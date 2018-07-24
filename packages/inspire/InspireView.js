@@ -6,16 +6,17 @@ import { vRefFromURI } from "~/raem/ValaaReference";
 
 import Cog from "~/engine/Cog";
 import Vrapper from "~/engine/Vrapper";
+import { dumpKuery } from "~/engine/VALEK";
 
 import ReactRoot from "~/inspire/ui/ReactRoot";
 
-import { getGlobal } from "~/tools";
+import { getGlobal, dumpObject } from "~/tools";
 
 /**
  * This class is the view entry point
  */
 export default class InspireView extends Cog {
-  async initialize ({ name, container, rootId, size, rootLensURI }: Object) {
+  async initialize ({ name, container, rootId, setTitleKuery, size, rootLensURI }: Object) {
     try {
       if (!rootLensURI) {
         throw new Error(`No options.rootLensURI found for view ${name}`);
@@ -28,6 +29,15 @@ export default class InspireView extends Cog {
           lensRef.rawId() || this._rootConnection.partitionRawId());
       this.warnEvent(`initialize(): partition '${this._vUIRoot.get("name")}' UI root set:`,
           this._vUIRoot.debugId());
+      if (setTitleKuery) {
+        const newTitle = this._vUIRoot.get(setTitleKuery);
+        if (typeof newTitle === "string") document.title = newTitle;
+        else {
+          this.warnEvent(`Ignored a request to set document.title to non-string value:`, newTitle,
+              "\n\tvia setTitleKuery:", ...dumpKuery(setTitleKuery),
+              "\n\tUIRoot:", ...dumpObject(this._vUIRoot));
+        }
+      }
       // this.warn("\n\n");
       // this.warnEvent(`createView('${name}'): LISTING ENGINE RESOURCES`);
       // engine.outputStatus(this.getLogger());

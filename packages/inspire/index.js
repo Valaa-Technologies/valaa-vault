@@ -63,7 +63,7 @@ export default (Valaa.createGateway = async function createGateway (...revelatio
     Valaa.gateway = ret;
     ret.warnEvent(`InspireGateway set to window.Valaa.gateway as`, ret);
 
-    while (delayedPlugins.length) await ret.attachPlugin(delayedPlugins.shift());
+    while (delayedPlugins.length) await ret.attachPlugins(delayedPlugins.splice(0));
     Valaa.plugins = { push (plugin) { ret.attachPlugin(plugin); } };
 
     return ret;

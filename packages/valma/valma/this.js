@@ -29,12 +29,15 @@ exports.handler = async (yargv) => {
           if (typeof property !== "string" && typeof property !== "number") {
             throw new Error(`expected an identifier or index after '.', got ${typeof property}`);
           }
-          if (typeof head[property] !== "function") {
-            return (ret = await _walk(head[property], argv, index + 2));
+          const { subHead, subProperty } = await _subWalk(head, property.split("."));
+          let nextHead = subHead[subProperty];
+          let nextIndex = index + 2;
+          if (typeof nextHead === "function") {
+            const args = await _getArgs(argv, nextIndex);
+            nextHead = await nextHead.apply(subHead, args.value);
+            nextIndex = args.index;
           }
-          const args = await _getArgs(argv, index + 2);
-          const nextHead = await head[property](...args.value);
-          return (ret = await _walk(nextHead, argv, args.index));
+          return (ret = await _walk(nextHead, argv, nextIndex));
         }
         case "&&":
         case "||":
@@ -67,6 +70,12 @@ exports.handler = async (yargv) => {
       vlm.ifVerbose(1)
           .log("  ret:", argv.slice(index), ret && ret.index, ":", ret && ret.value);
     }
+  }
+
+  async function _subWalk (head, properties, index = 0) {
+    const subHead = await head;
+    if (index + 1 >= properties.length) return { subHead, subProperty: properties[index] };
+    return _subWalk(subHead[properties[index]], properties, index + 1);
   }
 
   async function _getArgs (argv, index) {

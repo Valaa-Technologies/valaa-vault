@@ -52,6 +52,12 @@ const _vlm = globalVargs.vlm = {
   // Any plain objects are expanded to boolean or parameterized flags depending on the value type.
   invoke,
 
+  // TODO(iridian): Rename to delegate and clarify semantics with roughly following ideas:
+  // Delegate initiates a parallel execution with only limited diagnostics messages and for which
+  // the return value on completion is collected and returned to the delegate caller in a promise.
+  // Catastrophic interactions may be prompted from the user, at least by vlm command delegates.
+
+
   // Executes a command and returns a promise of the command standard output as string.
   // Any plain objects are expanded to boolean or parameterized flags depending on the value type.
   execute,
@@ -122,14 +128,22 @@ const _vlm = globalVargs.vlm = {
   // See https://nodejs.org/api/path.html
   path: path.posix,
 
-  // forward to node require. Non-absolute paths are resolved from the cwd.
-  require: function require_ (path_) {
-    const resolvedPath = require.resolve(path_, { paths: [this.cwd] });
-    if (!resolvedPath) {
-      throw new Error(`Could not require.resolve path "${path_}" from cwd "${this.cwd}"`);
-    }
-    return require(resolvedPath);
-  },
+  // forward to node require. Resolve non-absolute paths based on cwd.
+  require: (() => {
+    const ret = function vlmRequire (path_) {
+      const resolvedPath = require.resolve(path_, { paths: [this.cwd] });
+      if (!resolvedPath) {
+        throw new Error(`Could not require.resolve path "${path_}" from cwd "${this.cwd}"`);
+      }
+      return require(resolvedPath);
+    };
+    ret.cache = require.cache;
+    ret.resolve = (request, options) => require.resolve(request, { paths: [_vlm.cwd], ...options });
+    ret.resolve.paths = function vlmRequireResolvePaths (request) {
+      return require.resolve.paths(request);
+    };
+    return ret;
+  })(),
 
   // minimatch namespace of the glob matching tools
   // See https://github.com/isaacs/minimatch
@@ -194,11 +208,16 @@ const _vlm = globalVargs.vlm = {
     return this;
   },
   result (...rest) {
-    const output = this.render(_vlm.vargv.results, ...rest.map(result =>
-    // If the result has a heading, wrap it inside an object so that the heading will be shown.
+    const outputs = this.render(_vlm.vargv.results, ...rest.map(result =>
+    // If the result has a heading, wrap the result inside an object so that the heading will be
+    // rendered.
         ((typeof result === "object") && ((result || {})["..."] || {}).heading
             ? { result } : result)));
-    if (output) console.log(...output);
+    if (outputs) {
+      console.log(...outputs.map(value_ => ((typeof value_ === "string")
+          ? value_
+          : JSON.stringify(value_, null, 2))));
+    }
     return this;
   },
   // Alias for console.warn for unprocessed diagnostics output directly to stderr
@@ -419,6 +438,7 @@ const _renderers = {
   json: (value) => JSON.stringify(value, null, 2),
   "json-compact": (value) => JSON.stringify(value),
   "markdown-cli": (value) => markdownify.default(value, _vlm.theme),
+  "markdown-json": (value) => markdownify.extendWithLayouts(value),
   markdown: (value) => markdownify.default(value, themes.codeless),
 };
 

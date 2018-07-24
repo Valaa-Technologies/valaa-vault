@@ -55,14 +55,18 @@ const _spreaderKey = "...";
  * @returns
  */
 function markdownify (value, theme, context) {
-  const niceRenderable = deepExtend(undefined, value, createDeepExtendOptions());
-  // console.log("niceRenderable:", JSON.stringify(niceRenderable, null, 2));
+  const laidOutJSON = extendWithLayouts(value);
   const markdownifyTheme = createRenderTheme(theme);
-  return _renderBlock(niceRenderable, context, markdownifyTheme);
+  return _renderBlock(laidOutJSON, context, markdownifyTheme);
+}
+
+function extendWithLayouts (value, target) {
+  return deepExtend(target, value, createDeepExtendOptions());
 }
 
 module.exports = {
   default: markdownify,
+  extendWithLayouts,
   createDeepExtendOptions,
   createRenderTheme,
   render: _renderBlock,
@@ -115,9 +119,13 @@ const _deepExtendOptions = Object.freeze({
     if (source === null) return "";
     if ((source[0] === _spreaderKey) || source[_spreaderKey]) return undefined;
     const ret = target || {};
-    const layout = ret[_layoutKey] = deepExtend(_getLayout(ret) || {
-      trivial: true, height: 0, depth: ((_getLayout(targetContainer) || {}).depth || 0) + 1,
-    }, _getLayout(source));
+    const layout = ret[_layoutKey] = deepExtend(
+        _getLayout(ret) || {
+          trivial: true, height: 0, depth: ((_getLayout(targetContainer) || {}).depth || 0) + 1,
+        },
+        _getLayout(source));
+    // TODO(iridian): Make the markdownify extend idempotent so that an already extended structure
+    // will produce a structure identical to itself when extended onto "undefined".
     return Array.isArray(source)
         ? this._extendArrayBlock(ret, source, layout)
         : this._extendObjectBlock(ret, source, layout);
@@ -217,12 +225,10 @@ function _extractObjectEntries (entry, sourceObject, targetEntries, target, layo
 function _resolveObjectColumns (target, layout) {
   if (layout.type === "numbered" || layout.chapters || !layout.entries) return;
   let totalElementCount = 0;
-  let columns = [];
+  const columns = [];
   const columnLookup = {};
-  if (layout.height === 1) {
-    columns = layout.entries.map(e => { columnLookup[e[0]] = e[1]; return e; });
-    delete layout.entries;
-    totalElementCount = columns.length;
+  if ((layout.height === 1) && (layout.type === "object")) {
+    layout.columns = [[null, { text: "key" }], ["", { text: "value" }]];
   } else if (layout.height === 2) {
     // Gather all column names from row properties.
     layout.entries.forEach(entry => {
@@ -422,8 +428,9 @@ function _renderTable (rowKeys, rowLookup, columns, layout, tableTheme) {
     const rowData = rowLookup[rowKey];
     const elementLayouts = (_getLayout(rowData) || {}).entryLayouts || {};
     const _columnElementRenderer = ([columnKey, columnLayout]) => {
-      let text = (columnKey === "") || (typeof rowData !== "object")
-          ? rowData : (rowData || {})[columnKey];
+      let text = (columnKey === null) ? rowKey
+          : ((columnKey === "") || (typeof rowData !== "object")) ? rowData
+          : (rowData || {})[columnKey];
       const elementLayout = elementLayouts[columnKey];
       const lookups = [elementLayout, columnLayout];
       if (typeof text !== "string") text = _renderBlock(text, layout, tableTheme);

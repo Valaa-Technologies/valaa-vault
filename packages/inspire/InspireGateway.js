@@ -72,7 +72,7 @@ export default class InspireGateway extends LogEventGenerator {
       this.falseProphet = await this._proselytizeFalseProphet(this.gatewayRevelation,
           this.corpus, this.oracle);
 
-      await this._attachPlugins(this.gatewayRevelation);
+      await this.attachPlugins(await this.gatewayRevelation.plugins);
 
       this.prologueRevelation = await this.revelation.prologue;
 
@@ -101,8 +101,7 @@ export default class InspireGateway extends LogEventGenerator {
   }) {
     const ret = {};
     for (const [viewName, viewConfig: Object] of Object.entries(viewConfigs)) {
-      this.warnEvent(`createView({ name: '${viewConfig.name}', size: ${
-            JSON.stringify(viewConfig.size)} })`);
+      this.warnEvent(`createView({ name: '${viewConfig.name}', ... })`, viewConfig);
       const engineOptions = {
         name: `${viewConfig.name} Engine`,
         logger: this.getLogger(),
@@ -303,12 +302,23 @@ export default class InspireGateway extends LogEventGenerator {
     }
   }
 
-  async _attachPlugins (gatewayRevelation: Object) {
-    for (const plugin of await gatewayRevelation.plugins) this.attachPlugin(await plugin);
+  async attachPlugin (plugin: Promise<Object>) { return this.attachPlugins([plugin]); }
+
+  async attachPlugins (plugins_: (Promise<Object> | Object)[]) {
+    const plugins = await Promise.all(plugins_);
+    const pluginLookup = {};
+    for (const plugin of plugins) {
+      if (pluginLookup[plugin.name]) {
+        this.errorEvent(`Plugin '${plugin.name}' already being added:`,
+            pluginLookup[plugin.name], "\n\tskipping adding a new duplicate:", plugin);
+      }
+      pluginLookup[plugin.name] = plugin;
+    }
+    this.warnEvent(`Attaching ${plugins.length} plugins:`, pluginLookup);
+    for (const plugin of plugins) this._attachPlugin(plugin);
   }
 
-  attachPlugin (plugin: Object) {
-    this.warnEvent(`Attaching plugin '${plugin.name}':`, plugin);
+  _attachPlugin (plugin: Object) {
     for (const schemeModule of Object.values(plugin.schemeModules || {})) {
       this.nexus.addSchemeModule(this.callRevelation(schemeModule));
     }

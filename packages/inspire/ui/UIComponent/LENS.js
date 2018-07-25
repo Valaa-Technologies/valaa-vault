@@ -25,7 +25,7 @@ export default function LENS (lookupLensNames: string[], ...directLenses: any[])
         const lookedUpLens = lookupLensNames[i] && component.tryRenderLensRole(lookupLensNames[i]);
         if (typeof lookedUpLens !== "undefined") return lookedUpLens;
         if (i < directLenses.length && typeof directLenses[i] !== "undefined") {
-          return component.renderLens(directLenses[i], `LENS[i]`);
+          return component.renderLens(directLenses[i], undefined, `LENS[i]`);
         }
       } catch (error) {
         throw wrapError(error,

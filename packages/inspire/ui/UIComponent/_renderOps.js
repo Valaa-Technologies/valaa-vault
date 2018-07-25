@@ -8,7 +8,7 @@ import { Kuery } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
 
-import { arrayFromAny, isPromise, isSymbol, wrapError } from "~/tools";
+import { arrayFromAny, dumpObject, isPromise, isSymbol, outputError, wrapError } from "~/tools";
 
 import UIComponent, { isUIComponentElement } from "./UIComponent";
 import { uiComponentProps } from "./_propsOps";
@@ -16,8 +16,8 @@ import { uiComponentProps } from "./_propsOps";
 /* eslint-disable react/prop-types */
 
 // In general the render operations within delegate renders to each other through the component
-// and not directly (like component.tryRenderLensRole instead of _tryRenderLensRole(component)) to
-// get the try-catch handling.
+// and not directly (like component.tryRenderLensRole instead of
+// _tryRenderLensRole(component)) to get the try-catch handling.
 
 export function _render (component: UIComponent):
     null | string | React.Element<any> | [] {
@@ -31,30 +31,30 @@ export function _render (component: UIComponent):
     //*/
     if (component.props.overrideLens) {
       for (const override of arrayFromAny(component.props.overrideLens)) {
-        ret = component.renderLens(override, "override");
+        ret = component.renderLens(override, component.tryFocus(), "override");
         if (ret !== null) break;
       }
     } else if (typeof component.state.uiContext === "undefined") {
-      ret = component.tryRenderLensRole("disabledLens");
+      ret = component.tryRenderLensRole("disabledLens", null);
     // eslint-disable-next-line
     } else {
       const focus = component.tryFocus();
       if (typeof focus === "undefined") {
-        ret = component.tryRenderLensRole("pendingFocusLens");
+        ret = component.tryRenderLensRole("pendingFocusLens", null);
       } else {
         switch (!(focus instanceof Vrapper) ? "" : focus.getPhase()) {
           default: {
-            ret = component.renderFocus(focus);
+            ret = component.renderActiveFocus(focus);
             break;
           }
           case "Inactive":
-            ret = component.tryRenderLensRole("inactiveLens");
+            ret = component.tryRenderLensRole("inactiveLens", focus);
             break;
           case "Unavailable":
-            ret = component.tryRenderLensRole("unavailableLens");
+            ret = component.tryRenderLensRole("unavailableLens", focus);
             break;
           case "Destroyed":
-            ret = component.tryRenderLensRole("destroyedLens");
+            ret = component.tryRenderLensRole("destroyedLens", focus);
             break;
           case "Activating":
             ret = focus.activate();
@@ -89,7 +89,7 @@ export function _render (component: UIComponent):
   //*/
   if (isPromise(ret)) {
     ret.then(() => component.forceUpdate());
-    ret = component.tryRenderLensRole("delayedLens");
+    ret = component.tryRenderLensRole("delayedLens", focus);
     if (isPromise(ret)) {
       ret = component.tryRenderLensRole("disabledLens");
       if (isPromise(ret)) {
@@ -103,8 +103,8 @@ export function _render (component: UIComponent):
 }
 
 export function _tryRenderLensRole (component: UIComponent,
-    rootName: string, roleName: ?string, roleSymbol: ?Symbol, checkIfAvailable?: boolean,
-): void | null | string | React.Element<any> | [] | Promise<any> {
+    rootName: string, roleName: ?string, roleSymbol: ?Symbol, focus: any,
+    checkIfAvailable?: boolean): void | null | string | React.Element<any> | [] | Promise<any> {
   const Valaa = component.getValaa();
   const actualRoleName = roleName || Valaa.Lens[roleSymbol];
   const actualRoleSymbol = roleSymbol || Valaa.Lens[roleName];
@@ -125,51 +125,23 @@ export function _tryRenderLensRole (component: UIComponent,
         throw new Error(`Render role props.${actualRoleName
             } is specified but its value is undefined`);
       }
-      const ret = component.renderLens(lensFromProps, rootName);
-      /*
-      if (component.getFocus().getRawId() === "ff1fcf82-08b9-4daf-9c9b-398e0f036414") {
-        console.log(component.debugId(), `_tryRenderLensRole(${rootName}): props[${
-            actualRoleName}] =`, typeof lensFromProps, lensFromProps, ret);
-      }
-      */
-      return ret;
+      return component.renderLens(lensFromProps, focus, rootName);
     }
     const lensFromUIContext = actualRoleSymbol && component.getUIContextValue(actualRoleSymbol);
     if (typeof lensFromUIContext !== "undefined") {
-      const ret = component.renderLens(lensFromUIContext, rootName);
-      /*
-      if (component.getFocus().getRawId() === "ff1fcf82-08b9-4daf-9c9b-398e0f036414") {
-        console.log(component.debugId(), `_tryRenderLensRole(${rootName
-            }): uiContext[${actualRoleName}] =`, typeof lensFromUIContext, lensFromUIContext, ret);
-      }
-      */
-      return ret;
+      return component.renderLens(lensFromUIContext, focus, rootName);
     }
     const lensFromReactContext = component.context[actualRoleName];
     if (typeof lensFromReactContext !== "undefined") {
-      const ret = component.renderLens(lensFromReactContext, rootName);
-      /*
-      if (component.getFocus().getRawId() === "ff1fcf82-08b9-4daf-9c9b-398e0f036414") {
-        console.log(component.debugId(), `_tryRenderLensRole(${rootName
-            }): context[${actualRoleName}] =`, typeof lensFromReactContext, lensFromReactContext,
-                ret);
-      }
-      */
-      return ret;
+      return component.renderLens(lensFromReactContext, focus, rootName);
     }
   } catch (error) {
     throw wrapError(error,
         `During ${component.debugId()}\n ._tryRenderLensRole, with:`,
+        "\n\tfocus:", focus,
         "\n\tactualRoleName:", actualRoleName,
         "\n\tactualRoleSymbol:", actualRoleSymbol);
   }
-  /*
-  if (component.getUIContext() && component.getFocus() && component.getFocus().getRawId
-      && (component.getFocus().getRawId() === "ff1fcf82-08b9-4daf-9c9b-398e0f036414")) {
-    console.log(component.debugId(), `_tryRenderLensRole(${rootName
-        }): no match for [${actualRoleName}/${String(actualRoleSymbol)}] =`, undefined);
-  }
-  */
   return undefined;
 }
 
@@ -202,9 +174,11 @@ export function _renderFocusAsSequence (component: UIComponent,
 export function _renderFocus (component: UIComponent,
     focus: any
 ): null | string | React.Element<any> | [] | Promise<any> {
-  if (!component.preRenderFocus) return component.renderLensSequence(component.props.children);
+  if (!component.preRenderFocus) {
+    return component.renderLensSequence(component.props.children, focus);
+  }
   const preRendered = component.preRenderFocus(focus);
-  const ret = component.tryRenderLens(preRendered, "renderRoot");
+  const ret = component.tryRenderLens(preRendered, focus, "renderRoot");
   if (typeof ret !== "undefined") return ret;
   if (typeof preRendered === "object") return preRendered;
   const key = component.getUIContextValue("key");
@@ -213,12 +187,13 @@ export function _renderFocus (component: UIComponent,
 }
 
 export function _tryRenderLensArray (component: UIComponent,
-    lensArray: any[], lensName?: string
+    lensArray: any[], focus: any, lensName?: string
 ): void | [] | Promise<any[]> {
   let ret; // remains undefined if no entry tryRenderLens makes any changes
   let hasPromise;
   for (let i = 0; i !== lensArray.length; ++i) {
-    const processedEntry = component.tryRenderLens(lensArray[i], `#${String(i)}-${lensName || ""}`);
+    const processedEntry = component.tryRenderLens(
+        lensArray[i], focus, `#${String(i)}-${lensName || ""}`);
     if (typeof processedEntry !== "undefined") {
       if (isPromise(processedEntry)) hasPromise = true;
       if (!ret) ret = lensArray.slice(0, i);
@@ -231,17 +206,18 @@ export function _tryRenderLensArray (component: UIComponent,
 
 let _ValaaScope;
 
-export function _tryRenderLens (component: UIComponent,
-    lens: any, lensName: string
+export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
+    lensName: string
 ): void | null | string | React.Element<any> | [] | Promise<any> {
   switch (typeof lens) {
     case "undefined":
       return null;
     case "function": {
       const contextThis = component.getUIContextValue("component");
+      // lens.call(contextThis, component.getUIContext(), component),
       return component.renderLens(
           lens.call(contextThis, component.getUIContext(), component),
-          lensName);
+          focus, lensName);
     }
     case "object":
       if ((lens === null) || isPromise(lens)) {
@@ -264,7 +240,7 @@ export function _tryRenderLens (component: UIComponent,
         if (blocker) return blocker;
         if (lens.hasInterface("Media")) {
           const { mediaInfo, mime } = lens.resolveMediaInfo();
-          return component.renderLens(lens.interpretContent({ mediaInfo, mime }),
+          return component.renderLens(lens.interpretContent({ mediaInfo, mime }), focus,
               `${mediaInfo.name}:${mime}-${lensName}`);
         }
         console.error("DEPRECATED, SUBJECT TO CHANGE:",
@@ -278,7 +254,7 @@ export function _tryRenderLens (component: UIComponent,
             component.childProps(`legacy-focus-${lensName}`, { focus: lens }, {}));
       }
       if (Array.isArray(lens)) {
-        return _tryRenderLensArray(component, lens);
+        return _tryRenderLensArray(component, lens, focus);
       }
       if (Object.getPrototypeOf(lens) === Object.prototype) {
         const subName = `noscope-${lensName}`;
@@ -294,7 +270,7 @@ export function _tryRenderLens (component: UIComponent,
       }
     // eslint-disable-next-line no-fallthrough
     case "symbol":
-      return component.renderLensRole(lens, lensName);
+      return component.renderLensRole(lens, focus, lensName);
     default:
       break;
   }

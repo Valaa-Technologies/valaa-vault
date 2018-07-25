@@ -23,7 +23,7 @@ export default class ForEach extends UIComponent {
     });
   }
 
-  renderFocus (focus: any) {
+  renderActiveFocus (focus: any) {
     const renderedChildren = this.renderFocusAsSequence(
         focus,
         this.props.EntryUIComponent,
@@ -33,6 +33,7 @@ export default class ForEach extends UIComponent {
     return this.renderLens(
         React.createElement(
             this.props.RootElement || "div", this.props.rootProps || {}, ...renderedChildren),
+        focus,
         "customForEachRoot",
     );
   }

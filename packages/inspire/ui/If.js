@@ -9,8 +9,8 @@ export default class If extends UIComponent {
     test: PropTypes.any,
   };
 
-  renderFocus (focus: Object) {
+  renderActiveFocus (focus: Object) {
     if (!this.props.test) return null;
-    return super.renderFocus(focus);
+    return super.renderActiveFocus(focus);
   }
 }

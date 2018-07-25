@@ -108,7 +108,7 @@ export default class LiveProps extends UIComponent {
         nextProps.liveProps !== this.props.liveProps);
   }
 
-  renderFocus (/* focus: any */) {
+  renderActiveFocus (focus: any) {
     if (this.props.liveProps) {
       let pendingProps;
       const livePropValues = this.state.livePropValues || OrderedMap();
@@ -120,7 +120,7 @@ export default class LiveProps extends UIComponent {
       if (pendingProps) {
         this.trySetUIContextValue(this.getValaa().pendingPropNames, pendingProps.join(", "));
         try {
-          return this.renderLensRole("pendingPropsLens");
+          return this.renderLensRole("pendingPropsLens", focus);
         } finally {
           this.tryClearUIContextValue(this.getValaa().pendingPropNames);
         }
@@ -144,7 +144,7 @@ export default class LiveProps extends UIComponent {
       Promise.all(Object.values(promises)).then(() => { this.forceUpdate(); });
       this.trySetUIContextValue(this.getValaa().delayedPropNames, Object.keys(promises).join(", "));
       try {
-        return this.renderLensRole("delayedPropsLens");
+        return this.renderLensRole("delayedPropsLens", focus);
       } finally {
         this.tryClearUIContextValue(this.getValaa().delayedPropNames);
       }
@@ -165,10 +165,10 @@ export default class LiveProps extends UIComponent {
     else if (!this.props.elementType.isUIComponent) {
       // if no valaaScope is requested and the element is not an UIElement we need to post-process
       // children now and deal with a possible resulting promise.
-      children = this.renderLensSequence(children);
+      children = this.renderLensSequence(children, focus);
       if (isPromise(children)) {
         children.then(() => { this.forceUpdate(); });
-        return this.renderLensRole("delayedChildrenLens");
+        return this.renderLensRole("delayedChildrenLens", focus);
       }
     }
     /* Only enable this section for debugging React key warnings; it will break react elsewhere

@@ -9,14 +9,14 @@ import { Kuery, dumpKuery, dumpObject } from "~/engine/VALEK";
 
 import Presentable from "~/inspire/ui/Presentable";
 
-import { arrayFromAny, invariantify, isSymbol, outputError, wrapError }
+import { arrayFromAny, invariantify, isPromise, isSymbol, outputError, wrapError }
     from "~/tools";
 
 import { clearScopeValue, getScopeValue, setScopeValue } from "./scopeValue";
 import { presentationExpander } from "./presentationHelpers";
 
 import {
-  _enableError, _toggleError, _clearError, _renderError,
+  _enableError, _toggleError, _clearError,
 } from "./_errorOps";
 import {
   _componentWillMount, _componentWillReceiveProps, _shouldComponentUpdate, _componentWillUnmount,
@@ -25,8 +25,8 @@ import {
   _childProps, _checkForInfiniteRenderRecursion,
 } from "./_propsOps";
 import {
-  _render, _renderFocus, _renderFocusAsSequence, _tryRenderLens, _tryRenderLensRole,
-  _tryRenderLensArray, _validateElement,
+  _render, _renderFocus, _renderFocusAsSequence, _tryRenderLens,
+  _tryRenderLensRole, _tryRenderLensArray, _validateElement,
 } from "./_renderOps";
 import {
   _finalizeDetachSubscribers, _attachSubscriber, _detachSubscriber, _attachKuerySubscriber
@@ -397,17 +397,17 @@ export default class UIComponent extends React.Component {
   clearError = () => _clearError(this)
 
   // defaults to lens itself
-  renderLens (lens: any, lensName: string):
+  renderLens (lens: any, focus?: any, lensName: string):
       null | string | React.Element<any> | [] | Promise<any> {
-    const ret = this.tryRenderLens(lens, lensName);
+    const ret = this.tryRenderLens(lens, focus, lensName);
     return (typeof ret !== "undefined") ? ret
         : lens;
   }
 
-  tryRenderLens (lens: any, lensName: string):
+  tryRenderLens (lens: any, focus?: any = this.tryFocus(), lensName: string):
       void | null | string | React.Element<any> | [] | Promise<any> {
     try {
-      return _tryRenderLens(this, lens, lensName);
+      return _tryRenderLens(this, lens, focus, lensName);
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .renderLens, with:`,
           "\n\tlensName:", lensName,
@@ -417,20 +417,20 @@ export default class UIComponent extends React.Component {
   }
 
   // defaults to arrayFromAny(sequence)
-  renderLensSequence (sequence: any):
+  renderLensSequence (sequence: any, focus?: any = this.tryFocus()):
       [] | Promise<any[]> {
     const array = arrayFromAny(sequence !== null ? sequence : undefined);
-    const ret = _tryRenderLensArray(this, array);
+    const ret = _tryRenderLensArray(this, array, focus);
     return (typeof ret !== "undefined") ? ret
         : array;
   }
 
-  tryRenderLensSequence (sequence: any):
+  tryRenderLensSequence (sequence: any, focus?: any = this.tryFocus()):
       void | [] | Promise<any[]> {
-    return _tryRenderLensArray(this, arrayFromAny(sequence));
+    return _tryRenderLensArray(this, arrayFromAny(sequence), focus);
   }
 
-  renderFocus (focus: any):
+  renderActiveFocus (focus: any):
       null | string | React.Element<any> | [] | Promise<any> {
     return _renderFocus(this, focus);
   }
@@ -442,14 +442,14 @@ export default class UIComponent extends React.Component {
   }
 
   // defaults to null
-  renderLensRole (role: string | Symbol, rootRoleName?: string):
+  renderLensRole (role: string | Symbol, focus: any, rootRoleName?: string):
       null | string | React.Element<any> | [] | Promise<any> {
-    const ret = this.tryRenderLensRole(role, rootRoleName);
+    const ret = this.tryRenderLensRole(role, focus, rootRoleName);
     return (typeof ret !== "undefined") ? ret
         : null;
   }
 
-  tryRenderLensRole (role: string | Symbol, rootRoleName?: string):
+  tryRenderLensRole (role: string | Symbol, focus?: any = this.tryFocus(), rootRoleName?: string):
       void | null | string | React.Element<any> | [] | Promise<any> {
     const actualRootRoleName = rootRoleName || String(role);
     try {
@@ -457,14 +457,15 @@ export default class UIComponent extends React.Component {
         this.trySetUIContextValue(this.getValaa().rootRoleName, actualRootRoleName);
       }
       const ret = _tryRenderLensRole(this, actualRootRoleName,
-          (typeof role === "string") ? role : undefined,
-          isSymbol(role) ? role : undefined, false);
+          (typeof role === "string") ? role : undefined, isSymbol(role) ? role : undefined,
+          focus, false);
       if (!rootRoleName) {
         this.tryClearUIContextValue(this.getValaa().rootRoleName);
       }
       return ret;
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .renderLensRole(${String(role)}), with:`,
+          "\n\tfocus:", focus,
           "\n\trootRoleName:", actualRootRoleName);
     }
   }

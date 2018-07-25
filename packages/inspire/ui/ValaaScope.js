@@ -102,7 +102,6 @@ export default class ValaaScope extends UIComponent {
     ...UIComponent.propTypes,
     lensName: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
     lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-    fixedLens: PropTypes.any,
     lens: PropTypes.any,
     nullLens: PropTypes.any,
     activeLens: PropTypes.any,
@@ -136,8 +135,8 @@ export default class ValaaScope extends UIComponent {
     super.attachSubscribers(focus, props);
     this.setUIContextValue("this", this);
     let focusResource;
-    if ((typeof this.tryRenderLensRole("fixedLens") === "undefined")
-        && (typeof this.tryRenderLensRole("lens") === "undefined")
+    if ((typeof this.tryRenderLensRole("fixedLens", focus) === "undefined")
+        && (typeof this.tryRenderLensRole("lens", focus) === "undefined")
         && (typeof focus === "object") && (focus !== null) && (focus instanceof Vrapper)
         && (props.lensProperty || props.lensName || this.context.lensProperty
             || this.getUIContextValue(this.getValaa().Lens.lensProperty))) {
@@ -158,7 +157,7 @@ export default class ValaaScope extends UIComponent {
         || this.getUIContextValue(this.getValaa().Lens.lensProperty)
         || this.context.lensProperty);
     if (!lens) {
-      this.setState({ lensComponent: this.renderLensRole("fallbackLens") });
+      this.setState({ lensComponent: this.renderLensRole("fallbackLens", focus) });
     } else if (!(lens instanceof Vrapper) || !lens.hasInterface("Media")) {
       this.setState({
         lensComponent: React.createElement(ValaaScope, { ...props, focus: lens },
@@ -189,7 +188,7 @@ export default class ValaaScope extends UIComponent {
     }
   }
 
-  renderFocus (focus: any) {
+  renderActiveFocus (focus: any) {
     // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
     if (this.props.hasOwnProperty("styleSheet")) {
       this.setUIContextValue(VSSStyleSheetSymbol, this.props.styleSheet);
@@ -197,9 +196,9 @@ export default class ValaaScope extends UIComponent {
       this.clearUIContextValue(VSSStyleSheetSymbol);
     }
 
-    const lens = this.tryRenderLensRole("lens");
+    const lens = this.tryRenderLensRole("lens", focus);
     if (typeof lens !== "undefined") return lens;
-    const fixedLens = this.tryRenderLensRole("fixedLens");
+    const fixedLens = this.tryRenderLensRole("fixedLens", focus);
     if (typeof fixedLens !== "undefined") {
       console.error("DEPRECATED: props.fixedLens",
           "\n\tprefer: props.lens",
@@ -208,11 +207,11 @@ export default class ValaaScope extends UIComponent {
     }
 
     if (focus === null) {
-      return this.renderLensRole("nullLens");
+      return this.renderLensRole("nullLens", focus);
     }
 
     if ((typeof focus !== "object") || React.isValidElement(focus)) {
-      return this.renderLens(focus, "focus");
+      return this.renderLens(focus, null, "focus");
     }
 
     if (Array.isArray(focus)) {
@@ -228,13 +227,13 @@ export default class ValaaScope extends UIComponent {
           (focus.constructor && focus.constructor.name) || "<constructor missing>"}' as UI focus`);
     }
 
-    const activeLensComponent = this.tryRenderLensRole("activeLens");
+    const activeLensComponent = this.tryRenderLensRole("activeLens", focus);
     if (typeof activeLensComponent !== "undefined") return activeLensComponent;
 
     if (typeof this.state.lensComponent === "undefined") {
-      return this.renderLensRole("downloadingLens");
+      return this.renderLensRole("downloadingLens", focus);
     }
-    return this.renderLens(this.state.lensComponent, "lensComponent");
+    return this.renderLens(this.state.lensComponent, focus, "lensComponent");
   }
 
   renderObjectAsValaaScope (object: any) {

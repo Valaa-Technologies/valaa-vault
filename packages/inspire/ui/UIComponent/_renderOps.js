@@ -123,7 +123,7 @@ export function _tryRenderLensRole (component: UIComponent,
     const descriptor = component.context.engine.getHostObjectDescriptor(actualRoleSymbol);
     if (descriptor
         && (typeof descriptor.isLensAvailable === "function")
-        && !descriptor.isLensAvailable(component, component.tryFocus())) {
+        && !descriptor.isLensAvailable(focus, component)) {
       return undefined;
     }
   }
@@ -223,10 +223,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
       return null;
     case "function": {
       const contextThis = component.getUIContextValue("component");
-      // lens.call(contextThis, component.getUIContext(), component),
-      return component.renderLens(
-          lens.call(contextThis, component.getUIContext(), component),
-          focus, lensName);
+      return component.renderLens(lens.call(contextThis, focus, component), focus, lensName);
     }
     case "object":
       if ((lens === null) || isPromise(lens)) {

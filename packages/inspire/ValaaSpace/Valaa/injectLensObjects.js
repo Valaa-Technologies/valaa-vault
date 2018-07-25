@@ -171,12 +171,12 @@ default lens for this is the yelling-red screen.`,
   createLensRoleSymbol("nullLens",
       "Lens",
       `Lens role for null focus.`,
-      (component: UIComponent, focus?: Vrapper) => (focus === null),
+      (focus?: Vrapper) => (focus === null),
       () => null);
   createLensRoleSymbol("resourceLens",
       "Lens",
       `Lens role for whe the focus is a Resource.`,
-      (component: UIComponent, focus?: Vrapper) => (focus instanceof Vrapper),
+      (focus?: Vrapper) => (focus instanceof Vrapper),
       () => ({ overrideLens: [
         Valaa.Lens.activeLens,
         Valaa.Lens.activatingLens,
@@ -187,33 +187,33 @@ default lens for this is the yelling-red screen.`,
   createLensRoleSymbol("activeLens",
       "Lens",
       `Lens role for when the focus is a fully active Resource.`,
-      (component: UIComponent, focus?: Vrapper) => focus && focus.isActive(),
+      (focus?: Vrapper) => focus && focus.isActive(),
       () => Valaa.Lens.propertyLens);
   createLensRoleSymbol("activatingLens",
       "Lens",
       `Lens role for when the focus is a Resource which is still being activated.`,
-      (component: UIComponent, focus?: Vrapper) => focus && focus.isActivating(),
+      (focus?: Vrapper) => focus && focus.isActivating(),
       () => <div>
           Focus Activating: {Valaa.Lens.describeFocusLens}...
       </div>);
   createLensRoleSymbol("inactiveLens",
       "Lens",
       `Lens role for when the focus is an inactive Resource.`,
-      (component: UIComponent, focus?: Vrapper) => focus && focus.isInactive(),
+      (focus?: Vrapper) => focus && focus.isInactive(),
       () => <div>
           Focus Inactive: {Valaa.Lens.describeFocusLens}
       </div>);
   createLensRoleSymbol("unavailableLens",
       "Lens",
       `Lens role for when the focus is an unavailable Resource.`,
-      (component: UIComponent, focus?: Vrapper) => focus && focus.isUnavailable(),
+      (focus?: Vrapper) => focus && focus.isUnavailable(),
       () => <div>
           Focus Unavailable: {Valaa.Lens.describeFocusLens}
       </div>);
   createLensRoleSymbol("destroyedLens",
       "Lens",
       `Lens role for when the focus is a destroyed Resource.`,
-      (component: UIComponent, focus?: Vrapper) => focus && focus.isDestroyed(),
+      (focus?: Vrapper) => focus && focus.isDestroyed(),
       () => <div>
           Focus Destroyed: {Valaa.Lens.describeFocusLens}
       </div>);
@@ -225,9 +225,8 @@ default lens for this is the yelling-red screen.`,
           ""} If lensProperty is an array the first matching property from focus is used.${
           ""} If 'lensProperty' itself or no matching property can be found falls back to${
           ""} 'lensPropertyNotFoundLens'.`,
-      (component: UIComponent, focus?: Vrapper) => focus && focus.hasInterface("Scope"),
-      () => function renderPropertyLens (context: Object, component: UIComponent) {
-        const focus = context.focus;
+      (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
+      () => function renderPropertyLens (focus: any, component: UIComponent) {
         const props = component.props;
         const lensProperty = props.lensProperty || props.lensName
             || component.getUIContextValue(Valaa.Lens.lensProperty)
@@ -260,7 +259,7 @@ default lens for this is the yelling-red screen.`,
       "Lens",
       `DEPRECATED; prefer lensPropertyNotFoundLens.`,
       true,
-      () => (context: Object, component: UIComponent) => {
+      () => (focus: any, component: UIComponent) => {
         console.error("DEPRECATED: Valaa.Lens.fallbackLens",
             "\n\tprefer: Valaa.Lens.lensPropertyNotFoundLens",
             "\n\tin component:", component.debugId(), component);
@@ -268,15 +267,14 @@ default lens for this is the yelling-red screen.`,
       });
   createLensRoleSymbol("childrenLens",
       "Lens",
-      `Lens role for using the child elements of this element as the lens.`,
+      `Lens role for using the child elements of the containing component as the lens.`,
       true,
-      () => (context: Object, component: UIComponent) => component.props.children);
+      () => (focus: any, component: UIComponent) => component.props.children);
   createLensRoleSymbol("describeFocusLens",
       "Lens",
       `Lens role for rendering developer-oriented description of the current focus.`,
       true,
-      () => (function renderFocusDescription (context: Object, component: UIComponent,
-          focus: any = component.tryFocus()) {
+      () => (function renderFocusDescription (focus: any, component: UIComponent) {
         switch (typeof focus) {
           case "string":
             return `<"${focus.length <= 40 ? focus : `${focus.slice(0, 37)}...`}">`;
@@ -286,7 +284,7 @@ default lens for this is the yelling-red screen.`,
             if (focus !== null) {
               if (focus instanceof Vrapper) return `<${focus.debugId()}>`;
               if (Array.isArray(focus)) {
-                return `[${focus.map(entry => renderFocusDescription(context, component, entry))
+                return `[${focus.map(entry => renderFocusDescription(entry, component))
                     .join(", ")}]`;
               }
               return `<Object.keys: ['${Object.keys(focus).join(", ")}']>`;

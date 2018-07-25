@@ -91,9 +91,18 @@ export function _render (component: UIComponent):
     ret.then(() => component.forceUpdate());
     ret = component.tryRenderLensRole("delayedLens", focus);
     if (isPromise(ret)) {
-      ret = component.tryRenderLensRole("disabledLens");
+      const error = wrapError(new Error("Invalid render result: 'delayedLens' returned a promise"),
+          `During ${component.debugId()}\n .render().ret.delayedLens, with:`,
+          "\n\tdelayedLensRet ret:", dumpObject(ret),
+          "\n\tcomponent:", dumpObject(component));
+      ret = component.tryRenderLensRole("internalFailureLens", error);
       if (isPromise(ret)) {
-        throw new Error("disabledLens must never resolve to a promise");
+        const secondError = wrapError(error,
+            `During ${component.debugId()}\n .render().ret.internalFailureLens, with:`,
+            "\n\tinternalFailureLens ret:", dumpObject(ret));
+        outputError(secondError);
+        throw new Error(
+            "The lens handling the role 'internalFailureLens' must never return a promise");
       }
     }
   }

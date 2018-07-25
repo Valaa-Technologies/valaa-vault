@@ -390,7 +390,7 @@ export default class UIComponent extends React.Component {
 
   // Helpers
 
-  _errorMessage: ?string;
+  _errorObject: ?any;
 
   enableError = (error: string | Error) => _enableError(this, error)
   toggleError = () => _toggleError(this)
@@ -478,7 +478,7 @@ export default class UIComponent extends React.Component {
     let firstPassError;
     let ret;
     try {
-      if (!this._errorMessage && !_checkForInfiniteRenderRecursion(this)) {
+      if (!this._errorObject && !_checkForInfiniteRenderRecursion(this)) {
         return (ret = _render(this));
       }
     } catch (error) {
@@ -499,7 +499,10 @@ export default class UIComponent extends React.Component {
         outputError(wrappedError);
         this.enableError(wrappedError);
       }
-      return _renderError(this, this._errorMessage || "");
+      const failure: any = this.renderLensRole("internalFailureLens",
+          this._errorObject || "<error missing>");
+      if (isPromise(ret)) throw new Error("internalFailureLens returned a promise");
+      return failure;
     } catch (secondPassError) {
       // Exercise in defensive programming. We should never get here, really,, but there's nothing
       // more infurating and factually blocking for the user than react white screen of death.
@@ -511,7 +514,7 @@ export default class UIComponent extends React.Component {
             `INTERNAL ERROR: Exception caught in ${this.constructor.name
                 }.render() second pass,`,
             "\n\twhile rendering firstPassError:", firstPassError,
-            "\n\t...or existing error status:", this._errorMessage,
+            "\n\t...or the existing error status:", this._errorObject,
             "\n\tin component:", this));
         return (<div>
             Exception caught while trying to render error:
@@ -522,12 +525,12 @@ export default class UIComponent extends React.Component {
           console.error("INTERNAL ERROR: Exception caught on render() third pass:", thirdPassError,
               "\n\twhile rendering secondPassError:", secondPassError,
               "\n\tfirstPassError:", firstPassError,
-              "\n\texisting error:", this._errorMessage,
+              "\n\texisting error:", this._errorObject,
               "\n\tin component:", this);
           return UIComponent.thirdPassErrorElement;
         } catch (fourthPassError) {
           console.warn("INTERNAL ERROR: Exception caught on render() fourth pass:", fourthPassError,
-              "\n\tGiving up. You get candy if you ever see this.");
+              "\n\tGiving up. You get candy if you ever genuinely encounter this.");
         }
         return null;
       }

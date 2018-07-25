@@ -54,7 +54,7 @@ function _updateFocus (component: UIComponent, newProps: Object) {
         "\n\tnew props.kuery:", ...dumpKuery(newProps.kuery));
     //*/
     component.detachSubscribers();
-    component._errorMessage = null;
+    component._errorObject = null;
 
     invariantify(!(newProps.uiContext && newProps.parentUIContext),
         `only either ${component.constructor.name

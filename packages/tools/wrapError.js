@@ -70,6 +70,21 @@ export function unwrapError (error: Error) {
   return (error && error.originalError) || error;
 }
 
+export function messageFromError (error: any) {
+  if (typeof error !== "object" || !error) return String(error);
+  if (!(error instanceof Error)) {
+    return `<unrecognized Error object ${
+        (error.constructor && error.constructor.name) || "with no type"}>`;
+  }
+  if (!error.customErrorHandler) return error.message;
+  let message = error.originalMessage || error.message;
+  const catenator = { error (...args) {
+    message += `\n${args.map(entry => String(entry)).join(" ")}`;
+  } };
+  error.customErrorHandler(catenator);
+  return message;
+}
+
 function _clipFrameListToCurrentContext (innerError, dummySliceLineCount) {
   if (!innerError.stack) {
     console.log("innerError has no .stack:", innerError,

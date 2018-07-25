@@ -53,6 +53,7 @@ export const SimpleData = require("./SimpleData").default;
 export const thenChainEagerly = require("./thenChainEagerly").default;
 
 export const wrapError = require("./wrapError").default;
+export const messageFromError = require("./wrapError").messageFromError;
 export const dumpObject = require("./wrapError").dumpObject;
 export const inBrowser = require("./wrapError").inBrowser;
 export const outputError = require("./wrapError").outputError;

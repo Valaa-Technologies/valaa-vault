@@ -5,7 +5,7 @@ import React from "react";
 import Vrapper from "~/engine/Vrapper";
 import UIComponent from "~/inspire/ui/UIComponent";
 
-import { arrayFromAny } from "~/tools";
+import { arrayFromAny, messageFromError } from "~/tools";
 
 export default function injectLensObjects (Valaa: Object, rootScope: Object,
     hostObjectDescriptors: Object) {
@@ -42,11 +42,39 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       "string",
       `the root lens role name which is currently being rendered.`);
   createLensRoleSymbol("disabledLens",
+  createLensRoleSymbol("internalFailureLens",
       "Lens",
-      `Lens role for when the focus, another lens or some lens prop is not available.`,
+      `A catch-all lens role for when an internal failure like an
+unhandled exception or 'pendingLens' returns a promise happens. The
+default lens for this is the yelling-red screen.`,
       true,
-      () => <div>No lens found or component is disabled, no focus or context available.</div>);
-  createLensRoleSymbol("loadingLens",
+      () => function renderInternalFailure (failure: string | Error, component: UIComponent) {
+        return (
+          <div
+            style={{
+              color: "#f44336",
+              backgroundColor: "#ffeb3b",
+            }}
+          >
+            <p>
+              There is an error with component component:
+              <button onClick={component.toggleError}>
+                {component.state.errorHidden ? "Show" : "Hide"}
+              </button>
+              <button onClick={component.clearError}>
+                Clear
+              </button>
+            </p>
+            {!component.state.errorHidden
+                ? <pre style={{ fontFamily: "monospace" }}>{
+                    `${messageFromError(failure)}`
+                  }</pre>
+                : null}
+          </div>
+        );
+      }
+  );
+
       "Lens",
       `Lens role for when the focus, another lens or some lens prop is is still being loaded.`,
       true,

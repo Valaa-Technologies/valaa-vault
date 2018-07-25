@@ -9,33 +9,50 @@ import { PartitionURI, createValaaURI, createPartitionURI, getPartitionRawIdFrom
 import dumpify from "~/tools/dumpify";
 import wrapError, { dumpObject } from "~/tools/wrapError";
 import invariantify, { invariantifyString, invariantifyObject } from "~/tools/invariantify";
+import vdoc from "~/tools/vdoc";
 
 export type RawId = string;
 
 const VRefValueOf = Symbol("VRef.valueOf");
+
+@vdoc([
+  `ValaaReference is a value data object which contains all necessary
+  runtime information to reference a valaa object, possibly as part of
+  a coupling.`,
+  { fields: {
+    rawId: `an id string which identifies the target`,
+    ghostPath: `a GhostPath object which specifies the ghost
+                  instantiation path, for locating the actual ghost
+                  content: the ghost itself might not be materialized.`,
+    coupledField: `the coupled field name on the target Resource which
+                  contains a backreference to a referring Resource if
+                  this reference is part of a coupling.`,
+    partitionURI: `for cross-partition Valaa references partitionURI
+                  denotes the fully specified universal location of the
+                  target partition.`,
+  } },
+  `Because many use cases only need the rawId there is a collection
+  type:`,
+  `type IdData = VRef | string`,
+  "",
+  `IdData allows passing in a plain id string in most places where an
+  object reference is required. This usage has limitations, however.
+  Because rawId only specifies the identity of an object it cannot be
+  reliably used to locate the object content in isolation. The most
+  notable examples of this are immaterial ghosts and cross-partition
+  references: Immaterial ghosts inherit their properties from a
+  prototype but don't data have any data entries themselves (by
+  design). The ghostPath is required to locate the prototypes. For a
+  cross-partition reference the target partition might not necessarily
+  be loaded: partitionURI (which the Valaa infrastructure guarantees to
+  be locateable) is needed in this case.`,
+  "@export",
+  "@class ValaaReference",
+])
 /**
- * ValaaReference is a value data object which contains all necessary runtime information to
- * reference a valaa object, possibly as part of a coupling.
- *
- * rawId            is an id string which identifies the target
- * ghostPath        is a GhostPath object which specifies the ghost instantiation path, for locating
- *                  the actual ghost content: the ghost itself might not be materialized.
- * coupledField     the coupled field name on the target Resource which contains a backreference
- *                  to a referring Resource, if this reference is part of a coupling.
- * partitionURI     for cross-partition Valaa references partitionURI denotes the fully specified
- *                  universal location of the target partition.
- *
- * Because many use cases only need the rawId there is a collection type:
- * type IdData = VRef | string
- *
- * IdData allows passing in a plain id string in most places where an object reference is required.
- * This usage has limitations, however. Because rawId only specifies the identity of an object it
- * cannot be reliably used to locate the object content in isolation. The most notable examples of
- * this are immaterial ghosts and cross-partition references:
- * Immaterial ghosts inherit their properties from a prototype but don't data have any data entries
- * themselves (this is by design). The ghostPath is required to locate the prototypes.
- * For a cross-partition reference the target partition might not necessarily be loaded:
- * partitionURI (which the Valaa infrastructure guarantees to be locateable) is needed in this case.
+ * ValaaReference is a value data object which contains all necessary
+ * runtime information to reference a valaa object, possibly as part of
+ * a coupling.
  *
  * @export
  * @class VRef
@@ -277,25 +294,23 @@ export function vRefFromURI (uri: URL | string): VRef {
   return vRef(rawId, coupling, undefined, createValaaURI(partitionURI));
 }
 
-/**
- * Returns a new VRef object copied or deserialized from given idData, with its fields overridden
- * with given coupledField, ghostPath and/or partitionURI. If any of the overrides is null the
- * original value is kept.
- *
- * @export
- * @param {IdData} idData
- * @param {string=tryCoupledFieldFrom(idData)} coupledField
- * @param {GhostPath=tryGhostPathFrom(idData)} ghostPath
- * @param {PartitionURI=tryPartitionURIFrom(idData)} partitionURI
- * @returns {VRef}
- */
-export function obtainVRef (idData: IdData | JSONIdData,
+export const obtainVRef = vdoc([
+  `Returns a new VRef object copied or deserialized from given idData,
+  with its fields overridden with given coupledField, ghostPath and/or
+  partitionURI. If any of the overrides is null the original value is
+  kept.`,
+  "@export",
+  "@param {IdData} idData",
+  "@param {string=tryCoupledFieldFrom(idData)} coupledField",
+  "@param {GhostPath=tryGhostPathFrom(idData)} ghostPath",
+  "@param {PartitionURI=tryPartitionURIFrom(idData)} partitionURI",
+  "@returns {VRef}",
+])((idData: IdData | JSONIdData,
     coupledField: ?string = tryCoupledFieldFrom(idData) || null,
     ghostPath: ?GhostPath = tryGhostPathFrom(idData) || null,
     partitionURI: ?PartitionURI = tryPartitionURIFrom(idData) || null,
-    RefType: Function = ValaaResourceReference): VRef {
-  return new RefType([getRawIdFrom(idData), coupledField, ghostPath], partitionURI);
-}
+    RefType: Function = ValaaResourceReference): VRef =>
+        new RefType([getRawIdFrom(idData), coupledField, ghostPath], partitionURI));
 
 export function obtainRRef (idData: IdData | JSONIdData, coupledField: ?string,
     ghostPath: ?GhostPath, partitionURI: ?PartitionURI): RRef {
@@ -402,19 +417,17 @@ export function tryCoupledFieldFrom (idData: IdData | JSONIdData): ?string {
   return undefined;
 }
 
-/**
- * Returns partitionURI from given idData or undefined if no valid partitionURI can be
- * found. If idData is a VRef its .partitionURI() is called and used as the candidate.
- *
- * @export
- * @param {IdData} idData
- * @returns null
- */
-export function tryPartitionURIFrom (idData: IdData | JSONIdData): ?PartitionURI {
-  return idData instanceof VRef ? idData.partitionURI()
-      : (Array.isArray(idData) && idData[3]) ? createPartitionURI(idData[3])
-      : undefined;
-}
+export const tryPartitionURIFrom = vdoc(`
+  Returns partitionURI from given idData or undefined if no valid
+  partitionURI can be found. If idData is a VRef its .partitionURI() is
+  called and used as the candidate.
+  @export
+  @param {IdData} idData
+  @returns null
+`)((idData: IdData | JSONIdData): ?PartitionURI =>
+    (idData instanceof VRef ? idData.partitionURI()
+        : (Array.isArray(idData) && idData[3]) ? createPartitionURI(idData[3])
+        : undefined));
 
 export function expandIdDataFrom (idData: IdData): [RawId, ?string, ?GhostPath] {
   if (typeof idData === "string") return [idData];

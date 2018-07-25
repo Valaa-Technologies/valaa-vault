@@ -8,10 +8,10 @@ module.exports = { "...": { heading:
     semantic principles, informal text production guidelines and formal
     linter-enforceable style rules.`,
     `Additional files specifying formal style rules:`,
-    { styleRuleFiles: [
+    { styleRuleFiles: [[
       "@valos/toolset-vault/shared/.eslintrc.js",
       "@valos/toolset-vault/templates/.editorconfig"
-    ] },
+    ]] },
     "",
     `Note: while formal ValOS linter rules are formally based on airbnb
     style there is a lot of divergence in practice.`,
@@ -48,7 +48,7 @@ module.exports = { "...": { heading:
       "",
       `When solutions necessitate other languages, they should be
       implemented in following order of preference:`,
-      { foreignLanguageUsePreferenceOrder: {
+      { foreignLanguageUsePreferenceOrder: [{
         1: [`Transpiled into ECMAScript.`,
           `This allows full native reuse of the solution throughout all
           of Valaa ecosystem and potentially provides value for the JS
@@ -78,7 +78,7 @@ module.exports = { "...": { heading:
           that it reduces overall complexity.`,
           `See next chapter about I-JSON.`,
         ],
-      } },
+      }] },
     ],
     useJSON: ["...", { indexAfter: "useECMAScript", heading:
       `Create custom dialects on top I-JSON for data interchange`,
@@ -143,10 +143,10 @@ module.exports = { "...": { heading:
     },
       `One of the two options must be used for newlines in individual
       documentation pieces:`,
-      { newlineStyles: {
+      { newlineStyles: [{
         1: "manually line-break with max 71 characters per line.",
         2: "only separate paragraphs and leave line-breaking to the CLI tool."
-      } },
+      }] },
       `This choice should be followed consistently everywhere within the same
       tool or document.`,
     ],

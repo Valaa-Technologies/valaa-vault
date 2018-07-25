@@ -57,7 +57,7 @@ const _spreaderKey = "...";
 function markdownify (value, theme, context) {
   const laidOutJSON = extendWithLayouts(value);
   const markdownifyTheme = createRenderTheme(theme);
-  return _renderBlock(laidOutJSON, context, markdownifyTheme);
+  return _renderBlock(laidOutJSON, context || {}, markdownifyTheme);
 }
 
 function extendWithLayouts (value, target) {
@@ -119,16 +119,15 @@ const _deepExtendOptions = Object.freeze({
     if (source === null) return "";
     if ((source[0] === _spreaderKey) || source[_spreaderKey]) return undefined;
     const ret = target || {};
+    const containerLayout = _getLayout(targetContainer) || {};
     const layout = ret[_layoutKey] = deepExtend(
-        _getLayout(ret) || {
-          trivial: true, height: 0, depth: ((_getLayout(targetContainer) || {}).depth || 0) + 1,
-        },
+        _getLayout(ret) || { trivial: true, height: 0, depth: (containerLayout.depth || 0) + 1 },
         _getLayout(source));
     // TODO(iridian): Make the markdownify extend idempotent so that an already extended structure
     // will produce a structure identical to itself when extended onto "undefined".
     return Array.isArray(source)
-        ? this._extendArrayBlock(ret, source, layout)
-        : this._extendObjectBlock(ret, source, layout);
+        ? this._extendArrayBlock(ret, source, layout, containerLayout)
+        : this._extendObjectBlock(ret, source, layout, containerLayout);
   },
   postProcessor (block, source, key, targetContainer) {
     const layout = _getLayout(block);
@@ -137,6 +136,12 @@ const _deepExtendOptions = Object.freeze({
       contextLayout.height = Math.max(contextLayout.height, ((layout && layout.height) || 0) + 1);
       if (layout && !layout.trivial) delete contextLayout.trivial;
     }
+    /*
+    if (layout) {
+      delete layout.height;
+      if (layout.type !== "object") delete layout.depth;
+    }
+    */
   },
   _extendArrayBlock,
   _extendObjectBlock,
@@ -145,10 +150,13 @@ const _deepExtendOptions = Object.freeze({
   _postProcessObjectEntries,
 });
 
-function _extendArrayBlock (target, sourceArray, layout) {
+function _extendArrayBlock (target, sourceArray, layout, containerLayout) {
   layout.type = "array";
   const lastTargetIndex = target.length || 0;
-  layout.entries = (layout.entries || []).concat(sourceArray.map((sourceEntry, index) => {
+  const currentEntries = layout.entries || [];
+  if ((currentEntries.length + sourceArray.length) === 1) layout.singular = true;
+  else delete layout.singular;
+  layout.entries = currentEntries.concat(...sourceArray.map((sourceEntry, index) => {
     const block = this.extend(undefined, sourceEntry, lastTargetIndex + index, target, sourceArray);
     const entryLayout = _getLayout(block);
     const subEntries = (entryLayout || {}).entries || [];
@@ -160,15 +168,24 @@ function _extendArrayBlock (target, sourceArray, layout) {
     const subBlock = block[subEntries[0]];
     const subLayout = _getLayout(subBlock);
     if (subLayout && (subLayout.heading === undefined)) subLayout.heading = "";
-    if (subLayout && subLayout.type === "array") subLayout.type = "list";
-    target[subEntries[0]] = subBlock;
-    return subEntries[0];
+    if (!target[subEntries[0]]) {
+      target[subEntries[0]] = subBlock;
+      return subEntries[0];
+    }
+    if (Array.isArray(target[subEntries[0]])) target[subEntries[0]].push(subBlock);
+    else target[subEntries[0]] = [target[subEntries[0]], subBlock];
+    return [];
   }));
-  this._resolveObjectColumns(target, layout);
+  if ((containerLayout.type === "array") && containerLayout.singular) {
+    layout.type = "list";
+    delete layout.trivial;
+  } else {
+    this._resolveObjectColumns(target, layout);
+  }
   return target;
 }
 
-function _extendObjectBlock (target, sourceObject, layout) {
+function _extendObjectBlock (target, sourceObject, layout, containerLayout) {
   layout.type = "object";
   const newEntries = [];
   this._extractObjectEntries(layout.entries || null, sourceObject, newEntries, target, layout);
@@ -182,7 +199,11 @@ function _extendObjectBlock (target, sourceObject, layout) {
     else if ((String(key) !== "0") && hasOnlyNumbers === undefined) hasOnlyNumbers = true;
     // if ((typeof target[e] !== "object") || !(target[e]["."] || {}).empty) delete layout.empty;
   });
-  if (hasOnlyNumbers) layout.type = "numbered";
+  // console.log("extendObjectBlock, target:", target, "\nlayout:", layout,
+  //    "\ncontainer:", containerLayout);
+  if ((containerLayout.type === "array") && containerLayout.singular && hasOnlyNumbers) {
+    layout.type = "numbered";
+  }
   if (layout.columns) {
     const columns = layout.columns;
     this._extractObjectEntries(columns, undefined, layout.columns = [], {}, layout);
@@ -320,43 +341,55 @@ const _markdownifyStyles = Object.freeze({
 });
 
 function _renderBlock (block, contextLayout, theme) {
-  // console.log("block:", JSON.stringify(block, null, 2));
-  if (typeof block === "string") {
-    if (!theme.hasOwnProperty("paragraphStyle")) return block;
-    return theme.decoratorOf(theme.paragraphStyle)(block);
-  }
+  // console.log("block:", theme.hasOwnProperty("paragraphStyle"), JSON.stringify(block, null, 2));
   if (block === undefined) return "";
   if ((typeof block === "boolean") || (typeof block === "number")) return String(block);
-  if (Array.isArray(block)) {
-    const isOutermost = contextLayout.type !== "array";
-    const arrayTheme = isOutermost ? theme : Object.create(theme);
-    const entries = block.map(entry => _renderBlock(entry, contextLayout, arrayTheme));
-    if (!isOutermost) return entries.join(" ");
-    return entries.map(theme.decoratorOf(theme.paragraphStyle)).join("\n");
-  }
-  const layout = _getLayout(block);
+  const layout = _getLayout(block) || {};
   if (layout.hide) return "";
   if (layout.text !== undefined) return layout.text;
   if (layout.columns) {
-    if (!layout.entries) return _renderTable([0], [block], layout.columns, layout, theme);
-    return _renderTable(layout.entries, block, layout.columns, layout, theme);
+    return _renderTable(layout.entries || [null], block, layout.columns, layout, theme);
   }
   if ((layout.type === "numbered") || (layout.type === "list")) {
     return _renderList(layout.entries, block, layout, theme);
   }
-  const sectionTheme = Object.create(theme);
-  if (/* (layout.type === "array") && */ (!contextLayout || (contextLayout.type !== "array"))) {
-    sectionTheme.paragraphStyle = "paragraphize";
-  }
-  return _renderChapters(layout.entries || Object.keys(block).filter(key => (key !== _layoutKey)),
-      block, layout, sectionTheme);
+  const sectionTheme = ((contextLayout.type !== "array") || Array.isArray(block))
+      && Object.assign(Object.create(theme), { paragraphStyle: "paragraphize" });
+  const sectionText = _maybeRenderSection(block, layout, sectionTheme, theme);
+  if (sectionText !== undefined) return sectionText;
+  return _renderChapters(
+      layout.entries || Object.keys(block).filter(key => (key !== _layoutKey)),
+      block, layout, sectionTheme || theme);
 }
 
-function _renderChapters (chapters, chapterLookup, chaptersLayout, sectionTheme) {
+function _maybeRenderSection (block, layout, sectionTheme, theme) {
+  let ret;
+  let shouldParagraphize = theme.hasOwnProperty("paragraphStyle");
+  // console.log("_maybeRenderSection:", shouldParagraphize, "block:", block,
+  //    "\nlayout:", layout, "\n\n");
+  if (typeof block === "string") {
+    ret = block;
+  } else {
+    const arrayEntries = (Array.isArray(block) && Object.keys(block))
+        || (((layout || {}).type === "array") && layout.entries);
+    if (arrayEntries) {
+      const style = _getLayoutProperty([layout], "style");
+      const styler = (style && (sectionTheme || theme).decoratorOf(style)) || (text => text);
+      ret = arrayEntries
+          .map(key => styler(_renderBlock(block[key], layout, sectionTheme || theme)))
+          .join(sectionTheme ? "\n" : " ");
+    } else return undefined;
+    if (!layout.trivial) shouldParagraphize = false;
+  }
+  return ((ret !== undefined) && shouldParagraphize) ? theme.decoratorOf(theme.paragraphStyle)(ret)
+      : ret;
+}
+
+function _renderChapters (chapters, chapterLookup, chaptersLayout, chaptersTheme) {
   // console.log("renderChapters:", chapters, "\nchaptersLayout:", chaptersLayout);
   const retRows = [];
   if (chaptersLayout.indexSections) {
-    sectionTheme.sectionIndexes = [...sectionTheme.sectionIndexes, 0];
+    chaptersTheme.sectionIndexes = [...chaptersTheme.sectionIndexes, 0];
   }
   chapters.forEach((chapter) => {
     const [chapterName, chapterLayout] = Array.isArray(chapter) ? chapter : [chapter];
@@ -371,14 +404,16 @@ function _renderChapters (chapters, chapterLookup, chaptersLayout, sectionTheme)
     const heading = _getLayoutProperty(lookups, "heading");
     const headingText = (typeof heading === "string") ? heading : (heading && heading.text);
     if (headingText) {
-      retRows.push(sectionTheme.decoratorOf([
+      retRows.push(chaptersTheme.decoratorOf([
         _getLayoutProperty(lookups, "heading", "style"), { heading: chaptersLayout.depth }
       ])(headingText));
     }
+    const sectionTheme = _getLayoutProperty(lookups, "oob")
+        ? Object.create(chaptersTheme) : chaptersTheme;
     const chapterText = _renderBlock(chapterBlock, chaptersLayout, sectionTheme);
     const style = _getLayoutProperty(lookups, "elementStyle")
         || _getLayoutProperty(lookups, "style");
-    retRows.push(!style ? chapterText : sectionTheme.decoratorOf(style)(chapterText));
+    retRows.push(!style ? chapterText : chaptersTheme.decoratorOf(style)(chapterText));
   });
   return retRows.join("\n");
 }
@@ -425,7 +460,7 @@ function _renderTable (rowKeys, rowLookup, columns, layout, tableTheme) {
       ]));
   let pendingHeaderRow = headerRow;
   for (const rowKey of rowKeys) {
-    const rowData = rowLookup[rowKey];
+    const rowData = (rowKey === null) ? rowLookup : rowLookup[rowKey];
     const elementLayouts = (_getLayout(rowData) || {}).entryLayouts || {};
     const _columnElementRenderer = ([columnKey, columnLayout]) => {
       let text = (columnKey === null) ? rowKey
@@ -475,9 +510,14 @@ function _renderTable (rowKeys, rowLookup, columns, layout, tableTheme) {
   }).join("\n");
 }
 
+function _flattenArrays (value) {
+  return !Array.isArray(value)
+      ? value
+      : [].concat(...value.map(_flattenArrays));
+}
+
 function _layoutSectionText (section, indent = 0, prefix = "", width = 71) {
-  const _flatten = (value) => (!Array.isArray(value) ? value : [].concat(...value.map(_flatten)));
-  const words = _flatten([section]).join(" ").split(/[\n\r ]+/);
+  const words = _flattenArrays([section]).join(" ").split(/[\n\r ]+/);
   const prefindent = `${" ".repeat(indent)}${prefix}`;
   let charCount = prefindent.length - 1;
   let line = [];

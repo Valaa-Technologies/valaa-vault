@@ -18,6 +18,8 @@ const deepExtend = require("@valos/tools/deepExtend").default;
 
 cardinal.tomorrowNight = require("cardinal/themes/tomorrow-night");
 
+Error.stackTraceLimit = Infinity;
+
 /* eslint-disable vars-on-top, no-loop-func, no-restricted-syntax, no-cond-assign,
                   import/no-dynamic-require
 */
@@ -144,6 +146,10 @@ const _vlm = globalVargs.vlm = {
     };
     return ret;
   })(),
+  eval: function vlmEval (text) {
+    // eslint-disable-next-line
+    return eval(text);
+  },
 
   // minimatch namespace of the glob matching tools
   // See https://github.com/isaacs/minimatch
@@ -323,6 +329,7 @@ const _vlm = globalVargs.vlm = {
 
   // Implementation details
   _invoke,
+  _peekReturnValue,
   _parseUntilLastPositional,
   _locateDependedPools,
   _refreshActivePools,
@@ -346,16 +353,22 @@ function _setTheme (theme) {
     return (...texts) => this.decorateWith([rule, "join"], texts);
   };
   this.decorateWith = function decorateWith (rule, texts) {
-    if ((rule === undefined) || (rule === null)) return texts;
-    if (typeof rule === "string") return this.decorateWith(this[rule], texts);
-    if (typeof rule === "function") return rule.apply(this, texts);
-    if (Array.isArray(rule)) {
-      return rule.reduce(
-          (subTexts, ruleKey) => this.decorateWith(ruleKey, [].concat(subTexts)), texts);
+    try {
+      if ((rule === undefined) || (rule === null)) return texts;
+      if (typeof rule === "string") return this.decorateWith(this[rule], texts);
+      if (typeof rule === "function") return rule.apply(this, texts.map(text => String(text)));
+      if (Array.isArray(rule)) {
+        return rule.reduce(
+            (subTexts, ruleKey) => this.decorateWith(ruleKey, [].concat(subTexts)), texts);
+      }
+      return Object.keys(rule).reduce(
+          (subTexts, ruleKey) => this.decorateWith(ruleKey, [rule[ruleKey]].concat(subTexts)),
+          texts);
+    } catch (error) {
+      console.log("error while decorating with rule:", rule,
+          "\n\ttexts:", JSON.stringify(texts, null, 2));
+      throw error;
     }
-    return Object.keys(rule).reduce(
-        (subTexts, ruleKey) => this.decorateWith(ruleKey, [rule[ruleKey]].concat(subTexts)),
-        texts);
   };
   Object.keys(theme).forEach(name => {
     const rule = theme[name];
@@ -396,8 +409,9 @@ const themes = {
       const options = { ..._vlm.cardinalDefault };
       const ret = [];
       for (const textOrOpt of textsAndOptions) {
-        if (typeof textOrOpt === "string") ret.push(cardinal.highlight(textOrOpt, options));
-        else if (textOrOpt && (typeof textOrOpt === "object")) Object.assign(options, textOrOpt);
+        if (typeof textOrOpt === "string") {
+          ret.push(textOrOpt && cardinal.highlight(textOrOpt, options));
+        } else if (textOrOpt && (typeof textOrOpt === "object")) Object.assign(options, textOrOpt);
       }
       return ret;
     },
@@ -411,6 +425,7 @@ const themes = {
     babble: "cyan",
     expound: "cyan",
     argument: ["blue", "bold"],
+    return: ["blue"],
     executable: ["flatsplit", { first: ["magenta"], nonfirst: "argument" }],
     command: ["flatsplit", { first: ["magenta", "bold"], nonfirst: "argument" }],
     overridden: ["strikethrough", "command"],
@@ -904,7 +919,7 @@ async function invoke (commandSelector, args, options = {}) {
   let echoResult;
   try {
     const ret = await invokeVLM._invoke(selector, argv);
-    echoResult = invokeVLM.theme.blue((JSON.stringify(ret) || "undefined").slice(0, 71));
+    echoResult = invokeVLM._peekReturnValue(ret, 71);
     return ret;
   } catch (error) {
     echoResult = invokeVLM.theme.error("exception:", String(error));
@@ -919,6 +934,19 @@ async function invoke (commandSelector, args, options = {}) {
       this._reloadPackageAndToolsetsConfigs();
     }
   }
+}
+
+function _peekReturnValue (value, clipLength) {
+  let ret;
+  if ((typeof value === "object") && value && !Array.isArray(value)
+      && Object.getPrototypeOf(value) !== Object.prototype) {
+    ret = "<complex object>";
+  } else if (value === undefined) {
+    ret = "<undefined>";
+  } else {
+    ret = JSON.stringify(value);
+  }
+  return this.theme.return(ret.length <= clipLength ? ret : `${ret.slice(0, clipLength)}...`);
 }
 
 async function _invoke (commandSelector, argv) {
@@ -1065,7 +1093,7 @@ async function _invoke (commandSelector, argv) {
                 throw error;
               } finally {
                 this.echo(`${subVLM.getContextIndexText()}<<<? ${header}:`,
-                    this.theme.blue(requireResult));
+                    this._peekReturnValue(requireResult, 51));
               }
               if (!requireResult) {
                 const message = `'${this.theme.command(commandName)
@@ -1097,7 +1125,7 @@ async function _invoke (commandSelector, argv) {
             if (isWildcardCommand) {
               this.echo(`${this.getContextIndexText()}<<* ${subVLM.getContextIndexText()}vlm`,
                   `${this.theme.command(commandName)}:`,
-                  this.theme.blue(retValue.slice(0, 40), retValue.length > 40 ? "..." : ""));
+                  this._peekReturnValue(retValue, 40));
             }
           }
         }

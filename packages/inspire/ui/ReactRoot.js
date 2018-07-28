@@ -33,7 +33,7 @@ export default class ReactRoot extends React.Component {
     releaseVssSheets: PropTypes.func,
     lensContext: PropTypes.object,
     lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-    fallbackLens: PropTypes.any,
+    lensPropertyNotFoundLens: PropTypes.any,
   };
 
   constructor (props, context) {
@@ -58,7 +58,8 @@ export default class ReactRoot extends React.Component {
       releaseVssSheets: this.releaseVssSheets,
       lensContext: { ...vidgets, Math },
       lensProperty: this.props.lensProperty,
-      fallbackLens: <div>No lens found in Valaa Resource named {VALEK.toField("name")}</div>,
+      lensPropertyNotFoundLens: undefined,
+          // <div>No lens found in Valaa Resource named {VALEK.toField("name")}</div>
     };
   }
 

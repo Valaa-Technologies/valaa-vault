@@ -18,7 +18,7 @@ export default class UIContext extends UIComponent {
     ...UIComponent.contextTypes,
     lensContext: PropTypes.object,
     lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-    fallbackLens: PropTypes.any,
+    lensPropertyNotFoundLens: PropTypes.any,
   }
 
   static registeredBuiltinElements = {};
@@ -29,7 +29,7 @@ export default class UIContext extends UIComponent {
 
   static childContextTypes = {
     lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-    fallbackLens: PropTypes.any,
+    lensPropertyNotFoundLens: PropTypes.any,
   }
 
   vJSXUIDefaultMedia: Object;
@@ -44,29 +44,31 @@ export default class UIContext extends UIComponent {
     invariantify(focus.hasInterface("Scope"), "UIContext.focus must implement Scope");
     this.attachKuerySubscriber("UIContext[DEFAULT_LENS]", focus, UIContext.toDefaultLens, {
       onUpdate: (update) => {
-        const fallbackLens = update.value();
-        if (fallbackLens) {
-          // UIContext always waits for the fallbackLens context to be available before setting it
-          // for the children.
+        const lensPropertyNotFoundLens = update.value();
+        if (lensPropertyNotFoundLens) {
+          // UIContext always waits for the lensPropertyNotFoundLens context to be available before
+          // setting it for the children.
           thenChainEagerly(
-              (fallbackLens instanceof Vrapper)
-                  && fallbackLens.hasInterface("Media")
-                  && fallbackLens.interpretContent({ mimeFallback: "text/vsx" }),
+              (lensPropertyNotFoundLens instanceof Vrapper)
+                  && lensPropertyNotFoundLens.hasInterface("Media")
+                  && lensPropertyNotFoundLens.interpretContent({ mimeFallback: "text/vsx" }),
               (lensMediaContent) => {
-                this.setState({ fallbackLens, active: true });
-                this.outputDiagnostic(lensMediaContent, fallbackLens);
+                this.setState({ lensPropertyNotFoundLens, active: true });
+                this.outputDiagnostic(lensMediaContent, lensPropertyNotFoundLens);
               });
         } else {
-          invariantify(typeof this.context.fallbackLens !== "undefined",
-              "UIContext.context.fallbackLens (when no DEFAULT_LENS is given)");
-          this.setState({ fallbackLens: this.context.fallbackLens, active: true });
-          this.outputDiagnostic(undefined, this.context.fallbackLens);
+          invariantify(typeof this.context.lensPropertyNotFoundLens !== "undefined",
+              "UIContext.context.lensPropertyNotFoundLens (when no DEFAULT_LENS is given)");
+          this.setState({
+            lensPropertyNotFoundLens: this.context.lensPropertyNotFoundLens, active: true,
+          });
+          this.outputDiagnostic(undefined, this.context.lensPropertyNotFoundLens);
         }
       }
     });
   }
 
-  outputDiagnostic (fallbackLensText: ?string, fallbackLens: any) {
+  outputDiagnostic (fallbackLensText: ?string, lensPropertyNotFoundLens: any) {
     const lensProperty = this.getFocus().get(
         VALEK.propertyLiteral("DEFAULT_LENS_NAME", { optional: true })
             .or(VALEK.propertyLiteral("JSX_UI_PROPERTY_NAME", { optional: true })));
@@ -77,8 +79,8 @@ export default class UIContext extends UIComponent {
             : ["\n\tlensProperty (inherited from parent context):", this.context.lensProperty]),
         ...(fallbackLensText
             ? [`\n\tusing custom jsxUIDefaultMedia '${this.vJSXUIDefaultMedia.get("name")
-                }' as child fallback Lens:`, fallbackLens, "\n", fallbackLensText]
-            : [`\n\tforwarding fallback Lens from parent context:`, fallbackLens]),
+                }' as child fallback Lens:`, lensPropertyNotFoundLens, "\n", fallbackLensText]
+            : [`\n\tforwarding fallback Lens from parent context:`, lensPropertyNotFoundLens]),
     );
   }
 
@@ -89,7 +91,7 @@ export default class UIContext extends UIComponent {
               && this.getFocus().get(VALEK.propertyLiteral("DEFAULT_LENS_NAME", { optional: true })
                   .or(VALEK.propertyLiteral("JSX_UI_PROPERTY_NAME", { optional: true }))))
           || this.context.lensProperty,
-      fallbackLens: this.state.fallbackLens,
+      lensPropertyNotFoundLens: this.state.lensPropertyNotFoundLens,
     };
   }
 
@@ -100,9 +102,12 @@ export default class UIContext extends UIComponent {
   }
 
   createUIRootElement (focus: Object) {
-    const renderedChildren = super.renderActiveFocus(focus);
-    const defaultJSXElement = this.state.fallbackLens
-        && <ValaaScope {...this.childProps("uiRootDefault")} activeLens={LENS`fallbackLens`} />;
+    const renderedChildren = super.renderLoadedFocus(focus);
+    const defaultJSXElement = this.state.lensPropertyNotFoundLens
+        && <ValaaScope
+          {...this.childProps("uiRootDefault")}
+          activeLens={LENS`lensPropertyNotFoundLens`}
+        />;
     return (renderedChildren && defaultJSXElement)
         ? <div>{renderedChildren}{defaultJSXElement}</div>
         : defaultJSXElement || renderedChildren;

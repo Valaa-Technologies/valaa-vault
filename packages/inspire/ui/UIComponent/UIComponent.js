@@ -236,19 +236,23 @@ export default class UIComponent extends React.Component {
   }
 
   trySetUIContextValue (key: string | Symbol, value: any) {
-    if (this.state.uiContext) this.setUIContextValue(key, value);
+    if (!this.state.uiContext) return false;
+    this.setUIContextValue(key, value);
+    return true;
   }
 
   setUIContextValue (key: string | Symbol, value: any) {
     setScopeValue(this.state.uiContext, key, value);
+    return value;
   }
 
   tryClearUIContextValue (key: string | Symbol) {
-    if (this.state.uiContext) this.clearUIContextValue(key);
+    if (!this.state.uiContext) return false;
+    return this.clearUIContextValue(key);
   }
 
   clearUIContextValue (key: string | Symbol) {
-    clearScopeValue(this.state.uiContext, key);
+    return clearScopeValue(this.state.uiContext, key);
   }
 
   _attachedSubscribers: Object;
@@ -302,16 +306,17 @@ export default class UIComponent extends React.Component {
             ? `key: '${this.getUIContext().key}'`
         : (this.props.context && this.props.context.key)
             ? `key: '${this.props.context.key}'`
+        : ((this.state || {}).uiContext || {}).key
+            ? `key: '${this.state.uiContext.key}'`
         : "no key";
     let focus = this.getUIContextValue("focus");
     if (typeof focus === "undefined") focus = this.getUIContextValue("head");
-    return `${this.constructor.name}(${keyString}, focus: ${
+    return `<${this.constructor.name} key="${keyString}" focus={${
         Array.isArray(focus)
-            ? `[${focus.map(entry => debugId(entry, options)).join(", ")}]`
-            : debugId(focus, options)
-    })`;
+            ? `[${focus.map(entry => debugId(entry, { short: true, ...options })).join(", ")}]`
+            : debugId(focus, { short: true, ...options })
+    }} ... />`;
   }
-
 
   /**
    * Attach a given subscriber with a particular given subscriberKey to this UIComponent.
@@ -430,7 +435,7 @@ export default class UIComponent extends React.Component {
     return _tryRenderLensArray(this, arrayFromAny(sequence), focus);
   }
 
-  renderActiveFocus (focus: any):
+  renderLoadedFocus (focus: any):
       null | string | React.Element<any> | [] | Promise<any> {
     return _renderFocus(this, focus);
   }

@@ -10,7 +10,7 @@ import { arrayFromAny, messageFromError } from "~/tools";
 export default function injectLensObjects (Valaa: Object, rootScope: Object,
     hostObjectDescriptors: Object) {
   Valaa.Lens = {};
-  const lensDescriptorOptions = {};
+  const lensDescriptorOptions: { [string]: {} } = {};
   function createLensRoleSymbol (name: string, type: string, description: string,
       isLensAvailable: any, defaultLensThunk: any) {
     lensDescriptorOptions[name] = { name, type, description, isLensAvailable, defaultLensThunk };
@@ -255,6 +255,14 @@ default lens for this is the yelling-red screen.`,
           Could not find lens property ({Valaa.Lens.lensProperty}) from focus: {
               Valaa.Lens.describeFocusLens}
       </div>);
+
+/*
+  createLensRoleSymbol("fixedLens",
+      "Lens",
+      `DEPRECATED; prefer Valaa.Lens.lens.`,
+      true,
+      () => undefined);
+
   createLensRoleSymbol("fallbackLens",
       "Lens",
       `DEPRECATED; prefer lensPropertyNotFoundLens.`,
@@ -265,6 +273,7 @@ default lens for this is the yelling-red screen.`,
             "\n\tin component:", component.debugId(), component);
         return Valaa.Lens.lensPropertyNotFoundLens;
       });
+*/
   createLensRoleSymbol("childrenLens",
       "Lens",
       `Lens role for using the child elements of the containing component as the lens.`,

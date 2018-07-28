@@ -507,8 +507,13 @@ export default class Vrapper extends Cog {
 
   setDebug (level: number) { this._debug = level; }
 
-  debugId () {
-    if (!this.__debugId) this.__debugId = debugId(this._transient || this._objectId);
+  debugId (options?: any) {
+    if (options && options.short) {
+      return debugId(this._transient || this._objectId, { short: true });
+    }
+    if (!this.__debugId) {
+      this.__debugId = debugId(this._transient || this._objectId);
+    }
     return `${this.constructor.name}(${
         this._phase === ACTIVE ? "" : `${this._phase}: `}${this.__debugId})`;
   }

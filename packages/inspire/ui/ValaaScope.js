@@ -62,7 +62,7 @@ import { arrayFromAny, outputError, wrapError } from "~/tools";
  *    and getFocus().propertyValue(lensProperty) is defined:
  *    value-renders getFocus().propertyValue(lensProperty).
  * 6.4. otherwise:
- *    value-renders props/context "fallbackLens" or "disabledLens".
+ *    value-renders props/context "lensPropertyNotFoundLens" or "disabledLens".
  *
  * 7. If UI focus is an array or a plain object, ValaaScope behaves as if it was a ForEach component
  *    and renders the focus as a sequence, with following rules:
@@ -105,7 +105,7 @@ export default class ValaaScope extends UIComponent {
     lens: PropTypes.any,
     nullLens: PropTypes.any,
     activeLens: PropTypes.any,
-    fallbackLens: PropTypes.any,
+    lensPropertyNotFoundLens: PropTypes.any,
   };
 
   static contextTypes = {
@@ -115,7 +115,7 @@ export default class ValaaScope extends UIComponent {
     lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
     nullLens: PropTypes.any,
     activeLens: PropTypes.any,
-    fallbackLens: PropTypes.any,
+    lensPropertyNotFoundLens: PropTypes.any,
     lensContext: PropTypes.object,
   };
 
@@ -135,8 +135,8 @@ export default class ValaaScope extends UIComponent {
     super.attachSubscribers(focus, props);
     this.setUIContextValue("this", this);
     let focusResource;
-    if ((typeof this.tryRenderLensRole("fixedLens", focus) === "undefined")
-        && (typeof this.tryRenderLensRole("lens", focus) === "undefined")
+    if ((typeof this.tryRenderLensRole("lens", focus) === "undefined")
+        // && (typeof this.tryRenderLensRole("fixedLens", focus) === "undefined")
         && (typeof focus === "object") && (focus !== null) && (focus instanceof Vrapper)
         && (props.lensProperty || props.lensName || this.context.lensProperty
             || this.getUIContextValue(this.getValaa().Lens.lensProperty))) {
@@ -157,7 +157,9 @@ export default class ValaaScope extends UIComponent {
         || this.getUIContextValue(this.getValaa().Lens.lensProperty)
         || this.context.lensProperty);
     if (!lens) {
-      this.setState({ lensComponent: this.renderLensRole("fallbackLens", focus) });
+      this.setState({
+        lensComponent: this.renderLensRole("lensPropertyNotFoundLens", focus)
+      });
     } else if (!(lens instanceof Vrapper) || !lens.hasInterface("Media")) {
       this.setState({
         lensComponent: React.createElement(ValaaScope, { ...props, focus: lens },
@@ -188,7 +190,7 @@ export default class ValaaScope extends UIComponent {
     }
   }
 
-  renderActiveFocus (focus: any) {
+  renderLoadedFocus (focus: any) {
     // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
     if (this.props.hasOwnProperty("styleSheet")) {
       this.setUIContextValue(VSSStyleSheetSymbol, this.props.styleSheet);
@@ -198,6 +200,7 @@ export default class ValaaScope extends UIComponent {
 
     const lens = this.tryRenderLensRole("lens", focus);
     if (typeof lens !== "undefined") return lens;
+    /*
     const fixedLens = this.tryRenderLensRole("fixedLens", focus);
     if (typeof fixedLens !== "undefined") {
       console.error("DEPRECATED: props.fixedLens",
@@ -205,6 +208,7 @@ export default class ValaaScope extends UIComponent {
           "\n\tin component:", this.debugId(), this);
       return fixedLens;
     }
+    */
 
     if (focus === null) {
       return this.renderLensRole("nullLens", focus);
@@ -283,12 +287,3 @@ export class ValaaNode extends ValaaScope {
     console.error("DEPRECATED: ValaaNode\n\tprefer: ValaaScope");
   }
 }
-
-export function ValaaNodeDefault (props: Object) {
-  console.error("DEPRECATED: JSXNodeDefault",
-      "\n\tprefer: <ValaaScope activeLens={LENS`fallbackLens`} .../>");
-  return <ValaaScope {...props} activeLens={LENS`fallbackLens`}>{props.children}</ ValaaScope>;
-}
-
-ValaaNodeDefault.isUIComponent = true;
-ValaaNodeDefault.propTypes = ValaaScope.propTypes;

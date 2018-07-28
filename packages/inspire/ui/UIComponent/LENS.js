@@ -8,8 +8,8 @@ import type UIComponent from "./UIComponent";
  * A template literal tag for referring to UI elements by name.
  *
  * Useful for forwarding UI mode implementations:
- * For example: <ValaaScope activeLens={LENS`fallbackLens`}> means that if activeLens is
- * requested the fallbackLens implementation is used for it.
+ * For example: <ValaaScope activeLens={LENS`lensPropertyNotFoundLens`}> means that if activeLens is
+ * requested the lensPropertyNotFoundLens implementation is used for it.
  *
  * @export
  * @param {string} lookupLensNames

@@ -23,7 +23,7 @@ export default class ForEach extends UIComponent {
     });
   }
 
-  renderActiveFocus (focus: any) {
+  renderLoadedFocus (focus: any) {
     const renderedChildren = this.renderFocusAsSequence(
         focus,
         this.props.EntryUIComponent,

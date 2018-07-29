@@ -2,6 +2,8 @@
 
 import React from "react";
 
+import { denoteValaaBuiltinWithSignature } from "~/raem/VALK";
+
 import Vrapper from "~/engine/Vrapper";
 import UIComponent from "~/inspire/ui/UIComponent";
 
@@ -38,26 +40,140 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     hostObjectDescriptors.set(Valaa.Lens, lensDescriptors);
   }
 
-  createLensRoleSymbol("rootRoleName",
-      "string",
-      `the root lens role name which is currently being rendered.`);
-  createLensRoleSymbol("disabledLens",
-  createLensRoleSymbol("internalFailureLens",
+  const _lensMessageLoadingProps = {
+    className: `inspire__lensMessage inspire__lensMessage_loading`,
+  };
+  const _lensMessageLoadingFailedProps = {
+    className: `inspire__lensMessage inspire__lensMessage_loadingFailed`,
+  };
+  const _lensMessageInternalFailureProps = {
+    className: `inspire__lensMessage inspire__lensMessage_internalFailure`,
+  };
+  const _element = "inspire__lensMessage-infoRow";
+  const _message = { className: `${_element} ${_element}_message` };
+  const _parameters = { className: `${_element} ${_element}_parameter` };
+  const _lensChain = { className: `${_element} ${_element}_lensChain` };
+  const _component = { className: `${_element} ${_element}_component` };
+  const _key = { className: `inspire__lensMessage-infoKey` };
+  const _value = { className: `inspire__lensMessage-infoValue` };
+
+  Valaa.instrument = denoteValaaBuiltinWithSignature(
+      `function(lens1[, lens2[, ...[, lensN]]])
+      Creates an _instrument lens_ by chaining multiple lenses in
+      sequence. When an instrument lens is assigned into a lens role
+      the instrument passes its focus to the first lens. Then it
+      forwards the output of the first lens to the second lens and so
+      on until the output of the last lens is displayed as the output
+      of the instrument lens itself.`
+  // eslint-disable-next-line
+  )(function instrument (...lenses) {
+    return (focus: any, component: UIComponent, lensName: string) =>
+      lenses.reduce((refraction, lens) =>
+            component.renderLens(lens, refraction, lensName), focus);
+  });
+
+  // Primitive lenses
+
+  createLensRoleSymbol("activeRoles",
+      "string[]",
+      `Lens role for displaying the names of the lens roles that are
+      currently active in displaying content.`,
+  );
+
+  const niceActiveRoleNames = Valaa.instrument(
+      Valaa.Lens.activeRoles,
+      roleNames => roleNames.slice(0, -1).reverse().join(" <- "));
+
+  createLensRoleSymbol("childrenLens",
+      "any[]",
+      `Lens role for displaying the child elements of the containing
+      component.`,
+      true,
+      () => (focus: any, component: UIComponent) => component.props.children
+  );
+
+  createLensRoleSymbol("describeFocusLens",
       "Lens",
-      `A catch-all lens role for when an internal failure like an
-unhandled exception or 'pendingLens' returns a promise happens. The
-default lens for this is the yelling-red screen.`,
+      `Lens role for displaying a brief description of the current focus.
+
+      @param {any} focus  the focus to describe.`,
+      true,
+      () => (function renderFocusDescription (focus: any, component: UIComponent) {
+        switch (typeof focus) {
+          case "string":
+            return `"${focus.length <= 30 ? focus : `${focus.slice(0, 27)}...`}"`;
+          case "function":
+            return `(${focus.name})`;
+          case "object": {
+            if (focus !== null) {
+              if (focus instanceof Vrapper) return focus.debugId({ short: true });
+              if (Array.isArray(focus)) {
+                return `[${focus.map(entry => renderFocusDescription(entry, component))
+                    .join(", ")}]`;
+              }
+              return `{ ${Object.keys(focus).join(", ")} }`;
+            }
+          }
+          // eslint-disable-next-line no-fallthrough
+          default:
+            return JSON.stringify(focus);
+        }
+      })
+  );
+
+  createLensRoleSymbol("debugFocusLens",
+      "Lens",
+      `Lens role for displaying a developer-oriented information of the
+      current focus.
+
+      @param {any} focus  the focus to describe.`,
+      true,
+      () => (function renderFocusDebug (focus: any, component: UIComponent) {
+        switch (typeof focus) {
+          case "string":
+            return `<string "${focus.length <= 60 ? focus : `${focus.slice(0, 57)}...`}">`;
+          case "function":
+            return `<function ${focus.name}>`;
+          case "object": {
+            if (focus !== null) {
+              if (focus instanceof Vrapper) return `<${focus.debugId()}>`;
+              if (Array.isArray(focus)) {
+                return `[${focus.map(entry => renderFocusDebug(entry, component)).join(", ")}]`;
+              }
+              return `<object { ${Object.keys(focus).join(", ")} }>`;
+            }
+          }
+          // eslint-disable-next-line no-fallthrough
+          default:
+            return `<${typeof focus} ${JSON.stringify(focus)}>`;
+        }
+      })
+  );
+
+  createLensRoleSymbol("describeComponentLens",
+      "Lens",
+      `Lens role for displaying a developer-oriented description of the
+      current component.`,
+      true,
+      () => (function renderComponentDescription (unused: any, component: UIComponent) {
+        return component.debugId();
+      }),
+  );
+
+  createLensRoleSymbol("internalErrorLens",
+      "Lens",
+      `A catch-all lens role for displaying an internal error, such
+      as an unhandled exception or if a 'pendingLens' returns a
+      promise.
+      By default displays the yelling-red screen.
+
+      @param {string|Error} error  the failure description or exception object`,
       true,
       () => function renderInternalFailure (failure: string | Error, component: UIComponent) {
         return (
-          <div
-            style={{
-              color: "#f44336",
-              backgroundColor: "#ffeb3b",
-            }}
-          >
+          <div {..._lensMessageInternalFailureProps}>
             <p>
-              There is an error with component component:
+              There is an error with component:
               <button onClick={component.toggleError}>
                 {component.state.errorHidden ? "Show" : "Hide"}
               </button>
@@ -75,107 +191,28 @@ default lens for this is the yelling-red screen.`,
       }
   );
 
-      "Lens",
-      `Lens role for when the focus, another lens or some lens prop is is still being loaded.`,
-      true,
-      () => <div>
-          {Valaa.Lens.rootRoleName}: Some lens component still loading, with focus: {
-              Valaa.Lens.describeFocusLens}...
-      </div>);
-  createLensRoleSymbol("delayedLens",
-      "Lens",
-      `Lens role for when some lens sub-component is a non-resolved promise.`,
-      true,
-      () => <div>
-          {Valaa.Lens.rootRoleName}: Some lens component is delayed, with focus: {
-              Valaa.Lens.describeFocusLens}...
-      </div>);
-  createLensRoleSymbol("downloadingLens",
-      "Lens",
-      `Lens role for when Media content for the focus, another lens or some lens prop is still${
-          ""} being downloaded.`,
-      true,
-      () => <div>
-          {Valaa.Lens.rootRoleName}: Some lens component is being downloaded, with focus: {
-              Valaa.Lens.describeFocusLens}...
-      </div>);
-  createLensRoleSymbol("connectingLens",
-      "Lens",
-      `Lens role for when an operation threw a missing partition connection error and implicit${
-          ""} partition connection process was triggered.`,
-      true,
-      () => <div>
-          {Valaa.Lens.rootRoleName}: Connecting to partitions {Valaa.Lens.unconnectedPartitionNames
-              }, with focus: {Valaa.Lens.describeFocusLens}...
-      </div>);
-  createLensRoleSymbol("unconnectedPartitionNames",
-      "(string | string[])",
-      `partition URI's which are being implicitly connected.`);
-  createLensRoleSymbol("pendingLens",
-      "Lens",
-      `Lens role for when a partition of the focus, of another lens or of some lens prop is still${
-          ""} being connected.`,
-      true,
-      () => <div>
-          {Valaa.Lens.rootRoleName}: Some lens component kuery or partition connection pending,
-              with focus: {Valaa.Lens.describeFocusLens}...
-      </div>);
-  createLensRoleSymbol("pendingFocusLens",
-      "Lens",
-      `Lens role for when the focus kuery or its partition connection is still pending.`,
-      true,
-      () => <div>
-          {Valaa.Lens.rootRoleName}: Kuery or partition connection pending, with focus: {
-              Valaa.Lens.describeFocusLens}...
-      </div>);
-  createLensRoleSymbol("pendingPropsLens",
-      "Lens",
-      `Lens role for when the kuery for some props is still pending.`,
-      true,
-      () => <div>
-          {Valaa.Lens.rootRoleName}: Props {Valaa.Lens.pendingPropNames
-              } kuery(s) are pending, with focus: {Valaa.Lens.describeFocusLens}...
-      </div>);
-  createLensRoleSymbol("pendingPropNames",
-      "(string | string[])",
-      `props name or array of props names for which a kuery is still pending.`);
-  createLensRoleSymbol("delayedPropsLens",
-      "Lens",
-      `Lens role for when the direct value for some props is non-resolved promise.`,
-      true,
-      () => <div>
-          {Valaa.Lens.rootRoleName}: Props {Valaa.Lens.delayedPropNames
-              } value(s) are delayed, with focus: {Valaa.Lens.describeFocusLens}...
-      </div>);
-  createLensRoleSymbol("delayedPropNames",
-      "(string | string[])",
-      `props name or array of props names whose values are still non-resolved promises.`);
-  createLensRoleSymbol("delayedChildrenLens",
-      "Lens",
-      `Lens role for when some child entry is a non-resolved promise.`,
-      true,
-      () => <div>
-          {Valaa.Lens.rootRoleName}: Some child element is delayed, with focus: {
-              Valaa.Lens.describeFocusLens}...
-      </div>);
-  createLensRoleSymbol("fixedLens",
-      "Lens",
-      `DEPRECATED; prefer Valaa.Lens.lens.`,
-      true,
-      () => undefined);
+
+  // Content lenses
+
   createLensRoleSymbol("lens",
       "Lens",
-      `Lens role for a fully loaded component.`,
+      `Lens role for displaying a loaded component.
+
+      @param {Object} focus  the focus of the component.`,
       true,
       () => undefined);
+
   createLensRoleSymbol("nullLens",
       "Lens",
-      `Lens role for null focus.`,
+      `Lens role for displaying a null focus.`,
       (focus?: Vrapper) => (focus === null),
       () => null);
+
   createLensRoleSymbol("resourceLens",
       "Lens",
-      `Lens role for whe the focus is a Resource.`,
+      `Lens role for displaying a Resource focus of a loaded component.
+
+      @param {Object} focus  the Resource focus.`,
       (focus?: Vrapper) => (focus instanceof Vrapper),
       () => ({ overrideLens: [
         Valaa.Lens.activeLens,
@@ -184,47 +221,28 @@ default lens for this is the yelling-red screen.`,
         Valaa.Lens.destroyedLens,
         Valaa.Lens.unavailableLens,
       ] }));
+
   createLensRoleSymbol("activeLens",
       "Lens",
-      `Lens role for when the focus is a fully active Resource.`,
+      `Lens role for displaying an active Resource focus of a loaded
+      component.
+
+      @param {Object} focus  the active Resource focus.`,
       (focus?: Vrapper) => focus && focus.isActive(),
-      () => Valaa.Lens.propertyLens);
-  createLensRoleSymbol("activatingLens",
+      () => Valaa.Lens.lensPropertyLens);
+
+  createLensRoleSymbol("lensPropertyLens",
       "Lens",
-      `Lens role for when the focus is a Resource which is still being activated.`,
-      (focus?: Vrapper) => focus && focus.isActivating(),
-      () => <div>
-          Focus Activating: {Valaa.Lens.describeFocusLens}...
-      </div>);
-  createLensRoleSymbol("inactiveLens",
-      "Lens",
-      `Lens role for when the focus is an inactive Resource.`,
-      (focus?: Vrapper) => focus && focus.isInactive(),
-      () => <div>
-          Focus Inactive: {Valaa.Lens.describeFocusLens}
-      </div>);
-  createLensRoleSymbol("unavailableLens",
-      "Lens",
-      `Lens role for when the focus is an unavailable Resource.`,
-      (focus?: Vrapper) => focus && focus.isUnavailable(),
-      () => <div>
-          Focus Unavailable: {Valaa.Lens.describeFocusLens}
-      </div>);
-  createLensRoleSymbol("destroyedLens",
-      "Lens",
-      `Lens role for when the focus is a destroyed Resource.`,
-      (focus?: Vrapper) => focus && focus.isDestroyed(),
-      () => <div>
-          Focus Destroyed: {Valaa.Lens.describeFocusLens}
-      </div>);
-  createLensRoleSymbol("propertyLens",
-      "Lens",
-      `Lens role for using a property of a fully active focus Resource as the lens.${
-          ""} By default retrieves 'lensProperty' from props or 'Valaa.Lens.lensProperty' from${
-          ""} context and then searches the focus for a matching property.${
-          ""} If lensProperty is an array the first matching property from focus is used.${
-          ""} If 'lensProperty' itself or no matching property can be found falls back to${
-          ""} 'lensPropertyNotFoundLens'.`,
+      `Lens role for displaying an active Resource focus using one of
+      its own properties as the lens. By default retrieves
+      'lensProperty' from props or 'Valaa.Lens.lensProperty' from
+      context and then searches the focus for a matching property.
+      If lensProperty is an array the first matching property from
+      focus is used.
+      If 'lensProperty' itself or no matching property can be found
+      falls back to 'lensPropertyNotFoundLens'.
+
+      @param {Object} focus  the active Resource focus.`,
       (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
       () => function renderPropertyLens (focus: any, component: UIComponent) {
         const props = component.props;
@@ -240,21 +258,316 @@ default lens for this is the yelling-red screen.`,
           }
         }
         return {
-          overrideLens: [Valaa.Lens.fallbackLens, Valaa.Lens.lensPropertyNotFoundLens],
+          overrideLens: [Valaa.Lens.lensPropertyNotFoundLens],
         };
       });
+
   createLensRoleSymbol("lensProperty",
       "(string | string[])",
-      `property name or array of property names that are searched from an active focus resource${
-          ""} when rendering 'propertyLens' role.`);
+      `Lens role for the name or array of property names that are
+      searched from an active Resource focus when displaying the
+      *propertyLens* role.`);
+
+
+  // User-definable catch-all lenses
+
+  createLensRoleSymbol("loadingLens",
+      "Lens",
+      `A catch-all lens role for displaying a description of a
+      dependency which is still being loaded.
+      Unassigned by default; assign a lens to this role to have all the
+      *default* implementations of all other loading -like roles
+      delegate to this role (instead of using their own default lens).
+
+      @param {Object} component  an object description of the dependency being loaded`
+  );
+
+  createLensRoleSymbol("loadingFailedLens",
+      "Lens",
+      `A catch-all lens role for displaying a description of a
+      dependency which has failed to load.
+      Unassigned by default; assign a lens to this role to have all the
+      *default* implementations of all other loading-failed -like roles
+      delegate to this role (instead of using their own default lens).
+
+      @param {string|Error|Object} reason  the explanation of the loading failure`
+  );
+
+  // Failure and lifecycle lenses
+
+  const commonMessageRows = [
+    <div {..._lensChain}>
+      <span {..._key}>Lens role delegation:</span>
+      <span {..._value}>{niceActiveRoleNames}</span>
+    </div>,
+    <div {..._component}>
+      <span {..._key}>Containing component:</span>
+      <span {..._value}>{Valaa.Lens.describeComponentLens}</span>
+    </div>,
+  ]
+
+  createLensRoleSymbol("disabledLens",
+      "Lens",
+      `Lens role for displaying the reason why a component is
+      explicitly disabled.
+
+      @param {string|Error|Object} reason  a description of why the component is disabled.`,
+      true,
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageLoadingFailedProps}>
+          <div {..._message}>Component is disabled; focus and context are not available.</div>
+          <div {..._parameters}>
+            <span {..._key}>Disable reason:</span>
+            <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] })
+  );
+
+  createLensRoleSymbol("pendingLens",
+      "Lens",
+      `Lens role for displaying a description of a dependency which is
+      a pending promise. If the lens assigned to this role returns a
+      promise then 'internalErrorLens' is displayed instead.
+
+      @param {Object} dependency  a description object of the pending dependency.`,
+      true,
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingLens,
+        <div {..._lensMessageLoadingProps}>
+        <div {..._message}>Waiting for a pending dependency Promise to resolve.</div>
+        <div {..._parameters}>
+          <span {..._key}>Dependency:</span>
+          <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+        </div>
+        {commonMessageRows}
+        </div>
+      ] })
+  );
+
+  createLensRoleSymbol("connectingLens",
+      "Lens",
+      `Lens role for displaying a description of partition connections
+      that are being acquired.
+
+      @param {Object[]} partitions  the partition connections that are being acquired.`,
+      true,
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingLens,
+        <div {..._lensMessageLoadingProps}>
+          <div {..._message}>Acquiring partition connection(s).</div>
+          <div {..._parameters}>
+            <span {..._key}>Partitions:</span>
+            <span {..._value}>{Valaa.Lens.describeFocusLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] })
+  );
+
+  createLensRoleSymbol("downloadingLens",
+      "Lens",
+      `Lens role for displaying a description of Media dependency whose
+      content is being downloaded.
+
+      @param {Media} media  the Media being downloaded.`,
+      true,
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingLens,
+        <div {..._lensMessageLoadingProps}>
+          <div {..._message}>Downloading dependency {Valaa.Lens.debugFocusLens}.</div>
+          <div {..._parameters}>
+            <span {..._key}>Media:</span>
+            <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] })
+  );
+
+  createLensRoleSymbol("kueryingFocusLens",
+      "Lens",
+      `Lens role for displaying a description of an unfinished focus kuery.
+
+      @param {Object} focus  the focus kuery.`,
+      true,
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingLens,
+        <div {..._lensMessageLoadingProps}>
+          <div {..._message}>Waiting for focus kuery to complete.</div>
+          <div {..._parameters}>
+            <span {..._key}>Focus:</span>
+            <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] })
+  );
+
+  createLensRoleSymbol("kueryingPropsLens",
+      "Lens",
+      `Lens role for displaying a description of one or more unfinished props kueries.
+
+      @param {Object} props  the unfinished props kueries.`,
+      true,
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingLens,
+        <div {..._lensMessageLoadingProps}>
+          <div {..._message}>Waiting for props kueries to complete.</div>
+          <div {..._parameters}>
+            <span {..._key}>Props kueries:</span>
+            <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] })
+  );
+
+  createLensRoleSymbol("pendingPropsLens",
+      "Lens",
+      `Lens role for displaying the description of props which are pending Promises.
+
+      @param {Object} props  the pending props Promises.`,
+      true,
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingLens,
+        <div {..._lensMessageLoadingProps}>
+          <div {..._message}>Waiting for pending props Promise(s) to resolve.</div>
+          <div {..._parameters}>
+            <span {..._key}>Props promises:</span>
+            <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] })
+  );
+
+  createLensRoleSymbol("pendingChildrenLens",
+      "Lens",
+      `Lens role for displaying a description of pending children Promise.
+
+      @param {Object} children  the pending children Promise.`,
+      true,
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingLens,
+        <div {..._lensMessageLoadingProps}>
+          <div {..._message}>  Waiting for a pending children Promise to resolve.</div>
+          <div {..._parameters}>
+            <span {..._key}>Children promise:</span>
+            <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] })
+  );
+
+  createLensRoleSymbol("activatingLens",
+      "Lens",
+      `Lens role for displaying an activating Resource focus of a
+      loaded component.
+
+      @param {Object} focus  the activating Resource focus.`,
+      (focus?: Vrapper) => focus && focus.isActivating(),
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingLens,
+        <div {..._lensMessageLoadingProps}>
+          <div {..._message}>Activating focus {Valaa.Lens.describeFocusLens}.</div>
+          <div {..._parameters}>
+            <span {..._key}>Focus resource info:</span>
+            <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] })
+  );
+
+  createLensRoleSymbol("inactiveLens",
+      "Lens",
+      `Lens role for displaying an inactive Resource focus of a loaded
+      component.
+
+      @param {Object} focus  the inactive Resource focus.`,
+      (focus?: Vrapper) => focus && focus.isInactive(),
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageLoadingFailedProps}>
+          <div {..._message}>Focus {Valaa.Lens.describeFocusLens} is inactive.</div>
+          <div {..._parameters}>
+            <span {..._key}>Focus resource info:</span>
+            <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] })
+  );
+
+  createLensRoleSymbol("unavailableLens",
+      "Lens",
+      `Lens role for displaying an unavailable Resource focus of a
+      loaded component.
+
+      @param {Object} focus  the unavailable Resource focus.`,
+      (focus?: Vrapper) => focus && focus.isUnavailable(),
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageLoadingFailedProps}>
+          <div {..._message}>Focus {Valaa.Lens.describeFocusLens} is unavailable.</div>
+          <div {..._parameters}>
+            <span {..._key}>Focus resource info:</span>
+            <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] })
+  );
+
+  createLensRoleSymbol("destroyedLens",
+      "Lens",
+      `Lens role for displaying a destroyed Resource focus of a loaded
+      component.
+
+      @param {Object} focus  the destroyed Resource focus.`,
+      (focus?: Vrapper) => focus && focus.isDestroyed(),
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageLoadingFailedProps}>
+          <div {..._message}>Focus {Valaa.Lens.describeFocusLens} has been destroyed.</div>
+          <div {..._parameters}>
+            <span {..._key}>Focus resource info:</span>
+            <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] })
+  );
+
   createLensRoleSymbol("lensPropertyNotFoundLens",
       "Lens",
-      `Lens role for when the focus Resource does not have a matching lens property.`,
+      `Lens role for displaying a description of an active Resource
+      focus which does not have a requested lens property.
+
+      @param {Object} focus  the active Resource focus.`,
       true,
-      () => <div>
-          Could not find lens property ({Valaa.Lens.lensProperty}) from focus: {
-              Valaa.Lens.describeFocusLens}
-      </div>);
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageLoadingFailedProps}>
+          <div {..._message}>
+            Cannot find a lens property from the active focus {Valaa.Lens.describeFocusLens}.
+          </div>
+          <div {..._parameters}>
+            <span {..._key}>Property candidates:</span>
+            <span {..._value}>{Valaa.instrument(Valaa.Lens.lensProperty, p => p.join(", "))}</span>
+          </div>
+          <div {..._parameters}>
+            <span {..._key}>Focus being searched:</span>
+            <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] })
+  );
 
 /*
   createLensRoleSymbol("fixedLens",
@@ -274,37 +587,6 @@ default lens for this is the yelling-red screen.`,
         return Valaa.Lens.lensPropertyNotFoundLens;
       });
 */
-  createLensRoleSymbol("childrenLens",
-      "Lens",
-      `Lens role for using the child elements of the containing component as the lens.`,
-      true,
-      () => (focus: any, component: UIComponent) => component.props.children);
-  createLensRoleSymbol("describeFocusLens",
-      "Lens",
-      `Lens role for rendering developer-oriented description of the current focus.`,
-      true,
-      () => (function renderFocusDescription (focus: any, component: UIComponent) {
-        switch (typeof focus) {
-          case "string":
-            return `<"${focus.length <= 40 ? focus : `${focus.slice(0, 37)}...`}">`;
-          case "function":
-            return `<function '${focus.name}'>`;
-          case "object": {
-            if (focus !== null) {
-              if (focus instanceof Vrapper) return `<${focus.debugId()}>`;
-              if (Array.isArray(focus)) {
-                return `[${focus.map(entry => renderFocusDescription(entry, component))
-                    .join(", ")}]`;
-              }
-              return `<Object.keys: ['${Object.keys(focus).join(", ")}']>`;
-            }
-          }
-          // eslint-disable-next-line no-fallthrough
-          default:
-            return `<${String(focus)}>`;
-        }
-      }));
-
   finalizeLensDescriptors();
   return Valaa.Lens;
 }

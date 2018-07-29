@@ -1,0 +1,46 @@
+.lensMessage {
+  border: 2px dotted;
+}
+
+.lensMessage_loading {
+  background-color: #ffeb3b;
+}
+
+.lensMessage_loadingFailed {
+  color: #f44336;
+  background-color: #ffeb3b;
+}
+
+.lensMessage_internalFailure {
+  color: #f44336;
+  background-color: #ffeb3b;
+}
+
+.lensMessage-infoRow {
+  color: black;
+}
+
+.lensMessage-infoKey {
+  font-weight: bolder;
+}
+
+.lensMessage-infoValue {
+  color: black;
+}
+
+.lensMessage-infoRow_message {
+  font-size: larger;
+}
+
+.lensMessage-infoRow_parameter {
+  border: thin gray;
+}
+
+.lensMessage-infoRow_lensChain {
+  border: thin gray;
+}
+
+.lensMessage-infoRow_component {
+  border: thin gray;
+}
+

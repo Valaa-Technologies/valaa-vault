@@ -47,9 +47,23 @@ export default class UIComponent extends React.Component {
     getVSSSheet: PropTypes.func,
     releaseVssSheets: PropTypes.func,
     engine: PropTypes.object,
-    disabledLens: PropTypes.any,
+
     loadingLens: PropTypes.any,
+    loadingFailedLens: PropTypes.any,
+    internalErrorLens: PropTypes.any,
+
+    connectingLens: PropTypes.any,
+
+    disabledLens: PropTypes.any,
+    inactiveLens: PropTypes.any,
+    unavailableLens: PropTypes.any,
+    destroyedLens: PropTypes.any,
+
     pendingLens: PropTypes.any,
+    kueryingFocusLens: PropTypes.any,
+    kueryingPropsLens: PropTypes.any,
+    pendingPropsLens: PropTypes.any,
+    pendingChildrenLens: PropTypes.any,
   }
 
   static propTypes = {
@@ -66,10 +80,25 @@ export default class UIComponent extends React.Component {
     head: PropTypes.any, // obsolete alias for focus.
     locals: PropTypes.object,
     context: PropTypes.object,
+
     overrideLens: PropTypes.arrayOf(PropTypes.any),
-    disabledLens: PropTypes.any,
+
     loadingLens: PropTypes.any,
+    loadingFailedLens: PropTypes.any,
+    internalErrorLens: PropTypes.any,
+
+    connectingLens: PropTypes.any,
+
+    disabledLens: PropTypes.any,
+    inactiveLens: PropTypes.any,
+    unavailableLens: PropTypes.any,
+    destroyedLens: PropTypes.any,
+
     pendingLens: PropTypes.any,
+    kueryingFocusLens: PropTypes.any,
+    kueryingPropsLens: PropTypes.any,
+    pendingPropsLens: PropTypes.any,
+    pendingChildrenLens: PropTypes.any,
   }
   static noPostProcess = {
     children: true,
@@ -457,21 +486,23 @@ export default class UIComponent extends React.Component {
   tryRenderLensRole (role: string | Symbol, focus?: any = this.tryFocus(), rootRoleName?: string):
       void | null | string | React.Element<any> | [] | Promise<any> {
     const actualRootRoleName = rootRoleName || String(role);
+    const activeRoles = this.getUIContextValue(this.getValaa().Lens.activeRoles)
+        || (this.state.uiContext
+            && this.setUIContextValue(this.getValaa().Lens.activeRoles, []))
+        || [];
+    let ret; // eslint-disable-line
     try {
-      if (!rootRoleName) {
-        this.trySetUIContextValue(this.getValaa().rootRoleName, actualRootRoleName);
-      }
-      const ret = _tryRenderLensRole(this, actualRootRoleName,
+      activeRoles.push(typeof role === "string" ? role : String(role).slice(7, -1));
+      return (ret = _tryRenderLensRole(this,
           (typeof role === "string") ? role : undefined, isSymbol(role) ? role : undefined,
-          focus, false);
-      if (!rootRoleName) {
-        this.tryClearUIContextValue(this.getValaa().rootRoleName);
-      }
-      return ret;
+          focus, actualRootRoleName, false));
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .renderLensRole(${String(role)}), with:`,
           "\n\tfocus:", focus,
           "\n\trootRoleName:", actualRootRoleName);
+    } finally {
+      activeRoles.pop();
+      if (!activeRoles.length) this.clearUIContextValue(this.getValaa().Lens.activeRoles);
     }
   }
 
@@ -504,9 +535,9 @@ export default class UIComponent extends React.Component {
         outputError(wrappedError);
         this.enableError(wrappedError);
       }
-      const failure: any = this.renderLensRole("internalFailureLens",
+      const failure: any = this.renderLensRole("internalErrorLens",
           this._errorObject || "<error missing>");
-      if (isPromise(ret)) throw new Error("internalFailureLens returned a promise");
+      if (isPromise(ret)) throw new Error("internalErrorLens returned a promise");
       return failure;
     } catch (secondPassError) {
       // Exercise in defensive programming. We should never get here, really,, but there's nothing

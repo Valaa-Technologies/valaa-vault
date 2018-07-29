@@ -110,25 +110,20 @@ export default class LiveProps extends UIComponent {
 
   renderLoadedFocus (focus: any) {
     if (this.props.liveProps) {
-      let pendingProps;
+      const unfinishedKueries = [];
       const livePropValues = this.state.livePropValues || OrderedMap();
       for (const kueryId of Object.keys(this.props.liveProps)) {
         if (!livePropValues.has(kueryId)) {
-          (pendingProps || (pendingProps = [])).push(kueryId);
+          unfinishedKueries.push({ name: kueryId, kuery: this.props.liveProps[kueryId] });
         }
       }
-      if (pendingProps) {
-        this.trySetUIContextValue(this.getValaa().pendingPropNames, pendingProps.join(", "));
-        try {
-          return this.renderLensRole("pendingPropsLens", focus);
-        } finally {
-          this.tryClearUIContextValue(this.getValaa().pendingPropNames);
-        }
+      if (unfinishedKueries.length) {
+        return this.renderLensRole("kueryingPropsLens", unfinishedKueries);
       }
     }
 
     const newProps = { ...this.props.elementProps };
-    let promises;
+    let pendingProps;
     for (const name of Object.keys(this.props.elementProps)) {
       const prop = this.props.elementProps[name];
       if ((typeof prop === "function") && prop.kueryId) {
@@ -138,16 +133,11 @@ export default class LiveProps extends UIComponent {
               { immediate: undefined /* allows promise return values */ });
         }
       }
-      if (isPromise(newProps[name])) (promises || (promises = {}))[name] = newProps[name];
+      if (isPromise(newProps[name])) (pendingProps || (pendingProps = {}))[name] = newProps[name];
     }
-    if (promises) {
-      Promise.all(Object.values(promises)).then(() => { this.forceUpdate(); });
-      this.trySetUIContextValue(this.getValaa().delayedPropNames, Object.keys(promises).join(", "));
-      try {
-        return this.renderLensRole("delayedPropsLens", focus);
-      } finally {
-        this.tryClearUIContextValue(this.getValaa().delayedPropNames);
-      }
+    if (pendingProps) {
+      Promise.all(Object.values(pendingProps)).then(() => { this.forceUpdate(); });
+      return this.renderLensRole("pendingPropsLens", pendingProps);
     }
 
     if (newProps.refKuery) {
@@ -168,7 +158,7 @@ export default class LiveProps extends UIComponent {
       children = this.renderLensSequence(children, focus);
       if (isPromise(children)) {
         children.then(() => { this.forceUpdate(); });
-        return this.renderLensRole("delayedChildrenLens", focus);
+        return this.renderLensRole("pendingChildrenLens", focus);
       }
     }
     /* Only enable this section for debugging React key warnings; it will break react elsewhere

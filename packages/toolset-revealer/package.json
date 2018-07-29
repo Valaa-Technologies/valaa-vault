@@ -20,9 +20,9 @@
   "dependencies": {
     "autoprefixer": "^8.6.2",
     "compression-webpack-plugin": "^1.1.11",
-    "css-loader": "^0.26.1",
-    "postcss-loader": "^2.0.8",
-    "style-loader": "^0.13.1",
+    "css-loader": "^1.0.0",
+    "postcss-loader": "^2.1.6",
+    "style-loader": "^0.21.0",
     "uglify-js": "git://github.com/mishoo/UglifyJS2#harmony-v2.8.22",
     "uglifyjs-webpack-plugin": "^1.0.0-rc.0",
     "webpack": "^3.8.1",

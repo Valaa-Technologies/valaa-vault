@@ -18,7 +18,22 @@ module.exports = {
       { use: { loader: "babel-loader" }, test: /\.js$/, exclude: /node_modules/, },
       ...shared.module.rules.map(rule => (
           rule.use && (rule.use[0] === "style-loader")
-              ? { ...rule, include: "/packages/" }
+              ? {
+                ...rule,
+                use: rule.use.map(loader => {
+                  if (loader.loader === "css-loader") {
+                    return {
+                      ...loader,
+                      options: {
+                        ...loader.options,
+                        localIdentName: "[name]__[local]",
+                      }
+                    };
+                  }
+                  return loader;
+                }),
+                include: /packages/,
+              }
           : rule
       ))
     ],

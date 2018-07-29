@@ -4,7 +4,7 @@ import React from "react";
 import { OrderedMap } from "immutable";
 
 import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
-import { Kuery } from "~/raem/VALK";
+import { Kuery, dumpKuery } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
 
@@ -30,17 +30,16 @@ export function _render (component: UIComponent):
         "\n\tprops:", component.props);
     //*/
     if (component.props.overrideLens) {
-      for (const override of arrayFromAny(component.props.overrideLens)) {
-        ret = component.renderLens(override, component.tryFocus(), "override");
-        if (ret !== null) break;
-      }
+      ret = _renderFirstAlternate(component, component.tryFocus(), component.props.overrideLens,
+          "override");
     } else if (typeof component.state.uiContext === "undefined") {
-      ret = component.tryRenderLensRole("disabledLens", null);
+      ret = component.tryRenderLensRole("disabledLens", { uiContext: null });
     // eslint-disable-next-line
     } else {
       const focus = component.tryFocus();
       if (typeof focus === "undefined") {
-        ret = component.tryRenderLensRole("pendingFocusLens", null);
+        ret = component.tryRenderLensRole("kueryingFocusLens",
+            { kuery: dumpKuery(this.props.kuery || this.props.focus) });
       } else {
         switch (!(focus instanceof Vrapper) ? "" : focus.getPhase()) {
           default: {
@@ -73,14 +72,8 @@ export function _render (component: UIComponent):
     if (!tryConnectToMissingPartitionsAndThen(error, () => component.forceUpdate())) {
       throw error;
     }
-    component.trySetUIContextValue(component.getValaa().Lens.unconnectedPartitionNames,
-        (error.originalError || error).missingPartitions
-            .map(entry => String(entry)).join(", "));
-    try {
-      ret = component.tryRenderLensRole("connectingLens");
-    } finally {
-      component.tryClearUIContextValue(component.getValaa().Lens.unconnectedPartitionNames);
-    }
+    ret = component.tryRenderLensRole("connectingLens",
+        (error.originalError || error).missingPartitions.map(entry => String(entry)));
   }
   /*
   finally {
@@ -89,20 +82,20 @@ export function _render (component: UIComponent):
   //*/
   if (isPromise(ret)) {
     ret.then(() => component.forceUpdate());
-    ret = component.tryRenderLensRole("delayedLens", focus);
+    ret = component.tryRenderLensRole("pendingLens", { renderResult: ret });
     if (isPromise(ret)) {
-      const error = wrapError(new Error("Invalid render result: 'delayedLens' returned a promise"),
-          `During ${component.debugId()}\n .render().ret.delayedLens, with:`,
-          "\n\tdelayedLensRet ret:", dumpObject(ret),
+      const error = wrapError(new Error("Invalid render result: 'pendingLens' returned a promise"),
+          `During ${component.debugId()}\n .render().ret.pendingLens, with:`,
+          "\n\pendingLens ret:", dumpObject(ret),
           "\n\tcomponent:", dumpObject(component));
-      ret = component.tryRenderLensRole("internalFailureLens", error);
+      ret = component.tryRenderLensRole("internalErrorLens", error);
       if (isPromise(ret)) {
         const secondError = wrapError(error,
-            `During ${component.debugId()}\n .render().ret.internalFailureLens, with:`,
+            `During ${component.debugId()}\n .render().ret.internalErrorLens, with:`,
             "\n\tinternalFailureLens ret:", dumpObject(ret));
         outputError(secondError);
         throw new Error(
-            "The lens handling the role 'internalFailureLens' must never return a promise");
+            "The lens handling the role 'internalErrorLens' must never return a promise");
       }
     }
   }
@@ -231,7 +224,8 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
       return null;
     case "function": {
       const contextThis = component.getUIContextValue("component");
-      return component.renderLens(lens.call(contextThis, focus, component), focus, lensName);
+      return component.renderLens(lens.call(contextThis, focus, component, lensName),
+          focus, lensName);
     }
     case "object":
       if ((lens === null) || isPromise(lens)) {

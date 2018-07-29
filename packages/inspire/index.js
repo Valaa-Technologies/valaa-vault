@@ -17,6 +17,7 @@ import { exportValaaPlugin, getGlobal, Logger, LogEventGenerator, outputError }
     from "~/tools";
 
 import * as mediaDecoders from "./mediaDecoders";
+import "./inspire.css";
 
 window.URL = URL;
 

@@ -122,7 +122,7 @@ export default class LiveProps extends UIComponent {
       }
     }
 
-    const newProps = { ...this.props.elementProps };
+    let newProps = { ...this.props.elementProps };
     let pendingProps;
     for (const name of Object.keys(this.props.elementProps)) {
       const prop = this.props.elementProps[name];
@@ -150,10 +150,16 @@ export default class LiveProps extends UIComponent {
       }
     }
     let children = arrayFromAny(this.props.children);
-    const valaaScope = newProps.valaaScope;
-    if (valaaScope) delete newProps.valaaScope;
-    else if (!this.props.elementType.isUIComponent) {
-      // if no valaaScope is requested and the element is not an UIElement we need to post-process
+    let elementType = this.props.elementType;
+    if (newProps.valaaScope) {
+      const subProps = newProps;
+      newProps = { ...newProps.valaaScope };
+      delete subProps.valaaScope;
+      newProps.overrideLens = [React.createElement(elementType, subProps, ...children)];
+      elementType = ValaaScope;
+      children = [];
+    } else if (!elementType.isUIComponent) {
+      // if no valaaScope is requested and the element is not an UIComponent we need to post-process
       // children now and deal with a possible resulting promise.
       children = this.renderLensSequence(children, focus);
       if (isPromise(children)) {
@@ -162,7 +168,6 @@ export default class LiveProps extends UIComponent {
       }
     }
     /* Only enable this section for debugging React key warnings; it will break react elsewhere
-    let elementType = this.props.elementType;
     if (elementType === ValaaScope) {
       elementType = class DebugValaaScope extends ValaaScope {};
       Object.defineProperty(elementType, "name", {
@@ -170,20 +175,21 @@ export default class LiveProps extends UIComponent {
       });
     }
     /*/
-    const elementType = this.props.elementType;
     // eslint-disable-next-line
     //*/
-    if (!newProps.key) {
-      newProps.key = this.getUIContextValue("key");
+    const array = elementType.isUIComponent && newProps.array;
+    if (array != null) {
+      if (typeof array[Symbol.iterator] !== "function") {
+        return this.renderLensRole("arrayNotIterableLens", array);
+      }
+      delete newProps.array;
+      if (children.length) newProps.children = children;
+      return this.renderFocusAsSequence(
+          Array.isArray(array) ? array : [...array], elementType, newProps);
     }
-    const element = React.createElement(elementType, newProps, ...children);
+    if (!newProps.key) newProps.key = this.getUIContextValue("key");
     return _wrapElementInLiveProps(
-        this,
-        !valaaScope
-            ? element
-            : React.createElement(ValaaScope,
-                { ...valaaScope, key: newProps.key, overrideLens: [element] }),
-        "focus");
+        this, React.createElement(elementType, newProps, ...children), undefined, "focus");
   }
 
   _wrapInValaaExceptionProcessor (callback: Function, name: string) {

@@ -470,7 +470,7 @@ export default class UIComponent extends React.Component {
   }
 
   renderFocusAsSequence (foci: any[], EntryElement: Object = UIComponent, entryProps: Object = {},
-      keyFromFocus: (focus: any, index: number) => string
+      keyFromFocus?: (focus: any, index: number) => string
   ): [] {
     return _renderFocusAsSequence(this, foci, EntryElement, entryProps, keyFromFocus);
   }

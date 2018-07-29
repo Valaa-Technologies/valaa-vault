@@ -157,27 +157,27 @@ export function _tryRenderLensRole (component: UIComponent,
 
 export function _renderFocusAsSequence (component: UIComponent,
     foci: any[], EntryElement: Object, entryProps: Object,
-    keyFromFocus: (focus: any, index: number) => string,
+    keyFromFocus?: (focus: any, index: number) => string,
 ): [] {
   // Wraps the focus entries EntryElement, which is UIComponent by default.
   // Rendering a sequence focus can't be just a foci.map(_renderFocus) because individual entries
   // might have pending kueries or content downloads.
   const parentUIContext = component.getUIContext();
   const parentKey = component.getUIContextValue("key") || "-";
-  return arrayFromAny(foci).map((focus, forIndex) => {
+  return arrayFromAny(foci).map((focus, arrayIndex) => {
     const props = {
       ...entryProps,
       focus,
       parentUIContext,
-      context: { forIndex, focusSequenceIndex: forIndex },
-      key: keyFromFocus ? keyFromFocus(focus, forIndex)
-        : (focus instanceof Vrapper) ? `@${focus.getRawId().slice(0, 13)}<-${parentKey}`
-        : `[${typeof forIndex !== "undefined" ? forIndex : "-"}]${parentKey}`,
+      context: { forIndex: arrayIndex, /* focusSequenceIndex: arrayIndex, */ arrayIndex },
+      key: keyFromFocus ? keyFromFocus(focus, arrayIndex)
+          : (focus instanceof Vrapper) ? `@${focus.getRawId().slice(0, 13)}<-${parentKey}`
+          : `[${typeof arrayIndex !== "undefined" ? arrayIndex : "-"}]${parentKey}`,
     };
     return _wrapElementInLiveProps(
         component,
         React.createElement(EntryElement, props, ...arrayFromAny(component.props.children)),
-        props.key);
+        focus, props.key);
   });
 }
 
@@ -232,7 +232,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         return undefined;
       }
       if (React.isValidElement(lens)) {
-        return _tryWrapElementInLiveProps(component, lens, lensName);
+        return _tryWrapElementInLiveProps(component, lens, focus, lensName);
       }
       if (lens instanceof Kuery) {
         const subName = `kuery-${lensName}`;
@@ -240,7 +240,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         return _wrapElementInLiveProps(component,
             React.createElement(UIComponent,
                 component.childProps(subName, {}, { overrideLens: [lens] })),
-            subName);
+            focus, subName);
       }
 
       if (lens instanceof Vrapper) {
@@ -273,7 +273,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
             React.createElement(
                 _ValaaScope || (_ValaaScope = require("../ValaaScope").default),
                 component.childProps(subName, {}, { ...lens })),
-            subName);
+            focus, subName);
       }
       if (!isSymbol(lens)) {
         throw new Error(`Invalid lens value when trying to render ${lensName
@@ -288,8 +288,9 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
   return undefined;
 }
 
-export function _wrapElementInLiveProps (component: UIComponent, element: Object, name?: string) {
-  const ret = _tryWrapElementInLiveProps(component, element, name);
+export function _wrapElementInLiveProps (component: UIComponent, element: Object, focus: any,
+    name?: string) {
+  const ret = _tryWrapElementInLiveProps(component, element, focus, name);
   return (typeof ret !== "undefined") ? ret
       : element;
 }
@@ -305,7 +306,8 @@ let _LiveProps;
  * @param {string} [name]
  * @returns
  */
-function _tryWrapElementInLiveProps (component: UIComponent, element: Object, lensName?: string) {
+function _tryWrapElementInLiveProps (component: UIComponent, element: Object, focus: any,
+    lensName?: string) {
   const LiveProps = _LiveProps || (_LiveProps = require("./LiveProps").default);
 
   if ((element.type === LiveProps)
@@ -326,6 +328,9 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, le
           props[propName], livePropLookup, liveProps, propName, component);
       if (typeof newProp !== "undefined") {
         _obtainLiveElementProps()[propName] = newProp;
+      } else if ((propName === "valaaScope")
+        || ((propName === "array") && isUIComponentElement(element))) {
+        _obtainLiveElementProps();
       }
     }
     if (ref && (ref instanceof Kuery)) {
@@ -368,7 +373,7 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, le
       */
     } else if (!liveElementProps) {
       // non-UIComponent element with no live props: post-process its children directly here.
-      const processedChildren = component.tryRenderLensSequence(props.children);
+      const processedChildren = component.tryRenderLensSequence(props.children, focus);
       if ((key || !lensName) && (typeof processedChildren === "undefined")) return undefined;
       if (isPromise(processedChildren)) return processedChildren;
       const newProps = { ...props };

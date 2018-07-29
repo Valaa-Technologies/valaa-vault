@@ -569,6 +569,27 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       ] })
   );
 
+  createLensRoleSymbol("arrayNotIterableLens",
+      "Lens",
+      `Lens role for displaying an valaaScope props.array which is not
+      an iterable.
+
+      @param {Object} array  the array value.`,
+      true,
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageLoadingFailedProps}>
+          <div {..._message}>props.array {Valaa.Lens.describeFocusLens} is not an iterable.</div>
+          <div {..._parameters}>
+            <span {..._key}>props.array:</span>
+            <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] })
+  );
+
+
 /*
   createLensRoleSymbol("fixedLens",
       "Lens",

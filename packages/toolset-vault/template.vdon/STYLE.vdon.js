@@ -1,6 +1,6 @@
 module.exports = { "...": { heading:
-  "ValOS style guide",
-},
+    "ValOS style guide",
+  },
   0: [
     `[//]: # (don't edit auto-generated file - generated at @valos/vault root with)`,
     `[//]: # (vlm --markdown . require packages/toolset-vault/template.vdon/STYLE.vdon > STYLE.md)`,
@@ -138,7 +138,30 @@ module.exports = { "...": { heading:
       code, command line or log output, or even documentation. Any rule
       that can, should be expressed as a formal eslint or editor rule.`,
 
-    lineWidth: ["...", { indexAfter: 0, heading:
+    cssStyle: { "...": { indexAfter: 0, heading:
+      `Style CSS according to camelCase BEM.info rules`,
+    },
+      0: `[BEM (Block, Element, Modifier)](https://en.bem.info/methodology/quick-start/)
+        is a component-based approach to web development. ValOS uses
+        [its camelCase naming convention variant](https://en.bem.info/methodology/naming-convention/)
+        with option library-scope prefix described below.
+        BEM principles should be followed more generally as well whenever
+        applicable.`,
+      // FIXME(iridian, 2018-07): This is still very much a lie.
+      // Especially Inspire UI component id creation is very much not
+      // BEM. The whole inspure React/DOM approach should be
+      // re-evaluated against this anyway.
+      scopePrefixes: ["...", { indexAfter: 0, heading:
+        `Scope prefixes are separated from Block name with two underscores`
+      },
+        `In addition to its own styles @valos/inspire hosts several
+        programs within the same page which share the same global
+        css namespace. BEM naming is extended to allow a block name
+        to be prefixed with a scope name and two underscores like so:
+        'inspire__' to prevent conflicts.`
+      ],
+    },
+    lineWidth: ["...", { indexAfter: "cssStyle", heading:
       `Formatting non-structured inline documentation in CLI contexts`,
     },
       `One of the two options must be used for newlines in individual

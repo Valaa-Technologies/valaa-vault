@@ -3,6 +3,7 @@ const autoprefixer = require("autoprefixer");
 
 const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
 const CompressionPlugin = require("compression-webpack-plugin");
+const vdoc = require("@valos/tools/vdoc");
 
 // TODO(iridian): Figure out the clean and correct way to set up prod configuration; merely
 // running 'webpack -p' is not sufficient to enable isProduction, as -p only enables
@@ -28,7 +29,18 @@ if (isProduction) {
   console.info(`\n\nNON-PRODUCTION webpack inspire bundle - simple uglify + gzip\n\n`);
 }
 
-module.exports = {
+module.exports = vdoc({ "...": { heading:
+    "Shared revealer webpack.config.js configuration",
+},
+  0: [`This webpack configuration file contains the shared settings
+    across all revealer deployments. It is intended to be require'd by
+    particular deployment entry point webpack.config.js files.
+    These entry configurations can then override and customize these
+    base rules. (The template webpack.config.js)[templates/webpack.config.js]
+    is deployed automatically to any repository which grabs and
+    configures toolset-revealer as an in-use toolset.`
+  ],
+})({
   context: process.cwd(),
   devtool: "source-map",
 
@@ -113,4 +125,4 @@ module.exports = {
     ],
   },
   stats: {},
-};
+});

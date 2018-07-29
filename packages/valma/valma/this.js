@@ -14,12 +14,13 @@ exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const topArgs = [".", ...yargv._.slice(0, (yargv._.indexOf("--") + 1) || undefined)];
   const ret_ = (await _walk(vlm, topArgs)).value;
-  // console.log("args:", topArgs, "\n\tret:", ret);
+  vlm.ifVerbose(1)
+      .info("this.ret:", ret_);
   return ret_;
 
   async function _walk (head, argv, index = 0, isArgument) {
     vlm.ifVerbose(1)
-        .log("walk", isArgument, argv.slice(index));
+        .info("walk:", isArgument, argv.slice(index));
     let ret;
     try {
       if (index >= argv.length) return (ret = { value: head });
@@ -68,7 +69,7 @@ exports.handler = async (yargv) => {
       }
     } finally {
       vlm.ifVerbose(1)
-          .log("  ret:", argv.slice(index), ret && ret.index, ":", ret && ret.value);
+          .info("  walk.ret:", argv.slice(index), ret && ret.index, ":", ret && ret.value);
     }
   }
 

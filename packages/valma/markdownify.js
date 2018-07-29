@@ -115,6 +115,7 @@ const _deepExtendOptions = Object.freeze({
   },
   customizer (target, source, key, targetContainer) {
     // console.log("target:", target, "\nsource:", source, "\nkey:", key, "\n");
+    if (typeof source === "function") return `<function ${source.name}>`;
     if (typeof source !== "object") return undefined;
     if (source === null) return "";
     if ((source[0] === _spreaderKey) || source[_spreaderKey]) return undefined;

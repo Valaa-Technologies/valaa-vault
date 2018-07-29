@@ -356,7 +356,7 @@ function _setTheme (theme) {
     try {
       if ((rule === undefined) || (rule === null)) return texts;
       if (typeof rule === "string") return this.decorateWith(this[rule], texts);
-      if (typeof rule === "function") return rule.apply(this, texts.map(text => String(text)));
+      if (typeof rule === "function") return rule.apply(this, texts);
       if (Array.isArray(rule)) {
         return rule.reduce(
             (subTexts, ruleKey) => this.decorateWith(ruleKey, [].concat(subTexts)), texts);
@@ -424,10 +424,10 @@ const themes = {
     instruct: ["bold", "cyan"],
     babble: "cyan",
     expound: "cyan",
-    argument: ["blue", "bold"],
-    return: ["blue"],
+    argument: ["bold", "blue"],
+    return: ["bold", "italic", "blue"],
     executable: ["flatsplit", { first: ["magenta"], nonfirst: "argument" }],
-    command: ["flatsplit", { first: ["magenta", "bold"], nonfirst: "argument" }],
+    command: ["flatsplit", { first: ["bold", "magenta"], nonfirst: "argument" }],
     overridden: ["strikethrough", "command"],
     package: ["dim", "bold", "yellow"],
     path: ["underline"],
@@ -943,6 +943,8 @@ function _peekReturnValue (value, clipLength) {
     ret = "<complex object>";
   } else if (value === undefined) {
     ret = "<undefined>";
+  } else if (typeof value === "function") {
+    ret = `<function ${value.name}>`;
   } else {
     ret = JSON.stringify(value);
   }

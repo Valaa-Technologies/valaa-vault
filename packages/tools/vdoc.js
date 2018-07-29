@@ -1,6 +1,4 @@
-Object.defineProperty(exports, "__esModule", { value: true });
-
-exports.default = function vdoc (jsdocVDON) {
+module.exports = function vdoc (jsdocVDON) {
   const documentationVDON = _convertIntoVDON(jsdocVDON);
   return function vdocDecorator (target, memberName, descriptor) {
     Object.defineProperty(descriptor ? descriptor.value : target,

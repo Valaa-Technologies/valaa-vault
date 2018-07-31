@@ -25,12 +25,10 @@ import { registerVidgets } from "~/inspire/ui";
 import type { Revelation } from "~/inspire/Revelation";
 import extendValaaSpaceWithInspire from "~/inspire/ValaaSpace";
 
-import { getDatabaseAPI } from "~/tools/indexedDB/getRealDatabaseAPI";
 import { arrayBufferFromBase64 } from "~/tools/base64";
 import { invariantify, LogEventGenerator, valaaUUID } from "~/tools";
 
 const DEFAULT_ACTION_VERSION = process.env.DEFAULT_ACTION_VERSION || "0.1";
-
 
 export default class InspireGateway extends LogEventGenerator {
 
@@ -185,7 +183,7 @@ export default class InspireGateway extends LogEventGenerator {
       scribeOptions = {
         name: "Inspire Scribe",
         logger: this.getLogger(),
-        databaseAPI: getDatabaseAPI(),
+        databaseAPI: gatewayRevelation.scribe.getDatabaseAPI(),
         commandCountCallback: this._updateCommandCount,
         ...await gatewayRevelation.scribe,
       };
@@ -348,7 +346,6 @@ export default class InspireGateway extends LogEventGenerator {
           "\n\tprologues:", prologues);
     }
   }
-
   async _loadRevelationEntryPartitionAndPrologues (prologueRevelation: Object) {
     const ret = [];
     try {

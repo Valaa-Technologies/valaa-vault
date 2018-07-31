@@ -7,7 +7,7 @@ import { asyncConnectToPartitionsIfMissingAndRetry }
 
 import Vrapper, { VrapperSubscriber } from "~/engine/Vrapper";
 import VALEK, { dumpObject } from "~/engine/VALEK";
-import UIComponent, { LENS, VSSStyleSheetSymbol } from "~/inspire/ui/UIComponent";
+import UIComponent from "~/inspire/ui/UIComponent";
 
 import { arrayFromAny, outputError, wrapError } from "~/tools";
 
@@ -190,7 +190,7 @@ export default class ValaaScope extends UIComponent {
     }
   }
 
-  renderLoadedFocus (focus: any) {
+  renderLoaded (focus: any) {
     // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
     if (this.props.hasOwnProperty("styleSheet")) {
       this.setUIContextValue(VSSStyleSheetSymbol, this.props.styleSheet);

@@ -451,7 +451,7 @@ export default class UIComponent extends React.Component {
   }
 
   // defaults to arrayFromAny(sequence)
-  renderLensSequence (sequence: any, focus?: any = this.tryFocus()):
+  renderLensSequence (sequence: any, focus: any = this.tryFocus()):
       [] | Promise<any[]> {
     const array = arrayFromAny(sequence !== null ? sequence : undefined);
     const ret = _tryRenderLensArray(this, array, focus);
@@ -459,12 +459,12 @@ export default class UIComponent extends React.Component {
         : array;
   }
 
-  tryRenderLensSequence (sequence: any, focus?: any = this.tryFocus()):
+  tryRenderLensSequence (sequence: any, focus: any = this.tryFocus()):
       void | [] | Promise<any[]> {
     return _tryRenderLensArray(this, arrayFromAny(sequence), focus);
   }
 
-  renderLoadedFocus (focus: any):
+  renderLoaded (focus: any):
       null | string | React.Element<any> | [] | Promise<any> {
     return _renderFocus(this, focus);
   }
@@ -537,7 +537,7 @@ export default class UIComponent extends React.Component {
       }
       const failure: any = this.renderLensRole("internalErrorLens",
           this._errorObject || "<error missing>");
-      if (isPromise(ret)) throw new Error("internalErrorLens returned a promise");
+      if (isPromise(failure)) throw new Error("internalErrorLens returned a promise");
       return failure;
     } catch (secondPassError) {
       // Exercise in defensive programming. We should never get here, really,, but there's nothing
@@ -566,7 +566,7 @@ export default class UIComponent extends React.Component {
           return UIComponent.thirdPassErrorElement;
         } catch (fourthPassError) {
           console.warn("INTERNAL ERROR: Exception caught on render() fourth pass:", fourthPassError,
-              "\n\tGiving up. You get candy if you ever genuinely encounter this.");
+              "\n\tGiving up, rendering null. You get candy if you ever genuinely encounter this.");
         }
         return null;
       }

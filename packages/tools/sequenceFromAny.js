@@ -17,7 +17,7 @@
 export function arrayFromAny (value: void | any[] | any) {
   if (typeof value === "undefined") return [];
   if (Array.isArray(value)) return value;
-  if (typeof value === "object" && value[Symbol.iterator]) return [...value];
+  if ((typeof value === "object") && value && value[Symbol.iterator]) return [...value];
   return [value];
 }
 
@@ -32,6 +32,6 @@ export function arrayFromAny (value: void | any[] | any) {
  */
 export function iterableFromAny (value: void | any[] | any) {
   if (typeof value === "undefined") return [];
-  if (Array.isArray(value) || (typeof value === "object" && value[Symbol.iterator])) return value;
+  if (Array.isArray(value) || ((typeof value === "object") && value[Symbol.iterator])) return value;
   return [value];
 }

@@ -643,7 +643,7 @@ describe("Vrapper", () => {
       expect(console.warn.mock.calls.length).toBe(2);
       expect(console.warn.mock.calls[0][0])
           .toBe(`Overriding existing Property 'testField' in ${""
-              }Scope Vrapper("testName"/'VRef(test,,,)':TestScriptyThing), with:`);
+              }Scope Vrapper(<TestScriptyThing "testName"'VRef(test,,,)'>), with:`);
       console.warn = oldWarn;
       expect(testScriptPartitions().test.get(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.conflictingTestField");

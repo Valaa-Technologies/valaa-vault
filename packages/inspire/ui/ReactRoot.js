@@ -3,12 +3,10 @@ import PropTypes from "prop-types";
 import preset from "jss-preset-default";
 import jss, { SheetsManager } from "jss";
 
-import VALEK from "~/engine/VALEK";
 import { getImplicitMediaInterpretation } from "~/engine/Vrapper";
 
 import { uiComponentProps, VSSStyleSheetSymbol } from "~/inspire/ui/UIComponent";
 import { unthunkRepeat } from "~/inspire/ui/thunk";
-import vidgets from "~/inspire/ui";
 import ValaaScope from "~/inspire/ui/ValaaScope";
 
 import { dumpObject, invariantifyString, traverse, wrapError, valaaHash } from "~/tools";
@@ -31,7 +29,6 @@ export default class ReactRoot extends React.Component {
     css: PropTypes.func,
     getVSSSheet: PropTypes.func,
     releaseVssSheets: PropTypes.func,
-    lensContext: PropTypes.object,
     lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
     lensPropertyNotFoundLens: PropTypes.any,
   };
@@ -56,10 +53,7 @@ export default class ReactRoot extends React.Component {
         .join(" "),
       getVSSSheet: this.getVSSSheet,
       releaseVssSheets: this.releaseVssSheets,
-      lensContext: { ...vidgets, Math },
       lensProperty: this.props.lensProperty,
-      lensPropertyNotFoundLens: undefined,
-          // <div>No lens found in Valaa Resource named {VALEK.toField("name")}</div>
     };
   }
 

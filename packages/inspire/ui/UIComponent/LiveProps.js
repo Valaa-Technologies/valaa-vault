@@ -108,7 +108,7 @@ export default class LiveProps extends UIComponent {
         nextProps.liveProps !== this.props.liveProps);
   }
 
-  renderLoadedFocus (focus: any) {
+  renderLoaded (focus: any) {
     if (this.props.liveProps) {
       const unfinishedKueries = [];
       const livePropValues = this.state.livePropValues || OrderedMap();

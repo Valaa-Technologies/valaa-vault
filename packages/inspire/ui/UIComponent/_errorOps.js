@@ -1,7 +1,5 @@
 // @flow
 
-import React from "react";
-
 import type UIComponent from "./UIComponent";
 
 export function _enableError (component: UIComponent, error: string | Error) {

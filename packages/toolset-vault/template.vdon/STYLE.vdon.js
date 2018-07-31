@@ -1,6 +1,6 @@
 module.exports = { "...": { heading:
-    "ValOS style guide",
-  },
+  "ValOS style guide",
+},
   0: [
     `[//]: # (don't edit auto-generated file - generated at @valos/vault root with)`,
     `[//]: # (vlm --markdown . require packages/toolset-vault/template.vdon/STYLE.vdon > STYLE.md)`,

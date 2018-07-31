@@ -16,7 +16,6 @@ import { invariantify, thenChainEagerly } from "~/tools";
 export default class UIContext extends UIComponent {
   static contextTypes = {
     ...UIComponent.contextTypes,
-    lensContext: PropTypes.object,
     lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
     lensPropertyNotFoundLens: PropTypes.any,
   }
@@ -102,7 +101,7 @@ export default class UIContext extends UIComponent {
   }
 
   createUIRootElement (focus: Object) {
-    const renderedChildren = super.renderLoadedFocus(focus);
+    const renderedChildren = super.renderLoaded(focus);
     const defaultJSXElement = this.state.lensPropertyNotFoundLens
         && <ValaaScope
           {...this.childProps("uiRootDefault")}

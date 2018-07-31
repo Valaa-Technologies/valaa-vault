@@ -43,7 +43,18 @@ export default (Valaa.createGateway = async function createGateway (...revelatio
           Valaa.gateway.debugId()}). There can be only one.`);
     }
 
-    const gatewayPluginsRevelation = { gateway: { plugins: Valaa.plugins } };
+    const gatewayPluginsRevelation = {
+      gateway: {
+        plugins: Valaa.plugins,
+        scribe: {
+          getDatabaseAPI: (!global.process
+              ? require("~/tools/indexedDB/getBrowserDatabaseAPI")
+              : require("~/tools/indexedDB/getWebSQLShimDatabaseAPI"))
+            .getDatabaseAPI,
+        }
+      }
+    };
+
     Valaa.plugins = { push (plugin) { delayedPlugins.push(plugin); } };
 
     ret = new InspireGateway({ name: "Uninitialized InspireGateway", logger });

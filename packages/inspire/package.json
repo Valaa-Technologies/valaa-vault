@@ -19,6 +19,7 @@
     "brace": "^0.9.1",
     "graphql": "^0.6.2",
     "immutable": "~3.7.4",
+    "indexeddbshim": "^3.8.0",
     "jss": "^8.1.0",
     "jss-css": "^3.0.0",
     "jss-preset-default": "^3.0.0",
@@ -29,6 +30,7 @@
     "react-ace": "^5.8.0",
     "react-contextmenu": "^2.6.5",
     "react-dom": "^16.2.0",
-    "react-tap-event-plugin": "^3.0.2"
+    "react-tap-event-plugin": "^3.0.2",
+    "xhr2": "^0.1.4"
   }
 }

@@ -3,14 +3,15 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
+
 import { VrapperSubscriber, FieldUpdate } from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
 import { Kuery, dumpKuery, dumpObject } from "~/engine/VALEK";
 
 import Presentable from "~/inspire/ui/Presentable";
 
-import { arrayFromAny, invariantify, isPromise, isSymbol, outputError, wrapError }
-    from "~/tools";
+import { arrayFromAny, invariantify, isPromise, outputError, wrapError } from "~/tools";
 
 import { clearScopeValue, getScopeValue, setScopeValue } from "./scopeValue";
 import { presentationExpander } from "./presentationHelpers";
@@ -25,9 +26,12 @@ import {
   _childProps, _checkForInfiniteRenderRecursion,
 } from "./_propsOps";
 import {
-  _render, _renderFocus, _renderFocusAsSequence, _tryRenderLens,
-  _tryRenderLensRole, _tryRenderLensArray, _validateElement,
+  _renderFocus, _renderFocusAsSequence, _renderFirstAbleDelegate,
+  _tryRenderLens, _locateLensRoleAssignee, _tryRenderLensArray, _validateElement,
 } from "./_renderOps";
+import {
+  VSSStyleSheetSymbol,
+} from "./_styleOps";
 import {
   _finalizeDetachSubscribers, _attachSubscriber, _detachSubscriber, _attachKuerySubscriber
 } from "./_subscriberOps";
@@ -36,14 +40,20 @@ export function isUIComponentElement (element: any) {
   return (typeof element.type === "function") && element.type.isUIComponent;
 }
 
+const _propertyNames = PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]);
+
 @Presentable(require("./presentation").default, "UIComponent")
 export default class UIComponent extends React.Component {
+
+  static mainLensRoleName = "uiComponentLens";
+
   static _defaultPresentation = () => ({ root: {} });
 
   static isUIComponent = true;
 
   static contextTypes = {
     css: PropTypes.func,
+    styleSheet: PropTypes.any,
     getVSSSheet: PropTypes.func,
     releaseVssSheets: PropTypes.func,
     engine: PropTypes.object,
@@ -55,6 +65,7 @@ export default class UIComponent extends React.Component {
     connectingLens: PropTypes.any,
 
     disabledLens: PropTypes.any,
+    undefinedLens: PropTypes.any,
     inactiveLens: PropTypes.any,
     unavailableLens: PropTypes.any,
     destroyedLens: PropTypes.any,
@@ -69,6 +80,7 @@ export default class UIComponent extends React.Component {
   static propTypes = {
     children: PropTypes.any, // children can also be a singular element.
     style: PropTypes.object,
+    styleSheet: PropTypes.any,
     // If no uiContext nor parentUIContext the component is disabled. Only one of these two can be
     // given at the same time: if uiContext is given uiContext.focus is used directly,
     // otherwise parentUIContext.focus is taken as the focus and kuery is live-tracked against it.
@@ -90,6 +102,7 @@ export default class UIComponent extends React.Component {
     connectingLens: PropTypes.any,
 
     disabledLens: PropTypes.any,
+    undefinedLens: PropTypes.any,
     inactiveLens: PropTypes.any,
     unavailableLens: PropTypes.any,
     destroyedLens: PropTypes.any,
@@ -100,6 +113,7 @@ export default class UIComponent extends React.Component {
     pendingPropsLens: PropTypes.any,
     pendingChildrenLens: PropTypes.any,
   }
+
   static noPostProcess = {
     children: true,
     kuery: true,
@@ -431,22 +445,23 @@ export default class UIComponent extends React.Component {
   clearError = () => _clearError(this)
 
   // defaults to lens itself
-  renderLens (lens: any, focus?: any, lensName: string):
+  renderLens (lens: any, focus?: any, lensName: string, onlyIfAble?: boolean, onlyOnce?: boolean):
       null | string | React.Element<any> | [] | Promise<any> {
-    const ret = this.tryRenderLens(lens, focus, lensName);
+    const ret = this.tryRenderLens(lens, focus, lensName, onlyIfAble, onlyOnce);
     return (typeof ret !== "undefined") ? ret
         : lens;
   }
 
-  tryRenderLens (lens: any, focus?: any = this.tryFocus(), lensName: string):
-      void | null | string | React.Element<any> | [] | Promise<any> {
+  tryRenderLens (lens: any, focus: any = this.tryFocus(), lensName: string, onlyIfAble?: boolean,
+      onlyOnce?: boolean): void | null | string | React.Element<any> | [] | Promise<any> {
     try {
-      return _tryRenderLens(this, lens, focus, lensName);
+      return _tryRenderLens(this, lens, focus, lensName, onlyIfAble, onlyOnce);
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .renderLens, with:`,
           "\n\tlensName:", lensName,
           "\n\tlens:", lens,
-          "\n\ttypeof lens:", typeof lens);
+          "\n\ttypeof lens:", typeof lens,
+          "\n\tfocus:", ...dumpObject(focus));
     }
   }
 
@@ -476,33 +491,45 @@ export default class UIComponent extends React.Component {
   }
 
   // defaults to null
-  renderLensRole (role: string | Symbol, focus: any, rootRoleName?: string):
+  renderLensRole (role: string | Symbol, focus: any, rootRoleName?: string, onlyOnce?: boolean):
       null | string | React.Element<any> | [] | Promise<any> {
-    const ret = this.tryRenderLensRole(role, focus, rootRoleName);
+    const ret = this.tryRenderLensRole(role, focus, rootRoleName, onlyOnce);
     return (typeof ret !== "undefined") ? ret
         : null;
   }
 
-  tryRenderLensRole (role: string | Symbol, focus?: any = this.tryFocus(), rootRoleName?: string):
-      void | null | string | React.Element<any> | [] | Promise<any> {
-    const actualRootRoleName = rootRoleName || String(role);
-    const activeRoles = this.getUIContextValue(this.getValaa().Lens.activeRoles)
+  renderFirstAbleDelegate (delegates: any[], focus: any = this.tryFocus(), lensName: string):
+      null | string | React.Element<any> | [] | Promise<any> {
+    return _renderFirstAbleDelegate(this, delegates, focus, lensName);
+  }
+
+
+  tryRenderLensRole (role: string | Symbol, focus: any = this.tryFocus(), rootRoleName_?: string,
+      onlyOnce?: boolean): void | null | string | React.Element<any> | [] | Promise<any> {
+    const activeViewRoles = this.getUIContextValue(this.getValaa().Lens.activeViewRoles)
         || (this.state.uiContext
-            && this.setUIContextValue(this.getValaa().Lens.activeRoles, []))
+            && this.setUIContextValue(this.getValaa().Lens.activeViewRoles, []))
         || [];
-    let ret; // eslint-disable-line
+    let assignee; // eslint-disable-line
+    const Valaa = this.getValaa();
+    const roleName = typeof role === "string" ? role : Valaa.Lens[role];
+    const roleSymbol = typeof role !== "string" ? role : Valaa.Lens[role];
+    const rootRoleName = rootRoleName_ || roleName;
     try {
-      activeRoles.push(typeof role === "string" ? role : String(role).slice(7, -1));
-      return (ret = _tryRenderLensRole(this,
-          (typeof role === "string") ? role : undefined, isSymbol(role) ? role : undefined,
-          focus, actualRootRoleName, false));
+      if (!roleSymbol) throw new Error(`No Valaa.Lens role symbol for '${roleName}'`);
+      if (!roleName) throw new Error(`No Valaa.Lens role name for '${String(roleSymbol)}'`);
+      activeViewRoles.push(roleName);
+      assignee = _locateLensRoleAssignee(this, roleName, roleSymbol, focus, false);
+      return assignee && this.renderLens(assignee, focus, rootRoleName, undefined, onlyOnce);
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .renderLensRole(${String(role)}), with:`,
+      throw wrapError(error, `During ${this.debugId()}\n .renderLensRole(${
+              roleName || String(roleSymbol)}), with:`,
           "\n\tfocus:", focus,
-          "\n\trootRoleName:", actualRootRoleName);
+          "\n\trole assignee:", assignee,
+          "\n\trootRoleName:", rootRoleName);
     } finally {
-      activeRoles.pop();
-      if (!activeRoles.length) this.clearUIContextValue(this.getValaa().Lens.activeRoles);
+      activeViewRoles.pop();
+      if (!activeViewRoles.length) this.clearUIContextValue(this.getValaa().Lens.activeViewRoles);
     }
   }
 
@@ -515,7 +542,25 @@ export default class UIComponent extends React.Component {
     let ret;
     try {
       if (!this._errorObject && !_checkForInfiniteRenderRecursion(this)) {
-        return (ret = _render(this));
+        // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
+        if (this.props.hasOwnProperty("styleSheet")) {
+          this.setUIContextValue(VSSStyleSheetSymbol, this.props.styleSheet);
+        } else {
+          this.clearUIContextValue(VSSStyleSheetSymbol);
+        }
+        try {
+          // Render the main lens delegate sequence.
+          ret = this.tryRenderLensRole(this.constructor.mainLensRoleName);
+        } catch (error) {
+          // Try to connect to missing partitions.
+          if (tryConnectToMissingPartitionsAndThen(error, () => this.forceUpdate())) {
+            throw error;
+          }
+          ret = this.tryRenderLensRole("pendingConnectionsLens",
+              (error.originalError || error).missingPartitions.map(entry => String(entry)));
+        }
+        return (typeof ret !== "undefined") ? ret
+            : null;
       }
     } catch (error) {
       firstPassError = error;

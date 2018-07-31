@@ -182,16 +182,63 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       }
   );
 
+  // Main component lifecycle lens
 
-  // Content lenses
+  createLensRoleSymbol("valaaScopeLens",
+      "Lens",
+      `Lens role for viewing a ValaaScope component.
 
-  createLensRoleSymbol("lens",
+      @param {string|Error|Object} focus  the focus of the component`,
+      true,
+      () => ({ overrideLens: [
+        Valaa.Lens.delegateOverridesLens,
+        Valaa.Lens.disabledLens,
+        Valaa.Lens.undefinedLens,
+        Valaa.Lens.lens,
+        Valaa.Lens.nullLens,
+        Valaa.Lens.resourceLens,
+        Valaa.Lens.loadedLens,
+      ] }),
+  );
+
+  createLensRoleSymbol("livePropsLens",
       "Lens",
       `Lens role for viewing a LiveProps component.
 
-      @param {Object} focus  the focus of the component.`,
+      @param {string|Error|Object} focus  the focus of the component`,
       true,
-      () => undefined);
+      () => ({ overrideLens: [
+        Valaa.Lens.disabledLens,
+        Valaa.Lens.undefinedLens,
+        Valaa.Lens.loadedLens,
+      ] }),
+  );
+
+  createLensRoleSymbol("uiComponentLens",
+      "Lens",
+      `Lens role for viewing a UIComponent component.
+
+      @param {string|Error|Object} focus  the focus of the component`,
+      true,
+      () => ({ overrideLens: [
+        Valaa.Lens.delegateOverridesLens,
+        Valaa.Lens.disabledLens,
+        Valaa.Lens.undefinedLens,
+        Valaa.Lens.loadedLens,
+      ] }),
+  );
+
+
+  createLensRoleSymbol("delegateOverridesLens",
+      "Lens",
+      `Lens role for viewing componentn override delegations.
+
+      @param {string|Error|Object} focus  the focus of the component`,
+      (u, component) => (component.props.overrideLens !== undefined),
+      () => (focus, component, lensName = "override") =>
+          component.renderFirstAbleDelegate(component.props.overrideLens, focus, lensName),
+  );
+
   createLensRoleSymbol("loadedLens",
       "Lens",
       `Lens role for viewing component using its .renderLoaded method.
@@ -201,6 +248,18 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       () => (focus, component) => component.renderLoaded(focus),
   );
 
+  // Content lenses
+
+  createLensRoleSymbol("undefinedLens",
+      "Lens",
+      `Lens role for viewing an undefined focus.`,
+      (focus) => (focus === undefined),
+      () => ({ overrideLens: [
+        Valaa.Lens.instrument(
+            (u, component) => (component.props.kuery || component.props.focus),
+            Valaa.Lens.kueryingFocusLens),
+      ] }),
+  );
 
   createLensRoleSymbol("nullLens",
       "Lens",

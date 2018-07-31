@@ -98,6 +98,9 @@ import { arrayFromAny, outputError, wrapError } from "~/tools";
  * @extends {UIComponent}
  */
 export default class ValaaScope extends UIComponent {
+
+  static mainLensRoleName = "valaaScopeLens";
+
   static propTypes = {
     ...UIComponent.propTypes,
     lensName: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),

@@ -46,6 +46,9 @@ import { _wrapElementInLiveProps } from "./_renderOps";
  * @extends {UIComponent}
  */
 export default class LiveProps extends UIComponent {
+
+  static mainLensRoleName = "livePropsLens";
+
   static propTypes = {
     ...UIComponent.propTypes,
     elementType: PropTypes.any.isRequired,

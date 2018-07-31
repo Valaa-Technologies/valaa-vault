@@ -4,125 +4,35 @@ import React from "react";
 import { OrderedMap } from "immutable";
 
 import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
-import { Kuery, dumpKuery } from "~/raem/VALK";
+import { Kuery } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
 
-import { arrayFromAny, dumpObject, isPromise, isSymbol, outputError, wrapError } from "~/tools";
+import { arrayFromAny, dumpObject, isPromise, isSymbol, wrapError } from "~/tools";
 
 import UIComponent, { isUIComponentElement } from "./UIComponent";
 import { uiComponentProps } from "./_propsOps";
 
 /* eslint-disable react/prop-types */
 
-// In general the render operations within delegate renders to each other through the component
-// and not directly (like component.tryRenderLensRole instead of
-// _tryRenderLensRole(component)) to get the try-catch handling.
+// In general the _renderOps operations here delegate rendering to each
+// other via the component .render* and not directly to get proper
+// exception context wrappers in place.
 
-export function _render (component: UIComponent):
-    null | string | React.Element<any> | [] {
-  let ret: void | null | string | React.Element<any> | [] | Promise<any>;
-  try {
-    /*
-    console.warn(`${component.debugId()}.render()`, component,
-        "\n\tfocus:", component.tryFocus(),
-        "\n\tstate:", component.state,
-        "\n\tprops:", component.props);
-    //*/
-    if (component.props.overrideLens) {
-      ret = _renderFirstAlternate(component, component.tryFocus(), component.props.overrideLens,
-          "override");
-    } else if (typeof component.state.uiContext === "undefined") {
-      ret = component.tryRenderLensRole("disabledLens", { uiContext: null });
-    // eslint-disable-next-line
-    } else {
-      const focus = component.tryFocus();
-      if (typeof focus === "undefined") {
-        ret = component.tryRenderLensRole("kueryingFocusLens",
-            { kuery: dumpKuery(this.props.kuery || this.props.focus) });
-      } else {
-        switch (!(focus instanceof Vrapper) ? "" : focus.getPhase()) {
-          default: {
-            ret = component.renderLoadedFocus(focus);
-            break;
-          }
-          case "Inactive":
-            ret = component.tryRenderLensRole("inactiveLens", focus);
-            break;
-          case "Unavailable":
-            ret = component.tryRenderLensRole("unavailableLens", focus);
-            break;
-          case "Destroyed":
-            ret = component.tryRenderLensRole("destroyedLens", focus);
-            break;
-          case "Activating":
-            ret = focus.activate();
-            if (!isPromise(ret)) {
-              if (focus.isActivating()) {
-                throw new Error(`Internal error: focus.activate() didn't return a promise (got a '${
-                    typeof ret}') but focus is still in Activating phase`);
-              }
-              return component.render(); // Retry from beginning.
-            }
-            break;
-        }
-      }
-    }
-  } catch (error) {
-    if (!tryConnectToMissingPartitionsAndThen(error, () => component.forceUpdate())) {
-      throw error;
-    }
-    ret = component.tryRenderLensRole("connectingLens",
-        (error.originalError || error).missingPartitions.map(entry => String(entry)));
-  }
-  /*
-  finally {
-    console.log("\trender ret:", ret);
-  }
-  //*/
-  if (isPromise(ret)) {
-    ret.then(() => component.forceUpdate());
-    ret = component.tryRenderLensRole("pendingLens", { renderResult: ret });
-    if (isPromise(ret)) {
-      const error = wrapError(new Error("Invalid render result: 'pendingLens' returned a promise"),
-          `During ${component.debugId()}\n .render().ret.pendingLens, with:`,
-          "\n\pendingLens ret:", dumpObject(ret),
-          "\n\tcomponent:", dumpObject(component));
-      ret = component.tryRenderLensRole("internalErrorLens", error);
-      if (isPromise(ret)) {
-        const secondError = wrapError(error,
-            `During ${component.debugId()}\n .render().ret.internalErrorLens, with:`,
-            "\n\tinternalFailureLens ret:", dumpObject(ret));
-        outputError(secondError);
-        throw new Error(
-            "The lens handling the role 'internalErrorLens' must never return a promise");
-      }
-    }
-  }
-  // console.log(`${component.debugId()}.render() ret:`, ret, component);
-  return (typeof ret !== "undefined") ? ret
-      : null;
-}
-
-function _renderFirstAlternate (
-    component: UIComponent, focus: any, alternates: any[], lensName: string) {
-  for (const alternate of arrayFromAny(alternates)) {
-    const ret = component.renderLens(alternate, focus, lensName);
+export function _renderFirstAbleDelegate (
+    component: UIComponent, delegates: any[], focus: any, lensName: string) {
+  for (const delegate of arrayFromAny(delegates)) {
+    const ret = component.renderLens(delegate, focus, lensName, true);
     if (ret !== null) return ret;
   }
   return null;
 }
 
-export function _tryRenderLensRole (component: UIComponent,
-    roleName?: string, roleSymbol?: Symbol, focus: any, rootName: string,
-    checkIfAvailable?: boolean): void | null | string | React.Element<any> | [] | Promise<any> {
-  const Valaa = component.getValaa();
-  const actualRoleName = roleName || Valaa.Lens[roleSymbol];
-  const actualRoleSymbol = roleSymbol || Valaa.Lens[roleName];
-  if (!actualRoleSymbol) throw new Error(`No Valaa.Lens role symbol for '${actualRoleName}'`);
-  if (!actualRoleName) throw new Error(`No Valaa.Lens role name for '${String(actualRoleSymbol)}'`);
-  if (checkIfAvailable) {
-    const descriptor = component.context.engine.getHostObjectDescriptor(actualRoleSymbol);
+export function _locateLensRoleAssignee (component: UIComponent,
+    roleName: string, roleSymbol: Symbol, focus: any, skipPreconditionCheck?: boolean):
+    void | null | string | React.Element<any> | [] | Promise<any> {
+  if (!skipPreconditionCheck) {
+    const descriptor = component.context.engine.getHostObjectDescriptor(roleSymbol);
     if (descriptor
         && (typeof descriptor.isLensAvailable === "function")
         && !descriptor.isLensAvailable(focus, component)) {
@@ -131,26 +41,26 @@ export function _tryRenderLensRole (component: UIComponent,
   }
   let assignee;
   try {
-    assignee = component.props[actualRoleName];
+    assignee = component.props[roleName];
     if (typeof assignee === "undefined") {
-      if (component.props.hasOwnProperty(actualRoleName)) {
-        throw new Error(`Render role props.${actualRoleName
-            } is specified but its value is undefined`);
+      if (component.props.hasOwnProperty(roleName)) {
+        throw new Error(`Render role props.${roleName} is provided but its value is undefined`);
       }
-      assignee = component.getUIContextValue(actualRoleSymbol);
-      if (Array.isArray(assignee) && !Object.isFrozen(assignee)) assignee = [...assignee];
+      assignee = component.getUIContextValue(roleSymbol);
       if (typeof assignee === "undefined") {
-        assignee = component.context[actualRoleName];
+        assignee = component.context[roleName];
         if (typeof assignee === "undefined") return undefined;
+      } else if (Array.isArray(assignee) && !Object.isFrozen(assignee)) {
+        assignee = [...assignee]; // the lens chain constantly mutates assignee, return a copy
       }
     }
-    return component.renderLens(assignee, focus, rootName);
+    return assignee;
   } catch (error) {
     throw wrapError(error,
-        `During ${component.debugId()}\n ._tryRenderLensRole, with:`,
+        `During ${component.debugId()}\n ._locateLensRoleAssignee, with:`,
         "\n\tfocus:", focus,
-        "\n\tactualRoleName:", actualRoleName,
-        "\n\tactualRoleSymbol:", actualRoleSymbol,
+        "\n\troleName:", roleName,
+        "\n\troleSymbol:", roleSymbol,
         "\n\tassignee:", assignee);
   }
 }
@@ -217,15 +127,22 @@ export function _tryRenderLensArray (component: UIComponent,
 let _ValaaScope;
 
 export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
-    lensName: string
+    lensName: string, onlyIfAble?: boolean, onlyOnce?: boolean,
 ): void | null | string | React.Element<any> | [] | Promise<any> {
+  if (!_ValaaScope) _ValaaScope = require("../ValaaScope").default;
+
+  let ret;
+  let subLensName;
   switch (typeof lens) {
+    default:
+      return undefined;
     case "undefined":
       return null;
     case "function": {
       const contextThis = component.getUIContextValue("component");
-      return component.renderLens(lens.call(contextThis, focus, component, lensName),
-          focus, lensName);
+      subLensName = `${lens.name}-${lensName}`;
+      ret = lens.call(contextThis, focus, component, lensName);
+      break;
     }
     case "object":
       if ((lens === null) || isPromise(lens)) {
@@ -233,59 +150,64 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
       }
       if (React.isValidElement(lens)) {
         return _tryWrapElementInLiveProps(component, lens, focus, lensName);
-      }
-      if (lens instanceof Kuery) {
-        const subName = `kuery-${lensName}`;
+      } else if (lens instanceof Kuery) {
         // Delegates the kuery resolution to LiveProps.
-        return _wrapElementInLiveProps(component,
-            React.createElement(UIComponent,
-                component.childProps(subName, {}, { overrideLens: [lens] })),
-            focus, subName);
-      }
-
-      if (lens instanceof Vrapper) {
+        subLensName = `kuery-${lensName}`;
+        ret = React.createElement(UIComponent,
+            component.childProps(subLensName, {}, { overrideLens: [lens] }));
+      } else if (lens instanceof Vrapper) {
         const blocker = lens.activate();
         if (blocker) return blocker;
         if (lens.hasInterface("Media")) {
           const { mediaInfo, mime } = lens.resolveMediaInfo();
-          return component.renderLens(lens.interpretContent({ mediaInfo, mime }), focus,
-              `${mediaInfo.name}:${mime}-${lensName}`);
+          subLensName = `${mediaInfo.name}:${mime}-${lensName}`;
+          ret = lens.interpretContent({ mediaInfo, mime });
+        } else {
+          console.warn("NEW BEHAVIOUR: non-Media Resources as direct lenses are now in effect.",
+              "When a Resource is used as a lens, it will be searched for a lens property",
+              "and if found the lens property will be used _while retaining the original focus,",
+              "which likely is not necessarily the lens Resource itself",
+              "\n\tin component:", component.debugId(), component);
+          const Valaa = component.getValaa();
+          subLensName = `delegate-lens-${lensName}`;
+          ret = _locateLensRoleAssignee(component, "delegatePropertyLens",
+              Valaa.Lens.delegatePropertyLens, lens, true)(
+                  lens, component, lensName);
+          if (ret == null || ((ret.overrideLens || [])[0] === Valaa.Lens.notLensResourceLens)) {
+            return component.renderLensRole("notLensResourceLens", lens, subLensName, true);
+          }
         }
+        /*
         console.error("DEPRECATED, SUBJECT TO CHANGE:",
             "VSX notation `{focus.foo}` sets focus.foo as the new focus, for now",
             "\n\tprefer: `{{ focus: focus.foo }}` (ie no-scope syntax) to set focus",
             "\n\tchange: the compact notation will be used for rendering focus.foo",
             "as a _lens_, WITHOUT changing the focus.",
             "\n\tin component:", component.debugId(), component);
-        return React.createElement(
-            _ValaaScope || (_ValaaScope = require("../ValaaScope").default),
+        return React.createElement(_ValaaScope,
             component.childProps(`legacy-focus-${lensName}`, { focus: lens }, {}));
-      }
-      if (Array.isArray(lens)) {
+        */
+      } else if (Array.isArray(lens)) {
         return _tryRenderLensArray(component, lens, focus);
-      }
-      if (Object.getPrototypeOf(lens) === Object.prototype) {
+      } else if (Object.getPrototypeOf(lens) === Object.prototype) {
         if (lens.overrideLens && (Object.keys(lens).length === 1)) {
-          return _renderFirstAlternate(component, focus, lens.overrideLens, lensName);
+          return _renderFirstAbleDelegate(component, lens.overrideLens, focus, lensName);
         }
-        const subName = `noscope-${lensName}`;
-        return _wrapElementInLiveProps(component,
-            React.createElement(
-                _ValaaScope || (_ValaaScope = require("../ValaaScope").default),
-                component.childProps(subName, {}, { ...lens })),
-            focus, subName);
-      }
-      if (!isSymbol(lens)) {
+        subLensName = `noscope-${lensName}`;
+        ret = React.createElement(_ValaaScope, component.childProps(subLensName, {}, { ...lens }));
+      } else if (isSymbol(lens)) {
+        return component.renderLensRole(lens, focus, undefined, onlyOnce);
+      } else {
         throw new Error(`Invalid lens value when trying to render ${lensName
             }, got value of type '${lens.constructor.name}'`);
       }
-    // eslint-disable-next-line no-fallthrough
-    case "symbol":
-      return component.renderLensRole(lens, focus);
-    default:
       break;
+    case "symbol":
+      return component.renderLensRole(lens, focus, undefined, onlyOnce);
   }
-  return undefined;
+  if (React.isValidElement(ret)) return _wrapElementInLiveProps(component, ret, focus, subLensName);
+  if ((ret === undefined) || onlyOnce) return ret;
+  return component.renderLens(ret, focus, subLensName);
 }
 
 export function _wrapElementInLiveProps (component: UIComponent, element: Object, focus: any,
@@ -329,7 +251,7 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
       if (typeof newProp !== "undefined") {
         _obtainLiveElementProps()[propName] = newProp;
       } else if ((propName === "valaaScope")
-        || ((propName === "array") && isUIComponentElement(element))) {
+          || ((propName === "array") && isUIComponentElement(element))) {
         _obtainLiveElementProps();
       }
     }

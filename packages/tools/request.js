@@ -1,4 +1,4 @@
-import reqwest from "reqwest";
+//import reqwest from "reqwest";
 
 import wrapError from "~/tools/wrapError";
 
@@ -9,7 +9,12 @@ export default function (opts) { return asyncRequest(opts); }
 
 const outstandingRequests = {};
 
+let reqwest;
+
 async function asyncRequest (opts) {
+  if (!reqwest) {
+    reqwest = require("reqwest").default;
+  }
   try {
     if (!opts.url) throw new Error(`request call missing opts.url`);
     // console.log("requesting", opts.url);

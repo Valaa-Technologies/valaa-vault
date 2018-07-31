@@ -1,6 +1,6 @@
 export default {
   console,
   window,
-  document,
-  FileReader,
+  document: window.document,
+  FileReader: window.FileReader,
 };

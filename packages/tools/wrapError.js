@@ -26,7 +26,7 @@ export function dumpObject (value) {
  * @returns
  */
 export default function wrapError (errorIn: Error, ...contextDescriptions) {
-  const error = (errorIn instanceof XMLHttpRequest) ? new Error(errorIn) : errorIn;
+  const error = !(errorIn instanceof Error) ? new Error(errorIn) : errorIn;
   if ((typeof error !== "object") || !error || (typeof error.message !== "string")) {
     console.error("INVARIANT VIOLATION during wrapError:",
         "first argument must be an object with .message property!", "Instead got", error);
@@ -221,7 +221,7 @@ if (typeof process !== "undefined") {
   process.on("unhandledRejection", unhandledRejection);
 }
 
-if (typeof window !== "undefined") {
+if ((window || {}).addEventListener) {
   window.addEventListener("error", event => {
     event.preventDefault();
     unhandledError(event.error);

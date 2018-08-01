@@ -560,6 +560,12 @@ export default class UIComponent extends React.Component {
       Error caught while rendering error, see console for more details
   </div>;
 
+  enqueueRerenderIfPromise (maybePromise: any | Promise) {
+    if (!isPromise(maybePromise)) return false;
+    maybePromise.then(() => this.forceUpdate());
+    return true;
+  }
+
   render (): null | string | React.Element<any> | [] {
     let firstPassError;
     let ret;
@@ -581,6 +587,18 @@ export default class UIComponent extends React.Component {
           }
           ret = this.tryRenderLensRole("pendingConnectionsLens",
               (error.originalError || error).missingPartitions.map(entry => String(entry)));
+        }
+        // Try to handle pending promises.
+        if (this.enqueueRerenderIfPromise(ret)) {
+          const operationInfo = ret.operationInfo
+              || { roleName: "pendingLens", params: { render: ret } };
+          ret = this.tryRenderLensRole(operationInfo.roleName, operationInfo.params);
+          if (isPromise(ret)) {
+            throw wrapError(new Error("Invalid render result: 'pendingLens' returned a promise"),
+                `During ${this.debugId()}\n .render().ret.pendingLens, with:`,
+                "\n\tpendingLens ret:", dumpObject(ret),
+                "\n\tcomponent:", dumpObject(this));
+          }
         }
         return (typeof ret !== "undefined") ? ret
             : null;

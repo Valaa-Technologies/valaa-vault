@@ -294,14 +294,18 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
       */
     } else if (!liveElementProps) {
       // non-UIComponent element with no live props: post-process its children directly here.
-      const processedChildren = component.tryRenderLensSequence(props.children, focus);
-      if ((key || !lensName) && (typeof processedChildren === "undefined")) return undefined;
-      if (isPromise(processedChildren)) return processedChildren;
+      const children = component.tryRenderLensSequence(props.children, focus);
+      if ((key || !lensName) && (typeof children === "undefined")) return undefined;
+      if (isPromise(children)) {
+        if (!children.operationInfo) {
+          children.operationInfo = { roleName: "pendingChildrenLens", params: props.children };
+        }
+        return children;
+      }
       const newProps = { ...props };
       delete newProps.children;
       if (key || lensName) newProps.key = key || lensName;
-      return React.createElement(type, newProps,
-          ...(processedChildren || arrayFromAny(props.children)));
+      return React.createElement(type, newProps, ...(children || arrayFromAny(props.children)));
     } else {
       // non-UIComponent element with live props. Prepare live wrapper kuery options.
       // Because wrapper doesn't touch its uiContext we can forward our own to it.

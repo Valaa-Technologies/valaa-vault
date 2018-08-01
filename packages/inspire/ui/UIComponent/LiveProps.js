@@ -132,8 +132,16 @@ export default class LiveProps extends UIComponent {
       if (isPromise(newProps[name])) (pendingProps || (pendingProps = {}))[name] = newProps[name];
     }
     if (pendingProps) {
-      Promise.all(Object.values(pendingProps)).then(() => { this.forceUpdate(); });
-      return this.renderLensRole("pendingPropsLens", pendingProps);
+      const pendingKeys = Object.keys(pendingProps);
+      const ret = Promise.all(pendingKeys.map(key => pendingProps[key])).then((values) => {
+        this.setState((prevState) => ({
+          livePropValues: pendingKeys.reduce((newLivePropsValues, key, index) =>
+                  newLivePropsValues.set(key, values[index]),
+              prevState.livePropValues || OrderedMap())
+        }));
+      });
+      ret.operationInfo = { role: "pendingPropsLens", params: pendingProps };
+      return ret;
     }
 
     if (newProps.refKuery) {

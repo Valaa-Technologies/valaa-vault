@@ -60,14 +60,13 @@ export function connectToMissingPartitionsAndThen (error, callback, explicitConn
     throw wrapError(error, "caught MissingPartitionConnectionsError",
             "but error.missingPartitions is missing or empty: cannot try connecting");
   }
-  return (async () => {
-    await Promise.all(original.missingPartitions.map(missingPartition =>
-        (missingPartition instanceof URL
-            ? connectToPartition(missingPartition)
-            : missingPartition) // a promise for an already existing connection process
-    ));
-    return callback();
-  })();
+  const ret = Promise.all(original.missingPartitions.map(missingPartition =>
+      (missingPartition instanceof URL
+          ? connectToPartition(missingPartition)
+          : missingPartition) // a promise for an already existing connection process
+  )).then(() => callback());
+  ret.operationInfo = { roleName: "pendingConnectionsLens", params: original.missingPartitions };
+  return ret;
 }
 
 export function addConnectToPartitionToError (error, connectToPartition) {

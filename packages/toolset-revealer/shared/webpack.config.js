@@ -110,7 +110,7 @@ module.exports = vdoc({ "...": { heading:
             options: {
               modules: true,
               importLoaders: 1,
-              localIdentName: "[name]__[local]___[hash:base64:5]",
+              localIdentName: "[name]__[local]",
             },
           },
           {
@@ -120,7 +120,7 @@ module.exports = vdoc({ "...": { heading:
             }
           },
         ],
-        include: /node_modules/,
+        include: /node_modules|\.yalc/,
       },
     ],
   },

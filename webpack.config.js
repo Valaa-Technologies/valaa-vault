@@ -20,18 +20,6 @@ module.exports = {
           rule.use && (rule.use[0] === "style-loader")
               ? {
                 ...rule,
-                use: rule.use.map(loader => {
-                  if (loader.loader === "css-loader") {
-                    return {
-                      ...loader,
-                      options: {
-                        ...loader.options,
-                        localIdentName: "[name]__[local]",
-                      }
-                    };
-                  }
-                  return loader;
-                }),
                 include: /packages/,
               }
           : rule

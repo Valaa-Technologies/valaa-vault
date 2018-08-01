@@ -20,6 +20,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     lensDescriptorOptions[name] = { name, type, description, isLensAvailable, defaultLensThunk };
     Valaa.Lens[name] = Symbol(name);
     Valaa.Lens[Valaa.Lens[name]] = name;
+    return Valaa.Lens[name];
   }
   function finalizeLensDescriptors () {
     const lensDescriptors = {};
@@ -102,6 +103,15 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       () => (u: any, component: UIComponent) => component.props.children
   );
 
+  createLensRoleSymbol("parentComponentLens",
+      "any[]",
+      `Lens role for viewing the parent component itself.
+      This role is typically used in conjunction with some other role
+      like 'focusDetailLens'.`,
+      true,
+      () => (u: any, component: UIComponent) => component
+  );
+
   createLensRoleSymbol("focusDescriptionLens",
       "Lens",
       `Lens role for viewing a brief description of the focus.
@@ -141,14 +151,15 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       () => (focus: any) => debugId(focus),
   );
 
-  createLensRoleSymbol("describeComponentLens",
+  createLensRoleSymbol("focusPropertyKeysLens",
       "Lens",
-      `Lens role for displaying a developer-oriented description of the
-      current component.`,
-      true,
-      () => (function renderComponentDescription (unused: any, component: UIComponent) {
-        return component.debugId();
-      }),
+      `Lens role for viewing the list of property keys of the focus.
+
+      @param {any} focus  the focus to describe.`,
+      (focus) => focus && (typeof focus === "object"),
+      () => (focus: any) => (!focus || (typeof focus !== "object")
+          ? undefined
+          : Object.keys(!(focus instanceof Vrapper) ? focus : focus.getLexicalScope())),
   );
 
   createLensRoleSymbol("internalErrorLens",
@@ -265,14 +276,22 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       "Lens",
       `Lens role for viewing a null focus.`,
       (focus) => (focus === null),
-      () => null);
+      () => "");
+
+  createLensRoleSymbol("lens",
+      "Lens",
+      `Lens role for viewing a loaded component.
+
+      @param {Object} focus  the focus of the component.`,
+      true,
+      () => undefined);
 
   createLensRoleSymbol("resourceLens",
       "Lens",
       `Lens role for viewing a Resource focus.
 
       @param {Object} focus  the Resource focus.`,
-      (focus?: Vrapper) => (focus instanceof Vrapper),
+      (focus?: Vrapper) => (focus instanceof Vrapper) && (focus.activate() || true),
       () => ({ overrideLens: [
         Valaa.Lens.activeLens,
         Valaa.Lens.activatingLens,
@@ -287,45 +306,66 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} focus  the active Resource focus.`,
       (focus?: Vrapper) => focus && focus.isActive(),
-      () => Valaa.Lens.lensPropertyLens);
-
-  createLensRoleSymbol("lensPropertyLens",
-      "Lens",
-      `Lens role for displaying an active Resource focus using one of
-      its own properties as the lens. By default retrieves
-      'lensProperty' from props or 'Valaa.Lens.lensProperty' from
-      context and then searches the focus for a matching property.
-      If lensProperty is an array the first matching property from
-      focus is used.
-      If 'lensProperty' itself or no matching property can be found
-      falls back to 'lensPropertyNotFoundLens'.
-
-      @param {Object} focus  the active Resource focus.`,
-      (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
-      () => function renderPropertyLens (focus: any, component: UIComponent) {
-        const props = component.props;
-        const lensProperty = props.lensProperty || props.lensName
-            || component.getUIContextValue(Valaa.Lens.lensProperty)
-            || component.context.lensProperty;
-        if (lensProperty) {
-          const focusLexicalScope = focus.getLexicalScope();
-          for (const propertyName of arrayFromAny(lensProperty)) {
-            if (focusLexicalScope.hasOwnProperty(propertyName)) {
-              return focusLexicalScope[propertyName].extractValue();
-            }
-          }
-        }
-        return {
-          overrideLens: [Valaa.Lens.lensPropertyNotFoundLens],
-        };
-      });
+      () => Valaa.Lens.focusPropertyLens);
 
   createLensRoleSymbol("lensProperty",
       "(string | string[])",
       `Lens role for the name or array of property names that are
-      searched from an active Resource focus when displaying the
-      *propertyLens* role.`);
+      searched from a Resource when looking for a property lens.
+      This role is shared by all property lenses.`);
 
+  _createLensPropertyRoles("focusLensProperty", "focusPropertyLens", "lensPropertyNotFoundLens");
+  _createLensPropertyRoles("instanceLensProperty", "instancePropertyLens",
+      "instanceLensPropertyNotFoundLens");
+  _createLensPropertyRoles("delegateLensProperty", "delegatePropertyLens", "notLensResourceLens");
+
+  function _createLensPropertyRoles (lensPropertyRoleName, propertyLensRoleName, notFoundName) {
+    const roleSymbol = createLensRoleSymbol(lensPropertyRoleName,
+        "(string | string[])",
+        `Lens role for the name or array of property names that are
+        searched from the Resource focus when resolving the
+        *${propertyLensRoleName}* role.`);
+
+    createLensRoleSymbol(propertyLensRoleName,
+        "Lens",
+        `Lens role for retrieving a lens from a property of a Resource.
+        By default retrieves a property with the name specified by
+        props.${lensPropertyRoleName} or
+        context[Valaa.Lens.${lensPropertyRoleName}] from the focus.
+        If not found, falls back to searching property with name
+        props.lensProperty or context[Valaa.Lens.lensProperty] from the
+        focus.
+        The props/context property name can also be an array, in which
+        case the first matching lens is returned.
+
+        If still no suitable lens can be found delegates the display to
+        '${notFoundName}'.
+
+        @param {Object} focus  the Resource to search the lens from.`,
+        (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
+        () => function retrievePropertyLensFromFocus (focus: any, component: UIComponent) {
+          const lensPropertyNames = [].concat(
+              component.props[lensPropertyRoleName]
+                  || component.getUIContextValue(roleSymbol)
+                  || component.context[lensPropertyRoleName] || [],
+              // Deprecated.
+              component.props.lensName || [],
+              component.props.lensProperty
+                  || component.getUIContextValue(Valaa.Lens.lensProperty)
+                  || component.context.lensProperty || []);
+          const focusLexicalScope = focus.getLexicalScope();
+          for (const propertyName of lensPropertyNames) {
+            if (focusLexicalScope.hasOwnProperty(propertyName)) {
+              return focusLexicalScope[propertyName].extractValue();
+            }
+          }
+          console.error("can't find resource lens props:", lensPropertyRoleName, roleSymbol,
+              "\n\tnames:", lensPropertyNames,
+              "\n\tcomponent:", component,
+              "\n\tfocus:", focus);
+          return { overrideLens: [Valaa.Lens[notFoundName]] };
+        });
+  }
 
   // User-definable catch-all lenses
 
@@ -371,7 +411,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       `Lens role for viewing an explicitly disabled component.
 
       @param {string|Error|Object} reason  a description of why the component is disabled.`,
-      true,
+      (u, component) => ((component.state || {}).uiContext === undefined),
       () => ({ overrideLens: [
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
@@ -406,7 +446,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       ] }),
   );
 
-  createLensRoleSymbol("connectingLens",
+  createLensRoleSymbol("pendingConnectionsLens",
       "Lens",
       `Lens role for viewing a description of partition connections
       that are being acquired.
@@ -451,7 +491,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       `Lens role for viewing a component with an unfinished focus kuery.
 
       @param {Object} focus  the focus kuery.`,
-      true,
+      (focus) => (focus === undefined),
       () => ({ overrideLens: [
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
@@ -529,6 +569,10 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       @param {Object} focus  the activating Resource focus.`,
       (focus?: Vrapper) => focus && focus.isActivating(),
       () => ({ overrideLens: [
+        (focus, component) => {
+          component.enqueueRerenderIfPromise(Promise.resolve(focus.activate()));
+          return undefined;
+        },
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>Activating focus {Valaa.Lens.focusDescriptionLens}.</div>
@@ -612,12 +656,67 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
             Cannot find a lens property from the active focus {Valaa.Lens.focusDescriptionLens}.
           </div>
           <div {..._parameters}>
-            <span {..._key}>Property candidates:</span>
-            <span {..._value}>{Valaa.instrument(Valaa.Lens.lensProperty, p => p.join(", "))}</span>
+            <span {..._key}>focusLensProperty:</span>
+            <span {..._value}>{
+              Valaa.Lens.instrument(Valaa.Lens.focusLensProperty, p => JSON.stringify(p))
+            }</span>
           </div>
           <div {..._parameters}>
-            <span {..._key}>Focus being searched:</span>
-            <span {..._value}>{Valaa.Lens.debugFocusLens}</span>
+            <span {..._key}>lensProperty:</span>
+            <span {..._value}>{
+              Valaa.Lens.instrument(Valaa.Lens.lensProperty, p => JSON.stringify(p))
+            }</span>
+          </div>
+          <div {..._parameters}>
+            <span {..._key}>Focus detail:</span>
+            <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          </div>
+          <div {..._parameters}>
+            <span {..._key}>Focus properties:</span>
+            <span {..._value}>{
+              Valaa.Lens.instrument(Valaa.Lens.propertyKeysLens, p => JSON.stringify(p))
+            }</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] }),
+  );
+
+  createLensRoleSymbol("notLensResourceLens",
+      "Lens",
+      `Lens role for viewing a Resource which cannot be used as a lens.
+
+      @param {Object} nonLensResource  the non-lens-able Resource.`,
+      true,
+      () => ({ overrideLens: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageLoadingFailedProps}>
+          <div {..._message}>
+            Resource {Valaa.Lens.focusDescriptionLens} cannot be used as a lens.
+            This is because it is not a valid lens Media file and it does not have a lens property
+            that is listed in either delegateLensProperty or lensProperty roles.
+          </div>
+          <div {..._parameters}>
+            <span {..._key}>delegateLensProperty:</span>
+            <span {..._value}>{
+              Valaa.Lens.instrument(Valaa.Lens.delegateLensProperty, p => JSON.stringify(p))
+            }</span>
+          </div>
+          <div {..._parameters}>
+            <span {..._key}>lensProperty:</span>
+            <span {..._value}>{
+              Valaa.Lens.instrument(Valaa.Lens.lensProperty, p => JSON.stringify(p))
+            }</span>
+          </div>
+          <div {..._parameters}>
+            <span {..._key}>Resource detail:</span>
+            <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          </div>
+          <div {..._parameters}>
+            <span {..._key}>Resource properties:</span>
+            <span {..._value}>{
+              Valaa.Lens.instrument(Valaa.Lens.propertyKeysLens, p => JSON.stringify(p))
+            }</span>
           </div>
           {commonMessageRows}
         </div>

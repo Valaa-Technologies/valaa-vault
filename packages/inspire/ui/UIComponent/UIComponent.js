@@ -62,19 +62,30 @@ export default class UIComponent extends React.Component {
     loadingFailedLens: PropTypes.any,
     internalErrorLens: PropTypes.any,
 
-    connectingLens: PropTypes.any,
+    pendingConnectionsLens: PropTypes.any,
 
     disabledLens: PropTypes.any,
+    nullLens: PropTypes.any,
     undefinedLens: PropTypes.any,
+    lens: PropTypes.any,
+
+    resourceLens: PropTypes.any,
+    activeLens: PropTypes.any,
     inactiveLens: PropTypes.any,
     unavailableLens: PropTypes.any,
     destroyedLens: PropTypes.any,
+
+    lensProperty: _propertyNames,
+    focusLensProperty: _propertyNames,
+    delegateLensProperty: _propertyNames,
+    instanceLensProperty: _propertyNames,
 
     pendingLens: PropTypes.any,
     kueryingFocusLens: PropTypes.any,
     kueryingPropsLens: PropTypes.any,
     pendingPropsLens: PropTypes.any,
     pendingChildrenLens: PropTypes.any,
+    lensPropertyNotFoundLens: PropTypes.any,
   }
 
   static propTypes = {
@@ -99,19 +110,30 @@ export default class UIComponent extends React.Component {
     loadingFailedLens: PropTypes.any,
     internalErrorLens: PropTypes.any,
 
-    connectingLens: PropTypes.any,
+    pendingConnectionsLens: PropTypes.any,
 
     disabledLens: PropTypes.any,
+    nullLens: PropTypes.any,
     undefinedLens: PropTypes.any,
+    lens: PropTypes.any,
+
+    resourceLens: PropTypes.any,
+    activeLens: PropTypes.any,
     inactiveLens: PropTypes.any,
     unavailableLens: PropTypes.any,
     destroyedLens: PropTypes.any,
+
+    lensProperty: _propertyNames,
+    focusLensProperty: _propertyNames,
+    delegateLensProperty: _propertyNames,
+    instanceLensProperty: _propertyNames,
 
     pendingLens: PropTypes.any,
     kueryingFocusLens: PropTypes.any,
     kueryingPropsLens: PropTypes.any,
     pendingPropsLens: PropTypes.any,
     pendingChildrenLens: PropTypes.any,
+    lensPropertyNotFoundLens: PropTypes.any,
   }
 
   static noPostProcess = {
@@ -491,9 +513,9 @@ export default class UIComponent extends React.Component {
   }
 
   // defaults to null
-  renderLensRole (role: string | Symbol, focus: any, rootRoleName?: string, onlyOnce?: boolean):
-      null | string | React.Element<any> | [] | Promise<any> {
-    const ret = this.tryRenderLensRole(role, focus, rootRoleName, onlyOnce);
+  renderLensRole (role: string | Symbol, focus: any, rootRoleName?: string, onlyIfAble?: boolean,
+      onlyOnce?: boolean): null | string | React.Element<any> | [] | Promise<any> {
+    const ret = this.tryRenderLensRole(role, focus, rootRoleName, onlyIfAble, onlyOnce);
     return (typeof ret !== "undefined") ? ret
         : null;
   }
@@ -505,7 +527,8 @@ export default class UIComponent extends React.Component {
 
 
   tryRenderLensRole (role: string | Symbol, focus: any = this.tryFocus(), rootRoleName_?: string,
-      onlyOnce?: boolean): void | null | string | React.Element<any> | [] | Promise<any> {
+      onlyIfAble?: boolean, onlyOnce?: boolean):
+          void | null | string | React.Element<any> | [] | Promise<any> {
     const activeViewRoles = this.getUIContextValue(this.getValaa().Lens.activeViewRoles)
         || (this.state.uiContext
             && this.setUIContextValue(this.getValaa().Lens.activeViewRoles, []))
@@ -519,7 +542,7 @@ export default class UIComponent extends React.Component {
       if (!roleSymbol) throw new Error(`No Valaa.Lens role symbol for '${roleName}'`);
       if (!roleName) throw new Error(`No Valaa.Lens role name for '${String(roleSymbol)}'`);
       activeViewRoles.push(roleName);
-      assignee = _locateLensRoleAssignee(this, roleName, roleSymbol, focus, false);
+      assignee = _locateLensRoleAssignee(this, roleName, roleSymbol, focus, onlyIfAble);
       return assignee && this.renderLens(assignee, focus, rootRoleName, undefined, onlyOnce);
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .renderLensRole(${
@@ -553,7 +576,7 @@ export default class UIComponent extends React.Component {
           ret = this.tryRenderLensRole(this.constructor.mainLensRoleName);
         } catch (error) {
           // Try to connect to missing partitions.
-          if (tryConnectToMissingPartitionsAndThen(error, () => this.forceUpdate())) {
+          if (!tryConnectToMissingPartitionsAndThen(error, () => this.forceUpdate())) {
             throw error;
           }
           ret = this.tryRenderLensRole("pendingConnectionsLens",

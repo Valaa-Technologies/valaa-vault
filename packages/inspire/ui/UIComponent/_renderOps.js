@@ -3,7 +3,6 @@
 import React from "react";
 import { OrderedMap } from "immutable";
 
-import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
 import { Kuery } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
@@ -29,9 +28,9 @@ export function _renderFirstAbleDelegate (
 }
 
 export function _locateLensRoleAssignee (component: UIComponent,
-    roleName: string, roleSymbol: Symbol, focus: any, skipPreconditionCheck?: boolean):
+    roleName: string, roleSymbol: Symbol, focus: any, onlyIfAble?: boolean):
     void | null | string | React.Element<any> | [] | Promise<any> {
-  if (!skipPreconditionCheck) {
+  if (onlyIfAble) {
     const descriptor = component.context.engine.getHostObjectDescriptor(roleSymbol);
     if (descriptor
         && (typeof descriptor.isLensAvailable === "function")
@@ -174,7 +173,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
               Valaa.Lens.delegatePropertyLens, lens, true)(
                   lens, component, lensName);
           if (ret == null || ((ret.overrideLens || [])[0] === Valaa.Lens.notLensResourceLens)) {
-            return component.renderLensRole("notLensResourceLens", lens, subLensName, true);
+            return component.renderLensRole("notLensResourceLens", lens, subLensName);
           }
         }
         /*
@@ -196,14 +195,14 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         subLensName = `noscope-${lensName}`;
         ret = React.createElement(_ValaaScope, component.childProps(subLensName, {}, { ...lens }));
       } else if (isSymbol(lens)) {
-        return component.renderLensRole(lens, focus, undefined, onlyOnce);
+        return component.renderLensRole(lens, focus, undefined, onlyIfAble, onlyOnce);
       } else {
         throw new Error(`Invalid lens value when trying to render ${lensName
             }, got value of type '${lens.constructor.name}'`);
       }
       break;
     case "symbol":
-      return component.renderLensRole(lens, focus, undefined, onlyOnce);
+      return component.renderLensRole(lens, focus, undefined, onlyIfAble, onlyOnce);
   }
   if (React.isValidElement(ret)) return _wrapElementInLiveProps(component, ret, focus, subLensName);
   if ((ret === undefined) || onlyOnce) return ret;

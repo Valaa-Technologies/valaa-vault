@@ -104,22 +104,11 @@ export default class ValaaScope extends UIComponent {
   static propTypes = {
     ...UIComponent.propTypes,
     lensName: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-    lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-    lens: PropTypes.any,
-    nullLens: PropTypes.any,
-    activeLens: PropTypes.any,
-    lensPropertyNotFoundLens: PropTypes.any,
   };
 
   static contextTypes = {
     ...UIComponent.contextTypes,
     engine: PropTypes.object,
-    styleSheet: PropTypes.any,
-    lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-    nullLens: PropTypes.any,
-    activeLens: PropTypes.any,
-    lensPropertyNotFoundLens: PropTypes.any,
-    lensContext: PropTypes.object,
   };
 
   constructor (props: Object, context: Object) {
@@ -194,29 +183,6 @@ export default class ValaaScope extends UIComponent {
   }
 
   renderLoaded (focus: any) {
-    // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
-    if (this.props.hasOwnProperty("styleSheet")) {
-      this.setUIContextValue(VSSStyleSheetSymbol, this.props.styleSheet);
-    } else {
-      this.clearUIContextValue(VSSStyleSheetSymbol);
-    }
-
-    const lens = this.tryRenderLensRole("lens", focus);
-    if (typeof lens !== "undefined") return lens;
-    /*
-    const fixedLens = this.tryRenderLensRole("fixedLens", focus);
-    if (typeof fixedLens !== "undefined") {
-      console.error("DEPRECATED: props.fixedLens",
-          "\n\tprefer: props.lens",
-          "\n\tin component:", this.debugId(), this);
-      return fixedLens;
-    }
-    */
-
-    if (focus === null) {
-      return this.renderLensRole("nullLens", focus);
-    }
-
     if ((typeof focus !== "object") || React.isValidElement(focus)) {
       return this.renderLens(focus, null, "focus");
     }
@@ -233,9 +199,6 @@ export default class ValaaScope extends UIComponent {
       throw new Error(`Unrecognized complex object of type '${
           (focus.constructor && focus.constructor.name) || "<constructor missing>"}' as UI focus`);
     }
-
-    const activeLensComponent = this.tryRenderLensRole("activeLens", focus);
-    if (typeof activeLensComponent !== "undefined") return activeLensComponent;
 
     if (typeof this.state.lensComponent === "undefined") {
       return this.renderLensRole("downloadingLens", focus);

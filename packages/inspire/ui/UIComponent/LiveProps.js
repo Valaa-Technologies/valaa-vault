@@ -4,14 +4,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import { OrderedMap } from "immutable";
 
-import { asyncConnectToPartitionsIfMissingAndRetry, tryConnectToMissingPartitionsAndThen }
-    from "~/raem/tools/denormalized/partitions";
+import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
 import { Kuery } from "~/raem/VALK";
 
 import { FieldUpdate, getImplicitCallable } from "~/engine/Vrapper";
 
 import ValaaScope from "~/inspire/ui/ValaaScope";
-import { isThunk } from "~/inspire/ui/thunk";
 import UIComponent from "~/inspire/ui/UIComponent";
 
 import { arrayFromAny, isPromise, outputError, wrapError } from "~/tools";
@@ -82,15 +80,10 @@ export default class LiveProps extends UIComponent {
           contextThis,
           kuery, {
             scope: this.getUIContext(),
-            onUpdate: (update: FieldUpdate) => this.setState((prevState) => {
-              const value = update.value();
-              return {
-                livePropValues: (prevState.livePropValues || OrderedMap())
-                    .set(kueryId, !isThunk(value)
-                        ? value
-                        : asyncConnectToPartitionsIfMissingAndRetry(value))
-              };
-            }),
+            onUpdate: (update: FieldUpdate) => this.setState((prevState) => ({
+              livePropValues: (prevState.livePropValues || OrderedMap())
+                  .set(kueryId, update.value())
+            })),
           });
     }
   }
@@ -161,14 +154,6 @@ export default class LiveProps extends UIComponent {
       newProps.overrideLens = [React.createElement(elementType, subProps, ...children)];
       elementType = ValaaScope;
       children = [];
-    } else if (!elementType.isUIComponent) {
-      // if no valaaScope is requested and the element is not an UIComponent we need to post-process
-      // children now and deal with a possible resulting promise.
-      children = this.renderLensSequence(children, focus);
-      if (isPromise(children)) {
-        children.then(() => { this.forceUpdate(); });
-        return this.renderLensRole("pendingChildrenLens", focus);
-      }
     }
     /* Only enable this section for debugging React key warnings; it will break react elsewhere
     if (elementType === ValaaScope) {
@@ -180,19 +165,19 @@ export default class LiveProps extends UIComponent {
     /*/
     // eslint-disable-next-line
     //*/
-    const array = elementType.isUIComponent && newProps.array;
-    if (array != null) {
-      if (typeof array[Symbol.iterator] !== "function") {
-        return this.renderLensRole("arrayNotIterableLens", array);
-      }
-      delete newProps.array;
-      if (children.length) newProps.children = children;
-      return this.renderFocusAsSequence(
-          Array.isArray(array) ? array : [...array], elementType, newProps);
+    if (!elementType.isUIComponent || (newProps.array == null)) {
+      if (!newProps.key) newProps.key = this.getUIContextValue("key");
+      return _wrapElementInLiveProps(
+          this, React.createElement(elementType, newProps, ...children), focus, "focus");
     }
-    if (!newProps.key) newProps.key = this.getUIContextValue("key");
-    return _wrapElementInLiveProps(
-        this, React.createElement(elementType, newProps, ...children), undefined, "focus");
+    const array = newProps.array;
+    if (typeof array[Symbol.iterator] !== "function") {
+      return this.renderLensRole("arrayNotIterableLens", array);
+    }
+    delete newProps.array;
+    if (children.length) newProps.children = children;
+    return this.renderFocusAsSequence(
+        Array.isArray(array) ? array : [...array], elementType, newProps);
   }
 
   _wrapInValaaExceptionProcessor (callback: Function, name: string) {

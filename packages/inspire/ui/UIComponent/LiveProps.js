@@ -140,7 +140,7 @@ export default class LiveProps extends UIComponent {
               prevState.livePropValues || OrderedMap())
         }));
       });
-      ret.operationInfo = { role: "pendingPropsLens", params: pendingProps };
+      ret.operationInfo = { lensRole: "pendingPropsLens", params: pendingProps };
       return ret;
     }
 
@@ -159,7 +159,7 @@ export default class LiveProps extends UIComponent {
       const subProps = newProps;
       newProps = { ...newProps.valaaScope };
       delete subProps.valaaScope;
-      newProps.overrideLens = [React.createElement(elementType, subProps, ...children)];
+      newProps.delegate = [React.createElement(elementType, subProps, ...children)];
       elementType = ValaaScope;
       children = [];
     }

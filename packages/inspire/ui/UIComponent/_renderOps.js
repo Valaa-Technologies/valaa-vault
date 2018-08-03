@@ -153,14 +153,23 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         // Delegates the kuery resolution to LiveProps.
         subLensName = `kuery-${lensName}`;
         ret = React.createElement(UIComponent,
-            component.childProps(subLensName, {}, { overrideLens: [lens] }));
+            component.childProps(subLensName, {}, { delegate: [lens] }));
       } else if (lens instanceof Vrapper) {
         const blocker = lens.activate();
-        if (blocker) return blocker;
+        if (blocker) {
+          blocker.operationInfo = Object.assign(blocker.operationInfo || {},
+              { lensRole: "pendingConnectionsLens" });
+          return blocker;
+        }
         if (lens.hasInterface("Media")) {
           const { mediaInfo, mime } = lens.resolveMediaInfo();
           subLensName = `${mediaInfo.name}:${mime}-${lensName}`;
           ret = lens.interpretContent({ mediaInfo, mime });
+          if (isPromise(ret)) {
+            ret.operationInfo = Object.assign(ret.operationInfo || {},
+                { lensRole: "downloadingLens", params: lens });
+            return ret;
+          }
         } else {
           console.warn("NEW BEHAVIOUR: non-Media Resources as direct lenses are now in effect.",
               "When a Resource is used as a lens, it will be searched for a lens property",
@@ -172,7 +181,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
           ret = _locateLensRoleAssignee(component, "delegatePropertyLens",
               Valaa.Lens.delegatePropertyLens, lens, true)(
                   lens, component, lensName);
-          if (ret == null || ((ret.overrideLens || [])[0] === Valaa.Lens.notLensResourceLens)) {
+          if (ret == null || ((ret.delegate || [])[0] === Valaa.Lens.notLensResourceLens)) {
             return component.renderLensRole("notLensResourceLens", lens, subLensName);
           }
         }
@@ -189,8 +198,8 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
       } else if (Array.isArray(lens)) {
         return _tryRenderLensArray(component, lens, focus);
       } else if (Object.getPrototypeOf(lens) === Object.prototype) {
-        if (lens.overrideLens && (Object.keys(lens).length === 1)) {
-          return _renderFirstAbleDelegate(component, lens.overrideLens, focus, lensName);
+        if (lens.delegate && (Object.keys(lens).length === 1)) {
+          return _renderFirstAbleDelegate(component, lens.delegate, focus, lensName);
         }
         subLensName = `noscope-${lensName}`;
         ret = React.createElement(_ValaaScope, component.childProps(subLensName, {}, { ...lens }));
@@ -298,7 +307,7 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
       if ((key || !lensName) && (typeof children === "undefined")) return undefined;
       if (isPromise(children)) {
         if (!children.operationInfo) {
-          children.operationInfo = { roleName: "pendingChildrenLens", params: props.children };
+          children.operationInfo = { lensRole: "pendingChildrenLens", params: props.children };
         }
         return children;
       }
@@ -397,27 +406,27 @@ function _postProcessProp (prop: any, livePropLookup: Object, liveProps: Object,
   return ret;
 }
 
-export function _validateElement () {
-  return; // validation disabled until needed
-}
-
-/*
 export function _validateElement (component: UIComponent, element: any) {
   const faults = _recurseValidateElements(element);
-  if (faults) {
-    console.warn("Element validation failure in", component.debugId(), component,
-        "\n\tfaults:", faults);
-  }
+  return !faults
+      ? element
+      : component.renderLensRole("invalidElementLens", faults);
 }
 
 function _recurseValidateElements (element: any) {
+  if ((typeof element !== "object") || (element == null)) return undefined;
   if (Array.isArray(element)) {
     const faults = element.map(_recurseValidateElements);
     return typeof faults.find(entry => typeof entry !== "undefined") !== "undefined"
         ? faults
         : undefined;
   }
-  if (!React.isValidElement(element)) return undefined;
+  if (!React.isValidElement(element)) {
+    return {
+      elementFault: `non-react component objects (got ${
+          (element.constructor || { name: "unknown" }).name}) are not valid render result elements`,
+    };
+  }
   const ret = {};
   if (typeof element.key === "undefined") ret.keyFault = "key missing";
   const childFaults = _recurseValidateElements(element.children);
@@ -426,4 +435,4 @@ function _recurseValidateElements (element: any) {
   ret.element = element;
   return ret;
 }
-*/
+

@@ -201,8 +201,8 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {string|Error|Object} focus  the focus of the component`,
       true,
-      () => ({ overrideLens: [
-        Valaa.Lens.delegateOverridesLens,
+      () => ({ delegate: [
+        Valaa.Lens.firstAbleDelegateLens,
         Valaa.Lens.disabledLens,
         Valaa.Lens.undefinedLens,
         Valaa.Lens.lens,
@@ -218,7 +218,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {string|Error|Object} focus  the focus of the component`,
       true,
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.disabledLens,
         Valaa.Lens.undefinedLens,
         Valaa.Lens.loadedLens,
@@ -231,8 +231,8 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {string|Error|Object} focus  the focus of the component`,
       true,
-      () => ({ overrideLens: [
-        Valaa.Lens.delegateOverridesLens,
+      () => ({ delegate: [
+        Valaa.Lens.firstAbleDelegateLens,
         Valaa.Lens.disabledLens,
         Valaa.Lens.undefinedLens,
         Valaa.Lens.loadedLens,
@@ -240,14 +240,15 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
   );
 
 
-  createLensRoleSymbol("delegateOverridesLens",
+  createLensRoleSymbol("firstAbleDelegateLens",
       "Lens",
-      `Lens role for viewing componentn override delegations.
+      `Lens role for viewing a component via its first able
+      props.delegate.
 
       @param {string|Error|Object} focus  the focus of the component`,
-      (u, component) => (component.props.overrideLens !== undefined),
-      () => (focus, component, lensName = "override") =>
-          component.renderFirstAbleDelegate(component.props.overrideLens, focus, lensName),
+      (u, component) => (component.props.delegate !== undefined),
+      () => (focus, component, lensName = "delegate") =>
+          component.renderFirstAbleDelegate(component.props.delegate, focus, lensName),
   );
 
   createLensRoleSymbol("loadedLens",
@@ -265,7 +266,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       "Lens",
       `Lens role for viewing an undefined focus.`,
       (focus) => (focus === undefined),
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.instrument(
             (u, component) => (component.props.kuery || component.props.focus),
             Valaa.Lens.kueryingFocusLens),
@@ -292,7 +293,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} focus  the Resource focus.`,
       (focus?: Vrapper) => (focus instanceof Vrapper) && (focus.activate() || true),
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.activeLens,
         Valaa.Lens.activatingLens,
         Valaa.Lens.inactiveLens,
@@ -345,14 +346,14 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
         () => function retrievePropertyLensFromFocus (focus: any, component: UIComponent) {
           const lensPropertyNames = [].concat(
-              component.props[lensPropertyRoleName]
-                  || component.getUIContextValue(roleSymbol)
-                  || component.context[lensPropertyRoleName] || [],
-              // Deprecated.
-              component.props.lensName || [],
-              component.props.lensProperty
-                  || component.getUIContextValue(Valaa.Lens.lensProperty)
-                  || component.context.lensProperty || []);
+          component.props[lensPropertyRoleName]
+              || component.getUIContextValue(roleSymbol)
+              || component.context[lensPropertyRoleName] || [],
+          // Deprecated.
+          component.props.lensName || [],
+          component.props.lensProperty
+              || component.getUIContextValue(Valaa.Lens.lensProperty)
+              || component.context.lensProperty || []);
           const focusLexicalScope = focus.getLexicalScope();
           for (const propertyName of lensPropertyNames) {
             if (focusLexicalScope.hasOwnProperty(propertyName)) {
@@ -363,7 +364,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
               "\n\tnames:", lensPropertyNames,
               "\n\tcomponent:", component,
               "\n\tfocus:", focus);
-          return { overrideLens: [Valaa.Lens[notFoundName]] };
+          return { delegate: [Valaa.Lens[notFoundName]] };
         });
   }
 
@@ -412,7 +413,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {string|Error|Object} reason  a description of why the component is disabled.`,
       (u, component) => ((component.state || {}).uiContext === undefined),
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
           <div {..._message}>Component is disabled; focus and context are not available.</div>
@@ -433,7 +434,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} dependency  a description object of the pending dependency.`,
       true,
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
         <div {..._message}>Waiting for a pending dependency Promise to resolve.</div>
@@ -453,7 +454,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object[]} partitions  the partition connections that are being acquired.`,
       true,
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>Acquiring partition connection(s).</div>
@@ -473,7 +474,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Media} media  the Media being downloaded.`,
       true,
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>Downloading dependency {Valaa.Lens.focusDetailLens}.</div>
@@ -492,7 +493,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} focus  the focus kuery.`,
       (focus) => (focus === undefined),
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>Waiting for focus kuery to complete.</div>
@@ -511,7 +512,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} props  the unfinished props kueries.`,
       true,
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>Waiting for props kueries to complete.</div>
@@ -530,7 +531,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} props  the pending props Promises.`,
       true,
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>Waiting for pending props Promise(s) to resolve.</div>
@@ -549,7 +550,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} children  the pending children Promise.`,
       true,
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>  Waiting for a pending children Promise to resolve.</div>
@@ -568,7 +569,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} focus  the activating Resource focus.`,
       (focus?: Vrapper) => focus && focus.isActivating(),
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         (focus, component) => {
           component.enqueueRerenderIfPromise(Promise.resolve(focus.activate()));
           return undefined;
@@ -591,7 +592,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} focus  the inactive Resource focus.`,
       (focus?: Vrapper) => focus && focus.isInactive(),
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
           <div {..._message}>Focus {Valaa.Lens.focusDescriptionLens} is inactive.</div>
@@ -610,7 +611,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} focus  the unavailable Resource focus.`,
       (focus?: Vrapper) => focus && focus.isUnavailable(),
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
           <div {..._message}>Focus {Valaa.Lens.focusDescriptionLens} is unavailable.</div>
@@ -629,7 +630,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} focus  the destroyed Resource focus.`,
       (focus?: Vrapper) => focus && focus.isDestroyed(),
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
           <div {..._message}>Focus {Valaa.Lens.focusDescriptionLens} has been destroyed.</div>
@@ -649,7 +650,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} focus  the active Resource focus.`,
       true,
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
           <div {..._message}>
@@ -688,7 +689,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} nonLensResource  the non-lens-able Resource.`,
       true,
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
           <div {..._message}>
@@ -730,13 +731,32 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {Object} nonArray  the non-iterable value.`,
       true,
-      () => ({ overrideLens: [
+      () => ({ delegate: [
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
           <div {..._message}>props.array {Valaa.Lens.focusDescriptionLens} is not an iterable.</div>
           <div {..._parameters}>
             <span {..._key}>props.array:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] }),
+  );
+
+  createLensRoleSymbol("invalidElementLens",
+      "Lens",
+      `Lens role for viewing an a description of an invalid UI element.
+
+      @param {Object} description  string or object description.`,
+      true,
+      () => ({ delegate: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageLoadingFailedProps}>
+          <div {..._message}>UIComponent.render returned an invalid element.</div>
+          <div {..._parameters}>
+            <span {..._key}>Faults:</span>
+            <span {..._value}>{Valaa.Lens.focusStringifyLens}</span>
           </div>
           {commonMessageRows}
         </div>

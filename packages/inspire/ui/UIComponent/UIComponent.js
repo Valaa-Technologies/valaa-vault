@@ -104,7 +104,7 @@ export default class UIComponent extends React.Component {
     locals: PropTypes.object,
     context: PropTypes.object,
 
-    overrideLens: PropTypes.arrayOf(PropTypes.any),
+    delegate: PropTypes.arrayOf(PropTypes.any),
 
     loadingLens: PropTypes.any,
     loadingFailedLens: PropTypes.any,
@@ -591,8 +591,8 @@ export default class UIComponent extends React.Component {
         // Try to handle pending promises.
         if (this.enqueueRerenderIfPromise(ret)) {
           const operationInfo = ret.operationInfo
-              || { roleName: "pendingLens", params: { render: ret } };
-          ret = this.tryRenderLensRole(operationInfo.roleName, operationInfo.params);
+              || { lensRole: "pendingLens", params: { render: ret } };
+          ret = this.tryRenderLensRole(operationInfo.lensRole, operationInfo.params);
           if (isPromise(ret)) {
             throw wrapError(new Error("Invalid render result: 'pendingLens' returned a promise"),
                 `During ${this.debugId()}\n .render().ret.pendingLens, with:`,
@@ -600,13 +600,13 @@ export default class UIComponent extends React.Component {
                 "\n\tcomponent:", dumpObject(this));
           }
         }
+        ret = _validateElement(this, ret);
+
         return (typeof ret !== "undefined") ? ret
             : null;
       }
     } catch (error) {
       firstPassError = error;
-    } finally {
-      _validateElement(this, ret);
     }
 
     try {

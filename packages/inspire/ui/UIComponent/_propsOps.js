@@ -33,7 +33,7 @@ export function uiComponentProps (
     if (typeof focus !== "undefined") props.focus = focus;
     if (typeof options.kuery !== "undefined") props.kuery = options.kuery;
   }
-  props.context = options.context || {};
+  props.context = Object.assign(props.context || {}, options.context);
   if (!props.context.key) {
     props.context.key = _createComponentKey(options.name || "",
         focus || getScopeValue(props.uiContext || props.parentUIContext, "focus"),

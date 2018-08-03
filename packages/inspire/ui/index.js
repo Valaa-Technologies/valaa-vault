@@ -11,7 +11,7 @@ import MediaEditor from "./MediaEditor";
 // import TextFieldEditor from "./TextFieldEditor";
 import TextFileEditor from "./TextFileEditor";
 import UIContext from "./UIContext";
-import ValaaScope, { ValaaNode } from "./ValaaScope";
+import ValaaScope from "./ValaaScope";
 
 // List of Vidgets available for Editor JSX files
 
@@ -30,7 +30,7 @@ const Vidgets = {
 //  TextFieldEditor,
   TextFileEditor,
   UIContext,
-  ValaaNode,
+//  ValaaNode,
   ValaaScope,
 };
 

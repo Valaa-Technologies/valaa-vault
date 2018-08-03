@@ -126,6 +126,7 @@ export default class ValaaScope extends UIComponent {
   attachSubscribers (focus: any, props: Object) {
     super.attachSubscribers(focus, props);
     this.setUIContextValue("this", this);
+
     let focusResource;
     if ((typeof this.tryRenderLensRole("lens", focus) === "undefined")
         // && (typeof this.tryRenderLensRole("fixedLens", focus) === "undefined")
@@ -142,6 +143,7 @@ export default class ValaaScope extends UIComponent {
         focusResource && (() => {
           this.attachLens(focusResource, props);
         }));
+
   }
 
   async attachLens (focus: Vrapper, props: Object) {
@@ -246,10 +248,11 @@ const getLensByName = asyncConnectToPartitionsIfMissingAndRetry(
     }
   }
 );
-
+/*
 export class ValaaNode extends ValaaScope {
   constructor (props: any, context: any) {
     super(props, context);
     console.error("DEPRECATED: ValaaNode\n\tprefer: ValaaScope");
   }
 }
+*/

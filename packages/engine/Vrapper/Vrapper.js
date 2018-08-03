@@ -222,7 +222,8 @@ export default class Vrapper extends Cog {
     if (!initialBlocker) return undefined;
     if (this._activationProcess) return this._activationProcess;
     this._phase = ACTIVATING;
-    return (this._activationProcess = (async () => {
+    const operationInfo = { pendingConnection: null };
+    const activationProcess = this._activationProcess = (async () => {
       let blocker;
       try {
         for (blocker = initialBlocker; blocker; blocker = this._refreshPhaseOrGetBlocker()) {
@@ -231,9 +232,11 @@ export default class Vrapper extends Cog {
                 } because it is ${blocker.getPhase()}`);
           }
           if (!blocker._partitionConnection) {
-            await blocker.getPartitionConnection();
+            console.log("reading activationProcess:", activationProcess);
+            await (operationInfo.pendingConnection = blocker.getPartitionConnection());
           }
         }
+        operationInfo.pendingConnection = null;
         return true;
       } catch (error) {
         this._phase =
@@ -246,7 +249,9 @@ export default class Vrapper extends Cog {
       } finally {
         delete this._activationProcess;
       }
-    })());
+    })();
+    this._activationProcess.operationInfo = operationInfo;
+    return this._activationProcess;
   }
 
   /**

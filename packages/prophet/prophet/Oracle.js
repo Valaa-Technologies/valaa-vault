@@ -98,6 +98,7 @@ export default class Oracle extends Prophet {
               ret.fullConnection = fullConnection;
               return fullConnection;
             });
+        ret.operationInfo = { ...entry.pendingConnection.operationInfo };
         return ret;
       }
       if (options.dontCreateNewConnection) return undefined;
@@ -115,6 +116,7 @@ export default class Oracle extends Prophet {
         delete entry.pendingConnection;
         return entry.connection;
       })();
+      entry.pendingConnection.operationInfo = { connection: entry.connection };
       return entry.pendingConnection || entry.connection;
     } catch (error) {
       throw this.wrapErrorEvent(error, `acquirePartitionConnection(${partitionURI.toString()})`,

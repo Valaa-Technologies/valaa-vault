@@ -306,9 +306,8 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
       const children = component.tryRenderLensSequence(props.children, focus);
       if ((key || !lensName) && (typeof children === "undefined")) return undefined;
       if (isPromise(children)) {
-        if (!children.operationInfo) {
-          children.operationInfo = { lensRole: "pendingChildrenLens", params: props.children };
-        }
+        children.operationInfo = Object.assign(children.operationInfo || {},
+            { lensRole: "pendingChildrenLens", params: props.children });
         return children;
       }
       const newProps = { ...props };

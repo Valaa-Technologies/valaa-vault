@@ -2,14 +2,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { asyncConnectToPartitionsIfMissingAndRetry }
-    from "~/raem/tools/denormalized/partitions";
-
-import Vrapper, { VrapperSubscriber } from "~/engine/Vrapper";
-import VALEK, { dumpObject } from "~/engine/VALEK";
 import UIComponent from "~/inspire/ui/UIComponent";
-
-import { arrayFromAny, outputError, wrapError } from "~/tools";
 
 /**
  * ValaaScope performs a semantically rich, context-aware render of its local UI focus according to
@@ -111,77 +104,9 @@ export default class ValaaScope extends UIComponent {
     engine: PropTypes.object,
   };
 
-  constructor (props: Object, context: Object) {
-    super(props, context);
-    this.liveKuerySubscribers = new Map();
-  }
-
-  liveKuerySubscribers: Map<string, Array<VrapperSubscriber>>;
-
-  state: {
-    focusResource: any,
-    lensComponent: any,
-  }
-
   attachSubscribers (focus: any, props: Object) {
     super.attachSubscribers(focus, props);
     this.setUIContextValue("this", this);
-
-    let focusResource;
-    if ((typeof this.tryRenderLensRole("lens", focus) === "undefined")
-        // && (typeof this.tryRenderLensRole("fixedLens", focus) === "undefined")
-        && (typeof focus === "object") && (focus !== null) && (focus instanceof Vrapper)
-        && (props.lensProperty || props.lensName || this.context.lensProperty
-            || this.getUIContextValue(this.getValaa().Lens.lensProperty))) {
-      if (props.lensName) {
-        console.error("DEPRECATED: props.lensName\n\tprefer: props.lensProperty",
-            "\n\tin component:", this.debugId(), this);
-      }
-      focusResource = focus;
-    }
-    this.setState({ focusResource, lensComponent: undefined },
-        focusResource && (() => {
-          this.attachLens(focusResource, props);
-        }));
-
-  }
-
-  async attachLens (focus: Vrapper, props: Object) {
-    const lens = await getLensByName(focus, props.lensProperty || props.lensName
-        || this.getUIContextValue(this.getValaa().Lens.lensProperty)
-        || this.context.lensProperty);
-    if (!lens) {
-      this.setState({
-        lensComponent: this.renderLensRole("lensPropertyNotFoundLens", focus)
-      });
-    } else if (!(lens instanceof Vrapper) || !lens.hasInterface("Media")) {
-      this.setState({
-        lensComponent: React.createElement(ValaaScope, { ...props, focus: lens },
-            ...arrayFromAny(props.children)),
-      });
-    } else {
-      this.attachKuerySubscriber("ValaaScope.lensComponent",
-          lens, VALEK.toMediaContentField(), { onUpdate: async () => {
-            try {
-              if (this.state.focusResource !== focus) return false;
-              const lensComponent = await lens.interpretContent({ mimeFallback: "text/vsx" });
-              this.setState({ lensComponent });
-              return undefined;
-            } catch (error) {
-              const finalError = wrapError(error,
-                  `Exception caught in ${this.debugId()})\n .attachLens(), with:`,
-                  "\n\tlens:", ...dumpObject(lens),
-                  "\n\thead:", ...dumpObject(focus),
-                  "\n\tuiContext:", this.state.uiContext,
-                  "\n\tstate:", ...dumpObject(this.state),
-                  "\n\tprops:", ...dumpObject(this.props),
-              );
-              outputError(finalError);
-              this.enableError(finalError);
-              return false;
-            }
-          } });
-    }
   }
 
   renderLoaded (focus: any) {
@@ -197,23 +122,12 @@ export default class ValaaScope extends UIComponent {
       return this.renderObjectAsValaaScope(focus);
     }
 
-    if (!(focus instanceof Vrapper)) {
-      throw new Error(`Unrecognized complex object of type '${
-          (focus.constructor && focus.constructor.name) || "<constructor missing>"}' as UI focus`);
-    }
-
-    if (typeof this.state.lensComponent === "undefined") {
-      return this.renderLensRole("downloadingLens", focus);
-    }
-    return this.renderLens(this.state.lensComponent, focus, "lensComponent");
-  }
-
-  renderObjectAsValaaScope (object: any) {
-    return React.createElement(ValaaScope, this.childProps("noscope", object, { ...object }),
-        ...arrayFromAny(this.props.children));
+    throw new Error(`Unhandled complex object of type '${
+      (focus.constructor && focus.constructor.name) || "<constructor missing>"}' as UI focus`);
   }
 }
 
+/*
 const getLensByName = asyncConnectToPartitionsIfMissingAndRetry(
   // eslint-disable-next-line
   function getLensByName (focus: ?any, lensProperty?: string | string[]): ?Object {

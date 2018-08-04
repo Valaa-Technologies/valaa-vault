@@ -37,6 +37,10 @@ export function _attachSubscriber (component: UIComponent, subscriberKey: string
   return subscriber;
 }
 
+export function _getSubscriber (component: UIComponent, subscriberKey: string) {
+  return component._attachedSubscribers[subscriberKey];
+}
+
 export function _attachKuerySubscriber (component: UIComponent, subscriberName: string, head: any,
   kuery: any, options: { onUpdate: (update: FieldUpdate) => void, noImmediateRun?: boolean }
 ) {

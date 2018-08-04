@@ -6,8 +6,9 @@ import { OrderedMap } from "immutable";
 import { Kuery } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
+import VALEK, { dumpObject } from "~/engine/VALEK";
 
-import { arrayFromAny, dumpObject, isPromise, isSymbol, wrapError } from "~/tools";
+import { arrayFromAny, isPromise, isSymbol, wrapError } from "~/tools";
 
 import UIComponent, { isUIComponentElement } from "./UIComponent";
 import { uiComponentProps } from "./_propsOps";
@@ -162,14 +163,13 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
           return blocker;
         }
         if (lens.hasInterface("Media")) {
-          const { mediaInfo, mime } = lens.resolveMediaInfo();
-          subLensName = `${mediaInfo.name}:${mime}-${lensName}`;
-          ret = lens.interpretContent({ mediaInfo, mime });
+          ret = _tryRenderMediaLens(component, lens, focus, lensName);
           if (isPromise(ret)) {
             ret.operationInfo = Object.assign(ret.operationInfo || {},
                 { lensRole: "downloadingLens", params: lens });
             return ret;
           }
+          subLensName = `media-${lensName}`;
         } else {
           console.warn("NEW BEHAVIOUR: non-Media Resources as direct lenses are now in effect.",
               "When a Resource is used as a lens, it will be searched for a lens property",
@@ -216,6 +216,21 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
   if (React.isValidElement(ret)) return _wrapElementInLiveProps(component, ret, focus, subLensName);
   if ((ret === undefined) || onlyOnce) return ret;
   return component.renderLens(ret, focus, subLensName);
+}
+
+function _tryRenderMediaLens (component: UIComponent, lens: any, focus: any) {
+  const kueryKey = `UIComponent.media.${lens.getRawId()}`;
+  if (!component.getSubscriber(kueryKey)) {
+    component.attachKuerySubscriber(kueryKey, lens, VALEK.toMediaContentField(), { onUpdate: () => {
+      // detaches the live kuery
+      // this is likely uselessly defensive programming: the whole UIComponent state should refresh
+      // anyway whenever the focus changes.
+      if (component.tryFocus() !== focus) return false;
+      component.forceUpdate();
+      return undefined;
+    } });
+  }
+  return lens.interpretContent({ mimeFallback: "text/vsx" });
 }
 
 export function _wrapElementInLiveProps (component: UIComponent, element: Object, focus: any,

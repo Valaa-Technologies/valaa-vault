@@ -33,7 +33,8 @@ import {
   VSSStyleSheetSymbol,
 } from "./_styleOps";
 import {
-  _finalizeDetachSubscribers, _attachSubscriber, _detachSubscriber, _attachKuerySubscriber
+  _finalizeDetachSubscribers, _attachSubscriber, _getSubscriber, _detachSubscriber,
+  _attachKuerySubscriber
 } from "./_subscriberOps";
 
 export function isUIComponentElement (element: any) {
@@ -419,6 +420,14 @@ export default class UIComponent extends React.Component {
     return _attachSubscriber(this, subscriberKey, subscriber);
   }
 
+  getSubscriber (subscriberKey: string): string {
+    return _getSubscriber(this, subscriberKey);
+  }
+
+  detachSubscriber (subscriberKey: string, options: { require?: boolean } = {}) {
+    return _detachSubscriber(this, subscriberKey, options);
+  }
+
   attachKuerySubscriber (subscriberName: string, head: any, kuery: any, options: {
     onUpdate: (update: FieldUpdate) => void, noImmediateRun?: boolean, // ...rest are VALKOptions
   }) {
@@ -432,10 +441,6 @@ export default class UIComponent extends React.Component {
           "\n\toptions:", ...dumpObject(options),
       );
     }
-  }
-
-  detachSubscriber (subscriberKey: string, options: { require?: boolean } = {}) {
-    return _detachSubscriber(this, subscriberKey, options);
   }
 
   // Overridable callbacks. Remember to call base class implementations with super.

@@ -7,20 +7,7 @@ if (typeof window !== "undefined") window.beaumpify = beaumpify;
 
 export function dumpObject (value) {
   const ret = [];
-  if (value && (typeof value === "object")) {
-    if (typeof value.debugId === "function") ret.push(`'${value.debugId()}'`);
-    else {
-      const denormalized = (typeof value.get === "function") ? value
-          : ((typeof value._singular === "object") && typeof value._singular.get === "function")
-              ? value._singular
-          : null;
-      const name = denormalized && denormalized.get("name");
-      if (name) ret.push(`'${name}'`);
-      const dumpifiable = value._singular ? value
-          : (typeof value.get === "function") && value.get("id");
-      if (dumpifiable) ret.push(String(dumpifiable));
-    }
-  }
+  if ((value != null) && (typeof value.debugId === "function")) ret.push(`'${value.debugId()}'`);
   ret.push(debugObject(value));
   return ret;
 }

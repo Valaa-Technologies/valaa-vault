@@ -6,7 +6,7 @@ import { Valker, denoteValaaBuiltinWithSignature, denoteDeprecatedValaaBuiltin,
 import { VRef, RRef } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/tools/PartitionURI";
 
-import { BuiltinTypePrototype, createNativeIdentifier, ValaaPrimitive } from "~/script";
+import { BuiltinTypePrototype, createNativeIdentifier, ValaaPrimitiveTag } from "~/script";
 
 import VALEK, { extractFunctionVAKON } from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
@@ -28,7 +28,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
     constructor: scope.ResourceStub,
   });
   scope.ResourceStub.hostObjectPrototype = scope.ResourceStub.prototype;
-  scope.ResourceStub.prototype[ValaaPrimitive] = true;
+  scope.ResourceStub.prototype[ValaaPrimitiveTag] = true;
 
   scope.Resource = Valaa.Resource = Object.assign(Object.create(scope.ResourceStub), {
     name: "Resource",
@@ -341,7 +341,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
   });
   scope.Resource.hostObjectPrototype = scope.Resource.prototype;
 
-  scope.Resource.prototype[ValaaPrimitive] = true;
+  scope.Resource.prototype[ValaaPrimitiveTag] = true;
 
   scope.Discoverable = Valaa.Discoverable = Object.assign(Object.create(scope.Resource), {
     name: "Discoverable",

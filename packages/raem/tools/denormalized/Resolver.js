@@ -238,10 +238,13 @@ export default class Resolver extends LogEventGenerator {
     const partitionURI = id.partitionURI();
     if (!partitionURI) return undefined;
     id.setInactive();
+    /*
     this.info("tryBindToInactivePartitionObjectId: bound an id (with partitionURI set) as inactive",
         "id, without checking whether that partition is actually active (which would be an error)",
-        "<details suppressed to enable browser log collapsing>"
-        /* JSON.stringify(id.toJSON()), id */);
+        "<details suppressed to enable browser log collapsing>",
+        // JSON.stringify(id.toJSON()), id,
+    );
+    */
     // FIXME(iridian): This is a quick hack! We need to have active partition resolution logic and
     // object stubbing for referred but otherwise inactive resources.
     return id;

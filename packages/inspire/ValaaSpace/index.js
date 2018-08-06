@@ -3,12 +3,12 @@
 import { denoteValaaBuiltinWithSignature } from "~/raem/VALK";
 
 import globalHTML5BuiltinObjects from "./globalHTML5BuiltinObjects";
-import extendValaa from "./Valaa";
+import extendValaaWithInspire from "./Valaa";
 
-export default function extendValaaSpace (scope: Object, hostObjectDescriptors: any,
+export default function extendValaaSpaceWithInspire (scope: Object, hostObjectDescriptors: any,
     defaultAuthorityConfig?: Object, engine?: Object) {
   Object.assign(scope, globalHTML5BuiltinObjects);
-  extendValaa(scope, hostObjectDescriptors);
+  extendValaaWithInspire(scope, hostObjectDescriptors);
 
   let RemoteAuthorityURI = null;
   let getPartitionIndexEntityCall = function getPartitionIndexEntity () {

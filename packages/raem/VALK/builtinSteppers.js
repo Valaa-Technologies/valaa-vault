@@ -6,11 +6,12 @@ import { VRef, RRef, DRef, BRef, obtainVRef, obtainRRef, obtainDRef, obtainBRef 
     from "~/raem/ValaaReference";
 
 import { elevateFieldRawSequence } from "~/raem/tools/denormalized/FieldInfo";
+import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
+import { PrototypeOfImmaterialTag } from "~/raem/tools/denormalized/Transient";
+
 import Valker from "~/raem/VALK/Valker";
 import Kuery, { dumpObject, dumpKuery, dumpScope } from "~/raem/VALK/Kuery";
 import { isPackedField } from "~/raem/VALK/packedField";
-import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
-import { PrototypeOfImmaterialTag } from "~/raem/tools/denormalized/Transient";
 
 import { dumpify, invariantify, invariantifyObject, invariantifyArray, isPromise, isSymbol,
   outputCollapsedError, wrapError,

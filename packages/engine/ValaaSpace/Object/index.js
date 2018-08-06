@@ -1,7 +1,7 @@
 // @flow
 
 import { PartialRemovesTag } from "~/raem/tools/denormalized/partialSequences";
-import { BuiltinTypePrototype, ValaaPrimitive } from "~/script";
+import { BuiltinTypePrototype, ValaaPrimitiveTag } from "~/script";
 
 import VALEK, { expressionFromValue, expressionFromOperation } from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
@@ -35,7 +35,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
       valaaPrototypeOperation = objectOperation) {
     const ret = function objectDecoratorArg0Dispatcher (...rest) {
       const isValaa0 = (typeof rest[0] === "object") && (rest[0] !== null)
-          && rest[0][ValaaPrimitive];
+          && rest[0][ValaaPrimitiveTag];
       return (!isValaa0 ? objectOperation
               : rest[0] instanceof Vrapper ? valaaOperation
               : BuiltinTypePrototype.isPrototypeOf(rest[0]) ? valaaTypeOperation
@@ -51,9 +51,9 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
       valaaOperation: () => any) {
     const ret = function objectDecoratorArg01Dispatcher (...rest) {
       const isValaa0 = (typeof rest[0] === "object") && (rest[0] !== null)
-          && rest[0][ValaaPrimitive];
+          && rest[0][ValaaPrimitiveTag];
       const isValaa1 = (typeof rest[1] === "object") && (rest[1] !== null)
-          && rest[1][ValaaPrimitive];
+          && rest[1][ValaaPrimitiveTag];
       return (!isValaa0 && !isValaa1 ? objectOperation : valaaOperation).apply(this, rest);
     };
     ret._valkDescription = description;

@@ -18,12 +18,12 @@ import { AuthorityNexus, FalseProphet, Oracle, Prophet, Scribe } from "~/prophet
 
 import ValaaEngine from "~/engine/ValaaEngine";
 import EngineContentAPI from "~/engine/EngineContentAPI";
-import engineExtendValaaSpace from "~/engine/ValaaSpace";
+import extendValaaSpaceWithEngine from "~/engine/ValaaSpace";
 
 import InspireView from "~/inspire/InspireView";
 import { registerVidgets } from "~/inspire/ui";
 import type { Revelation } from "~/inspire/Revelation";
-import inspireExtendValaaSpace from "~/inspire/ValaaSpace";
+import extendValaaSpaceWithInspire from "~/inspire/ValaaSpace";
 
 import { getDatabaseAPI } from "~/tools/indexedDB/getRealDatabaseAPI";
 import { arrayBufferFromBase64 } from "~/tools/base64";
@@ -117,16 +117,16 @@ export default class InspireGateway extends LogEventGenerator {
 
       const rootScope = engine.getRootScope();
       const hostDescriptors = engine.getHostObjectDescriptors();
-      engineExtendValaaSpace(rootScope, hostDescriptors, engine.discourse.getSchema());
+      extendValaaSpaceWithEngine(rootScope, hostDescriptors, engine.discourse.getSchema());
       if (!viewConfig.defaultAuthorityURI) {
-        inspireExtendValaaSpace(rootScope, hostDescriptors);
+        extendValaaSpaceWithInspire(rootScope, hostDescriptors);
       } else {
         // FIXME(iridian): Implement this.schemes - still missing.
         const defaultAuthorityConfig = this.schemes[viewConfig.defaultAuthorityURI];
         invariantify(defaultAuthorityConfig,
             `defaultAuthorityConfig missing when looking for default authority ${
                   String(viewConfig.defaultAuthorityURI)}`);
-        inspireExtendValaaSpace(rootScope, hostDescriptors, defaultAuthorityConfig, engine);
+        extendValaaSpaceWithInspire(rootScope, hostDescriptors, defaultAuthorityConfig, engine);
       }
       rootScope.Valaa.gateway = this;
       ret[viewName] = new InspireView({ engine, name: `${viewConfig.name} View` })

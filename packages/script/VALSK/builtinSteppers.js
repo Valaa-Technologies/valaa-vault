@@ -26,26 +26,26 @@ export default Object.freeze({
   },
   "§$$": function identifierValue (valker: Valker, head: any, scope: ?Object,
       getIdentifierOp: any): any {
-    return getIdentifierOrPropertyValue(valker, head, scope, getIdentifierOp, false);
+    return _getIdentifierOrPropertyValue(valker, head, scope, getIdentifierOp, false);
   },
   "§..": function propertyValue (valker: Valker, head: any, scope: ?Object, getPropertyOp: any) {
-    return getIdentifierOrPropertyValue(valker, head, scope, getPropertyOp, true);
+    return _getIdentifierOrPropertyValue(valker, head, scope, getPropertyOp, true);
   },
   "§$$<-": function alterIdentifier (valker: Valker, head: any, scope: ?Object,
       alterIdentifierOp: any) {
-    return alterIdentifierOrProperty(valker, head, scope, alterIdentifierOp, false);
+    return _alterIdentifierOrPropertyValue(valker, head, scope, alterIdentifierOp, false);
   },
   "§..<-": function alterProperty (valker: Valker, head: any, scope: ?Object,
       alterPropertyOp: any) {
-    return alterIdentifierOrProperty(valker, head, scope, alterPropertyOp, true);
+    return _alterIdentifierOrPropertyValue(valker, head, scope, alterPropertyOp, true);
   },
   "§delete$$": function deleteIdentifier (valker: Valker, head: any, scope: ?Object,
       deletePropertyOp: any) {
-    return deleteIdentifierOrProperty(valker, head, scope, deletePropertyOp, false);
+    return _deleteIdentifierOrProperty(valker, head, scope, deletePropertyOp, false);
   },
   "§delete..": function deleteProperty (valker: Valker, head: any, scope: ?Object,
       deletePropertyOp: any) {
-    return deleteIdentifierOrProperty(valker, head, scope, deletePropertyOp, true);
+    return _deleteIdentifierOrProperty(valker, head, scope, deletePropertyOp, true);
   },
   "§new": function new_ (valker: Valker, head: any, scope: ?Object,
       newOp: any) {
@@ -82,7 +82,7 @@ export default Object.freeze({
     const packedObject = typeof object !== "object" ? object
     // typeof must not fail on a missing global identifier, even if plain identifier access fails.
         : (Array.isArray(object) && (object[0] === "§$$"))
-            ? getIdentifierOrPropertyValue(valker, head, scope, object, false, true)
+            ? _getIdentifierOrPropertyValue(valker, head, scope, object, false, true)
         : tryLiteral(valker, head, object, scope);
     return resolveTypeof(valker, head, scope, typeofStep, packedObject);
   },
@@ -106,12 +106,14 @@ export default Object.freeze({
   },
 });
 
-export const ValaaPrimitive = Symbol("Valaa Primitive");
-export const BuiltinTypePrototype = { [ValaaPrimitive]: true };
+// TODO(iridian): clarify the relationship between raem/VALK/hostValue.HostId and
+// ValaaPrimitiveTag. ValaaPrimitiveTag might be an alias for it.
+export const ValaaPrimitiveTag = Symbol("Valaa Primitive");
+export const BuiltinTypePrototype = { [ValaaPrimitiveTag]: true };
 
-const propertyValueMethodStep = ["§method", "propertyValue"];
+const _propertyValueMethodStep = ["§method", "propertyValue"];
 
-function getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Object,
+function _getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Object,
       [, propertyName, container]: any, isGetProperty: ?boolean,
       allowUndefinedIdentifier: ?boolean): any {
   let eContainer: Object;
@@ -125,8 +127,11 @@ function getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Object
     if (eContainer._sequence) {
       eContainer = valker.tryUnpack(eContainer);
     } else if (isHostHead(eContainer)) {
-      return valker.tryPack(valker._builtinSteppers["§method"](
-          valker, eContainer, scope, propertyValueMethodStep)(ePropertyName));
+      const ret = valker.tryPack(valker._builtinSteppers["§method"](
+          valker, eContainer, scope, _propertyValueMethodStep)(ePropertyName));
+      //console.warn("returning from method", head, eContainer, ePropertyName,
+      //    "\n\tret:", ret);
+      return ret;
     }
     const property = eContainer[ePropertyName];
     if (isGetProperty) return valker.tryPack(property);
@@ -167,9 +172,9 @@ function getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Object
   }
 }
 
-const alterPropertyMethodStep = ["§method", "alterProperty"];
+const _alterPropertyMethodStep = ["§method", "alterProperty"];
 
-function alterIdentifierOrProperty (valker: Valker, head: any, scope: ?Object,
+function _alterIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Object,
       [, propertyName, alterationVAKON, container]: any, isAlterProperty: ?boolean) {
   let eContainer: Object;
   let ePropertyName;
@@ -185,7 +190,7 @@ function alterIdentifierOrProperty (valker: Valker, head: any, scope: ?Object,
     if (isHostHead(eContainer)) {
       if (!eContainer._sequence) {
         return valker.tryPack(valker._builtinSteppers["§method"](
-            valker, eContainer, scope, alterPropertyMethodStep)(ePropertyName, eAlterationVAKON));
+            valker, eContainer, scope, _alterPropertyMethodStep)(ePropertyName, eAlterationVAKON));
       }
       // TODO(iridian): Implement host sequence entry manipulation.
       throw new Error(`Modifying host sequence entries via index assignment not implemented yet`);
@@ -242,9 +247,9 @@ function alterIdentifierOrProperty (valker: Valker, head: any, scope: ?Object,
   }
 }
 
-const deletePropertyMethodStep = ["§method", "deleteProperty"];
+const _deletePropertyMethodStep = ["§method", "deleteProperty"];
 
-function deleteIdentifierOrProperty (valker: Valker, head: any, scope: ?Object,
+function _deleteIdentifierOrProperty (valker: Valker, head: any, scope: ?Object,
       [, propertyName, container]: any, isPropertyNotIdentifier: ?boolean) {
   let eContainer: Object;
   let ePropertyName;
@@ -260,7 +265,7 @@ function deleteIdentifierOrProperty (valker: Valker, head: any, scope: ?Object,
         throw new Error(`Deleting host sequence entries via index not implemented yet`);
       }
       return valker._builtinSteppers["§method"](
-          valker, eContainer, scope, deletePropertyMethodStep)(ePropertyName);
+          valker, eContainer, scope, _deletePropertyMethodStep)(ePropertyName);
     }
     if (isPropertyNotIdentifier) {
       if (delete eContainer[ePropertyName]) return true;

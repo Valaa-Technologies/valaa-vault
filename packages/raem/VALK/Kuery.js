@@ -1703,7 +1703,24 @@ function toRawVAKON (kueryOrPrimitive: any): any {
   }
 }
 
-export const dumpObject = _dumpObject;
+export function dumpObject (value) {
+  const ret = _dumpObject(value);
+  if (ret.length === 2) return ret;
+  if ((value != null) && (typeof value === "object")) {
+    const denormalized = (typeof value.get === "function") ? value
+        : ((typeof value._singular === "object") && typeof value._singular.get === "function")
+            ? value._singular
+        : null;
+    const name = denormalized && denormalized.get("name");
+    if (name) ret.unshift(`'${name}'`);
+    const dumpifiable = value._singular ? value
+        : (typeof value.get === "function") && value.get("id");
+    if (dumpifiable) ret.unshift(String(dumpifiable));
+    return ret;
+  }
+  return ret;
+}
+
 
 export function dumpScope (scope) {
   return scope && (inBrowser() ? scope : `scope hidden with ${Object.keys(scope).length} keys`);

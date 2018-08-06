@@ -24,7 +24,7 @@ import { getObjectRawField } from "~/raem/tools/denormalized/getObjectField";
 
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 
-import { ValaaPrimitive } from "~/script";
+import { ValaaPrimitiveTag } from "~/script";
 
 import { Discourse, Transaction, PartitionConnection, Prophecy } from "~/prophet";
 import { createModuleGlobal } from "~/tools/mediaDecoders/JavaScriptDecoder";
@@ -232,7 +232,6 @@ export default class Vrapper extends Cog {
                 } because it is ${blocker.getPhase()}`);
           }
           if (!blocker._partitionConnection) {
-            console.log("reading activationProcess:", activationProcess);
             await (operationInfo.pendingConnection = blocker.getPartitionConnection());
           }
         }
@@ -1793,7 +1792,7 @@ export default class Vrapper extends Cog {
   }
 }
 
-Vrapper.prototype[ValaaPrimitive] = true;
+Vrapper.prototype[ValaaPrimitiveTag] = true;
 
 let vrapperEventHandlers;
 

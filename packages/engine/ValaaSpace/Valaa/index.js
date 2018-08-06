@@ -1,6 +1,6 @@
 // @flow
 
-import { ValaaPrimitive } from "~/script";
+import { ValaaPrimitiveTag } from "~/script";
 import { toVAKON } from "~/script/VALSK";
 
 import { beaumpify } from "~/tools";
@@ -15,7 +15,7 @@ export default function extendValaa (scope: any, hostObjectDescriptors: any, sch
   const Valaa = Object.assign(scope.Valaa || (scope.Valaa = {}), {
     beautify: beaumpify,
     toVAKON,
-    Primitive: ValaaPrimitive,
+    Primitive: ValaaPrimitiveTag,
     Lens: null,
   });
   injectSchemaTypeBindings(Valaa, scope);

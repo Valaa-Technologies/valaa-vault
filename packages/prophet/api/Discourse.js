@@ -21,15 +21,15 @@ export default class Discourse extends Valker {
   }
 
   /**
-   * kuery - Run given kuery starting from given head. See @valos/raem/VALK
+   * run - Run given kuery starting from given head. See @valos/raem/VALK
    *
    * @param  {type} kuery           description
    * @param  {type} state           description
    * @returns {type}                description
    */
-  run (head, kuery, options): any {
-    return super.run(head, kuery, options);
-  }
+  // run (head, kuery, options): any {
+  //  return super.run(head, kuery, options);
+  // }
 
   /**
    * transaction - Creates a transaction object for grouping resource manipulations together.

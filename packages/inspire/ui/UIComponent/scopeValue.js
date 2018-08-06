@@ -17,7 +17,7 @@ export function setScopeValue (scope: Object, name: string | Symbol, value: any)
 }
 
 export function clearScopeValue (scope: Object, name: string | Symbol) {
-  if (!scope.hasOwnProperty(name)) return false;
+  if (!scope || !scope.hasOwnProperty(name)) return false;
   delete scope[name];
   return true;
 }

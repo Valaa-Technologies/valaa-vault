@@ -29,5 +29,5 @@ export {
 } from "./denormalized/nativeIdentifier";
 export {
                                       BuiltinTypePrototype,
-                                      ValaaPrimitive,
+                                      ValaaPrimitiveTag,
 } from "./VALSK/builtinSteppers";

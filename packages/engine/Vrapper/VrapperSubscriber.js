@@ -1,9 +1,10 @@
 // @flow
 
 import type { VALKOptions } from "~/raem/VALK";
+import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
+
 import { VRef } from "~/raem/ValaaReference";
 import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
-import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 
 import { isNativeIdentifier, getNativeIdentifierValue } from "~/script";
 

@@ -110,20 +110,10 @@ export default class ValaaScope extends UIComponent {
   }
 
   renderLoaded (focus: any) {
-    if ((typeof focus !== "object") || React.isValidElement(focus)) {
-      return this.renderLens(focus, null, "focus");
-    }
-
     if (Array.isArray(focus)) {
       return this.renderFocusAsSequence(focus, this.props.forEach, ValaaScope);
     }
-
-    if (Object.getPrototypeOf(focus) === Object.prototype) {
-      return this.renderObjectAsValaaScope(focus);
-    }
-
-    throw new Error(`Unhandled complex object of type '${
-      (focus.constructor && focus.constructor.name) || "<constructor missing>"}' as UI focus`);
+    return this.renderLens(focus, null, "focus");
   }
 }
 

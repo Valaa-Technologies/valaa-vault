@@ -2,10 +2,11 @@
 
 import React from "react";
 
-import { denoteValaaBuiltinWithSignature, dumpObject } from "~/raem/VALK";
+import { denoteValaaBuiltinWithSignature } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
+import VALEK, { dumpObject } from "~/engine/VALEK";
 
 import UIComponent from "~/inspire/ui/UIComponent";
 
@@ -151,6 +152,15 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       () => (focus: any) => debugId(focus),
   );
 
+  createLensRoleSymbol("focusStringifyLens",
+      "Lens",
+      `Lens role for viewing a stringifed dump of the focus.
+
+      @param {any} focus  the focus to dump.`,
+      true,
+      () => (focus: any) => JSON.stringify(focus, null, 2),
+  );
+
   createLensRoleSymbol("focusPropertyKeysLens",
       "Lens",
       `Lens role for viewing the list of property keys of the focus.
@@ -219,6 +229,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       @param {string|Error|Object} focus  the focus of the component`,
       true,
       () => ({ delegate: [
+        Valaa.Lens.firstAbleDelegateLens,
         Valaa.Lens.disabledLens,
         Valaa.Lens.undefinedLens,
         Valaa.Lens.loadedLens,
@@ -345,6 +356,11 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         @param {Object} focus  the Resource to search the lens from.`,
         (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
         () => function retrievePropertyLensFromFocus (focus: any, component: UIComponent) {
+          if (component.props.lensName) {
+            console.error("DEPRECATED: props.lensName\n\tprefer: props.lensProperty",
+                "\n\tlensName:", JSON.stringify(component.props.lensName),
+                "\n\tin component:", component.debugId(), component);
+          }
           const lensPropertyNames = [].concat(
           component.props[lensPropertyRoleName]
               || component.getUIContextValue(roleSymbol)
@@ -358,6 +374,12 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
           for (const propertyName of lensPropertyNames) {
             if (focusLexicalScope.hasOwnProperty(propertyName)) {
               return focusLexicalScope[propertyName].extractValue();
+            } else {
+              const vProperty = focus.get(VALEK.property(propertyName));
+              if (vProperty) {
+                return vProperty.get(VALEK.toValueTarget({ optional: true })
+                    .or(VALEK.toValueLiteral({ optional: true })));
+              }
             }
           }
           console.error("can't find resource lens props:", lensPropertyRoleName, roleSymbol,

@@ -1,4 +1,5 @@
 // @flow
+import PropTypes from "prop-types";
 import React from "react";
 import AceEditor from "react-ace";
 import brace from "brace"; // eslint-disable-line
@@ -23,6 +24,12 @@ import { beaumpify } from "~/tools";
 
 @Presentable(require("./presentation").default, "TextFileEditor")
 export default class TextFileEditor extends MediaContentEditor {
+
+  static propTypes = {
+    ...MediaContentEditor.propTypes,
+    confirmSave: PropTypes.func,
+  };
+
   preRenderFocus () {
     return (
       <div
@@ -86,11 +93,20 @@ export default class TextFileEditor extends MediaContentEditor {
   }
 
   saveContent = async (text: string) => {
-    if (this.state.content === text) return;
-    const transaction = this.getFocus().acquireTransaction();
-    const createBlob = await this.getFocus().prepareBlob(text, { transaction });
-    this.getFocus().setField("content", createBlob(), { transaction });
-    transaction.releaseTransaction();
+    const target = this.getFocus();
+    if (!target) throw new Error(`TextfileEditor.saveContent called with '${typeof target}' focus`);
+    const transaction = target.acquireTransaction();
+    try {
+      if ((this.props.confirmSave && !this.props.confirmSave(text, (this.state || {}).content))
+          || (this.state.content === text)) {
+        return;
+      }
+      const createBlob = await target.prepareBlob(text, { transaction });
+      target.setField("content", createBlob(), { transaction });
+      transaction.releaseTransaction();
+    } finally {
+      if (transaction.isCommittable()) transaction.abort();
+    }
   }
 
   getEditorMode () {

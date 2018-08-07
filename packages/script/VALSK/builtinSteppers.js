@@ -129,8 +129,6 @@ function _getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Objec
     } else if (isHostRef(eContainer)) {
       const ret = valker.tryPack(valker._builtinSteppers["§method"](
           valker, eContainer, scope, _propertyValueMethodStep)(ePropertyName));
-      //console.warn("returning from method", head, eContainer, ePropertyName,
-      //    "\n\tret:", ret);
       return ret;
     }
     const property = eContainer[ePropertyName];

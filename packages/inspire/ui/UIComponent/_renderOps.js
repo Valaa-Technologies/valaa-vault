@@ -6,7 +6,7 @@ import { OrderedMap } from "immutable";
 import { Kuery } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
-import VALEK, { dumpObject } from "~/engine/VALEK";
+import VALEK from "~/engine/VALEK";
 
 import { arrayFromAny, isPromise, isSymbol, wrapError } from "~/tools";
 

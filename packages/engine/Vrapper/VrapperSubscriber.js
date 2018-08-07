@@ -633,7 +633,7 @@ function liveCall (subscriber: VrapperSubscriber, head: any, kueryVAKON: Array<a
         `trying to call a non-function value of type '${typeof eCallee}'`,
         `\n\tfunction wannabe value:`, eCallee);
   }
-  const eThis = (typeof kueryVAKON[2] === "undefined")
+  let eThis = (typeof kueryVAKON[2] === "undefined")
       ? scope
       : subscriber._processLiteral(head, kueryVAKON[2], scope, true);
   const eArgs = [];

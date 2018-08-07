@@ -33,13 +33,13 @@ import { dumpObject } from "~/tools";
  *
  * @memberof ValaaEngine
  */
-export default function integrateDecoding (decoding: any, vScope: Vrapper,
+export default function integrateDecoding (decodedContent: any, vScope: Vrapper,
     mediaInfo: MediaInfo, options: VALKOptions) {
-  return (typeof decoding === "function")
-      ? _integrateNative(decoding, vScope, mediaInfo, options)
-      : (decoding instanceof Kuery)
-      ? _integrateKuery(decoding, vScope, mediaInfo, options)
-      : decoding;
+  return (typeof decodedContent === "function")
+      ? _integrateNative(decodedContent, vScope, mediaInfo, options)
+      : (decodedContent instanceof Kuery)
+      ? _integrateKuery(decodedContent, vScope, mediaInfo, options)
+      : decodedContent;
 }
 
 function _integrateNative (native: Function, vScope: Vrapper, mediaInfo: MediaInfo,

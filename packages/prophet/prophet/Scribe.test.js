@@ -116,11 +116,12 @@ describe("Scribe", () => {
 
     const connection = await scribe.acquirePartitionConnection(uri, {});
 
-    for (const [bufferContent, mediaInfo, expectedDecoding] of structuredMediaContents) {
+    for (const [bufferContent, mediaInfo, expectedContent] of structuredMediaContents) {
       const preparedBlob = connection.prepareBlob(bufferContent);
       const blobId = await preparedBlob.persistProcess;
-      const decoding = await connection.decodeMediaContent(undefined, { blobId, ...mediaInfo });
-      expect(decoding).toEqual(expectedDecoding);
+      const decodedContent =
+          await connection.decodeMediaContent(undefined, { blobId, ...mediaInfo });
+      expect(decodedContent).toEqual(expectedContent);
     }
   });
 

@@ -224,7 +224,7 @@ export default class Vrapper extends Cog {
     if (this._activationProcess) return this._activationProcess;
     this._phase = ACTIVATING;
     const operationInfo = { pendingConnection: null };
-    const activationProcess = this._activationProcess = (async () => {
+    this._activationProcess = (async () => {
       let blocker;
       try {
         for (blocker = initialBlocker; blocker; blocker = this._refreshPhaseOrGetBlocker()) {
@@ -1135,29 +1135,31 @@ export default class Vrapper extends Cog {
         }
       }
       if (!mediaInfo) ({ mediaInfo, mime } = this.resolveMediaInfo(Object.create(options)));
-      let decoding = options.decoding;
-      if (typeof decoding === "undefined") {
-        decoding = this._withPartitionConnectionChainEagerly(Object.create(options),
+      let decodedContent = options.decodedContent;
+      if (typeof decodedContent === "undefined") {
+        decodedContent = this._withPartitionConnectionChainEagerly(Object.create(options),
             connection => connection.decodeMediaContent(this.getId(options), mediaInfo));
-        if ((options.immediate === true) && isPromise(decoding)) {
+        if ((options.immediate === true) && isPromise(decodedContent)) {
           throw new Error(`Media interpretation not immediately available for '${
               (mediaInfo && mediaInfo.name) || "<unnamed>"}'`);
         }
-        if ((options.immediate === false) || isPromise(decoding)) {
+        if ((options.immediate === false) || isPromise(decodedContent)) {
           return (async () => {
-            options.decoding = await decoding;
+            options.decodedContent = await decodedContent;
             options.immediate = true;
             return this._obtainMediaInterpretation(options, vExplicitOwner, activeTypeName);
           })();
         }
-        // else: decoding is immediately available and immediate !== false. Proceed to integration.
+        // else: decodedContent is immediately available and immediate !== false.
+        // Proceed to integration.
       }
       let vScope = vExplicitOwner || this.get("owner", Object.create(options));
       while (vScope && !vScope.hasInterface("Scope")) {
         vScope = vScope.get("owner", Object.create(options));
       }
       if (!vScope) vScope = this;
-      const interpretation = this.engine._integrateDecoding(decoding, vScope, mediaInfo, options);
+      const interpretation = this.engine._integrateDecoding(decodedContent, vScope, mediaInfo,
+          options);
       if (!interpretationsByMime) {
         this._mediaInterpretations
             .set(mostMaterializedTransient, interpretationsByMime = {});
@@ -1291,7 +1293,7 @@ export default class Vrapper extends Cog {
 
   /**
    * Eagerly returns an interpretation of this Media with optionally provided media type. Returns
-   * a fully integrated decoding associated with this resource and the provided media type.
+   * a fully integrated decoded content associated with this resource and the provided media type.
    *
    * If the interpretation is not immediately available or if the partition of the Media is not
    * acquired, returns a promise for acquiring the partition and performing this operation instead.

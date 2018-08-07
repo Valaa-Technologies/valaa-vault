@@ -1,14 +1,13 @@
 // @flow
 
 import { Valker, BuiltinStep } from "~/raem/VALK";
-import { HostRef, UnpackedHostValue, tryUnpackedHostValue } from "~/raem/VALK/hostReference";
+import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
 
 import { tryLiteral, /* tryFullLiteral,*/ tryUnpackLiteral }
     from "~/raem/VALK/builtinSteppers";
 
 import valaaScriptBuiltinSteppers from "~/script/VALSK/builtinSteppers";
 
-import Vrapper from "~/engine/Vrapper";
 import getImplicitCallable from "~/engine/Vrapper/getImplicitCallable";
 
 // import { createNativeIdentifier } from "~/script/denormalized/nativeIdentifier";

@@ -1,5 +1,4 @@
 // @flow
-import React from "react";
 import PropTypes from "prop-types";
 
 import UIComponent from "~/inspire/ui/UIComponent";

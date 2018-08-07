@@ -496,7 +496,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
         `returns an array which contains all outgoing (connected or not) *Relation* resources${
             ""} which have the given *name* as their *Describable.name*${
             ""} and which satisfy all constraints of the optionally given *additionalConditions*.${
-            ""} Incoming relations are listed in *Relatable.relations*${
+            ""} Outgoing relations are listed in *Relatable.relations*${
             ""} and they all have *this* *Relatable* as their *Relation.source*.${
             ""} Note: all matching relations are selected, even those in unconnected partitions.`
     )(function getRelations (name, ...additionalConditions) {

@@ -34,7 +34,7 @@ export function createHostNamespace (name: string) {
 
     _addProxyPrototypeFieldShortcut (fieldName: string, fieldSymbol: Symbol) {
       this._namespaceFields[fieldName] = fieldSymbol;
-      Object.defineProperty(this, fieldName, { get: function () {
+      Object.defineProperty(this, fieldName, { get () {
         throw new Error("host namespace prototype field access unimplemented in non-VALK contexts");
         /*
         const hostField = this[symbol];

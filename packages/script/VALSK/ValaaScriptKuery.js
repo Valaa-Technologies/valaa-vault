@@ -22,10 +22,13 @@ export default class ValaaScriptKuery extends Kuery {
   }
 
   hasName (name: any, ...additionalConditions: Kuery[]) {
-    const ret = this._root.to("name").equalTo(name);
-    return !additionalConditions.length
-        ? ret
-        : ret.and(...additionalConditions);
+    const ret = (name !== undefined)
+        ? this._root.to("name").equalTo(name)
+        : this._root;
+    return additionalConditions.length
+        ? ret.and(...additionalConditions)
+        : ret.isActiveKuery() ? ret
+        : ret.fromValue(true);
   }
 
   // Property value helpers

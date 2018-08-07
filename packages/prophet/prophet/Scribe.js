@@ -177,12 +177,12 @@ export default class Scribe extends Prophet {
       (buffer) => (typeof buffer === "undefined"
           ? undefined
           : decoder.decode(buffer, contextInfo)),
-      (decoding) => {
-        if (typeof decoding !== "undefined") {
+      (decodedContent) => {
+        if (typeof decodedContent !== "undefined") {
           if (!blobInfo.decodings) blobInfo.decodings = new WeakMap();
-          blobInfo.decodings.set(decoder, decoding);
+          blobInfo.decodings.set(decoder, decodedContent);
         }
-        return decoding;
+        return decodedContent;
       },
     ], error => this.wrapErrorEvent(error, `decodeBlobContent(${blobId}, ${
             decoder.getName()})`,

@@ -73,6 +73,7 @@ module.exports = {
     "object-property-newline": 0,
     "one-var": 0, // 'let foo, bar, baz;' for pre-declaring variables outside try-blocks so that they are available for debug output in catch-blocks
     "one-var-declaration-per-line": 0, // same as above
+    "prefer-arrow-callback": 0, // arrow functions don't have names which are useful with vdocorator
 
     "import/extensions": 0,
     "import/no-dynamic-require": 0, // Too many infrastructure tools use dynamic requires to warrant putting selective disables aroudn

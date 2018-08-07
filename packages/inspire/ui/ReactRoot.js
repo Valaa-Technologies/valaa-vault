@@ -122,7 +122,7 @@ export default class ReactRoot extends React.Component {
       const users = this._vssSheetUsers.get(sheet);
       if (users.indexOf(user) > -1) {
         this._vssSheetManager.unmanage(sheetId);
-        this._vssSheetUsers.set([...users.filter(u => u !== user)]);
+        this._vssSheetUsers.set(sheet, [...users.filter(u => u !== user)]);
       }
     }
   }

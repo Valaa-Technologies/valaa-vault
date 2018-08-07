@@ -10,7 +10,7 @@ import VALEK, { dumpObject } from "~/engine/VALEK";
 
 import UIComponent from "~/inspire/ui/UIComponent";
 
-import { messageFromError, wrapError } from "~/tools";
+import { arrayFromAny, messageFromError, wrapError } from "~/tools";
 
 export default function injectLensObjects (Valaa: Object, rootScope: Object,
     hostObjectDescriptors: Object) {
@@ -100,7 +100,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       "any[]",
       `Lens role for viewing the child elements of the parent
       component.`,
-      true,
+      (u: any, component: UIComponent) => arrayFromAny(component.props.children).length,
       () => (u: any, component: UIComponent) => component.props.children
   );
 
@@ -217,6 +217,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.undefinedLens,
         Valaa.Lens.lens,
         Valaa.Lens.nullLens,
+        Valaa.Lens.childrenLens,
         Valaa.Lens.resourceLens,
         Valaa.Lens.loadedLens,
       ] }),

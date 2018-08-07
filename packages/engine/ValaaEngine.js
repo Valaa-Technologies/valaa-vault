@@ -8,6 +8,7 @@ import Command, { created, duplicated, recombined, isCreatedLike } from "~/raem/
 
 import { VRef, vRef, IdData, obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/tools/PartitionURI";
+import { tryHostRef } from "~/raem/VALK/hostReference";
 
 import Transient, { createTransient, getTransientTypeName }
     from "~/raem/tools/denormalized/Transient";
@@ -53,13 +54,10 @@ export default class ValaaEngine extends Cog {
       return value;
     }
     ret.setHostValueUnpacker((value, valker) => {
-      const transient = Iterable.isKeyed(value) ? value : undefined;
-      const id = (typeof transient !== "undefined") ? transient.get("id")
-          : value instanceof VRef ? value
-          : undefined;
+      const id = tryHostRef(value);
       // FIXME: obtain vrapper for data objects? VRef/DRef/BRef can be used for this.
       if (!id) return Iterable.isIterable(value) ? value.toJS() : value;
-      return this.getVrapper(id, { state: valker.getState() }, transient);
+      return this.getVrapper(id, { state: valker.getState() }, Iterable.isKeyed(value) && value);
     });
     ret.setBuiltinSteppers(engineBuiltinSteppers);
     return ret;

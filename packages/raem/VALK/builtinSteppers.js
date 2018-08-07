@@ -353,9 +353,7 @@ export default Object.freeze({
   },
   "§coupling": function coupling (valker: Valker, head: any, scope: ?Object,
       [, operand]: BuiltinStep) {
-    const eOperand = tryLiteral(valker, head, operand, scope);
-    if (eOperand instanceof VRef) return eOperand.getCoupledField();
-    const hostRef = tryHostRef(eOperand);
+    const hostRef = tryHostRef(tryLiteral(valker, head, operand, scope));
     return hostRef && hostRef.getCoupledField();
   },
   "§isghost": function isghost (valker: Valker, head: any, scope: ?Object,
@@ -404,16 +402,20 @@ export default Object.freeze({
       [, left, right]: BuiltinStep) {
     const eLeft = (typeof left !== "object") ? left : tryUnpackLiteral(valker, head, left, scope);
     const eRight = typeof right !== "object" ? right : tryUnpackLiteral(valker, head, right, scope);
-    if (eLeft instanceof VRef) return eLeft.equals(eRight);
-    if (eRight instanceof VRef) return eRight.equals(eLeft);
+    const eLeftRef = tryHostRef(eLeft);
+    if (eLeftRef) return eLeftRef.equals(eRight);
+    const eRightRef = tryHostRef(eRight);
+    if (eRightRef) return eRightRef.equals(eLeft);
     return eLeft == eRight; // eslint-disable-line
   },
   "§!=": function looseNotEqualTo (valker: Valker, head: any, scope: ?Object,
       [, left, right]: BuiltinStep) {
     const eLeft = (typeof left !== "object") ? left : tryUnpackLiteral(valker, head, left, scope);
     const eRight = typeof right !== "object" ? right : tryUnpackLiteral(valker, head, right, scope);
-    if (eLeft instanceof VRef) return !eLeft.equals(eRight);
-    if (eRight instanceof VRef) return !eRight.equals(eLeft);
+    const eLeftRef = tryHostRef(eLeft);
+    if (eLeftRef) return !eLeftRef.equals(eRight);
+    const eRightRef = tryHostRef(eRight);
+    if (eRightRef) return !eRightRef.equals(eLeft);
     return eLeft != eRight; // eslint-disable-line
   },
   "§===": function equalTo (valker: Valker, head: any, scope: ?Object,

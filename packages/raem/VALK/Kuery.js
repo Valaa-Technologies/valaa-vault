@@ -5,7 +5,7 @@ import dumpify from "~/tools/dumpify";
 import invariantify, { invariantifyArray, invariantifyNumber, invariantifyString,
     invariantifyObject } from "~/tools/invariantify";
 import wrapError, { inBrowser, dumpObject as _dumpObject } from "~/tools/wrapError";
-import { isHostRef } from "./hostReference";
+import { isHostRef, tryHostRef } from "./hostReference";
 
 /**
  * VALK - VAlaa Language for Kuerying
@@ -260,8 +260,9 @@ export default class Kuery {
    * @returns {Kuery}
    */
   fromValue (value: any, headType: ?string): Kuery {
+    const hostRef = tryHostRef(value);
     return this._addRawVAKON(
-            (value instanceof VRef) ? [value instanceof DRef ? "§DRef" : "§VRef", value.toJSON()]
+        hostRef ? [`§${hostRef.shortTypeof()}`, hostRef.toJSON()]
             : (typeof value === "undefined") ? this._root.void()
             : ["§'", value],
         headType);
@@ -279,14 +280,12 @@ export default class Kuery {
    * @returns {Kuery}
    */
   fromObject (object: any, headType: ?string) {
-    const valaaReference = (object instanceof VRef) ? object
     // TODO(iridian): Add handling for dRef
-        : (typeof object === "string") ? vRef(object)
-        : undefined;
-    if (!valaaReference && (object !== null)) {
+    const ref = tryHostRef(object) || ((typeof object === "string") ? vRef(object) : undefined);
+    if (!ref && (object !== null)) {
       throw new Error(`VALK.fromObject.object is not a valid object reference, got: ${object}`);
     }
-    return this.fromValue(valaaReference, headType);
+    return this.fromValue(ref, headType);
   }
 
   refer (target: any, headType: ?string) {

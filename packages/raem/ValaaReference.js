@@ -6,7 +6,7 @@ import GhostPath, { JSONGhostPath, ghostPathFromJSON }
 import { PartitionURI, createValaaURI, createPartitionURI, getPartitionRawIdFrom }
     from "~/raem/tools/PartitionURI";
 
-import { HostRef, PackedHostValue } from "~/raem/VALK/hostReference";
+import { HostRef, PackedHostValue, tryHostRef } from "~/raem/VALK/hostReference";
 
 import dumpify from "~/tools/dumpify";
 import wrapError, { dumpObject } from "~/tools/wrapError";
@@ -178,12 +178,14 @@ export default class ValaaReference {
   }
 
   equals (other: any): boolean {
-    const ret = (this === other)
-        || ((this.rawId() === getRawIdFrom(other))
-            && (other instanceof VRef
-                ? this.getCoupledField() === other.getCoupledField()
-                : !this.getCoupledField()));
-    return ret;
+    const otherRef = tryHostRef(other);
+    if (this === otherRef) return true;
+    if (otherRef) {
+      return this.rawId() === otherRef.rawId()
+          && (this.getCoupledField() === otherRef.getCoupledField());
+    }
+    return (this.rawId() === getRawIdFrom(other))
+          && (this.getCoupledField() === tryCoupledFieldFrom(other));
   }
   hashCode (): number {
     if (this._hashCode) return this._hashCode;

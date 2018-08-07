@@ -4,6 +4,7 @@ import { GraphQLSchema } from "graphql/type";
 import { VRef, invariantifyId, obtainVRef, tryCoupledFieldFrom, expandIdDataFrom }
     from "~/raem/ValaaReference";
 import type { JSONIdData, IdData, RawId } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import { tryHostRef } from "~/raem/VALK/hostReference";
 import GhostPath from "~/raem/tools/denormalized/GhostPath";
 import Transient, { createImmaterialTransient, createInactiveTransient }
     from "~/raem/tools/denormalized/Transient";
@@ -90,7 +91,7 @@ export default class Resolver extends LogEventGenerator {
    */
   bindObjectId (id: VRef | JSONIdData, typeName: string = "Resource",
       bindPartition?: boolean): VRef {
-    const idVRef = id instanceof VRef ? id : obtainVRef(id);
+    const idVRef = tryHostRef(id) || obtainVRef(id);
     const rawId = idVRef.rawId();
     try {
       let object = this.state.getIn([typeName, rawId]);
@@ -234,10 +235,11 @@ export default class Resolver extends LogEventGenerator {
   tryBindToInactivePartitionObjectId (id: IdData) {
     // TODO(iridian): This function should make sure that the id refers to an _inactive_ partition.
     // if the id is part of an active partition but still missing from corpus, that's a violation.
-    if (!id || !(id instanceof VRef)) return undefined;
-    const partitionURI = id.partitionURI();
+    const ref = tryHostRef(id);
+    if (!ref) return undefined;
+    const partitionURI = ref.partitionURI();
     if (!partitionURI) return undefined;
-    id.setInactive();
+    ref.setInactive();
     /*
     this.info("tryBindToInactivePartitionObjectId: bound an id (with partitionURI set) as inactive",
         "id, without checking whether that partition is actually active (which would be an error)",

@@ -3,6 +3,7 @@ import URL from "url-parse";
 import { VRef } from "~/raem/ValaaReference";
 
 import Bard, { getActionFromPassage } from "~/raem/redux/Bard";
+import { tryHostRef } from "~/raem/VALK/hostReference";
 import { PartitionURI, createPartitionURI, getPartitionAuthorityURIStringFrom,
     getPartitionRawIdFrom } from "~/raem/tools/PartitionURI";
 import Resolver from "~/raem/tools/denormalized/Resolver";
@@ -88,9 +89,10 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
   let partitionURI;
   let partitions;
   try {
-    if (!bard.story.isBeingUniversalized || !(id instanceof VRef)) return undefined;
-    if (id.isInactive()) throw new Error("Cannot modify an inactive resource");
-    let smallestNonGhostId = id;
+    const ref = tryHostRef(id);
+    if (!bard.story.isBeingUniversalized || !ref) return undefined;
+    if (ref.isInactive()) throw new Error("Cannot modify an inactive resource");
+    let smallestNonGhostId = ref;
     partitionURI = smallestNonGhostId.partitionURI();
     if (!partitionURI && smallestNonGhostId.isGhost()) {
       const hostRawId = smallestNonGhostId.getGhostPath().headHostRawId();

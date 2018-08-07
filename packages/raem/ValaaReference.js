@@ -6,19 +6,19 @@ import GhostPath, { JSONGhostPath, ghostPathFromJSON }
 import { PartitionURI, createValaaURI, createPartitionURI, getPartitionRawIdFrom }
     from "~/raem/tools/PartitionURI";
 
+import { HostRef, PackedHostValue } from "~/raem/VALK/hostReference";
+
 import dumpify from "~/tools/dumpify";
 import wrapError, { dumpObject } from "~/tools/wrapError";
 import invariantify, { invariantifyString, invariantifyObject } from "~/tools/invariantify";
-import vdoc from "~/tools/vdoc";
+import vdocorate from "~/tools/vdoc";
 
 export type RawId = string;
 
-const VRefValueOf = Symbol("VRef.valueOf");
-
-@vdoc([
+@vdocorate([
   `ValaaReference is a value data object which contains all necessary
   runtime information to reference a valaa object, possibly as part of
-  a coupling.`,
+  a coupling. It is the HostRef for VALK.`,
   { fields: {
     rawId: `an id string which identifies the target`,
     ghostPath: `a GhostPath object which specifies the ghost
@@ -58,49 +58,59 @@ const VRefValueOf = Symbol("VRef.valueOf");
  * @class VRef
  */
 export default class ValaaReference {
-  _vref: [RawId, ?string, ?GhostPath];
+  // [PackedHostValue]: [RawId, ?string, ?GhostPath];
 
   _isInactive: ?boolean;
   _partitionURI: ?PartitionURI;
   _mostInheritedMaterializedTransient: Object;
 
   constructor (vref: [RawId, ?string, ?GhostPath], partitionURI: ?PartitionURI) {
-    this._vref = vref;
+    this[PackedHostValue] = vref;
     if (partitionURI) this.setPartitionURI(partitionURI);
-    if (this._vref[2]) this.connectGhostPath(this._vref[2]);
+    if (this[PackedHostValue][2]) this.connectGhostPath(this[PackedHostValue][2]);
   }
 
   debugId (): string { return this.toString(); }
 
-  rawId (): RawId { return this._vref[0]; }
+  rawId (): RawId { return this[PackedHostValue][0]; }
 
   typeof (): string { return "Resource"; }
+  shortTypeof (): string { return "VRef"; }
 
-  getCoupledField (): ?string { return this._vref[1]; }
+  getCoupledField (): ?string { return this[PackedHostValue][1]; }
 
   coupleWith (coupledField: string, partitionURI: PartitionURI = this._partitionURI): VRef {
     if (typeof coupledField === "undefined") return this;
-    return new this.constructor([this._vref[0], coupledField, this._vref[2]], partitionURI);
+    return new this.constructor([this[PackedHostValue][0], coupledField, this[PackedHostValue][2]],
+        partitionURI);
   }
 
   getGhostPath (): GhostPath {
-    return this._vref[2] || (this._vref[2] = new GhostPath(this.rawId()));
+    return this[PackedHostValue][2] || (this[PackedHostValue][2] = new GhostPath(this.rawId()));
   }
-  tryGhostPath (): ?GhostPath { return this._vref[2]; }
+  tryGhostPath (): ?GhostPath { return this[PackedHostValue][2]; }
 
   connectGhostPath (connectedGhostPath: GhostPath) {
-    if (this._vref[0] !== connectedGhostPath.headRawId()) {
+    if (this[PackedHostValue][0] !== connectedGhostPath.headRawId()) {
       throw new Error(`Inconsistent ValaaReference: this.rawId !== connectedGhostPath.headRawId, ${
-          ""} with rawId: '${this._vref[0]}' and ghostPath.headRawId: '${
+          ""} with rawId: '${this[PackedHostValue][0]}' and ghostPath.headRawId: '${
           connectedGhostPath.headRawId()}'`);
     }
-    this._vref[2] = connectedGhostPath;
+    this[PackedHostValue][2] = connectedGhostPath;
   }
-  previousGhostStep (): ?GhostPath { return this._vref[2] && this._vref[2].previousStep(); }
+  previousGhostStep (): ?GhostPath {
+    return this[PackedHostValue][2] && this[PackedHostValue][2].previousStep();
+  }
 
-  isInherited (): ?boolean { return this._vref[2] ? this._vref[2].isInherited() : false; }
-  isGhost (): ?boolean { return this._vref[2] ? this._vref[2].isGhost() : false; }
-  isInstance (): ?boolean { return this._vref[2] ? this._vref[2].isInstance() : false; }
+  isInherited (): ?boolean {
+    return this[PackedHostValue][2] ? this[PackedHostValue][2].isInherited() : false;
+  }
+  isGhost (): ?boolean {
+    return this[PackedHostValue][2] ? this[PackedHostValue][2].isGhost() : false;
+  }
+  isInstance (): ?boolean {
+    return this[PackedHostValue][2] ? this[PackedHostValue][2].isInstance() : false;
+  }
 
   isInactive (): ?boolean { return this._isInactive || false; }
   setInactive (value: boolean = true): ?boolean { this._isInactive = value; }
@@ -133,7 +143,7 @@ export default class ValaaReference {
   }
   clearPartitionURI () { this._partitionURI = undefined; }
   immutatePartitionURI (partitionURI: PartitionURI) {
-    return new this.constructor(this._vref, partitionURI);
+    return new this.constructor(this[PackedHostValue], partitionURI);
   }
 
   toString (nest: number = 1): string {
@@ -148,15 +158,18 @@ export default class ValaaReference {
         this.getCoupledField() || ""},${ghostPathText},${partitionText})`;
   }
   toJSON (): any[] {
-    const ret: any[] = this._vref.slice(0, 3);
+    const ret: any[] = this[PackedHostValue].slice(0, 3);
     if (ret[2]) ret[2] = ret[2].previousStep() ? ret[2].toJSON() : null;
     if (this._partitionURI) ret[3] = this._partitionURI.toString();
     let i = ret.length;
     while (!ret[i - 1]) i -= 1;
     return ret.slice(0, i);
   }
+
+  static VRefValueOf = Symbol("VRef.valueOf");
+
   valueOf (): string {
-    let ret = this[VRefValueOf];
+    let ret = this[ValaaReference.VRefValueOf];
     if (typeof ret === "undefined") {
       ret = `VRef(${this.rawId()},'${this.getCoupledField() || ""}')`;
       // this[VRefValueOf] = ret; // JEST doesn't deal well with temporary values like this
@@ -185,11 +198,19 @@ export default class ValaaReference {
   }
 }
 
+ValaaReference.prototype[HostRef] = null;
+
 export const VRef = ValaaReference;
 
 export class ValaaResourceReference extends ValaaReference {}
-export class ValaaDataReference extends ValaaReference { typeof (): string { return "Data"; } }
-export class ValaaBlobReference extends ValaaReference { typeof (): string { return "Blob"; } }
+export class ValaaDataReference extends ValaaReference {
+  typeof (): string { return "Data"; }
+  shortTypeof (): string { return "DRef"; }
+}
+export class ValaaBlobReference extends ValaaReference {
+  typeof (): string { return "Blob"; }
+  shortTypeof (): string { return "BRef"; }
+}
 
 export const RRef = ValaaResourceReference;
 export const DRef = ValaaDataReference;
@@ -261,19 +282,20 @@ export function dRef (rawId: RawId, coupledField: ?string, ghostPath: ?GhostPath
 
 export function vRefFromJSON (json: JSONIdData, RefType: Object = VRef): VRef {
   const ret = new RefType(json);
-  if ((typeof ret._vref[2] === "string") || (ret._vref[1] && typeof ret._vref[1] === "object")) {
+  if ((typeof ret[PackedHostValue][2] === "string")
+      || (ret[PackedHostValue][1] && typeof ret[PackedHostValue][1] === "object")) {
     // Flip obsolete coupledField / ghostPath order.
     console.warn("Encounted obsolete ValaaReference field order, expected " +
         "[rawId, coupledField, ghostPath], got [rawId, ghostPath, coupledField]");
-    const temp = ret._vref[1];
-    ret._vref[1] = ret._vref[2];
-    ret._vref[2] = temp;
+    const temp = ret[PackedHostValue][1];
+    ret[PackedHostValue][1] = ret[PackedHostValue][2];
+    ret[PackedHostValue][2] = temp;
   }
-  if (ret._vref[2] && !(ret._vref[2] instanceof GhostPath)) {
-    ret._vref[2] = ghostPathFromJSON(ret._vref[2]);
+  if (ret[PackedHostValue][2] && !(ret[PackedHostValue][2] instanceof GhostPath)) {
+    ret[PackedHostValue][2] = ghostPathFromJSON(ret[PackedHostValue][2]);
   }
-  if (ret._vref[3] && !(ret._vref[3] instanceof PartitionURI)) {
-    ret._vref[3] = createPartitionURI(ret._vref[3]);
+  if (ret[PackedHostValue][3] && !(ret[PackedHostValue][3] instanceof PartitionURI)) {
+    ret[PackedHostValue][3] = createPartitionURI(ret[PackedHostValue][3]);
   }
   return ret;
 }
@@ -294,7 +316,7 @@ export function vRefFromURI (uri: URL | string): VRef {
   return vRef(rawId, coupling, undefined, createValaaURI(partitionURI));
 }
 
-export const obtainVRef = vdoc([
+export const obtainVRef = vdocorate([
   `Returns a new VRef object copied or deserialized from given idData,
   with its fields overridden with given coupledField, ghostPath and/or
   partitionURI. If any of the overrides is null the original value is
@@ -417,7 +439,7 @@ export function tryCoupledFieldFrom (idData: IdData | JSONIdData): ?string {
   return undefined;
 }
 
-export const tryPartitionURIFrom = vdoc(`
+export const tryPartitionURIFrom = vdocorate(`
   Returns partitionURI from given idData or undefined if no valid
   partitionURI can be found. If idData is a VRef its .partitionURI() is
   called and used as the candidate.
@@ -431,7 +453,7 @@ export const tryPartitionURIFrom = vdoc(`
 
 export function expandIdDataFrom (idData: IdData): [RawId, ?string, ?GhostPath] {
   if (typeof idData === "string") return [idData];
-  if (idData instanceof VRef) return idData._vref;
+  if (idData instanceof VRef) return idData[PackedHostValue];
   throw new Error(`Invalid expandIdDataFrom.idData given, expected IdData (string or VRef), got ${
       dumpify(idData)}`);
 }

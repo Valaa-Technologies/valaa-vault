@@ -3,6 +3,7 @@ import { GraphQLObjectType, isAbstractType } from "graphql/type";
 import { Iterable } from "immutable";
 
 import VALK, { VALKOptions, packedSingular } from "~/raem/VALK";
+import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 
 import { fieldsSet, addedToFields, removedFromFields, replacedWithinFields, isCreatedLike }
     from "~/raem/command";
@@ -142,7 +143,7 @@ export default class Vrapper extends Cog {
     invariantifyString(typeName, "Vrapper.constructor.typeName");
     super({ engine, name: `Vrapper/${id.rawId()}:${typeName}` });
     this.vrapperIndex = (Vrapper.vrapperIndex += 1);
-    this._objectId = id;
+    this[HostRef] = id;
     this._setTypeName(typeName);
     if (typeName === "Blob" || !this.engine) {
       this._phase = NONRESOURCE;
@@ -167,9 +168,9 @@ export default class Vrapper extends Cog {
   }
 
   isPartitionRoot () {
-    const partitionURI = this._objectId.partitionURI();
+    const partitionURI = this[HostRef].partitionURI();
     if (!partitionURI) return false;
-    return getPartitionRawIdFrom(partitionURI) === this._objectId.rawId();
+    return getPartitionRawIdFrom(partitionURI) === this[HostRef].rawId();
   }
 
   toJSON () {
@@ -274,15 +275,15 @@ export default class Vrapper extends Cog {
     if ((this._phase !== INACTIVE) && (this._phase !== ACTIVATING)) return this;
     const state = refreshingState || this.engine.discourse.getState();
     const transient = refreshingTransient
-        || getObjectTransient(state, this._objectId, this._typeName);
+        || getObjectTransient(state, this[HostRef], this._typeName);
     this.updateTransient(state, transient);
-    this._objectId = transient.get("id");
+    this[HostRef] = transient.get("id");
     if (!this.tryPartitionConnection()) {
-      if (this._objectId.isInactive() || this._partitionConnectionProcess) return this;
+      if (this[HostRef].isInactive() || this._partitionConnectionProcess) return this;
     }
     let prototypeId = transient.get("prototype");
     if (!prototypeId) {
-      const prototypeGhostPath = this._objectId.previousGhostStep();
+      const prototypeGhostPath = this[HostRef].previousGhostStep();
       if (prototypeGhostPath) {
         prototypeId = vRef(prototypeGhostPath.headRawId(), undefined, prototypeGhostPath);
       }
@@ -345,7 +346,7 @@ export default class Vrapper extends Cog {
       // False Prophet and backend validations. But nevertheless the lack of symmetry and dirty
       // caching is unclean.
       const state = options.state || (options.transaction && options.transaction.getState());
-      if (state && getObjectTransient(state, this._objectId, this._typeName)) return;
+      if (state && getObjectTransient(state, this[HostRef], this._typeName)) return;
     }
     const error =
         !blocker.isResource() ?
@@ -363,7 +364,7 @@ export default class Vrapper extends Cog {
         "\n\toptions:", ...dumpObject(options),
         "\n\tactivation blocker is",
             (blocker === this) ? "this object itself" : "some prototype of this",
-        "\n\tthis._objectId:", ...dumpObject(this._objectId),
+        "\n\tthis[HostRef]:", ...dumpObject(this[HostRef]),
         "\n\tthis._partitionConnection:", ...dumpObject(this._partitionConnection),
         "\n\tthis._partitionConnectionProcess:", ...dumpObject(this._partitionConnectionProcess),
         "\n\tblocker:", ...dumpObject(blocker),
@@ -400,10 +401,10 @@ export default class Vrapper extends Cog {
       if (!this.isResource()) {
         throw new Error(`Non-resource Vrapper's cannot have partition connections`);
       }
-      partitionURI = this._objectId.partitionURI();
+      partitionURI = this[HostRef].partitionURI();
       if (!partitionURI) {
-        nonGhostOwnerRawId = this._objectId.getGhostPath().headHostRawId()
-            || this._objectId.rawId();
+        nonGhostOwnerRawId = this[HostRef].getGhostPath().headHostRawId()
+            || this[HostRef].rawId();
         const transient = (options.transaction || this.engine.discourse)
             .tryGoToTransientOfRawId(nonGhostOwnerRawId, "Resource");
         if (transient) {
@@ -438,7 +439,7 @@ export default class Vrapper extends Cog {
       return this.wrapErrorEvent(error, `getPartitionConnection(${
               options.require ? "require" : "optional"})`,
           "\n\toptions:", ...dumpObject(options),
-          "\n\tthis._objectId:", this._objectId,
+          "\n\tthis[HostRef]:", this[HostRef],
           "\n\tthis._transient:", this._transient,
           "\n\tpartitionURI:", partitionURI,
           "\n\tthis:", ...dumpObject(this));
@@ -477,7 +478,7 @@ export default class Vrapper extends Cog {
    */
   getId (options?: VALKOptions): VRef {
     const transient = options ? this.getTransient(options) : this._transient;
-    return transient ? transient.get("id") : this._objectId;
+    return transient ? transient.get("id") : this[HostRef];
   }
 
   getIdCoupledWith (coupledField: string): VRef {
@@ -492,7 +493,7 @@ export default class Vrapper extends Cog {
    *
    * @returns
    */
-  getRawId () { return this._objectId.rawId(); }
+  getRawId () { return this[HostRef].rawId(); }
 
 
   getTypeName (options: any) {
@@ -513,10 +514,10 @@ export default class Vrapper extends Cog {
 
   debugId (options?: any) {
     if (options && options.short) {
-      return debugId(this._transient || this._objectId, { short: true });
+      return debugId(this._transient || this[HostRef], { short: true });
     }
     if (!this.__debugId) {
-      this.__debugId = debugId(this._transient || this._objectId);
+      this.__debugId = debugId(this._transient || this[HostRef]);
     }
     return `${this.constructor.name}(${
         this._phase === ACTIVE ? "" : `${this._phase}: `}${this.__debugId})`;
@@ -549,7 +550,7 @@ export default class Vrapper extends Cog {
       const typeName = options.typeName || this.getTypeName(options);
       return explicitState.getIn([typeName, this.getRawId()])
           // Immaterial ghost.
-          || getObjectTransient(options.state || options.transaction, this._objectId, typeName,
+          || getObjectTransient(options.state || options.transaction, this[HostRef], typeName,
               undefined, undefined, options.mostMaterialized);
     }
     if (this.transientStaledIn) {
@@ -561,7 +562,7 @@ export default class Vrapper extends Cog {
     return this._transient;
   }
 
-  isGhost () { return this._objectId.isGhost(); }
+  isGhost () { return this[HostRef].isGhost(); }
 
   isMaterialized (transaction: ?Transaction) {
     const state = (transaction || this.engine.discourse).getState();
@@ -1495,7 +1496,7 @@ export default class Vrapper extends Cog {
   getGhostIn (vInstance: Vrapper, transaction: ?Transaction) {
     this.requireActive({ transaction });
     const state = (transaction || this.engine.discourse).getState();
-    const ghostVRef = createGhostVRefInInstance(this._objectId,
+    const ghostVRef = createGhostVRefInInstance(this[HostRef],
         vInstance.getTransient({ transaction }));
     // TODO(iridian): Verify and return null if this object has no ghost in instance, ie. if this
     // object is not a sub-component in the direct prototype of vInstance
@@ -1793,6 +1794,7 @@ export default class Vrapper extends Cog {
 }
 
 Vrapper.prototype[ValaaPrimitiveTag] = true;
+Vrapper.prototype[UnpackedHostValue] = null;
 
 let vrapperEventHandlers;
 

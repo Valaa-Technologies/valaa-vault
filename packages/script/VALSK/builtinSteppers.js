@@ -2,7 +2,7 @@
 
 import { dumpKuery, dumpObject, Valker } from "~/raem/VALK";
 import raemBuiltinSteppers, {
-  tryLiteral, tryFullLiteral, tryUnpackLiteral, isHostHead, resolveTypeof, BuiltinStep,
+  tryLiteral, tryFullLiteral, tryUnpackLiteral, isHostRef, resolveTypeof, BuiltinStep,
 } from "~/raem/VALK/builtinSteppers";
 
 import isSymbol from "~/tools/isSymbol";
@@ -64,7 +64,7 @@ export default Object.freeze({
       if ((typeof Type === "object") && BuiltinTypePrototype.isPrototypeOf(Type)) {
         return valker.pack(Type[".new"](valker, scope, ...eArgs));
       }
-      if (isHostHead(eType)) {
+      if (isHostRef(eType)) {
         const PrototypeType = scope.Valaa[Type.getTypeName({ transaction: valker })];
         return valker.pack(PrototypeType[".instantiate"](valker, scope, Type, ...eArgs));
       }
@@ -106,7 +106,7 @@ export default Object.freeze({
   },
 });
 
-// TODO(iridian): clarify the relationship between raem/VALK/hostValue.HostId and
+// TODO(iridian): clarify the relationship between raem/VALK/hostReference.HostRef and
 // ValaaPrimitiveTag. ValaaPrimitiveTag might be an alias for it.
 export const ValaaPrimitiveTag = Symbol("Valaa Primitive");
 export const BuiltinTypePrototype = { [ValaaPrimitiveTag]: true };
@@ -126,7 +126,7 @@ function _getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Objec
         : tryLiteral(valker, head, propertyName, scope);
     if (eContainer._sequence) {
       eContainer = valker.tryUnpack(eContainer);
-    } else if (isHostHead(eContainer)) {
+    } else if (isHostRef(eContainer)) {
       const ret = valker.tryPack(valker._builtinSteppers["§method"](
           valker, eContainer, scope, _propertyValueMethodStep)(ePropertyName));
       //console.warn("returning from method", head, eContainer, ePropertyName,
@@ -144,7 +144,7 @@ function _getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Objec
         // FIXME(iridian): Leaking abstractions like there's no tomorrow. This (among many other
         // parts of this file) belong to the @valos/engine builtinSteppers-extension, which
         // doesn't exist, which is the reason these are not there.
-        : (property._typeName === "Property") && isHostHead(valker.tryPack(property))
+        : (property._typeName === "Property") && isHostRef(valker.tryPack(property))
             ? property.extractValue({ transaction: valker }, eContainer.this)
             : property;
     return valker.tryPack(ret);
@@ -187,7 +187,7 @@ function _alterIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Obj
         : tryLiteral(valker, head, propertyName, scope);
     eAlterationVAKON = typeof alterationVAKON !== "object" ? alterationVAKON
         : tryLiteral(valker, head, alterationVAKON, scope);
-    if (isHostHead(eContainer)) {
+    if (isHostRef(eContainer)) {
       if (!eContainer._sequence) {
         return valker.tryPack(valker._builtinSteppers["§method"](
             valker, eContainer, scope, _alterPropertyMethodStep)(ePropertyName, eAlterationVAKON));
@@ -208,7 +208,7 @@ function _alterIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Obj
         setNativeIdentifierValue(property, valker.tryUnpack(packedNewValue));
         return packedNewValue;
       }
-      if ((typeof property.alterValue === "function") && isHostHead(valker.tryPack(property))) {
+      if ((typeof property.alterValue === "function") && isHostRef(valker.tryPack(property))) {
         return valker.tryPack(
             property.alterValue(eAlterationVAKON, { transaction: valker }, eContainer.this));
       }
@@ -259,7 +259,7 @@ function _deleteIdentifierOrProperty (valker: Valker, head: any, scope: ?Object,
         : tryFullLiteral(valker, head, container, scope);
     ePropertyName = typeof propertyName !== "object" ? propertyName
         : tryLiteral(valker, head, propertyName, scope);
-    if (isHostHead(eContainer)) {
+    if (isHostRef(eContainer)) {
       if (eContainer._sequence) {
         // TODO(iridian): Implement host sequence entry manipulation.
         throw new Error(`Deleting host sequence entries via index not implemented yet`);
@@ -277,7 +277,7 @@ function _deleteIdentifierOrProperty (valker: Valker, head: any, scope: ?Object,
         throw new SyntaxError(
             `Cannot delete regular variable '${String(ePropertyName)}' from scope`);
       }
-      if ((typeof property.deleteValue === "function") && isHostHead(valker.tryPack(property))) {
+      if ((typeof property.deleteValue === "function") && isHostRef(valker.tryPack(property))) {
         property.destroy({ transaction: valker });
         return true;
       }

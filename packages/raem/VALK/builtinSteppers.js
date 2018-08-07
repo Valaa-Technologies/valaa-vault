@@ -12,6 +12,7 @@ import { PrototypeOfImmaterialTag } from "~/raem/tools/denormalized/Transient";
 import Valker from "~/raem/VALK/Valker";
 import Kuery, { dumpObject, dumpKuery, dumpScope } from "~/raem/VALK/Kuery";
 import { isPackedField } from "~/raem/VALK/packedField";
+import { isHostRef, tryHostRef } from "~/raem/VALK/hostReference";
 
 import { dumpify, invariantify, invariantifyObject, invariantifyArray, isPromise, isSymbol,
   outputCollapsedError, wrapError,
@@ -19,6 +20,8 @@ import { dumpify, invariantify, invariantifyObject, invariantifyArray, isPromise
 
 /* eslint-disable no-bitwise */
 /* eslint-disable prefer-rest-params */
+
+export { isHostRef };
 
 export type BuiltinStep = any[];
 
@@ -35,11 +38,6 @@ export function getBuiltinStepName (kuery: any) {
 }
 
 export function getBuiltinStepArguments (kuery: any) { return kuery.slice(1); }
-
-export function isHostHead (head: any) {
-  return head && (typeof head === "object")
-      && (isPackedField(head) || Iterable.isKeyed(head) || (head instanceof VRef));
-}
 
 export default Object.freeze({
   "§'": function literal (valker: Valker, head: any, scope: ?Object, [, value]: BuiltinStep) {
@@ -169,11 +167,13 @@ export default Object.freeze({
     const eValue = typeof value !== "object" ? value
         : tryLiteral(valker, head, value, scope);
     if (typeof eValue === "undefined") return ["§void"];
-    if ((typeof eValue === "object") && (eValue !== null) && isHostHead(eValue)) {
-      // FIXME(iridian): This is wrong! This should be converted into appropriate ["'*Ref"].
+    const hostRef = tryHostRef(eValue);
+    if (hostRef) {
+      // TODO(iridian): This is wrong! This should be converted into appropriate ["'*Ref"].
       // TODO(iridian): Proper implementation is hindered by lack of elegant host object typing
       // system
-      return ["§'", eValue];
+      // TODO(iridian, 2018-08): No longer wrong as such but untested.
+      return [`§${hostRef.shortTypeof()}`, hostRef.toJSON()];
       // throw new Error("§literal for host objects not implemented yet");
     }
     return ["§'", eValue];
@@ -355,10 +355,8 @@ export default Object.freeze({
       [, operand]: BuiltinStep) {
     const eOperand = tryLiteral(valker, head, operand, scope);
     if (eOperand instanceof VRef) return eOperand.getCoupledField();
-    if (isPackedField(eOperand) && (eOperand._singular instanceof VRef)) {
-      return eOperand._singular.getCoupledField();
-    }
-    return undefined;
+    const hostRef = tryHostRef(eOperand);
+    return hostRef && hostRef.getCoupledField();
   },
   "§isghost": function isghost (valker: Valker, head: any, scope: ?Object,
       [, object]: any) {
@@ -718,18 +716,19 @@ export function resolveTypeof (valker: Valker, head: any, scope: ?Object,
       if (packedObject._fieldInfo) {
         type = packedObject._fieldInfo.intro.isResource ? "Resource" : "Data";
       } else if (packedObject._singular) {
-        if (packedObject._singular instanceof VRef) type = packedObject._singular.typeof();
-        else if (typeof packedObject._singular === "string") type = "Resource";
+        const hostRef = tryHostRef(packedObject);
+        if (hostRef) type = hostRef.typeof();
         else {
-          const id = packedObject._singular.id ||
-              (packedObject._singular.get && packedObject._singular.get("id"));
-          if (!id) type = "Data";
-          else if (id instanceof VRef) type = id.typeof();
-          else type = "Resource";
+          const id = packedObject._singular.id;
+          type = (id instanceof VRef) ? id.typeof()
+              : id ? "Resource" : "Data";
         }
       } else type = "Resource";
-    } else if (packedObject instanceof VRef) type = packedObject.typeof();
-    else if (Iterable.isIterable(packedObject)) type = "Resource";
+    } else {
+      const hostRef = tryHostRef(packedObject);
+      if (hostRef) type = hostRef.typeof();
+      else if (Iterable.isIterable(packedObject)) type = "Resource";
+    }
   }
   if (typeof equalTo === "undefined") return type;
   const candidateType = (typeof equalTo !== "object")

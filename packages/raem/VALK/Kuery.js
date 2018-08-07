@@ -5,6 +5,7 @@ import dumpify from "~/tools/dumpify";
 import invariantify, { invariantifyArray, invariantifyNumber, invariantifyString,
     invariantifyObject } from "~/tools/invariantify";
 import wrapError, { inBrowser, dumpObject as _dumpObject } from "~/tools/wrapError";
+import { isHostRef } from "./hostReference";
 
 /**
  * VALK - VAlaa Language for Kuerying
@@ -1706,7 +1707,7 @@ function toRawVAKON (kueryOrPrimitive: any): any {
 export function dumpObject (value) {
   const ret = _dumpObject(value);
   if (ret.length === 2) return ret;
-  if ((value != null) && (typeof value === "object")) {
+  if (isHostRef(value)) {
     const denormalized = (typeof value.get === "function") ? value
         : ((typeof value._singular === "object") && typeof value._singular.get === "function")
             ? value._singular

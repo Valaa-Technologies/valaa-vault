@@ -1,8 +1,13 @@
-import type { FieldInfo } from "~/raem/tools/denormalized/FieldInfo";
 import { Iterable } from "immutable";
+
+import { VRef } from "~/raem/ValaaReference";
+
+import type { FieldInfo } from "~/raem/tools/denormalized/FieldInfo";
 
 import dumpify from "~/tools/dumpify";
 import { invariantifyString } from "~/tools/invariantify";
+
+import { PackedHostValue, HostRef, tryHostRef } from "~/raem/VALK/hostReference";
 
 // PackedField is a packed, datatype for accessing reference fields lazily. Potentially expensive
 // operations like value elevations and sequence completions will only be performed when needed.
@@ -43,6 +48,8 @@ export function tryPackedField (value: any, fieldInfo: FieldInfo) {
 export function packedSingular (value, typeName, fieldInfo) {
   invariantifyString(typeName, "packed.typeName");
   return {
+    [HostRef]: tryHostRef(value) || ((typeof value === "string") && VRef([value])) || null,
+    [PackedHostValue]: value,
     _singular: value,
     _type: typeName,
     _fieldInfo: fieldInfo,
@@ -63,6 +70,8 @@ function _dumpifyPackedSingular () {
 export function packedSequence (denormalizedSequence, entryTypeName, fieldInfo) {
   invariantifyString(entryTypeName, "packedSeq.entryTypeName");
   return {
+    [HostRef]: null,
+    [PackedHostValue]: denormalizedSequence,
     _sequence: denormalizedSequence,
     _type: entryTypeName,
     _fieldInfo: fieldInfo,

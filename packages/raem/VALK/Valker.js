@@ -40,11 +40,6 @@ export type VALKOptions = {
   coupledField?: string,
 };
 
-export function isPacked (value: any) {
-  return typeof value === "object" && value !== null &&
-      (value._type || Iterable.isIterable(value) || (value instanceof VRef));
-}
-
 /**
  * FIXME(iridian): this doc is a bit stale.
  * run - runs the given kuery starting rom given head using given corpus.

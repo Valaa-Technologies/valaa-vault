@@ -614,12 +614,13 @@ export default class Vrapper extends Cog {
     return this._hostGlobal;
   }
 
-  getVALKMethod (methodName: string, valker: Valker, transient: Transient, scope: Object) {
+  getVALKMethod (methodName: string, valker: Valker, transient: Transient, scope: Object,
+      namespaceFieldLookup?: Object) {
     const createApplicator = applicatorCreators[methodName];
     if (!createApplicator) {
       throw new Error(`Unknown VALK host function '${methodName}' in '${this.debugId()}'`);
     }
-    return createApplicator(this, methodName, valker, transient, scope);
+    return createApplicator(this, methodName, valker, transient, scope, namespaceFieldLookup);
   }
 
 /*
@@ -860,6 +861,8 @@ export default class Vrapper extends Cog {
 
   // Scope and Property property host operations
 
+  _namespaceProxies: ?Object;
+
   propertyValue (propertyName: string | Symbol, options: VALKOptions = {}) {
     // eslint-disable-next-line
     const typeName = this.getTypeName(options);
@@ -867,13 +870,17 @@ export default class Vrapper extends Cog {
     if (vProperty) {
       return vProperty.extractValue(options, this);
     }
-    const hostValue = this.engine.getRootScope().Valaa[typeName].hostObjectPrototype[propertyName];
-    if ((typeof hostValue === "object") && (hostValue !== null) && hostValue.isHostField) {
-      // TODO(iridian): Make this solution semantically consistent native field access.
-      // Now stupidly trying to setField even if the field is not a primaryField.
-      return this.get(hostValue.kuery, options);
+    const hostReference = this.engine.getHostObjectPrototype(typeName)[propertyName];
+    if ((typeof hostReference === "object") && (hostReference !== null) && hostReference.isHostField) {
+      if (hostReference.namespace) {
+        return ((this._namespaceProxies
+            || (this._namespaceProxies = {}))[hostReference.namespace]
+                || (this._namespaceProxies[hostReference.namespace]
+                    = this.engine.getRootScope().Valaa.$valosNamespace._createProxy(this)));
+      }
+      return this.get(hostReference.kuery, options);
     }
-    return hostValue;
+    return hostReference;
   }
 
   _getProperty (propertyName: string | Symbol, options: VALKOptions) {
@@ -1819,9 +1826,9 @@ const applicatorCreators = {
   destroy: createApplicatorWithOptionsFirst,
   emplaceSetField: createApplicatorWithOptionsThird,
   emplaceAddToField: createApplicatorWithOptionsThird,
-  propertyValue: createApplicatorWithOptionsSecond,
-  alterProperty: createApplicatorWithOptionsThird,
-  deleteProperty: createApplicatorWithOptionsSecond,
+  propertyValue: createApplicatorWithNamespaceFieldFirstOptionsSecond,
+  alterProperty: createApplicatorWithNamespaceFieldFirstOptionsThird,
+  deleteProperty: createApplicatorWithNamespaceFieldFirstOptionsSecond,
   extractValue: createApplicatorWithOptionsFirst,
   blobContent: createApplicatorWithOptionsThird,
   mediaURL: createApplicatorWithOptionsFirst,
@@ -1886,6 +1893,53 @@ function createApplicatorWithOptionsThird (vrapper: Vrapper, methodName: string,
           "\n\targ#0:", dumpify(first),
           "\n\targ#1:", dumpify(second),
           "\n\targ#2, options:", ...dumpObject(options),
+      );
+    }
+  };
+}
+
+function createApplicatorWithNamespaceFieldFirstOptionsSecond (vrapper: Vrapper, methodName: string,
+    valker: Valker, transient: any, scope: any, namespaceFieldLookup: Object) {
+  if (!namespaceFieldLookup) return createApplicatorWithOptionsSecond(vrapper, methodName, valker);
+  return (fieldName: any, options: Object = {}, ...rest) => {
+    try {
+      const fieldSymbol = namespaceFieldLookup[fieldName];
+      if (!fieldSymbol) {
+        throw new Error(`${debugId(vrapper, { brief: true })
+            } does not implement host field '${fieldName}'`);
+      }
+      options.transaction = valker;
+      return vrapper[methodName](fieldSymbol, options, ...rest);
+    } catch (error) {
+      throw wrapError(error, `During ${vrapper.debugId()}\n .getVALKMethod(${
+              methodName}), with:`,
+          "\n\targ#0:", dumpify(fieldName),
+          "\n\targ#1, options:", ...dumpObject(options),
+          "\n\tknown host fields:", ...dumpObject(namespaceFieldLookup),
+      );
+    }
+  };
+}
+
+function createApplicatorWithNamespaceFieldFirstOptionsThird (vrapper: Vrapper, methodName: string,
+    valker: Valker, transient: any, scope: any, namespaceFieldLookup: Object) {
+  if (!namespaceFieldLookup) return createApplicatorWithOptionsThird(vrapper, methodName, valker);
+  return (fieldName: any, second: any, options: Object = {}, ...rest) => {
+    try {
+      const fieldSymbol = namespaceFieldLookup[fieldName];
+      if (!fieldSymbol) {
+        throw new Error(`${debugId(vrapper, { brief: true })
+            } does not implement host field '${fieldName}'`);
+      }
+      options.transaction = valker;
+      return vrapper[methodName](fieldSymbol, second, options, ...rest);
+    } catch (error) {
+      throw wrapError(error, `During ${vrapper.debugId()}\n .getVALKMethod(${
+              methodName}), with:`,
+          "\n\targ#0:", dumpify(fieldName),
+          "\n\targ#1:", dumpify(second),
+          "\n\targ#2, options:", ...dumpObject(options),
+          "\n\tknown host fields:", ...dumpObject(namespaceFieldLookup),
       );
     }
   };

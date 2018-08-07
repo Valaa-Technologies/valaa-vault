@@ -191,6 +191,10 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
   scope.Resource.prototype = Object.assign(Object.create(scope.ResourceStub.prototype), {
     constructor: scope.Resource,
 
+    $V: {
+      isHostField: true, enumerable: false, configurable: false, namespace: "@valos",
+    },
+
     hasOwnProperty: denoteValaaKueryFunction(
         `returns a boolean indicating whether the object has the specified property as own (not${
             ""} inherited) property`

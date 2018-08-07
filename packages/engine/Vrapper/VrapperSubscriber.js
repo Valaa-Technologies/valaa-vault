@@ -1,6 +1,7 @@
 // @flow
 
 import type { VALKOptions } from "~/raem/VALK";
+import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 
 import { VRef } from "~/raem/ValaaReference";
@@ -612,11 +613,13 @@ function liveApply (subscriber: VrapperSubscriber, head: any, kueryVAKON: Array<
         `trying to call a non-function value of type '${typeof eCallee}'`,
         "\n\tfunction wannabe value:", eCallee);
   }
-  const eThis = (typeof kueryVAKON[2] === "undefined")
+  let eThis = (typeof kueryVAKON[2] === "undefined")
       ? scope
       : subscriber._processLiteral(head, kueryVAKON[2], scope, true);
   const eArgs = subscriber._processLiteral(head, kueryVAKON[3], scope, true);
   if (!eCallee._valkCreateKuery) return performDefaultGet;
+  // TODO(iridian): Fix this kludge which enables namespace proxies
+  eThis = eThis[UnpackedHostValue] || eThis;
   return subscriber._processKuery(eThis, eCallee._valkCreateKuery(...eArgs), scope, evaluateKuery);
 }
 
@@ -638,8 +641,9 @@ function liveCall (subscriber: VrapperSubscriber, head: any, kueryVAKON: Array<a
     eArgs.push(subscriber._processLiteral(head, kueryVAKON[i], scope, true));
   }
   if (!eCallee._valkCreateKuery) return performDefaultGet;
-  const kueryFunction = eCallee._valkCreateKuery(...eArgs);
-  return subscriber._processKuery(eThis, kueryFunction, scope, evaluateKuery);
+  // TODO(iridian): Fix this kludge which enables namespace proxies
+  eThis = eThis[UnpackedHostValue] || eThis;
+  return subscriber._processKuery(eThis, eCallee._valkCreateKuery(...eArgs), scope, evaluateKuery);
 }
 
 function liveTypeof (subscriber: VrapperSubscriber, head: any, kueryVAKON: Array<any>) {
@@ -675,7 +679,7 @@ function liveMember (subscriber: VrapperSubscriber, head: any, kueryVAKON: Array
   }
 
   let vProperty;
-  if (!(container instanceof Vrapper)) {
+  if (container[HostRef] === undefined) {
     const property = container[propertyName];
     if ((typeof property !== "object") || (property === null)) {
       if (!isProperty && (typeof property === "undefined") && !(propertyName in container)) {
@@ -689,11 +693,22 @@ function liveMember (subscriber: VrapperSubscriber, head: any, kueryVAKON: Array
   } else if (container._lexicalScope && container._lexicalScope.hasOwnProperty(propertyName)) {
     vProperty = container._lexicalScope[propertyName];
   } else {
-    const descriptor = container.engine.getHostObjectPrototype(
-        container.getTypeName(subscriber._valkOptions))[propertyName];
+    let vrapper = container[UnpackedHostValue];
+    if (vrapper === undefined) {
+      throw new Error("Invalid container: expected one with valid UnpackedHostValue");
+    }
+    let propertyKey;
+    if (vrapper === null) { // container itself is the Vrapper.
+      vrapper = container;
+      propertyKey = propertyName;
+    } else { // container is a namespace proxy
+      propertyKey = container[propertyName];
+    }
+    const descriptor = vrapper.engine.getHostObjectPrototype(
+        vrapper.getTypeName(subscriber._valkOptions))[propertyKey];
     if (descriptor) {
       if (!descriptor.writable || !descriptor.kuery) return performDefaultGet;
-      return subscriber._processKuery(container, descriptor.kuery, scope, true);
+      return subscriber._processKuery(vrapper, descriptor.kuery, scope, true);
     }
     vProperty = subscriber._run(container,
         toProperty[propertyName]

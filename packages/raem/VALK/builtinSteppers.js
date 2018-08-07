@@ -12,7 +12,7 @@ import { PrototypeOfImmaterialTag } from "~/raem/tools/denormalized/Transient";
 import Valker from "~/raem/VALK/Valker";
 import Kuery, { dumpObject, dumpKuery, dumpScope } from "~/raem/VALK/Kuery";
 import { isPackedField } from "~/raem/VALK/packedField";
-import { isHostRef, tryHostRef } from "~/raem/VALK/hostReference";
+import { UnpackedHostValue, isHostRef, tryHostRef } from "~/raem/VALK/hostReference";
 
 import { dumpify, invariantify, invariantifyObject, invariantifyArray, isPromise, isSymbol,
   outputCollapsedError, wrapError,
@@ -211,6 +211,8 @@ export default Object.freeze({
           : tryUnpackLiteral(valker, head, args, scope);
       if (eCallee._valkCreateKuery) {
         eThis = typeof this_ === "undefined" ? scope : tryLiteral(valker, head, this_, scope);
+        // TODO(iridian): Fix this kludge which enables namespace proxies
+        eThis = (eThis[UnpackedHostValue] && tryHostRef(eThis)) || eThis;
         kueryFunction = eCallee._valkCreateKuery(...eArgs);
         return valker.advance(eThis, kueryFunction, scope);
       }
@@ -273,11 +275,13 @@ export default Object.freeze({
       if (eCallee._valkCreateKuery) {
         eThis = typeof callStep[2] === "undefined"
             ? scope : tryLiteral(valker, head, callStep[2], scope);
+        // TODO(iridian): Fix this kludge which enables namespace proxies
+        eThis = (eThis[UnpackedHostValue] && tryHostRef(eThis)) || eThis;
         kueryFunction = eCallee._valkCreateKuery(...eArgs);
         return valker.advance(eThis, kueryFunction, scope);
       }
-      eThis = typeof callStep[2] === "undefined" ? scope
-          : tryUnpackLiteral(valker, head, callStep[2], scope);
+      eThis = typeof callStep[2] === "undefined"
+          ? scope : tryUnpackLiteral(valker, head, callStep[2], scope);
       if (eCallee._valkCaller) {
         if (eThis === null || typeof eThis === "undefined") {
           eThis = { __callerValker__: valker, __callerScope__: scope };

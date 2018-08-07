@@ -3,6 +3,7 @@ import { GraphQLObjectType, GraphQLSchema } from "graphql/type";
 import getTypeInterfaces from "~/raem/tools/graphql/getTypeInterfaces";
 
 import createSymbolAliases from "~/engine/ValaaSpace/createSymbolAliases";
+import { addNamespaceField } from "~/engine/ValaaSpace/namespace";
 import { createHostFunctionDescriptor, createHostSymbolDescriptor }
     from "~/engine/ValaaSpace/hostPropertyDescriptors";
 
@@ -19,8 +20,8 @@ export default function injectSchemaFieldBindings (Valaa: Object,
     hostObjectDescriptors: Map<any, Object>, schema: GraphQLSchema) {
   const alreadyProcessed = new Set();
   Object.values(Valaa).forEach(processType);
-  Valaa.name = Valaa.Discoverable.nameAlias;
-  Valaa.prototype = Valaa.Discoverable.prototypeAlias;
+  addNamespaceField(Valaa, "valos", "name", Valaa.Discoverable.nameAlias);
+  addNamespaceField(Valaa, "valos", "prototype", Valaa.Discoverable.prototypeAlias);
   function processType (hostTypeDescriptor: any) {
     if (!hostTypeDescriptor || (typeof hostTypeDescriptor !== "object")
         || !hostTypeDescriptor.hasOwnProperty("name")

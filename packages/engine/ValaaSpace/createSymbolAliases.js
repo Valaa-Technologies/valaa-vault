@@ -2,16 +2,18 @@
 
 import { isSymbol } from "~/tools";
 
-export default function createSymbolAliases (topLevelScope: Object, sourceScope: any) {
+import { addNamespaceField } from "~/engine/ValaaSpace/namespace";
+
+export default function createSymbolAliases (targetScope: Object, sourceScope: any) {
   Object.getOwnPropertyNames(sourceScope).forEach(name => {
-    const value = sourceScope[name];
-    if (isSymbol(value)) {
-      if (typeof topLevelScope[name] === "undefined") {
-        topLevelScope[name] = value;
+    const symbol = sourceScope[name];
+    if (isSymbol(symbol)) {
+      if (typeof targetScope[name] === "undefined") {
+        addNamespaceField(targetScope, "valos", name, symbol);
       } else {
         console.warn(`Cannot create a symbol alias Valaa.${name} to ${
-            sourceScope.name}.${name}`, "with value", String(value),
-            `because topLevelScope.${name} already exists with value:`, topLevelScope[name]);
+            sourceScope.name}.${name}`, "with symbol value", String(symbol),
+            `because targetScope.${name} already exists with value:`, targetScope[name]);
       }
     }
   });

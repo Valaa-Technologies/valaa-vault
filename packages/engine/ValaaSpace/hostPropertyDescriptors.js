@@ -15,7 +15,7 @@ export function createHostPrototypeFieldDescriptor (field: Object) {
   return Object.freeze({
     writable: field.writable, enumerable: field.enumerable, configurable: field.configurable,
     valaa: true, host: true, field: true, description: field.description,
-    persisted: field.persisted,
+    namespace: field.namespace, persisted: field.persisted,
   });
 }
 

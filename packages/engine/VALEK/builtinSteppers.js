@@ -1,6 +1,8 @@
 // @flow
 
 import { Valker, BuiltinStep } from "~/raem/VALK";
+import { HostRef, UnpackedHostValue, tryUnpackedHostValue } from "~/raem/VALK/hostReference";
+
 import { tryLiteral, /* tryFullLiteral,*/ tryUnpackLiteral }
     from "~/raem/VALK/builtinSteppers";
 
@@ -15,18 +17,29 @@ import { wrapError, dumpObject } from "~/tools";
 
 export default Object.freeze({
   ...valaaScriptBuiltinSteppers,
-  "§callableof": function callableOf (valker: Valker, head: any, scope: ?Object,
-      [, callee, toRoleName]: BuiltinStep) {
-    const ret = tryUnpackLiteral(valker, head, callee, scope);
-    if (typeof ret === "function") return ret;
-    const roleName = tryUnpackLiteral(valker, head, toRoleName, scope);
-    if ((ret instanceof Vrapper) && (ret.tryTypeName() === "Media")) {
-      return getImplicitCallable(ret, roleName, { transaction: valker });
-    }
-    throw new Error(`Could not implicitly convert callee to a function for ${roleName}`);
-  },
+  "§callableof": callableOf,
   "§method": toMethod,
 });
+
+function callableOf (valker: Valker, head: any, scope: ?Object,
+    [, callee, toRoleName]: BuiltinStep) {
+  let eCandidate;
+  try {
+    eCandidate = tryUnpackLiteral(valker, head, callee, scope);
+    if (typeof eCandidate === "function") return eCandidate;
+    const roleName = tryUnpackLiteral(valker, head, toRoleName, scope);
+    const vrapper = tryUnpackedHostValue(eCandidate);
+    if (vrapper && (vrapper.tryTypeName() === "Media")) {
+      return getImplicitCallable(vrapper, roleName, { transaction: valker });
+    }
+    throw new Error(`Could not implicitly convert callee to a function for ${roleName}`);
+  } catch (error) {
+    throw wrapError(error, `During ${valker.debugId()}\n .callableof, with:`,
+        "\n\thead:", ...dumpObject(head),
+        "\n\tcallee candidate:", ...dumpObject(eCandidate),
+    );
+  }
+}
 
 function toMethod (valker: Valker, head: any, scope: ?Object, [, callableName]: any,
     hostHead?: Object) {
@@ -49,10 +62,10 @@ function toMethod (valker: Valker, head: any, scope: ?Object, [, callableName]: 
   // Luckily with ValaaScript no external interface exposes these details anymore so they can
   // eventually be simplified and made performant.
   const transient = valker.trySingularTransient(head);
-  const actualHostHead = hostHead || valker.unpack(transient);
+  const actualHostHead = hostHead || valker.unpack(transient) || head;
   if (!actualHostHead || !actualHostHead.getVALKMethod) {
     throw wrapError(new Error("Can't find host object or it is missing member .getVALKMethod"),
-        `During ${valker.debugId()}\n .getHostCallable(${callableName}), with:`,
+        `During ${valker.debugId()}\n .toMethod(${callableName}), with:`,
         "\n\thead:", ...dumpObject(head),
         "\n\thostValue:", ...dumpObject(actualHostHead));
   }

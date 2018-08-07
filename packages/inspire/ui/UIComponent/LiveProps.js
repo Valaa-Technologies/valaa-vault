@@ -7,12 +7,14 @@ import { OrderedMap } from "immutable";
 import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
 import { Kuery } from "~/raem/VALK";
 
-import { FieldUpdate, getImplicitCallable } from "~/engine/Vrapper";
+import Vrapper, { FieldUpdate, getImplicitCallable } from "~/engine/Vrapper";
+import VALEK from "~/engine/VALEK";
+import getImplicitMediaInterpretation from "~/engine/Vrapper/getImplicitMediaInterpretation";
 
 import ValaaScope from "~/inspire/ui/ValaaScope";
 import UIComponent from "~/inspire/ui/UIComponent";
 
-import { arrayFromAny, isPromise, outputError, wrapError } from "~/tools";
+import { arrayFromAny, deepExtend, isPromise, outputError, wrapError } from "~/tools";
 
 import { _wrapElementInLiveProps } from "./_renderOps";
 
@@ -104,6 +106,43 @@ export default class LiveProps extends UIComponent {
         nextProps.liveProps !== this.props.liveProps);
   }
 
+  _currentSheetContent: ?Object;
+  _currentSheetObject: ?Object;
+
+  refreshClassName (focus: any, value: any) {
+    if ((value == null) || !(value instanceof Vrapper)) return value;
+    const kueryKey = `props.className.content`;
+    if (value.hasInterface("Media") && !this.getSubscriber(kueryKey)) {
+      this.attachKuerySubscriber(kueryKey, value, VALEK.toMediaContentField(), {
+        onUpdate: (update: FieldUpdate) => {
+          if (this.tryFocus() !== focus) return false;
+          const className = update.value();
+          if (className !== ((this.state || {}).className || className)) this.forceUpdate();
+          this.setState(() => ({ className }));
+          return undefined;
+        }
+      });
+    }
+    const sheetContent = getImplicitMediaInterpretation(value, kueryKey, {
+      mimeFallback: "text/css", immediate: undefined, transaction: this.context.engine.discourse,
+    });
+    if ((sheetContent == null) || isPromise(sheetContent)) return sheetContent;
+    if (this._currentSheetContent !== sheetContent) {
+      if (this._currentSheetContent) this.context.releaseVssSheets(this);
+      this._currentSheetContent = sheetContent;
+      const sheet = {};
+      if (sheetContent.html) deepExtend(sheet, sheetContent.html);
+      if (sheetContent.body) deepExtend(sheet, sheetContent.body);
+      for (const [selector, styles] of Object.entries(sheetContent)) {
+        if ((selector !== "body") && (selector !== "html")) {
+          sheet[`& .${selector}`] = styles;
+        }
+      }
+      this._currentSheetObject = this.context.getVSSSheet({ sheet }, this);
+    }
+    return this._currentSheetObject.classes.sheet;
+  }
+
   renderLoaded (focus: any) {
     if (this.props.liveProps) {
       const unfinishedKueries = [];
@@ -126,8 +165,11 @@ export default class LiveProps extends UIComponent {
         newProps[name] = prop(this.state.livePropValues);
         if ((name.slice(0, 2) === "on") && (typeof newProps[name] !== "function")) {
           newProps[name] = getImplicitCallable(newProps[name], `props.${name}`,
-              { immediate: undefined /* allows promise return values */ });
+              { immediate: undefined });
         }
+      }
+      if (name === "className") {
+        newProps[name] = this.refreshClassName(focus, newProps[name]);
       }
       if (isPromise(newProps[name])) (pendingProps || (pendingProps = {}))[name] = newProps[name];
     }

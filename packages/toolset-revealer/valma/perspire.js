@@ -23,6 +23,22 @@ exports.handler = (yargv) => {
   } else {
     const revelation = require(path.join(process.cwd(), revelationPath));
     global.revelationPath = path.dirname(revelationPath);
-    const perspire = inspire.default(revelation);
+    const perspire = Valaa.createGateway(revelation)
+        .then((gateway) => {
+          const perspireEngine = gateway.createAndConnectViewsToDOM({
+            perspireMain: {
+              name: "Valaa AWS Warlock Main",
+              rootLensURI: gateway.getRootPartitionURI(),
+              container: {},
+              rootId: "valaa-inspire--main-root",
+              size: {
+                width: global.window.innerWidth,
+                height: global.window.innerHeight,
+                scale: 1
+              },
+            },
+          });
+          perspireEngine.perspireMain.then(p => console.log("perspire", p));
+        });
   }
 };

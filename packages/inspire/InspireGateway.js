@@ -27,6 +27,7 @@ import extendValaaSpaceWithInspire from "~/inspire/ValaaSpace";
 
 import { arrayBufferFromBase64 } from "~/tools/base64";
 import { invariantify, LogEventGenerator, valaaUUID } from "~/tools";
+import isInBrowser from "is-in-browser";
 
 const DEFAULT_ACTION_VERSION = process.env.DEFAULT_ACTION_VERSION || "0.1";
 
@@ -115,7 +116,9 @@ export default class InspireGateway extends LogEventGenerator {
 
       const rootScope = engine.getRootScope();
       const hostDescriptors = engine.getHostObjectDescriptors();
-      extendValaaSpaceWithEngine(rootScope, hostDescriptors, engine.discourse.getSchema());
+      if (isInBrowser) {
+        extendValaaSpaceWithEngine(rootScope, hostDescriptors, engine.discourse.getSchema());
+      }
       if (!viewConfig.defaultAuthorityURI) {
         extendValaaSpaceWithInspire(rootScope, hostDescriptors);
       } else {

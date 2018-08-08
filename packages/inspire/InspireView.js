@@ -11,6 +11,7 @@ import { dumpKuery } from "~/engine/VALEK";
 import ReactRoot from "~/inspire/ui/ReactRoot";
 
 import { getGlobal, dumpObject } from "~/tools";
+import isInBrowser from "is-in-browser";
 
 /**
  * This class is the view entry point
@@ -43,7 +44,9 @@ export default class InspireView extends Cog {
       // engine.outputStatus(this.getLogger());
 
       // Renderer
-      this._createReactRoot(rootId, container, this._vUIRoot);
+      if (isInBrowser) {
+        this._createReactRoot(rootId, container, this._vUIRoot);
+      }
       this.engine.addCog(this);
       this.warnEvent(`initialize(): engine running and view connected to DOM (size`,
           size, `unused)`);

@@ -112,6 +112,7 @@ function _trySpread (candidate: any) {
     ];
   }
   const path = require("path");
+
   return [
     require(path.join(process.cwd(), global.revelationPath, options)),
     rest

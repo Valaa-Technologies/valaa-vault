@@ -11,6 +11,7 @@ import { dumpKuery } from "~/engine/VALEK";
 import ReactRoot from "~/inspire/ui/ReactRoot";
 
 import { getGlobal, dumpObject } from "~/tools";
+import isInBrowser from "is-in-browser";
 
 /**
  * This class is the view entry point

@@ -26,10 +26,15 @@ const Valaa = getGlobal().Valaa || (getGlobal().Valaa = {});
 
 Valaa.getURIQueryField = getURIQueryField;
 
+
 Valaa.createInspireGateway = function createInspireGateway (...revelations: any[]) {
   const gatewayPromise = Valaa.createGateway(...revelations);
   return new Promise(resolve =>
       document.addEventListener("DOMContentLoaded", () => { resolve(gatewayPromise); }));
+};
+
+Valaa.createGateway = function createPerspire (...revelations: any[]) {
+  return Valaa.createGateway(...revelations);
 };
 
 export default (Valaa.createGateway = async function createGateway (...revelations: any) {

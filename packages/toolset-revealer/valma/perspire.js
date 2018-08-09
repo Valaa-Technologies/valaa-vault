@@ -1,8 +1,11 @@
 #!/usr/bin/env vlm
-
+global.self = global;
+global.name = "Perspire window";
 global.window = global;
 const path = require("path");
 const inspire = require("@valos/inspire");
+const ReactDOM = require("react-dom").default;
+const React = require("react").default;
 
 exports.command = "perspire [revelationPath]";
 exports.describe = "headless server-side environment";
@@ -27,9 +30,9 @@ exports.handler = (yargv) => {
         .then((gateway) => {
           const perspireEngine = gateway.createAndConnectViewsToDOM({
             perspireMain: {
-              name: "Valaa AWS Warlock Main",
+              name: "Valaa Local Perspire Main",
               rootLensURI: gateway.getRootPartitionURI(),
-              container: {},
+              container: global.window,
               rootId: "valaa-inspire--main-root",
               size: {
                 width: global.window.innerWidth,

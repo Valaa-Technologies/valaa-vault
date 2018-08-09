@@ -21,6 +21,8 @@ import EngineContentAPI from "~/engine/EngineContentAPI";
 import extendValaaSpaceWithEngine from "~/engine/ValaaSpace";
 
 import InspireView from "~/inspire/InspireView";
+import PerspireView from "~/inspire/PerspireView";
+
 import { registerVidgets } from "~/inspire/ui";
 import type { Revelation } from "~/inspire/Revelation";
 import extendValaaSpaceWithInspire from "~/inspire/ValaaSpace";
@@ -116,9 +118,7 @@ export default class InspireGateway extends LogEventGenerator {
 
       const rootScope = engine.getRootScope();
       const hostDescriptors = engine.getHostObjectDescriptors();
-      if (isInBrowser) {
-        extendValaaSpaceWithEngine(rootScope, hostDescriptors, engine.discourse.getSchema());
-      }
+      extendValaaSpaceWithEngine(rootScope, hostDescriptors, engine.discourse.getSchema());
       if (!viewConfig.defaultAuthorityURI) {
         extendValaaSpaceWithInspire(rootScope, hostDescriptors);
       } else {
@@ -130,13 +130,23 @@ export default class InspireGateway extends LogEventGenerator {
         extendValaaSpaceWithInspire(rootScope, hostDescriptors, defaultAuthorityConfig, engine);
       }
       rootScope.Valaa.gateway = this;
-      ret[viewName] = new InspireView({ engine, name: `${viewConfig.name} View` })
-          .initialize(viewConfig);
-      this.warnEvent(`Opened InspireView ${viewName}`,
-          ...(!this.getDebugLevel() ? [] : [", with:",
-            "\n\tviewConfig:", viewConfig,
-            "\n\tview:", ret[viewName],
-          ]));
+      if (isInBrowser) {
+        ret[viewName] = new InspireView({ engine, name: `${viewConfig.name} View` })
+            .initialize(viewConfig);
+        this.warnEvent(`Opened InspireView ${viewName}`,
+            ...(!this.getDebugLevel() ? [] : [", with:",
+              "\n\tviewConfig:", viewConfig,
+              "\n\tview:", ret[viewName],
+            ]));
+      } else {
+        ret[viewName] = new PerspireView({ engine, name: `${viewConfig.name} View` })
+            .initialize(viewConfig);
+        this.warnEvent(`Opened PerspireView ${viewName}`,
+            ...(!this.getDebugLevel() ? [] : [", with:",
+              "\n\tviewConfig:", viewConfig,
+              "\n\tview:", ret[viewName],
+            ]));
+      }
     }
     return ret;
   }

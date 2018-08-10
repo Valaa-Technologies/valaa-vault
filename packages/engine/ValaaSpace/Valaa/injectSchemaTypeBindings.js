@@ -20,6 +20,17 @@ import { derivedId, dumpify, dumpObject, invariantifyObject, outputCollapsedErro
 export const defaultOwnerCoupledField = Symbol("Valaa.defaultOwnerCoupledField");
 
 export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) {
+  scope.Blob = Object.assign(Object.create(BuiltinTypePrototype), {
+    name: "Blob",
+    ".new": function new_ (valker: Valker, innerScope: ?Object, initialState: ?Object) {
+      if (!initialState || !initialState.id) {
+        throw new Error("initialState.id missing when trying to create a Blob");
+      }
+      return valker.follower.create("Blob", undefined,
+          { transaction: valker, id: initialState.id });
+    },
+  });
+
   scope.ResourceStub = Valaa.ResourceStub = Object.assign(Object.create(BuiltinTypePrototype), {
     name: "ResourceStub",
   });

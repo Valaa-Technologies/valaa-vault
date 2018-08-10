@@ -4,7 +4,6 @@
 // at the moment it still is the top level entry point, but this might change.
 import "@babel/polyfill";
 import injectTapEventPlugin from "react-tap-event-plugin";
-import URL from "url-parse";
 
 import { getURIQueryField } from "~/raem/tools/PartitionURI";
 
@@ -18,8 +17,6 @@ import { exportValaaPlugin, getGlobal, Logger, LogEventGenerator, outputError }
 
 import * as mediaDecoders from "./mediaDecoders";
 import "./inspire.css";
-
-window.URL = URL;
 
 injectTapEventPlugin();
 

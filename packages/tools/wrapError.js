@@ -240,7 +240,7 @@ function unhandledError (error) {
   } else {
     errorLogger.error(header);
     errorLogger.error(`  Irregular error info:`,
-        (error && typeof error === "object" && (error.stack || error.message)) || error);
+        (error && (typeof error === "object") && (error.stack || error.message)) || error);
   }
 }
 

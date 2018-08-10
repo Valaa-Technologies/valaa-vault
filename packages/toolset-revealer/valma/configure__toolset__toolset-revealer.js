@@ -20,7 +20,7 @@ exports.builder = (yargs) => yargs.options({
   },
 });
 
-exports.handler = (yargv) => {
+exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const toolsetWebpackConfig = vlm.getToolsetConfig(vlm.toolset, "webpack");
   const templates = vlm.path.join(__dirname, "../templates/{.,}*");
@@ -42,6 +42,11 @@ exports.handler = (yargv) => {
     });
     vlm.instruct(`! Edit toolsets.json:['${vlm.theme.package(vlm.toolset
         )}'].webpack to further configure webpack entry and output locations.`);
+  }
+  if (!vlm.getPackageConfig("devDependencies", "@valos/inspire")) {
+    if (await vlm.inquireConfirm(`Install @valos/inspire in devDependencies?`)) {
+      await vlm.execute("yarn add -W --dev @valos/inspire");
+    }
   }
   return true;
 };

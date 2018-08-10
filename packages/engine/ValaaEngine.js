@@ -313,7 +313,7 @@ export default class ValaaEngine extends Cog {
 
   _createNewPartition (directive: Object) {
     this.engine.prophet.acquirePartitionConnection(
-        directive.id.partitionURI(), { createNewPartition: true });
+        directive.id.getPartitionURI(), { createNewPartition: true });
   }
 
   _resolveIdForConstructDirective (directive, options: VALKOptions,
@@ -326,7 +326,7 @@ export default class ValaaEngine extends Cog {
       partitionURI = createPartitionURI(initialState.partitionAuthorityURI, id.rawId());
     } else if (initialState.owner || initialState.source) {
       partitionURI = evaluateToCommandData(initialState.owner || initialState.source, options)
-          .partitionURI();
+          .getPartitionURI();
     }
     directive.id = !partitionURI ? id : id.immutatePartitionURI(partitionURI);
     return directive.id;

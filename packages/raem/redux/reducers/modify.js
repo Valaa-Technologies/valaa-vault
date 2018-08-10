@@ -244,11 +244,11 @@ function createResourceVRefDeserializer (fieldInfo) {
     if (!serialized) return null;
     const resourceId = bard.bindFieldVRef(serialized, fieldInfo);
     // Non-ghosts have the correct partitionURI in the Resource.id itself
-    if (resourceId.partitionURI() || !resourceId.isGhost()) return resourceId;
+    if (resourceId.getPartitionURI() || !resourceId.isGhost()) return resourceId;
     // Ghosts have the correct partitionURI in the host Resource.id
     const ghostPath = resourceId.getGhostPath();
     const hostId = bard.bindObjectId(ghostPath.headHostRawId());
-    return resourceId.immutatePartitionURI(hostId.partitionURI());
+    return resourceId.immutatePartitionURI(hostId.getPartitionURI());
   }
   return deserializeResourceVRef;
 }
@@ -429,7 +429,7 @@ const customSetFieldHandlers = {
         "prototype self-recursion for %s", bard.objectTransient);
   },
   owner (bard: Bard, fieldInfo: Object, value: any, newOwnerId: any) {
-    if ((newOwnerId && newOwnerId.partitionURI()) !== bard.objectId.partitionURI()) {
+    if ((newOwnerId && newOwnerId.getPartitionURI()) !== bard.objectId.getPartitionURI()) {
       bard.refreshPartition = true;
     }
     let i = 0;
@@ -448,7 +448,7 @@ const customSetFieldHandlers = {
   partitionAuthorityURI (bard: Bard, fieldInfo: Object, newPartitionAuthorityURIString: ?string) {
     const newPartitionURI = newPartitionAuthorityURIString &&
         createPartitionURI(newPartitionAuthorityURIString, bard.objectId.rawId());
-    const oldPartitionURI = bard.objectId.partitionURI();
+    const oldPartitionURI = bard.objectId.getPartitionURI();
     if ((newPartitionURI && newPartitionURI.toString()) !==
         (oldPartitionURI && oldPartitionURI.toString())) {
       bard.refreshPartition = true;

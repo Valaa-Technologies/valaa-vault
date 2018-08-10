@@ -114,12 +114,12 @@ export default class ValaaReference {
   isInactive (): ?boolean { return this._isInactive || false; }
   setInactive (value: boolean = true): ?boolean { this._isInactive = value; }
 
-  partitionURI (): ?ValaaURI { return this._partitionURI; }
-  partitionRawId (): ?string {
+  getPartitionURI (): ?ValaaURI { return this._partitionURI; }
+  getPartitionRawId (): ?string {
     try {
       return getPartitionRawIdFrom(this._partitionURI);
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .partitionRawId(), with:`,
+      throw wrapError(error, `During ${this.debugId()}\n .getPartitionRawId(), with:`,
           "\n\tpartitionURI:", this._partitionURI);
     }
   }
@@ -442,13 +442,13 @@ export function tryCoupledFieldFrom (idData: IdData | JSONIdData): ?string {
 
 export const tryPartitionURIFrom = vdocorate(`
   Returns partitionURI from given idData or undefined if no valid
-  partitionURI can be found. If idData is a VRef its .partitionURI() is
+  partitionURI can be found. If idData is a VRef its .getPartitionURI() is
   called and used as the candidate.
   @export
   @param {IdData} idData
   @returns null
 `)((idData: IdData | JSONIdData): ?ValaaURI =>
-    (idData instanceof VRef ? idData.partitionURI()
+    (idData instanceof VRef ? idData.getPartitionURI()
         : (Array.isArray(idData) && idData[3]) ? createPartitionURI(idData[3])
         : undefined));
 

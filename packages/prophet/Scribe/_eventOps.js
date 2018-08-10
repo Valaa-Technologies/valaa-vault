@@ -177,10 +177,10 @@ export function _reprocessAction (connection: ScribePartitionConnection, event: 
   } else if (event.typeName === "MediaType") {
     connection._prophet._mediaTypes[getRawIdFrom(event.id)] = event.initialState;
   } else if ((event.initialState !== undefined) || (event.sets !== undefined)) {
-    if (getRawIdFrom(event.id) === connection.partitionRawId()) {
+    if (getRawIdFrom(event.id) === connection.getPartitionRawId()) {
       const newName = (event.initialState && event.initialState.name)
           || (event.sets && event.sets.name);
-      if (newName) connection._name = `'${newName}'/${connection.partitionURI().toString()}`;
+      if (newName) connection._name = `'${newName}'/${connection.getPartitionURI().toString()}`;
     }
     if (event.typeName === "Media") {
       return connection._reprocessMedia(event, retrieveMediaContent, rootEvent);

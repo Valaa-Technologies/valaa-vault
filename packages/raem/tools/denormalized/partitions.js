@@ -91,7 +91,7 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
     if (!bard.story.isBeingUniversalized || !ref) return undefined;
     if (ref.isInactive()) throw new Error("Cannot modify an inactive resource");
     let smallestNonGhostId = ref;
-    partitionURI = smallestNonGhostId.partitionURI();
+    partitionURI = smallestNonGhostId.getPartitionURI();
     if (!partitionURI && smallestNonGhostId.isGhost()) {
       const hostRawId = smallestNonGhostId.getGhostPath().headHostRawId();
       const resolver = Object.create(bard);
@@ -150,15 +150,15 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
 }
 
 export function resolvePartitionURI (resolver: Resolver, resourceId: VRef) {
-  if (!resourceId.isGhost()) return resourceId.partitionURI();
-  return resolver.bindObjectId(resourceId.getGhostPath().headHostRawId()).partitionURI();
+  if (!resourceId.isGhost()) return resourceId.getPartitionURI();
+  return resolver.bindObjectId(resourceId.getGhostPath().headHostRawId()).getPartitionURI();
 }
 
 export function setCreatedObjectPartition (mutableTransient: Transient) {
   const transientId = mutableTransient.get("id");
   const partitionURI = determineNewObjectPartition(mutableTransient, transientId);
   if (!partitionURI) return;
-  const currentURI = transientId.partitionURI();
+  const currentURI = transientId.getPartitionURI();
   if (partitionURI.toString() !== (currentURI && currentURI.toString())) {
     transientId.setPartitionURI(partitionURI);
   }
@@ -168,7 +168,7 @@ export function setModifiedObjectPartitionAndUpdateOwneeObjectIdPartitions (
     bard: Bard, mutableTransient: Transient) {
   const transientId = mutableTransient.get("id");
   const partitionURI = determineNewObjectPartition(mutableTransient, transientId);
-  const oldPartitionURI = transientId.partitionURI();
+  const oldPartitionURI = transientId.getPartitionURI();
   if ((partitionURI && partitionURI.toString()) !==
       (oldPartitionURI && oldPartitionURI.toString())) {
     mutableTransient.set("id", transientId.immutatePartitionURI(partitionURI));
@@ -193,7 +193,7 @@ export function determineNewObjectPartition (mutableTransient: Transient, transi
   if (partitionAuthorityURIString) {
     partitionURI = createPartitionURI(partitionAuthorityURIString, transientId.rawId());
   } else if (ownerId) {
-    partitionURI = ownerId.partitionURI();
+    partitionURI = ownerId.getPartitionURI();
   } else {
     // Don't set partition: this might be a resource which part of a TRANSACTED and has its owner
     // subsequently set.
@@ -210,7 +210,7 @@ function _updateOwnlingPartitions (bard: Bard, transient: Transient,
       if (entryId.isGhost()
         // specifying "Resource" and not "ResourceStub" skips inactive Resource's as a side-effect.
           || !partitionerBard.tryGoToTransientOfRawId(entryId.rawId(), "Resource")
-          || (partitionerBard.objectId.partitionURI() !== oldPartitionURI)) return null;
+          || (partitionerBard.objectId.getPartitionURI() !== oldPartitionURI)) return null;
       mutableState.setIn([partitionerBard.typeName, entryId.rawId(), "id"],
               entryId.immutatePartition(newPartitionURI));
       return partitionerBard.objectTransient;

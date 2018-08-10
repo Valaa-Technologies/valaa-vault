@@ -103,17 +103,17 @@ export default class Resolver extends LogEventGenerator {
       invariantify(object, `Can't find ${rawId}:${typeName} in corpus`,
           "\n\twhile trying to bind id:", id);
       const boundId = object.get("id");
-      if (boundId.isInactive() && !boundId.partitionURI() && idVRef.partitionURI()) {
+      if (boundId.isInactive() && !boundId.getPartitionURI() && idVRef.getPartitionURI()) {
         // TODO(iridian): Refactor the object id partitionURI management. The thing that's going on
         // here is that inactive object stubs which originate from ghost paths don't have
         // partitionURI's specified because ghost path entries don't have them. Instead the
         // partitionURI must be sourced from the actual "prototype" field of the topmost instance.
-        boundId.setPartitionURI(idVRef.partitionURI());
+        boundId.setPartitionURI(idVRef.getPartitionURI());
       }
       return (!bindPartition || !boundId.isGhost())
           ? boundId
           : boundId.immutatePartitionURI(
-              this.fork().bindObjectId(boundId.getGhostPath().headHostRawId()).partitionURI());
+              this.fork().bindObjectId(boundId.getGhostPath().headHostRawId()).getPartitionURI());
     } catch (error) {
       throw this.wrapErrorEvent(error, `bindObjectId(${rawId}:${typeName})`,
           "\n\tid:", ...dumpObject(id),
@@ -235,7 +235,7 @@ export default class Resolver extends LogEventGenerator {
     // if the id is part of an active partition but still missing from corpus, that's a violation.
     const ref = tryHostRef(id);
     if (ref) {
-      const partitionURI = ref.partitionURI();
+      const partitionURI = ref.getPartitionURI();
       if (partitionURI) {
         ref.setInactive();
         /*

@@ -101,7 +101,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   _notifyProphetOfCommandCount () {
-    this._prophet.setConnectionCommandCount(this.partitionURI().toString(),
+    this._prophet.setConnectionCommandCount(this.getPartitionURI().toString(),
         Math.max(0,
             (this.getLastCommandEventId() + 1) - this._getFirstCommandEventId()));
   }

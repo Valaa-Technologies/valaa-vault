@@ -420,7 +420,7 @@ export default class Valker extends Resolver {
     const ret = typeName && this.getTypeIntro(typeName);
     if (typeof ret === "undefined") {
       if (typeName === "InactiveResource") {
-        const partitionURI = object.get("id").partitionURI();
+        const partitionURI = object.get("id").getPartitionURI();
         throw new MissingPartitionConnectionsError(`Missing active partition connections: '${
             partitionURI.toString()}'`, [partitionURI]);
       }

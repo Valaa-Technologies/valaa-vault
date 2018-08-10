@@ -140,7 +140,7 @@ export function createOracle (scribe: Scribe) {
 
 export function clearOracleScribeDatabases (oracle: Oracle) {
   return clearScribeDatabases(Object.values(oracle.getFullPartitionConnections())
-      .map(connection => connection.partitionURI().toString()));
+      .map(connection => connection.getPartitionURI().toString()));
 }
 
 

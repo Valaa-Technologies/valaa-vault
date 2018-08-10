@@ -168,7 +168,7 @@ export default class Vrapper extends Cog {
   }
 
   isPartitionRoot () {
-    const partitionURI = this[HostRef].partitionURI();
+    const partitionURI = this[HostRef].getPartitionURI();
     if (!partitionURI) return false;
     return getPartitionRawIdFrom(partitionURI) === this[HostRef].rawId();
   }
@@ -403,14 +403,14 @@ export default class Vrapper extends Cog {
       if (!this.isResource()) {
         throw new Error(`Non-resource Vrapper's cannot have partition connections`);
       }
-      partitionURI = this[HostRef].partitionURI();
+      partitionURI = this[HostRef].getPartitionURI();
       if (!partitionURI) {
         nonGhostOwnerRawId = this[HostRef].getGhostPath().headHostRawId()
             || this[HostRef].rawId();
         const transient = (options.transaction || this.engine.discourse)
             .tryGoToTransientOfRawId(nonGhostOwnerRawId, "Resource");
         if (transient) {
-          partitionURI = transient && transient.get("id").partitionURI();
+          partitionURI = transient && transient.get("id").getPartitionURI();
           if (!partitionURI) {
             const authorityURIString = transient.get("partitionAuthorityURI");
             partitionURI = authorityURIString
@@ -535,7 +535,7 @@ export default class Vrapper extends Cog {
       const targetId = transient.get("target");
       if (!targetId) targetText = "<null target>";
       else if (targetId.isInactive()) {
-        targetText = `<in inactive '${targetId.partitionURI()}'>`;
+        targetText = `<in inactive '${targetId.getPartitionURI()}'>`;
       } else {
         const target = this.get("target", options);
         targetText = (target && debugId(target, options)) || "<target not found>";
@@ -754,7 +754,7 @@ export default class Vrapper extends Cog {
     this.requireActive(options);
     const id = transaction.bindObjectId(this.getId(), this._typeName, true);
     options.head = this;
-    const partitionURI = id.partitionURI();
+    const partitionURI = id.getPartitionURI();
     options.partitionURIString = partitionURI && partitionURI.toString();
     return { transaction, id };
   }

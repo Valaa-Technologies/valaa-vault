@@ -50,10 +50,10 @@ describe("partitions", () => {
     }),
   ];
 
-  it("CREATED has correct partition and id.partitionURI for top-level partition children", () => {
+  it("CREATED has correct partition and id.getPartitionURI() for top-level children", () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createBlockA);
     const grandparent = harness.run(vRef("A_grandparent"), null);
-    const grandparentPartitionURI = harness.run(grandparent, "id").partitionURI();
+    const grandparentPartitionURI = harness.run(grandparent, "id").getPartitionURI();
 
     expect(grandparentPartitionURI)
         .toEqual(createLocalPartitionURIFromRawId("A_grandparent"));
@@ -62,21 +62,21 @@ describe("partitions", () => {
     expect(harness.run(grandparent, "partition"))
         .toBe(grandparent);
 
-    expect(harness.run(vRef("A_parent"), "id").partitionURI())
+    expect(harness.run(vRef("A_parent"), "id").getPartitionURI())
         .toBe(grandparentPartitionURI);
     expect(harness.run(vRef("A_parent"), "partition"))
         .toBe(grandparent);
 
-    expect(harness.run(vRef("A_child1"), "id").partitionURI())
+    expect(harness.run(vRef("A_child1"), "id").getPartitionURI())
         .toBe(grandparentPartitionURI);
     expect(harness.run(vRef("A_child1"), "partition"))
         .toBe(grandparent);
   });
 
-  it("CREATED has correct partition and id.partitionURI for non-top-level partition", () => {
+  it("CREATED has correct partition and id.getPartitionURI() for non-top-level partition", () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createBlockA);
     const child2 = harness.run(vRef("A_child2"), null);
-    const child2PartitionURI = harness.run(child2, "id").partitionURI();
+    const child2PartitionURI = harness.run(child2, "id").getPartitionURI();
 
     expect(child2PartitionURI)
         .toEqual(createMemoryPartitionURIFromRawId("A_child2"));
@@ -85,12 +85,12 @@ describe("partitions", () => {
     expect(harness.run(child2, "partition"))
         .toBe(child2);
 
-    expect(harness.run(vRef("A_grandchild"), "id").partitionURI())
+    expect(harness.run(vRef("A_grandchild"), "id").getPartitionURI())
         .toBe(child2PartitionURI);
     expect(harness.run(vRef("A_grandchild"), "partition"))
         .toBe(child2);
 
-    expect(harness.run(vRef("A_grandownee"), "id").partitionURI())
+    expect(harness.run(vRef("A_grandownee"), "id").getPartitionURI())
         .toBe(child2PartitionURI);
     expect(harness.run(vRef("A_grandownee"), "partition"))
         .toBe(child2);
@@ -128,9 +128,9 @@ describe("partitions", () => {
 
     const aGrandParent = harness.run(vRef("A_grandparent"), null);
     const bTestRoot = harness.run(vRef("B_testRoot"), null);
-    expect(aGrandParent.partitionRawId())
+    expect(aGrandParent.getPartitionRawId())
         .toEqual("A_grandparent");
-    expect(bTestRoot.partitionRawId())
+    expect(bTestRoot.getPartitionRawId())
         .toEqual("B_testRoot");
 
     expect(harness.run(vRef("A_grandparent"), ["§->", "siblings", 0]))

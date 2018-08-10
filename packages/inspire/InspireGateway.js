@@ -97,7 +97,7 @@ export default class InspireGateway extends LogEventGenerator {
   }
 
   getRootPartitionURI () {
-    return String(this.entryPartitionConnection.partitionURI());
+    return String(this.entryPartitionConnection.getPartitionURI());
   }
 
   createAndConnectViewsToDOM (viewConfigs: {

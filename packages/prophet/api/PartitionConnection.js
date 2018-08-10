@@ -37,12 +37,12 @@ export default class PartitionConnection extends LogEventGenerator {
   getName (): string {
     return super.getName()
         || (this._upstreamConnection && this._upstreamConnection.getName())
-        || this.partitionURI().toString();
+        || this.getPartitionURI().toString();
   }
   getProphet (): Prophet { return this._prophet; }
 
-  partitionURI (): ValaaURI { return this._partitionURI; }
-  partitionRawId (): string { return getPartitionRawIdFrom(this._partitionURI); }
+  getPartitionURI (): ValaaURI { return this._partitionURI; }
+  getPartitionRawId (): string { return getPartitionRawIdFrom(this._partitionURI); }
 
   isRemote () { return !this.isLocal() && !this.isMemory(); }
   isLocal () { return this._partitionURI.protocol === "valaa-local:"; }

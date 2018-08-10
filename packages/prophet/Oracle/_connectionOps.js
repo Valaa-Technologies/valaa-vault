@@ -64,7 +64,7 @@ export function _acquirePartitionConnection (oracle: Oracle, partitionURI: Valaa
 export async function _connect (connection: OraclePartitionConnection,
     initialNarrateOptions: Object, onConnectData: Object) {
   const scribeConnection = await connection._prophet._upstream.acquirePartitionConnection(
-      connection.partitionURI(), { callback: connection.createReceiveTruth("scribeUpstream") });
+      connection.getPartitionURI(), { callback: connection.createReceiveTruth("scribeUpstream") });
   connection.transferIntoDependentConnection("scribeUpstream", scribeConnection);
   connection.setUpstreamConnection(scribeConnection);
 
@@ -81,10 +81,10 @@ export async function _connect (connection: OraclePartitionConnection,
 
   if (!actionCount && (onConnectData.createNewPartition === false)) {
     throw new Error(`No actions found when connecting to an existing partition '${
-        connection.partitionURI().toString()}'`);
+        connection.getPartitionURI().toString()}'`);
   } else if (actionCount && (onConnectData.createNewPartition === true)) {
     throw new Error(`Existing actions found when trying to create a new partition '${
-        connection.partitionURI().toString()}'`);
+        connection.getPartitionURI().toString()}'`);
   }
   if ((onConnectData.requireLatestMediaContents !== false)
       && (ret.mediaRetrievalStatus || { latestFailures: [] }).latestFailures.length) {
@@ -101,11 +101,11 @@ export async function _connect (connection: OraclePartitionConnection,
 
 function _connectToAuthorityProphet (connection: OraclePartitionConnection) {
   connection._authorityProphet = connection._prophet._authorityNexus
-      .obtainAuthorityProphetOfPartition(connection.partitionURI());
+      .obtainAuthorityProphetOfPartition(connection.getPartitionURI());
   if (!connection._authorityProphet) return undefined;
   return (connection._authorityConnection = (async () => {
     const authorityConnection = await connection._authorityProphet
-        .acquirePartitionConnection(connection.partitionURI(), {
+        .acquirePartitionConnection(connection.getPartitionURI(), {
           callback: connection.createReceiveTruth("authorityUpstream"),
           subscribeRemote: false, narrateRemote: false,
         });

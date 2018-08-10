@@ -303,7 +303,7 @@ async function _takeNextPendingDowstreamTruth (connection: OraclePartitionConnec
         "\n\t-----------------------------------------------------------------------------------",
         "\n\t- Media retrieval failed, event log playback CONTINUES, however                   -",
         "\n\t- some Media MIGHT NOT BE IMMEDIATELY AVAILABLE                                   -",
-        "\n\t- affected partition:", connection.getName(), connection.partitionRawId(),
+        "\n\t- affected partition:", connection.getName(), connection.getPartitionRawId(),
         "\n\t-----------------------------------------------------------------------------------",
         "\n\t-----------------------------------------------------------------------------------",
         "\n\t",

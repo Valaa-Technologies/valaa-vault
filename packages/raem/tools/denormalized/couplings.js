@@ -140,7 +140,7 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
     } else {
       if (coupling.preventsDestroy && (actionType === DESTROY_COUPLING)) {
         // Check if remote is in other partition as they can't prevent destroy, otherwise throw.
-        const partitionURI = remoteVRef.partitionURI();
+        const partitionURI = remoteVRef.getPartitionURI();
         // Missing partitionURI means local partition reference, so throw.
         if (!partitionURI || (partitionURI.toString() === bard.destroyedResourcePartition)) {
           const nameBard = Object.create(bard);

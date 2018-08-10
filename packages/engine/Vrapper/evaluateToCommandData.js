@@ -44,7 +44,7 @@ export default function evaluateToCommandData (object: ?any, options:
     // Valaa reference
     if (!options.transaction) return id;
     const connectedId = options.transaction.bindFieldVRef(id, { bindPartition: true });
-    const partitionURI = connectedId.partitionURI();
+    const partitionURI = connectedId.getPartitionURI();
     if (partitionURI && (partitionURI.toString() === options.partitionURIString)) {
       return connectedId.immutatePartitionURI();
     }

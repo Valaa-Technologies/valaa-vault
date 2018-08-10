@@ -1,6 +1,7 @@
-module.exports = { "...": { heading:
-  "ValOS style guide",
-},
+module.exports = {
+  "...": { heading:
+    "ValOS style guide",
+  },
   0: [
     `[//]: # (don't edit auto-generated file - generated at @valos/vault root with)`,
     `[//]: # (vlm --markdown . require packages/toolset-vault/template.vdon/STYLE.vdon > STYLE.md)`,
@@ -22,14 +23,16 @@ module.exports = { "...": { heading:
     without affecting Valaa compatibility.`,
   ],
 
-  semanticPrinciples: { "...": { indexAfter: 0, heading:
-    "Semantic principles",
-  },
+  semanticPrinciples: {
+    "...": { indexAfter: 0, heading:
+      "Semantic principles",
+    },
     0: `This section lists generic semantic ValOS design principles and
       their rationales.`,
-    useECMAScript: ["...", { indexAfter: 0, heading:
-      `Use ECMAScript everywhere`,
-    },
+    useECMAScript: [
+      "...", { indexAfter: 0, heading:
+        `Use ECMAScript everywhere`,
+      },
       `ECMAScript should be used as the text-based turing language of
       choice in all ValOS contexts (ValaaScript is acceptable as
       an ECMAScript derivative).`,
@@ -80,9 +83,10 @@ module.exports = { "...": { heading:
         ],
       }] },
     ],
-    useJSON: ["...", { indexAfter: "useECMAScript", heading:
-      `Create custom dialects on top I-JSON for data interchange`,
-    },
+    useJSON: [
+      "...", { indexAfter: "useECMAScript", heading:
+        `Create custom dialects on top I-JSON for data interchange`,
+      },
       `JSON is the pre-eminent ValOS configuration and data interchange
       format. All ValOS tools must be able to both consume and produce
       their essential data input and output as`,
@@ -117,9 +121,10 @@ module.exports = { "...": { heading:
       // Well, might make use of, anyway. Right now only valaa.json uses it.
       // Also, revelation and universal command dialects are barely 'named' or specified.
     ],
-    useBase64URL: ["...", { indexAfter: "useJSON", heading:
-      `Use base64url to serialize binary data as text`,
-    },
+    useBase64URL: [
+      "...", { indexAfter: "useJSON", heading:
+        `Use base64url to serialize binary data as text`,
+      },
       `[base64url](https://tools.ietf.org/html/rfc4648#section-5)`,
       `(a base64 variant) must be used when binary content needs to be
       encoded as text. While main binary content is stored inside Media
@@ -130,20 +135,22 @@ module.exports = { "...": { heading:
     ],
   },
 
-  informalGuidelines: { "...": { indexAfter: "semanticPrinciples", heading:
-    "Informal text production style guidelines",
-  },
+  informalGuidelines: {
+    "...": { indexAfter: "semanticPrinciples", heading:
+      "Informal text production style guidelines",
+    },
     0: `This section lists informal style rules which relate to
       production of text. That text can be human or machine written
       code, command line or log output, or even documentation. Any rule
       that can, should be expressed as a formal eslint or editor rule.`,
 
-    cssStyle: { "...": { indexAfter: 0, heading:
-      `Style CSS according to camelCase BEM.info rules`,
-    },
+    cssStyle: {
+      "...": { indexAfter: 0, heading:
+        `Style CSS according to camelCase BEM.info rules`,
+      },
       0: `[BEM (Block, Element, Modifier)](https://en.bem.info/methodology/quick-start/)
         is a component-based approach to web development. ValOS uses
-        [its camelCase naming convention variant](https://en.bem.info/methodology/naming-convention/)
+        [the camelCase naming convention variant](https://en.bem.info/methodology/naming-convention/)
         with option library-scope prefix described below.
         BEM principles should be followed more generally as well whenever
         applicable.`,
@@ -151,9 +158,10 @@ module.exports = { "...": { heading:
       // Especially Inspire UI component id creation is very much not
       // BEM. The whole inspure React/DOM approach should be
       // re-evaluated against this anyway.
-      scopePrefixes: ["...", { indexAfter: 0, heading:
-        `Scope prefixes are separated from Block name with two underscores`
-      },
+      scopePrefixes: [
+        "...", { indexAfter: 0, heading:
+          `Scope prefixes are separated from Block name with two underscores`
+        },
         `In addition to its own styles @valos/inspire hosts several
         programs within the same page which share the same global
         css namespace. BEM naming is extended to allow a block name
@@ -161,9 +169,10 @@ module.exports = { "...": { heading:
         'inspire__' to prevent conflicts.`
       ],
     },
-    lineWidth: ["...", { indexAfter: "cssStyle", heading:
-      `Formatting non-structured inline documentation in CLI contexts`,
-    },
+    lineWidth: [
+      "...", { indexAfter: "cssStyle", heading:
+        `Formatting non-structured inline documentation in CLI contexts`,
+      },
       `One of the two options must be used for newlines in individual
       documentation pieces:`,
       { newlineStyles: [{
@@ -174,9 +183,10 @@ module.exports = { "...": { heading:
       tool or document.`,
     ],
 
-    collectionPluralization: ["...", { indexAfter: "lineWidth", heading:
-      `Pluralize collections, singularize things`,
-    },
+    collectionPluralization: [
+      "...", { indexAfter: "lineWidth", heading:
+        `Pluralize collections, singularize things`,
+      },
       // TODO(iridian): I'm not really happy with this section: it's
       // a long essay kinda sorta self-evident and vacuous. But I did
       // end up asking myself many times on when to pluralize so I
@@ -241,5 +251,107 @@ db.updateNoSQLTable("person", { name: "mack", favorites });`
       `@valos/tools is plural as it is a collection of largely
       independent tools.`,
     ],
+  },
+
+  gitWorkflows: {
+    "...": { indexAfter: "informalGuidelines", heading:
+      `Git branch, versioning and release workflows`
+    },
+    0: [
+      `The following guidelines describe the current practice but
+      should be still considered only as a proposal.`
+    ],
+    versioning: {
+      "...": { indexAfter: 0, heading:
+        `Vault semver version number is shared between all packages`
+      },
+      0: [
+        `Vault version numbers follow [semver 2](https://semver.org/spec/v2.0.0.html)
+        specification.`,
+        `Vault uses lerna locked mode versioning for its packages by
+        default. Only actually modified packages will have their
+        version numbers updated when released. When a package is
+        updated however the version number then potentially jumps
+        over any skipped versions to match the shared vault version.`,
+      ],
+    },
+    branches: {
+      "...": { indexAfter: "versioning", heading:
+        `Vault git branch naming and semantics`
+      },
+      0: "Branches.",
+      release: [
+        "...", { indexAfter: 0, heading:
+          `*release/_<major>_._<minor>_* branches track the supported releases`
+        },
+        `These branches will only get (possibly back-ported) patch
+        commits and are never rebased.`,
+        `The version number in lerna.json will not have prerelease
+        or build fields and its lerna auto-increment is configured
+        as patch.`,
+        `Tests, lints and any other release conditions must always
+        pass.`,
+        "",
+        `A release branch is deleted once support for that
+        particular release ends, ie. when that release will no
+        longer receive patches.`,
+      ],
+      master: [
+        "...", { indexAfter: "release", heading:
+          `*master* tracks latest release branch`
+        },
+        `An alias for the most recent release branch. Follows all
+        the rules of a release branch.`,
+      ],
+      prerelease: [
+        "...", { indexAfter: "release", heading:
+          `*prerelease/_<major>_._<minor>_* branch tracks the upcoming release`
+        },
+        `This branch (there shall be only one) is the target of
+        current feature development.`,
+        `It's never rebased except optionally once right before
+        release. It receives patch commits from the most current
+        release branch via merges. It receives feature commits and
+        pull requests via rebase-merges.`,
+        "",
+        `Its main version number in lerna.json and package.json
+        has a *-prerelease._<index>_* suffix and its lerna
+        auto-increment is correspondingly configured as
+        prerelease.`,
+        "",
+        `When being released may be squelched and rebased on top
+        of master. Alternatively it's left as-is to be the target
+        of fast-forward later. A release commit will be added
+        to contain lerna.json and other release version number
+        changes. The branch can then be renamed as the appropriate
+        release branch, and master fast-forwarded to track it.`,
+      ],
+      feature: [
+        "...", { indexAfter: "release", heading:
+          `*feature/_<feature-name>_* branches track isolated feature development`
+        },
+        `Feature owner is free to pick whichever workflow fits the
+        dynamics of that particular feature development best.
+        No matter the workflow that is chosen the final pull
+        request must rebased on top of the prerelease branch.`,
+      ],
+      patch: [
+        "...", { indexAfter: "release", heading:
+          `*patch/_<patch-name>_ branches* track bugfixes and _quickie features_`
+        },
+        `Similar to feature branches but the target is the master
+        branch (and thus by definition the most recent release
+        branch).`,
+        "",
+        `The content must obey semver patch version rules. Note
+        that major version 0 allows patch versions to introduce new
+        functionality. These _quickie features_ facilitate rapid
+        development during prototyping stage only and thus are not
+        allowed for major versions >= 1.`,
+        // TODO(iridian, 2018-8): figure out how the versioning
+        // should behave for patch commits as they skip prerelease
+        // stages.
+      ],
+    },
   },
 };

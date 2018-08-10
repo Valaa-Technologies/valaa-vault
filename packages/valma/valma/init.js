@@ -143,7 +143,7 @@ for the listings in following phases.
 
   async function _configure () {
     while (yargv.reconfigure || !vlm.getToolsetsConfig()) {
-      const choices = (vlm.getToolsetsConfig() ? ["Skip", "reconfigure"] : ["Initialize"])
+      const choices = (vlm.getToolsetsConfig() ? ["Skip", "reconfigure"] : ["Configure"])
           .concat(["help", "quit"]);
       const answer = await vlm.inquire([{
         message: `${vlm.getToolsetsConfig() ? "Reconfigure" : "Configure"} repository with '${

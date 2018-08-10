@@ -415,7 +415,16 @@ const themes = {
       }
       return ret;
     },
-
+    matches (conditions, ...texts) {
+      return [].concat(...texts.map(text => {
+        for (const matcher of Array.isArray(conditions) ? conditions : Object.entries(conditions)) {
+          if (text.match((typeof matcher[0] === "string") ? new RegExp(matcher[0]) : matcher[0])) {
+            return this.decorateWith(matcher[1], [text]);
+          }
+        }
+        return [];
+      }));
+    },
     echo: "dim",
     warning: ["bold", "yellow"],
     error: ["bold", "red"],
@@ -780,6 +789,10 @@ module.exports
       }
       process.exit(typeof error === "number" ? error : ((error && error.code) || -1));
     });
+
+process.on("unhandledRejection", error => {
+  _vlm.exception(JSON.stringify(error, null, 2), "unhandledRejection");
+});
 
 // Only function definitions from hereon.
 

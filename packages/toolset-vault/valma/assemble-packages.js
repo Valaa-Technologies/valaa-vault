@@ -107,7 +107,7 @@ exports.handler = async (yargv) => {
     if (updatedPackages.code) {
       vlm.warn("No updated packages found, exiting",
           `(or lerna error with code ${vlm.theme.warning(updatedPackages.code)}`);
-      return;
+      return false;
     }
     updatedPackageNames = JSON.parse(updatedPackages).map(p => p.name);
   }
@@ -241,32 +241,45 @@ exports.handler = async (yargv) => {
     });
   }
 
-  const align = selections.reduce((acc, { name }) => ((acc > name.length) ? acc : name.length), 0);
   let successes = 0;
-  selections.forEach(({ name, packageConfig, packagePath, failure }) => {
+  const ret = {
+    assemblies: ["...", {
+      heading: process.argv.slice(1),
+      columns: [
+        ["package", { style: "package" }],
+        ["status", { headerStyle: ["bold", "white"], style: "green" }],
+        ["resolution", { headerStyle: ["bold", "white"], style: { matches: [
+          ["updated", ["bold", "green"]],
+          ["kept at ", ["bold", "red"]],
+          ["", ["bold", "yellow"]],
+        ], }, }],
+        ["version", { headerStyle: ["bold", "white", "version"], style: "version" }],
+        ["original", { headerStyle: ["bold", "white", "version"], style: "version" }],
+      ],
+    }],
+  };
+  ret.assemblies.push(...selections.map(({ name, packageConfig, packagePath, failure }) => {
     const newConfig = JSON.parse(vlm.shell.head({ "-n": 1000000 }, packagePath));
     if (!failure) ++successes;
-    const header = `\t${vlm.theme.package(name)}${" ".repeat(align - name.length)}:`;
-    const conclusion = failure
-        ? vlm.theme.red(`failed: ${failure}`)
-        : vlm.theme.green(
-            newConfig.version === packageConfig.version
-                ? `success: ${vlm.theme.warning(`version kept at ${
-                    vlm.theme.version(vlm.theme.bold(packageConfig.version))}`)}`
-            : yargv.versioning
-                ? `success: version updated to ${
-                    vlm.theme.version(vlm.theme.bold(newConfig.version))} from ${
-                    vlm.theme.version(packageConfig.version)}`
-                : `success: ${vlm.theme.warning(`unexpected version update to ${
-                    vlm.theme.version(vlm.theme.bold(newConfig.version))} from ${
-                    vlm.theme.version(packageConfig.version)}`)}`);
-    if (failure) vlm.error(header, conclusion);
-    else vlm.info(header, conclusion);
-  });
+    const result = {
+      package: name,
+      status: failure ? "failed" : "success",
+      resolution: failure ? "kept at " // <- note the space, it's a kludge to color red.
+          : (newConfig.version === packageConfig.version) ? "kept at" // <- no space
+          : yargv.versioning ? "updated"
+          : "unexpectedly updated",
+      version: newConfig.version,
+    };
+    if (newConfig.version !== packageConfig.version) result.original = packageConfig.version;
+    return result;
+  }));
   if (successes === selections.length) {
     vlm.info(vlm.theme.green(`Successfully assembled all packages`), "out of", selections.length,
         "selected packages");
+  } else if (!successes) {
+    vlm.error(`Failed to assemble any of the ${selections.length} selected packages`);
   } else {
-    vlm.warn(`Assembled only ${successes} out of ${selections.length} selected packages`);
+    vlm.warn(`Assembled only ${successes} out of the ${selections.length} selected packages`);
   }
+  return ret;
 };

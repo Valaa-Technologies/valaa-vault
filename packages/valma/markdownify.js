@@ -446,7 +446,8 @@ function _getLayoutProperty (lookups, ...steps) {
 function _renderTable (rowKeys, rowLookup, columns, layout, tableTheme) {
   // console.log("_renderTable, keys:", rowKeys, "\nrowLookup:", rowLookup, "\ncolumns:", columns);
   const rows = [];
-  const _escpipe = (v, column) => (column.oob ? v : ((v && v.replace(/\|/g, "\\|")) || ""));
+  const _escpipe = (v, column) => (column.oob ? v
+      : ((typeof v !== "string") ? v : v.replace(/\|/g, "\\|")) || "");
   const columnKeyLayouts = [];
   const oobColumnKeyLayouts = []; // out-of-band ie. too big to fit the table.
   columns.forEach(entry => {
@@ -457,7 +458,7 @@ function _renderTable (rowKeys, rowLookup, columns, layout, tableTheme) {
   const headerRow = !(layout && layout.hideHeaders)
       && columnKeyLayouts.map(([columnKey, columnLayout]) => ([
         _escpipe(columnLayout.text || columnKey, columnLayout),
-        columnLayout.style,
+        columnLayout.headerStyle || columnLayout.style,
       ]));
   let pendingHeaderRow = headerRow;
   for (const rowKey of rowKeys) {

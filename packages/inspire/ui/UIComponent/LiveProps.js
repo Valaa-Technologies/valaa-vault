@@ -163,7 +163,8 @@ export default class LiveProps extends UIComponent {
       const prop = this.props.elementProps[name];
       if ((typeof prop === "function") && prop.kueryId) {
         newProps[name] = prop(this.state.livePropValues);
-        if ((name.slice(0, 2) === "on") && (typeof newProps[name] !== "function")) {
+        if (((name.slice(0, 2) === "on") || (name === "refKuery"))
+            && (typeof newProps[name] !== "function")) {
           newProps[name] = getImplicitCallable(newProps[name], `props.${name}`,
               { immediate: undefined });
         }
@@ -205,9 +206,9 @@ export default class LiveProps extends UIComponent {
       elementType = ValaaScope;
       children = [];
     }
+    let ret;
     if (newProps.delegate && (Object.keys(newProps).length === 1)) {
-      return this.renderFirstAbleDelegate(newProps.delegate, undefined, "delegate");
-    }
+      ret = this.renderFirstAbleDelegate(newProps.delegate, undefined, "delegate");
     /* Only enable this section for debugging React key warnings; it will break react elsewhere
     if (elementType === ValaaScope) {
       elementType = class DebugValaaScope extends ValaaScope {};
@@ -218,19 +219,22 @@ export default class LiveProps extends UIComponent {
     /*/
     // eslint-disable-next-line
     //*/
-    if (!elementType.isUIComponent || (newProps.array == null)) {
+    } else if (!elementType.isUIComponent || (newProps.array == null)) {
       if (!newProps.key) newProps.key = this.getUIContextValue("key");
-      return _wrapElementInLiveProps(
-          this, React.createElement(elementType, newProps, ...children), focus, "focus");
+      const inter = React.createElement(elementType, newProps, ...children);
+      ret = _wrapElementInLiveProps(this, inter, focus, "focus");
+    } else {
+      const array = newProps.array;
+      if (typeof array[Symbol.iterator] !== "function") {
+        ret = this.renderLensRole("arrayNotIterableLens", array);
+      } else {
+        delete newProps.array;
+        if (children.length) newProps.children = children;
+        ret = this.renderFocusAsSequence(
+            Array.isArray(array) ? array : [...array], elementType, newProps);
+      }
     }
-    const array = newProps.array;
-    if (typeof array[Symbol.iterator] !== "function") {
-      return this.renderLensRole("arrayNotIterableLens", array);
-    }
-    delete newProps.array;
-    if (children.length) newProps.children = children;
-    return this.renderFocusAsSequence(
-        Array.isArray(array) ? array : [...array], elementType, newProps);
+    return ret;
   }
 
   _wrapInValaaExceptionProcessor (callback: Function, name: string) {

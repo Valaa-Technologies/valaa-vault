@@ -230,7 +230,14 @@ function _tryRenderMediaLens (component: UIComponent, lens: any, focus: any) {
       return undefined;
     } });
   }
-  return lens.interpretContent({ mimeFallback: "text/vsx" });
+  let content = lens.interpretContent({ mimeFallback: "text/vsx" });
+  if ((content != null) && content.__esModule) {
+    content = content.default;
+    if (content === undefined) {
+      throw new Error(`Can't find default export from media '${lens.debugId()}'`);
+    }
+  }
+  return content;
 }
 
 export function _wrapElementInLiveProps (component: UIComponent, element: Object, focus: any,
@@ -257,18 +264,21 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
 
   if ((element.type === LiveProps)
       || LiveProps.isPrototypeOf(element.type)) return undefined;
-  const { type, props, ref, key } = element;
+  const { type: elementType, props, ref, key } = element;
   const liveProps = { currentIndex: 0 };
   const livePropLookup = new Map(); // deduplicate identical kueries
-  let liveElementProps;
+  let elementProps;
   function _obtainLiveElementProps () {
-    if (!liveElementProps) liveElementProps = { ...props };
-    return liveElementProps;
+    if (!elementProps) {
+      elementProps = { ...props };
+      if (ref) elementProps.ref = ref;
+    }
+    return elementProps;
   }
   try {
     for (const propName of Object.keys(props)) {
       if ((propName === "children")
-          || (type.noPostProcess && type.noPostProcess[propName])) continue;
+          || (elementType.noPostProcess && elementType.noPostProcess[propName])) continue;
       const newProp = _postProcessProp(
           props[propName], livePropLookup, liveProps, propName, component);
       if (typeof newProp !== "undefined") {
@@ -282,67 +292,46 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
       // Rewrite ref kuery as refKuery so that LiveProps can evaluate it.
       _obtainLiveElementProps().refKuery =
           _postProcessProp(ref, livePropLookup, liveProps, "ref", component);
+      delete elementProps.ref;
     }
-    if (isUIComponentElement(element)) {
-      if (!liveElementProps) {
+
+    if (!elementProps) {
+      let parentUIContext;
+      let children;
+      if (isUIComponentElement(element)) {
         // If UIComponent has no live props and already has a uiContext/parentUIContext no
         // processing is required now: The UIComponent does its own post-processing.
         const hasUIContext = props.uiContext || props.parentUIContext;
         if ((key || !lensName) && hasUIContext) return undefined;
         // Otherwise provide the current component context as the parentUIContext for the component.
-        const newProps = { ...props };
-        delete newProps.children;
-        if (key || lensName) newProps.key = key || lensName;
-        if (!hasUIContext) newProps.parentUIContext = component.getUIContext();
-        /*
-        console.log("_tryWrapElementInLiveProps UIComponent", type.name, newProps,
-            "\n\toriginal props:", props,
-            "\n\toriginal element:", element,
-            "\n\tparent component:", component);
-        */
-        return React.createElement(type, newProps, ...arrayFromAny(props.children));
-      }
-      // UIComponent with live props does its own path kuery management, Wrapper needs to only
-      // manage the props.
-    } else if (props.hasOwnProperty("kuery")) {
-      // Non-UIComponent elements which have specified a kuery need to be managed even if there are
-      // no live props.
-      throw new Error(`DEPRECATED: props.kuery\n\tprefer: props.valaaScope.focus${
-          ""}\n\talternatively for Valaa components: props.focus${
-          ""}\n\tin component: ${component.debugId()}`);
-      /*
-      delete _obtainLiveElementProps().kuery;
-      assistantPropsOptions = {
-        name, parentUIContext: component.getUIContext(), kuery: props.kuery
-      };
-      */
-    } else if (!liveElementProps) {
-      // non-UIComponent element with no live props: post-process its children directly here.
-      const children = component.tryRenderLensSequence(props.children, focus);
-      if ((key || !lensName) && (typeof children === "undefined")) return undefined;
-      if (isPromise(children)) {
-        children.operationInfo = Object.assign(children.operationInfo || {},
-            { lensRole: "pendingChildrenLens", params: props.children });
-        return children;
+        if (!hasUIContext) parentUIContext = component.getUIContext();
+      } else {
+        // non-UIComponent element with no live props: post-process its children directly here.
+        children = component.tryRenderLensSequence(props.children, focus);
+        if ((key || !lensName) && (children === undefined)) return undefined;
+        if (isPromise(children)) {
+          children.operationInfo = Object.assign(children.operationInfo || {},
+              { lensRole: "pendingChildrenLens", params: props.children });
+          return children;
+        }
       }
       const newProps = { ...props };
+      if (ref) newProps.ref = ref;
       delete newProps.children;
+      if (parentUIContext) newProps.parentUIContext = parentUIContext;
       if (key || lensName) newProps.key = key || lensName;
-      return React.createElement(type, newProps, ...(children || arrayFromAny(props.children)));
-    } else {
-      // non-UIComponent element with live props. Prepare live wrapper kuery options.
-      // Because wrapper doesn't touch its uiContext we can forward our own to it.
+      return React.createElement(elementType, newProps,
+          ...(children || arrayFromAny(props.children)));
     }
-    let livePropsProps: any = { elementType: type, elementProps: liveElementProps };
+    let livePropsProps: any = { elementType, elementProps };
     if (liveProps.currentIndex) {
       delete liveProps.currentIndex;
       livePropsProps.liveProps = liveProps;
     }
     livePropsProps = uiComponentProps({
-      name: key ? `live-${key}` : lensName,
-      parentUIContext: component.getUIContext(),
+      name: key ? `live-${key}` : lensName, parentUIContext: component.getUIContext(),
     }, livePropsProps);
-    // console.log("_tryWrapElementInLiveProps LiveWrapper for", type.name, wrapperProps);
+    // console.log("_tryWrapElementInLiveProps LiveWrapper for", elementType.name, wrapperProps);
     /* Only enable this section for debugging React key warnings; it will break react elsewhere
     const DebugLiveProps = class DebugLiveProps extends LiveProps {};
     Object.defineProperty(DebugLiveProps, "name", {
@@ -352,7 +341,7 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
     return React.createElement(LiveProps, livePropsProps, ...arrayFromAny(props.children));
   } catch (error) {
     throw wrapError(error, `During ${component.debugId()}\n ._tryWrapElementInLiveProps(`,
-            typeof type === "function" ? type.name : type, `), with:`,
+            typeof elementType === "function" ? elementType.name : elementType, `), with:`,
         "\n\telement.props:", props,
         "\n\telement.props.children:", props && props.children,
         "\n\tpropsKueries:", liveProps,

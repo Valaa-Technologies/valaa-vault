@@ -9,7 +9,7 @@ import { HostRef, PackedHostValue, tryHostRef } from "~/raem/VALK/hostReference"
 import dumpify from "~/tools/dumpify";
 import wrapError, { dumpObject } from "~/tools/wrapError";
 import invariantify, { invariantifyString, invariantifyObject } from "~/tools/invariantify";
-import vdocorate from "~/tools/vdoc";
+import { vdocorate } from "~/tools/vdon";
 
 export type RawId = string;
 

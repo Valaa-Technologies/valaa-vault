@@ -3,7 +3,7 @@ const autoprefixer = require("autoprefixer");
 
 const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
 const CompressionPlugin = require("compression-webpack-plugin");
-const vdoc = require("@valos/tools/vdoc");
+const vdocorate = require("@valos/tools/vdon").vdocorate;
 
 // TODO(iridian): Figure out the clean and correct way to set up prod configuration; merely
 // running 'webpack -p' is not sufficient to enable isProduction, as -p only enables
@@ -29,7 +29,7 @@ if (isProduction) {
   console.info(`\n\nNON-PRODUCTION webpack inspire bundle - simple uglify + gzip\n\n`);
 }
 
-module.exports = vdoc({ "...": { heading:
+module.exports = vdocorate({ "...": { heading:
     "Shared revealer webpack.config.js configuration",
 },
   0: [`This webpack configuration file contains the shared settings

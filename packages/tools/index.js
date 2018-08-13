@@ -54,7 +54,7 @@ export const SimpleData = require("./SimpleData").default;
 
 export const thenChainEagerly = require("./thenChainEagerly").default;
 
-export { toVDoc } from "./vdoc";
+export { vdon, vdocorate } from "./vdon";
 
 export const wrapError = require("./wrapError").default;
 export const messageFromError = require("./wrapError").messageFromError;

@@ -1,13 +1,13 @@
 // @flow
 
 import { Iterable } from "immutable";
-import { vdocorate, toVDoc } from "~/tools/vdoc";
+import { vdocorate, vdon } from "~/tools/vdon";
 
 export const HostRef = Symbol("HostRef");
 export const PackedHostValue = Symbol("PackedHostValue");
 export const UnpackedHostValue = Symbol("UnpackedHostValue");
 
-export const vdoc = toVDoc({ "...": { heading:
+export const vdoc = vdon({ "...": { heading:
   "Host References point to external resources",
 },
   0: [

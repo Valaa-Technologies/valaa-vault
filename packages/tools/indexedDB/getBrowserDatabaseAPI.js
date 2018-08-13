@@ -1,5 +1,5 @@
 // @flow
-import { type DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
+import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 export function getDatabaseAPI (): DatabaseAPI {
   return {

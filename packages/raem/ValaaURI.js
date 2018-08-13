@@ -2,10 +2,10 @@
 
 import ValaaURI from "url-parse";
 import { invariantifyString, invariantifyObject } from "~/tools/invariantify";
-import { toVDoc } from "~/tools/vdoc";
+import { vdon } from "~/tools/vdon";
 import wrapError from "~/tools/wrapError";
 
-export const vdoc = toVDoc({ "...": { heading:
+export const vdoc = vdon({ "...": { heading:
   "ValaaURI's refer to authorities, partitions, resources and their sub-aspects",
 },
   0: [

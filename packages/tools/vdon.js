@@ -1,6 +1,5 @@
-module.exports = vdocorate;
-
-module.exports.toVDoc = toVDoc;
+module.exports = vdon;
+module.exports.vdon = vdon;
 module.exports.vdocorate = vdocorate;
 
 /**
@@ -10,11 +9,10 @@ module.exports.vdocorate = vdocorate;
  * @returns
  */
 function vdocorate (jsdocVDON) {
-  const vdoc = toVDoc(jsdocVDON);
+  const value = vdon(jsdocVDON);
   return function vdocDecorator (target, memberName, descriptor) {
     Object.defineProperty(descriptor ? descriptor.value : target,
-        "vdoc",
-        { value: vdoc, enumerable: false, writable: true, configurable: true });
+        "vdoc", { value, enumerable: false, writable: true, configurable: true });
     return descriptor || target;
   };
 }
@@ -25,9 +23,9 @@ function vdocorate (jsdocVDON) {
  * @param {*} jsdocVDON
  * @returns
  */
-function toVDoc (jsdocVDON) {
+function vdon (jsdocVDON) {
   if (typeof jsdocVSON === "string") {
-    return toVDoc(jsdocVDON.split(/\s*\n\s*/g));
+    return vdon(jsdocVDON.split(/\s*\n\s*/g));
   }
   if (Array.isArray(jsdocVDON)) {
     return jsdocVDON.map(entry_ => {

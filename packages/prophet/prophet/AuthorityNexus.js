@@ -68,8 +68,7 @@ export default class AuthorityNexus extends LogEventGenerator {
     return this._tryAuthorityURIFromPartitionURI(partitionURI, { require: true });
   }
 
-  _tryAuthorityURIFromPartitionURI (partitionURI: ValaaURI, { require }: Object = {}
-      ): ValaaURI {
+  _tryAuthorityURIFromPartitionURI (partitionURI: ValaaURI, { require }: Object = {}): ValaaURI {
     let schemeModule;
     try {
       schemeModule = this.trySchemeModule(partitionURI.protocol.slice(0, -1), { require });

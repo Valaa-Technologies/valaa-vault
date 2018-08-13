@@ -12,7 +12,7 @@ import FDBCursor from "fake-indexeddb/lib/FDBCursor";
 import FDBCursorWithValue from "fake-indexeddb/lib/FDBCursorWithValue";
 import FDBKeyRange from "fake-indexeddb/lib/FDBKeyRange";
 
-import { type DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
+import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 /**
  * Returns a mocked IndexedDB API that can be passed around to the Scribe section of the prophet

@@ -6,12 +6,12 @@ import { VRef } from "~/raem/ValaaReference";
 import type { NarrateOptions } from "~/prophet/api/Prophet";
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 
-import { dumpObject, invariantifyNumber, thenChainEagerly, toVDoc } from "~/tools";
+import { dumpObject, invariantifyNumber, thenChainEagerly, vdon } from "~/tools";
 
 import Oracle from "./Oracle";
 import OraclePartitionConnection from "./OraclePartitionConnection";
 
-export const vdoc = toVDoc({
+export const vdoc = vdon({
   "...": { heading:
     "Connection ops acquires connections and narrates the initial events",
   },

@@ -79,7 +79,7 @@ export function _renderFocusAsSequence (component: UIComponent,
       ...entryProps,
       focus,
       parentUIContext,
-      context: { forIndex: arrayIndex, /* focusSequenceIndex: arrayIndex, */ arrayIndex },
+      context: { ...(entryProps.context || {}), forIndex: arrayIndex, arrayIndex },
       key: keyFromFocus ? keyFromFocus(focus, arrayIndex)
           : (focus instanceof Vrapper) ? `@${focus.getRawId().slice(0, 13)}<-${parentKey}`
           : `[${typeof arrayIndex !== "undefined" ? arrayIndex : "-"}]${parentKey}`,

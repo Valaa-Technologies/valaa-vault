@@ -14,7 +14,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@babel/polyfill": "^7.0.0-beta.51",
+    "@babel/polyfill": ">7.0.0-rc",
     "@valos/engine": "^0.31.0-prerelease.1",
     "brace": "^0.9.1",
     "graphql": "^0.6.2",

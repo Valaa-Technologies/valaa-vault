@@ -14,7 +14,8 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.0.0-beta.51",
+    "@babel/runtime": ">7.0.0-rc",
+    "@babel/runtime-corejs2": ">7.0.0-rc",
     "base64-js": "^1.2.3",
     "fake-indexeddb": "^2.0.3",
     "immutable": "~3.7.4",

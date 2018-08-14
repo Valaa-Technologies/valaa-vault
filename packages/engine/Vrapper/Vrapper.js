@@ -514,7 +514,7 @@ export default class Vrapper extends Cog {
 
   debugId (options?: any) {
     if (options && options.short) {
-      return debugId(this._transient || this[HostRef], { short: true });
+      return debugId(this.getTransient(options) || this[HostRef], { short: true });
     }
     if (!this.__debugId) {
       this.__debugId = debugId(this._transient || this[HostRef]);
@@ -553,9 +553,9 @@ export default class Vrapper extends Cog {
           || getObjectTransient(options.state || options.transaction, this[HostRef], typeName,
               undefined, undefined, options.mostMaterialized);
     }
-    if (this.transientStaledIn) {
+    if (this._transientStaledIn) {
       this.updateTransient(null,
-          getObjectTransient(this.transientStaledIn, this.getId(),
+          getObjectTransient(this._transientStaledIn, this.getId(),
               (options && options.typeName) || this.getTypeName(options), undefined, undefined,
               options && options.mostMaterialized));
     }
@@ -584,9 +584,9 @@ export default class Vrapper extends Cog {
     if (object) {
       invariantifyObject(object, "Vrapper.updateTransient.object", { instanceof: Transient });
       this._transient = object;
-      this.transientStaledIn = null;
+      this._transientStaledIn = null;
     } else if (this._transient) {
-      this.transientStaledIn = state;
+      this._transientStaledIn = state;
     } else throw new Error(`Must specify object with first updateTransient call`);
     if (!this.__debugId) this._refreshDebugId(this._transient, { state });
   }

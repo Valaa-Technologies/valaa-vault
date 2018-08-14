@@ -219,13 +219,13 @@ export default class LiveProps extends UIComponent {
     /*/
     // eslint-disable-next-line
     //*/
-    } else if (!elementType.isUIComponent || (newProps.array == null)) {
+    } else if (!elementType.isUIComponent || !newProps.hasOwnProperty("array")) {
       if (!newProps.key) newProps.key = this.getUIContextValue("key");
       const inter = React.createElement(elementType, newProps, ...children);
       ret = _wrapElementInLiveProps(this, inter, focus, "focus");
     } else {
       const array = newProps.array;
-      if (typeof array[Symbol.iterator] !== "function") {
+      if ((array == null) || (typeof array[Symbol.iterator] !== "function")) {
         ret = this.renderLensRole("arrayNotIterableLens", array);
       } else {
         delete newProps.array;

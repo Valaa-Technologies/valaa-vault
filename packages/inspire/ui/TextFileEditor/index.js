@@ -105,7 +105,7 @@ export default class TextFileEditor extends MediaContentEditor {
       target.setField("content", createBlob(), { transaction });
       transaction.releaseTransaction();
     } finally {
-      if (transaction.isCommittable()) transaction.abort();
+      if (transaction.isCommittable && transaction.isCommittable()) transaction.abort();
     }
   }
 

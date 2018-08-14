@@ -204,6 +204,7 @@ export default class VrapperSubscriber extends SimpleData {
         onComplete(ret);
       }
     } catch (error) {
+      this.unregister();
       const isConnecting = tryConnectToMissingPartitionsAndThen(error, () => {
         options.state = this._emitter.engine.discourse.getState();
         this._retryProcessKuery(onComplete);

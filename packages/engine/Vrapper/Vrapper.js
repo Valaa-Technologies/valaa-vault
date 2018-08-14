@@ -447,8 +447,8 @@ export default class Vrapper extends Cog {
   }
 
   _withPartitionConnectionChainEagerly (options: VALKOptions,
-      ...chainOperations: ((prev: any) => any)[]) {
-    return thenChainEagerly(this.getPartitionConnection(options), chainOperations);
+      chainOperations: ((prev: any) => any)[], onError?: Function) {
+    return thenChainEagerly(this.getPartitionConnection(options), chainOperations, onError);
   }
 
   hasInterface (name: string, type: GraphQLObjectType = this.getTypeIntro()): boolean {
@@ -1137,8 +1137,9 @@ export default class Vrapper extends Cog {
       if (!mediaInfo) ({ mediaInfo, mime } = this.resolveMediaInfo(Object.create(options)));
       let decodedContent = options.decodedContent;
       if (typeof decodedContent === "undefined") {
-        decodedContent = this._withPartitionConnectionChainEagerly(Object.create(options),
-            connection => connection.decodeMediaContent(this.getId(options), mediaInfo));
+        decodedContent = this._withPartitionConnectionChainEagerly(Object.create(options), [
+          connection => connection.decodeMediaContent(this.getId(options), mediaInfo),
+        ]);
         if ((options.immediate === true) && isPromise(decodedContent)) {
           throw new Error(`Media interpretation not immediately available for '${
               (mediaInfo && mediaInfo.name) || "<unnamed>"}'`);
@@ -1275,8 +1276,9 @@ export default class Vrapper extends Cog {
           "\n\ttype:", this._typeName,
           "\n\tobject:", this);
       ({ mediaInfo } = this.resolveMediaInfo(Object.create(options)));
-      const ret = this._withPartitionConnectionChainEagerly(Object.create(options), connection =>
-          connection.getMediaURL(this.getId(options), mediaInfo));
+      const ret = this._withPartitionConnectionChainEagerly(Object.create(options), [
+        connection => connection.getMediaURL(this.getId(options), mediaInfo),
+      ]);
       if (typeof options.immediate !== "undefined") {
         if (!options.immediate) return Promise.resolve(ret);
         if (isPromise(ret)) {
@@ -1326,27 +1328,34 @@ export default class Vrapper extends Cog {
    */
   prepareBlob (content: any, options: VALKOptions = {}) {
     let mediaInfo;
+    let handled;
     try {
       this.requireActive(options);
       if (this.hasInterface("Media")) {
         mediaInfo = this.get(Vrapper.toMediaInfoFields, Object.create(options));
       }
-      return this._withPartitionConnectionChainEagerly(Object.create(options),
-          connection => connection.prepareBlob(content, mediaInfo),
-          ({ persistProcess }) => persistProcess,
-          (contentId) => {
-            const engine = this.engine;
-            function ret (innerOptions: VALKOptions = Object.create(options)) {
-              innerOptions.id = contentId;
-              const callerValker = this && this.__callerValker__;
-              if (callerValker) innerOptions.transaction = callerValker;
-              return engine.create("Blob", undefined, innerOptions);
-            }
-            ret._valkCaller = true;
-            return ret;
-          });
-    } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .prepareBlob(), with:`,
+      return this._withPartitionConnectionChainEagerly(Object.create(options), [
+        connection => connection.prepareBlob(content, mediaInfo),
+        ({ contentId, persistProcess }) => (contentId || persistProcess),
+        (contentId) => {
+          if (!contentId || (typeof contentId !== "string")) {
+            throw new Error(`Invalid contentId '${typeof contentId}', truthy string expected`);
+          }
+          const engine = this.engine;
+          function ret (innerOptions: VALKOptions = Object.create(options)) {
+            innerOptions.id = contentId;
+            const callerValker = this && this.__callerValker__;
+            if (callerValker) innerOptions.transaction = callerValker;
+            return engine.create("Blob", undefined, innerOptions);
+          }
+          ret._valkCaller = true;
+          return ret;
+        },
+      ], onError.bind(this));
+    } catch (error) { throw (handled ? error : onError.call(this, error)); }
+    function onError (error) {
+      handled = true;
+      return wrapError(error, `During ${this.debugId()}\n .prepareBlob(), with:`,
           "\n\tmediaInfo:", mediaInfo);
     }
   }

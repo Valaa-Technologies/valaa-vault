@@ -200,11 +200,10 @@ export default class LiveProps extends UIComponent {
     let elementType = this.props.elementType;
     if (newProps.valaaScope) {
       const subProps = newProps;
-      newProps = { ...newProps.valaaScope };
+      newProps = newProps.valaaScope;
       delete subProps.valaaScope;
-      newProps.delegate = [React.createElement(elementType, subProps, ...children)];
       elementType = ValaaScope;
-      children = [];
+      children = [React.createElement(elementType, subProps, ...children)];
     }
     let ret;
     if (newProps.delegate && (Object.keys(newProps).length === 1)) {

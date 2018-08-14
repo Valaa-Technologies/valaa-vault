@@ -17,6 +17,7 @@ import { wrapError, dumpObject } from "~/tools";
 export default Object.freeze({
   ...valaaScriptBuiltinSteppers,
   "§callableof": callableOf,
+  "§argumentof": argumentOf,
   "§method": toMethod,
 });
 
@@ -36,6 +37,33 @@ function callableOf (valker: Valker, head: any, scope: ?Object,
     throw wrapError(error, `During ${valker.debugId()}\n .callableof, with:`,
         "\n\thead:", ...dumpObject(head),
         "\n\tcallee candidate:", ...dumpObject(eCandidate),
+    );
+  }
+}
+
+function argumentOf (valker: Valker, head: any, scope: ?Object,
+    [, hostValue]: BuiltinStep) {
+  let eHostValue;
+  try {
+    eHostValue = tryUnpackLiteral(valker, head, hostValue, scope);
+    if (eHostValue != null) {
+      const vrapper = tryUnpackedHostValue(eHostValue);
+      if (vrapper && (vrapper.tryTypeName() === "Media")) {
+        const { mime } = vrapper.resolveMediaInfo({ transaction: valker });
+        if ((mime === "application/javascript") || (mime === "application/valaascript")) {
+          const ret = vrapper.extractValue({ transaction: valker, immediate: true });
+          if (ret !== undefined) {
+            if ((ret != null) && (typeof ret.default === "function")) return ret.default;
+            return ret;
+          }
+        }
+      }
+    }
+    return head;
+  } catch (error) {
+    throw wrapError(error, `During ${valker.debugId()}\n .argumentOf, with:`,
+        "\n\thead:", ...dumpObject(head),
+        "\n\tcallee candidate:", ...dumpObject(eHostValue),
     );
   }
 }

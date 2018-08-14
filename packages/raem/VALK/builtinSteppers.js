@@ -214,6 +214,9 @@ export default Object.freeze({
     const roleName = tryUnpackLiteral(callableStep[2]);
     throw new Error(`Could not implicitly convert callee to a function for ${roleName}`);
   },
+  "§argumentof": function callableOf (valker: Valker, head: any) {
+    return head;
+  },
   "§regexp": function regexp (valker: Valker, head: any, scope: ?Object,
       [, pattern, flags]: BuiltinStep) {
     return new RegExp(
@@ -900,6 +903,13 @@ function _callOrApply (valker: Valker, head: any, scope: ?Object, step: BuiltinS
         eThis = Object.create(eThis);
         eThis.__callerValker__ = valker;
         eThis.__callerScope__ = scope;
+      }
+    } else {
+      for (let i = 0; i !== eArgs.length; ++i) {
+        if (isHostRef(eArgs[i])) {
+          eArgs[i] = valker._builtinSteppers["§argumentof"](
+              valker, eArgs[i], scope, ["§argumentof", null, opName]);
+        }
       }
     }
     const ret = (opName === "§apply")

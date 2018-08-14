@@ -193,128 +193,19 @@ export default Object.freeze({
   },
 
   "§apply": function apply (valker: Valker, head: any, scope: ?Object,
-      [, callee, this_, args]: BuiltinStep) {
-    let eCallee;
-    let eThis;
-    let eArgs;
-    let kueryFunction;
-    try {
-      eCallee = tryLiteral(valker, head, callee, scope);
-      if (typeof eCallee !== "function") {
-        eCallee = valker._builtinSteppers["§callableof"](
-            valker, eCallee, scope, ["$callable", null, "§call"]);
-        invariantify(typeof eCallee === "function",
-            `trying to call a non-function value of type '${typeof eCallee}'`,
-            `\n\tfunction wannabe value:`, eCallee);
-      }
-      eArgs = typeof args === "undefined" ? []
-          : tryUnpackLiteral(valker, head, args, scope);
-      if (eCallee._valkCreateKuery) {
-        eThis = typeof this_ === "undefined" ? scope : tryLiteral(valker, head, this_, scope);
-        // TODO(iridian): Fix this kludge which enables namespace proxies
-        eThis = (eThis[UnpackedHostValue] && tryHostRef(eThis)) || eThis;
-        kueryFunction = eCallee._valkCreateKuery(...eArgs);
-        return valker.advance(eThis, kueryFunction, scope);
-      }
-      eThis = typeof this_ === "undefined" ? scope
-          : tryUnpackLiteral(valker, head, this_, scope);
-      if (eCallee._valkCaller) {
-        if (eThis === null || typeof eThis === "undefined") {
-          eThis = { __callerValker__: valker, __callerScope__: scope };
-        } else if ((typeof eThis === "object") || (typeof eThis === "function")) {
-          eThis = Object.create(eThis);
-          eThis.__callerValker__ = valker;
-          eThis.__callerScope__ = scope;
-        }
-      }
-      const ret = eCallee.apply(eThis, eArgs);
-      if ((typeof ret === "object") && (ret !== null) && ret.catch && isPromise(ret)) {
-        ret.catch(error => {
-          outputCollapsedError(onError(error),
-              `Exception re-raised by VALK.§apply('${eCallee.name}').ret:Promise.catch`);
-          throw error;
-        });
-      }
-      return valker.tryPack(ret);
-    } catch (error) {
-      throw onError(error);
-    }
-    function onError (error) {
-      return valker.wrapErrorEvent(error, "builtin.§apply",
-          "\n\thead:", ...dumpObject(head),
-          "\n\tcallee:", ...dumpObject(eCallee),
-          "(via kuery:", ...dumpKuery(callee), ")",
-          "\n\tthis:", ...dumpObject(eThis),
-          "(via kuery:", ...dumpKuery(this_), ")",
-          "\n\targs:", ...dumpObject(eArgs),
-          "(via VAKONs:", ...dumpKuery(args), ")",
-          ...(kueryFunction ? ["\n\tkueryFunction VAKON:", ...dumpKuery(kueryFunction)] : []),
-      );
-    }
+      applyStep: BuiltinStep) {
+    const eArgs = (applyStep[3] === undefined) ? []
+        : tryUnpackLiteral(valker, head, applyStep[3], scope);
+    return _callOrApply(valker, head, scope, applyStep, "§apply", eArgs);
   },
   "§call": function call (valker: Valker, head: any, scope: ?Object,
       callStep: BuiltinStep) {
-    let eCallee;
-    let eThis;
-    let eArgs;
-    let kueryFunction;
-    try {
-      eCallee = tryLiteral(valker, head, callStep[1], scope);
-      if (typeof eCallee !== "function") {
-        eCallee = valker._builtinSteppers["§callableof"](
-            valker, eCallee, scope, ["§callableof", null, "§call"]);
-        invariantify(typeof eCallee === "function",
-            `trying to call a non-function value of type '${typeof eCallee}'`,
-            `\n\tfunction wannabe value:`, eCallee);
-      }
-      eArgs = callStep.length <= 3 ? [] : new Array(callStep.length - 3);
-      for (let index = 0; index + 3 < callStep.length; ++index) {
-        const arg = callStep[index + 3];
-        eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
-      }
-      if (eCallee._valkCreateKuery) {
-        eThis = typeof callStep[2] === "undefined"
-            ? scope : tryLiteral(valker, head, callStep[2], scope);
-        // TODO(iridian): Fix this kludge which enables namespace proxies
-        eThis = (eThis[UnpackedHostValue] && tryHostRef(eThis)) || eThis;
-        kueryFunction = eCallee._valkCreateKuery(...eArgs);
-        return valker.advance(eThis, kueryFunction, scope);
-      }
-      eThis = typeof callStep[2] === "undefined"
-          ? scope : tryUnpackLiteral(valker, head, callStep[2], scope);
-      if (eCallee._valkCaller) {
-        if (eThis === null || typeof eThis === "undefined") {
-          eThis = { __callerValker__: valker, __callerScope__: scope };
-        } else if ((typeof eThis === "object") || (typeof eThis === "function")) {
-          eThis = Object.create(eThis);
-          eThis.__callerValker__ = valker;
-          eThis.__callerScope__ = scope;
-        }
-      }
-      const ret = eCallee.call(eThis, ...eArgs);
-      if ((typeof ret === "object") && (ret !== null) && ret.catch && isPromise(ret)) {
-        ret.catch(error => {
-          outputCollapsedError(onError(error),
-              `Exception re-raised by VALK.§call('${eCallee.name}').ret:Promise.catch`);
-          throw error;
-        });
-      }
-      return valker.tryPack(ret);
-    } catch (error) {
-      throw onError(error);
+    const eArgs = callStep.length <= 3 ? [] : new Array(callStep.length - 3);
+    for (let index = 0; index + 3 < callStep.length; ++index) {
+      const arg = callStep[index + 3];
+      eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
     }
-    function onError (error) {
-      return valker.wrapErrorEvent(error, "builtin.§call",
-          "\n\thead:", ...dumpObject(head),
-          "\n\tcallee:", ...dumpObject(eCallee),
-          "(via kuery:", ...dumpKuery(callStep[1]), ")",
-          "\n\tthis:", ...dumpObject(eThis),
-          "(via kuery:", ...dumpKuery(callStep[2]), ")",
-          "\n\targs:", ...dumpObject(eArgs),
-          "(via VAKONs:", ...dumpKuery(callStep.slice(3)), ")",
-          ...(kueryFunction ? ["\n\tkueryFunction VAKON:", ...dumpKuery(kueryFunction)] : []),
-      );
-    }
+    return _callOrApply(valker, head, scope, callStep, "$call", eArgs);
   },
   "§callableof": function callableOf (valker: Valker, head: any, scope: ?Object,
       callableStep: BuiltinStep) {
@@ -976,4 +867,65 @@ function _runCapture (valker, thisArgument, vakon, callScope, capturingValker: V
   }
 
   return ret;
+}
+
+function _callOrApply (valker: Valker, head: any, scope: ?Object, step: BuiltinStep,
+    opName: string, eArgs: any) {
+  let eCallee;
+  let eThis;
+  let kueryFunction;
+  try {
+    eCallee = tryLiteral(valker, head, step[1], scope);
+    if (typeof eCallee !== "function") {
+      eCallee = valker._builtinSteppers["§callableof"](
+          valker, eCallee, scope, ["§callableof", null, opName]);
+      invariantify(typeof eCallee === "function",
+          `trying to call a non-function value of type '${typeof eCallee}'`,
+          `\n\tfunction wannabe value:`, eCallee);
+    }
+    if (eCallee._valkCreateKuery) {
+      eThis = typeof step[2] === "undefined"
+          ? scope : tryLiteral(valker, head, step[2], scope);
+      // TODO(iridian): Fix this kludge which enables namespace proxies
+      eThis = (eThis[UnpackedHostValue] && tryHostRef(eThis)) || eThis;
+      kueryFunction = eCallee._valkCreateKuery(...eArgs);
+      return valker.advance(eThis, kueryFunction, scope);
+    }
+    eThis = typeof step[2] === "undefined"
+        ? scope : tryUnpackLiteral(valker, head, step[2], scope);
+    if (eCallee._valkCaller) {
+      if (eThis === null || typeof eThis === "undefined") {
+        eThis = { __callerValker__: valker, __callerScope__: scope };
+      } else if ((typeof eThis === "object") || (typeof eThis === "function")) {
+        eThis = Object.create(eThis);
+        eThis.__callerValker__ = valker;
+        eThis.__callerScope__ = scope;
+      }
+    }
+    const ret = (opName === "§apply")
+        ? eCallee.apply(eThis, eArgs)
+        : eCallee.call(eThis, ...eArgs);
+    if ((typeof ret === "object") && (ret !== null) && ret.catch && isPromise(ret)) {
+      ret.catch(error => {
+        outputCollapsedError(onError(error),
+            `Exception re-raised by VALK.${opName}('${eCallee.name}').ret:Promise.catch`);
+        throw error;
+      });
+    }
+    return valker.tryPack(ret);
+  } catch (error) {
+    throw onError(error);
+  }
+  function onError (error) {
+    return valker.wrapErrorEvent(error, `builtin.${opName}`,
+        "\n\thead:", ...dumpObject(head),
+        "\n\tcallee:", ...dumpObject(eCallee),
+        "(via kuery:", ...dumpKuery(step[1]), ")",
+        "\n\tthis:", ...dumpObject(eThis),
+        "(via kuery:", ...dumpKuery(step[2]), ")",
+        "\n\targs:", ...dumpObject(eArgs),
+        "(via VAKONs:", ...dumpKuery(opName === "§apply" ? step[3] : step.slice(3)), ")",
+        ...(kueryFunction ? ["\n\tkueryFunction VAKON:", ...dumpKuery(kueryFunction)] : []),
+    );
+  }
 }

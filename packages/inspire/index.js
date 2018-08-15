@@ -17,6 +17,7 @@ import { exportValaaPlugin, getGlobal, Logger, LogEventGenerator, outputError }
 
 import * as mediaDecoders from "./mediaDecoders";
 import "./inspire.css";
+export { default as PerspireView } from "./PerspireView";
 
 injectTapEventPlugin();
 
@@ -33,7 +34,7 @@ Valaa.createInspireGateway = function createInspireGateway (...revelations: any[
       document.addEventListener("DOMContentLoaded", () => { resolve(gatewayPromise); }));
 };
 
-Valaa.createGateway = function createPerspire (...revelations: any[]) {
+Valaa.createPerspireGateway = function createPerspire (...revelations: any[]) {
   return Valaa.createGateway(...revelations);
 };
 

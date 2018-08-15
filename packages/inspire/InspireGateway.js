@@ -21,7 +21,6 @@ import EngineContentAPI from "~/engine/EngineContentAPI";
 import extendValaaSpaceWithEngine from "~/engine/ValaaSpace";
 
 import InspireView from "~/inspire/InspireView";
-import PerspireView from "~/inspire/PerspireView";
 
 import { registerVidgets } from "~/inspire/ui";
 import type { Revelation } from "~/inspire/Revelation";
@@ -29,7 +28,6 @@ import extendValaaSpaceWithInspire from "~/inspire/ValaaSpace";
 
 import { arrayBufferFromBase64 } from "~/tools/base64";
 import { invariantify, LogEventGenerator, valaaUUID } from "~/tools";
-import isInBrowser from "is-in-browser";
 
 const DEFAULT_ACTION_VERSION = process.env.DEFAULT_ACTION_VERSION || "0.1";
 
@@ -99,7 +97,7 @@ export default class InspireGateway extends LogEventGenerator {
 
   createAndConnectViewsToDOM (viewConfigs: {
     [string]: { name: string, size: Object, container: Object, rootId: string, rootLensURI: any }
-  }) {
+  }, createView = (options) => new InspireView(options)) {
     const ret = {};
     for (const [viewName, viewConfig: Object] of Object.entries(viewConfigs)) {
       this.warnEvent(`createView({ name: '${viewConfig.name}', ... })`, viewConfig);
@@ -130,23 +128,13 @@ export default class InspireGateway extends LogEventGenerator {
         extendValaaSpaceWithInspire(rootScope, hostDescriptors, defaultAuthorityConfig, engine);
       }
       rootScope.Valaa.gateway = this;
-      if (isInBrowser) {
-        ret[viewName] = new InspireView({ engine, name: `${viewConfig.name} View` })
-            .initialize(viewConfig);
-        this.warnEvent(`Opened InspireView ${viewName}`,
-            ...(!this.getDebugLevel() ? [] : [", with:",
-              "\n\tviewConfig:", viewConfig,
-              "\n\tview:", ret[viewName],
-            ]));
-      } else {
-        ret[viewName] = new PerspireView({ engine, name: `${viewConfig.name} View` })
-            .initialize(viewConfig);
-        this.warnEvent(`Opened PerspireView ${viewName}`,
-            ...(!this.getDebugLevel() ? [] : [", with:",
-              "\n\tviewConfig:", viewConfig,
-              "\n\tview:", ret[viewName],
-            ]));
-      }
+      ret[viewName] = createView({ engine, name: `${viewConfig.name} View` })
+          .initialize(viewConfig);
+      this.warnEvent(`Opened View ${viewName}`,
+          ...(!this.getDebugLevel() ? [] : [", with:",
+            "\n\tviewConfig:", ...dumpObject(viewConfig),
+            "\n\tview:", ...dumpObject(ret[viewName]),
+          ]));
     }
     return ret;
   }

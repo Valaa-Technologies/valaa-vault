@@ -3,6 +3,7 @@ global.self = global;
 global.name = "Perspire window";
 global.window = global;
 const path = require("path");
+const PerspireView = require("@valos/inspire").PerspireView;
 const inspire = require("@valos/inspire");
 const ReactDOM = require("react-dom").default;
 const React = require("react").default;
@@ -22,11 +23,10 @@ exports.handler = (yargv) => {
 
   if (!vlm.shell.test("-f", revelationPath)) {
     vlm.info(`file not found ${revelationPath}`);
-    process.exit();
   } else {
     const revelation = require(path.join(process.cwd(), revelationPath));
     global.revelationPath = path.dirname(revelationPath);
-    const perspire = Valaa.createGateway(revelation)
+    const perspire = Valaa.createPerspireGateway(revelation)
         .then((gateway) => {
           const perspireEngine = gateway.createAndConnectViewsToDOM({
             perspireMain: {
@@ -40,6 +40,8 @@ exports.handler = (yargv) => {
                 scale: 1
               },
             },
+          },
+            (options) => new PerspireView(options));
           });
           perspireEngine.perspireMain.then(p => console.log("perspire", p));
         });

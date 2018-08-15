@@ -25,7 +25,8 @@ export function addStackFrameToError (error: Error, sourceObject: Object,
   if (!sourceInfo) return error;
   invariantifyString(sourceInfo.mediaName, "(!sourceInfo || sourceInfo.mediaName)");
   invariantifyString(sourceInfo.source, "(!sourceInfo || sourceInfo.source)");
-  invariantifyObject(sourceInfo.sourceMap, "(!sourceInfo || sourceInfo.sourceMap)", {});
+  invariantifyObject(sourceInfo.sourceMap, "(!sourceInfo || sourceInfo.sourceMap)",
+      { allowEmpty: true });
   const stackFrame = { sourceObject, sourceInfo };
   // TODO(iridian): fix hack: grep wrapError.js outputError for "sourceStackFrames"
   error.sourceStackFrames = (error.sourceStackFrames || []).concat(stackFrame);

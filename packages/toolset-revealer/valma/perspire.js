@@ -52,9 +52,11 @@ exports.handler = async (yargv) => {
             (options) => new PerspireView(options));
           perspireEngine.perspireMain.then(p => {
             vlm.shell.ShellString(container.serialize()).to("./output/index.html");
+            vlm.info("PerspireView children:", p.getReactChildrenAsArray());
           });
       });
     container.window.setInterval(() => {
+      vlm.shell.ShellString(container.serialize()).to("./output/index.html");
     }, 1000); // keeps jsDom alive
   }
 };

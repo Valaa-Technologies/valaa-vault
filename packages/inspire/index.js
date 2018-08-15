@@ -17,6 +17,7 @@ import { exportValaaPlugin, getGlobal, Logger, LogEventGenerator, outputError }
 
 import * as mediaDecoders from "./mediaDecoders";
 import "./inspire.css";
+export { default as PerspireView } from "./PerspireView";
 
 injectTapEventPlugin();
 
@@ -26,10 +27,15 @@ const Valaa = getGlobal().Valaa || (getGlobal().Valaa = {});
 
 Valaa.getURIQueryField = getURIQueryField;
 
+
 Valaa.createInspireGateway = function createInspireGateway (...revelations: any[]) {
   const gatewayPromise = Valaa.createGateway(...revelations);
   return new Promise(resolve =>
       document.addEventListener("DOMContentLoaded", () => { resolve(gatewayPromise); }));
+};
+
+Valaa.createPerspireGateway = function createPerspire (...revelations: any[]) {
+  return Valaa.createGateway(...revelations);
 };
 
 export default (Valaa.createGateway = async function createGateway (...revelations: any) {
@@ -43,7 +49,18 @@ export default (Valaa.createGateway = async function createGateway (...revelatio
           Valaa.gateway.debugId()}). There can be only one.`);
     }
 
-    const gatewayPluginsRevelation = { gateway: { plugins: Valaa.plugins } };
+    const gatewayPluginsRevelation = {
+      gateway: {
+        plugins: Valaa.plugins,
+        scribe: {
+          getDatabaseAPI: (!global.process
+              ? require("~/tools/indexedDB/getBrowserDatabaseAPI")
+              : require("~/tools/indexedDB/getWebSQLShimDatabaseAPI"))
+            .getDatabaseAPI,
+        }
+      }
+    };
+
     Valaa.plugins = { push (plugin) { delayedPlugins.push(plugin); } };
 
     ret = new InspireGateway({ name: "Uninitialized InspireGateway", logger });

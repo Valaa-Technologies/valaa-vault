@@ -1,6 +1,7 @@
 // @flow
 
 import { dumpObject, inProduction, isPromise, request, wrapError } from "~/tools";
+import isInBrowser from "is-in-browser";
 
 // Revelation is a JSON object for which any expected sub-object can be replaced with an XHR
 // reqwest option object, identified by the presence of key 'url': { url: "..." }.
@@ -104,9 +105,17 @@ function _trySpread (candidate: any) {
   const options = candidate["..."];
   const rest = { ...candidate };
   delete rest["..."];
+  if (isInBrowser) {
+    return [
+      _markLazy(() => request(typeof options === "string" ? { url: options } : options)),
+      rest,
+    ];
+  }
+  const path = require("path");
+
   return [
-    _markLazy(() => request(typeof options === "string" ? { url: options } : options)),
-    rest,
+    require(path.join(process.cwd(), global.revelationPath, options)),
+    rest
   ];
 }
 

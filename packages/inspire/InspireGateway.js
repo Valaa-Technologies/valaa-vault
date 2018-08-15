@@ -21,16 +21,15 @@ import EngineContentAPI from "~/engine/EngineContentAPI";
 import extendValaaSpaceWithEngine from "~/engine/ValaaSpace";
 
 import InspireView from "~/inspire/InspireView";
+
 import { registerVidgets } from "~/inspire/ui";
 import type { Revelation } from "~/inspire/Revelation";
 import extendValaaSpaceWithInspire from "~/inspire/ValaaSpace";
 
-import { getDatabaseAPI } from "~/tools/indexedDB/getRealDatabaseAPI";
 import { arrayBufferFromBase64 } from "~/tools/base64";
-import { invariantify, LogEventGenerator, valaaUUID } from "~/tools";
+import { dumpObject, invariantify, LogEventGenerator, valaaUUID } from "~/tools";
 
 const DEFAULT_ACTION_VERSION = process.env.DEFAULT_ACTION_VERSION || "0.1";
-
 
 export default class InspireGateway extends LogEventGenerator {
 
@@ -86,9 +85,9 @@ export default class InspireGateway extends LogEventGenerator {
 
       registerVidgets();
       this.warnEvent(`initialize(): registered builtin Inspire vidgets`);
-      this.logEvent("InspireGateway initialized, with revelation", revelation);
+      this.logEvent("InspireGateway initialized, with revelation", ...dumpObject(revelation));
     } catch (error) {
-      throw this.wrapErrorEvent(error, "initialize", "\n\tthis:", this);
+      throw this.wrapErrorEvent(error, "initialize", "\n\tthis:", ...dumpObject(this));
     }
   }
 
@@ -98,10 +97,10 @@ export default class InspireGateway extends LogEventGenerator {
 
   createAndConnectViewsToDOM (viewConfigs: {
     [string]: { name: string, size: Object, container: Object, rootId: string, rootLensURI: any }
-  }) {
+  }, createView = (options) => new InspireView(options)) {
     const ret = {};
     for (const [viewName, viewConfig: Object] of Object.entries(viewConfigs)) {
-      this.warnEvent(`createView({ name: '${viewConfig.name}', ... })`, viewConfig);
+      this.warnEvent(`createView({ name: '${viewConfig.name}', ... })`, ...dumpObject(viewConfig));
       const engineOptions = {
         name: `${viewConfig.name} Engine`,
         logger: this.getLogger(),
@@ -111,8 +110,8 @@ export default class InspireGateway extends LogEventGenerator {
       const engine = new ValaaEngine(engineOptions);
       this.warnEvent(`Started ValaaEngine ${engine.debugId()}`,
           ...(!this.getDebugLevel() ? [] : [", with:",
-            "\n\tengineOptions:", engineOptions,
-            "\n\tengine:", engine,
+            "\n\tengineOptions:", ...dumpObject(engineOptions),
+            "\n\tengine:", ...dumpObject(engine),
           ]));
 
       const rootScope = engine.getRootScope();
@@ -129,12 +128,12 @@ export default class InspireGateway extends LogEventGenerator {
         extendValaaSpaceWithInspire(rootScope, hostDescriptors, defaultAuthorityConfig, engine);
       }
       rootScope.Valaa.gateway = this;
-      ret[viewName] = new InspireView({ engine, name: `${viewConfig.name} View` })
+      ret[viewName] = createView({ engine, name: `${viewConfig.name} View` })
           .initialize(viewConfig);
-      this.warnEvent(`Opened InspireView ${viewName}`,
+      this.warnEvent(`Opened View ${viewName}`,
           ...(!this.getDebugLevel() ? [] : [", with:",
-            "\n\tviewConfig:", viewConfig,
-            "\n\tview:", ret[viewName],
+            "\n\tviewConfig:", ...dumpObject(viewConfig),
+            "\n\tview:", ...dumpObject(ret[viewName]),
           ]));
     }
     return ret;
@@ -151,10 +150,10 @@ export default class InspireGateway extends LogEventGenerator {
    */
   async _interpretRevelation (revelation: Revelation): Object {
     try {
-      this.warnEvent(`Interpreted revelation`, revelation);
+      this.warnEvent(`Interpreted revelation`, ...dumpObject(revelation));
       return revelation;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "interpretRevelation", "\n\trevelation:", revelation);
+      throw this.wrapErrorEvent(error, "interpretRevelation", "\n\trevelation:", ...dumpObject(revelation));
     }
   }
 
@@ -168,13 +167,13 @@ export default class InspireGateway extends LogEventGenerator {
       const nexus = new AuthorityNexus(nexusOptions);
       this.warnEvent(`Established AuthorityNexus '${nexus.debugId()}'`,
           ...(!this.getDebugLevel() ? [] : [", with:",
-            "\n\toptions:", nexusOptions,
-            "\n\tnexus:", nexus,
+            "\n\toptions:", ...dumpObject(nexusOptions),
+            "\n\tnexus:", ...dumpObject(nexus),
           ]));
       return nexus;
     } catch (error) {
       throw this.wrapErrorEvent(error, "establishAuthorityNexus",
-          "\n\tnexusOptions:", nexusOptions);
+          "\n\tnexusOptions:", ...dumpObject(nexusOptions));
     }
   }
 
@@ -185,7 +184,7 @@ export default class InspireGateway extends LogEventGenerator {
       scribeOptions = {
         name: "Inspire Scribe",
         logger: this.getLogger(),
-        databaseAPI: getDatabaseAPI(),
+        databaseAPI: gatewayRevelation.scribe.getDatabaseAPI(),
         commandCountCallback: this._updateCommandCount,
         ...await gatewayRevelation.scribe,
       };
@@ -194,13 +193,13 @@ export default class InspireGateway extends LogEventGenerator {
 
       this.warnEvent(`Proselytized Scribe '${scribe.debugId()}'`,
           ...(!this.getDebugLevel() ? [] : [", with:",
-            "\n\tscribeOptions:", scribeOptions,
-            "\n\tscribe:", scribe,
+            "\n\tscribeOptions:", ...dumpObject(scribeOptions),
+            "\n\tscribe:", ...dumpObject(scribe),
           ]));
       return scribe;
     } catch (error) {
       throw this.wrapErrorEvent(error, "proselytizeScribe",
-          "\n\tscribeOptions:", scribeOptions);
+          "\n\tscribeOptions:", ...dumpObject(scribeOptions));
     }
   }
 
@@ -234,14 +233,14 @@ export default class InspireGateway extends LogEventGenerator {
       const oracle = new Oracle(oracleOptions);
       this.warnEvent(`Created Oracle ${oracle.debugId()}`,
           ...(!this.getDebugLevel() ? [] : [", with:",
-            "\n\toracleOptions:", oracleOptions,
-            "\n\toracle:", oracle,
+            "\n\toracleOptions:", ...dumpObject(oracleOptions),
+            "\n\toracle:", ...dumpObject(oracle),
           ]));
       return oracle;
     } catch (error) {
       throw this.wrapErrorEvent(error, "summonOracle",
-          "\n\toracleOptions:", oracleOptions,
-          "\n\tscribe:", scribe);
+          "\n\toracleOptions:", ...dumpObject(oracleOptions),
+          "\n\tscribe:", ...dumpObject(scribe));
     }
   }
 
@@ -290,15 +289,15 @@ export default class InspireGateway extends LogEventGenerator {
       const falseProphet = new FalseProphet(falseProphetOptions);
       this.warnEvent(`Proselytized FalseProphet ${falseProphet.debugId()}`,
           ...(!this.getDebugLevel() ? [] : [", with:",
-            "\n\tfalseProphetOptions:", falseProphetOptions,
-            "\n\tfalseProphet:", falseProphet,
+            "\n\tfalseProphetOptions:", ...dumpObject(falseProphetOptions),
+            "\n\tfalseProphet:", ...dumpObject(falseProphet),
           ]),
       );
       return falseProphet;
     } catch (error) {
       throw this.wrapErrorEvent(error, "proselytizeFalseProphet",
-          "\n\tfalseProphetOptions:", falseProphetOptions,
-          "\n\tupstream:", upstream);
+          "\n\tfalseProphetOptions:", ...dumpObject(falseProphetOptions),
+          "\n\tupstream:", ...dumpObject(upstream));
     }
   }
 
@@ -310,11 +309,11 @@ export default class InspireGateway extends LogEventGenerator {
     for (const plugin of plugins) {
       if (pluginLookup[plugin.name]) {
         this.errorEvent(`Plugin '${plugin.name}' already being added:`,
-            pluginLookup[plugin.name], "\n\tskipping adding a new duplicate:", plugin);
+            pluginLookup[plugin.name], "\n\tskipping adding a new duplicate:", ...dumpObject(plugin));
       }
       pluginLookup[plugin.name] = plugin;
     }
-    this.warnEvent(`Attaching ${plugins.length} plugins:`, pluginLookup);
+    this.warnEvent(`Attaching ${plugins.length} plugins:`, ...dumpObject(pluginLookup));
     for (const plugin of plugins) this._attachPlugin(plugin);
   }
 
@@ -340,15 +339,14 @@ export default class InspireGateway extends LogEventGenerator {
               `'${prologues.map(({ partitionURI }) => String(partitionURI)).join("', '")}'`);
       const ret = await Promise.all(prologues.map(this._connectAndNarratePrologue));
       this.warnEvent(`Acquired active connections for all revelation prologue partitions:`,
-          "\n\tconnections:", ret);
+          "\n\tconnections:", ...dumpObject(ret));
       return ret;
     } catch (error) {
       throw this.wrapErrorEvent(error, "narratePrologue",
           "\n\tprologue revelation:", prologueRevelation,
-          "\n\tprologues:", prologues);
+          "\n\tprologues:", ...dumpObject(prologues));
     }
   }
-
   async _loadRevelationEntryPartitionAndPrologues (prologueRevelation: Object) {
     const ret = [];
     try {
@@ -383,7 +381,7 @@ export default class InspireGateway extends LogEventGenerator {
       return ret;
     } catch (error) {
       throw this.wrapErrorEvent(error, "loadRevelationEntryPartitionAndPrologues",
-          "\n\tprologue revelation:", prologueRevelation,
+          "\n\tprologue revelation:", ...dumpObject(prologueRevelation),
       );
     }
   }
@@ -438,7 +436,7 @@ export default class InspireGateway extends LogEventGenerator {
       const blobBuffers = await this.prologueRevelation.blobBuffers;
       if (typeof blobBuffers[blobId] === "undefined") {
         this.errorEvent("Could not locate precached content for blob", blobId,
-            "from revelation blobBuffers", blobBuffers);
+            "from revelation blobBuffers", ...dumpObject(blobBuffers));
         return undefined;
       }
       const container = await blobBuffers[blobId];

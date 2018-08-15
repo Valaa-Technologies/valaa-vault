@@ -4,9 +4,15 @@ global.name = "Perspire window";
 global.window = global;
 const path = require("path");
 const PerspireView = require("@valos/inspire").PerspireView;
-const inspire = require("@valos/inspire");
-const ReactDOM = require("react-dom").default;
-const React = require("react").default;
+const JSDOM = require("jsdom").JSDOM;
+
+const container = new JSDOM(`
+  <div id="valaa-inspire--main-container"></div>
+`, { pretendToBeVisual: true });
+const meta = container.window.document.createElement("meta");
+meta.httpEquiv = "refresh";
+meta.content = "1";
+container.window.document.getElementsByTagName('head')[0].appendChild(meta);
 
 exports.command = "perspire [revelationPath]";
 exports.describe = "headless server-side environment";
@@ -14,9 +20,10 @@ exports.describe = "headless server-side environment";
 exports.disabled = (yargs) => !yargs.vlm.packageConfig;
 exports.builder = (yargs) => yargs.options({});
 
-exports.handler = (yargv) => {
+exports.handler = async (yargv) => {
   // Example template which displays the command name itself and package name where it is ran
   // Only enabled inside package
+
   const vlm = yargv.vlm;
 
   const revelationPath = yargv.revelationPath || "./valaa.json";
@@ -32,18 +39,22 @@ exports.handler = (yargv) => {
             perspireMain: {
               name: "Valaa Local Perspire Main",
               rootLensURI: gateway.getRootPartitionURI(),
-              container: global.window,
+              window: container.window,
+              container: container.window.document.querySelector("#valaa-inspire--main-container"),
               rootId: "valaa-inspire--main-root",
               size: {
-                width: global.window.innerWidth,
-                height: global.window.innerHeight,
+                width: container.window.innerWidth,
+                height: container.window.innerHeight,
                 scale: 1
               },
             },
           },
             (options) => new PerspireView(options));
+          perspireEngine.perspireMain.then(p => {
+            vlm.shell.ShellString(container.serialize()).to("./output/index.html");
           });
-          perspireEngine.perspireMain.then(p => console.log("perspire", p));
-        });
+      });
+    container.window.setInterval(() => {
+    }, 1000); // keeps jsDom alive
   }
 };

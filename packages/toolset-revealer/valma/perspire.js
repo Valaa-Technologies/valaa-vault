@@ -31,15 +31,16 @@ exports.handler = async (yargv) => {
   // Only enabled inside package
   const vlm = yargv.vlm;
   const revelationPath = yargv.revelationPath || "./valaa.json";
+  const Valaa = Valaa; // for eslint's peace of mind
 
   if (!vlm.shell.test("-f", revelationPath)) {
     vlm.info(`file not found ${revelationPath}`);
   } else {
     const revelation = require(path.join(process.cwd(), revelationPath));
     global.revelationPath = path.dirname(revelationPath);
-    const perspire = Valaa.createPerspireGateway(revelation)
+    Valaa.createPerspireGateway(revelation)
         .then((gateway) => {
-          const perspireEngine = gateway.createAndConnectViewsToDOM({
+          gateway.createAndConnectViewsToDOM({
             perspireMain: {
               name: "Valaa Local Perspire Main",
               rootLensURI: gateway.getRootPartitionURI(),

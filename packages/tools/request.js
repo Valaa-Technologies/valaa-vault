@@ -1,5 +1,3 @@
-//import reqwest from "reqwest";
-
 import wrapError from "~/tools/wrapError";
 
 /**
@@ -13,7 +11,7 @@ let reqwest;
 
 async function asyncRequest (opts) {
   if (!reqwest) {
-    reqwest = require("reqwest").default;
+    reqwest = require("reqwest");
   }
   try {
     if (!opts.url) throw new Error(`request call missing opts.url`);

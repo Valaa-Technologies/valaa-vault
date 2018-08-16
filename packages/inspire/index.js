@@ -4,7 +4,7 @@
 // at the moment it still is the top level entry point, but this might change.
 import "@babel/polyfill";
 import injectTapEventPlugin from "react-tap-event-plugin";
-
+import isInBrowser from "is-in-browser";
 import { getURIQueryField } from "~/raem/tools/PartitionURI";
 
 import InspireGateway from "~/inspire/InspireGateway";
@@ -16,7 +16,11 @@ import { exportValaaPlugin, getGlobal, Logger, LogEventGenerator, outputError }
     from "~/tools";
 
 import * as mediaDecoders from "./mediaDecoders";
-import "./inspire.css";
+
+if (isInBrowser) {
+  require("./inspire.css");
+}
+
 export { default as PerspireView } from "./PerspireView";
 
 injectTapEventPlugin();

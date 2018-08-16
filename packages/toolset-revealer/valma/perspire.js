@@ -12,20 +12,24 @@ const container = new JSDOM(`
 const meta = container.window.document.createElement("meta");
 meta.httpEquiv = "refresh";
 meta.content = "1";
-container.window.document.getElementsByTagName('head')[0].appendChild(meta);
+container.window.document.getElementsByTagName("head")[0].appendChild(meta);
 
 exports.command = "perspire [revelationPath]";
 exports.describe = "headless server-side environment";
 
 exports.disabled = (yargs) => !yargs.vlm.packageConfig;
-exports.builder = (yargs) => yargs.options({});
+exports.builder = (yargs) => yargs.option({
+  output: {
+    type: "string",
+    default: "",
+    description: "Outputs rendered HTML to a file"
+  }
+});
 
 exports.handler = async (yargv) => {
   // Example template which displays the command name itself and package name where it is ran
   // Only enabled inside package
-
   const vlm = yargv.vlm;
-
   const revelationPath = yargv.revelationPath || "./valaa.json";
 
   if (!vlm.shell.test("-f", revelationPath)) {
@@ -50,13 +54,11 @@ exports.handler = async (yargv) => {
             },
           },
             (options) => new PerspireView(options));
-          perspireEngine.perspireMain.then(p => {
-            vlm.shell.ShellString(container.serialize()).to("./output/index.html");
-            vlm.info("PerspireView children:", p.getReactChildrenAsArray());
-          });
-      });
+        });
     container.window.setInterval(() => {
-      vlm.shell.ShellString(container.serialize()).to("./output/index.html");
+      if (yargv.output) {
+        vlm.shell.ShellString(container.serialize()).to(yargv.output);
+      }
     }, 1000); // keeps jsDom alive
   }
 };

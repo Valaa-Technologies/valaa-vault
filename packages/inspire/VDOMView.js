@@ -1,9 +1,7 @@
 // @flow
 
 import { vRefFromURI } from "~/raem/ValaaReference";
-
 import Cog from "~/engine/Cog";
-
 import { getGlobal } from "~/tools";
 
 /**

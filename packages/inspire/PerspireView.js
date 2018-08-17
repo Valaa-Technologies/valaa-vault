@@ -35,7 +35,6 @@ export default class PerspireView extends VDOMView {
       vUIRoot={vUIRoot}
       lensProperty={["ROOT_LENS", "LENS", "EDITOR_LENS", "EDITOR_UI_JSX"]}
     />);
-
     ReactDOM.render(this._reactRoot, this._rootElement);
   }
 

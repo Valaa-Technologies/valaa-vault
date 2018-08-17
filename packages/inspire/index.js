@@ -38,9 +38,9 @@ Valaa.createInspireGateway = function createInspireGateway (...revelations: any[
       document.addEventListener("DOMContentLoaded", () => { resolve(gatewayPromise); }));
 };
 
-Valaa.createPerspireGateway = function createPerspire (...revelations: any[]) {
+export function createPerspireGateway (...revelations: any[]) {
   return Valaa.createGateway(...revelations);
-};
+}
 
 export default (Valaa.createGateway = async function createGateway (...revelations: any) {
   let ret;

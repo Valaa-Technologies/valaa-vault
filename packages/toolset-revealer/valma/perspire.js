@@ -1,18 +1,11 @@
 #!/usr/bin/env vlm
+
+// some web to node env emulation
 global.self = global;
 global.name = "Perspire window";
 global.window = global;
-const path = require("path");
-const PerspireView = require("@valos/inspire").PerspireView;
-const JSDOM = require("jsdom").JSDOM;
 
-const container = new JSDOM(`
-  <div id="valaa-inspire--main-container"></div>
-`, { pretendToBeVisual: true });
-const meta = container.window.document.createElement("meta");
-meta.httpEquiv = "refresh";
-meta.content = "1";
-container.window.document.getElementsByTagName("head")[0].appendChild(meta);
+const PerspireServer = require("@valos/inspire/PerspireServer").default;
 
 exports.command = "perspire [revelationPath]";
 exports.describe = "headless server-side environment";
@@ -23,6 +16,11 @@ exports.builder = (yargs) => yargs.option({
     type: "string",
     default: "",
     description: "Outputs rendered HTML to a file"
+  },
+  keepalive: {
+    type: "boolean",
+    default: true,
+    description: "Keeps server alive after initial run"
   }
 });
 
@@ -31,35 +29,11 @@ exports.handler = async (yargv) => {
   // Only enabled inside package
   const vlm = yargv.vlm;
   const revelationPath = yargv.revelationPath || "./valaa.json";
-  const Valaa = Valaa; // for eslint's peace of mind
 
   if (!vlm.shell.test("-f", revelationPath)) {
     vlm.info(`file not found ${revelationPath}`);
   } else {
-    const revelation = require(path.join(process.cwd(), revelationPath));
-    global.revelationPath = path.dirname(revelationPath);
-    Valaa.createPerspireGateway(revelation)
-        .then((gateway) => {
-          gateway.createAndConnectViewsToDOM({
-            perspireMain: {
-              name: "Valaa Local Perspire Main",
-              rootLensURI: gateway.getRootPartitionURI(),
-              window: container.window,
-              container: container.window.document.querySelector("#valaa-inspire--main-container"),
-              rootId: "valaa-inspire--main-root",
-              size: {
-                width: container.window.innerWidth,
-                height: container.window.innerHeight,
-                scale: 1
-              },
-            },
-          },
-            (options) => new PerspireView(options));
-        });
-    container.window.setInterval(() => {
-      if (yargv.output) {
-        vlm.shell.ShellString(container.serialize()).to(yargv.output);
-      }
-    }, 1000); // keeps jsDom alive
+    const server = new PerspireServer(yargv);
+    server.start();
   }
 };

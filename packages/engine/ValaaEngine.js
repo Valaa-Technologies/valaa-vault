@@ -184,7 +184,7 @@ export default class ValaaEngine extends Cog {
     return ret;
   }
 
-  create (typeName: string, initialState: Object, options: Object) {
+  create (typeName: string, initialState: Object, options: Object): Vrapper {
     return this._constructWith(created,
         { initialState, typeName },
         options,
@@ -195,7 +195,7 @@ export default class ValaaEngine extends Cog {
         });
   }
 
-  duplicate (duplicateOf: Vrapper, initialState: Object, options: Object) {
+  duplicate (duplicateOf: Vrapper, initialState: Object, options: Object): Vrapper {
     return this._constructWith(duplicated,
         { initialState, typeName: duplicateOf.getTypeName() },
         options,
@@ -206,7 +206,7 @@ export default class ValaaEngine extends Cog {
         });
   }
 
-  recombine (duplicationDirectives: Object, options: Object) {
+  recombine (duplicationDirectives: Object, options: Object): Vrapper[] {
     return this._constructWith(recombined,
         duplicationDirectives,
         options,

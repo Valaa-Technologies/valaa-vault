@@ -764,7 +764,7 @@ export default class Vrapper extends Cog {
    * @param {any} Object
    * @param {any} Number
    */
-  create (typeName: string, initialState: Object = {}, options: VALKOptions = {}) {
+  create (typeName: string, initialState: Object = {}, options: VALKOptions = {}): Vrapper {
     this.requireActive(options);
     if (options.coupledField && initialState.owner) {
       initialState.owner = initialState.owner.getIdCoupledWith(options.coupledField);
@@ -773,7 +773,7 @@ export default class Vrapper extends Cog {
     return this.engine.create(typeName, initialState, options);
   }
 
-  duplicate (initialState: Object, options: VALKOptions = {}) {
+  duplicate (initialState: Object, options: VALKOptions = {}): Vrapper {
     this.requireActive(options);
     options.head = this;
     return this.engine.duplicate(this, initialState, options);
@@ -787,7 +787,7 @@ export default class Vrapper extends Cog {
    *
    * @memberof Vrapper
    */
-  instantiate (initialState: Object = {}, options: VALKOptions = {}) {
+  instantiate (initialState: Object = {}, options: VALKOptions = {}): Vrapper {
     const typeName = this.getTypeName(options);
     initialState.instancePrototype = this;
     if (typeof initialState.owner === "undefined"
@@ -911,21 +911,12 @@ export default class Vrapper extends Cog {
     let newValue = this.run(0, [["§void"], actualAlterationVAKON],
         { ...options, scope: this.getLexicalScope() });
     const hostType = this.engine.getRootScope().Valaa[typeName];
-    const prototypeEntry = hostType.hostObjectPrototype[propertyName];
-    if ((typeof prototypeEntry === "object") && (prototypeEntry !== null)
-        && prototypeEntry.writableFieldName) {
+    const fieldPrototypeEntry = hostType.hostObjectPrototype[propertyName];
+    if ((fieldPrototypeEntry != null) && fieldPrototypeEntry.writableFieldName) {
+      newValue = this._preProcessNewReference(newValue, fieldPrototypeEntry, hostType);
       // TODO(iridian): Make this solution semantically consistent host field access.
       // Now stupidly trying to setField even if the field is not a primaryField.
-      if (prototypeEntry.fieldName === "owner"
-          && !(newValue instanceof VRef && newValue.getCoupledField())) {
-        const defaultCoupledField = hostType[defaultOwnerCoupledField];
-        if (defaultCoupledField) {
-          newValue = newValue instanceof Vrapper
-              ? newValue.getIdCoupledWith(defaultCoupledField)
-              : obtainVRef(newValue, defaultCoupledField);
-        }
-      }
-      this.setField(prototypeEntry.writableFieldName, newValue, options);
+      this.setField(fieldPrototypeEntry.writableFieldName, newValue, options);
       return newValue;
     }
     options.head = this;
@@ -934,6 +925,19 @@ export default class Vrapper extends Cog {
       name: propertyName,
       value: expressionFromValue(newValue),
     }, options);
+    return newValue;
+  }
+
+  _preProcessNewReference (newValue: VRef, fieldPrototypeEntry: Object, hostType: Object) {
+    if (fieldPrototypeEntry.fieldName === "owner"
+        && !(newValue instanceof VRef && newValue.getCoupledField())) {
+      const defaultCoupledField = hostType[defaultOwnerCoupledField];
+      if (defaultCoupledField) {
+        return newValue instanceof Vrapper
+            ? newValue.getIdCoupledWith(defaultCoupledField)
+            : obtainVRef(newValue, defaultCoupledField);
+      }
+    }
     return newValue;
   }
 

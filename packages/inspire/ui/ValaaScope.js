@@ -105,7 +105,9 @@ export default class ValaaScope extends UIComponent {
 
   attachSubscribers (focus: any, props: Object) {
     super.attachSubscribers(focus, props);
-    this.setUIContextValue("this", this);
+    if (!((this.stats || {}).uiContext || {}).hasOwnProperty("this")) {
+      this.setUIContextValue("this", this);
+    }
   }
 
   renderLoaded (focus: any) {
@@ -115,47 +117,3 @@ export default class ValaaScope extends UIComponent {
     return this.renderLens(focus, null, "focus");
   }
 }
-
-/*
-const getLensByName = asyncConnectToPartitionsIfMissingAndRetry(
-  // eslint-disable-next-line
-  function getLensByName (focus: ?any, lensProperty?: string | string[]): ?Object {
-    if (!lensProperty || !(focus instanceof Vrapper)
-        || (focus.isActive() && !focus.hasInterface("Scope"))) {
-      return undefined;
-    }
-    const propertyNames = Array.isArray(lensProperty) ? lensProperty : [lensProperty];
-    try {
-      for (const name of propertyNames) {
-        const vProperty = focus.get(VALEK.property(name));
-        if (vProperty) {
-          return vProperty.get(VALEK.toValueTarget({ optional: true })
-              .or(VALEK.toValueLiteral({ optional: true })));
-        }
-      }
-      if (!focus.hasInterface("Relation")) return undefined;
-      const target = focus.get("target");
-      if (!target || !target.isActive()) return undefined;
-      for (const name of propertyNames) {
-        const vProperty = target.get(VALEK.property(name));
-        if (vProperty) {
-          return vProperty.get(VALEK.toValueTarget({ optional: true })
-              .or(VALEK.toValueLiteral({ optional: true })));
-        }
-      }
-      return undefined;
-    } catch (error) {
-      throw wrapError(error, `During getLensByName(), with:`,
-          "\n\tfocus", focus,
-          "\n\tlens property names", propertyNames);
-    }
-  }
-);
-/*
-export class ValaaNode extends ValaaScope {
-  constructor (props: any, context: any) {
-    super(props, context);
-    console.error("DEPRECATED: ValaaNode\n\tprefer: ValaaScope");
-  }
-}
-*/

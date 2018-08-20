@@ -24,30 +24,30 @@ export default Object.freeze({
     return Object.freeze(createNativeIdentifier(
         (typeof value !== "object" ? value : tryUnpackLiteral(valker, head, value, scope))));
   },
-  "§$$": function identifierValue (valker: Valker, head: any, scope: ?Object,
+  "§$$": function _identifierValue (valker: Valker, head: any, scope: ?Object,
       getIdentifierOp: any): any {
     return _getIdentifierOrPropertyValue(valker, head, scope, getIdentifierOp, false);
   },
-  "§..": function propertyValue (valker: Valker, head: any, scope: ?Object, getPropertyOp: any) {
+  "§..": function _propertyValue (valker: Valker, head: any, scope: ?Object, getPropertyOp: any) {
     return _getIdentifierOrPropertyValue(valker, head, scope, getPropertyOp, true);
   },
-  "§$$<-": function alterIdentifier (valker: Valker, head: any, scope: ?Object,
+  "§$$<-": function _alterIdentifier (valker: Valker, head: any, scope: ?Object,
       alterIdentifierOp: any) {
     return _alterIdentifierOrPropertyValue(valker, head, scope, alterIdentifierOp, false);
   },
-  "§..<-": function alterProperty (valker: Valker, head: any, scope: ?Object,
+  "§..<-": function _alterProperty (valker: Valker, head: any, scope: ?Object,
       alterPropertyOp: any) {
     return _alterIdentifierOrPropertyValue(valker, head, scope, alterPropertyOp, true);
   },
-  "§delete$$": function deleteIdentifier (valker: Valker, head: any, scope: ?Object,
+  "§delete$$": function _deleteIdentifier (valker: Valker, head: any, scope: ?Object,
       deletePropertyOp: any) {
     return _deleteIdentifierOrProperty(valker, head, scope, deletePropertyOp, false);
   },
-  "§delete..": function deleteProperty (valker: Valker, head: any, scope: ?Object,
+  "§delete..": function _deleteProperty (valker: Valker, head: any, scope: ?Object,
       deletePropertyOp: any) {
     return _deleteIdentifierOrProperty(valker, head, scope, deletePropertyOp, true);
   },
-  "§new": function new_ (valker: Valker, head: any, scope: ?Object,
+  "§new": function _new (valker: Valker, head: any, scope: ?Object,
       newOp: any) {
     // FIXME(iridian): The implementation of this function is tightly coupled with scriptAPI.js,
     // is thus an extension and should be located with VALEK.
@@ -76,7 +76,7 @@ export default Object.freeze({
           "\n\tType:", ...dumpObject(Type));
     }
   },
-  "§typeof": function typeof_ (valker: Valker, head: any, scope: ?Object,
+  "§typeof": function _typeof (valker: Valker, head: any, scope: ?Object,
       typeofStep: BuiltinStep) {
     const object = typeofStep[1];
     const packedObject = typeof object !== "object" ? object
@@ -86,7 +86,7 @@ export default Object.freeze({
         : tryLiteral(valker, head, object, scope);
     return resolveTypeof(valker, head, scope, typeofStep, packedObject);
   },
-  "§while": function while_ (valker: Valker, head: any, scope: ?Object,
+  "§while": function _while (valker: Valker, head: any, scope: ?Object,
       [, toTest, toStep = null]: any) {
     if (typeof toStep !== "object" || (toStep === null)) {
       while (typeof toTest !== "object" ? toTest : valker.advance(head, toTest, scope));

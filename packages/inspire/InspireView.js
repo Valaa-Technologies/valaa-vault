@@ -56,13 +56,13 @@ export default class InspireView extends Cog {
  /**
   * Creates the root UI component with the react context, and connects it to the html container.
   */
-  _createReactRoot (rootId: string, container: Object, vUIRoot: Vrapper) {
+  _createReactRoot (rootId: string, container: Object, vViewFocus: Vrapper, viewName: string) {
     this._rootElement = document.createElement("DIV");
     this._rootElement.setAttribute("id", rootId);
     container.appendChild(this._rootElement);
     this._reactRoot = (<ReactRoot
-      vUIRoot={vUIRoot}
-      lensProperty={["ROOT_LENS", "LENS", "EDITOR_LENS", "EDITOR_UI_JSX"]}
+      vViewFocus={vViewFocus}
+      lensProperty={["ROOT_LENS", "LENS", "EDITOR_LENS"]}
     />);
     ReactDOM.render(this._reactRoot, this._rootElement);
   }

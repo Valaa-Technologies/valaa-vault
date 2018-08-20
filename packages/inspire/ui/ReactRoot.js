@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import preset from "jss-preset-default";
 import jss, { SheetsManager } from "jss";
 
-import { getImplicitMediaInterpretation } from "~/engine/Vrapper";
+import Vrapper, { getImplicitMediaInterpretation } from "~/engine/Vrapper";
 
 import { uiComponentProps, VSSStyleSheetSymbol } from "~/inspire/ui/UIComponent";
 import { unthunkRepeat } from "~/inspire/ui/thunk";
@@ -17,11 +17,9 @@ const _sheetIds = new WeakMap();
 
 export default class ReactRoot extends React.Component {
   static propTypes = {
-    uiContext: PropTypes.object,
     children: PropTypes.object,
-    vUIRoot: PropTypes.object,
+    vViewFocus: PropTypes.object,
     lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-    // inspireCSS: PropTypes.object,
   };
 
   static childContextTypes = {
@@ -35,14 +33,12 @@ export default class ReactRoot extends React.Component {
 
   constructor (props, context) {
     super(props, context);
-    this.cssRoot = {
-      // Inspire: this.props.inspireCSS,
-    };
+    this.cssRoot = {};
   }
 
   getChildContext () {
     return {
-      engine: this.props.vUIRoot.engine,
+      engine: this.props.vViewFocus.engine,
       css: (...cssClassPaths: string[]) =>
         cssClassPaths.map(cssClassPath => {
           const className = traverse(this.cssRoot, cssClassPath);
@@ -183,7 +179,7 @@ export default class ReactRoot extends React.Component {
             this._resolveVSSOption(localContext, result, activeSheet, singularOption), sheet);
       } else {
         const newSheet = getImplicitMediaInterpretation(option, "VSS.option",
-            { transaction: this.props.vUIRoot.engine.discourse, mime: "text/css" });
+            { transaction: this.props.vViewFocus.engine.discourse, mime: "text/css" });
         return this.getVSSSheet(newSheet, localContext.reactComponent).classes;
       }
       return sheet;

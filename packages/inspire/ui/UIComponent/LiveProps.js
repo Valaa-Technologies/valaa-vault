@@ -78,7 +78,7 @@ export default class LiveProps extends UIComponent {
     if (typeof contextThis === "undefined") contextThis = {};
     for (const kueryId of Object.keys(props.liveProps || {})) {
       const kuery = props.liveProps[kueryId];
-      this.attachKuerySubscriber(`LivePropsComponent.liveProps['${kueryId}']`,
+      this.attachKuerySubscriber(`LiveProps.liveProps['${kueryId}']`,
           contextThis,
           kuery, {
             scope: this.getUIContext(),

@@ -383,13 +383,20 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
               || component.context.lensProperty || []);
           const focusLexicalScope = focus.getLexicalScope();
           for (const propertyName of lensPropertyNames) {
+            let vProperty;
             if (focusLexicalScope.hasOwnProperty(propertyName)) {
-              return focusLexicalScope[propertyName].extractValue();
+              vProperty = focusLexicalScope[propertyName];
+            } else {
+              vProperty = focus.get(VALEK.property(propertyName));
             }
-            const vProperty = focus.get(VALEK.property(propertyName));
             if (vProperty) {
-              return vProperty.get(VALEK.toValueTarget({ optional: true })
-                  .or(VALEK.toValueLiteral({ optional: true })));
+              component.attachKuerySubscriber(`props.${lensPropertyRoleName}-${lensRoleName}`,
+                  vProperty, "value", {
+                    scope: component.getUIContext(),
+                    noImmediateRun: true,
+                    onUpdate: () => component.forceUpdate(),
+                  });
+              return vProperty.extractValue();
             }
           }
           console.error("can't find resource lens props:", lensPropertyRoleName, roleSymbol,

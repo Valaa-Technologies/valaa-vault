@@ -41,10 +41,12 @@ function callableOf (valker: Valker, head: any, scope: ?Object,
   }
 }
 
-function argumentOf (valker: Valker, head: any, scope: ?Object,
-    [, hostValue]: BuiltinStep) {
+function argumentOf (valker: Valker, head: any /* , scope: ?Object,
+    [, hostValue]: BuiltinStep */) {
   let eHostValue;
   try {
+    /*
+    // Temporarily disabled
     eHostValue = tryUnpackLiteral(valker, head, hostValue, scope);
     if (eHostValue != null) {
       const vrapper = tryUnpackedHostValue(eHostValue);
@@ -59,6 +61,7 @@ function argumentOf (valker: Valker, head: any, scope: ?Object,
         }
       }
     }
+    */
     return head;
   } catch (error) {
     throw wrapError(error, `During ${valker.debugId()}\n .argumentOf, with:`,

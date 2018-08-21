@@ -74,16 +74,17 @@ export function _renderFocusAsSequence (component: UIComponent,
   // Rendering a sequence focus can't be just a foci.map(_renderFocus) because individual entries
   // might have pending kueries or content downloads.
   const parentUIContext = component.getUIContext();
-  const parentKey = component.getUIContextValue("key") || "-";
+  const parentKey = component.getKey() || "-";
   return arrayFromAny(foci).map((focus, arrayIndex) => {
+    const key = keyFromFocus ? keyFromFocus(focus, arrayIndex)
+        : (focus instanceof Vrapper) ? `@${focus.getRawId().slice(0, 13)}<-${parentKey}`
+        : `[${typeof arrayIndex !== "undefined" ? arrayIndex : "-"}]${parentKey}`;
     const props = {
       ...entryProps,
       focus,
       parentUIContext,
       context: { ...(entryProps.context || {}), forIndex: arrayIndex, arrayIndex },
-      key: keyFromFocus ? keyFromFocus(focus, arrayIndex)
-          : (focus instanceof Vrapper) ? `@${focus.getRawId().slice(0, 13)}<-${parentKey}`
-          : `[${typeof arrayIndex !== "undefined" ? arrayIndex : "-"}]${parentKey}`,
+      key, elementKey: key,
     };
     return _wrapElementInLiveProps(
         component,

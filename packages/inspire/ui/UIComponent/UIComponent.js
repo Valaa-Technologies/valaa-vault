@@ -98,6 +98,7 @@ export default class UIComponent extends React.Component {
     // otherwise parentUIContext.focus is taken as the focus and kuery is live-tracked against it.
     // If kuery is not given, parentUIContext.focus is used directly.
     uiContext: PropTypes.object,
+    elementKey: PropTypes.string,
     parentUIContext: PropTypes.object,
     focus: PropTypes.any,
     kuery: PropTypes.instanceOf(Kuery),
@@ -301,6 +302,10 @@ export default class UIComponent extends React.Component {
     return getScopeValue(this.state.uiContext, key);
   }
 
+  getParentUIContextValue (key: string | Symbol) {
+    return getScopeValue(Object.getPrototypeOf(this.getUIContext()), key);
+  }
+
   trySetUIContextValue (key: string | Symbol, value: any) {
     if (!this.state.uiContext) return false;
     this.setUIContextValue(key, value);
@@ -319,6 +324,10 @@ export default class UIComponent extends React.Component {
 
   clearUIContextValue (key: string | Symbol) {
     return clearScopeValue(this.state.uiContext, key);
+  }
+
+  getKey () {
+    return this.props.elementKey || this.getUIContextValue("key");
   }
 
   _attachedSubscribers: Object;

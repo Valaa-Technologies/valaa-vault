@@ -4,11 +4,12 @@ import React from "react";
 
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 
-
 import VALEK, { Kuery, EngineKuery, VS } from "~/engine/VALEK";
+import Vrapper from "~/engine/Vrapper";
 
 import { LENS } from "~/inspire/ui/UIComponent";
 import vidgets from "~/inspire/ui";
+import ValaaScope from "~/inspire/ui/ValaaScope";
 import _jsxTransformFromString from "~/inspire/mediaDecoders/_jsxTransformFromString";
 
 import MediaDecoder from "~/tools/MediaDecoder";
@@ -98,13 +99,19 @@ export default class JSXDecoder extends MediaDecoder {
         const children = [].concat(...rest).map((child: any, index: number) =>
             ((typeof child !== "object" || child === null || !child.type || child.key)
                 ? child
-                : React.cloneElement(child, { key: `#${index}-` }, child.props.children)));
-        const element = React.createElement(type, props, ...(children.length ? [children] : []));
-        const infoedElement = Object.create(
+                : React.cloneElement(child, {
+                  key: `#${index}-`,
+                  ...(child.type.isUIComponent ? { elementKey: `#${index}-` } : {}),
+                }, child.props.children)));
+        const element = (type instanceof Vrapper)
+            ? React.createElement(ValaaScope, { ...props, elementPrototype: type },
+                  ...(children.length ? [children] : []))
+            : React.createElement(type, props, ...(children.length ? [children] : []));
+        const elementWithSourceInfo = Object.create(
             Object.getPrototypeOf(element),
             Object.getOwnPropertyDescriptors(element));
-        infoedElement._sourceInfo = sourceInfo;
-        return infoedElement;
+        elementWithSourceInfo._sourceInfo = sourceInfo;
+        return elementWithSourceInfo;
       },
       addSourceInfo: (embeddedContent, startLine, startColumn, endLine, endColumn) =>
         this._addKuerySourceInfo(embeddedContent, sourceInfo,

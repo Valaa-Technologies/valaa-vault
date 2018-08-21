@@ -3,7 +3,7 @@
 import { ValaaPrimitiveTag } from "~/script";
 import { toVAKON } from "~/script/VALSK";
 
-import { beaumpify } from "~/tools";
+import { beaumpify, isSymbol } from "~/tools";
 
 import injectSchemaFieldBindings from "./injectSchemaFieldBindings";
 import injectSchemaTypeBindings from "./injectSchemaTypeBindings";
@@ -19,6 +19,16 @@ export default function extendValaa (scope: any, hostObjectDescriptors: any, sch
     Lens: null,
   });
   injectSchemaTypeBindings(Valaa, scope);
-  if (schema) injectSchemaFieldBindings(Valaa, hostObjectDescriptors, schema);
+  if (schema) {
+    injectSchemaFieldBindings(Valaa, hostObjectDescriptors, schema);
+    for (const key of Object.keys(Valaa.Partition)) {
+      // Entity=>Partition multiple interface inheritance hardcode. Generalize when needed or get
+      // rid of multiple interface inheritance for good.
+      if (isSymbol(Valaa.Partition[key])) {
+        const field = Valaa.Partition.hostObjectPrototype[Valaa.Partition[key]];
+        if (field) Valaa.Entity.hostObjectPrototype[Valaa.Partition[key]] = field;
+      }
+    }
+  }
   return Valaa;
 }

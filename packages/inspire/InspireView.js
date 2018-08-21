@@ -43,7 +43,7 @@ export default class InspireView extends Cog {
       // engine.outputStatus(this.getLogger());
 
       // Renderer
-      this._createReactRoot(rootId, container, this._vUIRoot);
+      this._createReactRoot(rootId, container, this._vUIRoot, name);
       this.engine.addCog(this);
       this.warnEvent(`initialize(): engine running and view connected to DOM (size`,
           size, `unused)`);
@@ -61,6 +61,7 @@ export default class InspireView extends Cog {
     this._rootElement.setAttribute("id", rootId);
     container.appendChild(this._rootElement);
     this._reactRoot = (<ReactRoot
+      viewName={viewName}
       vViewFocus={vViewFocus}
       lensProperty={["ROOT_LENS", "LENS", "EDITOR_LENS"]}
     />);

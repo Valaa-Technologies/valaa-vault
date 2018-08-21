@@ -104,7 +104,7 @@ export default class JSXDecoder extends MediaDecoder {
                   ...(child.type.isUIComponent ? { elementKey: `#${index}-` } : {}),
                 }, child.props.children)));
         const element = (type instanceof Vrapper)
-            ? React.createElement(ValaaScope, { ...props, elementPrototype: type },
+            ? React.createElement(ValaaScope, { ...props, instanceLensPrototype: type },
                   ...(children.length ? [children] : []))
             : React.createElement(type, props, ...(children.length ? [children] : []));
         const elementWithSourceInfo = Object.create(

@@ -3,6 +3,7 @@
 import React from "react";
 
 import { denoteValaaBuiltinWithSignature } from "~/raem/VALK";
+import { UnpackedHostValue } from "~/raem/VALK/hostReference";
 
 import Vrapper from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
@@ -217,6 +218,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       () => ({ delegate: [
         Valaa.Lens.firstAbleDelegateLens,
         Valaa.Lens.disabledLens,
+        Valaa.Lens.instanceLens,
         Valaa.Lens.undefinedLens,
         Valaa.Lens.lens,
         Valaa.Lens.nullLens,
@@ -330,17 +332,21 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       searched from a Resource when looking for a property lens.
       This role is shared by all property lenses.`);
 
-  _createLensPropertyRoles("focusLensProperty", "focusPropertyLens", "lensPropertyNotFoundLens");
-  _createLensPropertyRoles("instanceLensProperty", "instancePropertyLens",
-      "instanceLensPropertyNotFoundLens");
-  _createLensPropertyRoles("delegateLensProperty", "delegatePropertyLens", "notLensResourceLens");
+  _createLensPropertyRoles("focusLensProperty", ["FOCUS_LENS"],
+      "focusPropertyLens", "lensPropertyNotFoundLens");
+  _createLensPropertyRoles("delegateLensProperty", ["DELEGATE_LENS"],
+      "delegatePropertyLens", "notLensResourceLens");
 
-  function _createLensPropertyRoles (lensPropertyRoleName, propertyLensRoleName, notFoundName) {
+  function _createLensPropertyRoles (lensPropertyRoleName, defaultLensNames, propertyLensRoleName,
+      notFoundName) {
     const roleSymbol = createLensRoleSymbol(lensPropertyRoleName,
         "(string | string[])",
         `Lens role for the name or array of property names that are
         searched from the Resource focus when resolving the
-        *${propertyLensRoleName}* role.`);
+        *${propertyLensRoleName}* role.`,
+        undefined,
+        () => defaultLensNames,
+    );
 
     createLensRoleSymbol(propertyLensRoleName,
         "Lens",
@@ -359,7 +365,8 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
         @param {Object} focus  the Resource to search the lens from.`,
         (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
-        () => function retrievePropertyLensFromFocus (focus: any, component: UIComponent) {
+        () => function retrievePropertyLensFromFocus (focus: any, component: UIComponent,
+            lensRoleName: string) {
           if (component.props.lensName) {
             console.error("DEPRECATED: props.lensName\n\tprefer: props.lensProperty",
                 "\n\tlensName:", JSON.stringify(component.props.lensName),
@@ -392,6 +399,72 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
           return { delegate: [Valaa.Lens[notFoundName]] };
         });
   }
+
+  // Instance lenses
+
+  createLensRoleSymbol("instanceLens",
+      "Lens",
+      `Lens role for viewing the focus through an instance lens.`,
+      (focus, component) => component.props.hasOwnProperty("instanceLensPrototype"),
+      () => (focus, component, lensRoleName) => {
+        const prototype = component.props.instanceLensPrototype;
+        const owner = component.getParentUIContextValue(Valaa.Lens.instanceLensOwner);
+        const obtainLensInstance = component.getUIContextValue(Valaa.Lens.obtainLensInstance);
+        return thenChainEagerly(
+            obtainLensInstance(prototype, owner, focus, lensRoleName, component), [
+              (instance) => {
+                if (instance === undefined) return undefined;
+                const vrapper = (instance != null) && instance[UnpackedHostValue];
+                component.setUIContextValue(Valaa.Lens.instanceLensOwner, vrapper || instance);
+                component.setUIContextValue("this", instance);
+                if (!vrapper) return instance;
+                if (!vrapper.hasInterface("Scope")) return vrapper;
+                const instanceRoleName = `instance-${lensRoleName}`;
+                const instanceLens = component.getUIContextValue(Valaa.Lens.instancePropertyLens)(
+                    vrapper, component, instanceRoleName);
+                return component.renderLens(instanceLens, focus, instanceRoleName);
+              },
+            ]);
+      },
+  );
+
+  createLensRoleSymbol("instanceLensPrototype",
+      "Resource",
+      `Resource-element prototype. Only valid when given as component props.`);
+
+  createLensRoleSymbol("instanceLensOwner",
+      "Resource",
+      "Resource-element owner");
+
+  createLensRoleSymbol("obtainLensInstance",
+      "(prototype: Resource, owner: Resource, focus: any, roleName: string): Resource",
+      `Returns an existing or creates a new Resource instance based on
+      *prototype*, *owner*, *focus* and *roleName*.`,
+      true,
+      () => (prototype: Vrapper, owner: Vrapper, focus: any, roleName: string,
+          component: UIComponent) => {
+        if (!(prototype instanceof Vrapper)) {
+          throw new Error(`obtainLensInstance.prototype is not a Resource, got ${
+              debugId(prototype)}`);
+        }
+        if (!(owner instanceof Vrapper)) {
+          throw new Error(`obtainLensInstance.owner is not a Resource, got ${debugId(owner)}`);
+        }
+        const isResourceFocus = (focus != null) && (focus instanceof Vrapper);
+        const focusId = isResourceFocus ? focus.getRawId() : roleName;
+        // "postLoadProperties" and "options" are optional arguments
+        const lensPath = component.getKey();
+        const instanceRawId = derivedId(prototype.getRawId(), `INSTANCELENS-${lensPath}-${focusId}`,
+            owner.getRawId());
+
+        return prototype.engine.tryVrapper(instanceRawId) || prototype.instantiate({
+          id: instanceRawId, owner,
+          name: `INSTANCELENS-${prototype.get("name")}-${lensPath}-${focusId}`,
+        });
+      });
+
+  _createLensPropertyRoles("instanceLensProperty", ["INSTANCE_LENS"],
+      "instancePropertyLens", "instanceLensPropertyNotFoundLens");
 
   // User-definable catch-all lenses
 

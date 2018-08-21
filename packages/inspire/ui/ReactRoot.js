@@ -3,13 +3,15 @@ import PropTypes from "prop-types";
 import preset from "jss-preset-default";
 import jss, { SheetsManager } from "jss";
 
+import { createPartitionURI } from "~/raem/tools/PartitionURI";
+
 import Vrapper, { getImplicitMediaInterpretation } from "~/engine/Vrapper";
 
 import { uiComponentProps, VSSStyleSheetSymbol } from "~/inspire/ui/UIComponent";
 import { unthunkRepeat } from "~/inspire/ui/thunk";
 import ValaaScope from "~/inspire/ui/ValaaScope";
 
-import { dumpObject, invariantifyString, traverse, wrapError, valaaHash } from "~/tools";
+import { derivedId, dumpObject, invariantifyString, traverse, wrapError, valaaHash } from "~/tools";
 
 jss.setup(preset());
 
@@ -17,6 +19,7 @@ const _sheetIds = new WeakMap();
 
 export default class ReactRoot extends React.Component {
   static propTypes = {
+    viewName: PropTypes.string,
     children: PropTypes.object,
     vViewFocus: PropTypes.object,
     lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
@@ -34,6 +37,11 @@ export default class ReactRoot extends React.Component {
   constructor (props, context) {
     super(props, context);
     this.cssRoot = {};
+    this._createRootContext(props.vViewFocus, props.viewName)
+    .then(rootContext => {
+      this._rootContext = rootContext;
+      this.forceUpdate();
+    });
   }
 
   getChildContext () {
@@ -123,17 +131,37 @@ export default class ReactRoot extends React.Component {
     }
   }
 
-  _populateRootContext (rootContext: Object) {
-    const reactRoot = this;
+  async _createRootContext (vViewFocus: Vrapper, viewName: string) {
+    const rootContext = Object.create(vViewFocus.engine.getLexicalScope());
     rootContext.this = this;
-    rootContext.VSS = function VSS (...rest: any[]) {
+    rootContext[rootContext.Valaa.Lens.instanceLensOwner] =
+        await this._obtainLocalUIRoot(vViewFocus, viewName);
+    rootContext.VSS = this._createVSS(vViewFocus.engine);
+    return rootContext;
+  }
+
+  async _obtainLocalUIRoot (vViewFocus: Vrapper, viewName: string) {
+    const localInstanceId = derivedId(vViewFocus.getRawId(), "LOCAL-UIROOT-PARTITION", viewName);
+    const partitionURI = createPartitionURI("valaa-local:", localInstanceId);
+    await vViewFocus.engine.discourse.prophet.acquirePartitionConnection(partitionURI, {});
+    let vLocalUIRoot = vViewFocus.engine.getVrapper(localInstanceId, { optional: true });
+    if (!vLocalUIRoot) {
+      vLocalUIRoot = vViewFocus.engine.create("Entity", {
+        id: localInstanceId, owner: null,
+        name: `Local UI root view '${viewName}' to '${vViewFocus.debugId()}'`,
+        partitionAuthorityURI: "valaa-local:",
+      });
+    }
+    return vLocalUIRoot;
+  }
+
+  _createVSS (engine: Object) {
+    const reactRoot = this;
+    return function VSS (...rest: any[]) {
       try {
         const ret = { data: "" };
         const rootSheet = getImplicitMediaInterpretation(this[VSSStyleSheetSymbol],
-            "VSS.rootStyleSheet", {
-              transaction: reactRoot.props.vUIRoot.engine.discourse,
-              mimeFallback: "text/css",
-            });
+            "VSS.rootStyleSheet", { mimeFallback: "text/css", transaction: engine.discourse });
         const contextSheet = rootSheet
             && reactRoot.getVSSSheet(rootSheet, this.reactComponent).classes;
         reactRoot._resolveVSSOption(this, ret, contextSheet, rest);
@@ -192,14 +220,14 @@ export default class ReactRoot extends React.Component {
   }
 
   render () {
-    const vUIRoot = this.props.vUIRoot;
-    if (!vUIRoot) return null;
-    const rootContext = Object.create(this.props.uiContext || vUIRoot.getLexicalScope());
-    this._populateRootContext(rootContext);
+    const vViewFocus = this.props.vViewFocus;
+    if (!vViewFocus || !this._rootContext) return null;
     return (
       <div style={{ width: "100vw", height: "100vh" }}>
         <ValaaScope
-          {...uiComponentProps({ name: "root", parentUIContext: rootContext, focus: vUIRoot })}
+          {...uiComponentProps({
+            name: "root", parentUIContext: this._rootContext, focus: vViewFocus,
+          })}
         >
           {this.props.children}
         </ValaaScope>

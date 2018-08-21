@@ -101,18 +101,63 @@ everything but the fragment.
 
 ### 1.2. Resource id
 
-Resources have id's, which are just raw strings with restricted
-character set of [`-_0-9a-zA-Z`] or
-[url-and-filename-ready base64url characters](https://tools.ietf.org/html/rfc4648#section-5).
+Resources have id's, which are strings with one or more parts separated
+by `:`. The first, non-optional *primary* part globally uniquely
+identifies a freely movable resource. The secondary parts identify
+sub-resources which are tightly bound to the primary resource.
 
-Note: As of now resource raw id's must be globally unique: uuid v4 is
-recommended.
+Two resource ids refer to the same resource if and only if their string
+representations are equivalent. Notably:
+1. all parts are case sensitive. If a part specification refers to a
+   case insensitive system it must specify a canonical representation,
+   with the recommended representation being all-lowercase.
+2. no redundant encoding. If a part contains encoding schemes then any
+   characters or tokens which can expressed without encoding must not
+   be encoded.
 
-Note: derived id's currently break character set requirement as they
-use regular base64 encoding and can contain `+` and `/` . For backwards
-compatibility they are permitted, but
-[considered equal to the base64url](https://tools.ietf.org/html/rfc7515#appendix-C)
+#### 1.2.1 Primary id part - restricted naming, free ownership
+
+The primary id part has a restricted character set of `unreserved`
+as specified in the [URI specification](https://tools.ietf.org/html/rfc3986).
+
+The *primary* part must be globally unique.
+Note: uuid v4 is recommended for now, but eventually primary id
+generation should tied to the deterministic command id chain. This in
+turn should be seeded by some ValOS authority.
+
+Note: when using base64 encoded values as primary id, use
+[ie. url-and-filename-ready base64url characters](https://tools.ietf.org/html/rfc4648#section-5).
+
+Note: derivedId currently used by the codebase uses only the primary id
+but breaks the above character set requirement, as it uses base64
+encoding with `+` and `/` . For backwards compatibility they are
+permitted, but [considered equal to the base64url](https://tools.ietf.org/html/rfc7515#appendix-C)
 using `+` <-> `-`, `/` <-> `_` character mappings.
+
+### 1.2.1 Secondary - lenient naming, restricted ownership
+
+The *secondary* id parts has a character set restricted to `reg-name`.
+Character set is treated case senstively. Any characters in the set
+which can be expressed without percent encoding must not be percent
+encoded.
+
+They are used for various types of deterministic resources with some
+restricted behaviour:
+
+TODO(iridian): Elaborate these.
+
+1. ghost ids
+  `f00:>ba54:>b7e4` - where `b7e4` is a traditional resource, `ba54:>b7e4`
+  reads as "instance `ba54` ownling ghost of prototype `b7e4`" and
+  `f00:>ba54:>b7e4` reads as "instance `f00` ownling ghost of `ba54:>b7e4`".
+  Etc.
+2. property ids
+  `f00:.propName` - a directly owned Property with fixed name `propName`
+  and prototype implicitly locked to `f00-prototype:.propName`.
+
+Resources identified by these parts are tightly bound to the resource
+identified by the primary party (which must exist). They must be always
+directly or indirectly owned by the primary resource.
 
 ### 1.3. ValaaReference
 

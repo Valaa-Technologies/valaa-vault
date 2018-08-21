@@ -12,7 +12,8 @@ import { PrototypeOfImmaterialTag } from "~/raem/tools/denormalized/Transient";
 import Valker from "~/raem/VALK/Valker";
 import Kuery, { dumpObject, dumpKuery, dumpScope } from "~/raem/VALK/Kuery";
 import { isPackedField } from "~/raem/VALK/packedField";
-import { UnpackedHostValue, isHostRef, tryHostRef } from "~/raem/VALK/hostReference";
+import { UnpackedHostValue, isHostRef, tryHostRef, tryUnpackedHostValue }
+    from "~/raem/VALK/hostReference";
 
 import { dumpify, invariantify, invariantifyObject, invariantifyArray, isPromise, isSymbol,
   outputCollapsedError, wrapError,
@@ -887,15 +888,16 @@ function _callOrApply (valker: Valker, head: any, scope: ?Object, step: BuiltinS
           `\n\tfunction wannabe value:`, eCallee);
     }
     if (eCallee._valkCreateKuery) {
-      eThis = typeof step[2] === "undefined"
+      eThis = (typeof step[2] === "undefined")
           ? scope : tryLiteral(valker, head, step[2], scope);
       // TODO(iridian): Fix this kludge which enables namespace proxies
       eThis = (eThis[UnpackedHostValue] && tryHostRef(eThis)) || eThis;
       kueryFunction = eCallee._valkCreateKuery(...eArgs);
       return valker.advance(eThis, kueryFunction, scope);
     }
-    eThis = typeof step[2] === "undefined"
+    eThis = (typeof step[2] === "undefined")
         ? scope : tryUnpackLiteral(valker, head, step[2], scope);
+    eThis = (eThis[UnpackedHostValue] && tryUnpackedHostValue(eThis)) || eThis;
     if (eCallee._valkCaller) {
       if (eThis === null || typeof eThis === "undefined") {
         eThis = { __callerValker__: valker, __callerScope__: scope };
@@ -929,7 +931,7 @@ function _callOrApply (valker: Valker, head: any, scope: ?Object, step: BuiltinS
   function onError (error) {
     return valker.wrapErrorEvent(error, `builtin.${opName}`,
         "\n\thead:", ...dumpObject(head),
-        "\n\tcallee:", ...dumpObject(eCallee),
+        "\n\tcallee (is valk):", (eCallee != null) && eCallee._valkCaller, ...dumpObject(eCallee),
         "(via kuery:", ...dumpKuery(step[1]), ")",
         "\n\tthis:", ...dumpObject(eThis),
         "(via kuery:", ...dumpKuery(step[2]), ")",

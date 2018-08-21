@@ -858,7 +858,11 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       () => ({ delegate: [
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
-          <div {..._message}>UIComponent.render returned an invalid element.</div>
+          <div {..._message}>
+              {Valaa.Lens.instrument(
+                  Valaa.Lens.parentComponentLens, Valaa.Lens.focusDetailLens)}
+              returned an invalid element.
+          </div>
           <div {..._parameters}>
             <span {..._key}>Faults:</span>
             <span {..._value}>{Valaa.Lens.focusDumpLens}</span>

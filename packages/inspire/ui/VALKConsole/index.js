@@ -8,7 +8,7 @@ import UIComponent from "~/inspire/ui/UIComponent";
 import Vrapper from "~/engine/Vrapper";
 import Presentable from "~/inspire/ui/Presentable";
 
-import { beaumpify, dumpify, outputError, wrapError } from "~/tools";
+import { dumpify, outputError, wrapError } from "~/tools";
 import notThatSafeEval from "~/tools/notThatSafeEval";
 
 // TODO(iridian): Obsoleted and detached.

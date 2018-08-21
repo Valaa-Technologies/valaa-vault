@@ -35,9 +35,9 @@ export default function dumpify (value, options: Object) {
         ret += suffix;
       }
     } else if (typeof value === "string") ret = value;
-    else ret = JSON.stringify(value, decirculator, options.indent);
+    else ret = JSON.stringify(value, decirculator, options && options.indent);
 
-    if (options.sliceAt && ret && (options.sliceAt < ret.length)) {
+    if (options && options.sliceAt && ret && (options.sliceAt < ret.length)) {
       return `${ret.slice(0, options.sliceAt)}${options.sliceSuffix || ""}`;
     }
     return ret;

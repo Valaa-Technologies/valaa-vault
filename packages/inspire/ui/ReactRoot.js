@@ -37,16 +37,18 @@ export default class ReactRoot extends React.Component {
   constructor (props, context) {
     super(props, context);
     this.cssRoot = {};
-    this._createRootContext(props.vViewFocus, props.viewName)
-    .then(rootContext => {
-      this._rootContext = rootContext;
-      this.forceUpdate();
-    });
+    if (props.vViewFocus) {
+      this._createRootContext(props.vViewFocus, props.viewName)
+      .then(rootContext => {
+        this._rootContext = rootContext;
+        this.forceUpdate();
+      });
+    }
   }
 
   getChildContext () {
     return {
-      engine: this.props.vViewFocus.engine,
+      engine: (this.props.vViewFocus || {}).engine,
       css: (...cssClassPaths: string[]) =>
         cssClassPaths.map(cssClassPath => {
           const className = traverse(this.cssRoot, cssClassPath);

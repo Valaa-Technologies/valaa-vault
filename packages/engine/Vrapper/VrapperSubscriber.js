@@ -412,6 +412,7 @@ export default class VrapperSubscriber extends SimpleData {
       (value) => {
         fieldUpdate._value = value;
         const ret = this.callback(fieldUpdate, this);
+        if (ret === false) this.unregister();
       },
     ], onError);
   }

@@ -145,10 +145,9 @@ function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalIdData:
     if (typeof recombineOverriddenId !== "undefined") {
       if (bard.getDebugLevel() >= 2) {
         bard.logEvent(`virtually recombining to sub-directive ${
-          dumpify(recombineOverriddenId, 40, "...")}:${bard.typeName} ${
-              JSON.stringify({ duplicateOf: originalIdData, initialState: { ownerId } })
-                  .slice(0, 380)
-          }`);
+          dumpify(recombineOverriddenId, { sliceAt: 40, sliceSuffix: "..." })}:${bard.typeName} ${
+          dumpify({ duplicateOf: originalIdData, initialState: { ownerId } }, { sliceAt: 380 })
+        }`);
       }
       return recombineOverriddenId;
     }
@@ -174,9 +173,9 @@ function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalIdData:
       // Not an immaterial ghost, ie. a material ghost or normal object: do full deep duplication
       if (bard.getDebugLevel() >= 2) {
         bard.logEvent(`Sub-reducing virtual DUPLICATED ${
-          dumpify(newObjectId, 40, "...")}:${bard.typeName} ${
-              JSON.stringify({ duplicateOf: originalIdData, initialState: { owner } }).slice(0, 380)
-          }`);
+          dumpify(newObjectId, { sliceAt: 40, sliceSuffix: "..." })}:${bard.typeName} ${
+          dumpify({ duplicateOf: originalIdData, initialState: { owner } }, { sliceAt: 380 })
+        }`);
       }
       _createDuplicate(bard, newObjectId, { owner });
     }

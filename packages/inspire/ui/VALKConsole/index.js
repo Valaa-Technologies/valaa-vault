@@ -8,9 +8,8 @@ import UIComponent from "~/inspire/ui/UIComponent";
 import Vrapper from "~/engine/Vrapper";
 import Presentable from "~/inspire/ui/Presentable";
 
-import beaumpify from "~/tools/beaumpify";
+import { beaumpify, dumpify, outputError, wrapError } from "~/tools";
 import notThatSafeEval from "~/tools/notThatSafeEval";
-import wrapError, { outputError } from "~/tools/wrapError";
 
 // TODO(iridian): Obsoleted and detached.
 
@@ -89,8 +88,8 @@ export default class VALKConsole extends UIComponent {
       let evalResult = notThatSafeEval(evalScope, `return ${this.state.cmd}`);
       if (evalResult instanceof VRef) evalResult = this.context.engine.getVrapper(evalResult);
       const txt = (evalResult instanceof Vrapper)
-          ? `${evalResult.debugId()}:\n${beaumpify(evalResult.getTransient())}`
-          : JSON.stringify(evalResult, null, 2);
+          ? `${evalResult.debugId()}:\n${dumpify(evalResult.getTransient(), { indent: 2 })}`
+          : dumpify(evalResult, { indent: 2 });
       result = [{ txt, color: "white" }];
       newValue = "";
     } catch (error) {

@@ -69,8 +69,8 @@ function checkAndAddCouplingPassages (bard: Bard, fieldIntro,
     entryOrList: IdData | Array<IdData>, entryIsSequence, actionType) {
   try {
     // console.log(`checkAndAddCouplingPassages '${fieldIntro.name}', remote:`,
-    //      dumpify(entryOrList, 100), entryIsSequence, actionType,
-    //      dumpify(fieldIntro.coupling, 100));
+    //      dumpify(entryOrList, { sliceAt: 100 }), entryIsSequence, actionType,
+    //      dumpify(fieldIntro.coupling, { sliceAt: 100 }));
     if (typeof fieldIntro.coupling === "string" || !entryOrList) return;
     const coupling = getCoupling(fieldIntro);
     if (!coupling) return;
@@ -96,7 +96,7 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
     actionType, remoteType = fieldIntro.namedType) {
   /*
   console.log("addCouplingPassages", actionType, `'${fieldIntro.name}', remote:`,
-      dumpify(remote, 100), "coupling", dumpify(coupling, 100));
+      dumpify(remote, { sliceAt: 100 }), "coupling", dumpify(coupling, { sliceAt: 100 }));
   */
   if (!remote || remote.isInactive()) return;
   const remoteVRef = obtainVRef(remote);

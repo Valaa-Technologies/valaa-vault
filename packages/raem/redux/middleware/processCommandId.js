@@ -2,7 +2,7 @@ import { CREATED, isCreatedLike, isTransactedLike } from "~/raem/command";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import { getRawIdFrom } from "~/raem/ValaaReference";
 
-import { createId, invariantify } from "~/tools";
+import { dumpify, createId, invariantify } from "~/tools";
 
 // FIXME(iridian): This whole id generation schema is still a mess and needs to be fully rethought.
 // FIXME(iridian): ID generation is simpler now, but a proper deterministic and linearly dependent
@@ -49,7 +49,8 @@ function recurseAndAugmentWithIds (command, previousId, schema, transactionType)
 function checkIsCreateImmutable (schema, command) {
   const objectType = schema.getType(command.typeName);
   if (!objectType) {
-    throw new Error(`No such type ${command.typeName} with command ${JSON.stringify(command)}`);
+    throw new Error(`No such type ${command.typeName} with command ${
+        dumpify(command, { sliceAt: 60, sliceSuffix: "..." })}`);
   }
   return !isResourceType(objectType);
 }

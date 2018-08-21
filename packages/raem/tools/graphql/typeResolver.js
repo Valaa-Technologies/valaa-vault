@@ -6,7 +6,7 @@ export function typeNameResolver (resource, info) {
   const ret = info.schema.getType(typeName);
   if (!ret) {
     info.rootValue.logger.error(`could not resolve internal type for typeName ${
-        typeName} for resource ${JSON.stringify(resource)}`);
+        typeName} for resource ${dumpify(resource)}`);
   }
   return ret;
 }
@@ -19,7 +19,7 @@ export function dataTypeResolver (data, info) {
   const ret = info.schema.getType(dataType);
   if (!ret) {
     info.rootValue.logger.error(`could not resolve internal type for dataType ${
-        dataType} for data ${JSON.stringify(data)}`);
+        dataType} for data ${dumpify(data)}`);
   }
   return ret;
 }

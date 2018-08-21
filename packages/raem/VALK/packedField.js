@@ -61,7 +61,7 @@ function _dumpifyPackedSingular () {
   return `packed(${Iterable.isKeyed(this._singular)
         ? this._singular.get("id")
             ? `tr.id:'${this._singular.get("id")}'`
-            : JSON.stringify(this._singular)
+            : dumpify(this._singular)
         : `id:'${String(this._singular)}'`
       }:${this._type}<-${(this._fieldInfo && this._fieldInfo.sourceTransient.get("id")) || ""}@${
         (this._fieldInfo && this._fieldInfo.elevationInstanceId) || ""})`;

@@ -11,14 +11,14 @@ function listLinkResolver (source, args, context) {
     if (!ret) {
       if (ret === null) return null;
       context.rootValue.logger.warn(`Expected link id sequence or null, got ${
-          dumpify(ret, 100)} for field '${context.fieldName}' in object: ${
-          dumpify(source, 200, "...}")}`);
+          dumpify(ret, { sliceAt: 100 })} for field '${context.fieldName}' in object: ${
+          dumpify(source, { sliceAt: 200, sliceSuffix: "...}" })}`);
       return null;
     }
     if (!Array.isArray(ret)) {
       context.rootValue.logger.warn(`Expected proper link id sequence, got ${
-          dumpify(ret, 100)} for field '${context.fieldName}' in object: ${
-          dumpify(source, 200, "...}")}`);
+          dumpify(ret, { sliceAt: 100 })} for field '${context.fieldName}' in object: ${
+          dumpify(source, { sliceAt: 200, sliceSuffix: "...}" })}`);
       return null;
     }
     return ret.map(getObjectTransient.bind(null, context.rootValue.resolver));
@@ -26,7 +26,7 @@ function listLinkResolver (source, args, context) {
     const suggestion = error.message.slice(0, 10) !== "source.get" ? "" : `
   Is this a mutation resolver? If so, remember to wrap resolver in mutationResolver.`;
     context.rootValue.logger.error(`During listLinkResolver for field ${context.fieldName}
-  from source: ${dumpify(source, 1000, "...}")}
+  from source: ${dumpify(source, { sliceAt: 1000, sliceSuffix: "...}" })}
   forwarding exception: ${error.message.slice(0, 140)}...${suggestion}`);
     throw error;
   }

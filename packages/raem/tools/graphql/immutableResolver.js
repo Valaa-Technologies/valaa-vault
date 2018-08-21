@@ -8,19 +8,21 @@ export default function immutableResolver (source, args, context) {
     if (!ret) {
       if (typeof ret === "undefined") {
         context.rootValue.logger.warn(`Expected a defined value, got undefined for field '${
-            context.fieldName}' in object: ${dumpify(source, 200, "...}")}`);
+            context.fieldName}' in object: ${
+                dumpify(source, { sliceAt: 200, sliceSuffix: "...}" })}`);
       }
       if (context.fieldName === "id") {
-        context.rootValue.logger.warn("null id for object: ", dumpify(source, 200, "...}"));
+        context.rootValue.logger.warn("null id for object: ",
+            dumpify(source, { sliceAt: 200, sliceSuffix: "...}" }));
       }
     }
-    // console.log("  Got", JSON.stringify(ret));
+    // console.log("  Got", dumpify(ret));
     return ret;
   } catch (error) {
     const suggestion = error.message.slice(0, 10) !== "source.get" ? "" : `
   Is this a mutation resolver? If so, remember to wrap resolver in mutationResolver.`;
     context.rootValue.logger.error(`During immutableResolver for field ${context.fieldName}
-  from source: ${dumpify(source, 1000, "...}")}
+  from source: ${dumpify(source, { sliceAt: 1000, sliceSuffix: "...}" })}
   forwarding exception: ${error.message.slice(0, 140)}...${suggestion}`);
     throw error;
   }

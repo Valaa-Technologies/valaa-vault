@@ -93,8 +93,9 @@ export default function createRootReducer ({
         // eslint-disable-next-line
         const { timeStamp, type, typeName, id, passages, parentPassage, bard, ...rest } = action;
         mainLogEventer.logEvent(
-            `Reducing @${time} ${action.type} ${minor}${dumpify(action.commandId, 40, "...")}`,
-            `\n\t${JSON.stringify(rest).slice(0, 380)}`);
+            `Reducing @${time} ${action.type} ${minor}${
+                dumpify(action.commandId, { sliceAt: 40, sliceSuffix: "..." })}`,
+            `\n\t${dumpify(rest, { sliceAt: 380 })}`);
       }
       const reducer = reducerByActionType[action.type];
       if (reducer) return reducer.call(this, state, action);
@@ -119,12 +120,12 @@ export default function createRootReducer ({
     try {
       if (subLogEventer.getDebugLevel() >= subReduceLogThreshold) {
         let minor = action.typeName ? `${action.typeName} ` : "";
-        if (action.id) minor = `${minor}${dumpify(action.id, 40, "...")}`;
+        if (action.id) minor = `${minor}${dumpify(action.id, { sliceAt: 40, sliceSuffix: "..." })}`;
         // eslint-disable-next-line
         const { type, typeName, id, passages, parentPassage, bard, ...rest } = action;
         subLogEventer.logEvent(
             `Sub-reducing ${action.type} ${minor}`,
-            `\n\t${JSON.stringify(rest).slice(0, 380)}`);
+            `\n\t${dumpify(rest, { sliceAt: 380 })}`);
       }
       if (action.story && action.story.isBeingUniversalized) {
         // Offers limited protection against programming errors for generated passages especially.

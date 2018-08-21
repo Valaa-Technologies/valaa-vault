@@ -22,7 +22,7 @@ export default function literalResolver (source, args, context) {
     const suggestion = error.message.slice(0, 10) !== "source.get" ? "" : `
   Is this a mutation resolver? If so, remember to wrap resolver in mutationResolver.`;
     context.rootValue.logger.error(`During literalResolver from source: ${
-      dumpify(source).slice(0, 1000, "...}")}...
+      dumpify(source, { sliceAt: 1000, sliceSuffix: "...}" })}...
   forwarding exception: ${error.message.slice(0, 140)}...${suggestion}`);
     throw wrapError(error, `During literalResolver from source:`, source);
   }

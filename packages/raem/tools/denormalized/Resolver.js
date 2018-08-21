@@ -244,7 +244,7 @@ export default class Resolver extends LogEventGenerator {
     this.info("tryBindToInactivePartitionObjectId: bound an id (with partitionURI set) as inactive",
         "id, without checking whether that partition is actually active (which would be an error)",
         "<details suppressed to enable browser log collapsing>",
-        // JSON.stringify(id.toJSON()), id,
+        // dumpify(id.toJSON()), id,
     );
     */
     // FIXME(iridian): This is a quick hack! We need to have active partition resolution logic and

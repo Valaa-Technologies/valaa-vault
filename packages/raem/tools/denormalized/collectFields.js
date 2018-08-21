@@ -30,7 +30,8 @@ export default function collectFields (schema, state, resourceId, typeName, revi
   return walkValue(start, startType);
 
   function walkValue (object, objectType, ownerFieldIntro, owner, ownerType) {
-    // console.log("walkValue", dumpify(object, 200, "...}"), objectType.name);
+    // console.log("walkValue",
+    //    dumpify(object, { sliceAt: 200, sliceSuffix: "...}" }), objectType.name);
     if (!object) return object;
     const nullableType = getNullableType(objectType);
     if (isLeafType(nullableType)) return object;
@@ -39,7 +40,7 @@ export default function collectFields (schema, state, resourceId, typeName, revi
       const sequenceAccumulator = [];
       if (!Iterable.isOrdered(object) || Iterable.isKeyed(object)) {
         console.warn(`Inconsistent data with schema, coercing non-list to single-entry list; got ${
-            dumpify(object, 100)}, expected list of ${nullableType.ofType.name
+            dumpify(object, { sliceAt: 100 })}, expected list of ${nullableType.ofType.name
             } when collecting field ${ownerType.name} ${owner.get("id")}.${
             ownerFieldIntro.name}`);
         sequenceAccumulator.push(object);

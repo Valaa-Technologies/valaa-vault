@@ -22,7 +22,7 @@ import { separatePartialSequence, combineAsPartialSequence, shouldAddAsPartialRe
 
 import Bard from "~/raem/redux/Bard";
 
-import { dumpObject, invariantify, invariantifyString, wrapError } from "~/tools";
+import { dumpify, dumpObject, invariantify, invariantifyString, wrapError } from "~/tools";
 
 // TODO(iridian): Well. MODIFIED is stupid, it should be four (or more) different actions:
 // FIELDS_SET, ADDED_TO, REMOVED_FROM, REPLACED_WITHIN, SPLICED.
@@ -516,7 +516,7 @@ function reduceSpliceWithCaptures (bard: Bard, captures = [], fieldInfo) {
       if (captureIndex >= captures.length || captureIndex < -captures.length) {
         bard.warnEvent("propertySpliced captureIndex out of bounds (vs. captures:",
             captures, "), skipping splice",
-            JSON.stringify({ index, removeNum, captureIndex, values }));
+            dumpify({ index, removeNum, captureIndex, values }));
         captures.push(List());
         return list;
       }

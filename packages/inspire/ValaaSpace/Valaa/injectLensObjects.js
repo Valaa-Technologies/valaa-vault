@@ -10,7 +10,9 @@ import VALEK, { dumpObject } from "~/engine/VALEK";
 
 import UIComponent from "~/inspire/ui/UIComponent";
 
-import { arrayFromAny, messageFromError, wrapError } from "~/tools";
+import {
+  arrayFromAny, derivedId, dumpify, messageFromError, thenChainEagerly, wrapError,
+} from "~/tools";
 
 export default function injectLensObjects (Valaa: Object, rootScope: Object,
     hostObjectDescriptors: Object) {
@@ -152,13 +154,14 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       () => (focus: any) => debugId(focus),
   );
 
-  createLensRoleSymbol("focusStringifyLens",
+  createLensRoleSymbol("focusDumpLens",
       "Lens",
-      `Lens role for viewing a stringifed dump of the focus.
+      `Lens role for viewing a full string dump of the focus. Replaces
+      circular/duplicates with tags.
 
       @param {any} focus  the focus to dump.`,
       true,
-      () => (focus: any) => JSON.stringify(focus, null, 2),
+      () => (focus: any) => dumpify(focus, { indent: 2 }),
   );
 
   createLensRoleSymbol("focusPropertyKeysLens",
@@ -778,7 +781,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
           <div {..._message}>UIComponent.render returned an invalid element.</div>
           <div {..._parameters}>
             <span {..._key}>Faults:</span>
-            <span {..._value}>{Valaa.Lens.focusStringifyLens}</span>
+            <span {..._value}>{Valaa.Lens.focusDumpLens}</span>
           </div>
           {commonMessageRows}
         </div>

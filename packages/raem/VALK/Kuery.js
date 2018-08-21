@@ -1499,7 +1499,7 @@ export default class Kuery {
   toJSON (): any { return this.toVAKON(); }
 
   toDumpify (cache: ?any): string {
-    return dumpify(this.toVAKON(), undefined, undefined, cache);
+    return dumpify(this.toVAKON(), { cache });
   }
 
 
@@ -1731,7 +1731,7 @@ export function dumpKuery (kuery: Object, shouldBeaumpify) {
     return [beaumpify(kuery)];
   }
   const vakon = kuery.toJSON ? kuery.toJSON() : kuery;
-  if (!inBrowser()) return ["", shouldBeaumpify ? beaumpify(vakon) : JSON.stringify(vakon)];
+  if (!inBrowser()) return ["", shouldBeaumpify ? beaumpify(vakon) : dumpify(vakon)];
   return [vakon, { vakonText: beaumpify(vakon) }];
 }
 

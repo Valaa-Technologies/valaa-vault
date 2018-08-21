@@ -15,7 +15,8 @@ export default function contentHashResolver (source, { rootValue }) {
   } catch (error) {
     const suggestion = error.message.slice(0, 10) !== "source.get" ? "" : `
   Is this a mutation resolver? If so, remember to wrap resolver in mutationResolver.`;
-    rootValue.logger.error(`During contentHashResolver from source: ${dumpify(source, 1000, "...}")}
+    rootValue.logger.error(`During contentHashResolver from source: ${
+        dumpify(source, { sliceAt: 1000, sliceSuffix: "...}" })}
   forwarding exception: ${error.message.slice(0, 140)}...${suggestion}`);
     throw error;
   }

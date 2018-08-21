@@ -70,8 +70,9 @@ export default async function snapshotPartition ({ partitionId, state, schema, o
 
   function fieldReviver (value, type, field, parent, parentType, walkValue, fieldEntry) {
     try {
-      // console.log(`fieldReviver ${dumpify(parent, 40, "...}")}:${parentType.name}.${field.name}`,
-      //    `${dumpify(value, 40, "...}")}:${type.name}`);
+      // console.log(`fieldReviver ${dumpify(parent, { sliceAt: 40, sliceSuffix: "...}" })}:${
+      //     parentType.name}.${field.name}`, `${
+      //     dumpify(value, { sliceAt: 40, sliceSuffix: "...}" })}:${type.name}`);
       if ((field.name === "id") || (field.name === "typeName")) return undefined;
       if (!value) return value;
       const namedType = getNamedType(type);

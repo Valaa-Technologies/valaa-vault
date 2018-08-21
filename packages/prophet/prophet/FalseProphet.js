@@ -12,6 +12,7 @@ import TransactionInfo from "~/prophet/prophet/TransactionInfo";
 
 import { dumpObject, invariantify, invariantifyObject, invariantifyString, outputError }
     from "~/tools";
+import thenChainEagerly from "../../tools/thenChainEagerly";
 
 /**
  * FalseProphet is non-authoritative (cache) in-memory denormalized store as well as a two-way proxy
@@ -83,20 +84,29 @@ export default class FalseProphet extends Prophet {
     } else {
       getBackendFinalEvent = () => prophecy && prophecy.story;
     }
-    const result = this._revealProphecyToAllFollowers(prophecy);
-    result.getBackendFinalEvent = getBackendFinalEvent;
-    result.getFinalEvent = (async () => {
-      // Returns a promise which will resolve to the content received from the backend
-      // but only after all the local follower reactions have been resolved as well
-      // TODO(iridian): Exceptions from follower reactions can't reject the claim, so we should
-      // catch and handle and/or expose them to the claim originator somehow.
-      await result.getFollowerReactions();
-      // TODO(iridian): Exceptions from upstream signal failure and possible heresy: we should
-      // catch and have logic for either retrying the operation or for full rejection.
-      // Nevertheless flushing the corpus is needed.
-      return await result.getBackendFinalEvent();
-    });
-    return result;
+    let result;
+    const onPostError = (error) => this.wrapErrorEvent(error, `claim().finalEvent:`,
+        "\n\trestrictedCommand:", ...dumpObject(restrictedCommand),
+        "\n\tprophecy:", ...dumpObject(prophecy),
+        "\n\tresult:", ...dumpObject(result));
+    try {
+      result = this._revealProphecyToAllFollowers(prophecy);
+      result.getBackendFinalEvent = getBackendFinalEvent;
+      result.getFinalEvent = () => thenChainEagerly(null, [
+        // Returns a promise which will resolve to the content received from the backend
+        // but only after all the local follower reactions have been resolved as well
+        // TODO(iridian): Exceptions from follower reactions can't reject the claim, so we should
+        // catch and handle and/or expose them to the claim originator somehow.
+        () => result.getFollowerReactions(),
+        // TODO(iridian): Exceptions from upstream signal failure and possible heresy: we should
+        // catch and have logic for either retrying the operation or for full rejection.
+        // Nevertheless flushing the corpus is needed.
+        () => result.getBackendFinalEvent(),
+      ], onPostError);
+      return result;
+    } catch (error) {
+      throw onPostError(error);
+    }
   }
 
   // Re-claim commands on application refresh which were cached during earlier executions.

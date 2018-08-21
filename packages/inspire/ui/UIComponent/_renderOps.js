@@ -7,6 +7,7 @@ import { Kuery } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
 import VALEK from "~/engine/VALEK";
+import debugId from "~/engine/debugId";
 
 import { arrayFromAny, isPromise, isSymbol, wrapError } from "~/tools";
 
@@ -410,10 +411,7 @@ function _postProcessProp (prop: any, livePropLookup: Object, liveProps: Object,
 }
 
 export function _validateElement (component: UIComponent, element: any) {
-  const faults = _recurseValidateElements(element);
-  return !faults
-      ? element
-      : component.renderLensRole("invalidElementLens", faults);
+  return _recurseValidateElements(element);
 }
 
 function _recurseValidateElements (element: any) {
@@ -432,8 +430,16 @@ function _recurseValidateElements (element: any) {
   }
   const ret = {};
   if (typeof element.key === "undefined") ret.keyFault = "key missing";
-  const childFaults = _recurseValidateElements(element.children);
-  if (typeof childFaults !== "undefined") ret.childFaults = childFaults;
+  if ((typeof element.type !== "string") && (typeof element.type !== "function")
+      && ((typeof element.type !== "object") || !(element.type instanceof React.Component))) {
+    ret.typeFault = `type must be string, function or React.Component, got ${
+        debugId(element.type)}`;
+  }
+  if (!element.type.isUIComponent) {
+    // Only iterate children if the component is not an UIComponent.
+    const childFaults = _recurseValidateElements((element.props || {}).children);
+    if (typeof childFaults !== "undefined") ret.childFaults = childFaults;
+  }
   if (!Object.keys(ret).length) return undefined;
   ret.element = element;
   return ret;

@@ -396,13 +396,7 @@ export default class VrapperSubscriber extends SimpleData {
   _valkScope () { return this._valkOptions.scope; }
 
   _sendUpdate (fieldUpdate: FieldUpdate) {
-    thenChainEagerly(undefined, [
-      () => fieldUpdate.value(),
-      (value) => {
-        fieldUpdate._value = value;
-        this.callback(fieldUpdate, this);
-      },
-    ], error => wrapError(error, `During ${this.debugId(fieldUpdate.valkOptions())
+    const onError = (error) => wrapError(error, `During ${this.debugId(fieldUpdate.valkOptions())
             }\n ._sendUpdate(), with:`,
         "\n\tsubscriber:", this.subscriber,
         "\n\temitter:", fieldUpdate.emitter(),
@@ -412,8 +406,14 @@ export default class VrapperSubscriber extends SimpleData {
             : "kuery"}:`,
             this._subscribedFieldName || this._subscribedFieldFilter || this._subscribedKuery,
         "\n\tfieldUpdate:", fieldUpdate,
-        "\n\tthis:", this)
-    );
+        "\n\tthis:", this);
+    thenChainEagerly(undefined, [
+      () => fieldUpdate.value(),
+      (value) => {
+        fieldUpdate._value = value;
+        const ret = this.callback(fieldUpdate, this);
+      },
+    ], onError);
   }
 
   _addStackFrameToError (error: Error, sourceVAKON: any) {

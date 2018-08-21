@@ -574,6 +574,7 @@ export default class UIComponent extends React.Component {
   render (): null | string | React.Element<any> | [] {
     let firstPassError;
     let ret;
+    let mainValidationFaults;
     try {
       if (!this._errorObject && !_checkForInfiniteRenderRecursion(this)) {
         // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
@@ -605,15 +606,20 @@ export default class UIComponent extends React.Component {
                 "\n\tcomponent:", dumpObject(this));
           }
         }
-        ret = _validateElement(this, ret);
-
-        return (typeof ret !== "undefined") ? ret
-            : null;
+        mainValidationFaults = _validateElement(this, ret);
+        if (mainValidationFaults === undefined) {
+          return ret === undefined ? null : ret;
+        }
+        console.error("Validation faults during render of", this.debugId(),
+            "\n\tfaults:", mainValidationFaults);
+        ret = this.renderLensRole("invalidElementLens",
+            "see console log for 'Validation faults' details");
       }
     } catch (error) {
       firstPassError = error;
     }
 
+    let internalErrorValidationFaults;
     try {
       if (firstPassError) {
         const wrappedError = wrapError(firstPassError,
@@ -626,10 +632,16 @@ export default class UIComponent extends React.Component {
         outputError(wrappedError);
         this.enableError(wrappedError);
       }
-      const failure: any = this.renderLensRole("internalErrorLens",
-          this._errorObject || "<error missing>");
-      if (isPromise(failure)) throw new Error("internalErrorLens returned a promise");
-      return failure;
+      if (ret === undefined) {
+        const failure: any = this.renderLensRole("internalErrorLens",
+            this._errorObject || "<error missing>");
+        if (isPromise(failure)) throw new Error("internalErrorLens returned a promise");
+        ret = failure;
+      }
+      internalErrorValidationFaults = _validateElement(this, ret);
+      if (internalErrorValidationFaults) {
+        throw new Error("Error rendering itself contains validation faults");
+      }
     } catch (secondPassError) {
       // Exercise in defensive programming. We should never get here, really,, but there's nothing
       // more infurating and factually blocking for the user than react white screen of death.
@@ -640,10 +652,17 @@ export default class UIComponent extends React.Component {
         outputError(wrapError(secondPassError,
             `INTERNAL ERROR: Exception caught in ${this.constructor.name
                 }.render() second pass,`,
-            "\n\twhile rendering firstPassError:", firstPassError,
-            "\n\t...or the existing error status:", this._errorObject,
+            ...(!internalErrorValidationFaults ? []
+                : ["\n\terror contains validation faults:", internalErrorValidationFaults]
+            ),
+            ...(firstPassError
+                    ? ["\n\twhile rendering firstPassError:", firstPassError]
+                : this._errorObject
+                    ? ["\n\twhile rendering existing error status:", this._errorObject]
+                : ["\n\twhile rendering main render validation fault:", mainValidationFaults]
+            ),
             "\n\tin component:", this));
-        return (<div>
+        ret = (<div>
             Exception caught while trying to render error:
             {String(secondPassError)}, see console for more details
         </div>);
@@ -654,13 +673,14 @@ export default class UIComponent extends React.Component {
               "\n\tfirstPassError:", firstPassError,
               "\n\texisting error:", this._errorObject,
               "\n\tin component:", this);
-          return UIComponent.thirdPassErrorElement;
+          ret = UIComponent.thirdPassErrorElement;
         } catch (fourthPassError) {
           console.warn("INTERNAL ERROR: Exception caught on render() fourth pass:", fourthPassError,
               "\n\tGiving up, rendering null. You get candy if you ever genuinely encounter this.");
+          ret = null;
         }
-        return null;
       }
     }
+    return ret;
   }
 }

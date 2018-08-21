@@ -78,14 +78,31 @@ export default class LiveProps extends UIComponent {
     if (typeof contextThis === "undefined") contextThis = {};
     for (const kueryId of Object.keys(props.liveProps || {})) {
       const kuery = props.liveProps[kueryId];
-      this.attachKuerySubscriber(`LiveProps.liveProps['${kueryId}']`,
+      const subscriberName = `LiveProps.liveProps['${kueryId}']`;
+      this.attachKuerySubscriber(subscriberName,
           contextThis,
           kuery, {
             scope: this.getUIContext(),
-            onUpdate: (update: FieldUpdate) => this.setState((prevState) => ({
-              livePropValues: (prevState.livePropValues || OrderedMap())
-                  .set(kueryId, update.value())
-            })),
+            onUpdate: (update: FieldUpdate) => {
+              try {
+                this.setState((prevState) => ({
+                  livePropValues: (prevState.livePropValues || OrderedMap())
+                      .set(kueryId, update.value())
+                }));
+                return true;
+              } catch (error) {
+                const wrappedError = wrapError(error,
+                    `Exception caught in ${this.debugId()})\n subscriber '${subscriberName}', with:`,
+                    "\n\tuiContext:", this.state.uiContext,
+                    "\n\tfocus:", this.tryFocus(),
+                    "\n\tstate:", this.state,
+                    "\n\tprops:", this.props,
+                );
+                outputError(wrappedError);
+                this.enableError(wrappedError);
+              }
+              return false;
+            },
           });
     }
   }

@@ -10,6 +10,7 @@ import InspireGatewayStatus from "./InspireGatewayStatus";
 import MediaEditor from "./MediaEditor";
 // import TextFieldEditor from "./TextFieldEditor";
 import TextFileEditor from "./TextFileEditor";
+import UIComponent from "./UIComponent";
 import UIContext from "./UIContext";
 import ValaaScope from "./ValaaScope";
 
@@ -29,6 +30,7 @@ const Vidgets = {
   MediaEditor,
 //  TextFieldEditor,
   TextFileEditor,
+  UIComponent,
   UIContext,
 //  ValaaNode,
   ValaaScope,

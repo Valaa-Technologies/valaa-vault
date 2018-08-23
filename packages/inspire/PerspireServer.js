@@ -26,11 +26,11 @@ export default class PerspireServer {
   }
 
   start () {
-      global.revelationPath = path.dirname(this.revelationPath);
-      global.document = this.container.window.document;
-      this.revelation = require(path.join(process.cwd(), this.revelationPath));
-      window.WebSocket = require("ws"); // for aws plugin
-      this.gateway = createPerspireGateway(this.revelation)
+    global.revelationPath = path.dirname(this.revelationPath);
+    global.document = this.container.window.document;
+    this.revelation = require(path.join(process.cwd(), this.revelationPath));
+    window.WebSocket = require("ws"); // for aws plugin
+    this.gateway = createPerspireGateway(this.revelation)
           .then((gateway) => {
             gateway.createAndConnectViewsToDOM({
               perspireMain: {
@@ -46,8 +46,8 @@ export default class PerspireServer {
                 },
               },
             },
-            (options) => new PerspireView(options))
-        });
+            (options) => new PerspireView(options));
+          });
     if (this.keepalive) {
       this.container.window.setInterval(() => {
         if (this.output) {

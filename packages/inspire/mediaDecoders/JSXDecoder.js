@@ -111,6 +111,10 @@ export default class JSXDecoder extends MediaDecoder {
             actualType = vidgets[type] || ValaaScope;
           }
         }
+        if (props_.class) {
+          props_.className = props_.class;
+          delete props_.class;
+        }
         props_.key = `${parentKey}-${name}#${props_.key ||
             (parentNameIndices[name] = (parentNameIndices[name] || 0) + 1) - 1}`;
         const hasComplexProps = Object.values(props_)

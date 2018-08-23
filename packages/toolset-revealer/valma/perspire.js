@@ -1,5 +1,7 @@
 #!/usr/bin/env vlm
 
+const path = require("path");
+
 // some web to node env emulation
 global.self = global;
 global.name = "Perspire window";
@@ -21,6 +23,12 @@ exports.builder = (yargs) => yargs.option({
     type: "boolean",
     default: true,
     description: "Keeps server alive after initial run"
+  },
+  plugin: {
+    type: "string",
+    array: true,
+    default: [],
+    description: "List of plugin paths to load at start"
   }
 });
 
@@ -29,6 +37,9 @@ exports.handler = async (yargv) => {
   // Only enabled inside package
   const vlm = yargv.vlm;
   const revelationPath = yargv.revelationPath || "./valaa.json";
+  yargv.plugin.forEach(element => {
+    require(path.join(process.cwd(), element));
+  });
 
   if (!vlm.shell.test("-f", revelationPath)) {
     vlm.info(`file not found ${revelationPath}`);

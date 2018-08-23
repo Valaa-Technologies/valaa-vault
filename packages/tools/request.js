@@ -11,6 +11,11 @@ let reqwest;
 
 async function asyncRequest (opts) {
   if (!reqwest) {
+    if (!document) {
+      document = global.document;
+      opts.crossOrigin = true;
+
+    }
     reqwest = require("reqwest");
   }
   try {

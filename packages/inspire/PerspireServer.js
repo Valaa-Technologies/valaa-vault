@@ -26,25 +26,27 @@ export default class PerspireServer {
   }
 
   start () {
-    this.revelation = require(path.join(process.cwd(), this.revelationPath));
-    global.revelationPath = path.dirname(this.revelationPath);
-    this.gateway = createPerspireGateway(this.revelation)
-        .then((gateway) => {
-          gateway.createAndConnectViewsToDOM({
-            perspireMain: {
-              name: "Valaa Local Perspire Main",
-              rootLensURI: gateway.getRootPartitionURI(),
-              window: this.container.window,
-              container: this.container.window.document.querySelector("#valaa-inspire--main-container"),
-              rootId: "valaa-inspire--main-root",
-              size: {
-                width: this.container.window.innerWidth,
-                height: this.container.window.innerHeight,
-                scale: 1
+      global.revelationPath = path.dirname(this.revelationPath);
+      global.document = this.container.window.document;
+      this.revelation = require(path.join(process.cwd(), this.revelationPath));
+      window.WebSocket = require("ws"); // for aws plugin
+      this.gateway = createPerspireGateway(this.revelation)
+          .then((gateway) => {
+            gateway.createAndConnectViewsToDOM({
+              perspireMain: {
+                name: "Valaa Local Perspire Main",
+                rootLensURI: gateway.getRootPartitionURI(),
+                window: this.container.window,
+                container: this.container.window.document.querySelector("#valaa-inspire--main-container"),
+                rootId: "valaa-inspire--main-root",
+                size: {
+                  width: this.container.window.innerWidth,
+                  height: this.container.window.innerHeight,
+                  scale: 1
+                },
               },
             },
-          },
-            (options) => new PerspireView(options));
+            (options) => new PerspireView(options))
         });
     if (this.keepalive) {
       this.container.window.setInterval(() => {

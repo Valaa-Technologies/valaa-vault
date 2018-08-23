@@ -4,7 +4,7 @@
     "type": "vault",
     "domain": "kernel"
   },
-  "version": "0.31.0-prerelease.0",
+  "version": "0.31.0-prerelease.4",
   "description": "Valaa common infrastructure tools and libraries monorepo.",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",

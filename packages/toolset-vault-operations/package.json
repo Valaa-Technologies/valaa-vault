@@ -1,6 +1,6 @@
 {
   "name": "@valos/toolset-vault-operations",
-  "version": "0.31.0-prerelease.3",
+  "version": "0.31.0-prerelease.4",
   "valaa": {
     "type": "toolset",
     "domain": "files"

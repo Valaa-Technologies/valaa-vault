@@ -2,7 +2,6 @@
 
 import { vRefFromURI } from "~/raem/ValaaReference";
 import Cog from "~/engine/Cog";
-import { getGlobal } from "~/tools";
 
 /**
  * This class is the view entry point
@@ -35,57 +34,5 @@ export default class VDOMView extends Cog {
 
   getSelfAsHead () {
     return this._vUIRoot.getSelfAsHead();
-  }
-
-
-  setAsActiveInspireView () {
-    console.log("Setting active Inspire View to", this.name);
-    this.pauseActiveInspireView();
-    getGlobal().activeInspireView = this;
-    if (this.getTimeDilation() < 0) {
-      this.resumeActiveInspireView();
-    }
-  }
-
-  play () {
-    const currentDilation = this.getTimeDilation();
-    if (currentDilation > 0.00001) {
-      return;
-    } else if (currentDilation < -0.00001) {
-      this.resumeActiveInspireView();
-    } else {
-      this.setTimeDilation(1);
-      this.start();
-    }
-  }
-
-  stop () {
-    this.pause();
-  }
-
-  pause () {
-    const currentTimeDilation = this.engine.getTimeDilation();
-    if (currentTimeDilation > 0) {
-      this.engine.setTimeDilation(currentTimeDilation * -1);
-    }
-  }
-
-  resume () {
-    const currentTimeDilation = this.engine.getTimeDilation();
-    if (currentTimeDilation < 0) {
-      this.engine.setTimeDilation(currentTimeDilation * -1);
-    }
-  }
-
-  toggleBulletTime (bulletTimeDilation) {
-    const currentTimeDilation = this.engine.getTimeDilation();
-    if (currentTimeDilation < 1) {
-      console.log("Resuming full speed playback for engine", this.name,
-          "from", currentTimeDilation);
-      this.engine.setTimeDilation(1);
-    } else {
-      console.log("Bullet timing engine", this.name, "playback to", bulletTimeDilation);
-      this.engine.setTimeDilation(bulletTimeDilation);
-    }
   }
 }

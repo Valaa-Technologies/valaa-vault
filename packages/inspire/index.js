@@ -20,8 +20,6 @@ if (inBrowser()) {
   require("./inspire.css");
 }
 
-export { default as PerspireView } from "./PerspireView";
-
 injectTapEventPlugin();
 
 const logger = new Logger();

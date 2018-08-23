@@ -10,7 +10,7 @@ import type { MediaInfo } from "~/prophet/api/Prophet";
 import Vrapper from "~/engine/Vrapper";
 import VALEK, { Kuery } from "~/engine/VALEK";
 
-import { dumpObject } from "~/tools";
+import { dumpObject, wrapError } from "~/tools";
 
 /**
  * Integrates the given context-free, shared decoding of some Media into the runtime context
@@ -35,11 +35,19 @@ import { dumpObject } from "~/tools";
  */
 export default function integrateDecoding (decodedContent: any, vScope: Vrapper,
     mediaInfo: MediaInfo, options: VALKOptions) {
-  return (typeof decodedContent === "function")
-      ? _integrateNative(decodedContent, vScope, mediaInfo, options)
-      : (decodedContent instanceof Kuery)
-      ? _integrateKuery(decodedContent, vScope, mediaInfo, options)
-      : decodedContent;
+  try {
+    return (typeof decodedContent === "function")
+            ? _integrateNative(decodedContent, vScope, mediaInfo, options)
+        : (decodedContent instanceof Kuery)
+            ? _integrateKuery(decodedContent, vScope, mediaInfo, options)
+        : decodedContent;
+  } catch (error) {
+    throw wrapError(error, `During integrateDecoding(${mediaInfo.name}), with:`,
+        "\n\tdecodedContent:", ...dumpObject({ decodedContent }),
+        "\n\tvScope:", ...dumpObject(vScope),
+        "\n\tmediaInfo:", ...dumpObject(mediaInfo),
+    );
+  }
 }
 
 function _integrateNative (native: Function, vScope: Vrapper, mediaInfo: MediaInfo,

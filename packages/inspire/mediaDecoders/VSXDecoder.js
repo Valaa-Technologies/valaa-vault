@@ -27,8 +27,8 @@ export default class VSXDecoder extends JSXDecoder {
     return ret;
   }
 
-  _createScope (scope: Object, sourceInfo: Object): Object {
-    const ret = super._createScope(scope, sourceInfo);
+  _createDecodeScope (sourceInfo: Object): Object {
+    const ret = super._createDecodeScope(sourceInfo);
     ret.__kueries = sourceInfo.kueries;
     return ret;
   }

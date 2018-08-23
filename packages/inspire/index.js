@@ -4,7 +4,6 @@
 // at the moment it still is the top level entry point, but this might change.
 import "@babel/polyfill";
 import injectTapEventPlugin from "react-tap-event-plugin";
-import isInBrowser from "is-in-browser";
 import { getURIQueryField } from "~/raem/tools/PartitionURI";
 
 import InspireGateway from "~/inspire/InspireGateway";
@@ -12,12 +11,12 @@ import { combineRevelationsLazily } from "~/inspire/Revelation";
 
 import revelationTemplate from "~/inspire/revelation.template";
 
-import { exportValaaPlugin, getGlobal, Logger, LogEventGenerator, outputError }
+import { exportValaaPlugin, getGlobal, Logger, LogEventGenerator, outputError, inBrowser }
     from "~/tools";
 
 import * as mediaDecoders from "./mediaDecoders";
 
-if (isInBrowser) {
+if (inBrowser()) {
   require("./inspire.css");
 }
 

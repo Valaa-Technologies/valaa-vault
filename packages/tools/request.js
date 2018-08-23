@@ -1,4 +1,4 @@
-import wrapError from "~/tools/wrapError";
+import wrapError, { inBrowser } from "~/tools/wrapError";
 
 /**
  * Wraps reqest in a real promise
@@ -11,7 +11,7 @@ let reqwest;
 
 async function asyncRequest (opts) {
   if (!reqwest) {
-    if (!document) {
+    if (!inBrowser) {
       document = global.document;
       opts.crossOrigin = true;
 

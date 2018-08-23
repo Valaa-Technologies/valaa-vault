@@ -2,6 +2,7 @@
 import beaumpify from "~/tools/beaumpify";
 import { invariantifyObject } from "~/tools/invariantify";
 import isSymbol from "~/tools/isSymbol";
+import isInBrowser from "is-in-browser";
 
 if (typeof window !== "undefined") window.beaumpify = beaumpify;
 
@@ -105,10 +106,7 @@ export function executingInJest () {
 }
 
 export function inBrowser () {
-  // TODO(iridian): Properly differentiate between browser and jest environments.
-  return window
-      && (true /* !process || (process.env.NODE_ENV !== "production") */)
-      && !executingInJest();
+  return isInBrowser;
 }
 
 export function outputError (error, header = "Exception caught", logger = errorLogger) {

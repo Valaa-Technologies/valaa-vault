@@ -1,5 +1,7 @@
 import PerspireServer from "@valos/inspire/PerspireServer";
+
 const fs = require("fs");
+
 const output = "./revelations/perspire-test/test/index.html";
 const revelationPath = "./revelations/perspire-test/valaa.json";
 const expected = `<html><head><meta http-equiv="refresh" content="1"></head><body><div id="valaa-inspire--main-container"><div id="valaa-inspire--main-root"><div><div><h1>Hello World!</h1><h2>Hello World! function</h2></div></div></div></div>`;

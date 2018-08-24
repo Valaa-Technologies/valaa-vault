@@ -30,6 +30,7 @@ export default class PerspireServer {
     global.document = this.container.window.document;
     this.revelation = require(path.join(process.cwd(), this.revelationPath));
     window.WebSocket = require("ws"); // for aws plugin
+
     this.gateway = createPerspireGateway(this.revelation)
           .then((gateway) => {
             gateway.createAndConnectViewsToDOM({
@@ -58,7 +59,7 @@ export default class PerspireServer {
       if (this.output) {
         shell.ShellString(this.container.serialize()).to(this.output);
       }
-      this.gateway.then((res) => this);
+      this.gateway.then((this));
     }
   }
 }

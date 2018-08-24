@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>perspireWorld 1.0.0</title>
+        <style>
+          html, body, #valaa-inspire--main-container {
+            margin: 0px;
+            padding: 0px;
+            box-sizing: border-box;
+            transition: all 0.5s ease;
+          }
+          *, *:before, *:after {
+            box-sizing: inherit;
+          }
+        </style>
+        <link href="inspire@0.31.0-prerelease.2.js" as="script" rel="preload" />
+<link href="inspire-plugin-valaa-aws@0.31.0-prerelease.2.js" as="script" rel="preload" />
+    </head>
+    <body>
+        <div id="valaa-inspire--main-container"></div>
+        <script src="inspire@0.31.0-prerelease.2.js"></script>
+<script src="inspire-plugin-valaa-aws@0.31.0-prerelease.2.js"></script>
+        <script>
+          Valaa.createInspireGateway({ "...": "valaa.json" }, {
+            gateway: {
+              verbosity: 0,
+            },
+            prologue: {
+              rootPartitionURI: Valaa.getURIQueryField(document.location, "partition"),
+            },
+          }).then(function (inspireGateway) {
+            Valaa.views = inspireGateway.createAndConnectViewsToDOM({
+              inspireMain: {
+                name: "Valaa local Zero Main",
+                rootLensURI: inspireGateway.getRootPartitionURI(),
+                container: document.querySelector("#valaa-inspire--main-container"),
+                rootId: "valaa-inspire--main-root",
+                size: { width: window.innerWidth, height: window.innerHeight, scale: 1 },
+              },
+            });
+          });
+        </script>
+    </body>
+</html>

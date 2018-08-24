@@ -12,6 +12,11 @@ export function dumpObject (value) {
   return ret;
 }
 
+// from tuxsudo's is-in-browser: https://github.com/tuxsudo/is-in-browser
+const isBrowser = typeof window === "object"
+&& typeof document === "object"
+&& document.nodeType === 9;
+
 /**
  *  Wraps given error in a new error, with given contextDescriptions added.
  *  The contextDescription can be anything that can be given to console.log/error, but as guideline:
@@ -105,10 +110,7 @@ export function executingInJest () {
 }
 
 export function inBrowser () {
-  // modified from tuxsudo's is-in-browser: https://github.com/tuxsudo/is-in-browser
-  return typeof window === "object"
-    && typeof document === "object"
-    && document.nodeType === 9;
+  return isBrowser;
 }
 
 export function outputError (error, header = "Exception caught", logger = errorLogger) {

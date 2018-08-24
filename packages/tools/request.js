@@ -1,4 +1,6 @@
-import wrapError from "~/tools/wrapError";
+import wrapError, { inBrowser } from "~/tools/wrapError";
+
+global.XMLHttpRequest = require("xhr2");
 
 /**
  * Wraps reqest in a real promise
@@ -10,9 +12,13 @@ const outstandingRequests = {};
 let reqwest;
 
 async function asyncRequest (opts) {
+  if (!inBrowser()) {
+    opts.crossOrigin = false;
+  }
   if (!reqwest) {
     reqwest = require("reqwest");
   }
+
   try {
     if (!opts.url) throw new Error(`request call missing opts.url`);
     // console.log("requesting", opts.url);

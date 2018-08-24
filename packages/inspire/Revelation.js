@@ -104,7 +104,7 @@ function _trySpread (candidate: any) {
   const options = candidate["..."];
   const rest = { ...candidate };
   delete rest["..."];
-  if (inBrowser) {
+  if (inBrowser()) {
     return [
       _markLazy(() => request(typeof options === "string" ? { url: options } : options)),
       rest,

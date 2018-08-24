@@ -2,7 +2,6 @@
 import beaumpify from "~/tools/beaumpify";
 import { invariantifyObject } from "~/tools/invariantify";
 import isSymbol from "~/tools/isSymbol";
-import isInBrowser from "is-in-browser";
 
 if (typeof window !== "undefined") window.beaumpify = beaumpify;
 
@@ -106,7 +105,10 @@ export function executingInJest () {
 }
 
 export function inBrowser () {
-  return isInBrowser;
+  // modified from tuxsudo's is-in-browser: https://github.com/tuxsudo/is-in-browser
+  return typeof window === "object"
+    && typeof document === "object"
+    && document.nodeType === 9;
 }
 
 export function outputError (error, header = "Exception caught", logger = errorLogger) {

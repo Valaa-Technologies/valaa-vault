@@ -1,7 +1,5 @@
 {
   "gateway": {
-    "version": "0.31.0-prerelease.1",
-    "runtime": "inspire@0.31.0-prerelease.1.js",
     "authorityConfigs": {
       "...": "authorityConfigs.json"
     }
@@ -17,7 +15,6 @@
     "blobBuffers": {
       "...": "blobBuffers.json"
     },
-    "runtime": "inspire@0.31.0-prerelease.1.js",
     "authorityConfigs": {
       "...": "authorityConfigs.json"
     }

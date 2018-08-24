@@ -1,5 +1,5 @@
 // @flow
-
+import "@babel/polyfill";
 import Vrapper from "~/engine/Vrapper";
 import ReactRoot from "~/inspire/ui/ReactRoot";
 import VDOMView from "~/inspire/VDOMView";

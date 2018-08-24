@@ -1,10 +1,10 @@
 // @flow
 
 import path from "path";
-import { PerspireView, createPerspireGateway } from "~/inspire";
 import { JSDOM } from "jsdom";
 import shell from "shelljs";
-
+import { createPerspireGateway } from "~/inspire";
+import PerspireView from "~/inspire/PerspireView";
 
 export default class PerspireServer {
   constructor ({ vlm, revelationPath, output, keepalive = true,

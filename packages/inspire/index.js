@@ -11,8 +11,9 @@ import { combineRevelationsLazily } from "~/inspire/Revelation";
 
 import revelationTemplate from "~/inspire/revelation.template";
 
-import { exportValaaPlugin, getGlobal, Logger, LogEventGenerator, outputError, inBrowser }
-    from "~/tools";
+import {
+  exportValaaPlugin, dumpObject, getGlobal, Logger, LogEventGenerator, outputError, inBrowser
+} from "~/tools";
 
 import * as mediaDecoders from "./mediaDecoders";
 
@@ -30,16 +31,42 @@ Valaa.getURIQueryField = getURIQueryField;
 
 
 Valaa.createInspireGateway = function createInspireGateway (...revelations: any[]) {
-  const gatewayPromise = Valaa.createGateway(...revelations);
+  const inspireBrowserEnvironmentRevelation = {
+    gateway: { scribe: {
+      getDatabaseAPI: require("~/tools/indexedDB/getBrowserDatabaseAPI").getDatabaseAPI,
+    }, },
+  };
+
+  const gatewayPromise = Valaa.createGateway({},
+      ...revelations, inspireBrowserEnvironmentRevelation);
   return new Promise(resolve =>
       document.addEventListener("DOMContentLoaded", () => { resolve(gatewayPromise); }));
 };
 
 export function createPerspireGateway (...revelations: any[]) {
-  return Valaa.createGateway(...revelations);
+  const perspireEnvironmentRevelation = {
+    gateway: { scribe: {
+      getDatabaseAPI: require("~/tools/indexedDB/getWebSQLShimDatabaseAPI").getDatabaseAPI,
+    }, },
+  };
+
+  return Valaa.createGateway({ revelationRootPath: process.cwd() },
+      ...revelations, perspireEnvironmentRevelation);
 }
 
-export default (Valaa.createGateway = async function createGateway (...revelations: any) {
+export function createTestPerspireGateway (...revelations: any[]) {
+  const perspireEnvironmentRevelation = {
+    gateway: { scribe: {
+      getDatabaseAPI: require("~/tools/indexedDB/getInMemoryDatabaseAPI").getDatabaseAPI,
+    }, },
+  };
+
+  return Valaa.createGateway({ revelationRootPath: process.cwd() },
+      ...revelations, perspireEnvironmentRevelation);
+}
+
+export default (Valaa.createGateway = async function createGateway (gatewayOptions: Object = {},
+    ...revelations: any) {
   let ret;
   let combinedRevelation;
   const delayedPlugins = [];
@@ -50,23 +77,15 @@ export default (Valaa.createGateway = async function createGateway (...revelatio
           Valaa.gateway.debugId()}). There can be only one.`);
     }
 
-    const gatewayPluginsRevelation = {
-      gateway: {
-        plugins: Valaa.plugins,
-        scribe: {
-          getDatabaseAPI: (!global.process
-              ? require("~/tools/indexedDB/getBrowserDatabaseAPI")
-              : require("~/tools/indexedDB/getWebSQLShimDatabaseAPI"))
-            .getDatabaseAPI,
-        }
-      }
-    };
+    const gatewayPluginsRevelation = { gateway: { plugins: Valaa.plugins } };
 
     Valaa.plugins = { push (plugin) { delayedPlugins.push(plugin); } };
 
-    ret = new InspireGateway({ name: "Uninitialized InspireGateway", logger });
+    ret = new InspireGateway({ name: "Uninitialized InspireGateway", logger, ...gatewayOptions });
     ret.warnEvent(`Initializing in environment (${
-        String(process.env.NODE_ENV)}) by combining`, ...revelations, gatewayPluginsRevelation);
+        String(process.env.NODE_ENV)}) by combining`,
+            ...([].concat(...revelations.map(dumpObject))),
+            ...dumpObject(gatewayPluginsRevelation));
 
     combinedRevelation = await combineRevelationsLazily(
         ret,

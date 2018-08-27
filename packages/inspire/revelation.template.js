@@ -21,6 +21,7 @@ export default {
     plugins: arrayOf(plugin()),
 
     authorityConfigs: dictionaryOf(authorityConfig()),
+    scribe: { logLevel: 0 },
     oracle: { logLevel: 0 },
     reducer: { logLevel: 0 },
     corpus: { logLevel: 0 },

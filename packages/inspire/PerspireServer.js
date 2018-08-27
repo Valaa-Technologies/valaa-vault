@@ -3,7 +3,7 @@
 import path from "path";
 import { JSDOM } from "jsdom";
 import shell from "shelljs";
-import { createPerspireGateway } from "~/inspire";
+import { createPerspireGateway, createTestPerspireGateway } from "~/inspire";
 import PerspireView from "~/inspire/PerspireView";
 
 export default class PerspireServer {

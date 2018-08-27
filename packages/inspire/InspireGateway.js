@@ -33,6 +33,11 @@ const DEFAULT_ACTION_VERSION = process.env.DEFAULT_ACTION_VERSION || "0.1";
 
 export default class InspireGateway extends LogEventGenerator {
 
+  constructor (options: Object) {
+    super(options);
+    this.revelationRootPath = options.revelationRootPath || "";
+  }
+
   callRevelation (Type: Function | any) {
     if (typeof Type !== "function") return Type;
     return new Type({ logger: this.getLogger() });
@@ -85,7 +90,7 @@ export default class InspireGateway extends LogEventGenerator {
 
       registerVidgets();
       this.warnEvent(`initialize(): registered builtin Inspire vidgets`);
-      this.logEvent("InspireGateway initialized, with revelation", ...dumpObject(revelation));
+      this.warnEvent("InspireGateway initialized, with revelation", ...dumpObject(revelation));
     } catch (error) {
       throw this.wrapErrorEvent(error, "initialize", "\n\tthis:", ...dumpObject(this));
     }

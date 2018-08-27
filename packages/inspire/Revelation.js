@@ -1,5 +1,6 @@
 // @flow
 
+import path from "path";
 import { dumpObject, inProduction, isPromise, request, wrapError, inBrowser } from "~/tools";
 
 // Revelation is a JSON object for which any expected sub-object can be replaced with an XHR
@@ -99,23 +100,32 @@ function _isLazy (candidate: Function | any) {
   return (typeof candidate === "function") && candidate._isLazy;
 }
 
-function _trySpread (candidate: any) {
+function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
   if ((typeof candidate !== "object") || !candidate.hasOwnProperty("...")) return undefined;
-  const options = candidate["..."];
+  const expandee = candidate["..."];
   const rest = { ...candidate };
   delete rest["..."];
+  const isObjectExpandee = (typeof expandee !== "string");
+  const expandeePath = path.join(gateway.revelationRootPath || ".",
+      isObjectExpandee ? expandee.url : expandee);
+  let retrievedContent;
   if (inBrowser()) {
-    return [
-      _markLazy(() => request(typeof options === "string" ? { url: options } : options)),
-      rest,
-    ];
+    const requestOptions = { ...(isObjectExpandee ? expandee : {}), url: expandeePath };
+    retrievedContent = _markLazy(() => request(requestOptions));
+  } else if (typeof expandee !== "string") {
+    throw new Error("Non-string expandees are not supported in non-browser Revelation contexts");
+  } else {
+    try {
+      retrievedContent = require(expandeePath);
+    } catch (error) {
+      throw gateway.wrapErrorEvent(error, `_tryExpandExtension('${expandee.url || expandee}')`,
+          "\n\texpandeePath:", expandeePath);
+    }
   }
-  const path = require("path");
-
-  return [
-    require(path.join(process.cwd(), global.revelationPath, options)),
-    rest
-  ];
+  const subGateway = Object.assign(Object.create(gateway), {
+    revelationRootPath: path.dirname(expandeePath),
+  });
+  return _markLazy(() => _combineRevelationsLazily(subGateway, base, retrievedContent, rest));
 }
 
 function _extendRevelation (gateway: Object, base: Object, extension: Object,
@@ -140,10 +150,8 @@ function _extendRevelation (gateway: Object, base: Object, extension: Object,
           _combineRevelationsLazily(gateway, _keepCalling(base), _keepCalling(extension))));
     }
 
-    const spread = _trySpread(extension);
-    if (spread) {
-      return (ret = _markLazy(() => _combineRevelationsLazily(gateway, base, ...spread)));
-    }
+    const expandedExtension = _tryExpandExtension(gateway, extension, base);
+    if (expandedExtension) return (ret = expandedExtension);
 
     if (typeof extension === "function" && (!validateeFieldName || (typeof base === "function"))) {
       if (typeof base !== "function") {

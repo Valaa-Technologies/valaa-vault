@@ -11,28 +11,28 @@ import VDOMView from "~/inspire/VDOMView";
  * This class is the view entry point
  */
 export default class InspireView extends VDOMView {
-  async initialize (options : Object) {
-    await this.initializeVDOM(options);
+  async attach (options : Object) {
+    await super.attach(options);
     try {
       // Set title
       if (options.setTitleKuery) {
-        const newTitle = this._vUIRoot.get(options.setTitleKuery);
+        const newTitle = this._vViewFocus.get(options.setTitleKuery);
         if (typeof newTitle === "string") document.title = newTitle;
         else {
           this.warnEvent(`Ignored a request to set document.title to non-string value:`, newTitle,
               "\n\tvia setTitleKuery:", ...dumpKuery(options.setTitleKuery),
-              "\n\tUIRoot:", ...dumpObject(this._vUIRoot));
+              "\n\tUIRoot:", ...dumpObject(this._vViewFocus));
         }
       }
 
       // Renderer
-      this._createReactRoot(options.rootId, options.container, this._vUIRoot, options.name);
+      this._createReactRoot(options.rootId, options.container, this._vViewFocus, options.name);
       this.engine.addCog(this);
-      this.warnEvent(`initialize(): engine running and view connected to DOM (size`,
+      this.warnEvent(`attach(): engine running and view attached to DOM (size`,
           options.size, `unused)`);
       return this;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `initialize('${options.name}' -> ${options.rootLensURI})`);
+      throw this.wrapErrorEvent(error, `attach('${options.name}' -> ${options.rootLensURI})`);
     }
   }
 

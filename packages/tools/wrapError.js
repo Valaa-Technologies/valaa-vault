@@ -2,6 +2,7 @@
 import beaumpify from "~/tools/beaumpify";
 import { invariantifyObject } from "~/tools/invariantify";
 import isSymbol from "~/tools/isSymbol";
+import inBrowser from "~/tools/inBrowser";
 
 if (typeof window !== "undefined") window.beaumpify = beaumpify;
 
@@ -11,11 +12,6 @@ export function dumpObject (value) {
   ret.push(debugObject(value));
   return ret;
 }
-
-// from tuxsudo's is-in-browser: https://github.com/tuxsudo/is-in-browser
-const isBrowser = typeof window === "object"
-&& typeof document === "object"
-&& document.nodeType === 9;
 
 /**
  *  Wraps given error in a new error, with given contextDescriptions added.
@@ -31,7 +27,7 @@ const isBrowser = typeof window === "object"
  * @returns
  */
 export default function wrapError (errorIn: Error, ...contextDescriptions) {
-  const error = !(errorIn instanceof Error) ? new Error(errorIn) : errorIn;
+  const error = _tryCooperativeError(errorIn) || new Error(errorIn);
   if ((typeof error !== "object") || !error || (typeof error.message !== "string")) {
     console.error("INVARIANT VIOLATION during wrapError:",
         "first argument must be an object with .message property!", "Instead got", error);
@@ -56,6 +52,22 @@ ${myTraceAndContext}`;
   ret.sourceStackFrames = errorIn.sourceStackFrames;
   ret.customErrorHandler = errorIn.customErrorHandler;
   return ret;
+}
+
+const _cooperativeErrorTypes = {
+  Error: true,
+  EvalError: true,
+  InternalError: true,
+  RangeError: true,
+  ReferenceError: true,
+  SyntaxError: true,
+  TypeError: true,
+  URIError: true,
+};
+
+function _tryCooperativeError (error: any) {
+  if (error == null) return undefined;
+  return _cooperativeErrorTypes[(error.constructor || {}).name] && error;
 }
 
 export function unwrapError (error: Error) {
@@ -103,14 +115,6 @@ function _clipFrameListToCurrentContext (innerError, dummySliceLineCount) {
     if (i + j === innerTraceList.length) return innerTraceList.slice(0, i);
   }
   return innerTraceList.concat(["<<< possibly missing frames >>>"]);
-}
-
-export function executingInJest () {
-  return window && window.afterAll;
-}
-
-export function inBrowser () {
-  return isBrowser;
 }
 
 export function outputError (error, header = "Exception caught", logger = errorLogger) {

@@ -49,7 +49,7 @@ this document.
          authority URI              partition id     resource id        coupling        lens name
 ┌──────────────┴──────────────┐    ┌──────┴──────┐ ┌──────┴──────┐ ┌───────┴────────┐ ┌─────┴──────┐
 
-valaa-aws://example.com:123/dev?id=abcd-123...2343#987b-72f...8263?coupling=relations&lens=ROOT_LENS
+valaa-test://example.com:123/dev?id=abcd-123...2343#987b-72f...8263?coupling=relations&lens=ROOT_LENS
 
 └───┬───┘   └──────┬──────┘└┬─┘ └───────┬────────┘ └───────────────────────┬───────────────────────┘
  scheme        authority   path        query                         fragment

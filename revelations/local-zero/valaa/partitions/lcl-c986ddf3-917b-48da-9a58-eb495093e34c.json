@@ -282,7 +282,7 @@
         "initialState": {
             "name": "ZeroEditor_partition",
             "owner": ["lcl-c986ddf3-917b-48da-9a58-eb495093e34c", "relations", null, "valaa-local:?id=lcl-c986ddf3-917b-48da-9a58-eb495093e34c"],
-            "target": ["38ca3f4d-6b28-498f-ae90-6e4c12ec89a8", null, null, "valaa-aws://e6yzibd6u3.execute-api.eu-west-1.amazonaws.com/developtest?id=38ca3f4d-6b28-498f-ae90-6e4c12ec89a8"]
+            "target": ["d0d0d0d0-d0d0-d0d0-d0d0-d0d0d0d0d0d0", null, null, "valaa-test://example.com/developtest?id=d0d0d0d0-d0d0-d0d0-d0d0-d0d0d0d0d0d0"]
         },
         "type": "CREATED",
         "commandId": "lcl-6bc0f8d1-5cc0-4669-b0c6-e473e4c84c60"
@@ -497,7 +497,7 @@
         "typeName": "Relation",
         "type": "FIELDS_SET",
         "sets": {
-            "target": ["024622d4-dede-449a-aeab-a0aa4b6e712c", null, null, "valaa-aws://e6yzibd6u3.execute-api.eu-west-1.amazonaws.com/developtest?id=024622d4-dede-449a-aeab-a0aa4b6e712c"]
+            "target": ["dededede-dede-dede-dede-dededede", null, null, "valaa-test://example.com/developtest?id=dededede-dede-dede-dede-dededede"]
         },
         "commandId": "lcl-0064d187-0cef-4545-b269-b402944a3a16"
     }],

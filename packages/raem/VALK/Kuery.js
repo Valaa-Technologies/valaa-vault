@@ -2,9 +2,10 @@ import { vRef } from "~/raem/ValaaReference";
 
 import beaumpify from "~/tools/beaumpify";
 import dumpify from "~/tools/dumpify";
+import inBrowser from "~/tools/inBrowser";
 import invariantify, { invariantifyArray, invariantifyNumber, invariantifyString,
     invariantifyObject } from "~/tools/invariantify";
-import wrapError, { inBrowser, dumpObject as _dumpObject } from "~/tools/wrapError";
+import wrapError, { dumpObject as _dumpObject } from "~/tools/wrapError";
 import { isHostRef, tryHostRef } from "./hostReference";
 
 /**

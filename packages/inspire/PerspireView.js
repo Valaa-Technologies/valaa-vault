@@ -11,16 +11,16 @@ import ReactDOM from "react-dom";
  * This class is the view entry point
  */
 export default class PerspireView extends VDOMView {
-  async initialize (options : Object) {
-    await this.initializeVDOM(options);
+  async attach (options : Object) {
+    await super.attach(options);
     try {
       // Renderer
       this._createReactRoot(options.rootId, options.window, options.container, this._vUIRoot);
-      this.warnEvent(`initialize(): engine running and view connected to DOM (size`,
+      this.warnEvent(`attach(): engine running and view attached to DOM (size`,
           options.size, `unused)`);
       return this;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `initialize('${options.name}' -> ${options.rootLensURI})`);
+      throw this.wrapErrorEvent(error, `attach('${options.name}' -> ${options.rootLensURI})`);
     }
   }
 
@@ -32,7 +32,8 @@ export default class PerspireView extends VDOMView {
     this._rootElement.setAttribute("id", rootId);
     container.appendChild(this._rootElement);
     this._reactRoot = (<ReactRoot
-      vUIRoot={vUIRoot}
+      viewName={viewName}
+      vViewFocus={vViewFocus}
       lensProperty={["ROOT_LENS", "LENS", "EDITOR_LENS", "EDITOR_UI_JSX"]}
     />);
     ReactDOM.render(this._reactRoot, this._rootElement);

@@ -134,7 +134,7 @@ export default class InspireGateway extends LogEventGenerator {
       }
       rootScope.Valaa.gateway = this;
       ret[viewName] = createView({ engine, name: `${viewConfig.name} View` })
-          .initialize(viewConfig);
+          .attach(viewConfig);
       this.warnEvent(`Opened View ${viewName}`,
           ...(!this.getDebugLevel() ? [] : [", with:",
             "\n\tviewConfig:", ...dumpObject(viewConfig),

@@ -39,6 +39,8 @@ export const invariantifyNumber = require("./invariantify").invariantifyNumber;
 export const invariantifyObject = require("./invariantify").invariantifyObject;
 export const invariantifyString = require("./invariantify").invariantifyString;
 
+export const inBrowser = require("./inBrowser").default;
+
 export const isPromise = require("./isPromise").default;
 export const isSymbol = require("./isSymbol").default;
 
@@ -55,7 +57,6 @@ export const thenChainEagerly = require("./thenChainEagerly").default;
 export const wrapError = require("./wrapError").default;
 export const messageFromError = require("./wrapError").messageFromError;
 export const dumpObject = require("./wrapError").dumpObject;
-export const inBrowser = require("./wrapError").inBrowser;
 export const outputError = require("./wrapError").outputError;
 export const outputCollapsedError = require("./wrapError").outputCollapsedError;
 export const unwrapError = require("./wrapError").unwrapError;

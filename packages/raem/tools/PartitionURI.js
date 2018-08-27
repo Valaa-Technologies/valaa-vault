@@ -2,6 +2,7 @@
 
 import URL from "url-parse";
 import { invariantifyString, invariantifyObject } from "~/tools/invariantify";
+import wrapError from "~/tools/wrapError";
 
 /**
  * PartitionURI is an universal identifier for a partition. Different parts of the URI define
@@ -77,9 +78,13 @@ export function getValaaURI (uri: URL | string): URL {
 
 export function createValaaURI (uriString: string): URL {
   if (typeof uriString !== "string") return undefined;
-  const ret = new URL(uriString, null, true);
-  // if (!ret.searchParams && ret.search) ret.searchParams = new URLSearchParams(ret.search);
-  return ret;
+  try {
+    const ret = new URL(uriString, null, true);
+    // if (!ret.searchParams && ret.search) ret.searchParams = new URLSearchParams(ret.search);
+    return ret;
+  } catch (error) {
+    throw wrapError(error, `During createValaaURI('${String(uriString)}')`);
+  }
 }
 
 export function getURIQueryField (uri: URL | string, fieldName: string): ?any {

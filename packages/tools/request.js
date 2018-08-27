@@ -1,4 +1,5 @@
-import wrapError, { inBrowser } from "~/tools/wrapError";
+import wrapError from "~/tools/wrapError";
+import inBrowser from "~/tools/inBrowser";
 
 global.XMLHttpRequest = require("xhr2");
 

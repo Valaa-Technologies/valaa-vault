@@ -74,8 +74,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
     let ret;
     try {
       if (this.getDebugLevel()) {
-        this.warnEvent("\n\tBegun initializing connection with options", initialNarrateOptions,
-            this);
+        this.warnEvent("\n\tBegun initializing connection with options", initialNarrateOptions);
       }
       const scribeConnection = await this._prophet._upstream
           .acquirePartitionConnection(this.partitionURI(),

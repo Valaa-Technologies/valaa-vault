@@ -20,7 +20,7 @@ import createValaaTransientScheme from "~/prophet/schemeModules/valaa-transient"
 import * as ValaaScriptDecoders from "~/script/mediaDecoders";
 import * as ToolsDecoders from "~/tools/mediaDecoders";
 
-import { getDatabaseAPI } from "~/tools/indexedDB/getFakeDatabaseAPI";
+import { getDatabaseAPI } from "~/tools/indexedDB/getInMemoryDatabaseAPI";
 import { openDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 
 export function createProphetTestHarness (options: Object, ...commandBlocks: any) {

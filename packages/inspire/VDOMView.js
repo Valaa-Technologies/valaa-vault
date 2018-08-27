@@ -18,6 +18,7 @@ export default class VDOMView extends Cog {
           lensRef.partitionURI());
       this._vViewFocus = await this.engine.getVrapper(
           lensRef.rawId() || this._rootConnection.partitionRawId());
+      await this._vViewFocus.activate();
       this.warnEvent(`attach(): partition '${this._vViewFocus.get("name")}' UI view focus set:`,
           this._vViewFocus.debugId());
       // this.warn("\n\n");

@@ -153,9 +153,16 @@ export default class Prophet extends LogEventGenerator {
   }
 
   /**
-   * Returns a map of actition partition connections by the connection id.
+   * Returns a map of fully acquired partition connections by the connection id.
    */
   getFullPartitionConnections () : Map<string, PartitionConnection> {
     return this._upstream.getFullPartitionConnections();
+  }
+
+  /**
+   * Returns a map of pending partition connections by the connection id.
+   */
+  getPendingPartitionConnections () : Map<string, Promise<PartitionConnection> > {
+    return this._upstream.getPendingPartitionConnections();
   }
 }

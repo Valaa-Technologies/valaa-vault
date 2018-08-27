@@ -192,11 +192,11 @@ export default class LiveProps extends UIComponent {
       if (isPromise(newProps[name])) (pendingProps || (pendingProps = {}))[name] = newProps[name];
     }
     if (pendingProps) {
-      const pendingKeys = Object.keys(pendingProps);
-      const ret = Promise.all(pendingKeys.map(key => pendingProps[key])).then((values) => {
+      const pendingPropsNames = Object.keys(pendingProps);
+      const ret = Promise.all(pendingPropsNames.map(name => pendingProps[name])).then((values) => {
         this.setState((prevState) => ({
-          livePropValues: pendingKeys.reduce((newLivePropsValues, key, index) =>
-                  newLivePropsValues.set(key, values[index]),
+          livePropValues: pendingPropsNames.reduce((newLivePropsValues, name, index) =>
+                  newLivePropsValues.set(name, values[index]),
               prevState.livePropValues || OrderedMap())
         }));
       });
@@ -236,7 +236,7 @@ export default class LiveProps extends UIComponent {
     // eslint-disable-next-line
     //*/
     } else if (!elementType.isUIComponent || !newProps.hasOwnProperty("array")) {
-      if (!newProps.key) newProps.key = this.getUIContextValue("key");
+      if (!newProps.key) newProps.key = newProps.elementKey || this.getUIContextValue("key");
       const inter = React.createElement(elementType, newProps, ...children);
       ret = _wrapElementInLiveProps(this, inter, focus, "focus");
     } else {

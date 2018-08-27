@@ -331,7 +331,10 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
       livePropsProps.liveProps = liveProps;
     }
     livePropsProps = uiComponentProps({
-      name: key ? `live-${key}` : lensName, parentUIContext: component.getUIContext(),
+      name: (typeof key === "string") ? `live-${key}`
+          : key ? `livekeyed-${lensName}`
+          : lensName,
+      parentUIContext: component.getUIContext(),
     }, livePropsProps);
     // console.log("_tryWrapElementInLiveProps LiveWrapper for", elementType.name, wrapperProps);
     /* Only enable this section for debugging React key warnings; it will break react elsewhere

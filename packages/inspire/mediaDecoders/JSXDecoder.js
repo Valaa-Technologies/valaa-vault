@@ -115,8 +115,10 @@ export default class JSXDecoder extends MediaDecoder {
           props_.className = props_.class;
           delete props_.class;
         }
-        props_.key = `${parentKey}-${name}#${props_.key ||
-            (parentNameIndices[name] = (parentNameIndices[name] || 0) + 1) - 1}`;
+        if (!props_.key) {
+          props_.key = `${typeof parentKey === "string" ? parentKey : "kuery"}-${name}#${
+              (parentNameIndices[name] = (parentNameIndices[name] || 0) + 1) - 1}`;
+        }
         const hasComplexProps = Object.values(props_)
             .find((value => (value != null)
                 && ((typeof value === "object") || (typeof value === "function"))));
@@ -132,6 +134,12 @@ export default class JSXDecoder extends MediaDecoder {
           return React.createElement(type, props_,
               ...(firstPassChildren.length ? [firstPassChildren] : []));
         }
+
+        if (props_.key instanceof Kuery || actualType.isUIComponent) {
+          props_.elementKey = props_.key;
+          if (props_.key instanceof Kuery) delete props_.key;
+        }
+
         if (actualType.isUIComponent && !props_.elementKey) props_.elementKey = props_.key;
         return (integrationHostGlobal: Object, mediaInfo: Object) => {
           try {

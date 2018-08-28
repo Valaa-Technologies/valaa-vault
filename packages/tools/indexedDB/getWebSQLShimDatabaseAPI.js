@@ -1,6 +1,8 @@
 const setGlobalVars = require("indexeddbshim");
 
-global.window = global;
-setGlobalVars(global.window, { checkOrigin: false });
+export function configure (initialConfig) {
+  global.window = global;
+  setGlobalVars(global.window, initialConfig);
+}
 
 export * from "~/tools/indexedDB/getBrowserDatabaseAPI";

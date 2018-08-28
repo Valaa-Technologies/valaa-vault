@@ -2,12 +2,38 @@
 
 import { JSDOM } from "jsdom";
 import shell from "shelljs";
-import { createPerspireGateway, createTestPerspireGateway } from "~/inspire";
+import createGateway from "~/inspire";
 import PerspireView from "~/inspire/PerspireView";
+
+function _createPerspireGateway (...revelations: any[]) {
+  const shimLibrary = require("~/tools/indexedDB/getWebSQLShimDatabaseAPI");
+
+  const perspireEnvironmentRevelation = {
+    gateway: { scribe: {
+      getDatabaseAPI () {
+        shimLibrary.configure(this.databaseConfig || {});
+        return shimLibrary.getDatabaseAPI();
+      },
+    } },
+  };
+  return createGateway({ revelationRootPath: process.cwd() },
+      ...revelations, perspireEnvironmentRevelation);
+}
+
+function _createTestPerspireGateway (...revelations: any[]) {
+  const perspireEnvironmentRevelation = {
+    gateway: { scribe: {
+      getDatabaseAPI: require("~/tools/indexedDB/getInMemoryDatabaseAPI").getDatabaseAPI,
+    }, },
+  };
+
+  return createGateway({ revelationRootPath: process.cwd() },
+      ...revelations, perspireEnvironmentRevelation);
+}
 
 export default class PerspireServer {
   constructor ({
-    revelations, pluginPaths, outputPath, keepalive = true, test,
+    revelations, pluginPaths, cacheRoot, outputPath, test,
     container = () => {
       const ret = new JSDOM(`
         <div id="valaa-inspire--main-container"></div>
@@ -20,8 +46,9 @@ export default class PerspireServer {
     } }: Object,
   ) {
     this.revelations = revelations;
+    this.pluginPaths = pluginPaths;
+    this.cacheRoot = cacheRoot;
     this.outputPath = outputPath;
-    this.keepalive = (typeof keepalive === "number") ? keepalive : 1000;
     this.test = test;
     this.container = container();
   }
@@ -30,9 +57,11 @@ export default class PerspireServer {
     global.document = this.container.window.document;
     window.WebSocket = require("ws"); // For networking in Node environments
 
+    (this.pluginPaths || []).forEach(pluginPath => require(pluginPath));
+
     return (this.gateway = (!this.test
-        ? createPerspireGateway
-        : createTestPerspireGateway)(...this.revelations)
+        ? _createPerspireGateway
+        : _createTestPerspireGateway)(...this.revelations)
     .then(async (gateway) => {
       const viewOptions = {
         perspireMain: {
@@ -51,18 +80,23 @@ export default class PerspireServer {
       const views = gateway.createAndConnectViewsToDOM(
           viewOptions, (options) => new PerspireView(options));
       await views.perspireMain;
-      if (this.keepalive) {
-        // keeps jsDom alive
-        this.container.window.setInterval(this.serializeToOutputPath, this.keepalive);
-      }
+      this.serializeToOutputPath();
       this.gateway = gateway;
       return gateway;
     }));
   }
 
+  async run (interval: number) {
+    return new Promise(terminate => {
+      this.container.window.setInterval(() => {
+        this.serializeToOutputPath();
+      }, interval * 1000);
+    });
+  }
+
   serializeMainDOM () { return this.container.serialize(); }
 
-  serializeToOutputPath = () => {
+  serializeToOutputPath () {
     if (this.outputPath) {
       shell.ShellString(this.container.serialize()).to(this.outputPath);
     }

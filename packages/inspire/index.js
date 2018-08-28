@@ -43,28 +43,6 @@ Valaa.createInspireGateway = function createInspireGateway (...revelations: any[
       document.addEventListener("DOMContentLoaded", () => { resolve(gatewayPromise); }));
 };
 
-export function createPerspireGateway (...revelations: any[]) {
-  const perspireEnvironmentRevelation = {
-    gateway: { scribe: {
-      getDatabaseAPI: require("~/tools/indexedDB/getWebSQLShimDatabaseAPI").getDatabaseAPI,
-    }, },
-  };
-
-  return Valaa.createGateway({ revelationRootPath: process.cwd() },
-      ...revelations, perspireEnvironmentRevelation);
-}
-
-export function createTestPerspireGateway (...revelations: any[]) {
-  const perspireEnvironmentRevelation = {
-    gateway: { scribe: {
-      getDatabaseAPI: require("~/tools/indexedDB/getInMemoryDatabaseAPI").getDatabaseAPI,
-    }, },
-  };
-
-  return Valaa.createGateway({ revelationRootPath: process.cwd() },
-      ...revelations, perspireEnvironmentRevelation);
-}
-
 export default (Valaa.createGateway = async function createGateway (gatewayOptions: Object = {},
     ...revelations: any) {
   let ret;

@@ -27,7 +27,7 @@
     "publish-packages": "vlm publish-packages "
   },
   "devDependencies": {
-    "@valos/toolset-revealer": "file:./packages/toolset-revealer",
+    "@valos/toolset-revealer": ">0.31.0-prerelease",
     "@valos/toolset-vault": "file:./packages/toolset-vault",
     "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.5.0",

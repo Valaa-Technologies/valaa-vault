@@ -15,12 +15,14 @@
   "bin": {
     ".valma-configure_.toolset_@valos_toolset-revealer": "valma/configure__toolset__toolset-revealer.js",
     "valma-compose-revelation": "valma/compose-revelation.js",
+    "valma-perspire": "valma/perspire.js",
     "valma-rouse-revealer": "valma/rouse-revealer.js"
   },
   "dependencies": {
     "autoprefixer": "^8.6.2",
     "compression-webpack-plugin": "^1.1.11",
     "css-loader": "^1.0.0",
+    "indexeddbshim": "^3.8.0",
     "jsdom": "^11.12.0",
     "postcss-loader": "^2.1.6",
     "style-loader": "^0.21.0",

@@ -1,7 +1,7 @@
 {
   "gateway": {
-    "version": "0.31.0-prerelease.2",
-    "runtime": "inspire@0.31.0-prerelease.2.js",
+    "version": "0.31.0",
+    "runtime": "inspire@0.31.0.js",
     "authorityConfigs": {
       "...": "authorityConfigs.json"
     }

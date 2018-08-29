@@ -754,7 +754,7 @@
     to-fast-properties "^2.0.0"
 
 "@valos/toolset-vault@file:./packages/toolset-vault":
-  version "0.31.0-prerelease.4"
+  version "0.31.0"
   dependencies:
     "@babel/cli" ">7.0.0-rc"
     "@babel/core" "^7.0.0-rc"
@@ -789,7 +789,7 @@
     karma-jasmine "^1.1.0"
     karma-webpack "^2.0.4"
     lerna "^2.11.0"
-    valma "^0.31.0-prerelease.4"
+    valma "^0.31.0"
 
 JSONStream@^1.0.4:
   version "1.3.4"
@@ -8148,9 +8148,9 @@ validate-npm-package-license@^3.0.1:
     spdx-expression-parse "^3.0.0"
 
 "valma@file:./packages/valma":
-  version "0.31.0-prerelease.4"
+  version "0.31.0"
   dependencies:
-    "@valos/tools" "^0.31.0-prerelease.4"
+    "@valos/tools" "^0.31.0"
     cardinal "^2.1.1"
     colors "1.3.0"
     glob-to-regexp "^0.4.0"

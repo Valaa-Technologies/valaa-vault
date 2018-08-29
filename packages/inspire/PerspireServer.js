@@ -17,7 +17,7 @@ function _createPerspireGateway (...revelations: any[]) {
       },
     } },
   };
-  return createGateway({ revelationRootPath: process.cwd() },
+  return createGateway({ revelationSiteRootPath: process.cwd() },
       ...revelations, perspireEnvironmentRevelation);
 }
 
@@ -28,7 +28,7 @@ function _createTestPerspireGateway (...revelations: any[]) {
     }, },
   };
 
-  return createGateway({ revelationRootPath: process.cwd() },
+  return createGateway({ revelationSiteRootPath: process.cwd() },
       ...revelations, perspireEnvironmentRevelation);
 }
 

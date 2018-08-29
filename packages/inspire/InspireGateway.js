@@ -35,7 +35,7 @@ export default class InspireGateway extends LogEventGenerator {
 
   constructor (options: Object) {
     super(options);
-    this.revelationRootPath = options.revelationRootPath || "";
+    this.revelationSiteRootPath = options.revelationSiteRootPath || "";
   }
 
   callRevelation (Type: Function | any) {

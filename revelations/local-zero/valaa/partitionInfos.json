@@ -3,7 +3,7 @@
     "name": "Zero weave for developers",
     "commandId": -1,
     "eventId": 14,
-    "logs": { "...": "partitions/lcl-c986ddf3-917b-48da-9a58-eb495093e34c.json" }
+    "logs": { "...": "/valaa/partitions/lcl-c986ddf3-917b-48da-9a58-eb495093e34c.json" }
   },
   "valaa-local:?id=lcl-493ab7ff-3b66-4d75-8b16-4e4010f43c8a": {
     "name": "Zero release",
@@ -15,6 +15,6 @@
     "name": "Zero homes",
     "commandId": -1,
     "eventId": 1,
-    "logs": { "...": "partitions/lcl-0a494baa-a45e-4ae6-8f6f-be2ef222f45b.json" }
+    "logs": { "...": { "url": "valaa/partitions/lcl-0a494baa-a45e-4ae6-8f6f-be2ef222f45b.json" } }
   }
 }

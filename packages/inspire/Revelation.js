@@ -3,19 +3,62 @@
 import path from "path";
 import { dumpObject, inProduction, isPromise, request, wrapError, inBrowser } from "~/tools";
 
-// Revelation is a JSON object for which any expected sub-object can be replaced with an XHR
-// reqwest option object, identified by the presence of key 'url': { url: "..." }.
-// The consumers of the Revelation will lazily (or never) asynchronously request such an object
-// via awaiting on the corresponding property.
+// Revelation is a JSON file in which all "..." keys and their
+// *spreader* values denote XHR operation requests to remote resources.
+// Each such request is expected resolve into a JSON resource which is
+// parsed and extended on around the original revelation spreader key.
+// If no charset or media type can be inferred, the document binary
+// stream is interpreted as utf-8 encoded JSON file.
 //
-// Only properties which have a template value set can be deferred this way.
+// The spreader has two semantic forms: a URL form and a path form.
+// Both forms can contain absolute and relative path references with
+// differing root locations.
 //
-// As an example, the inspire revelation.blobBuffers looks like:
+// Revelation system nominates three major root locations: host root,
+// site root and current file.
+// Current file location is always internally tracked by Revelation
+// system and corresponds to the request which was used to retrieve
+// the file inside which the spreader operation appears.
+
+// The other two depend on the gateway environment. In browser
+// environments host root is scheme+host+port+'/' and site root is
+// window.location.pathname. In Node.js contexts host root is
+// process.cwd() and site root is
+// TODO(iridian): define site root semantics properly.
+//
+// The first form is when spreader.url option is provided. It is used
+// as-is as as the target of an XHR request. Thus it also follows
+// typical XHR URI semantics: an absolute, full URL is used as-is,
+// a root-relative URL beginning with '/' is relative to the host root
+// and relative path URL is relative to site root.
+//
+// The second form is when spreader.path is provided. This path cannot
+// be a full URL. If this path is absolute it is resolved relative to
+// site root (not host root!). If this path is relative it is resolved
+// relative to the current revelation file itself.
+//
+// If the spreader is a flat string it is expanded as if it was a
+// the value of spreader.path with no other spreader options.
+//
+// The consumers of the Revelation will lazily (thus possibly never,
+// saving resources and enabling offline functionality) asynchronously
+// request spreader expansion when they make async/await property
+// accesses to revelation contents.
+//
+// As an example, the inspire revelation.blobBuffers might look like:
 // ```
 // {
 //   "somebobcontenthash": { "base64": "v0987c1r1bxa876a8s723f21=" },
 //   "otherblobcontenthash": { "base64": "b7b98q09au2322h3f2j3hf==" },
-//   "thirdcontenthash": { "url": http://url.com/to/buffer52" },
+//   "contenthash3": { "...": "relative/to/thisFile" },
+//   "contenthash4": { "...": "./relative/to/thisFile" },
+//   "contenthash5": { "...": "/relative/to/revelationSiteRootPath" },
+//   "contenthash6": { "...": { "path": "relative/to/thisFile" } },
+//   "contenthash7": { "...": { "path": "./relative/to/thisFile" } },
+//   "contenthash8": { "...": { "path": "/relative/to/revelationSiteRootPath" } },
+//   "contenthash9": { "...": { "url": "http://url.com/to/buffer52" } },
+//   "contenthash10": { "...": { "url": "relative/to/revelationSiteRootPath" } },
+//   "contenthash11": { "...": { "url": "/relative/to/domainRoot" } },
 // }
 // ```
 // And the corresponding buffer template in revelation.template.js:
@@ -106,11 +149,17 @@ function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
   const rest = { ...candidate };
   delete rest["..."];
   const isObjectExpandee = (typeof expandee !== "string");
-  const expandeePath = path.join(gateway.revelationRootPath || ".",
-      isObjectExpandee ? expandee.url : expandee);
+  let expandeePath = isObjectExpandee ? (expandee.url || expandee.path) : expandee;
+  if (!expandee.url) {
+    expandeePath = path.join(
+        ((expandeePath[0] !== "/") && gateway.revelationContextPath)
+            || gateway.revelationSiteRootPath || "",
+        expandeePath);
+  }
   let retrievedContent;
   if (inBrowser()) {
     const requestOptions = { ...(isObjectExpandee ? expandee : {}), url: expandeePath };
+    delete requestOptions.path;
     retrievedContent = _markLazy(() => request(requestOptions));
   } else if (typeof expandee !== "string") {
     throw new Error("Non-string expandees are not supported in non-browser Revelation contexts");
@@ -126,7 +175,7 @@ function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
     }
   }
   const subGateway = Object.assign(Object.create(gateway), {
-    revelationRootPath: path.dirname(expandeePath),
+    revelationContextPath: path.dirname(expandeePath),
   });
   return _markLazy(() => _combineRevelationsLazily(subGateway, base, retrievedContent, rest));
 }

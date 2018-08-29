@@ -37,7 +37,8 @@ Valaa.createInspireGateway = function createInspireGateway (...revelations: any[
     }, },
   };
 
-  const gatewayPromise = Valaa.createGateway({},
+  const gatewayPromise = Valaa.createGateway(
+      { revelationSiteRootPath: window.location.pathname },
       ...revelations, inspireBrowserEnvironmentRevelation);
   return new Promise(resolve =>
       document.addEventListener("DOMContentLoaded", () => { resolve(gatewayPromise); }));

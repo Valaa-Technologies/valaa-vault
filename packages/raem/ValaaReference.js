@@ -1,10 +1,8 @@
 // @flow
-import URL from "url-parse";
-
 import GhostPath, { JSONGhostPath, ghostPathFromJSON }
     from "~/raem/tools/denormalized/GhostPath";
-import { PartitionURI, createValaaURI, createPartitionURI, getPartitionRawIdFrom }
-    from "~/raem/tools/PartitionURI";
+import ValaaURI, { createValaaURI, createPartitionURI, getPartitionRawIdFrom }
+    from "~/raem/ValaaURI";
 
 import { HostRef, PackedHostValue, tryHostRef } from "~/raem/VALK/hostReference";
 
@@ -16,9 +14,10 @@ import vdocorate from "~/tools/vdoc";
 export type RawId = string;
 
 @vdocorate([
-  `ValaaReference is a value data object which contains all necessary
-  runtime information to reference a valaa object, possibly as part of
-  a coupling. It is the HostRef for VALK.`,
+  `ValaaReference is the internal representation of a Valaa URI: it is
+  a value data object which contains all necessary runtime information
+  to reference a valaa object, possibly as part of a coupling.
+  It is the *HostRef* for VALK.`,
   { fields: {
     rawId: `an id string which identifies the target`,
     ghostPath: `a GhostPath object which specifies the ghost
@@ -61,10 +60,10 @@ export default class ValaaReference {
   // [PackedHostValue]: [RawId, ?string, ?GhostPath];
 
   _isInactive: ?boolean;
-  _partitionURI: ?PartitionURI;
+  _partitionURI: ?ValaaURI;
   _mostInheritedMaterializedTransient: Object;
 
-  constructor (vref: [RawId, ?string, ?GhostPath], partitionURI: ?PartitionURI) {
+  constructor (vref: [RawId, ?string, ?GhostPath], partitionURI: ?ValaaURI) {
     this[PackedHostValue] = vref;
     if (partitionURI) this.setPartitionURI(partitionURI);
     if (this[PackedHostValue][2]) this.connectGhostPath(this[PackedHostValue][2]);
@@ -79,7 +78,7 @@ export default class ValaaReference {
 
   getCoupledField (): ?string { return this[PackedHostValue][1]; }
 
-  coupleWith (coupledField: string, partitionURI: PartitionURI = this._partitionURI): VRef {
+  coupleWith (coupledField: string, partitionURI: ValaaURI = this._partitionURI): VRef {
     if (typeof coupledField === "undefined") return this;
     return new this.constructor([this[PackedHostValue][0], coupledField, this[PackedHostValue][2]],
         partitionURI);
@@ -115,7 +114,7 @@ export default class ValaaReference {
   isInactive (): ?boolean { return this._isInactive || false; }
   setInactive (value: boolean = true): ?boolean { this._isInactive = value; }
 
-  partitionURI (): ?PartitionURI { return this._partitionURI; }
+  partitionURI (): ?ValaaURI { return this._partitionURI; }
   partitionRawId (): ?string {
     try {
       return getPartitionRawIdFrom(this._partitionURI);
@@ -124,7 +123,7 @@ export default class ValaaReference {
           "\n\tpartitionURI:", this._partitionURI);
     }
   }
-  setPartitionURI (partitionURI: PartitionURI) {
+  setPartitionURI (partitionURI: ValaaURI) {
     try {
       if (this._partitionURI) {
         throw new Error(`partitionURI already exists when trying to assign '${
@@ -132,7 +131,7 @@ export default class ValaaReference {
       }
       if ((typeof partitionURI !== "object") || !partitionURI || !partitionURI.href) {
         invariantifyObject(partitionURI, "setPartitionURI.partitionURI",
-            { instanceof: URL, allowEmpty: true });
+            { instanceof: ValaaURI, allowEmpty: true });
       }
       this._partitionURI = partitionURI;
     } catch (error) {
@@ -142,7 +141,7 @@ export default class ValaaReference {
     }
   }
   clearPartitionURI () { this._partitionURI = undefined; }
-  immutatePartitionURI (partitionURI: PartitionURI) {
+  immutatePartitionURI (partitionURI: ValaaURI) {
     return new this.constructor(this[PackedHostValue], partitionURI);
   }
 
@@ -258,17 +257,17 @@ export function invariantifyId (candidate: any, name: string = "id",
  * @param {string} idData
  * @param {string} coupledField
  * @param {GhostPath} ghostPath
- * @param {PartitionURI} partitionURI
+ * @param {ValaaURI} partitionURI
  * @returns {VRef}
  */
 export function vRef (rawId: RawId, coupledField: ?string = null, ghostPath: ?GhostPath = null,
-    partitionURI: ?PartitionURI = null, RefType: Function = ValaaResourceReference): VRef {
+    partitionURI: ?ValaaURI = null, RefType: Function = ValaaResourceReference): VRef {
   try {
     invariantifyString(rawId, "vRef.rawId");
     invariantifyString(coupledField, "vRef.coupledField", { allowNull: true });
     invariantifyObject(ghostPath, "vRef.ghostPath", { allowNull: true, instanceof: GhostPath });
     invariantifyObject(partitionURI, "vRef.partitionURI",
-        { allowNull: true, allowEmpty: true, instanceof: URL });
+        { allowNull: true, allowEmpty: true, instanceof: ValaaURI });
     return new RefType([rawId, coupledField, ghostPath], partitionURI);
   } catch (error) {
     throw wrapError(error, `During vRef('${rawId}', '${coupledField}', ghostPath, ${
@@ -278,7 +277,7 @@ export function vRef (rawId: RawId, coupledField: ?string = null, ghostPath: ?Gh
 }
 
 export function dRef (rawId: RawId, coupledField: ?string, ghostPath: ?GhostPath,
-    partitionURI: ?PartitionURI) {
+    partitionURI: ?ValaaURI) {
   return vRef(rawId, coupledField, ghostPath, partitionURI, ValaaDataReference);
 }
 
@@ -296,13 +295,13 @@ export function vRefFromJSON (json: JSONIdData, RefType: Object = VRef): VRef {
   if (ret[PackedHostValue][2] && !(ret[PackedHostValue][2] instanceof GhostPath)) {
     ret[PackedHostValue][2] = ghostPathFromJSON(ret[PackedHostValue][2]);
   }
-  if (ret[PackedHostValue][3] && !(ret[PackedHostValue][3] instanceof PartitionURI)) {
+  if (ret[PackedHostValue][3] && !(ret[PackedHostValue][3] instanceof ValaaURI)) {
     ret[PackedHostValue][3] = createPartitionURI(ret[PackedHostValue][3]);
   }
   return ret;
 }
 
-export function vRefFromURI (uri: URL | string): VRef {
+export function vRefFromURI (uri: ValaaURI | string): VRef {
   const [partitionURI, fragment] = String(uri).split("#");
   if (!fragment) return vRef("", null, null, createValaaURI(partitionURI));
   const [rawId, referenceOptions] = fragment.split("?");
@@ -327,27 +326,27 @@ export const obtainVRef = vdocorate([
   "@param {IdData} idData",
   "@param {string=tryCoupledFieldFrom(idData)} coupledField",
   "@param {GhostPath=tryGhostPathFrom(idData)} ghostPath",
-  "@param {PartitionURI=tryPartitionURIFrom(idData)} partitionURI",
+  "@param {ValaaURI=tryPartitionURIFrom(idData)} partitionURI",
   "@returns {VRef}",
 ])((idData: IdData | JSONIdData,
     coupledField: ?string = tryCoupledFieldFrom(idData) || null,
     ghostPath: ?GhostPath = tryGhostPathFrom(idData) || null,
-    partitionURI: ?PartitionURI = tryPartitionURIFrom(idData) || null,
+    partitionURI: ?ValaaURI = tryPartitionURIFrom(idData) || null,
     RefType: Function = ValaaResourceReference): VRef =>
         new RefType([getRawIdFrom(idData), coupledField, ghostPath], partitionURI));
 
 export function obtainRRef (idData: IdData | JSONIdData, coupledField: ?string,
-    ghostPath: ?GhostPath, partitionURI: ?PartitionURI): RRef {
+    ghostPath: ?GhostPath, partitionURI: ?ValaaURI): RRef {
   return obtainVRef(idData, coupledField, ghostPath, partitionURI, ValaaResourceReference);
 }
 
 export function obtainDRef (idData: IdData | JSONIdData, coupledField: ?string,
-    ghostPath: ?GhostPath, partitionURI: ?PartitionURI): DRef {
+    ghostPath: ?GhostPath, partitionURI: ?ValaaURI): DRef {
   return obtainVRef(idData, coupledField, ghostPath, partitionURI, ValaaDataReference);
 }
 
 export function obtainBRef (idData: IdData | JSONIdData, coupledField: ?string,
-    ghostPath: ?GhostPath, partitionURI: ?PartitionURI): BRef {
+    ghostPath: ?GhostPath, partitionURI: ?ValaaURI): BRef {
   return obtainVRef(idData, coupledField, ghostPath, partitionURI, ValaaBlobReference);
 }
 
@@ -448,7 +447,7 @@ export const tryPartitionURIFrom = vdocorate(`
   @export
   @param {IdData} idData
   @returns null
-`)((idData: IdData | JSONIdData): ?PartitionURI =>
+`)((idData: IdData | JSONIdData): ?ValaaURI =>
     (idData instanceof VRef ? idData.partitionURI()
         : (Array.isArray(idData) && idData[3]) ? createPartitionURI(idData[3])
         : undefined));

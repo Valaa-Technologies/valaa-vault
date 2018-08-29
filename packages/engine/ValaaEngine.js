@@ -7,7 +7,7 @@ import VALEK, { Kuery, VALKOptions, dumpObject, rootScopeSelf,
 import Command, { created, duplicated, recombined, isCreatedLike } from "~/raem/command";
 
 import { vRef, IdData, obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
-import { createPartitionURI } from "~/raem/tools/PartitionURI";
+import { createPartitionURI } from "~/raem/ValaaURI";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 
 import Transient, { createTransient, getTransientTypeName }

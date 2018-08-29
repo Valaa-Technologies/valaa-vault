@@ -1,7 +1,7 @@
 // @flow
 
 import type Command from "~/raem/command";
-import { createValaaURI } from "~/raem/tools/PartitionURI";
+import { createValaaURI } from "~/raem/ValaaURI";
 import { VRef } from "~/raem/ValaaReference";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";

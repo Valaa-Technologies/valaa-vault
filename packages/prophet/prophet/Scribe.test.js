@@ -1,7 +1,7 @@
 // @flow
 
 import { created, transacted } from "~/raem/command/index";
-import { createPartitionURI } from "~/raem/tools/PartitionURI";
+import { createPartitionURI } from "~/raem/ValaaURI";
 
 import { createScribe, clearScribeDatabases } from "~/prophet/test/ProphetTestHarness";
 

@@ -6,7 +6,7 @@ export default function createValaaMemoryScheme (/* { logger } */) {
 
     getAuthorityURIFromPartitionURI: () => `valaa-memory:`,
 
-    createDefaultAuthorityConfig: (/* partitionURI: URL */) => ({}),
+    createDefaultAuthorityConfig: (/* partitionURI: ValaaURI */) => ({}),
 
     createAuthorityProphet: () => null,
   };

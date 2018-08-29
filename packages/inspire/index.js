@@ -4,7 +4,7 @@
 // at the moment it still is the top level entry point, but this might change.
 import "@babel/polyfill";
 import injectTapEventPlugin from "react-tap-event-plugin";
-import { getURIQueryField } from "~/raem/tools/PartitionURI";
+import { getURIQueryField } from "~/raem/ValaaURI";
 
 import InspireGateway from "~/inspire/InspireGateway";
 import { combineRevelationsLazily } from "~/inspire/Revelation";

@@ -1,13 +1,13 @@
 // @flow
 import { GraphQLObjectType } from "graphql/type";
 import { Map } from "immutable";
-import URL from "url-parse";
 
 import type Command, { Action } from "~/raem/command";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import Resolver from "~/raem/tools/denormalized/Resolver";
 import { getTransientTypeName } from "~/raem/tools/denormalized/Transient";
 import type { State } from "~/raem/tools/denormalized/State";
+import ValaaURI from "~/raem/ValaaURI";
 import { obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
 
 import { dumpObject, invariantify, outputCollapsedError } from "~/tools";
@@ -22,7 +22,7 @@ export type Story = Passage;
 
 export function createUniversalizableCommand (restrictedCommand: Command) {
   return trivialCloneWith(restrictedCommand,
-      entry => (entry instanceof URL ? entry : undefined));
+      entry => (entry instanceof ValaaURI ? entry : undefined));
 }
 
 export function isRestrictedCommand (action: Action) {

@@ -6,7 +6,7 @@ export default function createValaaTransientScheme (/* { logger } */) {
 
     getAuthorityURIFromPartitionURI: () => `valaa-transient:`,
 
-    createDefaultAuthorityConfig: (/* partitionURI: URL */) => ({}),
+    createDefaultAuthorityConfig: (/* partitionURI: ValaaURI */) => ({}),
 
     createAuthorityProphet: () => null,
   };

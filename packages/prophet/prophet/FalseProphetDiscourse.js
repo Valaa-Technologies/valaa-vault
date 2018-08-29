@@ -2,7 +2,7 @@
 
 import Command, { created, duplicated, destroyed } from "~/raem/command";
 import type { Corpus } from "~/raem/Corpus";
-import type { PartitionURI } from "~/raem/tools/PartitionURI";
+import type ValaaURI from "~/raem/ValaaURI";
 import { dumpObject } from "~/raem/VALK";
 import { addConnectToPartitionToError } from "~/raem/tools/denormalized/partitions";
 
@@ -68,7 +68,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   _implicitlyConnectedPartitions: Object;
 
-  connectToMissingPartition = async (missingPartitionURI: PartitionURI) => {
+  connectToMissingPartition = async (missingPartitionURI: ValaaURI) => {
     const partitionURIString = missingPartitionURI.toString();
     if (!this._implicitlyConnectedPartitions[partitionURIString]) {
       this._implicitlyConnectedPartitions[partitionURIString] =

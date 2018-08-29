@@ -1,6 +1,6 @@
 // @flow
 
-import { getPartitionRawIdFrom } from "~/raem/tools/PartitionURI";
+import { getPartitionRawIdFrom } from "~/raem/ValaaURI";
 import { resolvePartitionURI } from "~/raem/tools/denormalized/partitions";
 
 export default function partitionResolver (source: any, args: any,

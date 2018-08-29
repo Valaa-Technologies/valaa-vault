@@ -1,7 +1,7 @@
 // @flow
 
 import type Command from "~/raem/command";
-import type { PartitionURI } from "~/raem/tools/PartitionURI";
+import type ValaaURI from "~/raem/ValaaURI";
 import { VRef } from "~/raem/ValaaReference";
 
 import Follower from "~/prophet/api/Follower";
@@ -129,12 +129,12 @@ export default class Prophet extends LogEventGenerator {
    * Irrespective of where the first narration is sourced, an authorized full narration is
    * initiated against the remote authority if available.
    *
-   * @param {PartitionURI} partitionURI
+   * @param {ValaaURI} partitionURI
    * @returns {PartitionConnection}
    *
    * @memberof Prophet
    */
-  acquirePartitionConnection (partitionURI: PartitionURI,
+  acquirePartitionConnection (partitionURI: ValaaURI,
       options: NarrateOptions = {}): PartitionConnection {
     return this._upstream.acquirePartitionConnection(partitionURI, options);
   }

@@ -1,7 +1,7 @@
 // @flow
 
 import { VRef } from "~/raem/ValaaReference";
-import { PartitionURI, getPartitionRawIdFrom } from "~/raem/tools/PartitionURI";
+import ValaaURI, { getPartitionRawIdFrom } from "~/raem/ValaaURI";
 
 import Prophet, { MediaInfo, NarrateOptions } from "~/prophet/api/Prophet";
 
@@ -13,7 +13,7 @@ import { invariantifyObject } from "~/tools/invariantify";
  */
 export default class PartitionConnection extends LogEventGenerator {
   _prophet: Prophet;
-  _partitionURI: PartitionURI;
+  _partitionURI: ValaaURI;
 
   _refCount: number;
   _dependentConnections: Object;
@@ -21,13 +21,13 @@ export default class PartitionConnection extends LogEventGenerator {
   _isFrozen: boolean;
 
   constructor ({ name, prophet, partitionURI, logger, debugLevel }: {
-    name: any, prophet: Prophet, partitionURI: PartitionURI, logger?: Logger, debugLevel?: number,
+    name: any, prophet: Prophet, partitionURI: ValaaURI, logger?: Logger, debugLevel?: number,
   }) {
     super({ name: name || null, logger: logger || prophet.getLogger(), debugLevel });
     invariantifyObject(prophet, "PartitionConnection.constructor.prophet",
         { instanceof: Prophet });
     invariantifyObject(partitionURI, "PartitionConnection.constructor.partitionURI",
-        { instanceof: PartitionURI, allowEmpty: true });
+        { instanceof: ValaaURI, allowEmpty: true });
 
     this._prophet = prophet;
     this._partitionURI = partitionURI;
@@ -41,7 +41,7 @@ export default class PartitionConnection extends LogEventGenerator {
   }
   getProphet (): Prophet { return this._prophet; }
 
-  partitionURI (): PartitionURI { return this._partitionURI; }
+  partitionURI (): ValaaURI { return this._partitionURI; }
   partitionRawId (): string { return getPartitionRawIdFrom(this._partitionURI); }
 
   isLocal () { return this._partitionURI.protocol === "valaa-local:"; }

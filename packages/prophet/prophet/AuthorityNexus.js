@@ -1,8 +1,6 @@
 // @flow
 
-import URL from "url-parse";
-
-import { getValaaURI } from "~/raem/tools/PartitionURI";
+import ValaaURI, { getValaaURI } from "~/raem/ValaaURI";
 
 import Prophet from "~/prophet/api/Prophet";
 
@@ -42,22 +40,22 @@ export default class AuthorityNexus extends LogEventGenerator {
     throw new Error(`Unrecognized URI scheme "${uriScheme}"`);
   }
 
-  getAuthorityProphet (authorityURI: URL | string) {
+  getAuthorityProphet (authorityURI: ValaaURI | string) {
     return this.tryAuthorityProphet(authorityURI, { require: true });
   }
 
-  tryAuthorityProphet (authorityURI: URL | string, { require } = {}) {
+  tryAuthorityProphet (authorityURI: ValaaURI | string, { require } = {}) {
     const ret = this._authorityProphets[String(authorityURI)];
     if (!require || (typeof ret !== "undefined")) return ret;
     throw new Error(`Cannot find authority prophet for "${String(authorityURI)}"`);
   }
 
-  obtainAuthorityProphetOfPartition (partitionURI: URL | string) {
+  obtainAuthorityProphetOfPartition (partitionURI: ValaaURI | string) {
     return this.obtainAuthorityProphet(
         this._getAuthorityURIFromPartitionURI(getValaaURI(partitionURI)));
   }
 
-  obtainAuthorityProphet (authorityURI: URL | string) {
+  obtainAuthorityProphet (authorityURI: ValaaURI | string) {
     let ret = this._authorityProphets[String(authorityURI)];
     if (typeof ret === "undefined") {
       ret = this._authorityProphets[String(authorityURI)]
@@ -66,11 +64,12 @@ export default class AuthorityNexus extends LogEventGenerator {
     return ret;
   }
 
-  _getAuthorityURIFromPartitionURI (partitionURI: URL): URL {
+  _getAuthorityURIFromPartitionURI (partitionURI: ValaaURI): ValaaURI {
     return this._tryAuthorityURIFromPartitionURI(partitionURI, { require: true });
   }
 
-  _tryAuthorityURIFromPartitionURI (partitionURI: URL, { require }: Object = {}): URL {
+  _tryAuthorityURIFromPartitionURI (partitionURI: ValaaURI, { require }: Object = {}
+      ): ValaaURI {
     let schemeModule;
     try {
       schemeModule = this.trySchemeModule(partitionURI.protocol.slice(0, -1), { require });
@@ -87,7 +86,7 @@ export default class AuthorityNexus extends LogEventGenerator {
     }
   }
 
-  _createAuthorityProphet (authorityURI: URL): Prophet {
+  _createAuthorityProphet (authorityURI: ValaaURI): Prophet {
     let schemeModule;
     let authorityConfig;
     try {

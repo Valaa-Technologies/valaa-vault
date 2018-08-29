@@ -4,7 +4,7 @@ import { Valker, denoteValaaBuiltinWithSignature, denoteDeprecatedValaaBuiltin,
   denoteValaaKueryFunction,
 } from "~/raem/VALK";
 import { VRef, RRef } from "~/raem/ValaaReference";
-import { createPartitionURI } from "~/raem/tools/PartitionURI";
+import { createPartitionURI } from "~/raem/ValaaURI";
 
 import { BuiltinTypePrototype, createNativeIdentifier, ValaaPrimitiveTag } from "~/script";
 

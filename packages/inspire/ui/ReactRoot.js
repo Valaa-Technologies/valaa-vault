@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import preset from "jss-preset-default";
 import jss, { SheetsManager } from "jss";
 
-import { createPartitionURI } from "~/raem/tools/PartitionURI";
+import { createPartitionURI } from "~/raem/ValaaURI";
 
 import Vrapper, { getImplicitMediaInterpretation } from "~/engine/Vrapper";
 

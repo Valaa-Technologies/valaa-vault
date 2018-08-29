@@ -4,7 +4,7 @@ import { OrderedMap } from "immutable";
 import Command from "~/raem/command";
 
 import { createTestPartitionURIFromRawId, createPartitionURI }
-    from "~/raem/tools/PartitionURI";
+    from "~/raem/ValaaURI";
 
 import ScriptTestHarness, { createScriptTestHarness } from "~/script/test/ScriptTestHarness";
 

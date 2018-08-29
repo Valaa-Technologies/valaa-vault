@@ -1,6 +1,6 @@
 // @flow
 
-import type { PartitionURI } from "~/raem/tools/PartitionURI";
+import type ValaaURI from "~/raem/ValaaURI";
 
 import Prophet, { NarrateOptions } from "~/prophet/api/Prophet";
 
@@ -129,7 +129,7 @@ export default class Scribe extends Prophet {
     return this._sharedDb.transaction(stores, mode, opsCallback);
   }
 
-  async acquirePartitionConnection (partitionURI: PartitionURI,
+  async acquirePartitionConnection (partitionURI: ValaaURI,
       initialNarrateOptions: NarrateOptions): ScribePartitionConnection {
     // Oracle does connection caching and sharing, no need to have a connections structure here.
     const ret = new ScribePartitionConnection({

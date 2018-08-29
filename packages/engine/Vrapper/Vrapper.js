@@ -9,7 +9,7 @@ import { fieldsSet, addedToFields, removedFromFields, replacedWithinFields, isCr
     from "~/raem/command";
 import { VRef, vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom, expandIdDataFrom,
     obtainVRef } from "~/raem/ValaaReference";
-import { createPartitionURI, getPartitionRawIdFrom } from "~/raem/tools/PartitionURI";
+import { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";
 import { tryElevateFieldValue } from "~/raem/tools/denormalized/FieldInfo";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";

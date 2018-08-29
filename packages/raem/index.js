@@ -23,6 +23,9 @@ export {
                                       vRef,
 } from "./ValaaReference";
 export {
+                           default as ValaaURI,
+} from "./ValaaURI";
+export {
                            default as VALK
 } from "./VALK/VALK";
 export {

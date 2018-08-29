@@ -3,7 +3,7 @@ import { GraphQLObjectType } from "graphql/type";
 
 import { isCreatedLike } from "~/raem/command";
 import { getRawIdFrom } from "~/raem/ValaaReference";
-import { createPartitionURI } from "~/raem/tools/PartitionURI";
+import { createPartitionURI } from "~/raem/ValaaURI";
 
 import getObjectField, { fillFieldInfoAndResolveAliases }
     from "~/raem/tools/denormalized/getObjectField";

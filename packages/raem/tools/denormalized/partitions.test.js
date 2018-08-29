@@ -4,7 +4,7 @@ import { vRef } from "~/raem/ValaaReference";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 import { createLocalPartitionURIFromRawId, createMemoryPartitionURIFromRawId }
-    from "~/raem/tools/PartitionURI";
+    from "~/raem/ValaaURI";
 
 const testAuthorityURI = "valaa-test:";
 // const sharedURI = "valaa-shared-content";

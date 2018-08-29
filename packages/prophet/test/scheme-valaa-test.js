@@ -6,7 +6,7 @@ export default function createValaaTestScheme (/* { logger } */) {
 
     getAuthorityURIFromPartitionURI: () => `valaa-test:`,
 
-    createDefaultAuthorityConfig: (/* partitionURI: URL */) => ({}),
+    createDefaultAuthorityConfig: (/* partitionURI: ValaaURI */) => ({}),
 
     createAuthorityProphet: () => null,
   };

@@ -1,8 +1,7 @@
 // @flow
 
 import type Command from "~/raem/command";
-import { PartitionURI, createPartitionURI, getPartitionRawIdFrom }
-    from "~/raem/tools/PartitionURI";
+import ValaaURI, { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
 
 import Prophet, { ClaimResult, NarrateOptions } from "~/prophet/api/Prophet";
@@ -53,7 +52,7 @@ export default class Oracle extends Prophet {
    * returns a promise of one. If any narration options are specified in the options, said
    * narration is also performed before the connection is considered fully connected.
    *
-   * @param {PartitionURI} partitionURI
+   * @param {ValaaURI} partitionURI
    * @param {NarrateOptions} [options={
    *   // If true and a connection (even a non-fully-connected) exists it is returned synchronously.
    *   allowPartialConnection: boolean = false,
@@ -74,7 +73,7 @@ export default class Oracle extends Prophet {
    *
    * @memberof Oracle
    */
-  acquirePartitionConnection (partitionURI: PartitionURI, options: NarrateOptions = {}): any {
+  acquirePartitionConnection (partitionURI: ValaaURI, options: NarrateOptions = {}): any {
     let entry;
     try {
       const partitionRawId = getPartitionRawIdFrom(partitionURI);

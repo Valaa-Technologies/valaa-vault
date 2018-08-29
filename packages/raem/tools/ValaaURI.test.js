@@ -1,6 +1,6 @@
 import {
   createPartitionURI, getValaaURI, createValaaURI, getPartitionAuthorityURIStringFrom,
-} from "~/raem/tools/PartitionURI";
+} from "~/raem/ValaaURI";
 
 describe("Basic operations", () => {
   it("roundtrips trivial uri 'foo:'", () => {

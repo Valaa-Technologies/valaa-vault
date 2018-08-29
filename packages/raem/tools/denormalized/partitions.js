@@ -1,11 +1,9 @@
-import URL from "url-parse";
-
 import { VRef } from "~/raem/ValaaReference";
 
 import Bard, { getActionFromPassage } from "~/raem/redux/Bard";
 import { tryHostRef } from "~/raem/VALK/hostReference";
-import { PartitionURI, createPartitionURI, getPartitionAuthorityURIStringFrom,
-    getPartitionRawIdFrom } from "~/raem/tools/PartitionURI";
+import ValaaURI, { createPartitionURI, getPartitionAuthorityURIStringFrom,
+    getPartitionRawIdFrom } from "~/raem/ValaaURI";
 import Resolver from "~/raem/tools/denormalized/Resolver";
 import Transient from "~/raem/tools/denormalized/Transient";
 import traverseMaterializedOwnlings
@@ -13,7 +11,7 @@ import traverseMaterializedOwnlings
 import { dumpObject, invariantify, invariantifyArray, unwrapError, wrapError } from "~/tools";
 
 export class MissingPartitionConnectionsError extends Error {
-  constructor (message, missingPartitions: (PartitionURI | Promise<any>)[]) {
+  constructor (message, missingPartitions: (ValaaURI | Promise<any>)[]) {
     super(message);
     invariantifyArray(missingPartitions, "MissingPartitionConnectionsError.missingPartitions",
         { elementInvariant: value => value });
@@ -62,7 +60,7 @@ export function connectToMissingPartitionsAndThen (error, callback, explicitConn
             "but error.missingPartitions is missing or empty: cannot try connecting");
   }
   const ret = Promise.all(original.missingPartitions.map(missingPartition =>
-      (missingPartition instanceof URL
+      (missingPartition instanceof ValaaURI
           ? connectToPartition(missingPartition)
           : missingPartition) // a promise for an already existing connection process
   )).then(() => callback());
@@ -204,7 +202,7 @@ export function determineNewObjectPartition (mutableTransient: Transient, transi
 }
 
 function _updateOwnlingPartitions (bard: Bard, transient: Transient,
-    newPartitionURI: PartitionURI, oldPartitionURI: PartitionURI) {
+    newPartitionURI: ValaaURI, oldPartitionURI: ValaaURI) {
   return bard.getState().withMutations(mutableState => {
     const partitionerBard = Object.create(bard);
     traverseMaterializedOwnlings(partitionerBard, transient, entryId => {

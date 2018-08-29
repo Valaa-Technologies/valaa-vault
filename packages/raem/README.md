@@ -21,10 +21,9 @@ integrity to the resource model via `couplings`.
 
 ## 1. Valaa URIS, references and raw id's
 
-Valaa reference URI (or just Valaa URI) is a URI used to specify a
-reference to a Valaa Resource. It has two major parts separated by
-the URI fragment separator `#`: *partition URI* part and a
-*local reference* part.
+Valaa URI (is a URI used to specify a reference to a Valaa Resource.
+It has two major parts separated by the URI fragment separator `#`:
+*partition URI* part and a *local reference* part.
 
 *Partition URI* identifies the target authority and partition of
 the reference. It corresponds to scheme, hierarchical and query parts
@@ -40,7 +39,7 @@ to the URI fragment part but has sub-structure which is specified in
 this document.
 
 ```
-                                            reference URI
+                                            Valaa URI
 ┌────────────────────────────────────────────────┴─────────────────────────────────────────────────┐
                   partition URI                                    local reference
 ┌───────────────────────┴────────────────────────┐ ┌───────────────────────┴───────────────────────┐

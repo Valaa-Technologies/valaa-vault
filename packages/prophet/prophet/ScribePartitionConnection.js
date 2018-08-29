@@ -1,5 +1,4 @@
-import URL from "url-parse";
-
+import ValaaURI from "~/raem/ValaaURI";
 import Command, { isCreatedLike, isTransactedLike } from "~/raem/command";
 import { VRef, obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
 
@@ -718,7 +717,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
       try {
         if ((typeof value !== "object") || (value === null)) return value;
         if (typeof value.toJSON === "function") return value.toJSON();
-        if (value instanceof URL) return value.toString();
+        if (value instanceof ValaaURI) return value.toString();
         return undefined;
       } catch (error) {
         throw this.wrapErrorEvent(error, "serializeEventAsJSON.trivialClone.customizer",

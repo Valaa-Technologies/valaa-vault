@@ -1,6 +1,3 @@
-
-import { isId as exportIsId } from "~/tools/invariantify";
-
 import valaaUUID from "~/tools/id/valaaUUID";
 import valaaHash from "~/tools/id/valaaHash";
 
@@ -21,6 +18,3 @@ export default function createId ({ typeName, owner, initialState, parentId, ...
 export function immutableObjectId (state) {
   return valaaHash(state);
 }
-
-// A bit dirty dependency inversion here.
-export const isId = exportIsId;

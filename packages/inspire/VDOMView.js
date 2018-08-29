@@ -1,13 +1,21 @@
 // @flow
 
+import React from "react";
+import ReactDOM from "react-dom";
+
+
 import { vRefFromURI } from "~/raem/ValaaReference";
+
+import Vrapper from "~/engine/Vrapper";
 import Cog from "~/engine/Cog";
+
+import ReactRoot from "~/inspire/ui/ReactRoot";
 
 /**
  * This class is the view entry point
  */
 export default class VDOMView extends Cog {
-  async attach ({ name, size, rootLensURI }: Object) {
+  async attach ({ name, rootLensURI }: Object) {
     try {
       if (!rootLensURI) {
         throw new Error(`No options.rootLensURI found for view ${name}`);
@@ -33,5 +41,28 @@ export default class VDOMView extends Cog {
 
   getSelfAsHead () {
     return this._vViewFocus.getSelfAsHead();
+  }
+
+ /**
+  * Creates the root UI component with the react context, and connects it to the html container.
+  */
+  async _createReactRoot (rootId: string, window: Object, container: Object, vViewFocus: Vrapper,
+      viewName: string) {
+    this._rootElement = window.document.createElement("DIV");
+    this._rootElement.setAttribute("id", rootId);
+    container.appendChild(this._rootElement);
+    this._reactRoot = (<ReactRoot
+      viewName={viewName}
+      vViewFocus={vViewFocus}
+      lensProperty={["ROOT_LENS", "LENS", "EDITOR_LENS"]}
+    />);
+    return new Promise(onDone => {
+      ReactDOM.render(this._reactRoot, this._rootElement, onDone);
+    });
+  }
+
+  _destroy () {
+    // This is not called from anywhere as it is
+    ReactDOM.unmountComponentAtNode(this._rootElement);
   }
 }

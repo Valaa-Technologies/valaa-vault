@@ -67,7 +67,8 @@ const _cooperativeErrorTypes = {
 
 function _tryCooperativeError (error: any) {
   if (error == null) return undefined;
-  return _cooperativeErrorTypes[(error.constructor || {}).name] && error;
+  return ((error instanceof Error) || _cooperativeErrorTypes[(error.constructor || {}).name])
+      && error;
 }
 
 export function unwrapError (error: Error) {

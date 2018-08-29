@@ -2,6 +2,7 @@
 
 import { JSDOM } from "jsdom";
 import shell from "shelljs";
+import path from "path";
 import createGateway from "~/inspire";
 import PerspireView from "~/inspire/PerspireView";
 
@@ -57,7 +58,7 @@ export default class PerspireServer {
     global.document = this.container.window.document;
     window.WebSocket = require("ws"); // For networking in Node environments
 
-    (this.pluginPaths || []).forEach(pluginPath => require(pluginPath));
+    (this.pluginPaths || []).forEach(pluginPath => require(path.join(process.cwd(), pluginPath)));
 
     return (this.gateway = (!this.test
         ? _createPerspireGateway
@@ -87,7 +88,7 @@ export default class PerspireServer {
   }
 
   async run (interval: number) {
-    return new Promise(terminate => {
+    return new Promise((/* terminate */) => {
       this.container.window.setInterval(() => {
         this.serializeToOutputPath();
       }, interval * 1000);

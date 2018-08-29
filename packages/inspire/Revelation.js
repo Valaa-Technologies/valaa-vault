@@ -116,6 +116,9 @@ function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
     throw new Error("Non-string expandees are not supported in non-browser Revelation contexts");
   } else {
     try {
+      // TODO(iridian): This will give a webpack warning, but is actually a line which will never
+      // be run in webpack contexts. There is no suppressor comment directive, but the structure
+      // of the code should be changed so that webpack contexts never even get to see this require.
       retrievedContent = require(expandeePath);
     } catch (error) {
       throw gateway.wrapErrorEvent(error, `_tryExpandExtension('${expandee.url || expandee}')`,

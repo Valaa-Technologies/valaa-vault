@@ -1,6 +1,6 @@
 import { vRef } from "~/raem/ValaaReference";
 import VALEK from "~/engine/VALEK";
-import { asyncRequest } from "~/tools";
+import { request } from "~/tools";
 
 // TODO(iridian): I think this is dead code. Verify and remove or at least deprecate, using
 // accessor properties which output warnings but return the concrete values below.
@@ -22,5 +22,5 @@ export default {
   interpretContent: VALEK.interpretContent(VALEK.fromScope("$1")),
   prepareBlob: VALEK.prepareBlob(VALEK.fromScope("$1"), VALEK.fromScope("$1")),
 
-  asyncRequest,
+  asyncRequest: request,
 };

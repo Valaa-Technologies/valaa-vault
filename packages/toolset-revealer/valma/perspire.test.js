@@ -5,7 +5,9 @@ import PerspireServer from "~/inspire/PerspireServer";
 const testRevelationPath = "./revelations/perspire-test/valaa.json";
 const expectedOutputHTML = `<html><head><meta http-equiv="refresh" content="1"></head><body>${""
   }<div id="valaa-inspire--main-container"><div id="valaa-inspire--main-root">${""
-    }<div><div><h1>Hello World!</h1><h2>Hello World! function</h2></div></div>${""
+    }<div style="width: 100vw; height: 100vh;"><div>${""
+      }<h1>Hello World!</h1><h2>Hello World! function</h2>${""
+    }</div></div>${""
   }</div></div>
         </body></html>`;
 

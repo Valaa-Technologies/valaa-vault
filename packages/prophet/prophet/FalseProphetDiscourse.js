@@ -83,8 +83,8 @@ export default class FalseProphetDiscourse extends Discourse {
     return this.follower.revealProphecy(prophecy);
   }
 
-  confirmTruth (authorizedEvent: Command) {
-    return this.follower.confirmTruth(authorizedEvent);
+  receiveTruth (truthEvent: Command) {
+    return this.follower.receiveTruth(truthEvent);
   }
 
   rejectHeresy (hereticEvent: Command, purgedCorpus: Corpus, revisedEvents: Command[]) {

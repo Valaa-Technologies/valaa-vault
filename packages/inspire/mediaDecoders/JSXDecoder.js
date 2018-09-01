@@ -22,7 +22,7 @@ export default class JSXDecoder extends MediaDecoder {
 
   static columnOffset = 0;
 
-  decode (buffer: ArrayBuffer, { partitionName, mediaName }: Object): any {
+  decode (buffer: ArrayBuffer, { partitionName, mediaName }: Object = {}): any {
     if (!buffer) return null;
     const sourceInfo: Object = {
       partitionName,

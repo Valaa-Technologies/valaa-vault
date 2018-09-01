@@ -112,12 +112,22 @@ export function _persistMediaEntry (connection: ScribePartitionConnection, newMe
       if (newInfo.blobId !== oldBlobId) {
         // TODO(iridian): Are there race conditions here? The refcount operations are not awaited on
         if (newInfo.blobId) {
-          if (newMediaEntry.isInMemory) connection._prophet._addContentInMemoryReference(newInfo);
-          if (newMediaEntry.isPersisted) connection._prophet._addContentPersistReference(newInfo);
+          if (!connection._prophet._blobLookup[newInfo.blobId]) {
+            console.error(`Can't find Media "${newInfo.name}" Blob info for ${newInfo.blobId
+                } when adding new content references`);
+          } else {
+            if (newMediaEntry.isInMemory) connection._prophet._addContentInMemoryReference(newInfo);
+            if (newMediaEntry.isPersisted) connection._prophet._addContentPersistReference(newInfo);
+          }
         }
         if (oldBlobId) {
-          if (oldEntry.isInMemory) connection._prophet._removeContentInMemoryReference(oldBlobId);
-          if (oldEntry.isPersisted) connection._prophet._removeContentPersistReference(oldBlobId);
+          if (!connection._prophet._blobLookup[oldBlobId]) {
+            console.error(`Can't find Media "${newInfo.name}" Blob info for ${oldBlobId
+                } when removing old content references`);
+          } else {
+            if (oldEntry.isInMemory) connection._prophet._removeContentInMemoryReference(oldBlobId);
+            if (oldEntry.isPersisted) connection._prophet._removeContentPersistReference(oldBlobId);
+          }
         }
       }
       connection._prophet._persistedMediaLookup[newMediaEntry.mediaId] = newMediaEntry;
@@ -170,7 +180,7 @@ export function _destroyMediaInfo (connection: ScribePartitionConnection, mediaR
 // Blob reads & writes
 
 export function _persistBlobContent (scribe: Scribe, buffer: ArrayBuffer,
-    blobId: string, blobInfo: BlobInfo, initialPersistRefCount: number = 0): ?Promise<any> {
+    blobId: string, blobInfo?: BlobInfo, initialPersistRefCount: number = 0): ?Promise<any> {
   if (blobInfo && blobInfo.persistRefCount) return blobInfo.persistProcess;
   // Initiate write (set persistProcess so eventual commands using the blobId can wait
   // before being accepted) but leave the blob persist refcount to zero. Even if the blob is

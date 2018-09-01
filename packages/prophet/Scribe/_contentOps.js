@@ -157,8 +157,7 @@ async function _waitBackoff (backoffSeconds: number) {
 // Otherwise is known in the partition returns undefined.
 // Otherwise throws an error.
 export function _readMediaContent (connection: ScribePartitionConnection, mediaId: VRef,
-    mediaEntry: MediaEntry, mediaInfo?: MediaInfo, onError: Function): any {
-  if (!mediaInfo) throw new Error(`No media info found for ${String(mediaId)}`);
+    mediaEntry: MediaEntry, mediaInfo: MediaInfo, onError: Function): any {
   // Only return cached in-memory nativeContent if its id matches the requested id.
   if (mediaEntry
       && (typeof mediaEntry.nativeContent !== "undefined")
@@ -170,6 +169,7 @@ export function _readMediaContent (connection: ScribePartitionConnection, mediaI
       connection._prophet.readBlobContent(mediaInfo.blobId),
       (buffer) => {
         if (!buffer) return undefined;
+        // nativeContent should go in favor of blobInfo decoded contents
         const nativeContent = _nativeObjectFromBufferAndMediaInfo(buffer, mediaInfo);
         if (mediaEntry && (mediaInfo.blobId === mediaEntry.mediaInfo.blobId)) {
           mediaEntry.nativeContent = nativeContent;
@@ -180,14 +180,8 @@ export function _readMediaContent (connection: ScribePartitionConnection, mediaI
 }
 
 export function _decodeMediaContent (connection: ScribePartitionConnection, mediaId: VRef,
-    mediaInfo: MediaInfo, onError: Function): any {
-  if (!mediaInfo.blobId) return undefined;
+    mediaInfo: MediaInfo, decoder: MediaDecoder, onError: Function): any {
   const name = mediaInfo.name ? `'${mediaInfo.name}'` : `unnamed media`;
-  const decoder = connection._decoderArray.findDecoder(mediaInfo);
-  if (!decoder) {
-    throw new Error(`Can't find decoder for ${mediaInfo.type}/${mediaInfo.subtype} in ${
-      connection.getName()}`);
-  }
   return thenChainEagerly(
       connection._prophet.decodeBlobContent(mediaInfo.blobId, decoder,
           { mediaName: name, partitionName: connection.getName() }),
@@ -195,12 +189,11 @@ export function _decodeMediaContent (connection: ScribePartitionConnection, medi
       onError.bind(connection));
 }
 
-export function _decodeBlobContent (scribe: Scribe, blobId: string, blobInfo: BlobInfo,
-    decoder: MediaDecoder, contextInfo: Object, onError: Function) {
-  if (!blobInfo) return undefined;
+export function _decodeBlobContent (scribe: Scribe, blobInfo: BlobInfo,
+    decoder: MediaDecoder, contextInfo?: Object, onError: Function) {
   const cacheHit = blobInfo.decodings && blobInfo.decodings.get(decoder);
   if (cacheHit) return cacheHit;
-  return thenChainEagerly(scribe.readBlobContent(blobId), [
+  return thenChainEagerly(scribe.readBlobContent(blobInfo.blobId), [
     (buffer) => (typeof buffer === "undefined"
         ? undefined
         : decoder.decode(buffer, contextInfo)),

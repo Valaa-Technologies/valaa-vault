@@ -18,12 +18,12 @@ export default class Follower {
   revealProphecy (prophecy: Prophecy): ?Promise<any>[] {} // eslint-disable-line
 
   /**
-   * confirmTruth - confirm an earlier prophecy as true
+   * receiveTruth - confirm an earlier prophecy as true
    *
-   * @param  {type} authorizedEvent   earlier prophecy confirmed as truth ie. part of knowledge
+   * @param  {type} truthEvent   earlier prophecy confirmed as truth ie. part of knowledge
    * @returns {type}             description
    */
-  confirmTruth (authorizedEvent) {} // eslint-disable-line
+  receiveTruth (truthEvent) {} // eslint-disable-line
 
   /**
    * rejectHeresy - reject an earlier prophecy as false, resetting the corpus to state before it.

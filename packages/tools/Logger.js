@@ -52,17 +52,29 @@ export class LogEventGenerator {
   warn (...rest: any[]) { return this._logger.warn(...rest); }
   error (...rest: any[]) { return this._logger.error(...rest); }
 
-  infoEvent (...messagePieces: any[]) {
-    return this._logger.info(`${this.debugId()}:`, ...messagePieces);
+  infoEvent (minLogLevel: any, ...messagePieces: any[]) {
+    if ((typeof minLogLevel === "number") && (minLogLevel > this._debugLevel)) return this;
+    return this._logger.info(`${this.debugId()}:`,
+        ...((typeof minLogLevel !== "number") ? [minLogLevel] : []),
+        ...messagePieces);
   }
-  logEvent (...messagePieces: any[]) {
-    return this._logger.log(`${this.debugId()}:`, ...messagePieces);
+  logEvent (minLogLevel: any, ...messagePieces: any[]) {
+    if ((typeof minLogLevel === "number") && (minLogLevel > this._debugLevel)) return this;
+    return this._logger.log(`${this.debugId()}:`,
+        ...((typeof minLogLevel !== "number") ? [minLogLevel] : []),
+        ...messagePieces);
   }
-  warnEvent (...messagePieces: any[]) {
-    return this._logger.warn(`${this.debugId()}:`, ...messagePieces);
+  warnEvent (minLogLevel: any, ...messagePieces: any[]) {
+    if ((typeof minLogLevel === "number") && (minLogLevel > this._debugLevel)) return this;
+    return this._logger.warn(`${this.debugId()}:`,
+        ...((typeof minLogLevel !== "number") ? [minLogLevel] : []),
+        ...messagePieces);
   }
-  errorEvent (...messagePieces: any[]) {
-    return this._logger.error(`${this.debugId()}:`, ...messagePieces);
+  errorEvent (minLogLevel: any, ...messagePieces: any[]) {
+    if ((typeof minLogLevel === "number") && (minLogLevel > this._debugLevel)) return this;
+    return this._logger.error(`${this.debugId()}:`,
+        ...((typeof minLogLevel !== "number") ? [minLogLevel] : []),
+        ...messagePieces);
   }
   wrapErrorEvent (error: Error, functionName: string, ...contexts: any[]) {
     if (typeof error === "object") error.frameListClipDepth = 5;

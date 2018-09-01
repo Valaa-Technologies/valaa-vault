@@ -71,15 +71,11 @@ export default class OraclePartitionConnection extends PartitionConnection {
   async connect (initialNarrateOptions: NarrateOptions) {
     const onConnectData = { ...initialNarrateOptions };
     try {
-      if (this.getDebugLevel()) {
-        this.warnEvent("\n\tBegun initializing connection with options", initialNarrateOptions,
-            ...dumpObject(this));
-      }
+      this.warnEvent(1, "\n\tBegun initializing connection with options", initialNarrateOptions,
+          ...dumpObject(this));
       const ret = _connect(this, initialNarrateOptions, onConnectData);
-      if (this.getDebugLevel()) {
-        this.warnEvent("\n\tDone initializing connection with options", initialNarrateOptions,
-            "\n\tinitial narration:", ret);
-      }
+      this.warnEvent(1, "\n\tDone initializing connection with options", initialNarrateOptions,
+          "\n\tinitial narration:", ret);
       return ret;
     } catch (error) {
       throw this.wrapErrorEvent(error, "connect",
@@ -94,8 +90,8 @@ export default class OraclePartitionConnection extends PartitionConnection {
       return await _narrateEventLog(this, options, ret, retrievals);
     } catch (error) {
       throw this.wrapErrorEvent(error, "narrateEventLog()",
-          "\n\toptions:", options,
-          "\n\tcurrent ret:", ret);
+          "\n\toptions:", ...dumpObject(options),
+          "\n\tcurrent ret:", ...dumpObject(ret));
     } finally {
       if (options.retrieveMediaContent) {
         delete this._narrationRetrieveMediaContent;
@@ -103,19 +99,18 @@ export default class OraclePartitionConnection extends PartitionConnection {
     }
   }
 
-  async _onConfirmTruth (originName: string, authorizedEvent: Object): Promise<Object> {
-    const partitionData = authorizedEvent.partitions &&
-        authorizedEvent.partitions[this.partitionRawId()];
+  async _receiveTruth (originName: string, truthEvent: UniversalEvent): Promise<Object> {
+    const partitionData = truthEvent.partitions && truthEvent.partitions[this.partitionRawId()];
     try {
       if (!partitionData) {
-        throw new Error(`authorizedEvent is missing partition info for ${this.debugId()}`);
+        throw new Error(`truthEvent is missing partition info for ${this.debugId()}`);
       }
       return _onConfirmTruth(this, originName, authorizedEvent, partitionData);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_onConfirmTruth('${originName}')`,
+      throw this.wrapErrorEvent(error, `_receiveTruth('${originName}')`,
           "\n\toriginName:", originName,
           "\n\teventId:", partitionData && partitionData.eventId,
-          "\n\tauthorizedEvent:", ...dumpObject(authorizedEvent),
+          "\n\ttruthEvent:", ...dumpObject(truthEvent),
           "\n\tthis:", ...dumpObject(this));
     }
   }
@@ -125,7 +120,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
   }
 
   _preAuthorizeCommand = (preAuthorizedEvent: Object) =>
-      this._onConfirmTruth("preAuthorizer", preAuthorizedEvent)
+      this._receiveTruth("preAuthorizer", preAuthorizedEvent)
 
   // Coming from downstream: tries scribe first, otherwise forwards the request to authority.
   // In latter case forwards the result received from authority to Scribe for caching.

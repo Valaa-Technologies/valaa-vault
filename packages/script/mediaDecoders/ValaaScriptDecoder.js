@@ -16,7 +16,7 @@ export default class ValaaScriptDecoder extends MediaDecoder {
     this._customVALK = options.customVALK;
   }
 
-  decode (buffer: ArrayBuffer, { mediaName, partitionName }: Object): any {
+  decode (buffer: ArrayBuffer, { mediaName, partitionName }: Object = {}): any {
     const source = this.stringFromBuffer(buffer);
     return transpileValaaScriptModule(source, {
       sourceInfo: {

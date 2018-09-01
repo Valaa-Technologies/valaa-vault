@@ -9,7 +9,7 @@ import DecoderArray from "~/prophet/prophet/DecoderArray";
 import type MediaDecoder from "~/tools/MediaDecoder";
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 
-import { dumpObject, invariantifyObject, invariantifyString } from "~/tools";
+import { dumpObject, invariantifyObject } from "~/tools";
 import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 import { _decodeBlobContent } from "./_contentOps";
@@ -98,19 +98,20 @@ export default class Scribe extends Prophet {
 
   static initialPreCachedPersistRefCount = 1;
 
-  preCacheBlob (blobId: string, newInfo: Object, readBlobContent: Function) {
+  preCacheBlob (blobId: string, newInfo: Object, retrieveBlobContent: Function) {
     const blobInfo = this._blobLookup[blobId];
     try {
-      if (!blobInfo) {
-        return Promise.resolve(readBlobContent(blobId)).then(buffer => (buffer !== undefined)
-            && this._persistBlobContent(buffer, blobId, Scribe.initialPreCachedPersistRefCount));
+      if (blobInfo) {
+        if ((blobInfo.byteLength !== newInfo.byteLength)
+            && (blobInfo.byteLength !== undefined) && (newInfo.byteLength !== undefined)) {
+          throw new Error(`byteLength mismatch between new blob (${newInfo.byteLength
+              }) and existing blob (${blobInfo.byteLength}) while precaching blob "${blobId}"`);
+        }
+        return undefined;
       }
-      if ((blobInfo.byteLength !== newInfo.byteLength)
-          && (blobInfo.byteLength !== undefined) && (newInfo.byteLength !== undefined)) {
-        throw new Error(`byteLength mismatch between new blob (${newInfo.byteLength
-            }) and existing blob (${blobInfo.byteLength}) while precaching blob "${blobId}"`);
-      }
-      return undefined;
+      return Promise.resolve(retrieveBlobContent(blobId))
+      .then(buffer => (buffer !== undefined)
+          && this._persistBlobContent(buffer, blobId, Scribe.initialPreCachedPersistRefCount));
     } catch (error) {
       throw this.wrapErrorEvent(error, `preCacheBlob('${blobId}')`,
           "\n\tblobInfo:", ...dumpObject(blobInfo));
@@ -132,14 +133,16 @@ export default class Scribe extends Prophet {
     }
   }
 
-  decodeBlobContent (blobId: string, decoder: MediaDecoder, contextInfo: Object) {
+  decodeBlobContent (blobId: string, decoder: MediaDecoder, contextInfo?: Object) {
     const blobInfo = this._blobLookup[blobId || ""];
-    let handled;
+    let alreadyWrapped;
     try {
-      return _decodeBlobContent(this, blobId, blobInfo, decoder, contextInfo, onError);
-    } catch (error) { throw (handled ? error : onError.call(this, error)); }
+      if (!blobInfo) throw new Error(`Cannot find Blob info '${blobId}'`);
+      return _decodeBlobContent(this, blobInfo, decoder, contextInfo, onError);
+    } catch (error) { throw onError.call(this, error); }
     function onError (error) {
-      handled = true;
+      if (alreadyWrapped) return error;
+      alreadyWrapped = true;
       return this.wrapErrorEvent(error, `decodeBlobContent('${blobId}', ${decoder.getName()})`,
           "\n\tdecoder:", ...dumpObject(decoder),
           "\n\tcontext info:", ...dumpObject(contextInfo),
@@ -151,9 +154,11 @@ export default class Scribe extends Prophet {
       ?Promise<any> {
     const blobInfo = this._blobLookup[blobId || ""];
     try {
+      if ((typeof blobId !== "string") || !blobId) {
+        throw new Error(`Invalid blobId '${blobId}', expected non-empty string`);
+      }
       invariantifyObject(buffer, "_persistBlobContent.buffer",
           { instanceof: ArrayBuffer, allowEmpty: true });
-      invariantifyString(blobId, "_persistBlobContent.blobId");
       return _persistBlobContent(this, buffer, blobId, blobInfo, initialPersistRefCount);
     } catch (error) {
       throw this.wrapErrorEvent(error, `_persistBlobContent('${blobId}')`,
@@ -174,13 +179,27 @@ export default class Scribe extends Prophet {
     }
   }
 
-  _removeContentInMemoryReference (blobId: string) {
+  /**
+   * Removes a blob buffer in-memory reference count as an immediate
+   * increment of blobId.inMemoryRefCount. If as a result the ref count
+   * reaches zero frees the cached buffer and all cached decodings and
+   * returns true.
+   * Otherwise returns false.
+   *
+   * Note that The inMemoryRefCount is not persisted.
+   *
+   * @param {string} blobId
+   * @returns {boolean}
+   * @memberof Scribe
+   */
+  _removeContentInMemoryReference (blobId: string): boolean {
     const blobInfo = this._blobLookup[blobId || ""];
     try {
-      if (blobInfo && !--blobInfo.inMemoryRefCount) {
-        delete blobInfo.buffer;
-        delete blobInfo.decodings;
-      }
+      if (!blobInfo) throw new Error(`Cannot find Blob info '${blobId}'`);
+      if (--blobInfo.inMemoryRefCount) return false;
+      delete blobInfo.buffer;
+      delete blobInfo.decodings;
+      return true;
     } catch (error) {
       throw this.wrapErrorEvent(error, `_removeContentInMemoryReference('${blobId}')`,
           "\n\tblobInfo:", ...dumpObject(blobInfo));
@@ -189,9 +208,8 @@ export default class Scribe extends Prophet {
 
   async _addContentPersistReference (mediaInfo: Object) {
     const blobInfo = this._blobLookup[mediaInfo.blobId || ""];
-    // TODO(iridian): What's going on here? Why can the content ref increase be ignored?
-    if (!blobInfo) return undefined;
     try {
+      if (!blobInfo) throw new Error(`Cannot find Blob info '${mediaInfo.blobId}'`);
       return await _addContentPersistReference(this, mediaInfo, blobInfo);
     } catch (error) {
       throw this.wrapErrorEvent(error, `_addContentPersistReference('${mediaInfo.blobId}')`,
@@ -202,9 +220,8 @@ export default class Scribe extends Prophet {
 
   async _removeContentPersistReference (blobId: string) {
     const blobInfo = this._blobLookup[blobId || ""];
-    // TODO(iridian): What's going on here? Why can the content ref decrease be ignored?
-    if (!blobInfo) return undefined;
     try {
+      if (!blobInfo) throw new Error(`Cannot find Blob info '${blobInfo.blobId}'`);
       return await _removeContentPersistReference(this, blobId, blobInfo);
     } catch (error) {
       throw this.wrapErrorEvent(error, `_removeContentPersistReference('${blobId}')`,

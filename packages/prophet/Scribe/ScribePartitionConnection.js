@@ -151,13 +151,15 @@ export default class ScribePartitionConnection extends PartitionConnection {
   // Otherwise throws an error.
   readMediaContent (mediaId: VRef, mediaInfo?: MediaInfo): any {
     const mediaEntry = this._getMediaEntry(mediaId, false);
-    let handled;
+    let alreadyWrapped;
     const actualInfo = mediaInfo || (mediaEntry && mediaEntry.mediaInfo);
     try {
+      if (!actualInfo) throw new Error(`Cannot find Media info for '${String(mediaId)}'`);
       return _readMediaContent(this, mediaId, mediaEntry, actualInfo, onError);
-    } catch (error) { throw (handled ? error : onError.call(this, error)); }
+    } catch (error) { throw onError.call(this, error); }
     function onError (error) {
-      handled = true;
+      if (alreadyWrapped) return error;
+      alreadyWrapped = true;
       return this.wrapErrorEvent(error, `readMediaContent(${
               actualInfo && actualInfo.name ? `'${actualInfo.name}'` : `unnamed media`}`,
           "\n\tmediaId:", mediaId,
@@ -169,18 +171,24 @@ export default class ScribePartitionConnection extends PartitionConnection {
 
   decodeMediaContent (mediaId: VRef, mediaInfo?: MediaInfo): any {
     let actualInfo = mediaInfo;
-    let handled;
+    let alreadyWrapped;
     try {
       if (!actualInfo) {
         const mediaEntry = this._getMediaEntry(mediaId, false);
         actualInfo = mediaEntry && mediaEntry.mediaInfo;
-        if (!actualInfo) throw new Error(`No media info found for ${mediaId}`);
+        if (!actualInfo) throw new Error(`Cannot find Media info for '${String(mediaId)}'`);
       }
-      return _decodeMediaContent(this, mediaId, actualInfo, onError);
-    } catch (error) { throw (handled ? error : onError.call(this, error)); }
+      if (!actualInfo.blobId) return undefined;
+      const decoder = this._decoderArray.findDecoder(actualInfo);
+      if (!decoder) {
+        throw new Error(`Can't find decoder for ${actualInfo.type}/${actualInfo.subtype}`);
+      }
+      return _decodeMediaContent(this, mediaId, actualInfo, decoder, onError);
+    } catch (error) { throw onError.call(this, error); }
     function onError (error) {
-      handled = true;
-      return this.wrapErrorEvent(error, `decodeMediaContent(${name}`,
+      if (alreadyWrapped) return error;
+      alreadyWrapped = true;
+      return this.wrapErrorEvent(error, `decodeMediaContent(${this.getName()}`,
           "\n\tmediaId:", mediaId,
           "\n\tactualMediaInfo:", ...dumpObject(actualInfo),
       );

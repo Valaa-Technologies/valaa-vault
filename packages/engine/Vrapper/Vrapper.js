@@ -1332,7 +1332,7 @@ export default class Vrapper extends Cog {
    */
   prepareBlob (content: any, options: VALKOptions = {}) {
     let mediaInfo;
-    let handled;
+    let alreadyWrapped;
     try {
       this.requireActive(options);
       if (this.hasInterface("Media")) {
@@ -1356,9 +1356,10 @@ export default class Vrapper extends Cog {
           return ret;
         },
       ], onError.bind(this));
-    } catch (error) { throw (handled ? error : onError.call(this, error)); }
+    } catch (error) { throw onError.call(this, error); }
     function onError (error) {
-      handled = true;
+      if (alreadyWrapped) return error;
+      alreadyWrapped = true;
       return wrapError(error, `During ${this.debugId()}\n .prepareBlob(), with:`,
           "\n\tmediaInfo:", mediaInfo);
     }

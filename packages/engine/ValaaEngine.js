@@ -412,7 +412,7 @@ export default class ValaaEngine extends Cog {
     }
   }
 
-  confirmTruth (/* authorizedEvent */) {
+  receiveTruth (/* truthEvent */) {
     // console.log("TRUTH Confirmed", truthEvent);
   }
 

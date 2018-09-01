@@ -67,19 +67,17 @@ export function _claim (oracle: Oracle, command: Command, options: Object): Clai
       } catch (error) { throw oracle.wrapErrorEvent(error, "claim.claimCommandEvent"); }
 
       remoteAuthority = operation.authorities[authorityURIs[0]];
-      if (oracle.getDebugLevel()) {
-        oracle.warnEvent(`Done ${remoteAuthority
-                ? "queuing a remote command locally"
-                : "claiming a local event"} of authority "${authorityURIs[0]}":`,
-            "\n\tpartitions:", ...partitionDatas.map(([, conn]) => conn.partitionRawId()),
-            "\n\tcommand:", command);
-      }
+      oracle.warnEvent(1, `Done ${remoteAuthority
+              ? "queuing a remote command locally"
+              : "claiming a local event"} of authority "${authorityURIs[0]}":`,
+          "\n\tpartitions:", ...partitionDatas.map(([, conn]) => conn.partitionRawId()),
+          "\n\tcommand:", command);
 
       if (!remoteAuthority) {
         const event = { ...command };
         try {
           partitionDatas.map(([, connection]) =>
-              connection._onConfirmTruth("locallyAuthenticated", event));
+              connection._receiveTruth("locallyAuthenticated", event));
         } catch (error) { throw oracle.wrapErrorEvent(error, "claim.local.onConfirmTruth"); }
         return command;
       }
@@ -87,9 +85,7 @@ export function _claim (oracle: Oracle, command: Command, options: Object): Clai
       try {
         ret = await remoteAuthority.claim(command, operation.options).getFinalEvent();
       } catch (error) { throw oracle.wrapErrorEvent(error, "claim.remoteAuthority.claim"); }
-      if (oracle.getDebugLevel()) {
-        oracle.warnEvent(`Done claiming remote command"`, ret);
-      }
+      oracle.warnEvent(1, `Done claiming remote command"`, ret);
       return ret;
     } catch (error) {
       throw oracle.wrapErrorEvent(error, "claim",

@@ -18,9 +18,11 @@ export const vdoc = vdon({
   0: [],
 });
 
+
 export function _acquirePartitionConnection (oracle: Oracle, partitionURI: ValaaURI,
-    partitionRawId: string, options: Object):
+    partitionRawId: string, options: NarrateOptions):
         ?OraclePartitionConnection | Promise<OraclePartitionConnection> {
+  // Synchronous reject or return full connection section
   let entry = oracle._partitionConnections[partitionRawId];
   if (entry && options.createNewPartition && (entry.connection._lastAuthorizedEventId !== -1)) {
     throw new Error(`Partition already exists when trying to create a new partition '${
@@ -32,6 +34,8 @@ export function _acquirePartitionConnection (oracle: Oracle, partitionURI: Valaa
     return entry.connection;
   }
   if (options.onlyTrySynchronousConnection) return undefined;
+
+  // Asynchronous pending connection section
   if (entry) {
     entry.connection.acquireConnection();
     if (!options.eventLog) return entry.pendingConnection;
@@ -45,29 +49,31 @@ export function _acquirePartitionConnection (oracle: Oracle, partitionURI: Valaa
     return ret;
   }
   if (options.dontCreateNewConnection) return undefined;
+
+  // Asynchronous create new connection section
   entry = oracle._partitionConnections[partitionRawId] = {
     connection: new OraclePartitionConnection({
       prophet: oracle, partitionURI, debugLevel: oracle.getDebugLevel(),
     }),
     pendingConnection: undefined,
   };
-  entry.pendingConnection = (async () => {
-    await entry.connection.connect(options);
+  entry.pendingConnection = entry.connection.connect(options).then(() => {
     // fullConnection allows promise users to inspect the promise for completion synchronously:
     // standard promises interface doesn't support this functionality.
     entry.pendingConnection.fullConnection = entry.connection;
     delete entry.pendingConnection;
     return entry.connection;
-  })();
+  });
   entry.pendingConnection.operationInfo = { connection: entry.connection };
-  return entry.pendingConnection || entry.connection;
+  return entry.pendingConnection;
 }
+
 
 export async function _connect (connection: OraclePartitionConnection,
     initialNarrateOptions: Object, onConnectData: Object) {
   const scribeConnection = await connection._prophet._upstream
-  .acquirePartitionConnection(connection.partitionURI(),
-      { callback: connection._onConfirmTruth.bind(connection, "scribeUpstream") });
+      .acquirePartitionConnection(connection.partitionURI(),
+          { callback: connection._receiveTruth.bind(connection, "scribeUpstream") });
   connection.transferIntoDependentConnection("scribeUpstream", scribeConnection);
   connection.setUpstreamConnection(scribeConnection);
 
@@ -99,7 +105,7 @@ export async function _connect (connection: OraclePartitionConnection,
   }
 
   if (ret.mediaRetrievalStatus.latestFailures.length
-    && (onConnectData.requireLatestMediaContents !== false)) {
+      && (onConnectData.requireLatestMediaContents !== false)) {
     throw new Error(`Failed to connect to partition: encountered ${
             onConnectData.mediaRetrievalStatus.latestFailures.length
         } latest media content retrieval failures (and acquirePartitionConnection.${
@@ -110,6 +116,7 @@ export async function _connect (connection: OraclePartitionConnection,
   return ret;
 }
 
+
 function _connectToAuthorityProphet (connection: OraclePartitionConnection) {
   connection._authorityProphet = connection._prophet._authorityNexus
       .obtainAuthorityProphetOfPartition(connection.partitionURI());
@@ -117,13 +124,14 @@ function _connectToAuthorityProphet (connection: OraclePartitionConnection) {
   return (async () => {
     const authorityConnection = await connection._authorityProphet
         .acquirePartitionConnection(connection.partitionURI(), {
-          callback: connection._onConfirmTruth.bind(connection, "authorityUpstream"),
+          callback: connection._receiveTruth.bind(connection, "authorityUpstream"),
           noConnect: true,
         });
     connection.transferIntoDependentConnection("authorityUpstream", authorityConnection);
     return authorityConnection;
   })();
 }
+
 
 export async function _narrateEventLog (connection: OraclePartitionConnection,
     options: NarrateOptions, ret: Object, retrievals: Object) {

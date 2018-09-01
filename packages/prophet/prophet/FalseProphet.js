@@ -1,4 +1,4 @@
-import type Command, { Action, AuthorizedEvent } from "~/raem/command";
+import type Command, { Action, UniversalEvent } from "~/raem/command";
 import type { State } from "~/raem/tools/denormalized/State";
 import { isRestrictedCommand, createUniversalizableCommand, getActionFromPassage }
     from "~/raem/redux/Bard";
@@ -125,10 +125,10 @@ export default class FalseProphet extends Prophet {
   // Handle event confirmation coming from upstream, including a possible reformation.
   // Sends notifications downstream on the confirmed events.
   // Can also send new command claims upstream if old commands get rewritten during reformation.
-  confirmTruth (authorizedEvent: AuthorizedEvent, purgedCommands?: Array<AuthorizedEvent>) {
-    if (!authorizedEvent) return;
+  receiveTruth (truthEvent: UniversalEvent, purgedCommands?: Array<UniversalEvent>) {
+    if (!truthEvent) return;
     /*
-    this.warnEvent("\n\tconfirmTruth", authorizedEvent.commandId, authorizedEvent,
+    this.warnEvent("\n\tconfirmTruth", truthEvent.commandId, truthEvent,
         ...(purgedCommands ? ["\n\tPURGES:", purgedCommands] : []),
         ...this._dumpStatus());
     //*/
@@ -143,7 +143,7 @@ export default class FalseProphet extends Prophet {
     // to different partitions are temporarily removed from the state, but as per partition
     // semantics they can be reordered to happen later.
     // So add the truth to the end of current pending prophecies.
-    this._addTruthToPendingProphecies(authorizedEvent);
+    this._addTruthToPendingProphecies(truthEvent);
 
     if (reformation) this._finishReformation(reformation);
 
@@ -178,7 +178,7 @@ export default class FalseProphet extends Prophet {
    * @returns {type}          description
    */
   _fabricateProphecy (action: Action, dispatchDescription: string,
-      timed: ?AuthorizedEvent = undefined, transactionInfo?: TransactionInfo) {
+      timed: ?UniversalEvent = undefined, transactionInfo?: TransactionInfo) {
     const restrictedCommand = isRestrictedCommand(action) ? action : undefined;
     try {
       const previousState = this.getState();
@@ -206,25 +206,25 @@ export default class FalseProphet extends Prophet {
     }
   }
 
-  _addTruthToPendingProphecies (authorizedEvent: AuthorizedEvent) {
+  _addTruthToPendingProphecies (truthEvent: UniversalEvent) {
     // Add the authorized and notify downstrea
     // no truthId means a legacy command.
-    const truthId = authorizedEvent.commandId;
+    const truthId = truthEvent.commandId;
     // TODO(iridian): After migration to zero missing commandId should be at create warnings
     let prophecy = truthId && this._prophecyByCommandId[truthId];
     if (!prophecy) {
       if (!truthId) {
         this.warnEvent("Warning: encountered an authorized event with missing commandId:",
-            authorizedEvent);
+            truthEvent);
       }
-      prophecy = this._fabricateProphecy(authorizedEvent,
+      prophecy = this._fabricateProphecy(truthEvent,
           `event ${!truthId ? "legacy" : truthId.slice(0, 13)}...`);
       this._revealProphecyToAllFollowers(prophecy);
     }
     prophecy.isTruth = true;
   }
 
-  _purgeCommandsWith (hereticEvent: AuthorizedEvent, purgedCorpusState: State, revisedEvents) {
+  _purgeCommandsWith (hereticEvent: UniversalEvent, purgedCorpusState: State, revisedEvents) {
     this._recreateCorpus(purgedCorpusState);
     this._followers.forEach(discourse =>
         discourse.rejectHeresy(hereticEvent, purgedCorpusState, revisedEvents));
@@ -408,7 +408,7 @@ export default class FalseProphet extends Prophet {
     return prophecy;
   }
 
-  _rejectLastProphecyAsHeresy (hereticClaim: AuthorizedEvent) {
+  _rejectLastProphecyAsHeresy (hereticClaim: UniversalEvent) {
     if (this._prophecySentinel.prev.story.commandId !== hereticClaim.commandId) {
       throw new Error(`rejectLastProphecyAsHeresy.hereticClaim.commandId (${hereticClaim.commandId
           }) does not match latest prophecy.commandId (${

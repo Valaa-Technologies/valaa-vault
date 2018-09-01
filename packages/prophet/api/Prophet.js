@@ -76,14 +76,14 @@ export default class Prophet extends LogEventGenerator {
     return this._upstream.claim(command, options);
   }
 
-  _confirmTruthToAllFollowers (authorizedEvent: Object, purgedCommands?: Array<Object>) {
+  _confirmTruthToAllFollowers (truthEvent: Object, purgedCommands?: Array<Object>) {
     (this._followers || []).forEach(discourse => {
       try {
-        discourse.confirmTruth(authorizedEvent, purgedCommands);
+        discourse.receiveTruth(truthEvent, purgedCommands);
       } catch (error) {
         this.outputErrorEvent(this.wrapErrorEvent(error,
             "_confirmTruthToAllFollowers",
-            "\n\tauthorizedEvent:", authorizedEvent,
+            "\n\ttruthEvent:", truthEvent,
             "\n\tpurgedCommands:", purgedCommands,
             "\n\ttarget discourse:", discourse,
         ));

@@ -8,7 +8,7 @@ import resourceTimed, * as td from "./timed";
 import resourceTransacted, * as t from "./transacted";
 
 import Command from "./Command";
-import type { AuthorizedEvent } from "./AuthorizedEvent";
+import type { UniversalEvent } from "./UniversalEvent";
 
 /**
  * Command subsystem.
@@ -21,13 +21,8 @@ import type { AuthorizedEvent } from "./AuthorizedEvent";
  */
 
 export { Command };
-export type { AuthorizedEvent };
-export type Action = Command | AuthorizedEvent;
-
-export function convertCommandToEvent (command: Command): AuthorizedEvent {
-  // TODO(iridian): Strip away all extraneous command specific datas which should not be saved.
-  return { ...command }; // Eh. Should deep clone, too.
-}
+export type { UniversalEvent };
+export type Action = Command | UniversalEvent;
 
 export const CREATED = c.CREATED;
 export const DESTROYED = d.DESTROYED;

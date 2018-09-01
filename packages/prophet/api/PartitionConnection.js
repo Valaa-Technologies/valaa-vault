@@ -2,6 +2,7 @@
 
 import { VRef } from "~/raem/ValaaReference";
 import ValaaURI, { getPartitionRawIdFrom } from "~/raem/ValaaURI";
+import type { UniversalEvent } from "~/raem/command";
 
 import Prophet, { MediaInfo, NarrateOptions } from "~/prophet/api/Prophet";
 
@@ -115,6 +116,15 @@ export default class PartitionConnection extends LogEventGenerator {
     this.transferIntoDependentConnection(dependentName, dependentConnection);
   }
 
+  /**
+   * Request replay of the event log using provided narration options from wherever the events
+   * and commands can be sourced.
+   * If
+   *
+   * @param {NarrateOptions} [options={}]
+   * @returns {Promise<Object>}
+   * @memberof PartitionConnection
+   */
   narrateEventLog (options: NarrateOptions = {}): Promise<Object> {
     return this._upstreamConnection.narrateEventLog(options);
   }

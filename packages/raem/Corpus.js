@@ -50,9 +50,7 @@ export default class Corpus extends Bard {
                   .map(([id, info]) => `${id.slice(0, 13)}...[${info.eventId}]}`)
                   .join(", ")
               }`);
-      if (this.getDebugLevel()) {
-        this.logEvent("dispatch:", ...dumpObject(action));
-      }
+      this.logEvent(1, "dispatch:", ...dumpObject(action));
       return this._dispatch(action, this);
     } catch (error) {
       throw this.wrapErrorEvent(error, `dispatch()`,

@@ -34,16 +34,19 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
   const eventList = firstEventId > eventLastEventId
     ? []
     : (await connection._readEvents({ firstEventId, lastEventId: eventLastEventId })) || [];
+
   const commandFirstEventId = eventLastEventId + 1;
   const commandList = (!options.commandCallback || (commandFirstEventId > lastEventId))
     ? []
     : (await connection._readCommands({ firstEventId: commandFirstEventId, lastEventId })) || [];
-  const commandQueueLength = (connection.getLastCommandEventId() + 1)
-    - connection._getFirstCommandEventId();
+
+  const commandQueueLength =
+      (connection.getLastCommandEventId() + 1) - connection._getFirstCommandEventId();
   if ((connection._commandQueueInfo.commandIds.length !== commandQueueLength)
     && (commandList.length === commandQueueLength)
     && commandFirstEventId === connection._getFirstCommandEventId()) {
     connection._commandQueueInfo.commandIds = commandList.map(command => command.commandId);
+
     connection.setIsFrozen(commandList[commandList.length - 1].type === "FROZEN");
   }
   return {
@@ -52,48 +55,6 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
   };
 }
 
-export function _claimCommandEvent (connection: ScribePartitionConnection,
-    command: Command, retrieveMediaContent: RetrieveMediaContent): Object {
-  if (connection._getFirstCommandEventId() <= connection.getLastAuthorizedEventId()) {
-    _setCommandQueueFirstEventId(connection, connection.getLastAuthorizedEventId() + 1);
-  }
-  const commandEventId = _addCommandsToQueue(connection, [command]);
-  /*
-  connection.warnEvent("\n\tclaimcommand:", ...dumpObject(command).commandId, commandEventId,
-          command,
-      "\n\tcommand/eventInfos:", connection._commandQueueInfo, connection._eventLogInfo,
-      "\n\tcommandIds:", connection._commandQueueInfo.commandIds);
-  //*/
-  return {
-    eventId: commandEventId,
-    finalizeLocal: async () => {
-      const finalizers = _reprocessAction(connection, command,
-          retrieveMediaContent || _throwOnMediaContentRetrieveRequest.bind(null, connection));
-      if (!connection.isTransient()) {
-        await connection._writeCommand(commandEventId, command);
-        /*
-        connection.warnEvent("\n\twrotecommand:", ...dumpObject(command).commandId, commandEventId,
-                command,
-            "\n\t:", connection.isLocal() ? "local" : "remote",
-                connection.getLastAuthorizedEventId(),
-            "\n\tcommandIds:", connection._commandQueueInfo.commandIds);
-        //*/
-      }
-      return Promise.all(finalizers.map(finalize => finalize({ retryTimes: 1 })));
-    }
-  };
-}
-
-export function _throwOnMediaContentRetrieveRequest (connection: ScribePartitionConnection,
-    mediaId: VRef, mediaInfo: MediaInfo) {
-  throw connection.wrapErrorEvent(
-      new Error(`Cannot retrieve media '${mediaInfo.name}' content through partition '${
-        connection.getName()}'`),
-      "retrieveMediaContent",
-      "\n\tdata not found in local blob cache and no remote content retriever is specified",
-      ...(connection.isLocal() || connection.isTransient()
-          ? ["\n\tlocal/transient partitions don't have remote storage backing"] : []),
-      "\n\tmediaInfo:", ...dumpObject(mediaInfo));
 }
 
 export async function _recordTruth (connection: ScribePartitionConnection,
@@ -156,6 +117,51 @@ export async function _recordTruth (connection: ScribePartitionConnection,
   //*/
   return { purgedCommands };
 }
+
+export function _claimCommandEvent (connection: ScribePartitionConnection,
+    command: Command, retrieveMediaContent: RetrieveMediaContent): Object {
+  if (connection._getFirstCommandEventId() <= connection.getLastAuthorizedEventId()) {
+    _setCommandQueueFirstEventId(connection, connection.getLastAuthorizedEventId() + 1);
+  }
+  const commandEventId = _addCommandsToQueue(connection, [command]);
+  /*
+  connection.warnEvent("\n\tclaimcommand:", ...dumpObject(command).commandId, commandEventId,
+          command,
+      "\n\tcommand/eventInfos:", connection._commandQueueInfo, connection._eventLogInfo,
+      "\n\tcommandIds:", connection._commandQueueInfo.commandIds);
+  //*/
+  return {
+    eventId: commandEventId,
+    finalizeLocal: async () => {
+      const finalizers = _reprocessAction(connection, command,
+          retrieveMediaContent || _throwOnMediaContentRetrieveRequest.bind(null, connection));
+      if (!connection.isTransient()) {
+        await connection._writeCommand(commandEventId, command);
+        /*
+        connection.warnEvent("\n\twrotecommand:", ...dumpObject(command).commandId, commandEventId,
+                command,
+            "\n\t:", connection.isLocal() ? "local" : "remote",
+                connection.getLastAuthorizedEventId(),
+            "\n\tcommandIds:", connection._commandQueueInfo.commandIds);
+        //*/
+      }
+      return Promise.all(finalizers.map(finalize => finalize({ retryTimes: 1 })));
+    }
+  };
+}
+
+export function _throwOnMediaContentRetrieveRequest (connection: ScribePartitionConnection,
+    mediaId: VRef, mediaInfo: MediaInfo) {
+  throw connection.wrapErrorEvent(
+      new Error(`Cannot retrieve media '${mediaInfo.name}' content through partition '${
+        connection.getName()}'`),
+      "retrieveMediaContent",
+      "\n\tdata not found in local blob cache and no remote content retriever is specified",
+      ...(connection.isLocal() || connection.isTransient()
+          ? ["\n\tlocal/transient partitions don't have remote storage backing"] : []),
+      "\n\tmediaInfo:", ...dumpObject(mediaInfo));
+}
+
 
 export function _reprocessAction (connection: ScribePartitionConnection, event: Object,
     retrieveMediaContent: ?RetrieveMediaContent, rootEvent: Object = event) {

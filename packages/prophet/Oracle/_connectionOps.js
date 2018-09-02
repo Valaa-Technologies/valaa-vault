@@ -1,12 +1,12 @@
 // @flow
 
+import type { UniversalEvent } from "~/raem/command";
 import type ValaaURI from "~/raem/ValaaURI";
-import { VRef } from "~/raem/ValaaReference";
 
 import type { NarrateOptions } from "~/prophet/api/Prophet";
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 
-import { dumpObject, invariantifyNumber, thenChainEagerly, vdon } from "~/tools";
+import { invariantifyNumber, vdon } from "~/tools";
 
 import Oracle from "./Oracle";
 import OraclePartitionConnection from "./OraclePartitionConnection";
@@ -38,15 +38,7 @@ export function _acquirePartitionConnection (oracle: Oracle, partitionURI: Valaa
   // Asynchronous pending connection section
   if (entry) {
     entry.connection.acquireConnection();
-    if (!options.eventLog) return entry.pendingConnection;
-    const ret = thenChainEagerly(entry.pendingConnection,
-        fullConnection => {
-          fullConnection.narrateEventLog(options);
-          ret.fullConnection = fullConnection;
-          return fullConnection;
-        });
-    ret.operationInfo = { ...entry.pendingConnection.operationInfo };
-    return ret;
+    return entry.pendingConnection;
   }
   if (options.dontCreateNewConnection) return undefined;
 
@@ -71,9 +63,8 @@ export function _acquirePartitionConnection (oracle: Oracle, partitionURI: Valaa
 
 export async function _connect (connection: OraclePartitionConnection,
     initialNarrateOptions: Object, onConnectData: Object) {
-  const scribeConnection = await connection._prophet._upstream
-      .acquirePartitionConnection(connection.partitionURI(),
-          { callback: connection._receiveTruth.bind(connection, "scribeUpstream") });
+  const scribeConnection = await connection._prophet._upstream.acquirePartitionConnection(
+      connection.partitionURI(), { callback: connection.createReceiveTruth("scribeUpstream") });
   connection.transferIntoDependentConnection("scribeUpstream", scribeConnection);
   connection.setUpstreamConnection(scribeConnection);
 
@@ -81,15 +72,7 @@ export async function _connect (connection: OraclePartitionConnection,
   // in PartitionConnection.js) and begin I/O bound scribe event log narration in parallel to
   // the authority proxy/connection creation.
 
-  const authorityConnection = _connectToAuthorityProphet(connection);
-  if (authorityConnection) {
-    connection._authorityConnection = Promise.resolve(authorityConnection).then(async conn_ => {
-      connection._authorityRetrieveMediaContent = conn_.readMediaContent.bind(conn_);
-      await conn_.connect();
-      connection._authorityConnection = conn_;
-      return conn_;
-    });
-  }
+  _connectToAuthorityProphet(connection, initialNarrateOptions);
 
   const ret = await connection.narrateEventLog(initialNarrateOptions);
 
@@ -104,8 +87,8 @@ export async function _connect (connection: OraclePartitionConnection,
         connection.partitionURI().toString()}'`);
   }
 
-  if (ret.mediaRetrievalStatus.latestFailures.length
-      && (onConnectData.requireLatestMediaContents !== false)) {
+  if ((onConnectData.requireLatestMediaContents !== false)
+      && (ret.mediaRetrievalStatus || { latestFailures: [] }).latestFailures.length) {
     throw new Error(`Failed to connect to partition: encountered ${
             onConnectData.mediaRetrievalStatus.latestFailures.length
         } latest media content retrieval failures (and acquirePartitionConnection.${
@@ -117,174 +100,93 @@ export async function _connect (connection: OraclePartitionConnection,
 }
 
 
-function _connectToAuthorityProphet (connection: OraclePartitionConnection) {
+function _connectToAuthorityProphet (connection: OraclePartitionConnection,
+    { subscribeRemote }: Object) {
   connection._authorityProphet = connection._prophet._authorityNexus
       .obtainAuthorityProphetOfPartition(connection.partitionURI());
   if (!connection._authorityProphet) return undefined;
-  return (async () => {
+  return (connection._authorityConnection = (async () => {
     const authorityConnection = await connection._authorityProphet
         .acquirePartitionConnection(connection.partitionURI(), {
-          callback: connection._receiveTruth.bind(connection, "authorityUpstream"),
-          noConnect: true,
+          callback: connection.createReceiveTruth("authorityUpstream"),
+          subscribeRemote: false,
+          noConnect: true, // deprecated
         });
     connection.transferIntoDependentConnection("authorityUpstream", authorityConnection);
+    connection._retrieveMediaContentFromAuthority =
+        authorityConnection.readMediaContent.bind(authorityConnection);
+    await authorityConnection.connect({ subscribeRemote });
+    connection._authorityConnection = authorityConnection;
     return authorityConnection;
-  })();
+  })());
 }
 
-
 export async function _narrateEventLog (connection: OraclePartitionConnection,
-    options: NarrateOptions, ret: Object, retrievals: Object) {
-  let currentFirstEventId = options.firstEventId;
+    options: NarrateOptions, ret: Object) {
+  Object.assign(ret, await PartitionConnection.prototype.narrateEventLog.call(connection, {
+    ...options,
+    commandCallback: options.commandCallback
+        || (!options.callback
+            && connection._prophet._repeatClaimToAllFollowers.bind(connection._prophet))
+  }));
 
-  if (options.retrieveMediaContent) {
-    // TODO(iridian): _narrationRetrieveMediaContent should probably be a function parameter
-    // instead of an object member.
-    if (connection._narrationRetrieveMediaContent) {
-      throw new Error(`There can be only one concurrent narrateEventLog with${
-          ""} an options.retrieveMediaContent override`);
+  if ((options.narrateRemote !== false) && connection._authorityConnection) {
+    const batch = connection.createReceiveTruthBatch("initialAuthorityNarration");
+    const authorityNarration = Promise.resolve((await connection._authorityConnection)
+        .narrateEventLog({
+          subscribeRemote: options.subscribeRemote,
+          firstEventId: connection._lastAuthorizedEventId + 1,
+          callback: batch.receiveTruth,
+        }))
+        .then(async (result) => (await batch.finalize(result)) || result);
+    if ((options.fullNarrate === true)
+        || (!(ret.eventLog || []).length && !(ret.scribeEventLog || []).length
+            && !(ret.scribeCommandQueue || []).length)) {
+      // Handle step 2 of the opportunistic narration if local narration didn't find any events.
+      const authorityNarrationResult = await authorityNarration;
+      connection.logEvent(1, "Awaited authority narration", authorityNarrationResult,
+          ", scribe narration results:", ret);
+      ret.mediaRetrievalStatus = batch.analyzeRetrievals();
+      Object.assign(ret, authorityNarrationResult);
+    } else {
+      connection.logEvent(1, "Kicked off authority narration on the side",
+          ", scribe narration results:", ret);
     }
-    connection._narrationRetrieveMediaContent =
-        _decorateRetrieveMediaContent(connection, options.retrieveMediaContent, retrievals);
   }
+  return ret;
+}
+
+export async function _chronicleEventLog (connection: OraclePartitionConnection,
+    eventLog: ?UniversalEvent[], options: NarrateOptions, ret: Object) {
+  let currentEventId = options.firstEventId;
+
   const isPastLastEvent = (candidateEventId) =>
       (typeof candidateEventId !== "undefined") &&
       (typeof options.lastEventId !== "undefined") &&
       (candidateEventId > options.lastEventId);
+
+  const batch = connection.createReceiveTruthBatch("chronicleEventLog",
+      options.retrieveMediaContent);
+  const explicitEventLogNarrations = [];
   const rawId = connection.partitionRawId();
-  if (options.eventLog && options.eventLog.length) {
-    const explicitEventLogNarrations = [];
-    for (const event of options.eventLog) {
-      const eventId = event.partitions[rawId].eventId;
-      invariantifyNumber(eventId, `event.partitions[${rawId}].eventId`, {}, "\n\tevent:",
-          event);
-      if (typeof currentFirstEventId !== "undefined") {
-        if ((eventId < currentFirstEventId) || isPastLastEvent(eventId)) continue;
-        if (eventId > currentFirstEventId) {
-          throw new Error(`got eventId ${eventId} while narrating explicit eventLog, expected ${
-              currentFirstEventId}, eventlog ids must be monotonous starting at firstEventId`);
-        }
+  for (const event of eventLog) {
+    const eventId = event.partitions[rawId].eventId;
+    invariantifyNumber(eventId, `event.partitions[${rawId}].eventId`, {}, "\n\tevent:", event);
+    if (typeof currentEventId !== "undefined") {
+      if ((eventId < currentEventId) || isPastLastEvent(eventId)) continue;
+      if (eventId > currentEventId) {
+        throw new Error(`got eventId ${eventId} while narrating explicit eventLog, expected ${
+          currentEventId}, eventlog ids must be monotonously increasing starting at firstEventId ${
+              options.firstEventId}`);
       }
-      explicitEventLogNarrations.push(options.callback
-          ? options.callback(event)
-          : connection._onConfirmTruth("explicitEventLog", event));
-      currentFirstEventId = eventId + 1;
     }
-    ret.explicitEventLog = await Promise.all(explicitEventLogNarrations);
+    explicitEventLogNarrations.push(options.callback
+        ? options.callback(event)
+        : batch.receiveTruth(event));
+    currentEventId = eventId + 1;
   }
-  if (!isPastLastEvent(currentFirstEventId)) {
-    Object.assign(ret, await PartitionConnection.prototype.narrateEventLog.call(connection, {
-      ...options,
-      firstEventId: currentFirstEventId,
-      commandCallback: options.commandCallback
-          || (!options.callback
-              && connection._prophet._repeatClaimToAllFollowers.bind(connection._prophet))
-    }));
-  }
-
-  if (connection._authorityConnection && !options.dontRemoteNarrate) {
-    const authoritativeNarration = (await connection._authorityConnection)
-        .narrateEventLog({ firstEventId: connection._lastAuthorizedEventId + 1 });
-    if (!(ret.eventLog || []).length
-        && !(ret.scribeEventLog || []).length
-        && !(ret.scribeCommandQueue || []).length) {
-      // Handle step 2 of the narration logic if local narration didn't find any events.
-      Object.assign(ret, await authoritativeNarration);
-      console.log("done", ret);
-    }
-  }
-
-  ret.mediaRetrievalStatus = _analyzeRetrievals(retrievals);
+  await batch.finalize(explicitEventLogNarrations);
+  ret.explicitEventLog = await Promise.all(explicitEventLogNarrations);
+  ret.mediaRetrievalStatus = batch.analyzeRetrievals();
   return ret;
 }
-
-
-const _maxOnConnectRetrievalRetries = 3;
-
-/**
- * Creates and returns a connect-process decorator for the retrieveMediaContent callback of this
- * connection. This decorator manages all media retrievals for the duration of the initial
- * narration. Intermediate Media contents are potentially skipped so that only the latest content
- * of each Media is available.
- * The retrieval of the latest content is attempted maxOnConnectRetrievalRetries times.
- *
- * @param {Object} onConnectData
- * @returns
- */
-function _decorateRetrieveMediaContent (connection: OraclePartitionConnection,
-    retrieveMediaContent: Function, retrievals: Object) {
-  return (mediaId: VRef, mediaInfo: Object) => {
-    const mediaRetrievals
-        = retrievals[mediaId.rawId()]
-        || (retrievals[mediaId.rawId()] = { history: [], pendingRetrieval: undefined });
-    const thisRetrieval = {
-      process: undefined, content: undefined, retries: 0, error: undefined, skipped: false,
-    };
-    mediaRetrievals.history.push(thisRetrieval);
-    return (async () => {
-      try {
-        if (mediaRetrievals.pendingRetrieval) await mediaRetrievals.pendingRetrieval.process;
-      } catch (error) {
-        // Ignore any errors of earlier retrievals.
-      }
-      while (thisRetrieval === mediaRetrievals.history[mediaRetrievals.history.length - 1]) {
-        try {
-          thisRetrieval.process = retrieveMediaContent(mediaId, mediaInfo);
-          mediaRetrievals.pendingRetrieval = thisRetrieval;
-          thisRetrieval.content = await thisRetrieval.process;
-          return thisRetrieval.content;
-        } catch (error) {
-          ++thisRetrieval.retries;
-          const description = `connect/retrieveMediaContent(${
-              mediaInfo.name}), ${thisRetrieval.retries}. attempt`;
-          if (thisRetrieval.retries <= _maxOnConnectRetrievalRetries) {
-            connection.warnEvent(`${description} retrying after ignoring an exception: ${
-                error.originalMessage || error.message}`);
-          } else {
-            thisRetrieval.error = connection.wrapErrorEvent(error, description,
-                "\n\tretrievals:", ...dumpObject(retrievals),
-                "\n\tmediaId:", mediaId.rawId(),
-                "\n\tmediaInfo:", ...dumpObject(mediaInfo),
-                "\n\tmediaRetrievals:", ...dumpObject(mediaRetrievals),
-                "\n\tthisRetrieval:", ...dumpObject(thisRetrieval),
-            );
-            return undefined;
-          }
-        } finally {
-          if (mediaRetrievals.pendingRetrieval === thisRetrieval) {
-            mediaRetrievals.pendingRetrieval = null;
-          }
-        }
-      }
-      thisRetrieval.skipped = true;
-      return undefined;
-    })();
-  };
-}
-
-function _analyzeRetrievals (retrievals: Object): Object {
-  const ret = {
-    medias: Object.keys(retrievals).length,
-    successfulRetrievals: 0,
-    overallSkips: 0,
-    overallRetries: 0,
-    intermediateFailures: [],
-    latestFailures: [],
-  };
-  for (const mediaRetrievals of Object.values(retrievals)) {
-    mediaRetrievals.history.forEach((retrieval, index) => {
-      if (typeof retrieval.content !== "undefined") ++ret.successfulRetrievals;
-      if (retrieval.skipped) ++ret.overallSkips;
-      ret.overallRetries += retrieval.retries;
-      if (retrieval.error) {
-        if (index + 1 !== mediaRetrievals.history.length) {
-          ret.intermediateFailures.push(retrieval.error);
-        } else {
-          ret.latestFailures.push(retrieval.error);
-        }
-      }
-    });
-  }
-  return ret;
-}
-

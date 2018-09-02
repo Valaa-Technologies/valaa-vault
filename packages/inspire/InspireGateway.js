@@ -342,7 +342,7 @@ export default class InspireGateway extends LogEventGenerator {
       this.warnEvent(`Narrated revelation with ${prologues.length} prologues`,
           "\n\tprologue partitions:",
               `'${prologues.map(({ partitionURI }) => String(partitionURI)).join("', '")}'`);
-      const ret = await Promise.all(prologues.map(this._connectAndNarratePrologue));
+      const ret = await Promise.all(prologues.map(this._connectChronicleAndNarratePrologue));
       this.warnEvent(`Acquired active connections for all revelation prologue partitions:`,
           "\n\tconnections:", ...dumpObject(ret));
       return ret;
@@ -391,21 +391,20 @@ export default class InspireGateway extends LogEventGenerator {
     }
   }
 
-  _connectAndNarratePrologue = async ({ partitionURI, info }: any) => {
+  _connectChronicleAndNarratePrologue = async ({ partitionURI, info }: any) => {
     if ((await info.commandId) >= 0) {
       throw new Error("Command queues in revelation are not supported yet");
     }
     // Acquire connection without remote narration to determine the current last authorized event
     // so that we can narrate any content in the prologue before any remote activity.
     const connection = await this.falseProphet.acquirePartitionConnection(partitionURI, {
-      dontRemoteNarrate: true,
+      narrateRemote: false, subscribeRemote: false,
     });
-    const eventId = await info.eventId;
-    const lastEventId = connection.getLastAuthorizedEventId();
-    if ((typeof eventId === "undefined") || (eventId <= lastEventId)) {
-      const remoteNarration = connection.narrateEventLog();
-      if (!(lastEventId >= 0)) await remoteNarration;
-    } else {
+    const lastPrologueEventId = await info.eventId;
+    const lastChronicledEventId = connection.getLastAuthorizedEventId() || 0;
+    const shouldChroniclePrologue = (lastPrologueEventId !== undefined)
+        && (lastPrologueEventId > lastChronicledEventId);
+    if (shouldChroniclePrologue) {
       // If no event logs are replayed, we don't need to precache the blobs either, so we delay
       // loading them up to this point.
       await (this.blobInfos || (this.blobInfos = this._getBlobInfos()));
@@ -416,9 +415,8 @@ export default class InspireGateway extends LogEventGenerator {
         throw new Error("commandQueue revelation not implemented yet");
       }
       const latestMediaInfos = await logs.latestMediaInfos;
-      await connection.narrateEventLog({
-        eventLog,
-        firstEventId: lastEventId + 1,
+      await connection.chronicleEventLog(eventLog, {
+        firstEventId: lastChronicledEventId + 1,
         retrieveMediaContent (mediaId: VRef, mediaInfo: Object) {
           if (!latestMediaInfos[mediaId.rawId()] ||
               (mediaInfo.blobId !== latestMediaInfos[mediaId.rawId()].mediaInfo.blobId)) {
@@ -433,6 +431,9 @@ export default class InspireGateway extends LogEventGenerator {
         }
       });
     }
+    // Initiate remote narration.
+    const remoteNarration = connection.narrateEventLog();
+    if (!shouldChroniclePrologue && !(lastChronicledEventId >= 0)) await remoteNarration;
     return connection;
   }
 

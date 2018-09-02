@@ -1,25 +1,113 @@
 // @flow
 
+import { VRef } from "~/raem/ValaaReference";
+
+import { dumpObject } from "~/tools";
+
 import Oracle from "./Oracle";
 import OraclePartitionConnection from "./OraclePartitionConnection";
 
-export async function _onConfirmTruth (connection: OraclePartitionConnection, originName: string,
-    authorizedEvent: Object, partitionData: Object): Promise<Object> {
+export async function _receiveTruthOf (connection: OraclePartitionConnection,
+    group: Object, eventId: number, event: Object): Promise<Object> {
+  const finalizers = connection.getScribeConnection().createEventFinalizers(
+      event, eventId, group.retrieveMediaContent || connection.getRetrieveMediaContent());
+
   const lastAuthorizedEventId = connection._lastAuthorizedEventId;
-  const pendingIndex = partitionData.eventId - lastAuthorizedEventId - 1;
+  const pendingIndex = eventId - lastAuthorizedEventId - 1;
   if (pendingIndex >= 0 && !connection._downstreamTruthQueue[pendingIndex]) {
-    connection._downstreamTruthQueue[pendingIndex] = {
-      event: authorizedEvent,
-      eventId: partitionData.eventId,
-      finalizers: connection.getScribeConnection().createEventFinalizers(
-          authorizedEvent, partitionData.eventId, connection.getRetrieveMediaContent()),
-    };
+    connection._downstreamTruthQueue[pendingIndex] = { event, eventId, finalizers };
     const pendingMultiPartitionEvent = await _unwindSinglePartitionEvents(connection);
     if (pendingMultiPartitionEvent) {
       _tryConfirmPendingMultiPartitionTruths(connection._prophet, pendingMultiPartitionEvent);
     }
   }
-  return authorizedEvent;
+  return event;
+}
+
+const _maxOnConnectRetrievalRetries = 3;
+
+export function _createReceiveTruthBatch (connection: OraclePartitionConnection,
+    batchName: string, retrieveMediaContent: Function) {
+  const retrievals = {};
+  const batch = {
+    name: batchName,
+    retrievals,
+    retrieveMediaContent (mediaId: VRef, mediaInfo: Object) {
+      const mediaRetrievals
+          = retrievals[mediaId.rawId()]
+          || (retrievals[mediaId.rawId()] = { history: [], pendingRetrieval: undefined });
+      const thisRetrieval = {
+        process: undefined, content: undefined, retries: 0, error: undefined, skipped: false,
+      };
+      mediaRetrievals.history.push(thisRetrieval);
+      return (async () => {
+        try {
+          if (mediaRetrievals.pendingRetrieval) await mediaRetrievals.pendingRetrieval.process;
+        } catch (error) {
+          // Ignore any errors of earlier retrievals.
+        }
+        while (thisRetrieval === mediaRetrievals.history[mediaRetrievals.history.length - 1]) {
+          try {
+            thisRetrieval.process = retrieveMediaContent(mediaId, mediaInfo);
+            mediaRetrievals.pendingRetrieval = thisRetrieval;
+            thisRetrieval.content = await thisRetrieval.process;
+            return thisRetrieval.content;
+          } catch (error) {
+            ++thisRetrieval.retries;
+            const description = `connect/retrieveMediaContent(${
+                mediaInfo.name}), ${thisRetrieval.retries}. attempt`;
+            if (thisRetrieval.retries <= _maxOnConnectRetrievalRetries) {
+              connection.warnEvent(`${description} retrying after ignoring an exception: ${
+                  error.originalMessage || error.message}`);
+            } else {
+              thisRetrieval.error = connection.wrapErrorEvent(error, description,
+                  "\n\tretrievals:", ...dumpObject(retrievals),
+                  "\n\tmediaId:", mediaId.rawId(),
+                  "\n\tmediaInfo:", ...dumpObject(mediaInfo),
+                  "\n\tmediaRetrievals:", ...dumpObject(mediaRetrievals),
+                  "\n\tthisRetrieval:", ...dumpObject(thisRetrieval),
+              );
+              return undefined;
+            }
+          } finally {
+            if (mediaRetrievals.pendingRetrieval === thisRetrieval) {
+              mediaRetrievals.pendingRetrieval = null;
+            }
+          }
+        }
+        thisRetrieval.skipped = true;
+        return undefined;
+      })();
+    },
+    analyzeRetrievals (): Object {
+      const ret = {
+        medias: Object.keys(retrievals).length,
+        successfulRetrievals: 0,
+        overallSkips: 0,
+        overallRetries: 0,
+        intermediateFailures: [],
+        latestFailures: [],
+      };
+      for (const mediaRetrievals of Object.values(retrievals)) {
+        mediaRetrievals.history.forEach((retrieval, index) => {
+          if (typeof retrieval.content !== "undefined") ++ret.successfulRetrievals;
+          if (retrieval.skipped) ++ret.overallSkips;
+          ret.overallRetries += retrieval.retries;
+          if (retrieval.error) {
+            if (index + 1 !== mediaRetrievals.history.length) {
+              ret.intermediateFailures.push(retrieval.error);
+            } else {
+              ret.latestFailures.push(retrieval.error);
+            }
+          }
+        });
+      }
+      return ret;
+    },
+  };
+  batch.receiveTruth = connection._receiveTruthOf.bind(connection, batch);
+  batch.finalize = (truthReceiveResults => truthReceiveResults);
+  return batch;
 }
 
 /**

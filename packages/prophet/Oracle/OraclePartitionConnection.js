@@ -1,15 +1,16 @@
 // @flow
 
-import type Command from "~/raem/command";
+import type Command, { UniversalEvent } from "~/raem/command";
 import { VRef } from "~/raem/ValaaReference";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import type { NarrateOptions, MediaInfo, RetrieveMediaContent } from "~/prophet/api/Prophet";
+import type { ChronicleOptions, NarrateOptions, MediaInfo, RetrieveMediaContent }
+    from "~/prophet/api/Prophet";
 
 import { dumpObject, thenChainEagerly } from "~/tools";
 
-import { _connect, _narrateEventLog } from "./_connectionOps";
-import { _onConfirmTruth } from "./_downstreamOps";
+import { _connect, _chronicleEventLog, _narrateEventLog } from "./_connectionOps";
+import { _createReceiveTruthBatch, _receiveTruthOf } from "./_downstreamOps";
 import { _readMediaContent, _getMediaURL, _prepareBlob } from "./_mediaOps";
 
 /**
@@ -29,8 +30,7 @@ import { _readMediaContent, _getMediaURL, _prepareBlob } from "./_mediaOps";
 export default class OraclePartitionConnection extends PartitionConnection {
   _lastAuthorizedEventId: number;
   _downstreamTruthQueue: Object[];
-  _authorityRetrieveMediaContent: ?RetrieveMediaContent;
-  _narrationRetrieveMediaContent: ?RetrieveMediaContent;
+  _retrieveMediaContentFromAuthority: ?RetrieveMediaContent;
 
   constructor (options: Object) {
     super(options);
@@ -44,7 +44,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
   }
 
   getRetrieveMediaContent () {
-    return this._narrationRetrieveMediaContent || this._authorityRetrieveMediaContent;
+    return this._retrieveMediaContentFromAuthority;
   }
 
   isConnected (): boolean {
@@ -85,30 +85,47 @@ export default class OraclePartitionConnection extends PartitionConnection {
 
   async narrateEventLog (options: NarrateOptions = {}): Promise<any> {
     const ret = {};
-    const retrievals = {};
     try {
-      return await _narrateEventLog(this, options, ret, retrievals);
+      return await _narrateEventLog(this, options, ret);
     } catch (error) {
       throw this.wrapErrorEvent(error, "narrateEventLog()",
           "\n\toptions:", ...dumpObject(options),
           "\n\tcurrent ret:", ...dumpObject(ret));
-    } finally {
-      if (options.retrieveMediaContent) {
-        delete this._narrationRetrieveMediaContent;
-      }
     }
   }
 
-  async _receiveTruth (originName: string, truthEvent: UniversalEvent): Promise<Object> {
+  async chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
+      Promise<any> {
+    const ret = {};
+    try {
+      return await _chronicleEventLog(this, eventLog, options, ret);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, "chronicleEventLog()",
+          "\n\toptions:", ...dumpObject(options),
+          "\n\tcurrent ret:", ...dumpObject(ret),
+      );
+    }
+  }
+
+  createReceiveTruth (originName: string) {
+    return this._receiveTruthOf.bind(this, { name: originName });
+  }
+
+  createReceiveTruthBatch (batchName: string,
+      retrieveMediaContent: Function = this.getRetrieveMediaContent()) {
+    return _createReceiveTruthBatch(this, batchName, retrieveMediaContent);
+  }
+
+  async _receiveTruthOf (group: Object, truthEvent: UniversalEvent): Promise<Object> {
     const partitionData = truthEvent.partitions && truthEvent.partitions[this.partitionRawId()];
     try {
       if (!partitionData) {
-        throw new Error(`truthEvent is missing partition info for ${this.debugId()}`);
+        throw new Error(`truthEvent of '${group.name}' has no partition ${this.debugId()} info`);
       }
-      return _onConfirmTruth(this, originName, authorizedEvent, partitionData);
+      return _receiveTruthOf(this, group, partitionData.eventId, truthEvent);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_receiveTruth('${originName}')`,
-          "\n\toriginName:", originName,
+      throw this.wrapErrorEvent(error, `_receiveTruthOf('${group.name}')`,
+          "\n\tgroup:", ...dumpObject(group),
           "\n\teventId:", partitionData && partitionData.eventId,
           "\n\ttruthEvent:", ...dumpObject(truthEvent),
           "\n\tthis:", ...dumpObject(this));
@@ -119,8 +136,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
     return this.getScribeConnection().claimCommandEvent(command, this.getRetrieveMediaContent());
   }
 
-  _preAuthorizeCommand = (preAuthorizedEvent: Object) =>
-      this._receiveTruth("preAuthorizer", preAuthorizedEvent)
+  _preAuthorizeCommand = this.createReceiveTruth("preAuthorizer")
 
   // Coming from downstream: tries scribe first, otherwise forwards the request to authority.
   // In latter case forwards the result received from authority to Scribe for caching.

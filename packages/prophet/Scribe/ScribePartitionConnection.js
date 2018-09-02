@@ -1,10 +1,11 @@
 // @flow
 
-import type Command from "~/raem/command";
+import type Command, { UniversalEvent } from "~/raem/command";
 import { VRef, obtainVRef } from "~/raem/ValaaReference";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import type { MediaInfo, NarrateOptions, RetrieveMediaContent } from "~/prophet/api/Prophet";
+import type { MediaInfo, NarrateOptions, ChronicleOptions, RetrieveMediaContent }
+    from "~/prophet/api/Prophet";
 import DecoderArray from "~/prophet/prophet/DecoderArray";
 
 import { dumpObject } from "~/tools";
@@ -22,7 +23,7 @@ import {
   _deleteCommand, _deleteCommands,
 } from "./_databaseOps";
 import {
-  _narrateEventLog, _claimCommandEvent, _recordTruth, _reprocessAction,
+  _narrateEventLog, _chronicleEventLog, _claimCommandEvent, _recordTruth, _reprocessAction,
   _throwOnMediaContentRetrieveRequest,
 } from "./_eventOps";
 
@@ -92,6 +93,11 @@ export default class ScribePartitionConnection extends PartitionConnection {
   async narrateEventLog (options: NarrateOptions = {}):
       Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
     return _narrateEventLog(this, options);
+  }
+
+  async chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
+      Promise<any> {
+    return _chronicleEventLog(this, eventLog, options);
   }
 
   _notifyProphetOfCommandCount () {

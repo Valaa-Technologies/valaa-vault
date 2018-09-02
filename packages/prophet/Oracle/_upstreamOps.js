@@ -77,7 +77,7 @@ export function _claim (oracle: Oracle, command: Command, options: Object): Clai
         const event = { ...command };
         try {
           partitionDatas.map(([, connection]) =>
-              connection._receiveTruth("locallyAuthenticated", event));
+              connection._receiveTruthOf("localAuthority", event));
         } catch (error) { throw oracle.wrapErrorEvent(error, "claim.local.onConfirmTruth"); }
         return command;
       }

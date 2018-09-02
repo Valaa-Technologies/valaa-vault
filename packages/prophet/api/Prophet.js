@@ -33,12 +33,21 @@ export type MediaInfo = {
 export type RetrieveMediaContent = (mediaId: VRef, mediaInfo: MediaInfo) => Promise<any>;
 
 export type NarrateOptions = {
-  eventLog?: Object[],
-  retrieveMediaContent?: RetrieveMediaContent,
+  narrateRemote?: boolean,   // default true - narrate remote content.
+  subscribeRemote?: boolean, // default true - subscribe for downstream events.
+
+  fullNarrate?: boolean,     // default false - await for remote narration result even if optimistic
+                             // could be performed locally.
+  snapshots?: boolean,       // default true, currently ignored - start narration from most recent
+                             // snapshot within provided event range
+  commands?: boolean,        // default true - narrate pending commands as well.
   callback?: EventCallback,
   firstEventId?: number,
   lastEventId?: number,
-  noSnapshots?: boolean,
+};
+
+export type ChronicleOptions = NarrateOptions & {
+  retrieveMediaContent?: RetrieveMediaContent,
 };
 
 /* eslint-disable no-unused-vars */

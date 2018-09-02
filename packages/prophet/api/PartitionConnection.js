@@ -4,7 +4,7 @@ import { VRef } from "~/raem/ValaaReference";
 import ValaaURI, { getPartitionRawIdFrom } from "~/raem/ValaaURI";
 import type { UniversalEvent } from "~/raem/command";
 
-import Prophet, { MediaInfo, NarrateOptions } from "~/prophet/api/Prophet";
+import Prophet, { MediaInfo, NarrateOptions, ChronicleOptions } from "~/prophet/api/Prophet";
 
 import Logger, { LogEventGenerator } from "~/tools/Logger";
 import { invariantifyObject } from "~/tools/invariantify";
@@ -127,6 +127,17 @@ export default class PartitionConnection extends LogEventGenerator {
    */
   narrateEventLog (options: NarrateOptions = {}): Promise<Object> {
     return this._upstreamConnection.narrateEventLog(options);
+  }
+
+  /**
+   * Integrate events listed in options.
+   *
+   * @param {ChronicleOptions} [options={}]
+   * @returns {Promise<Object>}
+   * @memberof PartitionConnection
+   */
+  chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}): Promise<Object> {
+    return this._upstreamConnection.chronicleEventLog(eventLog, options);
   }
 
   getLastAuthorizedEventId () {

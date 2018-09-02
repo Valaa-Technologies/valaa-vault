@@ -53,6 +53,7 @@ export async function getKeysFromDB (database: FDBDatabase, table: string) {
 export async function expectStoredInDB (command: Object, database: FDBDatabase, table: string,
     eventId: number) {
   const storedCommand = await getFromDB(database, table, eventId);
+  if (command instanceof Error) throw command;
   const indexedCommand = Object.assign({ eventId }, command);
 
   // XXX Hack to flatten any vrefs that may be dangling onto the commands

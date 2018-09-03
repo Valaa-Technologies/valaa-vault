@@ -40,7 +40,7 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
   if (bard.objectTransient) {
     // The object already exists in the denormalized state.
     // In general this is an error but there are specific circumstances below where it is valid.
-    // 1. Blob (and Data, non-implemented atm) object creation is idempotent thus we can return.
+    // 1. Bvob (and Data, non-implemented atm) object creation is idempotent thus we can return.
     if (bard.passage.typeName === "Blob") return bard.state;
     // 2. The same TRANSACTED can create same Resource twice. Usually this is the result of some
     // sub-actions, like how ghost materialization can arrive and materialize the same

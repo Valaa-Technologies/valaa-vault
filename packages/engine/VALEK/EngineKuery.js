@@ -81,7 +81,7 @@ export default class EngineKuery extends ValaaScriptKuery {
    * Be mindful about the difference to VALK.typeof (and typeofEqualTo): hasInterface at the moment
    * only works in engine abstraction piercing context and is only applicable for Valaa
    * objects but can be used to inspect any interfaces. typeof only returns "Resource" "Data" or
-   * "Blob" but can be used on any values.
+   * "Bvob" but can be used on any values.
    *
    * @param {Kuery} mutationKuery
    * @returns
@@ -221,7 +221,10 @@ export default class EngineKuery extends ValaaScriptKuery {
     return this.call(this._root.toMethod("extractValue"), null, options);
   }
 
-  // Blob and Media
+  // Bvob and Media
+
+  bvobContent (mediaId: ?any, remoteURL: ?any, options: Object = {}) {
+    return this.call(this._root.toMethod("bvobContent"), null, mediaId, remoteURL, options);
 
   blobContent (mediaId: ?any, remoteURL: ?any, options: Object = {}) {
     return this.call(this._root.toMethod("blobContent"), null, mediaId, remoteURL, options);
@@ -243,8 +246,8 @@ export default class EngineKuery extends ValaaScriptKuery {
     return this.call(this._root.toMethod("interpretContent"), null, options);
   }
 
-  prepareBlob (blobContent: any, options: Kuery = {}) {
-    return this.call(this._root.toMethod("prepareBlob"), null, blobContent, options);
+  prepareBvob (bvobContent: any, options: Kuery = {}) {
+    return this.call(this._root.toMethod("prepareBvob"), null, bvobContent, options);
   }
 
   updateMediaContent (blobContent: any, options: Kuery = {}) {

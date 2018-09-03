@@ -16,10 +16,12 @@ export default {
   emplaceAddToField: VALEK.emplaceAddToField(VALEK.fromScope("$1"), VALEK.fromScope("$2")),
   do: VALEK.do(VALEK.fromScope("$1"), VALEK.fromScope("$2")),
 
+  bvobContent: VALEK.bvobContent(VALEK.fromScope("$1"), VALEK.fromScope("$2")),
   blobContent: VALEK.blobContent(VALEK.fromScope("$1"), VALEK.fromScope("$2")),
   mediaURL: VALEK.mediaURL(),
   mediaContent: VALEK.mediaContent(),
   interpretContent: VALEK.interpretContent(VALEK.fromScope("$1")),
+  prepareBvob: VALEK.prepareBvob(VALEK.fromScope("$1"), VALEK.fromScope("$1")),
   prepareBlob: VALEK.prepareBlob(VALEK.fromScope("$1"), VALEK.fromScope("$1")),
 
   asyncRequest: request,

@@ -121,7 +121,7 @@ function isNonActivateablePhase (candidate: string) {
  *   isUnavailable() returns true and getPhase() returns "Unavailable".
  *   Active-operations will throw an exception describing the cause of unavailability.
  *
- * 2.6. NonResource: the Vrapper is a degenerate proxy to a non-Resource Valaa object; Blob or Data.
+ * 2.6. NonResource: the Vrapper is a degenerate proxy to a non-Resource Valaa object; Bvob or Data.
  *   isUnavailable() returns true and getPhase() returns "NonResource".
  *   Such Vrapper's like their associated backend objects are essentially immutable. They have no
  *   lifecycle and many operations (usually those with side-effects) are not available for them.
@@ -1068,7 +1068,7 @@ export default class Vrapper extends Cog {
   _mediaInterpretations: WeakMap<Object, { [mime: string]: Object }>;
 
   static toMediaInfoFields = VALK.fromVAKON({
-    blobId: ["content", false, "blobId"],
+    bvobId: ["content", false, "bvobId"],
     name: "name",
     sourceURL: "sourceURL",
     type: ["mediaType", false, "type"],
@@ -1230,30 +1230,30 @@ export default class Vrapper extends Cog {
     }
   }
 
-  // Blob and Media content management
+  // Bvob and Media content management
 
 
   /**
-   * Returns raw blob content of this Blob as an ArrayBuffer object.
+   * Returns raw bvob content of this Bvob as an ArrayBuffer object.
    *
-   * @param {*} blobContent
+   * @param {*} bvobContent
    * @param {VALKOptions} [options={}]
    * @returns
    *
    * @memberof Vrapper
    */
-  blobContent (): ArrayBuffer {
+  bvobContent (): ArrayBuffer {
     try {
       invariantify(this._typeName === "Blob",
-          "Vrapper.blobContent only available for objects of Blob type",
+          "Vrapper.bvobContent only available for objects of Bvob type",
           "\n\ttype:", this._typeName,
           "\n\tobject:", this);
-      const buffer = this.engine.prophet.tryGetCachedBlobContent(this.getRawId());
+      const buffer = this.engine.prophet.tryGetCachedBvobContent(this.getRawId());
       if (typeof buffer !== "undefined") return buffer;
-      throw new Error(`Cannot locate Blob buffer directly from caches (with id '${
+      throw new Error(`Cannot locate Bvob buffer directly from caches (with id '${
           this.getRawId()}'`);
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .blobContent()`);
+      throw wrapError(error, `During ${this.debugId()}\n .bvobContent()`);
     }
   }
 
@@ -1315,22 +1315,22 @@ export default class Vrapper extends Cog {
   interpretContent (options: VALKOptions = {}) { return this._obtainMediaInterpretation(options); }
 
   /**
-   * Eagerly updates the Blob cache entry with given content, creates a new Blob for it and returns
-   * the Blob id.
+   * Eagerly updates the Bvob cache entry with given content, creates a new Bvob for it and returns
+   * the Bvob id.
    * If the partition of the Media is not acquired, returns a promise for acquiring the partition
    * and performing this operation instead.
    * TODO(iridian): This is quite a sucky API. It was deviced to work nicely with LinkField toValue
    * etc. but the interaction just feels forced and stupid: it really should just set the content
-   * Blob field of the Media.
+   * Bvob field of the Media.
    *
-   * @param {*} blobContent
+   * @param {*} bvobContent
    * @param {VALKOptions} [options={}]
-   * @returns a function callback which creates the Blob object inside the transaction specified in
+   * @returns a function callback which creates the Bvob object inside the transaction specified in
    * the options.transaction parameter.
    *
    * @memberof Vrapper
    */
-  prepareBlob (content: any, options: VALKOptions = {}) {
+  prepareBvob (content: any, options: VALKOptions = {}) {
     let mediaInfo;
     let alreadyWrapped;
     try {
@@ -1339,7 +1339,7 @@ export default class Vrapper extends Cog {
         mediaInfo = this.get(Vrapper.toMediaInfoFields, Object.create(options));
       }
       return this._withPartitionConnectionChainEagerly(Object.create(options), [
-        connection => connection.prepareBlob(content, mediaInfo),
+        connection => connection.prepareBvob(content, mediaInfo),
         ({ contentId, persistProcess }) => (contentId || persistProcess),
         (contentId) => {
           if (!contentId || (typeof contentId !== "string")) {
@@ -1360,7 +1360,7 @@ export default class Vrapper extends Cog {
     function onError (error) {
       if (alreadyWrapped) return error;
       alreadyWrapped = true;
-      return wrapError(error, `During ${this.debugId()}\n .prepareBlob(), with:`,
+      return wrapError(error, `During ${this.debugId()}\n .prepareBvob(), with:`,
           "\n\tmediaInfo:", mediaInfo);
     }
   }
@@ -1846,11 +1846,11 @@ const applicatorCreators = {
   alterProperty: createApplicatorWithNamespaceFieldFirstOptionsThird,
   deleteProperty: createApplicatorWithNamespaceFieldFirstOptionsSecond,
   extractValue: createApplicatorWithOptionsFirst,
-  blobContent: createApplicatorWithOptionsThird,
+  bvobContent: createApplicatorWithOptionsThird,
   mediaURL: createApplicatorWithOptionsFirst,
   mediaContent: createApplicatorWithOptionsFirst,
   interpretContent: createApplicatorWithOptionsFirst,
-  prepareBlob: createApplicatorWithOptionsSecond,
+  prepareBvob: createApplicatorWithOptionsSecond,
   updateMediaContent: createApplicatorWithOptionsSecond,
   recurseMaterializedFieldResources: createApplicatorWithOptionsSecond,
   recurseConnectedPartitionMaterializedFieldResources: createApplicatorWithOptionsSecond,

@@ -2,7 +2,7 @@
 
 This package is likely the most important package of Valaa Open System.
 @valos/prophet specifications and components provide the foundation for
-event stream and blob content delivery network. All the rest of the
+event stream and bvob content delivery network. All the rest of the
 Valaa infrastructure and by extension of the whole ecosystem build on
 top of this fabric.
 
@@ -133,9 +133,9 @@ into three stages: *retrieve* octet stream, *decode* as object
 representation and *integrate* in use site context.
 
 
-#### 2.3.1. Blob *retrieve* yields an ArrayBuffer via network download, cache hit, etc.
+#### 2.3.1. Bvob *retrieve* yields an ArrayBuffer via network download, cache hit, etc.
 
-Persisted octet sequences are typically identified by their *blobId*,
+Persisted octet sequences are typically identified by their *bvobId*,
 a well-defined content hash of the whole octet sequence (and nothing
 else). Their in-memory representation is shared between all consumers
 inside the same execution environment.

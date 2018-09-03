@@ -87,16 +87,16 @@ describe("Scribe", () => {
     const sharedDB = await openDB(sharedURI);
 
     for (const mediaContent of textMediaContents) {
-      const preparedBlob = connection.prepareBlob(mediaContent, "Some media");
-      const blobId = await preparedBlob.persistProcess;
+      const preparedBvob = connection.prepareBvob(mediaContent, "Some media");
+      const bvobId = await preparedBvob.persistProcess;
 
-      const blobKeys = await getKeysFromDB(sharedDB, "blobs");
-      expect(blobKeys).toContain(blobId);
+      const bvobKeys = await getKeysFromDB(sharedDB, "bvobs");
+      expect(bvobKeys).toContain(bvobId);
 
       const bufferKeys = await getKeysFromDB(sharedDB, "buffers");
-      expect(bufferKeys).toContain(blobId);
+      expect(bufferKeys).toContain(bvobId);
 
-      const restoredBuffer = await getFromDB(sharedDB, "buffers", blobId);
+      const restoredBuffer = await getFromDB(sharedDB, "buffers", bvobId);
       const restoredContent = stringFromUTF8ArrayBuffer(restoredBuffer.buffer);
       expect(restoredContent).toEqual(mediaContent);
     }
@@ -109,7 +109,7 @@ describe("Scribe", () => {
     [`{ "a": 10 }`, { name: "a10.json", type: "application", subtype: "json" }, { a: 10 }],
   ];
 
-  it("decodes blob buffers based on media type", async () => {
+  it("decodes bvob buffers based on media type", async () => {
     const scribe = createScribe();
     await scribe.initialize();
     const uri = createPartitionURI(URI);
@@ -117,8 +117,8 @@ describe("Scribe", () => {
     const connection = await scribe.acquirePartitionConnection(uri, {});
 
     for (const [bufferContent, mediaInfo, expectedContent] of structuredMediaContents) {
-      const preparedBlob = connection.prepareBlob(bufferContent);
-      const blobId = await preparedBlob.persistProcess;
+      const preparedBvob = connection.prepareBvob(bufferContent);
+      const bvobId = await preparedBvob.persistProcess;
       const decodedContent =
           await connection.decodeMediaContent(undefined, { blobId, ...mediaInfo });
       expect(decodedContent).toEqual(expectedContent);

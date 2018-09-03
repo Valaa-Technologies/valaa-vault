@@ -42,7 +42,7 @@ const modify = {
           removes: args.input.removes && JSON.parse(args.input.removes),
           splices: args.input.splices && JSON.parse(args.input.splices),
         }),
-        blobStubs: context.blobStubs,
+        bvobStubs: context.bvobStubs,
       });
       return {
         clientMutationId: command.id,

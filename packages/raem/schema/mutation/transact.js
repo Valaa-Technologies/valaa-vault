@@ -29,7 +29,7 @@ const transact = {
   resolve: async (context, args/* , info */) => {
     try {
       const transactedCommand = transacted(JSON.parse(args.input.actions));
-      transactedCommand.blobStubs = context.blobStubs;
+      transactedCommand.bvobStubs = context.bvobStubs;
       const command = await context.store.dispatch(transactedCommand);
       return {
         clientMutationId: command.id,

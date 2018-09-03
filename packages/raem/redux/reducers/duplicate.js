@@ -19,7 +19,7 @@ export default function duplicate (bard: DuplicateBard) {
 
   const bailOut = prepareCreateOrDuplicateObjectTransientAndId(bard, "ResourceStub");
   invariantify(!bailOut, `DUPLICATED internal error:${
-      ""} should never bail out due to Blob/re-create conditions`);
+      ""} should never bail out due to Bvob/re-create conditions`);
   // TODO(iridian): invariantify that the type is a Resource
 
   bard._duplicationRootId = bard.objectId.rawId();

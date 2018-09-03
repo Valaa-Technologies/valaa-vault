@@ -105,7 +105,7 @@ A minimal but complete backend authority needs to be two things:
   authorize (or reject) incoming commands into events and then publish
   these to clients who are subscribed to the relevant `partitions`, as
   well as provide full event logs when requested
-- An immutable binary hosting provider: to receive blob content which
+- An immutable binary hosting provider: to receive bvob content which
   is referred to by above events and then later deliver the content to
   clients requesting it.
 
@@ -154,7 +154,7 @@ integrity to the resource model via `couplings`.
 
 - depends: `@valos/tools`, `immutable`
 - exports: `Corpus`, `Command`, `VALK`, `RAEMContentAPI`
-- ValaaSpace: `Resource`, `ResourceStub`, `Blob`, `Partition`
+- ValaaSpace: `Resource`, `ResourceStub`, `Bvob`, `Partition`
 - concepts: `ghost instancing`, `partitions`, `couplings`
 
 
@@ -179,7 +179,7 @@ authorities but also to local browser `IndexedDB` storage. Provides
 a non-authoritative in-memory repository `FalseProphet`, which wraps
 @valos/raem and @valos/script. Provides command queueing and reformation
 capabilities. Provides a client-side `ACID` `transaction` framework
-with transparent ValaaScript integration. Provides blob content
+with transparent ValaaScript integration. Provides bvob content
 caching and management pathways. Extends the schema with folder-like
 structure as well as relation-like connectivity. Together these
 provide fully offline mode readiness. Provides the backend event

@@ -32,8 +32,8 @@ export default {
     rootPartitionURI: "",
     endpoints: dictionaryOf(""),
     partitionInfos: dictionaryOf(partitionInfo()),
-    blobInfos: dictionaryOf(blobInfo()),
-    blobBuffers: dictionaryOf(blobBuffer()),
+    bvobInfos: dictionaryOf(bvobInfo()),
+    bvobBuffers: dictionaryOf(bvobBuffer()),
   }
 };
 
@@ -96,6 +96,7 @@ function partitionInfo () {
         mediaId: "",
         mediaInfo: {
           name: "",
+          bvobId: "",
           blobId: "",
         },
         isPersisted: null,
@@ -121,6 +122,19 @@ function action () {
     actions: [],
     initialState: {},
     */
+  };
+}
+
+function bvobInfo () {
+  return {
+    byteLength: NaN,
+    persistRefCount: NaN,
+  };
+}
+
+function bvobBuffer () {
+  return {
+    base64: "",
   };
 }
 

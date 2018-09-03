@@ -159,7 +159,7 @@ export function _throwOnMediaContentRetrieveRequest (connection: ScribePartition
       new Error(`Cannot retrieve media '${mediaInfo.name}' content through partition '${
         connection.getName()}'`),
       "retrieveMediaContent",
-      "\n\tdata not found in local blob cache and no remote content retriever is specified",
+      "\n\tdata not found in local bvob cache and no remote content retriever is specified",
       ...(connection.isLocal() || connection.isTransient()
           ? ["\n\tlocal/transient partitions don't have remote storage backing"] : []),
       "\n\tmediaInfo:", ...dumpObject(mediaInfo));

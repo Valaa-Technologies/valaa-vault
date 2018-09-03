@@ -56,7 +56,7 @@ export default Object.freeze({
       [, args]: BuiltinStep): DRef {
     return valker.pack(obtainDRef(args));
   },
-  "§BRef": function valaaBlobReference (valker: Valker, head: any, scope: ?Object,
+  "§BRef": function valaaBvobReference (valker: Valker, head: any, scope: ?Object,
       [, args]: BuiltinStep): BRef {
     return valker.pack(obtainBRef(args));
   },

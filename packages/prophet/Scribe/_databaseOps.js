@@ -20,10 +20,10 @@ export const vdoc = vdon({
   ],
 });
 
-export type BlobInfo = {
-  blobId: string, // db primary key for "blobs" and "buffers"
-  persistRefCount: number, // db-backed in "blobs"
-  byteLength: number, // db-backed in "blobs"
+export type BvobInfo = {
+  bvobId: string, // db primary key for "bvobs" and "buffers"
+  persistRefCount: number, // db-backed in "bvobs"
+  byteLength: number, // db-backed in "bvobs"
   inMemoryRefCount: number, // not db-backed
   buffer: ?ArrayBuffer, // db-backed in "buffers" but not always in memory
   decodings?: WeakMap<MediaDecoder, any>,
@@ -33,8 +33,8 @@ export type BlobInfo = {
 export async function _initializeSharedIndexedDB (scribe: Scribe) {
   scribe._sharedDb = new IndexedDBWrapper("valaa-shared-content",
     [
-      { name: "blobs", keyPath: "blobId" },
-      { name: "buffers", keyPath: "blobId" },
+      { name: "bvobs", keyPath: "bvobId" },
+      { name: "buffers", keyPath: "bvobId" },
     ],
     scribe.getLogger(),
     scribe._databaseAPI,
@@ -45,8 +45,8 @@ export async function _initializeSharedIndexedDB (scribe: Scribe) {
   let totalBytes = 0;
   let clearedBuffers = 0;
   let releasedBytes = 0;
-  await scribe._sharedDb.transaction(["blobs", "buffers"], "readwrite", ({ blobs, buffers }) => {
-    blobs.openCursor().onsuccess = event => {
+  await scribe._sharedDb.transaction(["bvobs", "buffers"], "readwrite", ({ bvobs, buffers }) => {
+    bvobs.openCursor().onsuccess = event => {
       const cursor: IDBCursorWithValue = event.target.result;
       if (!cursor) return;
       if (cursor.value.persistRefCount <= 0) {
@@ -61,7 +61,7 @@ export async function _initializeSharedIndexedDB (scribe: Scribe) {
       cursor.continue();
     };
   });
-  scribe._blobLookup = contentLookup;
+  scribe._bvobLookup = contentLookup;
   scribe.warnEvent(`Content lookup initialization done with ${
     Object.keys(contentLookup).length} buffers, totaling ${totalBytes} bytes.`,
       `\n\tcleared ${clearedBuffers} buffers, releasing ${releasedBytes} bytes`);
@@ -108,25 +108,25 @@ export function _persistMediaEntry (connection: ScribePartitionConnection, newMe
     const req = medias.put(newMediaEntry);
     req.onsuccess = () => {
       const newInfo = newMediaEntry.mediaInfo;
-      const oldBlobId = oldEntry && oldEntry.mediaInfo.blobId;
-      if (newInfo.blobId !== oldBlobId) {
+      const oldBvobId = oldEntry && oldEntry.mediaInfo.bvobId;
+      if (newInfo.bvobId !== oldBvobId) {
         // TODO(iridian): Are there race conditions here? The refcount operations are not awaited on
-        if (newInfo.blobId) {
-          if (!connection._prophet._blobLookup[newInfo.blobId]) {
-            console.error(`Can't find Media "${newInfo.name}" Blob info for ${newInfo.blobId
+        if (newInfo.bvobId) {
+          if (!connection._prophet._bvobLookup[newInfo.bvobId]) {
+            console.error(`Can't find Media "${newInfo.name}" Bvob info for ${newInfo.bvobId
                 } when adding new content references`);
           } else {
             if (newMediaEntry.isInMemory) connection._prophet._addContentInMemoryReference(newInfo);
             if (newMediaEntry.isPersisted) connection._prophet._addContentPersistReference(newInfo);
           }
         }
-        if (oldBlobId) {
-          if (!connection._prophet._blobLookup[oldBlobId]) {
-            console.error(`Can't find Media "${newInfo.name}" Blob info for ${oldBlobId
+        if (oldBvobId) {
+          if (!connection._prophet._bvobLookup[oldBvobId]) {
+            console.error(`Can't find Media "${newInfo.name}" Bvob info for ${oldBvobId
                 } when removing old content references`);
           } else {
-            if (oldEntry.isInMemory) connection._prophet._removeContentInMemoryReference(oldBlobId);
-            if (oldEntry.isPersisted) connection._prophet._removeContentPersistReference(oldBlobId);
+            if (oldEntry.isInMemory) connection._prophet._removeContentInMemoryReference(oldBvobId);
+            if (oldEntry.isPersisted) connection._prophet._removeContentPersistReference(oldBvobId);
           }
         }
       }
@@ -147,7 +147,7 @@ export function _readMediaInfos (connection: ScribePartitionConnection, results:
             return;
           }
           const thisMediaInfo = { ...cursor.value, isInMemory: true };
-          if (thisMediaInfo.mediaInfo && thisMediaInfo.mediaInfo.blobId
+          if (thisMediaInfo.mediaInfo && thisMediaInfo.mediaInfo.bvobId
               && thisMediaInfo.isInMemory) {
             connection._prophet._addContentInMemoryReference(thisMediaInfo.mediaInfo);
           }
@@ -168,46 +168,46 @@ export function _destroyMediaInfo (connection: ScribePartitionConnection, mediaR
   return connection._db.transaction(["medias"], "readwrite", ({ medias }) => {
     const req = medias.delete(mediaRawId);
     req.onsuccess = () => {
-      const blobId = mediaEntry.mediaInfo.blobId;
-      if (blobId) {
-        if (mediaEntry.isInMemory) connection._prophet._removeContentInMemoryReference(blobId);
-        if (mediaEntry.isPersisted) connection._prophet._removeContentPersistReference(blobId);
+      const bvobId = mediaEntry.mediaInfo.bvobId;
+      if (bvobId) {
+        if (mediaEntry.isInMemory) connection._prophet._removeContentInMemoryReference(bvobId);
+        if (mediaEntry.isPersisted) connection._prophet._removeContentPersistReference(bvobId);
       }
     };
   });
 }
 
-// Blob reads & writes
+// Bvob reads & writes
 
-export function _persistBlobContent (scribe: Scribe, buffer: ArrayBuffer,
-    blobId: string, blobInfo?: BlobInfo, initialPersistRefCount: number = 0): ?Promise<any> {
-  if (blobInfo && blobInfo.persistRefCount) return blobInfo.persistProcess;
-  // Initiate write (set persistProcess so eventual commands using the blobId can wait
-  // before being accepted) but leave the blob persist refcount to zero. Even if the blob is
-  // never actually attached to a metadata, zero-refcount blobs can be cleared from storage at
+export function _persistBvobContent (scribe: Scribe, buffer: ArrayBuffer,
+    bvobId: string, bvobInfo?: BvobInfo, initialPersistRefCount: number = 0): ?Promise<any> {
+  if (bvobInfo && bvobInfo.persistRefCount) return bvobInfo.persistProcess;
+  // Initiate write (set persistProcess so eventual commands using the bvobId can wait
+  // before being accepted) but leave the bvob persist refcount to zero. Even if the bvob is
+  // never actually attached to a metadata, zero-refcount bvobs can be cleared from storage at
   // next _initializeContentLookup.
-  const actualBlobInfo = scribe._blobLookup[blobId] = {
-    blobId,
+  const actualBvobInfo = scribe._bvobLookup[bvobId] = {
+    bvobId,
     buffer,
     byteLength: buffer.byteLength,
     persistRefCount: initialPersistRefCount,
     inMemoryRefCount: 0,
-    persistProcess: scribe._sharedDb.transaction(["blobs", "buffers"], "readwrite",
-        ({ blobs, buffers }) => {
-          blobs.get(blobId).onsuccess = event => {
+    persistProcess: scribe._sharedDb.transaction(["bvobs", "buffers"], "readwrite",
+        ({ bvobs, buffers }) => {
+          bvobs.get(bvobId).onsuccess = event => {
             const existingRefCount = event.target.result && event.target.result.persistRefCount;
-            actualBlobInfo.persistRefCount = existingRefCount || initialPersistRefCount;
-            blobs.put({
-              blobId,
-              byteLength: actualBlobInfo.byteLength,
-              persistRefCount: actualBlobInfo.persistRefCount,
+            actualBvobInfo.persistRefCount = existingRefCount || initialPersistRefCount;
+            bvobs.put({
+              bvobId,
+              byteLength: actualBvobInfo.byteLength,
+              persistRefCount: actualBvobInfo.persistRefCount,
             });
-            if (!existingRefCount) buffers.put({ blobId, buffer });
+            if (!existingRefCount) buffers.put({ bvobId, buffer });
           };
-          return blobId;
+          return bvobId;
         })
   };
-  return actualBlobInfo.persistProcess;
+  return actualBvobInfo.persistProcess;
 }
 
 export function _readBlobContent (scribe: Scribe, blobId: string, blobInfo: BlobInfo):

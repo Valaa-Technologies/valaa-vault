@@ -15,7 +15,7 @@ integrity to the resource model via `couplings`.
 
 - depends: `@valos/tools`, `immutable`
 - exports: `Corpus`, `Command`, `VALK`, `RAEMContentAPI`
-- ValaaSpace: `Resource`, `ResourceStub`, `Blob`, `Partition`
+- ValaaSpace: `Resource`, `ResourceStub`, `Bvob`, `Partition`
 - concepts: `ghost instancing`, `partitions`, `couplings`
 
 

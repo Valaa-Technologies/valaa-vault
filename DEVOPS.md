@@ -54,7 +54,7 @@ builds or depends on the previous layers.
 - `authorities` layer provides the Valaa live authority service APIs.
    Authorities are controlled by git repositories called `autholleries`.
 - `partitions` layer provides the resource content as partition
-   events and blobs. These are served via authority service APIs.
+   events and bvobs. These are served via authority service APIs.
 
 TODO(iridian): Figure out and describe the concrete role of domains.
 
@@ -195,7 +195,7 @@ Utility    |Tool          |Payload                    |Providers   |Consumed via
 files      |`git`         |files in `./*`             |github.com  |`git clone`       |N/A     |`.git/*`      |`branch` `commit`   |`git push` & PR    |human      |merge PR to & `git push master`
 packages   |`vlm`, `yarn` |files in `/node_modules/..`|npmjs.com   |`depend` `require`|`files` |`package.json`|ups. `src/*` `bin/*`|upstream           |hybrid     |`assemble-packages` `publish-packages`
 authorities|`vlm`         |APIs, site & gateway files |IaaS, custom|browsers, various |`files` |upstream *    |upstream *          |upstream           |hybrid     |`build-release` `deploy-release`
-partitions |`vlm`, gateway|event logs, blobs          |authorities |event & blob APIs |N/A     |N/A           |gateway prophet     |command & blob APIs|authorities|automatic, custom
+partitions |`vlm`, gateway|event logs, bvobs          |authorities |event & bvob APIs |N/A     |N/A           |gateway prophet     |command & bvob APIs|authorities|automatic, custom
 
 - `Utility` - the utility layer which is being described
 - `Tool` - the name of the tool used to manipulate the payload and/or metadata
@@ -268,7 +268,7 @@ valma package commands: `vlm assemble-packages` `vlm publish-packages`
 
 > `valos-vault-4.4.2`: A Valaa `authority` can contain Valaa
 > `partitions` and must provide a mechanism for accessing event logs
-> and blob content as well as for accepting and authorizing incoming
+> and bvob content as well as for accepting and authorizing incoming
 > commands into authorized partition events.
 
 Authorities are usually live deployments on some infrastructure and
@@ -350,7 +350,7 @@ only ValOS plugins (including no plugins at all).
 
 ## 4.5. Partitions utility layer - the foundation of ValaaSpace
 
-Event logs and blob content are the partitions payload and are consumed
+Event logs and bvob content are the partitions payload and are consumed
 by ValOS gateways. It is more extensively covered elsewhere and is
 mentioned here for completeness; precious little infrastructural
 tooling is provided for them yet.

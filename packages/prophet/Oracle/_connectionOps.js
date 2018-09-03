@@ -113,8 +113,8 @@ function _connectToAuthorityProphet (connection: OraclePartitionConnection,
           noConnect: true, // deprecated
         });
     connection.transferIntoDependentConnection("authorityUpstream", authorityConnection);
-    connection._retrieveMediaContentFromAuthority =
-        authorityConnection.readMediaContent.bind(authorityConnection);
+    connection._retrieveMediaContentFromAuthority = (mediaId, mediaInfo) =>
+        authorityConnection.readMediaContent({ mediaId, ...mediaInfo });
     await authorityConnection.connect({ subscribeRemote });
     connection._authorityConnection = authorityConnection;
     return authorityConnection;
@@ -131,14 +131,13 @@ export async function _narrateEventLog (connection: OraclePartitionConnection,
   }));
 
   if ((options.narrateRemote !== false) && connection._authorityConnection) {
-    const batch = connection.createReceiveTruthBatch("initialAuthorityNarration");
-    const authorityNarration = Promise.resolve((await connection._authorityConnection)
-        .narrateEventLog({
-          subscribeRemote: options.subscribeRemote,
-          firstEventId: connection._lastAuthorizedEventId + 1,
-          callback: batch.receiveTruth,
-        }))
-        .then(async (result) => (await batch.finalize(result)) || result);
+    const authorityConnection = await connection._authorityConnection;
+    const batch = connection.createReceiveTruthBatch("initialAuthorityNarration", {});
+    const authorityNarration = Promise.resolve(authorityConnection.narrateEventLog({
+      subscribeRemote: options.subscribeRemote,
+      firstEventId: connection._lastAuthorizedEventId + 1,
+      callback: batch.receiveTruth,
+    })).then(async (result) => (await batch.finalize(result)) || result);
     if ((options.fullNarrate === true)
         || (!(ret.eventLog || []).length && !(ret.scribeEventLog || []).length
             && !(ret.scribeCommandQueue || []).length)) {
@@ -166,7 +165,7 @@ export async function _chronicleEventLog (connection: OraclePartitionConnection,
       (candidateEventId > options.lastEventId);
 
   const batch = connection.createReceiveTruthBatch("chronicleEventLog",
-      options.retrieveMediaContent);
+      { retrieveMediaContent: options.retrieveMediaContent });
   const explicitEventLogNarrations = [];
   const rawId = connection.partitionRawId();
   for (const event of eventLog) {

@@ -161,42 +161,6 @@ async function _waitBackoff (backoffSeconds: number) {
   await new Promise(resolve => { setTimeout(() => { resolve(); }, backoffSeconds * 1000); });
 }
 
-// Returns the requested media content immediately as a native object if it is in in-memory cache.
-// Otherwise if the media is in a local persisted cache returns a promise to a native object.
-// Otherwise is known in the partition returns undefined.
-// Otherwise throws an error.
-export function _readMediaContent (connection: ScribePartitionConnection, mediaId: VRef,
-    mediaEntry: MediaEntry, mediaInfo: MediaInfo, onError: Function): any {
-  // Only return cached in-memory nativeContent if its id matches the requested id.
-  if (mediaEntry
-      && (typeof mediaEntry.nativeContent !== "undefined")
-      && (mediaInfo.blobId === mediaEntry.mediaInfo.blobId)) {
-    return mediaEntry.nativeContent;
-  }
-  if (!mediaInfo.blobId) return undefined;
-  return thenChainEagerly(
-      connection._prophet.readBlobContent(mediaInfo.blobId),
-      (buffer) => {
-        if (!buffer) return undefined;
-        // nativeContent should go in favor of blobInfo decoded contents
-        const nativeContent = _nativeObjectFromBufferAndMediaInfo(buffer, mediaInfo);
-        if (mediaEntry && (mediaInfo.blobId === mediaEntry.mediaInfo.blobId)) {
-          mediaEntry.nativeContent = nativeContent;
-        }
-        return nativeContent;
-      },
-      onError.bind(connection));
-}
-
-export function _decodeMediaContent (connection: ScribePartitionConnection, mediaId: VRef,
-    mediaInfo: MediaInfo, decoder: MediaDecoder, onError: Function): any {
-  const name = mediaInfo.name ? `'${mediaInfo.name}'` : `unnamed media`;
-  return thenChainEagerly(
-      connection._prophet.decodeBlobContent(mediaInfo.blobId, decoder,
-          { mediaName: name, partitionName: connection.getName() }),
-      undefined,
-      onError.bind(connection));
-}
 
 export function _decodeBvobContent (scribe: Scribe, bvobInfo: BvobInfo,
     decoder: MediaDecoder, contextInfo?: Object, onError: Function) {
@@ -216,8 +180,8 @@ export function _decodeBvobContent (scribe: Scribe, bvobInfo: BvobInfo,
   ], onError.bind(scribe));
 }
 
-export function _getMediaURL (connection: ScribePartitionConnection, mediaId: VRef,
-    mediaInfo?: MediaInfo, mediaEntry: MediaEntry): any {
+export function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
+    mediaEntry: MediaEntry): any {
   let nativeContent;
   // Only use cached in-memory nativeContent if its id matches the requested id.
   if ((!mediaInfo || !mediaInfo.bvobId || (mediaInfo.bvobId === mediaEntry.mediaInfo.bvobId))
@@ -246,6 +210,33 @@ export function _getMediaURL (connection: ScribePartitionConnection, mediaId: VR
   // used like so:
   // https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
   return undefined;
+}
+
+// Returns the requested media content immediately as a native object if it is in in-memory cache.
+// Otherwise if the media is in a local persisted cache returns a promise to a native object.
+// Otherwise is known in the partition returns undefined.
+// Otherwise throws an error.
+export function _readMediaContent (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
+    mediaEntry: MediaEntry, onError: Function): any {
+  // Only return cached in-memory nativeContent if its id matches the requested id.
+  if (mediaEntry
+      && (typeof mediaEntry.nativeContent !== "undefined")
+      && (mediaInfo.bvobId === mediaEntry.mediaInfo.bvobId)) {
+    return mediaEntry.nativeContent;
+  }
+  if (!mediaInfo.bvobId) return undefined;
+  return thenChainEagerly(
+      connection._prophet.readBvobContent(mediaInfo.bvobId),
+      (buffer) => {
+        if (!buffer) return undefined;
+        // nativeContent should go in favor of bvobInfo decoded contents
+        const nativeContent = _nativeObjectFromBufferAndMediaInfo(buffer, mediaInfo);
+        if (mediaEntry && (mediaInfo.bvobId === mediaEntry.mediaInfo.bvobId)) {
+          mediaEntry.nativeContent = nativeContent;
+        }
+        return nativeContent;
+      },
+      onError);
 }
 
 function _nativeObjectFromBufferAndMediaInfo (buffer: ArrayBuffer, mediaInfo?:

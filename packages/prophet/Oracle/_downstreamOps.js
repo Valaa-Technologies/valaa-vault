@@ -27,15 +27,14 @@ export async function _receiveTruthOf (connection: OraclePartitionConnection,
 const _maxOnConnectRetrievalRetries = 3;
 
 export function _createReceiveTruthBatch (connection: OraclePartitionConnection,
-    batchName: string, retrieveMediaContent: Function) {
-  const retrievals = {};
+    { name, retrieveMediaContent, finalizeRetrieves }: Object) {
   const batch = {
-    name: batchName,
-    retrievals,
+    name,
+    retrievals: {},
     retrieveMediaContent (mediaId: VRef, mediaInfo: Object) {
       const mediaRetrievals
-          = retrievals[mediaId.rawId()]
-          || (retrievals[mediaId.rawId()] = { history: [], pendingRetrieval: undefined });
+          = batch.retrievals[mediaId.rawId()]
+          || (batch.retrievals[mediaId.rawId()] = { history: [], pendingRetrieval: undefined });
       const thisRetrieval = {
         process: undefined, content: undefined, retries: 0, error: undefined, skipped: false,
       };
@@ -61,7 +60,7 @@ export function _createReceiveTruthBatch (connection: OraclePartitionConnection,
                   error.originalMessage || error.message}`);
             } else {
               thisRetrieval.error = connection.wrapErrorEvent(error, description,
-                  "\n\tretrievals:", ...dumpObject(retrievals),
+                  "\n\tretrievals:", ...dumpObject(batch.retrievals),
                   "\n\tmediaId:", mediaId.rawId(),
                   "\n\tmediaInfo:", ...dumpObject(mediaInfo),
                   "\n\tmediaRetrievals:", ...dumpObject(mediaRetrievals),
@@ -81,14 +80,14 @@ export function _createReceiveTruthBatch (connection: OraclePartitionConnection,
     },
     analyzeRetrievals (): Object {
       const ret = {
-        medias: Object.keys(retrievals).length,
+        medias: Object.keys(batch.retrievals).length,
         successfulRetrievals: 0,
         overallSkips: 0,
         overallRetries: 0,
         intermediateFailures: [],
         latestFailures: [],
       };
-      for (const mediaRetrievals of Object.values(retrievals)) {
+      for (const mediaRetrievals of Object.values(batch.retrievals)) {
         mediaRetrievals.history.forEach((retrieval, index) => {
           if (typeof retrieval.content !== "undefined") ++ret.successfulRetrievals;
           if (retrieval.skipped) ++ret.overallSkips;

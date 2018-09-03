@@ -8,14 +8,14 @@ import type { MediaInfo, NarrateOptions, ChronicleOptions, RetrieveMediaContent 
     from "~/prophet/api/Prophet";
 import DecoderArray from "~/prophet/prophet/DecoderArray";
 
-import { dumpObject } from "~/tools";
+import { dumpObject, thenChainEagerly } from "~/tools";
 import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 import { bufferAndContentIdFromNative } from "~/tools/textEncoding";
 
 import {
-  MediaEntry, _reprocessMedia, _readMediaContent, _decodeMediaContent, _getMediaURL,
+  MediaEntry, _reprocessMedia, _getMediaURL, _readMediaContent,
 } from "./_contentOps";
 import {
   _initializeConnectionIndexedDB, _persistMediaEntry, _readMediaInfos, _destroyMediaInfo,
@@ -151,68 +151,45 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  // Returns the requested media content immediately as a native object if it is in in-memory cache.
-  // Otherwise if the media is in a local persisted cache returns a promise to a native object.
-  // Otherwise is known in the partition returns undefined.
-  // Otherwise throws an error.
-  readMediaContent (mediaId: VRef, mediaInfo?: MediaInfo): any {
-    const mediaEntry = this._getMediaEntry(mediaId, false);
-    let alreadyWrapped;
-    const actualInfo = mediaInfo || (mediaEntry && mediaEntry.mediaInfo);
-    try {
-      if (!actualInfo) throw new Error(`Cannot find Media info for '${String(mediaId)}'`);
-      return _readMediaContent(this, mediaId, mediaEntry, actualInfo, onError);
-    } catch (error) { throw onError.call(this, error); }
-    function onError (error) {
-      if (alreadyWrapped) return error;
-      alreadyWrapped = true;
-      return this.wrapErrorEvent(error, `readMediaContent(${
-              actualInfo && actualInfo.name ? `'${actualInfo.name}'` : `unnamed media`}`,
-          "\n\tmediaId:", mediaId,
-          "\n\tactualMediaInfo:", ...dumpObject(actualInfo),
-          "\n\tmediaEntry:", ...dumpObject(mediaEntry),
-      );
-    }
-  }
-
-  decodeMediaContent (mediaId: VRef, mediaInfo?: MediaInfo): any {
-    let actualInfo = mediaInfo;
-    let alreadyWrapped;
-    try {
-      if (!actualInfo) {
-        const mediaEntry = this._getMediaEntry(mediaId, false);
-        actualInfo = mediaEntry && mediaEntry.mediaInfo;
-        if (!actualInfo) throw new Error(`Cannot find Media info for '${String(mediaId)}'`);
-      }
-      if (!actualInfo.blobId) return undefined;
-      const decoder = this._decoderArray.findDecoder(actualInfo);
-      if (!decoder) {
-        throw new Error(`Can't find decoder for ${actualInfo.type}/${actualInfo.subtype}`);
-      }
-      return _decodeMediaContent(this, mediaId, actualInfo, decoder, onError);
-    } catch (error) { throw onError.call(this, error); }
-    function onError (error) {
-      if (alreadyWrapped) return error;
-      alreadyWrapped = true;
-      return this.wrapErrorEvent(error, `decodeMediaContent(${this.getName()}`,
-          "\n\tmediaId:", mediaId,
-          "\n\tactualMediaInfo:", ...dumpObject(actualInfo),
-      );
-    }
-  }
-
-
-  getMediaURL (mediaId: VRef, mediaInfo?: MediaInfo): any {
-    const mediaEntry = this._getMediaEntry(mediaId);
-    try {
-      return _getMediaURL(this, mediaId, mediaInfo, mediaEntry);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, `getMediaURL(${
-              (mediaInfo && mediaInfo.name) ? `'${mediaInfo.name}'` : `unnamed media`}`,
-          "\n\tmediaId:", mediaId,
+  requestMediaContents (mediaInfos: MediaInfo[]): any[] {
+    return mediaInfos.map(mediaInfo => {
+      try {
+        const mediaEntry = this._getMediaEntry(mediaInfo.mediaId, !!mediaInfo.asLocalURL);
+        if (mediaInfo.asLocalURL) return _getMediaURL(this, mediaInfo, mediaEntry);
+        let actualInfo = mediaInfo;
+        if (!actualInfo.bvobId) {
+          if (!mediaEntry || !mediaEntry.mediaInfo) {
+            throw new Error(`Cannot find Media info for '${String(mediaInfo.mediaId)}'`);
+          }
+          actualInfo = { ...mediaInfo, ...mediaEntry.mediaInfo };
+        }
+        if (!mediaInfo.type) {
+          return _readMediaContent(this, actualInfo, mediaEntry, onError.bind(this, mediaInfo));
+        }
+        if (!actualInfo.bvobId) return undefined;
+        if (actualInfo.sourceURL) {
+          throw new Error(`Cannot explicitly decode sourceURL-content as '${mediaInfo.mime}'`);
+        }
+        const decoder = this._decoderArray.findDecoder(actualInfo);
+        if (!decoder) {
+          throw new Error(`Can't find decoder for ${actualInfo.type}/${actualInfo.subtype}`);
+        }
+        const name = actualInfo.name ? `'${mediaInfo.name}'` : `unnamed media`;
+        return thenChainEagerly(
+          this._prophet.decodeBvobContent(actualInfo.bvobId, decoder,
+                { mediaName: name, partitionName: this.getName() }),
+            undefined,
+            onError.bind(this, mediaInfo));
+      } catch (error) { throw onError.call(this, mediaInfo, error); }
+    });
+    function onError (mediaInfo, error) {
+      if (error.wrappedInRequestMediaContents) return error;
+      const ret = this.wrapErrorEvent(error, `requestMediaContents(${this.getName()}`,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
-          "\n\tmediaEntry:", ...dumpObject(mediaEntry),
+          "\n\tmediaInfos:", ...dumpObject(mediaInfos),
       );
+      ret.wrappedInRequestMediaContents = true;
+      return ret;
     }
   }
 

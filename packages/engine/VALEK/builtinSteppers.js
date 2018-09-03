@@ -51,7 +51,7 @@ function argumentOf (valker: Valker, head: any /* , scope: ?Object,
     if (eHostValue != null) {
       const vrapper = tryUnpackedHostValue(eHostValue);
       if (vrapper && (vrapper.tryTypeName() === "Media")) {
-        const { mime } = vrapper.resolveMediaInfo({ transaction: valker });
+        const mime = vrapper.resolveMediaInfo({ transaction: valker }).mime;
         if ((mime === "application/javascript") || (mime === "application/valaascript")) {
           const ret = vrapper.extractValue({ transaction: valker, immediate: true });
           if (ret !== undefined) {

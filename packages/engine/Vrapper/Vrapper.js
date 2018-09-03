@@ -1096,12 +1096,13 @@ export default class Vrapper extends Cog {
       }
       mime = `${mediaInfo.type}/${mediaInfo.subtype}`;
     }
-    return { mediaInfo, mime };
+    mediaInfo.mime = mime;
+    mediaInfo.mediaId = this.getId(options);
+    return mediaInfo;
   }
 
   _obtainMediaInterpretation (options: VALKOptions, vExplicitOwner: ?Vrapper, typeName: ?string) {
     let mediaInfo;
-    let mime;
     try {
       const activeTypeName = typeName || this.getTypeName(options);
       if (activeTypeName !== "Media") {
@@ -1125,28 +1126,30 @@ export default class Vrapper extends Cog {
               .get(mostMaterializedTransient);
       if (interpretationsByMime) {
         if (!options.mediaInfo) {
-          mime = options.mime || "";
+          mediaInfo = { mime: options.mime || "" };
         } else {
-          ({ mediaInfo, mime } = this.resolveMediaInfo(Object.create(options)));
+          mediaInfo = this.resolveMediaInfo(Object.create(options));
         }
-        const cachedInterpretation = interpretationsByMime[mime];
+        const cachedInterpretation = interpretationsByMime[mediaInfo.mime];
         if (cachedInterpretation
-            && (mime || !options.mimeFallback
+            && (mediaInfo.mime || !options.mimeFallback
                 || (cachedInterpretation === interpretationsByMime[options.mimeFallback]))) {
           return (options.immediate !== false)
               ? cachedInterpretation
               : Promise.resolve(cachedInterpretation);
         }
       }
-      if (!mediaInfo) ({ mediaInfo, mime } = this.resolveMediaInfo(Object.create(options)));
+      if (!mediaInfo || !mediaInfo.mediaId) {
+        mediaInfo = this.resolveMediaInfo(Object.create(options));
+      }
       let decodedContent = options.decodedContent;
       if (typeof decodedContent === "undefined") {
         decodedContent = this._withPartitionConnectionChainEagerly(Object.create(options), [
-          connection => connection.decodeMediaContent(this.getId(options), mediaInfo),
+          connection => connection.decodeMediaContent(mediaInfo),
         ]);
         if ((options.immediate === true) && isPromise(decodedContent)) {
           throw new Error(`Media interpretation not immediately available for '${
-              (mediaInfo && mediaInfo.name) || "<unnamed>"}'`);
+              mediaInfo.name || "<unnamed>"}'`);
         }
         if ((options.immediate === false) || isPromise(decodedContent)) {
           return (async () => {
@@ -1169,16 +1172,17 @@ export default class Vrapper extends Cog {
         this._mediaInterpretations
             .set(mostMaterializedTransient, interpretationsByMime = {});
       }
-      interpretationsByMime[mime] = interpretation;
+      interpretationsByMime[mediaInfo.mime] = interpretation;
       if (!options.mediaInfo && !options.mime
-          && (!options.mimeFallback || (mime === options.mimeFallback))) {
+          && (!options.mimeFallback || (mediaInfo.mime === options.mimeFallback))) {
         // Set default integration lookup
         interpretationsByMime[""] = interpretation;
       }
       return interpretation;
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          `_obtainMediaInterpretation('${this.get("name", options)}' as ${String(mime)})`,
+          `_obtainMediaInterpretation('${this.get("name", options)}' as ${
+              String(mediaInfo && mediaInfo.mime)})`,
           "\n\tid:", this.getId(options).toString(),
           "\n\toptions:", ...dumpObject(options),
           "\n\tvExplicitOwner:", ...dumpObject(vExplicitOwner),
@@ -1279,9 +1283,9 @@ export default class Vrapper extends Cog {
           "Vrapper.mediaURL only available for objects with Media interface",
           "\n\ttype:", this._typeName,
           "\n\tobject:", this);
-      ({ mediaInfo } = this.resolveMediaInfo(Object.create(options)));
+      mediaInfo = this.resolveMediaInfo(Object.create(options));
       const ret = this._withPartitionConnectionChainEagerly(Object.create(options), [
-        connection => connection.getMediaURL(this.getId(options), mediaInfo),
+        connection => connection.getMediaURL(mediaInfo),
       ]);
       if (typeof options.immediate !== "undefined") {
         if (!options.immediate) return Promise.resolve(ret);

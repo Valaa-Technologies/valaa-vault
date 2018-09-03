@@ -61,7 +61,7 @@ export default class Scribe extends Prophet {
   // Idempotent: returns a promise until the initialization is complete. await on it.
   initialize () {
     if (!this._bvobLookup) {
-      this.warnEvent("Initializing bvob content lookups...");
+      this.warnEvent(1, "Initializing bvob content lookups...");
       this._bvobLookup = _initializeSharedIndexedDB(this);
     }
     return this._bvobLookup;

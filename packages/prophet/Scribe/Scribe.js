@@ -9,7 +9,7 @@ import DecoderArray from "~/prophet/prophet/DecoderArray";
 import type MediaDecoder from "~/tools/MediaDecoder";
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 
-import { dumpObject, invariantifyObject } from "~/tools";
+import { dumpObject, invariantifyObject, isPromise } from "~/tools";
 import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 import { _decodeBvobContent } from "./_contentOps";
@@ -126,7 +126,8 @@ export default class Scribe extends Prophet {
   readBvobContent (bvobId: string): ?ArrayBuffer {
     const bvobInfo = this._bvobLookup[bvobId || ""];
     try {
-      return _readBlobContent(this, blobId, blobInfo);
+      if (!bvobInfo) throw new Error(`Can't find Bvob info '${bvobId}'`);
+      return _readBvobBuffers(this, [bvobInfo])[0];
     } catch (error) {
       throw this.wrapErrorEvent(error, `readBvobContent('${bvobId}')`,
           "\n\tbvobInfo:", ...dumpObject(bvobInfo));
@@ -167,15 +168,43 @@ export default class Scribe extends Prophet {
     }
   }
 
-  async _addContentInMemoryReference (mediaInfo: Object) {
-    const blobInfo = this._blobLookup[mediaInfo.blobId || ""];
+  /**
+   * Adds a bvob buffer in-memory reference count as an immediate
+   * increment of bvobId.inMemoryRefCount. Returns a Promise to a read
+   * operation if the buffer was not in memory already.
+   * Otherwise returns false.
+   *
+   * Note that The inMemoryRefCount is not persisted.
+   *
+   * Note that even if inMemoryRefCount is positive the content might
+   * not be in memory yet before the pending read operation has
+   * finished. In such a caseThe pending read operation can be found in
+   * bvobInfo.pendingBuffer before it's complete.
+   *
+   * @param {Object} mediaInfo
+   * @returns {(false | Promise<any>)}
+   * @memberof Scribe
+   */
+  _addContentInMemoryReference (mediaInfo: Object): false | Promise<any> {
+    const bvobInfo = this._bvobLookup[mediaInfo.bvobId || ""];
+    let process;
     try {
-      if (!blobInfo || blobInfo.inMemoryRefCount++) return undefined;
-      return await this.readBlobContent(mediaInfo.blobId);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, `_addContentInMemoryReference('${mediaInfo.blobId}')`,
+      if (!bvobInfo) throw new Error(`Cannot find Bvob info '${mediaInfo.bvobId}'`);
+      if (!bvobInfo.inMemoryRefCount++ && !bvobInfo.buffer) {
+        process = this.readBvobContent(bvobInfo.bvobId);
+        if (!isPromise(process)) {
+          throw new Error(
+            `INTERNAL ERROR: readBvobContent didn't return a promise with falsy inMemoryRefCount`);
+        }
+        return process.catch(error => { throw onError.call(this, error); });
+      }
+      return bvobInfo.pendingBuffer;
+    } catch (error) { throw onError.call(this, error); }
+    function onError (error) {
+      return this.wrapErrorEvent(error, `_addContentInMemoryReference('${mediaInfo.bvobId}')`,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
-          "\n\tblobInfo:", ...dumpObject(blobInfo));
+          "\n\tbvobInfo:", ...dumpObject({ ...bvobInfo }), ...dumpObject(bvobInfo),
+          "\n\tread bvob content process:", ...dumpObject(process));
     }
   }
 
@@ -210,7 +239,7 @@ export default class Scribe extends Prophet {
     const bvobInfo = this._bvobLookup[mediaInfo.bvobId || ""];
     try {
       if (!bvobInfo) throw new Error(`Cannot find Bvob info '${mediaInfo.bvobId}'`);
-      return await _addContentPersistReference(this, mediaInfo, blobInfo);
+      return await _addBvobPersistReferences(this, [bvobInfo]);
     } catch (error) {
       throw this.wrapErrorEvent(error, `_addContentPersistReference('${mediaInfo.bvobId}')`,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
@@ -222,7 +251,7 @@ export default class Scribe extends Prophet {
     const bvobInfo = this._bvobLookup[bvobId || ""];
     try {
       if (!bvobInfo) throw new Error(`Cannot find Bvob info '${bvobInfo.bvobId}'`);
-      return await _removeContentPersistReference(this, blobId, blobInfo);
+      return await _removeBvobPersistReferences(this, [bvobInfo]);
     } catch (error) {
       throw this.wrapErrorEvent(error, `_removeContentPersistReference('${bvobId}')`,
           "\n\tbvobInfo:", ...dumpObject(bvobInfo));

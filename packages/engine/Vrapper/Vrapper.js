@@ -1365,10 +1365,6 @@ export default class Vrapper extends Cog {
     }
   }
 
-  updateMediaContent (/* content: any, options: VALKOptions = {} */) {
-    throw new Error("DEPRECATED: Vrapper.updateMediaContent\n\tprefer:Vrapper.prepareBlob");
-  }
-
   recurseConnectedPartitionMaterializedFieldResources (fieldNames: Array<string>,
       options: Kuery = {}) {
     const activeConnections = this.engine.prophet.getFullPartitionConnections();

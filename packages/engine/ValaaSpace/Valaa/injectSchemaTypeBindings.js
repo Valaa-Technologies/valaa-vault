@@ -30,6 +30,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
           { transaction: valker, id: initialState.id });
     },
   });
+  scope.Blob = scope.Bvob;
 
   scope.ResourceStub = Valaa.ResourceStub = Object.assign(Object.create(BuiltinTypePrototype), {
     name: "ResourceStub",
@@ -336,6 +337,11 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
       return interfaceName.hasInterface(interfaceNameLegacy);
     }),
 
+    [scope.Resource.prepareBlob]: denoteDeprecatedValaaBuiltin("[Resource.prepareBlob](content)",
+        "Returns a promise to a Bvob creator callback. See Resource.prepareBvob.",
+    )(function prepareBlob (content: any) {
+      return Promise.resolve(this.prepareBvob(content, { transaction: this.__callerValker__ }));
+    }),
     [scope.Resource.prepareBvob]: denoteValaaBuiltinWithSignature(
         `Returns a promise to a Bvob creator callback based on given *content*. This promise${
             ""} resolves when the given content has been converted into raw data and persisted in${

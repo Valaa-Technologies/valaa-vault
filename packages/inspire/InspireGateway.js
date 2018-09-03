@@ -420,7 +420,7 @@ export default class InspireGateway extends LogEventGenerator {
         retrieveMediaContent (mediaId: VRef, mediaInfo: Object) {
           const latestInfo = latestMediaInfos[mediaId.rawId()];
           if (!latestInfo ||
-              (mediaInfo.bvobId !== (latestInfo.mediaInfo.bvobId))) {
+              (mediaInfo.bvobId !== (latestInfo.mediaInfo.bvobId || latestInfo.mediaInfo.blobId))) {
             // Bvob wasn't found in cache and the bvobId doesn't match the latest known bvobId for
             // the requested media. The request for the latest bvob should come later:
             // Return undefined to silently ignore this request.
@@ -440,23 +440,29 @@ export default class InspireGateway extends LogEventGenerator {
 
   async _getBvobInfos () {
     const readRevelationBvobContent = async (bvobId: string) => {
-      const blobBuffers = await this.prologueRevelation.blobBuffers;
+      const bvobBuffers = {
+        ...await this.prologueRevelation.bvobBuffers,
+        ...await this.prologueRevelation.blobBuffers, // deprecated
+      };
       if (typeof bvobBuffers[bvobId] === "undefined") {
         this.errorEvent("Could not locate precached content for bvob", bvobId,
             "from revelation bvobBuffers", ...dumpObject(bvobBuffers));
         return undefined;
       }
-      const container = await blobBuffers[blobId];
+      const container = await bvobBuffers[bvobId];
       if (typeof container.base64 !== "undefined") return arrayBufferFromBase64(container.base64);
       return container;
     };
-    const blobInfos = (await this.prologueRevelation.blobInfos) || {};
-    for (const [blobId, blobInfoMaybe] of Object.entries(blobInfos || {})) {
-      const blobInfo = await blobInfoMaybe;
-      if (blobInfo.persistRefCount !== 0) {
-        await this.scribe.preCacheBlob(blobId, blobInfo, readRevelationBlobContent);
+    const bvobInfos = {
+      ...((await this.prologueRevelation.bvobInfos) || {}),
+      ...((await this.prologueRevelation.blobInfos) || {}), // deprecated
+    };
+    for (const [bvobId, bvobInfoMaybe] of Object.entries(bvobInfos || {})) {
+      const bvobInfo = await bvobInfoMaybe;
+      if (bvobInfo.persistRefCount !== 0) {
+        await this.scribe.preCacheBvob(bvobId, bvobInfo, readRevelationBvobContent);
       }
     }
-    return (this.blobInfos = blobInfos);
+    return (this.bvobInfos = bvobInfos);
   }
 }

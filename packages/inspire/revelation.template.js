@@ -34,6 +34,8 @@ export default {
     partitionInfos: dictionaryOf(partitionInfo()),
     bvobInfos: dictionaryOf(bvobInfo()),
     bvobBuffers: dictionaryOf(bvobBuffer()),
+    blobInfos: dictionaryOf(blobInfo()), // deprecated
+    blobBuffers: dictionaryOf(blobBuffer()), // deprecated
   }
 };
 
@@ -139,6 +141,7 @@ function bvobBuffer () {
 }
 
 function blobInfo () {
+  // deprecated
   return {
     byteLength: NaN,
     persistRefCount: NaN,
@@ -146,6 +149,7 @@ function blobInfo () {
 }
 
 function blobBuffer () {
+  // deprecated
   return {
     base64: "",
   };

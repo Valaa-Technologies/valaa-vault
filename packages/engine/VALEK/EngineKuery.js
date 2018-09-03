@@ -225,9 +225,11 @@ export default class EngineKuery extends ValaaScriptKuery {
 
   bvobContent (mediaId: ?any, remoteURL: ?any, options: Object = {}) {
     return this.call(this._root.toMethod("bvobContent"), null, mediaId, remoteURL, options);
+  }
 
   blobContent (mediaId: ?any, remoteURL: ?any, options: Object = {}) {
-    return this.call(this._root.toMethod("blobContent"), null, mediaId, remoteURL, options);
+    console.error("DEPRECATED: VALEK.blobContent\n\tprefer: VALEK.bvobContent");
+    return this.call(this._root.toMethod("bvobContent"), null, mediaId, remoteURL, options);
   }
 
   mediaURL (options: Kuery = {}) {
@@ -250,9 +252,9 @@ export default class EngineKuery extends ValaaScriptKuery {
     return this.call(this._root.toMethod("prepareBvob"), null, bvobContent, options);
   }
 
-  updateMediaContent (blobContent: any, options: Kuery = {}) {
-    console.error("DEPRECATED: VALEK.updateMediaContent\n\tprefer: VALEK.prepareBlob");
-    return this.call(this._root.toMethod("prepareBlob"), null, blobContent, options);
+  prepareBlob (bvobContent: any, options: Kuery = {}) {
+    console.error("DEPRECATED: VALEK.prepareBlob\n\tprefer: VALEK.prepareBvob");
+    return this.call(this._root.toMethod("prepareBvob"), null, bvobContent, options);
   }
 
   // Locators

@@ -36,7 +36,7 @@ const create = {
           typeName: args.input.typeName,
           initialState: args.input.initialState && JSON.parse(args.input.initialState),
         }),
-        blobStubs: context.blobStubs,
+        bvobStubs: context.bvobStubs,
       });
       return {
         clientMutationId: command.id,

@@ -1,7 +1,7 @@
 import Bard from "~/raem/redux/Bard";
 import getObjectField from "~/raem/tools/denormalized/getObjectField";
 
-export function bardCreateBlobReferenceData (bard, referrerFieldName) {
+export function bardCreateBvobReferenceData (bard, referrerFieldName) {
   return {
     referrerId: bard.objectId,
     referrerFieldName,
@@ -9,20 +9,20 @@ export function bardCreateBlobReferenceData (bard, referrerFieldName) {
   };
 }
 
-export function addBlobReferenceRegisterToRootCommand (bard: Bard, blobId: string,
+export function addBvobReferenceRegisterToRootCommand (bard: Bard, bvobId: string,
     referrerFieldName: string) {
   if (!bard.story.isBeingUniversalized) return;
-  const adds = bard.rootAction.addedBlobReferences
-      || (bard.rootAction.addedBlobReferences = {});
-  (adds[blobId] || (adds[blobId] = [])).push(
-      bardCreateBlobReferenceData(bard, referrerFieldName));
+  const adds = bard.rootAction.addedBvobReferences
+      || (bard.rootAction.addedBvobReferences = {});
+  (adds[bvobId] || (adds[bvobId] = [])).push(
+      bardCreateBvobReferenceData(bard, referrerFieldName));
 }
 
-export function addBlobReferenceUnregisterToRootCommand (bard: Bard, blobId: string,
+export function addBvobReferenceUnregisterToRootCommand (bard: Bard, bvobId: string,
     referrerFieldName: string) {
   if (!bard.story.isBeingUniversalized) return;
-  const removes = bard.rootAction.removedBlobReferences
-      || (bard.rootAction.removedBlobReferences = {});
-  (removes[blobId] || (removes[blobId] = [])).push(
-      bardCreateBlobReferenceData(bard, referrerFieldName));
+  const removes = bard.rootAction.removedBvobReferences
+      || (bard.rootAction.removedBvobReferences = {});
+  (removes[bvobId] || (removes[bvobId] = [])).push(
+      bardCreateBvobReferenceData(bard, referrerFieldName));
 }

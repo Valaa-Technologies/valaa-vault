@@ -1134,7 +1134,7 @@ export default class Kuery {
    * Operand type                                  Result
    * Valaa Resource reference                      "Resource"
    * Valaa Data reference or expanded Data object  "Data"
-   * Valaa Blob reference                          "Blob"
+   * Valaa Bvob reference                          "Blob"
    * Other                                         as per ecma-262
    *
    * Sugar for unary("§typeof", operand). See unary

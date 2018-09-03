@@ -23,11 +23,11 @@ export type EventData = {
 export type EventCallback = ((event: EventData) => void);
 
 export type MediaInfo = {
-  blobId: string,
   name: string,
   sourceURL: string,
   type: string,
   subtype: string,
+  bvobId?: string,
 };
 
 export type RetrieveMediaContent = (mediaId: VRef, mediaInfo: MediaInfo) => Promise<any>;
@@ -149,16 +149,16 @@ export default class Prophet extends LogEventGenerator {
   }
 
   /**
-   * Returns the blob buffer for given blobId as an ArrayBuffer if it is locally available,
+   * Returns the bvob buffer for given bvobId as an ArrayBuffer if it is locally available,
    * undefined otherwise.
    *
-   * @param {string} blobId
+   * @param {string} bvobId
    * @returns
    *
    * @memberof Prophet
    */
-  tryGetCachedBlobContent (blobId: string): ArrayBuffer {
-    return this._upstream.tryGetCachedBlobContent(blobId);
+  tryGetCachedBvobContent (bvobId: string): ArrayBuffer {
+    return this._upstream.tryGetCachedBvobContent(bvobId);
   }
 
   /**

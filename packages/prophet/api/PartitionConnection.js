@@ -194,7 +194,7 @@ export default class PartitionConnection extends LogEventGenerator {
 
 
   /**
-   * Prepares the blob content store process on upstream, returns the content id.
+   * Prepares the bvob content store process on upstream, returns the content id.
    *
    * @param {string} content
    * @param {VRef} mediaId
@@ -203,8 +203,8 @@ export default class PartitionConnection extends LogEventGenerator {
    *
    * @memberof Prophet
    */
-  prepareBlob (content: string, mediaInfo?: Object):
+  prepareBvob (content: string, mediaInfo?: Object):
       { contentId: string, persistProcess: ?Promise<any> } {
-    return this._upstreamConnection.prepareBlob(content, mediaInfo);
+    return this._upstreamConnection.prepareBvob(content, mediaInfo);
   }
 }

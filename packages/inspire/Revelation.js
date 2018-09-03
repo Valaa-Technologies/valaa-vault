@@ -45,11 +45,11 @@ import { dumpObject, inProduction, isPromise, request, wrapError, inBrowser } fr
 // request spreader expansion when they make async/await property
 // accesses to revelation contents.
 //
-// As an example, the inspire revelation.blobBuffers might look like:
+// As an example, the inspire revelation.bvobBuffers might look like:
 // ```
 // {
 //   "somebobcontenthash": { "base64": "v0987c1r1bxa876a8s723f21=" },
-//   "otherblobcontenthash": { "base64": "b7b98q09au2322h3f2j3hf==" },
+//   "otherbvobcontenthash": { "base64": "b7b98q09au2322h3f2j3hf==" },
 //   "contenthash3": { "...": "relative/to/thisFile" },
 //   "contenthash4": { "...": "./relative/to/thisFile" },
 //   "contenthash5": { "...": "/relative/to/revelationSiteRootPath" },
@@ -63,11 +63,11 @@ import { dumpObject, inProduction, isPromise, request, wrapError, inBrowser } fr
 // ```
 // And the corresponding buffer template in revelation.template.js:
 // ```
-//   blobBuffers: dictionaryOf({ base64: "" }),
+//   bvobBuffers: dictionaryOf({ base64: "" }),
 // ```
 //
 // TODO(iridian): Figure if exposed string content could be wrapped inside a wrapper, ie. if in
-// above base the http://url.com/to/blob52 resolves to string content (not as a JSON object with
+// above base the http://url.com/to/bvob52 resolves to string content (not as a JSON object with
 // "base64" field), it might be useful if by convention only JSON objects were resolved directly,
 // but flat text and any other content was automatically wrapped inside an object, possibly also
 // containing encoding and other XHR response information.

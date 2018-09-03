@@ -20,11 +20,11 @@ import { derivedId, dumpify, dumpObject, invariantifyObject, outputCollapsedErro
 export const defaultOwnerCoupledField = Symbol("Valaa.defaultOwnerCoupledField");
 
 export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) {
-  scope.Blob = Object.assign(Object.create(BuiltinTypePrototype), {
-    name: "Blob",
+  scope.Bvob = Object.assign(Object.create(BuiltinTypePrototype), {
+    name: "Bvob",
     ".new": function new_ (valker: Valker, innerScope: ?Object, initialState: ?Object) {
       if (!initialState || !initialState.id) {
-        throw new Error("initialState.id missing when trying to create a Blob");
+        throw new Error("initialState.id missing when trying to create a Bvob");
       }
       return valker.follower.create("Blob", undefined,
           { transaction: valker, id: initialState.id });
@@ -198,7 +198,9 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
     }),
 
     prepareBlob: Symbol("Resource.prepareBlob"),
+    prepareBvob: Symbol("Resource.prepareBvob"),
   });
+
   scope.Resource.prototype = Object.assign(Object.create(scope.ResourceStub.prototype), {
     constructor: scope.Resource,
 
@@ -334,24 +336,24 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
       return interfaceName.hasInterface(interfaceNameLegacy);
     }),
 
-    [scope.Resource.prepareBlob]: denoteValaaBuiltinWithSignature(
-        `Returns a promise to a Blob creator callback based on given *content*. This promise${
+    [scope.Resource.prepareBvob]: denoteValaaBuiltinWithSignature(
+        `Returns a promise to a Bvob creator callback based on given *content*. This promise${
             ""} resolves when the given content has been converted into raw data and persisted in${
             ""} the local binary caches and its content id has been determined. When the resolved${
-            ""} Blob callback is called it creates a Blob object in the current execution context${
+            ""} Bvob callback is called it creates a Bvob object in the current execution context${
             ""} (usually the partition of *this* Resource) and returns the content id.${
-            ""} This blob id can then be used as part of a command (usually Media.content) in the${
+            ""} This bvob id can then be used as part of a command (usually Media.content) in the${
             ""} current execution context to refer to the raw content.${
             ""} Note that all encoding information, media type and any other metadata must be${
             ""} persisted separately (see Media).${
-            ""} The blob id is valid until one of the following conditions is true:${
-            ""} 1. the blob id is used in a command that has been successfully locally persisted${
-            ""} in the command queue of this partition. At this point the blob id cache validity${
-            ""} is governed by the partition blob content caching rules.${
+            ""} The bvob id is valid until one of the following conditions is true:${
+            ""} 1. the bvob id is used in a command that has been successfully locally persisted${
+            ""} in the command queue of this partition. At this point the bvob id cache validity${
+            ""} is governed by the partition bvob content caching rules.${
             ""} 2. the execution context is reset (ie. on a browser/tab refresh).${
-            ""} 3. local blob cache is explicitly flushed (which is unimplemented).`
-    )(function prepareBlob (content: any) {
-      return Promise.resolve(this.prepareBlob(content, { transaction: this.__callerValker__ }));
+            ""} 3. local bvob cache is explicitly flushed (which is unimplemented).`
+    )(function prepareBvob (content: any) {
+      return Promise.resolve(this.prepareBvob(content, { transaction: this.__callerValker__ }));
     }),
   });
   scope.Resource.hostObjectPrototype = scope.Resource.prototype;

@@ -51,16 +51,16 @@ export function _getMediaURL (connection: OraclePartitionConnection, mediaId: VR
   return authorityConnection.getMediaURL(mediaId, actualInfo);
 }
 
-export function _prepareBlob (connection: OraclePartitionConnection, content: any,
+export function _prepareBvob (connection: OraclePartitionConnection, content: any,
     mediaInfo: Object, { noRemotePersist }: any = {}):
         { contentId: string, persistProcess: ?Promise<any> } {
-  const ret = connection.getScribeConnection().prepareBlob(content, mediaInfo);
+  const ret = connection.getScribeConnection().prepareBvob(content, mediaInfo);
   const authorityConnection = !noRemotePersist
       && connection.getDependentConnection("authorityUpstream");
   if (authorityConnection) {
-    const authorityMediaInfo = { ...(mediaInfo || {}), blobId: ret.contentId };
+    const authorityMediaInfo = { ...(mediaInfo || {}), bvobId: ret.contentId };
     ret.authorityPersistProcess =
-        authorityConnection.prepareBlob(ret.buffer, authorityMediaInfo)
+        authorityConnection.prepareBvob(ret.buffer, authorityMediaInfo)
             .persistProcess;
   }
   return ret;

@@ -101,8 +101,8 @@ export default class TextFileEditor extends MediaContentEditor {
           || (this.state.content === text)) {
         return;
       }
-      const createBlob = await target.prepareBlob(text, { transaction });
-      target.setField("content", createBlob(), { transaction });
+      const createBvob = await target.prepareBvob(text, { transaction });
+      target.setField("content", createBvob(), { transaction });
       transaction.releaseTransaction();
     } finally {
       if (transaction.isCommittable && transaction.isCommittable()) transaction.abort();

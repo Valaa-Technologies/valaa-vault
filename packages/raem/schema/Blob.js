@@ -11,17 +11,22 @@ export default new GraphQLObjectType({
 
   fields: () => ({
     ...generatedField("id", new GraphQLNonNull(GraphQLID),
-        `Content-hashed identifier of the blob`,
-        blob => blob.get("id")
+        `Content-hashed identifier of the Bvob`,
+        bvob => bvob.get("id")
     ),
 
     ...generatedField("blobId", new GraphQLNonNull(GraphQLString),
-        `Globally unique identifier string of this blob`,
-        blob => blob.get("id").rawId(),
+        `Globally unique identifier string of this Bvob`,
+        bvob => bvob.get("id").rawId(),
+    ),
+
+    ...generatedField("bvobId", new GraphQLNonNull(GraphQLString),
+        `Globally unique identifier string of this Bvob`,
+        bvob => bvob.get("id").rawId(),
     ),
 
     ...transientField("contentReferrers", new GraphQLList(GraphQLID),
-        `Incoming references to this Blob`,
+        `Incoming references to this Bvob`,
         { coupling: toMany({ defaultCoupledField: "content" }) }),
   }),
 });

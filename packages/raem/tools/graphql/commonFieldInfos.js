@@ -17,7 +17,7 @@ export default function commonFieldInfos (fieldName: string, type: GraphQLObject
     isComposite: isCompositeType(namedType),
     isResource: !isLeaf && isResourceType(namedType),
     isData: !isLeaf && !isResourceType(namedType),
-    isBlob: namedType.name === "Blob",
+    isBvob: namedType.name === "Blob",
     isPackable: !isLeaf && (namedType.name !== "Blob"),
   };
 }

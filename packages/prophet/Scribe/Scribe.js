@@ -12,19 +12,19 @@ import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 import { dumpObject, invariantifyObject } from "~/tools";
 import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
-import { _decodeBlobContent } from "./_contentOps";
+import { _decodeBvobContent } from "./_contentOps";
 import {
-  BlobInfo, _initializeSharedIndexedDB, _persistBlobContent, _readBlobContent,
-  _addContentPersistReference, _removeContentPersistReference,
+  BvobInfo, _initializeSharedIndexedDB, _persistBvobContent, _readBvobBuffers,
+  _addBvobPersistReferences, _removeBvobPersistReferences,
 } from "./_databaseOps";
 import ScribePartitionConnection from "./ScribePartitionConnection";
 
 /**
- * Scribe handles all localhost-based Blob and Media operations.
+ * Scribe handles all localhost-based Bvob and Media operations.
  * This includes in-memory caches, indexeddb storage (and eventually cross-browser-tab operations)
  * as well as possible service worker interactions.
  *
- * As a rule of thumb, all Blob operations ie. operations which manipulate ArrayBuffer-based data
+ * As a rule of thumb, all Bvob operations ie. operations which manipulate ArrayBuffer-based data
  * are handled by Scribe itself and all Media operations which manipulate native object data are
  * handled by ScribePartitionConnection objects.
  *
@@ -34,7 +34,7 @@ import ScribePartitionConnection from "./ScribePartitionConnection";
  */
 export default class Scribe extends Prophet {
   _sharedDb: IndexedDBWrapper;
-  _blobLookup: { [blobId: string]: BlobInfo; };
+  _bvobLookup: { [bvobId: string]: BvobInfo; };
   _mediaTypes: { [mediaTypeId: string]: { type: string, subtype: string, parameters: any }};
 
   // Contains the media infos for most recent action for which media retrieval is successful and
@@ -60,11 +60,11 @@ export default class Scribe extends Prophet {
 
   // Idempotent: returns a promise until the initialization is complete. await on it.
   initialize () {
-    if (!this._blobLookup) {
-      this.warnEvent("Initializing blob content lookups...");
-      this._blobLookup = _initializeSharedIndexedDB(this);
+    if (!this._bvobLookup) {
+      this.warnEvent("Initializing bvob content lookups...");
+      this._bvobLookup = _initializeSharedIndexedDB(this);
     }
-    return this._blobLookup;
+    return this._bvobLookup;
   }
 
   getDecoderArray () { return this._decoderArray; }
@@ -94,76 +94,76 @@ export default class Scribe extends Prophet {
     }
   }
 
-  // blob content ops
+  // bvob content ops
 
   static initialPreCachedPersistRefCount = 1;
 
-  preCacheBlob (blobId: string, newInfo: Object, retrieveBlobContent: Function) {
-    const blobInfo = this._blobLookup[blobId];
+  preCacheBvob (bvobId: string, newInfo: Object, retrieveBvobContent: Function) {
+    const bvobInfo = this._bvobLookup[bvobId];
     try {
-      if (blobInfo) {
-        if ((blobInfo.byteLength !== newInfo.byteLength)
-            && (blobInfo.byteLength !== undefined) && (newInfo.byteLength !== undefined)) {
-          throw new Error(`byteLength mismatch between new blob (${newInfo.byteLength
-              }) and existing blob (${blobInfo.byteLength}) while precaching blob "${blobId}"`);
+      if (bvobInfo) {
+        if ((bvobInfo.byteLength !== newInfo.byteLength)
+            && (bvobInfo.byteLength !== undefined) && (newInfo.byteLength !== undefined)) {
+          throw new Error(`byteLength mismatch between new bvob (${newInfo.byteLength
+              }) and existing bvob (${bvobInfo.byteLength}) while precaching bvob "${bvobId}"`);
         }
         return undefined;
       }
-      return Promise.resolve(retrieveBlobContent(blobId))
+      return Promise.resolve(retrieveBvobContent(bvobId))
       .then(buffer => (buffer !== undefined)
-          && this._persistBlobContent(buffer, blobId, Scribe.initialPreCachedPersistRefCount));
+          && this._persistBvobContent(buffer, bvobId, Scribe.initialPreCachedPersistRefCount));
     } catch (error) {
-      throw this.wrapErrorEvent(error, `preCacheBlob('${blobId}')`,
-          "\n\tblobInfo:", ...dumpObject(blobInfo));
+      throw this.wrapErrorEvent(error, `preCacheBvob('${bvobId}')`,
+          "\n\tbvobInfo:", ...dumpObject(bvobInfo));
     }
   }
 
-  tryGetCachedBlobContent (blobId: string): ?ArrayBuffer {
-    const blobInfo = this._blobLookup[blobId || ""];
-    return blobInfo && blobInfo.buffer;
+  tryGetCachedBvobContent (bvobId: string): ?ArrayBuffer {
+    const bvobInfo = this._bvobLookup[bvobId || ""];
+    return bvobInfo && bvobInfo.buffer;
   }
 
-  readBlobContent (blobId: string): ?ArrayBuffer {
-    const blobInfo = this._blobLookup[blobId || ""];
+  readBvobContent (bvobId: string): ?ArrayBuffer {
+    const bvobInfo = this._bvobLookup[bvobId || ""];
     try {
       return _readBlobContent(this, blobId, blobInfo);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `readBlobContent('${blobId}')`,
-          "\n\tblobInfo:", ...dumpObject(blobInfo));
+      throw this.wrapErrorEvent(error, `readBvobContent('${bvobId}')`,
+          "\n\tbvobInfo:", ...dumpObject(bvobInfo));
     }
   }
 
-  decodeBlobContent (blobId: string, decoder: MediaDecoder, contextInfo?: Object) {
-    const blobInfo = this._blobLookup[blobId || ""];
+  decodeBvobContent (bvobId: string, decoder: MediaDecoder, contextInfo?: Object) {
+    const bvobInfo = this._bvobLookup[bvobId || ""];
     let alreadyWrapped;
     try {
-      if (!blobInfo) throw new Error(`Cannot find Blob info '${blobId}'`);
-      return _decodeBlobContent(this, blobInfo, decoder, contextInfo, onError);
+      if (!bvobInfo) throw new Error(`Cannot find Bvob info '${bvobId}'`);
+      return _decodeBvobContent(this, bvobInfo, decoder, contextInfo, onError);
     } catch (error) { throw onError.call(this, error); }
     function onError (error) {
       if (alreadyWrapped) return error;
       alreadyWrapped = true;
-      return this.wrapErrorEvent(error, `decodeBlobContent('${blobId}', ${decoder.getName()})`,
+      return this.wrapErrorEvent(error, `decodeBvobContent('${bvobId}', ${decoder.getName()})`,
           "\n\tdecoder:", ...dumpObject(decoder),
           "\n\tcontext info:", ...dumpObject(contextInfo),
-          "\n\tblobInfo:", ...dumpObject(blobInfo));
+          "\n\tbvobInfo:", ...dumpObject(bvobInfo));
     }
   }
 
-  _persistBlobContent (buffer: ArrayBuffer, blobId: string, initialPersistRefCount: number = 0):
+  _persistBvobContent (buffer: ArrayBuffer, bvobId: string, initialPersistRefCount: number = 0):
       ?Promise<any> {
-    const blobInfo = this._blobLookup[blobId || ""];
+    const bvobInfo = this._bvobLookup[bvobId || ""];
     try {
-      if ((typeof blobId !== "string") || !blobId) {
-        throw new Error(`Invalid blobId '${blobId}', expected non-empty string`);
+      if ((typeof bvobId !== "string") || !bvobId) {
+        throw new Error(`Invalid bvobId '${bvobId}', expected non-empty string`);
       }
-      invariantifyObject(buffer, "_persistBlobContent.buffer",
+      invariantifyObject(buffer, "_persistBvobContent.buffer",
           { instanceof: ArrayBuffer, allowEmpty: true });
-      return _persistBlobContent(this, buffer, blobId, blobInfo, initialPersistRefCount);
+      return _persistBvobContent(this, buffer, bvobId, bvobInfo, initialPersistRefCount);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_persistBlobContent('${blobId}')`,
+      throw this.wrapErrorEvent(error, `_persistBvobContent('${bvobId}')`,
           "\n\tbuffer:", ...dumpObject(buffer),
-          "\n\tblobInfo:", ...dumpObject(blobInfo));
+          "\n\tbvobInfo:", ...dumpObject(bvobInfo));
     }
   }
 
@@ -180,52 +180,52 @@ export default class Scribe extends Prophet {
   }
 
   /**
-   * Removes a blob buffer in-memory reference count as an immediate
-   * increment of blobId.inMemoryRefCount. If as a result the ref count
+   * Removes a bvob buffer in-memory reference count as an immediate
+   * increment of bvobId.inMemoryRefCount. If as a result the ref count
    * reaches zero frees the cached buffer and all cached decodings and
    * returns true.
    * Otherwise returns false.
    *
    * Note that The inMemoryRefCount is not persisted.
    *
-   * @param {string} blobId
+   * @param {string} bvobId
    * @returns {boolean}
    * @memberof Scribe
    */
-  _removeContentInMemoryReference (blobId: string): boolean {
-    const blobInfo = this._blobLookup[blobId || ""];
+  _removeContentInMemoryReference (bvobId: string): boolean {
+    const bvobInfo = this._bvobLookup[bvobId || ""];
     try {
-      if (!blobInfo) throw new Error(`Cannot find Blob info '${blobId}'`);
-      if (--blobInfo.inMemoryRefCount) return false;
-      delete blobInfo.buffer;
-      delete blobInfo.decodings;
+      if (!bvobInfo) throw new Error(`Cannot find Bvob info '${bvobId}'`);
+      if (--bvobInfo.inMemoryRefCount) return false;
+      delete bvobInfo.buffer;
+      delete bvobInfo.decodings;
       return true;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_removeContentInMemoryReference('${blobId}')`,
-          "\n\tblobInfo:", ...dumpObject(blobInfo));
+      throw this.wrapErrorEvent(error, `_removeContentInMemoryReference('${bvobId}')`,
+          "\n\tbvobInfo:", ...dumpObject(bvobInfo));
     }
   }
 
   async _addContentPersistReference (mediaInfo: Object) {
-    const blobInfo = this._blobLookup[mediaInfo.blobId || ""];
+    const bvobInfo = this._bvobLookup[mediaInfo.bvobId || ""];
     try {
-      if (!blobInfo) throw new Error(`Cannot find Blob info '${mediaInfo.blobId}'`);
+      if (!bvobInfo) throw new Error(`Cannot find Bvob info '${mediaInfo.bvobId}'`);
       return await _addContentPersistReference(this, mediaInfo, blobInfo);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_addContentPersistReference('${mediaInfo.blobId}')`,
+      throw this.wrapErrorEvent(error, `_addContentPersistReference('${mediaInfo.bvobId}')`,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
-          "\n\tblobInfo:", ...dumpObject(blobInfo));
+          "\n\tbvobInfo:", ...dumpObject(bvobInfo));
     }
   }
 
-  async _removeContentPersistReference (blobId: string) {
-    const blobInfo = this._blobLookup[blobId || ""];
+  async _removeContentPersistReference (bvobId: string) {
+    const bvobInfo = this._bvobLookup[bvobId || ""];
     try {
-      if (!blobInfo) throw new Error(`Cannot find Blob info '${blobInfo.blobId}'`);
+      if (!bvobInfo) throw new Error(`Cannot find Bvob info '${bvobInfo.bvobId}'`);
       return await _removeContentPersistReference(this, blobId, blobInfo);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_removeContentPersistReference('${blobId}')`,
-          "\n\tblobInfo:", ...dumpObject(blobInfo));
+      throw this.wrapErrorEvent(error, `_removeContentPersistReference('${bvobId}')`,
+          "\n\tbvobInfo:", ...dumpObject(bvobInfo));
     }
   }
 }

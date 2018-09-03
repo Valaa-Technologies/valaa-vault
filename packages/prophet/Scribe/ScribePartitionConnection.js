@@ -216,12 +216,12 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  prepareBlob (content: any, mediaInfo?: MediaInfo):
+  prepareBvob (content: any, mediaInfo?: MediaInfo):
       { buffer: ArrayBuffer, contentId: string, persistProcess: ?Promise<any> } {
     const { buffer, contentId } = bufferAndContentIdFromNative(content, mediaInfo);
     return {
       content, buffer, contentId,
-      persistProcess: this._prophet._persistBlobContent(buffer, contentId),
+      persistProcess: this._prophet._persistBvobContent(buffer, contentId),
     };
   }
 

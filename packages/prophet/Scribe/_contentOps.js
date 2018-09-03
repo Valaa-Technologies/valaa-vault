@@ -10,13 +10,13 @@ import { encodeDataURI } from "~/tools/html5/urlEncode";
 import type MediaDecoder from "~/tools/MediaDecoder";
 import { stringFromUTF8ArrayBuffer } from "~/tools/textEncoding";
 
-import type { BlobInfo } from "./_databaseOps";
+import type { BvobInfo } from "./_databaseOps";
 import Scribe from "./Scribe";
 import ScribePartitionConnection from "./ScribePartitionConnection";
 
 export const vdoc = vdon({
   "...": { heading:
-    "Content ops manage shared media content and blob buffer storage lifetimes and decoding",
+    "Content ops manage shared media content and bvob buffer storage lifetimes and decoding",
   },
   0: [`Content ops are detail of Scribe and ScribePartitionConnection.`],
 });
@@ -33,7 +33,7 @@ export type MediaLookup = {
   [mediaRawId: string]: MediaEntry
 };
 
-// Blob pathways - mostly Scribe detail
+// Bvob pathways - mostly Scribe detail
 
 // ScribePartitionConnection & Media content pathways
 
@@ -69,34 +69,34 @@ export function _reprocessMedia (connection: ScribePartitionConnection, mediaEve
         : update.mediaType;
     Object.assign(mediaInfo, mediaType);
   }
-  if (update.content) mediaInfo.blobId = getRawIdFrom(update.content);
+  if (update.content) mediaInfo.bvobId = getRawIdFrom(update.content);
 
   if (!retrieveMediaContent) return [];
 
   const tryRetrieve = async () => {
     try {
-      if (mediaInfo.blobId && connection._prophet.tryGetCachedBlobContent(mediaInfo.blobId)) {
-        if (currentEntry && (currentEntry.mediaInfo.blobId === mediaInfo.blobId)) {
-          // content is in blob buffer cache with equal blobId. Reuse.
+      if (mediaInfo.bvobId && connection._prophet.tryGetCachedBvobContent(mediaInfo.bvobId)) {
+        if (currentEntry && (currentEntry.mediaInfo.bvobId === mediaInfo.bvobId)) {
+          // content is in bvob buffer cache with equal bvobId. Reuse.
           newEntry.nativeContent = currentEntry.nativeContent;
         }
-      } else if (mediaInfo.blobId || mediaInfo.sourceURL) {
+      } else if (mediaInfo.bvobId || mediaInfo.sourceURL) {
         // TODO(iridian): Determine whether media content should be pre-cached or not.
         const content = await retrieveMediaContent(mediaId, mediaInfo);
         if (typeof content !== "undefined") {
           newEntry.nativeContent = content;
-          const { persistProcess } = connection.prepareBlob(newEntry.nativeContent, mediaInfo);
+          const { persistProcess } = connection.prepareBvob(newEntry.nativeContent, mediaInfo);
           await persistProcess;
         }
       }
       // Delays actual media info content update into a finalizer function so that recordTruth
-      // can be sure event has been persisted before updating mediaInfo blob references
+      // can be sure event has been persisted before updating mediaInfo bvob references
       invariantifyString(newEntry.mediaId, "readPersistAndUpdateMedia.newEntry.mediaId",
           {}, "\n\tnewEntry", newEntry);
       return () => connection._persistMediaEntry(newEntry, currentEntry);
     } catch (error) {
       throw connection.wrapErrorEvent(error, `reprocessMedia.tryRetrieve('${mediaInfo.name}'/'${
-              mediaInfo.blobId || mediaInfo.sourceURL}')`,
+              mediaInfo.bvobId || mediaInfo.sourceURL}')`,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo));
     }
   };
@@ -189,18 +189,18 @@ export function _decodeMediaContent (connection: ScribePartitionConnection, medi
       onError.bind(connection));
 }
 
-export function _decodeBlobContent (scribe: Scribe, blobInfo: BlobInfo,
+export function _decodeBvobContent (scribe: Scribe, bvobInfo: BvobInfo,
     decoder: MediaDecoder, contextInfo?: Object, onError: Function) {
-  const cacheHit = blobInfo.decodings && blobInfo.decodings.get(decoder);
+  const cacheHit = bvobInfo.decodings && bvobInfo.decodings.get(decoder);
   if (cacheHit) return cacheHit;
-  return thenChainEagerly(scribe.readBlobContent(blobInfo.blobId), [
+  return thenChainEagerly(scribe.readBvobContent(bvobInfo.bvobId), [
     (buffer) => (typeof buffer === "undefined"
         ? undefined
         : decoder.decode(buffer, contextInfo)),
     (decodedContent) => {
       if (typeof decodedContent !== "undefined") {
-        if (!blobInfo.decodings) blobInfo.decodings = new WeakMap();
-        blobInfo.decodings.set(decoder, decodedContent);
+        if (!bvobInfo.decodings) bvobInfo.decodings = new WeakMap();
+        bvobInfo.decodings.set(decoder, decodedContent);
       }
       return decodedContent;
     },
@@ -211,16 +211,16 @@ export function _getMediaURL (connection: ScribePartitionConnection, mediaId: VR
     mediaInfo?: MediaInfo, mediaEntry: MediaEntry): any {
   let nativeContent;
   // Only use cached in-memory nativeContent if its id matches the requested id.
-  if ((!mediaInfo || !mediaInfo.blobId || (mediaInfo.blobId === mediaEntry.mediaInfo.blobId))
+  if ((!mediaInfo || !mediaInfo.bvobId || (mediaInfo.bvobId === mediaEntry.mediaInfo.bvobId))
       && (typeof mediaEntry.nativeContent !== "undefined")) {
     nativeContent = mediaEntry.nativeContent;
   } else {
-    const blobId = (mediaInfo && mediaInfo.blobId) || mediaEntry.mediaInfo.blobId;
-    if (!blobId) return undefined;
-    const bufferCandidate = connection._prophet.tryGetCachedBlobContent(blobId);
+    const bvobId = (mediaInfo && mediaInfo.bvobId) || mediaEntry.mediaInfo.bvobId;
+    if (!bvobId) return undefined;
+    const bufferCandidate = connection._prophet.tryGetCachedBvobContent(bvobId);
     nativeContent = bufferCandidate &&
         _nativeObjectFromBufferAndMediaInfo(bufferCandidate, mediaInfo || mediaEntry.mediaInfo);
-    if (blobId === mediaEntry.mediaInfo.blobId) {
+    if (bvobId === mediaEntry.mediaInfo.bvobId) {
       mediaEntry.nativeContent = nativeContent;
     }
   }

@@ -208,14 +208,14 @@ export class ValaaDataReference extends ValaaReference {
   typeof (): string { return "Data"; }
   shortTypeof (): string { return "DRef"; }
 }
-export class ValaaBlobReference extends ValaaReference {
+export class ValaaBvobReference extends ValaaReference {
   typeof (): string { return "Blob"; }
   shortTypeof (): string { return "BRef"; }
 }
 
 export const RRef = ValaaResourceReference;
 export const DRef = ValaaDataReference;
-export const BRef = ValaaBlobReference;
+export const BRef = ValaaBvobReference;
 
 export type JSONVRef = [RawId, ?string, ?JSONGhostPath, ?string];
 
@@ -347,7 +347,7 @@ export function obtainDRef (idData: IdData | JSONIdData, coupledField: ?string,
 
 export function obtainBRef (idData: IdData | JSONIdData, coupledField: ?string,
     ghostPath: ?GhostPath, partitionURI: ?ValaaURI): BRef {
-  return obtainVRef(idData, coupledField, ghostPath, partitionURI, ValaaBlobReference);
+  return obtainVRef(idData, coupledField, ghostPath, partitionURI, ValaaBvobReference);
 }
 
 /**

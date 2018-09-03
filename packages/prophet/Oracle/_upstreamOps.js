@@ -140,29 +140,29 @@ function _resolveCommandPartitionDatas (oracle: Oracle,
 
 function _getOngoingAuthorityPersists (oracle: Oracle, { command }: Object) {
   const ret = [];
-  for (const blobId of Object.keys(command.addedBlobReferences || {})) {
-    for (const { referrerId } of command.addedBlobReferences[blobId]) {
+  for (const bvobId of Object.keys(command.addedBvobReferences || {})) {
+    for (const { referrerId } of command.addedBvobReferences[bvobId]) {
       let entry;
       try {
         const partitionRawId = getPartitionRawIdFrom(referrerId.partitionURI());
         entry = oracle._partitionConnections[partitionRawId];
         invariantifyObject(entry, `partitionConnections[${partitionRawId}]`);
-      } catch (error) { throw onError.call(oracle, blobId, referrerId, error); }
+      } catch (error) { throw onError.call(oracle, bvobId, referrerId, error); }
       const persistProcess = thenChainEagerly(entry.pendingConnection || entry.connection,
           (connectedConnection) => {
             const authorityConnection =
                 connectedConnection.getDependentConnection("authorityUpstream");
-            return authorityConnection && authorityConnection.getContentPersistProcess(blobId);
+            return authorityConnection && authorityConnection.getContentPersistProcess(bvobId);
           },
-          onError.bind(oracle, blobId, referrerId));
+          onError.bind(oracle, bvobId, referrerId));
       if (persistProcess) ret.push(persistProcess);
     }
   }
   return ret;
-  function onError (blobId, referrerId, error) {
+  function onError (bvobId, referrerId, error) {
     return oracle.wrapErrorEvent(error, "_getOngoingAuthorityPersists",
             "\n\tcurrent referrerId:", ...dumpObject(referrerId),
-            "\n\tcurrent blobId:", ...dumpObject(blobId),
+            "\n\tcurrent bvobId:", ...dumpObject(bvobId),
             "\n\tret (so far):", ...dumpObject(ret),
             "\n\tcommand:", ...dumpObject(command));
   }

@@ -179,12 +179,12 @@ export default class OraclePartitionConnection extends PartitionConnection {
 
   // Coming from downstream: stores Media content in Scribe and uploads it to possible remote
   // uploads pool.
-  prepareBlob (content: any, mediaInfo: Object, options: any = {}):
+  prepareBvob (content: any, mediaInfo: Object, options: any = {}):
       { contentId: string, persistProcess: ?Promise<any> } {
     try {
-      return _prepareBlob(this, content, mediaInfo, options);
+      return _prepareBvob(this, content, mediaInfo, options);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `prepareBlob()`,
+      throw this.wrapErrorEvent(error, `prepareBvob()`,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
       );
     }

@@ -80,8 +80,8 @@ const TestScriptyThing = new GraphQLObjectType({
         "Version of the testing partition",
     ),
 
-    ...primaryField("blobs", new GraphQLList(Blob),
-        "Blob's contained in the testing partition",
+    ...primaryField("bvobs", new GraphQLList(Blob),
+        "Bvob's contained in the testing partition",
     ),
 
     ...primaryField("music", new GraphQLList(Sprite),

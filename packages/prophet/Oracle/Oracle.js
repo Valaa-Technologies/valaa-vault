@@ -18,10 +18,10 @@ import { _claim } from "./_upstreamOps";
  * 1. Provides downstream multi-partition event synchronization and deduplication by gating
  * individual partition event downstreams until all partitions reach the same point.
  *
- * 2. Provides media blob pre-caching by gating downstream events until all required blob content
+ * 2. Provides media bvob pre-caching by gating downstream events until all required bvob content
  * has been retrieved and stored in scribe.
  *
- * 3. Provides upstream media command gating by making sure all associated blob content is stored in
+ * 3. Provides upstream media command gating by making sure all associated bvob content is stored in
  * corresponding authority storage before letting the commands go further upstream.
  *
  * 4. Provides offline mode handling through scribe.

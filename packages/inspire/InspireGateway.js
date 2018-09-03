@@ -62,7 +62,7 @@ export default class InspireGateway extends LogEventGenerator {
 
       this.nexus = await this._establishAuthorityNexus(this.gatewayRevelation);
 
-      // Create a connector (the 'scribe') to the locally backed event log / blob indexeddb cache
+      // Create a connector (the 'scribe') to the locally backed event log / bvob indexeddb cache
       // ('scriptures') based on the revelation.
       this.scribe = await this._proselytizeScribe(this.gatewayRevelation);
 
@@ -405,9 +405,9 @@ export default class InspireGateway extends LogEventGenerator {
     const shouldChroniclePrologue = (lastPrologueEventId !== undefined)
         && (lastPrologueEventId > lastChronicledEventId);
     if (shouldChroniclePrologue) {
-      // If no event logs are replayed, we don't need to precache the blobs either, so we delay
+      // If no event logs are replayed, we don't need to precache the bvobs either, so we delay
       // loading them up to this point.
-      await (this.blobInfos || (this.blobInfos = this._getBlobInfos()));
+      await (this.bvobInfos || (this.bvobInfos = this._getBvobInfos()));
       const logs = await info.logs;
       const eventLog = await logs.eventLog;
       const commandQueue = await logs.commandQueue;
@@ -418,16 +418,17 @@ export default class InspireGateway extends LogEventGenerator {
       await connection.chronicleEventLog(eventLog, {
         firstEventId: lastChronicledEventId + 1,
         retrieveMediaContent (mediaId: VRef, mediaInfo: Object) {
-          if (!latestMediaInfos[mediaId.rawId()] ||
-              (mediaInfo.blobId !== latestMediaInfos[mediaId.rawId()].mediaInfo.blobId)) {
-            // Blob wasn't found in cache and the blobId doesn't match the latest known blobId for
-            // the requested media. The request for the latest blob should come later:
+          const latestInfo = latestMediaInfos[mediaId.rawId()];
+          if (!latestInfo ||
+              (mediaInfo.bvobId !== (latestInfo.mediaInfo.bvobId))) {
+            // Bvob wasn't found in cache and the bvobId doesn't match the latest known bvobId for
+            // the requested media. The request for the latest bvob should come later:
             // Return undefined to silently ignore this request.
             return undefined;
           }
-          // Otherwise this is the request for last known blob, which should have been precached.
-          throw new Error(`Cannot find the latest blob of media "${mediaInfo.name
-              }" during prologue narration, with blob id "${mediaInfo.blobId}" `);
+          // Otherwise this is the request for last known bvob, which should have been precached.
+          throw new Error(`Cannot find the latest bvob of media "${mediaInfo.name
+              }" during prologue narration, with bvob id "${mediaInfo.bvobId}" `);
         }
       });
     }
@@ -437,12 +438,12 @@ export default class InspireGateway extends LogEventGenerator {
     return connection;
   }
 
-  async _getBlobInfos () {
-    const readRevelationBlobContent = async (blobId: string) => {
+  async _getBvobInfos () {
+    const readRevelationBvobContent = async (bvobId: string) => {
       const blobBuffers = await this.prologueRevelation.blobBuffers;
-      if (typeof blobBuffers[blobId] === "undefined") {
-        this.errorEvent("Could not locate precached content for blob", blobId,
-            "from revelation blobBuffers", ...dumpObject(blobBuffers));
+      if (typeof bvobBuffers[bvobId] === "undefined") {
+        this.errorEvent("Could not locate precached content for bvob", bvobId,
+            "from revelation bvobBuffers", ...dumpObject(bvobBuffers));
         return undefined;
       }
       const container = await blobBuffers[blobId];

@@ -23,11 +23,14 @@ export type EventData = {
 export type EventCallback = ((event: EventData) => void);
 
 export type MediaInfo = {
-  name: string,
-  sourceURL: string,
-  type: string,
-  subtype: string,
+  mediaId: VRef,
   bvobId?: string,
+  name?: string,
+  sourceURL?: string,
+  mime?: string,
+  type?: string,
+  subtype?: string,
+  asLocalURL? : boolean,     // default false
 };
 
 export type RetrieveMediaContent = (mediaId: VRef, mediaInfo: MediaInfo) => Promise<any>;

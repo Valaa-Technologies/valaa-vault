@@ -1,7 +1,6 @@
 // @flow
 
 import type Command, { UniversalEvent } from "~/raem/command";
-import { VRef } from "~/raem/ValaaReference";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import type { ChronicleOptions, NarrateOptions, MediaInfo, RetrieveMediaContent }
@@ -11,7 +10,7 @@ import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _connect, _chronicleEventLog, _narrateEventLog } from "./_connectionOps";
 import { _createReceiveTruthBatch, _receiveTruthOf } from "./_downstreamOps";
-import { _readMediaContent, _getMediaURL, _prepareBlob } from "./_mediaOps";
+import { _requestMediaContents, _prepareBvob } from "./_mediaOps";
 
 /**
  * The nexus connection object, which consolidates the local scribe connections and the possible
@@ -112,8 +111,9 @@ export default class OraclePartitionConnection extends PartitionConnection {
   }
 
   createReceiveTruthBatch (batchName: string,
-      retrieveMediaContent: Function = this.getRetrieveMediaContent()) {
-    return _createReceiveTruthBatch(this, batchName, retrieveMediaContent);
+      { retrieveMediaContent = this.getRetrieveMediaContent(), finalizeRetrieves }: Object) {
+    return _createReceiveTruthBatch(this,
+        { name: batchName, retrieveMediaContent, finalizeRetrieves });
   }
 
   async _receiveTruthOf (group: Object, truthEvent: UniversalEvent): Promise<Object> {
@@ -140,41 +140,31 @@ export default class OraclePartitionConnection extends PartitionConnection {
 
   // Coming from downstream: tries scribe first, otherwise forwards the request to authority.
   // In latter case forwards the result received from authority to Scribe for caching.
-  readMediaContent (mediaId: VRef, mediaInfo?: MediaInfo): any {
-    let ret;
-    let actualInfo;
-    try {
-      actualInfo = mediaInfo || this.getScribeConnection().getMediaInfo(mediaId);
-      ret = _readMediaContent(this, mediaId, mediaInfo, actualInfo);
-      if (ret === undefined) return ret;
-    } catch (error) { throw onError.call(this, error); }
-    // Store the content to Scribe as well (but not to authority): dont wait for completion
-    thenChainEagerly(ret,
-        (content) => this.prepareBlob(content, actualInfo, { noRemotePersist: true }),
-        onError.bind(this));
-    return ret;
-    function onError (error) {
-      return this.wrapErrorEvent(error, `readMediaContent(${
-              (actualInfo && actualInfo.name)
-                  ? `'${actualInfo.name}'` : `unnamed media`})`,
-          "\n\tmediaId:", mediaId,
-          "\n\tactualMediaInfo:", actualInfo,
-          "\n\tresult candidate:", ret);
-    }
-  }
-
-  // Coming from downstream: tries scribe first, otherwise forwards the request to authority.
-  getMediaURL (mediaId: VRef, mediaInfo?: MediaInfo): any {
-    let actualInfo;
-    try {
-      actualInfo = mediaInfo || this.getScribeConnection().getMediaInfo(mediaId);
-      return _getMediaURL(this, mediaId, mediaInfo, actualInfo);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, `getMediaURL(${
-              (mediaInfo && mediaInfo.name) ? `'${mediaInfo.name}'` : `unnamed media`})`,
-          "\n\tmediaId:", mediaId,
-          "\n\tactual mediaInfo:", actualInfo);
-    }
+  requestMediaContents (mediaInfos: MediaInfo[]): any[] {
+    return mediaInfos.map(mediaInfo => {
+      let ret;
+      let combinedInfo;
+      try {
+        combinedInfo = {
+          ...this.getScribeConnection().getMediaInfo(mediaInfo.mediaId),
+          ...mediaInfo,
+        };
+        ret = _requestMediaContents(this, [combinedInfo])[0];
+        if (ret === undefined || mediaInfo.asLocalURL) return ret;
+      } catch (error) { throw onError.call(this, error); }
+      // Store the content to Scribe as well (but not to authority): dont wait for completion
+      thenChainEagerly(ret,
+          (content) => this.prepareBvob(content, combinedInfo, { remotePersist: false }),
+          onError.bind(this));
+      return ret;
+      function onError (error) {
+        return this.wrapErrorEvent(error, `requestMediaContents(${
+                (combinedInfo || mediaInfo).name || `unnamed media`})`,
+            "\n\tmediaId:", mediaInfo.mediaId,
+            "\n\tcombined MediaInfo:", combinedInfo,
+            "\n\tresult candidate:", ret);
+      }
+    });
   }
 
   // Coming from downstream: stores Media content in Scribe and uploads it to possible remote

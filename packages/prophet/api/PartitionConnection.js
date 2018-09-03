@@ -1,13 +1,12 @@
 // @flow
 
-import { VRef } from "~/raem/ValaaReference";
 import ValaaURI, { getPartitionRawIdFrom } from "~/raem/ValaaURI";
 import type { UniversalEvent } from "~/raem/command";
 
 import Prophet, { MediaInfo, NarrateOptions, ChronicleOptions } from "~/prophet/api/Prophet";
 
 import Logger, { LogEventGenerator } from "~/tools/Logger";
-import { invariantifyObject } from "~/tools/invariantify";
+import { dumpObject, invariantifyObject } from "~/tools";
 
 /**
  * Interface for sending commands to upstream and registering for prophecy event updates
@@ -149,9 +148,9 @@ export default class PartitionConnection extends LogEventGenerator {
   }
 
   /**
-   * Returns the media content if it is immediately synchronously available or a Promise if the
-   * content is asynchronously available. Throws directly if the content is not available at all or
-   * indirectly through the Promise in situations like timeouts.
+   * TODO(iridian): Specify the semantics for this function. An ArrayBuffer can be retrieved using
+   * mime application/octet-stream and decodeMediaContent. What should this return? Maybe
+   * always sync or always aync? Or just delete this whole function?
    *
    * @param {VRef} mediaId
    * @param {MediaInfo} mediaInfo
@@ -159,8 +158,11 @@ export default class PartitionConnection extends LogEventGenerator {
    *
    * @memberof ValaaEngine
    */
-  readMediaContent (mediaId: VRef, mediaInfo?: MediaInfo): any {
-    return this._upstreamConnection.readMediaContent(mediaId, mediaInfo);
+  readMediaContent (mediaInfo: MediaInfo): any {
+    delete mediaInfo.mime;
+    delete mediaInfo.type;
+    delete mediaInfo.subtype;
+    return this.requestMediaContents([mediaInfo])[0];
   }
 
   /**
@@ -168,30 +170,44 @@ export default class PartitionConnection extends LogEventGenerator {
    * content is asynchronously available. Throws directly if the content is not available at all or
    * indirectly through the Promise in situations like timeouts.
    *
+   * This function is convenience forward to alias for
+   * requestMediaContents([mediaInfo])[0].
+   *
    * @param {VRef} mediaId
    * @param {MediaInfo} mediaInfo
    * @returns
    *
    * @memberof ValaaEngine
    */
-  decodeMediaContent (mediaId: VRef, mediaInfo?: MediaInfo): any {
-    return this._upstreamConnection.decodeMediaContent(mediaId, mediaInfo);
+  decodeMediaContent (mediaInfo: MediaInfo): any {
+    if (!mediaInfo.type) {
+      throw this.wrapErrorEvent(new Error("decodeMediaContent: mediaInfo.type is missing"),
+          `decodeMediaContent('${mediaInfo.name || "<unnamed>"}')`,
+              "\n\tmediaInfo:", ...dumpObject(mediaInfo));
+    }
+    return this.requestMediaContents([mediaInfo])[0];
   }
 
   /**
    * Returns a URL for given mediaId pair which can be used in html context for retrieving media
    * content.
    *
+   * Convenience for requestMediaContents([{ ...mediaInfo, asLocalURL: true }])[0].
+   *
    * @param {VRef} mediaId
    * @param {MediaInfo} mediaInfo
    * @returns
    *
    * @memberof ValaaEngine
    */
-  getMediaURL (mediaId: VRef, mediaInfo?: MediaInfo): any {
-    return this._upstreamConnection.getMediaURL(mediaId, mediaInfo);
+  getMediaURL (mediaInfo: MediaInfo): any {
+    mediaInfo.asLocalURL = true;
+    return this.requestMediaContents([mediaInfo])[0];
   }
 
+  requestMediaContents (mediaInfos: MediaInfo[]) {
+    return this._upstreamConnection.requestMediaContents(mediaInfos);
+  }
 
   /**
    * Prepares the bvob content store process on upstream, returns the content id.

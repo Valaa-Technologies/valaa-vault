@@ -1,6 +1,7 @@
 // @flow
 
 import { created, transacted } from "~/raem/command/index";
+import { vRef } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
 
 import { createScribe, clearScribeDatabases } from "~/prophet/test/ProphetTestHarness";
@@ -116,11 +117,12 @@ describe("Scribe", () => {
 
     const connection = await scribe.acquirePartitionConnection(uri, {});
 
+    const mediaId = vRef("abcd-0123");
     for (const [bufferContent, mediaInfo, expectedContent] of structuredMediaContents) {
       const preparedBvob = connection.prepareBvob(bufferContent);
       const bvobId = await preparedBvob.persistProcess;
       const decodedContent =
-          await connection.decodeMediaContent(undefined, { blobId, ...mediaInfo });
+          await connection.decodeMediaContent({ mediaId, bvobId, ...mediaInfo });
       expect(decodedContent).toEqual(expectedContent);
     }
   });

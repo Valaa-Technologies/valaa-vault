@@ -210,71 +210,92 @@ export function _persistBvobContent (scribe: Scribe, buffer: ArrayBuffer,
   return actualBvobInfo.persistProcess;
 }
 
-export function _readBlobContent (scribe: Scribe, blobId: string, blobInfo: BlobInfo):
-    ?ArrayBuffer {
-  if (!blobInfo) return undefined; // maybe throw?
-  if (blobInfo.buffer) return blobInfo.buffer;
-  return scribe._sharedDb.transaction(["buffers"], "readonly", ({ buffers }) =>
-    new Promise((resolve, reject) => {
-      const req = buffers.get(blobId);
-      req.onsuccess = async event => {
-        if (!event.target.result) {
-          reject(new Error(`Cannot find blob '${blobId}' from shared cache`));
-        } else {
-          const buffer = event.target.result.buffer;
-          if (blobInfo.inMemoryRefCount) blobInfo.buffer = buffer;
-          resolve(buffer);
-        }
-      };
-    })
-  );
+export function _readBvobBuffers (scribe: Scribe, bvobInfos: BvobInfo[]):
+    (Promise<ArrayBuffer> | ArrayBuffer)[] {
+  const pendingReads = [];
+  const ret = bvobInfos.map((bvobInfo) => {
+    if (!bvobInfo) return undefined;
+    if (bvobInfo.buffer) return bvobInfo.buffer;
+    if (bvobInfo.pendingBuffer) return bvobInfo.pendingBuffer;
+    const pendingRead = { bvobInfo };
+    pendingReads.push(pendingRead);
+    return (bvobInfo.pendingBuffer = new Promise((resolve_, reject_) => {
+      pendingRead.resolve = resolve_;
+      pendingRead.reject = reject_;
+    }));
+  });
+  if (pendingReads.length) {
+    scribe._sharedDb.transaction(["buffers"], "readonly", ({ buffers }) => {
+      pendingReads.forEach(pendingRead => {
+        const bvobInfo = pendingRead.bvobInfo;
+        const req = buffers.get(bvobInfo.bvobId);
+        req.onerror = (error) => {
+          delete bvobInfo.pendingBuffer;
+          pendingRead.reject(error);
+        };
+        req.onsuccess = () => {
+          delete bvobInfo.pendingBuffer;
+          if (!req.result || !req.result.buffer) {
+            pendingRead.reject(new Error(`Cannot find bvob '${bvobInfo.bvobId}' from IndexedDB`));
+          } else {
+            if (bvobInfo.inMemoryRefCount) bvobInfo.buffer = req.result.buffer;
+            pendingRead.resolve(req.result.buffer);
+          }
+        };
+      });
+    });
+  }
+  return ret;
 }
 
-export function _addContentPersistReference (scribe: Scribe, mediaInfo: Object,
-    blobInfo: BlobInfo) {
-  // Check if recently created file does not need in-memory buffer persist but blobInfo still
+export function _addBvobPersistReferences (scribe: Scribe, bvobInfos: BvobInfo[]) {
+  // Check if recently created file does not need in-memory buffer persist but bvobInfo still
   // has it and delete the buffer.
-  if (!blobInfo.inMemoryRefCount && blobInfo.buffer) delete blobInfo.buffer;
-  return scribe._sharedDb.transaction(["blobs"], "readwrite", ({ blobs }) => {
-    blobs.get(mediaInfo.blobId).onsuccess = event => {
-      blobInfo.persistRefCount = (event.target.result && event.target.result.persistRefCount)
-          || 0;
-      ++blobInfo.persistRefCount;
-      blobs.put({
-        blobId: mediaInfo.blobId,
-        byteLength: blobInfo.byteLength,
-        persistRefCount: blobInfo.persistRefCount,
-      });
-    };
+  return scribe._sharedDb.transaction(["bvobs"], "readwrite", ({ bvobs }) => {
+    bvobInfos.forEach(bvobInfo => {
+      if (!bvobInfo.inMemoryRefCount && bvobInfo.buffer) delete bvobInfo.buffer;
+      const req = bvobs.get(bvobInfo.bvobId);
+      req.onsuccess = () => {
+        bvobInfo.persistRefCount = (req.result && req.result.persistRefCount) || 0;
+        ++bvobInfo.persistRefCount;
+        bvobs.put({
+          bvobId: bvobInfo.bvobId,
+          byteLength: bvobInfo.byteLength,
+          persistRefCount: bvobInfo.persistRefCount,
+        });
+      };
+    });
   });
 }
 
-export function _removeContentPersistReference (scribe: Scribe, blobId: string,
-    blobInfo: BlobInfo) {
-  return scribe._sharedDb.transaction(["blobs"], "readwrite", ({ blobs }) => {
-    blobs.get(blobId).onsuccess = event => {
-      if (!event.target.result) {
-        scribe.errorEvent(`While removing content buffer persist reference, cannot find ${
-            ""}IndexedDB.valaa-shared-content.blobs entry ${blobId}`);
-        return;
-      }
-      blobInfo.persistRefCount = event.target.result.persistRefCount;
-      --blobInfo.persistRefCount;
-      if (!(blobInfo.persistRefCount > 0)) { // a bit of defensive programming vs NaN...
-        blobInfo.persistRefCount = 0;
-      }
-      blobs.put({
-        blobId,
-        byteLength: blobInfo.byteLength,
-        persistRefCount: blobInfo.persistRefCount,
-      });
-      /* Only removing blob infos and associated buffers on start-up.
-      if (!blobInfo.persistRefCount) {
-        blobs.delete(blobInfo.blobId);
-        buffers.delete(blobInfo.blobId);
-      }
-      */
-    };
+export function _removeBvobPersistReferences (scribe: Scribe, bvobInfos: BvobInfo[]) {
+  return scribe._sharedDb.transaction(["bvobs"], "readwrite", ({ bvobs }) => {
+    bvobInfos.forEach(bvobInfo => {
+      const req = bvobs.get(bvobInfo.bvobId);
+      req.onsuccess = () => {
+        if (!req.result) {
+          scribe.errorEvent(`While removing content buffer persist reference, cannot find ${
+              ""}IndexedDB.valaa-shared-content.bvobs entry ${bvobInfo.bvobId}`);
+          return;
+        }
+        bvobInfo.persistRefCount = req.result.persistRefCount;
+        --bvobInfo.persistRefCount;
+        if (!(bvobInfo.persistRefCount > 0)) { // a bit of defensive programming vs NaN...
+          bvobInfo.persistRefCount = 0;
+        }
+        bvobs.put({
+          bvobId: bvobInfo.bvobId,
+          byteLength: bvobInfo.byteLength,
+          persistRefCount: bvobInfo.persistRefCount,
+        });
+        /* Only removing bvob infos and associated buffers on start-up.
+        if (!bvobInfo.persistRefCount) {
+          bvobs.delete(bvobInfo.bvobId);
+          buffers.delete(bvobInfo.bvobId);
+        }
+        */
+      };
+    });
   });
 }
 

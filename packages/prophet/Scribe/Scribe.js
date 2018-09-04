@@ -187,16 +187,16 @@ export default class Scribe extends Prophet {
    */
   _addContentInMemoryReference (mediaInfo: Object): false | Promise<any> {
     const bvobInfo = this._bvobLookup[mediaInfo.bvobId || ""];
-    let process;
+    let pendingContent;
     try {
       if (!bvobInfo) throw new Error(`Cannot find Bvob info '${mediaInfo.bvobId}'`);
       if (!bvobInfo.inMemoryRefCount++ && !bvobInfo.buffer) {
-        process = this.readBvobContent(bvobInfo.bvobId);
-        if (!isPromise(process)) {
+        pendingContent = this.readBvobContent(bvobInfo.bvobId);
+        if (!isPromise(pendingContent)) {
           throw new Error(
             `INTERNAL ERROR: readBvobContent didn't return a promise with falsy inMemoryRefCount`);
         }
-        return process.catch(error => { throw onError.call(this, error); });
+        return pendingContent.catch(error => { throw onError.call(this, error); });
       }
       return bvobInfo.pendingBuffer;
     } catch (error) { throw onError.call(this, error); }
@@ -204,7 +204,7 @@ export default class Scribe extends Prophet {
       return this.wrapErrorEvent(error, `_addContentInMemoryReference('${mediaInfo.bvobId}')`,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
           "\n\tbvobInfo:", ...dumpObject({ ...bvobInfo }), ...dumpObject(bvobInfo),
-          "\n\tread bvob content process:", ...dumpObject(process));
+          "\n\tpending bvob content:", ...dumpObject(pendingContent));
     }
   }
 

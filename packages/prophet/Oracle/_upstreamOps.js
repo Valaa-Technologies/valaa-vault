@@ -14,7 +14,7 @@ import Oracle from "./Oracle";
 export function _claim (oracle: Oracle, command: Command, options: Object): ClaimResult {
   const operation: any = {
     command, options, authorities: {},
-    localFinalizes: null, isLocallyPersisted: false, process: null,
+    localFinalizes: null, isLocallyPersisted: false, pendingClaim: null,
   };
   operation.partitionProcesses = _resolveCommandPartitionDatas(oracle, operation);
 
@@ -28,15 +28,15 @@ export function _claim (oracle: Oracle, command: Command, options: Object): Clai
   operation.authorityPersistProcesses = _getOngoingAuthorityPersists(oracle, operation);
 
   oracle._claimOperationQueue.push(operation);
-  const operationProcess = operation.process = (async () => {
+  const pendingOperationClaim = operation.pendingClaim = (async () => {
     let remoteAuthority;
     try {
       await Promise.all(operation.authorityPersistProcesses);
       while (oracle._claimOperationQueue[0] !== operation) {
-        if (!oracle._claimOperationQueue[0].process) oracle._claimOperationQueue.shift();
+        if (!oracle._claimOperationQueue[0].pendingClaim) oracle._claimOperationQueue.shift();
         else {
           try {
-            await oracle._claimOperationQueue[0].process;
+            await oracle._claimOperationQueue[0].pendingClaim;
           } catch (error) {
             // Silence errors which arise from other claim processes.
           }
@@ -94,12 +94,12 @@ export function _claim (oracle: Oracle, command: Command, options: Object): Clai
           "\n\tremoteAuthority:", remoteAuthority,
           "\n\tthis:", oracle);
     } finally {
-      operation.process = null;
+      operation.pendingClaim = null;
     }
   })();
   return {
     prophecy: new Prophecy(command),
-    getFinalEvent: () => operationProcess,
+    getFinalEvent: () => pendingOperationClaim,
   };
 }
 

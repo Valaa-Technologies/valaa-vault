@@ -72,7 +72,7 @@ export async function _connect (connection: OraclePartitionConnection,
   // in PartitionConnection.js) and begin I/O bound scribe event log narration in parallel to
   // the authority proxy/connection creation.
 
-  _connectToAuthorityProphet(connection, initialNarrateOptions);
+  _connectToAuthorityProphet(connection);
 
   const ret = await connection.narrateEventLog(initialNarrateOptions);
 
@@ -100,8 +100,7 @@ export async function _connect (connection: OraclePartitionConnection,
 }
 
 
-function _connectToAuthorityProphet (connection: OraclePartitionConnection,
-    { subscribeRemote }: Object) {
+function _connectToAuthorityProphet (connection: OraclePartitionConnection) {
   connection._authorityProphet = connection._prophet._authorityNexus
       .obtainAuthorityProphetOfPartition(connection.partitionURI());
   if (!connection._authorityProphet) return undefined;
@@ -109,13 +108,11 @@ function _connectToAuthorityProphet (connection: OraclePartitionConnection,
     const authorityConnection = await connection._authorityProphet
         .acquirePartitionConnection(connection.partitionURI(), {
           callback: connection.createReceiveTruth("authorityUpstream"),
-          subscribeRemote: false,
-          noConnect: true, // deprecated
+          subscribeRemote: false, narrateRemote: false,
         });
     connection.transferIntoDependentConnection("authorityUpstream", authorityConnection);
     connection._retrieveMediaContentFromAuthority = (mediaId, mediaInfo) =>
         authorityConnection.readMediaContent({ mediaId, ...mediaInfo });
-    await authorityConnection.connect({ subscribeRemote });
     connection._authorityConnection = authorityConnection;
     return authorityConnection;
   })());
@@ -132,21 +129,29 @@ export async function _narrateEventLog (connection: OraclePartitionConnection,
 
   if ((options.narrateRemote !== false) && connection._authorityConnection) {
     const authorityConnection = await connection._authorityConnection;
-    const batch = connection.createReceiveTruthBatch("initialAuthorityNarration", {});
+    // const mediaRetrievalTransaction = connection.
+    const collection = connection.createReceiveTruthCollection("initialAuthorityNarration", {
+      retrieveBatchContents: authorityConnection.requestMediaContents.bind(authorityConnection),
+    });
     const authorityNarration = Promise.resolve(authorityConnection.narrateEventLog({
-      subscribeRemote: options.subscribeRemote,
+      narrateRemote: true, subscribeRemote: options.subscribeRemote,
       firstEventId: connection._lastAuthorizedEventId + 1,
-      callback: batch.receiveTruth,
-    })).then(async (result) => (await batch.finalize(result)) || result);
-    if ((options.fullNarrate === true)
-        || (!(ret.eventLog || []).length && !(ret.scribeEventLog || []).length
-            && !(ret.scribeCommandQueue || []).length)) {
+      callback: collection.receiveTruth,
+    })).then(async (remoteNarration) =>
+        ((await collection.finalize(remoteNarration)) || remoteNarration));
+    if ((options.fullNarrate === true) || (!(ret.eventLog || []).length
+        && !(ret.scribeEventLog || []).length && !(ret.scribeCommandQueue || []).length)) {
       // Handle step 2 of the opportunistic narration if local narration didn't find any events.
-      const authorityNarrationResult = await authorityNarration;
-      connection.logEvent(1, "Awaited authority narration", authorityNarrationResult,
-          ", scribe narration results:", ret);
-      ret.mediaRetrievalStatus = batch.analyzeRetrievals();
-      Object.assign(ret, authorityNarrationResult);
+      const authorityResults = await authorityNarration;
+      for (const key of Object.keys(authorityResults)) {
+        if (Array.isArray(authorityResults[key])) {
+          authorityResults[key] = await Promise.all(authorityResults[key]);
+        }
+      }
+      ret.mediaRetrievalStatus = collection.analyzeRetrievals();
+      connection.logEvent(1, "Awaited authority narration after scribe narration:", ret,
+          "\n\tauthority results:", authorityResults, ", retrievals:", ret.mediaRetrievalStatus);
+      Object.assign(ret, authorityResults);
     } else {
       connection.logEvent(1, "Kicked off authority narration on the side",
           ", scribe narration results:", ret);
@@ -164,7 +169,7 @@ export async function _chronicleEventLog (connection: OraclePartitionConnection,
       (typeof options.lastEventId !== "undefined") &&
       (candidateEventId > options.lastEventId);
 
-  const batch = connection.createReceiveTruthBatch("chronicleEventLog",
+  const collection = connection.createReceiveTruthCollection(options.name || "chronicleEventLog",
       { retrieveMediaContent: options.retrieveMediaContent });
   const explicitEventLogNarrations = [];
   const rawId = connection.partitionRawId();
@@ -181,11 +186,11 @@ export async function _chronicleEventLog (connection: OraclePartitionConnection,
     }
     explicitEventLogNarrations.push(options.callback
         ? options.callback(event)
-        : batch.receiveTruth(event));
+        : collection.receiveTruth(event));
     currentEventId = eventId + 1;
   }
-  await batch.finalize(explicitEventLogNarrations);
+  await collection.finalize(explicitEventLogNarrations);
   ret.explicitEventLog = await Promise.all(explicitEventLogNarrations);
-  ret.mediaRetrievalStatus = batch.analyzeRetrievals();
+  ret.mediaRetrievalStatus = collection.analyzeRetrievals();
   return ret;
 }

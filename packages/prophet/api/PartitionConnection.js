@@ -6,7 +6,7 @@ import type { UniversalEvent } from "~/raem/command";
 import Prophet, { MediaInfo, NarrateOptions, ChronicleOptions } from "~/prophet/api/Prophet";
 
 import Logger, { LogEventGenerator } from "~/tools/Logger";
-import { dumpObject, invariantifyObject } from "~/tools";
+import { dumpObject, invariantifyObject, thenChainEagerly } from "~/tools";
 
 /**
  * Interface for sending commands to upstream and registering for prophecy event updates
@@ -185,14 +185,14 @@ export default class PartitionConnection extends LogEventGenerator {
           `decodeMediaContent('${mediaInfo.name || "<unnamed>"}')`,
               "\n\tmediaInfo:", ...dumpObject(mediaInfo));
     }
-    return this.requestMediaContents([mediaInfo])[0];
+    return thenChainEagerly(this.requestMediaContents([mediaInfo]), results => results[0]);
   }
 
   /**
    * Returns a URL for given mediaId pair which can be used in html context for retrieving media
    * content.
    *
-   * Convenience for requestMediaContents([{ ...mediaInfo, asLocalURL: true }])[0].
+   * Convenience for requestMediaContents([{ ...mediaInfo, asURL: true }])[0].
    *
    * @param {VRef} mediaId
    * @param {MediaInfo} mediaInfo
@@ -201,8 +201,8 @@ export default class PartitionConnection extends LogEventGenerator {
    * @memberof ValaaEngine
    */
   getMediaURL (mediaInfo: MediaInfo): any {
-    mediaInfo.asLocalURL = true;
-    return this.requestMediaContents([mediaInfo])[0];
+    mediaInfo.asURL = true;
+    return thenChainEagerly(this.requestMediaContents([mediaInfo]), results => results[0]);
   }
 
   requestMediaContents (mediaInfos: MediaInfo[]) {

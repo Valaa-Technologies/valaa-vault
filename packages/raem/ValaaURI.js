@@ -1,6 +1,7 @@
 // @flow
 
 import ValaaURI from "url-parse";
+
 import { invariantifyString, invariantifyObject } from "~/tools/invariantify";
 import { vdon } from "~/tools/vdon";
 import wrapError from "~/tools/wrapError";

@@ -26,31 +26,98 @@ export async function _receiveTruthOf (connection: OraclePartitionConnection,
 
 const _maxOnConnectRetrievalRetries = 3;
 
-export function _createReceiveTruthBatch (connection: OraclePartitionConnection,
-    { name, retrieveMediaContent, finalizeRetrieves }: Object) {
-  const batch = {
-    name,
-    retrievals: {},
-    retrieveMediaContent (mediaId: VRef, mediaInfo: Object) {
-      const mediaRetrievals
-          = batch.retrievals[mediaId.rawId()]
-          || (batch.retrievals[mediaId.rawId()] = { history: [], pendingRetrieval: undefined });
-      const thisRetrieval = {
-        process: undefined, content: undefined, retries: 0, error: undefined, skipped: false,
-      };
-      mediaRetrievals.history.push(thisRetrieval);
-      return (async () => {
-        try {
-          if (mediaRetrievals.pendingRetrieval) await mediaRetrievals.pendingRetrieval.process;
-        } catch (error) {
-          // Ignore any errors of earlier retrievals.
+export function _createReceiveTruthCollection (connection: OraclePartitionConnection,
+    { name, retrieveMediaContent, retrieveBatchContents }: Object) {
+  // This is a monster.
+  // However the gory syncrhonization details of the monster are mostly hidden here.
+  const collection = { name, retrievals: {} };
+
+  collection.receiveTruth = (truthEvent) => {
+    const ret = connection._receiveTruthOf(collection, truthEvent);
+    return ret;
+  };
+
+  collection.currentBatch = createBatch();
+  function createBatch () {
+    const ret = { queue: [] };
+    ret.toLaunch = new Promise((launch, fail) => { ret.launch = launch; ret.fail = fail; });
+    ret.pendingBatchContents = new Promise((resolve) => { ret.resolveContents = resolve; });
+    ret.retrieveMediaForQueueEntry = (retrieval) => (retrieveBatchContents
+        ? ret.pendingBatchContents.then(() => retrieval.pendingBatchEntryContent)
+        : retrieveMediaContent(retrieval.mediaInfo.mediaId, retrieval.mediaInfo));
+    return ret;
+  }
+
+  collection.finalize = async (eventLogNarrationResults) => {
+    collection.eventLogNarrationResults = eventLogNarrationResults;
+    for (;;) {
+      // The order of the two sections defines behaviour. Having queue launch section first will
+      // opportunistically keep emptying the queue and only after that wait for all existing
+      // retrieves to finish.
+      if (((collection.currentBatch || {}).queue || []).length) {
+        // Retrieval batch launch section
+        const batch = collection.currentBatch;
+        collection.currentBatch = createBatch();
+        batch.launch();
+        await Promise.all(batch.queue.map(retrieval => retrieval.pendingRetrieveStart));
+        if (retrieveBatchContents) {
+          const issuedRetrievals = batch.queue.filter(retrieval => retrieval.pendingContent);
+          Promise.resolve(retrieveBatchContents(issuedRetrievals.map(r => r.mediaInfo)))
+              .then(batchContents => {
+                batchContents.forEach((pendingBatchEntryContent, index) => {
+                  issuedRetrievals[index].pendingBatchEntryContent = pendingBatchEntryContent;
+                });
+                batch.resolveBatchContents(batchContents);
+              });
         }
-        while (thisRetrieval === mediaRetrievals.history[mediaRetrievals.history.length - 1]) {
+      } else {
+        // Pending retrieval wait section
+        const pendingRetrievals = [];
+        for (const ofMedia of Object.values(collection.retrievals)) {
+          const pendingRetrieval = (ofMedia.ongoingRetrieval || {}).pendingContent;
+          if (pendingRetrieval) pendingRetrievals.push(ofMedia.ongoingRetrieval.pendingContent);
+        }
+        if (!pendingRetrievals.length) break; // No retrieval queue, no pending retrievals - finish.
+        await Promise.all(pendingRetrievals);
+      }
+    }
+  };
+
+  collection.retrieveMediaContent = (mediaId: VRef, mediaInfo: Object) => {
+    // This is the heart of the monster which will beat until it has received content for a
+    // requested Media.
+    const ofMedia = collection.retrievals[mediaId.rawId()]
+        || (collection.retrievals[mediaId.rawId()] = { history: [], ongoingRetrieval: undefined });
+    const thisRetrieval = {
+      mediaInfo, pendingContent: undefined, content: undefined,
+      retries: 0, error: undefined, skipped: false,
+    };
+    ofMedia.history.push(thisRetrieval);
+    return (async () => {
+      try {
+        for (;;) {
           try {
-            thisRetrieval.process = retrieveMediaContent(mediaId, mediaInfo);
-            mediaRetrievals.pendingRetrieval = thisRetrieval;
-            thisRetrieval.content = await thisRetrieval.process;
-            return thisRetrieval.content;
+            let retrieveStarted;
+            const batch = collection.currentBatch;
+            try {
+              if (!batch) {
+                // The old strategy - when not being batched, wait for previous retrieval to finish
+                // before sending new ones, ignoring errors.
+                try { await (ofMedia.ongoingRetrieval || {}).pendingContent; } catch (error) { /* */ }
+              } else {
+                batch.queue.push(thisRetrieval);
+                thisRetrieval.pendingRetrieveStart = new Promise(res => { retrieveStarted = res; });
+                try { await batch.toLaunch; } catch (error) { /* Ignore launch errors. */ }
+              }
+              if (thisRetrieval !== ofMedia.history[ofMedia.history.length - 1]) break;
+              thisRetrieval.pendingContent = batch
+                  ? batch.retrieveMediaForQueueEntry(thisRetrieval)
+                  : retrieveMediaContent(mediaId, mediaInfo);
+              ofMedia.ongoingRetrieval = thisRetrieval;
+            } finally {
+              if (retrieveStarted) retrieveStarted({ retrieval: thisRetrieval });
+            }
+            return (thisRetrieval.content = await thisRetrieval.pendingContent);
           } catch (error) {
             ++thisRetrieval.retries;
             const description = `connect/retrieveMediaContent(${
@@ -60,53 +127,51 @@ export function _createReceiveTruthBatch (connection: OraclePartitionConnection,
                   error.originalMessage || error.message}`);
             } else {
               thisRetrieval.error = connection.wrapErrorEvent(error, description,
-                  "\n\tretrievals:", ...dumpObject(batch.retrievals),
+                  "\n\tretrievals:", ...dumpObject(collection.retrievals),
                   "\n\tmediaId:", mediaId.rawId(),
                   "\n\tmediaInfo:", ...dumpObject(mediaInfo),
-                  "\n\tmediaRetrievals:", ...dumpObject(mediaRetrievals),
+                  "\n\tmediaRetrievals:", ...dumpObject(ofMedia),
                   "\n\tthisRetrieval:", ...dumpObject(thisRetrieval),
               );
-              return undefined;
-            }
-          } finally {
-            if (mediaRetrievals.pendingRetrieval === thisRetrieval) {
-              mediaRetrievals.pendingRetrieval = null;
+              break;
             }
           }
         }
         thisRetrieval.skipped = true;
         return undefined;
-      })();
-    },
-    analyzeRetrievals (): Object {
-      const ret = {
-        medias: Object.keys(batch.retrievals).length,
-        successfulRetrievals: 0,
-        overallSkips: 0,
-        overallRetries: 0,
-        intermediateFailures: [],
-        latestFailures: [],
-      };
-      for (const mediaRetrievals of Object.values(batch.retrievals)) {
-        mediaRetrievals.history.forEach((retrieval, index) => {
-          if (typeof retrieval.content !== "undefined") ++ret.successfulRetrievals;
-          if (retrieval.skipped) ++ret.overallSkips;
-          ret.overallRetries += retrieval.retries;
-          if (retrieval.error) {
-            if (index + 1 !== mediaRetrievals.history.length) {
-              ret.intermediateFailures.push(retrieval.error);
-            } else {
-              ret.latestFailures.push(retrieval.error);
-            }
-          }
-        });
+      } finally {
+        thisRetrieval.pendingContent = null;
+        if (ofMedia.ongoingRetrieval === thisRetrieval) ofMedia.ongoingRetrieval = null;
       }
-      return ret;
-    },
+    })();
   };
-  batch.receiveTruth = connection._receiveTruthOf.bind(connection, batch);
-  batch.finalize = (truthReceiveResults => truthReceiveResults);
-  return batch;
+
+  collection.analyzeRetrievals = (): Object => {
+    const ret = {
+      medias: Object.keys(collection.retrievals).length,
+      successfulRetrievals: 0,
+      overallSkips: 0,
+      overallRetries: 0,
+      intermediateFailures: [],
+      latestFailures: [],
+    };
+    for (const mediaRetrievals of Object.values(collection.retrievals)) {
+      mediaRetrievals.history.forEach((retrieval, index) => {
+        if (typeof retrieval.content !== "undefined") ++ret.successfulRetrievals;
+        if (retrieval.skipped) ++ret.overallSkips;
+        ret.overallRetries += retrieval.retries;
+        if (retrieval.error) {
+          if (index + 1 !== mediaRetrievals.history.length) {
+            ret.intermediateFailures.push(retrieval.error);
+          } else {
+            ret.latestFailures.push(retrieval.error);
+          }
+        }
+      });
+    }
+    return ret;
+  };
+  return collection;
 }
 
 /**

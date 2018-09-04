@@ -113,7 +113,7 @@ export function _persistMediaEntry (connection: ScribePartitionConnection, newMe
         // TODO(iridian): Are there race conditions here? The refcount operations are not awaited on
         if (newInfo.bvobId) {
           if (!connection._prophet._bvobLookup[newInfo.bvobId]) {
-            console.error(`Can't find Media "${newInfo.name}" Bvob info for ${newInfo.bvobId
+            console.log(`Can't find Media "${newInfo.name}" Bvob info for ${newInfo.bvobId
                 } when adding new content references`);
           } else {
             if (newMediaEntry.isInMemory) connection._prophet._addContentInMemoryReference(newInfo);
@@ -122,7 +122,7 @@ export function _persistMediaEntry (connection: ScribePartitionConnection, newMe
         }
         if (oldBvobId) {
           if (!connection._prophet._bvobLookup[oldBvobId]) {
-            console.error(`Can't find Media "${newInfo.name}" Bvob info for ${oldBvobId
+            console.log(`Can't find Media "${newInfo.name}" Bvob info for ${oldBvobId
                 } when removing old content references`);
           } else {
             if (oldEntry.isInMemory) connection._prophet._removeContentInMemoryReference(oldBvobId);
@@ -352,9 +352,7 @@ export function _writeCommand (connection: ScribePartitionConnection, eventId: n
         const commandJSON = _serializeEventAsJSON(command);
         commandJSON.eventId = eventId;
         const req = commands.add(commandJSON);
-        req.onsuccess = () => {
-          resolve(eventId);
-        };
+        req.onsuccess = () => { resolve(eventId); };
         req.onerror = (evt => reject(new Error(evt.target.error.message)));
       }));
 }

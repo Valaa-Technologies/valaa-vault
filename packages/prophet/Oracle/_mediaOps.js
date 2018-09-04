@@ -1,7 +1,6 @@
 // @flow
 
 import { createValaaURI } from "~/raem/ValaaURI";
-import { VRef } from "~/raem/ValaaReference";
 
 import type { MediaInfo } from "~/prophet/api/Prophet";
 import PartitionConnection from "~/prophet/api/PartitionConnection";
@@ -11,12 +10,12 @@ import OraclePartitionConnection from "./OraclePartitionConnection";
 export function _requestMediaContents (connection: OraclePartitionConnection,
     mediaInfos: MediaInfo[]): any {
   return mediaInfos.map(mediaInfo => {
-    if (!mediaInfo.bvobId && !(mediaInfo.asLocalURL && mediaInfo.sourceURL)) return undefined;
+    if (!mediaInfo.bvobId && !(mediaInfo.asURL && mediaInfo.sourceURL)) return undefined;
     const ret = PartitionConnection.prototype.requestMediaContents.call(connection, [mediaInfo])[0];
     if (ret !== undefined) return ret;
     if (!mediaInfo.bvobId) {
       const sourceURI = createValaaURI(mediaInfo.sourceURL);
-      if (mediaInfo.asLocalURL) {
+      if (mediaInfo.asURL) {
         if (sourceURI.protocol === "http:" || sourceURI.protocol === "https:") {
           return mediaInfo.sourceURL;
         }
@@ -30,7 +29,7 @@ export function _requestMediaContents (connection: OraclePartitionConnection,
       throw new Error(`direct retrieval not implemented for mediaInfo.sourceURL '${
           sourceURI.toString()}'`);
     }
-    if (mediaInfo.asLocalURL) {
+    if (mediaInfo.asURL) {
       const authorityConnection = connection.getDependentConnection("authorityUpstream");
       if (!authorityConnection) {
         throw new Error(`OraclePartitionConnection has no authority connection specified ${

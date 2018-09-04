@@ -416,6 +416,7 @@ export default class InspireGateway extends LogEventGenerator {
       }
       const latestMediaInfos = await logs.latestMediaInfos;
       await connection.chronicleEventLog(eventLog, {
+        name: `prologue event log for '${connection.getName()}'`,
         firstEventId: lastChronicledEventId + 1,
         retrieveMediaContent (mediaId: VRef, mediaInfo: Object) {
           const latestInfo = latestMediaInfos[mediaId.rawId()];

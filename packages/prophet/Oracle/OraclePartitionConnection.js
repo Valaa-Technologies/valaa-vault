@@ -9,7 +9,7 @@ import type { ChronicleOptions, NarrateOptions, MediaInfo, RetrieveMediaContent 
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _connect, _chronicleEventLog, _narrateEventLog } from "./_connectionOps";
-import { _createReceiveTruthBatch, _receiveTruthOf } from "./_downstreamOps";
+import { _createReceiveTruthCollection, _receiveTruthOf } from "./_downstreamOps";
 import { _requestMediaContents, _prepareBvob } from "./_mediaOps";
 
 /**
@@ -110,10 +110,35 @@ export default class OraclePartitionConnection extends PartitionConnection {
     return this._receiveTruthOf.bind(this, { name: originName });
   }
 
-  createReceiveTruthBatch (batchName: string,
-      { retrieveMediaContent = this.getRetrieveMediaContent(), finalizeRetrieves }: Object) {
-    return _createReceiveTruthBatch(this,
-        { name: batchName, retrieveMediaContent, finalizeRetrieves });
+  /**
+   * Creates a truth Event receiver collection on this connection for performant side effect
+   * grouping and returns it.
+   *
+   * The collection.receiveTruth will process individual truths and forwards them to Scribe like
+   * createReceiveTruth does.
+   *
+   * The collection postpones and groups complex operations with costly overheads together.
+   * Most notably media retrievals will be postponed to the collection finalize phase (which is
+   * triggered by calling collection.finalize). This allows dropping unneeded media retrievals and
+   * potentially grouping all the retrievals into a single multi-part request.
+   *
+   * Additionally later other types of side-effect groupings can be added, like indexeddb writes
+   * and persistence refcount updates: these are not yet implemented however and are done
+   * one-by-one.
+   *
+   * @param {string}   collectionName
+   * @param {Object}   { retrieveMediaContent, requestMediaContents }
+   * @returns {Object} { receiveTruth, finalize, retrieveMediaContent, analyzeRetrievals }
+   * @memberof OraclePartitionConnection
+   */
+  createReceiveTruthCollection (name: string,
+      { retrieveMediaContent = this.getRetrieveMediaContent(), requestMediaContents }: Object): {
+    receiveTruth: Function,
+    finalize: Function,
+    analyzeRetrievals: Function,
+  } {
+    return _createReceiveTruthCollection(this,
+        { name, retrieveMediaContent, requestMediaContents });
   }
 
   async _receiveTruthOf (group: Object, truthEvent: UniversalEvent): Promise<Object> {
@@ -150,7 +175,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
           ...mediaInfo,
         };
         ret = _requestMediaContents(this, [combinedInfo])[0];
-        if (ret === undefined || mediaInfo.asLocalURL) return ret;
+        if (ret === undefined || mediaInfo.asURL) return ret;
       } catch (error) { throw onError.call(this, error); }
       // Store the content to Scribe as well (but not to authority): dont wait for completion
       thenChainEagerly(ret,

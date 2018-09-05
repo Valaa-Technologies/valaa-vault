@@ -11,6 +11,13 @@
 
 _Note: Gaps between patch versions are faulty, broken or test releases._
 
+## v0.31.1 (2018-08-30)
+
+#### :bug:
+
+- `@valos/prophet`
+   * Demote no-Media-entry severity so it doesn't block activation
+
 ## v0.31.0 (2018-08-30)
 
 > First relatively quicker release. Contains mostly bugfixes (which are

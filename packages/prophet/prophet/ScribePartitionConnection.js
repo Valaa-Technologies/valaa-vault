@@ -329,8 +329,17 @@ export default class ScribePartitionConnection extends PartitionConnection {
         } else if (isCreatedLike(mediaEvent)) {
           mediaInfo = {};
         } else {
-          throw new Error(`mediaEvent has no previous media entry and ${
-              ""}event is not CREATED, DUPLICATED and resource is not ghost`);
+          // FIXME(iridian): This should throw in principle: this is an indication of a corrupted
+          // event log. For now we accept and replay the event logs due to lack of resources for
+          // a proper fix - corrupted event logs must be accepted as a fact of life for the time
+          // being.
+          this.errorEvent(`mediaEvent for media has no previous media entry and ${
+                  ""}event is not CREATED, DUPLICATED and resource is not ghost`,
+              "\n\treplay not blocked but media accesses made against this Media will throw.",
+              "\n\tmediaId:", String(mediaId),
+              "\n\tmediaEvent:", ...dumpObject(mediaEvent),
+              "\n\trootEvent:", ...dumpObject(rootEvent));
+          return [];
         }
         newEntry = {
           mediaId: mediaRawId, mediaInfo, isPersisted: true, isInMemory: true,

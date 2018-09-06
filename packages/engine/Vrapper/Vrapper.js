@@ -542,22 +542,26 @@ export default class Vrapper extends Cog {
   }
 
   getTransient (options: ?{
-    state?: Object, transaction?: Transaction, typeName?: string, mostMaterialized?: boolean
-  }) {
-    const explicitState = options &&
-        (options.state || (options.transaction && options.transaction.getState()));
+    state?: Object, transaction?: Transaction, typeName?: string, mostMaterialized?: any,
+    requireField?: string,
+  } = {}) {
+    const explicitState = options.state
+        || (options.transaction && options.transaction.getState())
+        || (options.requireField && this.engine.discourse.getState());
     if (explicitState) {
       const typeName = options.typeName || this.getTypeName(options);
-      return explicitState.getIn([typeName, this.getRawId()])
-          // Immaterial ghost.
-          || getObjectTransient(options.state || options.transaction, this[HostRef], typeName,
-              undefined, undefined, options.mostMaterialized);
+      const ret = explicitState.getIn([typeName, this.getRawId()]);
+      if (ret && (!options.requireField || ret.has(options.requireField))) return ret;
+      // Immaterial ghost.
+      return getObjectTransient(options.state || options.transaction || this.engine.discourse,
+          this[HostRef], typeName, undefined,
+          options.require, options.mostMaterialized, options.requireField);
     }
     if (this._transientStaledIn) {
       this.updateTransient(null,
           getObjectTransient(this._transientStaledIn, this.getId(),
-              (options && options.typeName) || this.getTypeName(options), undefined, undefined,
-              options && options.mostMaterialized));
+              options.typeName || this.getTypeName(options), undefined,
+              options.require, options.mostMaterialized, options.requireField));
     }
     return this._transient;
   }
@@ -1103,6 +1107,7 @@ export default class Vrapper extends Cog {
 
   _obtainMediaInterpretation (options: VALKOptions, vExplicitOwner: ?Vrapper, typeName: ?string) {
     let mediaInfo;
+    let mostMaterializedTransient;
     try {
       const activeTypeName = typeName || this.getTypeName(options);
       if (activeTypeName !== "Media") {
@@ -1111,9 +1116,10 @@ export default class Vrapper extends Cog {
             "\n\ttype:", activeTypeName,
             "\n\tobject:", this);
       }
-      const transientOptions = Object.create(options);
-      transientOptions.mostMaterialized = true;
-      const mostMaterializedTransient = this.getTransient(transientOptions);
+      mostMaterializedTransient = this.getTransient(Object.assign(Object.create(options), {
+        mostMaterialized: true, require: false, requireField: "content",
+      }));
+      if (!mostMaterializedTransient) return undefined;
 
       // Integrations are cached by transient and thus flushed if it changes via adding or removing
       // of properties, change of mediaType etc. This does _not_ include the change of Media
@@ -1187,6 +1193,7 @@ export default class Vrapper extends Cog {
           "\n\toptions:", ...dumpObject(options),
           "\n\tvExplicitOwner:", ...dumpObject(vExplicitOwner),
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
+          "\n\tmostMaterializedTransient:", ...dumpObject(mostMaterializedTransient),
           "\n\tthis:", ...dumpObject(this),
       );
     }
@@ -1318,6 +1325,12 @@ export default class Vrapper extends Cog {
    */
   interpretContent (options: VALKOptions = {}) { return this._obtainMediaInterpretation(options); }
 
+  static toMediaPrepareBvobInfoFields = VALK.fromVAKON({
+    name: "name",
+    type: ["mediaType", false, "type"],
+    subtype: ["mediaType", false, "subtype"],
+  });
+
   /**
    * Eagerly updates the Bvob cache entry with given content, creates a new Bvob for it and returns
    * the Bvob id.
@@ -1340,7 +1353,7 @@ export default class Vrapper extends Cog {
     try {
       this.requireActive(options);
       if (this.hasInterface("Media")) {
-        mediaInfo = this.get(Vrapper.toMediaInfoFields, Object.create(options));
+        mediaInfo = this.get(Vrapper.toMediaPrepareBvobInfoFields, Object.create(options));
       }
       return this._withPartitionConnectionChainEagerly(Object.create(options), [
         connection => connection.prepareBvob(content, mediaInfo),

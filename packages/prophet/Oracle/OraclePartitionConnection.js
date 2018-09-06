@@ -6,7 +6,7 @@ import PartitionConnection from "~/prophet/api/PartitionConnection";
 import type { ChronicleOptions, NarrateOptions, MediaInfo, RetrieveMediaContent }
     from "~/prophet/api/Prophet";
 
-import { dumpObject, thenChainEagerly } from "~/tools";
+import { dumpObject } from "~/tools";
 
 import { _connect, _chronicleEventLog, _narrateEventLog } from "./_connectionOps";
 import { _createReceiveTruthCollection, _receiveTruthOf } from "./_downstreamOps";
@@ -174,14 +174,9 @@ export default class OraclePartitionConnection extends PartitionConnection {
           ...this.getScribeConnection().getMediaInfo(mediaInfo.mediaId),
           ...mediaInfo,
         };
-        ret = _requestMediaContents(this, [combinedInfo])[0];
-        if (ret === undefined || mediaInfo.asURL) return ret;
+        return _requestMediaContents(this, [combinedInfo], onError.bind(this))[0];
       } catch (error) { throw onError.call(this, error); }
       // Store the content to Scribe as well (but not to authority): dont wait for completion
-      thenChainEagerly(ret,
-          (content) => this.prepareBvob(content, combinedInfo, { remotePersist: false }),
-          onError.bind(this));
-      return ret;
       function onError (error) {
         return this.wrapErrorEvent(error, `requestMediaContents(${
                 (combinedInfo || mediaInfo).name || `unnamed media`})`,

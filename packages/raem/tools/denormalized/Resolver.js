@@ -164,7 +164,7 @@ export default class Resolver extends LogEventGenerator {
   }
 
   tryGoToTransientOfId (id: IdData, typeName: string, require?: boolean, nonGhostLookup?: boolean,
-      mostMaterialized?: boolean) {
+      mostMaterialized?: any, requireField?: string) {
     invariantifyString(typeName, "goToTransientOfId.typeName");
     this.objectId = id;
     if (!this.objectId) {
@@ -173,9 +173,10 @@ export default class Resolver extends LogEventGenerator {
     }
     const [rawId, , ghostPath] = expandIdDataFrom(id);
     const ret = this.tryGoToTransientOfRawId(rawId, typeName, false,
-        nonGhostLookup ? undefined : ghostPath, mostMaterialized);
+        nonGhostLookup ? undefined : ghostPath, mostMaterialized, requireField);
     if (ret) return ret;
-    this.objectId = this.tryBindToInactivePartitionObjectId(id);
+    this.objectId = requireField ? undefined
+        : this.tryBindToInactivePartitionObjectId(id, typeName);
     if (this.objectId) {
       this.objectTransient = createInactiveTransient(this.objectId);
     } else if (require) {
@@ -189,29 +190,26 @@ export default class Resolver extends LogEventGenerator {
   }
 
   tryGoToTransientOfRawId (rawId: RawId, typeName?: string, require?: boolean = false,
-      ghostPath?: GhostPath, mostMaterialized?: boolean) {
+      ghostPath?: GhostPath, mostMaterialized?: any, requireField?: string) {
     try {
       if (typeName) this.setTypeName(typeName);
       this.objectTransient = this.getTransientFromTypeTable(rawId);
-      if (!this.objectTransient) {
-        if (ghostPath && ghostPath.isGhost()) {
-          // The outermost ghost is not materialized: set object as immaterial transient.
-          if (!this.goToMostInheritedMaterializedTransient(ghostPath, require)) {
-            this.objectId = this.tryBindToInactivePartitionObjectId(ghostPath);
-            return (this.objectTransient = null);
-          }
-          if (mostMaterialized) {
-            this.objectId = null;
-            return this.objectTransient;
-          }
-          this.objectTransient = createImmaterialTransient(rawId, ghostPath, this.objectTransient);
-        } else if (require) {
-          throw new Error(`Could not resolve non-ghost object '${rawId}:${this.typeName}'`);
-        } else {
-          return (this.objectTransient = null);
-        }
+      if (this.objectTransient && (!requireField || this.objectTransient.has(requireField))) {
+        this.objectId = this.objectTransient.get("id");
+      } else if (!ghostPath || ghostPath.isRoot()) {
+        this.objectTransient = null;
+        if (require) throw new Error(`Could not find non-ghost object '${rawId}:${this.typeName}'`);
+      } else if (!this.goToMostInheritedMaterializedTransient(ghostPath, require, requireField)) {
+        this.objectId = requireField
+            ? undefined : this.tryBindToInactivePartitionObjectId(ghostPath, requireField);
+        this.objectTransient = null;
+      } else if (mostMaterialized || requireField) {
+        // The most inherited materialized transient or requireField was found but its id naturally
+        // is not the requested rawId so we clear objectId to denote that.
+        this.objectId = null;
+      } else {
+        this.objectTransient = createImmaterialTransient(rawId, ghostPath, this.objectTransient);
       }
-      this.objectId = this.objectTransient.get("id");
       return this.objectTransient;
     } catch (error) {
       throw this.wrapErrorEvent(error,
@@ -261,10 +259,12 @@ export default class Resolver extends LogEventGenerator {
    * @export
    * @param {Resolver} resolver
    * @param {GhostPath} currentPath
+   * @param {GhostPath} requireField - require transient to have this field for it to be considered
+   *                                   a match
    * @returns {GhostPath} the transient ghostPath
    */
-  goToMostInheritedMaterializedTransient (ghostPath: GhostPath, require: boolean = true):
-      GhostPath {
+  goToMostInheritedMaterializedTransient (ghostPath: GhostPath, require: boolean = true,
+      requireField?: string): GhostPath {
     let nextStep = ghostPath;
     let currentPath;
     try {
@@ -277,7 +277,7 @@ export default class Resolver extends LogEventGenerator {
         }
         const rawId = currentPath.headRawId();
         const transient = this.getTransientFromTypeTable(rawId);
-        if (transient) {
+        if (transient && (!requireField || transient.get(requireField))) {
           this.objectTransient = transient;
           const transientId = transient.get("id");
           const transientGhostPath = transientId.getGhostPath();
@@ -292,7 +292,8 @@ export default class Resolver extends LogEventGenerator {
     } catch (error) {
       throw this.wrapErrorEvent(error, `goToMostInheritedMaterializedTransient`,
           "\n\tghostPath:", ghostPath,
-          "\n\tcurrentPath:", currentPath);
+          "\n\tcurrentPath:", currentPath,
+          "\n\trequireField:", requireField);
     }
   }
 }

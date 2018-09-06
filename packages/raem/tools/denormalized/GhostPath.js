@@ -62,6 +62,10 @@ export default class GhostPath {
 
   isInherited (): boolean { return this[this[hostPrototypeRawIdKey]][0] !== null; }
 
+  isRoot (): boolean {
+    return this[hostPrototypeRawIdKey] === "";
+  }
+
   isGhost (): boolean {
     const entry = this[this[hostPrototypeRawIdKey]];
     return (entry[0] !== null) && (entry[0] !== entry[1]);

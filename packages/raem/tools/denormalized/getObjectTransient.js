@@ -14,9 +14,10 @@ import { wrapError } from "~/tools";
  */
 export default function getObjectTransient (stateOrResolver: State, idData: IdData,
     typeName: string, logger: Object = console, require: boolean = true,
-    mostMaterialized: ?boolean): Transient {
+    mostMaterialized: ?any, requireField?: string): Transient {
   try {
-    const ret = tryObjectTransient(stateOrResolver, idData, typeName, logger, mostMaterialized);
+    const ret = tryObjectTransient(stateOrResolver, idData, typeName, logger, mostMaterialized,
+        requireField);
     if (!ret && require) throw new Error(`Object ${String(idData)} resolved to falsy`);
     return ret;
   } catch (error) {
@@ -45,10 +46,11 @@ export default function getObjectTransient (stateOrResolver: State, idData: IdDa
  * @returns {Transient}
  */
 export function tryObjectTransient (stateOrResolver: State, idData: IdData, typeName: string,
-    logger: Object, mostMaterialized: ?boolean): Transient {
+    logger: Object, mostMaterialized: ?any, requireField?: string): Transient {
   if (!idData) return undefined;
   const resolver = stateOrResolver.goToTransientOfId
       ? stateOrResolver
       : new Resolver({ state: stateOrResolver, logger });
-  return resolver.tryGoToTransientOfId(idData, typeName, false, undefined, mostMaterialized);
+  return resolver.tryGoToTransientOfId(idData, typeName, false, undefined, mostMaterialized,
+      requireField);
 }

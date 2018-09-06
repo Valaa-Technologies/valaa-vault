@@ -7,11 +7,13 @@ import PartitionConnection from "~/prophet/api/PartitionConnection";
 
 import OraclePartitionConnection from "./OraclePartitionConnection";
 
+import { thenChainEagerly } from "~/tools";
+
 export function _requestMediaContents (connection: OraclePartitionConnection,
-    mediaInfos: MediaInfo[]): any {
+    mediaInfos: MediaInfo[], onError: Function): any {
   return mediaInfos.map(mediaInfo => {
     if (!mediaInfo.bvobId && !(mediaInfo.asURL && mediaInfo.sourceURL)) return undefined;
-    const ret = PartitionConnection.prototype.requestMediaContents.call(connection, [mediaInfo])[0];
+    let ret = PartitionConnection.prototype.requestMediaContents.call(connection, [mediaInfo])[0];
     if (ret !== undefined) return ret;
     if (!mediaInfo.bvobId) {
       const sourceURI = createValaaURI(mediaInfo.sourceURL);
@@ -42,7 +44,13 @@ export function _requestMediaContents (connection: OraclePartitionConnection,
       throw new Error(`Could not locate media content in Scribe and ${
         ""}no OraclePartitionConnection._(override)retrieveMediaContent is defined`);
     }
-    return retrieveMediaContent(mediaInfo.mediaId, mediaInfo);
+    ret = retrieveMediaContent(mediaInfo.mediaId, mediaInfo);
+    if (ret !== undefined) {
+      thenChainEagerly(ret,
+        (content) => _prepareBvob(connection, content, mediaInfo, { remotePersist: false }),
+        onError.bind(this));
+    }
+    return ret;
   });
 }
 

@@ -55,7 +55,7 @@ export function thenChainEagerlyList (initialValue: any, functionChain: Function
           ? value
           : thenChainEagerlyList(
               functionChain[currentIndex](value), functionChain, onRejected, currentIndex + 1)),
-      wrapChainError);
+      (error) => { throw wrapChainError(error); });
   function wrapChainError (error) {
     const innerError = (onRejected && onRejected(error)) || error;
     return wrapError(innerError, `During thenChainEagerly step #${currentIndex}`,

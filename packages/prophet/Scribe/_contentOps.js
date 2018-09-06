@@ -210,19 +210,19 @@ export function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: 
 export function _readMediaContent (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
     mediaEntry: MediaEntry, onError: Function): any {
   // Only return cached in-memory nativeContent if its id matches the requested id.
-  if (mediaEntry
-      && (typeof mediaEntry.nativeContent !== "undefined")
-      && (mediaInfo.bvobId === mediaEntry.mediaInfo.bvobId)) {
+  const bvobId = mediaInfo.bvobId;
+  if (mediaEntry && (typeof mediaEntry.nativeContent !== "undefined")
+      && (!bvobId || (bvobId === mediaEntry.mediaInfo.bvobId))) {
     return mediaEntry.nativeContent;
   }
-  if (!mediaInfo.bvobId) return undefined;
+  if (!bvobId) return undefined;
   return thenChainEagerly(
-      connection._prophet.readBvobContent(mediaInfo.bvobId),
+      connection._prophet.readBvobContent(bvobId),
       (buffer) => {
         if (!buffer) return undefined;
         // nativeContent should go in favor of bvobInfo decoded contents
         const nativeContent = _nativeObjectFromBufferAndMediaInfo(buffer, mediaInfo);
-        if (mediaEntry && (mediaInfo.bvobId === mediaEntry.mediaInfo.bvobId)) {
+        if (mediaEntry && (bvobId === mediaEntry.mediaInfo.bvobId)) {
           mediaEntry.nativeContent = nativeContent;
         }
         return nativeContent;

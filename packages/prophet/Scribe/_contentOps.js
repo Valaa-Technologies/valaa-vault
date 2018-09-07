@@ -174,13 +174,21 @@ export function _decodeBvobContent (scribe: Scribe, bvobInfo: BvobInfo,
   ], onError);
 }
 
+const maxDataURISourceBytes = 48000;
+
 export function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
     mediaEntry: MediaEntry, onError: Function): any {
   // Only use cached in-memory nativeContent if its id matches the requested id.
   const bvobId = (mediaInfo && mediaInfo.bvobId) || mediaEntry.mediaInfo.bvobId;
   const bvobInfo = connection._prophet._bvobLookup[bvobId || ""];
   // Media's with sourceURL or too large/missing bvobs will be handled by Oracle
-  if (!bvobInfo || !(bvobInfo.byteLength <= 10000)) return undefined;
+  if (!bvobInfo) return undefined;
+  if (!(bvobInfo.byteLength <= maxDataURISourceBytes)) {
+    if (connection.isRemote()) return undefined;
+    connection.warnEvent(`getMediaURL requested on a local Media "${mediaInfo.name
+        }" of ${bvobInfo.byteLength} bytes, larger than recommended ${maxDataURISourceBytes
+        } bytes for data URI's.`,
+        "However as no Service Worker implementation is found returning as large data URI anyway.");
   }
   // TODO(iridian): With systems that support Service Workers we will eventually return URL's which
   // the service workers recognize and can redirect to 'smooth' IndexedDB accesses, see

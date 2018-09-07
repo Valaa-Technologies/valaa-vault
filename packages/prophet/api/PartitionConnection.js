@@ -162,7 +162,7 @@ export default class PartitionConnection extends LogEventGenerator {
     delete mediaInfo.mime;
     delete mediaInfo.type;
     delete mediaInfo.subtype;
-    return this.requestMediaContents([mediaInfo])[0];
+    return thenChainEagerly(this.requestMediaContents([mediaInfo]), results => results[0]);
   }
 
   /**
@@ -205,7 +205,7 @@ export default class PartitionConnection extends LogEventGenerator {
     return thenChainEagerly(this.requestMediaContents([mediaInfo]), results => results[0]);
   }
 
-  requestMediaContents (mediaInfos: MediaInfo[]) {
+  requestMediaContents (mediaInfos: MediaInfo[]): Promise<(Promise | any)[]> | (Promise | any)[] {
     return this._upstreamConnection.requestMediaContents(mediaInfos);
   }
 

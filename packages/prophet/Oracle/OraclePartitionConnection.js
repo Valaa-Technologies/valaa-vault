@@ -72,7 +72,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
     try {
       this.warnEvent(1, "\n\tBegun initializing connection with options", initialNarrateOptions,
           ...dumpObject(this));
-      const ret = _connect(this, initialNarrateOptions, onConnectData);
+      const ret = await _connect(this, initialNarrateOptions, onConnectData);
       this.warnEvent(1, "\n\tDone initializing connection with options", initialNarrateOptions,
           "\n\tinitial narration:", ret);
       return ret;

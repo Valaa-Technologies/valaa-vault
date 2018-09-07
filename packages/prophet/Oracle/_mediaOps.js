@@ -37,7 +37,7 @@ export function _requestMediaContents (connection: OraclePartitionConnection,
         throw new Error(`OraclePartitionConnection has no authority connection specified ${
             ""} and could not locate local media URL from Scribe`);
       }
-      return authorityConnection.requestMediaContents([mediaInfo])[0];
+      return authorityConnection.getMediaURL(mediaInfo);
     }
     const retrieveMediaContent = connection.getRetrieveMediaContent();
     if (!retrieveMediaContent) {

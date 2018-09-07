@@ -497,7 +497,7 @@ export default class Vrapper extends Cog {
 
 
   getTypeName (options: any) {
-    this.requireActive(options);
+    if (this.isResource()) this.requireActive(options);
     return this._typeName;
   }
 

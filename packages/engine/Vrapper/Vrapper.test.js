@@ -44,10 +44,23 @@ const createAInstance
       instancePrototype: "test",
     }, });
 
+const createMedia = {
+  type: "TRANSACTED",
+  actions: [
+    created({ id: "theContent", typeName: "Blob" }),
+    created({ id: "theMedia", typeName: "Media", initialState: {
+      owner: "child",
+      name: "mediaName",
+      content: "theContent",
+    }, }),
+  ],
+};
+
 
 describe("Vrapper", () => {
   let harness: { createds: Object, engine: Object, prophet: Object, testEntities: Object };
   const testScriptPartitions = () => harness.createds.TestScriptyThing;
+  const medias = () => harness.createds.Media;
   const entities = () => harness.createds.Entity;
 
   const expectNoVrapper = rawId => { expect(harness.engine.tryVrapper(rawId)).toBeFalsy(); };
@@ -151,9 +164,9 @@ describe("Vrapper", () => {
 
     beforeEach(() => {
       harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
-        transactionA, createAInstance,
+        transactionA, createAInstance, createMedia,
       ]);
-      testVrapper = testScriptPartitions().child;
+      testVrapper = medias().theMedia;
     });
 
     describe("_getMediaTypeFromTags", () => {

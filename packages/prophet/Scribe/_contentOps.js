@@ -6,7 +6,7 @@ import { VRef, getRawIdFrom } from "~/raem/ValaaReference";
 import type { MediaInfo, RetrieveMediaContent } from "~/prophet/api/Prophet";
 
 import { dumpObject, invariantifyString, thenChainEagerly, vdon } from "~/tools";
-import { encodeDataURI } from "~/tools/html5/urlEncode";
+import { encodeDataURI } from "~/tools/html5/dataURI";
 import type MediaDecoder from "~/tools/MediaDecoder";
 import { stringFromUTF8ArrayBuffer } from "~/tools/textEncoding";
 
@@ -26,7 +26,6 @@ export type MediaEntry = {
   mediaInfo: MediaInfo,
   isPersisted: boolean,
   isInMemory: boolean,
-  nativeContent?: any,
 };
 
 export type MediaLookup = {
@@ -45,7 +44,7 @@ export function _reprocessMedia (connection: ScribePartitionConnection, mediaEve
   let newEntry: MediaEntry;
   if (currentEntry) {
     mediaInfo = { ...currentEntry.mediaInfo };
-    newEntry = { ...currentEntry, mediaInfo, nativeContent: undefined };
+    newEntry = { ...currentEntry, mediaInfo };
   } else {
     if (mediaId.isInherited()) {
       mediaInfo = { ...connection._getMediaEntry(mediaId).mediaInfo };
@@ -75,18 +74,13 @@ export function _reprocessMedia (connection: ScribePartitionConnection, mediaEve
 
   const tryRetrieve = async () => {
     try {
-      if (mediaInfo.bvobId && connection._prophet.tryGetCachedBvobContent(mediaInfo.bvobId)) {
-        if (currentEntry && (currentEntry.mediaInfo.bvobId === mediaInfo.bvobId)) {
-          // content is in bvob buffer cache with equal bvobId. Reuse.
-          newEntry.nativeContent = currentEntry.nativeContent;
-        }
-      } else if (mediaInfo.bvobId || mediaInfo.sourceURL) {
+      if (mediaInfo.bvobId && !connection._prophet.tryGetCachedBvobContent(mediaInfo.bvobId)) {
         // TODO(iridian): Determine whether media content should be pre-cached or not.
-        const content = await retrieveMediaContent(mediaId, mediaInfo);
+        const content = await retrieveMediaContent(mediaId, { ...mediaInfo,
+          type: "application", subtype: "octet-stream", mime: "application/octet-stream",
+        });
         if (typeof content !== "undefined") {
-          newEntry.nativeContent = content;
-          const { persistProcess } = connection.prepareBvob(newEntry.nativeContent, mediaInfo);
-          await persistProcess;
+          await connection.prepareBvob(content, mediaInfo).persistProcess;
         }
       }
       // Delays actual media info content update into a finalizer function so that recordTruth
@@ -168,39 +162,30 @@ export function _decodeBvobContent (scribe: Scribe, bvobInfo: BvobInfo,
       }
       return decodedContent;
     },
-  ], onError.bind(scribe));
+  ], onError);
 }
 
 export function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
-    mediaEntry: MediaEntry): any {
-  let nativeContent;
+    mediaEntry: MediaEntry, onError: Function): any {
   // Only use cached in-memory nativeContent if its id matches the requested id.
-  if ((!mediaInfo || !mediaInfo.bvobId || (mediaInfo.bvobId === mediaEntry.mediaInfo.bvobId))
-      && (typeof mediaEntry.nativeContent !== "undefined")) {
-    nativeContent = mediaEntry.nativeContent;
-  } else {
-    const bvobId = (mediaInfo && mediaInfo.bvobId) || mediaEntry.mediaInfo.bvobId;
-    if (!bvobId) return undefined;
-    const bufferCandidate = connection._prophet.tryGetCachedBvobContent(bvobId);
-    nativeContent = bufferCandidate &&
-        _nativeObjectFromBufferAndMediaInfo(bufferCandidate, mediaInfo || mediaEntry.mediaInfo);
-    if (bvobId === mediaEntry.mediaInfo.bvobId) {
-      mediaEntry.nativeContent = nativeContent;
-    }
+  const bvobId = (mediaInfo && mediaInfo.bvobId) || mediaEntry.mediaInfo.bvobId;
+  const bvobInfo = connection._prophet._bvobLookup[bvobId || ""];
+  // Media's with sourceURL or too large/missing bvobs will be handled by Oracle
+  if (!bvobInfo || !(bvobInfo.byteLength <= 10000)) return undefined;
   }
-  if ((typeof nativeContent === "string") && nativeContent.length < 10000) {
-    // TODO(iridian): Is there a use case to create data URI's for json types?
-    const { type, subtype } = mediaInfo || mediaEntry.mediaInfo;
-    return encodeDataURI(nativeContent, type, subtype);
-  }
-  // TODO(iridian): With systems that support Service Workers we return URL's which the service
-  // workers recognize and can redirect to 'smooth' IndexedDB accesses, see
+  // TODO(iridian): With systems that support Service Workers we will eventually return URL's which
+  // the service workers recognize and can redirect to 'smooth' IndexedDB accesses, see
   // https://gist.github.com/inexorabletash/687e7c5914049536f5a3
   // ( https://www.google.com/search?q=url+to+indexeddb )
   // Otherwise IndexedDB can't be accessed by the web pages directly, but horrible hacks must be
   // used like so:
   // https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
-  return undefined;
+  return thenChainEagerly(connection._prophet.readBvobContent(bvobInfo.bvobId),
+      (buffer => {
+        const { type, subtype } = mediaInfo || mediaEntry.mediaInfo;
+        return encodeDataURI(buffer, type, subtype);
+      })
+      , onError);
 }
 
 // Returns the requested media content immediately as a native object if it is in in-memory cache.
@@ -209,24 +194,10 @@ export function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: 
 // Otherwise throws an error.
 export function _readMediaContent (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
     mediaEntry: MediaEntry, onError: Function): any {
-  // Only return cached in-memory nativeContent if its id matches the requested id.
   const bvobId = mediaInfo.bvobId;
-  if (mediaEntry && (typeof mediaEntry.nativeContent !== "undefined")
-      && (!bvobId || (bvobId === mediaEntry.mediaInfo.bvobId))) {
-    return mediaEntry.nativeContent;
-  }
   if (!bvobId) return undefined;
-  return thenChainEagerly(
-      connection._prophet.readBvobContent(bvobId),
-      (buffer) => {
-        if (!buffer) return undefined;
-        // nativeContent should go in favor of bvobInfo decoded contents
-        const nativeContent = _nativeObjectFromBufferAndMediaInfo(buffer, mediaInfo);
-        if (mediaEntry && (bvobId === mediaEntry.mediaInfo.bvobId)) {
-          mediaEntry.nativeContent = nativeContent;
-        }
-        return nativeContent;
-      },
+  return thenChainEagerly(connection._prophet.readBvobContent(bvobId),
+      (buffer) => (!buffer ? undefined : _nativeObjectFromBufferAndMediaInfo(buffer, mediaInfo)),
       onError);
 }
 

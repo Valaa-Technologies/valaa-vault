@@ -139,7 +139,7 @@ export default class Scribe extends Prophet {
     let alreadyWrapped;
     try {
       if (!bvobInfo) throw new Error(`Cannot find Bvob info '${bvobId}'`);
-      return _decodeBvobContent(this, bvobInfo, decoder, contextInfo, onError);
+      return _decodeBvobContent(this, bvobInfo, decoder, contextInfo, onError.bind(this));
     } catch (error) { throw onError.call(this, error); }
     function onError (error) {
       if (alreadyWrapped) return error;

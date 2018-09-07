@@ -155,7 +155,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
     return mediaInfos.map(mediaInfo => {
       try {
         const mediaEntry = this._getMediaEntry(mediaInfo.mediaId, !!mediaInfo.asURL);
-        if (mediaInfo.asURL) return _getMediaURL(this, mediaInfo, mediaEntry);
+        if (mediaInfo.asURL) return _getMediaURL(this, mediaInfo, mediaEntry, onError.bind(this));
         let actualInfo = mediaInfo;
         if (!actualInfo.bvobId) {
           if (!mediaEntry || !mediaEntry.mediaInfo) {
@@ -195,11 +195,27 @@ export default class ScribePartitionConnection extends PartitionConnection {
 
   prepareBvob (content: any, mediaInfo?: MediaInfo):
       { buffer: ArrayBuffer, contentId: string, persistProcess: ?Promise<any> } {
-    const { buffer, contentId } = bufferAndContentIdFromNative(content, mediaInfo);
-    return {
-      content, buffer, contentId,
-      persistProcess: this._prophet._persistBvobContent(buffer, contentId),
-    };
+    try {
+      const { buffer, contentId } = bufferAndContentIdFromNative(content, mediaInfo);
+      if (mediaInfo.bvobId && (!mediaInfo.bvobId !== contentId)) {
+        this.errorEvent(`\n\tINTERNAL ERROR: bvobId mismatch when preparing bvob for Media '${
+                mediaInfo.name}', CONTENT IS NOT PERSISTED`,
+            "\n\tactual content id:", contentId,
+            "\n\trequested bvobId:", mediaInfo.bvobId,
+            "\n\tmediaInfo:", ...dumpObject(mediaInfo),
+            "\n\tcontent:", ...dumpObject({ content }),
+        );
+        return {};
+      }
+      return {
+        content, buffer, contentId,
+        persistProcess: this._prophet._persistBvobContent(buffer, contentId),
+      };
+    } catch (error) {
+      throw this.wrapErrorEvent(error, `prepareBvob(${typeof content})`,
+          "\n\tcontent:", ...dumpObject({ content }),
+          "\n\tmediaInfo:", ...dumpObject(mediaInfo));
+    }
   }
 
   getMediaInfo (mediaId: VRef) {

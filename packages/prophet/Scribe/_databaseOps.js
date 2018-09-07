@@ -146,13 +146,18 @@ export function _readMediaInfos (connection: ScribePartitionConnection, results:
             resolve();
             return;
           }
-          const thisMediaInfo = { ...cursor.value, isInMemory: true };
-          if (thisMediaInfo.mediaInfo && thisMediaInfo.mediaInfo.bvobId
-              && thisMediaInfo.isInMemory) {
-            connection._prophet._addContentInMemoryReference(thisMediaInfo.mediaInfo);
+          const entry = { ...cursor.value, isInMemory: true };
+          if (entry.mediaInfo && entry.mediaInfo.bvobId && entry.isInMemory) {
+            if (!connection._prophet._bvobLookup[entry.mediaInfo.bvobId]) {
+              connection.errorEvent(`Can't find Media "${entry.mediaInfo.name
+                  }" in-memory Bvob info for ${entry.mediaInfo.bvobId
+                  } when reading partition media infos`);
+            } else {
+              connection._prophet._addContentInMemoryReference(entry.mediaInfo);
+            }
           }
-          results[cursor.key] = thisMediaInfo;
-          cursor.update(thisMediaInfo);
+          results[cursor.key] = entry;
+          cursor.update(entry);
           cursor.continue();
         };
         req.onerror = (evt) => reject(new Error(evt.target.error.message));

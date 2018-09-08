@@ -230,24 +230,28 @@ export default class Resolver extends LogEventGenerator {
     return transientCandidate;
   }
 
-  tryBindToInactivePartitionObjectId (id: IdData) {
+  tryBindToInactivePartitionObjectId (id: IdData, typeName: string) {
     // TODO(iridian): This function should make sure that the id refers to an _inactive_ partition.
     // if the id is part of an active partition but still missing from corpus, that's a violation.
     const ref = tryHostRef(id);
-    if (!ref) return undefined;
-    const partitionURI = ref.partitionURI();
-    if (!partitionURI) return undefined;
-    ref.setInactive();
-    /*
-    this.info("tryBindToInactivePartitionObjectId: bound an id (with partitionURI set) as inactive",
-        "id, without checking whether that partition is actually active (which would be an error)",
-        "<details suppressed to enable browser log collapsing>",
-        // dumpify(id.toJSON()), id,
-    );
-    */
-    // FIXME(iridian): This is a quick hack! We need to have active partition resolution logic and
-    // object stubbing for referred but otherwise inactive resources.
-    return id;
+    if (ref) {
+      const partitionURI = ref.partitionURI();
+      if (partitionURI) {
+        ref.setInactive();
+        /*
+        this.info("tryBindToInactivePartitionObjectId: bound an id (with partitionURI set) as inactive",
+            "id, without checking whether that partition is actually active (which would be an error)",
+            "<details suppressed to enable browser log collapsing>",
+            // dumpify(id.toJSON()), id,
+        );
+        */
+        // FIXME(iridian): This is a quick hack! We need to have active partition resolution logic and
+        // object stubbing for referred but otherwise inactive resources.
+        return id;
+      }
+    }
+    if (typeName === "Blob") return obtainVRef(id);
+    return undefined;
   }
 
   /**

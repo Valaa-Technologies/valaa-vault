@@ -99,9 +99,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       Valaa.Lens.activeViewRoles,
       roleNames => roleNames.slice(0, -1).reverse().join(" <- "));
 
-  createLensRoleSymbol("childrenLens",
+  createLensRoleSymbol("componentChildrenLens",
       "any[]",
-      `Lens role for viewing the child elements of the parent
+      `Lens role for viewing the child elements of the current parent
       component.`,
       (u: any, component: UIComponent) => arrayFromAny(component.props.children).length,
       () => (u: any, component: UIComponent) => component.props.children
@@ -222,7 +222,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.undefinedLens,
         Valaa.Lens.lens,
         Valaa.Lens.nullLens,
-        Valaa.Lens.childrenLens,
+        Valaa.Lens.componentChildrenLens,
         Valaa.Lens.resourceLens,
         Valaa.Lens.loadedLens,
       ] }),
@@ -406,6 +406,14 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
           return { delegate: [Valaa.Lens[notFoundName]] };
         });
   }
+
+  // ValaaScope lenses
+
+  createLensRoleSymbol("scopeChildren",
+      "any",
+      `The child element(s) of the innermost enclosing ValaaScope-like
+      parent component.`,
+  );
 
   // Instance lenses
 

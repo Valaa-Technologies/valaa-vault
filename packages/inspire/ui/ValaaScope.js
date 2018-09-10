@@ -105,6 +105,7 @@ export default class ValaaScope extends UIComponent {
 
   attachSubscribers (focus: any, props: Object) {
     super.attachSubscribers(focus, props);
+    this.setUIContextValue(this.getValaa().Lens.scopeChildren, props.children);
     if (!((this.stats || {}).uiContext || {}).hasOwnProperty("this")) {
       this.setUIContextValue("this", this);
     }

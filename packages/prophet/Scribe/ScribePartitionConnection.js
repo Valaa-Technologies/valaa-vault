@@ -155,7 +155,14 @@ export default class ScribePartitionConnection extends PartitionConnection {
     return mediaInfos.map(mediaInfo => {
       try {
         const mediaEntry = this._getMediaEntry(mediaInfo.mediaId, !!mediaInfo.asURL);
-        if (mediaInfo.asURL) return _getMediaURL(this, mediaInfo, mediaEntry, onError.bind(this));
+        if (mediaInfo.asURL) {
+          if ((mediaInfo.asURL === true)
+              || (mediaInfo.asURL === "data")
+              || ((mediaInfo.asURL === "source") && !this.isRemote())) {
+            return _getMediaURL(this, mediaInfo, mediaEntry, onError.bind(this));
+          }
+          return undefined;
+        }
         let actualInfo = mediaInfo;
         if (!actualInfo.bvobId) {
           if (!mediaEntry || !mediaEntry.mediaInfo) {

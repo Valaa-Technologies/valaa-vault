@@ -5,9 +5,10 @@ import { createValaaURI } from "~/raem/ValaaURI";
 import type { MediaInfo } from "~/prophet/api/Prophet";
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 
+import { thenChainEagerly } from "~/tools";
+
 import OraclePartitionConnection from "./OraclePartitionConnection";
 
-import { thenChainEagerly } from "~/tools";
 
 export function _requestMediaContents (connection: OraclePartitionConnection,
     mediaInfos: MediaInfo[], onError: Function): any {
@@ -22,7 +23,7 @@ export function _requestMediaContents (connection: OraclePartitionConnection,
           return mediaInfo.sourceURL;
         }
         // TODO(iridian): Implement schema-based request forwarding to remote authorities
-        throw new Error(`schema-based mediaInfo.sourceURL's not implemented, got '${
+        throw new Error(`non-http(s) mediaInfo.sourceURL's not implemented, got '${
             sourceURI.toString()}'`);
       }
       // TODO(iridian): Implement schema-based request forwarding to authorities

@@ -3,7 +3,7 @@
 import React from "react";
 
 import { denoteValaaBuiltinWithSignature } from "~/raem/VALK";
-import { UnpackedHostValue } from "~/raem/VALK/hostReference";
+import { createPartitionURI } from "~/raem/ValaaURI";
 
 import Vrapper from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
@@ -12,7 +12,7 @@ import VALEK, { dumpObject } from "~/engine/VALEK";
 import UIComponent from "~/inspire/ui/UIComponent";
 
 import {
-  arrayFromAny, derivedId, dumpify, messageFromError, thenChainEagerly, wrapError,
+  arrayFromAny, derivedId, dumpify, isPromise, messageFromError, thenChainEagerly, wrapError,
 } from "~/tools";
 
 export default function injectLensObjects (Valaa: Object, rootScope: Object,
@@ -218,6 +218,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       () => ({ delegate: [
         Valaa.Lens.firstAbleDelegateLens,
         Valaa.Lens.disabledLens,
+        Valaa.Lens.unscopedLens,
         Valaa.Lens.instanceLens,
         Valaa.Lens.undefinedLens,
         Valaa.Lens.lens,
@@ -361,7 +362,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         case the first matching lens is returned.
 
         If still no suitable lens can be found delegates the display to
-        '${notFoundName}'.
+        '${notFoundName || "null"}'.
 
         @param {Object} focus  the Resource to search the lens from.`,
         (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
@@ -405,6 +406,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
               "\n\tcomponent:", component,
               "\n\tfocus:", focus);
           */
+          if (!notFoundName) return null;
           return { delegate: [Valaa.Lens[notFoundName]] };
         });
   }
@@ -419,69 +421,210 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
   // Instance lenses
 
+  createLensRoleSymbol("unscopedLens",
+      "Lens",
+      `Lens role for viewing a ValaaScope which has not yet loaded its
+      lens resource.`,
+    (focus, component) => !component.state || (component.state.lensObject === undefined),
+    () => "",
+  );
+
   createLensRoleSymbol("instanceLens",
       "Lens",
       `Lens role for viewing the focus through an instance lens.`,
-      (focus, component) => component.props.hasOwnProperty("instanceLensPrototype"),
-      () => (focus, component, lensRoleName) => {
-        const prototype = component.props.instanceLensPrototype;
-        const owner = component.getParentUIContextValue(Valaa.Lens.instanceLensOwner);
-        const obtainLensInstance = component.getUIContextValue(Valaa.Lens.obtainLensInstance);
-        return thenChainEagerly(
-            obtainLensInstance(prototype, owner, focus, lensRoleName, component), [
-              (instance) => {
-                if (instance === undefined) return undefined;
-                const vrapper = (instance != null) && instance[UnpackedHostValue];
-                component.setUIContextValue(Valaa.Lens.instanceLensOwner, vrapper || instance);
-                component.setUIContextValue("this", instance);
-                if (!vrapper) return instance;
-                if (!vrapper.hasInterface("Scope")) return vrapper;
-                const instanceRoleName = `instance-${lensRoleName}`;
-                const instanceLens = component.getUIContextValue(Valaa.Lens.instancePropertyLens)(
-                    vrapper, component, instanceRoleName);
-                return component.renderLens(instanceLens, focus, instanceRoleName);
-              },
-            ]);
-      },
+      (focus, component) => component.props.instanceLensPrototype,
+      () => (focus, component, lensRoleName) => thenChainEagerly(
+          component.state.lensObject, [
+            (lensObject => {
+              if ((lensObject == null) || !(lensObject instanceof Vrapper)) return "";
+              if (!lensObject.hasInterface("Scope")) return lensObject;
+              const instanceRoleName = `instance-${lensRoleName}`;
+              const instanceLens = component.getUIContextValue(Valaa.Lens.instancePropertyLens)(
+                  lensObject, component, instanceRoleName);
+              return (instanceLens != null) ? instanceLens : lensObject;
+            }),
+          ]),
   );
+
+  _createLensPropertyRoles("instanceLensProperty", ["INSTANCE_LENS"], "instancePropertyLens");
 
   createLensRoleSymbol("instanceLensPrototype",
       "Resource",
-      `Resource-element prototype. Only valid when given as component props.`);
+      `Lens Resource prototype. Only valid when given as component props.`);
 
-  createLensRoleSymbol("instanceLensOwner",
+  createLensRoleSymbol("lensResourceFrame",
       "Resource",
-      "Resource-element owner");
+      "Lens Resource owner.");
 
-  createLensRoleSymbol("obtainLensInstance",
-      "(prototype: Resource, owner: Resource, focus: any, roleName: string): Resource",
-      `Returns an existing or creates a new Resource instance based on
-      *prototype*, *owner*, *focus* and *roleName*.`,
-      true,
-      () => (prototype: Vrapper, owner: Vrapper, focus: any, roleName: string,
+  createLensRoleSymbol("obtainLensObject",
+      "(prototype: Resource, owner: Resource, focus: any, lensName: string): Resource",
+      `Returns an existing or creates a new Resource or object to be
+      used as the lens resource for a ValaaScope component, which is
+      then made available as 'this' to its child lenses. By default
+      creates a Valaa Resource or null using following rules:
+      1. A *derived id* for the Resource will be derived using rules
+         described below. If a Resource by that id exists that Resource
+         will be used as-is.
+         Otherwise a new Resource is created with that id.
+      2. If defined the *prototype* is used as part of the id
+         derivation and the possible new Resource will use the
+         prototype as its Resource.instancePrototype. Additionally if
+         the prototype has a lens authority property its value will be
+         defined as the *lens authority*.
+         Otherwise (if prototype is undefined) a new Entity is created.
+      3. If *focus* is a singular Resource its id is used as part of
+         the id derivation. Then if lens authority is not yet defined
+         and if the focus has a lens authority property its value will
+         is defined as the lens authority. Alternatively, if the focus
+         is a partition root then Valaa.partitionLensAuthority is
+         defined as the lens authority.
+         Otherwise (focus is not a singular Resource) focus is not used
+         in id derivation.
+      4. If defined the *owner* is used as part of the id derivation.
+      5. If the lens authority is defined and is not falsy it's used as
+         the Partition.partitionAuthorityURI of the possible new
+         Resource.
+         Otherwise if the *owner* is defined its used as Resource.owner
+         for the possible new Resource.
+         Otherwise no lens Resource is obtained and 'this' of the
+         component will be set to null.
+         Note that even if a new partition is created for a Resource
+         (in which case it will not be given an owner) the owner id and
+         lens name are used as part of the id derivation.
+      6. If the component has a custom key then it will be used as part
+         of the id derivation. Additionally if the surrounding context
+         defines a non-falsy 'this' then the lens Resource is assigned
+         to 'this[key]'.
+         Otherwise an autogenerated key which accounts for the relative
+         position of the component inside its lens definition file is
+         used as part of the id derivation.
+      7. A component lens resource is *elidable* if
+         1. its component has an autogenerated key,
+         2. its child lenses don't refer to 'this', and
+         3. each of its immediately descendant ValaaScope child
+            components is either elidable itself or has
+            an autogenerated key and defines lens authority.
+         An implementation may skip the creation of an elidable lens
+         resource. This is true even if it would have side effects that
+         are visible elsewhere (ie. a lens resource creation can be
+         elided even if it would be created into a remote authority).
+      `,
+      undefined,
+      () => (prototype: Vrapper, owner: Vrapper, focus: any, lensName: string = "",
           component: UIComponent) => {
-        if (!(prototype instanceof Vrapper)) {
-          throw new Error(`obtainLensInstance.prototype is not a Resource, got ${
+        let ownerPart = "";
+        const focusPart = ((focus != null) && (focus instanceof Vrapper) && focus.getRawId()) || "";
+        let prototypePart = "";
+        if (owner != null) {
+          if (owner instanceof Vrapper) ownerPart = owner.getRawId();
+          else throw new Error(`obtainLensObject.owner expects a Resource, got ${debugId(owner)}`);
+        }
+        if (prototype != null) {
+          if (prototype instanceof Vrapper) prototypePart = prototype.getRawId();
+          else {
+            throw new Error(`obtainLensObject.prototype is defined but is not a Resource, got ${
               debugId(prototype)}`);
+          }
         }
-        if (!(owner instanceof Vrapper)) {
-          throw new Error(`obtainLensInstance.owner is not a Resource, got ${debugId(owner)}`);
-        }
-        const isResourceFocus = (focus != null) && (focus instanceof Vrapper);
-        const focusId = isResourceFocus ? focus.getRawId() : roleName;
+        const lensResourceRawId = derivedId(ownerPart, `-${lensName}-${focusPart}`, prototypePart);
         // "postLoadProperties" and "options" are optional arguments
-        const lensPath = component.getKey();
-        const instanceRawId = derivedId(prototype.getRawId(), `INSTANCELENS-${lensPath}-${focusId}`,
-            owner.getRawId());
+        const engine = component.context.engine;
+        let vResource = engine.tryVrapper(lensResourceRawId, { optional: true });
+        if (vResource !== undefined) return vResource;
 
-        return prototype.engine.tryVrapper(instanceRawId) || prototype.instantiate({
-          id: instanceRawId, owner,
-          name: `INSTANCELENS-${prototype.get("name")}-${lensPath}-${focusId}`,
-        });
+        const lensAuthorityProperty = component.getUIContextValue(Valaa.Lens.lensAuthorityProperty);
+        let partitionAuthorityURI;
+        if ((prototype != null) && lensAuthorityProperty && prototype.hasInterface("Scope")) {
+          partitionAuthorityURI = prototype.propertyValue(lensAuthorityProperty);
+        }
+        let shouldShadowRoot;
+        if (focusPart !== "") {
+          if ((partitionAuthorityURI === undefined) && lensAuthorityProperty
+              && (focus.hasInterface("Scope"))) {
+            partitionAuthorityURI = focus.propertyValue(lensAuthorityProperty);
+          }
+          if (focus.isPartitionRoot() && (focus !==
+              component.getParentUIContextValue(Valaa.Lens.shadowedFocusPartitionRoot))) {
+            shouldShadowRoot = true;
+            if (partitionAuthorityURI === undefined) {
+              partitionAuthorityURI = component.getUIContextValue(Valaa.Lens.partitionLensAuthority);
+            }
+          }
+        }
+        if (partitionAuthorityURI) {
+          const partitionURI = createPartitionURI(partitionAuthorityURI, lensResourceRawId);
+          vResource = thenChainEagerly(
+              engine.discourse.prophet.acquirePartitionConnection(partitionURI, {}), [
+                () => engine.tryVrapper(lensResourceRawId, { optional: true }),
+              ]);
+        }
+        return thenChainEagerly(vResource, [
+          (vResourceInner) => {
+            if (vResourceInner) return vResourceInner;
+            if (!partitionAuthorityURI && !owner) {
+              throw new Error(`Cannot obtain a new Lens Resource: neither partitionAuthorityURI ${
+                  ""}nor owner could be determined`);
+            }
+            const options = {
+              id: lensResourceRawId,
+              ...(partitionAuthorityURI ? { partitionAuthorityURI } : { owner }),
+              name: `LENS-${lensName}-${prototype ? prototype.get("name") : "Entity"}-${focusPart}`,
+            };
+            const ret = (prototype != null)
+                ? prototype.instantiate(options)
+                : engine.create("Entity", options);
+            console.log("Created lens Resource:", ret,
+                "\n\tname, id:", options.name, lensResourceRawId,
+                "\n\tprototype:", prototype,
+                "\n\tfocus:", focus,
+                "\n\tpartitionAuthorityURI:", partitionAuthorityURI, "owner:", owner,
+                "\n\tcomponent:", component);
+            return ret;
+          },
+          (vResourceInner) => {
+            if (shouldShadowRoot) {
+              component.setUIContextValue(Valaa.Lens.shadowedFocusPartitionRoot, focus);
+              component.setUIContextValue(Valaa.Lens.shadowingLensPartitionRoot,
+                  partitionAuthorityURI ? vResourceInner : null);
+            }
+            return vResourceInner;
+          },
+        ]);
       });
 
-  _createLensPropertyRoles("instanceLensProperty", ["INSTANCE_LENS"],
-      "instancePropertyLens", "instanceLensPropertyNotFoundLens");
+  createLensRoleSymbol("shadowingLensPartitionRoot",
+      "(Resource | null)",
+      `Lens role for a lens partition root resource of a partition that
+      was created to shadow a focus which is a partition root (which is
+      found in Valaa.Lens.shadowedPartitionRoot).`,
+  );
+
+  createLensRoleSymbol("shadowedFocusPartitionRoot",
+      "(Resource | null)",
+      `Lens role for a partition that is being shadowed by lens
+      partition (which is found in Valaa.Lens.shadowLensPartitionroot).`,
+  );
+
+  createLensRoleSymbol("lensAuthorityProperty",
+      "(string)",
+      `Lens role for the name property name that is searched from
+      a lens instance prototype or a Resource focus when creating
+      a new Lens Resource. If found the property value will be used as
+      the authority for a new partition, for which the new Lens
+      Resource will be partition root Resource.`,
+      undefined,
+      () => "LENS_AUTHORITY",
+  );
+
+  createLensRoleSymbol("partitionLensAuthority",
+      "(string | null)",
+      `Lens role for the default lens authority URI for lens resources
+      which have a partition root Resource as their focus. Used when
+      a lens authority is not defined via other means, such as
+      an explicit instance or focus lens authority property.`,
+      undefined,
+      () => "valaa-local:",
+  );
 
   // User-definable catch-all lenses
 

@@ -110,7 +110,8 @@ export function _comparePropsOrState (leftObject: any, rightObject: any, default
 ) {
   if (_isSimplyEqual(leftObject, rightObject)) return false;
   if ((typeof leftObject !== typeof rightObject)
-      || (typeof leftObject !== "object") || (leftObject === null) || (rightObject === null)) {
+      || (typeof leftObject !== "object") || (leftObject === null) || (rightObject === null)
+      || (leftObject._sourceInfo !== rightObject._sourceInfo)) {
     /*
     if (debug) {
       console.info(type, "objects differ:", leftObject, rightObject);
@@ -118,6 +119,7 @@ export function _comparePropsOrState (leftObject: any, rightObject: any, default
     */
     return true;
   }
+
   const leftKeys = Object.keys(leftObject);
   const rightKeys = Object.keys(rightObject);
   if (leftKeys.length !== rightKeys.length) {

@@ -399,10 +399,12 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
               return vProperty.extractValue();
             }
           }
-          console.error("can't find resource lens props:", lensPropertyRoleName, roleSymbol,
+          /*
+          console.error("Can't find resource lens props:", lensPropertyRoleName, roleSymbol,
               "\n\tnames:", lensPropertyNames,
               "\n\tcomponent:", component,
               "\n\tfocus:", focus);
+          */
           return { delegate: [Valaa.Lens[notFoundName]] };
         });
   }

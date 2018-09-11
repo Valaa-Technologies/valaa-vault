@@ -310,7 +310,9 @@ export default class Vrapper extends Cog {
         this._setTypeName(transient.get("typeName"));
       }
       this.setName(`Vrapper/${this.getRawId()}:${this._typeName}`);
-      this.registerComplexHandlers(this.engine._prophecyHandlerRoot, state);
+      if (!this.isInactive()) {
+        this.registerComplexHandlers(this.engine._prophecyHandlerRoot, state);
+      }
       this._refreshDebugId(transient, { state });
       if (this.hasInterface("Scope")) this._setUpScopeFeatures({ state });
     } catch (error) {
@@ -497,7 +499,7 @@ export default class Vrapper extends Cog {
 
 
   getTypeName (options: any) {
-    if (this.isResource()) this.requireActive(options);
+    if (this.isResource() && (!options || (options.require !== false))) this.requireActive(options);
     return this._typeName;
   }
 
@@ -514,6 +516,7 @@ export default class Vrapper extends Cog {
 
   debugId (options?: any) {
     if (options && options.short) {
+      options.require = false;
       return debugId(this.getTransient(options) || this[HostRef], { short: true });
     }
     if (!this.__debugId) {
@@ -1745,6 +1748,8 @@ export default class Vrapper extends Cog {
     });
   }
 
+  static infiniteLoopTester = Symbol("InfiniteLoopTest");
+
   _setUpScopeFeatures (options: VALKOptions) {
     // Refers all Scope.properties:Property objects in this._lexicalScope to enable scoped script
     // access which uses the owner._lexicalScope as the scope prototype if one exists.
@@ -1756,8 +1761,19 @@ export default class Vrapper extends Cog {
         this._lexicalScope.this = this;
         this._nativeScope = Object.create(parent.getNativeScope());
       } else {
-        Object.setPrototypeOf(this._lexicalScope, parent.getLexicalScope());
-        Object.setPrototypeOf(this._nativeScope, parent.getNativeScope());
+        const dummy = {};
+        this._lexicalScope[Vrapper.infiniteLoopTester] = dummy;
+        const parentScope = parent.getLexicalScope();
+        const loopedDummy = parentScope[Vrapper.infiniteLoopTester];
+        delete this._lexicalScope[Vrapper.infiniteLoopTester];
+        if (dummy === loopedDummy) {
+          this.errorEvent("INTERNAL ERROR: Vrapper.owner listener detected cyclic owner loop:",
+              "\n\tself:", ...dumpObject(this),
+              "\n\tparent:", ...dumpObject(parent));
+        } else {
+          Object.setPrototypeOf(this._lexicalScope, parentScope);
+          Object.setPrototypeOf(this._nativeScope, parent.getNativeScope());
+        }
       }
     }, new VrapperSubscriber().setSubscriberInfo(`Vrapper(${this.debugId()}).scope.owner`)
     ).triggerUpdate(options);

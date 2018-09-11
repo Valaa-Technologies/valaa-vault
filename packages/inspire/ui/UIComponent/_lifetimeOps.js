@@ -98,10 +98,13 @@ function _updateFocus (component: UIComponent, newProps: Object) {
   }
 }
 
+const depthTag = Symbol("ContextDepth");
+
 function _createContextAndSetFocus (component: UIComponent, newFocus: any, newProps: Object) {
   const uiContext = newProps.uiContext
       || component.state.uiContext
       || Object.create(component.props.parentUIContext);
+  uiContext[depthTag] = (component.props.parentUIContext[depthTag] || 0) + 1;
   setScopeValue(uiContext, "focus", newFocus);
   setScopeValue(uiContext, "head", newFocus);
   if (newProps.locals) {

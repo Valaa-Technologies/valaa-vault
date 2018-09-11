@@ -30,7 +30,12 @@ export type MediaInfo = {
   mime?: string,
   type?: string,
   subtype?: string,
-  asURL? : boolean,     // default false
+  asURL? : any,                // default false. Available options: true, false, "data", "public",
+                               // "source".
+  contentDisposition?: string,
+  contentEncoding?: string,
+  contentLanguage?: string,
+  contentType?: string,
 };
 
 export type RetrieveMediaContent = (mediaId: VRef, mediaInfo: MediaInfo) => Promise<any>;

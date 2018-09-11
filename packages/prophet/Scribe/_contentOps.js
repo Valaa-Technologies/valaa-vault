@@ -173,8 +173,14 @@ export function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: 
   const bvobId = (mediaInfo && mediaInfo.bvobId) || mediaEntry.mediaInfo.bvobId;
   const bvobInfo = connection._prophet._bvobLookup[bvobId || ""];
   // Media's with sourceURL or too large/missing bvobs will be handled by Oracle
-  if (!bvobInfo) return undefined;
-  if (!(bvobInfo.byteLength <= maxDataURISourceBytes)) {
+  if (!bvobInfo) {
+    if (mediaInfo.asURL === "data") {
+      throw new Error(`Cannot create a data URI for Media ${mediaInfo.name
+          }: can't find Bvob info for ${bvobId}`);
+    }
+    return undefined;
+  }
+  if ((mediaInfo.asURL !== "data") && !(bvobInfo.byteLength <= maxDataURISourceBytes)) {
     if (connection.isRemote()) return undefined;
     connection.warnEvent(`getMediaURL requested on a local Media "${mediaInfo.name
         }" of ${bvobInfo.byteLength} bytes, larger than recommended ${maxDataURISourceBytes
@@ -188,8 +194,14 @@ export function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: 
   // Otherwise IndexedDB can't be accessed by the web pages directly, but horrible hacks must be
   // used like so:
   // https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
-  return thenChainEagerly(connection._prophet.readBvobContent(bvobInfo.bvobId),
+  return thenChainEagerly(connection._prophet.readBvobContent(bvobId),
       (buffer => {
+        if (!buffer) {
+          if (mediaInfo.asURL === "data") {
+            throw new Error(`Cannot create a data URI for Media ${mediaInfo.name
+                }: can't read Bvob content for ${bvobId}`);
+          }
+        }
         const { type, subtype } = mediaInfo || mediaEntry.mediaInfo;
         return encodeDataURI(buffer, type, subtype);
       })

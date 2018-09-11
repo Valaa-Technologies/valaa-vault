@@ -203,7 +203,7 @@ export default class PartitionConnection extends LogEventGenerator {
    * @memberof ValaaEngine
    */
   getMediaURL (mediaInfo: MediaInfo): any {
-    mediaInfo.asURL = true;
+    if (!mediaInfo.asURL) mediaInfo.asURL = true;
     return thenChainEagerly(this.requestMediaContents([mediaInfo]), results => results[0]);
   }
 

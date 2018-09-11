@@ -8,7 +8,7 @@ import Vrapper from "~/engine/Vrapper";
 
 import UIComponent from "~/inspire/ui/UIComponent";
 
-import { thenChainEagerly } from "~/tools";
+import { dumpObject, thenChainEagerly } from "~/tools";
 
 /**
  * ValaaScope performs a semantically rich, context-aware render of its local UI focus according to
@@ -114,19 +114,28 @@ export default class ValaaScope extends UIComponent {
     super.attachSubscribers(focus, props);
     const Valaa = this.getValaa();
     this.setUIContextValue(Valaa.Lens.scopeChildren, props.children);
-    const vOwner = this.getParentUIContextValue(Valaa.Lens.lensResourceFrame);
-    const obtainLensObject = this.getUIContextValue(Valaa.Lens.obtainLensObject);
+    const vOwner = this.getParentUIContextValue(Valaa.Lens.scopeFrameResource);
+    const obtainScopeFrame = this.getUIContextValue(Valaa.Lens.obtainScopeFrame);
     const key = this.getKey();
     thenChainEagerly(
-        obtainLensObject(props.instanceLensPrototype, vOwner, focus, key, this), [
-          (lensObject) => {
-            this.setUIContextValue("frame", lensObject);
-            if (lensObject === undefined) return undefined;
-            const vLensResource = tryUnpackedHostValue(lensObject);
-            if (vLensResource) this.setUIContextValue(Valaa.Lens.lensResourceFrame, vLensResource);
-            return vLensResource || lensObject;
+        obtainScopeFrame(props.instanceLensPrototype, vOwner, focus, key, this), [
+          (scopeFrame) => {
+            this.setUIContextValue("frame", scopeFrame);
+            if (scopeFrame === undefined) return undefined;
+            if ((typeof key === "string") && (key[0] !== "-") && (vOwner != null)
+                && (vOwner instanceof Vrapper) && vOwner.hasInterface("Scope")
+                && (vOwner.propertyValue(key) !== scopeFrame)) {
+              // TODO(iridian): This is initial non-rigorous prototype functionality:
+              // The owner[key] value remains set even after the components get detached.
+              console.log(`Assigning scopeFrame to owner["${key}"]`,
+                  ...dumpObject(vOwner), ...dumpObject(scopeFrame));
+              vOwner.alterProperty(key, VALEK.fromValue(scopeFrame));
+            }
+            const vScopeFrame = tryUnpackedHostValue(scopeFrame);
+            if (vScopeFrame) this.setUIContextValue(Valaa.Lens.scopeFrameResource, vScopeFrame);
+            return vScopeFrame || scopeFrame;
           },
-          (lensObject) => this.setState({ lensObject }),
+          (scopeFrame) => this.setState({ scopeFrame }),
         ],
         (error) => this.enableError(error));
   }

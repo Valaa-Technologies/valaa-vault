@@ -203,7 +203,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         if (lens.delegate && (Object.keys(lens).length === 1)) {
           return _renderFirstAbleDelegate(component, lens.delegate, focus, lensName);
         }
-        subLensName = `noscope-${lensName}`;
+        subLensName = `-noscope-${lensName}`;
         ret = React.createElement(_ValaaScope, component.childProps(subLensName, {}, { ...lens }));
       } else if (isSymbol(lens)) {
         return component.renderLensRole(lens, focus, undefined, onlyIfAble, onlyOnce);

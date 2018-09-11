@@ -137,8 +137,8 @@ export default class ReactRoot extends React.Component {
     const rootContext = Object.create(vViewFocus.engine.getLexicalScope());
     const Valaa = rootContext.Valaa;
     rootContext.frame = await this._obtainUIRootFrame(
-        rootContext[Valaa.Lens.partitionLensAuthority], vViewFocus, viewName);
-    rootContext[Valaa.Lens.lensResourceFrame] = rootContext.frame;
+        rootContext[Valaa.Lens.shadowLensAuthority], vViewFocus, viewName);
+    rootContext[Valaa.Lens.scopeFrameResource] = rootContext.frame;
     rootContext.VSS = this._createVSS(vViewFocus.engine);
     return rootContext;
   }

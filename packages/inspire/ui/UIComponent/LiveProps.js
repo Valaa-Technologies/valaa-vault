@@ -74,13 +74,13 @@ export default class LiveProps extends UIComponent {
     super.attachSubscribers(focus, props);
     // Live props are always based on the parent focus.
     // Now uselessly reattaching listeners if the local focus changes.
-    let contextThis = this.getUIContextValue("this");
-    if (typeof contextThis === "undefined") contextThis = {};
+    let frame = this.getUIContextValue("frame");
+    if (typeof frame === "undefined") frame = {};
     for (const kueryId of Object.keys(props.liveProps || {})) {
       const kuery = props.liveProps[kueryId];
       const subscriberName = `LiveProps.liveProps['${kueryId}']`;
       this.attachKuerySubscriber(subscriberName,
-          contextThis,
+          frame,
           kuery, {
             scope: this.getUIContext(),
             onUpdate: (update: FieldUpdate) => {

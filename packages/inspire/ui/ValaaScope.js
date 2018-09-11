@@ -1,7 +1,14 @@
 // @flow
 import PropTypes from "prop-types";
 
+import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
+
+import VALEK from "~/engine/VALEK";
+import Vrapper from "~/engine/Vrapper";
+
 import UIComponent from "~/inspire/ui/UIComponent";
+
+import { thenChainEagerly } from "~/tools";
 
 /**
  * ValaaScope performs a semantically rich, context-aware render of its local UI focus according to
@@ -105,10 +112,23 @@ export default class ValaaScope extends UIComponent {
 
   attachSubscribers (focus: any, props: Object) {
     super.attachSubscribers(focus, props);
-    this.setUIContextValue(this.getValaa().Lens.scopeChildren, props.children);
-    if (!((this.stats || {}).uiContext || {}).hasOwnProperty("this")) {
-      this.setUIContextValue("this", this);
-    }
+    const Valaa = this.getValaa();
+    this.setUIContextValue(Valaa.Lens.scopeChildren, props.children);
+    const vOwner = this.getParentUIContextValue(Valaa.Lens.lensResourceFrame);
+    const obtainLensObject = this.getUIContextValue(Valaa.Lens.obtainLensObject);
+    const key = this.getKey();
+    thenChainEagerly(
+        obtainLensObject(props.instanceLensPrototype, vOwner, focus, key, this), [
+          (lensObject) => {
+            this.setUIContextValue("frame", lensObject);
+            if (lensObject === undefined) return undefined;
+            const vLensResource = tryUnpackedHostValue(lensObject);
+            if (vLensResource) this.setUIContextValue(Valaa.Lens.lensResourceFrame, vLensResource);
+            return vLensResource || lensObject;
+          },
+          (lensObject) => this.setState({ lensObject }),
+        ],
+        (error) => this.enableError(error));
   }
 
   renderLoaded (focus: any) {

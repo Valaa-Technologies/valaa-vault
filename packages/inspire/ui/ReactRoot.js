@@ -135,16 +135,17 @@ export default class ReactRoot extends React.Component {
 
   async _createRootContext (vViewFocus: Vrapper, viewName: string) {
     const rootContext = Object.create(vViewFocus.engine.getLexicalScope());
-    rootContext.this = this;
-    rootContext[rootContext.Valaa.Lens.instanceLensOwner] =
-        await this._obtainLocalUIRoot(vViewFocus, viewName);
+    const Valaa = rootContext.Valaa;
+    rootContext.frame = await this._obtainUIRootFrame(
+        rootContext[Valaa.Lens.partitionLensAuthority], vViewFocus, viewName);
+    rootContext[Valaa.Lens.lensResourceFrame] = rootContext.frame;
     rootContext.VSS = this._createVSS(vViewFocus.engine);
     return rootContext;
   }
 
-  async _obtainLocalUIRoot (vViewFocus: Vrapper, viewName: string) {
+  async _obtainUIRootFrame (authorityURI: string, vViewFocus: Vrapper, viewName: string) {
     const localInstanceId = derivedId(vViewFocus.getRawId(), "LOCAL-UIROOT-PARTITION", viewName);
-    const partitionURI = createPartitionURI("valaa-local:", localInstanceId);
+    const partitionURI = createPartitionURI(authorityURI, localInstanceId);
     await vViewFocus.engine.discourse.prophet.acquirePartitionConnection(partitionURI, {});
     let vLocalUIRoot = vViewFocus.engine.getVrapper(localInstanceId, { optional: true });
     if (!vLocalUIRoot) {

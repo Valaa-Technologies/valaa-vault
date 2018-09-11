@@ -30,6 +30,10 @@ describe("testing perspire", () => {
   describe("perspire rendering", () => {
     it("runs a trivial local revelation which renders a proper html dump", async () => {
       const server = await _createAndStartPerspireServer();
+      // This wait should be removeable: however as it stands the creation of frame partitions will
+      // cause an asynchronous delay in creation of UI tree, which the above await doesn't catch.
+      // So we wait a small bit.
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       expect(server.serializeMainDOM())
           .toEqual(expectedOutputHTML);
     });

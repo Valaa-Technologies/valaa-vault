@@ -67,11 +67,19 @@ export function _claim (oracle: Oracle, command: Command, options: Object): Clai
       } catch (error) { throw oracle.wrapErrorEvent(error, "claim.claimCommandEvent"); }
 
       remoteAuthority = operation.authorities[authorityURIs[0]];
-      oracle.warnEvent(1, `Done ${remoteAuthority
-              ? "queuing a remote command locally"
-              : "claiming a local event"} of authority "${authorityURIs[0]}":`,
-          "\n\tpartitions:", ...partitionDatas.map(([, conn]) => conn.partitionRawId()),
-          "\n\tcommand:", command);
+      if (oracle.getDebugLevel() === 1) {
+        oracle.logEvent(1, `${remoteAuthority
+          ? "Queued a remote command locally"
+          : "Done claiming a local event"} of authority "${authorityURIs[0]}":`,
+          "of partitions:", ...[].concat(
+              ...partitionDatas.map(([pdata, conn]) => [conn.getName(), pdata.eventId])));
+      } else if (oracle.getDebugLevel() >= 2) {
+        oracle.warnEvent(2, `Done ${remoteAuthority
+                ? "queuing a remote command locally"
+                : "claiming a local event"} of authority "${authorityURIs[0]}":`,
+            "\n\tpartitions:", ...partitionDatas.map(([, conn]) => conn.getName()),
+            "\n\tcommand:", command);
+      }
 
       if (!remoteAuthority) {
         const event = { ...command };
@@ -85,7 +93,13 @@ export function _claim (oracle: Oracle, command: Command, options: Object): Clai
       try {
         ret = await remoteAuthority.claim(command, operation.options).getFinalEvent();
       } catch (error) { throw oracle.wrapErrorEvent(error, "claim.remoteAuthority.claim"); }
-      oracle.warnEvent(1, `Done claiming remote command"`, ret);
+      if (oracle.getDebugLevel() === 1) {
+        oracle.logEvent(1, `Done claiming remote command of authority`, remoteAuthority,
+            "and of partitions:", ...[].concat(
+              ...partitionDatas.map(([pdata, conn]) => [conn.getName(), pdata.eventId])));
+      } else if (oracle.getDebugLevel() === 2) {
+        oracle.warnEvent(2, `Done claiming remote command"`, ret);
+      }
       return ret;
     } catch (error) {
       throw oracle.wrapErrorEvent(error, "claim",

@@ -8,7 +8,7 @@ import Vrapper from "~/engine/Vrapper";
 
 import UIComponent from "~/inspire/ui/UIComponent";
 
-import { dumpObject, thenChainEagerly } from "~/tools";
+import { thenChainEagerly } from "~/tools";
 
 /**
  * ValaaScope performs a semantically rich, context-aware render of its local UI focus according to
@@ -127,8 +127,6 @@ export default class ValaaScope extends UIComponent {
                 && (vOwner.propertyValue(key) !== scopeFrame)) {
               // TODO(iridian): This is initial non-rigorous prototype functionality:
               // The owner[key] value remains set even after the components get detached.
-              console.log(`Assigning scopeFrame to owner["${key}"]`,
-                  ...dumpObject(vOwner), ...dumpObject(scopeFrame));
               vOwner.alterProperty(key, VALEK.fromValue(scopeFrame));
             }
             const vScopeFrame = tryUnpackedHostValue(scopeFrame);

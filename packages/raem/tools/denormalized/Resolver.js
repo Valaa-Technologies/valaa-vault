@@ -239,14 +239,14 @@ export default class Resolver extends LogEventGenerator {
       if (partitionURI) {
         ref.setInactive();
         /*
-        this.info("tryBindToInactivePartitionObjectId: bound an id (with partitionURI set) as inactive",
-            "id, without checking whether that partition is actually active (which would be an error)",
+        this.info("tryBindToInactivePartitionObjectId: bound an id (with partitionURI) as inactive",
+            "id, without checking whether that partition is actually active (which'd be an error)",
             "<details suppressed to enable browser log collapsing>",
             // dumpify(id.toJSON()), id,
         );
         */
-        // FIXME(iridian): This is a quick hack! We need to have active partition resolution logic and
-        // object stubbing for referred but otherwise inactive resources.
+        // FIXME(iridian): This is a quick hack! We need to have active partition resolution logic
+        // and object stubbing for referred but otherwise inactive resources.
         return id;
       }
     }

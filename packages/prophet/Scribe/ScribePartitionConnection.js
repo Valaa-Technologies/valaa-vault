@@ -204,7 +204,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
       { buffer: ArrayBuffer, contentId: string, persistProcess: ?Promise<any> } {
     try {
       const { buffer, contentId } = bufferAndContentIdFromNative(content, mediaInfo);
-      if (mediaInfo.bvobId && (!mediaInfo.bvobId !== contentId)) {
+      if (mediaInfo && mediaInfo.bvobId && (mediaInfo.bvobId !== contentId)) {
         this.errorEvent(`\n\tINTERNAL ERROR: bvobId mismatch when preparing bvob for Media '${
                 mediaInfo.name}', CONTENT IS NOT PERSISTED`,
             "\n\tactual content id:", contentId,

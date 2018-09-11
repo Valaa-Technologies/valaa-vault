@@ -12,7 +12,7 @@ import VALEK, { dumpObject } from "~/engine/VALEK";
 import UIComponent from "~/inspire/ui/UIComponent";
 
 import {
-  arrayFromAny, derivedId, dumpify, isPromise, messageFromError, thenChainEagerly, wrapError,
+  arrayFromAny, derivedId, dumpify, messageFromError, thenChainEagerly, wrapError,
 } from "~/tools";
 
 export default function injectLensObjects (Valaa: Object, rootScope: Object,
@@ -426,7 +426,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       `Lens role for viewing a ValaaScope which has not yet loaded its
       lens frame.`,
     (focus, component) => !component.state || (component.state.scopeFrame === undefined),
-    () => "",
+    () => "<Loading frame...>",
   );
 
   createLensRoleSymbol("instanceLens",
@@ -579,14 +579,6 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
             const ret = (prototype != null)
                 ? prototype.instantiate(options)
                 : engine.create("Entity", options);
-            /*
-            console.log("Created scope frame:", ret,
-                "\n\tname, id:", options.name, frameRawId,
-                "\n\tprototype:", prototype,
-                "\n\tfocus:", focus,
-                "\n\tpartitionAuthorityURI:", partitionAuthorityURI, "owner:", owner,
-                "\n\tcomponent:", component);
-            */
             return ret;
           },
           (vResource_) => {

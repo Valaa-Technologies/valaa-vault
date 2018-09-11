@@ -22,7 +22,7 @@ export const SourceInfoTag = Symbol("VALK.SourceInfo");
 
 export function addStackFrameToError (error: Error, sourceObject: Object,
     sourceInfo: Object): Error {
-  if (!sourceInfo) return error;
+  if (!sourceInfo || (error == null) || (typeof error !== "object")) return error;
   invariantifyString(sourceInfo.mediaName, "(!sourceInfo || sourceInfo.mediaName)");
   invariantifyString(sourceInfo.source, "(!sourceInfo || sourceInfo.source)");
   invariantifyObject(sourceInfo.sourceMap, "(!sourceInfo || sourceInfo.sourceMap)",

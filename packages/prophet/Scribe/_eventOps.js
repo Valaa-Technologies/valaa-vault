@@ -1,9 +1,9 @@
 // @flow
 
-import Command, { isTransactedLike, UniversalEvent } from "~/raem/command";
+import Command, { isTransactedLike /* , UniversalEvent */ } from "~/raem/command";
 import { VRef, getRawIdFrom } from "~/raem/ValaaReference";
 
-import type { MediaInfo, NarrateOptions, ChronicleOptions, RetrieveMediaContent }
+import type { MediaInfo, NarrateOptions /* , ChronicleOptions */, RetrieveMediaContent }
     from "~/prophet/api/Prophet";
 
 import { dumpObject, invariantify, vdon } from "~/tools";
@@ -56,8 +56,9 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
   };
 }
 
-export async function _chronicleEventLog (connection: ScribePartitionConnection,
-    eventLog: UniversalEvent[], options: ChronicleOptions = {}): Promise<any> {
+export async function _chronicleEventLog (/* connection: ScribePartitionConnection,
+    eventLog: UniversalEvent[], options: ChronicleOptions = {} */): Promise<any> {
+  throw new Error("Scribe.chronicleEventLog not implemented");
 }
 
 export async function _recordTruth (connection: ScribePartitionConnection,

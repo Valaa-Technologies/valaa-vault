@@ -30,7 +30,6 @@
     "react-ace": "^5.8.0",
     "react-contextmenu": "^2.6.5",
     "react-dom": "^16.2.0",
-    "react-tap-event-plugin": "^3.0.2",
     "xhr2": "^0.1.4"
   }
 }

@@ -3,7 +3,6 @@
 // TODO(iridian): @valos/inspire entry is possibly not the appropriate place for babel-polyfill:
 // at the moment it still is the top level entry point, but this might change.
 import "@babel/polyfill";
-import injectTapEventPlugin from "react-tap-event-plugin";
 import { getURIQueryField } from "~/raem/ValaaURI";
 
 import InspireGateway from "~/inspire/InspireGateway";
@@ -20,8 +19,6 @@ import * as mediaDecoders from "./mediaDecoders";
 if (inBrowser()) {
   require("./inspire.css");
 }
-
-injectTapEventPlugin();
 
 const logger = new Logger();
 

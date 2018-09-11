@@ -103,7 +103,9 @@ export function _createReceiveTruthCollection (connection: OraclePartitionConnec
               if (!batch) {
                 // The old strategy - when not being batched, wait for previous retrieval to finish
                 // before sending new ones, ignoring errors.
-                try { await (ofMedia.ongoingRetrieval || {}).pendingContent; } catch (error) { /* */ }
+                try {
+                  await (ofMedia.ongoingRetrieval || {}).pendingContent;
+                } catch (error) { /* */ }
               } else {
                 batch.queue.push(thisRetrieval);
                 thisRetrieval.pendingRetrieveStart = new Promise(res => { retrieveStarted = res; });

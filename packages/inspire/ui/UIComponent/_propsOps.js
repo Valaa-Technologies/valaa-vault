@@ -1,4 +1,5 @@
 // @flow
+import React from "react";
 import isEqual from "lodash.isequal";
 
 import { Kuery } from "~/raem/VALK";
@@ -108,17 +109,8 @@ export function _checkForInfiniteRenderRecursion (component: UIComponent) {
 export function _comparePropsOrState (leftObject: any, rightObject: any, defaultEntryCompare: any,
     entryCompares: any = {}, type: any, debug: any
 ) {
-  if (_isSimplyEqual(leftObject, rightObject)) return false;
-  if ((typeof leftObject !== typeof rightObject)
-      || (typeof leftObject !== "object") || (leftObject === null) || (rightObject === null)
-      || (leftObject._sourceInfo !== rightObject._sourceInfo)) {
-    /*
-    if (debug) {
-      console.info(type, "objects differ:", leftObject, rightObject);
-    }
-    */
-    return true;
-  }
+  const simplyEqual = _isSimplyEqual(leftObject, rightObject);
+  if (simplyEqual !== undefined) return !simplyEqual;
 
   const leftKeys = Object.keys(leftObject);
   const rightKeys = Object.keys(rightObject);
@@ -144,7 +136,9 @@ export function _comparePropsOrState (leftObject: any, rightObject: any, default
     if (entryMode === "ignore") continue;
     const left = leftObject[key];
     const right = rightObject[key];
-    if (_isSimplyEqual(left, right)) continue;
+    const _isSubSimplyEqual = _isSimplyEqual(left, right);
+    if (_isSubSimplyEqual === true) continue;
+    if (_isSubSimplyEqual === false) return true;
     if (entryMode === "shallow") {
       /*
       if (debug) {
@@ -177,8 +171,13 @@ export function _comparePropsOrState (leftObject: any, rightObject: any, default
 
 function _isSimplyEqual (left, right) {
   if (left === right) return true;
-  if ((typeof left === "function") && (typeof right === "function") && left.name === right.name) {
-    return true;
+  if (typeof left !== typeof right) return false;
+  if (typeof left === "function") return (left.name === right.name);
+  if ((typeof left !== "object") || (left === null) || (right === null)) return false;
+  const isLeftReactElement = React.isValidElement(left);
+  if (isLeftReactElement !== React.isValidElement(right)) return false;
+  if (isLeftReactElement) {
+    if (left._sourceInfo || right._sourceInfo) return false;
   }
-  return false;
+  return undefined;
 }

@@ -164,7 +164,12 @@ export default class PartitionConnection extends LogEventGenerator {
     delete mediaInfo.mime;
     delete mediaInfo.type;
     delete mediaInfo.subtype;
-    return thenChainEagerly(this.requestMediaContents([mediaInfo]), results => results[0]);
+    return thenChainEagerly(
+        this.requestMediaContents([mediaInfo]),
+        results => results[0],
+        (error) => this.wrapErrorEvent(error, `readMediaContent(${mediaInfo.name})`,
+            "\n\tmediaInfo:", ...dumpObject(mediaInfo))
+    );
   }
 
   /**
@@ -187,7 +192,13 @@ export default class PartitionConnection extends LogEventGenerator {
           `decodeMediaContent('${mediaInfo.name || "<unnamed>"}')`,
               "\n\tmediaInfo:", ...dumpObject(mediaInfo));
     }
-    return thenChainEagerly(this.requestMediaContents([mediaInfo]), results => results[0]);
+    return thenChainEagerly(
+        this.requestMediaContents([mediaInfo]),
+        results => results[0],
+        (error) => this.wrapErrorEvent(error, `decodeMediaContent(${mediaInfo.name} as ${
+                mediaInfo.mime})`,
+            "\n\tmediaInfo:", ...dumpObject(mediaInfo)),
+    );
   }
 
   /**
@@ -204,7 +215,12 @@ export default class PartitionConnection extends LogEventGenerator {
    */
   getMediaURL (mediaInfo: MediaInfo): any {
     if (!mediaInfo.asURL) mediaInfo.asURL = true;
-    return thenChainEagerly(this.requestMediaContents([mediaInfo]), results => results[0]);
+    return thenChainEagerly(
+        this.requestMediaContents([mediaInfo]),
+        results => results[0],
+        (error) => this.wrapErrorEvent(error, `getMediaURL(${mediaInfo.name})`,
+            "\n\tmediaInfo:", ...dumpObject(mediaInfo)),
+    );
   }
 
   requestMediaContents (mediaInfos: MediaInfo[]): Promise<(Promise | any)[]> | (Promise | any)[] {

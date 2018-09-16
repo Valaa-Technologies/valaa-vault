@@ -6,7 +6,7 @@ import type ValaaURI from "~/raem/ValaaURI";
 import type { NarrateOptions } from "~/prophet/api/Prophet";
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 
-import { invariantifyNumber, vdon } from "~/tools";
+import { dumpObject, invariantifyNumber, isPromise, vdon } from "~/tools";
 
 import Oracle from "./Oracle";
 import OraclePartitionConnection from "./OraclePartitionConnection";
@@ -86,15 +86,14 @@ export async function _connect (connection: OraclePartitionConnection,
     throw new Error(`Existing actions found when trying to create a new partition '${
         connection.partitionURI().toString()}'`);
   }
-
   if ((onConnectData.requireLatestMediaContents !== false)
       && (ret.mediaRetrievalStatus || { latestFailures: [] }).latestFailures.length) {
-    throw new Error(`Failed to connect to partition: encountered ${
-            onConnectData.mediaRetrievalStatus.latestFailures.length
+    // FIXME(iridian): This error temporarily demoted to log error
+    connection.outputErrorEvent(new Error(`Failed to connect to partition: encountered ${
+          ret.mediaRetrievalStatus.latestFailures.length
         } latest media content retrieval failures (and acquirePartitionConnection.${
-        ""}options.requireLatestMediaContents does not equal false).`);
+        ""}options.requireLatestMediaContents does not equal false).`));
   }
-
   connection._isConnected = true;
   return ret;
 }
@@ -133,19 +132,35 @@ export async function _narrateEventLog (connection: OraclePartitionConnection,
     const collection = connection.createReceiveTruthCollection("initialAuthorityNarration", {
       retrieveBatchContents: authorityConnection.requestMediaContents.bind(authorityConnection),
     });
+
     const authorityNarration = Promise.resolve(authorityConnection.narrateEventLog({
       narrateRemote: true, subscribeRemote: options.subscribeRemote,
       firstEventId: connection._lastAuthorizedEventId + 1,
       callback: collection.receiveTruth,
     })).then(async (remoteNarration) =>
         ((await collection.finalize(remoteNarration)) || remoteNarration));
+
     if ((options.fullNarrate === true) || (!(ret.eventLog || []).length
         && !(ret.scribeEventLog || []).length && !(ret.scribeCommandQueue || []).length)) {
       // Handle step 2 of the opportunistic narration if local narration didn't find any events.
       const authorityResults = await authorityNarration;
       for (const key of Object.keys(authorityResults)) {
-        if (Array.isArray(authorityResults[key])) {
-          authorityResults[key] = await Promise.all(authorityResults[key]);
+        const resultEntry = authorityResults[key];
+        if (!Array.isArray(resultEntry)) continue;
+        for (let i = 0; i !== resultEntry.length; ++i) {
+          const value = resultEntry[i];
+          if (!isPromise(value)) continue;
+          try {
+            resultEntry[i] = await value;
+          } catch (error) {
+            const wrapped = connection.wrapErrorEvent(error,
+                    `narrateEventLog.authorityResults[${key}][${i}]`,
+                "\n\toptions:", ...dumpObject(options),
+                "\n\tcurrent ret:", ...dumpObject(ret));
+            if (error.blocksNarration) throw wrapped;
+            connection.outputErrorEvent(wrapped);
+            resultEntry[i] = wrapped;
+          }
         }
       }
       ret.mediaRetrievalStatus = collection.analyzeRetrievals();

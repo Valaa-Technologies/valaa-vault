@@ -78,7 +78,9 @@ export function _createReceiveTruthCollection (connection: OraclePartitionConnec
           if (pendingRetrieval) pendingRetrievals.push(ofMedia.ongoingRetrieval.pendingContent);
         }
         if (!pendingRetrievals.length) break; // No retrieval queue, no pending retrievals - finish.
-        await Promise.all(pendingRetrievals);
+        try { await Promise.all(pendingRetrievals); } catch (error) {
+          // Ignore retrieval failures - we're just waiting for graceful retries.
+        }
       }
     }
   };
@@ -126,7 +128,7 @@ export function _createReceiveTruthCollection (connection: OraclePartitionConnec
                 mediaInfo.name}), ${thisRetrieval.retries}. attempt`;
             if (thisRetrieval.retries <= _maxOnConnectRetrievalRetries) {
               connection.warnEvent(`${description} retrying after ignoring an exception: ${
-                  error.originalMessage || error.message}`);
+                  error.originalMessage || error.message}`, ...dumpObject({ error }));
             } else {
               thisRetrieval.error = connection.wrapErrorEvent(error, description,
                   "\n\tretrievals:", ...dumpObject(collection.retrievals),

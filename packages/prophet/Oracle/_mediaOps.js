@@ -47,9 +47,10 @@ export function _requestMediaContents (connection: OraclePartitionConnection,
     }
     ret = retrieveMediaContent(mediaInfo.mediaId, mediaInfo);
     if (ret !== undefined) {
+      // Initiate write but don't wait for it to complete. (really?).
       thenChainEagerly(ret,
         (content) => _prepareBvob(connection, content, mediaInfo, { remotePersist: false }),
-        onError.bind(this));
+        onError);
     }
     return ret;
   });

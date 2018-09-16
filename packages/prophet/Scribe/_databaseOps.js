@@ -113,8 +113,8 @@ export function _persistMediaEntry (connection: ScribePartitionConnection, newMe
         // TODO(iridian): Are there race conditions here? The refcount operations are not awaited on
         if (newInfo.bvobId) {
           if (!connection._prophet._bvobLookup[newInfo.bvobId]) {
-            console.log(`Can't find Media "${newInfo.name}" Bvob info for ${newInfo.bvobId
-                } when adding new content references`);
+            // console.log(`Can't find Media "${newInfo.name}" Bvob info for ${newInfo.bvobId
+            //    } when adding new content references`);
           } else {
             if (newMediaEntry.isInMemory) connection._prophet._addContentInMemoryReference(newInfo);
             if (newMediaEntry.isPersisted) connection._prophet._addContentPersistReference(newInfo);
@@ -122,8 +122,8 @@ export function _persistMediaEntry (connection: ScribePartitionConnection, newMe
         }
         if (oldBvobId) {
           if (!connection._prophet._bvobLookup[oldBvobId]) {
-            console.log(`Can't find Media "${newInfo.name}" Bvob info for ${oldBvobId
-                } when removing old content references`);
+            // console.log(`Can't find Media "${newInfo.name}" Bvob info for ${oldBvobId
+            //    } when removing old content references`);
           } else {
             if (oldEntry.isInMemory) connection._prophet._removeContentInMemoryReference(oldBvobId);
             if (oldEntry.isPersisted) connection._prophet._removeContentPersistReference(oldBvobId);

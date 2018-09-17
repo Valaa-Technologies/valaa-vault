@@ -374,15 +374,19 @@ function _maybeRenderSection (block, layout, sectionTheme, theme) {
     const arrayEntries = (Array.isArray(block) && Object.keys(block))
         || (((layout || {}).type === "array") && layout.entries);
     if (arrayEntries) {
-      const style = _getLayoutProperty([layout], "style");
-      const styler = (style && (sectionTheme || theme).decoratorOf(style)) || (text => text);
+      const styler = (sectionTheme || theme).decoratorOf([
+        _getLayoutProperty([layout], "transform"),
+        _getLayoutProperty([layout], "style"),
+      ]);
       ret = arrayEntries
-          .map(key => styler(_renderBlock(block[key], layout, sectionTheme || theme)))
+          .map(key => styler.call(
+              block[key], _renderBlock(block[key], layout, sectionTheme || theme)))
           .join(sectionTheme ? "\n" : " ");
     } else return undefined;
     if (!layout.trivial) shouldParagraphize = false;
   }
-  return ((ret !== undefined) && shouldParagraphize) ? theme.decoratorOf(theme.paragraphStyle)(ret)
+  return ((ret !== undefined) && shouldParagraphize)
+      ? theme.decoratorOf(theme.paragraphStyle).call(block, ret)
       : ret;
 }
 
@@ -405,16 +409,21 @@ function _renderChapters (chapters, chapterLookup, chaptersLayout, chaptersTheme
     const heading = _getLayoutProperty(lookups, "heading");
     const headingText = (typeof heading === "string") ? heading : (heading && heading.text);
     if (headingText) {
-      retRows.push(chaptersTheme.decoratorOf([
-        _getLayoutProperty(lookups, "heading", "style"), { heading: chaptersLayout.depth }
-      ])(headingText));
+      retRows.push(
+          chaptersTheme.decoratorOf(
+              [_getLayoutProperty(lookups, "heading", "style"), { heading: chaptersLayout.depth }])
+          .call(chapterBlock, headingText));
     }
     const sectionTheme = _getLayoutProperty(lookups, "oob")
         ? Object.create(chaptersTheme) : chaptersTheme;
     const chapterText = _renderBlock(chapterBlock, chaptersLayout, sectionTheme);
+    const transformer = _getLayoutProperty(lookups, "transform");
+    const transformedText = !transformer ? chapterText
+        : chaptersTheme.decoratorOf(transformer).call(chapterBlock, headingText);
     const style = _getLayoutProperty(lookups, "elementStyle")
         || _getLayoutProperty(lookups, "style");
-    retRows.push(!style ? chapterText : chaptersTheme.decoratorOf(style)(chapterText));
+    retRows.push(!style ? transformedText
+        : chaptersTheme.decoratorOf(style).call(chapterBlock, transformedText));
   });
   return retRows.join("\n");
 }
@@ -463,17 +472,20 @@ function _renderTable (rowKeys, rowLookup, columns, layout, tableTheme) {
   let pendingHeaderRow = headerRow;
   for (const rowKey of rowKeys) {
     const rowData = (rowKey === null) ? rowLookup : rowLookup[rowKey];
-    const elementLayouts = (_getLayout(rowData) || {}).entryLayouts || {};
+    const elementLayouts = (_getLayout(rowData) || {}).elementLayouts || {};
     const _columnElementRenderer = ([columnKey, columnLayout]) => {
+      const elementLayout = elementLayouts[columnKey];
+      const lookups = [elementLayout, columnLayout];
+      const transform = _getLayoutProperty(lookups, "transform");
       let text = (columnKey === null) ? rowKey
           : ((columnKey === "") || (typeof rowData !== "object")) ? rowData
           : (rowData || {})[columnKey];
-      const elementLayout = elementLayouts[columnKey];
-      const lookups = [elementLayout, columnLayout];
+      if (transform) text = tableTheme.decoratorOf(transform).call(rowData, text);
       if (typeof text !== "string") text = _renderBlock(text, layout, tableTheme);
       return [
         _escpipe(text, elementLayout || columnLayout),
         _getLayoutProperty(lookups, "elementStyle") || _getLayoutProperty(lookups, "style"),
+        rowData,
       ];
     };
     if (pendingHeaderRow) {
@@ -493,6 +505,7 @@ function _renderTable (rowKeys, rowLookup, columns, layout, tableTheme) {
         row => ((Array.isArray(row && row[0]) && row[columnIndex][0]) || "").length));
   });
   // console.log("layouts:", columnKeyLayouts, oobColumnKeyLayouts, "\nrows:", rows);
+  const rowStyle = _getLayoutProperty([layout], "elementStyle");
   return rows.map(row => {
     if (row === null) { // header underline placeholder
       return columnKeyLayouts.map(([, columnLayout]) =>
@@ -501,14 +514,19 @@ function _renderTable (rowKeys, rowLookup, columns, layout, tableTheme) {
               (columnLayout.align || "left") !== "left" ? ":" : "-"}`
       ).join("|");
     }
-    const _renderElement = ([text_, style_], index) => {
+    let rowData;
+    const _renderElement = ([text_, style_, rowData_], index) => {
+      rowData = rowData_;
       const columnLayout = (index === undefined) ? { width: 0 } : columnKeyLayouts[index][1];
       const text = (typeof text_ === "string") ? text_ : `<${typeof text_}>`;
-      return `${!style_ ? text : tableTheme.decoratorOf(style_)(text)
+      return `${!style_ ? text : tableTheme.decoratorOf(style_).call(rowData_, text)
           }${" ".repeat(Math.max(0, (columnLayout.width || 0) - text.length))}`;
     };
-    if (row.length && !Array.isArray(row[0])) return _renderElement(row); // oob column
-    return row.map(_renderElement).join("|");
+    let ret = (row.length && !Array.isArray(row[0])) ? _renderElement(row) // oob column
+        : row.map(_renderElement).join("|");
+    const style = _getLayoutProperty([_getLayout(rowData)], "style") || rowStyle;
+    if (style) ret = tableTheme.decoratorOf(style).call(rowData, ret);
+    return ret;
   }).join("\n");
 }
 

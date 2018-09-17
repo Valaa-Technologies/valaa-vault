@@ -350,16 +350,21 @@ const _vlm = globalVargs.vlm = {
 colors._setTheme = _setTheme;
 function _setTheme (theme) {
   this.decoratorOf = function decoratorOf (rule) {
-    return (...texts) => this.decorateWith([rule, "join"], texts);
+    const self = this;
+    return function decorate (...texts) {
+      return Object.assign(Object.create(self), {
+        object: this || null,
+      }).decorateWith([rule, "join"], texts);
+    };
   };
-  this.decorateWith = function decorateWith (rule, texts) {
+  this.decorateWith = function decorateWith (rule, texts = []) {
     try {
       if ((rule === undefined) || (rule === null)) return texts;
       if (typeof rule === "string") return this.decorateWith(this[rule], texts);
       if (typeof rule === "function") return rule.apply(this, texts);
       if (Array.isArray(rule)) {
         return rule.reduce(
-            (subTexts, ruleKey) => this.decorateWith(ruleKey, [].concat(subTexts)), texts);
+            (subTexts, subRule) => this.decorateWith(subRule, [].concat(subTexts)), texts);
       }
       return Object.keys(rule).reduce(
           (subTexts, ruleKey) => this.decorateWith(ruleKey, [rule[ruleKey]].concat(subTexts)),
@@ -402,8 +407,17 @@ const themes = {
       return [].concat(...[].concat(...texts).map(
         text => String(text).split(" ")));
     },
-    default (defaultValue, ...texts) {
-      return texts.length > 1 || (texts[0] !== undefined) ? texts : [defaultValue];
+    defaultValue (defaultValue, ...texts) {
+      if (texts.length > 1 || (texts[0] !== undefined)) return texts;
+      if (typeof defaultValue !== "object") return [defaultValue];
+      return this.decorateWith(defaultValue);
+    },
+    property (keyPath) {
+      const ret = [].concat(keyPath).reduce((v, key) =>
+          ((key == null) ? v
+          : (v == null) ? null
+          : v[key]), this.object);
+      return (ret !== undefined) ? [ret] : [];
     },
     cardinal (...textsAndOptions) {
       const options = { ..._vlm.cardinalDefault };
@@ -414,6 +428,10 @@ const themes = {
         } else if (textOrOpt && (typeof textOrOpt === "object")) Object.assign(options, textOrOpt);
       }
       return ret;
+    },
+    if: function if_ ([conditionRule, thenRule, elseRule], ...texts) {
+      const condition = this.decorateWith(conditionRule, texts);
+      return this.decorateWith(condition[0] ? thenRule : elseRule, texts);
     },
     matches (conditions, ...texts) {
       return [].concat(...texts.map(text => {
@@ -1006,7 +1024,7 @@ async function _invoke (commandSelector, argv) {
 
   this.ifVerbose(2)
       .expound("activeCommands: {", ...Object.keys(activeCommands).map(
-              key => `\n\t\t${key}: ${activeCommands[key].filePath}`),
+              key => `\n\t\t${key}: ${activeCommands[key].linkPath}`),
           "\n\t}");
 
   if (introspect) {
@@ -1052,7 +1070,7 @@ async function _invoke (commandSelector, argv) {
       }
       if (!module) {
         this.error(`missing symlink target for`, this.theme.command(commandName),
-            "ignoring command script at", activeCommand.filePath);
+            "ignoring command script at", activeCommand.linkPath);
         continue;
       }
 
@@ -1280,16 +1298,26 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
       if (__isDirectory(file)) return;
       const commandName = __valmaCommandFromPath(file.name);
       const poolCommand = pool.commands[commandName] || (pool.commands[commandName] = {
-        name: commandName, pool, file, filePath: this.path.join(pool.path, file.name),
+        name: commandName, pool, file, linkPath: this.path.join(pool.path, file.name),
       });
       if (ret[commandName]) {
         pool.stats.overridden = (pool.stats.overridden || 0) + 1;
         return;
       }
-      if (!poolCommand.module && shell.test("-e", poolCommand.filePath)) {
-        poolCommand.module = require(poolCommand.filePath);
-        this.ifVerbose(3)
-            .babble(`    command ${commandName} module found at path`, poolCommand.filePath);
+      if (!poolCommand.module && shell.test("-e", poolCommand.linkPath)) {
+        try {
+          poolCommand.module = require(poolCommand.linkPath);
+          this.ifVerbose(3)
+              .babble(`    command ${commandName} module found at path`, poolCommand.linkPath);
+        } catch (error) {
+          if (!this.isCompleting && !introspect && !this.vargv.dryRun) throw error;
+          poolCommand.module = false;
+          poolCommand.requireError = error;
+          this.ifVerbose(this.vargv.dryRun ? 0 : 1)
+              .exception(String(error),
+                  `    while trying to require command ${commandName} module at path`,
+                  poolCommand.linkPath);
+        }
       }
       const module = poolCommand.module;
       if (!module || !module.command || !module.describe || !module.handler) {
@@ -1297,7 +1325,7 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
           ret[commandName] = { ...poolCommand };
           return;
         }
-        throw new Error(`invalid command '${commandName}' script file '${poolCommand.filePath
+        throw new Error(`invalid command '${commandName}' script file '${poolCommand.linkPath
             }': can't open for reading or exports.command, ...describe or ...handler missing`);
       }
 
@@ -1509,7 +1537,7 @@ function _determineIntrospection (module, selector, isWildcard, invokeEntry) {
     // Introspect context
     ret.identityPool = { path: path.dirname(process.argv[1]), commands: {} };
     ret.identityPool.commands.vlm = {
-      name: "vlm", module, filePath: __filename, pool: ret.identityPool,
+      name: "vlm", module, linkPath: __filename, pool: ret.identityPool,
     };
   }
   if (!selector && !ret.entryIntro) { // show default listing
@@ -1588,18 +1616,21 @@ function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcar
   const missingPackage = "<package_missing>";
   const poolIntro = { "...": {
     stats: pool.stats,
+    elementStyle: { if: [{ property: "disabled" }, "strikethrough"] },
     columns: [
       { name: { text: "command", style: "command" } },
       { usage: { style: "command" } },
-      { description: { style: { default: missingPackage } } },
+      { description: { transform: { defaultValue: { property: "disabledReason" } } } },
       { package: { style: "package" } },
-      { version: { style: [{ default: missingPackage }, "version"] } },
+      { version: {
+        style: "version", transform: { defaultValue: { property: "disabledReason" } }
+      } },
       { pool: { text: "source pool" } },
       { file: { text: "script path", style: "path" } },
-      { resolved: { text: "real file path", style: [{ default: missingFile }, "path"] } },
-      { introduction: {
-        oob: true, elementStyle: isWildcard && { prefix: "\n", suffix: "\n" }
+      { resolved: {
+        text: "real file path", style: "path", transform: { defaultValue: missingFile }
       } },
+      { introduction: { oob: true, elementStyle: isWildcard && { prefix: "\n", suffix: "\n" } } },
       { source: { oob: true, elementStyle: "cardinal" } },
     ].filter(c => introspect.show[Object.keys(c)[0]]),
   } };
@@ -1611,25 +1642,41 @@ function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcar
     const poolCommand = pool.commands[name];
     if (!poolCommand || !introedCommands[name]
         || (poolCommand.disabled && isWildcard && !matchAll)) return;
-    const info = __commandInfo(poolCommand.filePath, pool.path);
-    const module = poolCommand.module
-        || (poolCommand.module = info.resolvedPath && require(info.resolvedPath));
-    const rowData = { disabled: !!poolCommand.disabled };
-    if (!module || !module.command) rowData.missing = true;
-    if (poolCommand.disabled) rowData.disabled = true;
+    const info = __commandInfo(poolCommand.linkPath, pool.path);
+    const module = (poolCommand.module !== undefined) ? (poolCommand.module || undefined)
+        : (poolCommand.module = info.resolvedPath && require(info.resolvedPath));
+    const rowData = {};
+    if (poolCommand.disabled) {
+      rowData.disabled = "SELF_DISABLED";
+      rowData.disabledReason = `Command self-disabled: ${poolCommand.disabled}`;
+    } else if (poolCommand.requireError) {
+      rowData.moduleMissing = true;
+      rowData.disabled = "REQUIRE_ERROR";
+      rowData.disabledReason = `Error during require: ${poolCommand.requireError}`;
+    } else if (!poolCommand.module) {
+      rowData.moduleMissing = true;
+      rowData.disabled = "FILE_MISSING";
+      rowData.disabledReason = `Command link broken: "${poolCommand.linkPath}"`;
+    } else if (!module.command || !module.builder || !module.handler) {
+      rowData.moduleMissing = true;
+      rowData.disabled = "NOT_A_COMMAND";
+      rowData.disabledReason = `Command module is missing required exports: '${
+          ["command", "builder", "handler"] .filter(v => !module[v]).join("', '")}'`;
+    }
     if ((introedCommands[name] || { pool }).pool !== pool) {
       if (!showOverridden) return;
       rowData.overridden = true;
       rowData.entries = { name: { style: "overridden", }, usage: { style: "overridden " } };
     }
     const _addData = (property, data) => introspect.show[property] && (rowData[property] = data);
-    _addData("name", poolCommand.disabled ? `(${name})` : name);
-    _addData("usage", (module && module.command) || `${name} ${missingPackage}`);
-    _addData("description", (module && module.describe) || missingPackage);
+
+    _addData("name", rowData.disabled ? `(${name})` : name);
+    _addData("usage", rowData.disabled ? `(${name} <${rowData.disabled}>)` : module.command);
+    _addData("description", module && module.describe);
     _addData("package", info.package);
     _addData("version", info.version || missingPackage);
     _addData("pool", info.poolPath);
-    _addData("file", info.filePath);
+    _addData("file", info.linkPath);
     _addData("resolved", info.resolvedPath || missingFile);
     if (introspect.show.introduction) {
       rowData.introduction = !module ? null : (module.introduction || module.describe);
@@ -1649,10 +1696,10 @@ function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcar
   return poolIntro;
 }
 
-function __commandInfo (filePath, poolPath) {
-  const ret = { filePath, poolPath };
-  if (!filePath || !shell.test("-e", filePath)) return ret;
-  ret.resolvedPath = fs.realpathSync(filePath);
+function __commandInfo (linkPath, poolPath) {
+  const ret = { linkPath, poolPath };
+  if (!linkPath || !shell.test("-e", linkPath)) return ret;
+  ret.resolvedPath = fs.realpathSync(linkPath);
   let remaining = path.dirname(ret.resolvedPath);
   while (remaining !== "/") {
     const packagePath = _vlm.path.join(remaining, "package.json");

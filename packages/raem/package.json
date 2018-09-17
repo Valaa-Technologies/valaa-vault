@@ -1,6 +1,6 @@
 {
   "name": "@valos/raem",
-  "version": "0.32.0-prerelease.1",
+  "version": "0.32.0-prerelease.2",
   "description": "Valaa Resources And Events Model (ValaaRAEM) API, Schema",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
@@ -14,7 +14,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@valos/tools": "^0.32.0-prerelease.1",
+    "@valos/tools": "^0.32.0-prerelease.2",
     "graphql": "^0.6.2",
     "immutable": "~3.7.4",
     "url-parse": "^1.4.1"

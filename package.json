@@ -28,10 +28,9 @@
   },
   "devDependencies": {
     "@valos/toolset-revealer": ">0.32.0-prerelease",
-    "@valos/toolset-vault": "file:./packages/toolset-vault",
+    "@valos/toolset-vault": ">0.32.0-prerelease",
     "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.5.0",
-    "valma": "file:./packages/valma",
-    "yalc": "^1.0.0-pre.22"
+    "valma": ">0.32.0-prerelease"
   }
 }

@@ -47,22 +47,63 @@ const defaultPaths = {
 
 const defaultCommandPrefix = "valma-";
 
-// vlm - the Valma global API singleton - these are available to all command scripts via their
-// yargs.vlm (in scripts exports.builder) as well as yargv.vlm (in scripts exports.handler).
+// vlm - the Valma global API root context (with vlm.taskDepth === 0).
+// Nested command invokations and delegations will create local vlm
+// contexts with increased vlm.taskDepth and which inherit from their
+// parent contexts as per Object.create(parentVLM). These vlm contexts
+// are available to their command script modules via exports.builder
+// *yargs.vlm* parameter and also via exports.handler *yargv.vlm*
+// parameter.
 const _vlm = globalVargs.vlm = {
-  // Calls valma command with argv.
-  // Any plain objects are expanded to boolean or parameterized flags depending on the value type.
+
+  // Executes a command as an interactive foreground task and returns
+  // a promise to its result value. If the command results in an error
+  // it will be delivered through the promise reject. Any plain object
+  // args will have their key-value pairs expanded to boolean or
+  // parameterized flags depending on the value type, using the key as
+  // the flag name.
+  //
+  // Only one foreground task can execute at one time at a given
+  // vlm.taskDepth. Subsequent foreground task executions at
+  // a particular taskDepth will wait until all previously executed
+  // tasks are complete before starting themselves.
+  // All vlm.inquire calls are considered foreground tasks.
+  // FIXME(iridian): Actually implement the above semantics. Now
+  // there's no sequencing.
+  //
+  // A coding principle of awaiting on the result of all execute calls
+  // will result in a strictly linear execution of all foreground task
+  // computation, side-effects and inputs. Conversely not awaiting for
+  // a child task to finish allows the parent task to continue
+  // computation, display diagnostics and delegate new background tasks.
+  //
+  // Nevertheless the overall control flow happens in a linear fashion
+  // as new foreground tasks will wait for previous ones to finish.
+  execute,
+
+  // Special case of execute of the form 'vlm <command> ...'.
   invoke,
 
-  // TODO(iridian): Rename to delegate and clarify semantics with roughly following ideas:
-  // Delegate initiates a parallel execution with only limited diagnostics messages and for which
-  // the return value on completion is collected and returned to the delegate caller in a promise.
-  // Catastrophic interactions may be prompted from the user, at least by vlm command delegates.
+  // Initiates the given command as a primarily non-interactive
+  // background task which returns the command output in a promise or
+  // rejects it in case of an error.
+  //
+  // Interactive questions which are requested via vlm.inquire will
+  // throw, unless the question has the 'audience' option set to true.
+  // In this case the user is prompted for an audience at the next
+  // suitable time.
+  //
+  // All diagnostics and standard error output is buffered and
+  // displayed only before the task completes or immediately before
+  // user accepts a valma audience.
+  //
+  // For native commands the standard output is buffered and returned
+  // as a string (or as a JSON.parse'd object if options.json is
+  // truthy) and failures are delivered as Error objects via
+  // the promise reject.
+  delegate,
 
-
-  // Executes a command and returns a promise of the command standard output as string.
-  // Any plain objects are expanded to boolean or parameterized flags depending on the value type.
-  execute,
+  taskDepth: 0,
 
   cwd: process.cwd(),
 
@@ -235,13 +276,10 @@ const _vlm = globalVargs.vlm = {
   // As a diagnostic message outputs to stderr where available.
   echo (...rest) {
     if (this.theme.echo) {
-      if ((rest[0] || "").includes("<<")) this.echoIndent -= 2;
-      console.warn(" ".repeat(this.echoIndent - 1), this.theme.echo(...rest));
-      if ((rest[0] || "").includes(">>")) this.echoIndent += 2;
+      console.warn(" ".repeat((this.taskDepth * 2) - 1), this.theme.echo(...rest));
     }
     return this;
   },
-  echoIndent: 4,
   lineLength: 71,
 
   // Diagnostics ops
@@ -936,8 +974,114 @@ async function handler (vargv) {
   ####   #    #  ######  ######    #     #    #  ######  #    #  #    #
 */
 
+
+/**
+ * Execute given executable as per child_process.spawn.
+ * Extra options:
+ *   noDryRun: if true this call will be executed even if --dry-run is requested.
+ *   dryRunReturn: during dry runs this call will return immediately with the value of this option.
+ *
+ * All argv must be strings, all non-strings and falsy values will be filtered out.
+ *
+ * @param {*} executable
+ * @param {*} [argv=[]]
+ * @param {*} [spawnOptions={}]
+ * @returns
+ */
+async function execute (args, options = {}) {
+  this._flushPendingConfigWrites();
+  const argv = __processArgs(args);
+  if ((argv[0] === "vlm") && !Object.keys(options).length) {
+    argv.shift();
+    const vargv = this._parseUntilLastPositional(argv, module.exports.command);
+    return await this.invoke(vargv.command, vargv._,
+        { processArgs: false, flushConfigWrites: true, delegate: options.delegate });
+  }
+  const executeVLM = Object.create(this);
+  ++executeVLM.taskDepth;
+  return new Promise((resolve, failure) => {
+    this.echo(`${this.getContextIndexText()}>> ${executeVLM.getContextIndexText()}$`,
+        `${this.theme.executable(...argv)}`);
+    let maybeOutput, maybeDiagnostics;
+    const _onDone = (error, code, signal) => {
+      if (code || signal) {
+        this.echo(`${this.getContextIndexText()}<< ${executeVLM.getContextIndexText()}$`,
+            `${this.theme.executable(argv[0])}:`,
+        this.theme.error("<error>:", code || signal));
+        failure(code || signal);
+      } else {
+        Promise.resolve(maybeOutput)
+        .then(async output => {
+          this._refreshActivePools();
+          this._reloadPackageAndToolsetsConfigs();
+          const diagnostics = await maybeDiagnostics;
+          if (typeof diagnostics === "string") {
+            this.echo(`${this.getContextIndexText()}<> ${executeVLM.getContextIndexText()}$`,
+                `${this.theme.executable(argv[0])}, delegate diagnostics/stderr:`);
+            const indent = " ".repeat((executeVLM.taskDepth * 2) - 1);
+            this.speak(indent, diagnostics.replace(/\n/g, `\n${indent} `));
+          }
+          this.echo(`${this.getContextIndexText()}<< ${executeVLM.getContextIndexText()}$`,
+              `${this.theme.executable(argv[0])}:`, this._peekReturnValue(output, 71));
+          return output;
+        }).then(resolve, failure);
+      }
+    };
+
+    if (options.dryRun || (options.dryRun !== false && this.vargv && this.vargv.dryRun)) {
+      executeVLM.echo("dry-run: skipping execution and returning:",
+          executeVLM.theme.blue(options.dryRunReturn));
+      maybeOutput = options.dryRunReturn;
+      setTimeout(() => _onDone(null, 0), 2000);
+    } else {
+      const subProcess = childProcess.spawn(
+          argv[0],
+          argv.slice(1), {
+            stdio: options.delegate
+                ? ["ignore", "pipe", "pipe"]
+                : ["inherit", "pipe", "inherit"],
+            ...options.spawn,
+            detached: true,
+          },
+      );
+      subProcess.on("exit", (code, signal) => _onDone(null, code, signal));
+      subProcess.on("error", _onDone);
+      process.on("SIGINT", () => {
+        this.warn("vlm killing:", this.theme.green(...argv));
+        process.kill(-subProcess.pid, "SIGTERM");
+        process.kill(-subProcess.pid, "SIGKILL");
+      });
+      process.on("SIGTERM", () => {
+        this.warn("vlm killing:", this.theme.green(...argv));
+        process.kill(-subProcess.pid, "SIGTERM");
+        process.kill(-subProcess.pid, "SIGKILL");
+      });
+
+      // TODO(iridian): Implement stderr.isTTY faking on the child process side, so that client
+      // scripts emit colors
+      const _readStreamContent = (stream) => {
+        let resolveContent;
+        const ret = new Promise(resolve_ => { resolveContent = resolve_; });
+        let contentBuffer = "";
+        stream.on("data", (chunk) => { contentBuffer += chunk; });
+        stream.on("end", () => { resolveContent(contentBuffer); });
+        stream.on("error", _onDone);
+        return ret;
+      };
+
+      maybeOutput = _readStreamContent(subProcess.stdout);
+      if (options.delegate) maybeDiagnostics = _readStreamContent(subProcess.stderr);
+    }
+  });
+}
+
+function delegate (args, options = {}) {
+  return execute.call(this, args, { ...options, delegate: true });
+}
+
 async function invoke (commandSelector, args, options = {}) {
   const invokeVLM = Object.create(this);
+  ++invokeVLM.taskDepth;
   invokeVLM.contextVLM = this;
   // Remove everything after space so that exports.command can be given as commandSelector as-is
   // (these often have yargs usage arguments after the command selector itself).
@@ -1335,6 +1479,7 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
       subVargs.vlm = Object.assign(Object.create(this),
           module.vlm,
           { contextCommand: commandName, vargs: subVargs });
+      ++subVargs.vlm.taskDepth;
 
       const activeCommand = ret[commandName] = {
         ...poolCommand,
@@ -1423,72 +1568,6 @@ function listMatchingCommands (commandSelector, matchAll = false) {
 
 function listAllMatchingCommands (commandSelector) {
   return listMatchingCommands.call(this, commandSelector, true);
-}
-
-/**
- * Execute given executable as per child_process.spawn.
- * Extra spawnOptions:
- *   noDryRun: if true this call will be executed even if --dry-run is requested.
- *   dryRunReturn: during dry runs this call will return immediately with the value of this option.
- *
- * All argv must be strings, all non-strings and falsy values will be filtered out.
- *
- * @param {*} executable
- * @param {*} [argv=[]]
- * @param {*} [spawnOptions={}]
- * @returns
- */
-async function execute (args, spawnOptions = {}) {
-  this._flushPendingConfigWrites();
-  const argv = __processArgs(args);
-  if ((argv[0] === "vlm") && !Object.keys(spawnOptions).length) {
-    argv.shift();
-    const vargv = this._parseUntilLastPositional(argv, module.exports.command);
-    return await this.invoke(vargv.command, vargv._,
-        { processArgs: false, flushConfigWrites: true });
-  }
-  return new Promise((resolve, failure) => {
-    this.echo(`${this.getContextIndexText()}>>$`, `${this.theme.executable(...argv)}`);
-    const _onDone = (code, signal) => {
-      if (code || signal) {
-        this.echo(`${this.getContextIndexText()}<<$`, `${this.theme.executable(argv[0])}:`,
-        this.theme.error("<error>:", code || signal));
-        failure(code || signal);
-      } else {
-        this._refreshActivePools();
-        this._reloadPackageAndToolsetsConfigs();
-        this.echo(`${this.getContextIndexText()}<<$`, `${this.theme.executable(argv[0])}:`,
-            this.theme.warning("execute return values not implemented yet"));
-        resolve();
-      }
-    };
-    if (this.vargv && this.vargv.dryRun && !spawnOptions.noDryRun) {
-      this.echo("      dry-run: skipping execution and returning:",
-      this.theme.blue(spawnOptions.dryRunReturn || 0));
-      _onDone(spawnOptions.dryRunReturn || 0);
-    } else {
-      const subProcess = childProcess.spawn(
-          argv[0],
-          argv.slice(1), {
-            stdio: ["inherit", "inherit", "inherit"],
-            ...spawnOptions,
-            detached: true,
-          },
-      );
-      subProcess.on("exit", _onDone);
-      subProcess.on("error", _onDone);
-      process.on("SIGINT", () => {
-        this.warn("vlm killing:", this.theme.green(...argv));
-        process.kill(-subProcess.pid, "SIGTERM");
-        process.kill(-subProcess.pid, "SIGKILL");
-      });
-      process.on("SIGTERM", () => {
-        this.warn("vlm killing:", this.theme.green(...argv));
-        process.kill(-subProcess.pid, "SIGTERM");
-        process.kill(-subProcess.pid, "SIGKILL");
-      });
-    }
-  });
 }
 
 // All nulls and undefines are filtered out.

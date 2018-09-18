@@ -205,7 +205,7 @@ export async function _chronicleEventLog (connection: OraclePartitionConnection,
     currentEventId = eventId + 1;
   }
   await collection.finalize(explicitEventLogNarrations);
-  ret.explicitEventLog = await Promise.all(explicitEventLogNarrations);
+  ret.explicitEventLog = Promise.all(explicitEventLogNarrations);
   ret.mediaRetrievalStatus = collection.analyzeRetrievals();
   return ret;
 }

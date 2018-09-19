@@ -151,15 +151,15 @@ exports.handler = async (yargv) => {
     let defaultNPMIgnore = vlm.path.resolve(".npmignore");
     if (!vlm.shell.test("-f", defaultNPMIgnore)) defaultNPMIgnore = null;
 
-    selections.forEach(selection => {
+    for (const selection of selections) {
       const { name, sourceDirectory, targetDirectory, exists, failure } = selection;
-      if (failure) return;
+      if (failure) continue;
       if (exists && !yargv.overwrite) {
         vlm.error(`Cannot assemble package '${vlm.theme.package(name)}'`,
             `an existing assembly exists at '${vlm.theme.path(targetDirectory)
             }' and no --overwrite is specified)`);
         selection.failure = "pending assembly found";
-        return;
+        continue;
       }
 
       vlm.info(`Assembling package '${vlm.theme.package(name)}'`, "into", targetDirectory);
@@ -172,18 +172,17 @@ exports.handler = async (yargv) => {
         vlm.shell.cp(defaultNPMIgnore, targetDirectory);
       }
       if (vlm.shell.test("-f", vlm.path.join(sourceDirectory, "babel.config.js"))) {
-        const result = vlm.shell.exec(
-            `TARGET_ENV=${yargv.babelTargetEnv} babel ${sourceDirectory} --out-dir ${
-                targetDirectory}`);
+        const result = await vlm.delegate(`babel ${sourceDirectory} --out-dir ${targetDirectory}`,
+            { spawn: { env: { ...process.env, TARGET_ENV: yargv.babelTargetEnv } } });
         if (!String(result).match(/Successfully compiled/)) {
           selection.failure = "babel transpilation not successful";
           vlm.error(`${selection.failure} for ${vlm.theme.package(name)}`);
-          return;
+          continue;
         }
       }
       vlm.shell.rm("-rf", vlm.path.join(targetDirectory, "node_modules"));
       selection.assembled = true;
-    });
+    }
     vlm.info("No catastrophic errors during assembly");
   }
 
@@ -241,26 +240,30 @@ exports.handler = async (yargv) => {
     });
   }
 
-  let successes = 0;
   const ret = {
-    assemblies: ["...", {
+    selectedAssemblies: selections.length,
+    successfulAssemblies: 0,
+    failedAssemblies: 0,
+    assemblyBreakdown: ["...", {
       heading: process.argv.slice(1),
       columns: [
         ["package", { style: "package" }],
         ["status", { headerStyle: ["bold", "white"], style: "green" }],
         ["resolution", { headerStyle: ["bold", "white"], style: { matches: [
-          ["updated", ["bold", "green"]],
-          ["kept at ", ["bold", "red"]],
+          ["updated", "success"],
+          ["kept at ", "failure"],
           ["", ["bold", "yellow"]],
         ], }, }],
         ["version", { headerStyle: ["bold", "white", "version"], style: "version" }],
         ["original", { headerStyle: ["bold", "white", "version"], style: "version" }],
       ],
     }],
+    success: false,
   };
-  ret.assemblies.push(...selections.map(({ name, packageConfig, packagePath, failure }) => {
+  ret.assemblyBreakdown.push(...selections.map(({ name, packageConfig, packagePath, failure }) => {
     const newConfig = JSON.parse(vlm.shell.head({ "-n": 1000000 }, packagePath));
-    if (!failure) ++successes;
+    if (!failure) ++ret.successfulAssemblies;
+    else ++ret.failedAssemblies;
     const result = {
       package: name,
       status: failure ? "failed" : "success",
@@ -273,13 +276,15 @@ exports.handler = async (yargv) => {
     if (newConfig.version !== packageConfig.version) result.original = packageConfig.version;
     return result;
   }));
-  if (successes === selections.length) {
-    vlm.info(vlm.theme.green(`Successfully assembled all packages`), "out of", selections.length,
-        "selected packages");
-  } else if (!successes) {
-    vlm.error(`Failed to assemble any of the ${selections.length} selected packages`);
+  if (ret.successfulAssemblies === ret.selectedAssemblies) {
+    ret.success = true;
+    vlm.info(vlm.theme.green(`Successfully assembled all packages`), "out of",
+        ret.selectedAssemblies, "selected packages");
+  } else if (!ret.successfulAssemblies) {
+    vlm.error(`Failed to assemble any of the ${ret.selectedAssemblies} selected packages`);
   } else {
-    vlm.warn(`Assembled only ${successes} out of the ${selections.length} selected packages`);
+    vlm.warn(`Partially assembled only ${ret.successfulAssemblies} out of the ${
+        ret.selectedAssemblies} selected packages`);
   }
   return ret;
 };

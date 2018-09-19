@@ -497,6 +497,9 @@ const themes = {
     package: ["dim", "bold", "yellow"],
     path: ["underline"],
     version: ["italic"],
+    name: ["italic"],
+    success: ["bold", "green"],
+    failure: ["bold", "red"],
   },
 };
 
@@ -1003,36 +1006,52 @@ async function execute (args, options = {}) {
     this.echo(`${this.getContextIndexText()}>> ${executeVLM.getContextIndexText()}$`,
         `${this.theme.executable(...argv)}`);
     let maybeOutput, maybeDiagnostics;
-    const _onDone = (error, code, signal) => {
-      if (code || signal) {
-        this.echo(`${this.getContextIndexText()}<< ${executeVLM.getContextIndexText()}$`,
-            `${this.theme.executable(argv[0])}:`,
-        this.theme.error("<error>:", code || signal));
-        failure(code || signal);
-      } else {
-        Promise.resolve(maybeOutput)
+    const _onDone = (error, code, signal) => Promise.resolve(maybeOutput)
         .then(async output => {
-          this._refreshActivePools();
-          this._reloadPackageAndToolsetsConfigs();
           const diagnostics = await maybeDiagnostics;
-          if (typeof diagnostics === "string") {
-            this.echo(`${this.getContextIndexText()}<> ${executeVLM.getContextIndexText()}$`,
-                `${this.theme.executable(argv[0])}, delegate diagnostics/stderr:`);
-            const indent = " ".repeat((executeVLM.taskDepth * 2) - 1);
-            this.speak(indent, diagnostics.replace(/\n/g, `\n${indent} `));
+          let result;
+          let processedOutput = output;
+          try {
+            if (options.stdout === "json") processedOutput = JSON.parse(output);
+            if (error) {
+              result = error;
+            } else if (code || signal) {
+              result = (typeof diagnostics === "string") && (options.stderr === "erroronly")
+                  ? new Error(diagnostics.split("\n")[0])
+                  : new Error(`received ${signal ? "signal" : "code"} ${signal || code}`);
+            } else {
+              this._refreshActivePools();
+              this._reloadPackageAndToolsetsConfigs();
+              result = processedOutput;
+            }
+          } catch (parseError) {
+            result = parseError;
+          }
+          if ((typeof diagnostics === "string") && diagnostics) {
+            if (result instanceof Error) result.stderr = diagnostics;
+            if (options.stderr !== "erroronly") {
+              this.echo(`${this.getContextIndexText()}<> ${executeVLM.getContextIndexText()}$`,
+                  `${this.theme.executable(argv[0])}, diagnostics/stderr output (${
+                      diagnostics.length} chars):`);
+              const indent = " ".repeat((executeVLM.taskDepth * 2) - 1);
+              this.speak(indent, diagnostics.replace(/\n/g, `\n${indent} `));
+            }
           }
           this.echo(`${this.getContextIndexText()}<< ${executeVLM.getContextIndexText()}$`,
-              `${this.theme.executable(argv[0])}:`, this._peekReturnValue(output, 71));
-          return output;
-        }).then(resolve, failure);
-      }
-    };
+              `${this.theme.executable(argv[0])}:`, this._peekReturnValue(result, 71));
+          if (result instanceof Error) {
+            result.stdout = processedOutput || output;
+            throw result;
+          }
+          return result;
+        })
+        .then(resolve, failure);
 
     if (options.dryRun || (options.dryRun !== false && this.vargv && this.vargv.dryRun)) {
       executeVLM.echo("dry-run: skipping execution and returning:",
           executeVLM.theme.blue(options.dryRunReturn));
       maybeOutput = options.dryRunReturn;
-      setTimeout(() => _onDone(null, 0), 2000);
+      _onDone(null, 0);
     } else {
       const subProcess = childProcess.spawn(
           argv[0],
@@ -1088,7 +1107,8 @@ async function invoke (commandSelector, args, options = {}) {
   const selector = commandSelector && commandSelector.split(" ")[0];
   const argv = (options.processArgs !== false) ? __processArgs(args) : args;
   if (!options.suppressOutermostEcho) {
-    invokeVLM.echo(`${this.getContextIndexText()}>> ${invokeVLM.getContextIndexText()}vlm`,
+    invokeVLM.echo(`${this.getContextIndexText()}>> ${invokeVLM.getContextIndexText()}${
+        invokeVLM.theme.executable("vlm")}`,
         invokeVLM.theme.command(selector, ...argv));
   }
   let echoResult;
@@ -1101,7 +1121,8 @@ async function invoke (commandSelector, args, options = {}) {
     throw error;
   } finally {
     if (!options.suppressOutermostEcho) {
-      invokeVLM.echo(`${this.getContextIndexText()}<< ${invokeVLM.getContextIndexText()}vlm`,
+      invokeVLM.echo(`${this.getContextIndexText()}<< ${invokeVLM.getContextIndexText()}${
+          invokeVLM.theme.executable("vlm")}`,
           `${invokeVLM.theme.command(selector)}:`, echoResult);
     }
     if (options.flushConfigWrites) {
@@ -1115,7 +1136,12 @@ function _peekReturnValue (value, clipLength) {
   let ret;
   if ((typeof value === "object") && value && !Array.isArray(value)
       && Object.getPrototypeOf(value) !== Object.prototype) {
-    ret = "<complex object>";
+    if (value instanceof Error) {
+      ret = value.message;
+      ret = `<Error: ${ret.length <= clipLength ? ret : `${ret.slice(0, clipLength - 9)}...`}>`;
+    } else {
+      ret = "<complex object>";
+    }
   } else if (value === undefined) {
     ret = "<undefined>";
   } else if (typeof value === "function") {
@@ -1246,7 +1272,8 @@ async function _invoke (commandSelector, argv) {
         }
         try {
           if (isWildcardCommand) {
-            this.echo(`${this.getContextIndexText()}>>* ${subVLM.getContextIndexText()}vlm`,
+            this.echo(`${this.getContextIndexText()}>>* ${subVLM.getContextIndexText()}${
+                this.theme.executable("vlm")}`,
                 this.theme.command(commandName, ...argv));
           }
           await subVLM._fillVargvInteractively();
@@ -1300,7 +1327,8 @@ async function _invoke (commandSelector, argv) {
             let retValue = JSON.stringify(ret[ret.length - 1]);
             if (retValue === undefined) retValue = "undefined";
             if (isWildcardCommand) {
-              this.echo(`${this.getContextIndexText()}<<* ${subVLM.getContextIndexText()}vlm`,
+              this.echo(`${this.getContextIndexText()}<<* ${subVLM.getContextIndexText()}${
+                  this.theme.executable("vlm")}`,
                   `${this.theme.command(commandName)}:`,
                   this._peekReturnValue(retValue, 40));
             }
@@ -1740,7 +1768,8 @@ function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcar
       rowData.moduleMissing = true;
       rowData.disabled = "NOT_A_COMMAND";
       rowData.disabledReason = `Command module is missing required exports: '${
-          ["command", "builder", "handler"] .filter(v => !module[v]).join("', '")}'`;
+        ["command", "builder", "handler"].filter(v => !module[v]).join("', '")
+      }'`;
     }
     if ((introedCommands[name] || { pool }).pool !== pool) {
       if (!showOverridden) return;

@@ -250,7 +250,10 @@ function _resolveObjectColumns (target, layout) {
   const columns = [];
   const columnLookup = {};
   if ((layout.height === 1) && (layout.type === "object")) {
-    layout.columns = [[null, { text: "key" }], ["", { text: "value" }]];
+    layout.columns = [
+      [null, { text: layout.keyText || "key" }],
+      ["", { text: layout.valueText || "value" }],
+    ];
   } else if (layout.height === 2) {
     // Gather all column names from row properties.
     layout.entries.forEach(entry => {

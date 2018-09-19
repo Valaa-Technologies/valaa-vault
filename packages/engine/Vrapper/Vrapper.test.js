@@ -215,7 +215,7 @@ describe("Vrapper", () => {
         testVrapper.engine._integrateDecoding = mockIntegrateDecoding;
         testVrapper.interpretContent = (() => "");
         testVrapper.hasInterface = () => true;
-        testVrapper.get = function (kuery) {
+        testVrapper.get = function get (kuery) {
           if (kuery === Vrapper.toMediaInfoFields) return ({ ...testVrapperMediaInfo });
           return Vrapper.prototype.get.call(this, kuery);
         };

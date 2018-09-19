@@ -69,8 +69,10 @@ exports.builder = (yargs) => yargs.options({
     description: "Allows unchanged packages in the selection (default is to exclude them)",
   },
   versioning: {
-    type: "boolean", default: true,
-    description: "Bump the version, make a git commit and a git tag with lerna",
+    type: "any", default: true, choices: [false, true, "amend"],
+    description: `Bump the version, make a git commit and a git tag with ${
+        yargs.vlm.theme.executable("lerna version")}.
+'amend' will amend the most recent commit instead of creating a new one.`,
   },
   assemble: {
     type: "boolean", default: true,
@@ -103,7 +105,7 @@ exports.handler = async (yargv) => {
   vlm.info("Selecting packages matching:", vlm.theme.argument(...requestGlobs));
   if (!yargv.allowUnchanged) {
     vlm.info("Limiting the package selection to only the updated packages:");
-    const updatedPackages = vlm.shell.exec(`npx -c "lerna updated --json --loglevel=silent"`);
+    const updatedPackages = vlm.shell.exec(`npx -c "lerna changed --json --loglevel=silent"`);
     if (updatedPackages.code) {
       vlm.warn("No updated packages found, exiting",
           `(or lerna error with code ${vlm.theme.warning(updatedPackages.code)}`);
@@ -193,12 +195,10 @@ exports.handler = async (yargv) => {
   } else {
     vlm.info("Updating version, making git commit, creating a lerna git tag and",
         `updating target ${vlm.theme.path("package.json")}'s`);
-    await vlm.execute([
-      "lerna publish", {
-        "skip-npm": true, yes: true, loglevel: "silent",
-        // FIXME(iridian): This is broken: actually updates all package versions, not only those of
-        // the selected packages. Or if this is a feature, it should be documented.
-        "force-publish": yargv.allowUnchanged ? "*" : undefined,
+    await vlm.delegate([
+      "lerna version", {
+        "conventional-commits": true, amend: (yargv.versioning === "amend"), push: false, yes: true,
+        "force-publish": selections.map(({ name }) => name).join(","),
       },
     ]);
     if (!yargv.assemble && (!yargv.overwrite || !yargv.onlyPending)) {

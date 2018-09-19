@@ -1,24 +1,18 @@
-# Changelog
+# Change Log
 
-> **Tags:**
-> - :boom:         [Breaking Change]
-> - :satellite:    [New ValaaSpace Feature]
-> - :nut_and_bolt: [New Valaa Fabric Feature]
-> - :bug:          [Bug Fix]
-> - :memo:         [Documentation]
-> - :house:        [Internal]
-> - :nail_care:    [Polish]
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-_Note: Gaps between patch versions are faulty, broken or test releases._
+<a name="0.31.1"></a>
+# [0.31.1](https://github.com/valaatech/vault/compare/v0.31.0...v0.31.1) (2018-08-30)
 
-## v0.31.1 (2018-08-30)
-
-#### :bug:
+### :bug:
 
 - `@valos/prophet`
    * Demote no-Media-entry severity so it doesn't block activation
 
-## v0.31.0 (2018-08-30)
+<a name="0.31.0"></a>
+# [0.31.0](https://github.com/valaatech/vault/compare/v0.30.0...v0.31.0) (2018-08-30)
 
 > First relatively quicker release. Contains mostly bugfixes (which are
 > not listed) and minor enchancement features of the inspire UI
@@ -29,7 +23,7 @@ _Note: Gaps between patch versions are faulty, broken or test releases._
 > - instance lenses
 > - the live `*.props.class` CSS idiom
 
-#### :satellite: New ValaaSpace Feature
+### :satellite: New ValaaSpace Feature
 
 - `@valos/inspire`
   * Add support for live *.props.key values ([@iridiankin](https://github.com/iridiankin))
@@ -43,7 +37,7 @@ _Note: Gaps between patch versions are faulty, broken or test releases._
 - `@valos/engine`
   * Add namespaces functionality and the $V-is-for-ValOS namespace. ([@iridiankin](https://github.com/iridiankin))
 
-#### :nut_and_bolt: New Valaa Fabric Feature
+### :nut_and_bolt: New Valaa Fabric Feature
 
 - `@valos/inspire`
   * Add support for relative spreader paths in revelation files ([@iridiankin](https://github.com/iridiankin))
@@ -54,13 +48,14 @@ _Note: Gaps between patch versions are faulty, broken or test releases._
 - `@valos/toolset-revealer`
   * Add `vlm perspire` for launching Node.js-based revelation VDOM computation. ([@ismotee](https://github.com/ismotee))
 
-#### :house: Internal
+### :house: Internal
 
 - `*`
   * Add setTitleKuery option for createAndConnectViewsToDOM. ([@iridiankin](https://github.com/iridiankin))
   * Updates babel dependencies to 7.0.0
 
-## v0.30.0 (2018-08-07)
+<a name="0.30.0"></a>
+# [0.30.0](https://github.com/valaatech/vault/compare/86d3f54...v0.30.0) (2018-08-07)
 
 > This is the first major release after source base restructuring from
 > the poorly organized ValaaLabs repository into @valos/vault which

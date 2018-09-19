@@ -51,10 +51,9 @@ exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const ret = {};
   ret.preparation = await _prepare();
-  const newVersion = `${ret.preparation.branchVersionSuffix}.0`;
   vlm.info("Release preparation phase", ret.preparation.success
       ? vlm.theme.success("successful") : vlm.theme.failure("FAILED"),
-          "for version", vlm.theme.version(newVersion));
+          "for version", vlm.theme.version(ret.preparation.version));
   ret.commit = await _commit(ret.preparation);
   vlm.info("Release commit phase", ret.commit.success
       ? vlm.theme.success("successful") : vlm.theme.failure("FAILED"),
@@ -83,6 +82,9 @@ exports.handler = async (yargv) => {
     }
     const [, isCurrent, , branchVersionSuffix] =
         prereleases[0].match(/^((\* )| {2})prerelease\/([0-9.]*)$/);
+    // Only accept <MAJOR>(.<MINOR>)?(.<PATCH>)? formatted prerelease branches.
+    preparation.version = branchVersionSuffix.match(/^([0-9]*)\.?([0-9]*)?\.?(0-9*)?$/)
+        .slice(1).map(v => (v || "0")).join(".");
     preparation.branchVersionSuffix = branchVersionSuffix;
     preparation.prereleaseBranch = `prerelease/${branchVersionSuffix}`;
     preparation.releaseBranch = `release/${branchVersionSuffix}`;
@@ -143,7 +145,7 @@ exports.handler = async (yargv) => {
     return preparation;
   }
 
-  async function _commit ({ releaseBranch, lernaConfig, success }) {
+  async function _commit ({ version, releaseBranch, lernaConfig, success }) {
     const commit = { "...": { indexAfter: "preparation" } };
     if (!success) {
       commit.skipped = "preparation phase failed";
@@ -152,16 +154,18 @@ exports.handler = async (yargv) => {
     }
     await vlm.delegate(`git checkout -b ${releaseBranch}`);
     commit.releaseBranchCreated = releaseBranch;
-    await vlm.delegate(`git add yarn.lock`);
 
     commit.lernaConfig = JSON.parse(JSON.stringify(lernaConfig));
-    commit.lernaConfig.command.publish.allowBranch = releaseBranch;
-    commit.lernaConfig.command.publish.cdVersion = "patch";
-    commit.lernaConfig.command.publish.preid = "";
+    commit.lernaConfig.command.version.bump = "patch";
+    commit.lernaConfig.command.version.preid = "";
+    commit.lernaConfig.command.version.allowBranch = releaseBranch;
     vlm.shell.ShellString(JSON.stringify(commit.lernaConfig, null, 2)).to("./lerna.json");
+    await vlm.updatePackageConfig({ version });
+    await vlm.delegate(`git add lerna.json yarn.lock package.json`);
+    await vlm.delegate(`git commit -m v${version}`);
 
     commit["vlm assemble-packages"] = await vlm.invoke(
-        "assemble-packages", { "allow-unchanged": yargv["allow-unchanged"] });
+        "assemble-packages", { "allow-unchanged": yargv["allow-unchanged"], versioning: "amend" });
     commit.success = commit["vlm assemble-packages"].success;
     if (commit.success) {
       try {

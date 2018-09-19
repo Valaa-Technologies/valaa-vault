@@ -52,7 +52,7 @@
     "karma-chrome-launcher": "^2.2.0",
     "karma-jasmine": "^1.1.0",
     "karma-webpack": "^2.0.4",
-    "lerna": "^2.11.0",
+    "lerna": "^3.4.0",
     "valma": "^0.32.0-prerelease.2",
     "yalc": "^1.0.0-pre.23"
   }

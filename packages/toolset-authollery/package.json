@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@valos/toolset-revealer": "^0.32.0-prerelease.2",
-    "lerna": "^2.11.0",
+    "lerna": "^3.4.0",
     "valma": "^0.32.0-prerelease.2"
   }
 }

@@ -6,7 +6,7 @@ import { VRef, getRawIdFrom } from "~/raem/ValaaReference";
 import type { MediaInfo, NarrateOptions /* , ChronicleOptions */, RetrieveMediaContent }
     from "~/prophet/api/Prophet";
 
-import { dumpObject, invariantify, vdon } from "~/tools";
+import { dumpObject, invariantify, vdon, wrapError } from "~/tools";
 
 import ScribePartitionConnection from "./ScribePartitionConnection";
 
@@ -63,55 +63,56 @@ export async function _chronicleEventLog (/* connection: ScribePartitionConnecti
 
 export async function _recordTruth (connection: ScribePartitionConnection,
     { event, eventId }: Object, preAuthorizeCommand: () => any) {
-  if (eventId <= connection.getLastAuthorizedEventId()) return false;
-  invariantify(eventId === connection.getLastAuthorizedEventId() + 1,
+  try {
+    if (eventId <= connection.getLastAuthorizedEventId()) return false;
+    invariantify(eventId === connection.getLastAuthorizedEventId() + 1,
       `eventID race, expected confirmed truth eventId to be lastEventId + 1 === ${
           connection.getLastAuthorizedEventId() + 1}, but got ${eventId} instead`);
-  const { firstEventId: firstCommandId, lastEventId: lastCommandId, commandIds }
+    const { firstEventId: firstCommandId, lastEventId: lastCommandId, commandIds }
       = connection._commandQueueInfo;
-  let purgedCommands;
-  if ((firstCommandId <= eventId) && (lastCommandId >= eventId)
+    let purgedCommands;
+    if ((firstCommandId <= eventId) && (lastCommandId >= eventId)
       && (event.commandId !== commandIds[0])) {
     // connection.warnEvent("\n\tPURGING by", event.commandId, eventId, event, commandIds,
     //    "\n\tcommandIds:", firstCommandId, lastCommandId, commandIds);
     // Frankly, we could just store the commands in the 'commandIds' fully.
-    purgedCommands = await connection._readCommands(
+      purgedCommands = await connection._readCommands(
         { firstEventId: firstCommandId, lastEventId: lastCommandId });
   }
 
   // Add the authorized truth to the event log.
-  if (!connection.isTransient()) {
-    await connection._writeEvent(eventId, event);
-  }
-  connection._eventLogInfo.lastEventId = eventId;
+    if (!connection.isTransient()) {
+      await connection._writeEvent(eventId, event);
+    }
+    connection._eventLogInfo.lastEventId = eventId;
 
-  const newCommandQueueFirstEventId = (purgedCommands ? lastCommandId : eventId) + 1;
-  if (connection._getFirstCommandEventId() < newCommandQueueFirstEventId) {
-    _setCommandQueueFirstEventId(connection, newCommandQueueFirstEventId);
-  }
-  if (connection._getFirstCommandEventId() > connection.getLastCommandEventId()) {
-    connection.setIsFrozen(event.type === "FROZEN");
-  }
+    const newCommandQueueFirstEventId = (purgedCommands ? lastCommandId : eventId) + 1;
+    if (connection._getFirstCommandEventId() < newCommandQueueFirstEventId) {
+      _setCommandQueueFirstEventId(connection, newCommandQueueFirstEventId);
+    }
+    if (connection._getFirstCommandEventId() > connection.getLastCommandEventId()) {
+      connection.setIsFrozen(event.type === "FROZEN");
+    }
 
   // Delete commands after event is stored, so we get no gaps.
   // TODO(iridian): Put these to the same transaction with the writeEvent
-  if (!connection.isTransient()) {
-    if (purgedCommands) {
+    if (!connection.isTransient()) {
+      if (purgedCommands) {
       // TODO(iridian): Add merge-conflict-persistence. As it stands now, for the duration of
       // the merge process the purged commands are not persisted anywhere and could be lost.
-      connection._deleteCommands(firstCommandId, lastCommandId);
-    } else if ((firstCommandId <= eventId) && (lastCommandId >= eventId)) {
-      connection._deleteCommand(eventId);
+        connection._deleteCommands(firstCommandId, lastCommandId);
+      } else if ((firstCommandId <= eventId) && (lastCommandId >= eventId)) {
+        connection._deleteCommand(eventId);
+      }
     }
-  }
 
   // For local partitions where Scribe is the authority, always authorize the next
   // command in queue to the Oracle if one is available.
-  if ((connection.isLocal() || connection.isTransient()) && (lastCommandId > eventId)) {
-    invariantify(preAuthorizeCommand,
-        "recordTruth.preAuthorizeCommand missing when command queue has futures");
-    _preAuthorizeNextCommand(connection, eventId + 1, preAuthorizeCommand);
-  }
+    if ((connection.isLocal() || connection.isTransient()) && (lastCommandId > eventId)) {
+      invariantify(preAuthorizeCommand,
+          "recordTruth.preAuthorizeCommand missing when command queue has futures");
+      _preAuthorizeNextCommand(connection, eventId + 1, preAuthorizeCommand);
+    }
   /*
   connection.warnEvent("\n\trecordTruth", event.commandId, eventId,
       "\n\tevent/commandInfos:", connection._eventLogInfo, connection._commandQueueInfo,
@@ -119,7 +120,10 @@ export async function _recordTruth (connection: ScribePartitionConnection,
           connection.getLastCommandEventId(), connection._commandQueueInfo.commandIds,
       ...(purgedCommands ? ["\n\tPURGING:", purgedCommands] : []));
   //*/
-  return { purgedCommands };
+    return { purgedCommands };
+  } catch (error) {
+    throw wrapError(error, `During recordTruth(${dumpObject(connection)}, ${dumpObject(event)}, ${eventId})`);
+  }
 }
 
 export function _claimCommandEvent (connection: ScribePartitionConnection,

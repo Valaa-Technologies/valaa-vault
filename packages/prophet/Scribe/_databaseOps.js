@@ -2,7 +2,7 @@
 
 import ValaaURI from "~/raem/ValaaURI";
 
-import { dumpObject, vdon, wrapError } from "~/tools";
+import { dumpObject, vdon, wrapError, inBrowser } from "~/tools";
 import IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 import type MediaDecoder from "~/tools/MediaDecoder";
 import { trivialCloneWith } from "~/tools/trivialClone";
@@ -337,7 +337,9 @@ function _serializeEventAsJSON (event) {
     try {
       if ((typeof value !== "object") || (value === null)) return value;
       if (typeof value.toJSON === "function") return value.toJSON();
-      if ((value instanceof ValaaURI) || (value instanceof URL)) return value.toString();
+      if ((value instanceof ValaaURI) || (inBrowser() && value instanceof URL)) {
+        return value.toString();
+      }
       return undefined;
     } catch (error) {
       throw wrapError(error, "During serializeEventAsJSON.trivialClone.customizer",

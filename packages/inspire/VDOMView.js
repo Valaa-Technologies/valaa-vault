@@ -57,6 +57,7 @@ export default class VDOMView extends Cog {
       lensProperty={["ROOT_LENS", "LENS", "EDITOR_LENS"]}
     />);
     return new Promise(onDone => {
+      console.log("VDOMview: rendering", this._reactRoot, this._rootElement);
       ReactDOM.render(this._reactRoot, this._rootElement, onDone);
     });
   }

@@ -33,16 +33,10 @@ function _createTestPerspireGateway (gatewayOptions: Object, ...revelations: any
 export default class PerspireServer {
   constructor ({
     revelationRoot, revelations, pluginPaths, cacheRoot, outputPath, test,
-    container = () => {
-      const ret = new JSDOM(`
+    container = new JSDOM(`
         <div id="valaa-inspire--main-container"></div>
-        `, { pretendToBeVisual: true });
-      const meta = ret.window.document.createElement("meta");
-      meta.httpEquiv = "refresh";
-      meta.content = "1";
-      ret.window.document.getElementsByTagName("head")[0].appendChild(meta);
-      return ret;
-    } }: Object,
+        `, { pretendToBeVisual: true })
+    }: Object,
   ) {
     invariantifyString(revelationRoot, "PerspireServer.options.revelationRoot",
         { allowEmpty: true });
@@ -57,13 +51,10 @@ export default class PerspireServer {
     this.cacheRoot = cacheRoot;
     this.outputPath = outputPath;
     this.test = test;
-    this.container = container();
+    this.container = container;
   }
 
   async start () {
-    global.document = this.container.window.document;
-    window.WebSocket = require("ws"); // For networking in Node environments
-
     (this.pluginPaths || []).forEach(pluginPath => require(path.join(process.cwd(), pluginPath)));
 
     return (this.gateway = (!this.test
@@ -75,7 +66,7 @@ export default class PerspireServer {
           name: "Valaa Local Perspire Main",
           rootLensURI: gateway.getRootPartitionURI(),
           window: this.container.window,
-          container: this.container.window.document.querySelector("#valaa-inspire--main-container"),
+          container: document.querySelector("#valaa-inspire--main-container"),
           rootId: "valaa-inspire--main-root",
           size: {
             width: this.container.window.innerWidth,

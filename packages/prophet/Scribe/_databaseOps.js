@@ -5,7 +5,7 @@ import type { EventBase } from "~/raem/events";
 
 import { tryAspect, swapAspectRoot } from "~/prophet/tools/EventAspects";
 
-import { dumpObject, vdon, wrapError } from "~/tools";
+import { dumpObject, vdon, wrapError, inBrowser } from "~/tools";
 import IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 import type MediaDecoder from "~/tools/MediaDecoder";
 import { trivialCloneWith } from "~/tools/trivialClone";

@@ -2,12 +2,6 @@
 
 const path = require("path");
 
-// some web to node env emulation
-global.self = global;
-global.name = "Perspire window";
-global.window = global;
-
-const PerspireServer = require("@valos/inspire/PerspireServer").default;
 
 exports.command = "perspire [revelationPaths..]";
 exports.describe = "headless server-side environment";
@@ -43,6 +37,25 @@ exports.builder = (yargs) => yargs.option({
 exports.handler = async (yargv) => {
   // Example template which displays the command name itself and package name where it is ran
   // Only enabled inside package
+  global.self = global;
+  global.name = "Perspire window";
+  global.window = global;
+
+  const JSDOM = require("jsdom").JSDOM;
+
+  const container = new JSDOM(`
+  <div id="valaa-inspire--main-container"></div>
+  `, { pretendToBeVisual: true });
+  const meta = container.window.document.createElement("meta");
+  meta.httpEquiv = "refresh";
+  meta.content = "1";
+  container.window.document.getElementsByTagName("head")[0].appendChild(meta);
+  global.window = container.window;
+  global.document = container.window.document;
+  global.navigator = container.window.navigator;
+
+  const PerspireServer = require("@valos/inspire/PerspireServer").default;
+
   const vlm = yargv.vlm;
   const revelationPaths = (yargv.revelationPaths || []).length
       ? yargv.revelationPaths : ["./valaa.json"];
@@ -50,6 +63,7 @@ exports.handler = async (yargv) => {
     require(path.join(process.cwd(), element));
   });
   vlm.shell.mkdir("-p", yargv.cacheRoot);
+  // some web to node env emulation
 
   const server = new PerspireServer({
     revelations: [
@@ -66,6 +80,7 @@ exports.handler = async (yargv) => {
     ],
     pluginPaths: yargv.plugin,
     outputPath: yargv.output,
+    container
   });
   await server.start();
   const interval = (typeof yargv.keepalive === "number") ? yargv.keepalive : (yargv.keepalive && 1);

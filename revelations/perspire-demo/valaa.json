@@ -9,11 +9,11 @@
     "partitionInfos": {
       "...": "partitionInfos.json"
     },
-    "blobInfos": {
-      "...": "blobInfos.json"
+    "bvobInfos": {
+      "...": "bvobInfos.json"
     },
-    "blobBuffers": {
-      "...": "blobBuffers.json"
+    "bvobBuffers": {
+      "...": "bvobBuffers.json"
     },
     "authorityConfigs": {
       "...": "authorityConfigs.json"

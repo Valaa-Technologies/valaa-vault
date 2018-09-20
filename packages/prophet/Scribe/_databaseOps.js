@@ -307,25 +307,29 @@ export function _removeBvobPersistReferences (scribe: Scribe, bvobInfos: BvobInf
 // Events & commands reads & writes
 
 export function _writeEvent (connection: ScribePartitionConnection, eventId: number,
-    event: Object) {
-  return connection._db.transaction(["events"], "readwrite", ({ events }) => {
-    const req = events.get(eventId);
-    req.onsuccess = reqEvent => {
-      if (reqEvent.target.result) {
-        if (reqEvent.target.result.commandId === event.commandId) return;
-        throw connection.wrapErrorEvent(
+  event: Object) {
+  try {
+    return connection._db.transaction(["events"], "readwrite", ({ events }) => {
+      const req = events.get(eventId);
+      req.onsuccess = reqEvent => {
+        if (reqEvent.target.result) {
+          if (reqEvent.target.result.commandId === event.commandId) return;
+          throw connection.wrapErrorEvent(
             new Error(`Mismatching existing event commandId when persisting event`),
             `_writeEvent(${eventId})`,
             "\n\texisting commandId:", reqEvent.target.result.commandId,
             "\n\tnew event commandId:", event.commandId,
             "\n\texisting event:", ...dumpObject(reqEvent.target.result),
             "\n\tnew event:", ...dumpObject(event));
-      }
-      const eventJSON = _serializeEventAsJSON(event);
-      eventJSON.eventId = eventId;
-      events.put(eventJSON);
-    };
-  });
+        }
+        const eventJSON = _serializeEventAsJSON(event);
+        eventJSON.eventId = eventId;
+        events.put(eventJSON);
+      };
+    });
+  } catch (error) {
+    throw wrapError(error, `during _writeEvent(${connection}, ${eventId}, ${event})`);
+  }
 }
 
 function _serializeEventAsJSON (event) {

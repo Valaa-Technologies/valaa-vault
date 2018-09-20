@@ -850,7 +850,9 @@ module.exports
     });
 
 process.on("unhandledRejection", error => {
-  _vlm.exception(JSON.stringify(error, null, 2), "unhandledRejection");
+  // TODO (ismo): find the to handle circular structures in node
+  // _vlm.exception(JSON.stringify(error), "unhandledRejection");
+  _vlm.exception(error, "unhandledRejection");
 });
 
 // Only function definitions from hereon.

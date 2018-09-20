@@ -1,10 +1,10 @@
 {
   "name": "@valos/vault",
+  "version": "0.32.0",
   "valaa": {
     "type": "vault",
     "domain": "kernel"
   },
-  "version": "0.32.0-prerelease",
   "description": "Valaa common infrastructure tools and libraries monorepo.",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",

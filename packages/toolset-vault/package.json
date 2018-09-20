@@ -1,6 +1,6 @@
 {
   "name": "@valos/toolset-vault",
-  "version": "0.32.0-prerelease.2",
+  "version": "0.32.0",
   "valaa": {
     "type": "toolset",
     "domain": "packages"
@@ -53,7 +53,7 @@
     "karma-jasmine": "^1.1.0",
     "karma-webpack": "^2.0.4",
     "lerna": "^3.4.0",
-    "valma": "^0.32.0-prerelease.2",
+    "valma": "^0.32.0",
     "yalc": "^1.0.0-pre.23"
   }
 }

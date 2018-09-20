@@ -3,6 +3,39 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.32.0"></a>
+# [0.32.0](https://github.com/valaatech/vault/compare/v0.31.1...v0.32.0) (2018-09-20)
+
+
+### Bug Fixes
+
+* [#453](https://github.com/valaatech/vault/issues/453) Media content of an instance doesn't change with the prototype ([333c335](https://github.com/valaatech/vault/commit/333c335))
+* [#499](https://github.com/valaatech/vault/issues/499) Setting a Media's Blob to be a Blob on another partition causes failure ([ec7f0a4](https://github.com/valaatech/vault/commit/ec7f0a4))
+* [#538](https://github.com/valaatech/vault/issues/538) getURL should provide a data object for large size medias when in local/inmemory partition ([4321706](https://github.com/valaatech/vault/commit/4321706))
+* [#540](https://github.com/valaatech/vault/issues/540) getUrl provides faulty, mangled Data URLs ([cc45349](https://github.com/valaatech/vault/commit/cc45349))
+* [#549](https://github.com/valaatech/vault/issues/549) childrenLens never finds children ([392c6af](https://github.com/valaatech/vault/commit/392c6af))
+* Demote connection media validations (at least temporarily) ([493ba3f](https://github.com/valaatech/vault/commit/493ba3f))
+* lints, prepareBvob, tests, logging ([71b2ed1](https://github.com/valaatech/vault/commit/71b2ed1))
+* UI hangs on comparePropsOrState ([f1418e0](https://github.com/valaatech/vault/commit/f1418e0))
+
+
+### Features
+
+* [#547](https://github.com/valaatech/vault/issues/547) ValaaScope with a custom key makes itself available in 'frame' ([70d2c3d](https://github.com/valaatech/vault/commit/70d2c3d))
+* Add 'vlm release-vault' for creating new releases ([3324848](https://github.com/valaatech/vault/commit/3324848))
+* Add "frame" lens resource to all ValaaScope components ([b168cfd](https://github.com/valaatech/vault/commit/b168cfd))
+* Add MediaInfo contentDisposition etc. and asURL variants ([07e10db](https://github.com/valaatech/vault/commit/07e10db))
+* Add migration and deprecation for revelation and ValaaSpace Blob's ([bbaf48e](https://github.com/valaatech/vault/commit/bbaf48e))
+* Add vlm clean-vault ([0b21e8f](https://github.com/valaatech/vault/commit/0b21e8f))
+* Add vlm.delegate for background tasks ([1c9dd98](https://github.com/valaatech/vault/commit/1c9dd98))
+* Extract chronicleEventLog from narrateEventLog, changes flags ([828bcd9](https://github.com/valaatech/vault/commit/828bcd9))
+* Improve faulty valma command tolerance ([a216dee](https://github.com/valaatech/vault/commit/a216dee))
+* Update lerna to 3.x and enable conventional commits CHANGELOG ([0e900df](https://github.com/valaatech/vault/commit/0e900df))
+
+
+
+
+
 <a name="0.31.1"></a>
 # [0.31.1](https://github.com/valaatech/vault/compare/v0.31.0...v0.31.1) (2018-08-30)
 

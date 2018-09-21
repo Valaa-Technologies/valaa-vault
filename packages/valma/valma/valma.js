@@ -493,6 +493,7 @@ const themes = {
     return: ["bold", "italic", "blue"],
     executable: ["flatsplit", { first: ["magenta"], nonfirst: "argument" }],
     command: ["flatsplit", { first: ["bold", "magenta"], nonfirst: "argument" }],
+    vlmCommand: ["flatsplit", { first: "executable", nonfirst: "command" }],
     overridden: ["strikethrough", "command"],
     package: ["dim", "bold", "yellow"],
     path: ["underline"],
@@ -1030,7 +1031,7 @@ async function execute (args, options = {}) {
           if ((typeof diagnostics === "string") && diagnostics) {
             if (result instanceof Error) result.stderr = diagnostics;
             if (options.stderr !== "erroronly") {
-              this.echo(`${this.getContextIndexText()}<> ${executeVLM.getContextIndexText()}$`,
+              this.echo(`${this.getContextIndexText()}// ${executeVLM.getContextIndexText()}$`,
                   `${this.theme.executable(argv[0])}, diagnostics/stderr output (${
                       diagnostics.length} chars):`);
               const indent = " ".repeat((executeVLM.taskDepth * 2) - 1);
@@ -1108,8 +1109,7 @@ async function invoke (commandSelector, args, options = {}) {
   const argv = (options.processArgs !== false) ? __processArgs(args) : args;
   if (!options.suppressOutermostEcho) {
     invokeVLM.echo(`${this.getContextIndexText()}>> ${invokeVLM.getContextIndexText()}${
-        invokeVLM.theme.executable("vlm")}`,
-        invokeVLM.theme.command(selector, ...argv));
+        invokeVLM.theme.vlmCommand("vlm", selector, ...argv)}`);
   }
   let echoResult;
   try {
@@ -1122,8 +1122,7 @@ async function invoke (commandSelector, args, options = {}) {
   } finally {
     if (!options.suppressOutermostEcho) {
       invokeVLM.echo(`${this.getContextIndexText()}<< ${invokeVLM.getContextIndexText()}${
-          invokeVLM.theme.executable("vlm")}`,
-          `${invokeVLM.theme.command(selector)}:`, echoResult);
+          invokeVLM.theme.vlmCommand("vlm", selector)}:`, echoResult);
     }
     if (options.flushConfigWrites) {
       invokeVLM._flushPendingConfigWrites();
@@ -1273,8 +1272,7 @@ async function _invoke (commandSelector, argv) {
         try {
           if (isWildcardCommand) {
             this.echo(`${this.getContextIndexText()}>>* ${subVLM.getContextIndexText()}${
-                this.theme.executable("vlm")}`,
-                this.theme.command(commandName, ...argv));
+                this.theme.vlmCommand("vlm", commandName, ...argv)}`);
           }
           await subVLM._fillVargvInteractively();
           if (subVLM.toolset) {
@@ -1328,8 +1326,7 @@ async function _invoke (commandSelector, argv) {
             if (retValue === undefined) retValue = "undefined";
             if (isWildcardCommand) {
               this.echo(`${this.getContextIndexText()}<<* ${subVLM.getContextIndexText()}${
-                  this.theme.executable("vlm")}`,
-                  `${this.theme.command(commandName)}:`,
+                  this.theme.vlmCommand("vlm", commandName)}:`,
                   this._peekReturnValue(retValue, 40));
             }
           }

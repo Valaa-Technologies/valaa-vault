@@ -278,6 +278,9 @@ exports.handler = async (yargv) => {
   }));
   if (ret.successfulAssemblies === ret.selectedAssemblies) {
     ret.success = true;
+    // TODO(iridian): This is less than ideal way to determine the released version. We should be
+    // able to get it from lerna directly somehow.
+    ret.version = ret.assemblyBreakdown[2].version;
     vlm.info(vlm.theme.green(`Successfully assembled all packages`), "out of",
         ret.selectedAssemblies, "selected packages");
   } else if (!ret.successfulAssemblies) {

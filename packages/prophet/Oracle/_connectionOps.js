@@ -20,10 +20,10 @@ export const vdoc = vdon({
 
 
 export function _acquirePartitionConnection (oracle: Oracle, partitionURI: ValaaURI,
-    partitionRawId: string, options: NarrateOptions):
-        ?OraclePartitionConnection | Promise<OraclePartitionConnection> {
+    options: NarrateOptions): ?OraclePartitionConnection | Promise<OraclePartitionConnection> {
   // Synchronous reject or return full connection section
-  let entry = oracle._partitionConnections[partitionRawId];
+  const partitionURIString = String(partitionURI);
+  let entry = oracle._partitionConnections[partitionURIString];
   if (entry && options.createNewPartition && (entry.connection._lastAuthorizedEventId !== -1)) {
     throw new Error(`Partition already exists when trying to create a new partition '${
         String(partitionURI)}'`);
@@ -43,7 +43,7 @@ export function _acquirePartitionConnection (oracle: Oracle, partitionURI: Valaa
   if (options.dontCreateNewConnection) return undefined;
 
   // Asynchronous create new connection section
-  entry = oracle._partitionConnections[partitionRawId] = {
+  entry = oracle._partitionConnections[partitionURIString] = {
     connection: new OraclePartitionConnection({
       prophet: oracle, partitionURI, debugLevel: oracle.getDebugLevel(),
     }),
@@ -187,10 +187,8 @@ export async function _chronicleEventLog (connection: OraclePartitionConnection,
   const collection = connection.createReceiveTruthCollection(options.name || "chronicleEventLog",
       { retrieveMediaContent: options.retrieveMediaContent });
   const explicitEventLogNarrations = [];
-  const rawId = connection.partitionRawId();
   for (const event of eventLog) {
-    const eventId = event.partitions[rawId].eventId;
-    invariantifyNumber(eventId, `event.partitions[${rawId}].eventId`, {}, "\n\tevent:", event);
+    const eventId = connection._getOwnPartitionInfoOf(event).eventId;
     if (typeof currentEventId !== "undefined") {
       if ((eventId < currentEventId) || isPastLastEvent(eventId)) continue;
       if (eventId > currentEventId) {

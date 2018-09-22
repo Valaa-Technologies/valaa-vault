@@ -47,7 +47,7 @@ export default class Corpus extends Bard {
           ? `${description}`
           : `${description}: ${
               Object.entries(action.partitions)
-                  .map(([id, info]) => `${id.slice(0, 13)}...[${info.eventId}]}`)
+                  .map(([id, info]) => `${id.slice(0, 26)}...[${info.eventId}]}`)
                   .join(", ")
               }`);
       this.logEvent(1, "dispatch:", ...dumpObject(action));

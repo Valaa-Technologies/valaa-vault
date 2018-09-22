@@ -195,10 +195,10 @@ async function _tryConfirmPendingMultiPartitionTruths (oracle: Oracle,
     // blocked multipartition event.
     const connectionsWithCandidateAsHead = [];
     let isBlocked;
-    for (const partitionRawId of Object.keys(eventCandidate.partitions)) {
-      const { connection } = oracle._partitionConnections[partitionRawId] || {};
+    for (const partitionURIString of Object.keys(eventCandidate.partitions)) {
+      const { connection } = oracle._partitionConnections[partitionURIString] || {};
       if (!connection) continue;
-      const partitionData = eventCandidate.partitions[partitionRawId];
+      const partitionData = eventCandidate.partitions[partitionURIString];
       if (_nextPendingDownstreamTruthId(connection) === partitionData.eventId) {
         connectionsWithCandidateAsHead.push(connection);
       } else {

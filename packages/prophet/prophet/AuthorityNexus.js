@@ -52,7 +52,7 @@ export default class AuthorityNexus extends LogEventGenerator {
 
   obtainAuthorityProphetOfPartition (partitionURI: ValaaURI | string) {
     return this.obtainAuthorityProphet(
-        this._getAuthorityURIFromPartitionURI(getValaaURI(partitionURI)));
+        this.getAuthorityURIFromPartitionURI(getValaaURI(partitionURI)));
   }
 
   obtainAuthorityProphet (authorityURI: ValaaURI | string) {
@@ -64,7 +64,7 @@ export default class AuthorityNexus extends LogEventGenerator {
     return ret;
   }
 
-  _getAuthorityURIFromPartitionURI (partitionURI: ValaaURI): ValaaURI {
+  getAuthorityURIFromPartitionURI (partitionURI: ValaaURI): ValaaURI {
     return this._tryAuthorityURIFromPartitionURI(partitionURI, { require: true });
   }
 

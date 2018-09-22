@@ -6,7 +6,7 @@ import PartitionConnection from "~/prophet/api/PartitionConnection";
 import type { ChronicleOptions, NarrateOptions, MediaInfo, RetrieveMediaContent }
     from "~/prophet/api/Prophet";
 
-import { dumpObject } from "~/tools";
+import { dumpObject, invariantifyObject } from "~/tools";
 
 import { _connect, _chronicleEventLog, _narrateEventLog } from "./_connectionOps";
 import { _createReceiveTruthCollection, _receiveTruthOf } from "./_downstreamOps";
@@ -49,6 +49,24 @@ export default class OraclePartitionConnection extends PartitionConnection {
   isConnected (): boolean {
     return this._isConnected;
   }
+
+  _getOwnPartitionInfoOf (event: Object) {
+    const partitionURIString = String(this.getPartitionURI());
+    let ret = event.partitions[partitionURIString];
+    if (!ret) {
+      ret = event.partitions[this.getPartitionRawId()] || event.partitions[""];
+      // const partitionAuthorityURI = (this._authorityConnection || {})
+      // if (this._authorityConnection) {
+      //  invariantifyString(partitionInfo.partitionAuthorityURI, "partitionInfo.partitionAuthorityURI",
+      //      { value: this.partitionAuthorityURI})
+      // }
+    }
+    invariantifyObject(ret,
+        `event.partitions["${partitionURIString}" || "${this.getPartitionRawId()}"]`, {},
+        "\n\tevent:", event);
+    return ret;
+  }
+
 
   /**
    * Asynchronous operation which activates the connection to the Scribe and loads its metadatas,
@@ -142,16 +160,14 @@ export default class OraclePartitionConnection extends PartitionConnection {
   }
 
   async _receiveTruthOf (group: Object, truthEvent: UniversalEvent): Promise<Object> {
-    const partitionData = truthEvent.partitions && truthEvent.partitions[this.partitionRawId()];
+    let partitionInfo;
     try {
-      if (!partitionData) {
-        throw new Error(`truthEvent of '${group.name}' has no partition ${this.debugId()} info`);
-      }
-      return _receiveTruthOf(this, group, partitionData.eventId, truthEvent);
+      partitionInfo = this._getOwnPartitionInfoOf(truthEvent);
+      return _receiveTruthOf(this, group, partitionInfo.eventId, truthEvent);
     } catch (error) {
       throw this.wrapErrorEvent(error, `_receiveTruthOf('${group.name}')`,
           "\n\tgroup:", ...dumpObject(group),
-          "\n\teventId:", partitionData && partitionData.eventId,
+          "\n\tpartitionInfo:", ...dumpObject(partitionInfo),
           "\n\ttruthEvent:", ...dumpObject(truthEvent),
           "\n\tthis:", ...dumpObject(this));
     }

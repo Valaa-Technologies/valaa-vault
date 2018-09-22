@@ -291,7 +291,7 @@ export default class FalseProphet extends Prophet {
       const oldPartitions = oldProphecy.story.partitions;
 
       if (Object.keys(oldPartitions).find(
-          partitionRawId => reformation.conflictedPartitions[partitionRawId])) {
+          partitionURIString => reformation.conflictedPartitions[partitionURIString])) {
         oldProphecy.conflictReason = "previous prophecy conflicted";
         if (!oldProphecy.shouldReview) {
           this.errorEvent("TODO: non-purged conflict: this command should be purged from upstream");
@@ -318,8 +318,8 @@ export default class FalseProphet extends Prophet {
       if (oldProphecy.conflictReason) {
       // Mark all partitions of the old prophecy as conflicted. All subsequent commands need to
       // be evaluated as they're likely to depend on the first conflicting change.
-        Object.keys(oldPartitions).forEach(partitionRawId => {
-          reformation.conflictedPartitions[partitionRawId] = true;
+        Object.keys(oldPartitions).forEach(partitionURIString => {
+          reformation.conflictedPartitions[partitionURIString] = true;
         });
         (reformation.conflictedProphecies || (reformation.conflictedProphecies = []))
             .push(oldProphecy);

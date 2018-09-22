@@ -1,7 +1,7 @@
 // @flow
 
 import type Command from "~/raem/command";
-import ValaaURI, { getPartitionRawIdFrom } from "~/raem/ValaaURI";
+import ValaaURI from "~/raem/ValaaURI";
 
 import Prophet, { ClaimResult, NarrateOptions } from "~/prophet/api/Prophet";
 
@@ -33,7 +33,7 @@ import { _claim } from "./_upstreamOps";
 export default class Oracle extends Prophet {
 
   _partitionConnections: {
-    [partitionRawId: string]: {
+    [partitionURIString: string]: {
       // Set both if the connection process is on-going or fully connected.
       connection: OraclePartitionConnection,
       // Only set if connection process is on-going, null if fully connected.
@@ -74,16 +74,13 @@ export default class Oracle extends Prophet {
    * @memberof Oracle
    */
   acquirePartitionConnection (partitionURI: ValaaURI, options: NarrateOptions = {}): any {
-    let partitionRawId;
     try {
-      partitionRawId = getPartitionRawIdFrom(partitionURI);
-      return _acquirePartitionConnection(this, partitionURI, partitionRawId, options);
+      return _acquirePartitionConnection(this, partitionURI, options);
     } catch (error) {
       throw this.wrapErrorEvent(error, `acquirePartitionConnection(${String(partitionURI)})`,
           "\n\toptions:", ...dumpObject(options),
-          "\n\tpartitionRawId:", partitionRawId,
           "\n\texisting connection:", ...dumpObject(
-              partitionRawId && this._partitionConnections[partitionRawId]));
+              this._partitionConnections[String(partitionURI || "")]));
     }
   }
 

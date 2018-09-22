@@ -55,8 +55,8 @@ export function resourceStub (objectDescription: string = INTERFACE_DESCRIPTION)
 
       ...generatedField("partitionURI", GraphQLString,
           `The partitionURI string of the partition this ${objectDescription} belongs to.{
-              ""} This Partition is the innermost owner which has a non-null{
-              ""} Partition.partitionAuthorityURI.`,
+              ""} This root resource of this Partition is the innermost owning resource with {
+              ""} Partition.partitionAuthorityURI set.`,
           partitionURIResolver,
       ),
 

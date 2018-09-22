@@ -1,7 +1,7 @@
 // @flow
 
 import type Command from "~/raem/command";
-import { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";
+import { createPartitionURI, getValaaURI } from "~/raem/ValaaURI";
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
 
 import type { ClaimResult } from "~/prophet/api/Prophet";
@@ -124,22 +124,23 @@ function _resolveCommandPartitionDatas (oracle: Oracle,
   if (!command.partitions) {
     throw new Error("command is missing partition information");
   }
-  const connections = Object.keys(command.partitions).map((partitionRawId) => {
-    const entry = (oracle._partitionConnections || {})[partitionRawId];
+  const connections = Object.keys(command.partitions).map((partitionURIString) => {
+    const commandPartitionSection = command.partitions[partitionURIString];
+    const entry = (oracle._partitionConnections || {})[partitionURIString];
     if (entry) {
       if (entry.connection && entry.connection.isFrozen()) {
         throw new Error(`Trying to claim a command against a frozen partition ${
             entry.connection.getName()}`);
       }
-      const authorityURI = command.partitions[partitionRawId].partitionAuthorityURI;
+      const authorityURI = oracle._authorityNexus
+          .getAuthorityURIFromPartitionURI(getValaaURI(partitionURIString));
       operation.authorities[String(authorityURI)]
           = oracle._authorityNexus.tryAuthorityProphet(authorityURI);
       invariantifyObject(entry.connection || entry.pendingConnection,
           `"entry" must have either "connection" or "pendingConnection"`);
-      return [command.partitions[partitionRawId], entry.pendingConnection || entry.connection];
+      return [commandPartitionSection, entry.pendingConnection || entry.connection];
     }
-    missingConnections.push(createPartitionURI(
-        command.partitions[partitionRawId].partitionAuthorityURI, partitionRawId));
+    missingConnections.push(createPartitionURI(partitionURIString));
     return [];
   });
   if (missingConnections.length) {
@@ -158,9 +159,9 @@ function _getOngoingAuthorityPersists (oracle: Oracle, { command }: Object) {
     for (const { referrerId } of command.addedBvobReferences[bvobId]) {
       let entry;
       try {
-        const partitionRawId = getPartitionRawIdFrom(referrerId.partitionURI());
-        entry = oracle._partitionConnections[partitionRawId];
-        invariantifyObject(entry, `partitionConnections[${partitionRawId}]`);
+        const partitionURIString = String(referrerId.getPartitionURI());
+        entry = oracle._partitionConnections[partitionURIString];
+        invariantifyObject(entry, `partitionConnections[${partitionURIString}]`);
       } catch (error) { throw onError.call(oracle, bvobId, referrerId, error); }
       const persistProcess = thenChainEagerly(entry.pendingConnection || entry.connection,
           (connectedConnection) => {

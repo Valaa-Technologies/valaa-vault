@@ -110,20 +110,18 @@ describe("partitions", () => {
         }),
       ],
     }));
-    const A_grandparent = { // eslint-disable-line
-      eventId: null,
-      partitionAuthorityURI: "valaa-local:",
+    const aGrandparentPartition = { // eslint-disable-line
+      "valaa-local:?id=A_grandparent": { eventId: null },
     };
-    const B_testRoot = { // eslint-disable-line
-      eventId: null,
-      partitionAuthorityURI: testAuthorityURI,
+    const bTestRootPartition = { // eslint-disable-line
+      "valaa-test:?id=B_testRoot": { eventId: null },
     };
     expect(story.partitions)
-        .toEqual({ A_grandparent, B_testRoot });
+        .toEqual({ ...aGrandparentPartition, ...bTestRootPartition });
     expect(story.actions[0].partitions)
-        .toEqual({ B_testRoot });
+        .toEqual({ ...bTestRootPartition });
     expect(story.actions[1].partitions)
-        .toEqual({ A_grandparent, B_testRoot });
+        .toEqual({ ...aGrandparentPartition, ...bTestRootPartition });
 
 
     const aGrandParent = harness.run(vRef("A_grandparent"), null);

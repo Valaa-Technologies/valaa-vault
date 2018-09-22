@@ -2,13 +2,13 @@ import { VRef } from "~/raem/ValaaReference";
 
 import Bard, { getActionFromPassage } from "~/raem/redux/Bard";
 import { tryHostRef } from "~/raem/VALK/hostReference";
-import ValaaURI, { createPartitionURI, getPartitionAuthorityURIStringFrom,
-    getPartitionRawIdFrom } from "~/raem/ValaaURI";
+import ValaaURI, { createPartitionURI } from "~/raem/ValaaURI";
 import Resolver from "~/raem/tools/denormalized/Resolver";
 import Transient from "~/raem/tools/denormalized/Transient";
 import traverseMaterializedOwnlings
     from "~/raem/tools/denormalized/traverseMaterializedOwnlings";
-import { dumpObject, invariantify, invariantifyArray, unwrapError, wrapError } from "~/tools";
+
+import { dumpObject, invariantifyArray, unwrapError, wrapError } from "~/tools";
 
 export class MissingPartitionConnectionsError extends Error {
   constructor (message, missingPartitions: (ValaaURI | Promise<any>)[]) {
@@ -77,10 +77,11 @@ export function addConnectToPartitionToError (error, connectToPartition) {
 /**
  * Partition system
  *
- * The partition of a Resource is the innermost owning object (or self) which has
- * Partition.partitionAuthorityURI defined.
- * For all non-ghost Resource's the partition is also cached in the id:ValaaReference.partitionURI.
- * For ghosts the partition can be fetched from the ghost host.
+ * The partition of a Resource is the innermost owning object (or self)
+ * which has Partition.partitionAuthorityURI defined. For all non-ghost
+ * Resource's the partition is also cached in the
+ * id:ValaaReference.getPartitionURI. For ghosts the partition can be
+ * fetched from the ghost host.
  */
 
 export function universalizePartitionMutation (bard: Bard, id: VRef) {
@@ -97,43 +98,30 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
       const resolver = Object.create(bard);
       resolver.goToTransientOfRawId(hostRawId, "Resource");
       smallestNonGhostId = resolver.objectId;
-      partitionURI = smallestNonGhostId.partitionURI();
+      partitionURI = smallestNonGhostId.getPartitionURI();
     }
-    let partitionAuthorityURI;
-    let partitionRawId;
-    if (partitionURI) {
-      partitionAuthorityURI = getPartitionAuthorityURIStringFrom(partitionURI);
-      partitionRawId = getPartitionRawIdFrom(partitionURI);
-    } else {
-      partitionAuthorityURI = "valaa-memory:";
-      partitionRawId = smallestNonGhostId.rawId();
-    }
+    partitionURI = partitionURI
+        ? String(partitionURI)
+        : `valaa-memory:?id=${smallestNonGhostId.rawId()}`;
 
     let matchingPassage = bard.passage;
-    // Find or create the partitions with an existing matching partitionRawId entry
+    // Find or create the partitions with an existing matching partitionURI entry
     for (; matchingPassage; matchingPassage = matchingPassage.parentPassage) {
-      const partitionHit = matchingPassage.partitions && matchingPassage.partitions[partitionRawId];
+      const partitionHit = (matchingPassage.partitions || {})[partitionURI];
       if (!partitionHit) continue;
-      if (partitionHit.partitionAuthorityURI !== partitionAuthorityURI) {
-        invariantify(partitionHit.partitionAuthorityURI === partitionAuthorityURI,
-            `two different partitionAuthorityURI's encountered in one command for partition '${
-                partitionRawId}'`,
-            "\n\texisting authority URI:", partitionHit.partitionAuthorityURI,
-            "\n\tnew authority URI:", partitionAuthorityURI);
-      }
       partitions = Object.keys(matchingPassage.partitions) === 1
           ? matchingPassage.partitions
-          : { [partitionRawId]: partitionHit };
+          : { [partitionURI]: partitionHit };
       break;
     }
-    // Assign the partitions with current partitionRawId to all passages in the current branch.
+    // Assign the partitions with current partitionURI to all passages in the current branch.
     for (let passage = bard.passage; passage !== matchingPassage; passage = passage.parentPassage) {
       // Absolutize to the action.partitions (passage doesn't go upstream).
       const action = getActionFromPassage(passage);
       // skip virtual passages which don't have underlying actions
       if (!action || action === Object.prototype) continue;
       if (!partitions) {
-        partitions = { [partitionRawId]: { eventId: null, partitionAuthorityURI } };
+        partitions = { [partitionURI]: { eventId: null } };
       }
       action.partitions = !action.partitions
           ? partitions

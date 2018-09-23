@@ -71,12 +71,14 @@ describe("Prophet", () => {
     harness = await createProphetOracleHarness({});
     const partitionURI = createPartitionURI(testAuthorityURI, "test_partition");
 
-    const prophetConnection = await harness.prophet.acquirePartitionConnection(partitionURI);
+    const prophetConnection = await harness.prophet
+        .acquirePartitionConnection(partitionURI).getSyncedConnection();
     // Wrong:
-    // const scribeConnection = await scribe.acquirePartitionConnection(partitionURI, {});
+    // const scribeConnection = await scribe
+    //     .acquirePartitionConnection(partitionURI).getSyncedConnection();
     //
     // Right:
-    const scribeConnection = prophetConnection.getScribeConnection();
+    const scribeConnection = prophetConnection.getUpstreamConnection().getScribeConnection();
 
     let oldCommandId;
     let newCommandId = scribeConnection.getLastCommandEventId();
@@ -97,8 +99,9 @@ describe("Prophet", () => {
     harness = await createProphetOracleHarness({});
     const partitionURI = createPartitionURI(testAuthorityURI, "test_partition");
 
-    const prophetConnection = await harness.prophet.acquirePartitionConnection(partitionURI);
-    const scribeConnection = prophetConnection.getScribeConnection();
+    const prophetConnection = await harness.prophet
+        .acquirePartitionConnection(partitionURI).getSyncedConnection();
+    const scribeConnection = prophetConnection.getUpstreamConnection().getScribeConnection();
     const database = await openDB(partitionURI.toString());
 
     const commandList = [createPartitionCommand].concat(...basicCommands);
@@ -126,7 +129,8 @@ describe("Prophet", () => {
   it("Rejects commands executed after a freeze command", async () => {
     harness = await createProphetOracleHarness({});
     const partitionURI = createPartitionURI(testAuthorityURI, "test_partition");
-    await harness.prophet.acquirePartitionConnection(partitionURI);
+    await harness.prophet
+        .acquirePartitionConnection(partitionURI).getSyncedConnection();
 
     // Run commands up until the partition is frozen
     const commandsUntilFreeze = [createPartitionCommand, freezePartitionCommand];

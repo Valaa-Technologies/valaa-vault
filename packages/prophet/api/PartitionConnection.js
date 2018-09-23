@@ -19,6 +19,7 @@ export default class PartitionConnection extends LogEventGenerator {
   _dependentConnections: Object;
   _upstreamConnection: PartitionConnection;
   _isFrozen: boolean;
+  _syncedConnection: PartitionConnection | Promise<PartitionConnection>;
 
   constructor ({ name, prophet, partitionURI, logger, debugLevel }: {
     name: any, prophet: Prophet, partitionURI: ValaaURI, logger?: Logger, debugLevel?: number,
@@ -57,7 +58,7 @@ export default class PartitionConnection extends LogEventGenerator {
     throw new Error("isConnected not implemented");
   }
 
-  async connect (/* initialNarrateOptions: NarrateOptions */) {
+  async connect (/* options: ConnectOptions */) {
     throw new Error("connect");
   }
 
@@ -87,6 +88,21 @@ export default class PartitionConnection extends LogEventGenerator {
 
   setUpstreamConnection (connection: PartitionConnection) {
     this._upstreamConnection = connection;
+  }
+
+  isSynced () {
+    if (this._syncedConnection !== undefined) return (this._syncedConnection === this);
+    if (this._upstreamConnection) return this._upstreamConnection.isSynced();
+    return false;
+  }
+
+  getSyncedConnection (): null | Promise<PartitionConnection> | PartitionConnection {
+    if (this._syncedConnection !== undefined) return this._syncedConnection;
+    // Wait for upstream to sync, then denote this connection synced, then resolve as 'this'.
+    return (this._syncedConnection = thenChainEagerly(
+        this._upstreamConnection && this._upstreamConnection.getSyncedConnection(),
+        () => (this._syncedConnection = this),
+    ));
   }
 
   /**

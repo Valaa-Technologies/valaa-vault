@@ -8,8 +8,9 @@ import { createTestPartitionURIFromRawId, createPartitionURI }
 
 import ScriptTestHarness, { createScriptTestHarness } from "~/script/test/ScriptTestHarness";
 
-import { AuthorityNexus, FalseProphet, FalseProphetDiscourse, Oracle, Prophecy, Scribe }
-    from "~/prophet";
+import { AuthorityNexus, FalseProphet, FalseProphetDiscourse, Oracle, PartitionConnection, Prophecy,
+  Prophet, Scribe,
+} from "~/prophet";
 
 import ProphetTestAPI from "~/prophet/test/ProphetTestAPI";
 import createValaaTestScheme from "~/prophet/test/scheme-valaa-test";
@@ -40,7 +41,8 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
   if (options.acquirePartitions) {
     const partitionURIs = options.acquirePartitions.map(
         partitionId => createPartitionURI("valaa-test:", partitionId));
-    const connections = partitionURIs.map(uri => ret.oracle.acquirePartitionConnection(uri));
+    const connections = partitionURIs.map(uri => ret.oracle
+        .acquirePartitionConnection(uri).getSyncedConnection());
     await Promise.all(connections);
   }
   for (const block of commandBlocks) {
@@ -64,7 +66,8 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     this.prophet.setUpstream(this.upstream);
 
     this.testPartitionURI = createTestPartitionURIFromRawId("test_partition");
-    this.testPartitionConnection = this.prophet.acquirePartitionConnection(this.testPartitionURI);
+    this.testPartitionConnection = this.prophet
+        .acquirePartitionConnection(this.testPartitionURI).getSyncedConnection();
   }
 
   claim (...rest: any) {
@@ -139,12 +142,15 @@ export function createOracle (scribe: Scribe) {
 }
 
 export function clearOracleScribeDatabases (oracle: Oracle) {
-  return clearScribeDatabases(Object.values(oracle.getFullPartitionConnections())
+  return clearScribeDatabases(Object.values(oracle.getSyncedConnections())
       .map(connection => connection.getPartitionURI().toString()));
 }
 
+class MockPartitionConnection extends PartitionConnection {
+  async connect (/* options: ConnectOptions */) { return this; }
+}
 
-class MockProphet {
+class MockProphet extends Prophet {
   addFollower (/* falseProphet */) {
     const connectors = {};
     return connectors;
@@ -157,5 +163,9 @@ class MockProphet {
     };
   }
 
-  acquirePartitionConnection () { return null; }
+  _createPartitionConnection () {
+    return new MockPartitionConnection({
+      prophet: this, partitionURI: new createPartitionURI("valaa-test:", "dummy"),
+    });
+  }
 }

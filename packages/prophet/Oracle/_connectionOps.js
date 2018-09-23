@@ -1,14 +1,12 @@
 // @flow
 
 import type { UniversalEvent } from "~/raem/command";
-import type ValaaURI from "~/raem/ValaaURI";
 
-import type { NarrateOptions } from "~/prophet/api/Prophet";
+import type { ConnectOptions, NarrateOptions } from "~/prophet/api/Prophet";
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 
-import { dumpObject, invariantifyNumber, isPromise, vdon } from "~/tools";
+import { dumpObject, isPromise, vdon } from "~/tools";
 
-import Oracle from "./Oracle";
 import OraclePartitionConnection from "./OraclePartitionConnection";
 
 export const vdoc = vdon({
@@ -18,53 +16,13 @@ export const vdoc = vdon({
   0: [],
 });
 
-
-export function _acquirePartitionConnection (oracle: Oracle, partitionURI: ValaaURI,
-    options: NarrateOptions): ?OraclePartitionConnection | Promise<OraclePartitionConnection> {
-  // Synchronous reject or return full connection section
-  const partitionURIString = String(partitionURI);
-  let entry = oracle._partitionConnections[partitionURIString];
-  if (entry && options.createNewPartition && (entry.connection._lastAuthorizedEventId !== -1)) {
-    throw new Error(`Partition already exists when trying to create a new partition '${
-        String(partitionURI)}'`);
-  }
-  if (entry && (!entry.pendingConnection || entry.pendingConnection.fullConnection
-      || options.allowPartialConnection)) {
-    // TODO(iridian): Shouldn't we narrate here? Now just returning.
-    return entry.connection;
-  }
-  if (options.onlyTrySynchronousConnection) return undefined;
-
-  // Asynchronous pending connection section
-  if (entry) {
-    entry.connection.acquireConnection();
-    return entry.pendingConnection;
-  }
-  if (options.dontCreateNewConnection) return undefined;
-
-  // Asynchronous create new connection section
-  entry = oracle._partitionConnections[partitionURIString] = {
-    connection: new OraclePartitionConnection({
-      prophet: oracle, partitionURI, debugLevel: oracle.getDebugLevel(),
-    }),
-    pendingConnection: undefined,
-  };
-  entry.pendingConnection = entry.connection.connect(options).then(() => {
-    // fullConnection allows promise users to inspect the promise for completion synchronously:
-    // standard promises interface doesn't support this functionality.
-    entry.pendingConnection.fullConnection = entry.connection;
-    delete entry.pendingConnection;
-    return entry.connection;
-  });
-  entry.pendingConnection.operationInfo = { connection: entry.connection };
-  return entry.pendingConnection;
-}
-
-
 export async function _connect (connection: OraclePartitionConnection,
-    initialNarrateOptions: Object, onConnectData: Object) {
-  const scribeConnection = await connection._prophet._upstream.acquirePartitionConnection(
-      connection.getPartitionURI(), { callback: connection.createReceiveTruth("scribeUpstream") });
+    onConnectData: ConnectOptions) {
+  const scribeConnection = await connection._prophet._upstream
+      .acquirePartitionConnection(connection.getPartitionURI(),
+          { receiveEvent: connection.createReceiveTruth("scribeUpstream") })
+      .getSyncedConnection();
+
   connection.transferIntoDependentConnection("scribeUpstream", scribeConnection);
   connection.setUpstreamConnection(scribeConnection);
 
@@ -74,16 +32,16 @@ export async function _connect (connection: OraclePartitionConnection,
 
   _connectToAuthorityProphet(connection);
 
-  const ret = await connection.narrateEventLog(initialNarrateOptions);
+  const ret = await connection.narrateEventLog(onConnectData.narrate);
 
   const actionCount = Object.values(ret).reduce(
     (acc, log) => acc + (Array.isArray(log) ? log.length : 0), 0);
 
-  if (!actionCount && (onConnectData.createNewPartition === false)) {
-    throw new Error(`No actions found when connecting to an existing partition '${
+  if (!actionCount && (onConnectData.newPartition === false)) {
+    throw new Error(`No events found when connecting to an expected existing partition '${
         connection.getPartitionURI().toString()}'`);
-  } else if (actionCount && (onConnectData.createNewPartition === true)) {
-    throw new Error(`Existing actions found when trying to create a new partition '${
+  } else if (actionCount && (onConnectData.newPartition === true)) {
+    throw new Error(`Existing events found when trying to create a new partition '${
         connection.getPartitionURI().toString()}'`);
   }
   if ((onConnectData.requireLatestMediaContents !== false)
@@ -109,6 +67,8 @@ function _connectToAuthorityProphet (connection: OraclePartitionConnection) {
           callback: connection.createReceiveTruth("authorityUpstream"),
           subscribeRemote: false, narrateRemote: false,
         });
+        })
+        .getSyncedConnection();
     connection.transferIntoDependentConnection("authorityUpstream", authorityConnection);
     connection._retrieveMediaContentFromAuthority = (mediaId, mediaInfo) =>
         authorityConnection.readMediaContent({ mediaId, ...mediaInfo });

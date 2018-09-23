@@ -67,13 +67,21 @@ export default class ScribePartitionConnection extends PartitionConnection {
     });
   }
 
-  async connect () {
-    await _initializeConnectionIndexedDB(this);
-    this._notifyProphetOfCommandCount();
-    this._pendingMediaLookup = await this._readMediaInfos();
-    for (const [mediaRawId, info] of Object.entries(this._pendingMediaLookup)) {
-      this._prophet._persistedMediaLookup[mediaRawId] = info;
-    }
+  connect (/* options: ConnectOptions */) {
+    return (this._syncedConnection = thenChainEagerly(
+        _initializeConnectionIndexedDB(this), [
+          () => {
+            this._notifyProphetOfCommandCount();
+            return this._readMediaInfos();
+          }, (mediaInfos) => {
+            this._pendingMediaLookup = mediaInfos;
+            for (const [mediaRawId, info] of Object.entries(this._pendingMediaLookup)) {
+              this._prophet._persistedMediaLookup[mediaRawId] = info;
+            }
+            return (this._syncedConnection = this);
+          }
+        ],
+    ));
   }
 
   disconnect () {

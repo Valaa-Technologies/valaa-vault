@@ -40,7 +40,7 @@ describe("Scribe", () => {
 
     expect(commandsCounted).toBe(0);
 
-    const connection = await scribe.acquirePartitionConnection(uri, {});
+    const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
     expect(commandsCounted).toBe(0);
 
     await connection.claimCommandEvent(simpleCommand);
@@ -56,7 +56,7 @@ describe("Scribe", () => {
     await scribe.initialize();
     const uri = createPartitionURI(URI);
 
-    const connection = await scribe.acquirePartitionConnection(uri, {});
+    const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
     const database = await openDB(URI);
 
     // Adds an entity and checks that it has been stored
@@ -84,7 +84,7 @@ describe("Scribe", () => {
     await scribe.initialize();
     const uri = createPartitionURI(URI);
 
-    const connection = await scribe.acquirePartitionConnection(uri, {});
+    const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
     const sharedDB = await openDB(sharedURI);
 
     for (const mediaContent of textMediaContents) {
@@ -115,7 +115,7 @@ describe("Scribe", () => {
     await scribe.initialize();
     const uri = createPartitionURI(URI);
 
-    const connection = await scribe.acquirePartitionConnection(uri, {});
+    const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
 
     const mediaId = vRef("abcd-0123");
     for (const [bufferContent, mediaInfo, expectedContent] of structuredMediaContents) {
@@ -133,7 +133,7 @@ describe("Scribe", () => {
     await scribe.initialize();
     const uri = createPartitionURI(URI);
 
-    const firstConnection = await scribe.acquirePartitionConnection(uri, {});
+    const firstConnection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
 
     let claimResult = firstConnection.claimCommandEvent(simpleCommand);
     await claimResult.finalizeLocal();
@@ -145,7 +145,7 @@ describe("Scribe", () => {
     expect(lastCommandId).toBeGreaterThan(0);
     firstConnection.disconnect();
 
-    const secondConnection = await scribe.acquirePartitionConnection(uri, {});
+    const secondConnection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
     expect(secondConnection.getLastCommandEventId()).toBe(lastCommandId);
   });
 
@@ -163,7 +163,7 @@ describe("Scribe", () => {
     await scribe.initialize();
     const uri = createPartitionURI(URI);
 
-    const connection = await scribe.acquirePartitionConnection(uri, {});
+    const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
     let oldCommandId;
     let newCommandId = connection.getLastCommandEventId();
 

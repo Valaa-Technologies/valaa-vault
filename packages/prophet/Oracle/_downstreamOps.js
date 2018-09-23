@@ -196,7 +196,7 @@ async function _tryConfirmPendingMultiPartitionTruths (oracle: Oracle,
     const connectionsWithCandidateAsHead = [];
     let isBlocked;
     for (const partitionURIString of Object.keys(eventCandidate.partitions)) {
-      const { connection } = oracle._partitionConnections[partitionURIString] || {};
+      const connection = oracle._connections[partitionURIString];
       if (!connection) continue;
       const partitionData = eventCandidate.partitions[partitionURIString];
       if (_nextPendingDownstreamTruthId(connection) === partitionData.eventId) {

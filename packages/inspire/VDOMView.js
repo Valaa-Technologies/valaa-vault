@@ -22,8 +22,9 @@ export default class VDOMView extends Cog {
       }
       // Load project
       const lensRef = vRefFromURI(rootLensURI);
-      this._rootConnection = await this.engine.prophet.acquirePartitionConnection(
-          lensRef.getPartitionURI());
+      this._rootConnection = await this.engine.prophet
+          .acquirePartitionConnection(lensRef.getPartitionURI())
+          .getSyncedConnection();
       this._vViewFocus = await this.engine.getVrapper(
           lensRef.rawId() || this._rootConnection.getPartitionRawId());
       await this._vViewFocus.activate();

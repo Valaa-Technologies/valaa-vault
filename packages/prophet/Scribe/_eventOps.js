@@ -20,9 +20,8 @@ export const vdoc = vdon({
 });
 
 export async function _narrateEventLog (connection: ScribePartitionConnection,
-    options: NarrateOptions = {}):
-        Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
-  // Narrates both authorized events as well as claim commands to _processEvent callback.
+    options: NarrateOptions = {}): Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
+  // Narrates both authorized events as well as claim commands to _receiveEvent callback.
   // Commands have a truthy command.isCommand.
   const firstEventId = typeof options.firstEventId !== "undefined"
     ? options.firstEventId

@@ -3,12 +3,11 @@
 import type Command from "~/raem/command";
 import ValaaURI from "~/raem/ValaaURI";
 
-import Prophet, { ClaimResult, NarrateOptions } from "~/prophet/api/Prophet";
+import Prophet, { ClaimResult, ConnectOptions, PartitionConnection } from "~/prophet/api/Prophet";
 
 import { dumpObject } from "~/tools";
 
 import OraclePartitionConnection from "./OraclePartitionConnection";
-import { _acquirePartitionConnection } from "./_connectionOps";
 import { _claim } from "./_upstreamOps";
 
 /**
@@ -32,19 +31,9 @@ import { _claim } from "./_upstreamOps";
  */
 export default class Oracle extends Prophet {
 
-  _partitionConnections: {
-    [partitionURIString: string]: {
-      // Set both if the connection process is on-going or fully connected.
-      connection: OraclePartitionConnection,
-      // Only set if connection process is on-going, null if fully connected.
-      pendingConnection: ?Promise<OraclePartitionConnection>,
-    }
-  };
-
   constructor ({ scribe, authorityNexus, ...rest }: Object) {
     super({ ...rest, upstream: scribe });
     this._authorityNexus = authorityNexus;
-    this._partitionConnections = {};
   }
 
   /**
@@ -58,11 +47,11 @@ export default class Oracle extends Prophet {
    *   allowPartialConnection: boolean = false,
    *   // If true does not initiate new connection and returns undefined instead of any promise.
    *   onlyTrySynchronousConnection: boolean = false,
-   *   // If true does not create a new connection process is one cannot be found.
-   *   dontCreateNewConnection: boolean = false,
+   *   // If false does not create a new connection process is one cannot be found.
+   *   newConnection: boolean = true,
    *   // If true requests a creation of a new partition and asserts if one exists. If false,
    *   // asserts if no commands or events for the partition can be found.
-   *   createNewPartition: boolean = false,
+   *   newPartition: boolean = false,
    *   // If true, throws an error if the retrieval for the latest content for any media fails.
    *   // Otherwise allows the connection to complete successfully. But because then not all latest
    *   // content might be locally available, Media.immediateContent calls for script files might
@@ -73,15 +62,34 @@ export default class Oracle extends Prophet {
    *
    * @memberof Oracle
    */
-  acquirePartitionConnection (partitionURI: ValaaURI, options: NarrateOptions = {}): any {
+  acquirePartitionConnection (partitionURI: ValaaURI, options: ConnectOptions = {}):
+      ?PartitionConnection {
     try {
-      return _acquirePartitionConnection(this, partitionURI, options);
+      if (options.newPartition || options.onlyTrySynchronousConnection) {
+        const connection = this._connections[String(partitionURI)];
+        if (options.onlyTrySynchronousConnection) return connection;
+        if (connection && (connection._lastAuthorizedEventId !== -1)) {
+          throw new Error(`Partition already exists when trying to create a new partition '${
+              String(partitionURI)}'`);
+        }
+      }
+
+      const ret = super.acquirePartitionConnection(partitionURI, options);
+
+      if (!ret || (!ret.isSynced() && (options.allowPartialConnection === false))) return undefined;
+      return ret;
     } catch (error) {
       throw this.wrapErrorEvent(error, `acquirePartitionConnection(${String(partitionURI)})`,
           "\n\toptions:", ...dumpObject(options),
-          "\n\texisting connection:", ...dumpObject(
-              this._partitionConnections[String(partitionURI || "")]));
+          "\n\texisting connection:", ...dumpObject(this._connections[String(partitionURI || "")]));
     }
+  }
+
+  _createPartitionConnection (partitionURI: ValaaURI /* , options: ConnectOptions = {} */):
+      ?PartitionConnection {
+    return new OraclePartitionConnection({
+      prophet: this, partitionURI, debugLevel: this.getDebugLevel(),
+    });
   }
 
   getFullPartitionConnections (): Object {

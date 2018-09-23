@@ -2,7 +2,7 @@
 
 import type ValaaURI from "~/raem/ValaaURI";
 
-import Prophet, { NarrateOptions } from "~/prophet/api/Prophet";
+import Prophet, { ConnectOptions, NarrateOptions } from "~/prophet/api/Prophet";
 
 import DecoderArray from "~/prophet/prophet/DecoderArray";
 
@@ -71,16 +71,12 @@ export default class Scribe extends Prophet {
 
   // connection ops
 
-  async acquirePartitionConnection (partitionURI: ValaaURI,
-      initialNarrateOptions: NarrateOptions): ScribePartitionConnection {
-    const ret = new ScribePartitionConnection({
-      prophet: this,
-      partitionURI,
-      processEvent: initialNarrateOptions.callback,
-      databaseAPI: this._databaseAPI,
+  _createPartitionConnection (partitionURI: ValaaURI, options: ConnectOptions = {}):
+      ScribePartitionConnection {
+    return new ScribePartitionConnection({
+      prophet: this, partitionURI,
+      receiveEvent: options.receiveEvent, databaseAPI: this._databaseAPI,
     });
-    await ret.connect(initialNarrateOptions);
-    return ret;
   }
 
   // command ops

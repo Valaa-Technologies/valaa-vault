@@ -9,6 +9,7 @@ import type Prophecy from "~/prophet/api/Prophecy";
 import type PartitionConnection from "~/prophet/api/PartitionConnection";
 
 import { LogEventGenerator } from "~/tools/Logger";
+import thenChainEagerly from "~/tools/thenChainEagerly";
 
 export type ClaimResult = {
   prophecy: Prophecy;
@@ -40,10 +41,17 @@ export type MediaInfo = {
 
 export type RetrieveMediaContent = (mediaId: VRef, mediaInfo: MediaInfo) => Promise<any>;
 
-export type NarrateOptions = {
   narrateRemote?: boolean,   // default true - narrate remote content.
   subscribeRemote?: boolean, // default true - subscribe for downstream events.
+export type ConnectOptions = {
+  newConnection?: boolean,      // if true, throw if a connection exists,
+                                // if false, throw if no connection exists,
+  newPartition?: boolean,       // if true, throw if a partition exists (ie. has persisted events)
+                                // if false, throw if no partition exists (ie. no persisted events)
+  onlyTrySynchronousConnection?: boolean, // if true
+};
 
+export type NarrateOptions = {
   fullNarrate?: boolean,     // default false - await for remote narration result even if optimistic
                              // could be performed locally.
   snapshots?: boolean,       // default true, currently ignored - start narration from most recent
@@ -66,11 +74,13 @@ export type ChronicleOptions = NarrateOptions & {
 export default class Prophet extends LogEventGenerator {
   _upstream: Prophet;
   _followers: Follower;
+  _connections: { [partitionURIString: string]: PartitionConnection };
 
-  constructor ({ upstream, ...rest }: Object) {
+  constructor ({ upstream, ...rest }: Object = {}) {
     super({ ...rest });
     this._upstream = upstream;
     this._followers = new Map();
+    this._connections = {};
   }
 
   addFollower (follower: Follower): Follower {
@@ -152,7 +162,30 @@ export default class Prophet extends LogEventGenerator {
    * @memberof Prophet
    */
   acquirePartitionConnection (partitionURI: ValaaURI,
-      options: NarrateOptions = {}): PartitionConnection {
+      options: ConnectOptions = {}): ?PartitionConnection {
+    let connection = this._connections[String(partitionURI)];
+    if (connection) return connection;
+    if (options.newConnection === false) {
+      if (options.require === false) return undefined;
+      throw new Error("Can't create new partition connection with options.newConnection === false");
+    }
+    connection = this._createPartitionConnection(partitionURI, options);
+    if (!connection) return undefined;
+    connection.addReference();
+    this._connections[String(partitionURI)] = connection;
+    if (connection._syncedConnection === undefined) {
+      connection._syncedConnection = thenChainEagerly(
+        connection.connect(options),
+        () => { connection._syncedConnection = connection; return connection; }
+      );
+      if (connection._syncedConnection !== connection) {
+        connection._syncedConnection.operationInfo = { connection };
+      }
+    }
+    return connection;
+  }
+
+  _createPartitionConnection (partitionURI: ValaaURI, options: ConnectOptions) {
     return this._upstream.acquirePartitionConnection(partitionURI, options);
   }
 

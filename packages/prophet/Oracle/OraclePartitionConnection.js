@@ -3,7 +3,7 @@
 import type Command, { UniversalEvent } from "~/raem/command";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import type { ChronicleOptions, NarrateOptions, MediaInfo, RetrieveMediaContent }
+import type { ChronicleOptions, ConnectOptions, NarrateOptions, MediaInfo, RetrieveMediaContent }
     from "~/prophet/api/Prophet";
 
 import { dumpObject, invariantifyObject } from "~/tools";
@@ -73,25 +73,25 @@ export default class OraclePartitionConnection extends PartitionConnection {
    * initiates the authority connection and narrates any requested events before finalizing.
    *
    * The initial narration looks for the requested events in following order:
-   * 1. initialNarrateOptions.eventLog
+   * 1. options.eventLog
    * 2. scribe in-memory and IndexedDB caches
-   * 3. authority connection.narrateEventLog (only if initialNarrateOptions.lastEventId is given)
+   * 3. authority connection.narrateEventLog (only if options.lastEventId is given)
    *
    * If lastEventId is not specified, all the explicit eventLog and local cache events (starting
    * from the optional firstEventId) are narrated.
    *
    *
-   * @param {NarrateOptions} initialNarrateOptions
+   * @param {ConnectOptions} options
    *
    * @memberof OraclePartitionConnection
    */
-  async connect (initialNarrateOptions: NarrateOptions) {
-    const onConnectData = { ...initialNarrateOptions };
+  async connect (options: ConnectOptions) {
+    const onConnectData = { ...options };
     try {
-      this.warnEvent(1, "\n\tBegun initializing connection with options", initialNarrateOptions,
+      this.warnEvent(1, "\n\tBegun initializing connection with options", options,
           ...dumpObject(this));
-      const ret = await _connect(this, initialNarrateOptions, onConnectData);
-      this.warnEvent(1, "\n\tDone initializing connection with options", initialNarrateOptions,
+      const ret = await _connect(this, onConnectData);
+      this.warnEvent(1, "\n\tDone initializing connection with options", options,
           "\n\tinitial narration:", ret);
       return ret;
     } catch (error) {

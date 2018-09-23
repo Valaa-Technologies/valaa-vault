@@ -312,8 +312,9 @@ export default class ValaaEngine extends Cog {
   }
 
   _createNewPartition (directive: Object) {
-    this.engine.prophet.acquirePartitionConnection(
-        directive.id.getPartitionURI(), { createNewPartition: true });
+    this.engine.prophet
+        .acquirePartitionConnection(directive.id.getPartitionURI(), { newPartition: true })
+        .getSyncedConnection();
   }
 
   _resolveIdForConstructDirective (directive, options: VALKOptions,

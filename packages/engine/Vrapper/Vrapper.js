@@ -378,13 +378,13 @@ export default class Vrapper extends Cog {
 
   tryPartitionConnection (options: Object = {}): ?PartitionConnection {
     options.require = false;
-    options.dontCreateNewConnection = true;
+    options.newConnection = false;
     this.getPartitionConnection(options);
     return this._partitionConnection;
   }
 
   getPartitionConnection (options:
-      { require?: boolean, transaction?: Transaction, dontCreateNewConnection?: boolean }
+      { require?: boolean, transaction?: Transaction, newConnection?: boolean }
           = { require: true }): ?PartitionConnection {
     // FIXME(iridian): the direct singular caching means that if the partitionConnection is changed,
     // the change is not visible to Vrapper. When implementing this, be mindful that the full
@@ -418,15 +418,15 @@ export default class Vrapper extends Cog {
           }
         }
       }
-      this._partitionConnectionProcess = partitionURI && this.engine.prophet
+      const connection = partitionURI && this.engine.prophet
           .acquirePartitionConnection(partitionURI, {
-            dontCreateNewConnection: options.dontCreateNewConnection,
-            createNewPartition: false,
+            newConnection: options.newConnection, newPartition: false, require: options.require,
           });
-      if (!this._partitionConnectionProcess) {
+      if (!connection) {
         if (!options.require) return undefined;
         throw new Error(`Cannot determine partition connection for ${this.debugId()}`);
       }
+      this._partitionConnectionProcess = connection.getSyncedConnection();
     } catch (error) { throw onError.call(this, error); }
     const ret = thenChainEagerly(this._partitionConnectionProcess,
         (partitionConnection) => {
@@ -1387,7 +1387,7 @@ export default class Vrapper extends Cog {
 
   recurseConnectedPartitionMaterializedFieldResources (fieldNames: Array<string>,
       options: Kuery = {}) {
-    const activeConnections = this.engine.prophet.getFullPartitionConnections();
+    const activeConnections = this.engine.prophet.getSyncedConnections();
     const result = [];
     for (const partitionRawId of Object.keys(activeConnections)) {
       const partition = this.engine.tryVrapper(partitionRawId);

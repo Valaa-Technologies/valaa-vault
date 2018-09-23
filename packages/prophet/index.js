@@ -17,10 +17,10 @@ export { default as Prophecy } from "./api/Prophecy";
 export { default as Prophet } from "./api/Prophet";
 export type Transaction = Object;
 
+export { default as FalseProphet } from "./FalseProphet";
+export { default as FalseProphetDiscourse } from "./FalseProphet/FalseProphetDiscourse";
 export { default as Oracle } from "./Oracle";
 export { default as Scribe } from "./Scribe";
 
 export { default as AuthorityNexus } from "./prophet/AuthorityNexus";
 export { default as DecoderArray } from "./prophet/DecoderArray";
-export { default as FalseProphet } from "./prophet/FalseProphet";
-export { default as FalseProphetDiscourse } from "./prophet/FalseProphetDiscourse";

@@ -70,20 +70,24 @@ export default class PartitionConnection extends LogEventGenerator {
    */
   disconnect () {
     for (const dependentConnection of (this._dependentConnections || [])) {
-      dependentConnection.releaseConnection();
+      dependentConnection.removeReference();
     }
     this._dependentConnections = null;
     this._refCount = null;
   } // eslint-disable-line
 
-  acquireConnection () { ++this._refCount; }
-  releaseConnection () { if ((this._refCount !== null) && --this._refCount) this.disconnect(); }
+  addReference () { ++this._refCount; }
+  removeReference () { if ((this._refCount !== null) && --this._refCount) this.disconnect(); }
 
   setIsFrozen (value: boolean = true) { this._isFrozen = value; }
   isFrozen (): boolean {
     return (typeof this._isFrozen !== "undefined") ? this._isFrozen
         : this._upstreamConnection ? this._upstreamConnection.isFrozen()
         : false;
+  }
+
+  getUpstreamConnection () {
+    return this._upstreamConnection;
   }
 
   setUpstreamConnection (connection: PartitionConnection) {
@@ -129,7 +133,7 @@ export default class PartitionConnection extends LogEventGenerator {
 
   acquireAndAttachDependentConnection (dependentName: string,
       dependentConnection: PartitionConnection) {
-    dependentConnection.acquireConnection();
+    dependentConnection.addReference();
     this.transferIntoDependentConnection(dependentName, dependentConnection);
   }
 

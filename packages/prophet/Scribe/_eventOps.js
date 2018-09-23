@@ -36,7 +36,7 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
     : (await connection._readEvents({ firstEventId, lastEventId: eventLastEventId })) || [];
 
   const commandFirstEventId = eventLastEventId + 1;
-  const commandList = (!options.commandCallback || (commandFirstEventId > lastEventId))
+  const commandList = (!options.receiveCommand || (commandFirstEventId > lastEventId))
     ? []
     : (await connection._readCommands({ firstEventId: commandFirstEventId, lastEventId })) || [];
 
@@ -50,8 +50,9 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
     connection.setIsFrozen(commandList[commandList.length - 1].type === "FROZEN");
   }
   return {
-    scribeEventLog: await Promise.all(eventList.map(options.callback || connection._processEvent)),
-    scribeCommandQueue: await Promise.all(commandList.map(options.commandCallback)),
+    scribeEventLog: await Promise.all(eventList.map(
+        options.receiveEvent || connection._receiveEvent)),
+    scribeCommandQueue: await Promise.all(commandList.map(options.receiveCommand)),
   };
 }
 

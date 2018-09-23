@@ -41,23 +41,28 @@ export type MediaInfo = {
 
 export type RetrieveMediaContent = (mediaId: VRef, mediaInfo: MediaInfo) => Promise<any>;
 
-  narrateRemote?: boolean,   // default true - narrate remote content.
-  subscribeRemote?: boolean, // default true - subscribe for downstream events.
 export type ConnectOptions = {
+  connect?: boolean,            // default true - connect to updates
+  subscribe?: boolean,          // default true - subscribe for downstream events.
+  receiveEvent?: EventCallback, // a persistent callback for push events
+  narrate?: NarrateOptions,     // default {} - narrate with default options
   newConnection?: boolean,      // if true, throw if a connection exists,
                                 // if false, throw if no connection exists,
   newPartition?: boolean,       // if true, throw if a partition exists (ie. has persisted events)
                                 // if false, throw if no partition exists (ie. no persisted events)
   onlyTrySynchronousConnection?: boolean, // if true
+  allowPartialConnection?: boolean,       // default false - if true, return not fully narrated
+                                          // connection synchronously
+  requireLatestMediaContents?: boolean,   //
 };
 
 export type NarrateOptions = {
-  fullNarrate?: boolean,     // default false - await for remote narration result even if optimistic
-                             // could be performed locally.
-  snapshots?: boolean,       // default true, currently ignored - start narration from most recent
-                             // snapshot within provided event range
-  commands?: boolean,        // default true - narrate pending commands as well.
-  callback?: EventCallback,
+  fullNarrate?: boolean,        // default false - await for remote narration result even if
+                                // optimistic one could be performed locally.
+  snapshots?: boolean,          // default true, currently ignored - start narration from most
+                                // recent snapshot within provided event range
+  commands?: boolean,           // default true - narrate pending commands as well.
+  receiveEvent?: EventCallback, // a callback for narrated events
   firstEventId?: number,
   lastEventId?: number,
 };
@@ -138,7 +143,7 @@ export default class Prophet extends LogEventGenerator {
    *
    * The returned connection might be shared between other users and implements internal reference
    * counting; it is acquired once as part of this call. The connection must be manually released
-   * with releaseConnection or otherwise the connection resources will be left open.
+   * with removeReference or otherwise the connection resources will be left open.
    *
    * The connection is considered acquired and the promise is resolved after a lazy greedy
    * "first narration" is complete. Lazy means that only the single closest source which
@@ -203,16 +208,34 @@ export default class Prophet extends LogEventGenerator {
   }
 
   /**
-   * Returns a map of fully acquired partition connections by the connection id.
+   * Returns a map of fully synced partition connections keyed by their partition id.
    */
+  getSyncedConnections (): Map<string, PartitionConnection> {
+    const ret = {};
+    Object.entries(this._connections).forEach(([key, connection]) => {
+      if (connection.isSynced()) ret[key] = connection;
+    });
+    return ret;
+  }
   getFullPartitionConnections () : Map<string, PartitionConnection> {
-    return this._upstream.getFullPartitionConnections();
+    this.warnEvent(
+        "DEPRECATED: prefer getSyncedConnections instead of getFullPartitionConnections");
+    return this.getSyncedConnections();
   }
 
   /**
-   * Returns a map of pending partition connections by the connection id.
+   * Returns a map of still synchronizing partition connections keyed by their partition id.
    */
-  getPendingPartitionConnections () : Map<string, Promise<PartitionConnection> > {
-    return this._upstream.getPendingPartitionConnections();
+  getConnectionsPendingSync () : Map<string, Promise<PartitionConnection> > {
+    const ret = {};
+    Object.entries(this._connections).forEach(([key, connection]) => {
+      if (!connection.isSynced()) ret[key] = connection.getSyncedConnection();
+    });
+    return ret;
+  }
+  getPendingPartitionConnections () : Map<string, PartitionConnection> {
+    this.warnEvent(
+        "DEPRECATED: prefer getConnectionsPendingSync instead of getPendingPartitionConnections");
+    return this.getSyncedConnections();
   }
 }

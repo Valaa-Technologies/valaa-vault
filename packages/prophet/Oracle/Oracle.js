@@ -92,25 +92,6 @@ export default class Oracle extends Prophet {
     });
   }
 
-  getFullPartitionConnections (): Object {
-    const ret = {};
-    Object.entries(this._partitionConnections)
-        .forEach(([key, { connection, pendingConnection }]) => {
-          if (!pendingConnection) ret[key] = connection;
-        });
-    return ret;
-  }
-
-  getPendingPartitionConnections (): Object {
-    const ret = {};
-    Object.entries(this._partitionConnections).forEach(
-        ([key, { pendingConnection }]) => {
-          if (pendingConnection) ret[key] = pendingConnection;
-        }
-    );
-    return ret;
-  }
-
   _claimOperationQueue = [];
 
   // Coming from downstream

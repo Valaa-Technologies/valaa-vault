@@ -397,9 +397,9 @@ export default class InspireGateway extends LogEventGenerator {
     }
     // Acquire connection without remote narration to determine the current last authorized event
     // so that we can narrate any content in the prologue before any remote activity.
-      narrateRemote: false, subscribeRemote: false,
     const connection = await this.falseProphet
         .acquirePartitionConnection(partitionURI, {
+          subscribe: false, narrate: false,
         })
         .getSyncedConnection();
     const lastPrologueEventId = await info.eventId;

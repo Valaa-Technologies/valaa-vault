@@ -64,9 +64,8 @@ function _connectToAuthorityProphet (connection: OraclePartitionConnection) {
   return (connection._authorityConnection = (async () => {
     const authorityConnection = await connection._authorityProphet
         .acquirePartitionConnection(connection.getPartitionURI(), {
-          callback: connection.createReceiveTruth("authorityUpstream"),
-          subscribeRemote: false, narrateRemote: false,
-        });
+          receiveEvent: connection.createReceiveTruth("authorityUpstream"),
+          subscribe: false, narrate: false,
         })
         .getSyncedConnection();
     connection.transferIntoDependentConnection("authorityUpstream", authorityConnection);
@@ -81,12 +80,12 @@ export async function _narrateEventLog (connection: OraclePartitionConnection,
     options: NarrateOptions, ret: Object) {
   Object.assign(ret, await PartitionConnection.prototype.narrateEventLog.call(connection, {
     ...options,
-    commandCallback: options.commandCallback
-        || (!options.callback
+    receiveCommand: options.receiveCommand
+        || (!options.receiveEvent
             && connection._prophet._repeatClaimToAllFollowers.bind(connection._prophet))
   }));
 
-  if ((options.narrateRemote !== false) && connection._authorityConnection) {
+  if ((options.remote !== false) && connection._authorityConnection) {
     const authorityConnection = await connection._authorityConnection;
     // const mediaRetrievalTransaction = connection.
     const collection = connection.createReceiveTruthCollection("initialAuthorityNarration", {
@@ -94,9 +93,8 @@ export async function _narrateEventLog (connection: OraclePartitionConnection,
     });
 
     const authorityNarration = Promise.resolve(authorityConnection.narrateEventLog({
-      narrateRemote: true, subscribeRemote: options.subscribeRemote,
+      subscribe: options.subscribe, receiveEvent: collection.receiveTruth,
       firstEventId: connection._lastAuthorizedEventId + 1,
-      callback: collection.receiveTruth,
     })).then(async (remoteNarration) =>
         ((await collection.finalize(remoteNarration)) || remoteNarration));
 
@@ -157,8 +155,8 @@ export async function _chronicleEventLog (connection: OraclePartitionConnection,
               options.firstEventId}`);
       }
     }
-    explicitEventLogNarrations.push(options.callback
-        ? options.callback(event)
+    explicitEventLogNarrations.push(options.receiveEvent
+        ? options.receiveEvent(event)
         : collection.receiveTruth(event));
     currentEventId = eventId + 1;
   }

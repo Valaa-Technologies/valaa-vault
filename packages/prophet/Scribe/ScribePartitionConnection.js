@@ -28,7 +28,7 @@ import {
 } from "./_eventOps";
 
 export default class ScribePartitionConnection extends PartitionConnection {
-  _processEvent: () => void;
+  _receiveEvent: () => void;
 
   // Info structures
 
@@ -56,7 +56,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
 
   constructor (options: Object) {
     super(options);
-    this._processEvent = options.processEvent;
+    this._receiveEvent = options.receiveEvent;
     this._eventLogInfo = { firstEventId: 0, lastEventId: -1 };
     this._commandQueueInfo = { firstEventId: 0, lastEventId: -1, commandIds: [] };
     this._databaseAPI = options.databaseAPI;
@@ -79,7 +79,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
               this._prophet._persistedMediaLookup[mediaRawId] = info;
             }
             return (this._syncedConnection = this);
-          }
+          },
         ],
     ));
   }

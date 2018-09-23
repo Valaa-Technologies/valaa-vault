@@ -28,7 +28,7 @@ export default class FalseProphetDiscourse extends Discourse {
     this.follower = follower;
     this.prophet = prophet;
     this.corpus = prophet.corpus;
-    this._implicitlyConnectedPartitions = {};
+    this._implicitlySyncingConnections = {};
     this.setState(this.prophet.getState());
     invariantify(this.state, "FalseProphetDiscourse.state");
   }
@@ -66,16 +66,17 @@ export default class FalseProphetDiscourse extends Discourse {
     }
   }
 
-  _implicitlyConnectedPartitions: Object;
+  _implicitlySyncingConnections: Object;
 
   connectToMissingPartition = async (missingPartitionURI: ValaaURI) => {
     const partitionURIString = missingPartitionURI.toString();
-    if (!this._implicitlyConnectedPartitions[partitionURIString]) {
-      this._implicitlyConnectedPartitions[partitionURIString] =
-          this.prophet.acquirePartitionConnection(missingPartitionURI);
+    if (!this._implicitlySyncingConnections[partitionURIString]) {
+      this._implicitlySyncingConnections[partitionURIString] = this.prophet
+          .acquirePartitionConnection(missingPartitionURI)
+          .getSyncedConnection();
     }
-    return (this._implicitlyConnectedPartitions[partitionURIString] =
-        await this._implicitlyConnectedPartitions[partitionURIString]);
+    return (this._implicitlySyncingConnections[partitionURIString] =
+        await this._implicitlySyncingConnections[partitionURIString]);
   }
 
   revealProphecy (prophecy: Prophecy): ?Promise<any>[] {

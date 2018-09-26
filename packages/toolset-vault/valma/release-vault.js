@@ -110,18 +110,18 @@ exports.handler = async (yargv) => {
   async function _prepare (preparation) {
     const branches = ((await vlm.delegate("git branch --list --no-color release/* prerelease/*"))
             || "").split("\n")
-        .map(name => name.match(/^((\* )| {2})(pre)?release\/([0-9]*)(\.[0-9]+)?(\.[0-9]+)?$/))
+        .map(name => name.match(/^((\* )| {2})((pre)?release\/([0-9]*)(\.[0-9]+)?(\.[0-9]+)?)$/))
         .filter(match => match);
     const currentBranchMatch = branches.find(match => match[2]); // 2 <=> search for "* "
     if (!currentBranchMatch) throw new Error("Current branch is not a (pre)release branch");
-    const [,,, currentIsPrerelease, major, dotMinor, dotPatch] = currentBranchMatch;
+    const [,,, branchName, currentIsPrerelease, major, dotMinor, dotPatch] = currentBranchMatch;
     preparation.lernaConfig = require(vlm.path.join(process.cwd(), "lerna.json"));
     const [, minor, patch] = preparation.lernaConfig.version.match(/^[0-9]*\.([0-9]+)\.([0-9]+)/);
     preparation.isRelease = !!yargv.release || !(yargv.prerelease || currentIsPrerelease);
     preparation.newBranchGroup = yargv.release || yargv.prerelease;
     if (!preparation.newBranchGroup) {
       ret.releaseDescription = preparation.isRelease ? "Release" : "Prerelease";
-      preparation.targetBranch = currentBranchMatch[0];
+      preparation.targetBranch = branchName;
     } else {
       const type = yargv.release ? "release" : "prerelease";
       if (preparation.newBranchGroup === true) {
@@ -140,7 +140,7 @@ exports.handler = async (yargv) => {
           .split("\n").filter(b => !b.match(/^\s*$/)).length) {
         throw new Error(`Branch '${preparation.targetBranch}' already exists`);
       }
-      if (currentIsPrerelease) preparation.previousPrereleaseBranch = currentBranchMatch[0];
+      if (currentIsPrerelease) preparation.previousPrereleaseBranch = branchName;
     }
 
     const isDirty = (await vlm.delegate("git status -s"))
@@ -197,7 +197,8 @@ exports.handler = async (yargv) => {
       await vlm.delegate(`git add lerna.json`);
     }
     await vlm.delegate(`git add yarn.lock`);
-    await vlm.delegate(["git", "commit", "-m", [`placeholder commit for assemble to amend`]]);
+    await vlm.delegate(["git", "commit", "--allow-empty",
+      "-m", [`placeholder commit for assemble to amend`]]);
 
     commit["vlm assemble-packages"] = await vlm.invoke("assemble-packages",
         Object.assign({ versioning: "amend" }, assembleDefault, yargv.assemble));

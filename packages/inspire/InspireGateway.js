@@ -62,13 +62,13 @@ export default class InspireGateway extends LogEventGenerator {
 
       this.nexus = await this._establishAuthorityNexus(this.gatewayRevelation);
 
-      // Create a connector (the 'scribe') to the locally backed event log / bvob indexeddb cache
-      // ('scriptures') based on the revelation.
-      this.scribe = await this._proselytizeScribe(this.gatewayRevelation);
-
       // Create the stream router ('oracle') which uses scribe as its direct upstream, but which
       // manages the remote authority connections.
-      this.oracle = await this._summonOracle(this.gatewayRevelation, this.nexus, this.scribe);
+      this.oracle = await this._summonOracle(this.gatewayRevelation, this.nexus);
+
+      // Create a connector (the 'scribe') to the locally backed event log / bvob indexeddb cache
+      // ('scriptures') based on the revelation.
+      this.scribe = await this._proselytizeScribe(this.gatewayRevelation, this.oracle);
 
       this.corpus = await this._incorporateCorpus(this.gatewayRevelation);
 
@@ -182,13 +182,14 @@ export default class InspireGateway extends LogEventGenerator {
     }
   }
 
-  async _proselytizeScribe (gatewayRevelation: Object): Promise<Scribe> {
+  async _proselytizeScribe (gatewayRevelation: Object, oracle: Oracle): Promise<Scribe> {
     let scribeOptions;
     try {
       this._commandCountListeners = new Map();
       scribeOptions = {
         name: "Inspire Scribe",
         logger: this.getLogger(),
+        upstream: oracle,
         databaseAPI: gatewayRevelation.scribe.getDatabaseAPI(),
         commandCountCallback: this._updateCommandCount,
         ...await gatewayRevelation.scribe,
@@ -223,7 +224,7 @@ export default class InspireGateway extends LogEventGenerator {
     }
   }
 
-  async _summonOracle (gatewayRevelation: Object, authorityNexus: AuthorityNexus, scribe: Scribe):
+  async _summonOracle (gatewayRevelation: Object, authorityNexus: AuthorityNexus):
       Promise<Prophet> {
     let oracleOptions;
     try {
@@ -232,7 +233,6 @@ export default class InspireGateway extends LogEventGenerator {
         logger: this.getLogger(),
         debugLevel: 1,
         authorityNexus,
-        scribe,
         ...await gatewayRevelation.oracle,
       };
       const oracle = new Oracle(oracleOptions);
@@ -245,7 +245,7 @@ export default class InspireGateway extends LogEventGenerator {
     } catch (error) {
       throw this.wrapErrorEvent(error, "summonOracle",
           "\n\toracleOptions:", ...dumpObject(oracleOptions),
-          "\n\tscribe:", ...dumpObject(scribe));
+          "\n\tauthorityNexus:", ...dumpObject(authorityNexus));
     }
   }
 
@@ -398,9 +398,7 @@ export default class InspireGateway extends LogEventGenerator {
     // Acquire connection without remote narration to determine the current last authorized event
     // so that we can narrate any content in the prologue before any remote activity.
     const connection = await this.falseProphet
-        .acquirePartitionConnection(partitionURI, {
-          subscribe: false, narrate: false,
-        })
+        .acquirePartitionConnection(partitionURI, { subscribe: false, remote: false })
         .getSyncedConnection();
     const lastPrologueEventId = await info.eventId;
     const lastChronicledEventId = connection.getLastAuthorizedEventId() || 0;

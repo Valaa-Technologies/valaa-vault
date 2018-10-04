@@ -173,10 +173,6 @@ export default class OraclePartitionConnection extends PartitionConnection {
     }
   }
 
-  claimCommandEvent (command: Command) {
-    return this.getScribeConnection().claimCommandEvent(command, this.getRetrieveMediaContent());
-  }
-
   _preAuthorizeCommand = this.createReceiveTruth("preAuthorizer")
 
   // Coming from downstream: tries scribe first, otherwise forwards the request to authority.

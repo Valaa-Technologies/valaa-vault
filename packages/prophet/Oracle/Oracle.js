@@ -1,14 +1,14 @@
 // @flow
 
-import type Command from "~/raem/command";
 import ValaaURI from "~/raem/ValaaURI";
 
-import Prophet, { ClaimResult, ConnectOptions, PartitionConnection } from "~/prophet/api/Prophet";
+import Prophet, { ConnectOptions, PartitionConnection } from "~/prophet/api/Prophet";
 
 import { dumpObject } from "~/tools";
 
 import OraclePartitionConnection from "./OraclePartitionConnection";
-import { _claim } from "./_upstreamOps";
+
+import { _acquirePartitionConnection } from "./_connectionOps";
 
 /**
  * Oracle is the central hub for routing content and metadata streams between the downstream users,
@@ -31,8 +31,10 @@ import { _claim } from "./_upstreamOps";
  */
 export default class Oracle extends Prophet {
 
-  constructor ({ scribe, authorityNexus, ...rest }: Object) {
-    super({ ...rest, upstream: scribe });
+  static PartitionConnectionType = OraclePartitionConnection;
+
+  constructor ({ authorityNexus, ...rest }: Object) {
+    super({ ...rest });
     this._authorityNexus = authorityNexus;
   }
 
@@ -91,9 +93,4 @@ export default class Oracle extends Prophet {
       prophet: this, partitionURI, debugLevel: this.getDebugLevel(),
     });
   }
-
-  _claimOperationQueue = [];
-
-  // Coming from downstream
-  claim (command: Command, options: Object): ClaimResult { return _claim(this, command, options); }
 }

@@ -401,9 +401,9 @@ export default class InspireGateway extends LogEventGenerator {
         .acquirePartitionConnection(partitionURI, { subscribe: false, remote: false })
         .getSyncedConnection();
     const lastPrologueEventId = await info.eventId;
-    const lastChronicledEventId = connection.getLastAuthorizedEventId() || 0;
+    const firstUnusedEventId = connection.getFirstUnusedTruthEventId() || 0;
     const shouldChroniclePrologue = (lastPrologueEventId !== undefined)
-        && (lastPrologueEventId > lastChronicledEventId);
+        && (lastPrologueEventId >= firstUnusedEventId);
     if (shouldChroniclePrologue) {
       // If no event logs are replayed, we don't need to precache the bvobs either, so we delay
       // loading them up to this point.
@@ -417,7 +417,7 @@ export default class InspireGateway extends LogEventGenerator {
       const latestMediaInfos = await logs.latestMediaInfos;
       await connection.chronicleEventLog(eventLog, {
         name: `prologue event log for '${connection.getName()}'`,
-        firstEventId: lastChronicledEventId + 1,
+        firstEventId: firstUnusedEventId,
         retrieveMediaContent (mediaId: VRef, mediaInfo: Object) {
           const latestInfo = latestMediaInfos[mediaId.rawId()];
           if (!latestInfo ||
@@ -435,7 +435,7 @@ export default class InspireGateway extends LogEventGenerator {
     }
     // Initiate remote narration.
     const remoteNarration = connection.narrateEventLog();
-    if (!shouldChroniclePrologue && !(lastChronicledEventId >= 0)) await remoteNarration;
+    if (!shouldChroniclePrologue && !(firstUnusedEventId > 0)) await remoteNarration;
     return connection;
   }
 

@@ -192,7 +192,14 @@ export default class Prophet extends LogEventGenerator {
   }
 
   _createPartitionConnection (partitionURI: ValaaURI, options: ConnectOptions) {
-    return this._upstream.acquirePartitionConnection(partitionURI, options);
+    const PartitionConnectionType = this.constructor.PartitionConnectionType;
+    if (!PartitionConnectionType) {
+      return this._upstream.acquirePartitionConnection(partitionURI, options);
+    }
+    return new PartitionConnectionType({
+      partitionURI, prophet: this, debugLevel: this.getDebugLevel(),
+      receiveEvent: options.receiveEvent, ...(options.createConnection || {}),
+    });
   }
 
   /**

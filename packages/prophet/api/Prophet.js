@@ -21,7 +21,9 @@ export type EventData = {
       | "SPLICED" | "TRANSACTED" | "FROZEN"
 }
 
-export type EventCallback = ((event: EventData) => void);
+export type RetrieveMediaContent = (mediaId: VRef, mediaInfo: MediaInfo) => Promise<any>;
+export type ReceiveEvent =
+    ((event: EventData, retrieveMediaContent: RetrieveMediaContent) => Object);
 
 export type MediaInfo = {
   mediaId: VRef,
@@ -39,30 +41,29 @@ export type MediaInfo = {
   contentType?: string,
 };
 
-export type RetrieveMediaContent = (mediaId: VRef, mediaInfo: MediaInfo) => Promise<any>;
-
 export type ConnectOptions = {
-  connect?: boolean,            // default true - connect to updates
-  subscribe?: boolean,          // default true - subscribe for downstream events.
-  receiveEvent?: EventCallback, // a persistent callback for push events
-  narrate?: NarrateOptions,     // default {} - narrate with default options
+  connect?: boolean,            // default: true. Connect to updates
+  subscribe?: boolean,          // default: true. Subscribe for downstream push events.
+  receiveEvent?: ReceiveEvent,  // The persistent connection callback for downstream push events.
+  narrate?: NarrateOptions,     // default: {}. Narrate with default options
   newConnection?: boolean,      // if true, throw if a connection exists,
                                 // if false, throw if no connection exists,
   newPartition?: boolean,       // if true, throw if a partition exists (ie. has persisted events)
                                 // if false, throw if no partition exists (ie. no persisted events)
   onlyTrySynchronousConnection?: boolean, // if true
-  allowPartialConnection?: boolean,       // default false - if true, return not fully narrated
+  allowPartialConnection?: boolean,       // default: false. If true, return not fully narrated
                                           // connection synchronously
   requireLatestMediaContents?: boolean,   //
 };
 
 export type NarrateOptions = {
-  fullNarrate?: boolean,        // default false - await for remote narration result even if
-                                // optimistic one could be performed locally.
-  snapshots?: boolean,          // default true, currently ignored - start narration from most
-                                // recent snapshot within provided event range
-  commands?: boolean,           // default true - narrate pending commands as well.
-  receiveEvent?: EventCallback, // a callback for narrated events
+  remote?: boolean,              // If false, never remote narrate, if true, await for remote
+                                 // narration result even if optimistic one can be performed locally
+  snapshots?: boolean,           // default: true, currently ignored. Start narration from most
+                                 // recent snapshot within provided event range
+  commands?: boolean,            // default: true. Narrate pending commands as well.
+  receiveEvent?: ReceiveEvent,   // default: connection receiveEvent. Callback for narrated events
+  receiveCommand?: ReceiveEvent, // default: receiveEvent. Callback for re-narrated commands
   firstEventId?: number,
   lastEventId?: number,
 };

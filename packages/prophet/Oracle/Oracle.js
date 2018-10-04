@@ -67,30 +67,10 @@ export default class Oracle extends Prophet {
   acquirePartitionConnection (partitionURI: ValaaURI, options: ConnectOptions = {}):
       ?PartitionConnection {
     try {
-      if (options.newPartition || options.onlyTrySynchronousConnection) {
-        const connection = this._connections[String(partitionURI)];
-        if (options.onlyTrySynchronousConnection) return connection;
-        if (connection && (connection._lastAuthorizedEventId !== -1)) {
-          throw new Error(`Partition already exists when trying to create a new partition '${
-              String(partitionURI)}'`);
-        }
-      }
-
-      const ret = super.acquirePartitionConnection(partitionURI, options);
-
-      if (!ret || (!ret.isSynced() && (options.allowPartialConnection === false))) return undefined;
-      return ret;
+      return _acquirePartitionConnection(this, partitionURI, options);
     } catch (error) {
       throw this.wrapErrorEvent(error, `acquirePartitionConnection(${String(partitionURI)})`,
-          "\n\toptions:", ...dumpObject(options),
-          "\n\texisting connection:", ...dumpObject(this._connections[String(partitionURI || "")]));
+          "\n\toptions:", ...dumpObject(options));
     }
-  }
-
-  _createPartitionConnection (partitionURI: ValaaURI /* , options: ConnectOptions = {} */):
-      ?PartitionConnection {
-    return new OraclePartitionConnection({
-      prophet: this, partitionURI, debugLevel: this.getDebugLevel(),
-    });
   }
 }

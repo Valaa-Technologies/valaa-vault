@@ -1,38 +1,40 @@
 // @flow
 
-import type ValaaURI from "~/raem/ValaaURI";
-
-import Prophet, { ConnectOptions, NarrateOptions } from "~/prophet/api/Prophet";
+import Prophet from "~/prophet/api/Prophet";
 
 import DecoderArray from "~/prophet/prophet/DecoderArray";
 
 import type MediaDecoder from "~/tools/MediaDecoder";
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 
-import { dumpObject, invariantifyObject, isPromise } from "~/tools";
+import { dumpObject, invariantifyObject } from "~/tools";
 import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
+
+import ScribePartitionConnection from "./ScribePartitionConnection";
 
 import { _decodeBvobContent } from "./_contentOps";
 import {
-  BvobInfo, _initializeSharedIndexedDB, _persistBvobContent, _readBvobBuffers,
-  _addBvobPersistReferences, _removeBvobPersistReferences,
+  BvobInfo, _initializeSharedIndexedDB, _writeBvobBuffer, _readBvobBuffers,
+  _adjustBvobBufferPersistRefCounts,
 } from "./_databaseOps";
-import ScribePartitionConnection from "./ScribePartitionConnection";
 
 /**
  * Scribe handles all localhost-based Bvob and Media operations.
  * This includes in-memory caches, indexeddb storage (and eventually cross-browser-tab operations)
  * as well as possible service worker interactions.
  *
- * As a rule of thumb, all Bvob operations ie. operations which manipulate ArrayBuffer-based data
- * are handled by Scribe itself and all Media operations which manipulate native object data are
- * handled by ScribePartitionConnection objects.
+ * As a basic principles all Bvob operations ie. operations which manipulate ArrayBuffer-based data
+ * are shared between all partitions and thus handled by Scribe itself. All Media operations which
+ * associate metadata to bvods are partition specific and handled by ScribePartitionConnection's.
  *
  * @export
  * @class Scribe
  * @extends {Prophet}
  */
 export default class Scribe extends Prophet {
+
+  static PartitionConnectionType = ScribePartitionConnection;
+
   _sharedDb: IndexedDBWrapper;
   _bvobLookup: { [bvobId: string]: BvobInfo; };
   _mediaTypes: { [mediaTypeId: string]: { type: string, subtype: string, parameters: any }};

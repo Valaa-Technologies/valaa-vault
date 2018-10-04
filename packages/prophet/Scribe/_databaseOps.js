@@ -1,6 +1,7 @@
 // @flow
 
 import ValaaURI from "~/raem/ValaaURI";
+import type { UniversalEvent } from "~/raem/command";
 
 import { dumpObject, vdon, wrapError } from "~/tools";
 import IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
@@ -37,7 +38,7 @@ export async function _initializeSharedIndexedDB (scribe: Scribe) {
       { name: "buffers", keyPath: "bvobId" },
     ],
     scribe.getLogger(),
-    scribe._databaseAPI,
+    scribe.getDatabaseAPI(),
   );
   await scribe._sharedDb.initialize();
 
@@ -78,7 +79,7 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
     { name: "events", keyPath: "eventId" },
     { name: "commands", keyPath: "eventId" },
     { name: "medias", keyPath: "mediaId" },
-  ], connection.getLogger(), connection._databaseAPI);
+  ], connection.getLogger(), connection._prophet.getDatabaseAPI());
   await connection._db.initialize();
 
   // Populate _eventLogInfo with first and last events
@@ -100,42 +101,76 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
   }
 }
 
-// Media reads & writes
+/*
+ #    #  ######  #####      #      ##
+ ##  ##  #       #    #     #     #  #
+ # ## #  #####   #    #     #    #    #
+ #    #  #       #    #     #    ######
+ #    #  #       #    #     #    #    #
+ #    #  ######  #####      #    #    #
+*/
 
-export function _persistMediaEntry (connection: ScribePartitionConnection, newMediaEntry: Object,
-    oldEntry: Object) {
-  return connection._db.transaction(["medias"], "readwrite", ({ medias }) => {
-    const req = medias.put(newMediaEntry);
-    req.onsuccess = () => {
-      const newInfo = newMediaEntry.mediaInfo;
-      const oldBvobId = oldEntry && oldEntry.mediaInfo.bvobId;
-      if (newInfo.bvobId !== oldBvobId) {
-        // TODO(iridian): Are there race conditions here? The refcount operations are not awaited on
-        if (newInfo.bvobId) {
-          if (!connection._prophet._bvobLookup[newInfo.bvobId]) {
-            // console.log(`Can't find Media "${newInfo.name}" Bvob info for ${newInfo.bvobId
-            //    } when adding new content references`);
-          } else {
-            if (newMediaEntry.isInMemory) connection._prophet._addContentInMemoryReference(newInfo);
-            if (newMediaEntry.isPersisted) connection._prophet._addContentPersistReference(newInfo);
+export async function _updateMediaEntries (connection: ScribePartitionConnection,
+    updates: Object[]) {
+  const inMemoryRefCountAdjusts = {};
+  const persistRefCountAdjusts = {};
+  function _addAdjust (refs, bvobId, adjust) { refs[bvobId] = (refs[bvobId] || 0) + adjust; }
+
+  await connection._db.transaction(["medias"], "readwrite", ({ medias }) => {
+    updates.forEach(entry => {
+      const currentEntryReq = medias.get(entry.mediaId);
+      currentEntryReq.onsuccess = (/* event */) => {
+        const updateEntryReq = medias.put(entry);
+        updateEntryReq.onsuccess = () => {
+          const newInfo = entry.mediaInfo;
+          if (newInfo.bvobId) {
+            if (connection._prophet._bvobLookup[newInfo.bvobId]) {
+              if (entry.isInMemory) _addAdjust(inMemoryRefCountAdjusts, newInfo.bvobId, 1);
+              if (entry.isPersisted) _addAdjust(persistRefCountAdjusts, newInfo.bvobId, 1);
+            } else {
+              console.log(`Can't find Media "${newInfo.name}" Bvob info for ${newInfo.bvobId
+              } when adding new content references`);
+            }
           }
-        }
-        if (oldBvobId) {
-          if (!connection._prophet._bvobLookup[oldBvobId]) {
-            // console.log(`Can't find Media "${newInfo.name}" Bvob info for ${oldBvobId
-            //    } when removing old content references`);
-          } else {
-            if (oldEntry.isInMemory) connection._prophet._removeContentInMemoryReference(oldBvobId);
-            if (oldEntry.isPersisted) connection._prophet._removeContentPersistReference(oldBvobId);
+          const currentBvobId = ((currentEntryReq.result || {}).mediaInfo || {}).bvobId;
+          if (currentBvobId && currentEntryReq.result.isPersisted) {
+            if (connection._prophet._bvobLookup[currentBvobId]) {
+              _addAdjust(persistRefCountAdjusts, currentBvobId, -1);
+            } else {
+              console.log(`Can't find Media "${newInfo.name}" Bvob info for ${currentBvobId
+              } when removing old content references`);
+            }
           }
-        }
-      }
-      connection._prophet._persistedMediaLookup[newMediaEntry.mediaId] = newMediaEntry;
-    };
+          entry.successfullyPersisted = true;
+        };
+        updateEntryReq.onerror = (failureEvent) => {
+          connection.errorEvent(
+              `_updateMediaEntries().put("${(entry.mediaInfo || {}).name || entry.mediaId
+                  }") Failed:`, ...dumpObject(failureEvent),
+              "\n\terror:", ...dumpObject(updateEntryReq.error),
+              "\n\tmediaEntry:", ...dumpObject(entry));
+          // Don't prevent the error from aborting the transaction, which will then roll back and
+          // no refcount updates will be made either.
+          // This line is thus useless and is here only for future reminder: if this error is
+          // selectively ignored and the particular media update skipped
+        };
+      };
+    });
   });
+  updates.forEach(entry => {
+    if (!entry.successfullyPersisted) return;
+    delete entry.successfullyPersisted;
+    const currentScribeEntry = connection._prophet._persistedMediaLookup[entry.mediaId];
+    if ((currentScribeEntry || {}).isInMemory && (currentScribeEntry.mediaInfo || {}).bvobId) {
+      _addAdjust(inMemoryRefCountAdjusts, currentScribeEntry.mediaInfo.bvobId, -1);
+    }
+    connection._prophet._persistedMediaLookup[entry.mediaId] = entry;
+  });
+  connection._prophet._adjustInMemoryBvobBufferRefCounts(inMemoryRefCountAdjusts);
+  await connection._prophet._adjustBvobBufferPersistRefCounts(persistRefCountAdjusts);
 }
 
-export function _readMediaInfos (connection: ScribePartitionConnection, results: Object) {
+export function _readMediaEntries (connection: ScribePartitionConnection, results: Object) {
   return connection._db.transaction(["medias"], "readwrite", ({ medias }) =>
       new Promise((resolve, reject) => {
         const req = medias.openCursor();
@@ -147,13 +182,14 @@ export function _readMediaInfos (connection: ScribePartitionConnection, results:
             return;
           }
           const entry = { ...cursor.value, isInMemory: true };
-          if (entry.mediaInfo && entry.mediaInfo.bvobId && entry.isInMemory) {
-            if (!connection._prophet._bvobLookup[entry.mediaInfo.bvobId]) {
+          const bvobId = (entry.mediaInfo || {}).bvobId;
+          if (bvobId && entry.isInMemory) {
+            if (connection._prophet._bvobLookup[bvobId]) {
+              connection._prophet._adjustInMemoryBvobBufferRefCounts({ [bvobId]: 1 });
+            } else {
               connection.errorEvent(`Can't find Media "${entry.mediaInfo.name
                   }" in-memory Bvob info for ${entry.mediaInfo.bvobId
                   } when reading partition media infos`);
-            } else {
-              connection._prophet._addContentInMemoryReference(entry.mediaInfo);
             }
           }
           results[cursor.key] = entry;
@@ -175,16 +211,27 @@ export function _destroyMediaInfo (connection: ScribePartitionConnection, mediaR
     req.onsuccess = () => {
       const bvobId = mediaEntry.mediaInfo.bvobId;
       if (bvobId) {
-        if (mediaEntry.isInMemory) connection._prophet._removeContentInMemoryReference(bvobId);
-        if (mediaEntry.isPersisted) connection._prophet._removeContentPersistReference(bvobId);
+        if (mediaEntry.isInMemory) {
+          connection._prophet._adjustInMemoryBvobBufferRefCounts({ [bvobId]: -1 });
+        }
+        if (mediaEntry.isPersisted) {
+          connection._prophet._adjustBvobBufferPersistRefCounts({ [bvobId]: -1 });
+        }
       }
     };
   });
 }
 
-// Bvob reads & writes
+/*
+ #####   #    #   ####   #####
+ #    #  #    #  #    #  #    #
+ #####   #    #  #    #  #####
+ #    #  #    #  #    #  #    #
+ #    #   #  #   #    #  #    #
+ #####     ##     ####   #####
+*/
 
-export function _persistBvobContent (scribe: Scribe, buffer: ArrayBuffer,
+export function _writeBvobBuffer (scribe: Scribe, buffer: ArrayBuffer,
     bvobId: string, bvobInfo?: BvobInfo, initialPersistRefCount: number = 0): ?Promise<any> {
   if (bvobInfo && bvobInfo.persistRefCount) return bvobInfo.persistProcess;
   // Initiate write (set persistProcess so eventual commands using the bvobId can wait
@@ -253,46 +300,31 @@ export function _readBvobBuffers (scribe: Scribe, bvobInfos: BvobInfo[]):
   return ret;
 }
 
-export function _addBvobPersistReferences (scribe: Scribe, bvobInfos: BvobInfo[]) {
+export async function _adjustBvobBufferPersistRefCounts (
+    scribe: Scribe, adjusts: { [bvobId: string]: number },
+) {
   // Check if recently created file does not need in-memory buffer persist but bvobInfo still
   // has it and delete the buffer.
-  return scribe._sharedDb.transaction(["bvobs"], "readwrite", ({ bvobs }) => {
-    bvobInfos.forEach(bvobInfo => {
-      if (!bvobInfo.inMemoryRefCount && bvobInfo.buffer) delete bvobInfo.buffer;
-      const req = bvobs.get(bvobInfo.bvobId);
-      req.onsuccess = () => {
-        bvobInfo.persistRefCount = (req.result && req.result.persistRefCount) || 0;
-        ++bvobInfo.persistRefCount;
-        bvobs.put({
-          bvobId: bvobInfo.bvobId,
-          byteLength: bvobInfo.byteLength,
-          persistRefCount: bvobInfo.persistRefCount,
-        });
-      };
-    });
-  });
-}
-
-export function _removeBvobPersistReferences (scribe: Scribe, bvobInfos: BvobInfo[]) {
-  return scribe._sharedDb.transaction(["bvobs"], "readwrite", ({ bvobs }) => {
-    bvobInfos.forEach(bvobInfo => {
-      const req = bvobs.get(bvobInfo.bvobId);
+  const newPersistRefcounts = [];
+  await scribe._sharedDb.transaction(["bvobs"], "readwrite", ({ bvobs }) => {
+    Object.keys(adjusts).forEach(bvobId => {
+      const adjustment = adjusts[bvobId];
+      if (!adjustment) return;
+      // if (!bvobInfo.inMemoryRefCount && bvobInfo.buffer) delete bvobInfo.buffer;
+      const req = bvobs.get(bvobId);
       req.onsuccess = () => {
         if (!req.result) {
-          scribe.errorEvent(`While removing content buffer persist reference, cannot find ${
-              ""}IndexedDB.valaa-shared-content.bvobs entry ${bvobInfo.bvobId}`);
+          scribe.errorEvent(`While adjusting content buffer persist references, cannot find ${
+              ""}IndexedDB.valaa-shared-content.bvobs entry ${bvobId}, skipping`);
           return;
         }
-        bvobInfo.persistRefCount = req.result.persistRefCount;
-        --bvobInfo.persistRefCount;
-        if (!(bvobInfo.persistRefCount > 0)) { // a bit of defensive programming vs NaN...
-          bvobInfo.persistRefCount = 0;
+        let persistRefCount = (req.result && req.result.persistRefCount) || 0;
+        persistRefCount += adjustment;
+        if (!(persistRefCount > 0)) { // a bit of defensive programming vs NaN and negatives
+          persistRefCount = 0;
         }
-        bvobs.put({
-          bvobId: bvobInfo.bvobId,
-          byteLength: bvobInfo.byteLength,
-          persistRefCount: bvobInfo.persistRefCount,
-        });
+        const updateReq = bvobs.put({ bvobId, byteLength: req.result.byteLength, persistRefCount });
+        updateReq.onsuccess = () => newPersistRefcounts.push([bvobId, persistRefCount]);
         /* Only removing bvob infos and associated buffers on start-up.
         if (!bvobInfo.persistRefCount) {
           bvobs.delete(bvobInfo.bvobId);
@@ -302,30 +334,89 @@ export function _removeBvobPersistReferences (scribe: Scribe, bvobInfos: BvobInf
       };
     });
   });
+  return newPersistRefcounts.map(([bvobId, persistRefCount]) => {
+    const bvobInfo = scribe._bvobLookup[bvobId] || { bvobId };
+    bvobInfo.persistRefCount = persistRefCount;
+    return bvobInfo;
+  });
 }
 
-// Events & commands reads & writes
+/*
+ ######  #    #  ######  #    #   #####
+ #       #    #  #       ##   #     #
+ #####   #    #  #####   # #  #     #
+ #       #    #  #       #  # #     #
+ #        #  #   #       #   ##     #
+ ######    ##    ######  #    #     #
+*/
 
-export function _writeEvent (connection: ScribePartitionConnection, eventId: number,
-    event: Object) {
+export function _writeEvents (connection: ScribePartitionConnection, eventLog: UniversalEvent[]) {
   return connection._db.transaction(["events"], "readwrite", ({ events }) => {
-    const req = events.get(eventId);
-    req.onsuccess = reqEvent => {
-      if (reqEvent.target.result) {
-        if (reqEvent.target.result.commandId === event.commandId) return;
-        throw connection.wrapErrorEvent(
-            new Error(`Mismatching existing event commandId when persisting event`),
-            `_writeEvent(${eventId})`,
-            "\n\texisting commandId:", reqEvent.target.result.commandId,
-            "\n\tnew event commandId:", event.commandId,
-            "\n\texisting event:", ...dumpObject(reqEvent.target.result),
-            "\n\tnew event:", ...dumpObject(event));
+    eventLog.forEach(event => {
+      if (!event.eventId) {
+        throw new Error(`INTERNAL ERROR: Event is missing eventId when trying to write ${
+            eventLog.length} events to local cache`);
       }
-      const eventJSON = _serializeEventAsJSON(event);
-      eventJSON.eventId = eventId;
-      events.put(eventJSON);
-    };
+      const req = events.add(_serializeEventAsJSON(event));
+      req.onerror = reqEvent => {
+        if (reqEvent.error.name !== "ConstraintError") throw req.error;
+        reqEvent.preventDefault(); // Prevent transaction abort.
+        reqEvent.stopPropagation(); // Prevent transaction onerror callback call.
+        const validateReq = events.get(event.eventId);
+        validateReq.onsuccess = validateReqEvent => {
+          if ((validateReqEvent.target.result || {}).commandId === event.commandId) return;
+          throw connection.wrapErrorEvent(
+              new Error(`Mismatching existing event commandId when persisting event`),
+              `_writeEvents(${event.eventId})`,
+              "\n\texisting commandId:", (validateReqEvent.target.result || {}).commandId,
+              "\n\tnew event commandId:", event.commandId,
+              "\n\texisting event:", ...dumpObject(validateReqEvent.target.result),
+              "\n\tnew event:", ...dumpObject(event));
+        };
+      };
+    });
   });
+}
+
+export function _readEvents (connection: ScribePartitionConnection, options: Object) {
+  const range = connection._db.getIDBKeyRange(options);
+  if (range === null) return undefined;
+  return connection._db.transaction(["events"], "readonly",
+      ({ events }) => new Promise(_getAllShim.bind(null, events, range)));
+}
+
+export function _writeCommands (connection: ScribePartitionConnection,
+    commandLog: UniversalEvent[]) {
+  return connection._db.transaction(["commands"], "readwrite", ({ commands }) =>
+      commandLog.forEach(command => {
+        if (!command.eventId) {
+          throw new Error(`INTERNAL ERROR: Command is missing eventId when trying to write ${
+              commandLog.length} commands to local cache`);
+        }
+        const req = commands.add(_serializeEventAsJSON(command));
+        req.onerror = reqEvent => {
+          if (reqEvent.error.name !== "ConstraintError") throw req.error;
+          throw new Error(`Cross-tab command cache conflict: multiple tab synchronization not ${
+              ""}implemented yet`);
+        };
+      }));
+}
+
+export function _readCommands (connection: ScribePartitionConnection, options: Object) {
+  const range = connection._db.getIDBKeyRange(options);
+  if (range === null) return undefined;
+  return connection._db.transaction(["commands"], "readonly",
+      ({ commands }) => new Promise(_getAllShim.bind(null, commands, range)));
+}
+
+export function _deleteCommands (connection: ScribePartitionConnection,
+    fromEventId: string, toEventId: string) {
+  return connection._db.transaction(["commands"], "readwrite", ({ commands }) =>
+      new Promise((resolve, reject) => {
+        const req = commands.delete(connection.database.IDBKeyRange.bound(fromEventId, toEventId));
+        req.onsuccess = () => resolve();
+        req.onerror = (evt => reject(new Error(evt.target.error.message)));
+      }));
 }
 
 function _serializeEventAsJSON (event) {
@@ -342,58 +433,11 @@ function _serializeEventAsJSON (event) {
   });
 }
 
-export function _readEvents (connection: ScribePartitionConnection, options: Object) {
-  const range = connection._db.getIDBKeyRange(options);
-  if (range === null) return undefined;
-  return connection._db.transaction(["events"], "readonly",
-      ({ events }) => new Promise(_getAllShim.bind(null, events, range)));
-}
-
-export function _writeCommand (connection: ScribePartitionConnection, eventId: number,
-    command: Object) {
-  // invariantify(command.isCommand, "writeCommand.command.isCommand must be specified");
-  return connection._db.transaction(["commands"], "readwrite", ({ commands }) =>
-      new Promise((resolve, reject) => {
-        const commandJSON = _serializeEventAsJSON(command);
-        commandJSON.eventId = eventId;
-        const req = commands.add(commandJSON);
-        req.onsuccess = () => { resolve(eventId); };
-        req.onerror = (evt => reject(new Error(evt.target.error.message)));
-      }));
-}
-
-
-export function _readCommands (connection: ScribePartitionConnection, options: Object) {
-  const range = connection._db.getIDBKeyRange(options);
-  if (range === null) return undefined;
-  return connection._db.transaction(["commands"], "readonly",
-      ({ commands }) => new Promise(_getAllShim.bind(null, commands, range)));
-}
-
-export function _deleteCommand (connection: ScribePartitionConnection, eventId: number) {
-  return connection._db.transaction(["commands"], "readwrite", ({ commands }) =>
-      new Promise((resolve, reject) => {
-        const req = commands.delete(eventId);
-        req.onsuccess = () => resolve();
-        req.onerror = (evt => reject(new Error(evt.target.error.message)));
-      }));
-}
-
-export function _deleteCommands (connection: ScribePartitionConnection,
-    fromEventId: string, toEventId: string) {
-  return connection._db.transaction(["commands"], "readwrite", ({ commands }) =>
-      new Promise((resolve, reject) => {
-        const req = commands.delete(connection.database.IDBKeyRange.bound(fromEventId, toEventId));
-        req.onsuccess = () => resolve();
-        req.onerror = (evt => reject(new Error(evt.target.error.message)));
-      }));
-}
-
 function _getAllShim (database, range: IDBKeyRange, resolve: Function, reject: Function) {
   let req;
   if (typeof database.getAll !== "undefined") {
     req = database.getAll(range);
-    req.onsuccess = () => _resolveWith(req.result);
+    req.onsuccess = () => resolve(req.result);
   } else {
     console.warn("Using openCursor because getAll is not implemented (by Edge?)");
     const result = [];
@@ -405,16 +449,10 @@ function _getAllShim (database, range: IDBKeyRange, resolve: Function, reject: F
         nextCursor.continue();
       } else {
         // complete
-        console.log("Cursor processing complete, result:", result);
-        _resolveWith(result);
+        // console.log("Cursor processing complete, result:", result);
+        resolve(result);
       }
     };
-  }
-  function _resolveWith (results) {
-    resolve(results.map(event => {
-      delete event.eventId;
-      return event;
-    }));
   }
   req.onerror = (evt => reject(new Error(evt.target.error.message)));
 }

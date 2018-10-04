@@ -32,11 +32,16 @@ export type MediaLookup = {
   [mediaRawId: string]: MediaEntry
 };
 
-// Bvob pathways - mostly Scribe detail
+/*
+ ######  #    #  ######  #    #   #####
+ #       #    #  #       ##   #     #
+ #####   #    #  #####   # #  #     #
+ #       #    #  #       #  # #     #
+ #        #  #   #       #   ##     #
+ ######    ##    ######  #    #     #
+*/
 
-// ScribePartitionConnection & Media content pathways
-
-export function _reprocessMedia (connection: ScribePartitionConnection, mediaEvent: Object,
+export function _initiateMediaRetrievals (connection: ScribePartitionConnection, mediaEvent: Object,
     retrieveMediaContent: RetrieveMediaContent, rootEvent: Object, mediaId: VRef,
     currentEntry: MediaEntry) {
   const mediaRawId = mediaId.rawId();
@@ -55,7 +60,7 @@ export function _reprocessMedia (connection: ScribePartitionConnection, mediaEve
       // event log. For now we accept and replay the event logs due to lack of resources for
       // a proper fix - corrupted event logs must be accepted as a fact of life for the time
       // being.
-      this.errorEvent(`mediaEvent for media has no previous media entry and ${
+      connection.errorEvent(`mediaEvent for media has no previous media entry and ${
               ""}event is not CREATED, DUPLICATED and resource is not ghost`,
           "\n\treplay not blocked but media accesses made against this Media will throw.",
           "\n\tmediaId:", String(mediaId),
@@ -81,7 +86,7 @@ export function _reprocessMedia (connection: ScribePartitionConnection, mediaEve
 
   if (!retrieveMediaContent) return [];
 
-  const tryRetrieve = async () => {
+  const tryRetrieveAndPersist = async () => {
     try {
       if (mediaInfo.bvobId && !connection._prophet.tryGetCachedBvobContent(mediaInfo.bvobId)) {
         // TODO(iridian): Determine whether media content should be pre-cached or not.
@@ -96,49 +101,49 @@ export function _reprocessMedia (connection: ScribePartitionConnection, mediaEve
       // can be sure event has been persisted before updating mediaInfo bvob references
       invariantifyString(newEntry.mediaId, "readPersistAndUpdateMedia.newEntry.mediaId",
           {}, "\n\tnewEntry", newEntry);
-      return () => connection._persistMediaEntry(newEntry, currentEntry);
     } catch (error) {
-      throw connection.wrapErrorEvent(error, `reprocessMedia.tryRetrieve('${mediaInfo.name}'/'${
+      throw connection.wrapErrorEvent(error,
+          `reprocessMedia.tryRetrieveAndPersist('${mediaInfo.name}'/'${
               mediaInfo.bvobId || mediaInfo.sourceURL}')`,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo));
     }
   };
 
-  return [_retrieveMedia.bind(null, connection, {
-    mediaInfo,
-    tryRetrieve,
-    initialAttempt: tryRetrieve(),
+  return [_retryRetrieveMedia.bind(null, connection, {
+    newEntry,
+    tryRetrieveAndPersist,
+    initialTry: tryRetrieveAndPersist(),
   })];
 }
 
-async function _retrieveMedia (connection: ScribePartitionConnection,
-    { mediaInfo, tryRetrieve, initialAttempt }, options:
+async function _retryRetrieveMedia (connection: ScribePartitionConnection,
+    { newEntry, tryRetrieveAndPersist, initialTry }, options:
         { getNextBackoffSeconds?: Function, retryTimes?: number, delayBaseSeconds?: number } = {}
 ) {
+  const mediaInfo = newEntry.mediaInfo;
   let previousBackoff;
   let getNextBackoffSeconds = options.getNextBackoffSeconds;
   if (!getNextBackoffSeconds && (typeof options.retryTimes === "number")) {
-    getNextBackoffSeconds = (previousRetries: number) =>
-        (previousRetries < options.retryTimes
-            ? (previousBackoff || 0) + (previousRetries * (options.delayBaseSeconds || 1))
-            : undefined);
+    getNextBackoffSeconds = (previousRetries: number, mediaInfo_, error) =>
+        ((previousRetries >= options.retryTimes) || (error && error.noRetry) ? undefined
+            : error && error.instantRetry ? 0
+            : (previousBackoff || 0) + (previousRetries * (options.delayBaseSeconds || 1)));
   }
   if (!getNextBackoffSeconds) getNextBackoffSeconds = (() => undefined);
 
   let i = 0;
-  for (let currentAttempt = initialAttempt; ++i; currentAttempt = tryRetrieve()) {
+  for (let currentTry = initialTry; ++i; currentTry = tryRetrieveAndPersist()) {
     try {
-      const persistMedia = await currentAttempt;
-      await persistMedia();
-      break;
+      await currentTry;
+      return newEntry;
     } catch (error) {
-      const nextBackoff = getNextBackoffSeconds
-          && getNextBackoffSeconds(i - 1, mediaInfo, error);
+      const nextBackoff = getNextBackoffSeconds && getNextBackoffSeconds(i - 1, mediaInfo, error);
       const wrappedError = connection.wrapErrorEvent(error,
-          `takeNextPendingDownstreamTruth.scribe.retrieveMedia("${mediaInfo.name}") attempt#${i}`,
+          `scribe.retrieveMedia("${mediaInfo.name}") attempt#${i}`,
           "\n\tmedia name:", mediaInfo.name,
           "\n\tmediaInfo:", mediaInfo,
           ...(i > 1 ? ["\n\tbackoff was:", previousBackoff] : []),
+          "\n\terror.noRetry:", error.noRetry, ", error.immediateRetry:", error.immediateRetry,
           ...(typeof nextBackoff === "undefined"
               ? ["\n\tthis was final retry attempt"]
               : ["\n\tnext retry after (seconds):", nextBackoff]),
@@ -149,12 +154,21 @@ async function _retrieveMedia (connection: ScribePartitionConnection,
       previousBackoff = nextBackoff;
     }
   }
+  return undefined; // We never get here though.
 }
 
 async function _waitBackoff (backoffSeconds: number) {
   await new Promise(resolve => { setTimeout(() => { resolve(); }, backoffSeconds * 1000); });
 }
 
+/*
+ #####   ######   ####   #    #  ######   ####    #####
+ #    #  #       #    #  #    #  #       #          #
+ #    #  #####   #    #  #    #  #####    ####      #
+ #####   #       #  # #  #    #  #            #     #
+ #   #   #       #   #   #    #  #       #    #     #
+ #    #  ######   ### #   ####   ######   ####      #
+*/
 
 export function _decodeBvobContent (scribe: Scribe, bvobInfo: BvobInfo,
     decoder: MediaDecoder, contextInfo?: Object, onError: Function) {
@@ -174,9 +188,53 @@ export function _decodeBvobContent (scribe: Scribe, bvobInfo: BvobInfo,
   ], onError);
 }
 
+export function _requestMediaContents (connection: ScribePartitionConnection,
+    mediaInfos: MediaInfo[], onError: Function) {
+  return mediaInfos.map(mediaInfo => {
+    const onErrorWInfo = error => onError(error, mediaInfo);
+    try {
+      const mediaEntry = connection._getMediaEntry(mediaInfo.mediaId, !!mediaInfo.asURL);
+      if (mediaInfo.asURL) {
+        if ((mediaInfo.asURL === true) || (mediaInfo.asURL === "data")
+            || ((mediaInfo.asURL === "source") && !connection.isRemote())) {
+          return _getMediaURL(connection, mediaInfo, mediaEntry, onErrorWInfo);
+        }
+        return undefined;
+      }
+      let actualInfo = mediaInfo;
+      if (!actualInfo.bvobId) {
+        if (!mediaEntry || !mediaEntry.mediaInfo) {
+          throw new Error(`Cannot find Media info for '${String(mediaInfo.mediaId)}'`);
+        }
+        actualInfo = { ...mediaInfo, ...mediaEntry.mediaInfo };
+      }
+      if (!mediaInfo.type) {
+        return _readMediaContent(connection, actualInfo, mediaEntry, onErrorWInfo);
+      }
+      if (!actualInfo.bvobId) return undefined;
+      if (actualInfo.sourceURL) {
+        throw new Error(`Cannot explicitly decode sourceURL-content as '${mediaInfo.mime}'`);
+      }
+      const decoder = connection._decoderArray.findDecoder(actualInfo);
+      if (!decoder) {
+        throw new Error(`Can't find decoder for ${actualInfo.type}/${actualInfo.subtype}`);
+      }
+      const name = actualInfo.name ? `'${mediaInfo.name}'` : `unnamed media`;
+      return thenChainEagerly(
+        connection._prophet.decodeBvobContent(actualInfo.bvobId, decoder,
+              { mediaName: name, partitionName: connection.getName() }),
+          undefined,
+          onErrorWInfo);
+    } catch (error) {
+      error.mediaInfo = mediaInfo;
+      throw error;
+    }
+  });
+}
+
 const maxDataURISourceBytes = 48000;
 
-export function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
+function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
     mediaEntry: MediaEntry, onError: Function): any {
   // Only use cached in-memory nativeContent if its id matches the requested id.
   const bvobId = (mediaInfo && mediaInfo.bvobId) || mediaEntry.mediaInfo.bvobId;
@@ -221,7 +279,7 @@ export function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: 
 // Otherwise if the media is in a local persisted cache returns a promise to a native object.
 // Otherwise is known in the partition returns undefined.
 // Otherwise throws an error.
-export function _readMediaContent (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
+function _readMediaContent (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
     mediaEntry: MediaEntry, onError: Function): any {
   const bvobId = mediaInfo.bvobId;
   if (!bvobId) return undefined;

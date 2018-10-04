@@ -439,6 +439,9 @@ export default class InspireGateway extends LogEventGenerator {
     return connection;
   }
 
+  // Permanently precache revelation bvobs by setting its refcount to 1.
+  static revelationBvobInitialPersistRefCount = 1;
+
   async _getBvobInfos () {
     const readRevelationBvobContent = async (bvobId: string) => {
       const bvobBuffers = {
@@ -461,7 +464,8 @@ export default class InspireGateway extends LogEventGenerator {
     for (const [bvobId, bvobInfoMaybe] of Object.entries(bvobInfos || {})) {
       const bvobInfo = await bvobInfoMaybe;
       if (bvobInfo.persistRefCount !== 0) {
-        await this.scribe.preCacheBvob(bvobId, bvobInfo, readRevelationBvobContent);
+        await this.scribe.preCacheBvob(bvobId, bvobInfo, readRevelationBvobContent,
+            InspireGateway.revelationBvobInitialPersistRefCount);
       }
     }
     return (this.bvobInfos = bvobInfos);

@@ -30,25 +30,6 @@ export function _fabricateProphecy (falseProphet: FalseProphet, action: Action,
   return prophecy;
 }
 
-export function _addTruthToPendingProphecies (falseProphet: FalseProphet,
-    truthEvent: UniversalEvent) {
-  // Add the authorized and notify downstream
-  // no truthId means a legacy command.
-  const truthId = truthEvent.commandId;
-  // TODO(iridian): After migration to zero missing commandId should be at create warnings
-  let prophecy = truthId && falseProphet._prophecyByCommandId[truthId];
-  if (!prophecy) {
-    if (!truthId) {
-      falseProphet.warnEvent("Warning: encountered an authorized event with missing commandId:",
-          truthEvent);
-    }
-    prophecy = falseProphet._fabricateProphecy(truthEvent,
-        `event ${!truthId ? "legacy" : truthId.slice(0, 13)}...`);
-    falseProphet._revealProphecyToAllFollowers(prophecy);
-  }
-  prophecy.isTruth = true;
-}
-
 /*
 function _purgeCommandsWith (hereticEvent: UniversalEvent, purgedCorpusState: State,
     revisedEvents: UniversalEvent[]) {

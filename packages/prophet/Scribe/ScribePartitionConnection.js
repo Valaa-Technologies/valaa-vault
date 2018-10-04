@@ -113,10 +113,6 @@ export default class ScribePartitionConnection extends PartitionConnection {
         Math.max(0, this.getFirstUnusedCommandEventId() - this.getFirstCommandEventId()));
   }
 
-  claimCommandEvent (command: Command, retrieveMediaContent: RetrieveMediaContent): Object {
-    return _claimCommandEvent(this, command, retrieveMediaContent);
-  }
-
   async recordTruth (truthEntry: Object, preAuthorizeCommand: () => any) {
     if (truthEntry.eventId <= this.getLastAuthorizedEventId()) return false;
     try {

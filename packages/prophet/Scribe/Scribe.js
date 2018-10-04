@@ -47,7 +47,7 @@ export default class Scribe extends Prophet {
   _databaseAPI: DatabaseAPI;
 
   constructor ({ commandCountCallback, databaseAPI, ...rest }: Object) {
-    super({ upstream: null, ...rest });
+    super({ ...rest });
     this._mediaTypes = {};
     this._persistedMediaLookup = {};
     this._totalCommandCount = 0;
@@ -69,17 +69,8 @@ export default class Scribe extends Prophet {
     return this._bvobLookup;
   }
 
+  getDatabaseAPI (): DatabaseAPI { return this._databaseAPI; }
   getDecoderArray () { return this._decoderArray; }
-
-  // connection ops
-
-  _createPartitionConnection (partitionURI: ValaaURI, options: ConnectOptions = {}):
-      ScribePartitionConnection {
-    return new ScribePartitionConnection({
-      prophet: this, partitionURI,
-      receiveEvent: options.receiveEvent, databaseAPI: this._databaseAPI,
-    });
-  }
 
   // command ops
 
@@ -94,12 +85,13 @@ export default class Scribe extends Prophet {
 
   // bvob content ops
 
-  static initialPreCachedPersistRefCount = 1;
-
-  preCacheBvob (bvobId: string, newInfo: Object, retrieveBvobContent: Function) {
+  preCacheBvob (bvobId: string, newInfo: Object, retrieveBvobContent: Function,
+      initialPersistRefCount: number = 0) {
     const bvobInfo = this._bvobLookup[bvobId];
     try {
       if (bvobInfo) {
+        // This check produces false positives: if byteLengths match there is no error even if
+        // the contents might still be inconsistent.
         if ((bvobInfo.byteLength !== newInfo.byteLength)
             && (bvobInfo.byteLength !== undefined) && (newInfo.byteLength !== undefined)) {
           throw new Error(`byteLength mismatch between new bvob (${newInfo.byteLength
@@ -108,8 +100,8 @@ export default class Scribe extends Prophet {
         return undefined;
       }
       return Promise.resolve(retrieveBvobContent(bvobId))
-      .then(buffer => (buffer !== undefined)
-          && this._persistBvobContent(buffer, bvobId, Scribe.initialPreCachedPersistRefCount));
+          .then(buffer => (buffer !== undefined)
+              && this._writeBvobBuffer(buffer, bvobId, initialPersistRefCount));
     } catch (error) {
       throw this.wrapErrorEvent(error, `preCacheBvob('${bvobId}')`,
           "\n\tbvobInfo:", ...dumpObject(bvobInfo));
@@ -149,110 +141,85 @@ export default class Scribe extends Prophet {
     }
   }
 
-  _persistBvobContent (buffer: ArrayBuffer, bvobId: string, initialPersistRefCount: number = 0):
+  _writeBvobBuffer (buffer: ArrayBuffer, bvobId: string, initialPersistRefCount: number = 0):
       ?Promise<any> {
     const bvobInfo = this._bvobLookup[bvobId || ""];
     try {
       if ((typeof bvobId !== "string") || !bvobId) {
         throw new Error(`Invalid bvobId '${bvobId}', expected non-empty string`);
       }
-      invariantifyObject(buffer, "_persistBvobContent.buffer",
+      invariantifyObject(buffer, "_writeBvobBuffer.buffer",
           { instanceof: ArrayBuffer, allowEmpty: true });
-      return _persistBvobContent(this, buffer, bvobId, bvobInfo, initialPersistRefCount);
+      return _writeBvobBuffer(this, buffer, bvobId, bvobInfo, initialPersistRefCount);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_persistBvobContent('${bvobId}')`,
+      throw this.wrapErrorEvent(error, `_writeBvobBuffer('${bvobId}')`,
           "\n\tbuffer:", ...dumpObject(buffer),
           "\n\tbvobInfo:", ...dumpObject(bvobInfo));
     }
   }
 
   /**
-   * Adds a bvob buffer in-memory reference count as an immediate
-   * increment of bvobId.inMemoryRefCount. Returns a Promise to a read
-   * operation if the buffer was not in memory already.
-   * Otherwise returns false.
+   * Adjusts a bvob in-memory buffer reference counts as an immediate
+   * modification to bvobId.inMemoryRefCount. If as a result the ref
+   * count reaches zero frees the cached buffer and all cached
+   * decodings.
    *
    * Note that The inMemoryRefCount is not persisted.
    *
    * Note that even if inMemoryRefCount is positive the content might
    * not be in memory yet before the pending read operation has
-   * finished. In such a caseThe pending read operation can be found in
-   * bvobInfo.pendingBuffer before it's complete.
-   *
-   * @param {Object} mediaInfo
-   * @returns {(false | Promise<any>)}
-   * @memberof Scribe
-   */
-  _addContentInMemoryReference (mediaInfo: Object): false | Promise<any> {
-    const bvobInfo = this._bvobLookup[mediaInfo.bvobId || ""];
-    let pendingContent;
-    try {
-      if (!bvobInfo) throw new Error(`Cannot find Bvob info '${mediaInfo.bvobId}'`);
-      if (!bvobInfo.inMemoryRefCount++ && !bvobInfo.buffer) {
-        pendingContent = this.readBvobContent(bvobInfo.bvobId);
-        if (!isPromise(pendingContent)) {
-          throw new Error(
-            `INTERNAL ERROR: readBvobContent didn't return a promise with falsy inMemoryRefCount`);
-        }
-        return pendingContent.catch(error => { throw onError.call(this, error); });
-      }
-      return bvobInfo.pendingBuffer;
-    } catch (error) { throw onError.call(this, error); }
-    function onError (error) {
-      return this.wrapErrorEvent(error, `_addContentInMemoryReference('${mediaInfo.bvobId}')`,
-          "\n\tmediaInfo:", ...dumpObject(mediaInfo),
-          "\n\tbvobInfo:", ...dumpObject({ ...bvobInfo }), ...dumpObject(bvobInfo),
-          "\n\tpending bvob content:", ...dumpObject(pendingContent));
-    }
-  }
-
-  /**
-   * Removes a bvob buffer in-memory reference count as an immediate
-   * increment of bvobId.inMemoryRefCount. If as a result the ref count
-   * reaches zero frees the cached buffer and all cached decodings and
-   * returns true.
-   * Otherwise returns false.
-   *
-   * Note that The inMemoryRefCount is not persisted.
+   * finished. In such a case the pending read operation promise can be
+   * found in bvobInfo.pendingBuffer, and the function will return a
+   * promise.
    *
    * @param {string} bvobId
    * @returns {boolean}
    * @memberof Scribe
    */
-  _removeContentInMemoryReference (bvobId: string): boolean {
-    const bvobInfo = this._bvobLookup[bvobId || ""];
+  _adjustInMemoryBvobBufferRefCounts (adjusts: { [bvobId: string]: number }): Object[] {
+    const readBuffers = [];
     try {
-      if (!bvobInfo) throw new Error(`Cannot find Bvob info '${bvobId}'`);
-      if (--bvobInfo.inMemoryRefCount) return false;
-      delete bvobInfo.buffer;
-      delete bvobInfo.decodings;
-      return true;
-    } catch (error) {
-      throw this.wrapErrorEvent(error, `_removeContentInMemoryReference('${bvobId}')`,
-          "\n\tbvobInfo:", ...dumpObject(bvobInfo));
+      const ret = Object.keys(adjusts).map(bvobId => {
+        const bvobInfo = this._bvobLookup[bvobId];
+        if (!bvobInfo) throw new Error(`Cannot find Bvob info '${bvobId}'`);
+        return [bvobInfo, adjusts[bvobId]];
+      }).map(([bvobInfo, adjust]) => {
+        bvobInfo.inMemoryRefCount = (bvobInfo.inMemoryRefCount || 0) + adjust;
+        if (!(bvobInfo.inMemoryRefCount > 0)) {
+          delete bvobInfo.buffer;
+          delete bvobInfo.decodings;
+          bvobInfo.inMemoryRefCount = 0;
+        }
+        if (bvobInfo.inMemoryRefCount && !(bvobInfo.buffer || bvobInfo.pendingBuffer)) {
+          readBuffers.push(bvobInfo);
+        }
+        return bvobInfo;
+      });
+      if (!readBuffers.length) return ret;
+      return Promise.all(_readBvobBuffers(this, readBuffers).map(info => info.pendingBuffer))
+          .then(() => ret)
+          .catch(onError.bind(this));
+    } catch (error) { throw onError.call(this, error); }
+    function onError (error) {
+      return this.wrapErrorEvent(error,
+          `_adjustInMemoryBvobBufferRefCounts(${Object.keys(adjusts || {}).length} adjusts)`,
+          "\n\tbvob buffer reads:", ...dumpObject(readBuffers),
+          "\n\tadjusts:", ...dumpObject(adjusts),
+      );
     }
   }
 
-  async _addContentPersistReference (mediaInfo: Object) {
-    const bvobInfo = this._bvobLookup[mediaInfo.bvobId || ""];
+  async _adjustBvobBufferPersistRefCounts (adjusts: { [bvobId: string]: number }): Object[] {
     try {
-      if (!bvobInfo) throw new Error(`Cannot find Bvob info '${mediaInfo.bvobId}'`);
-      return await _addBvobPersistReferences(this, [bvobInfo]);
+      Object.keys(adjusts).forEach(bvobId => {
+        if (!this._bvobLookup[bvobId]) throw new Error(`Cannot find Bvob info '${bvobId}'`);
+      });
+      return await _adjustBvobBufferPersistRefCounts(this, adjusts);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_addContentPersistReference('${mediaInfo.bvobId}')`,
-          "\n\tmediaInfo:", ...dumpObject(mediaInfo),
-          "\n\tbvobInfo:", ...dumpObject(bvobInfo));
-    }
-  }
-
-  async _removeContentPersistReference (bvobId: string) {
-    const bvobInfo = this._bvobLookup[bvobId || ""];
-    try {
-      if (!bvobInfo) throw new Error(`Cannot find Bvob info '${bvobInfo.bvobId}'`);
-      return await _removeBvobPersistReferences(this, [bvobInfo]);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, `_removeContentPersistReference('${bvobId}')`,
-          "\n\tbvobInfo:", ...dumpObject(bvobInfo));
+      throw this.wrapErrorEvent(error,
+          `_adjustBvobBufferPersistRefCounts(${Object.keys(adjusts || {}).length} adjusts)`,
+          "\n\tadjusts:", ...dumpObject(adjusts),
+      );
     }
   }
 }

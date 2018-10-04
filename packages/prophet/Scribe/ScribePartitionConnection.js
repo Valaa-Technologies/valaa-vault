@@ -1,31 +1,24 @@
 // @flow
 
-import type Command, { UniversalEvent } from "~/raem/command";
+import type { UniversalEvent } from "~/raem/command";
 import { VRef, obtainVRef } from "~/raem/ValaaReference";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import type { MediaInfo, NarrateOptions, ChronicleOptions, RetrieveMediaContent }
+import type { MediaInfo, NarrateOptions, ChronicleOptions, ConnectOptions, RetrieveMediaContent }
     from "~/prophet/api/Prophet";
 import DecoderArray from "~/prophet/prophet/DecoderArray";
 
 import { dumpObject, thenChainEagerly } from "~/tools";
-import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 import { bufferAndContentIdFromNative } from "~/tools/textEncoding";
 
+import { MediaEntry, _initiateMediaRetrievals, _requestMediaContents } from "./_contentOps";
 import {
-  MediaEntry, _reprocessMedia, _getMediaURL, _readMediaContent,
-} from "./_contentOps";
-import {
-  _initializeConnectionIndexedDB, _persistMediaEntry, _readMediaInfos, _destroyMediaInfo,
-  _writeEvent, _readEvents, _writeCommand, _readCommands,
-  _deleteCommand, _deleteCommands,
+  _initializeConnectionIndexedDB, _updateMediaEntries, _readMediaEntries, _destroyMediaInfo,
+  _writeEvents, _readEvents, _writeCommands, _readCommands, _deleteCommands,
 } from "./_databaseOps";
-import {
-  _narrateEventLog, _chronicleEventLog, _claimCommandEvent, _recordTruth, _reprocessAction,
-  _throwOnMediaContentRetrieveRequest,
-} from "./_eventOps";
+import { _narrateEventLog, _chronicleEventLog, _recordEventLog } from "./_eventOps";
 
 export default class ScribePartitionConnection extends PartitionConnection {
   _receiveEvent: () => void;
@@ -52,14 +45,11 @@ export default class ScribePartitionConnection extends PartitionConnection {
   _pendingMediaLookup: { [mediaRawId: string]: MediaEntry };
 
   _db: IndexedDBWrapper;
-  _databaseAPI: DatabaseAPI;
 
   constructor (options: Object) {
     super(options);
-    this._receiveEvent = options.receiveEvent;
     this._eventLogInfo = { firstEventId: 0, lastEventId: -1 };
     this._commandQueueInfo = { firstEventId: 0, lastEventId: -1, commandIds: [] };
-    this._databaseAPI = options.databaseAPI;
     this._isFrozen = false;
     this._decoderArray = new DecoderArray({
       name: `Decoders of ${this.getName()}`,
@@ -67,29 +57,36 @@ export default class ScribePartitionConnection extends PartitionConnection {
     });
   }
 
-  connect (/* options: ConnectOptions */) {
+  connect (options: ConnectOptions) {
     return (this._syncedConnection = thenChainEagerly(
         _initializeConnectionIndexedDB(this), [
-          () => {
-            this._notifyProphetOfCommandCount();
-            return this._readMediaInfos();
-          }, (mediaInfos) => {
-            this._pendingMediaLookup = mediaInfos;
+          () => this._notifyProphetOfCommandCount(),
+          () => this._readMediaEntries(),
+          (mediaEntries) => {
+            this._pendingMediaLookup = mediaEntries;
             for (const [mediaRawId, info] of Object.entries(this._pendingMediaLookup)) {
               this._prophet._persistedMediaLookup[mediaRawId] = info;
             }
-            return (this._syncedConnection = this);
           },
+          () => this._prophet._upstream && this.setUpstreamConnection(
+              this._prophet._upstream.acquirePartitionConnection(this.getPartitionURI(), {
+                ...options, narrate: false, receiveEvent: this.recordTruthLog.bind(this),
+              })),
+          () => this.narrateEventLog(options.narrate),
+          () => (this._syncedConnection = this),
         ],
     ));
   }
 
   disconnect () {
+    const adjusts = {};
     for (const info of Object.values(this._pendingMediaLookup)) {
-      this._prophet._removeContentInMemoryReference(info.contentId);
+      if (info.isInMemory) adjusts[info.contentId] = -1;
       delete this._prophet._persistedMediaLookup[info.mediaId];
     }
+    this._prophet._adjustInMemoryBvobBufferRefCounts(adjusts);
     this._pendingMediaLookup = {};
+    this.super.disconnect();
   }
 
   getFirstTruthEventId () { return this._eventLogInfo.firstEventId; }
@@ -100,12 +97,26 @@ export default class ScribePartitionConnection extends PartitionConnection {
 
   async narrateEventLog (options: NarrateOptions = {}):
       Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
-    return _narrateEventLog(this, options);
+    if (!options) return undefined;
+    const ret = {};
+    try {
+      return await _narrateEventLog(this, options, ret);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, "narrateEventLog()",
+          "\n\toptions:", ...dumpObject(options),
+          "\n\tcurrent ret:", ...dumpObject(ret));
+    }
   }
 
   async chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
-      Promise<any> {
-    return _chronicleEventLog(this, eventLog, options);
+      Promise<UniversalEvent[]> {
+    try {
+      return await _chronicleEventLog(this, eventLog, options);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, "chronicleEventLog()",
+          "\n\toptions:", ...dumpObject(options),
+      );
+    }
   }
 
   _notifyProphetOfCommandCount () {
@@ -113,41 +124,31 @@ export default class ScribePartitionConnection extends PartitionConnection {
         Math.max(0, this.getFirstUnusedCommandEventId() - this.getFirstCommandEventId()));
   }
 
-  async recordTruth (truthEntry: Object, preAuthorizeCommand: () => any) {
-    if (truthEntry.eventId <= this.getLastAuthorizedEventId()) return false;
+  async _recordEventLog (eventLog: UniversalEvent[]) {
     try {
-      return _recordTruth(this, truthEntry, preAuthorizeCommand);
+      return await _recordEventLog(this, eventLog);
     } catch (error) {
-      throw this.wrapErrorEvent(error, "recordTruth",
-          "\n\tevent:", ...dumpObject(event),
-          "\n\teventId:", truthEntry.eventId,
+      throw this.wrapErrorEvent(error,
+          `_recordEventLog([${eventLog[0].eventId}, eventLog[eventLog.length - 1].eventId])`,
+          "\n\teventLog:", ...dumpObject(eventLog),
           "\n\tthis:", ...dumpObject(this));
     }
   }
 
-  createEventFinalizers (pendingAuthorizedEvent: Object, eventId: number,
-      retrieveMediaContent: RetrieveMediaContent): Promise<any>[] {
-    const shouldRetrieveMedias = (eventId > this.getLastAuthorizedEventId())
-        && (eventId > this.getLastCommandEventId());
-    return _reprocessAction(this, pendingAuthorizedEvent, shouldRetrieveMedias
-        && (retrieveMediaContent || _throwOnMediaContentRetrieveRequest.bind(null, this)));
-  }
-
-  _reprocessMedia (mediaEvent: Object, retrieveMediaContent: RetrieveMediaContent,
+  _initiateMediaRetrievals (mediaEvent: Object, retrieveMediaContent: RetrieveMediaContent,
       rootEvent: Object) {
     const mediaId = obtainVRef(mediaEvent.id);
-    let currentEntry = this._pendingMediaLookup[mediaId.rawId()];
+    let pendingEntry = this._pendingMediaLookup[mediaId.rawId()];
     try {
-      return _reprocessMedia(this, mediaEvent, retrieveMediaContent, rootEvent, mediaId,
-          currentEntry);
+      return _initiateMediaRetrievals(this, mediaEvent, retrieveMediaContent, rootEvent, mediaId,
+          pendingEntry);
     } catch (error) {
-      if (!currentEntry) currentEntry = this._pendingMediaLookup[mediaId.rawId()];
-      throw this.wrapErrorEvent(error, `_reprocessMedia(${
-              currentEntry && currentEntry.mediaInfo && currentEntry.mediaInfo.name}/${
-              mediaId.rawId()})`,
-          "\n\tmediaEvent:", ...dumpObject(mediaEvent),
+      if (!pendingEntry) pendingEntry = this._pendingMediaLookup[mediaId.rawId()];
+      throw this.wrapErrorEvent(error, `_initiateMediaRetrievals(${
+              ((pendingEntry || {}).mediaInfo || {}).name || ""}/${mediaId.rawId()})`,
           "\n\tmediaId:", mediaId,
-          "\n\tcurrentEntry:", ...dumpObject(currentEntry),
+          "\n\tmediaEvent:", ...dumpObject(mediaEvent),
+          "\n\tpendingEntry:", ...dumpObject(pendingEntry),
           "\n\troot event:", ...dumpObject(rootEvent),
           "\n\tthis:", ...dumpObject(this),
       );
@@ -155,44 +156,10 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   requestMediaContents (mediaInfos: MediaInfo[]): any[] {
-    return mediaInfos.map(mediaInfo => {
-      try {
-        const mediaEntry = this._getMediaEntry(mediaInfo.mediaId, !!mediaInfo.asURL);
-        if (mediaInfo.asURL) {
-          if ((mediaInfo.asURL === true)
-              || (mediaInfo.asURL === "data")
-              || ((mediaInfo.asURL === "source") && !this.isRemote())) {
-            return _getMediaURL(this, mediaInfo, mediaEntry, onError.bind(this));
-          }
-          return undefined;
-        }
-        let actualInfo = mediaInfo;
-        if (!actualInfo.bvobId) {
-          if (!mediaEntry || !mediaEntry.mediaInfo) {
-            throw new Error(`Cannot find Media info for '${String(mediaInfo.mediaId)}'`);
-          }
-          actualInfo = { ...mediaInfo, ...mediaEntry.mediaInfo };
-        }
-        if (!mediaInfo.type) {
-          return _readMediaContent(this, actualInfo, mediaEntry, onError.bind(this, mediaInfo));
-        }
-        if (!actualInfo.bvobId) return undefined;
-        if (actualInfo.sourceURL) {
-          throw new Error(`Cannot explicitly decode sourceURL-content as '${mediaInfo.mime}'`);
-        }
-        const decoder = this._decoderArray.findDecoder(actualInfo);
-        if (!decoder) {
-          throw new Error(`Can't find decoder for ${actualInfo.type}/${actualInfo.subtype}`);
-        }
-        const name = actualInfo.name ? `'${mediaInfo.name}'` : `unnamed media`;
-        return thenChainEagerly(
-          this._prophet.decodeBvobContent(actualInfo.bvobId, decoder,
-                { mediaName: name, partitionName: this.getName() }),
-            undefined,
-            onError.bind(this, mediaInfo));
-      } catch (error) { throw onError.call(this, mediaInfo, error); }
-    });
-    function onError (mediaInfo, error) {
+    try {
+      return _requestMediaContents(this, mediaInfos, onError.bind(this));
+    } catch (error) { throw onError.call(this, error); }
+    function onError (error: Object, mediaInfo: MediaInfo = error.mediaInfo) {
       if (error.wrappedInRequestMediaContents) return error;
       const ret = this.wrapErrorEvent(error, `requestMediaContents(${this.getName()}`,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
@@ -217,19 +184,18 @@ export default class ScribePartitionConnection extends PartitionConnection {
         );
         return {};
       }
+      // Add optimistic Bvob upload to upstream. This is allowed to fail as long as the scribe has
+      // persisted the content.
+      const upstreamPrepareBvob = super.prepareBvob(buffer, mediaInfo || { bvobId: contentId });
       return {
         content, buffer, contentId,
-        persistProcess: this._prophet._persistBvobContent(buffer, contentId),
+        persistProcess: this._prophet._writeBvobBuffer(buffer, contentId),
       };
     } catch (error) {
       throw this.wrapErrorEvent(error, `prepareBvob(${typeof content})`,
           "\n\tcontent:", ...dumpObject({ content }),
           "\n\tmediaInfo:", ...dumpObject(mediaInfo));
     }
-  }
-
-  getMediaInfo (mediaId: VRef) {
-    return this._getMediaEntry(mediaId).mediaInfo;
   }
 
   _getMediaEntry (mediaId: VRef, require_ = true) {
@@ -251,23 +217,22 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  async _persistMediaEntry (newMediaEntry: Object, oldEntry: Object) {
+  async _updateMediaEntries (updates: MediaEntry[]) {
     try {
-      return await _persistMediaEntry(this, newMediaEntry, oldEntry);
+      return await _updateMediaEntries(this, updates);
     } catch (error) {
-      throw this.wrapErrorEvent(error, "_persistMediaEntry",
-          "\n\tnewMediaEntry:", ...dumpObject(newMediaEntry),
-          "\n\toldEntry:", ...dumpObject(oldEntry));
+      throw this.wrapErrorEvent(error, `_updateMediaEntries(${updates.length} updates)`,
+          "\n\tupdates:", ...dumpObject(updates));
     }
   }
 
-  async _readMediaInfos () {
+  async _readMediaEntries () {
     const ret = {};
     try {
-      await _readMediaInfos(this, ret);
+      await _readMediaEntries(this, ret);
       return ret;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_readMediaInfos()`,
+      throw this.wrapErrorEvent(error, `_readMediaEntries()`,
           "\n\tret:", ret);
     }
   }
@@ -280,12 +245,14 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  async _writeEvent (eventId: number, event: Object) {
+  async _writeEvents (eventLog: UniversalEvent[]) {
+    if (!eventLog || !eventLog.length) return undefined;
     try {
-      return await _writeEvent(this, eventId, event);
+      return await _writeEvents(this, eventLog);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_writeEvent(${eventId})`,
-          "\n\tevent:", ...dumpObject(event));
+      throw this.wrapErrorEvent(error,
+          `_writeEvents([${eventLog[0].eventId},${eventLog[eventLog.length - 1].eventId}])`,
+          "\n\teventLog:", ...dumpObject(eventLog));
     }
   }
 
@@ -298,12 +265,13 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  async _writeCommand (eventId: number, command: Object) {
+  async _writeCommands (commandLog: UniversalEvent[]) {
     try {
-      return await _writeCommand(this, eventId, command);
+      return await _writeCommands(this, commandLog);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_writeCommand(${eventId})`,
-          "\n\tcommand:", ...dumpObject(command));
+      throw this.wrapErrorEvent(error,
+          `_writeCommands([${commandLog[0].eventId},${commandLog[commandLog.length - 1].eventId}])`,
+          "\n\tcommandLog:", ...dumpObject(commandLog));
     }
   }
 
@@ -316,15 +284,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  async _deleteCommand (eventId: number) {
-    try {
-      return await _deleteCommand(this, eventId);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, `_deleteCommand(${eventId})`);
-    }
-  }
-
-  async _deleteCommands (fromEventId: string, toEventId: string) {
+  async _deleteCommands (fromEventId: string, toEventId: string = fromEventId) {
     try {
       return await _deleteCommands(this, fromEventId, toEventId);
     } catch (error) {

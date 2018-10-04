@@ -3,7 +3,8 @@
 import ValaaURI, { getPartitionRawIdFrom } from "~/raem/ValaaURI";
 import type { UniversalEvent } from "~/raem/command";
 
-import Prophet, { MediaInfo, NarrateOptions, ChronicleOptions } from "~/prophet/api/Prophet";
+import Prophet, { ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions }
+    from "~/prophet/api/Prophet";
 
 import Logger, { LogEventGenerator } from "~/tools/Logger";
 import { dumpObject, invariantifyObject, thenChainEagerly } from "~/tools";
@@ -16,13 +17,13 @@ export default class PartitionConnection extends LogEventGenerator {
   _partitionURI: ValaaURI;
 
   _refCount: number;
-  _dependentConnections: Object;
   _upstreamConnection: PartitionConnection;
-  _isFrozen: boolean;
   _syncedConnection: PartitionConnection | Promise<PartitionConnection>;
+  _isFrozen: boolean;
 
-  constructor ({ name, prophet, partitionURI, logger, debugLevel }: {
-    name: any, prophet: Prophet, partitionURI: ValaaURI, logger?: Logger, debugLevel?: number,
+  constructor ({ name, prophet, partitionURI, receiveEvent, logger, debugLevel }: {
+    name: any, prophet: Prophet, partitionURI: ValaaURI, receiveEvent: Function, logger?: Logger,
+    debugLevel?: number,
   }) {
     super({ name: name || null, logger: logger || prophet.getLogger(), debugLevel });
     invariantifyObject(prophet, "PartitionConnection.constructor.prophet",
@@ -33,6 +34,7 @@ export default class PartitionConnection extends LogEventGenerator {
     this._prophet = prophet;
     this._partitionURI = partitionURI;
     this._refCount = 0;
+    this._receiveEvent = receiveEvent;
   }
 
   getName (): string {
@@ -58,8 +60,14 @@ export default class PartitionConnection extends LogEventGenerator {
     throw new Error("isConnected not implemented");
   }
 
-  async connect (/* options: ConnectOptions */) {
-    throw new Error("connect");
+  connect (options: ConnectOptions) {
+    if (!this._prophet._upstream) throw new Error("Cannot connect: upstream missing");
+    this.setUpstreamConnection(this._prophet._upstream
+        .acquirePartitionConnection(this.getPartitionURI(), options));
+    return (this._syncedConnection = thenChainEagerly(
+        this.getUpstreamConnection().getSyncedConnection(),
+        () => (this._syncedConnection = this),
+    ));
   }
 
   /**
@@ -69,17 +77,15 @@ export default class PartitionConnection extends LogEventGenerator {
    * @returns {type}                   description
    */
   disconnect () {
-    for (const dependentConnection of (this._dependentConnections || [])) {
-      dependentConnection.removeReference();
-    }
-    this._dependentConnections = null;
     this._refCount = null;
   } // eslint-disable-line
 
   addReference () { ++this._refCount; }
+
   removeReference () { if ((this._refCount !== null) && --this._refCount) this.disconnect(); }
 
   setIsFrozen (value: boolean = true) { this._isFrozen = value; }
+
   isFrozen (): boolean {
     return (typeof this._isFrozen !== "undefined") ? this._isFrozen
         : this._upstreamConnection ? this._upstreamConnection.isFrozen()
@@ -94,6 +100,12 @@ export default class PartitionConnection extends LogEventGenerator {
     this._upstreamConnection = connection;
   }
 
+  /**
+   * Returns true if this connection has successfully completed an optimistic narration.
+   *
+   * @returns
+   * @memberof PartitionConnection
+   */
   isSynced () {
     if (this._syncedConnection !== undefined) return (this._syncedConnection === this);
     if (this._upstreamConnection) return this._upstreamConnection.isSynced();
@@ -110,54 +122,27 @@ export default class PartitionConnection extends LogEventGenerator {
   }
 
   /**
-   * Returns a dependent connection with given dependentName. Dependent connections are connections
-   * which are attached to this connection and released when this connection is disconnected.
-   *
-   * @param {string} dependentName
-   * @returns
-   *
-   * @memberof PartitionConnection
-   */
-  getDependentConnection (dependentName: string): ?PartitionConnection {
-    return this._dependentConnections && this._dependentConnections[dependentName];
-  }
-
-  transferIntoDependentConnection (dependentName: string, connection: PartitionConnection) {
-    const dependents = (this._dependentConnections || (this._dependentConnections = {}));
-    if (dependents[dependentName]) {
-      throw new Error(`${this.debugId()}.transferIntoDependentConnection: dependent connection '${
-          dependentName}' already exists`);
-    }
-    dependents[dependentName] = connection;
-  }
-
-  acquireAndAttachDependentConnection (dependentName: string,
-      dependentConnection: PartitionConnection) {
-    dependentConnection.addReference();
-    this.transferIntoDependentConnection(dependentName, dependentConnection);
-  }
-
-  /**
-   * Request replay of the event log using provided narration options from wherever the events
-   * and commands can be sourced.
-   * If
+   * Request replay of the event log using provided narration options
+   * from the partition upstream.
    *
    * @param {NarrateOptions} [options={}]
    * @returns {Promise<Object>}
    * @memberof PartitionConnection
    */
   narrateEventLog (options: NarrateOptions = {}): Promise<Object> {
+    if (!options) return undefined;
     return this._upstreamConnection.narrateEventLog(options);
   }
 
   /**
-   * Integrate events listed in options.
+   * Record events listed in eventLog into the upstream.
    *
    * @param {ChronicleOptions} [options={}]
    * @returns {Promise<Object>}
    * @memberof PartitionConnection
    */
   chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}): Promise<Object> {
+    if (!options) return undefined;
     return this._upstreamConnection.chronicleEventLog(eventLog, options);
   }
 
@@ -250,14 +235,14 @@ export default class PartitionConnection extends LogEventGenerator {
   /**
    * Prepares the bvob content store process on upstream, returns the content id.
    *
-   * @param {string} content
+   * @param {any} content
    * @param {VRef} mediaId
    * @param {string} contentId
    * @returns {string}
    *
    * @memberof Prophet
    */
-  prepareBvob (content: string, mediaInfo?: Object):
+  prepareBvob (content: any, mediaInfo?: Object):
       { contentId: string, persistProcess: ?Promise<any> } {
     return this._upstreamConnection.prepareBvob(content, mediaInfo);
   }

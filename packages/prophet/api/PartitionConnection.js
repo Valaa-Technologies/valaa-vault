@@ -146,12 +146,9 @@ export default class PartitionConnection extends LogEventGenerator {
     return this._upstreamConnection.chronicleEventLog(eventLog, options);
   }
 
-  getLastAuthorizedEventId () {
-    return this._upstreamConnection.getLastAuthorizedEventId();
-  }
-
-  getLastCommandEventId () {
-    return this._upstreamConnection.getLastCommandEventId();
+  getFirstUnusedTruthEventId () { return this._upstreamConnection.getFirstUnusedTruthEventId(); }
+  getFirstUnusedCommandEventId () {
+    return this._upstreamConnection.getFirstUnusedCommandEventId();
   }
 
   /**

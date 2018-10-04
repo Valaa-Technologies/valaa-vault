@@ -63,13 +63,13 @@ describe("Scribe", () => {
     let claimResult = await connection.claimCommandEvent(simpleCommand);
     await claimResult.finalizeLocal();
     await expectStoredInDB(simpleCommand, database, "commands",
-        connection.getLastCommandEventId());
+        connection.getFirstUnusedCommandEventId() - 1);
 
     // Runs a transaction and confirms that it has been stored
     claimResult = await connection.claimCommandEvent(simpleTransaction);
     await claimResult.finalizeLocal();
     await expectStoredInDB(simpleTransaction, database, "commands",
-        connection.getLastCommandEventId());
+        connection.getFirstUnusedCommandEventId() - 1);
   });
 
   const textMediaContents = [
@@ -141,12 +141,12 @@ describe("Scribe", () => {
     claimResult = firstConnection.claimCommandEvent(simpleTransaction);
     await claimResult.finalizeLocal();
 
-    const lastCommandId = firstConnection.getLastCommandEventId();
-    expect(lastCommandId).toBeGreaterThan(0);
+    const firstUnusedCommandEventId = firstConnection.getFirstUnusedCommandEventId();
+    expect(firstUnusedCommandEventId).toBeGreaterThan(1);
     firstConnection.disconnect();
 
     const secondConnection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
-    expect(secondConnection.getLastCommandEventId()).toBe(lastCommandId);
+    expect(secondConnection.getFirstUnusedCommandEventId()).toBe(firstUnusedCommandEventId);
   });
 
   const commandList = [
@@ -158,22 +158,22 @@ describe("Scribe", () => {
     created({ id: "Entity F", typeName: "Entity" }),
   ];
 
-  it("Ensures command IDs are stored in a crescent order", async () => {
+  it("Ensures command IDs are stored in a ascending order", async () => {
     const scribe = createScribe();
     await scribe.initialize();
     const uri = createPartitionURI(URI);
 
     const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
-    let oldCommandId;
-    let newCommandId = connection.getLastCommandEventId();
+    let oldUnusedCommandId;
+    let newUnusedCommandId = connection.getFirstUnusedCommandEventId();
 
     for (const command of commandList) {
-      const claimResult = connection.claimCommandEvent(command);
+      const claimResult = connection.chronicleEventLog([command])[0];
       await claimResult.finalizeLocal();
 
-      oldCommandId = newCommandId;
-      newCommandId = connection.getLastCommandEventId();
-      expect(oldCommandId).toBeLessThan(newCommandId);
+      oldUnusedCommandId = newUnusedCommandId;
+      newUnusedCommandId = connection.getFirstUnusedCommandEventId();
+      expect(oldUnusedCommandId).toBeLessThan(newUnusedCommandId);
     }
   });
 });

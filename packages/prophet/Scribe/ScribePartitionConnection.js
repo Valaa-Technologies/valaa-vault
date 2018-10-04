@@ -92,11 +92,11 @@ export default class ScribePartitionConnection extends PartitionConnection {
     this._pendingMediaLookup = {};
   }
 
-  getLastAuthorizedEventId () { return this._eventLogInfo.lastEventId; }
-  getLastCommandEventId () { return this._commandQueueInfo.lastEventId; }
+  getFirstTruthEventId () { return this._eventLogInfo.firstEventId; }
+  getFirstUnusedTruthEventId () { return this._eventLogInfo.lastEventId + 1; }
 
-  _getFirstAuthorizedEventId () { return this._eventLogInfo.firstEventId; }
-  _getFirstCommandEventId () { return this._commandQueueInfo.firstEventId; }
+  getFirstCommandEventId () { return this._commandQueueInfo.firstEventId; }
+  getFirstUnusedCommandEventId () { return this._commandQueueInfo.lastEventId + 1; }
 
   async narrateEventLog (options: NarrateOptions = {}):
       Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
@@ -110,8 +110,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
 
   _notifyProphetOfCommandCount () {
     this._prophet.setConnectionCommandCount(this.getPartitionURI().toString(),
-        Math.max(0,
-            (this.getLastCommandEventId() + 1) - this._getFirstCommandEventId()));
+        Math.max(0, this.getFirstUnusedCommandEventId() - this.getFirstCommandEventId()));
   }
 
   claimCommandEvent (command: Command, retrieveMediaContent: RetrieveMediaContent): Object {

@@ -81,7 +81,7 @@ describe("Prophet", () => {
     const scribeConnection = prophetConnection.getUpstreamConnection().getScribeConnection();
 
     let oldCommandId;
-    let newCommandId = scribeConnection.getLastCommandEventId();
+    let newCommandId = scribeConnection.getFirstUnusedCommandEventId() - 1;
 
     const commandList = [createPartitionCommand].concat(...basicCommands);
     for (const command of commandList) {
@@ -90,7 +90,7 @@ describe("Prophet", () => {
       const claimResult = await harness.claim(command);
       await claimResult.getFinalEvent();
 
-      newCommandId = scribeConnection.getLastCommandEventId();
+      newCommandId = scribeConnection.getFirstUnusedCommandEventId() - 1;
       expect(oldCommandId).toBeLessThan(newCommandId);
     }
   });
@@ -108,7 +108,7 @@ describe("Prophet", () => {
     for (const command of commandList) {
       const claimResult = await harness.claim(command);
       const finalEvent = await claimResult.getFinalEvent();
-      const eventId = scribeConnection.getLastCommandEventId();
+      const eventId = scribeConnection.getFirstUnusedCommandEventId() - 1;
       await expectStoredInDB(finalEvent, database, "commands", eventId);
     }
   });

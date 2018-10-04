@@ -1,5 +1,6 @@
 // @flow
 
+
 import type Command, { Action, UniversalEvent } from "~/raem/command";
 import type { State } from "~/raem/tools/denormalized/State";
 import { isRestrictedCommand } from "~/raem/redux/Bard";
@@ -12,10 +13,11 @@ import TransactionInfo from "~/prophet/prophet/TransactionInfo";
 import { invariantify, invariantifyObject, invariantifyString } from "~/tools";
 
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
+import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
 import { _fabricateProphecy, _revealProphecyToAllFollowers } from "./_prophecyOps";
-import { _reviewProphecy } from "./_reformationOps";
-import { _claim, _repeatClaim, _receiveTruth } from "./_streamOps";
+import { _receiveTruth, _reviewProphecy } from "./_reformationOps";
+import { _claim, _repeatClaim } from "./_claimOps";
 
 /**
  * FalseProphet is non-authoritative (cache) in-memory denormalized store as well as a two-way proxy
@@ -33,6 +35,11 @@ import { _claim, _repeatClaim, _receiveTruth } from "./_streamOps";
  * reducers contained within the FalseProphet.
  */
 export default class FalseProphet extends Prophet {
+
+  static PartitionConnectionType = FalseProphetPartitionConnection;
+
+  _claimOperationQueue = [];
+
   constructor ({ name, logger, schema, corpus, upstream }: Object) {
     super({ name, logger });
     this.schema = schema;
@@ -59,7 +66,7 @@ export default class FalseProphet extends Prophet {
   }
 
   _createDiscourse (follower: Follower) {
-    return new FalseProphetDiscourse({ follower, prophet: this });
+    return new FalseProphetDiscourse({ prophet: this, follower });
   }
 
   // Handle a restricted command claim towards upstream.

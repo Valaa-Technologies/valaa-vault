@@ -185,13 +185,11 @@ export default class InspireGateway extends LogEventGenerator {
   async _proselytizeScribe (gatewayRevelation: Object, oracle: Oracle): Promise<Scribe> {
     let scribeOptions;
     try {
-      this._commandCountListeners = new Map();
       scribeOptions = {
         name: "Inspire Scribe",
         logger: this.getLogger(),
         upstream: oracle,
         databaseAPI: gatewayRevelation.scribe.getDatabaseAPI(),
-        commandCountCallback: this._updateCommandCount,
         ...await gatewayRevelation.scribe,
       };
       const scribe = await new Scribe(scribeOptions);
@@ -206,21 +204,6 @@ export default class InspireGateway extends LogEventGenerator {
     } catch (error) {
       throw this.wrapErrorEvent(error, "proselytizeScribe",
           "\n\tscribeOptions:", ...dumpObject(scribeOptions));
-    }
-  }
-
-  _updateCommandCount = (totalCount: number, partitionCommandCounts: Object) => {
-    this._totalCommandCount = totalCount;
-    this._partitionCommandCounts = partitionCommandCounts;
-    this._commandCountListeners.forEach(listener => listener(totalCount, partitionCommandCounts));
-  }
-
-  setCommandCountListener (component: Object,
-      callback: (totalCount: number, partitionCommandCounts: Object) => void) {
-    if (!callback) this._commandCountListeners.delete(component);
-    else {
-      this._commandCountListeners.set(component, callback);
-      callback(this._totalCommandCount, this._partitionCommandCounts);
     }
   }
 
@@ -283,12 +266,14 @@ export default class InspireGateway extends LogEventGenerator {
       Promise<Prophet> {
     let falseProphetOptions;
     try {
+      this._commandCountListeners = new Map();
       falseProphetOptions = {
         name: "Inspire FalseProphet",
         corpus,
         upstream,
         schema: EngineContentAPI.schema,
         logger: this.getLogger(),
+        commandCountCallback: this._updateCommandCount,
         ...await gatewayRevelation.falseProphet,
       };
       const falseProphet = new FalseProphet(falseProphetOptions);
@@ -303,6 +288,21 @@ export default class InspireGateway extends LogEventGenerator {
       throw this.wrapErrorEvent(error, "proselytizeFalseProphet",
           "\n\tfalseProphetOptions:", ...dumpObject(falseProphetOptions),
           "\n\tupstream:", ...dumpObject(upstream));
+    }
+  }
+
+  _updateCommandCount = (totalCount: number, partitionCommandCounts: Object) => {
+    this._totalCommandCount = totalCount;
+    this._partitionCommandCounts = partitionCommandCounts;
+    this._commandCountListeners.forEach(listener => listener(totalCount, partitionCommandCounts));
+  }
+
+  setCommandCountListener (component: Object,
+      callback: (totalCount: number, partitionCommandCounts: Object) => void) {
+    if (!callback) this._commandCountListeners.delete(component);
+    else {
+      this._commandCountListeners.set(component, callback);
+      callback(this._totalCommandCount, this._partitionCommandCounts);
     }
   }
 

@@ -40,16 +40,12 @@ export default class Scribe extends Prophet {
   // whose media info is successfully persisted.
   // See ScribePartitionConnection._pendingMediaLookup.
   _persistedMediaLookup: { [mediaId: string]: Object };
-  _totalCommandCount: number;
   _databaseAPI: DatabaseAPI;
 
-  constructor ({ commandCountCallback, databaseAPI, ...rest }: Object) {
+  constructor ({ databaseAPI, ...rest }: Object) {
     super({ ...rest });
     this._mediaTypes = {};
     this._persistedMediaLookup = {};
-    this._totalCommandCount = 0;
-    this._partitionCommandCounts = {};
-    this._commandCountCallback = commandCountCallback;
     this._databaseAPI = databaseAPI;
   }
 
@@ -63,16 +59,6 @@ export default class Scribe extends Prophet {
   }
 
   getDatabaseAPI (): DatabaseAPI { return this._databaseAPI; }
-  // command ops
-
-  setConnectionCommandCount (connectionName: Object, value: number = 1) {
-    const previous = this._partitionCommandCounts[connectionName] || 0;
-    this._partitionCommandCounts[connectionName] = value;
-    this._totalCommandCount += (value - previous);
-    if (this._commandCountCallback) {
-      this._commandCountCallback(this._totalCommandCount, this._partitionCommandCounts);
-    }
-  }
 
   // bvob content ops
 

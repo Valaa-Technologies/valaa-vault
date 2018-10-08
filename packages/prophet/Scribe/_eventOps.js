@@ -1,7 +1,7 @@
 // @flow
 
-import Command, { isTransactedLike, UniversalEvent } from "~/raem/command";
-import { VRef, getRawIdFrom } from "~/raem/ValaaReference";
+import { isTransactedLike, UniversalEvent } from "~/raem/command";
+import { getRawIdFrom } from "~/raem/ValaaReference";
 
 import type {
   MediaInfo, NarrateOptions, ChronicleOptions, ChronicleEventResult, PartitionConnection,
@@ -33,18 +33,12 @@ export const vdoc = vdon({
 export function _chronicleEventLog (connection: ScribePartitionConnection,
     eventLog: UniversalEvent[], options: ChronicleOptions = {}): Promise<any> {
   if (!eventLog || !eventLog.length) return eventLog;
-  if (!connection.isRemote() && !eventLog[0].eventId) _addCommandsToQueue(connection, eventLog);
   if (eventLog[0].eventId) return connection._recordEventLog(eventLog);
 
-  if (connection.getFirstCommandEventId() < connection.getFirstUnusedTruthEventId()) {
-    _setCommandQueueFirstEventId(connection, connection.getFirstUnusedTruthEventId());
-  }
-  _addCommandsToQueue(connection, eventLog); // assigns eventId's but doesn't persist.
   /*
   connection.warnEvent("\n\tclaimcommand:", ...dumpObject(command).commandId, commandEventId,
           command,
-      "\n\tcommand/eventInfos:", connection._commandQueueInfo, connection._eventLogInfo,
-      "\n\tcommandIds:", connection._commandQueueInfo.commandIds);
+      "\n\tcommand/eventInfos:", connection._commandQueueInfo, connection._eventLogInfo);
   //*/
 
   // FIXME(iridian): Go through the sequencing of all of these operations.
@@ -70,8 +64,7 @@ export function _chronicleEventLog (connection: ScribePartitionConnection,
       connection.warnEvent("\n\twrote commands:", ...dumpObject(commandEventLog),
           "\n\twrite results:", ...dumpObject(writeResults),
           "\n\t:", connection.isLocal() ? "local" : "remote",
-              connection.getFirstUnusedTruthEventId() - 1,
-          "\n\tcommandIds:", connection._commandQueueInfo.commandIds);
+              connection.getFirstUnusedTruthEventId() - 1);
     });
   }
   //*/
@@ -82,33 +75,6 @@ export function _chronicleEventLog (connection: ScribePartitionConnection,
       () => commandEvent,
     ]),
   }));
-}
-
-// Update in-memory metadata commandIds array, no db changes
-function _addCommandsToQueue (connection: ScribePartitionConnection, commands: Array<Command>) {
-  connection._commandQueueInfo.commandIds.push(...commands.map(command => {
-    command.eventId = ++connection._commandQueueInfo.lastEventId;
-    return command.commandId;
-  }));
-  if (commands.length) {
-    connection.setIsFrozen(commands[commands.length - 1].type === "FROZEN");
-  }
-  connection._notifyProphetOfCommandCount();
-}
-
-// Update in-memory metadata first event id, no db changes
-function _setCommandQueueFirstEventId (connection: ScribePartitionConnection,
-    firstEventId: number) {
-  const discardedCommands = firstEventId - connection.getFirstCommandEventId();
-  connection._commandQueueInfo.firstEventId = firstEventId;
-
-  if (connection.getFirstCommandEventId() < connection.getFirstUnusedCommandEventId()) {
-    connection._commandQueueInfo.commandIds.splice(0, discardedCommands);
-  } else {
-    connection._commandQueueInfo.lastEventId = connection.getFirstCommandEventId() - 1;
-    connection._commandQueueInfo.commandIds = [];
-  }
-  connection._notifyProphetOfCommandCount();
 }
 
 /*
@@ -166,15 +132,6 @@ async function _narrateCachedEventLog (connection: ScribePartitionConnection,
   const commandList = (!downstreamReceiveCommand || (commandFirstEventId > lastEventId))
     ? []
     : (await connection._readCommands({ firstEventId: commandFirstEventId, lastEventId })) || [];
-
-  const commandQueueLength =
-      connection.getFirstUnusedCommandEventId() - connection.getFirstCommandEventId();
-  if ((connection._commandQueueInfo.commandIds.length !== commandQueueLength)
-    && (commandList.length === commandQueueLength)
-    && commandFirstEventId === connection.getFirstCommandEventId()) {
-    connection._commandQueueInfo.commandIds = commandList.map(command => command.commandId);
-    connection.setIsFrozen(commandList[commandList.length - 1].type === "FROZEN");
-  }
   return {
     scribeEventLog: await Promise.all(eventList.map(downstreamReceiveEvent)),
     scribeCommandQueue: await Promise.all(commandList.map(downstreamReceiveCommand)),
@@ -313,54 +270,8 @@ export async function _recordEventLog (connection: ScribePartitionConnection,
   });
   if (newLastEventId === connection.getFirstUnusedTruthEventId() - 1) return [];
 
-  const lastNewEvent = newEvents[newEvents.length - 1];
-  const purgedCommands = await _confirmOrPurgeQueuedCommands(connection, lastNewEvent);
-  if (connection.getFirstCommandEventId() >= connection.getFirstUnusedCommandEventId()) {
-    connection.setIsFrozen(lastNewEvent.type === "FROZEN");
-  }
-
-  connection._eventLogInfo.lastEventId = lastNewEvent.eventId;
+  connection._eventLogInfo.lastEventId = newEvents[newEvents.length - 1].eventId;
   connection._writeEvents(newEvents);
   connection._updateMediaEntries(Object.values(mediaEntryUpdates));
-  return { purgedCommands };
-  /*
-  connection.warnEvent("\n\trecordTruth", event.commandId, eventId,
-      "\n\tevent/commandInfos:", connection._eventLogInfo, connection._commandQueueInfo,
-      "\n\tcommandIds:", connection.getFirstCommandEventId(),
-          connection.getFirstUnusedCommandEventId(), connection._commandQueueInfo.commandIds,
-      ...(purgedCommands ? ["\n\tPURGING:", purgedCommands] : []));
-  */
-}
-
-async function _confirmOrPurgeQueuedCommands (connection: ScribePartitionConnection,
-    lastNewEvent: UniversalEvent) {
-  let purgedCommands;
-  const { firstEventId: firstCommandId, lastEventId: lastCommandId, commandIds }
-      = connection._commandQueueInfo;
-  if ((firstCommandId <= lastNewEvent.eventId) && (lastNewEvent.eventId <= lastCommandId)
-      && (lastNewEvent.commandId !== commandIds[lastNewEvent.eventId - firstCommandId])) {
-    // connection.warnEvent("\n\tPURGING by", event.commandId, eventId, event, commandIds,
-    //    "\n\tcommandIds:", firstCommandId, lastCommandId, commandIds);
-    // Frankly, we could just store the commands in the 'commandIds' fully.
-    purgedCommands = await connection._readCommands(
-        { firstEventId: firstCommandId, lastEventId: lastCommandId });
-  }
-
-  const newCommandQueueFirstEventId = (purgedCommands ? lastCommandId : lastNewEvent.eventId) + 1;
-  if (connection.getFirstCommandEventId() < newCommandQueueFirstEventId) {
-    _setCommandQueueFirstEventId(connection, newCommandQueueFirstEventId);
-  }
-
-  // Delete commands after event is stored, so we get no gaps.
-  // TODO(iridian): Put these to the same transaction with the writeEvent
-  if (!connection.isTransient()) {
-    if (purgedCommands) {
-      // TODO(iridian): Add merge-conflict-persistence. As it stands now, for the duration of
-      // the merge process the purged commands are not persisted anywhere and could be lost.
-      connection._deleteCommands(firstCommandId, lastCommandId);
-    } else if (lastNewEvent.eventId >= firstCommandId) {
-      connection._deleteCommands(firstCommandId, Math.min(lastNewEvent.eventId, lastCommandId));
-    }
-  }
-  return purgedCommands;
+  return true;
 }

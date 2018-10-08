@@ -11,7 +11,7 @@ import Follower from "~/prophet/api/Follower";
 import Prophecy from "~/prophet/api/Prophecy";
 import Prophet, { ClaimResult } from "~/prophet/api/Prophet";
 
-import TransactionInfo from "~/prophet/prophet/TransactionInfo";
+import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
 import { createId, invariantify } from "~/tools";
 

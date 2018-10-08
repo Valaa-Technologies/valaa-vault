@@ -4,7 +4,7 @@ import type Command, { Action, UniversalEvent } from "~/raem/command";
 import { createUniversalizableCommand } from "~/raem/redux/Bard";
 
 import Prophecy from "~/prophet/api/Prophecy";
-import TransactionInfo from "~/prophet/prophet/TransactionInfo";
+import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
 import FalseProphet from "./FalseProphet";
 

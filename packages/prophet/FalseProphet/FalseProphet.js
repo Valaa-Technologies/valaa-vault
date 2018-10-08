@@ -7,8 +7,8 @@ import { isRestrictedCommand } from "~/raem/redux/Bard";
 
 import Prophecy from "~/prophet/api/Prophecy";
 import Follower from "~/prophet/api/Follower";
-import Prophet, { ClaimResult } from "~/prophet/api/Prophet";
-import TransactionInfo from "~/prophet/prophet/TransactionInfo";
+import Prophet from "~/prophet/api/Prophet";
+import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
 import { invariantify, invariantifyObject, invariantifyString } from "~/tools";
 
@@ -38,9 +38,10 @@ export default class FalseProphet extends Prophet {
 
   static PartitionConnectionType = FalseProphetPartitionConnection;
 
+  _totalCommandCount: number;
   _claimOperationQueue = [];
 
-  constructor ({ name, logger, schema, corpus, upstream }: Object) {
+  constructor ({ name, logger, schema, corpus, upstream, commandCountCallback }: Object) {
     super({ name, logger });
     this.schema = schema;
     this.corpus = corpus;
@@ -49,6 +50,9 @@ export default class FalseProphet extends Prophet {
     this._prophecySentinel = { id: "sentinel" };
     this._prophecySentinel.next = this._prophecySentinel.prev = this._prophecySentinel;
     this._prophecyByCommandId = {};
+    this._commandCountCallback = commandCountCallback;
+    this._partitionCommandCounts = {};
+    this._totalCommandCount = 0;
     if (upstream) this.setUpstream(upstream);
   }
 
@@ -128,6 +132,17 @@ export default class FalseProphet extends Prophet {
     invariantifyObject(prophecy, "_revealProphecyToAllFollowers.prophecy",
         { instanceof: Prophecy, allowNull: false, allowEmpty: false });
     return _revealProphecyToAllFollowers(this, prophecy);
+  }
+
+  // command ops
+
+  setConnectionCommandCount (connectionName: Object, value: number = 1) {
+    const previous = this._partitionCommandCounts[connectionName] || 0;
+    this._partitionCommandCounts[connectionName] = value;
+    this._totalCommandCount += (value - previous);
+    if (this._commandCountCallback) {
+      this._commandCountCallback(this._totalCommandCount, this._partitionCommandCounts);
+    }
   }
 
   _dumpStatus () {

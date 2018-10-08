@@ -26,18 +26,10 @@ export default class ScribePartitionConnection extends PartitionConnection {
 
   // Info structures
 
-  _eventLogInfo: {
-    firstEventId: number, // If not 0, the stored event is a snapshot whose last eventId is this
-    lastEventId: number,
-  };
-
-  _commandQueueInfo: {
-    firstEventId: number,
-    lastEventId: number,
-    commandIds: Array<string>,
-  };
-
-  _snapshotInfo: {}; // what goes here? Low priority.
+  // If not eventLogInfo firstEventId is not 0, it means the oldest
+  // stored event is a snapshot with that id.
+  _eventLogInfo: { firstEventId: number, lastEventId: number };
+  _commandQueueInfo: { firstEventId: number, lastEventId: number };
 
   // Contains the media infos for most recent actions seen per media.
   // This lookup is updated whenever the media retrievers are created for the action, which is
@@ -50,14 +42,12 @@ export default class ScribePartitionConnection extends PartitionConnection {
   constructor (options: Object) {
     super(options);
     this._eventLogInfo = { firstEventId: 0, lastEventId: -1 };
-    this._commandQueueInfo = { firstEventId: 0, lastEventId: -1, commandIds: [] };
-    this._isFrozen = false;
+    this._commandQueueInfo = { firstEventId: 0, lastEventId: -1 };
   }
 
   connect (options: ConnectOptions) {
     return (this._syncedConnection = thenChainEagerly(
         _initializeConnectionIndexedDB(this), [
-          () => this._notifyProphetOfCommandCount(),
           () => this._readMediaEntries(),
           (mediaEntries) => {
             this._pendingMediaLookup = mediaEntries;
@@ -106,7 +96,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   async chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
-      Promise<UniversalEvent[]> {
+      Promise<{ eventResults: ChronicleEventResult[] }> {
     try {
       return await _chronicleEventLog(this, eventLog, options);
     } catch (error) {
@@ -114,11 +104,6 @@ export default class ScribePartitionConnection extends PartitionConnection {
           "\n\toptions:", ...dumpObject(options),
       );
     }
-  }
-
-  _notifyProphetOfCommandCount () {
-    this._prophet.setConnectionCommandCount(this.getPartitionURI().toString(),
-        Math.max(0, this.getFirstUnusedCommandEventId() - this.getFirstCommandEventId()));
   }
 
   async _recordEventLog (eventLog: UniversalEvent[]) {

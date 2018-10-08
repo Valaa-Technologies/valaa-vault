@@ -1,6 +1,5 @@
 // @flow
 
-
 import type { MediaInfo } from "~/prophet/api/Prophet";
 
 import MediaDecoder from "~/tools/MediaDecoder";

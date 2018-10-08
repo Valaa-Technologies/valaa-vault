@@ -21,9 +21,9 @@ export type EventData = {
       | "SPLICED" | "TRANSACTED" | "FROZEN"
 }
 
-export type RetrieveMediaContent = (mediaId: VRef, mediaInfo: MediaInfo) => Promise<any>;
+export type RetrieveMediaBuffer = (mediaInfo: MediaInfo) => Promise<any>;
 export type ReceiveEvent =
-    ((event: EventData, retrieveMediaContent: RetrieveMediaContent) => Object);
+    ((event: EventData, retrieveMediaBuffer: RetrieveMediaBuffer) => Object);
 
 export type MediaInfo = {
   mediaId: VRef,
@@ -69,7 +69,7 @@ export type NarrateOptions = {
 };
 
 export type ChronicleOptions = NarrateOptions & {
-  retrieveMediaContent?: RetrieveMediaContent,
+  retrieveMediaBuffer?: RetrieveMediaBuffer,
 };
 
 /* eslint-disable no-unused-vars */

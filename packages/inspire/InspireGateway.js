@@ -330,7 +330,7 @@ export default class InspireGateway extends LogEventGenerator {
       this.nexus.addAuthorityConfig(authorityConfig);
     }
     for (const MediaDecoder_: any of Object.values(plugin.mediaDecoders || {})) {
-      this.scribe.getDecoderArray().addDecoder(this.callRevelation(MediaDecoder_));
+      this.oracle.getDecoderArray().addDecoder(this.callRevelation(MediaDecoder_));
     }
   }
 
@@ -418,8 +418,8 @@ export default class InspireGateway extends LogEventGenerator {
       await connection.chronicleEventLog(eventLog, {
         name: `prologue event log for '${connection.getName()}'`,
         firstEventId: firstUnusedEventId,
-        retrieveMediaContent (mediaId: VRef, mediaInfo: Object) {
-          const latestInfo = latestMediaInfos[mediaId.rawId()];
+        retrieveMediaBuffer (mediaInfo: Object) {
+          const latestInfo = latestMediaInfos[mediaInfo.mediaId];
           if (!latestInfo ||
               (mediaInfo.bvobId !== (latestInfo.mediaInfo.bvobId || latestInfo.mediaInfo.blobId))) {
             // Bvob wasn't found in cache and the bvobId doesn't match the latest known bvobId for

@@ -3,15 +3,12 @@
 import { isCreatedLike } from "~/raem/command";
 import { VRef, getRawIdFrom } from "~/raem/ValaaReference";
 
-import type { MediaInfo, RetrieveMediaContent } from "~/prophet/api/Prophet";
+import type { MediaInfo, RetrieveMediaBuffer } from "~/prophet/api/Prophet";
 
-import { dumpObject, invariantifyString, thenChainEagerly, vdon } from "~/tools";
+import { addDelayedOperationEntry, dumpObject, invariantifyString, thenChainEagerly, vdon }
+    from "~/tools";
 import { encodeDataURI } from "~/tools/html5/dataURI";
-import type MediaDecoder from "~/tools/MediaDecoder";
-import { stringFromUTF8ArrayBuffer } from "~/tools/textEncoding";
 
-import type { BvobInfo } from "./_databaseOps";
-import Scribe from "./Scribe";
 import ScribePartitionConnection from "./ScribePartitionConnection";
 
 export const vdoc = vdon({
@@ -42,7 +39,7 @@ export type MediaLookup = {
 */
 
 export function _initiateMediaRetrievals (connection: ScribePartitionConnection, mediaEvent: Object,
-    retrieveMediaContent: RetrieveMediaContent, rootEvent: Object, mediaId: VRef,
+    retrieveMediaBuffer: RetrieveMediaBuffer, rootEvent: Object, mediaId: VRef,
     currentEntry: MediaEntry) {
   const mediaRawId = mediaId.rawId();
   let mediaInfo;
@@ -84,15 +81,14 @@ export function _initiateMediaRetrievals (connection: ScribePartitionConnection,
   }
   if (update.content) mediaInfo.bvobId = getRawIdFrom(update.content);
 
-  if (!retrieveMediaContent) return [];
+  if (!retrieveMediaBuffer) return [];
 
   const tryRetrieveAndPersist = async () => {
     try {
       if (mediaInfo.bvobId && !connection._prophet.tryGetCachedBvobContent(mediaInfo.bvobId)) {
         // TODO(iridian): Determine whether media content should be pre-cached or not.
-        const content = await retrieveMediaContent(mediaId, { ...mediaInfo,
-          type: "application", subtype: "octet-stream", mime: "application/octet-stream",
-        });
+        mediaInfo.mediaId = mediaRawId;
+        const content = await retrieveMediaBuffer(mediaInfo);
         if (typeof content !== "undefined") {
           await connection.prepareBvob(content, mediaInfo).persistProcess;
         }
@@ -170,80 +166,73 @@ async function _waitBackoff (backoffSeconds: number) {
  #    #  ######   ### #   ####   ######   ####      #
 */
 
-export function _decodeBvobContent (scribe: Scribe, bvobInfo: BvobInfo,
-    decoder: MediaDecoder, contextInfo?: Object, onError: Function) {
-  const cacheHit = bvobInfo.decodings && bvobInfo.decodings.get(decoder);
-  if (cacheHit) return cacheHit;
-  return thenChainEagerly(scribe.readBvobContent(bvobInfo.bvobId), [
-    (buffer) => (typeof buffer === "undefined"
-        ? undefined
-        : decoder.decode(buffer, contextInfo)),
-    (decodedContent) => {
-      if (typeof decodedContent !== "undefined") {
-        if (!bvobInfo.decodings) bvobInfo.decodings = new WeakMap();
-        bvobInfo.decodings.set(decoder, decodedContent);
-      }
-      return decodedContent;
-    },
-  ], onError);
-}
-
 export function _requestMediaContents (connection: ScribePartitionConnection,
     mediaInfos: MediaInfo[], onError: Function) {
-  return mediaInfos.map(mediaInfo => {
+  const upstreamOperation = {};
+  const ret = mediaInfos.map(mediaInfo => {
     const onErrorWInfo = error => onError(error, mediaInfo);
     try {
       const mediaEntry = connection._getMediaEntry(mediaInfo.mediaId, !!mediaInfo.asURL);
-      if (mediaInfo.asURL) {
-        if ((mediaInfo.asURL === true) || (mediaInfo.asURL === "data")
-            || ((mediaInfo.asURL === "source") && !connection.isRemote())) {
-          return _getMediaURL(connection, mediaInfo, mediaEntry, onErrorWInfo);
-        }
-        return undefined;
-      }
-      let actualInfo = mediaInfo;
+      const actualInfo = { ...mediaInfo };
       if (!actualInfo.bvobId) {
         if (!mediaEntry || !mediaEntry.mediaInfo) {
           throw new Error(`Cannot find Media info for '${String(mediaInfo.mediaId)}'`);
         }
-        actualInfo = { ...mediaInfo, ...mediaEntry.mediaInfo };
+        Object.assign(actualInfo, mediaEntry.mediaInfo);
       }
-      if (!mediaInfo.type) {
-        return _readMediaContent(connection, actualInfo, mediaEntry, onErrorWInfo);
+      if (!actualInfo.asURL) {
+        return _getMediaContent(connection, actualInfo, upstreamOperation);
       }
-      if (!actualInfo.bvobId) return undefined;
-      if (actualInfo.sourceURL) {
-        throw new Error(`Cannot explicitly decode sourceURL-content as '${mediaInfo.mime}'`);
+      if ((actualInfo.asURL === true)
+          || (actualInfo.asURL === "data")
+          || ((actualInfo.asURL === "source") && !connection.isRemote())) {
+        return _getMediaURL(connection, actualInfo, mediaEntry, onErrorWInfo);
       }
-      const decoder = connection._decoderArray.findDecoder(actualInfo);
-      if (!decoder) {
-        throw new Error(`Can't find decoder for ${actualInfo.type}/${actualInfo.subtype}`);
-      }
-      const name = actualInfo.name ? `'${mediaInfo.name}'` : `unnamed media`;
-      return thenChainEagerly(
-        connection._prophet.decodeBvobContent(actualInfo.bvobId, decoder,
-              { mediaName: name, partitionName: connection.getName() }),
-          undefined,
-          onErrorWInfo);
+      return undefined;
     } catch (error) {
       error.mediaInfo = mediaInfo;
       throw error;
     }
   });
+  if (!upstreamOperation.entries) return ret;
+  return thenChainEagerly(
+      upstreamOperation.resolveWith(
+          connection.getUpstreamConnection().requestMediaContents(upstreamOperation.entries)),
+      () => ret,
+      onError);
+}
+
+function _getMediaContent (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
+    upstreamOperation: Object) {
+  const actualInfo = { ...mediaInfo };
+  const bvobInfo = connection._prophet._bvobLookup[actualInfo.bvobId || ""];
+  if (bvobInfo) {
+    actualInfo.buffer = bvobInfo.buffer || bvobInfo.pendingBuffer
+        || (bvobInfo.persistRefCount && connection._prophet.readBvobContent(actualInfo.bvobId));
+    const isArrayBufferType = !actualInfo.type
+        || (actualInfo.type === "application" && actualInfo.subtype === "octet-stream");
+    if (isArrayBufferType && actualInfo.buffer) return actualInfo.buffer;
+    if (!isArrayBufferType && !bvobInfo.decodings) bvobInfo.decodings = new WeakMap();
+    // Even if the decoding could be found from the cache we have to forward the call to
+    // upstream. Only Oracle knows about the decoders which acts as the weak map key for
+    // the cached decoding.
+    // Oracle will add the decoding into decodingCache if it didn't exist yet.
+    actualInfo.decodingCache = bvobInfo.decodings;
+  }
+  return addDelayedOperationEntry(upstreamOperation, actualInfo);
 }
 
 const maxDataURISourceBytes = 48000;
 
 function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
-    mediaEntry: MediaEntry, onError: Function): any {
+    onError: Function): any {
   // Only use cached in-memory nativeContent if its id matches the requested id.
-  const bvobId = (mediaInfo && mediaInfo.bvobId) || mediaEntry.mediaInfo.bvobId;
-  const bvobInfo = connection._prophet._bvobLookup[bvobId || ""];
+  const bvobInfo = connection._prophet._bvobLookup[mediaInfo.bvobId || ""];
   // Media's with sourceURL or too large/missing bvobs will be handled by Oracle
   if (!bvobInfo) {
     if (mediaInfo.asURL === "data") {
       throw new Error(`Cannot create a data URI for Media ${mediaInfo.name
-          }: can't find Bvob info for ${bvobId}`);
+          }: can't find Bvob info for ${mediaInfo.bvobId}`);
     }
     return undefined;
   }
@@ -261,59 +250,16 @@ function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaIn
   // Otherwise IndexedDB can't be accessed by the web pages directly, but horrible hacks must be
   // used like so:
   // https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
-  return thenChainEagerly(connection._prophet.readBvobContent(bvobId),
+  return thenChainEagerly(connection._prophet.readBvobContent(mediaInfo.bvobId),
       (buffer => {
         if (!buffer) {
           if (mediaInfo.asURL === "data") {
             throw new Error(`Cannot create a data URI for Media ${mediaInfo.name
-                }: can't read Bvob content for ${bvobId}`);
+                }: can't read Bvob content for ${mediaInfo.bvobId}`);
           }
         }
-        const { type, subtype } = mediaInfo || mediaEntry.mediaInfo;
+        const { type, subtype } = mediaInfo;
         return encodeDataURI(buffer, type, subtype);
-      })
-      , onError);
-}
-
-// Returns the requested media content immediately as a native object if it is in in-memory cache.
-// Otherwise if the media is in a local persisted cache returns a promise to a native object.
-// Otherwise is known in the partition returns undefined.
-// Otherwise throws an error.
-function _readMediaContent (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
-    mediaEntry: MediaEntry, onError: Function): any {
-  const bvobId = mediaInfo.bvobId;
-  if (!bvobId) return undefined;
-  return thenChainEagerly(connection._prophet.readBvobContent(bvobId),
-      (buffer) => (!buffer ? undefined : _nativeObjectFromBufferAndMediaInfo(buffer, mediaInfo)),
+      }),
       onError);
 }
-
-function _nativeObjectFromBufferAndMediaInfo (buffer: ArrayBuffer, mediaInfo?:
-    { type?: string, subtype?: string, name?: string
-  /* TODO(iridian): any other types we'd need for
-    https://html.spec.whatwg.org/multipage/parsing.html#determining-the-character-encoding ?
-  */ }) {
-  // TODO(iridian): This is a quick hack for common types: we should really obey the above practice.
-  if (!mediaInfo) return buffer;
-  if (_isTextType(mediaInfo)) {
-    const text = stringFromUTF8ArrayBuffer(buffer);
-    if (mediaInfo.subtype === "json") return JSON.parse(text);
-    return text;
-  }
-  return buffer;
-}
-
-function _isTextType ({ type, subtype }: { type: string, subtype: string }) {
-  if (type === "text") return true;
-  if (type === "application") return _applicationTextSubtypes[subtype];
-  return false;
-}
-
-const _applicationTextSubtypes: any = {
-  valaascript: true,
-  "x-javascript": true,
-  javascript: true,
-  ecmascript: true,
-  vsx: true,
-  jsx: true,
-};

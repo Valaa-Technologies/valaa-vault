@@ -4,6 +4,8 @@ import ValaaURI from "~/raem/ValaaURI";
 
 import Prophet, { ConnectOptions, PartitionConnection } from "~/prophet/api/Prophet";
 
+import DecoderArray from "~/prophet/Oracle/DecoderArray";
+
 import { dumpObject } from "~/tools";
 
 import OraclePartitionConnection from "./OraclePartitionConnection";
@@ -36,7 +38,13 @@ export default class Oracle extends Prophet {
   constructor ({ authorityNexus, ...rest }: Object) {
     super({ ...rest });
     this._authorityNexus = authorityNexus;
+    this._decoderArray = new DecoderArray({
+      name: `Decoders of ${this.getName()}`,
+      logger: this.getLogger(),
+    });
   }
+
+  getDecoderArray () { return this._decoderArray; }
 
   /**
    * Eagerly acquires and returns an existing full connection, otherwise

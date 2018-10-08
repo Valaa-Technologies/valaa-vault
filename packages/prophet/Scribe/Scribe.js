@@ -2,8 +2,6 @@
 
 import Prophet from "~/prophet/api/Prophet";
 
-import DecoderArray from "~/prophet/prophet/DecoderArray";
-
 import type MediaDecoder from "~/tools/MediaDecoder";
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 
@@ -12,14 +10,13 @@ import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 import ScribePartitionConnection from "./ScribePartitionConnection";
 
-import { _decodeBvobContent } from "./_contentOps";
 import {
   BvobInfo, _initializeSharedIndexedDB, _writeBvobBuffer, _readBvobBuffers,
   _adjustBvobBufferPersistRefCounts,
 } from "./_databaseOps";
 
 /**
- * Scribe handles all localhost-based Bvob and Media operations.
+ * Scribe handles all local event and content caching.
  * This includes in-memory caches, indexeddb storage (and eventually cross-browser-tab operations)
  * as well as possible service worker interactions.
  *
@@ -54,10 +51,6 @@ export default class Scribe extends Prophet {
     this._partitionCommandCounts = {};
     this._commandCountCallback = commandCountCallback;
     this._databaseAPI = databaseAPI;
-    this._decoderArray = new DecoderArray({
-      name: `Decoders of ${this.getName()}`,
-      logger: this.getLogger(),
-    });
   }
 
   // Idempotent: returns a promise until the initialization is complete. await on it.
@@ -70,8 +63,6 @@ export default class Scribe extends Prophet {
   }
 
   getDatabaseAPI (): DatabaseAPI { return this._databaseAPI; }
-  getDecoderArray () { return this._decoderArray; }
-
   // command ops
 
   setConnectionCommandCount (connectionName: Object, value: number = 1) {
@@ -120,23 +111,6 @@ export default class Scribe extends Prophet {
       return _readBvobBuffers(this, [bvobInfo])[0];
     } catch (error) {
       throw this.wrapErrorEvent(error, `readBvobContent('${bvobId}')`,
-          "\n\tbvobInfo:", ...dumpObject(bvobInfo));
-    }
-  }
-
-  decodeBvobContent (bvobId: string, decoder: MediaDecoder, contextInfo?: Object) {
-    const bvobInfo = this._bvobLookup[bvobId || ""];
-    let alreadyWrapped;
-    try {
-      if (!bvobInfo) throw new Error(`Cannot find Bvob info '${bvobId}'`);
-      return _decodeBvobContent(this, bvobInfo, decoder, contextInfo, onError.bind(this));
-    } catch (error) { throw onError.call(this, error); }
-    function onError (error) {
-      if (alreadyWrapped) return error;
-      alreadyWrapped = true;
-      return this.wrapErrorEvent(error, `decodeBvobContent('${bvobId}', ${decoder.getName()})`,
-          "\n\tdecoder:", ...dumpObject(decoder),
-          "\n\tcontext info:", ...dumpObject(contextInfo),
           "\n\tbvobInfo:", ...dumpObject(bvobInfo));
     }
   }

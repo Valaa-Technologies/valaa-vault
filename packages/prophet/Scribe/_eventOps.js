@@ -4,8 +4,8 @@ import Command, { isTransactedLike, UniversalEvent } from "~/raem/command";
 import { VRef, getRawIdFrom } from "~/raem/ValaaReference";
 
 import type {
-  MediaInfo, NarrateOptions, ChronicleOptions, PartitionConnection, ReceiveEvent,
-  RetrieveMediaContent,
+  MediaInfo, NarrateOptions, ChronicleOptions, ChronicleEventResult, PartitionConnection,
+  ReceiveEvent, RetrieveMediaBuffer,
 } from "~/prophet/api/Prophet";
 
 import { dumpObject, invariantify, isPromise, thenChainEagerly, vdon } from "~/tools";
@@ -53,19 +53,17 @@ export function _chronicleEventLog (connection: ScribePartitionConnection,
       connection.getUpstreamConnection().getSyncedConnection(),
       (syncedConnection) => syncedConnection.chronicleEventLog(eventLog, options));
   const commandWriteProcess = !connection.isTransient() && connection._writeCommands(eventLog);
-  const retrieveMediaContent = options.retrieveMediaContent
+  const retrieveMediaBuffer = options.retrieveMediaBuffer
       || _throwOnMediaContentRetrieveRequest.bind(null, connection);
   const mediaEntryUpdates = {};
   const mediaUpdateProcess = Promise.all(eventLog.map(commandEvent => thenChainEagerly(
-      _preprocessActionPrerequisites(connection, commandEvent, retrieveMediaContent), [
+      _preprocessActionPrerequisites(connection, commandEvent, retrieveMediaBuffer), [
         (preOps) => preOps.length && Promise.all(preOps.map(preOp => preOp({ retryTimes: 1 }))),
         preOpResults => {
           (preOpResults || []).forEach(results => (mediaEntryUpdates[results.mediaId] = results));
         },
       ]
-  ))).then(() => {
-    connection._updateMediaEntries(Object.values(mediaEntryUpdates));
-  });
+  ))).then(() => connection._updateMediaEntries(Object.values(mediaEntryUpdates)));
   /*
   if (commandWriteProcess) {
     Promise.resolve(commandWriteProcess).then(writeResults => {
@@ -192,13 +190,13 @@ async function _narrateUpstreamEventLog (connection: ScribePartitionConnection,
   const upstreamResults = await upstream.narrateEventLog({
     subscribe,
     firstEventId,
-    receiveEvent (event: UniversalEvent, retrieveMediaContent: RetrieveMediaContent) {
+    receiveEvent (event: UniversalEvent, retrieveMediaBuffer: RetrieveMediaBuffer) {
       let myPartitionInfo;
       try {
         const lastAuthorizedEventId = connection.getFirstUnusedTruthEventId() - 1;
         if (event.eventId <= lastAuthorizedEventId) return event;
         const preOps = _preprocessActionPrerequisites(connection, event,
-            retrieveMediaContent || PartitionConnection.retrieveMediaContent.bind(connection));
+            retrieveMediaBuffer || PartitionConnection.readMediaContent.bind(connection));
         // FIXME(iridian): This code path is unused. Should be used by revelation chronicleEventLog
         //    || _throwOnMediaContentRetrieveRequest.bind(null, connection)));
         const preOpsExecution = preOps.length && Promise.all(preOps.map(
@@ -261,11 +259,11 @@ async function _narrateUpstreamEventLog (connection: ScribePartitionConnection,
 */
 
 export function _throwOnMediaContentRetrieveRequest (connection: ScribePartitionConnection,
-    mediaId: VRef, mediaInfo: MediaInfo) {
+    mediaInfo: MediaInfo) {
   throw connection.wrapErrorEvent(
       new Error(`Cannot retrieve media '${mediaInfo.name}' content through partition '${
         connection.getName()}'`),
-      "retrieveMediaContent",
+      "retrieveMediaBuffer",
       "\n\tdata not found in local bvob cache and no remote content retriever is specified",
       ...(connection.isLocal() || connection.isTransient()
           ? ["\n\tlocal/transient partitions don't have remote storage backing"] : []),
@@ -273,11 +271,11 @@ export function _throwOnMediaContentRetrieveRequest (connection: ScribePartition
 }
 
 export function _preprocessActionPrerequisites (connection: ScribePartitionConnection,
-    event: Object, retrieveMediaContent: ?RetrieveMediaContent, rootEvent: Object = event) {
+    event: Object, retrieveMediaBuffer: ?RetrieveMediaBuffer, rootEvent: Object = event) {
   if (isTransactedLike(event)) {
     return [].concat(
         ...event.actions
-        .map(action => _preprocessActionPrerequisites(connection, action, retrieveMediaContent,
+        .map(action => _preprocessActionPrerequisites(connection, action, retrieveMediaBuffer,
             rootEvent))
         .filter(notFalsy => notFalsy));
   } else if (event.typeName === "MediaType") {
@@ -288,7 +286,7 @@ export function _preprocessActionPrerequisites (connection: ScribePartitionConne
       if (newName) connection.setName(`'${newName}'/${connection.getPartitionURI().toString()}`);
     }
     if (event.typeName === "Media") {
-      return connection._initiateMediaRetrievals(event, retrieveMediaContent, rootEvent);
+      return connection._initiateMediaRetrievals(event, retrieveMediaBuffer, rootEvent);
     }
   }
   return [];

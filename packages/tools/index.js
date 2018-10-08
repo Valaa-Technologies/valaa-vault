@@ -6,7 +6,6 @@ import * as mediaDecoders from "./mediaDecoders";
 
 export default exportValaaPlugin({ name: "@valos/tools", mediaDecoders });
 
-
 export { default as valaaHash } from "./id/valaaHash";
 export { default as valaaUUID } from "./id/valaaUUID";
 
@@ -18,6 +17,8 @@ export const contentIdFromNativeStream = require("./id/contentId").contentIdFrom
 export const createId = require("./id/createId").default;
 
 export const derivedId = require("./id/derivedId").default;
+
+export { default as addDelayedOperationEntry } from "./addDelayedOperationEntry";
 
 export { arrayFromAny, iterableFromAny } from "./sequenceFromAny";
 

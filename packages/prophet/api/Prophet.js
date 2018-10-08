@@ -1,20 +1,14 @@
 // @flow
 
-import type Command from "~/raem/command";
+import type { UniversalEvent } from "~/raem/command";
 import type ValaaURI from "~/raem/ValaaURI";
 import { VRef } from "~/raem/ValaaReference";
 
 import Follower from "~/prophet/api/Follower";
-import type Prophecy from "~/prophet/api/Prophecy";
 import type PartitionConnection from "~/prophet/api/PartitionConnection";
 
 import { LogEventGenerator } from "~/tools/Logger";
 import thenChainEagerly from "~/tools/thenChainEagerly";
-
-export type ClaimResult = {
-  prophecy: Prophecy;
-  getFinalEvent: () => Promise<Command>;
-}
 
 export type EventData = {
   type: "CREATED" | "MODIFIED" | "FIELDS_SET" | "ADDED_TO" | "REMOVED_FROM" | "REPLACED_WITHIN"
@@ -69,6 +63,7 @@ export type NarrateOptions = {
 };
 
 export type ChronicleOptions = NarrateOptions & {
+  authorized?: boolean,          // If true the chronicled events are already authorized
   retrieveMediaBuffer?: RetrieveMediaBuffer,
 };
 
@@ -90,9 +85,10 @@ export default class Prophet extends LogEventGenerator {
 
   constructor ({ upstream, ...rest }: Object = {}) {
     super({ ...rest });
-    this._upstream = upstream;
     this._followers = new Map();
     this._connections = {};
+    this.setUpstream(upstream);
+    this._upstream = upstream;
   }
 
   addFollower (follower: Follower): Follower {
@@ -101,18 +97,13 @@ export default class Prophet extends LogEventGenerator {
     return discourse;
   }
 
-  _createDiscourse (follower: Follower) {
-    return follower;
+  setUpstream (upstream) {
+    this._upstream = upstream;
+    if (upstream) upstream.addFollower(this);
   }
 
-  /**
-   * claim - Sends a command upstream or rejects it immediately.
-   *
-   * @param  {type} command                             description
-   * @returns {ClaimResult}                             description
-   */
-  claim (command: Command, options: { timed?: Object } = {}): ClaimResult {
-    return this._upstream.claim(command, options);
+  _createDiscourse (follower: Follower) {
+    return follower;
   }
 
   _confirmTruthToAllFollowers (truthEvent: Object, purgedCommands?: Array<Object>) {

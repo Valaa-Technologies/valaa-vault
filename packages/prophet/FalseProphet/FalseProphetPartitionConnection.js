@@ -24,9 +24,87 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
 
   isFrozen (): boolean { return !!this._isFrozen; }
 
+  narrateEventLog (options: NarrateOptions = {}): Promise<Object> {
+    return super.narrateEventLog({
+      ...options,
+      receiveEvent: (truthEvent: UniversalEvent) => {
+        const ret = this.receiveEvent(truthEvent);
+        return !options.receiveEvent ? ret : options.receiveEvent(truthEvent);
+      },
+      receiveCommand: (commandEvent: UniversalEvent) => {
+        const ret = this.receiveCommand(commandEvent);
+        return !options.receiveCommand ? ret : options.receiveCommand(commandEvent);
+      },
+    });
+  }
+
+  chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
+      Promise<{ eventResults: ChronicleEventResult[] }> {
+    if (!eventLog || !eventLog.length) return { eventResults: eventLog };
+    if (!eventLog[0].eventId) {
+      eventLog.forEach((event, index) => {
+        event.eventId = this._firstNonAuthorizedCommandId + this._nonAuthorizedCommands.length
+            + index;
+      });
+      if (options.reduced === true) this._addNonAuthorizedCommands(eventLog);
+    }
+    return super.chronicleEventLog(eventLog, {
+      ...options,
+      receiveEvent: this.receiveEvent,
+      receiveCommand: this.receiveCommand,
+    });
+  }
 
   receiveEvent (truthEvent: UniversalEvent) {
+    const nonAuthorizedIndex = truthEvent.eventId - this._firstNonAuthorizedCommandId;
+    if (nonAuthorizedIndex < 0) return;
+    if (nonAuthorizedIndex < this._nonAuthorizedCommands.length) {
+      // const purgedCommands = await _confirmOrPurgeQueuedCommands(connection, lastNewEvent);
+      if (truthEvent.commandId === this._nonAuthorizedCommands[nonAuthorizedIndex].commandId) {
+        // authorized
+        this._firstNonAuthorizedCommandId += nonAuthorizedIndex;
+        this._nonAuthorizedCommands.splice(0, nonAuthorizedIndex);
+      } else {
+        // purge
       }
+    } else {
+      const eventIndex = nonAuthorizedIndex - this._nonAuthorizedCommands.length;
+      this._eventsPendingSequencing[eventIndex] = truthEvent;
+    }
+    if (!this._nonAuthorizedCommands.length) {
+      while (this._eventsPendingSequencing[0]) {
+        ++this._firstNonAuthorizedCommandId;
+        this._prophet._fabricateProphecy(this._eventsPendingSequencing.shift(), "truth");
+      }
+    }
+  }
+
+  receiveCommand (commandEvent: UniversalEvent) {
+    try {
+      const nonAuthorizedIndex = commandEvent.eventId - this._firstNonAuthorizedCommandId;
+      if (nonAuthorizedIndex < 0) {
+        throw new Error("Can't receive commands with eventId before authorized head")
+      }
+      if (nonAuthorizedIndex < this._nonAuthorizedCommands.length) return commandEvent;
+      if (this._eventsPendingSequencing.length) {
+        throw new Error(
+            "Can't receive commands if there are out-of-order events pending sequencing");
+      }
+      if (nonAuthorizedIndex !== this._nonAuthorizedCommands.length) {
+        throw new Error("Can only receive commands to the end of non-authorized commands queue");
+      }
+      this._addNonAuthorizedCommands([commandEvent]);
+      this._prophet._fabricateProphecy(commandEvent, "reclaim");
+      return commandEvent;
+    } catch (error) {
+      throw this.wrapErrorEvent(error, `receiveCommand(${commandEvent.eventId}, ${
+              commandEvent.commandId})`,
+          "\n\tcommandEvent:", ...dumpObject(commandEvent),
+          "\n\tnonAuthorizedCommands:", ...dumpObject([...this._nonAuthorizedCommands]),
+          "\n\teventsPendingSequencing:", ...dumpObject([...this._eventsPendingSequencing]),
+          "\n\tthis:", ...dumpObject(this)
+      );
+    }
   }
 
   _addNonAuthorizedCommands (eventLog: UniversalEvent[]) {

@@ -1,6 +1,6 @@
 // @flow
 
-import type Command from "~/raem/command";
+import type Command, { isTransactedLike } from "~/raem/command";
 import { getActionFromPassage } from "~/raem/redux/Bard";
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
 import { createPartitionURI } from "~/raem/ValaaURI";
@@ -11,6 +11,7 @@ import { dumpObject, outputError, thenChainEagerly } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
 import { _rejectLastProphecyAsHeresy } from "./_prophecyOps";
+import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
 // Handle a restricted command claim towards upstream.
 export function _claim (falseProphet: FalseProphet, restrictedCommand: Command,
@@ -24,7 +25,7 @@ export function _claim (falseProphet: FalseProphet, restrictedCommand: Command,
     try {
       const operation = {};
       _extractSubOpsFromClaim(falseProphet, prophecy.story, operation);
-      _initiateSubOpConnectionValidation(falseProphet, operation.orderedSubOps);
+      _initiateSubOpConnectionValidation(falseProphet, operation.subOperations);
       operation.finalEvent = _processClaimSubOps(falseProphet, operation);
       getBackendFinalEvent = () => operation.finalEvent;
     } catch (error) {
@@ -81,94 +82,139 @@ export function _repeatClaim (falseProphet: FalseProphet, universalCommand: Comm
 function _extractSubOpsFromClaim (falseProphet: FalseProphet, claim: Command,
     operation: Object) {
   operation.command = getActionFromPassage(claim);
-  operation.orderedSubOps = [];
+  operation.subOperations = [];
   const missingConnections = [];
   if (!claim.partitions) {
     throw new Error("command is missing partition information");
   }
+  const remotes = [];
+  const locals = [];
+  const memorys = [];
   Object.keys(claim.partitions).forEach((partitionURIString) => {
     const connection = falseProphet._connections[partitionURIString];
     if (!connection) {
       missingConnections.push(createPartitionURI(partitionURIString));
       return;
     }
-    operation.orderedSubOps.push({
+    (connection.isMemory() ? memorys : connection.isLocal() ? locals : remotes).push({
       connection,
-      partitionInfo: claim.partitions[partitionURIString],
-      commandEvent: {}, // FIXME(iridian): Command event splitting implementation missing.
+      commandEvent: _extractSubCommand(falseProphet, claim, partitionURIString, connection),
     });
   });
+  if (remotes.length) operation.subOperations.push({ name: "remotes", partitions: remotes });
+  if (locals.length) operation.subOperations.push({ name: "locals", partitions: locals });
+  if (memorys.length) operation.subOperations.push({ name: "memory", partitions: memorys });
   if (missingConnections.length) {
     throw new MissingPartitionConnectionsError(`Missing active partition connections: '${
         missingConnections.map(c => c.toString()).join("', '")}'`, missingConnections);
   }
 }
 
-async function _initiateSubOpConnectionValidation (falseProphet: FalseProphet, operation: Object) {
-  operation.orderedSubOps.forEach(subOp => {
-    subOp.connection = thenChainEagerly(subOp.connection.getSyncedConnection(),
-      (syncedConnection) => {
-        if (subOp.connection.isFrozen()) {
-          throw new Error(`Trying to claim a command to a frozen partition ${
-              subOp.connection.getName()}`);
-        }
-        // Perform other partition validation
-        // TODO(iridian): extract partition content
-        return (subOp.connection = syncedConnection);
-      },
-    );
-  });
-}
-
-async function _processClaimSubOps (falseProphet: FalseProphet, operation: Object) {
+function _extractSubCommand (falseProphet: FalseProphet, claim: Command, partitionURIString: string,
+    connection: FalseProphetPartitionConnection) {
   let ret;
   try {
-    falseProphet._claimOperationQueue.push(operation);
-    try {
-      // wait for connections to sync and validate their post-sync
-      // conditions (started in _initiateSubOpConnectionValidation)
-      await Promise.all(operation.orderedSubOps.map(subOp => subOp.connection));
-    } catch (error) {
-      throw falseProphet.wrapErrorEvent(error, "claim.subOp.connection");
+    if (!(claim.partitions || {})[partitionURIString]) return undefined;
+    ret = { ...claim };
+    delete ret.partitions;
+    if (!ret.version) {
+      // TODO(iridian): Fix @valos/raem so that it doesn't generate these in the first place.
+      delete ret.commandId;
     }
-
-    // Persist the command and add refs to all associated event bvobs, so that the bvobs are not
-    // garbage collected on browser refresh, so that they can be reuploaded if their upload didn't
-    // finish before refresh. Because maybe the client is offline.
-    // TODO(iridian): Implement.
-
-    // Wait for remote bvob persists to complete.
-    // TODO(iridian): Implement.
-    // await Promise.all(operation.authorityPersistProcesses);
-
-    // Maybe determine eventId's beforehand?
-
-    // Get eventId and scribe persist finalizer for each partition
-    for (const subOp of operation.orderedSubOps) {
-      try {
-        if (subOp.connection.isFrozen()) {
-          throw new Error(`Trying to claim a command against a frozen partition ${
-            subOp.connection.getName()}`);
-        }
-        const { eventId } = await subOp.connection.chronicleEventLog([subOp.commandEvent])[0];
-        subOp.eventId = eventId;
-      } catch (error) {
-        throw falseProphet.wrapErrorEvent(error,
-            `claim.process.subOp["${subOp.connection.getName()}"].chonicleEventLog`,
-            "\n\tsubOp.commandEvent", ...dumpObject(subOp.commandEvent),
-            "\n\tsubOp:", ...dumpObject(subOp),
-        );
+    if (Object.keys(claim.partitions).length === 1) {
+      if (!isTransactedLike(claim)) {
+        throw new Error("Non-TRANSACTED-like multipartition commands are not supported");
+      }
+      ret.actions = claim.actions.map(action =>
+          _extractSubCommand(falseProphet, action, partitionURIString, connection))
+              .filter(notFalsy => notFalsy);
+      if (!ret.actions.length) {
+        throw new Error(`INTERNAL ERROR: No TRANSACTED-like.actions found for current partition ${
+            ""}in a multi-partition TRANSACTED-like command`);
       }
     }
     return ret;
   } catch (error) {
-    throw falseProphet.wrapErrorEvent(error, "claim._processClaimSubOps",
-        "\n\t(command, options):", ...dumpObject(operation.command),
-        "\n\toperation:", ...dumpObject(operation),
-        "\n\tthis:", falseProphet);
-  } finally {
-    operation.finalEvent = ret;
+    throw falseProphet.wrapErrorEvent(`_extractSubCommand(${connection.getName()})`,
+        "\n\tclaim:", ...dumpObject(claim),
+        "\n\tcurrent ret:", ...dumpObject(ret),
+    );
   }
+}
+
+async function _initiateSubOpConnectionValidation (falseProphet: FalseProphet, operation: Object) {
+  operation.subOperations.forEach(subOperation =>
+    subOperation.partitions.forEach(partition => {
+      partition.connection = thenChainEagerly(partition.connection.getSyncedConnection(),
+        (syncedConnection) => {
+          if (partition.connection.isFrozen()) {
+            throw new Error(`Trying to claim a command to a frozen partition ${
+              partition.connection.getName()}`);
+          }
+          // Perform other partition validation
+          // TODO(iridian): extract partition content
+          return (partition.connection = syncedConnection);
+        },
+      );
+    })
+  );
+}
+
+async function _processClaimSubOps (falseProphet: FalseProphet, operation: Object) {
+  let ret;
+  falseProphet._claimOperationQueue.push(operation);
+  for (const subOperation of operation.subOperations) {
+    try {
+      await _processClaimSubOp(falseProphet, subOperation);
+    } catch (error) {
+      throw falseProphet.wrapErrorEvent(error, "claim._processClaimSubOps",
+          "\n\toperation:", ...dumpObject(operation),
+          "\n\tsubOperation:", ...dumpObject(subOperation),
+          "\n\tthis:", falseProphet);
+    } finally {
+      operation.finalEvent = ret;
+    }
+  }
+}
+
+async function _processClaimSubOp (falseProphet: FalseProphet, subOperation: Object) {
+  try {
+    // wait for connections to sync and validate their post-sync
+    // conditions (started in _initiateSubOpConnectionValidation)
+    await Promise.all(subOperation.partitions.map(partition => partition.connection));
+  } catch (error) {
+    throw falseProphet.wrapErrorEvent(error, "claim.subOp.connection");
+  }
+
+  // Persist the command and add refs to all associated event bvobs.
+  // This is necessary for command reattempts so that the bvobs are not
+  // garbage collected on browser refresh. Otherwise they can't be
+  // reuploaded if their upload didn't finish before refresh.
+  // TODO(iridian): Implement.
+
+  // Wait for remote bvob persists to complete.
+  // TODO(iridian): Implement.
+  // await Promise.all(operation.authorityPersistProcesses);
+
+  // Maybe determine eventId's beforehand?
+
+  // Get eventId and scribe persist finalizer for each partition
+  const partitionAuthorizations = [];
+  for (const { connection, commandEvent } of subOperation.partitions) {
+    let eventChronichling;
+    try {
+      eventChronichling = (await connection.chronicleEventLog(
+          [commandEvent], { reduced: true }))[0];
+      partitionAuthorizations.push(eventChronichling.getAuthorizedEvent());
+    } catch (error) {
+      throw falseProphet.wrapErrorEvent(error,
+          `claim.process.subOp["${connection.getName()}"].chonicleEventLog`,
+          "\n\tcommandEvent:", ...dumpObject(commandEvent),
+          "\n\tevent chronichling:", ...dumpObject(eventChronichling),
+      );
+    }
+  }
+  await Promise.all(partitionAuthorizations);
 }
 
 /*

@@ -19,6 +19,12 @@ import { _fabricateProphecy, _revealProphecyToAllFollowers } from "./_prophecyOp
 import { _receiveTruth, _reviewProphecy } from "./_reformationOps";
 import { _claim, _repeatClaim } from "./_claimOps";
 
+
+export type ClaimResult = {
+  prophecy: Prophecy;
+  getFinalEvent: () => Promise<Command>;
+}
+
 /**
  * FalseProphet is non-authoritative (cache) in-memory denormalized store as well as a two-way proxy
  * to backend event streams.
@@ -54,11 +60,6 @@ export default class FalseProphet extends Prophet {
     this._partitionCommandCounts = {};
     this._totalCommandCount = 0;
     if (upstream) this.setUpstream(upstream);
-  }
-
-  setUpstream (upstream) {
-    this._upstream = upstream;
-    upstream.addFollower(this);
   }
 
   debugId () { return `${this.constructor.name}(${this.corpus.debugId()})`; }

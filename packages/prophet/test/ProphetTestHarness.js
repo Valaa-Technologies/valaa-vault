@@ -107,11 +107,6 @@ export function createScribe (commandCountCallback: any) {
     commandCountCallback,
   });
   ret.initialize();
-  for (const Decoder: any of Object.values({ ...ToolsDecoders, ...ValaaScriptDecoders })) {
-    if (Decoder.mediaTypes) {
-      ret.getDecoderArray().addDecoder(new Decoder({ logger: ret.getLogger() }));
-    }
-  }
   return ret;
 }
 
@@ -134,11 +129,17 @@ export function createOracle (scribe: Scribe) {
   authorityNexus.addSchemeModule(createValaaTransientScheme({ logger: scribe.getLogger() }));
   authorityNexus.addSchemeModule(createValaaMemoryScheme({ logger: scribe.getLogger() }));
   authorityNexus.addSchemeModule(createValaaTestScheme({ logger: scribe.getLogger() }));
-  return new Oracle({
+  const ret = new Oracle({
     name: "Test Oracle",
     authorityNexus,
     scribe,
   });
+  for (const Decoder: any of Object.values({ ...ToolsDecoders, ...ValaaScriptDecoders })) {
+    if (Decoder.mediaTypes) {
+      ret.getDecoderArray().addDecoder(new Decoder({ logger: ret.getLogger() }));
+    }
+  }
+  return ret;
 }
 
 export function clearOracleScribeDatabases (oracle: Oracle) {

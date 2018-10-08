@@ -15,7 +15,7 @@ export async function _narrateEventLog (connection: OraclePartitionConnection,
   const collection = _createReceiveTruthCollection(connection, {
     name: options.name || "authorityNarration",
     receiveEvent: options.receiveEvent || connection._receiveEvent,
-    localRetrieveMediaContent: options.retrieveMediaContent,
+    localRetrieveMediaContent: options.retrieveMediaBuffer,
     remoteRequestMediaContents: connection.requestMediaContents.bind(connection),
   });
   Object.assign(ret, await upstreamConnection.narrateEventLog({
@@ -40,7 +40,7 @@ export async function _chronicleEventLog (connection: OraclePartitionConnection,
   const collection = _createReceiveTruthCollection(connection, {
     name: options.name || "chronicleEventLog",
     receiveEvent: options.receiveEvent || connection._receiveEvent,
-    localRetrieveMediaContent: options.retrieveMediaContent,
+    localRetrieveMediaContent: options.retrieveMediaBuffer,
     remoteRequestMediaContents: connection.requestMediaContents.bind(connection),
   });
   const explicitEventLogNarrations = [];
@@ -83,8 +83,8 @@ const _maxOnConnectRetrievalRetries = 3;
  * one-by-one.
  *
  * @param {string}   collectionName
- * @param {Object}   { retrieveMediaContent, requestMediaContents }
- * @returns {Object} { receiveTruth, finalize, retrieveMediaContent, analyzeRetrievals }
+ * @param {Object}   { retrieveMediaBuffer, requestMediaContents }
+ * @returns {Object} { receiveTruth, finalize, retrieveMediaBuffer, analyzeRetrievals }
  * @memberof OraclePartitionConnection
  */
 export function _createReceiveTruthCollection (connection: OraclePartitionConnection,
@@ -120,7 +120,7 @@ export function _createReceiveTruthCollection (connection: OraclePartitionConnec
         delete truthEvent.partitions;
         truthEvent.eventId = partitionInfo.eventId;
       }
-      return receiveEvent(truthEvent, collection.retrieveMediaContent);
+      return receiveEvent(truthEvent, collection.retrieveMediaBuffer);
     },
     currentBatch: createBatch(),
   };
@@ -131,7 +131,7 @@ export function _createReceiveTruthCollection (connection: OraclePartitionConnec
     ret.pendingBatchContents = new Promise((resolve) => { ret.resolveContents = resolve; });
     ret.retrieveMediaForQueueEntry = (retrieval) => (remoteRequestMediaContents
         ? ret.pendingBatchContents.then(() => retrieval.pendingBatchEntryContent)
-        : localRetrieveMediaContent(retrieval.mediaInfo.mediaId, retrieval.mediaInfo));
+        : localRetrieveMediaContent(retrieval.mediaInfo));
     return ret;
   }
 
@@ -172,11 +172,12 @@ export function _createReceiveTruthCollection (connection: OraclePartitionConnec
     }
   };
 
-  collection.retrieveMediaContent = (mediaId: VRef, mediaInfo: Object) => {
+  collection.retrieveMediaBuffer = (mediaInfo: Object) => {
+    const mediaRawId = mediaInfo.mediaId;
     // This is the heart of the monster which will beat until it has received content for a
     // requested Media.
-    const ofMedia = collection.retrievals[mediaId.rawId()]
-        || (collection.retrievals[mediaId.rawId()] = { history: [], ongoingRetrieval: undefined });
+    const ofMedia = collection.retrievals[mediaRawId]
+        || (collection.retrievals[mediaRawId] = { history: [], ongoingRetrieval: undefined });
     const thisRetrieval = {
       mediaInfo, pendingContent: undefined, content: undefined,
       retries: 0, error: undefined, skipped: false,
@@ -203,7 +204,7 @@ export function _createReceiveTruthCollection (connection: OraclePartitionConnec
               if (thisRetrieval !== ofMedia.history[ofMedia.history.length - 1]) break;
               thisRetrieval.pendingContent = batch
                   ? batch.retrieveMediaForQueueEntry(thisRetrieval)
-                  : localRetrieveMediaContent(mediaId, mediaInfo);
+                  : localRetrieveMediaContent(mediaInfo);
               ofMedia.ongoingRetrieval = thisRetrieval;
             } finally {
               if (retrieveStarted) retrieveStarted({ retrieval: thisRetrieval });
@@ -211,7 +212,7 @@ export function _createReceiveTruthCollection (connection: OraclePartitionConnec
             return (thisRetrieval.content = await thisRetrieval.pendingContent);
           } catch (error) {
             ++thisRetrieval.retries;
-            const description = `connect/retrieveMediaContent(${
+            const description = `connect/retrieveMediaBuffer(${
                 mediaInfo.name}), ${thisRetrieval.retries}. attempt`;
             if (thisRetrieval.retries <= _maxOnConnectRetrievalRetries) {
               connection.warnEvent(`${description} retrying after ignoring an exception: ${
@@ -219,7 +220,7 @@ export function _createReceiveTruthCollection (connection: OraclePartitionConnec
             } else {
               thisRetrieval.error = connection.wrapErrorEvent(error, description,
                   "\n\tretrievals:", ...dumpObject(collection.retrievals),
-                  "\n\tmediaId:", mediaId.rawId(),
+                  "\n\tmediaRawId:", mediaRawId,
                   "\n\tmediaInfo:", ...dumpObject(mediaInfo),
                   "\n\tmediaRetrievals:", ...dumpObject(ofMedia),
                   "\n\tthisRetrieval:", ...dumpObject(thisRetrieval),

@@ -4,9 +4,10 @@ import type { UniversalEvent } from "~/raem/command";
 import { VRef, obtainVRef } from "~/raem/ValaaReference";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import type { MediaInfo, NarrateOptions, ChronicleOptions, ConnectOptions, RetrieveMediaContent }
-    from "~/prophet/api/Prophet";
-import DecoderArray from "~/prophet/prophet/DecoderArray";
+import type {
+  MediaInfo, NarrateOptions, ChronicleOptions, ChronicleEventResult, ConnectOptions,
+  RetrieveMediaBuffer,
+} from "~/prophet/api/Prophet";
 
 import { dumpObject, thenChainEagerly } from "~/tools";
 
@@ -51,10 +52,6 @@ export default class ScribePartitionConnection extends PartitionConnection {
     this._eventLogInfo = { firstEventId: 0, lastEventId: -1 };
     this._commandQueueInfo = { firstEventId: 0, lastEventId: -1, commandIds: [] };
     this._isFrozen = false;
-    this._decoderArray = new DecoderArray({
-      name: `Decoders of ${this.getName()}`,
-      fallbackArray: this.getProphet().getDecoderArray(),
-    });
   }
 
   connect (options: ConnectOptions) {
@@ -135,12 +132,12 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  _initiateMediaRetrievals (mediaEvent: Object, retrieveMediaContent: RetrieveMediaContent,
+  _initiateMediaRetrievals (mediaEvent: Object, retrieveMediaBuffer: RetrieveMediaBuffer,
       rootEvent: Object) {
     const mediaId = obtainVRef(mediaEvent.id);
     let pendingEntry = this._pendingMediaLookup[mediaId.rawId()];
     try {
-      return _initiateMediaRetrievals(this, mediaEvent, retrieveMediaContent, rootEvent, mediaId,
+      return _initiateMediaRetrievals(this, mediaEvent, retrieveMediaBuffer, rootEvent, mediaId,
           pendingEntry);
     } catch (error) {
       if (!pendingEntry) pendingEntry = this._pendingMediaLookup[mediaId.rawId()];

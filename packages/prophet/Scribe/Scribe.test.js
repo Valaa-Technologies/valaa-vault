@@ -28,7 +28,9 @@ describe("Scribe", () => {
     ],
   });
 
-  it("Keeps track of the count of commands executed", async () => {
+  xit("Keeps track of the count of commands executed", async () => {
+    // TODO(iridian): Move this test false prophet. Scribe no longer
+    // tracks the pending commands.
     let commandsCounted = 0;
     const commandCountCallback = (count) => {
       commandsCounted = count;
@@ -43,11 +45,11 @@ describe("Scribe", () => {
     const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
     expect(commandsCounted).toBe(0);
 
-    await connection.claimCommandEvent(simpleCommand);
+    await connection.chronicleEventLog([simpleCommand])[0];
     expect(commandsCounted).toBe(1);
 
     // A transaction counts as one command
-    await connection.claimCommandEvent(simpleTransaction);
+    await connection.chronicleEventLog([simpleTransaction])[0];
     expect(commandsCounted).toBe(2);
   });
 
@@ -60,13 +62,13 @@ describe("Scribe", () => {
     const database = await openDB(URI);
 
     // Adds an entity and checks that it has been stored
-    let claimResult = await connection.claimCommandEvent(simpleCommand);
+    let claimResult = await connection.chronicleEventLog([simpleCommand])[0];
     await claimResult.finalizeLocal();
     await expectStoredInDB(simpleCommand, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
 
     // Runs a transaction and confirms that it has been stored
-    claimResult = await connection.claimCommandEvent(simpleTransaction);
+    claimResult = await connection.chronicleEventLog([simpleTransaction])[0];
     await claimResult.finalizeLocal();
     await expectStoredInDB(simpleTransaction, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
@@ -135,10 +137,10 @@ describe("Scribe", () => {
 
     const firstConnection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
 
-    let claimResult = firstConnection.claimCommandEvent(simpleCommand);
+    let claimResult = firstConnection.chronicleEventLog([simpleCommand])[0];
     await claimResult.finalizeLocal();
 
-    claimResult = firstConnection.claimCommandEvent(simpleTransaction);
+    claimResult = firstConnection.chronicleEventLog([simpleTransaction])[0];
     await claimResult.finalizeLocal();
 
     const firstUnusedCommandEventId = firstConnection.getFirstUnusedCommandEventId();

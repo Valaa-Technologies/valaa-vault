@@ -415,7 +415,7 @@ export default class InspireGateway extends LogEventGenerator {
         throw new Error("commandQueue revelation not implemented yet");
       }
       const latestMediaInfos = await logs.latestMediaInfos;
-      await connection.chronicleEventLog(eventLog, {
+      const chronicling = await connection.chronicleEventLog(eventLog, {
         name: `prologue event log for '${connection.getName()}'`,
         firstEventId: firstUnusedEventId,
         retrieveMediaBuffer (mediaInfo: Object) {
@@ -432,6 +432,7 @@ export default class InspireGateway extends LogEventGenerator {
               }" during prologue narration, with bvob id "${mediaInfo.bvobId}" `);
         }
       });
+      await Promise.all(chronicling.eventResults.map(result => result.getLocallyPersistedEvent()));
     }
     // Initiate remote narration.
     const remoteNarration = connection.narrateEventLog();

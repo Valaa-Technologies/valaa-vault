@@ -3,7 +3,9 @@
 import type { UniversalEvent } from "~/raem/command";
 import { VRef } from "~/raem/ValaaReference";
 
-import type { NarrateOptions, ChronicleOptions, ReceiveEvent } from "~/prophet/api/Prophet";
+import type {
+  NarrateOptions, ChronicleOptions, ChronicleEventResult, ReceiveEvent,
+} from "~/prophet/api/Prophet";
 
 import { dumpObject, invariantifyNumber } from "~/tools";
 
@@ -29,8 +31,10 @@ export async function _narrateEventLog (connection: OraclePartitionConnection,
 }
 
 export async function _chronicleEventLog (connection: OraclePartitionConnection,
-    eventLog: UniversalEvent[], options: ChronicleOptions, ret: Object) {
+    eventLog: UniversalEvent[], options: ChronicleOptions, ret: Object,
+): Promise<{ eventResults: ChronicleEventResult[] }>  {
   let currentEventId = options.firstEventId;
+  // FIXME(iridian): Not-even-broken. Completely unimplemented.
 
   const isPastLastEvent = (candidateEventId) =>
       (typeof candidateEventId !== "undefined") &&
@@ -60,7 +64,10 @@ export async function _chronicleEventLog (connection: OraclePartitionConnection,
     currentEventId = eventId + 1;
   }
   await collection.finalize(explicitEventLogNarrations);
-  ret.explicitEventLog = await Promise.all(explicitEventLogNarrations);
+  ret.eventResults = (await Promise.all(explicitEventLogNarrations))
+      .map(event => ({
+        event,
+      }));
   ret.mediaRetrievalStatus = collection.analyzeRetrievals();
   return ret;
 }

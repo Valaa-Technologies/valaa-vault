@@ -72,6 +72,12 @@ export type ChronicleOptions = NarrateOptions & {
   retrieveMediaBuffer?: RetrieveMediaBuffer,
 };
 
+export type ChronicleEventResult = {
+  event: UniversalEvent,
+  getLocallyPersistedEvent: Function<Promise<UniversalEvent> >,
+  getAuthorizedEvent: Function<Promise<UniversalEvent> >,
+};
+
 /* eslint-disable no-unused-vars */
 
 /**

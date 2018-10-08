@@ -31,9 +31,10 @@ export const vdoc = vdon({
 */
 
 export function _chronicleEventLog (connection: ScribePartitionConnection,
-    eventLog: UniversalEvent[], options: ChronicleOptions = {}): Promise<any> {
-  if (!eventLog || !eventLog.length) return eventLog;
-  if (eventLog[0].eventId) return connection._recordEventLog(eventLog);
+    eventLog: UniversalEvent[], options: ChronicleOptions = {}
+): Promise<{ eventResults: ChronicleEventResult[] }> {
+  if (!eventLog || !eventLog.length) return { eventResults: eventLog };
+  if (options.authorized === true) return { eventResults: connection._recordEventLog(eventLog) };
 
   /*
   connection.warnEvent("\n\tclaimcommand:", ...dumpObject(command).commandId, commandEventId,
@@ -43,7 +44,7 @@ export function _chronicleEventLog (connection: ScribePartitionConnection,
 
   // FIXME(iridian): Go through the sequencing of all of these operations.
 
-  const upstreamChronicleEventLog = thenChainEagerly(
+  const upstreamChroniclingResult = thenChainEagerly(
       connection.getUpstreamConnection().getSyncedConnection(),
       (syncedConnection) => syncedConnection.chronicleEventLog(eventLog, options));
   const commandWriteProcess = !connection.isTransient() && connection._writeCommands(eventLog);
@@ -68,13 +69,21 @@ export function _chronicleEventLog (connection: ScribePartitionConnection,
     });
   }
   //*/
-  return eventLog.map(commandEvent => ({
-    eventId: commandEvent.eventId,
-    finalizeLocal: () => thenChainEagerly(commandWriteProcess, [
-      () => mediaUpdateProcess,
-      () => commandEvent,
-    ]),
-  }));
+  return {
+    eventResults: eventLog.map((commandEvent, index) => ({
+      event: commandEvent,
+      getLocallyPersistedEvent: () => thenChainEagerly(commandWriteProcess, [
+        () => mediaUpdateProcess,
+        () => commandEvent,
+      ]),
+      getAuthorizedEvent: () => thenChainEagerly(commandWriteProcess, [
+        // TODO(iridian): Also allow downstream events to complete this
+        // request
+        () => upstreamChroniclingResult,
+        ({ eventResults }) => eventResults[index].getAuthorizedEvent(),
+      ]),
+    })),
+  };
 }
 
 /*

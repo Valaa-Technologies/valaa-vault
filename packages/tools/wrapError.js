@@ -35,12 +35,14 @@ export default function wrapError (errorIn: Error, ...contextDescriptions) {
   }
   const clippedFrameList = _clipFrameListToCurrentContext(error, error.frameListClipDepth || 4);
   const originalMessage = error.originalMessage || error.message;
+  let ret = contextDescriptions[0];
+  if (!(ret instanceof Error)) ret = new Error("", error.fileName, error.lineNumber);
+  else contextDescriptions[0] = contextDescriptions[0].message;
   const myTraceAndContext = `${clippedFrameList.join("\n")}
 ${contextDescriptions.map(debugObjectHard).join(" ")}`;
   const allTraceAndContext = `${error.allTraceAndContext || ""}
 ${myTraceAndContext}`;
-  const ret = new Error(`${originalMessage}\n${allTraceAndContext}`,
-    error.fileName, error.lineNumber);
+  ret.message = `${originalMessage}\n${allTraceAndContext}`;
   ret.clippedFrameList = clippedFrameList;
   ret.allTraceAndContext = allTraceAndContext;
   ret.originalError = error.originalError || error;
@@ -173,13 +175,16 @@ export function debugObjectHard (head) { return debugObjectNest(head, 1, true); 
 export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
   try {
     if (!head || (!alwaysStringify && inBrowser())) return head;
-    if (typeof head === "function") return `[[function.name '${head.name}']]`;
-    if (head instanceof Function) return `[[Function.name '${head.name}']]`;
-    if (isSymbol(head)) return `[[${head.toString()}]]`;
+    if (typeof head === "function") {
+      if (head.name) return `<function name="${head.name}">`;
+      return `<lambda body.length=${head.toString().length}>`;
+    }
+    if (head instanceof Function) return `<Function name="${head.name}">`;
+    if (isSymbol(head)) return `<${head.toString()}>`;
     if (typeof head !== "object") return head;
     if (!nest) {
-      if (Array.isArray(head)) return `[[Array.length==${head.length}]]`;
-      if (isIterable(head)) return `[[Iterable.size==${head.size}]]`;
+      if (Array.isArray(head)) return `<Array length=${head.length} >`;
+      if (isIterable(head)) return `<Iterable size=${head.size}>`;
     }
     if (head.toString
         && (head.toString !== Object.prototype.toString)
@@ -187,8 +192,8 @@ export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
       return head.toString(nest);
     }
     if (!nest) {
-      return `[[${(head.constructor && head.constructor.name) || "<no constructor>"}.keys.length==${
-          Object.keys(head).length}]]`;
+      return `<${(head.constructor && head.constructor.name) || "no-constructor"} keys.length=${
+          Object.keys(head).length}>`;
     }
     return ((Array.isArray(head)
             && `[${head.map(entry => debugObjectNest(entry, nest, alwaysStringify)).join(", ")}]`)

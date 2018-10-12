@@ -48,19 +48,21 @@ export function thenChainEagerlyList (initialValue: any, functionChain: Function
       head = functionChain[currentIndex](head);
     }
   } catch (error) {
-    throw wrapChainError(error);
+    throw wrapChainError(error, new Error(`During thenChainEagerly step #${currentIndex}`));
   }
   return head.then(
       value => (currentIndex >= functionChain.length
           ? value
           : thenChainEagerlyList(
               functionChain[currentIndex](value), functionChain, onRejected, currentIndex + 1)),
-      (error) => { throw wrapChainError(error); });
-  function wrapChainError (error) {
+      (error) => {
+        throw wrapChainError(error, new Error(`During thenChainEagerly step #${currentIndex}`));
+      });
+  function wrapChainError (error, wrapperError) {
     const innerError = (onRejected && onRejected(error)) || error;
-    return wrapError(innerError, `During thenChainEagerly step #${currentIndex}`,
+    return wrapError(innerError, wrapperError,
         "\n\thead:", ...dumpObject(head),
-        "\n\tcurrent function:", functionChain[currentIndex],
+        "\n\tcurrent function:", ...dumpObject(functionChain[currentIndex]),
         "\n\tfunctionChain:", ...dumpObject(functionChain));
   }
 }

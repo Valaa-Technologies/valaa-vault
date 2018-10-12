@@ -46,7 +46,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   connect (options: ConnectOptions) {
-    return (this._syncedConnection = thenChainEagerly(
+    return this._syncedConnection || (this._syncedConnection = thenChainEagerly(
         _initializeConnectionIndexedDB(this), [
           () => this._readMediaEntries(),
           (mediaEntries) => {
@@ -62,7 +62,12 @@ export default class ScribePartitionConnection extends PartitionConnection {
           () => this.narrateEventLog(options.narrate),
           () => (this._syncedConnection = this),
         ],
+        errorOnConnect.bind(this),
     ));
+    function errorOnConnect (error) {
+      return this.wrapErrorEvent(error, new Error(`connect`),
+          "\n\toptions:", ...dumpObject(options));
+    }
   }
 
   disconnect () {
@@ -139,16 +144,13 @@ export default class ScribePartitionConnection extends PartitionConnection {
 
   requestMediaContents (mediaInfos: MediaInfo[]): any[] {
     try {
-      return _requestMediaContents(this, mediaInfos, onError.bind(this));
-    } catch (error) { throw onError.call(this, error); }
-    function onError (error: Object, mediaInfo: MediaInfo = error.mediaInfo) {
-      if (error.wrappedInRequestMediaContents) return error;
-      const ret = this.wrapErrorEvent(error, `requestMediaContents(${this.getName()}`,
+      return _requestMediaContents(this, mediaInfos, errorOnRequestMediaContents.bind(this));
+    } catch (error) { throw errorOnRequestMediaContents.call(this, error); }
+    function errorOnRequestMediaContents (error: Object, mediaInfo: MediaInfo = error.mediaInfo) {
+      return this.wrapErrorEvent(error, new Error(`requestMediaContents(${this.getName()}`),
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
           "\n\tmediaInfos:", ...dumpObject(mediaInfos),
       );
-      ret.wrappedInRequestMediaContents = true;
-      return ret;
     }
   }
 

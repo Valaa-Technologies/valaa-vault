@@ -14,19 +14,25 @@ import RAEMTestAPI from "~/raem/test/RAEMTestAPI";
 import Corpus from "~/raem/Corpus";
 import Valker from "~/raem/VALK/Valker";
 
-import { dumpObject, invariantify, LogEventGenerator, valaaUUID } from "~/tools";
+import { dumpObject, invariantify, LogEventGenerator, valaaUUID, wrapError } from "~/tools";
 
 const DEFAULT_ACTION_VERSION = "0.1";
 
 export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
-  const TestHarness = options.TestHarness || RAEMTestHarness;
-  const ret = new TestHarness({
-    name: "RAEM Test Harness", ContentAPI: RAEMTestAPI,
-    ...options,
-  });
-  commandBlocks.forEach(commandBlock => commandBlock.forEach(command =>
-      ret.dispatch(command)));
-  return ret;
+  try {
+    const TestHarness = options.TestHarness || RAEMTestHarness;
+    const ret = new TestHarness({
+      name: "RAEM Test Harness", ContentAPI: RAEMTestAPI,
+      ...options,
+    });
+    commandBlocks.forEach(commandBlock => commandBlock.forEach(command =>
+        ret.dispatch(command)));
+    return ret;
+  } catch (error) {
+    throw wrapError(error, new Error("During createProphetTestHarness"),
+        "\n\toptions:", ...dumpObject(options),
+        "\n\tcommandBlocks:", ...dumpObject(commandBlocks));
+  }
 }
 
 export default class RAEMTestHarness extends LogEventGenerator {

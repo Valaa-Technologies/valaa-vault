@@ -59,7 +59,8 @@ export default class OraclePartitionConnection extends PartitionConnection {
    */
   async connect (options: ConnectOptions) {
     try {
-      return await _connect(this, options);
+      return this._syncedConnection
+          || (this._syncedConnction = await (this._syncedConnection = _connect(this, options)));
     } catch (error) {
       throw this.wrapErrorEvent(error, "connect",
           "\n\toptions:", ...dumpObject(options));

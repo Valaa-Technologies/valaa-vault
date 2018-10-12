@@ -1,6 +1,6 @@
 // @flow
 
-import type Command, { isTransactedLike } from "~/raem/command";
+import Command, { isTransactedLike } from "~/raem/command";
 import { getActionFromPassage } from "~/raem/redux/Bard";
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
 import { createPartitionURI } from "~/raem/ValaaURI";
@@ -23,10 +23,10 @@ export function _claim (falseProphet: FalseProphet, restrictedCommand: Command,
   let getBackendFinalEvent;
   if (!timed) {
     try {
-      const operation = {};
+      const operation = { prophecy };
       _extractSubOpsFromClaim(falseProphet, prophecy.story, operation);
-      _initiateSubOpConnectionValidation(falseProphet, operation.subOperations);
-      operation.finalEvent = _processClaimSubOps(falseProphet, operation);
+      _initiateSubOpConnectionValidation(falseProphet, operation);
+      operation.finalEvent = _processClaim(falseProphet, operation);
       getBackendFinalEvent = () => operation.finalEvent;
     } catch (error) {
       try {
@@ -35,7 +35,7 @@ export function _claim (falseProphet: FalseProphet, restrictedCommand: Command,
         outputError(innerError, `Caught an exception in the exception handler of${
             ""} a claim; the resulting purge threw exception of its own:`);
       }
-      throw falseProphet.wrapErrorEvent(error, `claim():`,
+      throw falseProphet.wrapErrorEvent(error, new Error(`claim()`),
           "\n\trestrictedCommand:", ...dumpObject(restrictedCommand),
           "\n\tprophecy (purged from corpus):", ...dumpObject(prophecy));
     }
@@ -43,10 +43,6 @@ export function _claim (falseProphet: FalseProphet, restrictedCommand: Command,
     getBackendFinalEvent = () => prophecy && prophecy.story;
   }
   let result;
-  const onPostError = (error) => falseProphet.wrapErrorEvent(error, `claim().finalEvent:`,
-      "\n\trestrictedCommand:", ...dumpObject(restrictedCommand),
-      "\n\tprophecy:", ...dumpObject(prophecy),
-      "\n\tresult:", ...dumpObject(result));
   try {
     result = falseProphet._revealProphecyToAllFollowers(prophecy);
     result.getBackendFinalEvent = getBackendFinalEvent;
@@ -60,10 +56,14 @@ export function _claim (falseProphet: FalseProphet, restrictedCommand: Command,
       // catch and have logic for either retrying the operation or for full rejection.
       // Nevertheless flushing the corpus is needed.
       () => result.getBackendFinalEvent(),
-    ], onPostError);
+    ], errorOnClaim.bind(null, new Error("claim.getFinalEvent()")));
     return result;
-  } catch (error) {
-    throw onPostError(error);
+  } catch (error) { throw errorOnClaim.call(new Error("claim.finalizeResult()"), error); }
+  function errorOnClaim (wrappingError, error) {
+    falseProphet.wrapErrorEvent(error, wrappingError,
+        "\n\trestrictedCommand:", ...dumpObject(restrictedCommand),
+        "\n\tprophecy:", ...dumpObject(prophecy),
+        "\n\tresult:", ...dumpObject(result));
   }
 }
 
@@ -123,7 +123,7 @@ function _extractSubCommand (falseProphet: FalseProphet, claim: Command, partiti
       // TODO(iridian): Fix @valos/raem so that it doesn't generate these in the first place.
       delete ret.commandId;
     }
-    if (Object.keys(claim.partitions).length === 1) {
+    if (Object.keys(claim.partitions).length !== 1) {
       if (!isTransactedLike(claim)) {
         throw new Error("Non-TRANSACTED-like multipartition commands are not supported");
       }
@@ -137,14 +137,15 @@ function _extractSubCommand (falseProphet: FalseProphet, claim: Command, partiti
     }
     return ret;
   } catch (error) {
-    throw falseProphet.wrapErrorEvent(`_extractSubCommand(${connection.getName()})`,
+    throw falseProphet.wrapErrorEvent(error,
+        new Error(`_extractSubCommand(${connection.getName()})`),
         "\n\tclaim:", ...dumpObject(claim),
         "\n\tcurrent ret:", ...dumpObject(ret),
     );
   }
 }
 
-async function _initiateSubOpConnectionValidation (falseProphet: FalseProphet, operation: Object) {
+function _initiateSubOpConnectionValidation (falseProphet: FalseProphet, operation: Object) {
   operation.subOperations.forEach(subOperation =>
     subOperation.partitions.forEach(partition => {
       partition.connection = thenChainEagerly(partition.connection.getSyncedConnection(),
@@ -162,21 +163,19 @@ async function _initiateSubOpConnectionValidation (falseProphet: FalseProphet, o
   );
 }
 
-async function _processClaimSubOps (falseProphet: FalseProphet, operation: Object) {
-  let ret;
+async function _processClaim (falseProphet: FalseProphet, operation: Object) {
   falseProphet._claimOperationQueue.push(operation);
   for (const subOperation of operation.subOperations) {
     try {
       await _processClaimSubOp(falseProphet, subOperation);
     } catch (error) {
-      throw falseProphet.wrapErrorEvent(error, "claim._processClaimSubOps",
+      throw falseProphet.wrapErrorEvent(error, new Error("claim._processClaim"),
           "\n\toperation:", ...dumpObject(operation),
           "\n\tsubOperation:", ...dumpObject(subOperation),
           "\n\tthis:", falseProphet);
-    } finally {
-      operation.finalEvent = ret;
     }
   }
+  return operation.prophecy.story;
 }
 
 async function _processClaimSubOp (falseProphet: FalseProphet, subOperation: Object) {
@@ -206,11 +205,11 @@ async function _processClaimSubOp (falseProphet: FalseProphet, subOperation: Obj
     let eventChronichling;
     try {
       eventChronichling = (await connection.chronicleEventLog(
-          [commandEvent], { reduced: true }))[0];
+          [commandEvent], { reduced: true })).eventResults[0];
       partitionAuthorizations.push(eventChronichling.getAuthorizedEvent());
     } catch (error) {
       throw falseProphet.wrapErrorEvent(error,
-          `claim.process.subOp["${connection.getName()}"].chonicleEventLog`,
+          new Error(`claim.process.subOp["${connection.getName()}"].chonicleEventLog`),
           "\n\tcommandEvent:", ...dumpObject(commandEvent),
           "\n\tevent chronichling:", ...dumpObject(eventChronichling),
       );
@@ -252,13 +251,17 @@ if (!remoteAuthority) {
   try {
     partitionDatas.map(([, connection]) =>
         connection._receiveTruthOf("localAuthority", event));
-  } catch (error) { throw falseProphet.wrapErrorEvent(error, "claim.local.onConfirmTruth"); }
+  } catch (error) {
+    throw falseProphet.wrapErrorEvent(error, new Error("claim.local.onConfirmTruth"));
+  }
   return operation.command;
 }
 let ret;
 try {
   ret = await remoteAuthority.claim(operation.command, operation.options).getFinalEvent();
-} catch (error) { throw falseProphet.wrapErrorEvent(error, "claim.remoteAuthority.claim"); }
+} catch (error) {
+  throw falseProphet.wrapErrorEvent(error, new Error("claim.remoteAuthority.claim"));
+}
 if (falseProphet.getDebugLevel() === 1) {
   falseProphet.logEvent(1, `Done claiming remote command of authority`, remoteAuthority,
       "and of partitions:", ...[].concat(
@@ -287,21 +290,23 @@ function _getOngoingAuthorityPersists (falseProphet: FalseProphet, { command }: 
         const partitionURIString = String(referrerId.getPartitionURI());
         connection = falseProphet._connections[partitionURIString];
         invariantifyObject(connection, `partitionConnections[${partitionURIString}]`);
-      } catch (error) { throw onError.call(falseProphet, bvobId, referrerId, error); }
+      } catch (error) {
+        throw errorOnGetOngoingAuthorityPersists.call(falseProphet, bvobId, referrerId, error);
+      }
       const persistProcess = thenChainEagerly(
           connection.getSyncedConnection(),
           () => {
             const authorityConnection = connection.getUpstreamConnection();
             return authorityConnection && authorityConnection.getContentPersistProcess(bvobId);
           },
-          onError.bind(falseProphet, bvobId, referrerId),
+          errorOnGetOngoingAuthorityPersists.bind(falseProphet, bvobId, referrerId),
       );
       if (persistProcess) ret.push(persistProcess);
     }
   }
   return ret;
-  function onError (bvobId, referrerId, error) {
-    return falseProphet.wrapErrorEvent(error, "_getOngoingAuthorityPersists",
+  function errorOnGetOngoingAuthorityPersists (bvobId, referrerId, error) {
+    return falseProphet.wrapErrorEvent(error, new Error("_getOngoingAuthorityPersists"),
             "\n\tcurrent referrerId:", ...dumpObject(referrerId),
             "\n\tcurrent bvobId:", ...dumpObject(bvobId),
             "\n\tret (so far):", ...dumpObject(ret),

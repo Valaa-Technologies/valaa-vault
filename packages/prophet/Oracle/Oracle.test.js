@@ -20,8 +20,7 @@ afterEach(() => {
   harness = null;
 });
 
-
-describe("Prophet", () => {
+describe("Oracle", () => {
   const createPartitionCommand = created({
     id: vCrossRef("test_partition", "test_partition"),
     typeName: "Entity",

@@ -14,8 +14,8 @@ import { dumpObject } from "~/tools";
  */
 export default class FalseProphetPartitionConnection extends PartitionConnection {
   _firstNonAuthorizedCommandId: number = 0;
-  _nonAuthorizedCommands: Array<UniversalEvent>;
-  _eventsPendingSequencing: Object[] = [];
+  _nonAuthorizedCommands: UniversalEvent[] = [];
+  _eventsPendingSequencing: UniversalEvent[] = [];
   _isFrozen: ?boolean;
 
   // this._notifyProphetOfCommandCount(),
@@ -50,8 +50,8 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     }
     return super.chronicleEventLog(eventLog, {
       ...options,
-      receiveEvent: this.receiveEvent,
-      receiveCommand: this.receiveCommand,
+      receiveEvent: this.receiveEvent.bind(this),
+      receiveCommand: this.receiveCommand.bind(this),
     });
   }
 

@@ -2,7 +2,7 @@
 import { created } from "~/raem/command";
 import { vRef } from "~/raem/ValaaReference";
 
-import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
+import { createEngineTestHarness, createEngineOracleHarness } from "~/engine/test/EngineTestHarness";
 import VALEK, { literal, pointer } from "~/engine/VALEK";
 
 import { transpileValaaScriptBody } from "~/script";
@@ -12,12 +12,13 @@ afterEach(() => { harness = null; }); // eslint-disable-line no-undef
 
 const entities = () => harness.createds.Entity;
 
-describe("Engine bug tests", () => {
-  it("0000049: creates an entity with property and duplicates it", () => {
+describe("Engine bug tests", async () => {
+  it("0000049: creates an entity with property and duplicates it", async () => {
     // This test could be extracted as a separate DUPLICATED test case somewhere
     const commands = [
       created({ id: "Foo", typeName: "Entity", initialState: {
         name: "Foo",
+        partitionAuthorityURI: "valaa-test:",
       }, }),
       created({ id: "FooTen", typeName: "Property", initialState: {
         name: "Ten",
@@ -48,7 +49,9 @@ describe("Engine bug tests", () => {
       }, }),
     ];
 
-    harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, commands);
+    harness = await createEngineOracleHarness({
+      debug: 0, claimBaseBlock: false, acquirePartitions: ["Foo"],
+    }, commands);
 
     const foo = entities().Foo;
     const fooInst = foo.duplicate();

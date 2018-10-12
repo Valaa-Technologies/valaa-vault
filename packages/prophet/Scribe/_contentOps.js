@@ -185,7 +185,7 @@ export function _requestMediaContents (connection: ScribePartitionConnection,
       }
       if ((actualInfo.asURL === true)
           || (actualInfo.asURL === "data")
-          || ((actualInfo.asURL === "source") && !connection.isRemote())) {
+          || ((actualInfo.asURL === "source") && !connection.isRemoteAuthority())) {
         return _getMediaURL(connection, actualInfo, mediaEntry, onErrorWInfo);
       }
       return undefined;
@@ -237,7 +237,7 @@ function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaIn
     return undefined;
   }
   if ((mediaInfo.asURL !== "data") && !(bvobInfo.byteLength <= maxDataURISourceBytes)) {
-    if (connection.isRemote()) return undefined;
+    if (connection.isRemoteAuthority()) return undefined;
     connection.warnEvent(`getMediaURL requested on a local Media "${mediaInfo.name
         }" of ${bvobInfo.byteLength} bytes, larger than recommended ${maxDataURISourceBytes
         } bytes for data URI's.`,

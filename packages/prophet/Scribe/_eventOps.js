@@ -47,7 +47,8 @@ export function _chronicleEventLog (connection: ScribePartitionConnection,
   const upstreamChroniclingResult = thenChainEagerly(
       connection.getUpstreamConnection().getSyncedConnection(),
       (syncedConnection) => syncedConnection.chronicleEventLog(eventLog, options));
-  const commandWriteProcess = !connection.isTransient() && connection._writeCommands(eventLog);
+  const commandWriteProcess = connection.isLocallyPersisted()
+      && connection._writeCommands(eventLog);
   const retrieveMediaBuffer = options.retrieveMediaBuffer
       || _throwOnMediaContentRetrieveRequest.bind(null, connection);
   const mediaEntryUpdates = {};
@@ -64,7 +65,7 @@ export function _chronicleEventLog (connection: ScribePartitionConnection,
     Promise.resolve(commandWriteProcess).then(writeResults => {
       connection.warnEvent("\n\twrote commands:", ...dumpObject(commandEventLog),
           "\n\twrite results:", ...dumpObject(writeResults),
-          "\n\t:", connection.isLocal() ? "local" : "remote",
+          "\n\t:", connection.isLocallyPersisted() ? "local" : "remote",
               connection.getFirstUnusedTruthEventId() - 1);
     });
   }
@@ -231,7 +232,7 @@ export function _throwOnMediaContentRetrieveRequest (connection: ScribePartition
         connection.getName()}'`),
       "retrieveMediaBuffer",
       "\n\tdata not found in local bvob cache and no remote content retriever is specified",
-      ...(connection.isLocal() || connection.isTransient()
+      ...(connection.isRemoteAuthority()
           ? ["\n\tlocal/transient partitions don't have remote storage backing"] : []),
       "\n\tmediaInfo:", ...dumpObject(mediaInfo));
 }

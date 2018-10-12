@@ -96,10 +96,12 @@ function _extractSubOpsFromClaim (falseProphet: FalseProphet, claim: Command,
       missingConnections.push(createPartitionURI(partitionURIString));
       return;
     }
-    (connection.isMemory() ? memorys : connection.isLocal() ? locals : remotes).push({
-      connection,
-      commandEvent: _extractSubCommand(falseProphet, claim, partitionURIString, connection),
-    });
+    (connection.isRemoteAuthority() ? remotes
+        : connection.isLocallyPersisted() ? locals
+        : memorys).push({
+          connection,
+          commandEvent: _extractSubCommand(falseProphet, claim, partitionURIString, connection),
+        });
   });
   if (remotes.length) operation.subOperations.push({ name: "remotes", partitions: remotes });
   if (locals.length) operation.subOperations.push({ name: "locals", partitions: locals });

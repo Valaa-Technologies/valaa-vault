@@ -141,7 +141,7 @@ async function _confirmOrPurgeQueuedCommands (connection: ScribePartitionConnect
 
   // Delete commands after event is stored, so we get no gaps.
   // TODO(iridian): Put these to the same transaction with the writeEvent
-  if (!connection.isTransient()) {
+  if (connection.isLocallyPersisted()) {
     if (purgedCommands) {
       // TODO(iridian): Add merge-conflict-persistence. As it stands now, for the duration of
       // the merge process the purged commands are not persisted anywhere and could be lost.

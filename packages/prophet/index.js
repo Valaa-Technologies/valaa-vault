@@ -21,7 +21,11 @@ export { default as FalseProphet } from "./FalseProphet";
 export { default as FalseProphetDiscourse } from "./FalseProphet/FalseProphetDiscourse";
 
 export { default as Oracle } from "./Oracle";
-export { default as AuthorityNexus } from "./Oracle/AuthorityNexus";
 export { default as DecoderArray } from "./Oracle/DecoderArray";
 
 export { default as Scribe } from "./Scribe";
+
+export { default as AuthorityProphet } from "./AuthorityProphet";
+export { default as AuthorityPartitionConnection }
+    from "./AuthorityProphet/AuthorityPartitionConnection";
+export { default as AuthorityNexus } from "./AuthorityProphet/AuthorityNexus";

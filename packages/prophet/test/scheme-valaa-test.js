@@ -1,13 +1,18 @@
 // @flow
 
+import { AuthorityProphet } from "~/prophet";
+
 export default function createValaaTestScheme (/* { logger } */) {
   return {
     scheme: "valaa-test",
 
     getAuthorityURIFromPartitionURI: () => `valaa-test:`,
 
-    createDefaultAuthorityConfig: (/* partitionURI: ValaaURI */) => ({}),
+    createDefaultAuthorityConfig: () => ({
+      isLocallyPersisted: false,
+      isRemoteAuthority: false,
+    }),
 
-    createAuthorityProphet: () => null,
+    createAuthorityProphet: (options: Object) => new AuthorityProphet(options),
   };
 }

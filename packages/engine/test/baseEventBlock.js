@@ -7,7 +7,12 @@ import VALEK, { literal, pointer, kueryExpression } from "~/engine/VALEK";
 export default [{
   type: "TRANSACTED",
   actions: [
+    created({ id: "test_partition", typeName: "Entity", initialState: {
+      name: "testName",
+      partitionAuthorityURI: "valaa-test:",
+    }, }),
     created({ id: "test", typeName: "Entity", initialState: {
+      owner: "test_partition",
       name: "testName",
     }, }),
     created({ id: "ownling_prototype", typeName: "Entity", initialState: {
@@ -48,6 +53,7 @@ export default [{
       value: pointer("ownling"),
     }, }),
     created({ id: "test#1", typeName: "Entity", initialState: {
+      owner: "test_partition",
       instancePrototype: "test",
     }, }),
   ]

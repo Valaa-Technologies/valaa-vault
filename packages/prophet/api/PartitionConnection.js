@@ -57,12 +57,20 @@ export default class PartitionConnection extends LogEventGenerator {
 
   connect (options: ConnectOptions) {
     if (!this._prophet._upstream) throw new Error("Cannot connect: upstream missing");
-    this.setUpstreamConnection(this._prophet._upstream
-        .acquirePartitionConnection(this.getPartitionURI(), options));
-    return (this._syncedConnection = thenChainEagerly(
-        this.getUpstreamConnection().getSyncedConnection(),
-        () => (this._syncedConnection = this),
+    const ret = this._syncedConnection || (this._syncedConnection = thenChainEagerly(
+        this._prophet._upstream.acquirePartitionConnection(this.getPartitionURI(), options), [
+          upstreamConnection => {
+            this.setUpstreamConnection(upstreamConnection);
+            return upstreamConnection.getSyncedConnection();
+          },
+          () => (this._syncedConnection = this),
+        ],
+        errorOnConnect.bind(this),
     ));
+    return ret;
+    function errorOnConnect (error) {
+      return this.wrapErrorEvent(error, new Error("connect"));
+    }
   }
 
   /**
@@ -103,8 +111,9 @@ export default class PartitionConnection extends LogEventGenerator {
     if (this._syncedConnection !== undefined) return this._syncedConnection;
     // Wait for upstream to sync, then denote this connection synced, then resolve as 'this'.
     return (this._syncedConnection = thenChainEagerly(
-        this._upstreamConnection && this._upstreamConnection.getSyncedConnection(),
-        () => (this._syncedConnection = this),
+        this._upstreamConnection && this._upstreamConnection.getSyncedConnection(), [
+          () => (this._syncedConnection = this),
+        ]
     ));
   }
 

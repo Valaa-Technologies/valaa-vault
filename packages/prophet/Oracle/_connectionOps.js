@@ -2,7 +2,7 @@
 
 import ValaaURI from "~/raem/ValaaURI";
 
-import type { ConnectOptions } from "~/prophet/api/Prophet";
+import Prophet, { ConnectOptions } from "~/prophet/api/Prophet";
 
 import { dumpObject } from "~/tools";
 
@@ -23,7 +23,7 @@ export function _acquirePartitionConnection (oracle: Oracle, partitionURI: Valaa
   if (!authorityProphet) {
     throw new Error(`Can't obtain authority for partition URI '${partitionURI}'`);
   }
-  const ret = super.acquirePartitionConnection(partitionURI, {
+  const ret = Prophet.acquirePartitionConnection.call(oracle, partitionURI, {
     ...options, createConnection: { authorityProphet }
   });
 

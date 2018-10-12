@@ -33,7 +33,7 @@ export function _fabricateProphecy (falseProphet: FalseProphet, action: Action,
 /*
 function _purgeCommandsWith (hereticEvent: UniversalEvent, purgedCorpusState: State,
     revisedEvents: UniversalEvent[]) {
-  falseProphet._recreateCorpus(purgedCorpusState);
+  falseProphet.recreateCorpus(purgedCorpusState);
   falseProphet._followers.forEach(discourse =>
       discourse.rejectHeresy(hereticEvent, purgedCorpusState, revisedEvents));
 }
@@ -72,7 +72,7 @@ export function _rejectLastProphecyAsHeresy (falseProphet: FalseProphet,
           falseProphet._prophecySentinel.prev.story.commandId})`);
   }
   const hereticProphecy = _removeProphecy(falseProphet, falseProphet._prophecySentinel.prev);
-  falseProphet._recreateCorpus(hereticProphecy.previousState);
+  falseProphet.recreateCorpus(hereticProphecy.previousState);
 }
 
 function _addProphecy (falseProphet: FalseProphet, prophecy: Prophecy,

@@ -76,11 +76,22 @@ export class LogEventGenerator {
         ...((typeof minLogLevel !== "number") ? [minLogLevel] : []),
         ...messagePieces);
   }
-  wrapErrorEvent (error: Error, functionName: string, ...contexts: any[]) {
+  wrapErrorEvent (error: Error, functionName: Error | string, ...contexts: any[]) {
+    // Don't rewrap the error if it's already wrapped with the same functionName in the same context
+    const actualFunctionName = functionName instanceof Error ? functionName.message : functionName;
+    if (error.hasOwnProperty("functionName")
+        && (error.functionName === actualFunctionName)
+        && (error.contextObject === this)) {
+      return error;
+    }
     if (typeof error === "object") error.frameListClipDepth = 5;
-    return wrapError(error, `During ${this.debugId()}\n .${functionName}${
-        contexts.length ? ", with:" : ""}`,
-        ...contexts);
+    const wrapperError = (functionName instanceof Error) ? functionName : new Error("");
+    wrapperError.message =
+        `During ${this.debugId()}\n .${actualFunctionName}${contexts.length ? ", with:" : ""}`;
+    const ret = wrapError(error, wrapperError, ...contexts);
+    ret.functionName = actualFunctionName;
+    ret.contextObject = this;
+    return ret;
   }
 
   outputErrorEvent (error: Error, ...rest) {

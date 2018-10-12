@@ -427,8 +427,7 @@ export default class Vrapper extends Cog {
         throw new Error(`Cannot determine partition connection for ${this.debugId()}`);
       }
       this._partitionConnectionProcess = connection.getSyncedConnection();
-    } catch (error) { throw onError.call(this, error); }
-    const ret = thenChainEagerly(this._partitionConnectionProcess,
+      const ret = thenChainEagerly(this._partitionConnectionProcess,
         (partitionConnection) => {
           this._partitionConnection = partitionConnection;
           if (ret) ret.fullConnection = partitionConnection;
@@ -436,7 +435,8 @@ export default class Vrapper extends Cog {
           return partitionConnection;
         },
         onError.bind(this));
-    return ret;
+      return ret;
+    } catch (error) { throw onError.call(this, error); }
     function onError (error) {
       return this.wrapErrorEvent(error, `getPartitionConnection(${
               options.require ? "require" : "optional"})`,

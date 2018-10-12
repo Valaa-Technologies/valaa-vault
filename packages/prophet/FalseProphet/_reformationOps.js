@@ -83,7 +83,7 @@ export function _beginReformation (falseProphet: FalseProphet, purgedCommands) {
   // Retain all lookup entries.
   _removeProphecySequence(falseProphet, reformation.firstPurge,
       falseProphet._prophecySentinel.prev);
-  falseProphet._recreateCorpus(reformation.firstPurge.previousState);
+  falseProphet.recreateCorpus(reformation.firstPurge.previousState);
 
   // TODO(iridian): notify followers of the reformation
 

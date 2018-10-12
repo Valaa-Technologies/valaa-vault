@@ -176,15 +176,7 @@ export default class Prophet extends LogEventGenerator {
     if (!connection) return undefined;
     connection.addReference();
     this._connections[String(partitionURI)] = connection;
-    if (connection._syncedConnection === undefined) {
-      connection._syncedConnection = thenChainEagerly(
-        connection.connect(options),
-        () => { connection._syncedConnection = connection; return connection; }
-      );
-      if (connection._syncedConnection !== connection) {
-        connection._syncedConnection.operationInfo = { connection };
-      }
-    }
+    connection.connect(options); // Initiates the connection but doesn't wait for it to complete.
     return connection;
   }
 

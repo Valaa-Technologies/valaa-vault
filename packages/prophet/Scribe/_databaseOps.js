@@ -353,7 +353,7 @@ export async function _adjustBvobBufferPersistRefCounts (
 export function _writeEvents (connection: ScribePartitionConnection, eventLog: UniversalEvent[]) {
   return connection._db.transaction(["events"], "readwrite", ({ events }) => {
     eventLog.forEach(event => {
-      if (!event.eventId) {
+      if (typeof event.eventId !== "number") {
         throw new Error(`INTERNAL ERROR: Event is missing eventId when trying to write ${
             eventLog.length} events to local cache`);
       }
@@ -389,7 +389,7 @@ export function _writeCommands (connection: ScribePartitionConnection,
     commandLog: UniversalEvent[]) {
   return connection._db.transaction(["commands"], "readwrite", ({ commands }) =>
       commandLog.forEach(command => {
-        if (!command.eventId) {
+        if (typeof command.eventId !== "number") {
           throw new Error(`INTERNAL ERROR: Command is missing eventId when trying to write ${
               commandLog.length} commands to local cache`);
         }

@@ -63,7 +63,7 @@ export function _proclaim (falseProphet: FalseProphet, proclamation: Proclamatio
     return result;
   } catch (error) { return errorOnClaim.call(new Error("proclaim.finalizeResult()"), error); }
   function errorOnClaim (errorWrap, error) {
-    falseProphet.wrapErrorEvent(error, wrappingError,
+    throw falseProphet.wrapErrorEvent(error, errorWrap,
         "\n\tproclamation:", ...dumpObject(proclamation),
         "\n\tprophecy:", ...dumpObject(prophecy),
         "\n\tresult:", ...dumpObject(result));
@@ -313,7 +313,7 @@ function _getOngoingAuthorityPersists (falseProphet: FalseProphet, { command }: 
   }
   return ret;
   function errorOnGetOngoingAuthorityPersists (bvobId, referrerId, error) {
-    return falseProphet.wrapErrorEvent(error, new Error("_getOngoingAuthorityPersists"),
+    throw falseProphet.wrapErrorEvent(error, new Error("_getOngoingAuthorityPersists"),
             "\n\tcurrent referrerId:", ...dumpObject(referrerId),
             "\n\tcurrent bvobId:", ...dumpObject(bvobId),
             "\n\tret (so far):", ...dumpObject(ret),

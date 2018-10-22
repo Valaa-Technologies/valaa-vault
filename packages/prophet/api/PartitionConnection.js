@@ -65,12 +65,10 @@ export default class PartitionConnection extends LogEventGenerator {
           },
           () => (this._syncedConnection = this),
         ],
-        errorOnConnect.bind(this),
+        errorOnConnect.bind(this, new Error("connect")),
     ));
     return ret;
-    function errorOnConnect (error) {
-      return this.wrapErrorEvent(error, new Error("connect"));
-    }
+    function errorOnConnect (wrapper, error) { throw this.wrapErrorEvent(error, wrapper); }
   }
 
   /**
@@ -166,8 +164,10 @@ export default class PartitionConnection extends LogEventGenerator {
     return thenChainEagerly(
         this.requestMediaContents([mediaInfo]),
         results => results[0],
-        (error) => this.wrapErrorEvent(error, `readMediaContent(${mediaInfo.name})`,
-            "\n\tmediaInfo:", ...dumpObject(mediaInfo))
+        (error) => {
+          throw this.wrapErrorEvent(error, `readMediaContent(${mediaInfo.name})`,
+              "\n\tmediaInfo:", ...dumpObject(mediaInfo));
+        },
     );
   }
 
@@ -194,9 +194,11 @@ export default class PartitionConnection extends LogEventGenerator {
     return thenChainEagerly(
         this.requestMediaContents([mediaInfo]),
         results => results[0],
-        (error) => this.wrapErrorEvent(error, `decodeMediaContent(${mediaInfo.name} as ${
+        (error) => {
+          throw this.wrapErrorEvent(error, `decodeMediaContent(${mediaInfo.name} as ${
                 mediaInfo.mime})`,
-            "\n\tmediaInfo:", ...dumpObject(mediaInfo)),
+            "\n\tmediaInfo:", ...dumpObject(mediaInfo));
+        },
     );
   }
 
@@ -217,8 +219,10 @@ export default class PartitionConnection extends LogEventGenerator {
     return thenChainEagerly(
         this.requestMediaContents([mediaInfo]),
         results => results[0],
-        (error) => this.wrapErrorEvent(error, `getMediaURL(${mediaInfo.name})`,
-            "\n\tmediaInfo:", ...dumpObject(mediaInfo)),
+        (error) => {
+          throw this.wrapErrorEvent(error, `getMediaURL(${mediaInfo.name})`,
+              "\n\tmediaInfo:", ...dumpObject(mediaInfo));
+        },
     );
   }
 
@@ -227,16 +231,30 @@ export default class PartitionConnection extends LogEventGenerator {
   }
 
   /**
-   * Prepares the bvob content store process on upstream, returns the content id.
+   * Prepares the bvob content to be available for this partition,
+   * returning its contentId and a promise to the persist process.
    *
-   * @param {any} content
-   * @param {VRef} mediaId
-   * @param {string} contentId
-   * @returns {string}
+   * This availability is impermanent. If the contentId is not referred
+   * to by the event log the content will eventually be garbage
+   * collected.
+   * The Prophet chain will define the specific details of garbage
+   * collection (see Scribe for its local content caching semantics).
    *
-   * @memberof Prophet
+   * The idiomatic way to make content permanently available is to add
+   * a Media.content reference to a Bvob with Bvob.id equal to
+   * the contentId.
+   *
+   * mediaInfo is an optional hint containing the expected MediaInfo
+   * of a Media where this content is to be used. The upstream is
+   * allowed to reject the prepareBvob request based on this hint, most
+   * notably if mediaInfo.bvobId differs from the contentId.
+   *
+   * @param {*} content
+   * @param {MediaInfo} [mediaInfo]
+   * @returns {{ contentId: string, persistProcess: ?Promise<any> }}
+   * @memberof PartitionConnection
    */
-  prepareBvob (content: any, mediaInfo?: Object):
+  prepareBvob (content: any, mediaInfo?: MediaInfo):
       { contentId: string, persistProcess: ?Promise<any> } {
     return this._upstreamConnection.prepareBvob(content, mediaInfo);
   }

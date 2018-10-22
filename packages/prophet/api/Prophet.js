@@ -8,7 +8,6 @@ import Follower from "~/prophet/api/Follower";
 import type PartitionConnection from "~/prophet/api/PartitionConnection";
 
 import { LogEventGenerator } from "~/tools/Logger";
-import thenChainEagerly from "~/tools/thenChainEagerly";
 
 export type EventData = {
   type: "CREATED" | "MODIFIED" | "FIELDS_SET" | "ADDED_TO" | "REMOVED_FROM" | "REPLACED_WITHIN"

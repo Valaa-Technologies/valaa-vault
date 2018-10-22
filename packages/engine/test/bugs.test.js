@@ -17,8 +17,8 @@ describe("Engine bug tests", async () => {
     // This test could be extracted as a separate DUPLICATED test case somewhere
     const proclamations = [
       created({ id: "Foo", typeName: "Entity", initialState: {
+        owner: "test_partition",
         name: "Foo",
-        partitionAuthorityURI: "valaa-test:",
       }, }),
       created({ id: "FooTen", typeName: "Property", initialState: {
         name: "Ten",
@@ -40,6 +40,7 @@ describe("Engine bug tests", async () => {
         value: pointer(vRef("FooChild")),
       }, }),
       created({ id: "Bar", typeName: "Entity", initialState: {
+        owner: "test_partition",
         name: "Bar",
       }, }),
       created({ id: "FooBarPtr", typeName: "Property", initialState: {

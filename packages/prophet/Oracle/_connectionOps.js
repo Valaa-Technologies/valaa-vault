@@ -23,7 +23,7 @@ export function _acquirePartitionConnection (oracle: Oracle, partitionURI: Valaa
   if (!authorityProphet) {
     throw new Error(`Can't obtain authority for partition URI '${partitionURI}'`);
   }
-  const ret = Prophet.acquirePartitionConnection.call(oracle, partitionURI, {
+  const ret = Prophet.prototype.acquirePartitionConnection.call(oracle, partitionURI, {
     ...options, createConnection: { authorityProphet }
   });
 

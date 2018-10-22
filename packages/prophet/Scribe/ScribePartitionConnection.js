@@ -65,7 +65,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
         errorOnConnect.bind(this),
     ));
     function errorOnConnect (error) {
-      return this.wrapErrorEvent(error, new Error(`connect`),
+      throw this.wrapErrorEvent(error, new Error(`connect`),
           "\n\toptions:", ...dumpObject(options));
     }
   }
@@ -78,7 +78,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
     this._prophet._adjustInMemoryBvobBufferRefCounts(adjusts);
     this._pendingMediaLookup = {};
-    this.super.disconnect();
+    super.disconnect();
   }
 
   getFirstTruthEventId () { return this._eventLogInfo.firstEventId; }
@@ -147,7 +147,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
       return _requestMediaContents(this, mediaInfos, errorOnRequestMediaContents.bind(this));
     } catch (error) { throw errorOnRequestMediaContents.call(this, error); }
     function errorOnRequestMediaContents (error: Object, mediaInfo: MediaInfo = error.mediaInfo) {
-      return this.wrapErrorEvent(error, new Error(`requestMediaContents(${this.getName()}`),
+      throw this.wrapErrorEvent(error, new Error(`requestMediaContents(${this.getName()}`),
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
           "\n\tmediaInfos:", ...dumpObject(mediaInfos),
       );

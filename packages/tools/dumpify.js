@@ -26,7 +26,7 @@ export default function dumpify (value, options: Object) {
       if (value.toDumpify) return value.toDumpify(cache);
       if (value instanceof Date) return value.toString();
       ret = `${value.constructor ? `${value.constructor.name} ` : ""}${
-          JSON.stringify(value, decirculator)}`;
+          JSON.stringify(value, decirculator, options && options.indent)}`;
       const proto = Object.getPrototypeOf(value);
       if (proto) {
         const suffix = proto.constructor

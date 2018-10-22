@@ -13,6 +13,7 @@ const transactionA = {
   type: "TRANSACTED",
   actions: [
     created({ id: "test", typeName: "TestScriptyThing", initialState: {
+      owner: "test_partition",
       name: "testName",
     }, }),
     created({ id: "child", typeName: "TestScriptyThing", initialState: {
@@ -41,6 +42,7 @@ const transactionA = {
 
 const createAInstance
     = created({ id: "test#1", typeName: "TestScriptyThing", initialState: {
+      owner: "test_partition",
       instancePrototype: "test",
     }, });
 
@@ -655,8 +657,8 @@ describe("Vrapper", () => {
       ]);
       expect(console.warn.mock.calls.length).toBe(2);
       expect(console.warn.mock.calls[0][0])
-          .toBe(`Overriding existing Property 'testField' in ${""
-              }Scope Vrapper(<TestScriptyThing "testName"'VRef(test,,,)'>), with:`);
+          .toBe(`Overriding existing Property 'testField' in Scope Vrapper(${""
+              }<TestScriptyThing "testName"'VRef(test,,,valaa-test:?id=test_partition)'>), with:`);
       console.warn = oldWarn;
       expect(testScriptPartitions().test.get(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.conflictingTestField");

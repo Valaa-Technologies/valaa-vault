@@ -4,7 +4,6 @@ import "@babel/polyfill";
 
 import { Map as ImmutableMap } from "immutable";
 
-import { VRef } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
 import createRootReducer from "~/raem/tools/createRootReducer";
 import createValidateActionMiddleware from "~/raem/redux/middleware/validateAction";

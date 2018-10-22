@@ -29,10 +29,6 @@ describe("Partition freezing", () => {
   const transactionA = Object.freeze({
     type: "TRANSACTED",
     actions: [
-      created({ id: vCrossRef("test_partition"), typeName: "Entity", initialState: {
-        name: "Test Partition",
-        partitionAuthorityURI: "valaa-test:",
-      }, }),
       created({ id: vCrossRef("test_entity", "test_partition"), typeName: "Entity", initialState: {
         name: "Test Entity",
         owner: vRef("test_partition", "unnamedOwnlings"),

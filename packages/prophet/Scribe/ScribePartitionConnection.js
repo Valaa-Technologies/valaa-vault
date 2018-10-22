@@ -111,7 +111,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
 
   chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
       Promise<{ eventResults: ChronicleEventResult[] }> {
-    const contextError = new Error("chronicleEventLog"); // perf issue?
+    const contextError = new Error("chronicleEventLog");
     try {
       return _chronicleEventLog(this, eventLog, options, errorOnScribeChronicleEventLog.bind(this));
     } catch (error) { return errorOnScribeChronicleEventLog.call(this, error); }
@@ -128,16 +128,17 @@ export default class ScribePartitionConnection extends PartitionConnection {
       type: ("receiveTruths" | "receiveCommands") = "receiveTruths",
   ) {
     if (!truths.length) return truths;
-    const errorId = `${type}([${truths[0].eventId}, ${truths[truths.length - 1].eventId}])`;
+    let errorId;
     try {
+      errorId = `${type}([${truths[0].eventId}, ${truths[truths.length - 1].eventId}])`;
       return _receiveEvents(this, truths, retrieveMediaBuffer, downstreamReceiveTruths,
           type, errorOnReceiveTruths.bind(this, new Error(errorId)));
     } catch (error) {
-      throw errorOnReceiveTruths.call(this, new Error(errorId), error);
+      throw errorOnReceiveTruths.call(this, new Error(errorId || `${type}()`), error);
     }
     function errorOnReceiveTruths (wrapper, error) {
       throw this.wrapErrorEvent(error, wrapper,
-          "\n\ttruths:", ...dumpObject(truths),
+          "\n\ttruths:", ...dumpObject(truths), truths,
           "\n\tthis:", ...dumpObject(this));
     }
   }

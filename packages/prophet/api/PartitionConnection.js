@@ -170,27 +170,31 @@ export default class PartitionConnection extends LogEventGenerator {
   receiveTruths (truths: UniversalEvent[], retrieveMediaBuffer: RetrieveMediaBuffer,
       downstreamReceiveTruths: ?ReceiveEvents,
   ): Promise<(Promise<UniversalEvent> | UniversalEvent)[]> {
-    if (downstreamReceiveTruths) return downstreamReceiveTruths(truths, retrieveMediaBuffer);
-    throw this.wrapErrorEvent(
-        new Error(`receiveTruths not implemented by ${this.constructor.name
-            } and no explicit options.receiveTruths was provided.`),
-        new Error("receiveTruths"),
-        "\n\ttruths:", ...dumpObject(truths),
-        "\n\tretrieveMediaBuffer:", ...dumpObject(retrieveMediaBuffer));
+    try {
+      if (downstreamReceiveTruths) return downstreamReceiveTruths(truths, retrieveMediaBuffer);
+      throw new Error(`receiveTruths not implemented by ${this.constructor.name
+          } and no explicit options.receiveTruths was provided.`);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error("receiveTruths"),
+          "\n\ttruths:", ...dumpObject(truths), truths,
+          "\n\tretrieveMediaBuffer:", ...dumpObject(retrieveMediaBuffer));
+    }
   }
 
   receiveCommands (commands: UniversalEvent[], retrieveMediaBuffer: RetrieveMediaBuffer,
       downstreamReceiveCommands: ReceiveEvents,
   ): Promise<(Promise<UniversalEvent> | UniversalEvent)[]> {
-    if (downstreamReceiveCommands) {
-      return downstreamReceiveCommands(commands, retrieveMediaBuffer);
+    try {
+      if (downstreamReceiveCommands) {
+        return downstreamReceiveCommands(commands, retrieveMediaBuffer);
+      }
+      throw new Error(`receiveCommands not implemented by ${this.constructor.name
+              } and no explicit options.receiveCommands was provided.`);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error("receiveCommands"),
+          "\n\tcommands:", ...dumpObject(commands),
+          "\n\tretrieveMediaBuffer:", ...dumpObject(retrieveMediaBuffer));
     }
-    throw this.wrapErrorEvent(
-        new Error(`receiveCommands not implemented by ${this.constructor.name
-            } and no explicit options.receiveCommands was provided.`),
-        new Error("receiveCommands"),
-        "\n\tcommands:", ...dumpObject(commands),
-        "\n\tretrieveMediaBuffer:", ...dumpObject(retrieveMediaBuffer));
   }
 
   /**

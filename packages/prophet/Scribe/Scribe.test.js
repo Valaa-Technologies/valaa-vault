@@ -19,9 +19,10 @@ const sharedURI = "valaa-shared-content";
 let harness = null;
 
 afterEach(async () => {
-  if (harness) harness.cleanup();
-  harness = null;
-  await clearScribeDatabases();
+  if (harness) {
+    await harness.cleanup();
+    harness = null;
+  } else await clearScribeDatabases();
 });
 
 describe("Scribe", () => {
@@ -37,13 +38,17 @@ describe("Scribe", () => {
 
   const simpleEntityTemplate = { typeName: "Entity", initialState: { owner: "test_partition" } };
   const simpleCommandList = [
-    created({ id: "Entity A", eventId: 1, ...simpleEntityTemplate }),
-    created({ id: "Entity B", eventId: 2, ...simpleEntityTemplate }),
-    created({ id: "Entity C", eventId: 3, ...simpleEntityTemplate }),
-    created({ id: "Entity D", eventId: 4, ...simpleEntityTemplate }),
-    created({ id: "Entity E", eventId: 5, ...simpleEntityTemplate }),
-    created({ id: "Entity F", eventId: 6, ...simpleEntityTemplate }),
+    created({ id: "Entity A", ...simpleEntityTemplate }),
+    created({ id: "Entity B", ...simpleEntityTemplate }),
+    created({ id: "Entity C", ...simpleEntityTemplate }),
+    created({ id: "Entity D", ...simpleEntityTemplate }),
+    created({ id: "Entity E", ...simpleEntityTemplate }),
+    created({ id: "Entity F", ...simpleEntityTemplate }),
   ];
+  simpleCommandList.forEach((entry, index) => {
+    entry.commandId = entry.id;
+    entry.eventId = index;
+  });
 
   it("stores truths/commands in the database", async () => {
     const scribe = createScribe(createTestMockProphet({ isLocallyPersisted: true }));
@@ -76,9 +81,9 @@ describe("Scribe", () => {
   it("stores (and returns) utf-8 strings correctly", async () => {
     const scribe = createScribe(createTestMockProphet({ isLocallyPersisted: true }));
     await scribe.initialize();
-    const uri = createPartitionURI(testAuthorityURI);
 
-    const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
+    const connection = await scribe.acquirePartitionConnection(testPartitionURI)
+        .getSyncedConnection();
     const sharedDB = await openDB(sharedURI);
 
     for (const mediaContent of textMediaContents) {
@@ -100,9 +105,9 @@ describe("Scribe", () => {
   it("populates a new connection to an existing partition with its cached commands", async () => {
     const scribe = createScribe(createTestMockProphet({ isLocallyPersisted: true }));
     await scribe.initialize();
-    const uri = createPartitionURI(testAuthorityURI);
 
-    const firstConnection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
+    const firstConnection = await scribe.acquirePartitionConnection(testPartitionURI)
+        .getSyncedConnection();
 
     let claimResult = firstConnection.chronicleEventLog([simpleCommand]).eventResults[0];
     await claimResult.getLocallyReceivedEvent();
@@ -114,21 +119,22 @@ describe("Scribe", () => {
     expect(firstUnusedCommandEventId).toBeGreaterThan(1);
     firstConnection.disconnect();
 
-    const secondConnection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
+    const secondConnection = await scribe.acquirePartitionConnection(testPartitionURI)
+        .getSyncedConnection();
     expect(secondConnection.getFirstUnusedCommandEventId()).toBe(firstUnusedCommandEventId);
   });
 
   it("ensures commands are stored in a proper ascending order", async () => {
     const scribe = createScribe(createTestMockProphet({ isLocallyPersisted: true }));
     await scribe.initialize();
-    const uri = createPartitionURI(testAuthorityURI);
 
-    const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
+    const connection = await scribe.acquirePartitionConnection(testPartitionURI)
+        .getSyncedConnection();
     let oldUnusedCommandId;
     let newUnusedCommandId = connection.getFirstUnusedCommandEventId();
 
     for (const command of simpleCommandList) {
-      const claimResult = connection.chronicleEventLog(command).eventResults[0];
+      const claimResult = connection.chronicleEventLog([command]).eventResults[0];
       await claimResult.getLocallyReceivedEvent();
 
       oldUnusedCommandId = newUnusedCommandId;

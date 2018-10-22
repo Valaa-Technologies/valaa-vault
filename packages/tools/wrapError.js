@@ -174,6 +174,8 @@ export function debugObjectHard (head) { return debugObjectNest(head, 1, true); 
 
 export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
   try {
+    if (head === null) return "<null>";
+    if (head === undefined) return "<undefined>";
     if (!head || (!alwaysStringify && inBrowser())) return head;
     if (typeof head === "function") {
       if (head.name) return `<function name="${head.name}">`;

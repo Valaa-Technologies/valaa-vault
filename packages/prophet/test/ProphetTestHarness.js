@@ -48,7 +48,7 @@ export function createProphetTestHarness (options: Object, ...proclamationBlocks
 
 export async function createProphetOracleHarness (options: Object, ...proclamationBlocks: any) {
   const ret = createProphetTestHarness(
-    { name: "Prophet Oracle Harness", enableOracle: true, enableScribe: true, ...options });
+    { name: "Prophet Oracle Harness", oracleOptions: {}, scribeOptions: {}, ...options });
   try {
     ret.testPartitionConnection = await ret.testPartitionConnection;
     if (options.acquirePartitions) {
@@ -77,13 +77,13 @@ export async function createProphetOracleHarness (options: Object, ...proclamati
 export default class ProphetTestHarness extends ScriptTestHarness {
   constructor (options: Object) {
     super(options);
-    if (options.enableOracle) {
-      this.upstream = this.oracle = createOracle();
+    if (options.oracleOptions) {
+      this.upstream = this.oracle = createOracle(options.oracleOptions);
     } else {
       this.upstream = createTestMockProphet();
     }
-    if (options.enableScribe) {
-      this.upstream = this.scribe = createScribe(this.upstream);
+    if (options.scribeOptions) {
+      this.upstream = this.scribe = createScribe(this.upstream, options.scribeOptions);
       this.cleanup = () => clearOracleScribeDatabases(this.scribe);
     } else {
       this.cleanup = () => undefined;
@@ -134,18 +134,19 @@ export default class ProphetTestHarness extends ScriptTestHarness {
   }
 }
 
-export function createScribe (upstream: Prophet) {
+export function createScribe (upstream: Prophet, options?: Object) {
   const ret = new Scribe({
     name: "Test Scribe",
     databaseAPI: getDatabaseAPI(),
     upstream,
+    ...options,
   });
   ret.initialize();
   return ret;
 }
 
 export async function clearScribeDatabases (otherConnections: Object[] = []) {
-  const partitionURIs = ["valaa-test:?id=test_partition", "valaa-shared-content"];
+  const partitionURIs = ["valaa-shared-content", "valaa-test:?id=test_partition"];
   partitionURIs.push(...otherConnections);
   for (const uri of partitionURIs) {
     const database = await openDB(uri);
@@ -153,20 +154,24 @@ export async function clearScribeDatabases (otherConnections: Object[] = []) {
       const transaction = database.transaction([table], "readwrite");
       const objectStore = transaction.objectStore(table);
       objectStore.clear();
+      await transaction;
     }
   }
 }
 
-export function createOracle () {
+export function createOracle (options?: Object) {
   const authorityNexus = new AuthorityNexus();
   const ret = new Oracle({
     name: "Test Oracle",
     authorityNexus,
+    ...options,
   });
   authorityNexus.addSchemeModule(createValaaLocalScheme({ logger: ret.getLogger() }));
   authorityNexus.addSchemeModule(createValaaTransientScheme({ logger: ret.getLogger() }));
   authorityNexus.addSchemeModule(createValaaMemoryScheme({ logger: ret.getLogger() }));
-  authorityNexus.addSchemeModule(createValaaTestScheme({ logger: ret.getLogger() }));
+  authorityNexus.addSchemeModule(createValaaTestScheme({
+    logger: ret.getLogger(), config: (options || {}).testAuthorityConfig,
+  }));
   for (const Decoder: any of Object.values({ ...ToolsDecoders, ...ValaaScriptDecoders })) {
     if (Decoder.mediaTypes) {
       ret.getDecoderArray().addDecoder(new Decoder({ logger: ret.getLogger() }));

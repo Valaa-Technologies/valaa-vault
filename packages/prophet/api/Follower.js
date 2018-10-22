@@ -10,9 +10,9 @@ export default class Follower {
    * @param  {type} timed          time context of the event
    * @param  {type} state          current state of knowledge after prophecy
    * @param  {type} previousState  state of knowledge before prophecy
-   * @returns {type}               if this prophecy originates from a local claim call, any return
-   *                               values are returned back to the claim inside promises. This is to
-   *                               facilitate more complex interactive logic (such as UI
+   * @returns {type}               if this prophecy originates from a local proclaim call, any
+   *                               return values are returned back to the proclaim inside promises.
+   *                               This is to facilitate more complex interactive logic (such as UI
    *                               interactions) in a straightforward async/await fashion.
    */
   revealProphecy (prophecy: Prophecy): ?Promise<any>[] {} // eslint-disable-line

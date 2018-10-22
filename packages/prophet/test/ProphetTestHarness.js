@@ -1,10 +1,12 @@
 // @flow
 
 import { OrderedMap } from "immutable";
-import Command from "~/raem/command";
+import { created } from "~/raem/command";
 
 import { createTestPartitionURIFromRawId, createPartitionURI }
     from "~/raem/ValaaURI";
+
+import { Proclamation } from "~/prophet/FalseProphet/FalseProphet";
 
 import ScriptTestHarness, { createScriptTestHarness } from "~/script/test/ScriptTestHarness";
 
@@ -27,23 +29,23 @@ import { getDatabaseAPI } from "~/tools/indexedDB/getInMemoryDatabaseAPI";
 import { openDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 import { dumpObject, wrapError } from "~/tools";
 
-export function createProphetTestHarness (options: Object, ...commandBlocks: any) {
+export function createProphetTestHarness (options: Object, ...proclamationBlocks: any) {
   const ret = createScriptTestHarness({
     name: "Prophet Test Harness", ContentAPI: ProphetTestAPI, TestHarness: ProphetTestHarness,
     ...options,
   });
   try {
-    commandBlocks.forEach(commandBlock => commandBlock.forEach(command =>
-      ret.claim(command)));
+    proclamationBlocks.forEach(proclamations => proclamations.forEach(
+        proclamation => ret.proclaim(proclamation)));
     return ret;
   } catch (error) {
     throw wrapError(error, new Error("During createProphetTestHarness"),
         "\n\toptions:", ...dumpObject(options),
-        "\n\tcommandBlocks:", ...dumpObject(commandBlocks));
+        "\n\tproclamationBlocks:", ...dumpObject(proclamationBlocks));
   }
 }
 
-export async function createProphetOracleHarness (options: Object, ...commandBlocks: any) {
+export async function createProphetOracleHarness (options: Object, ...proclamationBlocks: any) {
   const ret = createProphetTestHarness(
     { name: "Prophet Oracle Harness", enableOracle: true, enableScribe: true, ...options });
   try {
@@ -55,14 +57,15 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
           ret.prophet.acquirePartitionConnection(uri).getSyncedConnection());
       await Promise.all(connections);
     }
-    for (const block of commandBlocks) {
-      await Promise.all(block.map(command => ret.claim(command).getFinalEvent()));
+    for (const proclamations of proclamationBlocks) {
+      await Promise.all(proclamations.map(
+          proclamation => ret.proclaim(proclamation).getStoryPremiere()));
     }
     return ret;
   } catch (error) {
     throw wrapError(error, new Error("During createProphetOracleHarness"),
         "\n\toptions:", ...dumpObject(options),
-        "\n\tcommandBlocks:", ...dumpObject(commandBlocks));
+        "\n\tproclamationBlocks:", ...dumpObject(proclamationBlocks));
   }
 }
 
@@ -94,8 +97,8 @@ export default class ProphetTestHarness extends ScriptTestHarness {
         .getSyncedConnection();
   }
 
-  claim (...rest: any) {
-    return this.prophet.claim(...rest);
+  proclaim (...rest: any) {
+    return this.prophet.proclaim(...rest);
   }
 
   createCorpus () { // Called by RAEMTestHarness.constructor (so before oracle/scribe are created)
@@ -181,10 +184,10 @@ class MockProphet extends AuthorityProphet {
     return connectors;
   }
 
-  claim (command: Command) {
+  proclaim (proclamation: Proclamation) {
     return {
-      prophecy: new Prophecy(command),
-      getFinalEvent: () => Promise.resolve(command),
+      prophecy: new Prophecy(proclamation),
+      getStoryPremiere: () => Promise.resolve(proclamation),
     };
   }
 /*

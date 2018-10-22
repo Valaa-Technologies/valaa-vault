@@ -29,9 +29,9 @@ const destroy = {
   },
   resolve: async (context, args/* , info */) => {
     try {
-      const command = await context.store.dispatch(destroyed(args.input));
+      const proclamation = await context.store.dispatch(destroyed(args.input));
       return {
-        clientMutationId: command.id,
+        clientMutationId: proclamation.id,
       };
     } catch (error) {
       console.error(error.message, error.stack);

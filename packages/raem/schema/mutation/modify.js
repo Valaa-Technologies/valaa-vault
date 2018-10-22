@@ -33,7 +33,7 @@ const modify = {
   },
   resolve: async (context, args/* , info */) => {
     try {
-      const command = await context.store.dispatch({
+      const proclamation = await context.store.dispatch({
         ...modified({
           id: args.input.id,
           typeName: args.input.typeName,
@@ -45,7 +45,7 @@ const modify = {
         bvobStubs: context.bvobStubs,
       });
       return {
-        clientMutationId: command.id,
+        clientMutationId: proclamation.id,
       };
     } catch (error) {
       console.error(error.message, error.stack);

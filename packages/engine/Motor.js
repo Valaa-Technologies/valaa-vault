@@ -91,7 +91,7 @@ export default class Motor extends Cog {
       this.engineTime = next.key;
       next.value.forEach(story => {
         // console.log("TIMED expanding", timed.startTime || timed.time, timed);
-        story.actions.forEach(action => this.prophet.claim(action, { timed: story }));
+        story.actions.forEach(action => this.prophet.proclaim(action, { timed: story }));
       });
     }
     this.engineTime = future;

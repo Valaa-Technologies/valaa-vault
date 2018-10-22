@@ -4,7 +4,7 @@ import VALEK, { Kuery, VALKOptions, dumpObject, rootScopeSelf,
   builtinSteppers as engineBuiltinSteppers,
 } from "~/engine/VALEK";
 
-import Command, { created, duplicated, recombined, isCreatedLike } from "~/raem/command";
+import { created, duplicated, recombined, isCreatedLike } from "~/raem/command";
 
 import { vRef, IdData, obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
@@ -15,12 +15,12 @@ import Transient, { createTransient, getTransientTypeName }
 import { isGhost } from "~/raem/tools/denormalized/ghost";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
 
-import type { Prophet } from "~/prophet";
+import type { Prophet, Proclamation } from "~/prophet";
 
 import Cog, { executeHandlers } from "~/engine/Cog";
 import Motor from "~/engine/Motor";
 import Vrapper from "~/engine/Vrapper";
-import evaluateToCommandData from "~/engine/Vrapper/evaluateToCommandData";
+import evaluateToProclamationData from "~/engine/Vrapper/evaluateToProclamationData";
 import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
 
 import { createId, dumpify, outputCollapsedError, wrapError } from "~/tools";
@@ -199,7 +199,7 @@ export default class ValaaEngine extends Cog {
     return this._constructWith(duplicated,
         { initialState, typeName: duplicateOf.getTypeName() },
         options,
-        (innerOptions) => ({ duplicateOf: evaluateToCommandData(duplicateOf, innerOptions) }),
+        (innerOptions) => ({ duplicateOf: evaluateToProclamationData(duplicateOf, innerOptions) }),
         (constructParams, id, evaluatedInitialState) => {
           constructParams.id = id;
           constructParams.initialState = evaluatedInitialState;
@@ -214,14 +214,14 @@ export default class ValaaEngine extends Cog {
         (constructParams, id, evaluatedInitialState, directive, innerOptions) => {
           constructParams.actions.push(duplicated({
             id,
-            duplicateOf: evaluateToCommandData(directive.duplicateOf, innerOptions),
+            duplicateOf: evaluateToProclamationData(directive.duplicateOf, innerOptions),
             initialState: evaluatedInitialState,
           }));
         });
   }
 
   _constructWith (
-      constructCommand: (Object) => Command,
+      constructProclamation: (Object) => Proclamation,
       directives: Object,
       options: Object = {},
       createConstructParams: Object,
@@ -243,20 +243,20 @@ export default class ValaaEngine extends Cog {
         extractedProperties.push(this._extractProperties(directive.initialState, options.head));
         addToConstructParams(constructParams,
           this._resolveIdForConstructDirective(directive, options),
-          evaluateToCommandData(directive.initialState, options),
+          evaluateToProclamationData(directive.initialState, options),
           directive,
           options);
       }
 
-      result = transaction.claim(constructCommand(constructParams));
+      result = transaction.proclaim(constructProclamation(constructParams));
 
       // FIXME(iridian): If the transaction fails the Vrapper will contain inconsistent data until
       // the next actual update on it.
 
       ret = directiveArray.map((directive, index) => {
         if (directive.initialState && directive.initialState.partitionAuthorityURI) {
-          // Create partition(s) before the transaction is committed (and thus before the command
-          // leaves upstream).
+          // Create partition(s) before the transaction is committed (and thus before the commands
+          // leave upstream).
           this._createNewPartition(directive);
         }
         const id = isRecombine
@@ -267,7 +267,7 @@ export default class ValaaEngine extends Cog {
           Promise.resolve(vResource.activate(transaction.getState()))
               .then(undefined, (error) => {
                 outputCollapsedError(localWrapError(this, error,
-                    `${constructCommand.name}.activate ${vResource.debugId()}`));
+                    `${constructProclamation.name}.activate ${vResource.debugId()}`));
               });
         }
         if (extractedProperties[index]) {
@@ -280,7 +280,7 @@ export default class ValaaEngine extends Cog {
 
       return isRecombine ? ret : ret[0];
     } catch (error) {
-      throw localWrapError(this, error, `${constructCommand.name}()`);
+      throw localWrapError(this, error, `${constructProclamation.name}()`);
     }
     function localWrapError (self, error, operationName) {
       return self.wrapErrorEvent(error, operationName,
@@ -326,7 +326,7 @@ export default class ValaaEngine extends Cog {
     if (initialState.partitionAuthorityURI) {
       partitionURI = createPartitionURI(initialState.partitionAuthorityURI, id.rawId());
     } else if (initialState.owner || initialState.source) {
-      partitionURI = evaluateToCommandData(initialState.owner || initialState.source, options)
+      partitionURI = evaluateToProclamationData(initialState.owner || initialState.source, options)
           .getPartitionURI();
     }
     directive.id = !partitionURI ? id : id.immutatePartitionURI(partitionURI);
@@ -417,8 +417,8 @@ export default class ValaaEngine extends Cog {
     // console.log("TRUTH Confirmed", truthEvent);
   }
 
-  rejectHeresy (/* rejectedCommand, purgedCorpus, revisedEvents */) {
-    // console.log("HERECY Rejected", rejectedCommand);
+  rejectHeresy (/* rejectedProclamation, purgedCorpus, revisedEvents */) {
+    // console.log("HERECY Rejected", rejectedProclamation);
   }
 
   start () { return this.motor.start(); }

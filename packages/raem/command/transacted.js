@@ -31,7 +31,7 @@ export function validateTransactedLike (command: TransactedLike, typeValue: stri
   const {
     type, actions,
     // eslint-disable-next-line no-unused-vars
-    version, commandId, partitions, parentId, timeStamp,
+    version, commandId, eventId, partitions, parentId, timeStamp,
     ...unrecognized
   } = command;
 

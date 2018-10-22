@@ -65,7 +65,7 @@ export function validateTimed (command: Timed, recursiveActionValidator: ?Functi
     type, actions,
     primaryPartition, time, startTime, interpolation, extrapolation,
     // eslint-disable-next-line no-unused-vars
-    version, commandId, partitions, parentId, timeStamp,
+    version, commandId, eventId, partitions, parentId, timeStamp,
     ...unrecognized
   } = command;
   invariantifyString(type, "TIMED.type", { value: TIMED });

@@ -2,7 +2,7 @@
 import { GraphQLObjectType } from "graphql/type";
 import { Map } from "immutable";
 
-import type Command, { Action } from "~/raem/command";
+import { Action } from "~/raem/command";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import Resolver from "~/raem/tools/denormalized/Resolver";
 import { getTransientTypeName } from "~/raem/tools/denormalized/Transient";
@@ -20,8 +20,8 @@ import { trivialCloneWith } from "~/tools/trivialClone";
 export type Passage = Action;
 export type Story = Passage;
 
-export function createUniversalizableCommand (restrictedCommand: Command) {
-  return trivialCloneWith(restrictedCommand,
+export function createUniversalizableCommand (proclamation: Action) {
+  return trivialCloneWith(proclamation,
       entry => (entry instanceof ValaaURI ? entry : undefined));
 }
 
@@ -41,7 +41,7 @@ export function getActionFromPassage (passage: Passage) {
 
 /**
  * Bard middleware creates a 'journeyman' bard (which prototypes a singleton-ish master bard) to
- * handle an incoming command or event action. It then smuggles the journeyman inside
+ * handle an incoming event. It then smuggles the journeyman inside
  * action[SmuggledBard] through redux to the master bard reducers, where new bard apprentices are
  * created to handle each sub-action.
  *
@@ -107,13 +107,14 @@ export function createBardReducer (bardOperation: (bard: Bard) => State,
 }
 
 /**
- * Bard processes incoming downstream events and upstream commands against current corpus state.
+ * Bard processes incoming truth and command events against current corpus state.
  *
- * A bard has three primary responsibilities. For each command/event action, it:
+ * A bard has three primary responsibilities. For each action, it:
  * 1. reduces the action against the corpus, ie. updates the corpus state based on the action
  * 2. creates a story, a convenience action which wraps the root action as its prototype
  * 3. creates a passage for each concrete and virtual sub-actions, wrapping them as prototypes
- * 4. universalizes a command, by validating and extends a command action before it's sent upstream
+ * 4. universalizes a proclamation, by validating and extends a proclamation action before it's
+ *    sent upstream
  *
  * A Bard object itself contains as fields:
  * 1. reducer context: .schema and ._logger
@@ -134,11 +135,14 @@ export function createBardReducer (bardOperation: (bard: Bard) => State,
  * book-keeping functionalities.
  * Story provides a uniform interface to all dependent information that can be computed from the
  * corpus state and the information in the action object itself, but which is non-primary and thus
- * should not be stored in the command/event objects themselves. This includes information such as
+ * should not be stored in the event objects themselves. This includes information such as
  * actualAdds/actualRemoves for a MODIFIED class of operations, passages lists for transactions
  * and for actions which involve coupling updates, etc.
  *
- * Command universalisation:
+ * Proclamation universalisation:
+ *
+ * FIXME(iridian): Outdated: command was renamed to proclamation and universalization process was
+ *                 overhauled
  *
  * A fundamental event log requirement is that it must fully reduceable in any configuration of
  * other partitions being partially or fully connected. This is called an universal playback
@@ -150,12 +154,12 @@ export function createBardReducer (bardOperation: (bard: Bard) => State,
  * become fully active when their dependent partitions are connected without the need for replaying
  * the original event log.
  *
- * Command objects coming in from downstream can be incomplete in the universal context.
+ * Proclamation objects coming in from downstream can be incomplete in the universal context.
  * For example ghost objects and their ownership relationships might depend on information that is
  * only available in their prototypes: this prototype and all the information on all its owned
  * objects can reside in another partition.
- * Command universalisation is the process where the command is extended to contain all information
- * that is needed for its playback on the universal context.
+ * Proclamation universalisation is the process where the proclamation is extended to contain all
+ * information that is needed for its playback on the universal context.
  */
 export default class Bard extends Resolver {
   subReduce: Function;

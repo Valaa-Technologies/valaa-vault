@@ -1,9 +1,8 @@
 // @flow
 
-import type Command from "~/raem/command/Command";
 import type { VALKOptions } from "~/raem/VALK";
 
-import { Discourse } from "~/prophet";
+import { Discourse, Proclamation } from "~/prophet";
 
 import VALEK, { Kuery, dumpKuery } from "~/engine/VALEK";
 
@@ -68,8 +67,10 @@ export default class Cog extends LogEventGenerator {
     }
   }
 
-  acquireTransaction (customCommandCallback: ?(actions: Command[]) => Command): Discourse {
-    return this.engine.discourse.acquireTransaction(customCommandCallback);
+  acquireTransaction (
+      customProclamationCallback: ?(actions: Proclamation[]) => Proclamation
+  ): Discourse {
+    return this.engine.discourse.acquireTransaction(customProclamationCallback);
   }
 
   // Implementation

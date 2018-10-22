@@ -45,8 +45,8 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
   // In latter case forwards the result received from authority to Scribe for caching.
   requestMediaContents (mediaInfos: MediaInfo[]): any[] {
     return mediaInfos.map(mediaInfo => Promise.reject(new Error(
-        `Authority connection '${this.getName()}' cannot deliver media content '${
-            mediaInfo.name}'`)));
+        `Authority connection '${this.getName()}' doesn't implement media content requests ('${
+            mediaInfo.name}' requested)`)));
   }
 
   prepareBvob (content: any, mediaInfo?: Object):

@@ -9,99 +9,103 @@ import type { ClaimResult } from "~/prophet/api/Prophet";
 
 import { dumpObject, outputError, thenChainEagerly } from "~/tools";
 
-import FalseProphet from "./FalseProphet";
+import FalseProphet, { Proclamation } from "./FalseProphet";
 import { _rejectLastProphecyAsHeresy } from "./_prophecyOps";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
-// Handle a restricted command claim towards upstream.
-export function _claim (falseProphet: FalseProphet, restrictedCommand: Command,
+// Handle a proclamation towards upstream.
+export function _proclaim (falseProphet: FalseProphet, proclamation: Proclamation,
     { timed, transactionInfo } = {}): ClaimResult {
-  const prophecy = falseProphet._fabricateProphecy(restrictedCommand, "claim", timed,
+  const prophecy = falseProphet._fabricateProphecy(proclamation, "proclaim", timed,
       transactionInfo);
-  // falseProphet.warnEvent("\n\tclaim", restrictedCommand.commandId, restrictedCommand,
+  // falseProphet.warnEvent("\n\tclaim", proclamation.commandId, proclamation,
   //    ...falseProphet._dumpStatus());
-  let getBackendFinalEvent;
+  let getFinalStory;
+  let getCommandOf;
   if (!timed) {
     try {
       const operation = { prophecy };
-      _extractSubOpsFromClaim(falseProphet, prophecy.story, operation);
+      _extractSubOpsFromClaim(falseProphet, getActionFromPassage(prophecy.story), operation);
       _initiateSubOpConnectionValidation(falseProphet, operation);
-      operation.finalEvent = _processClaim(falseProphet, operation);
-      getBackendFinalEvent = () => operation.finalEvent;
+      operation.finalStory = _processClaim(falseProphet, operation);
+      getFinalStory = () => operation.finalStory;
+      getCommandOf = (partitionURI) => operation.partitionCommands[String(partitionURI)];
     } catch (error) {
       try {
         _rejectLastProphecyAsHeresy(falseProphet, prophecy.story);
       } catch (innerError) {
         outputError(innerError, `Caught an exception in the exception handler of${
-            ""} a claim; the resulting purge threw exception of its own:`);
+            ""} a proclaim; the resulting purge threw exception of its own:`);
       }
-      throw falseProphet.wrapErrorEvent(error, new Error(`claim()`),
-          "\n\trestrictedCommand:", ...dumpObject(restrictedCommand),
+      throw falseProphet.wrapErrorEvent(error, new Error(`proclaim()`),
+          "\n\tproclamation:", ...dumpObject(proclamation),
           "\n\tprophecy (purged from corpus):", ...dumpObject(prophecy));
     }
   } else {
-    getBackendFinalEvent = () => prophecy && prophecy.story;
+    getFinalStory = () => prophecy && prophecy.story;
   }
   let result;
   try {
     result = falseProphet._revealProphecyToAllFollowers(prophecy);
-    result.getBackendFinalEvent = getBackendFinalEvent;
-    result.getFinalEvent = () => thenChainEagerly(null, [
+    result.getFinalStory = getFinalStory;
+    result.getCommandOf = getCommandOf;
+    result.getStoryPremiere = () => thenChainEagerly(null, [
       // Returns a promise which will resolve to the content received from the backend
       // but only after all the local follower reactions have been resolved as well
-      // TODO(iridian): Exceptions from follower reactions can't reject the claim, but we should
-      // catch and handle and/or expose them to the claim originator somehow.
+      // TODO(iridian): Exceptions from follower reactions can't reject the proclaim, but we should
+      // catch and handle and/or expose them to the proclaim originator somehow.
       () => result.getFollowerReactions(),
       // TODO(iridian): Exceptions from upstream signal failure and possible heresy: we should
       // catch and have logic for either retrying the operation or for full rejection.
       // Nevertheless flushing the corpus is needed.
-      () => result.getBackendFinalEvent(),
-    ], errorOnClaim.bind(null, new Error("claim.getFinalEvent()")));
+      () => result.getFinalStory(),
+    ], errorOnClaim.bind(null, new Error("proclaim.getStoryPremiere()")));
     return result;
-  } catch (error) { throw errorOnClaim.call(new Error("claim.finalizeResult()"), error); }
-  function errorOnClaim (wrappingError, error) {
+  } catch (error) { return errorOnClaim.call(new Error("proclaim.finalizeResult()"), error); }
+  function errorOnClaim (errorWrap, error) {
     falseProphet.wrapErrorEvent(error, wrappingError,
-        "\n\trestrictedCommand:", ...dumpObject(restrictedCommand),
+        "\n\tproclamation:", ...dumpObject(proclamation),
         "\n\tprophecy:", ...dumpObject(prophecy),
         "\n\tresult:", ...dumpObject(result));
   }
 }
 
-// Re-claim on application refresh commands which were cached but not yet resolved.
+// Re-proclaim on application refresh commands which were cached but not yet resolved.
 // The command is already universalized and there's no need to collect handler return values.
-export function _repeatClaim (falseProphet: FalseProphet, universalCommand: Command) {
-  if (falseProphet._prophecyByCommandId[universalCommand.commandId]) return undefined; // dedup
-  // falseProphet.warnEvent("\n\trepeatClaim", universalCommand.commandId, universalCommand,
+export function _repeatClaim (falseProphet: FalseProphet, command: Command) {
+  if (falseProphet._prophecyByCommandId[command.commandId]) return undefined; // dedup
+  // falseProphet.warnEvent("\n\trepeatClaim", command.commandId, command,
   //    ...falseProphet._dumpStatus());
-  const prophecy = falseProphet._fabricateProphecy(universalCommand,
-      `re-claim ${universalCommand.commandId.slice(0, 13)}...`);
+  const prophecy = falseProphet._fabricateProphecy(command,
+      `re-proclaim ${command.commandId.slice(0, 13)}...`);
   falseProphet._revealProphecyToAllFollowers(prophecy);
   return prophecy;
 }
 
-function _extractSubOpsFromClaim (falseProphet: FalseProphet, claim: Command,
+function _extractSubOpsFromClaim (falseProphet: FalseProphet, proclamation: Proclamation,
     operation: Object) {
-  operation.command = getActionFromPassage(claim);
+  operation.proclamation = proclamation;
+  operation.partitionCommands = {};
   operation.subOperations = [];
   const missingConnections = [];
-  if (!claim.partitions) {
-    throw new Error("command is missing partition information");
+  if (!proclamation.partitions) {
+    throw new Error("proclamation is missing partition information");
   }
   const remotes = [];
   const locals = [];
   const memorys = [];
-  Object.keys(claim.partitions).forEach((partitionURIString) => {
+  Object.keys(proclamation.partitions).forEach((partitionURIString) => {
     const connection = falseProphet._connections[partitionURIString];
     if (!connection) {
       missingConnections.push(createPartitionURI(partitionURIString));
       return;
     }
+    const commandEvent = extractCommandOf(falseProphet, proclamation, partitionURIString,
+        connection);
+    operation.partitionCommands[partitionURIString] = commandEvent;
     (connection.isRemoteAuthority() ? remotes
         : connection.isLocallyPersisted() ? locals
-        : memorys).push({
-          connection,
-          commandEvent: _extractSubCommand(falseProphet, claim, partitionURIString, connection),
-        });
+        : memorys).push({ connection, commandEvent });
   });
   if (remotes.length) operation.subOperations.push({ name: "remotes", partitions: remotes });
   if (locals.length) operation.subOperations.push({ name: "locals", partitions: locals });
@@ -112,34 +116,35 @@ function _extractSubOpsFromClaim (falseProphet: FalseProphet, claim: Command,
   }
 }
 
-function _extractSubCommand (falseProphet: FalseProphet, claim: Command, partitionURIString: string,
-    connection: FalseProphetPartitionConnection) {
+function extractCommandOf (falseProphet: FalseProphet, proclamation: Proclamation,
+    partitionURIString: string, connection: FalseProphetPartitionConnection) {
   let ret;
   try {
-    if (!(claim.partitions || {})[partitionURIString]) return undefined;
-    ret = { ...claim };
+    if (!(proclamation.partitions || {})[partitionURIString]) return undefined;
+    ret = { ...proclamation };
     delete ret.partitions;
     if (!ret.version) {
       // TODO(iridian): Fix @valos/raem so that it doesn't generate these in the first place.
       delete ret.commandId;
     }
-    if (Object.keys(claim.partitions).length !== 1) {
-      if (!isTransactedLike(claim)) {
+    if (Object.keys(proclamation.partitions).length !== 1) {
+      if (!isTransactedLike(proclamation)) {
         throw new Error("Non-TRANSACTED-like multipartition commands are not supported");
       }
-      ret.actions = claim.actions.map(action =>
-          _extractSubCommand(falseProphet, action, partitionURIString, connection))
+      ret.actions = proclamation.actions.map(action =>
+          extractCommandOf(falseProphet, action, partitionURIString, connection))
               .filter(notFalsy => notFalsy);
       if (!ret.actions.length) {
         throw new Error(`INTERNAL ERROR: No TRANSACTED-like.actions found for current partition ${
-            ""}in a multi-partition TRANSACTED-like command`);
+            ""}in a multi-partition TRANSACTED-like proclamation`);
       }
     }
     return ret;
   } catch (error) {
     throw falseProphet.wrapErrorEvent(error,
-        new Error(`_extractSubCommand(${connection.getName()})`),
-        "\n\tclaim:", ...dumpObject(claim),
+        new Error(`extractCommandOf(${connection.getName()})`),
+        "\n\tclaim:", ...dumpObject(proclamation),
+        "\n\tclaim partitions:", ...dumpObject(proclamation.partitions),
         "\n\tcurrent ret:", ...dumpObject(ret),
     );
   }
@@ -151,7 +156,7 @@ function _initiateSubOpConnectionValidation (falseProphet: FalseProphet, operati
       partition.connection = thenChainEagerly(partition.connection.getSyncedConnection(),
         (syncedConnection) => {
           if (partition.connection.isFrozen()) {
-            throw new Error(`Trying to claim a command to a frozen partition ${
+            throw new Error(`Trying to proclaim to a frozen partition ${
               partition.connection.getName()}`);
           }
           // Perform other partition validation
@@ -169,9 +174,10 @@ async function _processClaim (falseProphet: FalseProphet, operation: Object) {
     try {
       await _processClaimSubOp(falseProphet, subOperation);
     } catch (error) {
-      throw falseProphet.wrapErrorEvent(error, new Error("claim._processClaim"),
+      throw falseProphet.wrapErrorEvent(error,
+          new Error(`proclaim._processClaimSubOp(${subOperation.name})`),
           "\n\toperation:", ...dumpObject(operation),
-          "\n\tsubOperation:", ...dumpObject(subOperation),
+          "\n\tsubOperation.partitions:", ...dumpObject(subOperation.partitions),
           "\n\tthis:", falseProphet);
     }
   }
@@ -184,13 +190,13 @@ async function _processClaimSubOp (falseProphet: FalseProphet, subOperation: Obj
     // conditions (started in _initiateSubOpConnectionValidation)
     await Promise.all(subOperation.partitions.map(partition => partition.connection));
   } catch (error) {
-    throw falseProphet.wrapErrorEvent(error, "claim.subOp.connection");
+    throw falseProphet.wrapErrorEvent(error, "proclaim.subOp.connection");
   }
 
-  // Persist the command and add refs to all associated event bvobs.
-  // This is necessary for command reattempts so that the bvobs are not
-  // garbage collected on browser refresh. Otherwise they can't be
-  // reuploaded if their upload didn't finish before refresh.
+  // Persist the proclamation and add refs to all associated event bvobs.
+  // This is necessary for proclamation reattempts so that the bvobs
+  // are not garbage collected on browser refresh. Otherwise they can't
+  // be reuploaded if their upload didn't finish before refresh.
   // TODO(iridian): Implement.
 
   // Wait for remote bvob persists to complete.
@@ -200,22 +206,22 @@ async function _processClaimSubOp (falseProphet: FalseProphet, subOperation: Obj
   // Maybe determine eventId's beforehand?
 
   // Get eventId and scribe persist finalizer for each partition
-  const partitionAuthorizations = [];
+  const truths = [];
   for (const { connection, commandEvent } of subOperation.partitions) {
     let eventChronichling;
     try {
       eventChronichling = (await connection.chronicleEventLog(
           [commandEvent], { reduced: true })).eventResults[0];
-      partitionAuthorizations.push(eventChronichling.getAuthorizedEvent());
+      truths.push(eventChronichling.getTruthEvent());
     } catch (error) {
       throw falseProphet.wrapErrorEvent(error,
-          new Error(`claim.process.subOp["${connection.getName()}"].chonicleEventLog`),
+          new Error(`proclaim.process.subOp["${connection.getName()}"].chonicleEventLog`),
           "\n\tcommandEvent:", ...dumpObject(commandEvent),
           "\n\tevent chronichling:", ...dumpObject(eventChronichling),
       );
     }
   }
-  await Promise.all(partitionAuthorizations);
+  await Promise.all(truths);
 }
 
 /*
@@ -226,7 +232,7 @@ while (falseProphet._claimOperationQueue[0] !== operation) {
     try {
       await falseProphet._claimOperationQueue[0].pendingClaim;
     } catch (error) {
-      // Silence errors which arise from other claim operations.
+      // Silence errors which arise from other proclaim operations.
     }
   }
 }
@@ -243,24 +249,25 @@ if (falseProphet.getDebugLevel() === 1) {
           ? "queuing a remote command locally"
           : "claiming a local event"} of authority "${authorityURIs[0]}":`,
       "\n\tpartitions:", ...partitionDatas.map(([, conn]) => conn.getName()),
-      "\n\tcommand:", operation.command);
+      "\n\tcommand:", operation.proclamation);
 }
 
 if (!remoteAuthority) {
-  const event = { ...operation.command };
+  const event = { ...operation.proclamation };
   try {
     partitionDatas.map(([, connection]) =>
         connection._receiveTruthOf("localAuthority", event));
   } catch (error) {
-    throw falseProphet.wrapErrorEvent(error, new Error("claim.local.onConfirmTruth"));
+    throw falseProphet.wrapErrorEvent(error, new Error("proclaim.local.onConfirmTruth"));
   }
-  return operation.command;
+  return operation.proclamation;
 }
 let ret;
 try {
-  ret = await remoteAuthority.claim(operation.command, operation.options).getFinalEvent();
+  ret = await remoteAuthority.proclaim(operation.proclamation, operation.options)
+      .getStoryPremiere();
 } catch (error) {
-  throw falseProphet.wrapErrorEvent(error, new Error("claim.remoteAuthority.claim"));
+  throw falseProphet.wrapErrorEvent(error, new Error("proclaim.remoteAuthority.proclaim"));
 }
 if (falseProphet.getDebugLevel() === 1) {
   falseProphet.logEvent(1, `Done claiming remote command of authority`, remoteAuthority,

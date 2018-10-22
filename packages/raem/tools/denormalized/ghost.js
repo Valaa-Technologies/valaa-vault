@@ -61,7 +61,7 @@
  * wrappers to resource (and they should), they need to observe for such changes to update their
  * references.
  */
-import Command, { created, destroyed, transacted } from "~/raem/command";
+import { Action, created, destroyed, transacted } from "~/raem/command";
 import { vRef, getRawIdFrom, tryGhostPathFrom } from "~/raem/ValaaReference";
 import type { VRef, IdData } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import GhostPath from "~/raem/tools/denormalized/GhostPath";
@@ -90,7 +90,7 @@ export function isGhost (idDataOrTransient: IdData | Transient): boolean {
   return ghostPath ? ghostPath.isGhost() : false;
 }
 
-export function createMaterializeGhostAction (state: State, ghostId: VRef): ?Command {
+export function createMaterializeGhostAction (state: State, ghostId: VRef): ?Action {
   try {
     return createMaterializeGhostPathAction(state, ghostId.getGhostPath());
   } catch (error) {
@@ -99,7 +99,7 @@ export function createMaterializeGhostAction (state: State, ghostId: VRef): ?Com
   }
 }
 
-export function createImmaterializeGhostAction (state: State, ghostId: VRef): ?Command {
+export function createImmaterializeGhostAction (state: State, ghostId: VRef): ?Action {
   const actions = [];
   _createImmaterializeGhostAction(state, ghostId.rawId(), actions);
   return !actions.length ? undefined
@@ -108,9 +108,9 @@ export function createImmaterializeGhostAction (state: State, ghostId: VRef): ?C
 }
 
 export function createMaterializeGhostPathAction (state: State, ghostObjectPath: GhostPath,
-    typeName: string): ?Command {
+    typeName: string): ?Action {
   const actions = [];
-  invariantify(ghostObjectPath.isGhost(), "materializeGhostPathCommand.ghostObjectPath.isGhost");
+  invariantify(ghostObjectPath.isGhost(), "materializeGhostPathAction.ghostObjectPath.isGhost");
   _createMaterializeGhostAction(state, ghostObjectPath, typeName, actions);
   return !actions.length ? undefined
       : actions.length === 1 ? actions[0]
@@ -118,7 +118,7 @@ export function createMaterializeGhostPathAction (state: State, ghostObjectPath:
 }
 
 function _createMaterializeGhostAction (state: State, ghostObjectPath: GhostPath, typeName: string,
-    outputActions: Array<Command>): { id: string, actualType: string, ghostPath: GhostPath } {
+    outputActions: Array<Action>): { id: string, actualType: string, ghostPath: GhostPath } {
   // TODO(iridian): This whole segment needs to be re-evaluated now with the introduction of the
   // "ghostOwnlings"/"ghostOwner" coupling introduction. Specifically: owners
   // would not need to be materialized. However, parts of the code-base still operate under the
@@ -192,7 +192,7 @@ function _createMaterializeGhostAction (state: State, ghostObjectPath: GhostPath
 }
 
 export function createImmaterializeGhostPathAction (state: State, ghostObjectPath: GhostPath):
-    ?Command {
+    ?Action {
   const actions = [];
   _createImmaterializeGhostAction(state, ghostObjectPath.headRawId(), actions);
   return !actions.length ? undefined
@@ -201,7 +201,7 @@ export function createImmaterializeGhostPathAction (state: State, ghostObjectPat
 }
 
 function _createImmaterializeGhostAction (state: State, rawId: string,
-    outputActions: Array<Command>) {
+    outputActions: Array<Action>) {
   // FIXME(iridian): Right now immaterialization happens through DESTROYED. However this does not
   // obey ghostbuster rule: DESTROYED should destroy the ghost object for real, not just
   // immaterialize it as it does now. Also, DESTROYED doesn't affect materializedGhosts.

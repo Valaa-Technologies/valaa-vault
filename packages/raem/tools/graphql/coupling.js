@@ -37,21 +37,21 @@ export function toOne ({ coupledField, defaultCoupledField, alias, owned, whenUn
       "Can only specify either coupledField or defaultCoupledField");
   return coupledField ? {
     coupledField, alias, owned, whenUnmatched, preventsDestroy,
-    createCoupleToRemoteCommand: (id, typeName, coupledFieldName, localId) =>
+    createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId) =>
         modified({ id, typeName, dontUpdateCouplings: true,
           sets: { [coupledFieldName]: localId },
         }),
-    createUncoupleFromRemoteCommand: (id, typeName, coupledFieldName) =>
+    createUncoupleFromRemoteAction: (id, typeName, coupledFieldName) =>
         modified({ id, typeName, dontUpdateCouplings: true,
           sets: { [coupledFieldName]: null },
         }),
   } : {
     defaultCoupledField, alias, owned, whenUnmatched, preventsDestroy,
-    createCoupleToRemoteCommand: (id, typeName, coupledFieldName, localId, localFieldName) =>
+    createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
         modified({ id, typeName, dontUpdateCouplings: true,
           sets: { [coupledFieldName]: localId.coupleWith(localFieldName) },
         }),
-    createUncoupleFromRemoteCommand: (id, typeName, coupledFieldName) =>
+    createUncoupleFromRemoteAction: (id, typeName, coupledFieldName) =>
         modified({ id, typeName, dontUpdateCouplings: true,
           sets: { [coupledFieldName]: null },
         }),
@@ -65,21 +65,21 @@ export function toMany ({ coupledField, defaultCoupledField, alias, owned, whenU
       "Can only specify either coupledField or defaultCoupledField");
   return coupledField ? {
     coupledField, alias, owned, whenUnmatched, preventsDestroy,
-    createCoupleToRemoteCommand: (id, typeName, coupledFieldName, localId) =>
+    createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId) =>
         modified({ id, typeName, dontUpdateCouplings: true,
           adds: { [coupledFieldName]: [localId] },
         }),
-    createUncoupleFromRemoteCommand: (id, typeName, coupledFieldName, localId) =>
+    createUncoupleFromRemoteAction: (id, typeName, coupledFieldName, localId) =>
         modified({ id, typeName, dontUpdateCouplings: true,
           removes: { [coupledFieldName]: [localId] },
         }),
   } : {
     defaultCoupledField, alias, owned, whenUnmatched, preventsDestroy,
-    createCoupleToRemoteCommand: (id, typeName, coupledFieldName, localId, localFieldName) =>
+    createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
         modified({ id, typeName, dontUpdateCouplings: true,
           adds: { [coupledFieldName]: [localId.coupleWith(localFieldName)] },
         }),
-    createUncoupleFromRemoteCommand: (id, typeName, coupledFieldName, localId, localFieldName) =>
+    createUncoupleFromRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
         modified({ id, typeName, dontUpdateCouplings: true,
           removes: { [coupledFieldName]: [localId.coupleWith(localFieldName)] },
         }),
@@ -97,11 +97,11 @@ export function toManyOwnlings (fields = {}) {
 export function toOwner (defaultCoupledField = "unnamedOwnlings") {
   return {
     defaultCoupledField,
-    createCoupleToRemoteCommand: (id, typeName, coupledFieldName, localId, localFieldName) =>
+    createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
         modified({ id, typeName, dontUpdateCouplings: true,
           sets: { [coupledFieldName]: localId.coupleWith(localFieldName) },
         }),
-    createUncoupleFromRemoteCommand: (id, typeName) =>
+    createUncoupleFromRemoteAction: (id, typeName) =>
         destroyed({ id, typeName, dontUpdateCouplings: true }),
   };
 }

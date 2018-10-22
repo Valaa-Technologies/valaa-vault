@@ -28,7 +28,7 @@ export function validateDuplicated (command: Duplicated): Command {
   const {
     type, id, duplicateOf, preOverrides, initialState,
     // eslint-disable-next-line no-unused-vars
-    version, commandId, partitions, parentId, timeStamp,
+    version, commandId, eventId, partitions, parentId, timeStamp,
     // deprecateds,
     owner, instancePrototype, ghostPrototype,
     ...unrecognized

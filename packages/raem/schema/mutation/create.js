@@ -30,7 +30,7 @@ const create = {
   },
   resolve: async (context, args/* , info */) => {
     try {
-      const command = await context.store.dispatch({
+      const proclamation = await context.store.dispatch({
         ...created({
           id: args.input.id,
           typeName: args.input.typeName,
@@ -39,7 +39,7 @@ const create = {
         bvobStubs: context.bvobStubs,
       });
       return {
-        clientMutationId: command.id,
+        clientMutationId: proclamation.id,
       };
     } catch (error) {
       console.error(error.message, error.stack);

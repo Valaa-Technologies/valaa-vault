@@ -1,7 +1,7 @@
 // @flow
 
 
-import type Command, { Action, UniversalEvent } from "~/raem/command";
+import { Action, UniversalEvent } from "~/raem/command";
 import type { State } from "~/raem/tools/denormalized/State";
 import { isRestrictedCommand } from "~/raem/redux/Bard";
 
@@ -17,12 +17,13 @@ import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
 import { _fabricateProphecy, _revealProphecyToAllFollowers } from "./_prophecyOps";
 import { _receiveTruth, _reviewProphecy } from "./_reformationOps";
-import { _claim, _repeatClaim } from "./_claimOps";
+import { _proclaim, _repeatClaim } from "./_proclamationOps";
 
+export class Proclamation extends Action {}
 
 export type ClaimResult = {
   prophecy: Prophecy;
-  getFinalEvent: () => Promise<Command>;
+  getStoryPremiere: () => Promise<Action>;
 }
 
 /**
@@ -30,12 +31,12 @@ export type ClaimResult = {
  * to backend event streams.
  * In addition to the proxy and cache functionality the main localized responsibility of the
  * FalseProphet is to manage the non-authorized Prophecy queues. When upstream purges some
- * previously dispatched command claim, FalseProphet is responsible for reforming the cache by
+ * previously dispatched proclamation, FalseProphet is responsible for reforming the cache by
  * reviewing and reapplying all commands that come after the purged commands. This reapplication
  * can also include the purged commands themselves if the purge was not a discard but a basic
  * resequencing.
- * Finally, FalseProphet initiates the universalisation process, where so-called restricted commands
- * coming from downstream via .claim (whose meaning is well-defined only in current FalseProphet)
+ * Finally, FalseProphet initiates the universalisation process, where proclamations coming from
+ * downstream via .proclaim (whose meaning is well-defined only in current FalseProphet)
  * get rewritten as universal commands, whose meaning is well-defined for all clients.
  * This process is carried out and more closely documented by @valos/raem/redux/Bard and the
  * reducers contained within the FalseProphet.
@@ -74,31 +75,31 @@ export default class FalseProphet extends Prophet {
     return new FalseProphetDiscourse({ prophet: this, follower });
   }
 
-  // Handle a restricted command claim towards upstream.
-  claim (restrictedCommand: Command, options:
+  // Process and transmit a proclamation towards upstream.
+  proclaim (proclamation: Proclamation, options:
       { timed: Object, transactionInfo: TransactionInfo } = {}): ClaimResult {
-    invariantifyString(restrictedCommand.type, "restrictedCommand.type, with restrictedCommand:",
-        { restrictedCommand });
-    return _claim(this, restrictedCommand, options);
+    invariantifyString(proclamation.type, "proclamation.type, with proclamation:",
+        { proclamation });
+    return _proclaim(this, proclamation, options);
   }
 
-  // Re-claim commands on application refresh which were cached during earlier executions.
+  // Reclaim commands on application refresh which were cached during earlier executions.
   // The command is already universalized and there's no need to collect handler return values.
-  repeatClaim (universalCommand: Command) {
-    invariantify(universalCommand.commandId, "repeatClaim.universalCommand.commandId");
-    return _repeatClaim(this, universalCommand);
+  repeatClaim (proclamation: Proclamation) {
+    invariantify(proclamation.commandId, "repeatClaim.proclamation.commandId");
+    return _repeatClaim(this, proclamation);
   }
 
   // Handle event confirmation coming from upstream, including a possible reformation.
   // Sends notifications downstream on the confirmed events.
-  // Can also send new command claims upstream if old commands get rewritten during reformation.
+  // Might result in proclamation reclaims and thus fresh upstream command chroniclings.
   receiveTruth (truthEvent: UniversalEvent, purgedCommands?: Array<UniversalEvent>) {
     return _receiveTruth(this, truthEvent, purgedCommands);
   }
 
   /**
-   * Applies given action (which can be restricted upstream command claim, universalized command
-   * replay or a downstream event) to the corpus.
+   * Applies given action (which can be a downstream event or an upstream proclamation or command
+   * reclaim.
    * Returns a Prophecy object which contains the action itself and the corpus state before and
    * after the action.
    *
@@ -108,10 +109,10 @@ export default class FalseProphet extends Prophet {
   _fabricateProphecy (action: Action,
       dispatchDescription: string, timed: ?UniversalEvent = undefined,
       transactionInfo?: TransactionInfo) {
-    const restrictedCommand = isRestrictedCommand(action) ? action : undefined;
+    const proclamation = isRestrictedCommand(action) ? action : undefined;
     try {
       return _fabricateProphecy(this, action, dispatchDescription, timed, transactionInfo,
-          restrictedCommand);
+          proclamation);
     } catch (error) {
       throw this.wrapErrorEvent(error, `_fabricateProphecy(${dispatchDescription})`,
           "\n\taction:", action,

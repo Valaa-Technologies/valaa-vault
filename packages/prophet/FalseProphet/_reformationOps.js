@@ -138,10 +138,10 @@ export function _finishReformation (falseProphet: FalseProphet, reformation:
 export function _reviewProphecy (falseProphet: FalseProphet, reformation: Object,
     oldProphecy: Prophecy) {
   let universalisableCommand;
-  if (oldProphecy.restrictedCommand) {
-    universalisableCommand = createUniversalizableCommand(oldProphecy.restrictedCommand);
+  if (oldProphecy.proclamation) {
+    universalisableCommand = createUniversalizableCommand(oldProphecy.proclamation);
   } else {
-    throw new Error(`A prophecy under review should always have .restrictedCommand ${
+    throw new Error(`A prophecy under review should always have .proclamation ${
         ""} ie. originate from the local context`);
     // universalisableCommand = { ...Object.getPrototypeOf(oldProphecy.story) };
     // delete universalisableCommand.partitions;
@@ -160,14 +160,15 @@ export function _reviewProphecy (falseProphet: FalseProphet, reformation: Object
         "\n\told prophecy:", oldProphecy,
         ...falseProphet._dumpStatus());
     //*/
-    const {/* prophecy,*/ getFinalEvent } = falseProphet._upstream.claim(universalisableCommand);
+    const {/* prophecy,*/ getStoryPremiere } =
+        falseProphet._upstream.proclaim(universalisableCommand);
     (async () => {
       try {
-        await getFinalEvent();
+        await getStoryPremiere();
         /*
-        const finalEvent = await getFinalEvent();
+        const finalStory = await getStoryPremiere();
         falseProphet.warnEvent("\n\t_reviewProphecy success:",
-            "\n\treformation:", reformation, prophecy, finalEvent);
+            "\n\treformation:", reformation, prophecy, finalStory);
         //*/
       } catch (error) {
         outputError(falseProphet.wrapErrorEvent(error,

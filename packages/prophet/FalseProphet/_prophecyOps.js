@@ -1,16 +1,16 @@
 // @flow
 
-import type Command, { Action, UniversalEvent } from "~/raem/command";
+import { Action, UniversalEvent } from "~/raem/command";
 import { createUniversalizableCommand } from "~/raem/redux/Bard";
 
 import Prophecy from "~/prophet/api/Prophecy";
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
-import FalseProphet from "./FalseProphet";
+import FalseProphet, { Proclamation } from "./FalseProphet";
 
 export function _fabricateProphecy (falseProphet: FalseProphet, action: Action,
     dispatchDescription: string, timed: ?UniversalEvent, transactionInfo?: TransactionInfo,
-    restrictedCommand: Command) {
+    proclamation: Proclamation) {
   const previousState = falseProphet.getState();
   let story = (transactionInfo && transactionInfo.tryFastForwardOnCorpus(falseProphet.corpus));
   if (!story) {
@@ -20,10 +20,10 @@ export function _fabricateProphecy (falseProphet: FalseProphet, action: Action,
           "\n\trestrictedTransacted:", action);
     }
     story = falseProphet.corpus.dispatch(
-        !restrictedCommand ? action : createUniversalizableCommand(restrictedCommand),
+        !proclamation ? action : createUniversalizableCommand(proclamation),
         dispatchDescription);
   }
-  const prophecy = new Prophecy(story, falseProphet.getState(), previousState, restrictedCommand,
+  const prophecy = new Prophecy(story, falseProphet.getState(), previousState, proclamation,
       timed);
   prophecy.id = story.commandId;
   _addProphecy(falseProphet, prophecy);

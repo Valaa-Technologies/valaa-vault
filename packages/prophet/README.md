@@ -31,7 +31,7 @@ PartitionConnections it allows reading, writing and interpreting
 the content. Entity in turn provides directory-like hierarchies for
 Medias and other Entitys.
 
-This package also extends command/event semantics defined in
+This package also extends command/truth event semantics defined in
 @valos/raem with the concepts of restricted and universal commands.
 
 This package also provides various Prophet component javascript
@@ -118,7 +118,7 @@ Receiving and sending information to a partition is done using
 a *PartitionConnection*. With the the Prophet that provided
 the connection it manages four types of information streams:
   1. commands sent towards upstream
-  2. events received towards downstream
+  2. truths received towards downstream
   3. media content uploaded to upstream
   4. media content downloaded from upstream
 
@@ -197,8 +197,9 @@ host object associated with the context resource.
 
 ## 3. Only *universal* commands are accepted by the upstream
 
-Restricted commands are commands created by downstream components and
-which target a particular partition but for which some of the relevant
+TODO(iridian): Update outdated documentation
+Restricted proclamations are commands created by downstream components
+and which target a particular partition but for which some of the relevant
 data is found only in other partitions (such as a cross-partition
 DUPLICATED command). Before a restricted command can be sent upstream
 (from where it might reach other users which might not even have

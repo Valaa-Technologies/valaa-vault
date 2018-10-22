@@ -157,9 +157,9 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
   });
 
-  function testPropertyByExpressionAssignments (commands, getThisAndScope) {
+  function testPropertyByExpressionAssignments (proclamations, getThisAndScope) {
     it("assigns numbers", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsTen = 1;
       `);
@@ -172,7 +172,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("assigns strings", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsTen = 'hello';
       `);
@@ -185,7 +185,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("assigns booleans", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsTen = true;
       `);
@@ -198,7 +198,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("assigns JSON", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsTen = { prop1: 2, prop2: 1 };
       `);
@@ -211,7 +211,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("assigns null", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsTen = null;
       `);
@@ -224,7 +224,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles addition", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsUndefined = 1 + 1;
       `);
@@ -237,7 +237,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles subtraction", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsUndefined = 1 - 3;
       `);
@@ -250,7 +250,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles multiplication", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsUndefined = 5 * 3;
       `);
@@ -263,7 +263,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles division", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsUndefined = 5 / 3;
       `);
@@ -276,7 +276,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles modulo", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsUndefined = 999 % 500;
       `);
@@ -289,7 +289,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles unary minus", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsUndefined = -999;
       `);
@@ -302,7 +302,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles exponentiation", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsToOwnling = 5 ** 7;
       `);
@@ -316,7 +316,7 @@ describe("transpileValaaScriptBody with Engine", () => {
 
     /* eslint-disable no-bitwise */
     it("handles bitwise AND", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsToOwnling = 12 & 2;
       `);
@@ -329,7 +329,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles bitwise OR", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsToOwnling = 12 | 2;
       `);
@@ -342,7 +342,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles bitwise XOR", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsToOwnling = 12 ^ 2;
       `);
@@ -355,7 +355,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles bitwise NOT", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsToOwnling = ~2;
       `);
@@ -368,7 +368,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles bit shift left", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsToOwnling = 5 << 3;
       `);
@@ -381,7 +381,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles bit shift right", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsToOwnling = 5 >> 3;
       `);
@@ -394,9 +394,9 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
   }
 
-  function testStatementOperations (commands, getThisAndScope) {
+  function testStatementOperations (proclamations, getThisAndScope) {
     it("handles if and true '>'", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           if (10 > 1) this.startsToOwnling = 'then';
           this.startsToOwnling;
@@ -410,7 +410,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles if and false '!=='", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           if (2 !== 2); else this.startsToOwnling = 'else';
           this.startsToOwnling;
@@ -424,7 +424,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles if and true field-to-field with '!=' with block", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           if (this.startsAsTen != this.startsAsUndefined) { this.startsToOwnling = 'then'; }
           this.startsToOwnling;
@@ -438,7 +438,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles if and true < with 'wrong' block", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           if (9 < this.startsAsTen); else { this.startsToOwnling = 'else'; }
           this.startsToOwnling;
@@ -452,7 +452,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles if and false <= with content in both blocks", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           if (this.startsAsTen <= null) {
             this.startsToOwnling = 'then';
@@ -470,7 +470,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles ternary >=", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsUndefined = (null >= 0) ? 1 : '';
       `);
@@ -483,7 +483,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles pointer-!", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           if (!this.startsToOwnling) {
             this.startsAsUndefined = 10;
@@ -501,7 +501,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles undefined-!! with scope assignment and explicit VALK kuery usage", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           var scopeVar = 10;
           if (!!this.startsAsUndefined) {
@@ -518,7 +518,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles && with no short-circuit", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           var scopeVar = true && this.startsToOwnling;
           if (scopeVar) {
@@ -535,7 +535,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles || with short-circuit", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           const scopeEarlier = this.startsAsTen;
           var scopeVar = this.startsToOwnling || scopeEarlier;
@@ -553,7 +553,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles bit shift zero fill right into plain object member", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           let object = { field: 5 >>> 3 };
           this.startsAsUndefined = object.field;
@@ -567,7 +567,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("assigns scope lookups in place of identifiers", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsUndefined = startsAsTen;
       `);
@@ -580,7 +580,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("assigns property values in place of this identifiers", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsUndefined = this.startsToOwnling;
       `);
@@ -593,7 +593,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("assigns property values in place of this identifiers (deep 1)", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsToOwnling.counter = this.startsAsTen;
       `);
@@ -606,7 +606,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles +=", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           this.startsAsTen += 5;
       `);
@@ -619,7 +619,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles -=", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           const scopeValue = (this.startsAsTen += 5) + 2;
           scopeValue;
@@ -633,7 +633,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles *=", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           let scopeValue = this.startsAsTen + 2;
           scopeValue *= this.startsToOwnling.ownling_counter;
@@ -652,7 +652,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("handles if statements", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           if (startsAsTen !== startsToOwnling) { this.newValue = 1; } else { this.newValue = 2; }
           this.newValue;
@@ -706,9 +706,9 @@ describe("transpileValaaScriptBody with Engine", () => {
     testStatementOperations(...args);
   });
 
-  function testScopeManipulations (commands, getThisAndScope) {
+  function testScopeManipulations (proclamations, getThisAndScope) {
     it("extracts scope value through identifier", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           startsAsTen;
       `);
@@ -719,7 +719,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("sets a scope value through identifier", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           startsAsTen = 20;
       `);
@@ -732,7 +732,7 @@ describe("transpileValaaScriptBody with Engine", () => {
     });
 
     it("retains the original scope value if a shadowing variable is altered", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, commands);
+      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, proclamations);
       const kuery = transpileValaaScriptTestBody(`
           let startsAsTen = 10;
           startsAsTen = 20;

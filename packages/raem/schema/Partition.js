@@ -56,7 +56,7 @@ Resource to always be locateable from anywhere.`,
 // TODO(iridian): Implement partitions.
       ...generatedField("partitionSnapshot", new GraphQLNonNull(GraphQLString),
           `JSON containing a minimal elementary TRANSACTED event (containing only
-elementary events) that when executed reconstructs this ${objectDescription} state, without history
+elementary actions) that when executed reconstructs this ${objectDescription} state, without history
 and excluding child Partition's (replacing them with reference thunks).`,
           partitionSnapshotResolver,
       ),
@@ -64,7 +64,7 @@ and excluding child Partition's (replacing them with reference thunks).`,
 // TODO(iridian): Implement partitions.
       ...generatedField("partitionDeepSnapshot", new GraphQLNonNull(GraphQLString),
           `JSON containing a minimal elementary TRANSACTED event (containing only
-elementary events) that when executed reconstructs this ${objectDescription} state, without history
+elementary actions) that when executed reconstructs this ${objectDescription} state, without history
 but which includes the full state of child Partition's as well.`,
           partitionDeepSnapshotResolver,
       ),

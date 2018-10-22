@@ -129,8 +129,8 @@ describe("ghost lookups", () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createTestObj, createTestObjInst);
     let ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
-    const materializeCommand = createMaterializeGhostAction(harness.getState(), ghostOwnling);
-    harness.dispatch(materializeCommand);
+    const materializeProclamation = createMaterializeGhostAction(harness.getState(), ghostOwnling);
+    harness.dispatch(materializeProclamation);
     ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
 
@@ -398,7 +398,7 @@ describe("mutations", () => {
   });
 
   it("MODIFIED commands on a Prototype should reflect as new field values on all Instances and" +
-     "their ghosts as appropriate", () => {
+      "their ghosts as appropriate", () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createData, createBlankInstance);
 
     // Test instance

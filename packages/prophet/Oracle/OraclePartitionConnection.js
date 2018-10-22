@@ -49,8 +49,8 @@ export default class OraclePartitionConnection extends PartitionConnection {
    * 2. scribe in-memory and IndexedDB caches
    * 3. authority connection.narrateEventLog (only if options.lastEventId is given)
    *
-   * If lastEventId is not specified, all the explicit eventLog and local cache events (starting
-   * from the optional firstEventId) are narrated.
+   * If lastEventId is not specified, all the explicit eventLog and locally cached events (both
+   * truths and queued commands starting from the optional firstEventId) are narrated.
    *
    *
    * @param {ConnectOptions} options

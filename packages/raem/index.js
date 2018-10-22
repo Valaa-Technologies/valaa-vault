@@ -16,6 +16,9 @@ export {
 } from "./Corpus";
 export {
                            default as Command,
+                                      Action,
+                                      Truth,
+                                      UniversalEvent,
 } from "./command/Command";
 export {
                            default as ValaaReference,

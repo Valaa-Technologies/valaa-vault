@@ -14,7 +14,7 @@ import { dumpObject } from "~/tools";
  */
 export default class FalseProphetPartitionConnection extends PartitionConnection {
   _firstNonAuthorizedCommandId: number = 0;
-  _nonAuthorizedCommands: UniversalEvent[] = [];
+  _pendingCommands: UniversalEvent[] = [];
   _eventsPendingSequencing: UniversalEvent[] = [];
   _isFrozen: ?boolean;
 
@@ -27,14 +27,8 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   narrateEventLog (options: NarrateOptions = {}): Promise<Object> {
     return super.narrateEventLog({
       ...options,
-      receiveEvent: (truthEvent: UniversalEvent) => {
-        const ret = this.receiveEvent(truthEvent);
-        return !options.receiveEvent ? ret : options.receiveEvent(truthEvent);
-      },
-      receiveCommand: (commandEvent: UniversalEvent) => {
-        const ret = this.receiveCommand(commandEvent);
-        return !options.receiveCommand ? ret : options.receiveCommand(commandEvent);
-      },
+      receiveTruths: this.getReceiveTruths(options.receiveTruths),
+      receiveCommands: this.getReceiveCommands(options.receiveCommands),
     });
   }
 
@@ -43,54 +37,63 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     if (!eventLog || !eventLog.length) return { eventResults: eventLog };
     if (!eventLog[0].eventId) {
       eventLog.forEach((event, index) => {
-        event.eventId = this._firstNonAuthorizedCommandId + this._nonAuthorizedCommands.length
+        event.eventId = this._firstNonAuthorizedCommandId + this._pendingCommands.length
             + index;
       });
-      if (options.reduced === true) this._addNonAuthorizedCommands(eventLog);
+      this._addNonAuthorizedCommands(eventLog);
     }
     return super.chronicleEventLog(eventLog, {
       ...options,
-      receiveEvent: this.receiveEvent.bind(this),
-      receiveCommand: this.receiveCommand.bind(this),
+      receiveTruths: this.getReceiveTruths(options.receiveTruths),
+      receiveCommands: !options.alreadyReduced && this.getReceiveCommands(options.receiveCommands),
     });
   }
 
-  receiveEvent (truthEvent: UniversalEvent) {
-    const nonAuthorizedIndex = truthEvent.eventId - this._firstNonAuthorizedCommandId;
-    if (nonAuthorizedIndex < 0) return;
-    if (nonAuthorizedIndex < this._nonAuthorizedCommands.length) {
+  receiveTruths (truthEvents: UniversalEvent[]) {
+    return truthEvents.map(this._receiveTruth).filter(notNull => notNull);
+  }
+
+  _receiveTruth = (truth: UniversalEvent) => {
+    const nonAuthorizedIndex = truth.eventId - this._firstNonAuthorizedCommandId;
+    if (nonAuthorizedIndex < 0) return undefined;
+    if (nonAuthorizedIndex < this._pendingCommands.length) {
       // const purgedCommands = await _confirmOrPurgeQueuedCommands(connection, lastNewEvent);
-      if (truthEvent.commandId === this._nonAuthorizedCommands[nonAuthorizedIndex].commandId) {
+      if (truth.commandId === this._pendingCommands[nonAuthorizedIndex].commandId) {
         // authorized
         this._firstNonAuthorizedCommandId += nonAuthorizedIndex;
-        this._nonAuthorizedCommands.splice(0, nonAuthorizedIndex);
+        this._pendingCommands.splice(0, nonAuthorizedIndex);
       } else {
         // purge
       }
     } else {
-      const eventIndex = nonAuthorizedIndex - this._nonAuthorizedCommands.length;
-      this._eventsPendingSequencing[eventIndex] = truthEvent;
+      const eventIndex = nonAuthorizedIndex - this._pendingCommands.length;
+      this._eventsPendingSequencing[eventIndex] = truth;
     }
-    if (!this._nonAuthorizedCommands.length) {
+    if (!this._pendingCommands.length) {
       while (this._eventsPendingSequencing[0]) {
         ++this._firstNonAuthorizedCommandId;
         this._prophet._fabricateProphecy(this._eventsPendingSequencing.shift(), "truth");
       }
     }
+    return truth;
   }
 
-  receiveCommand (commandEvent: UniversalEvent) {
+  receiveCommands (commands: UniversalEvent[]) {
+    return commands.map(this._receiveCommand).filter(notNull => notNull);
+  }
+
+  _receiveCommand = (commandEvent: UniversalEvent) => {
     try {
       const nonAuthorizedIndex = commandEvent.eventId - this._firstNonAuthorizedCommandId;
       if (nonAuthorizedIndex < 0) {
-        throw new Error("Can't receive commands with eventId before authorized head")
+        throw new Error("Can't receive commands with eventId before authorized head");
       }
-      if (nonAuthorizedIndex < this._nonAuthorizedCommands.length) return commandEvent;
+      if (nonAuthorizedIndex < this._pendingCommands.length) return commandEvent;
       if (this._eventsPendingSequencing.length) {
         throw new Error(
-            "Can't receive commands if there are out-of-order events pending sequencing");
+            "Can't receive commands if there are out-of-order truths pending sequencing");
       }
-      if (nonAuthorizedIndex !== this._nonAuthorizedCommands.length) {
+      if (nonAuthorizedIndex !== this._pendingCommands.length) {
         throw new Error("Can only receive commands to the end of non-authorized commands queue");
       }
       this._addNonAuthorizedCommands([commandEvent]);
@@ -100,22 +103,22 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       throw this.wrapErrorEvent(error, `receiveCommand(${commandEvent.eventId}, ${
               commandEvent.commandId})`,
           "\n\tcommandEvent:", ...dumpObject(commandEvent),
-          "\n\tnonAuthorizedCommands:", ...dumpObject([...this._nonAuthorizedCommands]),
+          "\n\tnonAuthorizedCommands:", ...dumpObject([...this._pendingCommands]),
           "\n\teventsPendingSequencing:", ...dumpObject([...this._eventsPendingSequencing]),
           "\n\tthis:", ...dumpObject(this)
       );
     }
   }
 
-  _addNonAuthorizedCommands (eventLog: UniversalEvent[]) {
-    this._nonAuthorizedCommands.push(...eventLog);
-    this.setIsFrozen(eventLog[eventLog.length - 1].type === "FROZEN");
+  _addNonAuthorizedCommands (commands: UniversalEvent[]) {
+    this._pendingCommands.push(...commands);
+    this.setIsFrozen(commands[commands.length - 1].type === "FROZEN");
     this._notifyProphetOfCommandCount();
   }
 
   _notifyProphetOfCommandCount () {
     this._prophet.setConnectionCommandCount(this.getPartitionURI().toString(),
-        this._nonAuthorizedCommands.length);
+        this._pendingCommands.length);
   }
 }
 

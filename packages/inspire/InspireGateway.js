@@ -416,7 +416,7 @@ export default class InspireGateway extends LogEventGenerator {
       const latestMediaInfos = await logs.latestMediaInfos;
       const chronicling = await connection.chronicleEventLog(eventLog, {
         name: `prologue event log for '${connection.getName()}'`,
-        authorized: true,
+        preAuthorized: true,
         firstEventId: firstUnusedEventId,
         retrieveMediaBuffer (mediaInfo: Object) {
           const latestInfo = latestMediaInfos[mediaInfo.mediaId];
@@ -432,7 +432,7 @@ export default class InspireGateway extends LogEventGenerator {
               }" during prologue narration, with bvob id "${mediaInfo.bvobId}" `);
         }
       });
-      await Promise.all(chronicling.eventResults.map(result => result.getLocallyPersistedEvent()));
+      await Promise.all(chronicling.eventResults.map(result => result.getLocallyReceivedEvent()));
     }
     // Initiate remote narration.
     const remoteNarration = connection.narrateEventLog();

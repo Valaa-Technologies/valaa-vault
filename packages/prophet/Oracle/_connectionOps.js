@@ -42,11 +42,12 @@ export async function _connect (connection: OraclePartitionConnection, options: 
 
   connection.setUpstreamConnection(await connection._authorityProphet
       .acquirePartitionConnection(connection.getPartitionURI(), {
-        subscribe: false, narrate: false, receiveEvent: connection._receiveEvent,
+        subscribe: false, narrateOptions: false,
+        receiveTruths: connection.getReceiveTruths(options.receiveTruths),
       })
       .getSyncedConnection());
 
-  const ret = await connection.narrateEventLog(options.narrate);
+  const ret = await connection.narrateEventLog(options.narrateOptions);
   if (ret) {
     const actionCount = Object.values(ret).reduce(
       (acc, log) => acc + (Array.isArray(log) ? log.length : 0), 0);
@@ -69,5 +70,5 @@ export async function _connect (connection: OraclePartitionConnection, options: 
     connection.warnEvent(1, "\n\tDone initializing connection with options", options,
         "\n\tinitial narration:", ret);
   }
-  return ret;
+  return connection;
 }

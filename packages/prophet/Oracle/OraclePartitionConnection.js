@@ -12,7 +12,6 @@ import DecoderArray from "~/prophet/Oracle/DecoderArray";
 import { addDelayedOperationEntry, dumpObject, thenChainEagerly } from "~/tools";
 // import { stringFromUTF8ArrayBuffer } from "~/tools/textEncoding";
 
-import { _chronicleEventLog, _narrateEventLog } from "./_eventLogOps";
 import { _connect } from "./_connectionOps";
 
 
@@ -64,31 +63,6 @@ export default class OraclePartitionConnection extends PartitionConnection {
     } catch (error) {
       throw this.wrapErrorEvent(error, "connect",
           "\n\toptions:", ...dumpObject(options));
-    }
-  }
-
-  async narrateEventLog (options: NarrateOptions = {}): Promise<any> {
-    const ret = {};
-    try {
-      return await _narrateEventLog(this, options, ret);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, "narrateEventLog()",
-          "\n\toptions:", ...dumpObject(options),
-          "\n\tcurrent ret:", ...dumpObject(ret),
-      );
-    }
-  }
-
-  async chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
-      Promise<{ eventResults: ChronicleEventResult[] }> {
-    const ret = {};
-    try {
-      return await _chronicleEventLog(this, eventLog, options, ret);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, "chronicleEventLog()",
-          "\n\toptions:", ...dumpObject(options),
-          "\n\tcurrent ret:", ...dumpObject(ret),
-      );
     }
   }
 

@@ -1,10 +1,11 @@
 // @flow
 
 import { created, transacted } from "~/raem/command/index";
-import { vRef } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
 
-import { createScribe, clearScribeDatabases } from "~/prophet/test/ProphetTestHarness";
+import {
+  createScribe, clearScribeDatabases, createTestMockProphet
+} from "~/prophet/test/ProphetTestHarness";
 
 import { stringFromUTF8ArrayBuffer } from "~/tools/textEncoding";
 
@@ -24,58 +25,44 @@ afterEach(async () => {
 });
 
 describe("Scribe", () => {
-  const simpleCommand = created({ id: "Some entity", typeName: "Entity" });
+  const simpleCommand = created({ eventId: 0, id: "Some entity", typeName: "Entity" });
 
-  const simpleTransaction = transacted({
+  const followupTransaction = transacted({
+    eventId: 1,
     actions: [
       created({ id: "Some relation", typeName: "Relation" }),
       created({ id: "Some other entity", typeName: "Entity" }),
     ],
   });
 
-  xit("Keeps track of the count of commands executed", async () => {
-    // TODO(iridian): Move this test false prophet. Scribe no longer
-    // tracks the pending commands.
-    let commandsCounted = 0;
-    const commandCountCallback = (count) => {
-      commandsCounted = count;
-    };
+  const simpleEntityTemplate = { typeName: "Entity", initialState: { owner: "test_partition" } };
+  const simpleCommandList = [
+    created({ id: "Entity A", eventId: 1, ...simpleEntityTemplate }),
+    created({ id: "Entity B", eventId: 2, ...simpleEntityTemplate }),
+    created({ id: "Entity C", eventId: 3, ...simpleEntityTemplate }),
+    created({ id: "Entity D", eventId: 4, ...simpleEntityTemplate }),
+    created({ id: "Entity E", eventId: 5, ...simpleEntityTemplate }),
+    created({ id: "Entity F", eventId: 6, ...simpleEntityTemplate }),
+  ];
 
-    const scribe = createScribe(commandCountCallback);
+  it("stores truths/commands in the database", async () => {
+    const scribe = createScribe(createTestMockProphet({ isLocallyPersisted: true }));
     await scribe.initialize();
-    const uri = createPartitionURI(URI);
 
-    expect(commandsCounted).toBe(0);
-
-    const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
-    expect(commandsCounted).toBe(0);
-
-    await connection.chronicleEventLog([simpleCommand])[0];
-    expect(commandsCounted).toBe(1);
-
-    // A transaction counts as one command
-    await connection.chronicleEventLog([simpleTransaction])[0];
-    expect(commandsCounted).toBe(2);
-  });
-
-  it("Stores events/commands in the database", async () => {
-    const scribe = createScribe();
-    await scribe.initialize();
-    const uri = createPartitionURI(URI);
-
-    const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
-    const database = await openDB(URI);
+    const connection = await scribe
+        .acquirePartitionConnection(testPartitionURI).getSyncedConnection();
+    const database = await openDB(testPartitionURI.toString());
 
     // Adds an entity and checks that it has been stored
-    let claimResult = await connection.chronicleEventLog([simpleCommand])[0];
-    await claimResult.finalizeLocal();
+    let claimResult = connection.chronicleEventLog([simpleCommand]).eventResults[0];
+    await claimResult.getLocallyReceivedEvent();
     await expectStoredInDB(simpleCommand, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
 
     // Runs a transaction and confirms that it has been stored
-    claimResult = await connection.chronicleEventLog([simpleTransaction])[0];
-    await claimResult.finalizeLocal();
-    await expectStoredInDB(simpleTransaction, database, "commands",
+    claimResult = connection.chronicleEventLog([followupTransaction]).eventResults[0];
+    await claimResult.getLocallyReceivedEvent();
+    await expectStoredInDB(followupTransaction, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
   });
 
@@ -86,16 +73,16 @@ describe("Scribe", () => {
     "f".repeat(262144), // 256 KB
   ];
 
-  it("Stores (and returns) utf-8 strings correctly", async () => {
-    const scribe = createScribe();
+  it("stores (and returns) utf-8 strings correctly", async () => {
+    const scribe = createScribe(createTestMockProphet({ isLocallyPersisted: true }));
     await scribe.initialize();
-    const uri = createPartitionURI(URI);
+    const uri = createPartitionURI(testAuthorityURI);
 
     const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
     const sharedDB = await openDB(sharedURI);
 
     for (const mediaContent of textMediaContents) {
-      const preparedBvob = connection.prepareBvob(mediaContent, "Some media");
+      const preparedBvob = connection.prepareBvob(mediaContent, { name: "Some media" });
       const bvobId = await preparedBvob.persistProcess;
 
       const bvobKeys = await getKeysFromDB(sharedDB, "bvobs");
@@ -110,43 +97,18 @@ describe("Scribe", () => {
     }
   });
 
-  const structuredMediaContents = [
-    [`"Hello world"`, { name: "hello.txt", type: "text", subtype: "plain" }, `"Hello world"`],
-    [`"Hello world"`, { name: "hello.txt", type: "text", subtype: "whatevs" }, `"Hello world"`],
-    [`"Hello world"`, { name: "hello.json", type: "application", subtype: "json" }, "Hello world"],
-    [`{ "a": 10 }`, { name: "a10.json", type: "application", subtype: "json" }, { a: 10 }],
-  ];
-
-  it("decodes bvob buffers based on media type", async () => {
-    const scribe = createScribe();
+  it("populates a new connection to an existing partition with its cached commands", async () => {
+    const scribe = createScribe(createTestMockProphet({ isLocallyPersisted: true }));
     await scribe.initialize();
-    const uri = createPartitionURI(URI);
-
-    const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
-
-    const mediaId = vRef("abcd-0123");
-    for (const [bufferContent, mediaInfo, expectedContent] of structuredMediaContents) {
-      const preparedBvob = connection.prepareBvob(bufferContent);
-      const bvobId = await preparedBvob.persistProcess;
-      const decodedContent =
-          await connection.decodeMediaContent({ mediaId, bvobId, ...mediaInfo });
-      expect(decodedContent).toEqual(expectedContent);
-    }
-  });
-
-  it("Populates a brand new connection to an existing partition with its pre-existing commands",
-  async () => {
-    const scribe = createScribe();
-    await scribe.initialize();
-    const uri = createPartitionURI(URI);
+    const uri = createPartitionURI(testAuthorityURI);
 
     const firstConnection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
 
-    let claimResult = firstConnection.chronicleEventLog([simpleCommand])[0];
-    await claimResult.finalizeLocal();
+    let claimResult = firstConnection.chronicleEventLog([simpleCommand]).eventResults[0];
+    await claimResult.getLocallyReceivedEvent();
 
-    claimResult = firstConnection.chronicleEventLog([simpleTransaction])[0];
-    await claimResult.finalizeLocal();
+    claimResult = firstConnection.chronicleEventLog([followupTransaction]).eventResults[0];
+    await claimResult.getLocallyReceivedEvent();
 
     const firstUnusedCommandEventId = firstConnection.getFirstUnusedCommandEventId();
     expect(firstUnusedCommandEventId).toBeGreaterThan(1);
@@ -156,27 +118,18 @@ describe("Scribe", () => {
     expect(secondConnection.getFirstUnusedCommandEventId()).toBe(firstUnusedCommandEventId);
   });
 
-  const commandList = [
-    created({ id: "Entity A", typeName: "Entity" }),
-    created({ id: "Entity B", typeName: "Entity" }),
-    created({ id: "Entity C", typeName: "Entity" }),
-    created({ id: "Entity D", typeName: "Entity" }),
-    created({ id: "Entity E", typeName: "Entity" }),
-    created({ id: "Entity F", typeName: "Entity" }),
-  ];
-
-  it("Ensures command IDs are stored in a ascending order", async () => {
-    const scribe = createScribe();
+  it("ensures commands are stored in a proper ascending order", async () => {
+    const scribe = createScribe(createTestMockProphet({ isLocallyPersisted: true }));
     await scribe.initialize();
-    const uri = createPartitionURI(URI);
+    const uri = createPartitionURI(testAuthorityURI);
 
     const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
     let oldUnusedCommandId;
     let newUnusedCommandId = connection.getFirstUnusedCommandEventId();
 
-    for (const command of commandList) {
-      const claimResult = connection.chronicleEventLog([command])[0];
-      await claimResult.finalizeLocal();
+    for (const command of simpleCommandList) {
+      const claimResult = connection.chronicleEventLog(command).eventResults[0];
+      await claimResult.getLocallyReceivedEvent();
 
       oldUnusedCommandId = newUnusedCommandId;
       newUnusedCommandId = connection.getFirstUnusedCommandEventId();

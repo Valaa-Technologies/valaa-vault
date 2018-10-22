@@ -33,11 +33,12 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
   async chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions):
       Promise<{ eventResults: ChronicleEventResult[] }> {
     return {
-      eventResults: eventLog.map(event => ({
-        event: !options || !options.receiveEvent ? event : options.receiveEvent(event),
-        getPersistedEvent: () => null,
-        getAuthorizedEvent: () => event,
-      }))
+      eventResults: (await this.getReceiveTruths(options.receiveTruths)(eventLog))
+          .map((receivedEvent, index) => receivedEvent && ({
+            event: eventLog[index],
+            getPersistedEvent: () => null,
+            getTruthEvent: () => receivedEvent,
+          })),
     };
   }
 

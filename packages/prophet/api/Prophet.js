@@ -15,8 +15,9 @@ export type EventData = {
 }
 
 export type RetrieveMediaBuffer = (mediaInfo: MediaInfo) => Promise<any>;
-export type ReceiveEvent =
-    ((event: EventData, retrieveMediaBuffer: RetrieveMediaBuffer) => Object);
+export type ReceiveEvents =
+    ((events: EventData[], retrieveMediaBuffer?: RetrieveMediaBuffer) =>
+        (Promise<UniversalEvent> | UniversalEvent)[]);
 
 export type MediaInfo = {
   mediaId: VRef,
@@ -35,14 +36,14 @@ export type MediaInfo = {
 };
 
 export type ConnectOptions = {
-  connect?: boolean,            // default: true. Connect to updates
-  subscribe?: boolean,          // default: true. Subscribe for downstream push events.
-  receiveEvent?: ReceiveEvent,  // The persistent connection callback for downstream push events.
-  narrate?: NarrateOptions,     // default: {}. Narrate with default options
-  newConnection?: boolean,      // if true, throw if a connection exists,
-                                // if false, throw if no connection exists,
-  newPartition?: boolean,       // if true, throw if a partition exists (ie. has persisted events)
-                                // if false, throw if no partition exists (ie. no persisted events)
+  connect?: boolean,               // default: true. Connect to updates
+  subscribe?: boolean,             // default: true. Subscribe for downstream push events.
+  receiveTruths?: ReceiveEvents,   // The persistent connection callback for downstream push events.
+  narrateOptions?: NarrateOptions, // default: {}. Narrate with default options
+  newConnection?: boolean,         // if true, throw if a connection exists,
+                                   // if false, throw if no connection exists,
+  newPartition?: boolean,          // if true, throw if a partition exists (has persisted events)
+                                   // if false, throw if no partition exists (no persisted events)
   onlyTrySynchronousConnection?: boolean, // if true
   allowPartialConnection?: boolean,       // default: false. If true, return not fully narrated
                                           // connection synchronously
@@ -50,25 +51,28 @@ export type ConnectOptions = {
 };
 
 export type NarrateOptions = {
-  remote?: boolean,              // If false, never remote narrate, if true, await for remote
-                                 // narration result even if optimistic one can be performed locally
-  snapshots?: boolean,           // default: true, currently ignored. Start narration from most
-                                 // recent snapshot within provided event range
-  commands?: boolean,            // default: true. Narrate pending commands as well.
-  receiveEvent?: ReceiveEvent,   // default: connection receiveEvent. Callback for narrated events
-  receiveCommand?: ReceiveEvent, // default: receiveEvent. Callback for re-narrated commands
+  remote?: boolean,                // If false never narrate to upstream, if true wait for upstream
+                                   // narration result even if an optimistic narration can be
+                                   // performed locally
+  snapshots?: boolean,             // default: true, currently ignored. Start narration from most
+                                   // recent snapshot within provided event range
+  commands?: boolean,              // default: true. Narrate pending commands as well.
+  rechronicleOptions?: boolean,    // default: {}. Chronicle pending commands on the side.
+  receiveTruths?: ReceiveEvents,   // default: connection receiveTruths.
+                                   //   Callback for downstream truth events.
+  receiveCommands?: ReceiveEvents, // default: receiveTruths. Callback for re-narrated commands
   firstEventId?: number,
   lastEventId?: number,
 };
 
 export type ChronicleOptions = NarrateOptions & {
-  authorized?: boolean,          // If true the chronicled events are already authorized
+  preAuthorized?: boolean,         // If true the chronicled events are already authorized truths.
   retrieveMediaBuffer?: RetrieveMediaBuffer,
 };
 
 export type ChronicleEventResult = {
   event: UniversalEvent,
-  getLocallyPersistedEvent: Function<Promise<UniversalEvent> >,
+  getLocallyReceivedEvent: Function<Promise<UniversalEvent> >,
   getTruthEvent: Function<Promise<UniversalEvent> >,
 };
 
@@ -186,7 +190,7 @@ export default class Prophet extends LogEventGenerator {
     }
     return new PartitionConnectionType({
       partitionURI, prophet: this, debugLevel: this.getDebugLevel(),
-      receiveEvent: options.receiveEvent, ...(options.createConnection || {}),
+      receiveTruths: options.receiveTruths, ...(options.createConnection || {}),
     });
   }
 

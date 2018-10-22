@@ -211,7 +211,7 @@ async function _processClaimSubOp (falseProphet: FalseProphet, subOperation: Obj
     let eventChronichling;
     try {
       eventChronichling = (await connection.chronicleEventLog(
-          [commandEvent], { reduced: true })).eventResults[0];
+          [commandEvent], { alreadyReduced: true })).eventResults[0];
       truths.push(eventChronichling.getTruthEvent());
     } catch (error) {
       throw falseProphet.wrapErrorEvent(error,

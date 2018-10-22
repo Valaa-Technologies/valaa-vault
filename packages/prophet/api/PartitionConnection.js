@@ -5,6 +5,7 @@ import type { UniversalEvent } from "~/raem/command";
 
 import Prophet, {
   ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleEventResult,
+  ReceiveEvents, RetrieveMediaBuffer,
 } from "~/prophet/api/Prophet";
 
 import Logger, { LogEventGenerator } from "~/tools/Logger";
@@ -21,9 +22,12 @@ export default class PartitionConnection extends LogEventGenerator {
   _upstreamConnection: PartitionConnection;
   _syncedConnection: PartitionConnection | Promise<PartitionConnection>;
 
-  constructor ({ name, prophet, partitionURI, receiveEvent, logger, debugLevel }: {
-    name: any, prophet: Prophet, partitionURI: ValaaURI, receiveEvent: Function, logger?: Logger,
-    debugLevel?: number,
+  constructor ({
+    name, prophet, partitionURI, receiveTruths, receiveCommands, logger, debugLevel
+  }: {
+    name: any, prophet: Prophet, partitionURI: ValaaURI,
+    receiveTruths?: ReceiveEvents, receiveCommands?: ReceiveEvents,
+    logger?: Logger, debugLevel?: number,
   }) {
     super({ name: name || null, logger: logger || prophet.getLogger(), debugLevel });
     invariantifyObject(prophet, "PartitionConnection.constructor.prophet",
@@ -34,7 +38,8 @@ export default class PartitionConnection extends LogEventGenerator {
     this._prophet = prophet;
     this._partitionURI = partitionURI;
     this._refCount = 0;
-    this._receiveEvent = receiveEvent;
+    this._downstreamReceiveTruths = receiveTruths;
+    this._downstreamReceiveCommands = receiveCommands;
   }
 
   getName (): string {
@@ -50,6 +55,17 @@ export default class PartitionConnection extends LogEventGenerator {
   isLocallyPersisted () { return this._upstreamConnection.isLocallyPersisted(); }
   isRemoteAuthority () { return this._upstreamConnection.isRemoteAuthority(); }
 
+  getReceiveTruths (downstreamReceiveTruths?: ReceiveEvents = this._downstreamReceiveTruths):
+      ReceiveEvents {
+    return (truths, retrieveMediaBuffer) =>
+        this.receiveTruths(truths, retrieveMediaBuffer, downstreamReceiveTruths);
+  }
+  getReceiveCommands (downstreamReceiveCommands?: ReceiveEvents = this._downstreamReceiveCommands):
+      ReceiveEvents {
+    return (commands, retrieveMediaBuffer) =>
+        this.receiveCommands(commands, retrieveMediaBuffer, downstreamReceiveCommands);
+  }
+
   isConnected () {
     if (this._upstreamConnection) return this._upstreamConnection.isConnected();
     throw new Error("isConnected not implemented");
@@ -57,6 +73,9 @@ export default class PartitionConnection extends LogEventGenerator {
 
   connect (options: ConnectOptions) {
     if (!this._prophet._upstream) throw new Error("Cannot connect: upstream missing");
+    if (this._syncedConnection !== undefined) return this._syncedConnection;
+    options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
+    options.receiveCommands = this.getReceiveCommands(options.receiveCommands);
     const ret = this._syncedConnection || (this._syncedConnection = thenChainEagerly(
         this._prophet._upstream.acquirePartitionConnection(this.getPartitionURI(), options), [
           upstreamConnection => {
@@ -141,9 +160,37 @@ export default class PartitionConnection extends LogEventGenerator {
     return this._upstreamConnection.chronicleEventLog(eventLog, options);
   }
 
-  getFirstUnusedTruthEventId () { return this._upstreamConnection.getFirstUnusedTruthEventId(); }
+  getFirstUnusedTruthEventId () {
+    return this._upstreamConnection.getFirstUnusedTruthEventId();
+  }
   getFirstUnusedCommandEventId () {
     return this._upstreamConnection.getFirstUnusedCommandEventId();
+  }
+
+  receiveTruths (truths: UniversalEvent[], retrieveMediaBuffer: RetrieveMediaBuffer,
+      downstreamReceiveTruths: ?ReceiveEvents,
+  ): Promise<(Promise<UniversalEvent> | UniversalEvent)[]> {
+    if (downstreamReceiveTruths) return downstreamReceiveTruths(truths, retrieveMediaBuffer);
+    throw this.wrapErrorEvent(
+        new Error(`receiveTruths not implemented by ${this.constructor.name
+            } and no explicit options.receiveTruths was provided.`),
+        new Error("receiveTruths"),
+        "\n\ttruths:", ...dumpObject(truths),
+        "\n\tretrieveMediaBuffer:", ...dumpObject(retrieveMediaBuffer));
+  }
+
+  receiveCommands (commands: UniversalEvent[], retrieveMediaBuffer: RetrieveMediaBuffer,
+      downstreamReceiveCommands: ReceiveEvents,
+  ): Promise<(Promise<UniversalEvent> | UniversalEvent)[]> {
+    if (downstreamReceiveCommands) {
+      return downstreamReceiveCommands(commands, retrieveMediaBuffer);
+    }
+    throw this.wrapErrorEvent(
+        new Error(`receiveCommands not implemented by ${this.constructor.name
+            } and no explicit options.receiveCommands was provided.`),
+        new Error("receiveCommands"),
+        "\n\tcommands:", ...dumpObject(commands),
+        "\n\tretrieveMediaBuffer:", ...dumpObject(retrieveMediaBuffer));
   }
 
   /**

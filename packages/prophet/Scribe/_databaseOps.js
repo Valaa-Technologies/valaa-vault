@@ -76,19 +76,19 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
   // entries, including the in-memory contents.
   // If the partition does not exist, create it and its structures.
   connection._db = new IndexedDBWrapper(connection._partitionURI.toString(), [
-    { name: "events", keyPath: "eventId" },
+    { name: "events", keyPath: "eventId" }, // TODO(iridian): Rename to 'truths' (or 'truthEvents')?
     { name: "commands", keyPath: "eventId" },
     { name: "medias", keyPath: "mediaId" },
   ], connection.getLogger(), connection._prophet.getDatabaseAPI());
   await connection._db.initialize();
 
-  // Populate _eventLogInfo with first and last events
+  // Populate _truthLogInfo with first and last events
   await connection._db.transaction(["events", "commands"], "readonly", ({ events, commands }) => {
     // Get the last key in the events table and store it in eventLogInfo
-    _loadEventId(events, undefined, connection._eventLogInfo, "firstEventId");
-    _loadEventId(events, "prev", connection._eventLogInfo, "lastEventId");
+    _loadEventId(events, undefined, connection._truthLogInfo, "firstEventId");
+    _loadEventId(events, "prev", connection._truthLogInfo, "firstUnusedEventId");
     _loadEventId(commands, undefined, connection._commandQueueInfo, "firstEventId");
-    _loadEventId(commands, "prev", connection._commandQueueInfo, "lastEventId");
+    _loadEventId(commands, "prev", connection._commandQueueInfo, "firstUnusedEventId");
   });
   return connection;
 
@@ -96,7 +96,7 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
     const req = entries.openCursor(...(direction ? [null, direction] : []));
     req.onsuccess = event => {
       const cursor = event.target.result;
-      if (cursor) target[eventIdTargetFieldName] = cursor.key;
+      if (cursor) target[eventIdTargetFieldName] = direction ? cursor.key + 1 : cursor.key;
     };
   }
 }

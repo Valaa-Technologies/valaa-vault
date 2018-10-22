@@ -8,8 +8,12 @@ import type { MediaInfo, RetrieveMediaBuffer } from "~/prophet/api/Prophet";
 import { addDelayedOperationEntry, dumpObject, invariantifyString, thenChainEagerly, vdon }
     from "~/tools";
 import { encodeDataURI } from "~/tools/html5/dataURI";
+import { bufferAndContentIdFromNative } from "~/tools/textEncoding";
 
+import Scribe from "./Scribe";
 import ScribePartitionConnection from "./ScribePartitionConnection";
+
+import { BvobInfo } from "./_databaseOps";
 
 export const vdoc = vdon({
   "...": { heading:
@@ -30,17 +34,101 @@ export type MediaLookup = {
 };
 
 /*
- ######  #    #  ######  #    #   #####
- #       #    #  #       ##   #     #
- #####   #    #  #####   # #  #     #
- #       #    #  #       #  # #     #
- #        #  #   #       #   ##     #
- ######    ##    ######  #    #     #
+######
+#     #  #    #   ####   #####
+#     #  #    #  #    #  #    #
+######   #    #  #    #  #####
+#     #  #    #  #    #  #    #
+#     #   #  #   #    #  #    #
+######     ##     ####   #####
 */
 
-export function _initiateMediaRetrievals (connection: ScribePartitionConnection, mediaEvent: Object,
-    retrieveMediaBuffer: RetrieveMediaBuffer, rootEvent: Object, mediaId: VRef,
-    currentEntry: MediaEntry) {
+export function _preCacheBvob (scribe: Scribe, bvobInfo: BvobInfo, newInfo: Object,
+    retrieveBvobContent: Function, initialPersistRefCount: number) {
+  if (bvobInfo) {
+    // This check produces false positives: if byteLengths match there is no error even if
+    // the contents might still be inconsistent.
+    if ((bvobInfo.byteLength !== newInfo.byteLength)
+        && (bvobInfo.byteLength !== undefined) && (newInfo.byteLength !== undefined)) {
+      throw new Error(`byteLength mismatch between new bvob (${newInfo.byteLength
+          }) and existing bvob (${bvobInfo.byteLength}) while precaching bvob "${
+          bvobInfo.bvobId}"`);
+    }
+    return undefined;
+  }
+  return thenChainEagerly(
+      retrieveBvobContent(bvobInfo.bvobId),
+      buffer => (buffer !== undefined)
+          && scribe._writeBvobBuffer(buffer, bvobInfo.bvobId, initialPersistRefCount));
+}
+
+export function _prepareBvob (connection: ScribePartitionConnection, content: any,
+    mediaInfo: MediaInfo = {}, onError: Function) {
+  const { buffer, contentId } = bufferAndContentIdFromNative(content, mediaInfo);
+  if (mediaInfo && mediaInfo.bvobId && (mediaInfo.bvobId !== contentId)) {
+    connection.errorEvent(`\n\tINTERNAL ERROR: bvobId mismatch when preparing bvob for Media '${
+            mediaInfo.name}', CONTENT IS NOT PERSISTED`,
+        "\n\tactual content id:", contentId,
+        "\n\trequested bvobId:", mediaInfo.bvobId,
+        "\n\tmediaInfo:", ...dumpObject(mediaInfo),
+        "\n\tcontent:", ...dumpObject({ content }),
+    );
+    return {};
+  }
+  mediaInfo.bvobId = contentId;
+
+  const pendingBvobInfo = connection._pendingBvobLookup[contentId]
+      || (connection._pendingBvobLookup[contentId] = {});
+  if (!pendingBvobInfo.persistProcess) {
+    pendingBvobInfo.persistProcess = thenChainEagerly(
+        connection._prophet._writeBvobBuffer(buffer, contentId),
+        (persistedContentId) => (pendingBvobInfo.persistProcess = persistedContentId),
+        onError,
+    );
+  }
+  if (!pendingBvobInfo.prepareBvobUpstreamProcess) {
+    // Begin the retrying Bvob upstream preparation process.
+    pendingBvobInfo.prepareBvobUpstreamProcess = thenChainEagerly(
+        _prepareBvobUpstreamWithRetries(connection, buffer, mediaInfo),
+        (result) => (pendingBvobInfo.prepareBvobUpstreamProcess = result),
+        onError,
+    );
+  }
+
+  return { ...pendingBvobInfo, content, buffer, contentId };
+}
+
+async function _prepareBvobUpstreamWithRetries (connection: ScribePartitionConnection,
+    buffer: ArrayBuffer | (() => ArrayBuffer), mediaInfo: MediaInfo,
+) {
+  let wrappedError;
+  for (let retries = 3; ; --retries) {
+    try {
+      return await connection.getUpstreamConnection().prepareBvob(buffer, mediaInfo).persistProcess;
+    } catch (error) {
+      wrappedError = connection.wrapErrorEvent(error,
+          `prepareBvobUpstreamProcess(${
+              mediaInfo.name ? `"${mediaInfo.name}"` : mediaInfo.bvobId})`,
+          "\n\tmediaInfo:", ...dumpObject(mediaInfo),
+      );
+      if (!retries) throw wrappedError;
+      connection.outputErrorEvent(wrappedError, "\n\tretrying upload");
+    }
+  }
+}
+
+/*
+#######
+#        #    #  ######  #    #   #####
+#        #    #  #       ##   #     #
+#####    #    #  #####   # #  #     #
+#        #    #  #       #  # #     #
+#         #  #   #       #   ##     #
+#######    ##    ######  #    #     #
+*/
+
+export function _determineEventMediaPreOps (connection: ScribePartitionConnection,
+    mediaEvent: Object, rootEvent: Object, mediaId: VRef, currentEntry: MediaEntry) {
   const mediaRawId = mediaId.rawId();
   let mediaInfo;
   let newEntry: MediaEntry;
@@ -69,7 +157,6 @@ export function _initiateMediaRetrievals (connection: ScribePartitionConnection,
       mediaId: mediaRawId, mediaInfo, isPersisted: true, isInMemory: true,
     };
   }
-  connection._pendingMediaLookup[mediaRawId] = newEntry;
 
   const update = mediaEvent.initialState || mediaEvent.sets || {};
   if (update.name) mediaInfo.name = update.name;
@@ -80,44 +167,22 @@ export function _initiateMediaRetrievals (connection: ScribePartitionConnection,
     Object.assign(mediaInfo, mediaType);
   }
   if (update.content) mediaInfo.bvobId = getRawIdFrom(update.content);
-
-  if (!retrieveMediaBuffer) return [];
-
-  const tryRetrieveAndPersist = async () => {
-    try {
-      if (mediaInfo.bvobId && !connection._prophet.tryGetCachedBvobContent(mediaInfo.bvobId)) {
-        // TODO(iridian): Determine whether media content should be pre-cached or not.
-        mediaInfo.mediaId = mediaRawId;
-        const content = await retrieveMediaBuffer(mediaInfo);
-        if (typeof content !== "undefined") {
-          await connection.prepareBvob(content, mediaInfo).persistProcess;
-        }
-      }
-      // Delays actual media info content update into a finalizer function so that recordTruth
-      // can be sure event has been persisted before updating mediaInfo bvob references
-      invariantifyString(newEntry.mediaId, "readPersistAndUpdateMedia.newEntry.mediaId",
-          {}, "\n\tnewEntry", newEntry);
-    } catch (error) {
-      throw connection.wrapErrorEvent(error,
-          `reprocessMedia.tryRetrieveAndPersist('${mediaInfo.name}'/'${
-              mediaInfo.bvobId || mediaInfo.sourceURL}')`,
-          "\n\tmediaInfo:", ...dumpObject(mediaInfo));
-    }
-  };
-
-  return [_retryRetrieveMedia.bind(null, connection, {
-    newEntry,
-    tryRetrieveAndPersist,
-    initialTry: tryRetrieveAndPersist(),
-  })];
+  return [{ mediaId: newEntry.mediaId, preOp: _retrySyncMedia.bind(null, connection, newEntry) }];
 }
 
-async function _retryRetrieveMedia (connection: ScribePartitionConnection,
-    { newEntry, tryRetrieveAndPersist, initialTry }, options:
-        { getNextBackoffSeconds?: Function, retryTimes?: number, delayBaseSeconds?: number } = {}
+async function _retrySyncMedia (connection: ScribePartitionConnection, newEntry: Object,
+  options: {
+    getNextBackoffSeconds?: Function, retryTimes?: number, delayBaseSeconds?: number,
+    retrieveMediaBuffer: RetrieveMediaBuffer,
+  } = {},
 ) {
+  connection._pendingMediaLookup[newEntry.mediaId] = newEntry;
+
   const mediaInfo = newEntry.mediaInfo;
   let previousBackoff;
+  invariantifyString(newEntry.mediaId, "readPersistAndUpdateMedia.newEntry.mediaId",
+      {}, "\n\tnewEntry", newEntry);
+  mediaInfo.mediaId = newEntry.mediaId;
   let getNextBackoffSeconds = options.getNextBackoffSeconds;
   if (!getNextBackoffSeconds && (typeof options.retryTimes === "number")) {
     getNextBackoffSeconds = (previousRetries: number, mediaInfo_, error) =>
@@ -128,9 +193,18 @@ async function _retryRetrieveMedia (connection: ScribePartitionConnection,
   if (!getNextBackoffSeconds) getNextBackoffSeconds = (() => undefined);
 
   let i = 0;
-  for (let currentTry = initialTry; ++i; currentTry = tryRetrieveAndPersist()) {
+  let content;
+  while (++i) {
     try {
-      await currentTry;
+      if (mediaInfo.bvobId) {
+        content = content
+            || connection._prophet.tryGetCachedBvobContent(mediaInfo.bvobId)
+            || (options.retrieveMediaBuffer && (await options.retrieveMediaBuffer(mediaInfo)));
+        if (typeof content !== "undefined") {
+        // TODO(iridian): Determine whether media content should be pre-cached or not.
+          await connection.prepareBvob(content, mediaInfo).persistProcess;
+        }
+      }
       return newEntry;
     } catch (error) {
       const nextBackoff = getNextBackoffSeconds && getNextBackoffSeconds(i - 1, mediaInfo, error);
@@ -158,12 +232,13 @@ async function _waitBackoff (backoffSeconds: number) {
 }
 
 /*
- #####   ######   ####   #    #  ######   ####    #####
- #    #  #       #    #  #    #  #       #          #
- #    #  #####   #    #  #    #  #####    ####      #
- #####   #       #  # #  #    #  #            #     #
- #   #   #       #   #   #    #  #       #    #     #
- #    #  ######   ### #   ####   ######   ####      #
+######
+#     #  ######   ####   #    #  ######   ####    #####
+#     #  #       #    #  #    #  #       #          #
+######   #####   #    #  #    #  #####    ####      #
+#   #    #       #  # #  #    #  #            #     #
+#    #   #       #   #   #    #  #       #    #     #
+#     #  ######   ### #   ####   ######   ####      #
 */
 
 export function _requestMediaContents (connection: ScribePartitionConnection,

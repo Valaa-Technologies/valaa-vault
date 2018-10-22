@@ -2,7 +2,6 @@
 
 import Prophet from "~/prophet/api/Prophet";
 
-import type MediaDecoder from "~/tools/MediaDecoder";
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 
 import { dumpObject, invariantifyObject } from "~/tools";
@@ -15,14 +14,29 @@ import {
   _adjustBvobBufferPersistRefCounts,
 } from "./_databaseOps";
 
+import {
+  _preCacheBvob,
+} from "./_contentOps";
+
 /**
- * Scribe handles all local event and content caching.
- * This includes in-memory caches, indexeddb storage (and eventually cross-browser-tab operations)
- * as well as possible service worker interactions.
+ * Scribe handles all local event and content caching, providing both
+ * new semantic functionality as well as performance improvements of
+ * Prophet chain functionality.
  *
- * As a basic principles all Bvob operations ie. operations which manipulate ArrayBuffer-based data
- * are shared between all partitions and thus handled by Scribe itself. All Media operations which
- * associate metadata to bvods are partition specific and handled by ScribePartitionConnection's.
+ * Main Semantic functionalities are:
+ * 1. synchronous in-memory bvob caching and retrieval
+ * 2. delayed, retrying command forwarding and bvob content uploading
+ * 3. offline mode
+ *
+ * Main performance improvements are event log and media retrievals
+ * from the local indexeddb cache on browser refresh and during
+ * execution.
+ *
+ * As a basic principle all Bvob operations ie. operations which
+ * manipulate ArrayBuffer-based data are shared between all partitions
+ * and thus handled by Scribe object itself. All Media operations which
+ * associate metadata to bvods are partition specific and handled by
+ * ScribePartitionConnection's.
  *
  * @export
  * @class Scribe
@@ -36,8 +50,9 @@ export default class Scribe extends Prophet {
   _bvobLookup: { [bvobId: string]: BvobInfo; };
   _mediaTypes: { [mediaTypeId: string]: { type: string, subtype: string, parameters: any }};
 
-  // Contains the media infos for most recent action for which media retrieval is successful and
-  // whose media info is successfully persisted.
+  // Contains the media infos for most recent action for which media
+  // retrieval is successful and whose media info is successfully
+  // persisted.
   // See ScribePartitionConnection._pendingMediaLookup.
   _persistedMediaLookup: { [mediaId: string]: Object };
   _databaseAPI: DatabaseAPI;
@@ -66,19 +81,7 @@ export default class Scribe extends Prophet {
       initialPersistRefCount: number = 0) {
     const bvobInfo = this._bvobLookup[bvobId];
     try {
-      if (bvobInfo) {
-        // This check produces false positives: if byteLengths match there is no error even if
-        // the contents might still be inconsistent.
-        if ((bvobInfo.byteLength !== newInfo.byteLength)
-            && (bvobInfo.byteLength !== undefined) && (newInfo.byteLength !== undefined)) {
-          throw new Error(`byteLength mismatch between new bvob (${newInfo.byteLength
-              }) and existing bvob (${bvobInfo.byteLength}) while precaching bvob "${bvobId}"`);
-        }
-        return undefined;
-      }
-      return Promise.resolve(retrieveBvobContent(bvobId))
-          .then(buffer => (buffer !== undefined)
-              && this._writeBvobBuffer(buffer, bvobId, initialPersistRefCount));
+      return _preCacheBvob(this, bvobInfo, newInfo, retrieveBvobContent, initialPersistRefCount);
     } catch (error) {
       throw this.wrapErrorEvent(error, `preCacheBvob('${bvobId}')`,
           "\n\tbvobInfo:", ...dumpObject(bvobInfo));

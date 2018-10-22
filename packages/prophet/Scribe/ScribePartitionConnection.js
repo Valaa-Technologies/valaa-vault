@@ -6,30 +6,31 @@ import { VRef, obtainVRef } from "~/raem/ValaaReference";
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import type {
   MediaInfo, NarrateOptions, ChronicleOptions, ChronicleEventResult, ConnectOptions,
-  RetrieveMediaBuffer,
+  ReceiveEvents, RetrieveMediaBuffer,
 } from "~/prophet/api/Prophet";
 
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
-import { bufferAndContentIdFromNative } from "~/tools/textEncoding";
 
-import { MediaEntry, _initiateMediaRetrievals, _requestMediaContents } from "./_contentOps";
+import {
+  MediaEntry, _prepareBvob, _determineEventMediaPreOps, _requestMediaContents
+} from "./_contentOps";
 import {
   _initializeConnectionIndexedDB, _updateMediaEntries, _readMediaEntries, _destroyMediaInfo,
   _writeEvents, _readEvents, _writeCommands, _readCommands, _deleteCommands,
 } from "./_databaseOps";
-import { _narrateEventLog, _chronicleEventLog, _recordEventLog } from "./_eventOps";
+import {
+  _narrateEventLog, _chronicleEventLog, _receiveEvents,
+} from "./_eventOps";
 
 export default class ScribePartitionConnection extends PartitionConnection {
-  _receiveEvent: () => void;
-
   // Info structures
 
   // If not eventLogInfo firstEventId is not 0, it means the oldest
   // stored event is a snapshot with that id.
-  _eventLogInfo: { firstEventId: number, lastEventId: number };
-  _commandQueueInfo: { firstEventId: number, lastEventId: number };
+  _truthLogInfo: { firstEventId: number, firstUnusedEventId: number };
+  _commandQueueInfo: { firstEventId: number, firstUnusedEventId: number };
 
   // Contains the media infos for most recent actions seen per media.
   // This lookup is updated whenever the media retrievers are created for the action, which is
@@ -37,12 +38,18 @@ export default class ScribePartitionConnection extends PartitionConnection {
   // See Scribe._persistedMediaLookup for contrast.
   _pendingMediaLookup: { [mediaRawId: string]: MediaEntry };
 
+  // Contains partition specific bvob state data.
+  _pendingBvobLookup: { [bvobId: string]: {
+    localPersistProcess: Promise<Object>,
+    prepareBvobUpstreamProcess: Promise<Object>,
+  } } = {};
+
   _db: IndexedDBWrapper;
 
   constructor (options: Object) {
     super(options);
-    this._eventLogInfo = { firstEventId: 0, lastEventId: -1 };
-    this._commandQueueInfo = { firstEventId: 0, lastEventId: -1 };
+    this._truthLogInfo = { firstEventId: 0, firstUnusedEventId: 0 };
+    this._commandQueueInfo = { firstEventId: 0, firstUnusedEventId: 0 };
   }
 
   connect (options: ConnectOptions) {
@@ -57,9 +64,11 @@ export default class ScribePartitionConnection extends PartitionConnection {
           },
           () => this._prophet._upstream && this.setUpstreamConnection(
               this._prophet._upstream.acquirePartitionConnection(this.getPartitionURI(), {
-                ...options, narrate: false, receiveEvent: this.recordTruthLog.bind(this),
+                ...options, narrateOptions: false,
+                // Don't provide options.receiveTruths here.
+                receiveTruths: this.getReceiveTruths(),
               })),
-          () => this.narrateEventLog(options.narrate),
+          () => this.narrateEventLog(options.narrateOptions),
           () => (this._syncedConnection = this),
         ],
         errorOnConnect.bind(this),
@@ -81,11 +90,11 @@ export default class ScribePartitionConnection extends PartitionConnection {
     super.disconnect();
   }
 
-  getFirstTruthEventId () { return this._eventLogInfo.firstEventId; }
-  getFirstUnusedTruthEventId () { return this._eventLogInfo.lastEventId + 1; }
+  getFirstTruthEventId () { return this._truthLogInfo.firstEventId; }
+  getFirstUnusedTruthEventId () { return this._truthLogInfo.firstUnusedEventId; }
 
   getFirstCommandEventId () { return this._commandQueueInfo.firstEventId; }
-  getFirstUnusedCommandEventId () { return this._commandQueueInfo.lastEventId + 1; }
+  getFirstUnusedCommandEventId () { return this._commandQueueInfo.firstUnusedEventId; }
 
   async narrateEventLog (options: NarrateOptions = {}):
       Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
@@ -100,35 +109,50 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  async chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
+  chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
       Promise<{ eventResults: ChronicleEventResult[] }> {
+    const contextError = new Error("chronicleEventLog"); // perf issue?
     try {
-      return await _chronicleEventLog(this, eventLog, options);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, "chronicleEventLog()",
+      return _chronicleEventLog(this, eventLog, options, errorOnScribeChronicleEventLog.bind(this));
+    } catch (error) { return errorOnScribeChronicleEventLog.call(this, error); }
+    function errorOnScribeChronicleEventLog (error) {
+      throw this.wrapErrorEvent(error, contextError,
+          "\n\teventLog:", ...dumpObject(eventLog),
           "\n\toptions:", ...dumpObject(options),
       );
     }
   }
 
-  async _recordEventLog (eventLog: UniversalEvent[]) {
+  receiveTruths (truths: UniversalEvent[], retrieveMediaBuffer?: RetrieveMediaBuffer,
+      downstreamReceiveTruths: ReceiveEvents,
+      type: ("receiveTruths" | "receiveCommands") = "receiveTruths",
+  ) {
+    if (!truths.length) return truths;
+    const errorId = `${type}([${truths[0].eventId}, ${truths[truths.length - 1].eventId}])`;
     try {
-      return await _recordEventLog(this, eventLog);
+      return _receiveEvents(this, truths, retrieveMediaBuffer, downstreamReceiveTruths,
+          type, errorOnReceiveTruths.bind(this, new Error(errorId)));
     } catch (error) {
-      throw this.wrapErrorEvent(error,
-          `_recordEventLog([${eventLog[0].eventId}, eventLog[eventLog.length - 1].eventId])`,
-          "\n\teventLog:", ...dumpObject(eventLog),
+      throw errorOnReceiveTruths.call(this, new Error(errorId), error);
+    }
+    function errorOnReceiveTruths (wrapper, error) {
+      throw this.wrapErrorEvent(error, wrapper,
+          "\n\ttruths:", ...dumpObject(truths),
           "\n\tthis:", ...dumpObject(this));
     }
   }
 
-  _initiateMediaRetrievals (mediaEvent: Object, retrieveMediaBuffer: RetrieveMediaBuffer,
-      rootEvent: Object) {
+  receiveCommands (commands: UniversalEvent[], retrieveMediaBuffer?: RetrieveMediaBuffer,
+      downstreamReceiveCommands: ReceiveEvents) {
+    return this.receiveTruths(commands, retrieveMediaBuffer, downstreamReceiveCommands,
+        "receiveCommands");
+  }
+
+  _determineEventMediaPreOps (mediaEvent: Object, rootEvent: Object) {
     const mediaId = obtainVRef(mediaEvent.id);
     let pendingEntry = this._pendingMediaLookup[mediaId.rawId()];
     try {
-      return _initiateMediaRetrievals(this, mediaEvent, retrieveMediaBuffer, rootEvent, mediaId,
-          pendingEntry);
+      return _determineEventMediaPreOps(this, mediaEvent, rootEvent, mediaId, pendingEntry);
     } catch (error) {
       if (!pendingEntry) pendingEntry = this._pendingMediaLookup[mediaId.rawId()];
       throw this.wrapErrorEvent(error, `_initiateMediaRetrievals(${
@@ -156,27 +180,13 @@ export default class ScribePartitionConnection extends PartitionConnection {
 
   prepareBvob (content: any, mediaInfo?: MediaInfo):
       { buffer: ArrayBuffer, contentId: string, persistProcess: ?Promise<any> } {
+    const errorWrap = new Error(`prepareBvob(${
+        mediaInfo && mediaInfo.name ? `of Media "${mediaInfo.name}"` : typeof content})`);
     try {
-      const { buffer, contentId } = bufferAndContentIdFromNative(content, mediaInfo);
-      if (mediaInfo && mediaInfo.bvobId && (mediaInfo.bvobId !== contentId)) {
-        this.errorEvent(`\n\tINTERNAL ERROR: bvobId mismatch when preparing bvob for Media '${
-                mediaInfo.name}', CONTENT IS NOT PERSISTED`,
-            "\n\tactual content id:", contentId,
-            "\n\trequested bvobId:", mediaInfo.bvobId,
-            "\n\tmediaInfo:", ...dumpObject(mediaInfo),
-            "\n\tcontent:", ...dumpObject({ content }),
-        );
-        return {};
-      }
-      // Add optimistic Bvob upload to upstream. This is allowed to fail as long as the scribe has
-      // persisted the content.
-      const upstreamPrepareBvob = super.prepareBvob(buffer, mediaInfo || { bvobId: contentId });
-      return {
-        content, buffer, contentId,
-        persistProcess: this._prophet._writeBvobBuffer(buffer, contentId),
-      };
-    } catch (error) {
-      throw this.wrapErrorEvent(error, `prepareBvob(${typeof content})`,
+      return _prepareBvob(this, content, mediaInfo, errorOnPrepareBvob.bind(this));
+    } catch (error) { return errorOnPrepareBvob.call(this, error); }
+    function errorOnPrepareBvob (error) {
+      throw this.wrapErrorEvent(error, errorWrap,
           "\n\tcontent:", ...dumpObject({ content }),
           "\n\tmediaInfo:", ...dumpObject(mediaInfo));
     }

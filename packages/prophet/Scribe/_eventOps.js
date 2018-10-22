@@ -150,7 +150,8 @@ export function _chronicleEventLog (connection: ScribePartitionConnection,
   ], onError);
   options.receiveCommands = null;
   const chronicling = thenChainEagerly(localReception,
-      (events) => connection.getUpstreamConnection().chronicleEventLog(events, options),
+      (events) => connection.getUpstreamConnection()
+          .chronicleEventLog(events.filter(notNull => notNull), options),
       onError);
   return {
     eventResults: eventLog.map((event, index) => ({
@@ -177,7 +178,7 @@ export function _chronicleEventLog (connection: ScribePartitionConnection,
 
 export function _receiveEvents (
     connection: ScribePartitionConnection,
-    actions: UniversalEvent,
+    events: UniversalEvent,
     retrieveMediaBuffer: RetrieveMediaBuffer = connection.readMediaContent.bind(connection),
     downstreamReceiveTruths: ReceiveEvents,
     type: "receiveTruths" | "receiveCommands",
@@ -188,7 +189,7 @@ export function _receiveEvents (
       ? connection.getFirstUnusedTruthEventId() : connection.getFirstUnusedCommandEventId();
   const mediaPreOps = {};
   const newActions = [];
-  const receivedActions = actions.map((action, index) => {
+  const receivedActions = events.map((action, index) => {
     // FIXME(iridian): If type === "receiveCommands" perform command eviction on unordered commands
     if (typeof action.eventId !== "number") {
       throw new Error(`Expected eventId to be a number for received event #${index}, got: ${

@@ -17,14 +17,14 @@ import { openDB, getFromDB, getKeysFromDB, expectStoredInDB }
 
 const testAuthorityURI = "valaa-test:";
 const testPartitionURI = createPartitionURI(testAuthorityURI, "test_partition");
-const sharedURI = "valaa-shared-content";
 
 let harness = null;
 
 afterEach(async () => {
-  if (harness) harness.cleanup();
-  harness = null;
-  await clearScribeDatabases();
+  if (harness) {
+    await harness.cleanup();
+    harness = null;
+  } else await clearScribeDatabases([testPartitionURI]);
 });
 
 describe("Prophet", () => {
@@ -38,9 +38,9 @@ describe("Prophet", () => {
   it("decodes cached bvob buffers based on media type", async () => {
     const scribe = createScribe(createOracle(createTestMockProphet({ isLocallyPersisted: true })));
     await scribe.initialize();
-    const uri = createPartitionURI(testAuthorityURI);
 
-    const connection = await scribe.acquirePartitionConnection(uri).getSyncedConnection();
+    const connection = await scribe.acquirePartitionConnection(testPartitionURI)
+        .getSyncedConnection();
 
     const mediaId = vRef("abcd-0123");
     for (const [bufferContent, mediaInfo, expectedContent] of structuredMediaContents) {
@@ -71,8 +71,10 @@ describe("Prophet", () => {
     created({ id: "Entity F", typeName: "Entity", initialState: { owner: "test_partition" } }),
   ];
 
-  it("Stores the contents of the actions on the scribe correctly", async () => {
-    harness = await createProphetOracleHarness({ debug: 2 });
+  it("stores the contents of the actions on the scribe correctly", async () => {
+    harness = await createProphetOracleHarness({ debug: 0,
+      oracleOptions: { testAuthorityConfig: { isLocallyPersisted: true } },
+    });
     const prophetConnection = await harness.prophet
         .acquirePartitionConnection(testPartitionURI).getSyncedConnection();
     const scribeConnection = prophetConnection.getUpstreamConnection();

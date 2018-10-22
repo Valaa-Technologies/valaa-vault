@@ -3,6 +3,7 @@
 import type { UniversalEvent } from "~/raem/command";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
+import thenChainEagerly from "~/tools/thenChainEagerly";
 import type { ChronicleEventResult, ChronicleOptions, MediaInfo } from "~/prophet/api/Prophet";
 
 /**
@@ -30,15 +31,21 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
 
   async narrateEventLog (): Promise<any> { return {}; }
 
-  async chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions):
+  chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions):
       Promise<{ eventResults: ChronicleEventResult[] }> {
+    if (this.isRemoteAuthority()) {
+      throw new Error(`${this.constructor.name
+          }.chronicleEventLog not implemented by remote authority partition "${this.getName()}"`);
+    }
+    const receivedTruthsProcess = this.getReceiveTruths(options.receiveTruths)(eventLog);
     return {
-      eventResults: (await this.getReceiveTruths(options.receiveTruths)(eventLog))
-          .map((receivedEvent, index) => receivedEvent && ({
-            event: eventLog[index],
-            getPersistedEvent: () => null,
-            getTruthEvent: () => receivedEvent,
-          })),
+      eventResults: eventLog.map((event, index) => ({
+        event,
+        getLocallyReceivedEvent: () => thenChainEagerly(
+            receivedTruthsProcess,
+            (receivedTruths) => receivedTruths[index]),
+        getTruthEvent: () => event,
+      })),
     };
   }
 

@@ -2,15 +2,16 @@
 
 import { AuthorityProphet } from "~/prophet";
 
-export default function createValaaTestScheme (/* { logger } */) {
+export default function createValaaTestScheme ({ config, authorityURI } = {}) {
   return {
     scheme: "valaa-test",
 
-    getAuthorityURIFromPartitionURI: () => `valaa-test:`,
+    getAuthorityURIFromPartitionURI: () => authorityURI || `valaa-test:`,
 
     createDefaultAuthorityConfig: () => ({
       isLocallyPersisted: false,
       isRemoteAuthority: false,
+      ...config,
     }),
 
     createAuthorityProphet: (options: Object) => new AuthorityProphet(options),

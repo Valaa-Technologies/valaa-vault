@@ -25,6 +25,7 @@ import createValaaTransientScheme from "~/prophet/schemeModules/valaa-transient"
 import * as ValaaScriptDecoders from "~/script/mediaDecoders";
 import * as ToolsDecoders from "~/tools/mediaDecoders";
 
+import thenChainEagerly from "~/tools/thenChainEagerly";
 import { getDatabaseAPI } from "~/tools/indexedDB/getInMemoryDatabaseAPI";
 import { openDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 import { dumpObject, wrapError } from "~/tools";
@@ -52,10 +53,14 @@ export async function createProphetOracleHarness (options: Object, ...proclamati
     ret.testPartitionConnection = await ret.testPartitionConnection;
     if (options.acquirePartitions) {
       const partitionURIs = options.acquirePartitions.map(
-          partitionId => createPartitionURI("valaa-test:?id=", partitionId));
+          partitionId => createPartitionURI("valaa-test:", partitionId));
       const connections = partitionURIs.map(uri =>
           ret.prophet.acquirePartitionConnection(uri).getSyncedConnection());
-      await Promise.all(connections);
+      (await Promise.all(connections)).forEach(connection => {
+        if (ret.prophet.getDebugLevel() >= 1) {
+          console.log("PartitionConnection fully synced:", connection.debugId());
+        }
+      });
     }
     for (const proclamations of proclamationBlocks) {
       await Promise.all(proclamations.map(
@@ -75,13 +80,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     if (options.enableOracle) {
       this.upstream = this.oracle = createOracle();
     } else {
-      this.upstream = new MockProphet({
-        authorityURI: createPartitionURI("valaa-test:"),
-        authorityConfig: {
-          isLocallyPersisted: false,
-          isRemoteAuthority: false,
-        },
-      });
+      this.upstream = createTestMockProphet();
     }
     if (options.enableScribe) {
       this.upstream = this.scribe = createScribe(this.upstream);
@@ -92,9 +91,17 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     this.prophet.setUpstream(this.upstream);
 
     this.testPartitionURI = createTestPartitionURIFromRawId("test_partition");
-    this.testPartitionConnection = this.prophet
-        .acquirePartitionConnection(this.testPartitionURI)
-        .getSyncedConnection();
+    this.testPartitionConnection = thenChainEagerly(
+        this.prophet.acquirePartitionConnection(this.testPartitionURI, { newPartition: true })
+        .getSyncedConnection(), [
+          (conn) => Promise.all([
+            conn, this.proclaim(created({ id: "test_partition", typeName: "Entity", initialState: {
+              name: "Automatic Test Partition Root",
+              partitionAuthorityURI: "valaa-test:",
+            }, })).getStoryPremiere(),
+          ]),
+          ([conn]) => (this.testPartitionConnection = conn),
+        ]);
   }
 
   proclaim (...rest: any) {
@@ -127,18 +134,18 @@ export default class ProphetTestHarness extends ScriptTestHarness {
   }
 }
 
-export function createScribe (oracle: Oracle) {
+export function createScribe (upstream: Prophet) {
   const ret = new Scribe({
     name: "Test Scribe",
     databaseAPI: getDatabaseAPI(),
-    upstream: oracle,
+    upstream,
   });
   ret.initialize();
   return ret;
 }
 
 export async function clearScribeDatabases (otherConnections: Object[] = []) {
-  const partitionURIs = ["test-partition:", "valaa-shared-content"];
+  const partitionURIs = ["valaa-test:?id=test_partition", "valaa-shared-content"];
   partitionURIs.push(...otherConnections);
   for (const uri of partitionURIs) {
     const database = await openDB(uri);
@@ -173,9 +180,20 @@ export function clearOracleScribeDatabases (prophet: Prophet) {
       .map(connection => connection.getPartitionURI().toString()));
 }
 
+export function createTestMockProphet (configOverrides: Object = {}) {
+  return new MockProphet({
+    authorityURI: createPartitionURI("valaa-test:"),
+    authorityConfig: {
+      isLocallyPersisted: false,
+      isRemoteAuthority: false,
+      ...configOverrides,
+    },
+  });
+}
+
 class MockPartitionConnection extends AuthorityPartitionConnection {}
 
-class MockProphet extends AuthorityProphet {
+export class MockProphet extends AuthorityProphet {
 
   static PartitionConnectionType = MockPartitionConnection;
 

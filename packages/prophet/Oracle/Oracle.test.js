@@ -4,39 +4,20 @@ import { createPartitionURI } from "~/raem/ValaaURI";
 
 import { createProphetOracleHarness } from "~/prophet/test/ProphetTestHarness";
 
-import { openDB, expectStoredInDB } from "~/tools/html5/InMemoryIndexedDBUtils";
-
 const testAuthorityURI = "valaa-test:";
 // const sharedURI = "valaa-shared-content";
 
-function vCrossRef (rawId, partitionRawId = rawId) {
-  const uri = createPartitionURI("valaa-test:", partitionRawId);
-  return vRef(rawId, null, null, uri);
-}
-
 let harness = null;
-afterEach(() => {
-  harness.cleanup();
-  harness = null;
-});
+afterEach(() => { if (harness) harness.cleanup(); harness = null; });
 
 describe("Oracle", () => {
-  const createPartitionCommand = created({
-    id: vCrossRef("test_partition", "test_partition"),
-    typeName: "Entity",
-    initialState: {
-      name: "Test Partition",
-      partitionAuthorityURI: testAuthorityURI,
-    },
-  });
-
   it("sets up a connection and creates a partition", async () => {
-    harness = await createProphetOracleHarness({}, [createPartitionCommand]);
+    harness = await createProphetOracleHarness({});
     expect(harness.testPartitionConnection).toBeTruthy();
     expect(harness.testPartitionConnection.isConnected())
         .toEqual(true);
     expect(harness.run(vRef("test_partition"), "name"))
-        .toEqual("Test Partition");
+        .toEqual("Automatic Test Partition Root");
   });
 
   const basicCommands = [
@@ -111,12 +92,11 @@ describe("Oracle", () => {
       await expectStoredInDB(finalEvent, database, "commands", eventId);
     }
   });
-
-  const freezePartitionCommand = transacted({
+  const freezePartitionProclamation = transacted({
     actions: [fieldsSet({ id: vRef("test_partition"), typeName: "Entity" }, { isFrozen: true })],
   });
 
-  const lateCommand = created({
+  const lateProclamation = created({
     id: "Entity Late",
     typeName: "Entity",
     initialState: {
@@ -125,20 +105,21 @@ describe("Oracle", () => {
     }
   });
 
-  it("Rejects commands executed after a freeze command", async () => {
+  it("Rejects proclamations executed after a freeze proclamations", async () => {
     harness = await createProphetOracleHarness({});
     const partitionURI = createPartitionURI(testAuthorityURI, "test_partition");
     await harness.prophet
         .acquirePartitionConnection(partitionURI).getSyncedConnection();
 
-    // Run commands up until the partition is frozen
-    const commandsUntilFreeze = [createPartitionCommand, freezePartitionCommand];
-    for (const command of commandsUntilFreeze) {
-      const claimResult = await harness.claim(command);
-      await claimResult.getFinalEvent();
+    // Run proclamations up until the partition is frozen
+    const proclamationUntilFreeze = [freezePartitionProclamation];
+    for (const proclamation of proclamationUntilFreeze) {
+      const claimResult = await harness.proclaim(proclamation);
+      await claimResult.getStoryPremiere();
     }
 
     // Attempt to run an action post-freeze and expect complaints
-    expect(() => harness.claim(lateCommand)).toThrow(/Cannot modify frozen.*test_partition/);
+    expect(() => harness.proclaim(lateProclamation))
+        .toThrow(/Cannot modify frozen.*test_partition/);
   });
 });

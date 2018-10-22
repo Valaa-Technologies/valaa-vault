@@ -436,9 +436,9 @@ export default class Vrapper extends Cog {
         },
         onError.bind(this));
       return ret;
-    } catch (error) { throw onError.call(this, error); }
+    } catch (error) { return onError.call(this, error); }
     function onError (error) {
-      return this.wrapErrorEvent(error, `getPartitionConnection(${
+      throw this.wrapErrorEvent(error, `getPartitionConnection(${
               options.require ? "require" : "optional"})`,
           "\n\toptions:", ...dumpObject(options),
           "\n\tthis[HostRef]:", this[HostRef],

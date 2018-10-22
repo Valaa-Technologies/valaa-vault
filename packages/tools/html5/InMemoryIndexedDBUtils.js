@@ -1,5 +1,8 @@
+import Command from "~/raem/command";
 import FakeIndexedDB from "fake-indexeddb";
 import FDBDatabase from "fake-indexeddb/lib/FDBDatabase";
+
+import { dumpObject, wrapError } from "~/tools";
 
 export async function openDB (uri: string) {
   let database;
@@ -16,50 +19,70 @@ export async function openDB (uri: string) {
 }
 
 export async function getFromDB (database: FDBDatabase, table: string, key: any) {
-  const transaction = database.transaction([table], "readonly");
-  const objectStore = transaction.objectStore(table);
+  try {
+    const transaction = database.transaction([table], "readonly");
+    const objectStore = transaction.objectStore(table);
 
-  let entry;
-  const process = new Promise((resolve, reject) => {
-    const request = objectStore.get(key);
-    request.onerror = reject;
-    request.onsuccess = (event: Event) => {
-      entry = event.target.result;
-      resolve();
-    };
-  });
-  await process;
-  return entry;
+    let entry;
+    const process = new Promise((resolve, reject) => {
+      const request = objectStore.get(key);
+      request.onerror = reject;
+      request.onsuccess = (event: Event) => {
+        entry = event.target.result;
+        resolve();
+      };
+    });
+    await process;
+    return entry;
+  } catch (error) {
+    throw wrapError(error, `During getFromDB("${database.name}", ${table}, ${key}), with:`,
+        "\n\tkey:", key);
+  }
 }
 
 export async function getKeysFromDB (database: FDBDatabase, table: string) {
-  const transaction = database.transaction([table], "readonly");
-  const objectStore = transaction.objectStore(table);
-
   let keys;
-  const process = new Promise((resolve, reject) => {
-    const request = objectStore.getAllKeys();
-    request.onerror = reject;
-    request.onsuccess = (event: Event) => {
-      keys = event.target.result;
-      resolve();
-    };
-  });
-  await process;
-  return keys;
+  try {
+    const transaction = database.transaction([table], "readonly");
+    const objectStore = transaction.objectStore(table);
+
+    const process = new Promise((resolve, reject) => {
+      const request = objectStore.getAllKeys();
+      request.onerror = reject;
+      request.onsuccess = (event: Event) => {
+        keys = event.target.result;
+        resolve();
+      };
+    });
+    await process;
+    return keys;
+  } catch (error) {
+    throw wrapError(error, `During getKeyFromDB("${database.name}", ${table}), with:`,
+        "\n\tcurrent ret keys:", keys);
+  }
 }
 
 // Utility function verifying that a command got stored in the database with a given eventId.
-export async function expectStoredInDB (command: Object, database: FDBDatabase, table: string,
+export async function expectStoredInDB (command: Command, database: FDBDatabase, table: string,
     eventId: number) {
-  const storedCommand = await getFromDB(database, table, eventId);
-  if (command instanceof Error) throw command;
-  const indexedCommand = Object.assign({ eventId }, command);
+  let stored, indexed;
+  expect(command.eventId).toEqual(eventId);
+  try {
+    const storedCommand = await getFromDB(database, table, eventId);
+    if (storedCommand === undefined) {
+      throw new Error(`No event found for id '${eventId}' in "${database.name}"/${table}`);
+    }
+    if (command instanceof Error) throw command;
+    const indexedCommand = Object.assign({ eventId }, command);
 
-  // XXX Hack to flatten any vrefs that may be dangling onto the commands
-  const stored = JSON.parse(JSON.stringify(storedCommand));
-  const indexed = JSON.parse(JSON.stringify(indexedCommand));
-  // console.info("STORED:\n", stored, "\n\nINDEXED:\n", indexed);
-
+    // XXX Hack to flatten any vrefs that may be dangling onto the commands
+    stored = JSON.parse(JSON.stringify(storedCommand));
+    indexed = JSON.parse(JSON.stringify(indexedCommand));
+    // console.info("STORED:\n", stored, "\n\nINDEXED:\n", indexed);
+  } catch (error) {
+    throw wrapError(error, `During expectStoredInDB("${database.name}", ${table}), with:`,
+        "\n\teventId:", eventId,
+        "\n\texpected command:", ...dumpObject(command));
+  }
   expect(stored).toEqual(indexed);
 }

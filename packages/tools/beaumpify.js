@@ -11,8 +11,8 @@ import dumpify from "~/tools/dumpify";
  * @param {any} sliceSuffix
  * @returns
  */
-export default function beaumpify (value, { slice, sliceSuffix } = {}) {
-  return dumpify(value, slice, sliceSuffix);
+export default function beaumpify (value, options) {
+  return dumpify(value, options);
   // const dumpified = dumpify(value, slice, sliceSuffix);
   // return dumpified ? beautify(dumpified, {}) : "undefined";
 }

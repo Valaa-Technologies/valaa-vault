@@ -161,7 +161,7 @@ export default class Scribe extends Prophet {
           .catch(errorOnAdjustInMemoryBvobBufferRefCounts.bind(this));
     } catch (error) { throw errorOnAdjustInMemoryBvobBufferRefCounts.call(this, error); }
     function errorOnAdjustInMemoryBvobBufferRefCounts (error) {
-      return this.wrapErrorEvent(error,
+      throw this.wrapErrorEvent(error,
           new Error(`_adjustInMemoryBvobBufferRefCounts(${
               Object.keys(adjusts || {}).length} adjusts)`),
           "\n\tbvob buffer reads:", ...dumpObject(readBuffers),

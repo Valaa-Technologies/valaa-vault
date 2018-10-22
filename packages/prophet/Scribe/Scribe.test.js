@@ -11,10 +11,15 @@ import { stringFromUTF8ArrayBuffer } from "~/tools/textEncoding";
 import { openDB, getFromDB, getKeysFromDB, expectStoredInDB }
     from "~/tools/html5/InMemoryIndexedDBUtils";
 
-const URI = "test-partition:";
+const testAuthorityURI = "valaa-test:";
+const testPartitionURI = createPartitionURI(testAuthorityURI, "test_partition");
 const sharedURI = "valaa-shared-content";
 
+let harness = null;
+
 afterEach(async () => {
+  if (harness) harness.cleanup();
+  harness = null;
   await clearScribeDatabases();
 });
 

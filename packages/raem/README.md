@@ -145,14 +145,21 @@ restricted behaviour:
 
 TODO(iridian): Elaborate these.
 
-1. ghost ids
+1. instance-ghost ids
   `f00:>ba54:>b7e4` - where `b7e4` is a traditional resource, `ba54:>b7e4`
-  reads as "instance `ba54` ownling ghost of prototype `b7e4`" and
+  reads as "a ghost in instance `ba54` with ghost prototype `b7e4`" and
   `f00:>ba54:>b7e4` reads as "instance `f00` ownling ghost of `ba54:>b7e4`".
   Etc.
 2. property ids
   `f00:.propName` - a directly owned Property with fixed name `propName`
   and prototype implicitly locked to `f00-prototype:.propName`.
+3. virtual resource ids
+  permanently immaterial ghosts with nevertheless separate identities.
+  When used as prototype with instance-ghosts allows salty duplication
+  of the same fundamental prototype
+  `f00:/1:>b74e`
+  `f00:/2:>b74e`
+  `f00:/3:>b74e`
 
 Resources identified by these parts are tightly bound to the resource
 identified by the primary party (which must exist). They must be always

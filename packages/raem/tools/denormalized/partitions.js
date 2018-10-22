@@ -8,7 +8,7 @@ import Transient from "~/raem/tools/denormalized/Transient";
 import traverseMaterializedOwnlings
     from "~/raem/tools/denormalized/traverseMaterializedOwnlings";
 
-import { dumpObject, invariantifyArray, unwrapError, wrapError } from "~/tools";
+import { dumpify, dumpObject, invariantifyArray, unwrapError, wrapError } from "~/tools";
 
 export class MissingPartitionConnectionsError extends Error {
   constructor (message, missingPartitions: (ValaaURI | Promise<any>)[]) {
@@ -100,9 +100,13 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
       smallestNonGhostId = resolver.objectId;
       partitionURI = smallestNonGhostId.getPartitionURI();
     }
-    partitionURI = partitionURI
-        ? String(partitionURI)
-        : `valaa-memory:?id=${smallestNonGhostId.rawId()}`;
+    // Resources without partitions are allowed: they must appear and be subsequently used in a
+    // transaction to be valid, otherwise they're considered dangling and are not allowed.
+    // TODO(iridian): Add validations for detecting dangling partitionless resources.
+    if (!partitionURI) return undefined;
+    partitionURI = String(partitionURI)
+    // ? String(partitionURI)
+    // : `valaa-memory:?id=${smallestNonGhostId.rawId()}`;
 
     let matchingPassage = bard.passage;
     // Find or create the partitions with an existing matching partitionURI entry

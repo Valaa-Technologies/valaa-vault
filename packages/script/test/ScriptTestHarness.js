@@ -4,12 +4,12 @@ import RAEMTestHarness, { createRAEMTestHarness } from "~/raem/test/RAEMTestHarn
 import ScriptTestAPI from "~/script/test/ScriptTestAPI";
 import { Kuery, builtinSteppers } from "~/script/VALSK";
 
-export function createScriptTestHarness (options: Object, ...commandBlocks: any) {
+export function createScriptTestHarness (options: Object, ...proclamationBlocks: any) {
   return createRAEMTestHarness({
     name: "Script Test Harness", ContentAPI: ScriptTestAPI, TestHarness: ScriptTestHarness,
     corpusOptions: { builtinSteppers },
     ...options,
-  }, ...commandBlocks);
+  }, ...proclamationBlocks);
 }
 
 export default class ScriptTestHarness extends RAEMTestHarness {}
@@ -24,9 +24,9 @@ export default class ScriptTestHarness extends RAEMTestHarness {}
  * @param {Object} scope
  * @returns                       the resulting value of the expressionKuery
  */
-export function evaluateTestProgram (commandBlocks: any = [],
+export function evaluateTestProgram (proclamationBlocks: any = [],
     head: any, programKuery: Kuery, scope: ?Object, options: Object = {}) {
-  const harness = createScriptTestHarness({ debug: options.debug }, ...commandBlocks);
+  const harness = createScriptTestHarness({ debug: options.debug }, ...proclamationBlocks);
   if (options.harness) Object.setPrototypeOf(options.harness, harness);
   if (scope) {
     options.scope = scope;

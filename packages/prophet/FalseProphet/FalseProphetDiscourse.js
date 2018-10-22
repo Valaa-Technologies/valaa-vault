@@ -1,6 +1,6 @@
 // @flow
 
-import Command, { created, duplicated, destroyed } from "~/raem/command";
+import { created, duplicated, destroyed } from "~/raem/command";
 import type { Corpus } from "~/raem/Corpus";
 import type ValaaURI from "~/raem/ValaaURI";
 import { dumpObject } from "~/raem/VALK";
@@ -11,6 +11,7 @@ import Follower from "~/prophet/api/Follower";
 import Prophecy from "~/prophet/api/Prophecy";
 import Prophet, { ClaimResult } from "~/prophet/api/Prophet";
 
+import type { Proclamation } from "~/prophet/FalseProphet/FalseProphet";
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
 import { createId, invariantify } from "~/tools";
@@ -48,20 +49,20 @@ export default class FalseProphetDiscourse extends Discourse {
     }
   }
 
-  claim (command: Command, options: Object): ClaimResult {
-    if (this._transactionInfo) return this._transactionInfo.claim(command, options);
+  proclaim (proclamation: Proclamation, options: Object): ClaimResult {
+    if (this._transactionInfo) return this._transactionInfo.proclaim(proclamation, options);
     try {
-      const ret = this.prophet.claim(command, options);
+      const ret = this.prophet.proclaim(proclamation, options);
       ret.waitOwnReactions = (() => ret.getFollowerReactions(this.follower));
-      ret.getFinalEvent = (async () => {
+      ret.getStoryPremiere = (async () => {
         await ret.waitOwnReactions();
-        return await ret.getBackendFinalEvent();
+        return await ret.getFinalStory();
       });
       return ret;
     } catch (error) {
       addConnectToPartitionToError(error, this.connectToMissingPartition);
-      throw this.wrapErrorEvent(error, `claim()`,
-          "\n\tcommand:", ...dumpObject(command),
+      throw this.wrapErrorEvent(error, `proclaim()`,
+          "\n\tproclamation:", ...dumpObject(proclamation),
       );
     }
   }
@@ -84,11 +85,11 @@ export default class FalseProphetDiscourse extends Discourse {
     return this.follower.revealProphecy(prophecy);
   }
 
-  receiveTruth (truthEvent: Command) {
+  receiveTruth (truthEvent: Proclamation) {
     return this.follower.receiveTruth(truthEvent);
   }
 
-  rejectHeresy (hereticEvent: Command, purgedCorpus: Corpus, revisedEvents: Command[]) {
+  rejectHeresy (hereticEvent: Proclamation, purgedCorpus: Corpus, revisedEvents: Proclamation[]) {
     return this.follower.rejectHerecy(hereticEvent, purgedCorpus, revisedEvents);
   }
 
@@ -98,31 +99,33 @@ export default class FalseProphetDiscourse extends Discourse {
   /**
    * Returns a new valid transaction which wraps this Discourse and forks its corpus.
    * The returned transaction prototypically inherits the wrapped object and thus all of its
-   * API; all command functions are intercepted in an internal transaction event log.
+   * API; all proclamation functions are intercepted in an internal transaction event log.
    * These events are resolved immediately against the forked corpus, but only claimed forward to
    * the wrapped object once the transaction is committed using 'outermost' releaseTransaction.
    *
    * Transaction objects can be nested. Calling releaseTransaction on an inner transaction is a
-   * no-op (other than setting the customCommand).
+   * no-op (other than setting the customProclamation).
    *
-   * A transaction is committed using TRANSACTED by default. A custom command can be specified
+   * A transaction is committed using TRANSACTED by default. A custom proclamation can be specified
    * in any transaction, releaseTransaction or commit call as a function which takes the list of
-   * transaction actions as the first parameter and returns the final command that is then sent
+   * transaction actions as the first parameter and returns the final proclamation that is then sent
    * upstream.
    */
-  acquireTransaction (customCommand: ?Object): FalseProphetDiscourse {
+  acquireTransaction (customProclamation: ?Object): FalseProphetDiscourse {
     if (this._transactionInfo) {
-      return this._transactionInfo.createNestedTransaction(this, customCommand);
+      return this._transactionInfo.createNestedTransaction(this, customProclamation);
     }
     const transactionRoot = Object.create(this);
-    transactionRoot._transactionInfo = new TransactionInfo(transactionRoot, customCommand);
+    transactionRoot._transactionInfo = new TransactionInfo(transactionRoot, customProclamation);
     return transactionRoot;
   }
 
-  transaction (customCommand: (actions: Command[]) => Command): FalseProphetDiscourse {
+  transaction (
+      customProclamation: (actions: Proclamation[]) => Proclamation
+  ): FalseProphetDiscourse {
     this.errorEvent("\n\tDEPRECATED: FalseProphetDiscourse.transaction",
         "\n\tprefer: acquireTransaction");
-    return this.acquireTransaction(customCommand);
+    return this.acquireTransaction(customProclamation);
   }
 
   isActiveTransaction () {
@@ -133,11 +136,11 @@ export default class FalseProphetDiscourse extends Discourse {
     if (this._transactionInfo) this._transactionInfo.releaseTransaction();
   }
 
-  commit (commitCustomCommand: ?Object) {
+  commit (commitCustomProclamation: ?Object) {
     if (!this._transactionInfo) {
       throw new Error("Cannot call commit on a non-transaction discourse");
     }
-    this._transactionInfo.commit(commitCustomCommand, this);
+    this._transactionInfo.commit(commitCustomProclamation, this);
   }
 
   abort () {
@@ -149,17 +152,17 @@ export default class FalseProphetDiscourse extends Discourse {
     typeName, initialState, isImmutable,
     id = createId({ typeName, initialState }, { isImmutable }),
   }: Object): ClaimResult {
-    return this.claim(created({ id, typeName, initialState }), {});
+    return this.proclaim(created({ id, typeName, initialState }), {});
   }
 
   duplicate ({
     duplicateOf, initialState, isImmutable,
     id = createId({ duplicateOf, initialState }, { isImmutable }),
   }: Object): ClaimResult {
-    return this.claim(duplicated({ id, duplicateOf, initialState }), {});
+    return this.proclaim(duplicated({ id, duplicateOf, initialState }), {});
   }
 
   destroy ({ id, typeName, owner }: Object): ClaimResult {
-    return this.claim(destroyed({ id, typeName, owner }), {});
+    return this.proclaim(destroyed({ id, typeName, owner }), {});
   }
 }

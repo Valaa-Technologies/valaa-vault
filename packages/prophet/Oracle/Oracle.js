@@ -13,6 +13,8 @@ import OraclePartitionConnection from "./OraclePartitionConnection";
 import { _acquirePartitionConnection } from "./_connectionOps";
 
 /**
+ * TODO(iridian): Outdated, clean up.
+ *
  * Oracle is the central hub for routing content and metadata streams between the downstream users,
  * upstream authorities and local caches.
  *

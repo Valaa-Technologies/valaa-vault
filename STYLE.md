@@ -84,7 +84,7 @@ Whenever a JSON is used as the interchange for a particular domain a
 dialect should be named and defined.
 ValOS itself introduces several: VAKON for Kueries, VDON for
 documentation, Revelation VSON for the valaa.json inspire revelations
-and Events VSON for the universal commands and events.
+and Events VSON for the universal command and truth events.
 All ValOS JSON dialects (and only them) follow this convention: 'V*ON'
 or 'name + VSON' ('Valaa System Object Notation'). Only the fundamental
 dialects get their own abbreviation.

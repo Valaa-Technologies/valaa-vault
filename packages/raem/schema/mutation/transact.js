@@ -28,11 +28,11 @@ const transact = {
   },
   resolve: async (context, args/* , info */) => {
     try {
-      const transactedCommand = transacted(JSON.parse(args.input.actions));
-      transactedCommand.bvobStubs = context.bvobStubs;
-      const command = await context.store.dispatch(transactedCommand);
+      const transactedProclamation = transacted(JSON.parse(args.input.actions));
+      transactedProclamation.bvobStubs = context.bvobStubs;
+      const proclamation = await context.store.dispatch(transactedProclamation);
       return {
-        clientMutationId: command.id,
+        clientMutationId: proclamation.id,
       };
     } catch (error) {
       console.error(error.message, error.stack);

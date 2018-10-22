@@ -28,7 +28,7 @@ export const UNCOUPLE_COUPLING = "uncoupling";
 export const DESTROY_COUPLING = "destroying a coupling";
 
 /**
- *  Adds coupling side effect sub-events to bard.passage.passages.
+ *  Adds coupling side effect sub-actions to bard.passage.passages.
  *  These side effects primarily include updating coupled fields.
  *
  * @export
@@ -40,7 +40,7 @@ export function addCoupleCouplingPassages (bard: Bard, fieldIntro,
 }
 
 /**
- *  Adds uncoupling side effect sub-events to bard.passage.passages.
+ *  Adds uncoupling side effect sub-actions to bard.passage.passages.
  *  These side effects primarily include updating coupled fields.
  *
  * @export
@@ -52,7 +52,7 @@ export function addUncoupleCouplingPassages (bard: Bard, fieldIntro,
 }
 
 /**
- *  Adds destroy coupling side effect sub-events to bard.passage.passages.
+ *  Adds destroy coupling side effect sub-actions to bard.passage.passages.
  *  These side effects primarily include updating coupled fields.
  *  DestroyCoupling (unlike the regular uncouple) will throw an error if the fieldIntro coupling has
  *  'preventsDestroy' set.
@@ -135,7 +135,7 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
     }
     if (actionType === COUPLE_COUPLING) {
       bard.addPassage(
-          reverseCoupling.createCoupleToRemoteCommand(
+          reverseCoupling.createCoupleToRemoteAction(
               remoteVRef, remoteTypeName, coupledField, bard.objectId, fieldIntro.name));
     } else {
       if (coupling.preventsDestroy && (actionType === DESTROY_COUPLING)) {
@@ -164,7 +164,7 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
         }
       }
       bard.addPassage(
-          reverseCoupling.createUncoupleFromRemoteCommand(
+          reverseCoupling.createUncoupleFromRemoteAction(
               remoteVRef, remoteTypeName, coupledField, bard.objectId, fieldIntro.name));
     }
   } catch (error) {

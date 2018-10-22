@@ -18,20 +18,20 @@ import { dumpObject, invariantify, LogEventGenerator, valaaUUID, wrapError } fro
 
 const DEFAULT_ACTION_VERSION = "0.1";
 
-export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
+export function createRAEMTestHarness (options: Object, ...proclamationBlocks: any) {
   try {
     const TestHarness = options.TestHarness || RAEMTestHarness;
     const ret = new TestHarness({
       name: "RAEM Test Harness", ContentAPI: RAEMTestAPI,
       ...options,
     });
-    commandBlocks.forEach(commandBlock => commandBlock.forEach(command =>
-        ret.dispatch(command)));
+    proclamationBlocks.forEach(proclamations => proclamations.forEach(proclamation =>
+        ret.dispatch(proclamation)));
     return ret;
   } catch (error) {
     throw wrapError(error, new Error("During createProphetTestHarness"),
         "\n\toptions:", ...dumpObject(options),
-        "\n\tcommandBlocks:", ...dumpObject(commandBlocks));
+        "\n\tproclamationBlocks:", ...dumpObject(proclamationBlocks));
   }
 }
 
@@ -65,17 +65,17 @@ export default class RAEMTestHarness extends LogEventGenerator {
 
   /**
    * dispatch always delegates the operation to corpus.dispatch (handlings restricted commands is
-   * done via .claim, which is not available in @valos/raem). Also does validation for is-restricted
-   * for incoming commands, and for is-universal for resulting stories.
+   * done via .proclaim, which is not available in @valos/raem). Also does validation for
+   * is-restricted for incoming commands, and for is-universal for resulting stories.
    *
    * @param {any} rest
    *
    * @memberof RAEMTestHarness
    */
-  dispatch (restrictedCommand: Command) {
+  dispatch (proclamation: Command) {
     let story;
     try {
-      const universalizableCommand = createUniversalizableCommand(restrictedCommand);
+      const universalizableCommand = createUniversalizableCommand(proclamation);
       invariantify(isRestrictedCommand(universalizableCommand),
           "universalizable command must still be restricted");
       story = this.corpus.dispatch(universalizableCommand);
@@ -84,7 +84,7 @@ export default class RAEMTestHarness extends LogEventGenerator {
       return story;
     } catch (error) {
       throw this.wrapErrorEvent(error, "Dispatch",
-          "\n\trestrictedCommand:", ...dumpObject(restrictedCommand),
+          "\n\trestrictedCommand:", ...dumpObject(proclamation),
           "\n\tstory:", ...dumpObject(story));
     }
   }

@@ -36,7 +36,7 @@ import Cog, { extractMagicMemberEventHandlers } from "~/engine/Cog";
 import debugId from "~/engine/debugId";
 import _FieldUpdate from "~/engine/Vrapper/FieldUpdate";
 import _VrapperSubscriber from "~/engine/Vrapper/VrapperSubscriber";
-import evaluateToCommandData from "~/engine/Vrapper/evaluateToCommandData";
+import evaluateToProclamationData from "~/engine/Vrapper/evaluateToProclamationData";
 import { defaultOwnerCoupledField } from
     "~/engine/ValaaSpace/Valaa/injectSchemaTypeBindings";
 
@@ -581,7 +581,7 @@ export default class Vrapper extends Cog {
     const discourse = (transaction || this.engine.discourse);
     const state = discourse.getState();
     this.requireActive({ state });
-    discourse.claim(createMaterializeGhostAction(state, this.getId()));
+    discourse.proclaim(createMaterializeGhostAction(state, this.getId()));
   }
 
   updateTransient (state: ?Object, object: ?Object) {
@@ -660,56 +660,56 @@ export default class Vrapper extends Cog {
 
 
   setField (fieldName: string, value: any, options: VALKOptions = {}) {
-    let commandValue;
+    let proclamationValue;
     try {
       const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
-      commandValue = evaluateToCommandData(value, options);
-      return transaction.claim(fieldsSet({ id, typeName: this._typeName },
-          { [fieldName]: commandValue },
+      proclamationValue = evaluateToProclamationData(value, options);
+      return transaction.proclaim(fieldsSet({ id, typeName: this._typeName },
+          { [fieldName]: proclamationValue },
       ));
     } catch (error) {
       throw this.wrapErrorEvent(error, `setField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tnew value:", ...dumpObject(value),
-          "\n\tnew value (after command post-process):", ...dumpObject(commandValue),
+          "\n\tnew value (after proclamation post-process):", ...dumpObject(proclamationValue),
           "\n\toptions:", ...dumpObject(options),
       );
     }
   }
 
   addToField (fieldName: string, value: any, options: VALKOptions = {}) {
-    let commandValue;
+    let proclamationValue;
     try {
       const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
-      commandValue = evaluateToCommandData(value, options);
-      return transaction.claim(addedToFields({ id, typeName: this._typeName },
-          { [fieldName]: arrayFromAny(commandValue || undefined) },
+      proclamationValue = evaluateToProclamationData(value, options);
+      return transaction.proclaim(addedToFields({ id, typeName: this._typeName },
+          { [fieldName]: arrayFromAny(proclamationValue || undefined) },
       ));
     } catch (error) {
       throw this.wrapErrorEvent(error, `addToField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tnew value:", ...dumpObject(value),
-          "\n\tnew value (after command post-process):", ...dumpObject(commandValue),
+          "\n\tnew value (after proclamation post-process):", ...dumpObject(proclamationValue),
           "\n\toptions:", ...dumpObject(options),
       );
     }
   }
 
   removeFromField (fieldName: string, value: any, options: VALKOptions = {}) {
-    let commandValue;
+    let proclamationValue;
     try {
       const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
-      commandValue = evaluateToCommandData(value, options);
-      return transaction.claim(removedFromFields({ id, typeName: this._typeName }, {
+      proclamationValue = evaluateToProclamationData(value, options);
+      return transaction.proclaim(removedFromFields({ id, typeName: this._typeName }, {
         [fieldName]:
-            commandValue === null ? null
-                : arrayFromAny(commandValue)
+            proclamationValue === null ? null
+                : arrayFromAny(proclamationValue)
       }));
     } catch (error) {
       throw this.wrapErrorEvent(error, `removeFromField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tremoved value:", ...dumpObject(value),
-          "\n\tremoved value (after command post-process):", ...dumpObject(commandValue),
+          "\n\tremoved value (after proclamation post-process):", ...dumpObject(proclamationValue),
           "\n\toptions:", ...dumpObject(options),
       );
     }
@@ -721,29 +721,31 @@ export default class Vrapper extends Cog {
 
   replaceWithinField (fieldName: string, replacedValues: any[], withValues: any[],
       options: VALKOptions = {}) {
-    let commandRemovedValues;
-    let commandAddedValues;
+    let proclamationRemovedValues;
+    let proclamationAddedValues;
     const addedValues = new Set(withValues);
     try {
       const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
-      commandRemovedValues = arrayFromAny(
-          evaluateToCommandData(
+      proclamationRemovedValues = arrayFromAny(
+          evaluateToProclamationData(
                   replacedValues.filter(replacedValue => !addedValues.has(replacedValue)), options)
               || undefined);
-      commandAddedValues = arrayFromAny(
-          evaluateToCommandData(withValues, options)
+      proclamationAddedValues = arrayFromAny(
+          evaluateToProclamationData(withValues, options)
               || undefined);
-      return transaction.claim(replacedWithinFields({ id, typeName: this._typeName },
-          { [fieldName]: commandRemovedValues },
-          { [fieldName]: commandAddedValues },
+      return transaction.proclaim(replacedWithinFields({ id, typeName: this._typeName },
+          { [fieldName]: proclamationRemovedValues },
+          { [fieldName]: proclamationAddedValues },
       ));
     } catch (error) {
       throw this.wrapErrorEvent(error, `replaceInField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\treplaced values:", ...dumpObject(replacedValues),
-          "\n\tremoved values (after command post-process):", ...dumpObject(commandRemovedValues),
+          "\n\tremoved values (after proclamation post-process):",
+              ...dumpObject(proclamationRemovedValues),
           "\n\twith values:", ...dumpObject(addedValues),
-          "\n\tadded values (after command post-process):", ...dumpObject(commandAddedValues),
+          "\n\tadded values (after proclamation post-process):",
+              ...dumpObject(proclamationAddedValues),
           "\n\toptions:", ...dumpObject(options),
       );
     }

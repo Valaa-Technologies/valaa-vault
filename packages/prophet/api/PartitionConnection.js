@@ -131,7 +131,7 @@ export default class PartitionConnection extends LogEventGenerator {
   }
 
   /**
-   * Record events listed in eventLog into the upstream.
+   * Record commands or truths listed in eventLog into the upstream.
    *
    * @param {ChronicleOptions} [options={}]
    * @returns {Promise<Object>}

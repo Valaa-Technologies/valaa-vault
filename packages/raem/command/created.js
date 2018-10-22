@@ -33,7 +33,7 @@ export function validateCreated (command: Created): Command {
   const {
     type, id, typeName, initialState, files, data,
     // eslint-disable-next-line no-unused-vars
-    version, commandId, partitions, parentId, timeStamp,
+    version, commandId, eventId, partitions, parentId, timeStamp,
     noSubMaterialize,
     // deprecateds
     owner, instancePrototype, ghostPrototype,

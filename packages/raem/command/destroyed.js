@@ -25,7 +25,7 @@ export function validateDestroyed (command: Destroyed): Command {
   const {
     type, id, typeName, dontUpdateCouplings,
     // eslint-disable-next-line no-unused-vars
-    version, commandId, partitions, parentId, timeStamp,
+    version, commandId, eventId, partitions, parentId, timeStamp,
     // deprecateds
     owner,
     ...unrecognized

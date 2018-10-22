@@ -121,7 +121,7 @@ as specified in the [URI specification](https://tools.ietf.org/html/rfc3986).
 
 The *primary* part must be globally unique.
 Note: uuid v4 is recommended for now, but eventually primary id
-generation should tied to the deterministic command id chain. This in
+generation should tied to the deterministic event id chain. This in
 turn should be seeded by some ValOS authority.
 
 Note: when using base64 encoded values as primary id, use

@@ -372,9 +372,9 @@ export function handleSets (bard: Bard, fieldInfo, value, oldLocalValue, updateC
   let oldCompleteValue;
   if (bard.story.isBeingUniversalized && !isCreated && fieldInfo.intro.isResource
       && (isSequence || (typeof oldLocalValue === "undefined"))) {
-    // For universalisation we need to create the sub-events for cross-partition modifications, and
+    // For universalisation we need to create the sub-actions for cross-partition modifications, and
     // for that we need to have access to the actual previous value of the field. Absolutized
-    // commands and events will already have sub-events present to make cross-partition updates.
+    // commands and truths will already have sub-actions present to make cross-partition updates.
     oldCompleteValue = !isSequence
         ? getObjectField(Object.create(bard), bard.objectTransient, fieldInfo.name,
             Object.create(fieldInfo))
@@ -477,9 +477,9 @@ function handleSplices (bard: Bard, fieldInfo, splices, oldLocalValue, updateCou
   let { valueAsSet: oldLocalValueAsSet, removeDiffs } = separatePartialSequence(oldLocalValue);
   const oldLocalValueAsList = (oldLocalValue || List()).toList();
   const oldCompleteValue =
-      // non-commands will have these operations come from appropriate sub-events
+      // non-commands will have these operations come from appropriate sub-actions
       !bard.story.isBeingUniversalized ? undefined
-      // for commands we need to create these sub-events as part of the universalisation
+      // for commands we need to create these sub-actions as part of the universalisation
       : elevateFieldRawSequence(bard, oldLocalValue, fieldInfo, bard.objectTransient);
   const newValue = !Array.isArray(splices)
       ? oldLocalValueAsList.splice(splices.index, splices.removeNum || 0,

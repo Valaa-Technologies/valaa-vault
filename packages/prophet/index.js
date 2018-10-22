@@ -17,7 +17,7 @@ export { default as Prophecy } from "./api/Prophecy";
 export { default as Prophet } from "./api/Prophet";
 export type Transaction = Object;
 
-export { default as FalseProphet } from "./FalseProphet";
+export { default as FalseProphet, Proclamation } from "./FalseProphet";
 export { default as FalseProphetDiscourse } from "./FalseProphet/FalseProphetDiscourse";
 
 export { default as Oracle } from "./Oracle";

@@ -70,7 +70,7 @@ export type ChronicleOptions = NarrateOptions & {
 export type ChronicleEventResult = {
   event: UniversalEvent,
   getLocallyPersistedEvent: Function<Promise<UniversalEvent> >,
-  getAuthorizedEvent: Function<Promise<UniversalEvent> >,
+  getTruthEvent: Function<Promise<UniversalEvent> >,
 };
 
 /* eslint-disable no-unused-vars */
@@ -151,7 +151,7 @@ export default class Prophet extends LogEventGenerator {
    * functionally incomplete event logs, even if event log might be outdated in itself.
    *
    * More specifically in inspire context the first source resulting in non-zero events is chosen:
-   * 1. all events and commands of the optional explicit initialNarrateOptions.eventLog option and
+   * 1. all events of the optional explicit initialNarrateOptions.eventLog option and
    *    the latest previously seen full narration of this partition in the Scribe (deduplicated)
    * 2. all events in the most recent authorized snapshot known by the remote authority connection
    * 3. all events in the remote authorize event log itself

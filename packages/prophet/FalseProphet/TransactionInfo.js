@@ -1,19 +1,20 @@
 import { createPassageFromAction, createUniversalizableCommand, getActionFromPassage }
     from "~/raem/redux/Bard";
 
-import Command, { transacted } from "~/raem/command";
+import { transacted } from "~/raem/command";
 import type { Corpus } from "~/raem/Corpus";
 
 import { ClaimResult } from "~/prophet/api/Prophet";
 import Prophecy from "~/prophet/api/Prophecy";
 import type { Transaction } from "~/prophet/api/Transaction";
+import { Proclamation } from "~/prophet/FalseProphet/FalseProphet";
 
 import { dumpObject, invariantify } from "~/tools";
 
 let transactionCounter = 0;
 
 export default class TransactionInfo {
-  constructor (transaction: Transaction, customCommand: Object) {
+  constructor (transaction: Transaction, customProclamation: Object) {
     this.transaction = transaction;
     this.stateBefore = transaction.getState();
     this.stateAfter = null;
@@ -22,12 +23,12 @@ export default class TransactionInfo {
     this.transacted = transacted({ actions: [] });
     this.storyPassages = [];
     this.universalPartitions = {};
-    this.customCommand = customCommand;
+    this.customProclamation = customProclamation;
     this.resultPromises = [];
     transaction.transactionDepth = 1;
     transaction.corpus = transaction.corpus.fork();
     transactionCounter += 1;
-    this.transactionClaimDescription = `tx#${transactionCounter} sub-claim`;
+    this.transactionClaimDescription = `tx#${transactionCounter} sub-proclamation`;
     transaction.corpus.setName(
         `${transaction.corpus.getName()}/Transaction#${transactionCounter}`);
   }
@@ -40,29 +41,29 @@ export default class TransactionInfo {
     return this.stateBefore === previousState;
   }
 
-  createNestedTransaction (transaction: Transaction, customCommand?: Object) {
+  createNestedTransaction (transaction: Transaction, customProclamation?: Object) {
     const nestedTransaction = Object.create(transaction);
     nestedTransaction.transactionDepth = transaction.transactionDepth + 1;
-    // Custom command alters the custom command of the whole transaction.
-    this.setCustomCommand(customCommand, "creating new nested transaction");
-    nestedTransaction.releaseTransaction = (releaseCustomCommand) => {
-      // Nested transactions only set the custom command, only outermost transaction commits.
-      this.setCustomCommand(releaseCustomCommand, "releasing nested transaction");
+    // Custom proclamation alters the custom proclamation of the whole transaction.
+    this.setCustomProclamation(customProclamation, "creating new nested transaction");
+    nestedTransaction.releaseTransaction = (releaseCustomProclamation) => {
+      // Nested transactions only set the custom proclamation, only outermost transaction commits.
+      this.setCustomProclamation(releaseCustomProclamation, "releasing nested transaction");
     };
     return nestedTransaction;
   }
 
-  setCustomCommand (customCommandCandidate: any, context: string) {
-    if (typeof customCommandCandidate === "undefined") return;
-    invariantify(typeof this.customCommand === "undefined",
+  setCustomProclamation (customProclamationCandidate: any, context: string) {
+    if (typeof customProclamationCandidate === "undefined") return;
+    invariantify(typeof this.customProclamation === "undefined",
         `While ${context} '${this.transaction.corpus.getName()
-            }' trying to override an existing customCommand`,
+            }' trying to override an existing customProclamation`,
         "\n\tin transactionInfo:", this,
-        "\n\toverriding custom command candidate:", customCommandCandidate);
-    this.customCommand = customCommandCandidate;
+        "\n\toverriding custom proclamation candidate:", customProclamationCandidate);
+    this.customProclamation = customProclamationCandidate;
   }
 
-  claim (restrictedCommand: Command): ClaimResult {
+  proclaim (proclamation: Proclamation): ClaimResult {
     try {
       if (!this.restrictedActions) {
         throw new Error(`Transaction '${this.transaction.corpus.getName()}' has already been ${
@@ -70,18 +71,18 @@ export default class TransactionInfo {
             }, when trying to add an action to it`);
       }
       // What goes on here is an incremental construction and universalisation of a TRANSACTED
-      // command whenever a new restrictedCommand comes in, via dispatching the on-going
-      // info.transacted only containing that particular command. Once the transaction is finally
-      // committed, the pieces are put together in a complete, universal TRANSACTED.
+      // proclamation whenever a new proclamation comes in, via dispatching the on-going
+      // info.transacted only containing that particular proclamation. Once the transaction is
+      // finally committed, the pieces are put together in a complete, universal TRANSACTED.
       const index = this.restrictedActions.length;
-      this.restrictedActions.push(restrictedCommand);
+      this.restrictedActions.push(proclamation);
 
       const previousState = this.transaction.state;
       // This is an awkward way to incrementally construct the transacted.
       // Maybe generators could somehow be useful here?
       this.latestUniversalTransacted = {
         ...this.transacted,
-        actions: [createUniversalizableCommand(restrictedCommand)],
+        actions: [createUniversalizableCommand(proclamation)],
       };
       const story = this.transaction.corpus.dispatch(
           this.latestUniversalTransacted, this.transactionClaimDescription);
@@ -95,48 +96,48 @@ export default class TransactionInfo {
       const result = new Promise((succeed, fail) =>
           (this.resultPromises[index] = { succeed, fail }));
       return {
-        prophecy: new Prophecy(story.passages[0], state, previousState, restrictedCommand),
-        getFinalEvent: () => result,
+        prophecy: new Prophecy(story.passages[0], state, previousState, proclamation),
+        getStoryPremiere: () => result,
       };
     } catch (error) {
       throw this.transaction.wrapErrorEvent(error,
-          `transaction.claim(${this.transaction.corpus.getName()})`,
-          "\n\trestrictedCommand:", ...dumpObject(restrictedCommand),
+          `transaction.proclaim(${this.transaction.corpus.getName()})`,
+          "\n\tproclamation:", ...dumpObject(proclamation),
       );
     }
   }
 
-  commit (commitCustomCommand: ?Object): ClaimResult {
-    let command;
+  commit (commitCustomProclamation: ?Object): ClaimResult {
+    let proclamation;
     try {
       if (!this.restrictedActions) {
         throw new Error(`Transaction '${this.transaction.corpus.getName()}' has already been ${
                 this.finalRestrictedTransactedLike ? "committed" : "aborted"
             }, when trying to commit it again`);
       }
-      this.setCustomCommand(commitCustomCommand, "committing transaction");
+      this.setCustomProclamation(commitCustomProclamation, "committing transaction");
       this.stateAfter = this.transaction.getState();
 
       this.transacted.actions = this.restrictedActions;
       this.restrictedActions = null;
 
-      this.finalRestrictedTransactedLike = !this.customCommand
+      this.finalRestrictedTransactedLike = !this.customProclamation
           ? this.transacted
-          : this.customCommand(this.transacted);
-      if (!this.customCommand && !this.finalRestrictedTransactedLike.actions.length) {
-        const universalNoOpCommand = createUniversalizableCommand(
+          : this.customProclamation(this.transacted);
+      if (!this.customProclamation && !this.finalRestrictedTransactedLike.actions.length) {
+        const universalNoOpProclamation = createUniversalizableCommand(
             this.finalRestrictedTransactedLike);
-        universalNoOpCommand.partitions = {};
+        universalNoOpProclamation.partitions = {};
         return {
-          prophecy: new Prophecy(universalNoOpCommand, undefined, undefined,
+          prophecy: new Prophecy(universalNoOpProclamation, undefined, undefined,
               this.finalRestrictedTransactedLike),
-          getFinalEvent () { return universalNoOpCommand; },
+          getStoryPremiere () { return universalNoOpProclamation; },
         };
       }
-      const result = this.transaction.prophet.claim(
+      const result = this.transaction.prophet.proclaim(
           this.finalRestrictedTransactedLike, { transactionInfo: this });
 
-      Promise.resolve(result.getFinalEvent()).then(
+      Promise.resolve(result.getStoryPremiere()).then(
         // TODO(iridian): Implement returning results. What should they be anyway?
         innerResult => this.resultPromises.forEach((promise, index) =>
             promise.succeed(innerResult.actions && innerResult.actions[index])),
@@ -148,7 +149,7 @@ export default class TransactionInfo {
     } catch (error) {
       throw this.transaction.wrapErrorEvent(error,
         `transaction(${this.transaction.corpus.getName()}).commit()`,
-          "\n\tcommand:", ...dumpObject(command),
+          "\n\tproclamation:", ...dumpObject(proclamation),
       );
     }
   }
@@ -161,8 +162,8 @@ export default class TransactionInfo {
     this.restrictedActions = null;
   }
 
-  releaseTransaction (releaseCustomCommand: ?Object) {
-    this.setCustomCommand(releaseCustomCommand, "releasing transaction");
+  releaseTransaction (releaseCustomProclamation: ?Object) {
+    this.setCustomProclamation(releaseCustomProclamation, "releasing transaction");
     // If the transaction has not yet been explicitly committed or discarded, commit it now.
     if (this.isCommittable()) this.commit();
     return this.commitResult;

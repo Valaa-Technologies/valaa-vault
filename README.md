@@ -232,7 +232,7 @@ ValaaSpace integration with the UI.
 - concepts: `model-view`, `HTML5/CSS/JS`, `rapid devevelopment`
 
 
-## The promise and the claim
+## The promise and the proclaim
 
 Client-side computation, fully self-referential unified resource
 model, fundamentally live UI, full library integrations together with

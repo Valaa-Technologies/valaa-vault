@@ -82,7 +82,7 @@ describe("Vrapper", () => {
         notificationValues[key] = update.value();
       });
     }
-    harness.prophet.claim({ type: "FIELDS_SET", id: targetId,
+    harness.proclaim({ type: "FIELDS_SET", id: targetId,
       typeName: "TestScriptyThing",
       sets,
     });
@@ -367,9 +367,9 @@ describe("Vrapper", () => {
       testScriptPartitions().child.subscribeToMODIFIED("children", () => {
         modCalled = true;
       });
-      harness.prophet.claim(
+      harness.proclaim(
           { type: "DESTROYED", id: "grandChild", typeName: "TestScriptyThing" });
-      // children modified subscriber should have been called when the sub-command to remove
+      // children modified subscriber should have been called when the sub-event to remove
       // grandChild from the children list was reduced
       expect(modCalled).toEqual(true);
     });
@@ -385,7 +385,7 @@ describe("Vrapper", () => {
       testScriptPartitions().greatGrandChild.setField("parent",
           testScriptPartitions().grandSibling);
 
-      // children modified subscriber should have been called when the sub-command to remove
+      // children modified subscriber should have been called when the sub-event to remove
       // grandChild from the children list was reduced
       expect(modCalled).toEqual(true);
     });

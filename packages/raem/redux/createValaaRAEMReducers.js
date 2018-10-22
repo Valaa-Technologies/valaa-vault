@@ -27,7 +27,7 @@ export default function createValaaRAEMReducers () {
     [FROZEN]: createBardReducer(freeze),
     [RECOMBINED]: createBardReducer(recombine, { skipPostPassageStateUpdate: true }),
     [TRANSACTED]: createBardReducer(transact),
-    // TIMED events will be expanded to actions and resulting events/sub-events by appropriate
+    // TIMED events will be expanded to actions and resulting events/sub-actions by appropriate
     // FalseProphet engines and cogs
     [TIMED]: (state = EMPTY_MAP) => state,
     // TODO(iridian): This might not be a correct place for this. What is, though?

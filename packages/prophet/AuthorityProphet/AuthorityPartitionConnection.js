@@ -32,7 +32,7 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
   async narrateEventLog (): Promise<any> { return {}; }
 
   chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions):
-      Promise<{ eventResults: ChronicleEventResult[] }> {
+      { eventResults: ChronicleEventResult[] } {
     if (this.isRemoteAuthority()) {
       throw new Error(`${this.constructor.name
           }.chronicleEventLog not implemented by remote authority partition "${this.getName()}"`);

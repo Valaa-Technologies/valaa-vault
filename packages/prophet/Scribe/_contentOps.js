@@ -43,23 +43,23 @@ export type MediaLookup = {
 ######     ##     ####   #####
 */
 
-export function _preCacheBvob (scribe: Scribe, bvobInfo: BvobInfo, newInfo: Object,
+export function _preCacheBvob (scribe: Scribe, bvobId: string, newInfo: Object,
     retrieveBvobContent: Function, initialPersistRefCount: number) {
+  const bvobInfo = scribe._bvobLookup[bvobId];
   if (bvobInfo) {
     // This check produces false positives: if byteLengths match there is no error even if
     // the contents might still be inconsistent.
     if ((bvobInfo.byteLength !== newInfo.byteLength)
         && (bvobInfo.byteLength !== undefined) && (newInfo.byteLength !== undefined)) {
       throw new Error(`byteLength mismatch between new bvob (${newInfo.byteLength
-          }) and existing bvob (${bvobInfo.byteLength}) while precaching bvob "${
-          bvobInfo.bvobId}"`);
+          }) and existing bvob (${bvobInfo.byteLength}) while precaching bvob "${bvobId}"`);
     }
     return undefined;
   }
   return thenChainEagerly(
-      retrieveBvobContent(bvobInfo.bvobId),
+      retrieveBvobContent(bvobId),
       buffer => (buffer !== undefined)
-          && scribe._writeBvobBuffer(buffer, bvobInfo.bvobId, initialPersistRefCount));
+          && scribe._writeBvobBuffer(buffer, bvobId, initialPersistRefCount));
 }
 
 export function _prepareBvob (connection: ScribePartitionConnection, content: any,

@@ -59,7 +59,7 @@ function _addTruthToPendingProphecies (falseProphet: FalseProphet,
           truthEvent);
     }
     prophecy = falseProphet._fabricateProphecy(truthEvent,
-        `event ${!truthId ? "legacy" : truthId.slice(0, 13)}...`);
+        `truth ${!truthId ? "legacy" : truthId.slice(0, 13)}...`);
     falseProphet._revealProphecyToAllFollowers(prophecy);
   }
   prophecy.isTruth = true;

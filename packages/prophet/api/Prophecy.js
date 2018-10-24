@@ -10,16 +10,14 @@ export default class Prophecy {
   timed: ?Object;
   state: Object;
   previousState: Object;
-  proclamation: ?Command; // Original command, set if this client is the command originator
   timed: ?Object;
+  proclamation: ?Command; // Original command, set if this client is the command originator
 
-  constructor (story: Story, state?: Object, previousState?: Object, proclamation?: Command,
-      timed?: Story) {
+  constructor (story: Story, state?: Object, previousState?: Object, timed?: Story) {
     this.story = story;
     this.passage = story;
     this.timed = timed;
     this.state = state;
     this.previousState = previousState;
-    this.proclamation = proclamation;
   }
 }

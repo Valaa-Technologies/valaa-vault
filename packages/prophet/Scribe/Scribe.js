@@ -65,7 +65,7 @@ export default class Scribe extends Prophet {
   }
 
   // Idempotent: returns a promise until the initialization is complete. await on it.
-  initialize () {
+  initiate () {
     if (!this._bvobLookup) {
       this.warnEvent(1, "Initializing bvob content lookups...");
       this._bvobLookup = _initializeSharedIndexedDB(this);
@@ -79,12 +79,11 @@ export default class Scribe extends Prophet {
 
   preCacheBvob (bvobId: string, newInfo: Object, retrieveBvobContent: Function,
       initialPersistRefCount: number = 0) {
-    const bvobInfo = this._bvobLookup[bvobId];
     try {
-      return _preCacheBvob(this, bvobInfo, newInfo, retrieveBvobContent, initialPersistRefCount);
+      return _preCacheBvob(this, bvobId, newInfo, retrieveBvobContent, initialPersistRefCount);
     } catch (error) {
       throw this.wrapErrorEvent(error, `preCacheBvob('${bvobId}')`,
-          "\n\tbvobInfo:", ...dumpObject(bvobInfo));
+          "\n\tbvobInfo:", ...dumpObject(this._bvobLookup[bvobId]));
     }
   }
 

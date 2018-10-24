@@ -33,12 +33,16 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   }
 
   chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
-      Promise<{ eventResults: ChronicleEventResult[] }> {
+      { eventResults: ChronicleEventResult[] } {
     if (!eventLog || !eventLog.length) return { eventResults: eventLog };
     if (!eventLog[0].eventId) {
+      /*
+      console.log("assigning ids:", this.getName(), this._firstNonAuthorizedCommandId,
+          this._pendingCommands.length,
+          "\n\tevents:", ...dumpObject(eventLog));
+      */
       eventLog.forEach((event, index) => {
-        event.eventId = this._firstNonAuthorizedCommandId + this._pendingCommands.length
-            + index;
+        event.eventId = this._firstNonAuthorizedCommandId + this._pendingCommands.length + index;
       });
       this._addNonAuthorizedCommands(eventLog);
     }
@@ -49,8 +53,8 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     });
   }
 
-  receiveTruths (truthEvents: UniversalEvent[]) {
-    return truthEvents.map(this._receiveTruth).filter(notNull => notNull);
+  receiveTruths (truths: UniversalEvent[]) {
+    return truths.map(this._receiveTruth).filter(notNull => notNull);
   }
 
   _receiveTruth = (truth: UniversalEvent) => {
@@ -82,13 +86,13 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     return commands.map(this._receiveCommand).filter(notNull => notNull);
   }
 
-  _receiveCommand = (commandEvent: UniversalEvent) => {
+  _receiveCommand = (command: UniversalEvent) => {
     try {
-      const nonAuthorizedIndex = commandEvent.eventId - this._firstNonAuthorizedCommandId;
+      const nonAuthorizedIndex = command.eventId - this._firstNonAuthorizedCommandId;
       if (nonAuthorizedIndex < 0) {
         throw new Error("Can't receive commands with eventId before authorized head");
       }
-      if (nonAuthorizedIndex < this._pendingCommands.length) return commandEvent;
+      if (nonAuthorizedIndex < this._pendingCommands.length) return command;
       if (this._eventsPendingSequencing.length) {
         throw new Error(
             "Can't receive commands if there are out-of-order truths pending sequencing");
@@ -96,13 +100,12 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       if (nonAuthorizedIndex !== this._pendingCommands.length) {
         throw new Error("Can only receive commands to the end of non-authorized commands queue");
       }
-      this._addNonAuthorizedCommands([commandEvent]);
-      this._prophet._fabricateProphecy(commandEvent, "reclaim");
-      return commandEvent;
+      this._addNonAuthorizedCommands([command]);
+      this._prophet._fabricateProphecy(command, "reclaim");
+      return command;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `receiveCommand(${commandEvent.eventId}, ${
-              commandEvent.commandId})`,
-          "\n\tcommandEvent:", ...dumpObject(commandEvent),
+      throw this.wrapErrorEvent(error, `receiveCommand(${command.eventId}, ${command.commandId})`,
+          "\n\tcommandEvent:", ...dumpObject(command),
           "\n\tnonAuthorizedCommands:", ...dumpObject([...this._pendingCommands]),
           "\n\teventsPendingSequencing:", ...dumpObject([...this._eventsPendingSequencing]),
           "\n\tthis:", ...dumpObject(this)

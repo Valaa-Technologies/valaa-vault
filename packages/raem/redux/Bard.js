@@ -25,7 +25,7 @@ export function createUniversalizableCommand (proclamation: Action) {
       entry => (entry instanceof ValaaURI ? entry : undefined));
 }
 
-export function isRestrictedCommand (action: Action) {
+export function isProclamation (action: Action) {
   return !action.partitions;
 }
 

@@ -73,7 +73,7 @@ export default class InspireGateway extends LogEventGenerator {
 
       // Create the the main in-memory false prophet using the stream router as its upstream.
       this.falseProphet = await this._proselytizeFalseProphet(this.gatewayRevelation,
-          this.corpus, this.oracle);
+          this.corpus, this.scribe);
 
       await this.attachPlugins(await this.gatewayRevelation.plugins);
 
@@ -192,7 +192,7 @@ export default class InspireGateway extends LogEventGenerator {
         ...await gatewayRevelation.scribe,
       };
       const scribe = await new Scribe(scribeOptions);
-      await scribe.initialize();
+      await scribe.initiate();
 
       this.warnEvent(`Proselytized Scribe '${scribe.debugId()}'`,
           ...(!this.getDebugLevel() ? [] : [", with:",
@@ -235,16 +235,15 @@ export default class InspireGateway extends LogEventGenerator {
     const name = "Inspire Corpus";
     const reducerOptions = {
       ...EngineContentAPI, // schema, validators, reducers
-      logEventer: this,
+      eventLogger: this,
       ...await gatewayRevelation.reducer,
     };
     const { schema, validators, mainReduce, subReduce } = createRootReducer(reducerOptions);
 
     // FIXME(iridian): Create the deterministic-id schema. Now random.
     const previousId = valaaUUID();
-    const defaultCommandVersion = DEFAULT_ACTION_VERSION;
     const middlewares = [
-      createProcessCommandVersionMiddleware(defaultCommandVersion),
+      createProcessCommandVersionMiddleware(DEFAULT_EVENT_VERSION),
       createProcessCommandIdMiddleware(previousId, schema),
       createValidateActionMiddleware(validators),
       createBardMiddleware(),
@@ -336,9 +335,9 @@ export default class InspireGateway extends LogEventGenerator {
   async _narratePrologues (prologueRevelation: Object) {
     let prologues;
     try {
-      this.warnEvent(`Narrating revelation prologues`);
+      this.warnEvent(`Extracting revelation prologues`);
       prologues = await this._loadRevelationEntryPartitionAndPrologues(prologueRevelation);
-      this.warnEvent(`Narrated revelation with ${prologues.length} prologues`,
+      this.warnEvent(`Extracted ${prologues.length} prologues from the revelation`,
           "\n\tprologue partitions:",
               `'${prologues.map(({ partitionURI }) => String(partitionURI)).join("', '")}'`);
       const ret = await Promise.all(prologues.map(this._connectChronicleAndNarratePrologue));
@@ -415,7 +414,7 @@ export default class InspireGateway extends LogEventGenerator {
       }
       const latestMediaInfos = await logs.latestMediaInfos;
       const chronicling = await connection.chronicleEventLog(eventLog, {
-        name: `prologue event log for '${connection.getName()}'`,
+        name: `prologue truths for '${connection.getName()}'`,
         preAuthorized: true,
         firstEventId: firstUnusedEventId,
         retrieveMediaBuffer (mediaInfo: Object) {
@@ -432,7 +431,7 @@ export default class InspireGateway extends LogEventGenerator {
               }" during prologue narration, with bvob id "${mediaInfo.bvobId}" `);
         }
       });
-      await Promise.all(chronicling.eventResults.map(result => result.getLocallyReceivedEvent()));
+      for (const result of chronicling.eventResults) await result.getLocallyReceivedEvent();
     }
     // Initiate remote narration.
     const remoteNarration = connection.narrateEventLog();

@@ -10,6 +10,7 @@ export default function createValaaTestScheme ({ config, authorityURI } = {}) {
 
     createDefaultAuthorityConfig: () => ({
       isLocallyPersisted: false,
+      isPrimaryAuthority: true,
       isRemoteAuthority: false,
       ...config,
     }),

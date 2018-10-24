@@ -10,6 +10,7 @@ export default function createValaaMemoryScheme (/* { logger } */) {
 
     createDefaultAuthorityConfig: (/* partitionURI: ValaaURI */) => ({
       isLocallyPersisted: false,
+      isPrimaryAuthority: true,
       isRemoteAuthority: false,
     }),
 

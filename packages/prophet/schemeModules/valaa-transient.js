@@ -10,6 +10,7 @@ export default function createValaaTransientScheme (/* { logger } */) {
 
     createDefaultAuthorityConfig: (/* partitionURI: ValaaURI */) => ({
       isLocallyPersisted: false,
+      isPrimaryAuthority: true,
       isRemoteAuthority: false,
     }),
 

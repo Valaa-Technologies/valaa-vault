@@ -53,6 +53,7 @@ export default class PartitionConnection extends LogEventGenerator {
   getPartitionRawId (): string { return getPartitionRawIdFrom(this._partitionURI); }
 
   isLocallyPersisted () { return this._upstreamConnection.isLocallyPersisted(); }
+  isPrimaryAuthority () { return this._upstreamConnection.isPrimaryAuthority(); }
   isRemoteAuthority () { return this._upstreamConnection.isRemoteAuthority(); }
 
   getReceiveTruths (downstreamReceiveTruths?: ReceiveEvents = this._downstreamReceiveTruths):

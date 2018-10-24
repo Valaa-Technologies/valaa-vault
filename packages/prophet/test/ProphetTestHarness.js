@@ -200,6 +200,7 @@ export function createTestMockProphet (configOverrides: Object = {}) {
     authorityURI: createPartitionURI("valaa-test:"),
     authorityConfig: {
       isLocallyPersisted: false,
+      isPrimaryAuthority: true,
       isRemoteAuthority: false,
       ...configOverrides,
     },

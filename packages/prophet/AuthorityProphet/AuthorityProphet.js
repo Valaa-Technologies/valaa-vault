@@ -30,7 +30,9 @@ export default class AuthorityProphet extends Prophet {
   getAuthorityURI (): ValaaURI { return this._authorityURI; }
 
   isLocallyPersisted () { return this._authorityConfig.isLocallyPersisted; }
+  isPrimaryAuthority () { return this._authorityConfig.isPrimaryAuthority; }
   isRemoteAuthority () { return this._authorityConfig.isRemoteAuthority; }
+
   /*
     Authority qualities to think about (with overlapping semantics):
   isPrimary ()      - authorizes and serves event logs which can

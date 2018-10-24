@@ -18,6 +18,7 @@ import type { ChronicleEventResult, ChronicleOptions, MediaInfo } from "~/prophe
 export default class AuthorityPartitionConnection extends PartitionConnection {
 
   isLocallyPersisted () { return this._prophet.isLocallyPersisted(); }
+  isPrimaryAuthority () { return this._prophet.isPrimaryAuthority(); }
   isRemoteAuthority () { return this._prophet.isRemoteAuthority(); }
 
   isConnected () {
@@ -37,14 +38,15 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
       throw new Error(`${this.constructor.name
           }.chronicleEventLog not implemented by remote authority partition "${this.getName()}"`);
     }
-    const receivedTruthsProcess = this.getReceiveTruths(options.receiveTruths)(eventLog);
+    const receivedTruthsProcess = !this.isPrimaryAuthority() ? []
+        : this.getReceiveTruths(options.receiveTruths)(eventLog);
     return {
       eventResults: eventLog.map((event, index) => ({
         event,
         getLocallyReceivedEvent: () => thenChainEagerly(
             receivedTruthsProcess,
             (receivedTruths) => receivedTruths[index]),
-        getTruthEvent: () => event,
+        getTruthEvent: () => (this.isPrimaryAuthority() ? event : undefined),
       })),
     };
   }

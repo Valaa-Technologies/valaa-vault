@@ -32,21 +32,21 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     });
   }
 
-  chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
+  chronicleEvents (events: UniversalEvent[], options: ChronicleOptions = {}):
       { eventResults: ChronicleEventResult[] } {
-    if (!eventLog || !eventLog.length) return { eventResults: eventLog };
-    if (!eventLog[0].eventId) {
+    if (!events || !events.length) return { eventResults: events };
+    if (!events[0].eventId) {
       /*
       console.log("assigning ids:", this.getName(), this._firstNonAuthorizedCommandId,
           this._pendingCommands.length,
           "\n\tevents:", ...dumpObject(eventLog));
       */
-      eventLog.forEach((event, index) => {
+      events.forEach((event, index) => {
         event.eventId = this._firstNonAuthorizedCommandId + this._pendingCommands.length + index;
       });
-      this._addNonAuthorizedCommands(eventLog);
+      this._addNonAuthorizedCommands(events);
     }
-    return super.chronicleEventLog(eventLog, {
+    return super.chronicleEvents(events, {
       ...options,
       receiveTruths: this.getReceiveTruths(options.receiveTruths),
       receiveCommands: !options.alreadyReduced && this.getReceiveCommands(options.receiveCommands),

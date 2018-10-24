@@ -44,7 +44,7 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
 
   if ((options.rechronicleOptions !== false) && (localResults.scribeCommandQueue || []).length) {
     // Resend all cached commands to remote on the side. Do not wait for success or results.
-    connection.chronicleEventLog(localResults.scribeCommandQueue, options.rechronicleOptions || {});
+    connection.chronicleEvents(localResults.scribeCommandQueue, options.rechronicleOptions || {});
   }
 
   const upstreamNarration = connection.getUpstreamConnection().narrateEventLog({
@@ -126,18 +126,18 @@ async function _waitForRemoveNarration (connection: ScribePartitionConnection,
  #####   #    #  #    #   ####   #    #     #     ####   ######  ######
 */
 
-export function _chronicleEventLog (connection: ScribePartitionConnection,
-    eventLog: UniversalEvent[], options: ChronicleOptions = {}, onError: Function
+export function _chronicleEvents (connection: ScribePartitionConnection,
+    events: UniversalEvent[], options: ChronicleOptions = {}, onError: Function
 ): { eventResults: ChronicleEventResult[] } {
-  if (!eventLog || !eventLog.length) return { eventResults: eventLog };
+  if (!events || !events.length) return { eventResults: events };
   if (options.preAuthorized === true) {
     let receivedTruthsProcess = thenChainEagerly(
         connection.getReceiveTruths(options.receiveTruths)(
         // pre-authorized medias must be preCached, throw on any retrieveMediaBuffer calls.
-            eventLog, options.retrieveMediaBuffer || _throwOnMediaRequest.bind(null, connection)),
+            events, options.retrieveMediaBuffer || _throwOnMediaRequest.bind(null, connection)),
         (receivedTruths) => (receivedTruthsProcess = receivedTruths));
     return {
-      eventResults: eventLog.map((event, index) => ({
+      eventResults: events.map((event, index) => ({
         event,
         getLocallyReceivedEvent: () => thenChainEagerly(receivedTruthsProcess,
             receivedTruths => receivedTruths[index]),
@@ -146,18 +146,18 @@ export function _chronicleEventLog (connection: ScribePartitionConnection,
     };
   }
   const commandReception = connection.getReceiveCommands(options.receiveCommands)(
-      eventLog, options.retrieveMediaBuffer);
+      events, options.retrieveMediaBuffer);
   const localReception = thenChainEagerly(commandReception, [
     (receivedCommands) => Promise.all(receivedCommands),
     (results) => results,
   ], onError);
   options.receiveCommands = null;
   const chronicling = thenChainEagerly(localReception,
-      (events) => connection.getUpstreamConnection()
-          .chronicleEventLog(events.filter(notNull => notNull), options),
+      (receivedEvents) => connection.getUpstreamConnection()
+          .chronicleEvents(receivedEvents.filter(notNull => notNull), options),
       onError);
   return {
-    eventResults: eventLog.map((event, index) => ({
+    eventResults: events.map((event, index) => ({
       event,
       getLocallyReceivedEvent: () => thenChainEagerly(localReception,
           (events) => events[index],

@@ -110,7 +110,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
-      Promise<{ eventResults: ChronicleEventResult[] }> {
+      { eventResults: ChronicleEventResult[] } {
     const contextError = new Error("chronicleEventLog");
     try {
       return _chronicleEventLog(this, eventLog, options, errorOnScribeChronicleEventLog.bind(this));

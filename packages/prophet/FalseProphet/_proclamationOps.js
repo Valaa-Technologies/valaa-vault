@@ -1,7 +1,7 @@
 // @flow
 
-import Command, { isTransactedLike } from "~/raem/command";
-import { getActionFromPassage } from "~/raem/redux/Bard";
+import Command from "~/raem/command";
+import { getActionFromPassage, createUniversalizableCommand } from "~/raem/redux/Bard";
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
 import { createPartitionURI } from "~/raem/ValaaURI";
 
@@ -16,8 +16,9 @@ import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 // Handle a proclamation towards upstream.
 export function _proclaim (falseProphet: FalseProphet, proclamation: Proclamation,
     { timed, transactionInfo } = {}): ClaimResult {
-  const prophecy = falseProphet._fabricateProphecy(proclamation, "proclaim", timed,
-      transactionInfo);
+  const prophecy = falseProphet._fabricateProphecy(
+      createUniversalizableCommand(proclamation), "proclaim", timed, transactionInfo);
+  prophecy.proclamation = proclamation;
   // falseProphet.warnEvent("\n\tclaim", proclamation.commandId, proclamation,
   //    ...falseProphet._dumpStatus());
   let getFinalStory;
@@ -25,7 +26,8 @@ export function _proclaim (falseProphet: FalseProphet, proclamation: Proclamatio
   if (!timed) {
     try {
       const operation = { prophecy };
-      _extractSubOpsFromClaim(falseProphet, getActionFromPassage(prophecy.story), operation);
+      _extractSubOpCommandsFromProclamations(falseProphet, getActionFromPassage(prophecy.story),
+          operation);
       _initiateSubOpConnectionValidation(falseProphet, operation);
       operation.finalStory = _processClaim(falseProphet, operation);
       getFinalStory = () => operation.finalStory;
@@ -72,18 +74,18 @@ export function _proclaim (falseProphet: FalseProphet, proclamation: Proclamatio
 
 // Re-proclaim on application refresh commands which were cached but not yet resolved.
 // The command is already universalized and there's no need to collect handler return values.
-export function _repeatClaim (falseProphet: FalseProphet, command: Command) {
+export function _reclaim (falseProphet: FalseProphet, command: Command) {
   if (falseProphet._prophecyByCommandId[command.commandId]) return undefined; // dedup
   // falseProphet.warnEvent("\n\trepeatClaim", command.commandId, command,
   //    ...falseProphet._dumpStatus());
   const prophecy = falseProphet._fabricateProphecy(command,
-      `re-proclaim ${command.commandId.slice(0, 13)}...`);
+      `reclaim ${command.commandId.slice(0, 13)}...`);
   falseProphet._revealProphecyToAllFollowers(prophecy);
   return prophecy;
 }
 
-function _extractSubOpsFromClaim (falseProphet: FalseProphet, proclamation: Proclamation,
-    operation: Object) {
+function _extractSubOpCommandsFromProclamations (falseProphet: FalseProphet,
+    proclamation: Proclamation, operation: Object) {
   operation.proclamation = proclamation;
   operation.partitionCommands = {};
   operation.subOperations = [];

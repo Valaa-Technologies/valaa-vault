@@ -94,6 +94,8 @@ export default class Prophet extends LogEventGenerator {
     this._upstream = upstream;
   }
 
+  initiate (): Promise<Prophet> | Prophet {}
+
   addFollower (follower: Follower): Follower {
     const discourse = this._createDiscourse(follower);
     this._followers.set(follower, discourse);
@@ -124,13 +126,13 @@ export default class Prophet extends LogEventGenerator {
     });
   }
 
-  _repeatClaimToAllFollowers (command: Object) {
+  _reclaimToAllFollowers (command: Object) {
     (this._followers || []).forEach(discourse => {
       try {
         discourse.repeatClaim(command);
       } catch (error) {
         this.outputErrorEvent(this.wrapErrorEvent(error,
-            "_repeatClaimToAllFollowers",
+            "_reclaimToAllFollowers",
             "\n\trepeated command:", command,
             "\n\ttarget discourse:", discourse,
         ));

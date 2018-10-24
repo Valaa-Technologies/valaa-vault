@@ -6,7 +6,7 @@ import createValidateActionMiddleware from "~/raem/redux/middleware/validateActi
 import createProcessCommandIdMiddleware from "~/raem/redux/middleware/processCommandId";
 import createProcessCommandVersionMiddleware from
     "~/raem/redux/middleware/processCommandVersion";
-import { createBardMiddleware, isRestrictedCommand, createUniversalizableCommand }
+import { createBardMiddleware, isProclamation, createUniversalizableCommand }
     from "~/raem/redux/Bard";
 
 import RAEMTestAPI from "~/raem/test/RAEMTestAPI";
@@ -76,10 +76,10 @@ export default class RAEMTestHarness extends LogEventGenerator {
     let story;
     try {
       const universalizableCommand = createUniversalizableCommand(proclamation);
-      invariantify(isRestrictedCommand(universalizableCommand),
+      invariantify(isProclamation(universalizableCommand),
           "universalizable command must still be restricted");
       story = this.corpus.dispatch(universalizableCommand);
-      invariantify(!isRestrictedCommand(universalizableCommand),
+      invariantify(!isProclamation(universalizableCommand),
           "universalized story must not be restricted");
       return story;
     } catch (error) {
@@ -90,34 +90,16 @@ export default class RAEMTestHarness extends LogEventGenerator {
   }
 
   createCorpus () {
-    const { schema, validators, mainReduce, subReduce } = createRootReducer(Object.freeze({
-      ...this.ContentAPI,
-      logEventer: this,
-      ...(this.reducerOptions || {}),
-    }));
-    return new Corpus(Object.freeze({
+    return createCorpus(this.ContentAPI, {
+      eventLogger: this,
+      ...this.reducerOptions,
+    }, {
       name: `${this.getName()} Corpus`,
-      initialState: OrderedMap(),
-      middlewares: this._createTestMiddlewares({ schema, validators }),
-      reduce: mainReduce,
-      subReduce,
-      schema,
       debugLevel: this.getDebugLevel(),
       logger: this.getLogger(),
       // stubify all unpacked Transient's when packing: this causes them to autorefresh
-      ...(this.corpusOptions || {}),
-    }));
-  }
-
-  _createTestMiddlewares ({ schema, validators }) {
-    const previousId = valaaUUID();
-    const defaultCommandVersion = DEFAULT_ACTION_VERSION;
-    return [
-      createProcessCommandVersionMiddleware(defaultCommandVersion),
-      createProcessCommandIdMiddleware(previousId, schema),
-      createValidateActionMiddleware(validators),
-      createBardMiddleware(),
-    ];
+      ...this.corpusOptions,
+    });
   }
 
   createValker () {
@@ -135,4 +117,30 @@ export default class RAEMTestHarness extends LogEventGenerator {
         this.corpusOptions.builtinSteppers,
     );
   }
+}
+
+export function createCorpus (ContentAPI: Object, reducerOptions?: Object, corpusOptions?: Object) {
+  const { schema, validators, mainReduce, subReduce } = createRootReducer(Object.freeze({
+    ...ContentAPI,
+    ...reducerOptions,
+  }));
+  return new Corpus(Object.freeze({
+    name: "Test Corpus",
+    middlewares: _createTestMiddlewares({ schema, validators }),
+    initialState: OrderedMap(),
+    reduce: mainReduce,
+    subReduce,
+    schema,
+    ...corpusOptions,
+  }));
+}
+
+function _createTestMiddlewares ({ schema, validators }) {
+  const previousId = valaaUUID();
+  return [
+    createProcessCommandVersionMiddleware(DEFAULT_EVENT_VERSION),
+    createProcessCommandIdMiddleware(previousId, schema),
+    createValidateActionMiddleware(validators),
+    createBardMiddleware(),
+  ];
 }

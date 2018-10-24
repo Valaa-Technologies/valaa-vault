@@ -155,7 +155,7 @@ export default class PartitionConnection extends LogEventGenerator {
    * @memberof PartitionConnection
    */
   chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
-      Promise<{ eventResults: ChronicleEventResult[] }> {
+      { eventResults: ChronicleEventResult[] } {
     if (!options) return undefined;
     return this._upstreamConnection.chronicleEventLog(eventLog, options);
   }
@@ -168,15 +168,17 @@ export default class PartitionConnection extends LogEventGenerator {
   }
 
   receiveTruths (truths: UniversalEvent[], retrieveMediaBuffer: RetrieveMediaBuffer,
-      downstreamReceiveTruths: ?ReceiveEvents,
+      downstreamReceiveTruths: ?ReceiveEvents, type: string = "receiveTruths",
   ): Promise<(Promise<UniversalEvent> | UniversalEvent)[]> {
     try {
-      if (downstreamReceiveTruths) return downstreamReceiveTruths(truths, retrieveMediaBuffer);
-      throw new Error(`receiveTruths not implemented by ${this.constructor.name
-          } and no explicit options.receiveTruths was provided.`);
+      if (!downstreamReceiveTruths) {
+        throw new Error(`Internal Error: receiveTruths not implemented by ${this.constructor.name
+            } and no explicit options.receiveTruths was defined (for narrate/chronicle).`);
+      }
+      return downstreamReceiveTruths(truths, retrieveMediaBuffer);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error("receiveTruths"),
-          "\n\ttruths:", ...dumpObject(truths), truths,
+      throw this.wrapErrorEvent(error, new Error(type),
+          "\n\ttruths:", ...dumpObject(truths),
           "\n\tretrieveMediaBuffer:", ...dumpObject(retrieveMediaBuffer));
     }
   }
@@ -184,17 +186,8 @@ export default class PartitionConnection extends LogEventGenerator {
   receiveCommands (commands: UniversalEvent[], retrieveMediaBuffer: RetrieveMediaBuffer,
       downstreamReceiveCommands: ReceiveEvents,
   ): Promise<(Promise<UniversalEvent> | UniversalEvent)[]> {
-    try {
-      if (downstreamReceiveCommands) {
-        return downstreamReceiveCommands(commands, retrieveMediaBuffer);
-      }
-      throw new Error(`receiveCommands not implemented by ${this.constructor.name
-              } and no explicit options.receiveCommands was provided.`);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, new Error("receiveCommands"),
-          "\n\tcommands:", ...dumpObject(commands),
-          "\n\tretrieveMediaBuffer:", ...dumpObject(retrieveMediaBuffer));
-    }
+    return this.receiveTruths(commands, retrieveMediaBuffer, downstreamReceiveCommands,
+        "receiveCommands");
   }
 
   /**

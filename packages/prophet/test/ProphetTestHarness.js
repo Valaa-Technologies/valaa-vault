@@ -6,14 +6,12 @@ import { created } from "~/raem/command";
 import { createTestPartitionURIFromRawId, createPartitionURI }
     from "~/raem/ValaaURI";
 
-import { Proclamation } from "~/prophet/FalseProphet/FalseProphet";
-
 import ScriptTestHarness, { createScriptTestHarness } from "~/script/test/ScriptTestHarness";
+import { createCorpus } from "~/raem/test/RAEMTestHarness";
 
 import {
   AuthorityNexus, AuthorityProphet, AuthorityPartitionConnection,
-  FalseProphet, FalseProphetDiscourse, Oracle, Prophecy,
-  Prophet, Scribe,
+  FalseProphet, FalseProphetDiscourse, Oracle, Prophet, Scribe,
 } from "~/prophet";
 
 import ProphetTestAPI from "~/prophet/test/ProphetTestAPI";
@@ -74,6 +72,14 @@ export async function createProphetOracleHarness (options: Object, ...proclamati
   }
 }
 
+export const proclamationCREATEDTestPartitionEntity = created({
+  id: "test_partition", typeName: "Entity",
+  initialState: {
+    name: "Automatic Test Partition Root",
+    partitionAuthorityURI: "valaa-test:",
+  },
+});
+
 export default class ProphetTestHarness extends ScriptTestHarness {
   constructor (options: Object) {
     super(options);
@@ -95,10 +101,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
         this.prophet.acquirePartitionConnection(this.testPartitionURI, { newPartition: true })
         .getSyncedConnection(), [
           (conn) => Promise.all([
-            conn, this.proclaim(created({ id: "test_partition", typeName: "Entity", initialState: {
-              name: "Automatic Test Partition Root",
-              partitionAuthorityURI: "valaa-test:",
-            }, })).getStoryPremiere(),
+            conn, this.proclaim(proclamationCREATEDTestPartitionEntity).getStoryPremiere(),
           ]),
           ([conn]) => (this.testPartitionConnection = conn),
         ]);
@@ -110,9 +113,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
 
   createCorpus () { // Called by RAEMTestHarness.constructor (so before oracle/scribe are created)
     const corpus = super.createCorpus();
-    this.prophet = new FalseProphet({
-      name: "Test FalseProphet", schema: this.schema, corpus, logger: this.getLogger(),
-    });
+    this.prophet = createFalseProphet({ schema: this.schema, corpus, logger: this.getLogger() });
     return corpus;
   }
 
@@ -141,7 +142,7 @@ export function createScribe (upstream: Prophet, options?: Object) {
     upstream,
     ...options,
   });
-  ret.initialize();
+  ret.initiate();
   return ret;
 }
 
@@ -185,6 +186,15 @@ export function clearOracleScribeDatabases (prophet: Prophet) {
       .map(connection => connection.getPartitionURI().toString()));
 }
 
+export function createFalseProphet (options?: Object) {
+  const corpus = (options && options.corpus) || createCorpus(ProphetTestAPI, {}, {});
+  return new FalseProphet({
+    name: "Test FalseProphet",
+    corpus,
+    ...options,
+  });
+}
+
 export function createTestMockProphet (configOverrides: Object = {}) {
   return new MockProphet({
     authorityURI: createPartitionURI("valaa-test:"),
@@ -207,13 +217,14 @@ export class MockProphet extends AuthorityProphet {
     return connectors;
   }
 
+/*
   proclaim (proclamation: Proclamation) {
     return {
       prophecy: new Prophecy(proclamation),
       getStoryPremiere: () => Promise.resolve(proclamation),
     };
   }
-/*
+
   _createPartitionConnection (partition) {
     if
     return new MockPartitionConnection({

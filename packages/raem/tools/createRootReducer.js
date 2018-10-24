@@ -56,54 +56,54 @@ function mergeActionReducers (reducerDictionaryCreates, context) {
  *    fails the delayed calls (and the candidate reduction state head) can be safely discarded.
  */
 export default function createRootReducer ({
-  schema, logEventer, reducers, validators, context = {},
+  schema, eventLogger, reducers, validators, context = {},
   subReduceLogThreshold = 2, reduceLogThreshold = 1
 }) {
   const reducerContext = {
     subReduce,
     ...context,
     schema,
-    logEventer,
+    eventLogger,
     delayCall,
     mainReduce,
     reducers,
     validators,
   };
   const reducerByActionType = mergeActionReducers(reducers, reducerContext);
-  if (!reducerContext.logEventer) {
-    reducerContext.logEventer = new LogEventGenerator({ name: "Unnamed reducer" });
+  if (!reducerContext.eventLogger) {
+    reducerContext.eventLogger = new LogEventGenerator({ name: "Unnamed reducer" });
   }
 
   function delayCall (callback) {
     // The Promise specification guarantees that then() handlers will be executed only after the
     // execution stack only has platform functions. So we're golden.
     Promise.resolve().then(callback).catch(error => {
-      (this || reducerContext.logEventer)
+      (this || reducerContext.eventLogger)
           .error(`ERROR: While executing delayed call: ${error.message}, for callback ${callback
               }, in ${error.stack}`);
     });
   }
 
   function mainReduce (state = Map(), action) {
-    const mainLogEventer = this || reducerContext.logEventer;
+    const mainLogger = this || reducerContext.eventLogger;
     try {
-      if (mainLogEventer.getDebugLevel() >= reduceLogThreshold) {
+      if (mainLogger.getDebugLevel() >= reduceLogThreshold) {
         const time = action.timeStamp;
         const minor = action.typeName ? `${action.typeName} ` : "";
         // eslint-disable-next-line
         const { timeStamp, type, typeName, id, passages, parentPassage, bard, ...rest } = action;
-        mainLogEventer.logEvent(
+        mainLogger.logEvent(
             `Reducing @${time} ${action.type} ${minor}${
                 dumpify(action.commandId, { sliceAt: 40, sliceSuffix: "..." })}`,
             `\n\t${dumpify(rest, { sliceAt: 380 })}`);
       }
       const reducer = reducerByActionType[action.type];
       if (reducer) return reducer.call(this, state, action);
-      mainLogEventer.warnEvent(
+      mainLogger.warnEvent(
           `WARNING: While reducing, no reducer for action type ${action.type}, ignoring`);
       return state;
     } catch (error) {
-      throw mainLogEventer.wrapErrorEvent(error, `mainReduce(${action.type}, ${action.commandId})`,
+      throw mainLogger.wrapErrorEvent(error, `mainReduce(${action.type}, ${action.commandId})`,
           "\n\taction:", action,
           "\n\tthis:", this);
     }
@@ -116,14 +116,14 @@ export default function createRootReducer ({
    * @returns
    */
   function subReduce (state, action) {
-    const subLogEventer = this || reducerContext.logEventer;
+    const subEventLogger = this || reducerContext.eventLogger;
     try {
-      if (subLogEventer.getDebugLevel() >= subReduceLogThreshold) {
+      if (subEventLogger.getDebugLevel() >= subReduceLogThreshold) {
         let minor = action.typeName ? `${action.typeName} ` : "";
         if (action.id) minor = `${minor}${dumpify(action.id, { sliceAt: 40, sliceSuffix: "..." })}`;
         // eslint-disable-next-line
         const { type, typeName, id, passages, parentPassage, bard, ...rest } = action;
-        subLogEventer.logEvent(
+        subEventLogger.logEvent(
             `Sub-reducing ${action.type} ${minor}`,
             `\n\t${dumpify(rest, { sliceAt: 380 })}`);
       }
@@ -137,7 +137,7 @@ export default function createRootReducer ({
       if (reducer) return reducer.call(this, state, action);
       throw new Error(`No reducer found for sub-action of type ${action.type}`);
     } catch (error) {
-      throw subLogEventer.wrapErrorEvent(error, `subReduce(${action.typeName})`,
+      throw subEventLogger.wrapErrorEvent(error, `subReduce(${action.typeName})`,
           "\n\taction:", action,
           "\n\tthis:", this);
     }

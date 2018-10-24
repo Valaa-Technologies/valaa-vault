@@ -18,8 +18,8 @@ export default class TransactionInfo {
     this.transaction = transaction;
     this.stateBefore = transaction.getState();
     this.stateAfter = null;
-    // restrictedActions is set to null when the transaction has been committed.
-    this.restrictedActions = [];
+    // proclamations is set to null when the transaction has been committed.
+    this.proclamations = [];
     this.transacted = transacted({ actions: [] });
     this.storyPassages = [];
     this.universalPartitions = {};
@@ -34,7 +34,7 @@ export default class TransactionInfo {
   }
 
   isCommittable () {
-    return this.restrictedActions;
+    return this.proclamations;
   }
 
   isFastForwardFrom (previousState: Object) {
@@ -65,7 +65,7 @@ export default class TransactionInfo {
 
   proclaim (proclamation: Proclamation): ClaimResult {
     try {
-      if (!this.restrictedActions) {
+      if (!this.proclamations) {
         throw new Error(`Transaction '${this.transaction.corpus.getName()}' has already been ${
                 this.finalRestrictedTransactedLike ? "committed" : "aborted"
             }, when trying to add an action to it`);
@@ -74,8 +74,8 @@ export default class TransactionInfo {
       // proclamation whenever a new proclamation comes in, via dispatching the on-going
       // info.transacted only containing that particular proclamation. Once the transaction is
       // finally committed, the pieces are put together in a complete, universal TRANSACTED.
-      const index = this.restrictedActions.length;
-      this.restrictedActions.push(proclamation);
+      const index = this.proclamations.length;
+      this.proclamations.push(proclamation);
 
       const previousState = this.transaction.state;
       // This is an awkward way to incrementally construct the transacted.
@@ -95,10 +95,9 @@ export default class TransactionInfo {
       this.resultPromises.push(null);
       const result = new Promise((succeed, fail) =>
           (this.resultPromises[index] = { succeed, fail }));
-      return {
-        prophecy: new Prophecy(story.passages[0], state, previousState, proclamation),
-        getStoryPremiere: () => result,
-      };
+      const prophecy = new Prophecy(story.passages[0], state, previousState);
+      prophecy.proclamation = proclamation;
+      return { prophecy, getStoryPremiere: () => result };
     } catch (error) {
       throw this.transaction.wrapErrorEvent(error,
           `transaction.proclaim(${this.transaction.corpus.getName()})`,
@@ -110,7 +109,7 @@ export default class TransactionInfo {
   commit (commitCustomProclamation: ?Object): ClaimResult {
     let proclamation;
     try {
-      if (!this.restrictedActions) {
+      if (!this.proclamations) {
         throw new Error(`Transaction '${this.transaction.corpus.getName()}' has already been ${
                 this.finalRestrictedTransactedLike ? "committed" : "aborted"
             }, when trying to commit it again`);
@@ -118,8 +117,8 @@ export default class TransactionInfo {
       this.setCustomProclamation(commitCustomProclamation, "committing transaction");
       this.stateAfter = this.transaction.getState();
 
-      this.transacted.actions = this.restrictedActions;
-      this.restrictedActions = null;
+      this.transacted.actions = this.proclamations;
+      this.proclamations = null;
 
       this.finalRestrictedTransactedLike = !this.customProclamation
           ? this.transacted
@@ -128,11 +127,9 @@ export default class TransactionInfo {
         const universalNoOpProclamation = createUniversalizableCommand(
             this.finalRestrictedTransactedLike);
         universalNoOpProclamation.partitions = {};
-        return {
-          prophecy: new Prophecy(universalNoOpProclamation, undefined, undefined,
-              this.finalRestrictedTransactedLike),
-          getStoryPremiere () { return universalNoOpProclamation; },
-        };
+        const prophecy = new Prophecy(universalNoOpProclamation);
+        prophecy.proclamation = this.finalRestrictedTransactedLike;
+        return { prophecy, getStoryPremiere () { return universalNoOpProclamation; } };
       }
       const result = this.transaction.prophet.proclaim(
           this.finalRestrictedTransactedLike, { transactionInfo: this });
@@ -155,11 +152,11 @@ export default class TransactionInfo {
   }
 
   abort () {
-    if (!this.restrictedActions && this.finalRestrictedTransactedLike) {
+    if (!this.proclamations && this.finalRestrictedTransactedLike) {
       throw new Error(`Transaction '${this.transaction.corpus.getName()
           }' has already been committed, when trying to abort it`);
     }
-    this.restrictedActions = null;
+    this.proclamations = null;
   }
 
   releaseTransaction (releaseCustomProclamation: ?Object) {

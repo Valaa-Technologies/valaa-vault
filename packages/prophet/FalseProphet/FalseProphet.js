@@ -3,7 +3,7 @@
 
 import { Action, UniversalEvent } from "~/raem/command";
 import type { State } from "~/raem/tools/denormalized/State";
-import { isRestrictedCommand } from "~/raem/redux/Bard";
+import { isProclamation } from "~/raem/redux/Bard";
 
 import Prophecy from "~/prophet/api/Prophecy";
 import Follower from "~/prophet/api/Follower";
@@ -17,12 +17,14 @@ import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
 import { _fabricateProphecy, _revealProphecyToAllFollowers } from "./_prophecyOps";
 import { _receiveTruth, _reviewProphecy } from "./_reformationOps";
-import { _proclaim, _repeatClaim } from "./_proclamationOps";
+import { _proclaim, _reclaim } from "./_proclamationOps";
 
 export class Proclamation extends Action {}
 
 export type ClaimResult = {
   prophecy: Prophecy;
+  getFinalStory: () => Promise<Action>;
+  getCommandOf: (partitionURI: string) => Promise<Action>;
   getStoryPremiere: () => Promise<Action>;
 }
 
@@ -50,8 +52,8 @@ export default class FalseProphet extends Prophet {
 
   constructor ({ name, logger, schema, corpus, upstream, commandCountCallback }: Object) {
     super({ name, logger });
-    this.schema = schema;
     this.corpus = corpus;
+    this.schema = schema || corpus.getSchema();
 
     // Prophecy queue is a sentinel-based linked list with a separate lookup structure.
     this._prophecySentinel = { id: "sentinel" };
@@ -87,7 +89,7 @@ export default class FalseProphet extends Prophet {
   // The command is already universalized and there's no need to collect handler return values.
   repeatClaim (proclamation: Proclamation) {
     invariantify(proclamation.commandId, "repeatClaim.proclamation.commandId");
-    return _repeatClaim(this, proclamation);
+    return _reclaim(this, proclamation);
   }
 
   // Handle event confirmation coming from upstream, including a possible reformation.
@@ -106,13 +108,10 @@ export default class FalseProphet extends Prophet {
    * @param  {type} prophecy  an command to go upstream
    * @returns {type}          description
    */
-  _fabricateProphecy (action: Action,
-      dispatchDescription: string, timed: ?UniversalEvent = undefined,
+  _fabricateProphecy (action: Action, dispatchDescription: string, timed: ?UniversalEvent,
       transactionInfo?: TransactionInfo) {
-    const proclamation = isRestrictedCommand(action) ? action : undefined;
     try {
-      return _fabricateProphecy(this, action, dispatchDescription, timed, transactionInfo,
-          proclamation);
+      return _fabricateProphecy(this, action, dispatchDescription, timed, transactionInfo);
     } catch (error) {
       throw this.wrapErrorEvent(error, `_fabricateProphecy(${dispatchDescription})`,
           "\n\taction:", action,

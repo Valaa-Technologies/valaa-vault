@@ -4,8 +4,7 @@ import type { UniversalEvent } from "~/raem/command";
 import { createValaaURI } from "~/raem/ValaaURI";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import type { ChronicleOptions, ChronicleEventResult, ConnectOptions, NarrateOptions, MediaInfo }
-    from "~/prophet/api/Prophet";
+import type { ConnectOptions, MediaInfo } from "~/prophet/api/Prophet";
 
 import DecoderArray from "~/prophet/Oracle/DecoderArray";
 

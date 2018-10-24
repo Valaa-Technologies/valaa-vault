@@ -128,17 +128,20 @@ async function _waitForRemoveNarration (connection: ScribePartitionConnection,
 
 export function _chronicleEventLog (connection: ScribePartitionConnection,
     eventLog: UniversalEvent[], options: ChronicleOptions = {}, onError: Function
-): Promise<{ eventResults: ChronicleEventResult[] }> {
+): { eventResults: ChronicleEventResult[] } {
   if (!eventLog || !eventLog.length) return { eventResults: eventLog };
   if (options.preAuthorized === true) {
+    let receivedTruthsProcess = thenChainEagerly(
+        connection.getReceiveTruths(options.receiveTruths)(
+        // pre-authorized medias must be preCached, throw on any retrieveMediaBuffer calls.
+            eventLog, options.retrieveMediaBuffer || _throwOnMediaRequest.bind(null, connection)),
+        (receivedTruths) => (receivedTruthsProcess = receivedTruths));
     return {
-      eventResults: connection.getReceiveTruths(options.receiveTruths)(eventLog,
-          // pre-authorized medias must be preCached, throw on any retrieveMediaBuffer calls.
-          options.retrieveMediaBuffer || _throwOnMediaContentRetrieveRequest.bind(null, connection),
-      ).map((receivedEvent, index) => ({
-        event: eventLog[index],
-        getLocallyReceivedEvent: () => receivedEvent,
-        getTruthEvent: () => eventLog[index],
+      eventResults: eventLog.map((event, index) => ({
+        event,
+        getLocallyReceivedEvent: () => thenChainEagerly(receivedTruthsProcess,
+            receivedTruths => receivedTruths[index]),
+        getTruthEvent: () => event,
       })),
     };
   }
@@ -263,7 +266,7 @@ function _determineEventPreOps (connection: ScribePartitionConnection, event: Ob
   return [];
 }
 
-export function _throwOnMediaContentRetrieveRequest (connection: ScribePartitionConnection,
+export function _throwOnMediaRequest (connection: ScribePartitionConnection,
     mediaInfo: MediaInfo) {
   throw connection.wrapErrorEvent(
       new Error(`Cannot retrieve media '${mediaInfo.name}' content through partition '${

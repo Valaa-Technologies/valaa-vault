@@ -7,6 +7,7 @@ import PartitionConnection from "~/prophet/api/PartitionConnection";
 import type { ConnectOptions, MediaInfo } from "~/prophet/api/Prophet";
 
 import DecoderArray from "~/prophet/Oracle/DecoderArray";
+import { upgradeEventToVersion0dot2 } from "~/prophet/tools/upgradeEventToVersion0dot2";
 
 import { addDelayedOperationEntry, dumpObject, thenChainEagerly } from "~/tools";
 // import { stringFromUTF8ArrayBuffer } from "~/tools/textEncoding";
@@ -62,6 +63,23 @@ export default class OraclePartitionConnection extends PartitionConnection {
     } catch (error) {
       throw this.wrapErrorEvent(error, "connect",
           "\n\toptions:", ...dumpObject(options));
+    }
+  }
+
+  receiveTruths (truths: UniversalEvent[], retrieveMediaBuffer: RetrieveMediaBuffer,
+      downstreamReceiveTruths: ?ReceiveEvents, type: string = "receiveTruths",
+  ): Promise<(Promise<UniversalEvent> | UniversalEvent)[]> {
+    try {
+      if (!downstreamReceiveTruths) {
+        throw new Error(`Internal Error: downstreamReceiveTruths was not defined`);
+      }
+      return downstreamReceiveTruths(
+          eventLog.map(event => upgradeEventToVersion0dot2(event, connection)),
+          retrieveMediaBuffer);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error(type),
+          "\n\ttruths:", ...dumpObject(truths),
+          "\n\tretrieveMediaBuffer:", ...dumpObject(retrieveMediaBuffer));
     }
   }
 

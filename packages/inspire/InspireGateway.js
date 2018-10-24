@@ -14,6 +14,7 @@ import { createBardMiddleware } from "~/raem/redux/Bard";
 import Corpus from "~/raem/Corpus";
 
 import { AuthorityNexus, FalseProphet, Oracle, Prophet, Scribe } from "~/prophet";
+import upgradeEventToVersion0dot2 from "~/prophet/tools/upgradeEventToVersion0dot2";
 
 import ValaaEngine from "~/engine/ValaaEngine";
 import EngineContentAPI from "~/engine/EngineContentAPI";
@@ -28,7 +29,7 @@ import extendValaaSpaceWithInspire from "~/inspire/ValaaSpace";
 import { arrayBufferFromBase64 } from "~/tools/base64";
 import { dumpObject, invariantify, LogEventGenerator, valaaUUID } from "~/tools";
 
-const DEFAULT_ACTION_VERSION = process.env.DEFAULT_ACTION_VERSION || "0.1";
+const DEFAULT_EVENT_VERSION = process.env.DEFAULT_EVENT_VERSION || "0.2";
 
 export default class InspireGateway extends LogEventGenerator {
 
@@ -350,6 +351,7 @@ export default class InspireGateway extends LogEventGenerator {
           "\n\tprologues:", ...dumpObject(prologues));
     }
   }
+
   async _loadRevelationEntryPartitionAndPrologues (prologueRevelation: Object) {
     const ret = [];
     try {
@@ -413,7 +415,8 @@ export default class InspireGateway extends LogEventGenerator {
         throw new Error("commandQueue revelation not implemented yet");
       }
       const latestMediaInfos = await logs.latestMediaInfos;
-      const chronicling = await connection.chronicleEventLog(eventLog, {
+      const upgradedEventLog = eventLog.map(event => upgradeEventToVersion0dot2(event, connection));
+      const chronicling = connection.chronicleEventLog(upgradedEventLog, {
         name: `prologue truths for '${connection.getName()}'`,
         preAuthorized: true,
         firstEventId: firstUnusedEventId,

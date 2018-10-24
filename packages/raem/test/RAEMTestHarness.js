@@ -16,7 +16,7 @@ import Valker from "~/raem/VALK/Valker";
 
 import { dumpObject, invariantify, LogEventGenerator, valaaUUID, wrapError } from "~/tools";
 
-const DEFAULT_ACTION_VERSION = "0.1";
+const DEFAULT_EVENT_VERSION = "0.2";
 
 export function createRAEMTestHarness (options: Object, ...proclamationBlocks: any) {
   try {

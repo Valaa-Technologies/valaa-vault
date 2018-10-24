@@ -6,12 +6,12 @@ import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/part
 import { createPartitionURI } from "~/raem/ValaaURI";
 
 import type { ClaimResult } from "~/prophet/api/Prophet";
+import extractEventOfPartition from "~/prophet/tools/extractEventOfPartition";
 
 import { dumpObject, outputError, thenChainEagerly } from "~/tools";
 
 import FalseProphet, { Proclamation } from "./FalseProphet";
 import { _rejectLastProphecyAsHeresy } from "./_prophecyOps";
-import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
 // Handle a proclamation towards upstream.
 export function _proclaim (falseProphet: FalseProphet, proclamation: Proclamation,
@@ -102,8 +102,7 @@ function _extractSubOpCommandsFromProclamations (falseProphet: FalseProphet,
       missingConnections.push(createPartitionURI(partitionURIString));
       return;
     }
-    const commandEvent = extractCommandOf(falseProphet, proclamation, partitionURIString,
-        connection);
+    const commandEvent = extractEventOfPartition(proclamation, connection);
     operation.partitionCommands[partitionURIString] = commandEvent;
     (connection.isRemoteAuthority() ? remotes
         : connection.isLocallyPersisted() ? locals
@@ -115,40 +114,6 @@ function _extractSubOpCommandsFromProclamations (falseProphet: FalseProphet,
   if (missingConnections.length) {
     throw new MissingPartitionConnectionsError(`Missing active partition connections: '${
         missingConnections.map(c => c.toString()).join("', '")}'`, missingConnections);
-  }
-}
-
-function extractCommandOf (falseProphet: FalseProphet, proclamation: Proclamation,
-    partitionURIString: string, connection: FalseProphetPartitionConnection) {
-  let ret;
-  try {
-    if (!(proclamation.partitions || {})[partitionURIString]) return undefined;
-    ret = { ...proclamation };
-    delete ret.partitions;
-    if (!ret.version) {
-      // TODO(iridian): Fix @valos/raem so that it doesn't generate these in the first place.
-      delete ret.commandId;
-    }
-    if (Object.keys(proclamation.partitions).length !== 1) {
-      if (!isTransactedLike(proclamation)) {
-        throw new Error("Non-TRANSACTED-like multipartition commands are not supported");
-      }
-      ret.actions = proclamation.actions.map(action =>
-          extractCommandOf(falseProphet, action, partitionURIString, connection))
-              .filter(notFalsy => notFalsy);
-      if (!ret.actions.length) {
-        throw new Error(`INTERNAL ERROR: No TRANSACTED-like.actions found for current partition ${
-            ""}in a multi-partition TRANSACTED-like proclamation`);
-      }
-    }
-    return ret;
-  } catch (error) {
-    throw falseProphet.wrapErrorEvent(error,
-        new Error(`extractCommandOf(${connection.getName()})`),
-        "\n\tclaim:", ...dumpObject(proclamation),
-        "\n\tclaim partitions:", ...dumpObject(proclamation.partitions),
-        "\n\tcurrent ret:", ...dumpObject(ret),
-    );
   }
 }
 

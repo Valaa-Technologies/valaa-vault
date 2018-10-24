@@ -59,13 +59,13 @@ describe("Scribe", () => {
     const database = await openDB(testPartitionURI.toString());
 
     // Adds an entity and checks that it has been stored
-    let claimResult = connection.chronicleEventLog([simpleCommand]).eventResults[0];
+    let claimResult = connection.chronicleEvents([simpleCommand]).eventResults[0];
     await claimResult.getLocallyReceivedEvent();
     await expectStoredInDB(simpleCommand, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
 
     // Runs a transaction and confirms that it has been stored
-    claimResult = connection.chronicleEventLog([followupTransaction]).eventResults[0];
+    claimResult = connection.chronicleEvents([followupTransaction]).eventResults[0];
     await claimResult.getLocallyReceivedEvent();
     await expectStoredInDB(followupTransaction, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
@@ -109,10 +109,10 @@ describe("Scribe", () => {
     const firstConnection = await scribe.acquirePartitionConnection(testPartitionURI)
         .getSyncedConnection();
 
-    let claimResult = firstConnection.chronicleEventLog([simpleCommand]).eventResults[0];
+    let claimResult = firstConnection.chronicleEvents([simpleCommand]).eventResults[0];
     await claimResult.getLocallyReceivedEvent();
 
-    claimResult = firstConnection.chronicleEventLog([followupTransaction]).eventResults[0];
+    claimResult = firstConnection.chronicleEvents([followupTransaction]).eventResults[0];
     await claimResult.getLocallyReceivedEvent();
 
     const firstUnusedCommandEventId = firstConnection.getFirstUnusedCommandEventId();
@@ -134,7 +134,7 @@ describe("Scribe", () => {
     let newUnusedCommandId = connection.getFirstUnusedCommandEventId();
 
     for (const command of simpleCommandList) {
-      const claimResult = connection.chronicleEventLog([command]).eventResults[0];
+      const claimResult = connection.chronicleEvents([command]).eventResults[0];
       await claimResult.getLocallyReceivedEvent();
 
       oldUnusedCommandId = newUnusedCommandId;

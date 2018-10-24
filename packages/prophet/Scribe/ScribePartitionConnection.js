@@ -21,7 +21,7 @@ import {
   _writeEvents, _readEvents, _writeCommands, _readCommands, _deleteCommands,
 } from "./_databaseOps";
 import {
-  _narrateEventLog, _chronicleEventLog, _receiveEvents,
+  _narrateEventLog, _chronicleEvents, _receiveEvents,
 } from "./_eventOps";
 
 export default class ScribePartitionConnection extends PartitionConnection {
@@ -109,15 +109,15 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
+  chronicleEvents (events: UniversalEvent[], options: ChronicleOptions = {}):
       { eventResults: ChronicleEventResult[] } {
-    const contextError = new Error("chronicleEventLog");
+    const contextError = new Error("chronicleEvents");
     try {
-      return _chronicleEventLog(this, eventLog, options, errorOnScribeChronicleEventLog.bind(this));
-    } catch (error) { return errorOnScribeChronicleEventLog.call(this, error); }
-    function errorOnScribeChronicleEventLog (error) {
+      return _chronicleEvents(this, events, options, errorOnScribechronicleEvents.bind(this));
+    } catch (error) { return errorOnScribechronicleEvents.call(this, error); }
+    function errorOnScribechronicleEvents (error) {
       throw this.wrapErrorEvent(error, contextError,
-          "\n\teventLog:", ...dumpObject(eventLog),
+          "\n\teventLog:", ...dumpObject(events),
           "\n\toptions:", ...dumpObject(options),
       );
     }

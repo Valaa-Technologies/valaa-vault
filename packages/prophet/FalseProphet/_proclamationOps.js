@@ -177,7 +177,7 @@ async function _processClaimSubOp (falseProphet: FalseProphet, subOperation: Obj
   for (const { connection, commandEvent } of subOperation.partitions) {
     let eventChronichling;
     try {
-      eventChronichling = (await connection.chronicleEventLog(
+      eventChronichling = (await connection.chronicleEvents(
           [commandEvent], { alreadyReduced: true })).eventResults[0];
       truths.push(eventChronichling.getTruthEvent());
     } catch (error) {

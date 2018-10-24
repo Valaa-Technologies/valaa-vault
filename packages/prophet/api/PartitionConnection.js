@@ -149,16 +149,16 @@ export default class PartitionConnection extends LogEventGenerator {
   }
 
   /**
-   * Record commands or truths listed in eventLog into the upstream.
+   * Record events into the upstream.
    *
    * @param {ChronicleOptions} [options={}]
    * @returns {Promise<Object>}
    * @memberof PartitionConnection
    */
-  chronicleEventLog (eventLog: UniversalEvent[], options: ChronicleOptions = {}):
+  chronicleEvents (events: UniversalEvent[], options: ChronicleOptions = {}):
       { eventResults: ChronicleEventResult[] } {
     if (!options) return undefined;
-    return this._upstreamConnection.chronicleEventLog(eventLog, options);
+    return this._upstreamConnection.chronicleEvents(events, options);
   }
 
   getFirstUnusedTruthEventId () {

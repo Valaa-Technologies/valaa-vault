@@ -416,7 +416,7 @@ export default class InspireGateway extends LogEventGenerator {
       }
       const latestMediaInfos = await logs.latestMediaInfos;
       const upgradedEventLog = eventLog.map(event => upgradeEventToVersion0dot2(event, connection));
-      const chronicling = connection.chronicleEventLog(upgradedEventLog, {
+      const chronicling = connection.chronicleEvents(upgradedEventLog, {
         name: `prologue truths for '${connection.getName()}'`,
         preAuthorized: true,
         firstEventId: firstUnusedEventId,

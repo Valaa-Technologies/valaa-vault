@@ -66,7 +66,7 @@ export type NarrateOptions = {
 };
 
 export type ChronicleOptions = NarrateOptions & {
-  preAuthorized?: boolean,         // If true the chronicled events are already authorized truths.
+  isPreAuthorized?: boolean,         // If true the chronicled events are already authorized truths.
   retrieveMediaBuffer?: RetrieveMediaBuffer,
 };
 
@@ -192,7 +192,7 @@ export default class Prophet extends LogEventGenerator {
     }
     return new PartitionConnectionType({
       partitionURI, prophet: this, debugLevel: this.getDebugLevel(),
-      receiveTruths: options.receiveTruths, ...(options.createConnection || {}),
+      receiveTruths: options.receiveTruths, ...(options.createConnectionOptions || {}),
     });
   }
 

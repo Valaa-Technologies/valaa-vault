@@ -18,11 +18,9 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   _eventsPendingSequencing: UniversalEvent[] = [];
   _isFrozen: ?boolean;
 
-  // this._notifyProphetOfCommandCount(),
-
   setIsFrozen (value: boolean = true) { this._isFrozen = value; }
 
-  isFrozen (): boolean { return !!this._isFrozen; }
+  isFrozenConnection (): boolean { return !!this._isFrozen; }
 
   narrateEventLog (options: NarrateOptions = {}): Promise<Object> {
     return super.narrateEventLog({

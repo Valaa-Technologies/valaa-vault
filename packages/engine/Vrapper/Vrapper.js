@@ -308,6 +308,10 @@ export default class Vrapper extends Cog {
     try {
       if (!this._typeName || (this._typeName === "InactiveResource")) {
         this._setTypeName(transient.get("typeName"));
+        if (this[HostRef].isInactive()) {
+          this.warnEvent("Activating id explicitly! Should have been activated by reducers");
+          this[HostRef].setInactive(false);
+        }
       }
       this.setName(`Vrapper/${this.getRawId()}:${this._typeName}`);
       if (!this.isInactive()) {
@@ -1470,10 +1474,16 @@ export default class Vrapper extends Cog {
         }
         do {// eslint-disable-line
           currentObject = table.get(currentRawId);
-          const prototypeIdData = currentObject.get("prototype");
-          if (!prototypeIdData) break;
-          [currentRawId, , ghostPath] = expandIdDataFrom(prototypeIdData);
-          listenedRawIds.push(currentRawId);
+          if (!currentObject) {
+            this.errorEvent(`\n\tregisterComplexHandlers(): cannot find currentObject for "${
+                currentRawId}":${this._typeName}: live notifications will likely be broken`);
+            break;
+          } else {
+            const prototypeIdData = currentObject.get("prototype");
+            if (!prototypeIdData) break;
+            [currentRawId, , ghostPath] = expandIdDataFrom(prototypeIdData);
+            listenedRawIds.push(currentRawId);
+          }
         } while (!ghostPath);
       } while (ghostPath);
       this.refreshHandlers(targetEventHandlers, listenedRawIds, idHandlers);

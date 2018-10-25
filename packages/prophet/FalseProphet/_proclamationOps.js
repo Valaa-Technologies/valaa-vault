@@ -26,8 +26,8 @@ export function _proclaim (falseProphet: FalseProphet, proclamation: Proclamatio
   if (!timed) {
     try {
       const operation = { prophecy };
-      _extractSubOpCommandsFromProclamations(falseProphet, getActionFromPassage(prophecy.story),
-          operation);
+      _extractSubOpCommandsFromProclamations(
+          falseProphet, getActionFromPassage(prophecy.story), operation);
       _initiateSubOpConnectionValidation(falseProphet, operation);
       operation.finalStory = _processClaim(falseProphet, operation);
       getFinalStory = () => operation.finalStory;
@@ -120,15 +120,14 @@ function _extractSubOpCommandsFromProclamations (falseProphet: FalseProphet,
 function _initiateSubOpConnectionValidation (falseProphet: FalseProphet, operation: Object) {
   operation.subOperations.forEach(subOperation =>
     subOperation.partitions.forEach(partition => {
-      partition.connection = thenChainEagerly(partition.connection.getSyncedConnection(),
-        (syncedConnection) => {
-          if (partition.connection.isFrozen()) {
-            throw new Error(`Trying to proclaim to a frozen partition ${
-              partition.connection.getName()}`);
+      partition.validatedConnection = thenChainEagerly(partition.connection.getSyncedConnection(),
+        (connection) => {
+          if (connection.isFrozenConnection()) {
+            throw new Error(`Trying to proclaim to a frozen partition ${connection.getName()}`);
           }
           // Perform other partition validation
           // TODO(iridian): extract partition content
-          return (partition.connection = syncedConnection);
+          partition.validatedConnection = connection;
         },
       );
     })
@@ -155,7 +154,10 @@ async function _processClaimSubOp (falseProphet: FalseProphet, subOperation: Obj
   try {
     // wait for connections to sync and validate their post-sync
     // conditions (started in _initiateSubOpConnectionValidation)
-    await Promise.all(subOperation.partitions.map(partition => partition.connection));
+    for (const connection of subOperation.partitions.map(
+        partition => partition.validatedConnection)) {
+      await connection;
+    }
   } catch (error) {
     throw falseProphet.wrapErrorEvent(error, "proclaim.subOp.connection");
   }
@@ -177,8 +179,8 @@ async function _processClaimSubOp (falseProphet: FalseProphet, subOperation: Obj
   for (const { connection, commandEvent } of subOperation.partitions) {
     let eventChronichling;
     try {
-      eventChronichling = (await connection.chronicleEvents(
-          [commandEvent], { alreadyReduced: true })).eventResults[0];
+      eventChronichling = connection.chronicleEvents(
+          [commandEvent], { isProclaim: true }).eventResults[0];
       truths.push(eventChronichling.getTruthEvent());
     } catch (error) {
       throw falseProphet.wrapErrorEvent(error,

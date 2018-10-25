@@ -343,7 +343,8 @@ export default class InspireGateway extends LogEventGenerator {
               `'${prologues.map(({ partitionURI }) => String(partitionURI)).join("', '")}'`);
       const ret = await Promise.all(prologues.map(this._connectChronicleAndNarratePrologue));
       this.warnEvent(`Acquired active connections for all revelation prologue partitions:`,
-          "\n\tconnections:", ...dumpObject(ret));
+          ...[].concat(...ret.map(connection =>
+            [`\n\t${connection.getName()}:`, connection._headEventId - 1, "events"])));
       return ret;
     } catch (error) {
       throw this.wrapErrorEvent(error, "narratePrologue",
@@ -418,7 +419,7 @@ export default class InspireGateway extends LogEventGenerator {
       const upgradedEventLog = eventLog.map(event => upgradeEventToVersion0dot2(event, connection));
       const chronicling = connection.chronicleEvents(upgradedEventLog, {
         name: `prologue truths for '${connection.getName()}'`,
-        preAuthorized: true,
+        isPreAuthorized: true,
         firstEventId: firstUnusedEventId,
         retrieveMediaBuffer (mediaInfo: Object) {
           const latestInfo = latestMediaInfos[mediaInfo.mediaId];

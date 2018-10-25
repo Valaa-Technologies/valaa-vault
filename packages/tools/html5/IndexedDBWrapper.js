@@ -71,7 +71,7 @@ export default class IndexedDBWrapper extends LogEventGenerator {
       result = await opsCallback(objStores);
       await onCompletePromise;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `transaction("${this.database.name}", [${stores}], mode)`);
+      throw this.wrapErrorEvent(error, `transaction([${stores}], mode)`);
     }
     return result;
   }
@@ -88,7 +88,7 @@ export default class IndexedDBWrapper extends LogEventGenerator {
                   ? null
                   : this.databaseAPI.IDBKeyRange.bound(firstEventId, lastEventId);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `getIDBKeyRange(${firstEventId}, ${lastEventId})`);
+      throw this.wrapErrorEvent(error, `getIDBKeyRange([${firstEventId}, ${lastEventId}])`);
     }
   }
 }

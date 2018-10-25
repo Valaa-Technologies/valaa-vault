@@ -59,7 +59,7 @@ describe("Partition freezing", () => {
     expect(entities().test_partition.get("isFrozen")).toBeFalsy();
     await harness.proclaim(freezeProclamationFor("test_partition")).getStoryPremiere();
     expect(entities().test_partition.get("isFrozen")).toBeTruthy();
-    expect(harness.testPartitionConnection.isFrozen()).toBeTruthy();
+    expect(harness.testPartitionConnection.isFrozenConnection()).toBeTruthy();
   });
 
   it("Does not allow the user to add contents to a frozen partition", async () => {

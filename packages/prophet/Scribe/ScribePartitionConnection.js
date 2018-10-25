@@ -53,6 +53,16 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   connect (options: ConnectOptions) {
+    // ScribePartitionConnection can be synced even if the upstream connection isn't, as long as
+    // there are any events in the local cache and the optimistic narration is possible.
+    if (this._prophet._upstream) {
+      this.setUpstreamConnection(this._prophet._upstream.acquirePartitionConnection(
+          this.getPartitionURI(), {
+            // Set the permanent receiver without options.receiveTruths and disable narration;
+            // perform the initial optimistic narrateEventLog with options.receiveTruths below.
+            ...options, narrateOptions: false, receiveTruths: this.getReceiveTruths(),
+          }));
+    }
     return this._syncedConnection || (this._syncedConnection = thenChainEagerly(
         _initializeConnectionIndexedDB(this), [
           () => this._readMediaEntries(),
@@ -62,12 +72,6 @@ export default class ScribePartitionConnection extends PartitionConnection {
               this._prophet._persistedMediaLookup[mediaRawId] = info;
             }
           },
-          () => this._prophet._upstream && this.setUpstreamConnection(
-              this._prophet._upstream.acquirePartitionConnection(this.getPartitionURI(), {
-                ...options, narrateOptions: false,
-                // Don't provide options.receiveTruths here.
-                receiveTruths: this.getReceiveTruths(),
-              })),
           () => this.narrateEventLog(options.narrateOptions),
           () => (this._syncedConnection = this),
         ],

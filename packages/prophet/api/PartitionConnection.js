@@ -173,7 +173,7 @@ export default class PartitionConnection extends LogEventGenerator {
   ): Promise<(Promise<UniversalEvent> | UniversalEvent)[]> {
     try {
       if (!downstreamReceiveTruths) {
-        throw new Error(`Internal Error: receiveTruths not implemented by ${this.constructor.name
+        throw new Error(`INTERNAL ERROR: receiveTruths not implemented by ${this.constructor.name
             } and no explicit options.receiveTruths was defined (for narrate/chronicle).`);
       }
       return downstreamReceiveTruths(truths, retrieveMediaBuffer);

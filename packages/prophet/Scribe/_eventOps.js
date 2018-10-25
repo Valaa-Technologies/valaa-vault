@@ -130,7 +130,7 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
     events: UniversalEvent[], options: ChronicleOptions = {}, onError: Function
 ): { eventResults: ChronicleEventResult[] } {
   if (!events || !events.length) return { eventResults: events };
-  if (options.preAuthorized === true) {
+  if (options.isPreAuthorized === true) {
     let receivedTruthsProcess = thenChainEagerly(
         connection.getReceiveTruths(options.receiveTruths)(
         // pre-authorized medias must be preCached, throw on any retrieveMediaBuffer calls.
@@ -145,22 +145,21 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
       })),
     };
   }
-  const commandReception = connection.getReceiveCommands(options.receiveCommands)(
-      events, options.retrieveMediaBuffer);
-  const localReception = thenChainEagerly(commandReception, [
-    (receivedCommands) => Promise.all(receivedCommands),
-    (results) => results,
-  ], onError);
+  let receivedCommandsProcess = thenChainEagerly(
+      connection.getReceiveCommands(options.receiveCommands)(
+          events, options.retrieveMediaBuffer),
+      (receivedCommands) => (receivedCommandsProcess = receivedCommands),
+      onError);
   options.receiveCommands = null;
-  const chronicling = thenChainEagerly(localReception,
+  const chronicling = thenChainEagerly(receivedCommandsProcess,
       (receivedEvents) => connection.getUpstreamConnection()
           .chronicleEvents(receivedEvents.filter(notNull => notNull), options),
       onError);
   return {
     eventResults: events.map((event, index) => ({
       event,
-      getLocallyReceivedEvent: () => thenChainEagerly(localReception,
-          (events) => events[index],
+      getLocallyReceivedEvent: () => thenChainEagerly(receivedCommandsProcess,
+          (receivedCommands) => receivedCommands[index],
           onError),
       getTruthEvent: () => thenChainEagerly(chronicling,
           (results) => results.eventResults[index].getTruthEvent(),

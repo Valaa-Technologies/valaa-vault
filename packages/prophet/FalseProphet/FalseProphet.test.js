@@ -76,7 +76,7 @@ describe("FalseProphet", () => {
     await falseProphet.proclaim(proclamationCREATEDTestPartitionEntity).getFinalStory();
     expect(commandsCounted).toBe(1);
 
-    await connection.chronicleEvents(basicProclamations).eventResults[2];
+    await connection.chronicleEvents(basicProclamations, { isProclaim: true }).eventResults[2];
     expect(commandsCounted).toBe(4);
   });
 });

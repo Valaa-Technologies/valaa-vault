@@ -13,9 +13,20 @@ import { dumpObject } from "~/tools";
  * @extends {PartitionConnection}
  */
 export default class FalseProphetPartitionConnection extends PartitionConnection {
-  _firstNonAuthorizedCommandId: number = 0;
-  _pendingCommands: UniversalEvent[] = [];
-  _eventsPendingSequencing: UniversalEvent[] = [];
+  // _headEventId is the eventId of the first unconfirmed truth.
+  // penndingTruths and unconfirmedCommands are based on this, ie.
+  // their 0th entry eventId is always equal to this.
+  _headEventId: number = 0;
+  // Discontinuous, unreduced truths. If defined, the first entry is
+  // always immediately reduced. This means that first entry is always
+  // undefined.
+  _pendingTruths: UniversalEvent[] = [];
+  // Continuous, reduced but unconfirmed commands. Whenever
+  // _pendingTruths contains a truth at an equivalent position with
+  // equivalent commandId, then all commands with eventId equal or less
+  // to that are confirmed as truths and transferred to _pendingTruths.
+  _unconfirmedCommands: UniversalEvent[] = [];
+  _firstUnconfirmedEventId = 0;
   _isFrozen: ?boolean;
 
   setIsFrozen (value: boolean = true) { this._isFrozen = value; }
@@ -33,93 +44,193 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   chronicleEvents (events: UniversalEvent[], options: ChronicleOptions = {}):
       { eventResults: ChronicleEventResult[] } {
     if (!events || !events.length) return { eventResults: events };
-    if (!events[0].eventId) {
-      /*
-      console.log("assigning ids:", this.getName(), this._firstNonAuthorizedCommandId,
-          this._pendingCommands.length,
-          "\n\tevents:", ...dumpObject(eventLog));
-      */
-      events.forEach((event, index) => {
-        event.eventId = this._firstNonAuthorizedCommandId + this._pendingCommands.length + index;
+    try {
+      if (options.isProclaim) {
+        // console.log("assigning ids:", this.getName(), this._headEventId,
+        //     this._unconfirmedCommands.length, "\n\tevents:", ...dumpObject(eventLog));
+        events.forEach(event => {
+          event.eventId = this._headEventId + this._unconfirmedCommands.length;
+          this._unconfirmedCommands.push(event);
+        });
+        this._checkForFreezeAndNotify();
+      } else if (typeof events[0].eventId !== "number") {
+        throw new Error("Can't chronicle events without eventId (with falsy options.isProclaim)");
+      }
+      return super.chronicleEvents(events, {
+        ...options,
+        receiveTruths: this.getReceiveTruths(options.receiveTruths),
+        receiveCommands: options.isProclaim ? null : this.getReceiveCommands(options.receiveCommands),
       });
-      this._addNonAuthorizedCommands(events);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, `chronicleEvents(${events.length} events: [${
+              events[0].eventId}, ${events[events.length - 1].eventId}])`,
+          "\n\toptions:", ...dumpObject(options));
     }
-    return super.chronicleEvents(events, {
-      ...options,
-      receiveTruths: this.getReceiveTruths(options.receiveTruths),
-      receiveCommands: !options.alreadyReduced && this.getReceiveCommands(options.receiveCommands),
-    });
   }
 
   receiveTruths (truths: UniversalEvent[]) {
-    return truths.map(this._receiveTruth).filter(notNull => notNull);
-  }
-
-  _receiveTruth = (truth: UniversalEvent) => {
-    const nonAuthorizedIndex = truth.eventId - this._firstNonAuthorizedCommandId;
-    if (nonAuthorizedIndex < 0) return undefined;
-    if (nonAuthorizedIndex < this._pendingCommands.length) {
-      // const purgedCommands = await _confirmOrPurgeQueuedCommands(connection, lastNewEvent);
-      if (truth.commandId === this._pendingCommands[nonAuthorizedIndex].commandId) {
-        // authorized
-        this._firstNonAuthorizedCommandId += nonAuthorizedIndex;
-        this._pendingCommands.splice(0, nonAuthorizedIndex);
-      } else {
-        // purge
-      }
-    } else {
-      const eventIndex = nonAuthorizedIndex - this._pendingCommands.length;
-      this._eventsPendingSequencing[eventIndex] = truth;
-    }
-    if (!this._pendingCommands.length) {
-      while (this._eventsPendingSequencing[0]) {
-        ++this._firstNonAuthorizedCommandId;
-        this._prophet._fabricateProphecy(this._eventsPendingSequencing.shift(), "truth");
-      }
-    }
-    return truth;
-  }
-
-  receiveCommands (commands: UniversalEvent[]) {
-    return commands.map(this._receiveCommand).filter(notNull => notNull);
-  }
-
-  _receiveCommand = (command: UniversalEvent) => {
+    let purgedCommands;
     try {
-      const nonAuthorizedIndex = command.eventId - this._firstNonAuthorizedCommandId;
-      if (nonAuthorizedIndex < 0) {
-        throw new Error("Can't receive commands with eventId before authorized head");
-      }
-      if (nonAuthorizedIndex < this._pendingCommands.length) return command;
-      if (this._eventsPendingSequencing.length) {
-        throw new Error(
-            "Can't receive commands if there are out-of-order truths pending sequencing");
-      }
-      if (nonAuthorizedIndex !== this._pendingCommands.length) {
-        throw new Error("Can only receive commands to the end of non-authorized commands queue");
-      }
-      this._addNonAuthorizedCommands([command]);
-      this._prophet._fabricateProphecy(command, "reclaim");
-      return command;
+      this._insertEventsToQueue(truths, this._pendingTruths, {
+        continuous: false,
+        onMismatch: (truth, queueIndex, existingTruth) => {
+          this.errorEvent(`receiveTruths commandId mismatch to existing truth, expected '${
+              existingTruth.commandId}', ignoring incoming truth with commandId: '${
+              truth.commandId}'`);
+          return false;
+        },
+        onInserted: (truth, queueIndex) => {
+          const purgeEventId = this._correlateTruthToCommand(
+              queueIndex, truth, this._unconfirmedCommands[queueIndex]);
+          if (purgeEventId !== undefined) purgedCommands = this._purgeCommands(purgeEventId);
+        }
+      });
+      this._normalizeQueuesAndPostProcess(purgedCommands);
+      return truths;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `receiveCommand(${command.eventId}, ${command.commandId})`,
-          "\n\tcommandEvent:", ...dumpObject(command),
-          "\n\tnonAuthorizedCommands:", ...dumpObject([...this._pendingCommands]),
-          "\n\teventsPendingSequencing:", ...dumpObject([...this._eventsPendingSequencing]),
+      throw this.wrapErrorEvent(error, `receiveTruths([${truths[0].eventId}, ${
+              truths[truths.length - 1].eventId}])`,
+          "\n\treceived truths:", ...dumpObject(truths),
+          "\n\tpendingTruths:", ...dumpObject([...this._pendingTruths]),
+          "\n\tunconfirmedCommands:", ...dumpObject([...this._unconfirmedCommands]),
           "\n\tthis:", ...dumpObject(this)
       );
     }
   }
 
-  _addNonAuthorizedCommands (commands: UniversalEvent[]) {
-    this._pendingCommands.push(...commands);
-    this.setIsFrozen(commands[commands.length - 1].type === "FROZEN");
-    this._notifyProphetOfCommandCount();
+  receiveCommands (commands: UniversalEvent[]) {
+    let purgedCommands;
+    try {
+      this._insertEventsToQueue(commands, this._unconfirmedCommands, {
+        continuous: true,
+        onMismatch: (command, queueIndex, existingCommand) => {
+          purgedCommands = this._purgeCommands(existingCommand.eventId);
+          this._unconfirmedCommands[queueIndex] = command;
+          return true;
+        },
+        onInserted: (command, queueIndex) => {
+          if (this._correlateTruthToCommand(queueIndex, this._pendingTruths[queueIndex], command)
+              !== undefined) {
+            this._unconfirmedCommands.splice(queueIndex);
+            throw new Error(`INTERNAL ERROR: incoming command #${command.eventId
+                } has inconsistent commandId '${command.commandId
+                }' to corresponding pending truth commandId '${this._pendingTruths[queueIndex]}'`);
+          }
+          this._prophet._fabricateProphecy(command, "reclaim");
+        },
+      });
+      this._normalizeQueuesAndPostProcess(purgedCommands);
+      return commands;
+    } catch (error) {
+      throw this.wrapErrorEvent(error, `receiveCommand([${commands[0].eventId}, ${
+              commands[commands.length - 1].eventId}])`,
+          "\n\treceived commands:", ...dumpObject(commands),
+          "\n\tpendingTruths:", ...dumpObject([...this._pendingTruths]),
+          "\n\tunconfirmedCommands:", ...dumpObject([...this._unconfirmedCommands]),
+          "\n\tthis:", ...dumpObject(this)
+      );
+    }
   }
 
-  _notifyProphetOfCommandCount () {
-    this._prophet.setConnectionCommandCount(this.getPartitionURI().toString(),
-        this._pendingCommands.length);
+  _insertEventsToQueue (events: UniversalEvent[], targetQueue: UniversalEvent[],
+      { continuous, onMismatch, onInserted }: { onMismatch: Function, onInserted: Function }) {
+    events.forEach((event, index) => {
+      const queueIndex = !event ? -1 : (event.eventId - this._headEventId);
+      try {
+        if (queueIndex < 0) return;
+        if (continuous && queueIndex && !targetQueue[queueIndex - 1]) {
+          // TODO(iridian): non-continuousity support can be added in principle.
+          // But maybe it makes sense to put this functionality to scribe? Or to Oracle?
+          throw new Error(`Non-continuous eventId ${event.eventId
+              } detected when inserting events to queue`);
+        }
+        const existingEvent = targetQueue[queueIndex];
+        if (!existingEvent) {
+          targetQueue[queueIndex] = event;
+        } else if ((event.commandId === existingEvent.commandId)
+            || !onMismatch(event, queueIndex, existingEvent)) {
+          return;
+        }
+        onInserted(event, queueIndex, existingEvent);
+      } catch (error) {
+        throw this.wrapErrorEvent(error, `_insertEventsToQueue().events[${index}]`,
+            "\n\tevents:", ...dumpObject(events),
+            "\n\ttargetQueue:", ...dumpObject(targetQueue),
+            "\n\tqueueIndex:", queueIndex,
+            "\n\tthis:", ...dumpObject(this));
+      }
+    });
+  }
+
+  _correlateTruthToCommand (queueIndex: number, truth: ?UniversalEvent, command: ?UniversalEvent) {
+    // Correlate to unconfirmed commands to detect confirmations and purges.
+    if (!truth || !command) return undefined;
+    if (command.commandId === truth.commandId) {
+      this._firstUnconfirmedEventId = Math.max(truth.eventId + 1, this._firstUnconfirmedEventId);
+      return undefined;
+    }
+    if (truth.eventId < this._firstUnconfirmedEventId) {
+      this.errorEvent(`commandId SEQUENCING FAULT at eventId ${this._firstUnconfirmedEventId - 1}:`,
+          "\n\tequivalent commandId detected between a unconfirmed command and an incoming truth",
+          "even when unconfirmed commands are being purged earlier from eventId", truth.eventId,
+          "\n\tpurge queue index:", queueIndex,
+          "\n\tpending truths queue:", ...dumpObject([...this._pendingTruths]),
+          "\n\tunconfirmed commands queue:", ...dumpObject([...this._unconfirmedCommands]));
+      this._firstUnconfirmedEventId = truth.eventId;
+    }
+    return truth.eventId;
+  }
+
+  _purgeCommands (firstPurgedCommandEventId) {
+    let purgedCommands;
+    try {
+      const purgeOffset = firstPurgedCommandEventId - this._headEventId;
+      if (purgeOffset >= this._unconfirmedCommands.length) return;
+      purgedCommands = this._unconfirmedCommands.splice(purgeOffset);
+      throw new Error("purge not implemented yet against FalseProphet");
+      return purgedCommands;
+    } catch (error) {
+      throw this.wrapErrorEvent(`_purgeCommands(${firstPurgedCommandEventId})`,
+          "\n\tpurgedCommands:", ...dumpObject(purgedCommands));
+    }
+  }
+
+  _normalizeQueuesAndPostProcess (purgedCommands: UniversalEvent[]) {
+    const confirmedCommandCount = Math.min(
+        this._firstUnconfirmedEventId - this._headEventId, this._unconfirmedCommands.length);
+    if (confirmedCommandCount > 0) {
+      this._headEventId += confirmedCommandCount;
+      // TODO(iridian): Check the consistency of the spliced sequences?
+      // Corresponding non-empty entries should have same commandId's
+      // This check has already been done once, however.
+      this._pendingTruths.splice(0, confirmedCommandCount);
+      this._unconfirmedCommands.splice(0, confirmedCommandCount);
+    }
+
+    if (this._unconfirmedCommands.length) {
+      if (this._pendingTruths[0]) {
+        throw new Error(`INTERNAL ERROR: can't resolve pending truths when there are still${
+            ""} unconfirmed commands in the queue (those should have been confirmed or purged)`);
+      }
+    } else {
+      while (this._pendingTruths[0]) {
+        ++this._headEventId;
+        this._prophet._fabricateProphecy(this._pendingTruths.shift(), "truth");
+      }
+    }
+
+    if (purgedCommands) {
+      this.setIsFrozen(false);
+      throw new Error("reformation not implemented yet against FalseProphet");
+    }
+    this._checkForFreezeAndNotify();
+  }
+
+  _checkForFreezeAndNotify (lastEvent: UniversalEvent[]
+      = this._unconfirmedCommands[(this._unconfirmedCommands.length || 1) - 1]) {
+    if (lastEvent) this.setIsFrozen(lastEvent.type === "FROZEN");
+    this._prophet.setConnectionCommandCount(
+        this.getPartitionURI().toString(), this._unconfirmedCommands.length);
   }
 }
 

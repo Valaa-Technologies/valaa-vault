@@ -112,6 +112,7 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
 
 export async function _updateMediaEntries (connection: ScribePartitionConnection,
     updates: Object[]) {
+  if (!updates || !updates.length) return;
   const inMemoryRefCountAdjusts = {};
   const persistRefCountAdjusts = {};
   function _addAdjust (refs, bvobId, adjust) { refs[bvobId] = (refs[bvobId] || 0) + adjust; }

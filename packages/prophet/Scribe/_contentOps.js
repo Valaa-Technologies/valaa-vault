@@ -43,7 +43,7 @@ export type MediaLookup = {
 ######     ##     ####   #####
 */
 
-export function _preCacheBvob (scribe: Scribe, bvobId: string, newInfo: Object,
+export function _preCacheBvob (scribe: Scribe, bvobId: string, newInfo: BvobInfo,
     retrieveBvobContent: Function, initialPersistRefCount: number) {
   const bvobInfo = scribe._bvobLookup[bvobId];
   if (bvobInfo) {
@@ -111,7 +111,7 @@ async function _prepareBvobUpstreamWithRetries (connection: ScribePartitionConne
               mediaInfo.name ? `"${mediaInfo.name}"` : mediaInfo.bvobId})`,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
       );
-      if (!retries) throw wrappedError;
+      if (error.retryable === false || !retries) throw wrappedError;
       connection.outputErrorEvent(wrappedError, "\n\tretrying upload");
     }
   }
@@ -157,6 +157,7 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
       mediaId: mediaRawId, mediaInfo, isPersisted: true, isInMemory: true,
     };
   }
+  connection._pendingMediaLookup[newEntry.mediaId] = newEntry;
 
   const update = mediaEvent.initialState || mediaEvent.sets || {};
   if (update.name) mediaInfo.name = update.name;
@@ -167,22 +168,20 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
     Object.assign(mediaInfo, mediaType);
   }
   if (update.content) mediaInfo.bvobId = getRawIdFrom(update.content);
-  return [{ mediaId: newEntry.mediaId, preOp: _retrySyncMedia.bind(null, connection, newEntry) }];
+  return [{ mediaEntry: newEntry }];
 }
 
-async function _retrySyncMedia (connection: ScribePartitionConnection, newEntry: Object,
+export async function _retrySyncMedia (connection: ScribePartitionConnection, mediaEntry: Object,
   options: {
     getNextBackoffSeconds?: Function, retryTimes?: number, delayBaseSeconds?: number,
     retrieveMediaBuffer: RetrieveMediaBuffer,
   } = {},
 ) {
-  connection._pendingMediaLookup[newEntry.mediaId] = newEntry;
-
-  const mediaInfo = newEntry.mediaInfo;
+  const mediaInfo = mediaEntry.mediaInfo;
   let previousBackoff;
-  invariantifyString(newEntry.mediaId, "readPersistAndUpdateMedia.newEntry.mediaId",
-      {}, "\n\tnewEntry", newEntry);
-  mediaInfo.mediaId = newEntry.mediaId;
+  invariantifyString(mediaEntry.mediaId, "readPersistAndUpdateMedia.newEntry.mediaId",
+      {}, "\n\tnewEntry", mediaEntry);
+  mediaInfo.mediaId = mediaEntry.mediaId;
   let getNextBackoffSeconds = options.getNextBackoffSeconds;
   if (!getNextBackoffSeconds && (typeof options.retryTimes === "number")) {
     getNextBackoffSeconds = (previousRetries: number, mediaInfo_, error) =>
@@ -205,7 +204,7 @@ async function _retrySyncMedia (connection: ScribePartitionConnection, newEntry:
           await connection.prepareBvob(content, mediaInfo).persistProcess;
         }
       }
-      return newEntry;
+      return mediaEntry;
     } catch (error) {
       const nextBackoff = getNextBackoffSeconds && getNextBackoffSeconds(i - 1, mediaInfo, error);
       const wrappedError = connection.wrapErrorEvent(error,
@@ -293,6 +292,10 @@ function _getMediaContent (connection: ScribePartitionConnection, mediaInfo: Med
     // the cached decoding.
     // Oracle will add the decoding into decodingCache if it didn't exist yet.
     actualInfo.decodingCache = bvobInfo.decodings;
+    if (actualInfo.buffer) {
+      // If we have buffer available locally request a decoding synchronously.
+      return connection.getUpstreamConnection().requestMediaContents([actualInfo])[0];
+    }
   }
   return addDelayedOperationEntry(upstreamOperation, actualInfo);
 }

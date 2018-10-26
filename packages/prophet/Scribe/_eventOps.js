@@ -8,9 +8,10 @@ import type {
   RetrieveMediaBuffer,
 } from "~/prophet/api/Prophet";
 
-import { dumpObject, thenChainEagerly, vdon } from "~/tools";
+import { dumpify, dumpObject, thenChainEagerly, vdon } from "~/tools";
 
 import ScribePartitionConnection from "./ScribePartitionConnection";
+import { _retrySyncMedia } from "./_contentOps";
 
 export const vdoc = vdon({
   "...": { heading:
@@ -203,8 +204,8 @@ export function _receiveEvents (
           actionIdLowerBound}) for received event #${index}, got: ${action.eventId}`);
     }
     ++actionIdLowerBound;
-    _determineEventPreOps(connection, action).forEach(({ mediaId, preOp }) => {
-      if (mediaId) mediaPreOps[mediaId] = preOp;
+    _determineEventPreOps(connection, action).forEach(({ mediaEntry }) => {
+      if (mediaEntry) mediaPreOps[mediaEntry.mediaId] = mediaEntry;
     });
     newActions.push(action);
     return action;
@@ -213,11 +214,12 @@ export function _receiveEvents (
 
   const requestOptions = { retryTimes: 4, delayBaseSeconds: 5, retrieveMediaBuffer };
 
-  const preOpsProcess = connection.isLocallyPersisted()
-      && Promise.all(Object.keys(mediaPreOps).map(key => mediaPreOps[key](requestOptions)));
+  const preOpsProcess = connection.isLocallyPersisted() && Promise.all(
+      Object.values(mediaPreOps).map(mediaEntry =>
+          _retrySyncMedia(connection, mediaEntry, requestOptions)));
 
   if (downstreamReceiveTruths) {
-    // Send the truths downstream after all of their media
+    // Send all the truths downstream together after all of their media
     // retrievals have been persisted to the bvob cache, but before
     // media infos or event logs have been persisted.
     // This is acceptable because the media info/event log state is
@@ -246,8 +248,9 @@ export function _receiveEvents (
 
 function _determineEventPreOps (connection: ScribePartitionConnection, event: Object,
     rootEvent: Object = event) {
+  let ret;
   if (isTransactedLike(event)) {
-    return [].concat(
+    ret = [].concat(
         ...event.actions
         .map(action => _determineEventPreOps(connection, action, rootEvent))
         .filter(notFalsy => notFalsy));
@@ -259,10 +262,10 @@ function _determineEventPreOps (connection: ScribePartitionConnection, event: Ob
       if (newName) connection.setName(`'${newName}'/${connection.getPartitionURI().toString()}`);
     }
     if (event.typeName === "Media") {
-      return connection._determineEventMediaPreOps(event, rootEvent);
+      ret = connection._determineEventMediaPreOps(event, rootEvent);
     }
   }
-  return [];
+  return ret || [];
 }
 
 export function _throwOnMediaRequest (connection: ScribePartitionConnection,

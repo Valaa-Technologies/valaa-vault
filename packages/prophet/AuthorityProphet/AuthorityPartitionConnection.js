@@ -64,6 +64,12 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
     if (!mediaInfo || !mediaInfo.bvobId) {
       throw new Error("mediaInfo.bvobId not defined in AuthorityProphetConnection");
     }
-    return { contentId: mediaInfo.bvobId, persistProcess: undefined };
+    let persistProcess = mediaInfo.bvobId;
+    if (this.isRemoteAuthority()) {
+      const error = new Error(`prepareBvob not implemented by remote authority partition`);
+      error.retryable = false;
+      persistProcess = Promise.reject(this.wrapErrorEvent(error, new Error("prepareBvob")));
+    }
+    return { contentId: mediaInfo.bvobId, persistProcess };
   }
 }

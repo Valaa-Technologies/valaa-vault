@@ -7,11 +7,9 @@ import isResourceType from "~/raem/tools/graphql/isResourceType";
 import Resolver from "~/raem/tools/denormalized/Resolver";
 import { getTransientTypeName } from "~/raem/tools/denormalized/Transient";
 import type { State } from "~/raem/tools/denormalized/State";
-import ValaaURI from "~/raem/ValaaURI";
 import { obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
 
 import { dumpObject, invariantify, outputCollapsedError } from "~/tools";
-import { trivialCloneWith } from "~/tools/trivialClone";
 
 /**
  * Bard subsystem.
@@ -19,15 +17,6 @@ import { trivialCloneWith } from "~/tools/trivialClone";
 
 export type Passage = Action;
 export type Story = Passage;
-
-export function createUniversalizableCommand (proclamation: Action) {
-  return trivialCloneWith(proclamation,
-      entry => (entry instanceof ValaaURI ? entry : undefined));
-}
-
-export function isProclamation (action: Action) {
-  return !action.partitions;
-}
 
 export function createPassageFromAction (action: Action) {
   return Object.create(action);

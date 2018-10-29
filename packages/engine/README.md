@@ -1,4 +1,4 @@
-# @valos/engine provides the ValaaRAEM object mapper and computation engine
+# @valos/engine provides the ValOS-RAEM object mapper and computation engine
 
 Provides the live proxies (`Vrappers`) to ValaaSpace resources with
 `ValaaEngine`. Completes the modifcation and transaction frameworks

@@ -1,20 +1,45 @@
-# @valos/raem provides Valaa Resources And Events Model `ValaaRAEM` (/vælɑːɹɛem/)
+# @valos/raem provides ValOS Resources And Events Model `ValOS-RaEM` (/væləsˌɹɛem/)
 
-Provides the central Valaa technologies: the Valaa Resource Model and
-the Valaa Event Model. Provides the connection between these in the
-form of `reducers` which convert event streams into in-memory Valaa
-resources and their updates. Provides schema definitions for `Resource`
-and other essential Valaa resource model interfaces. Provides a kuery
-language `VALK` for accessing and making limited manipulations to the
-resources. Provides the low level APIs for manipulating partitions.
-Implements `ghost instancing` for the Valaa resource model;
-a generalization extension of the traditional prototypical inheritance
-which recursively inherits the sub-components of the prototype as
-transparent but selectively modifiable `ghosts`. Provides referential
-integrity to the resource model via `couplings`.
+This library provides the definitions and reference implementations for
+the fundamental `ValOS Resources` and `ValOS Events` systems.
+
+> ValOS Resources (`resources`) represent the static state of the world
+> at a particular moment in time.
+
+> ValOS Events ( `events`) represent the dynamic changes of the world
+> over time by describing the changes to the corresponding resources.
+
+The interplay of these distinct yet interwoven systems forms the
+foundation of the Valaa Open System.
+
+This library provides:
+- schema definitions for `Resource` and the other core types.
+- `Corpus` component which stores in-memory representations of the
+  resources.
+- `reducers` which a corpus uses to convert (`reduce`) events into
+  changes of its resource representations.
+- the kuery language `VALK` definition and the kuery engine `Valker`
+  component for accessing and manipulating the resources.
+- `ghost instancing` mechanism which unifies the object oriented
+  instantiation and inheritance principles into a single but powerful
+  mechanism for ValOS resources.
+- `resource couplings` mechanism which allows referential integrity and
+  the definition of different types of reference semantics like
+  ownership, global references and local references.
+- `ValaaURI` definition which allows universal references to resources
+  which are not locally available.
+- `ValaaSpace` definition as a distributed set of resources containing
+  references to each other using the ValaaURIs.
+- `partitions` mechanism which allows for unlimited scalability of the
+  `ValaaSpace` into a singular globally distributed and unified object
+  space.
+
+[//]: # (TODO(iridian): ValaaSpace and partitions should in principle be inside @valos/prophet)
+[//]: # (TODO(iridian): This refactoring effort would be valuable otherwise as well as it would clarify Valker API's and simplify its implementation)
+[//]: # (TODO(iridian): However that's gonna be a damn of a refactoring process to fully abstract and excise them from @valos/raem)
 
 - depends: `@valos/tools`, `immutable`
-- exports: `Corpus`, `Command`, `VALK`, `RAEMContentAPI`
+- exports: `Corpus`, `Command`, `VALK`, `Valker`, `RAEMContentAPI`
 - ValaaSpace: `Resource`, `ResourceStub`, `Bvob`, `Partition`
 - concepts: `ghost instancing`, `partitions`, `couplings`
 

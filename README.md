@@ -137,7 +137,7 @@ provide an incremental test harness under */test/*TestHarness.
 - concepts: `event sourcing`, `distributed infrastructure`, `es6`
 
 
-### @valos/raem provides Valaa Resources And Events Model `ValaaRAEM` (/vælɑːɹɛem/)
+### @valos/raem provides Valaa Resources And Events Model `ValOS-RAEM` (/vælɑːɹɛem/)
 
 Provides the central Valaa technologies: the Valaa Resource Model and
 the Valaa Event Model. Provides the connection between these in the
@@ -158,11 +158,11 @@ integrity to the resource model via `couplings`.
 - concepts: `ghost instancing`, `partitions`, `couplings`
 
 
-### @valos/script extends Javascript with ValaaRAEM as `ValaaScript`
+### @valos/script extends Javascript with ValOS-RAEM as `ValaaScript`
 
 ValaaScript is a semantic, non-syntactic extension of Javascript which
 seamlessly integrates Valaa resources with the Javascript object model.
-Bridges the gap between Javascript model and ValaaRAEM by considerably
+Bridges the gap between Javascript model and ValOS-RAEM by considerably
 extending the schema. Provides an implementation for ValaaScript via
 transpiling into VALK kueries as an intermediate language.
 
@@ -172,7 +172,7 @@ transpiling into VALK kueries as an intermediate language.
 - concepts: `ECMAScript2015`, `scope`, `transpilation`
 
 
-### @valos/prophet provides ValaaRAEM stream components
+### @valos/prophet provides ValOS-RAEM stream components
 
 Provides event stream connectivity. This is not just to remote
 authorities but also to local browser `IndexedDB` storage. Provides
@@ -192,7 +192,7 @@ REST lambdas and the AWS mqtt IoT as event pub-sub.
 - concepts: `ACID`, `authorities`, `pub-sub`, `offline readiness`
 
 
-### @valos/engine provides the ValaaRAEM object mapper and computation engine
+### @valos/engine provides the ValOS-RAEM object mapper and computation engine
 
 Provides the live proxies (`Vrappers`) to ValaaSpace resources with
 `ValaaEngine`. Completes the modifcation and transaction frameworks

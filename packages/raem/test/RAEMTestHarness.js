@@ -1,20 +1,19 @@
 import { OrderedMap } from "immutable";
 
-import type Command from "~/raem/command/Command";
+import type { UniversalEvent } from "~/raem/command/Command";
 import createRootReducer from "~/raem/tools/createRootReducer";
 import createValidateActionMiddleware from "~/raem/redux/middleware/validateAction";
 import createProcessCommandIdMiddleware from "~/raem/redux/middleware/processCommandId";
 import createProcessCommandVersionMiddleware from
     "~/raem/redux/middleware/processCommandVersion";
-import { createBardMiddleware, isProclamation, createUniversalizableCommand }
-    from "~/raem/redux/Bard";
+import { createBardMiddleware } from "~/raem/redux/Bard";
 
 import RAEMTestAPI from "~/raem/test/RAEMTestAPI";
 
 import Corpus from "~/raem/Corpus";
 import Valker from "~/raem/VALK/Valker";
 
-import { dumpObject, invariantify, LogEventGenerator, valaaUUID, wrapError } from "~/tools";
+import { dumpObject, LogEventGenerator, valaaUUID, wrapError } from "~/tools";
 
 const DEFAULT_EVENT_VERSION = "0.2";
 
@@ -72,20 +71,12 @@ export default class RAEMTestHarness extends LogEventGenerator {
    *
    * @memberof RAEMTestHarness
    */
-  dispatch (proclamation: Command) {
-    let story;
+  dispatch (event: UniversalEvent) {
     try {
-      const universalizableCommand = createUniversalizableCommand(proclamation);
-      invariantify(isProclamation(universalizableCommand),
-          "universalizable command must still be restricted");
-      story = this.corpus.dispatch(universalizableCommand);
-      invariantify(!isProclamation(universalizableCommand),
-          "universalized story must not be restricted");
-      return story;
+      return this.corpus.dispatch(event);
     } catch (error) {
-      throw this.wrapErrorEvent(error, "Dispatch",
-          "\n\trestrictedCommand:", ...dumpObject(proclamation),
-          "\n\tstory:", ...dumpObject(story));
+      throw this.wrapErrorEvent(error, "dispatch",
+          "\n\tevent:", ...dumpObject(event));
     }
   }
 

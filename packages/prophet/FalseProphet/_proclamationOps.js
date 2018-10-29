@@ -1,7 +1,8 @@
 // @flow
 
-import Command from "~/raem/command";
-import { getActionFromPassage, createUniversalizableCommand } from "~/raem/redux/Bard";
+import Command, { Action } from "~/raem/command";
+
+import { getActionFromPassage } from "~/raem/redux/Bard";
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
 import { createPartitionURI } from "~/raem/ValaaURI";
 
@@ -16,8 +17,8 @@ import { _rejectLastProphecyAsHeresy } from "./_prophecyOps";
 // Handle a proclamation towards upstream.
 export function _proclaim (falseProphet: FalseProphet, proclamation: Proclamation,
     { timed, transactionInfo } = {}): ClaimResult {
-  const prophecy = falseProphet._fabricateProphecy(
-      createUniversalizableCommand(proclamation), "proclaim", timed, transactionInfo);
+  const prophecy = falseProphet._fabricateProphecy(proclamation, "proclaim", timed,
+      transactionInfo);
   prophecy.proclamation = proclamation;
   // falseProphet.warnEvent("\n\tclaim", proclamation.commandId, proclamation,
   //    ...falseProphet._dumpStatus());

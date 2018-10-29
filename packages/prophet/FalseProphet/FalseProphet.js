@@ -3,7 +3,6 @@
 
 import { Action, UniversalEvent } from "~/raem/command";
 import type { State } from "~/raem/tools/denormalized/State";
-import { isProclamation } from "~/raem/redux/Bard";
 
 import Prophecy from "~/prophet/api/Prophecy";
 import Follower from "~/prophet/api/Follower";
@@ -15,9 +14,10 @@ import { invariantify, invariantifyObject, invariantifyString } from "~/tools";
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
-import { _fabricateProphecy, _revealProphecyToAllFollowers } from "./_prophecyOps";
-import { _receiveTruth, _reviewProphecy } from "./_reformationOps";
 import { _proclaim, _reclaim } from "./_proclamationOps";
+import {
+  _fabricateProphecy, _revealProphecyToAllFollowers, _receiveTruth, _reviewProphecy,
+} from "./_prophecyOps";
 
 export class Proclamation extends Action {}
 

@@ -1,3 +1,5 @@
+// @flow
+
 import { createPassageFromAction, createUniversalizableCommand, getActionFromPassage }
     from "~/raem/redux/Bard";
 

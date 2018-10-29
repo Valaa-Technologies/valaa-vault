@@ -5,12 +5,12 @@ import InactiveResource from "~/raem/schema/InactiveResource";
 
 import mutations from "~/raem/schema/mutation";
 import { validators } from "~/raem/command";
-import createValaaRAEMReducers from "~/raem/redux/createValaaRAEMReducers";
+import createRAEMReducers from "~/raem/redux/createRAEMReducers";
 
 export default createContentAPI({
-  name: "ValaaRAEMContentAPI",
+  name: "ValOSRAEMContentAPI",
   exposes: [Resource, InactiveResource], // TODO(iridian): Add the rest.
   mutations,
   validators,
-  reducers: [createValaaRAEMReducers],
+  reducers: [createRAEMReducers],
 });

@@ -1,4 +1,4 @@
-# @valos/prophet provides ValaaRAEM stream components
+# @valos/prophet provides ValOS-RAEM stream components
 
 This package is likely the most important package of Valaa Open System.
 @valos/prophet specifications and components provide the foundation for

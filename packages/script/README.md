@@ -1,8 +1,8 @@
-# @valos/script extends Javascript with ValaaRAEM as `ValaaScript`
+# @valos/script extends Javascript with ValOS-RAEM as `ValaaScript`
 
 ValaaScript is a semantic, non-syntactic extension of Javascript which
 seamlessly integrates Valaa resources with the Javascript object model.
-Bridges the gap between Javascript model and ValaaRAEM by considerably
+Bridges the gap between Javascript model and ValOS-RAEM by considerably
 extending the schema. Provides an implementation for ValaaScript via
 transpiling into VALK kueries as an intermediate language.
 

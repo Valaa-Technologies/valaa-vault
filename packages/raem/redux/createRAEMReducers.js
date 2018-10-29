@@ -13,7 +13,7 @@ import { createBardReducer } from "~/raem/redux/Bard";
 
 const EMPTY_MAP = Map();
 
-export default function createValaaRAEMReducers () {
+export default function createRAEMReducers () {
   return {
     [CREATED]: createBardReducer(create),
     [DESTROYED]: createBardReducer(destroy, { skipPostPassageStateUpdate: true }),

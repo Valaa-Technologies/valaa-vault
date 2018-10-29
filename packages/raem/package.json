@@ -1,7 +1,7 @@
 {
   "name": "@valos/raem",
   "version": "0.33.0-prerelease.0",
-  "description": "Valaa Resources And Events Model (ValaaRAEM) API, Schema",
+  "description": "ValOS Resources And Events Model (ValOS-RAEM) API, Schema",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
   "private": false,

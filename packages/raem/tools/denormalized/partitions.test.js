@@ -98,7 +98,7 @@ describe("partitions", () => {
 
   it("meshes partition infos properly when setting cross-partition dependency", () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createBlockA);
-    const story = harness.dispatch(transacted({
+    const finalEvent = harness.chronicleEvent(transacted({
       actions: [
         created({ id: "B_testRoot", typeName: "TestThing",
           initialState: {
@@ -109,18 +109,18 @@ describe("partitions", () => {
           siblings: [vRef("B_testRoot")],
         }),
       ],
-    }));
+    })).getFinalEvent();
     const aGrandparentPartition = { // eslint-disable-line
       "valaa-local:?id=A_grandparent": { eventId: null },
     };
     const bTestRootPartition = { // eslint-disable-line
       "valaa-test:?id=B_testRoot": { eventId: null },
     };
-    expect(story.partitions)
+    expect(finalEvent.partitions)
         .toEqual({ ...aGrandparentPartition, ...bTestRootPartition });
-    expect(story.actions[0].partitions)
+    expect(finalEvent.actions[0].partitions)
         .toEqual({ ...bTestRootPartition });
-    expect(story.actions[1].partitions)
+    expect(finalEvent.actions[1].partitions)
         .toEqual({ ...aGrandparentPartition, ...bTestRootPartition });
 
 

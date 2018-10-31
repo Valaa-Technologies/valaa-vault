@@ -6,10 +6,8 @@ import { createPartitionURI } from "~/raem/ValaaURI";
 
 import {
   createFalseProphet, createProphetOracleHarness, createTestMockProphet,
-  proclamationCREATEDTestPartitionEntity,
+  createdTestPartitionEntity,
 } from "~/prophet/test/ProphetTestHarness";
-
-import baseEventBlock from "~/engine/test/baseEventBlock";
 
 const testAuthorityURI = "valaa-test:";
 const partitionURI = createPartitionURI(testAuthorityURI, "test_partition");
@@ -19,7 +17,7 @@ afterEach(async () => {
   if (harness) { await harness.cleanup(); harness = null; }
 });
 
-const basicProclamations = [
+const basicCommands = [
   created({
     id: "Entity A",
     typeName: "Entity",
@@ -38,7 +36,7 @@ const basicProclamations = [
 ];
 
 describe("FalseProphet", () => {
-  it("assigns proper eventIds for proclamations", async () => {
+  it("assigns proper eventIds for chronicled commands", async () => {
     harness = await createProphetOracleHarness({});
 
     const prophetConnection = await harness.prophet
@@ -48,11 +46,10 @@ describe("FalseProphet", () => {
     let oldCommandId;
     let newCommandId = scribeConnection.getFirstUnusedCommandEventId() - 1;
 
-    for (const proclamation of basicProclamations) {
+    for (const command of basicCommands) {
       oldCommandId = newCommandId;
 
-      const claimResult = await harness.proclaim(proclamation);
-      await claimResult.getStoryPremiere();
+      await harness.chronicleEvent(command).getStoryPremiere();
 
       newCommandId = scribeConnection.getFirstUnusedCommandEventId() - 1;
       expect(oldCommandId).toBeLessThan(newCommandId);
@@ -73,10 +70,13 @@ describe("FalseProphet", () => {
     expect(commandsCounted).toBe(0);
 
     // A transaction counts as one command
-    await falseProphet.proclaim(proclamationCREATEDTestPartitionEntity).getFinalStory();
+    await falseProphet.chronicleEvent(createdTestPartitionEntity).getFinalStory();
     expect(commandsCounted).toBe(1);
 
-    await connection.chronicleEvents(basicProclamations, { isProclaim: true }).eventResults[2];
+    const results = connection.chronicleEvents(basicCommands, { isProphecy: true });
+    const lastStoredEvent = await results.eventResults[2].event;
+    expect(lastStoredEvent.eventId)
+        .toEqual(3);
     expect(commandsCounted).toBe(4);
   });
 });

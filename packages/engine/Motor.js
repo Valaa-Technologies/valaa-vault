@@ -89,16 +89,14 @@ export default class Motor extends Cog {
         next = this.futureEventsByTime.min()) {
       this.futureEventsByTime.delete(next.key);
       this.engineTime = next.key;
-      next.value.forEach(story => {
-        // console.log("TIMED expanding", timed.startTime || timed.time, timed);
-        story.actions.forEach(action => this.prophet.proclaim(action, { timed: story }));
-      });
+      // console.log("TIMED expanding", timed.startTime || timed.time, timed);
+      next.value.forEach(story => this.prophet.chronicleEvents(story.actions, { timed: story }));
     }
     this.engineTime = future;
     return actualDeltaS;
   }
 
-  onEventTIMED (vResource, { story, timed }) {
+  onEventTIMED (vResource, story, { timed }) {
     if (timed) {
       const offset = typeof timed.startTime !== "undefined" ? timed.startTime : timed.time;
       if (typeof story.startTime !== "undefined") story.startTime += offset;
@@ -112,7 +110,7 @@ export default class Motor extends Cog {
     currentEvents.push(story);
   }
 
-  onEventTRANSACTED (/* dummy, prophecy */) {
+  onEventTRANSACTED (/* dummy, story */) {
     return undefined;
   }
 }

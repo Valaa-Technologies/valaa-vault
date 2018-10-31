@@ -12,20 +12,20 @@ import extendValaaSpace from "~/engine/ValaaSpace";
 
 import baseEventBlock from "~/engine/test/baseEventBlock";
 
-export function createEngineTestHarness (options: Object, ...proclamationBlocks: any) {
+export function createEngineTestHarness (options: Object, ...commandBlocks: any) {
   return createProphetTestHarness({
     name: "Engine Test Harness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
     corpusOptions: { builtinSteppers },
     ...options,
-  }, ...(options.claimBaseBlock ? [baseEventBlock] : []), ...proclamationBlocks);
+  }, ...(options.claimBaseBlock ? [baseEventBlock] : []), ...commandBlocks);
 }
 
-export async function createEngineOracleHarness (options: Object, ...proclamationBlocks: any) {
+export async function createEngineOracleHarness (options: Object, ...commandBlocks: any) {
   return createProphetOracleHarness({
     name: "Engine Oracle Harness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
     corpusOptions: { builtinSteppers },
     ...options,
-  }, ...(options.claimBaseBlock ? [baseEventBlock] : []), ...proclamationBlocks);
+  }, ...(options.claimBaseBlock ? [baseEventBlock] : []), ...commandBlocks);
 }
 
 export default class EngineTestHarness extends ProphetTestHarness {

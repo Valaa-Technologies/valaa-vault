@@ -12,13 +12,19 @@ export {
                         ContentAPI as RAEMContentAPI,
 };
 export {
+                                      Passage,
+                                      Story,
+                                      createPassageFromAction,
+                                      getActionFromPassage,
+} from "./redux/Bard";
+export {
                            default as Corpus,
 } from "./Corpus";
 export {
                            default as Command,
                                       Action,
                                       Truth,
-                                      UniversalEvent,
+                                      EventBase,
 } from "./command/Command";
 export {
                            default as ValaaReference,

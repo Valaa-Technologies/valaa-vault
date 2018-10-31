@@ -84,7 +84,7 @@ describe("Vrapper", () => {
         notificationValues[key] = update.value();
       });
     }
-    harness.proclaim({ type: "FIELDS_SET", id: targetId,
+    harness.chronicleEvent({ type: "FIELDS_SET", id: targetId,
       typeName: "TestScriptyThing",
       sets,
     });
@@ -369,7 +369,7 @@ describe("Vrapper", () => {
       testScriptPartitions().child.subscribeToMODIFIED("children", () => {
         modCalled = true;
       });
-      harness.proclaim(
+      harness.chronicleEvent(
           { type: "DESTROYED", id: "grandChild", typeName: "TestScriptyThing" });
       // children modified subscriber should have been called when the sub-event to remove
       // grandChild from the children list was reduced

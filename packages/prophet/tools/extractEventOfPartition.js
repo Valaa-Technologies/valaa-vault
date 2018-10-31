@@ -23,7 +23,7 @@ export default function extractEventOfPartition (action: Action,
     }
     if (Object.keys(action.partitions).length !== 1) {
       if (!isTransactedLike(action)) {
-        throw new Error("Non-TRANSACTED-like multipartition proclamations are not supported");
+        throw new Error("Non-TRANSACTED-like multipartition commands are not supported");
       }
       ret.actions = action.actions
           .map(subAction => extractEventOfPartition(subAction, connection, partitionKey))
@@ -38,8 +38,8 @@ export default function extractEventOfPartition (action: Action,
     throw connection.wrapErrorEvent(error,
         new Error(`extractEventOfPartition(${connection.getName()})`),
         "\n\tpartitionKey:", partitionKey,
-        "\n\tproclamation:", ...dumpObject(action),
-        "\n\tproclamation partitions:", ...dumpObject(action.partitions),
+        "\n\taction:", ...dumpObject(action),
+        "\n\taction partitions:", ...dumpObject(action.partitions),
         "\n\tcurrent ret:", ...dumpObject(ret),
     );
   }

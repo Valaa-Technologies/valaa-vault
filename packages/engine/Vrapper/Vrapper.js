@@ -2,11 +2,14 @@
 import { GraphQLObjectType, isAbstractType } from "graphql/type";
 import { Iterable } from "immutable";
 
+import type { Passage, Story } from "~/raem";
 import VALK, { VALKOptions, packedSingular } from "~/raem/VALK";
 import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 
-import { fieldsSet, addedToFields, removedFromFields, replacedWithinFields, isCreatedLike }
-    from "~/raem/command";
+import {
+  fieldsSet, addedToFields, removedFromFields, replacedWithinFields, isCreatedLike,
+  ChronicleEventResult,
+} from "~/raem/command";
 import { VRef, vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom, expandIdDataFrom,
     obtainVRef } from "~/raem/ValaaReference";
 import { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";
@@ -27,7 +30,7 @@ import isResourceType from "~/raem/tools/graphql/isResourceType";
 
 import { ValaaPrimitiveTag } from "~/script";
 
-import { Discourse, Transaction, PartitionConnection, Prophecy } from "~/prophet";
+import { Discourse, Transaction, PartitionConnection } from "~/prophet";
 import { createModuleGlobal } from "~/tools/mediaDecoders/JavaScriptDecoder";
 
 import VALEK, { Valker, Kuery, dumpKuery, expressionFromValue } from "~/engine/VALEK";
@@ -36,7 +39,7 @@ import Cog, { extractMagicMemberEventHandlers } from "~/engine/Cog";
 import debugId from "~/engine/debugId";
 import _FieldUpdate from "~/engine/Vrapper/FieldUpdate";
 import _VrapperSubscriber from "~/engine/Vrapper/VrapperSubscriber";
-import evaluateToProclamationData from "~/engine/Vrapper/evaluateToProclamationData";
+import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import { defaultOwnerCoupledField } from
     "~/engine/ValaaSpace/Valaa/injectSchemaTypeBindings";
 
@@ -315,7 +318,7 @@ export default class Vrapper extends Cog {
       }
       this.setName(`Vrapper/${this.getRawId()}:${this._typeName}`);
       if (!this.isInactive()) {
-        this.registerComplexHandlers(this.engine._prophecyHandlerRoot, state);
+        this.registerComplexHandlers(this.engine._storyHandlerRoot, state);
       }
       this._refreshDebugId(transient, { state });
       if (this.hasInterface("Scope")) this._setUpScopeFeatures({ state });
@@ -581,11 +584,11 @@ export default class Vrapper extends Cog {
     return isMaterialized(state, this.getId());
   }
 
-  materialize (transaction: ?Transaction) {
+  materialize (transaction: ?Transaction): ChronicleEventResult {
     const discourse = (transaction || this.engine.discourse);
     const state = discourse.getState();
     this.requireActive({ state });
-    discourse.proclaim(createMaterializeGhostAction(state, this.getId()));
+    return discourse.chronicleEvent(createMaterializeGhostAction(state, this.getId()));
   }
 
   updateTransient (state: ?Object, object: ?Object) {
@@ -664,56 +667,54 @@ export default class Vrapper extends Cog {
 
 
   setField (fieldName: string, value: any, options: VALKOptions = {}) {
-    let proclamationValue;
+    let commandValue;
     try {
       const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
-      proclamationValue = evaluateToProclamationData(value, options);
-      return transaction.proclaim(fieldsSet({ id, typeName: this._typeName },
-          { [fieldName]: proclamationValue },
+      commandValue = universalizeCommandData(value, options);
+      return transaction.chronicleEvent(fieldsSet({ id, typeName: this._typeName },
+          { [fieldName]: commandValue },
       ));
     } catch (error) {
       throw this.wrapErrorEvent(error, `setField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tnew value:", ...dumpObject(value),
-          "\n\tnew value (after proclamation post-process):", ...dumpObject(proclamationValue),
+          "\n\tnew value (after universalization):", ...dumpObject(commandValue),
           "\n\toptions:", ...dumpObject(options),
       );
     }
   }
 
   addToField (fieldName: string, value: any, options: VALKOptions = {}) {
-    let proclamationValue;
+    let commandValue;
     try {
       const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
-      proclamationValue = evaluateToProclamationData(value, options);
-      return transaction.proclaim(addedToFields({ id, typeName: this._typeName },
-          { [fieldName]: arrayFromAny(proclamationValue || undefined) },
+      commandValue = universalizeCommandData(value, options);
+      return transaction.chronicleEvent(addedToFields({ id, typeName: this._typeName },
+          { [fieldName]: arrayFromAny(commandValue || undefined) },
       ));
     } catch (error) {
       throw this.wrapErrorEvent(error, `addToField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tnew value:", ...dumpObject(value),
-          "\n\tnew value (after proclamation post-process):", ...dumpObject(proclamationValue),
+          "\n\tnew value (after universalization):", ...dumpObject(commandValue),
           "\n\toptions:", ...dumpObject(options),
       );
     }
   }
 
   removeFromField (fieldName: string, value: any, options: VALKOptions = {}) {
-    let proclamationValue;
+    let commandValue;
     try {
       const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
-      proclamationValue = evaluateToProclamationData(value, options);
-      return transaction.proclaim(removedFromFields({ id, typeName: this._typeName }, {
-        [fieldName]:
-            proclamationValue === null ? null
-                : arrayFromAny(proclamationValue)
+      commandValue = universalizeCommandData(value, options);
+      return transaction.chronicleEvent(removedFromFields({ id, typeName: this._typeName }, {
+        [fieldName]: (commandValue === null) ? null : arrayFromAny(commandValue)
       }));
     } catch (error) {
       throw this.wrapErrorEvent(error, `removeFromField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tremoved value:", ...dumpObject(value),
-          "\n\tremoved value (after proclamation post-process):", ...dumpObject(proclamationValue),
+          "\n\tremoved value (after universalization):", ...dumpObject(commandValue),
           "\n\toptions:", ...dumpObject(options),
       );
     }
@@ -725,31 +726,31 @@ export default class Vrapper extends Cog {
 
   replaceWithinField (fieldName: string, replacedValues: any[], withValues: any[],
       options: VALKOptions = {}) {
-    let proclamationRemovedValues;
-    let proclamationAddedValues;
+    let universalRemovedValues;
+    let universalAddedValues;
     const addedValues = new Set(withValues);
     try {
       const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
-      proclamationRemovedValues = arrayFromAny(
-          evaluateToProclamationData(
+      universalRemovedValues = arrayFromAny(
+          universalizeCommandData(
                   replacedValues.filter(replacedValue => !addedValues.has(replacedValue)), options)
               || undefined);
-      proclamationAddedValues = arrayFromAny(
-          evaluateToProclamationData(withValues, options)
+      universalAddedValues = arrayFromAny(
+          universalizeCommandData(withValues, options)
               || undefined);
-      return transaction.proclaim(replacedWithinFields({ id, typeName: this._typeName },
-          { [fieldName]: proclamationRemovedValues },
-          { [fieldName]: proclamationAddedValues },
+      return transaction.chronicleEvent(replacedWithinFields({ id, typeName: this._typeName },
+          { [fieldName]: universalRemovedValues },
+          { [fieldName]: universalAddedValues },
       ));
     } catch (error) {
       throw this.wrapErrorEvent(error, `replaceInField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\treplaced values:", ...dumpObject(replacedValues),
-          "\n\tremoved values (after proclamation post-process):",
-              ...dumpObject(proclamationRemovedValues),
+          "\n\tremoved values (after universalization):",
+              ...dumpObject(universalRemovedValues),
           "\n\twith values:", ...dumpObject(addedValues),
-          "\n\tadded values (after proclamation post-process):",
-              ...dumpObject(proclamationAddedValues),
+          "\n\tadded values (after universalization):",
+              ...dumpObject(universalAddedValues),
           "\n\toptions:", ...dumpObject(options),
       );
     }
@@ -1561,25 +1562,25 @@ export default class Vrapper extends Cog {
 
   onEventMODIFIED (vResource: Vrapper, prophecy: Prophecy) {
     if (this._debug) {
-      console.log(`${this.debugId()}.onEventMODIFIED()`, prophecy, this);
+      console.log(`${this.debugId()}.onEventMODIFIED()`, story, this);
     }
     try {
-      this.updateTransient(prophecy.state);
+      this.updateTransient(story.state);
       if (prophecy.passage.sets && prophecy.passage.sets.name) {
         this._refreshDebugId(
-            this.getTransient({ typeName: prophecy.passage.typeName, state: prophecy.state }),
-            { state: prophecy.state });
+            this.getTransient({ typeName: passage.typeName, state: story.state }),
+            { state: story.state });
       }
       if (prophecy.passage.actualAdds) {
         for (const fieldName of prophecy.passage.actualAdds.keys()) {
-          this.notifyMODIFIEDHandlers(fieldName, prophecy, vResource);
+          this.notifyMODIFIEDHandlers(fieldName, story, vResource);
         }
       }
       if (prophecy.passage.actualRemoves) {
         for (const fieldName of prophecy.passage.actualRemoves.keys()) {
           if (!prophecy.passage.actualAdds || !prophecy.passage.actualAdds.has(fieldName)) {
             // Only fire modified event once per property.
-            this.notifyMODIFIEDHandlers(fieldName, prophecy, vResource);
+            this.notifyMODIFIEDHandlers(fieldName, story, vResource);
           }
         }
       }
@@ -1589,7 +1590,7 @@ export default class Vrapper extends Cog {
               && (!prophecy.passage.actualRemoves
                   || !prophecy.passage.actualRemoves.has(fieldName))) {
             // Only fire modified event once per property.
-            this.notifyMODIFIEDHandlers(fieldName, prophecy, vResource);
+            this.notifyMODIFIEDHandlers(fieldName, story, vResource);
           }
         }
       }
@@ -1634,7 +1635,7 @@ export default class Vrapper extends Cog {
     const filterSubscribers = this._fieldFilterSubscribers;
     if (!subscribers && !filterSubscribers) return;
     const fieldUpdate = new FieldUpdate(
-        this, fieldName, prophecy, { state: prophecy.state }, undefined, vProphecyResource);
+        this, fieldName, passage, { state: story.state }, undefined, vProtagonist);
     this._delayedNotifyMODIFIEDHandlers(fieldUpdate, subscribers, filterSubscribers);
     return;
   }
@@ -1642,8 +1643,8 @@ export default class Vrapper extends Cog {
   async _delayedNotifyMODIFIEDHandlers (fieldUpdate: FieldUpdate, subscribers: any,
       filterSubscribers: any) {
     const fieldName = fieldUpdate.fieldName();
-    const alreadyNotified = fieldUpdate.prophecy()._alreadyNotified
-        || (fieldUpdate.prophecy()._alreadyNotified = new Set());
+    const alreadyNotified = fieldUpdate.getPassage()._alreadyNotified
+        || (fieldUpdate.getPassage()._alreadyNotified = new Set());
     for (const subscriber of (subscribers || [])) {
       try {
         if (!alreadyNotified.has(subscriber)) {
@@ -1656,7 +1657,7 @@ export default class Vrapper extends Cog {
                 fieldName}')`,
             "\n\tfield update:", fieldUpdate,
             "\n\tfailing field subscriber:", ...dumpObject(subscriber),
-            "\n\tstate:", ...dumpObject(fieldUpdate.prophecy().state.toJS())));
+            "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())));
       }
     }
     if (filterSubscribers) {
@@ -1673,7 +1674,7 @@ export default class Vrapper extends Cog {
                   fieldName}')`,
               "\n\tfield update:", fieldUpdate,
               "\n\tfailing filter subscriber:", ...dumpObject(filterSubscriber),
-              "\n\tstate:", ...dumpObject(fieldUpdate.prophecy().state.toJS())));
+              "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())));
         }
       }
     }

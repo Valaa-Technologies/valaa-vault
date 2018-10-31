@@ -1,10 +1,13 @@
+// @flow
+
 import { Iterable } from "immutable";
+import type { Passage } from "~/raem";
 
 import VALEK, { Kuery, VALKOptions, dumpObject, rootScopeSelf,
   builtinSteppers as engineBuiltinSteppers,
 } from "~/engine/VALEK";
 
-import { created, duplicated, recombined, isCreatedLike } from "~/raem/command";
+import Command, { created, duplicated, recombined, isCreatedLike } from "~/raem/command";
 
 import { vRef, IdData, obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
@@ -15,12 +18,12 @@ import Transient, { createTransient, getTransientTypeName }
 import { isGhost } from "~/raem/tools/denormalized/ghost";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
 
-import type { Prophet, Proclamation } from "~/prophet";
+import type { Prophet } from "~/prophet";
 
 import Cog, { executeHandlers } from "~/engine/Cog";
 import Motor from "~/engine/Motor";
 import Vrapper from "~/engine/Vrapper";
-import evaluateToProclamationData from "~/engine/Vrapper/evaluateToProclamationData";
+import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
 
 import { createId, dumpify, outputCollapsedError, wrapError } from "~/tools";
@@ -32,8 +35,8 @@ export default class ValaaEngine extends Cog {
     this.prophet = prophet;
     this.cogs = new Set();
     this._vrappers = new Map();
-    this._prophecyHandlerRoot = new Map();
-    this._prophecyHandlerRoot.set("rawId", this._vrappers);
+    this._storyHandlerRoot = new Map();
+    this._storyHandlerRoot.set("rawId", this._vrappers);
 
     this.addCog(this);
     this.motor = new Motor({ engine: this, name: `${name}/Motor`, prophet, timeDilation });
@@ -92,20 +95,20 @@ export default class ValaaEngine extends Cog {
   addCog (cog) {
     if (!this.cogs.has(cog)) {
       this.cogs.add(cog);
-      cog.registerHandlers(this._prophecyHandlerRoot);
+      cog.registerHandlers(this._storyHandlerRoot);
     }
   }
 
   removeCog (cog) {
     if (this.cogs.delete(cog)) {
-      cog.unregisterHandlers(this._prophecyHandlerRoot);
+      cog.unregisterHandlers(this._storyHandlerRoot);
     }
   }
 
   delayedRemoveCog (cog) {
-    (this.delayedCogRemovals || (this.delayedCogRemovals = [])).push(cog);
+    (this._transientDelayedCogRemovals || (this._transientDelayedCogRemovals = [])).push(cog);
   }
-  delayedCogRemovals: Cog[];
+  _transientDelayedCogRemovals: Cog[];
 
   /**
    * Returns an existing Vrapper: does not return a Vrapper for non-instantiated ghost.
@@ -199,7 +202,7 @@ export default class ValaaEngine extends Cog {
     return this._constructWith(duplicated,
         { initialState, typeName: duplicateOf.getTypeName() },
         options,
-        (innerOptions) => ({ duplicateOf: evaluateToProclamationData(duplicateOf, innerOptions) }),
+        (innerOptions) => ({ duplicateOf: universalizeCommandData(duplicateOf, innerOptions) }),
         (constructParams, id, evaluatedInitialState) => {
           constructParams.id = id;
           constructParams.initialState = evaluatedInitialState;
@@ -214,14 +217,14 @@ export default class ValaaEngine extends Cog {
         (constructParams, id, evaluatedInitialState, directive, innerOptions) => {
           constructParams.actions.push(duplicated({
             id,
-            duplicateOf: evaluateToProclamationData(directive.duplicateOf, innerOptions),
+            duplicateOf: universalizeCommandData(directive.duplicateOf, innerOptions),
             initialState: evaluatedInitialState,
           }));
         });
   }
 
   _constructWith (
-      constructProclamation: (Object) => Proclamation,
+      constructCommand: (Object) => Command,
       directives: Object,
       options: Object = {},
       createConstructParams: Object,
@@ -243,12 +246,12 @@ export default class ValaaEngine extends Cog {
         extractedProperties.push(this._extractProperties(directive.initialState, options.head));
         addToConstructParams(constructParams,
           this._resolveIdForConstructDirective(directive, options),
-          evaluateToProclamationData(directive.initialState, options),
+          universalizeCommandData(directive.initialState, options),
           directive,
           options);
       }
 
-      result = transaction.proclaim(constructProclamation(constructParams));
+      result = transaction.chronicleEvent(constructCommand(constructParams));
 
       // FIXME(iridian): If the transaction fails the Vrapper will contain inconsistent data until
       // the next actual update on it.
@@ -267,7 +270,7 @@ export default class ValaaEngine extends Cog {
           Promise.resolve(vResource.activate(transaction.getState()))
               .then(undefined, (error) => {
                 outputCollapsedError(localWrapError(this, error,
-                    `${constructProclamation.name}.activate ${vResource.debugId()}`));
+                    `${constructCommand.name}.activate ${vResource.debugId()}`));
               });
         }
         if (extractedProperties[index]) {
@@ -280,7 +283,7 @@ export default class ValaaEngine extends Cog {
 
       return isRecombine ? ret : ret[0];
     } catch (error) {
-      throw localWrapError(this, error, `${constructProclamation.name}()`);
+      throw localWrapError(this, error, `${constructCommand.name}()`);
     }
     function localWrapError (self, error, operationName) {
       return self.wrapErrorEvent(error, operationName,
@@ -326,7 +329,7 @@ export default class ValaaEngine extends Cog {
     if (initialState.partitionAuthorityURI) {
       partitionURI = createPartitionURI(initialState.partitionAuthorityURI, id.rawId());
     } else if (initialState.owner || initialState.source) {
-      partitionURI = evaluateToProclamationData(initialState.owner || initialState.source, options)
+      partitionURI = universalizeCommandData(initialState.owner || initialState.source, options)
           .getPartitionURI();
     }
     directive.id = !partitionURI ? id : id.immutatePartitionURI(partitionURI);
@@ -336,7 +339,7 @@ export default class ValaaEngine extends Cog {
   outputStatus (output = console) {
     output.log(`${this.name}: Resources:`,
         layoutByObjectField(this.prophet.getState(), "name"));
-    output.log(`${this.name}: Handlers:`, this._prophecyHandlerRoot);
+    output.log(`${this.name}: Handlers:`, this._storyHandlerRoot);
     output.log(`${this.name}: Cogs:`);
     for (const cog of this.cogs) if (cog !== this) cog.outputStatus(output);
   }
@@ -413,12 +416,8 @@ export default class ValaaEngine extends Cog {
     }
   }
 
-  receiveTruth (/* truthEvent */) {
-    // console.log("TRUTH Confirmed", truthEvent);
-  }
-
-  rejectHeresy (/* rejectedProclamation, purgedCorpus, revisedEvents */) {
-    // console.log("HERECY Rejected", rejectedProclamation);
+  rejectHeresy (/* rejectedEvent, purgedCorpus, revisedEvents */) {
+    // console.log("HERESY Rejected", rejectedEvent);
   }
 
   start () { return this.motor.start(); }

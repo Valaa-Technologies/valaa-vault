@@ -35,19 +35,19 @@ describe("CREATED/DUPLICATED", () => {
 
   it("prevents DESTROYED if the resource has active instances", () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createBlockA);
-    expect(() => harness.dispatch(destroyed({ id: "A_child2" })))
+    expect(() => harness.chronicleEvent(destroyed({ id: "A_child2" })))
         .toThrow(/destruction blocked/);
   });
 
   it("doesn't prevent DESTROYED if a preventing instance will also be destroyed", () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createBlockA);
-    expect(() => harness.dispatch(destroyed({ id: "A_parent" })))
+    expect(() => harness.chronicleEvent(destroyed({ id: "A_parent" })))
         .not.toThrow(/destruction blocked/);
   });
 
   it("doesn't prevent DESTROYED for non-command", () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createBlockA);
-    expect(() => harness.dispatch(destroyed({ id: "A_child2", partitions: {} })))
+    expect(() => harness.chronicleEvent(destroyed({ id: "A_child2", partitions: {} })))
         .not.toThrow(/destruction blocked/);
   });
 });

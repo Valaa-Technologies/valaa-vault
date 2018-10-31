@@ -1,6 +1,6 @@
 // @flow
 
-import type { UniversalEvent } from "~/raem/command";
+import type { EventBase } from "~/raem/command";
 import { VRef, obtainVRef } from "~/raem/ValaaReference";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
@@ -113,7 +113,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  chronicleEvents (events: UniversalEvent[], options: ChronicleOptions = {}):
+  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
       { eventResults: ChronicleEventResult[] } {
     const contextError = new Error("chronicleEvents");
     try {
@@ -127,7 +127,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  receiveTruths (truths: UniversalEvent[], retrieveMediaBuffer?: RetrieveMediaBuffer,
+  receiveTruths (truths: EventBase[], retrieveMediaBuffer?: RetrieveMediaBuffer,
       downstreamReceiveTruths: ReceiveEvents,
       type: ("receiveTruths" | "receiveCommands") = "receiveTruths",
   ) {
@@ -147,7 +147,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  receiveCommands (commands: UniversalEvent[], retrieveMediaBuffer?: RetrieveMediaBuffer,
+  receiveCommands (commands: EventBase[], retrieveMediaBuffer?: RetrieveMediaBuffer,
       downstreamReceiveCommands: ReceiveEvents) {
     return this.receiveTruths(commands, retrieveMediaBuffer, downstreamReceiveCommands,
         "receiveCommands");
@@ -244,7 +244,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  async _writeEvents (eventLog: UniversalEvent[]) {
+  async _writeEvents (eventLog: EventBase[]) {
     if (!eventLog || !eventLog.length) return undefined;
     try {
       return await _writeEvents(this, eventLog);
@@ -264,7 +264,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  async _writeCommands (commandLog: UniversalEvent[]) {
+  async _writeCommands (commandLog: EventBase[]) {
     try {
       return await _writeCommands(this, commandLog);
     } catch (error) {

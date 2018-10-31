@@ -187,6 +187,9 @@ export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
     if (!nest) {
       if (Array.isArray(head)) return `<Array length=${head.length} >`;
       if (isIterable(head)) return `<Iterable size=${head.size}>`;
+      if (head instanceof Map) return `<Map size=${head.size}>`;
+      if (head instanceof WeakMap) return `<WeakMap size=${head.size}>`;
+      if (head instanceof Set) return `<Set size=${head.size}>`;
     }
     if (head.toString
         && (head.toString !== Object.prototype.toString)

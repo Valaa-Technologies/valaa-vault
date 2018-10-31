@@ -33,7 +33,7 @@ const modify = {
   },
   resolve: async (context, args/* , info */) => {
     try {
-      const proclamation = await context.store.dispatch({
+      const truth = await context.store.chronicleEvent({
         ...modified({
           id: args.input.id,
           typeName: args.input.typeName,
@@ -43,9 +43,9 @@ const modify = {
           splices: args.input.splices && JSON.parse(args.input.splices),
         }),
         bvobStubs: context.bvobStubs,
-      });
+      }).getTruthEvent();
       return {
-        clientMutationId: proclamation.id,
+        clientMutationId: truth.id,
       };
     } catch (error) {
       console.error(error.message, error.stack);

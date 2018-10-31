@@ -20,11 +20,11 @@ describe("Oracle", () => {
         .toEqual("Automatic Test Partition Root");
   });
 
-  const freezePartitionProclamation = transacted({
+  const freezePartitionEvent = transacted({
     actions: [fieldsSet({ id: vRef("test_partition"), typeName: "Entity" }, { isFrozen: true })],
   });
 
-  const lateProclamation = created({
+  const lateCommand = created({
     id: "Entity Late",
     typeName: "Entity",
     initialState: {
@@ -33,21 +33,19 @@ describe("Oracle", () => {
     }
   });
 
-  it("Rejects proclamations executed after a freeze proclamations", async () => {
+  it("Rejects commands chronicled after a freeze command", async () => {
     harness = await createProphetOracleHarness({});
     const partitionURI = createPartitionURI(testAuthorityURI, "test_partition");
     await harness.prophet
         .acquirePartitionConnection(partitionURI).getSyncedConnection();
 
-    // Run proclamations up until the partition is frozen
-    const proclamationUntilFreeze = [freezePartitionProclamation];
-    for (const proclamation of proclamationUntilFreeze) {
-      const claimResult = await harness.proclaim(proclamation);
-      await claimResult.getStoryPremiere();
+    const commandsUpToFreeze = [freezePartitionEvent];
+    for (const command of commandsUpToFreeze) {
+      await harness.chronicleEvent(command).getStoryPremiere();
     }
 
     // Attempt to run an action post-freeze and expect complaints
-    expect(() => harness.proclaim(lateProclamation))
+    expect(() => harness.chronicleEvent(lateCommand))
         .toThrow(/Cannot modify frozen.*test_partition/);
   });
 });

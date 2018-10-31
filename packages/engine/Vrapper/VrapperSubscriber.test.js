@@ -24,8 +24,8 @@ describe("VrapperSubscriber", () => {
   let liveCallback;
   let subscriber;
 
-  function setUpHarnessAndCallback (options: Object, ...proclamationBlocks: any) {
-    harness = createEngineTestHarness(options, ...proclamationBlocks);
+  function setUpHarnessAndCallback (options: Object, ...commandBlocks: any) {
+    harness = createEngineTestHarness(options, ...commandBlocks);
     liveCallback = jest.fn(); // eslint-disable-line
   }
 

@@ -1,6 +1,6 @@
 // @flow
 
-import type { UniversalEvent } from "~/raem/command";
+import type { EventBase } from "~/raem/command";
 import { createValaaURI } from "~/raem/ValaaURI";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
@@ -68,9 +68,9 @@ export default class OraclePartitionConnection extends PartitionConnection {
     }
   }
 
-  receiveTruths (truths: UniversalEvent[], retrieveMediaBuffer: RetrieveMediaBuffer,
+  receiveTruths (truths: EventBase[], retrieveMediaBuffer: RetrieveMediaBuffer,
       downstreamReceiveTruths: ?ReceiveEvents, type: string = "receiveTruths",
-  ): Promise<(Promise<UniversalEvent> | UniversalEvent)[]> {
+  ): Promise<(Promise<EventBase> | EventBase)[]> {
     try {
       if (!downstreamReceiveTruths) {
         throw new Error(`INTERNAL ERROR: downstreamReceiveTruths was not defined`);

@@ -129,8 +129,8 @@ describe("ghost lookups", () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createTestObj, createTestObjInst);
     let ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
-    const materializeProclamation = createMaterializeGhostAction(harness.getState(), ghostOwnling);
-    harness.dispatch(materializeProclamation);
+    const materializeEvent = createMaterializeGhostAction(harness.getState(), ghostOwnling);
+    harness.chronicleEvent(materializeEvent);
     ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
 
@@ -148,7 +148,7 @@ describe("ghost lookups", () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createTestObj, createTestObjInst);
     let ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
-    harness.dispatch(createMaterializeGhostAction(harness.getState(), ghostOwnling));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), ghostOwnling));
     ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
     const ghostGrandling = harness.run(ghostOwnling, ["§->", "children", 0]);
@@ -173,7 +173,7 @@ describe("ghost lookups", () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createTestObj, createOwnlingInst);
     let ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
-    harness.dispatch(createMaterializeGhostAction(harness.getState(), ghostGrandling));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), ghostGrandling));
     ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
 
@@ -190,7 +190,7 @@ describe("ghost lookups", () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createTestObj, createOwnlingInst);
     let ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
-    harness.dispatch(createMaterializeGhostAction(harness.getState(), ghostGrandling));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), ghostGrandling));
     ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
     const ghostGreatGrandling = harness.run(ghostGrandling, ["§->", "children", 0]);
@@ -239,7 +239,7 @@ describe("mutations", () => {
     let A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
     expect(isMaterialized(harness.getState(), A_instance_B))
         .toEqual(false);
-    harness.dispatch(modified({
+    harness.chronicleEvent(modified({
       id: A_instance_B, typeName: "TestThing", sets: { name: "sanic", },
     }));
     A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
@@ -254,7 +254,7 @@ describe("mutations", () => {
     let A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
     expect(isMaterialized(harness.getState(), A_instance_B))
         .toEqual(false);
-    harness.dispatch(modified({ id: A, typeName: "TestThing",
+    harness.chronicleEvent(modified({ id: A, typeName: "TestThing",
       sets: { uncoupledField: A_instance_B }
     }));
     A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
@@ -272,7 +272,7 @@ describe("mutations", () => {
     // Do tests that do not depend on autorefresh
     const A_name = harness.run(vRef("A"), "name");
     const A_instance_name = harness.run(A_instance, "name");
-    harness.dispatch(modified({ id: "A_instance", typeName: "TestThing",
+    harness.chronicleEvent(modified({ id: "A_instance", typeName: "TestThing",
       removes: { name: null } }));
     const A_instance_name_after_erase = harness.run(vRef("A_instance"),
         "name");
@@ -299,14 +299,14 @@ describe("mutations", () => {
     // Names are equal before any modifications to the ghost and different after changes
     expect(harness.run(A_instance_B, "name", { debug: 0 }))
         .toEqual(harness.run(A_B, "name"));
-    harness.dispatch(modified({ id: A_instance_B, typeName: "TestThing",
+    harness.chronicleEvent(modified({ id: A_instance_B, typeName: "TestThing",
       sets: { name: "Ghost of Ownling" }
     }));
     expect(harness.run(A_instance_B, "name"))
         .not.toEqual(harness.run(A_B, "name"));
 
     // Set value back to undefined, restoring the value to the prototype's current value
-    harness.dispatch(modified({ id: A_instance_B, typeName: "TestThing",
+    harness.chronicleEvent(modified({ id: A_instance_B, typeName: "TestThing",
       removes: { name: null }
     }));
     expect(harness.run(A_instance_B, "name"))
@@ -330,9 +330,9 @@ describe("mutations", () => {
 
     // Modify the original list
     const A = harness.run(vRef("A"), null);
-    harness.dispatch(created({ id: "A_C", typeName: "TestThing",
+    harness.chronicleEvent(created({ id: "A_C", typeName: "TestThing",
       initialState: { parent: A, name: "Second Ownling" } }));
-    harness.dispatch(created({ id: "A_D", typeName: "TestThing",
+    harness.chronicleEvent(created({ id: "A_D", typeName: "TestThing",
       initialState: { parent: A, name: "Third Ownling" } }));
 
     // Ensure that the new lists are different to the old ones, but equal to each other
@@ -376,8 +376,8 @@ describe("mutations", () => {
     }
 
     // Modify the original list
-    harness.dispatch(destroyed({ id: "A_C", typeName: "TestThing" }));
-    harness.dispatch(destroyed({ id: "A_D", typeName: "TestThing" }));
+    harness.chronicleEvent(destroyed({ id: "A_C", typeName: "TestThing" }));
+    harness.chronicleEvent(destroyed({ id: "A_D", typeName: "TestThing" }));
 
     // Ensure that the new lists are different to the old ones, but equal to each other
     const A_children_new = harness.run(vRef("A"), ["§->", "children"]);
@@ -402,7 +402,7 @@ describe("mutations", () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createData, createBlankInstance);
 
     // Test instance
-    harness.dispatch(modified({
+    harness.chronicleEvent(modified({
       id: "A",
       typeName: "TestThing",
       sets: {
@@ -416,7 +416,7 @@ describe("mutations", () => {
     );
 
     // Test ghost
-    harness.dispatch(modified({
+    harness.chronicleEvent(modified({
       id: "A_B",
       typeName: "TestThing",
       sets: {
@@ -497,18 +497,18 @@ describe("complex structures", () => {
         ["§->", "children", 0], { debug: 0 });
 
     // Falling apart workaround
-    harness.dispatch(createMaterializeGhostAction(harness.getState(), gA1_B));
-    harness.dispatch(createMaterializeGhostAction(harness.getState(), gA1_B_C));
-    harness.dispatch(createMaterializeGhostAction(harness.getState(), gA_B1_C));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), gA1_B));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), gA1_B_C));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), gA_B1_C));
 
     // Here everything falls apart
-    harness.dispatch(created({ id: "gA1_B1", typeName: "TestThing", initialState: {
+    harness.chronicleEvent(created({ id: "gA1_B1", typeName: "TestThing", initialState: {
       instancePrototype: gA1_B,
     } }));
-    harness.dispatch(created({ id: "gA1_B_C1", typeName: "TestThing", initialState: {
+    harness.chronicleEvent(created({ id: "gA1_B_C1", typeName: "TestThing", initialState: {
       instancePrototype: gA1_B_C,
     } }));
-    harness.dispatch(created({ id: "gA_B1_C1", typeName: "TestThing", initialState: {
+    harness.chronicleEvent(created({ id: "gA_B1_C1", typeName: "TestThing", initialState: {
       instancePrototype: gA_B1_C,
     } }));
   };
@@ -517,7 +517,7 @@ describe("complex structures", () => {
   /*
   const createThirdDegreeInstances = (harness) => {
       const gA1_B1_C = harness.run(vRef("gA1_B1"), ["§->", "children", 0]);
-      harness.dispatch(created({ id: "gA1_B1_C1", typeName: "TestThing", initialState: {
+      harness.chronicleEvent(created({ id: "gA1_B1_C1", typeName: "TestThing", initialState: {
         instancePrototype: gA1_B1_C,
       } }));
   };
@@ -719,7 +719,7 @@ describe("complex structures", () => {
     createAndExtractHarnessWithCommands({ debug: 0 });
     const oldName = harness.run(A_B_C, "name");
     const newName = "Elder / Middle / Youngest (A_B_C modification)";
-    harness.dispatch(modified({
+    harness.chronicleEvent(modified({
       id: A_B_C, typeName: "TestThing", sets: { name: newName }
     }));
     expect(harness.run(A_B_C, "name")).not.toEqual(oldName);
@@ -741,7 +741,7 @@ describe("complex structures", () => {
     createAndExtractHarnessWithCommands({ debug: 0 });
     const oldName = harness.run(A_B_C1i, "name");
     const newName = "Elder / Middle / Youngest (A_B_C1i modification)";
-    harness.dispatch(modified({
+    harness.chronicleEvent(modified({
       id: A_B_C1i, typeName: "TestThing", sets: { name: newName }
     }));
     expect(harness.run(A_B_C1i, "name")).toEqual(newName);
@@ -764,7 +764,7 @@ describe("complex structures", () => {
     createAndExtractHarnessWithCommands({ debug: 0 });
     const oldName = harness.run(gA_B1_C, "name", { debug: 0 });
     const newName = "Elder / Middle / Youngest (gA_B1_C modification)";
-    harness.dispatch(modified({
+    harness.chronicleEvent(modified({
       id: gA_B1_C, typeName: "TestThing", sets: { name: newName }
     }));
     expect(harness.run(gA_B1_C, "name", { debug: 0 })).toEqual(newName);
@@ -784,7 +784,7 @@ describe("complex structures", () => {
   it("Modifications in A_B_C should be visible from A1i, and A_B1i via children access", () => {
     createAndExtractHarnessWithCommands({ debug: 0 });
     const oldName = harness.run(A_B_C, "name");
-    harness.dispatch(modified({ id: A_B_C, typeName: "TestThing", sets: {
+    harness.chronicleEvent(modified({ id: A_B_C, typeName: "TestThing", sets: {
       name: "Elder / Middle / Youngest (changed)",
     } }));
     expect(harness.run(A_B_C, "name")).not.toEqual(oldName);
@@ -813,7 +813,7 @@ describe("complex structures", () => {
     const startingList = harness.run(A_B, "children", { debug: 0 });
 
     // Add a bloke to A_B1i
-    harness.dispatch(created({ id: "A_B1_D", typeName: "TestThing", initialState: {
+    harness.chronicleEvent(created({ id: "A_B1_D", typeName: "TestThing", initialState: {
       parent: A_B1i, name: "new guy",
     } }));
 
@@ -829,7 +829,7 @@ describe("complex structures", () => {
         .toEqual(harness.run(A_B1i, "children"));
 
     // Modify the name of the newly-added object
-    harness.dispatch(modified({ id: "A_B1_D", typeName: "TestThing",
+    harness.chronicleEvent(modified({ id: "A_B1_D", typeName: "TestThing",
       sets: { name: "new guy 2.0", },
     }));
 

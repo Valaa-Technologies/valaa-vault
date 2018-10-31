@@ -263,8 +263,8 @@ export default class ValaaEngine extends Cog {
           this._createNewPartition(directive);
         }
         const id = isRecombine
-            ? result.prophecy.passage.passages[index].id
-            : result.prophecy.passage.id;
+            ? result.story.passages[index].id
+            : result.story.id;
         const vResource = this.getVrapper(id, { transaction });
         if (vResource.isResource()) {
           Promise.resolve(vResource.activate(transaction.getState()))
@@ -352,68 +352,69 @@ export default class ValaaEngine extends Cog {
     }
   }
 
-  revealProphecy (prophecy) {
-    const { passage, timed, state, previousState } = prophecy;
-    if (this.getDebugLevel() || timed) {
-      // eslint-disable-next-line
-      const { parentPassage, passages, type, ...rest } = passage;
-      this.logEvent(`revealProphecy`, eventTypeString(passage),
-          (timed ? `@ ${timed.startTime || "|"}->${timed.time}:` : ":"),
-          dumpify(rest));
-    }
-    function eventTypeString (innerPassage, submostEventType = innerPassage.type) {
-      if (!innerPassage.parentPassage) return submostEventType;
-      return `sub-${eventTypeString(innerPassage.parentPassage, submostEventType)}`;
-    }
-    passage.timedness = timed ? "Timed" : "Timeless";
-    const alreadyExecutedHandlers = new Set();
-    let vResource;
-    try {
-      if (passage.id) {
-        passage.rawId = getRawIdFrom(passage.id);
-        const existingVrapper = this._vrappers.get(passage.rawId);
-        if (existingVrapper && existingVrapper.get(null)) vResource = existingVrapper.get(null)[0];
-        if (isCreatedLike(passage)) {
-          if (!existingVrapper) {
-            vResource = new Vrapper(this, obtainVRef(passage.id), passage.typeName);
-          } else vResource._setTypeName(passage.typeName);
-          if (vResource.isResource()) {
-            Promise.resolve(vResource.activate(state))
-                .then(undefined, (error) => {
-                  outputCollapsedError(localWrapError(this, error,
-                      `revealProphecy(${passage.type} ${vResource.debugId()}).activate`));
-                });
-          }
+  receiveCommands (stories: Command[]) {
+    let allReactionPromises;
+    stories.forEach(story => {
+      const { timed, state, previousState } = story;
+      const _recitePassage = (passage: Passage) => {
+        if (this.getDebugLevel() || timed) {
+          // eslint-disable-next-line
+          const { parentPassage, passages, type, state, previousState, next, prev, ...rest } = passage;
+          this.logEvent(`recitePassage`, _eventTypeString(passage),
+              (timed ? `@ ${timed.startTime || "|"}->${timed.time}:` : ":"),
+              dumpify(rest));
         }
+        passage.timedness = timed ? "Timed" : "Timeless";
+        let vProtagonist;
+        try {
+          if (passage.id) {
+            passage.rawId = getRawIdFrom(passage.id);
+            const protagonistEntry = this._vrappers.get(passage.rawId);
+            if (protagonistEntry && protagonistEntry.get(null)) {
+              vProtagonist = protagonistEntry.get(null)[0];
+            }
+            if (isCreatedLike(passage)) {
+              if (!vProtagonist) {
+                vProtagonist = new Vrapper(this, obtainVRef(passage.id), passage.typeName);
+              } else vProtagonist._setTypeName(passage.typeName);
+              if (vProtagonist.isResource()) {
+                Promise.resolve(vProtagonist.activate(state))
+                    .then(undefined, (error) => {
+                      outputCollapsedError(errorOnReceiveCommands.call(this, error,
+                        `receiveCommands(${passage.type} ${vProtagonist.debugId()}).activate`));
+                    });
+              }
+            }
+          }
+          const reactions = executeHandlers(this._storyHandlerRoot, passage, [vProtagonist, passage, story]);
+          if (reactions) (allReactionPromises || (allReactionPromises = [])).push(...reactions);
+          if (passage.passages) passage.passages.forEach(_recitePassage);
+        } catch (error) {
+          throw errorOnReceiveCommands.call(this, error,
+              new Error(`_recitePassage(${passage.type} ${
+                  vProtagonist ? vProtagonist.debugId() : ""})`),
+              "\n\tstory.state:", state && state.toJS(),
+              "\n\tstory.previousState:", previousState && previousState.toJS());
+        }
+        function errorOnReceiveCommands (error, operationName, ...extraContext) {
+          return this.wrapErrorEvent(error, operationName,
+              "\n\tvProtagonist:", vProtagonist,
+              "\n\tpassage:", passage,
+              "\n\tstory:", story,
+              ...extraContext);
+        }
+      };
+      _recitePassage.call(this, story);
+      if (this._transientDelayedCogRemovals) {
+        this._transientDelayedCogRemovals.forEach(cog => this.removeCog(cog));
+        this._transientDelayedCogRemovals = null;
       }
-      let promises = executeHandlers(this._prophecyHandlerRoot, passage,
-          alreadyExecutedHandlers, [vResource, prophecy]);
-      if (passage.passages) {
-        const subProphecy = { timed, state, previousState };
-        passage.passages.forEach(subPassage => {
-          subProphecy.passage = subPassage;
-          const subPromises = this.revealProphecy(subProphecy);
-          if (subPromises) (promises || (promises = [])).push(subPromises);
-        });
-      }
-      if (this.delayedCogRemovals) {
-        this.delayedCogRemovals.forEach(cog => this.removeCog(cog));
-        this.delayedCogRemovals = null;
-      }
-      return promises;
-    } catch (error) {
-      throw localWrapError(this, error, `revealProphecy(${passage.type} ${
-              vResource ? vResource.debugId() : ""})`,
-          "\n\tprophecy state:", state && state.toJS(),
-          "\n\tprophecy previousState:", prophecy.previousState && prophecy.previousState.toJS());
+    });
+    function _eventTypeString (innerPassage, submostEventType = innerPassage.type) {
+      if (!innerPassage.parentPassage) return submostEventType;
+      return `sub-${_eventTypeString(innerPassage.parentPassage, submostEventType)}`;
     }
-    function localWrapError (self, error, operationName, ...extraContext) {
-      return self.wrapErrorEvent(error, operationName,
-          "\n\tprophecy passage:", passage,
-          "\n\tprophecy vResource:", vResource,
-          "\n\tprophecy:", prophecy,
-          ...extraContext);
-    }
+    return allReactionPromises;
   }
 
   rejectHeresy (/* rejectedEvent, purgedCorpus, revisedEvents */) {

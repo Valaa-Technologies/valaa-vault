@@ -48,14 +48,17 @@ export default class FalseProphetDiscourse extends Discourse {
     }
   }
 
-  proclaim (proclamation: Proclamation, options: Object): ClaimResult {
-    if (this._transactionInfo) return this._transactionInfo.proclaim(proclamation, options);
+  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
+      { eventResults: ClaimResult } {
+    if (this._transactionInfo) return this._transactionInfo.chronicleEvents(events, options);
     try {
-      const ret = this.prophet.proclaim(proclamation, options);
-      ret.waitOwnReactions = (() => ret.getFollowerReactions(this.follower));
-      ret.getStoryPremiere = (async () => {
-        await ret.waitOwnReactions();
-        return await ret.getFinalStory();
+      const ret = this.prophet.chronicleEvents(events, options);
+      ret.eventResults.forEach(eventResult => {
+        eventResult.waitOwnReactions = (() => eventResult.getFollowerReactions(this.follower));
+        eventResult.getStoryPremiere = (async () => {
+          await eventResult.waitOwnReactions();
+          return await eventResult.getFinalStory();
+        });
       });
       return ret;
     } catch (error) {

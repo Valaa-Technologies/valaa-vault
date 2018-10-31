@@ -1,53 +1,88 @@
 // @flow
 
-import { Action, UniversalEvent } from "~/raem/command";
-import ValaaURI from "~/raem/ValaaURI";
+import { Story } from "~/raem";
+import { EventBase } from "~/raem/command";
 
-import Prophecy from "~/prophet/api/Prophecy";
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
-import { outputError } from "~/tools";
-import { trivialCloneWith } from "~/tools/trivialClone";
+import { dumpObject, outputError } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
+import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
-function createUniversalizableCommand (proclamation: Action) {
-  return trivialCloneWith(proclamation,
-      entry => (entry instanceof ValaaURI ? entry : undefined));
+export function _createStoryQueue () {
+  const ret = {
+    id: "sentinel",
+    getFirst () { return this.next; },
+    getLast () { return this.prev; },
+    getStoryBy (commandId: string) { return this._storyByCommandId[commandId]; },
+    addStory (story: Story, insertBefore: Story = this) {
+      if (story.commandId) {
+        this._storyByCommandId[story.commandId] = story;
+      } else story.isTruth = true;
+
+      story.next = insertBefore;
+      story.prev = insertBefore.prev;
+      insertBefore.prev.next = story;
+      insertBefore.prev = story;
+      return story;
+    },
+    removeStory (story: Story) {
+      story.prev.next = story.next;
+      story.next.prev = story.prev;
+      delete story.next;
+      delete story.prev;
+      if (story.commandId) {
+        delete this._storyByCommandId[story.commandId];
+      }
+      return story;
+    },
+    removeStories (firstStory: Story, lastStory: Story) {
+      firstStory.prev.next = lastStory.next;
+      lastStory.next.prev = firstStory.prev;
+      firstStory.prev = lastStory;
+      lastStory.next = null;
+      for (let story = firstStory; story; story = story.next) {
+        if (story.commandId) {
+          delete this._storyByCommandId[story.commandId];
+        }
+      }
+    },
+    dumpStatus () {
+      const ids = [];
+      for (let c = this.next; c !== this; c = c.next) {
+        ids.push(c.id);
+      }
+      return [
+        "\n\tpending:", Object.keys(this._storyByCommandId).length,
+            { ...this._storyByCommandId },
+        "\n\tcommandIds:", ids,
+      ];
+    },
+    _storyByCommandId: {},
+  };
+  ret.next = ret.prev = ret;
+  return ret;
 }
 
-export function isProclamation (action: Action) {
-  return !action.partitions;
-}
-
-export function _fabricateProphecy (falseProphet: FalseProphet, action: Action,
-    dispatchDescription: string, timed: ?UniversalEvent, transactionInfo?: TransactionInfo) {
-  const event = (dispatchDescription === "proclaim")
-      ? createUniversalizableCommand(action)
-      : action;
+export function _distpatchEventForAStory (falseProphet: FalseProphet, event: EventBase,
+    dispatchDescription: string, timed: ?EventBase, transactionInfo?: TransactionInfo) {
   const previousState = falseProphet.getState();
-  let story = (transactionInfo && transactionInfo.tryFastForwardOnCorpus(falseProphet.corpus));
+  let story = (transactionInfo && transactionInfo._tryFastForwardOnCorpus(falseProphet.corpus));
   if (!story) {
     // If no transaction or transaction is not a fast-forward, do a regular dispatch
     if (transactionInfo) {
       falseProphet.logEvent(`Committing a diverged transaction '${transactionInfo.name}' normally:`,
           "\n\trestrictedTransacted:", event);
     }
-    /*
-    const universalizableCommand = createUniversalizableCommand(proclamation);
-    invariantify(isProclamation(universalizableCommand),
-        "universalizable command must still be restricted");
-    */
     story = falseProphet.corpus.dispatch(event, dispatchDescription);
-    /*
-      invariantify(!isProclamation(universalizableCommand),
-          "universalized story must not be restricted");
-    */
   }
-  const prophecy = new Prophecy(story, falseProphet.getState(), previousState, timed);
-  prophecy.id = story.commandId;
-  _addProphecy(falseProphet, prophecy);
-  return prophecy;
+  story.timed = timed;
+  story.state = falseProphet.getState();
+  story.previousState = previousState;
+  // story.id = story.commandId; TODO(iridian): what was this?
+  falseProphet._storyQueue.addStory(story);
+  return story;
 }
 
 /*
@@ -59,17 +94,27 @@ function _purgeCommandsWith (hereticEvent: UniversalEvent, purgedCorpusState: St
 }
 */
 
-export function _revealProphecyToAllFollowers (falseProphet: FalseProphet, prophecy: Prophecy) {
+export function _purgeAndRevisePartitionCommands (connection: FalseProphetPartitionConnection,
+    purgedStories: Story[]) {
+  const falseProphet = connection.getProphet();
+  const purgedState = purgedStories[0].previousState;
+  falseProphet.recreateCorpus(purgedState);
+  falseProphet._followers.forEach(discourse =>
+      discourse.rejectHeresy(purgedStories[0], purgedState, []));
+  return undefined;
+}
+
+export function _revealStoryToAllFollowers (falseProphet: FalseProphet, story: Story) {
   let followerReactions;
   falseProphet._followers.forEach((discourse, follower) => {
-    const reaction = discourse.revealProphecy(prophecy);
+    const reaction = discourse.receiveCommands([story]);
     if (typeof reaction !== "undefined") {
       if (!followerReactions) followerReactions = new Map();
       followerReactions.set(follower, reaction);
     }
   });
   return {
-    prophecy,
+    story,
     getFollowerReactions: !followerReactions
         ? () => {}
         : (async (filter) => {
@@ -85,13 +130,14 @@ export function _revealProphecyToAllFollowers (falseProphet: FalseProphet, proph
 }
 
 export function _rejectLastProphecyAsHeresy (falseProphet: FalseProphet,
-    hereticClaim: UniversalEvent) {
-  if (falseProphet._prophecySentinel.prev.story.commandId !== hereticClaim.commandId) {
+    hereticClaim: EventBase) {
+  if (falseProphet._storyQueue.getLast().commandId !== hereticClaim.commandId) {
     throw new Error(`rejectLastProphecyAsHeresy.hereticClaim.commandId (${hereticClaim.commandId
-        }) does not match latest prophecy.commandId (${
-          falseProphet._prophecySentinel.prev.story.commandId})`);
+        }) does not match latest story.commandId (${
+          falseProphet._storyQueue.getLast().commandId})`);
   }
-  const hereticProphecy = _removeProphecy(falseProphet, falseProphet._prophecySentinel.prev);
+  const hereticProphecy = falseProphet._storyQueue
+      .removeStory(falseProphet._storyQueue.getLast());
   falseProphet.recreateCorpus(hereticProphecy.previousState);
 }
 
@@ -116,21 +162,20 @@ export function _removeProphecy (falseProphet: FalseProphet, prophecy) {
   if (prophecy.story.commandId) delete falseProphet._prophecyByCommandId[prophecy.story.commandId];
   return prophecy;
 }
-
-// Handle event confirmation coming from upstream, including a possible reformation.
+// Handle event confirmation coming from upstream, including a possible revisioning.
 // Sends notifications downstream on the confirmed events.
-// Can also send new command claims upstream if old commands get rewritten during reformation.
-export function _receiveTruth (falseProphet: FalseProphet, truthEvent: UniversalEvent,
-    purgedCommands?: Array<UniversalEvent>) {
+// Can also send new command claims upstream if old commands get rewritten during revisioning.
+export function _confirmProphecy (falseProphet: FalseProphet, truthEvent: EventBase,
+  purgedProphecies?: Array<EventBase>) {
   if (!truthEvent) return;
   /*
   falseProphet.warnEvent("\n\tconfirmTruth", truthEvent.commandId, truthEvent,
-      ...(purgedCommands ? ["\n\tPURGES:", purgedCommands] : []),
+      ...(purgedProphecies ? ["\n\tPURGES:", purgedProphecies] : []),
       ...falseProphet._dumpStatus());
   //*/
-  const reformation = purgedCommands && _beginReformation(falseProphet, purgedCommands);
+  const revisioning = purgedProphecies && _beginReformation(falseProphet, purgedProphecies);
 
-  // Even if a reformation is on-going we can outright add the new truth to the queue.
+  // Even if a revisioning is on-going we can outright add the new truth to the queue.
   // The future queue has been removed onwards from the first purged command. This is allowed
   // because no command or pending truth in the removed part of the queue can fundamentally
   // predate the new truth. Commands in the removed queue which belong to same partition(s) as
@@ -153,22 +198,22 @@ export function _receiveTruth (falseProphet: FalseProphet, truthEvent: Universal
 }
 
 function _addTruthToPendingProphecies (falseProphet: FalseProphet,
-    truthEvent: UniversalEvent) {
+    truthEvent: EventBase) {
   // Add the authorized and notify downstream
   // no truthId means a legacy command.
   const truthId = truthEvent.commandId;
   // TODO(iridian): After migration to zero missing commandId should be at create warnings
-  let prophecy = truthId && falseProphet._prophecyByCommandId[truthId];
-  if (!prophecy) {
+  let story = truthId && falseProphet._storyByCommandId[truthId];
+  if (!story) {
     if (!truthId) {
       falseProphet.warnEvent("Warning: encountered an authorized event with missing commandId:",
           truthEvent);
     }
-    prophecy = falseProphet._fabricateProphecy(truthEvent,
+    story = falseProphet._distpatchEventForAStory(truthEvent,
         `truth ${!truthId ? "legacy" : truthId.slice(0, 13)}...`);
-    falseProphet._revealProphecyToAllFollowers(prophecy);
+    falseProphet._revealStoryToAllFollowers(story);
   }
-  prophecy.isTruth = true;
+  story.isTruth = true;
 }
 
 export function _beginReformation (falseProphet: FalseProphet, purgedCommands) {

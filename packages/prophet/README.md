@@ -198,13 +198,15 @@ host object associated with the context resource.
 ## 3. Only *universal* commands are accepted by the upstream
 
 TODO(iridian): Update outdated documentation
-Restricted proclamations are commands created by downstream components
-and which target a particular partition but for which some of the relevant
-data is found only in other partitions (such as a cross-partition
-DUPLICATED command). Before a restricted command can be sent upstream
-(from where it might reach other users which might not even have
-permissions to access those other partitions) the command must be
-*universalized* by explicitly adding all necessary data to the command.
+Restricted commands are commands created by downstream components which
+contain incomplete information and cannot yet be chronicled upstream.
+An example of such is a cross-partition DUPLICATED command which only
+contains the source and the target owner resources: the final command
+which reaches the target partition event log must also contain full
+state of the duplicated resource.
+The process of adding all necessary information to a command is called
+*universalization*. A universalized command can then be handled by any
+clients irrespective of their local partition availability context.
 
 
 ## 4. Concrete components

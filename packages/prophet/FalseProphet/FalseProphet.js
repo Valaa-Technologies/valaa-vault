@@ -1,64 +1,68 @@
 // @flow
 
 
-import { Action, UniversalEvent } from "~/raem/command";
+import { Story } from "~/raem";
+import Command, { Action, EventBase } from "~/raem/command";
 import type { State } from "~/raem/tools/denormalized/State";
 
-import Prophecy from "~/prophet/api/Prophecy";
 import Follower from "~/prophet/api/Follower";
 import Prophet from "~/prophet/api/Prophet";
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
-import { invariantify, invariantifyObject, invariantifyString } from "~/tools";
+import { dumpObject, invariantifyObject } from "~/tools";
 
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
-import { _proclaim, _reclaim } from "./_proclamationOps";
+import { Prophecy, _chronicleEvents } from "./_proclamationOps";
 import {
-  _fabricateProphecy, _revealProphecyToAllFollowers, _receiveTruth, _reviewProphecy,
+  _createStoryQueue, _distpatchEventForAStory, _revealStoryToAllFollowers, _reviewProphecy,
 } from "./_prophecyOps";
 
 export class Proclamation extends Action {}
 
 export type ClaimResult = {
-  prophecy: Prophecy;
-  getFinalStory: () => Promise<Action>;
-  getCommandOf: (partitionURI: string) => Promise<Action>;
-  getStoryPremiere: () => Promise<Action>;
+  event: EventBase; // Preliminary event after universalization
+  story: Story; // Preliminary story before any revisions
+  getFinalStory: () => Promise<Story>; // Final story after the chronicling was authorized
+  getCommandOf: (partitionURI: string) => Promise<Command>;
+  getStoryPremiere: () => Promise<Story>; // Story after follower reaction promises have resolved.
 }
 
 /**
- * FalseProphet is non-authoritative (cache) in-memory denormalized store as well as a two-way proxy
- * to backend event streams.
- * In addition to the proxy and cache functionality the main localized responsibility of the
- * FalseProphet is to manage the non-authorized Prophecy queues. When upstream purges some
- * previously dispatched proclamation, FalseProphet is responsible for reforming the cache by
- * reviewing and reapplying all commands that come after the purged commands. This reapplication
- * can also include the purged commands themselves if the purge was not a discard but a basic
- * resequencing.
- * Finally, FalseProphet initiates the universalisation process, where proclamations coming from
- * downstream via .proclaim (whose meaning is well-defined only in current FalseProphet)
- * get rewritten as universal commands, whose meaning is well-defined for all clients.
- * This process is carried out and more closely documented by @valos/raem/redux/Bard and the
- * reducers contained within the FalseProphet.
+ * FalseProphet is non-authoritative denormalized in-memory store of
+ * ValOS state representations (corpus) and a two-way proxy to backend
+ * event streams.
+ *
+ * In addition FalseProphet manages an internal prophecy and story
+ * queue as a central component of event revisioning and operational
+ * transformations. When upstream purges some previously chronicled
+ * commands, FalseProphet is responsible for reforming the cache by
+ * revisioning all commands that have been reduced to the corpus after
+ * the come after the purged commands.
+ *
+ * Finally, FalseProphet initiates the universalisation process, where
+ * commands coming from downstream via .chronicleEvents (whose meaning
+ * is well-defined only in current FalseProphet context) get rewritten
+ * as universal commands so that their meaning is well-defined for all
+ * clients. This process is carried out and more closely documented by
+ * @valos/raem/redux/Bard and the reducers contained within the corpus.
  */
 export default class FalseProphet extends Prophet {
 
   static PartitionConnectionType = FalseProphetPartitionConnection;
 
   _totalCommandCount: number;
-  _claimOperationQueue = [];
+
+  _storyQueue: Story;
 
   constructor ({ name, logger, schema, corpus, upstream, commandCountCallback }: Object) {
     super({ name, logger });
     this.corpus = corpus;
     this.schema = schema || corpus.getSchema();
 
-    // Prophecy queue is a sentinel-based linked list with a separate lookup structure.
-    this._prophecySentinel = { id: "sentinel" };
-    this._prophecySentinel.next = this._prophecySentinel.prev = this._prophecySentinel;
-    this._prophecyByCommandId = {};
+    // Story queue is a sentinel-based linked list with a separate lookup structure.
+    this._storyQueue = _createStoryQueue();
     this._commandCountCallback = commandCountCallback;
     this._partitionCommandCounts = {};
     this._totalCommandCount = 0;
@@ -77,45 +81,41 @@ export default class FalseProphet extends Prophet {
     return new FalseProphetDiscourse({ prophet: this, follower });
   }
 
-  // Process and transmit a proclamation towards upstream.
-  proclaim (proclamation: Proclamation, options:
-      { timed: Object, transactionInfo: TransactionInfo } = {}): ClaimResult {
-    invariantifyString(proclamation.type, "proclamation.type, with proclamation:",
-        { proclamation });
-    return _proclaim(this, proclamation, options);
+  // Split a command and transmit resulting partition commands towards upstream.
+  chronicleEvents (commands: Command[], options:
+      { timed: Object, transactionInfo: TransactionInfo } = {}): { eventResults: ClaimResult[] } {
+    try {
+      return _chronicleEvents(this, commands, options);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, "chronicleEvents()",
+          "\n\toptions:", ...dumpObject(options));
+    }
+  }
+  chronicleEvent (event: EventBase, options: Object = {}) {
+    return this.chronicleEvents([event], options).eventResults[0];
   }
 
-  // Reclaim commands on application refresh which were cached during earlier executions.
-  // The command is already universalized and there's no need to collect handler return values.
-  repeatClaim (proclamation: Proclamation) {
-    invariantify(proclamation.commandId, "repeatClaim.proclamation.commandId");
-    return _reclaim(this, proclamation);
-  }
-
-  // Handle event confirmation coming from upstream, including a possible reformation.
-  // Sends notifications downstream on the confirmed events.
-  // Might result in proclamation reclaims and thus fresh upstream command chroniclings.
-  receiveTruth (truthEvent: UniversalEvent, purgedCommands?: Array<UniversalEvent>) {
-    return _receiveTruth(this, truthEvent, purgedCommands);
-  }
 
   /**
-   * Applies given action (which can be a downstream event or an upstream proclamation or command
-   * reclaim.
-   * Returns a Prophecy object which contains the action itself and the corpus state before and
-   * after the action.
+   * Dispatches given event to the corpus and get the corresponding
+   * story. This event can be a downstream-bound truth, a fresh
+   * upstream-bound command, cached command narration or an existing
+   * prophecy revision.
+   * Returns a story which contains the action itself and the corpus
+   * state before and after the action.
    *
-   * @param  {type} prophecy  an command to go upstream
+   * @param  {type} event     an command to go upstream
    * @returns {type}          description
    */
-  _fabricateProphecy (action: Action, dispatchDescription: string, timed: ?UniversalEvent,
+  _distpatchEventForAStory (event: EventBase, dispatchDescription: string, timed: ?EventBase,
       transactionInfo?: TransactionInfo) {
     try {
-      return _fabricateProphecy(this, action, dispatchDescription, timed, transactionInfo);
+      return _distpatchEventForAStory(
+          this, event, dispatchDescription, timed, transactionInfo);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_fabricateProphecy(${dispatchDescription})`,
-          "\n\taction:", action,
-          "\n\ttimed:", timed);
+      throw this.wrapErrorEvent(error, `_distpatchEventForAStory(${dispatchDescription})`,
+          "\n\tevent:", ...dumpObject(event),
+          "\n\ttimed:", ...dumpObject(timed));
     }
   }
 
@@ -123,16 +123,17 @@ export default class FalseProphet extends Prophet {
     try {
       _reviewProphecy(this, reformation, oldProphecy);
     } catch (error) {
-      // Hard conflict. The new incoming truth has introduced a low-level conflicting change,
-      // such as destroying a resource which the prophecies modify.
+      // Hard conflict. The new incoming truth has introduced a
+      // low-level conflicting change, such as destroying a resource
+      // which some prophecies are later trying to modify.
       oldProphecy.conflictReason = error;
     }
   }
 
-  _revealProphecyToAllFollowers (prophecy: Prophecy) {
-    invariantifyObject(prophecy, "_revealProphecyToAllFollowers.prophecy",
-        { instanceof: Prophecy, allowNull: false, allowEmpty: false });
-    return _revealProphecyToAllFollowers(this, prophecy);
+  _revealStoryToAllFollowers (story: Story) {
+    invariantifyObject(story, "_revealStoryToAllFollowers.story",
+        { instanceof: Story, allowNull: false, allowEmpty: false });
+    return _revealStoryToAllFollowers(this, story);
   }
 
   // command ops
@@ -147,14 +148,6 @@ export default class FalseProphet extends Prophet {
   }
 
   _dumpStatus () {
-    const ids = [];
-    for (let c = this._prophecySentinel.next; c !== this._prophecySentinel; c = c.next) {
-      ids.push(c.id);
-    }
-    return [
-      "\n\tpending:", Object.keys(this._prophecyByCommandId).length,
-          { ...this._prophecyByCommandId },
-      "\n\tcommandIds:", ids,
-    ];
+    return this._storyQueue.dumpStatus();
   }
 }

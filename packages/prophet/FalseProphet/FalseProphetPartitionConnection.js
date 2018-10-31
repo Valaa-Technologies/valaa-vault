@@ -1,11 +1,13 @@
 // @flow
 
-import { UniversalEvent } from "~/raem/command";
+import { EventBase } from "~/raem/command";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import type { NarrateOptions, ChronicleOptions, ChronicleEventResult } from "~/prophet/api/Prophet";
 
 import { dumpObject } from "~/tools";
+
+import { _purgeAndRevisePartitionCommands } from "./_prophecyOps";
 
 /**
  * @export
@@ -20,12 +22,12 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   // Discontinuous, unreduced truths. If defined, the first entry is
   // always immediately reduced. This means that first entry is always
   // undefined.
-  _pendingTruths: UniversalEvent[] = [];
+  _pendingTruths: EventBase[] = [];
   // Continuous, reduced but unconfirmed commands. Whenever
   // _pendingTruths contains a truth at an equivalent position with
   // equivalent commandId, then all commands with eventId equal or less
   // to that are confirmed as truths and transferred to _pendingTruths.
-  _unconfirmedCommands: UniversalEvent[] = [];
+  _unconfirmedCommands: EventBase[] = [];
   _firstUnconfirmedEventId = 0;
   _isFrozen: ?boolean;
 
@@ -41,11 +43,11 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     });
   }
 
-  chronicleEvents (events: UniversalEvent[], options: ChronicleOptions = {}):
+  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
       { eventResults: ChronicleEventResult[] } {
     if (!events || !events.length) return { eventResults: events };
     try {
-      if (options.isProclaim) {
+      if (options.isProphecy) {
         // console.log("assigning ids:", this.getName(), this._headEventId,
         //     this._unconfirmedCommands.length, "\n\tevents:", ...dumpObject(eventLog));
         events.forEach(event => {
@@ -54,12 +56,13 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
         });
         this._checkForFreezeAndNotify();
       } else if (typeof events[0].eventId !== "number") {
-        throw new Error("Can't chronicle events without eventId (with falsy options.isProclaim)");
+        throw new Error("Can't chronicle events without eventId (options.isProphecy is not set)");
       }
       return super.chronicleEvents(events, {
         ...options,
         receiveTruths: this.getReceiveTruths(options.receiveTruths),
-        receiveCommands: options.isProclaim ? null : this.getReceiveCommands(options.receiveCommands),
+        receiveCommands: options.isProphecy ? null
+            : this.getReceiveCommands(options.receiveCommands),
       });
     } catch (error) {
       throw this.wrapErrorEvent(error, `chronicleEvents(${events.length} events: [${
@@ -68,8 +71,8 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     }
   }
 
-  receiveTruths (truths: UniversalEvent[]) {
-    let purgedCommands;
+  receiveTruths (truths: EventBase[]) {
+    const revisedCommands = [];
     try {
       this._insertEventsToQueue(truths, this._pendingTruths, {
         continuous: false,
@@ -82,10 +85,10 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
         onInserted: (truth, queueIndex) => {
           const purgeEventId = this._correlateTruthToCommand(
               queueIndex, truth, this._unconfirmedCommands[queueIndex]);
-          if (purgeEventId !== undefined) purgedCommands = this._purgeCommands(purgeEventId);
+          revisedCommands.push(...(this._purgeAndReviseCommands(purgeEventId) || []));
         }
       });
-      this._normalizeQueuesAndPostProcess(purgedCommands);
+      this._normalizeQueuesAndPostProcess(revisedCommands);
       return truths;
     } catch (error) {
       throw this.wrapErrorEvent(error, `receiveTruths([${truths[0].eventId}, ${

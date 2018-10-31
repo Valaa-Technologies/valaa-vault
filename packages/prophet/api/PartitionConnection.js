@@ -7,14 +7,15 @@ import Prophet, {
   ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleEventResult,
   ReceiveEvents, RetrieveMediaBuffer,
 } from "~/prophet/api/Prophet";
+import Follower from "~/prophet/api/Follower";
 
-import Logger, { LogEventGenerator } from "~/tools/Logger";
+import Logger from "~/tools/Logger";
 import { dumpObject, invariantifyObject, thenChainEagerly } from "~/tools";
 
 /**
  * Interface for sending commands to upstream and registering for downstream truth updates
  */
-export default class PartitionConnection extends LogEventGenerator {
+export default class PartitionConnection extends Follower {
   _prophet: Prophet;
   _partitionURI: ValaaURI;
 

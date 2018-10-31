@@ -141,27 +141,6 @@ export function _rejectLastProphecyAsHeresy (falseProphet: FalseProphet,
   falseProphet.recreateCorpus(hereticProphecy.previousState);
 }
 
-function _addProphecy (falseProphet: FalseProphet, prophecy: Prophecy,
-    before = falseProphet._prophecySentinel) {
-  if (prophecy.story.commandId) {
-    falseProphet._prophecyByCommandId[prophecy.story.commandId] = prophecy;
-    // Legacy commands and other actions which don't have commandId set will be marked as truths.
-  } else prophecy.isTruth = true;
-
-  prophecy.next = before;
-  prophecy.prev = before.prev;
-  before.prev.next = prophecy;
-  before.prev = prophecy;
-}
-
-export function _removeProphecy (falseProphet: FalseProphet, prophecy) {
-  prophecy.prev.next = prophecy.next;
-  prophecy.next.prev = prophecy.prev;
-  delete prophecy.next;
-  delete prophecy.prev;
-  if (prophecy.story.commandId) delete falseProphet._prophecyByCommandId[prophecy.story.commandId];
-  return prophecy;
-}
 // Handle event confirmation coming from upstream, including a possible revisioning.
 // Sends notifications downstream on the confirmed events.
 // Can also send new command claims upstream if old commands get rewritten during revisioning.

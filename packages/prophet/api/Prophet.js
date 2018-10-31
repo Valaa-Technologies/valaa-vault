@@ -65,36 +65,6 @@ export default class Prophet extends LogEventGenerator {
     return follower;
   }
 
-  _confirmTruthToAllFollowers (truthEvent: Object, purgedCommands?: Array<Object>) {
-    (this._followers || []).forEach(discourse => {
-      try {
-        discourse.receiveTruth(truthEvent, purgedCommands);
-      } catch (error) {
-        this.outputErrorEvent(this.wrapErrorEvent(error,
-            "_confirmTruthToAllFollowers",
-            "\n\ttruthEvent:", truthEvent,
-            "\n\tpurgedCommands:", purgedCommands,
-            "\n\ttarget discourse:", discourse,
-        ));
-      }
-    });
-  }
-
-  _reclaimToAllFollowers (command: Object) {
-    (this._followers || []).forEach(discourse => {
-      try {
-        discourse.repeatClaim(command);
-      } catch (error) {
-        this.outputErrorEvent(this.wrapErrorEvent(error,
-            "_reclaimToAllFollowers",
-            "\n\trepeated command:", command,
-            "\n\ttarget discourse:", discourse,
-        ));
-      }
-    });
-    return command;
-  }
-
   /**
    * Returns a connection to partition identified by given partitionURI.
    *

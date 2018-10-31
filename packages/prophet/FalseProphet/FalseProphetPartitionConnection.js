@@ -101,13 +101,13 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     }
   }
 
-  receiveCommands (commands: UniversalEvent[]) {
-    let purgedCommands;
+  receiveCommands (commands: EventBase[]) {
+    let revisedCommands;
     try {
       this._insertEventsToQueue(commands, this._unconfirmedCommands, {
         continuous: true,
         onMismatch: (command, queueIndex, existingCommand) => {
-          purgedCommands = this._purgeCommands(existingCommand.eventId);
+          revisedCommands = this._purgeAndReviseCommands(existingCommand.eventId);
           this._unconfirmedCommands[queueIndex] = command;
           return true;
         },
@@ -119,10 +119,10 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
                 } has inconsistent commandId '${command.commandId
                 }' to corresponding pending truth commandId '${this._pendingTruths[queueIndex]}'`);
           }
-          this._prophet._fabricateProphecy(command, "reclaim");
+          this._prophet._distpatchEventForAStory(command, "receiveCommand");
         },
       });
-      this._normalizeQueuesAndPostProcess(purgedCommands);
+      this._normalizeQueuesAndPostProcess(revisedCommands);
       return commands;
     } catch (error) {
       throw this.wrapErrorEvent(error, `receiveCommand([${commands[0].eventId}, ${
@@ -135,7 +135,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     }
   }
 
-  _insertEventsToQueue (events: UniversalEvent[], targetQueue: UniversalEvent[],
+  _insertEventsToQueue (events: EventBase[], targetQueue: EventBase[],
       { continuous, onMismatch, onInserted }: { onMismatch: Function, onInserted: Function }) {
     events.forEach((event, index) => {
       const queueIndex = !event ? -1 : (event.eventId - this._headEventId);
@@ -165,7 +165,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     });
   }
 
-  _correlateTruthToCommand (queueIndex: number, truth: ?UniversalEvent, command: ?UniversalEvent) {
+  _correlateTruthToCommand (queueIndex: number, truth: ?EventBase, command: ?EventBase) {
     // Correlate to unconfirmed commands to detect confirmations and purges.
     if (!truth || !command) return undefined;
     if (command.commandId === truth.commandId) {
@@ -184,21 +184,19 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     return truth.eventId;
   }
 
-  _purgeCommands (firstPurgedCommandEventId) {
-    let purgedCommands;
+  _purgeAndReviseCommands (firstPurgedEventId = this._headEventId) {
+    let purgedStories;
     try {
-      const purgeOffset = firstPurgedCommandEventId - this._headEventId;
-      if (purgeOffset >= this._unconfirmedCommands.length) return;
-      purgedCommands = this._unconfirmedCommands.splice(purgeOffset);
-      throw new Error("purge not implemented yet against FalseProphet");
-      return purgedCommands;
+      if (firstPurgedEventId >= this._headEventId) return undefined;
+      purgedStories = this._unconfirmedCommands.splice(firstPurgedEventId - this._headEventId);
+      return _purgeAndRevisePartitionCommands(this, purgedStories);
     } catch (error) {
-      throw this.wrapErrorEvent(`_purgeCommands(${firstPurgedCommandEventId})`,
-          "\n\tpurgedCommands:", ...dumpObject(purgedCommands));
+      throw this.wrapErrorEvent(`_purgeAndReviseCommands(${firstPurgedEventId})`,
+          "\n\tpurgedCommands:", ...dumpObject(purgedStories));
     }
   }
 
-  _normalizeQueuesAndPostProcess (purgedCommands: UniversalEvent[]) {
+  _normalizeQueuesAndPostProcess (purgedStories: EventBase[]) {
     const confirmedCommandCount = Math.min(
         this._firstUnconfirmedEventId - this._headEventId, this._unconfirmedCommands.length);
     if (confirmedCommandCount > 0) {
@@ -218,18 +216,18 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     } else {
       while (this._pendingTruths[0]) {
         ++this._headEventId;
-        this._prophet._fabricateProphecy(this._pendingTruths.shift(), "truth");
+        this._prophet._distpatchEventForAStory(this._pendingTruths.shift(), "truth");
       }
     }
 
-    if (purgedCommands) {
+    if (purgedStories && purgedStories.length) {
       this.setIsFrozen(false);
       throw new Error("reformation not implemented yet against FalseProphet");
     }
     this._checkForFreezeAndNotify();
   }
 
-  _checkForFreezeAndNotify (lastEvent: UniversalEvent[]
+  _checkForFreezeAndNotify (lastEvent: EventBase[]
       = this._unconfirmedCommands[(this._unconfirmedCommands.length || 1) - 1]) {
     if (lastEvent) this.setIsFrozen(lastEvent.type === "FROZEN");
     this._prophet.setConnectionCommandCount(
@@ -239,8 +237,8 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
 
 /*
 async function _confirmOrPurgeQueuedCommands (connection: ScribePartitionConnection,
-    lastNewEvent: UniversalEvent) {
-  let purgedCommands;
+    lastNewEvent: EventBase) {
+  let purgedStories;
   const { firstEventId: firstCommandId, lastEventId: lastCommandId, commandIds }
       = connection._commandQueueInfo;
   if ((firstCommandId <= lastNewEvent.eventId) && (lastNewEvent.eventId <= lastCommandId)
@@ -248,11 +246,11 @@ async function _confirmOrPurgeQueuedCommands (connection: ScribePartitionConnect
     // connection.warnEvent("\n\tPURGING by", event.commandId, eventId, event, commandIds,
     //    "\n\tcommandIds:", firstCommandId, lastCommandId, commandIds);
     // Frankly, we could just store the commands in the 'commandIds' fully.
-    purgedCommands = await connection._readCommands(
+    purgedStories = await connection._readCommands(
         { firstEventId: firstCommandId, lastEventId: lastCommandId });
   }
 
-  const newCommandQueueFirstEventId = (purgedCommands ? lastCommandId : lastNewEvent.eventId) + 1;
+  const newCommandQueueFirstEventId = (purgedStories ? lastCommandId : lastNewEvent.eventId) + 1;
   if (connection.getFirstCommandEventId() < newCommandQueueFirstEventId) {
     _setCommandQueueFirstEventId(connection, newCommandQueueFirstEventId);
   }
@@ -260,7 +258,7 @@ async function _confirmOrPurgeQueuedCommands (connection: ScribePartitionConnect
   // Delete commands after event is stored, so we get no gaps.
   // TODO(iridian): Put these to the same transaction with the writeEvent
   if (connection.isLocallyPersisted()) {
-    if (purgedCommands) {
+    if (purgedStories) {
       // TODO(iridian): Add merge-conflict-persistence. As it stands now, for the duration of
       // the merge process the purged commands are not persisted anywhere and could be lost.
       connection._deleteCommands(firstCommandId, lastCommandId);
@@ -268,6 +266,6 @@ async function _confirmOrPurgeQueuedCommands (connection: ScribePartitionConnect
       connection._deleteCommands(firstCommandId, Math.min(lastNewEvent.eventId, lastCommandId));
     }
   }
-  return purgedCommands;
+  return purgedStories;
 }
 */

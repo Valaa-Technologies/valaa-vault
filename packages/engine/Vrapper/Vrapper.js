@@ -1556,39 +1556,38 @@ export default class Vrapper extends Cog {
     return this.engine.getVrapper(ghostVRef, { state });
   }
 
-  onEventCREATED (vResource: Vrapper, { state }: Prophecy) {
+  onEventCREATED (vResource: Vrapper, passage: Passage, { state }: Story) {
     this.updateTransient(state);
   }
 
-  onEventMODIFIED (vResource: Vrapper, prophecy: Prophecy) {
+  onEventMODIFIED (vResource: Vrapper, passage: Passage, story: Story) {
     if (this._debug) {
       console.log(`${this.debugId()}.onEventMODIFIED()`, story, this);
     }
     try {
       this.updateTransient(story.state);
-      if (prophecy.passage.sets && prophecy.passage.sets.name) {
+      if (passage.sets && passage.sets.name) {
         this._refreshDebugId(
             this.getTransient({ typeName: passage.typeName, state: story.state }),
             { state: story.state });
       }
-      if (prophecy.passage.actualAdds) {
-        for (const fieldName of prophecy.passage.actualAdds.keys()) {
+      if (passage.actualAdds) {
+        for (const fieldName of passage.actualAdds.keys()) {
           this.notifyMODIFIEDHandlers(fieldName, story, vResource);
         }
       }
-      if (prophecy.passage.actualRemoves) {
-        for (const fieldName of prophecy.passage.actualRemoves.keys()) {
-          if (!prophecy.passage.actualAdds || !prophecy.passage.actualAdds.has(fieldName)) {
+      if (passage.actualRemoves) {
+        for (const fieldName of passage.actualRemoves.keys()) {
+          if (!passage.actualAdds || !passage.actualAdds.has(fieldName)) {
             // Only fire modified event once per property.
             this.notifyMODIFIEDHandlers(fieldName, story, vResource);
           }
         }
       }
-      if (prophecy.passage.actualMoves) {
-        for (const fieldName of prophecy.passage.actualMoves.keys()) {
-          if ((!prophecy.passage.actualAdds || !prophecy.passage.actualAdds.has(fieldName))
-              && (!prophecy.passage.actualRemoves
-                  || !prophecy.passage.actualRemoves.has(fieldName))) {
+      if (passage.actualMoves) {
+        for (const fieldName of passage.actualMoves.keys()) {
+          if ((!passage.actualAdds || !passage.actualAdds.has(fieldName))
+              && (!passage.actualRemoves || !passage.actualRemoves.has(fieldName))) {
             // Only fire modified event once per property.
             this.notifyMODIFIEDHandlers(fieldName, story, vResource);
           }
@@ -1599,27 +1598,31 @@ export default class Vrapper extends Cog {
     }
   }
 
-  onEventFIELDS_SET (vResource: Vrapper, prophecy: Prophecy) { // eslint-disable-line camelcase
-    return this.onEventMODIFIED(vResource, prophecy);
+  // eslint-disable-next-line camelcase
+  onEventFIELDS_SET (vResource: Vrapper, passage: Passage, story: Story) {
+    return this.onEventMODIFIED(vResource, passage, story);
   }
 
-  onEventADDED_TO (vResource: Vrapper, prophecy: Prophecy) { // eslint-disable-line camelcase
-    return this.onEventMODIFIED(vResource, prophecy);
+  // eslint-disable-next-line camelcase
+  onEventADDED_TO (vResource: Vrapper, passage: Passage, story: Story) {
+    return this.onEventMODIFIED(vResource, passage, story);
   }
 
-  onEventREMOVED_FROM (vResource: Vrapper, prophecy: Prophecy) { // eslint-disable-line camelcase
-    return this.onEventMODIFIED(vResource, prophecy);
+  // eslint-disable-next-line camelcase
+  onEventREMOVED_FROM (vResource: Vrapper, passage: Passage, story: Story) {
+    return this.onEventMODIFIED(vResource, passage, story);
   }
 
-  onEventREPLACED_WITHIN (vResource: Vrapper, prophecy: Prophecy) { // eslint-disable-line camelcase
-    return this.onEventMODIFIED(vResource, prophecy);
+  // eslint-disable-next-line camelcase
+  onEventREPLACED_WITHIN (vResource: Vrapper, passage: Passage, story: Story) {
+    return this.onEventMODIFIED(vResource, passage, story);
   }
 
-  onEventSPLICED (vResource: Vrapper, prophecy: Prophecy) { // eslint-disable-line camelcase
-    return this.onEventMODIFIED(vResource, prophecy);
+  onEventSPLICED (vResource: Vrapper, passage: Passage, story: Story) {
+    return this.onEventMODIFIED(vResource, passage, story);
   }
 
-  onEventDESTROYED (vResource: Vrapper, { timed }: Prophecy) {
+  onEventDESTROYED (vResource: Vrapper, passage: Passage, { timed }: Story) {
     (this._destroyedHandlers || []).forEach(handler => handler(timed));
     this._phase = DESTROYED;
     this.engine.delayedRemoveCog(this);
@@ -1630,7 +1633,8 @@ export default class Vrapper extends Cog {
     this._destroyedHandlers.push(handler);
   }
 
-  notifyMODIFIEDHandlers (fieldName: string, prophecy: Prophecy, vProphecyResource: Vrapper) {
+  notifyMODIFIEDHandlers (fieldName: string, passage: Passage, story: Story,
+      vProtagonist: Vrapper) {
     const subscribers = this._subscribersByFieldName && this._subscribersByFieldName.get(fieldName);
     const filterSubscribers = this._fieldFilterSubscribers;
     if (!subscribers && !filterSubscribers) return;
@@ -1810,7 +1814,7 @@ export default class Vrapper extends Cog {
                 }' is a reserved word and is omitted from scope`);
             return;
           }
-          const passage = nameUpdate.prophecy() && nameUpdate.prophecy().passage;
+          const passage = nameUpdate.getPassage();
           if (passage && !isCreatedLike(passage)) {
             for (const propertyName of Object.keys(this._lexicalScope)) {
               if (this._lexicalScope[propertyName] === vActualAdd) {

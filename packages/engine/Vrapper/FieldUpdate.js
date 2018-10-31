@@ -68,12 +68,12 @@ export default class FieldUpdate {
   }
 
   actualAdds () {
-    if (!this._prophecy || isCreatedLike(this._prophecy.passage)) {
+    if (!this._passage || isCreatedLike(this._passage)) {
       const value = this.value();
       return arrayFromAny(value || undefined);
-    } else if (this._prophecy.passage.actualAdds) {
-      const ids = this._emitter._tryElevateFieldValueFrom(this._prophecy.state, this._fieldName,
-          this._prophecy.passage.actualAdds.get(this._fieldName), this._vProphecyResource);
+    } else if (this._passage.actualAdds) {
+      const ids = this._emitter._tryElevateFieldValueFrom(this._passage.state, this._fieldName,
+          this._passage.actualAdds.get(this._fieldName), this._vProtagonist);
       return this._emitter.engine.getVrappers(ids, this._valkOptions);
     }
     return [];
@@ -88,11 +88,11 @@ export default class FieldUpdate {
   // the new state will not have corresponding data.
   actualRemoves () {
     if (!this._passage) return [];
-    if (this._prophecy.passage.actualRemoves) {
+    if (this._passage.actualRemoves) {
       return this._emitter.engine.getVrappers(
-          this._prophecy.passage.actualRemoves.get(this._fieldName), this.previousStateOptions());
+          this._passage.actualRemoves.get(this._fieldName), this.previousStateOptions());
     }
-    if (this._prophecy.passage.type === "DESTROYED") {
+    if (this._passage.type === "DESTROYED") {
       // TODO(iridian): .get is getting called twice, redundantly, in the DESTROYED branch.
       // The first call in createFieldUpdate is useless as no actualAdds get made.
       // TODO(iridian): The non-pure kueries should be replaced with pure kueries?

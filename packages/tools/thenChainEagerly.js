@@ -47,6 +47,47 @@ export default function thenChainEagerly (initialValue: any,
   return thenChainEagerlyList(initialValue, arrayFromAny(functionChain), onRejected, 0);
 }
 
+// Sequential map on maybePromises which awaits for each entry and each return value of the mapped
+// function eagerly: if no promises are encountered resolves synchronously.
+export function mapEagerly (maybePromises: any[], callback: Function, onRejected?: Function,
+    startIndex: number = 0, results: Array<any> = []) {
+  let currentIndex = startIndex;
+  try {
+    for (; currentIndex < maybePromises.length; ++currentIndex) {
+      const maybeValue = maybePromises[currentIndex];
+      if (!isPromise(maybeValue)) {
+        results[currentIndex] = callback(maybeValue, currentIndex, maybePromises);
+        if (!isPromise(results[currentIndex])) continue;
+      } else {
+        results[currentIndex] = maybeValue.then(
+            (value) => callback(value, currentIndex, maybePromises)); // eslint-disable-line
+      }
+      return results[currentIndex].then(
+          (value) => { // eslint-disable-line
+            results[currentIndex] = value;
+            return mapEagerly(maybePromises, callback, onRejected, currentIndex + 1, results);
+          },
+          (error) => errorOnMapEagerly( // eslint-disable-line
+              error, new Error(`During mapEagerly step #${currentIndex}`)),
+      );
+    }
+    return results;
+  } catch (error) {
+    return errorOnMapEagerly(error, new Error(`During mapEagerly step #${currentIndex}`));
+  }
+  function errorOnMapEagerly (error, errorWrap) {
+    let innerError = error;
+    try {
+      if (onRejected) {
+        return onRejected(error, maybePromises[currentIndex], currentIndex, maybePromises);
+      }
+    } catch (onRejectedError) { innerError = onRejectedError; }
+    throw wrapError(innerError, errorWrap,
+        "\n\tmaybePromises:", ...dumpObject(maybePromises),
+        "\n\tcurrent entry:", ...dumpObject(maybePromises[currentIndex]));
+  }
+}
+
 export function thenChainEagerlyList (initialValue: any, functionChain: Function[],
     onRejected: ?Function, startIndex: number = 0) {
   let head = initialValue;
@@ -57,15 +98,17 @@ export function thenChainEagerlyList (initialValue: any, functionChain: Function
       head = functionChain[currentIndex](head);
     }
   } catch (error) {
-    return wrapChainError(error, new Error(`During thenChainEagerly step #${currentIndex}`));
+    return errorOnThenChainEagerly(
+        error, new Error(`During thenChainEagerly step #${currentIndex}`));
   }
   return head.then(
       value => (currentIndex >= functionChain.length
           ? value
           : thenChainEagerlyList(
               functionChain[currentIndex](value), functionChain, onRejected, currentIndex + 1)),
-      (error) => wrapChainError(error, new Error(`During thenChainEagerly step #${currentIndex}`)));
-  function wrapChainError (error, errorWrap) {
+      (error) => errorOnThenChainEagerly(
+          error, new Error(`During thenChainEagerly step #${currentIndex}`)));
+  function errorOnThenChainEagerly (error, errorWrap) {
     let innerError = error;
     try {
       if (onRejected) return onRejected(error, currentIndex, head, functionChain);

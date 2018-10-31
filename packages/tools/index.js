@@ -54,6 +54,7 @@ export const createForwardLogger = require("./Logger").createForwardLogger;
 export const SimpleData = require("./SimpleData").default;
 
 export const thenChainEagerly = require("./thenChainEagerly").default;
+export const mapEagerly = require("./thenChainEagerly").mapEagerly;
 
 export { vdon, vdocorate } from "./vdon";
 

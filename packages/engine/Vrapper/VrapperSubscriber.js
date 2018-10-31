@@ -368,8 +368,8 @@ export default class VrapperSubscriber extends SimpleData {
     //*/
     const kuery = this._subscribedKuery;
     if (typeof kuery === "undefined") return this._sendUpdate(fieldUpdate);
-    if (this._valkOptions.state === fieldUpdate.prophecy().state) return undefined;
-    this._valkOptions.state = fieldUpdate.prophecy().state;
+    if (this._valkOptions.state === fieldUpdate.getState()) return undefined;
+    this._valkOptions.state = fieldUpdate.getState();
     // TODO(iridian): PERFORMANCE CONCERN: Refreshing the kuery registrations on every update is
     // quite costly. Especially so if the kuery has property traversals: the current inefficient
     // live kuery implementation adds subscribers to all _candidate_ properties... so that's a lot
@@ -409,7 +409,7 @@ export default class VrapperSubscriber extends SimpleData {
               }\n ._sendUpdate(), with:`,
           "\n\tsubscriber:", this.subscriber,
           "\n\temitter:", fieldUpdate.emitter(),
-          "\n\tfieldUpdate:", fieldUpdate._prophecy && fieldUpdate._prophecy.passage,
+          "\n\tfieldUpdate:", fieldUpdate.getPassage(),
           `\n\tfilter ${this._subscribedFieldName ? "fieldName"
               : this._subscribedFieldFilter ? "filter"
               : "kuery"}:`,

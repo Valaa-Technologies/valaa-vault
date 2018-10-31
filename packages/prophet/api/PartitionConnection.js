@@ -1,7 +1,7 @@
 // @flow
 
 import ValaaURI, { getPartitionRawIdFrom } from "~/raem/ValaaURI";
-import type { UniversalEvent } from "~/raem/command";
+import type { EventBase } from "~/raem/command";
 
 import Prophet, {
   ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleEventResult,
@@ -12,7 +12,7 @@ import Logger, { LogEventGenerator } from "~/tools/Logger";
 import { dumpObject, invariantifyObject, thenChainEagerly } from "~/tools";
 
 /**
- * Interface for sending commands to upstream and registering for prophecy event updates
+ * Interface for sending commands to upstream and registering for downstream truth updates
  */
 export default class PartitionConnection extends LogEventGenerator {
   _prophet: Prophet;
@@ -155,7 +155,7 @@ export default class PartitionConnection extends LogEventGenerator {
    * @returns {Promise<Object>}
    * @memberof PartitionConnection
    */
-  chronicleEvents (events: UniversalEvent[], options: ChronicleOptions = {}):
+  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
       { eventResults: ChronicleEventResult[] } {
     if (!options) return undefined;
     return this._upstreamConnection.chronicleEvents(events, options);
@@ -168,9 +168,9 @@ export default class PartitionConnection extends LogEventGenerator {
     return this._upstreamConnection.getFirstUnusedCommandEventId();
   }
 
-  receiveTruths (truths: UniversalEvent[], retrieveMediaBuffer: RetrieveMediaBuffer,
+  receiveTruths (truths: EventBase[], retrieveMediaBuffer: RetrieveMediaBuffer,
       downstreamReceiveTruths: ?ReceiveEvents, type: string = "receiveTruths",
-  ): Promise<(Promise<UniversalEvent> | UniversalEvent)[]> {
+  ): Promise<(Promise<EventBase> | EventBase)[]> {
     try {
       if (!downstreamReceiveTruths) {
         throw new Error(`INTERNAL ERROR: receiveTruths not implemented by ${this.constructor.name
@@ -184,9 +184,9 @@ export default class PartitionConnection extends LogEventGenerator {
     }
   }
 
-  receiveCommands (commands: UniversalEvent[], retrieveMediaBuffer: RetrieveMediaBuffer,
-      downstreamReceiveCommands: ReceiveEvents,
-  ): Promise<(Promise<UniversalEvent> | UniversalEvent)[]> {
+  receiveCommands (commands: EventBase[], retrieveMediaBuffer: RetrieveMediaBuffer,
+      downstreamReceiveCommands?: ReceiveEvents,
+  ): Promise<(Promise<EventBase> | EventBase)[]> {
     return this.receiveTruths(commands, retrieveMediaBuffer, downstreamReceiveCommands,
         "receiveCommands");
   }

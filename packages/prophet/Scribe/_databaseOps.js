@@ -1,7 +1,7 @@
 // @flow
 
 import ValaaURI from "~/raem/ValaaURI";
-import type { UniversalEvent } from "~/raem/command";
+import type { EventBase } from "~/raem/command";
 
 import { dumpObject, vdon, wrapError } from "~/tools";
 import IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
@@ -351,7 +351,7 @@ export async function _adjustBvobBufferPersistRefCounts (
  ######    ##    ######  #    #     #
 */
 
-export function _writeEvents (connection: ScribePartitionConnection, eventLog: UniversalEvent[]) {
+export function _writeEvents (connection: ScribePartitionConnection, eventLog: EventBase[]) {
   return connection._db.transaction(["events"], "readwrite", ({ events }) => {
     eventLog.forEach(event => {
       if (typeof event.eventId !== "number") {
@@ -387,7 +387,7 @@ export function _readEvents (connection: ScribePartitionConnection, options: Obj
 }
 
 export function _writeCommands (connection: ScribePartitionConnection,
-    commandLog: UniversalEvent[]) {
+    commandLog: EventBase[]) {
   return connection._db.transaction(["commands"], "readwrite", ({ commands }) =>
       commandLog.forEach(command => {
         if (typeof command.eventId !== "number") {

@@ -13,11 +13,10 @@ export default exportValaaPlugin({ name: "@valos/prophet", ContentAPI, schemeMod
 export { default as Discourse } from "./api/Discourse";
 export { default as Follower } from "./api/Follower";
 export { default as PartitionConnection } from "./api/PartitionConnection";
-export { default as Prophecy } from "./api/Prophecy";
 export { default as Prophet } from "./api/Prophet";
 export type Transaction = Object;
 
-export { default as FalseProphet, Proclamation } from "./FalseProphet";
+export { default as FalseProphet } from "./FalseProphet";
 export { default as FalseProphetDiscourse } from "./FalseProphet/FalseProphetDiscourse";
 
 export { default as Oracle } from "./Oracle";

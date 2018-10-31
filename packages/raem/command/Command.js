@@ -7,20 +7,22 @@ export class Action {
   timeStamp: ?number;
 }
 
-export class UniversalEvent extends Action {
-  eventId: number;
+export class EventBase extends Action {
   version: ?string;
+  parentId: ?string;
+}
+
+export class UniversalEvent extends EventBase {
+  eventId: number;
   commandId: string;
 }
 
-export class Truth extends UniversalEvent {
+export class Truth extends EventBase {
   // partitions: ?Object;
-  parentId: ?string;
 }
 
-export default class Command extends UniversalEvent {
+export default class Command extends EventBase {
   // partitions: ?Object;
-  parentId: ?string;
 }
 
 export function validateCommandInterface (command: Command) {

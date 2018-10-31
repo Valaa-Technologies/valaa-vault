@@ -1,13 +1,13 @@
 // @flow
 
-import { UniversalEvent } from "~/raem/command";
+import { EventBase } from "~/raem/command";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import { dumpObject } from "~/tools";
 
 import extractEventOfPartition from "./extractEventOfPartition";
 
-export default function upgradeEventToVersion0dot2 (event: UniversalEvent,
+export default function upgradeEventToVersion0dot2 (event: EventBase,
     connection: PartitionConnection) {
   try {
     if (event.version === "0.2") return event;

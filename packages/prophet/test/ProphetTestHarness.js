@@ -26,25 +26,31 @@ import * as ToolsDecoders from "~/tools/mediaDecoders";
 import thenChainEagerly from "~/tools/thenChainEagerly";
 import { getDatabaseAPI } from "~/tools/indexedDB/getInMemoryDatabaseAPI";
 import { openDB } from "~/tools/html5/InMemoryIndexedDBUtils";
-import { dumpObject, wrapError } from "~/tools";
+import { dumpObject, isPromise, wrapError } from "~/tools";
 
-export function createProphetTestHarness (options: Object, ...proclamationBlocks: any) {
+export function createProphetTestHarness (options: Object, ...commandBlocks: any) {
   const ret = createScriptTestHarness({
     name: "Prophet Test Harness", ContentAPI: ProphetTestAPI, TestHarness: ProphetTestHarness,
     ...options,
   });
   try {
-    proclamationBlocks.forEach(proclamations => proclamations.forEach(
-        proclamation => ret.proclaim(proclamation)));
+    commandBlocks.forEach(commands => {
+      ret.chronicleEvents(commands).eventResults.forEach((result, index) => {
+        if (isPromise((result.getTruthEvent || result.getFinalStory)())) {
+          throw new Error(`command #${index} getTruthEvent resolves into a Promise.${
+              ""} Use the asynchronous createProphetOracleHarness instead.`);
+        }
+      });
+    });
     return ret;
   } catch (error) {
     throw wrapError(error, new Error("During createProphetTestHarness"),
         "\n\toptions:", ...dumpObject(options),
-        "\n\tproclamationBlocks:", ...dumpObject(proclamationBlocks));
+        "\n\tcommandBlocks:", ...dumpObject(commandBlocks));
   }
 }
 
-export async function createProphetOracleHarness (options: Object, ...proclamationBlocks: any) {
+export async function createProphetOracleHarness (options: Object, ...commandBlocks: any) {
   const ret = createProphetTestHarness(
     { name: "Prophet Oracle Harness", oracleOptions: {}, scribeOptions: {}, ...options });
   try {
@@ -60,19 +66,19 @@ export async function createProphetOracleHarness (options: Object, ...proclamati
         }
       });
     }
-    for (const proclamations of proclamationBlocks) {
-      await Promise.all(proclamations.map(
-          proclamation => ret.proclaim(proclamation).getStoryPremiere()));
+    for (const commands of commandBlocks) {
+      await Promise.all(ret.chronicleEvents(commands).eventResults
+          .map(result => result.getStoryPremiere()));
     }
     return ret;
   } catch (error) {
     throw wrapError(error, new Error("During createProphetOracleHarness"),
         "\n\toptions:", ...dumpObject(options),
-        "\n\tproclamationBlocks:", ...dumpObject(proclamationBlocks));
+        "\n\tcommandBlocks:", ...dumpObject(commandBlocks));
   }
 }
 
-export const proclamationCREATEDTestPartitionEntity = created({
+export const createdTestPartitionEntity = created({
   id: "test_partition", typeName: "Entity",
   initialState: {
     name: "Automatic Test Partition Root",
@@ -101,15 +107,13 @@ export default class ProphetTestHarness extends ScriptTestHarness {
         this.prophet.acquirePartitionConnection(this.testPartitionURI, { newPartition: true })
         .getSyncedConnection(), [
           (conn) => Promise.all([
-            conn, this.proclaim(proclamationCREATEDTestPartitionEntity).getStoryPremiere(),
+            conn, this.chronicleEvent(createdTestPartitionEntity).getStoryPremiere(),
           ]),
           ([conn]) => (this.testPartitionConnection = conn),
         ]);
   }
 
-  proclaim (...rest: any) {
-    return this.prophet.proclaim(...rest);
-  }
+  chronicleEvents (...rest: any) { return this.prophet.chronicleEvents(...rest); }
 
   createCorpus () { // Called by RAEMTestHarness.constructor (so before oracle/scribe are created)
     const corpus = super.createCorpus();
@@ -219,11 +223,11 @@ export class MockProphet extends AuthorityProphet {
   }
 
 /*
-  proclaim (proclamation: Proclamation) {
-    return {
-      prophecy: new Prophecy(proclamation),
-      getStoryPremiere: () => Promise.resolve(proclamation),
-    };
+  chronicleEvents (events: EventBase[]) {
+    return { eventResults: events.map(event => ({
+      event, story: event,
+      getStoryPremiere: () => Promise.resolve(event),
+    });
   }
 
   _createPartitionConnection (partition) {

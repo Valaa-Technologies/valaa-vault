@@ -1,6 +1,6 @@
 // @flow
 
-import { isTransactedLike, UniversalEvent } from "~/raem/command";
+import { isTransactedLike, EventBase } from "~/raem/command";
 import { getRawIdFrom } from "~/raem/ValaaReference";
 
 import type {
@@ -58,7 +58,7 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
       && ((ret.scribeEventLog || []).length || (ret.scribeCommandQueue || []).length)) {
     connection.logEvent(1, "Initiated async upstream narration, local narration results:", ret);
   } else {
-    const upstreamResults = await _waitForRemoveNarration(connection, upstreamNarration, options);
+    const upstreamResults = await _waitForRemoteNarration(connection, upstreamNarration, options);
     connection.logEvent(1, "Awaited upstream narration, local narration results:", ret,
         "\n\tupstream results:", upstreamResults);
     Object.assign(ret, upstreamResults);
@@ -89,7 +89,7 @@ async function _narrateLocalLogs (connection: ScribePartitionConnection,
   return ret;
 }
 
-async function _waitForRemoveNarration (connection: ScribePartitionConnection,
+async function _waitForRemoteNarration (connection: ScribePartitionConnection,
     upstreamNarration: Object, options: NarrateOptions,
 ): Object {
   // Handle step 2 of the opportunistic narration if local narration
@@ -128,7 +128,7 @@ async function _waitForRemoveNarration (connection: ScribePartitionConnection,
 */
 
 export function _chronicleEvents (connection: ScribePartitionConnection,
-    events: UniversalEvent[], options: ChronicleOptions = {}, onError: Function
+    events: EventBase[], options: ChronicleOptions = {}, onError: Function
 ): { eventResults: ChronicleEventResult[] } {
   if (!events || !events.length) return { eventResults: events };
   if (options.isPreAuthorized === true) {
@@ -152,7 +152,7 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
       (receivedCommands) => (receivedCommandsProcess = receivedCommands),
       onError);
   options.receiveCommands = null;
-  const chronicling = thenChainEagerly(receivedCommandsProcess,
+  const chroniclingProcess = thenChainEagerly(receivedCommandsProcess,
       (receivedEvents) => connection.getUpstreamConnection()
           .chronicleEvents(receivedEvents.filter(notNull => notNull), options),
       onError);
@@ -162,9 +162,8 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
       getLocallyReceivedEvent: () => thenChainEagerly(receivedCommandsProcess,
           (receivedCommands) => receivedCommands[index],
           onError),
-      getTruthEvent: () => thenChainEagerly(chronicling,
-          (results) => results.eventResults[index].getTruthEvent(),
-          onError),
+      getTruthEvent: () => thenChainEagerly(chroniclingProcess,
+          chronicling => chronicling.eventResults[index].getTruthEvent()),
     })),
   };
 }
@@ -181,7 +180,7 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
 
 export function _receiveEvents (
     connection: ScribePartitionConnection,
-    events: UniversalEvent,
+    events: EventBase,
     retrieveMediaBuffer: RetrieveMediaBuffer = connection.readMediaContent.bind(connection),
     downstreamReceiveTruths: ReceiveEvents,
     type: "receiveTruths" | "receiveCommands",

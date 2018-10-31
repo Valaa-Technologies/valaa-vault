@@ -1,6 +1,6 @@
 // @flow
 
-import type { UniversalEvent } from "~/raem/command";
+import type { EventBase } from "~/raem/command";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import thenChainEagerly from "~/tools/thenChainEagerly";
@@ -32,7 +32,7 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
 
   async narrateEventLog (): Promise<any> { return {}; }
 
-  chronicleEvents (events: UniversalEvent[], options: ChronicleOptions):
+  chronicleEvents (events: EventBase[], options: ChronicleOptions):
       { eventResults: ChronicleEventResult[] } {
     if (this.isRemoteAuthority()) {
       throw new Error(`${this.constructor.name

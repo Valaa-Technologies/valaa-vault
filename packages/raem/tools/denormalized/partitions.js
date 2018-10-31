@@ -8,7 +8,7 @@ import Transient from "~/raem/tools/denormalized/Transient";
 import traverseMaterializedOwnlings
     from "~/raem/tools/denormalized/traverseMaterializedOwnlings";
 
-import { dumpify, dumpObject, invariantifyArray, unwrapError, wrapError } from "~/tools";
+import { dumpObject, invariantifyArray, unwrapError, wrapError } from "~/tools";
 
 export class MissingPartitionConnectionsError extends Error {
   constructor (message, missingPartitions: (ValaaURI | Promise<any>)[]) {

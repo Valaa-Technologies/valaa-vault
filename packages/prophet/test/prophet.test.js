@@ -3,17 +3,13 @@
 import { created, transacted } from "~/raem/command/index";
 import { vRef } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
-import { getActionFromPassage } from "~/raem/redux/Bard";
 
 import {
   createScribe, clearScribeDatabases, createTestMockProphet, createOracle,
   createProphetOracleHarness,
 } from "~/prophet/test/ProphetTestHarness";
 
-import { stringFromUTF8ArrayBuffer } from "~/tools/textEncoding";
-
-import { openDB, getFromDB, getKeysFromDB, expectStoredInDB }
-    from "~/tools/html5/InMemoryIndexedDBUtils";
+import { openDB, expectStoredInDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 
 const testAuthorityURI = "valaa-test:";
 const testPartitionURI = createPartitionURI(testAuthorityURI, "test_partition");
@@ -52,7 +48,7 @@ describe("Prophet", () => {
     }
   });
 
-  const simpleProclamation = created({ eventId: 0, id: "Some entity", typeName: "Entity" });
+  const simpleCommand = created({ eventId: 0, id: "Some entity", typeName: "Entity" });
 
   const simpleTransaction = transacted({
     eventId: 1,
@@ -62,7 +58,7 @@ describe("Prophet", () => {
     ],
   });
 
-  const proclamations = [
+  const commands = [
     created({ id: "Entity A", typeName: "Entity", initialState: { owner: "test_partition" } }),
     created({ id: "Entity B", typeName: "Entity", initialState: { owner: "test_partition" } }),
     created({ id: "Entity C", typeName: "Entity", initialState: { owner: "test_partition" } }),
@@ -80,8 +76,8 @@ describe("Prophet", () => {
     const scribeConnection = prophetConnection.getUpstreamConnection();
     const database = await openDB(testPartitionURI.toString());
 
-    for (const proclamation of proclamations) {
-      const claimResult = await harness.proclaim(proclamation);
+    for (const command of commands) {
+      const claimResult = await harness.chronicleEvent(command);
       await claimResult.getStoryPremiere();
       const partitionCommand = await claimResult.getCommandOf(testPartitionURI);
       const eventId = scribeConnection.getFirstUnusedCommandEventId() - 1;
@@ -89,7 +85,7 @@ describe("Prophet", () => {
     }
   });
 
-  it("assigns proper eventIds for proclaim commands", async () => {
+  it("assigns proper eventIds for commands", async () => {
     harness = await createProphetOracleHarness({});
     const partitionURI = createPartitionURI(testAuthorityURI, "test_partition");
 
@@ -100,11 +96,10 @@ describe("Prophet", () => {
     let oldCommandId;
     let newCommandId = scribeConnection.getFirstUnusedCommandEventId() - 1;
 
-    for (const proclamation of proclamations) {
+    for (const command of commands) {
       oldCommandId = newCommandId;
 
-      const claimResult = await harness.proclaim(proclamation);
-      await claimResult.getStoryPremiere();
+      await harness.chronicleEvent(command).getStoryPremiere();
 
       newCommandId = scribeConnection.getFirstUnusedCommandEventId() - 1;
       expect(oldCommandId).toBeLessThan(newCommandId);

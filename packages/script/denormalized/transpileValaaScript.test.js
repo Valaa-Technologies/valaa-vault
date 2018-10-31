@@ -31,12 +31,12 @@ const createBlockA = [
 
 /**
  * Runs given programKuery from given head, with given scope, against corpus created with
- * the above createBlockA and given extraProclamationBlocks.
+ * the above createBlockA and given extracommandBlocks.
  */
-function evaluateProgram (extraProclamationBlocks = [], head, programKuery: Kuery, scope: ?Object,
+function evaluateProgram (extracommandBlocks = [], head, programKuery: Kuery, scope: ?Object,
     options: Object = {}) {
   return evaluateTestProgram(
-      [createBlockA, ...extraProclamationBlocks],
+      [createBlockA, ...extracommandBlocks],
       head, programKuery, scope, options);
 }
 

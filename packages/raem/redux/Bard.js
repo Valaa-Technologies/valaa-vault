@@ -16,7 +16,10 @@ import { dumpObject, invariantify, outputCollapsedError } from "~/tools";
  */
 
 export type Passage = Action;
-export type Story = Passage;
+export type Story = Passage & {
+  state: ?Object;
+  previousState: ?Object;
+};
 
 export function createPassageFromAction (action: Action) {
   return Object.create(action);
@@ -102,8 +105,7 @@ export function createBardReducer (bardOperation: (bard: Bard) => State,
  * 1. reduces the action against the corpus, ie. updates the corpus state based on the action
  * 2. creates a story, a convenience action which wraps the root action as its prototype
  * 3. creates a passage for each concrete and virtual sub-actions, wrapping them as prototypes
- * 4. universalizes a proclamation, by validating and extends a proclamation action before it's
- *    sent upstream
+ * 4. universalizes a command by validating and updating it in-place before it's sent upstream
  *
  * A Bard object itself contains as fields:
  * 1. reducer context: .schema and ._logger
@@ -128,9 +130,9 @@ export function createBardReducer (bardOperation: (bard: Bard) => State,
  * actualAdds/actualRemoves for a MODIFIED class of operations, passages lists for transactions
  * and for actions which involve coupling updates, etc.
  *
- * Proclamation universalisation:
+ * Event universalisation:
  *
- * FIXME(iridian): Outdated: command was renamed to proclamation and universalization process was
+ * FIXME(iridian): Outdated: command was renamed to whatever and universalization process was
  *                 overhauled
  *
  * A fundamental event log requirement is that it must fully reduceable in any configuration of
@@ -143,12 +145,12 @@ export function createBardReducer (bardOperation: (bard: Bard) => State,
  * become fully active when their dependent partitions are connected without the need for replaying
  * the original event log.
  *
- * Proclamation objects coming in from downstream can be incomplete in the universal context.
+ * Event objects coming in from downstream can be incomplete in the universal context.
  * For example ghost objects and their ownership relationships might depend on information that is
  * only available in their prototypes: this prototype and all the information on all its owned
  * objects can reside in another partition.
- * Proclamation universalisation is the process where the proclamation is extended to contain all
- * information that is needed for its playback on the universal context.
+ * Event universalisation is the process where the event is extended to contain all information that
+ * is needed for its playback on the universal context.
  */
 export default class Bard extends Resolver {
   subReduce: Function;

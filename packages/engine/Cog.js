@@ -1,8 +1,9 @@
 // @flow
 
 import type { VALKOptions } from "~/raem/VALK";
+import type { Action, Story } from "~/raem";
 
-import { Discourse, Proclamation } from "~/prophet";
+import { Discourse } from "~/prophet";
 
 import VALEK, { Kuery, dumpKuery } from "~/engine/VALEK";
 
@@ -67,10 +68,8 @@ export default class Cog extends LogEventGenerator {
     }
   }
 
-  acquireTransaction (
-      customProclamationCallback: ?(actions: Proclamation[]) => Proclamation
-  ): Discourse {
-    return this.engine.discourse.acquireTransaction(customProclamationCallback);
+  acquireTransaction (customEventCallback: ?(actions: Action[]) => Story): Discourse {
+    return this.engine.discourse.acquireTransaction(customEventCallback);
   }
 
   // Implementation
@@ -140,7 +139,7 @@ export function addEventHandler (target, [rule, ...rest]) {
   return [rule, addEventHandler(null, rest)];
 }
 
-export function executeHandlers (rule, passage, objectsHandled, args, handlerObject) {
+export function executeHandlers (rule, passage, args, handlerObject, objectsHandled = new Set()) {
   let currentRuleDebugInfo;
   try {
     if (!rule) return false;
@@ -153,7 +152,7 @@ export function executeHandlers (rule, passage, objectsHandled, args, handlerObj
     if (Array.isArray(rule)) {
       if (!objectsHandled.has(rule[0])) {
         currentRuleDebugInfo = rule;
-        return executeHandlers(rule[1], passage, objectsHandled, args, rule[0]);
+        return executeHandlers(rule[1], passage, args, rule[0], objectsHandled);
       }
     } else {
       let promises;
@@ -161,11 +160,11 @@ export function executeHandlers (rule, passage, objectsHandled, args, handlerObj
         currentRuleDebugInfo = [clause, passage[clause]];
         const handled = (typeof clause !== "string"
             // Non-string clause is straight-up used as a handler object.
-            ? executeHandlers(subRule, passage, objectsHandled, args, clause)
+            ? executeHandlers(subRule, passage, args, clause, objectsHandled)
             // A string clause (like "id" or "typeName") picks the corresponding selector from
             // passage, which is then used to select the one matching rule from subRules.
             : executeHandlers(
-                subRule.get(passage[clause]), passage, objectsHandled, args, handlerObject));
+                subRule.get(passage[clause]), passage, args, handlerObject, objectsHandled));
         if (handled) {
           if (handlerObject) return handled;
           if (typeof handled === "object") {

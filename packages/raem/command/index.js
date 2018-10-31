@@ -1,13 +1,4 @@
-import resourceCreated, * as c from "./created";
-import resourceDestroyed, * as d from "./destroyed";
-import resourceDuplicated, * as dup from "./duplicated";
-import resourceModified, * as m from "./modified";
-import resourceFrozen, * as f from "./frozen";
-import resourceRecombined, * as r from "./recombined";
-import resourceTimed, * as td from "./timed";
-import resourceTransacted, * as t from "./transacted";
-
-import Command, { Action, Truth, UniversalEvent } from "./Command";
+// @flow
 
 /**
  * # ValOS RAEM Event sourcing system.
@@ -96,17 +87,28 @@ import Command, { Action, Truth, UniversalEvent } from "./Command";
  * downstream inside a gateway, such as what entries were *actually*
  * added and removed from some list.
  *
- * ### Proclamations - non-universal, multi-partition commands
+ * ### Prophecies - non-universal, multi-partition command stories
  *
  * FalseProphet (in @valos/prophet) component introduces transactions.
- * These allow the grouping of a several resource changes
- * together into a singular upstream event called `proclamation`.
- * This is an internal helper object which FalseProphet splits into
- * per-partition commands and then either accept or reject depending on
+ * These allow the grouping of a several resource changes together into
+ * a single command. Prophecy is the Story of such a command, an
+ * internal helper object which FalseProphet splits into per-partition
+ * commands. The prophecy is then either accept or reject depending on
  * whether the transactionality requirements can be guaranteed or not.
  */
 
-export { Action, Command, Truth, UniversalEvent };
+import resourceCreated, * as c from "./created";
+import resourceDestroyed, * as d from "./destroyed";
+import resourceDuplicated, * as dup from "./duplicated";
+import resourceModified, * as m from "./modified";
+import resourceFrozen, * as f from "./frozen";
+import resourceRecombined, * as r from "./recombined";
+import resourceTimed, * as td from "./timed";
+import resourceTransacted, * as t from "./transacted";
+
+import Command, { Action, Truth, EventBase, UniversalEvent } from "./Command";
+
+export { Action, Command, Truth, EventBase, UniversalEvent };
 
 export const CREATED = c.CREATED;
 export const DESTROYED = d.DESTROYED;

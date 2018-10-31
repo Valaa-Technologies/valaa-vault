@@ -184,7 +184,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
             ""} even partitions to under the same entity while maintaining the internal${
             ""} cross-references between different recombined resources. Vice versa recombine${
             ""} allows spreading the duplicates to separate partitions (at least insofar a${
-            ""} multi-partition proclamations between said partitions is possible).`
+            ""} multi-partition commands between said partitions is possible).`
     )(function recombine (...duplicationDirectives) {
       // TODO(iridian): Replace valker.follower with some builtinStep when moving ValaaSpace to
       // @valos/script. Now this relies on valker always being a FalseProphetDiscourse/transaction.

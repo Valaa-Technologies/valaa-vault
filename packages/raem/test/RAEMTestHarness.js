@@ -1,6 +1,6 @@
 import { OrderedMap } from "immutable";
 
-import type { UniversalEvent } from "~/raem/command/Command";
+import type { EventBase } from "~/raem/command";
 import createRootReducer from "~/raem/tools/createRootReducer";
 import createValidateActionMiddleware from "~/raem/redux/middleware/validateAction";
 import createProcessCommandIdMiddleware from "~/raem/redux/middleware/processCommandId";
@@ -17,20 +17,19 @@ import { dumpObject, LogEventGenerator, valaaUUID, wrapError } from "~/tools";
 
 const DEFAULT_EVENT_VERSION = "0.2";
 
-export function createRAEMTestHarness (options: Object, ...proclamationBlocks: any) {
+export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
   try {
     const TestHarness = options.TestHarness || RAEMTestHarness;
     const ret = new TestHarness({
       name: "RAEM Test Harness", ContentAPI: RAEMTestAPI,
       ...options,
     });
-    proclamationBlocks.forEach(proclamations => proclamations.forEach(proclamation =>
-        ret.dispatch(proclamation)));
+    commandBlocks.forEach(events => ret.chronicleEvents(events));
     return ret;
   } catch (error) {
     throw wrapError(error, new Error("During createProphetTestHarness"),
         "\n\toptions:", ...dumpObject(options),
-        "\n\tproclamationBlocks:", ...dumpObject(proclamationBlocks));
+        "\n\teventBlocks:", ...dumpObject(commandBlocks));
   }
 }
 
@@ -63,21 +62,32 @@ export default class RAEMTestHarness extends LogEventGenerator {
   }
 
   /**
-   * dispatch always delegates the operation to corpus.dispatch (handlings restricted commands is
-   * done via .proclaim, which is not available in @valos/raem). Also does validation for
-   * is-restricted for incoming commands, and for is-universal for resulting stories.
+   * chronicleEvents always delegates the operation to corpus.dispatch
+   * (handling restricted commands is done via .chronicleEvents, only
+   * available in @valos/prophet). Also validates is-restricted for
+   * incoming commands, and for is-universal for resulting stories.
    *
    * @param {any} rest
    *
    * @memberof RAEMTestHarness
    */
-  dispatch (event: UniversalEvent) {
+  chronicleEvents (events: EventBase[]) {
     try {
-      return this.corpus.dispatch(event);
+      return {
+        eventResults: events.map(event => {
+          const story = this.corpus.dispatch(event);
+          return {
+            event, story, getFinalEvent: () => event,
+          };
+        }),
+      };
     } catch (error) {
       throw this.wrapErrorEvent(error, "dispatch",
-          "\n\tevent:", ...dumpObject(event));
+          "\n\tevents:", ...dumpObject(events));
     }
+  }
+  chronicleEvent (event: EventBase) {
+    return this.chronicleEvents([event]).eventResults[0];
   }
 
   createCorpus () {

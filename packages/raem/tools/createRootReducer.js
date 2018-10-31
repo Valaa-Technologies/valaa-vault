@@ -127,6 +127,8 @@ export default function createRootReducer ({
             `Sub-reducing ${action.type} ${minor}`,
             `\n\t${dumpify(rest, { sliceAt: 380 })}`);
       }
+      // TODO(iridian): This is likely incorrect (but harmless): probably should be just
+      //   if (action.isBeingUniversalized)
       if (action.story && action.story.isBeingUniversalized) {
         // Offers limited protection against programming errors for generated passages especially.
         const validator = validators[action.type];

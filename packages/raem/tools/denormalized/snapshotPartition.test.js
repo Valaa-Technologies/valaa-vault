@@ -57,7 +57,7 @@ describe("The snapshot node walker", () => {
 
   it("Should survive a simple snapshotting roundtrip", async () => {
     const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
-    const resultProclamations = [];
+    const resultEvents = [];
 
     // console.log("Store before roundtrip", beaumpify(store.getState()));
 
@@ -66,15 +66,15 @@ describe("The snapshot node walker", () => {
       state: harness.corpus.getState(),
       schema: harness.ContentAPI.schema,
       onCreated: (id, typeName, getInitialState) => {
-        const createdProclamation = created({ id, typeName, initialState: getInitialState() });
-        resultProclamations.push(createdProclamation);
+        const createdEvent = created({ id, typeName, initialState: getInitialState() });
+        resultEvents.push(createdEvent);
       },
       onModified: (id, typeName, modifies) => {
-        const modifiedProclamation = modified({ id, typeName, ...modifies });
-        resultProclamations.push(modifiedProclamation);
+        const modifiedEvent = modified({ id, typeName, ...modifies });
+        resultEvents.push(modifiedEvent);
       },
     });
-    const resultHarness = createRAEMTestHarness({ debug: 0 }, resultProclamations);
+    const resultHarness = createRAEMTestHarness({ debug: 0 }, resultEvents);
     expect(resultHarness.corpus.getState().toJS())
         .toEqual(harness.corpus.getState().toJS());
   });

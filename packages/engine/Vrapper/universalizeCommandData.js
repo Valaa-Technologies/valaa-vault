@@ -7,7 +7,7 @@ import Vrapper from "~/engine/Vrapper";
 import { invariantifyObject } from "~/tools/invariantify";
 import wrapError from "~/tools/wrapError";
 
-export default function evaluateToProclamationData (object: ?any, options:
+export default function universalizeCommandData (object: ?any, options:
     { head?: Vrapper, transaction?: Object, scope?: Object, partitionURIString?: string } = {}) {
   try {
     if ((typeof object !== "object") || (object === null)) {
@@ -18,14 +18,14 @@ export default function evaluateToProclamationData (object: ?any, options:
     if (object instanceof Kuery) {
       // Kuery
       invariantifyObject(options.head,
-          "evaluateToProclamationData.kueryOptions: { head } (when initialState contains a Kuery)",
+          "universalizeCommandData.kueryOptions: { head } (when initialState contains a Kuery)",
               { instanceof: Vrapper });
-      return evaluateToProclamationData(options.head.get(object, Object.create(options)), options);
+      return universalizeCommandData(options.head.get(object, Object.create(options)), options);
     }
 
     if (Array.isArray(object)) {
       // Array
-      return object.map(entry => evaluateToProclamationData(entry, options));
+      return object.map(entry => universalizeCommandData(entry, options));
     }
 
     const id = tryIdFromObject(object);
@@ -36,7 +36,7 @@ export default function evaluateToProclamationData (object: ?any, options:
       }
       const ret = {};
       for (const key of Object.keys(object)) {
-        ret[key] = evaluateToProclamationData(object[key], options);
+        ret[key] = universalizeCommandData(object[key], options);
       }
       return ret;
     }
@@ -50,7 +50,7 @@ export default function evaluateToProclamationData (object: ?any, options:
     }
     return connectedId;
   } catch (error) {
-    throw wrapError(error, `During evaluateToProclamationData(`, object, `)`);
+    throw wrapError(error, `During universalizeCommandData(`, object, `)`);
   }
 }
 

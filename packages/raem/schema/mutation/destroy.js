@@ -29,9 +29,9 @@ const destroy = {
   },
   resolve: async (context, args/* , info */) => {
     try {
-      const proclamation = await context.store.dispatch(destroyed(args.input));
+      const truth = await context.store.chronicleEvent(destroyed(args.input)).getTruthEvent();
       return {
-        clientMutationId: proclamation.id,
+        clientMutationId: truth.id,
       };
     } catch (error) {
       console.error(error.message, error.stack);

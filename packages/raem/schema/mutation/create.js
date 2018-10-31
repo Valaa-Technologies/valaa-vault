@@ -30,16 +30,16 @@ const create = {
   },
   resolve: async (context, args/* , info */) => {
     try {
-      const proclamation = await context.store.dispatch({
+      const truth = await context.store.chronicleEvent({
         ...created({
           id: args.input.id,
           typeName: args.input.typeName,
           initialState: args.input.initialState && JSON.parse(args.input.initialState),
         }),
         bvobStubs: context.bvobStubs,
-      });
+      }).getTruthEvent();
       return {
-        clientMutationId: proclamation.id,
+        clientMutationId: truth.id,
       };
     } catch (error) {
       console.error(error.message, error.stack);

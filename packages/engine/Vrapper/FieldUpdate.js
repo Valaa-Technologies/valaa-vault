@@ -1,8 +1,6 @@
 // @flow
 
-import type { VALKOptions } from "~/raem/VALK";
-
-import { Prophecy } from "~/prophet";
+import type { VALKOptions, Story, Passage } from "~/raem";
 import { isCreatedLike } from "~/raem/command";
 
 import Vrapper from "~/engine/Vrapper";
@@ -14,19 +12,19 @@ export default class FieldUpdate {
   _fieldName: string;
 
   _emitter: Vrapper;
-  _prophecy: ?Prophecy;
+  _passage: ?Passage;
 
   _valkOptions: ?Object;
   _explicitValue: any;
-  _vProphecyResource: ?Vrapper;
+  _vProtagonist: ?Vrapper;
 
-  constructor (emitter: Vrapper, fieldName: string, prophecy: ?Prophecy,
-      valkOptions: ?VALKOptions = {}, explicitValue: any, vProphecyResource: ?Vrapper) {
+  constructor (emitter: Vrapper, fieldName: string, passage: ?Passage,
+      valkOptions: ?VALKOptions = {}, explicitValue: any, vProtagonist: ?Vrapper) {
     this._emitter = emitter;
     this._fieldName = fieldName;
-    this._prophecy = prophecy;
-    this._valkOptions = { ...(prophecy ? { state: prophecy.state } : {}), ...valkOptions };
-    this._vProphecyResource = vProphecyResource;
+    this._passage = passage;
+    this._valkOptions = { ...(passage ? { state: passage.state } : {}), ...valkOptions };
+    this._vProtagonist = vProtagonist;
     this._explicitValue = explicitValue;
   }
 
@@ -62,10 +60,11 @@ export default class FieldUpdate {
 
   fieldName (): string { return this._fieldName; }
   emitter (): Vrapper { return this._emitter; }
-  prophecy (): ?Prophecy { return this._prophecy; }
+  getPassage (): ?Story { return this._passage; }
+  getState (): Object { return this._passage.state; }
   valkOptions (): ?VALKOptions { return this._valkOptions; }
   previousStateOptions (extraOptions: Object = {}): VALKOptions {
-    return { ...this._valkOptions, state: this._prophecy.previousState, ...extraOptions };
+    return { ...this._valkOptions, state: this._passage.previousState, ...extraOptions };
   }
 
   actualAdds () {
@@ -88,7 +87,7 @@ export default class FieldUpdate {
   // The reason the new Vrapper is not pointing to new state is that if the resource was DESTROYED
   // the new state will not have corresponding data.
   actualRemoves () {
-    if (!this._prophecy) return [];
+    if (!this._passage) return [];
     if (this._prophecy.passage.actualRemoves) {
       return this._emitter.engine.getVrappers(
           this._prophecy.passage.actualRemoves.get(this._fieldName), this.previousStateOptions());

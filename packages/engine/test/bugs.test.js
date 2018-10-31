@@ -15,7 +15,7 @@ const entities = () => harness.createds.Entity;
 describe("Engine bug tests", async () => {
   it("0000049: creates an entity with property and duplicates it", async () => {
     // This test could be extracted as a separate DUPLICATED test case somewhere
-    const proclamations = [
+    const commands = [
       created({ id: "Foo", typeName: "Entity", initialState: {
         owner: "test_partition",
         name: "Foo",
@@ -52,7 +52,7 @@ describe("Engine bug tests", async () => {
 
     harness = await createEngineOracleHarness({
       debug: 0, claimBaseBlock: false, acquirePartitions: ["Foo"],
-    }, proclamations);
+    }, commands);
 
     const foo = entities().Foo;
     const fooInst = foo.duplicate();

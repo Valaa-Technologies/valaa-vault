@@ -49,9 +49,7 @@ export default class Discourse extends Valker {
    * @param  {type} duplicateOf   duplicate source resource to copy owned fields from
    * @param  {type} initialState  overriding initial properties (over duplicate)
    * @param  {type} id            description
-   * @returns {ClaimResult}       prophecy will return the optimistically
-   *                              filled event of the created/duplicated resource immediately as
-   *                              given to create.
+   * @returns {ClaimResult}       returns the ChronicleEventResults of the underlying chronicling
    */
   create ({ typeName, initialState, id }): ClaimResult { // eslint-disable-line
     throw new Error(`${this.constructor.name}/Discourse.create unimplemented`);
@@ -70,12 +68,12 @@ export default class Discourse extends Valker {
    * TODO(iridian): Add docs, similar to create
    *
    * @param  {type} id           description
-   * @param  {type} typeName description
+   * @param  {type} typeName     description
    * @param  {type} sets         description
    * @param  {type} adds         description
    * @param  {type} removes      description
    * @param  {type} splices      description
-   * @returns {ClaimResult}      description
+   * @returns {ClaimResult}      returns the ChronicleEventResults of the underlying chronicling
    */
   modify ({ id, typeName, sets, adds, removes, splices }): ClaimResult { // eslint-disable-line
     throw new Error(`${this.constructor.name}/Discourse.modify unimplemented`);
@@ -85,8 +83,8 @@ export default class Discourse extends Valker {
    * destroy - Destroys a resource
    *
    * @param  {type} id           description
-   * @param  {type} typeName description
-   * @returns {ClaimResult}      description
+   * @param  {type} typeName     description
+   * @returns {ClaimResult}      returns the ChronicleEventResults of the underlying chronicling
    */
   destroy ({ id, typeName }): ClaimResult { // eslint-disable-line
     throw new Error(`${this.constructor.name}/Discourse.destroy unimplemented`);

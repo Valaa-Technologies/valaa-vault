@@ -1573,14 +1573,14 @@ export default class Vrapper extends Cog {
       }
       if (passage.actualAdds) {
         for (const fieldName of passage.actualAdds.keys()) {
-          this.notifyMODIFIEDHandlers(fieldName, story, vResource);
+          this.notifyMODIFIEDHandlers(fieldName, passage, story, vResource);
         }
       }
       if (passage.actualRemoves) {
         for (const fieldName of passage.actualRemoves.keys()) {
           if (!passage.actualAdds || !passage.actualAdds.has(fieldName)) {
             // Only fire modified event once per property.
-            this.notifyMODIFIEDHandlers(fieldName, story, vResource);
+            this.notifyMODIFIEDHandlers(fieldName, passage, story, vResource);
           }
         }
       }
@@ -1589,7 +1589,7 @@ export default class Vrapper extends Cog {
           if ((!passage.actualAdds || !passage.actualAdds.has(fieldName))
               && (!passage.actualRemoves || !passage.actualRemoves.has(fieldName))) {
             // Only fire modified event once per property.
-            this.notifyMODIFIEDHandlers(fieldName, story, vResource);
+            this.notifyMODIFIEDHandlers(fieldName, passage, story, vResource);
           }
         }
       }
@@ -1638,8 +1638,8 @@ export default class Vrapper extends Cog {
     const subscribers = this._subscribersByFieldName && this._subscribersByFieldName.get(fieldName);
     const filterSubscribers = this._fieldFilterSubscribers;
     if (!subscribers && !filterSubscribers) return;
-    const fieldUpdate = new FieldUpdate(
-        this, fieldName, passage, { state: story.state }, undefined, vProtagonist);
+    const fieldUpdate = new FieldUpdate(this, fieldName, passage,
+        { state: story.state, previousState: story.previousState }, undefined, vProtagonist);
     this._delayedNotifyMODIFIEDHandlers(fieldUpdate, subscribers, filterSubscribers);
     return;
   }

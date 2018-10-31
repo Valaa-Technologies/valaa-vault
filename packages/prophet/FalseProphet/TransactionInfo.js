@@ -52,45 +52,44 @@ export default class TransactionInfo {
     this.customCommand = customCommandCandidate;
   }
 
-  proclaim (proclamation: Proclamation): ClaimResult {
+  chronicleEvents (events: EventBase[], options: Object = {}): { eventResults: ClaimResult[] } {
     try {
-      if (!this.proclamations) {
+      if (!this.actions) {
         throw new Error(`Transaction '${this.transaction.corpus.getName()}' has already been ${
-                this.finalRestrictedTransactedLike ? "committed" : "aborted"
-            }, when trying to add an action to it`);
+                this._finalCommand ? "committed" : "aborted"
+            }, when trying to add actions to it`);
       }
       // What goes on here is an incremental construction and universalisation of a TRANSACTED
-      // proclamation whenever a new proclamation comes in, via dispatching the on-going
-      // info.transacted only containing that particular proclamation. Once the transaction is
+      // event whenever a new event comes in, via dispatching the on-going
+      // info.transacted only containing that particular event. Once the transaction is
       // finally committed, the pieces are put together in a complete, universal TRANSACTED.
-      const index = this.proclamations.length;
-      this.proclamations.push(proclamation);
-
-      const previousState = this.transaction.state;
       // This is an awkward way to incrementally construct the transacted.
       // Maybe generators could somehow be useful here?
-      this.latestUniversalTransacted = {
-        ...this.transacted,
-        actions: [createUniversalizableCommand(proclamation)],
-      };
-      const story = this.transaction.corpus.dispatch(
-          this.latestUniversalTransacted, this.transactionClaimDescription);
-      this.storyPassages.push(story.passages[0]);
-      Object.assign(this.universalPartitions, story.partitions);
-
+      const actions = events.map(event => universalizeEvent(this.transaction.prophet, event));
+      const universalTransacted = { ...this.transacted, actions };
+      const previousState = this.transaction.state;
+      const transactionStory = this.transaction.corpus.dispatch(
+          universalTransacted, this.transactionDescription);
+      // Only alter transaction internals after the dispatch has performed the content validations.
+      this.actions.push(...actions);
+      this.latestUniversalTransacted = universalTransacted;
+      this.passages.push(...transactionStory.passages);
+      Object.assign(this.universalPartitions, transactionStory.partitions);
       const state = this.transaction.corpus.getState();
       this.transaction.setState(state);
-
-      this.resultPromises.push(null);
-      const result = new Promise((succeed, fail) =>
-          (this.resultPromises[index] = { succeed, fail }));
-      const prophecy = new Prophecy(story.passages[0], state, previousState);
-      prophecy.proclamation = proclamation;
-      return { prophecy, getStoryPremiere: () => result };
+      return {
+        eventResults: events.map((event, index) => {
+          const result = new Promise(
+              (succeed, fail) => this.resultPromises.push({ succeed, fail }));
+          this.passages[index].state = state;
+          this.passages[index].previousState = previousState;
+          return { event, story: transactionStory.passages[index], getStoryPremiere: () => result };
+        })
+      };
     } catch (error) {
       throw this.transaction.wrapErrorEvent(error,
-          `transaction.proclaim(${this.transaction.corpus.getName()})`,
-          "\n\tproclamation:", ...dumpObject(proclamation),
+          `chronicleEvents(${this.transaction.corpus.getName()})`,
+          "\n\tevents:", ...dumpObject(events),
       );
     }
   }
@@ -113,12 +112,11 @@ export default class TransactionInfo {
           ? this.transacted
           : this.customCommand(this.transacted);
       if (!this.customCommand && !this._finalCommand.actions.length) {
-        const universalNoOpProclamation = createUniversalizableCommand(
-            this.finalRestrictedTransactedLike);
-        universalNoOpProclamation.partitions = {};
-        const prophecy = new Prophecy(universalNoOpProclamation);
-        prophecy.proclamation = this.finalRestrictedTransactedLike;
-        return { prophecy, getStoryPremiere () { return universalNoOpProclamation; } };
+        command = universalizeEvent(this.transaction.prophet, this._finalCommand);
+        command.partitions = {};
+        return {
+          event: this._finalCommand, story: command, getStoryPremiere () { return command; },
+        };
       }
       const result = this.transaction.prophet.chronicleEvent(
           this._finalCommand, { transactionInfo: this });

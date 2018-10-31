@@ -108,7 +108,7 @@ export default Object.freeze({
     } catch (error) {
       const commentText = typeof commentKuery !== "object" ? commentKuery
           : tryLiteral(valker, head, commentKuery, scope);
-      throw wrapError(error, "\n\nKUERY NOTE:", commentText, "\n\n");
+      throw wrapError(error, "\n-\nKUERY NOTE:", commentText, "\n-\n");
     }
   },
   "§debug": function debug (valker: Valker, head: any, scope: ? Object,

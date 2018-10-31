@@ -23,7 +23,7 @@ export default class FieldUpdate {
     this._emitter = emitter;
     this._fieldName = fieldName;
     this._passage = passage;
-    this._valkOptions = { ...(passage ? { state: passage.state } : {}), ...valkOptions };
+    this._valkOptions = { ...valkOptions };
     this._vProtagonist = vProtagonist;
     this._explicitValue = explicitValue;
   }
@@ -46,8 +46,7 @@ export default class FieldUpdate {
   previousValue (options: {} = {}) {
     if (!this.hasOwnProperty("_previousValue")) {
       try {
-        this._previousValue =
-            this._emitter.do(this._fieldName, this.previousStateOptions(options));
+        this._previousValue = this._emitter.do(this._fieldName, this.previousStateOptions(options));
       } catch (error) {
         // TODO(iridian): This is a hacky solution to deal with the situation where previous value
         // did not exist before this event. A proper 'return undefined on undefined resources'
@@ -61,10 +60,10 @@ export default class FieldUpdate {
   fieldName (): string { return this._fieldName; }
   emitter (): Vrapper { return this._emitter; }
   getPassage (): ?Story { return this._passage; }
-  getState (): Object { return this._passage.state; }
+  getState (): Object { return this._valkOptions.state; }
   valkOptions (): ?VALKOptions { return this._valkOptions; }
   previousStateOptions (extraOptions: Object = {}): VALKOptions {
-    return { ...this._valkOptions, state: this._passage.previousState, ...extraOptions };
+    return { ...this._valkOptions, state: this._valkOptions.previousState, ...extraOptions };
   }
 
   actualAdds () {
@@ -72,7 +71,7 @@ export default class FieldUpdate {
       const value = this.value();
       return arrayFromAny(value || undefined);
     } else if (this._passage.actualAdds) {
-      const ids = this._emitter._tryElevateFieldValueFrom(this._passage.state, this._fieldName,
+      const ids = this._emitter._tryElevateFieldValueFrom(this.getState(), this._fieldName,
           this._passage.actualAdds.get(this._fieldName), this._vProtagonist);
       return this._emitter.engine.getVrappers(ids, this._valkOptions);
     }

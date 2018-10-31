@@ -12,6 +12,7 @@ import Command, { created, duplicated, recombined, isCreatedLike } from "~/raem/
 import { vRef, IdData, obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
 import { tryHostRef } from "~/raem/VALK/hostReference";
+import { getActionFromPassage } from "~/raem/redux/Bard";
 
 import Transient, { createTransient, getTransientTypeName }
     from "~/raem/tools/denormalized/Transient";
@@ -360,9 +361,10 @@ export default class ValaaEngine extends Cog {
         if (this.getDebugLevel() || timed) {
           // eslint-disable-next-line
           const { parentPassage, passages, type, state, previousState, next, prev, ...rest } = passage;
-          this.logEvent(`recitePassage`, _eventTypeString(passage),
+          this.logEvent(`recitePassage`, _eventTypeString(passage), String(passage.id),
               (timed ? `@ ${timed.startTime || "|"}->${timed.time}:` : ":"),
-              dumpify(rest));
+              "\n\taction:", dumpify(getActionFromPassage(passage)),
+              "\n\tpassage:", dumpify(rest));
         }
         passage.timedness = timed ? "Timed" : "Timeless";
         let vProtagonist;

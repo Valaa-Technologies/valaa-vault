@@ -26,7 +26,7 @@ describe("CREATED/DUPLICATED", () => {
   ];
 
   it("doesn't find resource after dispatching DESTROYED", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       destroyed({ id: "A_child1" }),
     ]);
     expect(getObjectTransient(harness.getState(), "A_child1", "Resource", undefined, false))
@@ -34,19 +34,19 @@ describe("CREATED/DUPLICATED", () => {
   });
 
   it("prevents DESTROYED if the resource has active instances", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
     expect(() => harness.chronicleEvent(destroyed({ id: "A_child2" })))
         .toThrow(/destruction blocked/);
   });
 
   it("doesn't prevent DESTROYED if a preventing instance will also be destroyed", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
     expect(() => harness.chronicleEvent(destroyed({ id: "A_parent" })))
         .not.toThrow(/destruction blocked/);
   });
 
   it("doesn't prevent DESTROYED for non-command", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
     expect(() => harness.chronicleEvent(destroyed({ id: "A_child2", partitions: {} })))
         .not.toThrow(/destruction blocked/);
   });

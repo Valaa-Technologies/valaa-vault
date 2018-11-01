@@ -30,8 +30,8 @@ import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
 import { createId, dumpify, outputCollapsedError, wrapError } from "~/tools";
 
 export default class ValaaEngine extends Cog {
-  constructor ({ name, logger, prophet, timeDilation = 1.0, debugLevel }: Object) {
-    super({ name: `${name}/Engine`, logger, debugLevel });
+  constructor ({ name, logger, prophet, timeDilation = 1.0, verbosity }: Object) {
+    super({ name: `${name}/Engine`, logger, verbosity });
     this.engine = this;
     this.prophet = prophet;
     this.cogs = new Set();
@@ -358,7 +358,7 @@ export default class ValaaEngine extends Cog {
     stories.forEach(story => {
       const { timed, state, previousState } = story;
       const _recitePassage = (passage: Passage) => {
-        if (this.getDebugLevel() || timed) {
+        if (this.getVerbosity() || timed) {
           // eslint-disable-next-line
           const { parentPassage, passages, type, state, previousState, next, prev, ...rest } = passage;
           this.logEvent(`recitePassage`, _eventTypeString(passage), String(passage.id),

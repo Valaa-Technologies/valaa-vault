@@ -27,7 +27,7 @@ describe("RECOMBINED", () => {
   ];
 
   it("handles top-level sibling duplicate cross-references properly", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       recombined({
         actions: [
           duplicated({ id: "A_child1Copy",
@@ -72,7 +72,7 @@ describe("RECOMBINED", () => {
   });
 
   it("customizes cherry-picked sub-resources with id and initialState overrides", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       recombined({
         actions: [
           duplicated({
@@ -118,7 +118,7 @@ describe("RECOMBINED", () => {
   });
 
   it("omits sub-component duplication with id = null in a sub-directive", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       recombined({
         actions: [
           duplicated({
@@ -150,7 +150,7 @@ describe("RECOMBINED", () => {
   });
 
   it("restructures with sub-directive preOverrides.owner", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       recombined({
         actions: [
           duplicated({

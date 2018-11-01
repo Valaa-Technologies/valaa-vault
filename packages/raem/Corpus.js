@@ -21,13 +21,13 @@ import { dumpObject } from "~/tools/wrapError";
  */
 export default class Corpus extends Bard {
   constructor ({
-    schema, debugLevel, logger, middlewares, reduce, subReduce, initialState,
+    schema, verbosity, logger, middlewares, reduce, subReduce, initialState,
   }: Object) {
     invariantifyObject(schema, "schema");
     invariantifyFunction(reduce, "reduce");
     invariantifyFunction(subReduce, "subReduce");
     invariantifyObject(initialState, "initialState", { allowUndefined: true });
-    super({ schema, debugLevel, logger, subReduce: subReduce || reduce });
+    super({ schema, verbosity, logger, subReduce: subReduce || reduce });
     // TODO(iridian): These indirections are spaghetti. Simplify.
     this.reduce = reduce;
     this._dispatch = middlewares.reduceRight(

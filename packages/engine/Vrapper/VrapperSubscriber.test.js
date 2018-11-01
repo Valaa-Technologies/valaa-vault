@@ -43,14 +43,14 @@ describe("VrapperSubscriber", () => {
 
   describe("Live kuery VALEK.propertyTarget subscribeToMODIFIED callback calls", () => {
     it("is called with triggerUpdate", () => {
-      setUpPropertyTargetTestHarness("template", { debug: 0, claimBaseBlock: true });
+      setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
       expect(idOf(liveCallback.mock.calls[0][0].value()))
           .toBe(idOf(entities().ownling_prototype));
     });
 
     it("is called on first step content change: matching addition on filtered array", () => {
-      setUpPropertyTargetTestHarness("template_matching", { debug: 0, claimBaseBlock: true });
+      setUpPropertyTargetTestHarness("template_matching", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
       expect(idOf(liveCallback.mock.calls[0][0].value()))
           .toBe(undefined);
@@ -63,7 +63,7 @@ describe("VrapperSubscriber", () => {
     });
 
     it("is called on first step content change: matching removal on filtered array", () => {
-      setUpPropertyTargetTestHarness("template", { debug: 0, claimBaseBlock: true });
+      setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
       properties()["creator.prototype"].destroy();
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(idOf(liveCallback.mock.calls[1][0].value()))
@@ -73,7 +73,7 @@ describe("VrapperSubscriber", () => {
     it("is called on intermediate step content change: name changed out to non-matching", () => {
       // subscribing to updates on properties used in filters which land on the active object path
       // is not implemented even though it is computationally trivial
-      setUpPropertyTargetTestHarness("template", { debug: 0, claimBaseBlock: true });
+      setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
       properties()["creator.prototype"].setField("name", "template_nonmatching");
       expect(liveCallback.mock.calls.length).toBe(2);
@@ -86,7 +86,7 @@ describe("VrapperSubscriber", () => {
       // Subscribing to updates on filter-properties outside active object path is computationally
       // non-trivial. Right now the implementation implicitly subscribes to 'name' on all property
       // candidates as well, not just the one with a matching name.
-      setUpPropertyTargetTestHarness("template_matching", { debug: 0, claimBaseBlock: true });
+      setUpPropertyTargetTestHarness("template_matching", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
       properties()["creator.prototype"].setField("name", "template_matching");
       expect(liveCallback.mock.calls.length).toBe(2);
@@ -95,7 +95,7 @@ describe("VrapperSubscriber", () => {
     });
 
     it("is called on the last step content change: property value is set to a new pointer", () => {
-      setUpPropertyTargetTestHarness("template", { debug: 0, claimBaseBlock: true });
+      setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
       properties()["creator.prototype"].setField("value", pointer(entities().ownling));
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(idOf(liveCallback.mock.calls[1][0].value()))
@@ -103,7 +103,7 @@ describe("VrapperSubscriber", () => {
     });
 
     it("properly refreshes subscribers on structural updates", () => {
-      setUpPropertyTargetTestHarness("template_matching", { debug: 0, claimBaseBlock: true });
+      setUpPropertyTargetTestHarness("template_matching", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
 
       properties()["creator.prototype"].setField("value", pointer(entities().test));
@@ -121,7 +121,7 @@ describe("VrapperSubscriber", () => {
     });
 
     it("properly deregisters subscribers on structural updates", () => {
-      setUpPropertyTargetTestHarness("template", { debug: 0, claimBaseBlock: true });
+      setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
 
       properties()["creator.prototype"].setField("value", pointer(entities().test));
@@ -150,7 +150,7 @@ describe("VrapperSubscriber", () => {
 
     it("property refreshes subscribers to updated property itself", () => {
       setUpPropertyTargetValueTestHarness("pointer_to_ownling", "ownling_counter",
-          { debug: 0, claimBaseBlock: true });
+          { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
       expect(liveCallback.mock.calls[0][0].value()).toEqual(10);
 
@@ -162,7 +162,7 @@ describe("VrapperSubscriber", () => {
 
     it("kuery expression property refreshes subscribers on updates to a depended property", () => {
       setUpPropertyTargetValueTestHarness("pointer_to_ownling", "ownling_counter_plus_seven",
-          { debug: 0, claimBaseBlock: true });
+          { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
       expect(liveCallback.mock.calls[0][0].value()).toEqual(17);
 
@@ -175,7 +175,7 @@ describe("VrapperSubscriber", () => {
 
   describe("Live VALK kueries", () => {
     it("updates on ghost-of-ghost-of-thing property when middle ghost property is modified", () => {
-      setUpHarnessAndCallback({ debug: 0, claimBaseBlock: true }, [
+      setUpHarnessAndCallback({ verbosity: 0, claimBaseBlock: true }, [
         created({ id: "test#1#1", typeName: "Entity", initialState: {
           instancePrototype: "test#1",
         }, }),

@@ -20,7 +20,7 @@ describe("CREATED/DUPLICATED", () => {
   ];
 
   it("DUPLICATED with initialState override", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       duplicated({
         id: "A_parentCopy",
         duplicateOf: "A_parent",
@@ -32,7 +32,7 @@ describe("CREATED/DUPLICATED", () => {
   });
 
   it("DUPLICATED mirrors ownership structure", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       duplicated({
         id: "A_parentCopy",
         duplicateOf: "A_parent",

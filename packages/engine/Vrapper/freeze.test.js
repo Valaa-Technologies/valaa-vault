@@ -112,7 +112,7 @@ describe("Partition freezing", () => {
 
   it("Does not prevent the user from editing non-frozen partitions", async () => {
     harness = await createEngineOracleHarness({
-      debug: 0, claimBaseBlock: false, acquirePartitions: ["test_partition_b"],
+      verbosity: 0, claimBaseBlock: false, acquirePartitions: ["test_partition_b"],
     }, [transactionA, transactionB]);
     await harness.chronicleEvent(freezeEventFor("test_partition")).getStoryPremiere();
     expect(() => harness.chronicleEvent(lateEntityEvent))

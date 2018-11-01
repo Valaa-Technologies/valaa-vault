@@ -22,8 +22,8 @@ import { LogEventGenerator, wrapError, dumpObject } from "~/tools";
  * @extends {LogEventGenerator}
  */
 export default class Cog extends LogEventGenerator {
-  constructor ({ name, engine, parent, logger, debugLevel }: Object) {
-    super({ name, debugLevel, logger: logger || (engine && engine.getLogger()) });
+  constructor ({ name, engine, parent, logger, verbosity }: Object) {
+    super({ name, verbosity, logger: logger || (engine && engine.getLogger()) });
     if (engine) this.engine = engine;
     if (parent) this.parent = parent;
   }

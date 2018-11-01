@@ -31,7 +31,7 @@ export type VALKOptions = {
   scope?: Object,
   state?: Object,
   schema?: Object,
-  debug?: number,
+  verbosity?: number,
   typeName?: string,
   pure?: boolean,
   packFromHost?: Packer,
@@ -62,12 +62,12 @@ export type VALKOptions = {
  *     reduceSteps.reduce((midPoint, reductionStep) => valk(midPoint, reductionStep)), head)
  * @export
  * @param {any} {
- *   head, kuery, scope, corpus, state, packFromHost, debug
+ *   head, kuery, scope, corpus, state, packFromHost, verbosity
  * }
  * @returns
  */
 export function run (head: any, kuery: any, options: Object = {}) {
-  return (new Valker(options.schema, options.debug, options.logger, options.packFromHost,
+  return (new Valker(options.schema, options.verbosity, options.logger, options.packFromHost,
           options.unpackToHost, options.builtinSteppers))
       .run(head, kuery, options);
 }
@@ -79,10 +79,10 @@ export function run (head: any, kuery: any, options: Object = {}) {
  * @class Valker
  */
 export default class Valker extends Resolver {
-  constructor (schema: GraphQLSchema, debug: number = 0, logger: Logger, packFromHost?: Packer,
+  constructor (schema: GraphQLSchema, verbosity: number = 0, logger: Logger, packFromHost?: Packer,
       unpackToHost?: Unpacker, builtinSteppers?: Object) {
     super({ schema, logger });
-    this._indent = debug - 2;
+    this._indent = verbosity - 2;
     this.setHostValuePacker(packFromHost);
     this.setHostValueUnpacker(unpackToHost);
     this.setBuiltinSteppers(builtinSteppers);
@@ -131,10 +131,10 @@ export default class Valker extends Resolver {
     this._builtinSteppers = builtinSteppers || raemBuiltinSteppers;
   }
 
-  run (head: any, kuery: any, { scope, state, debug, pure, sourceInfo }: VALKOptions = {}) {
+  run (head: any, kuery: any, { scope, state, verbosity, pure, sourceInfo }: VALKOptions = {}) {
     const valker = Object.create(this);
     if (typeof pure !== "undefined") valker.pure = pure;
-    if (typeof debug !== "undefined") valker._indent = debug - 2;
+    if (typeof verbosity !== "undefined") valker._indent = verbosity - 2;
     if (typeof state !== "undefined") valker.setState(state);
     if (typeof sourceInfo !== "undefined") valker._sourceInfo = sourceInfo;
 
@@ -155,7 +155,7 @@ export default class Valker extends Resolver {
         const indent = valker._indent < 0 ? 0 : valker._indent;
         if (valker._indent >= 0) {
           valker._builtinSteppers = debugWrapBuiltinSteppers(valker._builtinSteppers);
-          valker.log("  ".repeat(indent), `${this.debugId()}.run(debug: ${debug}), using`,
+          valker.log("  ".repeat(indent), `${this.debugId()}.run(verbosity: ${verbosity}), using`,
                   !state ? "intrinsic state:" : "explicit options.state:",
               "\n", "  ".repeat(indent), "      head:", ...dumpObject(packedHead),
               "\n", "  ".repeat(indent), "      kuery:", ...dumpKuery(kueryVAKON),
@@ -165,9 +165,9 @@ export default class Valker extends Resolver {
         const packedResult = valker.advance(packedHead, kueryVAKON, scope);
         ret = valker.tryUnpack(packedResult);
 
-        valker.log("  ".repeat(indent), `${this.debugId()}.run(debug: ${
-                debug}) result, when using`,
-                !state ? "intrinsic state:" : "explicit options.state:",
+        valker.log("  ".repeat(indent), `${this.debugId()}.run(verbosity: ${
+                verbosity}) result, when using`,
+            !state ? "intrinsic state:" : "explicit options.state:",
             "\n", "  ".repeat(indent), "      head:", ...dumpObject(packedHead),
             "\n", "  ".repeat(indent), "      kuery:", ...dumpKuery(kueryVAKON, valker._indent),
             "\n", "  ".repeat(indent), "      final scope:", dumpScope(scope),

@@ -34,8 +34,8 @@ export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
 }
 
 export default class RAEMTestHarness extends LogEventGenerator {
-  constructor ({ ContentAPI, name, debug, reducerOptions = {}, corpusOptions = {} }) {
-    super({ name, debugLevel: debug });
+  constructor ({ ContentAPI, name, verbosity, reducerOptions = {}, corpusOptions = {} }) {
+    super({ name, verbosity });
     this.ContentAPI = ContentAPI;
     this.schema = ContentAPI.schema;
     this.reducerOptions = reducerOptions;
@@ -96,7 +96,7 @@ export default class RAEMTestHarness extends LogEventGenerator {
       ...this.reducerOptions,
     }, {
       name: `${this.getName()} Corpus`,
-      debugLevel: this.getDebugLevel(),
+      verbosity: this.getVerbosity(),
       logger: this.getLogger(),
       // stubify all unpacked Transient's when packing: this causes them to autorefresh
       ...this.corpusOptions,
@@ -106,7 +106,7 @@ export default class RAEMTestHarness extends LogEventGenerator {
   createValker () {
     return new Valker(
         this.schema,
-        this.getDebugLevel(),
+        this.getVerbosity(),
         this,
         value => (value instanceof OrderedMap ? value.get("id") : value),
         value => {

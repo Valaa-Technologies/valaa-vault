@@ -56,7 +56,7 @@ describe("The snapshot node walker", () => {
   });
 
   it("Should survive a simple snapshotting roundtrip", async () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const resultEvents = [];
 
     // console.log("Store before roundtrip", beaumpify(store.getState()));
@@ -74,7 +74,7 @@ describe("The snapshot node walker", () => {
         resultEvents.push(modifiedEvent);
       },
     });
-    const resultHarness = createRAEMTestHarness({ debug: 0 }, resultEvents);
+    const resultHarness = createRAEMTestHarness({ verbosity: 0 }, resultEvents);
     expect(resultHarness.corpus.getState().toJS())
         .toEqual(harness.corpus.getState().toJS());
   });

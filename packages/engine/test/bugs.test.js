@@ -51,7 +51,7 @@ describe("Engine bug tests", async () => {
     ];
 
     harness = await createEngineOracleHarness({
-      debug: 0, claimBaseBlock: false, acquirePartitions: ["Foo"],
+      verbosity: 0, claimBaseBlock: false, acquirePartitions: ["Foo"],
     }, commands);
 
     const foo = entities().Foo;
@@ -103,7 +103,7 @@ describe("Engine bug tests", async () => {
   });
 
   it("0000086: destroys unnamedOwnlings objects", () => {
-    harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true });
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const bodyText = `
       () => {
         const ownlings = this.$toField("unnamedOwnlings");
@@ -130,7 +130,7 @@ describe("Engine bug tests", async () => {
   });
 
   it("0000087: ValaaScript has unexpected behaviour with conditional branches and returns", () => {
-    harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true });
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const bodyText = `
       const entity = {
         a: 1,
@@ -181,13 +181,13 @@ describe("Engine bug tests", async () => {
       unthunk(entity);
     `;
     const bodyKuery = transpileValaaScriptBody(bodyText, { customVALK: VALEK });
-    const unthunkedResult = entities().test.do(bodyKuery, { debug: 0 });
+    const unthunkedResult = entities().test.do(bodyKuery, { verbosity: 0 });
     expect(unthunkedResult)
         .toEqual({ a: 1, b: 2, c: { A: 3, B: 4 }, d: { x: 5, y: 6 } });
   });
 
   it("Allows both low-level and high manipulation of transient objects", () => {
-    harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true });
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const bodyText = `
       const test = () => {
         const relationToOwnedEntity = new Valaa.Relation({
@@ -204,12 +204,12 @@ describe("Engine bug tests", async () => {
       test();
       `;
     const bodyKuery = transpileValaaScriptBody(bodyText, { customVALK: VALEK });
-    const result = entities().test.do(bodyKuery, { debug: 0 });
+    const result = entities().test.do(bodyKuery, { verbosity: 0 });
     expect(result).toEqual(true);
   });
 
   it("immaterializes a Property.value using REMOVED_FROM", () => {
-    harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true });
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const bodyText = `
       const Proto = new Entity({ properties: { foo: 10 }});
       const instance = new Proto;
@@ -218,7 +218,7 @@ describe("Engine bug tests", async () => {
       instance.foo;
       `;
     const bodyKuery = transpileValaaScriptBody(bodyText, { customVALK: VALEK });
-    const result = entities().test.do(bodyKuery, { debug: 0 });
+    const result = entities().test.do(bodyKuery, { verbosity: 0 });
     expect(result).toEqual(10);
   });
 });

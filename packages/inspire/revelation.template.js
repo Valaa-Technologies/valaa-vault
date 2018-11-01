@@ -21,11 +21,11 @@ export default {
     plugins: arrayOf(plugin()),
 
     authorityConfigs: dictionaryOf(authorityConfig()),
-    scribe: { logLevel: 0 },
-    oracle: { logLevel: 0 },
-    reducer: { logLevel: 0 },
-    corpus: { logLevel: 0 },
-    falseProphet: { logLevel: 0 },
+    scribe: { verbosity: 0 },
+    oracle: { verbosity: 0 },
+    reducer: { verbosity: 0 },
+    corpus: { verbosity: 0 },
+    falseProphet: { verbosity: 0 },
   },
   prologue: {
     endpoint: "",

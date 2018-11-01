@@ -61,7 +61,7 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
       const connections = partitionURIs.map(uri =>
           ret.prophet.acquirePartitionConnection(uri).getSyncedConnection());
       (await Promise.all(connections)).forEach(connection => {
-        if (ret.prophet.getDebugLevel() >= 1) {
+        if (ret.prophet.getVerbosity() >= 1) {
           console.log("PartitionConnection fully synced:", connection.debugId());
         }
       });
@@ -125,7 +125,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     return new FalseProphetDiscourse({
       prophet: this.prophet,
       schema: this.schema,
-      debugLevel: this.getDebugLevel(),
+      verbosity: this.getVerbosity(),
       logger: this.getLogger(),
       packFromHost: value => (value instanceof OrderedMap ? value.get("id") : value),
       unpackToHost: value => {

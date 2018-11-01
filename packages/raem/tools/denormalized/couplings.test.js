@@ -28,7 +28,7 @@ describe("Couplings", () => {
   ];
 
   it("forms ownership couplings on creation", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA)
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA)
         .getState();
 
     expect(getObjectTransient(state, "A_grandparent", "TestThing").get("children").first())
@@ -48,14 +48,14 @@ describe("Couplings", () => {
   });
 
   it("creates object with undefined owner property", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA)
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA)
         .getState();
     expect(getObjectTransient(state, "A_grandparent", "TestThing").get("owner"))
         .toEqual(undefined);
   });
 
   it("denies cyclic ownership", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
     expect(() => harness.chronicleEvent(fieldsSet({ id: "A_grandparent", typeName: "TestThing" },
       { owner: vRef("A_grandparent") },
     ))).toThrow(/Cyclic ownership not allowed.*parent/);
@@ -71,7 +71,7 @@ describe("Couplings", () => {
   });
 
   it("removes from owning coupling 'children' when ownee destroyed", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       destroyed({ id: "A_child1", typeName: "TestThing" }),
     ]).getState();
     expect(getObjectTransient(state, "A_parent", "TestThing").get("children").first())
@@ -79,7 +79,7 @@ describe("Couplings", () => {
   });
 
   it("destroys ownee when owner destroyed", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       destroyed({ id: "A_parent", typeName: "TestThing" }),
     ]).getState();
     expect(tryObjectTransient(state, "A_child1", "TestThing"))
@@ -89,7 +89,7 @@ describe("Couplings", () => {
   });
 
   it("cascade-destroys grandownees when grandowner destroyed", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, createGlueA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [
       destroyed({ id: "A_grandparent", typeName: "TestThing" }),
     ]).getState();
     expect(tryObjectTransient(state, "A_parent", "TestThing"))
@@ -103,7 +103,7 @@ describe("Couplings", () => {
   });
 
   it("removes couplings when cascade-destroying", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: "A_orphan", typeName: "TestThing", initialState: {
         siblings: [vRef("A_child1"), vRef("A_child2")],
       } }),
@@ -127,7 +127,7 @@ describe("Couplings", () => {
   });
 
   it("destroys ownee when owner coupling is removed from owner side", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       modified({ id: "A_parent", typeName: "TestThing",
         removes: { children: [vRef("A_child1")] }
       }),
@@ -139,7 +139,7 @@ describe("Couplings", () => {
   });
 
   it("orphans ownee when ownership coupling is removed from ownee side", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       modified({ id: "A_parent", typeName: "TestThing",
         sets: { owner: null }, }),
     ]).getState();
@@ -152,7 +152,7 @@ describe("Couplings", () => {
   });
 
   it("adopts orphan when an ownership coupling is created on the ownee side", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       modified({ id: "A_parent", typeName: "TestThing",
         sets: { owner: null }, }),
       modified({ id: "A_parent", typeName: "TestThing",
@@ -167,7 +167,7 @@ describe("Couplings", () => {
   });
 
   it("adopts orphan when an ownership coupling is created on the owner side", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       modified({ id: "A_parent", typeName: "TestThing",
         sets: { owner: null }, }),
       modified({ id: "A_grandparent", typeName: "TestThing",
@@ -182,7 +182,7 @@ describe("Couplings", () => {
   });
 
   it("forms non-ownership couplings on creation", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, createGlueA)
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA)
         .getState();
     expect(getObjectTransient(state, "A_child1", "TestThing").get("targetGlues").first())
         .toEqual(vRef("A_childGlue"));
@@ -191,7 +191,7 @@ describe("Couplings", () => {
   });
 
   it("removes non-owning singular coupling when other side resource is destroyed", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, createGlueA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [
       destroyed({ id: "A_child2", typeName: "TestThing" }),
     ]).getState();
     expect(getObjectTransient(state, "A_childGlue", "TestGlue").get("target"))
@@ -199,7 +199,7 @@ describe("Couplings", () => {
   });
 
   it("removes non-owner plural coupling when other side resource is destroyed", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, createGlueA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [
       destroyed({ id: "A_childGlue", typeName: "TestGlue" }),
     ]).getState();
     expect(getObjectTransient(state, "A_child2", "TestThing").get("sourceGlues").size)
@@ -207,7 +207,7 @@ describe("Couplings", () => {
   });
 
   it("creates symmetric 'sibling' couplings properly", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: "A_child3", typeName: "TestThing", initialState: {
         siblings: [vRef("A_child1"), vRef("A_child2")],
       }, }),
@@ -219,7 +219,7 @@ describe("Couplings", () => {
   });
 
   it("modifies symmetric 'sibling' couplings properly", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       modified({ id: "A_child1", typeName: "TestThing", sets: {
         siblings: [vRef("A_child2")],
       }, }),
@@ -231,7 +231,7 @@ describe("Couplings", () => {
   });
 
   it("removes symmetric 'sibling' coupling when other side resource is destroyed", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: "A_child3", typeName: "TestThing", initialState: {
         siblings: [vRef("A_child1"), vRef("A_child2")],
       }, }),
@@ -244,7 +244,7 @@ describe("Couplings", () => {
   });
 
   it("uses 'unnamedCouplings' by default for couplings missing explicit remote", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: "A_childGlue", typeName: "TestGlue", initialState: {
         dangling: vRef("A_child2"),
       }, }),
@@ -256,7 +256,7 @@ describe("Couplings", () => {
   });
 
   it("removes unnamed coupling when other side resource is destroyed", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: "A_childGlue", typeName: "TestGlue", initialState: {
         dangling: vRef("A_child2"),
       }, }),
@@ -267,7 +267,7 @@ describe("Couplings", () => {
   });
 
   it("removes unnamed coupling when other side resource is destroyed", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: "A_childGlue", typeName: "TestGlue", initialState: {
         dangling: vRef("A_child2"),
       }, }),
@@ -278,7 +278,7 @@ describe("Couplings", () => {
   });
 
   it("creates a resource with owner alias set to null", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, [
+    const state = createRAEMTestHarness({ verbosity: 0 }, [
       created({ id: "A_orphanGlue", typeName: "TestGlue",
         initialState: { source: null },
       }),
@@ -288,7 +288,7 @@ describe("Couplings", () => {
   });
 
   it("sets owner alias to null", () => {
-    const state = createRAEMTestHarness({ debug: 0 }, createBlockA, createGlueA, [modified({
+    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [modified({
       id: "A_childGlue", typeName: "TestGlue",
       sets: { source: null },
     })]).getState();
@@ -297,7 +297,7 @@ describe("Couplings", () => {
   });
 
   it("updates previous source children when source is changed directly", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createGlueA);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA);
     expect(harness.run(vRef("A_childGlue"), "source"))
         .toEqual(vRef("A_child1"));
     expect(harness.run(vRef("A_childGlue"), "owner"))
@@ -320,7 +320,7 @@ describe("Couplings", () => {
   });
 
   it("updates previous source children when source is changed through owner", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createGlueA);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA);
     harness.chronicleEvent(modified({ id: "A_childGlue", typeName: "TestGlue",
       sets: { owner: vRef("A_child2", "targetGlues") },
     }));
@@ -337,7 +337,7 @@ describe("Couplings", () => {
   });
 
   it("updates binding fields when owner/source are altered several times in various ways", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createGlueA);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA);
     harness.chronicleEvent(modified({ id: "A_childGlue", typeName: "TestGlue",
       sets: { owner: vRef("A_child2") },
     }));
@@ -390,7 +390,7 @@ describe("Couplings", () => {
   });
 
   it("performs a complex instantiation&move sequence while maintaining correct couplings", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createGlueA);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA);
     const childGlue = vRef("A_childGlue");
     expect(harness.run(childGlue, ["§coupling", ["owner"]]))
         .toEqual("targetGlues");
@@ -438,7 +438,7 @@ describe("Couplings", () => {
   });
 
   it("assigns the same owner but with different couplings", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createGlueA);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA);
     const childGlue = vRef("A_childGlue");
     expect(harness.run(childGlue, ["§coupling", ["owner"]]))
         .toEqual("targetGlues");
@@ -463,7 +463,7 @@ describe("Couplings", () => {
   });
 
   it("maintains all couplings when a ghost's owner is changed within instance", async () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, [
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: "A_grandparentInstance", typeName: "TestThing",
         initialState: { instancePrototype: "A_grandparent" },
       }),

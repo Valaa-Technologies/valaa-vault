@@ -83,7 +83,7 @@ describe("ValaaScript", () => {
       const head = { age: 35 };
       const scope = { diff: createNativeIdentifier(-5) };
 
-      const temp = evaluateProgram([], head, bodyKuery, scope, { debug: 0 });
+      const temp = evaluateProgram([], head, bodyKuery, scope, { verbosity: 0 });
       expect(temp)
           .toBe(25);
     });
@@ -137,7 +137,7 @@ describe("ValaaScript", () => {
       const head = { age: 35 };
       const scope = { temp: createNativeIdentifier(10) };
 
-      const temp = evaluateProgram([], head, bodyKuery, scope, { debug: 0 });
+      const temp = evaluateProgram([], head, bodyKuery, scope, { verbosity: 0 });
       expect(temp)
           .toEqual(35);
       expect(getNativeIdentifierValue(scope.temp))
@@ -169,7 +169,7 @@ describe("ValaaScript", () => {
       const head = { age: 35 };
       const scope = { temp: createNativeIdentifier(10) };
 
-      const temp = evaluateProgram([], head, bodyKuery, scope, { debug: 0 });
+      const temp = evaluateProgram([], head, bodyKuery, scope, { verbosity: 0 });
       expect(temp)
           .toEqual(50);
       expect(head.age)
@@ -185,7 +185,7 @@ describe("ValaaScript", () => {
           function returnMillion () { return 1000000; }
           returnMillion();
       `);
-      expect(evaluateProgram([], {}, bodyKuery, {}, { debug: 0 }))
+      expect(evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 }))
           .toEqual(1000000);
     });
 
@@ -194,7 +194,7 @@ describe("ValaaScript", () => {
           function funcWithParam (param) { return param + 20; }
           funcWithParam(100);
       `);
-      expect(evaluateProgram([], {}, bodyKuery, {}, { debug: 0 }))
+      expect(evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 }))
           .toEqual(120);
     });
 
@@ -203,7 +203,7 @@ describe("ValaaScript", () => {
           function paramPlusDefaulted (defaulted = 10) { return defaulted + 5; }
           paramPlusDefaulted(30) + paramPlusDefaulted();
       `);
-      expect(evaluateProgram([], {}, bodyKuery, {}, { debug: 0 }))
+      expect(evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 }))
           .toEqual(50);
     });
 
@@ -214,7 +214,7 @@ describe("ValaaScript", () => {
           const constVar = 6;
           val => val + varVar + letVar + constVar
       `);
-      expect(evaluateProgram([], {}, bodyKuery, {}, { debug: 0 })(1))
+      expect(evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 })(1))
           .toEqual(11);
     });
 
@@ -227,7 +227,7 @@ describe("ValaaScript", () => {
           }
           callCallback(value => value + callCallback(12));
       `);
-      expect(evaluateProgram([], {}, bodyKuery, {}, { debug: 0 }))
+      expect(evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 }))
           .toEqual(22);
     });
 
@@ -236,7 +236,7 @@ describe("ValaaScript", () => {
           var value = 0;
           () => (value += 7);
       `);
-      const callback = evaluateProgram([], {}, bodyKuery, {}, { debug: 0 });
+      const callback = evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 });
       expect(callback())
           .toEqual(7);
       expect(callback())
@@ -253,7 +253,7 @@ describe("ValaaScript", () => {
           [grabClosure, () => ++value];
       `;
       const bodyKuery = transpileValaaScriptBody(bodyText);
-      const [grabClosure, incValue] = evaluateProgram([], {}, bodyKuery, {}, { debug: 0 });
+      const [grabClosure, incValue] = evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 });
       expect(incValue())
           .toEqual(1);
       const grabbedOnce = grabClosure();
@@ -274,7 +274,7 @@ describe("ValaaScript", () => {
       `;
       const bodyKuery = transpileValaaScriptBody(bodyText);
       const programThis = { myField: 0 };
-      const accessMyField = evaluateProgram([], programThis, bodyKuery, {}, { debug: 0 });
+      const accessMyField = evaluateProgram([], programThis, bodyKuery, {}, { verbosity: 0 });
       expect(accessMyField())
           .toEqual(11);
       expect(programThis.myField)
@@ -294,7 +294,7 @@ describe("ValaaScript", () => {
       `;
       const bodyKuery = transpileValaaScriptBody(bodyText);
       const programThis = { myField: 0 };
-      const accessMyFieldFunc = evaluateProgram([], programThis, bodyKuery, {}, { debug: 0 });
+      const accessMyFieldFunc = evaluateProgram([], programThis, bodyKuery, {}, { verbosity: 0 });
       const firstAccessMyField = accessMyFieldFunc();
       expect(firstAccessMyField())
           .toEqual(101);
@@ -341,7 +341,7 @@ describe("ValaaScript", () => {
       `;
       const bodyKuery = transpileValaaScriptBody(bodyText);
       // console.log("bodyKuery VAKON", beaumpify(bodyKuery.toVAKON()));
-      const [whileTest, scopeSum] = evaluateProgram([], {}, bodyKuery, {}, { debug: 0 });
+      const [whileTest, scopeSum] = evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 });
       expect(whileTest())
           .toEqual(10);
       expect(scopeSum.value)
@@ -365,7 +365,7 @@ describe("ValaaScript", () => {
         [whileTest, scopeSum];
       `;
       const bodyKuery = transpileValaaScriptBody(bodyText);
-      const [whileTest, scopeSum] = evaluateProgram([], {}, bodyKuery, {}, { debug: 0 });
+      const [whileTest, scopeSum] = evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 });
       expect(whileTest())
           .toEqual(10);
       expect(scopeSum.value)
@@ -390,7 +390,7 @@ describe("ValaaScript", () => {
         [whileTest, scopeSum];
       `;
       const bodyKuery = transpileValaaScriptBody(bodyText);
-      const [whileTest, scopeSum] = evaluateProgram([], {}, bodyKuery, {}, { debug: 0 });
+      const [whileTest, scopeSum] = evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 });
       expect(whileTest())
           .toEqual(5);
       expect(scopeSum.value)
@@ -418,7 +418,7 @@ describe("ValaaScript", () => {
         [whileTest, scopeSum];
       `;
       const bodyKuery = transpileValaaScriptBody(bodyText);
-      const [whileTest, scopeSum] = evaluateProgram([], {}, bodyKuery, {}, { debug: 0 });
+      const [whileTest, scopeSum] = evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 });
       expect(whileTest())
           .toEqual(5);
       expect(scopeSum.value)
@@ -437,7 +437,7 @@ describe("ValaaScript", () => {
       `;
       const bodyKuery = transpileValaaScriptBody(bodyText);
       const programScope = { fooText: "nanny" };
-      const container = evaluateProgram([], {}, bodyKuery, programScope, { debug: 0 });
+      const container = evaluateProgram([], {}, bodyKuery, programScope, { verbosity: 0 });
       expect(container)
           .toEqual(["nanny", 0, "nanny", 1, "nanny", 2, "nanny", 3, "nanny", 4]);
     });
@@ -455,7 +455,7 @@ describe("ValaaScript", () => {
       `;
       const bodyKuery = transpileValaaScriptBody(bodyText);
       const programScope = { foo: { text: "NaN" } };
-      const [fooSum, fooCat] = evaluateProgram([], {}, bodyKuery, programScope, { debug: 0 });
+      const [fooSum, fooCat] = evaluateProgram([], {}, bodyKuery, programScope, { verbosity: 0 });
       expect(fooSum)
           .toEqual(45);
       expect(fooCat)
@@ -473,7 +473,7 @@ describe("ValaaScript", () => {
       `;
       const bodyKuery = transpileValaaScriptBody(bodyText);
       const programThis = { something: [{ num: 19, text: "bat" }, { num: 23, text: "bat" }] };
-      const [fooSum, fooCat] = evaluateProgram([], programThis, bodyKuery, {}, { debug: 0 });
+      const [fooSum, fooCat] = evaluateProgram([], programThis, bodyKuery, {}, { verbosity: 0 });
       expect(fooSum)
           .toEqual(42);
       expect(fooCat)
@@ -500,7 +500,7 @@ describe("ValaaScript", () => {
         [base, derived]
       `;
       const bodyKuery = transpileValaaScriptBody(bodyText);
-      const [base, derived] = evaluateProgram([], {}, bodyKuery, { Object }, { debug: 0 });
+      const [base, derived] = evaluateProgram([], {}, bodyKuery, { Object }, { verbosity: 0 });
       expect(base.hasOwnProperty("a")).toEqual(false);
       expect(base.a).toBe(undefined);
       expect(base.hasOwnProperty("b")).toEqual(false);
@@ -531,7 +531,7 @@ describe("ValaaScript", () => {
         [obj]
       `;
       const bodyKuery = transpileValaaScriptBody(bodyText);
-      expect(() => evaluateProgram([], {}, bodyKuery, { Object }, { debug: 0 }))
+      expect(() => evaluateProgram([], {}, bodyKuery, { Object }, { verbosity: 0 }))
           .toThrow(/Cannot delete.*unconfigurable/);
     });
   });

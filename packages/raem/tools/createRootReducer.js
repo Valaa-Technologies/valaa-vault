@@ -87,7 +87,7 @@ export default function createRootReducer ({
   function mainReduce (state = Map(), action) {
     const mainLogger = this || reducerContext.eventLogger;
     try {
-      if (mainLogger.getDebugLevel() >= reduceLogThreshold) {
+      if (mainLogger.getVerbosity() >= reduceLogThreshold) {
         const time = action.timeStamp;
         const minor = action.typeName ? `${action.typeName} ` : "";
         // eslint-disable-next-line
@@ -118,7 +118,7 @@ export default function createRootReducer ({
   function subReduce (state, action) {
     const subEventLogger = this || reducerContext.eventLogger;
     try {
-      if (subEventLogger.getDebugLevel() >= subReduceLogThreshold) {
+      if (subEventLogger.getVerbosity() >= subReduceLogThreshold) {
         let minor = action.typeName ? `${action.typeName} ` : "";
         if (action.id) minor = `${minor}${dumpify(action.id, { sliceAt: 40, sliceSuffix: "..." })}`;
         // eslint-disable-next-line

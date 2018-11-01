@@ -69,7 +69,7 @@ describe("CREATED with instancePrototype", () => {
   */
 
   it("sets the instance prototype correctly", async () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createChild1Instance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createChild1Instance);
     const child1Instance = getObjectTransient(
         harness.getState(), "A_child1Instance", "TestThing");
     expect(child1Instance.get("prototype"))
@@ -79,7 +79,7 @@ describe("CREATED with instancePrototype", () => {
   });
 
   it("sets instance owner explicitly to the owner of the prototype", async () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createChild1Instance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createChild1Instance);
     const child1Instance = getObjectTransient(
         harness.getState(), "A_child1Instance", "TestThing");
     expect(child1Instance.get("owner"))
@@ -91,7 +91,7 @@ describe("CREATED with instancePrototype", () => {
   });
 
   it("forwards non-mutated instance leaf property access to the prototype", async () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createChild1Instance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createChild1Instance);
     const child1Instance = getObjectTransient(
         harness.getState(), "A_child1Instance", "TestThing");
     expect(getObjectField(harness.corpus, child1Instance, "name"))
@@ -101,7 +101,7 @@ describe("CREATED with instancePrototype", () => {
   });
 
   it("doesn't forward mutated instance leaf property access to the prototype", async () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createChild1Instance, [
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createChild1Instance, [
       modified({ id: "A_child1Instance", typeName: "TestThing", sets: {
         name: "child1Instance",
       }, }),
@@ -118,7 +118,7 @@ describe("CREATED with instancePrototype", () => {
   });
 
   it("materializes ghost resources accessed with ghostPath", async () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createParentInstance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createParentInstance);
     harness.chronicleEvent(transacted({ actions:
         harness.run(vRef("A_parent"), "children")
             .map(child => createMaterializeGhostPathAction(harness.getState(),
@@ -134,7 +134,7 @@ describe("CREATED with instancePrototype", () => {
   });
 
   it("doesn't materialize the ghost grandling owner when materializing the grandling", async () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createGrandparentInstance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGrandparentInstance);
     harness.chronicleEvent(transacted({ actions:
         harness.run(vRef("A_grandparent"),
                 ["§->", "children", 0, "children"])
@@ -148,7 +148,7 @@ describe("CREATED with instancePrototype", () => {
   });
 
   it("materializes the ghost grandling from transient kuery result ghost resource", async () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createGrandparentInstance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGrandparentInstance);
     const ghostGrandlings = harness.run(vRef("A_grandparentInstance"),
         ["§->", "children", 0, "children"]);
     expect(getRawIdFrom(ghostGrandlings[0]))
@@ -165,7 +165,7 @@ describe("CREATED with instancePrototype", () => {
   });
 
   it("creates level 2 ghosts properly even after level 1 ghosts have been materialized", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createGrandparentInstance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGrandparentInstance);
     const parentInInstance = harness.run(vRef("A_grandparentInstance"),
         ["§->", "children", 0]);
     harness.chronicleEvent(modified({ id: parentInInstance, typeName: "TestThing", sets: {
@@ -175,7 +175,7 @@ describe("CREATED with instancePrototype", () => {
         .toEqual("parentInInstance");
     harness.chronicleEvent(createGrandparentInstanceInstance[0]);
     const parentInInstanceInstance = harness.run(vRef("A_grandparentInstanceInstance"),
-        ["§->", "children", 0], { debug: 0 });
+        ["§->", "children", 0], { verbosity: 0 });
     expect(parentInInstanceInstance)
         .not.toEqual(parentInInstance);
     expect(harness.run(parentInInstanceInstance, "name"))
@@ -191,7 +191,7 @@ describe("CREATED with instancePrototype", () => {
       }, }),
     ];
     it("calculates the owner of deep self-recursed instances correctly", () => {
-      const harness = createRAEMTestHarness({ debug: 0 }, createBlockA,
+      const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA,
           createGrandparentSelfRecursiveInstance);
       const recursor = harness.run(vRef("A_grandparentRecursor"), "id");
       const firstOrderRecursor = harness.run(recursor, ["§->", "unnamedOwnlings", 0]);

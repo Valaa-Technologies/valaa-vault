@@ -51,7 +51,7 @@ describe("partitions", () => {
   ];
 
   it("CREATED has correct partition and id.getPartitionURI() for top-level children", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
     const grandparent = harness.run(vRef("A_grandparent"), null);
     const grandparentPartitionURI = harness.run(grandparent, "id").getPartitionURI();
 
@@ -74,7 +74,7 @@ describe("partitions", () => {
   });
 
   it("CREATED has correct partition and id.getPartitionURI() for non-top-level partition", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
     const child2 = harness.run(vRef("A_child2"), null);
     const child2PartitionURI = harness.run(child2, "id").getPartitionURI();
 
@@ -97,7 +97,7 @@ describe("partitions", () => {
   });
 
   it("meshes partition infos properly when setting cross-partition dependency", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
     const finalEvent = harness.chronicleEvent(transacted({
       actions: [
         created({ id: "B_testRoot", typeName: "TestThing",

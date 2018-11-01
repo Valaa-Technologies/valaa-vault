@@ -39,7 +39,7 @@ function transpileValaaScriptTestBody (bodyText: string) {
 describe("transpileValaaScriptBody with Engine scriptAPI", () => {
   describe("Creating and instancing with 'new' keyword", () => {
     it("creates with 'new' a new Entity", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           new Entity({ name: "myEntity", properties: { foo: 10 } });
       `;
@@ -54,7 +54,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
           .toEqual(myEntity);
     });
     it("adds with 'new' a child Relation to an existing Entity", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const parent = new Entity({ name: "parent",
               properties: { position: { x: 10, y: 20 } } });
@@ -74,7 +74,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
           .toEqual(myRelation);
     });
     it("modifies existing Entity property", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const parent = new Entity({ name: "parent",
               properties: { position: { x: 10, y: 20 } } });
@@ -88,7 +88,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
           .toEqual({ x: 11, y: 22 });
     });
     it("instantiates with 'new' an Entity which has ownlings", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const MyType = new Entity({ name: "MyType",
               properties: { position: { x: 10, y: 20 } } });
@@ -143,7 +143,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
           .toEqual("more data");
     });
     it("returns the result of an expression with properties correctly", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const entity = new Entity({ name: "theEntity",
               properties: { numbers: { a: 1, b: 2 } } });
@@ -154,7 +154,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       expect(number).toEqual(3);
     });
     it("accesses array values using a number for index correctly", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const values = [3,4,5,6,7,8];
           values[3];
@@ -164,7 +164,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       expect(number).toEqual(6);
     });
     it("accesses array values using an expression with properties correctly", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const entity = new Entity({ name: "theEntity",
               properties: { numbers: { a: 1, b: 2 } } });
@@ -177,7 +177,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       expect(result).toEqual(6);
     });
     it("Accesses properties inside a function correctly", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const entity = new Entity({ name: "entity",
               properties: { numbers: { a: 1, b: 2 } } });
@@ -194,7 +194,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       expect(number).toEqual(4444);
     });
     it("Handles 'this' accessor in arrow functions correctly", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           this.a = 1;
           this.b = 2;
@@ -207,7 +207,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       expect(number).toEqual(4444);
     });
     it("Accesses to non-declared properties in a transient Entity resolves to undefined", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           function functionA () {
               const foo = new Entity({ name: "foo", });
@@ -227,7 +227,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
   });
   describe("Object.* decorator tests", () => {
     it("handles Object.assign roundtrip from native object to Valaa resource and back", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const target = new Entity();
           const properties = { a: 1, target: target };
@@ -245,7 +245,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       expect(result).not.toBe(properties);
     });
     it("handles more complex Object.assign between native and Valaa resources", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const Proto = new Entity();
           const protownling = new Entity({ owner: Proto });
@@ -283,7 +283,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
           });
     });
     it("Sums the values of all properties in an entity using Object.keys", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const properties = { a: 1, b: 2, c: 3, d: 4 };
           const propertiesTotal = Object.keys(properties).reduce((t, v) => t + properties[v], 0);
@@ -297,7 +297,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       expect(number).toEqual(1 + 2 + 3 + 4);
     });
     it("Sums the values of all properties in an entity using Object.values", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const properties = { a: 2, b: 3, c: 4, d: 5 };
           const propertiesTotal = Object.values(properties).reduce((t, v) => t + v, 0);
@@ -311,7 +311,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       expect(number).toEqual(2 + 3 + 4 + 5);
     });
     it("Sums the values of all properties in an entity using Object.entries", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const properties = { a: 3, b: 4, c: 5, d: 6 };
           const propertiesTotal = Object.entries(properties).reduce(
@@ -330,7 +330,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       expect(total).toEqual(3 + 4 + 5 + 6);
     });
     it("Object.getOwnPropertyDescriptor", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const properties = { a: 1, b: 2, d: this };
           const entity = new Entity({ name: "entity", properties: properties });
@@ -406,7 +406,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       expect(descriptors.instanceD).toEqual(undefined);
     });
     it("Object.getOwnPropertyNames", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const properties = { a: 1, b: 2, d: this };
           const entity = new Entity({ name: "entity", properties: properties });
@@ -430,7 +430,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       expect(names.instanceNames.sort()).toEqual(["a", "c"]);
     });
     it("Object.getOwnPropertySymbols", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const properties = { a: 1, b: 2, d: this };
           const entity = new Entity({ name: "entity", properties: properties });
@@ -460,7 +460,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       ]);
     });
     it("Object.defineProperty", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true }, valaaScriptBlock);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const properties = { a: 1, b: 2, d: this };
           const entity = new Entity({ name: "entity", properties: properties });
@@ -505,7 +505,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
 
 describe("Bug 0000090 tests", () => {
   it("creates an entity and stores it in to a variable with ValaaScript function", () => {
-    harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true });
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const bodyText = `
       () => new Entity({ name: "uusime" });
     `;
@@ -522,7 +522,7 @@ describe("Bug 0000090 tests", () => {
 
 
   it("instantiates an entity and sets it in a variable with ValaaScript function", () => {
-    harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true });
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const bodyText = `
       () => new this.pointer_to_ownling({ name: "uusime" });
     `;
@@ -538,7 +538,7 @@ describe("Bug 0000090 tests", () => {
   });
 
   it("creates an entity with ValaaScript function", () => {
-    harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true });
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const bodyText = `
       () => new Entity({ name: "uusime" });
     `;

@@ -107,7 +107,7 @@ export function _checkForInfiniteRenderRecursion (component: UIComponent) {
 }
 
 export function _comparePropsOrState (leftObject: any, rightObject: any, defaultEntryCompare: any,
-    entryCompares: any = {}, type: any, debug: any
+    entryCompares: any = {}, type: any, verbosity: any
 ) {
   const simplyEqual = _isSimplyEqual(leftObject, rightObject);
   if (simplyEqual !== undefined) return !simplyEqual;
@@ -116,7 +116,7 @@ export function _comparePropsOrState (leftObject: any, rightObject: any, default
   const rightKeys = Object.keys(rightObject);
   if (leftKeys.length !== rightKeys.length) {
     /*
-    if (debug) {
+    if (verbosity) {
       console.info(type, "key counts differ:",
           leftKeys.length, rightKeys.length, leftKeys, rightKeys);
     }
@@ -126,7 +126,7 @@ export function _comparePropsOrState (leftObject: any, rightObject: any, default
   for (const key of leftKeys) {
     if (!rightObject.hasOwnProperty(key)) {
       /*
-      if (debug) {
+      if (verbosity) {
         console.info(type, "right side missing key:", key);
       }
       */
@@ -141,17 +141,19 @@ export function _comparePropsOrState (leftObject: any, rightObject: any, default
     if (_isSubSimplyEqual === false) return true;
     if (entryMode === "shallow") {
       /*
-      if (debug) {
+      if (verbosity) {
         console.info(type, "shallow objects differ:", key, left, right);
       }
       */
       return true;
     }
     if (entryMode === "onelevelshallow") {
-      if (!_comparePropsOrState(left, right, "shallow", entryCompares, undefined, debug)) continue;
+      if (!_comparePropsOrState(left, right, "shallow", entryCompares, undefined, verbosity)) {
+        continue;
+      }
 
       /*
-      if (debug) {
+      if (verbosity) {
         console.info(type, "onelevelshallow objects differ:", key, left, right);
       }
       */
@@ -159,7 +161,7 @@ export function _comparePropsOrState (leftObject: any, rightObject: any, default
     }
     if (!isEqual(left, right)) {
       /*
-      if (debug) {
+      if (verbosity) {
         console.info(type, "deep objects differ:", key, left, right);
       }
       */

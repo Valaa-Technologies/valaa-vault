@@ -46,7 +46,7 @@ describe("The snapshot node walker", () => {
   ];
 
   it("retrieves aliased value properly", async () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const childGlue = getObjectTransient(harness.getState(), "A_childGlue", "TestGlue");
     expect(childGlue.get("source"))
         .toEqual(undefined);
@@ -57,7 +57,7 @@ describe("The snapshot node walker", () => {
   });
 
   it("retrieves expanded values properly", async () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
 
     expect(harness.run(vRef("A_childGlue"), "position"))
         .toEqual(OrderedMap([["x", 0], ["y", 1], ["z", null]]));
@@ -76,7 +76,7 @@ describe("The snapshot node walker", () => {
   ];
 
   it("executes a complex path + filtering kuery properly", async () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest,
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest,
         createBlockAMore);
     const childGlue = getObjectTransient(harness.getState(), "A_childGlue", "TestGlue");
     const child2 = getObjectTransient(harness.getState(), "A_child2", "TestThing");
@@ -116,7 +116,7 @@ describe("ghost lookups", () => {
   it("Resource-to-Immaterial-Transient - if an Instance Prototype has a field reference to its " +
      "Ownling, then Instance field access for the same field returns a Transient for the " +
      "Immaterial Ghost of the Ownling", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createTestObj, createTestObjInst);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createTestObjInst);
     const ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
 
@@ -126,7 +126,7 @@ describe("ghost lookups", () => {
 
   it("Resource-to-Material-Transient - same as above but if the Ghost has been Materialized before",
   () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createTestObj, createTestObjInst);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createTestObjInst);
     let ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
     const materializeEvent = createMaterializeGhostAction(harness.getState(), ghostOwnling);
@@ -145,7 +145,7 @@ describe("ghost lookups", () => {
 
   it("Resource-to-Partially-Material-Transient - same as above but when the Prototype Sequence is" +
      " deeper and some middle Ghost has been Materialized", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createTestObj, createTestObjInst);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createTestObjInst);
     let ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
     harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), ghostOwnling));
@@ -161,7 +161,7 @@ describe("ghost lookups", () => {
   // with the exact same variety of results as when using a full Resource
 
   it("Immaterial-Transient-to-* - The ghost grandling should be immaterial", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createTestObj, createOwnlingInst);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createOwnlingInst);
     const ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
 
@@ -170,7 +170,7 @@ describe("ghost lookups", () => {
   });
 
   it("Material-Transient-to-* - the ghost grandling should be materialized", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createTestObj, createOwnlingInst);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createOwnlingInst);
     let ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
     harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), ghostGrandling));
@@ -187,7 +187,7 @@ describe("ghost lookups", () => {
   });
 
   it("Partially-Material-Transient-to-* - the ghost great grandling should be immaterial", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createTestObj, createOwnlingInst);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createOwnlingInst);
     let ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
     harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), ghostGrandling));
@@ -200,7 +200,7 @@ describe("ghost lookups", () => {
   });
 
   it("omits the prototype fields through Resource.ownFields", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createTestObj, createOwnlingInst);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createOwnlingInst);
     expect(harness.run(vRef("ownlingInst"), "name"))
         .toEqual("ownling");
     expect(harness.run(vRef("ownlingInst"), VALK.toField("ownFields").toField("name")))
@@ -234,7 +234,7 @@ describe("mutations", () => {
   ];
 
   it("MODIFIED setting a field on a Transient should materialize it", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createData, createInstance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createInstance);
     const A_instance = harness.run(vRef("A_instance"), null);
     let A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
     expect(isMaterialized(harness.getState(), A_instance_B))
@@ -248,7 +248,7 @@ describe("mutations", () => {
   });
 
   it("MODIFIED assigning a Transient to a non-coupling field does not materialize it", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createData, createInstance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createInstance);
     const A = harness.run(vRef("A"), null);
     const A_instance = harness.run(vRef("A_instance"), null);
     let A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
@@ -264,7 +264,7 @@ describe("mutations", () => {
 
   it("MODIFIED.removes(null) on a previously modified field on a non-ghost Instance reveals " +
      "the undeflying Prototype field", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createData, createInstance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createInstance);
 
     const A = harness.run(vRef("A"), null);
     const A_instance = harness.run(vRef("A_instance"), null);
@@ -290,14 +290,14 @@ describe("mutations", () => {
 
   it("MODIFIED.removes(null) on a previously modified field on an Ghost reveals " +
      "the undeflying Prototype field", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createData, createInstance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createInstance);
 
     const A_B = harness.run(vRef("A_B"), null);
     const A_instance_B = harness.run(vRef("A_instance"),
         ["§->", "children", 0]);
 
     // Names are equal before any modifications to the ghost and different after changes
-    expect(harness.run(A_instance_B, "name", { debug: 0 }))
+    expect(harness.run(A_instance_B, "name", { verbosity: 0 }))
         .toEqual(harness.run(A_B, "name"));
     harness.chronicleEvent(modified({ id: A_instance_B, typeName: "TestThing",
       sets: { name: "Ghost of Ownling" }
@@ -314,7 +314,7 @@ describe("mutations", () => {
   });
 
   it("MODIFIED add on a plural field should cause changes to be reflected on Instances", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createData, createInstance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createInstance);
 
     const A_children_old = harness.run(vRef("A"), ["§->", "children"]);
     const A_instance_children_old = harness.run(vRef("A_instance"),
@@ -360,7 +360,7 @@ describe("mutations", () => {
   ];
 
   it("MODIFIED remove on a plural field should cause changes to be reflected on Instances", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createData, extraData,
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createData, extraData,
         createInstance);
 
     const A_children_old = harness.run(vRef("A"), ["§->", "children"]);
@@ -399,7 +399,7 @@ describe("mutations", () => {
 
   it("MODIFIED commands on a Prototype should reflect as new field values on all Instances and" +
       "their ghosts as appropriate", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createData, createBlankInstance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createBlankInstance);
 
     // Test instance
     harness.chronicleEvent(modified({
@@ -490,11 +490,11 @@ describe("complex structures", () => {
   /*
   const createSecondDegreeInstances = (harness) => {
     const gA1_B = harness.run(vRef("A1i"),
-        ["§->", "children", 0], { debug: 0 });
+        ["§->", "children", 0], { verbosity: 0 });
     const gA1_B_C = harness.run(vRef("A1i"),
-        ["§->", "children", 0, "children", 0], { debug: 0 });
+        ["§->", "children", 0, "children", 0], { verbosity: 0 });
     const gA_B1_C = harness.run(vRef("A_B1i"),
-        ["§->", "children", 0], { debug: 0 });
+        ["§->", "children", 0], { verbosity: 0 });
 
     // Falling apart workaround
     harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), gA1_B));
@@ -603,7 +603,7 @@ describe("complex structures", () => {
         transient: harness.run(
           (parent && getInfo(parent[0]).transient) || vRef(name),
           (parent && parent.slice(1).map(index => ["§->", "children", index])) || null,
-          { debug: 0 },
+          { verbosity: 0 },
         ),
         parent: parent && getInfo(parent[0]),
         ancestors: (function collectAncestors (list, parent_) {
@@ -706,7 +706,7 @@ describe("complex structures", () => {
   }
 
   it("Ensure that all instances & ghosts have the same names with their root prototype", () => {
-    createAndExtractHarnessWithCommands({ debug: 0 });
+    createAndExtractHarnessWithCommands({ verbosity: 0 });
     allInfos.forEach(({ name, transient, prototypes }) => {
       if (prototypes.length) {
         expect(`${name}: ${harness.run(transient, "name")}`)
@@ -716,7 +716,7 @@ describe("complex structures", () => {
   });
 
   it("Modifications in A_B_C should be reflected in and only in *_*_C*", () => {
-    createAndExtractHarnessWithCommands({ debug: 0 });
+    createAndExtractHarnessWithCommands({ verbosity: 0 });
     const oldName = harness.run(A_B_C, "name");
     const newName = "Elder / Middle / Youngest (A_B_C modification)";
     harness.chronicleEvent(modified({
@@ -738,7 +738,7 @@ describe("complex structures", () => {
   });
 
   it("Modifications in A_B_C1i should be reflected in and only in *_*_C1", () => {
-    createAndExtractHarnessWithCommands({ debug: 0 });
+    createAndExtractHarnessWithCommands({ verbosity: 0 });
     const oldName = harness.run(A_B_C1i, "name");
     const newName = "Elder / Middle / Youngest (A_B_C1i modification)";
     harness.chronicleEvent(modified({
@@ -761,28 +761,28 @@ describe("complex structures", () => {
   });
 
   it("Modifications in ghost gA_B1_C should be reflected in *_B1_C only", () => {
-    createAndExtractHarnessWithCommands({ debug: 0 });
-    const oldName = harness.run(gA_B1_C, "name", { debug: 0 });
+    createAndExtractHarnessWithCommands({ verbosity: 0 });
+    const oldName = harness.run(gA_B1_C, "name", { verbosity: 0 });
     const newName = "Elder / Middle / Youngest (gA_B1_C modification)";
     harness.chronicleEvent(modified({
       id: gA_B1_C, typeName: "TestThing", sets: { name: newName }
     }));
-    expect(harness.run(gA_B1_C, "name", { debug: 0 })).toEqual(newName);
+    expect(harness.run(gA_B1_C, "name", { verbosity: 0 })).toEqual(newName);
 
     getInfo("A_B_C").instances.forEach(({ name: instanceName, transient, prototypes }) => {
       if (instanceName === "gA_B1_C"
           || prototypes.find(({ name: prototypeName }) => prototypeName === "gA_B1_C")) {
-        expect(`/*B1_C/: ${instanceName}: ${harness.run(transient, "name", { debug: 0 })}`)
+        expect(`/*B1_C/: ${instanceName}: ${harness.run(transient, "name", { verbosity: 0 })}`)
             .toEqual(`/*B1_C/: ${instanceName}: ${newName}`);
       } else {
-        expect(`!/*B1_C*/: ${instanceName}: ${harness.run(transient, "name", { debug: 0 })}`)
+        expect(`!/*B1_C*/: ${instanceName}: ${harness.run(transient, "name", { verbosity: 0 })}`)
             .toEqual(`!/*B1_C*/: ${instanceName}: ${oldName}`);
       }
     });
   });
 
   it("Modifications in A_B_C should be visible from A1i, and A_B1i via children access", () => {
-    createAndExtractHarnessWithCommands({ debug: 0 });
+    createAndExtractHarnessWithCommands({ verbosity: 0 });
     const oldName = harness.run(A_B_C, "name");
     harness.chronicleEvent(modified({ id: A_B_C, typeName: "TestThing", sets: {
       name: "Elder / Middle / Youngest (changed)",
@@ -795,7 +795,7 @@ describe("complex structures", () => {
   });
 
   it("Instances simple unmodified lists", () => {
-    createAndExtractHarnessWithCommands({ debug: 0 });
+    createAndExtractHarnessWithCommands({ verbosity: 0 });
     // Confirm that all the lists A*_B* are similar
     const startingList = harness.run(A_B, ["§->", "children"]);
 
@@ -808,9 +808,9 @@ describe("complex structures", () => {
   });
 
   it("Reflects instance list insertion properly to the instance list values", () => {
-    createAndExtractHarnessWithCommands({ debug: 0 });
+    createAndExtractHarnessWithCommands({ verbosity: 0 });
     // Confirm that all the lists A*_B* are similar
-    const startingList = harness.run(A_B, "children", { debug: 0 });
+    const startingList = harness.run(A_B, "children", { verbosity: 0 });
 
     // Add a bloke to A_B1i
     harness.chronicleEvent(created({ id: "A_B1_D", typeName: "TestThing", initialState: {

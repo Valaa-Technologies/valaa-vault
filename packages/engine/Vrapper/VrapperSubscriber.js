@@ -152,16 +152,16 @@ export default class VrapperSubscriber extends SimpleData {
 
   _triggerKueryUpdate (update: FieldUpdate) {
     const options: any = update.valkOptions();
-    const debug = options.debug;
+    const verbosity = options.verbosity;
     options.state = (options && options.state)
         || this._emitter.engine.discourse.getState();
-    if (debug) {
-      options.debug = (debug > 2) ? debug - 2 : undefined;
-      console.log(" ".repeat(options.debug),
-          `VrapperSubscriber(${this.subscriberKey})._triggerKueryUpdate (debug: ${
-              options.debug}) valking with:`,
-          "\n", " ".repeat(options.debug), "head:", ...dumpObject(this._subscribedHead),
-          "\n", " ".repeat(options.debug), "kuery:",
+    if (verbosity) {
+      options.verbosity = (verbosity > 2) ? verbosity - 2 : undefined;
+      console.log(" ".repeat(options.verbosity),
+          `VrapperSubscriber(${this.subscriberKey})._triggerKueryUpdate (verbosity: ${
+              options.verbosity}) valking with:`,
+          "\n", " ".repeat(options.verbosity), "head:", ...dumpObject(this._subscribedHead),
+          "\n", " ".repeat(options.verbosity), "kuery:",
               ...dumpKuery(this._subscribedKuery),
       );
     }
@@ -171,29 +171,29 @@ export default class VrapperSubscriber extends SimpleData {
       }
       this._sendUpdate(update);
     } finally {
-      if (debug) {
-        console.log(" ".repeat(options.debug),
+      if (verbosity) {
+        console.log(" ".repeat(options.verbosity),
             `VrapperSubscriber(${this.subscriberKey})._triggerKueryUpdate result:`,
             ...dumpObject(update.value()));
-        options.debug = debug;
+        options.verbosity = verbosity;
       }
     }
   }
 
   _retryProcessKuery (onComplete: ?any) {
     const options: any = this._valkOptions;
-    const debug = options.debug;
+    const verbosity = options.verbosity;
     let ret;
     let scope;
     try {
-      if (debug) {
-        options.debug = (debug > 2) ? debug - 2 : undefined;
-        console.log(" ".repeat(options.debug),
-            `VrapperSubscriber(${this.subscriberKey}).retryProcessKuery (debug: ${
-                options.debug}) ${
+      if (verbosity) {
+        options.verbosity = (verbosity > 2) ? verbosity - 2 : undefined;
+        console.log(" ".repeat(options.verbosity),
+            `VrapperSubscriber(${this.subscriberKey}).retryProcessKuery (verbosity: ${
+                options.verbosity}) ${
                 (typeof onComplete !== "undefined") ? "evaluating" : "processing"} step with:`,
-            "\n", " ".repeat(options.debug), "head:", ...dumpObject(this._subscribedHead),
-            "\n", " ".repeat(options.debug), "kuery:", ...dumpKuery(this._subscribedKuery),
+            "\n", " ".repeat(options.verbosity), "head:", ...dumpObject(this._subscribedHead),
+            "\n", " ".repeat(options.verbosity), "kuery:", ...dumpKuery(this._subscribedKuery),
         );
       }
       scope = this._valkScope() ? Object.create(this._valkScope()) : {};
@@ -215,11 +215,11 @@ export default class VrapperSubscriber extends SimpleData {
           "\n\tkuery:", ...dumpKuery(this._subscribedKuery),
           "\n\tscope:", ...dumpObject(scope));
     } finally {
-      if (debug) {
-        console.log(" ".repeat(options.debug),
+      if (verbosity) {
+        console.log(" ".repeat(options.verbosity),
             `VrapperSubscriber(${this.subscriberKey}).retryProcessKuery result:`,
             ...dumpObject(ret));
-        options.debug = debug;
+        options.verbosity = verbosity;
       }
     }
   }
@@ -231,14 +231,14 @@ export default class VrapperSubscriber extends SimpleData {
     const head = rawHead instanceof VRef ? this._emitter.engine.getVrapper(rawHead) : rawHead;
     const kueryVAKON = kuery instanceof Kuery ? kuery.toVAKON() : kuery;
     let ret: any;
-    if (this._valkOptions.debug) {
-      console.log(" ".repeat(this._valkOptions.debug),
+    if (this._valkOptions.verbosity) {
+      console.log(" ".repeat(this._valkOptions.verbosity),
           `VrapperSubscriber(${this.subscriberKey}) ${
               evaluateKuery ? "evaluating" : "processing"} step with:`,
-          "\n", " ".repeat(this._valkOptions.debug), "head:", ...dumpObject(head),
-          "\n", " ".repeat(this._valkOptions.debug), "kuery:", ...dumpKuery(kuery)
+          "\n", " ".repeat(this._valkOptions.verbosity), "head:", ...dumpObject(head),
+          "\n", " ".repeat(this._valkOptions.verbosity), "kuery:", ...dumpKuery(kuery)
       );
-      this._valkOptions.debug += 2;
+      this._valkOptions.verbosity += 2;
     }
     try {
       switch (typeof kueryVAKON) {
@@ -318,10 +318,10 @@ export default class VrapperSubscriber extends SimpleData {
               "\n\tscope:", ...dumpObject(scope)),
           kueryVAKON);
     } finally {
-      if (this._valkOptions.debug) {
-        console.log(" ".repeat(this._valkOptions.debug),
+      if (this._valkOptions.verbosity) {
+        console.log(" ".repeat(this._valkOptions.verbosity),
             `VrapperSubscriber(${this.subscriberKey}) result:`, ...dumpObject(ret));
-        this._valkOptions.debug -= 2;
+        this._valkOptions.verbosity -= 2;
       }
     }
   }

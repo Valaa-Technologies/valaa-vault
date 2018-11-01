@@ -13,7 +13,7 @@ describe("VALEK extensions", () => {
 
   describe("VALEK mutations", () => {
     it("creates a resource using VALEK.create", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true });
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
       expectVrapper("test");
 
       // This emulates a VALK JS function definition: it expects head to be the vBuilder
@@ -36,25 +36,25 @@ describe("VALEK extensions", () => {
 
   describe("VALEK property* conveniences", () => {
     it("throws on non-optional propertyTarget access when actual data is a Literal", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true });
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
       expectVrapper("creator");
       expect(() => entities().creator.get(VALEK.propertyTarget("counter")))
           .toThrow(/Schema introspection missing for field 'Literal.reference'/);
     });
     it("returns null non-optional propertyTarget access when actual data is a Literal", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true });
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
       expectVrapper("creator");
       expect(entities().creator.get(VALEK.propertyTarget("counter", { optional: true })))
           .toEqual(undefined);
     });
     it("throws on non-optional propertyLiteral access when actual data is an Identifier", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true });
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
       expectVrapper("creator");
       expect(() => entities().creator.get(VALEK.propertyLiteral("template")))
           .toThrow(/Schema introspection missing for field 'Identifier.value'/);
     });
     it("returns null non-optional propertyLiteral access when actual data is a Identifier", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: true });
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
       expectVrapper("creator");
       expect(entities().creator.get(VALEK.propertyLiteral("template", { optional: true })))
           .toEqual(undefined);

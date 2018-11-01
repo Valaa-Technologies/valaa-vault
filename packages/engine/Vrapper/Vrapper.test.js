@@ -100,7 +100,7 @@ describe("Vrapper", () => {
 
   describe("Vrapper basic functionality", () => {
     it("returns vrappers for non-ghost when returned from kuery", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       expectVrapper("test");
@@ -112,7 +112,7 @@ describe("Vrapper", () => {
     });
 
     it("touches a Vrapper field and it is properly modified for subsequent reads", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       touchField(testScriptPartitions().test, "name");
@@ -123,14 +123,14 @@ describe("Vrapper", () => {
     });
 
     it("doesn't create Vrappers for ghosts by default", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       expectNoVrapper(createGhostRawId("child", "test#1"));
     });
 
     it("returns Vrappers for ghost when returned from kuery", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       const vChildGhost = testScriptPartitions()["test#1"].get(["§->", "children", 0]);
@@ -143,7 +143,7 @@ describe("Vrapper", () => {
     });
 
     it("returns a correct Vrapper with getGhostIn", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       const result = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]);
@@ -152,7 +152,7 @@ describe("Vrapper", () => {
     });
 
     it("returns a correct Vrapper with kuery", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       const result = testScriptPartitions()["test#1"].get(["§->", "children", 0]);
@@ -165,7 +165,7 @@ describe("Vrapper", () => {
     let testVrapper;
 
     beforeEach(() => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, createMedia,
       ]);
       testVrapper = medias().theMedia;
@@ -272,7 +272,7 @@ describe("Vrapper", () => {
 
   describe("Vrapper MODIFIED notifications", () => {
     it("notifies on field change when modified directly", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       checkVrapperSets(testScriptPartitions().test, {
@@ -284,7 +284,7 @@ describe("Vrapper", () => {
     });
 
     it("notifies on untouched instance field change when modified through prototype", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       checkVrapperSets(testScriptPartitions()["test#1"], {
@@ -299,7 +299,7 @@ describe("Vrapper", () => {
      * One possibility is to just compare the values: it might make sense to eliminate notifications
      * on events which change nothing.
     it("does not notify on touched instance field change when modified through prototype", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       touchField(testScriptPartitions["test#1"], "name");
@@ -313,7 +313,7 @@ describe("Vrapper", () => {
     */
 
     it("notifies on immaterial ghost field change when modified through ghost prototype", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       const vChildGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]);
@@ -329,7 +329,7 @@ describe("Vrapper", () => {
 
     it("notifies on material ghost untouched field change when modified through ghost prototype",
     () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       const vChildGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]);
@@ -345,7 +345,7 @@ describe("Vrapper", () => {
     });
 
     it("notifies on immaterial ghost field change when modified directly", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       const vChildGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]);
@@ -362,7 +362,7 @@ describe("Vrapper", () => {
     });
 
     it("notifies subscribers to the owner list when a child object is DESTROYED", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       let modCalled = false;
@@ -377,7 +377,7 @@ describe("Vrapper", () => {
     });
 
     it("notifies subscribers to the owner list when a child object is reparented", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       let modCalled = false;
@@ -408,19 +408,19 @@ describe("Vrapper", () => {
 
   describe("Vrapper DESTROYED notifications", () => {
     it("calls destroy subscribers when the object is destroyed", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [transactionA]);
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [transactionA]);
       checkVrapperDestroy(testScriptPartitions().test);
     });
 
     it("calls destroy subscribers when the instance is destroyed", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       checkVrapperDestroy(testScriptPartitions()["test#1"]);
     });
 
     it("calls destroy subscribers when the ghost is destroyed", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       checkVrapperDestroy(testScriptPartitions().child.getGhostIn(
@@ -428,7 +428,7 @@ describe("Vrapper", () => {
     });
 
     it("calls destroy subscribers on an instance when its prototype is destroyed", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       expect(() => checkVrapperDestroy(testScriptPartitions()["test#1"],
@@ -437,7 +437,7 @@ describe("Vrapper", () => {
     });
 
     it("calls destroy subscribers on a ghost when its ghost prototype is destroyed", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       checkVrapperDestroy(
@@ -448,7 +448,7 @@ describe("Vrapper", () => {
 
   describe("Vrapper sub-event notifications", () => {
     it("calls the destroy subscriber for all children of a destroyed object", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA,
       ]);
       const counts = [];
@@ -462,7 +462,7 @@ describe("Vrapper", () => {
     });
 
     it("calls the destroy subscriber for all ghosts of a destroyed object", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       const counts = [];
@@ -487,7 +487,7 @@ describe("Vrapper", () => {
 
   describe("Ghost relations manipulations", () => {
     it("does not mutate ghost prototype list field when mutating immaterial ghost field", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       const childGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]);
@@ -499,7 +499,7 @@ describe("Vrapper", () => {
     });
 
     it("maintains list references on list field prototype->ghost upgrades", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       const childGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]);
@@ -523,7 +523,7 @@ describe("Vrapper", () => {
 
   describe("abstraction piercing operations", () => {
     it("recurses materialized fields: ['children']", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       expect(harness.engine.getVrapper("test")
@@ -531,7 +531,7 @@ describe("Vrapper", () => {
           .toEqual(["child", "grandChild", "greatGrandChild", "grandSibling"]);
     });
     it("doesn't recurse immaterialized fields: ['children']", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       expect(harness.engine.getVrapper("test#1")
@@ -539,7 +539,7 @@ describe("Vrapper", () => {
           .toEqual([]);
     });
     it("recurses materialized fields: ['unnamedOwnlings']", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       expect(harness.engine.getVrapper("test")
@@ -547,7 +547,7 @@ describe("Vrapper", () => {
           .toEqual(["ownling"]);
     });
     it("recurses materialized fields: ['children', 'unnamedOwnlings']", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
       expect(harness.engine.getVrapper("test")
@@ -560,7 +560,7 @@ describe("Vrapper", () => {
     it("0000101: recurseMaterializedFieldResources kueries must not leak non-vrapped data", () => {
       // Bug was indeed directly with recurseMaterializedFieldResources: it was returning packed
       // transients inside a native container, which is forbidden.
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         created({ id: "top", typeName: "Entity", initialState: {
           name: "TopElement",
         }, }),
@@ -615,7 +615,7 @@ describe("Vrapper", () => {
 
   describe("lexical scope - basic accesses", () => {
     it("reads Scope property values through the Scope's lexicalScope kuery", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
       expect(testScriptPartitions().test.get(VALEK.fromScope("testField").toValueLiteral()))
@@ -625,7 +625,7 @@ describe("Vrapper", () => {
     });
 
     it("accesses grand-parent Scope properties through lexicalScope", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
       expect(testScriptPartitions().grandChild.get(VALEK.fromScope("secondField").toValueLiteral()))
@@ -633,7 +633,7 @@ describe("Vrapper", () => {
     });
 
     it("accesses overridden grand-parent Scope property through lexicalScope", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
       expect(testScriptPartitions().grandChild.get(VALEK.fromScope("testField").toValueLiteral()))
@@ -645,7 +645,7 @@ describe("Vrapper", () => {
     it("most recent property with a name overrides its sibling", () => {
       const oldWarn = console.warn;
       console.warn = jest.fn(); // eslint-disable-line
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA,
         createAInstance,
         basicProperties,
@@ -665,7 +665,7 @@ describe("Vrapper", () => {
     });
 
     it("accesses renamed Scope property", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
       testScriptPartitions().test.get(VALEK.property("testField"))
@@ -680,7 +680,7 @@ describe("Vrapper", () => {
     });
 
     it("fails to access previous value of a renamed Scope property", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
       expect(testScriptPartitions().test.get(VALEK.fromScope("testField").toValueLiteral()))
@@ -692,7 +692,7 @@ describe("Vrapper", () => {
     });
 
     it("fails to access a removed Scope value", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
       expect(testScriptPartitions().test.get(VALEK.fromScope("testField").toValueLiteral()))
@@ -704,7 +704,7 @@ describe("Vrapper", () => {
     });
 
     it("updates lexicalScope when reparented", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
       testScriptPartitions().greatGrandChild.emplaceAddToField("properties", {
@@ -733,7 +733,7 @@ describe("Vrapper", () => {
     });
 
     it("fails to access a Scope property with no name", () => {
-      harness = createEngineTestHarness({ debug: 0, claimBaseBlock: false }, [
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
         created({ id: "test.namelessField", typeName: "Property", initialState: {
           owner: vRef("test", "properties"),

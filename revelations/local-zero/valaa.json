@@ -8,7 +8,10 @@
   "gateway": {
     "version": "0.30.0",
     "runtime": "/valaa/inspire/valaa-inspire.js",
-    "authorityConfigs": { "...": "valaa/authorityConfigs.json" }
+    "authorityConfigs": { "...": "valaa/authorityConfigs.json" },
+    "verbosity": 1,
+    "falseProphet": { "verbosity": 1 },
+    "scribe": { "verbosity": 1 }
   },
   "prologue": {
     "rootPartitionURI": "valaa-local:?id=lcl-c986ddf3-917b-48da-9a58-eb495093e34c",

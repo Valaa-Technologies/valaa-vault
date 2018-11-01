@@ -68,7 +68,7 @@ describe("Prophet", () => {
   ];
 
   it("stores the contents of the actions on the scribe correctly", async () => {
-    harness = await createProphetOracleHarness({ debug: 0,
+    harness = await createProphetOracleHarness({ verbosity: 0,
       oracleOptions: { testAuthorityConfig: { isLocallyPersisted: true } },
     });
     const prophetConnection = await harness.prophet

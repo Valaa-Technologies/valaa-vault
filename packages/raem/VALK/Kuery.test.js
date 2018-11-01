@@ -69,7 +69,7 @@ const createBlockARest = [
 
 describe("VALK corpus kueries", () => {
   it("Converts trivial VALK to into VAKON", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("children");
     expect(kuery.toVAKON()).toEqual("children");
     expect(harness.run(vRef("A_parent"), kuery.map("rawId")))
@@ -82,7 +82,7 @@ describe("VALK corpus kueries", () => {
   });
 
   it("Converts basic VALK to-to-map-to into VAKON", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("source").to("children").map("name");
     expect(kuery.toVAKON())
         .toEqual(["§->", "source", "children", ["§map", "name"]]);
@@ -91,7 +91,7 @@ describe("VALK corpus kueries", () => {
   });
 
   it("Converts trivial VALK.equalTo into VAKON", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.equalTo(10);
     expect(kuery.toVAKON()).toEqual(["§===", null, 10]);
     expect(harness.run(vRef("A_parentGlue"),
@@ -100,7 +100,7 @@ describe("VALK corpus kueries", () => {
   });
 
   it("Converts basic VALK.equalTo into VAKON", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("id").looseEqualTo(vRef("A_parentGlue"));
     expect(kuery.toVAKON()).toEqual(["§==", ["id"], ["§VRef", ["A_parentGlue"]]]);
     expect(harness.run(vRef("A_parentGlue"), kuery))
@@ -110,7 +110,7 @@ describe("VALK corpus kueries", () => {
   });
 
   it("Converts trivial VALK.if into VAKON", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.if(VALK.fromValue(true));
     expect(kuery.toVAKON()).toEqual(["§?", true, null]);
     expect(harness.run(vRef("A_parent"), "rawId"))
@@ -118,7 +118,7 @@ describe("VALK corpus kueries", () => {
   });
 
   it("Converts basic VALK.if into VAKON", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.if(VALK.to("id").looseEqualTo(vRef("A_child1")));
     expect(kuery.toVAKON())
         .toEqual(["§?", ["§==", ["id"], ["§VRef", ["A_child1"]]], null]);
@@ -129,7 +129,7 @@ describe("VALK corpus kueries", () => {
   });
 
   it("Converts trivial VALK.map into VAKON", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.map("rawId");
     expect(kuery.toVAKON()).toEqual(["§map", "rawId"]);
     expect(harness.run(vRef("A_parent"), VALK.to("children").toKuery(kuery)))
@@ -137,7 +137,7 @@ describe("VALK corpus kueries", () => {
   });
 
   it("Converts basic VALK.map into VAKON", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("children").map("rawId");
     expect(kuery.toVAKON()).toEqual(["§->", "children", ["§map", "rawId"]]);
     expect(harness.run(vRef("A_parent"), kuery))
@@ -145,7 +145,7 @@ describe("VALK corpus kueries", () => {
   });
 
   it("Converts VALK.map + VALK.if into VAKON", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("children").map(VALK.if(VALK.fromValue(true)));
     expect(kuery.toVAKON()).toEqual(["§->", "children", ["§map", ["§?", true, null]]]);
     expect(harness.run(vRef("A_parent"), kuery.map("rawId")))
@@ -153,7 +153,7 @@ describe("VALK corpus kueries", () => {
   });
 
   it("Converts trivial VALK.filter into VAKON", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("children").filter(VALK.fromValue(false));
     expect(kuery.toVAKON())
         .toEqual(["§->", "children", ["§filter", ["§'", false]]]);
@@ -162,7 +162,7 @@ describe("VALK corpus kueries", () => {
   });
 
   it("Converts VALK.filter into VAKON", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("children").filter(VALK.to("id").looseEqualTo(vRef("A_child1")));
     expect(kuery.toVAKON())
         .toEqual(["§->", "children",
@@ -174,49 +174,49 @@ describe("VALK corpus kueries", () => {
 
 describe("VALK.nullable and VALK.nonNull - VAKON false and true", () => {
   it("Throws when stepping forward from null step head", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("parent").to("parent");
     expect(() => harness.run(vRef("A_grandparent"), kuery))
         .toThrow();
   });
 
   it("Short-circuits path properly with nullable on null step head", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("parent").nullable().to("parent");
     expect(harness.run(vRef("A_grandparent"), kuery))
         .toEqual(undefined);
   });
 
   it("Accepts nullable as an identity step on valid paths", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("parent").nullable().to("parent");
     expect(harness.run(vRef("A_child1"), kuery.to("rawId")))
         .toEqual("A_grandparent");
   });
 
   it("Throws if last step of a path is null", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("parent").notNull();
     expect(() => harness.run(vRef("A_grandparent"), kuery))
         .toThrow();
   });
 
   it("Accepts notNull as an identity step on valid paths", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("parent").notNull().to("parent");
     expect(harness.run(vRef("A_child1"), kuery.to("rawId")))
         .toEqual("A_grandparent");
   });
 
   it("Accepts notNull with error message properly on valid paths", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("parent").notNull("this should never be seen").to("parent");
     expect(harness.run(vRef("A_child1"), kuery.to("rawId")))
         .toEqual("A_grandparent");
   });
 
   it("Throws with notNull containing an error message and an empty head", () => {
-    const harness = createRAEMTestHarness({ debug: 0 }, createBlockA, createBlockARest);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("parent").notNull("this should be seen in the log");
     expect(() => harness.run(vRef("A_grandparent"), kuery))
         .toThrow();

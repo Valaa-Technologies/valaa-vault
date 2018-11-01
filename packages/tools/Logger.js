@@ -22,13 +22,13 @@ let counter = 0;
 export class LogEventGenerator {
   _logger: Logger | Object;
   _name: string;
-  _debugLevel: ?number;
+  _verbosity: ?number;
 
-  constructor ({ name = `unnamed#${++counter}`, logger, debugLevel }: {
-    name?: string, logger?: Logger, debugLevel?: number
+  constructor ({ name = `unnamed#${++counter}`, logger, verbosity }: {
+    name?: string, logger?: Logger, verbosity?: number
   } = {}) {
     this._logger = logger || console;
-    this._debugLevel = debugLevel || 0;
+    this._verbosity = verbosity || 0;
     this._name = name;
   }
 
@@ -42,8 +42,8 @@ export class LogEventGenerator {
   getName (): string { return this._name; }
   setName (name: any) { this._name = name; }
 
-  getDebugLevel () { return this._debugLevel; }
-  setDebugLevel (value: number) { this._debugLevel = value; }
+  getVerbosity () { return this._verbosity; }
+  setVerbosity (value: number) { this._verbosity = value; }
 
   debugId (): string { return `${this.constructor.name}(${this.getName()})`; }
 
@@ -52,28 +52,28 @@ export class LogEventGenerator {
   warn (...rest: any[]) { return this._logger.warn(...rest); }
   error (...rest: any[]) { return this._logger.error(...rest); }
 
-  infoEvent (minLogLevel: any, ...messagePieces: any[]) {
-    if ((typeof minLogLevel === "number") && (minLogLevel > this._debugLevel)) return this;
+  infoEvent (minVerbosity: any, ...messagePieces: any[]) {
+    if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
     return this._logger.info(`${this.debugId()}:`,
-        ...((typeof minLogLevel !== "number") ? [minLogLevel] : []),
+        ...((typeof minVerbosity !== "number") ? [minVerbosity] : []),
         ...messagePieces);
   }
-  logEvent (minLogLevel: any, ...messagePieces: any[]) {
-    if ((typeof minLogLevel === "number") && (minLogLevel > this._debugLevel)) return this;
+  logEvent (minVerbosity: any, ...messagePieces: any[]) {
+    if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
     return this._logger.log(`${this.debugId()}:`,
-        ...((typeof minLogLevel !== "number") ? [minLogLevel] : []),
+        ...((typeof minVerbosity !== "number") ? [minVerbosity] : []),
         ...messagePieces);
   }
-  warnEvent (minLogLevel: any, ...messagePieces: any[]) {
-    if ((typeof minLogLevel === "number") && (minLogLevel > this._debugLevel)) return this;
+  warnEvent (minVerbosity: any, ...messagePieces: any[]) {
+    if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
     return this._logger.warn(`${this.debugId()}:`,
-        ...((typeof minLogLevel !== "number") ? [minLogLevel] : []),
+        ...((typeof minVerbosity !== "number") ? [minVerbosity] : []),
         ...messagePieces);
   }
-  errorEvent (minLogLevel: any, ...messagePieces: any[]) {
-    if ((typeof minLogLevel === "number") && (minLogLevel > this._debugLevel)) return this;
+  errorEvent (minVerbosity: any, ...messagePieces: any[]) {
+    if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
     return this._logger.error(`${this.debugId()}:`,
-        ...((typeof minLogLevel !== "number") ? [minLogLevel] : []),
+        ...((typeof minVerbosity !== "number") ? [minVerbosity] : []),
         ...messagePieces);
   }
   wrapErrorEvent (error: Error, functionName: Error | string, ...contexts: any[]) {

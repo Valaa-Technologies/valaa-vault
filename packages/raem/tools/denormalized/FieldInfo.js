@@ -32,18 +32,18 @@ export function tryElevateFieldValue (resolver: Resolver, value: any, fieldInfo:
 
 export function elevateFieldReference (resolver: Resolver, reference: IdData, fieldInfo: FieldInfo,
     elevation: ?GhostElevation = _tryFieldGhostElevation(fieldInfo), typeName: ?string,
-    debug: ?number) {
+    verbosity: ?number) {
   if (!elevation) return reference;
   return _elevateReference(resolver.fork(), reference, fieldInfo, elevation,
-      typeName || fieldInfo.intro.namedType.name, debug);
+      typeName || fieldInfo.intro.namedType.name, verbosity);
 }
 
 export function elevateFieldRawSequence (resolver: Resolver, rawSequence: OrderedSet,
-    fieldInfo: FieldInfo, object: Transient = fieldInfo.sourceTransient, debug: ?number) {
+    fieldInfo: FieldInfo, object: Transient = fieldInfo.sourceTransient, verbosity: ?number) {
   if (!object) return rawSequence;
   const elevator = Object.create(resolver);
   elevator.typeName = "ResourceStub";
-  return _elevateRawSequence(elevator, object, rawSequence, Object.create(fieldInfo), debug);
+  return _elevateRawSequence(elevator, object, rawSequence, Object.create(fieldInfo), verbosity);
 }
 
 function _tryFieldGhostElevation (fieldInfo: FieldInfo) {
@@ -60,7 +60,7 @@ export function _getFieldGhostElevation (fieldInfo: FieldInfo, elevationInstance
 }
 
 function _elevateReference (elevator: Resolver, reference: IdData, fieldInfo: FieldInfo,
-    elevation: GhostElevation, typeName: string, debug: ?number) {
+    elevation: GhostElevation, typeName: string, verbosity: ?number) {
   elevator.tryGoToTransientOfId(reference, typeName);
   let elevatedId;
   if (elevator.objectId.isInactive()) {
@@ -74,13 +74,14 @@ function _elevateReference (elevator: Resolver, reference: IdData, fieldInfo: Fi
   } else {
     const referencePath = elevator.objectId.getGhostPath();
     elevatedId = elevation.getElevatedIdOf(referencePath);
-    if (!elevatedId || (typeof debug === "number")) {
-      elevatedId = _elevateObjectId(elevator, elevation.basePath, elevation.instancePath, debug);
+    if (!elevatedId || (typeof verbosity === "number")) {
+      elevatedId = _elevateObjectId(
+          elevator, elevation.basePath, elevation.instancePath, verbosity);
       elevation.setElevatedIdOf(referencePath, elevatedId);
-    } else if (typeof debug === "number") {
-      console.log("  ".repeat(debug), "Found existing elevated id:", elevatedId.toString(),
-          "\n ", "  ".repeat(debug), "in elevation:", elevation.toString(),
-          "\n ", "  ".repeat(debug), "for path:", referencePath.toString());
+    } else if (typeof verbosity === "number") {
+      console.log("  ".repeat(verbosity), "Found existing elevated id:", elevatedId.toString(),
+          "\n ", "  ".repeat(verbosity), "in elevation:", elevation.toString(),
+          "\n ", "  ".repeat(verbosity), "for path:", referencePath.toString());
     }
   }
   const coupledField = tryCoupledFieldFrom(reference);
@@ -88,7 +89,7 @@ function _elevateReference (elevator: Resolver, reference: IdData, fieldInfo: Fi
 }
 
 function _elevateRawSequence (resolver: Resolver, object: Transient,
-    partialRawSequence: OrderedSet, fieldInfo: FieldInfo, debug: ?number) {
+    partialRawSequence: OrderedSet, fieldInfo: FieldInfo, verbosity: ?number) {
   // TODO(iridian): Very potential optimization/caching focus: the current implementation doing
   // combined merge + elevate of the entries from prototypes is simplistic and has redundancies.
   const partialRemoves = partialRawSequence && partialRawSequence[PartialRemovesTag];
@@ -108,7 +109,7 @@ function _elevateRawSequence (resolver: Resolver, object: Transient,
       fieldInfo.elevationInstanceId = fieldInfo.sourceTransient.get("id");
       fieldInfo.sourceTransient = resolver.objectTransient;
       fullUnelevatedSequence = _elevateRawSequence(
-          resolver, currentObject, prototypeSequence, fieldInfo, debug);
+          resolver, currentObject, prototypeSequence, fieldInfo, verbosity);
       if (typeof partialRemoves !== "undefined") {
         fullUnelevatedSequence = fullUnelevatedSequence.subtract(partialRemoves);
       }
@@ -123,11 +124,11 @@ function _elevateRawSequence (resolver: Resolver, object: Transient,
   const elevator = Object.create(resolver);
   const typeName = fieldInfo.intro.namedType.name;
   return fullUnelevatedSequence.map(reference =>
-      _elevateReference(elevator, reference, fieldInfo, elevation, typeName, debug));
+      _elevateReference(elevator, reference, fieldInfo, elevation, typeName, verbosity));
 }
 
 function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: GhostPath,
-    elevationInstancePath: GhostPath, debug: ?number): VRef {
+    elevationInstancePath: GhostPath, verbosity: ?number): VRef {
   if (elevationBasePath === elevationInstancePath) return referenceElevator.objectId;
   let elevatedGhostPath: GhostPath = referenceElevator.objectId.getGhostPath();
   let ghostHostRawId;
@@ -147,16 +148,17 @@ function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: Ghost
       // the ghost path should be active as well.
       takeToCurrentObjectOwnerTransient(ownersResolver);
     }
-    if (typeof debug === "number") {
-      console.log("  ".repeat(debug), "elevating", referenceElevator.objectId.toString(),
-          "\n ", "  ".repeat(debug), "elevationBasePath:", elevationBasePath.toString(),
-          "\n ", "  ".repeat(debug), "elevationInstancePath:", elevationInstancePath.toString());
+    if (typeof verbosity === "number") {
+      console.log("  ".repeat(verbosity), "elevating", referenceElevator.objectId.toString(),
+          "\n ", "  ".repeat(verbosity), "elevationBasePath:", elevationBasePath.toString(),
+          "\n ", "  ".repeat(verbosity), "elevationInstancePath:",
+              elevationInstancePath.toString());
     }
     while (true) {
-      if (typeof debug === "number") {
-        console.log("  ".repeat(debug + 1), "elevation phase 1 entry with current owner at",
+      if (typeof verbosity === "number") {
+        console.log("  ".repeat(verbosity + 1), "elevation phase 1 entry with current owner at",
                 ownersResolver.objectId.toString(),
-            "\n ", "  ".repeat(debug + 1), "currentReferencePath:",
+            "\n ", "  ".repeat(verbosity + 1), "currentReferencePath:",
                 currentReferencePath.toString());
       }
       const innermostMaterializedPrototypeOwnerTransient = ownersResolver.objectTransient;
@@ -181,18 +183,18 @@ function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: Ghost
         if (instanceGhostPath) break;
         takeToCurrentObjectOwnerTransient(ownersResolver);
         if (!ownersResolver.objectId) {
-          if (typeof debug === "number") {
-            console.log("  ".repeat(debug), "final elevated reference",
-                "\n ", "  ".repeat(debug), "owned by", String(elevationBasePath),
-                "\n ", "  ".repeat(debug), "in lookup context", String(elevationInstancePath),
-                "\n ", "  ".repeat(debug), "result:", String(referenceElevator.objectId));
+          if (typeof verbosity === "number") {
+            console.log("  ".repeat(verbosity), "final elevated reference",
+                "\n ", "  ".repeat(verbosity), "owned by", String(elevationBasePath),
+                "\n ", "  ".repeat(verbosity), "in lookup context", String(elevationInstancePath),
+                "\n ", "  ".repeat(verbosity), "result:", String(referenceElevator.objectId));
           }
           return referenceElevator.objectId;
         }
-        if (typeof debug === "number") {
-          console.log("  ".repeat(debug + 2), "expanded owner to",
+        if (typeof verbosity === "number") {
+          console.log("  ".repeat(verbosity + 2), "expanded owner to",
               ownersResolver.objectId.toString(),
-              "\n ", "  ".repeat(debug + 2),
+              "\n ", "  ".repeat(verbosity + 2),
               ...(currentReferencePath.getHostRawIdByHostPrototype(ownersResolver.objectId.rawId())
                   ? ["previous owner already found in current elevation base path",
                     String(currentReferencePath)]
@@ -208,18 +210,18 @@ function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: Ghost
           : createGhostRawId(referenceElevator.objectId.rawId(), ghostHostRawId);
       const ghostPrototypeTransient = referenceElevator.objectTransient;
       referenceElevator.tryGoToTransientOfRawId(newGhostRawId);
-      if (typeof debug === "number") {
-        console.log("  ".repeat(debug + 1), "elevation phase 2 to",
+      if (typeof verbosity === "number") {
+        console.log("  ".repeat(verbosity + 1), "elevation phase 2 to",
                 newGhostRawId === ghostHostRawId ? "instance" : "ghost", newGhostRawId,
-            "\n ", "  ".repeat(debug + 1), "ghostHostRawId:", ghostHostRawId,
-            "\n ", "  ".repeat(debug + 1), "ghostHostPrototypeRawId:",
+            "\n ", "  ".repeat(verbosity + 1), "ghostHostRawId:", ghostHostRawId,
+            "\n ", "  ".repeat(verbosity + 1), "ghostHostPrototypeRawId:",
                 currentReferencePath.headHostPrototypeRawId(),
-            "\n ", "  ".repeat(debug + 1), "transient:",
+            "\n ", "  ".repeat(verbosity + 1), "transient:",
                 referenceElevator.objectTransient
                     ? referenceElevator.objectTransient.toJS() : "is immaterial ghost",
-            "\n ", "  ".repeat(debug + 1), "current owner id:",
+            "\n ", "  ".repeat(verbosity + 1), "current owner id:",
                 String(ownersResolver.objectId),
-            "\n ", "  ".repeat(debug + 1), "innermost materialized prototype owner:",
+            "\n ", "  ".repeat(verbosity + 1), "innermost materialized prototype owner:",
                 String(innermostMaterializedPrototypeOwnerTransient.get("id")));
       }
       if (referenceElevator.objectTransient) {
@@ -251,20 +253,20 @@ function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: Ghost
           if (ownersResolver.tryGoToTransientOfRawId(ghostOwnerCandidateId, "Resource")) {
             break;
           }
-          if (typeof debug === "number") {
-            console.log("  ".repeat(debug + 2), "ghost owner candidate immaterial:",
+          if (typeof verbosity === "number") {
+            console.log("  ".repeat(verbosity + 2), "ghost owner candidate immaterial:",
                     ghostOwnerCandidateId,
-                "\n ", "  ".repeat(debug + 2), "for ghost owner prototype",
+                "\n ", "  ".repeat(verbosity + 2), "for ghost owner prototype",
                     referenceElevator.objectId.toString());
           }
         }
         referenceElevator.objectTransient = ghostTransient;
         referenceElevator.objectId = ghostTransient.get("id");
       }
-      if (typeof debug === "number") {
-        console.log("  ".repeat(debug + 1), "current elevated path", String(elevatedGhostPath),
-            "\n ", "  ".repeat(debug + 1), "by ghost host", ghostHostRawId,
-            "\n ", "  ".repeat(debug + 1), "owner:", String(ownersResolver.objectId));
+      if (typeof verbosity === "number") {
+        console.log("  ".repeat(verbosity + 1), "current elevated path", String(elevatedGhostPath),
+            "\n ", "  ".repeat(verbosity + 1), "by ghost host", ghostHostRawId,
+            "\n ", "  ".repeat(verbosity + 1), "owner:", String(ownersResolver.objectId));
       }
     }
   } catch (error) {

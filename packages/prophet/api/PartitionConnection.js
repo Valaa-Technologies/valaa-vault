@@ -24,13 +24,13 @@ export default class PartitionConnection extends Follower {
   _syncedConnection: PartitionConnection | Promise<PartitionConnection>;
 
   constructor ({
-    name, prophet, partitionURI, receiveTruths, receiveCommands, logger, debugLevel
+    name, prophet, partitionURI, receiveTruths, receiveCommands, logger, verbosity
   }: {
     name: any, prophet: Prophet, partitionURI: ValaaURI,
     receiveTruths?: ReceiveEvents, receiveCommands?: ReceiveEvents,
-    logger?: Logger, debugLevel?: number,
+    logger?: Logger, verbosity?: number,
   }) {
-    super({ name: name || null, logger: logger || prophet.getLogger(), debugLevel });
+    super({ name: name || null, logger: logger || prophet.getLogger(), verbosity });
     invariantifyObject(prophet, "PartitionConnection.constructor.prophet",
         { instanceof: Prophet });
     invariantifyObject(partitionURI, "PartitionConnection.constructor.partitionURI",

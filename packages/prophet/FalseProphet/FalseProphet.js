@@ -56,8 +56,8 @@ export default class FalseProphet extends Prophet {
 
   _storyQueue: Story;
 
-  constructor ({ name, logger, schema, corpus, upstream, commandCountCallback }: Object) {
-    super({ name, logger });
+  constructor ({ schema, corpus, upstream, commandCountCallback, ...rest }: Object) {
+    super(rest);
     this.corpus = corpus;
     this.schema = schema || corpus.getSchema();
 

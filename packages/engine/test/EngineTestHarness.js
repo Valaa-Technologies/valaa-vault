@@ -35,7 +35,7 @@ export default class EngineTestHarness extends ProphetTestHarness {
       name: "Test ValaaEngine",
       logger: this.getLogger(),
       prophet: this.prophet,
-      debugLevel: this.getDebugLevel(),
+      verbosity: this.getVerbosity(),
     });
 
     const rootScope = this.engine.getRootScope();

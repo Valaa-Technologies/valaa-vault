@@ -20,10 +20,10 @@ export default class FalseProphetDiscourse extends Discourse {
   prophet: Prophet;
 
   constructor ({
-    follower, prophet, debugLevel, logger, packFromHost, unpackToHost, builtinSteppers,
+    follower, prophet, verbosity, logger, packFromHost, unpackToHost, builtinSteppers,
   }: Object) {
     // goes to Valker
-    super(prophet.corpus.schema, debugLevel, logger, packFromHost, unpackToHost, builtinSteppers);
+    super(prophet.corpus.schema, verbosity, logger, packFromHost, unpackToHost, builtinSteppers);
     this.nonTransactionalBase = this;
     this.follower = follower;
     this.prophet = prophet;

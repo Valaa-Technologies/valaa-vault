@@ -26,7 +26,7 @@ export default class ScriptTestHarness extends RAEMTestHarness {}
  */
 export function evaluateTestProgram (commandBlocks: any = [],
     head: any, programKuery: Kuery, scope: ?Object, options: Object = {}) {
-  const harness = createScriptTestHarness({ debug: options.debug }, ...commandBlocks);
+  const harness = createScriptTestHarness({ verbosity: options.verbosity }, ...commandBlocks);
   if (options.harness) Object.setPrototypeOf(options.harness, harness);
   if (scope) {
     options.scope = scope;

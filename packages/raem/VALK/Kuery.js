@@ -1706,7 +1706,7 @@ function toRawVAKON (kueryOrPrimitive: any): any {
 
 export function dumpObject (value) {
   const ret = _dumpObject(value);
-  if (ret.length === 2) return ret;
+  if (ret.length) return ret;
   if (isHostRef(value)) {
     const denormalized = (typeof value.get === "function") ? value
         : ((typeof value._singular === "object") && typeof value._singular.get === "function")

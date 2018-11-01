@@ -89,6 +89,7 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
     _loadEventId(truths, "prev", connection._truthLogInfo, "eventIdEnd");
     _loadEventId(commands, undefined, connection._commandQueueInfo, "eventIdBegin");
     _loadEventId(commands, "prev", connection._commandQueueInfo, "eventIdEnd");
+    connection._clampCommandQueueByTruthEvendIdEnd(connection);
   });
   return true;
 
@@ -117,7 +118,7 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
   const persistRefCountAdjusts = {};
   function _addAdjust (refs, bvobId, adjust) { refs[bvobId] = (refs[bvobId] || 0) + adjust; }
 
-  await connection._db.transaction(["medias"], "readwrite", ({ medias }) => {
+  await (connection._db && connection._db.transaction(["medias"], "readwrite", ({ medias }) => {
     updates.forEach(entry => {
       const currentEntryReq = medias.get(entry.mediaId);
       currentEntryReq.onsuccess = (/* event */) => {
@@ -157,9 +158,9 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
         };
       };
     });
-  });
+  }));
   updates.forEach(entry => {
-    if (!entry.successfullyPersisted) return;
+    if (connection.isLocallyPersisted() && !entry.successfullyPersisted) return;
     delete entry.successfullyPersisted;
     const currentScribeEntry = connection._prophet._persistedMediaLookup[entry.mediaId];
     if ((currentScribeEntry || {}).isInMemory && (currentScribeEntry.mediaInfo || {}).bvobId) {
@@ -172,6 +173,7 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
 }
 
 export function _readMediaEntries (connection: ScribePartitionConnection, results: Object) {
+  if (!connection._db) return undefined;
   return connection._db.transaction(["medias"], "readwrite", ({ medias }) =>
       new Promise((resolve, reject) => {
         const req = medias.openCursor();
@@ -203,7 +205,7 @@ export function _readMediaEntries (connection: ScribePartitionConnection, result
 
 export function _destroyMediaInfo (connection: ScribePartitionConnection, mediaRawId: string) {
   const mediaEntry = connection._pendingMediaLookup[mediaRawId];
-  if (!mediaEntry) return undefined;
+  if (!mediaEntry || !connection._db) return undefined;
   delete connection._pendingMediaLookup[mediaRawId];
   delete connection._prophet._persistedMediaLookup[mediaRawId];
 
@@ -352,6 +354,7 @@ export async function _adjustBvobBufferPersistRefCounts (
 */
 
 export function _writeTruths (connection: ScribePartitionConnection, truthLog: EventBase[]) {
+  if (!connection._db) return undefined;
   return connection._db.transaction(["truths"], "readwrite", ({ truths }) => {
     truthLog.forEach(truth => {
       if (typeof truth.eventId !== "number") {
@@ -380,6 +383,7 @@ export function _writeTruths (connection: ScribePartitionConnection, truthLog: E
 }
 
 export function _readTruths (connection: ScribePartitionConnection, options: Object) {
+  if (!connection._db) return undefined;
   const range = connection._db.getIDBKeyRange(options);
   if (range === null) return undefined;
   return connection._db.transaction(["truths"], "readonly",
@@ -388,6 +392,7 @@ export function _readTruths (connection: ScribePartitionConnection, options: Obj
 
 export function _writeCommands (connection: ScribePartitionConnection,
     commandLog: EventBase[]) {
+  if (!connection._db) return undefined;
   return connection._db.transaction(["commands"], "readwrite", ({ commands }) =>
       commandLog.forEach(command => {
         if (typeof command.eventId !== "number") {
@@ -404,6 +409,7 @@ export function _writeCommands (connection: ScribePartitionConnection,
 }
 
 export function _readCommands (connection: ScribePartitionConnection, options: Object) {
+  if (!connection._db) return undefined;
   const range = connection._db.getIDBKeyRange(options);
   if (range === null) return undefined;
   return connection._db.transaction(["commands"], "readonly",
@@ -412,6 +418,7 @@ export function _readCommands (connection: ScribePartitionConnection, options: O
 
 export function _deleteCommands (connection: ScribePartitionConnection,
     fromEventId: string, toEventId: string) {
+  if (!connection._db) return undefined;
   return connection._db.transaction(["commands"], "readwrite", ({ commands }) =>
       new Promise((resolve, reject) => {
         const req = commands.delete(connection.database.IDBKeyRange.bound(fromEventId, toEventId));

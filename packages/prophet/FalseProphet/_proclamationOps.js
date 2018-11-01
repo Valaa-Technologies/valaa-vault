@@ -25,12 +25,12 @@ export type Prophecy = Story & {
 // and rolls back previous ones.
 export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[],
     { timed, transactionInfo } = {}): ClaimResult {
-  return {
-    eventResults: events.map((event, index) => {
-      const prophecy = falseProphet._distpatchEventForAStory(
-          universalizeEvent(falseProphet, event), "chronicle", timed, transactionInfo);
-      prophecy.isProphecy = true;
+  const prophecies = events.map(event => falseProphet._dispatchEventForStory(
+      universalizeEvent(falseProphet, event), "prophecy", timed, transactionInfo));
+  const reactions = falseProphet._reciteStoriesToFollowers(prophecies);
 
+  return {
+    eventResults: prophecies.map((prophecy, index) => {
       let getCommandOf;
       let prophecyFulfillment;
       if (!timed) {
@@ -53,7 +53,7 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
       }
       let result;
       try {
-        result = falseProphet._revealStoryToAllFollowers(prophecy);
+        result = reactions[index];
         result.getCommandOf = getCommandOf;
         result.getFinalStory = () => thenChainEagerly(prophecyFulfillment,
             () => prophecy,
@@ -82,7 +82,7 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
       function errorOnChronicleEvents (errorWrap, error) {
         throw falseProphet.wrapErrorEvent(error, errorWrap,
             "\n\tevents:", ...dumpObject(events),
-            "\n\tevent:", ...dumpObject(event),
+            "\n\tevent:", ...dumpObject(events[index]),
             "\n\tprophecy:", ...dumpObject(prophecy),
             "\n\tresult:", ...dumpObject(result),
         );
@@ -179,27 +179,28 @@ function _fulfillStage (falseProphet: FalseProphet, stage: Object) {
       // Maybe determine eventId's beforehand?
 
       // Get eventId and scribe persist finalizer for each partition
-      const chronichlings = [];
+      const chroniclings = [];
       for (const { connection, commandEvent } of stage.partitions) {
-        let chronichling;
+        let chronicling;
         try {
-          chronichling = connection.chronicleEvent(commandEvent, { isProphecy: true });
-          chronichlings.push(chronichling);
+          chronicling = connection.chronicleEvent(commandEvent, { isProphecy: true });
+          chroniclings.push(chronicling);
         } catch (error) {
           throw falseProphet.wrapErrorEvent(error,
               new Error(`chronicleEvents.stage["${stage.name}"].connection["${
                   connection.getName()}"].chronicleEvents`),
               "\n\tcommandEvent:", ...dumpObject(commandEvent),
-              "\n\tevent chronichling:", ...dumpObject(chronichling),
+              "\n\tevent chronicling:", ...dumpObject(chronicling),
           );
         }
       }
-      return mapEagerly(chronichlings,
-          chronichling => chronichling.getTruthEvent(),
-          (error, chronichling) => {
+      return mapEagerly(chroniclings,
+          chronicling => chronicling.getTruthEvent(),
+          (error, chronicling, index) => {
             throw falseProphet.wrapErrorEvent(error,
-                new Error(`chronicleEvents.stage["${stage.name}"].chronicling(${
-                      chronichling.event.eventId})getTruthEvent()"`));
+                new Error(`chronicleEvents.stage["${stage.name}"].chroniclings[${index}](${
+                      chronicling && chronicling.event.eventId}).getTruthEvent()"`),
+                "\n\tchroniclings:", ...dumpObject(chroniclings));
           }
       );
     },

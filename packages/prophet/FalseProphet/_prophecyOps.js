@@ -80,6 +80,7 @@ export function _dispatchEventForStory (falseProphet: FalseProphet, event: Event
   story.timed = timed;
   story.state = falseProphet.getState();
   story.previousState = previousState;
+  if (dispatchDescription === "prophecy") story.isProphecy = true;
   // story.id = story.commandId; TODO(iridian): what was this?
   falseProphet._storyQueue.addStory(story);
   return story;
@@ -160,15 +161,29 @@ export function _confirmProphecy (falseProphet: FalseProphet, truthEvent: EventB
 
   // Notify followers about the prophecies that have become permanent truths, ie. all prophecies
   // at the front of the pending prophecies list markes as isTruth, and which thus can no longer
-  // be affected by any future reformation.
-  while (falseProphet._prophecySentinel.next.isTruth) {
-    const nextTruth = _removeProphecy(falseProphet, falseProphet._prophecySentinel.next);
-    falseProphet._confirmTruthToAllFollowers(nextTruth.story, purgedCommands);
+  // be affected by any future revisioning.
+  while (falseProphet._storyQueue.getFirst().isTruth) {
+    const nextTruth = falseProphet._storyQueue
+        .removeStory(falseProphet._storyQueue.getFirst());
+    _confirmTruthToAllFollowers(nextTruth, purgedProphecies);
+  }
+  function _confirmTruthToAllFollowers (confirmedProphecy: Object) {
+    (falseProphet._followers || []).forEach(discourse => {
+      try {
+        discourse.onConfirmProphecy(confirmedProphecy, purgedProphecies);
+      } catch (error) {
+        falseProphet.outputErrorEvent(falseProphet.wrapErrorEvent(error,
+            "_confirmTruthToAllFollowers",
+            "\n\ttruthEvent:", confirmedProphecy,
+            "\n\tpurgedCommands:", purgedProphecies,
+            "\n\ttarget discourse:", discourse,
+        ));
+      }
+    });
   }
 }
-
-function _addTruthToPendingProphecies (falseProphet: FalseProphet,
-    truthEvent: EventBase) {
+/*
+function _addTruthToPendingProphecies (falseProphet: FalseProphet, truthEvent: EventBase) {
   // Add the authorized and notify downstream
   // no truthId means a legacy command.
   const truthId = truthEvent.commandId;
@@ -185,6 +200,7 @@ function _addTruthToPendingProphecies (falseProphet: FalseProphet,
   }
   story.isTruth = true;
 }
+*/
 
 export function _beginReformation (falseProphet: FalseProphet, purgedCommands) {
   if (!purgedCommands.length) return undefined;

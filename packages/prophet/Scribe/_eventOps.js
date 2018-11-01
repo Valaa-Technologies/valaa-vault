@@ -8,7 +8,7 @@ import type {
   RetrieveMediaBuffer,
 } from "~/prophet/api/Prophet";
 
-import { dumpify, dumpObject, thenChainEagerly, vdon } from "~/tools";
+import { dumpObject, thenChainEagerly, vdon } from "~/tools";
 
 import ScribePartitionConnection from "./ScribePartitionConnection";
 import { _retrySyncMedia } from "./_contentOps";
@@ -35,8 +35,9 @@ export const vdoc = vdon({
 export async function _narrateEventLog (connection: ScribePartitionConnection,
     options: NarrateOptions, ret: Object) {
   const localResults = await _narrateLocalLogs(connection,
-      connection.getReceiveTruths(options.receiveTruths),
-      (options.commands !== false) && connection.getReceiveCommands(options.receiveCommands),
+      options.receiveTruths || connection._downstreamReceiveTruths,
+      (options.commands !== false)
+          && (options.receiveCommands || connection._downstreamReceiveCommands),
       options.eventIdBegin, options.eventIdEnd,
       options.retrieveMediaBuffer);
 
@@ -74,6 +75,7 @@ async function _narrateLocalLogs (connection: ScribePartitionConnection,
         connection.getFirstUnusedTruthEventId(), connection.getFirstUnusedCommandEventId()),
     retrieveMediaBuffer: ?RetrieveMediaBuffer,
 ): Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
+  if (!receiveTruths) return {};
   const truthEventIdEnd = Math.min(connection.getFirstUnusedTruthEventId(), eventIdEnd);
   const truths = ((eventIdBegin < truthEventIdEnd)
           && await connection._readTruths({ eventIdBegin, eventIdEnd: truthEventIdEnd }))

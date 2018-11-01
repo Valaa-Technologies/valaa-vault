@@ -102,7 +102,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   }
 
   receiveCommands (commands: EventBase[]) {
-    let revisedCommands;
+    let newStories, revisedStories;
     try {
       this._insertEventsToQueue(commands, this._unconfirmedCommands, {
         continuous: true,
@@ -119,10 +119,11 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
                 } has inconsistent commandId '${command.commandId
                 }' to corresponding pending truth commandId '${this._pendingTruths[queueIndex]}'`);
           }
-          this._prophet._distpatchEventForAStory(command, "receiveCommand");
+          if (!newStories) newStories = [];
+          newStories.push(this._prophet._dispatchEventForStory(command, "receiveCommand"));
         },
       });
-      this._normalizeQueuesAndPostProcess(revisedCommands);
+      this._normalizeQueuesAndPostProcess(newStories, revisedStories);
       return commands;
     } catch (error) {
       throw this.wrapErrorEvent(error, `receiveCommand([${commands[0].eventId}, ${
@@ -196,7 +197,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     }
   }
 
-  _normalizeQueuesAndPostProcess (purgedStories: EventBase[]) {
+  _normalizeQueuesAndPostProcess (newStories: Story[] = [], purgedStories: EventBase[]) {
     const confirmedCommandCount = Math.min(
         this._firstUnconfirmedEventId - this._headEventId, this._unconfirmedCommands.length);
     if (confirmedCommandCount > 0) {
@@ -216,10 +217,10 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     } else {
       while (this._pendingTruths[0]) {
         ++this._headEventId;
-        this._prophet._distpatchEventForAStory(this._pendingTruths.shift(), "truth");
+        newStories.push(this._prophet._dispatchEventForStory(this._pendingTruths.shift(), "truth"));
       }
     }
-
+    this._prophet._reciteStoriesToFollowers(newStories);
     if (purgedStories && purgedStories.length) {
       this.setIsFrozen(false);
       throw new Error("reformation not implemented yet against FalseProphet");

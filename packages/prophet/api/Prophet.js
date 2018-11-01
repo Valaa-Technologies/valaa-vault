@@ -24,7 +24,7 @@ export type ConnectOptions = {
                                    // if false, throw if no connection exists,
   newPartition?: boolean,          // if true, throw if a partition exists (has persisted events)
                                    // if false, throw if no partition exists (no persisted events)
-  onlyTrySynchronousConnection?: boolean, // if true
+  synchronous?: boolean, // if true
   allowPartialConnection?: boolean,       // default: false. If true, return not fully narrated
                                           // connection synchronously
   requireLatestMediaContents?: boolean,   //
@@ -95,18 +95,25 @@ export default class Prophet extends LogEventGenerator {
    */
   acquirePartitionConnection (partitionURI: ValaaURI,
       options: ConnectOptions = {}): ?PartitionConnection {
-    let connection = this._connections[String(partitionURI)];
-    if (connection) return connection;
-    if (options.newConnection === false) {
-      if (options.require === false) return undefined;
-      throw new Error("Can't create new partition connection with options.newConnection === false");
+    try {
+      let connection = this._connections[String(partitionURI)];
+      if (connection) return connection;
+      if (options.newConnection === false) {
+        if (options.require === false) return undefined;
+        throw new Error(
+            "Can't create new partition connection with options.newConnection === false");
+      }
+      connection = this._createPartitionConnection(partitionURI, options);
+      if (!connection) return undefined;
+      connection.addReference();
+      this._connections[String(partitionURI)] = connection;
+      connection.connect(options); // Initiates the connection but doesn't wait for it to complete.
+      return connection;
+    } catch (error) {
+      throw this.wrapErrorEvent(error,
+          new Error(`acquirePartitionConnection(${String(partitionURI)})`),
+          "\n\toptions:", ...dumpObject(options));
     }
-    connection = this._createPartitionConnection(partitionURI, options);
-    if (!connection) return undefined;
-    connection.addReference();
-    this._connections[String(partitionURI)] = connection;
-    connection.connect(options); // Initiates the connection but doesn't wait for it to complete.
-    return connection;
   }
 
   _createPartitionConnection (partitionURI: ValaaURI, options: ConnectOptions) {

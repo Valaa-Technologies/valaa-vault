@@ -141,7 +141,7 @@ export default class LiveProps extends UIComponent {
       });
     }
     const sheetContent = getImplicitMediaInterpretation(value, kueryKey, {
-      mimeFallback: "text/css", immediate: undefined, transaction: this.context.engine.discourse,
+      mimeFallback: "text/css", synchronous: undefined, transaction: this.context.engine.discourse,
     });
     if ((sheetContent == null) || isPromise(sheetContent)) return sheetContent;
     if (this._currentSheetContent !== sheetContent) {
@@ -183,7 +183,7 @@ export default class LiveProps extends UIComponent {
         if (((name.slice(0, 2) === "on") || (name === "refKuery"))
             && (typeof newProps[name] !== "function")) {
           newProps[name] = getImplicitCallable(newProps[name], `props.${name}`,
-              { immediate: undefined });
+              { synchronous: undefined });
         }
       }
       if (name === "className") {

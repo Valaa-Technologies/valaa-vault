@@ -258,14 +258,19 @@ export default class Vrapper extends Cog {
   }
 
   /**
-   * Tries to synchronously activate the Vrapper to Active phase from Inactive or Activating
-   * phase (or do nothing if already Active), returns undefined if successful ie. the phase is now
-   * Active, otherwise returns the Vrapper blocking the immediate activation (which might be this
-   * Vrapper itself).
+   * Tries to synchronously activate the Vrapper to Active phase from
+   * Inactive or Activating phase (or do nothing if already Active).
+   * Returns undefined if successful ie. the phase is now Active,
+   * otherwise returns the Vrapper blocking the synchronous activation
+   * (which might be this Vrapper itself).
    * Will *not* initiate an activation process by itself.
-   * The blocking cause can be inspected by blocker.getPhase(): if the phase is Inactive or
-   * Activating, the cause is a non-full partition connection. Otherwise the cause is a
-   * non-activateable phase (Destroyed, Unavailable, NonResource).
+   * The blocking cause can be inspected by blocker.getPhase(): if the
+   * phase is Inactive or Activating, the cause is a non-full partition
+   * connection. Otherwise the cause is a non-activateable phase
+   * (Destroyed, Unavailable, NonResource).
+   * Unavailable indicates an error on the partition connection sync
+   * which can be extracted with
+   * `Promise.resolve(conn.getSyncedConnection()).catch(onError);`
    *
    * @param {Object} state
    * @param {Transient} transient
@@ -323,8 +328,8 @@ export default class Vrapper extends Cog {
       this._refreshDebugId(transient, { state });
       if (this.hasInterface("Scope")) this._setUpScopeFeatures({ state });
     } catch (error) {
-      outputError(this.wrapErrorEvent(error, "_finalizeActivate()",
-          "caught an error after activation, which will be swallowed",
+      outputError(this.wrapErrorEvent(error,
+          new Error("_finalizeActivate() caught an error post-activation, which will be swallowed"),
           "\n\ttransient:", ...dumpObject(transient.toJS()),
           "\n\tpartitionConnection:", ...dumpObject(this._partitionConnection),
           "\n\tpartitionConnectionProcess:", ...dumpObject(this._partitionConnectionProcess),
@@ -345,15 +350,18 @@ export default class Vrapper extends Cog {
    * @memberof Vrapper
    */
   requireActive (options?: VALKOptions) {
+    if (this._phase === ACTIVE) return;
     const blocker = this._refreshPhaseOrGetBlocker();
     if (!blocker) return;
     if (blocker.isDestroyed() && options) {
-      // TODO(iridian): While this takes care of the situation where a Resource is destroyed in the
-      // main line but not destroyed in a transaction, the reverse scenario is not handled:
-      // if a resource is destroyed in transaction but not in main line, requireActive will keep on
-      // passing. This is a lesser issue as any illegal operations will still be caught by the
-      // False Prophet and backend validations. But nevertheless the lack of symmetry and dirty
-      // caching is unclean.
+      // TODO(iridian): While this takes care of the situation where
+      // a Resource is destroyed in the main line but not destroyed in
+      // a transaction, the reverse scenario is not handled: if a
+      // resource is destroyed in transaction but not in main line,
+      // requireActive will keep on passing. This is a lesser issue as
+      // any illegal operations will still be caught by FalseProphet
+      // and backend validations. But nevertheless the lack of symmetry
+      // and dirty caching is unclean. Caching is hard.
       const state = options.state || (options.transaction && options.transaction.getState());
       if (state && getObjectTransient(state, this[HostRef], this._typeName)) return;
     }
@@ -393,11 +401,6 @@ export default class Vrapper extends Cog {
   getPartitionConnection (options:
       { require?: boolean, transaction?: Transaction, newConnection?: boolean }
           = { require: true }): ?PartitionConnection {
-    // FIXME(iridian): the direct singular caching means that if the partitionConnection is changed,
-    // the change is not visible to Vrapper. When implementing this, be mindful that the full
-    // solution involves partition-specific return values, so some kind of mapping is needed.
-    // However this carries an extra burden: the connections must be released at some point,
-    // otherwise they will hog resources (ie. they hold refcounts on in-memory files).
     if (this._partitionConnectionProcess) {
       if (!this._partitionConnectionProcess.fullConnection) return this._partitionConnectionProcess;
       this._partitionConnection = this._partitionConnectionProcess.fullConnection;
@@ -412,8 +415,7 @@ export default class Vrapper extends Cog {
       }
       partitionURI = this[HostRef].getPartitionURI();
       if (!partitionURI) {
-        nonGhostOwnerRawId = this[HostRef].getGhostPath().headHostRawId()
-            || this[HostRef].rawId();
+        nonGhostOwnerRawId = this[HostRef].getGhostPath().headHostRawId() || this[HostRef].rawId();
         const transient = (options.transaction || this.engine.discourse)
             .tryGoToTransientOfRawId(nonGhostOwnerRawId, "Resource");
         if (transient) {
@@ -1150,7 +1152,7 @@ export default class Vrapper extends Cog {
         if (cachedInterpretation
             && (mediaInfo.mime || !options.mimeFallback
                 || (cachedInterpretation === interpretationsByMime[options.mimeFallback]))) {
-          return (options.immediate !== false)
+          return (options.synchronous !== false)
               ? cachedInterpretation
               : Promise.resolve(cachedInterpretation);
         }
@@ -1163,18 +1165,18 @@ export default class Vrapper extends Cog {
         decodedContent = this._withPartitionConnectionChainEagerly(Object.create(options), [
           connection => connection.decodeMediaContent(mediaInfo),
         ]);
-        if ((options.immediate === true) && isPromise(decodedContent)) {
+        if ((options.synchronous === true) && isPromise(decodedContent)) {
           throw new Error(`Media interpretation not immediately available for '${
               mediaInfo.name || "<unnamed>"}'`);
         }
-        if ((options.immediate === false) || isPromise(decodedContent)) {
+        if ((options.synchronous === false) || isPromise(decodedContent)) {
           return (async () => {
             options.decodedContent = await decodedContent;
-            options.immediate = true;
+            options.synchronous = true;
             return this._obtainMediaInterpretation(options, vExplicitOwner, activeTypeName);
           })();
         }
-        // else: decodedContent is immediately available and immediate !== false.
+        // else: decodedContent is synchronously available and synchronous !== false.
         // Proceed to integration.
       }
       let vScope = vExplicitOwner || this.get("owner", Object.create(options));
@@ -1303,18 +1305,18 @@ export default class Vrapper extends Cog {
       mediaInfo = this.resolveMediaInfo(Object.create(options));
       const ret = this._withPartitionConnectionChainEagerly(Object.create(options), [
         connection => connection.getMediaURL(mediaInfo),
-      ]);
-      if (typeof options.immediate !== "undefined") {
-        if (!options.immediate) return Promise.resolve(ret);
+      ], errorOnMediaURL.bind(this));
+      if (typeof options.synchronous !== "undefined") {
+        if (!options.synchronous) return Promise.resolve(ret);
         if (isPromise(ret)) {
           throw new Error(`Media URL not immediately available for '${
               (mediaInfo && mediaInfo.name) || "<unnamed>"}'`);
         }
       }
       return ret;
-    } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .mediaURL(), with:`,
-          "\n\tinfo:", mediaInfo);
+    } catch (error) { return errorOnMediaURL(error); }
+    function errorOnMediaURL (error) {
+      throw this.wrapErrorEvent(error, wrapper, "\n\tinfo:", ...dumpObject(mediaInfo));
     }
   }
 
@@ -1325,8 +1327,8 @@ export default class Vrapper extends Cog {
    * If the interpretation is not immediately available or if the partition of the Media is not
    * acquired, returns a promise for acquiring the partition and performing this operation instead.
    *
-   * If options.immediate equals true and this would return a promise, throws instead.
-   * If options.immediate equals false always returns a promise.
+   * If options.synchronous equals true and this would return a promise, throws instead.
+   * If options.synchronous equals false always returns a promise.
    *
    * @param {VALKOptions} [options={}]
    * @returns
@@ -1382,13 +1384,10 @@ export default class Vrapper extends Cog {
           ret._valkCaller = true;
           return ret;
         },
-      ], onError.bind(this));
-    } catch (error) { throw onError.call(this, error); }
-    function onError (error) {
-      if (alreadyWrapped) return error;
-      alreadyWrapped = true;
-      return wrapError(error, `During ${this.debugId()}\n .prepareBvob(), with:`,
-          "\n\tmediaInfo:", mediaInfo);
+      ], errorOnPrepareBvob.bind(this));
+    } catch (error) { return errorOnPrepareBvob.call(this, error); }
+    function errorOnPrepareBvob (error) {
+      throw this.wrapErrorEvent(error, wrapper, "\n\tmediaInfo:", mediaInfo);
     }
   }
 

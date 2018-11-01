@@ -18,7 +18,7 @@ import {
 } from "./_contentOps";
 import {
   _initializeConnectionIndexedDB, _updateMediaEntries, _readMediaEntries, _destroyMediaInfo,
-  _writeEvents, _readEvents, _writeCommands, _readCommands, _deleteCommands,
+  _writeTruths, _readTruths, _writeCommands, _readCommands, _deleteCommands,
 } from "./_databaseOps";
 import {
   _narrateEventLog, _chronicleEvents, _receiveEvents,
@@ -27,10 +27,10 @@ import {
 export default class ScribePartitionConnection extends PartitionConnection {
   // Info structures
 
-  // If not eventLogInfo firstEventId is not 0, it means the oldest
+  // If not eventLogInfo eventIdBegin is not 0, it means the oldest
   // stored event is a snapshot with that id.
-  _truthLogInfo: { firstEventId: number, firstUnusedEventId: number };
-  _commandQueueInfo: { firstEventId: number, firstUnusedEventId: number };
+  _truthLogInfo: { eventIdBegin: number, eventIdEnd: number };
+  _commandQueueInfo: { eventIdBegin: number, eventIdEnd: number };
 
   // Contains the media infos for most recent actions seen per media.
   // This lookup is updated whenever the media retrievers are created for the action, which is
@@ -48,8 +48,8 @@ export default class ScribePartitionConnection extends PartitionConnection {
 
   constructor (options: Object) {
     super(options);
-    this._truthLogInfo = { firstEventId: 0, firstUnusedEventId: 0 };
-    this._commandQueueInfo = { firstEventId: 0, firstUnusedEventId: 0 };
+    this._truthLogInfo = { eventIdBegin: 0, eventIdEnd: 0 };
+    this._commandQueueInfo = { eventIdBegin: 0, eventIdEnd: 0 };
   }
 
   connect (options: ConnectOptions) {
@@ -94,11 +94,11 @@ export default class ScribePartitionConnection extends PartitionConnection {
     super.disconnect();
   }
 
-  getFirstTruthEventId () { return this._truthLogInfo.firstEventId; }
-  getFirstUnusedTruthEventId () { return this._truthLogInfo.firstUnusedEventId; }
+  getFirstTruthEventId () { return this._truthLogInfo.eventIdBegin; }
+  getFirstUnusedTruthEventId () { return this._truthLogInfo.eventIdEnd; }
 
-  getFirstCommandEventId () { return this._commandQueueInfo.firstEventId; }
-  getFirstUnusedCommandEventId () { return this._commandQueueInfo.firstUnusedEventId; }
+  getFirstCommandEventId () { return this._commandQueueInfo.eventIdBegin; }
+  getFirstUnusedCommandEventId () { return this._commandQueueInfo.eventIdEnd; }
 
   async narrateEventLog (options: NarrateOptions = {}):
       Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
@@ -244,22 +244,22 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  async _writeEvents (eventLog: EventBase[]) {
+  async _writeTruths (eventLog: EventBase[]) {
     if (!eventLog || !eventLog.length) return undefined;
     try {
-      return await _writeEvents(this, eventLog);
+      return await _writeTruths(this, eventLog);
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          `_writeEvents([${eventLog[0].eventId},${eventLog[eventLog.length - 1].eventId}])`,
+          `_writeTruths([${eventLog[0].eventId},${eventLog[eventLog.length - 1].eventId}])`,
           "\n\teventLog:", ...dumpObject(eventLog));
     }
   }
 
-  async _readEvents (options: Object) {
+  async _readTruths (options: Object) {
     try {
-      return await _readEvents(this, options);
+      return await _readTruths(this, options);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_readEvents()`,
+      throw this.wrapErrorEvent(error, `_readTruths()`,
           "\n\toptions", ...dumpObject(options));
     }
   }

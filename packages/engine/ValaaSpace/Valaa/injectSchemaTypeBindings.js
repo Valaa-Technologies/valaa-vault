@@ -670,7 +670,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
         `returns the Media content if it is immediately available.`
     )(function immediateContent (options: any) {
       return VALEK.interpretContent({
-        immediate: true,
+        synchronous: true,
         mediaInfo: Vrapper.toMediaInfoFields,
         ...(options || {}),
       }).toVAKON();
@@ -679,7 +679,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
         `returns a promise to the Media content.`
     )(function readContent (options: any) {
       const ret = VALEK.interpretContent({
-        immediate: false,
+        synchronous: false,
         mediaInfo: Vrapper.toMediaInfoFields,
         ...(options || {}),
       }).toVAKON();
@@ -689,7 +689,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
         `returns a promise to the Media content.`
     )(function interpretContent (options: any) {
       const ret = VALEK.interpretContent({
-        immediate: false,
+        synchronous: false,
         mediaInfo: Vrapper.toMediaInfoFields,
         ...(options || {}),
       }).toVAKON();
@@ -700,7 +700,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
         ""} context (ie. browser HTML) to access the Media content.`
     )(function getURL (options: any) {
       return VALEK.mediaURL({
-        immediate: false,
+        synchronous: false,
         mediaInfo: Vrapper.toMediaInfoFields,
         ...(options || {}),
       }).toVAKON();

@@ -76,21 +76,21 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
   // entries, including the in-memory contents.
   // If the partition does not exist, create it and its structures.
   connection._db = new IndexedDBWrapper(connection._partitionURI.toString(), [
-    { name: "events", keyPath: "eventId" }, // TODO(iridian): Rename to 'truths' (or 'truthEvents')?
+    { name: "truths", keyPath: "eventId" },
     { name: "commands", keyPath: "eventId" },
     { name: "medias", keyPath: "mediaId" },
   ], connection.getLogger(), connection._prophet.getDatabaseAPI());
   await connection._db.initialize();
 
   // Populate _truthLogInfo with first and last events
-  await connection._db.transaction(["events", "commands"], "readonly", ({ events, commands }) => {
+  await connection._db.transaction(["truths", "commands"], "readonly", ({ truths, commands }) => {
     // Get the last key in the events table and store it in eventLogInfo
-    _loadEventId(events, undefined, connection._truthLogInfo, "firstEventId");
-    _loadEventId(events, "prev", connection._truthLogInfo, "firstUnusedEventId");
-    _loadEventId(commands, undefined, connection._commandQueueInfo, "firstEventId");
-    _loadEventId(commands, "prev", connection._commandQueueInfo, "firstUnusedEventId");
+    _loadEventId(truths, undefined, connection._truthLogInfo, "eventIdBegin");
+    _loadEventId(truths, "prev", connection._truthLogInfo, "eventIdEnd");
+    _loadEventId(commands, undefined, connection._commandQueueInfo, "eventIdBegin");
+    _loadEventId(commands, "prev", connection._commandQueueInfo, "eventIdEnd");
   });
-  return connection;
+  return true;
 
   function _loadEventId (entries, direction: ?"prev", target, eventIdTargetFieldName) {
     const req = entries.openCursor(...(direction ? [null, direction] : []));
@@ -351,39 +351,39 @@ export async function _adjustBvobBufferPersistRefCounts (
  ######    ##    ######  #    #     #
 */
 
-export function _writeEvents (connection: ScribePartitionConnection, eventLog: EventBase[]) {
-  return connection._db.transaction(["events"], "readwrite", ({ events }) => {
-    eventLog.forEach(event => {
-      if (typeof event.eventId !== "number") {
-        throw new Error(`INTERNAL ERROR: Event is missing eventId when trying to write ${
-            eventLog.length} events to local cache`);
+export function _writeTruths (connection: ScribePartitionConnection, truthLog: EventBase[]) {
+  return connection._db.transaction(["truths"], "readwrite", ({ truths }) => {
+    truthLog.forEach(truth => {
+      if (typeof truth.eventId !== "number") {
+        throw new Error(`INTERNAL ERROR: Truth is missing eventId when trying to write ${
+            truthLog.length} truths to local cache`);
       }
-      const req = events.add(_serializeEventAsJSON(event));
+      const req = truths.add(_serializeEventAsJSON(truth));
       req.onerror = reqEvent => {
         if (reqEvent.error.name !== "ConstraintError") throw req.error;
         reqEvent.preventDefault(); // Prevent transaction abort.
         reqEvent.stopPropagation(); // Prevent transaction onerror callback call.
-        const validateReq = events.get(event.eventId);
+        const validateReq = truths.get(truth.eventId);
         validateReq.onsuccess = validateReqEvent => {
-          if ((validateReqEvent.target.result || {}).commandId === event.commandId) return;
+          if ((validateReqEvent.target.result || {}).commandId === truth.commandId) return;
           throw connection.wrapErrorEvent(
-              new Error(`Mismatching existing event commandId when persisting event`),
-              `_writeEvents(${event.eventId})`,
+              new Error(`Mismatching existing truth commandId when persisting truth`),
+              `_writeTruths(${truth.eventId})`,
               "\n\texisting commandId:", (validateReqEvent.target.result || {}).commandId,
-              "\n\tnew event commandId:", event.commandId,
-              "\n\texisting event:", ...dumpObject(validateReqEvent.target.result),
-              "\n\tnew event:", ...dumpObject(event));
+              "\n\tnew truth commandId:", truth.commandId,
+              "\n\texisting truth:", ...dumpObject(validateReqEvent.target.result),
+              "\n\tnew truth:", ...dumpObject(truth));
         };
       };
     });
   });
 }
 
-export function _readEvents (connection: ScribePartitionConnection, options: Object) {
+export function _readTruths (connection: ScribePartitionConnection, options: Object) {
   const range = connection._db.getIDBKeyRange(options);
   if (range === null) return undefined;
-  return connection._db.transaction(["events"], "readonly",
-      ({ events }) => new Promise(_getAllShim.bind(null, events, range)));
+  return connection._db.transaction(["truths"], "readonly",
+      ({ truths }) => new Promise(_getAllShim.bind(null, truths, range)));
 }
 
 export function _writeCommands (connection: ScribePartitionConnection,

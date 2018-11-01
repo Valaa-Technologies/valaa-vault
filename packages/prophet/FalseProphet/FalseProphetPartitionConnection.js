@@ -1,6 +1,6 @@
 // @flow
 
-import { EventBase } from "~/raem/command";
+import { EventBase, Story } from "~/raem/command";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import type { NarrateOptions, ChronicleOptions, ChronicleEventResult } from "~/prophet/api/Prophet";
@@ -72,7 +72,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   }
 
   receiveTruths (truths: EventBase[]) {
-    const revisedCommands = [];
+    const revisedStories = [];
     try {
       this._insertEventsToQueue(truths, this._pendingTruths, {
         continuous: false,
@@ -85,10 +85,10 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
         onInserted: (truth, queueIndex) => {
           const purgeEventId = this._correlateTruthToCommand(
               queueIndex, truth, this._unconfirmedCommands[queueIndex]);
-          revisedCommands.push(...(this._purgeAndReviseCommands(purgeEventId) || []));
+          revisedStories.push(...(this._purgeAndReviseCommands(purgeEventId) || []));
         }
       });
-      this._normalizeQueuesAndPostProcess(revisedCommands);
+      this._normalizeQueuesAndPostProcess(revisedStories);
       return truths;
     } catch (error) {
       throw this.wrapErrorEvent(error, `receiveTruths([${truths[0].eventId}, ${
@@ -107,7 +107,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       this._insertEventsToQueue(commands, this._unconfirmedCommands, {
         continuous: true,
         onMismatch: (command, queueIndex, existingCommand) => {
-          revisedCommands = this._purgeAndReviseCommands(existingCommand.eventId);
+          revisedStories = this._purgeAndReviseCommands(existingCommand.eventId);
           this._unconfirmedCommands[queueIndex] = command;
           return true;
         },
@@ -239,18 +239,18 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
 async function _confirmOrPurgeQueuedCommands (connection: ScribePartitionConnection,
     lastNewEvent: EventBase) {
   let purgedStories;
-  const { firstEventId: firstCommandId, lastEventId: lastCommandId, commandIds }
+  const { eventIdBegin: beginCommandId, eventIdEnd: endCommandId, commandIds }
       = connection._commandQueueInfo;
-  if ((firstCommandId <= lastNewEvent.eventId) && (lastNewEvent.eventId <= lastCommandId)
-      && (lastNewEvent.commandId !== commandIds[lastNewEvent.eventId - firstCommandId])) {
+  if ((beginCommandId <= lastNewEvent.eventId) && (lastNewEvent.eventId < endCommandId)
+      && (lastNewEvent.commandId !== commandIds[lastNewEvent.eventId - beginCommandId])) {
     // connection.warnEvent("\n\tPURGING by", event.commandId, eventId, event, commandIds,
-    //    "\n\tcommandIds:", firstCommandId, lastCommandId, commandIds);
+    //    "\n\tcommandIds:", beginCommandId, endCommandId, commandIds);
     // Frankly, we could just store the commands in the 'commandIds' fully.
     purgedStories = await connection._readCommands(
-        { firstEventId: firstCommandId, lastEventId: lastCommandId });
+        { eventIdBegin: beginCommandId, eventIdEnd: endCommandId });
   }
 
-  const newCommandQueueFirstEventId = (purgedStories ? lastCommandId : lastNewEvent.eventId) + 1;
+  const newCommandQueueFirstEventId = (purgedStories ? endCommandId : lastNewEvent.eventId) + 1;
   if (connection.getFirstCommandEventId() < newCommandQueueFirstEventId) {
     _setCommandQueueFirstEventId(connection, newCommandQueueFirstEventId);
   }
@@ -261,9 +261,9 @@ async function _confirmOrPurgeQueuedCommands (connection: ScribePartitionConnect
     if (purgedStories) {
       // TODO(iridian): Add merge-conflict-persistence. As it stands now, for the duration of
       // the merge process the purged commands are not persisted anywhere and could be lost.
-      connection._deleteCommands(firstCommandId, lastCommandId);
-    } else if (lastNewEvent.eventId >= firstCommandId) {
-      connection._deleteCommands(firstCommandId, Math.min(lastNewEvent.eventId, lastCommandId));
+      connection._deleteCommands(beginCommandId, endCommandId);
+    } else if (lastNewEvent.eventId >= beginCommandId) {
+      connection._deleteCommands(beginCommandId, Math.min(lastNewEvent.eventId + 1, endCommandId));
     }
   }
   return purgedStories;

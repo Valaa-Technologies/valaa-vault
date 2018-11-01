@@ -53,7 +53,7 @@ function argumentOf (valker: Valker, head: any /* , scope: ?Object,
       if (vrapper && (vrapper.tryTypeName() === "Media")) {
         const mime = vrapper.resolveMediaInfo({ transaction: valker }).mime;
         if ((mime === "application/javascript") || (mime === "application/valaascript")) {
-          const ret = vrapper.extractValue({ transaction: valker, immediate: true });
+          const ret = vrapper.extractValue({ transaction: valker, synchronous: true });
           if (ret !== undefined) {
             if ((ret != null) && (typeof ret.default === "function")) return ret.default;
             return ret;

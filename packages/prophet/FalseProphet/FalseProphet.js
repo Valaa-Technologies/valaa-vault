@@ -9,14 +9,14 @@ import Follower from "~/prophet/api/Follower";
 import Prophet from "~/prophet/api/Prophet";
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
-import { dumpObject, invariantifyObject } from "~/tools";
+import { dumpObject } from "~/tools";
 
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
 import { Prophecy, _chronicleEvents } from "./_proclamationOps";
 import {
-  _createStoryQueue, _distpatchEventForAStory, _revealStoryToAllFollowers, _reviewProphecy,
+  _createStoryQueue, _dispatchEventForStory, _reciteStoriesToFollowers, _reviewProphecy,
 } from "./_prophecyOps";
 
 export class Proclamation extends Action {}
@@ -107,13 +107,12 @@ export default class FalseProphet extends Prophet {
    * @param  {type} event     an command to go upstream
    * @returns {type}          description
    */
-  _distpatchEventForAStory (event: EventBase, dispatchDescription: string, timed: ?EventBase,
+  _dispatchEventForStory (event: EventBase, dispatchDescription: string, timed: ?EventBase,
       transactionInfo?: TransactionInfo) {
     try {
-      return _distpatchEventForAStory(
-          this, event, dispatchDescription, timed, transactionInfo);
+      return _dispatchEventForStory(this, event, dispatchDescription, timed, transactionInfo);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_distpatchEventForAStory(${dispatchDescription})`,
+      throw this.wrapErrorEvent(error, `_dispatchEventForStory(${dispatchDescription})`,
           "\n\tevent:", ...dumpObject(event),
           "\n\ttimed:", ...dumpObject(timed));
     }
@@ -130,10 +129,13 @@ export default class FalseProphet extends Prophet {
     }
   }
 
-  _revealStoryToAllFollowers (story: Story) {
-    invariantifyObject(story, "_revealStoryToAllFollowers.story",
-        { instanceof: Story, allowNull: false, allowEmpty: false });
-    return _revealStoryToAllFollowers(this, story);
+  _reciteStoriesToFollowers (stories: Story[]) {
+    try {
+      return _reciteStoriesToFollowers(this, stories);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error(`_reciteStoriesToFollowers()`),
+          "\n\tstories:", ...dumpObject(stories));
+    }
   }
 
   // command ops

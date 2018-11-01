@@ -12,6 +12,6 @@ export default function getImplicitMediaInterpretation (candidate: any, opName: 
         "\n\tprefer: explicit media interpretation");
   }
   const actualOptions = options || {};
-  if (!actualOptions.hasOwnProperty("immediate")) actualOptions.immediate = true;
+  if (!actualOptions.hasOwnProperty("synchronous")) actualOptions.synchronous = true;
   return candidate.extractValue(actualOptions);
 }

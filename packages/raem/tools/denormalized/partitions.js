@@ -104,7 +104,7 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
     // transaction to be valid, otherwise they're considered dangling and are not allowed.
     // TODO(iridian): Add validations for detecting dangling partitionless resources.
     if (!partitionURI) return undefined;
-    partitionURI = String(partitionURI)
+    partitionURI = String(partitionURI);
     // ? String(partitionURI)
     // : `valaa-memory:?id=${smallestNonGhostId.rawId()}`;
 

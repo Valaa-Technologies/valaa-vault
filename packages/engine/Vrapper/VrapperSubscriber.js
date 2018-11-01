@@ -34,7 +34,8 @@ export default class VrapperSubscriber extends SimpleData {
   subscriber: Object;
 
   debugId (options: ?Object): string {
-    return `${this.constructor.name}(${this.subscriberKey}: ${this._emitter.debugId(options)})`;
+    return `${this.constructor.name}(${this.subscriberKey}: ${
+        this._emitter && this._emitter.debugId(options)})`;
   }
 
   initializeFilter (emitter: Cog, filter: boolean | string | Function, callback: Function) {

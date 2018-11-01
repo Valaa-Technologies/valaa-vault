@@ -37,7 +37,8 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
   const localResults = await _narrateLocalLogs(connection,
       connection.getReceiveTruths(options.receiveTruths),
       (options.commands !== false) && connection.getReceiveCommands(options.receiveCommands),
-      options.firstEventId, options.lastEventId, options.retrieveMediaBuffer);
+      options.eventIdBegin, options.eventIdEnd,
+      options.retrieveMediaBuffer);
 
   Object.assign(ret, localResults);
 
@@ -51,7 +52,7 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
   const upstreamNarration = connection.getUpstreamConnection().narrateEventLog({
     ...options,
     receiveTruths: connection.getReceiveTruths(options.receiveTruths),
-    firstEventId: Math.max(options.firstEventId || 0, connection.getFirstUnusedTruthEventId()),
+    eventIdBegin: Math.max(options.eventIdBegin || 0, connection.getFirstUnusedTruthEventId()),
   });
 
   if ((options.fullNarrate !== true)
@@ -67,24 +68,26 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
 }
 
 async function _narrateLocalLogs (connection: ScribePartitionConnection,
-    receiveTruths: ReceiveEvents, receiveCommands: ReceiveEvents,
-    firstEventId: ?number = connection.getFirstTruthEventId(),
-    firstUnusedActionId: ?number = Math.max(
+    receiveTruths: ReceiveEvents, receiveCommands: ?ReceiveEvents,
+    eventIdBegin: ?number = connection.getFirstTruthEventId(),
+    eventIdEnd: ?number = Math.max(
         connection.getFirstUnusedTruthEventId(), connection.getFirstUnusedCommandEventId()),
     retrieveMediaBuffer: ?RetrieveMediaBuffer,
 ): Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
-  const eventUpperBound = Math.min(connection.getFirstUnusedTruthEventId(), firstUnusedActionId);
-  const truths = ((firstEventId < eventUpperBound)
-          && await connection._readEvents({ firstEventId, lastEventId: eventUpperBound - 1 }))
+  const truthEventIdEnd = Math.min(connection.getFirstUnusedTruthEventId(), eventIdEnd);
+  const truths = ((eventIdBegin < truthEventIdEnd)
+          && await connection._readTruths({ eventIdBegin, eventIdEnd: truthEventIdEnd }))
       || [];
   const ret = {
     scribeEventLog: await Promise.all(await receiveTruths(truths, retrieveMediaBuffer)),
   };
   if (!receiveCommands) return ret;
 
-  const lastEventId = Math.min(connection.getFirstUnusedCommandEventId(), firstUnusedActionId) - 1;
-  const commands = ((eventUpperBound >= firstUnusedActionId)
-      && await connection._readCommands({ firstEventId: eventUpperBound, lastEventId })) || [];
+  const commandEventIdEnd = Math.min(connection.getFirstUnusedCommandEventId(), eventIdEnd);
+  const commands = ((truthEventIdEnd < commandEventIdEnd)
+      && await connection._readCommands({
+        eventIdBegin: truthEventIdEnd, eventIdEnd: commandEventIdEnd,
+      })) || [];
   ret.scribeCommandQueue = await Promise.all(await receiveCommands(commands, retrieveMediaBuffer));
   return ret;
 }
@@ -235,12 +238,12 @@ export function _receiveEvents (
         onError);
   }
   (receivingTruths ? connection._truthLogInfo : connection._commandQueueInfo)
-      .firstUnusedEventId = newActions[newActions.length - 1].eventId + 1;
+      .eventIdEnd = newActions[newActions.length - 1].eventId + 1;
   return !preOpsProcess
       ? receivedActions
       : thenChainEagerly(preOpsProcess, [
         (updatedEntries) => connection._updateMediaEntries(updatedEntries),
-        () => connection[receivingTruths ? "_writeEvents" : "_writeCommands"](newActions),
+        () => connection[receivingTruths ? "_writeTruths" : "_writeCommands"](newActions),
         () => receivedActions,
       ], onError);
 }

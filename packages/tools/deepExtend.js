@@ -176,7 +176,7 @@ exports.default = function deepExtend (target /* : Object */, source /* : Array<
       ret = stack_.extend(ret, spreadee, targetKey, targetParent, sourceParent);
       return false;
     }
-    // Returns true on cache hit for immediate return: source has already extended the target
+    // Returns true on cache hit for synchronous return: source has already extended the target
     function _setRetFromCacheAndMaybeBail () {
       const cache = stack.cache || (stack.cache = new Map());
       const cacheHit = cache.get(source_);

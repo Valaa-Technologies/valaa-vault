@@ -2,15 +2,11 @@
 
 import ValaaURI from "~/raem/ValaaURI";
 
-import Prophet, { ConnectOptions, PartitionConnection } from "~/prophet/api/Prophet";
+import Prophet, { ConnectOptions } from "~/prophet/api/Prophet";
 
 import DecoderArray from "~/prophet/Oracle/DecoderArray";
 
-import { dumpObject } from "~/tools";
-
 import OraclePartitionConnection from "./OraclePartitionConnection";
-
-import { _acquirePartitionConnection } from "./_connectionOps";
 
 /**
  * TODO(iridian): Outdated, clean up.

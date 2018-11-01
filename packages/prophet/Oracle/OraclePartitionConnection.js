@@ -8,13 +8,9 @@ import type { ConnectOptions, MediaInfo, ReceiveEvents, RetrieveMediaBuffer }
     from "~/prophet/api/Prophet";
 
 import DecoderArray from "~/prophet/Oracle/DecoderArray";
-import { upgradeEventToVersion0dot2 } from "~/prophet/tools/upgradeEventToVersion0dot2";
+import upgradeEventToVersion0dot2 from "~/prophet/tools/upgradeEventToVersion0dot2";
 
 import { addDelayedOperationEntry, dumpObject, thenChainEagerly } from "~/tools";
-// import { stringFromUTF8ArrayBuffer } from "~/tools/textEncoding";
-
-import { _connect } from "./_connectionOps";
-
 
 /**
  * The nexus connection object, which consolidates the local scribe connections and the possible

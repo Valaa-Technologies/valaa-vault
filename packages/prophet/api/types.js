@@ -39,8 +39,8 @@ export type NarrateOptions = {
   receiveTruths?: ReceiveEvents,   // default: connection receiveTruths.
                                    //   Callback for downstream truth events.
   receiveCommands?: ReceiveEvents, // default: receiveTruths. Callback for re-narrated commands
-  firstEventId?: number,
-  lastEventId?: number,
+  eventIdBegin?: number,
+  eventIdEnd?: number,
 };
 
 export type ChronicleOptions = NarrateOptions & {

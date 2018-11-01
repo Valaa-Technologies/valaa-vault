@@ -4,8 +4,8 @@ import { Logger, LogEventGenerator, wrapError } from "~/tools";
 import { type DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 export type KeyRangeQuery = {
-  firstEventId: ?number,
-  lastEventId: ?number,
+  eventIdBegin: ?number,
+  eventIdEnd: ?number,
 };
 
 
@@ -76,19 +76,19 @@ export default class IndexedDBWrapper extends LogEventGenerator {
     return result;
   }
 
-  getIDBKeyRange ({ firstEventId, lastEventId }: KeyRangeQuery) {
+  getIDBKeyRange ({ eventIdBegin, eventIdEnd }: KeyRangeQuery) {
     try {
-      return (typeof firstEventId === "undefined")
-          ? (typeof lastEventId === "undefined")
+      return (typeof eventIdBegin === "undefined")
+          ? (typeof eventIdEnd === "undefined")
               ? undefined
-              : this.databaseAPI.IDBKeyRange.upperBound(lastEventId)
-          : (typeof lastEventId === "undefined")
-              ? this.databaseAPI.IDKeyRange(firstEventId)
-              : lastEventId < firstEventId
-                  ? null
-                  : this.databaseAPI.IDBKeyRange.bound(firstEventId, lastEventId);
+              : this.databaseAPI.IDBKeyRange.upperBound(eventIdEnd - 1)
+          : (typeof eventIdEnd === "undefined")
+              ? this.databaseAPI.IDKeyRange(eventIdBegin)
+          : (eventIdEnd > eventIdBegin)
+              ? this.databaseAPI.IDBKeyRange.bound(eventIdBegin, eventIdEnd - 1)
+          : null;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `getIDBKeyRange([${firstEventId}, ${lastEventId}])`);
+      throw this.wrapErrorEvent(error, `getIDBKeyRange([${eventIdBegin}, ${eventIdEnd}))`);
     }
   }
 }

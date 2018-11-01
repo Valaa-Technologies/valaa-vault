@@ -65,7 +65,7 @@ export function _createStoryQueue () {
   return ret;
 }
 
-export function _distpatchEventForAStory (falseProphet: FalseProphet, event: EventBase,
+export function _dispatchEventForStory (falseProphet: FalseProphet, event: EventBase,
     dispatchDescription: string, timed: ?EventBase, transactionInfo?: TransactionInfo) {
   const previousState = falseProphet.getState();
   let story = (transactionInfo && transactionInfo._tryFastForwardOnCorpus(falseProphet.corpus));
@@ -85,15 +85,6 @@ export function _distpatchEventForAStory (falseProphet: FalseProphet, event: Eve
   return story;
 }
 
-/*
-function _purgeCommandsWith (hereticEvent: UniversalEvent, purgedCorpusState: State,
-    revisedEvents: UniversalEvent[]) {
-  falseProphet.recreateCorpus(purgedCorpusState);
-  falseProphet._followers.forEach(discourse =>
-      discourse.rejectHeresy(hereticEvent, purgedCorpusState, revisedEvents));
-}
-*/
-
 export function _purgeAndRevisePartitionCommands (connection: FalseProphetPartitionConnection,
     purgedStories: Story[]) {
   const falseProphet = connection.getProphet();
@@ -104,29 +95,29 @@ export function _purgeAndRevisePartitionCommands (connection: FalseProphetPartit
   return undefined;
 }
 
-export function _revealStoryToAllFollowers (falseProphet: FalseProphet, story: Story) {
+export function _reciteStoriesToFollowers (falseProphet: FalseProphet, stories: Story[]) {
   let followerReactions;
   falseProphet._followers.forEach((discourse, follower) => {
-    const reaction = discourse.receiveCommands([story]);
-    if (typeof reaction !== "undefined") {
+    const reactions = discourse.receiveCommands(stories);
+    if (typeof reactions !== "undefined") {
       if (!followerReactions) followerReactions = new Map();
-      followerReactions.set(follower, reaction);
+      followerReactions.set(follower, reactions);
     }
   });
-  return {
+  return stories.map((story, index) => ({
     story,
-    getFollowerReactions: !followerReactions
-        ? () => {}
+    getFollowerReactions: !followerReactions ? () => {}
         : (async (filter) => {
-          for (const [reaction, follower] of followerReactions.entries()) {
+          const storyReactions = [];
+          for (const [allStoryReactions, follower] of followerReactions.entries()) {
             if (!filter
                 || ((typeof filter !== "function") ? filter === follower : filter(follower))) {
-              followerReactions.set(follower, await Promise.all(reaction));
+              storyReactions.push(...await Promise.all(allStoryReactions[index]));
             }
           }
-          return followerReactions;
+          return storyReactions;
         }),
-  };
+  }));
 }
 
 export function _rejectLastProphecyAsHeresy (falseProphet: FalseProphet,
@@ -165,7 +156,7 @@ export function _confirmProphecy (falseProphet: FalseProphet, truthEvent: EventB
   // So add the truth to the end of current pending prophecies.
   _addTruthToPendingProphecies(falseProphet, truthEvent);
 
-  if (reformation) _finishReformation(falseProphet, reformation);
+  if (revisioning) _finishReformation(falseProphet, revisioning);
 
   // Notify followers about the prophecies that have become permanent truths, ie. all prophecies
   // at the front of the pending prophecies list markes as isTruth, and which thus can no longer
@@ -188,9 +179,9 @@ function _addTruthToPendingProphecies (falseProphet: FalseProphet,
       falseProphet.warnEvent("Warning: encountered an authorized event with missing commandId:",
           truthEvent);
     }
-    story = falseProphet._distpatchEventForAStory(truthEvent,
+    story = falseProphet._dispatchEventForStory(truthEvent,
         `truth ${!truthId ? "legacy" : truthId.slice(0, 13)}...`);
-    falseProphet._revealStoryToAllFollowers(story);
+    falseProphet._reciteStoriesToFollowers([story]);
   }
   story.isTruth = true;
 }

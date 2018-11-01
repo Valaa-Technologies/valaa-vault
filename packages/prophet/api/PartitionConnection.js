@@ -126,7 +126,11 @@ export default class PartitionConnection extends Follower {
     return false;
   }
 
-  getSyncedConnection (): null | Promise<PartitionConnection> | PartitionConnection {
+  getSyncedConnection (require: ?boolean):
+      null | Promise<PartitionConnection> | PartitionConnection {
+    if (require && (this._syncedConnection !== this)) {
+      throw new Error(`Couldn't synchronously sync ${this.constructor.name} to ${this.getName()}`);
+    }
     if (this._syncedConnection !== undefined) return this._syncedConnection;
     // Wait for upstream to sync, then denote this connection synced, then resolve as 'this'.
     return (this._syncedConnection = thenChainEagerly(

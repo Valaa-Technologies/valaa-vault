@@ -9,12 +9,39 @@ import Follower, {
 import type PartitionConnection from "~/prophet/api/PartitionConnection";
 
 import { LogEventGenerator } from "~/tools/Logger";
+import { dumpObject } from "~/tools/wrapError";
 
 export type {
   ChronicleEventResult, ChronicleOptions, MediaInfo, NarrateOptions, ReceiveEvents,
   RetrieveMediaBuffer
 };
 
+  /**
+   * Eagerly acquires and returns an existing full connection, otherwise
+   * returns a promise of one. If any narration options are specified in the options, said
+   * narration is also performed before the connection is considered fully connected.
+   *
+   * @param {ValaaURI} partitionURI
+   * @param {NarrateOptions} [options={
+   *   // If true and a connection (even a non-fully-connected) exists it is returned synchronously.
+   *   allowPartialConnection: boolean = false,
+   *   // If true does not initiate new connection and returns undefined instead of any promise.
+   *   synchronous: boolean = false,
+   *   // If false does not create a new connection process is one cannot be found.
+   *   newConnection: boolean = true,
+   *   // If true requests a creation of a new partition and asserts if one exists. If false,
+   *   // asserts if no commands or events for the partition can be found.
+   *   newPartition: boolean = false,
+   *   // If true, throws an error if the retrieval for the latest content for any media fails.
+   *   // Otherwise allows the connection to complete successfully. But because then not all latest
+   *   // content might be locally available, Media.immediateContent calls for script files might
+   *   // fail and Media.readContent operations might result in making unreliable network accesses.
+   *   requireLatestMediaContents: boolean = true,
+   * }]
+   * @returns {*}
+   *
+   * @memberof Oracle
+   */
 export type ConnectOptions = {
   connect?: boolean,               // default: true. Connect to updates
   subscribe?: boolean,             // default: true. Subscribe for downstream push events.
@@ -123,7 +150,8 @@ export default class Prophet extends LogEventGenerator {
     }
     return new PartitionConnectionType({
       partitionURI, prophet: this, verbosity: this.getVerbosity(),
-      receiveTruths: options.receiveTruths, ...(options.createConnectionOptions || {}),
+      receiveTruths: options.receiveTruths, receiveCommands: options.receiveCommands,
+      ...(options.createConnectionOptions || {}),
     });
   }
 

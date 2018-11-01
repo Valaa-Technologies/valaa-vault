@@ -20,7 +20,7 @@ afterEach(async () => {
   if (harness) {
     await harness.cleanup();
     harness = null;
-  } else await clearScribeDatabases([testPartitionURI]);
+  } else await clearScribeDatabases(/* [testPartitionURI] */);
 });
 
 describe("Prophet", () => {
@@ -86,7 +86,9 @@ describe("Prophet", () => {
   });
 
   it("assigns proper eventIds for commands", async () => {
-    harness = await createProphetOracleHarness({});
+    harness = await createProphetOracleHarness({ verbosity: 0,
+      oracleOptions: { testAuthorityConfig: { isLocallyPersisted: true } },
+    });
     const partitionURI = createPartitionURI(testAuthorityURI, "test_partition");
 
     const prophetConnection = await harness.prophet

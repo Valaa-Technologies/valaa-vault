@@ -22,7 +22,7 @@ afterEach(async () => {
   if (harness) {
     await harness.cleanup();
     harness = null;
-  } else await clearScribeDatabases();
+  } else await clearScribeDatabases(["valaa-test:?id=test_partition"]);
 });
 
 describe("Scribe", () => {

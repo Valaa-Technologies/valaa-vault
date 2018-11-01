@@ -151,7 +151,7 @@ export function createScribe (upstream: Prophet, options?: Object) {
 }
 
 export async function clearScribeDatabases (otherConnections: Object[] = []) {
-  const partitionURIs = ["valaa-shared-content", "valaa-test:?id=test_partition"];
+  const partitionURIs = ["valaa-shared-content"];
   partitionURIs.push(...otherConnections);
   for (const uri of partitionURIs) {
     const database = await openDB(uri);
@@ -186,8 +186,9 @@ export function createOracle (options?: Object) {
 }
 
 export function clearOracleScribeDatabases (prophet: Prophet) {
-  return clearScribeDatabases(Object.values(prophet.getSyncedConnections())
-      .map(connection => connection.getPartitionURI().toString()));
+  return clearScribeDatabases(["valaa-test:?id=test_partition",
+      ...Object.values(prophet.getSyncedConnections())
+          .map(connection => connection.getPartitionURI().toString())]);
 }
 
 export function createFalseProphet (options?: Object) {

@@ -63,8 +63,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
             ...options, narrateOptions: false, receiveTruths: this.getReceiveTruths(),
           }));
     }
-    return this._syncedConnection || (this._syncedConnection = thenChainEagerly(
-        _initializeConnectionIndexedDB(this), [
+
           () => this._readMediaEntries(),
           (mediaEntries) => {
             this._pendingMediaLookup = mediaEntries;
@@ -81,6 +80,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
       throw this.wrapErrorEvent(error, new Error(`connect`),
           "\n\toptions:", ...dumpObject(options));
     }
+    return thenChainEagerly(this.isLocallyPersisted() && _initializeConnectionIndexedDB(this), [
   }
 
   disconnect () {
@@ -100,14 +100,14 @@ export default class ScribePartitionConnection extends PartitionConnection {
   getFirstCommandEventId () { return this._commandQueueInfo.eventIdBegin; }
   getFirstUnusedCommandEventId () { return this._commandQueueInfo.eventIdEnd; }
 
-  async narrateEventLog (options: NarrateOptions = {}):
+  narrateEventLog (options: NarrateOptions = {}):
       Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
     if (!options) return undefined;
     const ret = {};
-    try {
-      return await _narrateEventLog(this, options, ret);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, "narrateEventLog()",
+    return _narrateEventLog(this, options, ret)
+        .catch(errorOnNarrateEventLog.bind(this, new Error("narrateEventLog()")));
+    function errorOnNarrateEventLog (wrapper, error) {
+      throw this.wrapErrorEvent(error, wrapper,
           "\n\toptions:", ...dumpObject(options),
           "\n\tcurrent ret:", ...dumpObject(ret));
     }
@@ -151,6 +151,13 @@ export default class ScribePartitionConnection extends PartitionConnection {
       downstreamReceiveCommands: ReceiveEvents) {
     return this.receiveTruths(commands, retrieveMediaBuffer, downstreamReceiveCommands,
         "receiveCommands");
+  }
+
+  _clampCommandQueueByTruthEvendIdEnd () {
+    this._commandQueueInfo.eventIdBegin =
+        Math.max(this._commandQueueInfo.eventIdBegin, this._truthLogInfo.eventIdEnd);
+    this._commandQueueInfo.eventIdEnd =
+        Math.max(this._commandQueueInfo.eventIdBegin, this._commandQueueInfo.eventIdEnd);
   }
 
   _determineEventMediaPreOps (mediaEvent: Object, rootEvent: Object) {

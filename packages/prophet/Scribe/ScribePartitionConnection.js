@@ -52,7 +52,14 @@ export default class ScribePartitionConnection extends PartitionConnection {
     this._commandQueueInfo = { eventIdBegin: 0, eventIdEnd: 0 };
   }
 
-  connect (options: ConnectOptions) {
+  getStatus () {
+    return {
+      indexedDB: { truthLog: this._truthLogInfo, commandQueue: this._commandQueueInfo },
+      ...super.getStatus(),
+    };
+  }
+
+  _connect (options: ConnectOptions, onError: Function) {
     // ScribePartitionConnection can be synced even if the upstream connection isn't, as long as
     // there are any events in the local cache and the optimistic narration is possible.
     if (this._prophet._upstream) {
@@ -64,23 +71,38 @@ export default class ScribePartitionConnection extends PartitionConnection {
           }));
     }
 
-          () => this._readMediaEntries(),
-          (mediaEntries) => {
-            this._pendingMediaLookup = mediaEntries;
-            for (const [mediaRawId, info] of Object.entries(this._pendingMediaLookup)) {
-              this._prophet._persistedMediaLookup[mediaRawId] = info;
-            }
-          },
-          () => this.narrateEventLog(options.narrateOptions),
-          () => (this._syncedConnection = this),
-        ],
-        errorOnConnect.bind(this),
-    ));
-    function errorOnConnect (error) {
-      throw this.wrapErrorEvent(error, new Error(`connect`),
-          "\n\toptions:", ...dumpObject(options));
-    }
     return thenChainEagerly(this.isLocallyPersisted() && _initializeConnectionIndexedDB(this), [
+      (isIndexedDBConnected) => (!isIndexedDBConnected ? {} : this._readMediaEntries()),
+      (mediaEntries) => {
+        this._pendingMediaLookup = mediaEntries;
+        for (const [mediaRawId, info] of Object.entries(this._pendingMediaLookup)) {
+          this._prophet._persistedMediaLookup[mediaRawId] = info;
+        }
+      },
+      () => this.narrateEventLog(options.narrateOptions),
+      (narration) => {
+        if (!narration) return narration;
+        const actionCount = Object.values(narration).reduce(
+            (s, log) => s + (Array.isArray(log) ? log.length : 0),
+            options.eventIdBegin || 0);
+        if (!actionCount && (options.newPartition === false)) {
+          throw new Error(`No events found when connecting to an expected existing partition '${
+            this.getPartitionURI().toString()}'`);
+        } else if (actionCount && (options.newPartition === true)) {
+          throw new Error(`Existing events found when trying to create a new partition '${
+            this.getPartitionURI().toString()}'`);
+        }
+        if ((options.requireLatestMediaContents !== false)
+            && (narration.mediaRetrievalStatus || { latestFailures: [] }).latestFailures.length) {
+          // FIXME(iridian): This error temporarily demoted to log error
+          this.outputErrorEvent(new Error(`Failed to connect to partition: encountered ${
+                narration.mediaRetrievalStatus.latestFailures.length
+              } latest media content retrieval failures (and ${
+              ""}options.requireLatestMediaContents does not equal false).`));
+        }
+        return narration;
+      },
+    ], onError);
   }
 
   disconnect () {

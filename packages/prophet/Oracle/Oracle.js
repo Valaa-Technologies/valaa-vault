@@ -30,9 +30,6 @@ import OraclePartitionConnection from "./OraclePartitionConnection";
  * @extends {Prophet}
  */
 export default class Oracle extends Prophet {
-
-  static PartitionConnectionType = OraclePartitionConnection;
-
   constructor ({ authorityNexus, ...rest }: Object) {
     super({ ...rest });
     this._authorityNexus = authorityNexus;
@@ -44,39 +41,14 @@ export default class Oracle extends Prophet {
 
   getDecoderArray () { return this._decoderArray; }
 
-  /**
-   * Eagerly acquires and returns an existing full connection, otherwise
-   * returns a promise of one. If any narration options are specified in the options, said
-   * narration is also performed before the connection is considered fully connected.
-   *
-   * @param {ValaaURI} partitionURI
-   * @param {NarrateOptions} [options={
-   *   // If true and a connection (even a non-fully-connected) exists it is returned synchronously.
-   *   allowPartialConnection: boolean = false,
-   *   // If true does not initiate new connection and returns undefined instead of any promise.
-   *   onlyTrySynchronousConnection: boolean = false,
-   *   // If false does not create a new connection process is one cannot be found.
-   *   newConnection: boolean = true,
-   *   // If true requests a creation of a new partition and asserts if one exists. If false,
-   *   // asserts if no commands or events for the partition can be found.
-   *   newPartition: boolean = false,
-   *   // If true, throws an error if the retrieval for the latest content for any media fails.
-   *   // Otherwise allows the connection to complete successfully. But because then not all latest
-   *   // content might be locally available, Media.immediateContent calls for script files might
-   *   // fail and Media.readContent operations might result in making unreliable network accesses.
-   *   requireLatestMediaContents: boolean = true,
-   * }]
-   * @returns {*}
-   *
-   * @memberof Oracle
-   */
-  acquirePartitionConnection (partitionURI: ValaaURI, options: ConnectOptions = {}):
-      ?PartitionConnection {
-    try {
-      return _acquirePartitionConnection(this, partitionURI, options);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, `acquirePartitionConnection(${String(partitionURI)})`,
-          "\n\toptions:", ...dumpObject(options));
+  _createPartitionConnection (partitionURI: ValaaURI, options: ConnectOptions) {
+    const authorityProphet = this._authorityNexus.obtainAuthorityProphetOfPartition(partitionURI);
+    if (!authorityProphet) {
+      throw new Error(`Can't obtain authority for partition URI '${partitionURI}'`);
     }
+    return new OraclePartitionConnection({
+      partitionURI, prophet: this, verbosity: this.getVerbosity(),
+      receiveTruths: options.receiveTruths, authorityProphet,
+    });
   }
 }

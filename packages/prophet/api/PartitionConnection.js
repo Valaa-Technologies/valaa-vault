@@ -53,6 +53,14 @@ export default class PartitionConnection extends Follower {
   getPartitionURI (): ValaaURI { return this._partitionURI; }
   getPartitionRawId (): string { return getPartitionRawIdFrom(this._partitionURI); }
 
+  getStatus (): Object {
+    return {
+      local: !!this.isLocallyPersisted(),
+      primary: !!this.isPrimaryAuthority(),
+      remote: !!this.isRemoteAuthority(),
+    };
+  }
+
   isLocallyPersisted () { return this._upstreamConnection.isLocallyPersisted(); }
   isPrimaryAuthority () { return this._upstreamConnection.isPrimaryAuthority(); }
   isRemoteAuthority () { return this._upstreamConnection.isRemoteAuthority(); }
@@ -73,23 +81,55 @@ export default class PartitionConnection extends Follower {
     throw new Error("isConnected not implemented");
   }
 
+
+  /**
+   * Asynchronous operation which activates the connection to the Scribe and loads its metadatas,
+   * initiates the authority connection and narrates any requested events before finalizing.
+   *
+   * The initial narration looks for the requested events in following order:
+   * 1. options.eventLog
+   * 2. scribe in-memory and IndexedDB caches
+   * 3. authority connection.narrateEventLog (only if options.eventIdEnd is given)
+   *
+   * If eventIdEnd is not specified, all the explicit eventLog and locally cached events (both
+   * truths and queued commands starting from the optional eventIdBegin) are narrated.
+   *
+   *
+   * @param {ConnectOptions} options
+   *
+   * @memberof OraclePartitionConnection
+   */
   connect (options: ConnectOptions) {
+    const onError = errorOnConnect.bind(this, new Error("connect"));
+    try {
+      this.warnEvent(1, "\n\tBegun connecting with options",
+          ...dumpObject(options), ...dumpObject(this));
+      return this._syncedConnection || (this._syncedConnection = thenChainEagerly(
+          this._connect(options, onError),
+          (connectResults) => {
+            this.warnEvent(1, "\n\tDone connecting with results:", connectResults,
+                "\n\tstatus:", this.getStatus());
+            return (this._syncedConnection = this);
+          },
+          onError,
+      ));
+    } catch (error) { return onError(error); }
+    function errorOnConnect (wrapper, error) {
+      throw this.wrapErrorEvent(error, wrapper, "\n\toptions:", ...dumpObject(options));
+    }
+  }
+
+  _connect (options: ConnectOptions, onError: Function) {
     if (!this._prophet._upstream) throw new Error("Cannot connect: upstream missing");
-    if (this._syncedConnection !== undefined) return this._syncedConnection;
     options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
     options.receiveCommands = this.getReceiveCommands(options.receiveCommands);
-    const ret = this._syncedConnection || (this._syncedConnection = thenChainEagerly(
-        this._prophet._upstream.acquirePartitionConnection(this.getPartitionURI(), options), [
-          upstreamConnection => {
-            this.setUpstreamConnection(upstreamConnection);
-            return upstreamConnection.getSyncedConnection();
-          },
-          () => (this._syncedConnection = this),
-        ],
-        errorOnConnect.bind(this, new Error("connect")),
-    ));
-    return ret;
-    function errorOnConnect (wrapper, error) { throw this.wrapErrorEvent(error, wrapper); }
+    return thenChainEagerly(
+        this._prophet._upstream.acquirePartitionConnection(this.getPartitionURI(), options),
+        upstreamConnection => {
+          this.setUpstreamConnection(upstreamConnection);
+          return upstreamConnection.getSyncedConnection();
+        },
+        onError);
   }
 
   /**

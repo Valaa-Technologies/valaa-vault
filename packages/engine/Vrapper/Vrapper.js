@@ -235,8 +235,9 @@ export default class Vrapper extends Cog {
             throw new Error(`Cannot activate ${blocker.debugId()
                 } because it is ${blocker.getPhase()}`);
           }
-          if (!blocker._partitionConnection) {
-            await (operationInfo.pendingConnection = blocker.getPartitionConnection());
+          if (!blocker._partitionConnection || !blocker._partitionConnection.isSynced()) {
+            await (operationInfo.pendingConnection = blocker.getPartitionConnection())
+                .getSyncedConnection();
           }
         }
         operationInfo.pendingConnection = null;
@@ -286,8 +287,9 @@ export default class Vrapper extends Cog {
         || getObjectTransient(state, this[HostRef], this._typeName);
     this.updateTransient(state, transient);
     this[HostRef] = transient.get("id");
-    if (!this.tryPartitionConnection()) {
-      if (this[HostRef].isInactive() || this._partitionConnectionProcess) return this;
+    const connection = this.tryPartitionConnection();
+    if (!connection || !connection.isSynced()) {
+      if (this[HostRef].isInactive()) return this;
     }
     let prototypeId = transient.get("prototype");
     if (!prototypeId) {
@@ -332,7 +334,6 @@ export default class Vrapper extends Cog {
           new Error("_finalizeActivate() caught an error post-activation, which will be swallowed"),
           "\n\ttransient:", ...dumpObject(transient.toJS()),
           "\n\tpartitionConnection:", ...dumpObject(this._partitionConnection),
-          "\n\tpartitionConnectionProcess:", ...dumpObject(this._partitionConnectionProcess),
           "\n\tpartitionAuthorityURI:", partitionAuthorityURIString,
           "\n\tauthorityConnection:", authorityConnection,
           "\n\tthis:", ...dumpObject(this),
@@ -383,29 +384,21 @@ export default class Vrapper extends Cog {
             (blocker === this) ? "this object itself" : "some prototype of this",
         "\n\tthis[HostRef]:", ...dumpObject(this[HostRef]),
         "\n\tthis._partitionConnection:", ...dumpObject(this._partitionConnection),
-        "\n\tthis._partitionConnectionProcess:", ...dumpObject(this._partitionConnectionProcess),
         "\n\tblocker:", ...dumpObject(blocker),
         "\n\tblocker._partitionConnection:", ...dumpObject(blocker._partitionConnection),
-        "\n\tblocker._partitionConnectionProcess:",
-            ...dumpObject(blocker._partitionConnectionProcess),
         "\n\tthis:", ...dumpObject(this));
   }
 
   tryPartitionConnection (options: Object = {}): ?PartitionConnection {
     options.require = false;
     options.newConnection = false;
-    this.getPartitionConnection(options);
-    return this._partitionConnection;
+    const ret = this.getPartitionConnection(options);
+    return ret && ret.isSynced() ? ret : undefined;
   }
 
   getPartitionConnection (options:
       { require?: boolean, transaction?: Transaction, newConnection?: boolean }
           = { require: true }): ?PartitionConnection {
-    if (this._partitionConnectionProcess) {
-      if (!this._partitionConnectionProcess.fullConnection) return this._partitionConnectionProcess;
-      this._partitionConnection = this._partitionConnectionProcess.fullConnection;
-      delete this._partitionConnectionProcess;
-    }
     if (this._partitionConnection) return this._partitionConnection;
     let partitionURI;
     let nonGhostOwnerRawId;
@@ -427,28 +420,25 @@ export default class Vrapper extends Cog {
           }
         }
       }
-      const connection = partitionURI && this.engine.prophet
+      this._partitionConnection = partitionURI && this.engine.prophet
           .acquirePartitionConnection(partitionURI, {
-            newConnection: options.newConnection, newPartition: false, require: options.require,
+            newPartition: false, newConnection: options.newConnection, require: options.require,
           });
-      if (!connection) {
+      if (!this._partitionConnection) {
         if (!options.require) return undefined;
-        throw new Error(`Cannot determine partition connection for ${this.debugId()}`);
+        throw new Error(`Failed to acquire the partition connection of ${this.debugId()}`);
       }
-      this._partitionConnectionProcess = connection.getSyncedConnection();
-      const ret = thenChainEagerly(this._partitionConnectionProcess,
-        (partitionConnection) => {
-          this._partitionConnection = partitionConnection;
-          if (ret) ret.fullConnection = partitionConnection;
-          delete this._partitionConnectionProcess;
-          return partitionConnection;
-        },
-        onError.bind(this));
-      return ret;
-    } catch (error) { return onError.call(this, error); }
-    function onError (error) {
-      throw this.wrapErrorEvent(error, `getPartitionConnection(${
-              options.require ? "require" : "optional"})`,
+      if (!this._partitionConnection.isSynced()) {
+        this._partitionConnection.getSyncedConnection().catch(onError.bind(this,
+            new Error(`getPartitionConnection.acquire.getSyncedConnection()`)));
+      }
+      return this._partitionConnection;
+    } catch (error) {
+      return onError.call(this, new Error(`getPartitionConnection(${
+          options.require ? "require" : "optional"})`), error);
+    }
+    function onError (wrapper, error) {
+      throw this.wrapErrorEvent(error, wrapper,
           "\n\toptions:", ...dumpObject(options),
           "\n\tthis[HostRef]:", this[HostRef],
           "\n\tthis._transient:", this._transient,
@@ -457,9 +447,12 @@ export default class Vrapper extends Cog {
     }
   }
 
-  _withPartitionConnectionChainEagerly (options: VALKOptions,
+  _withSyncedConnectionChainEagerly (options: VALKOptions,
       chainOperations: ((prev: any) => any)[], onError?: Function) {
-    return thenChainEagerly(this.getPartitionConnection(options), chainOperations, onError);
+    return thenChainEagerly(
+        this.getPartitionConnection(options).getSyncedConnection(options.synchronous),
+        chainOperations,
+        onError);
   }
 
   hasInterface (name: string, type: GraphQLObjectType = this.getTypeIntro()): boolean {
@@ -1162,9 +1155,12 @@ export default class Vrapper extends Cog {
       }
       let decodedContent = options.decodedContent;
       if (typeof decodedContent === "undefined") {
-        decodedContent = this._withPartitionConnectionChainEagerly(Object.create(options), [
+        decodedContent = this._withSyncedConnectionChainEagerly(Object.create(options), [
           connection => connection.decodeMediaContent(mediaInfo),
-        ]);
+        ], errorOnObtainMediaInterpretation.bind(this,
+            new Error(`_obtainMediaInterpretation('${this.get("name", options)
+                }').decodeAs(${String(mediaInfo && mediaInfo.mime)})`))
+        );
         if ((options.synchronous === true) && isPromise(decodedContent)) {
           throw new Error(`Media interpretation not immediately available for '${
               mediaInfo.name || "<unnamed>"}'`);
@@ -1198,15 +1194,20 @@ export default class Vrapper extends Cog {
       }
       return interpretation;
     } catch (error) {
-      throw this.wrapErrorEvent(error,
+      return errorOnObtainMediaInterpretation.call(this, new Error(
           `_obtainMediaInterpretation('${this.get("name", options)}' as ${
-              String(mediaInfo && mediaInfo.mime)})`,
-          "\n\tid:", this.getId(options).toString(),
-          "\n\toptions:", ...dumpObject(options),
-          "\n\tvExplicitOwner:", ...dumpObject(vExplicitOwner),
-          "\n\tmediaInfo:", ...dumpObject(mediaInfo),
-          "\n\tmostMaterializedTransient:", ...dumpObject(mostMaterializedTransient),
-          "\n\tthis:", ...dumpObject(this),
+              String(mediaInfo && mediaInfo.mime)})`), error);
+    }
+    function errorOnObtainMediaInterpretation (wrapper, error) {
+      throw this.wrapErrorEvent(error, wrapper,
+        "\n\tid:", this.getId(options).toString(),
+        "\n\toptions:", ...dumpObject(options),
+        "\n\tvExplicitOwner:", ...dumpObject(vExplicitOwner),
+        "\n\tmediaInfo:", ...dumpObject(mediaInfo),
+        "\n\tmostMaterializedTransient:", ...dumpObject(mostMaterializedTransient),
+        "\n\tconnection.isSynced:", ...dumpObject(
+            this._partitionConnection && this._partitionConnection.isSynced()),
+        "\n\tthis:", ...dumpObject(this),
       );
     }
   }
@@ -1296,6 +1297,7 @@ export default class Vrapper extends Cog {
    */
   mediaURL (options: VALKOptions = {}) {
     let mediaInfo;
+    const wrapper = new Error("mediaURL");
     try {
       this.requireActive(options);
       invariantify(this.hasInterface("Media"),
@@ -1303,7 +1305,7 @@ export default class Vrapper extends Cog {
           "\n\ttype:", this._typeName,
           "\n\tobject:", this);
       mediaInfo = this.resolveMediaInfo(Object.create(options));
-      const ret = this._withPartitionConnectionChainEagerly(Object.create(options), [
+      const ret = this._withSyncedConnectionChainEagerly(Object.create(options), [
         connection => connection.getMediaURL(mediaInfo),
       ], errorOnMediaURL.bind(this));
       if (typeof options.synchronous !== "undefined") {
@@ -1361,13 +1363,13 @@ export default class Vrapper extends Cog {
    */
   prepareBvob (content: any, options: VALKOptions = {}) {
     let mediaInfo;
-    let alreadyWrapped;
+    const wrapper = new Error("prepareBvob()");
     try {
       this.requireActive(options);
       if (this.hasInterface("Media")) {
         mediaInfo = this.get(Vrapper.toMediaPrepareBvobInfoFields, Object.create(options));
       }
-      return this._withPartitionConnectionChainEagerly(Object.create(options), [
+      return this._withSyncedConnectionChainEagerly(Object.create(options), [
         connection => connection.prepareBvob(content, mediaInfo),
         ({ contentId, persistProcess }) => (contentId || persistProcess),
         (contentId) => {

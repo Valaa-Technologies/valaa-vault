@@ -26,9 +26,7 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
     return super.isConnected();
   }
 
-  connect (/* options: ConnectOptions */) {
-    return (this._syncedConnection = this);
-  }
+  _connect (/* options: ConnectOptions, onError: Function */) {}
 
   async narrateEventLog (): Promise<any> { return {}; }
 

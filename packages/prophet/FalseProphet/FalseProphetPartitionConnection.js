@@ -31,6 +31,15 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   _firstUnconfirmedEventId = 0;
   _isFrozen: ?boolean;
 
+  getStatus () {
+    return {
+      truths: this._headEventId,
+      commands: this._unconfirmedCommands.length,
+      frozen: this.isFrozenConnection(),
+      ...super.getStatus(),
+    };
+  }
+
   setIsFrozen (value: boolean = true) { this._isFrozen = value; }
 
   isFrozenConnection (): boolean { return !!this._isFrozen; }

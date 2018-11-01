@@ -36,32 +36,19 @@ export default class OraclePartitionConnection extends PartitionConnection {
     });
   }
 
-  /**
-   * Asynchronous operation which activates the connection to the Scribe and loads its metadatas,
-   * initiates the authority connection and narrates any requested events before finalizing.
-   *
-   * The initial narration looks for the requested events in following order:
-   * 1. options.eventLog
-   * 2. scribe in-memory and IndexedDB caches
-   * 3. authority connection.narrateEventLog (only if options.lastEventId is given)
-   *
-   * If lastEventId is not specified, all the explicit eventLog and locally cached events (both
-   * truths and queued commands starting from the optional firstEventId) are narrated.
-   *
-   *
-   * @param {ConnectOptions} options
-   *
-   * @memberof OraclePartitionConnection
-   */
-  connect (options: ConnectOptions) {
-    try {
-      return this._syncedConnection || (this._syncedConnection = thenChainEagerly(
-          _connect(this, options, errorOnConnect.bind(this, new Error("connect"))),
-          () => (this._syncedConnection = this)));
-    } catch (error) { return errorOnConnect.call(this, error); }
-    function errorOnConnect (wrapperError, error) {
-      throw this.wrapErrorEvent(error, wrapperError, "\n\toptions:", ...dumpObject(options));
-    }
+  _connect (options: ConnectOptions, onError: Function) {
+    // Handle step 2. of the acquirePartitionConnection first narration logic (defined
+    // in PartitionConnection.js) and begin I/O bound scribe event log narration in parallel to
+    // the authority proxy/connection creation.
+    const upstreamConnection = this._authorityProphet.acquirePartitionConnection(
+        this.getPartitionURI(), {
+          subscribe: false, narrateOptions: false,
+          receiveTruths: this.getReceiveTruths(options.receiveTruths),
+        });
+    this.setUpstreamConnection(upstreamConnection);
+    return thenChainEagerly(upstreamConnection.getSyncedConnection(),
+      () => this.narrateEventLog(options.narrateOptions),
+      onError);
   }
 
   receiveTruths (truths: EventBase[], retrieveMediaBuffer: RetrieveMediaBuffer,

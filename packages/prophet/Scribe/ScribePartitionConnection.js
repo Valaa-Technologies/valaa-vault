@@ -5,7 +5,7 @@ import { VRef, obtainVRef } from "~/raem/ValaaReference";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import type {
-  MediaInfo, NarrateOptions, ChronicleOptions, ChronicleEventResult, ConnectOptions,
+  MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest, ConnectOptions,
   ReceiveEvents, RetrieveMediaBuffer,
 } from "~/prophet/api/Prophet";
 
@@ -135,8 +135,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
-      { eventResults: ChronicleEventResult[] } {
+  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
     const contextError = new Error("chronicleEvents");
     try {
       return _chronicleEvents(this, events, options, errorOnScribechronicleEvents.bind(this));

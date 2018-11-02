@@ -4,7 +4,7 @@ import ValaaURI, { getPartitionRawIdFrom } from "~/raem/ValaaURI";
 import type { EventBase } from "~/raem/command";
 
 import Prophet, {
-  ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleEventResult,
+  ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest,
   ReceiveEvents, RetrieveMediaBuffer,
 } from "~/prophet/api/Prophet";
 import Follower from "~/prophet/api/Follower";
@@ -200,8 +200,7 @@ export default class PartitionConnection extends Follower {
    * @returns {Promise<Object>}
    * @memberof PartitionConnection
    */
-  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
-      { eventResults: ChronicleEventResult[] } {
+  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
     if (!options) return undefined;
     return this._upstreamConnection.chronicleEvents(events, options);
   }

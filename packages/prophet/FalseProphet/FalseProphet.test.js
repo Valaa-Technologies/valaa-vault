@@ -49,7 +49,7 @@ describe("FalseProphet", () => {
     for (const command of basicCommands) {
       oldCommandId = newCommandId;
 
-      await harness.chronicleEvent(command).getStoryPremiere();
+      await harness.chronicleEvent(command).getPremiereStory();
 
       newCommandId = scribeConnection.getFirstUnusedCommandEventId() - 1;
       expect(oldCommandId).toBeLessThan(newCommandId);

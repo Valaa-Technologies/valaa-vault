@@ -77,7 +77,7 @@ export default class RAEMTestHarness extends LogEventGenerator {
         eventResults: events.map(event => {
           const story = this.corpus.dispatch(event);
           return {
-            event, story, getFinalEvent: () => event,
+            event, story, getTruthEvent: () => event,
           };
         }),
       };

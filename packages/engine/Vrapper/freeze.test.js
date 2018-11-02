@@ -57,14 +57,14 @@ describe("Partition freezing", () => {
   it("Allows the user to freeze a partition", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
     expect(entities().test_partition.get("isFrozen")).toBeFalsy();
-    await harness.chronicleEvent(freezeEventFor("test_partition")).getStoryPremiere();
+    await harness.chronicleEvent(freezeEventFor("test_partition")).getPremiereStory();
     expect(entities().test_partition.get("isFrozen")).toBeTruthy();
     expect(harness.testPartitionConnection.isFrozenConnection()).toBeTruthy();
   });
 
   it("Does not allow the user to add contents to a frozen partition", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
-    await harness.chronicleEvent(freezeEventFor("test_partition")).getStoryPremiere();
+    await harness.chronicleEvent(freezeEventFor("test_partition")).getPremiereStory();
     expect(() => harness.chronicleEvent(lateEntityEvent))
         .toThrow(/Cannot modify frozen.*test_partition/);
     expect(entities().late_entity).toBeFalsy();
@@ -72,7 +72,7 @@ describe("Partition freezing", () => {
 
   it("Does not allow modifying properties of a frozen Entity", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
-    await harness.chronicleEvent(freezeEventFor("test_entity")).getStoryPremiere();
+    await harness.chronicleEvent(freezeEventFor("test_entity")).getPremiereStory();
     expect(() => entities().test_entity.alterProperty("prop", VALEK.fromValue("Changed string")))
         .toThrow(/Cannot modify frozen.*test_entity/);
     expect(entities().test_entity.propertyValue("prop"))
@@ -114,11 +114,11 @@ describe("Partition freezing", () => {
     harness = await createEngineOracleHarness({
       verbosity: 0, claimBaseBlock: false, acquirePartitions: ["test_partition_b"],
     }, [transactionA, transactionB]);
-    await harness.chronicleEvent(freezeEventFor("test_partition")).getStoryPremiere();
+    await harness.chronicleEvent(freezeEventFor("test_partition")).getPremiereStory();
     expect(() => harness.chronicleEvent(lateEntityEvent))
         .toThrow(/Cannot modify frozen.*test_partition/);
     expect(entities().late_entity).toBeFalsy();
-    await harness.chronicleEvent(lateEntityEventB).getStoryPremiere();
+    await harness.chronicleEvent(lateEntityEventB).getPremiereStory();
     expect(entities().late_entity_b).toBeTruthy();
   });
 });

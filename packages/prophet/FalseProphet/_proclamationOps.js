@@ -6,7 +6,7 @@ import type { Story } from "~/raem/redux/Bard";
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
 import ValaaURI, { createPartitionURI } from "~/raem/ValaaURI";
 
-import type { ClaimResult } from "~/prophet/api/Prophet";
+import type { ProphecyChronicleRequest } from "~/prophet/api/types";
 import extractEventOfPartition from "~/prophet/tools/extractEventOfPartition";
 
 import { dumpObject, outputError, thenChainEagerly, mapEagerly } from "~/tools";
@@ -24,7 +24,7 @@ export type Prophecy = Story & {
 // commands upstream. Aborts all remaining events on first exception
 // and rolls back previous ones.
 export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[],
-    { timed, transactionInfo } = {}): ClaimResult {
+    { timed, transactionInfo } = {}): ProphecyChronicleRequest {
   const prophecies = events.map(event => falseProphet._dispatchEventForStory(
       universalizeEvent(falseProphet, event), "prophecy", timed, transactionInfo));
   const reactions = falseProphet._reciteStoriesToFollowers(prophecies);
@@ -59,7 +59,7 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
             () => prophecy,
             errorOnChronicleEvents.bind(null,
                 new Error(`chronicleEvents.eventResults[${index}].getFinalStory()`)));
-        result.getStoryPremiere = () => thenChainEagerly(
+        result.getPremiereStory = () => thenChainEagerly(
             // Returns a promise which will resolve to the content
             // received from the backend but only after all the local
             // follower reactions have been resolved as well.
@@ -73,7 +73,7 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
             // Nevertheless flushing the corpus is needed.
             () => result.getFinalStory(),
             errorOnChronicleEvents.bind(null,
-                new Error(`chronicleEvents.eventResults[${index}].getStoryPremiere()`)));
+                new Error(`chronicleEvents.eventResults[${index}].getPremiereStory()`)));
       } catch (error) {
         errorOnChronicleEvents(
             new Error(`chronicleEvents.eventResults[${index}].revealToFollowers()`), error);

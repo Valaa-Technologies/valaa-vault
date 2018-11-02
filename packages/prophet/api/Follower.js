@@ -4,7 +4,7 @@ import type Command, { EventBase, Truth } from "~/raem/command";
 
 import { LogEventGenerator } from "~/tools/Logger";
 
-import type { ChronicleOptions, ChronicleEventResult } from "./types";
+import type { ChronicleOptions, ChronicleRequest, ChronicleEventResult } from "./types";
 
 /**
  * Interface for events flowing downstream
@@ -54,12 +54,11 @@ export default class Follower extends LogEventGenerator {
    * @returns {Promise<Object>}
    * @memberof PartitionConnection
    */
-  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): // eslint-disable-line
-      { eventResults: ChronicleEventResult[] } {
+  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest { // eslint-disable-line
     throw new Error(`chronicleEvents not implemented by ${this.constructor.name}`);
   }
 
-  chronicleEvent (event: EventBase, options: ChronicleOptions = {}) {
+  chronicleEvent (event: EventBase, options: ChronicleOptions = {}): ChronicleEventResult {
     return this.chronicleEvents([event], options).eventResults[0];
   }
 }

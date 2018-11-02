@@ -59,14 +59,14 @@ describe("Scribe", () => {
     const database = await openDB(testPartitionURI.toString());
 
     // Adds an entity and checks that it has been stored
-    let storedEvent = await connection.chronicleEvent(simpleCommand).getLocallyReceivedEvent();
+    let storedEvent = await connection.chronicleEvent(simpleCommand).getLocalEvent();
     expect(storedEvent.eventId)
         .toEqual(connection.getFirstUnusedCommandEventId() - 1);
     await expectStoredInDB(simpleCommand, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
 
     // Runs a transaction and confirms that it has been stored
-    storedEvent = await connection.chronicleEvent(followupTransaction).getLocallyReceivedEvent();
+    storedEvent = await connection.chronicleEvent(followupTransaction).getLocalEvent();
     expect(storedEvent.eventId)
         .toEqual(connection.getFirstUnusedCommandEventId() - 1);
     await expectStoredInDB(followupTransaction, database, "commands",
@@ -111,10 +111,10 @@ describe("Scribe", () => {
     const firstConnection = await scribe.acquirePartitionConnection(testPartitionURI)
         .getSyncedConnection();
 
-    await firstConnection.chronicleEvent(simpleCommand).getLocallyReceivedEvent();
+    await firstConnection.chronicleEvent(simpleCommand).getLocalEvent();
 
     const storedEvent =
-        await firstConnection.chronicleEvent(followupTransaction).getLocallyReceivedEvent();
+        await firstConnection.chronicleEvent(followupTransaction).getLocalEvent();
 
     const firstUnusedCommandEventId = firstConnection.getFirstUnusedCommandEventId();
     expect(firstUnusedCommandEventId).toEqual(storedEvent.eventId + 1);
@@ -136,7 +136,7 @@ describe("Scribe", () => {
     let newUnusedCommandId = connection.getFirstUnusedCommandEventId();
 
     for (const command of simpleCommandList) {
-      const storedEvent = await connection.chronicleEvent(command).getLocallyReceivedEvent();
+      const storedEvent = await connection.chronicleEvent(command).getLocalEvent();
       expect(storedEvent.eventId)
           .toEqual(newUnusedCommandId);
 

@@ -3,7 +3,7 @@
 import { EventBase, Story } from "~/raem/command";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import type { NarrateOptions, ChronicleOptions, ChronicleEventResult } from "~/prophet/api/Prophet";
+import type { NarrateOptions, ChronicleOptions, ChronicleRequest } from "~/prophet/api/Prophet";
 
 import { dumpObject } from "~/tools";
 
@@ -52,8 +52,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     });
   }
 
-  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
-      { eventResults: ChronicleEventResult[] } {
+  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
     if (!events || !events.length) return { eventResults: events };
     try {
       if (options.isProphecy) {

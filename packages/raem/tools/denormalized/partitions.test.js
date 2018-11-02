@@ -109,7 +109,7 @@ describe("partitions", () => {
           siblings: [vRef("B_testRoot")],
         }),
       ],
-    })).getFinalEvent();
+    })).getTruthEvent();
     const aGrandparentPartition = { // eslint-disable-line
       "valaa-local:?id=A_grandparent": { eventId: null },
     };

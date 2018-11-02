@@ -75,7 +75,7 @@ describe("MODIFIED", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
       const dataGlue = harness.chronicleEvent(created({ id: "glue1", typeName: "TestDataGlue",
         initialState: { source: "A_child1", target: "A_child2" },
-      })).getFinalEvent();
+      })).getTruthEvent();
       harness.chronicleEvent(modified({ id: "A_child1", typeName: "TestThing",
         adds: { sourceDataGlues: [dataGlue.id] },
       }));
@@ -89,7 +89,7 @@ describe("MODIFIED", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
       const dataGlue = harness.chronicleEvent(created({ id: dRef("glue1"), typeName: "TestDataGlue",
         initialState: { source: "A_child1", target: "A_child2" },
-      })).getFinalEvent();
+      })).getTruthEvent();
       harness.chronicleEvent(modified({ id: "A_child1", typeName: "TestThing",
         adds: { sourceDataGlues: [dataGlue.id] },
       }));

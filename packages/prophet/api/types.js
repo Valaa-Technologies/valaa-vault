@@ -1,6 +1,6 @@
 // @flow
 
-import type { EventBase } from "~/raem/command";
+import type { Command, EventBase, Story, Truth } from "~/raem/command";
 import { VRef } from "~/raem/ValaaReference";
 
 export type MediaInfo = {
@@ -44,12 +44,56 @@ export type NarrateOptions = {
 };
 
 export type ChronicleOptions = NarrateOptions & {
-  isPreAuthorized?: boolean,         // If true the chronicled events are already authorized truths.
+  isTruth?: boolean,         // If true the chronicled events are already authorized truths.
   retrieveMediaBuffer?: RetrieveMediaBuffer,
 };
 
-export type ChronicleEventResult = {
-  event: EventBase,
-  getLocallyReceivedEvent: Function<Promise<EventBase> >,
-  getTruthEvent: Function<Promise<EventBase> >,
-};
+export class ChronicleEventResult {
+  event: EventBase; // Preliminary event after universalization
+
+  // Get a fully universalized event (complete with eventId if appropriate).
+  getUniversalEvent (): EventBase { return this.getPersistedEvent(); }
+
+  // Get universalized event after it has been processed through local prophet chain.
+  getLocalEvent (): EventBase | null | Promise<EventBase | null> {}
+
+  // Get event after it has been persisted (possibly locally).
+  getPersistedEvent (): EventBase | Promise<EventBase> { return this.getTruthEvent(); }
+
+  // Get event after it has been confirmed as a truth by its authority
+  getTruthEvent (): Truth | Promise<Truth> {
+    throw new Error(`getTruthEvent not implemented by ${this.constructor.name}`);
+  }
+}
+
+export type ChronicleRequest = {
+  eventResults: ChronicleEventResult[];
+}
+
+export class ChronicleProphecyResult extends ChronicleEventResult {
+  story: Story; // Preliminary story before any revisions
+
+  // Returns the partition specific command of this prophecy event
+  getCommandOf (/* partitionURI: string */): Command | Promise<Command> {
+    throw new Error(`getCommandOf not implemented by ${this.constructor.name}`);
+  }
+
+  // Story of the event after its immediate follower reaction promises have resolved.
+  getPremiereStory (): Story | Promise<Story> {
+    return this.getPersistedStory();
+  }
+
+  // Story of the event after it's persisted (possibly locally) but not yet authorized.
+  getPersistedStory (): Story | Promise<Story> {
+    return this.getTruthStory();
+  }
+
+  // Story of the event after it's confirmed as a true story by its authority
+  getTruthStory (): Story | Promise<Story> {
+    throw new Error(`getTruthEvent not implemented by ${this.constructor.name}`);
+  }
+}
+
+export type ProphecyChronicleRequest = {
+  eventResults: ChronicleProphecyResult[];
+}

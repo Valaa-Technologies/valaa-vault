@@ -68,7 +68,7 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
     }
     for (const commands of commandBlocks) {
       await Promise.all(ret.chronicleEvents(commands).eventResults
-          .map(result => result.getStoryPremiere()));
+          .map(result => result.getPremiereStory()));
     }
     return ret;
   } catch (error) {
@@ -107,7 +107,8 @@ export default class ProphetTestHarness extends ScriptTestHarness {
         this.prophet.acquirePartitionConnection(this.testPartitionURI, { newPartition: true })
         .getSyncedConnection(), [
           (conn) => Promise.all([
-            conn, this.chronicleEvent(createdTestPartitionEntity).getStoryPremiere(),
+            conn, this.chronicleEvent(createdTestPartitionEntity, { isTruth: true })
+                .getPremiereStory(),
           ]),
           ([conn]) => (this.testPartitionConnection = conn),
         ]);
@@ -187,8 +188,9 @@ export function createOracle (options?: Object) {
 
 export function clearOracleScribeDatabases (prophet: Prophet) {
   return clearScribeDatabases(["valaa-test:?id=test_partition",
-      ...Object.values(prophet.getSyncedConnections())
-          .map(connection => connection.getPartitionURI().toString())]);
+    ...Object.values(prophet.getSyncedConnections())
+        .map(connection => connection.getPartitionURI().toString()),
+  ]);
 }
 
 export function createFalseProphet (options?: Object) {
@@ -222,20 +224,4 @@ export class MockProphet extends AuthorityProphet {
     const connectors = {};
     return connectors;
   }
-
-/*
-  chronicleEvents (events: EventBase[]) {
-    return { eventResults: events.map(event => ({
-      event, story: event,
-      getStoryPremiere: () => Promise.resolve(event),
-    });
-  }
-
-  _createPartitionConnection (partition) {
-    if
-    return new MockPartitionConnection({
-      prophet: this, partitionURI: new createPartitionURI("valaa-test:", "dummy"),
-    });
-  }
-*/
 }

@@ -1,6 +1,6 @@
 import Valker from "~/raem/VALK/Valker";
 
-import type { ClaimResult } from "~/prophet/api/Prophet";
+import type { ChronicleProphecyResult } from "~/prophet/api/types";
 
 /**
  * Discourse is a fancy name for a one-to-one communication connection between a single Prophet and
@@ -49,9 +49,9 @@ export default class Discourse extends Valker {
    * @param  {type} duplicateOf   duplicate source resource to copy owned fields from
    * @param  {type} initialState  overriding initial properties (over duplicate)
    * @param  {type} id            description
-   * @returns {ClaimResult}       returns the ChronicleEventResults of the underlying chronicling
+   * @returns {ChronicleProphecyResult} returns the ChronicleEventResults of the chronicling
    */
-  create ({ typeName, initialState, id }): ClaimResult { // eslint-disable-line
+  create ({ typeName, initialState, id }): ChronicleProphecyResult { // eslint-disable-line
     throw new Error(`${this.constructor.name}/Discourse.create unimplemented`);
   }
 
@@ -59,7 +59,7 @@ export default class Discourse extends Valker {
    * duplicate - alias for create which asserts that duplicate is specified and extracts the owner
    * from it.
    */
-  duplicate ({ duplicateOf, initialState, id }): ClaimResult { // eslint-disable-line
+  duplicate ({ duplicateOf, initialState, id }): ChronicleProphecyResult { // eslint-disable-line
     throw new Error(`${this.constructor.name}/Discourse.duplicate unimplemented`);
   }
 
@@ -73,9 +73,9 @@ export default class Discourse extends Valker {
    * @param  {type} adds         description
    * @param  {type} removes      description
    * @param  {type} splices      description
-   * @returns {ClaimResult}      returns the ChronicleEventResults of the underlying chronicling
+   * @returns {ChronicleProphecyResult} returns the ChronicleEventResults of the chronicling
    */
-  modify ({ id, typeName, sets, adds, removes, splices }): ClaimResult { // eslint-disable-line
+  modify ({ id, typeName, sets, adds, removes, splices }): ChronicleProphecyResult { // eslint-disable-line
     throw new Error(`${this.constructor.name}/Discourse.modify unimplemented`);
   }
 
@@ -84,9 +84,9 @@ export default class Discourse extends Valker {
    *
    * @param  {type} id           description
    * @param  {type} typeName     description
-   * @returns {ClaimResult}      returns the ChronicleEventResults of the underlying chronicling
+   * @returns {ChronicleProphecyResult} returns the ChronicleEventResults of the chronicling
    */
-  destroy ({ id, typeName }): ClaimResult { // eslint-disable-line
+  destroy ({ id, typeName }): ChronicleProphecyResult { // eslint-disable-line
     throw new Error(`${this.constructor.name}/Discourse.destroy unimplemented`);
   }
 }

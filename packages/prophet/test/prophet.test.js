@@ -78,7 +78,7 @@ describe("Prophet", () => {
 
     for (const command of commands) {
       const claimResult = await harness.chronicleEvent(command);
-      await claimResult.getStoryPremiere();
+      await claimResult.getPremiereStory();
       const partitionCommand = await claimResult.getCommandOf(testPartitionURI);
       const eventId = scribeConnection.getFirstUnusedCommandEventId() - 1;
       await expectStoredInDB(partitionCommand, database, "commands", eventId);
@@ -89,10 +89,8 @@ describe("Prophet", () => {
     harness = await createProphetOracleHarness({ verbosity: 0,
       oracleOptions: { testAuthorityConfig: { isLocallyPersisted: true } },
     });
-    const partitionURI = createPartitionURI(testAuthorityURI, "test_partition");
-
     const prophetConnection = await harness.prophet
-        .acquirePartitionConnection(partitionURI).getSyncedConnection();
+        .acquirePartitionConnection(testPartitionURI).getSyncedConnection();
     const scribeConnection = prophetConnection.getUpstreamConnection();
 
     let oldCommandId;
@@ -101,7 +99,8 @@ describe("Prophet", () => {
     for (const command of commands) {
       oldCommandId = newCommandId;
 
-      await harness.chronicleEvent(command).getStoryPremiere();
+      await harness.chronicleEvent(command).getPremiereStory();
+
 
       newCommandId = scribeConnection.getFirstUnusedCommandEventId() - 1;
       expect(oldCommandId).toBeLessThan(newCommandId);

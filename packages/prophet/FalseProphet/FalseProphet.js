@@ -8,7 +8,7 @@ import type { State } from "~/raem/tools/denormalized/State";
 import Follower from "~/prophet/api/Follower";
 import Prophet from "~/prophet/api/Prophet";
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
-
+import type { ChroniclePropheciesRequest } from "~/prophet/api/types";
 import { dumpObject } from "~/tools";
 
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
@@ -19,15 +19,7 @@ import {
   _createStoryQueue, _dispatchEventForStory, _reciteStoriesToFollowers, _reviewProphecy,
 } from "./_prophecyOps";
 
-export class Proclamation extends Action {}
 
-export type ClaimResult = {
-  event: EventBase; // Preliminary event after universalization
-  story: Story; // Preliminary story before any revisions
-  getFinalStory: () => Promise<Story>; // Final story after the chronicling was authorized
-  getCommandOf: (partitionURI: string) => Promise<Command>;
-  getStoryPremiere: () => Promise<Story>; // Story after follower reaction promises have resolved.
-}
 
 /**
  * FalseProphet is non-authoritative denormalized in-memory store of
@@ -82,8 +74,9 @@ export default class FalseProphet extends Prophet {
   }
 
   // Split a command and transmit resulting partition commands towards upstream.
-  chronicleEvents (commands: Command[], options:
-      { timed: Object, transactionInfo: TransactionInfo } = {}): { eventResults: ClaimResult[] } {
+  chronicleEvents (commands: Command[],
+      options: { timed: Object, transactionInfo: TransactionInfo } = {},
+  ): ChroniclePropheciesRequest {
     try {
       return _chronicleEvents(this, commands, options);
     } catch (error) {
@@ -91,7 +84,7 @@ export default class FalseProphet extends Prophet {
           "\n\toptions:", ...dumpObject(options));
     }
   }
-  chronicleEvent (event: EventBase, options: Object = {}) {
+  chronicleEvent (event: EventBase, options: Object = {}): ChronicleProphecyResult {
     return this.chronicleEvents([event], options).eventResults[0];
   }
 

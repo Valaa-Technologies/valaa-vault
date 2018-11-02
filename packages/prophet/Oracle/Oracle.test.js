@@ -41,7 +41,7 @@ describe("Oracle", () => {
 
     const commandsUpToFreeze = [freezePartitionEvent];
     for (const command of commandsUpToFreeze) {
-      await harness.chronicleEvent(command).getStoryPremiere();
+      await harness.chronicleEvent(command).getPremiereStory();
     }
 
     // Attempt to run an action post-freeze and expect complaints

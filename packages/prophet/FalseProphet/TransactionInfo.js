@@ -5,7 +5,7 @@ import { createPassageFromAction, getActionFromPassage } from "~/raem";
 import { transacted, EventBase } from "~/raem/command";
 import type { Corpus } from "~/raem/Corpus";
 
-import { ClaimResult } from "~/prophet/api/Prophet";
+import { ChronicleRequest } from "~/prophet/api/types";
 import type { Transaction } from "~/prophet/api/Transaction";
 
 import { dumpObject, invariantify } from "~/tools";
@@ -52,7 +52,7 @@ export default class TransactionInfo {
     this.customCommand = customCommandCandidate;
   }
 
-  chronicleEvents (events: EventBase[], options: Object = {}): { eventResults: ClaimResult[] } {
+  chronicleEvents (events: EventBase[], options: Object = {}): ChronicleRequest {
     try {
       if (!this.actions) {
         throw new Error(`Transaction '${this.transaction.corpus.getName()}' has already been ${
@@ -83,7 +83,7 @@ export default class TransactionInfo {
               (succeed, fail) => this.resultPromises.push({ succeed, fail }));
           this.passages[index].state = state;
           this.passages[index].previousState = previousState;
-          return { event, story: transactionStory.passages[index], getStoryPremiere: () => result };
+          return { event, story: transactionStory.passages[index], getPremiereStory: () => result };
         })
       };
     } catch (error) {
@@ -115,13 +115,13 @@ export default class TransactionInfo {
         command = universalizeEvent(this.transaction.prophet, this._finalCommand);
         command.partitions = {};
         return {
-          event: this._finalCommand, story: command, getStoryPremiere () { return command; },
+          event: this._finalCommand, story: command, getPremiereStory () { return command; },
         };
       }
       const result = this.transaction.prophet.chronicleEvent(
           this._finalCommand, { transactionInfo: this });
 
-      Promise.resolve(result.getStoryPremiere()).then(
+      Promise.resolve(result.getPremiereStory()).then(
         // TODO(iridian): Implement returning results. What should they be anyway?
         transactionStoryResult => this.resultPromises.forEach((promise, index) =>
             promise.succeed((transactionStoryResult.actions || [])[index])),

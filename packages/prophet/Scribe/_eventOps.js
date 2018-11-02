@@ -4,7 +4,7 @@ import { isTransactedLike, EventBase } from "~/raem/command";
 import { getRawIdFrom } from "~/raem/ValaaReference";
 
 import type {
-  MediaInfo, NarrateOptions, ChronicleOptions, ChronicleEventResult, ReceiveEvents,
+  MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest, ReceiveEvents,
   RetrieveMediaBuffer,
 } from "~/prophet/api/Prophet";
 
@@ -105,9 +105,9 @@ async function _waitForRemoteNarration (connection: ScribePartitionConnection,
     if (!Array.isArray(resultEntries)) continue;
     for (let i = 0; i !== resultEntries.length; ++i) {
       const entry = resultEntries[i];
-      if (!entry.getLocallyReceivedEvent) continue;
+      if (!entry.getLocalEvent) continue;
       try {
-        await entry.getLocallyReceivedEvent();
+        await entry.getLocalEvent();
       } catch (error) {
         entry.localPersistError = error;
         const wrapped = connection.wrapErrorEvent(error,
@@ -133,10 +133,10 @@ async function _waitForRemoteNarration (connection: ScribePartitionConnection,
 */
 
 export function _chronicleEvents (connection: ScribePartitionConnection,
-    events: EventBase[], options: ChronicleOptions = {}, onError: Function
-): { eventResults: ChronicleEventResult[] } {
+    events: EventBase[], options: ChronicleOptions = {}, onError: Function,
+): ChronicleRequest {
   if (!events || !events.length) return { eventResults: events };
-  if (options.isPreAuthorized === true) {
+  if (options.isTruth === true) {
     let receivedTruthsProcess = thenChainEagerly(
         connection.getReceiveTruths(options.receiveTruths)(
         // pre-authorized medias must be preCached, throw on any retrieveMediaBuffer calls.
@@ -145,7 +145,7 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
     return {
       eventResults: events.map((event, index) => ({
         event,
-        getLocallyReceivedEvent: () => thenChainEagerly(receivedTruthsProcess,
+        getLocalEvent: () => thenChainEagerly(receivedTruthsProcess,
             receivedTruths => receivedTruths[index]),
         getTruthEvent: () => event,
       })),
@@ -164,7 +164,7 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
   return {
     eventResults: events.map((event, index) => ({
       event,
-      getLocallyReceivedEvent: () => thenChainEagerly(receivedCommandsProcess,
+      getLocalEvent: () => thenChainEagerly(receivedCommandsProcess,
           (receivedCommands) => receivedCommands[index],
           onError),
       getTruthEvent: () => thenChainEagerly(chroniclingProcess,

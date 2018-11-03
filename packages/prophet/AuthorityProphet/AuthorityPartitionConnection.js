@@ -36,14 +36,15 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
       throw new Error(`${this.constructor.name
           }.chronicleEvents not implemented by remote authority partition "${this.getName()}"`);
     }
-    const receivedTruthsProcess = !this.isPrimaryAuthority() ? []
+    const isPrimary = this.isPrimaryAuthority();
+    const receivedTruthsProcess = !isPrimary ? []
         : this.getReceiveTruths(options.receiveTruths)(events);
     return {
       eventResults: events.map((event, index) => (new ChronicleEventResult(event, {
         getLocalEvent: () => thenChainEagerly(
             receivedTruthsProcess,
             (receivedTruths) => receivedTruths[index]),
-        getTruthEvent: () => (this.isPrimaryAuthority() ? event : undefined),
+        getTruthEvent () { return isPrimary ? this.getLocalEvent() : undefined; },
       }))),
     };
   }

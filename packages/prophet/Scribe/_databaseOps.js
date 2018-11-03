@@ -417,11 +417,11 @@ export function _readCommands (connection: ScribePartitionConnection, options: O
 }
 
 export function _deleteCommands (connection: ScribePartitionConnection,
-    fromEventId: string, toEventId: string) {
+    eventIdBegin: string, eventIdEnd: string) {
   if (!connection._db) return undefined;
   return connection._db.transaction(["commands"], "readwrite", ({ commands }) =>
       new Promise((resolve, reject) => {
-        const req = commands.delete(connection.database.IDBKeyRange.bound(fromEventId, toEventId));
+        const req = commands.delete(connection._db.getIDBKeyRange({ eventIdBegin, eventIdEnd }));
         req.onsuccess = () => resolve();
         req.onerror = (evt => reject(new Error(evt.target.error.message)));
       }));

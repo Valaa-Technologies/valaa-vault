@@ -32,7 +32,7 @@ describe("Prophet", () => {
   ];
 
   it("decodes cached bvob buffers based on media type", async () => {
-    const scribe = createScribe(createOracle(createTestMockProphet({ isLocallyPersisted: true })));
+    const scribe = createScribe(createOracle(createTestMockProphet()));
     await scribe.initiate();
 
     const connection = await scribe.acquirePartitionConnection(testPartitionURI)
@@ -48,16 +48,6 @@ describe("Prophet", () => {
     }
   });
 
-  const simpleCommand = created({ eventId: 0, id: "Some entity", typeName: "Entity" });
-
-  const simpleTransaction = transacted({
-    eventId: 1,
-    actions: [
-      created({ id: "Some relation", typeName: "Relation" }),
-      created({ id: "Some other entity", typeName: "Entity" }),
-    ],
-  });
-
   const commands = [
     created({ id: "Entity A", typeName: "Entity", initialState: { owner: "test_partition" } }),
     created({ id: "Entity B", typeName: "Entity", initialState: { owner: "test_partition" } }),
@@ -69,7 +59,7 @@ describe("Prophet", () => {
 
   it("stores the contents of the actions on the scribe correctly", async () => {
     harness = await createProphetOracleHarness({ verbosity: 0,
-      oracleOptions: { testAuthorityConfig: { isLocallyPersisted: true } },
+      oracleOptions: { testAuthorityConfig: { isLocallyPersisted: true, isRemoteAuthority: true } },
     });
     const prophetConnection = await harness.prophet
         .acquirePartitionConnection(testPartitionURI).getSyncedConnection();
@@ -101,9 +91,114 @@ describe("Prophet", () => {
 
       await harness.chronicleEvent(command).getPremiereStory();
 
-
       newCommandId = scribeConnection.getFirstUnusedCommandEventId() - 1;
       expect(oldCommandId).toBeLessThan(newCommandId);
     }
+  });
+});
+
+describe("Prophet", () => {
+  const simpleCommand = created({
+    id: "simple_entity", typeName: "Entity", initialState: {
+      name: "Simple Entity", owner: "test_partition",
+    }
+  });
+
+  const coupleCommands = [
+    created({ id: "other_entity", typeName: "Entity", initialState: {
+      name: "Some other entity", owner: "test_partition",
+    } }),
+    created({ id: "simple_relation", typeName: "Relation", initialState: {
+      name: "Simple-other Relation", owner: "simple_entity",
+      target: "other_entity",
+    } }),
+  ];
+
+  async function setUp (testAuthorityConfig: Object = {}, options: {}) {
+    harness = await createProphetOracleHarness({ verbosity: 0,
+      oracleOptions: { testAuthorityConfig },
+      ...options,
+    });
+    const ret = {
+      connection: await harness.prophet.acquirePartitionConnection(
+          testPartitionURI).getSyncedConnection(),
+      scribeConnection: await harness.scribe.acquirePartitionConnection(
+          testPartitionURI, { newConnection: false }).getSyncedConnection(),
+      oracleConnection: await harness.oracle.acquirePartitionConnection(
+          testPartitionURI, { newConnection: false }).getSyncedConnection(),
+    };
+    ret.authorityConnection = ret.oracleConnection.getUpstreamConnection();
+    return ret;
+  }
+
+  function expectConnectionEventIds (connection,
+      truthEventIdBegin, truthToCommandBorderEventId, commandEventIdEnd) {
+    expect(connection.getFirstTruthEventId()).toEqual(truthEventIdBegin);
+    expect(connection.getFirstUnusedTruthEventId()).toEqual(truthToCommandBorderEventId);
+    expect(connection.getFirstCommandEventId()).toEqual(truthToCommandBorderEventId);
+    expect(connection.getFirstUnusedCommandEventId()).toEqual(commandEventIdEnd);
+  }
+
+  it("confirms remote partition commands as truths only when explicitly confirmed", async () => {
+    const { scribeConnection, authorityConnection } =
+        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+    let totalCommandCount;
+    harness.prophet.setCommandCountCallback((total) => { totalCommandCount = total; });
+    expect(totalCommandCount).toEqual(0);
+    expectConnectionEventIds(scribeConnection, 0, 1, 1);
+    const result = harness.chronicleEvent(simpleCommand);
+    expect(result.getCommandOf(testPartitionURI).eventId).toEqual(1);
+    expect(totalCommandCount).toEqual(1);
+    expectConnectionEventIds(scribeConnection, 0, 1, 2);
+    expect(authorityConnection._upstreamQueue.length).toEqual(0);
+    await result.getPersistedEvent();
+    expect(authorityConnection._upstreamQueue.length).toEqual(1);
+    expectConnectionEventIds(scribeConnection, 0, 1, 2);
+    const results = harness.chronicleEvents(coupleCommands).eventResults;
+    expect(results[0].getCommandOf(testPartitionURI).eventId).toEqual(2);
+    expect(results[1].getCommandOf(testPartitionURI).eventId).toEqual(3);
+    expectConnectionEventIds(scribeConnection, 0, 1, 4);
+    expect(totalCommandCount).toEqual(3);
+    expect(authorityConnection._upstreamQueue.length).toEqual(1);
+    await results[1].getPersistedEvent();
+    expect(authorityConnection._upstreamQueue.length).toEqual(3);
+
+    const twoConfirmedTruths = JSON.parse(JSON.stringify(
+          authorityConnection._upstreamQueue.splice(0, 2)));
+    await authorityConnection.getReceiveTruths()(twoConfirmedTruths);
+    expect(totalCommandCount).toEqual(1);
+    expectConnectionEventIds(scribeConnection, 0, 3, 4);
+
+    const lastConfirmedTruths = JSON.parse(JSON.stringify(
+          authorityConnection._upstreamQueue.splice(0, 1)));
+    await authorityConnection.getReceiveTruths()(lastConfirmedTruths);
+    expect(totalCommandCount).toEqual(0);
+    expectConnectionEventIds(scribeConnection, 0, 4, 4);
+  });
+
+  it("automatically confirms local partition commands as truths", async () => {
+    const { scribeConnection } = await setUp({ isLocallyPersisted: true }, { verbosity: 0 });
+    let totalCommandCount;
+    harness.prophet.setCommandCountCallback((total) => { totalCommandCount = total; });
+    expect(totalCommandCount).toEqual(0);
+    expectConnectionEventIds(scribeConnection, 0, 1, 1);
+    const result = harness.chronicleEvent(simpleCommand);
+    expect(result.getCommandOf(testPartitionURI).eventId).toEqual(1);
+    expect(totalCommandCount).toEqual(1);
+    expectConnectionEventIds(scribeConnection, 0, 1, 2);
+    const persisted = result.getPersistedEvent();
+    expectConnectionEventIds(scribeConnection, 0, 1, 2);
+    await persisted;
+    expect(totalCommandCount).toEqual(0);
+    expectConnectionEventIds(scribeConnection, 0, 2, 2);
+
+    const results = harness.chronicleEvents(coupleCommands).eventResults;
+    expect(results[0].getCommandOf(testPartitionURI).eventId).toEqual(2);
+    expect(results[1].getCommandOf(testPartitionURI).eventId).toEqual(3);
+    expect(totalCommandCount).toEqual(2);
+    expectConnectionEventIds(scribeConnection, 0, 2, 4);
+    await results[1].getPersistedEvent();
+    expect(totalCommandCount).toEqual(0);
+    expectConnectionEventIds(scribeConnection, 0, 4, 4);
   });
 });

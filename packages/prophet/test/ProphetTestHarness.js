@@ -10,12 +10,11 @@ import ScriptTestHarness, { createScriptTestHarness } from "~/script/test/Script
 import { createCorpus } from "~/raem/test/RAEMTestHarness";
 
 import {
-  AuthorityNexus, AuthorityProphet, AuthorityPartitionConnection,
-  FalseProphet, FalseProphetDiscourse, Oracle, Prophet, Scribe,
+  AuthorityNexus, FalseProphet, FalseProphetDiscourse, Oracle, Prophet, Scribe,
 } from "~/prophet";
 
 import ProphetTestAPI from "~/prophet/test/ProphetTestAPI";
-import createValaaTestScheme from "~/prophet/test/scheme-valaa-test";
+import createValaaTestScheme, { MockProphet } from "~/prophet/test/scheme-valaa-test";
 import createValaaLocalScheme from "~/prophet/schemeModules/valaa-local";
 import createValaaMemoryScheme from "~/prophet/schemeModules/valaa-memory";
 import createValaaTransientScheme from "~/prophet/schemeModules/valaa-transient";

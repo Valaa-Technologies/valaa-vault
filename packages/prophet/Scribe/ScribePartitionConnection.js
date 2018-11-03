@@ -175,10 +175,15 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   _clampCommandQueueByTruthEvendIdEnd () {
-    this._commandQueueInfo.eventIdBegin =
-        Math.max(this._commandQueueInfo.eventIdBegin, this._truthLogInfo.eventIdEnd);
-    this._commandQueueInfo.eventIdEnd =
-        Math.max(this._commandQueueInfo.eventIdBegin, this._commandQueueInfo.eventIdEnd);
+    if (this._truthLogInfo.eventIdEnd > this._commandQueueInfo.eventIdBegin) {
+      if (this._commandQueueInfo.eventIdBegin !== this._commandQueueInfo.eventIdEnd) {
+        _deleteCommands(this, this._commandQueueInfo.eventIdBegin,
+            Math.min(this._commandQueueInfo.eventIdEnd, this._truthLogInfo.eventIdEnd));
+      }
+      this._commandQueueInfo.eventIdBegin = this._truthLogInfo.eventIdEnd;
+      this._commandQueueInfo.eventIdEnd =
+          Math.max(this._commandQueueInfo.eventIdBegin, this._commandQueueInfo.eventIdEnd);
+    }
   }
 
   _determineEventMediaPreOps (mediaEvent: Object, rootEvent: Object) {

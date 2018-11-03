@@ -163,6 +163,7 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
           events, options.retrieveMediaBuffer),
       (receivedCommands) => (receivedCommandsProcess = receivedCommands),
       onError);
+  options.receiveTruths = connection.getReceiveTruths(options.receiveTruths);
   options.receiveCommands = null;
   let chroniclingProcess = thenChainEagerly(receivedCommandsProcess,
       (receivedEvents) => (chroniclingProcess = connection.getUpstreamConnection()

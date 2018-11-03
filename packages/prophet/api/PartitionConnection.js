@@ -190,6 +190,8 @@ export default class PartitionConnection extends Follower {
    */
   narrateEventLog (options: NarrateOptions = {}): Promise<Object> {
     if (!options) return undefined;
+    options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
+    options.receiveCommands = this.getReceiveCommands(options.receiveTruths);
     return this._upstreamConnection.narrateEventLog(options);
   }
 
@@ -202,6 +204,8 @@ export default class PartitionConnection extends Follower {
    */
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
     if (!options) return undefined;
+    options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
+    options.receiveCommands = this.getReceiveCommands(options.receiveTruths);
     return this._upstreamConnection.chronicleEvents(events, options);
   }
 

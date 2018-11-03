@@ -62,6 +62,11 @@ export default class FalseProphet extends Prophet {
 
   getState () { return this.corpus.getState(); }
 
+  setCommandCountCallback (callback: Function) {
+    this._commandCountCallback = callback;
+    callback(this._totalCommandCount, this._partitionCommandCounts);
+  }
+
   recreateCorpus (newState: State) {
     this.corpus.reinitialize(newState);
   }

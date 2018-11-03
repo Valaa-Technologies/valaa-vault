@@ -51,7 +51,7 @@ describe("Scribe", () => {
   });
 
   it("stores truths/commands in the database", async () => {
-    const scribe = createScribe(createTestMockProphet());
+    const scribe = createScribe(createTestMockProphet({ isRemoteAuthority: true }));
     await scribe.initiate();
 
     const connection = await scribe

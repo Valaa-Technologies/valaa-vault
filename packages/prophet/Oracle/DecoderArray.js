@@ -1,6 +1,6 @@
 // @flow
 
-import type { MediaInfo } from "~/prophet/api/Prophet";
+import { MediaInfo } from "~/prophet/api/types";
 
 import MediaDecoder from "~/tools/MediaDecoder";
 import { mergeDeepWith } from "~/tools/mergeDeep";

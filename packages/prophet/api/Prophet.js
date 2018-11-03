@@ -2,19 +2,12 @@
 
 import type ValaaURI from "~/raem/ValaaURI";
 
-import Follower, {
-  ChronicleEventResult, ChronicleOptions, MediaInfo, NarrateOptions, ReceiveEvents,
-  RetrieveMediaBuffer,
-} from "~/prophet/api/Follower";
+import { NarrateOptions, ReceiveEvents } from "~/prophet/api/types";
+import Follower from "~/prophet/api/Follower";
 import type PartitionConnection from "~/prophet/api/PartitionConnection";
 
 import { LogEventGenerator } from "~/tools/Logger";
 import { dumpObject } from "~/tools/wrapError";
-
-export type {
-  ChronicleEventResult, ChronicleOptions, MediaInfo, NarrateOptions, ReceiveEvents,
-  RetrieveMediaBuffer
-};
 
   /**
    * Eagerly acquires and returns an existing full connection, otherwise

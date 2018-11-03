@@ -3,7 +3,7 @@
 import { isCreatedLike } from "~/raem/command";
 import { VRef, getRawIdFrom } from "~/raem/ValaaReference";
 
-import type { MediaInfo, RetrieveMediaBuffer } from "~/prophet/api/Prophet";
+import { MediaInfo, RetrieveMediaBuffer } from "~/prophet/api/types";
 
 import { addDelayedOperationEntry, dumpObject, invariantifyString, thenChainEagerly, vdon }
     from "~/tools";

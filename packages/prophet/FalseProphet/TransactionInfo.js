@@ -5,7 +5,7 @@ import { createPassageFromAction, getActionFromPassage } from "~/raem";
 import { transacted, EventBase } from "~/raem/command";
 import type { Corpus } from "~/raem/Corpus";
 
-import { ChronicleRequest } from "~/prophet/api/types";
+import { ChronicleRequest, ChronicleEventResult } from "~/prophet/api/types";
 import type { Transaction } from "~/prophet/api/Transaction";
 
 import { dumpObject, invariantify } from "~/tools";
@@ -83,7 +83,10 @@ export default class TransactionInfo {
               (succeed, fail) => this.resultPromises.push({ succeed, fail }));
           this.passages[index].state = state;
           this.passages[index].previousState = previousState;
-          return { event, story: transactionStory.passages[index], getPremiereStory: () => result };
+          return new ChronicleEventResult(event, {
+            story: transactionStory.passages[index],
+            getPremiereStory: () => result,
+          });
         })
       };
     } catch (error) {

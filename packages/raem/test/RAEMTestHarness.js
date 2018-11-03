@@ -86,8 +86,8 @@ export default class RAEMTestHarness extends LogEventGenerator {
           "\n\tevents:", ...dumpObject(events));
     }
   }
-  chronicleEvent (event: EventBase) {
-    return this.chronicleEvents([event]).eventResults[0];
+  chronicleEvent (event: EventBase, options: ?Object) {
+    return this.chronicleEvents([event], options).eventResults[0];
   }
 
   createCorpus () {

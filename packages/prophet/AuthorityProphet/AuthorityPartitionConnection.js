@@ -4,7 +4,8 @@ import type { EventBase } from "~/raem/command";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import thenChainEagerly from "~/tools/thenChainEagerly";
-import type { ChronicleRequest, ChronicleOptions, MediaInfo } from "~/prophet/api/Prophet";
+import { ChronicleRequest, ChronicleOptions, ChronicleEventResult, MediaInfo }
+    from "~/prophet/api/types";
 
 /**
  * The base authority partition connection implementation.
@@ -38,13 +39,12 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
     const receivedTruthsProcess = !this.isPrimaryAuthority() ? []
         : this.getReceiveTruths(options.receiveTruths)(events);
     return {
-      eventResults: events.map((event, index) => ({
-        event,
+      eventResults: events.map((event, index) => (new ChronicleEventResult(event, {
         getLocalEvent: () => thenChainEagerly(
             receivedTruthsProcess,
             (receivedTruths) => receivedTruths[index]),
         getTruthEvent: () => (this.isPrimaryAuthority() ? event : undefined),
-      })),
+      }))),
     };
   }
 

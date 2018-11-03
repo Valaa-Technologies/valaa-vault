@@ -2,6 +2,9 @@
 
 import type { Command, EventBase, Story, Truth } from "~/raem/command";
 import { VRef } from "~/raem/ValaaReference";
+import { getActionFromPassage } from "~/raem/redux/Bard";
+
+import thenChainEagerly from "~/tools/thenChainEagerly";
 
 export type MediaInfo = {
   mediaId: VRef,
@@ -49,16 +52,24 @@ export type ChronicleOptions = NarrateOptions & {
 };
 
 export class ChronicleEventResult {
+  constructor (event, overrides) { this.event = event; Object.assign(this, overrides); }
+
   event: EventBase; // Preliminary event after universalization
 
   // Get a fully universalized event (complete with eventId if appropriate).
-  getUniversalEvent (): EventBase { return this.getPersistedEvent(); }
+  getUniversalEvent (): EventBase {
+    return this.getPersistedEvent();
+  }
 
   // Get universalized event after it has been processed through local prophet chain.
-  getLocalEvent (): EventBase | null | Promise<EventBase | null> {}
+  getLocalEvent (): EventBase | null | Promise<EventBase | null> {
+    throw new Error(`getLocalEvent not implemented by ${this.constructor.name}`);
+  }
 
   // Get event after it has been persisted (possibly locally).
-  getPersistedEvent (): EventBase | Promise<EventBase> { return this.getTruthEvent(); }
+  getPersistedEvent (): EventBase | Promise<EventBase> {
+    return this.getTruthEvent();
+  }
 
   // Get event after it has been confirmed as a truth by its authority
   getTruthEvent (): Truth | Promise<Truth> {
@@ -70,7 +81,7 @@ export type ChronicleRequest = {
   eventResults: ChronicleEventResult[];
 }
 
-export class ChronicleProphecyResult extends ChronicleEventResult {
+export class ProphecyEventResult extends ChronicleEventResult {
   story: Story; // Preliminary story before any revisions
 
   // Returns the partition specific command of this prophecy event
@@ -92,8 +103,24 @@ export class ChronicleProphecyResult extends ChronicleEventResult {
   getTruthStory (): Story | Promise<Story> {
     throw new Error(`getTruthEvent not implemented by ${this.constructor.name}`);
   }
+
+  // default get*Event implementations which rely on the get*Story
+
+  getUniversalEvent (): EventBase {
+    return thenChainEagerly(this.getPremiereStory(), getActionFromPassage);
+  }
+
+  // Get event after it has been persisted (possibly locally).
+  getPersistedEvent (): EventBase | Promise<EventBase> {
+    return thenChainEagerly(this.getPersistedStory(), getActionFromPassage);
+  }
+
+  // Get event after it has been confirmed as a truth by its authority
+  getTruthEvent (): Truth | Promise<Truth> {
+    return thenChainEagerly(this.getTruthStory(), getActionFromPassage);
+  }
 }
 
 export type ProphecyChronicleRequest = {
-  eventResults: ChronicleProphecyResult[];
+  eventResults: ProphecyEventResult[];
 }

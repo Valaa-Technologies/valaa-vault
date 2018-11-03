@@ -51,7 +51,7 @@ describe("Scribe", () => {
   });
 
   it("stores truths/commands in the database", async () => {
-    const scribe = createScribe(createTestMockProphet({ isLocallyPersisted: true }));
+    const scribe = createScribe(createTestMockProphet());
     await scribe.initiate();
 
     const connection = await scribe
@@ -81,7 +81,7 @@ describe("Scribe", () => {
   ];
 
   it("stores (and returns) utf-8 strings correctly", async () => {
-    const scribe = createScribe(createTestMockProphet({ isLocallyPersisted: true }));
+    const scribe = createScribe(createTestMockProphet());
     await scribe.initiate();
 
     const connection = await scribe.acquirePartitionConnection(testPartitionURI)
@@ -105,7 +105,7 @@ describe("Scribe", () => {
   });
 
   it("populates a new connection to an existing partition with its cached commands", async () => {
-    const scribe = createScribe(createTestMockProphet({ isLocallyPersisted: true }));
+    const scribe = createScribe(createTestMockProphet());
     await scribe.initiate();
 
     const firstConnection = await scribe.acquirePartitionConnection(testPartitionURI)
@@ -127,7 +127,7 @@ describe("Scribe", () => {
   });
 
   it("ensures commands are stored in a proper ascending order", async () => {
-    const scribe = createScribe(createTestMockProphet({ isLocallyPersisted: true }));
+    const scribe = createScribe(createTestMockProphet());
     await scribe.initiate();
 
     const connection = await scribe.acquirePartitionConnection(testPartitionURI)

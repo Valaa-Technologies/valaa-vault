@@ -6,7 +6,7 @@ import type { Story } from "~/raem/redux/Bard";
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
 import ValaaURI, { createPartitionURI } from "~/raem/ValaaURI";
 
-import type { ProphecyChronicleRequest } from "~/prophet/api/types";
+import { ProphecyChronicleRequest, ProphecyEventResult } from "~/prophet/api/types";
 import extractEventOfPartition from "~/prophet/tools/extractEventOfPartition";
 
 import { dumpObject, outputError, thenChainEagerly, mapEagerly } from "~/tools";
@@ -20,11 +20,15 @@ export type Prophecy = Story & {
   isProphecy: true;
 }
 
+class FalseProphetEventResult extends ProphecyEventResult {
+
+}
+
 // Create prophecies out of provided events and send their partition
 // commands upstream. Aborts all remaining events on first exception
 // and rolls back previous ones.
 export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[],
-    { timed, transactionInfo } = {}): ProphecyChronicleRequest {
+    { timed, transactionInfo, ...rest } = {}): ProphecyChronicleRequest {
   const prophecies = events.map(event => falseProphet._dispatchEventForStory(
       universalizeEvent(falseProphet, event), "prophecy", timed, transactionInfo));
   const reactions = falseProphet._reciteStoriesToFollowers(prophecies);
@@ -35,7 +39,7 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
       let prophecyFulfillment;
       if (!timed) {
         try {
-          const operation = { prophecy };
+          const operation = { prophecy, options: rest };
           _prepareStagesAndCommands(falseProphet, operation);
           _initiateConnectionValidations(falseProphet, operation);
           prophecyFulfillment = _fulfillProphecy(falseProphet, operation);
@@ -53,27 +57,29 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
       }
       let result;
       try {
-        result = reactions[index];
-        result.getCommandOf = getCommandOf;
-        result.getFinalStory = () => thenChainEagerly(prophecyFulfillment,
-            () => prophecy,
-            errorOnChronicleEvents.bind(null,
-                new Error(`chronicleEvents.eventResults[${index}].getFinalStory()`)));
-        result.getPremiereStory = () => thenChainEagerly(
-            // Returns a promise which will resolve to the content
-            // received from the backend but only after all the local
-            // follower reactions have been resolved as well.
-            // TODO(iridian): Exceptions from follower reactions can't
-            // reject the prophecy, but we should catch, handle and/or
-            // expose them to the prophecy chronicleEvents originator.
-            result.getFollowerReactions(),
-            // TODO(iridian): Exceptions from upstream signal failure
-            // and possible heresy: we should catch and have logic for
-            // either retrying the operation or for full rejection.
-            // Nevertheless flushing the corpus is needed.
-            () => result.getFinalStory(),
-            errorOnChronicleEvents.bind(null,
-                new Error(`chronicleEvents.eventResults[${index}].getPremiereStory()`)));
+        result = new FalseProphetEventResult(prophecy, {
+          ...reactions[index],
+          getCommandOf,
+          getTruthStory: () => thenChainEagerly(prophecyFulfillment,
+              () => prophecy,
+              errorOnChronicleEvents.bind(null,
+                  new Error(`chronicleEvents.eventResults[${index}].getTruthStory()`))),
+          getPremiereStory: () => thenChainEagerly(
+              // Returns a promise which will resolve to the content
+              // received from the backend but only after all the local
+              // follower reactions have been resolved as well.
+              // TODO(iridian): Exceptions from follower reactions can't
+              // reject the prophecy, but we should catch, handle and/or
+              // expose them to the prophecy chronicleEvents originator.
+              result.getFollowerReactions(),
+              // TODO(iridian): Exceptions from upstream signal failure
+              // and possible heresy: we should catch and have logic for
+              // either retrying the operation or for full rejection.
+              // Nevertheless flushing the corpus is needed.
+              () => result.getTruthStory(),
+              errorOnChronicleEvents.bind(null,
+                  new Error(`chronicleEvents.eventResults[${index}].getPremiereStory()`))),
+        });
       } catch (error) {
         errorOnChronicleEvents(
             new Error(`chronicleEvents.eventResults[${index}].revealToFollowers()`), error);
@@ -147,7 +153,7 @@ function _initiateConnectionValidations (falseProphet: FalseProphet, operation: 
 
 function _fulfillProphecy (falseProphet: FalseProphet, operation: Object) {
   return mapEagerly(operation.stages,
-      stage => _fulfillStage(falseProphet, stage),
+      stage => _fulfillStage(falseProphet, operation, stage),
       (error, stage) => {
         throw falseProphet.wrapErrorEvent(error,
           new Error(`chronicleEvents._fulfillStage(${stage.name})`),
@@ -157,7 +163,7 @@ function _fulfillProphecy (falseProphet: FalseProphet, operation: Object) {
       });
 }
 
-function _fulfillStage (falseProphet: FalseProphet, stage: Object) {
+function _fulfillStage (falseProphet: FalseProphet, operation: Object, stage: Object) {
   return thenChainEagerly(stage, [
     () => mapEagerly(stage.partitions, partition => partition.validatedConnection,
         (error, partition) => {
@@ -183,7 +189,8 @@ function _fulfillStage (falseProphet: FalseProphet, stage: Object) {
       for (const { connection, commandEvent } of stage.partitions) {
         let chronicling;
         try {
-          chronicling = connection.chronicleEvent(commandEvent, { isProphecy: true });
+          chronicling = connection.chronicleEvent(commandEvent,
+              { ...operation.options, isProphecy: true });
           chroniclings.push(chronicling);
         } catch (error) {
           throw falseProphet.wrapErrorEvent(error,

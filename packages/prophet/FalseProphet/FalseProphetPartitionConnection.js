@@ -3,7 +3,7 @@
 import { EventBase, Story } from "~/raem/command";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import type { NarrateOptions, ChronicleOptions, ChronicleRequest } from "~/prophet/api/Prophet";
+import { NarrateOptions, ChronicleOptions, ChronicleRequest } from "~/prophet/api/types";
 
 import { dumpObject } from "~/tools";
 

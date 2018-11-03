@@ -1,6 +1,9 @@
 // @flow
 
-import { AuthorityProphet } from "~/prophet";
+import { EventBase } from "~/raem/command";
+
+import { AuthorityProphet, AuthorityPartitionConnection } from "~/prophet";
+import { ChronicleRequest, ChronicleOptions, ChronicleEventResult } from "~/prophet/api/types";
 
 export default function createValaaTestScheme ({ config, authorityURI } = {}) {
   return {
@@ -15,6 +18,31 @@ export default function createValaaTestScheme ({ config, authorityURI } = {}) {
       ...config,
     }),
 
-    createAuthorityProphet: (options: Object) => new AuthorityProphet(options),
+    createAuthorityProphet: (options: Object) => new MockProphet(options),
   };
+}
+
+class MockPartitionConnection extends AuthorityPartitionConnection {
+  _upstreamQueue = [];
+  chronicleEvents (events: EventBase[], options: ChronicleOptions): ChronicleRequest {
+    if (!this.isRemoteAuthority()) return super.chronicleEvents(events, options);
+    this._upstreamQueue.push(...events);
+    this._mostRecentChronicleOptions = options;
+    return {
+      eventResults: events.map((event) => (new ChronicleEventResult(event, {
+        getLocalEvent: () => undefined,
+        getTruthEvent: () => undefined,
+      }))),
+    };
+  }
+}
+
+export class MockProphet extends AuthorityProphet {
+
+  static PartitionConnectionType = MockPartitionConnection;
+
+  addFollower (/* falseProphet */) {
+    const connectors = {};
+    return connectors;
+  }
 }

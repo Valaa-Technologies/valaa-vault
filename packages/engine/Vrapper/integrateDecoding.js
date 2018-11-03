@@ -5,7 +5,7 @@ import { SourceInfoTag } from "~/raem/VALK/StackTrace";
 
 import { addExportsContainerToScope } from "~/script";
 
-import type { MediaInfo } from "~/prophet/api/Prophet";
+import { MediaInfo } from "~/prophet/api/types";
 
 import Vrapper from "~/engine/Vrapper";
 import VALEK, { Kuery } from "~/engine/VALEK";

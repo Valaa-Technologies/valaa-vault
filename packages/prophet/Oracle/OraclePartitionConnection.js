@@ -4,8 +4,7 @@ import type { EventBase } from "~/raem/command";
 import { createValaaURI } from "~/raem/ValaaURI";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import type { ConnectOptions, MediaInfo, ReceiveEvents, RetrieveMediaBuffer }
-    from "~/prophet/api/Prophet";
+import { ConnectOptions, MediaInfo, ReceiveEvents, RetrieveMediaBuffer } from "~/prophet/api/types";
 
 import DecoderArray from "~/prophet/Oracle/DecoderArray";
 import upgradeEventToVersion0dot2 from "~/prophet/tools/upgradeEventToVersion0dot2";

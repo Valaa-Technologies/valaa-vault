@@ -36,7 +36,7 @@ export function createProphetTestHarness (options: Object, ...commandBlocks: any
   try {
     commandBlocks.forEach(commands => {
       ret.chronicleEvents(commands).eventResults.forEach((result, index) => {
-        if (isPromise((result.getTruthEvent || result.getFinalStory)())) {
+        if (isPromise((result.getTruthEvent || result.getTruthStory).call(result))) {
           throw new Error(`command #${index} getTruthEvent resolves into a Promise.${
               ""} Use the asynchronous createProphetOracleHarness instead.`);
         }
@@ -92,7 +92,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     if (options.oracleOptions) {
       this.upstream = this.oracle = createOracle(options.oracleOptions);
     } else {
-      this.upstream = createTestMockProphet();
+      this.upstream = createTestMockProphet({ isLocallyPersisted: false });
     }
     if (options.scribeOptions) {
       this.upstream = this.scribe = createScribe(this.upstream, options.scribeOptions);
@@ -106,9 +106,9 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     this.testPartitionConnection = thenChainEagerly(
         this.prophet.acquirePartitionConnection(this.testPartitionURI, { newPartition: true })
         .getSyncedConnection(), [
-          (conn) => Promise.all([
-            conn, this.chronicleEvent(createdTestPartitionEntity, { isTruth: true })
-                .getPremiereStory(),
+          (connection) => Promise.all([
+            connection,
+            this.chronicleEvent(createdTestPartitionEntity, { isTruth: true }).getPremiereStory(),
           ]),
           ([conn]) => (this.testPartitionConnection = conn),
         ]);
@@ -206,22 +206,10 @@ export function createTestMockProphet (configOverrides: Object = {}) {
   return new MockProphet({
     authorityURI: createPartitionURI("valaa-test:"),
     authorityConfig: {
-      isLocallyPersisted: false,
+      isLocallyPersisted: true,
       isPrimaryAuthority: true,
       isRemoteAuthority: false,
       ...configOverrides,
     },
   });
-}
-
-class MockPartitionConnection extends AuthorityPartitionConnection {}
-
-export class MockProphet extends AuthorityProphet {
-
-  static PartitionConnectionType = MockPartitionConnection;
-
-  addFollower (/* falseProphet */) {
-    const connectors = {};
-    return connectors;
-  }
 }

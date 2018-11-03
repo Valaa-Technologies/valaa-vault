@@ -1,12 +1,12 @@
 // @flow
 
-import { isTransactedLike, EventBase } from "~/raem/command";
+import { isTransactedLike, EventBase, Truth } from "~/raem/command";
 import { getRawIdFrom } from "~/raem/ValaaReference";
 
-import type {
-  MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest, ReceiveEvents,
-  RetrieveMediaBuffer,
-} from "~/prophet/api/Prophet";
+import {
+  MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest, ChronicleEventResult,
+  ReceiveEvents, RetrieveMediaBuffer,
+} from "~/prophet/api/types";
 
 import { dumpObject, thenChainEagerly, vdon } from "~/tools";
 
@@ -132,6 +132,14 @@ async function _waitForRemoteNarration (connection: ScribePartitionConnection,
  #####   #    #  #    #   ####   #    #     #     ####   ######  ######
 */
 
+class ScribeEventResult extends ChronicleEventResult {
+  getPersistedEvent (): Truth { return this.getLocalEvent(); }
+}
+
+class ScribeTruthResult extends ScribeEventResult {
+  getTruthEvent (): Truth { return this.event; }
+}
+
 export function _chronicleEvents (connection: ScribePartitionConnection,
     events: EventBase[], options: ChronicleOptions = {}, onError: Function,
 ): ChronicleRequest {
@@ -143,11 +151,10 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
             events, options.retrieveMediaBuffer || _throwOnMediaRequest.bind(null, connection)),
         (receivedTruths) => (receivedTruthsProcess = receivedTruths));
     return {
-      eventResults: events.map((event, index) => ({
-        event,
+      eventResults: events.map((event, index) => new ScribeTruthResult(event, {
         getLocalEvent: () => thenChainEagerly(receivedTruthsProcess,
-            receivedTruths => receivedTruths[index]),
-        getTruthEvent: () => event,
+            receivedTruths => receivedTruths[index],
+            onError),
       })),
     };
   }
@@ -157,18 +164,19 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
       (receivedCommands) => (receivedCommandsProcess = receivedCommands),
       onError);
   options.receiveCommands = null;
-  const chroniclingProcess = thenChainEagerly(receivedCommandsProcess,
-      (receivedEvents) => connection.getUpstreamConnection()
-          .chronicleEvents(receivedEvents.filter(notNull => notNull), options),
+  let chroniclingProcess = thenChainEagerly(receivedCommandsProcess,
+      (receivedEvents) => (chroniclingProcess = connection.getUpstreamConnection()
+          .chronicleEvents(receivedEvents.filter(notNull => notNull), options)),
       onError);
   return {
-    eventResults: events.map((event, index) => ({
-      event,
+    eventResults: events.map((event, index) => new ScribeEventResult(event, {
       getLocalEvent: () => thenChainEagerly(receivedCommandsProcess,
           (receivedCommands) => receivedCommands[index],
           onError),
       getTruthEvent: () => thenChainEagerly(chroniclingProcess,
-          chronicling => chronicling.eventResults[index].getTruthEvent()),
+          ({ eventResults }) => eventResults[index - (events.length - eventResults.length)]
+              .getTruthEvent(),
+          onError),
     })),
   };
 }
@@ -239,8 +247,13 @@ export function _receiveEvents (
         () => downstreamReceiveTruths(newActions, retrieveMediaBuffer),
         onError);
   }
-  (receivingTruths ? connection._truthLogInfo : connection._commandQueueInfo)
-      .eventIdEnd = newActions[newActions.length - 1].eventId + 1;
+  if (!receivingTruths) {
+    connection._commandQueueInfo.eventIdEnd = newActions[newActions.length - 1].eventId + 1;
+  } else {
+    connection._truthLogInfo.eventIdEnd = newActions[newActions.length - 1].eventId + 1;
+    connection._clampCommandQueueByTruthEvendIdEnd();
+  }
+
   return !preOpsProcess
       ? receivedActions
       : thenChainEagerly(preOpsProcess, [

@@ -9,8 +9,9 @@ import { addConnectToPartitionToError } from "~/raem/tools/denormalized/partitio
 
 import Discourse from "~/prophet/api/Discourse";
 import Follower from "~/prophet/api/Follower";
-import Prophet, { ChronicleOptions } from "~/prophet/api/Prophet";
-import type { ChroniclePropheciesRequest, ChronicleProphecyResult } from "~/prophet/api/types";
+import Prophet from "~/prophet/api/Prophet";
+import type { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult }
+    from "~/prophet/api/types";
 
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
@@ -58,7 +59,7 @@ export default class FalseProphetDiscourse extends Discourse {
         eventResult.waitOwnReactions = (() => eventResult.getFollowerReactions(this.follower));
         eventResult.getPremiereStory = (async () => {
           await eventResult.waitOwnReactions();
-          return await eventResult.getFinalStory();
+          return await eventResult.getTruthStory();
         });
       });
       return ret;
@@ -69,7 +70,7 @@ export default class FalseProphetDiscourse extends Discourse {
       );
     }
   }
-  chronicleEvent (event: EventBase, options: ChronicleOptions = {}): ChronicleProphecyResult {
+  chronicleEvent (event: EventBase, options: ChronicleOptions = {}): ProphecyEventResult {
     return this.chronicleEvents([event], options).eventResults[0];
   }
 

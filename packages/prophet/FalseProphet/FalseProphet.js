@@ -1,14 +1,13 @@
 // @flow
 
-
 import { Story } from "~/raem";
-import Command, { Action, EventBase } from "~/raem/command";
+import Command, { EventBase } from "~/raem/command";
 import type { State } from "~/raem/tools/denormalized/State";
 
 import Follower from "~/prophet/api/Follower";
 import Prophet from "~/prophet/api/Prophet";
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
-import type { ChroniclePropheciesRequest } from "~/prophet/api/types";
+import { ChroniclePropheciesRequest, ProphecyEventResult } from "~/prophet/api/types";
 import { dumpObject } from "~/tools";
 
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
@@ -18,8 +17,6 @@ import { Prophecy, _chronicleEvents } from "./_proclamationOps";
 import {
   _createStoryQueue, _dispatchEventForStory, _reciteStoriesToFollowers, _reviewProphecy,
 } from "./_prophecyOps";
-
-
 
 /**
  * FalseProphet is non-authoritative denormalized in-memory store of
@@ -84,7 +81,8 @@ export default class FalseProphet extends Prophet {
           "\n\toptions:", ...dumpObject(options));
     }
   }
-  chronicleEvent (event: EventBase, options: Object = {}): ChronicleProphecyResult {
+
+  chronicleEvent (event: EventBase, options: Object = {}): ProphecyEventResult {
     return this.chronicleEvents([event], options).eventResults[0];
   }
 

@@ -3,10 +3,10 @@
 import ValaaURI, { getPartitionRawIdFrom } from "~/raem/ValaaURI";
 import type { EventBase } from "~/raem/command";
 
-import Prophet, {
-  ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest,
+import Prophet from "~/prophet/api/Prophet";
+import { ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest,
   ReceiveEvents, RetrieveMediaBuffer,
-} from "~/prophet/api/Prophet";
+} from "~/prophet/api/types";
 import Follower from "~/prophet/api/Follower";
 
 import Logger from "~/tools/Logger";

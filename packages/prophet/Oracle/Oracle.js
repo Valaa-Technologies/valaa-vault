@@ -2,7 +2,8 @@
 
 import ValaaURI from "~/raem/ValaaURI";
 
-import Prophet, { ConnectOptions } from "~/prophet/api/Prophet";
+import Prophet from "~/prophet/api/Prophet";
+import { ConnectOptions } from "~/prophet/api/types";
 
 import DecoderArray from "~/prophet/Oracle/DecoderArray";
 

@@ -4,10 +4,10 @@ import type { EventBase } from "~/raem/command";
 import { VRef, obtainVRef } from "~/raem/ValaaReference";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import type {
+import {
   MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest, ConnectOptions,
   ReceiveEvents, RetrieveMediaBuffer,
-} from "~/prophet/api/Prophet";
+} from "~/prophet/api/types";
 
 import { dumpObject, thenChainEagerly } from "~/tools";
 

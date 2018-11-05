@@ -13,10 +13,10 @@ import { dumpObject } from "~/tools";
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
-import { Prophecy, _chronicleEvents } from "./_proclamationOps";
+import { Prophecy, _chronicleEvents } from "./_chronicleProphecyOps";
 import {
   _createStoryQueue, _dispatchEventForStory, _reciteStoriesToFollowers, _reviewProphecy,
-} from "./_prophecyOps";
+} from "./_queueOps";
 
 /**
  * FalseProphet is non-authoritative denormalized in-memory store of

@@ -13,7 +13,7 @@ import { dumpObject, outputError, thenChainEagerly, mapEagerly } from "~/tools";
 import { trivialCloneWith } from "~/tools/trivialClone";
 
 import FalseProphet from "./FalseProphet";
-import { _rejectLastProphecyAsHeresy } from "./_prophecyOps";
+import { _rejectLastProphecyAsHeresy } from "./_queueOps";
 
 export type Prophecy = Story & {
   timed: ?Object;

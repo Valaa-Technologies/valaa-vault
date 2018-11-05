@@ -255,13 +255,18 @@ export function _receiveEvents (
     connection._clampCommandQueueByTruthEvendIdEnd();
   }
 
+  let updatedEntries;
   return !preOpsProcess
       ? receivedActions
       : thenChainEagerly(preOpsProcess, [
-        (updatedEntries) => connection._updateMediaEntries(updatedEntries),
+        (updatedEntries_) => (updatedEntries = updatedEntries_),
         () => connection[receivingTruths ? "_writeTruths" : "_writeCommands"](newActions),
+        () => connection._updateMediaEntries(updatedEntries),
         () => receivedActions,
-      ], onError);
+      ], error => {
+        if ((error.originalError || error).cacheConflict) error.revise = true;
+        throw error;
+      });
 }
 
 function _determineEventPreOps (connection: ScribePartitionConnection, event: Object,

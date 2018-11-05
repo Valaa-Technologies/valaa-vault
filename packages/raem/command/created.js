@@ -36,7 +36,7 @@ export function validateCreated (command: Created): Command {
     version, commandId, eventId, partitions, parentId, timeStamp,
     noSubMaterialize,
     // deprecateds
-    owner, instancePrototype, ghostPrototype,
+    // owner, instancePrototype, ghostPrototype,
     ...unrecognized
   }: Created = command;
   invariantifyString(type, "CREATED.type", { value: CREATED });
@@ -63,6 +63,7 @@ export function validateCreated (command: Created): Command {
       "\n\tcommand:", command);
 
   // deprecated but accepted
+  /*
   if (owner) {
     invariantifyObject(owner, "CREATED.owner", {}, "\n\tcommand:", command);
     invariantifyId(owner.id, "CREATED.owner.id", {}, "\n\tcommand:", command);
@@ -76,5 +77,6 @@ export function validateCreated (command: Created): Command {
   // deprecated but accepted
   invariantifyId(ghostPrototype, "CREATED.ghostPrototype", { allowUndefined: true },
       "\n\tcommand:", command);
+  */
   return command;
 }

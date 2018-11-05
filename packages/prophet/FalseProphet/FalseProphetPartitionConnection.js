@@ -7,7 +7,7 @@ import { NarrateOptions, ChronicleOptions, ChronicleRequest } from "~/prophet/ap
 
 import { dumpObject } from "~/tools";
 
-import { _purgeAndRevisePartitionCommands } from "./_prophecyOps";
+import { _purgeAndRevisePartitionCommands } from "./_queueOps";
 
 /**
  * @export

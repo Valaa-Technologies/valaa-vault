@@ -5,7 +5,7 @@ import { EventBase } from "~/raem/command";
 
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
-import { dumpObject, outputError } from "~/tools";
+import { outputError } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
@@ -83,6 +83,7 @@ export function _dispatchEventForStory (falseProphet: FalseProphet, event: Event
   if (dispatchDescription === "prophecy") story.isProphecy = true;
   // story.id = story.commandId; TODO(iridian): what was this?
   falseProphet._storyQueue.addStory(story);
+  // console.log("Added dispatched event:", event, story, { state: story.state.toJS() });
   return story;
 }
 
@@ -201,51 +202,50 @@ function _addTruthToPendingProphecies (falseProphet: FalseProphet, truthEvent: E
   story.isTruth = true;
 }
 */
-
-export function _beginReformation (falseProphet: FalseProphet, purgedCommands) {
-  if (!purgedCommands.length) return undefined;
-  purgedCommands.forEach(command => {
-    falseProphet._prophecyByCommandId[command.commandId].shouldReview = true;
+export function _beginReformation (falseProphet: FalseProphet, purgedStories) {
+  if (!purgedStories.length) return undefined;
+  purgedStories.forEach(command => {
+    falseProphet._storyByCommandId[command.commandId].shouldReview = true;
   });
-  const reformation = {
-    purgedCommands,
-    firstPurge: falseProphet._prophecySentinel.next,
+  const revisioning = {
+    purgedStories,
+    firstPurge: falseProphet._storyQueue.getFirst(),
   };
 
-  while (!reformation.firstPurge.shouldReview) {
-    reformation.firstPurge = reformation.firstPurge.next;
+  while (!revisioning.firstPurge.shouldReview) {
+    revisioning.firstPurge = revisioning.firstPurge.next;
   }
-  // Begin reformation.
+  // Begin revisioning.
   // Remove the purged prophecies (and pending truths alike!) from the prophecies list.
   // Retain all lookup entries.
-  _removeProphecySequence(falseProphet, reformation.firstPurge,
-      falseProphet._prophecySentinel.prev);
-  falseProphet.recreateCorpus(reformation.firstPurge.previousState);
+  falseProphet._storyQueue
+      .removeStories(revisioning.firstPurge, falseProphet._storyQueue.getLast());
+  falseProphet.recreateCorpus(revisioning.firstPurge.previousState);
 
-  // TODO(iridian): notify followers of the reformation
+  // TODO(iridian): notify followers of the revisioning
 
-  return reformation;
+  return revisioning;
 }
 
-export function _finishReformation (falseProphet: FalseProphet, reformation:
-    { purgedCommands: Array<Object>, firstPurge: Prophecy }) {
-  reformation.conflictedPartitions = {};
-  for (let oldProphecy = reformation.firstPurge; oldProphecy; oldProphecy = oldProphecy.next) {
-    const oldPartitions = oldProphecy.story.partitions;
+export function _finishReformation (falseProphet: FalseProphet, revisioning:
+    { purgedStories: Array<Story>, firstPurge: Story }) {
+  revisioning.conflictedPartitions = {};
+  for (let oldStory = revisioning.firstPurge; oldStory; oldStory = oldStory.next) {
+    const oldPartitions = oldStory.partitions;
 
     if (Object.keys(oldPartitions).find(
-        partitionURIString => reformation.conflictedPartitions[partitionURIString])) {
-      oldProphecy.conflictReason = "previous prophecy conflicted";
-      if (!oldProphecy.shouldReview) {
+        partitionURIString => revisioning.conflictedPartitions[partitionURIString])) {
+      oldStory.conflictReason = "previous prophecy conflicted";
+      if (!oldStory.shouldReview) {
         falseProphet.errorEvent(
             "TODO: non-purged conflict: this command should be purged from upstream");
       }
-    } else if (oldProphecy.shouldReview) {
-      falseProphet._reviewProphecy(reformation, oldProphecy);
+    } else if (oldStory.shouldReview) {
+      falseProphet._reviewProphecy(revisioning, oldStory);
     } else {
       // Event or command in a partition that's not being purged: don't send to upstream.
-      const action = Object.getPrototypeOf(oldProphecy.story);
-      if (oldProphecy.isTruth) {
+      const action = Object.getPrototypeOf(oldStory);
+      if (oldStory.isTruth) {
         _addTruthToPendingProphecies(falseProphet, action);
       } else {
         try {
@@ -255,75 +255,60 @@ export function _finishReformation (falseProphet: FalseProphet, reformation:
               "_finishReformation on non-purged action",
               "\n\tINTERNAL ERROR: reforming non-purged actions should not cause errors");
           outputError(wrappedError);
-          oldProphecy.conflictReason = wrappedError;
+          oldStory.conflictReason = wrappedError;
         }
       }
     }
 
-    if (oldProphecy.conflictReason) {
+    if (oldStory.conflictReason) {
     // Mark all partitions of the old prophecy as conflicted. All subsequent commands need to
     // be evaluated as they're likely to depend on the first conflicting change.
       Object.keys(oldPartitions).forEach(partitionURIString => {
-        reformation.conflictedPartitions[partitionURIString] = true;
+        revisioning.conflictedPartitions[partitionURIString] = true;
       });
-      (reformation.conflictedProphecies || (reformation.conflictedProphecies = []))
-          .push(oldProphecy);
+      (revisioning.conflictedProphecies || (revisioning.conflictedProphecies = []))
+          .push(oldStory);
     }
   }
 }
 
-export function _reviewProphecy (falseProphet: FalseProphet, reformation: Object,
-    oldProphecy: Prophecy) {
-  let universalisableCommand;
-  if (oldProphecy.proclamation) {
-    universalisableCommand = createUniversalizableCommand(oldProphecy.proclamation);
-  } else {
-    throw new Error(`A prophecy under review should always have .proclamation ${
-        ""} ie. originate from the local context`);
-    // universalisableCommand = { ...Object.getPrototypeOf(oldProphecy.story) };
-    // delete universalisableCommand.partitions;
-  }
-  const reformedProphecy = falseProphet._fabricateProphecy(universalisableCommand, "reform");
-  const softConflict = _checkForSoftConflict(falseProphet, oldProphecy, reformedProphecy);
+/*
+export function _reviewProphecy (falseProphet: FalseProphet, revisioning: Object, oldStory: Story) {
+  const revisedProphecy = falseProphet._dispatchEventForStory(oldStory, "reform");
+  const softConflict = _checkForSoftConflict(falseProphet, oldStory, revisedProphecy);
   if (softConflict) {
-    oldProphecy.conflictReason = softConflict;
-    _rejectLastProphecyAsHeresy(falseProphet, reformedProphecy);
+    oldStory.conflictReason = softConflict;
+    _rejectLastProphecyAsHeresy(falseProphet, revisedProphecy);
   } else {
-    /*
     falseProphet.warnEvent("\n\treview claiming", universalisableCommand.commandId,
         "was", oldCommand.commandId,
-        "\n\treformation:", reformation,
-        "\n\tnew prophecy:", reformedProphecy,
-        "\n\told prophecy:", oldProphecy,
+        "\n\treformation:", revisioning,
+        "\n\tnew prophecy:", revisedProphecy,
+        "\n\told prophecy:", oldStory,
         ...falseProphet._dumpStatus());
-    //*/
-    const {/* prophecy,*/ getStoryPremiere } =
-        falseProphet._upstream.proclaim(universalisableCommand);
+    const { getPremiereStory } = falseProphet._upstream.chronicleEvent(getActionFromPassage(revisedProphecy));
     (async () => {
       try {
-        await getStoryPremiere();
-        /*
-        const finalStory = await getStoryPremiere();
+        await getPremiereStory();
+        const finalStory = await getPremiereStory();
         falseProphet.warnEvent("\n\t_reviewProphecy success:",
-            "\n\treformation:", reformation, prophecy, finalStory);
-        //*/
+            "\n\treformation:", revisioning, prophecy, finalStory);
       } catch (error) {
         outputError(falseProphet.wrapErrorEvent(error,
-            "_reviewProphecy:", universalisableCommand.commandId,
-            "was", oldProphecy.story.commandId,
-            "\n\treformation:", reformation,
-            "\n\tnew prophecy:", reformedProphecy,
-            "\n\told prophecy:", oldProphecy,
+            new Error(`_reviewProphecy(${oldStory.commandId})`),
+            "\n\trevised prophecy:", ...dumpObject(revisedProphecy),
+            "\n\tpurged prophecy:", ...dumpObject(oldStory),
             ...falseProphet._dumpStatus()));
       }
     })();
-    falseProphet._revealProphecyToAllFollowers(reformedProphecy);
+    falseProphet._reciteStoriesToFollowers(revisedProphecy);
     return;
   }
 }
+*/
 
-export function _checkForSoftConflict (/* falseProphet: FalseProphet, oldProphecy: Prophecy,
-    reformedProphecy: Prophecy */) {
+export function _checkForSoftConflict (/* falseProphet: FalseProphet, oldStory: Story,
+    revisedProphecy: Story */) {
   // TODO(iridian): Detect and resolve soft conflicts: ie. of the type where the reformed
   // commands modify something that has been modified by the new incoming truth(s), thus
   // overriding such changes. This class of errors does not corrupt the event log, but
@@ -331,15 +316,101 @@ export function _checkForSoftConflict (/* falseProphet: FalseProphet, oldProphec
   return undefined;
 }
 
-function _removeProphecySequence (falseProphet: FalseProphet, firstProphecy: Prophecy,
-    lastProphecy: Prophecy) {
-  firstProphecy.prev.next = lastProphecy.next;
-  lastProphecy.next.prev = firstProphecy.prev;
-  firstProphecy.prev = lastProphecy;
-  lastProphecy.next = null;
-  for (let prophecy = firstProphecy; prophecy; prophecy = prophecy.next) {
-    if (prophecy.story.commandId) {
-      delete falseProphet._prophecyByCommandId[prophecy.story.commandId];
+/*
+while (falseProphet._claimOperationQueue[0] !== operation) {
+  if (!falseProphet._claimOperationQueue[0].pendingClaim) {
+    falseProphet._claimOperationQueue.shift();
+  } else {
+    try {
+      await falseProphet._claimOperationQueue[0].pendingClaim;
+    } catch (error) {
+      // Silence errors which arise from other chronicleEvents operations.
     }
   }
 }
+
+remoteAuthority = operation.authorities[authorityURIs[0]];
+if (falseProphet.getVerbosity() === 1) {
+  falseProphet.logEvent(1, `${remoteAuthority
+    ? "Queued a remote command locally"
+    : "Done claiming a local event"} of authority "${authorityURIs[0]}":`,
+    "of partitions:", ...[].concat(
+        ...partitionDatas.map(([pdata, conn]) => [conn.getName(), pdata.eventId])));
+} else if (falseProphet.getVerbosity() >= 2) {
+  falseProphet.warnEvent(2, `Done ${remoteAuthority
+          ? "queuing a remote command locally"
+          : "claiming a local event"} of authority "${authorityURIs[0]}":`,
+      "\n\tpartitions:", ...partitionDatas.map(([, conn]) => conn.getName()),
+      "\n\tcommand:", operation.prophecy);
+}
+
+if (!remoteAuthority) {
+  const event = { ...operation.prophecy };
+  try {
+    partitionDatas.map(([, connection]) =>
+        connection._receiveTruthOf("localAuthority", event));
+  } catch (error) {
+    throw falseProphet.wrapErrorEvent(error, new Error("chronicleEvents.local.onConfirmTruth"));
+  }
+  return operation.prophecy;
+}
+let ret;
+try {
+  ret = await remoteAuthority.chronicleEvent(operation.prophecy, operation.options)
+      .getPremiereStory();
+} catch (error) {
+  throw falseProphet.wrapErrorEvent(error,
+      new Error("chronicleEvents.remoteAuthority.chronicleEvent"));
+}
+if (falseProphet.getVerbosity() === 1) {
+  falseProphet.logEvent(1, `Done claiming remote command of authority`, remoteAuthority,
+      "and of partitions:", ...[].concat(
+        ...partitionDatas.map(([pdata, conn]) => [conn.getName(), pdata.eventId])));
+} else if (falseProphet.getVerbosity() === 2) {
+  falseProphet.warnEvent(2, `Done claiming remote command"`, ret);
+}
+*/
+
+/*
+  const authorityURIs = Object.keys(operation.authorities);
+  if (!authorityURIs.length) throw new Error("command is missing authority information");
+  else if (authorityURIs.length > 1) {
+    throw new Error(`Valaa FalseProphet: multi-authority commands not supported, authorities:"${
+        authorityURIs.join(`", "`)}"`);
+  }
+
+// operation.authorityPersistProcesses = _getOngoingAuthorityPersists(falseProphet, operation);
+
+function _getOngoingAuthorityPersists (falseProphet: FalseProphet, { command }: Object) {
+  const ret = [];
+  for (const bvobId of Object.keys(command.addedBvobReferences || {})) {
+    for (const { referrerId } of command.addedBvobReferences[bvobId]) {
+      let connection;
+      try {
+        const partitionURIString = String(referrerId.getPartitionURI());
+        connection = falseProphet._connections[partitionURIString];
+        invariantifyObject(connection, `partitionConnections[${partitionURIString}]`);
+      } catch (error) {
+        throw errorOnGetOngoingAuthorityPersists.call(falseProphet, bvobId, referrerId, error);
+      }
+      const persistProcess = thenChainEagerly(
+          connection.getSyncedConnection(),
+          () => {
+            const authorityConnection = connection.getUpstreamConnection();
+            return authorityConnection && authorityConnection.getContentPersistProcess(bvobId);
+          },
+          errorOnGetOngoingAuthorityPersists.bind(falseProphet, bvobId, referrerId),
+      );
+      if (persistProcess) ret.push(persistProcess);
+    }
+  }
+  return ret;
+  function errorOnGetOngoingAuthorityPersists (bvobId, referrerId, error) {
+    throw falseProphet.wrapErrorEvent(error, new Error("_getOngoingAuthorityPersists"),
+            "\n\tcurrent referrerId:", ...dumpObject(referrerId),
+            "\n\tcurrent bvobId:", ...dumpObject(bvobId),
+            "\n\tret (so far):", ...dumpObject(ret),
+            "\n\tcommand:", ...dumpObject(command));
+  }
+}
+*/

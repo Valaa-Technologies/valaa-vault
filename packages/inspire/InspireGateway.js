@@ -215,7 +215,11 @@ export default class InspireGateway extends LogEventGenerator {
 
       ret[viewName] = thenChainEagerly(createView({ engine, name: `${viewConfig.name} View` }), [
         view => view.attach(viewConfig),
-        attachedView => (ret[viewName] = attachedView),
+        attachedView => {
+          ret[viewName] = attachedView;
+          attachedView.rootScope = rootScope;
+          return attachedView;
+        },
       ]);
       this.warnEvent(`Opened View ${viewName}`,
           ...(!this.getVerbosity() ? [] : [", with:",

@@ -81,6 +81,7 @@ export default class PerspireServer {
       await views.perspireMain;
       this.serializeToOutputPath();
       this.gateway = gateway;
+      this.Valaa = views.perspireMain.rootScope.Valaa;
       return gateway;
     }));
   }

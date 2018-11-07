@@ -138,6 +138,7 @@ export default class InspireGateway extends LogEventGenerator {
             "\n\tviewConfig:", ...dumpObject(viewConfig),
             "\n\tview:", ...dumpObject(ret[viewName]),
           ]));
+      ret[viewName].rootScope = rootScope;
     }
     return ret;
   }

@@ -10,7 +10,7 @@ import type { Transaction } from "~/prophet/api/Transaction";
 
 import { dumpObject, invariantify } from "~/tools";
 
-import { universalizeEvent } from "~/prophet/FalseProphet/_chronicleProphecyOps";
+import { universalizeEvent } from "~/prophet/FalseProphet/_prophecyOps";
 
 let transactionCounter = 0;
 

@@ -26,7 +26,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
       if (!initialState || !initialState.id) {
         throw new Error("initialState.id missing when trying to create a Bvob");
       }
-      return valker.follower.create("Blob", undefined,
+      return valker._follower.create("Blob", undefined,
           { transaction: valker, id: initialState.id });
     },
   });
@@ -46,9 +46,9 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
     name: "Resource",
     ".new": function new_ (valker: Valker, innerScope: ?Object, initialState: ?Object) {
       const actualInitialState = prepareInitialState(this, innerScope, initialState);
-      // TODO(iridian): Replace valker.follower with some builtinStep when moving ValaaSpace to
+      // TODO(iridian): Replace valker._follower with some builtinStep when moving ValaaSpace to
       // @valos/script. Now this relies on valker always being a FalseProphetDiscourse/transaction.
-      const resource = valker.follower.create(this.name, actualInitialState,
+      const resource = valker._follower.create(this.name, actualInitialState,
           { transaction: valker });
       return resource;
     },
@@ -186,9 +186,9 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
             ""} allows spreading the duplicates to separate partitions (at least insofar a${
             ""} multi-partition commands between said partitions is possible).`
     )(function recombine (...duplicationDirectives) {
-      // TODO(iridian): Replace valker.follower with some builtinStep when moving ValaaSpace to
+      // TODO(iridian): Replace valker._follower with some builtinStep when moving ValaaSpace to
       // @valos/script. Now this relies on valker always being a FalseProphetDiscourse/transaction.
-      return this.__callerValker__.follower.recombine(duplicationDirectives,
+      return this.__callerValker__._follower.recombine(duplicationDirectives,
           { transaction: this.__callerValker__ });
     }),
 
@@ -621,7 +621,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
         `Returns an existing, fully synced connection to the partition with given${
           ""} *partitionURI*, undefined otherwise`
     )(function tryPartitionConnection (partitionURI) {
-      const ret = this.__callerValker__.prophet
+      const ret = this.__callerValker__.getProphet()
           .acquirePartitionConnection(partitionURI, { require: false, newConnection: false });
       return (ret && ret.isSynced()) ? ret : undefined;
     }),
@@ -630,7 +630,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
             ""} *options*. If no full connection exists, waits on a possibly existing on-going ${
             ""} connection process. If none exists creates a new connection process.`
     )(function acquirePartitionConnection (partitionURI, options = {}) {
-      return Promise.resolve(this.__callerValker__.prophet
+      return Promise.resolve(this.__callerValker__.getProphet()
           .acquirePartitionConnection(partitionURI, options)
           .getSyncedConnection());
     }),

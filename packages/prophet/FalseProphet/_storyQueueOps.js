@@ -43,10 +43,9 @@ export function _createStoryQueue () {
       firstStory.prev = lastStory;
       lastStory.next = null;
       for (let story = firstStory; story; story = story.next) {
-        if (story.commandId) {
-          delete this._storyByCommandId[story.commandId];
-        }
+        if (story.commandId) delete this._storyByCommandId[story.commandId];
       }
+      return firstStory;
     },
     dumpStatus () {
       const ids = [];

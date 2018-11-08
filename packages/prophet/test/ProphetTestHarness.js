@@ -6,11 +6,12 @@ import { created } from "~/raem/command";
 import { createTestPartitionURIFromRawId, createPartitionURI }
     from "~/raem/ValaaURI";
 
-import ScriptTestHarness, { createScriptTestHarness } from "~/script/test/ScriptTestHarness";
 import { createCorpus } from "~/raem/test/RAEMTestHarness";
 
+import ScriptTestHarness, { createScriptTestHarness } from "~/script/test/ScriptTestHarness";
+
 import {
-  AuthorityNexus, FalseProphet, FalseProphetDiscourse, Oracle, Prophet, Scribe,
+  AuthorityNexus, FalseProphet, FalseProphetDiscourse, Oracle, Prophet, Scribe, Follower,
 } from "~/prophet";
 
 import ProphetTestAPI from "~/prophet/test/ProphetTestAPI";
@@ -124,6 +125,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
   createValker () {
     return new FalseProphetDiscourse({
       prophet: this.prophet,
+      follower: new Follower(),
       schema: this.schema,
       verbosity: this.getVerbosity(),
       logger: this.getLogger(),
@@ -212,3 +214,9 @@ export function createTestMockProphet (configOverrides: Object = {}) {
     },
   });
 }
+
+export function createTestFollower () {
+  return MockFollower();
+}
+
+class MockFollower extends Follower {};

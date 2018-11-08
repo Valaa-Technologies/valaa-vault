@@ -33,7 +33,7 @@ export default class ValaaEngine extends Cog {
   constructor ({ name, logger, prophet, timeDilation = 1.0, verbosity }: Object) {
     super({ name: `${name}/Engine`, logger, verbosity });
     this.engine = this;
-    this.prophet = prophet;
+    this._prophet = prophet;
     this.cogs = new Set();
     this._vrappers = new Map();
     this._storyHandlerRoot = new Map();
@@ -70,6 +70,7 @@ export default class ValaaEngine extends Cog {
   getSelfAsHead () {
     return this._enginePartitionId ? vRef(this._enginePartitionId) : {};
   }
+  getProphet () { return this._prophet; }
 
   getRootScope () { return this._rootScope; }
   getLexicalScope () { return this.getRootScope(); }
@@ -316,7 +317,7 @@ export default class ValaaEngine extends Cog {
   }
 
   _createNewPartition (directive: Object) {
-    this.engine.prophet
+    this.engine.getProphet()
         .acquirePartitionConnection(directive.id.getPartitionURI(), { newPartition: true })
         .getSyncedConnection();
   }
@@ -339,7 +340,7 @@ export default class ValaaEngine extends Cog {
 
   outputStatus (output = console) {
     output.log(`${this.name}: Resources:`,
-        layoutByObjectField(this.prophet.getState(), "name"));
+        layoutByObjectField(this.getProphet().getState(), "name"));
     output.log(`${this.name}: Handlers:`, this._storyHandlerRoot);
     output.log(`${this.name}: Cogs:`);
     for (const cog of this.cogs) if (cog !== this) cog.outputStatus(output);
@@ -418,6 +419,8 @@ export default class ValaaEngine extends Cog {
     }
     return allReactionPromises;
   }
+
+  receiveTruths () {}
 
   rejectHeresy (/* rejectedEvent, purgedCorpus, revisedEvents */) {
     // console.log("HERESY Rejected", rejectedEvent);

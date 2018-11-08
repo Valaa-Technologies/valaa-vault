@@ -65,7 +65,7 @@ export default class TransactionInfo {
       // finally committed, the pieces are put together in a complete, universal TRANSACTED.
       // This is an awkward way to incrementally construct the transacted.
       // Maybe generators could somehow be useful here?
-      const actions = events.map(event => universalizeEvent(this.transaction.prophet, event));
+      const actions = events.map(event => universalizeEvent(this.transaction._prophet, event));
       const universalTransacted = { ...this.transacted, actions };
       const previousState = this.transaction.state;
       const transactionStory = this.transaction.corpus.dispatch(
@@ -115,13 +115,13 @@ export default class TransactionInfo {
           ? this.transacted
           : this.customCommand(this.transacted);
       if (!this.customCommand && !this._finalCommand.actions.length) {
-        command = universalizeEvent(this.transaction.prophet, this._finalCommand);
+        command = universalizeEvent(this.transaction._prophet, this._finalCommand);
         command.partitions = {};
         return {
           event: this._finalCommand, story: command, getPremiereStory () { return command; },
         };
       }
-      const result = this.transaction.prophet.chronicleEvent(
+      const result = this.transaction._prophet.chronicleEvent(
           this._finalCommand, { transactionInfo: this });
 
       Promise.resolve(result.getPremiereStory()).then(

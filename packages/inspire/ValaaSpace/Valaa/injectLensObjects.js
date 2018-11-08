@@ -556,7 +556,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
             partitionAuthorityURI = "";
           } else {
             const partitionURI = createPartitionURI(partitionAuthorityURI, frameRawId);
-            connection = engine.discourse.prophet
+            connection = engine.getProphet()
                 .acquirePartitionConnection(partitionURI)
                 .getSyncedConnection();
           }

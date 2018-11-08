@@ -15,30 +15,31 @@ import type { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult 
 
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
-import { createId, invariantify } from "~/tools";
+import { createId, invariantify, invariantifyObject } from "~/tools";
 
 export default class FalseProphetDiscourse extends Discourse {
-  follower: Follower;
-  prophet: Prophet;
+  _follower: Follower;
+  _prophet: Prophet;
 
   constructor ({
     follower, prophet, verbosity, logger, packFromHost, unpackToHost, builtinSteppers,
   }: Object) {
     // goes to Valker
     super(prophet.corpus.schema, verbosity, logger, packFromHost, unpackToHost, builtinSteppers);
+    invariantifyObject(follower, "FalseProphetDiscourse.constructor.follower");
     this.nonTransactionalBase = this;
-    this.follower = follower;
-    this.prophet = prophet;
     this.corpus = prophet.corpus;
+    this._follower = follower;
+    this._prophet = prophet;
     this._implicitlySyncingConnections = {};
-    this.setState(this.prophet.getState());
+    this.setState(this._prophet.getState());
     invariantify(this.state, "FalseProphetDiscourse.state");
   }
 
   debugId (options: ?Object): string {
     return `${this.constructor.name}(${
         this._transactionInfo ? this._transactionInfo.name : "non-transactional"}: ${
-        this.follower.debugId(options)} <-> ${this.prophet.debugId(options)})`;
+        this._follower.getName(options)} <-> ${this._prophet.debugId(options)})`;
   }
 
   run (head: any, kuery: any, options: Object): any {
@@ -54,9 +55,9 @@ export default class FalseProphetDiscourse extends Discourse {
       ChroniclePropheciesRequest {
     if (this._transactionInfo) return this._transactionInfo.chronicleEvents(events, options);
     try {
-      const ret = this.prophet.chronicleEvents(events, options);
+      const ret = this._prophet.chronicleEvents(events, options);
       ret.eventResults.forEach(eventResult => {
-        eventResult.waitOwnReactions = (() => eventResult.getFollowerReactions(this.follower));
+        eventResult.waitOwnReactions = (() => eventResult.getFollowerReactions(this._follower));
         eventResult.getPremiereStory = (async () => {
           await eventResult.waitOwnReactions();
           return await eventResult.getTruthStory();
@@ -79,7 +80,7 @@ export default class FalseProphetDiscourse extends Discourse {
   connectToMissingPartition = async (missingPartitionURI: ValaaURI) => {
     const partitionURIString = missingPartitionURI.toString();
     if (!this._implicitlySyncingConnections[partitionURIString]) {
-      this._implicitlySyncingConnections[partitionURIString] = this.prophet
+      this._implicitlySyncingConnections[partitionURIString] = this._prophet
           .acquirePartitionConnection(missingPartitionURI)
           .getSyncedConnection();
     }
@@ -90,15 +91,15 @@ export default class FalseProphetDiscourse extends Discourse {
   receiveCommands (commands: Command[]): ?Command[] {
     if (!commands.length) return undefined;
     this.setState(commands[commands.length - 1].state);
-    return this.follower.receiveCommands(commands);
+    return this._follower.receiveCommands(commands);
   }
 
   receiveTruths (truthEvents: EventBase[]) {
-    return this.follower.receiveTruths(truthEvents);
+    return this._follower.receiveTruths(truthEvents);
   }
 
   rejectHeresy (hereticEvent: EventBase, purgedCorpus: Corpus, revisedEvents: EventBase[]) {
-    return this.follower.rejectHerecy(hereticEvent, purgedCorpus, revisedEvents);
+    return this._follower.rejectHerecy(hereticEvent, purgedCorpus, revisedEvents);
   }
 
 

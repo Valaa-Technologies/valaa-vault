@@ -204,4 +204,60 @@ describe("Prophet", () => {
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
   });
+
+
+  it("resolves prophecy getTruthEvent only when its commands are properly confirmed", async () => {
+    const { scribeConnection, authorityConnection } =
+        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+    expectConnectionEventIds(scribeConnection, 0, 1, 1);
+
+    const result = harness.chronicleEvent(simpleCommand);
+
+    let truthEvent;
+    const truthProcess = result.getTruthEvent().then(truthEvent_ => (truthEvent = truthEvent_));
+
+    expect(result.getCommandOf(testPartitionURI).eventId).toEqual(1);
+    expectConnectionEventIds(scribeConnection, 0, 1, 2);
+    await result.getPersistedEvent();
+
+    expect(truthEvent).toEqual(undefined);
+    expectConnectionEventIds(scribeConnection, 0, 1, 2);
+
+    const results = harness.chronicleEvents(coupleCommands).eventResults;
+
+    const truthEvents = [];
+    const truthProcesses = results.map((result_, index) => result_.getTruthEvent()
+        .then(truthEvent_ => (truthEvents[index] = truthEvent_)));
+
+    expect(results[0].getCommandOf(testPartitionURI).eventId).toEqual(2);
+    expect(results[1].getCommandOf(testPartitionURI).eventId).toEqual(3);
+    expectConnectionEventIds(scribeConnection, 0, 1, 4);
+    await results[1].getPersistedEvent();
+
+    expect(truthEvent).toEqual(undefined);
+    expect(truthEvents.length).toEqual(0);
+    expect(truthEvents[0]).toEqual(undefined);
+    expect(truthEvents[1]).toEqual(undefined);
+
+
+    const twoEntries = authorityConnection._upstreamEntries.splice(0, 2);
+    const twoConfirmedTruths = JSON.parse(JSON.stringify(twoEntries.map(entry => entry.event)));
+    twoEntries[0].resolveTruthEvent(twoConfirmedTruths[0]);
+    twoEntries[1].resolveTruthEvent(twoConfirmedTruths[1]);
+    await authorityConnection.getReceiveTruths()(twoConfirmedTruths);
+    expectConnectionEventIds(scribeConnection, 0, 3, 4);
+
+    expect(await truthProcess).toMatchObject(simpleCommand);
+    expect(await truthProcesses[0]).toMatchObject(coupleCommands[0]);
+    expect(truthEvents.length).toEqual(1);
+
+    const lastEntry = authorityConnection._upstreamEntries.splice(0, 1);
+    const lastConfirmedTruths = JSON.parse(JSON.stringify(lastEntry.map(entry => entry.event)));
+    lastEntry[0].resolveTruthEvent(coupleCommands[1]);
+    await authorityConnection.getReceiveTruths()(lastConfirmedTruths);
+    expectConnectionEventIds(scribeConnection, 0, 4, 4);
+
+    expect(await truthProcesses[1]).toMatchObject(coupleCommands[1]);
+    expect(truthEvents.length).toEqual(2);
+  });
 });

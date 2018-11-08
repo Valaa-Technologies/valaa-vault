@@ -402,8 +402,9 @@ export function _writeCommands (connection: ScribePartitionConnection,
         const req = commands.add(_serializeEventAsJSON(command));
         req.onerror = reqEvent => {
           if (reqEvent.error.name !== "ConstraintError") throw req.error;
-          throw new Error(`Cross-tab command cache conflict: multiple tab synchronization not ${
-              ""}implemented yet`);
+          const error = new Error(`Cross-tab command cache conflict`);
+          error.cacheConflict = true;
+          throw error;
         };
       }));
 }

@@ -13,10 +13,10 @@ import { dumpObject } from "~/tools";
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
-import { Prophecy, _chronicleEvents } from "./_chronicleProphecyOps";
+import { _chronicleEvents } from "./_chronicleProphecyOps";
 import {
-  _createStoryQueue, _dispatchEventForStory, _reciteStoriesToFollowers, _reviewProphecy,
-} from "./_queueOps";
+  _createStoryQueue, _dispatchEventForStory, _reciteStoriesToFollowers,
+} from "./_storyQueueOps";
 
 /**
  * FalseProphet is non-authoritative denormalized in-memory store of
@@ -111,17 +111,6 @@ export default class FalseProphet extends Prophet {
       throw this.wrapErrorEvent(error, `_dispatchEventForStory(${dispatchDescription})`,
           "\n\tevent:", ...dumpObject(event),
           "\n\ttimed:", ...dumpObject(timed));
-    }
-  }
-
-  _reviewProphecy (reformation: Object, oldProphecy: Prophecy) {
-    try {
-      _reviewProphecy(this, reformation, oldProphecy);
-    } catch (error) {
-      // Hard conflict. The new incoming truth has introduced a
-      // low-level conflicting change, such as destroying a resource
-      // which some prophecies are later trying to modify.
-      oldProphecy.conflictReason = error;
     }
   }
 

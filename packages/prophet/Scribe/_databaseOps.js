@@ -89,8 +89,8 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
     _loadEventId(truths, "prev", connection._truthLogInfo, "eventIdEnd");
     _loadEventId(commands, undefined, connection._commandQueueInfo, "eventIdBegin");
     _loadEventId(commands, "prev", connection._commandQueueInfo, "eventIdEnd");
-    connection._clampCommandQueueByTruthEvendIdEnd(connection);
   });
+  connection._clampCommandQueueByTruthEvendIdEnd();
   return true;
 
   function _loadEventId (entries, direction: ?"prev", target, eventIdTargetFieldName) {

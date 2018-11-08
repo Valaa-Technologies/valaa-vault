@@ -13,16 +13,16 @@ import { dumpObject, outputError, thenChainEagerly, mapEagerly } from "~/tools";
 import { trivialCloneWith } from "~/tools/trivialClone";
 
 import FalseProphet from "./FalseProphet";
-import { _rejectLastProphecyAsHeresy } from "./_queueOps";
+import { _rejectLastProphecyAsHeresy } from "./_storyQueueOps";
+import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
 export type Prophecy = Story & {
   timed: ?Object;
   isProphecy: true;
 }
 
-class FalseProphetEventResult extends ProphecyEventResult {
+class FalseProphetEventResult extends ProphecyEventResult {}
 
-}
 
 // Create prophecies out of provided events and send their partition
 // commands upstream. Aborts all remaining events on first exception
@@ -62,6 +62,11 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
           getCommandOf,
           getTruthStory: () => thenChainEagerly(prophecyFulfillment,
               () => prophecy,
+          getPersistedEvent: () => thenChainEagerly(
+              mapEagerly(operation.chroniclings, (chronicling) => chronicling.getPersistedEvent()),
+              () => operation.prophecy,
+              errorOnChronicleEvents.bind(null,
+                  new Error(`chronicleEvents.eventResults[${index}].getPersistedStory()`))),
               errorOnChronicleEvents.bind(null,
                   new Error(`chronicleEvents.eventResults[${index}].getTruthStory()`))),
           getPremiereStory: () => thenChainEagerly(
@@ -165,7 +170,8 @@ function _fulfillProphecy (falseProphet: FalseProphet, operation: Object) {
 
 function _fulfillStage (falseProphet: FalseProphet, operation: Object, stage: Object) {
   return thenChainEagerly(stage, [
-    () => mapEagerly(stage.partitions, partition => partition.validatedConnection,
+    () => mapEagerly(stage.partitions,
+        partition => partition.validatedConnection,
         (error, partition) => {
           throw falseProphet.wrapErrorEvent(error,
               new Error(`chronicleEvents.stage["${stage.name}"].connection["${
@@ -189,9 +195,8 @@ function _fulfillStage (falseProphet: FalseProphet, operation: Object, stage: Ob
       for (const { connection, commandEvent } of stage.partitions) {
         let chronicling;
         try {
-          chronicling = connection.chronicleEvent(commandEvent,
-              { ...operation.options, isProphecy: true });
           chroniclings.push(chronicling);
+          chronicling = connection.chronicleEvent(commandEvent, Object.create(operation.options));
         } catch (error) {
           throw falseProphet.wrapErrorEvent(error,
               new Error(`chronicleEvents.stage["${stage.name}"].connection["${

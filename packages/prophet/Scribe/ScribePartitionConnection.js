@@ -138,9 +138,9 @@ export default class ScribePartitionConnection extends PartitionConnection {
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
     const contextError = new Error("chronicleEvents");
     try {
-      return _chronicleEvents(this, events, options, errorOnScribechronicleEvents.bind(this));
-    } catch (error) { return errorOnScribechronicleEvents.call(this, error); }
-    function errorOnScribechronicleEvents (error) {
+      return _chronicleEvents(this, events, options, errorOnScribeChronicleEvents.bind(this));
+    } catch (error) { return errorOnScribeChronicleEvents.call(this, error); }
+    function errorOnScribeChronicleEvents (error) {
       throw this.wrapErrorEvent(error, contextError,
           "\n\teventLog:", ...dumpObject(events),
           "\n\toptions:", ...dumpObject(options),

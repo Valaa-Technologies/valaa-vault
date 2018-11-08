@@ -157,18 +157,18 @@ export default class FalseProphetDiscourse extends Discourse {
   create ({
     typeName, initialState, isImmutable,
     id = createId({ typeName, initialState }, { isImmutable }),
-  }: Object): ClaimResult {
+  }: Object): ProphecyEventResult {
     return this.chronicleEvent(created({ id, typeName, initialState }), {});
   }
 
   duplicate ({
     duplicateOf, initialState, isImmutable,
     id = createId({ duplicateOf, initialState }, { isImmutable }),
-  }: Object): ClaimResult {
+  }: Object): ProphecyEventResult {
     return this.chronicleEvent(duplicated({ id, duplicateOf, initialState }), {});
   }
 
-  destroy ({ id, typeName, owner }: Object): ClaimResult {
+  destroy ({ id, typeName, owner }: Object): ProphecyEventResult {
     return this.chronicleEvent(destroyed({ id, typeName, owner }), {});
   }
 }

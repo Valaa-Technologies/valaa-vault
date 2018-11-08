@@ -150,27 +150,30 @@ describe("Prophet", () => {
     expect(result.getCommandOf(testPartitionURI).eventId).toEqual(1);
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
-    expect(authorityConnection._upstreamQueue.length).toEqual(0);
+    expect(authorityConnection._upstreamEntries.length).toEqual(0);
     await result.getPersistedEvent();
-    expect(authorityConnection._upstreamQueue.length).toEqual(1);
+    expect(authorityConnection._upstreamEntries.length).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
     const results = harness.chronicleEvents(coupleCommands).eventResults;
     expect(results[0].getCommandOf(testPartitionURI).eventId).toEqual(2);
     expect(results[1].getCommandOf(testPartitionURI).eventId).toEqual(3);
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
     expect(totalCommandCount).toEqual(3);
-    expect(authorityConnection._upstreamQueue.length).toEqual(1);
+    expect(authorityConnection._upstreamEntries.length).toEqual(1);
     await results[1].getPersistedEvent();
-    expect(authorityConnection._upstreamQueue.length).toEqual(3);
+    expect(authorityConnection._upstreamEntries.length).toEqual(3);
 
-    const twoConfirmedTruths = JSON.parse(JSON.stringify(
-          authorityConnection._upstreamQueue.splice(0, 2)));
+    const twoEntries = authorityConnection._upstreamEntries.splice(0, 2);
+    const twoConfirmedTruths = JSON.parse(JSON.stringify(twoEntries.map(entry => entry.event)));
+    twoEntries[0].resolveTruthEvent();
+    twoEntries[1].resolveTruthEvent();
     await authorityConnection.getReceiveTruths()(twoConfirmedTruths);
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 3, 4);
 
-    const lastConfirmedTruths = JSON.parse(JSON.stringify(
-          authorityConnection._upstreamQueue.splice(0, 1)));
+    const lastEntry = authorityConnection._upstreamEntries.splice(0, 1);
+    const lastConfirmedTruths = JSON.parse(JSON.stringify(lastEntry.map(entry => entry.event)));
+    lastEntry[0].resolveTruthEvent();
     await authorityConnection.getReceiveTruths()(lastConfirmedTruths);
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);

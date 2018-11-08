@@ -81,7 +81,7 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
               // and possible heresy: we should catch and have logic for
               // either retrying the operation or for full rejection.
               // Nevertheless flushing the corpus is needed.
-              () => result.getTruthStory(),
+              () => result.getPersistedEvent(),
               errorOnChronicleEvents.bind(null,
                   new Error(`chronicleEvents.eventResults[${index}].getPremiereStory()`))),
         });

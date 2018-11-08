@@ -196,12 +196,12 @@ export default class Vrapper extends Cog {
   }
 
   getSchema () {
-    return this.engine.prophet.schema;
+    return this.engine.getProphet().schema;
   }
 
   getTypeIntro () {
     if (!this._typeIntro) {
-      const intro = this.engine.prophet.schema.getType(this._typeName);
+      const intro = this.engine.getProphet().schema.getType(this._typeName);
       if (!intro) throw new Error(`Could not find schema type for '${this._typeName}'`);
       this._typeIntro = intro;
     }
@@ -420,7 +420,7 @@ export default class Vrapper extends Cog {
           }
         }
       }
-      this._partitionConnection = partitionURI && this.engine.prophet
+      this._partitionConnection = partitionURI && this.engine.getProphet()
           .acquirePartitionConnection(partitionURI, {
             newPartition: false, newConnection: options.newConnection, require: options.require,
           });
@@ -1272,7 +1272,7 @@ export default class Vrapper extends Cog {
           "Vrapper.bvobContent only available for objects of Bvob type",
           "\n\ttype:", this._typeName,
           "\n\tobject:", this);
-      const buffer = this.engine.prophet.tryGetCachedBvobContent(this.getRawId());
+      const buffer = this.engine.getProphet().tryGetCachedBvobContent(this.getRawId());
       if (typeof buffer !== "undefined") return buffer;
       throw new Error(`Cannot locate Bvob buffer directly from caches (with id '${
           this.getRawId()}'`);
@@ -1395,7 +1395,7 @@ export default class Vrapper extends Cog {
 
   recurseConnectedPartitionMaterializedFieldResources (fieldNames: Array<string>,
       options: Kuery = {}) {
-    const activeConnections = this.engine.prophet.getSyncedConnections();
+    const activeConnections = this.engine.getProphet().getSyncedConnections();
     const result = [];
     for (const partitionRawId of Object.keys(activeConnections)) {
       const partition = this.engine.tryVrapper(partitionRawId);

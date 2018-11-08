@@ -1,16 +1,20 @@
 // @flow
 
-import { Story } from "~/raem";
+import { Command, Story } from "~/raem";
 import { EventBase } from "~/raem/command";
+import { getActionFromPassage } from "~/raem/redux/Bard";
 
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
-import { outputError } from "~/tools";
+import { dumpObject, outputError } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
+import { Prophecy } from "./_chronicleProphecyOps";
 
-export function _createStoryQueue () {
+export function _createStoryQueue (chain: ?Object) {
+  // The queue is an intrusive linked ring structure with sentinel as
+  // one-before-first-one-after-last link.
   const ret = {
     id: "sentinel",
     getFirst () { return this.next; },
@@ -60,7 +64,13 @@ export function _createStoryQueue () {
     },
     _storyByCommandId: {},
   };
-  ret.next = ret.prev = ret;
+  if (!chain) {
+    ret.next = ret.prev = ret;
+  } else {
+    ret.next = chain;
+    ret.prev = chain.prev;
+    chain.prev = chain.prev.next = ret;
+  }
   return ret;
 }
 
@@ -79,30 +89,84 @@ export function _dispatchEventForStory (falseProphet: FalseProphet, event: Event
   story.timed = timed;
   story.state = falseProphet.getState();
   story.previousState = previousState;
-  if (dispatchDescription === "prophecy") story.isProphecy = true;
+  if (dispatchDescription === "chronicleProphecy") story.isProphecy = true;
+  if (dispatchDescription === "receiveTruth") story.isTruth = true;
   // story.id = story.commandId; TODO(iridian): what was this?
   falseProphet._storyQueue.addStory(story);
   // console.log("Added dispatched event:", event, story, { state: story.state.toJS() });
   return story;
 }
 
-export function _purgeAndRevisePartitionCommands (connection: FalseProphetPartitionConnection,
-    purgedStories: Story[]) {
+export function _rejectLastProphecyAsHeresy (falseProphet: FalseProphet, hereticClaim: EventBase) {
+  if (falseProphet._storyQueue.getLast().commandId !== hereticClaim.commandId) {
+    throw new Error(`rejectLastProphecyAsHeresy.hereticClaim.commandId (${hereticClaim.commandId
+        }) does not match latest story.commandId (${
+          falseProphet._storyQueue.getLast().commandId})`);
+  }
+  const hereticProphecy = falseProphet._storyQueue
+      .removeStory(falseProphet._storyQueue.getLast());
+  falseProphet.recreateCorpus(hereticProphecy.previousState);
+}
+
+export function _confirmCommands (connection: FalseProphetPartitionConnection,
+    confirmedCommands: Command[]) {
   const falseProphet = connection.getProphet();
-  const purgedState = purgedStories[0].previousState;
-  falseProphet.recreateCorpus(purgedState);
-  falseProphet._followers.forEach(discourse =>
-      discourse.rejectHeresy(purgedStories[0], purgedState, []));
-  return undefined;
+  for (const command of confirmedCommands) {
+    const commandStory = falseProphet._storyQueue.getStoryBy(command.commandId);
+    if (commandStory) {
+      if (Object.keys(commandStory.partitions).length === 1) {
+        commandStory.isTruth = true;
+      }
+    }
+  }
+}
+
+export function _purgeDispatchAndReviseEvents (connection: FalseProphetPartitionConnection,
+    purgedCommands: ?Command[], newEvents: Command[], type: string) {
+  if (purgedCommands && purgedCommands.length) connection.setIsFrozen(false);
+  const falseProphet = connection.getProphet();
+  const purgedProphecyChain = purgedCommands && _beginPurge(falseProphet, purgedCommands);
+  // Even if a revisioning is on-going we can outright add new events
+  // to the queue. The future queue has been removed onwards from the
+  // first purged command. This is allowed because no command or
+  // pending truth in the removed part of the queue can fundamentally
+  // predate the new truth. Commands in the removed queue which belong
+  // to same partition(s) as the new truth are those that have just
+  // been purged and which by definition become subsequent events (if
+  // at all; they can still get rejected). Commands and pending truths
+  // which belong to different partitions are temporarily removed from
+  // the state, but as per partition semantics they are allowed to be
+  // reordered to happen later.
+  // Add the truth to the end of current pending prophecies.
+  const newStories = newEvents && newEvents.map(newEvent =>
+      falseProphet._dispatchEventForStory(newEvent, type));
+  if (newStories) falseProphet._reciteStoriesToFollowers(newStories);
+  if (purgedProphecyChain) {
+    const { refreshedStories, partitions, conflictedQueue } =
+        _dispatchAndRevisePurgedStories(connection, purgedProphecyChain);
+    falseProphet._reciteStoriesToFollowers(refreshedStories);
+  }
+  _deliverLeadingTruthsToAllFollowers(falseProphet);
+  connection._checkForFreezeAndNotify();
 }
 
 export function _reciteStoriesToFollowers (falseProphet: FalseProphet, stories: Story[]) {
   let followerReactions;
   falseProphet._followers.forEach((discourse, follower) => {
-    const reactions = discourse.receiveCommands(stories);
-    if (typeof reactions !== "undefined") {
-      if (!followerReactions) followerReactions = new Map();
-      followerReactions.set(follower, reactions);
+    let reactions;
+    try {
+      reactions = discourse.receiveCommands(stories);
+      if (typeof reactions !== "undefined") {
+        if (!followerReactions) followerReactions = new Map();
+        followerReactions.set(follower, reactions);
+      }
+    } catch (error) {
+      falseProphet.outputErrorEvent(falseProphet.wrapErrorEvent(error,
+          "_reciteStoriesToFollowers",
+          "\n\tstories:", ...dumpObject(stories),
+          "\n\treactions:", ...dumpObject(reactions),
+          "\n\ttarget discourse:", ...dumpObject(discourse),
+      ));
     }
   });
   return stories.map((story, index) => ({
@@ -121,213 +185,114 @@ export function _reciteStoriesToFollowers (falseProphet: FalseProphet, stories: 
   }));
 }
 
-export function _rejectLastProphecyAsHeresy (falseProphet: FalseProphet,
-    hereticClaim: EventBase) {
-  if (falseProphet._storyQueue.getLast().commandId !== hereticClaim.commandId) {
-    throw new Error(`rejectLastProphecyAsHeresy.hereticClaim.commandId (${hereticClaim.commandId
-        }) does not match latest story.commandId (${
-          falseProphet._storyQueue.getLast().commandId})`);
+// Notify followers about the prophecies that have become permanent
+// truths, ie. all prophecies at the front of the pending prophecies
+// list marked as isTruth, and which thus can no longer be affected by
+// any future revisioning.
+function _deliverLeadingTruthsToAllFollowers (falseProphet: FalseProphet) {
+  const truths = [];
+  for (let story = falseProphet._storyQueue.getFirst(); story.isTruth; story = story.next) {
+    truths.push(story);
   }
-  const hereticProphecy = falseProphet._storyQueue
-      .removeStory(falseProphet._storyQueue.getLast());
-  falseProphet.recreateCorpus(hereticProphecy.previousState);
-}
-
-// Handle event confirmation coming from upstream, including a possible revisioning.
-// Sends notifications downstream on the confirmed events.
-// Can also send new command claims upstream if old commands get rewritten during revisioning.
-export function _confirmProphecy (falseProphet: FalseProphet, truthEvent: EventBase,
-  purgedProphecies?: Array<EventBase>) {
-  if (!truthEvent) return;
-  /*
-  falseProphet.warnEvent("\n\tconfirmTruth", truthEvent.commandId, truthEvent,
-      ...(purgedProphecies ? ["\n\tPURGES:", purgedProphecies] : []),
-      ...falseProphet._dumpStatus());
-  //*/
-  const revisioning = purgedProphecies && _beginReformation(falseProphet, purgedProphecies);
-
-  // Even if a revisioning is on-going we can outright add the new truth to the queue.
-  // The future queue has been removed onwards from the first purged command. This is allowed
-  // because no command or pending truth in the removed part of the queue can fundamentally
-  // predate the new truth. Commands in the removed queue which belong to same partition(s) as
-  // the new truth are those that have just been purged and which by definition become subsequent
-  // events (if at all; they can still get rejected). Commands and pending truths which belong
-  // to different partitions are temporarily removed from the state, but as per partition
-  // semantics they can be reordered to happen later.
-  // So add the truth to the end of current pending prophecies.
-  _addTruthToPendingProphecies(falseProphet, truthEvent);
-
-  if (revisioning) _finishReformation(falseProphet, revisioning);
-
-  // Notify followers about the prophecies that have become permanent truths, ie. all prophecies
-  // at the front of the pending prophecies list markes as isTruth, and which thus can no longer
-  // be affected by any future revisioning.
-  while (falseProphet._storyQueue.getFirst().isTruth) {
-    const nextTruth = falseProphet._storyQueue
-        .removeStory(falseProphet._storyQueue.getFirst());
-    _confirmTruthToAllFollowers(nextTruth, purgedProphecies);
+  if (truths.length) {
+    falseProphet._storyQueue.removeStories(truths[0], truths[truths.length - 1]);
   }
-  function _confirmTruthToAllFollowers (confirmedProphecy: Object) {
-    (falseProphet._followers || []).forEach(discourse => {
-      try {
-        discourse.onConfirmProphecy(confirmedProphecy, purgedProphecies);
-      } catch (error) {
-        falseProphet.outputErrorEvent(falseProphet.wrapErrorEvent(error,
-            "_confirmTruthToAllFollowers",
-            "\n\ttruthEvent:", confirmedProphecy,
-            "\n\tpurgedCommands:", purgedProphecies,
-            "\n\ttarget discourse:", discourse,
-        ));
-      }
-    });
-  }
-}
-/*
-function _addTruthToPendingProphecies (falseProphet: FalseProphet, truthEvent: EventBase) {
-  // Add the authorized and notify downstream
-  // no truthId means a legacy command.
-  const truthId = truthEvent.commandId;
-  // TODO(iridian): After migration to zero missing commandId should be at create warnings
-  let story = truthId && falseProphet._storyByCommandId[truthId];
-  if (!story) {
-    if (!truthId) {
-      falseProphet.warnEvent("Warning: encountered an authorized event with missing commandId:",
-          truthEvent);
+  falseProphet._followers.forEach(discourse => {
+    try {
+      discourse.receiveTruths(truths);
+    } catch (error) {
+      falseProphet.outputErrorEvent(falseProphet.wrapErrorEvent(error,
+          "_deliverLeadingTruthsToAllFollowers",
+          "\n\tstories:", ...dumpObject(truths),
+          "\n\ttarget discourse:", ...dumpObject(discourse),
+      ));
     }
-    story = falseProphet._dispatchEventForStory(truthEvent,
-        `truth ${!truthId ? "legacy" : truthId.slice(0, 13)}...`);
-    falseProphet._reciteStoriesToFollowers([story]);
-  }
-  story.isTruth = true;
-}
-*/
-export function _beginReformation (falseProphet: FalseProphet, purgedStories) {
-  if (!purgedStories.length) return undefined;
-  purgedStories.forEach(command => {
-    falseProphet._storyByCommandId[command.commandId].shouldReview = true;
   });
-  const revisioning = {
-    purgedStories,
-    firstPurge: falseProphet._storyQueue.getFirst(),
-  };
-
-  while (!revisioning.firstPurge.shouldReview) {
-    revisioning.firstPurge = revisioning.firstPurge.next;
-  }
-  // Begin revisioning.
-  // Remove the purged prophecies (and pending truths alike!) from the prophecies list.
-  // Retain all lookup entries.
-  falseProphet._storyQueue
-      .removeStories(revisioning.firstPurge, falseProphet._storyQueue.getLast());
-  falseProphet.recreateCorpus(revisioning.firstPurge.previousState);
-
-  // TODO(iridian): notify followers of the revisioning
-
-  return revisioning;
 }
 
-export function _finishReformation (falseProphet: FalseProphet, revisioning:
-    { purgedStories: Array<Story>, firstPurge: Story }) {
-  revisioning.conflictedPartitions = {};
-  for (let oldStory = revisioning.firstPurge; oldStory; oldStory = oldStory.next) {
-    const oldPartitions = oldStory.partitions;
+function _beginPurge (falseProphet: FalseProphet, purgedCommands: Command[]): Story {
+  let purgedProphecyChain;
+  for (const purgedCommand of purgedCommands) {
+    const purged = falseProphet._storyQueue.getStoryBy(purgedCommand.commandId);
+    if (!purged) continue;
+    if (!purgedProphecyChain) purgedProphecyChain = purged;
+    purged.needsRevision = true;
+  }
+  if (!purgedProphecyChain) return undefined;
+  falseProphet._storyQueue.removeStories(purgedProphecyChain, falseProphet._storyQueue.getLast());
+  const purgedState = purgedProphecyChain.previousState;
+  falseProphet.recreateCorpus(purgedState);
+  falseProphet._followers.forEach(discourse =>
+      discourse.rejectHeresy(purgedProphecyChain, purgedState, []));
+  return purgedProphecyChain;
+}
 
-    if (Object.keys(oldPartitions).find(
-        partitionURIString => revisioning.conflictedPartitions[partitionURIString])) {
-      oldStory.conflictReason = "previous prophecy conflicted";
-      if (!oldStory.shouldReview) {
-        falseProphet.errorEvent(
-            "TODO: non-purged conflict: this command should be purged from upstream");
+function _dispatchAndRevisePurgedStories (connection: FalseProphetPartitionConnection,
+    purgedProphecyChain: Prophecy) {
+  const partitions = {};
+  const refreshedStories = [];
+  const purgedQueue = _createStoryQueue(purgedProphecyChain);
+  for (let purged = purgedQueue.getFirst(); purged !== purgedQueue; purged = purged.next) {
+    for (const partitionURI of Object.keys(purged.partitions)) {
+      const partition = partitions[partitionURI];
+      if (partition.isRevised) purged.needsRevision = true;
+      if (partition.isConflicted) {
+        purged.conflictReason = `prophecy partition(s) are conflicted`;
+        (purged.conflictsIn || (purged.conflictsIn = [])).push(partitionURI);
       }
-    } else if (oldStory.shouldReview) {
-      falseProphet._reviewProphecy(revisioning, oldStory);
-    } else {
-      // Event or command in a partition that's not being purged: don't send to upstream.
-      const action = Object.getPrototypeOf(oldStory);
-      if (oldStory.isTruth) {
-        _addTruthToPendingProphecies(falseProphet, action);
-      } else {
-        try {
-          falseProphet.repeatClaim(action);
-        } catch (error) {
-          const wrappedError = falseProphet.wrapErrorEvent(
-              "_finishReformation on non-purged action",
-              "\n\tINTERNAL ERROR: reforming non-purged actions should not cause errors");
-          outputError(wrappedError);
-          oldStory.conflictReason = wrappedError;
+    }
+
+    if (!purged.conflictReason) {
+      let newProphecy = _dispatchPurgedEvent(connection.getProphet(), purged);
+      if (newProphecy && purged.needsRevision) {
+        const revisedProphecy = connection._revisePurgedProphecy(purged, newProphecy);
+        if (!revisedProphecy) _rejectLastProphecyAsHeresy(connection.getProphet(), newProphecy);
+        newProphecy = revisedProphecy;
+      }
+      if (newProphecy) refreshedStories.push(newProphecy);
+    }
+
+    if (purged.conflictReason || purged.needsRevision) {
+      // Mark all partitions of the old prophecy as conflicted/revisioned.
+      // If conflicted, all subsequent commands on these partitions
+      // need to be fully, possibly interactively revised as they're
+      // likely to depend on the first conflicting change.
+      for (const partitionURI of Object.keys(purged.partitions)) {
+        const partition = partitions[partitionURI] || (partitions[partitionURI] = {});
+        partition.isRevised = true;
+        if (purged.conflictReason) {
+          partition.isConflicted = true;
+          (partition.purgedProphecies || (partition.purgedProphecies = [])).push(purged);
         }
       }
     }
-
-    if (oldStory.conflictReason) {
-    // Mark all partitions of the old prophecy as conflicted. All subsequent commands need to
-    // be evaluated as they're likely to depend on the first conflicting change.
-      Object.keys(oldPartitions).forEach(partitionURIString => {
-        revisioning.conflictedPartitions[partitionURIString] = true;
-      });
-      (revisioning.conflictedProphecies || (revisioning.conflictedProphecies = []))
-          .push(oldStory);
-    }
+    if (!purged.conflictReason) purgedQueue.removeStory(purged);
   }
+  return { refreshedStories, partitions, conflictedQueue: purgedQueue };
 }
 
-/*
-export function _reviewProphecy (falseProphet: FalseProphet, revisioning: Object, oldStory: Story) {
-  const revisedProphecy = falseProphet._dispatchEventForStory(oldStory, "reform");
-  const softConflict = _checkForSoftConflict(falseProphet, oldStory, revisedProphecy);
-  if (softConflict) {
-    oldStory.conflictReason = softConflict;
-    _rejectLastProphecyAsHeresy(falseProphet, revisedProphecy);
-  } else {
-    falseProphet.warnEvent("\n\treview claiming", universalisableCommand.commandId,
-        "was", oldCommand.commandId,
-        "\n\treformation:", revisioning,
-        "\n\tnew prophecy:", revisedProphecy,
-        "\n\told prophecy:", oldStory,
-        ...falseProphet._dumpStatus());
-    const { getPremiereStory } = falseProphet._upstream.chronicleEvent(getActionFromPassage(revisedProphecy));
-    (async () => {
-      try {
-        await getPremiereStory();
-        const finalStory = await getPremiereStory();
-        falseProphet.warnEvent("\n\t_reviewProphecy success:",
-            "\n\treformation:", revisioning, prophecy, finalStory);
-      } catch (error) {
-        outputError(falseProphet.wrapErrorEvent(error,
-            new Error(`_reviewProphecy(${oldStory.commandId})`),
-            "\n\trevised prophecy:", ...dumpObject(revisedProphecy),
-            "\n\tpurged prophecy:", ...dumpObject(oldStory),
-            ...falseProphet._dumpStatus()));
-      }
-    })();
-    falseProphet._reciteStoriesToFollowers(revisedProphecy);
-    return;
+function _dispatchPurgedEvent (falseProphet: FalseProphet, purged: Prophecy) {
+  const purgedEvent = getActionFromPassage(purged);
+  const isRevision = purged.needsRevision;
+  try {
+    return _dispatchEventForStory(falseProphet, purgedEvent,
+        isRevision ? "revisePurged" : "repeatPurged");
+  } catch (error) {
+    const wrappedError = falseProphet.wrapErrorEvent(error, isRevision
+            ? new Error(`_dispatchAndRevisePurgedStories.revise.dispatch(${purged.commandId
+                }) hard conflict: failed to reduce a purged command`)
+            : new Error(`_dispatchAndRevisePurgedStories.repeat.dispatch(${purged.commandId
+                }) INTERNAL ERROR: non-purged event repeat dispatch shouldn't cause errors`),
+        "\n\tpurgedEvent:", ...dumpObject(purgedEvent),
+        "\n\tpurgedProphecy:", ...dumpObject(purged));
+    outputError(wrappedError);
+    purged.conflictReason = wrappedError;
+    purged.needsRevision = true;
   }
-}
-*/
-
-export function _checkForSoftConflict (/* falseProphet: FalseProphet, oldStory: Story,
-    revisedProphecy: Story */) {
-  // TODO(iridian): Detect and resolve soft conflicts: ie. of the type where the reformed
-  // commands modify something that has been modified by the new incoming truth(s), thus
-  // overriding such changes. This class of errors does not corrupt the event log, but
-  // most likely is a ValaaSpace conflict.
   return undefined;
 }
 
 /*
-while (falseProphet._claimOperationQueue[0] !== operation) {
-  if (!falseProphet._claimOperationQueue[0].pendingClaim) {
-    falseProphet._claimOperationQueue.shift();
-  } else {
-    try {
-      await falseProphet._claimOperationQueue[0].pendingClaim;
-    } catch (error) {
-      // Silence errors which arise from other chronicleEvents operations.
-    }
-  }
-}
-
 remoteAuthority = operation.authorities[authorityURIs[0]];
 if (falseProphet.getVerbosity() === 1) {
   falseProphet.logEvent(1, `${remoteAuthority

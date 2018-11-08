@@ -23,6 +23,7 @@ export type Prophecy = Story & {
 
 class FalseProphetEventResult extends ProphecyEventResult {}
 
+const ProphecyOperationTag = Symbol("Prophecy Operation");
 
 // Create prophecies out of provided events and send their partition
 // commands upstream. Aborts all remaining events on first exception
@@ -30,19 +31,19 @@ class FalseProphetEventResult extends ProphecyEventResult {}
 export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[],
     { timed, transactionInfo, ...rest } = {}): ProphecyChronicleRequest {
   const prophecies = events.map(event => falseProphet._dispatchEventForStory(
-      universalizeEvent(falseProphet, event), "prophecy", timed, transactionInfo));
+      universalizeEvent(falseProphet, event), "chronicleProphecy", timed, transactionInfo));
   const reactions = falseProphet._reciteStoriesToFollowers(prophecies);
 
   return {
     eventResults: prophecies.map((prophecy, index) => {
       let getCommandOf;
-      let prophecyFulfillment;
+      const operation = prophecy[ProphecyOperationTag] = { prophecy, options: rest };
+      operation.options.isProphecy = true;
       if (!timed) {
         try {
-          const operation = { prophecy, options: rest };
           _prepareStagesAndCommands(falseProphet, operation);
           _initiateConnectionValidations(falseProphet, operation);
-          prophecyFulfillment = _fulfillProphecy(falseProphet, operation);
+          _fulfillProphecy(falseProphet, operation);
           getCommandOf = (partitionURI) => operation.partitionCommands[String(partitionURI)];
         } catch (error) {
           try {
@@ -60,13 +61,14 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
         result = new FalseProphetEventResult(prophecy, {
           ...reactions[index],
           getCommandOf,
-          getTruthStory: () => thenChainEagerly(prophecyFulfillment,
-              () => prophecy,
           getPersistedEvent: () => thenChainEagerly(
               mapEagerly(operation.chroniclings, (chronicling) => chronicling.getPersistedEvent()),
               () => operation.prophecy,
               errorOnChronicleEvents.bind(null,
                   new Error(`chronicleEvents.eventResults[${index}].getPersistedStory()`))),
+          getTruthStory: () => thenChainEagerly(
+              operation.fulfillment,
+              () => operation.prophecy,
               errorOnChronicleEvents.bind(null,
                   new Error(`chronicleEvents.eventResults[${index}].getTruthStory()`))),
           getPremiereStory: () => thenChainEagerly(
@@ -100,6 +102,31 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
       }
     }),
   };
+}
+
+export function _revisePurgedProphecy (connection: FalseProphetPartitionConnection,
+    purged: Prophecy, revised: Prophecy) {
+  const softConflict = _checkForSoftConflict(purged, revised);
+  if (softConflict) {
+    purged.conflictReason = softConflict;
+    return undefined;
+  }
+  connection.warnEvent("\n\trevised prophecy", revised.commandId,
+          "from purged prophecy", purged.commandId,
+      "\n\trevised prophecy:", ...dumpObject(revised),
+      "\n\tpurged prophecy:", ...dumpObject(purged),
+      ...connection._prophet._dumpStatus());
+  return revised;
+}
+
+function _checkForSoftConflict (/* purgedProphecy: Prophecy, revisedProphecy: Prophecy */) {
+  // TODO(iridian): Detect and resolve soft conflicts: ie. of the
+  // type where the reformed commands modify something that has been
+  // modified by the new incoming truth(s), thus overriding such
+  // changes. This class of errors does not corrupt the event log so
+  // cannot be detected as a reduction error but still most likely is
+  // a ValaaSpace conflict and thus should be rejected.
+  return undefined;
 }
 
 export function universalizeEvent (falseProphet: FalseProphet, event: EventBase): EventBase {
@@ -157,7 +184,7 @@ function _initiateConnectionValidations (falseProphet: FalseProphet, operation: 
 }
 
 function _fulfillProphecy (falseProphet: FalseProphet, operation: Object) {
-  return mapEagerly(operation.stages,
+  return (operation.fulfillment = mapEagerly(operation.stages,
       stage => _fulfillStage(falseProphet, operation, stage),
       (error, stage) => {
         throw falseProphet.wrapErrorEvent(error,
@@ -165,7 +192,7 @@ function _fulfillProphecy (falseProphet: FalseProphet, operation: Object) {
           "\n\toperation:", ...dumpObject(operation),
           "\n\tstage.partitions:", ...dumpObject(stage.partitions),
           "\n\tthis:", falseProphet);
-      });
+      }));
 }
 
 function _fulfillStage (falseProphet: FalseProphet, operation: Object, stage: Object) {
@@ -191,12 +218,12 @@ function _fulfillStage (falseProphet: FalseProphet, operation: Object, stage: Ob
       // Maybe determine eventId's beforehand?
 
       // Get eventId and scribe persist finalizer for each partition
-      const chroniclings = [];
+      operation.chroniclings = [];
       for (const { connection, commandEvent } of stage.partitions) {
         let chronicling;
         try {
-          chroniclings.push(chronicling);
           chronicling = connection.chronicleEvent(commandEvent, Object.create(operation.options));
+          operation.chroniclings.push(chronicling);
         } catch (error) {
           throw falseProphet.wrapErrorEvent(error,
               new Error(`chronicleEvents.stage["${stage.name}"].connection["${
@@ -206,13 +233,13 @@ function _fulfillStage (falseProphet: FalseProphet, operation: Object, stage: Ob
           );
         }
       }
-      return mapEagerly(chroniclings,
+      return mapEagerly(operation.chroniclings,
           chronicling => chronicling.getTruthEvent(),
           (error, chronicling, index) => {
             throw falseProphet.wrapErrorEvent(error,
                 new Error(`chronicleEvents.stage["${stage.name}"].chroniclings[${index}](${
                       chronicling && chronicling.event.eventId}).getTruthEvent()"`),
-                "\n\tchroniclings:", ...dumpObject(chroniclings));
+                "\n\tchroniclings:", ...dumpObject(operation.chroniclings));
           }
       );
     },

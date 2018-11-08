@@ -1,6 +1,6 @@
 // @flow
 
-import { EventBase, Story } from "~/raem/command";
+import { Command, EventBase, Story } from "~/raem/command";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import { NarrateOptions, ChronicleOptions, ChronicleRequest } from "~/prophet/api/types";
@@ -45,11 +45,9 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   isFrozenConnection (): boolean { return !!this._isFrozen; }
 
   narrateEventLog (options: NarrateOptions = {}): Promise<Object> {
-    return super.narrateEventLog({
-      ...options,
-      receiveTruths: this.getReceiveTruths(options.receiveTruths),
-      receiveCommands: this.getReceiveCommands(options.receiveCommands),
-    });
+    options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
+    options.receiveCommands = this.getReceiveCommands(options.receiveCommands);
+    return super.narrateEventLog(options);
   }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
@@ -58,20 +56,18 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       if (options.isProphecy) {
         // console.log("assigning ids:", this.getName(), this._headEventId,
         //     this._unconfirmedCommands.length, "\n\tevents:", ...dumpObject(eventLog));
-        events.forEach(event => {
+        for (const event of events) {
           event.eventId = this._headEventId + this._unconfirmedCommands.length;
           this._unconfirmedCommands.push(event);
-        });
+        }
         this._checkForFreezeAndNotify();
       } else if (typeof events[0].eventId !== "number") {
         throw new Error("Can't chronicle events without eventId (options.isProphecy is not set)");
       }
-      return super.chronicleEvents(events, {
-        ...options,
-        receiveTruths: this.getReceiveTruths(options.receiveTruths),
-        receiveCommands: options.isProphecy ? null
-            : this.getReceiveCommands(options.receiveCommands),
-      });
+      options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
+      options.receiveCommands = options.isProphecy ? null
+          : this.getReceiveCommands(options.receiveCommands);
+      return this._upstreamConnection.chronicleEvents(events, options);
     } catch (error) {
       throw this.wrapErrorEvent(error, `chronicleEvents(${events.length} events: [${
               events[0].eventId}, ${events[events.length - 1].eventId}])`,

@@ -132,54 +132,51 @@ async function _waitForRemoteNarration (connection: ScribePartitionConnection,
  #####   #    #  #    #   ####   #    #     #     ####   ######  ######
 */
 
-class ScribeEventResult extends ChronicleEventResult {
-  getPersistedEvent (): Truth { return this.getLocalEvent(); }
-}
-
-class ScribeTruthResult extends ScribeEventResult {
-  getTruthEvent (): Truth { return this.event; }
-}
-
 export function _chronicleEvents (connection: ScribePartitionConnection,
     events: EventBase[], options: ChronicleOptions = {}, onError: Function,
 ): ChronicleRequest {
   if (!events || !events.length) return { eventResults: events };
-  if (options.isTruth === true) {
-    let receivedTruthsProcess = thenChainEagerly(
-        connection.getReceiveTruths(options.receiveTruths)(
-        // pre-authorized medias must be preCached, throw on any retrieveMediaBuffer calls.
-            events, options.retrieveMediaBuffer || _throwOnMediaRequest.bind(null, connection)),
-        (receivedTruths) => (receivedTruthsProcess = receivedTruths));
-    return {
-      eventResults: events.map((event, index) => new ScribeTruthResult(event, {
-        getLocalEvent: () => thenChainEagerly(receivedTruthsProcess,
-            receivedTruths => receivedTruths[index],
-            onError),
-      })),
-    };
+  const resultBase = new ScribeEventResult(null, { events, onError });
+  resultBase.receivedEventsProcess = thenChainEagerly(
+      options.isTruth
+          ? connection.getReceiveTruths(options.receiveTruths)(
+            // pre-authorized medias must be preCached, throw on any retrieveMediaBuffer calls.
+              events, options.retrieveMediaBuffer || _throwOnMediaRequest.bind(null, connection))
+          : connection.getReceiveCommands(options.receiveCommands)(
+              events, options.retrieveMediaBuffer),
+      receivedEvents => (resultBase.receivedEventsProcess = receivedEvents),
+      onError);
+  if (options.isTruth) {
+    resultBase.getTruthEvent = function getTruthEvent () { return this.event; };
+  } else {
+    options.receiveTruths = connection.getReceiveTruths(options.receiveTruths);
+    options.receiveCommands = null;
+    resultBase.chroniclingProcess = thenChainEagerly(
+        resultBase.receivedEventsProcess,
+        (receivedEvents) => (resultBase.chroniclingProcess = connection.getUpstreamConnection()
+            .chronicleEvents(receivedEvents.filter(notNull => notNull), options)),
+        onError);
   }
-  let receivedCommandsProcess = thenChainEagerly(
-      connection.getReceiveCommands(options.receiveCommands)(
-          events, options.retrieveMediaBuffer),
-      (receivedCommands) => (receivedCommandsProcess = receivedCommands),
-      onError);
-  options.receiveTruths = connection.getReceiveTruths(options.receiveTruths);
-  options.receiveCommands = null;
-  let chroniclingProcess = thenChainEagerly(receivedCommandsProcess,
-      (receivedEvents) => (chroniclingProcess = connection.getUpstreamConnection()
-          .chronicleEvents(receivedEvents.filter(notNull => notNull), options)),
-      onError);
   return {
-    eventResults: events.map((event, index) => new ScribeEventResult(event, {
-      getLocalEvent: () => thenChainEagerly(receivedCommandsProcess,
-          (receivedCommands) => receivedCommands[index],
-          onError),
-      getTruthEvent: () => thenChainEagerly(chroniclingProcess,
-          ({ eventResults }) => eventResults[index - (events.length - eventResults.length)]
-              .getTruthEvent(),
-          onError),
-    })),
+    eventResults: events.map((event, index) => {
+      const ret = Object.create(resultBase); ret.event = event; ret.index = index; return ret;
+    }),
   };
+}
+
+class ScribeEventResult extends ChronicleEventResult {
+  getPersistedEvent (): Truth { return this.getLocalEvent(); }
+  getLocalEvent (): EventBase {
+    return thenChainEagerly(this.receivedEventsProcess,
+        receivedEvents => receivedEvents[this.index],
+        this.onError);
+  }
+  getTruthEvent (): EventBase {
+    return thenChainEagerly(this.chroniclingProcess,
+        ({ eventResults }) => eventResults[this.index - (this.events.length - eventResults.length)]
+            .getTruthEvent(),
+        this.onError);
+  }
 }
 
 /*

@@ -36,16 +36,15 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
       throw new Error(`${this.constructor.name
           }.chronicleEvents not implemented by remote authority partition "${this.getName()}"`);
     }
-    const isPrimary = this.isPrimaryAuthority();
-    const receivedTruthsProcess = !isPrimary ? []
-        : this.getReceiveTruths(options.receiveTruths)(events);
+    const resultBase = new AuthorityEventResult(null, {
+      isPrimary: this.isPrimaryAuthority(),
+      receivedTruthsProcess: !this.isPrimaryAuthority() ? []
+          : this.getReceiveTruths(options.receiveTruths)(events),
+    });
     return {
-      eventResults: events.map((event, index) => (new ChronicleEventResult(event, {
-        getLocalEvent: () => thenChainEagerly(
-            receivedTruthsProcess,
-            (receivedTruths) => receivedTruths[index]),
-        getTruthEvent () { return isPrimary ? this.getLocalEvent() : undefined; },
-      }))),
+      eventResults: events.map((event, index) => {
+        const ret = Object.create(resultBase); ret.event = event; ret.index = index; return ret;
+      }),
     };
   }
 
@@ -69,5 +68,15 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
       persistProcess = Promise.reject(this.wrapErrorEvent(error, new Error("prepareBvob")));
     }
     return { contentId: mediaInfo.bvobId, persistProcess };
+  }
+}
+
+export class AuthorityEventResult extends ChronicleEventResult {
+  getLocalEvent () {
+    return thenChainEagerly(this.receivedTruthsProcess,
+        (receivedTruths) => receivedTruths[this.index]);
+  }
+  getTruthEvent () {
+    return this.isPrimary ? this.getLocalEvent() : undefined;
   }
 }

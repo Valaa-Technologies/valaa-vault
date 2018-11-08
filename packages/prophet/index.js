@@ -25,6 +25,6 @@ export { default as DecoderArray } from "./Oracle/DecoderArray";
 export { default as Scribe } from "./Scribe";
 
 export { default as AuthorityProphet } from "./AuthorityProphet";
-export { default as AuthorityPartitionConnection }
+export { default as AuthorityPartitionConnection, AuthorityEventResult }
     from "./AuthorityProphet/AuthorityPartitionConnection";
 export { default as AuthorityNexus } from "./AuthorityProphet/AuthorityNexus";

@@ -7,8 +7,8 @@ import { NarrateOptions, ChronicleOptions, ChronicleRequest } from "~/prophet/ap
 
 import { dumpObject } from "~/tools";
 
-import { Prophecy, _revisePurgedProphecy } from "./_chronicleProphecyOps";
-import { _confirmCommands, _purgeDispatchAndReviseEvents } from "./_storyQueueOps";
+import { Prophecy, _revisePurgedProphecy } from "./_prophecyOps";
+import { _confirmCommands, _purgeDispatchAndReviseEvents } from "./_storyOps";
 
 /**
  * @export

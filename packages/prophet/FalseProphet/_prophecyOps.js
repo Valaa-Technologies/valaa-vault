@@ -13,7 +13,7 @@ import { dumpObject, outputError, thenChainEagerly, mapEagerly } from "~/tools";
 import { trivialCloneWith } from "~/tools/trivialClone";
 
 import FalseProphet from "./FalseProphet";
-import { _rejectLastProphecyAsHeresy } from "./_storyQueueOps";
+import { _rejectLastProphecyAsHeresy } from "./_storyOps";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
 export type Prophecy = Story & {
@@ -30,9 +30,9 @@ const ProphecyOperationTag = Symbol("Prophecy Operation");
 // and rolls back previous ones.
 export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[],
     { timed, transactionInfo, ...rest } = {}): ProphecyChronicleRequest {
-  const prophecies = events.map(event => falseProphet._dispatchEventForStory(
+  const prophecies = events.map(event => falseProphet._fabricateStoryFromEvent(
       universalizeEvent(falseProphet, event), "chronicleProphecy", timed, transactionInfo));
-  const reactions = falseProphet._reciteStoriesToFollowers(prophecies);
+  const reactions = falseProphet._tellStoriesToFollowers(prophecies);
 
   return {
     eventResults: prophecies.map((prophecy, index) => {

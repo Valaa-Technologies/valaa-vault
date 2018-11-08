@@ -13,10 +13,10 @@ import { dumpObject } from "~/tools";
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
-import { _chronicleEvents } from "./_chronicleProphecyOps";
+import { _chronicleEvents } from "./_prophecyOps";
 import {
-  _createStoryQueue, _dispatchEventForStory, _reciteStoriesToFollowers,
-} from "./_storyQueueOps";
+  _createStoryTelling, _fabricateStoryFromEvent, _tellStoriesToFollowers,
+} from "./_storyOps";
 
 /**
  * FalseProphet is non-authoritative denormalized in-memory store of
@@ -43,7 +43,7 @@ export default class FalseProphet extends Prophet {
 
   _totalCommandCount: number;
 
-  _storyQueue: Story;
+  _storyTelling: Story;
 
   constructor ({ schema, corpus, upstream, commandCountCallback, ...rest }: Object) {
     super(rest);
@@ -51,7 +51,7 @@ export default class FalseProphet extends Prophet {
     this.schema = schema || corpus.getSchema();
 
     // Story queue is a sentinel-based linked list with a separate lookup structure.
-    this._storyQueue = _createStoryQueue();
+    this._storyTelling = _createStoryTelling();
     this._commandCountCallback = commandCountCallback;
     this._partitionCommandCounts = {};
     this._totalCommandCount = 0;
@@ -103,22 +103,22 @@ export default class FalseProphet extends Prophet {
    * @param  {type} event     an command to go upstream
    * @returns {type}          description
    */
-  _dispatchEventForStory (event: EventBase, dispatchDescription: string, timed: ?EventBase,
+  _fabricateStoryFromEvent (event: EventBase, dispatchDescription: string, timed: ?EventBase,
       transactionInfo?: TransactionInfo) {
     try {
-      return _dispatchEventForStory(this, event, dispatchDescription, timed, transactionInfo);
+      return _fabricateStoryFromEvent(this, event, dispatchDescription, timed, transactionInfo);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_dispatchEventForStory(${dispatchDescription})`,
+      throw this.wrapErrorEvent(error, `_fabricateStoryFromEvent(${dispatchDescription})`,
           "\n\tevent:", ...dumpObject(event),
           "\n\ttimed:", ...dumpObject(timed));
     }
   }
 
-  _reciteStoriesToFollowers (stories: Story[]) {
+  _tellStoriesToFollowers (stories: Story[]) {
     try {
-      return _reciteStoriesToFollowers(this, stories);
+      return _tellStoriesToFollowers(this, stories);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`_reciteStoriesToFollowers()`),
+      throw this.wrapErrorEvent(error, new Error(`_tellStoriesToFollowers()`),
           "\n\tstories:", ...dumpObject(stories));
     }
   }
@@ -135,6 +135,6 @@ export default class FalseProphet extends Prophet {
   }
 
   _dumpStatus () {
-    return this._storyQueue.dumpStatus();
+    return this._storyTelling.dumpStatus();
   }
 }

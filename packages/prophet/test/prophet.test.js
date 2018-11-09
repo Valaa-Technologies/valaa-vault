@@ -139,14 +139,16 @@ describe("Prophet", () => {
     expect(connection.getFirstUnusedCommandEventId()).toEqual(commandEventIdEnd);
   }
 
-  it("confirms remote partition commands as truths only when explicitly confirmed", async () => {
+  it("confirms remote partition commands as truths", async () => {
     const { scribeConnection, authorityConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
     let totalCommandCount;
     harness.prophet.setCommandCountCallback((total) => { totalCommandCount = total; });
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
+
     const result = harness.chronicleEvent(simpleCommand);
+
     expect(result.getCommandOf(testPartitionURI).eventId).toEqual(1);
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
@@ -154,7 +156,9 @@ describe("Prophet", () => {
     await result.getPersistedEvent();
     expect(authorityConnection._upstreamEntries.length).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
+
     const results = harness.chronicleEvents(coupleCommands).eventResults;
+
     expect(results[0].getCommandOf(testPartitionURI).eventId).toEqual(2);
     expect(results[1].getCommandOf(testPartitionURI).eventId).toEqual(3);
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
@@ -164,17 +168,17 @@ describe("Prophet", () => {
     expect(authorityConnection._upstreamEntries.length).toEqual(3);
 
     const twoEntries = authorityConnection._upstreamEntries.splice(0, 2);
-    const twoConfirmedTruths = JSON.parse(JSON.stringify(twoEntries.map(entry => entry.event)));
+    const twoTruthEvents = JSON.parse(JSON.stringify(twoEntries.map(entry => entry.event)));
     twoEntries[0].resolveTruthEvent();
     twoEntries[1].resolveTruthEvent();
-    await authorityConnection.getReceiveTruths()(twoConfirmedTruths);
+    await authorityConnection.getReceiveTruths()(twoTruthEvents);
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 3, 4);
 
     const lastEntry = authorityConnection._upstreamEntries.splice(0, 1);
-    const lastConfirmedTruths = JSON.parse(JSON.stringify(lastEntry.map(entry => entry.event)));
+    const lastTruthEvents = JSON.parse(JSON.stringify(lastEntry.map(entry => entry.event)));
     lastEntry[0].resolveTruthEvent();
-    await authorityConnection.getReceiveTruths()(lastConfirmedTruths);
+    await authorityConnection.getReceiveTruths()(lastTruthEvents);
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
   });
@@ -206,7 +210,7 @@ describe("Prophet", () => {
   });
 
 
-  it("resolves prophecy getTruthEvent only when its commands are properly confirmed", async () => {
+  it("resolves getTruthEvent when its commands are confirmed by either pull or push", async () => {
     const { scribeConnection, authorityConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
@@ -216,12 +220,9 @@ describe("Prophet", () => {
     let truthEvent;
     const truthProcess = result.getTruthEvent().then(truthEvent_ => (truthEvent = truthEvent_));
 
-    expect(result.getCommandOf(testPartitionURI).eventId).toEqual(1);
-    expectConnectionEventIds(scribeConnection, 0, 1, 2);
     await result.getPersistedEvent();
 
     expect(truthEvent).toEqual(undefined);
-    expectConnectionEventIds(scribeConnection, 0, 1, 2);
 
     const results = harness.chronicleEvents(coupleCommands).eventResults;
 
@@ -229,9 +230,6 @@ describe("Prophet", () => {
     const truthProcesses = results.map((result_, index) => result_.getTruthEvent()
         .then(truthEvent_ => (truthEvents[index] = truthEvent_)));
 
-    expect(results[0].getCommandOf(testPartitionURI).eventId).toEqual(2);
-    expect(results[1].getCommandOf(testPartitionURI).eventId).toEqual(3);
-    expectConnectionEventIds(scribeConnection, 0, 1, 4);
     await results[1].getPersistedEvent();
 
     expect(truthEvent).toEqual(undefined);
@@ -241,20 +239,23 @@ describe("Prophet", () => {
 
 
     const twoEntries = authorityConnection._upstreamEntries.splice(0, 2);
-    const twoConfirmedTruths = JSON.parse(JSON.stringify(twoEntries.map(entry => entry.event)));
-    twoEntries[0].resolveTruthEvent(twoConfirmedTruths[0]);
-    twoEntries[1].resolveTruthEvent(twoConfirmedTruths[1]);
-    await authorityConnection.getReceiveTruths()(twoConfirmedTruths);
-    expectConnectionEventIds(scribeConnection, 0, 3, 4);
-
+    const twoTruthEvents = JSON.parse(JSON.stringify(twoEntries.map(entry => entry.event)));
+    // resolve prophecy getTruthEvent via pull
+    twoEntries[0].resolveTruthEvent(twoTruthEvents[0]);
+    twoEntries[1].resolveTruthEvent(twoTruthEvents[1]);
     expect(await truthProcess).toMatchObject(simpleCommand);
     expect(await truthProcesses[0]).toMatchObject(coupleCommands[0]);
     expect(truthEvents.length).toEqual(1);
+    // pull doesn't store anything to scribe, let push take care of that (really??)
+    expectConnectionEventIds(scribeConnection, 0, 1, 4);
+    await authorityConnection.getReceiveTruths()(twoTruthEvents);
+    expectConnectionEventIds(scribeConnection, 0, 3, 4);
 
     const lastEntry = authorityConnection._upstreamEntries.splice(0, 1);
-    const lastConfirmedTruths = JSON.parse(JSON.stringify(lastEntry.map(entry => entry.event)));
-    lastEntry[0].resolveTruthEvent(coupleCommands[1]);
-    await authorityConnection.getReceiveTruths()(lastConfirmedTruths);
+    const lastTruthEvents = JSON.parse(JSON.stringify(lastEntry.map(entry => entry.event)));
+    // skip resolveTruthEvent - rely on downstream push via getReceiveTruths
+    // lastEntry[0].resolveTruthEvent(coupleCommands[1]);
+    await authorityConnection.getReceiveTruths()(lastTruthEvents);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
 
     expect(await truthProcesses[1]).toMatchObject(coupleCommands[1]);

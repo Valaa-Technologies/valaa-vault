@@ -10,7 +10,7 @@ import { dumpObject, outputError } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
-import { Prophecy } from "./_prophecyOps";
+import { Prophecy, _confirmProphecyCommand } from "./_prophecyOps";
 
 export function _createStoryTelling (chain: ?Object) {
   // The telling is an intrusive linked ring structure with sentinel as
@@ -112,11 +112,16 @@ export function _confirmCommands (connection: FalseProphetPartitionConnection,
     confirmedCommands: Command[]) {
   const falseProphet = connection.getProphet();
   for (const command of confirmedCommands) {
-    const commandStory = falseProphet._storyTelling.getStoryBy(command.commandId);
-    if (commandStory) {
-      if (Object.keys(commandStory.partitions).length === 1) {
-        commandStory.isTruth = true;
-      }
+    const story = falseProphet._storyTelling.getStoryBy(command.commandId);
+    if (story) {
+      if (story.partitions && !_confirmProphecyCommand(connection, story, command)) continue;
+      story.isTruth = true;
+    } else {
+      connection.warnEvent(`_confirmCommands encountered a command with id '${command.commandId
+          }' with no corresponding story, with:`,
+          "\n\tcommand:", ...dumpObject(command),
+          "\n\tconfirmedCommands:", ...dumpObject(confirmedCommands),
+          "\n\tstoryTelling:", ...dumpObject(falseProphet._storyTelling));
     }
   }
 }
@@ -142,17 +147,20 @@ export function _purgeDispatchAndReviseEvents (connection: FalseProphetPartition
   // the state, but as per partition semantics they are allowed to be
   // reordered to happen later.
   // Add the truth to the end of current pending prophecies.
+  const newStories = [];
   if (newEvents) {
-    const newStories = newEvents.map(event => falseProphet._fabricateStoryFromEvent(event, type));
-    falseProphet._tellStoriesToFollowers(newStories);
+    for (const event of newEvents) {
+      newStories.push(falseProphet._fabricateStoryFromEvent(event, type));
+    }
   }
 
   // Revise purged events.
   if (purgedProphecyChain) {
     const { refreshedStories, partitions, conflictedTelling } =
         _dispatchAndRevisePurgedStories(connection, purgedProphecyChain);
-    falseProphet._tellStoriesToFollowers(refreshedStories);
+    newStories.push(...refreshedStories);
   }
+  falseProphet._tellStoriesToFollowers(newStories);
 
   _affirmLeadingTruthsToFollowers(falseProphet);
 

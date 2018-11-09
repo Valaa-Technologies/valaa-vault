@@ -1,15 +1,16 @@
 // @flow
 
 import { getActionFromPassage } from "~/raem";
-import { EventBase } from "~/raem/command";
+import { Command, EventBase } from "~/raem/command";
 import type { Story } from "~/raem/redux/Bard";
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
 import ValaaURI, { createPartitionURI } from "~/raem/ValaaURI";
 
-import { ProphecyChronicleRequest, ProphecyEventResult } from "~/prophet/api/types";
+import { ChronicleEventResult, PartitionConnection, ProphecyChronicleRequest, ProphecyEventResult }
+    from "~/prophet/api/types";
 import extractEventOfPartition from "~/prophet/tools/extractEventOfPartition";
 
-import { dumpObject, outputError, thenChainEagerly, mapEagerly } from "~/tools";
+import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
 import { trivialCloneWith } from "~/tools/trivialClone";
 
 import FalseProphet from "./FalseProphet";
@@ -21,8 +22,6 @@ export type Prophecy = Story & {
   isProphecy: true;
 }
 
-class FalseProphetEventResult extends ProphecyEventResult {}
-
 const ProphecyOperationTag = Symbol("Prophecy Operation");
 
 // Create prophecies out of provided events and send their partition
@@ -30,78 +29,38 @@ const ProphecyOperationTag = Symbol("Prophecy Operation");
 // and rolls back previous ones.
 export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[],
     { timed, transactionInfo, ...rest } = {}): ProphecyChronicleRequest {
+  if (timed) throw new Error("timed events not supported yet");
   const prophecies = events.map(event => falseProphet._fabricateStoryFromEvent(
       universalizeEvent(falseProphet, event), "chronicleProphecy", timed, transactionInfo));
-  const reactions = falseProphet._tellStoriesToFollowers(prophecies);
+  const resultBase = new ProphecyOperation(null, {
+    _prophet: falseProphet, _events: events, _options: rest,
+    _reactions: falseProphet._tellStoriesToFollowers(prophecies),
+  });
+  resultBase._options.isProphecy = true;
 
   return {
-    eventResults: prophecies.map((prophecy, index) => {
-      let getCommandOf;
-      const operation = prophecy[ProphecyOperationTag] = { prophecy, options: rest };
-      operation.options.isProphecy = true;
-      if (!timed) {
-        try {
-          _prepareStagesAndCommands(falseProphet, operation);
-          _initiateConnectionValidations(falseProphet, operation);
-          _fulfillProphecy(falseProphet, operation);
-          getCommandOf = (partitionURI) => operation.partitionCommands[String(partitionURI)];
-        } catch (error) {
-          try {
-            _rejectLastProphecyAsHeresy(falseProphet, prophecy);
-          } catch (innerError) {
-            outputError(innerError, `Caught an exception in the exception handler of${
-                ""} chronicleEvents; the resulting purge threw exception of its own:`);
-          }
-          errorOnChronicleEvents(
-              new Error(`chronicleEvents.eventResults[${index}].preparation`), error);
-        }
-      }
-      let result;
-      try {
-        result = new FalseProphetEventResult(prophecy, {
-          ...reactions[index],
-          getCommandOf,
-          getPersistedEvent: () => thenChainEagerly(
-              mapEagerly(operation.chroniclings, (chronicling) => chronicling.getPersistedEvent()),
-              () => operation.prophecy,
-              errorOnChronicleEvents.bind(null,
-                  new Error(`chronicleEvents.eventResults[${index}].getPersistedStory()`))),
-          getTruthStory: () => thenChainEagerly(
-              operation.fulfillment,
-              () => operation.prophecy,
-              errorOnChronicleEvents.bind(null,
-                  new Error(`chronicleEvents.eventResults[${index}].getTruthStory()`))),
-          getPremiereStory: () => thenChainEagerly(
-              // Returns a promise which will resolve to the content
-              // received from the backend but only after all the local
-              // follower reactions have been resolved as well.
-              // TODO(iridian): Exceptions from follower reactions can't
-              // reject the prophecy, but we should catch, handle and/or
-              // expose them to the prophecy chronicleEvents originator.
-              result.getFollowerReactions(),
-              // TODO(iridian): Exceptions from upstream signal failure
-              // and possible heresy: we should catch and have logic for
-              // either retrying the operation or for full rejection.
-              // Nevertheless flushing the corpus is needed.
-              () => result.getPersistedEvent(),
-              errorOnChronicleEvents.bind(null,
-                  new Error(`chronicleEvents.eventResults[${index}].getPremiereStory()`))),
-        });
-      } catch (error) {
-        errorOnChronicleEvents(
-            new Error(`chronicleEvents.eventResults[${index}].revealToFollowers()`), error);
-      }
-      return result;
-      function errorOnChronicleEvents (errorWrap, error) {
-        throw falseProphet.wrapErrorEvent(error, errorWrap,
-            "\n\tevents:", ...dumpObject(events),
-            "\n\tevent:", ...dumpObject(events[index]),
-            "\n\tprophecy:", ...dumpObject(prophecy),
-            "\n\tresult:", ...dumpObject(result),
-        );
-      }
-    }),
+    eventResults: prophecies.map(
+        (prophecy, index) => Object.create(resultBase)._execute(prophecy, index)),
   };
+}
+
+export function universalizeEvent (falseProphet: FalseProphet, event: EventBase): EventBase {
+  return trivialCloneWith(event,
+      entry => (entry instanceof ValaaURI ? entry : undefined));
+}
+
+export function _confirmProphecyCommand (connection: FalseProphetPartitionConnection,
+    prophecy: Prophecy, command: Command) {
+  const operation = prophecy[ProphecyOperationTag];
+  if (operation) {
+    const partition = operation._partitions[String(connection.getPartitionURI())];
+    if (!partition || !partition.confirmCommand) return false;
+    partition.confirmCommand(command);
+  } else {
+    prophecy.confirmedCommandCount = (prophecy.confirmedCommandCount || 0) + 1;
+    if (prophecy.confirmedCommandCount < Object.keys(prophecy.partitions).length) return false;
+  }
+  return true;
 }
 
 export function _revisePurgedProphecy (connection: FalseProphetPartitionConnection,
@@ -129,122 +88,218 @@ function _checkForSoftConflict (/* purgedProphecy: Prophecy, revisedProphecy: Pr
   return undefined;
 }
 
-export function universalizeEvent (falseProphet: FalseProphet, event: EventBase): EventBase {
-  return trivialCloneWith(event,
-      entry => (entry instanceof ValaaURI ? entry : undefined));
-}
+class ProphecyOperation extends ProphecyEventResult {
+  _prophecy: Prophecy;
+  _prophet: FalseProphet;
+  _events: EventBase[];
+  _options: Object; // partition command chronicleEvents options
+  _partitions: { [partitionURI: string]: {
+    connection: PartitionConnection,
+    commandEvent: Command,
+    chronicling: ChronicleEventResult,
+    confirmCommand?: Function,
+    purgeCommand?: Function,
+  } };
+  _activePartitions: Object[];
+  _stages: Object;
+  _fulfillment: Promise<Object>;
 
-function _prepareStagesAndCommands (falseProphet: FalseProphet, operation: Object) {
-  operation.partitionCommands = {};
-  operation.stages = [];
-  const missingConnections = [];
-  if (!operation.prophecy.partitions) {
-    throw new Error("prophecy is missing partition information");
+  getCommandOf (partitionURI) {
+    return this._partitions[partitionURI].commandEvent;
   }
-  const remotes = [];
-  const locals = [];
-  const memorys = [];
-  Object.keys(operation.prophecy.partitions).forEach((partitionURIString) => {
-    const connection = falseProphet._connections[partitionURIString];
-    if (!connection) {
-      missingConnections.push(createPartitionURI(partitionURIString));
-      return;
-    }
-    const commandEvent = extractEventOfPartition(
-        getActionFromPassage(operation.prophecy), connection);
-    operation.partitionCommands[partitionURIString] = commandEvent;
-    (connection.isRemoteAuthority() ? remotes
-        : connection.isLocallyPersisted() ? locals
-        : memorys
-    ).push({ connection, commandEvent });
-  });
-  if (remotes.length) operation.stages.push({ name: "remotes", partitions: remotes });
-  if (locals.length) operation.stages.push({ name: "locals", partitions: locals });
-  if (memorys.length) operation.stages.push({ name: "memory", partitions: memorys });
-  if (missingConnections.length) {
-    throw new MissingPartitionConnectionsError(`Missing active partition connections: '${
-        missingConnections.map(c => c.toString()).join("', '")}'`, missingConnections);
-  }
-}
 
-function _initiateConnectionValidations (falseProphet: FalseProphet, operation: Object) {
-  operation.stages.forEach(stage => stage.partitions.forEach(partition => {
-    partition.validatedConnection = thenChainEagerly(partition.connection.getSyncedConnection(),
-      (connection) => {
-        if (connection.isFrozenConnection()) {
-          throw new Error(`Trying to chronicle events to a frozen partition ${
-              connection.getName()}`);
-        }
-        // Perform other partition validation
-        // TODO(iridian): extract partition content
-        partition.validatedConnection = connection;
-      },
+  getPersistedEvent () {
+    return thenChainEagerly(
+        mapEagerly(this._activePartitions, ({ chronicling }) => chronicling.getPersistedEvent()),
+        () => this._prophecy,
+        this.errorOnProphecyOperation.bind(null,
+            new Error(`chronicleEvents.eventResults[${this.index}].getPersistedStory()`)));
+  }
+
+  getTruthStory () {
+    return thenChainEagerly(
+        this._fulfillment,
+        () => this._prophecy,
+        this.errorOnProphecyOperation.bind(null,
+            new Error(`chronicleEvents.eventResults[${this.index}].getTruthStory()`)));
+  }
+
+  getPremiereStory () {
+    return thenChainEagerly(
+    // Returns a promise which will resolve to the content
+    // received from the backend but only after all the local
+    // follower reactions have been resolved as well.
+    // TODO(iridian): Exceptions from follower reactions can't
+    // reject the prophecy, but we should catch, handle and/or
+    // expose them to the prophecy chronicleEvents originator.
+        this.getFollowerReactions(),
+    // TODO(iridian): Exceptions from upstream signal failure
+    // and possible heresy: we should catch and have logic for
+    // either retrying the operation or for full rejection.
+    // Nevertheless flushing the corpus is needed.
+        () => this.getPersistedEvent(),
+        this.errorOnProphecyOperation.bind(null,
+            new Error(`chronicleEvents.eventResults[${this.index}].getPremiereStory()`)));
+  }
+
+  errorOnProphecyOperation (errorWrap, error) {
+    throw this._prophet.wrapErrorEvent(error, errorWrap,
+        "\n\tevents:", ...dumpObject(this._events),
+        "\n\tevent:", ...dumpObject(this._events[this.index]),
+        "\n\tprophecy:", ...dumpObject(this.event),
+        "\n\toperation:", ...dumpObject(this),
     );
-  }));
-}
+  }
 
-function _fulfillProphecy (falseProphet: FalseProphet, operation: Object) {
-  return (operation.fulfillment = mapEagerly(operation.stages,
-      stage => _fulfillStage(falseProphet, operation, stage),
-      (error, stage) => {
-        throw falseProphet.wrapErrorEvent(error,
-          new Error(`chronicleEvents._fulfillStage(${stage.name})`),
-          "\n\toperation:", ...dumpObject(operation),
-          "\n\tstage.partitions:", ...dumpObject(stage.partitions),
-          "\n\tthis:", falseProphet);
-      }));
-}
-
-function _fulfillStage (falseProphet: FalseProphet, operation: Object, stage: Object) {
-  return thenChainEagerly(stage, [
-    () => mapEagerly(stage.partitions,
-        partition => partition.validatedConnection,
-        (error, partition) => {
-          throw falseProphet.wrapErrorEvent(error,
-              new Error(`chronicleEvents.stage["${stage.name}"].connection["${
-                  partition.connection.getName()}"].validate`));
-        }),
-    () => {
-      // Persist the prophecy and add refs to all associated event bvobs.
-      // This is necessary for prophecy reattempts so that the bvobs aren't
-      // garbage collected on browser refresh. Otherwise they can't be
-      // reuploaded if their upload didn't finish before refresh.
-      // TODO(iridian): Implement.
-
-      // Wait for remote bvob persists to complete.
-      // TODO(iridian): Implement.
-      // await Promise.all(operation.authorityPersistProcesses);
-
-      // Maybe determine eventId's beforehand?
-
-      // Get eventId and scribe persist finalizer for each partition
-      operation.chroniclings = [];
-      for (const { connection, commandEvent } of stage.partitions) {
-        let chronicling;
-        try {
-          chronicling = connection.chronicleEvent(commandEvent, Object.create(operation.options));
-          operation.chroniclings.push(chronicling);
-        } catch (error) {
-          throw falseProphet.wrapErrorEvent(error,
-              new Error(`chronicleEvents.stage["${stage.name}"].connection["${
-                  connection.getName()}"].chronicleEvents`),
-              "\n\tcommandEvent:", ...dumpObject(commandEvent),
-              "\n\tevent chronicling:", ...dumpObject(chronicling),
-          );
-        }
+  _execute (prophecy: Prophecy, index: number) {
+    this.event = getActionFromPassage(prophecy);
+    this.index = index;
+    this._prophecy = prophecy;
+    prophecy[ProphecyOperationTag] = this;
+    Object.assign(this, this._reactions[index]);
+    try {
+      this._prepareStagesAndCommands();
+      this._initiateConnectionValidations();
+      this._fulfillProphecy();
+    } catch (error) {
+      try {
+        _rejectLastProphecyAsHeresy(this._prophet, prophecy);
+      } catch (innerError) {
+        outputError(innerError, `Caught an exception in the exception handler of${
+            ""} chronicleEvents; the resulting purge threw exception of its own:`);
       }
-      return mapEagerly(operation.chroniclings,
-          chronicling => chronicling.getTruthEvent(),
-          (error, chronicling, index) => {
-            throw falseProphet.wrapErrorEvent(error,
-                new Error(`chronicleEvents.stage["${stage.name}"].chroniclings[${index}](${
-                      chronicling && chronicling.event.eventId}).getTruthEvent()"`),
-                "\n\tchroniclings:", ...dumpObject(operation.chroniclings));
+      this.errorOnProphecyOperation(
+          new Error(`chronicleEvents.eventResults[${index}].preparation`), error);
+    }
+    return this;
+  }
+
+  _prepareStagesAndCommands () {
+    this._partitions = {};
+    this._stages = [];
+    const missingConnections = [];
+    if (!this._prophecy.partitions) {
+      throw new Error("prophecy is missing partition information");
+    }
+    const remotes = [];
+    const locals = [];
+    const memorys = [];
+    Object.keys(this._prophecy.partitions).forEach((partitionURIString) => {
+      const connection = this._prophet._connections[partitionURIString];
+      if (!connection) {
+        missingConnections.push(createPartitionURI(partitionURIString));
+        return;
+      }
+      (connection.isRemoteAuthority() ? remotes
+          : connection.isLocallyPersisted() ? locals
+          : memorys
+      ).push((this._partitions[partitionURIString] = {
+        connection,
+        commandEvent: extractEventOfPartition(getActionFromPassage(this._prophecy), connection),
+      }));
+    });
+    if (remotes.length) this._stages.push({ name: "remotes", partitions: remotes });
+    if (locals.length) this._stages.push({ name: "locals", partitions: locals });
+    if (memorys.length) this._stages.push({ name: "memory", partitions: memorys });
+    if (missingConnections.length) {
+      throw new MissingPartitionConnectionsError(`Missing active partition connections: '${
+          missingConnections.map(c => c.toString()).join("', '")}'`, missingConnections);
+    }
+  }
+
+  _initiateConnectionValidations () {
+    this._stages.forEach(stage => stage.partitions.forEach(partition => {
+      partition.validatedConnection = thenChainEagerly(partition.connection.getSyncedConnection(),
+        (connection) => {
+          if (connection.isFrozenConnection()) {
+            throw new Error(`Trying to chronicle events to a frozen partition ${
+                connection.getName()}`);
           }
+          // Perform other partition validation
+          // TODO(iridian): extract partition content
+          partition.validatedConnection = connection;
+        },
       );
-    },
-  ], (error, index) => {
-    throw falseProphet.wrapErrorEvent(error,
-        new Error(`chronicleEvents.stage["${stage.name}"].step#${index}`));
-  });
+    }));
+  }
+
+  _fulfillProphecy () {
+    return (this._fulfillment = mapEagerly(this._stages,
+        stage => this._fulfillStage(stage),
+        (error, stage) => {
+          throw this._prophet.wrapErrorEvent(error,
+            new Error(`chronicleEvents._fulfillStage(${stage.name})`),
+            "\n\toperation:", ...dumpObject(this),
+            "\n\tstage.partitions:", ...dumpObject(stage.partitions));
+        }));
+  }
+
+  _fulfillStage (stage: Object) {
+    return thenChainEagerly(stage, [
+      () => mapEagerly(stage.partitions,
+          partition => partition.validatedConnection,
+          (error, partition) => {
+            throw this._prophet.wrapErrorEvent(error,
+                new Error(`chronicleEvents.stage["${stage.name}"].connection["${
+                    partition.connection.getName()}"].validate`));
+          }),
+      () => {
+        // Persist the prophecy and add refs to all associated event bvobs.
+        // This is necessary for prophecy reattempts so that the bvobs aren't
+        // garbage collected on browser refresh. Otherwise they can't be
+        // reuploaded if their upload didn't finish before refresh.
+        // TODO(iridian): Implement prophecy reattempts.
+        // TODO(iridian): Implement bvob refcounting once reattempts are implemented.
+
+        // Wait for remote bvob persists to complete.
+        // TODO(iridian): Implement.
+        // await Promise.all(this.authorityPersistProcesses);
+
+        // Maybe determine eventId's beforehand?
+
+        // Get eventId and scribe persist finalizer for each partition
+        this._activePartitions = [];
+        for (const partition of stage.partitions) {
+          try {
+            partition.chronicling = partition.connection.chronicleEvent(
+                partition.commandEvent, Object.create(this._options));
+            this._activePartitions.push(partition);
+          } catch (error) {
+            throw this._prophet.wrapErrorEvent(error,
+                new Error(`chronicleEvents.stage["${stage.name}"].connection["${
+                    partition.connection.getName()}"].chronicleEvents`),
+                "\n\tcommandEvent:", ...dumpObject(partition.commandEvent),
+                "\n\tchronicling:", ...dumpObject(partition.chronicling),
+            );
+          }
+        }
+        return mapEagerly(this._activePartitions,
+            partition => {
+              const maybeQuickTruth = partition.chronicling.getTruthEvent();
+              return !isPromise(maybeQuickTruth)
+                  ? maybeQuickTruth
+                  : Promise.race([maybeQuickTruth, new Promise((resolve, reject) => {
+                    partition.confirmCommand = resolve;
+                    partition.purgeCommand = reject;
+                  })]);
+            },
+            (error, { chronicling }, index) => {
+              throw this._prophet.wrapErrorEvent(error,
+                  new Error(`chronicleEvents.stage["${stage.name}"]._activePartitions[${index}](${
+                      chronicling && chronicling.event.eventId}).getTruthEvent()"`),
+                  "\n\tchroniclings:", ...dumpObject(this._activePartitions));
+            }
+        );
+      },
+      () => {
+        this._prophecy.isTruth = true;
+        return this._prophecy;
+      }
+    ], (error, index) => {
+      this._prophecy.isRejected = true;
+      this._prophecy = null;
+      throw this._prophet.wrapErrorEvent(error,
+          new Error(`chronicleEvents.stage["${stage.name}"].step#${index}`));
+    });
+  }
 }

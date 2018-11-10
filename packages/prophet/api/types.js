@@ -110,6 +110,10 @@ export class ProphecyEventResult extends ChronicleEventResult {
     return thenChainEagerly(this.getPremiereStory(), getActionFromPassage);
   }
 
+  getLocalEvent (): EventBase {
+    return thenChainEagerly(this.getLocalStory(), getActionFromPassage);
+  }
+
   // Get event after it has been persisted (possibly locally).
   getPersistedEvent (): EventBase | Promise<EventBase> {
     return thenChainEagerly(this.getPersistedStory(), getActionFromPassage);

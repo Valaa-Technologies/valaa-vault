@@ -9,11 +9,12 @@ import { Story } from "~/raem";
  * @export
  * @class StoryTelling
  */
-export class StoryTelling {
-  id = "sentinel";
+export default class StoryTelling {
+  id: string;
   _storyByCommandId = {};
 
-  constructor (storyChain: ?Story) {
+  constructor (storyChain: ?Story, id: string = "sentinel") {
+    this.id = id;
     this.next = this.prev = this;
     if (storyChain) this.insertStoryChain(storyChain);
   }
@@ -37,34 +38,38 @@ export class StoryTelling {
   removeStory (story: Story) { return this.extractStoryChain(story, story.next); }
 
   insertStoryChain (storyChain: Story, before: Story = this) {
-    before.prev.next = storyChain;
-    before.prev = storyChain.prev;
+    if (!storyChain.prev) throw new Error("storyChain.prev must be non-null");
+    const lastStory = storyChain.prev;
     storyChain.prev = before.prev;
-    storyChain.prev.next = before;
+    storyChain.prev.next = storyChain;
+    before.prev = lastStory;
+    before.prev.next = before;
     for (let story = storyChain; story !== before; story = story.next) {
       if (story.commandId) {
         this._storyByCommandId[story.commandId] = story;
       }
     }
   }
+
   // If no before is specified, extracts all stories to the end of the telling.
-  extractStoryChain (firstStory: Story, before: Story = this) {
-    if (firstStory === before) return undefined;
-    const lastStory = before.prev;
-    firstStory.prev.next = before;
-    before.prev = firstStory.prev;
+  extractStoryChain (firstStory: Story, allBefore: Story = this) {
+    if (firstStory.id === "sentinel") throw new Error("cannot extract sentinel");
+    if (firstStory === allBefore) return undefined;
+    const lastStory = allBefore.prev;
+    allBefore.prev = firstStory.prev;
+    allBefore.prev.next = allBefore;
     firstStory.prev = lastStory;
     lastStory.next = null;
     for (let story = firstStory; story; story = story.next) {
       if (story.commandId) delete this._storyByCommandId[story.commandId];
     }
-    return before;
+    return allBefore;
   }
 
   dumpStatus () {
     const ids = [];
     for (let c = this.next; c !== this; c = c.next) {
-      ids.push(c.id);
+      ids.push(c.id || c.commandId);
     }
     return [
       "\n\tpending:", Object.keys(this._storyByCommandId).length,

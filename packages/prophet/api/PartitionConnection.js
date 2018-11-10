@@ -10,7 +10,7 @@ import { ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleR
 import Follower from "~/prophet/api/Follower";
 
 import Logger from "~/tools/Logger";
-import { dumpObject, invariantifyObject, thenChainEagerly } from "~/tools";
+import { dumpObject, invariantifyArray, invariantifyObject, thenChainEagerly } from "~/tools";
 
 /**
  * Interface for sending commands to upstream and registering for downstream truth updates
@@ -67,13 +67,17 @@ export default class PartitionConnection extends Follower {
 
   getReceiveTruths (downstreamReceiveTruths?: ReceiveEvents = this._downstreamReceiveTruths):
       ReceiveEvents {
-    return (truths, retrieveMediaBuffer) =>
-        this.receiveTruths(truths, retrieveMediaBuffer, downstreamReceiveTruths);
+    return (truths, retrieveMediaBuffer) => {
+      invariantifyArray(truths, "receiveTruths.truths", { min: 1 });
+      return this.receiveTruths(truths, retrieveMediaBuffer, downstreamReceiveTruths);
+    };
   }
   getReceiveCommands (downstreamReceiveCommands?: ReceiveEvents = this._downstreamReceiveCommands):
       ReceiveEvents {
-    return (commands, retrieveMediaBuffer) =>
-        this.receiveCommands(commands, retrieveMediaBuffer, downstreamReceiveCommands);
+    return (commands, retrieveMediaBuffer) => {
+      invariantifyArray(commands, "receiveTruths.commands", { min: 1 });
+      return this.receiveCommands(commands, retrieveMediaBuffer, downstreamReceiveCommands);
+    }
   }
 
   isConnected () {

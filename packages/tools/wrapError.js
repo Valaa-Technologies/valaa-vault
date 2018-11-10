@@ -51,8 +51,8 @@ ${myTraceAndContext}`;
   ret.errorContexts = (error.errorContexts || []).concat([ret]);
 
   // FIXME (thiago) this breaks abstractions
-  ret.sourceStackFrames = errorIn.sourceStackFrames;
-  ret.customErrorHandler = errorIn.customErrorHandler;
+  ret.sourceStackFrames = errorIn && errorIn.sourceStackFrames;
+  ret.customErrorHandler = errorIn && errorIn.customErrorHandler;
   return ret;
 }
 

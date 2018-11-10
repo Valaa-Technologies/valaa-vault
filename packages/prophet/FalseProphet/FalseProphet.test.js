@@ -64,7 +64,7 @@ describe("FalseProphet", () => {
 
     const falseProphet = createFalseProphet({
       commandCountCallback, upstream: createTestMockProphet({
-        isLocallyPersisted: false, isPrimaryAuthority: false,
+        isLocallyPersisted: false, isRemoteAuthority: true,
       }),
     });
     const connection = await falseProphet
@@ -72,7 +72,7 @@ describe("FalseProphet", () => {
     expect(commandsCounted).toBe(0);
 
     // A transaction counts as one command
-    await falseProphet.chronicleEvent(createdTestPartitionEntity).getTruthStory();
+    await falseProphet.chronicleEvent(createdTestPartitionEntity).getPremiereStory();
     expect(commandsCounted).toBe(1);
 
     const results = connection.chronicleEvents(basicCommands, { isProphecy: true });

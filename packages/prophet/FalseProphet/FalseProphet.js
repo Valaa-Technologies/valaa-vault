@@ -13,10 +13,9 @@ import { dumpObject } from "~/tools";
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
-import { _chronicleEvents } from "./_prophecyOps";
-import {
-  StoryTelling, _fabricateStoryFromEvent, _tellStoriesToFollowers,
-} from "./_storyOps";
+import { Prophecy, _chronicleEvents, _rejectHereticProphecy } from "./_prophecyOps";
+import { _composeStoryFromEvent, _tellStoriesToFollowers } from "./_storyOps";
+import StoryTelling from "./StoryTelling";
 
 /**
  * FalseProphet is non-authoritative denormalized in-memory store of
@@ -51,7 +50,7 @@ export default class FalseProphet extends Prophet {
     this.schema = schema || corpus.getSchema();
 
     // Story queue is a sentinel-based linked list with a separate lookup structure.
-    this._storyTelling = new StoryTelling();
+    this._storyTelling = new StoryTelling(undefined, "main");
     this._commandCountCallback = commandCountCallback;
     this._partitionCommandCounts = {};
     this._totalCommandCount = 0;
@@ -103,12 +102,12 @@ export default class FalseProphet extends Prophet {
    * @param  {type} event     an command to go upstream
    * @returns {type}          description
    */
-  _fabricateStoryFromEvent (event: EventBase, dispatchDescription: string, timed: ?EventBase,
+  _composeStoryFromEvent (event: EventBase, dispatchDescription: string, timed: ?EventBase,
       transactionInfo?: TransactionInfo) {
     try {
-      return _fabricateStoryFromEvent(this, event, dispatchDescription, timed, transactionInfo);
+      return _composeStoryFromEvent(this, event, dispatchDescription, timed, transactionInfo);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_fabricateStoryFromEvent(${dispatchDescription})`,
+      throw this.wrapErrorEvent(error, `_composeStoryFromEvent(${dispatchDescription})`,
           "\n\tevent:", ...dumpObject(event),
           "\n\ttimed:", ...dumpObject(timed));
     }

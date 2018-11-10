@@ -79,7 +79,7 @@ export function mapEagerly (maybePromises: any[], callback: Function, onRejected
     let innerError = error;
     try {
       if (onRejected) {
-        return onRejected(error, maybePromises[currentIndex], currentIndex, maybePromises);
+        return onRejected(error, maybePromises[currentIndex], currentIndex, results, maybePromises);
       }
     } catch (onRejectedError) { innerError = onRejectedError; }
     throw wrapError(innerError, errorWrap,

@@ -81,7 +81,8 @@ async function _narrateLocalLogs (connection: ScribePartitionConnection,
           && await connection._readTruths({ eventIdBegin, eventIdEnd: truthEventIdEnd }))
       || [];
   const ret = {
-    scribeEventLog: await Promise.all(await receiveTruths(truths, retrieveMediaBuffer)),
+    scribeEventLog: !truths.length ? truths
+        : await Promise.all(await receiveTruths(truths, retrieveMediaBuffer)),
   };
   if (!receiveCommands) return ret;
 
@@ -90,7 +91,8 @@ async function _narrateLocalLogs (connection: ScribePartitionConnection,
       && await connection._readCommands({
         eventIdBegin: truthEventIdEnd, eventIdEnd: commandEventIdEnd,
       })) || [];
-  ret.scribeCommandQueue = await Promise.all(await receiveCommands(commands, retrieveMediaBuffer));
+  ret.scribeCommandQueue = !commands.length ? commands
+      : await Promise.all(await receiveCommands(commands, retrieveMediaBuffer));
   return ret;
 }
 

@@ -10,11 +10,10 @@ import { dumpObject, outputError } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
-import { Prophecy, _confirmProphecyCommand } from "./_prophecyOps";
-import { StoryTelling } from "./StoryTelling";
+import { Prophecy, _confirmProphecyCommand, _reformProphecyCommand } from "./_prophecyOps";
+import StoryTelling from "./StoryTelling";
 
-
-export function _fabricateStoryFromEvent (falseProphet: FalseProphet, event: EventBase,
+export function _composeStoryFromEvent (falseProphet: FalseProphet, event: EventBase,
     dispatchDescription: string, timed: ?EventBase, transactionInfo?: TransactionInfo) {
   const previousState = falseProphet.getState();
   let story = (transactionInfo && transactionInfo._tryFastForwardOnCorpus(falseProphet.corpus));
@@ -39,7 +38,7 @@ export function _fabricateStoryFromEvent (falseProphet: FalseProphet, event: Eve
 
 export function _rejectLastProphecyAsHeresy (falseProphet: FalseProphet, hereticClaim: EventBase) {
   if (falseProphet._storyTelling.getLast().commandId !== hereticClaim.commandId) {
-    throw new Error(`rejectLastProphecyAsHeresy.hereticClaim.commandId (${hereticClaim.commandId
+    throw new Error(`_rejectLastProphecyAsHeresy.hereticClaim.commandId (${hereticClaim.commandId
         }) does not match latest story.commandId (${
           falseProphet._storyTelling.getLast().commandId})`);
   }
@@ -54,8 +53,8 @@ export function _confirmCommands (connection: FalseProphetPartitionConnection,
   for (const confirmed of confirmedCommands) {
     const story = falseProphet._storyTelling.getStoryBy(confirmed.commandId);
     if (story) {
-      if (story.partitions && !_confirmProphecyCommand(connection, story, confirmed)) continue;
-      story.isTruth = true;
+      if (!story.isProphecy) story.isTruth = true;
+      else _confirmProphecyCommand(connection, story, confirmed);
     } else {
       connection.warnEvent(`_confirmCommands encountered a command with id '${confirmed.commandId
           }' with no corresponding story, with:`,
@@ -66,7 +65,7 @@ export function _confirmCommands (connection: FalseProphetPartitionConnection,
   }
 }
 
-export function _purgeDispatchAndReviseEvents (connection: FalseProphetPartitionConnection,
+export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConnection,
     purgedCommands: ?Command[], newEvents: Command[], type: string) {
   if (purgedCommands && purgedCommands.length) connection.setIsFrozen(false);
   const falseProphet = connection.getProphet();

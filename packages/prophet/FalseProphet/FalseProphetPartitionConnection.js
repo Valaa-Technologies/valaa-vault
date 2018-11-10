@@ -7,8 +7,8 @@ import { NarrateOptions, ChronicleOptions, ChronicleRequest } from "~/prophet/ap
 
 import { dumpObject } from "~/tools";
 
-import { Prophecy, _revisePurgedProphecy } from "./_prophecyOps";
-import { _confirmCommands, _purgeDispatchAndReviseEvents } from "./_storyOps";
+import { Prophecy, _reviewPurgedProphecy } from "./_prophecyOps";
+import { _confirmCommands, _purgeAndRecomposeStories } from "./_storyOps";
 
 /**
  * @export
@@ -86,7 +86,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
           });
       let purgedCommands;
       let confirms = 0;
-      for (; this._pendingTruths[confirms] && this._unconfirmedCommands[confirms]; ++confirms) {
+      for (; this._unconfirmedCommands[confirms] && this._pendingTruths[confirms]; ++confirms) {
         if (this._pendingTruths[confirms].commandId !==
             this._unconfirmedCommands[confirms].commandId) {
           purgedCommands = this._unconfirmedCommands.slice(confirms);
@@ -98,17 +98,18 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       if (confirms) {
         confirmedCommands = this._pendingTruths.splice(0, confirms);
         if (!purgedCommands) this._unconfirmedCommands.splice(0, confirms);
+        // purge clears all unconfirmed commands
       }
       let newTruthCount = 0;
       while (this._pendingTruths[newTruthCount]) ++newTruthCount;
       this._headEventId += confirms + newTruthCount;
       if (confirmedCommands) _confirmCommands(this, confirmedCommands);
       const newTruths = this._pendingTruths.splice(0, newTruthCount);
-      _purgeDispatchAndReviseEvents(this, purgedCommands, newTruths, "receiveTruth");
+      _purgeAndRecomposeStories(this, purgedCommands, newTruths, "receiveTruth");
       return truths;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `receiveTruths([${truths[0].eventId}, ${
-              truths[truths.length - 1].eventId}])`,
+      throw this.wrapErrorEvent(error, `receiveTruths([${(truths[0] || {}).eventId}, ${
+              (truths[(truths.length || 1) - 1] || {}).eventId}])`,
           "\n\treceived truths:", ...dumpObject(truths),
           "\n\tpendingTruths:", ...dumpObject([...this._pendingTruths]),
           "\n\tunconfirmedCommands:", ...dumpObject([...this._unconfirmedCommands]),
@@ -126,11 +127,11 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
           (command, queueIndex) => {
             purgedCommands = this._unconfirmedCommands.splice(queueIndex);
           });
-      _purgeDispatchAndReviseEvents(this, purgedCommands, newCommands, "receiveCommand");
+      _purgeAndRecomposeStories(this, purgedCommands, newCommands, "receiveCommand");
       return commands;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `receiveCommand([${commands[0].eventId}, ${
-              commands[commands.length - 1].eventId}])`,
+      throw this.wrapErrorEvent(error, `receiveCommand([${(commands[0] || {}).eventId}, ${
+              (commands[(commands.length || 1) - 1] || {}).eventId}])`,
           "\n\treceived commands:", ...dumpObject(commands),
           "\n\tpendingTruths:", ...dumpObject([...this._pendingTruths]),
           "\n\tunconfirmedCommands:", ...dumpObject([...this._unconfirmedCommands]),
@@ -177,12 +178,12 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     return undefined;
   }
 
-  _revisePurgedProphecy (purged: Prophecy, newProphecy: Prophecy) {
+  _reviewPurgedProphecy (purged: Prophecy, newProphecy: Prophecy) {
     try {
-      return _revisePurgedProphecy(this, purged, newProphecy);
+      return _reviewPurgedProphecy(this, purged, newProphecy);
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          new Error(`_revisePurgedProphecy(${purged.commandId} -> ${newProphecy.commandId})`),
+          new Error(`_reviewPurgedProphecy(${purged.commandId} -> ${newProphecy.commandId})`),
           "\n\tpurged prophecy:", ...dumpObject(purged),
           "\n\tnew prophecy:", ...dumpObject(newProphecy));
     }

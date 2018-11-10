@@ -11,68 +11,8 @@ import { dumpObject, outputError } from "~/tools";
 import FalseProphet from "./FalseProphet";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 import { Prophecy, _confirmProphecyCommand } from "./_prophecyOps";
+import { StoryTelling } from "./StoryTelling";
 
-export function _createStoryTelling (chain: ?Object) {
-  // The telling is an intrusive linked ring structure with sentinel as
-  // one-before-first-one-after-last link.
-  const ret = {
-    id: "sentinel",
-    getFirst () { return this.next; },
-    getLast () { return this.prev; },
-    getStoryBy (commandId: string) { return this._storyByCommandId[commandId]; },
-    addStory (story: Story, insertBefore: Story = this) {
-      if (story.commandId) {
-        this._storyByCommandId[story.commandId] = story;
-      } else story.isTruth = true;
-
-      story.next = insertBefore;
-      story.prev = insertBefore.prev;
-      insertBefore.prev.next = story;
-      insertBefore.prev = story;
-      return story;
-    },
-    removeStory (story: Story) {
-      story.prev.next = story.next;
-      story.next.prev = story.prev;
-      delete story.next;
-      delete story.prev;
-      if (story.commandId) {
-        delete this._storyByCommandId[story.commandId];
-      }
-      return story;
-    },
-    removeStories (firstStory: Story, lastStory: Story) {
-      firstStory.prev.next = lastStory.next;
-      lastStory.next.prev = firstStory.prev;
-      firstStory.prev = lastStory;
-      lastStory.next = null;
-      for (let story = firstStory; story; story = story.next) {
-        if (story.commandId) delete this._storyByCommandId[story.commandId];
-      }
-      return firstStory;
-    },
-    dumpStatus () {
-      const ids = [];
-      for (let c = this.next; c !== this; c = c.next) {
-        ids.push(c.id);
-      }
-      return [
-        "\n\tpending:", Object.keys(this._storyByCommandId).length,
-            { ...this._storyByCommandId },
-        "\n\tcommandIds:", ids,
-      ];
-    },
-    _storyByCommandId: {},
-  };
-  if (!chain) {
-    ret.next = ret.prev = ret;
-  } else {
-    ret.next = chain;
-    ret.prev = chain.prev;
-    chain.prev = chain.prev.next = ret;
-  }
-  return ret;
-}
 
 export function _fabricateStoryFromEvent (falseProphet: FalseProphet, event: EventBase,
     dispatchDescription: string, timed: ?EventBase, transactionInfo?: TransactionInfo) {
@@ -103,24 +43,24 @@ export function _rejectLastProphecyAsHeresy (falseProphet: FalseProphet, heretic
         }) does not match latest story.commandId (${
           falseProphet._storyTelling.getLast().commandId})`);
   }
-  const hereticProphecy = falseProphet._storyTelling
-      .removeStory(falseProphet._storyTelling.getLast());
+  const hereticProphecy = falseProphet._storyTelling.getLast();
+  falseProphet._storyTelling.removeStory(hereticProphecy);
   falseProphet.recreateCorpus(hereticProphecy.previousState);
 }
 
 export function _confirmCommands (connection: FalseProphetPartitionConnection,
     confirmedCommands: Command[]) {
   const falseProphet = connection.getProphet();
-  for (const command of confirmedCommands) {
-    const story = falseProphet._storyTelling.getStoryBy(command.commandId);
+  for (const confirmed of confirmedCommands) {
+    const story = falseProphet._storyTelling.getStoryBy(confirmed.commandId);
     if (story) {
-      if (story.partitions && !_confirmProphecyCommand(connection, story, command)) continue;
+      if (story.partitions && !_confirmProphecyCommand(connection, story, confirmed)) continue;
       story.isTruth = true;
     } else {
-      connection.warnEvent(`_confirmCommands encountered a command with id '${command.commandId
+      connection.warnEvent(`_confirmCommands encountered a command with id '${confirmed.commandId
           }' with no corresponding story, with:`,
-          "\n\tcommand:", ...dumpObject(command),
-          "\n\tconfirmedCommands:", ...dumpObject(confirmedCommands),
+          "\n\tconfirmed command:", ...dumpObject(confirmed),
+          "\n\tconfirmed commands:", ...dumpObject(confirmedCommands),
           "\n\tstoryTelling:", ...dumpObject(falseProphet._storyTelling));
     }
   }
@@ -212,7 +152,7 @@ function _affirmLeadingTruthsToFollowers (falseProphet: FalseProphet) {
     truths.push(story);
   }
   if (truths.length) {
-    falseProphet._storyTelling.removeStories(truths[0], truths[truths.length - 1]);
+    falseProphet._storyTelling.extractStoryChain(truths[0], truths[truths.length - 1].next);
   }
   falseProphet._followers.forEach(discourse => {
     try {

@@ -15,7 +15,7 @@ import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
 import { _chronicleEvents } from "./_prophecyOps";
 import {
-  _createStoryTelling, _fabricateStoryFromEvent, _tellStoriesToFollowers,
+  StoryTelling, _fabricateStoryFromEvent, _tellStoriesToFollowers,
 } from "./_storyOps";
 
 /**
@@ -51,7 +51,7 @@ export default class FalseProphet extends Prophet {
     this.schema = schema || corpus.getSchema();
 
     // Story queue is a sentinel-based linked list with a separate lookup structure.
-    this._storyTelling = _createStoryTelling();
+    this._storyTelling = new StoryTelling();
     this._commandCountCallback = commandCountCallback;
     this._partitionCommandCounts = {};
     this._totalCommandCount = 0;

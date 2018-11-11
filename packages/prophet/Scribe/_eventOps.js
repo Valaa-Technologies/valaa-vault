@@ -35,10 +35,7 @@ export const vdoc = vdon({
 export async function _narrateEventLog (connection: ScribePartitionConnection,
     options: NarrateOptions, ret: Object) {
   const localResults = await _narrateLocalLogs(connection,
-      options.receiveTruths || connection._downstreamReceiveTruths,
-      (options.commands !== false)
-          && (options.receiveCommands || connection._downstreamReceiveCommands),
-      options.eventIdBegin, options.eventIdEnd,
+      options.receiveTruths, options.receiveCommands, options.eventIdBegin, options.eventIdEnd,
       options.retrieveMediaBuffer);
 
   Object.assign(ret, localResults);
@@ -69,30 +66,36 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
 }
 
 async function _narrateLocalLogs (connection: ScribePartitionConnection,
-    receiveTruths: ReceiveEvents, receiveCommands: ?ReceiveEvents,
+    receiveTruths: ?ReceiveEvents = connection._downstreamReceiveTruths,
+    receiveCommands: ?ReceiveEvents = connection._downstreamReceiveCommands,
     eventIdBegin: ?number = connection.getFirstTruthEventId(),
     eventIdEnd: ?number = Math.max(
         connection.getFirstUnusedTruthEventId(), connection.getFirstUnusedCommandEventId()),
     retrieveMediaBuffer: ?RetrieveMediaBuffer,
 ): Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
-  if (!receiveTruths) return {};
-  const truthEventIdEnd = Math.min(connection.getFirstUnusedTruthEventId(), eventIdEnd);
-  const truths = ((eventIdBegin < truthEventIdEnd)
-          && await connection._readTruths({ eventIdBegin, eventIdEnd: truthEventIdEnd }))
-      || [];
-  const ret = {
-    scribeEventLog: !truths.length ? truths
-        : await Promise.all(await receiveTruths(truths, retrieveMediaBuffer)),
-  };
-  if (!receiveCommands) return ret;
-
-  const commandEventIdEnd = Math.min(connection.getFirstUnusedCommandEventId(), eventIdEnd);
-  const commands = ((truthEventIdEnd < commandEventIdEnd)
-      && await connection._readCommands({
-        eventIdBegin: truthEventIdEnd, eventIdEnd: commandEventIdEnd,
-      })) || [];
-  ret.scribeCommandQueue = !commands.length ? commands
-      : await Promise.all(await receiveCommands(commands, retrieveMediaBuffer));
+  const ret = {};
+  let currentEventId = eventIdBegin;
+  if (receiveTruths) {
+    const truthEventIdEnd = Math.min(connection.getFirstUnusedTruthEventId(), eventIdEnd);
+    const truths = ((currentEventId < truthEventIdEnd) && await connection._readTruths({
+      eventIdBegin: currentEventId, eventIdEnd: truthEventIdEnd
+    })) || [];
+    currentEventId = truthEventIdEnd;
+    ret.scribeEventLog = !truths.length ? truths
+        : await Promise.all(await receiveTruths(truths, retrieveMediaBuffer));
+  }
+  if (receiveCommands) {
+    const commandEventIdEnd = Math.min(connection.getFirstUnusedCommandEventId(), eventIdEnd);
+    const commands = ((currentEventId < commandEventIdEnd) && await connection._readCommands({
+      eventIdBegin: currentEventId, eventIdEnd: commandEventIdEnd,
+    })) || [];
+    commands.forEach(command => {
+      this._commandQueueInfo.commandIds[command.eventId - this._commandQueueInfo.eventIdBegin] =
+          command.commandId;
+    });
+    ret.scribeCommandQueue = !commands.length ? commands
+        : await Promise.all(await receiveCommands(commands, retrieveMediaBuffer));
+  }
   return ret;
 }
 
@@ -248,10 +251,11 @@ export function _receiveEvents (
         onError);
   }
   if (!receivingTruths) {
-    connection._commandQueueInfo.eventIdEnd = newActions[newActions.length - 1].eventId + 1;
+    newActions.forEach(action => connection._commandQueueInfo.commandIds.push(action.commandId));
+    connection._commandQueueInfo.eventIdEnd += newActions.length;
   } else {
     connection._truthLogInfo.eventIdEnd = newActions[newActions.length - 1].eventId + 1;
-    connection._clampCommandQueueByTruthEvendIdEnd();
+    connection._clampCommandQueueByTruthEvendIdEnd(newActions[newActions.length - 1].commandId);
   }
 
   let updatedEntries;

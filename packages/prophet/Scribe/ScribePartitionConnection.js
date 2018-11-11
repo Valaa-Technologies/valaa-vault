@@ -30,7 +30,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   // If not eventLogInfo eventIdBegin is not 0, it means the oldest
   // stored event is a snapshot with that id.
   _truthLogInfo: { eventIdBegin: number, eventIdEnd: number };
-  _commandQueueInfo: { eventIdBegin: number, eventIdEnd: number };
+  _commandQueueInfo: { eventIdBegin: number, eventIdEnd: number, commandIds: string[] };
 
   // Contains the media infos for most recent actions seen per media.
   // This lookup is updated whenever the media retrievers are created for the action, which is
@@ -49,7 +49,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   constructor (options: Object) {
     super(options);
     this._truthLogInfo = { eventIdBegin: 0, eventIdEnd: 0 };
-    this._commandQueueInfo = { eventIdBegin: 0, eventIdEnd: 0 };
+    this._commandQueueInfo = { eventIdBegin: 0, eventIdEnd: 0, commandIds: [] };
   }
 
   getStatus () {
@@ -174,16 +174,32 @@ export default class ScribePartitionConnection extends PartitionConnection {
         "receiveCommands");
   }
 
-  _clampCommandQueueByTruthEvendIdEnd () {
-    if (this._truthLogInfo.eventIdEnd > this._commandQueueInfo.eventIdBegin) {
-      if (this._commandQueueInfo.eventIdBegin !== this._commandQueueInfo.eventIdEnd) {
-        _deleteCommands(this, this._commandQueueInfo.eventIdBegin,
-            Math.min(this._commandQueueInfo.eventIdEnd, this._truthLogInfo.eventIdEnd));
-      }
-      this._commandQueueInfo.eventIdBegin = this._truthLogInfo.eventIdEnd;
-      this._commandQueueInfo.eventIdEnd =
-          Math.max(this._commandQueueInfo.eventIdBegin, this._commandQueueInfo.eventIdEnd);
+  _clampCommandQueueByTruthEvendIdEnd (lastTruthCommandId?: any) {
+    const deleteBegin = this._commandQueueInfo.eventIdBegin;
+    if (this._truthLogInfo.eventIdEnd <= deleteBegin) return undefined;
+    const commandIds = this._commandQueueInfo.commandIds;
+    const lastDeletedCommandId = commandIds[this._truthLogInfo.eventIdEnd - deleteBegin - 1];
+    this._commandQueueInfo.eventIdBegin = (lastDeletedCommandId !== lastTruthCommandId)
+        && lastTruthCommandId && lastDeletedCommandId
+            ? this._commandQueueInfo.eventIdEnd // Purge all commands
+            : Math.min(this._commandQueueInfo.eventIdEnd, this._truthLogInfo.eventIdEnd);
+    const deleteCommandIds = commandIds.splice(0,
+        this._commandQueueInfo.eventIdBegin - deleteBegin);
+    if (this._commandQueueInfo.eventIdBegin === this._commandQueueInfo.eventIdEnd) {
+      this._commandQueueInfo.eventIdBegin = this._commandQueueInfo.eventIdEnd =
+          this._truthLogInfo.eventIdEnd;
     }
+    return !deleteCommandIds.length ? undefined : thenChainEagerly(
+        _deleteCommands(this, deleteBegin, deleteBegin + deleteCommandIds.length, deleteCommandIds),
+        commands => commands,
+        error => {
+          if (typeof error.conflictingCommandEventId !== "number") throw error;
+          this._reloadCommandQueue(error.conflictingCommandEventId);
+        });
+  }
+
+  _reloadCommandQueue (conflictingCommandEventId: number) {
+
   }
 
   _determineEventMediaPreOps (mediaEvent: Object, rootEvent: Object) {
@@ -316,11 +332,13 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  async _deleteCommands (fromEventId: string, toEventId: string = fromEventId) {
+  async _deleteCommands (fromEventId: string, toEventId: string = fromEventId,
+      expectedCommandIds?: string[]) {
     try {
-      return await _deleteCommands(this, fromEventId, toEventId);
+      return await _deleteCommands(this, fromEventId, toEventId, expectedCommandIds);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_deleteCommands(${fromEventId}, ${toEventId})`);
+      throw this.wrapErrorEvent(error, `_deleteCommands(${fromEventId}, ${toEventId})`,
+          "\n\texpectedCommandIds:", ...dumpObject(expectedCommandIds));
     }
   }
 }

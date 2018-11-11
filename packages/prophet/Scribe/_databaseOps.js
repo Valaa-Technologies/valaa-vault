@@ -89,6 +89,9 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
     _loadEventId(truths, "prev", connection._truthLogInfo, "eventIdEnd");
     _loadEventId(commands, undefined, connection._commandQueueInfo, "eventIdBegin");
     _loadEventId(commands, "prev", connection._commandQueueInfo, "eventIdEnd");
+    // Filled by narrate.
+    connection._commandQueueInfo.commandIds = new Array(
+        connection._commandQueueInfo.eventIdEnd - connection._commandQueueInfo.eventIdBegin);
   });
   connection._clampCommandQueueByTruthEvendIdEnd();
   return true;
@@ -403,7 +406,7 @@ export function _writeCommands (connection: ScribePartitionConnection,
         req.onerror = reqEvent => {
           if (reqEvent.error.name !== "ConstraintError") throw req.error;
           const error = new Error(`Cross-tab command cache conflict`);
-          error.cacheConflict = true;
+          error.conflictingCommandEventId = commandLog[0].eventId;
           throw error;
         };
       }));
@@ -418,14 +421,35 @@ export function _readCommands (connection: ScribePartitionConnection, options: O
 }
 
 export function _deleteCommands (connection: ScribePartitionConnection,
-    eventIdBegin: string, eventIdEnd: string) {
+    eventIdBegin: string, eventIdEnd: string, expectedCommandIds?: string[]) {
   if (!connection._db) return undefined;
-  return connection._db.transaction(["commands"], "readwrite", ({ commands }) =>
-      new Promise((resolve, reject) => {
-        const req = commands.delete(connection._db.getIDBKeyRange({ eventIdBegin, eventIdEnd }));
-        req.onsuccess = () => resolve();
-        req.onerror = (evt => reject(new Error(evt.target.error.message)));
-      }));
+  const range = connection._db.getIDBKeyRange({ eventIdBegin, eventIdEnd });
+  return connection._db.transaction(["commands"], "readwrite", ({ commands }) => {
+    if (!expectedCommandIds) return _deleteRange(commands);
+    if (expectedCommandIds.length !== eventIdEnd - eventIdBegin) {
+      throw new Error(`Expected expectedCommandIds.length(${expectedCommandIds.length
+          }) to equal range ([${eventIdBegin}, ${eventIdEnd}} === ${eventIdEnd - eventIdBegin})`);
+    }
+    return new Promise(_getAllShim.bind(null, commands, range)).then(existingCommands => {
+      for (let i = 0; i !== expectedCommandIds.length; ++i) {
+        if (expectedCommandIds[i] !== existingCommands[i].commandId) {
+          const error = new Error(`commandId mismatch between stored '${
+              existingCommands[i].commandId}' and expected '${expectedCommandIds[i]
+              }' commandId's for eventId ${eventIdBegin + i}`);
+          error.conflictingCommandEventId = eventIdBegin + i;
+          throw error;
+        }
+      }
+      return _deleteRange(commands, existingCommands);
+    });
+  });
+  function _deleteRange (commands, deletedCommands?: Object[]) {
+    return new Promise((resolve, reject) => {
+      const req = commands.delete(range);
+      req.onsuccess = () => resolve(deletedCommands);
+      req.onerror = (evt => reject(new Error(evt.target.error.message)));
+    });
+  }
 }
 
 function _serializeEventAsJSON (event) {

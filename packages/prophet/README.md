@@ -1,5 +1,7 @@
 # @valos/prophet provides ValOS-RAEM stream components
 
+## 1. Introduction
+
 This package is likely the most important package of Valaa Open System.
 @valos/prophet specifications and components provide the foundation for
 event stream and bvob content delivery network. All the rest of the
@@ -45,14 +47,42 @@ browser specific.
 - ValaaSpace: `Relatable`, `Entity`, `Media`, `Relation`,
 - concepts: `ACID`, `authorities`, `pub-sub`, `offline readiness`
 
+### 1.1. Note on naming and of the importance of history
 
-## 1. Deconstruction of the dense definition
+This package draws heavily from religious nomenclature, especially
+in internal naming. This is not a statement any kind (besides maybe
+one*) nor intended as a commentary of any social structures: effort is
+made to keep the terminology non-specific.
 
-### 1.1. *Valaa Resource*s are the basic building blocks and defined by package schemas
+The justification is to manage complexity (with a tad of vanity).
+The progression of ValOS events is a long and complex one; it can start
+from an initial user action, go through revisions into a permanent
+change event of global state and finally into notification events sent
+to other users' screens and devices. This journey sees the events go
+through many similar looking shapes and stages which are still
+fundamentally distinct. The scriptural naming scheme provides a rich
+terminological ground for highlighting these differences in a memorable
+fashion and for providing intuitive, existing meanings to guide
+understanding.
+TODO(iridian): Create and link to the full definitions of the precise
+definitions of all these terms in ValOS context.
 
-### 1.2. *ValaaSpace* contains everything
+*If there is a statement, it would be one of knowledge. Understanding
+the historical development of texts and stories, their originating
+events, knowledge of those told about them, wrote them down, revised
+and reformed them, knowledge of those confirmed, purged and rejected
+them as truths or falsehoods, all of this is fundamentally valuable.
 
-### 1.3. *Partition*s allow loading resources and requesting updates selectively
+In choosing this naming scheme @valos/prophet unapologetically places
+and appreciates the knowledge of history at the front and center.
+
+## 2. Deconstruction of the dense definition
+
+### 2.1. *Valaa Resource*s are the basic building blocks and defined by package schemas
+
+### 2.2. *ValaaSpace* contains everything
+
+### 2.3. *Partition*s allow loading resources and requesting updates selectively
 
 Event sourcing, for all its expressive power and architectural
 simplicity, has a major glaring weakness: loading a single resource
@@ -65,28 +95,28 @@ The Valaa solves this problem with *Partition*s which divide
 the ValaaSpace into smaller pieces.
 
 
-#### 1.3.1. Partition rules
+#### 2.3.1. Partition rules
 
-##### 1.3.1.1. A Partition contains a single root Entity
+##### 2.3.1.1. A Partition contains a single root Entity
 
 This entity is called *the partition root*.
 
 
-##### 1.3.1.2. All resources owned (even indirectly) by the partition root belong to the partition
+##### 2.3.1.2. All resources owned (even indirectly) by the partition root belong to the partition
 
 Together with the partition root these are called
 *the partition resources*.
 
 
-##### 1.3.1.3. Each partition has an event log which contains all the events that modify the partition resources and no other events
+##### 2.3.1.3. Each partition has an event log which contains all the events that modify the partition resources and no other events
 
 Those events have an incrementing serial number *eventId*. Together
 they form *the partition event log*.
 
 
-#### 1.3.2. Low coupling and high cohesion rules even more
+#### 2.3.2. Low coupling and high cohesion rules even more
 
-##### 1.3.2.1. Low coupling saves network bandwidth and CPU ...
+##### 2.3.2.1. Low coupling saves network bandwidth and CPU ...
 
 When [partitions have low coupling in relation to each other](https://en.wikipedia.org/wiki/Coupling_(computer_programming))
 (ie. dependencies between partitions are clear and mostly
@@ -98,7 +128,7 @@ start loading the next area when the player is about to finish
 the previous one.
 
 
-##### 1.3.2.2. ... and high cohesion saves time, spares nerves and minimizes overheads
+##### 2.3.2.2. ... and high cohesion saves time, spares nerves and minimizes overheads
 
 Loading a partition still loads all of its resources. With a sound
 partition design this is advantageous. As a corollary to the low
@@ -108,11 +138,11 @@ others) it is useful to load them all together as it spares the network
 latency and overheads of repeated consequtive requests.
 
 
-### 1.4. *Authority*s implement the infrastructure and authorize new events for their partitions
+### 2.4. *Authority*s implement the infrastructure and authorize new events for their partitions
 
-### 1.5. *Prophet*s are software components which connect to each other and form information streams
+### 2.5. *Prophet*s are software components which connect to each other and form information streams
 
-### 1.6. *PartitionConnection* provides an API for accessing an individual partition
+### 2.6. *PartitionConnection* provides an API for accessing an individual partition
 
 Receiving and sending information to a partition is done using
 a *PartitionConnection*. With the the Prophet that provided
@@ -123,9 +153,9 @@ the connection it manages four types of information streams:
   4. media content downloaded from upstream
 
 
-## 2. *Media*s and *Entity*s as files and folders
+## 3. *Media*s and *Entity*s as files and folders
 
-### 2.3. Media interpretation process
+### 3.3. Media interpretation process
 
 Media interpretation is the process of retrieving content and
 converting it to a representation that is useful for users. It is split
@@ -133,7 +163,7 @@ into three stages: *retrieve* octet stream, *decode* as object
 representation and *integrate* in use site context.
 
 
-#### 2.3.1. Bvob *retrieve* yields an ArrayBuffer via network download, cache hit, etc.
+#### 3.3.1. Bvob *retrieve* yields an ArrayBuffer via network download, cache hit, etc.
 
 Persisted octet sequences are typically identified by their *bvobId*,
 a well-defined content hash of the whole octet sequence (and nothing
@@ -141,7 +171,7 @@ else). Their in-memory representation is shared between all consumers
 inside the same execution environment.
 
 
-#### 2.3.2. Content ArrayBuffer is *decoded* into immutable, cacheable object representation based on mime
+#### 3.3.2. Content ArrayBuffer is *decoded* into immutable, cacheable object representation based on mime
 
 The octet stream is decoded by decoder plugins associated with
 the requested mime type into some runtime object representation. This
@@ -154,7 +184,7 @@ unspecified contexts. This implies that the decoded object should be
 immutable or provide an immutable API.
 
 
-##### 2.3.2.1. decoding "application/valaascript"
+##### 3.3.2.1. decoding "application/valaascript"
 
 The application/valaascript decoder transpiles the octet stream into
 a *module program Kuery*. This Kuery contains the rules for setting up
@@ -163,7 +193,7 @@ different integration contexts (different ghosts of the same base media
 in different instances, etc.)
 
 
-#### 2.3.2.2. decoding "application/javascript"
+#### 3.3.2.2. decoding "application/javascript"
 
 The application/javascript decoder wraps the octet stream text into
 a native function. This function accepts a contextual global scope
@@ -173,9 +203,9 @@ Like with other interpretations, this outermost native function will be
 shared between contexts.
 
 
-#### 2.3.3. Decoded representation is *integrated* into a specific context
+#### 3.3.3. Decoded representation is *integrated* into a specific context
 
-#### 2.3.3.1. integrating "application/valaascript"
+#### 3.3.3.1. integrating "application/valaascript"
 
 When the kuery is valked against a resource and some context the valk
 result is an object with ES6-style bindings of the exported symbols as
@@ -189,13 +219,13 @@ TODO(iridian): Define this precisely. Consult an
 for some starting inspiration.
 
 
-#### 2.3.3.2. integrating  "application/javascript"
+#### 3.3.3.2. integrating  "application/javascript"
 
 The contextual global scope for the integration is a javascript global
 host object associated with the context resource.
 
 
-## 3. Only *universal* commands are accepted by the upstream
+## 4. Only *universal* commands are accepted by the upstream
 
 TODO(iridian): Update outdated documentation
 Restricted commands are commands created by downstream components which
@@ -209,10 +239,10 @@ The process of adding all necessary information to a command is called
 clients irrespective of their local partition availability context.
 
 
-## 4. Concrete components
+## 5. Concrete components
 
-### 4.1. The *FalseProphet* extends Corpus in-memory store with full connectivity and transactionality
+### 5.1. The *FalseProphet* extends Corpus in-memory store with full connectivity and transactionality
 
-### 4.2. The *Scribe* provides partition content, command queue and event log caching in IndexedDB.
+### 5.2. The *Scribe* provides partition content, command queue and event log caching in IndexedDB.
 
-### 4.3. The *Oracle* manages connection information stream routing to authorities and Scribe
+### 5.3. The *Oracle* manages connection information stream routing to authorities and Scribe

@@ -120,7 +120,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
 
   receiveCommands (commands: EventBase[]) {
     // This is not called by chronicle, but either by command recall on
-    // startup or to update conflicting command read from another tab.
+    // startup or to update a conflicting command read from another tab.
     let purgedCommands;
     try {
       const newCommands = this._insertEventsToQueue(commands, this._unconfirmedCommands, true,
@@ -178,6 +178,13 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     return undefined;
   }
 
+  _checkForFreezeAndNotify (lastEvent: EventBase[]
+    = this._unconfirmedCommands[(this._unconfirmedCommands.length || 1) - 1]) {
+    if (lastEvent) this.setIsFrozen(lastEvent.type === "FROZEN");
+    this._prophet.setConnectionCommandCount(
+        this.getPartitionURI().toString(), this._unconfirmedCommands.length);
+  }
+
   _reviewPurgedProphecy (purged: Prophecy, newProphecy: Prophecy) {
     try {
       return _reviewPurgedProphecy(this, purged, newProphecy);
@@ -188,14 +195,6 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
           "\n\tnew prophecy:", ...dumpObject(newProphecy));
     }
   }
-
-  _checkForFreezeAndNotify (lastEvent: EventBase[]
-      = this._unconfirmedCommands[(this._unconfirmedCommands.length || 1) - 1]) {
-    if (lastEvent) this.setIsFrozen(lastEvent.type === "FROZEN");
-    this._prophet.setConnectionCommandCount(
-        this.getPartitionURI().toString(), this._unconfirmedCommands.length);
-  }
-}
 
 /*
 async function _confirmOrPurgeQueuedCommands (connection: ScribePartitionConnection,

@@ -74,26 +74,29 @@ export function _reformProphecyCommand (connection: FalseProphetPartitionConnect
 }
 
 export function _reviewPurgedProphecy (connection: FalseProphetPartitionConnection,
-    purged: Prophecy, revised: Prophecy) {
-  const softConflict = _checkForSoftConflict(purged, revised);
-  if (softConflict) {
-    purged.conflictReason = softConflict;
+    purged: Prophecy, reviewed: Prophecy) {
+  const softSchism = _checkForSoftSchism(purged, reviewed);
+  if (softSchism) {
+    purged.schismCause = softSchism;
     return undefined;
   }
-  connection.warnEvent("\n\trevised prophecy", revised.commandId,
-          "from purged prophecy", purged.commandId,
-      "\n\trevised prophecy:", ...dumpObject(revised),
-      "\n\tpurged prophecy:", ...dumpObject(purged));
-  return revised;
+  /*
+  connection.warnEvent(1, "\n\treviewed prophecy", reviewed.commandId,
+      "\n\tpurged prophecy:", ...dumpObject(purged),
+      "\n\treviewed prophecy:", ...dumpObject(reviewed),
+      "\n\tbase command:", getActionFromPassage(purged));
+  */
+  return reviewed;
 }
 
-function _checkForSoftConflict (/* purgedProphecy: Prophecy, revisedProphecy: Prophecy */) {
-  // TODO(iridian): Detect and resolve soft conflicts: ie. of the
-  // type where the reformed commands modify something that has been
-  // modified by the new incoming truth(s), thus overriding such
-  // changes. This class of errors does not corrupt the event log so
-  // cannot be detected as a reduction error but still most likely is
-  // a ValaaSpace conflict and thus should be rejected.
+function _checkForSoftSchism (/* purgedProphecy: Prophecy, revisedProphecy: Prophecy */) {
+  // TODO(iridian): Detect and resolve soft schisms: for example if a
+  // reformed command modifies something that has been modified by an
+  // new incoming truth(s); this would incorrectly override and discard
+  // the change made in the incoming truth. This class of errors does
+  // not corrupt the event log so cannot be detected as a reduction
+  // error but still most likely is a ValaaSpace schism and thus should
+  // marked as needing revision.
   return undefined;
 }
 
@@ -103,7 +106,9 @@ export function _rejectHereticProphecy (falseProphet: FalseProphet, prophecy: Pr
   if (!operation || !operation._partitions) return;
   for (const partition of Object.values(operation._partitions)) {
     if (!partition.confirmedTruth) {
-      partition.rejectCommand(reason || partition.rejectionReason || prophecy.conflictReason);
+      partition.rejectCommand(reason || partition.rejectionReason
+          || new Error(prophecy.schismCause));
+      partition.commandEvent = null;
     }
   }
 }

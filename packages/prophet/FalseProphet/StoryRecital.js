@@ -3,13 +3,17 @@
 import { Story } from "~/raem";
 
 /**
- * An intrusive linked ring structure of Story objects with sentinel as
- * one-before-first and one-after-last link.
+ * A recital is an ordered list of Story objects.
+ * It is an intrusive linked ring structure of Story objects with
+ * sentinel as one-before-first and one-past-last link.
+ *
+ * It also maintains a lookup structure from story commandId to
+ * individual link Story objects.
  *
  * @export
- * @class StoryTelling
+ * @class StoryRecital
  */
-export default class StoryTelling {
+export default class StoryRecital {
   id: string;
   _storyByCommandId = {};
 
@@ -23,6 +27,25 @@ export default class StoryTelling {
     let value = this;
     return { next: () => (value = value.next) && { done: value === this, value } };
   }
+  forEach (callback: Function) {
+    let i = 0;
+    for (let e = this.next; e !== this; e = e.next) callback(e, i++, this);
+  }
+  map (callback: Function) {
+    const ret = [];
+    let i = 0;
+    for (let e = this.next; e !== this; e = e.next) ret.push(callback(e, i++, this));
+    return ret;
+  }
+
+  push (...stories: Story) { stories.forEach(story => this.addStory(story)); }
+  pop () { return this.removeStory(this.prev); }
+  unshift (...stories: Story) {
+    const beforeFirst = this.next;
+    stories.forEach(story => this.addStory(story, beforeFirst));
+  }
+  shift () { return this.removeStory(this.next); }
+
   getFirst () { return this.next; }
   getLast () { return this.prev; }
   getStoryBy (commandId: string) { return this._storyByCommandId[commandId]; }
@@ -51,9 +74,12 @@ export default class StoryTelling {
     }
   }
 
-  // If no before is specified, extracts all stories to the end of the telling.
+  // If no before is specified, extracts all stories to the end of the
+  // recital.
   extractStoryChain (firstStory: Story, allBefore: Story = this) {
-    if (firstStory.id === "sentinel") throw new Error("cannot extract sentinel");
+    if (firstStory.id === "sentinel") {
+      throw new Error("cannot remove sentinel (possibly empty recital)");
+    }
     if (firstStory === allBefore) return undefined;
     const lastStory = allBefore.prev;
     allBefore.prev = firstStory.prev;
@@ -74,7 +100,7 @@ export default class StoryTelling {
     return [
       "\n\tpending:", Object.keys(this._storyByCommandId).length,
           { ...this._storyByCommandId },
-      "\n\tcommandIds:", ids,
+      "\n\tcommandId's:", ids,
     ];
   }
 }

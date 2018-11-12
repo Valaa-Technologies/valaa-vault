@@ -7,16 +7,22 @@ import type { State } from "~/raem/tools/denormalized/State";
 import Follower from "~/prophet/api/Follower";
 import Prophet from "~/prophet/api/Prophet";
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
-import { ChroniclePropheciesRequest, ProphecyEventResult } from "~/prophet/api/types";
+import { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult }
+    from "~/prophet/api/types";
 import { dumpObject } from "~/tools";
 
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
-import { Prophecy, _chronicleEvents, _rejectHereticProphecy } from "./_prophecyOps";
-import { _composeStoryFromEvent, _tellStoriesToFollowers } from "./_storyOps";
+import { Prophecy, _chronicleEvents } from "./_prophecyOps";
+import { _composeStoryFromEvent, _reviseSchismaticRecital, _tellStoriesToFollowers }
+    from "./_storyOps";
 import StoryRecital from "./StoryRecital";
 
+type FalseProphetChronicleOptions = ChronicleOptions & {
+  reviseSchism?: (schism: Prophecy, connection: FalseProphetPartitionConnection,
+      purgedCommands: Command[], newEvents: Command[]) => Prophecy,
+};
 
 /**
  * FalseProphet is non-authoritative denormalized in-memory store of
@@ -76,9 +82,8 @@ export default class FalseProphet extends Prophet {
   }
 
   // Split a command and transmit resulting partition commands towards upstream.
-  chronicleEvents (commands: Command[],
-      options: { timed: Object, transactionInfo: TransactionInfo } = {},
-  ): ChroniclePropheciesRequest {
+  chronicleEvents (commands: Command[], options: FalseProphetChronicleOptions = {}):
+      ChroniclePropheciesRequest {
     try {
       return _chronicleEvents(this, commands, options);
     } catch (error) {
@@ -111,6 +116,22 @@ export default class FalseProphet extends Prophet {
       throw this.wrapErrorEvent(error, `_composeStoryFromEvent(${dispatchDescription})`,
           "\n\tevent:", ...dumpObject(event),
           "\n\ttimed:", ...dumpObject(timed));
+    }
+  }
+
+  _reviseSchismaticRecital (schismaticRecital: Prophecy, reviewedPartitions: Object,
+      originatingConnection: FalseProphetPartitionConnection, purgedCommands: Command[],
+      newEvents: Command[]): Story[] {
+    try {
+      return _reviseSchismaticRecital(this, schismaticRecital, reviewedPartitions,
+          originatingConnection, purgedCommands, newEvents);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, `_reviseSchismaticRecital(${schismaticRecital.id})`,
+          "\n\tschismatic recital:", ...dumpObject(schismaticRecital),
+          "\n\treviewed partitions:", ...dumpObject(reviewedPartitions),
+          "\n\toriginating connection:", ...dumpObject(originatingConnection),
+          "\n\tpurged commands:", ...dumpObject(purgedCommands),
+          "\n\tnew events:", ...dumpObject(newEvents));
     }
   }
 

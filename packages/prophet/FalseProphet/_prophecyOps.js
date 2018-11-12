@@ -14,7 +14,7 @@ import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from
 import { trivialCloneWith } from "~/tools/trivialClone";
 
 import FalseProphet from "./FalseProphet";
-import { _rejectLastProphecyAsHeresy } from "./_storyOps";
+import { _rejectLastProphecyAsHeresy, _recomposeStoryFromPurgedEvent } from "./_storyOps";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
 export type Prophecy = Story & {
@@ -31,7 +31,7 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
     { timed, transactionInfo, ...rest } = {}): ProphecyChronicleRequest {
   if (timed) throw new Error("timed events not supported yet");
   const prophecies = events.map(event => falseProphet._composeStoryFromEvent(
-      universalizeEvent(falseProphet, event), "chronicleProphecy", timed, transactionInfo));
+      universalizeEvent(falseProphet, event), "prophecy-chronicle", timed, transactionInfo));
   const resultBase = new ProphecyOperation(null, {
     _prophet: falseProphet, _events: events, _options: rest,
     _reactions: falseProphet._tellStoriesToFollowers(prophecies),
@@ -55,7 +55,7 @@ export function _confirmProphecyCommand (connection: FalseProphetPartitionConnec
   if (operation) {
     const partition = operation._partitions[String(connection.getPartitionURI())];
     if (!partition) {
-      connection.warnEvent("confirmProphecyCommand operation partition missing",
+      connection.warnEvent(0, "confirmProphecyCommand operation partition missing",
           "\n\tcommand:", ...dumpObject(command),
           "\n\toperation:", ...dumpObject(operation));
       return false;
@@ -70,14 +70,24 @@ export function _confirmProphecyCommand (connection: FalseProphetPartitionConnec
 }
 
 export function _reformProphecyCommand (connection: FalseProphetPartitionConnection,
-  prophecy: Prophecy, command: Command) {
+    prophecy: Prophecy, reformedCommand: Command) {
+  const partition = prophecy[ProphecyOperationTag]
+      ._partitions[String(connection.getPartitionURI())];
+  const originalCommand = partition.commandEvent;
+  connection.warnEvent(1, "\n\treforming prophecy", prophecy.commandId,
+          "command", originalCommand.eventId, "with command", reformedCommand.eventId,
+      "\n\toriginal command:", ...dumpObject(originalCommand),
+      "\n\treformed command:", ...dumpObject(reformedCommand),
+      "\n\treformed prophecy:", ...dumpObject(prophecy));
+  partition.commandEvent = reformedCommand;
 }
 
 export function _reviewPurgedProphecy (connection: FalseProphetPartitionConnection,
     purged: Prophecy, reviewed: Prophecy) {
-  const softSchism = _checkForSoftSchism(purged, reviewed);
-  if (softSchism) {
-    purged.schismCause = softSchism;
+  const semanticSchism = _checkForSemanticSchism(purged, reviewed);
+  if (semanticSchism) {
+    purged.schismDescription = semanticSchism;
+    purged.semanticSchismWithReviewedProphecy = reviewed;
     return undefined;
   }
   /*
@@ -89,9 +99,9 @@ export function _reviewPurgedProphecy (connection: FalseProphetPartitionConnecti
   return reviewed;
 }
 
-function _checkForSoftSchism (/* purgedProphecy: Prophecy, revisedProphecy: Prophecy */) {
-  // TODO(iridian): Detect and resolve soft schisms: for example if a
-  // reformed command modifies something that has been modified by an
+function _checkForSemanticSchism (/* purgedProphecy: Prophecy, revisedProphecy: Prophecy */) {
+  // TODO(iridian): Detect and resolve semtnic schisms: for example if
+  // a reformed command modifies something that has been modified by an
   // new incoming truth(s); this would incorrectly override and discard
   // the change made in the incoming truth. This class of errors does
   // not corrupt the event log so cannot be detected as a reduction
@@ -100,14 +110,43 @@ function _checkForSoftSchism (/* purgedProphecy: Prophecy, revisedProphecy: Prop
   return undefined;
 }
 
-export function _rejectHereticProphecy (falseProphet: FalseProphet, prophecy: Prophecy,
-    reason: ?any) {
+export function _reviseSchism (connection: FalseProphetPartitionConnection,
+    schism: Prophecy, purgedStories: Story[], newEvents: EventBase[]) {
+  const operation = schism[ProphecyOperationTag];
+  // No way to revise non-prophecy schisms: these come from elsewhere so not our job.
+  if (!operation) return undefined;
+  // First try to revise by prophecy chronicleEvents.options.reviseSchism
+  if (operation._options.reviseSchism) {
+    return operation._options.reviseSchism(schism, connection, purgedStories, newEvents);
+  }
+  // Then if the schism is not a semantic schism try basic revise-recompose.
+  if (schism.semanticSchism) return undefined;
+  delete schism.structuralSchism;
+  const recomposedProphecy = _recomposeStoryFromPurgedEvent(connection.getProphet(), schism);
+  const partitionURI = String(connection.getPartitionURI());
+  if (!recomposedProphecy || (Object.keys(recomposedProphecy.partitions).length !== 1)) {
+    // Can't revise multi-partition commands (for now).
+    return undefined;
+  }
+  const revisedProphecyCommand = getActionFromPassage(recomposedProphecy);
+  const revisedPartitionCommandEvent = extractEventOfPartition(revisedProphecyCommand, connection);
+  // Can only revise commands belonging to the originating partition
+  if (!revisedPartitionCommandEvent) return undefined;
+  recomposedProphecy[ProphecyOperationTag] = operation;
+  operation._prophecy = recomposedProphecy;
+  const operationPartition = operation._partitions[partitionURI];
+  operationPartition.commandEvent = revisedPartitionCommandEvent;
+  operationPartition.chronicling = connection.chronicleEvent(
+      operationPartition.commandEvent, Object.create(operation._options));
+  return [recomposedProphecy];
+}
+
+export function _rejectHereticProphecy (falseProphet: FalseProphet, prophecy: Prophecy) {
   const operation = prophecy[ProphecyOperationTag];
   if (!operation || !operation._partitions) return;
   for (const partition of Object.values(operation._partitions)) {
     if (!partition.confirmedTruth) {
-      partition.rejectCommand(reason || partition.rejectionReason
-          || new Error(prophecy.schismCause));
+      partition.rejectCommand(partition.rejectionReason || new Error(prophecy.schismDescription));
       partition.commandEvent = null;
     }
   }
@@ -136,7 +175,7 @@ class ProphecyOperation extends ProphecyEventResult {
   getLocalStory () {
     return thenChainEagerly(
       mapEagerly(this._activePartitions, ({ chronicling }) => chronicling.getLocalEvent()),
-      () => this._prophecy,
+      () => this._prophecy || this.throwRejectionError(),
       this.errorOnProphecyOperation.bind(this,
           new Error(`chronicleEvents.eventResults[${this.index}].getLocalEvent()`)));
   }
@@ -144,7 +183,7 @@ class ProphecyOperation extends ProphecyEventResult {
   getPersistedStory () {
     return thenChainEagerly(
         mapEagerly(this._activePartitions, ({ chronicling }) => chronicling.getPersistedEvent()),
-        () => this._prophecy,
+        () => this._prophecy || this.throwRejectionError(),
         this.errorOnProphecyOperation.bind(this,
             new Error(`chronicleEvents.eventResults[${this.index}].getPersistedStory()`)));
   }
@@ -152,7 +191,7 @@ class ProphecyOperation extends ProphecyEventResult {
   getTruthStory () {
     return thenChainEagerly(
         this._fulfillment,
-        () => this._prophecy,
+        () => this._prophecy || this.throwRejectionError(),
         this.errorOnProphecyOperation.bind(this,
             new Error(`chronicleEvents.eventResults[${this.index}].getTruthStory()`)));
   }
@@ -182,6 +221,11 @@ class ProphecyOperation extends ProphecyEventResult {
         "\n\tprophecy:", ...dumpObject(this.event),
         "\n\toperation:", ...dumpObject(this),
     );
+  }
+
+  throwRejectionError () {
+    throw this._rejectionError || new Error(
+        "INTERNAL ERROR: ProphecyOperation._prophecy and _rejectionReason are both missing");
   }
 
   _execute (prophecy: Prophecy, index: number) {
@@ -259,7 +303,7 @@ class ProphecyOperation extends ProphecyEventResult {
   _fulfillProphecy () {
     this._fulfillment = mapEagerly(this._stages,
         stage => this._fulfillStage(stage),
-        (error, stage, index) => {
+        (error, stage) => {
           throw this._prophet.wrapErrorEvent(error,
               new Error(`chronicleEvents._fulfillStage(${stage.name})`),
               "\n\toperation:", ...dumpObject(this),
@@ -343,9 +387,10 @@ class ProphecyOperation extends ProphecyEventResult {
       }
     ], (error, index) => {
       this._prophecy.isRejected = true;
-      this._prophecy = null;
-      throw this._prophet.wrapErrorEvent(error,
+      this._rejectionError = this._prophecy.rejectionReason = this._prophet.wrapErrorEvent(error,
           new Error(`chronicleEvents.stage["${stage.name}"].step#${index}`));
+      this._prophecy = null;
+      throw this._rejectionError;
     });
   }
 }

@@ -1,13 +1,13 @@
 // @flow
 
-import { EventBase } from "~/raem/command";
+import { EventBase, Story } from "~/raem/command";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import { NarrateOptions, ChronicleOptions, ChronicleRequest } from "~/prophet/api/types";
 
 import { dumpObject } from "~/tools";
 
-import { Prophecy, _reviewPurgedProphecy } from "./_prophecyOps";
+import { Prophecy, _reviewPurgedProphecy, _reviseSchism } from "./_prophecyOps";
 import { _confirmCommands, _purgeAndRecomposeStories } from "./_storyOps";
 
 /**
@@ -105,6 +105,12 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       this._headEventId += confirms + newTruthCount;
       if (confirmedCommands) _confirmCommands(this, confirmedCommands);
       const newTruths = this._pendingTruths.splice(0, newTruthCount);
+      /*
+      this.logEvent(1, "receiveTruths.confirm&purge",
+          "\n\tconfirmedCommands:", ...dumpObject(confirmedCommands),
+          "\n\tpurgedCommands:", ...dumpObject(purgedCommands),
+          "\n\tnewTruths:", ...dumpObject(newTruths));
+      */
       _purgeAndRecomposeStories(this, purgedCommands, newTruths, "receiveTruth");
       return truths;
     } catch (error) {
@@ -196,37 +202,15 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     }
   }
 
-/*
-async function _confirmOrPurgeQueuedCommands (connection: ScribePartitionConnection,
-    lastNewEvent: EventBase) {
-  let purgedStories;
-  const { eventIdBegin: beginCommandId, eventIdEnd: endCommandId, commandIds }
-      = connection._commandQueueInfo;
-  if ((beginCommandId <= lastNewEvent.eventId) && (lastNewEvent.eventId < endCommandId)
-      && (lastNewEvent.commandId !== commandIds[lastNewEvent.eventId - beginCommandId])) {
-    // connection.warnEvent("\n\tPURGING by", event.commandId, eventId, event, commandIds,
-    //    "\n\tcommandIds:", beginCommandId, endCommandId, commandIds);
-    // Frankly, we could just store the commands in the 'commandIds' fully.
-    purgedStories = await connection._readCommands(
-        { eventIdBegin: beginCommandId, eventIdEnd: endCommandId });
-  }
-
-  const newCommandQueueFirstEventId = (purgedStories ? endCommandId : lastNewEvent.eventId) + 1;
-  if (connection.getFirstCommandEventId() < newCommandQueueFirstEventId) {
-    _setCommandQueueFirstEventId(connection, newCommandQueueFirstEventId);
-  }
-
-  // Delete commands after event is stored, so we get no gaps.
-  // TODO(iridian): Put these to the same transaction with the writeEvent
-  if (connection.isLocallyPersisted()) {
-    if (purgedStories) {
-      // TODO(iridian): Add merge-conflict-persistence. As it stands now, for the duration of
-      // the merge process the purged commands are not persisted anywhere and could be lost.
-      connection._deleteCommands(beginCommandId, endCommandId);
-    } else if (lastNewEvent.eventId >= beginCommandId) {
-      connection._deleteCommands(beginCommandId, Math.min(lastNewEvent.eventId + 1, endCommandId));
+  _reviseSchism (schism: Prophecy, purgedStories: Story[], newEvents: EventBase[]) {
+    try {
+      return _reviseSchism(this, schism, purgedStories, newEvents);
+    } catch (error) {
+      throw this.wrapErrorEvent(error,
+          new Error(`_reviseSchism(${schism.commandId})`),
+          "\n\tschism:", ...dumpObject(schism),
+          "\n\tpurged stories:", ...dumpObject(purgedStories),
+          "\n\tnew events:", ...dumpObject(newEvents));
     }
   }
-  return purgedStories;
 }
-*/

@@ -11,7 +11,7 @@ import { dumpObject, outputError } from "~/tools";
 import FalseProphet from "./FalseProphet";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 import { Prophecy, _confirmProphecyCommand, _reformProphecyCommand } from "./_prophecyOps";
-import StoryTelling from "./StoryTelling";
+import StoryRecital from "./StoryRecital";
 
 export function _composeStoryFromEvent (falseProphet: FalseProphet, event: EventBase,
     dispatchDescription: string, timed: ?EventBase, transactionInfo?: TransactionInfo) {
@@ -31,19 +31,19 @@ export function _composeStoryFromEvent (falseProphet: FalseProphet, event: Event
   if (dispatchDescription === "chronicleProphecy") story.isProphecy = true;
   if (dispatchDescription === "receiveTruth") story.isTruth = true;
   // story.id = story.commandId; TODO(iridian): what was this?
-  falseProphet._storyTelling.addStory(story);
+  falseProphet._primaryRecital.addStory(story);
   // console.log("Added dispatched event:", event, story, { state: story.state.toJS() });
   return story;
 }
 
 export function _rejectLastProphecyAsHeresy (falseProphet: FalseProphet, hereticClaim: EventBase) {
-  if (falseProphet._storyTelling.getLast().commandId !== hereticClaim.commandId) {
+  if (falseProphet._primaryRecital.getLast().commandId !== hereticClaim.commandId) {
     throw new Error(`_rejectLastProphecyAsHeresy.hereticClaim.commandId (${hereticClaim.commandId
         }) does not match latest story.commandId (${
-          falseProphet._storyTelling.getLast().commandId})`);
+          falseProphet._primaryRecital.getLast().commandId})`);
   }
-  const hereticProphecy = falseProphet._storyTelling.getLast();
-  falseProphet._storyTelling.removeStory(hereticProphecy);
+  const hereticProphecy = falseProphet._primaryRecital.getLast();
+  falseProphet._primaryRecital.removeStory(hereticProphecy);
   falseProphet.recreateCorpus(hereticProphecy.previousState);
 }
 
@@ -51,7 +51,7 @@ export function _confirmCommands (connection: FalseProphetPartitionConnection,
     confirmedCommands: Command[]) {
   const falseProphet = connection.getProphet();
   for (const confirmed of confirmedCommands) {
-    const story = falseProphet._storyTelling.getStoryBy(confirmed.commandId);
+    const story = falseProphet._primaryRecital.getStoryBy(confirmed.commandId);
     if (story) {
       if (!story.isProphecy) story.isTruth = true;
       else _confirmProphecyCommand(connection, story, confirmed);
@@ -60,7 +60,7 @@ export function _confirmCommands (connection: FalseProphetPartitionConnection,
           }' with no corresponding story, with:`,
           "\n\tconfirmed command:", ...dumpObject(confirmed),
           "\n\tconfirmed commands:", ...dumpObject(confirmedCommands),
-          "\n\tstoryTelling:", ...dumpObject(falseProphet._storyTelling));
+          "\n\tprimary recital:", ...dumpObject(falseProphet._primaryRecital));
     }
   }
 }
@@ -143,15 +143,15 @@ export function _tellStoriesToFollowers (falseProphet: FalseProphet, stories: St
 
 // Notify followers about the stories that have been confirmed as
 // permanent truths in chronological order, ie. all stories at the
-// front of the telling marked as isTruth and which thus can no
+// front of the recital marked as isTruth and which thus can no
 // longer be affected by any future purges and revisionings.
 function _affirmLeadingTruthsToFollowers (falseProphet: FalseProphet) {
   const truths = [];
-  for (let story = falseProphet._storyTelling.getFirst(); story.isTruth; story = story.next) {
+  for (let story = falseProphet._primaryRecital.getFirst(); story.isTruth; story = story.next) {
     truths.push(story);
   }
   if (truths.length) {
-    falseProphet._storyTelling.extractStoryChain(truths[0], truths[truths.length - 1].next);
+    falseProphet._primaryRecital.extractStoryChain(truths[0], truths[truths.length - 1].next);
   }
   falseProphet._followers.forEach(discourse => {
     try {

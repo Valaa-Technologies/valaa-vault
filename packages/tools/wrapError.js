@@ -186,10 +186,11 @@ export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
     if (typeof head !== "object") return head;
     if (!nest) {
       if (Array.isArray(head)) return `<Array length=${head.length} >`;
-      if (isIterable(head)) return `<Iterable size=${head.size}>`;
+      if (isIterable(head)) return `<immutable.Iterable size=${head.size}>`;
       if (head instanceof Map) return `<Map size=${head.size}>`;
       if (head instanceof WeakMap) return `<WeakMap size=${head.size}>`;
       if (head instanceof Set) return `<Set size=${head.size}>`;
+      if (head[Symbol.iterator]) return `<Iterable ${head.constructor.name}>`;
     }
     if (head.toString
         && (head.toString !== Object.prototype.toString)
@@ -203,6 +204,7 @@ export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
     return ((Array.isArray(head)
             && `[${head.map(entry => debugObjectNest(entry, nest, alwaysStringify)).join(", ")}]`)
         || (isIterable(head) && debugObjectNest(head.toJS(), nest, alwaysStringify))
+        || (head[Symbol.iterator] && debugObjectNest([...head], nest, alwaysStringify))
         || `{ ${Object.keys(head)
               .map(key => `${isSymbol(key) ? key.toString() : key}: ${
                   debugObjectNest(head[key], nest - 1, alwaysStringify)}`)

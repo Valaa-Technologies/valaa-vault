@@ -1,6 +1,6 @@
 // @flow
 
-import { created, transacted } from "~/raem/command/index";
+import { created } from "~/raem/command/index";
 import { vRef } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
 
@@ -109,7 +109,7 @@ describe("Prophet", () => {
       name: "Some other entity", owner: "test_partition",
     } }),
     created({ id: "simple_relation", typeName: "Relation", initialState: {
-      name: "Simple-other Relation", owner: "simple_entity",
+      name: "Simple-other Relation", owner: vRef("simple_entity", "relations"),
       target: "other_entity",
     } }),
   ];
@@ -147,24 +147,24 @@ describe("Prophet", () => {
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
 
-    const result = harness.chronicleEvent(simpleCommand);
+    const first = harness.chronicleEvent(simpleCommand);
 
-    expect(result.getCommandOf(testPartitionURI).eventId).toEqual(1);
+    expect(first.getCommandOf(testPartitionURI).eventId).toEqual(1);
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
     expect(authorityConnection._upstreamEntries.length).toEqual(0);
-    await result.getPersistedEvent();
+    await first.getPersistedEvent();
     expect(authorityConnection._upstreamEntries.length).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
 
-    const results = harness.chronicleEvents(coupleCommands).eventResults;
+    const seconds = harness.chronicleEvents(coupleCommands).eventResults;
 
-    expect(results[0].getCommandOf(testPartitionURI).eventId).toEqual(2);
-    expect(results[1].getCommandOf(testPartitionURI).eventId).toEqual(3);
+    expect(seconds[0].getCommandOf(testPartitionURI).eventId).toEqual(2);
+    expect(seconds[1].getCommandOf(testPartitionURI).eventId).toEqual(3);
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
     expect(totalCommandCount).toEqual(3);
     expect(authorityConnection._upstreamEntries.length).toEqual(1);
-    await results[1].getPersistedEvent();
+    await seconds[1].getPersistedEvent();
     expect(authorityConnection._upstreamEntries.length).toEqual(3);
 
     const twoEntries = authorityConnection._upstreamEntries.splice(0, 2);
@@ -189,22 +189,22 @@ describe("Prophet", () => {
     harness.prophet.setCommandCountCallback((total) => { totalCommandCount = total; });
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
-    const result = harness.chronicleEvent(simpleCommand);
-    expect(result.getCommandOf(testPartitionURI).eventId).toEqual(1);
+    const first = harness.chronicleEvent(simpleCommand);
+    expect(first.getCommandOf(testPartitionURI).eventId).toEqual(1);
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
-    const persisted = result.getPersistedEvent();
+    const persisted = first.getPersistedEvent();
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
     await persisted;
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 2, 2);
 
-    const results = harness.chronicleEvents(coupleCommands).eventResults;
-    expect(results[0].getCommandOf(testPartitionURI).eventId).toEqual(2);
-    expect(results[1].getCommandOf(testPartitionURI).eventId).toEqual(3);
+    const seconds = harness.chronicleEvents(coupleCommands).eventResults;
+    expect(seconds[0].getCommandOf(testPartitionURI).eventId).toEqual(2);
+    expect(seconds[1].getCommandOf(testPartitionURI).eventId).toEqual(3);
     expect(totalCommandCount).toEqual(2);
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
-    await results[1].getPersistedEvent();
+    await seconds[1].getPersistedEvent();
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
   });
@@ -215,27 +215,27 @@ describe("Prophet", () => {
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
 
-    const result = harness.chronicleEvent(simpleCommand);
+    const first = harness.chronicleEvent(simpleCommand);
 
-    let truthEvent;
-    const truthProcess = result.getTruthEvent().then(truthEvent_ => (truthEvent = truthEvent_));
+    let firstTruth;
+    const firstTruthProcess = first.getTruthEvent().then(truthEvent_ => (firstTruth = truthEvent_));
 
-    await result.getPersistedEvent();
+    await first.getPersistedEvent();
 
-    expect(truthEvent).toEqual(undefined);
+    expect(firstTruth).toEqual(undefined);
 
-    const results = harness.chronicleEvents(coupleCommands).eventResults;
+    const seconds = harness.chronicleEvents(coupleCommands).eventResults;
 
-    const truthEvents = [];
-    const truthProcesses = results.map((result_, index) => result_.getTruthEvent()
-        .then(truthEvent_ => (truthEvents[index] = truthEvent_)));
+    const secondsTruths = [];
+    const secondsTruthProcesses = seconds.map((result_, index) => result_.getTruthEvent()
+        .then(truthEvent_ => (secondsTruths[index] = truthEvent_)));
 
-    await results[1].getPersistedEvent();
+    await seconds[1].getPersistedEvent();
 
-    expect(truthEvent).toEqual(undefined);
-    expect(truthEvents.length).toEqual(0);
-    expect(truthEvents[0]).toEqual(undefined);
-    expect(truthEvents[1]).toEqual(undefined);
+    expect(firstTruth).toEqual(undefined);
+    expect(secondsTruths.length).toEqual(0);
+    expect(secondsTruths[0]).toEqual(undefined);
+    expect(secondsTruths[1]).toEqual(undefined);
 
 
     const twoEntries = authorityConnection._upstreamEntries.splice(0, 2);
@@ -243,9 +243,9 @@ describe("Prophet", () => {
     // resolve prophecy getTruthEvent via pull
     twoEntries[0].resolveTruthEvent(twoTruthEvents[0]);
     twoEntries[1].resolveTruthEvent(twoTruthEvents[1]);
-    expect(await truthProcess).toMatchObject(simpleCommand);
-    expect(await truthProcesses[0]).toMatchObject(coupleCommands[0]);
-    expect(truthEvents.length).toEqual(1);
+    expect(await firstTruthProcess).toMatchObject(simpleCommand);
+    expect(await secondsTruthProcesses[0]).toMatchObject(coupleCommands[0]);
+    expect(secondsTruths.length).toEqual(1);
     // pull doesn't store anything to scribe, let push take care of that (really??)
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
     await authorityConnection.getReceiveTruths()(twoTruthEvents);
@@ -258,7 +258,7 @@ describe("Prophet", () => {
     await authorityConnection.getReceiveTruths()(lastTruthEvents);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
 
-    expect(await truthProcesses[1]).toMatchObject(coupleCommands[1]);
-    expect(truthEvents.length).toEqual(2);
+    expect(await secondsTruthProcesses[1]).toMatchObject(coupleCommands[1]);
+    expect(secondsTruths.length).toEqual(2);
   });
 });

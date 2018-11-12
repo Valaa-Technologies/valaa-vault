@@ -15,7 +15,8 @@ import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
 import { Prophecy, _chronicleEvents, _rejectHereticProphecy } from "./_prophecyOps";
 import { _composeStoryFromEvent, _tellStoriesToFollowers } from "./_storyOps";
-import StoryTelling from "./StoryTelling";
+import StoryRecital from "./StoryRecital";
+
 
 /**
  * FalseProphet is non-authoritative denormalized in-memory store of
@@ -42,7 +43,7 @@ export default class FalseProphet extends Prophet {
 
   _totalCommandCount: number;
 
-  _storyTelling: Story;
+  _primaryRecital: StoryRecital;
 
   constructor ({ schema, corpus, upstream, commandCountCallback, ...rest }: Object) {
     super(rest);
@@ -50,7 +51,7 @@ export default class FalseProphet extends Prophet {
     this.schema = schema || corpus.getSchema();
 
     // Story queue is a sentinel-based linked list with a separate lookup structure.
-    this._storyTelling = new StoryTelling(undefined, "main");
+    this._primaryRecital = new StoryRecital(undefined, "main");
     this._commandCountCallback = commandCountCallback;
     this._partitionCommandCounts = {};
     this._totalCommandCount = 0;
@@ -134,6 +135,6 @@ export default class FalseProphet extends Prophet {
   }
 
   _dumpStatus () {
-    return this._storyTelling.dumpStatus();
+    return this._primaryRecital.dumpStatus();
   }
 }

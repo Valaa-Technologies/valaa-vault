@@ -145,4 +145,20 @@ describe("Scribe", () => {
       expect(oldUnusedCommandId).toBeLessThan(newUnusedCommandId);
     }
   });
+
+  it("writes multiple commands in a single go gracefully", async () => {
+    const scribe = createScribe(createTestMockProphet());
+    await scribe.initiate();
+
+    const connection = await scribe.acquirePartitionConnection(testPartitionURI)
+        .getSyncedConnection();
+
+    const chronicling = connection.chronicleEvents(simpleCommandList);
+    const lastLocal = await chronicling.eventResults[simpleCommandList.length - 1].getLocalEvent();
+    expect(lastLocal.eventId + 1)
+        .toEqual(connection.getFirstUnusedCommandEventId());
+    const lastTruth = await chronicling.eventResults[simpleCommandList.length - 1].getTruthEvent();
+    expect(lastTruth.eventId + 1)
+        .toEqual(connection.getFirstUnusedTruthEventId());
+  });
 });

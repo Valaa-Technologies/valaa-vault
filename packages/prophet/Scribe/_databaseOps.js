@@ -362,7 +362,7 @@ export function _writeTruths (connection: ScribePartitionConnection, truthLog: E
     truthLog.forEach(truth => {
       if (typeof truth.eventId !== "number") {
         throw new Error(`INTERNAL ERROR: Truth is missing eventId when trying to write ${
-            truthLog.length} truths to local cache`);
+            truthLog.length} truths to local cache, aborting _writeTruths`);
       }
       const req = truths.add(_serializeEventAsJSON(truth));
       req.onerror = reqEvent => {
@@ -382,6 +382,7 @@ export function _writeTruths (connection: ScribePartitionConnection, truthLog: E
         };
       };
     });
+    return truthLog;
   });
 }
 
@@ -396,20 +397,22 @@ export function _readTruths (connection: ScribePartitionConnection, options: Obj
 export function _writeCommands (connection: ScribePartitionConnection,
     commandLog: EventBase[]) {
   if (!connection._db) return undefined;
-  return connection._db.transaction(["commands"], "readwrite", ({ commands }) =>
-      commandLog.forEach(command => {
-        if (typeof command.eventId !== "number") {
-          throw new Error(`INTERNAL ERROR: Command is missing eventId when trying to write ${
-              commandLog.length} commands to local cache`);
-        }
-        const req = commands.add(_serializeEventAsJSON(command));
-        req.onerror = reqEvent => {
-          if (reqEvent.error.name !== "ConstraintError") throw req.error;
-          const error = new Error(`Cross-tab command cache conflict`);
-          error.conflictingCommandEventId = commandLog[0].eventId;
-          throw error;
-        };
-      }));
+  return connection._db.transaction(["commands"], "readwrite", ({ commands }) => {
+    commandLog.forEach(command => {
+      if (typeof command.eventId !== "number") {
+        throw new Error(`INTERNAL ERROR: Command is missing eventId when trying to write ${
+            commandLog.length} commands to local cache, aborting _writeCommands`);
+      }
+      const req = commands.add(_serializeEventAsJSON(command));
+      req.onerror = reqEvent => {
+        if (reqEvent.error.name !== "ConstraintError") throw req.error;
+        const error = new Error(`Cross-tab command cache conflict`);
+        error.conflictingCommandEventId = commandLog[0].eventId;
+        throw error;
+      };
+    });
+    return commandLog;
+  });
 }
 
 export function _readCommands (connection: ScribePartitionConnection, options: Object) {
@@ -432,7 +435,11 @@ export function _deleteCommands (connection: ScribePartitionConnection,
     }
     return new Promise(_getAllShim.bind(null, commands, range)).then(existingCommands => {
       for (let i = 0; i !== expectedCommandIds.length; ++i) {
-        if (expectedCommandIds[i] !== existingCommands[i].commandId) {
+        const existingCommandId = (existingCommands[i] || {}).commandId;
+        if (existingCommandId === undefined) {
+          connection.errorEvent(`deleteCommands: No existing command found when trying to delete #${
+              eventIdBegin + i}:`, expectedCommandIds[i]);
+        } else if (expectedCommandIds[i] !== existingCommandId) {
           const error = new Error(`commandId mismatch between stored '${
               existingCommands[i].commandId}' and expected '${expectedCommandIds[i]
               }' commandId's for eventId ${eventIdBegin + i}`);

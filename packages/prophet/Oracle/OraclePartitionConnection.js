@@ -95,7 +95,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
           throw new Error(`direct retrieval not implemented for mediaInfo.sourceURL '${
               sourceURI.toString()}'`);
         }
-        if (mediaInfo.asURL) return urlRequests.push(mediaInfo);
+        if (mediaInfo.asURL) return urlRequests.push(mediaInfo)[0];
         let decoder;
         if (mediaInfo.type
             && !((mediaInfo.type === "application") && (mediaInfo.subtype === "octet-stream"))) {
@@ -109,7 +109,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
         // Split requests into three sets: one for URL's, one for actual contents and one for
         // just immediate decoding for buffer content that is already locally available.
         return thenChainEagerly(
-            mediaInfo.buffer || bufferRequests.push(mediaInfo),
+            mediaInfo.buffer || bufferRequests.push(mediaInfo)[0],
             buffer => {
               if (buffer === undefined) return undefined;
               mediaInfo.buffer = buffer;
@@ -130,7 +130,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
     if (urlRequests.length) {
       urlRequests.resolve(this.getUpstreamConnection().requestMediaContents([...urlRequests]));
     }
-    if (bufferRequests.entries) {
+    if (bufferRequests.length) {
       bufferRequests.resolve(
           this.getUpstreamConnection().requestMediaContents([...bufferRequests]));
     }

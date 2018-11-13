@@ -296,7 +296,7 @@ function _getMediaContent (connection: ScribePartitionConnection, mediaInfo: Med
       return connection.getUpstreamConnection().requestMediaContents([actualInfo])[0];
     }
   }
-  return upstreamOperation.push(actualInfo);
+  return upstreamOperation.push(actualInfo)[0];
 }
 
 const maxDataURISourceBytes = 48000;

@@ -18,7 +18,7 @@ export const createId = require("./id/createId").default;
 
 export const derivedId = require("./id/derivedId").default;
 
-export { default as addDelayedOperationEntry } from "./addDelayedOperationEntry";
+export { default as DelayedQueue } from "./DelayedQueue";
 
 export { arrayFromAny, iterableFromAny } from "./sequenceFromAny";
 

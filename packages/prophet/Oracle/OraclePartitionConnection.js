@@ -9,7 +9,7 @@ import { ConnectOptions, MediaInfo, ReceiveEvents, RetrieveMediaBuffer } from "~
 import DecoderArray from "~/prophet/Oracle/DecoderArray";
 import upgradeEventToVersion0dot2 from "~/prophet/tools/upgradeEventToVersion0dot2";
 
-import { addDelayedOperationEntry, dumpObject, thenChainEagerly } from "~/tools";
+import { DelayedQueue, dumpObject, thenChainEagerly } from "~/tools";
 
 /**
  * The nexus connection object, which consolidates the local scribe connections and the possible
@@ -70,8 +70,8 @@ export default class OraclePartitionConnection extends PartitionConnection {
   // Coming from downstream: tries scribe first, otherwise forwards the request to authority.
   // In latter case forwards the result received from authority to Scribe for caching.
   requestMediaContents (mediaInfos: MediaInfo[]): any[] {
-    const urlRequests = {};
-    const bufferRequests = {};
+    const urlRequests = new DelayedQueue();
+    const bufferRequests = new DelayedQueue();
     const ret = mediaInfos.map(mediaInfo => {
       try {
         if (!mediaInfo.bvobId) {
@@ -95,7 +95,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
           throw new Error(`direct retrieval not implemented for mediaInfo.sourceURL '${
               sourceURI.toString()}'`);
         }
-        if (mediaInfo.asURL) return addDelayedOperationEntry(urlRequests, mediaInfo);
+        if (mediaInfo.asURL) return urlRequests.push(mediaInfo);
         let decoder;
         if (mediaInfo.type
             && !((mediaInfo.type === "application") && (mediaInfo.subtype === "octet-stream"))) {
@@ -109,7 +109,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
         // Split requests into three sets: one for URL's, one for actual contents and one for
         // just immediate decoding for buffer content that is already locally available.
         return thenChainEagerly(
-            mediaInfo.buffer || addDelayedOperationEntry(bufferRequests, mediaInfo),
+            mediaInfo.buffer || bufferRequests.push(mediaInfo),
             buffer => {
               if (buffer === undefined) return undefined;
               mediaInfo.buffer = buffer;
@@ -127,13 +127,12 @@ export default class OraclePartitionConnection extends PartitionConnection {
       "\n\tmediaInfo:", ...dumpObject(mediaInfo));
       }
     });
-    if (urlRequests.entries) {
-      urlRequests.resolveWith(
-          this.getUpstreamConnection().requestMediaContents(urlRequests.entries));
+    if (urlRequests.length) {
+      urlRequests.resolve(this.getUpstreamConnection().requestMediaContents([...urlRequests]));
     }
     if (bufferRequests.entries) {
-      bufferRequests.resolveWith(
-          this.getUpstreamConnection().requestMediaContents(bufferRequests.entries));
+      bufferRequests.resolve(
+          this.getUpstreamConnection().requestMediaContents([...bufferRequests]));
     }
     return ret;
   }

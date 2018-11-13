@@ -5,8 +5,7 @@ import { VRef, getRawIdFrom } from "~/raem/ValaaReference";
 
 import { MediaInfo, RetrieveMediaBuffer } from "~/prophet/api/types";
 
-import { addDelayedOperationEntry, dumpObject, invariantifyString, thenChainEagerly, vdon }
-    from "~/tools";
+import { DelayedQueue, dumpObject, invariantifyString, thenChainEagerly, vdon } from "~/tools";
 import { encodeDataURI } from "~/tools/html5/dataURI";
 import { bufferAndContentIdFromNative } from "~/tools/textEncoding";
 
@@ -242,7 +241,7 @@ async function _waitBackoff (backoffSeconds: number) {
 
 export function _requestMediaContents (connection: ScribePartitionConnection,
     mediaInfos: MediaInfo[], onError: Function) {
-  const upstreamOperation = {};
+  const upstreamOperation = new DelayedQueue();
   const ret = mediaInfos.map(mediaInfo => {
     const onErrorWInfo = error => onError(error, mediaInfo);
     try {
@@ -268,10 +267,10 @@ export function _requestMediaContents (connection: ScribePartitionConnection,
       throw error;
     }
   });
-  if (!upstreamOperation.entries) return ret;
+  if (!upstreamOperation.length) return ret;
   return thenChainEagerly(
-      upstreamOperation.resolveWith(
-          connection.getUpstreamConnection().requestMediaContents(upstreamOperation.entries)),
+      upstreamOperation.resolve(
+          connection.getUpstreamConnection().requestMediaContents([...upstreamOperation])),
       () => ret,
       onError);
 }
@@ -297,7 +296,7 @@ function _getMediaContent (connection: ScribePartitionConnection, mediaInfo: Med
       return connection.getUpstreamConnection().requestMediaContents([actualInfo])[0];
     }
   }
-  return addDelayedOperationEntry(upstreamOperation, actualInfo);
+  return upstreamOperation.push(actualInfo);
 }
 
 const maxDataURISourceBytes = 48000;

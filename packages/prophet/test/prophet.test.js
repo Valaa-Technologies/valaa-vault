@@ -107,12 +107,12 @@ describe("Prophet", () => {
   });
 
   const coupleCommands = [
-    created({ id: "other_entity", typeName: "Entity", initialState: {
-      name: "Some other entity", owner: "test_partition",
+    created({ id: "some_media", typeName: "Media", initialState: {
+      name: "Simple Media", owner: "test_partition",
     } }),
     created({ id: "simple_relation", typeName: "Relation", initialState: {
       name: "Simple-other Relation", owner: vRef("simple_entity", "relations"),
-      target: "other_entity",
+      target: "some_media",
     } }),
   ];
 
@@ -137,7 +137,7 @@ describe("Prophet", () => {
       truthEventIdBegin, truthToCommandBorderEventId, commandEventIdEnd) {
     expect(connection.getFirstTruthEventId()).toEqual(truthEventIdBegin);
     expect(connection.getFirstUnusedTruthEventId()).toEqual(truthToCommandBorderEventId);
-    expect(connection.getFirstCommandEventId()).toEqual(truthToCommandBorderEventId);
+    expect(connection.getFirstCommandEventId()).toBeLessThanOrEqual(truthToCommandBorderEventId);
     expect(connection.getFirstUnusedCommandEventId()).toEqual(commandEventIdEnd);
   }
 
@@ -166,27 +166,28 @@ describe("Prophet", () => {
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
     expect(totalCommandCount).toEqual(3);
     expect(authorityConnection._upstreamEntries.length).toEqual(1);
+    await seconds[0].getPersistedEvent();
     await seconds[1].getPersistedEvent();
     expect(authorityConnection._upstreamEntries.length).toEqual(3);
 
     const twoEntries = authorityConnection._upstreamEntries.splice(0, 2);
     const twoTruthEvents = JSON.parse(JSON.stringify(twoEntries.map(entry => entry.event)));
-    twoEntries[0].resolveTruthEvent();
-    twoEntries[1].resolveTruthEvent();
+    twoEntries[0].resolveTruthEvent(twoTruthEvents[0]);
+    twoEntries[1].resolveTruthEvent(twoTruthEvents[1]);
     await authorityConnection.getReceiveTruths()(twoTruthEvents);
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 3, 4);
 
     const lastEntry = authorityConnection._upstreamEntries.splice(0, 1);
     const lastTruthEvents = JSON.parse(JSON.stringify(lastEntry.map(entry => entry.event)));
-    lastEntry[0].resolveTruthEvent();
+    lastEntry[0].resolveTruthEvent(lastTruthEvents[0]);
     await authorityConnection.getReceiveTruths()(lastTruthEvents);
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
   });
 
   it("automatically confirms local partition commands as truths", async () => {
-    const { scribeConnection } = await setUp({ isLocallyPersisted: true }, { verbosity: 0 });
+    const { scribeConnection } = await setUp({ isLocallyPersisted: true }, { verbosity: 2 });
     let totalCommandCount;
     harness.prophet.setCommandCountCallback((total) => { totalCommandCount = total; });
     expect(totalCommandCount).toEqual(0);
@@ -199,6 +200,7 @@ describe("Prophet", () => {
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
     await persisted;
     expect(totalCommandCount).toEqual(0);
+    await first.getTruthEvent();
     expectConnectionEventIds(scribeConnection, 0, 2, 2);
 
     const seconds = harness.chronicleEvents(coupleCommands).eventResults;
@@ -210,7 +212,6 @@ describe("Prophet", () => {
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
   });
-
 
   it("resolves getTruthEvent when its commands are confirmed by either pull or push", async () => {
     const { scribeConnection, authorityConnection } =
@@ -265,8 +266,7 @@ describe("Prophet", () => {
   });
 
   it(`resolves getTruthEvent when command is reordered and others rejected,${
-      ""} with a manual re-chronicle of the schismatic prophecies`,
-  async () => {
+      ""} with a manual re-chronicle of the schismatic prophecies`, async () => {
     const { scribeConnection, authorityConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
 
@@ -358,7 +358,7 @@ describe("Prophet", () => {
 
     expect(harness.run(vRef("simple_entity"),
             VALK.toField("relations").toIndex(0).toField("target").toField("name")))
-        .toEqual("Some other entity");
+        .toEqual("Simple Media");
   });
 
   it("resolves getTruthEvent when a command is reordered and others revised", async () => {
@@ -374,8 +374,8 @@ describe("Prophet", () => {
     const seconds = harness.chronicleEvents(coupleCommands).eventResults;
     const secondsTruths = [], secondsFailures = [];
     const secondsTruthProcesses = seconds.map((result_, index) => result_.getTruthEvent().then(
-            truthEvent_ => (secondsTruths[index] = truthEvent_),
-            failure => (secondsFailures[index] = failure)));
+        truthEvent_ => (secondsTruths[index] = truthEvent_),
+        failure => (secondsFailures[index] = failure)));
     await seconds[1].getPersistedEvent();
     const secondsFirstEntries = authorityConnection._upstreamEntries.splice(1, 1);
     authorityConnection._upstreamEntries = [];
@@ -385,8 +385,12 @@ describe("Prophet", () => {
     secondsFirstEntries[0].resolveTruthEvent(secondsFirstTruth[0]);
     await authorityConnection.getReceiveTruths()(secondsFirstTruth);
     // ...until a divergence due to revise-instead-of-reject happens here.
-    await seconds[1].getPersistedEvent();
+    await seconds[0].getTruthEvent();
+    expect(seconds[0].getCommandOf(testPartitionURI).eventId).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
+    expect(first.getCommandOf(testPartitionURI).eventId).toEqual(2);
+    expect(seconds[1].getCommandOf(testPartitionURI).eventId).toEqual(3);
+    await seconds[1].getPersistedEvent();
 
     expect(authorityConnection._upstreamEntries.length).toEqual(2);
     const stageTwoEntries = JSON.parse(JSON.stringify(
@@ -406,6 +410,60 @@ describe("Prophet", () => {
     expect(seconds[0].getCommandOf(testPartitionURI).eventId).toEqual(1);
     expect(JSON.parse(JSON.stringify(seconds[1].getCommandOf(testPartitionURI))))
         .toMatchObject(stageTwoEntries[1]);
+
+    expect(secondsTruths.length).toEqual(2);
+    expect(secondsFailures.length).toEqual(0);
+  });
+
+  it("reviews prophecies and resolves getTruthEvent with incoming foreign truths", async () => {
+    const { scribeConnection, authorityConnection } =
+        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+
+    // Repeat the steps of the previous test case...
+    const first = harness.chronicleEvent(simpleCommand);
+    let firstTruth, firstFailure;
+    const firstTruthProcess = first.getTruthEvent()
+        .then(truthEvent_ => (firstTruth = truthEvent_), failure => (firstFailure = failure));
+    await first.getPersistedEvent();
+    const seconds = harness.chronicleEvents(coupleCommands).eventResults;
+    const secondsTruths = [], secondsFailures = [];
+    const secondsTruthProcesses = seconds.map((result_, index) => result_.getTruthEvent().then(
+            truthEvent_ => (secondsTruths[index] = truthEvent_),
+            failure => (secondsFailures[index] = failure)));
+    await seconds[1].getPersistedEvent();
+    expectConnectionEventIds(scribeConnection, 0, 1, 4);
+    expect(authorityConnection._upstreamEntries.length).toEqual(3);
+    authorityConnection._upstreamEntries = [];
+    const foreignTruth = created({
+      id: "foreign_entity", typeName: "Entity", initialState: {
+        name: "Simple Entity", owner: "test_partition",
+      },
+      version: "0.2", commandId: "foreign_entity", eventId: 1,
+    });
+    await authorityConnection.getReceiveTruths()([foreignTruth]);
+    await seconds[1].getPersistedEvent();
+    expectConnectionEventIds(scribeConnection, 0, 2, 5);
+
+    expect(authorityConnection._upstreamEntries.length).toEqual(3);
+    const stageTwoEntries = JSON.parse(JSON.stringify(
+        authorityConnection._upstreamEntries.splice(0, 3).map(entry => entry.event)));
+    expect(stageTwoEntries[0].eventId).toEqual(2);
+    expect(stageTwoEntries[1].eventId).toEqual(3);
+    expect(stageTwoEntries[2].eventId).toEqual(4);
+    await authorityConnection.getReceiveTruths()(stageTwoEntries);
+    expectConnectionEventIds(scribeConnection, 0, 5, 5);
+
+    await firstTruthProcess;
+    expect(firstTruth).toMatchObject(simpleCommand);
+    expect(firstFailure).toEqual(undefined);
+    expect(first.getCommandOf(testPartitionURI)).toMatchObject(stageTwoEntries[0]);
+
+    await secondsTruthProcesses[0];
+    await secondsTruthProcesses[1];
+    expect(JSON.parse(JSON.stringify(seconds[0].getCommandOf(testPartitionURI))))
+        .toMatchObject(stageTwoEntries[1]);
+    expect(JSON.parse(JSON.stringify(seconds[1].getCommandOf(testPartitionURI))))
+        .toMatchObject(stageTwoEntries[2]);
 
     expect(secondsTruths.length).toEqual(2);
     expect(secondsFailures.length).toEqual(0);

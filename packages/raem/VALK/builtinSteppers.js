@@ -44,6 +44,10 @@ export default Object.freeze({
   "§'": function literal (valker: Valker, head: any, scope: ?Object, [, value]: BuiltinStep) {
     return value;
   },
+  "§ref": function valaaReference (valker: Valker, head: any, scope: ?Object,
+    [, resourceParts, partition]: BuiltinStep): VRef {
+    return valker.pack(obtainVRef(resourceParts, undefined, undefined, partition));
+  },
   "§VRef": function valaaReference (valker: Valker, head: any, scope: ?Object,
       [, args]: BuiltinStep): VRef {
     return valker.pack(obtainVRef(args));

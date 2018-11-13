@@ -38,7 +38,7 @@ class MockPartitionConnection extends AuthorityPartitionConnection {
 }
 
 class MockEventResult extends ChronicleEventResult {
-  getLocalEvent () { return undefined; };
+  getLocalEvent () { return undefined; }
   getTruthEvent () {
     if (!this.isPrimary) return Promise.reject(new Error("Not primary"));
     return (this.truthEventProcess = new Promise((resolve, reject) => {

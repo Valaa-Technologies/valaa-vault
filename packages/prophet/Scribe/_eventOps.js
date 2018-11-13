@@ -142,14 +142,24 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
 ): ChronicleRequest {
   if (!events || !events.length) return { eventResults: events };
   const resultBase = new ScribeEventResult(null, { events, onError });
-  resultBase.receivedEventsProcess = thenChainEagerly(
-      options.isTruth
-          ? connection.getReceiveTruths(options.receiveTruths)(
-            // pre-authorized medias must be preCached, throw on any retrieveMediaBuffer calls.
-              events, options.retrieveMediaBuffer || _throwOnMediaRequest.bind(null, connection))
-          : connection.getReceiveCommands(options.receiveCommands)(
-              events, options.retrieveMediaBuffer),
-      receivedEvents => (resultBase.receivedEventsProcess = receivedEvents),
+  // the 'mostRecentReceiveEventsProcess' is a kludge to sequentialize the chronicling process so
+  // that waiting for possible media ops doesn't mess up the order.
+  const receiveEventsProcess = options.isTruth
+      ? connection.getReceiveTruths(options.receiveTruths)(
+        // pre-authorized medias must be preCached, throw on any retrieveMediaBuffer calls.
+          events, options.retrieveMediaBuffer || _throwOnMediaRequest.bind(null, connection))
+      : connection.getReceiveCommands(options.receiveCommands)(
+          events, options.retrieveMediaBuffer);
+  connection._mostRecentReceiveEventsProcess = resultBase.receivedEventsProcess = thenChainEagerly(
+      connection._mostRecentReceiveEventsProcess, [
+        () => receiveEventsProcess,
+        (receivedEvents) => {
+          if (connection._mostRecentReceiveEventsProcess === resultBase.receivedEventsProcess) {
+            connection._mostRecentReceiveEventsProcess = null;
+          }
+          return (resultBase.receivedEventsProcess = receivedEvents);
+        },
+      ],
       onError);
   if (options.isTruth) {
     resultBase.getTruthEvent = function getTruthEvent () { return this.event; };
@@ -177,10 +187,14 @@ class ScribeEventResult extends ChronicleEventResult {
         this.onError);
   }
   getTruthEvent (): EventBase {
-    return thenChainEagerly(this.chroniclingProcess,
-        ({ eventResults }) => eventResults[this.index - (this.events.length - eventResults.length)]
-            .getTruthEvent(),
-        this.onError);
+    let results;
+    return thenChainEagerly(this.chroniclingProcess, [
+      ({ eventResults }) => (results = eventResults)[
+          this.index - (this.events.length - eventResults.length)].getTruthEvent(),
+      (truthEvent) => {
+        return truthEvent;
+      }
+    ], this.onError);
   }
 }
 

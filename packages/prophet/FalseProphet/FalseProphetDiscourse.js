@@ -36,6 +36,8 @@ export default class FalseProphetDiscourse extends Discourse {
     invariantify(this.state, "FalseProphetDiscourse.state");
   }
 
+  getProphet () { return this._prophet; }
+
   debugId (options: ?Object): string {
     return `${this.constructor.name}(${
         this._transactionInfo ? this._transactionInfo.name : "non-transactional"}: ${

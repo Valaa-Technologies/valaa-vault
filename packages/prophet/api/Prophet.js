@@ -134,6 +134,20 @@ export default class Prophet extends LogEventGenerator {
           new Error(`acquirePartitionConnection(${String(partitionURI)})`),
           "\n\toptions:", ...dumpObject(options));
     }
+      /*
+      if (options.newPartition || options.synchronous) {
+        if (options.synchronous) return connection;
+        if (connection && connection.getFirstUnusedTruthEventId()) {
+          throw new Error(`Partition already exists when trying to create a new partition '${
+              String(partitionURI)}'`);
+        }
+      }
+
+      if (!ret || (!ret.isSynced() && (options.allowPartialConnection === false))) return undefined;
+      // oracle.logEvent("acquirePC:", partitionURI, ...dumpObject(options),
+      //    "\n\tret:", ...dumpObject(ret));
+      return ret;
+      */
   }
 
   _createPartitionConnection (partitionURI: ValaaURI, options: ConnectOptions) {

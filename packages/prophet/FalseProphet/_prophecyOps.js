@@ -61,6 +61,11 @@ export function _confirmProphecyCommand (connection: FalseProphetPartitionConnec
       return false;
     }
     if (!partition.confirmCommand) return false;
+    /*
+    connection.warnEvent(1, "\n\t.confirmProphecyCommand:",
+        "\n\tprophecy:", ...dumpObject(prophecy),
+        "\n\tcommand:", ...dumpObject(command));
+    */
     partition.confirmCommand(command);
     partition.confirmCommand = null;
   }
@@ -353,15 +358,29 @@ class ProphecyOperation extends ProphecyEventResult {
         }
         return mapEagerly(this._activePartitions,
             partition => {
-              const maybeQuickTruth = partition.chronicling.getTruthEvent();
+              const chronicledTruth = partition.chronicling.getTruthEvent();
+              let truthProcess = chronicledTruth;
+              let receivedTruth;
+              if (isPromise(truthProcess)) {
+                receivedTruth = new Promise((resolve, reject) => {
+                  partition.confirmCommand = resolve;
+                  partition.rejectCommand = reject;
+                });
+                truthProcess = Promise.race([receivedTruth, truthProcess]);
+              }
               return thenChainEagerly(
-                  !isPromise(maybeQuickTruth)
-                      ? maybeQuickTruth
-                      : Promise.race([maybeQuickTruth, new Promise((resolve, reject) => {
-                        partition.confirmCommand = resolve;
-                        partition.rejectCommand = reject;
-                      })]),
+                  truthProcess,
                   truth => {
+                    if (!truth) {
+                      Promise.all([chronicledTruth, receivedTruth]).then(([chronicled, received]) => {
+                        partition.connection.errorEvent(
+                          "\n\tnull truth when fulfilling prophecy:", ...dumpObject(this._prophecy),
+                          "\n\tchronicled:", isPromise(chronicledTruth),
+                              ...dumpObject(chronicled), ...dumpObject(chronicledTruth),
+                          "\n\treceived:", isPromise(receivedTruth),
+                              ...dumpObject(received), ...dumpObject(receivedTruth));
+                      });
+                    }
                     if (truth.eventId !== partition.commandEvent.eventId) {
                       // this partition command was/will be revised
                     }
@@ -375,8 +394,9 @@ class ProphecyOperation extends ProphecyEventResult {
             },
             (error, { connection, chronicling }, index) => {
               throw this._prophet.wrapErrorEvent(error,
-                  new Error(`chronicleEvents.stage["${stage.name}"]._activePartitions[${index}](${
-                      chronicling && chronicling.event.eventId}).getTruthEvent()"`),
+                  new Error(`chronicleEvents.stage["${stage.name}"]._activePartitions[${index
+                      }].eventResults[${chronicling && chronicling.event.eventId
+                      }].getTruthEvent()"`),
                   "\n\tchroniclings:", ...dumpObject(this._activePartitions));
             }
         );

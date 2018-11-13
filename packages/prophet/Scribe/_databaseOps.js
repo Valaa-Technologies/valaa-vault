@@ -193,7 +193,7 @@ export function _readMediaEntries (connection: ScribePartitionConnection, result
             if (connection._prophet._bvobLookup[bvobId]) {
               connection._prophet._adjustInMemoryBvobBufferRefCounts({ [bvobId]: 1 });
             } else {
-              connection.errorEvent(`Can't find Media "${entry.mediaInfo.name
+              connection.errorEvent(`Can't find Media "${(entry.mediaInfo || {}).name
                   }" in-memory Bvob info for ${entry.mediaInfo.bvobId
                   } when reading partition media infos`);
             }
@@ -366,7 +366,7 @@ export function _writeTruths (connection: ScribePartitionConnection, truthLog: E
       }
       const req = truths.add(_serializeEventAsJSON(truth));
       req.onerror = reqEvent => {
-        if (reqEvent.error.name !== "ConstraintError") throw req.error;
+        if (((reqEvent.target || {}).error || {}).name !== "ConstraintError") throw req.error;
         reqEvent.preventDefault(); // Prevent transaction abort.
         reqEvent.stopPropagation(); // Prevent transaction onerror callback call.
         const validateReq = truths.get(truth.eventId);

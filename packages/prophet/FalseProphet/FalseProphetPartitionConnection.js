@@ -175,7 +175,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
                 ? `_insertUnconfirmedCommandsToQueue().events[${index}]`
                 : `_insertPendingTruthsToQueue().events[${index}]`,
             "\n\tevents:", ...dumpObject(events),
-            "\n\tevents[${index}]:", ...dumpObject(events[index]),
+            `\n\tevents[${index}]:`, ...dumpObject(events[index]),
             "\n\ttargetQueue:", ...dumpObject(targetQueue),
             "\n\tqueueIndex:", queueIndex,
             "\n\tthis:", ...dumpObject(this));

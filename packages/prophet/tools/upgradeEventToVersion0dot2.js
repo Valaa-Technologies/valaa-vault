@@ -10,7 +10,10 @@ import extractEventOfPartition from "./extractEventOfPartition";
 export default function upgradeEventToVersion0dot2 (event: EventBase,
     connection: PartitionConnection) {
   try {
-    if (event.version === "0.2") return event;
+    if (event.version === "0.2") {
+      if (!event.commandId) throw new Error("invalid version 0.2 event: .commandId missing");
+      return event;
+    }
     let ret;
     if (event.version === "0.1") {
       ret = extractEventOfPartition(event, connection, connection.getPartitionRawId());

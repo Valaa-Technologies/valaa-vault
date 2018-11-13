@@ -33,15 +33,16 @@
  * @param {*} entry
  * @returns
  */
-export class DelayedQueue {
+export default class DelayedQueue {
   _entries: Array<any> = [];
   _promises: Array<{ resolve: Function, reject: Function }> = [];
 
-  [Symbol.iterator] () { return this._entries[Symbol.iterator]; }
+  [Symbol.iterator] () { return this._entries[Symbol.iterator](); }
   forEach (callback: Function) { return this._entries.forEach(callback); }
   map (callback: Function) { return this._entries.map(callback); }
 
-  push (entry) { return this.set(this._entries.length, entry); }
+  push (...entries) { return entries.map(entry => this.set(this._entries.length, entry)); }
+  get (index) { return this._entries[index]; }
   set (index, entry) {
     this._entries[index] = entry;
     return new Promise((resolve, reject) => { this._promises[index] = { resolve, reject }; });
@@ -53,10 +54,12 @@ export class DelayedQueue {
         promise => promise && promise.reject(rejectReason));
     return ret;
   }
-  resolve (values: Array<any>, start: number = 0) {
+  resolve (values: Promise<Array<any> > | Array<any>, start: number = 0) {
+    if (!values) throw new Error("DelayedQueue.values must be an array or promise to one");
     if (!Array.isArray(values)) {
       return Promise.resolve(values).then(values_ => this.resolve(values_, start));
     }
+    if (!values.length) return [];
     const ret = this._entries.splice(start, values.length);
     this._promises.splice(start, values.length).forEach(
         (promise, index) => promise && promise.resolve(values[index]));

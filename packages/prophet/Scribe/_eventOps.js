@@ -89,9 +89,9 @@ async function _narrateLocalLogs (connection: ScribePartitionConnection,
     const commands = ((currentEventId < commandEventIdEnd) && await connection._readCommands({
       eventIdBegin: currentEventId, eventIdEnd: commandEventIdEnd,
     })) || [];
+    const commandIdBegin = connection._commandQueueInfo.eventIdBegin;
     commands.forEach(command => {
-      this._commandQueueInfo.commandIds[command.eventId - this._commandQueueInfo.eventIdBegin] =
-          command.commandId;
+      connection._commandQueueInfo.commandIds[command.eventId - commandIdBegin] = command.commandId;
     });
     ret.scribeCommandQueue = !commands.length ? commands
         : await Promise.all(await receiveCommands(commands, retrieveMediaBuffer));
@@ -184,6 +184,18 @@ class ScribeEventResult extends ChronicleEventResult {
   }
 }
 
+export function _throwOnMediaRequest (connection: ScribePartitionConnection,
+    mediaInfo: MediaInfo) {
+  throw connection.wrapErrorEvent(
+      new Error(`Cannot retrieve media '${mediaInfo.name}' content through partition '${
+        connection.getName()}'`),
+      "retrieveMediaBuffer",
+      "\n\tdata not found in local bvob cache and no remote content retriever is specified",
+      ...(connection.isRemoteAuthority()
+          ? ["\n\tlocal/transient partitions don't have remote storage backing"] : []),
+      "\n\tmediaInfo:", ...dumpObject(mediaInfo));
+}
+
 /*
  #####
 #     #   ####   #    #  #    #   ####   #    #
@@ -228,8 +240,9 @@ export function _receiveEvents (
   if (!newActions.length) return receivedActions;
 
   const requestOptions = { retryTimes: 4, delayBaseSeconds: 5, retrieveMediaBuffer };
+  const persist = connection.isLocallyPersisted();
 
-  const preOpsProcess = connection.isLocallyPersisted() && Promise.all(
+  const mediaProcesses = persist && Promise.all(
       Object.values(mediaPreOps).map(mediaEntry =>
           _retrySyncMedia(connection, mediaEntry, requestOptions)));
 
@@ -246,30 +259,38 @@ export function _receiveEvents (
     // immediately and have the UI start responding to the incoming
     // changes.
     // This delivery is unordered: downstream must handle ordering.
-    thenChainEagerly(preOpsProcess,
+    thenChainEagerly(mediaProcesses,
         () => downstreamReceiveTruths(newActions, retrieveMediaBuffer),
         onError);
   }
+  let writeProcess;
   if (!receivingTruths) {
-    newActions.forEach(action => connection._commandQueueInfo.commandIds.push(action.commandId));
     connection._commandQueueInfo.eventIdEnd += newActions.length;
+    writeProcess = persist
+        && Promise.all(connection._commandQueueInfo.writeQueue.push(...newActions));
+    newActions.forEach(action => connection._commandQueueInfo.commandIds.push(action.commandId));
+    connection._triggerCommandQueueWrites();
   } else {
-    connection._truthLogInfo.eventIdEnd = newActions[newActions.length - 1].eventId + 1;
-    connection._clampCommandQueueByTruthEvendIdEnd(newActions[newActions.length - 1].commandId);
+    const lastTruth = newActions[newActions.length - 1];
+    connection._truthLogInfo.eventIdEnd = lastTruth.eventId + 1;
+    writeProcess = persist
+        && Promise.all(connection._truthLogInfo.writeQueue.push(...newActions));
+    connection._triggerTruthLogWrites(lastTruth.commandId);
   }
 
-  let updatedEntries;
-  return !preOpsProcess
-      ? receivedActions
-      : thenChainEagerly(preOpsProcess, [
-        (updatedEntries_) => (updatedEntries = updatedEntries_),
-        () => connection[receivingTruths ? "_writeTruths" : "_writeCommands"](newActions),
-        () => connection._updateMediaEntries(updatedEntries),
-        () => receivedActions,
-      ], error => {
-        if ((error.originalError || error).cacheConflict) error.revise = true;
-        throw error;
-      });
+  const newActionIndex = receivedActions.length - newActions.length;
+  return thenChainEagerly(writeProcess, [
+    writtenEvents => {
+      (writtenEvents || []).forEach(
+          (event, index) => { receivedActions[newActionIndex + index] = event; });
+      return mediaProcesses;
+    },
+    updatedEntries => updatedEntries && connection._updateMediaEntries(updatedEntries),
+    () => receivedActions,
+  ], error => {
+    if ((error.originalError || error).cacheConflict) error.revise = true;
+    throw error;
+  });
 }
 
 function _determineEventPreOps (connection: ScribePartitionConnection, event: Object,
@@ -294,14 +315,36 @@ function _determineEventPreOps (connection: ScribePartitionConnection, event: Ob
   return ret || [];
 }
 
-export function _throwOnMediaRequest (connection: ScribePartitionConnection,
-    mediaInfo: MediaInfo) {
-  throw connection.wrapErrorEvent(
-      new Error(`Cannot retrieve media '${mediaInfo.name}' content through partition '${
-        connection.getName()}'`),
-      "retrieveMediaBuffer",
-      "\n\tdata not found in local bvob cache and no remote content retriever is specified",
-      ...(connection.isRemoteAuthority()
-          ? ["\n\tlocal/transient partitions don't have remote storage backing"] : []),
-      "\n\tmediaInfo:", ...dumpObject(mediaInfo));
+// Returns a promise to the next write operation that completes and
+// initiates one if no writes are currently on-going.
+// If onComplete is provided it will be called with the written
+// events and its return value is used to resolve the returned
+// promise. Otherwise the written events will be used to resolve the
+// promise directly.
+// If there are new entries in the write queue and onComplete didn't
+// throw an error, a new write operation will then be initiated.
+export function _triggerEventQueueWrites (connection: ScribePartitionConnection, eventsInfo: Object,
+    writeEvents: Function, onComplete?: Function, onError?: Function) {
+  const myQueue = eventsInfo.writeQueue;
+  if (!myQueue.length || eventsInfo.writeProcess) return eventsInfo.writeProcess;
+  return (eventsInfo.writeProcess = thenChainEagerly(
+      writeEvents([...myQueue]),
+      writtenEvents => {
+        if (myQueue !== eventsInfo.writeQueue) {
+          const error = new Error(
+              `${writeEvents.name} write queue purged, discarding all old writes`);
+          myQueue.reject(error);
+          throw error;
+        }
+        eventsInfo.writeProcess = null;
+        myQueue.resolve(writtenEvents);
+        const ret = !onComplete ? writtenEvents : onComplete(writtenEvents);
+        _triggerEventQueueWrites(connection, eventsInfo, writeEvents, onComplete, onError);
+        return ret;
+      },
+      error => {
+        eventsInfo.writeProcess = null;
+        if (!onError) throw error;
+        return onError(error);
+      }));
 }

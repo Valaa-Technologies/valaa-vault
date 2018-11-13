@@ -9,7 +9,7 @@ import {
   ReceiveEvents, RetrieveMediaBuffer,
 } from "~/prophet/api/types";
 
-import { dumpObject, thenChainEagerly } from "~/tools";
+import { DelayedQueue, dumpObject, thenChainEagerly } from "~/tools";
 
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 
@@ -21,7 +21,7 @@ import {
   _writeTruths, _readTruths, _writeCommands, _readCommands, _deleteCommands,
 } from "./_databaseOps";
 import {
-  _narrateEventLog, _chronicleEvents, _receiveEvents,
+  _narrateEventLog, _chronicleEvents, _receiveEvents, _triggerEventQueueWrites
 } from "./_eventOps";
 
 export default class ScribePartitionConnection extends PartitionConnection {
@@ -48,8 +48,12 @@ export default class ScribePartitionConnection extends PartitionConnection {
 
   constructor (options: Object) {
     super(options);
-    this._truthLogInfo = { eventIdBegin: 0, eventIdEnd: 0 };
-    this._commandQueueInfo = { eventIdBegin: 0, eventIdEnd: 0, commandIds: [] };
+    this._truthLogInfo = {
+      eventIdBegin: 0, eventIdEnd: 0, writeQueue: new DelayedQueue(),
+    };
+    this._commandQueueInfo = {
+      eventIdBegin: 0, eventIdEnd: 0, writeQueue: new DelayedQueue(), commandIds: [],
+    };
   }
 
   getStatus () {
@@ -174,6 +178,33 @@ export default class ScribePartitionConnection extends PartitionConnection {
         "receiveCommands");
   }
 
+  // Returns a promise to a write operation after which all entries
+  // currently in the command queue write queue have been written, or
+  // undefined if there are no pending command writes.
+  _triggerCommandQueueWrites () {
+    if (!this._commandQueueInfo.writeQueue.length) return undefined;
+    if (this._commandQueueInfo.writeProcess) {
+      return this._commandQueueInfo.writeProcess.then(() => this._commandQueueInfo.writeProcess);
+    }
+    return _triggerEventQueueWrites(this, this._commandQueueInfo, this._writeCommands.bind(this),
+        undefined, (error) => {
+          // Check for cross-tab writes
+          throw error;
+        });
+  }
+
+  // Returns a promise to a write operation after which all entries
+  // currently in the truth log write queue have been written, or
+  // undefined if there are no pending truth writes.
+  _triggerTruthLogWrites (lastTruthCommandId?: any) {
+    this._clampCommandQueueByTruthEvendIdEnd(lastTruthCommandId);
+    if (!this._truthLogInfo.writeQueue.length) return undefined;
+    if (this._truthLogInfo.writeProcess) {
+      return this._truthLogInfo.writeProcess.then(() => this._truthLogInfo.writeProcess);
+    }
+    return _triggerEventQueueWrites(this, this._truthLogInfo, this._writeTruths.bind(this));
+  }
+
   _clampCommandQueueByTruthEvendIdEnd (lastTruthCommandId?: any) {
     const deleteBegin = this._commandQueueInfo.eventIdBegin;
     if (this._truthLogInfo.eventIdEnd <= deleteBegin) return undefined;
@@ -198,9 +229,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
         });
   }
 
-  _reloadCommandQueue (conflictingCommandEventId: number) {
-
-  }
+  _reloadCommandQueue (conflictingCommandEventId: number) {}
 
   _determineEventMediaPreOps (mediaEvent: Object, rootEvent: Object) {
     const mediaId = obtainVRef(mediaEvent.id);

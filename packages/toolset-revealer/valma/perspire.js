@@ -2,7 +2,6 @@
 
 const path = require("path");
 
-
 exports.command = "perspire [revelationPaths..]";
 exports.describe = "headless server-side environment";
 
@@ -40,13 +39,10 @@ exports.builder = (yargs) => yargs.option({
 });
 
 exports.handler = async (yargv) => {
-  // Example template which displays the command name itself and package name where it is ran
-  // Only enabled inside package
-  global.self = global;
-  global.name = "Perspire window";
-  global.window = global;
-
   const JSDOM = require("jsdom").JSDOM;
+  const WebSocket = require("ws"); // For networking in Node environments
+
+  const PerspireServer = require("@valos/inspire/PerspireServer").default;
 
   const container = new JSDOM(`
   <div id="valaa-inspire--main-container"></div>
@@ -55,18 +51,20 @@ exports.handler = async (yargv) => {
   meta.httpEquiv = "refresh";
   meta.content = "1";
   container.window.document.getElementsByTagName("head")[0].appendChild(meta);
+
+  // for jsdom.
+  global.self = global;
+  global.name = "Perspire window";
+  global.WebSocket = WebSocket;
+
+  // reset of window after jsdom is set
   global.window = container.window;
   global.document = container.window.document;
   global.navigator = container.window.navigator;
-  global.WebSocket = require("ws"); // For networking in Node environments
-  global.requestAnimationFrame = (callback) => {
-    setTimeout(callback, 0);
-  };
-  global.cancelAnimationFrame = (callback) => {
-    setTimeout(callback, 0);
-  };
-  const PerspireServer = require("@valos/inspire/PerspireServer").default;
+  global.requestAnimationFrame = (callback) => { setTimeout(callback, 0); };
+  global.cancelAnimationFrame = (callback) => { setTimeout(callback, 0); };
 
+  // revelationPaths parsing
   const vlm = yargv.vlm;
   const revelationPaths = (yargv.revelationPaths || []).length
       ? yargv.revelationPaths : ["./revela.json"];
@@ -74,17 +72,18 @@ exports.handler = async (yargv) => {
     require(path.join(process.cwd(), element));
   });
   vlm.shell.mkdir("-p", yargv.cacheRoot);
-  // some web to node env emulation
 
-  const server = new PerspireServer({
+  const serverOptions = {
     revelationRoot: (yargv.revelationRoot !== undefined)
         ? yargv.revelationRoot
         : vlm.path.dirname(revelationPaths[0]),
     revelations: [
-      { gateway: { scribe: { databaseConfig: {
-        // See https://github.com/axemclion/IndexedDBShim for config options
-        databaseBasePath: yargv.cacheRoot,
-        checkOrigin: false,
+      { gateway: {
+          scribe: {
+            databaseConfig: {
+              // See https://github.com/axemclion/IndexedDBShim for config options
+              databaseBasePath: yargv.cacheRoot,
+              checkOrigin: false,
       } } } },
       ...revelationPaths.map(p => {
         if (!vlm.shell.test("-f", p)) throw new Error(`Cannot open file '${p}' for reading`);
@@ -94,9 +93,16 @@ exports.handler = async (yargv) => {
     ],
     pluginPaths: yargv.plugin,
     outputPath: yargv.output,
-    container
-  });
+    container: container,
+  };
+
+  const server = new PerspireServer(serverOptions);
   await server.start();
+
+  // Creating perspire specific objects and variables.
+  // Please use server.Valaa.Perspire for external packages
+  server.Valaa.Perspire = {};
+  server.Valaa.isServer = true;
 
   const interval = (typeof yargv.keepalive === "number") ? yargv.keepalive : (yargv.keepalive && 1);
   if (interval) {

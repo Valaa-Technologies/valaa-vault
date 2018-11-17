@@ -1,7 +1,6 @@
 // @flow
 
-import Command, { created, duplicated, destroyed, EventBase } from "~/raem/command";
-import { Action } from "~/raem";
+import { Action, Command, created, duplicated, destroyed, EventBase } from "~/raem/events";
 import type { Corpus } from "~/raem/Corpus";
 import ValaaURI, { createValaaURI, createPartitionURI } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/ValaaReference";

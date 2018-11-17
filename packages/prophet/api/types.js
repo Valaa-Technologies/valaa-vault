@@ -1,8 +1,8 @@
 // @flow
 
-import type { Command, EventBase, Story, Truth } from "~/raem/command";
+import { Command, EventBase, Truth } from "~/raem/events";
 import { VRef } from "~/raem/ValaaReference";
-import { getActionFromPassage } from "~/raem/redux/Bard";
+import { getActionFromPassage, Story } from "~/raem/redux/Bard";
 
 import thenChainEagerly from "~/tools/thenChainEagerly";
 

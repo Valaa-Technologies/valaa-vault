@@ -2,7 +2,7 @@
 
 import { createPassageFromAction, getActionFromPassage } from "~/raem";
 
-import { transacted, EventBase } from "~/raem/command";
+import { transacted, EventBase } from "~/raem/events";
 import type { Corpus } from "~/raem/Corpus";
 
 import { ChronicleRequest, ChronicleEventResult } from "~/prophet/api/types";

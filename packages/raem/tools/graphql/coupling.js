@@ -1,4 +1,4 @@
-import { addedTo, destroyed, fieldsSet, removedFrom } from "~/raem/command";
+import { addedTo, destroyed, fieldsSet, removedFrom } from "~/raem/events";
 import invariantify from "~/tools/invariantify";
 
 // There are two categories for boths side of the coupling separately: plurality and specifity.

@@ -1,5 +1,5 @@
 import { OrderedMap } from "immutable";
-import { created, fieldsSet, removedFrom, destroyed } from "~/raem/command";
+import { created, fieldsSet, removedFrom, destroyed } from "~/raem/events";
 import VALK from "~/raem/VALK";
 
 import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";

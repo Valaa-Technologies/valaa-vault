@@ -1,6 +1,6 @@
 // @flow
 
-import type { EventBase } from "~/raem/command";
+import type { EventBase } from "~/raem/events";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import thenChainEagerly from "~/tools/thenChainEagerly";

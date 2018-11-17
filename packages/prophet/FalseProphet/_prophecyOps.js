@@ -1,7 +1,7 @@
 // @flow
 
 import { getActionFromPassage } from "~/raem";
-import { Command, EventBase } from "~/raem/command";
+import { Command, EventBase } from "~/raem/events";
 import type { Story } from "~/raem/redux/Bard";
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
 import { createPartitionURI } from "~/raem/ValaaURI";

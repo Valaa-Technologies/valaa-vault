@@ -195,7 +195,7 @@ module.exports = {
       // names which are still a mess:
       // @valos/tools (I think correct),
       // */schema (maybe plural? maybe not),
-      // raem/command (should probably be plural). Etc.
+      // raem/events (should probably be plural). Etc.
       `The decision on when a thing with sub-things is a collection of
       homogenous entries (and should maybe be pluralized) and when is
       such a thing a single entity with properties is sometimes hard.`,

@@ -1,4 +1,4 @@
-import Command from "~/raem/command";
+import { Command } from "~/raem/events";
 import FakeIndexedDB from "fake-indexeddb";
 import FDBDatabase from "fake-indexeddb/lib/FDBDatabase";
 

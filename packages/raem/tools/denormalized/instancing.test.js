@@ -1,4 +1,4 @@
-import { created, fieldsSet, transacted } from "~/raem/command";
+import { created, fieldsSet, transacted } from "~/raem/events";
 
 import { vRef, getRawIdFrom } from "~/raem/ValaaReference";
 import getObjectTransient, { tryObjectTransient }

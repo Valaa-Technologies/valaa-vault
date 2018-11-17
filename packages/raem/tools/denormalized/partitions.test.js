@@ -1,5 +1,5 @@
 // @flow
-import { created, addedTo, transacted } from "~/raem/command";
+import { created, addedTo, transacted } from "~/raem/events";
 import { vRef } from "~/raem/ValaaReference";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
@@ -111,10 +111,10 @@ describe("partitions", () => {
       ],
     })).getTruthEvent();
     const aGrandparentPartition = { // eslint-disable-line
-      "valaa-local:?id=A_grandparent": { eventId: null },
+      "valaa-local:?id=A_grandparent": {},
     };
     const bTestRootPartition = { // eslint-disable-line
-      "valaa-test:?id=B_testRoot": { eventId: null },
+      "valaa-test:?id=B_testRoot": {},
     };
     expect(finalEvent.partitions)
         .toEqual({ ...aGrandparentPartition, ...bTestRootPartition });

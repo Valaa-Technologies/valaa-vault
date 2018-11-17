@@ -1,6 +1,6 @@
 // @flow
 
-import { isCreatedLike } from "~/raem/command";
+import { isCreatedLike } from "~/raem/events";
 import { VRef, getRawIdFrom } from "~/raem/ValaaReference";
 
 import { MediaInfo, RetrieveMediaBuffer } from "~/prophet/api/types";

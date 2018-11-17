@@ -1,4 +1,4 @@
-import { created, duplicated } from "~/raem/command";
+import { created, duplicated } from "~/raem/events";
 import { vRef } from "~/raem/ValaaReference";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";

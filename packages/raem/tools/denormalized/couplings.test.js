@@ -1,4 +1,4 @@
-import { addedTo, created, fieldsSet, destroyed, removedFrom } from "~/raem/command";
+import { addedTo, created, fieldsSet, destroyed, removedFrom } from "~/raem/events";
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 import { vRef } from "~/raem/ValaaReference";
 

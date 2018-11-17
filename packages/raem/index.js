@@ -21,11 +21,11 @@ export {
                            default as Corpus,
 } from "./Corpus";
 export {
-                           default as Command,
-                                      Action,
+                           default as Action,
+                                      Command,
                                       Truth,
                                       EventBase,
-} from "./command/Command";
+} from "./events/Action";
 export {
                            default as ValaaReference,
                                       VRef,

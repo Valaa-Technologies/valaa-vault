@@ -1,6 +1,6 @@
 // @flow
 
-import { EventBase } from "~/raem/command";
+import { EventBase } from "~/raem/events";
 
 import { AuthorityProphet, AuthorityPartitionConnection, AuthorityEventResult } from "~/prophet";
 import { ChronicleRequest, ChronicleOptions, ChronicleEventResult } from "~/prophet/api/types";

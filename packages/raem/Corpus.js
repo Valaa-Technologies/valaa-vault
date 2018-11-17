@@ -2,7 +2,7 @@
 
 import { invariantifyObject, invariantifyFunction } from "~/tools/invariantify";
 
-import type { Action } from "~/raem/command";
+import type { Action } from "~/raem/events";
 import Bard from "~/raem/redux/Bard";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
 

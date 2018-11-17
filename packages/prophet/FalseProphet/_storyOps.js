@@ -1,8 +1,7 @@
 // @flow
 
-import { Command, Story } from "~/raem";
-import { EventBase } from "~/raem/command";
-import { getActionFromPassage } from "~/raem/redux/Bard";
+import { Command, EventBase } from "~/raem/events";
+import { getActionFromPassage, Story } from "~/raem/redux/Bard";
 
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 

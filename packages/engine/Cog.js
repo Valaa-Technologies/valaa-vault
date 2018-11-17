@@ -1,11 +1,10 @@
 // @flow
 
-import type { VALKOptions } from "~/raem/VALK";
-import type { Action, Story } from "~/raem";
+import type { Action, Story } from "~/raem/redux/Bard";
 
 import { Discourse } from "~/prophet";
 
-import VALEK, { Kuery, dumpKuery } from "~/engine/VALEK";
+import VALEK, { Kuery, dumpKuery, VALKOptions } from "~/engine/VALEK";
 
 import VrapperSubscriber from "~/engine/Vrapper/VrapperSubscriber";
 

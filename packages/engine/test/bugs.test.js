@@ -1,5 +1,5 @@
 
-import { created } from "~/raem/command";
+import { created } from "~/raem/events";
 import { vRef } from "~/raem/ValaaReference";
 
 import { createEngineTestHarness, createEngineOracleHarness } from "~/engine/test/EngineTestHarness";

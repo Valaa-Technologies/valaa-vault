@@ -1,7 +1,7 @@
 // @flow
 
-import { Action, ActionCollection, validateActionCollectionBase } from "~/raem/command/Command";
-import { Duplicated, validateDuplicated } from "~/raem/command/duplicated";
+import Action, { ActionCollection, validateActionCollectionBase } from "~/raem/events/Action";
+import { Duplicated, validateDuplicated } from "~/raem/events/duplicated";
 
 export const RECOMBINED = "RECOMBINED";
 

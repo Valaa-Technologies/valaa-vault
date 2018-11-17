@@ -1,6 +1,6 @@
 // @flow
 
-import { Action, isTransactedLike } from "~/raem/command";
+import { Action, isTransactedLike } from "~/raem/events";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 

@@ -1,6 +1,6 @@
 // @flow
 
-import Action, { validateActionBase } from "~/raem/command/Command";
+import Action, { validateActionBase } from "~/raem/events/Action";
 import { ValaaReference, invariantifyId, invariantifyTypeName } from "~/raem/ValaaReference";
 
 import { invariantifyObject, invariantifyArray } from "~/tools/invariantify";

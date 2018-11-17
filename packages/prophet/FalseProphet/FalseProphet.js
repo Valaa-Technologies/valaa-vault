@@ -1,7 +1,7 @@
 // @flow
 
-import { Story } from "~/raem";
-import Command, { EventBase } from "~/raem/command";
+import { Command, EventBase } from "~/raem/events";
+import type { Story } from "~/raem/redux/Bard";
 import type { State } from "~/raem/tools/denormalized/State";
 import ValaaURI from "~/raem/ValaaURI";
 

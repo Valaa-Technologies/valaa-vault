@@ -3,13 +3,17 @@
 import { Story } from "~/raem";
 import Command, { EventBase } from "~/raem/command";
 import type { State } from "~/raem/tools/denormalized/State";
+import ValaaURI from "~/raem/ValaaURI";
 
 import Follower from "~/prophet/api/Follower";
 import Prophet from "~/prophet/api/Prophet";
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 import { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult }
     from "~/prophet/api/types";
+
 import { dumpObject } from "~/tools";
+import valaaUUID from "~/tools/id/valaaUUID";
+import { trivialCloneWith } from "~/tools/trivialClone";
 
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
@@ -23,6 +27,10 @@ type FalseProphetChronicleOptions = ChronicleOptions & {
   reviseSchism?: (schism: Prophecy, connection: FalseProphetPartitionConnection,
       purgedCommands: Command[], newEvents: Command[]) => Prophecy,
 };
+
+export function universalizeAction (event: EventBase): EventBase {
+  return trivialCloneWith(event, entry => (entry instanceof ValaaURI ? entry : undefined));
+}
 
 /**
  * FalseProphet is non-authoritative denormalized in-memory store of
@@ -51,16 +59,26 @@ export default class FalseProphet extends Prophet {
 
   _primaryRecital: StoryRecital;
 
-  constructor ({ schema, corpus, upstream, commandCountCallback, ...rest }: Object) {
+  _onCommandCountUpdate: Function<>;
+  _partitionCommandCounts: Object = {};
+  _totalCommandCount: number = 0;
+
+  _assignCommandId: (command: Command, discourse: FalseProphetDiscourse) => string;
+
+  constructor ({
+    schema, corpus, upstream, onCommandCountUpdate, assignCommandId, ...rest
+  }: Object) {
     super(rest);
     this.corpus = corpus;
     this.schema = schema || corpus.getSchema();
 
     // Story queue is a sentinel-based linked list with a separate lookup structure.
     this._primaryRecital = new StoryRecital(undefined, "main");
-    this._commandCountCallback = commandCountCallback;
-    this._partitionCommandCounts = {};
-    this._totalCommandCount = 0;
+    this._onCommandCountUpdate = onCommandCountUpdate;
+    this._assignCommandId = assignCommandId || (command => {
+      command.version = "0.2";
+      command.commandId = valaaUUID();
+    });
     if (upstream) this.setUpstream(upstream);
   }
 
@@ -69,7 +87,7 @@ export default class FalseProphet extends Prophet {
   getState () { return this.corpus.getState(); }
 
   setCommandCountCallback (callback: Function) {
-    this._commandCountCallback = callback;
+    this._onCommandCountUpdate = callback;
     callback(this._totalCommandCount, this._partitionCommandCounts);
   }
 
@@ -150,8 +168,8 @@ export default class FalseProphet extends Prophet {
     const previous = this._partitionCommandCounts[connectionName] || 0;
     this._partitionCommandCounts[connectionName] = value;
     this._totalCommandCount += (value - previous);
-    if (this._commandCountCallback) {
-      this._commandCountCallback(this._totalCommandCount, this._partitionCommandCounts);
+    if (this._onCommandCountUpdate) {
+      this._onCommandCountUpdate(this._totalCommandCount, this._partitionCommandCounts);
     }
   }
 

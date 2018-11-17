@@ -9,15 +9,26 @@ import type { ProphecyEventResult } from "~/prophet/api/types";
 export default class Discourse extends Valker {
   static isDiscourse = true;
 
+  obtainId (rawId: string): VRef { // eslint-disable-line
+    throw new Error(`${this.constructor.name}/Discourse.obtainId not implemented`);
+  }
+
   /**
-   * createId - Creates an id based on given mutation parameters and options.
+   * assignNewResourceId - Creates a new resource id and assigns it to targetAction.
    *
-   * @param  {type} mutationParams mutation parameters like for CreateMutation
-   * @param  {type} options { immutableType } for different id creation schema for immutables
    * @returns {type} a new id for the object
    */
-  createId (mutationParams): VRef { // eslint-disable-line
-    throw new Error(`${this.constructor.name}/Discourse.createId unimplemented`);
+  assignNewResourceId (targetAction: EventBase, partitionURI: string): VRef { // eslint-disable-line
+    throw new Error(`${this.constructor.name}/Discourse.assignNewResourceId not implemented`);
+  }
+
+  /**
+   * assignNewPartitionId - Creates a new partition id and assigns it to targetAction.
+   *
+   * @returns {type} partitionURI
+   */
+  assignNewPartitionId (targetAction: EventBase, partitionAuthorityURI: string): ValaaURI { // eslint-disable-line
+    throw new Error(`${this.constructor.name}/Discourse.assignNewPartitionId not implemented`);
   }
 
   /**
@@ -36,7 +47,7 @@ export default class Discourse extends Valker {
    * @returns {Discourse}  transaction object
    */
   transaction (): Discourse {
-    throw new Error(`${this.constructor.name}/Discourse.transaction unimplemented`);
+    throw new Error(`${this.constructor.name}/Discourse.transaction not implemented`);
   }
 
   /**
@@ -52,7 +63,7 @@ export default class Discourse extends Valker {
    * @returns {ProphecyEventResult} returns the ChronicleEventResults of the chronicling
    */
   create ({ typeName, initialState, id }): ProphecyEventResult { // eslint-disable-line
-    throw new Error(`${this.constructor.name}/Discourse.create unimplemented`);
+    throw new Error(`${this.constructor.name}/Discourse.create not implemented`);
   }
 
   /**
@@ -60,7 +71,7 @@ export default class Discourse extends Valker {
    * from it.
    */
   duplicate ({ duplicateOf, initialState, id }): ProphecyEventResult { // eslint-disable-line
-    throw new Error(`${this.constructor.name}/Discourse.duplicate unimplemented`);
+    throw new Error(`${this.constructor.name}/Discourse.duplicate not implemented`);
   }
 
   /**
@@ -76,7 +87,7 @@ export default class Discourse extends Valker {
    * @returns {ProphecyEventResult} returns the ChronicleEventResults of the chronicling
    */
   modify ({ id, typeName, sets, adds, removes, splices }): ProphecyEventResult { // eslint-disable-line
-    throw new Error(`${this.constructor.name}/Discourse.modify unimplemented`);
+    throw new Error(`${this.constructor.name}/Discourse.modify not implemented`);
   }
 
   /**
@@ -87,6 +98,6 @@ export default class Discourse extends Valker {
    * @returns {ProphecyEventResult} returns the ChronicleEventResults of the chronicling
    */
   destroy ({ id, typeName }): ProphecyEventResult { // eslint-disable-line
-    throw new Error(`${this.constructor.name}/Discourse.destroy unimplemented`);
+    throw new Error(`${this.constructor.name}/Discourse.destroy not implemented`);
   }
 }

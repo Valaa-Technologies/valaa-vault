@@ -4,7 +4,7 @@ import { getActionFromPassage } from "~/raem";
 import { Command, EventBase } from "~/raem/command";
 import type { Story } from "~/raem/redux/Bard";
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
-import ValaaURI, { createPartitionURI } from "~/raem/ValaaURI";
+import { createPartitionURI } from "~/raem/ValaaURI";
 
 import { ChronicleEventResult, PartitionConnection, ProphecyChronicleRequest, ProphecyEventResult }
     from "~/prophet/api/types";
@@ -12,7 +12,6 @@ import extractPartitionEvent0Dot2
     from "~/prophet/tools/event-version-0.2/extractPartitionEvent0Dot2";
 
 import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
-import { trivialCloneWith } from "~/tools/trivialClone";
 
 import FalseProphet from "./FalseProphet";
 import { _rejectLastProphecyAsHeresy, _recomposeStoryFromPurgedEvent } from "./_storyOps";
@@ -32,7 +31,7 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
     { timed, transactionInfo, ...rest } = {}): ProphecyChronicleRequest {
   if (timed) throw new Error("timed events not supported yet");
   const prophecies = events.map(event => falseProphet._composeStoryFromEvent(
-      universalizeEvent(falseProphet, event), "prophecy-chronicle", timed, transactionInfo));
+      event, "prophecy-chronicle", timed, transactionInfo));
   const resultBase = new ProphecyOperation(null, {
     _prophet: falseProphet, _events: events, _options: rest,
     _reactions: falseProphet._tellStoriesToFollowers(prophecies),
@@ -43,11 +42,6 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
     eventResults: prophecies.map(
         (prophecy, index) => Object.create(resultBase)._execute(prophecy, index)),
   };
-}
-
-export function universalizeEvent (falseProphet: FalseProphet, event: EventBase): EventBase {
-  return trivialCloneWith(event,
-      entry => (entry instanceof ValaaURI ? entry : undefined));
 }
 
 export function _confirmProphecyCommand (connection: FalseProphetPartitionConnection,

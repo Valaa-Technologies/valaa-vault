@@ -10,7 +10,7 @@ import type { Transaction } from "~/prophet/api/Transaction";
 
 import { dumpObject, invariantify } from "~/tools";
 
-import { universalizeEvent } from "~/prophet/FalseProphet/_prophecyOps";
+import { universalizeAction } from "./FalseProphet";
 
 let transactionCounter = 0;
 
@@ -23,6 +23,7 @@ export default class TransactionInfo {
     this.actions = [];
     this.passages = [];
     this.transacted = transacted({ actions: [] });
+    transaction._prophet._assignCommandId(this.transacted, transaction);
     this.universalPartitions = {};
     this.customCommand = customCommand;
     this.resultPromises = [];
@@ -59,18 +60,21 @@ export default class TransactionInfo {
                 this._finalCommand ? "committed" : "aborted"
             }, when trying to add actions to it`);
       }
-      // What goes on here is an incremental construction and universalisation of a TRANSACTED
-      // event whenever a new event comes in, via dispatching the on-going
-      // info.transacted only containing that particular event. Once the transaction is
-      // finally committed, the pieces are put together in a complete, universal TRANSACTED.
-      // This is an awkward way to incrementally construct the transacted.
-      // Maybe generators could somehow be useful here?
-      const actions = events.map(event => universalizeEvent(this.transaction._prophet, event));
+      // What goes on here is an incremental construction and
+      // universalisation of a TRANSACTED event whenever a new event
+      // comes in, via dispatching the on-going info.transacted only
+      // containing that particular event. Once the transaction is
+      // finally committed, the pieces are put together in a complete,
+      // universal TRANSACTED. This is an awkward way to incrementally
+      // construct the transacted.
+      // Maybe javascript generators could somehow be useful here?
+      const actions = events.map(event => universalizeAction(event));
       const universalTransacted = { ...this.transacted, actions };
       const previousState = this.transaction.state;
       const transactionStory = this.transaction.corpus.dispatch(
           universalTransacted, this.transactionDescription);
-      // Only alter transaction internals after the dispatch has performed the content validations.
+      // Only alter transaction internals after the dispatch has
+      // performed the content validations.
       this.actions.push(...actions);
       this.latestUniversalTransacted = universalTransacted;
       this.passages.push(...transactionStory.passages);
@@ -115,7 +119,7 @@ export default class TransactionInfo {
           ? this.transacted
           : this.customCommand(this.transacted);
       if (!this.customCommand && !this._finalCommand.actions.length) {
-        command = universalizeEvent(this.transaction._prophet, this._finalCommand);
+        command = universalizeAction(this._finalCommand);
         command.partitions = {};
         return {
           event: this._finalCommand, story: command, getPremiereStory () { return command; },

@@ -6,10 +6,7 @@ import type { Passage, Story } from "~/raem";
 import VALK, { VALKOptions, packedSingular } from "~/raem/VALK";
 import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 
-import {
-  fieldsSet, addedToFields, removedFromFields, replacedWithinFields, isCreatedLike,
-  ChronicleEventResult,
-} from "~/raem/command";
+import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "~/raem/command";
 import { VRef, vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom, expandIdDataFrom,
     obtainVRef } from "~/raem/ValaaReference";
 import { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";
@@ -666,9 +663,9 @@ export default class Vrapper extends Cog {
     try {
       const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
       commandValue = universalizeCommandData(value, options);
-      return transaction.chronicleEvent(fieldsSet({ id, typeName: this._typeName },
-          { [fieldName]: commandValue },
-      ));
+      return transaction.chronicleEvent(fieldsSet({ id, typeName: this._typeName,
+        sets: { [fieldName]: commandValue },
+      }));
     } catch (error) {
       throw this.wrapErrorEvent(error, `setField(${fieldName})`,
           "\n\tfield name:", fieldName,
@@ -684,9 +681,9 @@ export default class Vrapper extends Cog {
     try {
       const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
       commandValue = universalizeCommandData(value, options);
-      return transaction.chronicleEvent(addedToFields({ id, typeName: this._typeName },
-          { [fieldName]: arrayFromAny(commandValue || undefined) },
-      ));
+      return transaction.chronicleEvent(addedTo({ id, typeName: this._typeName,
+        adds: { [fieldName]: arrayFromAny(commandValue || undefined) },
+      }));
     } catch (error) {
       throw this.wrapErrorEvent(error, `addToField(${fieldName})`,
           "\n\tfield name:", fieldName,
@@ -702,8 +699,8 @@ export default class Vrapper extends Cog {
     try {
       const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
       commandValue = universalizeCommandData(value, options);
-      return transaction.chronicleEvent(removedFromFields({ id, typeName: this._typeName }, {
-        [fieldName]: (commandValue === null) ? null : arrayFromAny(commandValue)
+      return transaction.chronicleEvent(removedFrom({ id, typeName: this._typeName,
+        removes: { [fieldName]: (commandValue === null) ? null : arrayFromAny(commandValue) },
       }));
     } catch (error) {
       throw this.wrapErrorEvent(error, `removeFromField(${fieldName})`,
@@ -733,10 +730,10 @@ export default class Vrapper extends Cog {
       universalAddedValues = arrayFromAny(
           universalizeCommandData(withValues, options)
               || undefined);
-      return transaction.chronicleEvent(replacedWithinFields({ id, typeName: this._typeName },
-          { [fieldName]: universalRemovedValues },
-          { [fieldName]: universalAddedValues },
-      ));
+      return transaction.chronicleEvent(replacedWithin({ id, typeName: this._typeName,
+        removes: { [fieldName]: universalRemovedValues },
+        adds: { [fieldName]: universalAddedValues },
+      }));
     } catch (error) {
       throw this.wrapErrorEvent(error, `replaceInField(${fieldName})`,
           "\n\tfield name:", fieldName,
@@ -1616,10 +1613,6 @@ export default class Vrapper extends Cog {
 
   // eslint-disable-next-line camelcase
   onEventREPLACED_WITHIN (vResource: Vrapper, passage: Passage, story: Story) {
-    return this.onEventMODIFIED(vResource, passage, story);
-  }
-
-  onEventSPLICED (vResource: Vrapper, passage: Passage, story: Story) {
     return this.onEventMODIFIED(vResource, passage, story);
   }
 

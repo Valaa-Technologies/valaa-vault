@@ -1,4 +1,4 @@
-import { created, modified, transacted } from "~/raem/command";
+import { created, fieldsSet, transacted } from "~/raem/command";
 
 import { vRef, getRawIdFrom } from "~/raem/ValaaReference";
 import getObjectTransient, { tryObjectTransient }
@@ -29,12 +29,12 @@ describe("CREATED with instancePrototype", () => {
     created({ id: "A_childDataGlue", typeName: "TestDataGlue", initialState: {
       source: "A_child1", target: "A_child2",
     }, }),
-    modified({ id: "A_child1", typeName: "TestThing", sets: {
-      targetDataGlues: ["A_childDataGlue"],
-    }, }),
-    modified({ id: "A_child2", typeName: "TestThing", sets: {
-      sourceDataGlues: ["A_childDataGlue"],
-    }, }),
+    fieldsSet({ id: "A_child1", typeName: "TestThing",
+      sets: { targetDataGlues: ["A_childDataGlue"], },
+    }),
+    fieldsSet({ id: "A_child2", typeName: "TestThing",
+      sets: { sourceDataGlues: ["A_childDataGlue"], },
+    }),
   ];
 
   const createGrandparentInstance = [
@@ -102,12 +102,12 @@ describe("CREATED with instancePrototype", () => {
 
   it("doesn't forward mutated instance leaf property access to the prototype", async () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createChild1Instance, [
-      modified({ id: "A_child1Instance", typeName: "TestThing", sets: {
-        name: "child1Instance",
-      }, }),
-      modified({ id: "A_child1", typeName: "TestThing", sets: {
-        name: "child1Mutated",
-      }, }),
+      fieldsSet({ id: "A_child1Instance", typeName: "TestThing",
+        sets: { name: "child1Instance", },
+      }),
+      fieldsSet({ id: "A_child1", typeName: "TestThing",
+        sets: { name: "child1Mutated", },
+      }),
     ]);
     const child1Instance = getObjectTransient(
         harness.getState(), "A_child1Instance", "TestThing");
@@ -168,7 +168,7 @@ describe("CREATED with instancePrototype", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGrandparentInstance);
     const parentInInstance = harness.run(vRef("A_grandparentInstance"),
         ["§->", "children", 0]);
-    harness.chronicleEvent(modified({ id: parentInInstance, typeName: "TestThing", sets: {
+    harness.chronicleEvent(fieldsSet({ id: parentInInstance, typeName: "TestThing", sets: {
       name: "parentInInstance",
     }, }));
     expect(harness.run(parentInInstance, "name"))

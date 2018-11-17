@@ -51,9 +51,9 @@ creation of new Data objects and mutation of Resource's that contain them.`,
         * The referredResources is transitive by referredDatas: if Data A has a referred Data B, and
         * B has a referred Resource R, then A also will have referred Resource R. This allows the
         * full Data graph be mapped out with a single kuery without recursion.
-        * For example, take the following MODIFIED:
-        * modified({ id, typeName: "MyResource", { sets: {
-        *   myResourceData: { myDataSubData: { subDataTargetResource: myResourceId } } }
+        * For example, take the following FIELDS_SET:
+        * fieldsSet({ id, typeName: "MyResource", sets: {
+        *   myResourceData: { myDataSubData: { subDataTargetResource: myResourceId } },
         * } });
         * Two Data are specified as expanded objects, inner one containing subDataTargetResource and
         * outer one containing myDataSubData. But because recursively both contain a Resource

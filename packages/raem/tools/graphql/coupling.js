@@ -1,4 +1,4 @@
-import { modified, destroyed } from "~/raem/command";
+import { addedTo, destroyed, fieldsSet, removedFrom } from "~/raem/command";
 import invariantify from "~/tools/invariantify";
 
 // There are two categories for boths side of the coupling separately: plurality and specifity.
@@ -38,21 +38,21 @@ export function toOne ({ coupledField, defaultCoupledField, alias, owned, whenUn
   return coupledField ? {
     coupledField, alias, owned, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId) =>
-        modified({ id, typeName, dontUpdateCouplings: true,
+        fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: localId },
         }),
     createUncoupleFromRemoteAction: (id, typeName, coupledFieldName) =>
-        modified({ id, typeName, dontUpdateCouplings: true,
+        fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: null },
         }),
   } : {
     defaultCoupledField, alias, owned, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
-        modified({ id, typeName, dontUpdateCouplings: true,
+        fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: localId.coupleWith(localFieldName) },
         }),
     createUncoupleFromRemoteAction: (id, typeName, coupledFieldName) =>
-        modified({ id, typeName, dontUpdateCouplings: true,
+        fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: null },
         }),
   };
@@ -66,21 +66,21 @@ export function toMany ({ coupledField, defaultCoupledField, alias, owned, whenU
   return coupledField ? {
     coupledField, alias, owned, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId) =>
-        modified({ id, typeName, dontUpdateCouplings: true,
+        addedTo({ id, typeName, local: { dontUpdateCouplings: true },
           adds: { [coupledFieldName]: [localId] },
         }),
     createUncoupleFromRemoteAction: (id, typeName, coupledFieldName, localId) =>
-        modified({ id, typeName, dontUpdateCouplings: true,
+        removedFrom({ id, typeName, local: { dontUpdateCouplings: true },
           removes: { [coupledFieldName]: [localId] },
         }),
   } : {
     defaultCoupledField, alias, owned, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
-        modified({ id, typeName, dontUpdateCouplings: true,
+        addedTo({ id, typeName, local: { dontUpdateCouplings: true },
           adds: { [coupledFieldName]: [localId.coupleWith(localFieldName)] },
         }),
     createUncoupleFromRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
-        modified({ id, typeName, dontUpdateCouplings: true,
+        removedFrom({ id, typeName, local: { dontUpdateCouplings: true },
           removes: { [coupledFieldName]: [localId.coupleWith(localFieldName)] },
         }),
   };
@@ -98,11 +98,11 @@ export function toOwner (defaultCoupledField = "unnamedOwnlings") {
   return {
     defaultCoupledField,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
-        modified({ id, typeName, dontUpdateCouplings: true,
+        fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: localId.coupleWith(localFieldName) },
         }),
     createUncoupleFromRemoteAction: (id, typeName) =>
-        destroyed({ id, typeName, dontUpdateCouplings: true }),
+        destroyed({ id, local: { dontUpdateCouplings: true } }),
   };
 }
 

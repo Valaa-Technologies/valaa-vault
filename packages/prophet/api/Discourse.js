@@ -75,22 +75,6 @@ export default class Discourse extends Valker {
   }
 
   /**
-   * modify - Modifies an object and returns a Promise to the resource view after modification.
-   * TODO(iridian): Add docs, similar to create
-   *
-   * @param  {type} id           description
-   * @param  {type} typeName     description
-   * @param  {type} sets         description
-   * @param  {type} adds         description
-   * @param  {type} removes      description
-   * @param  {type} splices      description
-   * @returns {ProphecyEventResult} returns the ChronicleEventResults of the chronicling
-   */
-  modify ({ id, typeName, sets, adds, removes, splices }): ProphecyEventResult { // eslint-disable-line
-    throw new Error(`${this.constructor.name}/Discourse.modify not implemented`);
-  }
-
-  /**
    * destroy - Destroys a resource
    *
    * @param  {type} id           description

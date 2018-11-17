@@ -1,5 +1,5 @@
 import { OrderedMap } from "immutable";
-import { created, modified, destroyed } from "~/raem/command";
+import { created, fieldsSet, removedFrom, destroyed } from "~/raem/command";
 import VALK from "~/raem/VALK";
 
 import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";
@@ -37,12 +37,12 @@ describe("The snapshot node walker", () => {
     created({ id: "A_childDataGlue", typeName: "TestDataGlue", initialState: {
       source: "A_child1", target: "A_child2",
     } }),
-    modified({ id: "A_child1", typeName: "TestThing", sets: {
-      targetDataGlues: ["A_childDataGlue"],
-    } }),
-    modified({ id: "A_child2", typeName: "TestThing", sets: {
-      sourceDataGlues: ["A_childDataGlue"],
-    } }),
+    fieldsSet({ id: "A_child1", typeName: "TestThing",
+      sets: { targetDataGlues: ["A_childDataGlue"], },
+    }),
+    fieldsSet({ id: "A_child2", typeName: "TestThing",
+      sets: { sourceDataGlues: ["A_childDataGlue"], },
+    }),
   ];
 
   it("retrieves aliased value properly", async () => {
@@ -233,36 +233,36 @@ describe("mutations", () => {
       initialState: { instancePrototype: "A", } }),
   ];
 
-  it("MODIFIED setting a field on a Transient should materialize it", () => {
+  it("FIELDS_SET setting a field on a Transient should materialize it", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createInstance);
     const A_instance = harness.run(vRef("A_instance"), null);
     let A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
     expect(isMaterialized(harness.getState(), A_instance_B))
         .toEqual(false);
-    harness.chronicleEvent(modified({
-      id: A_instance_B, typeName: "TestThing", sets: { name: "sanic", },
+    harness.chronicleEvent(fieldsSet({ id: A_instance_B, typeName: "TestThing",
+      sets: { name: "sanic", },
     }));
     A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
     expect(isMaterialized(harness.getState(), A_instance_B))
         .toEqual(true);
   });
 
-  it("MODIFIED assigning a Transient to a non-coupling field does not materialize it", () => {
+  it("FIELDS_SET assigning a Transient to a non-coupling field does not materialize it", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createInstance);
     const A = harness.run(vRef("A"), null);
     const A_instance = harness.run(vRef("A_instance"), null);
     let A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
     expect(isMaterialized(harness.getState(), A_instance_B))
         .toEqual(false);
-    harness.chronicleEvent(modified({ id: A, typeName: "TestThing",
-      sets: { uncoupledField: A_instance_B }
+    harness.chronicleEvent(fieldsSet({ id: A, typeName: "TestThing",
+      sets: { uncoupledField: A_instance_B },
     }));
     A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
     expect(isMaterialized(harness.getState(), A_instance_B))
         .toEqual(false);
   });
 
-  it("MODIFIED.removes(null) on a previously modified field on a non-ghost Instance reveals " +
+  it("REMOVED_FROM.removes(null) on a previously modified field on a non-ghost Instance reveals " +
      "the undeflying Prototype field", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createInstance);
 
@@ -272,7 +272,7 @@ describe("mutations", () => {
     // Do tests that do not depend on autorefresh
     const A_name = harness.run(vRef("A"), "name");
     const A_instance_name = harness.run(A_instance, "name");
-    harness.chronicleEvent(modified({ id: "A_instance", typeName: "TestThing",
+    harness.chronicleEvent(removedFrom({ id: "A_instance", typeName: "TestThing",
       removes: { name: null } }));
     const A_instance_name_after_erase = harness.run(vRef("A_instance"),
         "name");
@@ -288,7 +288,7 @@ describe("mutations", () => {
         .toEqual(harness.run(A, "name"));
   });
 
-  it("MODIFIED.removes(null) on a previously modified field on an Ghost reveals " +
+  it("FIELDS_SET.removes(null) on a previously modified field on an Ghost reveals " +
      "the undeflying Prototype field", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createInstance);
 
@@ -299,21 +299,21 @@ describe("mutations", () => {
     // Names are equal before any modifications to the ghost and different after changes
     expect(harness.run(A_instance_B, "name", { verbosity: 0 }))
         .toEqual(harness.run(A_B, "name"));
-    harness.chronicleEvent(modified({ id: A_instance_B, typeName: "TestThing",
+    harness.chronicleEvent(fieldsSet({ id: A_instance_B, typeName: "TestThing",
       sets: { name: "Ghost of Ownling" }
     }));
     expect(harness.run(A_instance_B, "name"))
         .not.toEqual(harness.run(A_B, "name"));
 
     // Set value back to undefined, restoring the value to the prototype's current value
-    harness.chronicleEvent(modified({ id: A_instance_B, typeName: "TestThing",
+    harness.chronicleEvent(removedFrom({ id: A_instance_B, typeName: "TestThing",
       removes: { name: null }
     }));
     expect(harness.run(A_instance_B, "name"))
         .toEqual(harness.run(A_B, "name"));
   });
 
-  it("MODIFIED add on a plural field should cause changes to be reflected on Instances", () => {
+  it("CREATED add on an plural owner field causes changes to be reflected on Instances", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createInstance);
 
     const A_children_old = harness.run(vRef("A"), ["§->", "children"]);
@@ -359,7 +359,7 @@ describe("mutations", () => {
       initialState: { parent: "A", name: "Kenny" } }),
   ];
 
-  it("MODIFIED remove on a plural field should cause changes to be reflected on Instances", () => {
+  it("DESTROYED remove on a plural owner field causes changes to be reflected on Instances", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createData, extraData,
         createInstance);
 
@@ -376,8 +376,8 @@ describe("mutations", () => {
     }
 
     // Modify the original list
-    harness.chronicleEvent(destroyed({ id: "A_C", typeName: "TestThing" }));
-    harness.chronicleEvent(destroyed({ id: "A_D", typeName: "TestThing" }));
+    harness.chronicleEvent(destroyed({ id: "A_C" }));
+    harness.chronicleEvent(destroyed({ id: "A_D" }));
 
     // Ensure that the new lists are different to the old ones, but equal to each other
     const A_children_new = harness.run(vRef("A"), ["§->", "children"]);
@@ -397,17 +397,13 @@ describe("mutations", () => {
     }
   });
 
-  it("MODIFIED commands on a Prototype should reflect as new field values on all Instances and" +
+  it("FIELDS_SET commands on a Prototype should reflect as new field values on all Instances and" +
       "their ghosts as appropriate", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createBlankInstance);
 
     // Test instance
-    harness.chronicleEvent(modified({
-      id: "A",
-      typeName: "TestThing",
-      sets: {
-        name: "What is dead may never die and in strange aeons even death may die",
-      },
+    harness.chronicleEvent(fieldsSet({ id: "A", typeName: "TestThing",
+      sets: { name: "What is dead may never die and in strange aeons even death may die", },
     }));
     expect(
       harness.run(vRef("A_instance_blank"), ["§->", "name"])
@@ -416,12 +412,8 @@ describe("mutations", () => {
     );
 
     // Test ghost
-    harness.chronicleEvent(modified({
-      id: "A_B",
-      typeName: "TestThing",
-      sets: {
-        name: "cthulhu fhtagn",
-      },
+    harness.chronicleEvent(fieldsSet({ id: "A_B", typeName: "TestThing",
+      sets: { name: "cthulhu fhtagn", },
     }));
     // A_B is child of A, so query children -> 0 -> name
     expect(
@@ -719,8 +711,8 @@ describe("complex structures", () => {
     createAndExtractHarnessWithCommands({ verbosity: 0 });
     const oldName = harness.run(A_B_C, "name");
     const newName = "Elder / Middle / Youngest (A_B_C modification)";
-    harness.chronicleEvent(modified({
-      id: A_B_C, typeName: "TestThing", sets: { name: newName }
+    harness.chronicleEvent(fieldsSet({ id: A_B_C, typeName: "TestThing",
+      sets: { name: newName },
     }));
     expect(harness.run(A_B_C, "name")).not.toEqual(oldName);
     getInfo("A_B_C").instances.forEach(({ name: instanceName, transient }) => {
@@ -741,8 +733,8 @@ describe("complex structures", () => {
     createAndExtractHarnessWithCommands({ verbosity: 0 });
     const oldName = harness.run(A_B_C1i, "name");
     const newName = "Elder / Middle / Youngest (A_B_C1i modification)";
-    harness.chronicleEvent(modified({
-      id: A_B_C1i, typeName: "TestThing", sets: { name: newName }
+    harness.chronicleEvent(fieldsSet({ id: A_B_C1i, typeName: "TestThing",
+      sets: { name: newName },
     }));
     expect(harness.run(A_B_C1i, "name")).toEqual(newName);
 
@@ -764,8 +756,8 @@ describe("complex structures", () => {
     createAndExtractHarnessWithCommands({ verbosity: 0 });
     const oldName = harness.run(gA_B1_C, "name", { verbosity: 0 });
     const newName = "Elder / Middle / Youngest (gA_B1_C modification)";
-    harness.chronicleEvent(modified({
-      id: gA_B1_C, typeName: "TestThing", sets: { name: newName }
+    harness.chronicleEvent(fieldsSet({ id: gA_B1_C, typeName: "TestThing",
+      sets: { name: newName },
     }));
     expect(harness.run(gA_B1_C, "name", { verbosity: 0 })).toEqual(newName);
 
@@ -784,7 +776,7 @@ describe("complex structures", () => {
   it("Modifications in A_B_C should be visible from A1i, and A_B1i via children access", () => {
     createAndExtractHarnessWithCommands({ verbosity: 0 });
     const oldName = harness.run(A_B_C, "name");
-    harness.chronicleEvent(modified({ id: A_B_C, typeName: "TestThing", sets: {
+    harness.chronicleEvent(fieldsSet({ id: A_B_C, typeName: "TestThing", sets: {
       name: "Elder / Middle / Youngest (changed)",
     } }));
     expect(harness.run(A_B_C, "name")).not.toEqual(oldName);
@@ -829,7 +821,7 @@ describe("complex structures", () => {
         .toEqual(harness.run(A_B1i, "children"));
 
     // Modify the name of the newly-added object
-    harness.chronicleEvent(modified({ id: "A_B1_D", typeName: "TestThing",
+    harness.chronicleEvent(fieldsSet({ id: "A_B1_D", typeName: "TestThing",
       sets: { name: "new guy 2.0", },
     }));
 

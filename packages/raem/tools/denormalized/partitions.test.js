@@ -1,5 +1,5 @@
 // @flow
-import { created, addedToFields, transacted } from "~/raem/command";
+import { created, addedTo, transacted } from "~/raem/command";
 import { vRef } from "~/raem/ValaaReference";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
@@ -105,8 +105,8 @@ describe("partitions", () => {
             partitionAuthorityURI: testAuthorityURI,
           },
         }),
-        addedToFields({ id: "A_grandparent", typeName: "TestThing" }, {
-          siblings: [vRef("B_testRoot")],
+        addedTo({ id: "A_grandparent", typeName: "TestThing",
+          adds: { siblings: [vRef("B_testRoot")], },
         }),
       ],
     })).getTruthEvent();

@@ -1,5 +1,5 @@
 import VALK, { run } from "~/raem/VALK";
-import { created, modified } from "~/raem/command";
+import { created, fieldsSet } from "~/raem/command";
 import { vRef } from "~/raem/ValaaReference";
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 
@@ -59,12 +59,12 @@ const createBlockARest = [
   created({ id: "A_childDataGlue", typeName: "TestDataGlue", initialState: {
     source: "A_child1", target: "A_child2",
   } }),
-  modified({ id: "A_child1", typeName: "TestThing", sets: {
-    targetDataGlues: ["A_childDataGlue"],
-  } }),
-  modified({ id: "A_child2", typeName: "TestThing", sets: {
-    sourceDataGlues: ["A_childDataGlue"],
-  } }),
+  fieldsSet({ id: "A_child1", typeName: "TestThing",
+    sets: { targetDataGlues: ["A_childDataGlue"], },
+  }),
+  fieldsSet({ id: "A_child2", typeName: "TestThing",
+    sets: { sourceDataGlues: ["A_childDataGlue"], },
+  }),
 ];
 
 describe("VALK corpus kueries", () => {

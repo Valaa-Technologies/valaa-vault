@@ -1,4 +1,4 @@
-import { created, modified } from "~/raem/command";
+import { created, fieldsSet } from "~/raem/command";
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 import { vRef } from "~/raem/ValaaReference";
 
@@ -25,12 +25,12 @@ describe("The snapshot node walker", () => {
     created({ id: "A_childDataGlue", typeName: "TestDataGlue", initialState: {
       source: "A_child1", target: "A_child2",
     }, }),
-    modified({ id: "A_child1", typeName: "TestThing", sets: {
-      targetDataGlues: ["A_childDataGlue"],
-    }, }),
-    modified({ id: "A_child2", typeName: "TestThing", sets: {
-      sourceDataGlues: ["A_childDataGlue"],
-    }, }),
+    fieldsSet({ id: "A_child1", typeName: "TestThing",
+      sets: { targetDataGlues: ["A_childDataGlue"], },
+    }),
+    fieldsSet({ id: "A_child2", typeName: "TestThing",
+      sets: { sourceDataGlues: ["A_childDataGlue"], },
+    }),
   ];
   /* TODO(iridian): Extend the tests to use this data.
   const createBlockB = [
@@ -70,8 +70,11 @@ describe("The snapshot node walker", () => {
         resultEvents.push(createdEvent);
       },
       onModified: (id, typeName, modifies) => {
-        const modifiedEvent = modified({ id, typeName, ...modifies });
+        throw new Error("snapshotPartition.onModified has rotten");
+        /*
+        const modifiedEvent = fieldsSet({ id, typeName, ...modifies });
         resultEvents.push(modifiedEvent);
+        */
       },
     });
     const resultHarness = createRAEMTestHarness({ verbosity: 0 }, resultEvents);

@@ -1,21 +1,20 @@
 // @flow
-import Command from "~/raem/command/Command";
-import { validateTransactedLike } from "~/raem/command/transacted";
+
+import { Action, ActionCollection, validateActionCollectionBase } from "~/raem/command/Command";
 
 export const FROZEN = "FROZEN";
 
-export class Frozen extends Command {
+export class Frozen extends ActionCollection {
   type: "FROZEN";
-  actions: ?Command[]; // alias name for sub-command
-
-  unrecognized: ?void;
 }
 
-export default function frozen (command: Frozen): Command {
-  command.type = FROZEN;
-  return validateFrozen(command);
+export default function frozen (action: Action): Frozen {
+  action.type = FROZEN;
+  return validateFrozen(action);
 }
 
-export function validateFrozen (command: Frozen, recursiveActionValidator: ?Function): Command {
-  return validateTransactedLike(command, FROZEN, recursiveActionValidator);
+export function validateFrozen (action: Action, validateAction: ?Function): Frozen {
+  const { type, local, actions, ...unrecognized } = action;
+  return validateActionCollectionBase(FROZEN, action, type, local, actions, unrecognized,
+      validateAction);
 }

@@ -1,89 +1,67 @@
 // @flow
-import invariantify, { invariantifyString, invariantifyBoolean, invariantifyObject,
-    invariantifyArray, invariantifyTypeName } from "~/tools/invariantify";
-import Command, { validateCommandInterface } from "~/raem/command/Command";
-import { invariantifyId } from "~/raem/ValaaReference";
-import { dumpObject } from "~/tools";
 
-export const MODIFIED = "MODIFIED";
+import Action, { validateActionBase } from "~/raem/command/Command";
+import { ValaaReference, invariantifyId, invariantifyTypeName } from "~/raem/ValaaReference";
+
+import { invariantifyObject, invariantifyArray } from "~/tools/invariantify";
+
 export const FIELDS_SET = "FIELDS_SET";
 export const ADDED_TO = "ADDED_TO";
 export const REMOVED_FROM = "REMOVED_FROM";
 export const REPLACED_WITHIN = "REPLACED_WITHIN";
-export const SPLICED = "SPLICED";
 
-export class Modified extends Command {
-  type: "MODIFIED" | "FIELDS_SET" | "ADDED_TO" | "REMOVED_FROM" | "REPLACED_WITHIN" | "SPLICED";
+class Modified extends Action {
+  type: "FIELDS_SET" | "ADDED_TO" | "REMOVED_FROM" | "REPLACED_WITHIN";
+
   id: mixed;
   typeName: string;
+}
+
+export class FieldsSet extends Modified {
+  type: "FIELDS_SET";
   sets: ?Object;
-  splices: ?Object;
-  adds: ?Object;
-  removes: ?Object;
-  dontUpdateCouplings: ?boolean;
-
-  unrecognized: ?void;
 }
 
-export default function modified (command: Modified): Command {
-  if (!command.type) command.type = MODIFIED;
-  return validateModified(command);
+export class AddedTo extends Modified {
+  type: "ADDED_TO";
+  adds: Object;
 }
 
-export function validateModified (command: Modified): Command {
-  const {
-    type, id, typeName,
-    sets, splices, adds, removes, dontUpdateCouplings,
-    // eslint-disable-next-line no-unused-vars
-    version, commandId, eventId, partitions, parentId, timeStamp,
-    ...unrecognized
-  } = command;
-  invariantifyString(type, "MODIFIED.type", {
-    value: [MODIFIED, FIELDS_SET, ADDED_TO, REMOVED_FROM, REPLACED_WITHIN, SPLICED],
-  });
-  invariantify(!Object.keys(unrecognized).length, `${type}: command contains unrecognized fields`,
-      "\n\tunrecognized keys:", Object.keys(unrecognized),
-      "\n\tunrecognized fields:", unrecognized,
-      "\n\tcommand:", command);
+export class RemovedFrom extends Modified {
+  type: "REMOVED_FROM";
+  removes: Object;
+}
 
-  validateCommandInterface(command);
+export class ReplacedWithin extends Modified {
+  type: "REPLACED_WITHIN";
+}
 
-  invariantifyId(id, `${type}.id`, {}, "\n\tcommand:", command);
-  invariantifyTypeName(typeName, `${type}.typeName`, {}, "\n\tcommand:", command);
-  const count = (sets ? 1 : 0) + (splices ? 1 : 0) + (adds ? 1 : 0) + (removes ? 1 : 0);
-  invariantify(count === (type !== REPLACED_WITHIN ? 1 : 2),
-      `${type} has extraneous fields, can have only one of: sets, adds, removes, splices`,
-      "\n\tcommand:", command);
-  if ((type === FIELDS_SET) || command.sets) validateFieldsSet(command);
-  if ((type === ADDED_TO) || (command.adds && (type !== REPLACED_WITHIN))) {
-    validateAddedToFields(command);
-  }
-  if ((type === REMOVED_FROM) || (command.removes && (type !== REPLACED_WITHIN))) {
-    validateRemovedFromFields(command);
-  }
-  if ((type === REPLACED_WITHIN)) validateReplacedWithinFields(command);
-  if ((type === SPLICED) || command.splices) validateSplicedFields(command);
-  invariantifyBoolean(dontUpdateCouplings, `${type}.dontUpdateCouplings`, { allowUndefined: true },
-      "\n\tcommand:", command);
-  return command;
+export function validateModifiedBase (expectedType: string, action: Action, type: string,
+    local: ?Object, id: string | ValaaReference, typeName: string, unrecognized: Object): Modified {
+  validateActionBase(expectedType, action, type, local, unrecognized);
+
+  invariantifyId(id, `${expectedType}.id`, {});
+  invariantifyTypeName(typeName, `${expectedType}.typeName`, {});
+  return action;
 }
 
 /**
  * For Map/object type properties
  * sets = { property: value, ... }
  */
-export function fieldsSet (command: Modified, sets: Object) {
-  command.type = FIELDS_SET;
-  command.sets = sets;
-  invariantify(sets, "fieldsSet: must specify sets", "\n\tcommand:", command);
-  return modified(command);
+export function fieldsSet (action: Action): FieldsSet {
+  action.type = FIELDS_SET;
+  return validateFieldsSet(action);
 }
 
-export function validateFieldsSet (command: Modified) {
-  invariantifyObject(command.sets, "FIELDS_SET.sets",
-      { elementInvariant: (value, key) => key && (typeof key === "string") },
-      "\n\tcommand:", command);
-  return command;
+export function validateFieldsSet (action: Action): FieldsSet {
+  const { type, local, id, typeName, sets, ...unrecognized } = action;
+  validateModifiedBase(FIELDS_SET, action, type, local, id, typeName, unrecognized);
+
+  invariantifyObject(sets, "FIELDS_SET.sets", {
+    elementInvariant: (value, key) => key && (typeof key === "string"),
+  }, "\n\taction:", action);
+  return action;
 }
 
 /**
@@ -99,23 +77,24 @@ export function validateFieldsSet (command: Modified) {
  * the fully generic replacement as combination of REMOVED_FROM and ADDED_TO.
  * adds: { property: value, ... } or { property: [ value1, value2, ...], ... }
  */
-export function addedToFields (command: Modified, adds: Object) {
-  command.type = ADDED_TO;
-  command.adds = adds;
-  invariantify(adds, "addedToFields: must specify adds", "\n\tcommand:", command);
-  return modified(command);
+export function addedTo (action: Action): AddedTo {
+  action.type = ADDED_TO;
+  return validateAddedTo(action);
 }
 
-export function validateAddedToFields (command: Modified, type: string = "ADDED_TO") {
-  invariantifyObject(command.adds, `${type}.removes`, {
+export function validateAddedTo (action: Action): AddedTo {
+  const { type, local, id, typeName, adds, ...unrecognized } = action;
+  validateModifiedBase(ADDED_TO, action, type, local, id, typeName, unrecognized);
+
+  invariantifyObject(adds, `ADDED_TO.adds`, {
     elementInvariant: (value, key) => key
         && (typeof key === "string")
-        && invariantifyArray(value, `${type}.adds['${key}'], with:`,
+        && invariantifyArray(value, `ADDED_TO.adds['${key}'], with:`,
             {},
-            "\n\tcommand.adds:", command.adds,
-            "\n\tcommand:", command)
-  }, "\n\tcommand:", command);
-  return command;
+            "\n\taction.adds:", action.adds,
+            "\n\taction:", action)
+  }, "\n\taction:", action);
+  return action;
 }
 
 // TODO(iridian): This API is horrible. Fix it.
@@ -123,23 +102,24 @@ export function validateAddedToFields (command: Modified, type: string = "ADDED_
  * For Set type properties
  * adds: { property: value, ... } or { property: [ value1, value2, ...], ... }
  */
-export function removedFromFields (command: Modified, removes: Object) {
-  command.type = REMOVED_FROM;
-  command.removes = removes;
-  invariantify(removes, "removedFromFields: must specify removes", "\n\tcommand:", command);
-  return modified(command);
+export function removedFrom (action: Action): RemovedFrom {
+  action.type = REMOVED_FROM;
+  return validateRemovedFrom(action);
 }
 
-export function validateRemovedFromFields (command: Modified, type: string = "REMOVED_FROM") {
-  invariantifyObject(command.removes, `${type}.removes`, {
+export function validateRemovedFrom (action: Action): RemovedFrom {
+  const { type, local, id, typeName, removes, ...unrecognized } = action;
+  validateModifiedBase(REMOVED_FROM, action, type, local, id, typeName, unrecognized);
+
+  invariantifyObject(removes, `REMOVED_FROM.removes`, {
     elementInvariant: (value, key) => key
         && (typeof key === "string")
-        && invariantifyArray(value, `${type}.removes['${key}'], with:`,
+        && invariantifyArray(value, `REMOVED_FROM.removes['${key}'], with:`,
             { allowNull: true },
-            "\n\tcommand.removes:", command.removes,
-            "\n\tcommand:", command)
-  }, "\n\tcommand:", command);
-  return command;
+            "\n\taction.removes:", action.removes,
+            "\n\taction:", action)
+  }, "\n\taction:", action);
+  return action;
 }
 
 /**
@@ -149,53 +129,31 @@ export function validateRemovedFromFields (command: Modified, type: string = "RE
  * The removes and adds sequences must be disjoint; all entries in the adds are considered
  * implicitly removed as per ADDED_TO semantics.
  */
-export function replacedWithinFields (command: Modified, removes: Object, adds: Object) {
-  command.type = REPLACED_WITHIN;
-  command.removes = removes;
-  command.adds = adds;
-  invariantify(removes, "replacedWithinFields: must specify removes", "\n\tcommand:", command);
-  invariantify(adds, "replacedWithinFields: must specify adds", "\n\tcommand:", command);
-  return modified(command);
+export function replacedWithin (action: Action): ReplacedWithin {
+  action.type = REPLACED_WITHIN;
+  return validateReplacedWithin(action);
 }
 
-export function validateReplacedWithinFields (command: Modified) {
-  validateRemovedFromFields(command, "REPLACED_WITHIN");
-  validateAddedToFields(command, "REPLACED_WITHIN");
-  return command;
-}
+export function validateReplacedWithin (action: Action): ReplacedWithin {
+  const { type, local, id, typeName, removes, adds, ...unrecognized } = action;
+  validateModifiedBase(REPLACED_WITHIN, action, type, local, id, typeName, unrecognized);
 
-/**
- * Create a new splice for splicedFields below. Starting from index, first removeNum number of
- * entries are removed, after which the entries in values list are inserted at the same location.
- * @captureIndex {number}: If specified, values are ignored and the added entries are instead
- *   retrieved from an earlier spliceList performed on the same _property_, specified by this index.
-  */
-export function spliceList (/* { index = 0, removeNum, values, captureIndex }: Object */) {
-  throw new Error("DEPRECATED: SPLICED\n\tprefer: REPLACE_WITHIN");
-  // return { index, removeNum, values, captureIndex };
-}
+  invariantifyObject(removes, `REPLACED_WITHIN.removes`, {
+    elementInvariant: (value, key) => key
+        && (typeof key === "string")
+        && invariantifyArray(value, `REPLACED_WITHIN.removes['${key}'], with:`,
+            { allowNull: true },
+            "\n\taction.removes:", action.removes,
+            "\n\taction:", action)
+  }, "\n\taction:", action);
+  invariantifyObject(adds, `REPLACED_WITHIN.adds`, {
+    elementInvariant: (value, key) => key
+        && (typeof key === "string")
+        && invariantifyArray(value, `REPLACED_WITHIN.adds['${key}'], with:`,
+            {},
+            "\n\taction.adds:", action.adds,
+            "\n\taction:", action)
+  }, "\n\taction:", action);
 
-// TODO(iridian): This API is horrible. Fix it.
-/**
- * For List type properties.
- * splices = { property: spliceList, ... } or { property: [ spliceList1, spliceList2, ...] }
- */
-export function splicedFields (/* command: Modified, splices: Object */) {
-  throw new Error("DEPRECATED: SPLICED\n\tprefer: REPLACE_WITHIN");
-  /*
-  command.type = SPLICED;
-  command.splices = splices;
-  invariantify(splices, "splicedFields: must specify splices", "\n\tcommand:", command);
-  return modified(command);
-  */
-}
-
-export function validateSplicedFields (command: Modified) {
-  console.error("DEPRECATED: SPLICED\n\tprefer: REPLACE_WITHIN",
-      "\n\tcommand:", ...dumpObject(command));
-  invariantifyObject(command.splices, "SPLICED.splices", {
-    elementInvariant: (value, key) => key && (typeof key === "string")
-        && (value.values || value.captureIndex || value.removeNum),
-  }, "\n\tcommand:", command);
-  return command;
+  return action;
 }

@@ -1,4 +1,4 @@
-import { created, modified } from "~/raem/command";
+import { created, fieldsSet } from "~/raem/command";
 import VALK from "~/raem/VALK";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
@@ -233,7 +233,7 @@ describe("Ghost materialization and immaterialization", () => {
         .toBeFalsy();
     expect(harness.run(greatGrandling1InRoot1VRef, "name"))
         .toEqual("Harambaby");
-    harness.chronicleEvent(modified({ id: greatGrandling1InRoot1VRef, typeName: "TestThing",
+    harness.chronicleEvent(fieldsSet({ id: greatGrandling1InRoot1VRef, typeName: "TestThing",
       sets: { name: "ghostGhostBaby" },
     }));
     const greatGrandling1InRoot1 = harness.run(greatGrandling1InRoot1VRef, null);
@@ -284,7 +284,7 @@ describe("Mixing references across instantiation boundaries", () => {
   it("returns a sub-component of an instance prototype for an explicitly set instance field " +
       "instead of returning a ghost corresponding to this sub-component", () => {
     setUp({ verbosity: 0 });
-    harness.chronicleEvent(modified({ id: "root#1", typeName: "TestThing",
+    harness.chronicleEvent(fieldsSet({ id: "root#1", typeName: "TestThing",
       sets: { siblings: ["ownling"] },
     }));
     expect(harness.run(getTestPartition("root#1"), ["§->", "siblings", 0]))
@@ -296,7 +296,7 @@ describe("Mixing references across instantiation boundaries", () => {
   it("returns a sub-component of an instance prototype for an explicitly set ghost field " +
       "instead of returning a ghost corresponding to this sub-component", () => {
     setUp({ verbosity: 0 });
-    harness.chronicleEvent(modified({ id: getGhostOwnling(), typeName: "TestThing",
+    harness.chronicleEvent(fieldsSet({ id: getGhostOwnling(), typeName: "TestThing",
       sets: { siblings: ["grandling"] },
     }));
     expect(harness.run(getGhostOwnling(), ["§->", "siblings", 0]))
@@ -367,9 +367,9 @@ describe("Deep instantiations", () => {
     const grandling11 = harness.run(vRef("root#1#1"), ["§->", "children", 0, "children", 0]);
     expect(harness.run(grandling11, "name"))
         .toEqual("Harambe");
-    harness.chronicleEvent(modified({ id: grandling11, typeName: "TestThing", sets: {
-      name: "Ghostambe",
-    } }));
+    harness.chronicleEvent(fieldsSet({ id: grandling11, typeName: "TestThing",
+      sets: { name: "Ghostambe", },
+    }));
     expect(harness.run(grandling11, "name"))
         .toEqual("Ghostambe");
     expect(harness.run(vRef("root#1#1"), ["§->", "children", 0, "children", 0, "name"]))

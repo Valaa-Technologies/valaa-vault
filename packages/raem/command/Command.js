@@ -1,13 +1,21 @@
 // @flow
-import { invariantifyNumber, invariantifyObject } from "~/tools/invariantify";
-import { invariantifyId } from "~/raem/ValaaReference";
+
+import invariantify, {
+  invariantifyArray, invariantifyNumber, invariantifyObject, invariantifyString,
+} from "~/tools/invariantify";
 
 export class Action {
   +type: string;
+  local: ?Object;
+
+  unrecognized: ?void;
+}
+
+export class ActionCollection extends Action {
+  +actions: ?Action[];
 }
 
 export class EventBase extends Action {
-  version: ?string;
   commandId: string;
 }
 
@@ -16,25 +24,57 @@ export class UniversalEvent extends EventBase {
   timeStamp: ?number;
 }
 
-export class Truth extends EventBase {
-  // partitions: ?Object;
+export default class Command extends EventEnvelope {
+  type: "COMMAND";
 }
 
-export default class Command extends EventBase {
-  // partitions: ?Object;
+export class Truth extends EventEnvelope {
+  type: "TRUTH";
+  chainHash: string;
 }
 
-export function validateCommandInterface (command: Command) {
-  const { type, version, commandId, eventId, partitions, timeStamp } = command;
+export function validateActionBase (expectedType: string, action: Action, type: string,
+    local: ?Object, unrecognized: Object) {
+  invariantifyString(type, `${expectedType}.type`, { value: expectedType });
+  invariantifyObject(local, `${expectedType}.local`, { allowNull: false, allowUndefined: true });
+  if (Object.keys(unrecognized).length) {
+    const { version, partitions, commandId, eventId, ...rest } = unrecognized; // migration code - version is being removed
+    if (Object.keys(rest).length) {
+      invariantify(false,
+        `${expectedType} action contains unrecognized fields`,
+        "\n\tunrecognized keys:", Object.keys(unrecognized),
+        "\n\tunrecognized fields:", unrecognized);
+    }
+  }
+}
 
-  invariantifyId(version, `${type}.version`, { allowUndefined: true },
-      "\n\tcommand:", command);
-  invariantifyId(commandId, `${type}.commandId`, { allowUndefined: true },
-      "\n\tcommand:", command);
+export function validateActionCollectionBase (expectedType: string, action: ActionCollection,
+    type, local, actions, unrecognized, validateAction: ?Function,
+): ?ActionCollection {
+  validateActionBase(expectedType, action, type, local, unrecognized);
+
+  invariantifyArray(actions, `${expectedType}.actions`, {
+    elementInvariant: validateAction ||
+        (subAction => subAction && (typeof subAction === "object") && subAction.type),
+    suffix: " of sub-action objects",
+  }, "\n\taction:", action);
+
+  return action;
+}
+
+export function validateEvent (command: EventBase) {
+  const { type, version, commandId, eventId, timeStamp } = command;
+
+  invariantifyString(version, `${type}.version`, { allowUndefined: true },
+      "\n\taction:", command);
+  invariantifyString(commandId, `${type}.commandId`, { allowUndefined: true },
+      "\n\taction:", command);
   invariantifyNumber(eventId, `${type}.eventId`, { allowUndefined: true },
-      "\n\tcommand:", command);
-  invariantifyObject(partitions, `${type}.partitions`, { allowUndefined: true, allowEmpty: true },
-      "\n\tcommand:", command);
+      "\n\taction:", command);
   invariantifyNumber(timeStamp, `${type}.timeStamp`, { allowUndefined: true },
-      "\n\tcommand:", command);
+      "\n\taction:", command);
+}
+
+export function validateTruth (truth: Truth) {
+
 }

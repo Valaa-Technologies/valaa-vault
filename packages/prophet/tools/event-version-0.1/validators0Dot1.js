@@ -2,9 +2,9 @@
 
 import invariantify, {
   invariantifyArray, invariantifyBoolean, invariantifyNumber, invariantifyString,
-  invariantifyTypeName, invariantifyObject,
+  invariantifyObject,
 } from "~/tools/invariantify";
-import { invariantifyId } from "~/raem/ValaaReference";
+import { invariantifyId, invariantifyTypeName } from "~/raem/ValaaReference";
 
 import { dumpObject } from "~/tools";
 
@@ -171,7 +171,7 @@ function validateDuplicated (command: Object): Object {
 }
 
 function validateFrozen (command: Object, recursiveActionValidator: ?Function): Object {
-  return validateTransactedLike(command, "FROZEN", recursiveActionValidator);
+  return validateActionCollectionBase(command, "FROZEN", recursiveActionValidator);
 }
 
 function validateModified (command: Object): Object {
@@ -260,7 +260,7 @@ function validateSplicedFields (command: Object) {
 }
 
 function validateRecombined (command: Object): Object {
-  return validateTransactedLike(command, "RECOMBINED", validateDuplicated);
+  return validateActionCollectionBase(command, "RECOMBINED", validateDuplicated);
 }
 
 function validateTimed (command: Object, recursiveActionValidator: ?Function): Object {
@@ -299,10 +299,10 @@ function validateTimed (command: Object, recursiveActionValidator: ?Function): O
 }
 
 function validateTransacted (command: Object, recursiveActionValidator: ?Function): Object {
-  return validateTransactedLike(command, "TRANSACTED", recursiveActionValidator);
+  return validateActionCollectionBase(command, "TRANSACTED", recursiveActionValidator);
 }
 
-function validateTransactedLike (command: Object, typeValue: string,
+function validateActionCollectionBase (command: Object, typeValue: string,
     recursiveActionValidator: ?Function): Object {
   const {
     type, actions,

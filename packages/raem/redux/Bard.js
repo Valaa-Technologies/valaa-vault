@@ -293,7 +293,7 @@ export default class Bard extends Resolver {
 
   goToResourceTypeIntro (operationDescription: string = this.passage.type): Object {
     const ret = this.goToObjectTypeIntro(operationDescription);
-    if (!isResourceType(ret) && !this.passage.dontUpdateCouplings) {
+    if (!isResourceType(ret) && !(this.passage.local || {}).dontUpdateCouplings) {
       throw this.wrapErrorEvent(
           new Error(`${operationDescription} attempted on a non-Resource object`),
           `goToResourceTypeIntro(${operationDescription})`,

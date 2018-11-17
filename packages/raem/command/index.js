@@ -115,12 +115,10 @@ export { Action, Command, Truth, EventBase, UniversalEvent };
 export const CREATED = c.CREATED;
 export const DESTROYED = d.DESTROYED;
 export const DUPLICATED = dup.DUPLICATED;
-export const MODIFIED = m.MODIFIED;
 export const FIELDS_SET = m.FIELDS_SET;
 export const ADDED_TO = m.ADDED_TO;
 export const REMOVED_FROM = m.REMOVED_FROM;
 export const REPLACED_WITHIN = m.REPLACED_WITHIN;
-export const SPLICED = m.SPLICED;
 export const FROZEN = f.FROZEN;
 export const RECOMBINED = r.RECOMBINED;
 export const TIMED = td.TIMED;
@@ -134,15 +132,21 @@ export const recombined = resourceRecombined;
 export const timed = resourceTimed;
 export const transacted = resourceTransacted;
 export const fieldsSet = m.fieldsSet;
-export const addedToFields = m.addedToFields;
-export const removedFromFields = m.removedFromFields;
-export const replacedWithinFields = m.replacedWithinFields;
-export const spliceList = m.spliceList;
-export const splicedFields = m.splicedFields;
+export const addedTo = m.addedTo;
+export const removedFrom = m.removedFrom;
+export const replacedWithin = m.replacedWithin;
 
+export function isActionLike (action: Action) {
+  return !!actionValidators[VERSION][action.type];
+}
 
 export function isCreatedLike (action: Action) {
   return (action.type === CREATED) || (action.type === DUPLICATED);
+}
+
+export function isModifiedLike (action: Action) {
+  return (action.type === FIELDS_SET) || (action.type === ADDED_TO)
+      || (action.type === REMOVED_FROM) || (action.type === REPLACED_WITHIN);
 }
 
 export function isTransactedLike (action: Action) {
@@ -150,20 +154,24 @@ export function isTransactedLike (action: Action) {
       || (action.type === RECOMBINED);
 }
 
-export const validators = {
+export const actionValidators = {
   [VERSION]: {
     CREATED: c.validateCreated,
     DESTROYED: d.validateDestroyed,
     DUPLICATED: dup.validateDuplicated,
-    MODIFIED: m.validateModified,
-    FIELDS_SET: m.validateModified,
-    ADDED_TO: m.validateModified,
-    REMOVED_FROM: m.validateModified,
-    REPLACED_WITHIN: m.validateModified,
-    SPLICED: m.validateModified,
+    FIELDS_SET: m.validateFieldsSet,
+    ADDED_TO: m.validateAddedTo,
+    REMOVED_FROM: m.validateRemovedFrom,
+    REPLACED_WITHIN: m.validateReplacedWithin,
     FROZEN: f.validateFrozen,
     RECOMBINED: r.validateRecombined,
     TIMED: td.validateTimed,
     TRANSACTED: t.validateTransacted,
+  }
+};
+
+export const validators = {
+  [VERSION]: {
+    ...actionValidators[VERSION],
   },
 };

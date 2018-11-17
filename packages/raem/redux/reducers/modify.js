@@ -22,16 +22,20 @@ import { separatePartialSequence, combineAsPartialSequence, shouldAddAsPartialRe
 
 import Bard from "~/raem/redux/Bard";
 
-import { dumpify, dumpObject, invariantify, invariantifyString, wrapError } from "~/tools";
+import { invariantify, invariantifyString, wrapError } from "~/tools";
 
-// TODO(iridian): Well. MODIFIED is stupid, it should be four (or more) different actions:
-// FIELDS_SET, ADDED_TO, REMOVED_FROM, REPLACED_WITHIN, SPLICED.
-// Having them be part of the same action doesn't really give any added value. If grouping is
-// needed TRANSACTED can be used. I guess the design predates TRANSACTED, however even before there
-// were no use cases for a modification that contains different modalities. Lament.
-// TODO(iridian): The above-mentioned action types have now been introduced but the actual execution
-// path still uses the unified MODIFIED pathway. Validators exclude multiples of sets, adds, removes
-// and splices from being specified in a command now, but maybe there's more to do.
+// TODO(iridian): Well. MODIFIED is stupid, it should be four (or more)
+// different actions: FIELDS_SET, ADDED_TO, REMOVED_FROM, REPLACED_WITHIN.
+// Having them be part of the same action doesn't really give any added
+// value. If grouping is needed TRANSACTED can be used. I guess the
+// design predates TRANSACTED, however even before there were no use
+// cases for a modification that contains different modalities. Lament.
+// TODO(iridian): The above-mentioned action types have now been
+// introduced but the actual execution path still uses the unified
+// MODIFIED pathway. Validators exclude multiples of sets, adds and
+// removes from being specified in a command now, but maybe there's
+// more to do.
+// NOTE(iridian-2018-11): MODIFIED is now externally hidden as of event version "0.2".
 /**
  *  Elementary modify operation, for changing the properties of a Resource object.
  *  Sub-operation order is not specified; two sub-operations shall not modify the same field.
@@ -41,7 +45,7 @@ import { dumpify, dumpObject, invariantify, invariantifyString, wrapError } from
 export default function modifyResource (bard: Bard) {
   try {
     const objectId = bard.getPassageObjectId();
-    bard.shouldUpdateCouplings = !bard.passage.dontUpdateCouplings;
+    bard.shouldUpdateCouplings = !(bard.passage.local || {}).dontUpdateCouplings;
     bard.denormalized = {};
     bard.fieldsTouched = new Set();
     bard.tryGoToTransientOfRawId(objectId.rawId(), bard.passage.typeName);
@@ -61,24 +65,18 @@ export default function modifyResource (bard: Bard) {
     const newResource = bard.objectTransient.withMutations(mutableObject => {
       if (bard.passage.sets) {
         mutatesPartition =
-            processUpdate(bard, bard.passage.sets, handleSets, "MODIFIED.sets", mutableObject)
+            processUpdate(bard, bard.passage.sets, handleSets, "FIELDS_SET.sets", mutableObject)
             || mutatesPartition;
       }
       if (bard.passage.removes) {
         mutatesPartition =
-            processUpdate(bard, bard.passage.removes, handleRemoves, "MODIFIED.removes",
+            processUpdate(bard, bard.passage.removes, handleRemoves, "REMOVED_FROM.removes",
                 mutableObject)
             || mutatesPartition;
       }
       if (bard.passage.adds) {
         mutatesPartition =
-            processUpdate(bard, bard.passage.adds, handleAdds, "MODIFIED.adds", mutableObject)
-            || mutatesPartition;
-      }
-      if (bard.passage.splices) {
-        mutatesPartition =
-            processUpdate(bard, bard.passage.splices, handleSplices, "MODIFIED.splices",
-                mutableObject)
+            processUpdate(bard, bard.passage.adds, handleAdds, "ADDED_TO.adds", mutableObject)
             || mutatesPartition;
       }
       if (bard.refreshPartition) {
@@ -124,7 +122,7 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
       if (isCreatedLike(bard.passage)) continue;
       bard.error(`Invalid ${operationDescription}, trying to update ${
           bard.objectTypeIntro.name}.${fieldName
-          } with 'undefined' (use MODIFIED.removes or MODIFIED.splices instead)`);
+          } with 'undefined' (use MODIFIED.removes instead)`);
       return false;
     }
     const fieldInfo = {
@@ -207,6 +205,7 @@ function deserializeAs (bard: Bard, value, fieldInfo, SequenceType) {
   }
 }
 
+/*
 function deserializeAsArray (bard: Bard, sequence, fieldInfo) {
   const ret = [];
   try {
@@ -220,6 +219,7 @@ function deserializeAsArray (bard: Bard, sequence, fieldInfo) {
         "\n\tbard:", bard);
   }
 }
+*/
 
 function forEachDeserializeAndDo (bard: Bard, sequence, fieldInfo, operation) {
   const deserializeSingular = obtainSingularDeserializer(fieldInfo);
@@ -466,70 +466,6 @@ const customSetFieldHandlers = {
     }
   }
 };
-
-function handleSplices (bard: Bard, fieldInfo, splices, oldLocalValue, updateCoupling) {
-  // Splice only affects the local values. If RemoveDiffs are enabled, splice will add any removed
-  // entries to it. Elevate the full value beforehand using 'set' if you want
-  // to have splice affect some inherited entries as well.
-  bard.errorEvent("DEPRECATED: SPLICED\n\tprefer: REPLACED_WITHIN",
-      "\n\tsplices:", ...dumpObject(splices));
-  // eslint-disable-next-line
-  let { valueAsSet: oldLocalValueAsSet, removeDiffs } = separatePartialSequence(oldLocalValue);
-  const oldLocalValueAsList = (oldLocalValue || List()).toList();
-  const oldCompleteValue =
-      // non-commands will have these operations come from appropriate sub-actions
-      !bard.story.isBeingUniversalized ? undefined
-      // for commands we need to create these sub-actions as part of the universalisation
-      : elevateFieldRawSequence(bard, oldLocalValue, fieldInfo, bard.objectTransient);
-  const newValue = !Array.isArray(splices)
-      ? oldLocalValueAsList.splice(splices.index, splices.removeNum || 0,
-          ...(deserializeAsArray(bard, splices.values, fieldInfo) || []))
-      : splices.reduce(
-          reduceSpliceWithCaptures(bard, [], fieldInfo),
-          oldLocalValueAsList);
-  const fieldAdds = [];
-  const fieldRemoves = [];
-  const universalizedFieldRemoves = [];
-  removeDiffs = _extractListAddsAndRemoves(newValue, oldLocalValueAsSet, oldCompleteValue,
-      fieldAdds, fieldRemoves, universalizedFieldRemoves, removeDiffs);
-  if (fieldAdds.length) {
-    (bard.passage.actualAdds || (bard.passage.actualAdds = new Map()))
-        .set(fieldInfo.name, fieldAdds);
-  }
-  if (fieldRemoves.length) {
-    (bard.passage.actualRemoves || (bard.passage.actualRemoves = new Map()))
-        .set(fieldInfo.name, fieldRemoves);
-  }
-  if (updateCoupling) {
-    addCoupleCouplingPassages(bard, fieldInfo.intro, fieldAdds, true);
-    addUncoupleCouplingPassages(bard, fieldInfo.intro, fieldRemoves, true);
-    // TODO: universalize this
-    addUncoupleCouplingPassages(bard, fieldInfo.intro, universalizedFieldRemoves, true);
-  }
-  return combineAsPartialSequence(newValue, removeDiffs);
-}
-
-function reduceSpliceWithCaptures (bard: Bard, captures = [], fieldInfo) {
-  return function inner (list, { index, removeNum, values, captureIndex }) {
-    let actualValues;
-    if (typeof captureIndex !== "undefined") {
-      if (captureIndex >= captures.length || captureIndex < -captures.length) {
-        bard.warnEvent("propertySpliced captureIndex out of bounds (vs. captures:",
-            captures, "), skipping splice",
-            dumpify({ index, removeNum, captureIndex, values }));
-        captures.push(List());
-        return list;
-      }
-      actualValues = captures[captureIndex];
-    } else {
-      actualValues = deserializeAsArray(bard, values, fieldInfo);
-    }
-    if (removeNum) {
-      if (captures) captures.push(list.slice(index, index + removeNum));
-    }
-    return list.splice(index, removeNum, ...(actualValues || []));
-  };
-}
 
 function _extractListAddsAndRemoves (newSeq, oldLocalValues, oldCompleteValues,
     actualAdds, fieldRemoves, universalizedRemoves, removeDiffs) {

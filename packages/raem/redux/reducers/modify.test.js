@@ -1,11 +1,11 @@
-import { created, modified, removedFromFields, replacedWithinFields } from "~/raem/command";
+import { addedTo, created, fieldsSet, removedFrom, replacedWithin } from "~/raem/command";
 import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";
 import getObjectField, { getObjectRawField } from "~/raem/tools/denormalized/getObjectField";
 import { vRef, dRef } from "~/raem/ValaaReference";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 
-describe("MODIFIED", () => {
+describe("MODIFIED action class", () => {
   beforeEach(() => {});
 
   const createBlockA = [
@@ -26,7 +26,7 @@ describe("MODIFIED", () => {
 
   it("modify sets a singular literal", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
-      modified({ id: "A_parent", typeName: "TestThing",
+      fieldsSet({ id: "A_parent", typeName: "TestThing",
         sets: { name: "parent" },
       }),
     ]);
@@ -39,10 +39,8 @@ describe("MODIFIED", () => {
 
   it("modify sets a singular literal to null", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
-      modified({ id: "A_parent", typeName: "TestThing", sets: { name: "parent" } }),
-      modified({ id: "A_parent", typeName: "TestThing",
-        sets: { name: null },
-      }),
+      fieldsSet({ id: "A_parent", typeName: "TestThing", sets: { name: "parent" } }),
+      fieldsSet({ id: "A_parent", typeName: "TestThing", sets: { name: null } }),
     ]);
     expect(getObjectTransient(harness.corpus, "A_parent", "TestThing").get("name"))
         .toEqual(null);
@@ -76,7 +74,7 @@ describe("MODIFIED", () => {
       const dataGlue = harness.chronicleEvent(created({ id: "glue1", typeName: "TestDataGlue",
         initialState: { source: "A_child1", target: "A_child2" },
       })).getTruthEvent();
-      harness.chronicleEvent(modified({ id: "A_child1", typeName: "TestThing",
+      harness.chronicleEvent(addedTo({ id: "A_child1", typeName: "TestThing",
         adds: { sourceDataGlues: [dataGlue.id] },
       }));
 
@@ -90,7 +88,7 @@ describe("MODIFIED", () => {
       const dataGlue = harness.chronicleEvent(created({ id: dRef("glue1"), typeName: "TestDataGlue",
         initialState: { source: "A_child1", target: "A_child2" },
       })).getTruthEvent();
-      harness.chronicleEvent(modified({ id: "A_child1", typeName: "TestThing",
+      harness.chronicleEvent(addedTo({ id: "A_child1", typeName: "TestThing",
         adds: { sourceDataGlues: [dataGlue.id] },
       }));
 
@@ -101,7 +99,7 @@ describe("MODIFIED", () => {
 
     it("adds and traverses expanded Data without explicit typeName to a concrete field", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
-        modified({ id: "A_child1", typeName: "TestThing",
+        addedTo({ id: "A_child1", typeName: "TestThing",
           adds: { sourceDataGlues: [{ source: "A_child1", target: "A_child2" }] }
         }),
       ]);
@@ -113,14 +111,14 @@ describe("MODIFIED", () => {
 
     it("fails to add expanded Data without explicit typeName to an abstract field", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-      expect(() => harness.chronicleEvent(modified({ id: "A_child1", typeName: "TestThing",
+      expect(() => harness.chronicleEvent(addedTo({ id: "A_child1", typeName: "TestThing",
         adds: { targetDataGlues: [{ target: "A_child1", source: "A_child2" }] },
       }))).toThrow(/must have typeName field/);
     });
 
     it("adds and traverses expanded Data with explicit typeName to an abstract field", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-      harness.chronicleEvent(modified({ id: "A_child1", typeName: "TestThing",
+      harness.chronicleEvent(addedTo({ id: "A_child1", typeName: "TestThing",
         adds: { targetDataGlues: [{ typeName: "TestDataGlue",
           target: "A_child1", source: "A_child2",
         }], },
@@ -137,9 +135,9 @@ describe("MODIFIED", () => {
           .toEqual([]);
       expect(harness.run(vRef("A_parent"), "children"))
           .toEqual([vRef("A_child1"), vRef("A_child2")]);
-      harness.chronicleEvent(removedFromFields({ id: "A_parent", typeName: "TestThing" },
-          { children: null },
-      ));
+      harness.chronicleEvent(removedFrom({ id: "A_parent", typeName: "TestThing",
+        removes: { children: null },
+      }));
       expect(harness.run(vRef("A_parent"), "children"))
           .toEqual([]);
     });
@@ -148,9 +146,10 @@ describe("MODIFIED", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
       expect(harness.run(vRef("A_parent"), "children"))
           .toEqual([vRef("A_child1"), vRef("A_child2")]);
-      harness.chronicleEvent(replacedWithinFields({ id: "A_parent", typeName: "TestThing" },
-          { children: [] }, { children: [vRef("A_child2"), vRef("A_child1")] },
-      ));
+      harness.chronicleEvent(replacedWithin({ id: "A_parent", typeName: "TestThing",
+        removes: { children: [] },
+        adds: { children: [vRef("A_child2"), vRef("A_child1")] },
+      }));
       expect(harness.run(vRef("A_parent"), "children"))
           .toEqual([vRef("A_child2"), vRef("A_child1")]);
     });
@@ -159,9 +158,10 @@ describe("MODIFIED", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
       expect(harness.run(vRef("A_parent"), "children"))
           .toEqual([vRef("A_child1"), vRef("A_child2")]);
-      harness.chronicleEvent(replacedWithinFields({ id: "A_parent", typeName: "TestThing" },
-          { children: [vRef("A_child2")] }, { children: [vRef("A_child3"), vRef("A_child1")] },
-      ));
+      harness.chronicleEvent(replacedWithin({ id: "A_parent", typeName: "TestThing",
+        removes: { children: [vRef("A_child2")] },
+        adds: { children: [vRef("A_child3"), vRef("A_child1")] },
+      }));
       expect(harness.run(vRef("A_parent"), "children", { verbosity: 0 }))
           .toEqual([vRef("A_child3"), vRef("A_child1")]);
     });

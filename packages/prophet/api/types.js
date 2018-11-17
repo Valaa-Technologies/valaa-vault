@@ -25,8 +25,8 @@ export type MediaInfo = {
 export type RetrieveMediaBuffer = (mediaInfo: MediaInfo) => Promise<any>;
 
 export type EventData = {
-  type: "CREATED" | "MODIFIED" | "FIELDS_SET" | "ADDED_TO" | "REMOVED_FROM" | "REPLACED_WITHIN"
-      | "SPLICED" | "TRANSACTED" | "FROZEN"
+  type: "CREATED" | "FIELDS_SET" | "ADDED_TO" | "REMOVED_FROM" | "REPLACED_WITHIN"
+      | "TRANSACTED" | "FROZEN"
 }
 export type ReceiveEvents = ((events: EventData[], options: Object) =>
     (Promise<EventBase> | EventBase)[]);

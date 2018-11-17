@@ -1,6 +1,6 @@
 import { Map } from "immutable";
 
-import { CREATED, DESTROYED, MODIFIED, FIELDS_SET, ADDED_TO, REMOVED_FROM, REPLACED_WITHIN, SPLICED,
+import { CREATED, DESTROYED, FIELDS_SET, ADDED_TO, REMOVED_FROM, REPLACED_WITHIN,
     DUPLICATED, FROZEN, RECOMBINED, TIMED, TRANSACTED } from "~/raem/command";
 import create from "~/raem/redux/reducers/create";
 import duplicate from "~/raem/redux/reducers/duplicate";
@@ -18,12 +18,10 @@ export default function createRAEMReducers () {
     [CREATED]: createBardReducer(create),
     [DESTROYED]: createBardReducer(destroy, { skipPostPassageStateUpdate: true }),
     [DUPLICATED]: createBardReducer(duplicate),
-    [MODIFIED]: createBardReducer(modify),
     [FIELDS_SET]: createBardReducer(modify),
     [ADDED_TO]: createBardReducer(modify),
     [REMOVED_FROM]: createBardReducer(modify),
     [REPLACED_WITHIN]: createBardReducer(modify),
-    [SPLICED]: createBardReducer(modify),
     [FROZEN]: createBardReducer(freeze),
     [RECOMBINED]: createBardReducer(recombine, { skipPostPassageStateUpdate: true }),
     [TRANSACTED]: createBardReducer(transact),

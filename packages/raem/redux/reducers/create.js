@@ -10,7 +10,7 @@ export default function create (bard: CreateBard) {
   invariantifyString(bard.passage.typeName, "CREATED.typeName required");
 
   let initialState = bard.passage.initialState;
-  if (!bard.passage.noSubMaterialize) {
+  if (!(bard.passage.local || {}).noSubMaterialize) {
     const bailOut = prepareCreateOrDuplicateObjectTransientAndId(bard, bard.passage.typeName);
     if (bailOut) return bailOut;
     initialState = convertLegacyOwnerField(bard, initialState);

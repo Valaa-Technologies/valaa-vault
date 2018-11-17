@@ -51,7 +51,7 @@ describe("Partition freezing", () => {
   });
 
   const freezeEventFor = (entityRawId: string) => transacted({
-    actions: [fieldsSet({ id: vRef(entityRawId), typeName: "Entity" }, { isFrozen: true })],
+    actions: [fieldsSet({ id: vRef(entityRawId), typeName: "Entity", sets: { isFrozen: true } })],
   });
 
   it("Allows the user to freeze a partition", async () => {

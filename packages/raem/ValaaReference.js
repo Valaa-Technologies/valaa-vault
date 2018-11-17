@@ -250,6 +250,26 @@ export function invariantifyId (candidate: any, name: string = "id",
       ...additionalContextInformation);
 }
 
+export function invariantifyTypeName (candidate: ?string, name: string = "typeName",
+    { value, valueInvariant, allowNull, allowUndefined, suffix = "" }: Object = {},
+    ...additionalContextInformation: any) {
+  if ((typeof candidate === "string" && (candidate.length)
+          && (typeof value === "undefined" || (candidate === value))
+          && (!valueInvariant || valueInvariant(candidate)))
+      || ((typeof candidate === "undefined") && allowUndefined)
+      || (candidate === null && allowNull)) return true;
+
+  return invariantify(false,
+      `'${name}' must be a valid type field name${
+          typeof value !== "undefined" ? ` with exact value '${value}'` : ""}${
+          valueInvariant ? " obeying given value invariant" : ""}${
+          allowNull ? ", or null" : ""}${allowUndefined ? ", or undefined" : ""}${
+          suffix}`,
+      `\n\t'${name}' candidate:`, candidate,
+      ...(valueInvariant ? [`\n\tvalue invariant:`, valueInvariant] : []),
+      ...additionalContextInformation);
+}
+
 /**
  * Create a Valaa reference.
  *

@@ -149,7 +149,9 @@ function _createMaterializeGhostAction (state: State, ghostObjectPath: GhostPath
       ret.id.setInactive();
       ret.actualType = "InactiveResource";
       ret.ghostPath = ret.id.getGhostPath();
-      outputActions.push(created({ id: ret.id, typeName: ret.actualType, noSubMaterialize: true }));
+      outputActions.push(created({
+        id: ret.id, typeName: ret.actualType, local: { noSubMaterialize: true },
+      }));
     } else {
       // A regular non-root ghost Resource, but still possibly inside an inactive partition.
       // However, there is no difference between materialized reference and
@@ -177,7 +179,7 @@ function _createMaterializeGhostAction (state: State, ghostObjectPath: GhostPath
           ghostPrototype: prototypeId,
           ghostOwner: vRef(ghostHostRawId, "ghostOwnlings"),
         },
-        noSubMaterialize: true,
+        local: { noSubMaterialize: true },
       }));
     }
     return ret;

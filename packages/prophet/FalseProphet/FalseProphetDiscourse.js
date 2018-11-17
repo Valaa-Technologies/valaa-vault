@@ -234,7 +234,7 @@ export default class FalseProphetDiscourse extends Discourse {
     return this.chronicleEvent(command, {});
   }
 
-  destroy ({ id, typeName, owner }: Object): ProphecyEventResult {
-    return this.chronicleEvent(destroyed({ id, typeName, owner }), {});
+  destroy ({ id }: Object): ProphecyEventResult {
+    return this.chronicleEvent(destroyed({ id }), {});
   }
 }

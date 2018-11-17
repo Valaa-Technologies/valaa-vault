@@ -3,7 +3,7 @@ import { GraphQLString, GraphQLObjectType, GraphQLInputObjectType, GraphQLNonNul
 
 import mutationInputField from "~/raem/tools/graphql/mutationInputField";
 import mutationPayloadField from "~/raem/tools/graphql/mutationPayloadField";
-import modified from "~/raem/command/modified";
+// import modified from "~/raem/command/modified";
 
 const ModifyMutationInput = new GraphQLInputObjectType({
   name: "ModifyMutationInput",
@@ -14,7 +14,6 @@ const ModifyMutationInput = new GraphQLInputObjectType({
     ...mutationInputField("sets", GraphQLString),
     ...mutationInputField("adds", GraphQLString),
     ...mutationInputField("removes", GraphQLString),
-    ...mutationInputField("splices", GraphQLString),
   },
 });
 
@@ -31,8 +30,10 @@ const modify = {
   args: {
     input: { type: new GraphQLNonNull(ModifyMutationInput) },
   },
-  resolve: async (context, args/* , info */) => {
+  resolve: async (/* context, args, info */) => {
     try {
+      throw new Error("MODIFIED endpoint rotted - needs to be replaced with specific variants");
+      /*
       const truth = await context.store.chronicleEvent({
         ...modified({
           id: args.input.id,
@@ -40,13 +41,13 @@ const modify = {
           sets: args.input.sets && JSON.parse(args.input.sets),
           adds: args.input.adds && JSON.parse(args.input.adds),
           removes: args.input.removes && JSON.parse(args.input.removes),
-          splices: args.input.splices && JSON.parse(args.input.splices),
         }),
         bvobStubs: context.bvobStubs,
       }).getTruthEvent();
       return {
         clientMutationId: truth.id,
       };
+      */
     } catch (error) {
       console.error(error.message, error.stack);
       throw error;

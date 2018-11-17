@@ -21,7 +21,8 @@ describe("Oracle", () => {
   });
 
   const freezePartitionEvent = transacted({
-    actions: [fieldsSet({ id: vRef("test_partition"), typeName: "Entity" }, { isFrozen: true })],
+    actions: [
+      fieldsSet({ id: vRef("test_partition"), typeName: "Entity", sets: { isFrozen: true } })],
   });
 
   const lateCommand = created({

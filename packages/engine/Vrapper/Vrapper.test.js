@@ -1,6 +1,6 @@
 // @flow
 
-import { created } from "~/raem/command/index";
+import { created, destroyed } from "~/raem/command";
 import { vRef } from "~/raem/ValaaReference";
 import { createGhostRawId } from "~/raem/tools/denormalized/GhostPath";
 
@@ -369,8 +369,7 @@ describe("Vrapper", () => {
       testScriptPartitions().child.subscribeToMODIFIED("children", () => {
         modCalled = true;
       });
-      harness.chronicleEvent(
-          { type: "DESTROYED", id: "grandChild", typeName: "TestScriptyThing" });
+      harness.chronicleEvent(destroyed({ type: "DESTROYED", id: "grandChild" }));
       // children modified subscriber should have been called when the sub-event to remove
       // grandChild from the children list was reduced
       expect(modCalled).toEqual(true);

@@ -1,7 +1,7 @@
 import { List, OrderedMap, OrderedSet, Set, is } from "immutable";
 import { GraphQLObjectType } from "graphql/type";
 
-import { isCreatedLike } from "~/raem/command";
+import { isCreatedLike } from "~/raem/events";
 import { getRawIdFrom } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
 

@@ -1,5 +1,5 @@
 /*
-import { CREATED, isCreatedLike, isTransactedLike } from "~/raem/command";
+import { CREATED, isCreatedLike, isTransactedLike } from "~/raem/events";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import { getRawIdFrom } from "~/raem/ValaaReference";
 

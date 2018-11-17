@@ -1,7 +1,7 @@
 // @flow
 
 import { OrderedMap } from "immutable";
-import { created, EventBase } from "~/raem/command";
+import { created, EventBase } from "~/raem/events";
 
 import { createTestPartitionURIFromRawId, createPartitionURI }
     from "~/raem/ValaaURI";

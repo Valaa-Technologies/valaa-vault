@@ -1,4 +1,4 @@
-import { addedTo, created, fieldsSet, removedFrom, replacedWithin } from "~/raem/command";
+import { addedTo, created, fieldsSet, removedFrom, replacedWithin } from "~/raem/events";
 import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";
 import getObjectField, { getObjectRawField } from "~/raem/tools/denormalized/getObjectField";
 import { vRef, dRef } from "~/raem/ValaaReference";

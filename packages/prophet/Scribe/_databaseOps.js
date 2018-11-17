@@ -1,7 +1,7 @@
 // @flow
 
 import ValaaURI from "~/raem/ValaaURI";
-import type { EventBase } from "~/raem/command";
+import type { EventBase } from "~/raem/events";
 
 import { dumpObject, vdon, wrapError } from "~/tools";
 import IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";

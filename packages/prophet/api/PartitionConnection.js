@@ -1,7 +1,7 @@
 // @flow
 
 import ValaaURI, { getPartitionRawIdFrom } from "~/raem/ValaaURI";
-import type { EventBase } from "~/raem/command";
+import type { EventBase } from "~/raem/events";
 
 import Prophet from "~/prophet/api/Prophet";
 import { ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest,

@@ -1,6 +1,6 @@
 // @flow
 
-import { created, destroyed } from "~/raem/command";
+import { created, destroyed } from "~/raem/events";
 import { vRef } from "~/raem/ValaaReference";
 import { createGhostRawId } from "~/raem/tools/denormalized/GhostPath";
 

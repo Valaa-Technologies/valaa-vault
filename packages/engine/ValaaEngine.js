@@ -7,7 +7,7 @@ import VALEK, { Kuery, VALKOptions, dumpObject, rootScopeSelf,
   builtinSteppers as engineBuiltinSteppers,
 } from "~/engine/VALEK";
 
-import Command, { created, duplicated, recombined, isCreatedLike } from "~/raem/command";
+import { Command, created, duplicated, recombined, isCreatedLike } from "~/raem/events";
 
 import ValaaReference, { vRef, IdData, obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
 import { tryHostRef } from "~/raem/VALK/hostReference";

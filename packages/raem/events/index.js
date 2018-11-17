@@ -106,7 +106,7 @@ import resourceRecombined, * as r from "./recombined";
 import resourceTimed, * as td from "./timed";
 import resourceTransacted, * as t from "./transacted";
 
-import Command, { Action, Truth, EventBase, UniversalEvent } from "./Command";
+import Action, { Command, Truth, EventBase, UniversalEvent } from "./Action";
 
 export const VERSION = "0.2";
 

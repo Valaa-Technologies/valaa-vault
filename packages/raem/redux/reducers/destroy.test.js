@@ -1,4 +1,4 @@
-import { created, destroyed } from "~/raem/command";
+import { created, destroyed } from "~/raem/events";
 import { vRef } from "~/raem/ValaaReference";
 import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";
 

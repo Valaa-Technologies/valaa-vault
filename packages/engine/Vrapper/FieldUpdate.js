@@ -1,9 +1,11 @@
 // @flow
 
-import type { VALKOptions, Story, Passage } from "~/raem";
-import { isCreatedLike } from "~/raem/command";
+import { isCreatedLike } from "~/raem/events";
+import type { Story, Passage } from "~/raem/redux/Bard";
+import type { VALKOptions } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
+
 import { arrayFromAny } from "~/tools";
 
 export default class FieldUpdate {

@@ -2,11 +2,11 @@
 import { GraphQLObjectType, isAbstractType } from "graphql/type";
 import { Iterable } from "immutable";
 
-import type { Passage, Story } from "~/raem";
 import VALK, { VALKOptions, packedSingular } from "~/raem/VALK";
+import type { Passage, Story } from "~/raem/redux/Bard";
 import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 
-import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "~/raem/command";
+import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "~/raem/events";
 import { VRef, vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom, expandIdDataFrom,
     obtainVRef } from "~/raem/ValaaReference";
 import { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";

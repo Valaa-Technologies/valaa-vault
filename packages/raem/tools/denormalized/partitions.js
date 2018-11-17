@@ -125,7 +125,7 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
       // skip virtual passages which don't have underlying actions
       if (!action || action === Object.prototype) continue;
       if (!partitions) {
-        partitions = { [partitionURI]: { eventId: null } };
+        partitions = { [partitionURI]: {} };
       }
       action.partitions = !action.partitions
           ? partitions

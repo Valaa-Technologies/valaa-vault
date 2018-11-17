@@ -1,6 +1,6 @@
 // @flow
 
-import { Story } from "~/raem";
+import type { Story } from "~/raem/redux/Bard";
 
 /**
  * A recital is an ordered list of Story objects.

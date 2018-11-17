@@ -1,6 +1,6 @@
 // @flow
 
-import { EventBase } from "~/raem/command";
+import { EventBase } from "~/raem/events";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import { dumpObject } from "~/tools";

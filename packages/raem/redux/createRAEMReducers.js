@@ -1,7 +1,7 @@
 import { Map } from "immutable";
 
 import { CREATED, DESTROYED, FIELDS_SET, ADDED_TO, REMOVED_FROM, REPLACED_WITHIN,
-    DUPLICATED, FROZEN, RECOMBINED, TIMED, TRANSACTED } from "~/raem/command";
+    DUPLICATED, FROZEN, RECOMBINED, TIMED, TRANSACTED } from "~/raem/events";
 import create from "~/raem/redux/reducers/create";
 import duplicate from "~/raem/redux/reducers/duplicate";
 import destroy from "~/raem/redux/reducers/destroy";

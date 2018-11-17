@@ -3,7 +3,7 @@ import { GraphQLString, GraphQLObjectType, GraphQLInputObjectType, GraphQLNonNul
 
 import mutationInputField from "~/raem/tools/graphql/mutationInputField";
 import mutationPayloadField from "~/raem/tools/graphql/mutationPayloadField";
-import transacted from "~/raem/command/transacted";
+import transacted from "~/raem/events/transacted";
 
 const TransactMutationInput = new GraphQLInputObjectType({
   name: "TransactMutationInput",

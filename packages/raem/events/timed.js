@@ -1,6 +1,6 @@
 // @flow
 
-import { Action, ActionCollection, validateActionCollectionBase } from "~/raem/command/Command";
+import Action, { ActionCollection, validateActionCollectionBase } from "~/raem/events/Action";
 
 import { invariantifyNumber, invariantifyObject } from "~/tools/invariantify";
 

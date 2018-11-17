@@ -1,6 +1,6 @@
 /* global jest describe expect beforeEach it */
 
-import { created } from "~/raem/command";
+import { created } from "~/raem/events";
 import { vRef } from "~/raem/ValaaReference";
 
 import { createNativeIdentifier, getNativeIdentifierValue, transpileValaaScriptBody }

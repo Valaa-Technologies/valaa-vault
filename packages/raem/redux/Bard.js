@@ -2,7 +2,7 @@
 import { GraphQLObjectType } from "graphql/type";
 import { Map } from "immutable";
 
-import { Action } from "~/raem/command";
+import { Action } from "~/raem/events";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import Resolver from "~/raem/tools/denormalized/Resolver";
 import { getTransientTypeName } from "~/raem/tools/denormalized/Transient";

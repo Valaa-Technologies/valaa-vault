@@ -1,6 +1,6 @@
 import { OrderedMap } from "immutable";
 
-import type { EventBase } from "~/raem/command";
+import type { EventBase } from "~/raem/events";
 import createRootReducer from "~/raem/tools/createRootReducer";
 import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent";
 import createProcessCommandVersionMiddleware from

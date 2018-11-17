@@ -1,6 +1,6 @@
 // @flow
 
-import { created } from "~/raem/command/index";
+import { created } from "~/raem/events/index";
 import { vRef } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
 

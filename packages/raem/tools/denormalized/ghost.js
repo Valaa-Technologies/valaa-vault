@@ -61,7 +61,7 @@
  * wrappers to resource (and they should), they need to observe for such changes to update their
  * references.
  */
-import { Action, created, destroyed, transacted } from "~/raem/command";
+import { Action, created, destroyed, transacted } from "~/raem/events";
 import { vRef, getRawIdFrom, tryGhostPathFrom } from "~/raem/ValaaReference";
 import type { VRef, IdData } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import GhostPath from "~/raem/tools/denormalized/GhostPath";

@@ -4,7 +4,7 @@ import invariantify, {
   invariantifyArray, invariantifyNumber, invariantifyObject, invariantifyString,
 } from "~/tools/invariantify";
 
-export class Action {
+export default class Action {
   +type: string;
   local: ?Object;
 
@@ -19,12 +19,17 @@ export class EventBase extends Action {
   commandId: string;
 }
 
-export class UniversalEvent extends EventBase {
-  eventId: number;
+export class EventEnvelope extends EventBase {
+  event: {
+    hash: string;
+    text: string;
+  };
+  logIndex: number;
   timeStamp: ?number;
+  prevCommandId: string;
 }
 
-export default class Command extends EventEnvelope {
+export class Command extends EventEnvelope {
   type: "COMMAND";
 }
 
@@ -38,7 +43,7 @@ export function validateActionBase (expectedType: string, action: Action, type: 
   invariantifyString(type, `${expectedType}.type`, { value: expectedType });
   invariantifyObject(local, `${expectedType}.local`, { allowNull: false, allowUndefined: true });
   if (Object.keys(unrecognized).length) {
-    const { version, partitions, commandId, eventId, ...rest } = unrecognized; // migration code - version is being removed
+    const { version, partitions, commandId, eventId, timeStamp, ...rest } = unrecognized; // migration code - version is being removed
     if (Object.keys(rest).length) {
       invariantify(false,
         `${expectedType} action contains unrecognized fields`,

@@ -1,5 +1,5 @@
 import VALK, { run } from "~/raem/VALK";
-import { created, fieldsSet } from "~/raem/command";
+import { created, fieldsSet } from "~/raem/events";
 import { vRef } from "~/raem/ValaaReference";
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 

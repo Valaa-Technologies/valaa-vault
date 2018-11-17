@@ -1,4 +1,4 @@
-import { created, fieldsSet } from "~/raem/command";
+import { created, fieldsSet } from "~/raem/events";
 import VALK from "~/raem/VALK";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";

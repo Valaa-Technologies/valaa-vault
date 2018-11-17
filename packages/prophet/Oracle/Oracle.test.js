@@ -1,4 +1,4 @@
-import { created, transacted, fieldsSet } from "~/raem/command/index";
+import { created, transacted, fieldsSet } from "~/raem/events/index";
 import { vRef } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
 

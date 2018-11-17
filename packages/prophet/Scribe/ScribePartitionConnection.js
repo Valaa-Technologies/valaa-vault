@@ -1,6 +1,6 @@
 // @flow
 
-import type { EventBase } from "~/raem/command";
+import type { EventBase } from "~/raem/events";
 import { VRef, obtainVRef } from "~/raem/ValaaReference";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";

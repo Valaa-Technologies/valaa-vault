@@ -1,6 +1,7 @@
 // @flow
 
-import { EventBase, Story } from "~/raem/command";
+import { EventBase } from "~/raem/events";
+import type { Story } from "~/raem/redux/Bard";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import { NarrateOptions, ChronicleOptions, ChronicleRequest } from "~/prophet/api/types";

@@ -1,6 +1,6 @@
 // @flow
 
-import { Action, ActionCollection, validateActionCollectionBase } from "~/raem/command/Command";
+import Action, { ActionCollection, validateActionCollectionBase } from "~/raem/events/Action";
 
 export const FROZEN = "FROZEN";
 

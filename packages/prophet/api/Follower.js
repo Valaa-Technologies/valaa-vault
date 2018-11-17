@@ -1,6 +1,6 @@
 // @flow
 
-import type Command, { EventBase, Truth } from "~/raem/command";
+import { Command, EventBase, Truth } from "~/raem/events";
 
 import { LogEventGenerator } from "~/tools/Logger";
 

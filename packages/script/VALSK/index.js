@@ -22,7 +22,7 @@ export {
   dumpObject,
   isValaaFunction,
   toVAKON,
-} from "../../raem/VALK";
+} from "~/raem/VALK";
 
 export {
   Kuery,

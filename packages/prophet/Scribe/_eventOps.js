@@ -1,6 +1,6 @@
 // @flow
 
-import { isTransactedLike, EventBase, Truth } from "~/raem/command";
+import { isTransactedLike, EventBase, Truth } from "~/raem/events";
 import { getRawIdFrom } from "~/raem/ValaaReference";
 
 import {

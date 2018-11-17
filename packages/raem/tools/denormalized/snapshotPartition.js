@@ -30,6 +30,8 @@ export default async function snapshotPartition ({ partitionId, state, schema, o
   onModified,
 }) {
   // TODO(iridian): Refactor snapshotPartition to use Resolver
+  throw new Error("snapshotPartition has rotted.");
+  /*
   const walkedIds = new Set();
   let defers = { resources: [], datas: [], modifies: [] };
   const partition = getObjectTransient(state, partitionId, "Partition");
@@ -162,4 +164,5 @@ export default async function snapshotPartition ({ partitionId, state, schema, o
       }
     }
   }
+  */
 };

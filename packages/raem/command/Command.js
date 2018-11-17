@@ -4,17 +4,16 @@ import { invariantifyId } from "~/raem/ValaaReference";
 
 export class Action {
   +type: string;
-  timeStamp: ?number;
 }
 
 export class EventBase extends Action {
   version: ?string;
-  parentId: ?string;
+  commandId: string;
 }
 
 export class UniversalEvent extends EventBase {
   eventId: number;
-  commandId: string;
+  timeStamp: ?number;
 }
 
 export class Truth extends EventBase {
@@ -26,7 +25,7 @@ export default class Command extends EventBase {
 }
 
 export function validateCommandInterface (command: Command) {
-  const { type, version, commandId, eventId, partitions, parentId, timeStamp } = command;
+  const { type, version, commandId, eventId, partitions, timeStamp } = command;
 
   invariantifyId(version, `${type}.version`, { allowUndefined: true },
       "\n\tcommand:", command);
@@ -35,8 +34,6 @@ export function validateCommandInterface (command: Command) {
   invariantifyNumber(eventId, `${type}.eventId`, { allowUndefined: true },
       "\n\tcommand:", command);
   invariantifyObject(partitions, `${type}.partitions`, { allowUndefined: true, allowEmpty: true },
-      "\n\tcommand:", command);
-  invariantifyId(parentId, `${type}.parentId`, { allowUndefined: true },
       "\n\tcommand:", command);
   invariantifyNumber(timeStamp, `${type}.timeStamp`, { allowUndefined: true },
       "\n\tcommand:", command);

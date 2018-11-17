@@ -6,7 +6,7 @@ import { Map as ImmutableMap } from "immutable";
 
 import { createPartitionURI } from "~/raem/ValaaURI";
 import createRootReducer from "~/raem/tools/createRootReducer";
-import createValidateActionMiddleware from "~/raem/redux/middleware/validateAction";
+import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent";
 import createProcessCommandIdMiddleware from "~/raem/redux/middleware/processCommandId";
 import createProcessCommandVersionMiddleware from
     "~/raem/redux/middleware/processCommandVersion";
@@ -14,7 +14,7 @@ import { createBardMiddleware } from "~/raem/redux/Bard";
 import Corpus from "~/raem/Corpus";
 
 import { AuthorityNexus, FalseProphet, Oracle, Prophet, Scribe } from "~/prophet";
-import upgradeEventToVersion0dot2 from "~/prophet/tools/upgradeEventToVersion0dot2";
+import upgradeEventTo0Dot2 from "~/prophet/tools/event-version-0.2/upgradeEventTo0Dot2";
 
 import ValaaEngine from "~/engine/ValaaEngine";
 import EngineContentAPI from "~/engine/EngineContentAPI";
@@ -27,7 +27,7 @@ import type { Revelation } from "~/inspire/Revelation";
 import extendValaaSpaceWithInspire from "~/inspire/ValaaSpace";
 
 import { arrayBufferFromBase64 } from "~/tools/base64";
-import { dumpObject, invariantify, LogEventGenerator, valaaUUID } from "~/tools";
+import { dumpObject, invariantify, LogEventGenerator } from "~/tools";
 
 const DEFAULT_EVENT_VERSION = process.env.DEFAULT_EVENT_VERSION || "0.2";
 
@@ -241,11 +241,11 @@ export default class InspireGateway extends LogEventGenerator {
     const { schema, validators, mainReduce, subReduce } = createRootReducer(reducerOptions);
 
     // FIXME(iridian): Create the deterministic-id schema. Now random.
-    const previousId = valaaUUID();
+    // const previousId = valaaUUID();
     const middlewares = [
       createProcessCommandVersionMiddleware(DEFAULT_EVENT_VERSION),
-      createProcessCommandIdMiddleware(previousId, schema),
-      createValidateActionMiddleware(validators),
+      createProcessCommandIdMiddleware(undefined /* previousId */, schema),
+      createValidateEventMiddleware(validators),
       createBardMiddleware(),
     ];
 
@@ -415,7 +415,7 @@ export default class InspireGateway extends LogEventGenerator {
         throw new Error("commandQueue revelation not implemented yet");
       }
       const latestMediaInfos = await logs.latestMediaInfos;
-      const upgradedEventLog = eventLog.map(event => upgradeEventToVersion0dot2(event, connection));
+      const upgradedEventLog = eventLog.map(event => upgradeEventTo0Dot2(event, connection));
       const chronicling = connection.chronicleEvents(upgradedEventLog, {
         name: `prologue truths for '${connection.getName()}'`,
         isTruth: true,

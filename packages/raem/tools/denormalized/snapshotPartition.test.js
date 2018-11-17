@@ -55,7 +55,7 @@ describe("The snapshot node walker", () => {
   beforeEach(() => {
   });
 
-  it("Should survive a simple snapshotting roundtrip", async () => {
+  xit("Should survive a simple snapshotting roundtrip", async () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const resultEvents = [];
 

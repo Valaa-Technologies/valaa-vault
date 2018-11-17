@@ -1,24 +1,27 @@
+/*
 import { CREATED, isCreatedLike, isTransactedLike } from "~/raem/command";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import { getRawIdFrom } from "~/raem/ValaaReference";
 
 import { dumpify, createId, invariantify } from "~/tools";
+*/
 
 // FIXME(iridian): This whole id generation schema is still a mess and needs to be fully rethought.
 // FIXME(iridian): ID generation is simpler now, but a proper deterministic and linearly dependent
 // schema would still be teh juice.
 
-export default function createProcessCommandIdMiddleware (initialId, schema) {
-  const previousId = { value: initialId };
+export default function createProcessCommandIdMiddleware (/* initialId, schema */) {
+  // const previousId = { value: initialId };
   return (/* store */) => next => (action, ...rest: any[]) => {
     if (!action.hasOwnProperty("commandId")) {
-      action.timeStamp = Date.now();
-      recurseAndAugmentWithIds(action, previousId, schema);
+      throw new Error("commandId expected but missing");
+      // action.timeStamp = Date.now();
+      // recurseAndAugmentWithIds(action, previousId, schema);
     }
     return next(action, ...rest);
   };
 }
-
+/*
 function recurseAndAugmentWithIds (command, previousId, schema, transactionType) {
   if (!isCreatedLike(command)) {
     command.commandId = createId(command);
@@ -54,3 +57,4 @@ function checkIsCreateImmutable (schema, command) {
   }
   return !isResourceType(objectType);
 }
+*/

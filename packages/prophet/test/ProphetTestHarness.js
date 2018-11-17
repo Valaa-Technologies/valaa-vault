@@ -1,7 +1,7 @@
 // @flow
 
 import { OrderedMap } from "immutable";
-import { created } from "~/raem/command";
+import { created, EventBase } from "~/raem/command";
 
 import { createTestPartitionURIFromRawId, createPartitionURI }
     from "~/raem/ValaaURI";
@@ -19,6 +19,8 @@ import createValaaTestScheme, { MockProphet } from "~/prophet/test/scheme-valaa-
 import createValaaLocalScheme from "~/prophet/schemeModules/valaa-local";
 import createValaaMemoryScheme from "~/prophet/schemeModules/valaa-memory";
 import createValaaTransientScheme from "~/prophet/schemeModules/valaa-transient";
+
+import { universalizeAction } from "~/prophet/FalseProphet/FalseProphet";
 
 import * as ValaaScriptDecoders from "~/script/mediaDecoders";
 import * as ToolsDecoders from "~/tools/mediaDecoders";
@@ -112,9 +114,18 @@ export default class ProphetTestHarness extends ScriptTestHarness {
           ]),
           ([conn]) => (this.testPartitionConnection = conn),
         ]);
+
+    this.nextCommandIdIndex = 1;
   }
 
-  chronicleEvents (...rest: any) { return this.prophet.chronicleEvents(...rest); }
+  chronicleEvents (events: EventBase[], ...rest: any) {
+    return this.prophet.chronicleEvents(events.map(event => {
+      const ret = universalizeAction(event);
+      ret.version = "0.2";
+      ret.commandId = `cid-${this.nextCommandIdIndex++}`;
+      return ret;
+    }), ...rest);
+  }
 
   createCorpus () { // Called by RAEMTestHarness.constructor (so before oracle/scribe are created)
     const corpus = super.createCorpus();

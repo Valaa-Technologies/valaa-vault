@@ -108,6 +108,8 @@ import resourceTransacted, * as t from "./transacted";
 
 import Command, { Action, Truth, EventBase, UniversalEvent } from "./Command";
 
+export const VERSION = "0.2";
+
 export { Action, Command, Truth, EventBase, UniversalEvent };
 
 export const CREATED = c.CREATED;
@@ -149,17 +151,19 @@ export function isTransactedLike (action: Action) {
 }
 
 export const validators = {
-  CREATED: c.validateCreated,
-  DESTROYED: d.validateDestroyed,
-  DUPLICATED: dup.validateDuplicated,
-  MODIFIED: m.validateModified,
-  FIELDS_SET: m.validateModified,
-  ADDED_TO: m.validateModified,
-  REMOVED_FROM: m.validateModified,
-  REPLACED_WITHIN: m.validateModified,
-  SPLICED: m.validateModified,
-  FROZEN: f.validateFrozen,
-  RECOMBINED: r.validateRecombined,
-  TIMED: td.validateTimed,
-  TRANSACTED: t.validateTransacted,
+  [VERSION]: {
+    CREATED: c.validateCreated,
+    DESTROYED: d.validateDestroyed,
+    DUPLICATED: dup.validateDuplicated,
+    MODIFIED: m.validateModified,
+    FIELDS_SET: m.validateModified,
+    ADDED_TO: m.validateModified,
+    REMOVED_FROM: m.validateModified,
+    REPLACED_WITHIN: m.validateModified,
+    SPLICED: m.validateModified,
+    FROZEN: f.validateFrozen,
+    RECOMBINED: r.validateRecombined,
+    TIMED: td.validateTimed,
+    TRANSACTED: t.validateTransacted,
+  },
 };

@@ -187,7 +187,7 @@ describe("Prophet", () => {
   });
 
   it("automatically confirms local partition commands as truths", async () => {
-    const { scribeConnection } = await setUp({ isLocallyPersisted: true }, { verbosity: 2 });
+    const { scribeConnection } = await setUp({ isLocallyPersisted: true }, { verbosity: 0 });
     let totalCommandCount;
     harness.prophet.setCommandCountCallback((total) => { totalCommandCount = total; });
     expect(totalCommandCount).toEqual(0);

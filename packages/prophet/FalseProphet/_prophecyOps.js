@@ -8,7 +8,8 @@ import ValaaURI, { createPartitionURI } from "~/raem/ValaaURI";
 
 import { ChronicleEventResult, PartitionConnection, ProphecyChronicleRequest, ProphecyEventResult }
     from "~/prophet/api/types";
-import extractEventOfPartition from "~/prophet/tools/extractEventOfPartition";
+import extractPartitionEvent0Dot2
+    from "~/prophet/tools/event-version-0.2/extractPartitionEvent0Dot2";
 
 import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
 import { trivialCloneWith } from "~/tools/trivialClone";
@@ -134,7 +135,8 @@ export function _reviseSchism (connection: FalseProphetPartitionConnection,
     return undefined;
   }
   const revisedProphecyCommand = getActionFromPassage(recomposedProphecy);
-  const revisedPartitionCommandEvent = extractEventOfPartition(revisedProphecyCommand, connection);
+  const revisedPartitionCommandEvent = extractPartitionEvent0Dot2(
+      revisedProphecyCommand, connection);
   // Can only revise commands belonging to the originating partition
   if (!revisedPartitionCommandEvent) return undefined;
   recomposedProphecy[ProphecyOperationTag] = operation;
@@ -277,7 +279,7 @@ class ProphecyOperation extends ProphecyEventResult {
           : memorys
       ).push((this._partitions[partitionURIString] = {
         connection,
-        commandEvent: extractEventOfPartition(getActionFromPassage(this._prophecy), connection),
+        commandEvent: extractPartitionEvent0Dot2(getActionFromPassage(this._prophecy), connection),
       }));
     });
     if (remotes.length) this._stages.push({ name: "remotes", partitions: remotes });

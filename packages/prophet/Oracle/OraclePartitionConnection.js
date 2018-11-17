@@ -7,7 +7,7 @@ import PartitionConnection from "~/prophet/api/PartitionConnection";
 import { ConnectOptions, MediaInfo, ReceiveEvents, RetrieveMediaBuffer } from "~/prophet/api/types";
 
 import DecoderArray from "~/prophet/Oracle/DecoderArray";
-import upgradeEventToVersion0dot2 from "~/prophet/tools/upgradeEventToVersion0dot2";
+import upgradeEventTo0Dot2 from "~/prophet/tools/event-version-0.2/upgradeEventTo0Dot2";
 
 import { DelayedQueue, dumpObject, thenChainEagerly } from "~/tools";
 
@@ -58,7 +58,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
         throw new Error(`INTERNAL ERROR: downstreamReceiveTruths was not defined`);
       }
       return downstreamReceiveTruths(
-          truths.map(event => upgradeEventToVersion0dot2(event, this)),
+          truths.map(event => upgradeEventTo0Dot2(event, this)),
           retrieveMediaBuffer);
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error(type),

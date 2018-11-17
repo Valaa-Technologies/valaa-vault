@@ -6,7 +6,7 @@ import PartitionConnection from "~/prophet/api/PartitionConnection";
 
 import { dumpObject } from "~/tools";
 
-export default function extractEventOfPartition (action: Action,
+export default function extractPartitionEvent0Dot2 (action: Action,
     connection: PartitionConnection, partitionKey: string = String(connection.getPartitionURI())) {
   let ret;
   try {
@@ -26,7 +26,7 @@ export default function extractEventOfPartition (action: Action,
         throw new Error("Non-TRANSACTED-like multipartition commands are not supported");
       }
       ret.actions = action.actions
-          .map(subAction => extractEventOfPartition(subAction, connection, partitionKey))
+          .map(subAction => extractPartitionEvent0Dot2(subAction, connection, partitionKey))
           .filter(notFalsy => notFalsy);
       if (!ret.actions.length) {
         throw new Error(`INTERNAL ERROR: No TRANSACTED-like.actions found for current partition ${
@@ -36,7 +36,7 @@ export default function extractEventOfPartition (action: Action,
     return ret;
   } catch (error) {
     throw connection.wrapErrorEvent(error,
-        new Error(`extractEventOfPartition(${connection.getName()})`),
+        new Error(`extractPartitionEvent0Dot2(${connection.getName()})`),
         "\n\tpartitionKey:", partitionKey,
         "\n\taction:", ...dumpObject(action),
         "\n\taction partitions:", ...dumpObject(action.partitions),

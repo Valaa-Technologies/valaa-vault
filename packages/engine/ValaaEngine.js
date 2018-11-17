@@ -9,8 +9,7 @@ import VALEK, { Kuery, VALKOptions, dumpObject, rootScopeSelf,
 
 import Command, { created, duplicated, recombined, isCreatedLike } from "~/raem/command";
 
-import { vRef, IdData, obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
-import { createPartitionURI } from "~/raem/ValaaURI";
+import ValaaReference, { vRef, IdData, obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import { getActionFromPassage } from "~/raem/redux/Bard";
 
@@ -27,7 +26,7 @@ import Vrapper from "~/engine/Vrapper";
 import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
 
-import { createId, dumpify, outputCollapsedError, wrapError } from "~/tools";
+import { dumpify, outputCollapsedError, wrapError } from "~/tools";
 
 export default class ValaaEngine extends Cog {
   constructor ({ name, logger, prophet, timeDilation = 1.0, verbosity }: Object) {
@@ -290,6 +289,8 @@ export default class ValaaEngine extends Cog {
     function localWrapError (self, error, operationName) {
       return self.wrapErrorEvent(error, operationName,
           "\n\tdirectives:", ...dumpObject(directives),
+          ...(!directives.initialState ? []
+              : ["\n\tinitialState:", ...dumpObject(directives.initialState)]),
           "\n\toptions:", ...dumpObject(options),
           "\n\tconstruct params:", ...dumpObject(constructParams),
           "\n\tclaim result:", ...dumpObject(result),
@@ -322,20 +323,24 @@ export default class ValaaEngine extends Cog {
         .getSyncedConnection();
   }
 
-  _resolveIdForConstructDirective (directive, options: VALKOptions,
-      typeName: string) {
+  _resolveIdForConstructDirective (directive, options: VALKOptions) {
+    const transaction = options.transaction;
     const initialState = directive.initialState || {};
-    const id = obtainVRef(options.id || initialState.id || createId({ typeName, initialState }));
-    let partitionURI;
+    const explicitRawId = options.id || initialState.id;
     delete initialState.id;
     if (initialState.partitionAuthorityURI) {
-      partitionURI = createPartitionURI(initialState.partitionAuthorityURI, id.rawId());
-    } else if (initialState.owner || initialState.source) {
-      partitionURI = universalizeCommandData(initialState.owner || initialState.source, options)
-          .getPartitionURI();
+      return transaction.assignNewPartitionId(directive,
+          initialState.partitionAuthorityURI, explicitRawId);
     }
-    directive.id = !partitionURI ? id : id.immutatePartitionURI(partitionURI);
-    return directive.id;
+    const explicitOwner = initialState.owner || initialState.source;
+    if (!explicitOwner) {
+      return transaction.assignNewPartitionlessResourceId(directive, explicitRawId);
+    }
+    const partitionURI =
+        ((explicitOwner instanceof ValaaReference) && explicitOwner.getPartitionURI())
+        || universalizeCommandData(explicitOwner, options).getPartitionURI();
+    return transaction.assignNewResourceId(directive, partitionURI && String(partitionURI),
+        explicitRawId);
   }
 
   outputStatus (output = console) {

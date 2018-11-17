@@ -60,10 +60,10 @@ describe("FalseProphet", () => {
     // TODO(iridian): Move this test false prophet. Scribe no longer
     // tracks the pending commands.
     let commandsCounted = 0;
-    const commandCountCallback = (count) => { commandsCounted = count; };
+    const onCommandCountUpdate = (count) => { commandsCounted = count; };
 
     const falseProphet = createFalseProphet({
-      commandCountCallback, upstream: createTestMockProphet({
+      onCommandCountUpdate, upstream: createTestMockProphet({
         isLocallyPersisted: false, isRemoteAuthority: true,
       }),
     });

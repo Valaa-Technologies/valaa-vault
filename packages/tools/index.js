@@ -14,8 +14,6 @@ export { exportValaaPlugin };
 export const contentIdFromArrayBuffer = require("./id/contentId").contentIdFromArrayBuffer;
 export const contentIdFromNativeStream = require("./id/contentId").contentIdFromNativeStream;
 
-export const createId = require("./id/createId").default;
-
 export const derivedId = require("./id/derivedId").default;
 
 export { default as DelayedQueue } from "./DelayedQueue";

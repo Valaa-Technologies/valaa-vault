@@ -3,7 +3,8 @@
 import Command, { created, duplicated, destroyed, EventBase } from "~/raem/command";
 import { Action } from "~/raem";
 import type { Corpus } from "~/raem/Corpus";
-import type ValaaURI from "~/raem/ValaaURI";
+import ValaaURI, { createValaaURI, createPartitionURI } from "~/raem/ValaaURI";
+import { vRef } from "~/raem/ValaaReference";
 import { dumpObject } from "~/raem/VALK";
 import { addConnectToPartitionToError } from "~/raem/tools/denormalized/partitions";
 
@@ -14,12 +15,18 @@ import type { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult 
     from "~/prophet/api/types";
 
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
+import createResourceId0Dot2, { createPartitionId0Dot2 }
+    from "~/prophet/tools/event-version-0.2/createResourceId0Dot2";
 
-import { createId, invariantify, invariantifyObject } from "~/tools";
+import { invariantify, invariantifyObject } from "~/tools";
+import valaaUUID from "~/tools/id/valaaUUID";
+
+import { universalizeAction } from "./FalseProphet";
 
 export default class FalseProphetDiscourse extends Discourse {
   _follower: Follower;
   _prophet: Prophet;
+  _transactionInfo: ?TransactionInfo = null;
 
   constructor ({
     follower, prophet, verbosity, logger, packFromHost, unpackToHost, builtinSteppers,
@@ -56,8 +63,14 @@ export default class FalseProphetDiscourse extends Discourse {
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
       ChroniclePropheciesRequest {
     if (this._transactionInfo) return this._transactionInfo.chronicleEvents(events, options);
+    let universalizedEvents;
     try {
-      const ret = this._prophet.chronicleEvents(events, options);
+      universalizedEvents = events.map(event => {
+        const ret = universalizeAction(event);
+        if (!ret.commandId) this._prophet._assignCommandId(ret, this);
+        return ret;
+      });
+      const ret = this._prophet.chronicleEvents(universalizedEvents, options);
       ret.eventResults.forEach(eventResult => {
         eventResult.waitOwnReactions = (() => eventResult.getFollowerReactions(this._follower));
         eventResult.getPremiereStory = (async () => {
@@ -70,6 +83,7 @@ export default class FalseProphetDiscourse extends Discourse {
       addConnectToPartitionToError(error, this.connectToMissingPartition);
       throw this.wrapErrorEvent(error, `chronicleEvents()`,
           "\n\tevents:", ...dumpObject(events),
+          "\n\tevents:", ...dumpObject(universalizedEvents),
       );
     }
   }
@@ -104,8 +118,57 @@ export default class FalseProphetDiscourse extends Discourse {
     return this._follower.rejectHerecy(hereticEvent, purgedCorpus, revisedEvents);
   }
 
+  assignNewResourceId (targetAction: EventBase, partitionURI: string, explicitRawId?: string) {
+    if (!partitionURI) throw new Error("assignNewResourceId.partitionURI missing");
+    const root = this._transactionInfo ? this._transactionInfo.transacted : targetAction;
+    if (!root.commandId) this._prophet._assignCommandId(root, this);
+    const partitions = root.partitions || (root.partitions = {});
+    const partition = partitions[partitionURI] || (partitions[partitionURI] = { createIndex: 0 });
+    let resourceRawId;
+    if (!explicitRawId) {
+      resourceRawId = createResourceId0Dot2(root.commandId, partitionURI, partition.createIndex++);
+    } else {
+      this.warnEvent(`assignNewResourceId.explicitRawId was explicitly provided for a regular${
+          ""} partition resource: this will be deprecated`,
+          "\n\texplicitrawId:", explicitRawId);
+      resourceRawId = explicitRawId;
+    }
 
-  createId (mutationParams: any, options: Object) { createId(mutationParams, options); }
+    targetAction.id = vRef(resourceRawId, undefined, undefined, createValaaURI(partitionURI));
+    /*
+    console.log("assignNewResourceId", root.commandId, partitionURI, explicitRawId,
+        "\n\tresourceRawId:", resourceRawId,
+        "\n\tresults:", String(targetAction.id),
+        "\n\ttargetAction:", ...dumpObject(targetAction),
+        "\n\ttargetAction.initialState:", ...dumpObject(targetAction.initialState));
+    */
+    return targetAction.id;
+  }
+
+  assignNewPartitionlessResourceId (targetAction: EventBase, explicitRawId?: string) {
+    targetAction.id = vRef(explicitRawId || valaaUUID());
+    /*
+    console.log("assignNewPartitionlessResourceId", String(targetAction.id), explicitRawId,
+        "\n\ttargetAction:", ...dumpObject(targetAction),
+        "\n\ttargetAction.initialState:", ...dumpObject(targetAction.initialState));
+    */
+    return targetAction.id;
+  }
+
+  assignNewPartitionId (targetAction: EventBase, partitionAuthorityURI: string,
+      explicitPartitionRawId?: string) {
+    const root = this._transactionInfo ? this._transactionInfo.transacted : targetAction;
+    if (!root.commandId) this._prophet._assignCommandId(root, this);
+    const partitionRawId = explicitPartitionRawId
+        || createPartitionId0Dot2(root.commandId, partitionAuthorityURI);
+    targetAction.id = vRef(partitionRawId, undefined, undefined,
+        createPartitionURI(partitionAuthorityURI, partitionRawId));
+    /*
+    console.log("assignNewPartitionId", String(targetAction.id), partitionAuthorityURI,
+        explicitPartitionRawId, "\n\ttargetAction:", ...dumpObject(targetAction));
+    */
+    return targetAction.id;
+  }
 
   /**
    * Returns a new valid transaction which wraps this Discourse and forks its corpus.
@@ -157,18 +220,18 @@ export default class FalseProphetDiscourse extends Discourse {
     this._transactionInfo.abort(this);
   }
 
-  create ({
-    typeName, initialState, isImmutable,
-    id = createId({ typeName, initialState }, { isImmutable }),
-  }: Object): ProphecyEventResult {
-    return this.chronicleEvent(created({ id, typeName, initialState }), {});
+  create ({ typeName, initialState, id }: Object): ProphecyEventResult {
+    const command = created({ id, typeName, initialState });
+    if (!command.id) command.id = this.assignNewResourceId(command);
+    return this.chronicleEvent(command, {});
   }
 
   duplicate ({
-    duplicateOf, initialState, isImmutable,
-    id = createId({ duplicateOf, initialState }, { isImmutable }),
+    duplicateOf, initialState, id,
   }: Object): ProphecyEventResult {
-    return this.chronicleEvent(duplicated({ id, duplicateOf, initialState }), {});
+    const command = duplicated({ id, duplicateOf, initialState });
+    if (!command.id) command.id = this.assignNewResourceId(command);
+    return this.chronicleEvent(command, {});
   }
 
   destroy ({ id, typeName, owner }: Object): ProphecyEventResult {

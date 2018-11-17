@@ -271,7 +271,7 @@ export default class InspireGateway extends LogEventGenerator {
         upstream,
         schema: EngineContentAPI.schema,
         logger: this.getLogger(),
-        commandCountCallback: this._updateCommandCount,
+        onCommandCountUpdate: this._updateCommandCount,
         ...await gatewayRevelation.falseProphet,
       };
       const falseProphet = new FalseProphet(falseProphetOptions);

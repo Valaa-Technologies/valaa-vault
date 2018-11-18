@@ -1,8 +1,11 @@
-import wrapError, { dumpObject } from "~/tools/wrapError";
+import wrapError from "~/tools/wrapError";
 
-export default function createValidateEventMiddleware (validators) {
+export default function createValidateEventMiddleware (validators, fixedVersion?: string) {
   const actionValidatorsByVersion = Object.entries(validators).reduce((acc, [version, byType]) => {
-    acc[version] = validateAction;
+    // TODO(iridian): Add semver support for version restriction?
+    if (!fixedVersion || (fixedVersion === version)) {
+      acc[version] = validateAction;
+    }
     return acc;
     function validateAction (action) {
       try {
@@ -18,10 +21,15 @@ export default function createValidateEventMiddleware (validators) {
         return validatedAction;
       } catch (error) {
         throw wrapError(error, `During validateAction, with:`,
-            "\n\taction:", ...dumpObject(action));
+            "\n\taction:", JSON.stringify(action, null, 2));
       }
     }
   }, {});
-  return (/* store */) => next => (event, ...rest: any[]) =>
-      next(actionValidatorsByVersion[event.version](event), ...rest);
+  return (/* store */) => next => (event, ...rest: any[]) => {
+    const versionValidator = actionValidatorsByVersion[event.version];
+    if (!versionValidator) {
+      throw new Error(`Could not find event validator for version ${event.version}`)
+    }
+    return next(versionValidator(event), ...rest);
+  };
 }

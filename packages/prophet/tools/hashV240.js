@@ -3,8 +3,8 @@
 import jsSHA from "jssha/src/sha3";
 
 /**
- * Returns a 240-bit SHAKE256 hash of the given utf-8 text string
- * utf8Text as as a base64-url encoded string (ie. [A-Za-z0-9\-_]{40}).
+ * Returns a 240-bit SHAKE256 hash of the given input buffer or utf-8
+ * text string as a base64-url encoded string (ie. [A-Za-z0-9\-_]{40}).
  *
  * Bit-count choice rationale:
  * 1. practicality: divisible by 6 and 8 for exact representation both
@@ -22,12 +22,22 @@ import jsSHA from "jssha/src/sha3";
  * https://crypto.stackexchange.com/questions/43718/if-the-output-size-of-shake128-256-is-variable-why-is-the-security-fixed-at-128
  *
  * @export
- * @param {string} utf8Text
+ * @param {string | ArrayBuffer} input  if a text string this is interpreted as utf-8.
  * @returns
  */
-export default function createValOSHash (utf8Text: string) {
-  const hash = new jsSHA("SHAKE256", "TEXT");
-  hash.update(utf8Text);
+export default function hashV240 (input: string | ArrayBuffer): HashV240 {
+  const hash = new jsSHA("SHAKE256",
+      (typeof input === "string") ? "TEXT"
+      : (input instanceof ArrayBuffer) ? "ARRAYBUFFER"
+      : undefined);
+  hash.update(input);
   return hash.getHash("B64", { outputUpper: false, b64Pad: "=", shakeLen: 240 })
       .replace(/\+/g, "-").replace(/\//g, "_");
+}
+
+// String containing a V240 hash, ie. matches /[A-Za-z0-9\-_]{40}/ .
+export type HashV240 = string;
+
+export function isHashV240 (value: any): boolean {
+  return ((typeof value === "string") && !!value.match(/^[A-Za-z0-9\-_]{40}$/));
 }

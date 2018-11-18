@@ -1,7 +1,7 @@
 // @flow
 
 import { LogEventGenerator } from "~/tools/Logger";
-import { stringFromUTF8ArrayBuffer } from "~/tools/textEncoding";
+import { utf8StringFromArrayBuffer } from "~/tools/textEncoding";
 
 /**
  * Defines media decoder interface.
@@ -62,7 +62,7 @@ export default class MediaDecoder extends LogEventGenerator {
     // or figure out whether encoding sniffing is feasible:
     // https://html.spec.whatwg.org/multipage/parsing.html#determining-the-character-encoding ?
     // There's also an rfc on this: https://tools.ietf.org/html/rfc6657
-    return stringFromUTF8ArrayBuffer(buffer);
+    return utf8StringFromArrayBuffer(buffer);
   }
 
   _prepareMediaTypeLookup () {

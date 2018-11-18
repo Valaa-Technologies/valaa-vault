@@ -1,6 +1,6 @@
 // @flow
 
-import createValOSHash from "~/prophet/tools/createValOSHash";
+import hashV240 from "~/prophet/tools/hashV240";
 
 export default function createResourceId0Dot2 (commandId: string, partitionURI: string,
     intraEventIndex: ?number) {
@@ -9,9 +9,9 @@ export default function createResourceId0Dot2 (commandId: string, partitionURI: 
   if (!Number.isInteger(intraEventIndex) || !(intraEventIndex >= 0) || !(intraEventIndex < 65536)) {
     throw new Error("intraEventIndex is not an integer between 0 and and 65535");
   }
-  return createValOSHash(`${commandId} ${partitionURI} ${String(intraEventIndex)}`);
+  return hashV240(`${commandId} ${partitionURI} ${String(intraEventIndex)}`);
 }
 
 export function createPartitionId0Dot2 (commandId: string, partitionAuthorityURI: string) {
-  return createValOSHash(`${commandId} ${partitionAuthorityURI} partition`);
+  return hashV240(`${commandId} ${partitionAuthorityURI} partition`);
 }

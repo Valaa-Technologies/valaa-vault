@@ -14,7 +14,7 @@ import Valker from "~/raem/VALK/Valker";
 
 import { dumpObject, LogEventGenerator, wrapError } from "~/tools";
 
-const DEFAULT_EVENT_VERSION = "0.2";
+const TEST_EVENT_VERSION = "0.2";
 
 export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
   try {
@@ -135,11 +135,11 @@ export function createCorpus (ContentAPI: Object, reducerOptions?: Object, corpu
   }));
 }
 
-function _createTestMiddlewares ({ schema, validators }) {
+function _createTestMiddlewares ({ validators }) {
   return [
-    createProcessCommandVersionMiddleware(DEFAULT_EVENT_VERSION),
+    createProcessCommandVersionMiddleware(TEST_EVENT_VERSION),
     // createProcessCommandIdMiddleware(undefined, schema),
-    createValidateEventMiddleware(validators),
+    createValidateEventMiddleware(validators, TEST_EVENT_VERSION),
     createBardMiddleware(),
   ];
 }

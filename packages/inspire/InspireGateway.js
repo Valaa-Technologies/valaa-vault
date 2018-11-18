@@ -376,7 +376,10 @@ export default class InspireGateway extends LogEventGenerator {
         ret.push({
           partitionURI,
           isNewPartition: false,
-          info: { commandId: -1, eventId: -1, logs: { commandQueue: [], eventLog: [] } },
+          info: {
+            lastCommandIndex: -1, lastTruthIndex: -1,
+            logs: { commandQueue: [], eventLog: [] },
+          },
         });
       }
       if (!ret.length) {
@@ -400,10 +403,13 @@ export default class InspireGateway extends LogEventGenerator {
     const connection = await this.falseProphet
         .acquirePartitionConnection(partitionURI, { subscribe: false, remote: false })
         .getSyncedConnection();
-    const lastPrologueEventId = await info.eventId;
+    let prologueTruthCount = await info.truthCount;
+    if (!Number.isInteger(prologueTruthCount)) {
+      const lastEventId = await info.eventId;
+      prologueTruthCount = lastEventId !== undefined ? lastEventId + 1 : 0;
+    }
     const eventIdEnd = connection.getFirstUnusedTruthEventId() || 0;
-    const shouldChroniclePrologue = (lastPrologueEventId !== undefined)
-        && (lastPrologueEventId >= eventIdEnd);
+    const shouldChroniclePrologue = ((prologueTruthCount || 0) > eventIdEnd);
     if (shouldChroniclePrologue) {
       // If no event logs are replayed, we don't need to precache the bvobs either, so we delay
       // loading them up to this point.

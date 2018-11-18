@@ -26,10 +26,10 @@ afterEach(async () => {
 });
 
 describe("Scribe", () => {
-  const simpleCommand = created({ eventId: 0, id: "Some entity", typeName: "Entity" });
+  const simpleCommand = created({ logIndex: 0, id: "Some entity", typeName: "Entity" });
 
   const followupTransaction = transacted({
-    eventId: 1,
+    logIndex: 1,
     actions: [
       created({ id: "Some relation", typeName: "Relation" }),
       created({ id: "Some other entity", typeName: "Entity" }),
@@ -47,7 +47,7 @@ describe("Scribe", () => {
   ];
   simpleCommandList.forEach((entry, index) => {
     entry.commandId = entry.id;
-    entry.eventId = index;
+    entry.logIndex = index;
   });
 
   it("stores truths/commands in the database", async () => {
@@ -60,14 +60,14 @@ describe("Scribe", () => {
 
     // Adds an entity and checks that it has been stored
     let storedEvent = await connection.chronicleEvent(simpleCommand).getLocalEvent();
-    expect(storedEvent.eventId)
+    expect(storedEvent.logIndex)
         .toEqual(connection.getFirstUnusedCommandEventId() - 1);
     await expectStoredInDB(simpleCommand, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
 
     // Runs a transaction and confirms that it has been stored
     storedEvent = await connection.chronicleEvent(followupTransaction).getLocalEvent();
-    expect(storedEvent.eventId)
+    expect(storedEvent.logIndex)
         .toEqual(connection.getFirstUnusedCommandEventId() - 1);
     await expectStoredInDB(followupTransaction, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
@@ -117,7 +117,7 @@ describe("Scribe", () => {
         await firstConnection.chronicleEvent(followupTransaction).getLocalEvent();
 
     const firstUnusedCommandEventId = firstConnection.getFirstUnusedCommandEventId();
-    expect(firstUnusedCommandEventId).toEqual(storedEvent.eventId + 1);
+    expect(firstUnusedCommandEventId).toEqual(storedEvent.logIndex + 1);
     expect(firstUnusedCommandEventId).toBeGreaterThan(1);
     firstConnection.disconnect();
 
@@ -137,7 +137,7 @@ describe("Scribe", () => {
 
     for (const command of simpleCommandList) {
       const storedEvent = await connection.chronicleEvent(command).getLocalEvent();
-      expect(storedEvent.eventId)
+      expect(storedEvent.logIndex)
           .toEqual(newUnusedCommandId);
 
       oldUnusedCommandId = newUnusedCommandId;
@@ -155,10 +155,10 @@ describe("Scribe", () => {
 
     const chronicling = connection.chronicleEvents(simpleCommandList);
     const lastLocal = await chronicling.eventResults[simpleCommandList.length - 1].getLocalEvent();
-    expect(lastLocal.eventId + 1)
+    expect(lastLocal.logIndex + 1)
         .toEqual(connection.getFirstUnusedCommandEventId());
     const lastTruth = await chronicling.eventResults[simpleCommandList.length - 1].getTruthEvent();
-    expect(lastTruth.eventId + 1)
+    expect(lastTruth.logIndex + 1)
         .toEqual(connection.getFirstUnusedTruthEventId());
   });
 });

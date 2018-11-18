@@ -65,7 +65,10 @@ export function _confirmProphecyCommand (connection: FalseProphetPartitionConnec
     partition.confirmCommand = null;
   }
   prophecy.confirmedCommandCount = (prophecy.confirmedCommandCount || 0) + 1;
-  if (prophecy.confirmedCommandCount < Object.keys(prophecy.partitions).length) return false;
+  if (prophecy.confirmedCommandCount
+      < Object.keys((prophecy.local || {}).partitions).length) {
+    return false;
+  }
   return true;
 }
 
@@ -75,7 +78,7 @@ export function _reformProphecyCommand (connection: FalseProphetPartitionConnect
       ._partitions[String(connection.getPartitionURI())];
   const originalCommand = partition.commandEvent;
   connection.warnEvent(1, "\n\treforming prophecy", prophecy.commandId,
-          "command", originalCommand.eventId, "with command", reformedCommand.eventId,
+          "command", originalCommand.logIndex, "with command", reformedCommand.logIndex,
       "\n\toriginal command:", ...dumpObject(originalCommand),
       "\n\treformed command:", ...dumpObject(reformedCommand),
       "\n\treformed prophecy:", ...dumpObject(prophecy));
@@ -124,13 +127,14 @@ export function _reviseSchism (connection: FalseProphetPartitionConnection,
   delete schism.structuralSchism;
   const recomposedProphecy = _recomposeStoryFromPurgedEvent(connection.getProphet(), schism);
   const partitionURI = String(connection.getPartitionURI());
-  if (!recomposedProphecy || (Object.keys(recomposedProphecy.partitions).length !== 1)) {
+  if (!recomposedProphecy
+      || (Object.keys((recomposedProphecy.local || {}).partitions).length !== 1)) {
     // Can't revise multi-partition commands (for now).
     return undefined;
   }
   const revisedProphecyCommand = getActionFromPassage(recomposedProphecy);
   const revisedPartitionCommandEvent = extractPartitionEvent0Dot2(
-      revisedProphecyCommand, connection);
+      connection, revisedProphecyCommand);
   // Can only revise commands belonging to the originating partition
   if (!revisedPartitionCommandEvent) return undefined;
   recomposedProphecy[ProphecyOperationTag] = operation;
@@ -256,13 +260,14 @@ class ProphecyOperation extends ProphecyEventResult {
     this._partitions = {};
     this._stages = [];
     const missingConnections = [];
-    if (!this._prophecy.partitions) {
+    const partitions = (this._prophecy.local || {}).partitions;
+    if (!partitions) {
       throw new Error("prophecy is missing partition information");
     }
     const remotes = [];
     const locals = [];
     const memorys = [];
-    Object.keys(this._prophecy.partitions).forEach((partitionURIString) => {
+    Object.keys(partitions).forEach((partitionURIString) => {
       const connection = this._prophet._connections[partitionURIString];
       if (!connection) {
         missingConnections.push(createPartitionURI(partitionURIString));
@@ -273,7 +278,7 @@ class ProphecyOperation extends ProphecyEventResult {
           : memorys
       ).push((this._partitions[partitionURIString] = {
         connection,
-        commandEvent: extractPartitionEvent0Dot2(getActionFromPassage(this._prophecy), connection),
+        commandEvent: extractPartitionEvent0Dot2(connection, getActionFromPassage(this._prophecy)),
       }));
     });
     if (remotes.length) this._stages.push({ name: "remotes", partitions: remotes });
@@ -334,9 +339,9 @@ class ProphecyOperation extends ProphecyEventResult {
         // TODO(iridian): Implement.
         // await Promise.all(this.authorityPersistProcesses);
 
-        // Maybe determine eventId's beforehand?
+        // Maybe determine logIndex's beforehand?
 
-        // Get eventId and scribe persist finalizer for each partition
+        // Get logIndex and scribe persist finalizer for each partition
         this._activePartitions = [];
         for (const partition of stage.partitions) {
           try {
@@ -377,7 +382,7 @@ class ProphecyOperation extends ProphecyEventResult {
                               ...dumpObject(received), ...dumpObject(receivedTruth));
                       });
                     }
-                    if (truth.eventId !== partition.commandEvent.eventId) {
+                    if (truth.logIndex !== partition.commandEvent.logIndex) {
                       // this partition command was/will be revised
                     }
                     partition.confirmedTruth = truth;
@@ -391,7 +396,7 @@ class ProphecyOperation extends ProphecyEventResult {
             (error, { connection, chronicling }, index) => {
               throw this._prophet.wrapErrorEvent(error,
                   new Error(`chronicleEvents.stage["${stage.name}"]._activePartitions[${index
-                      }].eventResults[${chronicling && chronicling.event.eventId
+                      }].eventResults[${chronicling && chronicling.event.logIndex
                       }].getTruthEvent()"`),
                   "\n\tchroniclings:", ...dumpObject(this._activePartitions));
             }

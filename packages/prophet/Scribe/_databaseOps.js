@@ -76,8 +76,8 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
   // entries, including the in-memory contents.
   // If the partition does not exist, create it and its structures.
   connection._db = new IndexedDBWrapper(connection._partitionURI.toString(), [
-    { name: "truths", keyPath: "eventId" },
-    { name: "commands", keyPath: "eventId" },
+    { name: "truths", keyPath: "logIndex" },
+    { name: "commands", keyPath: "logIndex" },
     { name: "medias", keyPath: "mediaId" },
   ], connection.getLogger(), connection._prophet.getDatabaseAPI());
   await connection._db.initialize();
@@ -360,8 +360,8 @@ export function _writeTruths (connection: ScribePartitionConnection, truthLog: E
   if (!connection._db) return undefined;
   return connection._db.transaction(["truths"], "readwrite", ({ truths }) => {
     truthLog.forEach(truth => {
-      if (typeof truth.eventId !== "number") {
-        throw new Error(`INTERNAL ERROR: Truth is missing eventId when trying to write ${
+      if (typeof truth.logIndex !== "number") {
+        throw new Error(`INTERNAL ERROR: Truth is missing logIndex when trying to write ${
             truthLog.length} truths to local cache, aborting _writeTruths`);
       }
       const req = truths.add(_serializeEventAsJSON(truth));
@@ -369,12 +369,12 @@ export function _writeTruths (connection: ScribePartitionConnection, truthLog: E
         if (((reqEvent.target || {}).error || {}).name !== "ConstraintError") throw req.error;
         reqEvent.preventDefault(); // Prevent transaction abort.
         reqEvent.stopPropagation(); // Prevent transaction onerror callback call.
-        const validateReq = truths.get(truth.eventId);
+        const validateReq = truths.get(truth.logIndex);
         validateReq.onsuccess = validateReqEvent => {
           if ((validateReqEvent.target.result || {}).commandId === truth.commandId) return;
           throw connection.wrapErrorEvent(
               new Error(`Mismatching existing truth commandId when persisting truth`),
-              `_writeTruths(${truth.eventId})`,
+              `_writeTruths(${truth.logIndex})`,
               "\n\texisting commandId:", (validateReqEvent.target.result || {}).commandId,
               "\n\tnew truth commandId:", truth.commandId,
               "\n\texisting truth:", ...dumpObject(validateReqEvent.target.result),
@@ -399,15 +399,15 @@ export function _writeCommands (connection: ScribePartitionConnection,
   if (!connection._db) return undefined;
   return connection._db.transaction(["commands"], "readwrite", ({ commands }) => {
     commandLog.forEach(command => {
-      if (typeof command.eventId !== "number") {
-        throw new Error(`INTERNAL ERROR: Command is missing eventId when trying to write ${
+      if (typeof command.logIndex !== "number") {
+        throw new Error(`INTERNAL ERROR: Command is missing logIndex when trying to write ${
             commandLog.length} commands to local cache, aborting _writeCommands`);
       }
       const req = commands.add(_serializeEventAsJSON(command));
       req.onerror = reqEvent => {
         if (reqEvent.error.name !== "ConstraintError") throw req.error;
         const error = new Error(`Cross-tab command cache conflict`);
-        error.conflictingCommandEventId = commandLog[0].eventId;
+        error.conflictingCommandEventId = commandLog[0].logIndex;
         throw error;
       };
     });
@@ -442,7 +442,7 @@ export function _deleteCommands (connection: ScribePartitionConnection,
         } else if (expectedCommandIds[i] !== existingCommandId) {
           const error = new Error(`commandId mismatch between stored '${
               existingCommands[i].commandId}' and expected '${expectedCommandIds[i]
-              }' commandId's for eventId ${eventIdBegin + i}`);
+              }' commandId's for logIndex ${eventIdBegin + i}`);
           error.conflictingCommandEventId = eventIdBegin + i;
           throw error;
         }

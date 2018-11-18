@@ -159,7 +159,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
     if (!truths.length) return truths;
     let errorId;
     try {
-      errorId = `${type}([${truths[0].eventId}, ${truths[truths.length - 1].eventId}])`;
+      errorId = `${type}([${truths[0].logIndex}, ${truths[truths.length - 1].logIndex}])`;
       return _receiveEvents(this, truths, retrieveMediaBuffer, downstreamReceiveTruths,
           type, errorOnReceiveTruths.bind(this, new Error(errorId)));
     } catch (error) {
@@ -328,7 +328,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
       return await _writeTruths(this, eventLog);
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          `_writeTruths([${eventLog[0].eventId},${eventLog[eventLog.length - 1].eventId}])`,
+          `_writeTruths([${eventLog[0].logIndex},${eventLog[eventLog.length - 1].logIndex}])`,
           "\n\teventLog:", ...dumpObject(eventLog));
     }
   }
@@ -347,7 +347,8 @@ export default class ScribePartitionConnection extends PartitionConnection {
       return await _writeCommands(this, commandLog);
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          `_writeCommands([${commandLog[0].eventId},${commandLog[commandLog.length - 1].eventId}])`,
+          `_writeCommands([${commandLog[0].logIndex},${
+              commandLog[commandLog.length - 1].logIndex}])`,
           "\n\tcommandLog:", ...dumpObject(commandLog));
     }
   }

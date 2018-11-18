@@ -89,8 +89,10 @@ function authorityConfig () {
 function partitionInfo () {
   return {
     name: "",
-    commandId: NaN,
-    eventId: NaN,
+    commandId: NaN, // last commandId. Deprecated in favor of commandCount (add +1 when migrating)
+    commandCount: NaN,
+    eventId: NaN, // last eventId. Deprecated in favor of truthCount (add +1 when migrating)
+    truthCount: NaN,
     logs: {
       commandQueue: arrayOf(action()),
       eventLog: arrayOf(action()),
@@ -114,9 +116,10 @@ function action () {
     version: "",
     commandId: "",
     timeStamp: NaN,
+    // logIndex: NaN,
     partitions: dictionaryOf({
-      eventId: NaN,
-      partitionAuthorityURI: "",
+      eventId: NaN, // Deprecated since 0.2. Use logIndex on top-level.
+      partitionAuthorityURI: "", // Deprecated since 0.2: events are now single-partition only.
     }),
     /*
     typeName: "",

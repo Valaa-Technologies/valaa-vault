@@ -62,6 +62,9 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
     }
     subAPIs[subAPI.name] = subAPI;
     exposedAccessPoints[subAPI.name] = subAPI.subAPIDependencyField;
+    // FIXME: recurse validators: now extending content API overrides
+    // all validators of the extended API's if they express matching
+    // version numbers
     _assign(actualValidators, subAPI.validators || {});
     _assign(actualMutations, subAPI.mutations || {});
     subAPI.reducers.forEach(reducer => reducer && actualReducers.add(reducer));

@@ -47,7 +47,7 @@ describe("CREATED/DUPLICATED", () => {
 
   it("doesn't prevent DESTROYED for non-command", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-    expect(() => harness.chronicleEvent(destroyed({ id: "A_child2", partitions: {} })))
+    expect(() => harness.chronicleEvent(destroyed({ id: "A_child2", local: { partitions: {} } })))
         .not.toThrow(/destruction blocked/);
   });
 });

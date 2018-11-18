@@ -62,18 +62,18 @@ export async function getKeysFromDB (database: FDBDatabase, table: string) {
   }
 }
 
-// Utility function verifying that a command got stored in the database with a given eventId.
+// Utility function verifying that a command got stored in the database with a given logIndex.
 export async function expectStoredInDB (command: Command, database: FDBDatabase, table: string,
-    eventId: number) {
+    logIndex: number) {
   let stored, indexed;
-  expect(command.eventId).toEqual(eventId);
+  expect(command.logIndex).toEqual(logIndex);
   try {
-    const storedCommand = await getFromDB(database, table, eventId);
+    const storedCommand = await getFromDB(database, table, logIndex);
     if (storedCommand === undefined) {
-      throw new Error(`No event found for id '${eventId}' in "${database.name}"/${table}`);
+      throw new Error(`No event found for id '${logIndex}' in "${database.name}"/${table}`);
     }
     if (command instanceof Error) throw command;
-    const indexedCommand = Object.assign({ eventId }, command);
+    const indexedCommand = Object.assign({ logIndex }, command);
 
     // XXX Hack to flatten any vrefs that may be dangling onto the commands
     stored = JSON.parse(JSON.stringify(storedCommand));
@@ -81,7 +81,7 @@ export async function expectStoredInDB (command: Command, database: FDBDatabase,
     // console.info("STORED:\n", stored, "\n\nINDEXED:\n", indexed);
   } catch (error) {
     throw wrapError(error, `During expectStoredInDB("${database.name}", ${table}), with:`,
-        "\n\teventId:", eventId,
+        "\n\tlogIndex:", logIndex,
         "\n\texpected command:", ...dumpObject(command));
   }
   expect(stored).toEqual(indexed);

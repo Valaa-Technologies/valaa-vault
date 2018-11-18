@@ -46,8 +46,8 @@ export default class AuthorityProphet extends Prophet {
   isProcedural ()   - contains locally generated resource model
                       extensions which only use an event log as a seed
   isHashChained ()  - enforces event log consistency
-  isReducing ()     - is able to perform local reductions, eventId
-                      recalculations w/ pre-condition checking, etc.
+  isReducing ()     - is able to perform local reductions, logIndex
+                      reorderings w/ pre-condition checking, etc.
   isForgetful ()    - forgets history and always serves only a
                       snapshot of the most recent content
 

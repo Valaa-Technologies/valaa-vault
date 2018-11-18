@@ -98,7 +98,7 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
     if (purgedStory === purgedRecital) break;
 
     if (purgedStory.isProphecy) {
-      for (const partitionURI of Object.keys(purgedStory.partitions)) {
+      for (const partitionURI of Object.keys((purgedStory.local || {}).partitions)) {
         const reviewedPartition = reviewedPartitions[partitionURI];
         if (!reviewedPartition) continue;
         purgedStory.needsReview = true;
@@ -147,7 +147,7 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
       // If schismatic all subsequent commands on these partitions
       // need to be fully, possibly interactively revised as they're
       // likely to depend on the first schismatic change.
-      for (const partitionURI of Object.keys(purgedStory.partitions)) {
+      for (const partitionURI of Object.keys((purgedStory.local || {}).partitions)) {
         const partition = reviewedPartitions[partitionURI]
             || (reviewedPartitions[partitionURI] = {});
         if (purgedStory.schismDescription) {
@@ -199,7 +199,7 @@ function _beginPurge (falseProphet: FalseProphet, purgedCommands: Command[]): St
 export function _recomposeStoryFromPurgedEvent (falseProphet: FalseProphet, purged: Prophecy) {
   const purgedEvent = getActionFromPassage(purged);
   // const oldPartitions = purgedEvent.partitions;
-  delete purgedEvent.partitions;
+  delete (purgedEvent.local || {}).partitions;
   try {
     return _composeStoryFromEvent(falseProphet, purgedEvent,
         !purged.needsReview
@@ -317,8 +317,7 @@ if (falseProphet.getVerbosity() === 1) {
   falseProphet.logEvent(1, `${remoteAuthority
     ? "Queued a remote command locally"
     : "Done claiming a local event"} of authority "${authorityURIs[0]}":`,
-    "of partitions:", ...[].concat(
-        ...partitionDatas.map(([pdata, conn]) => [conn.getName(), pdata.eventId])));
+    "of partitions:", ...[].concat(...partitionDatas.map(([pdata]) => [conn.getName()])));
 } else if (falseProphet.getVerbosity() >= 2) {
   falseProphet.warnEvent(2, `Done ${remoteAuthority
           ? "queuing a remote command locally"
@@ -347,8 +346,7 @@ try {
 }
 if (falseProphet.getVerbosity() === 1) {
   falseProphet.logEvent(1, `Done claiming remote command of authority`, remoteAuthority,
-      "and of partitions:", ...[].concat(
-        ...partitionDatas.map(([pdata, conn]) => [conn.getName(), pdata.eventId])));
+      "and of partitions:", ...[].concat(...partitionDatas.map(([pdata]) => [conn.getName()])));
 } else if (falseProphet.getVerbosity() === 2) {
   falseProphet.warnEvent(2, `Done claiming remote command"`, ret);
 }

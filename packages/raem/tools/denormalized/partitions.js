@@ -111,25 +111,26 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
     let matchingPassage = bard.passage;
     // Find or create the partitions with an existing matching partitionURI entry
     for (; matchingPassage; matchingPassage = matchingPassage.parentPassage) {
-      const partitionHit = (matchingPassage.partitions || {})[partitionURI];
+      const partitionHit = ((matchingPassage.local || {}).partitions || {})[partitionURI];
       if (!partitionHit) continue;
-      partitions = Object.keys(matchingPassage.partitions) === 1
-          ? matchingPassage.partitions
+      partitions = Object.keys(matchingPassage.local.partitions) === 1
+          ? matchingPassage.local.partitions
           : { [partitionURI]: partitionHit };
       break;
     }
     // Assign the partitions with current partitionURI to all passages in the current branch.
     for (let passage = bard.passage; passage !== matchingPassage; passage = passage.parentPassage) {
-      // Absolutize to the action.partitions (passage doesn't go upstream).
+      // Absolutize to the action.local.partitions (passage doesn't go upstream).
       const action = getActionFromPassage(passage);
       // skip virtual passages which don't have underlying actions
       if (!action || action === Object.prototype) continue;
       if (!partitions) {
         partitions = { [partitionURI]: {} };
       }
-      action.partitions = !action.partitions
+      const local = action.local || (action.local = {});
+      local.partitions = !local.partitions
           ? partitions
-          : Object.assign({}, action.partitions, partitions);
+          : Object.assign({}, local.partitions, partitions);
     }
     return partitionURI;
   } catch (error) {

@@ -110,7 +110,7 @@ Together with the partition root these are called
 
 ##### 2.3.1.3. Each partition has an event log which contains all the events that modify the partition resources and no other events
 
-Those events have an incrementing serial number *eventId*. Together
+Those events have an incrementing serial number *logIndex*. Together
 they form *the partition event log*.
 
 

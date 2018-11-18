@@ -91,7 +91,8 @@ async function _narrateLocalLogs (connection: ScribePartitionConnection,
     })) || [];
     const commandIdBegin = connection._commandQueueInfo.eventIdBegin;
     commands.forEach(command => {
-      connection._commandQueueInfo.commandIds[command.eventId - commandIdBegin] = command.commandId;
+      connection._commandQueueInfo.commandIds[command.logIndex - commandIdBegin]
+          = command.commandId;
     });
     ret.scribeCommandQueue = !commands.length ? commands
         : await Promise.all(await receiveCommands(commands, retrieveMediaBuffer));
@@ -235,14 +236,14 @@ export function _receiveEvents (
   const newActions = [];
   const receivedActions = events.map((action, index) => {
     // FIXME(iridian): If type === "receiveCommands" perform command eviction on unordered commands
-    if (typeof action.eventId !== "number") {
-      throw new Error(`Expected eventId to be a number for received event #${index}, got: ${
-          typeof action.eventId}`);
+    if (typeof action.logIndex !== "number") {
+      throw new Error(`Expected logIndex to be a number for received event #${index}, got: ${
+          typeof action.logIndex}`);
     }
-    if (action.eventId < actionIdLowerBound) return null;
-    if (action.eventId > actionIdLowerBound) {
-      throw new Error(`Expected eventId to be the first free event id (${
-          actionIdLowerBound}) for received event #${index}, got: ${action.eventId}`);
+    if (action.logIndex < actionIdLowerBound) return null;
+    if (action.logIndex > actionIdLowerBound) {
+      throw new Error(`Expected logIndex to be the first free log index (${
+          actionIdLowerBound}) for received event #${index}, got: ${action.logIndex}`);
     }
     ++actionIdLowerBound;
     _determineEventPreOps(connection, action).forEach(({ mediaEntry }) => {
@@ -286,7 +287,7 @@ export function _receiveEvents (
     connection._triggerCommandQueueWrites();
   } else {
     const lastTruth = newActions[newActions.length - 1];
-    connection._truthLogInfo.eventIdEnd = lastTruth.eventId + 1;
+    connection._truthLogInfo.eventIdEnd = lastTruth.logIndex + 1;
     writeProcess = persist
         && Promise.all(connection._truthLogInfo.writeQueue.push(...newActions));
     connection._triggerTruthLogWrites(lastTruth.commandId);

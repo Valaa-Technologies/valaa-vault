@@ -182,8 +182,9 @@ export default class Bard extends Resolver {
     this.updateState(this.preActionState);
     this._resourceChapters = {};
     this.story = createPassageFromAction(action);
-    if (!action.partitions) {
-      action.partitions = {};
+    const local = action.local || (action.local = {});
+    if (!local.partitions) {
+      local.partitions = {};
       this.story.isBeingUniversalized = true;
     }
     return this.story;
@@ -199,8 +200,8 @@ export default class Bard extends Resolver {
         const message = `${remoteTypeName} ${remoteName} destruction blocked due to field '${
             remoteFieldName}' containing a reference to ${typeName} ${name}`;
         if (this.story.isBeingUniversalized) throw new Error(message);
-        console.warn("Suppressing a destroy prevention error (ie. the DESTROYED is resolved)",
-            "for downstream event:", ...dumpObject(this.story),
+        console.warn("Suppressing a destroy prevention error (ie. DESTROYED is actually resolved)",
+            "for downstream truth:", ...dumpObject(this.story),
             "\n\tsuppressed error:", message);
       }
     });

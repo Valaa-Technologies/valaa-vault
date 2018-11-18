@@ -41,14 +41,17 @@ export class Truth extends EventEnvelope {
 export function validateActionBase (expectedType: string, action: Action, type: string,
     local: ?Object, unrecognized: Object) {
   invariantifyString(type, `${expectedType}.type`, { value: expectedType });
-  invariantifyObject(local, `${expectedType}.local`, { allowNull: false, allowUndefined: true });
+  invariantifyObject(local, `${expectedType}.local`, { allowUndefined: true, allowEmpty: true });
   if (Object.keys(unrecognized).length) {
-    const { version, partitions, commandId, eventId, timeStamp, ...rest } = unrecognized; // migration code - version is being removed
+    // migration code - these are being removed from Action
+    const { version, commandId, timeStamp, logIndex, ...rest } = unrecognized;
     if (Object.keys(rest).length) {
       invariantify(false,
         `${expectedType} action contains unrecognized fields`,
-        "\n\tunrecognized keys:", Object.keys(unrecognized),
-        "\n\tunrecognized fields:", unrecognized);
+        "\n\tmigratee keys:", Object.keys(unrecognized),
+        "\n\tmigratee fields:", unrecognized,
+        "\n\tunrecognized keys:", Object.keys(rest),
+        "\n\tunrecognized fields:", rest);
     }
   }
 }

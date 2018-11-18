@@ -121,7 +121,7 @@ export default class FalseProphetDiscourse extends Discourse {
     if (!partitionURI) throw new Error("assignNewResourceId.partitionURI missing");
     const root = this._transactionInfo ? this._transactionInfo.transacted : targetAction;
     if (!root.commandId) this._prophet._assignCommandId(root, this);
-    const partitions = root.partitions || (root.partitions = {});
+    const partitions = (root.local || (root.local = {})).partitions || (root.local.partitions = {});
     const partition = partitions[partitionURI] || (partitions[partitionURI] = { createIndex: 0 });
     let resourceRawId;
     if (!explicitRawId) {

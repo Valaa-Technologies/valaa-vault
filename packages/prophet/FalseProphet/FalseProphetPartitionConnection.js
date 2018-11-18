@@ -17,9 +17,9 @@ import { _confirmCommands, _purgeAndRecomposeStories } from "./_storyOps";
  * @extends {PartitionConnection}
  */
 export default class FalseProphetPartitionConnection extends PartitionConnection {
-  // _headEventId is the eventId of the first unconfirmed truth.
+  // _headEventId is the logIndex of the first unconfirmed truth.
   // penndingTruths and unconfirmedCommands are based on this, ie.
-  // their 0th entry eventId is always equal to this.
+  // their 0th entry logIndex is always equal to this.
   _headEventId: number = 0;
   // Discontinuous, unreduced truths. If defined, the first entry is
   // always immediately reduced. This means that first entry is always
@@ -27,8 +27,9 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   _pendingTruths: EventBase[] = [];
   // Continuous, reduced but unconfirmed commands. Whenever
   // _pendingTruths contains a truth at an equivalent position with
-  // equivalent commandId, then all commands with eventId equal or less
-  // to that are confirmed as truths and transferred to _pendingTruths.
+  // equivalent commandId, then all commands with logIndex equal or
+  // less to that are confirmed as truths and transferred to
+  // _pendingTruths.
   _unconfirmedCommands: EventBase[] = [];
   _firstUnconfirmedEventId = 0;
   _isFrozen: ?boolean;
@@ -59,12 +60,12 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
         // console.log("assigning ids:", this.getName(), this._headEventId,
         //     this._unconfirmedCommands.length, "\n\tevents:", ...dumpObject(eventLog));
         for (const event of events) {
-          event.eventId = this._headEventId + this._unconfirmedCommands.length;
+          event.logIndex = this._headEventId + this._unconfirmedCommands.length;
           this._unconfirmedCommands.push(event);
         }
         this._checkForFreezeAndNotify();
-      } else if (typeof events[0].eventId !== "number") {
-        throw new Error("Can't chronicle events without eventId (options.isProphecy is not set)");
+      } else if (typeof events[0].logIndex !== "number") {
+        throw new Error("Can't chronicle events without logIndex (options.isProphecy is not set)");
       }
       options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
       options.receiveCommands = options.isProphecy ? null
@@ -72,7 +73,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       return this._upstreamConnection.chronicleEvents(events, options);
     } catch (error) {
       throw this.wrapErrorEvent(error, `chronicleEvents(${events.length} events: [${
-              events[0].eventId}, ${events[events.length - 1].eventId}])`,
+              events[0].logIndex}, ${events[events.length - 1].logIndex}])`,
           "\n\toptions:", ...dumpObject(options));
     }
   }
@@ -115,8 +116,8 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       _purgeAndRecomposeStories(this, purgedCommands, newTruths, "receiveTruth");
       return truths;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `receiveTruths([${(truths[0] || {}).eventId}, ${
-              (truths[(truths.length || 1) - 1] || {}).eventId}])`,
+      throw this.wrapErrorEvent(error, `receiveTruths([${(truths[0] || {}).logIndex}, ${
+              (truths[(truths.length || 1) - 1] || {}).logIndex}])`,
           "\n\treceived truths:", ...dumpObject(truths),
           "\n\tpendingTruths:", ...dumpObject([...this._pendingTruths]),
           "\n\tunconfirmedCommands:", ...dumpObject([...this._unconfirmedCommands]),
@@ -137,8 +138,8 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       _purgeAndRecomposeStories(this, purgedCommands, newCommands, "receiveCommand");
       return commands;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `receiveCommand([${(commands[0] || {}).eventId}, ${
-              (commands[(commands.length || 1) - 1] || {}).eventId}])`,
+      throw this.wrapErrorEvent(error, `receiveCommand([${(commands[0] || {}).logIndex}, ${
+              (commands[(commands.length || 1) - 1] || {}).logIndex}])`,
           "\n\treceived commands:", ...dumpObject(commands),
           "\n\tpendingTruths:", ...dumpObject([...this._pendingTruths]),
           "\n\tunconfirmedCommands:", ...dumpObject([...this._unconfirmedCommands]),
@@ -151,13 +152,13 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       onMismatch: Function) {
     for (let index = 0; index !== events.length; ++index) {
       const event = events[index];
-      const queueIndex = !event ? -1 : (event.eventId - this._headEventId);
+      const queueIndex = !event ? -1 : (event.logIndex - this._headEventId);
       try {
         if (queueIndex < 0) continue;
         if (isCommand && queueIndex && !targetQueue[queueIndex - 1]) {
           // TODO(iridian): non-continuousity support can be added in principle.
           // But maybe it makes sense to put this functionality to scribe? Or to Oracle?
-          throw new Error(`Non-continuous eventId ${event.eventId
+          throw new Error(`Non-continuous logIndex ${event.logIndex
               } detected when inserting commands to queue`);
         }
         const existingEvent = targetQueue[queueIndex];

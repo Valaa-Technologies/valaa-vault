@@ -78,7 +78,7 @@ export default class TransactionInfo {
       this.actions.push(...actions);
       this.latestUniversalTransacted = universalTransacted;
       this.passages.push(...transactionStory.passages);
-      Object.assign(this.universalPartitions, transactionStory.partitions);
+      Object.assign(this.universalPartitions, (transactionStory.local || {}).partitions);
       const state = this.transaction.corpus.getState();
       this.transaction.setState(state);
       return {
@@ -120,7 +120,7 @@ export default class TransactionInfo {
           : this.customCommand(this.transacted);
       if (!this.customCommand && !this._finalCommand.actions.length) {
         command = universalizeAction(this._finalCommand);
-        command.partitions = {};
+        (command.local || (command.local = {})).partitions = {};
         return {
           event: this._finalCommand, story: command, getPremiereStory () { return command; },
         };
@@ -191,7 +191,7 @@ export default class TransactionInfo {
       ...this.latestUniversalTransacted,
       ...this._finalCommand,
       actions: this.passages.map(passage => getActionFromPassage(passage)),
-      partitions: this.universalPartitions,
+      local: { partitions: this.universalPartitions },
     };
     const story = createPassageFromAction(universalTransactedLike);
     story.passages = this.passages;

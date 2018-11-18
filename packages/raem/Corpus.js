@@ -43,11 +43,11 @@ export default class Corpus extends Bard {
   dispatch (action: Action, description: string) {
     const prevName = this.getName();
     try {
-      this.setName(!action.partitions
+      this.setName(!(action.local || {}).partitions
           ? `${description}`
           : `${description}: ${
-              Object.entries(action.partitions)
-                  .map(([id, info]) => `${id.slice(0, 26)}...[${info.eventId}]}`)
+              Object.entries(action.local.partitions)
+                  .map(([id]) => `${id.slice(0, 26)}...}`)
                   .join(", ")
               }`);
       this.logEvent(1, "dispatch:", ...dumpObject(action));

@@ -1,21 +1,30 @@
 // @flow
 
-import { EventBase } from "~/raem/events";
+import { Action, EventBase } from "~/raem/events";
+import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent";
 
+import ProphetContentAPI from "~/prophet/ProphetContentAPI";
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import { dumpObject } from "~/tools";
+
+import { dumpify, dumpObject } from "~/tools";
 
 import extractPartitionEvent0Dot2 from "./extractPartitionEvent0Dot2";
 
-export default function upgradeEventTo0Dot2 (event: EventBase, connection: PartitionConnection) {
+const validateAnyVersion = createValidateEventMiddleware(
+    ProphetContentAPI.validators)()(event => event);
+
+export default function upgradeEventTo0Dot2 (connection: PartitionConnection, event: EventBase) {
+  let ret;
   try {
-    if (event.version === "0.2") {
-      if (!event.commandId) throw new Error("invalid version 0.2 event: .commandId missing");
-      return event;
-    }
-    let ret;
+    validateAnyVersion(event);
+    if (event.version === "0.2") return event;
     if (event.version === "0.1") {
-      ret = extractPartitionEvent0Dot2(event, connection, connection.getPartitionRawId());
+      ret = convertEvent0Dot1To0Dot2(connection, event);
+      const extracted = extractPartitionEvent0Dot2(connection, ret, connection.getPartitionRawId());
+      if (!extracted) {
+        throw new Error("Could not extract partition event while upgrading event from version 0.1");
+      }
+      ret = extracted;
     } else {
       throw new Error(`Unrecognized event version "${event.version
           }" when trying to upgrade event to version 0.2`);
@@ -24,9 +33,41 @@ export default function upgradeEventTo0Dot2 (event: EventBase, connection: Parti
     ret.version = "0.2";
     return ret;
   } catch (error) {
-    throw connection.wrapErrorEvent(error, new Error("upgradeEventTo0Dot2()"),
-      "\n\tevent:", ...dumpObject(event),
-      "\n\tevent.partitions:", ...dumpObject(event.partitions),
-      "\n\tconnection:", connection.getName());
+    throw connection.wrapErrorEvent(error,
+        new Error(`upgradeEventTo0Dot2(${connection.getName()})`),
+        "\n\tpartitionRawId:", connection.getPartitionRawId(),
+        "\n\tpartitionURI:", ...dumpObject(connection.getPartitionURI()),
+        "\n\tevent:", ...dumpObject(event),
+        "\n\tevent.partitions:", dumpify(event.partitions),
+        "\n\tret (partial):", JSON.stringify(ret, null, 2));
+  }
+}
+
+export function convertEvent0Dot1To0Dot2 (connection: PartitionConnection,
+    action: Action, isRoot: boolean = true) {
+  let ret;
+  try {
+    ret = { ...action };
+    if (ret.partitions) {
+      (ret.local = { ...ret.local }).partitions = action.partitions;
+      delete ret.partitions;
+    }
+    if (isRoot) {
+      const partition = ret.local.partitions[connection.getPartitionRawId()];
+      ret.logIndex = partition.eventId;
+    } else {
+      delete ret.commandId;
+    }
+    if (ret.actions) {
+      ret.actions = action.actions.map(subAction =>
+          convertEvent0Dot1To0Dot2(connection, subAction, false));
+    }
+    return ret;
+  } catch (error) {
+    throw connection.wrapErrorEvent(error,
+        new Error(`convertEvent0Dot1To0Dot2()`),
+        "\n\taction:", ...dumpObject(action),
+        "\n\tret (partial):", ...dumpObject(ret),
+    );
   }
 }

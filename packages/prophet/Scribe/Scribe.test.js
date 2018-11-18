@@ -7,7 +7,7 @@ import {
   createScribe, clearScribeDatabases, createTestMockProphet
 } from "~/prophet/test/ProphetTestHarness";
 
-import { stringFromUTF8ArrayBuffer } from "~/tools/textEncoding";
+import { utf8StringFromArrayBuffer } from "~/tools/textEncoding";
 
 import { openDB, getFromDB, getKeysFromDB, expectStoredInDB }
     from "~/tools/html5/InMemoryIndexedDBUtils";
@@ -99,7 +99,7 @@ describe("Scribe", () => {
       expect(bufferKeys).toContain(bvobId);
 
       const restoredBuffer = await getFromDB(sharedDB, "buffers", bvobId);
-      const restoredContent = stringFromUTF8ArrayBuffer(restoredBuffer.buffer);
+      const restoredContent = utf8StringFromArrayBuffer(restoredBuffer.buffer);
       expect(restoredContent).toEqual(mediaContent);
     }
   });

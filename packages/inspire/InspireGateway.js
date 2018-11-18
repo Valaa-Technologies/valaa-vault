@@ -29,7 +29,7 @@ import extendValaaSpaceWithInspire from "~/inspire/ValaaSpace";
 import { arrayBufferFromBase64 } from "~/tools/base64";
 import { dumpObject, invariantify, LogEventGenerator } from "~/tools";
 
-const DEFAULT_EVENT_VERSION = process.env.DEFAULT_EVENT_VERSION || "0.2";
+const EVENT_VERSION = process.env.EVENT_VERSION || "0.2";
 
 export default class InspireGateway extends LogEventGenerator {
 
@@ -243,9 +243,9 @@ export default class InspireGateway extends LogEventGenerator {
     // FIXME(iridian): Create the deterministic-id schema. Now random.
     // const previousId = valaaUUID();
     const middlewares = [
-      createProcessCommandVersionMiddleware(DEFAULT_EVENT_VERSION),
+      createProcessCommandVersionMiddleware(EVENT_VERSION),
       createProcessCommandIdMiddleware(undefined /* previousId */, schema),
-      createValidateEventMiddleware(validators),
+      createValidateEventMiddleware(validators, EVENT_VERSION),
       createBardMiddleware(),
     ];
 
@@ -421,7 +421,7 @@ export default class InspireGateway extends LogEventGenerator {
         throw new Error("commandQueue revelation not implemented yet");
       }
       const latestMediaInfos = await logs.latestMediaInfos;
-      const upgradedEventLog = eventLog.map(event => upgradeEventTo0Dot2(event, connection));
+      const upgradedEventLog = eventLog.map(event => upgradeEventTo0Dot2(connection, event));
       const chronicling = connection.chronicleEvents(upgradedEventLog, {
         name: `prologue truths for '${connection.getName()}'`,
         isTruth: true,

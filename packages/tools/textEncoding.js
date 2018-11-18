@@ -19,22 +19,22 @@ export function bufferAndContentIdFromNative (object: any, mediaInfo?: Object) {
 }
 
 function _arrayBufferFromStringAndMediaInfo (text: string, mediaInfo?: Object) {
-  if (!mediaInfo) return utf8ArrayBufferFromString(text);
+  if (!mediaInfo) return arrayBufferFromUTF8String(text);
   // TODO(iridian): Implement mediaInfo encoding schemas eventually.
   // Now storing everything as utf8 which is maybe not what we want: it thrashes save/load
   // roundtrips for documents whose original encoding is not utf8.
-  return utf8ArrayBufferFromString(text);
+  return arrayBufferFromUTF8String(text);
 }
 
-export function stringFromUTF8ArrayBuffer (buffer: ArrayBuffer): string {
+export function utf8StringFromArrayBuffer (buffer: ArrayBuffer): string {
   return _stringFromArrayBuffer("utf-8", buffer);
 }
 
-export function stringFromUTF16LEArrayBuffer (buffer: ArrayBuffer): string {
+export function utf16LEStringFromArrayBuffer (buffer: ArrayBuffer): string {
   return _stringFromArrayBuffer("utf-16le", buffer);
 }
 
-export function stringFromUTF16BEArrayBuffer (buffer: ArrayBuffer): string {
+export function utf16BEStringFromArrayBuffer (buffer: ArrayBuffer): string {
   return _stringFromArrayBuffer("utf-16be", buffer);
 }
 
@@ -43,15 +43,15 @@ function _stringFromArrayBuffer (encoding: string, buffer: ArrayBuffer): string 
   return enc.decode(new Uint8Array(buffer));
 }
 
-export function utf8ArrayBufferFromString (stringContent: string): ArrayBuffer {
+export function arrayBufferFromUTF8String (stringContent: string): ArrayBuffer {
   return _arrayBufferFromString("utf-8", stringContent);
 }
 
-export function utf16LEArrayBufferFromString (stringContent: string): ArrayBuffer {
+export function arrayBufferFromUTF16LEString (stringContent: string): ArrayBuffer {
   return _arrayBufferFromString("utf-16le", stringContent);
 }
 
-export function utf16BEArrayBufferFromString (stringContent: string): ArrayBuffer {
+export function arrayBufferFromUTF16BEString (stringContent: string): ArrayBuffer {
   return _arrayBufferFromString("utf-16be", stringContent);
 }
 
@@ -61,6 +61,6 @@ function _arrayBufferFromString (encoding: string, stringContent: string): Array
 }
 
 export function contentIdFromUCS2String (contentString: string) {
-  const buffer = utf8ArrayBufferFromString(contentString);
+  const buffer = arrayBufferFromUTF8String(contentString);
   return contentIdFromArrayBuffer(buffer);
 }

@@ -58,7 +58,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
         throw new Error(`INTERNAL ERROR: downstreamReceiveTruths was not defined`);
       }
       return downstreamReceiveTruths(
-          truths.map(event => upgradeEventTo0Dot2(event, this)),
+          truths.map(event => upgradeEventTo0Dot2(this, event)),
           retrieveMediaBuffer);
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error(type),

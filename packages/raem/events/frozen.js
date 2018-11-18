@@ -6,6 +6,7 @@ export const FROZEN = "FROZEN";
 
 export class Frozen extends ActionCollection {
   type: "FROZEN";
+  frozenPartitions: string[];
 }
 
 export default function frozen (action: Action): Frozen {
@@ -14,7 +15,7 @@ export default function frozen (action: Action): Frozen {
 }
 
 export function validateFrozen (action: Action, validateAction: ?Function): Frozen {
-  const { type, local, actions, ...unrecognized } = action;
-  return validateActionCollectionBase(FROZEN, action, type, local, actions, unrecognized,
-      validateAction);
+  const { type, local, actions, frozenPartitions, ...unrecognized } = action;
+  validateActionCollectionBase(FROZEN, action, type, local, actions, unrecognized, validateAction);
+  return action;
 }

@@ -12,13 +12,13 @@ import { dumpify, createId, invariantify } from "~/tools";
 
 export default function createProcessCommandIdMiddleware (/* initialId, schema */) {
   // const previousId = { value: initialId };
-  return (/* store */) => next => (action, ...rest: any[]) => {
-    if (!action.hasOwnProperty("commandId")) {
+  return (/* store */) => next => (event, ...rest: any[]) => {
+    if (!((event.aspects || {}).command || {}).id) {
       throw new Error("commandId expected but missing");
       // action.timeStamp = Date.now();
       // recurseAndAugmentWithIds(action, previousId, schema);
     }
-    return next(action, ...rest);
+    return next(event, ...rest);
   };
 }
 /*

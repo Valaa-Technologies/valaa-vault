@@ -38,10 +38,10 @@ export class Truth extends EventEnvelope {
   chainHash: string;
 }
 
-export function validateActionBase (expectedType: string, action: Action, type: string,
-    local: ?Object, unrecognized: Object) {
+export function validateActionBase (expectedType: string, action: Action, rest: Object) {
+  const { type, local, aspects, ...unrecognized } = rest;
   invariantifyString(type, `${expectedType}.type`, { value: expectedType });
-  invariantifyObject(local, `${expectedType}.local`, { allowUndefined: true, allowEmpty: true });
+  invariantifyObject(local, `${type}.local`, { allowUndefined: true, allowEmpty: true });
   if (Object.keys(unrecognized).length) {
     // migration code - these are being removed from Action
     const { version, commandId, timeStamp, logIndex, ...rest } = unrecognized;
@@ -57,9 +57,9 @@ export function validateActionBase (expectedType: string, action: Action, type: 
 }
 
 export function validateActionCollectionBase (expectedType: string, action: ActionCollection,
-    type, local, actions, unrecognized, validateAction: ?Function,
+    actions, rest, validateAction: ?Function,
 ): ?ActionCollection {
-  validateActionBase(expectedType, action, type, local, unrecognized);
+  validateActionBase(expectedType, action, rest);
 
   invariantifyArray(actions, `${expectedType}.actions`, {
     elementInvariant: validateAction ||

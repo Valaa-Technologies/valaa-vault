@@ -16,7 +16,6 @@ export default function recombined (action: Action): Recombined {
 }
 
 export function validateRecombined (action: Recombined): Recombined {
-  const { type, local, actions, ...unrecognized } = action;
-  return validateActionCollectionBase(RECOMBINED, action, type, local, actions, unrecognized,
-      validateDuplicated);
+  const { actions, ...rest } = action;
+  return validateActionCollectionBase(RECOMBINED, action, actions, rest, validateDuplicated);
 }

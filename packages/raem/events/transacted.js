@@ -14,7 +14,6 @@ export default function transacted (action: Action): Transacted {
 }
 
 export function validateTransacted (action: Action, validateAction: ?Function): ?Transacted {
-  const { type, local, actions, ...unrecognized } = action;
-  return validateActionCollectionBase(TRANSACTED, action, type, local, actions, unrecognized,
-      validateAction);
+  const { actions, ...rest } = action;
+  return validateActionCollectionBase(TRANSACTED, action, actions, rest, validateAction);
 }

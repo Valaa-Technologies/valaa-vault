@@ -77,7 +77,7 @@ describe("FalseProphet", () => {
 
     const results = connection.chronicleEvents(basicCommands, { isProphecy: true });
     const lastStoredEvent = await results.eventResults[2].event;
-    expect(lastStoredEvent.logIndex)
+    expect(lastStoredEvent.aspects.log.index)
         .toEqual(3);
     expect(commandsCounted).toBe(4);
   });

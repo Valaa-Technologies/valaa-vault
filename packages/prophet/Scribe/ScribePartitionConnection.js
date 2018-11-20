@@ -8,6 +8,7 @@ import {
   MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest, ConnectOptions,
   ReceiveEvents, RetrieveMediaBuffer,
 } from "~/prophet/api/types";
+import { tryAspect } from "~/prophet/tools/EventAspects";
 
 import { DelayedQueue, dumpObject, thenChainEagerly } from "~/tools";
 
@@ -159,7 +160,8 @@ export default class ScribePartitionConnection extends PartitionConnection {
     if (!truths.length) return truths;
     let errorId;
     try {
-      errorId = `${type}([${truths[0].logIndex}, ${truths[truths.length - 1].logIndex}])`;
+      errorId = `${type}([${tryAspect(truths[0], "log").index}, ${
+          tryAspect(truths[truths.length - 1], "log").index}])`;
       return _receiveEvents(this, truths, retrieveMediaBuffer, downstreamReceiveTruths,
           type, errorOnReceiveTruths.bind(this, new Error(errorId)));
     } catch (error) {
@@ -322,14 +324,15 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  async _writeTruths (eventLog: EventBase[]) {
-    if (!eventLog || !eventLog.length) return undefined;
+  async _writeTruths (truths: EventBase[]) {
+    if (!truths || !truths.length) return undefined;
     try {
-      return await _writeTruths(this, eventLog);
+      return await _writeTruths(this, truths);
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          `_writeTruths([${eventLog[0].logIndex},${eventLog[eventLog.length - 1].logIndex}])`,
-          "\n\teventLog:", ...dumpObject(eventLog));
+          `_writeTruths([${tryAspect(truths[0], "log").index} ,${
+              tryAspect(truths[truths.length - 1], "log").index}])`,
+          "\n\teventLog:", ...dumpObject(truths));
     }
   }
 
@@ -342,14 +345,14 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  async _writeCommands (commandLog: EventBase[]) {
+  async _writeCommands (commands: EventBase[]) {
     try {
-      return await _writeCommands(this, commandLog);
+      return await _writeCommands(this, commands);
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          `_writeCommands([${commandLog[0].logIndex},${
-              commandLog[commandLog.length - 1].logIndex}])`,
-          "\n\tcommandLog:", ...dumpObject(commandLog));
+          `_writeCommands([${tryAspect(commands[0], "log").index},${
+              tryAspect(commands[commands.length - 1], "log").index}])`,
+          "\n\tcommands:", ...dumpObject(commands));
     }
   }
 

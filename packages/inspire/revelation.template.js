@@ -94,14 +94,15 @@ function partitionInfo () {
     eventId: NaN, // last eventId. Deprecated in favor of truthCount (add +1 when migrating)
     truthCount: NaN,
     logs: {
-      commandQueue: arrayOf(action()),
-      eventLog: arrayOf(action()),
+      commandQueue: arrayOf(actionDeprecated()),
+      eventLog: arrayOf(actionDeprecated()), // Deprecated since 0.2. Use truthLog instead.
+      truthLog: arrayOf(action()),
       latestMediaInfos: dictionaryOf({
         mediaId: "",
         mediaInfo: {
           name: "",
           bvobId: "",
-          blobId: "",
+          blobId: "", // Deprecated since 0.2. Use bvobId instead.
         },
         isPersisted: null,
         isInMemory: null,
@@ -110,23 +111,49 @@ function partitionInfo () {
   };
 }
 
-function action () {
+function actionDeprecated () {
   return {
     type: "",
-    version: "",
-    commandId: "",
-    timeStamp: NaN,
-    // logIndex: NaN,
+    version: "", // Deprecated since 0.2. Use aspects.version instead.
+    commandId: "", // Deprecated since 0.2. Use aspects.command.id instead.
+    timeStamp: NaN, // Deprecated since 0.2. Use aspects.log.timeStamp instead.
     partitions: dictionaryOf({
-      eventId: NaN, // Deprecated since 0.2. Use logIndex on top-level.
+      eventId: NaN, // Deprecated since 0.2. Use aspects.log.index isntead.
       partitionAuthorityURI: "", // Deprecated since 0.2: events are now single-partition only.
     }),
+    // aspects: aspects(),
     /*
     typeName: "",
     id: [],
     actions: [],
     initialState: {},
     */
+  };
+}
+
+function action () {
+  return {
+    type: "",
+    aspects: aspects(),
+    /*
+    typeName: "",
+    id: [],
+    actions: [],
+    initialState: {},
+    */
+  };
+}
+
+function aspects () {
+  return {
+    version: "",
+    command: {
+      id: "",
+    },
+    log: {
+      index: NaN,
+      timeStamp: NaN,
+    },
   };
 }
 

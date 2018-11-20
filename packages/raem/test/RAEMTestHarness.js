@@ -3,8 +3,6 @@ import { OrderedMap } from "immutable";
 import type { EventBase } from "~/raem/events";
 import createRootReducer from "~/raem/tools/createRootReducer";
 import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent";
-import createProcessCommandVersionMiddleware from
-    "~/raem/redux/middleware/processCommandVersion";
 import { createBardMiddleware } from "~/raem/redux/Bard";
 
 import RAEMTestAPI from "~/raem/test/RAEMTestAPI";
@@ -137,9 +135,8 @@ export function createCorpus (ContentAPI: Object, reducerOptions?: Object, corpu
 
 function _createTestMiddlewares ({ validators }) {
   return [
-    createProcessCommandVersionMiddleware(TEST_EVENT_VERSION),
     // createProcessCommandIdMiddleware(undefined, schema),
-    createValidateEventMiddleware(validators, TEST_EVENT_VERSION),
+    createValidateEventMiddleware(validators, TEST_EVENT_VERSION, TEST_EVENT_VERSION),
     createBardMiddleware(),
   ];
 }

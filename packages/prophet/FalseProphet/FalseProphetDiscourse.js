@@ -16,11 +16,12 @@ import type { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult 
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 import createResourceId0Dot2, { createPartitionId0Dot2 }
     from "~/prophet/tools/event-version-0.2/createResourceId0Dot2";
+import { tryAspect } from "~/prophet/tools/EventAspects";
 
 import { invariantify, invariantifyObject } from "~/tools";
 import valaaUUID from "~/tools/id/valaaUUID";
 
-import { universalizeAction } from "./FalseProphet";
+import { universalizeEvent } from "./FalseProphet";
 
 export default class FalseProphetDiscourse extends Discourse {
   _follower: Follower;
@@ -65,8 +66,8 @@ export default class FalseProphetDiscourse extends Discourse {
     let universalizedEvents;
     try {
       universalizedEvents = events.map(event => {
-        const ret = universalizeAction(event);
-        if (!ret.commandId) this._prophet._assignCommandId(ret, this);
+        const ret = universalizeEvent(event);
+        if (!tryAspect(ret, "command").id) this._prophet._assignCommandId(ret, this);
         return ret;
       });
       const ret = this._prophet.chronicleEvents(universalizedEvents, options);
@@ -120,12 +121,13 @@ export default class FalseProphetDiscourse extends Discourse {
   assignNewResourceId (targetAction: EventBase, partitionURI: string, explicitRawId?: string) {
     if (!partitionURI) throw new Error("assignNewResourceId.partitionURI missing");
     const root = this._transactionInfo ? this._transactionInfo.transacted : targetAction;
-    if (!root.commandId) this._prophet._assignCommandId(root, this);
+    if (!tryAspect(root, "command").id) this._prophet._assignCommandId(root, this);
     const partitions = (root.local || (root.local = {})).partitions || (root.local.partitions = {});
     const partition = partitions[partitionURI] || (partitions[partitionURI] = { createIndex: 0 });
     let resourceRawId;
     if (!explicitRawId) {
-      resourceRawId = createResourceId0Dot2(root.commandId, partitionURI, partition.createIndex++);
+      resourceRawId = createResourceId0Dot2(
+          root.aspects.command.id, partitionURI, partition.createIndex++);
     } else {
       this.warnEvent(`assignNewResourceId.explicitRawId was explicitly provided for a regular${
           ""} partition resource: this will be deprecated`,
@@ -135,7 +137,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
     targetAction.id = vRef(resourceRawId, undefined, undefined, createValaaURI(partitionURI));
     /*
-    console.log("assignNewResourceId", root.commandId, partitionURI, explicitRawId,
+    console.log("assignNewResourceId", tryAspect(root, "command").id, partitionURI, explicitRawId,
         "\n\tresourceRawId:", resourceRawId,
         "\n\tresults:", String(targetAction.id),
         "\n\ttargetAction:", ...dumpObject(targetAction),
@@ -157,9 +159,9 @@ export default class FalseProphetDiscourse extends Discourse {
   assignNewPartitionId (targetAction: EventBase, partitionAuthorityURI: string,
       explicitPartitionRawId?: string) {
     const root = this._transactionInfo ? this._transactionInfo.transacted : targetAction;
-    if (!root.commandId) this._prophet._assignCommandId(root, this);
+    if (!tryAspect(root, "command").id) this._prophet._assignCommandId(root, this);
     const partitionRawId = explicitPartitionRawId
-        || createPartitionId0Dot2(root.commandId, partitionAuthorityURI);
+        || createPartitionId0Dot2(root.aspects.command.id, partitionAuthorityURI);
     targetAction.id = vRef(partitionRawId, undefined, undefined,
         createPartitionURI(partitionAuthorityURI, partitionRawId));
     /*

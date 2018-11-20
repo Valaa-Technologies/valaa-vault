@@ -3,6 +3,8 @@
 import ValaaURI from "~/raem/ValaaURI";
 import type { EventBase } from "~/raem/events";
 
+import { tryAspect, swapAspectRoot } from "~/prophet/tools/EventAspects";
+
 import { dumpObject, vdon, wrapError } from "~/tools";
 import IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 import type MediaDecoder from "~/tools/MediaDecoder";
@@ -76,8 +78,8 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
   // entries, including the in-memory contents.
   // If the partition does not exist, create it and its structures.
   connection._db = new IndexedDBWrapper(connection._partitionURI.toString(), [
-    { name: "truths", keyPath: "logIndex" },
-    { name: "commands", keyPath: "logIndex" },
+    { name: "truths", keyPath: "index" },
+    { name: "commands", keyPath: "index" },
     { name: "medias", keyPath: "mediaId" },
   ], connection.getLogger(), connection._prophet.getDatabaseAPI());
   await connection._db.initialize();
@@ -360,8 +362,8 @@ export function _writeTruths (connection: ScribePartitionConnection, truthLog: E
   if (!connection._db) return undefined;
   return connection._db.transaction(["truths"], "readwrite", ({ truths }) => {
     truthLog.forEach(truth => {
-      if (typeof truth.logIndex !== "number") {
-        throw new Error(`INTERNAL ERROR: Truth is missing logIndex when trying to write ${
+      if (typeof truth.aspects.log.index !== "number") {
+        throw new Error(`INTERNAL ERROR: Truth is missing aspects.log.index when trying to write ${
             truthLog.length} truths to local cache, aborting _writeTruths`);
       }
       const req = truths.add(_serializeEventAsJSON(truth));
@@ -369,14 +371,16 @@ export function _writeTruths (connection: ScribePartitionConnection, truthLog: E
         if (((reqEvent.target || {}).error || {}).name !== "ConstraintError") throw req.error;
         reqEvent.preventDefault(); // Prevent transaction abort.
         reqEvent.stopPropagation(); // Prevent transaction onerror callback call.
-        const validateReq = truths.get(truth.logIndex);
+        const validateReq = truths.get(truth.aspects.log.index);
         validateReq.onsuccess = validateReqEvent => {
-          if ((validateReqEvent.target.result || {}).commandId === truth.commandId) return;
+          if (tryAspect(validateReqEvent.target.result, "command").id
+              === tryAspect(truth, "command").id) return;
           throw connection.wrapErrorEvent(
-              new Error(`Mismatching existing truth commandId when persisting truth`),
-              `_writeTruths(${truth.logIndex})`,
-              "\n\texisting commandId:", (validateReqEvent.target.result || {}).commandId,
-              "\n\tnew truth commandId:", truth.commandId,
+              new Error(`Mismatching existing truth aspects.command.id when persisting truth`),
+              `_writeTruths(#${truth.aspects.log.index})`,
+              "\n\texisting aspects.command.id:",
+                  tryAspect(validateReqEvent.target.result, "command").id,
+              "\n\tnew truth aspects.command.id:", truth.aspects.command.id,
               "\n\texisting truth:", ...dumpObject(validateReqEvent.target.result),
               "\n\tnew truth:", ...dumpObject(truth));
         };
@@ -391,7 +395,7 @@ export function _readTruths (connection: ScribePartitionConnection, options: Obj
   const range = connection._db.getIDBKeyRange(options);
   if (range === null) return undefined;
   return connection._db.transaction(["truths"], "readonly",
-      ({ truths }) => new Promise(_getAllShim.bind(null, truths, range)));
+      ({ truths }) => new Promise(_getAllShim.bind(null, connection, truths, range)));
 }
 
 export function _writeCommands (connection: ScribePartitionConnection,
@@ -399,15 +403,15 @@ export function _writeCommands (connection: ScribePartitionConnection,
   if (!connection._db) return undefined;
   return connection._db.transaction(["commands"], "readwrite", ({ commands }) => {
     commandLog.forEach(command => {
-      if (typeof command.logIndex !== "number") {
-        throw new Error(`INTERNAL ERROR: Command is missing logIndex when trying to write ${
-            commandLog.length} commands to local cache, aborting _writeCommands`);
+      if (typeof command.aspects.log.index !== "number") {
+        throw new Error(`INTERNAL ERROR: Command is missing aspects.log.index when writing ${
+            commandLog.length} commands to local cache: aborting _writeCommands`);
       }
       const req = commands.add(_serializeEventAsJSON(command));
       req.onerror = reqEvent => {
         if (reqEvent.error.name !== "ConstraintError") throw req.error;
         const error = new Error(`Cross-tab command cache conflict`);
-        error.conflictingCommandEventId = commandLog[0].logIndex;
+        error.conflictingCommandEventId = commandLog[0].aspects.log.index;
         throw error;
       };
     });
@@ -420,7 +424,7 @@ export function _readCommands (connection: ScribePartitionConnection, options: O
   const range = connection._db.getIDBKeyRange(options);
   if (range === null) return undefined;
   return connection._db.transaction(["commands"], "readonly",
-      ({ commands }) => new Promise(_getAllShim.bind(null, commands, range)));
+      ({ commands }) => new Promise(_getAllShim.bind(null, connection, commands, range)));
 }
 
 export function _deleteCommands (connection: ScribePartitionConnection,
@@ -433,21 +437,21 @@ export function _deleteCommands (connection: ScribePartitionConnection,
       throw new Error(`Expected expectedCommandIds.length(${expectedCommandIds.length
           }) to equal range ([${eventIdBegin}, ${eventIdEnd}} === ${eventIdEnd - eventIdBegin})`);
     }
-    return new Promise(_getAllShim.bind(null, commands, range)).then(existingCommands => {
+    return new Promise(_getAllShim.bind(null, connection, commands, range)).then(storedCommands => {
       for (let i = 0; i !== expectedCommandIds.length; ++i) {
-        const existingCommandId = (existingCommands[i] || {}).commandId;
+        const existingCommandId = tryAspect(storedCommands[i], "command").id;
         if (existingCommandId === undefined) {
           connection.errorEvent(`deleteCommands: No existing command found when trying to delete #${
               eventIdBegin + i}:`, expectedCommandIds[i]);
         } else if (expectedCommandIds[i] !== existingCommandId) {
-          const error = new Error(`commandId mismatch between stored '${
-              existingCommands[i].commandId}' and expected '${expectedCommandIds[i]
-              }' commandId's for logIndex ${eventIdBegin + i}`);
+          const error = new Error(`aspects.command.id mismatch between stored '${
+              existingCommandId}' and expected '${expectedCommandIds[i]
+              }' for aspects.log.index #${eventIdBegin + i}`);
           error.conflictingCommandEventId = eventIdBegin + i;
           throw error;
         }
       }
-      return _deleteRange(commands, existingCommands);
+      return _deleteRange(commands, storedCommands);
     });
   });
   function _deleteRange (commands, deletedCommands?: Object[]) {
@@ -460,7 +464,8 @@ export function _deleteCommands (connection: ScribePartitionConnection,
 }
 
 function _serializeEventAsJSON (event) {
-  return trivialCloneWith(event, (value) => {
+  const logRoot = swapAspectRoot("event", event, "log");
+  const ret = trivialCloneWith(logRoot, (value) => {
     try {
       if ((typeof value !== "object") || (value === null)) return value;
       if (typeof value.toJSON === "function") return value.toJSON();
@@ -471,13 +476,23 @@ function _serializeEventAsJSON (event) {
           "\n\tvalue:", ...dumpObject({ value }));
     }
   });
+  swapAspectRoot("log", logRoot, "event");
+  return ret;
 }
 
-function _getAllShim (database, range: IDBKeyRange, resolve: Function, reject: Function) {
+function _getAllShim (connection: ScribePartitionConnection, database, range: IDBKeyRange,
+    resolve: Function, reject: Function) {
   let req;
   if (typeof database.getAll !== "undefined") {
     req = database.getAll(range);
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => {
+      try {
+        resolve(req.result.map(eventLogRoot => swapAspectRoot("log", eventLogRoot, "event")));
+      } catch (error) {
+        reject(connection.wrapErrorEvent(error, `getAll("${database.name}", ${range})`,
+            "\n\treq.result:", ...dumpObject(req.result)));
+      }
+    };
   } else {
     console.warn("Using openCursor because getAll is not implemented (by Edge?)");
     const result = [];
@@ -485,7 +500,7 @@ function _getAllShim (database, range: IDBKeyRange, resolve: Function, reject: F
     req.onsuccess = () => {
       const nextCursor = event.target.result;
       if (nextCursor) {
-        result.push(nextCursor.value);
+        result.push(swapAspectRoot("log", nextCursor.value, "event"));
         nextCursor.continue();
       } else {
         // complete

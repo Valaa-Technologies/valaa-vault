@@ -10,6 +10,7 @@ import { ChronicleEventResult, PartitionConnection, ProphecyChronicleRequest, Pr
     from "~/prophet/api/types";
 import extractPartitionEvent0Dot2
     from "~/prophet/tools/event-version-0.2/extractPartitionEvent0Dot2";
+import { tryAspect } from "~/prophet/tools/EventAspects";
 
 import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
 
@@ -77,8 +78,9 @@ export function _reformProphecyCommand (connection: FalseProphetPartitionConnect
   const partition = prophecy[ProphecyOperationTag]
       ._partitions[String(connection.getPartitionURI())];
   const originalCommand = partition.commandEvent;
-  connection.warnEvent(1, "\n\treforming prophecy", prophecy.commandId,
-          "command", originalCommand.logIndex, "with command", reformedCommand.logIndex,
+  connection.warnEvent(1, "\n\treforming prophecy", tryAspect(prophecy, "command").id,
+          `command #${tryAspect(originalCommand, "log").index} with command #${
+              tryAspect(reformedCommand, "log").index}`,
       "\n\toriginal command:", ...dumpObject(originalCommand),
       "\n\treformed command:", ...dumpObject(reformedCommand),
       "\n\treformed prophecy:", ...dumpObject(prophecy));
@@ -94,7 +96,7 @@ export function _reviewPurgedProphecy (connection: FalseProphetPartitionConnecti
     return undefined;
   }
   /*
-  connection.warnEvent(1, "\n\treviewed prophecy", reviewed.commandId,
+  connection.warnEvent(1, "\n\treviewed prophecy", tryAspect(reviewed, "command").id,
       "\n\tpurged prophecy:", ...dumpObject(purged),
       "\n\treviewed prophecy:", ...dumpObject(reviewed),
       "\n\tbase command:", getActionFromPassage(purged));
@@ -175,6 +177,9 @@ class ProphecyOperation extends ProphecyEventResult {
 
   getCommandOf (partitionURI) {
     return this._partitions[partitionURI].commandEvent;
+  }
+  getLogAspectFor (partitionURI) {
+    return this._partitions[partitionURI].commandEvent.aspects.log;
   }
 
   getLocalStory () {
@@ -339,9 +344,9 @@ class ProphecyOperation extends ProphecyEventResult {
         // TODO(iridian): Implement.
         // await Promise.all(this.authorityPersistProcesses);
 
-        // Maybe determine logIndex's beforehand?
+        // Maybe determine aspects.log.index's beforehand?
 
-        // Get logIndex and scribe persist finalizer for each partition
+        // Get aspects.log.index and scribe persist finalizer for each partition
         this._activePartitions = [];
         for (const partition of stage.partitions) {
           try {
@@ -382,7 +387,7 @@ class ProphecyOperation extends ProphecyEventResult {
                               ...dumpObject(received), ...dumpObject(receivedTruth));
                       });
                     }
-                    if (truth.logIndex !== partition.commandEvent.logIndex) {
+                    if (truth.aspects.log.index !== partition.commandEvent.aspects.log.index) {
                       // this partition command was/will be revised
                     }
                     partition.confirmedTruth = truth;
@@ -396,7 +401,7 @@ class ProphecyOperation extends ProphecyEventResult {
             (error, { connection, chronicling }, index) => {
               throw this._prophet.wrapErrorEvent(error,
                   new Error(`chronicleEvents.stage["${stage.name}"]._activePartitions[${index
-                      }].eventResults[${chronicling && chronicling.event.logIndex
+                      }].eventResults[${tryAspect(chronicling && chronicling.event, "log").index
                       }].getTruthEvent()"`),
                   "\n\tchroniclings:", ...dumpObject(this._activePartitions));
             }

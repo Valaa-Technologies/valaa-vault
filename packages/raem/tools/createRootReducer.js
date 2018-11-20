@@ -94,7 +94,7 @@ export default function createRootReducer ({
         const { timeStamp, type, typeName, id, passages, parentPassage, bard, ...rest } = action;
         mainLogger.logEvent(
             `Reducing @${time} ${action.type} ${minor}${
-                dumpify(action.commandId || action.id, { sliceAt: 40, sliceSuffix: "..." })}`,
+                dumpify(action.id || "", { sliceAt: 40, sliceSuffix: "..." })}`,
             `\n\t${dumpify(rest, { sliceAt: 380 })}`);
       }
       const reducer = reducerByActionType[action.type];
@@ -103,8 +103,7 @@ export default function createRootReducer ({
           `WARNING: While reducing, no reducer for action type ${action.type}, ignoring`);
       return state;
     } catch (error) {
-      throw mainLogger.wrapErrorEvent(error, `mainReduce(${action.type}, ${
-              action.commandId || action.id})`,
+      throw mainLogger.wrapErrorEvent(error, `mainReduce(${action.type}, ${action.id || ""})`,
           "\n\taction:", action,
           "\n\tthis:", this);
     }

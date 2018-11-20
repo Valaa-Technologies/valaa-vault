@@ -1,6 +1,6 @@
 // @flow
 
-import { Command, EventBase } from "~/raem/events";
+import { Action, Command, EventBase } from "~/raem/events";
 import type { Story } from "~/raem/redux/Bard";
 import type { State } from "~/raem/tools/denormalized/State";
 import ValaaURI from "~/raem/ValaaURI";
@@ -10,6 +10,7 @@ import Prophet from "~/prophet/api/Prophet";
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 import { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult }
     from "~/prophet/api/types";
+import { initializeAspects, obtainAspect } from "~/prophet/tools/EventAspects";
 
 import { dumpObject } from "~/tools";
 import valaaUUID from "~/tools/id/valaaUUID";
@@ -28,8 +29,14 @@ type FalseProphetChronicleOptions = ChronicleOptions & {
       purgedCommands: Command[], newEvents: Command[]) => Prophecy,
 };
 
-export function universalizeAction (event: EventBase): EventBase {
-  return trivialCloneWith(event, entry => (entry instanceof ValaaURI ? entry : undefined));
+export const ASPECTS_VERSION = "0.2";
+
+export function universalizeAction (action: Action): Action {
+  return trivialCloneWith(action, entry => (entry instanceof ValaaURI ? entry : undefined));
+}
+
+export function universalizeEvent (event: EventBase): EventBase {
+  return initializeAspects(universalizeAction(event), { version: ASPECTS_VERSION });
 }
 
 /**
@@ -76,8 +83,7 @@ export default class FalseProphet extends Prophet {
     this._primaryRecital = new StoryRecital(undefined, "main");
     this._onCommandCountUpdate = onCommandCountUpdate;
     this._assignCommandId = assignCommandId || (command => {
-      command.version = "0.2";
-      command.commandId = valaaUUID();
+      obtainAspect(command, "command").id = valaaUUID();
     });
     if (upstream) this.setUpstream(upstream);
   }

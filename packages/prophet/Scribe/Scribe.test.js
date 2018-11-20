@@ -11,6 +11,7 @@ import { utf8StringFromArrayBuffer } from "~/tools/textEncoding";
 
 import { openDB, getFromDB, getKeysFromDB, expectStoredInDB }
     from "~/tools/html5/InMemoryIndexedDBUtils";
+import { initializeAspects } from "../tools/EventAspects";
 
 const testAuthorityURI = "valaa-test:";
 const testPartitionURI = createPartitionURI(testAuthorityURI, "test_partition");
@@ -26,15 +27,16 @@ afterEach(async () => {
 });
 
 describe("Scribe", () => {
-  const simpleCommand = created({ logIndex: 0, id: "Some entity", typeName: "Entity" });
+  const simpleCommand = initializeAspects(created({
+    id: "Some entity", typeName: "Entity",
+  }), { version: "0.2", command: { id: "cid-0" }, log: { index: 0 } });
 
-  const followupTransaction = transacted({
-    logIndex: 1,
+  const followupTransaction = initializeAspects(transacted({
     actions: [
       created({ id: "Some relation", typeName: "Relation" }),
       created({ id: "Some other entity", typeName: "Entity" }),
     ],
-  });
+  }), { version: "0.2", command: { id: "cid-1" }, log: { index: 1 } });
 
   const simpleEntityTemplate = { typeName: "Entity", initialState: { owner: "test_partition" } };
   const simpleCommandList = [
@@ -45,9 +47,8 @@ describe("Scribe", () => {
     created({ id: "Entity E", ...simpleEntityTemplate }),
     created({ id: "Entity F", ...simpleEntityTemplate }),
   ];
-  simpleCommandList.forEach((entry, index) => {
-    entry.commandId = entry.id;
-    entry.logIndex = index;
+  simpleCommandList.forEach((event, index) => {
+    initializeAspects(event, { version: "0.2", command: { id: event.id }, log: { index } });
   });
 
   it("stores truths/commands in the database", async () => {
@@ -60,14 +61,14 @@ describe("Scribe", () => {
 
     // Adds an entity and checks that it has been stored
     let storedEvent = await connection.chronicleEvent(simpleCommand).getLocalEvent();
-    expect(storedEvent.logIndex)
+    expect(storedEvent.aspects.log.index)
         .toEqual(connection.getFirstUnusedCommandEventId() - 1);
     await expectStoredInDB(simpleCommand, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
 
     // Runs a transaction and confirms that it has been stored
     storedEvent = await connection.chronicleEvent(followupTransaction).getLocalEvent();
-    expect(storedEvent.logIndex)
+    expect(storedEvent.aspects.log.index)
         .toEqual(connection.getFirstUnusedCommandEventId() - 1);
     await expectStoredInDB(followupTransaction, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
@@ -113,11 +114,10 @@ describe("Scribe", () => {
 
     await firstConnection.chronicleEvent(simpleCommand).getLocalEvent();
 
-    const storedEvent =
-        await firstConnection.chronicleEvent(followupTransaction).getLocalEvent();
+    const storedEvent = await firstConnection.chronicleEvent(followupTransaction).getLocalEvent();
 
     const firstUnusedCommandEventId = firstConnection.getFirstUnusedCommandEventId();
-    expect(firstUnusedCommandEventId).toEqual(storedEvent.logIndex + 1);
+    expect(firstUnusedCommandEventId).toEqual(storedEvent.aspects.log.index + 1);
     expect(firstUnusedCommandEventId).toBeGreaterThan(1);
     firstConnection.disconnect();
 
@@ -137,7 +137,7 @@ describe("Scribe", () => {
 
     for (const command of simpleCommandList) {
       const storedEvent = await connection.chronicleEvent(command).getLocalEvent();
-      expect(storedEvent.logIndex)
+      expect(storedEvent.aspects.log.index)
           .toEqual(newUnusedCommandId);
 
       oldUnusedCommandId = newUnusedCommandId;
@@ -155,10 +155,10 @@ describe("Scribe", () => {
 
     const chronicling = connection.chronicleEvents(simpleCommandList);
     const lastLocal = await chronicling.eventResults[simpleCommandList.length - 1].getLocalEvent();
-    expect(lastLocal.logIndex + 1)
+    expect(lastLocal.aspects.log.index + 1)
         .toEqual(connection.getFirstUnusedCommandEventId());
     const lastTruth = await chronicling.eventResults[simpleCommandList.length - 1].getTruthEvent();
-    expect(lastTruth.logIndex + 1)
+    expect(lastTruth.aspects.log.index + 1)
         .toEqual(connection.getFirstUnusedTruthEventId());
   });
 });

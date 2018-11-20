@@ -1,14 +1,15 @@
 // @flow
 
 import type { Story } from "~/raem/redux/Bard";
+import { tryAspect } from "~/prophet/tools/EventAspects";
 
 /**
  * A recital is an ordered list of Story objects.
  * It is an intrusive linked ring structure of Story objects with
  * sentinel as one-before-first and one-past-last link.
  *
- * It also maintains a lookup structure from story commandId to
- * individual link Story objects.
+ * It also maintains a lookup structure from story aspects.command.id
+ * to individual link Story objects.
  *
  * @export
  * @class StoryRecital
@@ -68,9 +69,8 @@ export default class StoryRecital {
     before.prev = lastStory;
     before.prev.next = before;
     for (let story = storyChain; story !== before; story = story.next) {
-      if (story.commandId) {
-        this._storyByCommandId[story.commandId] = story;
-      }
+      const commandId = tryAspect(story, "command").id;
+      if (commandId) this._storyByCommandId[commandId] = story;
     }
   }
 
@@ -87,7 +87,8 @@ export default class StoryRecital {
     firstStory.prev = lastStory;
     lastStory.next = null;
     for (let story = firstStory; story; story = story.next) {
-      if (story.commandId) delete this._storyByCommandId[story.commandId];
+      const commandId = tryAspect(story, "command").id;
+      if (commandId) delete this._storyByCommandId[commandId];
     }
     return allBefore;
   }
@@ -95,7 +96,7 @@ export default class StoryRecital {
   dumpStatus () {
     const ids = [];
     for (let c = this.next; c !== this; c = c.next) {
-      ids.push(c.id || c.commandId);
+      ids.push(c.id || (((c.aspects || {}).command || {}).id));
     }
     return [
       "\n\tpending:", Object.keys(this._storyByCommandId).length,

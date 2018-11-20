@@ -4,10 +4,11 @@ import { Command, EventBase } from "~/raem/events";
 import { getActionFromPassage, Story } from "~/raem/redux/Bard";
 
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
+import { initializeAspects } from "~/prophet/tools/EventAspects";
 
 import { dumpObject, outputError } from "~/tools";
 
-import FalseProphet from "./FalseProphet";
+import FalseProphet, { ASPECTS_VERSION } from "./FalseProphet";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 import { Prophecy, _confirmProphecyCommand, _reformProphecyCommand, _rejectHereticProphecy }
     from "./_prophecyOps";
@@ -16,6 +17,7 @@ import StoryRecital from "./StoryRecital";
 export function _composeStoryFromEvent (falseProphet: FalseProphet, event: EventBase,
     dispatchDescription: string, timed: ?EventBase, transactionInfo?: TransactionInfo) {
   const previousState = falseProphet.getState();
+  if (!event.aspects) initializeAspects(event, { version: ASPECTS_VERSION });
   let story = (transactionInfo && transactionInfo._tryFastForwardOnCorpus(falseProphet.corpus));
   if (!story) {
     // If no transaction or transaction is not a fast-forward, do a regular dispatch
@@ -30,17 +32,18 @@ export function _composeStoryFromEvent (falseProphet: FalseProphet, event: Event
   story.previousState = previousState;
   if (dispatchDescription.slice(0, 8) === "prophecy") story.isProphecy = true;
   if (dispatchDescription === "receiveTruth") story.isTruth = true;
-  // story.id = story.commandId; TODO(iridian): what was this?
+  // story.id = story.aspects.command.id; TODO(iridian): what was this?
   falseProphet._primaryRecital.addStory(story);
   // console.log("Added dispatched event:", event, story, { state: story.state.toJS() });
   return story;
 }
 
 export function _rejectLastProphecyAsHeresy (falseProphet: FalseProphet, hereticClaim: EventBase) {
-  if (falseProphet._primaryRecital.getLast().commandId !== hereticClaim.commandId) {
-    throw new Error(`_rejectLastProphecyAsHeresy.hereticClaim.commandId (${hereticClaim.commandId
-        }) does not match latest story.commandId (${
-          falseProphet._primaryRecital.getLast().commandId})`);
+  if (falseProphet._primaryRecital.getLast().aspects.command.id
+      !== hereticClaim.aspects.command.id) {
+    throw new Error(`_rejectLastProphecyAsHeresy.hereticClaim.aspects.command.id ('${
+        hereticClaim.aspects.command.id}') does not that of the latest story ('${
+        falseProphet._primaryRecital.getLast().aspects.command.id}')`);
   }
   const hereticProphecy = falseProphet._primaryRecital.getLast();
   falseProphet._primaryRecital.removeStory(hereticProphecy);
@@ -51,13 +54,13 @@ export function _confirmCommands (connection: FalseProphetPartitionConnection,
     confirmedCommands: Command[]) {
   const falseProphet = connection.getProphet();
   for (const confirmed of confirmedCommands) {
-    const story = falseProphet._primaryRecital.getStoryBy(confirmed.commandId);
+    const story = falseProphet._primaryRecital.getStoryBy(confirmed.aspects.command.id);
     if (story) {
       if (!story.isProphecy) story.isTruth = true;
       else _confirmProphecyCommand(connection, story, confirmed);
     } else {
-      connection.warnEvent(`_confirmCommands encountered a command with id '${confirmed.commandId
-          }' with no corresponding story, with:`,
+      connection.warnEvent(`_confirmCommands encountered a command '${
+              confirmed.aspects.command.id}' with no corresponding story, with:`,
           "\n\tconfirmed command:", ...dumpObject(confirmed),
           "\n\tconfirmed commands:", ...dumpObject(confirmedCommands),
           "\n\tprimary recital:", ...dumpObject(falseProphet._primaryRecital));
@@ -89,7 +92,8 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
     // to dispatching new events.
     for (; !reformingPurgedProphecy && (newEventIndex !== newEvents.length); ++newEventIndex) {
       const newEvent = newEvents[newEventIndex];
-      reformingPurgedProphecy = purgedRecital && purgedRecital.getStoryBy(newEvent.commandId);
+      reformingPurgedProphecy = purgedRecital
+          && purgedRecital.getStoryBy(newEvent.aspects.command.id);
       if (!reformingPurgedProphecy) {
         newAndRewrittenStories.push(falseProphet._composeStoryFromEvent(newEvent, type));
       }
@@ -182,7 +186,7 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
 function _beginPurge (falseProphet: FalseProphet, purgedCommands: Command[]): Story {
   let firstPurgedProphecy;
   for (const purgedCommand of purgedCommands) {
-    const purged = falseProphet._primaryRecital.getStoryBy(purgedCommand.commandId);
+    const purged = falseProphet._primaryRecital.getStoryBy(purgedCommand.aspects.command.id);
     if (!purged) continue;
     if (!firstPurgedProphecy) firstPurgedProphecy = purged;
     purged.needsReview = true;
@@ -193,7 +197,7 @@ function _beginPurge (falseProphet: FalseProphet, purgedCommands: Command[]): St
   falseProphet.recreateCorpus(purgedState);
   falseProphet._followers.forEach(discourse =>
       discourse.rejectHeresy(firstPurgedProphecy, purgedState, []));
-  return new StoryRecital(firstPurgedProphecy, `purge-${firstPurgedProphecy.commandId}`);
+  return new StoryRecital(firstPurgedProphecy, `purge-${firstPurgedProphecy.aspects.command.id}`);
 }
 
 export function _recomposeStoryFromPurgedEvent (falseProphet: FalseProphet, purged: Prophecy) {
@@ -209,9 +213,9 @@ export function _recomposeStoryFromPurgedEvent (falseProphet: FalseProphet, purg
             : "prophecy-schism-revise");
   } catch (error) {
     const wrappedError = falseProphet.wrapErrorEvent(error, purged.needsReview
-            ? new Error(`_recomposeStoryFromPurgedEvent.review.dispatch(${purged.commandId
+            ? new Error(`_recomposeStoryFromPurgedEvent.review.dispatch(${purged.aspects.command.id
                 }) structural schism: failed to reduce the purged command against fresh corpus`)
-            : new Error(`_recomposeStoryFromPurgedEvent.repeat.dispatch(${purged.commandId
+            : new Error(`_recomposeStoryFromPurgedEvent.repeat.dispatch(${purged.aspects.command.id
                 }) INTERNAL ERROR: non-purged event repeat dispatch shouldn't cause errors`),
         "\n\tpurgedEvent:", ...dumpObject(purgedEvent),
         "\n\tpurgedProphecy:", ...dumpObject(purged));

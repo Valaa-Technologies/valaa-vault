@@ -8,8 +8,6 @@ import { createPartitionURI } from "~/raem/ValaaURI";
 import createRootReducer from "~/raem/tools/createRootReducer";
 import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent";
 import createProcessCommandIdMiddleware from "~/raem/redux/middleware/processCommandId";
-import createProcessCommandVersionMiddleware from
-    "~/raem/redux/middleware/processCommandVersion";
 import { createBardMiddleware } from "~/raem/redux/Bard";
 import Corpus from "~/raem/Corpus";
 
@@ -243,9 +241,9 @@ export default class InspireGateway extends LogEventGenerator {
     // FIXME(iridian): Create the deterministic-id schema. Now random.
     // const previousId = valaaUUID();
     const middlewares = [
-      createProcessCommandVersionMiddleware(EVENT_VERSION),
+      _createProcessCommandVersionMiddleware(EVENT_VERSION),
       createProcessCommandIdMiddleware(undefined /* previousId */, schema),
-      createValidateEventMiddleware(validators, EVENT_VERSION),
+      createValidateEventMiddleware(validators, EVENT_VERSION, EVENT_VERSION),
       createBardMiddleware(),
     ];
 
@@ -258,6 +256,18 @@ export default class InspireGateway extends LogEventGenerator {
       ...await gatewayRevelation.corpus,
     };
     return new Corpus(corpusOptions);
+
+    function _createProcessCommandVersionMiddleware (version) {
+      // Naive versioning which accepts versions given in or uses the supplied version as default
+      return (/* store */) => next => (command, ...rest: any[]) => {
+        const aspects = command.aspects || (command.aspects = { event: command });
+        if (!aspects.version) aspects.version = version;
+        else if (aspects.version !== version) {
+          throw new Error(`Invalid command version '${aspects.version}', expected '${version}'`);
+        }
+        return next(command, ...rest);
+      };
+    }
   }
 
   async _proselytizeFalseProphet (gatewayRevelation: Object, corpus: Corpus, upstream: Prophet):
@@ -377,8 +387,8 @@ export default class InspireGateway extends LogEventGenerator {
           partitionURI,
           isNewPartition: false,
           info: {
-            lastCommandIndex: -1, lastTruthIndex: -1,
-            logs: { commandQueue: [], eventLog: [] },
+            commandCount: 0, truthCount: 0,
+            logs: { commandQueue: [], truthLog: [] },
           },
         });
       }
@@ -395,7 +405,7 @@ export default class InspireGateway extends LogEventGenerator {
   }
 
   _connectChronicleAndNarratePrologue = async ({ partitionURI, info }: any) => {
-    if ((await info.commandId) >= 0) {
+    if ((await info.commandId) >= 0 || ((await info.commandCount) > 0)) {
       throw new Error("Command queues in revelation are not supported yet");
     }
     // Acquire connection without remote narration to determine the current last authorized event
@@ -405,6 +415,7 @@ export default class InspireGateway extends LogEventGenerator {
         .getSyncedConnection();
     let prologueTruthCount = await info.truthCount;
     if (!Number.isInteger(prologueTruthCount)) {
+      // Migration code for eventId deprecation.
       const lastEventId = await info.eventId;
       prologueTruthCount = lastEventId !== undefined ? lastEventId + 1 : 0;
     }
@@ -415,13 +426,18 @@ export default class InspireGateway extends LogEventGenerator {
       // loading them up to this point.
       await (this.bvobInfos || (this.bvobInfos = this._getBvobInfos()));
       const logs = await info.logs;
-      const eventLog = await logs.eventLog;
+      let truthLog = await logs.truthLog;
+      if (!truthLog || !truthLog.length) {
+        // Migration code for eventLog deprecation.
+        const eventLog = await logs.eventLog;
+        if (eventLog && eventLog.length) truthLog = eventLog;
+      }
       const commandQueue = await logs.commandQueue;
       if (commandQueue && commandQueue.length) {
         throw new Error("commandQueue revelation not implemented yet");
       }
       const latestMediaInfos = await logs.latestMediaInfos;
-      const upgradedEventLog = eventLog.map(event => upgradeEventTo0Dot2(connection, event));
+      const upgradedEventLog = truthLog.map(event => upgradeEventTo0Dot2(connection, event));
       const chronicling = connection.chronicleEvents(upgradedEventLog, {
         name: `prologue truths for '${connection.getName()}'`,
         isTruth: true,

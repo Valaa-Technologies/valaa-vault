@@ -91,8 +91,8 @@ async function _narrateLocalLogs (connection: ScribePartitionConnection,
     })) || [];
     const commandIdBegin = connection._commandQueueInfo.eventIdBegin;
     commands.forEach(command => {
-      connection._commandQueueInfo.commandIds[command.logIndex - commandIdBegin]
-          = command.commandId;
+      connection._commandQueueInfo.commandIds[command.aspects.log.index - commandIdBegin]
+          = command.aspects.command.id;
     });
     ret.scribeCommandQueue = !commands.length ? commands
         : await Promise.all(await receiveCommands(commands, retrieveMediaBuffer));
@@ -236,14 +236,15 @@ export function _receiveEvents (
   const newActions = [];
   const receivedActions = events.map((action, index) => {
     // FIXME(iridian): If type === "receiveCommands" perform command eviction on unordered commands
-    if (typeof action.logIndex !== "number") {
-      throw new Error(`Expected logIndex to be a number for received event #${index}, got: ${
-          typeof action.logIndex}`);
+    const logIndex = action.aspects.log.index;
+    if (typeof logIndex !== "number") {
+      throw new Error(`Expected aspects.log.index to be a number for received event #${
+          index}, got: ${typeof logIndex} instead`);
     }
-    if (action.logIndex < actionIdLowerBound) return null;
-    if (action.logIndex > actionIdLowerBound) {
-      throw new Error(`Expected logIndex to be the first free log index (${
-          actionIdLowerBound}) for received event #${index}, got: ${action.logIndex}`);
+    if (logIndex < actionIdLowerBound) return null;
+    if (logIndex > actionIdLowerBound) {
+      throw new Error(`Expected aspects.log.index to be the first free log index (${
+          actionIdLowerBound}) for received event #${index}, got: ${logIndex} instead`);
     }
     ++actionIdLowerBound;
     _determineEventPreOps(connection, action).forEach(({ mediaEntry }) => {
@@ -283,14 +284,14 @@ export function _receiveEvents (
     connection._commandQueueInfo.eventIdEnd += newActions.length;
     writeProcess = persist
         && Promise.all(connection._commandQueueInfo.writeQueue.push(...newActions));
-    newActions.forEach(action => connection._commandQueueInfo.commandIds.push(action.commandId));
+    newActions.forEach(action =>
+        connection._commandQueueInfo.commandIds.push(action.aspects.command.id));
     connection._triggerCommandQueueWrites();
   } else {
     const lastTruth = newActions[newActions.length - 1];
-    connection._truthLogInfo.eventIdEnd = lastTruth.logIndex + 1;
-    writeProcess = persist
-        && Promise.all(connection._truthLogInfo.writeQueue.push(...newActions));
-    connection._triggerTruthLogWrites(lastTruth.commandId);
+    connection._truthLogInfo.eventIdEnd = lastTruth.aspects.log.index + 1;
+    writeProcess = persist && Promise.all(connection._truthLogInfo.writeQueue.push(...newActions));
+    connection._triggerTruthLogWrites(lastTruth.aspects.command.id);
   }
 
   const newActionIndex = receivedActions.length - newActions.length;

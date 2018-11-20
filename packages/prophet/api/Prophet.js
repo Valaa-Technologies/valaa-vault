@@ -88,25 +88,33 @@ export default class Prophet extends LogEventGenerator {
   /**
    * Returns a connection to partition identified by given partitionURI.
    *
-   * The returned connection might be shared between other users and implements internal reference
-   * counting; it is acquired once as part of this call. The connection must be manually released
-   * with removeReference or otherwise the connection resources will be left open.
+   * The returned connection might be shared between other users and
+   * implements internal reference counting; it is acquired once as
+   * part of this call. The connection must be manually released
+   * with removeReference or otherwise the connection resources will be
+   * left open.
    *
-   * The connection is considered acquired and the promise is resolved after a lazy greedy
-   * "first narration" is complete. Lazy means that only the single closest source which
-   * can provide events is consulted. Greedy means that all events from that source are retrieved.
+   * The connection is considered acquired and the promise is resolved
+   * after a lazy greedy "first narration" is complete. Lazy means that
+   * only the single closest source which can provide events is
+   * consulted. Greedy means that all events from that source are
+   * retrieved.
    *
-   * The design principle behind this is that no non-authoritative event log cache shalle have
-   * functionally incomplete event logs, even if event log might be outdated in itself.
+   * The design principle behind this is that no non-authoritative
+   * event log cache shall have functionally incomplete event logs,
+   * even if event log might be outdated in itself.
    *
-   * More specifically in inspire context the first source resulting in non-zero events is chosen:
-   * 1. all events of the optional explicit initialNarrateOptions.eventLog option and
-   *    the latest previously seen full narration of this partition in the Scribe (deduplicated)
-   * 2. all events in the most recent authorized snapshot known by the remote authority connection
+   * More specifically in inspire context the first source resulting in
+   * non-zero events is chosen:
+   * 1. all events of the latest previously seen full narration of this
+   *    partition in the Scribe
+   * 2. all events in the most recent authorized snapshot known by the
+   *    remote authority connection
    * 3. all events in the remote authorize event log itself
    *
-   * Irrespective of where the first narration is sourced, an authorized full narration is
-   * initiated against the remote authority if available.
+   * Irrespective of where the first narration is sourced, an
+   * authorized full narration is initiated against the remote
+   * authority if available.
    *
    * @param {ValaaURI} partitionURI
    * @returns {PartitionConnection}

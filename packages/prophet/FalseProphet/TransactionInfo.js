@@ -10,7 +10,7 @@ import type { Transaction } from "~/prophet/api/Transaction";
 
 import { dumpObject, invariantify } from "~/tools";
 
-import { universalizeAction } from "./FalseProphet";
+import { universalizeEvent, universalizeAction } from "./FalseProphet";
 
 let transactionCounter = 0;
 
@@ -22,7 +22,7 @@ export default class TransactionInfo {
     // actions is set to null when the transaction has been committed.
     this.actions = [];
     this.passages = [];
-    this.transacted = transacted({ actions: [] });
+    this.transacted = universalizeEvent(transacted({ actions: [] }));
     transaction._prophet._assignCommandId(this.transacted, transaction);
     this.universalPartitions = {};
     this.customCommand = customCommand;
@@ -119,7 +119,7 @@ export default class TransactionInfo {
           ? this.transacted
           : this.customCommand(this.transacted);
       if (!this.customCommand && !this._finalCommand.actions.length) {
-        command = universalizeAction(this._finalCommand);
+        command = universalizeEvent(this._finalCommand);
         (command.local || (command.local = {})).partitions = {};
         return {
           event: this._finalCommand, story: command, getPremiereStory () { return command; },

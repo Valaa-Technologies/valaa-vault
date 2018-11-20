@@ -1,6 +1,7 @@
 import wrapError from "~/tools/wrapError";
 
-export default function createValidateEventMiddleware (validators, fixedVersion?: string) {
+export default function createValidateEventMiddleware (validators, defaultVersion: string,
+    fixedVersion?: string) {
   const actionValidatorsByVersion = Object.entries(validators).reduce((acc, [version, byType]) => {
     // TODO(iridian): Add semver support for version restriction?
     if (!fixedVersion || (fixedVersion === version)) {
@@ -26,9 +27,12 @@ export default function createValidateEventMiddleware (validators, fixedVersion?
     }
   }, {});
   return (/* store */) => next => (event, ...rest: any[]) => {
-    const versionValidator = actionValidatorsByVersion[event.version];
+    // kludge: raem shouldn't know about aspects, but then again, shouldn't know about versions
+    // either.
+    const version = (event.aspects && event.aspects.version) || event.version || defaultVersion;
+    const versionValidator = actionValidatorsByVersion[version];
     if (!versionValidator) {
-      throw new Error(`Could not find event validator for version ${event.version}`)
+      throw new Error(`Could not find event validator for version ${version}`);
     }
     return next(versionValidator(event), ...rest);
   };

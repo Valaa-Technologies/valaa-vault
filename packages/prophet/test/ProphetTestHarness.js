@@ -13,6 +13,7 @@ import ScriptTestHarness, { createScriptTestHarness } from "~/script/test/Script
 import {
   AuthorityNexus, FalseProphet, FalseProphetDiscourse, Oracle, Prophet, Scribe, Follower,
 } from "~/prophet";
+import { obtainAspect } from "~/prophet/tools/EventAspects";
 
 import ProphetTestAPI from "~/prophet/test/ProphetTestAPI";
 import createValaaTestScheme, { MockProphet } from "~/prophet/test/scheme-valaa-test";
@@ -20,7 +21,7 @@ import createValaaLocalScheme from "~/prophet/schemeModules/valaa-local";
 import createValaaMemoryScheme from "~/prophet/schemeModules/valaa-memory";
 import createValaaTransientScheme from "~/prophet/schemeModules/valaa-transient";
 
-import { universalizeAction } from "~/prophet/FalseProphet/FalseProphet";
+import { universalizeEvent } from "~/prophet/FalseProphet/FalseProphet";
 
 import * as ValaaScriptDecoders from "~/script/mediaDecoders";
 import * as ToolsDecoders from "~/tools/mediaDecoders";
@@ -120,9 +121,8 @@ export default class ProphetTestHarness extends ScriptTestHarness {
 
   chronicleEvents (events: EventBase[], ...rest: any) {
     return this.prophet.chronicleEvents(events.map(event => {
-      const ret = universalizeAction(event);
-      ret.version = "0.2";
-      ret.commandId = `cid-${this.nextCommandIdIndex++}`;
+      const ret = universalizeEvent(event);
+      obtainAspect(ret, "command").id = `cid-${this.nextCommandIdIndex++}`;
       return ret;
     }), ...rest);
   }

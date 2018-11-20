@@ -100,7 +100,7 @@
 import resourceCreated, * as c from "./created";
 import resourceDestroyed, * as d from "./destroyed";
 import resourceDuplicated, * as dup from "./duplicated";
-import resourceModified, * as m from "./modified";
+import * as m from "./modified";
 import resourceFrozen, * as f from "./frozen";
 import resourceRecombined, * as r from "./recombined";
 import resourceTimed, * as td from "./timed";
@@ -125,7 +125,6 @@ export const TIMED = td.TIMED;
 export const TRANSACTED = t.TRANSACTED;
 export const created = resourceCreated;
 export const destroyed = resourceDestroyed;
-export const modified = resourceModified;
 export const duplicated = resourceDuplicated;
 export const frozen = resourceFrozen;
 export const recombined = resourceRecombined;

@@ -87,16 +87,17 @@ export default class PartitionConnection extends Follower {
 
 
   /**
-   * Asynchronous operation which activates the connection to the Scribe and loads its metadatas,
-   * initiates the authority connection and narrates any requested events before finalizing.
+   * Asynchronous operation which activates the connection to the
+   * upstream loads its metadatas, initiates the authority connection
+   * and narrates any requested events before finalizing.
    *
    * The initial narration looks for the requested events in following order:
-   * 1. options.eventLog
-   * 2. scribe in-memory and IndexedDB caches
-   * 3. authority connection.narrateEventLog (only if options.eventIdEnd is given)
+   * 1. scribe in-memory and IndexedDB caches
+   * 2. authority connection.narrateEventLog (only if options.eventIdEnd is given)
    *
-   * If eventIdEnd is not specified, all the explicit eventLog and locally cached events (both
-   * truths and queued commands starting from the optional eventIdBegin) are narrated.
+   * If eventIdEnd is not specified, all the locally cached events
+   * (both truths and queued commands starting from the optional
+   * eventIdBegin) are narrated.
    *
    *
    * @param {ConnectOptions} options

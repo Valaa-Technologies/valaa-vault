@@ -56,7 +56,7 @@ export class ChronicleEventResult {
 
   event: EventBase; // Preliminary event after universalization
 
-  // Get a fully universalized event (complete with logIndex if appropriate).
+  // Get a fully universalized event (complete with aspects.log.index if appropriate).
   getUniversalEvent (): EventBase {
     return this.getPersistedEvent();
   }

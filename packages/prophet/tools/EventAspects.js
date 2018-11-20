@@ -1,5 +1,10 @@
 // @flow
 
+import { EventBase } from "~/raem/events";
+import type HashV240 from "~/prophet/tools/hashV240";
+
+import { invariantifyNumber, invariantifyString } from "~/tools/invariantify";
+
 // Event Aspects
 
 // Event aspects provides shared types and idioms for conveniently but
@@ -19,14 +24,14 @@
 // 1. reducers inside Corpus promote Event aspect as the root, so that
 //    root.type, root.actions etc. are directly available.
 // 2. IndexedDB storage promotes Log aspect as the root so that
-//    root.logIndex can be used the key and root.timeStamp is directly
+//    root.index can be used the key and root.timeStamp is directly
 //    visible available for manual debugging.
 // 3. An authority plugin network serializer might promote Buffer
 //    aspect as the root to facilitate performant serialization.
 // 4. etc.
 //
-// In contexts where root is still a javascript/JSON object the other
-// aspects are accessible like so: `root.aspect.log.logIndex`.
+// Irrespective of which aspect is currently the root all the other
+// aspects are generally accessible like so: `root.aspect.log.index`.
 //
 // As a general principle when a message is sent forward in the streams
 // the ownership of the message object is also transferred also. This
@@ -40,9 +45,6 @@
 // delete root.aspects; // The 'aspects' must be only available from the current root.
 // ```
 
-import { EventBase } from "~raem/events";
-import type HashV240 from "~prophet/tools/hashV240";
-
 export default class EventAspects {
   version: string;
 
@@ -53,18 +55,41 @@ export default class EventAspects {
   buffer: ?BufferAspect;
 }
 
-export function addToAspect (root: Object, targetAspectName: string, newAspectProperties) {
-  const aspects = root.aspects || (root.aspects = new EventAspects());
-  const existingAspect = aspects[targetAspectName];
-  if (existingAspect) Object.assign(existingAspect, newAspectProperties);
-  else aspects[targetAspectName] = newAspectProperties;
+export function initializeAspects (root, newAspects = {}) {
+  if (root.aspects) Object.assign(root.aspects, newAspects)
+  else root.aspects = newAspects;
+  return root;
 }
 
-export function promoteAspect (root: Object, newRootAspectName: string) {
-  const aspects = root.aspects;
-  delete root.aspects;
-  aspects[newRootAspectName].aspects = aspects;
-  return aspects[newRootAspectName];
+export function obtainAspect (root: Object, aspectName: string) {
+  if (!root.aspects) throw new Error("root.aspects missing");
+  const aspects = root.aspects || (root.aspects = new EventAspects());
+  const existingAspect = aspects[aspectName];
+  if (existingAspect) return existingAspect;
+  return (aspects[aspectName] = {});
+}
+
+const emptyAspect = Object.freeze({});
+
+export function getAspect (root, aspectName) {
+  const ret = (root && root.aspects && root.aspects[aspectName]);
+  if (ret) return ret;
+  throw new Error(`No aspect '${aspectName}' found from event root`);
+}
+
+export function tryAspect (root, aspectName) {
+  return (root && root.aspects && root.aspects[aspectName]) || emptyAspect;
+}
+
+export function swapAspectRoot (currentRootAspectName: string, currentRoot: Object,
+    newRootAspectName: string) {
+  const aspects = currentRoot.aspects;
+  delete currentRoot.aspects;
+  aspects[currentRootAspectName] = currentRoot;
+  const newRoot = aspects[newRootAspectName];
+  delete aspects[newRootAspectName];
+  newRoot.aspects = aspects;
+  return newRoot;
 }
 
 class BufferAspect {
@@ -106,7 +131,7 @@ class CommandAspect {
   eventHash: ?HashV240;
 
   // map of all other partitions and their particular event hashes
-  // of a multi-partition command with the same commandId.
+  // of a multi-partition command with the same aspects.command.id.
   // Required for multi-partition events.
   partitions: ?{ [partitionURI: string]: HashV240 };
 
@@ -116,7 +141,7 @@ class CommandAspect {
 
 class LogAspect {
   // Index of the command in the event log.
-  logIndex: number;
+  index: number;
 
   // Unix epoch milliseconds as an integer.
   timeStamp: number;

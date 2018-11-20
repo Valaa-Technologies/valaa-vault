@@ -36,9 +36,9 @@ export class ReplacedWithin extends Modified {
   type: "REPLACED_WITHIN";
 }
 
-export function validateModifiedBase (expectedType: string, action: Action, type: string,
-    local: ?Object, id: string | ValaaReference, typeName: string, unrecognized: Object): Modified {
-  validateActionBase(expectedType, action, type, local, unrecognized);
+function _validateModifiedBase (expectedType: string, action: Action,
+    id: string | ValaaReference, typeName: string, rest: Object): Modified {
+  validateActionBase(expectedType, action, rest);
 
   invariantifyId(id, `${expectedType}.id`, {});
   invariantifyTypeName(typeName, `${expectedType}.typeName`, {});
@@ -55,8 +55,8 @@ export function fieldsSet (action: Action): FieldsSet {
 }
 
 export function validateFieldsSet (action: Action): FieldsSet {
-  const { type, local, id, typeName, sets, ...unrecognized } = action;
-  validateModifiedBase(FIELDS_SET, action, type, local, id, typeName, unrecognized);
+  const { id, typeName, sets, ...rest } = action;
+  _validateModifiedBase(FIELDS_SET, action, id, typeName, rest);
 
   invariantifyObject(sets, "FIELDS_SET.sets", {
     elementInvariant: (value, key) => key && (typeof key === "string"),
@@ -83,8 +83,8 @@ export function addedTo (action: Action): AddedTo {
 }
 
 export function validateAddedTo (action: Action): AddedTo {
-  const { type, local, id, typeName, adds, ...unrecognized } = action;
-  validateModifiedBase(ADDED_TO, action, type, local, id, typeName, unrecognized);
+  const { id, typeName, adds, ...rest } = action;
+  _validateModifiedBase(ADDED_TO, action, id, typeName, rest);
 
   invariantifyObject(adds, `ADDED_TO.adds`, {
     elementInvariant: (value, key) => key
@@ -108,8 +108,8 @@ export function removedFrom (action: Action): RemovedFrom {
 }
 
 export function validateRemovedFrom (action: Action): RemovedFrom {
-  const { type, local, id, typeName, removes, ...unrecognized } = action;
-  validateModifiedBase(REMOVED_FROM, action, type, local, id, typeName, unrecognized);
+  const { id, typeName, removes, ...rest } = action;
+  _validateModifiedBase(REMOVED_FROM, action, id, typeName, rest);
 
   invariantifyObject(removes, `REMOVED_FROM.removes`, {
     elementInvariant: (value, key) => key
@@ -135,8 +135,8 @@ export function replacedWithin (action: Action): ReplacedWithin {
 }
 
 export function validateReplacedWithin (action: Action): ReplacedWithin {
-  const { type, local, id, typeName, removes, adds, ...unrecognized } = action;
-  validateModifiedBase(REPLACED_WITHIN, action, type, local, id, typeName, unrecognized);
+  const { id, typeName, removes, adds, ...rest } = action;
+  _validateModifiedBase(REPLACED_WITHIN, action, id, typeName, rest);
 
   invariantifyObject(removes, `REPLACED_WITHIN.removes`, {
     elementInvariant: (value, key) => key

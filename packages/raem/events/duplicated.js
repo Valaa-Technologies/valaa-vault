@@ -22,9 +22,9 @@ export default function duplicated (action: Action): Duplicated {
 }
 
 export function validateDuplicated (action: Action): Duplicated {
-  const { type, local, id, duplicateOf, preOverrides, initialState, ...unrecognized } = action;
+  const { id, duplicateOf, preOverrides, initialState, ...rest } = action;
 
-  validateActionBase(DUPLICATED, action, type, local, unrecognized);
+  validateActionBase(DUPLICATED, action, rest);
 
   invariantifyId(id, "DUPLICATED.id", { allowUndefined: true, allowNull: true });
   invariantifyId(duplicateOf, "DUPLICATED.duplicateOf", {});

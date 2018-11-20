@@ -17,9 +17,9 @@ export default function destroyed (action: Action): Destroyed {
 }
 
 export function validateDestroyed (action: Action): Destroyed {
-  const { type, local, id, ...unrecognized }: Destroyed = action;
+  const { id, ...rest }: Destroyed = action;
 
-  validateActionBase(DESTROYED, action, type, local, unrecognized);
+  validateActionBase(DESTROYED, action, rest);
 
   invariantifyId(id, "DESTROYED.id", {}, "\n\taction:", action);
   return action;

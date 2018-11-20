@@ -21,9 +21,9 @@ export default function created (action: Action): Created {
 }
 
 export function validateCreated (action: Action): Created {
-  const { type, local, id, typeName, initialState, ...unrecognized }: Created = action;
+  const { id, typeName, initialState, ...rest }: Created = action;
 
-  validateActionBase(CREATED, action, type, local, unrecognized);
+  validateActionBase(CREATED, action, rest);
 
   invariantifyId(id, "CREATED.id", { allowUndefined: true }, "\n\taction:", action);
   invariantifyTypeName(typeName, "CREATED.typeName", {}, "\n\taction:", action);

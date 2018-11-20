@@ -15,7 +15,7 @@ export default function frozen (action: Action): Frozen {
 }
 
 export function validateFrozen (action: Action, validateAction: ?Function): Frozen {
-  const { type, local, actions, frozenPartitions, ...unrecognized } = action;
-  validateActionCollectionBase(FROZEN, action, type, local, actions, unrecognized, validateAction);
+  const { actions, frozenPartitions, ...rest } = action;
+  validateActionCollectionBase(FROZEN, action, actions, rest, validateAction);
   return action;
 }

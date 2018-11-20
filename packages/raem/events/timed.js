@@ -59,13 +59,10 @@ export default function timed (action: Action): Timed {
 
 export function validateTimed (action: Action, validateAction: ?Function): Timed {
   const {
-    type, local, actions,
-    time, startTime, interpolation, extrapolation,
-    ...unrecognized
+    actions, time, startTime, interpolation, extrapolation, ...rest
   } = action;
 
-  validateActionCollectionBase(TIMED, action, type, local, actions, unrecognized,
-      validateAction);
+  validateActionCollectionBase(TIMED, action, actions, rest, validateAction);
 
   invariantifyNumber(time, "TIMED.startTime",
       { allowUndefined: true }, "\n\taction:", action);

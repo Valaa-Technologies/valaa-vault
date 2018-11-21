@@ -1,7 +1,7 @@
 // @flow
 
 export default function trivialClone (value: any) {
-  return trivialCloneWith(value: any);
+  return trivialCloneWith(value);
 }
 
 /**

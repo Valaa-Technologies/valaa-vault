@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.33.0-prerelease.1](https://github.com/valaatech/vault/compare/v0.33.0-prerelease.0...v0.33.0-prerelease.1) (2018-11-21)
+
+
+### Bug Fixes
+
+* **toolset-vault:** Fix couple minor release-vault bugs ([b435ba7](https://github.com/valaatech/vault/commit/b435ba7))
+
+
+### Features
+
+* **toolset-vault:** Add release-vault --prerelease and advance support ([adf632f](https://github.com/valaatech/vault/commit/adf632f))
+
+
+
+
+
 <a name="0.33.0-prerelease.0"></a>
 # [0.33.0-prerelease.0](https://github.com/valaatech/vault/compare/v0.32.0...v0.33.0-prerelease.0) (2018-09-21)
 

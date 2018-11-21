@@ -469,7 +469,7 @@ function _serializeEventAsJSON (event) {
     try {
       if ((typeof value !== "object") || (value === null)) return value;
       if (typeof value.toJSON === "function") return value.toJSON();
-      if ((value instanceof ValaaURI) || (value instanceof URL)) return value.toString();
+      if ((value instanceof ValaaURI) || (inBrowser() && value instanceof URL)) return value.toString();
       return undefined;
     } catch (error) {
       throw wrapError(error, "During serializeEventAsJSON.trivialClone.customizer",

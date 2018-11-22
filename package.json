@@ -27,10 +27,10 @@
     "publish-packages": "vlm publish-packages "
   },
   "devDependencies": {
-    "@valos/toolset-revealer": ">0.32.0-prerelease",
-    "@valos/toolset-vault": ">0.32.0-prerelease",
+    "@valos/toolset-revealer": ">0.33.0-prerelease",
+    "@valos/toolset-vault": ">0.33.0-prerelease",
     "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.5.0",
-    "valma": ">0.32.0-prerelease"
+    "valma": ">0.33.0-prerelease"
   }
 }

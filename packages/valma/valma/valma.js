@@ -4,10 +4,10 @@ const childProcess = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const util = require("util");
-
 const cardinal = require("cardinal");
 const colors = require("colors/safe");
-const inquirer = require("inquirer");
+
+let inquirer; // = require("inquirer"); // inquirer is fat. Postpone load to vlm.inquire ()
 const minimatch = require("minimatch");
 const semver = require("semver");
 const shell = require("shelljs");
@@ -153,7 +153,12 @@ const _vlm = globalVargs.vlm = {
 
   // Opens interactive inquirer prompt and returns a completion promise.
   // See https://github.com/SBoudrias/Inquirer.js/
-  inquire: inquirer.createPromptModule(),
+  inquire: (...rest) => {
+    if (!inquirer) inquirer = require("inquirer"); // inquirer is fat and loads slowly. Postpone here.
+
+    _vlm.inquire = inquirer.createPromptModule();
+    return _vlm.inquire.call(this, ...rest);
+  },
 
   // shelljs namespace of portable Unix commands
   // See https://github.com/shelljs/shelljs
@@ -793,7 +798,7 @@ _vlm.ifVerbose(1).babble("phase 1, init:", "determine global options and availab
     "\n\tprocess.env.VLM_PATH:", process.env.VLM_PATH,
     "\n\tprocess.env.PATH:", process.env.PATH,
     "\n\tdefaultPaths:", JSON.stringify(defaultPaths)
-).ifVerbose(3).expound("global options:", _vlm.vargv);
+).ifVerbose(3).expound("global options:", JSON.stringify({ ..._vlm.vargv, vlm: "<hidden>" }));
 
 // When a command begins with ./ or contains the command prefix (if it is non-empty) it is
 // considered a direct file valma command. It's parent directory is made the initial "file" pool.
@@ -859,10 +864,10 @@ process.on("unhandledRejection", error => {
 async function handler (vargv) {
   // Phase21: Pre-load args with so-far empty pools to detect fully builtin commands (which don't
   // need forwarding).
-  const fullyBuiltin = _vlm.isCompleting || !vargv.command;
+  const fullyBuiltin = _vlm.isCompleting && !vargv.command;
   const contextVLM = vargv.vlm;
 
-  const needNPM = !fullyBuiltin && vargv.npmConfigEnv && !process.env.npm_package_name;
+  const needNPM = vargv.command && vargv.npmConfigEnv && !process.env.npm_package_name;
   const needVLMPath = !fullyBuiltin && !process.env.VLM_PATH;
   const needForward = !fullyBuiltin && needVLMPath;
 
@@ -874,12 +879,17 @@ async function handler (vargv) {
   // Phase 2: Load pools and forward to 'vlm' if needed (if a more specific 'vlm' is found or if the
   // node environment or 'vlm' needs to be loaded)
   const forwardPool = contextVLM._refreshActivePools((pool, poolHasVLM, specificEnoughVLMSeen) => {
+    const shouldForwardVLM = _vlm.vargv.forward && !fullyBuiltin && poolHasVLM
+        && (!specificEnoughVLMSeen || needForward) && (specificEnoughVLMSeen || vargv.promote);
     contextVLM.ifVerbose(3)
-        .babble(`evaluating pool ${pool.path}`, "has 'vlm':", poolHasVLM,
-            "vlm seen:", specificEnoughVLMSeen);
-    if (!_vlm.vargv.forward || fullyBuiltin || !poolHasVLM
-        || (specificEnoughVLMSeen && !needForward)
-        || (!specificEnoughVLMSeen && !vargv.promote)) return undefined;
+        .babble(`evaluating pool ${pool.path} for VLM forward, result:`, shouldForwardVLM,
+            ...(!shouldForwardVLM ? [] : [
+              "\n\tvargv.forward:", _vlm.vargv.forward, ", vargv.promote:", _vlm.vargv.promote,
+              "\n\tnot fully builtin command:", !fullyBuiltin,
+              "\n\tpool has 'vlm':", poolHasVLM, ", sufficient vlm seen:", specificEnoughVLMSeen,
+              "\n\tmissing env.VLM_PATH:", needVLMPath,
+            ]));
+    if (!shouldForwardVLM) return undefined;
     Object.assign(process.env, {
       VLM_PATH: process.env.VLM_PATH || pool.path,
       VLM_GLOBAL_POOL: process.env.VLM_GLOBAL_POOL || _vlm.vargv.globalPool,
@@ -891,23 +901,30 @@ async function handler (vargv) {
       ].join(":")}:${process.env.PATH}`,
       _: contextVLM.path.join(pool.path, "vlm"),
     });
-    const myRealVLM = fs.realpathSync(process.argv[1]);
     pool.vlmPath = path.join(pool.path, "vlm");
-    const forwardRealVLM = fs.realpathSync(pool.vlmPath);
-    if (myRealVLM === forwardRealVLM) return undefined;
-    contextVLM.ifVerbose(1)
-        .info(`forwarding to vlm at require('${contextVLM.theme.path(pool.vlmPath)}')`,
-            "via pool", contextVLM.theme.path(pool.path),
-            "\n\treal path:", contextVLM.theme.path(forwardRealVLM), `(current vlm "${
-                contextVLM.theme.path(myRealVLM)})"`);
     return pool;
   });
+
   if (forwardPool) {
-    // Call is handled by a forward require to another valma.
-    process.argv[1] = forwardPool.vlmPath;
-    require(forwardPool.vlmPath);
-    return undefined;
+    const myRealVLM = fs.realpathSync(process.argv[1]);
+    const forwardRealVLM = fs.realpathSync(forwardPool.vlmPath);
+    if (myRealVLM !== forwardRealVLM) {
+      contextVLM.ifVerbose(1)
+          .info(`forwarding to vlm via require('${contextVLM.theme.path(forwardPool.vlmPath)}')`,
+              "within pool", contextVLM.theme.path(forwardPool.path),
+              "\n\treal path:", contextVLM.theme.path(forwardRealVLM), `(current vlm "${
+                  contextVLM.theme.path(myRealVLM)})"`);
+      // Call is handled by a forward require to another valma.
+      process.argv[1] = forwardPool.vlmPath;
+      require(forwardPool.vlmPath);
+      return undefined;
+    }
+    contextVLM.ifVerbose(1)
+    .info(`forwarding to vlm requested but skipped because forward target has same real path`,
+        "\n\ttarget real path:", contextVLM.theme.path(forwardRealVLM), `(current vlm "${
+            contextVLM.theme.path(myRealVLM)})"`);
   }
+
   if (needNPM) {
     await __loadNPMConfigVariables();
   }
@@ -1516,8 +1533,13 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
                     && `exports.disabled => ${String(module.disabled(subVargs))}`))),
       };
 
-      if (!module.builder || !module.builder(subVargs)) {
-        if (!activeCommand.disabled) activeCommand.disabled = "exports.builder => falsy";
+      try {
+        if (!module.builder || !module.builder(subVargs)) {
+          if (!activeCommand.disabled) activeCommand.disabled = "exports.builder => falsy";
+        }
+      } catch (error) {
+        activeCommand.disabled = `exports.builder threw: ${error.message}`;
+        activeCommand.builderError = error;
       }
       const exportedCommandName = module.command.match(/^([^ ]*)/)[1];
       if (exportedCommandName !== commandName) {

@@ -378,11 +378,11 @@ class ProphecyOperation extends ProphecyEventResult {
                   truthProcess,
                   truth => {
                     if (!truth) {
-                      Promise.all([chronicledTruth, receivedTruth]).then(([chronicled, received]) => {
+                      Promise.all([chronicledTruth, receivedTruth]).then(([chrond, received]) => {
                         partition.connection.errorEvent(
                           "\n\tnull truth when fulfilling prophecy:", ...dumpObject(this._prophecy),
                           "\n\tchronicled:", isPromise(chronicledTruth),
-                              ...dumpObject(chronicled), ...dumpObject(chronicledTruth),
+                              ...dumpObject(chrond), ...dumpObject(chronicledTruth),
                           "\n\treceived:", isPromise(receivedTruth),
                               ...dumpObject(received), ...dumpObject(receivedTruth));
                       });

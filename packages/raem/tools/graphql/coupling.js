@@ -101,7 +101,7 @@ export function toOwner (defaultCoupledField = "unnamedOwnlings") {
         fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: localId.coupleWith(localFieldName) },
         }),
-    createUncoupleFromRemoteAction: (id, typeName) =>
+    createUncoupleFromRemoteAction: (id) =>
         destroyed({ id, local: { dontUpdateCouplings: true } }),
   };
 }

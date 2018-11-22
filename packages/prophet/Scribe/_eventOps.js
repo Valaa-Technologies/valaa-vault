@@ -188,13 +188,9 @@ class ScribeEventResult extends ChronicleEventResult {
         this.onError);
   }
   getTruthEvent (): EventBase {
-    let results;
     return thenChainEagerly(this.chroniclingProcess, [
-      ({ eventResults }) => (results = eventResults)[
-          this.index - (this.events.length - eventResults.length)].getTruthEvent(),
-      (truthEvent) => {
-        return truthEvent;
-      }
+      ({ eventResults }) => eventResults[this.index - (this.events.length - eventResults.length)]
+          .getTruthEvent(),
     ], this.onError);
   }
 }

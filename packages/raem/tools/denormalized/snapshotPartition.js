@@ -1,3 +1,4 @@
+/*
 import { Iterable } from "immutable";
 import { GraphQLList, isLeafType, getNamedType } from "graphql/type";
 
@@ -8,6 +9,7 @@ import isResourceType from "~/raem/tools/graphql/isResourceType";
 import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";
 
 import { createId, wrapError } from "~/tools";
+*/
 
 /**
  * snapshotPartition - traverses all descendants and dependents of the given partition and then
@@ -26,9 +28,9 @@ import { createId, wrapError } from "~/tools";
  * @param  {async function(id, typeName, modifies)}            onModified description
  * @returns {type}                                                            description
  */
-export default async function snapshotPartition ({ partitionId, state, schema, onCreated,
+export default async function snapshotPartition (/* { partitionId, state, schema, onCreated,
   onModified,
-}) {
+} */) {
   // TODO(iridian): Refactor snapshotPartition to use Resolver
   throw new Error("snapshotPartition has rotted.");
   /*
@@ -165,4 +167,4 @@ export default async function snapshotPartition ({ partitionId, state, schema, o
     }
   }
   */
-};
+}

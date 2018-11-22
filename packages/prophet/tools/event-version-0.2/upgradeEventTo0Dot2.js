@@ -5,7 +5,6 @@ import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent
 
 import ProphetContentAPI from "~/prophet/ProphetContentAPI";
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import { obtainAspect } from "~/prophet/tools/EventAspects";
 
 import { dumpify, dumpObject } from "~/tools";
 

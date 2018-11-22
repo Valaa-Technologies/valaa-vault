@@ -2,7 +2,7 @@
 
 import { EventBase } from "~/raem/events";
 
-import { AuthorityProphet, AuthorityPartitionConnection, AuthorityEventResult } from "~/prophet";
+import { AuthorityProphet, AuthorityPartitionConnection } from "~/prophet";
 import { ChronicleRequest, ChronicleOptions, ChronicleEventResult } from "~/prophet/api/types";
 
 export default function createValaaTestScheme ({ config, authorityURI } = {}) {
@@ -46,7 +46,7 @@ class MockEventResult extends ChronicleEventResult {
       this.rejectTruthEvent = reject;
     }));
   }
-};
+}
 
 export class MockProphet extends AuthorityProphet {
 

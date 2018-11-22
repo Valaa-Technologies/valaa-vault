@@ -77,7 +77,7 @@ export default class PartitionConnection extends Follower {
     return (commands, retrieveMediaBuffer) => {
       invariantifyArray(commands, "receiveTruths.commands", { min: 1 });
       return this.receiveCommands(commands, retrieveMediaBuffer, downstreamReceiveCommands);
-    }
+    };
   }
 
   isConnected () {

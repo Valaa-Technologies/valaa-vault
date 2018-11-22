@@ -134,7 +134,8 @@ describe("CREATED with instancePrototype", () => {
   });
 
   it("doesn't materialize the ghost grandling owner when materializing the grandling", async () => {
-    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGrandparentInstance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA,
+        createGrandparentInstance);
     harness.chronicleEvent(transacted({ actions:
         harness.run(vRef("A_grandparent"),
                 ["§->", "children", 0, "children"])
@@ -148,7 +149,8 @@ describe("CREATED with instancePrototype", () => {
   });
 
   it("materializes the ghost grandling from transient kuery result ghost resource", async () => {
-    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGrandparentInstance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA,
+        createGrandparentInstance);
     const ghostGrandlings = harness.run(vRef("A_grandparentInstance"),
         ["§->", "children", 0, "children"]);
     expect(getRawIdFrom(ghostGrandlings[0]))
@@ -165,7 +167,8 @@ describe("CREATED with instancePrototype", () => {
   });
 
   it("creates level 2 ghosts properly even after level 1 ghosts have been materialized", () => {
-    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGrandparentInstance);
+    const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA,
+        createGrandparentInstance);
     const parentInInstance = harness.run(vRef("A_grandparentInstance"),
         ["§->", "children", 0]);
     harness.chronicleEvent(fieldsSet({ id: parentInInstance, typeName: "TestThing", sets: {

@@ -28,6 +28,8 @@ import isResourceType from "~/raem/tools/graphql/isResourceType";
 import { ValaaPrimitiveTag } from "~/script";
 
 import { Discourse, Transaction, PartitionConnection } from "~/prophet";
+import { ChronicleEventResult } from "~/prophet/api/types";
+
 import { createModuleGlobal } from "~/tools/mediaDecoders/JavaScriptDecoder";
 
 import VALEK, { Valker, Kuery, dumpKuery, expressionFromValue } from "~/engine/VALEK";

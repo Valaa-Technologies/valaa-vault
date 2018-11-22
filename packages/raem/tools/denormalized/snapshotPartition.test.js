@@ -69,7 +69,7 @@ describe("The snapshot node walker", () => {
         const createdEvent = created({ id, typeName, initialState: getInitialState() });
         resultEvents.push(createdEvent);
       },
-      onModified: (id, typeName, modifies) => {
+      onModified: (/* id, typeName, modifies */) => {
         throw new Error("snapshotPartition.onModified has rotten");
         /*
         const modifiedEvent = fieldsSet({ id, typeName, ...modifies });

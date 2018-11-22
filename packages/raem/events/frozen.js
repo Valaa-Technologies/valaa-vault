@@ -1,6 +1,7 @@
 // @flow
 
 import Action, { ActionCollection, validateActionCollectionBase } from "~/raem/events/Action";
+import { invariantifyArray } from "~/tools";
 
 export const FROZEN = "FROZEN";
 
@@ -17,5 +18,6 @@ export default function frozen (action: Action): Frozen {
 export function validateFrozen (action: Action, validateAction: ?Function): Frozen {
   const { actions, frozenPartitions, ...rest } = action;
   validateActionCollectionBase(FROZEN, action, actions, rest, validateAction);
+  invariantifyArray(frozenPartitions, "FROZEN.frozenPartitions");
   return action;
 }

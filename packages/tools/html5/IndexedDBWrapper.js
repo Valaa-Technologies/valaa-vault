@@ -1,6 +1,6 @@
 // @flow
 
-import { Logger, LogEventGenerator, wrapError } from "~/tools";
+import { Logger, LogEventGenerator } from "~/tools";
 import { type DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 export type KeyRangeQuery = {

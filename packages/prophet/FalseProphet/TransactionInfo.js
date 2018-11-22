@@ -53,7 +53,7 @@ export default class TransactionInfo {
     this.customCommand = customCommandCandidate;
   }
 
-  chronicleEvents (events: EventBase[], options: Object = {}): ChronicleRequest {
+  chronicleEvents (events: EventBase[] /* , options: Object = {} */): ChronicleRequest {
     try {
       if (!this.actions) {
         throw new Error(`Transaction '${this.transaction.corpus.getName()}' has already been ${
@@ -101,7 +101,7 @@ export default class TransactionInfo {
     }
   }
 
-  commit (commitCustomCommand: ?Object): ClaimResult {
+  commit (commitCustomCommand: ?Object): ChronicleEventResult {
     let command;
     try {
       if (!this.actions) {

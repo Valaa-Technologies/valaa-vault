@@ -230,4 +230,4 @@ export function createTestFollower () {
   return MockFollower();
 }
 
-class MockFollower extends Follower {};
+class MockFollower extends Follower {}

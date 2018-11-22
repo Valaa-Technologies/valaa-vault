@@ -3,8 +3,6 @@
 import { EventBase } from "~/raem/events";
 import type HashV240 from "~/prophet/tools/hashV240";
 
-import { invariantifyNumber, invariantifyString } from "~/tools/invariantify";
-
 // Event Aspects
 
 // Event aspects provides shared types and idioms for conveniently but
@@ -56,7 +54,7 @@ export default class EventAspects {
 }
 
 export function initializeAspects (root, newAspects = {}) {
-  if (root.aspects) Object.assign(root.aspects, newAspects)
+  if (root.aspects) Object.assign(root.aspects, newAspects);
   else root.aspects = newAspects;
   return root;
 }

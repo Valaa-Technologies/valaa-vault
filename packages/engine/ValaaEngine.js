@@ -394,7 +394,8 @@ export default class ValaaEngine extends Cog {
               }
             }
           }
-          const reactions = executeHandlers(this._storyHandlerRoot, passage, [vProtagonist, passage, story]);
+          const reactions = executeHandlers(this._storyHandlerRoot, passage,
+              [vProtagonist, passage, story]);
           if (reactions) (allReactionPromises || (allReactionPromises = [])).push(...reactions);
           if (passage.passages) passage.passages.forEach(_recitePassage);
         } catch (error) {

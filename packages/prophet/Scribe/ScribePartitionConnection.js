@@ -231,7 +231,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
         });
   }
 
-  _reloadCommandQueue (conflictingCommandEventId: number) {}
+  _reloadCommandQueue (/* conflictingCommandEventId: number */) {}
 
   _determineEventMediaPreOps (mediaEvent: Object, rootEvent: Object) {
     const mediaId = obtainVRef(mediaEvent.id);

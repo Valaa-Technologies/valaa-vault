@@ -54,7 +54,7 @@ exports.handler = async function handler (yargv) {
   vlm.info(`${vlm.theme.bold("Rousing revealer")} using ${
       vlm.theme.executable("webpack-dev-server")} with revelation content base:`,
           vlm.theme.path(contentBase));
-  return vlm.execute([
+  return vlm.interact([
     "webpack-dev-server",
     yargv.inline && "--inline",
     yargv.progress && "--progress",

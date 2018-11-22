@@ -45,7 +45,7 @@ exports.handler = async (yargv) => {
   }
   if (!vlm.getPackageConfig("devDependencies", "@valos/inspire")) {
     if (await vlm.inquireConfirm(`Install @valos/inspire in devDependencies?`)) {
-      await vlm.execute("yarn add -W --dev @valos/inspire");
+      await vlm.interact("yarn add -W --dev @valos/inspire");
     }
   }
   return true;

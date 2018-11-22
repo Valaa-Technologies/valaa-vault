@@ -31,11 +31,11 @@ exports.builder = (yargs) => {
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   if (!vlm.getPackageConfig("devDependencies", "@valos/toolset-vault")) {
-    await vlm.execute("yarn add -W --dev @valos/toolset-vault");
+    await vlm.interact("yarn add -W --dev @valos/toolset-vault");
   }
   if (vlm.getPackageConfig("workspaces", 0) !== yargv.workspaces) {
     await vlm.updatePackageConfig({ workspaces: [yargv.workspaces] });
-    await vlm.execute("yarn install");
+    await vlm.interact("yarn install");
   }
   return vlm.invoke(`.configure/.type/.vault/**/*`, { reconfigure: yargv.reconfigure });
 };

@@ -54,8 +54,7 @@ file for yarn (and for npm, for which yarn is an analogue).
 `);
         continue;
       }
-      await vlm.execute("yarn init");
-      return true;
+      return await vlm.interact("yarn init", true);
     }
     vlm.info(`Skipped '${vlm.theme.executable("yarn init")}'.`, ...tellIfNoReconfigure);
     return true;
@@ -128,7 +127,7 @@ for the listings in following phases.
         vlm.info(`No devDependencies provided, skipping workshop registration phase`);
       } else {
         try {
-          await vlm.execute(["yarn add -W --dev", answer.devDependencies]);
+          await vlm.interact(["yarn add -W --dev", answer.devDependencies]);
         } catch (error) {
           vlm.speak();
           vlm.exception(`An exception caught during executable '${

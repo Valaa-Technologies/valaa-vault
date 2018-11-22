@@ -84,6 +84,11 @@ const _vlm = globalVargs.vlm = {
   // Special case of execute of the form 'vlm <command> ...'.
   invoke,
 
+  // Special case of execute which has the executed script interact
+  // directly with the current TTY and returns the provided return
+  // value instead of stdout if successful.
+  interact,
+
   // Initiates the given command as a primarily non-interactive
   // background task which returns the command output in a promise or
   // rejects it in case of an error.
@@ -153,11 +158,11 @@ const _vlm = globalVargs.vlm = {
 
   // Opens interactive inquirer prompt and returns a completion promise.
   // See https://github.com/SBoudrias/Inquirer.js/
-  inquire: (...rest) => {
+  inquire (...rest) {
     if (!inquirer) inquirer = require("inquirer"); // inquirer is fat and loads slowly. Postpone here.
 
     _vlm.inquire = inquirer.createPromptModule();
-    return _vlm.inquire.call(this, ...rest);
+    return this.inquire(...rest);
   },
 
   // shelljs namespace of portable Unix commands
@@ -1071,16 +1076,17 @@ async function execute (args, options = {}) {
       maybeOutput = options.dryRunReturn;
       _onDone(null, 0);
     } else {
-      const subProcess = childProcess.spawn(
-          argv[0],
-          argv.slice(1), {
-            stdio: options.delegate
-                ? ["ignore", "pipe", "pipe"]
-                : ["inherit", "pipe", "inherit"],
-            ...options.spawn,
-            detached: true,
-          },
-      );
+      const spawnOptions = {
+        stdio: options.delegate
+            ? ["ignore", "pipe", "pipe"]
+            : [0, (options.asTTYResult !== undefined) ? 1 : "pipe", 2],
+        ...options.spawn,
+        detached: false,
+      };
+      executeVLM.ifVerbose(3)
+      .babble(`spawning child process "${argv[0]}" with options:`, spawnOptions);
+
+      const subProcess = childProcess.spawn(argv[0], argv.slice(1), spawnOptions);
       subProcess.on("exit", (code, signal) => _onDone(null, code, signal));
       subProcess.on("error", _onDone);
       process.on("SIGINT", () => {
@@ -1096,17 +1102,16 @@ async function execute (args, options = {}) {
 
       // TODO(iridian): Implement stderr.isTTY faking on the child process side, so that client
       // scripts emit colors
-      const _readStreamContent = (stream) => {
-        let resolveContent;
-        const ret = new Promise(resolve_ => { resolveContent = resolve_; });
+      const _readStreamContent = (stream) => new Promise(resolve_ => {
         let contentBuffer = "";
         stream.on("data", (chunk) => { contentBuffer += chunk; });
-        stream.on("end", () => { resolveContent(contentBuffer); });
+        stream.on("end", () => { resolve_(contentBuffer); });
         stream.on("error", _onDone);
-        return ret;
-      };
+      });
 
-      maybeOutput = _readStreamContent(subProcess.stdout);
+      maybeOutput = (options.asTTYResult !== undefined)
+          ? options.asTTYResult
+          : _readStreamContent(subProcess.stdout);
       if (options.delegate) maybeDiagnostics = _readStreamContent(subProcess.stderr);
     }
   });
@@ -1114,6 +1119,10 @@ async function execute (args, options = {}) {
 
 function delegate (args, options = {}) {
   return execute.call(this, args, { ...options, delegate: true });
+}
+
+function interact (args, successResult = true, options = {}) {
+  return execute.call(this, args, { ...options, asTTYResult: successResult });
 }
 
 async function invoke (commandSelector, args, options = {}) {
@@ -1191,7 +1200,7 @@ async function _invoke (commandSelector, argv) {
           "\n\tisWildcard:", isWildcardCommand, ", introspect options:", !!introspect);
   this.ifVerbose(2)
       .expound("introspect:", introspect)
-      .expound("contextVargv:", { ...contextVargv, vlm: "<hidden>" });
+      .expound("contextVargv:", JSON.stringify({ ...contextVargv, vlm: "<hidden>" }));
 
   const activeCommands = this._selectActiveCommands(commandGlob, argv, introspect);
 
@@ -1268,7 +1277,7 @@ async function _invoke (commandSelector, argv) {
           .babble("parsed:", this.theme.command(commandName, ...argv),
               activeCommand.disabled ? `: disabled, ${activeCommand.disabled}` : ""
       ).ifVerbose(4)
-          .expound("\tsubArgv:", subVLM.vargv)
+          .expound("\tsubArgv:", JSON.stringify({ ...subVLM.vargv, vlm: "<hidden>" }))
           .expound("\tsubIntrospect:", subIntrospect);
 
       if (subIntrospect) {
@@ -1476,7 +1485,7 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
       const matches = minimatch(normalizedName, commandGlob, { dot: this.vargv.matchAll });
       this.ifVerbose(3)
           .babble(`evaluating file ${file.name}`, "matches:", matches, "vs glob:", commandGlob,
-          ", dir:", __isDirectory(file), ", normalizedName:", normalizedName);
+              ", dir:", __isDirectory(file), ", normalizedName:", normalizedName);
       if (!matches) {
         pool.stats.nonmatching = (pool.stats.nonmatching || 0) + 1;
         return;

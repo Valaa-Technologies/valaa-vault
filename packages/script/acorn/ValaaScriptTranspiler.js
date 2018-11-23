@@ -24,13 +24,13 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
     this._VALK = acornParseOptions.VALK;
     this.language = language;
     this.acornParseOptions = { ...language.acornParseOptions, ...acornParseOptions };
-    this._indent = 0;
   }
 
   VALK () { return this._VALK; }
 
   transpileKueryFromText (expressionText: string, options: Object = {}): Kuery {
     const actualTranspiler = Object.create(this);
+    actualTranspiler._indent = options.verbosity || undefined;
     actualTranspiler._sourceInfo = options.sourceInfo;
     let ast;
     try {
@@ -89,7 +89,14 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
   parseAst (ast: Node, options: Object = { scope: {}, contextRuleOverrides: Object },
       type: string) {
     let rule = options.contextRuleOverrides && options.contextRuleOverrides[`override${type}`];
+    const indent = this._indent;
+    let result;
     try {
+      if (indent !== undefined) {
+        this._indent += 2;
+        this.log(`\n${" ".repeat(indent)}: ${type}, options:`, JSON.stringify(options, null, 0),
+            ...(rule ? ["\n\tusing rule override:", rule.name] : []));
+      }
       if (typeof rule === "undefined") {
         rule = this.language.parseRules[`parse${type}`];
         invariantify(typeof rule === "function",
@@ -98,7 +105,7 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
             "\n\tlanguage:", this.language,
             "\n\trules:", this.language.parseRules);
       }
-      const result = rule(this, ast, options);
+      result = rule(this, ast, options);
       if ((result instanceof Kuery) && this._sourceInfo) {
         this._recurseToSourceMap(result.toVAKON(), ast, true);
       }
@@ -114,6 +121,11 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
       const sourceDummy = {};
       this._sourceInfo.sourceMap.set(sourceDummy, { ...ast });
       throw addStackFrameToError(wrappedError, sourceDummy, this._sourceInfo);
+    } finally {
+      if (indent !== undefined) {
+        this.log(`\n${" ".repeat(indent)}: ${type}, result:`, JSON.stringify(result, null, 0));
+      }
+      this._indent = indent;
     }
   }
 

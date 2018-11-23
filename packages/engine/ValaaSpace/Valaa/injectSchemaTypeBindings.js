@@ -45,7 +45,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
   scope.Resource = Valaa.Resource = Object.assign(Object.create(scope.ResourceStub), {
     name: "Resource",
     ".new": function new_ (valker: Valker, innerScope: ?Object, initialState: ?Object) {
-      const actualInitialState = prepareInitialState(this, innerScope, initialState);
+      const actualInitialState = prepareInitialState(this, innerScope, initialState, "new");
       // TODO(iridian): Replace valker._follower with some builtinStep when moving ValaaSpace to
       // @valos/script. Now this relies on valker always being a FalseProphetDiscourse/transaction.
       const resource = valker._follower.create(this.name, actualInitialState,
@@ -158,8 +158,8 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
     instantiate: Symbol("Resource.instantiate"),
     ".instantiate": function _instantiate (valker: Valker, innerScope: ?Object,
         resource: any, initialState: ?Object) {
-      return resource.instantiate(prepareInitialState(this, innerScope, initialState),
-          { transaction: valker });
+      return resource.instantiate(prepareInitialState(
+          this, innerScope, initialState, "instantiate"), { transaction: valker });
     },
 
     duplicate: Symbol("Resource.duplicate"),
@@ -302,15 +302,14 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
         `instantiates *this* Resource with given *initialState*. If initialState.owner is not${
             ""} specified the current global context *self* is used as the default owner`
     )(function instantiate (initialState) {
-      return this.instantiate(prepareInitialState(this, this.__callerScope__, initialState),
-          { transaction: this.__callerValker__ });
+      return this.instantiate(prepareInitialState(this, this.__callerScope__, initialState,
+          "instantiate"), { transaction: this.__callerValker__ }, true);
     }),
 
     [scope.Resource.duplicate]: denoteValaaBuiltinWithSignature(
-        `duplicates *this* Resource with given *initialState*. If initialState.owner is not${
-            ""} specified the current global context *self* is used as the default owner`
+        `duplicates *this* Resource with given *initialState*.`
     )(function duplicate (initialState) {
-      return this.duplicate(prepareInitialState(this, this.__callerScope__, initialState),
+      return this.duplicate(prepareInitialState(this, this.__callerScope__, initialState, false),
           { transaction: this.__callerValker__ });
     }),
 
@@ -709,32 +708,37 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
   scope.Media.hostObjectPrototype = scope.Media.prototype;
 }
 
-function prepareInitialState (Type: Object, scope: ?Object, initialState: ?Object) {
-  let ret = initialState;
-  if (!ret) ret = {};
-  else {
-    invariantifyObject(ret, "new.initialState", { allowEmpty: true });
-    // TODO(iridian): Check for non-allowed fields.
-  }
-  if (ret.owner !== null) {
-    if (typeof ret.owner === "undefined") {
-      if (!hasOwnerAlias(Type, initialState)
-          && scope && (typeof scope.self === "object") && scope.self.this) {
-        ret.owner = scope.self.this.getIdCoupledWith(Type[defaultOwnerCoupledField]);
-      }
-    } else if (typeof ret.owner !== "object") {
-      throw new Error(`new.initialState.owner must be a Resource, got '${ret.owner}'`);
-    } else if (Type[defaultOwnerCoupledField]) {
-      if (ret.owner instanceof Vrapper) {
-        ret.owner = ret.owner.getIdCoupledWith(Type[defaultOwnerCoupledField]);
-      } else if (ret.owner instanceof RRef) {
-        ret.owner = ret.owner.coupleWith(Type[defaultOwnerCoupledField]);
-      } else {
-        throw new Error(`new.initialState.owner must be a Resource, got '${dumpify(ret.owner)}'`);
-      }
+function prepareInitialState (Type: Object, scope: ?Object, initialState: ?Object,
+    requireOwnerOperation: ?string) {
+  invariantifyObject(initialState, "new initialState", { allowEmpty: true, allowUndefined: true });
+  // TODO(iridian): Check for non-allowed fields.
+  const initialOwner = initialState && (initialState.owner !== undefined
+      ? initialState.owner : hasOwnerAlias(Type, initialState));
+  if (!initialOwner) {
+    if (initialOwner === null) return initialState;
+    if (requireOwnerOperation) {
+      throw new Error(`${requireOwnerOperation} initialState.owner required`);
+    }
+    /*
+    if (!hasOwnerAlias(Type, initialState)
+        && scope && (typeof scope.self === "object") && scope.self.this) {
+      ret.owner = scope.self.this.getIdCoupledWith(Type[defaultOwnerCoupledField]);
+    }
+    */
+  } else if (typeof initialOwner !== "object") {
+    throw new Error(`${requireOwnerOperation || "duplicate"
+        } initialState.owner must be a Resource, got '${typeof initialOwner}'`);
+  } else if ((initialState.owner !== undefined) && Type[defaultOwnerCoupledField]) {
+    if (initialState.owner instanceof Vrapper) {
+      initialState.owner = initialState.owner.getIdCoupledWith(Type[defaultOwnerCoupledField]);
+    } else if (initialState.owner instanceof VRef) {
+      initialState.owner = initialState.owner.coupleWith(Type[defaultOwnerCoupledField]);
+    } else {
+      throw new Error(`${requireOwnerOperation || "duplicate"
+          } initialState.owner must be a Resource, got '${dumpify(ret.owner)}'`);
     }
   }
-  return ret;
+  return initialState;
 }
 
 function hasOwnerAlias (Type: Object, initialState: Object) {

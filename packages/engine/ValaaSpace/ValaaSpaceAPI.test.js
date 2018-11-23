@@ -41,7 +41,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
     it("creates with 'new' a new Entity", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
-          new Entity({ name: "myEntity", properties: { foo: 10 } });
+          new Entity({ name: "myEntity", owner: this, properties: { foo: 10 } });
       `;
       const bodyKuery = transpileValaaScriptTestBody(bodyText);
       const myEntity = entities().creator.do(bodyKuery);
@@ -56,7 +56,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
     it("adds with 'new' a child Relation to an existing Entity", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
-          const parent = new Entity({ name: "parent",
+          const parent = new Entity({ name: "parent", owner: this,
               properties: { position: { x: 10, y: 20 } } });
           new Relation({ name: "myRelation", owner: parent,
               properties: { position: { x: 1, y: 2 } } });
@@ -76,7 +76,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
     it("modifies existing Entity property", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
-          const parent = new Entity({ name: "parent",
+          const parent = new Entity({ name: "parent", owner: this,
               properties: { position: { x: 10, y: 20 } } });
           [parent, parent.position = { x: 11, y: 22 }];
       `;
@@ -90,12 +90,12 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
     it("instantiates with 'new' an Entity which has ownlings", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
-          const MyType = new Entity({ name: "MyType",
+          const MyType = new Entity({ name: "MyType", owner: this,
               properties: { position: { x: 10, y: 20 } } });
-          const target = new Entity({ name: "targetOfRelation" });
+          const target = new Entity({ name: "targetOfRelation", owner: this });
           const relation = new Relation({ name: "myTypeRelation", owner: MyType, target: target,
               properties: { position: { x: 1, y: 2 } } });
-          const instance = new MyType({ name: "instance",
+          const instance = new MyType({ name: "instance", owner: this,
               properties: { position: { x: 100, y: 200 } } });
           MyType.position = { x: 11, y: 22 };
           relation.orientation = { a: 90 };
@@ -145,7 +145,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
     it("returns the result of an expression with properties correctly", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
-          const entity = new Entity({ name: "theEntity",
+          const entity = new Entity({ name: "theEntity", owner: this,
               properties: { numbers: { a: 1, b: 2 } } });
           entity.numbers.a + entity.numbers.b;
       `;
@@ -166,7 +166,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
     it("accesses array values using an expression with properties correctly", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
-          const entity = new Entity({ name: "theEntity",
+          const entity = new Entity({ name: "theEntity", owner: this,
               properties: { numbers: { a: 1, b: 2 } } });
           const values = [3,4,5,6,7,8];
           [entity.numbers.a + entity.numbers.b, values[entity.numbers.a + entity.numbers.b]];
@@ -179,7 +179,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
     it("Accesses properties inside a function correctly", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
-          const entity = new Entity({ name: "entity",
+          const entity = new Entity({ name: "entity", owner: this,
               properties: { numbers: { a: 1, b: 2 } } });
           function f () {
               return 400 + g(entity.numbers.a + 1, entity.numbers.b);
@@ -210,15 +210,16 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           function functionA () {
-              const foo = new Entity({ name: "foo", });
-              if (foo.bar !== undefined) return "very much not ok";
-              else return functionB(foo);
+            // console.log("inner this:", this);
+            const foo = new Entity({ name: "foo", owner: this });
+            if (foo.bar !== undefined) return "very much not ok";
+            else return functionB(foo);
           }
           function functionB (foo) {
-              if (foo.bar !== undefined) return "not ok";
-              else return "ok";
+            if (foo.bar !== undefined) return "not ok";
+            else return "ok";
           }
-          functionA();
+          functionA.call(this);
       `;
       const bodyKuery = transpileValaaScriptTestBody(bodyText);
       const result = entities().creator.do(bodyKuery);
@@ -229,9 +230,9 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
     it("handles Object.assign roundtrip from native object to Valaa resource and back", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
-          const target = new Entity();
+          const target = new Entity({ owner: this });
           const properties = { a: 1, target: target };
-          const midway = new Entity();
+          const midway = new Entity({ owner: this });
           Object.assign(midway, properties);
           const result = Object.assign({}, midway);
           [target, properties, midway, result];
@@ -247,14 +248,18 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
     it("handles more complex Object.assign between native and Valaa resources", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
-          const Proto = new Entity();
+          const Proto = new Entity({ owner: this });
           const protownling = new Entity({ owner: Proto });
           Object.assign(Proto, { a: "baseA" }, { b: protownling });
           const protoProps = {};
           Object.assign(protoProps, Proto);
           Object.assign(protoProps.b, { ownP: "ownP" });
-          const instance = new Proto({ properties: { a: "instanceA", c: "instanceC" } });
-          const source = new Relation({ properties: { a: "relationA", d: "relationD" } });
+          const instance = new Proto({ owner: this, properties: {
+            a: "instanceA", c: "instanceC",
+          } });
+          const source = new Relation({ owner: this, properties: {
+            a: "relationA", d: "relationD",
+          } });
           const nativeTarget = {};
           Object.assign(nativeTarget, { d: "nativeD", e: "nativeE", }, source);
           Object.assign(instance, source, { d: "nativeD", e: "nativeE", });
@@ -287,7 +292,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       const bodyText = `
           const properties = { a: 1, b: 2, c: 3, d: 4 };
           const propertiesTotal = Object.keys(properties).reduce((t, v) => t + properties[v], 0);
-          const entity = new Entity({ name: "entity", properties: properties });
+          const entity = new Entity({ name: "entity", owner: this, properties });
           const total = Object.keys(entity).reduce((t, v) => t + entity[v], 0);
           [propertiesTotal, total];
       `;
@@ -301,7 +306,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       const bodyText = `
           const properties = { a: 2, b: 3, c: 4, d: 5 };
           const propertiesTotal = Object.values(properties).reduce((t, v) => t + v, 0);
-          const entity = new Entity({ name: "entity", properties: properties });
+          const entity = new Entity({ name: "entity", owner: this, properties });
           const total = Object.values(entity).reduce((t, v) => t + v, 0);
           [propertiesTotal, total];
       `;
@@ -316,7 +321,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
           const properties = { a: 3, b: 4, c: 5, d: 6 };
           const propertiesTotal = Object.entries(properties).reduce(
               (t, v) => [((t[0][v[0]] = -v[1]), t[0]), t[1] + v[1]], [{}, 0]);
-          const entity = new Entity({ name: "entity", properties: properties });
+          const entity = new Entity({ name: "entity", owner: this, properties });
           const total = Object.entries(entity).reduce(
               (t, v) => [((t[0][v[0]] = -v[1]), t[0]), t[1] + v[1]], [{}, 0]);
           [propertiesTotal, total];
@@ -333,10 +338,10 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const properties = { a: 1, b: 2, d: this };
-          const entity = new Entity({ name: "entity", properties: properties });
+          const entity = new Entity({ name: "entity", owner: this, properties });
           const overriddenProperties = Object.create(properties);
           Object.assign(overriddenProperties, { a: 3, c: 4 });
-          const instance = new entity({ properties: overriddenProperties });
+          const instance = new entity({ owner: this, properties: overriddenProperties });
           ({
             propertyA: Object.getOwnPropertyDescriptor(properties, "a"),
             propertyB: Object.getOwnPropertyDescriptor(properties, "b"),
@@ -409,10 +414,10 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const properties = { a: 1, b: 2, d: this };
-          const entity = new Entity({ name: "entity", properties: properties });
+          const entity = new Entity({ name: "entity", owner: this, properties });
           const overriddenProperties = Object.create(properties);
           Object.assign(overriddenProperties, { a: 3, c: 4 });
-          const instance = new entity({ properties: overriddenProperties });
+          const instance = new entity({ owner: this, properties: overriddenProperties });
           ({
             entity: Object.assign({}, entity),
             instance: Object.assign({}, instance),
@@ -433,10 +438,10 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const properties = { a: 1, b: 2, d: this };
-          const entity = new Entity({ name: "entity", properties: properties });
+          const entity = new Entity({ name: "entity", owner: this, properties });
           const overriddenProperties = Object.create(properties);
           Object.assign(overriddenProperties, { a: 3, c: 4 });
-          const instance = new entity({ properties: overriddenProperties });
+          const instance = new entity({ owner: this, properties: overriddenProperties });
           ({
             Valaa: Valaa,
             propertiesSymbols: Object.getOwnPropertySymbols(properties),
@@ -463,7 +468,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const bodyText = `
           const properties = { a: 1, b: 2, d: this };
-          const entity = new Entity({ name: "entity", properties: properties });
+          const entity = new Entity({ name: "entity", owner: this, properties });
 
           Object.defineProperty(entity, "a_plus_b",
               { get: function () { return this.a + this.b; } });
@@ -500,6 +505,42 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
       expect(still_22).toEqual(22);
       expect(lots).toEqual(60);
     });
+
+    it("duplicates an entity with ValaaScript function", () => {
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
+      const bodyText = `
+          () => {
+            const owner = new Entity({ owner: this });
+            const orig = new Entity({
+              name: "origame", owner, properties: { first: 1, second: 2 },
+            });
+            const dup = orig.$V.duplicate();
+            orig.first = 11;
+            dup.second = -2;
+            dup.third = -3;
+            orig.fourth = 4;
+            return {
+              owner,
+              orig, origProps: Object.assign({}, orig),
+              dup, dupProps: Object.assign({}, dup),
+            };
+          }
+      `;
+      const bodyKuery = transpileValaaScriptTestBody(bodyText);
+      const { owner, orig, origProps, dup, dupProps } = entities().test.do(bodyKuery, {})();
+      expect(origProps)
+          .toEqual({ first: 11, second: 2, fourth: 4 });
+      expect(dupProps)
+          .toEqual({ first: 1, second: -2, third: -3 });
+      expect(owner.get("owner").getRawId())
+          .toBe(entities().test.getRawId());
+      expect(orig.get("owner").getRawId())
+          .toBe(owner.getRawId());
+      expect(dup.get("owner").getRawId())
+          .toBe(owner.getRawId());
+      expect(entities().test.get("unnamedOwnlings").length)
+          .toEqual(4);
+    });
   });
 });
 
@@ -507,7 +548,7 @@ describe("Bug 0000090 tests", () => {
   it("creates an entity and stores it in to a variable with ValaaScript function", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const bodyText = `
-      () => new Entity({ name: "uusime" });
+      () => new Entity({ name: "uusime", owner: this });
     `;
     const bodyKuery = transpileValaaScriptTestBody(bodyText);
     const entityCreator = entities().test.do(bodyKuery);
@@ -524,7 +565,7 @@ describe("Bug 0000090 tests", () => {
   it("instantiates an entity and sets it in a variable with ValaaScript function", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const bodyText = `
-      () => new this.pointer_to_ownling({ name: "uusime" });
+      () => new this.pointer_to_ownling({ name: "uusime", owner: this });
     `;
     const bodyKuery = transpileValaaScriptTestBody(bodyText);
     const instantiator = entities().creator.do(bodyKuery);
@@ -540,7 +581,7 @@ describe("Bug 0000090 tests", () => {
   it("creates an entity with ValaaScript function", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const bodyText = `
-      () => new Entity({ name: "uusime" });
+      () => new Entity({ name: "uusime", owner: this });
     `;
     const bodyKuery = transpileValaaScriptTestBody(bodyText);
     const entityCreator = entities().test.do(bodyKuery);

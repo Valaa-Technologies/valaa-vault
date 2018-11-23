@@ -84,7 +84,7 @@ export function mapEagerly (maybePromises: any[], callback: Function, onRejected
     } catch (onRejectedError) { innerError = onRejectedError; }
     throw wrapError(innerError, errorWrap,
         "\n\tmaybePromises:", ...dumpObject(maybePromises),
-        "\n\tcurrent entry:", ...dumpObject(maybePromises[currentIndex]));
+        "\n\tcurrent entry:", ...dumpObject((maybePromises || [])[currentIndex]));
   }
 }
 

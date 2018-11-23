@@ -79,10 +79,10 @@ describe("transpileValaaScriptBody with Engine", () => {
     it("deletes a native object property, but doesn't propagate to prototype properties", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
       const programText = `
-        const base = new Entity({ properties: {
+        const base = new Entity({ owner: this, properties: {
           a: "a", b: "b", c: "c", d: "d", e: "e"
         } });
-        const derived = Object.assign(new base, {
+        const derived = Object.assign(new base({ owner: this }), {
           b: "+b", c: "+c", d: "+d", e: "+e",
         });
         delete base.a;

@@ -32,7 +32,7 @@ export default function universalizeCommandData (object: ?any, options:
     if (!id) {
       // Plain data object
       if (Object.getPrototypeOf(object) !== Object.prototype) {
-        throw new Error(`Object is not a plain data object: ${Object.constructor.name}`);
+        throw new Error(`Object is not a plain data object, got: ${Object.constructor.name}`);
       }
       const ret = {};
       for (const key of Object.keys(object)) {

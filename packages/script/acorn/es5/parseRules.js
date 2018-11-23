@@ -76,7 +76,7 @@ export function parseRegExpLiteral (transpiler: Transpiler, ast: RegExpLiteral,
 // # Programs
 
 const programContextRuleOverrides: Object = {
-  overrideThisExpression: ((t) => t.VALK().head()),
+  // overrideThisExpression: ((t) => t.VALK().head()),
   overrideBreakStatement: ((t, ast, options) =>
       t.parseError(ast, options, "'break' statement forbidden in top-level context")),
   overrideContinueStatement: ((t, ast, options) =>

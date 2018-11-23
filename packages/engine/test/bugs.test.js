@@ -190,19 +190,19 @@ describe("Engine bug tests", async () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const bodyText = `
       const test = () => {
+        const owner = this;
         const relationToOwnedEntity = new Valaa.Relation({
-            name: "Relation To Owned Entity",
+            name: "Relation To Owned Entity", owner,
         });
         const ownedEntity = new Valaa.Entity({
-            name: "Owned Entity",
-            owner: relationToOwnedEntity,
+            name: "Owned Entity", owner: relationToOwnedEntity,
         });
         relationToOwnedEntity[Valaa.Relation.target] = ownedEntity;
         ownedEntity.pointerToRelationThatOwnsIt = relationToOwnedEntity;
         return ownedEntity.pointerToRelationThatOwnsIt === relationToOwnedEntity;
       }
       test();
-      `;
+    `;
     const bodyKuery = transpileValaaScriptBody(bodyText, { customVALK: VALEK });
     const result = entities().test.do(bodyKuery, { verbosity: 0 });
     expect(result).toEqual(true);
@@ -211,14 +211,25 @@ describe("Engine bug tests", async () => {
   it("immaterializes a Property.value using REMOVED_FROM", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const bodyText = `
-      const Proto = new Entity({ properties: { foo: 10 }});
-      const instance = new Proto;
+      const Proto = new Entity({ owner: this, properties: { foo: 10 }});
+      const instance = new Proto({ owner: this });
       instance.foo = 20;
       delete instance.foo;
       instance.foo;
-      `;
+    `;
     const bodyKuery = transpileValaaScriptBody(bodyText, { customVALK: VALEK });
     const result = entities().test.do(bodyKuery, { verbosity: 0 });
     expect(result).toEqual(10);
+  });
+
+  it("doesn't redefine global scope 'this' inside call expressions", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
+    const bodyText = `
+      const foo = this;
+      Object.assign({}, { counter: this.counter });
+    `;
+    const bodyKuery = transpileValaaScriptBody(bodyText, { customVALK: VALEK, verbosity: 0 });
+    const result = entities().creator.do(bodyKuery, { verbosity: 0 });
+    expect(result.counter).toEqual(0);
   });
 });

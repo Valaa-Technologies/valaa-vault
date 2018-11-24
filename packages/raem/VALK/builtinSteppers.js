@@ -5,9 +5,10 @@ import { Iterable } from "immutable";
 import { VRef, RRef, DRef, BRef, obtainVRef, obtainRRef, obtainDRef, obtainBRef }
     from "~/raem/ValaaReference";
 
-import { elevateFieldRawSequence } from "~/raem/tools/denormalized/FieldInfo";
+import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
+import { PrototypeOfImmaterialTag } from "~/raem/state/Transient";
+
 import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
-import { PrototypeOfImmaterialTag } from "~/raem/tools/denormalized/Transient";
 
 import Valker from "~/raem/VALK/Valker";
 import Kuery, { dumpObject, dumpKuery, dumpScope } from "~/raem/VALK/Kuery";

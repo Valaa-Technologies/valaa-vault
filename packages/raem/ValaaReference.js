@@ -1,8 +1,9 @@
 // @flow
-import GhostPath, { JSONGhostPath, ghostPathFromJSON }
-    from "~/raem/tools/denormalized/GhostPath";
+
 import ValaaURI, { createValaaURI, createPartitionURI, getPartitionRawIdFrom }
     from "~/raem/ValaaURI";
+
+import GhostPath, { JSONGhostPath, ghostPathFromJSON } from "~/raem/state/GhostPath";
 
 import { HostRef, PackedHostValue, tryHostRef } from "~/raem/VALK/hostReference";
 

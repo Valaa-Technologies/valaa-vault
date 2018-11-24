@@ -1,9 +1,12 @@
-import { addedTo, created, fieldsSet, destroyed, removedFrom } from "~/raem/events";
-import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
+// @flow
+
 import { vRef } from "~/raem/ValaaReference";
 
-import getObjectTransient, { tryObjectTransient }
-    from "~/raem/tools/denormalized/getObjectTransient";
+import { addedTo, created, fieldsSet, destroyed, removedFrom } from "~/raem/events";
+
+import getObjectTransient, { tryObjectTransient } from "~/raem/state/getObjectTransient";
+
+import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 
 describe("Couplings", () => {
   beforeEach(() => {});

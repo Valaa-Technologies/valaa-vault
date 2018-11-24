@@ -3,7 +3,8 @@ import CreateBard, {
   recurseCreateOrDuplicate, mergeDenormalizedStateToState,
 } from "~/raem/redux/reducers/construct";
 
-import { createTransient } from "~/raem/tools/denormalized/Transient";
+import { createTransient } from "~/raem/state/Transient";
+
 import { invariantifyString } from "~/tools";
 
 export default function create (bard: CreateBard) {

@@ -1,4 +1,6 @@
-import denormalizedFromJS from "~/raem/tools/denormalized/denormalizedFromJS";
+// @flow
+
+import denormalizedFromJS from "~/raem/state/denormalizedFromJS";
 
 
 /**

@@ -1,11 +1,11 @@
 import { created, fieldsSet, transacted } from "~/raem/events";
 
 import { vRef, getRawIdFrom } from "~/raem/ValaaReference";
-import getObjectTransient, { tryObjectTransient }
-    from "~/raem/tools/denormalized/getObjectTransient";
-import getObjectField from "~/raem/tools/denormalized/getObjectField";
 
-import { createGhostRawId } from "~/raem/tools/denormalized/GhostPath";
+import getObjectField from "~/raem/state/getObjectField";
+import getObjectTransient, { tryObjectTransient } from "~/raem/state/getObjectTransient";
+import { createGhostRawId } from "~/raem/state/GhostPath";
+
 import { createMaterializeGhostPathAction, createMaterializeGhostAction }
     from "~/raem/tools/denormalized/ghost";
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";

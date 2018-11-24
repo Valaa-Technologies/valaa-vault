@@ -1,5 +1,7 @@
+// @flow
+
 import Bard from "~/raem/redux/Bard";
-import getObjectField from "~/raem/tools/denormalized/getObjectField";
+import getObjectField from "~/raem/state/getObjectField";
 
 export function bardCreateBvobReferenceData (bard, referrerFieldName) {
   return {

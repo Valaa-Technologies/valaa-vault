@@ -1,5 +1,7 @@
+// @flow
+
 import isSymbol from "~/tools/isSymbol";
-import { getTransientTypeName } from "~/raem/tools/denormalized/Transient";
+import { getTransientTypeName } from "~/raem/state/Transient";
 import dumpify from "~/tools/dumpify";
 
 export default function debugId (object: any, options: any) {

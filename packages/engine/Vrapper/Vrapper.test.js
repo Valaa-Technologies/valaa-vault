@@ -1,8 +1,9 @@
 // @flow
 
-import { created, destroyed } from "~/raem/events";
 import { vRef } from "~/raem/ValaaReference";
-import { createGhostRawId } from "~/raem/tools/denormalized/GhostPath";
+
+import { created, destroyed } from "~/raem/events";
+import { createGhostRawId } from "~/raem/state/GhostPath";
 
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";

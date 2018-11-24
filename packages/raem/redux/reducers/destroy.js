@@ -1,7 +1,10 @@
 // @flow
+
 import { getRawIdFrom } from "~/raem/ValaaReference";
-import Transient from "~/raem/tools/denormalized/Transient";
-import GhostPath from "~/raem/tools/denormalized/GhostPath";
+
+import GhostPath from "~/raem/state/GhostPath";
+import Transient from "~/raem/state/Transient";
+
 import { addDestroyCouplingPassages } from "~/raem/tools/denormalized/couplings";
 import { universalizePartitionMutation } from "~/raem/tools/denormalized/partitions";
 

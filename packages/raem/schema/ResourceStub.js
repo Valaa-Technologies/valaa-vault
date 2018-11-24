@@ -2,7 +2,7 @@
 import { GraphQLInterfaceType, GraphQLID, GraphQLNonNull, GraphQLList, GraphQLString }
     from "graphql/type";
 
-import { getTransientTypeName } from "~/raem/tools/denormalized/Transient";
+import { getTransientTypeName } from "~/raem/state/Transient";
 
 import aliasField from "~/raem/tools/graphql/aliasField";
 import generatedField from "~/raem/tools/graphql/generatedField";

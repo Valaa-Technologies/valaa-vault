@@ -5,10 +5,12 @@ import { isCreatedLike } from "~/raem/events";
 import { getRawIdFrom } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
 
+import { elevateFieldRawSequence, takeToCurrentObjectOwnerTransient } from "~/raem/state/FieldInfo";
 import getObjectField, { fillFieldInfoAndResolveAliases }
-    from "~/raem/tools/denormalized/getObjectField";
-import { elevateFieldRawSequence, takeToCurrentObjectOwnerTransient }
-    from "~/raem/tools/denormalized/FieldInfo";
+    from "~/raem/state/getObjectField";
+import { separatePartialSequence, combineAsPartialSequence, shouldAddAsPartialRemove }
+    from "~/raem/state/partialSequences";
+
 import { addCoupleCouplingPassages, addUncoupleCouplingPassages, getCoupling }
     from "~/raem/tools/denormalized/couplings";
 import { universalizePartitionMutation,
@@ -17,8 +19,6 @@ import { universalizePartitionMutation,
 import { isFrozen, universalizeFreezePartitionRoot, freezeOwnlings }
     from "~/raem/tools/denormalized/freezes";
 import { createMaterializeGhostPathAction } from "~/raem/tools/denormalized/ghost";
-import { separatePartialSequence, combineAsPartialSequence, shouldAddAsPartialRemove }
-    from "~/raem/tools/denormalized/partialSequences";
 
 import Bard from "~/raem/redux/Bard";
 

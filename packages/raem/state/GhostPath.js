@@ -1,6 +1,5 @@
 // @flow
 
-
 import type { RawId } from "~/raem/ValaaReference";
 
 import { invariantifyString } from "~/tools/invariantify";

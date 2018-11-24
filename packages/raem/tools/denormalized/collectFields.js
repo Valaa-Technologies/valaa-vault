@@ -1,7 +1,8 @@
 import { Iterable } from "immutable";
 import { GraphQLList, isLeafType, getNullableType } from "graphql/type";
-import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";
-import { getTransientTypeName } from "~/raem/tools/denormalized/Transient";
+
+import getObjectTransient from "~/raem/state/getObjectTransient";
+import { getTransientTypeName } from "~/raem/state/Transient";
 
 import wrapError from "~/tools/wrapError";
 import dumpify from "~/tools/dumpify";

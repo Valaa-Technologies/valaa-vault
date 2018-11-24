@@ -1,7 +1,8 @@
+// @flow
+
 import Bard from "~/raem/redux/Bard";
-import Transient from "~/raem/tools/denormalized/Transient";
-import traverseMaterializedOwnlings
-    from "~/raem/tools/denormalized/traverseMaterializedOwnlings";
+import Transient from "~/raem/state/Transient";
+import traverseMaterializedOwnlings from "~/raem/tools/denormalized/traverseMaterializedOwnlings";
 
 export function isFrozen (bard: Bard, transient: Transient) {
   return transient.get("isFrozen");

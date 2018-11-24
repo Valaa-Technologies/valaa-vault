@@ -64,9 +64,7 @@
 import { Action, created, destroyed, transacted } from "~/raem/events";
 import { vRef, getRawIdFrom, tryGhostPathFrom } from "~/raem/ValaaReference";
 import type { VRef, IdData } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
-import GhostPath from "~/raem/tools/denormalized/GhostPath";
-import type { State } from "~/raem/tools/denormalized/State";
-import Transient from "~/raem/tools/denormalized/Transient";
+import { GhostPath, State, Transient } from "~/raem/state";
 
 import { dumpify, dumpObject, invariantify, invariantifyObject, wrapError } from "~/tools";
 

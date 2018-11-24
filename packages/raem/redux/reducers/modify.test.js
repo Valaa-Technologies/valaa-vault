@@ -1,7 +1,11 @@
-import { addedTo, created, fieldsSet, removedFrom, replacedWithin } from "~/raem/events";
-import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";
-import getObjectField, { getObjectRawField } from "~/raem/tools/denormalized/getObjectField";
+// @flow
+
 import { vRef, dRef } from "~/raem/ValaaReference";
+
+import { addedTo, created, fieldsSet, removedFrom, replacedWithin } from "~/raem/events";
+
+import getObjectTransient from "~/raem/state/getObjectTransient";
+import getObjectField, { getObjectRawField } from "~/raem/state/getObjectField";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 

@@ -1,8 +1,11 @@
+// @flow
+
 import { IdData, obtainVRef } from "~/raem/ValaaReference";
 
-import { getTransientTypeName } from "~/raem/tools/denormalized/Transient";
-import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";
-import getObjectField from "~/raem/tools/denormalized/getObjectField";
+import { getTransientTypeName } from "~/raem/state/Transient";
+import getObjectTransient from "~/raem/state/getObjectTransient";
+import getObjectField from "~/raem/state/getObjectField";
+
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
 
 import { unspecifiedPlural, unspecifiedSingular } from "~/raem/tools/graphql/coupling";

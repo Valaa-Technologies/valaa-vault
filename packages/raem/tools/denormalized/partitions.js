@@ -3,8 +3,8 @@ import { VRef } from "~/raem/ValaaReference";
 import Bard, { getActionFromPassage } from "~/raem/redux/Bard";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import ValaaURI, { createPartitionURI } from "~/raem/ValaaURI";
-import Resolver from "~/raem/tools/denormalized/Resolver";
-import Transient from "~/raem/tools/denormalized/Transient";
+import { Resolver, Transient } from "~/raem/state";
+
 import traverseMaterializedOwnlings
     from "~/raem/tools/denormalized/traverseMaterializedOwnlings";
 

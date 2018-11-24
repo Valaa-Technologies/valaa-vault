@@ -1,19 +1,21 @@
 // @flow
 import { OrderedMap } from "immutable";
-
-import denormalizedFromJS from "~/raem/tools/denormalized/denormalizedFromJS";
 import { GraphQLObjectType } from "graphql/type";
 
-import Bard from "~/raem/redux/Bard";
-import isResourceType from "~/raem/tools/graphql/isResourceType";
-import fieldInitialValue from "~/raem/tools/graphql/fieldInitialValue";
-import { processUpdate, handleSets } from "~/raem/redux/reducers/modify";
 import { IdData, RawId, getRawIdFrom, tryCoupledFieldFrom, tryGhostPathFrom, obtainVRef }
     from "~/raem/ValaaReference";
+
+import denormalizedFromJS from "~/raem/state/denormalizedFromJS";
+import Transient from "~/raem/state/Transient";
+
+import Bard from "~/raem/redux/Bard";
+import { processUpdate, handleSets } from "~/raem/redux/reducers/modify";
+import { duplicateFields } from "~/raem/redux/reducers/duplicate";
+
+import isResourceType from "~/raem/tools/graphql/isResourceType";
+import fieldInitialValue from "~/raem/tools/graphql/fieldInitialValue";
 import { addCoupleCouplingPassages } from "~/raem/tools/denormalized/couplings";
 import { createMaterializeGhostPathAction } from "~/raem/tools/denormalized/ghost";
-import Transient from "~/raem/tools/denormalized/Transient";
-import { duplicateFields } from "~/raem/redux/reducers/duplicate";
 import { setCreatedObjectPartition, universalizePartitionMutation }
     from "~/raem/tools/denormalized/partitions";
 

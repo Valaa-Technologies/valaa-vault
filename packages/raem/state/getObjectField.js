@@ -1,14 +1,16 @@
+// @flow
+
 import { GraphQLObjectType } from "graphql/type";
 
 import { IdData, VRef } from "~/raem/ValaaReference";
 
-import { FieldInfo, elevateFieldReference, elevateFieldRawSequence }
-    from "~/raem/tools/denormalized/FieldInfo";
-import Resolver from "~/raem/tools/denormalized/Resolver";
-import type { State } from "~/raem/tools/denormalized/State";
+import { FieldInfo, elevateFieldReference, elevateFieldRawSequence } from "~/raem/state/FieldInfo";
+import Resolver from "~/raem/state/Resolver";
+import type { State } from "~/raem/state/State";
 import Transient, { tryTransientTypeName, createImmaterialTransient, PrototypeOfImmaterialTag }
-    from "~/raem/tools/denormalized/Transient";
-import denormalizedFromJS from "~/raem/tools/denormalized/denormalizedFromJS";
+    from "~/raem/state/Transient";
+import denormalizedFromJS from "~/raem/state/denormalizedFromJS";
+
 import fieldDefaultValue from "~/raem/tools/graphql/fieldDefaultValue";
 
 import { wrapError, dumpObject } from "~/tools";

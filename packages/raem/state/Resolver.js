@@ -1,35 +1,45 @@
 // @flow
+
 import { GraphQLSchema } from "graphql/type";
 
 import { VRef, invariantifyId, obtainVRef, tryCoupledFieldFrom, expandIdDataFrom }
     from "~/raem/ValaaReference";
 import type { JSONIdData, IdData, RawId } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
-import { tryHostRef } from "~/raem/VALK/hostReference";
-import GhostPath from "~/raem/tools/denormalized/GhostPath";
+
+import GhostPath from "~/raem/state/GhostPath";
 import Transient, { createImmaterialTransient, createInactiveTransient }
-    from "~/raem/tools/denormalized/Transient";
+    from "~/raem/state/Transient";
+import type { State } from "~/raem/state/State";
 
-import type { State } from "~/raem/tools/denormalized/State";
+import { tryHostRef } from "~/raem/VALK/hostReference";
 
-import { dumpObject, invariantify, invariantifyString, LogEventGenerator }
-    from "~/tools";
+
+import { dumpObject, invariantify, invariantifyString, LogEventGenerator } from "~/tools";
 
 type BindFieldVRefOptions = {
   coupledField?: string, defaultCoupledField?: string, bindPartition?: boolean,
 };
 
 /**
- * Resolver is a helper component for performing various resolutions against a specific known state.
- * Three main types of resolutions are:
- * 1. resolving ValaaReference's (VRef's) to find corresponding Transient's from the state
- * 2. binding external VRef data to existing VRef objects with the same identity in the state
- * 3. resolving Transient field lookups
+ * Resolver is a very low-level component for performing various
+ * resolutions against a specific known state.
  *
- * All references in corpus state must be VRef's, and those VRef's must be bound. Binding
- * means that before storing their target Transient is looked up, and the VRef is replaced with that
- * of the transient "id" field (with appropriate coupledField). This enables both internal
- * consistency (no invalid references to void) as well as better performance (id-VRef's can be
- * strict equally compared).
+ * Three main types of resolutions are:
+ * 1. resolving ValaaReference's (VRef's) to find corresponding
+ *    Transient's from the state
+ * 2. binding external, possibly serialized VRef data to existing VRef
+ *    objects with the same identity in the state
+ * 3. resolving Transient field lookups, including ghost elevation
+ *    proceduce
+ *
+ * All references in corpus state must be VRef's, and those VRef's must
+ * be bound, meaning that the same conceptual reference uses the same
+ * object and can thus be compared with '==='.
+ * Binding means that before storing their target Transient is looked
+ * up, and the VRef is replaced with that of the transient "id" field
+ * (with appropriate coupledField). This enables both internal
+ * consistency (no invalid references to void) as well as better
+ * performance.
  *
  * @export
  * @class Resolver

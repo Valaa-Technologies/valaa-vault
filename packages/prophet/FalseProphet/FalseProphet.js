@@ -2,7 +2,7 @@
 
 import { Action, Command, EventBase } from "~/raem/events";
 import type { Story } from "~/raem/redux/Bard";
-import type { State } from "~/raem/tools/denormalized/State";
+import type { State } from "~/raem/state";
 import ValaaURI from "~/raem/ValaaURI";
 
 import Follower from "~/prophet/api/Follower";

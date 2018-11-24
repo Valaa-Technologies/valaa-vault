@@ -1,4 +1,5 @@
 // @flow
+
 import { OrderedSet } from "immutable";
 
 // If a sequence field has this field specified, the field value is a sequence-diff field on top of

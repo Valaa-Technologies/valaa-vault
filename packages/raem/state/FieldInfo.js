@@ -1,14 +1,15 @@
 // @flow
+
 import { OrderedSet } from "immutable";
+
 import { IdData, isIdData, VRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
 
-import { getObjectRawField } from "~/raem/tools/denormalized/getObjectField";
-import GhostPath, { createGhostRawId, GhostElevation }
-    from "~/raem/tools/denormalized/GhostPath";
-import Resolver from "~/raem/tools/denormalized/Resolver";
+import { getObjectRawField } from "~/raem/state/getObjectField";
+import GhostPath, { createGhostRawId, GhostElevation } from "~/raem/state/GhostPath";
+import { PartialRemovesTag } from "~/raem/state/partialSequences";
+import Resolver from "~/raem/state/Resolver";
 import Transient, { createImmaterialTransient, PrototypeOfImmaterialTag }
-    from "~/raem/tools/denormalized/Transient";
-import { PartialRemovesTag } from "~/raem/tools/denormalized/partialSequences";
+    from "~/raem/state/Transient";
 
 export type FieldInfo = {
   name: string,

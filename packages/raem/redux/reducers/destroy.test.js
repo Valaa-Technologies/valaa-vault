@@ -1,6 +1,10 @@
-import { created, destroyed } from "~/raem/events";
+// @flow
+
 import { vRef } from "~/raem/ValaaReference";
-import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";
+
+import { created, destroyed } from "~/raem/events";
+
+import getObjectTransient from "~/raem/state/getObjectTransient";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 

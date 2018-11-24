@@ -1,9 +1,11 @@
-import getObjectField from "~/raem/tools/denormalized/getObjectField";
-import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";
+// @flow
+
+import getObjectField from "~/raem/state/getObjectField";
+import getObjectTransient from "~/raem/state/getObjectTransient";
 
 import dumpify from "~/tools/dumpify";
 
-function listLinkResolver (source, args, context) {
+function listLinkResolver (source: any, args: any, context: Object) {
   try {
     // console.log(`Resolving list link ${context.parentType.name}.${context.fieldName}: ${
     //    returnType.name}`);

@@ -2,12 +2,13 @@
 import { GraphQLObjectType } from "graphql/type";
 import { Map } from "immutable";
 
-import { Action } from "~/raem/events";
-import isResourceType from "~/raem/tools/graphql/isResourceType";
-import Resolver from "~/raem/tools/denormalized/Resolver";
-import { getTransientTypeName } from "~/raem/tools/denormalized/Transient";
-import type { State } from "~/raem/tools/denormalized/State";
 import { obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
+
+import { Action } from "~/raem/events";
+
+import { Resolver, State } from "~/raem/state";
+import { getTransientTypeName } from "~/raem/state/Transient";
+import isResourceType from "~/raem/tools/graphql/isResourceType";
 
 import { dumpObject, invariantify, outputCollapsedError } from "~/tools";
 

@@ -1,10 +1,12 @@
 import { OrderedSet } from "immutable";
 
-import Bard from "~/raem/redux/Bard";
 import { VRef, obtainVRef, vRef, getRawIdFrom, expandIdDataFrom }
     from "~/raem/ValaaReference";
+
 import Transient, { createTransient, getTransientTypeName, PrototypeOfImmaterialTag }
-    from "~/raem/tools/denormalized/Transient";
+    from "~/raem/state/Transient";
+
+import Bard from "~/raem/redux/Bard";
 
 import { derivedId, dumpify, dumpObject, invariantify, wrapError } from "~/tools";
 import {

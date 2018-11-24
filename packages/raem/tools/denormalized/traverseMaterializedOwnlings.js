@@ -1,6 +1,8 @@
-import Bard from "~/raem/redux/Bard";
+// @flow
+
 import { VRef } from "~/raem/ValaaReference";
-import Transient from "~/raem/tools/denormalized/Transient";
+import Transient from "~/raem/state/Transient";
+import Bard from "~/raem/redux/Bard";
 
 /**
  * Traverses all materialized ownlings recursively and calls the given *visitor* callback for each.

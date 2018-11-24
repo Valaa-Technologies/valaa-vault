@@ -1,5 +1,7 @@
+// @flow
+
 import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
-import Transient from "~/raem/tools/denormalized/Transient";
+import Transient from "~/raem/state/Transient";
 
 // import debugId from "~/engine/debugId";
 import { Valker } from "~/engine/VALEK";

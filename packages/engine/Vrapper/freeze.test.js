@@ -1,9 +1,10 @@
 // @flow
 
-import { created, transacted, fieldsSet } from "~/raem/events/index";
 import { vRef } from "~/raem/ValaaReference";
-// import { createGhostRawId } from "~/raem/tools/denormalized/GhostPath";
 import { createPartitionURI } from "~/raem/ValaaURI";
+
+import { created, transacted, fieldsSet } from "~/raem/events/index";
+// import { createGhostRawId } from "~/raem/state/GhostPath";
 
 import VALEK from "~/engine/VALEK";
 // import Vrapper from "~/engine/Vrapper";

@@ -1,8 +1,7 @@
 // @flow
+
 import type { IdData } from "~/raem/ValaaReference";
-import type { State } from "~/raem/tools/denormalized/State";
-import type { Transient } from "~/raem/tools/denormalized/Transient";
-import Resolver from "~/raem/tools/denormalized/Resolver";
+import { Resolver, State, Transient } from "~/raem/state";
 
 import { wrapError } from "~/tools";
 

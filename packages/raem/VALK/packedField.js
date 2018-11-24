@@ -2,7 +2,7 @@ import { Iterable } from "immutable";
 
 import { VRef } from "~/raem/ValaaReference";
 
-import type { FieldInfo } from "~/raem/tools/denormalized/FieldInfo";
+import type { FieldInfo } from "~/raem/state/FieldInfo";
 
 import dumpify from "~/tools/dumpify";
 import { invariantifyString } from "~/tools/invariantify";

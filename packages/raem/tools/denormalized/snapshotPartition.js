@@ -3,10 +3,10 @@ import { Iterable } from "immutable";
 import { GraphQLList, isLeafType, getNamedType } from "graphql/type";
 
 import { getRawIdFrom, tryRawIdFrom } from "~/raem/ValaaReference";
-import { getTransientTypeName } from "~/raem/tools/denormalized/Transient";
+import { getTransientTypeName } from "~/raem/state/Transient";
 import collectFields from "~/raem/tools/denormalized/collectFields";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
-import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";
+import getObjectTransient from "~/raem/state/getObjectTransient";
 
 import { createId, wrapError } from "~/tools";
 */

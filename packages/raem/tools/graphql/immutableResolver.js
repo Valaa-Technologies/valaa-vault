@@ -1,7 +1,9 @@
-import dumpify from "~/tools/dumpify";
-import getObjectField from "~/raem/tools/denormalized/getObjectField";
+// @flow
 
-export default function immutableResolver (source, args, context) {
+import dumpify from "~/tools/dumpify";
+import getObjectField from "~/raem/state/getObjectField";
+
+export default function immutableResolver (source: any, args: any, context: Object) {
   try {
     // console.log(`Resolving immutable ${parentType.name}.${fieldName}: ${returnType}`);
     const ret = getObjectField(context.rootValue.resolver, source, context.fieldName);

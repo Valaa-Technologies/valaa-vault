@@ -2,7 +2,7 @@
 import { OrderedMap } from "immutable";
 
 import { VRef, IdData, RawId, vRef, ValaaDataReference } from "~/raem/ValaaReference";
-import type GhostPath from "~/raem/tools/denormalized/GhostPath";
+import type GhostPath from "~/raem/state/GhostPath";
 
 import invariantify from "~/tools/invariantify";
 import wrapError from "~/tools/wrapError";

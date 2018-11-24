@@ -10,18 +10,18 @@ import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "
 import { VRef, vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom, expandIdDataFrom,
     obtainVRef } from "~/raem/ValaaReference";
 import { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";
-import { tryElevateFieldValue } from "~/raem/tools/denormalized/FieldInfo";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
-import Resolver from "~/raem/tools/denormalized/Resolver";
-import type { State } from "~/raem/tools/denormalized/State";
-import Transient from "~/raem/tools/denormalized/Transient";
+
+import { Resolver, State, Transient } from "~/raem/state";
+import { tryElevateFieldValue } from "~/raem/state/FieldInfo";
+import getObjectTransient from "~/raem/state/getObjectTransient";
+import { getObjectRawField } from "~/raem/state/getObjectField";
+
 import { createGhostVRefInInstance, isMaterialized, createMaterializeGhostAction }
     from "~/raem/tools/denormalized/ghost";
 import { MissingPartitionConnectionsError, addConnectToPartitionToError }
     from "~/raem/tools/denormalized/partitions";
-import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";
-import { getObjectRawField } from "~/raem/tools/denormalized/getObjectField";
 
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 

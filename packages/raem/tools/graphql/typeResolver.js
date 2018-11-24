@@ -1,5 +1,8 @@
+// @flow
+
+import { getTransientTypeName } from "~/raem/state/Transient";
+
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
-import { getTransientTypeName } from "~/raem/tools/denormalized/Transient";
 import dumpify from "~/tools/dumpify";
 
 export function typeNameResolver (resource, info) {

@@ -2,10 +2,11 @@ import { OrderedMap } from "immutable";
 import { created, fieldsSet, removedFrom, destroyed } from "~/raem/events";
 import VALK from "~/raem/VALK";
 
-import getObjectTransient from "~/raem/tools/denormalized/getObjectTransient";
-import getObjectField from "~/raem/tools/denormalized/getObjectField";
 import { vRef } from "~/raem/ValaaReference";
-import GhostPath from "~/raem/tools/denormalized/GhostPath";
+
+import getObjectTransient from "~/raem/state/getObjectTransient";
+import getObjectField from "~/raem/state/getObjectField";
+import GhostPath from "~/raem/state/GhostPath";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 import { isMaterialized, createMaterializeGhostAction }

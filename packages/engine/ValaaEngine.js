@@ -13,8 +13,7 @@ import ValaaReference, { vRef, IdData, obtainVRef, getRawIdFrom } from "~/raem/V
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import { getActionFromPassage } from "~/raem/redux/Bard";
 
-import Transient, { createTransient, getTransientTypeName }
-    from "~/raem/tools/denormalized/Transient";
+import Transient, { createTransient, getTransientTypeName } from "~/raem/state/Transient";
 import { isGhost } from "~/raem/tools/denormalized/ghost";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
 

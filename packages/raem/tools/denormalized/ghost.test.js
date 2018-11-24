@@ -4,10 +4,11 @@ import VALK from "~/raem/VALK";
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 import { VRef, IdData, vRef, getRawIdFrom } from "~/raem/ValaaReference";
 
-import { createTransient } from "~/raem/tools/denormalized/Transient";
+import GhostPath from "~/raem/state/GhostPath";
+import { createTransient } from "~/raem/state/Transient";
+
 import { createMaterializeGhostAction, createImmaterializeGhostAction, isGhost, isMaterialized,
     createGhostVRefInInstance } from "~/raem/tools/denormalized/ghost";
-import GhostPath from "~/raem/tools/denormalized/GhostPath";
 
 function _ghostVRef (prototypeRef: VRef, hostRawId: IdData, hostPrototypeRawId: IdData): VRef {
   const ghostPath = prototypeRef.getGhostPath()

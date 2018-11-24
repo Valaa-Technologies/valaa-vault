@@ -1,4 +1,7 @@
+// @flow
+
 import { Seq, Iterable } from "immutable";
+
 import ValaaReference from "~/raem/ValaaReference";
 
 export default function denormalizedFromJS (data) {

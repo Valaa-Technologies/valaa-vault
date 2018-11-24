@@ -3,15 +3,16 @@
 import { Iterable, OrderedMap } from "immutable";
 import { GraphQLSchema, GraphQLObjectType } from "graphql/type";
 
-import { elevateFieldReference, elevateFieldRawSequence }
-    from "~/raem/tools/denormalized/FieldInfo";
-import Resolver from "~/raem/tools/denormalized/Resolver";
-import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
-import Transient, { tryTransientTypeName, PrototypeOfImmaterialTag }
-    from "~/raem/tools/denormalized/Transient";
-import { getObjectRawField } from "~/raem/tools/denormalized/getObjectField";
-
 import { VRef, isIdData } from "~/raem/ValaaReference";
+
+import { elevateFieldReference, elevateFieldRawSequence }
+    from "~/raem/state/FieldInfo";
+import { getObjectRawField } from "~/raem/state/getObjectField";
+import Resolver from "~/raem/state/Resolver";
+import Transient, { tryTransientTypeName, PrototypeOfImmaterialTag }
+    from "~/raem/state/Transient";
+
+import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
 
 import raemBuiltinSteppers, { debugWrapBuiltinSteppers } from "~/raem/VALK/builtinSteppers";
 import Kuery, { dumpKuery, dumpScope, dumpObject } from "~/raem/VALK/Kuery";

@@ -1,7 +1,6 @@
 import { OrderedSet } from "immutable";
 
-import { VRef, obtainVRef, vRef, getRawIdFrom, expandIdDataFrom }
-    from "~/raem/ValaaReference";
+import { VRef, obtainVRef, vRef, expandIdDataFrom } from "~/raem/ValaaReference";
 
 import Transient, { createTransient, getTransientTypeName, PrototypeOfImmaterialTag }
     from "~/raem/state/Transient";
@@ -16,28 +15,29 @@ import {
 } from "~/raem/redux/reducers/construct";
 
 export default function duplicate (bard: DuplicateBard) {
+  const passage = bard.passage;
   invariantify(!bard.passage.typeName, "DUPLICATED.typeName must be empty");
-  if (bard.passage.id === null) return bard.getState();
+  if (passage.id === null) return bard.getState();
 
   const bailOut = prepareCreateOrDuplicateObjectTransientAndId(bard, "ResourceStub");
   invariantify(!bailOut, `DUPLICATED internal error:${
       ""} should never bail out due to Bvob/re-create conditions`);
   // TODO(iridian): invariantify that the type is a Resource
 
-  bard._duplicationRootId = bard.objectId.rawId();
+  bard._duplicationRootId = passage.id.rawId();
 
   const isInsideRecombined = bard._fieldsToPostProcess;
   if (!isInsideRecombined) prepareDuplicationContext(bard);
   // else we're a sub-action inside a RECOMBINED operation
 
-  const newObjectId = bard.objectId;
+  const newObjectId = passage.id;
   const newObjectTransient = bard.objectTransient;
 
   // Specifying "Resource" as opposed to "ResourceStub" as the typeName implicitly requires the
   // resource to be active. Inactive resources appear only in InactiveResource/ResourceStub tables.
-  bard.goToTransientOfId(obtainVRef(bard.passage.duplicateOf), "Resource");
-  const ghostPath = bard.objectId.getGhostPath();
-  bard.passage.typeName = getTransientTypeName(bard.objectTransient);
+  bard.goToTransientOfId(obtainVRef(passage.duplicateOf), "Resource");
+  const ghostPath = passage.id.getGhostPath();
+  passage.typeName = getTransientTypeName(bard.objectTransient);
   if (!ghostPath.isGhost()) {
     // original is not a ghost: only check if it is an instance for _duplicationRootPrototypeId
     const prototypeId = bard.objectTransient.get("prototype");
@@ -56,7 +56,7 @@ export default function duplicate (bard: DuplicateBard) {
     if (!bard.objectTransient[PrototypeOfImmaterialTag]) {
       bard.objectTransient = bard.objectTransient.set("prototype", prototypeId);
     } else {
-      invariantify(bard.passage.initialState.owner,
+      invariantify(passage.initialState.owner,
           `DUPLICATED: explicit initialState.owner required when duplicating an immaterialized ${
                 ""}ghost: implicit ghost owner retrieval/materialization not implemented yet`);
       // TODO(iridian): this needed? mem-cpu tradeoff: found in prototype's...
@@ -64,7 +64,7 @@ export default function duplicate (bard: DuplicateBard) {
       bard.objectTransient = createTransient({ typeName: bard.typeName, prototype: prototypeId });
     }
   }
-  _createDuplicate(bard, newObjectId, bard.passage.initialState, bard.passage.preOverrides,
+  _createDuplicate(bard, newObjectId, passage.initialState, passage.preOverrides,
       newObjectTransient);
 
   return isInsideRecombined
@@ -75,7 +75,7 @@ export default function duplicate (bard: DuplicateBard) {
 function _createDuplicate (bard: DuplicateBard, duplicateId: VRef, initialState: Object,
     preOverrides?: Object, newObjectTransient: Object) {
   // Assumes that the original ie. duplicate source object is bard.objectTransient/Id
-  bard._duplicateIdByOriginalRawId[getRawIdFrom(bard.objectId)] = duplicateId;
+  bard._duplicateIdByOriginalRawId[bard.objectId.rawId()] = duplicateId;
   if (!newObjectTransient) {
     bard.objectTransient = bard.objectTransient.set("id", duplicateId);
   } else {

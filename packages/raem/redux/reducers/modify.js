@@ -43,40 +43,41 @@ import { invariantify, invariantifyString, wrapError } from "~/tools";
  *  Should eventually be removed from public API or at the very least very strictly validated.
  */
 export default function modifyResource (bard: Bard) {
+  const passage = bard.passage;
   try {
-    const objectId = bard.getPassageObjectId();
-    bard.shouldUpdateCouplings = !(bard.passage.local || {}).dontUpdateCouplings;
+    bard.shouldUpdateCouplings = !(passage.local || {}).dontUpdateCouplings;
     bard.denormalized = {};
     bard.fieldsTouched = new Set();
-    bard.tryGoToTransientOfRawId(objectId.rawId(), bard.passage.typeName);
-    if (!bard.objectTransient) {
+    bard.goToTransientOfPassageObject(); // no-require, non-ghost-lookup
+    if (!bard.objectTransient) { // ghost or fail
       const materializeGhostSubCommand = createMaterializeGhostPathAction(
-          bard.state, objectId.getGhostPath(), bard.passage.typeName);
+          bard.state, passage.id.getGhostPath(), passage.typeName);
       bard.updateState(bard.subReduce(bard.state, materializeGhostSubCommand));
-      bard.goToTransientOfRawId(objectId.rawId());
+      bard.goToTransientOfRawId(passage.id.rawId());
+      passage.id = bard.objectId;
+      if (!passage.id) throw new Error("INTERNAL ERROR: no bard.objectId");
     }
     bard.goToResourceTypeIntro();
 
-    bard.passage.id = bard.objectId;
     invariantify(OrderedMap.isOrderedMap(bard.objectTransient),
         "object Transient must be an OrderedMap");
     let mutatesPartition = false;
     const wasFrozen = isFrozen(bard, bard.objectTransient); // transient modifications are allowed.
     const newResource = bard.objectTransient.withMutations(mutableObject => {
-      if (bard.passage.sets) {
+      if (passage.sets) {
         mutatesPartition =
-            processUpdate(bard, bard.passage.sets, handleSets, "FIELDS_SET.sets", mutableObject)
+            processUpdate(bard, passage.sets, handleSets, "FIELDS_SET.sets", mutableObject)
             || mutatesPartition;
       }
-      if (bard.passage.removes) {
+      if (passage.removes) {
         mutatesPartition =
-            processUpdate(bard, bard.passage.removes, handleRemoves, "REMOVED_FROM.removes",
+            processUpdate(bard, passage.removes, handleRemoves, "REMOVED_FROM.removes",
                 mutableObject)
             || mutatesPartition;
       }
-      if (bard.passage.adds) {
+      if (passage.adds) {
         mutatesPartition =
-            processUpdate(bard, bard.passage.adds, handleAdds, "ADDED_TO.adds", mutableObject)
+            processUpdate(bard, passage.adds, handleAdds, "ADDED_TO.adds", mutableObject)
             || mutatesPartition;
       }
       if (bard.refreshPartition) {
@@ -87,15 +88,15 @@ export default function modifyResource (bard: Bard) {
     });
     if (mutatesPartition) {
       if (wasFrozen) {
-        throw new Error(`Cannot modify frozen ${bard.objectId.rawId()}:${bard.passage.typeName}`);
+        throw new Error(`Cannot modify frozen ${passage.id.rawId()}:${passage.typeName}`);
       }
-      universalizePartitionMutation(bard, bard.objectId);
+      universalizePartitionMutation(bard, passage.id);
     }
     return bard.updateStateWith(state =>
-        state.setIn([bard.objectTypeIntro.name, bard.objectId.rawId()], newResource));
+        state.setIn([bard.objectTypeIntro.name, passage.id.rawId()], newResource));
   } catch (error) {
     throw wrapError(error, `During ${bard.debugId()}\n .modifyResource(), with:`,
-        "\n\tpassage:", bard.passage,
+        "\n\tpassage:", passage,
         "\n\ttransient:", bard.objectTransient,
         "\n\tbard:", bard);
   }

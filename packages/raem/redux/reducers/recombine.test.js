@@ -61,14 +61,14 @@ describe("RECOMBINED", () => {
         .toEqual(1);
     expect(harness.run(vRef("A_child2Copy"), ["§->", "sourceGlues"]).length)
         .toEqual(1);
-    expect(harness.run(vRef("A_child1Copy"), ["§->", "targetGlues", 0, "target"]))
-        .toEqual(vRef("A_child2Copy"));
-    expect(harness.run(vRef("A_child1Copy"), ["§->", "sourceGlues", 0, "source"]))
-        .toEqual(vRef("A_child2Copy"));
-    expect(harness.run(vRef("A_child2Copy"), ["§->", "targetGlues", 0, "target"]))
-        .toEqual(vRef("A_child1Copy"));
-    expect(harness.run(vRef("A_child2Copy"), ["§->", "sourceGlues", 0, "source"]))
-        .toEqual(vRef("A_child1Copy"));
+    expect(harness.run(vRef("A_child1Copy"), ["§->", "targetGlues", 0, "target"]).rawId())
+        .toEqual("A_child2Copy");
+    expect(harness.run(vRef("A_child1Copy"), ["§->", "sourceGlues", 0, "source"]).rawId())
+        .toEqual("A_child2Copy");
+    expect(harness.run(vRef("A_child2Copy"), ["§->", "targetGlues", 0, "target"]).rawId())
+        .toEqual("A_child1Copy");
+    expect(harness.run(vRef("A_child2Copy"), ["§->", "sourceGlues", 0, "source"]).rawId())
+        .toEqual("A_child1Copy");
   });
 
   it("customizes cherry-picked sub-resources with id and initialState overrides", () => {
@@ -95,18 +95,18 @@ describe("RECOMBINED", () => {
         .not.toEqual(vRef("A_child1"));
     expect(harness.run(childCopies[0], "name"))
         .toEqual("child1");
-    expect(childCopies[1])
-        .toEqual(vRef("A_child2Copy"));
+    expect(childCopies[1].rawId())
+        .toEqual("A_child2Copy");
     expect(harness.run(childCopies[1], "name"))
         .toEqual("child2 copy");
     expect(harness.run(childCopies[0], "name"))
         .toEqual("child1");
     expect(harness.run(childCopies[1], "name"))
         .toEqual("child2 copy");
-    expect(harness.run(childCopies[0], "parent"))
-        .toEqual(vRef("A_parentCopy"));
-    expect(harness.run(childCopies[1], "parent"))
-        .toEqual(vRef("A_parentCopy"));
+    expect(harness.run(childCopies[0], "parent").rawId())
+        .toEqual("A_parentCopy");
+    expect(harness.run(childCopies[1], "parent").rawId())
+        .toEqual("A_parentCopy");
     expect(harness.run(childCopies[0], ["§->", "targetGlues", 0, "target"]))
         .toEqual(childCopies[1]);
     expect(harness.run(childCopies[0], ["§->", "sourceGlues", 0, "source"]))
@@ -178,12 +178,12 @@ describe("RECOMBINED", () => {
     const childCopyChildren = harness.run(parentCopyChildren[0], ["§->", "children"]);
     expect(childCopyChildren.length)
         .toEqual(1);
-    expect(childCopyChildren[0])
-        .toEqual(vRef("A_child2Copy"));
+    expect(childCopyChildren[0].rawId())
+        .toEqual("A_child2Copy");
     const child1GlueCopy = harness.run(parentCopyChildren[0], ["§->", "targetGlues", 0]);
     expect(child1GlueCopy.rawId())
         .not.toEqual("A_child1GlueChild2");
-    expect(harness.run(child1GlueCopy, "target"))
-        .toEqual(vRef("A_child2Copy"));
+    expect(harness.run(child1GlueCopy, "target").rawId())
+        .toEqual("A_child2Copy");
   });
 });

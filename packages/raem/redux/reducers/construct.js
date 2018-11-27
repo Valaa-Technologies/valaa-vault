@@ -6,7 +6,7 @@ import { IdData, RawId, getRawIdFrom, tryCoupledFieldFrom, tryGhostPathFrom, obt
     from "~/raem/ValaaReference";
 
 import denormalizedFromJS from "~/raem/state/denormalizedFromJS";
-import Transient from "~/raem/state/Transient";
+import Transient, { createTransient } from "~/raem/state/Transient";
 
 import Bard from "~/raem/redux/Bard";
 import { processUpdate, handleSets } from "~/raem/redux/reducers/modify";
@@ -38,39 +38,55 @@ export class DuplicateBard extends CreateBard {
 
 export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, typeName: string) {
   // typeName can be falsy if this is a DUPLICATED action
-  bard.goToTransientOfActionObject({ typeName, require: false, nonGhostLookup: true });
+  bard.goToTransientOfPassageObject(typeName); // no-require, non-ghost
+  const passage = bard.passage;
   if (bard.objectTransient) {
     // The object already exists in the denormalized state.
-    // In general this is an error but there are specific circumstances below where it is valid.
-    // 1. Bvob (and Data, non-implemented atm) object creation is idempotent thus we can return.
-    if (bard.passage.typeName === "Blob") return bard.state;
-    // 2. The same TRANSACTED can create same Resource twice. Usually this is the result of some
-    // sub-actions, like how ghost materialization can arrive and materialize the same
-    // owner/prototype Resource multiple times through multiple paths.
+    // In general this is an error but there are specific circumstances
+    // below where it is valid.
+    // 1. Bvob (and Data, non-implemented atm) object creation is
+    //    idempotent thus we can return.
+    if (passage.typeName === "Blob") return bard.state;
+    // 2. The same TRANSACTED can create same Resource twice. Usually
+    //    this is the result of some sub-actions, like how ghost
+    //    materialization can arrive and materialize the same owner or
+    //    prototype Resource multiple times through separate diamond
+    //    paths.
     const preActionBard = bard.fork({ state: bard.preActionState });
-    if (!preActionBard.tryGoToTransientOfRawId(bard.objectId.rawId())) {
+    if (!preActionBard.tryGoToTransientOfRawId(passage.id.rawId())) {
       // Object didn't exist before this action, so we can just ignored this CREATED.
       return bard.state;
     }
-    // 3. Inactive object stub transients are created in denormalized state by various
-    // cross-partition references. Such a stub contains "id" and any possible already-related
-    // transientField fields. These stubs are merged to the newly created Resource on creation.
-    invariantify(bard.objectId.isInactive(),
-        `${bard.passage.type}: Resource already exists with id: ${
-            bard.objectId.rawId()}:${bard.passage.typeName}`, bard.objectTransient);
-    bard.objectId.setInactive(false);
-  } else if (bard.objectId.isGhost()) {
+    // 3. Inactive object stub transients are created in denormalized
+    //    state by various cross-partition references. Such a stub
+    //    contains "id" and any possible already-related transientField
+    //    fields. These stubs are merged to the newly created Resource
+    //    on creation.
+    invariantify(passage.id.isInactive(),
+        `${passage.type}: Resource already exists with id: ${
+          passage.id.rawId()}:${passage.typeName}`, bard.objectTransient);
+    passage.id.setInactive(false);
+    if (passage.typeName) {
+      // Inactive resource typeName is "ResourceStub": update it to correct value for CREATEDs.
+      bard.objectTransient = bard.objectTransient.set("typeName", passage.typeName);
+    }
+  } else if (passage.id.isGhost()) {
     // Materializing a potentially immaterial ghost
-    invariantify(bard.passage.type === "CREATED",
+    invariantify(passage.type === "CREATED",
         "action.type must be CREATED if action.id is a ghost path");
-    invariantifyString(bard.passage.typeName, "CREATED.typeName required");
+    invariantifyString(passage.typeName, "CREATED.typeName required");
     bard.updateState(
         bard.subReduce(bard.state,
-            createMaterializeGhostPathAction(bard.state, bard.objectId.getGhostPath(),
-                bard.passage.typeName)));
-    bard.goToTransientOfRawId(bard.objectId.rawId());
-    bard.objectId = bard.objectTransient.get("id");
-  } // else a regular, plain create/duplicate/instantiate
+            createMaterializeGhostPathAction(
+                bard.state, passage.id.getGhostPath(), passage.typeName)));
+    bard.goToTransientOfRawId(passage.id.rawId());
+    passage.id = bard.objectTransient.get("id");
+    if (!passage.id) throw new Error("INTERNAL ERROR: no bard.objectTransient.get('id')");
+  } else {
+    // regular, plain create/duplicate/instantiate
+    bard.objectId = passage.id;
+    bard.objectTransient = createTransient(passage);
+  }
   return undefined;
 }
 

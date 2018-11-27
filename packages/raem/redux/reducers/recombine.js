@@ -1,36 +1,48 @@
 // @flow
 
-import { createPassageFromAction } from "~/raem/redux/Bard";
 import {
-  DuplicateBard,
-  prepareDuplicationContext, postProcessDuplicationContext,
+  DuplicateBard, prepareDuplicationContext, postProcessDuplicationContext,
 } from "~/raem/redux/reducers/construct";
-import { obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
+import { getRawIdFrom } from "~/raem/ValaaReference";
 
 export default function recombine (bard: DuplicateBard) {
   // Execute first pass, scan-and-duplicate-hierarchy by reducing all contained DUPLICATEDs
   prepareDuplicationContext(bard);
   bard.setPassages((bard.passage.actions || []).map(action => {
-    let newId = action.id
-    // If the directive updates the owner we mark the new id as null: this will omit the entry
-    // from the first phase ownling fields. When the DUPLICATED directive is later on actually
-    // evaluated it will set the lookup id value propertly for the subsequent phases.
-        && !(action.initialState && (action.initialState.owner || action.initialState.source))
-        && !(action.preOverrides && (action.preOverrides.owner || action.preOverrides.source))
-            ? obtainVRef(action.id)
-            : null;
-    if (newId && bard.tryGoToTransientOfRawId(
-        newId.rawId(), "ResourceStub", false, newId.tryGhostPath())) {
-      newId = bard.objectId;
+    const passage = bard.createPassageFromAction(action);
+    if (!action.id
+        || (action.initialState && (action.initialState.owner || action.initialState.source))
+        || (action.preOverrides && (action.preOverrides.owner || action.preOverrides.source))) {
+      // If the directive updates the owner we mark the new id as null:
+      // this will omit the entry from the corresponding ownling field
+      // side during first pass reduction.
+      // Once the DUPLICATED directive itself is reduced it will set
+      // the lookup id value properly and add a coupling aggregate
+      // event for adding itself to the owner ownling field.
+      // See duplicateFields.js:~120 with "const newFieldEntry"
+      bard._duplicateIdByOriginalRawId[getRawIdFrom(action.duplicateOf)] = null;
+    } else {
+      // If the DUPLICATED action has an id and is not relocated then
+      // pre-initialize the lookup: this will maintain the relative
+      // position of the duplicated resource in its owning field as no
+      // coupling transient event will be emitted.
+      if (bard.tryGoToTransientOfRawId(
+          passage.id.rawId(), "ResourceStub", false, passage.id.tryGhostPath())) {
+        // Existing duplicate target means an existing inactive resource
+        // with incoming references etc.
+        passage.id = bard.objectId;
+        if (!passage.id) throw new Error("INTERNAL ERROR: no bard.objectId");
+      }
+      bard._duplicateIdByOriginalRawId[getRawIdFrom(action.duplicateOf)] = passage.id;
     }
-    bard._duplicateIdByOriginalRawId[getRawIdFrom(action.duplicateOf)] = newId;
-    return createPassageFromAction(action);
+    return passage;
   }));
   bard.initiatePassageAggregation();
   bard.updateStateWithPassages();
   postProcessDuplicationContext(bard);
 
-  // Second pass, fill-lateral-references-and-couplings by reducing the aggregated sub-stories.
+  // Second pass, fill-lateral-references-and-couplings by reducing
+  // the aggregated sub-stories.
   return bard.updateStateWithPassages(bard.passage,
       bard.finalizeAndExtractAggregatedPassages());
 }

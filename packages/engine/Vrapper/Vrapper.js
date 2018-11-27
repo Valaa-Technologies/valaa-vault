@@ -807,9 +807,7 @@ export default class Vrapper extends Cog {
 
   destroy (options: { transaction?: Transaction } = {}) {
     this.requireActive(options);
-    return (options.transaction || this.engine.discourse).destroy({
-      id: this.getId(options), typeName: this._typeName,
-    });
+    return (options.transaction || this.engine.discourse).destroy({ id: this.getId(options) });
   }
 
   /**

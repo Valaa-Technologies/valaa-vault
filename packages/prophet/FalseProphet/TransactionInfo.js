@@ -1,6 +1,6 @@
 // @flow
 
-import { createPassageFromAction, getActionFromPassage } from "~/raem";
+import { getActionFromPassage } from "~/raem";
 
 import { transacted, EventBase } from "~/raem/events";
 import type { Corpus } from "~/raem/Corpus";
@@ -193,7 +193,7 @@ export default class TransactionInfo {
       actions: this.passages.map(passage => getActionFromPassage(passage)),
       local: { partitions: this.universalPartitions },
     };
-    const story = createPassageFromAction(universalTransactedLike);
+    const story = targetCorpus.createPassageFromAction(universalTransactedLike);
     story.passages = this.passages;
     return story;
   }

@@ -61,7 +61,7 @@ export function _confirmCommands (connection: FalseProphetPartitionConnection,
     } else {
       connection.warnEvent(`_confirmCommands encountered a command '${
               confirmed.aspects.command.id}' with no corresponding story, with:`,
-          "\n\tconfirmed command:", ...dumpObject(confirmed),
+          "\n\tcurrent command:", ...dumpObject(confirmed),
           "\n\tconfirmed commands:", ...dumpObject(confirmedCommands),
           "\n\tprimary recital:", ...dumpObject(falseProphet._primaryRecital));
     }

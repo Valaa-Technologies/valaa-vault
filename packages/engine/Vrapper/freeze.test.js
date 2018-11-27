@@ -55,7 +55,7 @@ describe("Partition freezing", () => {
     actions: [fieldsSet({ id: vRef(entityRawId), typeName: "Entity", sets: { isFrozen: true } })],
   });
 
-  it("Allows the user to freeze a partition", async () => {
+  it("allows freezing a partition", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
     expect(entities().test_partition.get("isFrozen")).toBeFalsy();
     await harness.chronicleEvent(freezeEventFor("test_partition")).getPremiereStory();
@@ -63,7 +63,7 @@ describe("Partition freezing", () => {
     expect(harness.testPartitionConnection.isFrozenConnection()).toBeTruthy();
   });
 
-  it("Does not allow the user to add contents to a frozen partition", async () => {
+  it("prevents adding contents to a frozen partition", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
     await harness.chronicleEvent(freezeEventFor("test_partition")).getPremiereStory();
     expect(() => harness.chronicleEvent(lateEntityEvent))
@@ -71,7 +71,7 @@ describe("Partition freezing", () => {
     expect(entities().late_entity).toBeFalsy();
   });
 
-  it("Does not allow modifying properties of a frozen Entity", async () => {
+  it("prevents modifying properties of a frozen Entity", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
     await harness.chronicleEvent(freezeEventFor("test_entity")).getPremiereStory();
     expect(() => entities().test_entity.alterProperty("prop", VALEK.fromValue("Changed string")))
@@ -111,7 +111,7 @@ describe("Partition freezing", () => {
     },
   });
 
-  it("Does not prevent the user from editing non-frozen partitions", async () => {
+  it("doesn't prevent the user from editing non-frozen partitions", async () => {
     harness = await createEngineOracleHarness({
       verbosity: 0, claimBaseBlock: false, acquirePartitions: ["test_partition_b"],
     }, [transactionA, transactionB]);

@@ -8,12 +8,16 @@ import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
 
 import { dumpObject } from "~/tools/wrapError";
 
-
 /**
- * Bards in general and Corpus in specific are responsibile for managing incoming actions and
- * modifying state in response to them.
+ * Bards in general and Corpus in specific are responsibile for
+ * managing incoming actions and modifying state in response to them.
  *
- * Valker, Discourses and Transactions are responsible for computation and creation of actions.
+ * Corpus acts as the grandmaster Bard (ie. the object prototype) for
+ * individual journeyman Bard's which are created to handle specific
+ * commands.
+ *
+ * Valker, Discourses and Transactions are responsible for computation
+ * and creation of actions.
  *
  * @export
  * @class Corpus

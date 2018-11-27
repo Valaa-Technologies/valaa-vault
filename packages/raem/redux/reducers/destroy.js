@@ -1,7 +1,5 @@
 // @flow
 
-import { getRawIdFrom } from "~/raem/ValaaReference";
-
 import GhostPath from "~/raem/state/GhostPath";
 import Transient from "~/raem/state/Transient";
 
@@ -17,16 +15,17 @@ const allowedHiddenFields = { typeName: true };
 
 export default function destroy (bard: Bard) {
   let transient: Object;
+  const passage = bard.passage;
   try {
-    transient = bard.goToTransientOfActionObject({ require: true, typeName: "Resource" });
+    transient = bard.goToTransientOfPassageObject("Resource", true, true); // require, ghost-lookup
     const objectTypeIntro = bard.goToResourceTypeIntro();
-    const partitionURI = universalizePartitionMutation(bard, bard.objectId);
+    const partitionURI = universalizePartitionMutation(bard, passage.id);
     bard.destroyedResourcePartition = partitionURI && partitionURI.toString();
     const resourceFieldIntros = objectTypeIntro.getFields();
     transient.forEach((fieldValue, fieldName) => {
       // Need to process non-default fields only ie. those in store: only they can have couplings.
       if (!fieldValue) return;
-      if ((fieldName !== "owner") || !(bard.passage.local || {}).dontUpdateCouplings) {
+      if ((fieldName !== "owner") || !passage.local || !passage.local.dontUpdateCouplings) {
         const fieldIntro = resourceFieldIntros[fieldName];
         if (!fieldIntro) {
           if (allowedHiddenFields[fieldName]) return;
@@ -37,9 +36,9 @@ export default function destroy (bard: Bard) {
         addDestroyCouplingPassages(bard, fieldIntro, fieldValue);
       }
     });
-    const rawId = getRawIdFrom(bard.passage.id);
+    const rawId = passage.id.rawId();
     bard.obtainResourceChapter(rawId).destroyed = true;
-    removeGhostElevationsFromPrototypeChain(bard, bard.passage.id.getGhostPath(), transient);
+    removeGhostElevationsFromPrototypeChain(bard, passage.id.getGhostPath(), transient);
     bard.updateStateWithPassages();
     bard.updateStateWith(state => (objectTypeIntro.getInterfaces() || [])
         .reduce((innerState, classInterface) => innerState.deleteIn([classInterface.name, rawId]),
@@ -47,6 +46,7 @@ export default function destroy (bard: Bard) {
     return bard.updateStateWith(state => state.deleteIn([objectTypeIntro.name, rawId]));
   } catch (error) {
     throw wrapError(error, `During ${bard.debugId()}\n .destroy(), with:`,
+        "\n\tid:", passage.id,
         "\n\towner:", transient && transient.get("owner"));
   }
 }

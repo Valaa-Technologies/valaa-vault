@@ -174,7 +174,7 @@ export default class Resolver extends LogEventGenerator {
   }
 
   tryGoToTransientOfId (id: IdData, typeName: string, require?: boolean, nonGhostLookup?: boolean,
-      mostMaterialized?: any, requireField?: string) {
+      onlyMostMaterialized?: any, requireField?: string) {
     invariantifyString(typeName, "goToTransientOfId.typeName");
     this.objectId = id;
     if (!this.objectId) {
@@ -183,7 +183,7 @@ export default class Resolver extends LogEventGenerator {
     }
     const [rawId, , ghostPath] = expandIdDataFrom(id);
     const ret = this.tryGoToTransientOfRawId(rawId, typeName, false,
-        nonGhostLookup ? undefined : ghostPath, mostMaterialized, requireField);
+        nonGhostLookup ? undefined : ghostPath, onlyMostMaterialized, requireField);
     if (ret) return ret;
     this.objectId = requireField ? undefined
         : this.tryBindToInactivePartitionObjectId(id, typeName);
@@ -200,7 +200,7 @@ export default class Resolver extends LogEventGenerator {
   }
 
   tryGoToTransientOfRawId (rawId: RawId, typeName?: string, require?: boolean = false,
-      ghostPath?: GhostPath, mostMaterialized?: any, requireField?: string) {
+      ghostPath?: GhostPath, onlyMostMaterialized?: any, requireField?: string) {
     try {
       if (typeName) this.setTypeName(typeName);
       this.objectTransient = this.getTransientFromTypeTable(rawId);
@@ -213,12 +213,14 @@ export default class Resolver extends LogEventGenerator {
         this.objectId = requireField
             ? undefined : this.tryBindToInactivePartitionObjectId(ghostPath, requireField);
         this.objectTransient = null;
-      } else if (mostMaterialized || requireField) {
-        // The most inherited materialized transient or requireField was found but its id naturally
-        // is not the requested rawId so we clear objectId to denote that.
+      } else if (onlyMostMaterialized || requireField) {
+        // A most inherited materialized transient or requireField was
+        // found but its id naturally is not the requested rawId so we
+        // clear objectId to denote that.
         this.objectId = null;
       } else {
         this.objectTransient = createImmaterialTransient(rawId, ghostPath, this.objectTransient);
+        this.objectId = this.objectTransient.get("id");
       }
       return this.objectTransient;
     } catch (error) {

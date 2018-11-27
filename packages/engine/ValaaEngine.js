@@ -375,14 +375,14 @@ export default class ValaaEngine extends Cog {
         let vProtagonist;
         try {
           if (passage.id) {
-            passage.rawId = getRawIdFrom(passage.id);
+            passage.rawId = passage.id.rawId();
             const protagonistEntry = this._vrappers.get(passage.rawId);
             if (protagonistEntry && protagonistEntry.get(null)) {
               vProtagonist = protagonistEntry.get(null)[0];
             }
             if (isCreatedLike(passage)) {
               if (!vProtagonist) {
-                vProtagonist = new Vrapper(this, obtainVRef(passage.id), passage.typeName);
+                vProtagonist = new Vrapper(this, passage.id, passage.typeName);
               } else vProtagonist._setTypeName(passage.typeName);
               if (vProtagonist.isResource()) {
                 Promise.resolve(vProtagonist.activate(state))

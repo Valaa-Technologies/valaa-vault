@@ -14,7 +14,6 @@ export {
 export {
                                       Passage,
                                       Story,
-                                      createPassageFromAction,
                                       getActionFromPassage,
 } from "./redux/Bard";
 export {

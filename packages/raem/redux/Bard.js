@@ -2,7 +2,7 @@
 import { GraphQLObjectType } from "graphql/type";
 import { Map } from "immutable";
 
-import { obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
+import { VRef, obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
 
 import { Action } from "~/raem/events";
 
@@ -22,10 +22,6 @@ export type Story = Passage & {
   previousState: ?Object;
 };
 
-export function createPassageFromAction (action: Action) {
-  return Object.create(action);
-}
-
 export function getActionFromPassage (passage: Passage) {
   const ret = Object.getPrototypeOf(passage);
   if (ret === Object.prototype) return undefined;
@@ -33,14 +29,13 @@ export function getActionFromPassage (passage: Passage) {
 }
 
 /**
- * Bard middleware creates a 'journeyman' bard (which prototypes a singleton-ish master bard) to
- * handle an incoming event. It then smuggles the journeyman inside
- * action[SmuggledBard] through redux to the master bard reducers, where new bard apprentices are
- * created to handle each sub-action.
+ * Bard middleware creates a 'journeyman' bard (which prototypes a
+ * singleton-ish master bard) to handle an incoming event.
  *
- * The fluff: journeyman bard arrives with a story of some event and recruits apprentices to flesh
- * out the passages of the event details for everyone to hear. In doing so the bards use the
- * knowledge provided by the master bard (reducers, schema, logger).
+ * The fluff: journeyman bard arrives with a story of some event and
+ * recruits apprentices to flesh out the passages of the event details
+ * for followers to hear. In doing so the bards use the knowledge
+ * provided by the master bard (reducers, schema, logger).
  *
  * @export
  * @param {{
@@ -165,6 +160,7 @@ export default class Bard extends Resolver {
   constructor (options: Object) {
     super(options);
     this.subReduce = options.subReduce;
+    this._deserializeReference = obtainVRef;
   }
 
   debugId () {
@@ -182,7 +178,7 @@ export default class Bard extends Resolver {
     this.preActionState = store.getState();
     this.updateState(this.preActionState);
     this._resourceChapters = {};
-    this.story = createPassageFromAction(action);
+    this.story = this.createPassageFromAction(action);
     const local = action.local || (action.local = {});
     if (!local.partitions) {
       local.partitions = {};
@@ -267,19 +263,25 @@ export default class Bard extends Resolver {
         || (this._resourceChapters[getRawIdFrom(idData)] = {});
   }
 
-  getPassageObjectId () {
-    return obtainVRef(this.passage.id);
+  createPassageFromAction (action: Action) {
+    const ret = Object.create(action);
+    if (action.id) {
+      ret.id = action.id instanceof VRef
+          ? action.id
+          : this._deserializeReference(action.id);
+    }
+    return ret;
   }
 
-  goToTransientOfActionObject (options:
-      { typeName?: string, require?: boolean, nonGhostLookup?: boolean } = {}): Object {
-    this.objectId = this.getPassageObjectId();
-    const ret = this.tryGoToTransientOfRawId(
-        this.objectId.rawId(),
-        options.typeName || this.passage.typeName,
-        options.require,
-        !options.nonGhostLookup && this.objectId.tryGhostPath());
-    this.passage.id = this.objectId;
+  goToTransientOfPassageObject (typeName?: string, require?: boolean, allowGhostLookup?: boolean):
+      Object {
+    const id = this.passage.id;
+    const ret = this.tryGoToTransientOfRawId(id.rawId(), typeName || this.passage.typeName, require,
+        allowGhostLookup && id.tryGhostPath());
+    if (ret) {
+      if (!this.objectId) throw new Error("INTERNAL ERROR: no this.objectId");
+      this.passage.id = this.objectId;
+    }
     return ret;
   }
 

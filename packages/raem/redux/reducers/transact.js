@@ -1,8 +1,9 @@
 // @flow
 
-import Bard, { createPassageFromAction } from "~/raem/redux/Bard";
+import Bard from "~/raem/redux/Bard";
 
 export default function transact (bard: Bard) {
-  bard.setPassages((bard.passage.actions || []).map(createPassageFromAction));
+  bard.setPassages((bard.passage.actions || [])
+      .map(action => bard.createPassageFromAction(action)));
   return bard.state;
 }

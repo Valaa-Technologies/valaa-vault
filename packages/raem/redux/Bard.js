@@ -180,10 +180,8 @@ export default class Bard extends Resolver {
     this._resourceChapters = {};
     this.story = this.createPassageFromAction(action);
     const local = action.local || (action.local = {});
-    if (!local.partitions) {
-      local.partitions = {};
-      this.story.isBeingUniversalized = true;
-    }
+    if (!local.partitions) local.partitions = {};
+    this.story.isBeingUniversalized = local.isBeingUniversalized;
     return this.story;
   }
 

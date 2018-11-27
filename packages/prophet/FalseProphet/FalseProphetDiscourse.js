@@ -21,8 +21,6 @@ import { tryAspect } from "~/prophet/tools/EventAspects";
 import { invariantify, invariantifyObject } from "~/tools";
 import valaaUUID from "~/tools/id/valaaUUID";
 
-import { universalizeEvent } from "./FalseProphet";
-
 export default class FalseProphetDiscourse extends Discourse {
   _follower: Follower;
   _prophet: Prophet;
@@ -63,14 +61,9 @@ export default class FalseProphetDiscourse extends Discourse {
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
       ChroniclePropheciesRequest {
     if (this._transactionInfo) return this._transactionInfo.chronicleEvents(events, options);
-    let universalizedEvents;
     try {
-      universalizedEvents = events.map(event => {
-        const ret = universalizeEvent(event);
-        if (!tryAspect(ret, "command").id) this._prophet._assignCommandId(ret, this);
-        return ret;
-      });
-      const ret = this._prophet.chronicleEvents(universalizedEvents, options);
+      options.discourse = this;
+      const ret = this._prophet.chronicleEvents(events, options);
       ret.eventResults.forEach(eventResult => {
         eventResult.waitOwnReactions = (() => eventResult.getFollowerReactions(this._follower));
         eventResult.getPremiereStory = (async () => {
@@ -83,7 +76,6 @@ export default class FalseProphetDiscourse extends Discourse {
       addConnectToPartitionToError(error, this.connectToMissingPartition);
       throw this.wrapErrorEvent(error, `chronicleEvents()`,
           "\n\tevents:", ...dumpObject(events),
-          "\n\tevents:", ...dumpObject(universalizedEvents),
       );
     }
   }

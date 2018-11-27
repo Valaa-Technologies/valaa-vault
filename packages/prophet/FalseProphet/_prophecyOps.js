@@ -14,7 +14,7 @@ import { tryAspect } from "~/prophet/tools/EventAspects";
 
 import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
 
-import FalseProphet from "./FalseProphet";
+import FalseProphet, { universalizeEvent } from "./FalseProphet";
 import { _rejectLastProphecyAsHeresy, _recomposeStoryFromPurgedEvent } from "./_storyOps";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 
@@ -29,10 +29,16 @@ const ProphecyOperationTag = Symbol("Prophecy Operation");
 // commands upstream. Aborts all remaining events on first exception
 // and rolls back previous ones.
 export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[],
-    { timed, transactionInfo, ...rest } = {}): ProphecyChronicleRequest {
+    { timed, transactionInfo, discourse, ...rest } = {}): ProphecyChronicleRequest {
   if (timed) throw new Error("timed events not supported yet");
-  const prophecies = events.map(event => falseProphet._composeStoryFromEvent(
-      event, "prophecy-chronicle", timed, transactionInfo));
+  const prophecies = events.map(event => {
+    const universalizedEvent = universalizeEvent(event);
+    if (!tryAspect(universalizedEvent, "command").id) {
+      falseProphet._assignCommandId(universalizedEvent, discourse);
+    }
+    return falseProphet._composeStoryFromEvent(
+        universalizedEvent, "prophecy-chronicle", timed, transactionInfo);
+  });
   const resultBase = new ProphecyOperation(null, {
     _prophet: falseProphet, _events: events, _options: rest,
     _reactions: falseProphet._tellStoriesToFollowers(prophecies),

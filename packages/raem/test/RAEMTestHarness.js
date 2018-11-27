@@ -72,6 +72,7 @@ export default class RAEMTestHarness extends LogEventGenerator {
     try {
       return {
         eventResults: events.map(event => {
+          if (!event.local) event.local = { isBeingUniversalized: true };
           const story = this.corpus.dispatch(event);
           return {
             event, story, getTruthEvent: () => event,

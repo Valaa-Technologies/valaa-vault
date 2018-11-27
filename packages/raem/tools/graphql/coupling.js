@@ -29,14 +29,14 @@ import invariantify from "~/tools/invariantify";
 
 export function toNone () { return "none"; }
 
-export function toOne ({ coupledField, defaultCoupledField, alias, owned, whenUnmatched,
+export function toOne ({ coupledField, defaultCoupledField, alias, isOwner, whenUnmatched,
     preventsDestroy, ...rest } = {}) {
   invariantify(!Object.keys(rest).length, "toOne: Unrecognized coupling options:",
       "\n\tunrecognized options:", rest);
   invariantify(!(coupledField && defaultCoupledField),
       "Can only specify either coupledField or defaultCoupledField");
   return coupledField ? {
-    coupledField, alias, owned, whenUnmatched, preventsDestroy,
+    coupledField, alias, isOwner, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId) =>
         fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: localId },
@@ -46,7 +46,7 @@ export function toOne ({ coupledField, defaultCoupledField, alias, owned, whenUn
           sets: { [coupledFieldName]: null },
         }),
   } : {
-    defaultCoupledField, alias, owned, whenUnmatched, preventsDestroy,
+    defaultCoupledField, alias, isOwner, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
         fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: localId.coupleWith(localFieldName) },
@@ -58,13 +58,13 @@ export function toOne ({ coupledField, defaultCoupledField, alias, owned, whenUn
   };
 }
 
-export function toMany ({ coupledField, defaultCoupledField, alias, owned, whenUnmatched,
+export function toMany ({ coupledField, defaultCoupledField, alias, isOwner, whenUnmatched,
     preventsDestroy, ...rest } = {}) {
   invariantify(!Object.keys(rest).length, "toMany: Unrecognized coupling options: %s", rest);
   invariantify(!(coupledField && defaultCoupledField),
       "Can only specify either coupledField or defaultCoupledField");
   return coupledField ? {
-    coupledField, alias, owned, whenUnmatched, preventsDestroy,
+    coupledField, alias, isOwner, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId) =>
         addedTo({ id, typeName, local: { dontUpdateCouplings: true },
           adds: { [coupledFieldName]: [localId] },
@@ -74,7 +74,7 @@ export function toMany ({ coupledField, defaultCoupledField, alias, owned, whenU
           removes: { [coupledFieldName]: [localId] },
         }),
   } : {
-    defaultCoupledField, alias, owned, whenUnmatched, preventsDestroy,
+    defaultCoupledField, alias, isOwner, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
         addedTo({ id, typeName, local: { dontUpdateCouplings: true },
           adds: { [coupledFieldName]: [localId.coupleWith(localFieldName)] },
@@ -87,16 +87,16 @@ export function toMany ({ coupledField, defaultCoupledField, alias, owned, whenU
 }
 
 export function toOneOwnling (fields = {}) {
-  return toOne({ coupledField: "owner", owned: true, ...fields });
+  return toOne({ coupledField: "owner", isOwner: true, ...fields });
 }
 
 export function toManyOwnlings (fields = {}) {
-  return toMany({ coupledField: "owner", owned: true, ...fields });
+  return toMany({ coupledField: "owner", isOwner: true, ...fields });
 }
 
 export function toOwner (defaultCoupledField = "unnamedOwnlings") {
   return {
-    defaultCoupledField,
+    defaultCoupledField, isOwned: true,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
         fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: localId.coupleWith(localFieldName) },

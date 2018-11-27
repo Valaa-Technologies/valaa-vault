@@ -61,24 +61,23 @@ export default function modifyResource (bard: Bard) {
 
     invariantify(OrderedMap.isOrderedMap(bard.objectTransient),
         "object Transient must be an OrderedMap");
-    let mutatesPartition = false;
+    let isPrimaryMutation = false;
     const wasFrozen = isFrozen(bard, bard.objectTransient); // transient modifications are allowed.
     const newResource = bard.objectTransient.withMutations(mutableObject => {
       if (passage.sets) {
-        mutatesPartition =
-            processUpdate(bard, passage.sets, handleSets, "FIELDS_SET.sets", mutableObject)
-            || mutatesPartition;
+        isPrimaryMutation = processUpdate(bard,
+            passage.sets, handleSets, "FIELDS_SET.sets", mutableObject)
+                || isPrimaryMutation;
       }
       if (passage.removes) {
-        mutatesPartition =
-            processUpdate(bard, passage.removes, handleRemoves, "REMOVED_FROM.removes",
-                mutableObject)
-            || mutatesPartition;
+        isPrimaryMutation = processUpdate(bard,
+            passage.removes, handleRemoves, "REMOVED_FROM.removes", mutableObject)
+                || isPrimaryMutation;
       }
       if (passage.adds) {
-        mutatesPartition =
-            processUpdate(bard, passage.adds, handleAdds, "ADDED_TO.adds", mutableObject)
-            || mutatesPartition;
+        isPrimaryMutation = processUpdate(bard,
+            passage.adds, handleAdds, "ADDED_TO.adds", mutableObject)
+                || isPrimaryMutation;
       }
       if (bard.refreshPartition) {
         setModifiedObjectPartitionAndUpdateOwneeObjectIdPartitions(bard, mutableObject);
@@ -86,7 +85,7 @@ export default function modifyResource (bard: Bard) {
       }
       return mutableObject;
     });
-    if (mutatesPartition) {
+    if (isPrimaryMutation) {
       if (wasFrozen) {
         throw new Error(`Cannot modify frozen ${passage.id.rawId()}:${passage.typeName}`);
       }
@@ -116,7 +115,7 @@ export default function modifyResource (bard: Bard) {
 export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
     operationDescription, mutableObject) {
   const sortedKeys = Object.keys(updatesByField || {}).sort();
-  let mutatesPartition = false;
+  let isPrimaryMutation = false;
   for (const fieldName of sortedKeys) {
     const fieldUpdate = updatesByField[fieldName];
     if (typeof fieldUpdate === "undefined") {
@@ -142,7 +141,10 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
       }
       updateCoupling = bard.shouldUpdateCouplings && getCoupling(fieldInfo.intro);
       if (!validateFieldUpdate(bard, fieldInfo.intro, fieldUpdate, operationDescription)) continue;
-      if (fieldInfo.intro.isPersisted) mutatesPartition = true;
+      // frozen resources can still be moved
+      if (fieldInfo.intro.isPersisted && !fieldInfo.intro.isOwned) {
+        isPrimaryMutation = true;
+      }
       bard.fieldsTouched.add(fieldInfo.name);
       const newValue = handleFieldUpdate(bard, fieldInfo, fieldUpdate, oldLocalValue,
           updateCoupling);
@@ -158,7 +160,7 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
           "\n\tbard:", bard);
     }
   }
-  return mutatesPartition;
+  return isPrimaryMutation;
 }
 
 export function validateFieldUpdate (bard: Bard, fieldIntro, fieldUpdate, operationDescription) {

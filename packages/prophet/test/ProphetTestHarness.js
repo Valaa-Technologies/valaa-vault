@@ -21,8 +21,6 @@ import createValaaLocalScheme from "~/prophet/schemeModules/valaa-local";
 import createValaaMemoryScheme from "~/prophet/schemeModules/valaa-memory";
 import createValaaTransientScheme from "~/prophet/schemeModules/valaa-transient";
 
-import { universalizeEvent } from "~/prophet/FalseProphet/FalseProphet";
-
 import * as ValaaScriptDecoders from "~/script/mediaDecoders";
 import * as ToolsDecoders from "~/tools/mediaDecoders";
 
@@ -120,16 +118,16 @@ export default class ProphetTestHarness extends ScriptTestHarness {
   }
 
   chronicleEvents (events: EventBase[], ...rest: any) {
-    return this.prophet.chronicleEvents(events.map(event => {
-      const ret = universalizeEvent(event);
-      obtainAspect(ret, "command").id = `cid-${this.nextCommandIdIndex++}`;
-      return ret;
-    }), ...rest);
+    return this.prophet.chronicleEvents(events, ...rest);
   }
 
   createCorpus () { // Called by RAEMTestHarness.constructor (so before oracle/scribe are created)
     const corpus = super.createCorpus();
-    this.prophet = createFalseProphet({ schema: this.schema, corpus, logger: this.getLogger() });
+    this.prophet = createFalseProphet({ schema: this.schema, corpus, logger: this.getLogger(),
+      assignCommandId: (command) => {
+        obtainAspect(command, "command").id = `cid-${this.nextCommandIdIndex++}`;
+      },
+    });
     return corpus;
   }
 

@@ -36,7 +36,10 @@ export function universalizeAction (action: Action): Action {
 }
 
 export function universalizeEvent (event: EventBase): EventBase {
-  return initializeAspects(universalizeAction(event), { version: ASPECTS_VERSION });
+  const ret = initializeAspects(universalizeAction(event), { version: ASPECTS_VERSION });
+  if (!ret.local) ret.local = {};
+  ret.local.isBeingUniversalized = true;
+  return ret;
 }
 
 /**

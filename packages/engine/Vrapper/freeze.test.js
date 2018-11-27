@@ -80,6 +80,19 @@ describe("Partition freezing", () => {
         .toEqual("This is some string");
   });
 
+  it("allows modifying the owner of a frozen Entity", async () => {
+    harness = await createEngineOracleHarness({ claimBaseBlock: false, verbosity: 0 },
+        [transactionA, lateEntityEvent]);
+    await harness.chronicleEvent(freezeEventFor("test_entity")).getPremiereStory();
+    expect(() => entities().test_entity.setField("owner", entities().late_entity))
+        .not.toThrow();
+    expect(entities().test_entity.get("owner").getId())
+        .toEqual(entities().late_entity.getId());
+    expect(() => entities().test_entity.alterProperty("prop",
+            VALEK.fromValue("Changed string")))
+        .toThrow(/Cannot modify frozen.*test_entity/);
+  });
+
   const transactionB = {
     type: "TRANSACTED",
     actions: [

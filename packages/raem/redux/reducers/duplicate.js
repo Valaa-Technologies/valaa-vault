@@ -35,7 +35,7 @@ export default function duplicate (bard: DuplicateBard) {
 
   // Specifying "Resource" as opposed to "ResourceStub" as the typeName implicitly requires the
   // resource to be active. Inactive resources appear only in InactiveResource/ResourceStub tables.
-  bard.goToTransientOfId(obtainVRef(passage.duplicateOf), "Resource");
+  bard.goToTransientOfRef(obtainVRef(passage.duplicateOf), "Resource");
   const ghostPath = passage.id.getGhostPath();
   passage.typeName = getTransientTypeName(bard.objectTransient);
   if (!ghostPath.isGhost()) {

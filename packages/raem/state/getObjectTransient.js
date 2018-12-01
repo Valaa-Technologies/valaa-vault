@@ -1,6 +1,6 @@
 // @flow
 
-import type { IdData } from "~/raem/ValaaReference";
+import type { IdData, getRawIdFrom, tryGhostPathFrom } from "~/raem/ValaaReference";
 import { Resolver, State, Transient } from "~/raem/state";
 
 import { wrapError } from "~/tools";
@@ -13,10 +13,10 @@ import { wrapError } from "~/tools";
  */
 export default function getObjectTransient (stateOrResolver: State, idData: IdData,
     typeName: string, logger: Object = console, require: boolean = true,
-    mostMaterialized: ?any, requireField?: string): Transient {
+    mostMaterialized: ?any, withOwnField?: string): Transient {
   try {
     const ret = tryObjectTransient(stateOrResolver, idData, typeName, logger, mostMaterialized,
-        requireField);
+        withOwnField);
     if (!ret && require) throw new Error(`Object ${String(idData)} resolved to falsy`);
     return ret;
   } catch (error) {
@@ -45,11 +45,14 @@ export default function getObjectTransient (stateOrResolver: State, idData: IdDa
  * @returns {Transient}
  */
 export function tryObjectTransient (stateOrResolver: State, idData: IdData, typeName: string,
-    logger: Object, mostMaterialized: ?any, requireField?: string): Transient {
+    logger: Object, mostMaterialized: ?any, withOwnField?: string): Transient {
   if (!idData) return undefined;
-  const resolver = stateOrResolver.goToTransientOfId
+  const resolver = stateOrResolver.goToTransientOfRef
       ? stateOrResolver
       : new Resolver({ state: stateOrResolver, logger });
-  return resolver.tryGoToTransientOfId(idData, typeName, false, undefined, mostMaterialized,
-      requireField);
+  const rawId = getRawIdFrom(idData);
+  const ghostPath = tryGhostPathFrom(idData);
+  const ret = resolver.resolveToTransientOf(rawId, ghostPath, typeName, false, false,
+      mostMaterialized, withOwnField);
+  return ret;
 }

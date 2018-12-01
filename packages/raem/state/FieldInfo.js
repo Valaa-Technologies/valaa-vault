@@ -20,7 +20,8 @@ export type FieldInfo = {
   elevationInstanceId: ?IdData,
 };
 
-export function tryElevateFieldValue (resolver: Resolver, value: any, fieldInfo: FieldInfo) {
+export function tryElevateFieldValue (resolver: Resolver, value: VRef | VRef[],
+    fieldInfo: FieldInfo) {
   const elevation = value && _tryFieldGhostElevation(fieldInfo);
   if (!elevation) return value;
   const elevator = resolver.fork();
@@ -31,7 +32,7 @@ export function tryElevateFieldValue (resolver: Resolver, value: any, fieldInfo:
           _elevateReference(elevator, entry, fieldInfo, elevation, typeName));
 }
 
-export function elevateFieldReference (resolver: Resolver, reference: IdData, fieldInfo: FieldInfo,
+export function elevateFieldReference (resolver: Resolver, reference: VRef, fieldInfo: FieldInfo,
     elevation: ?GhostElevation = _tryFieldGhostElevation(fieldInfo), typeName: ?string,
     verbosity: ?number) {
   if (!elevation) return reference;
@@ -60,9 +61,9 @@ export function _getFieldGhostElevation (fieldInfo: FieldInfo, elevationInstance
       .obtainGhostElevation(elevationInstanceId.getGhostPath());
 }
 
-function _elevateReference (elevator: Resolver, reference: IdData, fieldInfo: FieldInfo,
+function _elevateReference (elevator: Resolver, reference: VRef, fieldInfo: FieldInfo,
     elevation: GhostElevation, typeName: string, verbosity: ?number) {
-  elevator.tryGoToTransientOfId(reference, typeName);
+  elevator.tryGoToTransientOfRef(reference, typeName);
   let elevatedId;
   if (elevator.objectId.isInactive()) {
     // TODO(iridian): Following assumption has not been fully reasoned, evaluate thoroughly:
@@ -103,7 +104,7 @@ function _elevateRawSequence (resolver: Resolver, object: Transient,
     do {
       const prototypeId = currentObject.get("prototype");
       if (!prototypeId) break;
-      currentObject = resolver.goToNonGhostTransientOfId(prototypeId, resolver.typeName);
+      currentObject = resolver.goToNonGhostTransientOfRef(prototypeId, resolver.typeName);
       prototypeSequence = currentObject.get(fieldInfo.name);
     } while (typeof prototypeSequence === "undefined");
     if (prototypeSequence) {
@@ -291,7 +292,7 @@ export function takeToCurrentObjectOwnerTransient (resolver: Resolver) {
     if (elevation) {
       owner = _elevateReference(elevator, owner, fieldInfo, elevation, "Resource");
     }
-    if (isIdData(owner)) return resolver.goToTransientOfId(owner, "Resource");
+    if (isIdData(owner)) return resolver.goToTransientOfRef(owner, "Resource");
     resolver.objectId = owner.get("id");
     resolver.objectTransient = owner;
   } else {

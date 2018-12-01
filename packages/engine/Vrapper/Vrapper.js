@@ -547,25 +547,25 @@ export default class Vrapper extends Cog {
 
   getTransient (options: ?{
     state?: Object, transaction?: Transaction, typeName?: string, mostMaterialized?: any,
-    requireField?: string,
+    withOwnField?: string,
   } = {}) {
     const explicitState = options.state
         || (options.transaction && options.transaction.getState())
-        || (options.requireField && this.engine.discourse.getState());
+        || (options.withOwnField && this.engine.discourse.getState());
     if (explicitState) {
       const typeName = options.typeName || this.getTypeName(options);
       const ret = explicitState.getIn([typeName, this.getRawId()]);
-      if (ret && (!options.requireField || ret.has(options.requireField))) return ret;
+      if (ret && (!options.withOwnField || ret.has(options.withOwnField))) return ret;
       // Immaterial ghost.
       return getObjectTransient(options.state || options.transaction || this.engine.discourse,
           this[HostRef], typeName, undefined,
-          options.require, options.mostMaterialized, options.requireField);
+          options.require, options.mostMaterialized, options.withOwnField);
     }
     if (this._transientStaledIn) {
       this.updateTransient(null,
           getObjectTransient(this._transientStaledIn, this.getId(),
               options.typeName || this.getTypeName(options), undefined,
-              options.require, options.mostMaterialized, options.requireField));
+              options.require, options.mostMaterialized, options.withOwnField));
     }
     return this._transient;
   }
@@ -1119,7 +1119,7 @@ export default class Vrapper extends Cog {
             "\n\tobject:", this);
       }
       mostMaterializedTransient = this.getTransient(Object.assign(Object.create(options), {
-        mostMaterialized: true, require: false, requireField: "content",
+        mostMaterialized: true, require: false, withOwnField: "content",
       }));
       if (!mostMaterializedTransient) return undefined;
 

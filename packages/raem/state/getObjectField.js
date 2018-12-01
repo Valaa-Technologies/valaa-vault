@@ -148,7 +148,7 @@ export function getObjectRawField (stateOrResolver: State | Resolver, object: Tr
             prototypeGhostPath.headRawId(), prototypeGhostPath, resolver.objectTransient);
       }
       typeName = resolver.objectTransient.get("typeName");
-      resolver.objectTransient = resolver.goToTransientOfId(resolver.objectId, typeName);
+      resolver.objectTransient = resolver.goToTransientOfRef(resolver.objectId, typeName);
       skipFirstPrototypeStep = true;
     } else {
       // Regular object
@@ -167,7 +167,7 @@ export function getObjectRawField (stateOrResolver: State | Resolver, object: Tr
         const prototype = resolver.objectTransient.get("prototype");
         // If prototype is null, we're on Resource.ownFields: don't generate default values.
         if (prototype === null) return undefined;
-        if (!resolver.tryGoToNonGhostTransientOfId(prototype, typeName)) break;
+        if (!resolver.tryGoToNonGhostTransientOfRef(prototype, typeName)) break;
       }
 
       ret = resolver.objectTransient.get(fieldInfo.name);

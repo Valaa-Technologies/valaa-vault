@@ -2,7 +2,7 @@
 
 import { GraphQLSchema } from "graphql/type";
 
-import { VRef, invariantifyId, obtainVRef, tryCoupledFieldFrom, expandIdDataFrom }
+import { VRef, invariantifyId, obtainVRef, tryCoupledFieldFrom }
     from "~/raem/ValaaReference";
 import type { JSONIdData, IdData, RawId } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
@@ -99,26 +99,25 @@ export default class Resolver extends LogEventGenerator {
    * @param {JSONIdData} id             serialized JSONIdData or plain VRef
    * @returns {VRef}
    */
-  bindObjectId (id: VRef | JSONIdData, typeName: string = "Resource",
-      bindPartition?: boolean): VRef {
-    const idVRef = tryHostRef(id) || obtainVRef(id);
-    const rawId = idVRef.rawId();
+  bindObjectId (objectId: any, typeName: string = "Resource", bindPartition?: boolean): VRef {
+    const id = tryHostRef(objectId) || obtainVRef(objectId);
+    const rawId = id.rawId();
     try {
       let object = this.state.getIn([typeName, rawId]);
       if (typeof object === "string") object = this.state.getIn([object, rawId]);
       if (!object) {
         // Ghost, inactive or fail
-        object = this.fork().tryGoToTransientOfId(idVRef, typeName);
+        object = this.fork().resolveToTransientOf(rawId, id.tryGhostPath(), typeName, false, false);
       }
       invariantify(object, `Can't find ${rawId}:${typeName} in corpus`,
           "\n\twhile trying to bind id:", id);
       const boundId = object.get("id");
-      if (boundId.isInactive() && !boundId.getPartitionURI() && idVRef.getPartitionURI()) {
+      if (boundId.isInactive() && !boundId.getPartitionURI() && id.getPartitionURI()) {
         // TODO(iridian): Refactor the object id partitionURI management. The thing that's going on
         // here is that inactive object stubs which originate from ghost paths don't have
         // partitionURI's specified because ghost path entries don't have them. Instead the
         // partitionURI must be sourced from the actual "prototype" field of the topmost instance.
-        boundId.setPartitionURI(idVRef.getPartitionURI());
+        boundId.setPartitionURI(id.getPartitionURI());
       }
       return (!bindPartition || !boundId.isGhost())
           ? boundId
@@ -161,31 +160,51 @@ export default class Resolver extends LogEventGenerator {
   objectTransient: Transient;
   objectId: VRef;
 
-  goToTransientOfId (id: IdData, typeName: string) {
-    return this.tryGoToTransientOfId(id, typeName, true, false);
+  tryGoToTransientOfRef (id: VRef, typeName: string, require: ?boolean, nonGhostLookup: ?boolean) {
+    if (!(id instanceof VRef)) {
+      throw new Error("INTERNAL ERROR: tryGoToTransientOfRef.id is not a ValaaReference");
+    }
+    return this.resolveToTransientOf(id.rawId(), id.tryGhostPath(), typeName, require, nonGhostLookup);
   }
 
-  tryGoToNonGhostTransientOfId (id: IdData, typeName: string) {
-    return this.tryGoToTransientOfId(id, typeName, false, true);
+  goToTransientOfRef (id: VRef, typeName: string) {
+    if (!(id instanceof VRef)) {
+      throw new Error("INTERNAL ERROR: goToTransientOfRef.id is not a ValaaReference");
+    }
+    return this.resolveToTransientOf(id.rawId(), id.tryGhostPath(), typeName, true, false);
   }
 
-  goToNonGhostTransientOfId (id: IdData, typeName: string) {
-    return this.tryGoToTransientOfId(id, typeName, true, true);
+  tryGoToNonGhostTransientOfRef (id: VRef, typeName: string) {
+    if (!(id instanceof VRef)) {
+      throw new Error("INTERNAL ERROR: tryGoToNonGhostTransientOfRef.id is not a ValaaReference");
+    }
+    return this.resolveToTransientOf(id.rawId(), id.tryGhostPath(), typeName, false, true);
   }
 
-  tryGoToTransientOfId (id: IdData, typeName: string, require?: boolean, nonGhostLookup?: boolean,
-      onlyMostMaterialized?: any, requireField?: string) {
-    invariantifyString(typeName, "goToTransientOfId.typeName");
+  goToNonGhostTransientOfRef (id: VRef, typeName: string) {
+    if (!(id instanceof VRef)) {
+      throw new Error("INTERNAL ERROR: goToNonGhostTransientOfRef.id is not a ValaaReference");
+    }
+    return this.resolveToTransientOf(id.rawId(), id.tryGhostPath(), typeName, true, true);
+  }
+
+  resolveToTransientOf (rawId: string, ghostPath: ?GhostPath, typeName: string, require: boolean,
+      nonGhostLookup: boolean, onlyMostMaterialized?: any, withOwnField?: string) {
+    invariantifyString(rawId, "resolveToTransientOf.rawId");
+    invariantifyString(ghostPath, "resolveToTransientOf.ghostPath",
+        { allowUndefined: true, instanceOf: GhostPath });
+    invariantifyString(typeName, "resolveToTransientOf.typeName");
+    /*
     this.objectId = id;
     if (!this.objectId) {
       if (!require) return (this.objectTransient = null);
-      invariantifyId(id, "getObjectTransientWith.id must be valid IdData");
+      invariantifyId(id, "resolveToTransientOf.id must be valid ValaaReference");
     }
-    const [rawId, , ghostPath] = expandIdDataFrom(id);
+    */
     const ret = this.tryGoToTransientOfRawId(rawId, typeName, false,
-        nonGhostLookup ? undefined : ghostPath, onlyMostMaterialized, requireField);
+        nonGhostLookup ? undefined : ghostPath, onlyMostMaterialized, withOwnField);
     if (ret) return ret;
-    this.objectId = requireField ? undefined
+    this.objectId = withOwnField ? undefined
         : this.tryBindToInactivePartitionObjectId(id, typeName);
     if (this.objectId) {
       this.objectTransient = createInactiveTransient(this.objectId);
@@ -200,21 +219,21 @@ export default class Resolver extends LogEventGenerator {
   }
 
   tryGoToTransientOfRawId (rawId: RawId, typeName?: string, require?: boolean = false,
-      ghostPath?: GhostPath, onlyMostMaterialized?: any, requireField?: string) {
+      ghostPath?: GhostPath, onlyMostMaterialized?: any, withOwnField?: string) {
     try {
       if (typeName) this.setTypeName(typeName);
       this.objectTransient = this.getTransientFromTypeTable(rawId);
-      if (this.objectTransient && (!requireField || this.objectTransient.has(requireField))) {
+      if (this.objectTransient && (!withOwnField || this.objectTransient.has(withOwnField))) {
         this.objectId = this.objectTransient.get("id");
       } else if (!ghostPath || ghostPath.isRoot()) {
         this.objectTransient = null;
         if (require) throw new Error(`Could not find non-ghost object '${rawId}:${this.typeName}'`);
-      } else if (!this.goToMostInheritedMaterializedTransient(ghostPath, require, requireField)) {
-        this.objectId = requireField
-            ? undefined : this.tryBindToInactivePartitionObjectId(ghostPath, requireField);
+      } else if (!this.goToMostInheritedMaterializedTransient(ghostPath, require, withOwnField)) {
+        this.objectId = withOwnField
+            ? undefined : this.tryBindToInactivePartitionObjectId(ghostPath, withOwnField);
         this.objectTransient = null;
-      } else if (onlyMostMaterialized || requireField) {
-        // A most inherited materialized transient or requireField was
+      } else if (onlyMostMaterialized || withOwnField) {
+        // A most inherited materialized transient or withOwnField was
         // found but its id naturally is not the requested rawId so we
         // clear objectId to denote that.
         this.objectId = null;
@@ -275,12 +294,12 @@ export default class Resolver extends LogEventGenerator {
    * @export
    * @param {Resolver} resolver
    * @param {GhostPath} currentPath
-   * @param {GhostPath} requireField - require transient to have this field for it to be considered
+   * @param {GhostPath} withOwnField - require transient to have this field for it to be considered
    *                                   a match
    * @returns {GhostPath} the transient ghostPath
    */
   goToMostInheritedMaterializedTransient (ghostPath: GhostPath, require: boolean = true,
-      requireField?: string): GhostPath {
+      withOwnField?: string): GhostPath {
     let nextStep = ghostPath;
     let currentPath;
     try {
@@ -293,7 +312,7 @@ export default class Resolver extends LogEventGenerator {
         }
         const rawId = currentPath.headRawId();
         const transient = this.getTransientFromTypeTable(rawId);
-        if (transient && (!requireField || transient.get(requireField))) {
+        if (transient && (!withOwnField || transient.get(withOwnField))) {
           this.objectTransient = transient;
           const transientId = transient.get("id");
           const transientGhostPath = transientId.getGhostPath();
@@ -309,7 +328,7 @@ export default class Resolver extends LogEventGenerator {
       throw this.wrapErrorEvent(error, `goToMostInheritedMaterializedTransient`,
           "\n\tghostPath:", ghostPath,
           "\n\tcurrentPath:", currentPath,
-          "\n\trequireField:", requireField);
+          "\n\twithOwnField:", withOwnField);
     }
   }
 }

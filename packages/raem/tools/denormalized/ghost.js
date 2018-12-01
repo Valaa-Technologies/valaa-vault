@@ -76,7 +76,7 @@ export function createGhostVRefInInstance (prototypeId: VRef,
   return vRef(ghostPath.headRawId(), null, ghostPath);
 }
 
-export function tryGhostHostIdFrom (idData: IdData): ?string {
+export function tryGhostHostRawIdFrom (idData: IdData): ?string {
   const ghostPath = tryGhostPathFrom(idData);
   return ghostPath && ghostPath.headHostRawId();
 }

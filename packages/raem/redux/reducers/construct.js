@@ -190,7 +190,7 @@ function _connectNonGhostObjectIdGhostPathToPrototype (bard: CreateBard, rawId: 
     if (prototypeId) {
       invariantify(prototypeId.getCoupledField() !== "materializedGhosts",
           "object with prototype ghostInstance must have an active ghost path in id");
-      newGhostPath = bard.fork().goToTransientOfId(prototypeId, "ResourceStub")
+      newGhostPath = bard.fork().goToTransientOfRef(prototypeId, "ResourceStub")
           .get("id").getGhostPath();
       if (prototypeId.getCoupledField() === "instances") {
         newGhostPath = newGhostPath.withNewInstanceStep(rawId);

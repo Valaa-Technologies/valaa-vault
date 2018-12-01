@@ -16,6 +16,7 @@ import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/part
 
 import raemBuiltinSteppers, { debugWrapBuiltinSteppers } from "~/raem/VALK/builtinSteppers";
 import Kuery, { dumpKuery, dumpScope, dumpObject } from "~/raem/VALK/Kuery";
+import { tryHostRef } from "~/raem/VALK/hostReference";
 import { tryPackedField, packedSingular } from "~/raem/VALK/packedField";
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 
@@ -480,10 +481,9 @@ export default class Valker extends Resolver {
           elevateFieldRawSequence(this, value._sequence, value._fieldInfo)
           // TODO(iridian): Do we allow undefined entries in our unpacked arrays? Now we do.
               .forEach(entry => {
-                const transient = !isIdData(entry)
-                    ? entry
-                    : this.tryGoToTransientOfId(entry, value._type);
-                ret.push(this.unpack(transient));
+                const hostRef = tryHostRef(entry);
+                ret.push(this.unpack(
+                    !hostRef ? entry : this.tryGoToTransientOfRef(hostRef, value._type)));
               });
         }
       } else if (Iterable.isIterable(value)) {
@@ -528,14 +528,14 @@ export default class Valker extends Resolver {
       if (Iterable.isKeyed(object)) {
         ret = object;
       } else if (object instanceof VRef) {
-        ret = this.tryGoToTransientOfId(object, "ResourceStub", require, false);
+        ret = this.tryGoToTransientOfRef(object, "ResourceStub", require, false);
       } else if (typeof object._singular !== "undefined") {
         if (!isIdData(object._singular)) {
           ret = object._singular;
         } else {
           elevatedId = elevateFieldReference(this, object._singular, object._fieldInfo,
               undefined, object._type, this._indent < 2 ? undefined : this._indent);
-          ret = this.tryGoToTransientOfId(elevatedId, object._type, require, false);
+          ret = this.tryGoToTransientOfRef(elevatedId, object._type, require, false);
         }
       }
       if (this._indent >= 1) {

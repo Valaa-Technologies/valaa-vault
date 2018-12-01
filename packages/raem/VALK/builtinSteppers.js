@@ -2,8 +2,7 @@
 
 import { Iterable } from "immutable";
 
-import { VRef, RRef, DRef, BRef, obtainVRef, obtainRRef, obtainDRef, obtainBRef }
-    from "~/raem/ValaaReference";
+import { VRef } from "~/raem/ValaaReference";
 
 import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import { PrototypeOfImmaterialTag } from "~/raem/state/Transient";
@@ -47,23 +46,7 @@ export default Object.freeze({
   },
   "§ref": function valaaReference (valker: Valker, head: any, scope: ?Object,
     [, resourceParts, partition]: BuiltinStep): VRef {
-    return valker.pack(obtainVRef(resourceParts, undefined, undefined, partition));
-  },
-  "§VRef": function valaaReference (valker: Valker, head: any, scope: ?Object,
-      [, args]: BuiltinStep): VRef {
-    return valker.pack(obtainVRef(args));
-  },
-  "§RRef": function valaaResourceReference (valker: Valker, head: any, scope: ?Object,
-      [, args]: BuiltinStep): RRef {
-    return valker.pack(obtainRRef(args));
-  },
-  "§DRef": function valaaDataReference (valker: Valker, head: any, scope: ?Object,
-      [, args]: BuiltinStep): DRef {
-    return valker.pack(obtainDRef(args));
-  },
-  "§BRef": function valaaBvobReference (valker: Valker, head: any, scope: ?Object,
-      [, args]: BuiltinStep): BRef {
-    return valker.pack(obtainBRef(args));
+    return valker.pack(new VRef(resourceParts, partition));
   },
   "§$": function scopeLookup (valker: Valker, head: any, scope: ?Object,
       [, lookupName]: BuiltinStep) {

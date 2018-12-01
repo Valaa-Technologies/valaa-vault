@@ -204,19 +204,6 @@ ValaaReference.prototype[HostRef] = null;
 
 export const VRef = ValaaReference;
 
-export class ValaaResourceReference extends ValaaReference {}
-export class ValaaDataReference extends ValaaReference {
-  typeof (): string { return "Data"; }
-  shortTypeof (): string { return "DRef"; }
-}
-export class ValaaBvobReference extends ValaaReference {
-  typeof (): string { return "Blob"; }
-  shortTypeof (): string { return "BRef"; }
-}
-
-export const RRef = ValaaResourceReference;
-export const DRef = ValaaDataReference;
-export const BRef = ValaaBvobReference;
 
 export type JSONVRef = [RawId, ?string, ?JSONGhostPath, ?string];
 
@@ -282,24 +269,19 @@ export function invariantifyTypeName (candidate: ?string, name: string = "typeNa
  * @returns {VRef}
  */
 export function vRef (rawId: RawId, coupledField: ?string = null, ghostPath: ?GhostPath = null,
-    partitionURI: ?ValaaURI = null, RefType: Function = ValaaResourceReference): VRef {
+    partitionURI: ?ValaaURI = null): VRef {
   try {
     invariantifyString(rawId, "vRef.rawId");
     invariantifyString(coupledField, "vRef.coupledField", { allowNull: true });
     invariantifyObject(ghostPath, "vRef.ghostPath", { allowNull: true, instanceof: GhostPath });
     invariantifyObject(partitionURI, "vRef.partitionURI",
         { allowNull: true, allowEmpty: true, instanceof: ValaaURI });
-    return new RefType([rawId, coupledField, ghostPath], partitionURI);
+    return new ValaaReference([rawId, coupledField, ghostPath], partitionURI);
   } catch (error) {
     throw wrapError(error, `During vRef('${rawId}', '${coupledField}', ghostPath, ${
         partitionURI}), with:`,
         "\n\tghostPath:", ghostPath);
   }
-}
-
-export function dRef (rawId: RawId, coupledField: ?string, ghostPath: ?GhostPath,
-    partitionURI: ?ValaaURI) {
-  return vRef(rawId, coupledField, ghostPath, partitionURI, ValaaDataReference);
 }
 
 export function vRefFromJSON (json: JSONIdData, RefType: Object = VRef): VRef {
@@ -352,24 +334,8 @@ export const obtainVRef = vdocorate([
 ])((idData: IdData | JSONIdData,
     coupledField: ?string = tryCoupledFieldFrom(idData) || null,
     ghostPath: ?GhostPath = tryGhostPathFrom(idData) || null,
-    partitionURI: ?ValaaURI = tryPartitionURIFrom(idData) || null,
-    RefType: Function = ValaaResourceReference): VRef =>
-        new RefType([getRawIdFrom(idData), coupledField, ghostPath], partitionURI));
-
-export function obtainRRef (idData: IdData | JSONIdData, coupledField: ?string,
-    ghostPath: ?GhostPath, partitionURI: ?ValaaURI): RRef {
-  return obtainVRef(idData, coupledField, ghostPath, partitionURI, ValaaResourceReference);
-}
-
-export function obtainDRef (idData: IdData | JSONIdData, coupledField: ?string,
-    ghostPath: ?GhostPath, partitionURI: ?ValaaURI): DRef {
-  return obtainVRef(idData, coupledField, ghostPath, partitionURI, ValaaDataReference);
-}
-
-export function obtainBRef (idData: IdData | JSONIdData, coupledField: ?string,
-    ghostPath: ?GhostPath, partitionURI: ?ValaaURI): BRef {
-  return obtainVRef(idData, coupledField, ghostPath, partitionURI, ValaaBvobReference);
-}
+    partitionURI: ?ValaaURI = tryPartitionURIFrom(idData) || null): VRef =>
+        new ValaaReference([getRawIdFrom(idData), coupledField, ghostPath], partitionURI));
 
 /**
  * Returns rawId from given idData or throws if the input does not have a valid rawId.

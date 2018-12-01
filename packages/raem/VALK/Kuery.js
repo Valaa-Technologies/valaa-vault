@@ -281,7 +281,6 @@ export default class Kuery {
    * @returns {Kuery}
    */
   fromObject (object: any, headType: ?string) {
-    // TODO(iridian): Add handling for dRef
     const ref = tryHostRef(object) || ((typeof object === "string") ? vRef(object) : undefined);
     if (!ref && (object !== null)) {
       throw new Error(`VALK.fromObject.object is not a valid object reference, got: ${object}`);

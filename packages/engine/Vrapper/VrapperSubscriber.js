@@ -444,10 +444,7 @@ function throwMutationLiveKueryError (subscriber, head, kueryVAKON) {
 //        otherwise return the value directly.
 const customLiveExpressionOpHandlers = {
   "§'": null,
-  "§VRef": null,
-  "§RRef": null,
-  "§DRef": null,
-  "§BRef": null,
+  "§ref": null,
   "§$": undefined,
   "§map": liveMap,
   "§filter": liveFilter,

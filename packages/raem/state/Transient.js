@@ -1,7 +1,7 @@
 // @flow
 import { OrderedMap } from "immutable";
 
-import { VRef, IdData, RawId, vRef, ValaaDataReference } from "~/raem/ValaaReference";
+import { VRef, IdData, RawId, vRef } from "~/raem/ValaaReference";
 import type GhostPath from "~/raem/state/GhostPath";
 
 import invariantify from "~/tools/invariantify";
@@ -16,7 +16,6 @@ export function createTransient (options: {
 } = {}) {
   let ret = Transient();
   if (typeof options.id !== "undefined") {
-    // TODO(iridian): This always creates a ValaaResourceReference: add support for dRef
     ret = ret.set("id", typeof options.id === "string"
         ? vRef(options.id, undefined, undefined, undefined, options.RefType)
         : options.id);
@@ -25,12 +24,6 @@ export function createTransient (options: {
   if (typeof options.owner !== "undefined") ret = ret.set("owner", options.owner);
   if (typeof options.prototype !== "undefined") ret = ret.set("prototype", options.prototype);
   return ret;
-}
-
-export function createDataTransient (options:
-    { id?: IdData, typeName?: string, owner?: IdData, prototype?: IdData } = {}) {
-  options.RefType = ValaaDataReference;
-  return createTransient(options);
 }
 
 export const PrototypeOfImmaterialTag = Symbol("PrototypeOfImmaterial");

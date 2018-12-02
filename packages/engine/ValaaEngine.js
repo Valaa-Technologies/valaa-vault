@@ -9,7 +9,7 @@ import VALEK, { Kuery, VALKOptions, dumpObject, rootScopeSelf,
 
 import { Command, created, duplicated, recombined, isCreatedLike } from "~/raem/events";
 
-import ValaaReference, { vRef, IdData, obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
+import ValaaReference, { vRef, IdData, getRawIdFrom } from "~/raem/ValaaReference";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import { getActionFromPassage } from "~/raem/redux/Bard";
 
@@ -57,7 +57,6 @@ export default class ValaaEngine extends Cog {
     }
     ret.setHostValueUnpacker((value, valker) => {
       const id = tryHostRef(value);
-      // FIXME: obtain vrapper for data objects? VRef/DRef/BRef can be used for this.
       if (!id) return Iterable.isIterable(value) ? value.toJS() : value;
       return this.getVrapper(id, { state: valker.getState() }, Iterable.isKeyed(value) && value);
     });

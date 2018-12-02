@@ -14,7 +14,7 @@ import Resource from "~/raem/schema/Resource";
 import Relation from "~/script/schema/Relation";
 import Scope, { scopeInterface } from "~/script/schema/Scope";
 
-const INTERFACE_DESCRIPTION = "entity";
+const INTERFACE_DESCRIPTION = "relatable";
 
 export function relatableInterface (objectDescription: string = INTERFACE_DESCRIPTION) {
   return {
@@ -31,12 +31,12 @@ export function relatableInterface (objectDescription: string = INTERFACE_DESCRI
       ...scopeInterface(objectDescription).fields(),
 
       ...primaryField("relations", new GraphQLList(Relation),
-          "List of relations that this entity has",
+          "List of relations that this relatable has",
           { coupling: toManyOwnlings() },
       ),
 
       ...transientField("incomingRelations", new GraphQLList(Relation),
-          "List of relations that are bound to this entity",
+          "List of relations that are targeting this relatable",
           { coupling: toMany({ coupledField: "target" }) },
       ),
     }),

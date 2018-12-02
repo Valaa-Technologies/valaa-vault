@@ -238,11 +238,9 @@ export default class InspireGateway extends LogEventGenerator {
     };
     const { schema, validators, mainReduce, subReduce } = createRootReducer(reducerOptions);
 
-    // FIXME(iridian): Create the deterministic-id schema. Now random.
-    // const previousId = valaaUUID();
     const middlewares = [
       _createProcessCommandVersionMiddleware(EVENT_VERSION),
-      createProcessCommandIdMiddleware(undefined /* previousId */, schema),
+      createProcessCommandIdMiddleware(undefined, schema),
       createValidateEventMiddleware(validators, EVENT_VERSION, EVENT_VERSION),
       createBardMiddleware(),
     ];

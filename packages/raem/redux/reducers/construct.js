@@ -92,11 +92,13 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
 
 export function convertLegacyOwnerField (bard: CreateBard, initialState: Object) {
   if (!bard.passage.owner) return initialState;
-  bard.errorEvent(`\n\tDEPRECATED: ${bard.passage.type}.owner",
-      "\n\tprefer: ${bard.passage.type}.initialState.owner`);
+  throw bard.wrapErrorEvent(new Error(`\n\tDEPRECATED: ${bard.passage.type}.owner`),
+      `\n\tprefer: ${bard.passage.type}.initialState.owner`);
+  /*
   const actualInitialState = initialState || {};
-  actualInitialState.owner = obtainVRef(bard.passage.owner.id, bard.passage.owner.property);
+  actualInitialState.owner = obtain-VRef(bard.passage.owner.id, bard.passage.owner.property);
   return actualInitialState;
+  */
 }
 
 export function prepareDenormalizedRoot (bard: CreateBard) {

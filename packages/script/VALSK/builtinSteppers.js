@@ -11,6 +11,8 @@ import { createNativeIdentifier, isNativeIdentifier, getNativeIdentifierValue,
   setNativeIdentifierValue,
 } from "~/script/denormalized/nativeIdentifier";
 
+export { BuiltinStep };
+
 export default Object.freeze({
   ...raemBuiltinSteppers,
   // @valos/script property builtin steppers

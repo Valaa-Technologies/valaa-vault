@@ -27,7 +27,7 @@ export function freezeOwnlings (bard: Bard, transient: Transient) {
     const freezeBard = Object.create(bard);
     traverseMaterializedOwnlings(freezeBard, transient, entryId => {
       if (freezeBard.tryGoToTransientOfRawId(entryId.rawId(), "Resource")) {
-        mutableState.setIn([freezeBard.typeName, entryId.rawId(), "isFrozen"], true);
+        mutableState.setIn([freezeBard.objectTypeName, entryId.rawId(), "isFrozen"], true);
         return freezeBard.objectTransient;
       }
       return null;

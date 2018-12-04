@@ -144,7 +144,7 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
 
 export function resolvePartitionURI (resolver: Resolver, resourceId: VRef) {
   if (!resourceId.isGhost()) return resourceId.getPartitionURI();
-  return resolver.bindObjectId(resourceId.getGhostPath().headHostRawId()).getPartitionURI();
+  return resolver.bindObjectRawId(resourceId.getGhostPath().headHostRawId()).getPartitionURI();
 }
 
 export function setCreatedObjectPartition (mutableTransient: Transient) {
@@ -204,7 +204,7 @@ function _updateOwnlingPartitions (bard: Bard, transient: Transient,
         // specifying "Resource" and not "ResourceStub" skips inactive Resource's as a side-effect.
           || !partitionerBard.tryGoToTransientOfRawId(entryId.rawId(), "Resource")
           || (partitionerBard.objectId.getPartitionURI() !== oldPartitionURI)) return null;
-      mutableState.setIn([partitionerBard.typeName, entryId.rawId(), "id"],
+      mutableState.setIn([partitionerBard.objectTypeName, entryId.rawId(), "id"],
               entryId.immutatePartition(newPartitionURI));
       return partitionerBard.objectTransient;
     });

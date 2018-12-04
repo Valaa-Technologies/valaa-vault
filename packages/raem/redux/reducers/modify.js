@@ -250,7 +250,7 @@ function createResourceVRefDeserializer (fieldInfo) {
     if (resourceId.getPartitionURI() || !resourceId.isGhost()) return resourceId;
     // Ghosts have the correct partitionURI in the host Resource.id
     const ghostPath = resourceId.getGhostPath();
-    const hostId = bard.bindObjectId(ghostPath.headHostRawId());
+    const hostId = bard.bindObjectRawId(ghostPath.headHostRawId());
     return resourceId.immutatePartitionURI(hostId.getPartitionURI());
   }
   return deserializeResourceVRef;
@@ -264,7 +264,7 @@ function createSingularDataDeserializer (fieldInfo) {
     try {
       if (data === null) return null;
       if (typeof data === "string" || Object.getPrototypeOf(data) !== Object.prototype) {
-        return bard.bindObjectId(data, concreteTypeName || "Data");
+        return bard.bindObjectIdData(data, concreteTypeName || "Data");
       }
       const typeName = concreteTypeName || data.typeName;
       invariantifyString(typeName,
@@ -438,7 +438,7 @@ const customSetFieldHandlers = {
     let i = 0;
     if (newOwnerId) {
       const ownerBard = bard.fork();
-      for (ownerBard.tryGoToTransientOfRef(newOwnerId, "Resource"); ownerBard.objectId;
+      for (ownerBard.tryGoToObjectIdTransient(newOwnerId, "Resource"); ownerBard.objectId;
           takeToCurrentObjectOwnerTransient(ownerBard), ++i) {
         if (ownerBard.objectId.rawId() === bard.objectId.rawId()) {
           throw new Error(`Cyclic ownership not allowed while trying to set owner of ${

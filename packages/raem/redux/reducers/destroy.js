@@ -63,7 +63,7 @@ function removeGhostElevationsFromPrototypeChain (bard: Bard, destroyedPath: Gho
     object: Transient) {
   const prototypeId = object.get("prototype");
   if (!prototypeId) return;
-  const prototype = bard.goToTransientOfRef(prototypeId, "Resource");
+  const prototype = bard.goToObjectIdTransient(prototypeId, "Resource");
   prototype.get("id").getGhostPath().removeGhostElevation(destroyedPath);
   removeGhostElevationsFromPrototypeChain(bard, destroyedPath, prototype);
 }

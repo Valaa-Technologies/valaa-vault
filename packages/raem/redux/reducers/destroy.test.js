@@ -4,7 +4,7 @@ import { vRef } from "~/raem/ValaaReference";
 
 import { created, destroyed } from "~/raem/events";
 
-import getObjectTransient from "~/raem/state/getObjectTransient";
+import { tryObjectTransient } from "~/raem/state/getObjectTransient";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 
@@ -33,7 +33,7 @@ describe("CREATED/DUPLICATED", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       destroyed({ id: "A_child1" }),
     ]);
-    expect(getObjectTransient(harness.getState(), "A_child1", "Resource", undefined, false))
+    expect(tryObjectTransient(harness.getState(), "A_child1", "Resource"))
         .toEqual(null);
   });
 

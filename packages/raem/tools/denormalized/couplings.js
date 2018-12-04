@@ -3,7 +3,7 @@
 import { IdData, obtainVRef } from "~/raem/ValaaReference";
 
 import { getTransientTypeName } from "~/raem/state/Transient";
-import getObjectTransient from "~/raem/state/getObjectTransient";
+import { getObjectTransientDetailed } from "~/raem/state/getObjectTransient";
 import getObjectField from "~/raem/state/getObjectField";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
@@ -122,7 +122,8 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
       return;
     }
     if (!remoteFieldIntro) {
-      remoteTransient = getObjectTransient(bard.state, remote, remoteType.name);
+      remoteTransient = getObjectTransientDetailed(
+          Object.create(bard), remoteVRef, remoteType.name);
       remoteTypeName = getTransientTypeName(remoteTransient);
       remoteFieldIntro = bard.schema.getType(remoteTypeName).getFields()[coupledField];
       if (!remoteFieldIntro) {
@@ -150,7 +151,8 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
           const name = bard.objectTypeIntro.getFields().name
               ? `'${getObjectField(nameBard, bard.objectTransient, "name")}' `
               : bard.objectId.rawId();
-          remoteTransient = getObjectTransient(bard.state, remote, remoteType.name);
+          remoteTransient = getObjectTransientDetailed(
+              Object.create(bard), remoteVRef, remoteType.name);
           const remoteName = bard.schema.getType(getTransientTypeName(remoteTransient))
                   .getFields().name
               ? `'${getObjectField(nameBard, remoteTransient, "name")}' `

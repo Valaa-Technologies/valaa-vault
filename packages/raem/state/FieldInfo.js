@@ -44,7 +44,7 @@ export function elevateFieldRawSequence (resolver: Resolver, rawSequence: Ordere
     fieldInfo: FieldInfo, object: Transient = fieldInfo.sourceTransient, verbosity: ?number) {
   if (!object) return rawSequence;
   const elevator = Object.create(resolver);
-  elevator.typeName = "ResourceStub";
+  elevator.objectTypeName = "ResourceStub";
   return _elevateRawSequence(elevator, object, rawSequence, Object.create(fieldInfo), verbosity);
 }
 
@@ -63,15 +63,22 @@ export function _getFieldGhostElevation (fieldInfo: FieldInfo, elevationInstance
 
 function _elevateReference (elevator: Resolver, reference: VRef, fieldInfo: FieldInfo,
     elevation: GhostElevation, typeName: string, verbosity: ?number) {
-  elevator.tryGoToTransientOfRef(reference, typeName);
+  elevator.tryGoToObjectIdTransient(reference, typeName);
   let elevatedId;
   if (elevator.objectId.isInactive()) {
-    // TODO(iridian): Following assumption has not been fully reasoned, evaluate thoroughly:
-    // If reference is to a resource in an inactive partition there will be no elevation.
-    // Theory goes: both the elevation base and the eleation instance are in an active partition,
-    // and as the reference target is not, the reference target is an outside resource and thus
-    // needs no elevation.
-    // Counter-argument: if the outside resource is in an inactive prototype of an elevation base?
+    // TODO(iridian): Following assumption has not been fully reasoned,
+    // evaluate thoroughly: If reference is to a resource in an
+    // inactive partition there will be no elevation.
+    // Reasoning:
+    // 1. both the elevation base and the elevation instance are in
+    //    an active partition, otherwise elevation would have already
+    //    failed,
+    // 2. reference target partition is inactive partition and thus
+    //    must a separate partition,
+    // 3. reference target itself
+    // target is an outside resource and thus needs no elevation.
+    // Counter-argument: if the outside resource is in an inactive
+    // prototype of an elevation base?
     elevatedId = elevator.objectId;
   } else {
     const referencePath = elevator.objectId.getGhostPath();
@@ -98,21 +105,23 @@ function _elevateRawSequence (resolver: Resolver, object: Transient,
   let fullUnelevatedSequence = partialRawSequence || [];
   // Grab elevation before the recursive self-call thrashes fieldInfo.
   const elevation = _tryFieldGhostElevation(fieldInfo);
-  if (partialRemoves !== null && (typeof fieldInfo.intro.immediateDefaultValue === "undefined")) {
+  if (partialRemoves !== null && (fieldInfo.intro.immediateDefaultValue === undefined)) {
     let prototypeSequence;
     let currentObject = object;
     do {
       const prototypeId = currentObject.get("prototype");
       if (!prototypeId) break;
-      currentObject = resolver.goToNonGhostTransientOfRef(prototypeId, resolver.typeName);
+      currentObject = resolver.goToNonGhostObjectIdTransient(
+          prototypeId, resolver.objectTypeName);
       prototypeSequence = currentObject.get(fieldInfo.name);
-    } while (typeof prototypeSequence === "undefined");
+    } while (prototypeSequence === undefined);
+
     if (prototypeSequence) {
       fieldInfo.elevationInstanceId = fieldInfo.sourceTransient.get("id");
       fieldInfo.sourceTransient = resolver.objectTransient;
       fullUnelevatedSequence = _elevateRawSequence(
           resolver, currentObject, prototypeSequence, fieldInfo, verbosity);
-      if (typeof partialRemoves !== "undefined") {
+      if (partialRemoves !== undefined) {
         fullUnelevatedSequence = fullUnelevatedSequence.subtract(partialRemoves);
       }
       if (partialRawSequence) {
@@ -292,7 +301,7 @@ export function takeToCurrentObjectOwnerTransient (resolver: Resolver) {
     if (elevation) {
       owner = _elevateReference(elevator, owner, fieldInfo, elevation, "Resource");
     }
-    if (isIdData(owner)) return resolver.goToTransientOfRef(owner, "Resource");
+    if (isIdData(owner)) return resolver.goToObjectIdTransient(owner, "Resource");
     resolver.objectId = owner.get("id");
     resolver.objectTransient = owner;
   } else {

@@ -482,8 +482,9 @@ export default class Valker extends Resolver {
           // TODO(iridian): Do we allow undefined entries in our unpacked arrays? Now we do.
               .forEach(entry => {
                 const hostRef = tryHostRef(entry);
-                ret.push(this.unpack(
-                    !hostRef ? entry : this.tryGoToTransientOfRef(hostRef, value._type)));
+                const transient = !hostRef ? entry
+                    : this.tryGoToObjectIdTransient(hostRef, value._type);
+                ret.push(this.unpack(transient));
               });
         }
       } else if (Iterable.isIterable(value)) {
@@ -528,14 +529,14 @@ export default class Valker extends Resolver {
       if (Iterable.isKeyed(object)) {
         ret = object;
       } else if (object instanceof VRef) {
-        ret = this.tryGoToTransientOfRef(object, "ResourceStub", require, false);
+        ret = this.tryGoToObjectIdTransient(object, "ResourceStub", require, false);
       } else if (typeof object._singular !== "undefined") {
         if (!isIdData(object._singular)) {
           ret = object._singular;
         } else {
           elevatedId = elevateFieldReference(this, object._singular, object._fieldInfo,
               undefined, object._type, this._indent < 2 ? undefined : this._indent);
-          ret = this.tryGoToTransientOfRef(elevatedId, object._type, require, false);
+          ret = this.tryGoToObjectIdTransient(elevatedId, object._type, require, false);
         }
       }
       if (this._indent >= 1) {

@@ -17,7 +17,7 @@ import Bard from "~/raem/redux/Bard";
  */
 export default function traverseMaterializedOwnlings (bard: Bard, transient: Transient,
     visitor: Function) {
-  const typeIntro = bard.getTypeIntro(bard.typeName);
+  const typeIntro = bard.getTypeIntro(bard.objectTypeName);
   const fieldIntros = typeIntro.getFields();
   for (const [fieldName, fieldValue] of transient.entries()) {
     const fieldIntro = fieldIntros[fieldName];

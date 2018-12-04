@@ -16,7 +16,7 @@ export default function ghostHostResolver (source: Transient, args: any[], conte
     if (!ghostHostRawId) return null;
     const resolver = context.rootValue.resolver.fork();
     // resolver.setTypeName(getNullableType(context.returnType));
-    return resolver.resolveToTransientOf(ghostHostRawId, undefined, "Resource", true, false);
+    return resolver.goToTransientOfRawId(ghostHostRawId, "Resource");
   } catch (error) {
     const suggestion = error.message.slice(0, 10) !== "source.get" ? "" : `
   Is this a mutation resolver? If so, remember to wrap resolver in mutationResolver.`;

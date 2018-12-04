@@ -800,6 +800,23 @@ describe("complex structures", () => {
         .toEqual(startingList);
   });
 
+  it("Reflects instance list insertion properly via prototype of prototype access", () => {
+    createAndExtractHarnessWithCommands({ verbosity: 0 });
+    // Confirm that all the lists A*_B* are similar
+    // const startingList = harness.run(A_B, "children", { verbosity: 0 });
+
+    expect(harness.run(gA1_B1, ["§->", "children", ["§map", "prototype"]]))
+        .toEqual(harness.run(A_B1i, "children"));
+
+    // Add a bloke to A_B1i
+    harness.chronicleEvent(created({ id: "A_B1_D", typeName: "TestThing", initialState: {
+      parent: A_B1i, name: "new guy",
+    } }));
+
+    expect(harness.run(gA1_B1, ["§->", "children", ["§map", "prototype"]]))
+        .toEqual(harness.run(A_B1i, "children"));
+  });
+
   it("Reflects instance list insertion properly to the instance list values", () => {
     createAndExtractHarnessWithCommands({ verbosity: 0 });
     // Confirm that all the lists A*_B* are similar
@@ -815,11 +832,12 @@ describe("complex structures", () => {
         .toEqual(startingList);
     expect(harness.run(gA1_B, ["§->", "children", ["§map", "prototype"]]))
         .toEqual(startingList);
-    expect(harness.run(gA1_B1, ["§->", "children", ["§map", "prototype", "prototype"]]).slice(0, -1))
-        .toEqual(startingList);
 
     expect(harness.run(gA1_B1, ["§->", "children", ["§map", "prototype"]]))
         .toEqual(harness.run(A_B1i, "children"));
+
+    expect(harness.run(gA1_B1, ["§->", "children", ["§map", "prototype", "prototype"]]).slice(0, -1))
+        .toEqual(startingList);
 
     // Modify the name of the newly-added object
     harness.chronicleEvent(fieldsSet({ id: "A_B1_D", typeName: "TestThing",
@@ -831,6 +849,7 @@ describe("complex structures", () => {
         .toEqual(startingList);
     expect(harness.run(gA1_B, ["§->", "children", ["§map", "prototype"]]))
         .toEqual(startingList);
+
     expect(harness.run(gA1_B1, ["§->", "children", ["§map", "prototype", "prototype"]]).slice(0, -1))
         .toEqual(startingList);
 

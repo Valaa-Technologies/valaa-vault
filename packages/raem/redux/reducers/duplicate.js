@@ -61,7 +61,8 @@ export default function duplicate (bard: DuplicateBard) {
                 ""}ghost: implicit ghost owner retrieval/materialization not implemented yet`);
       // TODO(iridian): this needed? mem-cpu tradeoff: found in prototype's...
       // ["owner"] // TODO(iridian): Retrieve and materialize correct owner for the ghost
-      bard.objectTransient = createTransient({ typeName: bard.typeName, prototype: prototypeId });
+      bard.objectTransient = createTransient(
+          { typeName: bard.objectTypeName, prototype: prototypeId });
     }
   }
   _createDuplicate(bard, newObjectId, passage.initialState, passage.preOverrides,
@@ -91,7 +92,7 @@ export function duplicateFields (bard: DuplicateBard, mutableTransient: Transien
   // If we have a prototype thus default values are not needed, and are not duplicating we can skip
   // field iteration.
   const ownerId = bard.objectId;
-  const typeName = bard.typeName;
+  const typeName = bard.objectTypeName;
   for (const [fieldName, originalFieldValue] of bard.objectTransient) {
     if (!originalFieldValue || (bard.fieldsTouched && bard.fieldsTouched.has(fieldName))) continue;
     const fieldIntro = fieldIntros[fieldName];
@@ -147,7 +148,8 @@ function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalIdData:
     if (typeof recombineOverriddenId !== "undefined") {
       if (bard.getVerbosity() >= 2) {
         bard.logEvent(`virtually recombining to sub-directive ${
-          dumpify(recombineOverriddenId, { sliceAt: 40, sliceSuffix: "..." })}:${bard.typeName} ${
+          dumpify(recombineOverriddenId, { sliceAt: 40, sliceSuffix: "..." })}:${
+          bard.objectTypeName} ${
           dumpify({ duplicateOf: originalIdData, initialState: { ownerId } }, { sliceAt: 380 })
         }`);
       }
@@ -175,7 +177,7 @@ function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalIdData:
       // Not an immaterial ghost, ie. a material ghost or normal object: do full deep duplication
       if (bard.getVerbosity() >= 2) {
         bard.logEvent(`Sub-reducing virtual DUPLICATED ${
-          dumpify(newObjectId, { sliceAt: 40, sliceSuffix: "..." })}:${bard.typeName} ${
+          dumpify(newObjectId, { sliceAt: 40, sliceSuffix: "..." })}:${bard.objectTypeName} ${
           dumpify({ duplicateOf: originalIdData, initialState: { owner } }, { sliceAt: 380 })
         }`);
       }

@@ -63,7 +63,8 @@ function _dumpifyPackedSingular () {
             ? `tr.id:'${this._singular.get("id")}'`
             : dumpify(this._singular)
         : `id:'${String(this._singular)}'`
-      }:${this._type}<-${(this._fieldInfo && this._fieldInfo.sourceTransient.get("id")) || ""}@${
+      }:${this._type}<-${((this._fieldInfo || {}).sourceTransient
+          && (this._fieldInfo || {}).sourceTransient.get("id")) || ""}@${
         (this._fieldInfo && this._fieldInfo.elevationInstanceId) || ""})`;
 }
 

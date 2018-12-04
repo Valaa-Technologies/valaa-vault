@@ -117,19 +117,19 @@ export function recurseCreateOrDuplicate (bard: CreateBard, initialState: Object
   try {
     // Make the objectId available for all VRef connectors within this Bard.
     bard.setState(bard.state
-        .setIn(["ResourceStub", rawId], bard.typeName)
-        .setIn(["Resource", rawId], bard.typeName)
-        .setIn([bard.typeName, rawId],
-            OrderedMap([["id", bard.objectId], ["typeName", bard.typeName]])));
+        .setIn(["ResourceStub", rawId], bard.objectTypeName)
+        .setIn(["Resource", rawId], bard.objectTypeName)
+        .setIn([bard.objectTypeName, rawId],
+            OrderedMap([["id", bard.objectId], ["typeName", bard.objectTypeName]])));
     bard.objectTransient = bard.objectTransient.withMutations(mutableTransient => {
       bard.objectTransient = mutableTransient;
       bard.goToObjectTypeIntro();
       const objectTypeIntro: GraphQLObjectType = bard.objectTypeIntro;
       if (typeof objectTypeIntro.getInterfaces !== "function") {
-        bard.error(`Cannot instantiate interface type: ${bard.typeName}`);
+        bard.error(`Cannot instantiate interface type: ${bard.objectTypeName}`);
       }
       (objectTypeIntro.getInterfaces() || []).forEach(classInterface => {
-        bard.getDenormalizedTable(classInterface.name)[rawId] = bard.typeName;
+        bard.getDenormalizedTable(classInterface.name)[rawId] = bard.objectTypeName;
       });
 
       const isResource = isResourceType(objectTypeIntro);
@@ -166,7 +166,7 @@ export function recurseCreateOrDuplicate (bard: CreateBard, initialState: Object
 
       _connectNonGhostObjectIdGhostPathToPrototype(bard, rawId);
     });
-    bard.getDenormalizedTable(bard.typeName)[rawId] = bard.objectTransient;
+    bard.getDenormalizedTable(bard.objectTypeName)[rawId] = bard.objectTransient;
   } catch (error) {
     throw wrapError(error, `During ${bard.debugId()}\n .recurseCreateOrDuplicate(), with:`,
         "\n\tobject:", bard.objectTransient,
@@ -192,7 +192,7 @@ function _connectNonGhostObjectIdGhostPathToPrototype (bard: CreateBard, rawId: 
     if (prototypeId) {
       invariantify(prototypeId.getCoupledField() !== "materializedGhosts",
           "object with prototype ghostInstance must have an active ghost path in id");
-      newGhostPath = bard.fork().goToTransientOfRef(prototypeId, "ResourceStub")
+      newGhostPath = bard.fork().goToObjectIdTransient(prototypeId, "ResourceStub")
           .get("id").getGhostPath();
       if (prototypeId.getCoupledField() === "instances") {
         newGhostPath = newGhostPath.withNewInstanceStep(rawId);

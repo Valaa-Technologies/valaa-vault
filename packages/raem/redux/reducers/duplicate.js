@@ -1,6 +1,6 @@
 import { OrderedSet } from "immutable";
 
-import { VRef, obtainVRef, vRef, expandIdDataFrom } from "~/raem/ValaaReference";
+import { VRef, vRef, expandIdDataFrom } from "~/raem/ValaaReference";
 
 import Transient, { createTransient, getTransientTypeName, PrototypeOfImmaterialTag }
     from "~/raem/state/Transient";
@@ -33,9 +33,10 @@ export default function duplicate (bard: DuplicateBard) {
   const newObjectId = passage.id;
   const newObjectTransient = bard.objectTransient;
 
+  const duplicateOf = passage.duplicateOf = bard.obtainReference(passage.duplicateOf);
   // Specifying "Resource" as opposed to "ResourceStub" as the typeName implicitly requires the
   // resource to be active. Inactive resources appear only in InactiveResource/ResourceStub tables.
-  bard.goToTransientOfRef(obtainVRef(passage.duplicateOf), "Resource");
+  bard.goToObjectIdTransient(duplicateOf, "Resource");
   const ghostPath = passage.id.getGhostPath();
   passage.typeName = getTransientTypeName(bard.objectTransient);
   if (!ghostPath.isGhost()) {

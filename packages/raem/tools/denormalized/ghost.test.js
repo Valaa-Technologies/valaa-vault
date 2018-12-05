@@ -2,7 +2,7 @@ import { created, fieldsSet } from "~/raem/events";
 import VALK from "~/raem/VALK";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
-import { VRef, IdData, vRef, getRawIdFrom } from "~/raem/ValaaReference";
+import { VRef, IdData, vRef } from "~/raem/ValaaReference";
 
 import GhostPath from "~/raem/state/GhostPath";
 import { createTransient } from "~/raem/state/Transient";
@@ -10,9 +10,8 @@ import { createTransient } from "~/raem/state/Transient";
 import { createMaterializeGhostAction, createImmaterializeGhostAction, isGhost, isMaterialized,
     createGhostVRefInInstance } from "~/raem/tools/denormalized/ghost";
 
-function _ghostVRef (prototypeRef: VRef, hostRawId: IdData, hostPrototypeRawId: IdData): VRef {
-  const ghostPath = prototypeRef.getGhostPath()
-      .withNewGhostStep(getRawIdFrom(hostPrototypeRawId), getRawIdFrom(hostRawId));
+function _ghostVRef (prototypeRef: VRef, hostRawId: IdData, hostPrototypeRawId: string): VRef {
+  const ghostPath = prototypeRef.getGhostPath().withNewGhostStep(hostPrototypeRawId, hostRawId);
   return vRef(ghostPath.headRawId(), null, ghostPath);
 }
 

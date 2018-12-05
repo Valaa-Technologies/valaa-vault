@@ -2,9 +2,9 @@
 
 import { GraphQLSchema } from "graphql/type";
 
-import { VRef, obtainVRef, tryCoupledFieldFrom }
-    from "~/raem/ValaaReference";
+import { VRef, obtainVRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
 import type { JSONIdData, IdData, RawId } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import type ValaaURI from "~/raem/ValaaURI";
 
 import GhostPath from "~/raem/state/GhostPath";
 import Transient, { createImmaterialTransient, createInactiveTransient }
@@ -14,8 +14,7 @@ import type { State } from "~/raem/state/State";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 
 
-import { dumpObject, invariantify, invariantifyObject, invariantifyString, LogEventGenerator }
-    from "~/tools";
+import { dumpObject, invariantify, invariantifyString, LogEventGenerator } from "~/tools";
 
 type BindFieldVRefOptions = {
   coupledField?: string, defaultCoupledField?: string, bindPartition?: boolean,
@@ -46,11 +45,15 @@ type BindFieldVRefOptions = {
  * @class Resolver
  */
 export default class Resolver extends LogEventGenerator {
+  obtainReference:
+      (idData: IdData, coupling?: string, ghostPath?: GhostPath, partitionURI?: ValaaURI) => VRef;
+
   constructor (options: ?Object) {
     if (!options.name) options.name = "Resolver";
     super(options);
     this.state = options.state;
     this.schema = options.schema;
+    this.obtainReference = options.obtainReference || obtainVRef;
   }
 
   schema: GraphQLSchema;
@@ -133,8 +136,9 @@ export default class Resolver extends LogEventGenerator {
       }
       return (!bindPartition || !boundId.isGhost())
           ? boundId
-          : boundId.immutatePartitionURI(
-              this.fork().bindObjectId(boundId.getGhostPath().headHostRawId()).getPartitionURI());
+          : boundId.immutatePartitionURI(this.fork()
+              .bindObjectRawId(boundId.getGhostPath().headHostRawId())
+              .getPartitionURI());
     } catch (error) {
       throw this.wrapErrorEvent(error, `bindObjectId(${rawId}:${typeName})`,
           "\n\tid:", ...dumpObject(objectId),
@@ -147,7 +151,7 @@ export default class Resolver extends LogEventGenerator {
   }
 
   bindObjectIdData (idData: IdData, typeName: string, bindPartition?: boolean) {
-    return this.bindObjectId(obtainVRef(idData), typeName, bindPartition);
+    return this.bindObjectId(this.obtainReference(idData), typeName, bindPartition);
   }
 
   /**
@@ -319,7 +323,7 @@ export default class Resolver extends LogEventGenerator {
         return id;
       }
     }
-    if (typeName === "Blob") return obtainVRef(id);
+    if (typeName === "Blob") return this.obtainReference(id);
     return undefined;
   }
 

@@ -263,7 +263,9 @@ function createSingularDataDeserializer (fieldInfo) {
     let objectIntro;
     try {
       if (data === null) return null;
-      if (typeof data === "string" || Object.getPrototypeOf(data) !== Object.prototype) {
+      if (typeof data === "string") {
+        return bard.bindObjectRawId(data, concreteTypeName || "Data");
+      } else if (Object.getPrototypeOf(data) !== Object.prototype) {
         return bard.bindObjectIdData(data, concreteTypeName || "Data");
       }
       const typeName = concreteTypeName || data.typeName;
@@ -428,7 +430,7 @@ export function handleSets (bard: Bard, fieldInfo, value, oldLocalValue, updateC
 const customSetFieldHandlers = {
   prototype (bard: Bard, fieldInfo: Object, value: any) {
     // This is a naive check for simple self-recursion but doesn't protect against deeper cycles.
-    invariantify(!value || (getRawIdFrom(value) !== getRawIdFrom(bard.objectId)),
+    invariantify(!value || (getRawIdFrom(value) !== bard.objectId.rawId()),
         "prototype self-recursion for %s", bard.objectTransient);
   },
   owner (bard: Bard, fieldInfo: Object, value: any, newOwnerId: any) {

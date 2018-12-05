@@ -2,7 +2,7 @@
 import { Iterable } from "immutable";
 import { GraphQLList, isLeafType, getNamedType } from "graphql/type";
 
-import { getRawIdFrom, tryRawIdFrom } from "~/raem/ValaaReference";
+import { tryRawIdFrom } from "~/raem/ValaaReference";
 import { getTransientTypeName } from "~/raem/state/Transient";
 import collectFields from "~/raem/tools/denormalized/collectFields";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
@@ -39,7 +39,7 @@ export default async function snapshotPartition (/* { partitionId, state, schema
   const partition = getObjectTransient(state, partitionId, "Partition");
   try {
     walkResourceProcessingOwnersFirst(partition, (object) =>
-      collectFields(schema, state, getRawIdFrom(object.get("id")),
+      collectFields(schema, state, object.get("id").rawId(),
           getTransientTypeName(object),
           fieldReviver));
     processDefers();
@@ -50,7 +50,7 @@ export default async function snapshotPartition (/* { partitionId, state, schema
   }
 
   function walkResourceProcessingOwnersFirst (resource, walkValue, field, parent, parentType) {
-    const id = getRawIdFrom(resource.get("id"));
+    const id = resource.get("id").rawId();
     if (!walkedIds.has(id)) {
       walkedIds.add(id);
       const ownerData = resource.get("owner");
@@ -89,7 +89,7 @@ export default async function snapshotPartition (/* { partitionId, state, schema
         if (!parentIsResource) return object;
         const idList = value.toJS();
         if (idList.length) {
-          addDeferredSet(getTransientTypeName(parent), getRawIdFrom(parent.get("id")), field.name,
+          addDeferredSet(getTransientTypeName(parent), parent.get("id").rawId(), field.name,
               idList);
         }
         // Irrespective of whether the array has owned or non-owned objects they'll be added later.
@@ -121,7 +121,7 @@ export default async function snapshotPartition (/* { partitionId, state, schema
       // field and if we're not processing an entry in an array (field.type !== type).
       if (!(field.coupling && field.coupling.isOwner)
           && (!(field.type instanceof GraphQLList) || (type instanceof GraphQLList))) {
-        addDeferredSet(getTransientTypeName(parent), getRawIdFrom(parent.get("id")), field.name,
+        addDeferredSet(getTransientTypeName(parent), parent.get("id").rawId(), field.name,
             Iterable.isIterable(fieldEntry) ? fieldEntry.toJS() : fieldEntry);
       }
       return null;

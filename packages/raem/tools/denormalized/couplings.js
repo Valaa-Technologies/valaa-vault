@@ -1,6 +1,6 @@
 // @flow
 
-import { IdData, obtainVRef } from "~/raem/ValaaReference";
+import { IdData } from "~/raem/ValaaReference";
 
 import { getTransientTypeName } from "~/raem/state/Transient";
 import { getObjectTransientDetailed } from "~/raem/state/getObjectTransient";
@@ -101,8 +101,8 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
   console.log("addCouplingPassages", actionType, `'${fieldIntro.name}', remote:`,
       dumpify(remote, { sliceAt: 100 }), "coupling", dumpify(coupling, { sliceAt: 100 }));
   */
-  if (!remote || remote.isInactive()) return;
-  const remoteVRef = obtainVRef(remote);
+  if (!remote /* || remote.isInactive() */) return;
+  const remoteVRef = bard.obtainReference(remote);
   let coupledField = remoteVRef.getCoupledField();
   let remoteTypeName = remoteType.name;
   let remoteFieldIntro = remoteType.getFields()[coupledField];

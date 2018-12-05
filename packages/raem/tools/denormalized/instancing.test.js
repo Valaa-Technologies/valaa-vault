@@ -1,6 +1,6 @@
 import { created, fieldsSet, transacted } from "~/raem/events";
 
-import { vRef, getRawIdFrom } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/ValaaReference";
 
 import getObjectField from "~/raem/state/getObjectField";
 import getObjectTransient, { tryObjectTransient } from "~/raem/state/getObjectTransient";
@@ -73,7 +73,7 @@ describe("CREATED with instancePrototype", () => {
     const child1Instance = getObjectTransient(harness.getState(), "A_child1Instance", "TestThing");
     expect(child1Instance.get("prototype"))
         .toEqual(vRef("A_child1", "instances"));
-    expect(getRawIdFrom(harness.run(child1Instance, "prototype")))
+    expect(harness.run(child1Instance, "prototype").rawId())
         .toEqual("A_child1");
   });
 
@@ -149,9 +149,9 @@ describe("CREATED with instancePrototype", () => {
         createGrandparentInstance);
     const ghostGrandlings = harness.run(vRef("A_grandparentInstance"),
         ["§->", "children", 0, "children"]);
-    expect(getRawIdFrom(ghostGrandlings[0]))
+    expect(ghostGrandlings[0].rawId())
         .toEqual(createGhostRawId("A_child1", "A_grandparentInstance"));
-    expect(getRawIdFrom(ghostGrandlings[1]))
+    expect(ghostGrandlings[1].rawId())
         .toEqual(createGhostRawId("A_child2", "A_grandparentInstance"));
     harness.chronicleEvent(transacted({ actions:
         ghostGrandlings.map(

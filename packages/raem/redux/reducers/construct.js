@@ -2,8 +2,7 @@
 import { OrderedMap } from "immutable";
 import { GraphQLObjectType } from "graphql/type";
 
-import { IdData, RawId, getRawIdFrom, tryCoupledFieldFrom, tryGhostPathFrom, obtainVRef }
-    from "~/raem/ValaaReference";
+import { VRef, RawId, tryGhostPathFrom } from "~/raem/ValaaReference";
 
 import denormalizedFromJS from "~/raem/state/denormalizedFromJS";
 import Transient, { createTransient } from "~/raem/state/Transient";
@@ -28,7 +27,7 @@ export class CreateBard extends Bard {
 }
 
 export class DuplicateBard extends CreateBard {
-  _fieldsToPostProcess: [IdData, string, Object, any][];
+  _fieldsToPostProcess: [VRef, string, Object, any][];
   _duplicationRootId: RawId;
   _duplicationRootGhostHostId: ?RawId;
   _duplicationRootPrototypeId: RawId;
@@ -233,7 +232,7 @@ export function addDuplicateNonOwnlingFieldPassagesToBard (bard: DuplicateBard) 
   bard.objectId = null;
   for (const postProcessEntry of bard._fieldsToPostProcess) {
     [objectId, objectTypeName, fieldIntro, originalFieldValue] = postProcessEntry;
-    const objectRawId = getRawIdFrom(objectId);
+    const objectRawId = objectId.rawId();
     if (bard.objectId !== objectId) {
       bard.objectId = objectId;
       objectTable = bard.getDenormalizedTable(objectTypeName);
@@ -257,10 +256,10 @@ export function addDuplicateNonOwnlingFieldPassagesToBard (bard: DuplicateBard) 
     if (isSequence === true) {
       return originalData.map(entry => _duplicateNonOwnlingResource(entry, false, addCouplings));
     }
-    const duplicateId = bard._duplicateIdByOriginalRawId[getRawIdFrom(originalData)];
+    const duplicateId = bard._duplicateIdByOriginalRawId[originalData.rawId()];
     let ret;
     if (duplicateId) {
-      const currentCoupledField = tryCoupledFieldFrom(originalData);
+      const currentCoupledField = originalData.getCoupledField();
       ret = !currentCoupledField
           ? duplicateId
           : duplicateId.coupleWith(currentCoupledField);
@@ -298,7 +297,7 @@ export function addDuplicateNonOwnlingFieldPassagesToBard (bard: DuplicateBard) 
           ? dataFieldTypeIntro
           : bard.schema.getType(typeName);
     } else {
-      const dataRawId = getRawIdFrom(originalData);
+      const dataRawId = originalData.rawId();
       typeName = dataTable.get(dataRawId);
       if (typeName !== dataFieldTypeName) {
         dataFieldTable = bard.state.getIn(typeName);

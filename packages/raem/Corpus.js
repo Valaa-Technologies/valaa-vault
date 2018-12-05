@@ -25,13 +25,13 @@ import { dumpObject } from "~/tools/wrapError";
  */
 export default class Corpus extends Bard {
   constructor ({
-    schema, verbosity, logger, middlewares, reduce, subReduce, initialState,
+    schema, verbosity, logger, middlewares, reduce, subReduce, initialState, obtainReference,
   }: Object) {
     invariantifyObject(schema, "schema");
     invariantifyFunction(reduce, "reduce");
     invariantifyFunction(subReduce, "subReduce");
     invariantifyObject(initialState, "initialState", { allowUndefined: true });
-    super({ schema, verbosity, logger, subReduce: subReduce || reduce });
+    super({ schema, verbosity, logger, subReduce: subReduce || reduce, obtainReference });
     // TODO(iridian): These indirections are spaghetti. Simplify.
     this.reduce = reduce;
     this._dispatch = middlewares.reduceRight(
@@ -54,7 +54,7 @@ export default class Corpus extends Bard {
                   .map(([id]) => `${id.slice(0, 26)}...}`)
                   .join(", ")
               }`);
-      this.logEvent(1, "dispatch:", ...dumpObject(action));
+      this.logEvent(1, "dispatch:", JSON.stringify(action));
       return this._dispatch(action, this);
     } catch (error) {
       throw this.wrapErrorEvent(error, `dispatch()`,

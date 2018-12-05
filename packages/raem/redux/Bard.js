@@ -2,7 +2,7 @@
 import { GraphQLObjectType } from "graphql/type";
 import { Map } from "immutable";
 
-import { VRef, obtainVRef, getRawIdFrom } from "~/raem/ValaaReference";
+import { VRef } from "~/raem/ValaaReference";
 
 import { Action } from "~/raem/events";
 
@@ -160,7 +160,6 @@ export default class Bard extends Resolver {
   constructor (options: Object) {
     super(options);
     this.subReduce = options.subReduce;
-    this._deserializeReference = obtainVRef;
   }
 
   debugId () {
@@ -254,19 +253,16 @@ export default class Bard extends Resolver {
     return this.updateState(nextState);
   }
 
-  obtainResourceChapter (idData: any) {
+  obtainResourceChapter (rawId: string) {
     // Uses the _resourceChapters of the root bard, ie. the one which had beginStory called
     // directly on it (not any subsequent Object.create wrap).
-    return this._resourceChapters[getRawIdFrom(idData)]
-        || (this._resourceChapters[getRawIdFrom(idData)] = {});
+    return this._resourceChapters[rawId] || (this._resourceChapters[rawId] = {});
   }
 
   createPassageFromAction (action: Action) {
     const ret = Object.create(action);
     if (action.id) {
-      ret.id = action.id instanceof VRef
-          ? action.id
-          : this._deserializeReference(action.id);
+      ret.id = (action.id instanceof VRef) ? action.id : this.obtainReference(action.id);
     }
     return ret;
   }

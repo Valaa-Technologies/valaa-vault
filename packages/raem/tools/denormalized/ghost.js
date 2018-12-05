@@ -71,8 +71,8 @@ import { dumpify, dumpObject, invariantify, invariantifyObject, wrapError } from
 export function createGhostVRefInInstance (prototypeId: VRef,
     instanceTransient: Transient): VRef {
   const ghostPath = prototypeId.getGhostPath().withNewGhostStep(
-      getRawIdFrom(instanceTransient.get("prototype")),
-      getRawIdFrom(instanceTransient.get("id")));
+      instanceTransient.get("prototype").rawId(),
+      instanceTransient.get("id").rawId());
   return vRef(ghostPath.headRawId(), null, ghostPath);
 }
 

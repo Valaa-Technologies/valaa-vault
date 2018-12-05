@@ -3,13 +3,13 @@
 import {
   DuplicateBard, prepareDuplicationContext, postProcessDuplicationContext,
 } from "~/raem/redux/reducers/construct";
-import { getRawIdFrom } from "~/raem/ValaaReference";
 
 export default function recombine (bard: DuplicateBard) {
   // Execute first pass, scan-and-duplicate-hierarchy by reducing all contained DUPLICATEDs
   prepareDuplicationContext(bard);
   bard.setPassages((bard.passage.actions || []).map(action => {
     const passage = bard.createPassageFromAction(action);
+    const duplicateOf = passage.duplicateOf = bard.obtainReference(action.duplicateOf);
     if (!action.id
         || (action.initialState && (action.initialState.owner || action.initialState.source))
         || (action.preOverrides && (action.preOverrides.owner || action.preOverrides.source))) {
@@ -20,7 +20,7 @@ export default function recombine (bard: DuplicateBard) {
       // the lookup id value properly and add a coupling aggregate
       // event for adding itself to the owner ownling field.
       // See duplicateFields.js:~120 with "const newFieldEntry"
-      bard._duplicateIdByOriginalRawId[getRawIdFrom(action.duplicateOf)] = null;
+      bard._duplicateIdByOriginalRawId[duplicateOf.rawId()] = null;
     } else {
       // If the DUPLICATED action has an id and is not relocated then
       // pre-initialize the lookup: this will maintain the relative
@@ -33,7 +33,7 @@ export default function recombine (bard: DuplicateBard) {
         passage.id = bard.objectId;
         if (!passage.id) throw new Error("INTERNAL ERROR: no bard.objectId");
       }
-      bard._duplicateIdByOriginalRawId[getRawIdFrom(action.duplicateOf)] = passage.id;
+      bard._duplicateIdByOriginalRawId[duplicateOf.rawId()] = passage.id;
     }
     return passage;
   }));

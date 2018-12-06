@@ -10,7 +10,7 @@ import { toOne, toMany, toManyOwnlings, toNone } from "~/raem/tools/graphql/coup
 import Blob from "~/raem/schema/Blob";
 import Data from "~/raem/schema/Data";
 import Discoverable, { discoverableInterface } from "~/raem/schema/Discoverable";
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Partition, { partitionInterface } from "~/raem/schema/Partition";
 import Resource from "~/raem/schema/Resource";
 
@@ -23,6 +23,8 @@ import TestGlue from "~/raem/test/schema/TestGlue";
 
 // TODO(iridian): This introduces library cross-dependence and should be replaced.
 import Scope, { scopeInterface } from "~/script/schema/Scope";
+import TransientScriptFields, { transientScriptFields }
+    from "~/script/schema/TransientScriptFields";
 
 const OBJECT_DESCRIPTION = "testing partition";
 
@@ -31,11 +33,15 @@ const TestScriptyThing = new GraphQLObjectType({
 
   description: "An encompassing partition for testing RAEM schema and tools.",
 
-  interfaces: () => [Partition, Scope, Discoverable, Resource, ResourceStub],
+  interfaces: () => [
+    Partition, Scope, TransientScriptFields,
+    Discoverable, Resource, TransientFields,
+  ],
 
   fields: () => ({
     ...discoverableInterface(OBJECT_DESCRIPTION).fields(),
     ...scopeInterface(OBJECT_DESCRIPTION).fields(),
+    ...transientScriptFields(OBJECT_DESCRIPTION).fields(),
     ...partitionInterface(OBJECT_DESCRIPTION).fields(),
 
     ...aliasField("parent", "owner", TestScriptyThing,

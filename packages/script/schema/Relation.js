@@ -7,19 +7,23 @@ import { toOne } from "~/raem/tools/graphql/coupling";
 
 import Describable from "~/raem/schema/Describable";
 import Discoverable from "~/raem/schema/Discoverable";
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Position from "~/raem/schema/Position";
 import Resource from "~/raem/schema/Resource";
 import Scope from "~/script/schema/Scope";
 
 import Relatable, { relatableInterface } from "~/script/schema/Relatable";
+import TransientScriptFields from "~/script/schema/TransientScriptFields";
 
 const OBJECT_DESCRIPTION = "relation";
 
 export default new GraphQLObjectType({
   name: "Relation",
 
-  interfaces: () => [Relatable, Scope, Describable, Discoverable, Resource, ResourceStub],
+  interfaces: () => [
+    Relatable, Scope, TransientScriptFields,
+    Describable, Discoverable, Resource, TransientFields,
+  ],
 
   description: "An abstract relation between typically two objects which can have properties.",
 

@@ -119,7 +119,7 @@ export default class LinkFieldEditor extends UIComponent {
                 value = this.getFocus().get(VALEK.to(this.props.fieldName));
               } else {
                 throw new Error(`Cannot determine LinkFieldEditor target value because it is not ${
-                    ""}an Identifier, Entity, InactiveResource or Discoverable: got ${typeName}`);
+                    ""}an Identifier, Entity or Discoverable: got ${typeName}`);
               }
           }
         }

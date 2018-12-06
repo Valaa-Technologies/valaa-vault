@@ -3,7 +3,7 @@ import { GraphQLInterfaceType, GraphQLString } from "graphql/type";
 import primaryField from "~/raem/tools/graphql/primaryField";
 import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
 
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Resource, { resourceInterface } from "~/raem/schema/Resource";
 import Sprite from "~/raem/schema/Sprite";
 
@@ -17,7 +17,7 @@ export function representationInterface (objectDescription: string = INTERFACE_D
 undivisible piece of presentable content, given as collection of data in different forms.
 `,
 
-    interfaces: () => [Resource, ResourceStub],
+    interfaces: () => [Resource, TransientFields],
 
     fields: () => ({
       ...resourceInterface(objectDescription).fields(),

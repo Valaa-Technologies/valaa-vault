@@ -116,7 +116,12 @@ export function recurseCreateOrDuplicate (bard: CreateBard, initialState: Object
   try {
     // Make the objectId available for all VRef connectors within this Bard.
     bard.setState(bard.state
-        .setIn(["ResourceStub", rawId], bard.objectTypeName)
+        .setIn(["TransientFields", rawId], bard.objectTypeName)
+        // FIXME(iridian, 2018-12): this breaks abstractions as
+        // TransientScriptFields is only introduced in @valos/script.
+        // I couldn't think of correct non-abstraction which is not
+        // overly engineered, so this is hard-coded now.
+        .setIn(["TransientScriptFields", rawId], bard.objectTypeName)
         .setIn(["Resource", rawId], bard.objectTypeName)
         .setIn([bard.objectTypeName, rawId],
             OrderedMap([["id", bard.objectId], ["typeName", bard.objectTypeName]])));
@@ -191,7 +196,7 @@ function _connectNonGhostObjectIdGhostPathToPrototype (bard: CreateBard, rawId: 
     if (prototypeId) {
       invariantify(prototypeId.getCoupledField() !== "materializedGhosts",
           "object with prototype ghostInstance must have an active ghost path in id");
-      newGhostPath = bard.fork().goToObjectIdTransient(prototypeId, "ResourceStub")
+      newGhostPath = bard.fork().goToObjectIdTransient(prototypeId, "TransientFields")
           .get("id").getGhostPath();
       if (prototypeId.getCoupledField() === "instances") {
         newGhostPath = newGhostPath.withNewInstanceStep(rawId);

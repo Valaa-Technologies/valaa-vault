@@ -6,7 +6,7 @@ import { toManyOwnlings } from "~/raem/tools/graphql/coupling";
 
 import Description from "~/raem/schema/Description";
 import Discoverable, { discoverableInterface } from "~/raem/schema/Discoverable";
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Resource from "~/raem/schema/Resource";
 
 const INTERFACE_DESCRIPTION = "describable";
@@ -17,7 +17,7 @@ export function describableInterface (objectDescription: string = INTERFACE_DESC
 
     description: "An object that can be searched using various means",
 
-    interfaces: () => [Discoverable, Resource, ResourceStub],
+    interfaces: () => [Discoverable, Resource, TransientFields],
 
     fields: () => ({
       ...discoverableInterface(objectDescription).fields(),

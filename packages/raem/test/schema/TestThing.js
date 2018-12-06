@@ -10,7 +10,7 @@ import { toOne, toMany, toManyOwnlings, toNone } from "~/raem/tools/graphql/coup
 import Blob from "~/raem/schema/Blob";
 import Data from "~/raem/schema/Data";
 import Discoverable, { discoverableInterface } from "~/raem/schema/Discoverable";
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Partition, { partitionInterface } from "~/raem/schema/Partition";
 import Resource from "~/raem/schema/Resource";
 
@@ -28,7 +28,7 @@ const TestThing = new GraphQLObjectType({
 
   description: "An encompassing partition for testing RAEM schema and tools.",
 
-  interfaces: () => [Partition, Discoverable, Resource, ResourceStub],
+  interfaces: () => [Partition, Discoverable, Resource, TransientFields],
 
   fields: () => ({
     ...discoverableInterface(OBJECT_DESCRIPTION).fields(),

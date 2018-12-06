@@ -5,7 +5,7 @@ import aliasField from "~/raem/tools/graphql/aliasField";
 import primaryField from "~/raem/tools/graphql/primaryField";
 
 import Discoverable, { discoverableInterface } from "~/raem/schema/Discoverable";
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Resource from "~/raem/schema/Resource";
 import Position from "~/raem/schema/Position";
 import { toOne } from "~/raem/tools/graphql/coupling";
@@ -15,7 +15,7 @@ const OBJECT_DESCRIPTION = "test partition glue";
 export default new GraphQLObjectType({
   name: "TestGlue",
 
-  interfaces: () => [Discoverable, Resource, ResourceStub],
+  interfaces: () => [Discoverable, Resource, TransientFields],
 
   description: "An entity connection in 3d space",
 

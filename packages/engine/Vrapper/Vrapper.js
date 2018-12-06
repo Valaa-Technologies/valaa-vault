@@ -24,6 +24,7 @@ import { MissingPartitionConnectionsError, addConnectToPartitionToError }
     from "~/raem/tools/denormalized/partitions";
 
 import isResourceType from "~/raem/tools/graphql/isResourceType";
+import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
 import { ValaaPrimitiveTag } from "~/script";
 
@@ -315,7 +316,7 @@ export default class Vrapper extends Cog {
     let partitionAuthorityURIString;
     let authorityConnection;
     try {
-      if (!this._typeName || (this._typeName === "InactiveResource")) {
+      if (!this._typeName || isInactiveTypeName(this._typeName)) {
         this._setTypeName(transient.get("typeName"));
         if (this[HostRef].isInactive()) {
           this.warnEvent("Activating id explicitly! Should have been activated by reducers");
@@ -600,7 +601,7 @@ export default class Vrapper extends Cog {
   }
 
   getSelfAsHead (singularTransient: any = this.getTransient()) {
-    return packedSingular(singularTransient, this._typeName || "ResourceStub");
+    return packedSingular(singularTransient, this._typeName || "TransientFields");
   }
 
   getLexicalScope () {

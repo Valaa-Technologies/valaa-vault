@@ -19,7 +19,7 @@ export default function duplicate (bard: DuplicateBard) {
   invariantify(!bard.passage.typeName, "DUPLICATED.typeName must be empty");
   if (passage.id === null) return bard.getState();
 
-  const bailOut = prepareCreateOrDuplicateObjectTransientAndId(bard, "ResourceStub");
+  const bailOut = prepareCreateOrDuplicateObjectTransientAndId(bard, "TransientFields");
   invariantify(!bailOut, `DUPLICATED internal error:${
       ""} should never bail out due to Bvob/re-create conditions`);
   // TODO(iridian): invariantify that the type is a Resource
@@ -34,8 +34,9 @@ export default function duplicate (bard: DuplicateBard) {
   const newObjectTransient = bard.objectTransient;
 
   const duplicateOf = passage.duplicateOf = bard.obtainReference(passage.duplicateOf);
-  // Specifying "Resource" as opposed to "ResourceStub" as the typeName implicitly requires the
-  // resource to be active. Inactive resources appear only in InactiveResource/ResourceStub tables.
+  // Specifying "Resource" as opposed to "TransientFields" as this
+  // requires the resource to be active: Inactive resources appear only
+  // in inactive interface and type tables.
   bard.goToObjectIdTransient(duplicateOf, "Resource");
   const ghostPath = passage.id.getGhostPath();
   passage.typeName = getTransientTypeName(bard.objectTransient);

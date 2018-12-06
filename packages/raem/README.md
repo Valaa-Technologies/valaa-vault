@@ -40,7 +40,7 @@ This library provides:
 
 - depends: `@valos/tools`, `immutable`
 - exports: `Corpus`, `Command`, `VALK`, `Valker`, `RAEMContentAPI`
-- ValaaSpace: `Resource`, `ResourceStub`, `Bvob`, `Partition`
+- ValaaSpace: `Resource`, `TransientFields`, `Bvob`, `Partition`
 - concepts: `ghost instancing`, `partitions`, `couplings`
 
 

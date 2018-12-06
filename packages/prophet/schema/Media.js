@@ -7,12 +7,13 @@ import { toOne } from "~/raem/tools/graphql/coupling";
 import Blob from "~/raem/schema/Blob";
 import Describable from "~/raem/schema/Describable";
 import Discoverable from "~/raem/schema/Discoverable";
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Resource from "~/raem/schema/Resource";
 import MediaType from "~/raem/schema/MediaType";
 import Scope from "~/script/schema/Scope";
 
 import Relatable, { relatableInterface } from "~/script/schema/Relatable";
+import TransientScriptFields from "~/script/schema/TransientScriptFields";
 
 const OBJECT_DESCRIPTION = "media";
 
@@ -25,7 +26,10 @@ export default new GraphQLObjectType({
   description: `Describes an identifiable singular whole of ${OBJECT_DESCRIPTION} content, ` +
       `means of accessing it and metadata associated with it. This content can undergo updates.`,
 
-  interfaces: () => [Relatable, Scope, Describable, Discoverable, Resource, ResourceStub],
+  interfaces: () => [
+    Relatable, Scope, TransientScriptFields,
+    Describable, Discoverable, Resource, TransientFields,
+  ],
 
   fields: () => ({
     ...relatableInterface(OBJECT_DESCRIPTION).fields(),

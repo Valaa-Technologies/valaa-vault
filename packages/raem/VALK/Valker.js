@@ -19,6 +19,7 @@ import Kuery, { dumpKuery, dumpScope, dumpObject } from "~/raem/VALK/Kuery";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import { tryPackedField, packedSingular } from "~/raem/VALK/packedField";
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
+import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
 import type Logger from "~/tools/Logger";
 import { dumpify, isSymbol, wrapError } from "~/tools";
@@ -420,12 +421,10 @@ export default class Valker extends Resolver {
       typeName = possiblePackedHead._type;
     }
     const ret = typeName && this.getTypeIntro(typeName);
-    if (typeof ret === "undefined") {
-      if (typeName === "InactiveResource") {
-        const partitionURI = object.get("id").getPartitionURI();
-        throw new MissingPartitionConnectionsError(`Missing active partition connections: '${
-            partitionURI.toString()}'`, [partitionURI]);
-      }
+    if ((ret === undefined) && isInactiveTypeName(typeName)) {
+      const partitionURI = object.get("id").getPartitionURI();
+      throw new MissingPartitionConnectionsError(`Missing active partition connections: '${
+          partitionURI.toString()}'`, [partitionURI]);
     }
     if (this._indent >= 0) {
       this.log("  ".repeat(this._indent), "getObjectTypeIntro", typeName, ...dumpObject(ret));
@@ -529,7 +528,7 @@ export default class Valker extends Resolver {
       if (Iterable.isKeyed(object)) {
         ret = object;
       } else if (object instanceof VRef) {
-        ret = this.tryGoToObjectIdTransient(object, "ResourceStub", require, false);
+        ret = this.tryGoToObjectIdTransient(object, "TransientFields", require, false);
       } else if (typeof object._singular !== "undefined") {
         if (!isIdData(object._singular)) {
           ret = object._singular;

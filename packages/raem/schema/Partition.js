@@ -7,7 +7,7 @@ import { partitionHeadEventIdResolver, partitionSnapshotResolver,
 
 import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
 
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Resource, { resourceInterface } from "~/raem/schema/Resource";
 
 const INTERFACE_DESCRIPTION = "partition";
@@ -34,7 +34,7 @@ ie. objects that only contain the Resource id and its most recently known partit
 retain the new owning Partition in a stub, enabling forwarding). Together these allow for any
 Resource to always be locateable from anywhere.`,
 
-    interfaces: () => [Resource, ResourceStub],
+    interfaces: () => [Resource, TransientFields],
 
     fields: () => ({
       ...resourceInterface(objectDescription).fields(),

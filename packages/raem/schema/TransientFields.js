@@ -18,15 +18,15 @@ import { toOne, toMany, unspecifiedSingular, unspecifiedPlural }
 
 import Partition from "~/raem/schema/Partition";
 
-const INTERFACE_DESCRIPTION = "inactive resource";
+const INTERFACE_DESCRIPTION = "inactive resource fields";
 
-const ResourceStub = new GraphQLInterfaceType(resourceStub());
+const TransientFields = new GraphQLInterfaceType(transientFields());
 
-export default ResourceStub;
+export default TransientFields;
 
-export function resourceStub (objectDescription: string = INTERFACE_DESCRIPTION) {
+export function transientFields (objectDescription: string = INTERFACE_DESCRIPTION) {
   return {
-    name: "ResourceStub",
+    name: "TransientFields",
 
     description: `Fields available even for inactive Resource ${objectDescription}.`,
 
@@ -60,25 +60,25 @@ export function resourceStub (objectDescription: string = INTERFACE_DESCRIPTION)
           partitionURIResolver,
       ),
 
-      ...primaryField("prototype", ResourceStub,
+      ...primaryField("prototype", TransientFields,
           `The prototype of this ${objectDescription}. All field lookups for which there is no${
             ""} associated value set and whose field descriptors don't have immediateDefaultValue${
             ""} are forwarded to the prototype.`,
           { coupling: toOne({ defaultCoupledField: "prototypers" }) },
       ),
 
-      ...aliasField("prototypeAlias", "prototype", ResourceStub,
-          `The prototype of this ${objectDescription}. This is an alias for ResourceStub.prototype${
+      ...aliasField("prototypeAlias", "prototype", TransientFields,
+          `The prototype of this ${objectDescription}. This is an alias for TransientFields.prototype${
               ""} to bypass conflicts with native javascript property 'prototype'.`,
       ),
 
-      ...generatedField("ownFields", ResourceStub,
+      ...generatedField("ownFields", TransientFields,
           `A transient version of this object without prototype. All property accesses will only${
             ""}return values owned directly.`,
           object => object.set("prototype", null),
       ),
 
-      ...transientField("prototypers", new GraphQLList(ResourceStub),
+      ...transientField("prototypers", new GraphQLList(TransientFields),
           `All ${objectDescription}'s which have this ${objectDescription
           } as prototype but which are not instances (direct nor ghost)`, {
             coupling: toMany({ coupledField: "prototype", preventsDestroy: true }),
@@ -86,19 +86,19 @@ export function resourceStub (objectDescription: string = INTERFACE_DESCRIPTION)
           },
       ),
 
-      ...aliasField("instancePrototype", "prototype", ResourceStub,
+      ...aliasField("instancePrototype", "prototype", TransientFields,
           `Instance prototype of this ${objectDescription} instance`,
           { coupling: toOne({ coupledField: "instances" }) },
       ),
 
-      ...transientField("instances", new GraphQLList(ResourceStub),
+      ...transientField("instances", new GraphQLList(TransientFields),
           `Instances which have this ${objectDescription} as prototype`, {
             coupling: toMany({ coupledField: "prototype", preventsDestroy: true, }),
             immediateDefaultValue: [],
           },
       ),
 
-      ...aliasField("ghostPrototype", "prototype", ResourceStub,
+      ...aliasField("ghostPrototype", "prototype", TransientFields,
           `Ghost prototype for this ${objectDescription} ghost instance. The ghost prototype is${
             ""} the original resource from which this ghost was created during some instantiation.${
             ""} This instantiation (which happens on prototype and results in an instance of it)${
@@ -110,14 +110,14 @@ export function resourceStub (objectDescription: string = INTERFACE_DESCRIPTION)
           { coupling: toOne({ coupledField: "materializedGhosts" }) },
       ),
 
-      ...transientField("materializedGhosts", new GraphQLList(ResourceStub),
+      ...transientField("materializedGhosts", new GraphQLList(TransientFields),
           `Materialized ghosts which have this ${objectDescription} as their ghostPrototype`, {
             coupling: toMany({ coupledField: "prototype", preventsDestroy: true }),
             immediateDefaultValue: [],
           },
       ),
 
-      ...transientField("unnamedCouplings", new GraphQLList(ResourceStub),
+      ...transientField("unnamedCouplings", new GraphQLList(TransientFields),
           `Referrers without specified coupledField referring this ${objectDescription}`, {
             coupling: toMany({
               whenUnmatched: isPlural => (isPlural ? unspecifiedPlural() : unspecifiedSingular()),

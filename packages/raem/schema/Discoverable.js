@@ -5,7 +5,7 @@ import primaryField from "~/raem/tools/graphql/primaryField";
 import aliasField from "~/raem/tools/graphql/aliasField";
 import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
 
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Resource, { resourceInterface } from "~/raem/schema/Resource";
 
 import Tag from "~/raem/schema/Tag";
@@ -18,7 +18,7 @@ export function discoverableInterface (objectDescription: string = INTERFACE_DES
 
     description: "An object that can be searched using various means",
 
-    interfaces: () => [Resource, ResourceStub],
+    interfaces: () => [Resource, TransientFields],
 
     fields: () => ({
       ...resourceInterface(objectDescription).fields(),

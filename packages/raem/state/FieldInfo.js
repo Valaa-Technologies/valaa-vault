@@ -44,7 +44,7 @@ export function elevateFieldRawSequence (resolver: Resolver, rawSequence: Ordere
     fieldInfo: FieldInfo, object: Transient = fieldInfo.sourceTransient, verbosity: ?number) {
   if (!object) return rawSequence;
   const elevator = Object.create(resolver);
-  elevator.objectTypeName = "ResourceStub";
+  elevator.objectTypeName = "TransientFields";
   return _elevateRawSequence(elevator, object, rawSequence, Object.create(fieldInfo), verbosity);
 }
 

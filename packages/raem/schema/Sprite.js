@@ -10,7 +10,7 @@ import immutableResolver from "~/raem/tools/graphql/immutableResolver";
 import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
 
 import Discoverable, { discoverableInterface } from "~/raem/schema/Discoverable";
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Position from "~/raem/schema/Position";
 import Resource from "~/raem/schema/Resource";
 
@@ -34,7 +34,7 @@ for higher level recursive composition of Animation's. TransformationSprite woul
 spatial and temporal transformations between the source data and the target container.
 `,
 
-    interfaces: () => [Discoverable, Resource, ResourceStub],
+    interfaces: () => [Discoverable, Resource, TransientFields],
 
     fields: () => ({
       ...discoverableInterface(objectDescription).fields(),

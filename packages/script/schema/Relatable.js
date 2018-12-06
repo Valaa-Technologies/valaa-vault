@@ -1,18 +1,19 @@
 // @flow
 import { GraphQLInterfaceType, GraphQLList } from "graphql/type";
 
-import { toMany, toManyOwnlings } from "~/raem/tools/graphql/coupling";
+import { toManyOwnlings } from "~/raem/tools/graphql/coupling";
 import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
 import primaryField from "~/raem/tools/graphql/primaryField";
-import transientField from "~/raem/tools/graphql/transientField";
 
 import Discoverable from "~/raem/schema/Discoverable";
 import Describable, { describableInterface } from "~/raem/schema/Describable";
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Resource from "~/raem/schema/Resource";
 
 import Relation from "~/script/schema/Relation";
 import Scope, { scopeInterface } from "~/script/schema/Scope";
+import TransientScriptFields, { transientScriptFields }
+    from "~/script/schema/TransientScriptFields";
 
 const INTERFACE_DESCRIPTION = "relatable";
 
@@ -22,22 +23,21 @@ export function relatableInterface (objectDescription: string = INTERFACE_DESCRI
 
     description: "Interface for resources that can be set as Relation.source and Relation.target.",
 
-    interfaces: () => [Scope, Describable, Discoverable, Resource, ResourceStub],
+    interfaces: () => [
+      Scope, TransientScriptFields,
+      Describable, Discoverable, Resource, TransientFields,
+    ],
 
     resolveType: typeNameResolver,
 
     fields: () => ({
       ...describableInterface(objectDescription).fields(),
       ...scopeInterface(objectDescription).fields(),
+      ...transientScriptFields(objectDescription).fields(),
 
       ...primaryField("relations", new GraphQLList(Relation),
           "List of relations that this relatable has",
           { coupling: toManyOwnlings() },
-      ),
-
-      ...transientField("incomingRelations", new GraphQLList(Relation),
-          "List of relations that are targeting this relatable",
-          { coupling: toMany({ coupledField: "target" }) },
       ),
     }),
   };

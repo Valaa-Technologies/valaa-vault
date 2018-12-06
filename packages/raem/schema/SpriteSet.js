@@ -4,7 +4,7 @@ import primaryField from "~/raem/tools/graphql/primaryField";
 import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
 import { toManyOwnlings } from "~/raem/tools/graphql/coupling";
 
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Resource, { resourceInterface } from "~/raem/schema/Resource";
 
 import Sprite from "./Sprite";
@@ -15,7 +15,7 @@ export function spriteSetInterface (objectDescription: string = INTERFACE_DESCRI
   return {
     name: "SpriteSet",
 
-    interfaces: () => [Resource, ResourceStub],
+    interfaces: () => [Resource, TransientFields],
 
     fields: () => ({
       ...resourceInterface(objectDescription).fields(),

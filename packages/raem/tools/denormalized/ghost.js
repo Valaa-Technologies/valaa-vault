@@ -65,6 +65,7 @@ import { Action, created, destroyed, transacted } from "~/raem/events";
 import { vRef, getRawIdFrom, tryGhostPathFrom } from "~/raem/ValaaReference";
 import type { VRef, IdData } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import { GhostPath, State, Transient } from "~/raem/state";
+import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
 import { dumpify, dumpObject, invariantify, invariantifyObject, wrapError } from "~/tools";
 
@@ -129,7 +130,7 @@ function _createMaterializeGhostAction (state: State, ghostObjectPath: GhostPath
   const [ghostHostRawId, ghostRawId] =
       ghostObjectPath.getGhostHostAndObjectRawIdByHostPrototype(ghostHostPrototypeRawId);
   const ret = { id: null, actualType: null, ghostPath: undefined };
-  const resourceTable = state.get("ResourceStub");
+  const resourceTable = state.get("TransientFields");
   const transientType = resourceTable.get(ghostRawId);
   try {
     if (transientType) {
@@ -161,13 +162,13 @@ function _createMaterializeGhostAction (state: State, ghostObjectPath: GhostPath
           .withNewStep(ghostHostPrototypeRawId, ghostHostRawId, ghostRawId);
       ret.id = vRef(ghostRawId, null, ret.ghostPath);
       ret.actualType = prototypeTypeName;
-      const hostType = state.getIn(["ResourceStub", ghostHostRawId]);
-      if (!hostType || (hostType === "InactiveResource")
+      const hostType = state.getIn(["TransientFields", ghostHostRawId]);
+      if (!hostType || isInactiveTypeName(hostType)
           || state.getIn([hostType, ghostHostRawId, "id"]).isInactive()) {
         // FIXME(iridian): setInactive on materialized ghosts doesn't get properly cleared when the
         // partition becomes active. Fix that.
         ret.id.setInactive();
-        ret.actualType = prototypeTypeName !== "InactiveResource" ? prototypeTypeName : typeName;
+        ret.actualType = isInactiveTypeName(prototypeTypeName) ? typeName : prototypeTypeName;
       }
       outputActions.push(created({
         id: ret.id,

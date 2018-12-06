@@ -154,7 +154,7 @@ integrity to the resource model via `couplings`.
 
 - depends: `@valos/tools`, `immutable`
 - exports: `Corpus`, `Command`, `VALK`, `RAEMContentAPI`
-- ValaaSpace: `Resource`, `ResourceStub`, `Bvob`, `Partition`
+- ValaaSpace: `Resource`, `TransientFields`, `Bvob`, `Partition`
 - concepts: `ghost instancing`, `partitions`, `couplings`
 
 
@@ -189,6 +189,7 @@ REST lambdas and the AWS mqtt IoT as event pub-sub.
 - depends: `@valos/script`, `IndexedDB`, `AWS IoT/S3/DynamoDB`
 - exports: `FalseProphet`, `PartitionConnection`, `ProphetContentAPI`
 - ValaaSpace: `Relatable`, `Entity`, `Media`, `Relation`,
+  `TransientProphetFields`
 - concepts: `ACID`, `authorities`, `pub-sub`, `offline readiness`
 
 

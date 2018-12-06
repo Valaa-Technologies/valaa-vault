@@ -152,20 +152,20 @@ export default class ValaaEngine extends Cog {
         transient = explicitTransient;
       } else {
         const rawId = getRawIdFrom(idData);
-        typeName = state.getIn(["ResourceStub", rawId]);
+        typeName = state.getIn(["TransientFields", rawId]);
         if (typeName) {
           transient = state.getIn([typeName, rawId]);
         } else if (!isGhost(idData)) {
           if (options.optional) return undefined;
-          throw new Error(`Cannot find non-ghost ${idData}:ResourceStub from state`);
+          throw new Error(`Cannot find non-ghost ${idData}:TransientFields from state`);
         } else {
-          typeName = state.getIn(["ResourceStub", idData.getGhostPath().rootRawId()]);
+          typeName = state.getIn(["TransientFields", idData.getGhostPath().rootRawId()]);
           if (typeName) {
             transient = createTransient({ id: idData, typeName });
           } else {
             if (options.optional) return undefined;
-            throw new Error(`Cannot find ghost ${idData}:ResourceStub root ${
-                idData.getGhostPath().rootRawId()}:ResourceStub from state`);
+            throw new Error(`Cannot find ghost ${idData}:TransientFields root ${
+                idData.getGhostPath().rootRawId()}:TransientFields from state`);
           }
         }
       }

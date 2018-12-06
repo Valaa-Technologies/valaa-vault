@@ -32,17 +32,17 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
   });
   scope.Blob = scope.Bvob;
 
-  scope.ResourceStub = Valaa.ResourceStub = Object.assign(Object.create(BuiltinTypePrototype), {
-    name: "ResourceStub",
+  scope.TransientFields = Valaa.TransientFields = Object.assign(Object.create(BuiltinTypePrototype), {
+    name: "TransientFields",
   });
 
-  scope.ResourceStub.prototype = Object.assign(Object.create(Object.prototype), {
-    constructor: scope.ResourceStub,
+  scope.TransientFields.prototype = Object.assign(Object.create(Object.prototype), {
+    constructor: scope.TransientFields,
   });
-  scope.ResourceStub.hostObjectPrototype = scope.ResourceStub.prototype;
-  scope.ResourceStub.prototype[ValaaPrimitiveTag] = true;
+  scope.TransientFields.hostObjectPrototype = scope.TransientFields.prototype;
+  scope.TransientFields.prototype[ValaaPrimitiveTag] = true;
 
-  scope.Resource = Valaa.Resource = Object.assign(Object.create(scope.ResourceStub), {
+  scope.Resource = Valaa.Resource = Object.assign(Object.create(scope.TransientFields), {
     name: "Resource",
     ".new": function new_ (valker: Valker, innerScope: ?Object, initialState: ?Object) {
       const actualInitialState = prepareInitialState(this, innerScope, initialState, "new");
@@ -202,7 +202,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
     prepareBvob: Symbol("Resource.prepareBvob"),
   });
 
-  scope.Resource.prototype = Object.assign(Object.create(scope.ResourceStub.prototype), {
+  scope.Resource.prototype = Object.assign(Object.create(scope.TransientFields.prototype), {
     constructor: scope.Resource,
 
     $V: {
@@ -401,6 +401,21 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
   });
   scope.Describable.hostObjectPrototype = scope.Describable.prototype;
 
+  scope.TransientScriptFields = Valaa.TransientScriptFields = Object.assign(
+      Object.create(scope.TransientFields),
+      { name: "TransientScriptFields" });
+  scope.TransientScriptFields.prototype = Object.assign(
+      Object.create(scope.TransientFields.prototype),
+      { constructor: scope.TransientScriptFields });
+  scope.TransientScriptFields.hostObjectPrototype = scope.TransientScriptFields.prototype;
+
+  // The fact that Scope inherits from Describable is an implementation
+  // hack compared to the actual Scope interface declaration which
+  // doesn't inherit any interfaces (and in principle could be
+  // available for Data types as well). However, in practice a Scope is
+  // only inherited by Relatable alongside multiply inheriting
+  // Describable. By making Describable the base of Scope the need for
+  // multiple inheritance diagram here is avoided.
   scope.Scope = Valaa.Scope = Object.assign(Object.create(scope.Describable), {
     name: "Scope",
     createVariable: denoteDeprecatedValaaBuiltin("Valaa.Scope.createIdentifier",
@@ -465,7 +480,10 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
   scope.Property.hostObjectPrototype = scope.Property.prototype;
 
 
-  scope.Relatable = Valaa.Relatable = Object.assign(Object.create(scope.Scope), {
+  const RelatableMultipleInherited = Object.assign(Object.create(scope.Scope),
+      scope.TransientScriptFields);
+  delete RelatableMultipleInherited.name;
+  scope.Relatable = Valaa.Relatable = Object.assign(Object.create(RelatableMultipleInherited), {
     name: "Relatable",
 
     getRelations: Symbol("Relatable.getRelations"),
@@ -508,7 +526,10 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
                   VALEK.fromVAKON(extractFunctionVAKON(condition)))));
     }),
   });
-  scope.Relatable.prototype = Object.assign(Object.create(scope.Scope.prototype), {
+
+  const RelatablePrototypeMultipleInherited = Object.assign(Object.create(scope.Scope.prototype),
+      scope.TransientScriptFields.hostObjectPrototype);
+  scope.Relatable.prototype = Object.assign(Object.create(RelatablePrototypeMultipleInherited), {
     constructor: scope.Relatable,
     [scope.Relatable.getRelations]: denoteValaaKueryFunction(
         `returns an array which contains all outgoing (connected or not) *Relation* resources${

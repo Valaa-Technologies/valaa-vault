@@ -3,11 +3,12 @@ import { GraphQLObjectType } from "graphql/type";
 
 import Describable from "~/raem/schema/Describable";
 import Discoverable from "~/raem/schema/Discoverable";
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Partition, { partitionInterface } from "~/raem/schema/Partition";
 import Resource from "~/raem/schema/Resource";
 
 import Scope from "~/script/schema/Scope";
+import TransientScriptFields from "~/script/schema/TransientScriptFields";
 
 import Relatable, { relatableInterface } from "~/script/schema/Relatable";
 
@@ -23,8 +24,10 @@ export default new GraphQLObjectType({
 
   description: "A conceptual area that contains objects and an environment",
 
-  interfaces: () =>
-      [Partition, Relatable, Scope, Describable, Discoverable, Resource, ResourceStub],
+  interfaces: () => [
+    Partition, Relatable, Scope, TransientScriptFields,
+    Describable, Discoverable, Resource, TransientFields
+  ],
 
   fields: () => ({
     ...partitionInterface(OBJECT_DESCRIPTION).fields(),

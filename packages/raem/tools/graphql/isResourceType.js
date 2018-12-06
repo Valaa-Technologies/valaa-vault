@@ -13,8 +13,8 @@ export default function isResourceType (typeIntro: GraphQLObjectType) {
         : typeof intro._typeConfig.interfaces === "function" ? intro._typeConfig.interfaces()
         : Array.isArray(intro._typeConfig.interfaces) ? intro._typeConfig.interfaces
         : [];
-    if (intro.name === "ResourceStub"
-        || interfaces.find(iface => (iface.name === "ResourceStub"))) {
+    if (intro.name === "TransientFields"
+        || interfaces.find(iface => (iface.name === "TransientFields"))) {
       value = true;
     }
     ret = typeIntro.__isValaaResource = value;

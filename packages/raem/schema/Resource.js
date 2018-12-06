@@ -10,7 +10,7 @@ import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
 
 import { toOwner, toManyOwnlings } from "~/raem/tools/graphql/coupling";
 
-import ResourceStub, { resourceStub } from "~/raem/schema/ResourceStub";
+import TransientFields, { transientFields } from "~/raem/schema/TransientFields";
 
 const INTERFACE_DESCRIPTION = "resource";
 
@@ -27,10 +27,10 @@ queries through by its id. It has identity and thus can also be destroyed. In th
 instances to maintain referential integrity all references will be nulled and all Resource's/Data's
 containing non-nullable references will be cascade destroyed.`,
 
-    interfaces: () => [ResourceStub],
+    interfaces: () => [TransientFields],
 
     fields: () => ({
-      ...resourceStub(objectDescription).fields(),
+      ...transientFields(objectDescription).fields(),
 
       ...primaryField("owner", Resource,
           `Owner of the resource`,

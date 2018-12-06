@@ -4,6 +4,7 @@ import { RAEMContentAPI } from "~/raem";
 
 import Expression from "~/script/schema/Expression";
 import Identifier from "~/script/schema/Identifier";
+import InactiveScriptResource from "~/script/schema/InactiveScriptResource";
 import KueryExpression from "~/script/schema/KueryExpression";
 import Literal from "~/script/schema/Literal";
 import Property from "~/script/schema/Property";
@@ -14,7 +15,9 @@ import Scope from "~/script/schema/Scope";
 export default createContentAPI({
   name: "ValaaScriptContentAPI",
   inherits: [RAEMContentAPI],
+
   exposes: [
     Expression, Identifier, KueryExpression, Literal, Property, Relation, Relatable, Scope,
+    InactiveScriptResource,
   ],
 });

@@ -1,7 +1,7 @@
 import implementInterface from "~/raem/tools/graphql/implementInterface";
-import ResourceStub from "~/raem/schema/ResourceStub";
+import TransientFields from "~/raem/schema/TransientFields";
 import Representation, { representationInterface } from "~/raem/schema/Representation";
 import Resource from "~/raem/schema/Resource";
 
 export default implementInterface("Description", "description",
-    () => [Representation, Resource, ResourceStub], representationInterface);
+    () => [Representation, Resource, TransientFields], representationInterface);

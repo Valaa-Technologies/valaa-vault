@@ -27,7 +27,7 @@ export default function recombine (bard: DuplicateBard) {
       // position of the duplicated resource in its owning field as no
       // coupling transient event will be emitted.
       if (bard.tryGoToTransientOfRawId(
-          passage.id.rawId(), "ResourceStub", false, passage.id.tryGhostPath())) {
+          passage.id.rawId(), "TransientFields", false, passage.id.tryGhostPath())) {
         // Existing duplicate target means an existing inactive resource
         // with incoming references etc.
         passage.id = bard.objectId;

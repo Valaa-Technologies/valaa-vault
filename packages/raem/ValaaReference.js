@@ -1,7 +1,6 @@
 // @flow
 
-import ValaaURI, { createValaaURI, createPartitionURI, getPartitionRawIdFrom }
-    from "~/raem/ValaaURI";
+import ValaaURI, { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";
 
 import GhostPath, { JSONGhostPath, ghostPathFromJSON } from "~/raem/state/GhostPath";
 
@@ -65,8 +64,13 @@ export default class ValaaReference {
   _mostInheritedMaterializedTransient: Object;
 
   constructor (vref: [RawId, ?string, ?GhostPath], partitionURI: ?ValaaURI) {
-    this[PackedHostValue] = vref;
     if (partitionURI) this.setPartitionURI(partitionURI);
+    this._initializeHostValue(vref || []);
+    if (!vref) this.setInactive();
+  }
+
+  _initializeHostValue (vref: [RawId, ?string, ?GhostPath]) {
+    this[PackedHostValue] = vref;
     if (this[PackedHostValue][2]) this.connectGhostPath(this[PackedHostValue][2]);
   }
 

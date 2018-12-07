@@ -7,7 +7,7 @@ import { VRef } from "~/raem/ValaaReference";
 import { Action } from "~/raem/events";
 
 import { Resolver, State } from "~/raem/state";
-import { getTransientTypeName } from "~/raem/state/Transient";
+import Transient, { getTransientTypeName } from "~/raem/state/Transient";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 
 import { dumpObject, invariantify, outputCollapsedError } from "~/tools";
@@ -279,22 +279,21 @@ export default class Bard extends Resolver {
     return ret;
   }
 
-  goToObjectTypeIntro (operationDescription: string = this.passage.type): Object {
-    this.objectTypeIntro = this.schema.getType(this.typeName
-        || getTransientTypeName(this.objectTransient, this.schema));
+
+  goToTypeIntro (typeName: string): Object {
+    this.objectTypeIntro = this.schema.getType(typeName);
     if (!this.objectTypeIntro) {
-      throw new Error(`${operationDescription} schema introspection missing for type '${
-          getTransientTypeName(this.objectTransient, this.schema)}'`);
+      throw new Error(`${this.passage.type} schema type '${typeName}' missing`);
     }
     return this.objectTypeIntro;
   }
 
-  goToResourceTypeIntro (operationDescription: string = this.passage.type): Object {
-    const ret = this.goToObjectTypeIntro(operationDescription);
+  goToResourceTransientTypeIntro (transient: Transient): Object {
+    const ret = this.goToTypeIntro(getTransientTypeName(transient, this.schema));
     if (!isResourceType(ret) && !(this.passage.local || {}).dontUpdateCouplings) {
       throw this.wrapErrorEvent(
-          new Error(`${operationDescription} attempted on a non-Resource object`),
-          `goToResourceTypeIntro(${operationDescription})`,
+          new Error(`${this.passage.type} attempted on a non-Resource object`),
+          new Error(`goToResourceTransientTypeIntro(${this.passage.type})`),
           "\n\ttypeIntro:", ret);
     }
     return ret;

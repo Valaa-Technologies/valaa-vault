@@ -18,7 +18,7 @@ import { universalizePartitionMutation,
     from "~/raem/tools/denormalized/partitions";
 import { isFrozen, universalizeFreezePartitionRoot, freezeOwnlings }
     from "~/raem/tools/denormalized/freezes";
-import { createMaterializeGhostPathAction } from "~/raem/tools/denormalized/ghost";
+import { createMaterializeTransientAction } from "~/raem/tools/denormalized/ghost";
 
 import Bard from "~/raem/redux/Bard";
 
@@ -49,15 +49,15 @@ export default function modifyResource (bard: Bard) {
     bard.denormalized = {};
     bard.fieldsTouched = new Set();
     bard.goToTransientOfPassageObject(); // no-require, non-ghost-lookup
-    if (!bard.objectTransient) { // ghost or fail
-      const materializeGhostSubCommand = createMaterializeGhostPathAction(
+    if (!bard.objectTransient) { // ghost, inactive transient or fail
+      const materializeGhostSubCommand = createMaterializeTransientAction(
           bard, passage.id.getGhostPath(), passage.typeName);
       bard.updateState(bard.subReduce(bard.state, materializeGhostSubCommand));
       bard.goToTransientOfRawId(passage.id.rawId());
       passage.id = bard.objectId;
       if (!passage.id) throw new Error("INTERNAL ERROR: no bard.objectId");
     }
-    bard.goToResourceTypeIntro();
+    bard.goToResourceTransientTypeIntro(bard.objectTransient);
 
     invariantify(OrderedMap.isOrderedMap(bard.objectTransient),
         "object Transient must be an OrderedMap");

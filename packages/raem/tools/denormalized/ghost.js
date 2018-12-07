@@ -116,14 +116,35 @@ export function createMaterializeGhostPathAction (resolver: Resolver, ghostObjec
       : transacted({ actions });
 }
 
+/**
+ * Like createMaterializeGhostPathAction but allows creationg of
+ * a transient for non-ghost resources as well.
+ *
+ * @export
+ * @param {Resolver} resolver
+ * @param {GhostPath} ghostObjectPath
+ * @param {string} typeName
+ * @returns {?Action}
+ */
+export function createMaterializeTransientAction (resolver: Resolver, ghostObjectPath: GhostPath,
+    typeName: string): ?Action {
+  const actions = [];
+  _createMaterializeGhostAction(resolver, resolver.getState(), ghostObjectPath, typeName, actions);
+  return !actions.length ? undefined
+      : actions.length === 1 ? actions[0]
+      : transacted({ actions });
+}
+
 function _createMaterializeGhostAction (resolver: Resolver, state: State,
     ghostObjectPath: GhostPath, typeName: string,
     outputActions: Array<Action>): { id: string, actualType: string, ghostPath: GhostPath } {
-  // TODO(iridian): This whole segment needs to be re-evaluated now with the introduction of the
-  // "ghostOwnlings"/"ghostOwner" coupling introduction. Specifically: owners
-  // would not need to be materialized. However, parts of the code-base still operate under the
-  // assumption that if an object is materialized, all its owners will be.
-  // Notably: FieldInfo:_elevateObjectId (but there might be others).
+  // TODO(iridian): This whole segment needs to be re-evaluated now
+  // with the introduction of the "ghostOwnlings"/"ghostOwner" coupling
+  // introduction. Specifically: owners would not need to be
+  // materialized. However, parts of the code-base still operate under
+  // the assumption that if an object is materialized, all its owners
+  // will be. Notably: FieldInfo:_elevateObjectId (but there might be
+  // others).
   invariantifyObject(ghostObjectPath, "_createMaterializeGhostAction.ghostObjectPath",
       { instanceof: GhostPath },
       "perhaps createMaterializeGhostAction.ghostId is missing a ghost path?");
@@ -184,7 +205,8 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
     return ret;
   } catch (error) {
     throw wrapError(error, `During createMaterializeGhostAction(${dumpify(ghostObjectPath)}:${
-        ret.actualType}}), with:`,
+        typeName}/${ret.actualType}}), with:`,
+        "\n\ttransientType:", transientType,
         "\n\tghost host prototype:", ghostHostPrototypeRawId,
         "\n\tghost host:", ghostHostRawId,
         "\n\tghost id:", ghostRawId,

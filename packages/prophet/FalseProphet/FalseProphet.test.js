@@ -56,9 +56,7 @@ describe("FalseProphet", () => {
     }
   });
 
-  it("Keeps track of the count of commands executed", async () => {
-    // TODO(iridian): Move this test false prophet. Scribe no longer
-    // tracks the pending commands.
+  it("keeps track of the count of commands executed", async () => {
     let commandsCounted = 0;
     const onCommandCountUpdate = (count) => { commandsCounted = count; };
 

@@ -18,7 +18,7 @@ export default function destroy (bard: Bard) {
   const passage = bard.passage;
   try {
     transient = bard.goToTransientOfPassageObject("Resource", true, true); // require, ghost-lookup
-    const objectTypeIntro = bard.goToResourceTypeIntro();
+    const objectTypeIntro = bard.goToResourceTransientTypeIntro(transient);
     const partitionURI = universalizePartitionMutation(bard, passage.id);
     bard.destroyedResourcePartition = partitionURI && partitionURI.toString();
     const resourceFieldIntros = objectTypeIntro.getFields();

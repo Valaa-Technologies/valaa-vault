@@ -23,6 +23,6 @@ export default function create (bard: CreateBard) {
     bard.objectTransient = createTransient(passage);
   }
   const denormalizedRoot = prepareDenormalizedRoot(bard);
-  recurseCreateOrDuplicate(bard, initialState);
+  recurseCreateOrDuplicate(bard, passage.typeName, initialState);
   return mergeDenormalizedStateToState(bard, denormalizedRoot);
 }

@@ -19,6 +19,23 @@ const testPartitionURI = createPartitionURI(testAuthorityURI, "test_partition");
 
 let harness = null;
 
+async function setUp (testAuthorityConfig: Object = {}, options: {}) {
+  harness = await createProphetOracleHarness({ verbosity: 0,
+    oracleOptions: { testAuthorityConfig },
+    ...options,
+  });
+  const ret = {
+    connection: await harness.prophet.acquirePartitionConnection(
+        testPartitionURI).getSyncedConnection(),
+    scribeConnection: await harness.scribe.acquirePartitionConnection(
+        testPartitionURI, { newConnection: false }).getSyncedConnection(),
+    oracleConnection: await harness.oracle.acquirePartitionConnection(
+        testPartitionURI, { newConnection: false }).getSyncedConnection(),
+  };
+  ret.authorityConnection = ret.oracleConnection.getUpstreamConnection();
+  return ret;
+}
+
 afterEach(async () => {
   if (harness) {
     await harness.cleanup();
@@ -116,23 +133,6 @@ describe("Prophet", () => {
       target: "some_media",
     } }),
   ];
-
-  async function setUp (testAuthorityConfig: Object = {}, options: {}) {
-    harness = await createProphetOracleHarness({ verbosity: 0,
-      oracleOptions: { testAuthorityConfig },
-      ...options,
-    });
-    const ret = {
-      connection: await harness.prophet.acquirePartitionConnection(
-          testPartitionURI).getSyncedConnection(),
-      scribeConnection: await harness.scribe.acquirePartitionConnection(
-          testPartitionURI, { newConnection: false }).getSyncedConnection(),
-      oracleConnection: await harness.oracle.acquirePartitionConnection(
-          testPartitionURI, { newConnection: false }).getSyncedConnection(),
-    };
-    ret.authorityConnection = ret.oracleConnection.getUpstreamConnection();
-    return ret;
-  }
 
   function expectConnectionEventIds (connection,
       truthEventIdBegin, truthToCommandBorderEventId, commandEventIdEnd) {
@@ -470,5 +470,98 @@ describe("Prophet", () => {
 
     expect(secondsTruths.length).toEqual(2);
     expect(secondsFailures.length).toEqual(0);
+  });
+});
+
+describe("Cross-partition", () => {
+  it("handles out-of-order cross-partition incomingRelations", async () => {
+    const { scribeConnection } =
+        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+    const latePartitionURI = createPartitionURI(testAuthorityURI, "test_late");
+
+    const lateTargetId = vRef("late_target", undefined, undefined, latePartitionURI);
+
+    await scribeConnection.chronicleEvent(created({
+      id: "CrossRelation_A", typeName: "Relation",
+      initialState: { name: "CrossRelation", source: "test_partition", target: lateTargetId },
+      aspects: {
+        version: "0.2",
+        log: { index: scribeConnection.getFirstUnusedCommandEventId() },
+        command: { id: "cid-1" },
+      },
+    }), { isTruth: true }).getPersistedEvent();
+
+    const lateConnection = await harness.prophet
+        .acquirePartitionConnection(latePartitionURI).getSyncedConnection();
+    const lateScribeConnection = lateConnection.getUpstreamConnection();
+    await Promise.all(lateScribeConnection.chronicleEvents([
+      created({
+        id: "test_late", typeName: "Entity",
+        initialState: { name: "Test Late" },
+        aspects: { version: "0.2", log: { index: 0 }, command: { id: "lid-0" } },
+      }),
+      created({
+        id: "late_target", typeName: "Entity",
+        initialState: { name: "Late Target" },
+        aspects: { version: "0.2", log: { index: 1 }, command: { id: "lid-1" } },
+      }),
+    ], { isTruth: true }).eventResults.map(result => result.getPersistedEvent()));
+
+    const incomingRelations = harness.run(lateTargetId, "incomingRelations");
+    expect(incomingRelations.length)
+        .toEqual(1);
+  });
+
+  it("handles out-of-order instantiation with properties in both partitions", async () => {
+    const { scribeConnection } =
+        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+    const latePartitionURI = createPartitionURI(testAuthorityURI, "test_late");
+
+    const latePrototypeId = vRef("late_prototype", undefined, undefined, latePartitionURI);
+
+    const index = scribeConnection.getFirstUnusedCommandEventId();
+    await Promise.all(scribeConnection.chronicleEvents([
+      created({
+        id: "CrossEntryInstance_A", typeName: "Entity",
+        initialState: { owner: "test_partition", instancePrototype: latePrototypeId,
+          name: "Cross-partition instance",
+        },
+        aspects: { version: "0.2", log: { index: index + 0 }, command: { id: "cid-1" } },
+      }),
+      created({
+        id: "CrossEntryInstance_A.foo", typeName: "Property",
+        initialState: { owner: ["CrossEntryInstance_A", "properties"],
+          name: "bar",
+        },
+        aspects: { version: "0.2", log: { index: index + 1 }, command: { id: "cid-2" } },
+      })], { isTruth: true }).eventResults.map(result => result.getPersistedEvent()));
+
+    const lateConnection = await harness.prophet
+        .acquirePartitionConnection(latePartitionURI).getSyncedConnection();
+    const lateScribeConnection = lateConnection.getUpstreamConnection();
+    await Promise.all(lateScribeConnection.chronicleEvents([
+      created({
+        id: "test_late", typeName: "Entity",
+        initialState: { name: "Test Late" },
+        aspects: { version: "0.2", log: { index: 0 }, command: { id: "lid-0" } },
+      }),
+      created({
+        id: "late_prototype", typeName: "Entity",
+        initialState: { name: "Late Prototype" },
+        aspects: { version: "0.2", log: { index: 1 }, command: { id: "lid-1" } },
+      }),
+      created({
+        id: "late_prototype.bar", typeName: "Property",
+        initialState: { owner: ["late_prototype", "properties"],
+          name: "foo",
+        },
+        aspects: { version: "0.2", log: { index: 2 }, command: { id: "lid-3" } },
+      }),
+    ], { isTruth: true }).eventResults.map(result => result.getPersistedEvent()));
+
+    const properties = harness.run(vRef("CrossEntryInstance_A"),
+        ["§->", "properties", ["§map", "name"]]);
+    expect(properties)
+        .toEqual(["foo", "bar"]);
   });
 });

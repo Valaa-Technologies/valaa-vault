@@ -19,7 +19,7 @@ export default function duplicate (bard: DuplicateBard) {
   invariantify(!bard.passage.typeName, "DUPLICATED.typeName must be empty");
   if (passage.id === null) return bard.getState();
 
-  const bailOut = prepareCreateOrDuplicateObjectTransientAndId(bard, "TransientFields");
+  const bailOut = prepareCreateOrDuplicateObjectTransientAndId(bard);
   invariantify(!bailOut, `DUPLICATED internal error:${
       ""} should never bail out due to Bvob/re-create conditions`);
   // TODO(iridian): invariantify that the type is a Resource
@@ -39,7 +39,7 @@ export default function duplicate (bard: DuplicateBard) {
   // in inactive interface and type tables.
   bard.goToObjectIdTransient(duplicateOf, "Resource");
   const ghostPath = passage.id.getGhostPath();
-  passage.typeName = getTransientTypeName(bard.objectTransient, bard.schema);
+  const typeName = passage.typeName = getTransientTypeName(bard.objectTransient, bard.schema);
   if (!ghostPath.isGhost()) {
     // original is not a ghost: only check if it is an instance for _duplicationRootPrototypeId
     const prototypeId = bard.objectTransient.get("prototype");
@@ -63,11 +63,10 @@ export default function duplicate (bard: DuplicateBard) {
                 ""}ghost: implicit ghost owner retrieval/materialization not implemented yet`);
       // TODO(iridian): this needed? mem-cpu tradeoff: found in prototype's...
       // ["owner"] // TODO(iridian): Retrieve and materialize correct owner for the ghost
-      bard.objectTransient = createTransient(
-          { typeName: bard.objectTypeName, prototype: prototypeId });
+      bard.objectTransient = createTransient({ typeName, prototype: prototypeId });
     }
   }
-  _createDuplicate(bard, newObjectId, passage.initialState, passage.preOverrides,
+  _createDuplicate(bard, newObjectId, typeName, passage.initialState, passage.preOverrides,
       newObjectTransient);
 
   return isInsideRecombined
@@ -75,8 +74,8 @@ export default function duplicate (bard: DuplicateBard) {
       : postProcessDuplicationContext(bard);
 }
 
-function _createDuplicate (bard: DuplicateBard, duplicateId: VRef, initialState: Object,
-    preOverrides?: Object, newObjectTransient: Object) {
+function _createDuplicate (bard: DuplicateBard, duplicateId: VRef, typeName: string,
+    initialState: Object, preOverrides?: Object, newObjectTransient: Object) {
   // Assumes that the original ie. duplicate source object is bard.objectTransient/Id
   bard._duplicateIdByOriginalRawId[bard.objectId.rawId()] = duplicateId;
   if (!newObjectTransient) {
@@ -85,7 +84,7 @@ function _createDuplicate (bard: DuplicateBard, duplicateId: VRef, initialState:
     bard.objectTransient = bard.objectTransient.merge(newObjectTransient); // shallow merge
   }
   bard.objectId = duplicateId;
-  recurseCreateOrDuplicate(bard, initialState, preOverrides);
+  recurseCreateOrDuplicate(bard, typeName, initialState, preOverrides);
 }
 
 // Overwrites bard.objectTransient/Intro
@@ -183,12 +182,12 @@ function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalIdData:
           dumpify({ duplicateOf: originalIdData, initialState: { owner } }, { sliceAt: 380 })
         }`);
       }
-      _createDuplicate(bard, newObjectId, { owner });
+      _createDuplicate(bard, newObjectId, bard.objectTypeName, { owner });
     }
     return newObjectId;
   } catch (error) {
     throw bard.wrapErrorEvent(error, `duplicateField(${fieldIntro.name}:${
-            fieldIntro.namedType.name})`,
+            fieldIntro.namedType.name}/${bard.objectTypeName})`,
         "\n\tfieldIntro:", ...dumpObject(fieldIntro),
         "\n\toriginalIdData:", ...dumpObject(originalIdData),
         "\n\toriginalGhostProtoPath:", originalGhostProtoPath,

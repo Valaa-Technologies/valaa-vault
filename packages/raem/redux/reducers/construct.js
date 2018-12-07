@@ -35,9 +35,9 @@ export class DuplicateBard extends CreateBard {
 }
 
 
-export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, typeName: string) {
+export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, typeName?: string) {
   // typeName can be falsy if this is a DUPLICATED action
-  bard.goToTransientOfPassageObject(typeName); // no-require, non-ghost
+  bard.goToTransientOfPassageObject("TransientFields"); // no-require, non-ghost
   const passage = bard.passage;
   if (bard.objectTransient) {
     // The object already exists in the denormalized state.
@@ -45,7 +45,7 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
     // below where it is valid.
     // 1. Bvob (and Data, non-implemented atm) object creation is
     //    idempotent thus we can return.
-    if (passage.typeName === "Blob") return bard.state;
+    if (typeName === "Blob") return bard.state;
     // 2. The same TRANSACTED can create same Resource twice. Usually
     //    this is the result of some sub-actions, like how ghost
     //    materialization can arrive and materialize the same owner or
@@ -61,22 +61,15 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
     //    contains "id" and any possible already-related transientField
     //    fields. These stubs are merged to the newly created Resource
     //    on creation.
-    invariantify(passage.id.isInactive(),
-        `${passage.type}: Resource already exists with id: ${
-          passage.id.rawId()}:${passage.typeName}`, bard.objectTransient);
-    passage.id.setInactive(false);
-    if (passage.typeName) {
-      // Inactive resource typeName is "ResourceStub": update it to correct value for CREATEDs.
-      bard.objectTransient = bard.objectTransient.set("typeName", passage.typeName);
-    }
+    _mergeWithInactiveStub(bard, passage, typeName);
   } else if (passage.id.isGhost()) {
     // Materializing a potentially immaterial ghost
     invariantify(passage.type === "CREATED",
         "action.type must be CREATED if action.id is a ghost path");
-    invariantifyString(passage.typeName, "CREATED.typeName required");
+    invariantifyString(typeName, "CREATED.typeName required");
     bard.updateState(
         bard.subReduce(bard.state,
-            createMaterializeGhostPathAction(bard, passage.id.getGhostPath(), passage.typeName)));
+            createMaterializeGhostPathAction(bard, passage.id.getGhostPath(), typeName)));
     bard.goToTransientOfRawId(passage.id.rawId());
     passage.id = bard.objectTransient.get("id");
     if (!passage.id) throw new Error("INTERNAL ERROR: no bard.objectTransient.get('id')");
@@ -86,6 +79,20 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
     bard.objectTransient = createTransient(passage);
   }
   return undefined;
+}
+
+function _mergeWithInactiveStub (bard: CreateBard, passage: Object, typeName?: string) {
+  if (!passage.id.isInactive()) {
+    invariantify(passage.id.isInactive(),
+        `${passage.type}: Resource already exists with id: ${
+          passage.id.rawId()}:${typeName}`, bard.objectTransient);
+  }
+  passage.id.setInactive(false);
+  if (typeName) {
+    // Inactive resource typeName is an inactive type: update it to
+    // correct value for CREATEDs.
+    bard.objectTransient = bard.objectTransient.set("typeName", typeName);
+  }
 }
 
 export function convertLegacyOwnerField (bard: CreateBard, initialState: Object) {
@@ -109,30 +116,29 @@ export function mergeDenormalizedStateToState (bard: CreateBard, denormalizedRoo
   return bard.updateStateWith(state => state.mergeDeep(denormalizedFromJS(denormalizedRoot)));
 }
 
-export function recurseCreateOrDuplicate (bard: CreateBard, initialState: Object,
+export function recurseCreateOrDuplicate (bard: CreateBard, typeName: string, initialState: Object,
     preOverrides?: Object) {
   const rawId = bard.objectId.rawId();
   try {
     // Make the objectId available for all VRef connectors within this Bard.
     bard.setState(bard.state
-        .setIn(["TransientFields", rawId], bard.objectTypeName)
+        .setIn(["TransientFields", rawId], typeName)
         // FIXME(iridian, 2018-12): this breaks abstractions as
         // TransientScriptFields is only introduced in @valos/script.
         // I couldn't think of correct non-abstraction which is not
         // overly engineered, so this is hard-coded now.
-        .setIn(["TransientScriptFields", rawId], bard.objectTypeName)
-        .setIn(["Resource", rawId], bard.objectTypeName)
-        .setIn([bard.objectTypeName, rawId],
-            OrderedMap([["id", bard.objectId], ["typeName", bard.objectTypeName]])));
+        .setIn(["TransientScriptFields", rawId], typeName)
+        .setIn(["Resource", rawId], typeName)
+        .setIn([typeName, rawId], OrderedMap([["id", bard.objectId], ["typeName", typeName]])));
     bard.objectTransient = bard.objectTransient.withMutations(mutableTransient => {
       bard.objectTransient = mutableTransient;
-      bard.goToObjectTypeIntro();
+      bard.goToTypeIntro(typeName);
       const objectTypeIntro: GraphQLObjectType = bard.objectTypeIntro;
       if (typeof objectTypeIntro.getInterfaces !== "function") {
-        bard.error(`Cannot instantiate interface type: ${bard.objectTypeName}`);
+        bard.error(`Cannot instantiate interface type: ${typeName}`);
       }
       (objectTypeIntro.getInterfaces() || []).forEach(classInterface => {
-        bard.getDenormalizedTable(classInterface.name)[rawId] = bard.objectTypeName;
+        bard.getDenormalizedTable(classInterface.name)[rawId] = typeName;
       });
 
       const isResource = isResourceType(objectTypeIntro);
@@ -169,7 +175,7 @@ export function recurseCreateOrDuplicate (bard: CreateBard, initialState: Object
 
       _connectNonGhostObjectIdGhostPathToPrototype(bard, rawId);
     });
-    bard.getDenormalizedTable(bard.objectTypeName)[rawId] = bard.objectTransient;
+    bard.getDenormalizedTable(typeName)[rawId] = bard.objectTransient;
   } catch (error) {
     throw wrapError(error, `During ${bard.debugId()}\n .recurseCreateOrDuplicate(), with:`,
         "\n\tobject:", bard.objectTransient,

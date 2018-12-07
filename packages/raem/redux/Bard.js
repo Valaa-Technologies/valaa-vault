@@ -281,10 +281,10 @@ export default class Bard extends Resolver {
 
   goToObjectTypeIntro (operationDescription: string = this.passage.type): Object {
     this.objectTypeIntro = this.schema.getType(this.typeName
-        || getTransientTypeName(this.objectTransient));
+        || getTransientTypeName(this.objectTransient, this.schema));
     if (!this.objectTypeIntro) {
       throw new Error(`${operationDescription} schema introspection missing for type '${
-          getTransientTypeName(this.objectTransient)}'`);
+          getTransientTypeName(this.objectTransient, this.schema)}'`);
     }
     return this.objectTypeIntro;
   }

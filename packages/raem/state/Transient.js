@@ -5,7 +5,7 @@ import { VRef, IdData, RawId, vRef } from "~/raem/ValaaReference";
 import type GhostPath from "~/raem/state/GhostPath";
 
 import invariantify from "~/tools/invariantify";
-import wrapError from "~/tools/wrapError";
+import wrapError, { dumpObject } from "~/tools/wrapError";
 
 const Transient = OrderedMap;
 // A Transient is an immutable-js denormalized representation of a Valaa object.
@@ -43,31 +43,33 @@ export function isInactiveTransient (value: Transient) {
   return value.get("id").isInactive();
 }
 
-export function getTransientTypeName (value: Transient): string {
+export function getTransientTypeName (value: Transient, schema?: Object): string {
   try {
-    const typeName = tryTransientTypeName(value);
+    const typeName = tryTransientTypeName(value, schema);
     if (typeof typeName !== "string") {
       invariantify(typeName, "transient must have either 'typeName' or immaterial prototype");
     }
     return typeName;
   } catch (error) {
     throw wrapError(error, `During getTransientTypeName, with:`,
-        "\n\tvalue:", value);
+        "\n\tvalue:", ...dumpObject(value),
+        "\n\tschema:", ...dumpObject(schema));
   }
 }
 
-export function tryTransientTypeName (value: Transient): ?string {
+export function tryTransientTypeName (value: Transient, schema?: Object): ?string {
   try {
     const typeName = value.get("typeName");
     if (typeName) return typeName;
     const id = value.get("id");
     if (!id) return undefined;
-    if (id.isInactive()) return "InactiveResource";
+    if (id.isInactive()) return !schema ? "InactiveResource" : schema.inactiveType.name;
     const immaterialPrototype = value[PrototypeOfImmaterialTag];
     if (!immaterialPrototype) return undefined;
-    return tryTransientTypeName(immaterialPrototype);
+    return tryTransientTypeName(immaterialPrototype, schema);
   } catch (error) {
     throw wrapError(error, `During tryTransientTypeName, with:`,
-        "\n\tvalue:", value);
+        "\n\tvalue:", ...dumpObject(value),
+        "\n\tschema:", ...dumpObject(schema));
   }
 }

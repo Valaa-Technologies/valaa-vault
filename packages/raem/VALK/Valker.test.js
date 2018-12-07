@@ -130,7 +130,7 @@ describe("ghost lookups", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createTestObjInst);
     let ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
-    const materializeEvent = createMaterializeGhostAction(harness.getState(), ghostOwnling);
+    const materializeEvent = createMaterializeGhostAction(harness.getValker(), ghostOwnling);
     harness.chronicleEvent(materializeEvent);
     ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
@@ -149,7 +149,7 @@ describe("ghost lookups", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createTestObjInst);
     let ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
-    harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), ghostOwnling));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), ghostOwnling));
     ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
     const ghostGrandling = harness.run(ghostOwnling, ["§->", "children", 0]);
@@ -174,7 +174,7 @@ describe("ghost lookups", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createOwnlingInst);
     let ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
-    harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), ghostGrandling));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), ghostGrandling));
     ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
 
@@ -191,7 +191,7 @@ describe("ghost lookups", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createOwnlingInst);
     let ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
-    harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), ghostGrandling));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), ghostGrandling));
     ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
     const ghostGreatGrandling = harness.run(ghostGrandling, ["§->", "children", 0]);
@@ -490,9 +490,9 @@ describe("complex structures", () => {
         ["§->", "children", 0], { verbosity: 0 });
 
     // Falling apart workaround
-    harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), gA1_B));
-    harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), gA1_B_C));
-    harness.chronicleEvent(createMaterializeGhostAction(harness.getState(), gA_B1_C));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), gA1_B));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), gA1_B_C));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), gA_B1_C));
 
     // Here everything falls apart
     harness.chronicleEvent(created({ id: "gA1_B1", typeName: "TestThing", initialState: {

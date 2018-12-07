@@ -41,7 +41,7 @@ function contentAPIField (targetFieldName, type, description,
  *              reducers        incoming mutation reducers (fallthrough from the param reducers)
  */
 export default function createContentAPI ({ name, inherits = [], exposes, mutations, validators,
-  reducers,
+  reducers, inactiveType,
 }) {
   const exposedAccessPoints = exposes.reduce((accessPoints, exposedTypeEntry) => {
     const typeName = !Array.isArray(exposedTypeEntry) ? exposedTypeEntry.name : exposedTypeEntry[0];
@@ -70,27 +70,44 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
     subAPI.reducers.forEach(reducer => reducer && actualReducers.add(reducer));
   }
 
+  let inheritedInactiveType;
+
   for (const inheritedContentAPI of (inherits || [])) {
     Object.values(inheritedContentAPI.subAPIs).forEach(tryToAddSubAPI);
     tryToAddSubAPI(inheritedContentAPI);
+
+    const subInactiveType = inheritedContentAPI.schema.inactiveType;
+    if (!inactiveType && subInactiveType) {
+      if (inheritedInactiveType && (inheritedInactiveType !== subInactiveType)) {
+        throw new Error(`Mismatching ${name} inherited inactiveType ${
+            inheritedInactiveType.name} !== ${subInactiveType
+                } (from ${inheritedContentAPI.name}) and no explicit inactiveType was provided`);
+      }
+      inheritedInactiveType = subInactiveType;
+    }
   }
   Object.freeze(subAPIs);
   Object.freeze(exposedAccessPoints);
 
   _assign(actualValidators, validators || {});
   _assign(actualMutations, mutations || {});
+
+  const schema = _validateSchema(new GraphQLSchema({
+    query: new GraphQLObjectType({
+      name: "Query",
+      fields: () => exposedAccessPoints,
+    }),
+    mutation: new GraphQLObjectType({
+      name: "Mutation",
+      fields: () => actualMutations,
+    }),
+  }));
+  schema.inactiveType = inactiveType || inheritedInactiveType;
+  if (!schema.inactiveType) throw new Error(`ContentAPI ${name} is missing .inactiveType`);
+
   return Object.freeze({
     name,
-    schema: _validateSchema(new GraphQLSchema({
-      query: new GraphQLObjectType({
-        name: "Query",
-        fields: () => exposedAccessPoints,
-      }),
-      mutation: new GraphQLObjectType({
-        name: "Mutation",
-        fields: () => actualMutations,
-      }),
-    })),
+    schema,
     mutations: Object.freeze(actualMutations),
     validators: Object.freeze(actualValidators),
     reducers: Object.freeze([...actualReducers]),
@@ -103,6 +120,7 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
           }
         }
     ),
+    inactiveType,
     subAPIs,
   });
 }

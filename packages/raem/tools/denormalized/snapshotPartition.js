@@ -40,13 +40,13 @@ export default async function snapshotPartition (/* { partitionId, state, schema
   try {
     walkResourceProcessingOwnersFirst(partition, (object) =>
       collectFields(schema, state, object.get("id").rawId(),
-          getTransientTypeName(object),
+          getTransientTypeName(object, schema),
           fieldReviver));
     processDefers();
     return;
   } catch (error) {
     throw wrapError(error, `During snapshotPartition(${partitionId}:${
-        partition && getTransientTypeName(partition)})`);
+        partition && getTransientTypeName(partition, schema)})`);
   }
 
   function walkResourceProcessingOwnersFirst (resource, walkValue, field, parent, parentType) {
@@ -58,7 +58,7 @@ export default async function snapshotPartition (/* { partitionId, state, schema
         walkResourceProcessingOwnersFirst(getObjectTransient(state, ownerData, "Resource"),
             walkValue);
       }
-      const typeName = getTransientTypeName(resource);
+      const typeName = getTransientTypeName(resource, schema);
       defers.resources.push(() => {
         let initialData;
         try {
@@ -89,7 +89,7 @@ export default async function snapshotPartition (/* { partitionId, state, schema
         if (!parentIsResource) return object;
         const idList = value.toJS();
         if (idList.length) {
-          addDeferredSet(getTransientTypeName(parent), parent.get("id").rawId(), field.name,
+          addDeferredSet(getTransientTypeName(parent, schema), parent.get("id").rawId(), field.name,
               idList);
         }
         // Irrespective of whether the array has owned or non-owned objects they'll be added later.
@@ -99,7 +99,7 @@ export default async function snapshotPartition (/* { partitionId, state, schema
       // TODO(iridian): Inline Data code (not denormalized). The whole concept of inline data is
       // problematic: doesn't offer anything but readability. And that's what tools are for.
       if (typeof value.get !== "function") return value;
-      const valueType = getTransientTypeName(value) || getNamedType(field.type).name;
+      const valueType = getTransientTypeName(value, schema) || getNamedType(field.type).name;
       // FIXME(iridian): createId is not deterministic at the moment.
       const valueId = tryRawIdFrom(value.get("id")) || createId({
         typeName: valueType, initialState: value.toJS(), isImmutable: true,
@@ -121,7 +121,7 @@ export default async function snapshotPartition (/* { partitionId, state, schema
       // field and if we're not processing an entry in an array (field.type !== type).
       if (!(field.coupling && field.coupling.isOwner)
           && (!(field.type instanceof GraphQLList) || (type instanceof GraphQLList))) {
-        addDeferredSet(getTransientTypeName(parent), parent.get("id").rawId(), field.name,
+        addDeferredSet(getTransientTypeName(parent, schema), parent.get("id").rawId(), field.name,
             Iterable.isIterable(fieldEntry) ? fieldEntry.toJS() : fieldEntry);
       }
       return null;

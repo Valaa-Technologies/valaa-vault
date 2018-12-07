@@ -64,7 +64,7 @@
 import { Action, created, destroyed, transacted } from "~/raem/events";
 import { vRef, getRawIdFrom, tryGhostPathFrom } from "~/raem/ValaaReference";
 import type { VRef, IdData } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
-import { GhostPath, State, Transient } from "~/raem/state";
+import { GhostPath, Resolver, State, Transient } from "~/raem/state";
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
 import { dumpify, dumpObject, invariantify, invariantifyObject, wrapError } from "~/tools";
@@ -89,34 +89,35 @@ export function isGhost (idDataOrTransient: IdData | Transient): boolean {
   return ghostPath ? ghostPath.isGhost() : false;
 }
 
-export function createMaterializeGhostAction (state: State, ghostId: VRef): ?Action {
+export function createMaterializeGhostAction (resolver: Resolver, ghostId: VRef): ?Action {
   try {
-    return createMaterializeGhostPathAction(state, ghostId.getGhostPath());
+    return createMaterializeGhostPathAction(resolver, ghostId.getGhostPath());
   } catch (error) {
     throw wrapError(error, `During createMaterializeGhostAction(), with:`,
-        "\n\ttransientGhostObject:", ghostId);
+        "\n\tghostId:", ...dumpObject(ghostId));
   }
 }
 
-export function createImmaterializeGhostAction (state: State, ghostId: VRef): ?Action {
+export function createImmaterializeGhostAction (resolver: Resolver, ghostId: VRef): ?Action {
   const actions = [];
-  _createImmaterializeGhostAction(state, ghostId.rawId(), actions);
+  _createImmaterializeGhostAction(resolver.getState(), ghostId.rawId(), actions);
   return !actions.length ? undefined
       : actions.length === 1 ? actions[0]
       : transacted({ actions });
 }
 
-export function createMaterializeGhostPathAction (state: State, ghostObjectPath: GhostPath,
+export function createMaterializeGhostPathAction (resolver: Resolver, ghostObjectPath: GhostPath,
     typeName: string): ?Action {
   const actions = [];
   invariantify(ghostObjectPath.isGhost(), "materializeGhostPathAction.ghostObjectPath.isGhost");
-  _createMaterializeGhostAction(state, ghostObjectPath, typeName, actions);
+  _createMaterializeGhostAction(resolver, resolver.getState(), ghostObjectPath, typeName, actions);
   return !actions.length ? undefined
       : actions.length === 1 ? actions[0]
       : transacted({ actions });
 }
 
-function _createMaterializeGhostAction (state: State, ghostObjectPath: GhostPath, typeName: string,
+function _createMaterializeGhostAction (resolver: Resolver, state: State,
+    ghostObjectPath: GhostPath, typeName: string,
     outputActions: Array<Action>): { id: string, actualType: string, ghostPath: GhostPath } {
   // TODO(iridian): This whole segment needs to be re-evaluated now with the introduction of the
   // "ghostOwnlings"/"ghostOwner" coupling introduction. Specifically: owners
@@ -125,13 +126,12 @@ function _createMaterializeGhostAction (state: State, ghostObjectPath: GhostPath
   // Notably: FieldInfo:_elevateObjectId (but there might be others).
   invariantifyObject(ghostObjectPath, "_createMaterializeGhostAction.ghostObjectPath",
       { instanceof: GhostPath },
-      "perhaps createMaterializeGhostAction.transientGhostObject is missing a ghost path?");
+      "perhaps createMaterializeGhostAction.ghostId is missing a ghost path?");
   const ghostHostPrototypeRawId = ghostObjectPath.headHostPrototypeRawId();
   const [ghostHostRawId, ghostRawId] =
       ghostObjectPath.getGhostHostAndObjectRawIdByHostPrototype(ghostHostPrototypeRawId);
   const ret = { id: null, actualType: null, ghostPath: undefined };
-  const resourceTable = state.get("TransientFields");
-  const transientType = resourceTable.get(ghostRawId);
+  const transientType = state.getIn(["TransientFields", ghostRawId]);
   try {
     if (transientType) {
       // Already materialized or not a ghost, possibly inside an inactive partition.
@@ -146,7 +146,7 @@ function _createMaterializeGhostAction (state: State, ghostObjectPath: GhostPath
       ret.id = vRef(ghostRawId);
       // TODO(iridian): Add inactive partition checks: throw if this partition is in fact active.
       ret.id.setInactive();
-      ret.actualType = "InactiveResource";
+      ret.actualType = resolver.schema.inactiveType.name;
       ret.ghostPath = ret.id.getGhostPath();
       outputActions.push(created({
         id: ret.id, typeName: ret.actualType, local: { noSubMaterialize: true },
@@ -156,7 +156,7 @@ function _createMaterializeGhostAction (state: State, ghostObjectPath: GhostPath
       // However, there is no difference between materialized reference and
       /* , owner: prototypeOwner */
       const { id: prototypeId, actualType: prototypeTypeName, ghostPath: prototypePath }
-          = _createMaterializeGhostAction(state, ghostObjectPath.previousStep(), typeName,
+          = _createMaterializeGhostAction(resolver, state, ghostObjectPath.previousStep(), typeName,
               outputActions);
       ret.ghostPath = prototypePath
           .withNewStep(ghostHostPrototypeRawId, ghostHostRawId, ghostRawId);

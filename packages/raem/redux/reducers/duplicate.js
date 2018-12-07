@@ -39,7 +39,7 @@ export default function duplicate (bard: DuplicateBard) {
   // in inactive interface and type tables.
   bard.goToObjectIdTransient(duplicateOf, "Resource");
   const ghostPath = passage.id.getGhostPath();
-  passage.typeName = getTransientTypeName(bard.objectTransient);
+  passage.typeName = getTransientTypeName(bard.objectTransient, bard.schema);
   if (!ghostPath.isGhost()) {
     // original is not a ghost: only check if it is an instance for _duplicationRootPrototypeId
     const prototypeId = bard.objectTransient.get("prototype");

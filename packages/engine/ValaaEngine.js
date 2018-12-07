@@ -145,10 +145,11 @@ export default class ValaaEngine extends Cog {
     if (vExisting) return vExisting;
     let typeName;
     let transient;
-    const state = options.state || (options.transaction || this.discourse).getState();
+    const discourse = options.transaction || this.discourse;
+    const state = options.state || discourse.getState();
     try {
       if (explicitTransient) {
-        typeName = getTransientTypeName(explicitTransient);
+        typeName = getTransientTypeName(explicitTransient, discourse.schema);
         transient = explicitTransient;
       } else {
         const rawId = getRawIdFrom(idData);

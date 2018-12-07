@@ -457,11 +457,11 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
           (left.toString() < right.toString() ? -1 : left.toString() > right.toString() ? 1 : 0);
       expect(symbols.propertiesSymbols.sort(symbolSorter)).toEqual([]);
       expect(symbols.entitySymbols.sort(symbolSorter)).toEqual([
-        Valaa.name, Valaa.Resource.owner, Valaa.Resource.instances, Valaa.Scope.properties,
+        Valaa.name, Valaa.Resource.owner, Valaa.Scope.properties, Valaa.TransientFields.instances,
       ]);
       expect(symbols.overriddenPropertiesSymbols.sort(symbolSorter)).toEqual([]);
       expect(symbols.instanceSymbols.sort(symbolSorter)).toEqual([
-        Valaa.Resource.ghostOwnlings, Valaa.Resource.owner, Valaa.prototype, Valaa.Scope.properties,
+        Valaa.Resource.ghostOwnlings, Valaa.Resource.owner, Valaa.Scope.properties, Valaa.prototype,
       ]);
     });
     it("Object.defineProperty", () => {

@@ -76,8 +76,7 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
     invariantifyString(passage.typeName, "CREATED.typeName required");
     bard.updateState(
         bard.subReduce(bard.state,
-            createMaterializeGhostPathAction(
-                bard.state, passage.id.getGhostPath(), passage.typeName)));
+            createMaterializeGhostPathAction(bard, passage.id.getGhostPath(), passage.typeName)));
     bard.goToTransientOfRawId(passage.id.rawId());
     passage.id = bard.objectTransient.get("id");
     if (!passage.id) throw new Error("INTERNAL ERROR: no bard.objectTransient.get('id')");

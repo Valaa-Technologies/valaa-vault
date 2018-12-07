@@ -7,15 +7,15 @@ import type { Passage, Story } from "~/raem/redux/Bard";
 import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 
 import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "~/raem/events";
-import { VRef, vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom, expandIdDataFrom,
-    obtainVRef } from "~/raem/ValaaReference";
+import { VRef, vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom, expandIdDataFrom }
+    from "~/raem/ValaaReference";
 import { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
 
 import { Resolver, State, Transient } from "~/raem/state";
 import { tryElevateFieldValue } from "~/raem/state/FieldInfo";
-import getObjectTransient from "~/raem/state/getObjectTransient";
+import getObjectTransient, { getObjectTransientDetailed } from "~/raem/state/getObjectTransient";
 import { getObjectRawField } from "~/raem/state/getObjectField";
 
 import { createGhostVRefInInstance, isMaterialized, createMaterializeGhostAction }
@@ -553,19 +553,23 @@ export default class Vrapper extends Cog {
     const explicitState = options.state
         || (options.transaction && options.transaction.getState())
         || (options.withOwnField && this.engine.discourse.getState());
+    const discourse = options.transaction || this.engine.discourse;
     if (explicitState) {
       const typeName = options.typeName || this.getTypeName(options);
       const ret = explicitState.getIn([typeName, this.getRawId()]);
       if (ret && (!options.withOwnField || ret.has(options.withOwnField))) return ret;
       // Immaterial ghost.
-      return getObjectTransient(options.state || options.transaction || this.engine.discourse,
+      return getObjectTransientDetailed(
+          !options.state ? discourse
+              : Object.assign(Object.create(discourse), { state: options.state }),
           this[HostRef], typeName, undefined,
           options.require, options.mostMaterialized, options.withOwnField);
     }
     if (this._transientStaledIn) {
       this.updateTransient(null,
-          getObjectTransient(this._transientStaledIn, this.getId(),
-              options.typeName || this.getTypeName(options), undefined,
+          getObjectTransientDetailed(
+              Object.assign(Object.create(discourse), { state: this._transientStaledIn }),
+              this.getId(), options.typeName || this.getTypeName(options), undefined,
               options.require, options.mostMaterialized, options.withOwnField));
     }
     return this._transient;
@@ -581,9 +585,8 @@ export default class Vrapper extends Cog {
 
   materialize (transaction: ?Transaction): ChronicleEventResult {
     const discourse = (transaction || this.engine.discourse);
-    const state = discourse.getState();
-    this.requireActive({ state });
-    return discourse.chronicleEvent(createMaterializeGhostAction(state, this.getId()));
+    this.requireActive({ state: discourse.getState() });
+    return discourse.chronicleEvent(createMaterializeGhostAction(discourse, this.getId()));
   }
 
   updateTransient (state: ?Object, object: ?Object) {
@@ -942,7 +945,7 @@ export default class Vrapper extends Cog {
       if (defaultCoupledField) {
         return newValue instanceof Vrapper
             ? newValue.getIdCoupledWith(defaultCoupledField)
-            : obtainVRef(newValue, defaultCoupledField);
+            : this.engine.discourse.obtainReference(newValue, defaultCoupledField);
       }
     }
     return newValue;

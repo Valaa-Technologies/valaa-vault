@@ -416,12 +416,12 @@ export default class Valker extends Resolver {
   }
 
   getObjectTypeIntro (object: Object | Transient, possiblePackedHead: Object) {
-    let typeName = tryTransientTypeName(object);
+    let typeName = tryTransientTypeName(object, this.schema);
     if (!typeName && possiblePackedHead._type && !possiblePackedHead._fieldInfo.intro.isResource) {
       typeName = possiblePackedHead._type;
     }
     const ret = typeName && this.getTypeIntro(typeName);
-    if ((ret === undefined) && isInactiveTypeName(typeName)) {
+    if ((ret === undefined) && typeName && isInactiveTypeName(typeName)) {
       const partitionURI = object.get("id").getPartitionURI();
       throw new MissingPartitionConnectionsError(`Missing active partition connections: '${
           partitionURI.toString()}'`, [partitionURI]);

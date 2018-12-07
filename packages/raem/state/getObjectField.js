@@ -81,7 +81,7 @@ export function getObjectRawField (stateOrResolver: State | Resolver, object: Tr
 
     let actualTypeIntro = objectTypeIntro;
     if (!actualTypeIntro && stateOrResolver.schema) {
-      const typeName = tryTransientTypeName(object);
+      const typeName = tryTransientTypeName(object, stateOrResolver.schema);
       actualTypeIntro = typeName && stateOrResolver.schema.getType(typeName);
     }
 

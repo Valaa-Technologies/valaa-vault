@@ -117,7 +117,7 @@ describe("CREATED with instancePrototype", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createParentInstance);
     harness.chronicleEvent(transacted({ actions:
         harness.run(vRef("A_parent"), "children")
-            .map(child => createMaterializeGhostPathAction(harness.getState(),
+            .map(child => createMaterializeGhostPathAction(harness.getValker(),
                 child.getGhostPath()
                     .withNewGhostStep("A_parent", "A_parentInstance")))
     }));
@@ -135,7 +135,7 @@ describe("CREATED with instancePrototype", () => {
     harness.chronicleEvent(transacted({ actions:
         harness.run(vRef("A_grandparent"),
                 ["§->", "children", 0, "children"])
-            .map(grandling => createMaterializeGhostPathAction(harness.getState(),
+            .map(grandling => createMaterializeGhostPathAction(harness.getValker(),
                 grandling.getGhostPath()
                     .withNewGhostStep("A_grandparent", "A_grandparentInstance")))
     }));
@@ -155,7 +155,7 @@ describe("CREATED with instancePrototype", () => {
         .toEqual(createGhostRawId("A_child2", "A_grandparentInstance"));
     harness.chronicleEvent(transacted({ actions:
         ghostGrandlings.map(
-            ghostGrandling => createMaterializeGhostAction(harness.getState(), ghostGrandling))
+            ghostGrandling => createMaterializeGhostAction(harness.getValker(), ghostGrandling))
     }));
     const parentInGrandparentInstanceId = createGhostRawId("A_parent", "A_grandparentInstance");
     expect(tryObjectTransient(harness.getState(), parentInGrandparentInstanceId, "TestThing"))

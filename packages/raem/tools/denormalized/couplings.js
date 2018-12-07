@@ -124,7 +124,7 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
     if (!remoteFieldIntro) {
       remoteTransient = getObjectTransientDetailed(
           Object.create(bard), remoteVRef, remoteType.name);
-      remoteTypeName = getTransientTypeName(remoteTransient);
+      remoteTypeName = getTransientTypeName(remoteTransient, bard.schema);
       remoteFieldIntro = bard.schema.getType(remoteTypeName).getFields()[coupledField];
       if (!remoteFieldIntro) {
         throw new Error(`No introspection found for remote field ${remoteType.name}/${
@@ -153,7 +153,8 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
               : bard.objectId.rawId();
           remoteTransient = getObjectTransientDetailed(
               Object.create(bard), remoteVRef, remoteType.name);
-          const remoteName = bard.schema.getType(getTransientTypeName(remoteTransient))
+          const remoteName = bard.schema
+                  .getType(getTransientTypeName(remoteTransient, bard.schema))
                   .getFields().name
               ? `'${getObjectField(nameBard, remoteTransient, "name")}' `
               : remoteVRef.rawId();

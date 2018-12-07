@@ -6,7 +6,7 @@ import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
 import dumpify from "~/tools/dumpify";
 
 export function typeNameResolver (resource, info) {
-  const typeName = getTransientTypeName(resource);
+  const typeName = getTransientTypeName(resource, info.schema);
   const ret = info.schema.getType(typeName);
   if (!ret) {
     info.rootValue.logger.error(`could not resolve internal type for typeName ${

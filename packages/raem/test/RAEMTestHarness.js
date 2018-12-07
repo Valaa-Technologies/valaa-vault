@@ -42,6 +42,10 @@ export default class RAEMTestHarness extends LogEventGenerator {
   }
 
   getState () { return this.corpus.getState(); }
+  getValker () {
+    this.valker.setState(this.corpus.getState());
+    return this.valker;
+  }
 
   /**
    * run always delegates the run to most sophisticated component in the harness.

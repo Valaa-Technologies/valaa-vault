@@ -21,9 +21,8 @@ import dumpify from "~/tools/dumpify";
 export default function collectFields (schema, state, resourceId, typeName, reviver) {
   // TODO(iridian): Refactor collectFields to use Resolver.
   const start = getObjectTransient(state, resourceId, typeName);
-  // console.log("collectFields", typeName, resourceId, start && getTransientTypeName(start));
   if (!start) return null;
-  const startType = schema.getType(getTransientTypeName(start));
+  const startType = schema.getType(getTransientTypeName(start, schema));
   if (!startType) {
     console.error(`ERROR: unrecognized schema type '${typeName}'`);
     return undefined;
@@ -93,7 +92,9 @@ export default function collectFields (schema, state, resourceId, typeName, revi
       }
       const innerObject = getObjectTransient(state, value, type.name);
       if (innerObject) {
-        return { value: innerObject, type: schema.getType(getTransientTypeName(innerObject)) };
+        return {
+          value: innerObject, type: schema.getType(getTransientTypeName(innerObject, schema)),
+        };
       }
       console.error(`Cannot find ${value}:${type.name}: ${innerObject
           } from store, coercing to undefined, while collecting ${

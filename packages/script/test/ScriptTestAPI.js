@@ -8,4 +8,5 @@ export default createContentAPI({
   name: "ValaaScriptTestAPI",
   inherits: [ScriptContentAPI, RAEMTestAPI],
   exposes: [TestScriptyThing],
+  inactiveType: ScriptContentAPI.inactiveType,
 });

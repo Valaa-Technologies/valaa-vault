@@ -3,7 +3,7 @@
 import { Iterable, OrderedMap } from "immutable";
 import { GraphQLSchema, GraphQLObjectType } from "graphql/type";
 
-import { VRef, isIdData } from "~/raem/ValaaReference";
+import ValaaReference, { isIdData } from "~/raem/ValaaReference";
 
 import { elevateFieldReference, elevateFieldRawSequence }
     from "~/raem/state/FieldInfo";
@@ -482,7 +482,7 @@ export default class Valker extends Resolver {
               .forEach(entry => {
                 const hostRef = tryHostRef(entry);
                 const transient = !hostRef ? entry
-                    : this.tryGoToObjectIdTransient(hostRef, value._type);
+                    : this.tryGoToTransient(hostRef, value._type);
                 ret.push(this.unpack(transient));
               });
         }
@@ -527,15 +527,15 @@ export default class Valker extends Resolver {
       let elevatedId;
       if (Iterable.isKeyed(object)) {
         ret = object;
-      } else if (object instanceof VRef) {
-        ret = this.tryGoToObjectIdTransient(object, "TransientFields", require, false);
+      } else if (object instanceof ValaaReference) {
+        ret = this.tryGoToTransient(object, "TransientFields", require, false);
       } else if (typeof object._singular !== "undefined") {
         if (!isIdData(object._singular)) {
           ret = object._singular;
         } else {
           elevatedId = elevateFieldReference(this, object._singular, object._fieldInfo,
               undefined, object._type, this._indent < 2 ? undefined : this._indent);
-          ret = this.tryGoToObjectIdTransient(elevatedId, object._type, require, false);
+          ret = this.tryGoToTransient(elevatedId, object._type, require, false);
         }
       }
       if (this._indent >= 1) {

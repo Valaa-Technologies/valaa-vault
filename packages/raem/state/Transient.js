@@ -1,29 +1,31 @@
 // @flow
 import { OrderedMap } from "immutable";
 
-import { VRef, IdData, RawId, vRef } from "~/raem/ValaaReference";
+import ValaaReference, { VRef, RawId, vRef } from "~/raem/ValaaReference";
 import type GhostPath from "~/raem/state/GhostPath";
 
-import invariantify from "~/tools/invariantify";
+import invariantify, { invariantifyObject } from "~/tools/invariantify";
 import wrapError, { dumpObject } from "~/tools/wrapError";
 
 const Transient = OrderedMap;
 // A Transient is an immutable-js denormalized representation of a Valaa object.
 export default Transient;
 
-export function createTransient (options: {
-  id?: IdData, typeName?: string, owner?: IdData, prototype?: IdData, RefType: Function
-} = {}) {
+export function createTransient (
+    initialValues: { id?: VRef, typeName?: string, owner?: VRef, prototype?: VRef } = {}) {
   let ret = Transient();
-  if (typeof options.id !== "undefined") {
-    ret = ret.set("id", typeof options.id === "string"
-        ? vRef(options.id, undefined, undefined, undefined, options.RefType)
-        : options.id);
-  }
-  if (typeof options.typeName !== "undefined") ret = ret.set("typeName", options.typeName);
-  if (typeof options.owner !== "undefined") ret = ret.set("owner", options.owner);
-  if (typeof options.prototype !== "undefined") ret = ret.set("prototype", options.prototype);
+  if (initialValues.id) ret = _validateAndSet(ret, "id", initialValues.id);
+  if (initialValues.typeName) ret = ret.set("typeName", initialValues.typeName);
+  if (initialValues.owner) ret = _validateAndSet(ret, "owner", initialValues.owner);
+  if (initialValues.prototype) ret = _validateAndSet(ret, "prototype", initialValues.prototype);
   return ret;
+}
+
+function _validateAndSet (transient: Transient, fieldName: string, value: VRef) {
+  if (!(value instanceof ValaaReference)) {
+    invariantifyObject(value, `createTransient.${fieldName}`, { instanceof: ValaaReference });
+  }
+  return transient.set(fieldName, value);
 }
 
 export const PrototypeOfImmaterialTag = Symbol("PrototypeOfImmaterial");

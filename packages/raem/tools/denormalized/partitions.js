@@ -201,7 +201,7 @@ function _updateOwnlingPartitions (bard: Bard, transient: Transient,
     traverseMaterializedOwnlings(partitionerBard, transient, entryId => {
       // skip ghosts: their partition is specified in the host.
       if (entryId.isGhost()
-        // specifying "Resource" and not "TransientFields" skips inactive Resource's as a side-effect.
+          // specifying "Resource" only traverses actives Resource's.
           || !partitionerBard.tryGoToTransientOfRawId(entryId.rawId(), "Resource")
           || (partitionerBard.objectId.getPartitionURI() !== oldPartitionURI)) return null;
       mutableState.setIn([partitionerBard.objectTypeName, entryId.rawId(), "id"],

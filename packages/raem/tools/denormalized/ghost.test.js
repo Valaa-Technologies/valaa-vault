@@ -2,15 +2,15 @@ import { created, fieldsSet } from "~/raem/events";
 import VALK from "~/raem/VALK";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
-import { VRef, IdData, vRef } from "~/raem/ValaaReference";
+import { VRef, vRef } from "~/raem/ValaaReference";
 
 import GhostPath from "~/raem/state/GhostPath";
 import { createTransient } from "~/raem/state/Transient";
 
-import { createMaterializeGhostAction, createImmaterializeGhostAction, isGhost, isMaterialized,
+import { createMaterializeGhostAction, createImmaterializeGhostAction, isMaterialized,
     createGhostVRefInInstance } from "~/raem/tools/denormalized/ghost";
 
-function _ghostVRef (prototypeRef: VRef, hostRawId: IdData, hostPrototypeRawId: string): VRef {
+function _ghostVRef (prototypeRef: VRef, hostRawId: string, hostPrototypeRawId: string): VRef {
   const ghostPath = prototypeRef.getGhostPath().withNewGhostStep(hostPrototypeRawId, hostRawId);
   return vRef(ghostPath.headRawId(), null, ghostPath);
 }
@@ -111,20 +111,13 @@ describe("Ghost helpers", () => {
 
   it("isGhost should tell if an object has ghost path in its 'id'", () => {
     setUp({ verbosity: 0 });
-    const notAGhost = createTransient();
-    expect(isGhost(notAGhost))
-        .toEqual(false);
-    const isAGhost = createTransient({
-      id: vRef("flerpGhost", null,
-        (new GhostPath("flerp")).withNewStep("protoId", "instanceId", "flerpGhost")),
-    });
-    expect(isGhost(isAGhost))
+    const ghostId = vRef("flerpGhost", null,
+        (new GhostPath("flerp")).withNewStep("protoId", "instanceId", "flerpGhost"));
+    expect(ghostId.isGhost())
         .toEqual(true);
-    const isNotAGhostButAnInstance = createTransient({
-      id: vRef("instanceId", null,
-        (new GhostPath("flerp")).withNewStep("protoId", "instanceId", "instanceId")),
-    });
-    expect(isGhost(isNotAGhostButAnInstance))
+    const isNotAGhostButAnInstanceRef = vRef("instanceId", null,
+        (new GhostPath("flerp")).withNewStep("protoId", "instanceId", "instanceId"));
+    expect(isNotAGhostButAnInstanceRef.isGhost())
         .toEqual(false);
   });
 
@@ -253,7 +246,8 @@ describe("Ghost materialization and immaterialization", () => {
       const firstResult = harness.run(
         vRef("root#1"), ["§->", "children", 0, "children", 0, "name"]
       );
-      harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), getGhostGrandling()));
+      harness.chronicleEvent(
+          createMaterializeGhostAction(harness.getValker(), getGhostGrandling()));
       const secondResult = harness.run(
         vRef("root#1"), ["§->", "children", 0, "children", 0, "name"]
       );
@@ -263,7 +257,8 @@ describe("Ghost materialization and immaterialization", () => {
 
     it("is true on immaterialization", () => {
       setUp({ verbosity: 0 });
-      harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), getGhostGrandling()));
+      harness.chronicleEvent(
+          createMaterializeGhostAction(harness.getValker(), getGhostGrandling()));
       const firstResult = harness.run(
         vRef("root#1"), ["§->", "children", 0, "children", 0, "name"]
       );
@@ -438,5 +433,6 @@ describe("Deep instantiations", () => {
     } }));
 
     expect(harness.run(grandling11, ["§->", "children", ["§map", "prototype"]]))
-        .toEqual(harness.run(vRef("grandling#1"), "children"));  });
+        .toEqual(harness.run(vRef("grandling#1"), "children"));
+  });
 });

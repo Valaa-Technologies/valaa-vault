@@ -2,7 +2,7 @@
 
 import { Kuery } from "~/raem/VALK";
 
-import type { IdData } from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference";
 
 import { literal as _literal } from "~/script/schema/Literal";
 import { identifier } from "~/script/schema/Identifier";
@@ -60,10 +60,10 @@ export function literal (value: Kuery | Object | Array<any> | boolean | string |
  * \see literal for more details.
  *
  * @export
- * @param {(Kuery | Vrapper | IdData)} target
+ * @param {(Kuery | Vrapper)} target
  * @returns
  */
-export function pointer (target: Kuery | IdData) {
+export function pointer (target: Kuery | VRef) {
   if (!(target instanceof Kuery)) return identifier(target);
   return { typeName: "Identifier", reference: target };
 }

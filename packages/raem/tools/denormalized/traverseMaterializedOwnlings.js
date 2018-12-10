@@ -1,6 +1,5 @@
 // @flow
 
-import { VRef } from "~/raem/ValaaReference";
 import Transient from "~/raem/state/Transient";
 import Bard from "~/raem/redux/Bard";
 
@@ -24,7 +23,7 @@ export default function traverseMaterializedOwnlings (bard: Bard, transient: Tra
     if (fieldIntro && fieldIntro.isOwner && fieldValue) {
       for (const entryId of (fieldIntro.isSequence ? fieldValue : [fieldValue])) {
         if (!entryId) continue;
-        let entryTransient = visitor(typeof entryId === "string" ? VRef([entryId]) : entryId);
+        let entryTransient = visitor(entryId);
         if (typeof entryTransient === "undefined") {
           entryTransient = bard.tryGoToTransientOfRawId(entryId.rawId(), "Resource");
         }

@@ -3,6 +3,7 @@
 import { Valker, denoteValaaBuiltinWithSignature, denoteDeprecatedValaaBuiltin,
   denoteValaaKueryFunction,
 } from "~/raem/VALK";
+import { getHostRef } from "~/raem/VALK/hostReference";
 import { VRef } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
 
@@ -11,9 +12,8 @@ import { BuiltinTypePrototype, createNativeIdentifier, ValaaPrimitiveTag } from 
 import VALEK, { extractFunctionVAKON } from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
-import { derivedId, dumpify, dumpObject, invariantifyObject, outputCollapsedError,
-  wrapError,
-} from "~/tools";
+import { derivedId, dumpObject, invariantifyObject, outputCollapsedError, wrapError }
+    from "~/tools";
 
 /* eslint-disable prefer-arrow-callback */
 
@@ -32,9 +32,8 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
   });
   scope.Blob = scope.Bvob;
 
-  scope.TransientFields = Valaa.TransientFields = Object.assign(Object.create(BuiltinTypePrototype), {
-    name: "TransientFields",
-  });
+  scope.TransientFields = Valaa.TransientFields =
+      Object.assign(Object.create(BuiltinTypePrototype), { name: "TransientFields" });
 
   scope.TransientFields.prototype = Object.assign(Object.create(Object.prototype), {
     constructor: scope.TransientFields,
@@ -105,7 +104,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
           ""} 'listeners'`
     )(function setOwnerOf (
           resource, owner, coupledField = this[defaultOwnerCoupledField] || "unnamedOwnlings") {
-      return this.setFieldOf(resource, "owner", owner.getIdCoupledWith(coupledField));
+      return this.setFieldOf(resource, "owner", owner.getId().coupleWith(coupledField));
     }),
 
     getEntity: Symbol("Resource.getEntity"),
@@ -280,7 +279,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
     )(function setOwner (owner,
         coupledFieldName = (scope[this.name] && scope[this.name][defaultOwnerCoupledField])
             || "unnamedOwnlings") {
-      return this.setField("owner", owner.getIdCoupledWith(coupledFieldName),
+      return this.setField("owner", owner.getId().coupleWith(coupledFieldName),
           { transaction: this.__callerValker__ });
     }),
 
@@ -743,21 +742,16 @@ function prepareInitialState (Type: Object, scope: ?Object, initialState: ?Objec
     /*
     if (!hasOwnerAlias(Type, initialState)
         && scope && (typeof scope.self === "object") && scope.self.this) {
-      ret.owner = scope.self.this.getIdCoupledWith(Type[defaultOwnerCoupledField]);
+      ret.owner = scope.self.this.getId().coupleWith(Type[defaultOwnerCoupledField]);
     }
     */
   } else if (typeof initialOwner !== "object") {
     throw new Error(`${requireOwnerOperation || "duplicate"
         } initialState.owner must be a Resource, got '${typeof initialOwner}'`);
   } else if ((initialState.owner !== undefined) && Type[defaultOwnerCoupledField]) {
-    if (initialState.owner instanceof Vrapper) {
-      initialState.owner = initialState.owner.getIdCoupledWith(Type[defaultOwnerCoupledField]);
-    } else if (initialState.owner instanceof VRef) {
-      initialState.owner = initialState.owner.coupleWith(Type[defaultOwnerCoupledField]);
-    } else {
-      throw new Error(`${requireOwnerOperation || "duplicate"
-          } initialState.owner must be a Resource, got '${dumpify(ret.owner)}'`);
-    }
+    initialState.owner =
+        getHostRef(initialState.owner, `${requireOwnerOperation || "duplicate"} initialState.owner`)
+        .coupleWith(Type[defaultOwnerCoupledField]);
   }
   return initialState;
 }

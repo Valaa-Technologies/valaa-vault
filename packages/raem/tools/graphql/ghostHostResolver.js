@@ -5,14 +5,14 @@ import dumpify from "~/tools/dumpify";
 
 import type { Transient } from "~/raem/state/Transient";
 
-import { tryGhostHostRawIdFrom } from "~/raem/tools/denormalized/ghost";
-
 // context { rootValue, returnType, parentType, fieldName, operation, fragments, fieldASTs, schema }
 export default function ghostHostResolver (source: Transient, args: any[], context: Object) {
   try {
     // console.log(`Resolving link ${context.parentType.name}.${context.fieldName}: ${
     //    returnType.name}`);
-    const ghostHostRawId = tryGhostHostRawIdFrom(source.get("id"));
+    const ghostPath = source.get("id").tryGhostPath();
+    if (!ghostPath) return null;
+    const ghostHostRawId = ghostPath.headHostRawId();
     if (!ghostHostRawId) return null;
     const resolver = context.rootValue.resolver.fork();
     // resolver.setTypeName(getNullableType(context.returnType));

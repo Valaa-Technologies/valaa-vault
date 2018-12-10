@@ -2,7 +2,7 @@
 
 import { GraphQLSchema } from "graphql/type";
 
-import { VRef, obtainVRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
+import ValaaReference, { VRef, obtainVRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
 import type { JSONIdData, IdData, RawId } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import type ValaaURI from "~/raem/ValaaURI";
 
@@ -57,6 +57,12 @@ export default class Resolver extends LogEventGenerator {
   }
 
   schema: GraphQLSchema;
+
+  obtainReference (params) {
+    return !params
+        && (tryHostRef(params)
+            || obtainVRef(params));
+  }
 
   getSchema () { return this.schema; }
   getTypeIntro (typeName: string) {
@@ -120,7 +126,7 @@ export default class Resolver extends LogEventGenerator {
       if (typeof object === "string") object = this.state.getIn([object, rawId]);
       if (!object) {
         // Ghost, inactive or fail
-        object = this.fork().tryGoToObjectIdTransient(objectId, typeName, false, false);
+        object = Object.create(this).tryGoToTransient(objectId, typeName, false, false);
         if (!object) {
           invariantify(object, `Can't find ${rawId}:${typeName} in corpus`,
               "\n\twhile trying to bind id:", objectId);
@@ -147,7 +153,7 @@ export default class Resolver extends LogEventGenerator {
   }
 
   bindObjectRawId (rawId: string, typeName: string, bindPartition?: boolean) {
-    return this.bindObjectId(new VRef([rawId]), typeName, bindPartition);
+    return this.bindObjectId(new ValaaReference(rawId), typeName, bindPartition);
   }
 
   bindObjectIdData (idData: IdData, typeName: string, bindPartition?: boolean) {
@@ -184,16 +190,16 @@ export default class Resolver extends LogEventGenerator {
   objectTransient: Transient;
   objectId: VRef;
 
-  goToObjectIdTransient (id: VRef, typeName: string) {
-    return this.tryGoToObjectIdTransient(id, typeName, true, false);
+  goToTransient (id: VRef, typeName: string) {
+    return this.tryGoToTransient(id, typeName, true, false);
   }
 
-  tryGoToNonGhostObjectIdTransient (id: VRef, typeName: string) {
-    return this.tryGoToObjectIdTransient(id, typeName, false, true);
+  tryGoToNonGhostTransient (id: VRef, typeName: string) {
+    return this.tryGoToTransient(id, typeName, false, true);
   }
 
-  goToNonGhostObjectIdTransient (id: VRef, typeName: string) {
-    return this.tryGoToObjectIdTransient(id, typeName, true, true);
+  goToNonGhostTransient (id: VRef, typeName: string) {
+    return this.tryGoToTransient(id, typeName, true, true);
   }
 
   /**
@@ -208,13 +214,15 @@ export default class Resolver extends LogEventGenerator {
    * @returns
    * @memberof Resolver
    */
-  tryGoToObjectIdTransient (objectId: VRef, typeName: string, require: ?boolean,
+  tryGoToTransient (objectId: VRef, typeName: string, require: ?boolean,
       nonGhostLookup: ?boolean, onlyMostMaterialized?: any, withOwnField?: string) {
     try {
-      invariantifyString(typeName, "tryGoToObjectIdTransient.typeName");
-      if (!(objectId instanceof VRef)) {
+      if (typeof typeName !== "string") {
+        invariantifyString(typeName, "tryGoToTransient.typeName");
+      }
+      if (!(objectId instanceof ValaaReference)) {
         if (objectId || require) {
-          throw new Error("tryGoToObjectIdTransient.objectId must be a valid ValaaReference");
+          throw new Error("tryGoToTransient.objectId must be a valid ValaaReference");
         }
         this.objectId = null;
         return (this.objectTransient = null);
@@ -233,7 +241,7 @@ export default class Resolver extends LogEventGenerator {
       }
       return this.objectTransient;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "tryGoToObjectIdTransient",
+      throw this.wrapErrorEvent(error, "tryGoToTransient",
           "\n\tid:", ...dumpObject(objectId), ":", typeName,
           "\n\trequire:", require, ", nonGhostLookup:", nonGhostLookup);
     }

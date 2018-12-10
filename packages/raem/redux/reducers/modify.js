@@ -439,8 +439,8 @@ const customSetFieldHandlers = {
     }
     let i = 0;
     if (newOwnerId) {
-      const ownerBard = bard.fork();
-      for (ownerBard.tryGoToObjectIdTransient(newOwnerId, "Resource"); ownerBard.objectId;
+      const ownerBard = Object.create(bard);
+      for (ownerBard.tryGoToTransient(newOwnerId, "Resource"); ownerBard.objectId;
           takeToCurrentObjectOwnerTransient(ownerBard), ++i) {
         if (ownerBard.objectId.rawId() === bard.objectId.rawId()) {
           throw new Error(`Cyclic ownership not allowed while trying to set owner of ${

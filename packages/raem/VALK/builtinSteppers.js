@@ -2,7 +2,7 @@
 
 import { Iterable } from "immutable";
 
-import { VRef } from "~/raem/ValaaReference";
+import ValaaReference, { VRef } from "~/raem/ValaaReference";
 
 import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import { PrototypeOfImmaterialTag } from "~/raem/state/Transient";
@@ -45,8 +45,9 @@ export default Object.freeze({
     return value;
   },
   "§ref": function valaaReference (valker: Valker, head: any, scope: ?Object,
-    [, resourceParts, partition]: BuiltinStep): VRef {
-    return valker.pack(new VRef(resourceParts, partition));
+      [, params]: BuiltinStep): VRef {
+    return valker.pack(valker.obtainReference(
+        typeof params !== "object" ? params : tryLiteral(valker, head, params, scope)));
   },
   "§$": function scopeLookup (valker: Valker, head: any, scope: ?Object,
       [, lookupName]: BuiltinStep) {
@@ -609,7 +610,7 @@ export function resolveTypeof (valker: Valker, head: any, scope: ?Object,
         if (hostRef) type = hostRef.typeof();
         else {
           const id = packedObject._singular.id;
-          type = (id instanceof VRef) ? id.typeof()
+          type = (id instanceof ValaaReference) ? id.typeof()
               : id ? "Resource" : "Data";
         }
       } else type = "Resource";

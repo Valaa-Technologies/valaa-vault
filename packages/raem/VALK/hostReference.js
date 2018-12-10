@@ -2,6 +2,7 @@
 
 import { Iterable } from "immutable";
 import { vdocorate, vdon } from "~/tools/vdon";
+import wrapError, { debugObjectType, dumpObject } from "~/tools/wrapError";
 
 export const HostRef = Symbol("HostRef");
 export const PackedHostValue = Symbol("PackedHostValue");
@@ -38,6 +39,20 @@ export const tryHostRef = vdocorate([
   }
   return undefined;
 });
+
+export function getHostRef (value: any, descriptor: ?string): any {
+  try {
+    const ret = tryHostRef(value);
+    if (ret === undefined) {
+      throw new Error(`Could not extract reference from ${descriptor || "host"} with value type ${
+          debugObjectType(value)}`);
+    }
+    return ret;
+  } catch (error) {
+    throw wrapError(error, "During getHostRef(), with",
+        "\n\tvalue:", ...dumpObject(value));
+  }
+}
 
 export const tryPackedHostValue = vdocorate([
   `Returns the packed value if _value_ is a packed and valid host

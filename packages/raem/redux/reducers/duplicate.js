@@ -1,6 +1,6 @@
 import { OrderedSet } from "immutable";
 
-import { VRef, vRef, expandIdDataFrom } from "~/raem/ValaaReference";
+import { VRef, vRef } from "~/raem/ValaaReference";
 
 import Transient, { createTransient, getTransientTypeName, PrototypeOfImmaterialTag }
     from "~/raem/state/Transient";
@@ -37,7 +37,7 @@ export default function duplicate (bard: DuplicateBard) {
   // Specifying "Resource" as opposed to "TransientFields" as this
   // requires the resource to be active: Inactive resources appear only
   // in inactive interface and type tables.
-  bard.goToObjectIdTransient(duplicateOf, "Resource");
+  bard.goToTransient(duplicateOf, "Resource");
   const ghostPath = passage.id.getGhostPath();
   const typeName = passage.typeName = getTransientTypeName(bard.objectTransient, bard.schema);
   if (!ghostPath.isGhost()) {
@@ -137,21 +137,21 @@ export function duplicateFields (bard: DuplicateBard, mutableTransient: Transien
   }
 }
 
-function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalIdData: any,
-    ownerId: VRef) {
+function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalRef: VRef, ownerId: VRef) {
   let originalOwnlingRawId;
   let originalGhostPath;
   let originalGhostProtoPath;
   let newObjectId;
   try {
-    ([originalOwnlingRawId, , originalGhostPath] = expandIdDataFrom(originalIdData));
+    originalOwnlingRawId = originalRef.rawId();
+    originalGhostPath = originalRef.tryGhostPath();
     const recombineOverriddenId = bard._duplicateIdByOriginalRawId[originalOwnlingRawId];
     if (typeof recombineOverriddenId !== "undefined") {
       if (bard.getVerbosity() >= 2) {
         bard.logEvent(`virtually recombining to sub-directive ${
           dumpify(recombineOverriddenId, { sliceAt: 40, sliceSuffix: "..." })}:${
           bard.objectTypeName} ${
-          dumpify({ duplicateOf: originalIdData, initialState: { ownerId } }, { sliceAt: 380 })
+          dumpify({ duplicateOf: originalRef, initialState: { ownerId } }, { sliceAt: 380 })
         }`);
       }
       return recombineOverriddenId;
@@ -179,7 +179,7 @@ function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalIdData:
       if (bard.getVerbosity() >= 2) {
         bard.logEvent(`Sub-reducing virtual DUPLICATED ${
           dumpify(newObjectId, { sliceAt: 40, sliceSuffix: "..." })}:${bard.objectTypeName} ${
-          dumpify({ duplicateOf: originalIdData, initialState: { owner } }, { sliceAt: 380 })
+          dumpify({ duplicateOf: originalRef, initialState: { owner } }, { sliceAt: 380 })
         }`);
       }
       _createDuplicate(bard, newObjectId, bard.objectTypeName, { owner });
@@ -189,7 +189,7 @@ function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalIdData:
     throw bard.wrapErrorEvent(error, `duplicateField(${fieldIntro.name}:${
             fieldIntro.namedType.name}/${bard.objectTypeName})`,
         "\n\tfieldIntro:", ...dumpObject(fieldIntro),
-        "\n\toriginalIdData:", ...dumpObject(originalIdData),
+        "\n\toriginalRef:", ...dumpObject(originalRef),
         "\n\toriginalGhostProtoPath:", originalGhostProtoPath,
         "\n\tnewObjectId:", ...dumpObject(newObjectId));
   }

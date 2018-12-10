@@ -4,7 +4,7 @@ import type { VALKOptions } from "~/raem/VALK";
 import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 
-import { VRef } from "~/raem/ValaaReference";
+import ValaaReference from "~/raem/ValaaReference";
 import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
 
 import { isNativeIdentifier, getNativeIdentifierValue } from "~/script";
@@ -229,7 +229,8 @@ export default class VrapperSubscriber extends SimpleData {
     // Processing a Kuery for live updates involves walking the kuery tree for all field steps
     // which have a Vrapper as a head and subscribing to those. Effectively this means that only
     // non-final path steps need to be evaluated.
-    const head = rawHead instanceof VRef ? this._emitter.engine.getVrapper(rawHead) : rawHead;
+    const head = (rawHead instanceof ValaaReference)
+        ? this._emitter.engine.getVrapper(rawHead) : rawHead;
     const kueryVAKON = kuery instanceof Kuery ? kuery.toVAKON() : kuery;
     let ret: any;
     if (this._valkOptions.verbosity) {

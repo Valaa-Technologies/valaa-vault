@@ -171,6 +171,7 @@ export function outputCollapsedError (error, header = "Exception caught", logger
 
 export function debugObject (head) { return debugObjectNest(head); }
 export function debugObjectHard (head) { return debugObjectNest(head, 1, true); }
+export function debugObjectType (head) { return debugObjectNest(head, 0); }
 
 export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
   try {

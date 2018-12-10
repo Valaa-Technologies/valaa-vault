@@ -14,7 +14,6 @@ import { tryHostRef } from "~/raem/VALK/hostReference";
 import { getActionFromPassage } from "~/raem/redux/Bard";
 
 import Transient, { createTransient, getTransientTypeName } from "~/raem/state/Transient";
-import { isGhost } from "~/raem/tools/denormalized/ghost";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
 
 import type { Prophet } from "~/prophet";
@@ -147,26 +146,27 @@ export default class ValaaEngine extends Cog {
     let transient;
     const discourse = options.transaction || this.discourse;
     const state = options.state || discourse.getState();
+    const id = discourse.obtainReference(idData);
     try {
       if (explicitTransient) {
         typeName = getTransientTypeName(explicitTransient, discourse.schema);
         transient = explicitTransient;
       } else {
-        const rawId = getRawIdFrom(idData);
+        const rawId = id.rawId();
         typeName = state.getIn(["TransientFields", rawId]);
         if (typeName) {
           transient = state.getIn([typeName, rawId]);
-        } else if (!isGhost(idData)) {
+        } else if (!id.isGhost()) {
           if (options.optional) return undefined;
-          throw new Error(`Cannot find non-ghost ${idData}:TransientFields from state`);
+          throw new Error(`Cannot find non-ghost ${id}:TransientFields from state`);
         } else {
-          typeName = state.getIn(["TransientFields", idData.getGhostPath().rootRawId()]);
+          typeName = state.getIn(["TransientFields", id.getGhostPath().rootRawId()]);
           if (typeName) {
-            transient = createTransient({ id: idData, typeName });
+            transient = createTransient({ id, typeName });
           } else {
             if (options.optional) return undefined;
-            throw new Error(`Cannot find ghost ${idData}:TransientFields root ${
-                idData.getGhostPath().rootRawId()}:TransientFields from state`);
+            throw new Error(`Cannot find ghost ${id}:TransientFields root ${
+                id.getGhostPath().rootRawId()}:TransientFields from state`);
           }
         }
       }
@@ -174,6 +174,7 @@ export default class ValaaEngine extends Cog {
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .getVrapper(${idData}), with:`,
           "\n\tidData:", ...dumpObject(idData),
+          "\n\tid:", ...dumpObject(id),
           "\n\ttypeName:", ...dumpObject(typeName),
           "\n\texplicitTransient:", ...dumpObject(explicitTransient),
           "\n\ttransient:", ...dumpObject(transient),

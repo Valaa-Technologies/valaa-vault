@@ -1,7 +1,6 @@
 // @flow
 
 import getObjectField from "~/raem/state/getObjectField";
-import getObjectTransient from "~/raem/state/getObjectTransient";
 
 import dumpify from "~/tools/dumpify";
 
@@ -10,7 +9,7 @@ export default function linkResolver (source: any, args: any, context: Object) {
   try {
     // console.log(`Resolving link ${context.parentType.name}.${context.fieldName}: ${
     //    returnType.name}`);
-    return getObjectTransient(context.rootValue.resolver,
+    return context.rootValue.resolver.goToTransient(
         getObjectField(context.rootValue.resolver, source, context.fieldName));
   } catch (error) {
     const suggestion = error.message.slice(0, 10) !== "source.get" ? "" : `

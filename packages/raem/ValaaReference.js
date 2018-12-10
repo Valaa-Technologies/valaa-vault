@@ -6,7 +6,6 @@ import GhostPath, { JSONGhostPath, ghostPathFromJSON } from "~/raem/state/GhostP
 
 import { HostRef, PackedHostValue, tryHostRef } from "~/raem/VALK/hostReference";
 
-import dumpify from "~/tools/dumpify";
 import wrapError, { dumpObject } from "~/tools/wrapError";
 import invariantify, { invariantifyString, invariantifyObject } from "~/tools/invariantify";
 import { vdocorate } from "~/tools/vdon";
@@ -206,16 +205,14 @@ export default class ValaaReference {
 
 ValaaReference.prototype[HostRef] = null;
 
-export const VRef = ValaaReference;
-
+export type VRef = ValaaReference;
+export type IdData = string | VRef;
 
 export type JSONVRef = [RawId, ?string, ?JSONGhostPath, ?string];
-
-export type IdData = string | VRef;
 export type JSONIdData = string | JSONVRef;
 
 export function isIdData (value: any): boolean {
-  return (typeof value === "string") || (value instanceof VRef);
+  return (typeof value === "string") || (value instanceof ValaaReference);
 }
 
 export function isJSONIdData (value: any): boolean {
@@ -369,7 +366,7 @@ export function getRawIdFrom (idData: IdData | JSONIdData): string {
  */
 export function tryRawIdFrom (idData: IdData | JSONIdData): ?string {
   if (typeof idData === "string") return idData;
-  if (idData instanceof VRef) return idData.rawId();
+  if (idData instanceof ValaaReference) return idData.rawId();
   if (Array.isArray(idData)) return idData[0];
   return undefined;
 }
@@ -400,7 +397,7 @@ export function getGhostPathFrom (idData: IdData): GhostPath {
  * @returns null
  */
 export function tryGhostPathFrom (idData: IdData): ?GhostPath {
-  if (idData instanceof VRef) return idData.isGhost() ? idData.getGhostPath() : undefined;
+  if (idData instanceof ValaaReference) return idData.isGhost() ? idData.getGhostPath() : undefined;
   if (!Array.isArray(idData)) return undefined;
   if (Array.isArray(idData[2])) return ghostPathFromJSON(idData[2]);
   if (Array.isArray(idData[1])) {
@@ -420,7 +417,7 @@ export function tryGhostPathFrom (idData: IdData): ?GhostPath {
  * @returns null
  */
 export function tryCoupledFieldFrom (idData: IdData | JSONIdData): ?string {
-  if (idData instanceof VRef) return idData.getCoupledField();
+  if (idData instanceof ValaaReference) return idData.getCoupledField();
   if (!Array.isArray(idData)) return undefined;
   if (typeof idData[1] === "string") return idData[1];
   if (typeof idData[2] === "string") {
@@ -439,13 +436,6 @@ export const tryPartitionURIFrom = vdocorate(`
   @param {IdData} idData
   @returns null
 `)((idData: IdData | JSONIdData): ?ValaaURI =>
-    (idData instanceof VRef ? idData.getPartitionURI()
+    (idData instanceof ValaaReference ? idData.getPartitionURI()
         : (Array.isArray(idData) && idData[3]) ? createPartitionURI(idData[3])
         : undefined));
-
-export function expandIdDataFrom (idData: IdData): [RawId, ?string, ?GhostPath] {
-  if (typeof idData === "string") return [idData];
-  if (idData instanceof VRef) return idData[PackedHostValue];
-  throw new Error(`Invalid expandIdDataFrom.idData given, expected IdData (string or VRef), got ${
-      dumpify(idData)}`);
-}

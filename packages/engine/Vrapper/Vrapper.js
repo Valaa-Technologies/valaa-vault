@@ -1,13 +1,14 @@
 // @flow
+
 import { GraphQLObjectType, isAbstractType } from "graphql/type";
 import { Iterable } from "immutable";
 
 import VALK, { VALKOptions, packedSingular } from "~/raem/VALK";
 import type { Passage, Story } from "~/raem/redux/Bard";
-import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
+import { getHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 
 import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "~/raem/events";
-import { VRef, vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom, expandIdDataFrom }
+import ValaaReference, { VRef, vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom }
     from "~/raem/ValaaReference";
 import { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";
 
@@ -485,10 +486,6 @@ export default class Vrapper extends Cog {
     return transient ? transient.get("id") : this[HostRef];
   }
 
-  getIdCoupledWith (coupledField: string): VRef {
-    return this.getId().coupleWith(coupledField);
-  }
-
   /**
    * Returns the unique raw id string of this resource.
    * This id string should not be used as an id in outgoing kueries because it might belong to a
@@ -779,7 +776,8 @@ export default class Vrapper extends Cog {
   create (typeName: string, initialState: Object = {}, options: VALKOptions = {}): Vrapper {
     this.requireActive(options);
     if (options.coupledField && initialState.owner) {
-      initialState.owner = initialState.owner.getIdCoupledWith(options.coupledField);
+      initialState.owner = getHostRef(initialState.owner, "create.initialState.owner")
+          .coupleWith(options.coupledField);
     }
     options.head = this;
     return this.engine.create(typeName, initialState, options);
@@ -931,7 +929,7 @@ export default class Vrapper extends Cog {
     }
     options.head = this;
     this.engine.create("Property", {
-      owner: this.getIdCoupledWith("properties"),
+      owner: this.getId().coupleWith("properties"),
       name: propertyName,
       value: expressionFromValue(newValue),
     }, options);
@@ -940,12 +938,10 @@ export default class Vrapper extends Cog {
 
   _preProcessNewReference (newValue: VRef, fieldPrototypeEntry: Object, hostType: Object) {
     if (fieldPrototypeEntry.fieldName === "owner"
-        && !(newValue instanceof VRef && newValue.getCoupledField())) {
+        && !((newValue instanceof ValaaReference) && newValue.getCoupledField())) {
       const defaultCoupledField = hostType[defaultOwnerCoupledField];
       if (defaultCoupledField) {
-        return newValue instanceof Vrapper
-            ? newValue.getIdCoupledWith(defaultCoupledField)
-            : this.engine.discourse.obtainReference(newValue, defaultCoupledField);
+        return getHostRef(newValue).coupleWith(defaultCoupledField);
       }
     }
     return newValue;
@@ -1012,7 +1008,7 @@ export default class Vrapper extends Cog {
       }
       let state;
       let valueType;
-      const isExpandedTransient = !(valueEntry instanceof VRef);
+      const isExpandedTransient = !(valueEntry instanceof ValaaReference);
       if (isExpandedTransient) {
         valueType = dataFieldValue(valueEntry, "typeName");
       } else {
@@ -1482,9 +1478,10 @@ export default class Vrapper extends Cog {
                 currentRawId}":${this._typeName}: live notifications will likely be broken`);
             break;
           } else {
-            const prototypeIdData = currentObject.get("prototype");
-            if (!prototypeIdData) break;
-            [currentRawId, , ghostPath] = expandIdDataFrom(prototypeIdData);
+            const prototypeRef = currentObject.get("prototype");
+            if (!prototypeRef) break;
+            currentRawId = prototypeRef.rawId();
+            ghostPath = prototypeRef.tryGhostPath();
             listenedRawIds.push(currentRawId);
           }
         } while (!ghostPath);
@@ -1868,7 +1865,7 @@ let vrapperEventHandlers;
 function getVrapperEventHandlers () {
   if (!vrapperEventHandlers) {
     vrapperEventHandlers = new Map();
-    const prototype = new Vrapper(null, new VRef(["dummy"]), "Dummy");
+    const prototype = new Vrapper(null, vRef("dummy"), "Dummy");
     extractMagicMemberEventHandlers(vrapperEventHandlers, prototype, null);
   }
   return vrapperEventHandlers;

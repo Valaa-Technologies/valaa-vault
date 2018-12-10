@@ -2,7 +2,7 @@
 
 import { OrderedSet } from "immutable";
 
-import { IdData, isIdData, VRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
+import ValaaReference, { VRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
 
 import { getObjectRawField } from "~/raem/state/getObjectField";
 import GhostPath, { createGhostRawId, GhostElevation } from "~/raem/state/GhostPath";
@@ -17,7 +17,7 @@ export type FieldInfo = {
   coupledField: ?string,
   defaultCoupledField: ?string,
   sourceTransient: ?Transient,
-  elevationInstanceId: ?IdData,
+  elevationInstanceId: ?VRef,
 };
 
 export function tryElevateFieldValue (resolver: Resolver, value: VRef | VRef[],
@@ -63,7 +63,7 @@ export function _getFieldGhostElevation (fieldInfo: FieldInfo, elevationInstance
 
 function _elevateReference (elevator: Resolver, reference: VRef, fieldInfo: FieldInfo,
     elevation: GhostElevation, typeName: string, verbosity: ?number) {
-  elevator.tryGoToObjectIdTransient(reference, typeName);
+  elevator.tryGoToTransient(reference, typeName);
   let elevatedId;
   if (elevator.objectId.isInactive()) {
     // TODO(iridian): Following assumption has not been fully reasoned,
@@ -111,8 +111,7 @@ function _elevateRawSequence (resolver: Resolver, object: Transient,
     do {
       const prototypeId = currentObject.get("prototype");
       if (!prototypeId) break;
-      currentObject = resolver.goToNonGhostObjectIdTransient(
-          prototypeId, resolver.objectTypeName);
+      currentObject = resolver.goToNonGhostTransient(prototypeId, resolver.objectTypeName);
       prototypeSequence = currentObject.get(fieldInfo.name);
     } while (prototypeSequence === undefined);
 
@@ -301,7 +300,7 @@ export function takeToCurrentObjectOwnerTransient (resolver: Resolver) {
     if (elevation) {
       owner = _elevateReference(elevator, owner, fieldInfo, elevation, "Resource");
     }
-    if (isIdData(owner)) return resolver.goToObjectIdTransient(owner, "Resource");
+    if (owner instanceof ValaaReference) return resolver.goToTransient(owner, "Resource");
     resolver.objectId = owner.get("id");
     resolver.objectTransient = owner;
   } else {

@@ -1,6 +1,6 @@
 import { Iterable } from "immutable";
 
-import { VRef } from "~/raem/ValaaReference";
+import ValaaReference from "~/raem/ValaaReference";
 
 import type { FieldInfo } from "~/raem/state/FieldInfo";
 
@@ -48,7 +48,9 @@ export function tryPackedField (value: any, fieldInfo: FieldInfo) {
 export function packedSingular (value, typeName, fieldInfo) {
   invariantifyString(typeName, "packed.typeName");
   return {
-    [HostRef]: tryHostRef(value) || ((typeof value === "string") && VRef([value])) || null,
+    [HostRef]: tryHostRef(value)
+        || ((typeof value === "string") && new ValaaReference(value))
+        || null,
     [PackedHostValue]: value,
     _singular: value,
     _type: typeName,

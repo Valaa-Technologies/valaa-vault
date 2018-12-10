@@ -4,7 +4,7 @@ import { vRef } from "~/raem/ValaaReference";
 
 import { addedTo, created, fieldsSet, removedFrom, replacedWithin } from "~/raem/events";
 
-import getObjectTransient from "~/raem/state/getObjectTransient";
+import { tryObjectTransient } from "~/raem/state/getObjectTransient";
 import getObjectField, { getObjectRawField } from "~/raem/state/getObjectField";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
@@ -34,10 +34,10 @@ describe("MODIFIED action class", () => {
         sets: { name: "parent" },
       }),
     ]);
-    expect(getObjectTransient(harness.corpus, "A_parent", "TestThing").get("name"))
+    expect(tryObjectTransient(harness.corpus, "A_parent", "TestThing").get("name"))
         .toEqual("parent");
     expect(getObjectField(harness.corpus,
-            getObjectTransient(harness.corpus, "A_parent", "TestThing"), "name"))
+            tryObjectTransient(harness.corpus, "A_parent", "TestThing"), "name"))
         .toEqual("parent");
   });
 
@@ -46,10 +46,10 @@ describe("MODIFIED action class", () => {
       fieldsSet({ id: "A_parent", typeName: "TestThing", sets: { name: "parent" } }),
       fieldsSet({ id: "A_parent", typeName: "TestThing", sets: { name: null } }),
     ]);
-    expect(getObjectTransient(harness.corpus, "A_parent", "TestThing").get("name"))
+    expect(tryObjectTransient(harness.corpus, "A_parent", "TestThing").get("name"))
         .toEqual(null);
     expect(getObjectField(harness.corpus,
-            getObjectTransient(harness.corpus, "A_parent", "TestThing"), "name"))
+            tryObjectTransient(harness.corpus, "A_parent", "TestThing"), "name"))
         .toEqual(null);
   });
 
@@ -61,8 +61,8 @@ describe("MODIFIED action class", () => {
 
   it("exposes prototype field list when getObjectRawField requests an unset instance field", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createInstancesA);
-    const parent = getObjectTransient(harness.corpus, "A_parent", "TestThing");
-    const parentInstance = getObjectTransient(harness.corpus, "A_parentInstance", "TestThing");
+    const parent = tryObjectTransient(harness.corpus, "A_parent", "TestThing");
+    const parentInstance = tryObjectTransient(harness.corpus, "A_parentInstance", "TestThing");
 
     expect(getObjectRawField(harness.corpus, parentInstance, "children"))
         .toEqual(getObjectRawField(harness.corpus, parent, "children"));

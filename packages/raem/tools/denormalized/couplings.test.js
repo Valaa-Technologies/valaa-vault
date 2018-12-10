@@ -4,7 +4,7 @@ import { vRef } from "~/raem/ValaaReference";
 
 import { addedTo, created, fieldsSet, destroyed, removedFrom } from "~/raem/events";
 
-import getObjectTransient, { tryObjectTransient } from "~/raem/state/getObjectTransient";
+import { tryObjectTransient } from "~/raem/state/getObjectTransient";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 
@@ -34,26 +34,26 @@ describe("Couplings", () => {
     const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA)
         .getState();
 
-    expect(getObjectTransient(state, "A_grandparent", "TestThing").get("children").first())
+    expect(tryObjectTransient(state, "A_grandparent", "TestThing").get("children").first())
         .toEqual(vRef("A_parent"));
-    expect(getObjectTransient(state, "A_parent", "TestThing").get("owner"))
+    expect(tryObjectTransient(state, "A_parent", "TestThing").get("owner"))
         .toEqual(vRef("A_grandparent", "children"));
 
-    expect(getObjectTransient(state, "A_parent", "TestThing").get("children").first())
+    expect(tryObjectTransient(state, "A_parent", "TestThing").get("children").first())
         .toEqual(vRef("A_child1"));
-    expect(getObjectTransient(state, "A_child1", "TestThing").get("owner"))
+    expect(tryObjectTransient(state, "A_child1", "TestThing").get("owner"))
         .toEqual(vRef("A_parent", "children"));
 
-    expect(getObjectTransient(state, "A_parent", "TestThing").get("children").slice(1).first())
+    expect(tryObjectTransient(state, "A_parent", "TestThing").get("children").slice(1).first())
         .toEqual(vRef("A_child2"));
-    expect(getObjectTransient(state, "A_child1", "TestThing").get("owner"))
+    expect(tryObjectTransient(state, "A_child1", "TestThing").get("owner"))
         .toEqual(vRef("A_parent", "children"));
   });
 
   it("creates object with undefined owner property", () => {
     const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA)
         .getState();
-    expect(getObjectTransient(state, "A_grandparent", "TestThing").get("owner"))
+    expect(tryObjectTransient(state, "A_grandparent", "TestThing").get("owner"))
         .toEqual(undefined);
   });
 
@@ -77,7 +77,7 @@ describe("Couplings", () => {
     const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       destroyed({ id: "A_child1" }),
     ]).getState();
-    expect(getObjectTransient(state, "A_parent", "TestThing").get("children").first())
+    expect(tryObjectTransient(state, "A_parent", "TestThing").get("children").first())
         .toEqual(vRef("A_child2"));
   });
 
@@ -123,9 +123,9 @@ describe("Couplings", () => {
         .toEqual(null);
     // Coupling removal never removes fields but leaves them as empty arrays or nulls.
     // Otherwise the removal might uncover ghost prototype fields.
-    expect(getObjectTransient(state, "A_orphan", "TestThing").get("siblings").size)
+    expect(tryObjectTransient(state, "A_orphan", "TestThing").get("siblings").size)
         .toEqual(0);
-    expect(getObjectTransient(state, "A_orphanGlue", "TestGlue").get("target"))
+    expect(tryObjectTransient(state, "A_orphanGlue", "TestGlue").get("target"))
         .toEqual(null);
   });
 
@@ -137,7 +137,7 @@ describe("Couplings", () => {
     ]).getState();
     expect(tryObjectTransient(state, "A_child1", "TestThing"))
         .toEqual(null);
-    expect(getObjectTransient(state, "A_parent", "TestThing").get("children").first())
+    expect(tryObjectTransient(state, "A_parent", "TestThing").get("children").first())
         .toEqual(vRef("A_child2"));
   });
 
@@ -146,11 +146,11 @@ describe("Couplings", () => {
       fieldsSet({ id: "A_parent", typeName: "TestThing",
         sets: { owner: null }, }),
     ]).getState();
-    expect(getObjectTransient(state, "A_grandparent", "TestThing").get("children").size)
+    expect(tryObjectTransient(state, "A_grandparent", "TestThing").get("children").size)
         .toEqual(0);
-    expect(getObjectTransient(state, "A_parent", "TestThing"))
+    expect(tryObjectTransient(state, "A_parent", "TestThing"))
         .toBeTruthy();
-    expect(getObjectTransient(state, "A_parent", "TestThing").get("owner"))
+    expect(tryObjectTransient(state, "A_parent", "TestThing").get("owner"))
         .toEqual(null);
   });
 
@@ -161,11 +161,11 @@ describe("Couplings", () => {
       fieldsSet({ id: "A_parent", typeName: "TestThing",
         sets: { owner: vRef("A_grandparent", "children") }, }),
     ]).getState();
-    expect(getObjectTransient(state, "A_grandparent", "TestThing").get("children").size)
+    expect(tryObjectTransient(state, "A_grandparent", "TestThing").get("children").size)
         .toEqual(1);
-    expect(getObjectTransient(state, "A_parent", "TestThing"))
+    expect(tryObjectTransient(state, "A_parent", "TestThing"))
         .toBeTruthy();
-    expect(getObjectTransient(state, "A_parent", "TestThing").get("owner"))
+    expect(tryObjectTransient(state, "A_parent", "TestThing").get("owner"))
         .toEqual(vRef("A_grandparent", "children"));
   });
 
@@ -176,20 +176,20 @@ describe("Couplings", () => {
       addedTo({ id: "A_grandparent", typeName: "TestThing",
         adds: { children: ["A_parent"] }, }),
     ]).getState();
-    expect(getObjectTransient(state, "A_grandparent", "TestThing").get("children").size)
+    expect(tryObjectTransient(state, "A_grandparent", "TestThing").get("children").size)
         .toEqual(1);
-    expect(getObjectTransient(state, "A_parent", "TestThing"))
+    expect(tryObjectTransient(state, "A_parent", "TestThing"))
         .toBeTruthy();
-    expect(getObjectTransient(state, "A_parent", "TestThing").get("owner"))
+    expect(tryObjectTransient(state, "A_parent", "TestThing").get("owner"))
         .toEqual(vRef("A_grandparent", "children"));
   });
 
   it("forms non-ownership couplings on creation", () => {
     const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA)
         .getState();
-    expect(getObjectTransient(state, "A_child1", "TestThing").get("targetGlues").first())
+    expect(tryObjectTransient(state, "A_child1", "TestThing").get("targetGlues").first())
         .toEqual(vRef("A_childGlue"));
-    expect(getObjectTransient(state, "A_child2", "TestThing").get("sourceGlues").first())
+    expect(tryObjectTransient(state, "A_child2", "TestThing").get("sourceGlues").first())
         .toEqual(vRef("A_childGlue"));
   });
 
@@ -197,7 +197,7 @@ describe("Couplings", () => {
     const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [
       destroyed({ id: "A_child2" }),
     ]).getState();
-    expect(getObjectTransient(state, "A_childGlue", "TestGlue").get("target"))
+    expect(tryObjectTransient(state, "A_childGlue", "TestGlue").get("target"))
         .toEqual(null);
   });
 
@@ -205,7 +205,7 @@ describe("Couplings", () => {
     const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [
       destroyed({ id: "A_childGlue" }),
     ]).getState();
-    expect(getObjectTransient(state, "A_child2", "TestThing").get("sourceGlues").size)
+    expect(tryObjectTransient(state, "A_child2", "TestThing").get("sourceGlues").size)
         .toEqual(0);
   });
 
@@ -215,9 +215,9 @@ describe("Couplings", () => {
         siblings: [vRef("A_child1"), vRef("A_child2")],
       }, }),
     ]).getState();
-    expect(getObjectTransient(state, "A_child1", "TestThing").get("siblings").first())
+    expect(tryObjectTransient(state, "A_child1", "TestThing").get("siblings").first())
         .toEqual(vRef("A_child3"));
-    expect(getObjectTransient(state, "A_child2", "TestThing").get("siblings").first())
+    expect(tryObjectTransient(state, "A_child2", "TestThing").get("siblings").first())
         .toEqual(vRef("A_child3"));
   });
 
@@ -227,9 +227,9 @@ describe("Couplings", () => {
         sets: { siblings: [vRef("A_child2")] },
       }),
     ]).getState();
-    expect(getObjectTransient(state, "A_child1", "TestThing").get("siblings").first())
+    expect(tryObjectTransient(state, "A_child1", "TestThing").get("siblings").first())
         .toEqual(vRef("A_child2"));
-    expect(getObjectTransient(state, "A_child2", "TestThing").get("siblings").first())
+    expect(tryObjectTransient(state, "A_child2", "TestThing").get("siblings").first())
         .toEqual(vRef("A_child1"));
   });
 
@@ -240,9 +240,9 @@ describe("Couplings", () => {
       }, }),
       destroyed({ id: "A_child3" }),
     ]).getState();
-    expect(getObjectTransient(state, "A_child1", "TestThing").get("siblings").size)
+    expect(tryObjectTransient(state, "A_child1", "TestThing").get("siblings").size)
         .toEqual(0);
-    expect(getObjectTransient(state, "A_child2", "TestThing").get("siblings").size)
+    expect(tryObjectTransient(state, "A_child2", "TestThing").get("siblings").size)
         .toEqual(0);
   });
 
@@ -252,9 +252,9 @@ describe("Couplings", () => {
         dangling: vRef("A_child2"),
       }, }),
     ]).getState();
-    expect(getObjectTransient(state, "A_childGlue", "TestGlue").get("dangling"))
+    expect(tryObjectTransient(state, "A_childGlue", "TestGlue").get("dangling"))
         .toEqual(vRef("A_child2"));
-    expect(getObjectTransient(state, "A_child2", "TestThing").get("unnamedCouplings").first())
+    expect(tryObjectTransient(state, "A_child2", "TestThing").get("unnamedCouplings").first())
         .toEqual(vRef("A_childGlue", "dangling"));
   });
 
@@ -265,7 +265,7 @@ describe("Couplings", () => {
       }, }),
       destroyed({ id: "A_childGlue" }),
     ]).getState();
-    expect(getObjectTransient(state, "A_child2", "TestThing").get("unnamedCouplings").size)
+    expect(tryObjectTransient(state, "A_child2", "TestThing").get("unnamedCouplings").size)
         .toEqual(0);
   });
 
@@ -276,7 +276,7 @@ describe("Couplings", () => {
       }, }),
       destroyed({ id: "A_child2" }),
     ]).getState();
-    expect(getObjectTransient(state, "A_childGlue", "TestGlue").get("dangling"))
+    expect(tryObjectTransient(state, "A_childGlue", "TestGlue").get("dangling"))
         .toEqual(null);
   });
 
@@ -286,7 +286,7 @@ describe("Couplings", () => {
         initialState: { source: null },
       }),
     ]).getState();
-    expect(getObjectTransient(state, "A_orphanGlue", "TestGlue").get("owner"))
+    expect(tryObjectTransient(state, "A_orphanGlue", "TestGlue").get("owner"))
         .toEqual(null);
   });
 
@@ -296,7 +296,7 @@ describe("Couplings", () => {
         sets: { source: null },
       })
     ]).getState();
-    expect(getObjectTransient(state, "A_childGlue", "TestGlue").get("owner"))
+    expect(tryObjectTransient(state, "A_childGlue", "TestGlue").get("owner"))
         .toEqual(null);
   });
 

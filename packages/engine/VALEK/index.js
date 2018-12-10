@@ -1,5 +1,5 @@
 // @flow
-import { VRef } from "~/raem/ValaaReference";
+import ValaaReference from "~/raem/ValaaReference";
 
 import { transpileValaaScript, isNativeIdentifier, getNativeIdentifierValue } from "~/script";
 import { dumpObject as _dumpObject, Kuery, ValaaScriptKuery, isValaaFunction, toVAKON }
@@ -55,7 +55,8 @@ export function kueryExpression (kuery: Kuery | any) {
 // avoid toExpressionKuery and the typeof/Resource-condition below
 export function expressionFromValue (value: any) {
   if (typeof value === "undefined") return null;
-  if (typeof value === "object" && ((value instanceof Vrapper) || (value instanceof VRef))) {
+  if (typeof value === "object"
+      && ((value instanceof Vrapper) || (value instanceof ValaaReference))) {
     return pointer(value);
   }
   return literal(value);

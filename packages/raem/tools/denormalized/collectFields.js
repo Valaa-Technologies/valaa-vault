@@ -1,7 +1,7 @@
 import { Iterable } from "immutable";
 import { GraphQLList, isLeafType, getNullableType } from "graphql/type";
 
-import getObjectTransient from "~/raem/state/getObjectTransient";
+import { tryObjectTransient } from "~/raem/state/getObjectTransient";
 import { getTransientTypeName } from "~/raem/state/Transient";
 
 import wrapError from "~/tools/wrapError";
@@ -20,7 +20,7 @@ import dumpify from "~/tools/dumpify";
  */
 export default function collectFields (schema, state, resourceId, typeName, reviver) {
   // TODO(iridian): Refactor collectFields to use Resolver.
-  const start = getObjectTransient(state, resourceId, typeName);
+  const start = tryObjectTransient(state, resourceId, typeName);
   if (!start) return null;
   const startType = schema.getType(getTransientTypeName(start, schema));
   if (!startType) {
@@ -90,7 +90,7 @@ export default function collectFields (schema, state, resourceId, typeName, revi
             value);
         return { value: null, type };
       }
-      const innerObject = getObjectTransient(state, value, type.name);
+      const innerObject = tryObjectTransient(state, value, type.name);
       if (innerObject) {
         return {
           value: innerObject, type: schema.getType(getTransientTypeName(innerObject, schema)),

@@ -2,8 +2,6 @@
 import { GraphQLObjectType } from "graphql/type";
 import { Map } from "immutable";
 
-import { VRef } from "~/raem/ValaaReference";
-
 import { Action } from "~/raem/events";
 
 import { Resolver, State } from "~/raem/state";
@@ -261,9 +259,7 @@ export default class Bard extends Resolver {
 
   createPassageFromAction (action: Action) {
     const ret = Object.create(action);
-    if (action.id) {
-      ret.id = (action.id instanceof VRef) ? action.id : this.obtainReference(action.id);
-    }
+    if (action.id) ret.id = this.obtainReference(action.id);
     return ret;
   }
 

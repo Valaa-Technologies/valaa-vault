@@ -62,8 +62,8 @@
  * references.
  */
 import { Action, created, destroyed, transacted } from "~/raem/events";
-import { vRef, getRawIdFrom, tryGhostPathFrom } from "~/raem/ValaaReference";
-import type { VRef, IdData } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import { vRef } from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import { GhostPath, Resolver, State, Transient } from "~/raem/state";
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
@@ -75,18 +75,6 @@ export function createGhostVRefInInstance (prototypeId: VRef,
       instanceTransient.get("prototype").rawId(),
       instanceTransient.get("id").rawId());
   return vRef(ghostPath.headRawId(), null, ghostPath);
-}
-
-export function tryGhostHostRawIdFrom (idData: IdData): ?string {
-  const ghostPath = tryGhostPathFrom(idData);
-  return ghostPath && ghostPath.headHostRawId();
-}
-
-export function isGhost (idDataOrTransient: IdData | Transient): boolean {
-  const ghostPath = tryGhostPathFrom(idDataOrTransient && idDataOrTransient.get
-      ? idDataOrTransient.get("id")
-      : idDataOrTransient);
-  return ghostPath ? ghostPath.isGhost() : false;
 }
 
 export function createMaterializeGhostAction (resolver: Resolver, ghostId: VRef): ?Action {
@@ -237,6 +225,6 @@ function _createImmaterializeGhostAction (state: State, rawId: string,
   }
 }
 
-export function isMaterialized (state: State, id: IdData): boolean {
-  return !!state.getIn(["Resource", getRawIdFrom(id)]);
+export function isMaterialized (state: State, id: VRef): boolean {
+  return !!state.getIn(["Resource", id.rawId()]);
 }

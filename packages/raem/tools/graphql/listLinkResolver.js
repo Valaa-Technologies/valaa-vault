@@ -1,7 +1,6 @@
 // @flow
 
 import getObjectField from "~/raem/state/getObjectField";
-import getObjectTransient from "~/raem/state/getObjectTransient";
 
 import dumpify from "~/tools/dumpify";
 
@@ -23,7 +22,7 @@ function listLinkResolver (source: any, args: any, context: Object) {
           dumpify(source, { sliceAt: 200, sliceSuffix: "...}" })}`);
       return null;
     }
-    return ret.map(getObjectTransient.bind(null, context.rootValue.resolver));
+    return ret.map(entry => context.rootValue.resolver.goToTransient(entry));
   } catch (error) {
     const suggestion = error.message.slice(0, 10) !== "source.get" ? "" : `
   Is this a mutation resolver? If so, remember to wrap resolver in mutationResolver.`;

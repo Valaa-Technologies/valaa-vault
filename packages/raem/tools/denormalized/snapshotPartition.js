@@ -6,7 +6,7 @@ import { tryRawIdFrom } from "~/raem/ValaaReference";
 import { getTransientTypeName } from "~/raem/state/Transient";
 import collectFields from "~/raem/tools/denormalized/collectFields";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
-import getObjectTransient from "~/raem/state/getObjectTransient";
+import { tryObjectTransient } from "~/raem/state/getObjectTransient";
 
 import { createId, wrapError } from "~/tools";
 */
@@ -36,7 +36,7 @@ export default async function snapshotPartition (/* { partitionId, state, schema
   /*
   const walkedIds = new Set();
   let defers = { resources: [], datas: [], modifies: [] };
-  const partition = getObjectTransient(state, partitionId, "Partition");
+  const partition = tryObjectTransient(state, partitionId, "Partition", true);
   try {
     walkResourceProcessingOwnersFirst(partition, (object) =>
       collectFields(schema, state, object.get("id").rawId(),
@@ -53,9 +53,9 @@ export default async function snapshotPartition (/* { partitionId, state, schema
     const id = resource.get("id").rawId();
     if (!walkedIds.has(id)) {
       walkedIds.add(id);
-      const ownerData = resource.get("owner");
-      if (ownerData) {
-        walkResourceProcessingOwnersFirst(getObjectTransient(state, ownerData, "Resource"),
+      const owner = resource.get("owner");
+      if (owner) {
+        walkResourceProcessingOwnersFirst(tryObjectTransient(state, owner, "Resource", true),
             walkValue);
       }
       const typeName = getTransientTypeName(resource, schema);

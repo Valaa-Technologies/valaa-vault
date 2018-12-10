@@ -29,7 +29,6 @@ const OBJECT_DESCRIPTION = "identifier";
  *
  * @export
  * @param null target
- * @param {any} IdData
  * @returns
  */
 export function identifier (target) {

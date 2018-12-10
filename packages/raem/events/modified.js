@@ -1,7 +1,7 @@
 // @flow
 
 import Action, { validateActionBase } from "~/raem/events/Action";
-import { ValaaReference, invariantifyId, invariantifyTypeName } from "~/raem/ValaaReference";
+import { VRef, invariantifyId, invariantifyTypeName } from "~/raem/ValaaReference";
 
 import { invariantifyObject, invariantifyArray } from "~/tools/invariantify";
 
@@ -37,7 +37,7 @@ export class ReplacedWithin extends Modified {
 }
 
 function _validateModifiedBase (expectedType: string, action: Action,
-    id: string | ValaaReference, typeName: string, rest: Object): Modified {
+    id: string | VRef, typeName: string, rest: Object): Modified {
   validateActionBase(expectedType, action, rest);
 
   invariantifyId(id, `${expectedType}.id`, {});

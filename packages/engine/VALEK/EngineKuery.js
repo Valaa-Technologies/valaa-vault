@@ -1,12 +1,11 @@
 // @flow
 
-import type { IdData } from "~/raem/ValaaReference";
 import { Kuery } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
 import { ValaaScriptKuery, pointer as _pointer, literal } from "~/script/VALSK";
 
-export function pointer (target: Kuery | Vrapper | IdData) {
+export function pointer (target: Kuery | Vrapper) {
   if (!(target instanceof Vrapper)) return _pointer(target);
   return { typeName: "Identifier", reference: target };
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { VRef } from "~/raem/ValaaReference";
+import ValaaReference from "~/raem/ValaaReference";
 
 import VALEK from "~/engine/VALEK";
 import UIComponent from "~/inspire/ui/UIComponent";
@@ -86,7 +86,9 @@ export default class VALKConsole extends UIComponent {
         fields: this.fields,
       };
       let evalResult = notThatSafeEval(evalScope, `return ${this.state.cmd}`);
-      if (evalResult instanceof VRef) evalResult = this.context.engine.getVrapper(evalResult);
+      if (evalResult instanceof ValaaReference) {
+        evalResult = this.context.engine.getVrapper(evalResult);
+      }
       const txt = (evalResult instanceof Vrapper)
           ? `${evalResult.debugId()}:\n${dumpify(evalResult.getTransient(), { indent: 2 })}`
           : dumpify(evalResult, { indent: 2 });

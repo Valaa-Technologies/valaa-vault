@@ -2,7 +2,7 @@
 
 import { GraphQLObjectType } from "graphql/type";
 
-import { IdData, VRef } from "~/raem/ValaaReference";
+import ValaaReference, { VRef } from "~/raem/ValaaReference";
 
 import { FieldInfo, elevateFieldReference, elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import Resolver from "~/raem/state/Resolver";
@@ -28,11 +28,10 @@ import { wrapError, dumpObject } from "~/tools";
  * @param {any} fieldName
  * @param {any} objectFields
  * @param {any} fieldInfoOut
- * @returns {IdData | Transient}
+ * @returns {any | VRef | Transient}
  */
 export default function getObjectField (resolver: Resolver, object: Transient, fieldName: string,
-    fieldInfo: FieldInfo = {}):
-    ?IdData | ?Transient {
+    fieldInfo: FieldInfo = {}): any | ?VRef | ?Transient {
   const rawField = getObjectRawField(resolver, object, fieldName, fieldInfo);
   if (!rawField || !fieldInfo.intro || !fieldInfo.intro.isComposite) return rawField;
   if (!fieldInfo.elevationInstanceId) fieldInfo.elevationInstanceId = object.get("id");
@@ -70,7 +69,7 @@ export default function getObjectField (resolver: Resolver, object: Transient, f
  */
 export function getObjectRawField (stateOrResolver: State | Resolver, object: Transient,
     fieldName: string, fieldInfoOut: FieldInfo, objectTypeIntro?: GraphQLObjectType):
-    ?IdData | ?Transient {
+    ?VRef | ?Transient {
   let fieldInfo = fieldInfoOut;
   let resolver;
   try {
@@ -148,7 +147,7 @@ export function getObjectRawField (stateOrResolver: State | Resolver, object: Tr
             prototypeGhostPath.headRawId(), prototypeGhostPath, resolver.objectTransient);
       }
       typeName = resolver.objectTransient.get("typeName");
-      resolver.objectTransient = resolver.goToObjectIdTransient(resolver.objectId, typeName);
+      resolver.objectTransient = resolver.goToTransient(resolver.objectId, typeName);
       skipFirstPrototypeStep = true;
     } else {
       // Regular object
@@ -167,7 +166,7 @@ export function getObjectRawField (stateOrResolver: State | Resolver, object: Tr
         const prototype = resolver.objectTransient.get("prototype");
         // If prototype is null, we're on Resource.ownFields: don't generate default values.
         if (prototype === null) return undefined;
-        if (!resolver.tryGoToNonGhostObjectIdTransient(prototype, typeName)) break;
+        if (!resolver.tryGoToNonGhostTransient(prototype, typeName)) break;
       }
 
       ret = resolver.objectTransient.get(fieldInfo.name);
@@ -248,7 +247,7 @@ export function fillFieldInfoAndResolveAliases (object: Transient, objectFields:
 }
 
 function _postProcessAlias (ret: any, fieldInfo: FieldInfo) {
-  if (!fieldInfo.coupledField || !(ret instanceof VRef) || fieldInfo.skipAliasPostProcess
+  if (!fieldInfo.coupledField || !(ret instanceof ValaaReference) || fieldInfo.skipAliasPostProcess
       || (ret.getCoupledField() === fieldInfo.coupledField)) {
     return ret;
   }

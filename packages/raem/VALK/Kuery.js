@@ -1,4 +1,4 @@
-import { vRef } from "~/raem/ValaaReference";
+import { vRef, VRef } from "~/raem/ValaaReference";
 
 import beaumpify from "~/tools/beaumpify";
 import dumpify from "~/tools/dumpify";
@@ -274,13 +274,13 @@ export default class Kuery {
   }
 
   /**
-   * Core from-step which sets the current head to the object described by the given idData.
+   * Core from-step which sets the current head to the given object.
    *
-   * @param {IdData} id The idData describing the object to refer to.
+   * @param {string | VRef} object The idData describing the object to refer to.
    * @param {string} typeName The type of the object described by the given idData.
    * @returns {Kuery}
    */
-  fromObject (object: any, headType: ?string) {
+  fromObject (object: string | VRef, headType: ?string) {
     const ref = tryHostRef(object) || ((typeof object === "string") ? vRef(object) : undefined);
     if (!ref && (object !== null)) {
       throw new Error(`VALK.fromObject.object is not a valid object reference, got: ${object}`);

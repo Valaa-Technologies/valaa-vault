@@ -1042,6 +1042,8 @@ async function execute (args, options = {}) {
               result = (typeof diagnostics === "string") && (options.stderr === "erroronly")
                   ? new Error(diagnostics.split("\n")[0])
                   : new Error(`received ${signal ? "signal" : "code"} ${signal || code}`);
+              result.code = code;
+              result.signal = signal;
             } else {
               this._refreshActivePools();
               this._reloadPackageAndToolsetsConfigs();

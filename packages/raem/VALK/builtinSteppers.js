@@ -159,12 +159,7 @@ export default Object.freeze({
     if (typeof eValue === "undefined") return ["§void"];
     const hostRef = tryHostRef(eValue);
     if (hostRef) {
-      // TODO(iridian): This is wrong! This should be converted into appropriate ["'*Ref"].
-      // TODO(iridian): Proper implementation is hindered by lack of elegant host object typing
-      // system
-      // TODO(iridian, 2018-08): No longer wrong as such but untested.
-      return [`§${hostRef.shortTypeof()}`, hostRef.toJSON()];
-      // throw new Error("§literal for host objects not implemented yet");
+      return [`§ref`, hostRef.toJSON()];
     }
     return ["§'", eValue];
   },

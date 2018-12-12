@@ -1,5 +1,5 @@
 import { GraphQLList, GraphQLScalarType } from "graphql/type";
-import { List } from "immutable";
+import { OrderedMap } from "immutable";
 
 /**
  *  Returns the default values for fields which are undefined in the store.
@@ -10,7 +10,7 @@ import { List } from "immutable";
  */
 export default function fieldDefaultValue (fieldIntro) {
   const type = fieldIntro.type;
-  return type instanceof GraphQLList ? List()
+  return type instanceof GraphQLList ? OrderedMap()
       : type instanceof GraphQLScalarType ?
           (type.name === "String" ? ""
           : type.name === "Int" ? 0

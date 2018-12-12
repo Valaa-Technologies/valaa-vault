@@ -143,8 +143,10 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
 }
 
 export function resolvePartitionURI (resolver: Resolver, resourceId: VRef) {
-  if (!resourceId.isGhost()) return resourceId.getPartitionURI();
-  return resolver.bindObjectRawId(resourceId.getGhostPath().headHostRawId()).getPartitionURI();
+  return (!resourceId.isGhost()
+          ? resourceId
+          : resolver.bindObjectRawId(resourceId.getGhostPath().headHostRawId(), "Resource"))
+      .getPartitionURI();
 }
 
 export function setCreatedObjectPartition (mutableTransient: Transient) {

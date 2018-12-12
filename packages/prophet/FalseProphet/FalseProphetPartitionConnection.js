@@ -2,16 +2,17 @@
 
 import { EventBase } from "~/raem/events";
 import type { Story } from "~/raem/redux/Bard";
+import ValaaReference, { VRef } from "~/raem/ValaaReference";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import { NarrateOptions, ChronicleOptions, ChronicleRequest } from "~/prophet/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/prophet/tools/EventAspects";
-import { ASPECTS_VERSION } from "~/prophet/FalseProphet/FalseProphet";
 
 import { dumpObject } from "~/tools";
 
 import { Prophecy, _reviewPurgedProphecy, _reviseSchism } from "./_prophecyOps";
 import { _confirmCommands, _purgeAndRecomposeStories } from "./_storyOps";
+import { ASPECTS_VERSION } from "./_universalizationOps";
 
 /**
  * @export
@@ -35,6 +36,19 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   _unconfirmedCommands: EventBase[] = [];
   _firstUnconfirmedEventId = 0;
   _isFrozen: ?boolean;
+  _referencePrototype: VRef;
+
+  constructor (options) {
+    super(options);
+    const existingRef = this._prophet._inactivePartitionVRefPrototypes[String(this._partitionURI)];
+    if (existingRef) {
+      this._referencePrototype = existingRef;
+      delete this._prophet._inactivePartitionVRefPrototypes[String(this._partitionURI)];
+    } else {
+      this._referencePrototype = new ValaaReference()
+          .initResolverComponent({ inactive: true, partition: this._partitionURI });
+    }
+  }
 
   getStatus () {
     return {

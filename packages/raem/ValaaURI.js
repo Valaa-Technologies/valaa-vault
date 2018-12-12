@@ -93,8 +93,11 @@ export function getValaaURI (uri: ValaaURI | string): ValaaURI {
 }
 
 export function createValaaURI (uriString: string): ValaaURI {
-  if (typeof uriString !== "string") return undefined;
   try {
+    if (uriString instanceof ValaaURI) return uriString;
+    if (typeof uriString !== "string") {
+      throw new Error(`Invalid uri: expected a string, got '${typeof uriString}'`);
+    }
     const ret = new ValaaURI(uriString, null, true);
     // if (!ret.searchParams && ret.search) ret.searchParams = new URLSearchParams(ret.search);
     return ret;

@@ -16,7 +16,6 @@ import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
 
 import { Resolver, State, Transient } from "~/raem/state";
 import { tryElevateFieldValue } from "~/raem/state/FieldInfo";
-import getObjectTransient, { getObjectTransientDetailed } from "~/raem/state/getObjectTransient";
 import { getObjectRawField } from "~/raem/state/getObjectField";
 
 import { createGhostVRefInInstance, isMaterialized, createMaterializeGhostAction }
@@ -283,10 +282,10 @@ export default class Vrapper extends Cog {
   _refreshPhaseOrGetBlocker (refreshingState?: Object, refreshingTransient?: Transient) {
     if (this._phase === ACTIVE) return undefined;
     if ((this._phase !== INACTIVE) && (this._phase !== ACTIVATING)) return this;
-    const state = refreshingState || this.engine.discourse.getState();
+    const resolver = this.engine.discourse.maybeForkWithState(refreshingState);
     const transient = refreshingTransient
-        || getObjectTransient(state, this[HostRef], this._typeName);
-    this.updateTransient(state, transient);
+        || resolver.goToTransient(this[HostRef], this._typeName);
+    this.updateTransient(resolver.state, transient);
     this[HostRef] = transient.get("id");
     const connection = this.tryPartitionConnection();
     if (!connection || !connection.isSynced()) {
@@ -309,7 +308,7 @@ export default class Vrapper extends Cog {
     }
     this._phase = ACTIVE;
     this._activationProcess = undefined;
-    this._finalizeActivate(state, transient);
+    this._finalizeActivate(resolver.state, transient);
     return undefined;
   }
 
@@ -364,8 +363,10 @@ export default class Vrapper extends Cog {
       // any illegal operations will still be caught by FalseProphet
       // and backend validations. But nevertheless the lack of symmetry
       // and dirty caching is unclean. Caching is hard.
-      const state = options.state || (options.transaction && options.transaction.getState());
-      if (state && getObjectTransient(state, this[HostRef], this._typeName)) return;
+      const resolver = options.transaction
+          || (!options.state && this.engine.discourse)
+          || Object.create(this.engine.discourse).setState(options.state);
+      if (resolver.tryGoToTransient(this[HostRef], this._typeName)) return;
     }
     const error =
         !blocker.isResource() ?
@@ -548,28 +549,27 @@ export default class Vrapper extends Cog {
     withOwnField?: string,
   } = {}) {
     const explicitState = options.state
-        || (options.transaction && options.transaction.getState())
-        || (options.withOwnField && this.engine.discourse.getState());
+        || (options.transaction ? options.transaction.getState()
+            : options.withOwnField ? this.engine.discourse.getState()
+            : undefined);
+    const state = explicitState || this._transientStaledIn;
+    if (!state) return this._transient;
     const discourse = options.transaction || this.engine.discourse;
-    if (explicitState) {
-      const typeName = options.typeName || this.getTypeName(options);
-      const ret = explicitState.getIn([typeName, this.getRawId()]);
-      if (ret && (!options.withOwnField || ret.has(options.withOwnField))) return ret;
-      // Immaterial ghost.
-      return getObjectTransientDetailed(
-          !options.state ? discourse
-              : Object.assign(Object.create(discourse), { state: options.state }),
-          this[HostRef], typeName, undefined,
-          options.require, options.mostMaterialized, options.withOwnField);
+    const typeName = options.typeName || this.getTypeName(options);
+    let ret = state.getIn([typeName, this.getRawId()]);
+    if (!ret || (options.withOwnField && !ret.has(options.withOwnField))) {
+      let resolver = discourse;
+      if (discourse.state !== state) {
+        resolver = Object.create(discourse);
+        resolver.state = state;
+      }
+      ret = resolver.tryGoToTransient(this[HostRef], typeName,
+          options.require, false, options.mostMaterialized, options.withOwnField);
     }
-    if (this._transientStaledIn) {
-      this.updateTransient(null,
-          getObjectTransientDetailed(
-              Object.assign(Object.create(discourse), { state: this._transientStaledIn }),
-              this.getId(), options.typeName || this.getTypeName(options), undefined,
-              options.require, options.mostMaterialized, options.withOwnField));
+    if (ret && !explicitState) {
+      this.updateTransient(null, ret);
     }
-    return this._transient;
+    return ret;
   }
 
   isGhost () { return this[HostRef].isGhost(); }
@@ -754,9 +754,14 @@ export default class Vrapper extends Cog {
   _primeTransactionAndOptionsAndId (options: VALKOptions): { transaction: Discourse, id: VRef } {
     const transaction = options.transaction || this.engine.discourse;
     this.requireActive(options);
-    const id = transaction.bindObjectId(this.getId(), this._typeName, true);
+    let id = transaction.bindObjectId(this.getId(), this._typeName);
     options.head = this;
-    const partitionURI = id.getPartitionURI();
+    let partitionURI = id.getPartitionURI();
+    if (!partitionURI && id.isGhost()) {
+      partitionURI = transaction.bindObjectRawId(id.getGhostPath().headHostRawId(), "Resource")
+          .getPartitionURI();
+      id = id.immutatePartitionURI(partitionURI);
+    }
     options.partitionURIString = partitionURI && partitionURI.toString();
     return { transaction, id };
   }
@@ -1426,11 +1431,11 @@ export default class Vrapper extends Cog {
           (Iterable.isKeyed(fieldValue) ? [fieldValue]
               : iterableFromAny(fieldValue || undefined))) {
         // TODO(iridian): Replace with tryRawIdFrom or similar
-        const id = getRawIdFrom(fieldEntry);
-        const typeName = id && state.getIn(["Resource", id]);
-        const fieldTransient = typeName && state.getIn([typeName, id]);
+        const rawId = getRawIdFrom(fieldEntry);
+        const typeName = rawId && state.getIn(["Resource", rawId]);
+        const fieldTransient = typeName && state.getIn([typeName, rawId]);
         if (fieldTransient && !results.has(fieldTransient)) {
-          const vrapper = this.engine.getVrapper(id);
+          const vrapper = this.engine.getVrapperByRawId(rawId);
           results.set(fieldTransient, vrapper);
           this._accumulateMaterializedFieldResources(state, fieldTransient, fieldNames, results);
         }

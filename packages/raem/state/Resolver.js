@@ -2,23 +2,19 @@
 
 import { GraphQLSchema } from "graphql/type";
 
-import ValaaReference, { VRef, obtainVRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
-import type { JSONIdData, IdData, RawId } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import ValaaReference, { VRef, vRef, obtainVRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
+import type { JSONIdData, IdData, RawId,  } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import type ValaaURI from "~/raem/ValaaURI";
 
 import GhostPath from "~/raem/state/GhostPath";
 import Transient, { createImmaterialTransient, createInactiveTransient }
     from "~/raem/state/Transient";
 import type { State } from "~/raem/state/State";
+import type { FieldInfo } from "~/raem/state/FieldInfo";
 
 import { tryHostRef } from "~/raem/VALK/hostReference";
 
-
 import { dumpObject, invariantify, invariantifyString, LogEventGenerator } from "~/tools";
-
-type BindFieldVRefOptions = {
-  coupledField?: string, defaultCoupledField?: string, bindPartition?: boolean,
-};
 
 /**
  * Resolver is a very low-level component for performing various
@@ -45,23 +41,27 @@ type BindFieldVRefOptions = {
  * @class Resolver
  */
 export default class Resolver extends LogEventGenerator {
-  obtainReference:
-      (idData: IdData, coupling?: string, ghostPath?: GhostPath, partitionURI?: ValaaURI) => VRef;
+  deserializeReference: (idData: IdData, originatingPartitionURI?: ValaaURI) => VRef;
 
   constructor (options: ?Object) {
     if (!options.name) options.name = "Resolver";
     super(options);
     this.state = options.state;
     this.schema = options.schema;
-    this.obtainReference = options.obtainReference || obtainVRef;
   }
 
   schema: GraphQLSchema;
 
-  obtainReference (params) {
-    return !params
+  obtainReference (params, originatingPartitionURI: ?ValaaURI) {
+    return params
         && (tryHostRef(params)
-            || obtainVRef(params));
+            || (this._deserializeReference
+                && this._deserializeReference(params, originatingPartitionURI))
+            || obtainVRef(params, undefined, undefined, originatingPartitionURI || undefined));
+  }
+
+  setDeserializeReference (deserializeReference: Function) {
+    this._deserializeReference = deserializeReference;
   }
 
   getSchema () { return this.schema; }
@@ -74,8 +74,13 @@ export default class Resolver extends LogEventGenerator {
   getState () { return this.state; }
 
   setState (state: State) {
-    invariantify(state, "state must be truthy");
+    if (!state) invariantify(state, "state must be truthy");
     this.state = state;
+    return this;
+  }
+
+  maybeForkWithState (state: ?State) {
+    return !state || (state === this.state) ? this : Object.create(this).setState(state);
   }
 
   // object section
@@ -119,7 +124,7 @@ export default class Resolver extends LogEventGenerator {
    * @param {JSONIdData} id             serialized JSONIdData or plain VRef
    * @returns {VRef}
    */
-  bindObjectId (objectId: VRef, typeName: string = "Resource", bindPartition?: boolean): VRef {
+  bindObjectId (objectId: VRef, typeName: string): VRef {
     const rawId = objectId.rawId();
     try {
       let object = this.state.getIn([typeName, rawId]);
@@ -140,11 +145,7 @@ export default class Resolver extends LogEventGenerator {
         // partitionURI must be sourced from the actual "prototype" field of the topmost instance.
         boundId.setPartitionURI(objectId.getPartitionURI());
       }
-      return (!bindPartition || !boundId.isGhost())
-          ? boundId
-          : boundId.immutatePartitionURI(this.fork()
-              .bindObjectRawId(boundId.getGhostPath().headHostRawId())
-              .getPartitionURI());
+      return boundId;
     } catch (error) {
       throw this.wrapErrorEvent(error, `bindObjectId(${rawId}:${typeName})`,
           "\n\tid:", ...dumpObject(objectId),
@@ -152,12 +153,12 @@ export default class Resolver extends LogEventGenerator {
     }
   }
 
-  bindObjectRawId (rawId: string, typeName: string, bindPartition?: boolean) {
-    return this.bindObjectId(new ValaaReference(rawId), typeName, bindPartition);
+  bindObjectRawId (rawId: string, typeName: string, contextPartitionURI?: ValaaURI) {
+    return this.bindObjectId(vRef(rawId, undefined, undefined, contextPartitionURI), typeName);
   }
 
-  bindObjectIdData (idData: IdData, typeName: string, bindPartition?: boolean) {
-    return this.bindObjectId(this.obtainReference(idData), typeName, bindPartition);
+  bindObjectIdData (idData: IdData, typeName: string, contextPartitionURI?: ValaaURI) {
+    return this.bindObjectId(this.obtainReference(idData, contextPartitionURI), typeName);
   }
 
   /**
@@ -180,10 +181,12 @@ export default class Resolver extends LogEventGenerator {
    * @param {any} [{ coupledField, defaultCoupledField }={}]    accepts a fieldInfo structure
    * @returns
    */
-  bindFieldVRef (fieldRef: VRef | JSONIdData, options: BindFieldVRefOptions = {}) {
-    const coupledField = options.coupledField || tryCoupledFieldFrom(fieldRef)
-        || options.defaultCoupledField;
-    const boundId = this.bindObjectIdData(fieldRef, undefined, options.bindPartition);
+  bindFieldVRef (fieldRef: VRef | JSONIdData, fieldInfo: FieldInfo,
+      contextPartitionURI?: ValaaURI) {
+    const coupledField = fieldInfo.coupledField
+        || tryCoupledFieldFrom(fieldRef)
+        || fieldInfo.defaultCoupledField;
+    const boundId = this.bindObjectIdData(fieldRef, "TransientFields", contextPartitionURI);
     return !coupledField ? boundId : boundId.coupleWith(coupledField);
   }
 

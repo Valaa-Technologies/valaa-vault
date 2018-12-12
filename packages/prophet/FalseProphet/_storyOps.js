@@ -8,7 +8,8 @@ import { initializeAspects } from "~/prophet/tools/EventAspects";
 
 import { dumpObject, outputError } from "~/tools";
 
-import FalseProphet, { ASPECTS_VERSION } from "./FalseProphet";
+import FalseProphet from "./FalseProphet";
+import { ASPECTS_VERSION } from "./_universalizationOps";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 import { Prophecy, _confirmProphecyCommand, _reformProphecyCommand, _rejectHereticProphecy }
     from "./_prophecyOps";
@@ -72,9 +73,13 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
     purgedCommands: ?Command[], newEvents: Command[], type: string) {
   if (purgedCommands && purgedCommands.length) connection.setIsFrozen(false);
   const falseProphet = connection.getProphet();
+  const originatingPartitionURI = connection.getPartitionURI();
   const purgedPartitionURI = String(connection.getPartitionURI());
   const newAndRewrittenStories = [];
   let purgedRecital, purgedStory, reviewedPartitions;
+  for (const newEvent of newEvents) {
+    (newEvent.local || (newEvent.local = {})).partitionURI = originatingPartitionURI;
+  }
 
   // Purge events.
   if (purgedCommands) {

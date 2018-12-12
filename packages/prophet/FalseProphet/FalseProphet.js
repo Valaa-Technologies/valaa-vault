@@ -1,20 +1,19 @@
 // @flow
 
-import { Action, Command, EventBase } from "~/raem/events";
+import { Command, EventBase } from "~/raem/events";
 import type { Story } from "~/raem/redux/Bard";
 import type { State } from "~/raem/state";
-import ValaaURI from "~/raem/ValaaURI";
+import type { VRef } from "~/raem/ValaaReference";
 
 import Follower from "~/prophet/api/Follower";
 import Prophet from "~/prophet/api/Prophet";
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 import { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult }
     from "~/prophet/api/types";
-import { initializeAspects, obtainAspect } from "~/prophet/tools/EventAspects";
+import { obtainAspect } from "~/prophet/tools/EventAspects";
 
 import { dumpObject } from "~/tools";
 import valaaUUID from "~/tools/id/valaaUUID";
-import { trivialCloneWith } from "~/tools/trivialClone";
 
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
@@ -22,25 +21,13 @@ import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 import { Prophecy, _chronicleEvents } from "./_prophecyOps";
 import { _composeStoryFromEvent, _reviseSchismaticRecital, _tellStoriesToFollowers }
     from "./_storyOps";
+import { JSONIdData, deserializeVRef } from "./_universalizationOps";
 import StoryRecital from "./StoryRecital";
 
 type FalseProphetChronicleOptions = ChronicleOptions & {
   reviseSchism?: (schism: Prophecy, connection: FalseProphetPartitionConnection,
       purgedCommands: Command[], newEvents: Command[]) => Prophecy,
 };
-
-export const ASPECTS_VERSION = "0.2";
-
-export function universalizeAction (action: Action): Action {
-  return trivialCloneWith(action, entry => (entry instanceof ValaaURI ? entry : undefined));
-}
-
-export function universalizeEvent (event: EventBase): EventBase {
-  const ret = initializeAspects(universalizeAction(event), { version: ASPECTS_VERSION });
-  if (!ret.local) ret.local = {};
-  ret.local.isBeingUniversalized = true;
-  return ret;
-}
 
 /**
  * FalseProphet is non-authoritative denormalized in-memory store of
@@ -72,6 +59,7 @@ export default class FalseProphet extends Prophet {
   _onCommandCountUpdate: Function<>;
   _partitionCommandCounts: Object = {};
   _totalCommandCount: number = 0;
+  _inactivePartitionVRefPrototypes: { [partitionURI: string]: VRef } = {};
 
   _assignCommandId: (command: Command, discourse: FalseProphetDiscourse) => string;
 
@@ -80,6 +68,7 @@ export default class FalseProphet extends Prophet {
   }: Object) {
     super(rest);
     this.corpus = corpus;
+    corpus.setDeserializeReference(this.deserializeReference);
     this.schema = schema || corpus.getSchema();
 
     // Story queue is a sentinel-based linked list with a separate lookup structure.
@@ -184,5 +173,15 @@ export default class FalseProphet extends Prophet {
 
   _dumpStatus () {
     return this._primaryRecital.dumpStatus();
+  }
+
+  deserializeReference = (serializedReference: JSONIdData, currentPartitionURI?: string) => {
+    try {
+      return deserializeVRef(serializedReference, currentPartitionURI, this);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error("deserializeReference"),
+          "\n\tserializedReference:", ...dumpObject(serializedReference),
+          "\n\tcurrentPartitionURI:", ...dumpObject(currentPartitionURI));
+    }
   }
 }

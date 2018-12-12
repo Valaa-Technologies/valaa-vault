@@ -1,14 +1,19 @@
 // @flow
+
 import { GraphQLObjectType } from "graphql/type";
-import { Map } from "immutable";
+import { List, Map, OrderedMap, OrderedSet } from "immutable";
 
 import { Action } from "~/raem/events";
 
+import ValaaReference from "~/raem/ValaaReference";
+
 import { Resolver, State } from "~/raem/state";
+import type { FieldInfo } from "~/raem/state/FieldInfo";
 import Transient, { getTransientTypeName } from "~/raem/state/Transient";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 
-import { dumpObject, invariantify, outputCollapsedError } from "~/tools";
+import { dumpObject, invariantify, invariantifyString, outputCollapsedError, wrapError }
+    from "~/tools";
 
 /**
  * Bard subsystem.
@@ -176,9 +181,8 @@ export default class Bard extends Resolver {
     this.updateState(this.preActionState);
     this._resourceChapters = {};
     this.story = this.createPassageFromAction(action);
-    const local = action.local || (action.local = {});
-    if (!local.partitions) local.partitions = {};
-    this.story.isBeingUniversalized = local.isBeingUniversalized;
+    if (!action.local.partitionURI && !action.local.partitions) action.local.partitions = {};
+    this.story.isBeingUniversalized = action.local.isBeingUniversalized;
     return this.story;
   }
 
@@ -210,6 +214,14 @@ export default class Bard extends Resolver {
 
   updateStateWith (stateOperation: Function) {
     return this.updateState(stateOperation(this.state));
+  }
+
+  // Passage operations
+
+  createPassageFromAction (action: Action) {
+    const ret = Object.create(action);
+    this.correlateReference(action, ret, "id");
+    return ret;
   }
 
   initiatePassageAggregation () {
@@ -257,17 +269,13 @@ export default class Bard extends Resolver {
     return this._resourceChapters[rawId] || (this._resourceChapters[rawId] = {});
   }
 
-  createPassageFromAction (action: Action) {
-    const ret = Object.create(action);
-    if (action.id) ret.id = this.obtainReference(action.id);
-    return ret;
-  }
+  // Bard resolver operations
 
   goToTransientOfPassageObject (typeName?: string, require?: boolean, allowGhostLookup?: boolean):
       Object {
     const id = this.passage.id;
-    const ret = this.tryGoToTransientOfRawId(id.rawId(), typeName || this.passage.typeName, require,
-        allowGhostLookup && id.tryGhostPath());
+    const ret = this.tryGoToTransientOfRawId(id.rawId(), typeName || this.passage.typeName,
+        require, allowGhostLookup && id.tryGhostPath());
     if (ret) {
       if (!this.objectId) throw new Error("INTERNAL ERROR: no this.objectId");
       this.passage.id = this.objectId;
@@ -294,4 +302,178 @@ export default class Bard extends Resolver {
     }
     return ret;
   }
+
+  // Reference value correlation between actions and passages.
+  // For commands going upstream this means universalization of
+  // references in-place on the action objects.
+  // For events coming downstream this means deserialization of
+  // reference field values from the action objects into corresponding
+  // passage fields.
+
+  correlateReference (action: Action, passage: Passage, propertyName: string) {
+    let reference = action[propertyName];
+    if (!reference) return reference;
+    if (!this.rootAction.local.isBeingUniversalized) {
+      // Downstream reduction
+      if (!this.rootAction.local.partitionURI) {
+        throw new Error(`INTERNAL ERROR: Cannot correlate downstream event reference (field '${
+            propertyName}') because root action is missing local.partitionURI`);
+      }
+      reference = this.obtainReference(reference, this.rootAction.local.partitionURI);
+      passage[propertyName] = reference;
+    } else {
+      // Universalization of an existing VRef
+      // TODO(iridian, 2018-12): If the event never gets persisted
+      // (f.ex. with valaa-memory scheme) universalization can be
+      // completely skipped.
+      if (!(reference instanceof ValaaReference)) reference = this.obtainReference(reference, null);
+      passage[propertyName] = reference;
+      action[propertyName] = reference.toJSON();
+    }
+    return reference;
+  }
+
+
+  // TODO(iridian): Deserialization might happening in a wrong place:
+  // it might need to happen in the middleware, not here in reducers.
+  // However a lot of the infrastructure is the same, and every event
+  // being replayed from the event log has already passed
+  // deserialization the first time.
+
+  deserializeField (newValue: any, fieldInfo: FieldInfo) {
+    try {
+      if (!fieldInfo.intro.isSequence) {
+        return _obtainSingularDeserializer(fieldInfo)(newValue, this);
+      }
+      if (!newValue) return newValue;
+      return fieldInfo.intro.isResource
+          ? this.deserializeAndReduceOntoField(newValue, fieldInfo,
+              (target, deserializedEntry) => target.add(deserializedEntry),
+              OrderedSet())
+          : this.deserializeAndReduceOntoField(newValue, fieldInfo,
+              (target, deserializedEntry) => target.push(deserializedEntry),
+              List());
+    } catch (error) {
+      throw this.wrapErrorEvent(error,
+          new Error(`deserializeField(${fieldInfo.name}: ${
+              fieldInfo.intro.namedType.name}${fieldInfo.intro.isSequence ? "[]" : ""})`),
+          "\n\tnewValue:", newValue,
+          "\n\tfieldInfo:", fieldInfo);
+    }
+  }
+
+  deserializeAndReduceOntoField (incomingSequence, fieldInfo, operation, target) {
+    return target.withMutations(mutableTarget => {
+      const deserializeSingular = _obtainSingularDeserializer(fieldInfo);
+      incomingSequence.forEach(!this.story.isBeingUniversalized
+          ? (serialized => operation(mutableTarget, deserializeSingular(serialized, this)))
+          : ((serialized, index) => {
+            const deserialized = deserializeSingular(serialized, this);
+            if (deserialized instanceof ValaaReference) {
+              incomingSequence[index] = deserialized.toJSON();
+            }
+            operation(mutableTarget, deserialized);
+          }));
+    });
+  }
+
+  /*
+  function deserializeAsArray (bard: Bard, sequence, fieldInfo) {
+    const ret = [];
+    try {
+      forEachDeserializeAndDo(bard, sequence, fieldInfo, deserialized => ret.push(deserialized));
+      return ret;
+    } catch (error) {
+      throw wrapError(error, `During ${bard.debugId()}\n .deserializeAsArray(), with:`,
+          "\n\tsequence:", sequence,
+          "\n\tfieldInfo:", fieldInfo,
+          "\n\taccumulated ret:", ret,
+          "\n\tbard:", bard);
+    }
+  }
+  */
+}
+
+function _obtainSingularDeserializer (fieldInfo) {
+  const ret = fieldInfo._valaaSingularDeserializer;
+  if (ret) return ret;
+  return (fieldInfo._valaaSingularDeserializer =
+      fieldInfo.intro.isLeaf
+          ? deserializeLeafValue
+      : fieldInfo.intro.isResource
+          ? _createResourceVRefDeserializer(fieldInfo)
+          : _createSingularDataDeserializer(fieldInfo));
+}
+
+function deserializeLeafValue (serialized) { return serialized; }
+
+function _createResourceVRefDeserializer (fieldInfo) {
+  function deserializeResourceVRef (serialized, bard) {
+    if (!serialized) return null;
+    const resourceId = bard.bindFieldVRef(
+        serialized, fieldInfo, bard.rootAction.local.partitionURI || null);
+    // Non-ghosts have the correct partitionURI in the Resource.id itself
+    if (resourceId.getPartitionURI() || !resourceId.isGhost()) return resourceId;
+    // Ghosts have the correct partitionURI in the host Resource.id
+    const ghostPath = resourceId.getGhostPath();
+    const hostId = bard.bindObjectRawId(ghostPath.headHostRawId(), "Resource");
+    return resourceId.immutatePartitionURI(hostId.getPartitionURI());
+  }
+  return deserializeResourceVRef;
+}
+
+function _createSingularDataDeserializer (fieldInfo) {
+  const concreteTypeName = (fieldInfo.intro.namedType instanceof GraphQLObjectType)
+      && fieldInfo.intro.namedType.name;
+  return function deserializeSingularData (data, bard: Bard) {
+    let objectIntro;
+    const isBeingUniversalized = bard.story.isBeingUniversalized;
+    try {
+      if (data === null) return null;
+      if (typeof data === "string") {
+        return bard.bindObjectRawId(data, concreteTypeName || "Data",
+            bard.rootAction.local.partitionURI || null);
+      } else if (Object.getPrototypeOf(data) !== Object.prototype) {
+        return bard.bindObjectIdData(data, concreteTypeName || "Data",
+            bard.rootAction.local.partitionURI || null);
+      }
+      const typeName = concreteTypeName || data.typeName;
+      if (!typeName) {
+        invariantifyString(typeName,
+          "Serialized expanded Data must have typeName field or belong to concrete field", {},
+          "\n\ttypeName:", typeName,
+          "\n\tdata:", data);
+      }
+      objectIntro = bard.schema.getType(typeName);
+      if (!objectIntro) invariantify(objectIntro, `Unknown Data type '${typeName}' in schema`);
+      return OrderedMap().withMutations(mutableExpandedData => {
+        const sortedFieldNames = Object.keys(data).sort();
+        for (const fieldName of sortedFieldNames) {
+          if (fieldName !== "typeName") {
+            const intro = objectIntro.getFields()[fieldName];
+            if (!intro) {
+              invariantify(intro, `Unknown Data field '${typeName}.${fieldName}' in schema`);
+            }
+            const serializedFieldValue = data[fieldName];
+            const deserializedValue = bard.deserializeField(serializedFieldValue, { intro });
+            if (isBeingUniversalized && (deserializedValue instanceof ValaaReference)) {
+              data[fieldName] = deserializedValue.toJSON();
+            }
+            mutableExpandedData.set(fieldName, deserializedValue);
+          } else if (!concreteTypeName) {
+            mutableExpandedData.set("typeName", typeName);
+          }
+        }
+      });
+    } catch (error) {
+      throw wrapError(error, `During ${bard.debugId()
+              }\n.deserializeSingularData(parent field: '${fieldInfo.name}'), with:`,
+          "\n\tdata:", data,
+          "\n\tobject intro:", objectIntro,
+          "\n\tparent fieldInfo:", fieldInfo,
+          "\n\tparent field type:", fieldInfo.intro.namedType,
+          "\n\tisResource:", fieldInfo.intro.isResource,
+          "\n\tbard:", bard);
+    }
+  };
 }

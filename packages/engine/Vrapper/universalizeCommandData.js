@@ -5,10 +5,11 @@ import { Kuery } from "~/raem/VALK";
 import Vrapper from "~/engine/Vrapper";
 
 import { invariantifyObject } from "~/tools/invariantify";
-import wrapError from "~/tools/wrapError";
+import wrapError, { dumpObject } from "~/tools/wrapError";
 
 export default function universalizeCommandData (object: ?any, options:
     { head?: Vrapper, transaction?: Object, scope?: Object, partitionURIString?: string } = {}) {
+  let id, connectedId;
   try {
     if ((typeof object !== "object") || (object === null)) {
       // Literal
@@ -28,7 +29,7 @@ export default function universalizeCommandData (object: ?any, options:
       return object.map(entry => universalizeCommandData(entry, options));
     }
 
-    const id = tryIdFromObject(object);
+    id = tryIdFromObject(object);
     if (!id) {
       // Plain data object
       if (Object.getPrototypeOf(object) !== Object.prototype) {
@@ -43,14 +44,25 @@ export default function universalizeCommandData (object: ?any, options:
 
     // Valaa reference
     if (!options.transaction) return id;
-    const connectedId = options.transaction.bindFieldVRef(id, { bindPartition: true });
+    connectedId = options.transaction.bindFieldVRef(id, {}, null);
     const partitionURI = connectedId.getPartitionURI();
-    if (partitionURI && (partitionURI.toString() === options.partitionURIString)) {
-      return connectedId.immutatePartitionURI();
+    if (partitionURI) {
+      if (partitionURI.toString() === options.partitionURIString) {
+        return connectedId.immutatePartitionURI();
+      }
+    } else if (connectedId.isGhost()) {
+      const ghostPartitionURI = options.transaction.bindObjectRawId(
+          id.getGhostPath().headHostRawId(), "Resource").getPartitionURI();
+      if (ghostPartitionURI.toString() !== options.partitionURIString) {
+        return connectedId.immutatePartitionURI(partitionURI);
+      }
+    }
     }
     return connectedId;
   } catch (error) {
-    throw wrapError(error, `During universalizeCommandData(`, object, `)`);
+    throw wrapError(error, `During universalizeCommandData(`, object, `), with:`,
+        "\n\tid:", ...dumpObject(id),
+        "\n\tconnectedId:", ...dumpObject(connectedId));
   }
 }
 

@@ -19,7 +19,10 @@ export {                   default as PartitionConnection } from "./api/Partitio
 export {                   default as Prophet } from "./api/Prophet";
 export                           type Transaction = Object;
 
-export {                   default as FalseProphet } from "./FalseProphet";
+export {
+                           default as FalseProphet,
+                                      deserializeVRef,
+} from "./FalseProphet";
 export {
                            default as FalseProphetDiscourse
 } from "./FalseProphet/FalseProphetDiscourse";

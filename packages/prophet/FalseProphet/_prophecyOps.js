@@ -12,9 +12,10 @@ import extractPartitionEvent0Dot2
     from "~/prophet/tools/event-version-0.2/extractPartitionEvent0Dot2";
 import { tryAspect } from "~/prophet/tools/EventAspects";
 
-import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
+import { dumpify, dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
 
-import FalseProphet, { universalizeEvent } from "./FalseProphet";
+import FalseProphet from "./FalseProphet";
+import { universalizeEvent } from "./_universalizationOps";
 import { _rejectLastProphecyAsHeresy, _recomposeStoryFromPurgedEvent } from "./_storyOps";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 

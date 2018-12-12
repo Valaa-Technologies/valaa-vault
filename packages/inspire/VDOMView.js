@@ -3,9 +3,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-
-import { vRefFromURI } from "~/raem/ValaaReference";
-
 import Vrapper from "~/engine/Vrapper";
 import Cog from "~/engine/Cog";
 
@@ -21,11 +18,11 @@ export default class VDOMView extends Cog {
         throw new Error(`No options.rootLensURI found for view ${name}`);
       }
       // Load project
-      const lensRef = vRefFromURI(rootLensURI);
+      const lensRef = this.engine.discourse.obtainReference(rootLensURI);
       this._rootConnection = await this.engine.getProphet()
           .acquirePartitionConnection(lensRef.getPartitionURI())
           .getSyncedConnection();
-      this._vViewFocus = await this.engine.getVrapper(
+      this._vViewFocus = await this.engine.getVrapperByRawId(
           lensRef.rawId() || this._rootConnection.getPartitionRawId());
       await this._vViewFocus.activate();
       this.warnEvent(`attach(): partition '${this._vViewFocus.get("name")}' UI view focus set:`,

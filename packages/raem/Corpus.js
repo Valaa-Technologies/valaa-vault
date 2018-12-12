@@ -6,6 +6,7 @@ import type { Action } from "~/raem/events";
 import Bard from "~/raem/redux/Bard";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
 
+import { dumpify } from "~/tools";
 import { dumpObject } from "~/tools/wrapError";
 
 /**
@@ -25,13 +26,13 @@ import { dumpObject } from "~/tools/wrapError";
  */
 export default class Corpus extends Bard {
   constructor ({
-    schema, verbosity, logger, middlewares, reduce, subReduce, initialState, obtainReference,
+    schema, verbosity, logger, middlewares, reduce, subReduce, initialState, deserializeReference,
   }: Object) {
     invariantifyObject(schema, "schema");
     invariantifyFunction(reduce, "reduce");
     invariantifyFunction(subReduce, "subReduce");
     invariantifyObject(initialState, "initialState", { allowUndefined: true });
-    super({ schema, verbosity, logger, subReduce: subReduce || reduce, obtainReference });
+    super({ schema, verbosity, logger, subReduce: subReduce || reduce, deserializeReference });
     // TODO(iridian): These indirections are spaghetti. Simplify.
     this.reduce = reduce;
     this._dispatch = middlewares.reduceRight(
@@ -44,21 +45,21 @@ export default class Corpus extends Bard {
     this.reinitialize(initialState);
   }
 
-  dispatch (action: Action, description: string) {
+  dispatch (event: Action, description: string) {
     const prevName = this.getName();
     try {
-      this.setName(!(action.local || {}).partitions
+      this.setName(!(event.local || {}).partitions
           ? `${description}`
           : `${description}: ${
-              Object.entries(action.local.partitions)
+              Object.entries(event.local.partitions)
                   .map(([id]) => `${id.slice(0, 26)}...}`)
                   .join(", ")
               }`);
-      this.logEvent(1, "dispatch:", JSON.stringify(action));
-      return this._dispatch(action, this);
+      this.logEvent(1, () => ["dispatching event:", JSON.stringify(event)]);
+      return this._dispatch(event, this);
     } catch (error) {
       throw this.wrapErrorEvent(error, `dispatch()`,
-          "\n\taction:", ...dumpObject(action),
+          "\n\tevent:", dumpify(event),
           "\n\tthis:", ...dumpObject(this),
       );
     } finally {

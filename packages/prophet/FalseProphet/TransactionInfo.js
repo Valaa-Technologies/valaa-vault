@@ -10,7 +10,7 @@ import type { Transaction } from "~/prophet/api/Transaction";
 
 import { dumpObject, invariantify } from "~/tools";
 
-import { universalizeEvent, universalizeAction } from "./FalseProphet";
+import { universalizeEvent, universalizeAction } from "./_universalizationOps";
 
 let transactionCounter = 0;
 
@@ -68,15 +68,15 @@ export default class TransactionInfo {
       // universal TRANSACTED. This is an awkward way to incrementally
       // construct the transacted.
       // Maybe javascript generators could somehow be useful here?
-      const actions = events.map(event => universalizeAction(event));
-      const universalTransacted = { ...this.transacted, actions };
+      this.transacted.actions = events.map(event => universalizeAction(event));
+
       const previousState = this.transaction.state;
       const transactionStory = this.transaction.corpus.dispatch(
-          universalTransacted, this.transactionDescription);
+          this.transacted, this.transactionDescription);
       // Only alter transaction internals after the dispatch has
       // performed the content validations.
-      this.actions.push(...actions);
-      this.latestUniversalTransacted = universalTransacted;
+      this.actions.push(...this.transacted.actions);
+      this.transacted.actions = [];
       this.passages.push(...transactionStory.passages);
       Object.assign(this.universalPartitions, (transactionStory.local || {}).partitions);
       const state = this.transaction.corpus.getState();
@@ -188,7 +188,7 @@ export default class TransactionInfo {
     // this.logEvent(`Committed '${transactionInfo.name}'`, story);
 
     const universalTransactedLike = {
-      ...this.latestUniversalTransacted,
+      ...this.transacted,
       ...this._finalCommand,
       actions: this.passages.map(passage => getActionFromPassage(passage)),
       local: { partitions: this.universalPartitions },

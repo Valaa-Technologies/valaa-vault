@@ -276,10 +276,9 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
         `sets the host owner of *this* Resource to the given *owner*, with optionally${
           ""} given *coupledFieldName*. The coupledFieldName default value is based on the type of${
           ""} this resource as either 'unnamedOwnlings', 'properties', 'relations' or 'listeners'`
-    )(function setOwner (owner,
-        coupledFieldName = (scope[this.name] && scope[this.name][defaultOwnerCoupledField])
-            || "unnamedOwnlings") {
-      return this.setField("owner", owner.getId().coupleWith(coupledFieldName),
+    )(function setOwner (owner, coupledField
+        = (scope[this.name] && scope[this.name][defaultOwnerCoupledField]) || "unnamedOwnlings") {
+      return this.setField("owner", owner.getId().coupleWith(coupledField),
           { transaction: this.__callerValker__ });
     }),
 

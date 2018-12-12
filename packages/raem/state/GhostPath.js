@@ -145,6 +145,16 @@ export default class GhostPath {
     return this.withNewStep(this.headRawId(), instanceRawId, instanceRawId);
   }
 
+  toURIString (): string {
+    const json = this.toJSON();
+    let ret = json[0];
+    for (const step of json.slice(1)) {
+      if (typeof step === "string") ret = step;
+      else ret = `${encodeURIComponent(step[1])}/@:${ret}`;
+    }
+    return ret;
+  }
+
   toString (): string {
     const json = this.toJSON();
     return `path(${json.slice(1).reduce((accum, step) => (typeof step === "string"

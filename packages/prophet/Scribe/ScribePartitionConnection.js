@@ -1,7 +1,7 @@
 // @flow
 
 import type { EventBase } from "~/raem/events";
-import { VRef, obtainVRef } from "~/raem/ValaaReference";
+import { VRef } from "~/raem/ValaaReference";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import {
@@ -9,6 +9,7 @@ import {
   ReceiveEvents, RetrieveMediaBuffer,
 } from "~/prophet/api/types";
 import { tryAspect } from "~/prophet/tools/EventAspects";
+import { deserializeVRef } from "~/prophet/FalseProphet";
 
 import { DelayedQueue, dumpObject, thenChainEagerly } from "~/tools";
 
@@ -234,7 +235,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   _reloadCommandQueue (/* conflictingCommandEventId: number */) {}
 
   _determineEventMediaPreOps (mediaEvent: Object, rootEvent: Object) {
-    const mediaId = obtainVRef(mediaEvent.id);
+    const mediaId = deserializeVRef(mediaEvent.id);
     let pendingEntry = this._pendingMediaLookup[mediaId.rawId()];
     try {
       return _determineEventMediaPreOps(this, mediaEvent, rootEvent, mediaId, pendingEntry);

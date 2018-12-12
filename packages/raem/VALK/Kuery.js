@@ -6,6 +6,7 @@ import inBrowser from "~/tools/inBrowser";
 import invariantify, { invariantifyArray, invariantifyNumber, invariantifyString,
     invariantifyObject } from "~/tools/invariantify";
 import wrapError, { dumpObject as _dumpObject } from "~/tools/wrapError";
+
 import { isHostRef, tryHostRef } from "./hostReference";
 
 /**
@@ -263,7 +264,7 @@ export default class Kuery {
   fromValue (value: any, headType: ?string): Kuery {
     const hostRef = tryHostRef(value);
     return this._addRawVAKON(
-        hostRef ? [`§${hostRef.shortTypeof()}`, hostRef.toJSON()]
+        hostRef ? [`§ref`, hostRef.toJSON()]
             : (typeof value === "undefined") ? this._root.void()
             : ["§'", value],
         headType);

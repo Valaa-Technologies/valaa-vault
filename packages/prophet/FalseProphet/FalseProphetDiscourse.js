@@ -18,7 +18,7 @@ import createResourceId0Dot2, { createPartitionId0Dot2 }
     from "~/prophet/tools/event-version-0.2/createResourceId0Dot2";
 import { tryAspect } from "~/prophet/tools/EventAspects";
 
-import { invariantify, invariantifyObject } from "~/tools";
+import { dumpify, invariantify, invariantifyObject } from "~/tools";
 import valaaUUID from "~/tools/id/valaaUUID";
 
 export default class FalseProphetDiscourse extends Discourse {
@@ -32,6 +32,7 @@ export default class FalseProphetDiscourse extends Discourse {
     // goes to Valker
     super(prophet.corpus.schema, verbosity, logger, packFromHost, unpackToHost, builtinSteppers);
     invariantifyObject(follower, "FalseProphetDiscourse.constructor.follower");
+    this.setDeserializeReference(prophet.deserializeReference);
     this.nonTransactionalBase = this;
     this.corpus = prophet.corpus;
     this._follower = follower;
@@ -115,7 +116,8 @@ export default class FalseProphetDiscourse extends Discourse {
     const root = this._transactionInfo ? this._transactionInfo.transacted : targetAction;
     if (!tryAspect(root, "command").id) this._prophet._assignCommandId(root, this);
     const partitions = (root.local || (root.local = {})).partitions || (root.local.partitions = {});
-    const partition = partitions[partitionURI] || (partitions[partitionURI] = { createIndex: 0 });
+    const partition = partitions[partitionURI] || (partitions[partitionURI] = {});
+    if (!partition.createIndex) partition.createIndex = 0;
     let resourceRawId;
     if (!explicitRawId) {
       resourceRawId = createResourceId0Dot2(

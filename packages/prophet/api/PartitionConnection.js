@@ -107,13 +107,16 @@ export default class PartitionConnection extends Follower {
   connect (options: ConnectOptions) {
     const onError = errorOnConnect.bind(this, new Error("connect"));
     try {
-      this.warnEvent(1, "\n\tBegun connecting with options",
-          ...dumpObject(options), ...dumpObject(this));
+      this.warnEvent(1, () => [
+        "\n\tBegun connecting with options", ...dumpObject(options), ...dumpObject(this)
+      ]);
       return this._syncedConnection || (this._syncedConnection = thenChainEagerly(
           this._connect(options, onError),
           (connectResults) => {
-            this.warnEvent(1, "\n\tDone connecting with results:", connectResults,
-                "\n\tstatus:", this.getStatus());
+            this.warnEvent(1, () => [
+              "\n\tDone connecting with results:", connectResults,
+              "\n\tstatus:", this.getStatus(),
+            ]);
             return (this._syncedConnection = this);
           },
           onError,

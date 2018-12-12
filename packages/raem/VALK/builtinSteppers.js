@@ -443,13 +443,13 @@ export function debugWrapBuiltinSteppers (steppers: { [string]: Function }) {
   ret = {};
   for (const [stepName, stepper: Function] of Object.entries(steppers)) {
     ret[stepName] = function ( // eslint-disable-line
-        valker: Valker, head: any, scope: ?Object, step: any, nonFinalStep: ?boolean) {
+        valker: Valker, head: any, scope: ?Object, step: any, ...rest) {
       valker.log("  ".repeat(valker._indent++),
           `{ '${stepName}'/${stepper.name}, args:`, ...step.slice(1),
           ", head:", ...dumpObject(head), ", scope:", dumpScope(scope));
       let nextHead;
       try {
-        nextHead = stepper(valker, head, scope, step, nonFinalStep);
+        nextHead = stepper(valker, head, scope, step, ...rest);
         return nextHead;
       } finally {
         valker.log("  ".repeat(--valker._indent),

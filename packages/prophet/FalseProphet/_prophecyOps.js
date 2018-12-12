@@ -58,16 +58,20 @@ export function _confirmProphecyCommand (connection: FalseProphetPartitionConnec
   if (operation) {
     const partition = operation._partitions[String(connection.getPartitionURI())];
     if (!partition) {
-      connection.warnEvent(0, "confirmProphecyCommand operation partition missing",
-          "\n\tcommand:", ...dumpObject(command),
-          "\n\toperation:", ...dumpObject(operation));
+      connection.warnEvent(0, () => [
+        "confirmProphecyCommand operation partition missing",
+        "\n\tcommand:", ...dumpObject(command),
+        "\n\toperation:", ...dumpObject(operation),
+      ]);
       return false;
     }
     if (!partition.confirmCommand) return false;
     /*
-    connection.warnEvent(1, "\n\t.confirmProphecyCommand:",
-        "\n\tprophecy:", ...dumpObject(prophecy),
-        "\n\tcommand:", ...dumpObject(command));
+    connection.warnEvent(1, () => [
+      "\n\t.confirmProphecyCommand:",
+      "\n\tprophecy:", ...dumpObject(prophecy),
+      "\n\tcommand:", ...dumpObject(command),
+    ]);
     */
     partition.confirmCommand(command);
     partition.confirmCommand = null;
@@ -85,12 +89,14 @@ export function _reformProphecyCommand (connection: FalseProphetPartitionConnect
   const partition = prophecy[ProphecyOperationTag]
       ._partitions[String(connection.getPartitionURI())];
   const originalCommand = partition.commandEvent;
-  connection.warnEvent(1, "\n\treforming prophecy", tryAspect(prophecy, "command").id,
-          `command #${tryAspect(originalCommand, "log").index} with command #${
-              tryAspect(reformedCommand, "log").index}`,
-      "\n\toriginal command:", ...dumpObject(originalCommand),
-      "\n\treformed command:", ...dumpObject(reformedCommand),
-      "\n\treformed prophecy:", ...dumpObject(prophecy));
+  connection.warnEvent(1, () => [
+    "\n\treforming prophecy", tryAspect(prophecy, "command").id,
+    `command #${tryAspect(originalCommand, "log").index} with command #${
+        tryAspect(reformedCommand, "log").index}`,
+    "\n\toriginal command:", ...dumpObject(originalCommand),
+    "\n\treformed command:", ...dumpObject(reformedCommand),
+    "\n\treformed prophecy:", ...dumpObject(prophecy),
+  ]);
   partition.commandEvent = reformedCommand;
 }
 
@@ -103,10 +109,12 @@ export function _reviewPurgedProphecy (connection: FalseProphetPartitionConnecti
     return undefined;
   }
   /*
-  connection.warnEvent(1, "\n\treviewed prophecy", tryAspect(reviewed, "command").id,
-      "\n\tpurged prophecy:", ...dumpObject(purged),
-      "\n\treviewed prophecy:", ...dumpObject(reviewed),
-      "\n\tbase command:", getActionFromPassage(purged));
+  connection.warnEvent(1, () => [
+    "\n\treviewed prophecy", tryAspect(reviewed, "command").id,
+    "\n\tpurged prophecy:", ...dumpObject(purged),
+    "\n\treviewed prophecy:", ...dumpObject(reviewed),
+    "\n\tbase command:", getActionFromPassage(purged),
+  ]);
   */
   return reviewed;
 }
@@ -234,8 +242,8 @@ class ProphecyOperation extends ProphecyEventResult {
   errorOnProphecyOperation (errorWrap, error) {
     throw this._prophet.wrapErrorEvent(error, errorWrap,
         "\n\tevents:", ...dumpObject(this._events),
-        "\n\tevent:", ...dumpObject(this._events[this.index]),
-        "\n\tprophecy:", ...dumpObject(this.event),
+        "\n\tevent:", dumpify(this._events[this.index], { indent: 2 }),
+        "\n\tprophecy:", dumpify(this.event, { indent: 2 }),
         "\n\toperation:", ...dumpObject(this),
     );
   }

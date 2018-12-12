@@ -80,7 +80,7 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
 }
 
 export const createdTestPartitionEntity = created({
-  id: "test_partition", typeName: "Entity",
+  id: ["test_partition"], typeName: "Entity",
   initialState: {
     name: "Automatic Test Partition Root",
     partitionAuthorityURI: "valaa-test:",
@@ -90,6 +90,7 @@ export const createdTestPartitionEntity = created({
 export default class ProphetTestHarness extends ScriptTestHarness {
   constructor (options: Object) {
     super(options);
+    this.nextCommandIdIndex = 1;
     if (options.oracleOptions) {
       this.upstream = this.oracle = createOracle(options.oracleOptions);
     } else {
@@ -113,8 +114,6 @@ export default class ProphetTestHarness extends ScriptTestHarness {
           ]),
           ([conn]) => (this.testPartitionConnection = conn),
         ]);
-
-    this.nextCommandIdIndex = 1;
   }
 
   chronicleEvents (events: EventBase[], ...rest: any) {

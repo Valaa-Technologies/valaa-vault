@@ -59,7 +59,7 @@ export type VALKOptions = {
  *   valk (head, step: number) => head[step]               // access rule
  *
  *   map (container, step) =>
- *     container.map(entry => reduce(entry, step)).filter(v => (typeof v != "undefined"))
+ *     container.map(entry => reduce(entry, step)).filter(v => (v !==  undefined))
  *
  *   reduce(head, reduceSteps: array) =>
  *     reduceSteps.reduce((midPoint, reductionStep) => valk(midPoint, reductionStep)), head)
@@ -136,10 +136,10 @@ export default class Valker extends Resolver {
 
   run (head: any, kuery: any, { scope, state, verbosity, pure, sourceInfo }: VALKOptions = {}) {
     const valker = Object.create(this);
-    if (typeof pure !== "undefined") valker.pure = pure;
-    if (typeof verbosity !== "undefined") valker._indent = verbosity - 2;
-    if (typeof state !== "undefined") valker.setState(state);
-    if (typeof sourceInfo !== "undefined") valker._sourceInfo = sourceInfo;
+    if (pure !== undefined) valker.pure = pure;
+    if (verbosity !== undefined) valker._indent = verbosity - 2;
+    if (state !== undefined) valker.setState(state);
+    if (sourceInfo !== undefined) valker._sourceInfo = sourceInfo;
 
     const packedHead = valker.tryPack(head);
     let kueryVAKON = kuery;
@@ -154,7 +154,7 @@ export default class Valker extends Resolver {
       if (valker._indent < -1) {
         ret = valker.tryUnpack(valker.advance(packedHead, kueryVAKON, scope));
       } else {
-        if (typeof packedHead === "undefined") throw new Error("Head missing for kuery");
+        if (packedHead === undefined) throw new Error("Head missing for kuery");
         const indent = valker._indent < 0 ? 0 : valker._indent;
         if (valker._indent >= 0) {
           valker._builtinSteppers = debugWrapBuiltinSteppers(valker._builtinSteppers);
@@ -176,7 +176,7 @@ export default class Valker extends Resolver {
             "\n", "  ".repeat(indent), "      final scope:", dumpScope(scope),
             "\n", "  ".repeat(indent), "      result (packed):", dumpify(packedResult),
             "\n", "  ".repeat(indent), "      result:", ...dumpObject(valker.tryUnpack(packedResult,
-                ({ id, typeName, value, objectGhostPath }) => ((typeof value !== "undefined")
+                ({ id, typeName, value, objectGhostPath }) => ((value !== undefined)
                     ? value
                     : `{${id}:${typeName}/${dumpify(objectGhostPath)}}`))));
       }
@@ -236,7 +236,7 @@ export default class Valker extends Resolver {
         case "number": // Index lookup
           return this.index(head, step, nonFinalStep ? scope : undefined);
         case "boolean": // nonNull op. nullable only makes a difference in paths.
-          if (step === true && ((head === null) || (typeof head === "undefined"))) {
+          if (step === true && ((head === null) || (head === undefined))) {
             throw new Error(`Valk head is '${head}' at notNull assertion`);
           }
           return head;
@@ -460,7 +460,7 @@ export default class Valker extends Resolver {
       }
       let ret;
       const singularTransient = this._trySingularTransientFromObject(value, false);
-      if (typeof singularTransient !== "undefined") {
+      if (singularTransient !== undefined) {
         if (this._indent >= 0) {
           this.log("  ".repeat(this._indent), "unpacking singular:", ...dumpObject(value),
               "\n\t", "  ".repeat(this._indent), "transient:", ...dumpObject(singularTransient),
@@ -469,7 +469,7 @@ export default class Valker extends Resolver {
               ] : []));
         }
         ret = this.unpack(singularTransient);
-      } else if (typeof value._sequence !== "undefined") {
+      } else if (value._sequence !== undefined) {
         if (this._indent >= 0) {
           this.log("  ".repeat(this._indent), "unpacking sequence:", ...dumpObject(value));
         }
@@ -481,8 +481,7 @@ export default class Valker extends Resolver {
           // TODO(iridian): Do we allow undefined entries in our unpacked arrays? Now we do.
               .forEach(entry => {
                 const hostRef = tryHostRef(entry);
-                const transient = !hostRef ? entry
-                    : this.tryGoToTransient(hostRef, value._type);
+                const transient = !hostRef ? entry : this.tryGoToTransient(hostRef, value._type);
                 ret.push(this.unpack(transient));
               });
         }
@@ -529,7 +528,7 @@ export default class Valker extends Resolver {
         ret = object;
       } else if (object instanceof ValaaReference) {
         ret = this.tryGoToTransient(object, "TransientFields", require, false);
-      } else if (typeof object._singular !== "undefined") {
+      } else if (object._singular !== undefined) {
         if (!isIdData(object._singular)) {
           ret = object._singular;
         } else {

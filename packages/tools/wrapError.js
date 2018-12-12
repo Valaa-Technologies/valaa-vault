@@ -171,7 +171,7 @@ export function outputCollapsedError (error, header = "Exception caught", logger
 
 export function debugObject (head) { return debugObjectNest(head); }
 export function debugObjectHard (head) { return debugObjectNest(head, 1, true); }
-export function debugObjectType (head) { return debugObjectNest(head, 0); }
+export function debugObjectType (head) { return debugObjectNest(head, false, false); }
 
 export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
   try {
@@ -180,7 +180,8 @@ export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
     if (!head || (!alwaysStringify && inBrowser())) return head;
     if (typeof head === "function") {
       if (head.name) return `<function name="${head.name}">`;
-      return `<lambda body.length=${head.toString().length}>`;
+      const lineCount = (head.toString().match(/\n/g) || []).length + 1;
+      return `<lambda body.lines=${lineCount}>`;
     }
     if (head instanceof Function) return `<Function name="${head.name}">`;
     if (isSymbol(head)) return `<${head.toString()}>`;
@@ -193,7 +194,7 @@ export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
       if (head instanceof Set) return `<Set size=${head.size}>`;
       if (head[Symbol.iterator]) return `<Iterable ${head.constructor.name}>`;
     }
-    if (head.toString
+    if (head.toString && (typeof nest === "number")
         && (head.toString !== Object.prototype.toString)
         && (head.toString !== Array.prototype.toString)) {
       return head.toString(nest);

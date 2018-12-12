@@ -147,13 +147,12 @@ function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalRef: VR
     originalGhostPath = originalRef.tryGhostPath();
     const recombineOverriddenId = bard._duplicateIdByOriginalRawId[originalOwnlingRawId];
     if (typeof recombineOverriddenId !== "undefined") {
-      if (bard.getVerbosity() >= 2) {
-        bard.logEvent(`virtually recombining to sub-directive ${
-          dumpify(recombineOverriddenId, { sliceAt: 40, sliceSuffix: "..." })}:${
-          bard.objectTypeName} ${
-          dumpify({ duplicateOf: originalRef, initialState: { ownerId } }, { sliceAt: 380 })
-        }`);
-      }
+      bard.logEvent(2, () => [
+        `virtually recombining to sub-directive ${
+            dumpify(recombineOverriddenId, { sliceAt: 40, sliceSuffix: "..." })}:${
+            bard.objectTypeName} ${
+            dumpify({ duplicateOf: originalRef, initialState: { ownerId } }, { sliceAt: 380 })}`
+      ]);
       return recombineOverriddenId;
     }
 
@@ -176,12 +175,10 @@ function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalRef: VR
     if (bard.objectTransient) {
       const owner = ownerId.coupleWith(bard.objectTransient.get("owner").getCoupledField());
       // Not an immaterial ghost, ie. a material ghost or normal object: do full deep duplication
-      if (bard.getVerbosity() >= 2) {
-        bard.logEvent(`Sub-reducing virtual DUPLICATED ${
+      bard.logEvent(2, () => [`Sub-reducing virtual DUPLICATED ${
           dumpify(newObjectId, { sliceAt: 40, sliceSuffix: "..." })}:${bard.objectTypeName} ${
-          dumpify({ duplicateOf: originalRef, initialState: { owner } }, { sliceAt: 380 })
-        }`);
-      }
+          dumpify({ duplicateOf: originalRef, initialState: { owner } }, { sliceAt: 380 })}`
+      ]);
       _createDuplicate(bard, newObjectId, bard.objectTypeName, { owner });
     }
     return newObjectId;

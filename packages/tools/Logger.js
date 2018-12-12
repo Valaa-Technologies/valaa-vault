@@ -52,30 +52,39 @@ export class LogEventGenerator {
   warn (...rest: any[]) { return this._logger.warn(...rest); }
   error (...rest: any[]) { return this._logger.error(...rest); }
 
-  infoEvent (minVerbosity: any, ...messagePieces: any[]) {
+  infoEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._logger.info(`${this.debugId()}:`,
-        ...((typeof minVerbosity !== "number") ? [minVerbosity] : []),
-        ...messagePieces);
+    return this._outputMessageEvent(this._logger.info.bind(this._logger),
+        minVerbosity, maybeFunction, ...messagePieces);
   }
-  logEvent (minVerbosity: any, ...messagePieces: any[]) {
+  logEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._logger.log(`${this.debugId()}:`,
-        ...((typeof minVerbosity !== "number") ? [minVerbosity] : []),
-        ...messagePieces);
+    return this._outputMessageEvent(this._logger.log.bind(this._logger),
+        minVerbosity, maybeFunction, ...messagePieces);
   }
-  warnEvent (minVerbosity: any, ...messagePieces: any[]) {
+  warnEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._logger.warn(`${this.debugId()}:`,
-        ...((typeof minVerbosity !== "number") ? [minVerbosity] : []),
-        ...messagePieces);
+    return this._outputMessageEvent(this._logger.warn.bind(this._logger),
+        minVerbosity, maybeFunction, ...messagePieces);
   }
-  errorEvent (minVerbosity: any, ...messagePieces: any[]) {
+  errorEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._logger.error(`${this.debugId()}:`,
-        ...((typeof minVerbosity !== "number") ? [minVerbosity] : []),
-        ...messagePieces);
+    return this._outputMessageEvent(this._logger.error.bind(this._logger),
+        minVerbosity, maybeFunction, ...messagePieces);
   }
+  _outputMessageEvent (operation: Function, minVerbosity: any, maybeFunction: any,
+      ...messagePieces: any[]) {
+    let pieces = (typeof minVerbosity === "number") && !messagePieces.length
+            && (typeof maybeFunction === "function") && maybeFunction();
+    if (!Array.isArray(pieces)) {
+      pieces = pieces ? [pieces]
+          : typeof minVerbosity !== "number" ? [minVerbosity, maybeFunction, ...messagePieces]
+          : typeof maybeFunction !== "function" ? [maybeFunction, ...messagePieces]
+          : messagePieces;
+    }
+    return operation(`${this.debugId()}:`, ...pieces);
+  }
+
   wrapErrorEvent (error: Error, functionName: Error | string, ...contexts: any[]) {
     // Don't rewrap the error if it's already wrapped with the same functionName in the same context
     const actualFunctionName = functionName instanceof Error ? functionName.message : functionName;

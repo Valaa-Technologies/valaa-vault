@@ -249,13 +249,15 @@ export function _reviseSchismaticRecital (falseProphet: FalseProphet,
   }
   if (rejectedSchisms.length) {
     rejectedSchisms.forEach(herecy => _rejectHereticProphecy(falseProphet, herecy));
-    originatingConnection.errorEvent(1, "\n\nSCHISMS REJECTED (ie. conflicting prophecies):",
-        "\n\trejected schisms:", ...dumpObject(rejectedSchisms),
-        "\n\tof schismatic recital:", ...dumpObject(schismaticRecital),
-        "\n\treviewed partitions:", ...dumpObject(reviewedPartitions),
-        "\n\toriginating partition:", ...dumpObject(originatingConnection),
-        "\n\tpurged stories:", ...dumpObject(purgedStories),
-        "\n\tnew events:", ...dumpObject(newEvents));
+    originatingConnection.errorEvent(1, () => [
+      "\n\nSCHISMS REJECTED (ie. conflicting prophecies):",
+      "\n\trejected schisms:", ...dumpObject(rejectedSchisms),
+      "\n\tof schismatic recital:", ...dumpObject(schismaticRecital),
+      "\n\treviewed partitions:", ...dumpObject(reviewedPartitions),
+      "\n\toriginating partition:", ...dumpObject(originatingConnection),
+      "\n\tpurged stories:", ...dumpObject(purgedStories),
+      "\n\tnew events:", ...dumpObject(newEvents),
+    ]);
   }
   return ret;
 }
@@ -328,11 +330,13 @@ if (falseProphet.getVerbosity() === 1) {
     : "Done claiming a local event"} of authority "${authorityURIs[0]}":`,
     "of partitions:", ...[].concat(...partitionDatas.map(([pdata]) => [conn.getName()])));
 } else if (falseProphet.getVerbosity() >= 2) {
-  falseProphet.warnEvent(2, `Done ${remoteAuthority
-          ? "queuing a remote command locally"
-          : "claiming a local event"} of authority "${authorityURIs[0]}":`,
-      "\n\tpartitions:", ...partitionDatas.map(([, conn]) => conn.getName()),
-      "\n\tcommand:", operation.prophecy);
+  falseProphet.warnEvent(2, () => [
+    `Done ${remoteAuthority
+        ? "queuing a remote command locally"
+        : "claiming a local event"} of authority "${authorityURIs[0]}":`,
+    "\n\tpartitions:", ...partitionDatas.map(([, conn]) => conn.getName()),
+    "\n\tcommand:", operation.prophecy,
+  ]);
 }
 
 if (!remoteAuthority) {
@@ -354,10 +358,12 @@ try {
       new Error("chronicleEvents.remoteAuthority.chronicleEvent"));
 }
 if (falseProphet.getVerbosity() === 1) {
-  falseProphet.logEvent(1, `Done claiming remote command of authority`, remoteAuthority,
-      "and of partitions:", ...[].concat(...partitionDatas.map(([pdata]) => [conn.getName()])));
+  falseProphet.logEvent(1, () => [
+    `Done claiming remote command of authority`, remoteAuthority,
+    "and of partitions:", ...[].concat(...partitionDatas.map(([pdata]) => [conn.getName()])),
+  ]);
 } else if (falseProphet.getVerbosity() === 2) {
-  falseProphet.warnEvent(2, `Done claiming remote command"`, ret);
+  falseProphet.warnEvent(2, () => [`Done claiming remote command"`, ret]);
 }
 */
 

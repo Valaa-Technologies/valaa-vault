@@ -1558,7 +1558,7 @@ export default class Kuery {
     this._VAKON = undefined;
     switch (this._mode) {
       case "rawVAKON":
-        invariantify(typeof first !== "undefined", "rawVAKON can't be undefined");
+        invariantify(first !== undefined, "rawVAKON can't be undefined");
         this._VAKON = first;
         break;
       case "path":
@@ -1613,7 +1613,7 @@ export default class Kuery {
 
   _addStepsTypeless (step: any, ...steps: any) {
     try {
-      if (typeof step === "undefined") return this;
+      if (step === undefined) return this;
       if (this.isActiveKuery() || steps.length) {
         return this._newPath((this._pathOperator || "§->"),
             [...(this._pathSteps || (this.isActiveKuery() && [this]) || []), step, ...steps]);

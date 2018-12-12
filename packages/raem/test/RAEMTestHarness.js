@@ -4,12 +4,14 @@ import type { EventBase } from "~/raem/events";
 import createRootReducer from "~/raem/tools/createRootReducer";
 import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent";
 import { createBardMiddleware } from "~/raem/redux/Bard";
+import ValaaURI from "~/raem/ValaaURI";
 
 import RAEMTestAPI from "~/raem/test/RAEMTestAPI";
 
 import Corpus from "~/raem/Corpus";
 import Valker from "~/raem/VALK/Valker";
 
+import { trivialCloneWith } from "~/tools/trivialClone";
 import { dumpObject, LogEventGenerator, wrapError } from "~/tools";
 
 const TEST_EVENT_VERSION = "0.2";
@@ -75,8 +77,13 @@ export default class RAEMTestHarness extends LogEventGenerator {
   chronicleEvents (events: EventBase[]) {
     try {
       return {
-        eventResults: events.map(event => {
-          if (!event.local) event.local = { isBeingUniversalized: true };
+        eventResults: events.map(event_ => {
+          const event = trivialCloneWith(event_,
+              entry => (entry instanceof ValaaURI ? entry : undefined));
+          if (!event.local) event.local = {};
+          if (event.local.isBeingUniversalized === undefined) {
+            event.local.isBeingUniversalized = true;
+          }
           const story = this.corpus.dispatch(event);
           return {
             event, story, getTruthEvent: () => event,

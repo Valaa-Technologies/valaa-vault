@@ -55,11 +55,15 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
 
   if ((options.fullNarrate !== true)
       && ((ret.scribeEventLog || []).length || (ret.scribeCommandQueue || []).length)) {
-    connection.logEvent(2, "Initiated async upstream narration, local narration results:", ret);
+    connection.logEvent(2, () => [
+      "Initiated async upstream narration, local narration results:", ret,
+    ]);
   } else {
     const upstreamResults = await _waitForRemoteNarration(connection, upstreamNarration, options);
-    connection.logEvent(2, "Awaited upstream narration, local narration results:", ret,
-        "\n\tupstream results:", upstreamResults);
+    connection.logEvent(2, () => [
+      "Awaited upstream narration, local narration results:", ret,
+      "\n\tupstream results:", upstreamResults,
+    ]);
     Object.assign(ret, upstreamResults);
   }
   return ret;

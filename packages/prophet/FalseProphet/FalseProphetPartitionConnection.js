@@ -131,10 +131,11 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       if (confirmedCommands) _confirmCommands(this, confirmedCommands);
       const newTruths = this._pendingTruths.splice(0, newTruthCount);
       /*
-      this.logEvent(1, "receiveTruths.confirm&purge",
-          "\n\tconfirmedCommands:", ...dumpObject(confirmedCommands),
-          "\n\tpurgedCommands:", ...dumpObject(purgedCommands),
-          "\n\tnewTruths:", ...dumpObject(newTruths));
+      this.logEvent(1, () => ["receiveTruths.confirm&purge",
+        "\n\tconfirmedCommands:", ...dumpObject(confirmedCommands),
+        "\n\tpurgedCommands:", ...dumpObject(purgedCommands),
+        "\n\tnewTruths:", ...dumpObject(newTruths)
+      ]);
       */
       _purgeAndRecomposeStories(this, purgedCommands, newTruths, "receiveTruth");
       return truths;

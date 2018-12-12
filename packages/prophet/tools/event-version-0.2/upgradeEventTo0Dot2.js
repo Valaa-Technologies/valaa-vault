@@ -25,7 +25,6 @@ export default function upgradeEventTo0Dot2 (connection: PartitionConnection, ev
         throw new Error("Could not extract partition event while upgrading event from version 0.1");
       }
       ret = extracted;
-      console.log("extracted:", ...dumpObject(ret));
     } else {
       throw new Error(`Unrecognized event version "${event.version || (event.aspects || {}).version
           }" when trying to upgrade event to version 0.2`);

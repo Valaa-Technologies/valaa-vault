@@ -5,7 +5,8 @@ import type { EventBase } from "~/raem/events";
 
 import { tryAspect, swapAspectRoot } from "~/prophet/tools/EventAspects";
 
-import { dumpObject, vdon, wrapError } from "~/tools";
+import { dumpify, dumpObject, vdon, wrapError } from "~/tools";
+import { debugObjectType } from "~/tools/wrapError";
 import IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 import type MediaDecoder from "~/tools/MediaDecoder";
 import { trivialCloneWith } from "~/tools/trivialClone";
@@ -467,19 +468,28 @@ export function _deleteCommands (connection: ScribePartitionConnection,
 
 function _serializeEventAsJSON (event) {
   const logRoot = swapAspectRoot("event", event, "log");
-  const ret = trivialCloneWith(logRoot, (value) => {
-    try {
-      if ((typeof value !== "object") || (value === null)) return value;
-      if (typeof value.toJSON === "function") return value.toJSON();
-      if ((value instanceof ValaaURI) || (value instanceof URL)) return value.toString();
-      return undefined;
-    } catch (error) {
-      throw wrapError(error, "During serializeEventAsJSON.trivialClone.customizer",
-          "\n\tvalue:", ...dumpObject({ value }));
-    }
-  });
-  swapAspectRoot("log", logRoot, "event");
-  return ret;
+  try {
+    return trivialCloneWith(logRoot, (value, key) => {
+      try {
+        if ((typeof value !== "object") || (value === null)) return value;
+        if (!Array.isArray(value) && (Object.getPrototypeOf(value) !== Object.prototype)) {
+          throw new Error(`Event cannot be serialized to IndexedDB due to non-trivial member${
+              ""} .${key}:${debugObjectType(value)}`);
+        }
+        if (typeof value.toJSON === "function") return value.toJSON();
+        if ((value instanceof ValaaURI) || (value instanceof URL)) return value.toString();
+        return undefined;
+      } catch (error) {
+        throw wrapError(error, new Error("During serializeEventAsJSON.trivialClone.customizer"),
+            "\n\tmember object:", ...dumpObject({ value }));
+      }
+    });
+  } catch (error) {
+    throw wrapError(error, new Error("During serializeEventAsJSON"),
+        "\n\tevent:", dumpify({ event }, { indent: 2 }));
+  } finally {
+    swapAspectRoot("log", logRoot, "event");
+  }
 }
 
 function _getAllShim (connection: ScribePartitionConnection, database, range: IDBKeyRange,

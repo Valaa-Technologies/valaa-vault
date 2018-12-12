@@ -28,27 +28,27 @@ afterEach(async () => {
 
 describe("Scribe", () => {
   const simpleCommand = initializeAspects(created({
-    id: "Some entity", typeName: "Entity",
+    id: ["some-entity"], typeName: "Entity",
   }), { version: "0.2", command: { id: "cid-0" }, log: { index: 0 } });
 
   const followupTransaction = initializeAspects(transacted({
     actions: [
-      created({ id: "Some relation", typeName: "Relation" }),
-      created({ id: "Some other entity", typeName: "Entity" }),
+      created({ id: ["some-relation"], typeName: "Relation" }),
+      created({ id: ["some-other-entity"], typeName: "Entity" }),
     ],
   }), { version: "0.2", command: { id: "cid-1" }, log: { index: 1 } });
 
-  const simpleEntityTemplate = { typeName: "Entity", initialState: { owner: "test_partition" } };
+  const simpleEntityTemplate = { typeName: "Entity", initialState: { owner: ["test_partition"] } };
   const simpleCommandList = [
-    created({ id: "Entity A", ...simpleEntityTemplate }),
-    created({ id: "Entity B", ...simpleEntityTemplate }),
-    created({ id: "Entity C", ...simpleEntityTemplate }),
-    created({ id: "Entity D", ...simpleEntityTemplate }),
-    created({ id: "Entity E", ...simpleEntityTemplate }),
-    created({ id: "Entity F", ...simpleEntityTemplate }),
+    created({ id: ["Entity-A"], ...simpleEntityTemplate }),
+    created({ id: ["Entity-B"], ...simpleEntityTemplate }),
+    created({ id: ["Entity-C"], ...simpleEntityTemplate }),
+    created({ id: ["Entity-D"], ...simpleEntityTemplate }),
+    created({ id: ["Entity-E"], ...simpleEntityTemplate }),
+    created({ id: ["Entity-F"], ...simpleEntityTemplate }),
   ];
   simpleCommandList.forEach((event, index) => {
-    initializeAspects(event, { version: "0.2", command: { id: event.id }, log: { index } });
+    initializeAspects(event, { version: "0.2", command: { id: `cid-2-${index}` }, log: { index } });
   });
 
   it("stores truths/commands in the database", async () => {

@@ -11,7 +11,7 @@ import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
 import VALEK, { Kuery, literal, pointer } from "~/engine/VALEK";
 
 const valaaScriptBlock = [
-  created({ id: "creator.myFunc", typeName: "Property", initialState: {
+  created({ id: ["creator-myFunc"], typeName: "Property", initialState: {
     name: "myFunc", owner: vRef("creator", "properties"),
     value: literal(VALEK.doStatements(VALEK.apply(
         VALEK.fromScope("propertyCallback").notNull(), VALEK.fromScope("this"))).toJSON()),
@@ -680,17 +680,17 @@ describe("transpileValaaScriptBody with Engine", () => {
   });
 
   const createCreatorProperties = [
-    created({ id: "creator.startsAsTen", typeName: "Property", initialState: {
+    created({ id: ["creator-startsAsTen"], typeName: "Property", initialState: {
       name: "startsAsTen",
       owner: vRef("creator", "properties"),
       value: literal(10),
     }, }),
-    created({ id: "creator.startsToOwnling", typeName: "Property", initialState: {
+    created({ id: ["creator-startsToOwnling"], typeName: "Property", initialState: {
       name: "startsToOwnling",
       owner: vRef("creator", "properties"),
       value: pointer(vRef("ownling")),
     }, }),
-    created({ id: "creator.startsAsUndefined", typeName: "Property", initialState: {
+    created({ id: ["creator-startsAsUndefined"], typeName: "Property", initialState: {
       name: "startsAsUndefined",
       owner: vRef("creator", "properties"),
       value: null,

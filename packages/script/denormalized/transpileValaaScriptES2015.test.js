@@ -10,20 +10,20 @@ import { getNativeIdentifierValue } from "~/script";
 import VALSK, { Kuery, literal, pointer } from "~/script/VALSK";
 
 const createBlockA = [
-  created({ id: "A_parent", typeName: "TestScriptyThing" }),
-  created({ id: "A_test", typeName: "TestScriptyThing", initialState: {
+  created({ id: ["A_parent"], typeName: "TestScriptyThing" }),
+  created({ id: ["A_test"], typeName: "TestScriptyThing", initialState: {
     owner: vRef("A_parent", "children")
   }, }),
-  created({ id: "test.myFunc", typeName: "Property", initialState: {
+  created({ id: ["test-myFunc"], typeName: "Property", initialState: {
     name: "myFunc", owner: vRef("A_test", "properties"),
     value: literal(VALSK.doStatements(VALSK.apply(
         VALSK.fromScope("propertyCallback").notNull(), VALSK.fromScope("this"))).toJSON()),
   }, }),
-  created({ id: "test.age", typeName: "Property", initialState: {
+  created({ id: ["test-age"], typeName: "Property", initialState: {
     name: "age", owner: vRef("A_test", "properties"),
     value: literal(35),
   }, }),
-  created({ id: "test.myParent", typeName: "Property", initialState: {
+  created({ id: ["test-myParent"], typeName: "Property", initialState: {
     name: "myParent", owner: vRef("A_test", "properties"),
     value: pointer(vRef("A_parent")),
   }, }),

@@ -13,24 +13,24 @@ describe("MODIFIED action class", () => {
   beforeEach(() => {});
 
   const createBlockA = [
-    created({ id: "A_grandparent", typeName: "TestThing" }),
-    created({ id: "A_parent", typeName: "TestThing",
+    created({ id: ["A_grandparent"], typeName: "TestThing" }),
+    created({ id: ["A_parent"], typeName: "TestThing",
       initialState: { owner: vRef("A_grandparent", "children") },
     }),
-    created({ id: "A_child1", typeName: "TestThing",
+    created({ id: ["A_child1"], typeName: "TestThing",
       initialState: { owner: vRef("A_parent", "children") },
     }),
-    created({ id: "A_child2", typeName: "TestThing",
+    created({ id: ["A_child2"], typeName: "TestThing",
       initialState: { owner: vRef("A_parent", "children") },
     }),
-    created({ id: "A_child3", typeName: "TestThing",
+    created({ id: ["A_child3"], typeName: "TestThing",
       initialState: { owner: null },
     }),
   ];
 
   it("modify sets a singular literal", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
-      fieldsSet({ id: "A_parent", typeName: "TestThing",
+      fieldsSet({ id: ["A_parent"], typeName: "TestThing",
         sets: { name: "parent" },
       }),
     ]);
@@ -43,8 +43,8 @@ describe("MODIFIED action class", () => {
 
   it("modify sets a singular literal to null", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
-      fieldsSet({ id: "A_parent", typeName: "TestThing", sets: { name: "parent" } }),
-      fieldsSet({ id: "A_parent", typeName: "TestThing", sets: { name: null } }),
+      fieldsSet({ id: ["A_parent"], typeName: "TestThing", sets: { name: "parent" } }),
+      fieldsSet({ id: ["A_parent"], typeName: "TestThing", sets: { name: null } }),
     ]);
     expect(tryObjectTransient(harness.corpus, "A_parent", "TestThing").get("name"))
         .toEqual(null);
@@ -54,8 +54,8 @@ describe("MODIFIED action class", () => {
   });
 
   const createInstancesA = [
-    created({ id: "A_parentInstance", typeName: "TestThing", initialState: {
-      instancePrototype: "A_parent",
+    created({ id: ["A_parentInstance"], typeName: "TestThing", initialState: {
+      instancePrototype: ["A_parent"],
     } }),
   ];
 
@@ -75,10 +75,10 @@ describe("MODIFIED action class", () => {
   describe("Data manipulations", () => {
     it("adds and traverses non-expanded, string reference Data", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-      const dataGlue = harness.chronicleEvent(created({ id: "glue1", typeName: "TestDataGlue",
-        initialState: { source: "A_child1", target: "A_child2" },
+      const dataGlue = harness.chronicleEvent(created({ id: ["glue1"], typeName: "TestDataGlue",
+        initialState: { source: ["A_child1"], target: ["A_child2"] },
       })).getTruthEvent();
-      harness.chronicleEvent(addedTo({ id: "A_child1", typeName: "TestThing",
+      harness.chronicleEvent(addedTo({ id: ["A_child1"], typeName: "TestThing",
         adds: { sourceDataGlues: [dataGlue.id] },
       }));
 
@@ -90,9 +90,9 @@ describe("MODIFIED action class", () => {
     it("adds and traverses non-expanded ValaaReference Data", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
       const dataGlue = harness.chronicleEvent(created({ id: vRef("glue1"), typeName: "TestDataGlue",
-        initialState: { source: "A_child1", target: "A_child2" },
+        initialState: { source: ["A_child1"], target: ["A_child2"] },
       })).getTruthEvent();
-      harness.chronicleEvent(addedTo({ id: "A_child1", typeName: "TestThing",
+      harness.chronicleEvent(addedTo({ id: ["A_child1"], typeName: "TestThing",
         adds: { sourceDataGlues: [dataGlue.id] },
       }));
 
@@ -103,8 +103,8 @@ describe("MODIFIED action class", () => {
 
     it("adds and traverses expanded Data without explicit typeName to a concrete field", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
-        addedTo({ id: "A_child1", typeName: "TestThing",
-          adds: { sourceDataGlues: [{ source: "A_child1", target: "A_child2" }] }
+        addedTo({ id: ["A_child1"], typeName: "TestThing",
+          adds: { sourceDataGlues: [{ source: ["A_child1"], target: ["A_child2"] }] }
         }),
       ]);
 
@@ -115,16 +115,16 @@ describe("MODIFIED action class", () => {
 
     it("fails to add expanded Data without explicit typeName to an abstract field", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-      expect(() => harness.chronicleEvent(addedTo({ id: "A_child1", typeName: "TestThing",
-        adds: { targetDataGlues: [{ target: "A_child1", source: "A_child2" }] },
+      expect(() => harness.chronicleEvent(addedTo({ id: ["A_child1"], typeName: "TestThing",
+        adds: { targetDataGlues: [{ target: ["A_child1"], source: ["A_child2"] }] },
       }))).toThrow(/must have typeName field/);
     });
 
     it("adds and traverses expanded Data with explicit typeName to an abstract field", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-      harness.chronicleEvent(addedTo({ id: "A_child1", typeName: "TestThing",
+      harness.chronicleEvent(addedTo({ id: ["A_child1"], typeName: "TestThing",
         adds: { targetDataGlues: [{ typeName: "TestDataGlue",
-          target: "A_child1", source: "A_child2",
+          target: ["A_child1"], source: ["A_child2"],
         }], },
       }));
 
@@ -139,7 +139,7 @@ describe("MODIFIED action class", () => {
           .toEqual([]);
       expect(harness.run(vRef("A_parent"), "children"))
           .toEqual([vRef("A_child1"), vRef("A_child2")]);
-      harness.chronicleEvent(removedFrom({ id: "A_parent", typeName: "TestThing",
+      harness.chronicleEvent(removedFrom({ id: ["A_parent"], typeName: "TestThing",
         removes: { children: null },
       }));
       expect(harness.run(vRef("A_parent"), "children"))
@@ -150,7 +150,7 @@ describe("MODIFIED action class", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
       expect(harness.run(vRef("A_parent"), "children"))
           .toEqual([vRef("A_child1"), vRef("A_child2")]);
-      harness.chronicleEvent(replacedWithin({ id: "A_parent", typeName: "TestThing",
+      harness.chronicleEvent(replacedWithin({ id: ["A_parent"], typeName: "TestThing",
         removes: { children: [] },
         adds: { children: [vRef("A_child2"), vRef("A_child1")] },
       }));
@@ -162,7 +162,7 @@ describe("MODIFIED action class", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
       expect(harness.run(vRef("A_parent"), "children"))
           .toEqual([vRef("A_child1"), vRef("A_child2")]);
-      harness.chronicleEvent(replacedWithin({ id: "A_parent", typeName: "TestThing",
+      harness.chronicleEvent(replacedWithin({ id: ["A_parent"], typeName: "TestThing",
         removes: { children: [vRef("A_child2")] },
         adds: { children: [vRef("A_child3"), vRef("A_child1")] },
       }));

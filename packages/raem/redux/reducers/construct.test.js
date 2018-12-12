@@ -7,14 +7,14 @@ describe("CREATED/DUPLICATED", () => {
   beforeEach(() => {});
 
   const createBlockA = [
-    created({ id: "A_grandparent", typeName: "TestThing" }),
-    created({ id: "A_parent", typeName: "TestThing",
+    created({ id: ["A_grandparent"], typeName: "TestThing" }),
+    created({ id: ["A_parent"], typeName: "TestThing",
       initialState: { owner: vRef("A_grandparent", "children") },
     }),
-    created({ id: "A_child1", typeName: "TestThing",
+    created({ id: ["A_child1"], typeName: "TestThing",
       initialState: { owner: vRef("A_parent", "children") },
     }),
-    created({ id: "A_child2", typeName: "TestThing",
+    created({ id: ["A_child2"], typeName: "TestThing",
       initialState: { owner: vRef("A_parent", "children") },
     }),
   ];
@@ -22,8 +22,8 @@ describe("CREATED/DUPLICATED", () => {
   it("DUPLICATED with initialState override", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       duplicated({
-        id: "A_parentCopy",
-        duplicateOf: "A_parent",
+        id: ["A_parentCopy"],
+        duplicateOf: ["A_parent"],
         initialState: { name: "parent copy" },
       }),
     ]);
@@ -34,8 +34,8 @@ describe("CREATED/DUPLICATED", () => {
   it("DUPLICATED mirrors ownership structure", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       duplicated({
-        id: "A_parentCopy",
-        duplicateOf: "A_parent",
+        id: ["A_parentCopy"],
+        duplicateOf: ["A_parent"],
         initialState: { name: "structure-test copy" },
       }),
     ]);

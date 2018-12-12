@@ -9,19 +9,19 @@ import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
 import VALEK, { pointer } from "~/engine/VALEK";
 
 const valaaScriptBlock = [
-  created({ id: "creator.myStatement", typeName: "Entity", initialState: {
+  created({ id: ["creator-myStatement"], typeName: "Entity", initialState: {
     name: "myStatement", owner: vRef("creator"),
   }, }),
-  created({ id: "creator.myFunction", typeName: "Entity", initialState: {
+  created({ id: ["creator-myFunction"], typeName: "Entity", initialState: {
     name: "myFunction", owner: vRef("creator"),
   }, }),
-  created({ id: "creator.pointerTo.myStatement", typeName: "Property", initialState: {
+  created({ id: ["creator-pointerTo-myStatement"], typeName: "Property", initialState: {
     name: "toMyStatement", owner: vRef("creator", "properties"),
-    value: pointer("creator.myStatement"),
+    value: pointer(["creator-myStatement"]),
   }, }),
-  created({ id: "creator.pointerTo.myFunction", typeName: "Property", initialState: {
+  created({ id: ["creator-pointerTo-myFunction"], typeName: "Property", initialState: {
     name: "toMyFunction", owner: vRef("creator", "properties"),
-    value: pointer("creator.myFunction"),
+    value: pointer(["creator-myFunction"]),
   }, }),
 ];
 

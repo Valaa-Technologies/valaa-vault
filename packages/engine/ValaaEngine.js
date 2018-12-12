@@ -182,6 +182,10 @@ export default class ValaaEngine extends Cog {
     }
   }
 
+  getVrapperByRawId (rawId: string, options: VALKOptions, explicitTransient: Transient) {
+    return this.getVrapper(new ValaaReference(rawId), options, explicitTransient);
+  }
+
   getVrappers (idSequence: IdData[], options: VALKOptions = {}) {
     const ret = [];
     idSequence.forEach(idData => { ret.push(this.getVrapper(idData, options)); });
@@ -339,8 +343,8 @@ export default class ValaaEngine extends Cog {
     const partitionURI =
         ((explicitOwner instanceof ValaaReference) && explicitOwner.getPartitionURI())
         || universalizeCommandData(explicitOwner, options).getPartitionURI();
-    return transaction.assignNewResourceId(directive, partitionURI && String(partitionURI),
-        explicitRawId);
+    return transaction.assignNewResourceId(
+        directive, partitionURI && String(partitionURI), explicitRawId);
   }
 
   outputStatus (output = console) {

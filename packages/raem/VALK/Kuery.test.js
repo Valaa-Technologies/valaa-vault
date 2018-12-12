@@ -37,32 +37,32 @@ describe("VALK basic functionality tests", () => {
 });
 
 const createBlockA = [
-  created({ id: "A_grandparent", typeName: "TestThing" }),
-  created({ id: "A_parent", typeName: "TestThing",
+  created({ id: ["A_grandparent"], typeName: "TestThing" }),
+  created({ id: ["A_parent"], typeName: "TestThing",
     initialState: { name: "parent", owner: vRef("A_grandparent", "children") },
   }),
-  created({ id: "A_child1", typeName: "TestThing",
+  created({ id: ["A_child1"], typeName: "TestThing",
     initialState: { name: "child1", owner: vRef("A_parent", "children") },
   }),
-  created({ id: "A_parentGlue", typeName: "TestGlue", initialState: {
-    source: "A_parent", target: "A_grandparent", position: { x: 10, y: 1, z: null },
+  created({ id: ["A_parentGlue"], typeName: "TestGlue", initialState: {
+    source: ["A_parent"], target: ["A_grandparent"], position: { x: 10, y: 1, z: null },
   } }),
 ];
 
 const createBlockARest = [
-  created({ id: "A_child2", typeName: "TestThing",
+  created({ id: ["A_child2"], typeName: "TestThing",
     initialState: { name: "child2", owner: vRef("A_parent", "children") },
   }),
-  created({ id: "A_childGlue", typeName: "TestGlue", initialState: {
-    source: "A_child1", target: "A_child2", position: { x: 10, y: 1, z: null },
+  created({ id: ["A_childGlue"], typeName: "TestGlue", initialState: {
+    source: ["A_child1"], target: ["A_child2"], position: { x: 10, y: 1, z: null },
   } }),
-  created({ id: "A_childDataGlue", typeName: "TestDataGlue", initialState: {
-    source: "A_child1", target: "A_child2",
+  created({ id: ["A_childDataGlue"], typeName: "TestDataGlue", initialState: {
+    source: ["A_child1"], target: ["A_child2"],
   } }),
-  fieldsSet({ id: "A_child1", typeName: "TestThing",
+  fieldsSet({ id: ["A_child1"], typeName: "TestThing",
     sets: { targetDataGlues: ["A_childDataGlue"], },
   }),
-  fieldsSet({ id: "A_child2", typeName: "TestThing",
+  fieldsSet({ id: ["A_child2"], typeName: "TestThing",
     sets: { sourceDataGlues: ["A_childDataGlue"], },
   }),
 ];
@@ -86,7 +86,7 @@ describe("VALK corpus kueries", () => {
     const kuery = VALK.to("source").to("children").map("name");
     expect(kuery.toVAKON())
         .toEqual(["§->", "source", "children", ["§map", "name"]]);
-    expect(harness.run(vRef("A_parentGlue"), kuery))
+    expect(harness.run(vRef("A_parentGlue"), kuery, { verbosity: 0 }))
         .toEqual(["child1", "child2"]);
   });
 

@@ -26,7 +26,7 @@ describe("Oracle", () => {
   });
 
   const lateCommand = created({
-    id: "Entity Late",
+    id: ["Entity-Late"],
     typeName: "Entity",
     initialState: {
       name: "A late entity",

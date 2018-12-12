@@ -21,31 +21,31 @@ describe("partitions", () => {
 
   const createBlockA = [
     // LocalPartition is implicitly created
-    created({ id: "A_grandparent", typeName: "TestThing",
+    created({ id: ["A_grandparent"], typeName: "TestThing",
       initialState: {
         partitionAuthorityURI: "valaa-local:"
       },
     }),
-    created({ id: "A_parent", typeName: "TestThing",
+    created({ id: ["A_parent"], typeName: "TestThing",
       initialState: { owner: vRef("A_grandparent", "children") },
     }),
-    created({ id: "A_child1", typeName: "TestThing",
+    created({ id: ["A_child1"], typeName: "TestThing",
       initialState: { owner: vRef("A_parent", "children") },
     }),
-    created({ id: "A_child2", typeName: "TestThing",
+    created({ id: ["A_child2"], typeName: "TestThing",
       initialState: {
         owner: vRef("A_parent", "children"),
         partitionAuthorityURI: "valaa-memory:",
       },
     }),
-    created({ id: "A_grandchild", typeName: "TestThing",
+    created({ id: ["A_grandchild"], typeName: "TestThing",
       initialState: {
         owner: vRef("A_child2", "children"),
       },
     }),
-    created({ id: "A_grandownee", typeName: "TestThing",
+    created({ id: ["A_grandownee"], typeName: "TestThing",
       initialState: {
-        owner: "A_child2",
+        owner: ["A_child2"],
       },
     }),
   ];
@@ -100,12 +100,12 @@ describe("partitions", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
     const finalEvent = harness.chronicleEvent(transacted({
       actions: [
-        created({ id: "B_testRoot", typeName: "TestThing",
+        created({ id: ["B_testRoot"], typeName: "TestThing",
           initialState: {
             partitionAuthorityURI: testAuthorityURI,
           },
         }),
-        addedTo({ id: "A_grandparent", typeName: "TestThing",
+        addedTo({ id: ["A_grandparent"], typeName: "TestThing",
           adds: { siblings: [vRef("B_testRoot")], },
         }),
       ],

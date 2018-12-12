@@ -64,7 +64,7 @@ describe("VrapperSubscriber", () => {
 
     it("is called on first step content change: matching removal on filtered array", () => {
       setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
-      properties()["creator.prototype"].destroy();
+      properties()["creator-prototype"].destroy();
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(idOf(liveCallback.mock.calls[1][0].value()))
           .toBe(undefined);
@@ -75,7 +75,7 @@ describe("VrapperSubscriber", () => {
       // is not implemented even though it is computationally trivial
       setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
-      properties()["creator.prototype"].setField("name", "template_nonmatching");
+      properties()["creator-prototype"].setField("name", "template_nonmatching");
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(idOf(liveCallback.mock.calls[1][0].value()))
           .toBe(undefined);
@@ -88,7 +88,7 @@ describe("VrapperSubscriber", () => {
       // candidates as well, not just the one with a matching name.
       setUpPropertyTargetTestHarness("template_matching", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
-      properties()["creator.prototype"].setField("name", "template_matching");
+      properties()["creator-prototype"].setField("name", "template_matching");
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(idOf(liveCallback.mock.calls[1][0].value()))
           .toBe(idOf(entities().ownling_prototype));
@@ -96,7 +96,7 @@ describe("VrapperSubscriber", () => {
 
     it("is called on the last step content change: property value is set to a new pointer", () => {
       setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
-      properties()["creator.prototype"].setField("value", pointer(entities().ownling));
+      properties()["creator-prototype"].setField("value", pointer(entities().ownling));
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(idOf(liveCallback.mock.calls[1][0].value()))
           .toBe(idOf(entities().ownling));
@@ -106,15 +106,15 @@ describe("VrapperSubscriber", () => {
       setUpPropertyTargetTestHarness("template_matching", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
 
-      properties()["creator.prototype"].setField("value", pointer(entities().test));
+      properties()["creator-prototype"].setField("value", pointer(entities().test));
       expect(liveCallback.mock.calls.length).toBe(1);
 
-      properties()["creator.prototype"].setField("name", "template_matching");
+      properties()["creator-prototype"].setField("name", "template_matching");
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(idOf(liveCallback.mock.calls[1][0].value()))
           .toBe(idOf(entities().test));
 
-      properties()["creator.prototype"].setField("value", pointer(entities().ownling));
+      properties()["creator-prototype"].setField("value", pointer(entities().ownling));
       expect(liveCallback.mock.calls.length).toBe(3);
       expect(idOf(liveCallback.mock.calls[2][0].value()))
           .toBe(idOf(entities().ownling));
@@ -124,17 +124,17 @@ describe("VrapperSubscriber", () => {
       setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
 
-      properties()["creator.prototype"].setField("value", pointer(entities().test));
+      properties()["creator-prototype"].setField("value", pointer(entities().test));
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(idOf(liveCallback.mock.calls[1][0].value()))
           .toBe(idOf(entities().test));
 
-      properties()["creator.prototype"].setField("name", "template_nonmatching");
+      properties()["creator-prototype"].setField("name", "template_nonmatching");
       expect(liveCallback.mock.calls.length).toBe(3);
       expect(liveCallback.mock.calls[2][0].value())
           .toBe(undefined);
 
-      properties()["creator.prototype"].setField("value", pointer(entities().ownling));
+      properties()["creator-prototype"].setField("value", pointer(entities().ownling));
       expect(liveCallback.mock.calls.length).toBe(3);
     });
   });
@@ -154,7 +154,7 @@ describe("VrapperSubscriber", () => {
       expect(liveCallback.mock.calls.length).toBe(1);
       expect(liveCallback.mock.calls[0][0].value()).toEqual(10);
 
-      properties()["ownling.counter"].setField("value", literal(1));
+      properties()["ownling-counter"].setField("value", literal(1));
 
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(liveCallback.mock.calls[1][0].value()).toEqual(1);
@@ -166,7 +166,7 @@ describe("VrapperSubscriber", () => {
       expect(liveCallback.mock.calls.length).toBe(1);
       expect(liveCallback.mock.calls[0][0].value()).toEqual(17);
 
-      properties()["ownling.counter"].setField("value", literal(1));
+      properties()["ownling-counter"].setField("value", literal(1));
 
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(liveCallback.mock.calls[1][0].value()).toEqual(8);
@@ -176,12 +176,12 @@ describe("VrapperSubscriber", () => {
   describe("Live VALK kueries", () => {
     it("updates on ghost-of-ghost-of-thing property when middle ghost property is modified", () => {
       setUpHarnessAndCallback({ verbosity: 0, claimBaseBlock: true }, [
-        created({ id: "test#1#1", typeName: "Entity", initialState: {
-          instancePrototype: "test#1",
+        created({ id: ["test+1+1"], typeName: "Entity", initialState: {
+          instancePrototype: ["test+1"],
         }, }),
       ]);
-      const creatori1 = entities().creator.getGhostIn(entities()["test#1"]);
-      const creatori1i1 = creatori1.getGhostIn(entities()["test#1#1"]);
+      const creatori1 = entities().creator.getGhostIn(entities()["test+1"]);
+      const creatori1i1 = creatori1.getGhostIn(entities()["test+1+1"]);
 
       creatori1i1.get(VALEK.propertyValue("counter"), { onUpdate: liveCallback });
 

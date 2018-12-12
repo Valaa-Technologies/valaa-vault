@@ -13,48 +13,48 @@ import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
 const transactionA = {
   type: "TRANSACTED",
   actions: [
-    created({ id: "test", typeName: "TestScriptyThing", initialState: {
-      owner: "test_partition",
+    created({ id: ["test"], typeName: "TestScriptyThing", initialState: {
+      owner: ["test_partition"],
       name: "testName",
     }, }),
-    created({ id: "child", typeName: "TestScriptyThing", initialState: {
-      parent: "test",
+    created({ id: ["child"], typeName: "TestScriptyThing", initialState: {
+      parent: ["test"],
       name: "childName",
     }, }),
-    created({ id: "ownling", typeName: "TestScriptyThing", initialState: {
-      owner: "test",
+    created({ id: ["ownling"], typeName: "TestScriptyThing", initialState: {
+      owner: ["test"],
       name: "ownlingName",
     }, }),
-    created({ id: "grandChild", typeName: "TestScriptyThing", initialState: {
-      parent: "child",
+    created({ id: ["grandChild"], typeName: "TestScriptyThing", initialState: {
+      parent: ["child"],
     }, }),
-    created({ id: "grandSibling", typeName: "TestScriptyThing", initialState: {
-      parent: "child",
+    created({ id: ["grandSibling"], typeName: "TestScriptyThing", initialState: {
+      parent: ["child"],
     }, }),
-    created({ id: "greatGrandChild", typeName: "TestScriptyThing", initialState: {
-      parent: "grandChild",
+    created({ id: ["greatGrandChild"], typeName: "TestScriptyThing", initialState: {
+      parent: ["grandChild"],
     }, }),
-    created({ id: "greatGrandChildOwnling", typeName: "TestScriptyThing", initialState: {
-      owner: "greatGrandChild",
+    created({ id: ["greatGrandChildOwnling"], typeName: "TestScriptyThing", initialState: {
+      owner: ["greatGrandChild"],
       name: "greatGrandChildOwnlingName",
     }, }),
   ]
 };
 
 const createAInstance
-    = created({ id: "test#1", typeName: "TestScriptyThing", initialState: {
-      owner: "test_partition",
-      instancePrototype: "test",
+    = created({ id: ["test+1"], typeName: "TestScriptyThing", initialState: {
+      owner: ["test_partition"],
+      instancePrototype: ["test"],
     }, });
 
 const createMedia = {
   type: "TRANSACTED",
   actions: [
-    created({ id: "theContent", typeName: "Blob" }),
-    created({ id: "theMedia", typeName: "Media", initialState: {
-      owner: "child",
+    created({ id: ["theContent"], typeName: "Blob" }),
+    created({ id: ["theMedia"], typeName: "Media", initialState: {
+      owner: ["child"],
       name: "mediaName",
-      content: "theContent",
+      content: ["theContent"],
     }, }),
   ],
 };
@@ -97,7 +97,7 @@ describe("Vrapper", () => {
   };
 
   const getGhostVrapperById = (ghostPrototypeRawId, instanceRawId) =>
-      harness.engine.getVrapper(createGhostRawId(ghostPrototypeRawId, instanceRawId));
+      harness.engine.getVrapperByRawId(createGhostRawId(ghostPrototypeRawId, instanceRawId));
 
   describe("Vrapper basic functionality", () => {
     it("returns vrappers for non-ghost when returned from kuery", () => {
@@ -109,7 +109,7 @@ describe("Vrapper", () => {
       expect(vChild instanceof Vrapper)
           .toEqual(true);
       expect(vChild)
-          .toEqual(harness.engine.getVrapper("child"));
+          .toEqual(harness.engine.getVrapperByRawId("child"));
     });
 
     it("touches a Vrapper field and it is properly modified for subsequent reads", () => {
@@ -119,7 +119,7 @@ describe("Vrapper", () => {
       touchField(testScriptPartitions().test, "name");
       expect(testScriptPartitions().test.get("name"))
           .toEqual("touched_testName");
-      expect(harness.engine.getVrapper("test").get("name"))
+      expect(harness.engine.getVrapperByRawId("test").get("name"))
           .toEqual("touched_testName");
     });
 
@@ -127,17 +127,17 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      expectNoVrapper(createGhostRawId("child", "test#1"));
+      expectNoVrapper(createGhostRawId("child", "test+1"));
     });
 
     it("returns Vrappers for ghost when returned from kuery", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const vChildGhost = testScriptPartitions()["test#1"].get(["§->", "children", 0]);
+      const vChildGhost = testScriptPartitions()["test+1"].get(["§->", "children", 0]);
       expect(vChildGhost instanceof Vrapper)
           .toEqual(true);
-      const expectedChildGhostRawId = createGhostRawId("child", "test#1");
+      const expectedChildGhostRawId = createGhostRawId("child", "test+1");
       expect(vChildGhost.getRawId())
           .toEqual(expectedChildGhostRawId);
       expectVrapper(expectedChildGhostRawId);
@@ -147,18 +147,18 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const result = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]);
+      const result = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
       expect(result)
-          .toEqual(getGhostVrapperById("child", "test#1"));
+          .toEqual(getGhostVrapperById("child", "test+1"));
     });
 
     it("returns a correct Vrapper with kuery", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const result = testScriptPartitions()["test#1"].get(["§->", "children", 0]);
+      const result = testScriptPartitions()["test+1"].get(["§->", "children", 0]);
       expect(result)
-          .toEqual(getGhostVrapperById("child", "test#1"));
+          .toEqual(getGhostVrapperById("child", "test+1"));
     });
   });
 
@@ -278,7 +278,7 @@ describe("Vrapper", () => {
       ]);
       checkVrapperSets(testScriptPartitions().test, {
         expectFields: { name: "testName" },
-        targetId: "test",
+        targetId: ["test"],
         sets: { name: "harambe" },
         expectUpdates: { name: "harambe" },
       });
@@ -288,9 +288,9 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      checkVrapperSets(testScriptPartitions()["test#1"], {
+      checkVrapperSets(testScriptPartitions()["test+1"], {
         expectFields: { name: "testName" },
-        targetId: "test",
+        targetId: ["test"],
         sets: { name: "harambe" },
         expectUpdates: { name: "harambe" },
       });
@@ -303,8 +303,8 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      touchField(testScriptPartitions["test#1"], "name");
-      checkVrapperSets(testScriptPartitions["test#1"], {
+      touchField(testScriptPartitions["test+1"], "name");
+      checkVrapperSets(testScriptPartitions["test+1"], {
         expectFields: { name: "touched_testName" },
         targetId: "test",
         sets: { name: "harambe" },
@@ -317,12 +317,12 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const vChildGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]);
+      const vChildGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
       expect(vChildGhost.isMaterialized())
           .toEqual(false);
       checkVrapperSets(vChildGhost, {
         expectFields: { name: "childName" },
-        targetId: "child",
+        targetId: ["child"],
         sets: { name: "harambe" },
         expectUpdates: { name: "harambe" },
       });
@@ -333,13 +333,13 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const vChildGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]);
+      const vChildGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
       vChildGhost.materialize();
       expect(vChildGhost.isMaterialized())
           .toEqual(true);
       checkVrapperSets(vChildGhost, {
         expectFields: { name: "childName" },
-        targetId: "child",
+        targetId: ["child"],
         sets: { name: "harambe" },
         expectUpdates: { name: "harambe" },
       });
@@ -349,7 +349,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const vChildGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]);
+      const vChildGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
       expect(vChildGhost.isMaterialized())
           .toEqual(false);
       checkVrapperSets(vChildGhost, {
@@ -370,7 +370,7 @@ describe("Vrapper", () => {
       testScriptPartitions().child.subscribeToMODIFIED("children", () => {
         modCalled = true;
       });
-      harness.chronicleEvent(destroyed({ type: "DESTROYED", id: "grandChild" }));
+      harness.chronicleEvent(destroyed({ type: "DESTROYED", id: ["grandChild"] }));
       // children modified subscriber should have been called when the sub-event to remove
       // grandChild from the children list was reduced
       expect(modCalled).toEqual(true);
@@ -416,7 +416,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      checkVrapperDestroy(testScriptPartitions()["test#1"]);
+      checkVrapperDestroy(testScriptPartitions()["test+1"]);
     });
 
     it("calls destroy subscribers when the ghost is destroyed", () => {
@@ -424,14 +424,14 @@ describe("Vrapper", () => {
         transactionA, createAInstance,
       ]);
       checkVrapperDestroy(testScriptPartitions().child.getGhostIn(
-          testScriptPartitions()["test#1"]));
+          testScriptPartitions()["test+1"]));
     });
 
     it("calls destroy subscribers on an instance when its prototype is destroyed", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      expect(() => checkVrapperDestroy(testScriptPartitions()["test#1"],
+      expect(() => checkVrapperDestroy(testScriptPartitions()["test+1"],
               { destroyVrapper: testScriptPartitions().test }))
           .toThrow(/destruction blocked/);
     });
@@ -441,7 +441,7 @@ describe("Vrapper", () => {
         transactionA, createAInstance,
       ]);
       checkVrapperDestroy(
-          testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]),
+          testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]),
           { destroyVrapper: testScriptPartitions().child });
     });
   });
@@ -466,10 +466,10 @@ describe("Vrapper", () => {
         transactionA, createAInstance,
       ]);
       const counts = [];
-      const childGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]);
+      const childGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
       childGhost.addDESTROYEDHandler(() => { counts[0] = (counts[0] || 0) + 1; });
       const grandChildGhost = testScriptPartitions().grandChild.getGhostIn(
-          testScriptPartitions()["test#1"]);
+          testScriptPartitions()["test+1"]);
       grandChildGhost.addDESTROYEDHandler(() => { counts[1] = (counts[1] || 0) + 1; });
       expect(harness.engine.tryVrapper("child"))
           .toBeTruthy();
@@ -490,7 +490,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const childGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]);
+      const childGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
       expect(testScriptPartitions().child.get("children").length)
           .toEqual(2);
       harness.engine.create("TestScriptyThing", { parent: childGhost, name: "guest" });
@@ -502,9 +502,9 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const childGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test#1"]);
+      const childGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
       const grandChildGhost = testScriptPartitions().grandChild.getGhostIn(
-          testScriptPartitions()["test#1"]);
+          testScriptPartitions()["test+1"]);
       expect(childGhost.get(["§->", "children", 0]))
           .toEqual(grandChildGhost);
       const vGuest = harness.engine.create("TestScriptyThing",
@@ -526,7 +526,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      expect(harness.engine.getVrapper("test")
+      expect(harness.engine.getVrapperByRawId("test")
               .do(VALEK.recurseMaterializedFieldResources(["children"]).map("rawId")))
           .toEqual(["child", "grandChild", "greatGrandChild", "grandSibling"]);
     });
@@ -534,7 +534,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      expect(harness.engine.getVrapper("test#1")
+      expect(harness.engine.getVrapperByRawId("test+1")
               .do(VALEK.recurseMaterializedFieldResources(["children"]).map("rawId")))
           .toEqual([]);
     });
@@ -542,7 +542,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      expect(harness.engine.getVrapper("test")
+      expect(harness.engine.getVrapperByRawId("test")
               .do(VALEK.recurseMaterializedFieldResources(["unnamedOwnlings"]).map("rawId")))
           .toEqual(["ownling"]);
     });
@@ -550,7 +550,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      expect(harness.engine.getVrapper("test")
+      expect(harness.engine.getVrapperByRawId("test")
               .do(VALEK.recurseMaterializedFieldResources(["children", "unnamedOwnlings"])
                   .map("rawId")))
           .toEqual(["child", "grandChild", "greatGrandChild", "greatGrandChildOwnling",
@@ -561,18 +561,18 @@ describe("Vrapper", () => {
       // Bug was indeed directly with recurseMaterializedFieldResources: it was returning packed
       // transients inside a native container, which is forbidden.
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
-        created({ id: "top", typeName: "Entity", initialState: {
+        created({ id: ["top"], typeName: "Entity", initialState: {
           name: "TopElement",
         }, }),
-        created({ id: "middleA", typeName: "Entity", initialState: {
+        created({ id: ["middleA"], typeName: "Entity", initialState: {
           name: "MiddleElementA",
           owner: vRef("top"),
         }, }),
-        created({ id: "middleB", typeName: "Entity", initialState: {
+        created({ id: ["middleB"], typeName: "Entity", initialState: {
           name: "MiddleElementB",
           owner: vRef("top"),
         }, }),
-        created({ id: "bottom", typeName: "Entity", initialState: {
+        created({ id: ["bottom"], typeName: "Entity", initialState: {
           name: "BottomElement",
           owner: vRef("middleA"),
         }, }),
@@ -590,22 +590,22 @@ describe("Vrapper", () => {
   const basicProperties = {
     type: "TRANSACTED",
     actions: [
-      created({ id: "test.testField", typeName: "Property", initialState: {
+      created({ id: ["test-testField"], typeName: "Property", initialState: {
         owner: vRef("test", "properties"),
         name: "testField",
         value: { typeName: "Literal", value: "testOwned.testField" },
       }, }),
-      created({ id: "test.secondField", typeName: "Property", initialState: {
+      created({ id: ["test-secondField"], typeName: "Property", initialState: {
         owner: vRef("test", "properties"),
         name: "secondField",
         value: { typeName: "Literal", value: "testOwned.secondField" },
       }, }),
-      created({ id: "grandChild.testField", typeName: "Property", initialState: {
+      created({ id: ["grandChild-testField"], typeName: "Property", initialState: {
         owner: vRef("grandChild", "properties"),
         name: "testField",
         value: { typeName: "Literal", value: "grandChildOwned.testField" },
       }, }),
-      created({ id: "grandSibling.siblingField", typeName: "Property", initialState: {
+      created({ id: ["grandSibling-siblingField"], typeName: "Property", initialState: {
         owner: vRef("grandSibling", "properties"),
         name: "siblingField",
         value: { typeName: "Literal", value: "grandSiblingOwned.siblingField" },
@@ -649,7 +649,7 @@ describe("Vrapper", () => {
         transactionA,
         createAInstance,
         basicProperties,
-        created({ id: "test.conflictingTestField", typeName: "Property", initialState: {
+        created({ id: ["test-conflictingTestField"], typeName: "Property", initialState: {
           owner: vRef("test", "properties"),
           name: "testField",
           value: { typeName: "Literal", value: "testOwned.conflictingTestField" },
@@ -657,8 +657,8 @@ describe("Vrapper", () => {
       ]);
       expect(console.warn.mock.calls.length).toBe(2);
       expect(console.warn.mock.calls[0][0])
-          .toBe(`Overriding existing Property 'testField' in Scope Vrapper(${""
-              }<TestScriptyThing "testName"'VRef(test,,,valaa-test:?id=test_partition)'>), with:`);
+          .toBe(`Overriding existing Property 'testField' in Scope Vrapper(<TestScriptyThing ${""
+              }"testName"'urn:valos:test?+partition=valaa-test%3A%3Fid%3Dtest_partition'>), with:`);
       console.warn = oldWarn;
       expect(testScriptPartitions().test.get(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.conflictingTestField");
@@ -735,7 +735,7 @@ describe("Vrapper", () => {
     it("fails to access a Scope property with no name", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
-        created({ id: "test.namelessField", typeName: "Property", initialState: {
+        created({ id: ["test-namelessField"], typeName: "Property", initialState: {
           owner: vRef("test", "properties"),
           name: "",
           value: { typeName: "Literal", value: "testOwned.namelessField" },

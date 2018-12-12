@@ -19,17 +19,17 @@ afterEach(async () => {
 
 const basicCommands = [
   created({
-    id: "Entity A",
+    id: ["Entity-A"],
     typeName: "Entity",
     initialState: { name: "Entity A", owner: vRef("test_partition", "unnamedOwnlings") },
   }),
   created({
-    id: "Entity B",
+    id: ["Entity-B"],
     typeName: "Entity",
     initialState: { name: "Entity B", owner: vRef("test_partition", "unnamedOwnlings") },
   }),
   created({
-    id: "Entity C",
+    id: ["Entity-C"],
     typeName: "Entity",
     initialState: { name: "Entity C", owner: vRef("test_partition", "unnamedOwnlings") },
   }),

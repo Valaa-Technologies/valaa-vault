@@ -30,7 +30,7 @@ describe("VALEK extensions", () => {
           .toEqual("article-0-name");
       expect(entities().test.get(
           VALEK.to("unnamedOwnlings").find(VALEK.hasName("article-0-name"))))
-          .toEqual(harness.engine.getVrapper(scope.article.get("rawId")));
+          .toEqual(harness.engine.getVrapperByRawId(scope.article.get("rawId")));
     });
   });
 

@@ -19,29 +19,29 @@ import invariantify from "~/tools/invariantify";
 
 describe("The snapshot node walker", () => {
   const createBlockA = [
-    created({ id: "A_grandparent", typeName: "TestThing" }),
-    created({ id: "A_parent", typeName: "TestThing",
+    created({ id: ["A_grandparent"], typeName: "TestThing" }),
+    created({ id: ["A_parent"], typeName: "TestThing",
       initialState: { owner: vRef("A_grandparent", "children") },
     }),
-    created({ id: "A_child1", typeName: "TestThing",
+    created({ id: ["A_child1"], typeName: "TestThing",
       initialState: { owner: vRef("A_parent", "children") },
     }),
   ];
 
   const createBlockARest = [
-    created({ id: "A_child2", typeName: "TestThing",
+    created({ id: ["A_child2"], typeName: "TestThing",
       initialState: { owner: vRef("A_parent", "children") },
     }),
-    created({ id: "A_childGlue", typeName: "TestGlue", initialState: {
-      source: "A_child1", target: "A_child2", position: { x: 0, y: 1, z: null },
+    created({ id: ["A_childGlue"], typeName: "TestGlue", initialState: {
+      source: ["A_child1"], target: ["A_child2"], position: { x: 0, y: 1, z: null },
     } }),
-    created({ id: "A_childDataGlue", typeName: "TestDataGlue", initialState: {
-      source: "A_child1", target: "A_child2",
+    created({ id: ["A_childDataGlue"], typeName: "TestDataGlue", initialState: {
+      source: ["A_child1"], target: ["A_child2"],
     } }),
-    fieldsSet({ id: "A_child1", typeName: "TestThing",
+    fieldsSet({ id: ["A_child1"], typeName: "TestThing",
       sets: { targetDataGlues: ["A_childDataGlue"], },
     }),
-    fieldsSet({ id: "A_child2", typeName: "TestThing",
+    fieldsSet({ id: ["A_child2"], typeName: "TestThing",
       sets: { sourceDataGlues: ["A_childDataGlue"], },
     }),
   ];
@@ -51,8 +51,8 @@ describe("The snapshot node walker", () => {
     const childGlue = tryObjectTransient(harness.getState(), "A_childGlue", "TestGlue");
     expect(childGlue.get("source"))
         .toEqual(undefined);
-    expect(getObjectField(harness.corpus, childGlue, "source"))
-        .toEqual(vRef("A_child1", "targetGlues"));
+    expect(getObjectField(harness.corpus, childGlue, "source").toJSON())
+        .toEqual(vRef("A_child1", "targetGlues").toJSON());
     expect(harness.run(vRef("A_childGlue"), "source"))
         .toEqual(vRef("A_child1"));
   });
@@ -65,14 +65,16 @@ describe("The snapshot node walker", () => {
   });
 
   const createBlockAMore = [
-    created({ id: "A_child3", typeName: "TestThing",
+    created({ id: ["A_child3"], typeName: "TestThing",
       initialState: { owner: vRef("A_parent", "children") },
     }),
-    created({ id: "A_childGlue13", typeName: "TestGlue", initialState: {
-      source: "A_child1", target: "A_child3", name: "moveTo", position: { x: 30, y: 30, z: null },
+    created({ id: ["A_childGlue13"], typeName: "TestGlue", initialState: {
+      source: ["A_child1"], target: ["A_child3"], name: "moveTo",
+      position: { x: 30, y: 30, z: null },
     } }),
-    created({ id: "A_childGlue12", typeName: "TestGlue", initialState: {
-      source: "A_child1", target: "A_child2", name: "moveTo", position: { x: 20, y: 20, z: null },
+    created({ id: ["A_childGlue12"], typeName: "TestGlue", initialState: {
+      source: ["A_child1"], target: ["A_child2"], name: "moveTo",
+      position: { x: 20, y: 20, z: null },
     } }),
   ];
 
@@ -83,34 +85,34 @@ describe("The snapshot node walker", () => {
     const child2 = tryObjectTransient(harness.getState(), "A_child2", "TestThing");
     expect(harness.run(childGlue, VALK.to("source").to("targetGlues")
         .find(VALK.to("name").equalTo("moveTo").and(
-            VALK.to("target").equalTo(child2.get("id"))))))
-        .toEqual(vRef("A_childGlue12"));
+            VALK.to("target").equalTo(child2.get("id"))))).toJSON())
+        .toEqual(vRef("A_childGlue12").toJSON());
   });
 });
 
 describe("ghost lookups", () => {
   const createTestObj = [
-    created({ id: "testObj", typeName: "TestThing", initialState: { name: "testObj" } }),
-    created({ id: "ownling", typeName: "TestThing", initialState: {
-      parent: "testObj", name: "ownling"
+    created({ id: ["testObj"], typeName: "TestThing", initialState: { name: "testObj" } }),
+    created({ id: ["ownling"], typeName: "TestThing", initialState: {
+      parent: ["testObj"], name: "ownling"
     }, }),
-    created({ id: "grandling", typeName: "TestThing", initialState: {
-      parent: "ownling",
+    created({ id: ["grandling"], typeName: "TestThing", initialState: {
+      parent: ["ownling"],
     }, }),
-    created({ id: "greatGrandling", typeName: "TestThing", initialState: {
-      parent: "grandling",
+    created({ id: ["greatGrandling"], typeName: "TestThing", initialState: {
+      parent: ["grandling"],
     }, }),
   ];
 
   const createTestObjInst = [
-    created({ id: "testObjInst", typeName: "TestThing",
-      initialState: { instancePrototype: "testObj" },
+    created({ id: ["testObjInst"], typeName: "TestThing",
+      initialState: { instancePrototype: ["testObj"] },
     }),
   ];
 
   const createOwnlingInst = [
-    created({ id: "ownlingInst", typeName: "TestThing",
-      initialState: { instancePrototype: "ownling" },
+    created({ id: ["ownlingInst"], typeName: "TestThing",
+      initialState: { instancePrototype: ["ownling"] },
     }),
   ];
 
@@ -118,8 +120,7 @@ describe("ghost lookups", () => {
      "Ownling, then Instance field access for the same field returns a Transient for the " +
      "Immaterial Ghost of the Ownling", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createTestObjInst);
-    const ghostOwnling = harness.run(vRef("testObjInst"),
-        ["§->", "children", 0]);
+    const ghostOwnling = harness.run(vRef("testObjInst"), ["§->", "children", 0]);
 
     expect(isMaterialized(harness.getState(), ghostOwnling))
         .toEqual(false);
@@ -140,8 +141,8 @@ describe("ghost lookups", () => {
     const transient = harness.getState().getIn(["TestThing", ghostOwnling.rawId()]);
     expect(transient.get("prototype"))
         .toBeDefined();
-    expect(transient.get("prototype"))
-        .toEqual(vRef("ownling", "materializedGhosts", new GhostPath("ownling")));
+    expect(transient.get("prototype").toJSON())
+        .toEqual(vRef("ownling", "materializedGhosts", new GhostPath("ownling")).toJSON());
   });
 
   it("Resource-to-Partially-Material-Transient - same as above but when the Prototype Sequence is" +
@@ -183,8 +184,8 @@ describe("ghost lookups", () => {
     const transient = harness.getState().getIn(["TestThing", ghostGrandling.rawId()]);
     expect(transient.get("prototype"))
         .toBeDefined();
-    expect(transient.get("prototype"))
-        .toEqual(vRef("grandling", "materializedGhosts", new GhostPath("grandling")));
+    expect(transient.get("prototype").toJSON())
+        .toEqual(vRef("grandling", "materializedGhosts", new GhostPath("grandling")).toJSON());
   });
 
   it("Partially-Material-Transient-to-* - the ghost great grandling should be immaterial", () => {
@@ -215,23 +216,23 @@ describe("ghost lookups", () => {
 
 describe("mutations", () => {
   const createData = [
-    created({ id: "A", typeName: "TestThing", initialState: {
+    created({ id: ["A"], typeName: "TestThing", initialState: {
       name: "Original",
     } }),
-    created({ id: "A_B", typeName: "TestThing", initialState: {
-      parent: "A", name: "Ownling",
+    created({ id: ["A_B"], typeName: "TestThing", initialState: {
+      parent: ["A"], name: "Ownling",
     } }),
   ];
 
   const createInstance = [
-    created({ id: "A_instance", typeName: "TestThing", initialState: {
-      instancePrototype: "A", name: "Instance of Original",
+    created({ id: ["A_instance"], typeName: "TestThing", initialState: {
+      instancePrototype: ["A"], name: "Instance of Original",
     } }),
   ];
 
   const createBlankInstance = [
-    created({ id: "A_instance_blank", typeName: "TestThing",
-      initialState: { instancePrototype: "A", } }),
+    created({ id: ["A_instance_blank"], typeName: "TestThing",
+      initialState: { instancePrototype: ["A"], } }),
   ];
 
   it("FIELDS_SET setting a field on a Transient should materialize it", () => {
@@ -273,7 +274,7 @@ describe("mutations", () => {
     // Do tests that do not depend on autorefresh
     const A_name = harness.run(vRef("A"), "name");
     const A_instance_name = harness.run(A_instance, "name");
-    harness.chronicleEvent(removedFrom({ id: "A_instance", typeName: "TestThing",
+    harness.chronicleEvent(removedFrom({ id: ["A_instance"], typeName: "TestThing",
       removes: { name: null } }));
     const A_instance_name_after_erase = harness.run(vRef("A_instance"),
         "name");
@@ -331,9 +332,9 @@ describe("mutations", () => {
 
     // Modify the original list
     const A = harness.run(vRef("A"), null);
-    harness.chronicleEvent(created({ id: "A_C", typeName: "TestThing",
+    harness.chronicleEvent(created({ id: ["A_C"], typeName: "TestThing",
       initialState: { parent: A, name: "Second Ownling" } }));
-    harness.chronicleEvent(created({ id: "A_D", typeName: "TestThing",
+    harness.chronicleEvent(created({ id: ["A_D"], typeName: "TestThing",
       initialState: { parent: A, name: "Third Ownling" } }));
 
     // Ensure that the new lists are different to the old ones, but equal to each other
@@ -354,10 +355,10 @@ describe("mutations", () => {
   });
 
   const extraData = [
-    created({ id: "A_C", typeName: "TestThing",
-      initialState: { parent: "A", name: "Memelord" } }),
-    created({ id: "A_D", typeName: "TestThing",
-      initialState: { parent: "A", name: "Kenny" } }),
+    created({ id: ["A_C"], typeName: "TestThing",
+      initialState: { parent: ["A"], name: "Memelord" } }),
+    created({ id: ["A_D"], typeName: "TestThing",
+      initialState: { parent: ["A"], name: "Kenny" } }),
   ];
 
   it("DESTROYED remove on a plural owner field causes changes to be reflected on Instances", () => {
@@ -377,8 +378,8 @@ describe("mutations", () => {
     }
 
     // Modify the original list
-    harness.chronicleEvent(destroyed({ id: "A_C" }));
-    harness.chronicleEvent(destroyed({ id: "A_D" }));
+    harness.chronicleEvent(destroyed({ id: ["A_C"] }));
+    harness.chronicleEvent(destroyed({ id: ["A_D"] }));
 
     // Ensure that the new lists are different to the old ones, but equal to each other
     const A_children_new = harness.run(vRef("A"), ["§->", "children"]);
@@ -403,7 +404,7 @@ describe("mutations", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createBlankInstance);
 
     // Test instance
-    harness.chronicleEvent(fieldsSet({ id: "A", typeName: "TestThing",
+    harness.chronicleEvent(fieldsSet({ id: ["A"], typeName: "TestThing",
       sets: { name: "What is dead may never die and in strange aeons even death may die", },
     }));
     expect(
@@ -413,7 +414,7 @@ describe("mutations", () => {
     );
 
     // Test ghost
-    harness.chronicleEvent(fieldsSet({ id: "A_B", typeName: "TestThing",
+    harness.chronicleEvent(fieldsSet({ id: ["A_B"], typeName: "TestThing",
       sets: { name: "cthulhu fhtagn", },
     }));
     // A_B is child of A, so query children -> 0 -> name
@@ -433,50 +434,50 @@ describe("complex structures", () => {
     T: "ElderTwo",
   };
   const baseData = [
-    created({ id: "A", typeName: "TestThing", initialState: {
+    created({ id: ["A"], typeName: "TestThing", initialState: {
       name: names.A,
     } }),
-    created({ id: "A_B", typeName: "TestThing", initialState: {
-      parent: "A", name: names.A_B,
+    created({ id: ["A_B"], typeName: "TestThing", initialState: {
+      parent: ["A"], name: names.A_B,
     } }),
-    created({ id: "A_B_C", typeName: "TestThing", initialState: {
-      parent: "A_B", name: names.A_B_C,
+    created({ id: ["A_B_C"], typeName: "TestThing", initialState: {
+      parent: ["A_B"], name: names.A_B_C,
     } }),
-    created({ id: "T", typeName: "TestThing", initialState: {
+    created({ id: ["T"], typeName: "TestThing", initialState: {
       name: names.T,
     } }),
   ];
   const firstDegreeInstances = [
-    created({ id: "A1i", typeName: "TestThing", initialState: {
-      instancePrototype: "A"
+    created({ id: ["A1i"], typeName: "TestThing", initialState: {
+      instancePrototype: ["A"]
     } }),
-    created({ id: "A_B1i", typeName: "TestThing", initialState: {
-      instancePrototype: "A_B", parent: "A",
+    created({ id: ["A_B1i"], typeName: "TestThing", initialState: {
+      instancePrototype: ["A_B"], parent: ["A"],
     } }),
-    created({ id: "A_B_C1i", typeName: "TestThing", initialState: {
-      instancePrototype: "A_B_C", parent: "A_B",
+    created({ id: ["A_B_C1i"], typeName: "TestThing", initialState: {
+      instancePrototype: ["A_B_C"], parent: ["A_B"],
     } }),
   ];
   const firstDegreeUpwardsInstances = [
-    created({ id: "B2i", typeName: "TestThing", initialState: {
-      instancePrototype: "A_B",
+    created({ id: ["B2i"], typeName: "TestThing", initialState: {
+      instancePrototype: ["A_B"],
     } }),
-    created({ id: "A_C2i", typeName: "TestThing", initialState: {
-      instancePrototype: "A_B_C", parent: "A",
+    created({ id: ["A_C2i"], typeName: "TestThing", initialState: {
+      instancePrototype: ["A_B_C"], parent: ["A"],
     } }),
-    created({ id: "C3", typeName: "TestThing", initialState: {
-      instancePrototype: "A_B_C",
+    created({ id: ["C3"], typeName: "TestThing", initialState: {
+      instancePrototype: ["A_B_C"],
     } }),
   ];
   const firstDegreeDownwardsInstances = [
-    created({ id: "A_B_C_T1i", typeName: "TestThing", initialState: {
-      instancePrototype: "T", parent: "A_B_C",
+    created({ id: ["A_B_C_T1i"], typeName: "TestThing", initialState: {
+      instancePrototype: ["T"], parent: ["A_B_C"],
     } }),
-    created({ id: "A_B_T2i", typeName: "TestThing", initialState: {
-      instancePrototype: "T", parent: "A_B",
+    created({ id: ["A_B_T2i"], typeName: "TestThing", initialState: {
+      instancePrototype: ["T"], parent: ["A_B"],
     } }),
-    created({ id: "A_T3i", typeName: "TestThing", initialState: {
-      instancePrototype: "T", parent: "A",
+    created({ id: ["A_T3i"], typeName: "TestThing", initialState: {
+      instancePrototype: ["T"], parent: ["A"],
     } }),
   ];
 
@@ -495,13 +496,13 @@ describe("complex structures", () => {
     harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), gA_B1_C));
 
     // Here everything falls apart
-    harness.chronicleEvent(created({ id: "gA1_B1", typeName: "TestThing", initialState: {
+    harness.chronicleEvent(created({ id: ["gA1_B1"], typeName: "TestThing", initialState: {
       instancePrototype: gA1_B,
     } }));
-    harness.chronicleEvent(created({ id: "gA1_B_C1", typeName: "TestThing", initialState: {
+    harness.chronicleEvent(created({ id: ["gA1_B_C1"], typeName: "TestThing", initialState: {
       instancePrototype: gA1_B_C,
     } }));
-    harness.chronicleEvent(created({ id: "gA_B1_C1", typeName: "TestThing", initialState: {
+    harness.chronicleEvent(created({ id: ["gA_B1_C1"], typeName: "TestThing", initialState: {
       instancePrototype: gA_B1_C,
     } }));
   };
@@ -510,7 +511,7 @@ describe("complex structures", () => {
   /*
   const createThirdDegreeInstances = (harness) => {
       const gA1_B1_C = harness.run(vRef("gA1_B1"), ["§->", "children", 0]);
-      harness.chronicleEvent(created({ id: "gA1_B1_C1", typeName: "TestThing", initialState: {
+      harness.chronicleEvent(created({ id: ["gA1_B1_C1"], typeName: "TestThing", initialState: {
         instancePrototype: gA1_B1_C,
       } }));
   };
@@ -809,7 +810,7 @@ describe("complex structures", () => {
         .toEqual(harness.run(A_B1i, "children"));
 
     // Add a bloke to A_B1i
-    harness.chronicleEvent(created({ id: "A_B1_D", typeName: "TestThing", initialState: {
+    harness.chronicleEvent(created({ id: ["A_B1_D"], typeName: "TestThing", initialState: {
       parent: A_B1i, name: "new guy",
     } }));
 
@@ -823,7 +824,7 @@ describe("complex structures", () => {
     const startingList = harness.run(A_B, "children", { verbosity: 0 });
 
     // Add a bloke to A_B1i
-    harness.chronicleEvent(created({ id: "A_B1_D", typeName: "TestThing", initialState: {
+    harness.chronicleEvent(created({ id: ["A_B1_D"], typeName: "TestThing", initialState: {
       parent: A_B1i, name: "new guy",
     } }));
 
@@ -840,7 +841,7 @@ describe("complex structures", () => {
         .toEqual(startingList);
 
     // Modify the name of the newly-added object
-    harness.chronicleEvent(fieldsSet({ id: "A_B1_D", typeName: "TestThing",
+    harness.chronicleEvent(fieldsSet({ id: ["A_B1_D"], typeName: "TestThing",
       sets: { name: "new guy 2.0", },
     }));
 

@@ -16,34 +16,34 @@ describe("Engine bug tests", async () => {
   it("0000049: creates an entity with property and duplicates it", async () => {
     // This test could be extracted as a separate DUPLICATED test case somewhere
     const commands = [
-      created({ id: "Foo", typeName: "Entity", initialState: {
-        owner: "test_partition",
+      created({ id: ["Foo"], typeName: "Entity", initialState: {
+        owner: ["test_partition"],
         name: "Foo",
       }, }),
-      created({ id: "FooTen", typeName: "Property", initialState: {
+      created({ id: ["FooTen"], typeName: "Property", initialState: {
         name: "Ten",
         owner: vRef("Foo", "properties"),
         value: literal(10),
       }, }),
-      created({ id: "FooSelfPtr", typeName: "Property", initialState: {
+      created({ id: ["FooSelfPtr"], typeName: "Property", initialState: {
         name: "SelfPtr",
         owner: vRef("Foo", "properties"),
         value: pointer(vRef("Foo")),
       }, }),
-      created({ id: "FooChild", typeName: "Entity", initialState: {
+      created({ id: ["FooChild"], typeName: "Entity", initialState: {
         name: "Child",
         owner: vRef("Foo"),
       }, }),
-      created({ id: "FooChildPtr", typeName: "Property", initialState: {
+      created({ id: ["FooChildPtr"], typeName: "Property", initialState: {
         name: "ChildPtr",
         owner: vRef("Foo", "properties"),
         value: pointer(vRef("FooChild")),
       }, }),
-      created({ id: "Bar", typeName: "Entity", initialState: {
-        owner: "test_partition",
+      created({ id: ["Bar"], typeName: "Entity", initialState: {
+        owner: ["test_partition"],
         name: "Bar",
       }, }),
-      created({ id: "FooBarPtr", typeName: "Property", initialState: {
+      created({ id: ["FooBarPtr"], typeName: "Property", initialState: {
         name: "BarPtr",
         owner: vRef("Foo", "properties"),
         value: pointer(vRef("Bar")),

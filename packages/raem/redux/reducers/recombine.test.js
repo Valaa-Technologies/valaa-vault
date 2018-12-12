@@ -7,21 +7,21 @@ describe("RECOMBINED", () => {
   beforeEach(() => {});
 
   const createBlockA = [
-    created({ id: "A_grandparent", typeName: "TestThing" }),
-    created({ id: "A_parent", typeName: "TestThing",
+    created({ id: ["A_grandparent"], typeName: "TestThing" }),
+    created({ id: ["A_parent"], typeName: "TestThing",
       initialState: { parent: vRef("A_grandparent") },
     }),
-    created({ id: "A_child1", typeName: "TestThing",
+    created({ id: ["A_child1"], typeName: "TestThing",
       initialState: { name: "child1", parent: vRef("A_parent") },
     }),
-    created({ id: "A_child2", typeName: "TestThing",
+    created({ id: ["A_child2"], typeName: "TestThing",
       // child2 is asymmetric with child1 and does not have a name
       initialState: { parent: vRef("A_parent") },
     }),
-    created({ id: "A_child1GlueChild2", typeName: "TestGlue",
+    created({ id: ["A_child1GlueChild2"], typeName: "TestGlue",
       initialState: { source: vRef("A_child1"), target: vRef("A_child2") },
     }),
-    created({ id: "A_child2GlueChild1", typeName: "TestGlue",
+    created({ id: ["A_child2GlueChild1"], typeName: "TestGlue",
       initialState: { source: vRef("A_child2"), target: vRef("A_child1") },
     }),
   ];
@@ -30,12 +30,12 @@ describe("RECOMBINED", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       recombined({
         actions: [
-          duplicated({ id: "A_child1Copy",
-            duplicateOf: "A_child1",
+          duplicated({ id: ["A_child1Copy"],
+            duplicateOf: ["A_child1"],
             initialState: { name: "child1 copy" },
           }),
-          duplicated({ id: "A_child2Copy",
-            duplicateOf: "A_child2",
+          duplicated({ id: ["A_child2Copy"],
+            duplicateOf: ["A_child2"],
             initialState: { name: "child2 copy" },
           }),
         ]
@@ -76,13 +76,13 @@ describe("RECOMBINED", () => {
       recombined({
         actions: [
           duplicated({
-            id: "A_parentCopy",
-            duplicateOf: "A_parent",
+            id: ["A_parentCopy"],
+            duplicateOf: ["A_parent"],
             initialState: { name: "parent copy" },
           }),
           duplicated({
-            id: "A_child2Copy",
-            duplicateOf: "A_child2",
+            id: ["A_child2Copy"],
+            duplicateOf: ["A_child2"],
             initialState: { name: "child2 copy" },
           }),
         ],
@@ -122,13 +122,13 @@ describe("RECOMBINED", () => {
       recombined({
         actions: [
           duplicated({
-            id: "A_parentCopy",
-            duplicateOf: "A_parent",
+            id: ["A_parentCopy"],
+            duplicateOf: ["A_parent"],
             initialState: { name: "parent copy" },
           }),
           duplicated({
             id: null,
-            duplicateOf: "A_child2",
+            duplicateOf: ["A_child2"],
           }),
         ],
       }),
@@ -154,13 +154,13 @@ describe("RECOMBINED", () => {
       recombined({
         actions: [
           duplicated({
-            id: "A_parentCopy",
-            duplicateOf: "A_parent",
+            id: ["A_parentCopy"],
+            duplicateOf: ["A_parent"],
             initialState: { name: "parent copy" },
           }),
           duplicated({
-            id: "A_child2Copy",
-            duplicateOf: "A_child2",
+            id: ["A_child2Copy"],
+            duplicateOf: ["A_child2"],
             preOverrides: { owner: vRef("A_child1", "children") },
           }),
         ],

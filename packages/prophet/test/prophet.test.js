@@ -69,12 +69,12 @@ describe("Prophet", () => {
   });
 
   const commands = [
-    created({ id: "Entity A", typeName: "Entity", initialState: { owner: "test_partition" } }),
-    created({ id: "Entity B", typeName: "Entity", initialState: { owner: "test_partition" } }),
-    created({ id: "Entity C", typeName: "Entity", initialState: { owner: "test_partition" } }),
-    created({ id: "Entity D", typeName: "Entity", initialState: { owner: "test_partition" } }),
-    created({ id: "Entity E", typeName: "Entity", initialState: { owner: "test_partition" } }),
-    created({ id: "Entity F", typeName: "Entity", initialState: { owner: "test_partition" } }),
+    created({ id: ["Entity-A"], typeName: "Entity", initialState: { owner: ["test_partition"] } }),
+    created({ id: ["Entity-B"], typeName: "Entity", initialState: { owner: ["test_partition"] } }),
+    created({ id: ["Entity-C"], typeName: "Entity", initialState: { owner: ["test_partition"] } }),
+    created({ id: ["Entity-D"], typeName: "Entity", initialState: { owner: ["test_partition"] } }),
+    created({ id: ["Entity-E"], typeName: "Entity", initialState: { owner: ["test_partition"] } }),
+    created({ id: ["Entity-F"], typeName: "Entity", initialState: { owner: ["test_partition"] } }),
   ];
 
   it("stores the contents of the actions on the scribe correctly", async () => {
@@ -119,18 +119,19 @@ describe("Prophet", () => {
 
 describe("Prophet", () => {
   const simpleCommand = created({
-    id: "simple_entity", typeName: "Entity", initialState: {
-      name: "Simple Entity", owner: "test_partition",
+    id: ["simple_entity"], typeName: "Entity", initialState: {
+      name: "Simple Entity", owner: ["test_partition", {}, {}],
     }
   });
 
   const coupleCommands = [
-    created({ id: "some_media", typeName: "Media", initialState: {
-      name: "Simple Media", owner: "test_partition",
+    created({ id: ["some_media"], typeName: "Media", initialState: {
+      name: "Simple Media", owner: ["test_partition", { partition: String(testPartitionURI) }, {}],
     } }),
-    created({ id: "simple_relation", typeName: "Relation", initialState: {
-      name: "Simple-other Relation", owner: vRef("simple_entity", "relations"),
-      target: "some_media",
+    created({ id: ["simple_relation"], typeName: "Relation", initialState: {
+      name: "Simple-other Relation",
+      owner: vRef("simple_entity", "relations", undefined, testPartitionURI).toJSON(),
+      target: ["some_media", { partition: String(testPartitionURI) }],
     } }),
   ];
 
@@ -439,8 +440,8 @@ describe("Prophet", () => {
     expect(authorityConnection._upstreamEntries.length).toEqual(3);
     authorityConnection._upstreamEntries = [];
     const foreignTruth = initializeAspects(created({
-      id: "foreign_entity", typeName: "Entity", initialState: {
-        name: "Simple Entity", owner: "test_partition",
+      id: ["foreign_entity"], typeName: "Entity", initialState: {
+        name: "Simple Entity", owner: ["test_partition"],
       },
     }), { version: "0.2", command: { id: "foreign_entity" }, log: { index: 1 } });
     await authorityConnection.getReceiveTruths()([foreignTruth]);
@@ -482,8 +483,10 @@ describe("Cross-partition", () => {
     const lateTargetId = vRef("late_target", undefined, undefined, latePartitionURI);
 
     await scribeConnection.chronicleEvent(created({
-      id: "CrossRelation_A", typeName: "Relation",
-      initialState: { name: "CrossRelation", source: "test_partition", target: lateTargetId },
+      id: ["CrossRelation_A"], typeName: "Relation",
+      initialState: {
+        source: ["test_partition"], name: "CrossRelation", target: lateTargetId.toJSON(),
+      },
       aspects: {
         version: "0.2",
         log: { index: scribeConnection.getFirstUnusedCommandEventId() },
@@ -496,12 +499,12 @@ describe("Cross-partition", () => {
     const lateScribeConnection = lateConnection.getUpstreamConnection();
     await Promise.all(lateScribeConnection.chronicleEvents([
       created({
-        id: "test_late", typeName: "Entity",
+        id: ["test_late"], typeName: "Entity",
         initialState: { name: "Test Late" },
         aspects: { version: "0.2", log: { index: 0 }, command: { id: "lid-0" } },
       }),
       created({
-        id: "late_target", typeName: "Entity",
+        id: ["late_target"], typeName: "Entity",
         initialState: { name: "Late Target" },
         aspects: { version: "0.2", log: { index: 1 }, command: { id: "lid-1" } },
       }),
@@ -522,15 +525,15 @@ describe("Cross-partition", () => {
     const index = scribeConnection.getFirstUnusedCommandEventId();
     await Promise.all(scribeConnection.chronicleEvents([
       created({
-        id: "CrossEntryInstance_A", typeName: "Entity",
-        initialState: { owner: "test_partition", instancePrototype: latePrototypeId,
+        id: ["CrossEntryInstance_A"], typeName: "Entity",
+        initialState: { owner: ["test_partition"], instancePrototype: latePrototypeId.toJSON(),
           name: "Cross-partition instance",
         },
         aspects: { version: "0.2", log: { index: index + 0 }, command: { id: "cid-1" } },
       }),
       created({
-        id: "CrossEntryInstance_A.foo", typeName: "Property",
-        initialState: { owner: ["CrossEntryInstance_A", "properties"],
+        id: ["CrossEntryInstance_A-foo"], typeName: "Property",
+        initialState: { owner: ["CrossEntryInstance_A", {}, { coupling: "properties" }],
           name: "bar",
         },
         aspects: { version: "0.2", log: { index: index + 1 }, command: { id: "cid-2" } },
@@ -541,18 +544,18 @@ describe("Cross-partition", () => {
     const lateScribeConnection = lateConnection.getUpstreamConnection();
     await Promise.all(lateScribeConnection.chronicleEvents([
       created({
-        id: "test_late", typeName: "Entity",
+        id: ["test_late"], typeName: "Entity",
         initialState: { name: "Test Late" },
         aspects: { version: "0.2", log: { index: 0 }, command: { id: "lid-0" } },
       }),
       created({
-        id: "late_prototype", typeName: "Entity",
+        id: ["late_prototype"], typeName: "Entity",
         initialState: { name: "Late Prototype" },
         aspects: { version: "0.2", log: { index: 1 }, command: { id: "lid-1" } },
       }),
       created({
-        id: "late_prototype.bar", typeName: "Property",
-        initialState: { owner: ["late_prototype", "properties"],
+        id: ["late_prototype-bar"], typeName: "Property",
+        initialState: { owner: ["late_prototype", {}, { coupling: "properties" }],
           name: "foo",
         },
         aspects: { version: "0.2", log: { index: 2 }, command: { id: "lid-3" } },

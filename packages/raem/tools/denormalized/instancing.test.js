@@ -12,58 +12,58 @@ import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 
 describe("CREATED with instancePrototype", () => {
   const createBlockA = [
-    created({ id: "A_grandparent", typeName: "TestThing" }),
-    created({ id: "A_parent", typeName: "TestThing", initialState: {
-      parent: "A_grandparent",
+    created({ id: ["A_grandparent"], typeName: "TestThing" }),
+    created({ id: ["A_parent"], typeName: "TestThing", initialState: {
+      parent: ["A_grandparent"],
     }, }),
-    created({ id: "A_child1", typeName: "TestThing", initialState: {
-      parent: "A_parent",
+    created({ id: ["A_child1"], typeName: "TestThing", initialState: {
+      parent: ["A_parent"],
       name: "child1",
     }, }),
-    created({ id: "A_child2", typeName: "TestThing", initialState: {
-      parent: "A_parent",
+    created({ id: ["A_child2"], typeName: "TestThing", initialState: {
+      parent: ["A_parent"],
     }, }),
-    created({ id: "A_childGlue", typeName: "TestGlue", initialState: {
-      source: "A_child1", target: "A_child2", position: { x: 0, y: 1, z: null },
+    created({ id: ["A_childGlue"], typeName: "TestGlue", initialState: {
+      source: ["A_child1"], target: ["A_child2"], position: { x: 0, y: 1, z: null },
     }, }),
-    created({ id: "A_childDataGlue", typeName: "TestDataGlue", initialState: {
-      source: "A_child1", target: "A_child2",
+    created({ id: ["A_childDataGlue"], typeName: "TestDataGlue", initialState: {
+      source: ["A_child1"], target: ["A_child2"],
     }, }),
-    fieldsSet({ id: "A_child1", typeName: "TestThing",
+    fieldsSet({ id: ["A_child1"], typeName: "TestThing",
       sets: { targetDataGlues: ["A_childDataGlue"], },
     }),
-    fieldsSet({ id: "A_child2", typeName: "TestThing",
+    fieldsSet({ id: ["A_child2"], typeName: "TestThing",
       sets: { sourceDataGlues: ["A_childDataGlue"], },
     }),
   ];
 
   const createGrandparentInstance = [
-    created({ id: "A_grandparentInstance", typeName: "TestThing",
-      initialState: { instancePrototype: "A_grandparent" },
+    created({ id: ["A_grandparentInstance"], typeName: "TestThing",
+      initialState: { instancePrototype: ["A_grandparent"] },
     }),
   ];
 
   const createGrandparentInstanceInstance = [
-    created({ id: "A_grandparentInstanceInstance", typeName: "TestThing",
-      initialState: { instancePrototype: "A_grandparentInstance" },
+    created({ id: ["A_grandparentInstanceInstance"], typeName: "TestThing",
+      initialState: { instancePrototype: ["A_grandparentInstance"] },
     }),
   ];
 
   const createParentInstance = [
-    created({ id: "A_parentInstance", typeName: "TestThing",
-      initialState: { instancePrototype: "A_parent", owner: "A_grandparent" },
+    created({ id: ["A_parentInstance"], typeName: "TestThing",
+      initialState: { instancePrototype: ["A_parent"], owner: ["A_grandparent"] },
     }),
   ];
 
   const createChild1Instance = [
-    created({ id: "A_child1Instance", typeName: "TestThing",
-      initialState: { instancePrototype: "A_child1", owner: "A_parent" },
+    created({ id: ["A_child1Instance"], typeName: "TestThing",
+      initialState: { instancePrototype: ["A_child1"], owner: ["A_parent"] },
     }),
   ];
   /*
   const createChild1InstanceInGrandparent = [
-    created({ id: "A_child1Instance", typeName: "TestThing",
-      initialState: { instancePrototype: "A_child1Instance", owner: "A_grandparent" },
+    created({ id: ["A_child1Instance"], typeName: "TestThing",
+      initialState: { instancePrototype: ["A_child1Instance"], owner: ["A_grandparent"] },
     }),
   ];
   */
@@ -71,8 +71,8 @@ describe("CREATED with instancePrototype", () => {
   it("sets the instance prototype correctly", async () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createChild1Instance);
     const child1Instance = tryObjectTransient(harness.getState(), "A_child1Instance", "TestThing");
-    expect(child1Instance.get("prototype"))
-        .toEqual(vRef("A_child1", "instances"));
+    expect(child1Instance.get("prototype").toJSON())
+        .toEqual(vRef("A_child1", "instances").toJSON());
     expect(harness.run(child1Instance, "prototype").rawId())
         .toEqual("A_child1");
   });
@@ -80,8 +80,8 @@ describe("CREATED with instancePrototype", () => {
   it("sets instance owner explicitly to the owner of the prototype", async () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createChild1Instance);
     const child1Instance = tryObjectTransient(harness.getState(), "A_child1Instance", "TestThing");
-    expect(child1Instance.get("owner"))
-        .toEqual(vRef("A_parent", "unnamedOwnlings"));
+    expect(child1Instance.get("owner").toJSON())
+        .toEqual(vRef("A_parent", "unnamedOwnlings").toJSON());
     expect(harness.run(child1Instance, "parent"))
         .toEqual(undefined);
     expect(harness.run(vRef("A_parent"), ["unnamedOwnlings", 0]).rawId())
@@ -99,10 +99,10 @@ describe("CREATED with instancePrototype", () => {
 
   it("doesn't forward mutated instance leaf property access to the prototype", async () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createChild1Instance, [
-      fieldsSet({ id: "A_child1Instance", typeName: "TestThing",
+      fieldsSet({ id: ["A_child1Instance"], typeName: "TestThing",
         sets: { name: "child1Instance", },
       }),
-      fieldsSet({ id: "A_child1", typeName: "TestThing",
+      fieldsSet({ id: ["A_child1"], typeName: "TestThing",
         sets: { name: "child1Mutated", },
       }),
     ]);

@@ -46,8 +46,9 @@ export default Object.freeze({
   },
   "§ref": function valaaReference (valker: Valker, head: any, scope: ?Object,
       [, params]: BuiltinStep): VRef {
-    return valker.pack(valker.obtainReference(
-        typeof params !== "object" ? params : tryLiteral(valker, head, params, scope)));
+    // const lit = typeof params !== "object" ? params : tryLiteral(valker, head, params, scope);
+    // console.log("reflit:", lit, "by", params);
+    return valker.pack(valker.obtainReference(params));
   },
   "§$": function scopeLookup (valker: Valker, head: any, scope: ?Object,
       [, lookupName]: BuiltinStep) {

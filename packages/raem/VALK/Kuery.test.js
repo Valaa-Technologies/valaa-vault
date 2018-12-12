@@ -17,7 +17,7 @@ describe("VALK basic functionality tests", () => {
         .toEqual(["3"]);
 
     expect(VALK.fromValue("4").to(VALK.array()).toVAKON())
-        .toEqual([["§'", "4"], ["§[]"]]);
+        .toEqual(["§->", ["§'", "4"], ["§[]"]]);
     expect(run(head, VALK.fromValue("4").to(VALK.array())))
         .toEqual([]);
   });
@@ -25,9 +25,9 @@ describe("VALK basic functionality tests", () => {
   it("Copies steps as per immutable rules", () => {
     const base = VALK.fromValue("1");
     expect(base.to("originalFollowUpStep").toVAKON())
-        .toEqual([["§'", "1"], "originalFollowUpStep"]);
+        .toEqual(["§->", ["§'", "1"], "originalFollowUpStep"]);
     expect(base.to("branchFollowUpStep").toVAKON())
-        .toEqual([["§'", "1"], "branchFollowUpStep"]);
+        .toEqual(["§->", ["§'", "1"], "branchFollowUpStep"]);
   });
 
   it("Resolves selection with head to null VAKON", () => {
@@ -102,7 +102,7 @@ describe("VALK corpus kueries", () => {
   it("Converts basic VALK.equalTo into VAKON", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("id").looseEqualTo(vRef("A_parentGlue"));
-    expect(kuery.toVAKON()).toEqual(["§==", ["id"], ["§ref", ["A_parentGlue"]]]);
+    expect(kuery.toVAKON()).toEqual(["§==", ["§->", "id"], ["§ref", ["A_parentGlue"]]]);
     expect(harness.run(vRef("A_parentGlue"), kuery))
         .toEqual(true);
     expect(harness.run(vRef("A_childGlue"), kuery))
@@ -121,7 +121,7 @@ describe("VALK corpus kueries", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.if(VALK.to("id").looseEqualTo(vRef("A_child1")));
     expect(kuery.toVAKON())
-        .toEqual(["§?", ["§==", ["id"], ["§ref", ["A_child1"]]], null]);
+        .toEqual(["§?", ["§==", ["§->", "id"], ["§ref", ["A_child1"]]], null]);
     expect(harness.run(vRef("A_child1"), "rawId"))
         .toEqual("A_child1");
     expect(harness.run(vRef("A_child2"), kuery))
@@ -166,7 +166,7 @@ describe("VALK corpus kueries", () => {
     const kuery = VALK.to("children").filter(VALK.to("id").looseEqualTo(vRef("A_child1")));
     expect(kuery.toVAKON())
         .toEqual(["§->", "children",
-            ["§filter", ["§==", ["id"], ["§ref", ["A_child1"]]]]]);
+            ["§filter", ["§==", ["§->", "id"], ["§ref", ["A_child1"]]]]]);
     expect(harness.run(vRef("A_parent"), kuery.toIndex(0).to("rawId")))
         .toEqual("A_child1");
   });

@@ -1631,18 +1631,23 @@ export default class Kuery {
       if (typeof this._VAKON === "undefined") {
         switch (this._mode) {
           case "path":
-            this._VAKON = (this._pathSteps || []).map(toVAKON);
+            this._VAKON = [this._pathOperator];
+            for (const step of (this._pathSteps || [])) this._VAKON.push(toVAKON(step));
+            /*
             if ((typeof this._VAKON[0] === "string") || (this._pathOperator !== "§->")) {
               this._VAKON = [this._pathOperator, ...this._VAKON];
             }
+            */
             break;
           case "expression": {
             const args = this._expressionArgs.map(arg => {
               const vakon = (arg instanceof Kuery ? arg : this._root.toTemplate(arg)).toVAKON();
-              // All expressions treat their arguments as literals, so if a kuery VAKON is
-              // a non-object we must wrap it inside a path.
-              if (typeof vakon !== "object") return [vakon];
+              // All expressions treat their arguments as literals, so
+              // if a kuery VAKON is a non-object we must wrap it inside a path.
+              if (typeof vakon !== "object") return ["§->", vakon];
               if (vakon && (vakon[0] === "§'") && (typeof vakon[1] !== "object")) {
+                // A literal expression with primitive value can be
+                // used directly
                 return vakon[1];
               }
               return vakon;

@@ -6,6 +6,7 @@ import inBrowser from "~/tools/inBrowser";
 import invariantify, { invariantifyArray, invariantifyNumber, invariantifyString,
     invariantifyObject } from "~/tools/invariantify";
 import wrapError, { dumpObject as _dumpObject } from "~/tools/wrapError";
+import trivialClone from "~/tools/trivialClone";
 
 import { isHostRef, tryHostRef } from "./hostReference";
 
@@ -185,7 +186,7 @@ export default class Kuery {
       case "string":
       case "symbol": // TODO(iridian): This will not serialize and is thus quite broken.
       case "number":
-        return this._addRawVAKON(step, headType);
+        return this._addPathRawVAKON(step, headType);
       case "function":
         throw new Error(`VALK.to: invalid step, got function '${step.name}'`);
       default:
@@ -225,7 +226,7 @@ export default class Kuery {
    * @returns {Kuery}
    */
   nullable (): Kuery {
-    return this._addRawVAKON(false);
+    return this._addPathRawVAKON(false);
   }
 
   /**
@@ -238,7 +239,7 @@ export default class Kuery {
    * @returns {Kuery}
    */
   notNull (errorMessage: ?string): Kuery {
-    if (!errorMessage) return this._addRawVAKON(true);
+    if (!errorMessage) return this._addPathRawVAKON(true);
     return this.to(this._newRawVAKON(true).comment(errorMessage));
   }
 
@@ -308,23 +309,12 @@ export default class Kuery {
    * @returns {Kuery}
    */
   toTemplate (value: any, headType: ?string): Kuery {
-    if ((typeof value !== "object") || (value === null)) {
-      return this.fromValue(value, headType);
-    }
     if (value instanceof Kuery) return this.toKuery(value, headType);
-    if (Array.isArray(value)) {
-      return this.toKuery(
-          this._root.array(...value.map(
-              entry => this._root.toTemplate(entry, headType))), headType);
-    }
-    if (Object.getPrototypeOf(value) !== Object.prototype) {
+    if ((value === null) || (typeof value !== "object")
+        || ((Object.getPrototypeOf(value) !== Object.prototype) && !Array.isArray(value))) {
       return this.fromValue(value, headType);
     }
-    const ret = {};
-    for (const key of Object.keys(value)) {
-      ret[key] = toRawVAKON(value[key]);
-    }
-    return this._addRawVAKON(ret, headType);
+    return this._addRawVAKON(_recurseToVAKON(value), headType);
   }
 
   /**
@@ -342,7 +332,7 @@ export default class Kuery {
   toField (fieldName: string | Object, headType: ?string): Kuery {
     if (typeof fieldName === "object") return this.evalk(fieldName).setHeadType(headType);
     invariantifyString(name, "VALK.toField.name");
-    return this._addRawVAKON(fieldName, headType);
+    return this._addPathRawVAKON(fieldName, headType);
   }
 
   field (name: string, headType: ?string): Kuery {
@@ -383,7 +373,7 @@ export default class Kuery {
   toIndex (index: number, headType: ?string): Kuery {
     if (typeof index === "object") return this.evalk(index).setHeadType(headType);
     invariantifyNumber(index, "VALK.toIndex.index", { integer: true });
-    return this._addRawVAKON(index, headType);
+    return this._addPathRawVAKON(index, headType);
   }
 
   /**
@@ -426,7 +416,8 @@ export default class Kuery {
    * @returns {Kuery}
    */
   map (...pathSteps: any[]): Kuery {
-    return this._addPath("§map", pathSteps.map(toStep => this._root.to(toStep)));
+    return this._addStep(pathSteps.reduce(
+        (acc, toStep) => acc.to(toStep), this._root._newPath("§map", [])));
   }
 
   /**
@@ -509,7 +500,6 @@ export default class Kuery {
     return this._addRawVAKON(selectorVAKON);
   }
 
-
   // Valker reference engine host steps
 
   /**
@@ -552,11 +542,7 @@ export default class Kuery {
         return true;
       }
     });
-    return this._addExpression("§$<-",
-        setters.map(setter => (Array.isArray(setter)
-            ? this._newRawVAKON(
-                [this._root.to(setter[0]).toVAKON(), this._root.to(setter[1]).toVAKON()])
-            : this._root.toTemplate(setter))));
+    return this._addExpression("§$<-", _recurseToVAKON(setters));
   }
 
   /**
@@ -580,11 +566,7 @@ export default class Kuery {
         return true;
       }
     });
-    return this._addExpression("§.<-",
-        setters.map(setter => (Array.isArray(setter)
-            ? this._newRawVAKON(
-                [this._root.to(setter[0]).toVAKON(), this._root.to(setter[1]).toVAKON()])
-            : this._root.toTemplate(setter))));
+    return this._addExpression("§.<-", _recurseToVAKON(setters));
   }
 
   /**
@@ -616,9 +598,15 @@ export default class Kuery {
    * @returns
    */
   array (...entries: ?any[]) {
-    return entries.length || !this.isActiveKuery()
-        ? this._addExpression("§[]", entries)
+    return (entries.length || !this.isActiveKuery())
+        ? this._addRawVAKON(_recurseToVAKON(entries))
         : this._root._addExpression("§[]", [this.head()]);
+  }
+
+  object (...setters) {
+    return (setters.length === 1) && !Array.isArray(setters[0])
+        ? this.toTemplate(setters[0])
+        : this._addExpression("§{}", _recurseToVAKON(setters));
   }
 
   // Valker reference engine flow control host steps
@@ -1540,7 +1528,7 @@ export default class Kuery {
     return this._newPath(this._pathOperator, this._pathSteps.slice(begin, end));
   }
   pathConcat (...values: Kuery[]): Kuery {
-    const ret = this._addStepsTypeless(...values.reduce((result, value) => (
+    const ret = this._addStepsTypeless(false, ...values.reduce((result, value) => (
         (!value || !value.isActiveKuery())
             ? result
             : result.concat(value._pathSteps || value)),
@@ -1598,6 +1586,9 @@ export default class Kuery {
   _addRawVAKON (step: any, type: ?string): Kuery {
     return this._addStep(this._newRawVAKON(step, type));
   }
+  _addPathRawVAKON (step: any, type: ?string): Kuery {
+    return this._addStep(this._newRawVAKON(step, type), undefined, true);
+  }
   _addExpression (operator: string, params: any[]): Kuery {
     return this._addStep(this._newExpression(operator, params));
   }
@@ -1605,16 +1596,16 @@ export default class Kuery {
     return this._addStep(this._newPath(pathOperator, stepKueries));
   }
 
-  _addStep (step: any, headType: ?string): Kuery {
-    const ret = this._addStepsTypeless(step);
+  _addStep (step: any, headType: ?string, forcePath: ?boolean): Kuery {
+    const ret = this._addStepsTypeless(forcePath, step);
     if (headType) ret._headType = headType;
     return ret;
   }
 
-  _addStepsTypeless (step: any, ...steps: any) {
+  _addStepsTypeless (forcePath: boolean, step: any, ...steps: any) {
     try {
       if (step === undefined) return this;
-      if (this.isActiveKuery() || steps.length) {
+      if (forcePath || this.isActiveKuery() || steps.length) {
         return this._newPath((this._pathOperator || "§->"),
             [...(this._pathSteps || (this.isActiveKuery() && [this]) || []), step, ...steps]);
       }
@@ -1672,6 +1663,18 @@ export function toVAKON (kueryOrVAKON: Kuery | any) {
   return kueryOrVAKON;
 }
 
+function _recurseToVAKON (kuery: Kuery | any) {
+  return trivialClone(kuery, value => {
+    if ((!value || (typeof value !== "object")
+        || Array.isArray(value) || (Object.getPrototypeOf(value) === Object.prototype))) {
+      return undefined;
+    }
+    if (value instanceof Kuery) return value.toVAKON();
+    const hostRef = tryHostRef(value);
+    if (hostRef) return ["§ref", hostRef.toJSON()];
+    return value;
+  });
+}
 
 function toRawVAKON (kueryOrPrimitive: any): any {
   try {

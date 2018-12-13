@@ -252,12 +252,22 @@ export default class Valker extends Resolver {
               }
               if (stepName[0] === "§") throw new Error(`Unrecognized builtin step ${stepName}`);
             }
-            if (!Array.isArray(step)) {
-              type = "select";
-              return this.select(head, step, scope, nonFinalStep);
+            if (step instanceof Kuery) {
+              throw new Error("Kuery objects must have been expanded as VAKON before valking");
             }
+            if (!Array.isArray(step)) {
+              type = "object";
+              return this._builtinSteppers["§{}"](this, head, scope, ["§{}", step], nonFinalStep);
+              // type = "select";
+              // return this.select(head, step, scope, nonFinalStep);
+            }
+            //*
+            type = "array";
+            return this._builtinSteppers["§[]"](this, head, scope, step, nonFinalStep, 0);
+            /*/
             type = "path";
             return this._builtinSteppers["§->"](this, head, scope, step, nonFinalStep, 0);
+            //*/
           }
         }
         // eslint-disable-line no-fallthrough

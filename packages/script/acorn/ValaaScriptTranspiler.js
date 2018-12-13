@@ -223,7 +223,7 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
   }
 
   createControlBlock (customSelectors: ?Object = {}) {
-    return this.VALK().select(customSelectors);
+    return this.VALK().object(customSelectors);
   }
 
   kueriesFromArray (args: any, options: Object) {

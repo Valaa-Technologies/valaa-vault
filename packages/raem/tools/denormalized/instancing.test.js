@@ -84,7 +84,7 @@ describe("CREATED with instancePrototype", () => {
         .toEqual(vRef("A_parent", "unnamedOwnlings").toJSON());
     expect(harness.run(child1Instance, "parent"))
         .toEqual(undefined);
-    expect(harness.run(vRef("A_parent"), ["unnamedOwnlings", 0]).rawId())
+    expect(harness.run(vRef("A_parent"), ["§->", "unnamedOwnlings", 0]).rawId())
         .toEqual("A_child1Instance");
   });
 

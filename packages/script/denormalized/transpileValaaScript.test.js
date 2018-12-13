@@ -340,7 +340,6 @@ describe("ValaaScript", () => {
         [whileTest, scopeSum];
       `;
       const bodyKuery = transpileValaaScriptBody(bodyText);
-      // console.log("bodyKuery VAKON", beaumpify(bodyKuery.toVAKON()));
       const [whileTest, scopeSum] = evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 });
       expect(whileTest())
           .toEqual(10);
@@ -539,7 +538,7 @@ describe("ValaaScript", () => {
   describe("VALK lookups", () => {
     it("Should handle arrays", () => {
       expect(transpileValaaScriptBody("[1, 2, 3]"))
-          .toEqual(VALSK.array(VALSK.fromValue(1), VALSK.fromValue(2), VALSK.fromValue(3)));
+          .toEqual(VALSK.array(1, 2, 3));
     });
 
     it("should escape to VALK if property access field name starts with '$'", () => {

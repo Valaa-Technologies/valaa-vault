@@ -7,7 +7,7 @@ describe("VALK basic functionality tests", () => {
   it("Executes VALK.array example kueries with freeKuery", () => {
     const head = { dummy: true };
     expect(VALK.array("1", "2").toVAKON())
-        .toEqual(["§[]", "1", "2"]);
+        .toEqual(["1", "2"]);
     expect(run(head, VALK.array("1", "2")))
         .toEqual(["1", "2"]);
 
@@ -17,7 +17,7 @@ describe("VALK basic functionality tests", () => {
         .toEqual(["3"]);
 
     expect(VALK.fromValue("4").to(VALK.array()).toVAKON())
-        .toEqual(["§->", ["§'", "4"], ["§[]"]]);
+        .toEqual(["§->", ["§'", "4"], []]);
     expect(run(head, VALK.fromValue("4").to(VALK.array())))
         .toEqual([]);
   });
@@ -71,7 +71,7 @@ describe("VALK corpus kueries", () => {
   it("Converts trivial VALK to into VAKON", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("children");
-    expect(kuery.toVAKON()).toEqual("children");
+    expect(kuery.toVAKON()).toEqual(["§->", "children"]);
     expect(harness.run(vRef("A_parent"), kuery.map("rawId")))
         .toEqual(["A_child1", "A_child2"]);
   });

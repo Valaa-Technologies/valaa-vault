@@ -380,20 +380,20 @@ describe("Deep instantiations", () => {
     }));
     const ownlingIn1 = harness.run(vRef("root-1"), ["§->", "children", 0]);
     const grandMuckIn1 = harness.run(ownlingIn1, ["§->", "targetGlues", 0]);
-    expect(harness.run(grandMuckIn1, ["§isghost", [null]]))
+    expect(harness.run(grandMuckIn1, ["§isghost", ["§->", null]]))
         .toEqual(true);
-    expect(harness.run(grandMuckIn1, ["§isimmaterial", [null]]))
+    expect(harness.run(grandMuckIn1, ["§isimmaterial", ["§->", null]]))
         .toEqual(true);
     const grandMukIn1i1 = vRef("grandMuckIn1-1");
     harness.chronicleEvent(created({ id: grandMukIn1i1, typeName: "TestGlue", initialState: {
       owner: ownlingIn1,
       instancePrototype: grandMuckIn1,
     } }));
-    expect(harness.run(grandMuckIn1, ["§isghost", [null]]))
+    expect(harness.run(grandMuckIn1, ["§isghost", ["§->", null]]))
         .toEqual(true);
-    expect(harness.run(grandMuckIn1, ["§isimmaterial", [null]]))
+    expect(harness.run(grandMuckIn1, ["§isimmaterial", ["§->", null]]))
         .toEqual(false);
-    expect(harness.run(grandMukIn1i1, ["§isghost", [null]]))
+    expect(harness.run(grandMukIn1i1, ["§isghost", ["§->", null]]))
         .toEqual(false);
     expect(harness.run(grandMukIn1i1, ["§->", "unnamedOwnlings", 0, "name"]))
         .toEqual("muckPartition");

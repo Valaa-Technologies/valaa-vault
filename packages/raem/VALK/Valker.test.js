@@ -596,7 +596,7 @@ describe("complex structures", () => {
         name,
         transient: harness.run(
           (parent && getInfo(parent[0]).transient) || vRef(name),
-          (parent && parent.slice(1).map(index => ["§->", "children", index])) || null,
+          (parent && ["§->", ...parent.slice(1).map(index => ["§->", "children", index])]) || null,
           { verbosity: 0 },
         ),
         parent: parent && getInfo(parent[0]),

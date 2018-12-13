@@ -17,15 +17,15 @@ describe("VALEK extensions", () => {
       expectVrapper("test");
 
       // This emulates a VALK JS function definition: it expects head to be the vBuilder
-      const toCreation = VALEK.setScopeValues(
-        ["root", null],
-        ["article", VALEK.create("Entity", {
+      const toCreation = VALEK.setScopeValues({
+        root: ["§->", null],
+        article: VALEK.create("Entity", {
           name: VALEK.add("article-", VALEK.propertyLiteral("counter"), "-name"),
-          owner: VALEK.to("owner"),
+          owner: VALEK.toField("owner"),
           instancePrototype: VALEK.propertyTarget("template"),
-        })],
-      ).fromScope();
-      const scope = entities().creator.do(toCreation);
+        }),
+      }).fromScope();
+      const scope = entities().creator.do(toCreation.toVAKON());
       expect(scope.article.get("name"))
           .toEqual("article-0-name");
       expect(entities().test.get(

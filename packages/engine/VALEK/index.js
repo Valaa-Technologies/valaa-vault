@@ -127,7 +127,7 @@ export function extractFunctionVAKON (caller: any) {
     _extractScopeAccesses(vakon, caller._capturedScope, lifts);
     caller._persistedVAKON = !Object.keys(lifts).length
         ? vakon
-        : ["§->", VALEK.setScopeValues(...Object.entries(lifts)).toVAKON(), vakon];
+        : ["§->", VALEK.setScopeValues(lifts).toVAKON(), vakon];
   }
   return caller._persistedVAKON;
 }

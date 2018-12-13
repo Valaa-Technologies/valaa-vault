@@ -250,15 +250,13 @@ export interface ReturnStatement extends Statement {
 export function parseReturnStatement (transpiler: Transpiler, ast: ReturnStatement,
     options: Object): Kuery {
   options.surroundingBlock.requireFlowReturn = true;
-  return transpiler.VALK().void(transpiler.VALK().setHeadProperties(
-    ["return",
-      { result: ast.argument
-          ? transpiler.VALK().toTemplate(transpiler.kueryFromAst(ast.argument, options))
-          : transpiler.VALK().void()
-      }
-    ],
-    ["looping", 0],
-  ));
+  return transpiler.VALK().void(transpiler.VALK().setHeadProperties({
+    return: {
+      result: !ast.argument ? transpiler.VALK().void()
+          : transpiler.VALK().toTemplate(transpiler.kueryFromAst(ast.argument, options))
+    },
+    looping: 0,
+  }));
 }
 
 
@@ -274,7 +272,7 @@ export interface BreakStatement extends Statement {
 export function parseBreakStatement (transpiler: Transpiler, ast: BreakStatement,
     options: Object): Kuery {
   options.surroundingBlock.requireFlowLooping = true;
-  return transpiler.VALK().void(transpiler.VALK().setHeadProperties(["looping", 0]));
+  return transpiler.VALK().void(transpiler.VALK().setHeadProperties({ looping: 0 }));
 }
 
 export interface ContinueStatement extends Statement {
@@ -284,7 +282,7 @@ export interface ContinueStatement extends Statement {
 export function parseContinueStatement (transpiler: Transpiler, ast: ContinueStatement,
     options: Object): Kuery {
   options.surroundingBlock.requireFlowLooping = true;
-  return transpiler.VALK().void(transpiler.VALK().setHeadProperties(["looping", 1]));
+  return transpiler.VALK().void(transpiler.VALK().setHeadProperties({ looping: 1 }));
 }
 
 
@@ -473,7 +471,7 @@ function _parseLoopStatement (transpiler: Transpiler, ast: any,
   }
   const resetLooping = bodyOptions.surroundingBlock.requireFlowLooping
           && options.surroundingFunction.requireControlLooping
-      ? transpiler.VALK().setHeadProperties(["looping", 1])
+      ? transpiler.VALK().setHeadProperties({ looping: 1 })
       : undefined;
   return bodyOptions.surroundingBlock.requireFlowReturn
           ? core.if(transpiler.VALK().to("return").not(), resetLooping && { then: resetLooping })
@@ -494,7 +492,7 @@ export function parseForInStatement (transpiler: Transpiler, ast: ForInStatement
           transpiler.kueryFromAst(ast.test, options),
           transpiler.kueryFromAst(ast.body, options)))
       .if(transpiler.VALK().to("return").not(),
-          { then: transpiler.VALK().setHeadProperties(["looping", 1]) });
+          { then: transpiler.VALK().setHeadProperties({ looping: 1 }) });
 }
 
 
@@ -621,29 +619,29 @@ export interface Property extends Node {
 // values `"get"` and `"set"`, respectively.
 export function parseObjectExpression (transpiler: Transpiler, ast: ObjectExpression,
     options: Object): Kuery {
-  const staticKeyProperties = [];
-  const computedKeyProperties = [];
+  let literalObject;
+  const propertySetters = [];
   for (const { computed, key, value, kind } of ast.properties) {
-    if (key.type === "Literal") {
-      staticKeyProperties.push([key.value, transpiler.kueryFromAst(value, options)]);
+    const staticName = ((key.type === "Literal") && key.value)
+        || (!computed && (key.type === "Identifier") && key.name);
+    if (staticName) {
+      if (value.type === "Literal") {
+        (literalObject || (literalObject = {}))[staticName] = value.value;
+      } else {
+        propertySetters.push([staticName, transpiler.kueryFromAst(value, options)]);
+      }
     } else if (computed) {
       const previousOverride = options.contextRuleOverrides.overrideThisExpression;
       if (previousOverride) options.contextRuleOverrides.overrideThisExpression = undefined;
-      computedKeyProperties.push([
-        transpiler.kueryFromAst(key, options),
-        transpiler.kueryFromAst(value, options),
+      propertySetters.push([
+        transpiler.kueryFromAst(key, options), transpiler.kueryFromAst(value, options),
       ]);
       if (previousOverride) options.contextRuleOverrides.overrideThisExpression = previousOverride;
-    } else if (key.type === "Identifier") {
-      staticKeyProperties.push([key.name, transpiler.kueryFromAst(value, options)]);
     } else if (kind !== "init") {
       throw new Error("Getters and setters not implemented");
     }
   }
-  const staticObjectKuery = transpiler.VALK().select(staticKeyProperties);
-  return !computedKeyProperties.length
-      ? staticObjectKuery
-      : staticObjectKuery.setHeadProperties(...computedKeyProperties);
+  return transpiler.VALK().object(...(literalObject ? [literalObject] : []), ...propertySetters);
 }
 
 export const functionContextRuleOverrides: Object = {
@@ -682,18 +680,19 @@ export function parseFunctionHelper (transpiler: Transpiler, ast: FunctionExpres
   const controlHeader =
       (options.omitThisFromScope
           ? transpiler.VALK()
-          : transpiler.VALK().setScopeValues(["this", transpiler.VALK().head()]))
+          : transpiler.VALK().setScopeValues({ this: transpiler.VALK().head() }))
       .to(transpiler.createControlBlock(
           functionOptions.surroundingFunction.requireControlLooping
-              ? { looping: transpiler.VALK().fromValue(1) } : {}));
+              ? { looping: 1 } : {}));
   const paramDeclarations = scopeSettersFromParamDeclarators(transpiler, ast, functionOptions);
   const functionScopeHoists = functionOptions.surroundingFunction.hoists.length &&
       transpiler.VALK().setScopeValues(...functionOptions.surroundingFunction.hoists.map(
-          hoistName => [hoistName, { value: transpiler.VALK().void() }]));
-  const path = transpiler.VALK().pathConcat(controlHeader, paramDeclarations, functionScopeHoists)
+          hoistName => ({ [hoistName]: { value: transpiler.VALK().void() } })));
+  const captivePath = transpiler.VALK()
+      .pathConcat(controlHeader, paramDeclarations, functionScopeHoists)
       .to(transpiler.statements(body))
       .to("return").nullable().to("result");
-  return transpiler.VALK().capture(transpiler.VALK().fromValue(path.toJSON()));
+  return transpiler.VALK().capture(transpiler.VALK().fromValue(captivePath.toVAKON()));
 }
 
 export function scopeSettersFromParamDeclarators (transpiler: Transpiler, { params, defaults, rest }:

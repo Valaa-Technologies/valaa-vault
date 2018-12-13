@@ -46,9 +46,9 @@ export default Object.freeze({
   },
   "§ref": function valaaReference (valker: Valker, head: any, scope: ?Object,
       [, params]: BuiltinStep): VRef {
-    // const lit = typeof params !== "object" ? params : tryLiteral(valker, head, params, scope);
-    // console.log("reflit:", lit, "by", params);
-    return valker.pack(valker.obtainReference(params));
+    return valker.pack(valker.obtainReference(
+        typeof params !== "object" ? params : tryLiteral(valker, head, params, scope),
+        null));
   },
   "§$": function scopeLookup (valker: Valker, head: any, scope: ?Object,
       [, lookupName]: BuiltinStep) {
@@ -118,28 +118,38 @@ export default Object.freeze({
     }
   },
   "§[]": function array (valker: Valker, head: any, scope: ?Object,
-      entriesStep: BuiltinStep) {
-    const ret = new Array(entriesStep.length - 1);
-    for (let index = 0; index + 1 !== entriesStep.length; ++index) {
-      const entry = entriesStep[index + 1];
-      ret[index] = tryUnpackLiteral(valker, head, entry, scope);
+      entriesStep: BuiltinStep, isNonFinalStep: ?boolean, startIndex: number = 1) {
+    const ret = new Array(entriesStep.length - startIndex);
+    for (let index = startIndex; index !== entriesStep.length; ++index) {
+      const entry = entriesStep[index];
+      ret[index - startIndex] = tryUnpackLiteral(valker, head, entry, scope);
     }
     return ret;
   },
+  "§{}": function object (valker: Valker, head: any, scope: ?Object,
+      propertyInitializersStep: BuiltinStep) {
+    return _headOrScopeSet(valker, {}, head, scope, propertyInitializersStep);
+  },
+  "§$<-": function setScopeValues (valker: Valker, head: any, scope: ?Object,
+      scopeSettersStep: BuiltinStep) {
+    _headOrScopeSet(valker, scope, head, scope, scopeSettersStep);
+    return head;
+  },
   "§.<-": function setHeadProperties (valker: Valker, head: any, scope: ?Object,
-      settersStep: BuiltinStep) {
+      headSettersStep: BuiltinStep) {
     if (!head || (typeof head !== "object")) {
       throw new Error(`Cannot setHeadProperties fields on non-object head`);
     }
     if (isPackedField(head)) {
       throw new Error(`Cannot setHeadProperties fields on a Resource head`);
     }
-    return _headOrScopeSet(valker, head, head, scope, settersStep);
-  },
-  "§$<-": function setScopeValues (valker: Valker, head: any, scope: ?Object,
-      settersStep: BuiltinStep) {
-    _headOrScopeSet(valker, scope, head, scope, settersStep);
-    return head;
+    const isTransient = Iterable.isIterable(head);
+    const objectTarget = _headOrScopeSet(
+        valker, isTransient ? {} : head, head, scope, headSettersStep);
+    if (!isTransient) return objectTarget; // just head, actually
+    return head.withMutations(mutableHead => {
+      for (const key of Object.keys(objectTarget)) mutableHead.set(key, objectTarget[key]);
+    });
   },
 
   "§expression": function expression (valker: Valker, head: any, scope: ?Object,
@@ -625,29 +635,34 @@ export function resolveTypeof (valker: Valker, head: any, scope: ?Object,
 
 function _headOrScopeSet (valker: Valker, target: any, head: any, scope: ?Object,
     settersStep: any[]) {
-  const isTransient = Iterable.isIterable(target);
-  const eTarget = isTransient ? {} : target;
-  for (let index = 0; index + 1 !== settersStep.length; ++index) {
-    const setter = settersStep[index + 1];
+  for (let index = 1; index !== settersStep.length; ++index) {
+    const setter = settersStep[index];
     if (Array.isArray(setter)) {
-      invariantifyArray(setter, `head/setScopeValues.setter#${index}`, { length: 2 });
+      if (setter.length !== 2) {
+        invariantifyArray(setter, `${settersStep[0]}.setter#${index - 1}`,
+            { length: 2 });
+      }
       const eKey = (typeof setter[0] !== "object") ? setter[0]
           : tryLiteral(valker, head, setter[0], scope);
-      const eValue = tryUnpackLiteral(valker, head, setter[1], scope);
-      if ((typeof eKey !== "string") && !isSymbol(eKey)) {
-        throw new Error(`head/setScopeValues.setter#${index}.key is not a string or a symbol`);
+      const eValue = (typeof setter[1] !== "object") ? setter[1]
+          : tryUnpackLiteral(valker, head, setter[1], scope);
+      if ((typeof eKey !== "string") && !isSymbol(eKey) && (typeof eKey !== "number")) {
+        throw new Error(`${settersStep[0]}.setter#${index - 1}.key is not a string or a symbol`);
       }
-      eTarget[eKey] = eValue;
+      target[eKey] = eValue;
+    } else if (setter && (typeof setter === "object")) {
+      for (const key of Object.keys(setter)) {
+        const value = setter[key];
+        target[key] = (typeof value !== "object") ? value
+            : tryUnpackLiteral(valker, head, value, scope);
+      }
+      // Object.assign(target, valker.tryUnpack(valker.advance(head, setter, scope)));
     } else {
-      invariantifyObject(setter,
-          `setHeadProperties/ScopeValues.setter must be an object, got '${typeof setter}':`, eTarget);
-      Object.assign(eTarget, valker.tryUnpack(valker.advance(head, setter, scope)));
+      invariantifyObject(setter, `${settersStep[0]}.setter#${index - 1
+          } must be an object or a key-value pair, got '${typeof setter}':`, setter);
     }
   }
-  if (!isTransient) return eTarget;
-  return target.withMutations(mutableHead => {
-    for (const key of Object.keys(eTarget)) mutableHead.set(key, eTarget[key]);
-  });
+  return target;
 }
 
 

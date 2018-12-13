@@ -921,7 +921,7 @@ export default class Vrapper extends Cog {
     if (vProperty) {
       return vProperty.alterValue(actualAlterationVAKON, options, this);
     }
-    let newValue = this.run(0, [["§void"], actualAlterationVAKON],
+    let newValue = this.run(0, ["§->", ["§void"], actualAlterationVAKON],
         { ...options, scope: this.getLexicalScope() });
     const hostType = this.engine.getRootScope().Valaa[typeName];
     const fieldPrototypeEntry = hostType.hostObjectPrototype[propertyName];
@@ -1079,11 +1079,11 @@ export default class Vrapper extends Cog {
   _mediaInterpretations: WeakMap<Object, { [mime: string]: Object }>;
 
   static toMediaInfoFields = VALK.fromVAKON({
-    bvobId: ["content", false, "bvobId"],
+    bvobId: ["§->", "content", false, "bvobId"],
     name: "name",
     sourceURL: "sourceURL",
-    type: ["mediaType", false, "type"],
-    subtype: ["mediaType", false, "subtype"],
+    type: ["§->", "mediaType", false, "type"],
+    subtype: ["§->", "mediaType", false, "subtype"],
   });
 
   resolveMediaInfo (options: VALKOptions) {

@@ -1,13 +1,9 @@
 // @flow
 
-export default function trivialClone (value: any) {
-  return trivialCloneWith(value);
-}
-
 /**
  * Performs a deep clone with a customizer using the trivial clone algorithm described below.
  *
- * IMPORTANT: trivialCloneWith does not perform special "object" handling. Javascript native objects
+ * IMPORTANT: trivialClone does not perform special "object" handling. Javascript native objects
  * like "URL" and "Date" have quirky custom behaviour and WILL NOT get cloned appropriately; custom
  * customizer needs to be provided for them. trivialClone is geared to be minimalistic but
  * sufficient for cloning (deals with cyclic structures etc.). Ergo why it's called trivial.
@@ -48,17 +44,17 @@ export default function trivialClone (value: any) {
  * @param {Function} customizer
  * @returns
  */
-export function trivialCloneWith (value_: any, customizer: ?Function) {
+export default function trivialClone (value_: any, customizer: ?Function) {
   const existingClones = new Map();
   return _trivialClone(value_);
 
   function _trivialClone (value: any, indexKeyOrSymbol?: any, object?: Object,
       fieldDescriptor?: Object) {
     let clone = existingClones.get(value);
-    if (typeof clone !== "undefined") return clone;
+    if (clone !== undefined) return clone;
     clone = customizer
         && customizer(value, indexKeyOrSymbol, object, fieldDescriptor, _trivialClone);
-    if (typeof clone !== "undefined") {
+    if (clone !== undefined) {
       existingClones.set(value, clone);
       return clone;
     } else if ((typeof value !== "object") || (value === null)) {
@@ -78,7 +74,7 @@ export function trivialCloneWith (value_: any, customizer: ?Function) {
       for (const keyOrSymbol of keysOrSymbols) {
         const descriptor = Object.getOwnPropertyDescriptor(value, keyOrSymbol);
         const clonedValue = _trivialClone(descriptor.value, keyOrSymbol, value, descriptor);
-        if (typeof clonedValue !== "undefined") descriptor.value = clonedValue;
+        if (clonedValue !== undefined) descriptor.value = clonedValue;
         if (!descriptor.skip) Object.defineProperty(clone, keyOrSymbol, descriptor);
       }
     }

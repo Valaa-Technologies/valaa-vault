@@ -11,7 +11,7 @@ import RAEMTestAPI from "~/raem/test/RAEMTestAPI";
 import Corpus from "~/raem/Corpus";
 import Valker from "~/raem/VALK/Valker";
 
-import { trivialCloneWith } from "~/tools/trivialClone";
+import trivialClone from "~/tools/trivialClone";
 import { dumpObject, LogEventGenerator, wrapError } from "~/tools";
 
 const TEST_EVENT_VERSION = "0.2";
@@ -78,7 +78,7 @@ export default class RAEMTestHarness extends LogEventGenerator {
     try {
       return {
         eventResults: events.map(event_ => {
-          const event = trivialCloneWith(event_,
+          const event = trivialClone(event_,
               entry => (entry instanceof ValaaURI ? entry : undefined));
           if (!event.local) event.local = {};
           if (event.local.isBeingUniversalized === undefined) {

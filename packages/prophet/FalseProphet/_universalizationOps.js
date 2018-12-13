@@ -7,7 +7,7 @@ import { ghostPathFromJSON } from "~/raem/state/GhostPath";
 
 import { initializeAspects } from "~/prophet/tools/EventAspects";
 
-import { trivialCloneWith } from "~/tools/trivialClone";
+import trivialClone from "~/tools/trivialClone";
 import wrapError, { dumpObject, debugObjectType } from "~/tools/wrapError";
 
 import FalseProphet from "./FalseProphet";
@@ -22,7 +22,7 @@ export function universalizeEvent (event: EventBase): EventBase {
 }
 
 export function universalizeAction (action: Action): Action {
-  return trivialCloneWith(action, entry => (entry instanceof ValaaURI ? entry : undefined));
+  return trivialClone(action, entry => (entry instanceof ValaaURI ? entry : undefined));
 }
 
 export function vRefFromURI (uri: ValaaURI | string): VRef {
@@ -113,14 +113,12 @@ export function deserializeVRef (serializedRef: string | JSONIdData,
     } else if (!Array.isArray(serializedRef)) {
       throw new Error(`Malformed urn:valos reference ${debugObjectType(serializedRef)
           }, expected URI string or an array expansion`);
-    } else if ((serializedRef[0] === "§ref")
+    } else if (serializedRef[0] === "§ref") {
+      return deserializeVRef(serializedRef[1], currentPartitionURI, falseProphet, true);
+    } else if ((serializedRef.length === 1)
         || (serializedRef[1] && (typeof serializedRef[1] === "object"))) {
-      const params = ((serializedRef[0] === "§ref") ? serializedRef[1] : serializedRef);
-      if (typeof params === "string") {
-        return deserializeVRef(params, currentPartitionURI, falseProphet, true);
-      }
       // new-style array expansion: [nss, resolverComponent, queryComponent, fragmentComponent]
-      ([nss, resolver, query, fragment] = params);
+      ([nss, resolver, query, fragment] = serializedRef);
     } else {
       // old-style array expansion: [rawId, coupling, ghostPath, partitionURI]
       nss = serializedRef[0];

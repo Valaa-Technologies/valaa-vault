@@ -57,7 +57,6 @@ export default function universalizeCommandData (object: ?any, options:
         return connectedId.immutatePartitionURI(partitionURI);
       }
     }
-    }
     return connectedId;
   } catch (error) {
     throw wrapError(error, `During universalizeCommandData(`, object, `), with:`,

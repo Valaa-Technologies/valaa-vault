@@ -54,7 +54,7 @@ export function kueryExpression (kuery: Kuery | any) {
 // there is no referential integrity yet. We can't avoid the setField, but we could
 // avoid toExpressionKuery and the typeof/Resource-condition below
 export function expressionFromValue (value: any) {
-  if (typeof value === "undefined") return null;
+  if (value === undefined) return null;
   if (typeof value === "object"
       && ((value instanceof Vrapper) || (value instanceof ValaaReference))) {
     return pointer(value);
@@ -114,7 +114,7 @@ export function VS (texts: string[], ...variables: any[]): Kuery {
  * @returns
  */
 export function extractFunctionVAKON (caller: any) {
-  if (typeof caller._persistedVAKON === "undefined") {
+  if (caller._persistedVAKON === undefined) {
     const lifts = {};
     let vakon = caller[toVAKON];
     if (!vakon) {
@@ -149,11 +149,10 @@ function _extractScopeAccesses (vakon: any, scope: Object, lifts: Object) {
     if (typeof vakon[1] !== "string") {
       throw new Error("While persisting function cannot access an identifier with non-string name");
     }
-    if (typeof vakon[2] !== "undefined") {
+    if (vakon[2] !== undefined) {
       throw new Error("While persisting function cannot have custom scope specified");
     }
-    if ((typeof lifts[vakon[1]] === "undefined") && (vakon[1] !== "this")
-        && (vakon[1] !== "arguments")) {
+    if ((lifts[vakon[1]] === undefined) && (vakon[1] !== "this") && (vakon[1] !== "arguments")) {
       const scopeEntry = scope[vakon[1]];
       const rootScope = scope[rootScopeSelf];
       if (!rootScope || (scopeEntry !== rootScope[vakon[1]])) {

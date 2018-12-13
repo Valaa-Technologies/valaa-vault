@@ -9,7 +9,7 @@ import { dumpify, dumpObject, vdon, wrapError } from "~/tools";
 import { debugObjectType } from "~/tools/wrapError";
 import IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 import type MediaDecoder from "~/tools/MediaDecoder";
-import { trivialCloneWith } from "~/tools/trivialClone";
+import trivialClone from "~/tools/trivialClone";
 
 import Scribe from "./Scribe";
 import ScribePartitionConnection from "./ScribePartitionConnection";
@@ -469,7 +469,7 @@ export function _deleteCommands (connection: ScribePartitionConnection,
 function _serializeEventAsJSON (event) {
   const logRoot = swapAspectRoot("event", event, "log");
   try {
-    return trivialCloneWith(logRoot, (value, key) => {
+    return trivialClone(logRoot, (value, key) => {
       try {
         if ((typeof value !== "object") || (value === null)) return value;
         if (!Array.isArray(value) && (Object.getPrototypeOf(value) !== Object.prototype)) {

@@ -62,7 +62,7 @@
  * references.
  */
 import { Action, created, destroyed, transacted } from "~/raem/events";
-import { vRef } from "~/raem/ValaaReference";
+import ValaaReference, { vRef } from "~/raem/ValaaReference";
 import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import { GhostPath, Resolver, State, Transient } from "~/raem/state";
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
@@ -133,68 +133,62 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
   // the assumption that if an object is materialized, all its owners
   // will be. Notably: FieldInfo:_elevateObjectId (but there might be
   // others).
-  invariantifyObject(ghostObjectPath, "_createMaterializeGhostAction.ghostObjectPath",
-      { instanceof: GhostPath },
-      "perhaps createMaterializeGhostAction.ghostId is missing a ghost path?");
+  if (!(ghostObjectPath instanceof GhostPath)) {
+    invariantifyObject(ghostObjectPath, "_createMaterializeGhostAction.ghostObjectPath",
+        { instanceof: GhostPath },
+        "perhaps createMaterializeGhostAction.ghostId is missing a ghost path?");
+  }
   const ghostHostPrototypeRawId = ghostObjectPath.headHostPrototypeRawId();
   const [ghostHostRawId, ghostRawId] =
       ghostObjectPath.getGhostHostAndObjectRawIdByHostPrototype(ghostHostPrototypeRawId);
-  const ret = { id: null, actualType: null, ghostPath: undefined };
-  const transientType = state.getIn(["TransientFields", ghostRawId]);
+  let actualType = state.getIn(["TransientFields", ghostRawId]);
   try {
-    if (transientType) {
-      // Already materialized or not a ghost, possibly inside an inactive partition.
-      // Nevertheless just return info without adding any side effects.
-      const transient = state.getIn([transientType, ghostRawId]);
-      ret.id = transient.get("id");
-      ret.actualType = transientType;
-      ret.ghostPath = ret.id.getGhostPath();
-    } else if (!ghostHostPrototypeRawId) {
-      // no host prototype means this is the Ghost path base Resource: no transient means we're
-      // inside an inactive partition. Create an inactive reference for it.
-      ret.id = vRef(ghostRawId);
-      // TODO(iridian): Add inactive partition checks: throw if this partition is in fact active.
-      ret.id.setInactive();
-      ret.actualType = resolver.schema.inactiveType.name;
-      ret.ghostPath = ret.id.getGhostPath();
-      outputActions.push(created({
-        id: ret.id, typeName: ret.actualType, local: { noSubMaterialize: true },
-      }));
-    } else {
-      // A regular non-root ghost Resource, but still possibly inside an inactive partition.
-      // However, there is no difference between materialized reference and
-      /* , owner: prototypeOwner */
-      const { id: prototypeId, actualType: prototypeTypeName, ghostPath: prototypePath }
-          = _createMaterializeGhostAction(resolver, state, ghostObjectPath.previousStep(), typeName,
-              outputActions);
-      ret.ghostPath = prototypePath
-          .withNewStep(ghostHostPrototypeRawId, ghostHostRawId, ghostRawId);
-      ret.id = vRef(ghostRawId, null, ret.ghostPath);
-      ret.actualType = prototypeTypeName;
-      const hostType = state.getIn(["TransientFields", ghostHostRawId]);
-      if (!hostType || isInactiveTypeName(hostType)
-          || state.getIn([hostType, ghostHostRawId, "id"]).isInactive()) {
-        // FIXME(iridian): setInactive on materialized ghosts doesn't get properly cleared when the
-        // partition becomes active. Fix that.
-        ret.id.setInactive();
-        ret.actualType = isInactiveTypeName(prototypeTypeName) ? typeName : prototypeTypeName;
-      }
-      outputActions.push(created({
-        id: ret.id,
-        typeName: ret.actualType,
-        initialState: {
-          // owner: ret.owner && ret.owner.id.coupleWith("ghostOwnlings"),
-          ghostPrototype: prototypeId,
-          ghostOwner: vRef(ghostHostRawId, "ghostOwnlings"),
-        },
-        local: { noSubMaterialize: true },
-      }));
+    if (actualType) {
+      // Transient found: already materialized ghost or not a ghost to
+      // begin with. Still possibly inside an inactive partition.
+      // Return without side effects.
+      const transient = state.getIn([actualType, ghostRawId]);
+      const id = transient.get("id");
+      return { id, actualType, ghostPath: id.getGhostPath() };
     }
-    return ret;
+    if (!ghostHostPrototypeRawId) {
+      // No host prototype means this is the Ghost path base Resource.
+      // No transient means we're inside an unconnected partition or
+      // the referred resource doesn't exist. As it stands there is no
+      // theoretical way to determine the actual partition id reliably,
+      // either. Create an inactive reference for the resource.
+      const id = vRef(ghostRawId);
+      // TODO(iridian): Add inactive partition checks: throw if this partition is in fact active.
+      id.setInactive();
+      actualType = resolver.schema.inactiveType.name;
+      outputActions.push(created({ id, typeName: actualType, local: { noSubMaterialize: true } }));
+      return { id, actualType, ghostPath: id.getGhostPath };
+    }
+    // A regular non-root ghost Resource with no transient.
+    // Still possibly inside an inactive partition.
+    const { id: ghostPrototype, actualType: prototypeTypeName, ghostPath: prototypePath }
+        = _createMaterializeGhostAction(resolver, state, ghostObjectPath.previousStep(), typeName,
+            outputActions);
+    actualType = isInactiveTypeName(prototypeTypeName) ? typeName : prototypeTypeName;
+    const ghostPath = prototypePath
+        .withNewStep(ghostHostPrototypeRawId, ghostHostRawId, ghostRawId);
+    const hostType = state.getIn(["TransientFields", ghostHostRawId]);
+    const hostId = hostType
+        ? state.getIn([hostType, ghostHostRawId]).get("id")
+        : Object.create(new ValaaReference().initResolverComponent({ inactive: true }))
+            .initNSS(ghostHostRawId);
+    const id = Object.create(Object.getPrototypeOf(hostId)).initNSS(ghostRawId);
+    id.connectGhostPath(ghostPath);
+    outputActions.push(created({
+      id, typeName: actualType,
+      initialState: { ghostPrototype, ghostOwner: hostId.coupleWith("ghostOwnlings"), },
+      local: { noSubMaterialize: true },
+    }));
+    return { id, actualType, ghostPath };
   } catch (error) {
     throw wrapError(error, `During createMaterializeGhostAction(${dumpify(ghostObjectPath)}:${
-        typeName}/${ret.actualType}}), with:`,
-        "\n\ttransientType:", transientType,
+        typeName}/${actualType}}), with:`,
+        "\n\ttransientType:", actualType,
         "\n\tghost host prototype:", ghostHostPrototypeRawId,
         "\n\tghost host:", ghostHostRawId,
         "\n\tghost id:", ghostRawId,

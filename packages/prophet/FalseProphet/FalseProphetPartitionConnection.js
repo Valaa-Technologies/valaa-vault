@@ -8,7 +8,7 @@ import PartitionConnection from "~/prophet/api/PartitionConnection";
 import { NarrateOptions, ChronicleOptions, ChronicleRequest } from "~/prophet/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/prophet/tools/EventAspects";
 
-import { dumpObject } from "~/tools";
+import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { Prophecy, _reviewPurgedProphecy, _reviseSchism } from "./_prophecyOps";
 import { _confirmCommands, _purgeAndRecomposeStories } from "./_storyOps";
@@ -48,6 +48,14 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       this._referencePrototype = new ValaaReference()
           .initResolverComponent({ inactive: true, partition: this._partitionURI });
     }
+  }
+
+  _connect (...rest: any[]) {
+    return thenChainEagerly(super._connect(...rest),
+        connectResults => {
+          this._referencePrototype.setInactive(false);
+          return connectResults;
+        });
   }
 
   getStatus () {

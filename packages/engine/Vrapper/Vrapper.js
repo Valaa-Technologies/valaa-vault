@@ -351,7 +351,8 @@ export default class Vrapper extends Cog {
    * @memberof Vrapper
    */
   requireActive (options?: VALKOptions) {
-    if (this._phase === ACTIVE) return;
+    if (this._phase === ACTIVE
+        || ((options && options.allowActivating) && (this._phase === ACTIVATING))) return;
     const blocker = this._refreshPhaseOrGetBlocker();
     if (!blocker) return;
     if (blocker.isDestroyed() && options) {
@@ -1699,7 +1700,7 @@ export default class Vrapper extends Cog {
       subscriber: VrapperSubscriber = new VrapperSubscriber(),
       options: VALKOptions = {}): VrapperSubscriber {
     try {
-      this.requireActive();
+      this.requireActive({ allowActivating: true });
       if (filter instanceof Kuery) {
         return subscriber.initializeKuery(this, this, filter, callback, options);
       }
@@ -1718,7 +1719,7 @@ export default class Vrapper extends Cog {
     let currentSubscribers;
     try {
       if (this._phase === NONRESOURCE) return undefined;
-      this.requireActive();
+      this.requireActive({ allowActivating: true });
       if (!this._subscribersByFieldName) this._subscribersByFieldName = new Map();
       currentSubscribers = this._subscribersByFieldName.get(fieldName);
       if (!currentSubscribers) {

@@ -336,15 +336,22 @@ export default class ValaaEngine extends Cog {
       return transaction.assignNewPartitionId(directive,
           initialState.partitionAuthorityURI, explicitRawId);
     }
-    const explicitOwner = initialState.owner || initialState.source;
-    if (!explicitOwner) {
-      return transaction.assignNewPartitionlessResourceId(directive, explicitRawId);
+    let owner = initialState.owner || initialState.source;
+    if (owner) {
+      if (!(owner instanceof ValaaReference)) owner = universalizeCommandData(owner, options);
+      if (owner instanceof ValaaReference) {
+        let partitionURI = owner.getPartitionURI();
+        if (!partitionURI && owner.isGhost()) {
+          partitionURI = transaction.bindObjectRawId(
+                  owner.getGhostPath().headHostRawId(), "Resource")
+              .getPartitionURI();
+        }
+        if (partitionURI) {
+          return transaction.assignNewResourceId(directive, String(partitionURI), explicitRawId);
+        }
+      }
     }
-    const partitionURI =
-        ((explicitOwner instanceof ValaaReference) && explicitOwner.getPartitionURI())
-        || universalizeCommandData(explicitOwner, options).getPartitionURI();
-    return transaction.assignNewResourceId(
-        directive, partitionURI && String(partitionURI), explicitRawId);
+    return transaction.assignNewPartitionlessResourceId(directive, explicitRawId);
   }
 
   outputStatus (output = console) {

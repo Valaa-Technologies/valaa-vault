@@ -93,6 +93,7 @@ function _mergeWithInactiveStub (bard: CreateBard, passage: Object, typeName?: s
     // Inactive resource typeName is an inactive type: update it to
     // correct value for CREATEDs.
     bard.objectTransient = bard.objectTransient.set("typeName", typeName);
+    bard.objectTypeName = typeName;
   }
 }
 

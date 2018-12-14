@@ -67,21 +67,20 @@ export default function getObjectField (resolver: Resolver, object: Transient, f
  * @param {FieldInfo} fieldInfoOut
  * @returns null
  */
-export function getObjectRawField (stateOrResolver: State | Resolver, object: Transient,
+export function getObjectRawField (resolver: Resolver, object: Transient,
     fieldName: string, fieldInfoOut: FieldInfo, objectTypeIntro?: GraphQLObjectType):
     ?VRef | ?Transient {
   let fieldInfo = fieldInfoOut;
-  let resolver;
   try {
     // Direct access section. A value which matches the requested fieldName is always directly
     // returned without further pre/post-processing.
     let ret = object.get(fieldName);
-    if ((typeof ret !== "undefined") && !fieldInfoOut) return ret;
+    if ((ret !== undefined) && !fieldInfoOut) return ret;
 
     let actualTypeIntro = objectTypeIntro;
-    if (!actualTypeIntro && stateOrResolver.schema) {
-      const typeName = tryTransientTypeName(object, stateOrResolver.schema);
-      actualTypeIntro = typeName && stateOrResolver.schema.getType(typeName);
+    if (!actualTypeIntro) {
+      const typeName = tryTransientTypeName(object, resolver.schema);
+      actualTypeIntro = typeName && resolver.schema.getType(typeName);
     }
 
     if (typeof ret !== "undefined") {
@@ -91,10 +90,6 @@ export function getObjectRawField (stateOrResolver: State | Resolver, object: Tr
       }
       return ret;
     }
-
-    resolver = stateOrResolver instanceof Resolver
-        ? stateOrResolver
-        : new Resolver({ state: stateOrResolver, logger: console });
 
     // Alias and generated field resolution section
     if (!fieldInfo) fieldInfo = {};

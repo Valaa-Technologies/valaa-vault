@@ -48,7 +48,7 @@ describe("The snapshot node walker", () => {
 
   it("retrieves aliased value properly", async () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
-    const childGlue = tryObjectTransient(harness.getState(), "A_childGlue", "TestGlue");
+    const childGlue = tryObjectTransient(harness.getValker(), "A_childGlue", "TestGlue");
     expect(childGlue.get("source"))
         .toEqual(undefined);
     expect(getObjectField(harness.corpus, childGlue, "source").toJSON())
@@ -81,8 +81,8 @@ describe("The snapshot node walker", () => {
   it("executes a complex path + filtering kuery properly", async () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest,
         createBlockAMore);
-    const childGlue = tryObjectTransient(harness.getState(), "A_childGlue", "TestGlue");
-    const child2 = tryObjectTransient(harness.getState(), "A_child2", "TestThing");
+    const childGlue = tryObjectTransient(harness.getValker(), "A_childGlue", "TestGlue");
+    const child2 = tryObjectTransient(harness.getValker(), "A_child2", "TestThing");
     expect(harness.run(childGlue, VALK.to("source").to("targetGlues")
         .find(VALK.to("name").equalTo("moveTo").and(
             VALK.to("target").equalTo(child2.get("id"))))).toJSON())

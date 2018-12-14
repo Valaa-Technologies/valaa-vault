@@ -89,7 +89,7 @@ export function VS (texts: string[], ...variables: any[]): Kuery {
       }
     }
     const sourceInfo = {
-      phase: "VS-tag transpilation",
+      phase: "VS-string transpilation",
       source,
       mediaName: undefined,
       sourceMap: new Map(),

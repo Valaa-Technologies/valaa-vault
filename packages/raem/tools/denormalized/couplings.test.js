@@ -31,29 +31,29 @@ describe("Couplings", () => {
   ];
 
   it("forms ownership couplings on creation", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA)
-        .getState();
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA)
+        .corpus;
 
-    expect(tryObjectTransient(state, "A_grandparent", "TestThing").get("children").first())
+    expect(tryObjectTransient(corpus, "A_grandparent", "TestThing").get("children").first())
         .toEqual(vRef("A_parent"));
-    expect(tryObjectTransient(state, "A_parent", "TestThing").get("owner").toJSON())
+    expect(tryObjectTransient(corpus, "A_parent", "TestThing").get("owner").toJSON())
         .toEqual(vRef("A_grandparent", "children").toJSON());
 
-    expect(tryObjectTransient(state, "A_parent", "TestThing").get("children").first())
+    expect(tryObjectTransient(corpus, "A_parent", "TestThing").get("children").first())
         .toEqual(vRef("A_child1"));
-    expect(tryObjectTransient(state, "A_child1", "TestThing").get("owner").toJSON())
+    expect(tryObjectTransient(corpus, "A_child1", "TestThing").get("owner").toJSON())
         .toEqual(vRef("A_parent", "children").toJSON());
 
-    expect(tryObjectTransient(state, "A_parent", "TestThing").get("children").slice(1).first())
+    expect(tryObjectTransient(corpus, "A_parent", "TestThing").get("children").slice(1).first())
         .toEqual(vRef("A_child2"));
-    expect(tryObjectTransient(state, "A_child1", "TestThing").get("owner").toJSON())
+    expect(tryObjectTransient(corpus, "A_child1", "TestThing").get("owner").toJSON())
         .toEqual(vRef("A_parent", "children").toJSON());
   });
 
   it("creates object with undefined owner property", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA)
-        .getState();
-    expect(tryObjectTransient(state, "A_grandparent", "TestThing").get("owner"))
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA)
+        .corpus;
+    expect(tryObjectTransient(corpus, "A_grandparent", "TestThing").get("owner"))
         .toEqual(undefined);
   });
 
@@ -74,39 +74,39 @@ describe("Couplings", () => {
   });
 
   it("removes from owning coupling 'children' when ownee destroyed", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       destroyed({ id: ["A_child1"] }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_parent", "TestThing").get("children").first())
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_parent", "TestThing").get("children").first())
         .toEqual(vRef("A_child2"));
   });
 
   it("destroys ownee when owner destroyed", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       destroyed({ id: ["A_parent"] }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_child1", "TestThing"))
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_child1", "TestThing"))
         .toEqual(null);
-    expect(tryObjectTransient(state, "A_child2", "TestThing"))
+    expect(tryObjectTransient(corpus, "A_child2", "TestThing"))
         .toEqual(null);
   });
 
   it("cascade-destroys grandownees when grandowner destroyed", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [
       destroyed({ id: ["A_grandparent"] }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_parent", "TestThing"))
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_parent", "TestThing"))
         .toEqual(null);
-    expect(tryObjectTransient(state, "A_child1", "TestThing"))
+    expect(tryObjectTransient(corpus, "A_child1", "TestThing"))
         .toEqual(null);
-    expect(tryObjectTransient(state, "A_child2", "TestThing"))
+    expect(tryObjectTransient(corpus, "A_child2", "TestThing"))
         .toEqual(null);
-    expect(tryObjectTransient(state, "A_childGlue", "TestGlue"))
+    expect(tryObjectTransient(corpus, "A_childGlue", "TestGlue"))
         .toEqual(null);
   });
 
   it("removes couplings when cascade-destroying", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: ["A_orphan"], typeName: "TestThing", initialState: {
         siblings: [vRef("A_child1"), vRef("A_child2")],
       } }),
@@ -114,190 +114,190 @@ describe("Couplings", () => {
         target: vRef("A_child2"),
       } }),
       destroyed({ id: ["A_grandparent"] }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_parent", "TestThing"))
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_parent", "TestThing"))
         .toEqual(null);
-    expect(tryObjectTransient(state, "A_child1", "TestThing"))
+    expect(tryObjectTransient(corpus, "A_child1", "TestThing"))
         .toEqual(null);
-    expect(tryObjectTransient(state, "A_child2", "TestThing"))
+    expect(tryObjectTransient(corpus, "A_child2", "TestThing"))
         .toEqual(null);
     // Coupling removal never removes fields but leaves them as empty arrays or nulls.
     // Otherwise the removal might uncover ghost prototype fields.
-    expect(tryObjectTransient(state, "A_orphan", "TestThing").get("siblings").size)
+    expect(tryObjectTransient(corpus, "A_orphan", "TestThing").get("siblings").size)
         .toEqual(0);
-    expect(tryObjectTransient(state, "A_orphanGlue", "TestGlue").get("target"))
+    expect(tryObjectTransient(corpus, "A_orphanGlue", "TestGlue").get("target"))
         .toEqual(null);
   });
 
   it("destroys ownee when owner coupling is removed from owner side", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       removedFrom({ id: ["A_parent"], typeName: "TestThing",
         removes: { children: [vRef("A_child1")] }
       }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_child1", "TestThing"))
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_child1", "TestThing"))
         .toEqual(null);
-    expect(tryObjectTransient(state, "A_parent", "TestThing").get("children").first())
+    expect(tryObjectTransient(corpus, "A_parent", "TestThing").get("children").first())
         .toEqual(vRef("A_child2"));
   });
 
   it("orphans ownee when ownership coupling is removed from ownee side", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       fieldsSet({ id: ["A_parent"], typeName: "TestThing",
         sets: { owner: null }, }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_grandparent", "TestThing").get("children").size)
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_grandparent", "TestThing").get("children").size)
         .toEqual(0);
-    expect(tryObjectTransient(state, "A_parent", "TestThing"))
+    expect(tryObjectTransient(corpus, "A_parent", "TestThing"))
         .toBeTruthy();
-    expect(tryObjectTransient(state, "A_parent", "TestThing").get("owner"))
+    expect(tryObjectTransient(corpus, "A_parent", "TestThing").get("owner"))
         .toEqual(null);
   });
 
   it("adopts orphan when an ownership coupling is created on the ownee side", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       fieldsSet({ id: ["A_parent"], typeName: "TestThing",
         sets: { owner: null }, }),
       fieldsSet({ id: ["A_parent"], typeName: "TestThing",
         sets: { owner: vRef("A_grandparent", "children") }, }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_grandparent", "TestThing").get("children").size)
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_grandparent", "TestThing").get("children").size)
         .toEqual(1);
-    expect(tryObjectTransient(state, "A_parent", "TestThing"))
+    expect(tryObjectTransient(corpus, "A_parent", "TestThing"))
         .toBeTruthy();
-    expect(tryObjectTransient(state, "A_parent", "TestThing").get("owner").toJSON())
+    expect(tryObjectTransient(corpus, "A_parent", "TestThing").get("owner").toJSON())
         .toEqual(vRef("A_grandparent", "children").toJSON());
   });
 
   it("adopts orphan when an ownership coupling is created on the owner side", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       fieldsSet({ id: ["A_parent"], typeName: "TestThing",
         sets: { owner: null }, }),
       addedTo({ id: ["A_grandparent"], typeName: "TestThing",
         adds: { children: ["A_parent"] }, }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_grandparent", "TestThing").get("children").size)
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_grandparent", "TestThing").get("children").size)
         .toEqual(1);
-    expect(tryObjectTransient(state, "A_parent", "TestThing"))
+    expect(tryObjectTransient(corpus, "A_parent", "TestThing"))
         .toBeTruthy();
-    expect(tryObjectTransient(state, "A_parent", "TestThing").get("owner").toJSON())
+    expect(tryObjectTransient(corpus, "A_parent", "TestThing").get("owner").toJSON())
         .toEqual(vRef("A_grandparent", "children").toJSON());
   });
 
   it("forms non-ownership couplings on creation", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA)
-        .getState();
-    expect(tryObjectTransient(state, "A_child1", "TestThing").get("targetGlues").first())
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA)
+        .corpus;
+    expect(tryObjectTransient(corpus, "A_child1", "TestThing").get("targetGlues").first())
         .toEqual(vRef("A_childGlue"));
-    expect(tryObjectTransient(state, "A_child2", "TestThing").get("sourceGlues").first())
+    expect(tryObjectTransient(corpus, "A_child2", "TestThing").get("sourceGlues").first())
         .toEqual(vRef("A_childGlue"));
   });
 
   it("removes non-owning singular coupling when other side resource is destroyed", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [
       destroyed({ id: ["A_child2"] }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_childGlue", "TestGlue").get("target"))
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_childGlue", "TestGlue").get("target"))
         .toEqual(null);
   });
 
   it("removes non-owner plural coupling when other side resource is destroyed", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [
       destroyed({ id: ["A_childGlue"] }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_child2", "TestThing").get("sourceGlues").size)
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_child2", "TestThing").get("sourceGlues").size)
         .toEqual(0);
   });
 
   it("creates symmetric 'sibling' couplings properly", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: ["A_child3"], typeName: "TestThing", initialState: {
         siblings: [vRef("A_child1"), vRef("A_child2")],
       }, }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_child1", "TestThing").get("siblings").first())
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_child1", "TestThing").get("siblings").first())
         .toEqual(vRef("A_child3"));
-    expect(tryObjectTransient(state, "A_child2", "TestThing").get("siblings").first())
+    expect(tryObjectTransient(corpus, "A_child2", "TestThing").get("siblings").first())
         .toEqual(vRef("A_child3"));
   });
 
   it("modifies symmetric 'sibling' couplings properly", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       fieldsSet({ id: ["A_child1"], typeName: "TestThing",
         sets: { siblings: [vRef("A_child2")] },
       }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_child1", "TestThing").get("siblings").first())
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_child1", "TestThing").get("siblings").first())
         .toEqual(vRef("A_child2"));
-    expect(tryObjectTransient(state, "A_child2", "TestThing").get("siblings").first())
+    expect(tryObjectTransient(corpus, "A_child2", "TestThing").get("siblings").first())
         .toEqual(vRef("A_child1"));
   });
 
   it("removes symmetric 'sibling' coupling when other side resource is destroyed", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: ["A_child3"], typeName: "TestThing", initialState: {
         siblings: [vRef("A_child1"), vRef("A_child2")],
       }, }),
       destroyed({ id: ["A_child3"] }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_child1", "TestThing").get("siblings").size)
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_child1", "TestThing").get("siblings").size)
         .toEqual(0);
-    expect(tryObjectTransient(state, "A_child2", "TestThing").get("siblings").size)
+    expect(tryObjectTransient(corpus, "A_child2", "TestThing").get("siblings").size)
         .toEqual(0);
   });
 
   it("uses 'unnamedCouplings' by default for couplings missing explicit remote", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: ["A_childGlue"], typeName: "TestGlue", initialState: {
         dangling: vRef("A_child2"),
       }, }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_childGlue", "TestGlue").get("dangling").toJSON())
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_childGlue", "TestGlue").get("dangling").toJSON())
         .toEqual(vRef("A_child2").toJSON());
-    expect(tryObjectTransient(state, "A_child2", "TestThing")
+    expect(tryObjectTransient(corpus, "A_child2", "TestThing")
             .get("unnamedCouplings").first().toJSON())
         .toEqual(vRef("A_childGlue", "dangling").toJSON());
   });
 
   it("removes unnamed coupling when other side resource is destroyed", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: ["A_childGlue"], typeName: "TestGlue", initialState: {
         dangling: vRef("A_child2"),
       }, }),
       destroyed({ id: ["A_childGlue"] }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_child2", "TestThing").get("unnamedCouplings").size)
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_child2", "TestThing").get("unnamedCouplings").size)
         .toEqual(0);
   });
 
   it("removes unnamed coupling when other side resource is destroyed", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: ["A_childGlue"], typeName: "TestGlue", initialState: {
         dangling: vRef("A_child2"),
       }, }),
       destroyed({ id: ["A_child2"] }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_childGlue", "TestGlue").get("dangling"))
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_childGlue", "TestGlue").get("dangling"))
         .toEqual(null);
   });
 
   it("creates a resource with owner alias set to null", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, [
       created({ id: ["A_orphanGlue"], typeName: "TestGlue",
         initialState: { source: null },
       }),
-    ]).getState();
-    expect(tryObjectTransient(state, "A_orphanGlue", "TestGlue").get("owner"))
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_orphanGlue", "TestGlue").get("owner"))
         .toEqual(null);
   });
 
   it("sets owner alias to null", () => {
-    const state = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [
+    const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA, [
       fieldsSet({ id: ["A_childGlue"], typeName: "TestGlue",
         sets: { source: null },
       })
-    ]).getState();
-    expect(tryObjectTransient(state, "A_childGlue", "TestGlue").get("owner"))
+    ]).corpus;
+    expect(tryObjectTransient(corpus, "A_childGlue", "TestGlue").get("owner"))
         .toEqual(null);
   });
 

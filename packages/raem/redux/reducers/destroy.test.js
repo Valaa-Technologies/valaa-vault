@@ -33,7 +33,7 @@ describe("CREATED/DUPLICATED", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       destroyed({ id: ["A_child1"] }),
     ]);
-    expect(tryObjectTransient(harness.getState(), "A_child1", "Resource"))
+    expect(tryObjectTransient(harness.getValker(), "A_child1", "Resource"))
         .toEqual(null);
   });
 

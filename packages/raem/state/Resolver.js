@@ -14,7 +14,8 @@ import type { FieldInfo } from "~/raem/state/FieldInfo";
 
 import { tryHostRef } from "~/raem/VALK/hostReference";
 
-import { dumpObject, invariantify, invariantifyString, LogEventGenerator } from "~/tools";
+import { dumpObject, invariantify, invariantifyObject, invariantifyString, LogEventGenerator }
+    from "~/tools";
 
 /**
  * Resolver is a very low-level component for performing various
@@ -48,6 +49,9 @@ export default class Resolver extends LogEventGenerator {
     super(options);
     this.state = options.state;
     this.schema = options.schema;
+    if (!(this.schema instanceof GraphQLSchema)) {
+      invariantifyObject(this.schema, `${this.getName()}.schema`, { instanceof: GraphQLSchema });
+    }
   }
 
   schema: GraphQLSchema;
@@ -86,11 +90,18 @@ export default class Resolver extends LogEventGenerator {
   // object section
   objectTypeName: ?string;
 
-  setTypeName (typeName: string) {
+  setObject (id: VRef, typeName: string) {
+    this.objectId = id;
     this.objectTypeName = typeName;
-    if (typeof typeName !== "string") {
-      invariantifyString(this.objectTypeName, "Resolver.setTypeName.typeName");
+  }
+
+  tryStateTransient (rawId: string, typeName: string): Transient {
+    let transientCandidate = this.state.getIn([typeName, rawId]);
+    if (typeof transientCandidate === "string") {
+      this.objectTypeName = transientCandidate;
+      transientCandidate = this.state.getIn([transientCandidate, rawId]);
     }
+    return transientCandidate;
   }
 
   /**
@@ -127,8 +138,7 @@ export default class Resolver extends LogEventGenerator {
   bindObjectId (objectId: VRef, typeName: string): VRef {
     const rawId = objectId.rawId();
     try {
-      let object = this.state.getIn([typeName, rawId]);
-      if (typeof object === "string") object = this.state.getIn([object, rawId]);
+      let object = this.tryStateTransient(rawId, typeName);
       if (!object) {
         // Ghost, inactive or fail
         object = Object.create(this).tryGoToTransient(objectId, typeName, false, false);
@@ -228,6 +238,7 @@ export default class Resolver extends LogEventGenerator {
           throw new Error("tryGoToTransient.objectId must be a valid ValaaReference");
         }
         this.objectId = null;
+        this.objectTypeName = null;
         return (this.objectTransient = null);
       }
       this.tryGoToTransientOfRawId(objectId.rawId(), typeName,
@@ -235,6 +246,7 @@ export default class Resolver extends LogEventGenerator {
           nonGhostLookup ? undefined : objectId.tryGhostPath(), onlyMostMaterialized, withOwnField);
       if (!this.objectTransient && !withOwnField) {
         this.objectId = this.tryBindToInactivePartitionObjectId(objectId, typeName);
+        this.objectTypeName = this.schema.inactiveType.name;
         if (this.objectId) {
           this.objectTransient = createInactiveTransient(this.objectId);
         } else if (require) {
@@ -269,8 +281,8 @@ export default class Resolver extends LogEventGenerator {
   tryGoToTransientOfRawId (rawId: RawId, typeName?: string, require?: boolean = false,
       ghostPath?: GhostPath, onlyMostMaterialized?: any, withOwnField?: string) {
     try {
-      if (typeName) this.setTypeName(typeName);
-      this.objectTransient = this.getTransientFromTypeTable(rawId);
+      if (typeName) this.objectTypeName = typeName;
+      this.objectTransient = this.tryStateTransient(rawId, this.objectTypeName);
       if (this.objectTransient && (!withOwnField || this.objectTransient.has(withOwnField))) {
         this.objectId = this.objectTransient.get("id");
       } else if (!ghostPath || ghostPath.isRoot()
@@ -303,15 +315,6 @@ export default class Resolver extends LogEventGenerator {
           "\n\tthis:", this,
       );
     }
-  }
-
-  getTransientFromTypeTable (rawId: string): Transient {
-    let transientCandidate = this.state.getIn([this.objectTypeName, rawId]);
-    if (typeof transientCandidate === "string") {
-      this.objectTypeName = transientCandidate;
-      transientCandidate = this.state.getIn([this.objectTypeName, rawId]);
-    }
-    return transientCandidate;
   }
 
   tryBindToInactivePartitionObjectId (id: IdData, typeName: string) {
@@ -366,7 +369,7 @@ export default class Resolver extends LogEventGenerator {
               ""}or concrete object`);
         }
         const rawId = currentPath.headRawId();
-        const transient = this.getTransientFromTypeTable(rawId);
+        const transient = this.tryStateTransient(rawId, this.objectTypeName);
         if (transient && (!withOwnField || transient.get(withOwnField))) {
           this.objectTransient = transient;
           const transientId = transient.get("id");

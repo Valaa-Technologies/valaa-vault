@@ -1,3 +1,6 @@
+// @flow
+
+/*
 import { Iterable } from "immutable";
 import { GraphQLList, isLeafType, getNullableType } from "graphql/type";
 
@@ -6,6 +9,7 @@ import { getTransientTypeName } from "~/raem/state/Transient";
 
 import wrapError from "~/tools/wrapError";
 import dumpify from "~/tools/dumpify";
+*/
 
 /**
  * collectFields - Walks all fields of the given resource, sends them to reviver and
@@ -18,8 +22,10 @@ import dumpify from "~/tools/dumpify";
  * @param  {(value, type, fieldIntro, ownerValue, ownerType) => value} reviver description
  * @returns {type}               description
  */
-export default function collectFields (schema, state, resourceId, typeName, reviver) {
+export default function collectFields (/* schema, state, resourceId, typeName, reviver */) {
   // TODO(iridian): Refactor collectFields to use Resolver.
+  throw new Error("collectFields has rotted");
+  /*
   const start = tryObjectTransient(state, resourceId, typeName);
   if (!start) return null;
   const startType = schema.getType(getTransientTypeName(start, schema));
@@ -104,4 +110,5 @@ export default function collectFields (schema, state, resourceId, typeName, revi
       return { value: undefined, type };
     }
   }
+  */
 }

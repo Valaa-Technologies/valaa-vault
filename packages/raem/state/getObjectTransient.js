@@ -27,17 +27,13 @@ import { dumpObject, wrapError } from "~/tools";
  * @param {any} Object
  * @returns {Transient}
  */
-export function tryObjectTransient (stateOrResolver: State, idData: IdData, typeName: string,
+export function tryObjectTransient (resolver: Resolver, idData: IdData, typeName: string,
     require: boolean = false): Transient {
-  const resolver = stateOrResolver.obtainReference
-      ? stateOrResolver
-      : new Resolver({ state: stateOrResolver, logger: console });
   try {
     if (!(resolver instanceof Resolver)) {
       throw new Error("INTERNAL ERROR: getObjectTransientDetailed.resolver is not a Resolver");
     }
-    return resolver.tryGoToTransient(
-        resolver.obtainReference(idData), typeName, require, false);
+    return resolver.tryGoToTransient(resolver.obtainReference(idData), typeName, require, false);
   } catch (error) {
     throw wrapError(error, `During getObjectTransientDetailed(${idData}: ${typeName}), with:`,
         "\n\trequire:", require,

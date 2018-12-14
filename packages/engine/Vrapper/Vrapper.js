@@ -14,7 +14,7 @@ import { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
 
-import { Resolver, State, Transient } from "~/raem/state";
+import { State, Transient } from "~/raem/state";
 import { tryElevateFieldValue } from "~/raem/state/FieldInfo";
 import { getObjectRawField } from "~/raem/state/getObjectField";
 
@@ -1757,7 +1757,9 @@ export default class Vrapper extends Cog {
   _tryElevateFieldValueFrom (state: State, name: string, value: any, vIdOwner: Vrapper) {
     if (!vIdOwner || (vIdOwner === this)) return value;
     const options = { state };
-    return tryElevateFieldValue(new Resolver(options), value, {
+    const elevator = Object.create(this.engine.discourse);
+    elevator.state = state;
+    return tryElevateFieldValue(elevator, value, {
       name,
       intro: this.getFieldIntro(name),
       sourceTransient: vIdOwner.getTransient(options),

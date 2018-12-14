@@ -3,7 +3,7 @@
 import { Action, EventBase } from "~/raem/events";
 import ValaaURI, { createValaaURI } from "~/raem/ValaaURI";
 import ValaaReference, { VRef, vRef, JSONIdData } from "~/raem/ValaaReference";
-import { ghostPathFromJSON } from "~/raem/state/GhostPath";
+import GhostPath, { ghostPathFromJSON } from "~/raem/state/GhostPath";
 
 import { initializeAspects } from "~/prophet/tools/EventAspects";
 
@@ -119,28 +119,29 @@ export function deserializeVRef (serializedRef: string | JSONIdData,
         || (serializedRef[1] && (typeof serializedRef[1] === "object"))) {
       // new-style array expansion: [nss, resolverComponent, queryComponent, fragmentComponent]
       ([nss, resolver, query, fragment] = serializedRef);
+      if (resolver) resolver = { ...resolver };
+      if (query) query = { ...query };
     } else {
       // old-style array expansion: [rawId, coupling, ghostPath, partitionURI]
       nss = serializedRef[0];
-      resolver = {
-        ghostPath: serializedRef[2] && ghostPathFromJSON(serializedRef[2]),
-        partition: serializedRef[3] && createValaaURI(serializedRef[3]),
-      };
+      resolver = { ghostPath: serializedRef[2], partition: serializedRef[3] };
       query = { coupling: serializedRef[1] };
+      /*
       if (falseProphet) {
         falseProphet.warnEvent(1, () => [
           "deserializeVRef encountered an old-style reference which will be deprecated:",
           ...dumpObject(serializedRef),
         ]);
       }
+      */
     }
+
     let partitionURIString = resolver && resolver.partition;
-    if (partitionURIString) {
-      resolver.partition = createValaaURI(partitionURIString);
-    } else if (currentPartitionURI) {
+    if (!partitionURIString && currentPartitionURI) {
       (resolver || (resolver = {})).partition = currentPartitionURI;
       partitionURIString = String(currentPartitionURI);
     }
+
     if (!falseProphet || ((currentPartitionURI === null) && !partitionURIString)) {
       return new ValaaReference(nss)
           .initResolverComponent(resolver)
@@ -158,15 +159,19 @@ export function deserializeVRef (serializedRef: string | JSONIdData,
         ? connection._referencePrototype
         : falseProphet._inactivePartitionVRefPrototypes[partitionURIString];
     if (!referencePrototype) {
+      resolver.inactive = true;
       referencePrototype = falseProphet._inactivePartitionVRefPrototypes[partitionURIString] =
-          new ValaaReference()
-              .initResolverComponent({ inactive: true, partition: resolver.partition });
+          new ValaaReference().initResolverComponent(resolver);
     }
     const ret = Object.create(referencePrototype)
         .initNSS(nss)
         .initQueryComponent(query)
         .initFragmentComponent(fragment);
     ret._nss = nss;
+    if (resolver.ghostPath) {
+      ret.obtainOwnResolverComponent().ghostPath = (resolver.ghostPath instanceof GhostPath)
+          ? resolver.ghostPath : ghostPathFromJSON(resolver.ghostPath);
+    }
     return ret;
   } catch (error) {
     throw (falseProphet ? falseProphet.wrapErrorEvent.bind(falseProphet) : wrapError)(error,

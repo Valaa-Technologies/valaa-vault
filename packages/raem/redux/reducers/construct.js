@@ -76,6 +76,7 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
   } else {
     // regular, plain create/duplicate/instantiate
     bard.objectId = passage.id;
+    bard.objectTypeName = typeName;
     bard.objectTransient = createTransient(passage);
   }
   return undefined;
@@ -119,6 +120,10 @@ export function mergeDenormalizedStateToState (bard: CreateBard, denormalizedRoo
 export function recurseCreateOrDuplicate (bard: CreateBard, typeName: string, initialState: Object,
     preOverrides?: Object) {
   const rawId = bard.objectId.rawId();
+  if (typeName !== bard.objectTypeName) {
+    throw new Error(`INTERNAL ERROR: mismatching requested construct typeName '${typeName
+        }' with bard.objectTypeName '${bard.objectTypeName}'`);
+  }
   try {
     // Make the objectId available for all VRef connectors within this Bard.
     bard.setState(bard.state
@@ -245,6 +250,7 @@ export function addDuplicateNonOwnlingFieldPassagesToBard (bard: DuplicateBard) 
     const objectRawId = objectId.rawId();
     if (bard.objectId !== objectId) {
       bard.objectId = objectId;
+      bard.objectTypeName = objectTypeName;
       objectTable = bard.getDenormalizedTable(objectTypeName);
       bard.objectTransient = objectTable[objectRawId]
           || bard.state.getIn([objectTypeName, objectRawId]);

@@ -87,10 +87,10 @@ export function addConnectToPartitionToError (error, connectToPartition) {
 export function universalizePartitionMutation (bard: Bard, id: VRef) {
   let partitionURI;
   let partitions;
+  const ref = tryHostRef(id);
   try {
-    const ref = tryHostRef(id);
     if (!bard.story.isBeingUniversalized || !ref) return undefined;
-    if (ref.isInactive()) throw new Error("Cannot modify an inactive resource");
+    if (ref.isInactive()) throw new Error(`Cannot modify an inactive resource <${ref.toString()}>`);
     let smallestNonGhostId = ref;
     partitionURI = smallestNonGhostId.getPartitionURI();
     if (!partitionURI && smallestNonGhostId.isGhost()) {
@@ -137,6 +137,7 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
     throw bard.wrapErrorEvent(error, "universalizePartitionMutation",
         "\n\tbard:", ...dumpObject(bard),
         "\n\tid:", id,
+        "\n\tref:", ...dumpObject(ref),
         "\n\tpartitionURI:", partitionURI,
         "\n\tpartitions:", ...dumpObject(partitions));
   }

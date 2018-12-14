@@ -18,8 +18,8 @@ export default function create (bard: CreateBard) {
     initialState = convertLegacyOwnerField(bard, initialState);
   } else {
     // This passage is a sub-passage of some ghost materialization.
-    bard.setTypeName(passage.typeName);
     bard.objectId = passage.id;
+    bard.objectTypeName = passage.typeName;
     bard.objectTransient = createTransient(passage);
   }
   const denormalizedRoot = prepareDenormalizedRoot(bard);

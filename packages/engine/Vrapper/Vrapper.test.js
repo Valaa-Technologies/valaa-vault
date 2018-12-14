@@ -44,7 +44,7 @@ const transactionA = {
 const createAInstance
     = created({ id: ["test+1"], typeName: "TestScriptyThing", initialState: {
       owner: ["test_partition"],
-      instancePrototype: ["test"],
+      instancePrototype: vRef("test"),
     }, });
 
 const createMedia = {

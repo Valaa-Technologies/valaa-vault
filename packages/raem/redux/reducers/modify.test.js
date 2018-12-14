@@ -55,7 +55,7 @@ describe("MODIFIED action class", () => {
 
   const createInstancesA = [
     created({ id: ["A_parentInstance"], typeName: "TestThing", initialState: {
-      instancePrototype: ["A_parent"],
+      instancePrototype: vRef("A_parent"),
     } }),
   ];
 

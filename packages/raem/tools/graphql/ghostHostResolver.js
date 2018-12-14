@@ -15,7 +15,6 @@ export default function ghostHostResolver (source: Transient, args: any[], conte
     const ghostHostRawId = ghostPath.headHostRawId();
     if (!ghostHostRawId) return null;
     const resolver = context.rootValue.resolver.fork();
-    // resolver.setTypeName(getNullableType(context.returnType));
     return resolver.goToTransientOfRawId(ghostHostRawId, "Resource");
   } catch (error) {
     const suggestion = error.message.slice(0, 10) !== "source.get" ? "" : `

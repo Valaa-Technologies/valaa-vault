@@ -268,7 +268,10 @@ export default class VrapperSubscriber extends SimpleData {
             }
             ret = (evaluateKuery === true) ? {} : undefined;
             for (const key of Object.keys(kueryVAKON)) {
-              const value = this._processKuery(head, kueryVAKON[key], scope, evaluateKuery);
+              let value = kueryVAKON[key];
+              if ((typeof value === "object") && (value !== null)) {
+                value = this._processKuery(head, kueryVAKON[key], scope, evaluateKuery);
+              }
               if (evaluateKuery === true) ret[key] = value;
             }
             return ret;
@@ -454,6 +457,10 @@ const customLiveExpressionOpHandlers = {
   "§?": liveTernary,
   "§//": null,
   "§[]": undefined,
+  "§{}": function liveFieldSet (subscriber: VrapperSubscriber, head: any, kueryVAKON: Array<any>,
+      scope: any) {
+    return liveFieldOrScopeSet(subscriber, head, kueryVAKON, scope, {});
+  },
   // Allow immediate object live mutations; parameter object computed properties use this.
   "§.<-": function liveFieldSet (subscriber: VrapperSubscriber, head: any, kueryVAKON: Array<any>,
       scope: any) {
@@ -589,14 +596,23 @@ function liveFieldOrScopeSet (subscriber: VrapperSubscriber, head: any, kueryVAK
     const setter = kueryVAKON[index + 1];
     if ((typeof setter !== "object") || (setter === null)) continue;
     if (Array.isArray(setter)) {
-      const name = subscriber._processLiteral(head, setter[0], scope, true);
-      const value = subscriber._processLiteral(head, setter[1], scope, true);
+      const name = (typeof setter[0] !== "object") || (setter[0] === null)
+          ? setter[0]
+          : subscriber._processLiteral(head, setter[0], scope, true);
+      const value = (typeof setter[1] !== "object") || (setter[1] === null)
+          ? setter[1]
+          : subscriber._processLiteral(head, setter[1], scope, true);
       target[name] = value;
     } else {
-      subscriber._processKuery(head, setter, scope);
+      for (const key of Object.keys(setter)) {
+        const value = setter[key];
+        target[key] = (typeof value !== "object") || (value === null)
+            ? value
+            : subscriber._processLiteral(head, value, scope, true);
+      }
     }
   }
-  return head;
+  return target;
 }
 
 function liveEvalk (subscriber: VrapperSubscriber, head: any, kueryVAKON: Array<any>, scope: any,

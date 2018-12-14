@@ -1,7 +1,15 @@
-import VALK, { run } from "~/raem/VALK";
+// @flow
+
+import VALK, { run as unwrappedRun } from "~/raem/VALK";
 import { created, fieldsSet } from "~/raem/events";
 import { vRef } from "~/raem/ValaaReference";
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
+import RAEMTestAPI from "~/raem/test/RAEMTestAPI";
+
+function run (head, kuery, options = {}, ...rest) {
+  options.schema = RAEMTestAPI.schema;
+  return unwrappedRun(head, kuery, options, ...rest);
+}
 
 describe("VALK basic functionality tests", () => {
   it("Executes VALK.array example kueries with freeKuery", () => {
@@ -31,8 +39,8 @@ describe("VALK basic functionality tests", () => {
   });
 
   it("Resolves selection with head to null VAKON", () => {
-    expect(VALK.select({ value: VALK.head() }).toVAKON())
-        .toEqual({ value: null });
+    expect(VALK.object({ value: VALK.head() }).toVAKON())
+        .toEqual({ value: ["§->", null] });
   });
 });
 
@@ -306,5 +314,10 @@ describe("VALK.to", () => {
   it("constructs an Array by lookups", () => {
     expect(run({ aKey: "a", bKey: "b" }, VALK.to([VALK.to("aKey"), VALK.to("bKey")]),
         { scope: { Array } })).toEqual(["a", "b"]);
+  });
+  it("constructs an object", () => {
+    expect(run({ aKey: "a" }, { null: null, aKeyName: "aKey", aKeyValue: ["§->", "aKey"] },
+            { verbosity: 0, scope: { Array } }))
+        .toEqual({ null: null, aKeyName: "aKey", aKeyValue: "a" });
   });
 });

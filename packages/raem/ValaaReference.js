@@ -1,12 +1,13 @@
 // @flow
 
-import ValaaURI, { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";
+import ValaaURI, { createPartitionURI, createValaaURI, getPartitionRawIdFrom }
+    from "~/raem/ValaaURI";
 
 import GhostPath, { JSONGhostPath, ghostPathFromJSON } from "~/raem/state/GhostPath";
 
 import { HostRef, tryHostRef } from "~/raem/VALK/hostReference";
 
-import wrapError, { dumpObject } from "~/tools/wrapError";
+import wrapError, { debugObjectType, dumpObject } from "~/tools/wrapError";
 import invariantify, { invariantifyString, invariantifyObject } from "~/tools/invariantify";
 import { vdocorate } from "~/tools/vdon";
 
@@ -76,7 +77,21 @@ export default class ValaaReference {
   }
   initNSS (nss: string) { return this._initPart("_nss", nss); }
   initQueryComponent (query: Object) { return this._initPart("_q", query); }
-  initResolverComponent (resolver: Object) { return this._initPart("_r", resolver); }
+  initResolverComponent (resolver: Object) {
+    if (!resolver) return this;
+    if (!resolver.partition) {
+      if (resolver.hasOwnProperty("partition")) delete resolver.partition;
+    } else if (!(resolver.partition instanceof ValaaURI)) {
+      resolver.partition = createValaaURI(resolver.partition);
+    }
+    if (!resolver.ghostPath) {
+      if (resolver.hasOwnProperty("ghostPath")) delete resolver.ghostPath;
+    } else if (!(resolver.ghostPath instanceof GhostPath)) {
+      resolver.ghostPath = ghostPathFromJSON(resolver.ghostPath);
+    }
+    if (!Object.keys(resolver).length) return this;
+    return this._initPart("_r", resolver);
+  }
   initFragmentComponent (fragment: string) { return this._initPart("_fragment", fragment); }
   _initPart (partName, value) {
     if (value) {
@@ -130,6 +145,10 @@ export default class ValaaReference {
       throw new Error(`Inconsistent ValaaReference: this.rawId !== connectedGhostPath.headRawId, ${
           ""} with rawId: '${this._nss}' and ghostPath.headRawId: '${
           connectedGhostPath.headRawId()}'`);
+    }
+    if (!(connectedGhostPath instanceof GhostPath)) {
+      throw new Error(`connectGhostPath: expected GhostPath, got: '${
+          debugObjectType(connectedGhostPath)}'`);
     }
     this.obtainOwnResolverComponent().ghostPath = connectedGhostPath;
     return connectedGhostPath;
@@ -203,7 +222,7 @@ export default class ValaaReference {
         let value = component[param];
         if (value && (typeof value !== "string")) {
           if (value instanceof GhostPath) {
-            value = (nest && value.previousStep()) ? value.toURIString() : undefined;
+            value = (nest && value.isGhost()) ? value.toURIString() : undefined;
           } else if (value instanceof ValaaURI) value = encodeURIComponent(String(value));
           else value = encodeURIComponent(JSON.stringify(value));
         }
@@ -214,19 +233,29 @@ export default class ValaaReference {
   }
 
   toJSON (): any[] {
-    const ret = [this._nss];
-    if (this._f) ret[3] = this._f;
-    if (ret.length > 3) ret[2] = {};
+    const ret = [this._nss, {}, {}, ""];
+    let usedFields = 1;
+    if (this._f) { ret[3] = this._f; usedFields = 4; }
     if (this._q) {
-      if (this._q.coupling) (ret[2] || (ret[2] = {})).coupling = this._q.coupling;
-    }
-    if (ret.length > 2) ret[1] = {};
-    if (this._r) {
-      if (this._r.partition) (ret[1] || (ret[1] = {})).partition = this._r.partition.toString();
-      if (this._r.ghostPath && this._r.ghostPath.previousStep()) {
-        (ret[1] || (ret[1] = {})).ghostPath = this._r.ghostPath.toJSON();
+      if (this._q.coupling) {
+        ret[2].coupling = this._q.coupling;
+        if (usedFields < 3) usedFields = 3;
       }
     }
+    if (this._r) {
+      if (this._r.partition) {
+        ret[1].partition = this._r.partition.toString();
+        if (typeof ret[1].partition !== "string") {
+          throw new Error(`Invalid stringification of partition ${this._r.partition}`);
+        }
+        if (usedFields < 2) usedFields = 2;
+      }
+      if (this._r.ghostPath && this._r.ghostPath.isGhost()) {
+        ret[1].ghostPath = this._r.ghostPath.toJSON();
+        if (usedFields < 2) usedFields = 2;
+      }
+    }
+    ret.length = usedFields;
     return ret;
   }
 

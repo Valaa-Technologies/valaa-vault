@@ -644,7 +644,7 @@ function _headOrScopeSet (valker: Valker, target: any, head: any, scope: ?Object
       }
       const eKey = (typeof setter[0] !== "object") ? setter[0]
           : tryLiteral(valker, head, setter[0], scope);
-      const eValue = (typeof setter[1] !== "object") ? setter[1]
+      const eValue = (typeof setter[1] !== "object") || (setter[1] === null) ? setter[1]
           : tryUnpackLiteral(valker, head, setter[1], scope);
       if ((typeof eKey !== "string") && !isSymbol(eKey) && (typeof eKey !== "number")) {
         throw new Error(`${settersStep[0]}.setter#${index - 1}.key is not a string or a symbol`);
@@ -653,7 +653,7 @@ function _headOrScopeSet (valker: Valker, target: any, head: any, scope: ?Object
     } else if (setter && (typeof setter === "object")) {
       for (const key of Object.keys(setter)) {
         const value = setter[key];
-        target[key] = (typeof value !== "object") ? value
+        target[key] = (typeof value !== "object") || (value === null) ? value
             : tryUnpackLiteral(valker, head, value, scope);
       }
       // Object.assign(target, valker.tryUnpack(valker.advance(head, setter, scope)));

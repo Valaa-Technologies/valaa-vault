@@ -25,7 +25,9 @@ describe("VALEK extensions", () => {
           instancePrototype: VALEK.propertyTarget("template"),
         }),
       }).fromScope();
-      const scope = entities().creator.do(toCreation.toVAKON());
+      const scope = entities().creator.do(toCreation);
+      expect(scope.root.toJSON())
+          .toEqual(entities().creator.getId().toJSON());
       expect(scope.article.get("name"))
           .toEqual("article-0-name");
       expect(entities().test.get(

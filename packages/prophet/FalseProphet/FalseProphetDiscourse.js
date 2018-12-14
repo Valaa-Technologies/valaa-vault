@@ -133,10 +133,10 @@ export default class FalseProphetDiscourse extends Discourse {
     /*
     console.log("assignNewResourceId", tryAspect(root, "command").id, partitionURI, explicitRawId,
         "\n\tresourceRawId:", resourceRawId,
-        "\n\tresults:", String(targetAction.id),
+        "\n\tresults:", String(targetAction.id), targetAction.id,
         "\n\ttargetAction:", ...dumpObject(targetAction),
         "\n\ttargetAction.initialState:", ...dumpObject(targetAction.initialState));
-    */
+    //*/
     return targetAction.id;
   }
 

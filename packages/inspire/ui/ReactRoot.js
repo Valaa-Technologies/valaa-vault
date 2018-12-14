@@ -10,6 +10,7 @@ import Vrapper, { getImplicitMediaInterpretation } from "~/engine/Vrapper";
 import { uiComponentProps, VSSStyleSheetSymbol } from "~/inspire/ui/UIComponent";
 import { unthunkRepeat } from "~/inspire/ui/thunk";
 import ValaaScope from "~/inspire/ui/ValaaScope";
+import { VS } from "~/engine/VALEK";
 
 import { derivedId, dumpObject, invariantifyString, traverse, wrapError, valaaHash } from "~/tools";
 
@@ -140,6 +141,7 @@ export default class ReactRoot extends React.Component {
         rootContext[Valaa.Lens.shadowLensAuthority], vViewFocus, viewName);
     rootContext[Valaa.Lens.scopeFrameResource] = rootContext.frame;
     rootContext.VSS = this._createVSS(vViewFocus.engine);
+    rootContext.VS = VS;
     return rootContext;
   }
 

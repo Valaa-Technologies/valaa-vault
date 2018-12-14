@@ -118,6 +118,7 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
     operationDescription, mutableObject) {
   const sortedKeys = Object.keys(updatesByField || {}).sort();
   let isPrimaryMutation = false;
+  const isBeingUniversalized = bard.story.isBeingUniversalized;
   for (const fieldName of sortedKeys) {
     const fieldUpdate = updatesByField[fieldName];
     if (fieldUpdate === undefined) {
@@ -151,6 +152,12 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
       bard.fieldsTouched.add(fieldInfo.name);
       const newValue = handleFieldUpdate(
           bard, fieldInfo, fieldUpdate, oldLocalValue, updateCoupling, updatesByField);
+      if (isBeingUniversalized && (newValue instanceof ValaaReference)) {
+        updatesByField[fieldInfo.name] = newValue.toJSON();
+        // Remove alias original
+        if (fieldInfo.name !== fieldName) delete updatesByField[fieldName];
+      }
+
       if (newValue === undefined) mutableObject.delete(fieldInfo.name);
       else mutableObject.set(fieldInfo.name, newValue);
     } catch (error) {
@@ -248,11 +255,10 @@ function handleRemoves (bard: Bard, fieldInfo, removes, oldLocalValue, updateCou
   return combineAsPartialSequence(newLocalValue, removeDiffs);
 }
 
-export function handleSets (bard: Bard, fieldInfo, value, oldLocalValue, updateCoupling,
-    eventUpdateSection) {
+export function handleSets (bard: Bard, fieldInfo, value, oldLocalValue, updateCoupling) {
   const isCreated = isCreatedLike(bard.passage);
   const isSequence = fieldInfo.intro.isSequence;
-  const newValue = bard.deserializeField(value, fieldInfo);
+  const newValue = Object.create(bard).deserializeField(value, fieldInfo);
   const fieldAdds = [];
   const fieldRemoves = [];
   const universalizedFieldRemoves = [];
@@ -268,9 +274,6 @@ export function handleSets (bard: Bard, fieldInfo, value, oldLocalValue, updateC
           ? getObjectField(Object.create(bard), bard.objectTransient, fieldInfo.name,
               Object.create(fieldInfo))
           : elevateFieldRawSequence(bard, oldLocalValue, fieldInfo, bard.objectTransient);
-    }
-    if (!isSequence && (newValue instanceof ValaaReference)) {
-      eventUpdateSection[fieldInfo.name] = newValue.toJSON();
     }
   }
 

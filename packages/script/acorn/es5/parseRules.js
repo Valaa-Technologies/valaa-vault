@@ -99,15 +99,15 @@ export function parseProgram (transpiler: Transpiler, ast: Program, options: Obj
     },
     surroundingBlock: { requireFlowReturn: 0, requireFlowLooping: 0 },
   };
-  const globals = [];
+  let globals;
   if (topLevelOptions.surroundingFunction.requireScopeSelf) {
-    globals.push(["self", transpiler.VALK().fromScope()]);
+    (globals = {}).self = transpiler.VALK().fromScope();
   }
   if (topLevelOptions.surroundingFunction.requireScopeThis) {
-    globals.push(["this", null]);
+    (globals || (globals = {})).this = ["§->", null];
   }
-  const topLevelHeader = globals.length
-      ? transpiler.VALK().setScopeValues(...globals) : transpiler.VALK();
+  const topLevelHeader = globals
+      ? transpiler.VALK().setScopeValues(globals) : transpiler.VALK();
   let lastNode = ast.body.slice(-1)[0];
   let body;
   if (lastNode.type === "ExpressionStatement") {
@@ -589,7 +589,7 @@ export interface ThisExpression extends Expression { type: "ThisExpression"; }
 // A `this` expression.
 export function parseThisExpression (transpiler: Transpiler, ast: ThisExpression,
     options: Object): Kuery {
-  if (options.headIsThis) return transpiler.VALK();
+  if (options.headIsThis) return transpiler.VALK().head();
   options.surroundingFunction.requireScopeThis = true;
   return transpiler.VALK().fromThis();
 }

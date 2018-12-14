@@ -84,6 +84,7 @@ function _createDuplicate (bard: DuplicateBard, duplicateId: VRef, typeName: str
     bard.objectTransient = bard.objectTransient.merge(newObjectTransient); // shallow merge
   }
   bard.objectId = duplicateId;
+  bard.objectTypeName = typeName;
   recurseCreateOrDuplicate(bard, typeName, initialState, preOverrides);
 }
 

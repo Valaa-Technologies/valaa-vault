@@ -205,7 +205,7 @@ export default class Kuery {
    * @returns {Kuery}
    */
   head (): Kuery {
-    return this.isActiveKuery() ? this : this._newRawVAKON(null);
+    return this.isActiveKuery() ? this : this._newRawVAKON(["§->", null]);
   }
 
   /**
@@ -266,7 +266,7 @@ export default class Kuery {
     const hostRef = tryHostRef(value);
     return this._addRawVAKON(
         hostRef ? [`§ref`, hostRef.toJSON()]
-            : (typeof value === "undefined") ? this._root.void()
+            : (value === undefined) ? this._root.void()
             : ["§'", value],
         headType);
   }

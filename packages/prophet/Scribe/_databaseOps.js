@@ -481,12 +481,12 @@ function _serializeEventAsJSON (event) {
         return undefined;
       } catch (error) {
         throw wrapError(error, new Error("During serializeEventAsJSON.trivialClone.customizer"),
-            "\n\tmember object:", ...dumpObject({ value }));
+            `\n\t${key}:`, ...dumpObject(value));
       }
     });
   } catch (error) {
     throw wrapError(error, new Error("During serializeEventAsJSON"),
-        "\n\tevent:", dumpify({ event }, { indent: 2 }));
+        "\n\tevent:", ...dumpObject(event));
   } finally {
     swapAspectRoot("log", logRoot, "event");
   }

@@ -5,6 +5,7 @@ import type { Corpus } from "~/raem/Corpus";
 import ValaaURI, { createValaaURI, createPartitionURI } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/ValaaReference";
 import { dumpObject } from "~/raem/VALK";
+import { getHostRef } from "~/raem/VALK/hostReference";
 import { addConnectToPartitionToError } from "~/raem/tools/denormalized/partitions";
 
 import Discourse from "~/prophet/api/Discourse";
@@ -120,8 +121,19 @@ export default class FalseProphetDiscourse extends Discourse {
     if (!partition.createIndex) partition.createIndex = 0;
     let resourceRawId;
     if (!explicitRawId) {
-      resourceRawId = createResourceId0Dot2(
-          root.aspects.command.id, partitionURI, partition.createIndex++);
+      if (targetAction.typeName === "Property") {
+        const ownerRawId = getHostRef(targetAction.initialState.owner,
+            `${targetAction.type}.Property.initialState.owner`).rawId();
+        const propertyName = targetAction.initialState.name;
+        if (!targetAction.initialState.name) {
+          throw new Error(`${targetAction.type
+              }.Property.initialState.name required for Property id secondary part`);
+        }
+        resourceRawId = `${ownerRawId}/.:${encodeURIComponent(propertyName)}`;
+      } else {
+        resourceRawId = createResourceId0Dot2(
+            root.aspects.command.id, partitionURI, partition.createIndex++);
+      }
     } else {
       this.warnEvent(`assignNewResourceId.explicitRawId was explicitly provided for a regular${
           ""} partition resource: this will be deprecated`,

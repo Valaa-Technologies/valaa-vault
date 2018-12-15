@@ -35,7 +35,7 @@ export type BvobInfo = {
 };
 
 export async function _initializeSharedIndexedDB (scribe: Scribe) {
-  scribe._sharedDb = new IndexedDBWrapper("valaa-shared-content",
+  scribe._sharedDb = new IndexedDBWrapper(`${scribe._databasePrefix}valaa-shared-content`,
     [
       { name: "bvobs", keyPath: "bvobId" },
       { name: "buffers", keyPath: "bvobId" },
@@ -80,11 +80,12 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
   // Also create Scribe._contentLookup entries for contents referenced by the _pendingMediaLookup
   // entries, including the in-memory contents.
   // If the partition does not exist, create it and its structures.
-  connection._db = new IndexedDBWrapper(connection._partitionURI.toString(), [
-    { name: "truths", keyPath: "index" },
-    { name: "commands", keyPath: "index" },
-    { name: "medias", keyPath: "mediaId" },
-  ], connection.getLogger(), connection._prophet.getDatabaseAPI());
+  connection._db = new IndexedDBWrapper(
+      `${connection._prophet._databasePrefix}${connection._partitionURI.toString()}`, [
+        { name: "truths", keyPath: "index" },
+        { name: "commands", keyPath: "index" },
+        { name: "medias", keyPath: "mediaId" },
+      ], connection.getLogger(), connection._prophet.getDatabaseAPI());
   await connection._db.initialize();
 
   // Populate _truthLogInfo with first and last events

@@ -11,12 +11,14 @@ import { createCorpus } from "~/raem/test/RAEMTestHarness";
 import ScriptTestHarness, { createScriptTestHarness } from "~/script/test/ScriptTestHarness";
 
 import {
-  AuthorityNexus, FalseProphet, FalseProphetDiscourse, Oracle, Prophet, Scribe, Follower,
+  AuthorityNexus, FalseProphet, FalseProphetDiscourse, Oracle, PartitionConnection, Prophet,
+  Scribe, Follower,
 } from "~/prophet";
 import { obtainAspect } from "~/prophet/tools/EventAspects";
 
 import ProphetTestAPI from "~/prophet/test/ProphetTestAPI";
-import createValaaTestScheme, { MockProphet } from "~/prophet/test/scheme-valaa-test";
+import createValaaTestScheme, { TestProphet, TestPartitionConnection }
+    from "~/prophet/test/scheme-valaa-test";
 import createValaaLocalScheme from "~/prophet/schemeModules/valaa-local";
 import createValaaMemoryScheme from "~/prophet/schemeModules/valaa-memory";
 import createValaaTransientScheme from "~/prophet/schemeModules/valaa-transient";
@@ -98,7 +100,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     }
     if (options.scribeOptions) {
       this.upstream = this.scribe = createScribe(this.upstream, options.scribeOptions);
-      this.cleanup = () => clearOracleScribeDatabases(this.scribe);
+      this.cleanup = () => clearScribeDatabases(this.scribe);
     } else {
       this.cleanup = () => undefined;
     }
@@ -147,7 +149,43 @@ export default class ProphetTestHarness extends ScriptTestHarness {
       builtinSteppers: this.corpusOptions.builtinSteppers,
     });
   }
+
+  async receiveTestPartitionTruthsFrom (source: Prophet | PartitionConnection, {
+    requireReceivingConnection = true,
+    clearSourceUpstreamEntries = false,
+    clearReceiverUpstreamEntries = false,
+    authorizeTruth = (i => i),
+  } = {}) {
+    for (const connection of ((source instanceof PartitionConnection)
+        ? [source]
+        : Object.values((source instanceof Prophet ? source : source.prophet)._connections))) {
+      let testSourceBackend = connection;
+      for (; testSourceBackend; testSourceBackend = testSourceBackend.getUpstreamConnection()) {
+        if (testSourceBackend instanceof TestPartitionConnection) break;
+      }
+      if (!testSourceBackend) continue;
+      const testPartitionURI = String(testSourceBackend.getPartitionURI());
+      const receiver = this.oracle._connections[testPartitionURI];
+      if (!receiver) {
+        if (!requireReceivingConnection) continue;
+        throw new Error(`Could not find a receiving connection for <${testPartitionURI}>`);
+      }
+      const receiverBackend = receiver.getUpstreamConnection();
+      if (!receiverBackend || !(receiverBackend instanceof TestPartitionConnection)) {
+        throw new Error(`Receving connection <${testPartitionURI
+            }> has no TestPartitionConnection at the end of the chain`);
+      }
+      const truths = JSON.parse(JSON.stringify(
+              (testSourceBackend._testUpstreamEntries || []).map(entry => entry.event)))
+          .map(authorizeTruth);
+      if (clearSourceUpstreamEntries) testSourceBackend._testUpstreamEntries = [];
+      if (clearReceiverUpstreamEntries) receiverBackend._testUpstreamEntries = [];
+      await receiverBackend.getReceiveTruths()(truths);
+    }
+  }
 }
+
+const activeScribes = [];
 
 export function createScribe (upstream: Prophet, options?: Object) {
   const ret = new Scribe({
@@ -156,15 +194,24 @@ export function createScribe (upstream: Prophet, options?: Object) {
     upstream,
     ...options,
   });
+  activeScribes.push(ret);
   ret.initiate();
   return ret;
 }
 
-export async function clearScribeDatabases (otherConnections: Object[] = []) {
-  const partitionURIs = ["valaa-shared-content"];
-  partitionURIs.push(...otherConnections);
-  for (const uri of partitionURIs) {
-    const database = await openDB(uri);
+export async function clearAllScribeDatabases () {
+  for (const scribe of activeScribes.slice()) {
+    await clearScribeDatabases(scribe);
+  }
+}
+
+async function clearScribeDatabases (scribe: Scribe) {
+  const index = activeScribes.findIndex(candidate => (candidate === scribe));
+  if (index === -1) return;
+  activeScribes.splice(index, 1);
+  for (const idbw of [scribe._sharedDb, ...Object.values(scribe._connections).map(c => c._db)]) {
+    if (!idbw) continue;
+    const database = await openDB(idbw.databaseId);
     for (const table of database.objectStoreNames) {
       const transaction = database.transaction([table], "readwrite");
       const objectStore = transaction.objectStore(table);
@@ -195,13 +242,6 @@ export function createOracle (options?: Object) {
   return ret;
 }
 
-export function clearOracleScribeDatabases (prophet: Prophet) {
-  return clearScribeDatabases(["valaa-test:?id=test_partition",
-    ...Object.values(prophet.getSyncedConnections())
-        .map(connection => connection.getPartitionURI().toString()),
-  ]);
-}
-
 export function createFalseProphet (options?: Object) {
   const corpus = (options && options.corpus) || createCorpus(ProphetTestAPI, {}, {});
   return new FalseProphet({
@@ -212,7 +252,7 @@ export function createFalseProphet (options?: Object) {
 }
 
 export function createTestMockProphet (configOverrides: Object = {}) {
-  return new MockProphet({
+  return new TestProphet({
     authorityURI: createPartitionURI("valaa-test:"),
     authorityConfig: {
       isLocallyPersisted: true,

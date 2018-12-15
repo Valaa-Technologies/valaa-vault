@@ -56,12 +56,14 @@ export default class Scribe extends Prophet {
   // See ScribePartitionConnection._pendingMediaLookup.
   _persistedMediaLookup: { [mediaId: string]: Object };
   _databaseAPI: DatabaseAPI;
+  _databasePrefix: string;
 
-  constructor ({ databaseAPI, ...rest }: Object) {
+  constructor ({ databaseAPI, databasePrefix, ...rest }: Object) {
     super({ ...rest });
     this._mediaTypes = {};
     this._persistedMediaLookup = {};
     this._databaseAPI = databaseAPI;
+    this._databasePrefix = databasePrefix || "";
   }
 
   // Idempotent: returns a promise until the initialization is complete. await on it.

@@ -68,15 +68,25 @@ export default class PartitionConnection extends Follower {
   getReceiveTruths (downstreamReceiveTruths?: ReceiveEvents = this._downstreamReceiveTruths):
       ReceiveEvents {
     return (truths, retrieveMediaBuffer) => {
-      invariantifyArray(truths, "receiveTruths.truths", { min: 1 });
-      return this.receiveTruths(truths, retrieveMediaBuffer, downstreamReceiveTruths);
+      try {
+        invariantifyArray(truths, "receiveTruths.truths", { min: 1 });
+        return this.receiveTruths(truths, retrieveMediaBuffer, downstreamReceiveTruths);
+      } catch (error) {
+        throw this.wrapErrorEvent(error, new Error("receiveTruths()"),
+            "\n\ttruths:", ...dumpObject(truths));
+      }
     };
   }
   getReceiveCommands (downstreamReceiveCommands?: ReceiveEvents = this._downstreamReceiveCommands):
       ReceiveEvents {
     return (commands, retrieveMediaBuffer) => {
-      invariantifyArray(commands, "receiveTruths.commands", { min: 1 });
-      return this.receiveCommands(commands, retrieveMediaBuffer, downstreamReceiveCommands);
+      try {
+        invariantifyArray(commands, "receiveTruths.commands", { min: 1 });
+        return this.receiveCommands(commands, retrieveMediaBuffer, downstreamReceiveCommands);
+      } catch (error) {
+        throw this.wrapErrorEvent(error, new Error(`receiveCommands()`),
+            "\n\tcommands:", ...dumpObject(commands));
+      }
     };
   }
 

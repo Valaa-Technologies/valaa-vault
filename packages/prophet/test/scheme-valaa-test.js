@@ -18,26 +18,26 @@ export default function createValaaTestScheme ({ config, authorityURI } = {}) {
       ...config,
     }),
 
-    createAuthorityProphet: (options: Object) => new MockProphet(options),
+    createAuthorityProphet: (options: Object) => new TestProphet(options),
   };
 }
 
-class MockPartitionConnection extends AuthorityPartitionConnection {
-  _upstreamEntries = [];
+export class TestPartitionConnection extends AuthorityPartitionConnection {
+  _testUpstreamEntries = [];
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions): ChronicleRequest {
     if (!this.isRemoteAuthority()) return super.chronicleEvents(events, options);
     this._mostRecentChronicleOptions = options;
-    const resultBase = new MockEventResult(null, { isPrimary: this.isPrimaryAuthority() });
+    const resultBase = new TestEventResult(null, { isPrimary: this.isPrimaryAuthority() });
     const eventResults = events.map((event, index) => {
       const ret = Object.create(resultBase); ret.event = event; ret.index = index; return ret;
     });
-    this._upstreamEntries.push(...eventResults);
+    this._testUpstreamEntries.push(...eventResults);
     return { eventResults };
   }
 }
 
-class MockEventResult extends ChronicleEventResult {
+class TestEventResult extends ChronicleEventResult {
   getLocalEvent () { return undefined; }
   getTruthEvent () {
     if (!this.isPrimary) return Promise.reject(new Error("Not primary"));
@@ -48,9 +48,9 @@ class MockEventResult extends ChronicleEventResult {
   }
 }
 
-export class MockProphet extends AuthorityProphet {
+export class TestProphet extends AuthorityProphet {
 
-  static PartitionConnectionType = MockPartitionConnection;
+  static PartitionConnectionType = TestPartitionConnection;
 
   addFollower (/* falseProphet */) {
     const connectors = {};

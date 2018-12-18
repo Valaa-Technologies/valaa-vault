@@ -5,8 +5,7 @@ import type { EventBase } from "~/raem/events";
 
 import { tryAspect, swapAspectRoot } from "~/prophet/tools/EventAspects";
 
-import { dumpify, dumpObject, vdon, wrapError } from "~/tools";
-import { debugObjectType } from "~/tools/wrapError";
+import { debugObjectType, dumpify, dumpObject, vdon, wrapError } from "~/tools";
 import IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 import type MediaDecoder from "~/tools/MediaDecoder";
 import trivialClone from "~/tools/trivialClone";
@@ -472,7 +471,9 @@ function _serializeEventAsJSON (event) {
   try {
     return trivialClone(logRoot, (value, key) => {
       try {
-        if ((typeof value !== "object") || (value === null)) return value;
+        if (((typeof value !== "object") || (value === null)) && (typeof value !== "function")) {
+          return value;
+        }
         if (!Array.isArray(value) && (Object.getPrototypeOf(value) !== Object.prototype)) {
           throw new Error(`Event cannot be serialized to IndexedDB due to non-trivial member${
               ""} .${key}:${debugObjectType(value)}`);

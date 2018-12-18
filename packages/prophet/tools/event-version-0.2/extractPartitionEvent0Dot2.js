@@ -8,14 +8,14 @@ import { dumpObject } from "~/tools";
 
 export default function extractPartitionEvent0Dot2 (connection: PartitionConnection, action: Action,
     partitionKey: string = String(connection.getPartitionURI())) {
-  let ret;
-  const partitions = (action.local || {}).partitions;
+  const local = action.local;
+  if (!local) return action;
+  const partitions = action.local.partitions;
   try {
-    if (!partitions) return action;
-    const partitionData = partitions[partitionKey];
-    if (!partitionData) return undefined;
-    ret = { ...action };
+    if (partitions && partitionKey && !partitions[partitionKey]) return undefined;
+    const ret = { ...action };
     delete ret.local;
+    if (!partitions) return ret;
     if (Object.keys(partitions).length !== 1) {
       if (!isTransactedLike(action)) {
         throw new Error("Non-TRANSACTED-like multi-partition commands are not supported");
@@ -24,17 +24,20 @@ export default function extractPartitionEvent0Dot2 (connection: PartitionConnect
         throw new Error(`Multi-partition ${action.type} not implemented`);
       }
       ret.actions = action.actions
-          .map(subAction => extractPartitionEvent0Dot2(subAction, connection, partitionKey))
+          .map(subAction => extractPartitionEvent0Dot2(connection, subAction, partitionKey))
           .filter(notFalsy => notFalsy);
       if (!ret.actions.length) {
         throw new Error(`INTERNAL ERROR: No TRANSACTED.actions found for current partition ${
             ""}in a multi-partition TRANSACTED action`);
       }
-    }
-    if ((ret.type === "TRANSACTED") && (ret.actions.length === 1)) {
-      const simplifiedAction = ret.actions[0];
-      delete ret.actions;
-      Object.assign(ret, simplifiedAction);
+    } else if (isTransactedLike(ret)) {
+      ret.actions = action.actions.map(subAction =>
+          extractPartitionEvent0Dot2(connection, subAction));
+      if ((ret.type === "TRANSACTED") && (ret.actions.length === 1)) {
+        const simplifiedAction = ret.actions[0];
+        delete ret.actions;
+        Object.assign(ret, simplifiedAction);
+      }
     }
     return ret;
   } catch (error) {

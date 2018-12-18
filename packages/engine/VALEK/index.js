@@ -7,7 +7,7 @@ import { dumpObject as _dumpObject, Kuery, ValaaScriptKuery, isValaaFunction, to
 
 import Vrapper from "~/engine/Vrapper";
 
-import { inBrowser, wrapError } from "~/tools";
+import { debugObjectType, inBrowser, wrapError } from "~/tools";
 
 import EngineKuery, { pointer, literal } from "./EngineKuery";
 
@@ -22,6 +22,7 @@ export {
   literal,
   ValaaScriptKuery,
 };
+
 export {
   Valker,
   kueryHash,
@@ -31,7 +32,7 @@ export {
   dumpKuery,
   isValaaFunction,
   toVAKON,
-} from "../../script/VALSK";
+} from "~/script/VALSK";
 
 export { default as builtinSteppers } from "./builtinSteppers";
 
@@ -106,8 +107,9 @@ export function VS (texts: string[], ...variables: any[]): Kuery {
 
 /**
  * Extracts a standalone VAKON from a ValaaScript function caller thunk.
- * Any identifiers of the captured scope of the original function that are referenced to from inside
- * the function body are lifted and embedded in the resulting VAKON.
+ * Any identifiers of the captured scope of the original function that
+ * are referenced to from inside the function body are lifted and
+ * embedded in the resulting VAKON.
  *
  * @export
  * @param {*} caller

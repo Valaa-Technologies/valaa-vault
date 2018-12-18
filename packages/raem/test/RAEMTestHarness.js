@@ -59,9 +59,7 @@ export default class RAEMTestHarness extends LogEventGenerator {
    */
   run (...rest) {
     this.valker.setState(this.corpus.getState());
-    const ret = this.valker.run(...rest);
-    this.corpus.setState(this.valker.getState());
-    return ret;
+    return this.valker.run(...rest);
   }
 
   /**
@@ -99,7 +97,7 @@ export default class RAEMTestHarness extends LogEventGenerator {
     return this.chronicleEvents([event], options).eventResults[0];
   }
 
-  createCorpus () {
+  createCorpus (corpusOptions: Object = {}) {
     return createCorpus(this.ContentAPI, {
       eventLogger: this,
       ...this.reducerOptions,
@@ -109,6 +107,7 @@ export default class RAEMTestHarness extends LogEventGenerator {
       logger: this.getLogger(),
       // stubify all unpacked Transient's when packing: this causes them to autorefresh
       ...this.corpusOptions,
+      ...corpusOptions,
     });
   }
 

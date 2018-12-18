@@ -56,14 +56,14 @@ export function packedSingular (value, typeName, fieldInfo) {
     _type: typeName,
     _fieldInfo: fieldInfo,
     toDumpify: _dumpifyPackedSingular,
-    toString: _dumpifyPackedSingular,
+    toString () { return _dumpifyPackedSingular.call(this); }
   };
 }
-function _dumpifyPackedSingular () {
+function _dumpifyPackedSingular (options?: any) {
   return `packed(${Iterable.isKeyed(this._singular)
         ? this._singular.get("id")
             ? `tr.id:'${this._singular.get("id")}'`
-            : dumpify(this._singular)
+            : dumpify(this._singular, options)
         : `id:'${String(this._singular)}'`
       }:${this._type}<-${((this._fieldInfo || {}).sourceTransient
           && (this._fieldInfo || {}).sourceTransient.get("id")) || ""}@${
@@ -79,11 +79,12 @@ export function packedSequence (denormalizedSequence, entryTypeName, fieldInfo) 
     _type: entryTypeName,
     _fieldInfo: fieldInfo,
     toDumpify: _dumpifyPackedSequence,
-    toString: _dumpifyPackedSequence,
+    toString () { return _dumpifyPackedSequence.call(this); }
   };
 }
-function _dumpifyPackedSequence () {
-  return `packedSeq([${dumpify(this._sequence)}]:${this._type}<-${
+
+function _dumpifyPackedSequence (options?: any) {
+  return `packedSeq([${dumpify(this._sequence, options)}]:${this._type}<-${
       (this._fieldInfo && this._fieldInfo.sourceTransient.get("id")) || ""}@${
         (this._fieldInfo && this._fieldInfo.elevationInstanceId) || ""})`;
 }

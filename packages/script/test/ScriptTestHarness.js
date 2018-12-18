@@ -1,8 +1,11 @@
 // @flow
 
+import { tryHostRef } from "~/raem/VALK/hostReference";
 import RAEMTestHarness, { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
+
 import ScriptTestAPI from "~/script/test/ScriptTestAPI";
 import { Kuery, builtinSteppers } from "~/script/VALSK";
+import { transpileValaaScriptBody } from "~/script/transpileValaaScript";
 
 export function createScriptTestHarness (options: Object, ...commandBlocks: any) {
   return createRAEMTestHarness({
@@ -12,7 +15,24 @@ export function createScriptTestHarness (options: Object, ...commandBlocks: any)
   }, ...commandBlocks);
 }
 
-export default class ScriptTestHarness extends RAEMTestHarness {}
+export default class ScriptTestHarness extends RAEMTestHarness {
+  runBody (self: any, valaaScriptBody: string, options: Object = {}) {
+    const bodyKuery = transpileValaaScriptBody(valaaScriptBody, {
+      verbosity: options.verbosity || 0,
+      customVALK: this.ContentAPI.VALK,
+      sourceInfo: options.sourceInfo,
+    });
+    options.transaction = this.valker.acquireTransaction();
+    const selfMaybeRef = tryHostRef(self) || self;
+    (options.scope || (options.scope = {})).this = selfMaybeRef;
+    const ret = this.run(selfMaybeRef, bodyKuery, options);
+    if (options.transaction) {
+      const result = options.transaction.releaseTransaction();
+      if (result) return Promise.resolve(result.getLocalEvent()).then(() => ret);
+    }
+    return ret;
+  }
+}
 
 /**
  * Calls given expressionKuery against given corpus, setting given thisReference as the call this

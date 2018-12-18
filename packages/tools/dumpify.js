@@ -7,56 +7,46 @@ import isSymbol from "~/tools/isSymbol";
  *  and decircularization will replace duplicate/circular sub-sections with tags.
  *
  *  @param value the string to dumpify
- *  @param options.indent      forwarded JSON.stringify third parameter
- *  @param options.sliceAt the max length of the dump string
- *  @param options.sliceSuffix the suffix appended to the dump if it got sliced
- *  @param options.cache       the cache object for decircularization
+ *  @param options.indent                forwarded JSON.stringify third parameter
+ *  @param options.sliceAt               the max length of the dump string
+ *  @param options.sliceSuffix           the suffix appended to the dump if it got sliced
+ *  @param options.cache                 the cache object for decircularization/deduplication
+ *  @param options.expandComplexObjects  if true will expand non-array, non-plain objects as well
+ *  @param options.expandDuplicates      if true will expand duplicate objects. Only useful if the
+ *                                       object is a directed graph, so that dumpification doesn't
+ *                                       result in circular recursion
  */
-export default function dumpify (value, options: Object) {
-  let ret;
-  const cache = (options && options.cache) || new Map();
+export default function dumpify (value, options: Object = {}) {
+  if (!options.cache) options.cache = new Map();
   try {
-    if (value === undefined) ret = `<undefined>`;
-    else if (value === null) ret = `<null>`;
-    else if (typeof value === "function") ret = `<function ${value.name}()>`;
-    else if (isSymbol(value)) ret = `<Symbol ${value.toString()}>`;
-    else if (typeof value === "object") {
-      const cacheIndex = cache.get(value);
-      if (typeof cacheIndex !== "undefined") return `<circular ref #${cacheIndex}>`;
-      if (value.toDumpify) return value.toDumpify(cache);
-      if (value instanceof Date) return value.toString();
-      ret = `${value.constructor ? `${value.constructor.name} ` : ""}${
-          JSON.stringify(value, decirculator, options && options.indent)}`;
-      const proto = Object.getPrototypeOf(value);
-      if (proto) {
-        const suffix = proto.constructor
-            ? `:${proto.constructor.name}`
-            : `->${dumpify(proto, { cache })}`;
-        ret += suffix;
-      }
-    } else if (typeof value === "string") ret = value;
-    else ret = JSON.stringify(value, decirculator, options && options.indent);
-
-    if (options && options.sliceAt && ret && (options.sliceAt < ret.length)) {
-      return `${ret.slice(0, options.sliceAt)}${options.sliceSuffix || ""}`;
-    }
-    return ret;
+    const ret = JSON.stringify(value, replacer, options.indent);
+    if (!options.sliceAt || !ret || !(options.sliceAt < ret.length)) return ret;
+    return `${ret.slice(0, options.sliceAt)}${options.sliceSuffix || ""}`;
   } catch (error) {
     console.error("Error forwarded during dumpify:", value);
     throw error;
   }
-  function decirculator (key, innerValue) {
-    if (typeof innerValue === "object" && innerValue !== null) {
-      const cacheIndex = cache.get(innerValue);
-      if (typeof cacheIndex !== "undefined") {
-        // Circular reference found, discard key
-        return `<circular ref #${cacheIndex}>`;
-      }
-      // Store value in our collection
-      cache.set(innerValue, cache.size + 1);
-      if (innerValue.toDumpify) return innerValue.toDumpify(cache);
+  function replacer (key, value_) {
+    if (value_ === undefined) return `<undefined>`;
+    if (value_ === null) return `<null>`;
+    if (typeof value_ === "function") return `<function ${value_.name}()>`;
+    if (isSymbol(value_)) return `<Symbol ${value_.toString()}>`;
+    if (typeof value_ !== "object") return value_;
+
+    const proto = Object.getPrototypeOf(value_);
+    const isPlain = Array.isArray(value_) || (proto === Object.prototype);
+    let objectIndex = options.cache.get(value_);
+    const isNew = (objectIndex === undefined);
+    if (isNew) options.cache.set(value_, (objectIndex = options.cache.size + 1));
+    if ((options.expandDuplicates !== true) && !isNew) {
+      return `<${((value_ != null) && (value_.constructor || {}).name) || (typeof value_)
+          } seen #${objectIndex}>`;
     }
-    if (typeof innerValue === "function") return innerValue.toString();
-    return innerValue;
+    if (value_.toDumpify) return value_.toDumpify(options);
+    if (value_ instanceof Date) return value_.toString();
+    if ((options.expandComplexObjects !== true) && !isPlain) {
+      return `<${(value_.constructor || {}).name || "ComplexObject"} #${objectIndex}>`;
+    }
+    return value_;
   }
 }

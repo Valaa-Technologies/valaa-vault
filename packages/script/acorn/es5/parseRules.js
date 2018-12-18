@@ -820,7 +820,7 @@ export function parseAssignmentExpression (transpiler: Transpiler, ast: Assignme
       transpiler.VALK().expression("§'", transpiler.kueryFromAst(ast.right, options));
   const toAlterationVAKON = (ast.operator === "=")
       ? rightSideVAKON
-      : transpiler.VALK().expression(operatorLookupName, null, rightSideVAKON);
+      : transpiler.VALK().expression(operatorLookupName, ["§'", ["§->", null]], rightSideVAKON);
   return createModifierKuery(toAlterationVAKON);
 }
 

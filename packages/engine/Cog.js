@@ -58,7 +58,7 @@ export default class Cog extends LogEventGenerator {
         subscriber.initializeKuery(this, head, kuery, callback, options, !options.noImmediateRun);
         return subscriber;
       }
-      return (options.transaction || this.engine.discourse).run(head, kuery, options);
+      return this.engine.discourse.run(head, kuery, options);
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .run(), with:`,
           "\n\thead:", ...dumpObject(head),

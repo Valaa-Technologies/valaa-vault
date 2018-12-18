@@ -4,26 +4,23 @@ import { created, transacted } from "~/raem/events/index";
 import { createPartitionURI } from "~/raem/ValaaURI";
 
 import {
-  createScribe, clearScribeDatabases, createTestMockProphet
+  createScribe, clearAllScribeDatabases, createTestMockProphet
 } from "~/prophet/test/ProphetTestHarness";
+// @flow
+
+import { initializeAspects } from "~/prophet/tools/EventAspects";
 
 import { utf8StringFromArrayBuffer } from "~/tools/textEncoding";
 
 import { openDB, getFromDB, getKeysFromDB, expectStoredInDB }
     from "~/tools/html5/InMemoryIndexedDBUtils";
-import { initializeAspects } from "../tools/EventAspects";
 
 const testAuthorityURI = "valaa-test:";
 const testPartitionURI = createPartitionURI(testAuthorityURI, "test_partition");
 const sharedURI = "valaa-shared-content";
 
-let harness = null;
-
 afterEach(async () => {
-  if (harness) {
-    await harness.cleanup();
-    harness = null;
-  } else await clearScribeDatabases(["valaa-test:?id=test_partition"]);
+  await clearAllScribeDatabases();
 });
 
 describe("Scribe", () => {

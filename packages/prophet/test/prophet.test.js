@@ -10,14 +10,11 @@ import VALK from "~/raem/VALK";
 
 import {
   createScribe, clearAllScribeDatabases, createTestMockProphet, createOracle,
-  createProphetOracleHarness,
+  createProphetOracleHarness, testPartitionURI,
 } from "~/prophet/test/ProphetTestHarness";
 import { initializeAspects, obtainAspect } from "~/prophet/tools/EventAspects";
 
 import { openDB, expectStoredInDB } from "~/tools/html5/InMemoryIndexedDBUtils";
-
-const testAuthorityURI = "valaa-test:";
-const testPartitionURI = createPartitionURI(testAuthorityURI, "test_partition");
 
 let harness = null;
 
@@ -28,11 +25,11 @@ async function setUp (testAuthorityConfig: Object = {}, options: {}) {
   });
   const ret = {
     connection: await harness.prophet.acquirePartitionConnection(
-        testPartitionURI).getSyncedConnection(),
+        harness.testPartitionURI).getSyncedConnection(),
     scribeConnection: await harness.scribe.acquirePartitionConnection(
-        testPartitionURI, { newConnection: false }).getSyncedConnection(),
+        harness.testPartitionURI, { newConnection: false }).getSyncedConnection(),
     oracleConnection: await harness.oracle.acquirePartitionConnection(
-        testPartitionURI, { newConnection: false }).getSyncedConnection(),
+        harness.testPartitionURI, { newConnection: false }).getSyncedConnection(),
   };
   ret.authorityConnection = ret.oracleConnection.getUpstreamConnection();
   return ret;
@@ -58,7 +55,7 @@ describe("Prophet", () => {
     const scribe = createScribe(createOracle(createTestMockProphet()));
     await scribe.initiate();
 
-    const connection = await scribe.acquirePartitionConnection(testPartitionURI)
+    const connection = await scribe.acquirePartitionConnection(createPartitionURI("valaa-test:"))
         .getSyncedConnection();
 
     const mediaId = vRef("abcd-0123");
@@ -85,14 +82,14 @@ describe("Prophet", () => {
       oracleOptions: { testAuthorityConfig: { isLocallyPersisted: true, isRemoteAuthority: true } },
     });
     const prophetConnection = await harness.prophet
-        .acquirePartitionConnection(testPartitionURI).getSyncedConnection();
+        .acquirePartitionConnection(harness.testPartitionURI).getSyncedConnection();
     const scribeConnection = prophetConnection.getUpstreamConnection();
-    const database = await openDB(testPartitionURI.toString());
+    const database = await openDB(harness.testPartitionURI.toString());
 
     for (const command of commands) {
       const claimResult = await harness.chronicleEvent(command);
       await claimResult.getPremiereStory();
-      const partitionCommand = await claimResult.getCommandOf(testPartitionURI);
+      const partitionCommand = await claimResult.getCommandOf(harness.testPartitionURI);
       const logIndex = scribeConnection.getFirstUnusedCommandEventId() - 1;
       await expectStoredInDB(partitionCommand, database, "commands", logIndex);
     }
@@ -103,7 +100,7 @@ describe("Prophet", () => {
       oracleOptions: { testAuthorityConfig: { isLocallyPersisted: true } },
     });
     const prophetConnection = await harness.prophet
-        .acquirePartitionConnection(testPartitionURI).getSyncedConnection();
+        .acquirePartitionConnection(harness.testPartitionURI).getSyncedConnection();
     const scribeConnection = prophetConnection.getUpstreamConnection();
 
     let oldCommandId;
@@ -129,7 +126,8 @@ describe("Prophet", () => {
 
   const coupleCommands = [
     created({ id: ["some_media"], typeName: "Media", initialState: {
-      name: "Simple Media", owner: ["test_partition", { partition: String(testPartitionURI) }, {}],
+      name: "Simple Media",
+      owner: ["test_partition", { partition: String(testPartitionURI) }, {}],
     } }),
     created({ id: ["simple_relation"], typeName: "Relation", initialState: {
       name: "Simple-other Relation",
@@ -160,7 +158,7 @@ describe("Prophet", () => {
 
     const first = harness.chronicleEvent(simpleCommand);
 
-    expect(first.getLogAspectFor(testPartitionURI).index).toEqual(1);
+    expect(first.getLogAspectFor(harness.testPartitionURI).index).toEqual(1);
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
     expect(authorityConnection._testUpstreamEntries.length).toEqual(0);
@@ -170,8 +168,8 @@ describe("Prophet", () => {
 
     const seconds = harness.chronicleEvents(coupleCommands).eventResults;
 
-    expect(seconds[0].getLogAspectFor(testPartitionURI).index).toEqual(2);
-    expect(seconds[1].getLogAspectFor(testPartitionURI).index).toEqual(3);
+    expect(seconds[0].getLogAspectFor(harness.testPartitionURI).index).toEqual(2);
+    expect(seconds[1].getLogAspectFor(harness.testPartitionURI).index).toEqual(3);
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
     expect(totalCommandCount).toEqual(3);
     expect(authorityConnection._testUpstreamEntries.length).toEqual(1);
@@ -203,7 +201,7 @@ describe("Prophet", () => {
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
     const first = harness.chronicleEvent(simpleCommand);
-    expect(first.getLogAspectFor(testPartitionURI).index).toEqual(1);
+    expect(first.getLogAspectFor(harness.testPartitionURI).index).toEqual(1);
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
     const persisted = first.getPersistedEvent();
@@ -214,8 +212,8 @@ describe("Prophet", () => {
     expectConnectionEventIds(scribeConnection, 0, 2, 2);
 
     const seconds = harness.chronicleEvents(coupleCommands).eventResults;
-    expect(seconds[0].getLogAspectFor(testPartitionURI).index).toEqual(2);
-    expect(seconds[1].getLogAspectFor(testPartitionURI).index).toEqual(3);
+    expect(seconds[0].getLogAspectFor(harness.testPartitionURI).index).toEqual(2);
+    expect(seconds[1].getLogAspectFor(harness.testPartitionURI).index).toEqual(3);
     expect(totalCommandCount).toEqual(2);
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
     await seconds[1].getPersistedEvent();
@@ -286,7 +284,7 @@ describe("Prophet", () => {
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
 
     const first = harness.chronicleEvent(simpleCommand, { reviseSchism });
-    expect(first.getLogAspectFor(testPartitionURI).index).toEqual(1);
+    expect(first.getLogAspectFor(harness.testPartitionURI).index).toEqual(1);
 
     let firstTruth, firstFailure;
     const firstTruthProcess = first.getTruthEvent()
@@ -336,8 +334,8 @@ describe("Prophet", () => {
     await secondsTruthProcesses[0];
     await secondsTruthProcesses[1];
 
-    expect(seconds[0].getLogAspectFor(testPartitionURI).index).toEqual(1);
-    expect(seconds[1].getCommandOf(testPartitionURI)).toEqual(null);
+    expect(seconds[0].getLogAspectFor(harness.testPartitionURI).index).toEqual(1);
+    expect(seconds[1].getCommandOf(harness.testPartitionURI)).toEqual(null);
     expect(secondsTruths.length).toEqual(1);
     expect(secondsFailures.length).toEqual(2);
     expect(secondsFailures[0]).toEqual(undefined);
@@ -352,7 +350,7 @@ describe("Prophet", () => {
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
 
     // Check that first command has been properly revised and resent
-    expect(rechronicleResults[0].getLogAspectFor(testPartitionURI).index).toEqual(2);
+    expect(rechronicleResults[0].getLogAspectFor(harness.testPartitionURI).index).toEqual(2);
     expect(authorityConnection._testUpstreamEntries.length).toEqual(2);
 
     const lastEntry = authorityConnection._testUpstreamEntries.splice(0, 2);
@@ -394,10 +392,10 @@ describe("Prophet", () => {
     await authorityConnection.getReceiveTruths()(secondsFirstTruth);
     // ...until a divergence due to revise-instead-of-reject happens here.
     await seconds[0].getTruthEvent();
-    expect(seconds[0].getLogAspectFor(testPartitionURI).index).toEqual(1);
+    expect(seconds[0].getLogAspectFor(harness.testPartitionURI).index).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
-    expect(first.getLogAspectFor(testPartitionURI).index).toEqual(2);
-    expect(seconds[1].getLogAspectFor(testPartitionURI).index).toEqual(3);
+    expect(first.getLogAspectFor(harness.testPartitionURI).index).toEqual(2);
+    expect(seconds[1].getLogAspectFor(harness.testPartitionURI).index).toEqual(3);
     await seconds[1].getPersistedEvent();
 
     expect(authorityConnection._testUpstreamEntries.length).toEqual(2);
@@ -411,12 +409,12 @@ describe("Prophet", () => {
     await firstTruthProcess;
     expect(firstTruth).toMatchObject(simpleCommand);
     expect(firstFailure).toEqual(undefined);
-    expect(first.getCommandOf(testPartitionURI)).toMatchObject(stageTwoEntries[0]);
+    expect(first.getCommandOf(harness.testPartitionURI)).toMatchObject(stageTwoEntries[0]);
 
     await secondsTruthProcesses[0];
     await secondsTruthProcesses[1];
-    expect(seconds[0].getLogAspectFor(testPartitionURI).index).toEqual(1);
-    expect(roundtripEvent(seconds[1].getCommandOf(testPartitionURI)))
+    expect(seconds[0].getLogAspectFor(harness.testPartitionURI).index).toEqual(1);
+    expect(roundtripEvent(seconds[1].getCommandOf(harness.testPartitionURI)))
         .toMatchObject(stageTwoEntries[1]);
 
     expect(secondsTruths.length).toEqual(2);
@@ -463,13 +461,13 @@ describe("Prophet", () => {
     await firstTruthProcess;
     expect(firstTruth).toMatchObject(simpleCommand);
     expect(firstFailure).toEqual(undefined);
-    expect(first.getCommandOf(testPartitionURI)).toMatchObject(stageTwoEntries[0]);
+    expect(first.getCommandOf(harness.testPartitionURI)).toMatchObject(stageTwoEntries[0]);
 
     await secondsTruthProcesses[0];
     await secondsTruthProcesses[1];
-    expect(JSON.parse(JSON.stringify(seconds[0].getCommandOf(testPartitionURI))))
+    expect(JSON.parse(JSON.stringify(seconds[0].getCommandOf(harness.testPartitionURI))))
         .toMatchObject(stageTwoEntries[1]);
-    expect(JSON.parse(JSON.stringify(seconds[1].getCommandOf(testPartitionURI))))
+    expect(JSON.parse(JSON.stringify(seconds[1].getCommandOf(harness.testPartitionURI))))
         .toMatchObject(stageTwoEntries[2]);
 
     expect(secondsTruths.length).toEqual(2);
@@ -481,7 +479,7 @@ describe("Cross-partition", () => {
   it("handles out-of-order cross-partition incomingRelations", async () => {
     const { scribeConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
-    const latePartitionURI = createPartitionURI(testAuthorityURI, "test_late");
+    const latePartitionURI = createPartitionURI(harness.testAuthorityURI, "test_late");
 
     const lateTargetId = vRef("late_target", undefined, undefined, latePartitionURI);
 
@@ -521,7 +519,7 @@ describe("Cross-partition", () => {
   it("handles out-of-order instantiation with properties in both partitions", async () => {
     const { scribeConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
-    const latePartitionURI = createPartitionURI(testAuthorityURI, "test_late");
+    const latePartitionURI = createPartitionURI(harness.testAuthorityURI, "test_late");
 
     const latePrototypeId = vRef("late_prototype", undefined, undefined, latePartitionURI);
 
@@ -572,16 +570,13 @@ describe("Cross-partition", () => {
   });
 });
 
-describe("Multi-harness", () => {
+describe("Disjoint clients using paired harnesses", () => {
   it("delivers commands from one harness as events to another harness", async () => {
     const { scribeConnection } = await setUp({ isRemoteAuthority: true, isLocallyPersisted: true },
         { verbosity: 0 });
-    const pairness = await createProphetOracleHarness({
-      verbosity: 0,
-      scribeOptions: { databasePrefix: "paired-" },
-      oracleOptions: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
-    });
-    const pairedConnection = await pairness.prophet.acquirePartitionConnection(testPartitionURI);
+    const pairness = await createProphetOracleHarness({ verbosity: 0, pairedHarness: harness });
+    const pairedConnection = await pairness.prophet
+        .acquirePartitionConnection(harness.testPartitionURI);
 
     const result = harness.chronicleEvent(created({
       id: ["multiharness-entity"], typeName: "Entity",
@@ -589,24 +584,20 @@ describe("Multi-harness", () => {
       aspects: { version: "0.2", log: {}, command: { id: "cid-1" } },
     }));
     await result.getLocalEvent();
-    await pairness.receiveTestPartitionTruthsFrom(harness);
+    await pairness.receiveTruthsFrom(harness);
     expect(scribeConnection.getFirstCommandEventId())
         .toEqual(1);
     expect(pairedConnection.getUpstreamConnection().getFirstCommandEventId())
         .toEqual(2);
-    await harness.receiveTestPartitionTruthsFrom(harness, { clearUpstreamEntries: true });
+    await harness.receiveTruthsFrom(harness, { clearUpstreamEntries: true });
     expect(scribeConnection.getFirstCommandEventId())
         .toEqual(2);
   });
 
   it("reorders conflicting commands between harnesses", async () => {
     await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
-    const pairness = await createProphetOracleHarness({
-      verbosity: 0,
-      scribeOptions: { databasePrefix: "paired-" },
-      oracleOptions: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
-    });
-    await pairness.prophet.acquirePartitionConnection(testPartitionURI);
+    const pairness = await createProphetOracleHarness({ verbosity: 0, pairedHarness: harness });
+    await pairness.prophet.acquirePartitionConnection(harness.testPartitionURI);
 
     const result = harness.chronicleEvent(created({
       id: ["multiharness-entity"], typeName: "Entity",
@@ -614,7 +605,7 @@ describe("Multi-harness", () => {
       aspects: { version: "0.2", log: {}, command: { id: "cid-1" } },
     }));
     await result.getLocalEvent();
-    expect(result.getCommandOf(testPartitionURI).aspects.log.index)
+    expect(result.getCommandOf(harness.testPartitionURI).aspects.log.index)
         .toEqual(1);
 
     const pairedResult = pairness.chronicleEvent(created({
@@ -623,14 +614,14 @@ describe("Multi-harness", () => {
       aspects: { version: "0.2", log: {}, command: { id: "cid-p-1" } },
     }));
     await pairedResult.getLocalEvent();
-    expect(pairedResult.getCommandOf(testPartitionURI).aspects.log.index)
+    expect(pairedResult.getCommandOf(harness.testPartitionURI).aspects.log.index)
         .toEqual(1);
     // Make paired harness commands into truths first.
-    await harness.receiveTestPartitionTruthsFrom(pairness, { clearReceiverUpstreamEntries: true });
-    await pairness.receiveTestPartitionTruthsFrom(pairness, { clearReceiverUpstreamEntries: true });
+    await harness.receiveTruthsFrom(pairness, { clearReceiverUpstreamEntries: true });
+    await pairness.receiveTruthsFrom(pairness, { clearReceiverUpstreamEntries: true });
     // Re-send reordered commands by harness.
-    await pairness.receiveTestPartitionTruthsFrom(harness);
-    await harness.receiveTestPartitionTruthsFrom(harness, { clearReceiverUpstreamEntries: true });
+    await pairness.receiveTruthsFrom(harness);
+    await harness.receiveTruthsFrom(harness, { clearReceiverUpstreamEntries: true });
     expect(immutableIs(harness.corpus.getState(), pairness.corpus.getState()))
         .toEqual(true);
     expect(harness.run(vRef("test_partition"), ["§->", "unnamedOwnlings", ["§map", "name"]]))

@@ -19,7 +19,7 @@ import createResourceId0Dot2, { createPartitionId0Dot2 }
     from "~/prophet/tools/event-version-0.2/createResourceId0Dot2";
 import { tryAspect } from "~/prophet/tools/EventAspects";
 
-import { dumpify, invariantify, invariantifyObject } from "~/tools";
+import { invariantify, invariantifyObject } from "~/tools";
 import valaaUUID from "~/tools/id/valaaUUID";
 
 export default class FalseProphetDiscourse extends Discourse {
@@ -53,6 +53,9 @@ export default class FalseProphetDiscourse extends Discourse {
 
   run (head: any, kuery: any, options: Object): any {
     try {
+      if (options && options.transaction && (this !== options.transaction)) {
+        return options.transaction.run(head, kuery, options);
+      }
       return super.run(head, kuery, options);
     } catch (error) {
       addConnectToPartitionToError(error, this.connectToMissingPartition);
@@ -212,7 +215,7 @@ export default class FalseProphetDiscourse extends Discourse {
   }
 
   releaseTransaction () {
-    if (this._transactionInfo) this._transactionInfo.releaseTransaction();
+    return !this._transactionInfo ? undefined : this._transactionInfo.releaseTransaction();
   }
 
   commit (commitCustomCommand: ?Object) {

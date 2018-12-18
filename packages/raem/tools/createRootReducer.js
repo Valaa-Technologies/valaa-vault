@@ -125,7 +125,8 @@ export default function createRootReducer ({
         const { type, typeName, id, passages, parentPassage, bard, ...rest } = action;
         subEventLogger.logEvent(
             `Sub-reducing ${action.type} ${minor}`,
-            `\n\t${dumpify(rest, { sliceAt: 380 })}`);
+            `\n\tpassage:${dumpify(rest, { sliceAt: 380 })}`,
+            "\n\taction:", dumpify(Object.getPrototypeOf(action)));
       }
       // TODO(iridian): This is likely incorrect (but harmless): probably should be just
       //   if (action.isBeingUniversalized)

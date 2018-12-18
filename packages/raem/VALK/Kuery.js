@@ -1487,8 +1487,8 @@ export default class Kuery {
   }
   toJSON (): any { return this.toVAKON(); }
 
-  toDumpify (cache: ?any): string {
-    return dumpify(this.toVAKON(), { cache });
+  toDumpify (options: ?any): string {
+    return dumpify(this.toVAKON(), options);
   }
 
 
@@ -1664,7 +1664,11 @@ export function toVAKON (kueryOrVAKON: Kuery | any) {
 }
 
 function _recurseToVAKON (kuery: Kuery | any) {
-  return trivialClone(kuery, value => {
+  return trivialClone(kuery, (value, key, object, descriptor) => {
+    if (typeof value === "function") {
+      descriptor.skip = true;
+      return undefined;
+    }
     if ((!value || (typeof value !== "object")
         || Array.isArray(value) || (Object.getPrototypeOf(value) === Object.prototype))) {
       return undefined;

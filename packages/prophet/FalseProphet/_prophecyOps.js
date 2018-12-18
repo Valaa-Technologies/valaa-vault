@@ -293,13 +293,12 @@ class ProphecyOperation extends ProphecyEventResult {
         missingConnections.push(createPartitionURI(partitionURIString));
         return;
       }
+      const commandEvent = extractPartitionEvent0Dot2(connection,
+          getActionFromPassage(this._prophecy));
       (connection.isRemoteAuthority() ? remotes
           : connection.isLocallyPersisted() ? locals
           : memorys
-      ).push((this._partitions[partitionURIString] = {
-        connection,
-        commandEvent: extractPartitionEvent0Dot2(connection, getActionFromPassage(this._prophecy)),
-      }));
+      ).push((this._partitions[partitionURIString] = { connection, commandEvent }));
     });
     if (remotes.length) this._stages.push({ name: "remotes", partitions: remotes });
     if (locals.length) this._stages.push({ name: "locals", partitions: locals });

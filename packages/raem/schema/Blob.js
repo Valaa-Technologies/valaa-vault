@@ -6,6 +6,8 @@ import generatedField from "~/raem/tools/graphql/generatedField";
 import transientField from "~/raem/tools/graphql/transientField";
 import { toMany } from "~/raem/tools/graphql/coupling";
 
+import Resource from "~/raem/schema/Resource";
+
 export default new GraphQLObjectType({
   name: "Blob",
 
@@ -25,7 +27,7 @@ export default new GraphQLObjectType({
         bvob => bvob.get("id").rawId(),
     ),
 
-    ...transientField("contentReferrers", new GraphQLList(GraphQLID),
+    ...transientField("contentReferrers", new GraphQLList(Resource),
         `Incoming references to this Bvob`,
         { coupling: toMany({ defaultCoupledField: "content" }) }),
   }),

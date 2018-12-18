@@ -125,17 +125,16 @@ export default class TransactionInfo {
           event: this._finalCommand, story: command, getPremiereStory () { return command; },
         };
       }
-      const result = this.transaction._prophet.chronicleEvent(
+      this._commitChronicleResult = this.transaction._prophet.chronicleEvent(
           this._finalCommand, { transactionInfo: this });
 
-      Promise.resolve(result.getPremiereStory()).then(
+      Promise.resolve(this._commitChronicleResult.getPremiereStory()).then(
         // TODO(iridian): Implement returning results. What should they be anyway?
         transactionStoryResult => this.resultPromises.forEach((promise, index) =>
             promise.succeed((transactionStoryResult.actions || [])[index])),
         failure => this.resultPromises.forEach((promise) => promise.fail(failure)),
       );
-      this._commitResult = result;
-      return result;
+      return this._commitChronicleResult;
     } catch (error) {
       throw this.transaction.wrapErrorEvent(error,
         `transaction(${this.transaction.corpus.getName()}).commit()`,
@@ -156,7 +155,7 @@ export default class TransactionInfo {
     this.setCustomCommand(releaseCustomCommand, "releasing transaction");
     // If the transaction has not yet been explicitly committed or discarded, commit it now.
     if (this.isCommittable()) this.commit();
-    return this._commitResult;
+    return this._commitChronicleResult;
   }
 
   _createNestedTransaction (transaction: Transaction, customCommand?: Object) {

@@ -6,7 +6,6 @@ import ValaaReference, { VRef } from "~/raem/ValaaReference";
 
 import { FieldInfo, elevateFieldReference, elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import Resolver from "~/raem/state/Resolver";
-import type { State } from "~/raem/state/State";
 import Transient, { tryTransientTypeName, createImmaterialTransient, PrototypeOfImmaterialTag }
     from "~/raem/state/Transient";
 import denormalizedFromJS from "~/raem/state/denormalizedFromJS";

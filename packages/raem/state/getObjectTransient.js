@@ -1,7 +1,7 @@
 // @flow
 
 import { IdData } from "~/raem/ValaaReference";
-import { Resolver, State, Transient } from "~/raem/state";
+import { Resolver, Transient } from "~/raem/state";
 
 import { dumpObject, wrapError } from "~/tools";
 

@@ -10,13 +10,11 @@ import ValaaReference from "~/raem/ValaaReference";
 import { Resolver, State } from "~/raem/state";
 import type { FieldInfo } from "~/raem/state/FieldInfo";
 import Transient, { getTransientTypeName } from "~/raem/state/Transient";
-import { tryHostRef } from "~/raem/VALK/hostReference";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 
-import { debugObjectType, dumpify, dumpObject, invariantify, invariantifyString,
+import { debugObjectType, dumpObject, invariantify, invariantifyString,
   outputCollapsedError, wrapError,
 } from "~/tools";
-import trivialClone from "~/tools/trivialClone";
 
 /**
  * Bard subsystem.

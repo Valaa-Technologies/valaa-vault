@@ -1680,42 +1680,6 @@ function _recurseToVAKON (kuery: Kuery | any) {
   });
 }
 
-function toRawVAKON (kueryOrPrimitive: any): any {
-  try {
-    if (typeof kueryOrPrimitive !== "object" || !kueryOrPrimitive) {
-      return ["§'", kueryOrPrimitive];
-    }
-    if (Array.isArray(kueryOrPrimitive)) {
-      return kueryOrPrimitive.map(toRawVAKON);
-    }
-    if (kueryOrPrimitive instanceof Kuery) return kueryOrPrimitive.toVAKON();
-    // TODO(iridian): Add assertion for non-plain objects.
-    if (Object.getPrototypeOf(kueryOrPrimitive) !== Object.prototype) {
-      // FIXME(iridian): This is a hack that goes against the VAKON: objects should be reduced
-      // to their identifiers. This reduction mechanism should be provided by the _root: but
-      // no time to implement that currently.
-      return ["§'", kueryOrPrimitive];
-      // console.log("Throwing typeless");
-      // throw new Error(`toRawVAKON: VAKON object literal values must be typeless, got ${
-      //  kueryOrPrimitive.constructor.name}`);
-    }
-    const ret = {};
-    for (const [key, value] of Object.entries(kueryOrPrimitive)) {
-      ret[key] = toRawVAKON(value);
-    }
-    return ret;
-  } catch (error) {
-    if (kueryOrPrimitive instanceof Kuery) {
-      if (kueryOrPrimitive._circular) {
-        kueryOrPrimitive._VAKON = undefined;
-      } else if (kueryOrPrimitive._VAKON === circularMarker) {
-        kueryOrPrimitive._VAKON = `Indeterminate due to exception`;
-      }
-    }
-    throw wrapError(error, `During ${this.constructor.name}().toRawVAKON(`, kueryOrPrimitive, ")");
-  }
-}
-
 export function dumpObject (value) {
   const ret = _dumpObject(value);
   if (ret.length) return ret;
@@ -1734,7 +1698,6 @@ export function dumpObject (value) {
   return ret;
 }
 
-
 export function dumpScope (scope) {
   return scope && (inBrowser() ? scope : `scope hidden with ${Object.keys(scope).length} keys`);
 }
@@ -1747,5 +1710,3 @@ export function dumpKuery (kuery: Object, shouldBeaumpify) {
   if (!inBrowser()) return ["", shouldBeaumpify ? beaumpify(vakon) : dumpify(vakon)];
   return [vakon, { vakonText: beaumpify(vakon) }];
 }
-
-const circularMarker = { __circular: true };

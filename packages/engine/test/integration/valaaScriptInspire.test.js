@@ -12,8 +12,6 @@ import { createEngineTestHarness, createEngineOracleHarness }
 import { clearAllScribeDatabases } from "~/prophet/test/ProphetTestHarness";
 import VALEK, { Kuery, literal, pointer } from "~/engine/VALEK";
 
-import { dumpify } from "~/tools";
-
 const valaaScriptBlock = [
   created({ id: ["creator-myFunc"], typeName: "Property", initialState: {
     name: "myFunc", owner: vRef("creator", "properties"),
@@ -845,13 +843,7 @@ describe("@valos/engine - @valos/prophet integrations", () => {
       ];
     `)).toEqual(["thingie", "yoyo", undefined, "local but not universal"]);
 
-    await pairness.receiveTruthsFrom(harness, { verbosity: 0,
-      authorizeTruth: (event) => {
-        console.log("authorizeTRuth.actions[2].initialState.value.value:",
-            (((((event.actions || [])[2] || {}).initialState || {}).value || {}).value || {}).things);
-        return event;
-      },
-    });
+    await pairness.receiveTruthsFrom(harness, { verbosity: 0 });
 
     expect(pairness.runBody(vRef("test_partition"), `
       [

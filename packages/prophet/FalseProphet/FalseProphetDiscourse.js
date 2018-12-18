@@ -138,9 +138,12 @@ export default class FalseProphetDiscourse extends Discourse {
             root.aspects.command.id, partitionURI, partition.createIndex++);
       }
     } else {
-      this.warnEvent(`assignNewResourceId.explicitRawId was explicitly provided for a regular${
-          ""} partition resource: this will be deprecated`,
-          "\n\texplicitrawId:", explicitRawId);
+      if (partitionURI.slice(0, 13) !== "valaa-memory:") {
+        this.warnEvent(`assignNewResourceId.explicitRawId was explicitly provided for a regular${
+            ""} partition resource in non-'valaa-memory:' partition: this will be deprecated`,
+            "\n\texplicitrawId:", explicitRawId,
+            "\n\tpartitionURI:", partitionURI);
+      }
       resourceRawId = explicitRawId;
     }
 

@@ -191,8 +191,7 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
         "\n\ttransientType:", actualType,
         "\n\tghost host prototype:", ghostHostPrototypeRawId,
         "\n\tghost host:", ghostHostRawId,
-        "\n\tghost id:", ghostRawId,
-        "\n\tcurrent ret candidate:", ...dumpObject(ret), "owner:", ret.owner);
+        "\n\tghost id:", ghostRawId);
   }
 }
 

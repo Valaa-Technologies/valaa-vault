@@ -10,10 +10,10 @@ export default function extractPartitionEvent0Dot2 (connection: PartitionConnect
     partitionKey: string = String(connection.getPartitionURI())) {
   const local = action.local;
   if (!local) return action;
-  const partitions = action.local.partitions;
+  const partitions = local.partitions;
+  if (partitions && partitionKey && !partitions[partitionKey]) return undefined;
+  const ret = { ...action };
   try {
-    if (partitions && partitionKey && !partitions[partitionKey]) return undefined;
-    const ret = { ...action };
     delete ret.local;
     if (!partitions) return ret;
     if (Object.keys(partitions).length !== 1) {

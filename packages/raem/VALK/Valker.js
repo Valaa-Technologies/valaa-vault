@@ -261,13 +261,8 @@ export default class Valker extends Resolver {
               // type = "select";
               // return this.select(head, step, scope, nonFinalStep);
             }
-            //*
             type = "array";
             return this._builtinSteppers["§[]"](this, head, scope, step, nonFinalStep, 0);
-            /*/
-            type = "path";
-            return this._builtinSteppers["§->"](this, head, scope, step, nonFinalStep, 0);
-            //*/
           }
         }
         // eslint-disable-line no-fallthrough

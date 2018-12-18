@@ -8,7 +8,7 @@ import Vrapper from "~/engine/Vrapper";
 
 import { tryHostRef } from "~/raem/VALK/hostReference";
 
-import { debugObjectType, dumpify, inBrowser, wrapError } from "~/tools";
+import { debugObjectType, inBrowser, wrapError } from "~/tools";
 import trivialClone from "~/tools/trivialClone";
 
 import EngineKuery, { pointer, literal } from "./EngineKuery";

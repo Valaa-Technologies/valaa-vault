@@ -41,6 +41,8 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
   scope.TransientFields.hostObjectPrototype = scope.TransientFields.prototype;
   scope.TransientFields.prototype[ValaaPrimitiveTag] = true;
 
+  scope.ResourceStub = Valaa.ResourceStub = scope.TransientFields;
+
   scope.Resource = Valaa.Resource = Object.assign(Object.create(scope.TransientFields), {
     name: "Resource",
     ".new": function new_ (valker: Valker, innerScope: ?Object, initialState: ?Object) {

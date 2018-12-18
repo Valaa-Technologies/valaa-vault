@@ -638,18 +638,23 @@ function _headOrScopeSet (valker: Valker, target: any, head: any, scope: ?Object
   for (let index = 1; index !== settersStep.length; ++index) {
     const setter = settersStep[index];
     if (Array.isArray(setter)) {
-      if (setter.length !== 2) {
+      if ((setter.length < 2) || (setter.length > 3)) {
         invariantifyArray(setter, `${settersStep[0]}.setter#${index - 1}`,
-            { length: 2 });
+            { min: 2, max: 3 });
       }
       const eKey = (typeof setter[0] !== "object") ? setter[0]
           : tryLiteral(valker, head, setter[0], scope);
-      const eValue = (typeof setter[1] !== "object") || (setter[1] === null) ? setter[1]
-          : tryUnpackLiteral(valker, head, setter[1], scope);
+      const setterValue = setter[setter.length - 1];
+      const eValue = (typeof setterValue !== "object") || (setterValue === null) ? setterValue
+          : tryUnpackLiteral(valker, head, setterValue, scope);
       if ((typeof eKey !== "string") && !isSymbol(eKey) && (typeof eKey !== "number")) {
         throw new Error(`${settersStep[0]}.setter#${index - 1}.key is not a string or a symbol`);
       }
-      target[eKey] = eValue;
+      if (setter.length === 2) {
+        target[eKey] = eValue;
+      } else {
+        Object.defineProperty(target[eKey], eKey, eValue);
+      }
     } else if (setter && (typeof setter === "object")) {
       for (const key of Object.keys(setter)) {
         const value = setter[key];

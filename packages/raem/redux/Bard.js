@@ -10,10 +10,13 @@ import ValaaReference from "~/raem/ValaaReference";
 import { Resolver, State } from "~/raem/state";
 import type { FieldInfo } from "~/raem/state/FieldInfo";
 import Transient, { getTransientTypeName } from "~/raem/state/Transient";
+import { tryHostRef } from "~/raem/VALK/hostReference";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 
-import { dumpObject, invariantify, invariantifyString, outputCollapsedError, wrapError }
-    from "~/tools";
+import { debugObjectType, dumpify, dumpObject, invariantify, invariantifyString,
+  outputCollapsedError, wrapError,
+} from "~/tools";
+import trivialClone from "~/tools/trivialClone";
 
 /**
  * Bard subsystem.
@@ -399,13 +402,23 @@ function _obtainSingularDeserializer (fieldInfo) {
   if (ret) return ret;
   return (fieldInfo._valaaSingularDeserializer =
       fieldInfo.intro.isLeaf
-          ? deserializeLeafValue
+          ? _createDeserializeLeafValue(fieldInfo)
       : fieldInfo.intro.isResource
           ? _createResourceVRefDeserializer(fieldInfo)
           : _createSingularDataDeserializer(fieldInfo));
 }
 
-function deserializeLeafValue (serialized) { return serialized; }
+function _createDeserializeLeafValue (fieldInfo) {
+  if (fieldInfo.intro.type === "LiteralValue") {
+    return (serialized => serialized);
+  }
+  return (serialized) => {
+    if ((typeof serialized !== "object") || (serialized === null)) return serialized;
+    console.log("failing intro:", fieldInfo.intro);
+    throw new Error(`Cannot deserialize value for leaf field ${fieldInfo.name
+      }: expected primitive, got ${debugObjectType(serialized)}`);
+  };
+}
 
 function _createResourceVRefDeserializer (fieldInfo) {
   function deserializeResourceVRef (serialized, bard) {
@@ -427,7 +440,6 @@ function _createSingularDataDeserializer (fieldInfo) {
       && fieldInfo.intro.namedType.name;
   return function deserializeSingularData (data, bard: Bard) {
     let objectIntro;
-    const isBeingUniversalized = bard.story.isBeingUniversalized;
     try {
       if (data === null) return null;
       if (typeof data === "string") {
@@ -446,6 +458,7 @@ function _createSingularDataDeserializer (fieldInfo) {
       }
       objectIntro = bard.schema.getType(typeName);
       if (!objectIntro) invariantify(objectIntro, `Unknown Data type '${typeName}' in schema`);
+      const isBeingUniversalized = bard.story.isBeingUniversalized;
       return OrderedMap().withMutations(mutableExpandedData => {
         const sortedFieldNames = Object.keys(data).sort();
         for (const fieldName of sortedFieldNames) {
@@ -454,10 +467,19 @@ function _createSingularDataDeserializer (fieldInfo) {
             if (!intro) {
               invariantify(intro, `Unknown Data field '${typeName}.${fieldName}' in schema`);
             }
-            const serializedFieldValue = data[fieldName];
-            const deserializedValue = bard.deserializeField(serializedFieldValue, { intro });
-            if (isBeingUniversalized && (deserializedValue instanceof ValaaReference)) {
-              data[fieldName] = deserializedValue.toJSON();
+            const serializedValue = data[fieldName];
+            let deserializedValue = serializedValue;
+            if ((intro.namedType.name !== "LiteralValue") // already universalized. Should validate.
+                && (typeof serializedValue === "object") && serializedValue) {
+              if (isBeingUniversalized && intro.isLeaf) {
+                throw new Error(`Cannot serialize value for leaf field ${
+                    fieldName}:${intro.namedType.name} expected a primitive, got ${
+                    debugObjectType(serializedValue)}`);
+              }
+              deserializedValue = bard.deserializeField(serializedValue, { intro });
+              if (isBeingUniversalized && (deserializedValue instanceof ValaaReference)) {
+                data[fieldName] = deserializedValue.toJSON();
+              }
             }
             mutableExpandedData.set(fieldName, deserializedValue);
           } else if (!concreteTypeName) {

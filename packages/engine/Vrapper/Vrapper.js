@@ -33,7 +33,7 @@ import { ChronicleEventResult } from "~/prophet/api/types";
 
 import { createModuleGlobal } from "~/tools/mediaDecoders/JavaScriptDecoder";
 
-import VALEK, { Valker, Kuery, dumpKuery, expressionFromValue } from "~/engine/VALEK";
+import VALEK, { Valker, Kuery, dumpKuery, expressionFromProperty } from "~/engine/VALEK";
 
 import Cog, { extractMagicMemberEventHandlers } from "~/engine/Cog";
 import debugId from "~/engine/debugId";
@@ -654,7 +654,7 @@ export default class Vrapper extends Cog {
 
   run (head: any, kuery: Kuery, options: VALKOptions = {}) {
     if (this._phase === ACTIVE) {
-      if (typeof options.scope === "undefined") options.scope = this.getLexicalScope();
+      if (options.scope === undefined) options.scope = this.getLexicalScope();
     } else if (!options.state && !options.transaction && this.isResource()) {
       this.requireActive();
     }
@@ -885,7 +885,8 @@ export default class Vrapper extends Cog {
       return vProperty.extractValue(options, this);
     }
     const hostReference = this.engine.getHostObjectPrototype(typeName)[propertyName];
-    if ((typeof hostReference === "object") && (hostReference !== null) && hostReference.isHostField) {
+    if ((typeof hostReference === "object") && (hostReference !== null)
+        && hostReference.isHostField) {
       if (hostReference.namespace) {
         return ((this._namespaceProxies
             || (this._namespaceProxies = {}))[hostReference.namespace]
@@ -937,7 +938,7 @@ export default class Vrapper extends Cog {
     this.engine.create("Property", {
       owner: this.getId().coupleWith("properties"),
       name: propertyName,
-      value: expressionFromValue(newValue),
+      value: expressionFromProperty(newValue, propertyName),
     }, options);
     return newValue;
   }
@@ -1021,17 +1022,14 @@ export default class Vrapper extends Cog {
         state = (options.transaction || this.engine.discourse).getState();
         valueType = state.getIn(["Expression", valueEntry.rawId()]);
       }
-      if (valueType === "Literal") {
-        ret = isExpandedTransient
-            ? dataFieldValue(valueEntry, "value")
-            : state.getIn(["Literal", valueEntry.rawId(), "value"]);
-      } else if (valueType === "Identifier") {
+      if (valueType === "Identifier") {
         ({ ret, valueEntry } = this._extractPointerValue(options, vExplicitOwner, valueEntry));
-      } else if (valueType === "KueryExpression") {
+      } else if ((valueType === "Literal") || (valueType === "KueryExpression")) {
+        const fieldName = (valueType === "Literal") ? "value" : "vakon";
         const vakon = isExpandedTransient
-            ? dataFieldValue(valueEntry, "vakon")
-            : state.getIn(["KueryExpression", valueEntry.rawId(), "vakon"]);
-        if (typeof vakon === "undefined") return undefined;
+            ? dataFieldValue(valueEntry, fieldName)
+            : state.getIn([valueType, valueEntry.rawId(), fieldName]);
+        if ((vakon == null) || (typeof vakon !== "object")) return vakon;
         const vOwner = vExplicitOwner || this.get("owner", Object.create(options)) || this;
         options.scope = vOwner.getLexicalScope();
         // TODO(iridian): We could add a flag to KueryExpression to denote that the evaluated value
@@ -1246,7 +1244,7 @@ export default class Vrapper extends Cog {
           "property owner (if defined) must be a Vrapper");
       options.scope = (vOwner || this).getLexicalScope();
       const newValue = this.run(currentValue, alterationVAKON, Object.create(options));
-      this.setField("value", expressionFromValue(newValue), options);
+      this.setField("value", expressionFromProperty(newValue, this), options);
       if (typeof newValue !== "object") {
         // TODO(iridian): Could set the cachedExtractvalueEntry for non-object types.
       }
@@ -1841,7 +1839,7 @@ export default class Vrapper extends Cog {
             configurable: true,
             enumerable: true,
             get: () => vActualAdd.extractValue(undefined, this),
-            set: (value) => vActualAdd.setField("value", expressionFromValue(value),
+            set: (value) => vActualAdd.setField("value", expressionFromProperty(value, newName),
                 { scope: this._lexicalScope }),
           });
         }, new VrapperSubscriber().setSubscriberInfo(

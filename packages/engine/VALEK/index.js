@@ -1,5 +1,4 @@
 // @flow
-import ValaaReference from "~/raem/ValaaReference";
 
 import { transpileValaaScript, isNativeIdentifier, getNativeIdentifierValue } from "~/script";
 import { dumpObject as _dumpObject, Kuery, ValaaScriptKuery, isValaaFunction, toVAKON }
@@ -7,7 +6,10 @@ import { dumpObject as _dumpObject, Kuery, ValaaScriptKuery, isValaaFunction, to
 
 import Vrapper from "~/engine/Vrapper";
 
-import { debugObjectType, inBrowser, wrapError } from "~/tools";
+import { tryHostRef } from "~/raem/VALK/hostReference";
+
+import { debugObjectType, dumpify, inBrowser, wrapError } from "~/tools";
+import trivialClone from "~/tools/trivialClone";
 
 import EngineKuery, { pointer, literal } from "./EngineKuery";
 
@@ -54,21 +56,70 @@ export function kueryExpression (kuery: Kuery | any) {
 // seems like a worse choice by the day. Biggest issue of all is that for Data pointers
 // there is no referential integrity yet. We can't avoid the setField, but we could
 // avoid toExpressionKuery and the typeof/Resource-condition below
-export function expressionFromValue (value: any) {
-  if (value === undefined) return null;
-  if (typeof value === "object"
-      && ((value instanceof Vrapper) || (value instanceof ValaaReference))) {
-    return pointer(value);
+export function expressionFromProperty (value: any, property: any, descriptor: ?Object) {
+  if (value === undefined) {
+    if (!descriptor || descriptor.hasOwnProperty("value")) return null;
+    if (!descriptor.get) {
+      throw new Error(`Must specify either descriptor.value or descriptor.get${
+        ""} when defining ValaaSpace property '${String(property)}'`);
+    }
+    const vakon = isValaaFunction(descriptor.get) ? extractFunctionVAKON(descriptor.get)
+        : (descriptor.get instanceof Kuery) ? descriptor.get.toVAKON()
+        : undefined;
+    if (vakon === undefined) {
+      throw new Error(`descriptor.get must be either VAKON kuery or a liveable function${
+        ""} when defining ValaaSpace property '${String(property)}'`);
+    }
+    return { typeName: "KueryExpression", vakon };
   }
-  return literal(value);
-}
-
-export function expressionFromOperation (operation: any) {
-  if (typeof operation !== "function") return { typeName: "KueryExpression", vakon: operation };
-  if (isValaaFunction(operation)) {
-    return { typeName: "KueryExpression", vakon: extractFunctionVAKON(operation) };
+  if (value instanceof Kuery) {
+    return { typeName: "KueryExpression", vakon: value.toVAKON() };
   }
-  return undefined;
+  const ref = tryHostRef(value);
+  if (ref) {
+    return { typeName: "Identifier", reference: ref.toJSON() };
+  }
+  const ret = {
+    typeName: "Literal",
+    value: trivialClone(value, (clonee, key, object, cloneeDescriptor, recurseClone) => {
+      if (typeof clonee === "function") {
+        if (!isValaaFunction(clonee)) {
+          throw new Error(`While universalizing into ValaaSpace resource property '${
+              String(property)}' encountered a non-ValaaSpace function at sub-property ${key}': ${
+                clonee.name}`);
+        }
+        return ["§capture", ["§'", extractFunctionVAKON(clonee)]];
+      }
+      /*
+      if (cloneeDescriptor && (typeof cloneeDescriptor.get === "function")) {
+        if (!isValaaFunction(cloneeDescriptor.get)) {
+          throw new Error(`While universalizing into ValaaSpace resource property '${
+              String(property)}' encountered a non-ValaaSpace getter for sub-property ${key}': ${
+                cloneeDescriptor.get.name}`);
+        }
+        cloneeDescriptor.enumerable = true;
+        cloneeDescriptor.configurable = true;
+        // This doesn't work because the kuery property vakon gets
+        // evaluated when the property is read. Instead the construct
+        // should introduce a getter to the object that is currently
+        // being constructed. But there's no support for that yet.
+        return extractFunctionVAKON(cloneeDescriptor.get);
+      }
+      */
+      if ((clonee == null) || (typeof clonee !== "object")) return clonee;
+      if (Array.isArray(clonee)) {
+        const ret_ = clonee.map(recurseClone);
+        if ((typeof ret_[0] === "string") && ret_[0][0] === "§") ret_[0] = ["§'", ret_[0]];
+        return ret_;
+      }
+      if (Object.getPrototypeOf(clonee) === Object.prototype) return undefined;
+      if (clonee instanceof Kuery) return clonee.toVAKON();
+      const cloneeRef = tryHostRef(clonee);
+      if (cloneeRef) return ["§ref", cloneeRef.toJSON()];
+      throw new Error(`Cannot universalize non-trivial value ${debugObjectType(value)}`);
+    }),
+  };
+  return ret;
 }
 
 /**

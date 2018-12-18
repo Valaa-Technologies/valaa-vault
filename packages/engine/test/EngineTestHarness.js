@@ -37,7 +37,6 @@ export default class EngineTestHarness extends ProphetTestHarness {
       prophet: this.prophet,
       verbosity: this.getVerbosity(),
     });
-
     const rootScope = this.engine.getRootScope();
     extendValaaSpace(rootScope, this.engine.getHostObjectDescriptors(), this.schema);
     // TODOO(iridian): This should be in @valos/inspire, but there is no such thing.
@@ -45,10 +44,24 @@ export default class EngineTestHarness extends ProphetTestHarness {
       RemoteAuthorityURI: "valaa-testing:",
       LocalAuthorityURI: "valaa-local:",
     };
+    this.valker = this.engine.discourse;
 
     this.createds = new TestCollectCREATEDCog();
     this.engine.addCog(this.createds);
     this.entities = this.createds.Entity;
+  }
+
+  createCorpus () {
+    return super.createCorpus();
+  }
+
+  createValker () { return undefined; /* set in constructor */ }
+
+  runBody (self: any, valaaScriptBody: string, options: Object = {}) {
+    options.scope = Object.assign(
+        Object.create(this.engine.getLexicalScope()),
+        options.scope || {});
+    return super.runBody(self, valaaScriptBody, options);
   }
 }
 

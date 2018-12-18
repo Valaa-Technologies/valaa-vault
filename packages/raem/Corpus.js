@@ -32,7 +32,9 @@ export default class Corpus extends Bard {
     invariantifyFunction(reduce, "reduce");
     invariantifyFunction(subReduce, "subReduce");
     invariantifyObject(initialState, "initialState", { allowUndefined: true });
-    super({ schema, verbosity, logger, subReduce: subReduce || reduce, deserializeReference });
+    super({
+      schema, verbosity, logger, subReduce: subReduce || reduce, deserializeReference,
+    });
     // TODO(iridian): These indirections are spaghetti. Simplify.
     this.reduce = reduce;
     this._dispatch = middlewares.reduceRight(

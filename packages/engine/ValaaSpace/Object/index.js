@@ -4,7 +4,7 @@ import { PartialRemovesTag } from "~/raem/state/partialSequences";
 
 import { BuiltinTypePrototype, ValaaPrimitiveTag } from "~/script";
 
-import VALEK, { expressionFromValue, expressionFromOperation } from "~/engine/VALEK";
+import VALEK, { expressionFromProperty } from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 import {
   createHostPrototypeFieldDescriptor, createHostMaterializedFieldDescriptor,
@@ -226,21 +226,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
             }' for an object which doesn't implement Scope`);
       } else {
         // Define a Scope property
-        let value;
-        if (descriptor.hasOwnProperty("value")) {
-          // Define a Scope property through a concrete value as Literal or Identifier Expression
-          value = expressionFromValue(descriptor.value);
-        } else if (typeof descriptor.get !== "undefined") {
-          // Define a Scope property through a getter as KueryExpression Expression
-          value = expressionFromOperation(descriptor.get);
-          if (typeof value === "undefined") {
-            throw new Error(`descriptor.get must be either VAKON kuery or a liveable function${
-              ""} when defining ValaaSpace property '${String(property)}'`);
-          }
-        } else {
-          throw new Error(`Must specify either descriptor.value or descriptor.get${
-              ""} when defining ValaaSpace property '${String(property)}'`);
-        }
+        const value = expressionFromProperty(descriptor.value, property, descriptor);
         const vProperty = vResource._getProperty(property, options);
         if (vProperty) {
           vProperty.setField("value", value, options);

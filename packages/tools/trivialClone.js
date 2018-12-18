@@ -69,12 +69,17 @@ export default function trivialClone (value_: any, customizer: ?Function) {
     }
     clone = Object.create(Object.getPrototypeOf(value));
     existingClones.set(value, clone);
-    for (const keysOrSymbols of
-        [Object.getOwnPropertyNames(value), Object.getOwnPropertySymbols(value)]) {
-      for (const keyOrSymbol of keysOrSymbols) {
+    const keys = Object.getOwnPropertyNames(value);
+    const symbols = Object.getOwnPropertySymbols(value);
+    for (let i = 0; i !== 2; ++i) {
+      for (const keyOrSymbol of (!i ? keys : symbols)) {
         const descriptor = Object.getOwnPropertyDescriptor(value, keyOrSymbol);
         const clonedValue = _trivialClone(descriptor.value, keyOrSymbol, value, descriptor);
-        if (clonedValue !== undefined) descriptor.value = clonedValue;
+        if (clonedValue !== undefined) {
+          descriptor.value = clonedValue;
+          delete descriptor.get;
+          delete descriptor.set;
+        }
         if (!descriptor.skip) Object.defineProperty(clone, keyOrSymbol, descriptor);
       }
     }

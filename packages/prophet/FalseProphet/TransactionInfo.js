@@ -15,28 +15,44 @@ import { universalizeEvent, universalizeAction } from "./_universalizationOps";
 let transactionCounter = 0;
 
 export default class TransactionInfo {
-  constructor (transaction: Transaction, customCommand: Object) {
+  constructor (transaction: Transaction, name: string) {
     this.transaction = transaction;
-    this.stateBefore = transaction.getState();
+    this.name = name;
+    transaction.transactionDepth = 1;
+    transaction.setState(this.stateBefore = transaction.getState());
+  }
+
+  _lazyInit () {
     this.stateAfter = null;
     // actions is set to null when the transaction has been committed.
     this.actions = [];
     this.passages = [];
     this.transacted = universalizeEvent(transacted({ actions: [] }));
-    transaction._prophet._assignCommandId(this.transacted, transaction);
+    this.transaction._prophet._assignCommandId(this.transacted, this.transaction);
     this.universalPartitions = {};
-    this.customCommand = customCommand;
     this.resultPromises = [];
-    transaction.transactionDepth = 1;
-    transaction.corpus = transaction.corpus.fork();
+    const corpus = this.transaction.corpus = Object.create(this.transaction.corpus);
     transactionCounter += 1;
     this.transactionDescription = `tx#${transactionCounter} sub-chronicle`;
-    transaction.corpus.setName(
-        `${transaction.corpus.getName()}/Transaction#${transactionCounter}`);
+    corpus.setName(`${this.transaction.corpus.getName()}/tx#${transactionCounter}:${this.name}`);
+    corpus.setState(this.stateBefore);
+    return this;
   }
 
-  isCommittable () {
-    return this.actions;
+  isActiveTransaction () {
+    return !this.transacted || this.actions;
+  }
+
+  obtainRootEvent () {
+    return this.transacted || this._lazyInit().transacted;
+  }
+
+  createNestedTransaction (transaction: Transaction) {
+    if (!this.transacted) this._lazyInit();
+    const nestedTransaction = Object.create(transaction);
+    nestedTransaction.transactionDepth = transaction.transactionDepth + 1;
+    nestedTransaction.releaseTransaction = () => {}; // Only outermost transaction commits.
+    return nestedTransaction;
   }
 
   isFastForwardFrom (previousState: Object) {
@@ -55,7 +71,8 @@ export default class TransactionInfo {
 
   chronicleEvents (events: EventBase[] /* , options: Object = {} */): ChronicleRequest {
     try {
-      if (!this.actions) {
+      if (!this.transacted) this._lazyInit();
+      else if (!this.actions) {
         throw new Error(`Transaction '${this.transaction.corpus.getName()}' has already been ${
                 this._finalCommand ? "committed" : "aborted"
             }, when trying to add actions to it`);
@@ -101,7 +118,7 @@ export default class TransactionInfo {
     }
   }
 
-  commit (commitCustomCommand: ?Object): ChronicleEventResult {
+  commit (): ChronicleEventResult {
     let command;
     try {
       if (!this.actions) {
@@ -109,31 +126,32 @@ export default class TransactionInfo {
                 this._finalCommand ? "committed" : "aborted"
             }, when trying to commit it again`);
       }
-      this.setCustomCommand(commitCustomCommand, "committing transaction");
       this.stateAfter = this.transaction.getState();
-
       this.transacted.actions = this.actions;
       this.actions = null;
+      if (this.transacted.actions.length) {
+        // this.transaction.logEvent("committing transaction", this.name,
+        //    `with ${this.transacted.actions.length} actions:`, this.transacted);
+        command = this._finalCommand = !this.customCommand
+            ? this.transacted
+            : this.customCommand(this.transacted);
+        if (!this.customCommand && !this._finalCommand.actions.length) {
+          command = universalizeEvent(this._finalCommand);
+          (command.local || (command.local = {})).partitions = {};
+          return {
+            event: this._finalCommand, story: command, getPremiereStory () { return command; },
+          };
+        }
+        this._commitChronicleResult = this.transaction._prophet.chronicleEvent(
+            this._finalCommand, { transactionInfo: this });
 
-      command = this._finalCommand = !this.customCommand
-          ? this.transacted
-          : this.customCommand(this.transacted);
-      if (!this.customCommand && !this._finalCommand.actions.length) {
-        command = universalizeEvent(this._finalCommand);
-        (command.local || (command.local = {})).partitions = {};
-        return {
-          event: this._finalCommand, story: command, getPremiereStory () { return command; },
-        };
+        Promise.resolve(this._commitChronicleResult.getPremiereStory()).then(
+          // TODO(iridian): Implement returning results. What should they be anyway?
+          transactionStoryResult => this.resultPromises.forEach((promise, index) =>
+              promise.succeed((transactionStoryResult.actions || [])[index])),
+          failure => this.resultPromises.forEach((promise) => promise.fail(failure)),
+        );
       }
-      this._commitChronicleResult = this.transaction._prophet.chronicleEvent(
-          this._finalCommand, { transactionInfo: this });
-
-      Promise.resolve(this._commitChronicleResult.getPremiereStory()).then(
-        // TODO(iridian): Implement returning results. What should they be anyway?
-        transactionStoryResult => this.resultPromises.forEach((promise, index) =>
-            promise.succeed((transactionStoryResult.actions || [])[index])),
-        failure => this.resultPromises.forEach((promise) => promise.fail(failure)),
-      );
       return this._commitChronicleResult;
     } catch (error) {
       throw this.transaction.wrapErrorEvent(error,
@@ -144,30 +162,19 @@ export default class TransactionInfo {
   }
 
   abort () {
-    if (!this.actions && this._finalCommand) {
+    if (!this.transacted) this.transacted = true; // prevent lazyInit to make tx inactive
+    else if (!this.actions && this._finalCommand) {
       throw new Error(`Transaction '${this.transaction.corpus.getName()
           }' has already been committed, when trying to abort it`);
     }
     this.actions = null;
   }
 
-  releaseTransaction (releaseCustomCommand: ?Object) {
-    this.setCustomCommand(releaseCustomCommand, "releasing transaction");
+  releaseTransaction () {
+    if (!this.transacted) this.transacted = true; // prevent lazyInit to make tx inactive
     // If the transaction has not yet been explicitly committed or discarded, commit it now.
-    if (this.isCommittable()) this.commit();
+    if (this.actions) this.commit();
     return this._commitChronicleResult;
-  }
-
-  _createNestedTransaction (transaction: Transaction, customCommand?: Object) {
-    const nestedTransaction = Object.create(transaction);
-    nestedTransaction.transactionDepth = transaction.transactionDepth + 1;
-    // Custom command alters the final command of the whole transaction.
-    this.setCustomCommand(customCommand, "creating new nested transaction");
-    nestedTransaction.releaseTransaction = (releaseCustomCommand) => {
-      // Nested transactions only set the custom command, only outermost transaction commits.
-      this.setCustomCommand(releaseCustomCommand, "releasing nested transaction");
-    };
-    return nestedTransaction;
   }
 
   /**

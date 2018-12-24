@@ -22,7 +22,7 @@ export default class ScriptTestHarness extends RAEMTestHarness {
       customVALK: this.ContentAPI.VALK,
       sourceInfo: options.sourceInfo,
     });
-    options.transaction = this.valker.acquireTransaction();
+    options.transaction = this.valker.acquireTransaction("test-run-body");
     const selfMaybeRef = tryHostRef(self) || self;
     (options.scope || (options.scope = {})).this = selfMaybeRef;
     const ret = this.run(selfMaybeRef, bodyKuery, options);

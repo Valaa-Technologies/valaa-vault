@@ -34,7 +34,7 @@ export default class FalseProphetDiscourse extends Discourse {
     super(prophet.corpus.schema, verbosity, logger, packFromHost, unpackToHost, builtinSteppers);
     invariantifyObject(follower, "FalseProphetDiscourse.constructor.follower");
     this.setDeserializeReference(prophet.deserializeReference);
-    this.nonTransactionalBase = this;
+    this.rootDiscourse = this;
     this.corpus = prophet.corpus;
     this._follower = follower;
     this._prophet = prophet;
@@ -46,8 +46,8 @@ export default class FalseProphetDiscourse extends Discourse {
   getProphet () { return this._prophet; }
 
   debugId (options: ?Object): string {
-    return `${this.constructor.name}(${
-        this._transactionInfo ? this._transactionInfo.name : "non-transactional"}: ${
+    return `${this.constructor.name}(${this._transactionInfo
+            ? (this._transactionInfo.name || "stub-transaction") : "non-transactional"}: ${
         this._follower.getName(options)} <-> ${this._prophet.debugId(options)})`;
   }
 
@@ -117,7 +117,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   assignNewResourceId (targetAction: EventBase, partitionURI: string, explicitRawId?: string) {
     if (!partitionURI) throw new Error("assignNewResourceId.partitionURI missing");
-    const root = this._transactionInfo ? this._transactionInfo.transacted : targetAction;
+    const root = this._transactionInfo ? this._transactionInfo.obtainRootEvent() : targetAction;
     if (!tryAspect(root, "command").id) this._prophet._assignCommandId(root, this);
     const partitions = (root.local || (root.local = {})).partitions || (root.local.partitions = {});
     const partition = partitions[partitionURI] || (partitions[partitionURI] = {});
@@ -170,7 +170,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   assignNewPartitionId (targetAction: EventBase, partitionAuthorityURI: string,
       explicitPartitionRawId?: string) {
-    const root = this._transactionInfo ? this._transactionInfo.transacted : targetAction;
+    const root = this._transactionInfo ? this._transactionInfo.obtainRootEvent() : targetAction;
     if (!tryAspect(root, "command").id) this._prophet._assignCommandId(root, this);
     const partitionRawId = explicitPartitionRawId
         || createPartitionId0Dot2(root.aspects.command.id, partitionAuthorityURI);
@@ -184,53 +184,41 @@ export default class FalseProphetDiscourse extends Discourse {
   }
 
   /**
-   * Returns a new valid transaction which wraps this Discourse and forks its corpus.
-   * The returned transaction prototypically inherits the wrapped object and thus all of its
-   * API; all chroniclings are intercepted in an internal transaction event log.
-   * These events are resolved immediately against the forked corpus, but only claimed forward to
-   * the wrapped object once the transaction is committed using 'outermost' releaseTransaction.
+   * Returns a new valid transaction which wraps this Discourse and
+   * forks its corpus. The returned transaction prototypically inherits
+   * the wrapped object and thus all of its API; all chroniclings are
+   * intercepted in an internal transaction event log.
+   * These events are resolved immediately against the forked corpus,
+   * but only claimed forward to the wrapped object once the
+   * transaction is committed using 'outermost' releaseTransaction.
    *
-   * Transaction objects can be nested. Calling releaseTransaction on an inner transaction is a
-   * no-op (other than setting the customCommand).
+   * Transaction objects can be nested. Calling releaseTransaction on
+   * an inner transaction is a no-op.
    *
-   * A transaction is committed using TRANSACTED by default. A custom command can be specified
-   * in any transaction, releaseTransaction or commit call as a function which takes the list of
-   * transaction actions as the first parameter and returns the final command that is then sent
-   * upstream.
+   * A transaction is committed using TRANSACTED by default. A custom
+   * command can be specified in any transaction, releaseTransaction or
+   * commit call as a function which takes the list of transaction
+   * actions as the first parameter and returns the final command that
+   * is then sent upstream.
    */
-  acquireTransaction (customCommand: ?Object): FalseProphetDiscourse {
-    if (this._transactionInfo) {
-      return this._transactionInfo._createNestedTransaction(this, customCommand);
-    }
+  acquireTransaction (name: string): FalseProphetDiscourse {
+    if (this._transactionInfo) return this._transactionInfo.createNestedTransaction(this, name);
     const transactionRoot = Object.create(this);
-    transactionRoot._transactionInfo = new TransactionInfo(transactionRoot, customCommand);
+    transactionRoot._transactionInfo = new TransactionInfo(transactionRoot, name);
     return transactionRoot;
   }
 
-  transaction (customCommand: (actions: Action[]) => EventBase): FalseProphetDiscourse {
-    this.errorEvent("\n\tDEPRECATED: FalseProphetDiscourse.transaction",
-        "\n\tprefer: acquireTransaction");
-    return this.acquireTransaction(customCommand);
-  }
-
   isActiveTransaction () {
-    return this._transactionInfo && this._transactionInfo.isCommittable();
+    return this._transactionInfo && this._transactionInfo.isActiveTransaction();
   }
 
   releaseTransaction () {
-    return !this._transactionInfo ? undefined : this._transactionInfo.releaseTransaction();
-  }
-
-  commit (commitCustomCommand: ?Object) {
-    if (!this._transactionInfo) {
-      throw new Error("Cannot call commit on a non-transaction discourse");
-    }
-    this._transactionInfo.commit(commitCustomCommand, this);
+    return this._transactionInfo && this._transactionInfo.releaseTransaction();
   }
 
   abort () {
     if (!this._transactionInfo) throw new Error("Cannot call abort on a non-transaction discourse");
-    this._transactionInfo.abort(this);
+    this._transactionInfo.abort();
   }
 
   create ({ typeName, initialState, id }: Object): ProphecyEventResult {

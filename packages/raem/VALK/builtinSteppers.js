@@ -787,7 +787,7 @@ function capture (valker: Valker, head: any, scope: ?Object,
 
 function _advanceCapture (valker, thisArgument, vakon, callScope, capturingValker: ?Valker) {
   let ret;
-  let transaction = valker.acquireTransaction();
+  let transaction = valker.acquireTransaction("advance-capture");
   try {
     if (capturingValker && capturingValker.hasOwnProperty("_sourceInfo")) {
       transaction = Object.create(transaction);
@@ -828,11 +828,11 @@ function _runCapture (valker, thisArgument, vakon, callScope, capturingValker: V
   const actualValker = (valker.transactionDepth && !valker.isActiveTransaction())
       // There is no active transaction so we are the outermost caller.
       // Do the housekeeping: create the transaction and handle missing partition retries.
-      ? valker.nonTransactionalBase
+      ? valker.rootDiscourse
       // The valker associated with this function still has an active transaction: we're a nested
       // callback call. No housekeeping, just add exception context if necessary.
       : valker;
-  const transaction = actualValker.acquireTransaction();
+  const transaction = actualValker.acquireTransaction("run-capture");
   let ret;
   try {
     ret = transaction.run(thisArgument, vakon,
@@ -840,7 +840,7 @@ function _runCapture (valker, thisArgument, vakon, callScope, capturingValker: V
   } catch (error) {
     transaction.abort();
     let opName;
-    if (actualValker !== valker.nonTransactionalBase) {
+    if (actualValker !== valker.rootDiscourse) {
       opName = `call/run (non-valk caller in active transactional callback context)`;
     } else {
       opName = `call/run (non-valk caller as outermost context)`;
@@ -863,7 +863,7 @@ function _runCapture (valker, thisArgument, vakon, callScope, capturingValker: V
   } catch (error) {
     throw capturingValker.addVALKRuntimeErrorStackFrame(
         transaction.wrapErrorEvent(error,
-            actualValker !== valker.nonTransactionalBase
+            actualValker !== valker.rootDiscourse
                 ? `call/releaseTransaction (non-valk caller in active transactional callback ${
                     ""}context)`
                 : `call/releaseTransaction (non-valk caller as outermost context)`,

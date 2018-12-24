@@ -67,8 +67,8 @@ export default class Cog extends LogEventGenerator {
     }
   }
 
-  acquireTransaction (customEventCallback: ?(actions: Action[]) => Story): Discourse {
-    return this.engine.discourse.acquireTransaction(customEventCallback);
+  acquireTransaction (name: string): Discourse {
+    return this.engine.discourse.acquireTransaction(name);
   }
 
   // Implementation

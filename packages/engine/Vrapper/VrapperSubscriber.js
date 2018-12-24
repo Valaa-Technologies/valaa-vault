@@ -368,7 +368,7 @@ export default class VrapperSubscriber extends SimpleData {
   _triggerUpdateByFieldUpdate (fieldUpdate: FieldUpdate) {
     /*
     console.log(this.subscriberKey,
-        `got update to field '${fieldUpdate.emitter().debugId()}.${fieldUpdate.fieldName()}'`,
+        `got update to field '${fieldUpdate.getEmitter().debugId()}.${fieldUpdate.fieldName()}'`,
         ", new value:", ...dumpObject(fieldUpdate.value()));
     //*/
     const kuery = this._subscribedKuery;
@@ -413,7 +413,7 @@ export default class VrapperSubscriber extends SimpleData {
       throw wrapError(error, `During ${this.debugId(fieldUpdate.valkOptions())
               }\n ._sendUpdate(), with:`,
           "\n\tsubscriber:", this.subscriber,
-          "\n\temitter:", fieldUpdate.emitter(),
+          "\n\temitter:", fieldUpdate.getEmitter(),
           "\n\tfieldUpdate:", fieldUpdate.getPassage(),
           `\n\tfilter ${this._subscribedFieldName ? "fieldName"
               : this._subscribedFieldFilter ? "filter"

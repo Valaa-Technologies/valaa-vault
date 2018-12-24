@@ -95,7 +95,7 @@ export default class TextFileEditor extends MediaContentEditor {
   saveContent = async (text: string) => {
     const target = this.getFocus();
     if (!target) throw new Error(`TextfileEditor.saveContent called with '${typeof target}' focus`);
-    const transaction = target.acquireTransaction();
+    const transaction = target.acquireTransaction("save-text-content");
     try {
       if ((this.props.confirmSave && !this.props.confirmSave(text, (this.state || {}).content))
           || (this.state.content === text)) {

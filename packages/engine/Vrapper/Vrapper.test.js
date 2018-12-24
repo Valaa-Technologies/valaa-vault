@@ -10,6 +10,8 @@ import Vrapper from "~/engine/Vrapper";
 
 import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
 
+import { dumpify } from "~/tools";
+
 const transactionA = {
   type: "TRANSACTED",
   actions: [
@@ -691,15 +693,16 @@ describe("Vrapper", () => {
           .toThrow(/'undefined' at notNull assertion/);
     });
 
-    it("fails to access a removed Scope value", () => {
+    it("fails to access a removed Scope value", async () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      expect(testScriptPartitions().test.get(VALEK.fromScope("testField").toValueLiteral()))
+      const vTest = testScriptPartitions().test;
+      expect(vTest.get(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.testField");
-      testScriptPartitions().test.get(VALEK.property("testField"))
-          .destroy();
-      expect(() => testScriptPartitions().test.get(VALEK.fromScope("testField").toValueLiteral()))
+      await vTest.get(VALEK.property("testField"))
+          .destroy().getPremiereStory();
+      expect(() => vTest.get(VALEK.fromScope("testField").toValueLiteral(), { verbosity: 0 }))
           .toThrow(/'undefined' at notNull assertion/);
     });
 

@@ -15,6 +15,7 @@ export default function extractPartitionEvent0Dot2 (connection: PartitionConnect
   const ret = { ...action };
   try {
     delete ret.local;
+    if (ret.aspects) ret.aspects = { ...ret.aspects };
     if (!partitions) return ret;
     if (Object.keys(partitions).length !== 1) {
       if (!isTransactedLike(action)) {

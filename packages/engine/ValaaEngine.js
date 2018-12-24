@@ -1,7 +1,7 @@
 // @flow
 
 import { Iterable } from "immutable";
-import type { Passage } from "~/raem";
+import type { Passage, Story } from "~/raem";
 
 import VALEK, { Kuery, VALKOptions, dumpObject, rootScopeSelf,
   builtinSteppers as engineBuiltinSteppers,
@@ -102,11 +102,6 @@ export default class ValaaEngine extends Cog {
       cog.unregisterHandlers(this._storyHandlerRoot);
     }
   }
-
-  delayedRemoveCog (cog) {
-    (this._transientDelayedCogRemovals || (this._transientDelayedCogRemovals = [])).push(cog);
-  }
-  _transientDelayedCogRemovals: Cog[];
 
   /**
    * Returns an existing Vrapper: does not return a Vrapper for non-instantiated ghost.
@@ -241,7 +236,7 @@ export default class ValaaEngine extends Cog {
     const isRecombine = Array.isArray(directives);
     const directiveArray = isRecombine ? directives : [directives];
     try {
-      const transaction = (options.transaction || this.discourse).acquireTransaction();
+      const transaction = (options.transaction || this.discourse).acquireTransaction("construct");
       options.transaction = transaction;
       if (!options.head) options.head = this;
       constructParams = createConstructParams(options);
@@ -371,70 +366,119 @@ export default class ValaaEngine extends Cog {
   }
 
   receiveCommands (stories: Command[]) {
-    let allReactionPromises;
+    const allReactionPromises = [];
     stories.forEach(story => {
-      const { timed, state, previousState } = story;
-      const _recitePassage = (passage: Passage) => {
-        if (this.getVerbosity() || timed) {
-          // eslint-disable-next-line
-          const { parentPassage, passages, type, state, previousState, next, prev, ...rest } = passage;
-          this.logEvent(`recitePassage`, _eventTypeString(passage), String(passage.id),
-              (timed ? `@ ${timed.startTime || "|"}->${timed.time}:` : ":"),
-              "\n\taction:", dumpify(getActionFromPassage(passage)),
-              "\n\tpassage:", dumpify(rest));
-        }
-        passage.timedness = timed ? "Timed" : "Timeless";
-        let vProtagonist;
-        try {
-          if (passage.id) {
-            passage.rawId = passage.id.rawId();
-            const protagonistEntry = this._vrappers.get(passage.rawId);
-            if (protagonistEntry && protagonistEntry.get(null)) {
-              vProtagonist = protagonistEntry.get(null)[0];
-            }
-            if (isCreatedLike(passage)) {
-              if (!vProtagonist) {
-                vProtagonist = new Vrapper(this, passage.id, passage.typeName);
-              } else vProtagonist._setTypeName(passage.typeName);
-              if (vProtagonist.isResource()) {
-                Promise.resolve(vProtagonist.activate(state))
-                    .then(undefined, (error) => {
-                      outputCollapsedError(errorOnReceiveCommands.call(this, error,
-                        `receiveCommands(${passage.type} ${vProtagonist.debugId()}).activate`));
-                    });
-              }
-            }
-          }
-          const reactions = executeHandlers(this._storyHandlerRoot, passage,
-              [vProtagonist, passage, story]);
-          if (reactions) (allReactionPromises || (allReactionPromises = [])).push(...reactions);
-          if (passage.passages) passage.passages.forEach(_recitePassage);
-        } catch (error) {
-          throw errorOnReceiveCommands.call(this, error,
-              new Error(`_recitePassage(${passage.type} ${
-                  vProtagonist ? vProtagonist.debugId() : ""})`),
-              "\n\tstory.state:", state && state.toJS(),
-              "\n\tstory.previousState:", previousState && previousState.toJS());
-        }
-        function errorOnReceiveCommands (error, operationName, ...extraContext) {
-          return this.wrapErrorEvent(error, operationName,
-              "\n\tvProtagonist:", vProtagonist,
-              "\n\tpassage:", passage,
-              "\n\tstory:", story,
-              ...extraContext);
-        }
-      };
-      _recitePassage.call(this, story);
-      if (this._transientDelayedCogRemovals) {
-        this._transientDelayedCogRemovals.forEach(cog => this.removeCog(cog));
-        this._transientDelayedCogRemovals = null;
-      }
+      story._delayedCogRemovals = [];
+      story._delayedFieldUpdates = [];
+
+      const discourse = this.discourse;
+      const transaction = this.discourse = discourse.acquireTransaction("receive-events");
+
+      this._recitePassage(story, story, allReactionPromises);
+
+      story._delayedCogRemovals.forEach(cog => this.removeCog(cog));
+      story._delayedCogRemovals = null;
+      story._delayedFieldUpdates.forEach(fieldUpdate => {
+        fieldUpdate.getEmitter()._notifyMODIFIEDHandlers(
+            fieldUpdate, fieldUpdate._delayedSubscribers, fieldUpdate._delayedFilterSubscribers);
+      });
+      story._delayedFieldUpdates = null;
+
+      this.discourse = discourse;
+      transaction.releaseTransaction();
     });
+    return allReactionPromises.length ? allReactionPromises : undefined;
+  }
+
+  _recitePassage (passage: Passage, story: Story, allReactionPromises) {
+    if (this.getVerbosity() || story.timed) {
+      // eslint-disable-next-line
+      const { parentPassage, passages, type, state, previousState, next, prev, ...rest } = passage;
+      this.logEvent(`recitePassage`, _eventTypeString(passage), String(passage.id),
+          (story.timed ? `@ ${story.timed.startTime || "|"}->${story.timed.time}:` : ":"),
+          "\n\taction:", dumpify(getActionFromPassage(passage)),
+          "\n\tpassage:", dumpify(rest));
+    }
+    passage.timedness = story.timed ? "Timed" : "Timeless";
+    let vProtagonist;
+    try {
+      if (passage.id) {
+        passage.rawId = passage.id.rawId();
+        const protagonistEntry = this._vrappers.get(passage.rawId);
+        if (protagonistEntry && protagonistEntry.get(null)) {
+          vProtagonist = protagonistEntry.get(null)[0];
+        }
+        if (isCreatedLike(passage)) {
+          if (!vProtagonist) {
+            vProtagonist = new Vrapper(this, passage.id, passage.typeName);
+          } else vProtagonist._setTypeName(passage.typeName);
+          if (vProtagonist.isResource()) {
+            Promise.resolve(vProtagonist.activate(story.state))
+                .then(undefined, (error) => {
+                  outputCollapsedError(errorOnReceiveCommands.call(this, error,
+                    `receiveCommands(${passage.type} ${vProtagonist.debugId()}).activate`));
+                });
+          }
+        }
+      }
+      const reactions = executeHandlers(this._storyHandlerRoot, passage,
+          [vProtagonist, passage, story]);
+      if (reactions) allReactionPromises.push(...reactions);
+      if (passage.passages) {
+        for (const subPassage of passage.passages) {
+          this._recitePassage(subPassage, story, allReactionPromises);
+        }
+      }
+    } catch (error) {
+      throw errorOnReceiveCommands.call(this, error,
+          new Error(`_recitePassage(${passage.type} ${
+              vProtagonist ? vProtagonist.debugId() : ""})`),
+          "\n\tstory.state:", story.state && story.state.toJS(),
+          "\n\tstory.previousState:", story.previousState && story.previousState.toJS());
+    }
+    function errorOnReceiveCommands (error, operationName, ...extraContext) {
+      return this.wrapErrorEvent(error, operationName,
+          "\n\tvProtagonist:", vProtagonist,
+          "\n\tpassage:", passage,
+          "\n\tstory:", story,
+          ...extraContext);
+    }
     function _eventTypeString (innerPassage, submostEventType = innerPassage.type) {
       if (!innerPassage.parentPassage) return submostEventType;
       return `sub-${_eventTypeString(innerPassage.parentPassage, submostEventType)}`;
     }
-    return allReactionPromises;
+  }
+
+  addDelayedRemoveCog (cog, story: Story) {
+    story._delayedCogRemovals.push(cog);
+  }
+
+  addDelayedFieldUpdate (fieldUpdate: FieldUpdate, subscribers, filterSubscribers, story: Story) {
+    fieldUpdate._delayedSubscribers = subscribers;
+    fieldUpdate._delayedFilterSubscribers = filterSubscribers;
+    story._delayedFieldUpdates.push(fieldUpdate);
+  }
+
+  _pendingTransactions = {};
+
+  obtainTransientGroupingTransaction (
+      groupName: string, finalizer: Promise = Promise.resolve(true)) {
+    let ret = this._pendingTransactions[groupName];
+    if (!ret) {
+      ret = this._pendingTransactions[groupName] = this.discourse.acquireTransaction(groupName);
+      if (this.discourse.rootDiscourse === this.discourse) {
+        // If there is no current transaction as the global discourse
+        // set this transaction as the global one.
+        this.discourse = ret;
+      }
+      finalizer.then(() => {
+        delete this._pendingTransactions[groupName];
+        // If the global discourse is us, revert it back.
+        if (this.discourse === ret) this.discourse = ret.rootDiscourse;
+        ret.releaseTransaction();
+      });
+    }
+    return ret;
   }
 
   receiveTruths () {}

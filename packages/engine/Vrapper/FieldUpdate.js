@@ -60,7 +60,7 @@ export default class FieldUpdate {
   }
 
   fieldName (): string { return this._fieldName; }
-  emitter (): Vrapper { return this._emitter; }
+  getEmitter (): Vrapper { return this._emitter; }
   getPassage (): ?Story { return this._passage; }
   getState (): Object { return this._valkOptions.state; }
   valkOptions (): ?VALKOptions { return this._valkOptions; }

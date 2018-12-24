@@ -144,7 +144,13 @@ export interface ArrowFunctionExpression extends es5.Function, es5.Expression {
 export function parseArrowFunctionExpression (transpiler: Transpiler, ast: ArrowFunctionExpression,
     options: Object): Kuery {
   if (!ast.expression) {
-    return es5.parseFunctionHelper(transpiler, ast, { ...options, omitThisFromScope: true });
+    return es5.parseFunctionHelper(transpiler, ast, {
+      ...options,
+      // omit 'this' hoisting even if used by the function. As it
+      // stands arrow function assumes 'this' is provided by the
+      // surrounding context capture.
+      omitThisFromScope: true,
+    });
   }
   const functionOptions = {
     ...options,

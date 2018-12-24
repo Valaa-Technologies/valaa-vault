@@ -545,8 +545,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
               partitionAuthorityURI = focus.propertyValue(lensAuthorityProperty);
             }
             if ((partitionAuthorityURI === undefined) && focus.isPartitionRoot()) {
-              partitionAuthorityURI =
-                  component.getUIContextValue(Valaa.Lens.shadowLensAuthority);
+              partitionAuthorityURI = component.getUIContextValue(Valaa.Lens.shadowLensAuthority);
             }
           }
         }
@@ -571,16 +570,18 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
               throw new Error(`Cannot obtain scope frame: neither partitionAuthorityURI ${
                   ""}nor owner could be determined`);
             }
-            const options = {
+            const initialState = {
               id: frameRawId,
-              ...(partitionAuthorityURI ? { partitionAuthorityURI } : { owner }),
               name: `FRAME-${lensName}=>${
                   prototype ? prototype.get("name") || prototypePart : "Entity"}->${
                   (focusPart && focus.hasInterface("Scope") && focus.get("name")) || focusPart}`,
             };
+            if (partitionAuthorityURI) initialState.partitionAuthorityURI = partitionAuthorityURI;
+            else initialState.owner = owner;
+            const transaction = engine.obtainTransientGroupingTransaction("frame-construction");
             const ret = (prototype != null)
-                ? prototype.instantiate(options)
-                : engine.create("Entity", options);
+                ? prototype.instantiate(initialState, { transaction })
+                : engine.create("Entity", initialState, { transaction });
             return ret;
           },
           (vResource_) => {

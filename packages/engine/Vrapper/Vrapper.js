@@ -844,7 +844,7 @@ export default class Vrapper extends Cog {
     let typeName = options.typeName;
     let transaction;
     try {
-      transaction = (options.transaction || this.engine.discourse).acquireTransaction();
+      transaction = (options.transaction || this.engine.discourse).acquireTransaction("emplace");
       options.transaction = transaction;
       if (!typeName) {
         const fieldIntro = this.getTypeIntro().getFields()[fieldName];
@@ -1621,10 +1621,10 @@ export default class Vrapper extends Cog {
     return this.onEventMODIFIED(vResource, passage, story);
   }
 
-  onEventDESTROYED (vResource: Vrapper, passage: Passage, { timed }: Story) {
-    (this._destroyedHandlers || []).forEach(handler => handler(timed));
+  onEventDESTROYED (vResource: Vrapper, passage: Passage, story: Story) {
+    (this._destroyedHandlers || []).forEach(handler => handler(story.timed));
     this._phase = DESTROYED;
-    this.engine.delayedRemoveCog(this);
+    return this.engine.addDelayedRemoveCog(this, story);
   }
 
   addDESTROYEDHandler (handler: Function) {
@@ -1636,15 +1636,14 @@ export default class Vrapper extends Cog {
       vProtagonist: Vrapper) {
     const subscribers = this._subscribersByFieldName && this._subscribersByFieldName.get(fieldName);
     const filterSubscribers = this._fieldFilterSubscribers;
-    if (!subscribers && !filterSubscribers) return;
+    if (!subscribers && !filterSubscribers) return undefined;
     const fieldUpdate = new FieldUpdate(this, fieldName, passage,
         { state: story.state, previousState: story.previousState }, undefined, vProtagonist);
-    this._delayedNotifyMODIFIEDHandlers(fieldUpdate, subscribers, filterSubscribers);
-    return;
+    return this.engine.addDelayedFieldUpdate(fieldUpdate, subscribers, filterSubscribers, story);
   }
 
-  async _delayedNotifyMODIFIEDHandlers (fieldUpdate: FieldUpdate, subscribers: any,
-      filterSubscribers: any) {
+  _notifyMODIFIEDHandlers (fieldUpdate: FieldUpdate, subscribers: any,
+    filterSubscribers: any) {
     const fieldName = fieldUpdate.fieldName();
     const alreadyNotified = fieldUpdate.getPassage()._alreadyNotified
         || (fieldUpdate.getPassage()._alreadyNotified = new Set());
@@ -1847,13 +1846,14 @@ export default class Vrapper extends Cog {
         ).triggerUpdate(update.valkOptions());
       });
       update.actualRemoves().forEach(vActualRemove => {
-        const subscriber = this._scopeNameSubscribers[vActualRemove.getRawId()];
+        const removedRawId = vActualRemove.getRawId();
+        const subscriber = this._scopeNameSubscribers[removedRawId];
         if (subscriber) {
           subscriber.unregister();
-          delete this._scopeNameSubscribers[vActualRemove.getRawId()];
+          delete this._scopeNameSubscribers[removedRawId];
         }
         const propertyName = vActualRemove.get("name", update.previousStateOptions());
-        if (this._lexicalScope[propertyName] === vActualRemove) {
+        if (this._lexicalScope[propertyName].getRawId() === removedRawId) {
           delete this._lexicalScope[propertyName];
           delete this._nativeScope[propertyName];
         }

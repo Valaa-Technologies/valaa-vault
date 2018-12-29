@@ -1,7 +1,7 @@
 const webpack = require("webpack");
 const autoprefixer = require("autoprefixer");
 
-const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const CompressionPlugin = require("compression-webpack-plugin");
 const vdocorate = require("@valos/tools/vdon").vdocorate;
 
@@ -41,6 +41,7 @@ module.exports = vdocorate({ "...": { heading:
     configures toolset-revealer as an in-use toolset.`
   ],
 })({
+  mode: isProduction ? "production" : "development",
   context: process.cwd(),
   devtool: "source-map",
 
@@ -57,48 +58,47 @@ module.exports = vdocorate({ "...": { heading:
   node: {
     fs: "empty",
   },
+
+  optimization: {
+    minimize: !isLocal,
+    minimizer: [
+      new UglifyJsPlugin({
+        parallel: true,
+        sourceMap: !isProduction,
+        uglifyOptions: {
+          ecma: 5,
+          warnings: false,
+          parse: {},
+          compress: false, // isProduction && { keep_fnames: true, },
+          mangle: false, // isProduction && { keep_fnames: true, },
+          output: {
+            comments: false,
+            beautify: false,
+          },
+          toplevel: false,
+          nameCache: null,
+          ie8: false,
+          safari10: false,
+          keep_fnames: true,
+        },
+      }),
+      new CompressionPlugin({
+        asset: "[path].gz[query]",
+        algorithm: "gzip",
+        test: /\.js$|\.css$|\.html$/,
+        threshold: 10240,
+        minRatio: 0.8,
+      }),
+    ],
+  },
+
   plugins: [
-    new webpack.DefinePlugin({
-      "process.env": {
-        NODE_ENV: JSON.stringify(isProduction ? "production" : process.env.NODE_ENV)
-      },
-    }),
     // Silences a console warning due to amdefine/require, coming through jstransform dependency.
     // In principle jstransform dependency should be eliminated in favor of babel jsx tools (as
     // esprima-fb is deprecated) but in practice VSX transformation relies on the custom
     // modifications of the locally expanded jsx-transform
     new webpack.ContextReplacementPlugin(/source-map/, /$^/),
-  ].concat(isLocal ? [] : [
-    new UglifyJSPlugin({
-      parallel: true,
-      sourceMap: !isProduction,
-      uglifyOptions: {
-        ecma: 5,
-        warnings: false,
-        parse: {},
-        compress: isProduction && {},
-        mangle: isProduction && {
-          keep_classnames: true,
-          keep_fnames: true,
-        },
-        output: {
-          comments: false,
-          beautify: false,
-        },
-        toplevel: false,
-        nameCache: null,
-        ie8: false,
-        safari10: false,
-      },
-    }),
-    new CompressionPlugin({
-      asset: "[path].gz[query]",
-      algorithm: "gzip",
-      test: /\.js$|\.css$|\.html$/,
-      threshold: 10240,
-      minRatio: 0.8,
-    }),
-  ]),
+  ],
   module: {
     rules: [
       {

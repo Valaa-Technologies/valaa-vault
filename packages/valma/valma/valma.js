@@ -1123,8 +1123,11 @@ function delegate (args, options = {}) {
   return execute.call(this, args, { ...options, delegate: true });
 }
 
-function interact (args, successResult = true, options = {}) {
-  return execute.call(this, args, { ...options, asTTYResult: successResult });
+function interact (args, options = {}) {
+  return execute.call(this, args, {
+    ...options,
+    asTTYResult: (options.successResult !== undefined) ? options.successResult : true,
+  });
 }
 
 async function invoke (commandSelector, args, options = {}) {

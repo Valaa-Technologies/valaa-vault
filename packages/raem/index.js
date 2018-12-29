@@ -1,10 +1,10 @@
 // @flow
 
-import exportValaaPlugin from "~/tools/exportValaaPlugin";
+import Valaa from "~/tools/Valaa";
 
 import ContentAPI from "./RAEMContentAPI";
 
-export default exportValaaPlugin({ name: "@valos/raem", ContentAPI });
+export default Valaa.exportPlugin({ name: "@valos/raem", ContentAPI });
 
 
 export {
@@ -32,6 +32,7 @@ export {
 } from "./ValaaReference";
 export {
                            default as ValaaURI,
+                                      getPartitionRawIdFrom,
 } from "./ValaaURI";
 export {
                            default as VALK

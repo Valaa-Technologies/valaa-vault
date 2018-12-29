@@ -1,15 +1,13 @@
 // @flow
 
-import exportValaaPlugin from "./exportValaaPlugin";
+export const Valaa = require("./Valaa").default;
 
 import * as mediaDecoders from "./mediaDecoders";
 
-export default exportValaaPlugin({ name: "@valos/tools", mediaDecoders });
+export default Valaa.exportPlugin({ name: "@valos/tools", mediaDecoders });
 
 export { default as valaaHash } from "./id/valaaHash";
 export { default as valaaUUID } from "./id/valaaUUID";
-
-export { exportValaaPlugin };
 
 export const contentIdFromArrayBuffer = require("./id/contentId").contentIdFromArrayBuffer;
 export const contentIdFromNativeStream = require("./id/contentId").contentIdFromNativeStream;
@@ -53,6 +51,8 @@ export const SimpleData = require("./SimpleData").default;
 
 export const thenChainEagerly = require("./thenChainEagerly").default;
 export const mapEagerly = require("./thenChainEagerly").mapEagerly;
+
+export const trivialClone = require("./trivialClone").default;
 
 export { vdon, vdocorate } from "./vdon";
 

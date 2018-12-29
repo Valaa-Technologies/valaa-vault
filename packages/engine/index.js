@@ -1,10 +1,9 @@
 // @flow
 
-import exportValaaPlugin from "~/tools/exportValaaPlugin";
-
+import Valaa from "~/tools/Valaa";
 import ContentAPI from "./EngineContentAPI";
 
-export default exportValaaPlugin({ name: "@valos/engine", ContentAPI });
+export default Valaa.exportPlugin({ name: "@valos/engine", ContentAPI });
 
 
 export {

@@ -66,11 +66,13 @@ import { dumpObject, inProduction, isPromise, request, wrapError, inBrowser } fr
 //   bvobBuffers: dictionaryOf({ base64: "" }),
 // ```
 //
-// TODO(iridian): Figure if exposed string content could be wrapped inside a wrapper, ie. if in
-// above base the http://url.com/to/bvob52 resolves to string content (not as a JSON object with
-// "base64" field), it might be useful if by convention only JSON objects were resolved directly,
-// but flat text and any other content was automatically wrapped inside an object, possibly also
-// containing encoding and other XHR response information.
+// TODO(iridian): Figure if exposed string content could be wrapped
+// inside a wrapper, ie. if in above base the http://url.com/to/bvob52
+// resolves to string content (not as a JSON object with "base64"
+// field), it might be useful if by convention only JSON objects were
+// resolved directly, but flat text and any other content was
+// automatically wrapped inside an object, possibly also containing
+// encoding and other XHR response information.
 
 export type Revelation = any;
 
@@ -104,8 +106,9 @@ export function deprecated (template: any, deprecationMessage: string) {
 }
 
 /**
- * Combines several revelations together, performing a lazy deep merge which resolves promises,
- * merges objects, concatenates arrays and replaces functions with their result values.
+ * Combines several revelations together, performing a lazy deep merge
+ * which resolves promises, merges objects, concatenates arrays and
+ * replaces functions with their result values.
  *
  * @export
  * @param {*} revelation
@@ -165,10 +168,7 @@ function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
     throw new Error("Non-string expandees are not supported in non-browser Revelation contexts");
   } else {
     try {
-      // TODO(iridian): This will give a webpack warning, but is actually a line which will never
-      // be run in webpack contexts. There is no suppressor comment directive, but the structure
-      // of the code should be changed so that webpack contexts never even get to see this require.
-      retrievedContent = require(expandeePath);
+      retrievedContent = gateway.require(expandeePath);
     } catch (error) {
       throw gateway.wrapErrorEvent(error, `_tryExpandExtension('${expandee.url || expandee}')`,
           "\n\texpandeePath:", expandeePath);

@@ -2,12 +2,12 @@
 
 /* eslint-disable */
 
-import exportValaaPlugin from "~/tools/exportValaaPlugin";
+import Valaa from "~/tools/Valaa";
 
 import ContentAPI from "./ProphetContentAPI";
 import schemeModules from "./schemeModules";
 
-export default exportValaaPlugin({ name: "@valos/prophet", ContentAPI, schemeModules });
+export default Valaa.exportPlugin({ name: "@valos/prophet", ContentAPI, schemeModules });
 
 export {
                                       ContentAPI,

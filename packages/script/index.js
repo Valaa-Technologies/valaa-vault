@@ -1,11 +1,11 @@
 // @flow
 
-import exportValaaPlugin from "~/tools/exportValaaPlugin";
+import Valaa from "~/tools/Valaa";
 
 import ContentAPI from "./ScriptContentAPI";
 import * as mediaDecoders from "./mediaDecoders";
 
-export default exportValaaPlugin({ name: "@valos/script", ContentAPI, mediaDecoders });
+export default Valaa.exportPlugin({ name: "@valos/script", ContentAPI, mediaDecoders });
 
 
 export {

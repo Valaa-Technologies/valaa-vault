@@ -4,6 +4,13 @@ import "@babel/polyfill";
 
 import { Map as ImmutableMap } from "immutable";
 
+import * as valosRaem from "~/raem";
+import * as valosTools from "~/tools";
+import * as valosScript from "~/script";
+import * as valosProphet from "~/prophet";
+import * as valosEngine from "~/engine";
+import * as valosInspire from "~/inspire";
+
 import { createPartitionURI } from "~/raem/ValaaURI";
 import createRootReducer from "~/raem/tools/createRootReducer";
 import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent";
@@ -11,7 +18,6 @@ import createProcessCommandIdMiddleware from "~/raem/redux/middleware/processCom
 import { createBardMiddleware } from "~/raem/redux/Bard";
 import Corpus from "~/raem/Corpus";
 
-import { AuthorityNexus, FalseProphet, Oracle, Prophet, Scribe } from "~/prophet";
 import upgradeEventTo0Dot2 from "~/prophet/tools/event-version-0.2/upgradeEventTo0Dot2";
 
 import ValaaEngine from "~/engine/ValaaEngine";
@@ -25,7 +31,9 @@ import type { Revelation } from "~/inspire/Revelation";
 import extendValaaSpaceWithInspire from "~/inspire/ValaaSpace";
 
 import { arrayBufferFromBase64 } from "~/tools/base64";
-import { dumpObject, invariantify, LogEventGenerator } from "~/tools";
+
+const { AuthorityNexus, FalseProphet, Oracle, Prophet, Scribe } = valosProphet;
+const { dumpObject, inBrowser, invariantify, LogEventGenerator } = valosTools;
 
 const EVENT_VERSION = process.env.EVENT_VERSION || "0.2";
 
@@ -38,7 +46,74 @@ export default class InspireGateway extends LogEventGenerator {
 
   callRevelation (Type: Function | any) {
     if (typeof Type !== "function") return Type;
-    return new Type({ logger: this.getLogger() });
+    return new Type({ gateway: this, logger: this.getLogger() });
+  }
+
+  static moduleMatcherString = "^((@[^@/]+\\/)?([^/]+))(\\/(.*))?$";
+  static moduleMatcher = new RegExp(InspireGateway.moduleMatcherString);
+
+  /**
+   * Valaa.gateway.require is the entry point for ValOS fabric library
+   * imports from inside plugins.
+   *
+   * @param {string} module
+   * @returns
+   * @memberof InspireGateway
+   */
+  require (module: string) {
+    // TODO(iridian, 2018-12): fabric library version semver compatibility checking against plugin
+    //                package.json dependencies
+    // TODO(iridian, 2018-12): plugin-sourced library registration system for webpack environments
+    // TODO(iridian, 2018-12): correlate require semantics with import semantics
+    // TODO(iridian, 2018-12): evaluate making require contents available as the default require
+    //                         from within ValaaSpace
+
+    // TODO(iridian): This issues a webpack warning but is not an
+    // actual fault; require will never be called in webpack context
+    // where inBrowser always returns true.
+    // Webpack unfortunately doesn't offer a convenient way to suppress
+    // individual lines to silence warnings. Although it probably would
+    // be the correct solution would be to have this structurally
+    // abstracted in a @valos/platform-dependent-tools or similar
+    // (also contain the inBrowser code) with inherently different
+    // paths for various platform-specific functionalities like the
+    // require here.
+    if (!inBrowser()) return require(module);
+
+    const parts = InspireGateway.moduleMatcher.exec(module);
+    if (!parts) {
+      throw new Error(`Invalid Valaa.require module: "${module
+          }" doesn't match regex /${InspireGateway.moduleMatcherString}/)`);
+    }
+    const scope = parts[2];
+    const library = parts[3];
+    const subPath = parts[4];
+    let ret;
+    if (scope === "@valos/") {
+      // Each of these must be explicitly require'd, so that
+      // 1. webpack knows to pack the library sources to the bundle
+      // 2. the require is still only performed when actually needed as
+      //    not all ValOS sub-modules need to be loaded at startup.
+      // TODO(iridian, 2018-12):
+      //    The above point 2. is a bit moot as there are a lot of
+      //    top-level library index.js imports in ValOS libs; all the
+      //    library content is imported via their index.js anyway.
+      //    When timing is right all the ValOS internal imports should
+      //    be replaced with most specific imports possible.
+      if (library === "engine") ret = valosEngine;
+      else if (library === "inspire") ret = valosInspire;
+      else if (library === "prophet") ret = valosProphet;
+      else if (library === "raem") ret = valosRaem;
+      else if (library === "script") ret = valosScript;
+      else if (library === "tools") ret = valosTools;
+      else throw new Error(`Unrecognized Valaa.require @valos library: '${library}'`);
+    } else if (scope) throw new Error(`Unrecognized Valaa.require scope: '${scope}'`);
+    else throw new Error(`Unrecognized Valaa.require library: '${library}'`);
+    if (subPath) {
+      throw new Error(`Unsupported Valaa.require sub-path: "${subPath
+          }" (only top level library require's supported for now)`);
+    }
+    return ret;
   }
 
   async initialize (revelation: Revelation) {
@@ -141,7 +216,6 @@ export default class InspireGateway extends LogEventGenerator {
     }
     return ret;
   }
-
 
   /**
    * Processes the landing page and extracts the revelation from it.

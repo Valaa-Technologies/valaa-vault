@@ -10,9 +10,7 @@ import { combineRevelationsLazily } from "~/inspire/Revelation";
 
 import revelationTemplate from "~/inspire/revelation.template";
 
-import {
-  exportValaaPlugin, dumpObject, getGlobal, Logger, LogEventGenerator, outputError, inBrowser
-} from "~/tools";
+import { dumpObject, Logger, LogEventGenerator, outputError, inBrowser, Valaa } from "~/tools";
 
 import * as mediaDecoders from "./mediaDecoders";
 
@@ -22,10 +20,10 @@ if (inBrowser()) {
 
 const logger = new Logger();
 
-const Valaa = getGlobal().Valaa || (getGlobal().Valaa = {});
-
+// TODO(iridian, 2018-12): Oof... this should be moved to @valos/raem
+// plugin initializer. This requires plugin initializers though which
+// don't exist.
 Valaa.getURIQueryField = getURIQueryField;
-
 
 Valaa.createInspireGateway = function createInspireGateway (...revelations: any[]) {
   const inspireBrowserEnvironmentRevelation = {
@@ -47,10 +45,10 @@ export default (Valaa.createGateway = async function createGateway (gatewayOptio
   let combinedRevelation;
   const delayedPlugins = [];
   try {
-    exportValaaPlugin({ name: "@valos/inspire", mediaDecoders });
+    Valaa.exportPlugin({ name: "@valos/inspire", mediaDecoders });
     if (Valaa.gateway) {
-      throw new Error(`Valaa.gateway already exists (${
-          Valaa.gateway.debugId()}). There can be only one.`);
+      throw new Error(`Valaa.gateway already exists as ${
+          Valaa.gateway.debugId()}. There can be only one.`);
     }
 
     const gatewayPluginsRevelation = { gateway: { plugins: Valaa.plugins } };
@@ -58,6 +56,8 @@ export default (Valaa.createGateway = async function createGateway (gatewayOptio
     Valaa.plugins = { push (plugin) { delayedPlugins.push(plugin); } };
 
     ret = new InspireGateway({ name: "Uninitialized InspireGateway", logger, ...gatewayOptions });
+    Valaa.require = ret.require.bind(ret);
+
     ret.warnEvent(`Initializing in environment (${
         String(process.env.NODE_ENV)}) by combining`,
             ...([].concat(...revelations.map(dumpObject))),

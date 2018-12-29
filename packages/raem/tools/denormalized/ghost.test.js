@@ -2,7 +2,8 @@ import { created, fieldsSet } from "~/raem/events";
 import VALK from "~/raem/VALK";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
-import { VRef, vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import GhostPath from "~/raem/state/GhostPath";
 import { createTransient } from "~/raem/state/Transient";

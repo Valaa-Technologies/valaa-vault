@@ -2,7 +2,8 @@
 
 import { OrderedSet } from "immutable";
 
-import ValaaReference, { VRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
+import ValaaReference, { tryCoupledFieldFrom } from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import { getObjectRawField } from "~/raem/state/getObjectField";
 import GhostPath, { createGhostRawId, GhostElevation } from "~/raem/state/GhostPath";

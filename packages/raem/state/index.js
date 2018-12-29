@@ -6,12 +6,13 @@
  *
  * Specifically excludes events and mutation.
  */
-export { default as FieldInfo, tryElevateFieldValue } from "./FieldInfo";
+export { tryElevateFieldValue } from "./FieldInfo";
+export type { FieldInfo } from "./FieldInfo";
 
 export { default as GhostPath } from "./GhostPath";
 
 export { default as Resolver } from "./Resolver";
 
-export { State } from "./State";
+export type { State } from "./State";
 
 export { default as Transient } from "./Transient";

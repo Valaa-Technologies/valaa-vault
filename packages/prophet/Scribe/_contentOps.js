@@ -1,7 +1,8 @@
 // @flow
 
 import { isCreatedLike } from "~/raem/events";
-import { VRef, getRawIdFrom } from "~/raem/ValaaReference";
+import { getRawIdFrom } from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import { MediaInfo, RetrieveMediaBuffer } from "~/prophet/api/types";
 

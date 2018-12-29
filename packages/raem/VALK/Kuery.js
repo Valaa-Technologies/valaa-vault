@@ -1,4 +1,5 @@
-import { vRef, VRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import beaumpify from "~/tools/beaumpify";
 import dumpify from "~/tools/dumpify";

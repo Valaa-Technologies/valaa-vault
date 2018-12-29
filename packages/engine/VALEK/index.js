@@ -27,9 +27,7 @@ export {
 
 export {
   Valker,
-  kueryHash,
   run,
-  VALKOptions,
   dumpScope,
   dumpKuery,
   isValaaFunction,

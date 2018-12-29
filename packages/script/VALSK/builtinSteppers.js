@@ -2,16 +2,15 @@
 
 import { dumpKuery, dumpObject, Valker } from "~/raem/VALK";
 import raemBuiltinSteppers, {
-  tryLiteral, tryFullLiteral, tryUnpackLiteral, isHostRef, resolveTypeof, BuiltinStep,
+  tryLiteral, tryFullLiteral, tryUnpackLiteral, isHostRef, resolveTypeof,
 } from "~/raem/VALK/builtinSteppers";
+import type { BuiltinStep } from "~/raem/VALK/builtinSteppers"; // eslint-disable-line no-duplicate-imports
 
 import isSymbol from "~/tools/isSymbol";
 
 import { createNativeIdentifier, isNativeIdentifier, getNativeIdentifierValue,
   setNativeIdentifierValue,
 } from "~/script/denormalized/nativeIdentifier";
-
-export { BuiltinStep };
 
 export default Object.freeze({
   ...raemBuiltinSteppers,

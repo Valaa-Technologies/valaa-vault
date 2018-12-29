@@ -1,8 +1,5 @@
 // @flow
 
-import Kuery from "./Kuery";
-import Valker, { run, VALKOptions } from "./Valker";
-
 /**
  * VALK = VAlaa Language for Kuerying.
  * Collection of top-level chainable kuery operations.
@@ -15,21 +12,21 @@ import Valker, { run, VALKOptions } from "./Valker";
  */
 export default from "./VALK";
 
-export {
-  Kuery,
-  Valker,
-  run,
-  VALKOptions,
-};
+export { default as Kuery } from "./Kuery";
+export { default as Valker, run } from "./Valker";
+export type { VALKOptions } from "./Valker";
+
 export {
   default as builtinSteppers,
-  BuiltinStep,
   isValaaFunction,
   toVAKON,
   denoteValaaBuiltin,
   denoteValaaBuiltinWithSignature,
   denoteDeprecatedValaaBuiltin,
   denoteValaaKueryFunction,
+} from "./builtinSteppers";
+export type {
+  BuiltinStep,
 } from "./builtinSteppers";
 export {
   dumpObject,
@@ -45,6 +42,3 @@ export {
 export {
   SourceInfoTag,
 } from "./StackTrace";
-export {
-  kueryHash
-} from "./kueryHash";

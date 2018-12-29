@@ -2,7 +2,8 @@
 import { OrderedMap } from "immutable";
 import { GraphQLObjectType } from "graphql/type";
 
-import { VRef, RawId, tryGhostPathFrom } from "~/raem/ValaaReference";
+import { RawId, tryGhostPathFrom } from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import denormalizedFromJS from "~/raem/state/denormalizedFromJS";
 import Transient, { createTransient } from "~/raem/state/Transient";

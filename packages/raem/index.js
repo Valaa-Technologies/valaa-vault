@@ -11,9 +11,11 @@ export {
                                       ContentAPI,
                         ContentAPI as RAEMContentAPI,
 };
-export {
+export type {
                                       Passage,
                                       Story,
+} from "./redux/Bard";
+export {
                                       getActionFromPassage,
 } from "./redux/Bard";
 export {
@@ -27,8 +29,10 @@ export {
 } from "./events/Action";
 export {
                            default as ValaaReference,
-                                      VRef,
                                       vRef,
+} from "./ValaaReference";
+export type {
+  VRef,
 } from "./ValaaReference";
 export {
                            default as ValaaURI,
@@ -37,6 +41,9 @@ export {
 export {
                            default as VALK
 } from "./VALK/VALK";
+export type {
+                                      VALKOptions
+} from "./VALK/Valker";
 export {
                            default as Valker,
                                       run,

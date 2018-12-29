@@ -1,7 +1,8 @@
 // @flow
 
 import Action, { validateActionBase } from "~/raem/events/Action";
-import { VRef, invariantifyId, invariantifyTypeName } from "~/raem/ValaaReference";
+import { invariantifyId, invariantifyTypeName } from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import { invariantifyObject, invariantifyArray } from "~/tools/invariantify";
 

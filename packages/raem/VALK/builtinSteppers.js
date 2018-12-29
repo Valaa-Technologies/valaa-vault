@@ -2,7 +2,8 @@
 
 import { Iterable } from "immutable";
 
-import ValaaReference, { VRef } from "~/raem/ValaaReference";
+import ValaaReference from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import { PrototypeOfImmaterialTag } from "~/raem/state/Transient";

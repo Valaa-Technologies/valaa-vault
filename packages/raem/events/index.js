@@ -106,11 +106,11 @@ import resourceRecombined, * as r from "./recombined";
 import resourceTimed, * as td from "./timed";
 import resourceTransacted, * as t from "./transacted";
 
-import Action, { Command, Truth, EventBase, UniversalEvent } from "./Action";
+import Action, { Command, Truth, EventBase } from "./Action";
 
 export const VERSION = "0.2";
 
-export { Action, Command, Truth, EventBase, UniversalEvent };
+export { Action, Command, Truth, EventBase };
 
 export const CREATED = c.CREATED;
 export const DESTROYED = d.DESTROYED;

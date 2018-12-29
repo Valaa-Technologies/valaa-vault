@@ -4,7 +4,7 @@ import { Valker, denoteValaaBuiltinWithSignature, denoteDeprecatedValaaBuiltin,
   denoteValaaKueryFunction,
 } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
-import { VRef } from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
 
 import { BuiltinTypePrototype, createNativeIdentifier, ValaaPrimitiveTag } from "~/script";

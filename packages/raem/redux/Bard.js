@@ -7,8 +7,8 @@ import { Action } from "~/raem/events";
 
 import ValaaReference from "~/raem/ValaaReference";
 
-import { Resolver, State } from "~/raem/state";
-import type { FieldInfo } from "~/raem/state/FieldInfo";
+import { Resolver } from "~/raem/state";
+import type { FieldInfo, State } from "~/raem/state"; // eslint-disable-line no-duplicate-imports
 import Transient, { getTransientTypeName } from "~/raem/state/Transient";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 

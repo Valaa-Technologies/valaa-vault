@@ -1,4 +1,6 @@
-import { VRef } from "~/raem/ValaaReference";
+// @flow
+
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import Bard, { getActionFromPassage } from "~/raem/redux/Bard";
 import { tryHostRef } from "~/raem/VALK/hostReference";

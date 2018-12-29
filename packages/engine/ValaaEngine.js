@@ -1,9 +1,9 @@
 // @flow
 
 import { Iterable } from "immutable";
-import type { Passage, Story } from "~/raem";
+import type { Passage, Story, VALKOptions } from "~/raem";
 
-import VALEK, { Kuery, VALKOptions, dumpObject, rootScopeSelf,
+import VALEK, { Kuery, dumpObject, rootScopeSelf,
   builtinSteppers as engineBuiltinSteppers,
 } from "~/engine/VALEK";
 

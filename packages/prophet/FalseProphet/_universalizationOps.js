@@ -2,7 +2,8 @@
 
 import { Action, EventBase } from "~/raem/events";
 import ValaaURI, { createValaaURI } from "~/raem/ValaaURI";
-import ValaaReference, { VRef, vRef, JSONIdData } from "~/raem/ValaaReference";
+import ValaaReference, { vRef, JSONIdData } from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import GhostPath, { ghostPathFromJSON } from "~/raem/state/GhostPath";
 
 import { initializeAspects } from "~/prophet/tools/EventAspects";

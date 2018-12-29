@@ -1,7 +1,8 @@
 // @flow
 import { OrderedMap } from "immutable";
 
-import ValaaReference, { VRef, RawId, vRef } from "~/raem/ValaaReference";
+import ValaaReference, { RawId, vRef } from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import type GhostPath from "~/raem/state/GhostPath";
 
 import invariantify, { invariantifyObject } from "~/tools/invariantify";

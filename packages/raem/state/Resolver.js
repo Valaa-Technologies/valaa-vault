@@ -2,15 +2,14 @@
 
 import { GraphQLSchema } from "graphql/type";
 
-import ValaaReference, { VRef, vRef, obtainVRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
-import type { JSONIdData, IdData, RawId } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import ValaaReference, { vRef, obtainVRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
+import type { JSONIdData, IdData, RawId, VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import type ValaaURI from "~/raem/ValaaURI";
 
 import GhostPath from "~/raem/state/GhostPath";
 import Transient, { createImmaterialTransient, createInactiveTransient }
     from "~/raem/state/Transient";
-import type { State } from "~/raem/state/State";
-import type { FieldInfo } from "~/raem/state/FieldInfo";
+import type { FieldInfo, State } from "~/raem/state";
 
 import { tryHostRef } from "~/raem/VALK/hostReference";
 

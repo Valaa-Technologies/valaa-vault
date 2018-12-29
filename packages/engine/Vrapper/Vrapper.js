@@ -3,18 +3,21 @@
 import { GraphQLObjectType, isAbstractType } from "graphql/type";
 import { Iterable } from "immutable";
 
-import VALK, { VALKOptions, packedSingular } from "~/raem/VALK";
+import VALK, { packedSingular } from "~/raem/VALK";
+import type { VALKOptions } from "~/raem/VALK"; // eslint-disable-line no-duplicate-imports
 import type { Passage, Story } from "~/raem/redux/Bard";
 import { getHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 
 import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "~/raem/events";
-import ValaaReference, { VRef, vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom }
+import ValaaReference, { vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom }
     from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
 
-import { State, Transient } from "~/raem/state";
+import { Transient } from "~/raem/state";
+import type { State } from "~/raem/state"; // eslint-disable-line no-duplicate-imports
 import { tryElevateFieldValue } from "~/raem/state/FieldInfo";
 import { getObjectRawField } from "~/raem/state/getObjectField";
 

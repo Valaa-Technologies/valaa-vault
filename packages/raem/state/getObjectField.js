@@ -2,7 +2,8 @@
 
 import { GraphQLObjectType } from "graphql/type";
 
-import ValaaReference, { VRef } from "~/raem/ValaaReference";
+import ValaaReference from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import { FieldInfo, elevateFieldReference, elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import Resolver from "~/raem/state/Resolver";

@@ -14,9 +14,7 @@ export default new ValaaScriptKuery();
 
 export {
   Valker,
-  kueryHash,
   run,
-  VALKOptions,
   dumpScope,
   dumpKuery,
   dumpObject,

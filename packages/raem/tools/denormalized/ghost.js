@@ -64,7 +64,9 @@
 import { Action, created, destroyed, transacted } from "~/raem/events";
 import ValaaReference, { vRef } from "~/raem/ValaaReference";
 import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
-import { GhostPath, Resolver, State, Transient } from "~/raem/state";
+import { GhostPath, Resolver } from "~/raem/state";
+import type { State, Transient } from "~/raem/state"; // eslint-disable-line no-duplicate-imports
+
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
 import { dumpify, dumpObject, invariantify, invariantifyObject, wrapError } from "~/tools";

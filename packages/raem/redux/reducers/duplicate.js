@@ -1,6 +1,7 @@
 import { OrderedSet } from "immutable";
 
-import { VRef, vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/ValaaReference";
+import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import Transient, { createTransient, getTransientTypeName, PrototypeOfImmaterialTag }
     from "~/raem/state/Transient";

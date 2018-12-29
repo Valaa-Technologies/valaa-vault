@@ -1,6 +1,7 @@
 // @flow
 
-import { Valker, BuiltinStep } from "~/raem/VALK";
+import { Valker } from "~/raem/VALK";
+import type { BuiltinStep } from "~/raem/VALK"; // eslint-disable-line no-duplicate-imports
 import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
 
 import { tryLiteral, /* tryFullLiteral,*/ tryUnpackLiteral }

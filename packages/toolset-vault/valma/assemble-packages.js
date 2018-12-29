@@ -126,7 +126,8 @@ exports.handler = async (yargv) => {
     const ret = {
       name, sourceDirectory, packagePath, packageConfig, targetDirectory, sourcePackageJSONPath,
     };
-    if (!yargv.allowUnchanged && !updatedPackageNames.includes(name)) return undefined;
+    if (!(yargv.allowUnchanged || yargv.onlyPending)
+        && !updatedPackageNames.includes(name)) return undefined;
     if (!requestGlobs.find(glob => vlm.minimatch(name, glob))) return undefined;
     if (vlm.shell.test("-d", targetDirectory)) {
       ret.exists = true;

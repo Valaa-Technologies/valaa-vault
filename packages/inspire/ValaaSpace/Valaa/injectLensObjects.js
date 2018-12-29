@@ -197,11 +197,11 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
                 Clear
               </button>
             </p>
-            {!component.state.errorHidden
-                ? <pre style={{ fontFamily: "monospace" }}>{
-                    `${messageFromError(failure)}`
-                  }</pre>
-                : null}
+            {component.state.errorHidden ? null : (
+              <pre style={{ fontFamily: "monospace" }}>
+                {messageFromError(failure)}
+              </pre>
+            )}
           </div>
         );
       }
@@ -669,9 +669,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     </div>,
     <div {..._component}>
       <span {..._key}>Containing component:</span>
-      <span {..._value}>{
-        Valaa.Lens.instrument(Valaa.Lens.parentComponentLens, Valaa.Lens.focusDetailLens)
-      }</span>
+      <span {..._value}>
+        {Valaa.Lens.instrument(Valaa.Lens.parentComponentLens, Valaa.Lens.focusDetailLens)}
+      </span>
     </div>,
   ];
 
@@ -926,15 +926,15 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
           </div>
           <div {..._parameters}>
             <span {..._key}>focusLensProperty:</span>
-            <span {..._value}>{
-              Valaa.Lens.instrument(Valaa.Lens.focusLensProperty, p => JSON.stringify(p))
-            }</span>
+            <span {..._value}>
+              {Valaa.Lens.instrument(Valaa.Lens.focusLensProperty, p => JSON.stringify(p))}
+            </span>
           </div>
           <div {..._parameters}>
             <span {..._key}>lensProperty:</span>
-            <span {..._value}>{
-              Valaa.Lens.instrument(Valaa.Lens.lensProperty, p => JSON.stringify(p))
-            }</span>
+            <span {..._value}>
+              {Valaa.Lens.instrument(Valaa.Lens.lensProperty, p => JSON.stringify(p))}
+            </span>
           </div>
           <div {..._parameters}>
             <span {..._key}>Focus detail:</span>
@@ -942,9 +942,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
           </div>
           <div {..._parameters}>
             <span {..._key}>Focus properties:</span>
-            <span {..._value}>{
-              Valaa.Lens.instrument(Valaa.Lens.propertyKeysLens, p => JSON.stringify(p))
-            }</span>
+            <span {..._value}>
+              {Valaa.Lens.instrument(Valaa.Lens.propertyKeysLens, p => JSON.stringify(p))}
+            </span>
           </div>
           {commonMessageRows}
         </div>
@@ -967,15 +967,15 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
           </div>
           <div {..._parameters}>
             <span {..._key}>delegateLensProperty:</span>
-            <span {..._value}>{
-              Valaa.Lens.instrument(Valaa.Lens.delegateLensProperty, p => JSON.stringify(p))
-            }</span>
+            <span {..._value}>
+              {Valaa.Lens.instrument(Valaa.Lens.delegateLensProperty, p => JSON.stringify(p))}
+            </span>
           </div>
           <div {..._parameters}>
             <span {..._key}>lensProperty:</span>
-            <span {..._value}>{
-              Valaa.Lens.instrument(Valaa.Lens.lensProperty, p => JSON.stringify(p))
-            }</span>
+            <span {..._value}>
+              {Valaa.Lens.instrument(Valaa.Lens.lensProperty, p => JSON.stringify(p))}
+            </span>
           </div>
           <div {..._parameters}>
             <span {..._key}>Resource detail:</span>
@@ -983,9 +983,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
           </div>
           <div {..._parameters}>
             <span {..._key}>Resource properties:</span>
-            <span {..._value}>{
-              Valaa.Lens.instrument(Valaa.Lens.propertyKeysLens, p => JSON.stringify(p))
-            }</span>
+            <span {..._value}>
+              {Valaa.Lens.instrument(Valaa.Lens.propertyKeysLens, p => JSON.stringify(p))}
+            </span>
           </div>
           {commonMessageRows}
         </div>

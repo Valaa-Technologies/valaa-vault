@@ -11,8 +11,8 @@ import Vrapper from "~/engine/Vrapper";
 
 import { dumpObject, wrapError } from "~/tools";
 
-@Presentable(require("./presentation").default, "LinkFieldEditor")
-export default class LinkFieldEditor extends UIComponent {
+export default @Presentable(require("./presentation").default, "LinkFieldEditor")
+class LinkFieldEditor extends UIComponent {
   static propTypes = {
     ...FieldEditor.propTypes,
     fieldName: PropTypes.string,
@@ -187,6 +187,7 @@ export default class LinkFieldEditor extends UIComponent {
   }
 
   getDataListOptions () {
+    // eslint-disable-next-line react/no-array-index-key
     return this.entryList.map((entry, index) => <option key={index} value={entry} />);
   }
 

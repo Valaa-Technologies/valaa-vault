@@ -443,7 +443,8 @@ function _createSingularDataDeserializer (fieldInfo) {
       if (typeof data === "string") {
         return bard.bindObjectRawId(data, concreteTypeName || "Data",
             bard.rootAction.local.partitionURI || null);
-      } else if (Object.getPrototypeOf(data) !== Object.prototype) {
+      }
+      if (Object.getPrototypeOf(data) !== Object.prototype) {
         return bard.bindObjectIdData(data, concreteTypeName || "Data",
             bard.rootAction.local.partitionURI || null);
       }

@@ -56,4 +56,3 @@ export default class VSXDecoder extends JSXDecoder {
     }
   }
 }
-

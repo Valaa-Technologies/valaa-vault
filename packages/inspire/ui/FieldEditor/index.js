@@ -8,8 +8,8 @@ import VALEK from "~/engine/VALEK";
 
 import wrapError from "~/tools/wrapError";
 
-@Presentable(require("./presentation").default, "FieldEditor")
-export default class FieldEditor extends UIComponent {
+export default @Presentable(require("./presentation").default, "FieldEditor")
+class FieldEditor extends UIComponent {
   static propTypes = {
     ...UIComponent.propTypes,
     fieldName: PropTypes.string

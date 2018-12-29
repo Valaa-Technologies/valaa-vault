@@ -75,7 +75,7 @@ describe("contentId module", () => {
           return contentIdFromNativeStream(stream).then(hash => {
             expect(hash).toEqual(tf.hash);
           });
-        }, Math.pow(2, 31) - 1); // last param is maximum timeout for jasmine, Infinity doesnt work
+        }, (2 ** 31) - 1); // last param is maximum timeout for jasmine, Infinity doesnt work
       }
     }
   });

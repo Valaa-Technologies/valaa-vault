@@ -17,9 +17,9 @@ import type UIComponent from "./UIComponent";
  * @returns
  */
 export default function LENS (lookupLensNames: string[], ...directLenses: any[]) {
-  return function (scope: any, component: UIComponent) {
+  return function lens (scope: any, component: UIComponent) {
     console.error("DEPRECATED: LENS`", lookupLensNames.join("..."), "`",
-          "\n\tprefer: lens role symbols in Valaa.Lens.*");
+        "\n\tprefer: lens role symbols in Valaa.Lens.*");
     for (let i = 0; i !== lookupLensNames.length; ++i) {
       try {
         const lookedUpLens = lookupLensNames[i] && component.tryRenderLensRole(lookupLensNames[i]);

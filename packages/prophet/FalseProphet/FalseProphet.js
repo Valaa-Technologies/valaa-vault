@@ -3,7 +3,7 @@
 import { Command, EventBase } from "~/raem/events";
 import type { Story } from "~/raem/redux/Bard";
 import type { State } from "~/raem/state";
-import type { VRef } from "~/raem/ValaaReference";
+import type { JSONIdData, VRef } from "~/raem/ValaaReference";
 
 import Follower from "~/prophet/api/Follower";
 import Prophet from "~/prophet/api/Prophet";
@@ -21,7 +21,7 @@ import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 import { Prophecy, _chronicleEvents } from "./_prophecyOps";
 import { _composeStoryFromEvent, _reviseSchismaticRecital, _tellStoriesToFollowers }
     from "./_storyOps";
-import { JSONIdData, deserializeVRef } from "./_universalizationOps";
+import { deserializeVRef } from "./_universalizationOps";
 import StoryRecital from "./StoryRecital";
 
 type FalseProphetChronicleOptions = ChronicleOptions & {
@@ -49,7 +49,6 @@ type FalseProphetChronicleOptions = ChronicleOptions & {
  * @valos/raem/redux/Bard and the reducers contained within the corpus.
  */
 export default class FalseProphet extends Prophet {
-
   static PartitionConnectionType = FalseProphetPartitionConnection;
 
   _totalCommandCount: number;

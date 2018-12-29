@@ -3,6 +3,9 @@
 module.exports = {
   "parser": "babel-eslint",
   "extends": "airbnb", // See major exceptions below.
+  "parserOptions": {
+    "ecmaVersion": 2018,
+  },
   "env": {
     "browser": true,
     "node": true,
@@ -17,14 +20,14 @@ module.exports = {
     "beforeEach": false,
     "xit": false,
   },
-  "ecmaFeatures": {
-    "modules": true,
-  },
   "plugins": [
     "flowtype",
   ],
   "settings": {
     "import/resolver": "babel-plugin-root-import",
+    "flowtype": {
+      "onlyFilesWithFlowAnnotation": true,
+    },
   },
   "rules": {
     // ## Major exceptions to AirBnB style
@@ -83,7 +86,26 @@ module.exports = {
 
     // ## Warning directives
 
-    "complexity": ["warn", 30],
+    "complexity": ["warn", 40],
     "no-warning-comments": ["warn", { "terms": ["fixme"], "location": "anywhere" }],
+
+    // ## 2018-12 Migration from eslint 3 to 5+ made several options stricter and
+    // introduced a lot of new ones. Disable most and review later.
+    indent: "off",
+    // "indent-legacy": "error",
+    "object-curly-newline": 0,
+    "no-await-in-loop": 0,
+    "implicit-arrow-linebreak": 0,
+    "no-return-assign": 0,
+    "operator-linebreak": 0,
+    "lines-between-class-members": 0,
+    "prefer-destructuring": 0,
+    "function-paren-newline": 0,
+    "no-restricted-syntax": 0,
+    "no-restricted-globals": 0,
+    "no-multi-assign": 0, // An idiom where a lookup structure entry is set to a value and where
+                          // a local variable is initialized at the same time is common in the
+                          // codebase and feels more natural and readable using multi-assign
+    "no-multi-spaces": 0, // Occasional comment left-alignment necessitates left-pad multi-spaces
   },
 };

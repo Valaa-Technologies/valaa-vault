@@ -10,7 +10,6 @@ import type { ChronicleOptions, ChronicleRequest, ChronicleEventResult } from ".
  * Interface for events flowing downstream
  */
 export default class Follower extends LogEventGenerator {
-
   /**
    * receiveTruths - receive truth events coming from the upstream
    *

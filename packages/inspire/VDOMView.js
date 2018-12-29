@@ -49,11 +49,13 @@ export default class VDOMView extends Cog {
     this._rootElement = window.document.createElement("DIV");
     this._rootElement.setAttribute("id", rootId);
     container.appendChild(this._rootElement);
-    this._reactRoot = (<ReactRoot
-      viewName={viewName}
-      vViewFocus={vViewFocus}
-      lensProperty={["ROOT_LENS", "LENS", "EDITOR_LENS"]}
-    />);
+    this._reactRoot = (
+      <ReactRoot
+        viewName={viewName}
+        vViewFocus={vViewFocus}
+        lensProperty={["ROOT_LENS", "LENS", "EDITOR_LENS"]}
+      />
+    );
     return new Promise(onDone => {
       ReactDOM.render(this._reactRoot, this._rootElement, onDone);
     });

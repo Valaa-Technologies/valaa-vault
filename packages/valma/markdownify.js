@@ -503,7 +503,7 @@ function _renderTable (rowKeys, rowLookup, columns, layout, tableTheme) {
     }
   }
   // TODO: render pending headers if table is empty?
-  columnKeyLayouts.forEach(([columnKey, columnLayout], columnIndex) => {
+  columnKeyLayouts.forEach(([, columnLayout], columnIndex) => {
     columnLayout.width = Math.max(...rows.map(
         row => ((Array.isArray(row && row[0]) && row[columnIndex][0]) || "").length));
   });

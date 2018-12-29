@@ -10,8 +10,6 @@ import Vrapper from "~/engine/Vrapper";
 
 import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
 
-import { dumpify } from "~/tools";
-
 const transactionA = {
   type: "TRANSACTED",
   actions: [

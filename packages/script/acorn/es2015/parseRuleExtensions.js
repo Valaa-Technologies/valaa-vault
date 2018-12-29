@@ -299,7 +299,7 @@ export interface ModuleSpecifier extends Node { local: es5.Identifier; }
 export function parseModuleSpecifier (transpiler: Transpiler, ast: ModuleSpecifier,
   options: Object): Kuery {
   console.log(ast);
-}*/
+} */
 
 // Imports
 
@@ -322,7 +322,8 @@ export function parseImportDeclaration (transpiler: Transpiler, ast: ExportNamed
         },
         property: { type: "Identifier", name: "default" },
       };
-    } else if (specifier.type === "ImportSpecifier") {
+    }
+    if (specifier.type === "ImportSpecifier") {
       return {
         type: "MemberExpression",
         object: {
@@ -332,7 +333,8 @@ export function parseImportDeclaration (transpiler: Transpiler, ast: ExportNamed
         },
         property: specifier.imported,
       };
-    } else if (specifier.type === "ImportNamespaceSpecifier") {
+    }
+    if (specifier.type === "ImportNamespaceSpecifier") {
       return {
         type: "CallExpression",
         callee: { type: "Identifier", name: "require" },

@@ -110,8 +110,8 @@ function _clipFrameListToCurrentContext (innerError, dummySliceLineCount) {
   const outerStack = (new Error("dummy")).stack;
   if (!outerStack) return innerTraceList;
   const outerTraceList = outerStack.split("\n").slice(dummySliceLineCount);
-  for (let i = Math.max(0, innerTraceList.length - outerTraceList.length)
-      ; i < innerTraceList.length; i += 1) {
+  for (let i = Math.max(0, innerTraceList.length - outerTraceList.length);
+      i < innerTraceList.length; i += 1) {
     let j = 0;
     while (i + j < innerTraceList.length && j < outerTraceList.length
         && innerTraceList[i + j] === outerTraceList[j]) ++j;

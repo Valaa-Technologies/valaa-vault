@@ -23,6 +23,7 @@ import Motor from "~/engine/Motor";
 import Vrapper from "~/engine/Vrapper";
 import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
+import type FieldUpdate from "~/engine/Vrapper/FieldUpdate";
 
 import { dumpify, outputCollapsedError, wrapError } from "~/tools";
 

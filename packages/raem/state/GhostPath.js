@@ -53,7 +53,6 @@ const hostPrototypeRawIdKey = Symbol("GhostPath.hostPrototypeRawIdKey");
  *   ghostHostPrototypeId -> [ghostId, ghostHostId]
  */
 export default class GhostPath {
-
   constructor (rootId: RawId) {
     this[""] = [null, rootId];
     this[hostPrototypeRawIdKey] = "";

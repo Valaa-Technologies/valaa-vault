@@ -43,7 +43,6 @@ import {
  * @extends {Prophet}
  */
 export default class Scribe extends Prophet {
-
   static PartitionConnectionType = ScribePartitionConnection;
 
   _sharedDb: IndexedDBWrapper;

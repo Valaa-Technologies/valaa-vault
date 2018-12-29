@@ -12,6 +12,6 @@ export default class CSSDecoder extends MediaDecoder {
 
   decode (buffer: ArrayBuffer): any {
     const source = this.stringFromBuffer(buffer);
-    return css `${source}`;
+    return css`${source}`;
   }
 }

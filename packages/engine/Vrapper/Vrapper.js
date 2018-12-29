@@ -148,7 +148,8 @@ export default class Vrapper extends Cog {
     invariantifyId(id, "Vrapper.constructor.id");
     invariantifyString(typeName, "Vrapper.constructor.typeName");
     super({ engine, name: `Vrapper/${id.rawId()}:${typeName}` });
-    this.vrapperIndex = (Vrapper.vrapperIndex += 1);
+    Vrapper.vrapperIndex += 1;
+    this.vrapperIndex = Vrapper.vrapperIndex;
     this[HostRef] = id;
     this._setTypeName(typeName);
     if (typeName === "Blob" || !this.engine) {
@@ -1558,7 +1559,6 @@ export default class Vrapper extends Cog {
         vInstance.getTransient({ transaction }));
     // TODO(iridian): Verify and return null if this object has no ghost in instance, ie. if this
     // object is not a sub-component in the direct prototype of vInstance
-    if (false) return null;
     return this.engine.getVrapper(ghostVRef, { state });
   }
 

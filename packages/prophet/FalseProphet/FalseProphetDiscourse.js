@@ -1,6 +1,6 @@
 // @flow
 
-import { Action, Command, created, duplicated, destroyed, EventBase } from "~/raem/events";
+import { Command, created, duplicated, destroyed, EventBase } from "~/raem/events";
 import type { Corpus } from "~/raem/Corpus";
 import ValaaURI, { createValaaURI, createPartitionURI } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/ValaaReference";
@@ -73,7 +73,7 @@ export default class FalseProphetDiscourse extends Discourse {
         eventResult.waitOwnReactions = (() => eventResult.getFollowerReactions(this._follower));
         eventResult.getPremiereStory = (async () => {
           await eventResult.waitOwnReactions();
-          return await eventResult.getTruthStory();
+          return eventResult.getTruthStory();
         });
       });
       return ret;
@@ -154,7 +154,7 @@ export default class FalseProphetDiscourse extends Discourse {
         "\n\tresults:", String(targetAction.id), targetAction.id,
         "\n\ttargetAction:", ...dumpObject(targetAction),
         "\n\ttargetAction.initialState:", ...dumpObject(targetAction.initialState));
-    //*/
+    // */
     return targetAction.id;
   }
 

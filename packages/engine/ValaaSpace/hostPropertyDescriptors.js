@@ -2,14 +2,16 @@
 
 /*
  * Note on semantics:
- * 'native' in ValaaScript context has the corresponding semantics to javascript 'native'. It refers
- * to objects which are self-contained in the execution context and can't be directly used to
- * manipulate data outside it. Conversely 'host' refers to objects and operations which can access
- * and/or modify such host and external data. Two most prominent ValaaScript host object categories
- * are Valaa resource proxies (used to manipulate ValaaSpace content) and engine execution context
- * objects (used to access environment like javascript global scope, DOM, execution engine
- * builtin operations, etc.)
-**/
+ * 'native' in ValaaScript context has the corresponding semantics to
+ * javascript 'native'. It refers to objects which are self-contained
+ * in the execution context and can't be directly used to manipulate
+ * data outside it. Conversely 'host' refers to objects and operations
+ * which can access and/or modify such host and external data. Two most
+ * prominent ValaaScript host object categories are Valaa resource
+ * proxies (used to manipulate ValaaSpace content) and engine execution
+ * context objects (used to access environment like javascript global
+ * scope, DOM, execution engine builtin operations, etc.)
+ */
 
 export function createHostPrototypeFieldDescriptor (field: Object) {
   return Object.freeze({

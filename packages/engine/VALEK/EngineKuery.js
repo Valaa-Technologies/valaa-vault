@@ -13,7 +13,6 @@ export function pointer (target: Kuery | Vrapper) {
 export { literal };
 
 export default class EngineKuery extends ValaaScriptKuery {
-
   fromValue (value: any, headType: ?string) {
     if (value instanceof Vrapper) return this.fromObject(value, headType);
     return super.fromValue(value, headType);
@@ -269,4 +268,3 @@ export default class EngineKuery extends ValaaScriptKuery {
         null, fieldNames, options);
   }
 }
-

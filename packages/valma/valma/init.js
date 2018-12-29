@@ -30,7 +30,7 @@ exports.handler = async (yargv) => {
   return await _initPackageJSON()
       && await _selectValaaTypeAndDomain()
       && await _addInitialValmaDevDependencies()
-      && await _configure();
+      && _configure();
 
   async function _initPackageJSON () {
     while (yargv.reconfigure || !vlm.packageConfig) {
@@ -54,7 +54,7 @@ file for yarn (and for npm, for which yarn is an analogue).
 `);
         continue;
       }
-      return await vlm.interact("yarn init", { successResult: true });
+      return vlm.interact("yarn init", { successResult: true });
     }
     vlm.info(`Skipped '${vlm.theme.executable("yarn init")}'.`, ...tellIfNoReconfigure);
     return true;
@@ -157,7 +157,7 @@ for the listings in following phases.
         vlm.speak();
         continue;
       }
-      return await vlm.invoke("configure", { reconfigure: yargv.reconfigure });
+      return vlm.invoke("configure", { reconfigure: yargv.reconfigure });
     }
     vlm.info("Skipped 'vlm configure'.", ...tellIfNoReconfigure);
     return true;

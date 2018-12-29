@@ -8,21 +8,25 @@ import TextFileEditor from "~/inspire/ui/TextFileEditor";
 
 import { mediaTypeFromFilename } from "~/tools/MediaTypeData";
 
-@Presentable(require("./presentation").default, "MediaEditor")
-export default class MediaEditor extends UIComponent {
+export default @Presentable(require("./presentation").default, "MediaEditor")
+class MediaEditor extends UIComponent {
   preRenderFocus (focus: any) {
     const mediaType = focus.get(VALEK.to("mediaType").nullable().select(["type", "subtype"]))
         || mediaTypeFromFilename(focus.get("name"));
     if (!mediaType) return <p>Cannot determine media type for file {`'${focus.get("name")}'`}</p>;
     if (!isTextMediaType(mediaType)) {
-      return (<p>
-        Non-text/unrecognized media type {`${mediaType.type}/${mediaType.subtype}`}
-        for file {`'${focus.get("name")}'`}
-      </p>);
+      return (
+        <p>
+          Non-text/unrecognized media type {`${mediaType.type}/${mediaType.subtype}`}
+          for file {`'${focus.get("name")}'`}
+        </p>
+      );
     }
-    return (<div {...this.presentation("root")}>
-      <TextFileEditor {...this.childProps("textFileEditor")} />
-    </div>);
+    return (
+      <div {...this.presentation("root")}>
+        <TextFileEditor {...this.childProps("textFileEditor")} />
+      </div>
+    );
   }
 }
 

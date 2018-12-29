@@ -34,7 +34,8 @@ export default class ValaaContextMenu extends UIComponent {
           <SubMenu
             title={item.get(VALEK.propertyValue("label"))}
             className={this.props.menuClass}
-            key={index}
+            // TODO(iridian): Legacy code, should remove once no longer needed by zero
+            key={index} // eslint-disable-line react/no-array-index-key
           >
             {this.getItems(item)}
           </SubMenu>
@@ -44,7 +45,7 @@ export default class ValaaContextMenu extends UIComponent {
         <MenuItem
           onClick={this.makeClickCallback(item)}
           attributes={{ className: this.props.itemClass }}
-          key={index}
+          key={index} // eslint-disable-line react/no-array-index-key
         >
           {item.get(VALEK.propertyValue("label"))}
         </MenuItem>

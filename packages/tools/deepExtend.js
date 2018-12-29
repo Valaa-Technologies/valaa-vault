@@ -91,7 +91,7 @@ exports.default = function deepExtend (target /* : Object */, source /* : Array<
   spreaderKey?: string,
   customizer?: Function,
   keyPath?: Array<any>,
-}*/) {
+} */) {
   const stack = options || {};
   stack.extend = extend;
   if (stack.spreaderKey === undefined) stack.spreaderKey = "...";

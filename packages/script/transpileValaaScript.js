@@ -16,14 +16,9 @@ export default function transpileValaaScript (expressionText: string, options: O
   let transpiler = lookup.get(VALK);
   if (!transpiler) {
     transpiler = new ValaaScriptTranspiler(
-        isModule
-            ? es2017module
-            : es2017body
-        , {
-          locations: true,
-          allowReturnOutsideFunction: !isModule,
-          VALK,
-        });
+        isModule ? es2017module : es2017body,
+        { locations: true, allowReturnOutsideFunction: !isModule, VALK, }
+    );
     lookup.set(VALK, transpiler);
   }
   return transpiler.transpileKueryFromText(expressionText, options);

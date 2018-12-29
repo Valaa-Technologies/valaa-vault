@@ -1,7 +1,6 @@
 
 import ContextMenu from "./ContextMenu";
 import ContextMenuTrigger, { DefaultContextMenuTrigger } from "./ContextMenuTrigger";
-// import DraftEditor from "./DraftEditor";
 // import ExpressionFieldEditor from "./ExpressionFieldEditor";
 import ForEach from "./ForEach";
 import If from "./If";
@@ -20,7 +19,6 @@ const Vidgets = {
   ContextMenu,
   ContextMenuTrigger,
   DefaultContextMenuTrigger,
-//  DraftEditor,
 //  ExpressionFieldEditor,
   ForEach,
   If,

@@ -6,8 +6,8 @@ import VALEK from "~/engine/VALEK";
 
 import wrapError from "~/tools/wrapError";
 
-@Presentable(require("./presentation").default, "MediaContentEditor")
-export default class MediaContentEditor extends UIComponent {
+export default @Presentable(require("./presentation").default, "MediaContentEditor")
+class MediaContentEditor extends UIComponent {
   attachSubscribers (focus: any, props: Object) {
     try {
       super.attachSubscribers(focus, props);

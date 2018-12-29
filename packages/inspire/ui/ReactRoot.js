@@ -238,6 +238,7 @@ export default class ReactRoot extends React.Component {
         >
           {this.props.children}
         </ValaaScope>
-      </div>);
+      </div>
+    );
   }
 }

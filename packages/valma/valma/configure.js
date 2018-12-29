@@ -34,6 +34,6 @@ exports.handler = async (yargv) => {
     await vlm.interact("yarn install");
     await vlm.invoke(`.configure/.select-toolsets`, rest);
   }
-  return await vlm.invoke(`.configure/{.domain/.${valaa.domain}/,.type/.${valaa.type}/,}.toolset/${
+  return vlm.invoke(`.configure/{.domain/.${valaa.domain}/,.type/.${valaa.type}/,}.toolset/${
       yargv.toolsetGlob || ""}{*/**/,}*`, rest);
 };

@@ -49,7 +49,6 @@ class TestEventResult extends ChronicleEventResult {
 }
 
 export class TestProphet extends AuthorityProphet {
-
   static PartitionConnectionType = TestPartitionConnection;
 
   addFollower (/* falseProphet */) {

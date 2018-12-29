@@ -483,7 +483,7 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
 
           const twentytwo = entity.scope_plus_b;
           scopeValue.number = 40;
-          const still_22 = entity.scope_plus_b;
+          const still22 = entity.scope_plus_b;
 
           Object.defineProperty(entity, "lots",
               { get: function () { return this.a + entity.a + scopeValue.number; } });
@@ -493,16 +493,16 @@ describe("transpileValaaScriptBody with Engine scriptAPI", () => {
             three: three,
             twelve: twelve,
             twentytwo: twentytwo,
-            still_22: still_22,
+            still22: still22,
             lots: lots,
           });
       `;
       const bodyKuery = transpileValaaScriptTestBody(bodyText);
-      const { three, twelve, twentytwo, still_22, lots } = entities().creator.do(bodyKuery);
+      const { three, twelve, twentytwo, still22, lots } = entities().creator.do(bodyKuery);
       expect(three).toEqual(3);
       expect(twelve).toEqual(12);
       expect(twentytwo).toEqual(22);
-      expect(still_22).toEqual(22);
+      expect(still22).toEqual(22);
       expect(lots).toEqual(60);
     });
 

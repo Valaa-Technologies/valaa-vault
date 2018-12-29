@@ -1,8 +1,8 @@
 // @flow
 
-export const Valaa = require("./Valaa").default;
-
 import * as mediaDecoders from "./mediaDecoders";
+
+export const Valaa = require("./Valaa").default;
 
 export default Valaa.exportPlugin({ name: "@valos/tools", mediaDecoders });
 

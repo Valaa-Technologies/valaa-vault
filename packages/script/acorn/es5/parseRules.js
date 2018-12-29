@@ -39,10 +39,12 @@ export function parseIdentifier (transpiler: Transpiler, ast: Identifier,
         ? transpiler.VALK().createConstIdentifier(options.initializer)
         : transpiler.VALK().createLetIdentifier(options.initializer)
     ]];
-  } else if (options.leftSideRole === "modify") {
+  }
+  if (options.leftSideRole === "modify") {
     return (toValueAlterationVAKON: Kuery) =>
         transpiler.VALK().alterIdentifier(ast.name, toValueAlterationVAKON);
-  } else if (options.leftSideRole === "delete") {
+  }
+  if (options.leftSideRole === "delete") {
     return () => transpiler.VALK().deleteIdentifier(ast.name);
   }
   return transpiler.VALK().identifierValue(ast.name);
@@ -695,7 +697,8 @@ export function parseFunctionHelper (transpiler: Transpiler, ast: FunctionExpres
   return transpiler.VALK().capture(transpiler.VALK().fromValue(captivePath.toVAKON()));
 }
 
-export function scopeSettersFromParamDeclarators (transpiler: Transpiler, { params, defaults, rest }:
+export function scopeSettersFromParamDeclarators (transpiler: Transpiler,
+    { params, /* defaults, */ rest }:
     { params: Pattern[], defaults: ?Expression[], rest: Identifier | null }, options: Object) {
   // TODO(iridian): What is defaults? Not available in es6+ at least?
   const setters = [].concat(...params.map((pattern: Pattern, index: number) =>
@@ -857,7 +860,8 @@ export function parseMemberExpression (transpiler: Transpiler, ast: MemberExpres
   if (options.leftSideRole === "modify") {
     return (toValueAlterationVAKON: Kuery) =>
         transpiler.VALK().alterProperty(propertyName, toValueAlterationVAKON, object);
-  } else if (options.leftSideRole === "delete") {
+  }
+  if (options.leftSideRole === "delete") {
     return () => transpiler.VALK().deleteProperty(propertyName, object);
   }
   return object.propertyValue(propertyName);
@@ -987,4 +991,3 @@ export interface GraphExpression extends Expression { type: "GraphExpression"; i
 export interface GraphIndexExpression extends Expression { type: "GraphIndexExpression"; index: uint32; } // SM-specific
 export interface LetExpression extends Expression { type: "LetExpression"; head: [ VariableDeclarator ]; body: Expression; } // SM-specific
 */
-

@@ -39,4 +39,3 @@ export default function layoutByObjectField (state, fieldNameToLayoutBy, fallbac
     return innerRet ? [typeName, innerRet] : undefined;
   }
 }
-

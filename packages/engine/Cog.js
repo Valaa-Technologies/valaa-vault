@@ -179,4 +179,3 @@ export function executeHandlers (rule, passage, args, handlerObject, objectsHand
   }
   return false;
 }
-

@@ -43,9 +43,8 @@ export function isUIComponentElement (element: any) {
 
 const _propertyNames = PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]);
 
-@Presentable(require("./presentation").default, "UIComponent")
-export default class UIComponent extends React.Component {
-
+export default @Presentable(require("./presentation").default, "UIComponent")
+class UIComponent extends React.Component {
   static mainLensRoleName = "uiComponentLens";
 
   static _defaultPresentation = () => ({ root: {} });
@@ -91,6 +90,7 @@ export default class UIComponent extends React.Component {
 
   static propTypes = {
     children: PropTypes.any, // children can also be a singular element.
+    _presentation: PropTypes.any, // TODO(iridian, 2018-12): Get rid of the presentation layer.
     style: PropTypes.object,
     styleSheet: PropTypes.any,
     // If no uiContext nor parentUIContext the component is disabled. Only one of these two can be
@@ -570,9 +570,8 @@ export default class UIComponent extends React.Component {
     }
   }
 
-  static thirdPassErrorElement = <div>
-      Error caught while rendering error, see console for more details
-  </div>;
+  static thirdPassErrorElement =
+      <div>Error caught while rendering error, see console for more details</div>;
 
   enqueueRerenderIfPromise (maybePromise: any | Promise) {
     if (!isPromise(maybePromise)) return false;
@@ -671,10 +670,12 @@ export default class UIComponent extends React.Component {
                 : ["\n\twhile rendering main render validation fault:", mainValidationFaults]
             ),
             "\n\tin component:", this));
-        ret = (<div>
+        ret = (
+          <div>
             Exception caught while trying to render error:
             {String(secondPassError)}, see console for more details
-        </div>);
+          </div>
+        );
       } catch (thirdPassError) {
         try {
           console.error("INTERNAL ERROR: Exception caught on render() third pass:", thirdPassError,

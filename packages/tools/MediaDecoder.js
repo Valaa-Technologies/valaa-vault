@@ -69,7 +69,8 @@ export default class MediaDecoder extends LogEventGenerator {
     if (!this.mediaTypes.length) return { "": { "": [this] } };
     const ret = {};
     for (const mediaType of this.mediaTypes) {
-      const bySub = (ret[mediaType.type || ""] = (ret[mediaType.type || ""] || {}));
+      const bySub = (ret[mediaType.type || ""] || {});
+      ret[mediaType.type || ""] = bySub;
       (bySub[mediaType.subtype || ""] = (bySub[mediaType.subtype || ""] || [this]));
     }
     return ret;

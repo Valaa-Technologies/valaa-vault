@@ -6,8 +6,8 @@ import UIComponent from "~/inspire/ui/UIComponent";
 
 import { beaumpify } from "~/tools";
 
-@Presentable(require("./presentation").default, "InspireGatewayStatus")
-export default class InspireGatewayStatus extends UIComponent {
+export default @Presentable(require("./presentation").default, "InspireGatewayStatus")
+class InspireGatewayStatus extends UIComponent {
   attachSubscribers (focus: any, props: Object) {
     super.attachSubscribers(focus, props);
     const inspireGateway = this.getValaa().gateway;
@@ -27,7 +27,7 @@ export default class InspireGatewayStatus extends UIComponent {
   preRenderFocus () {
     return (
       <div {...this.presentation("root")}>
-        <span
+        <span // eslint-disable-line jsx-a11y/click-events-have-key-events
           {...this.presentation("totalCommandCount", { extraContext: this.state })}
           onClick={this.props.toggle}
         >

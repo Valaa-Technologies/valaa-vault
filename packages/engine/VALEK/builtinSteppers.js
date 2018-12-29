@@ -4,7 +4,7 @@ import { Valker } from "~/raem/VALK";
 import type { BuiltinStep } from "~/raem/VALK"; // eslint-disable-line no-duplicate-imports
 import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
 
-import { tryLiteral, /* tryFullLiteral,*/ tryUnpackLiteral }
+import { tryLiteral, /* tryFullLiteral, */ tryUnpackLiteral }
     from "~/raem/VALK/builtinSteppers";
 
 import valaaScriptBuiltinSteppers from "~/script/VALSK/builtinSteppers";

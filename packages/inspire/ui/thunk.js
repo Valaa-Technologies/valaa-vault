@@ -13,4 +13,3 @@ export function isReactComponent (candidate) {
 export function isExpandable (candidate) {
   return candidate && (typeof candidate === "object") && !isReactComponent(candidate);
 }
-

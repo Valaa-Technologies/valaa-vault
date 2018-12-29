@@ -13,10 +13,11 @@ const semver = require("semver");
 const shell = require("shelljs");
 const yargs = require("yargs/yargs");
 const yargsParser = require("yargs-parser").detailed;
-const markdownify = require("../markdownify");
 const deepExtend = require("@valos/tools/deepExtend").default;
 
 cardinal.tomorrowNight = require("cardinal/themes/tomorrow-night");
+
+const markdownify = require("../markdownify");
 
 Error.stackTraceLimit = Infinity;
 
@@ -54,8 +55,7 @@ const defaultCommandPrefix = "valma-";
 // are available to their command script modules via exports.builder
 // *yargs.vlm* parameter and also via exports.handler *yargv.vlm*
 // parameter.
-const _vlm = globalVargs.vlm = {
-
+const _vlm = {
   // Executes a command as an interactive foreground task and returns
   // a promise to its result value. If the command results in an error
   // it will be delivered through the promise reject. Any plain object
@@ -395,6 +395,7 @@ const _vlm = globalVargs.vlm = {
   _commitUpdates,
 };
 
+globalVargs.vlm = _vlm;
 colors._setTheme = _setTheme;
 function _setTheme (theme) {
   this.decoratorOf = function decoratorOf (rule) {
@@ -976,7 +977,7 @@ async function handler (vargv) {
     }
   }
 
-  return await contextVLM.invoke(vargv.command, vargv._,
+  return contextVLM.invoke(vargv.command, vargv._,
       { suppressOutermostEcho: true, processArgs: false, flushConfigWrites: true });
 
   /*
@@ -1020,7 +1021,7 @@ async function execute (args, options = {}) {
   if ((argv[0] === "vlm") && !Object.keys(options).length) {
     argv.shift();
     const vargv = this._parseUntilLastPositional(argv, module.exports.command);
-    return await this.invoke(vargv.command, vargv._,
+    return this.invoke(vargv.command, vargv._,
         { processArgs: false, flushConfigWrites: true, delegate: options.delegate });
   }
   const executeVLM = Object.create(this);
@@ -1537,7 +1538,7 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
           { contextCommand: commandName, vargs: subVargs });
       ++subVargs.vlm.taskDepth;
 
-      const activeCommand = ret[commandName] = {
+      const activeCommand = {
         ...poolCommand,
         vlm: subVargs.vlm,
         disabled: (module.disabled
@@ -1546,6 +1547,7 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
                 : (module.disabled(subVargs)
                     && `exports.disabled => ${String(module.disabled(subVargs))}`))),
       };
+      ret[commandName] = activeCommand;
 
       try {
         if (!module.builder || !module.builder(subVargs)) {
@@ -1651,7 +1653,8 @@ function __processArgs (args) {
     : (!entry || (typeof entry !== "object"))
         ? _toArgString(entry)
         : [].concat(...Object.keys(entry).map(
-            key => _toArgString(entry[key], key))))));
+            key => _toArgString(entry[key], key))))
+  ));
 
   function _toArgString (value, key) {
     if ((value === undefined) || (value === null)) return [];

@@ -17,7 +17,6 @@ import { ChronicleRequest, ChronicleOptions, ChronicleEventResult, MediaInfo }
  * @extends {PartitionConnection}
  */
 export default class AuthorityPartitionConnection extends PartitionConnection {
-
   isLocallyPersisted () { return this._prophet.isLocallyPersisted(); }
   isPrimaryAuthority () { return this._prophet.isPrimaryAuthority(); }
   isRemoteAuthority () { return this._prophet.isRemoteAuthority(); }

@@ -31,4 +31,3 @@ export function combineAsPartialSequence (value: any, removeDiffs: any) {
   ret[PartialRemovesTag] = removeDiffs;
   return ret;
 }
-

@@ -52,6 +52,6 @@ exports.handler = async (yargv) => {
 
   vlm.releasePath = releasePath;
 
-  return await vlm.invoke(`.release-build/${yargv.toolsetGlob || "**/*"}`,
+  return vlm.invoke(`.release-build/${yargv.toolsetGlob || "**/*"}`,
       [{ target: releasePath, force: yargv.force }, ...yargv._]);
 };

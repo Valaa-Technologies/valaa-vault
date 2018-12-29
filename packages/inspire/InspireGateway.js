@@ -38,7 +38,6 @@ const { dumpObject, inBrowser, invariantify, LogEventGenerator } = valosTools;
 const EVENT_VERSION = process.env.EVENT_VERSION || "0.2";
 
 export default class InspireGateway extends LogEventGenerator {
-
   constructor (options: Object) {
     super(options);
     this.revelationSiteRootPath = options.revelationSiteRootPath || "";

@@ -97,7 +97,6 @@ import { thenChainEagerly } from "~/tools";
  * @extends {UIComponent}
  */
 export default class ValaaScope extends UIComponent {
-
   static mainLensRoleName = "valaaScopeLens";
 
   static propTypes = {

@@ -184,11 +184,11 @@ function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: Ghost
         // Delve into the innermost instance by ownerRawId in the elevation instance path which has
         // not yet been elevated.
         // eslint-disable-next-line
-        for (let delvingStep = elevationInstancePath
-            ; delvingStep
+        for (let delvingStep = elevationInstancePath;
+            delvingStep
                 && (delvingStep = delvingStep.getInstanceStepByHostPrototype(ownerRawId))
-                && (delvingStep !== alreadyElevatedStep)
-            ; delvingStep = delvingStep.previousStep()) {
+                && (delvingStep !== alreadyElevatedStep);
+            delvingStep = delvingStep.previousStep()) {
           instanceGhostPath = delvingStep;
         }
         if (instanceGhostPath) break;

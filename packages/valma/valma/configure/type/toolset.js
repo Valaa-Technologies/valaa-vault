@@ -29,12 +29,12 @@ exports.builder = (yargs) => yargs.options({
     type: "string",
     description: `Restrict this toolset to a valaa type (clear for no restriction):`,
     default: yargs.vlm.packageConfig.valaa.domain,
-    interactive: { type: "input", when: true ? "always" : "if-undefined" },
+    interactive: { type: "input", when: "always" /* : "if-undefined" */ },
   },
   grabbable: {
     description: `Make this toolset grabbable and stowable (falsy for always-on):`,
     default: true,
-    interactive: { type: "input", when: true ? "always" : "if-undefined" },
+    interactive: { type: "input", when: "always" /* : "if-undefined" */ },
   },
 });
 

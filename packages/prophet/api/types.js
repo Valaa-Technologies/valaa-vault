@@ -14,7 +14,7 @@ export type MediaInfo = {
   mime?: string,
   type?: string,
   subtype?: string,
-  asURL? : any,                // default false. Available options: true, false, "data", "public",
+  asURL?: any,                // default false. Available options: true, false, "data", "public",
                                // "source".
   contentDisposition?: string,
   contentEncoding?: string,

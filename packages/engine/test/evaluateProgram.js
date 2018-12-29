@@ -22,4 +22,3 @@ export default function evaluateProgram (engine: ValaaEngine, programKuery: Kuer
   }
   return engine.run(head, programKuery, options);
 }
-

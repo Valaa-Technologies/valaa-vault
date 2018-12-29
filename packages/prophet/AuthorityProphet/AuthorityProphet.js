@@ -15,7 +15,6 @@ import AuthorityPartitionConnection from "./AuthorityPartitionConnection";
  * @extends {Prophet}
  */
 export default class AuthorityProphet extends Prophet {
-
   static PartitionConnectionType = AuthorityPartitionConnection;
 
   constructor ({

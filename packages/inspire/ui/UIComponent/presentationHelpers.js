@@ -50,4 +50,3 @@ export function walkToPresentation (presentation: any, childPath: any, context: 
     context
   );
 }
-

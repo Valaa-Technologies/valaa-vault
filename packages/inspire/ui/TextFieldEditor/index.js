@@ -4,19 +4,21 @@ import React from "react";
 import Presentable from "~/inspire/ui/Presentable";
 import FieldEditor from "~/inspire/ui/FieldEditor";
 
-@Presentable(require("./presentation").default, "TextFieldEditor")
-export default class TextFieldEditor extends FieldEditor {
+export default @Presentable(require("./presentation").default, "TextFieldEditor")
+class TextFieldEditor extends FieldEditor {
   preRenderFocus () {
-    return (<input
-      {...this.presentation("textFieldEditor")}
-      type="text"
-      value={this.shownValue()}
-      onKeyDown={this.onKeyDown}
-      onKeyUp={this.onKeyUp}
-      onChange={this.onChange}
-      onBlur={this.onBlur}
-      onDoubleClick={this.stopPropagation}
-    />);
+    return (
+      <input
+        {...this.presentation("textFieldEditor")}
+        type="text"
+        value={this.shownValue()}
+        onKeyDown={this.onKeyDown}
+        onKeyUp={this.onKeyUp}
+        onChange={this.onChange}
+        onBlur={this.onBlur}
+        onDoubleClick={this.stopPropagation}
+      />
+    );
   }
 
   shownValue () {

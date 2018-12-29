@@ -295,7 +295,7 @@ function _extendRevelation (gateway: Object, base: Object, extension: Object,
         "\n\tbase revelation:", ...dumpObject(base),
         "\n\textension revelation:", ...dumpObject(extension),
         "\n\tresult:", ret);
-  }*/
+  } */
 }
 
 function _setPropertyToGetter (target: any, key: number | string, getter: Function) {

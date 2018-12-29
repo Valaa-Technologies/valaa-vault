@@ -45,7 +45,7 @@ async function _inquireIfCustomThenAlwaysConfirm (vlm, category, selection, answ
   }
   vlm.speak(
       await vlm.invoke(`.configure/.${category}/${answers[category]}`, ["--show-introduction"]));
-  return await vlm.inquireConfirm(`Confirm valaa.${category} selection: '${answers[category]}'?`);
+  return vlm.inquireConfirm(`Confirm valaa.${category} selection: '${answers[category]}'?`);
 }
 
 exports.handler = (yargv) => yargv.vlm.updatePackageConfig({

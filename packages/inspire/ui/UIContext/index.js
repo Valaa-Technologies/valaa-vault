@@ -12,8 +12,8 @@ import VALEK from "~/engine/VALEK";
 
 import { invariantify, thenChainEagerly } from "~/tools";
 
-@Presentable(require("./presentation").default, "UIContext")
-export default class UIContext extends UIComponent {
+export default @Presentable(require("./presentation").default, "UIContext")
+class UIContext extends UIComponent {
   static contextTypes = {
     ...UIComponent.contextTypes,
     lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
@@ -102,11 +102,12 @@ export default class UIContext extends UIComponent {
 
   createUIRootElement (focus: Object) {
     const renderedChildren = super.renderLoaded(focus);
-    const defaultJSXElement = this.state.lensPropertyNotFoundLens
-        && <ValaaScope
-          {...this.childProps("uiRootDefault")}
-          activeLens={LENS`lensPropertyNotFoundLens`}
-        />;
+    const defaultJSXElement = this.state.lensPropertyNotFoundLens && (
+      <ValaaScope
+        {...this.childProps("uiRootDefault")}
+        activeLens={LENS`lensPropertyNotFoundLens`}
+      />
+    );
     return (renderedChildren && defaultJSXElement)
         ? <div>{renderedChildren}{defaultJSXElement}</div>
         : defaultJSXElement || renderedChildren;

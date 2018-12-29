@@ -13,7 +13,7 @@ import { vdocorate } from "~/tools/vdon";
 
 export type RawId = string;
 
-@vdocorate([
+export default @vdocorate([
   `ValaaReference is a reference object to a Valaa Resource and the
   internal representation of a urn:valos URI. Its semantic value
   identity is the urn NSS part, accessible via .rawId.
@@ -61,7 +61,7 @@ export type RawId = string;
  * @export
  * @class VRef
  */
-export default class ValaaReference {
+class ValaaReference {
   _isInactive: ?boolean;
   _mostInheritedMaterializedTransient: Object;
 
@@ -312,7 +312,7 @@ export function isJSONIdData (value: any): boolean {
 }
 
 export function invariantifyId (candidate: any, name: string = "id",
-    { value, valueInvariant, allowNull, allowUndefined, suffix = "", parent }: Object = {},
+    { value, valueInvariant, allowNull, allowUndefined, suffix = "" }: Object = {},
     ...additionalContextInformation: any) {
   if (((isIdData(candidate) || isJSONIdData(candidate))
           && (typeof value === "undefined" || (candidate === value))

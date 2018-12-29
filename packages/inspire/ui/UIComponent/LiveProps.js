@@ -46,7 +46,6 @@ import { _wrapElementInLiveProps } from "./_renderOps";
  * @extends {UIComponent}
  */
 export default class LiveProps extends UIComponent {
-
   static mainLensRoleName = "livePropsLens";
 
   static propTypes = {
@@ -232,9 +231,9 @@ export default class LiveProps extends UIComponent {
         value: `ValaaScope_${newProps.className || ""}${this.getUIContextValue("key")}`,
       });
     }
-    /*/
+    /* */
     // eslint-disable-next-line
-    //*/
+    // */
     } else if (!elementType.isUIComponent || !newProps.hasOwnProperty("array")) {
       if (!newProps.key) newProps.key = newProps.elementKey || this.getUIContextValue("key");
       const inter = React.createElement(elementType, newProps, ...children);
@@ -279,4 +278,3 @@ export default class LiveProps extends UIComponent {
     return ret;
   }
 }
-

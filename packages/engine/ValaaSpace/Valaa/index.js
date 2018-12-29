@@ -10,7 +10,7 @@ import injectSchemaTypeBindings from "./injectSchemaTypeBindings";
 
 /*
  * Creates the Valaa introspection object.
-**/
+ */
 export default function extendValaa (scope: any, hostObjectDescriptors: any, schema: any) {
   const Valaa = Object.assign(scope.Valaa || (scope.Valaa = {}), {
     beautify: beaumpify,

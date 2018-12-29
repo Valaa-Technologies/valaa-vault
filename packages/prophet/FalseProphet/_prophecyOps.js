@@ -412,7 +412,7 @@ class ProphecyOperation extends ProphecyEventResult {
                     throw error;
                   });
             },
-            (error, { connection, chronicling }, index) => {
+            (error, { chronicling }, index) => {
               throw this._prophet.wrapErrorEvent(error,
                   new Error(`chronicleEvents.stage["${stage.name}"]._activePartitions[${index
                       }].eventResults[${tryAspect(chronicling && chronicling.event, "log").index

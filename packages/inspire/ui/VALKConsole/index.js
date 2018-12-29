@@ -13,8 +13,8 @@ import notThatSafeEval from "~/tools/notThatSafeEval";
 
 // TODO(iridian): Obsoleted and detached.
 
-@Presentable(require("./presentation").default, "VALKConsole") // eslint-disable-line
-export default class VALKConsole extends UIComponent {
+export default @Presentable(require("./presentation").default, "VALKConsole") // eslint-disable-line
+class VALKConsole extends UIComponent {
   static propTypes = {
     ...UIComponent.PropTypes,
     show: PropTypes.bool,
@@ -116,23 +116,26 @@ export default class VALKConsole extends UIComponent {
   }
 
   render () {
-    return (<div // eslint-disable-line
-      {...this.presentation("root", { extraContext: { show: this.props.show } })}
-      onKeyDown={this.onKeyDown}
-    >
-      <div {...this.presentation("output")} ref={outputDiv => { this.outputDiv = outputDiv; }}>
-        {this.state.output.map(
-          (o, i) => <pre key={i} style={{ color: o.color }}>{o.txt}</pre>)}
+    return (
+      <div
+        {...this.presentation("root", { extraContext: { show: this.props.show } })}
+        onKeyDown={this.onKeyDown}
+      >
+        <div {...this.presentation("output")} ref={outputDiv => { this.outputDiv = outputDiv; }}>
+          {this.state.output.map(
+            // eslint-disable-next-line react/no-array-index-key
+            (o, i) => <pre key={i} style={{ color: o.color }}>{o.txt}</pre>)}
+        </div>
+        <form onSubmit={this.handleSubmit} {...this.presentation("inputForm")}>
+          <input
+            ref={(input) => { this.textInput = input; }}
+            {...this.presentation("formInput")}
+            type="text"
+            value={this.state.cmd}
+            onChange={this.handleChange}
+          />
+        </form>
       </div>
-      <form onSubmit={this.handleSubmit} {...this.presentation("inputForm")}>
-        <input
-          ref={(input) => { this.textInput = input; }}
-          {...this.presentation("formInput")}
-          type="text"
-          value={this.state.cmd}
-          onChange={this.handleChange}
-        />
-      </form>
-    </div>);
+    );
   }
 }

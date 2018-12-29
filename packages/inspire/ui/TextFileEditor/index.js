@@ -22,9 +22,8 @@ import MediaContentEditor from "~/inspire/ui/MediaContentEditor";
 
 import { beaumpify } from "~/tools";
 
-@Presentable(require("./presentation").default, "TextFileEditor")
-export default class TextFileEditor extends MediaContentEditor {
-
+export default @Presentable(require("./presentation").default, "TextFileEditor")
+class TextFileEditor extends MediaContentEditor {
   static propTypes = {
     ...MediaContentEditor.propTypes,
     confirmSave: PropTypes.func,
@@ -33,7 +32,9 @@ export default class TextFileEditor extends MediaContentEditor {
   preRenderFocus () {
     return (
       <div
-        onKeyDown={this.onKeyDown} onKeyUp={this.onKeyUp} style={{ width: "100%", height: "100%" }}
+        onKeyDown={this.onKeyDown}
+        onKeyUp={this.onKeyUp}
+        style={{ width: "100%", height: "100%" }}
       >
         <AceEditor
           onLoad={this.setEditor}
@@ -44,7 +45,8 @@ export default class TextFileEditor extends MediaContentEditor {
           width="100%"
           height="100%"
         />
-      </div>);
+      </div>
+    );
   }
 
   setEditor = (editor: Object) => {

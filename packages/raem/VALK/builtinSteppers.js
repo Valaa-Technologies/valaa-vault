@@ -602,7 +602,7 @@ function filter (valker: Valker, head: any, scope: ?Object, filterStep: any,
 }
 
 export function resolveTypeof (valker: Valker, head: any, scope: ?Object,
-    [, object, equalTo]: BuiltinStep, packedObject: any) {
+    [, /* object */, equalTo]: BuiltinStep, packedObject: any) {
   let type = typeof packedObject;
   if ((type === "object") && packedObject) {
     // FIXME(iridian): This is a mess and definitely broken at the corner cases.

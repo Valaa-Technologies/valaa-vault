@@ -69,14 +69,14 @@ function _createForwarder (object, target) {
     }
     const newDescriptor = { ...descriptor };
     if (descriptor.get) {
-      newDescriptor.get = function () { return descriptor.get.call(target); };
+      newDescriptor.get = function get () { return descriptor.get.call(target); };
     }
     if (descriptor.set) {
-      newDescriptor.set = function (value: any) { return descriptor.set.call(target, value); };
+      newDescriptor.set = function set (value: any) { return descriptor.set.call(target, value); };
     }
     if ((typeof descriptor.value === "function") && !descriptor.value.prototype) {
       // eslint-disable-next-line prefer-rest-params
-      newDescriptor.value = function () { return descriptor.value.apply(target, arguments); };
+      newDescriptor.value = function value () { return descriptor.value.apply(target, arguments); };
     }
     Object.defineProperty(forwarder, propertyName, newDescriptor);
   });

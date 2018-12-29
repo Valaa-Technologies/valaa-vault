@@ -72,7 +72,8 @@ export default class FieldUpdate {
     if (!this._passage || isCreatedLike(this._passage)) {
       const value = this.value();
       return arrayFromAny(value || undefined);
-    } else if (this._passage.actualAdds) {
+    }
+    if (this._passage.actualAdds) {
       const ids = this._emitter._tryElevateFieldValueFrom(this.getState(), this._fieldName,
           this._passage.actualAdds.get(this._fieldName), this._vProtagonist);
       return this._emitter.engine.getVrappers(ids, this._valkOptions);

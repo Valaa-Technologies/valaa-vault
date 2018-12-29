@@ -52,7 +52,7 @@ function _updateFocus (component: UIComponent, newProps: Object) {
         "\n\tnew props.head:", newProps.head,
         "\n\tnew props.focus:", newProps.focus,
         "\n\tnew props.kuery:", ...dumpKuery(newProps.kuery));
-    //*/
+    // */
     component.detachSubscribers();
     component._errorObject = null;
 

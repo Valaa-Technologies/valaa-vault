@@ -22,7 +22,7 @@ export function contentIdFromNativeStream (contentStream: Stream): Promise<strin
         if (digest) {
           resolve(digest.toString("hex"));
         } else {
-          reject("Could not resolve digest for stream");
+          reject(new Error("Could not resolve digest for stream"));
         }
       });
       contentStream.pipe(hash);

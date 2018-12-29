@@ -96,7 +96,7 @@ export function invariantifyBoolean (candidate: ?boolean, name: string,
 }
 
 export function invariantifyFunction (candidate: ?Function, name: string,
-    { allowNull, allowUndefined, suffix = "", parent }: Object = {},
+    { allowNull, allowUndefined, suffix = "" }: Object = {},
     ...additionalContextInformation: any) {
   if ((typeof candidate === "function")
       || ((typeof candidate === "undefined") && allowUndefined)

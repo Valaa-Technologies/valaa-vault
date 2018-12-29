@@ -152,7 +152,8 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
       }
       if (React.isValidElement(lens)) {
         return _tryWrapElementInLiveProps(component, lens, focus, lensName);
-      } else if (lens instanceof Kuery) {
+      }
+      if (lens instanceof Kuery) {
         // Delegates the kuery resolution to LiveProps.
         subLensName = `kuery-${lensName}`;
         ret = React.createElement(UIComponent,
@@ -342,7 +343,7 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
     Object.defineProperty(DebugLiveProps, "name", {
       value: `LiveProps_${livePropsProps.key}`,
     });
-    //*/
+    // */
     return React.createElement(LiveProps, livePropsProps, ...arrayFromAny(props.children));
   } catch (error) {
     throw wrapError(error, `During ${component.debugId()}\n ._tryWrapElementInLiveProps(`,
@@ -448,4 +449,3 @@ function _recurseValidateElements (element: any) {
   ret.element = element;
   return ret;
 }
-

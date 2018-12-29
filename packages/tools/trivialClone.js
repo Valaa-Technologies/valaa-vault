@@ -57,9 +57,11 @@ export default function trivialClone (value_: any, customizer: ?Function) {
     if (clone !== undefined) {
       existingClones.set(value, clone);
       return clone;
-    } else if ((typeof value !== "object") || (value === null)) {
+    }
+    if ((typeof value !== "object") || (value === null)) {
       return value;
-    } else if (Array.isArray(value)) {
+    }
+    if (Array.isArray(value)) {
       clone = new Array(value.length);
       existingClones.set(value, clone);
       for (let i = 0; i !== value.length; ++i) {

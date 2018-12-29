@@ -203,7 +203,8 @@ function handleAdds (bard: Bard, fieldInfo, adds, oldLocalValue, updateCoupling)
     if (!oldLocalSequence.has(entry)) {
       fieldAdds.push(entry);
       return acc.add(entry);
-    } else if (bard.shouldUpdateCouplings) {
+    }
+    if (bard.shouldUpdateCouplings) {
       // reorder existing entry to end as per ADDED_TO contract unless we're in a coupling update
       fieldMoves.push(entry);
       return acc.remove(entry).add(entry);

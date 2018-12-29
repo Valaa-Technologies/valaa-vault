@@ -6,19 +6,21 @@ import FieldEditor from "~/inspire/ui/FieldEditor";
 import Vrapper from "~/engine/Vrapper";
 import VALEK, { literal } from "~/engine/VALEK";
 
-@Presentable(require("./presentation").default, "ExpressionFieldEditor")
-export default class ExpressionFieldEditor extends FieldEditor {
+export default @Presentable(require("./presentation").default, "ExpressionFieldEditor")
+class ExpressionFieldEditor extends FieldEditor {
   preRenderFocus () {
-    return (<input
-      {...this.presentation("expressionFieldEditor")}
-      type="text"
-      value={this.shownValue()}
-      onKeyDown={this.onKeyDown}
-      onKeyUp={this.onKeyUp}
-      onChange={this.onChange}
-      onBlur={this.onBlur}
-      onDoubleClick={this.stopPropagation}
-    />);
+    return (
+      <input
+        {...this.presentation("expressionFieldEditor")}
+        type="text"
+        value={this.shownValue()}
+        onKeyDown={this.onKeyDown}
+        onKeyUp={this.onKeyUp}
+        onChange={this.onChange}
+        onBlur={this.onBlur}
+        onDoubleClick={this.stopPropagation}
+      />
+    );
   }
 
   shownValue () {

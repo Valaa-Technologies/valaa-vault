@@ -343,7 +343,7 @@ export default class VrapperSubscriber extends SimpleData {
     /*
     console.log(`VrapperSubscriber(${this.subscriberKey})\n ._subscribeToFieldByName ${
         emitter.debugId()}.${fieldName}`);
-    //*/
+    // */
     const container = emitter._registerSubscriberByFieldName(fieldName, this);
     if (container) this._subscriberContainers.add(container);
   }
@@ -353,7 +353,7 @@ export default class VrapperSubscriber extends SimpleData {
     /*
     console.log(`VrapperSubscriber(${this.subscriberKey})\n ._subscribeToFieldByName ${
         emitter.debugId()}.${fieldFilter.constructor.name}`);
-    //*/
+    // */
     const container = emitter._registerSubscriberByFieldFilter(fieldFilter, this);
     if (container) this._subscriberContainers.add(container);
   }
@@ -370,7 +370,7 @@ export default class VrapperSubscriber extends SimpleData {
     console.log(this.subscriberKey,
         `got update to field '${fieldUpdate.getEmitter().debugId()}.${fieldUpdate.fieldName()}'`,
         ", new value:", ...dumpObject(fieldUpdate.value()));
-    //*/
+    // */
     const kuery = this._subscribedKuery;
     if (typeof kuery === "undefined") return this._sendUpdate(fieldUpdate);
     if (this._valkOptions.state === fieldUpdate.getState()) return undefined;

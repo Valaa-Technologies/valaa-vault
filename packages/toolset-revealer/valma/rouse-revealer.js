@@ -37,6 +37,14 @@ exports.builder = function builder (yargs) {
       type: "boolean", default: true,
       description: "webpack-dev-server --open option"
     },
+    prod: {
+      type: "boolean",
+      description: "set TARGET_ENV=production, emulating production environment",
+    },
+    dev: {
+      type: "boolean",
+      description: "if false, set TARGET_ENV=local, otherwise emulates development environment",
+    }
   });
 };
 exports.handler = async function handler (yargv) {
@@ -54,6 +62,9 @@ exports.handler = async function handler (yargv) {
   vlm.info(`${vlm.theme.bold("Rousing revealer")} using ${
       vlm.theme.executable("webpack-dev-server")} with revelation content base:`,
           vlm.theme.path(contentBase));
+  const env = { ...process.env };
+  if (yargv.prod) env.TARGET_ENV = "production";
+  else if (!yargv.dev) env.TARGET_ENV = "local";
   return vlm.interact([
     "webpack-dev-server",
     yargv.inline && "--inline",
@@ -61,5 +72,5 @@ exports.handler = async function handler (yargv) {
     yargv.open && "--open",
     "--host", yargv.host,
     "--content-base", contentBase,
-  ]);
+  ], { spawn: { env } });
 };

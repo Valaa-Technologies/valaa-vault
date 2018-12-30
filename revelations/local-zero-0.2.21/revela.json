@@ -1,0 +1,23 @@
+{
+  "name": "@valos/revelation-local-zero",
+  "version": "0.31.1",
+  "description": "Valaa local Zero revelation, lands at valaa-local: Zero",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "private": false,
+  "gateway": {
+    "version": "0.31.1",
+    "runtime": "/valaa/inspire/valaa-inspire.js",
+    "authorityConfigs": {},
+    "verbosity": 1,
+    "falseProphet": { "verbosity": 1 },
+    "scribe": { "verbosity": 1 }
+  },
+  "prologue": {
+    "rootPartitionURI": "valaa-local:?id=efff2621-b8e6-46d9-af39-604f242e15da",
+    "partitionInfos": { "...": "/local-zero-0.2.21/partitions/../partitions/partitionInfos.json" },
+    "bvobInfos": { "...": "</local-zero-0.2.21/partitions/./bvobInfos.json>" },
+    "bvobBuffers": { "...": "./partitions/../partitions/bvobBuffers.json" },
+    "authorityConfigs": {}
+  }
+}

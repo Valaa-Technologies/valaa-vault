@@ -1,6 +1,6 @@
 {
   "name": "@valos/vault",
-  "version": "0.33.0-prerelease.4",
+  "version": "0.33.0-prerelease.5",
   "valaa": {
     "type": "vault",
     "domain": "kernel"

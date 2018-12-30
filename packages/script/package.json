@@ -1,6 +1,6 @@
 {
   "name": "@valos/script",
-  "version": "0.33.0-prerelease.4",
+  "version": "0.33.0-prerelease.5",
   "description": "Valaa Script API, schema",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
@@ -14,7 +14,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@valos/raem": "^0.33.0-prerelease.4",
+    "@valos/raem": "^0.33.0-prerelease.5",
     "acorn": "^5.0.3",
     "graphql": "^0.6.2"
   }

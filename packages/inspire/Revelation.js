@@ -2,6 +2,7 @@
 
 import path from "path";
 import { dumpObject, inProduction, isPromise, request, wrapError, inBrowser } from "~/tools";
+import resolveRevelationSpreaderImport from "~/tools/resolveRevelationSpreaderImport";
 
 // Revelation is a JSON configuration file in which all "..." keys and
 // their *spreader* string values denote file import requests to other
@@ -233,24 +234,8 @@ function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
   const isObjectExpandee = (typeof expandee !== "string");
   let expandeePath = isObjectExpandee ? (expandee.url || expandee.path) : expandee;
   if (!expandee.url) {
-    if ((expandeePath[0] === "<") && (expandeePath[expandeePath.length - 1] === ">")) {
-      expandeePath = expandeePath.slice(1, -1);
-      if (expandeePath[0] === "/") {
-        if (!inBrowser()) {
-          throw new Error(`domain-root references URI's are undefined in non-browser contexts: <${
-              expandeePath}>`);
-        }
-      } else if (!expandeePath.match(/$[^/]*:/)) {
-        // relative-path URI ref - revelation root relative ref
-        expandeePath = path.join(gateway.revelationRoot, expandeePath);
-      }
-    } else {
-      expandeePath = path.join(
-          expandeePath[0] === "/"
-              ? gateway.siteRoot || ""
-              : gateway.currentRevelationPath || gateway.revelationRoot,
-          expandeePath);
-    }
+    expandeePath = resolveRevelationSpreaderImport(
+        expandeePath, gateway.siteRoot, gateway.revelationRoot, gateway.currentRevelationPath);
   }
   let retrievedContent;
   if (inBrowser()) {

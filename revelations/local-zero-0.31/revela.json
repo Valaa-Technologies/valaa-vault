@@ -15,9 +15,9 @@
   },
   "prologue": {
     "rootPartitionURI": "valaa-local:?id=7606501e-f262-40e3-b871-b32e0ae74748",
-    "partitionInfos": { "...": "valaa/partitionInfos.json" },
-    "bvobInfos": { "...": "valaa/bvobInfos.json" },
-    "bvobBuffers": { "...": "valaa/bvobBuffers.json" },
+    "partitionInfos": { "...": "/local-zero-0.31/valaa/../valaa/partitionInfos.json" },
+    "bvobInfos": { "...": "valaa/./bvobInfos.json" },
+    "bvobBuffers": { "...": "./valaa/../valaa/bvobBuffers.json" },
     "authorityConfigs": {}
   }
 }

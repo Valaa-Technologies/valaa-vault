@@ -17,7 +17,7 @@ exports.builder = (yargs) => yargs.option({
   output: {
     type: "string",
     default: "",
-    description: "Outputs rendered as HTML string to a file",
+    description: "Outputs rendered output as a HTML string to a file",
   },
   keepalive: {
     default: false,
@@ -38,6 +38,11 @@ exports.builder = (yargs) => yargs.option({
   revelation: {
     description: "Direct revelation object applied after all other revelations",
   },
+  revelationRoot: {
+    type: "string",
+    description: `Explicit gateway.options.revelationRoot path ${
+        ""}(by default the first revelationPaths dirname)`,
+  },
 });
 
 exports.handler = async (yargv) => {
@@ -45,13 +50,16 @@ exports.handler = async (yargv) => {
   // Only enabled inside package
   const vlm = yargv.vlm;
   const revelationPaths = (yargv.revelationPaths || []).length
-      ? yargv.revelationPaths : ["./valaa.json"];
+      ? yargv.revelationPaths : ["./revela.json"];
   yargv.plugin.forEach(element => {
     require(path.join(process.cwd(), element));
   });
   vlm.shell.mkdir("-p", yargv.cacheRoot);
 
   const server = new PerspireServer({
+    revelationRoot: (yargv.revelationRoot !== undefined)
+        ? yargv.revelationRoot
+        : vlm.path.dirname(revelationPaths[0]),
     revelations: [
       { gateway: { scribe: { databaseConfig: {
         // See https://github.com/axemclion/IndexedDBShim for config options

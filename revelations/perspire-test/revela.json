@@ -11,13 +11,13 @@
   "prologue": {
     "rootPartitionURI": "valaa-local:?id=f3d306d9-79ac-4087-afbc-46f739226eb2",
     "partitionInfos": {
-      "...": "partitionInfos.json"
+      "...": "<partitions/partitionInfos.json>"
     },
     "blobInfos": {
-      "...": "blobInfos.json"
+      "...": "/revelations/perspire-test/partitions/blobInfos.json"
     },
     "blobBuffers": {
-      "...": "blobBuffers.json"
+      "...": "./../perspire-test/partitions/blobBuffers.json"
     },
     "authorityConfigs": {
       "...": "authorityConfigs.json"

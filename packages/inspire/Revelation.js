@@ -3,39 +3,120 @@
 import path from "path";
 import { dumpObject, inProduction, isPromise, request, wrapError, inBrowser } from "~/tools";
 
-// Revelation is a JSON file in which all "..." keys and their
-// *spreader* values denote XHR operation requests to remote resources.
-// Each such request is expected resolve into a JSON resource which is
-// parsed and extended on around the original revelation spreader key.
-// If no charset or media type can be inferred, the document binary
-// stream is interpreted as utf-8 encoded JSON file.
+// Revelation is a JSON configuration file in which all "..." keys and
+// their *spreader* string values denote file import requests to other
+// revelation JSON files.
 //
-// The spreader has two semantic forms: a URL form and a path form.
-// Both forms can contain absolute and relative path references with
-// differing root locations.
+// The primary purpose of the revelation system is to allow config
+// files to extract configuration parameters shared by several
+// different config files into a shared JSON file which the other
+// config files then spread-import, thus implementing
+// https://en.wikipedia.org/wiki/Don%27t_repeat_yourself
 //
-// Revelation system nominates three major root locations: host root,
-// site root and current file.
-// Current file location is always internally tracked by Revelation
-// system and corresponds to the request which was used to retrieve
-// the file inside which the spreader operation appears.
-
-// The other two depend on the gateway environment. In browser
-// environments host root is scheme+host+port+'/' and site root is
-// window.location.pathname. In Node.js contexts host root is
-// process.cwd() and site root is
-// TODO(iridian): define site root semantics properly.
+// When a revelation is interpreted these spread-import requests are
+// executed and the returned JSON content is expanded on top of the
+// *surrounding object*, similar to the javascript spread syntax.
+// All other key/value pairs of the surrounding object are also
+// similarily merged on top of spreaded contents.
 //
-// The first form is when spreader.url option is provided. It is used
-// as-is as as the target of an XHR request. Thus it also follows
-// typical XHR URI semantics: an absolute, full URL is used as-is,
-// a root-relative URL beginning with '/' is relative to the host root
-// and relative path URL is relative to site root.
+// Unlike the actual javascript spread syntax however, the spreader
+// property is an actual dynamic property of a JSON object and is
+// resolved only when the revelation gets interpreted. This also means
+// there can be only one spreader property per object. The spreader
+// property is also always imported and spreaded before all the other
+// key/value pairs, even if the spreader property itself appears last
+// in the JSON file itself (this is unlike spread syntax which follows
+// file order).
 //
-// The second form is when spreader.path is provided. This path cannot
-// be a full URL. If this path is absolute it is resolved relative to
-// site root (not host root!). If this path is relative it is resolved
-// relative to the current revelation file itself.
+// Finally, the spreader merge semantics is a deep merge (unlike
+// javascript spread which is shallow). Properties with same keys
+// are recursively merged. This allows for highly selective but still
+// declarative overriding of even deeply nested configuration
+// properties.
+//
+// Revelation import request string has two main variants, each with
+// their sub-variants:
+// 1. URI reference strings are enclosed between "<" and ">", and are:
+//    - *global URI* references if they define an authority
+//    - *domain-root* references if they are absolute-path references
+//      (ie. have no authority but their path begins with "/")
+//    - *revelation-root* references if they are relative-path
+//      references (ie. no authority and path doesn't begin with "/"),
+// 2. Remaining request strings are either:
+//    - *site-root* relative paths if they begin with "/"
+//    - *file* relative paths otherwise, (including those beginning
+//      with "./" and "../")
+//
+// Roughly speaking URI references have more semantic, front-facing
+// meaning. They are more typically used for resources with some kind
+// of API contract, whether it is defined by some internet service (for
+// global refs), by a hosting provider (for domain-root refs) or by the
+// revealed app itself (for revelation-root refs).
+// Conversely, site-root and file relative paths are more used by
+// implementation defined, more freely mutable performance details.
+// (note: admittedly the distinction between site-root paths and
+// revelation-root refs are a bit blurry).
+//
+// A revelation root is the directory of a single /entry point/
+// revelation file, typically called "revela.json". This is usually a
+// landing page, an application entry point, user profile page etc. and
+// as such the first revelation requested by a user.
+// A site root on the other hand is a specific directory which can
+// contain several associated revelation files (possibly deeply nested)
+// but which nevertheless *must* contain all relative spread-import
+// targets inside itself.
+//
+// The site root can be a web URL, a filesystem path, or any other
+// locator with:
+// 1. a well-defined file tree structure
+// 2. a mechanism for retrieving files (no listing needed)
+// 3. a mechanism for combining two path parts into one.
+// The site root path is the same for all revelations inside that site.
+// This allows the site to provide commonly shared files from the same
+// location (using the "/" site-root relative paths) implementing the
+// DRY primary revelation purpose.
+// In browser environments site root is equal to
+// `scheme+host+port+'/'+siteroute` where siteroute is explicitly
+// provided by the current document or an empty string. In Node.js
+// contexts the site root is by default `process.cwd()`.
+//
+// Each entry revelation file defines its own parent directory as the
+// *revelation root* path. A URI relative-path reference (one which
+// has no authority part and doesn't begin with "/") is a revelation
+// root relative request. For web contexts this is
+// equal to `scheme+host+port+pathname`. For Node.js contexts this is
+// equal to `path.dirname(revelationPath)` where revelationPath is the
+// path of the revelation used to configure and launch the gateway.
+//
+// Note that revelation root is the same for all revelation files
+// imported (even recursively) by the same entry revelation.
+// This serves two secondary purposes.
+// Firstly, it acts as revelation-specific absolute path root.
+// Implementation detail files can use revelation root based references
+// to refer to "revelation global" resources without having to care
+// about their own location, reducing coupling.
+// Secondly, it allows for site shared files to make backreferencing
+// imports to revelation-specific configurations.
+// (NOTE(iridian, 2018-12): this is an experimental use case).
+//
+// The file relative requests are always relative to the file which
+// defines them. This makes splitting large configuration files into
+// smaller local files smooth.
+//
+// Splitting files serves three purposes: smaller files are easier
+// to manage mentally, they can have nicer metadata associated with
+// them (including in version control), and finally: clients can (and
+// the inspire gateway Revelation implementation does) implement lazy
+// loading of revelations. This allows the delivery of even large
+// datasets like event logs via revelation files.
+//
+// There is an explicit "url" import form which allows making XHR
+// requests using standard URI resolution semantics. For relative-ref's
+// the current context /revelation/ root path is used as the rfc3986
+// *Base URI*.
+// This makes it possible to make spread-imports from outside the site
+// itself and also to make revelation relative URL requests with query
+// and fragment parts.
 //
 // If the spreader is a flat string it is expanded as if it was a
 // the value of spreader.path with no other spreader options.
@@ -51,14 +132,12 @@ import { dumpObject, inProduction, isPromise, request, wrapError, inBrowser } fr
 //   "somebobcontenthash": { "base64": "v0987c1r1bxa876a8s723f21=" },
 //   "otherbvobcontenthash": { "base64": "b7b98q09au2322h3f2j3hf==" },
 //   "contenthash3": { "...": "relative/to/thisFile" },
-//   "contenthash4": { "...": "./relative/to/thisFile" },
-//   "contenthash5": { "...": "/relative/to/revelationSiteRootPath" },
-//   "contenthash6": { "...": { "path": "relative/to/thisFile" } },
-//   "contenthash7": { "...": { "path": "./relative/to/thisFile" } },
-//   "contenthash8": { "...": { "path": "/relative/to/revelationSiteRootPath" } },
-//   "contenthash9": { "...": { "url": "http://url.com/to/buffer52" } },
-//   "contenthash10": { "...": { "url": "relative/to/revelationSiteRootPath" } },
-//   "contenthash11": { "...": { "url": "/relative/to/domainRoot" } },
+//   "contenthash4": { "...": "./relative/to/thisFile/also" },
+//   "contenthash5": { "...": "/relative/to/siteRoot" },
+//   "contenthash8": { "...": "<http://global.url.com/to/buffer52>" },
+//   "contenthash9": { "...": "<relative/to/revelationRoot>" },
+//   "contenthash10": { "...": "<./relative/to/revelationRoot/also>" },
+//   "contenthash11": { "...": "</relative/to/domainRoot>" } },
 // }
 // ```
 // And the corresponding buffer template in revelation.template.js:
@@ -154,10 +233,24 @@ function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
   const isObjectExpandee = (typeof expandee !== "string");
   let expandeePath = isObjectExpandee ? (expandee.url || expandee.path) : expandee;
   if (!expandee.url) {
-    expandeePath = path.join(
-        ((expandeePath[0] !== "/") && gateway.revelationContextPath)
-            || gateway.revelationSiteRootPath || "",
-        expandeePath);
+    if ((expandeePath[0] === "<") && (expandeePath[expandeePath.length - 1] === ">")) {
+      expandeePath = expandeePath.slice(1, -1);
+      if (expandeePath[0] === "/") {
+        if (!inBrowser()) {
+          throw new Error(`domain-root references URI's are undefined in non-browser contexts: <${
+              expandeePath}>`);
+        }
+      } else if (!expandeePath.match(/$[^/]*:/)) {
+        // relative-path URI ref - revelation root relative ref
+        expandeePath = path.join(gateway.revelationRoot, expandeePath);
+      }
+    } else {
+      expandeePath = path.join(
+          expandeePath[0] === "/"
+              ? gateway.siteRoot || ""
+              : gateway.currentRevelationPath || gateway.revelationRoot,
+          expandeePath);
+    }
   }
   let retrievedContent;
   if (inBrowser()) {
@@ -171,11 +264,15 @@ function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
       retrievedContent = gateway.require(expandeePath);
     } catch (error) {
       throw gateway.wrapErrorEvent(error, `_tryExpandExtension('${expandee.url || expandee}')`,
-          "\n\texpandeePath:", expandeePath);
+          "\n\texpandeePath:", expandeePath,
+          "\n\tgateway.siteRoot:", gateway.siteRoot,
+          "\n\tgateway.revelationRoot:", gateway.revelationRoot,
+          "\n\tgateway.currentRevelationPath:", gateway.currentRevelationPath,
+      );
     }
   }
   const subGateway = Object.assign(Object.create(gateway), {
-    revelationContextPath: path.dirname(expandeePath),
+    currentRevelationPath: path.dirname(expandeePath),
   });
   return _markLazy(() => _combineRevelationsLazily(subGateway, base, retrievedContent, rest));
 }

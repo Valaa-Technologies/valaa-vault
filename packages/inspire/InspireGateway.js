@@ -40,7 +40,14 @@ const EVENT_VERSION = process.env.EVENT_VERSION || "0.2";
 export default class InspireGateway extends LogEventGenerator {
   constructor (options: Object) {
     super(options);
-    this.revelationSiteRootPath = options.revelationSiteRootPath || "";
+    if (options.siteRoot === undefined) {
+      throw new Error("Required gateway.options.siteRoot is undefined");
+    }
+    if (options.revelationRoot === undefined) {
+      throw new Error("Required gateway.options.revelationRoot is undefined");
+    }
+    this.siteRoot = options.siteRoot;
+    this.revelationRoot = options.revelationRoot;
   }
 
   callRevelation (Type: Function | any) {

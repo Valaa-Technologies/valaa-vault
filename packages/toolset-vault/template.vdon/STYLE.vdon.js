@@ -110,7 +110,7 @@ module.exports = {
       `Whenever a JSON is used as the interchange for a particular
       domain a dialect should be named and defined.`,
       `ValOS itself introduces several: VAKON for Kueries, VDON for
-      documentation, Revelation VSON for the valaa.json inspire
+      documentation, Revelation VSON for the revela.json inspire
       revelations and Events VSON for the universal command and truth
       events.`,
       `All ValOS JSON dialects (and only them) follow this convention:
@@ -118,7 +118,7 @@ module.exports = {
       the fundamental dialects get their own abbreviation.`,
       `Some dialects make use of some shared tooling like
       @valos/tools/deepExpand`,
-      // Well, might make use of, anyway. Right now only valaa.json uses it.
+      // Well, might make use of, anyway. Right now only revela.json uses it.
       // Also, revelation and universal command dialects are barely 'named' or specified.
     ],
     useBase64URL: [

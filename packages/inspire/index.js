@@ -32,9 +32,10 @@ Valaa.createInspireGateway = function createInspireGateway (...revelations: any[
     }, },
   };
 
-  const gatewayPromise = Valaa.createGateway(
-      { revelationSiteRootPath: window.location.pathname },
-      ...revelations, inspireBrowserEnvironmentRevelation);
+  const gatewayPromise = Valaa.createGateway({
+    siteRoot: "/", // TODO(iridian, 2018-12): provide this somehow via index.html
+    revelationRoot: window.location.pathname,
+  }, ...revelations, inspireBrowserEnvironmentRevelation);
   return new Promise(resolve =>
       document.addEventListener("DOMContentLoaded", () => { resolve(gatewayPromise); }));
 };

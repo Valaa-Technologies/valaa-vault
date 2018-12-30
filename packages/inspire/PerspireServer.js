@@ -5,8 +5,9 @@ import shell from "shelljs";
 import path from "path";
 import createGateway from "~/inspire";
 import PerspireView from "~/inspire/PerspireView";
+import { invariantifyString } from "~/tools";
 
-function _createPerspireGateway (...revelations: any[]) {
+function _createPerspireGateway (gatewayOptions: Object, ...revelations: any[]) {
   const shimLibrary = require("~/tools/indexedDB/getWebSQLShimDatabaseAPI");
 
   const perspireEnvironmentRevelation = {
@@ -17,24 +18,21 @@ function _createPerspireGateway (...revelations: any[]) {
       },
     } },
   };
-  return createGateway({ revelationSiteRootPath: process.cwd() },
-      ...revelations, perspireEnvironmentRevelation);
+  return createGateway(gatewayOptions, ...revelations, perspireEnvironmentRevelation);
 }
 
-function _createTestPerspireGateway (...revelations: any[]) {
+function _createTestPerspireGateway (gatewayOptions: Object, ...revelations: any[]) {
   const perspireEnvironmentRevelation = {
     gateway: { scribe: {
       getDatabaseAPI: require("~/tools/indexedDB/getInMemoryDatabaseAPI").getDatabaseAPI,
     }, },
   };
-
-  return createGateway({ revelationSiteRootPath: process.cwd() },
-      ...revelations, perspireEnvironmentRevelation);
+  return createGateway(gatewayOptions, ...revelations, perspireEnvironmentRevelation);
 }
 
 export default class PerspireServer {
   constructor ({
-    revelations, pluginPaths, cacheRoot, outputPath, test,
+    revelationRoot, revelations, pluginPaths, cacheRoot, outputPath, test,
     container = () => {
       const ret = new JSDOM(`
         <div id="valaa-inspire--main-container"></div>
@@ -46,6 +44,14 @@ export default class PerspireServer {
       return ret;
     } }: Object,
   ) {
+    invariantifyString(revelationRoot, "PerspireServer.options.revelationRoot",
+        { allowEmpty: true });
+    this.gatewayOptions = {
+      siteRoot: process.cwd(),
+      revelationRoot: revelationRoot[0] === "/"
+          ? revelationRoot
+          : path.join(process.cwd(), revelationRoot),
+    };
     this.revelations = revelations;
     this.pluginPaths = pluginPaths;
     this.cacheRoot = cacheRoot;
@@ -62,7 +68,7 @@ export default class PerspireServer {
 
     return (this.gateway = (!this.test
         ? _createPerspireGateway
-        : _createTestPerspireGateway)(...this.revelations)
+        : _createTestPerspireGateway)(this.gatewayOptions, ...this.revelations)
     .then(async (gateway) => {
       const viewOptions = {
         perspireMain: {

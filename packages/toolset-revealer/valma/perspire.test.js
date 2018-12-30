@@ -2,7 +2,7 @@
 
 import PerspireServer from "~/inspire/PerspireServer";
 
-const testRevelationPath = "./revelations/perspire-test/valaa.json";
+const revelationRoot = "./revelations/perspire-test";
 const expectedOutputHTML = `<html><head><meta http-equiv="refresh" content="1"></head><body>${""
   }<div id="valaa-inspire--main-container"><div id="valaa-inspire--main-root">${""
     }<div style="width: 100vw; height: 100vh;"><div>${""
@@ -17,10 +17,8 @@ async function _createAndStartPerspireServer () {
   // TODO(iridian): Implement proper logging levels. Now even verbosity 0 gives a lot of spam.
   const ret = new PerspireServer({
     test: true,
-    revelations: [
-      { "...": testRevelationPath },
-      { gateway: { verbosity: 0 } },
-    ],
+    revelationRoot,
+    revelations: [{ "...": "revela.json", gateway: { verbosity: 0 } }],
   });
   await ret.start();
   return ret;

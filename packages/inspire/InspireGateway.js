@@ -413,7 +413,7 @@ export default class InspireGateway extends LogEventGenerator {
       this.nexus.addSchemeModule(this.callRevelation(schemeModule));
     }
     for (const authorityConfig of Object.values(plugin.authorityConfigs || {})) {
-      this.nexus.addAuthorityConfig(authorityConfig);
+      this.nexus.addAuthorityPreConfig(authorityConfig);
     }
     for (const MediaDecoder_: any of Object.values(plugin.mediaDecoders || {})) {
       this.oracle.getDecoderArray().addDecoder(this.callRevelation(MediaDecoder_));

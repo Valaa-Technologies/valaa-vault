@@ -11,7 +11,7 @@ export default function createValaaTestScheme ({ config, authorityURI } = {}) {
 
     getAuthorityURIFromPartitionURI: () => authorityURI || `valaa-test:`,
 
-    createDefaultAuthorityConfig: () => ({
+    obtainAuthorityConfig: () => ({
       isLocallyPersisted: false,
       isPrimaryAuthority: true,
       isRemoteAuthority: false,

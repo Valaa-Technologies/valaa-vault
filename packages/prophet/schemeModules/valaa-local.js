@@ -1,14 +1,15 @@
 // @flow
 
 import { AuthorityProphet } from "~/prophet";
+import type { SchemeModule } from "~/prophet";
 
-export default function createValaaLocalScheme (/* { logger } */) {
+export default function createValaaLocalScheme (/* { logger } */): SchemeModule {
   return {
     scheme: "valaa-local",
 
     getAuthorityURIFromPartitionURI: () => `valaa-local:`,
 
-    createDefaultAuthorityConfig: (/* partitionURI: ValaaURI */) => ({
+    obtainAuthorityConfig: (/* partitionURI: ValaaURI, authorityPreConfig: Object */) => ({
       isLocallyPersisted: true,
       isPrimaryAuthority: true,
       isRemoteAuthority: false,

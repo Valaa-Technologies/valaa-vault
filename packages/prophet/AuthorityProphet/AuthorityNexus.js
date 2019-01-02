@@ -6,37 +6,61 @@ import Prophet from "~/prophet/api/Prophet";
 
 import { invariantify, LogEventGenerator } from "~/tools";
 
+export type AuthorityConfig = {
+  isLocallyPersisted: boolean,
+  isPrimaryAuthority: boolean,
+  isRemoteAuthority: boolean,
+};
+
+export type AuthorityProphetOptions = {
+  authorityConfig: AuthorityConfig,
+  authorityURI: ValaaURI,
+  nexus: AuthorityNexus,
+};
+
+export type SchemeModule = {
+  scheme: string,
+  getAuthorityURIFromPartitionURI: (partitionURI: ValaaURI) => ValaaURI,
+  obtainAuthorityConfig:
+      (partitionURI: ValaaURI, authorityPreConfig: ?AuthorityConfig) => ?AuthorityConfig,
+  createAuthorityProphet: (options: AuthorityProphetOptions) => Prophet,
+};
+
 export default class AuthorityNexus extends LogEventGenerator {
   _authorityProphets: Object;
-  _schemeModules: Object;
+  _schemeModules: { [scheme: string]: SchemeModule };
+  _authorityPreConfigs: { [authorityURI: string]: AuthorityConfig };
+  _authorityProphets: { [authorityURI: string]: Prophet };
 
   constructor (options: Object = {}) {
     super(options);
     this._schemeModules = {};
-    this._authorityConfigs = options.authorityConfigs || {};
+    this._authorityPreConfigs = options.authorityConfigs || {};
     this._authorityProphets = {};
   }
 
-  addSchemeModule (schemeModule: Object) {
+  addSchemeModule (schemeModule: SchemeModule) {
     invariantify(!this._schemeModules[schemeModule.scheme],
         `URI scheme '${schemeModule.scheme}' module already exists`);
     this._schemeModules[schemeModule.scheme] = schemeModule;
   }
 
-  addAuthorityConfig (authorityConfig: Object) {
-    invariantify(!this._schemeModules[authorityConfig.scheme],
-        `URI scheme '${authorityConfig.scheme}' module missing when trying to load authority${
-            ""} config for '${authorityConfig.authorityURI}'`);
-    this._authorityConfigs[String(authorityConfig.authorityURI)] = Object.freeze(authorityConfig);
+  addAuthorityPreConfig (authorityPreConfig: AuthorityConfig) {
+    invariantify(!this._schemeModules[authorityPreConfig.scheme],
+        `URI scheme '${authorityPreConfig.scheme}' module missing when trying to load${
+            ""} authority config for '${authorityPreConfig.authorityURI}'`);
+    if (!authorityPreConfig.eventVersion) authorityPreConfig.eventVersion = "0.1";
+    this._authorityPreConfigs[String(authorityPreConfig.authorityURI)] =
+        Object.freeze(authorityPreConfig);
   }
 
-  getSchemeModule (uriScheme: string) {
+  getSchemeModule (uriScheme: string): SchemeModule {
     return this.trySchemeModule(uriScheme, { require: true });
   }
 
-  trySchemeModule (uriScheme: string, { require } = {}) {
+  trySchemeModule (uriScheme: string, { require } = {}): ?SchemeModule {
     const ret = this._schemeModules[uriScheme];
-    if (!require || (typeof ret !== "undefined")) return ret;
+    if (!require || (ret !== undefined)) return ret;
     throw new Error(`Unrecognized URI scheme "${uriScheme}"`);
   }
 
@@ -46,7 +70,7 @@ export default class AuthorityNexus extends LogEventGenerator {
 
   tryAuthorityProphet (authorityURI: ValaaURI | string, { require } = {}) {
     const ret = this._authorityProphets[String(authorityURI)];
-    if (!require || (typeof ret !== "undefined")) return ret;
+    if (!require || (ret !== undefined)) return ret;
     throw new Error(`Cannot find authority prophet for "${String(authorityURI)}"`);
   }
 
@@ -55,9 +79,9 @@ export default class AuthorityNexus extends LogEventGenerator {
         this.getAuthorityURIFromPartitionURI(getValaaURI(partitionURI)));
   }
 
-  obtainAuthorityProphet (authorityURI: ValaaURI | string) {
+  obtainAuthorityProphet (authorityURI: ValaaURI | string): Prophet {
     let ret = this._authorityProphets[String(authorityURI)];
-    if (typeof ret === "undefined") {
+    if (ret === undefined) {
       ret = this._authorityProphets[String(authorityURI)]
           = this._createAuthorityProphet(getValaaURI(authorityURI));
     }
@@ -74,7 +98,7 @@ export default class AuthorityNexus extends LogEventGenerator {
       schemeModule = this.trySchemeModule(partitionURI.protocol.slice(0, -1), { require });
       if (!schemeModule) return undefined;
       const ret = schemeModule.getAuthorityURIFromPartitionURI(partitionURI, { require });
-      if (require && (typeof ret === "undefined")) {
+      if (require && (ret === undefined)) {
         throw new Error(`Scheme "${partitionURI.protocol.slice(0, -1)
             }" could not determine authority URI of partitionURI "${String(partitionURI)}"`);
       }
@@ -90,19 +114,17 @@ export default class AuthorityNexus extends LogEventGenerator {
     let authorityConfig;
     try {
       schemeModule = this.getSchemeModule(authorityURI.protocol.slice(0, -1));
-      authorityConfig = this._authorityConfigs[String(authorityURI)];
+      authorityConfig = schemeModule.obtainAuthorityConfig(authorityURI,
+          this._authorityPreConfigs[String(authorityURI)]);
       if (!authorityConfig) {
-        authorityConfig = schemeModule.createDefaultAuthorityConfig(authorityURI);
-        if (!authorityConfig) {
-          throw new Error(`No Valaa authority config found for "${String(authorityURI)}"`);
-        }
+        throw new Error(`No Valaa authority config found for "${String(authorityURI)}"`);
       }
       return schemeModule.createAuthorityProphet({ authorityURI, authorityConfig, nexus: this });
     } catch (error) {
       throw this.wrapErrorEvent(error, `createAuthorityProphet("${String(authorityURI)}")`,
           "\n\tschemeModule:", schemeModule,
           "\n\tauthorityConfig:", authorityConfig,
-          "\n\tconfigs:", this._authorityConfigs);
+          "\n\tconfigs:", this._authorityPreConfigs);
     }
   }
 }

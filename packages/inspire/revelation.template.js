@@ -58,7 +58,7 @@ function schemeModule () {
   return {
     scheme: "",
     getAuthorityURIFromPartitionURI () {},
-    createDefaultAuthorityConfig () {},
+    obtainAuthorityConfig () {},
     createAuthorityProphet () {},
   };
 }

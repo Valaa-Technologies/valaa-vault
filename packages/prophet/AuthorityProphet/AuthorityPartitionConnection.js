@@ -32,15 +32,24 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
   async narrateEventLog (): Promise<any> { return {}; }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions): ChronicleRequest {
-    if (this.isRemoteAuthority()) {
-      throw new Error(`${this.constructor.name
-          }.chronicleEvents not implemented by remote authority partition "${this.getName()}"`);
+    if (this.isRemoteAuthority() && !options.remoteChronicleEventsProcess) {
+      throw new Error(`Failed to chronicle events to ${this.getName()}: ${this.constructor.name
+          }.chronicleEvents not overridden and options.remoteChronicleEventsProcess not defined`);
     }
+    const receiveTruths = this.getReceiveTruths(options.receivedTruths);
     const resultBase = new AuthorityEventResult(null, {
       connection: this,
       isPrimary: this.isPrimaryAuthority(),
-      receivedTruthsProcess: !this.isPrimaryAuthority() ? []
-          : this.getReceiveTruths(options.receiveTruths)(events),
+      remoteChronicleEventsProcess: options.remoteChronicleEventsProcess,
+      receiveTruthsProcess:
+          options.remoteChronicleEventsProcess
+              ? thenChainEagerly(options.remoteChronicleEventsProcess, [
+                individualRemoteEventProcesses => Promise.all(individualRemoteEventProcesses),
+                remoteEvents => receiveTruths(remoteEvents),
+              ])
+          : this.isPrimaryAuthority()
+              ? receiveTruths(events)
+          : [],
     });
     return {
       eventResults: events.map((event, index) => {
@@ -74,12 +83,18 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
 
 export class AuthorityEventResult extends ChronicleEventResult {
   getLocalEvent () {
-    return thenChainEagerly(this.receivedTruthsProcess,
-        (receivedTruths) => receivedTruths[this.index]);
+    return thenChainEagerly(this.receiveTruthsProcess,
+        receivedTruths => receivedTruths[this.index],
+        this.onError);
   }
   getTruthEvent () {
-    if (this.isPrimary) return this.getLocalEvent();
-    throw new Error(`Non-primary authority '${this.connection.getName()
-        }' cannot deliver truths (by default)`);
+    if (!this.isPrimary) {
+      throw new Error(`Non-primary authority '${this.connection.getName()
+          }' cannot deliver truths (by default)`);
+    }
+    if (!this.remoteChronicleEventsProcess) return this.getLocalEvent(); // implies: not remote
+    return thenChainEagerly(this.remoteChronicleEventsProcess,
+        chronicledEvents => chronicledEvents[this.index],
+        this.onError);
   }
 }

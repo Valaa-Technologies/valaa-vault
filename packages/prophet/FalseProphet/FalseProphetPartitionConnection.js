@@ -59,6 +59,23 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
         });
   }
 
+  isLocallyPersisted () {
+    return this._isLocallyPersisted !== undefined ? this._isLocallyPersisted
+        : (this._isLocallyPersisted = this._upstreamConnection.isLocallyPersisted());
+  }
+  isPrimaryAuthority () {
+    return this._isPrimaryAuthority !== undefined ? this._isPrimaryAuthority
+        : (this._isPrimaryAuthority = this._upstreamConnection.isPrimaryAuthority());
+  }
+  isRemoteAuthority () {
+    return this._isRemoteAuthority !== undefined ? this._isRemoteAuthority
+        : (this._isRemoteAuthority = this._upstreamConnection.isRemoteAuthority());
+  }
+  getEventVersion () {
+    return this._eventVersion !== undefined ? this._eventVersion
+        : (this._eventVersion = this._upstreamConnection.getEventVersion());
+  }
+
   getStatus () {
     return {
       truths: this._headEventId,

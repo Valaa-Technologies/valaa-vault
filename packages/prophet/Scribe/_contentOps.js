@@ -171,15 +171,15 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
   return [{ mediaEntry: newEntry }];
 }
 
-export async function _retrySyncMedia (connection: ScribePartitionConnection, mediaEntry: Object,
-  options: {
-    getNextBackoffSeconds?: Function, retryTimes?: number, delayBaseSeconds?: number,
-    retrieveMediaBuffer: RetrieveMediaBuffer,
-  } = {},
+export async function _retryingTwoWaySyncMediaContent (connection: ScribePartitionConnection,
+    mediaEntry: Object, options: {
+      getNextBackoffSeconds?: Function, retryTimes?: number, delayBaseSeconds?: number,
+      retrieveMediaBuffer: RetrieveMediaBuffer,
+    } = {},
 ) {
   const mediaInfo = mediaEntry.mediaInfo;
   let previousBackoff;
-  invariantifyString(mediaEntry.mediaId, "readPersistAndUpdateMedia.newEntry.mediaId",
+  invariantifyString(mediaEntry.mediaId, "_retryingTwoWaySyncMediaContent.mediaEntry.mediaId",
       {}, "\n\tnewEntry", mediaEntry);
   mediaInfo.mediaId = mediaEntry.mediaId;
   let getNextBackoffSeconds = options.getNextBackoffSeconds;
@@ -199,7 +199,7 @@ export async function _retrySyncMedia (connection: ScribePartitionConnection, me
         content = content
             || connection._prophet.tryGetCachedBvobContent(mediaInfo.bvobId)
             || (options.retrieveMediaBuffer && (await options.retrieveMediaBuffer(mediaInfo)));
-        if (typeof content !== "undefined") {
+        if (content !== undefined) {
         // TODO(iridian): Determine whether media content should be pre-cached or not.
           await connection.prepareBvob(content, mediaInfo).persistProcess;
         }

@@ -65,7 +65,6 @@ export default class Prophet extends LogEventGenerator {
     this._followers = new Map();
     this._connections = {};
     this.setUpstream(upstream);
-    this._upstream = upstream;
   }
 
   initiate (): Promise<Prophet> | Prophet {}

@@ -11,7 +11,7 @@ import {
 import { dumpObject, thenChainEagerly, vdon } from "~/tools";
 
 import ScribePartitionConnection from "./ScribePartitionConnection";
-import { _retrySyncMedia } from "./_contentOps";
+import { _retryingTwoWaySyncMediaContent } from "./_contentOps";
 
 export const vdoc = vdon({
   "...": { heading:
@@ -258,9 +258,9 @@ export function _receiveEvents (
   const requestOptions = { retryTimes: 4, delayBaseSeconds: 5, retrieveMediaBuffer };
   const persist = connection.isLocallyPersisted();
 
-  const mediaProcesses = persist && Promise.all(
+  const mediaContentSyncs = persist && Promise.all(
       Object.values(mediaPreOps).map(mediaEntry =>
-          _retrySyncMedia(connection, mediaEntry, requestOptions)));
+          _retryingTwoWaySyncMediaContent(connection, mediaEntry, requestOptions)));
 
   if (downstreamReceiveTruths) {
     // Send all the truths downstream together after all of their media
@@ -275,7 +275,7 @@ export function _receiveEvents (
     // immediately and have the UI start responding to the incoming
     // changes.
     // This delivery is unordered: downstream must handle ordering.
-    thenChainEagerly(mediaProcesses,
+    thenChainEagerly(mediaContentSyncs,
         () => downstreamReceiveTruths(newActions, retrieveMediaBuffer),
         onError);
   }
@@ -299,9 +299,9 @@ export function _receiveEvents (
     writtenEvents => {
       (writtenEvents || []).forEach(
           (event, index) => { receivedActions[newActionIndex + index] = event; });
-      return mediaProcesses;
+      return mediaContentSyncs;
     },
-    updatedEntries => updatedEntries && connection._updateMediaEntries(updatedEntries),
+    syncedMediaEntries => syncedMediaEntries && connection._updateMediaEntries(syncedMediaEntries),
     () => receivedActions,
   ], error => {
     if ((error.originalError || error).cacheConflict) error.revise = true;

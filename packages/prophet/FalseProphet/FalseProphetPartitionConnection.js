@@ -8,12 +8,12 @@ import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-dup
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import { NarrateOptions, ChronicleOptions, ChronicleRequest } from "~/prophet/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/prophet/tools/EventAspects";
+import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
 
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { Prophecy, _reviewPurgedProphecy, _reviseSchism } from "./_prophecyOps";
 import { _confirmCommands, _purgeAndRecomposeStories } from "./_storyOps";
-import { ASPECTS_VERSION } from "./_universalizationOps";
 
 /**
  * @export
@@ -86,7 +86,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
         //     this._unconfirmedCommands.length, "\n\tevents:", ...dumpObject(events));
         for (const event of events) {
           if (!event.aspects || !event.aspects.version) {
-            initializeAspects(event, { version: ASPECTS_VERSION });
+            initializeAspects(event, { version: EVENT_VERSION });
           }
           obtainAspect(event, "log").index = this._headEventId + this._unconfirmedCommands.length;
           this._unconfirmedCommands.push(event);

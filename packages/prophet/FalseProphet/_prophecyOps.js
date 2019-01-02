@@ -317,6 +317,13 @@ class ProphecyOperation extends ProphecyEventResult {
             throw new Error(`Trying to chronicle events to a frozen partition ${
                 connection.getName()}`);
           }
+          const commandEventVersion = partition.commandEvent.aspects.version;
+          const connectionEventVersion = connection.getEventVersion();
+          if (!connectionEventVersion || (connectionEventVersion !== commandEventVersion)) {
+            throw new Error(`Command event version "${commandEventVersion
+                }" not supported by connection ${connection.getName()} which only supports "${
+                connectionEventVersion}"`);
+          }
           // Perform other partition validation
           // TODO(iridian): extract partition content
           partition.validatedConnection = connection;

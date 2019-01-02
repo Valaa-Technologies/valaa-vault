@@ -5,11 +5,11 @@ import { getActionFromPassage, Story } from "~/raem/redux/Bard";
 
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 import { initializeAspects } from "~/prophet/tools/EventAspects";
+import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
 
 import { dumpObject, outputError } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
-import { ASPECTS_VERSION } from "./_universalizationOps";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 import { Prophecy, _confirmProphecyCommand, _reformProphecyCommand, _rejectHereticProphecy }
     from "./_prophecyOps";
@@ -18,7 +18,7 @@ import StoryRecital from "./StoryRecital";
 export function _composeStoryFromEvent (falseProphet: FalseProphet, event: EventBase,
     dispatchDescription: string, timed: ?EventBase, transactionInfo?: TransactionInfo) {
   const previousState = falseProphet.getState();
-  if (!event.aspects) initializeAspects(event, { version: ASPECTS_VERSION });
+  if (!event.aspects) initializeAspects(event, { version: EVENT_VERSION });
   let story = (transactionInfo && transactionInfo._tryFastForwardOnCorpus(falseProphet.corpus));
   if (!story) {
     // If no transaction or transaction is not a fast-forward, do a regular dispatch

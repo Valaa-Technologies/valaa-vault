@@ -7,16 +7,15 @@ import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-dup
 import GhostPath, { ghostPathFromJSON } from "~/raem/state/GhostPath";
 
 import { initializeAspects } from "~/prophet/tools/EventAspects";
+import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
 
 import trivialClone from "~/tools/trivialClone";
 import wrapError, { dumpObject, debugObjectType } from "~/tools/wrapError";
 
 import FalseProphet from "./FalseProphet";
 
-export const ASPECTS_VERSION = "0.2";
-
 export function universalizeEvent (event: EventBase): EventBase {
-  const ret = initializeAspects(universalizeAction(event), { version: ASPECTS_VERSION });
+  const ret = initializeAspects(universalizeAction(event), { version: EVENT_VERSION });
   if (!ret.local) ret.local = {};
   ret.local.isBeingUniversalized = true;
   return ret;

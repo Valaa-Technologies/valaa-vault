@@ -7,6 +7,7 @@ import Prophet from "~/prophet/api/Prophet";
 import { invariantify, LogEventGenerator } from "~/tools";
 
 export type AuthorityConfig = {
+  eventVersion: string,
   isLocallyPersisted: boolean,
   isPrimaryAuthority: boolean,
   isRemoteAuthority: boolean,

@@ -14,6 +14,7 @@ import {
   Scribe, Follower,
 } from "~/prophet";
 import { obtainAspect } from "~/prophet/tools/EventAspects";
+import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
 
 import ProphetTestAPI from "~/prophet/test/ProphetTestAPI";
 import createValaaTestScheme, { TestProphet, TestPartitionConnection }
@@ -304,6 +305,7 @@ export function createTestMockProphet (configOverrides: Object = {}) {
   return new TestProphet({
     authorityURI: createPartitionURI("valaa-test:"),
     authorityConfig: {
+      eventVersion: EVENT_VERSION,
       isLocallyPersisted: true,
       isPrimaryAuthority: true,
       isRemoteAuthority: false,

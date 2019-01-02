@@ -64,6 +64,7 @@ export default class PartitionConnection extends Follower {
   isLocallyPersisted () { return this._upstreamConnection.isLocallyPersisted(); }
   isPrimaryAuthority () { return this._upstreamConnection.isPrimaryAuthority(); }
   isRemoteAuthority () { return this._upstreamConnection.isRemoteAuthority(); }
+  getEventVersion () { return this._upstreamConnection.getEventVersion(); }
 
   getReceiveTruths (downstreamReceiveTruths?: ReceiveEvents = this._downstreamReceiveTruths):
       ReceiveEvents {

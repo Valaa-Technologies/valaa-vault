@@ -19,6 +19,7 @@ import { createBardMiddleware } from "~/raem/redux/Bard";
 import Corpus from "~/raem/Corpus";
 
 import upgradeEventTo0Dot2 from "~/prophet/tools/event-version-0.2/upgradeEventTo0Dot2";
+import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
 
 import ValaaEngine from "~/engine/ValaaEngine";
 import EngineContentAPI from "~/engine/EngineContentAPI";
@@ -34,8 +35,6 @@ import { arrayBufferFromBase64 } from "~/tools/base64";
 
 const { AuthorityNexus, FalseProphet, Oracle, Prophet, Scribe } = valosProphet;
 const { dumpObject, inBrowser, invariantify, LogEventGenerator } = valosTools;
-
-const EVENT_VERSION = process.env.EVENT_VERSION || "0.2";
 
 export default class InspireGateway extends LogEventGenerator {
   constructor (options: Object) {

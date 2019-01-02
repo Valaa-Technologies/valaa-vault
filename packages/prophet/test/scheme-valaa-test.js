@@ -2,7 +2,7 @@
 
 import { EventBase } from "~/raem/events";
 
-import { AuthorityProphet, AuthorityPartitionConnection } from "~/prophet";
+import { AuthorityProphet, AuthorityPartitionConnection, EVENT_VERSION } from "~/prophet";
 import { ChronicleRequest, ChronicleOptions, ChronicleEventResult } from "~/prophet/api/types";
 
 export default function createValaaTestScheme ({ config, authorityURI } = {}) {
@@ -12,6 +12,7 @@ export default function createValaaTestScheme ({ config, authorityURI } = {}) {
     getAuthorityURIFromPartitionURI: () => authorityURI || `valaa-test:`,
 
     obtainAuthorityConfig: () => ({
+      eventVersion: EVENT_VERSION,
       isLocallyPersisted: false,
       isPrimaryAuthority: true,
       isRemoteAuthority: false,

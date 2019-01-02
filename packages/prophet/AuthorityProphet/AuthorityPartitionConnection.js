@@ -20,6 +20,7 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
   isLocallyPersisted () { return this._prophet.isLocallyPersisted(); }
   isPrimaryAuthority () { return this._prophet.isPrimaryAuthority(); }
   isRemoteAuthority () { return this._prophet.isRemoteAuthority(); }
+  getEventVersion () { return this._prophet.getEventVersion(); }
 
   isConnected () {
     if (!this.isRemoteAuthority()) return true;

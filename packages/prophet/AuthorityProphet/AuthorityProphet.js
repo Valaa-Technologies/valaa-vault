@@ -31,6 +31,7 @@ export default class AuthorityProphet extends Prophet {
   isLocallyPersisted () { return this._authorityConfig.isLocallyPersisted; }
   isPrimaryAuthority () { return this._authorityConfig.isPrimaryAuthority; }
   isRemoteAuthority () { return this._authorityConfig.isRemoteAuthority; }
+  getEventVersion () { return this._authorityConfig.eventVersion; }
 
   /*
     Authority qualities to think about (with overlapping semantics):

@@ -9,6 +9,8 @@ import schemeModules from "./schemeModules";
 
 export default Valaa.exportPlugin({ name: "@valos/prophet", ContentAPI, schemeModules });
 
+export {                   default as EVENT_VERSION } from "./tools/EVENT_VERSION";
+
 export {
                                       ContentAPI,
                         ContentAPI as EngineContentAPI,
@@ -38,3 +40,8 @@ export {
                                       AuthorityEventResult,
 } from "./AuthorityProphet/AuthorityPartitionConnection";
 export {                   default as AuthorityNexus } from "./AuthorityProphet/AuthorityNexus";
+export type {
+                                      AuthorityConfig,
+                                      AuthorityProphetOptions,
+                                      SchemeModule,
+} from "./AuthorityNexus";

@@ -213,4 +213,8 @@ export default class Prophet extends LogEventGenerator {
         "DEPRECATED: prefer getConnectionsPendingSync instead of getPendingPartitionConnections");
     return this.getSyncedConnections();
   }
+
+  obtainPartitionAuthority (partitionURI: string | ValaaURI) {
+    return this._upstream.obtainPartitionAuthority(partitionURI);
+  }
 }

@@ -25,7 +25,7 @@ import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
 import type FieldUpdate from "~/engine/Vrapper/FieldUpdate";
 
-import { dumpify, outputCollapsedError, wrapError } from "~/tools";
+import { debugObjectType, dumpify, outputCollapsedError, wrapError } from "~/tools";
 
 export default class ValaaEngine extends Cog {
   constructor ({ name, logger, prophet, timeDilation = 1.0, verbosity }: Object) {
@@ -41,6 +41,44 @@ export default class ValaaEngine extends Cog {
     this.motor = new Motor({ engine: this, name: `${name}/Motor`, prophet, timeDilation });
     this.addCog(this.motor);
     this.discourse = this._connectWithProphet(prophet);
+    this._activeIdentities = {};
+    this._identityManager = {
+      add: (identityPartitionURI: any /* , options: {} */) => {
+        try {
+          if (!identityPartitionURI) {
+            throw new Error(`identityPartition required, got: ${
+                debugObjectType(identityPartitionURI)}`);
+          }
+          const identityAuthority = prophet.obtainPartitionAuthority(identityPartitionURI);
+          if (!identityAuthority) {
+            throw new Error(`Can't locate the authority for identityPartition: <${
+                identityPartitionURI}>`);
+          }
+          this._activeIdentities[String(identityPartitionURI)] = true;
+          return true;
+        } catch (error) {
+          throw this.wrapErrorEvent(error, new Error("Valaa.identity.add"),
+              "\n\tidentityPartitionURI:", ...dumpObject(identityPartitionURI));
+        }
+      },
+      remove: (identityPartitionURI: any) => {
+        try {
+          if (!identityPartitionURI) {
+            throw new Error(`identityPartition required, got: ${
+                debugObjectType(identityPartitionURI)}`);
+          }
+          const uriString = String(identityPartitionURI);
+          if (this._activeIdentities[uriString]) {
+            throw new Error(`No such active identity: <${uriString}>`);
+          }
+          delete this._activeIdentities[uriString];
+          return true;
+        } catch (error) {
+          throw this.wrapErrorEvent(error, new Error("Valaa.identity.remove"),
+              "\n\tidentityPartitionURI:", ...dumpObject(identityPartitionURI));
+        }
+      },
+    };
 
     this._hostObjectDescriptors = new Map();
     this._rootScope = {};
@@ -81,7 +119,9 @@ export default class ValaaEngine extends Cog {
   getHostObjectPrototype (typeName: string) {
     return this._rootScope.Valaa[typeName].hostObjectPrototype;
   }
-
+  getIdentityManager () {
+    return this._identityManager;
+  }
   setRootScopeEntry (entryName: string, value: any) {
     this._rootScope[entryName] = value;
   }

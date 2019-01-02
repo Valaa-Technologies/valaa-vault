@@ -42,10 +42,18 @@ export default class Oracle extends Prophet {
 
   getDecoderArray () { return this._decoderArray; }
 
+  obtainPartitionAuthority (partitionURI: ValaaURI | string) {
+    const ret = this._authorityNexus.obtainAuthorityProphetOfPartition(partitionURI);
+    if (!ret) {
+      throw new Error(`Can't obtain authority for partition <${partitionURI}>`);
+    }
+    return ret;
+  }
+
   _createPartitionConnection (partitionURI: ValaaURI, options: ConnectOptions) {
     const authorityProphet = this._authorityNexus.obtainAuthorityProphetOfPartition(partitionURI);
     if (!authorityProphet) {
-      throw new Error(`Can't obtain authority for partition URI '${partitionURI}'`);
+      throw new Error(`Can't obtain authority for partition <${partitionURI}>`);
     }
     return new OraclePartitionConnection({
       partitionURI, prophet: this, verbosity: this.getVerbosity(),

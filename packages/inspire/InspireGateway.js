@@ -211,6 +211,8 @@ export default class InspireGateway extends LogEventGenerator {
         extendValaaSpaceWithInspire(rootScope, hostDescriptors, defaultAuthorityConfig, engine);
       }
       rootScope.Valaa.gateway = this;
+      rootScope.Valaa.identity = engine.getIdentityManager();
+
       ret[viewName] = createView({ engine, name: `${viewConfig.name} View` })
           .attach(viewConfig);
       this.warnEvent(`Opened View ${viewName}`,

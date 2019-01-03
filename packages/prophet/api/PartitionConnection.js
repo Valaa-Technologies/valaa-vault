@@ -10,7 +10,8 @@ import { ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleR
 import Follower from "~/prophet/api/Follower";
 
 import Logger from "~/tools/Logger";
-import { dumpObject, invariantifyArray, invariantifyObject, thenChainEagerly } from "~/tools";
+import { dumpObject, invariantifyArray, invariantifyObject, isPromise, thenChainEagerly }
+    from "~/tools";
 
 /**
  * Interface for sending commands to upstream and registering for downstream truth updates
@@ -123,8 +124,29 @@ export default class PartitionConnection extends Follower {
         "\n\tBegun connecting with options", ...dumpObject(options), ...dumpObject(this)
       ]);
       return (this._activeConnection = thenChainEagerly(
-          this._doConnect(options, onError),
+          this._doConnect(Object.create(options), onError),
           (connectResults) => {
+            if (options.narrateOptions !== false) {
+                const actionCount = Object.values(connectResults).reduce(
+                  (s, log) => s + (Array.isArray(log) ? log.length : 0),
+                  options.eventIdBegin || 0);
+              if (!actionCount && (options.newPartition === false)) {
+                throw new Error(`No events found when connecting to an existing partition '${
+                  this.getPartitionURI().toString()}'`);
+              } else if (actionCount && (options.newPartition === true)) {
+                throw new Error(`Existing events found when trying to create a new partition '${
+                  this.getPartitionURI().toString()}'`);
+              }
+              if ((options.requireLatestMediaContents !== false)
+                  && (connectResults.mediaRetrievalStatus
+                      || { latestFailures: [] }).latestFailures.length) {
+                // FIXME(iridian): This error temporarily demoted to log error
+                this.outputErrorEvent(new Error(`Failed to connect to partition: encountered ${
+                  connectResults.mediaRetrievalStatus.latestFailures.length
+                    } latest media content retrieval failures (and ${
+                    ""}options.requireLatestMediaContents does not equal false).`));
+              }
+            }
             this.warnEvent(1, () => [
               "\n\tDone connecting with results:", connectResults,
               "\n\tstatus:", this.getStatus(),
@@ -135,20 +157,24 @@ export default class PartitionConnection extends Follower {
       ));
     } catch (error) { return onError(error); }
     function errorOnConnect (wrapper, error) {
-      throw this.wrapErrorEvent(error, wrapper, "\n\toptions:", ...dumpObject(options));
+      throw this.wrapErrorEvent(error, wrapper,
+          "\n\toptions:", ...dumpObject(options));
     }
   }
 
   _doConnect (options: ConnectOptions, onError: Function) {
-    if (!this._prophet._upstream) throw new Error("Cannot connect: upstream missing");
+    if (!this._prophet._upstream) {
+      throw new Error("Cannot connect using default _doConnect with no upstream");
+    }
     options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
     options.receiveCommands = this.getReceiveCommands(options.receiveCommands);
-    const postponeNarrateOptions = options.narrateOptions;
+    const postponedNarrateOptions = options.narrateOptions;
     options.narrateOptions = false;
     this.setUpstreamConnection(this._prophet._upstream.acquirePartitionConnection(
         this.getPartitionURI(), options));
     return thenChainEagerly(this._upstreamConnection.getActiveConnection(),
-        () => (postponeNarrateOptions && this.narrateEventLog(postponeNarrateOptions)),
+        () => ((postponedNarrateOptions !== false)
+            && this.narrateEventLog(postponedNarrateOptions)),
         onError);
   }
 
@@ -171,6 +197,7 @@ export default class PartitionConnection extends Follower {
   }
 
   setUpstreamConnection (connection: PartitionConnection) {
+    if (isPromise(connection)) throw new Error("setUpstreamConnection must not be a promise");
     this._upstreamConnection = connection;
   }
 
@@ -196,7 +223,8 @@ export default class PartitionConnection extends Follower {
             this.getName()}`);
       }
       if (this._activeConnection) return this._activeConnection;
-      throw new Error(`Connection not being activated`);
+      throw new Error(
+          `Cannot get an active connection promise from connection which is not being activated`);
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error(`getActiveConnection(${
           requireSynchronous ? "sync" : "async"})`));

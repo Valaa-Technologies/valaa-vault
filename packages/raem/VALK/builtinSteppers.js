@@ -817,7 +817,7 @@ function _advanceCapture (valker, thisArgument, vakon, callScope, capturingValke
               : !advanceError ? `call/releaseTransaction (valk caller with active valker)`
               : `call/releaseTransaction({ abort: true }) (valk caller with active valker)`,
           ...((transactionError && advanceError)
-              ? ["\n\t\tabort-cause:", ...dumpObject(advanceError)] : []),
+              ? ["\n\t\tadvance abort cause:", ...dumpObject(advanceError)] : []),
           "\n\tthis:", ...dumpObject(thisArgument),
           "\n\tcallee vakon:", ...dumpKuery(vakon),
           "\n\tscope:", ...dumpObject(callScope),
@@ -846,7 +846,7 @@ function _runCapture (valker, thisArgument, vakon, callScope, capturingValker: V
     advanceError = error;
   }
 
-  let releaseError;
+  let transactionError;
   try {
     if (!advanceError) {
       transaction.releaseTransaction();
@@ -854,24 +854,26 @@ function _runCapture (valker, thisArgument, vakon, callScope, capturingValker: V
     }
     transaction.releaseTransaction({ abort: true });
   } catch (error) {
-    releaseError = error;
+    transactionError = error;
   }
   let opName;
-  if (!advanceError) {
+  if (transactionError) {
+    const prefix = `call/releaseTransaction ${advanceError ? "({ abort: true })" : "()"}`;
     opName = (actualValker !== valker.rootDiscourse)
-        ? `call/releaseTransaction (non-valk caller in active transactional callback ${
-            ""}context)`
-        : `call/releaseTransaction (non-valk caller as outermost context)`;
+        ? `${prefix} (non-valk caller in active transactional callback context)`
+        : `${prefix} (non-valk caller as outermost context)`;
   } else if (actualValker !== valker.rootDiscourse) {
     opName = `call/run (non-valk caller in active transactional callback context)`;
   } else {
     opName = `call/run (non-valk caller as outermost context)`;
-    const connectingMissingPartitions = tryConnectToMissingPartitionsAndThen(error,
+    const connectingMissingPartitions = tryConnectToMissingPartitionsAndThen(advanceError,
         () => _runCapture(valker, thisArgument, vakon, callScope, capturingValker));
     if (connectingMissingPartitions) return connectingMissingPartitions;
   }
   throw capturingValker.addVALKRuntimeErrorStackFrame(
-      actualValker.wrapErrorEvent(advanceError || releaseError, opName,
+      actualValker.wrapErrorEvent(transactionError || advanceError, opName,
+          ...((transactionError && advanceError)
+              ? ["\n\t\tadvance abort cause:", ...dumpObject(advanceError)] : []),
           "\n\ttransaction:", ...dumpObject(transaction),
           "\n\tthis:", ...dumpObject(thisArgument),
           "\n\tcallee vakon:", ...dumpKuery(vakon),

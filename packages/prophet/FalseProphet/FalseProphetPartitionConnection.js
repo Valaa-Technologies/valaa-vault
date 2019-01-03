@@ -6,7 +6,7 @@ import ValaaReference from "~/raem/ValaaReference";
 import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import { NarrateOptions, ChronicleOptions, ChronicleRequest } from "~/prophet/api/types";
+import { ChronicleOptions, ChronicleRequest } from "~/prophet/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/prophet/tools/EventAspects";
 import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
 

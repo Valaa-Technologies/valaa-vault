@@ -130,19 +130,18 @@ export default class Prophet extends LogEventGenerator {
         throw new Error(
             "Can't create new partition connection with options.newConnection === false");
       }
-      connection = this._createPartitionConnection(partitionURI, options);
+      connection = this._createPartitionConnection(partitionURI, { ...options, connect: false });
       if (!connection) return undefined;
       connection.addReference();
       this._connections[String(partitionURI)] = connection;
-      if (options.connect !== false) {
-        connection.connect(options); // Initiates the connection but doesn't wait for it to complete.
-      }
+      if (options.connect !== false) connection.connect(options); // Initiate connect but dont wait.
       return connection;
     } catch (error) {
       throw this.wrapErrorEvent(error,
           new Error(`acquirePartitionConnection(${String(partitionURI)})`),
           "\n\toptions:", ...dumpObject(options));
     }
+
       /*
       if (options.newPartition || options.synchronous) {
         if (options.synchronous) return connection;

@@ -56,7 +56,8 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
       }));
 
   if ((options.fullNarrate !== true)
-      && ((ret.scribeEventLog || []).length || (ret.scribeCommandQueue || []).length)) {
+      && (options.newPartition
+          || (ret.scribeEventLog || []).length || (ret.scribeCommandQueue || []).length)) {
     connection.logEvent(2, () => [
       "Initiated async upstream narration, local narration results:", ret,
     ]);

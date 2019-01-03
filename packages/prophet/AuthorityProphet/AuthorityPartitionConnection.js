@@ -29,7 +29,7 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
 
   _doConnect (/* options: ConnectOptions, onError: Function */) {}
 
-  async narrateEventLog (options: ?NarrateOptions = {}): Promise<any> {
+  narrateEventLog (options: ?NarrateOptions = {}): Promise<any> {
     return !options ? undefined : {};
   }
 

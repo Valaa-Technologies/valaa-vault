@@ -131,16 +131,18 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     this.testPartitionURI = options.testPartitionURI
         || (options.testAuthorityURI && createPartitionURI(this.testAuthorityURI, "test_partition"))
         || testPartitionURI;
+    const activeTestPartitionConnection = this.prophet.acquirePartitionConnection(
+        this.testPartitionURI, { newPartition: true }).getActiveConnection();
 
-    this.testPartitionConnection = thenChainEagerly(
-        this.prophet.acquirePartitionConnection(this.testPartitionURI, { newPartition: true })
-        .getActiveConnection(), [
-          (connection) => Promise.all([
-            connection,
-            this.chronicleEvent(createdTestPartitionEntity, { isTruth: true }).getPremiereStory(),
-          ]),
-          ([connection]) => (this.testPartitionConnection = connection),
-        ]);
+    this.testPartitionConnection = thenChainEagerly(activeTestPartitionConnection, [
+      (connection) => {
+        const testPartitionStory =
+            this.chronicleEvent(createdTestPartitionEntity, { isTruth: true })
+            .getPremiereStory();
+        return Promise.all([connection, testPartitionStory]);
+      },
+      ([connection]) => (this.testPartitionConnection = connection),
+    ]);
   }
 
   chronicleEvents (events: EventBase[], ...rest: any) {

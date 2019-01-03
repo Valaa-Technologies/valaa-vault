@@ -107,7 +107,9 @@ class TextFileEditor extends MediaContentEditor {
       target.setField("content", createBvob(), { transaction });
       transaction.releaseTransaction();
     } finally {
-      if (transaction.isCommittable && transaction.isCommittable()) transaction.abort();
+      if (transaction.isCommittable && transaction.isCommittable()) {
+        transaction.releaseTransaction({ abort: true });
+      }
     }
   }
 

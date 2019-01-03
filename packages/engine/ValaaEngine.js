@@ -276,8 +276,9 @@ export default class ValaaEngine extends Cog {
     let ret;
     const isRecombine = Array.isArray(directives);
     const directiveArray = isRecombine ? directives : [directives];
+    let transaction;
     try {
-      const transaction = (options.transaction || this.discourse).acquireTransaction("construct");
+      transaction = (options.transaction || this.discourse).acquireTransaction("construct");
       options.transaction = transaction;
       if (!options.head) options.head = this;
       constructParams = createConstructParams(options);
@@ -321,9 +322,9 @@ export default class ValaaEngine extends Cog {
       });
 
       transaction.releaseTransaction();
-
       return isRecombine ? ret : ret[0];
     } catch (error) {
+      if (transaction) transaction.abortTransaction();
       throw localWrapError(this, error, `${constructCommand.name}()`);
     }
     function localWrapError (self, error, operationName) {
@@ -353,7 +354,8 @@ export default class ValaaEngine extends Cog {
 
   _updateProperties (target: Vrapper, properties: Object, options: VALKOptions) {
     for (const propertyName of Object.keys(properties)) {
-      target.alterProperty(propertyName, VALEK.fromValue(properties[propertyName]), options);
+      target.alterProperty(propertyName, VALEK.fromValue(properties[propertyName]),
+          Object.create(options));
     }
   }
 

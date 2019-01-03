@@ -25,7 +25,7 @@ import valaaUUID from "~/tools/id/valaaUUID";
 export default class FalseProphetDiscourse extends Discourse {
   _follower: Follower;
   _prophet: Prophet;
-  _transactionInfo: ?TransactionInfo = null;
+  _transactionState: ?TransactionInfo = null;
 
   constructor ({
     follower, prophet, verbosity, logger, packFromHost, unpackToHost, builtinSteppers,
@@ -46,8 +46,8 @@ export default class FalseProphetDiscourse extends Discourse {
   getProphet () { return this._prophet; }
 
   debugId (options: ?Object): string {
-    return `${this.constructor.name}(${this._transactionInfo
-            ? (this._transactionInfo.name || "stub-transaction") : "non-transactional"}: ${
+    return `${this.constructor.name}(${this._transactionState
+            ? (this._transactionState.name || "stub-transaction") : "non-transactional"}: ${
         this._follower.getName(options)} <-> ${this._prophet.debugId(options)})`;
   }
 
@@ -65,7 +65,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
       ChroniclePropheciesRequest {
-    if (this._transactionInfo) return this._transactionInfo.chronicleEvents(events, options);
+    if (this._transactionState) return this._transactionState.chronicleEvents(events, options);
     try {
       options.discourse = this;
       const ret = this._prophet.chronicleEvents(events, options);
@@ -117,7 +117,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   assignNewResourceId (targetAction: EventBase, partitionURI: string, explicitRawId?: string) {
     if (!partitionURI) throw new Error("assignNewResourceId.partitionURI missing");
-    const root = this._transactionInfo ? this._transactionInfo.obtainRootEvent() : targetAction;
+    const root = this._transactionState ? this._transactionState.obtainRootEvent() : targetAction;
     if (!tryAspect(root, "command").id) this._prophet._assignCommandId(root, this);
     const partitions = (root.local || (root.local = {})).partitions || (root.local.partitions = {});
     const partition = partitions[partitionURI] || (partitions[partitionURI] = {});
@@ -170,7 +170,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   assignNewPartitionId (targetAction: EventBase, partitionAuthorityURI: string,
       explicitPartitionRawId?: string) {
-    const root = this._transactionInfo ? this._transactionInfo.obtainRootEvent() : targetAction;
+    const root = this._transactionState ? this._transactionState.obtainRootEvent() : targetAction;
     if (!tryAspect(root, "command").id) this._prophet._assignCommandId(root, this);
     const partitionRawId = explicitPartitionRawId
         || createPartitionId0Dot2(root.aspects.command.id, partitionAuthorityURI);
@@ -202,23 +202,30 @@ export default class FalseProphetDiscourse extends Discourse {
    * is then sent upstream.
    */
   acquireTransaction (name: string): FalseProphetDiscourse {
-    if (this._transactionInfo) return this._transactionInfo.createNestedTransaction(this, name);
-    const transactionRoot = Object.create(this);
-    transactionRoot._transactionInfo = new TransactionInfo(transactionRoot, name);
-    return transactionRoot;
+    let ret;
+    const transactionName = `${name}/${++FalseProphetDiscourse.nestIndex}`;
+    if (!this._transactionState) {
+      ret = Object.create(this);
+      const transactionState = ret._transactionState = new TransactionInfo(ret, name);
+      ret.releaseTransaction = function releaseTransaction (options: ?{ abort: boolean }) {
+        if (options && options.abort) transactionState.markAsAborting();
+        if (--this._nonFinalizedTransactions) return false;
+        if (this._parentTransaction) {
+          return this._parentTransaction.releaseTransaction();
+        }
+        return transactionState.finalize();
+      };
+    } else {
+      ret = this._transactionState.createNestedTransaction(this, name);
+    }
+    ret._transactionName = transactionName;
+    ret._nonFinalizedTransactions = 1;
+    return ret;
   }
+  static nestIndex = 0;
 
   isActiveTransaction () {
-    return this._transactionInfo && this._transactionInfo.isActiveTransaction();
-  }
-
-  releaseTransaction () {
-    return this._transactionInfo && this._transactionInfo.releaseTransaction();
-  }
-
-  abort () {
-    if (!this._transactionInfo) throw new Error("Cannot call abort on a non-transaction discourse");
-    this._transactionInfo.abort();
+    return this._transactionState && this._transactionState.isActiveTransaction();
   }
 
   create ({ typeName, initialState, id }: Object): ProphecyEventResult {

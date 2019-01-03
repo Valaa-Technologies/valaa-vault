@@ -565,7 +565,7 @@ export default class Valker extends Resolver {
 
   // Transaction base API stubs for systems which dont implement them.
   acquireTransaction () { return this; }
-  abort () {}
+  abortTransaction () {}
   releaseTransaction () {}
 
   addVALKRuntimeErrorStackFrame (error: Error, vakon: any) {

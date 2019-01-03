@@ -18,7 +18,7 @@ export default class TransactionInfo {
   constructor (transaction: Transaction, name: string) {
     this.transaction = transaction;
     this.name = name;
-    transaction.transactionDepth = 1;
+    transaction._parentTransaction = null;
     transaction.setState(this.stateBefore = transaction.getState());
   }
 
@@ -47,11 +47,20 @@ export default class TransactionInfo {
     return this.transacted || this._lazyInit().transacted;
   }
 
-  createNestedTransaction (transaction: Transaction) {
+  createNestedTransaction (nestingTransaction: Transaction) {
     if (!this.transacted) this._lazyInit();
-    const nestedTransaction = Object.create(transaction);
-    nestedTransaction.transactionDepth = transaction.transactionDepth + 1;
-    nestedTransaction.releaseTransaction = () => {}; // Only outermost transaction commits.
+    let parentTransaction = nestingTransaction;
+    while (!parentTransaction.hasOwnProperty("_nonFinalizedTransactions")) {
+      parentTransaction = Object.getPrototypeOf(parentTransaction);
+    }
+    const parentTransactionCount = parentTransaction._nonFinalizedTransactions;
+    if (!parentTransactionCount) {
+      throw new Error(`Cannot nest a transaction for an already-finalized parent transaction: ${
+          parentTransaction._transactionName}`);
+    }
+    parentTransaction._nonFinalizedTransactions = parentTransactionCount + 1;
+    const nestedTransaction = Object.create(nestingTransaction);
+    nestedTransaction._parentTransaction = parentTransaction;
     return nestedTransaction;
   }
 
@@ -73,9 +82,9 @@ export default class TransactionInfo {
     try {
       if (!this.transacted) this._lazyInit();
       else if (!this.actions) {
-        throw new Error(`Transaction '${this.transaction.corpus.getName()}' has already been ${
-                this._finalCommand ? "committed" : "aborted"
-            }, when trying to add actions to it`);
+        throw new Error(`Cannot chronicle new events against transaction '${
+            this.transaction.corpus.getName()}' which has already been ${
+                this._finalCommand ? "committed" : "aborted"}`);
       }
       // What goes on here is an incremental construction and
       // universalisation of a TRANSACTED event whenever a new event
@@ -122,9 +131,8 @@ export default class TransactionInfo {
     let command;
     try {
       if (!this.actions) {
-        throw new Error(`Transaction '${this.transaction.corpus.getName()}' has already been ${
-                this._finalCommand ? "committed" : "aborted"
-            }, when trying to commit it again`);
+        throw new Error(`Cannot commit a transaction '${this.transaction.corpus.getName()
+            }' that has already been ${this._finalCommand ? "committed" : "aborted"}`);
       }
       this.stateAfter = this.transaction.getState();
       this.transacted.actions = this.actions;
@@ -161,17 +169,17 @@ export default class TransactionInfo {
     }
   }
 
-  abort () {
-    if (!this.transacted) this.transacted = true; // prevent lazyInit to make tx inactive
+  markAsAborting () {
+    if (!this.transacted) this.transacted = true; // prevent lazyInit in order to make tx inactive
     else if (!this.actions && this._finalCommand) {
-      throw new Error(`Transaction '${this.transaction.corpus.getName()
-          }' has already been committed, when trying to abort it`);
+      throw new Error(`Cannot abort a transaction '${this.transaction.corpus.getName()
+          }' which has already been committed`);
     }
     this.actions = null;
   }
 
-  releaseTransaction () {
-    if (!this.transacted) this.transacted = true; // prevent lazyInit to make tx inactive
+  finalize () {
+    if (!this.transacted) this.transacted = true; // prevent lazyInit in order to make tx inactive
     // If the transaction has not yet been explicitly committed or discarded, commit it now.
     if (this.actions) this.commit();
     return this._commitChronicleResult;

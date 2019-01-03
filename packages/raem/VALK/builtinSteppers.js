@@ -789,6 +789,7 @@ function capture (valker: Valker, head: any, scope: ?Object,
 function _advanceCapture (valker, thisArgument, vakon, callScope, capturingValker: ?Valker) {
   let ret;
   let transaction = valker.acquireTransaction("advance-capture");
+  let advanceError;
   try {
     if (capturingValker && capturingValker.hasOwnProperty("_sourceInfo")) {
       transaction = Object.create(transaction);
@@ -797,36 +798,38 @@ function _advanceCapture (valker, thisArgument, vakon, callScope, capturingValke
     ret = transaction.tryUnpack(
         transaction.advance(thisArgument, vakon, callScope, true));
   } catch (error) {
-    transaction.abort();
-    throw transaction.addVALKRuntimeErrorStackFrame(
-        transaction.wrapErrorEvent(error,
-            `call/advance (valk caller with active valker), unwinding transaction`,
-            "\n\tthis:", ...dumpObject(thisArgument),
-            "\n\tcallee vakon:", ...dumpKuery(vakon),
-            "\n\tscope:", ...dumpObject(callScope)),
-        vakon,
-    );
+    advanceError = error;
+    throw error;
   }
-
+  let transactionError;
   try {
-    transaction.releaseTransaction();
+    if (!advanceError) {
+      transaction.releaseTransaction();
+      return ret;
+    }
+    transaction.releaseTransaction({ abort: true });
   } catch (error) {
-    throw transaction.addVALKRuntimeErrorStackFrame(
-        transaction.wrapErrorEvent(error,
-          `call/releaseTransaction (valk caller with active valker)`,
+    transactionError = error;
+  }
+  throw transaction.addVALKRuntimeErrorStackFrame(
+      transaction.wrapErrorEvent(transactionError || advanceError,
+          !transactionError ? `call/advance (valk caller with active valker): aborting transaction`
+              : !advanceError ? `call/releaseTransaction (valk caller with active valker)`
+              : `call/releaseTransaction({ abort: true }) (valk caller with active valker)`,
+          ...((transactionError && advanceError)
+              ? ["\n\t\tabort-cause:", ...dumpObject(advanceError)] : []),
           "\n\tthis:", ...dumpObject(thisArgument),
           "\n\tcallee vakon:", ...dumpKuery(vakon),
           "\n\tscope:", ...dumpObject(callScope),
-          "\n\tret:", ...dumpObject(ret)),
-        vakon,
-    );
-  }
-  return ret;
+          "\n\tret:", ...dumpObject(ret),
+      ),
+      vakon,
+  );
 }
 
 function _runCapture (valker, thisArgument, vakon, callScope, capturingValker: Valker) {
   // TODO(iridian): Undocumented dependency on transaction semi-internal details
-  const actualValker = (valker.transactionDepth && !valker.isActiveTransaction())
+  const actualValker = ((valker._parentTransaction !== undefined) && !valker.isActiveTransaction())
       // There is no active transaction so we are the outermost caller.
       // Do the housekeeping: create the transaction and handle missing partition retries.
       ? valker.rootDiscourse
@@ -835,48 +838,48 @@ function _runCapture (valker, thisArgument, vakon, callScope, capturingValker: V
       : valker;
   const transaction = actualValker.acquireTransaction("run-capture");
   let ret;
+  let advanceError;
   try {
     ret = transaction.run(thisArgument, vakon,
         { scope: callScope, sourceInfo: capturingValker._sourceInfo });
   } catch (error) {
-    transaction.abort();
-    let opName;
-    if (actualValker !== valker.rootDiscourse) {
-      opName = `call/run (non-valk caller in active transactional callback context)`;
-    } else {
-      opName = `call/run (non-valk caller as outermost context)`;
-      const connectingMissingPartitions = tryConnectToMissingPartitionsAndThen(error,
-          () => _runCapture(valker, thisArgument, vakon, callScope, capturingValker));
-      if (connectingMissingPartitions) return connectingMissingPartitions;
-    }
-    throw capturingValker.addVALKRuntimeErrorStackFrame(
-        actualValker.wrapErrorEvent(error, opName,
-            "\n\ttransaction:", ...dumpObject(transaction),
-            "\n\tthis:", ...dumpObject(thisArgument),
-            "\n\tcallee vakon:", ...dumpKuery(vakon),
-            "\n\tscope:", ...dumpObject(callScope)),
-        vakon,
-    );
+    advanceError = error;
   }
 
+  let releaseError;
   try {
-    transaction.releaseTransaction();
+    if (!advanceError) {
+      transaction.releaseTransaction();
+      return ret;
+    }
+    transaction.releaseTransaction({ abort: true });
   } catch (error) {
-    throw capturingValker.addVALKRuntimeErrorStackFrame(
-        transaction.wrapErrorEvent(error,
-            actualValker !== valker.rootDiscourse
-                ? `call/releaseTransaction (non-valk caller in active transactional callback ${
-                    ""}context)`
-                : `call/releaseTransaction (non-valk caller as outermost context)`,
-            "\n\tthis:", ...dumpObject(thisArgument),
-            "\n\tcallee vakon:", ...dumpKuery(vakon),
-            "\n\tscope:", ...dumpObject(callScope),
-            "\n\tret:", ...dumpObject(ret)),
-        vakon,
-    );
+    releaseError = error;
   }
-
-  return ret;
+  let opName;
+  if (!advanceError) {
+    opName = (actualValker !== valker.rootDiscourse)
+        ? `call/releaseTransaction (non-valk caller in active transactional callback ${
+            ""}context)`
+        : `call/releaseTransaction (non-valk caller as outermost context)`;
+  } else if (actualValker !== valker.rootDiscourse) {
+    opName = `call/run (non-valk caller in active transactional callback context)`;
+  } else {
+    opName = `call/run (non-valk caller as outermost context)`;
+    const connectingMissingPartitions = tryConnectToMissingPartitionsAndThen(error,
+        () => _runCapture(valker, thisArgument, vakon, callScope, capturingValker));
+    if (connectingMissingPartitions) return connectingMissingPartitions;
+  }
+  throw capturingValker.addVALKRuntimeErrorStackFrame(
+      actualValker.wrapErrorEvent(advanceError || releaseError, opName,
+          "\n\ttransaction:", ...dumpObject(transaction),
+          "\n\tthis:", ...dumpObject(thisArgument),
+          "\n\tcallee vakon:", ...dumpKuery(vakon),
+          "\n\tscope:", ...dumpObject(callScope),
+          "\n\tret:", ...dumpObject(ret),
+      ),
+      vakon,
+  );
 }
 
 function _callOrApply (valker: Valker, head: any, scope: ?Object, step: BuiltinStep,

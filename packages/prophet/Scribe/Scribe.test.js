@@ -53,7 +53,7 @@ describe("Scribe", () => {
     await scribe.initiate();
 
     const connection = await scribe
-        .acquirePartitionConnection(testPartitionURI).getSyncedConnection();
+        .acquirePartitionConnection(testPartitionURI).getActiveConnection();
     const database = await openDB(testPartitionURI.toString());
 
     // Adds an entity and checks that it has been stored
@@ -83,7 +83,7 @@ describe("Scribe", () => {
     await scribe.initiate();
 
     const connection = await scribe.acquirePartitionConnection(testPartitionURI)
-        .getSyncedConnection();
+        .getActiveConnection();
     const sharedDB = await openDB(sharedURI);
 
     for (const mediaContent of textMediaContents) {
@@ -107,7 +107,7 @@ describe("Scribe", () => {
     await scribe.initiate();
 
     const firstConnection = await scribe.acquirePartitionConnection(testPartitionURI)
-        .getSyncedConnection();
+        .getActiveConnection();
 
     await firstConnection.chronicleEvent(simpleCommand).getLocalEvent();
 
@@ -119,7 +119,7 @@ describe("Scribe", () => {
     firstConnection.disconnect();
 
     const secondConnection = await scribe.acquirePartitionConnection(testPartitionURI)
-        .getSyncedConnection();
+        .getActiveConnection();
     expect(secondConnection.getFirstUnusedCommandEventId()).toBe(firstUnusedCommandEventId);
   });
 
@@ -128,7 +128,7 @@ describe("Scribe", () => {
     await scribe.initiate();
 
     const connection = await scribe.acquirePartitionConnection(testPartitionURI)
-        .getSyncedConnection();
+        .getActiveConnection();
     let oldUnusedCommandId;
     let newUnusedCommandId = connection.getFirstUnusedCommandEventId();
 
@@ -148,7 +148,7 @@ describe("Scribe", () => {
     await scribe.initiate();
 
     const connection = await scribe.acquirePartitionConnection(testPartitionURI)
-        .getSyncedConnection();
+        .getActiveConnection();
 
     const chronicling = connection.chronicleEvents(simpleCommandList);
     const lastLocal = await chronicling.eventResults[simpleCommandList.length - 1].getLocalEvent();

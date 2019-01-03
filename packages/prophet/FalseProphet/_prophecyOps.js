@@ -311,7 +311,7 @@ class ProphecyOperation extends ProphecyEventResult {
 
   _initiateConnectionValidations () {
     this._stages.forEach(stage => stage.partitions.forEach(partition => {
-      partition.validatedConnection = thenChainEagerly(partition.connection.getSyncedConnection(),
+      partition.validatedConnection = thenChainEagerly(partition.connection.getActiveConnection(),
         (connection) => {
           if (connection.isFrozenConnection()) {
             throw new Error(`Trying to chronicle events to a frozen partition ${

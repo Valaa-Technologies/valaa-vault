@@ -29,33 +29,25 @@ export async function createEngineOracleHarness (options: Object, ...commandBloc
 }
 
 export default class EngineTestHarness extends ProphetTestHarness {
-  constructor (options: Object) {
-    super(options);
+  createValker () {
     this.engine = new ValaaEngine({
       name: "Test ValaaEngine",
       logger: this.getLogger(),
-      prophet: this.prophet,
+      prophet: this.prophet, // created by createCorpus of ProphetTestHarness
       verbosity: this.getVerbosity(),
     });
     const rootScope = this.engine.getRootScope();
     extendValaaSpace(rootScope, this.engine.getHostObjectDescriptors(), this.schema);
-    // TODOO(iridian): This should be in @valos/inspire, but there is no such thing.
+    // TODOO(iridian): This should be in InspireTestHarness, but there is no such thing.
     rootScope.Valaa.InspireGateway = {
       RemoteAuthorityURI: "valaa-testing:",
       LocalAuthorityURI: "valaa-local:",
     };
-    this.valker = this.engine.discourse;
-
     this.createds = new TestCollectCREATEDCog();
     this.engine.addCog(this.createds);
     this.entities = this.createds.Entity;
+    return this.engine.discourse;
   }
-
-  createCorpus () {
-    return super.createCorpus();
-  }
-
-  createValker () { return undefined; /* set in constructor */ }
 
   runBody (self: any, valaaScriptBody: string, options: Object = {}) {
     options.scope = Object.assign(

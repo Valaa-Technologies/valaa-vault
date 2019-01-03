@@ -51,11 +51,11 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     }
   }
 
-  _connect (...rest: any[]) {
-    return thenChainEagerly(super._connect(...rest),
-        connectResults => {
+  _doConnect (...rest: any[]) {
+    return thenChainEagerly(super._doConnect(...rest),
+        ret => {
           this._referencePrototype.setInactive(false);
-          return connectResults;
+          return ret;
         });
   }
 
@@ -88,12 +88,6 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   setIsFrozen (value: boolean = true) { this._isFrozen = value; }
 
   isFrozenConnection (): boolean { return !!this._isFrozen; }
-
-  narrateEventLog (options: NarrateOptions = {}): Promise<Object> {
-    options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
-    options.receiveCommands = this.getReceiveCommands(options.receiveCommands);
-    return super.narrateEventLog(options);
-  }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
     if (!events || !events.length) return { eventResults: events };

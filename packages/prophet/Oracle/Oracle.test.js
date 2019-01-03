@@ -38,7 +38,7 @@ describe("Oracle", () => {
     harness = await createProphetOracleHarness({});
     const partitionURI = createPartitionURI(testAuthorityURI, "test_partition");
     await harness.prophet
-        .acquirePartitionConnection(partitionURI).getSyncedConnection();
+        .acquirePartitionConnection(partitionURI).getActiveConnection();
 
     const commandsUpToFreeze = [freezePartitionEvent];
     for (const command of commandsUpToFreeze) {

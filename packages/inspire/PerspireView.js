@@ -12,7 +12,7 @@ export default class PerspireView extends VDOMView {
       // Renderer
       await this._createReactRoot(options.rootId, options.window, options.container,
           this._vViewFocus, options.name);
-      await this._waitForPendingConnectionsToComplete();
+      await this._waitForConnectionsToActivate();
       this.warnEvent(`attach(): engine running, view attached to DOM and all initial UI partition${
           ""} connections complete`);
       return this;
@@ -21,17 +21,17 @@ export default class PerspireView extends VDOMView {
     }
   }
 
-  async _waitForPendingConnectionsToComplete () {
+  async _waitForConnectionsToActivate () {
     let pendingConnections;
     while (true) {
-      pendingConnections = this._vViewFocus.engine.getProphet().getConnectionsPendingSync();
+      pendingConnections = this._vViewFocus.engine.getProphet().getActivatingConnections();
       const keys = Object.keys(pendingConnections);
       if (!keys.length) break;
       this.warnEvent(`attach(): acquiring pending UI-initiated connections:`, ...keys);
       await Promise.all(Object.values(pendingConnections));
     }
     this.warnEvent(`attach(): all connections acquired:`,
-        ...Object.values(this._vViewFocus.engine.getProphet().getSyncedConnections())
+        ...Object.values(this._vViewFocus.engine.getProphet().getActiveConnections())
             .map(connection => `\n\t${connection.debugId()}`));
   }
 }

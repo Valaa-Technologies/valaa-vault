@@ -21,7 +21,7 @@ export default class PartitionConnection extends Follower {
 
   _refCount: number;
   _upstreamConnection: PartitionConnection;
-  _syncedConnection: PartitionConnection | Promise<PartitionConnection>;
+  _activeConnection: PartitionConnection | Promise<PartitionConnection>;
 
   constructor ({
     name, prophet, partitionURI, receiveTruths, receiveCommands, logger, verbosity
@@ -118,17 +118,18 @@ export default class PartitionConnection extends Follower {
   connect (options: ConnectOptions) {
     const onError = errorOnConnect.bind(this, new Error("connect"));
     try {
+      if (this._activeConnection) return this._activeConnection;
       this.warnEvent(1, () => [
         "\n\tBegun connecting with options", ...dumpObject(options), ...dumpObject(this)
       ]);
-      return this._syncedConnection || (this._syncedConnection = thenChainEagerly(
-          this._connect(options, onError),
+      return (this._activeConnection = thenChainEagerly(
+          this._doConnect(options, onError),
           (connectResults) => {
             this.warnEvent(1, () => [
               "\n\tDone connecting with results:", connectResults,
               "\n\tstatus:", this.getStatus(),
             ]);
-            return (this._syncedConnection = this);
+            return (this._activeConnection = this);
           },
           onError,
       ));
@@ -138,16 +139,16 @@ export default class PartitionConnection extends Follower {
     }
   }
 
-  _connect (options: ConnectOptions, onError: Function) {
+  _doConnect (options: ConnectOptions, onError: Function) {
     if (!this._prophet._upstream) throw new Error("Cannot connect: upstream missing");
     options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
     options.receiveCommands = this.getReceiveCommands(options.receiveCommands);
-    return thenChainEagerly(
-        this._prophet._upstream.acquirePartitionConnection(this.getPartitionURI(), options),
-        upstreamConnection => {
-          this.setUpstreamConnection(upstreamConnection);
-          return upstreamConnection.getSyncedConnection();
-        },
+    const postponeNarrateOptions = options.narrateOptions;
+    options.narrateOptions = false;
+    this.setUpstreamConnection(this._prophet._upstream.acquirePartitionConnection(
+        this.getPartitionURI(), options));
+    return thenChainEagerly(this._upstreamConnection.getActiveConnection(),
+        () => (postponeNarrateOptions && this.narrateEventLog(postponeNarrateOptions)),
         onError);
   }
 
@@ -174,29 +175,32 @@ export default class PartitionConnection extends Follower {
   }
 
   /**
-   * Returns true if this connection has successfully completed an optimistic narration.
+   * Returns true if this connection has successfully completed an
+   * optimistic narration and is trying to receive events from its
+   * upstream.
    *
    * @returns
    * @memberof PartitionConnection
    */
-  isSynced () {
-    if (this._syncedConnection !== undefined) return (this._syncedConnection === this);
-    if (this._upstreamConnection) return this._upstreamConnection.isSynced();
+  isActive () {
+    if (this._activeConnection !== undefined) return (this._activeConnection === this);
+    if (this._upstreamConnection) return this._upstreamConnection.isActive();
     return false;
   }
 
-  getSyncedConnection (require: ?boolean):
+  getActiveConnection (requireSynchronous: ?boolean):
       null | Promise<PartitionConnection> | PartitionConnection {
-    if (require && (this._syncedConnection !== this)) {
-      throw new Error(`Couldn't synchronously sync ${this.constructor.name} to ${this.getName()}`);
+    try {
+      if (requireSynchronous && (this._activeConnection !== this)) {
+        throw new Error(`Active connection required but not synchronously available for ${
+            this.getName()}`);
+      }
+      if (this._activeConnection) return this._activeConnection;
+      throw new Error(`Connection not being activated`);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error(`getActiveConnection(${
+          requireSynchronous ? "sync" : "async"})`));
     }
-    if (this._syncedConnection !== undefined) return this._syncedConnection;
-    // Wait for upstream to sync, then denote this connection synced, then resolve as 'this'.
-    return (this._syncedConnection = thenChainEagerly(
-        this._upstreamConnection && this._upstreamConnection.getSyncedConnection(), [
-          () => (this._syncedConnection = this),
-        ]
-    ));
   }
 
   /**
@@ -207,7 +211,7 @@ export default class PartitionConnection extends Follower {
    * @returns {Promise<Object>}
    * @memberof PartitionConnection
    */
-  narrateEventLog (options: NarrateOptions = {}): Promise<Object> {
+  narrateEventLog (options: ?NarrateOptions = {}): Promise<Object> {
     if (!options) return undefined;
     options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
     options.receiveCommands = this.getReceiveCommands(options.receiveTruths);
@@ -259,9 +263,11 @@ export default class PartitionConnection extends Follower {
   }
 
   /**
-   * TODO(iridian): Specify the semantics for this function. An ArrayBuffer can be retrieved using
-   * mime application/octet-stream and decodeMediaContent. What should this return? Maybe
-   * always sync or always aync? Or just delete this whole function?
+   * TODO(iridian): Specify the semantics for this function.
+   * An ArrayBuffer can be retrieved using mime
+   * application/octet-stream and decodeMediaContent. What should this
+   * return? Maybe always sync or always aync? Or just delete this
+   * whole function?
    *
    * @param {VRef} mediaId
    * @param {MediaInfo} mediaInfo
@@ -284,8 +290,9 @@ export default class PartitionConnection extends Follower {
   }
 
   /**
-   * Returns the media content if it is immediately synchronously available or a Promise if the
-   * content is asynchronously available. Throws directly if the content is not available at all or
+   * Returns the media content if it is immediately synchronously
+   * available or a Promise if the content is asynchronously available.
+   * Throws directly if the content is not available at all or
    * indirectly through the Promise in situations like timeouts.
    *
    * This function is convenience forward to alias for

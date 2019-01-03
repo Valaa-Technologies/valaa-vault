@@ -491,7 +491,7 @@ export default class InspireGateway extends LogEventGenerator {
     // so that we can narrate any content in the prologue before any remote activity.
     const connection = await this.falseProphet
         .acquirePartitionConnection(partitionURI, { subscribe: false, remote: false })
-        .getSyncedConnection();
+        .getActiveConnection();
     let prologueTruthCount = await info.truthCount;
     if (!Number.isInteger(prologueTruthCount)) {
       // Migration code for eventId deprecation.

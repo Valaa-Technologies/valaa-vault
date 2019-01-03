@@ -4,7 +4,7 @@ import type { EventBase } from "~/raem/events";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import thenChainEagerly from "~/tools/thenChainEagerly";
-import { ChronicleRequest, ChronicleOptions, ChronicleEventResult, MediaInfo }
+import { ChronicleRequest, ChronicleOptions, ChronicleEventResult, MediaInfo, NarrateOptions }
     from "~/prophet/api/types";
 
 /**
@@ -27,9 +27,11 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
     return super.isConnected();
   }
 
-  _connect (/* options: ConnectOptions, onError: Function */) {}
+  _doConnect (/* options: ConnectOptions, onError: Function */) {}
 
-  async narrateEventLog (): Promise<any> { return {}; }
+  async narrateEventLog (options: ?NarrateOptions = {}): Promise<any> {
+    return !options ? undefined : {};
+  }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions): ChronicleRequest {
     if (this.isRemoteAuthority() && !options.remoteChronicleEventsProcess) {

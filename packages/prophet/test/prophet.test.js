@@ -25,11 +25,11 @@ async function setUp (testAuthorityConfig: Object = {}, options: {}) {
   });
   const ret = {
     connection: await harness.prophet.acquirePartitionConnection(
-        harness.testPartitionURI).getSyncedConnection(),
+        harness.testPartitionURI).getActiveConnection(),
     scribeConnection: await harness.scribe.acquirePartitionConnection(
-        harness.testPartitionURI, { newConnection: false }).getSyncedConnection(),
+        harness.testPartitionURI, { newConnection: false }).getActiveConnection(),
     oracleConnection: await harness.oracle.acquirePartitionConnection(
-        harness.testPartitionURI, { newConnection: false }).getSyncedConnection(),
+        harness.testPartitionURI, { newConnection: false }).getActiveConnection(),
   };
   ret.authorityConnection = ret.oracleConnection.getUpstreamConnection();
   return ret;
@@ -56,7 +56,7 @@ describe("Prophet", () => {
     await scribe.initiate();
 
     const connection = await scribe.acquirePartitionConnection(createPartitionURI("valaa-test:"))
-        .getSyncedConnection();
+        .getActiveConnection();
 
     const mediaId = vRef("abcd-0123");
     for (const [bufferContent, mediaInfo, expectedContent] of structuredMediaContents) {
@@ -82,7 +82,7 @@ describe("Prophet", () => {
       oracleOptions: { testAuthorityConfig: { isLocallyPersisted: true, isRemoteAuthority: true } },
     });
     const prophetConnection = await harness.prophet
-        .acquirePartitionConnection(harness.testPartitionURI).getSyncedConnection();
+        .acquirePartitionConnection(harness.testPartitionURI).getActiveConnection();
     const scribeConnection = prophetConnection.getUpstreamConnection();
     const database = await openDB(harness.testPartitionURI.toString());
 
@@ -100,7 +100,7 @@ describe("Prophet", () => {
       oracleOptions: { testAuthorityConfig: { isLocallyPersisted: true } },
     });
     const prophetConnection = await harness.prophet
-        .acquirePartitionConnection(harness.testPartitionURI).getSyncedConnection();
+        .acquirePartitionConnection(harness.testPartitionURI).getActiveConnection();
     const scribeConnection = prophetConnection.getUpstreamConnection();
 
     let oldCommandId;
@@ -505,7 +505,7 @@ describe("Cross-partition", () => {
     }), { isTruth: true }).getPersistedEvent();
 
     const lateConnection = await harness.prophet
-        .acquirePartitionConnection(latePartitionURI).getSyncedConnection();
+        .acquirePartitionConnection(latePartitionURI).getActiveConnection();
     const lateScribeConnection = lateConnection.getUpstreamConnection();
     await Promise.all(lateScribeConnection.chronicleEvents([
       created({
@@ -550,7 +550,7 @@ describe("Cross-partition", () => {
       })], { isTruth: true }).eventResults.map(result => result.getPersistedEvent()));
 
     const lateConnection = await harness.prophet
-        .acquirePartitionConnection(latePartitionURI).getSyncedConnection();
+        .acquirePartitionConnection(latePartitionURI).getActiveConnection();
     const lateScribeConnection = lateConnection.getUpstreamConnection();
     await Promise.all(lateScribeConnection.chronicleEvents([
       created({

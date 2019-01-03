@@ -390,7 +390,7 @@ function _getOngoingAuthorityPersists (falseProphet: FalseProphet, { command }: 
         throw errorOnGetOngoingAuthorityPersists.call(falseProphet, bvobId, referrerId, error);
       }
       const persistProcess = thenChainEagerly(
-          connection.getSyncedConnection(),
+          connection.getActiveConnection(),
           () => {
             const authorityConnection = connection.getUpstreamConnection();
             return authorityConnection && authorityConnection.getContentPersistProcess(bvobId);

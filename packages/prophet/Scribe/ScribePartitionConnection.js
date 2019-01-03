@@ -65,14 +65,17 @@ export default class ScribePartitionConnection extends PartitionConnection {
     };
   }
 
-  _connect (options: ConnectOptions, onError: Function) {
-    // ScribePartitionConnection can be synced even if the upstream connection isn't, as long as
-    // there are any events in the local cache and the optimistic narration is possible.
+  _doConnect (options: ConnectOptions, onError: Function) {
+    // ScribePartitionConnection can be active even if the upstream
+    // connection isn't, as long as there are any events in the local
+    // cache and the optimistic narration is possible.
     if (this._prophet._upstream) {
       this.setUpstreamConnection(this._prophet._upstream.acquirePartitionConnection(
           this.getPartitionURI(), {
-            // Set the permanent receiver without options.receiveTruths and disable narration;
-            // perform the initial optimistic narrateEventLog with options.receiveTruths below.
+          // Set the permanent receiver without options.receiveTruths,
+          // initiate connection but disable initial narration; perform
+          // the initial optimistic narrateEventLog later below using
+          // options.receiveTruths.
             ...options, narrateOptions: false, receiveTruths: this.getReceiveTruths(),
           }));
     }
@@ -85,7 +88,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
           this._prophet._persistedMediaLookup[mediaRawId] = info;
         }
       },
-      () => this.narrateEventLog(options.narrateOptions),
+      () => (options.narrateOptions && this.narrateEventLog(options.narrateOptions)),
       (narration) => {
         if (!narration) return narration;
         const actionCount = Object.values(narration).reduce(
@@ -128,7 +131,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   getFirstCommandEventId () { return this._commandQueueInfo.eventIdBegin; }
   getFirstUnusedCommandEventId () { return this._commandQueueInfo.eventIdEnd; }
 
-  narrateEventLog (options: NarrateOptions = {}):
+  narrateEventLog (options: ?NarrateOptions = {}):
       Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
     if (!options) return undefined;
     const ret = {};

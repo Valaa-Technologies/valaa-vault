@@ -83,10 +83,10 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
       const partitionURIs = options.acquirePartitions.map(
           partitionId => createPartitionURI("valaa-test:", partitionId));
       const connections = partitionURIs.map(uri =>
-          ret.prophet.acquirePartitionConnection(uri).getSyncedConnection());
+          ret.prophet.acquirePartitionConnection(uri).getActiveConnection());
       (await Promise.all(connections)).forEach(connection => {
         if (ret.prophet.getVerbosity() >= 1) {
-          console.log("PartitionConnection fully synced:", connection.debugId());
+          console.log("PartitionConnection fully active:", connection.debugId());
         }
       });
     }
@@ -134,12 +134,12 @@ export default class ProphetTestHarness extends ScriptTestHarness {
 
     this.testPartitionConnection = thenChainEagerly(
         this.prophet.acquirePartitionConnection(this.testPartitionURI, { newPartition: true })
-        .getSyncedConnection(), [
+        .getActiveConnection(), [
           (connection) => Promise.all([
             connection,
             this.chronicleEvent(createdTestPartitionEntity, { isTruth: true }).getPremiereStory(),
           ]),
-          ([conn]) => (this.testPartitionConnection = conn),
+          ([connection]) => (this.testPartitionConnection = connection),
         ]);
   }
 

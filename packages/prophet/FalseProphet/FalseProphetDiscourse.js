@@ -95,7 +95,7 @@ export default class FalseProphetDiscourse extends Discourse {
     if (!this._implicitlySyncingConnections[partitionURIString]) {
       this._implicitlySyncingConnections[partitionURIString] = this._prophet
           .acquirePartitionConnection(missingPartitionURI)
-          .getSyncedConnection();
+          .getActiveConnection();
     }
     return (this._implicitlySyncingConnections[partitionURIString] =
         await this._implicitlySyncingConnections[partitionURIString]);

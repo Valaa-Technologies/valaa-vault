@@ -40,7 +40,7 @@ describe("FalseProphet", () => {
     harness = await createProphetOracleHarness({});
 
     const prophetConnection = await harness.prophet
-        .acquirePartitionConnection(partitionURI).getSyncedConnection();
+        .acquirePartitionConnection(partitionURI).getActiveConnection();
     const scribeConnection = prophetConnection.getUpstreamConnection();
 
     let oldCommandId;
@@ -66,7 +66,7 @@ describe("FalseProphet", () => {
       }),
     });
     const connection = await falseProphet
-        .acquirePartitionConnection(partitionURI).getSyncedConnection();
+        .acquirePartitionConnection(partitionURI).getActiveConnection();
     expect(commandsCounted).toBe(0);
 
     // A transaction counts as one command

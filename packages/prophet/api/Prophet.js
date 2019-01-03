@@ -39,7 +39,7 @@ export type ConnectOptions = {
   connect?: boolean,               // default: true. Connect to updates
   subscribe?: boolean,             // default: true. Subscribe for downstream push events.
   receiveTruths?: ReceiveEvents,   // The persistent connection callback for downstream push events.
-  narrateOptions?: NarrateOptions, // default: {}. Narrate with default options
+  narrateOptions?: NarrateOptions, // default: {}. Narrate with default options. False to disable.
   newConnection?: boolean,         // if true, throw if a connection exists,
                                    // if false, throw if no connection exists,
   newPartition?: boolean,          // if true, throw if a partition exists (has persisted events)
@@ -134,7 +134,9 @@ export default class Prophet extends LogEventGenerator {
       if (!connection) return undefined;
       connection.addReference();
       this._connections[String(partitionURI)] = connection;
-      connection.connect(options); // Initiates the connection but doesn't wait for it to complete.
+      if (options.connect !== false) {
+        connection.connect(options); // Initiates the connection but doesn't wait for it to complete.
+      }
       return connection;
     } catch (error) {
       throw this.wrapErrorEvent(error,
@@ -150,7 +152,7 @@ export default class Prophet extends LogEventGenerator {
         }
       }
 
-      if (!ret || (!ret.isSynced() && (options.allowPartialConnection === false))) return undefined;
+      if (!ret || (!ret.isActive() && (options.allowPartialConnection === false))) return undefined;
       // oracle.logEvent("acquirePC:", partitionURI, ...dumpObject(options),
       //    "\n\tret:", ...dumpObject(ret));
       return ret;
@@ -183,35 +185,35 @@ export default class Prophet extends LogEventGenerator {
   }
 
   /**
-   * Returns a map of fully synced partition connections keyed by their partition id.
+   * Returns a map of fully active partition connections keyed by their partition id.
    */
-  getSyncedConnections (): Map<string, PartitionConnection> {
+  getActiveConnections (): Map<string, PartitionConnection> {
     const ret = {};
     Object.entries(this._connections).forEach(([key, connection]) => {
-      if (connection.isSynced()) ret[key] = connection;
+      if (connection.isActive()) ret[key] = connection;
     });
     return ret;
   }
   getFullPartitionConnections () : Map<string, PartitionConnection> {
     this.warnEvent(
-        "DEPRECATED: prefer getSyncedConnections instead of getFullPartitionConnections");
-    return this.getSyncedConnections();
+        "DEPRECATED: prefer getActiveConnections instead of getFullPartitionConnections");
+    return this.getActiveConnections();
   }
 
   /**
    * Returns a map of still synchronizing partition connections keyed by their partition id.
    */
-  getConnectionsPendingSync () : Map<string, Promise<PartitionConnection> > {
+  getActivatingConnections () : Map<string, Promise<PartitionConnection> > {
     const ret = {};
     Object.entries(this._connections).forEach(([key, connection]) => {
-      if (!connection.isSynced()) ret[key] = connection.getSyncedConnection();
+      if (!connection.isActive()) ret[key] = connection.getActiveConnection();
     });
     return ret;
   }
   getPendingPartitionConnections () : Map<string, PartitionConnection> {
     this.warnEvent(
-        "DEPRECATED: prefer getConnectionsPendingSync instead of getPendingPartitionConnections");
-    return this.getSyncedConnections();
+        "DEPRECATED: prefer getActivatingConnections instead of getPendingPartitionConnections");
+    return this.getActiveConnections();
   }
 
   obtainPartitionAuthority (partitionURI: string | ValaaURI) {

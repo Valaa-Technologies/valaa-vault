@@ -638,12 +638,12 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
         `Creates a URI from given *base* and *partitionId* strings`
     )(createPartitionURI),
     tryPartitionConnection: denoteValaaBuiltinWithSignature(
-        `Returns an existing, fully synced connection to the partition with given${
+        `Returns an existing, fully active connection to the partition with given${
           ""} *partitionURI*, undefined otherwise`
     )(function tryPartitionConnection (partitionURI) {
       const ret = this.__callerValker__.getProphet()
           .acquirePartitionConnection(partitionURI, { require: false, newConnection: false });
-      return (ret && ret.isSynced()) ? ret : undefined;
+      return (ret && ret.isActive()) ? ret : undefined;
     }),
     acquirePartitionConnection: denoteValaaBuiltinWithSignature(
         `Returns a promise to a full connection to the partition with given *partitionURI* and${
@@ -652,7 +652,7 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
     )(function acquirePartitionConnection (partitionURI, options = {}) {
       return Promise.resolve(this.__callerValker__.getProphet()
           .acquirePartitionConnection(partitionURI, options)
-          .getSyncedConnection());
+          .getActiveConnection());
     }),
   });
   scope.Partition.prototype = Object.assign(Object.create(scope.Resource.prototype), {

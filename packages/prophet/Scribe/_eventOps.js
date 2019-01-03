@@ -47,11 +47,13 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
     connection.chronicleEvents(localResults.scribeCommandQueue, options.rechronicleOptions || {});
   }
 
-  const upstreamNarration = connection.getUpstreamConnection().narrateEventLog({
-    ...options,
-    receiveTruths: connection.getReceiveTruths(options.receiveTruths),
-    eventIdBegin: Math.max(options.eventIdBegin || 0, connection.getFirstUnusedTruthEventId()),
-  });
+  const upstreamNarration = thenChainEagerly(
+      connection.getUpstreamConnection().getActiveConnection(),
+      (connectedUpstream) => connectedUpstream.narrateEventLog({
+        ...options,
+        receiveTruths: connection.getReceiveTruths(options.receiveTruths),
+        eventIdBegin: Math.max(options.eventIdBegin || 0, connection.getFirstUnusedTruthEventId()),
+      }));
 
   if ((options.fullNarrate !== true)
       && ((ret.scribeEventLog || []).length || (ret.scribeCommandQueue || []).length)) {

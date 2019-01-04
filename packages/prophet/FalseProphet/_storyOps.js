@@ -267,7 +267,7 @@ export function _tellStoriesToFollowers (falseProphet: FalseProphet, stories: St
     let reactions;
     try {
       reactions = discourse.receiveCommands(stories);
-      if (typeof reactions !== "undefined") {
+      if (reactions !== undefined) {
         if (!followerReactions) followerReactions = new Map();
         followerReactions.set(follower, reactions);
       }
@@ -288,7 +288,8 @@ export function _tellStoriesToFollowers (falseProphet: FalseProphet, stories: St
           for (const [allStoryReactions, follower] of followerReactions.entries()) {
             if (!filter
                 || ((typeof filter !== "function") ? filter === follower : filter(follower))) {
-              storyReactions.push(...await Promise.all(allStoryReactions[index]));
+              const reactions = allStoryReactions[index];
+              storyReactions.push(...(!reactions ? [] : await Promise.all(reactions)));
             }
           }
           return storyReactions;

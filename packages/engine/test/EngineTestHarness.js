@@ -46,6 +46,7 @@ export default class EngineTestHarness extends ProphetTestHarness {
     this.createds = new TestCollectCREATEDCog();
     this.engine.addCog(this.createds);
     this.entities = this.createds.Entity;
+    this.discourse = this.chronicler = this.engine.discourse;
     return this.engine.discourse;
   }
 

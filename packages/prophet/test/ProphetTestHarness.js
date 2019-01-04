@@ -146,22 +146,19 @@ export default class ProphetTestHarness extends ScriptTestHarness {
   }
 
   chronicleEvents (events: EventBase[], ...rest: any) {
-    return this.prophet.chronicleEvents(events, ...rest);
+    return this.chronicler.chronicleEvents(events, ...rest);
   }
 
   createCorpus (corpusOptions: Object = {}) {
     // Called by RAEMTestHarness.constructor (so before oracle/scribe are created)
     const corpus = super.createCorpus(corpusOptions);
-    this.prophet = createFalseProphet({ schema: this.schema, corpus, logger: this.getLogger(),
-      assignCommandId: (command) => {
-        obtainAspect(command, "command").id = `cid-${this.nextCommandIdIndex++}`;
-      },
-    });
+    this.prophet = createFalseProphet({ schema: this.schema, corpus, logger: this.getLogger() });
+    this.chronicler = this.prophet;
     return corpus;
   }
 
   createValker () {
-    return new FalseProphetDiscourse({
+    return (this.discourse = this.chronicler = new FalseProphetDiscourse({
       prophet: this.prophet,
       follower: new MockFollower(),
       schema: this.schema,
@@ -175,7 +172,10 @@ export default class ProphetTestHarness extends ScriptTestHarness {
         return id;
       },
       builtinSteppers: this.corpusOptions.builtinSteppers,
-    });
+      assignCommandId: (command) => {
+        obtainAspect(command, "command").id = `cid-${this.nextCommandIdIndex++}`;
+      },
+    }));
   }
 
   /**
@@ -316,7 +316,7 @@ export function createTestMockProphet (configOverrides: Object = {}) {
   });
 }
 
-class MockFollower extends Follower {
+export class MockFollower extends Follower {
   receiveTruths (truths: Object[]): Promise<(Promise<EventBase> | EventBase)[]> {
     return truths;
   }

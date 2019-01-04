@@ -8,9 +8,7 @@ import type { Corpus } from "~/raem/Corpus";
 import { ChronicleRequest, ChronicleEventResult } from "~/prophet/api/types";
 import type { Transaction } from "~/prophet/api/Transaction";
 
-import { dumpObject, invariantify } from "~/tools";
-
-import { universalizeEvent, universalizeAction } from "./_universalizationOps";
+import { dumpObject } from "~/tools";
 
 let transactionCounter = 0;
 
@@ -27,8 +25,7 @@ export default class TransactionInfo {
     // actions is set to null when the transaction has been committed.
     this.actions = [];
     this.passages = [];
-    this.transacted = universalizeEvent(transacted({ actions: [] }));
-    this.transaction._prophet._assignCommandId(this.transacted, this.transaction);
+    this.transacted = this.transaction._universalizeEvent(transacted({ actions: [] }));
     this.universalPartitions = {};
     this.resultPromises = [];
     const corpus = this.transaction.corpus = Object.create(this.transaction.corpus);
@@ -72,7 +69,7 @@ export default class TransactionInfo {
     try {
       if (!this.transacted) this._lazyInit();
       else if (!this.actions) {
-        throw new Error(`Cannot chronicle new events against transaction '${
+        throw new Error(`Cannot chronicle new events as actions into the transaction '${
             this.transaction.corpus.getName()}' which has already been ${
                 this._finalCommand ? "committed" : "aborted"}`);
       }
@@ -84,7 +81,7 @@ export default class TransactionInfo {
       // universal TRANSACTED. This is an awkward way to incrementally
       // construct the transacted.
       // Maybe javascript generators could somehow be useful here?
-      this.transacted.actions = events.map(event => universalizeAction(event));
+      this.transacted.actions = events.map(action => this.transaction._universalizeAction(action));
 
       const previousState = this.transaction.state;
       const transactionStory = this.transaction.corpus.dispatch(
@@ -132,8 +129,6 @@ export default class TransactionInfo {
         //    `with ${this.transacted.actions.length} actions:`, this.transacted);
         command = this._finalCommand = this.transacted;
         if (!this._finalCommand.actions.length) {
-          command = universalizeEvent(this._finalCommand);
-          (command.meta || (command.meta = {})).partitions = {};
           return {
             event: this._finalCommand, story: command, getPremiereStory () { return command; },
           };

@@ -6,7 +6,7 @@ import { createPartitionURI } from "~/raem/ValaaURI";
 
 import {
   createFalseProphet, createProphetOracleHarness, createTestMockProphet,
-  createdTestPartitionEntity,
+  createdTestPartitionEntity, MockFollower,
 } from "~/prophet/test/ProphetTestHarness";
 
 const testAuthorityURI = "valaa-test:";
@@ -68,12 +68,13 @@ describe("FalseProphet", () => {
     const connection = await falseProphet
         .acquirePartitionConnection(partitionURI).getActiveConnection();
     expect(commandsCounted).toBe(0);
+    const discourse = falseProphet.addFollower(new MockFollower());
 
     // A transaction counts as one command
     let resolveDelay;
     let delayer = new Promise(resolve => { resolveDelay = resolve; });
     falseProphet.setCommandNotificationDelayer(delayer);
-    await falseProphet.chronicleEvent(createdTestPartitionEntity).getPremiereStory();
+    await discourse.chronicleEvent(createdTestPartitionEntity).getPremiereStory();
     resolveDelay();
     await falseProphet._mostRecentNotification;
     expect(commandsCounted).toBe(1);

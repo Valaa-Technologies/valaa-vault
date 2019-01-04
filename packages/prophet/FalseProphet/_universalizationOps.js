@@ -1,29 +1,13 @@
 // @flow
 
-import { Action, EventBase } from "~/raem/events";
 import ValaaURI, { createValaaURI } from "~/raem/ValaaURI";
 import ValaaReference, { vRef, JSONIdData } from "~/raem/ValaaReference";
 import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import GhostPath, { ghostPathFromJSON } from "~/raem/state/GhostPath";
 
-import { initializeAspects } from "~/prophet/tools/EventAspects";
-import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
-
-import trivialClone from "~/tools/trivialClone";
 import wrapError, { dumpObject, debugObjectType } from "~/tools/wrapError";
 
 import FalseProphet from "./FalseProphet";
-
-export function universalizeEvent (event: EventBase): EventBase {
-  const ret = initializeAspects(universalizeAction(event), { version: EVENT_VERSION });
-  if (!ret.meta) ret.meta = {};
-  ret.meta.isBeingUniversalized = true;
-  return ret;
-}
-
-export function universalizeAction (action: Action): Action {
-  return trivialClone(action, entry => (entry instanceof ValaaURI ? entry : undefined));
-}
 
 export function vRefFromURI (uri: ValaaURI | string): VRef {
   const [partitionURI, fragment] = String(uri).split("#");

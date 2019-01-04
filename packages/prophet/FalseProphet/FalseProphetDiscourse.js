@@ -1,6 +1,6 @@
 // @flow
 
-import { Command, created, duplicated, destroyed, EventBase } from "~/raem/events";
+import { Action, Command, created, duplicated, destroyed, EventBase } from "~/raem/events";
 import type { Corpus } from "~/raem/Corpus";
 import ValaaURI, { createValaaURI, createPartitionURI } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/ValaaReference";
@@ -14,21 +14,26 @@ import Prophet from "~/prophet/api/Prophet";
 import type { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult }
     from "~/prophet/api/types";
 
-import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
+import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
+
 import createResourceId0Dot2, { createPartitionId0Dot2 }
     from "~/prophet/tools/event-version-0.2/createResourceId0Dot2";
-import { tryAspect } from "~/prophet/tools/EventAspects";
+import { initializeAspects, obtainAspect, tryAspect } from "~/prophet/tools/EventAspects";
 
-import { invariantify, invariantifyObject } from "~/tools";
+import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
+
+import { invariantify, invariantifyObject, trivialClone } from "~/tools";
 import valaaUUID from "~/tools/id/valaaUUID";
 
 export default class FalseProphetDiscourse extends Discourse {
   _follower: Follower;
   _prophet: Prophet;
   _transactionState: ?TransactionInfo = null;
+  _assignCommandId: (command: Command, discourse: FalseProphetDiscourse) => string;
 
   constructor ({
     follower, prophet, verbosity, logger, packFromHost, unpackToHost, builtinSteppers,
+    assignCommandId,
   }: Object) {
     // goes to Valker
     super(prophet.corpus.schema, verbosity, logger, packFromHost, unpackToHost, builtinSteppers);
@@ -41,6 +46,9 @@ export default class FalseProphetDiscourse extends Discourse {
     this._implicitlySyncingConnections = {};
     this.setState(this._prophet.getState());
     invariantify(this.state, "FalseProphetDiscourse.state");
+    this._assignCommandId = assignCommandId || (command => {
+      obtainAspect(command, "command").id = valaaUUID();
+    });
   }
 
   getProphet () { return this._prophet; }
@@ -68,14 +76,18 @@ export default class FalseProphetDiscourse extends Discourse {
     if (this._transactionState) return this._transactionState.chronicleEvents(events, options);
     try {
       options.discourse = this;
-      const ret = this._prophet.chronicleEvents(events, options);
+      const ret = this._prophet
+          .chronicleEvents(events.map(event => this._universalizeEvent(event)), options);
+
       ret.eventResults.forEach(eventResult => {
+        const getPremiereStory = eventResult.getPremiereStory;
         eventResult.waitOwnReactions = (() => eventResult.getFollowerReactions(this._follower));
         eventResult.getPremiereStory = (async () => {
           await eventResult.waitOwnReactions();
-          return eventResult.getTruthStory();
+          return getPremiereStory.call(eventResult);
         });
       });
+
       return ret;
     } catch (error) {
       addConnectToPartitionToError(error, this.connectToMissingPartition);
@@ -86,6 +98,19 @@ export default class FalseProphetDiscourse extends Discourse {
   }
   chronicleEvent (event: EventBase, options: ChronicleOptions = {}): ProphecyEventResult {
     return this.chronicleEvents([event], options).eventResults[0];
+  }
+
+  _universalizeEvent (event: EventBase): EventBase {
+    const ret = initializeAspects(this._universalizeAction(event), { version: EVENT_VERSION });
+    if (!ret.meta) ret.meta = {};
+    // This communicates with @valos/raem reducers somewhat awkwardly.
+    ret.meta.isBeingUniversalized = true;
+    if (!tryAspect(ret, "command").id) this._assignCommandId(ret, this);
+    return ret;
+  }
+
+  _universalizeAction (action: Action): Action {
+    return trivialClone(action, entry => (entry instanceof ValaaURI ? entry : undefined));
   }
 
   _implicitlySyncingConnections: Object;
@@ -118,7 +143,7 @@ export default class FalseProphetDiscourse extends Discourse {
   assignNewResourceId (targetAction: EventBase, partitionURI: string, explicitRawId?: string) {
     if (!partitionURI) throw new Error("assignNewResourceId.partitionURI missing");
     const root = this._transactionState ? this._transactionState.obtainRootEvent() : targetAction;
-    if (!tryAspect(root, "command").id) this._prophet._assignCommandId(root, this);
+    if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
     const partitions = (root.meta || (root.meta = {})).partitions || (root.meta.partitions = {});
     const partition = partitions[partitionURI] || (partitions[partitionURI] = {});
     if (!partition.createIndex) partition.createIndex = 0;
@@ -171,7 +196,7 @@ export default class FalseProphetDiscourse extends Discourse {
   assignNewPartitionId (targetAction: EventBase, partitionAuthorityURI: string,
       explicitPartitionRawId?: string) {
     const root = this._transactionState ? this._transactionState.obtainRootEvent() : targetAction;
-    if (!tryAspect(root, "command").id) this._prophet._assignCommandId(root, this);
+    if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
     const partitionRawId = explicitPartitionRawId
         || createPartitionId0Dot2(root.aspects.command.id, partitionAuthorityURI);
     targetAction.id = vRef(partitionRawId, undefined, undefined,

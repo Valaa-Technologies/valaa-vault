@@ -60,10 +60,8 @@ export default class FalseProphet extends Prophet {
   _totalCommandCount: number = 0;
   _inactivePartitionVRefPrototypes: { [partitionURI: string]: VRef } = {};
 
-  _assignCommandId: (command: Command, discourse: FalseProphetDiscourse) => string;
-
   constructor ({
-    schema, corpus, upstream, onCommandCountUpdate, assignCommandId, ...rest
+    schema, corpus, upstream, onCommandCountUpdate, ...rest
   }: Object) {
     super(rest);
     this.corpus = corpus;
@@ -73,9 +71,6 @@ export default class FalseProphet extends Prophet {
     // Story queue is a sentinel-based linked list with a separate lookup structure.
     this._primaryRecital = new StoryRecital(undefined, "main");
     this._onCommandCountUpdate = onCommandCountUpdate;
-    this._assignCommandId = assignCommandId || (command => {
-      obtainAspect(command, "command").id = valaaUUID();
-    });
     if (upstream) this.setUpstream(upstream);
   }
 

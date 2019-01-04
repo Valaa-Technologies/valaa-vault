@@ -103,37 +103,69 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
       smallestNonGhostId = resolver.objectId;
       partitionURI = smallestNonGhostId.getPartitionURI();
     }
-    // Resources without partitions are allowed: they must appear and be subsequently used in a
-    // transaction to be valid, otherwise they're considered dangling and are not allowed.
-    // TODO(iridian): Add validations for detecting dangling partitionless resources.
+    // Resources without partitions are allowed but they must be
+    // subsequently used in a transaction and assigned partition to be
+    // valid.
+    // TODO(iridian): Actually add the validations for detecting
+    // dangling partitionless resources.
     if (!partitionURI) return undefined;
     partitionURI = String(partitionURI);
-    // ? String(partitionURI)
-    // : `valaa-memory:?id=${smallestNonGhostId.rawId()}`;
+    let partitionInfo = (eventMeta.partitions || {})[partitionURI];
 
-    let matchingPassage = bard.passage;
-    // Find or create the partitions with an existing matching partitionURI entry
-    for (; matchingPassage; matchingPassage = matchingPassage.parentPassage) {
-      const partitionHit = ((matchingPassage.local || {}).partitions || {})[partitionURI];
-      if (!partitionHit) continue;
-      partitions = Object.keys(matchingPassage.local.partitions) === 1
-          ? matchingPassage.local.partitions
-          : { [partitionURI]: partitionHit };
-      break;
+    // Fill the meta.partitionURI and meta.partitions properly
+    // Invariant rules:
+    // 1. if action.meta doesn't have partitionURI explicitly defined
+    // then its partitionURI is implicitly the same as the explicitly
+    // defined meta.partitionURI of its nearest parent passage.
+    // 2. meta.partitions contains all partitionURI's of its children
+    // and itself as keys, each with their corresponding partition info
+    // structure as values. The partition info corresponding to a
+    // partitionURI is shared between all actions.
+
+    let enclosingPassage = bard.passage;
+    let enclosingPartitionURI;
+    while (enclosingPassage) {
+      enclosingPartitionURI = (enclosingPassage.meta || {}).partitionURI;
+      if (enclosingPartitionURI) break;
+      enclosingPassage = enclosingPassage.parentPassage;
     }
-    // Assign the partitions with current partitionURI to all passages in the current branch.
-    for (let passage = bard.passage; passage !== matchingPassage; passage = passage.parentPassage) {
-      // Absolutize to the action.local.partitions (passage doesn't go upstream).
-      const action = getActionFromPassage(passage);
-      // skip virtual passages which don't have underlying actions
-      if (!action || action === Object.prototype) continue;
-      if (!partitions) {
-        partitions = { [partitionURI]: {} };
+    if (enclosingPartitionURI === partitionURI) return undefined;
+    if (!partitionInfo) {
+      partitionInfo = {}; // bard.createMutationPartitionInfo(partitionURI);
+    }
+    let targetMeta = eventMeta;
+    if (enclosingPartitionURI) {
+      const action = getActionFromPassage(bard.passage);
+      // only modify non-virtual actions
+      targetMeta = action && (action.meta || (action.meta = {}));
+      // do fill all parents
+      const enclosingPartitionInfo = enclosingPassage.meta.partitions[enclosingPartitionURI];
+      let parentMeta;
+      let parentFiller = bard.passage.parentPassage;
+      for (; // eslint-disable-line no-cond-assign
+          !(parentMeta = parentFiller.meta) || !parentMeta.partitionURI;
+          parentFiller = parentFiller.parentPassage) {
+        if (!parentMeta) {
+          const parentAction = getActionFromPassage(parentFiller);
+          if (!parentAction) continue;
+          parentMeta = (parentAction.meta = {});
+        }
+        parentMeta.partitionURI = enclosingPartitionURI;
+        parentMeta.partitions = {
+          [enclosingPartitionURI]: enclosingPartitionInfo,
+          [partitionURI]: partitionInfo,
+        };
       }
-      const local = action.local || (action.local = {});
-      local.partitions = !local.partitions
-          ? partitions
-          : Object.assign({}, local.partitions, partitions);
+      for (; parentFiller && !parentFiller.meta.partitions[partitionURI];
+          parentFiller = parentFiller.parentPassage) {
+        parentFiller.meta.partitions[partitionURI] = partitionInfo;
+      }
+    }
+    if (targetMeta) {
+      targetMeta.partitionURI = partitionURI;
+      (targetMeta.partitions || (targetMeta.partitions = {}))[partitionURI] = partitionInfo;
+      // TODO(iridian): handle the case where a purged prophecy
+      // recomposition results in some partitions being removed.
     }
     return partitionURI;
   } catch (error) {
@@ -142,7 +174,7 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
         "\n\tid:", id,
         "\n\tref:", ...dumpObject(ref),
         "\n\tpartitionURI:", partitionURI,
-        "\n\tpartitions:", ...dumpObject(partitions));
+        "\n\tpartitionsUpdate:", ...dumpObject(partitionsUpdate));
   }
 }
 

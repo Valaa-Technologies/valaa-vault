@@ -88,10 +88,11 @@ export function addConnectToPartitionToError (error, connectToPartition) {
 
 export function universalizePartitionMutation (bard: Bard, id: VRef) {
   let partitionURI;
-  let partitions;
+  let partitionsUpdate;
   const ref = tryHostRef(id);
   try {
-    if (!bard.story.isBeingUniversalized || !ref) return undefined;
+    const eventMeta = bard.event.meta;
+    if (!eventMeta.isBeingUniversalized || !ref) return undefined;
     if (ref.isInactive()) throw new Error(`Cannot modify an inactive resource <${ref.toString()}>`);
     let smallestNonGhostId = ref;
     partitionURI = smallestNonGhostId.getPartitionURI();

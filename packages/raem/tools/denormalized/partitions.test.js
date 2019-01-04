@@ -116,11 +116,15 @@ describe("partitions", () => {
     const bTestRootPartition = { // eslint-disable-line
       "valaa-test:?id=B_testRoot": {},
     };
-    expect(finalEvent.local.partitions)
+    expect(finalEvent.meta.partitions)
         .toEqual({ ...aGrandparentPartition, ...bTestRootPartition });
-    expect(finalEvent.actions[0].local.partitions)
-        .toEqual({ ...bTestRootPartition });
-    expect(finalEvent.actions[1].local.partitions)
+    expect(finalEvent.meta.partitionURI)
+        .toEqual("valaa-test:?id=B_testRoot");
+    expect((finalEvent.actions[0].meta || {}).partitions)
+        .toBeFalsy();
+    expect((finalEvent.actions[0].meta || {}).partitionURI)
+        .toBeFalsy();
+    expect(finalEvent.actions[1].meta.partitions)
         .toEqual({ ...aGrandparentPartition, ...bTestRootPartition });
 
 

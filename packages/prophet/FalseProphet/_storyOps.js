@@ -78,7 +78,7 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
   const newAndRewrittenStories = [];
   let purgedRecital, purgedStory, reviewedPartitions;
   for (const newEvent of newEvents) {
-    (newEvent.local || (newEvent.local = {})).partitionURI = originatingPartitionURI;
+    (newEvent.meta || (newEvent.meta = {})).partitionURI = originatingPartitionURI;
   }
 
   // Purge events.
@@ -107,7 +107,7 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
     if (purgedStory === purgedRecital) break;
 
     if (purgedStory.isProphecy) {
-      for (const partitionURI of Object.keys((purgedStory.local || {}).partitions)) {
+      for (const partitionURI of Object.keys((purgedStory.meta || {}).partitions)) {
         const reviewedPartition = reviewedPartitions[partitionURI];
         if (!reviewedPartition) continue;
         purgedStory.needsReview = true;
@@ -156,7 +156,7 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
       // If schismatic all subsequent commands on these partitions
       // need to be fully, possibly interactively revised as they're
       // likely to depend on the first schismatic change.
-      for (const partitionURI of Object.keys((purgedStory.local || {}).partitions)) {
+      for (const partitionURI of Object.keys((purgedStory.meta || {}).partitions)) {
         const partition = reviewedPartitions[partitionURI]
             || (reviewedPartitions[partitionURI] = {});
         if (purgedStory.schismDescription) {
@@ -208,7 +208,6 @@ function _beginPurge (falseProphet: FalseProphet, purgedCommands: Command[]): St
 export function _recomposeStoryFromPurgedEvent (falseProphet: FalseProphet, purged: Prophecy) {
   const purgedEvent = getActionFromPassage(purged);
   // const oldPartitions = purgedEvent.partitions;
-  delete (purgedEvent.local || {}).partitions;
   try {
     return _composeStoryFromEvent(falseProphet, purgedEvent,
         !purged.needsReview
@@ -345,7 +344,7 @@ if (!remoteAuthority) {
     partitionDatas.map(([, connection]) =>
         connection._receiveTruthOf("localAuthority", event));
   } catch (error) {
-    throw falseProphet.wrapErrorEvent(error, new Error("chronicleEvents.local.onConfirmTruth"));
+    throw falseProphet.wrapErrorEvent(error, new Error("chronicleEvents.meta.onConfirmTruth"));
   }
   return operation.prophecy;
 }

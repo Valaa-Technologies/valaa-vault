@@ -21,7 +21,7 @@ import type { State } from "~/raem/state"; // eslint-disable-line no-duplicate-i
 import { tryElevateFieldValue } from "~/raem/state/FieldInfo";
 import { getObjectRawField } from "~/raem/state/getObjectField";
 
-import { createGhostVRefInInstance, isMaterialized, createMaterializeGhostAction }
+import { createGhostVRefInInstance, isMaterialized, createMaterializeGhostEvent }
     from "~/raem/tools/denormalized/ghost";
 import { MissingPartitionConnectionsError, addConnectToPartitionToError }
     from "~/raem/tools/denormalized/partitions";
@@ -588,7 +588,7 @@ export default class Vrapper extends Cog {
   materialize (transaction: ?Transaction): ChronicleEventResult {
     const discourse = (transaction || this.engine.discourse);
     this.requireActive({ state: discourse.getState() });
-    return discourse.chronicleEvent(createMaterializeGhostAction(discourse, this.getId()));
+    return discourse.chronicleEvent(createMaterializeGhostEvent(discourse, this.getId()));
   }
 
   updateTransient (state: ?Object, object: ?Object) {

@@ -79,11 +79,11 @@ export function createGhostVRefInInstance (prototypeId: VRef,
   return vRef(ghostPath.headRawId(), null, ghostPath);
 }
 
-export function createMaterializeGhostAction (resolver: Resolver, ghostId: VRef): ?Action {
+export function createMaterializeGhostEvent (resolver: Resolver, ghostId: VRef): ?Action {
   try {
-    return createMaterializeGhostPathAction(resolver, ghostId.getGhostPath());
+    return createMaterializeGhostPathAction(resolver, ghostId.getGhostPath(), undefined, true);
   } catch (error) {
-    throw wrapError(error, `During createMaterializeGhostAction(), with:`,
+    throw wrapError(error, `During createMaterializeGhostEvent(), with:`,
         "\n\tghostId:", ...dumpObject(ghostId));
   }
 }
@@ -97,10 +97,11 @@ export function createImmaterializeGhostAction (resolver: Resolver, ghostId: VRe
 }
 
 export function createMaterializeGhostPathAction (resolver: Resolver, ghostObjectPath: GhostPath,
-    typeName: string): ?Action {
+    typeName: string, isEvent: ?boolean): ?Action {
   const actions = [];
   invariantify(ghostObjectPath.isGhost(), "materializeGhostPathAction.ghostObjectPath.isGhost");
-  _createMaterializeGhostAction(resolver, resolver.getState(), ghostObjectPath, typeName, actions);
+  _createMaterializeGhostAction(resolver, resolver.getState(), ghostObjectPath, typeName, isEvent,
+      actions);
   return !actions.length ? undefined
       : actions.length === 1 ? actions[0]
       : transacted({ actions });
@@ -119,14 +120,15 @@ export function createMaterializeGhostPathAction (resolver: Resolver, ghostObjec
 export function createMaterializeTransientAction (resolver: Resolver, ghostObjectPath: GhostPath,
     typeName: string): ?Action {
   const actions = [];
-  _createMaterializeGhostAction(resolver, resolver.getState(), ghostObjectPath, typeName, actions);
+  _createMaterializeGhostAction(resolver, resolver.getState(), ghostObjectPath, typeName, false,
+      actions);
   return !actions.length ? undefined
       : actions.length === 1 ? actions[0]
       : transacted({ actions });
 }
 
 function _createMaterializeGhostAction (resolver: Resolver, state: State,
-    ghostObjectPath: GhostPath, typeName: string,
+    ghostObjectPath: GhostPath, typeName: string, isEvent: boolean,
     outputActions: Array<Action>): { id: string, actualType: string, ghostPath: GhostPath } {
   // TODO(iridian): This whole segment needs to be re-evaluated now
   // with the introduction of the "ghostOwnlings"/"ghostOwner" coupling
@@ -163,14 +165,17 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
       // TODO(iridian): Add inactive partition checks: throw if this partition is in fact active.
       id.setInactive();
       actualType = resolver.schema.inactiveType.name;
-      outputActions.push(created({ id, typeName: actualType, local: { noSubMaterialize: true } }));
+      outputActions.push(created({
+        id, typeName: actualType,
+        meta: { noSubMaterialize: !isEvent },
+      }));
       return { id, actualType, ghostPath: id.getGhostPath };
     }
     // A regular non-root ghost Resource with no transient.
     // Still possibly inside an inactive partition.
     const { id: ghostPrototype, actualType: prototypeTypeName, ghostPath: prototypePath }
         = _createMaterializeGhostAction(resolver, state, ghostObjectPath.previousStep(), typeName,
-            outputActions);
+            false, outputActions);
     actualType = isInactiveTypeName(prototypeTypeName) ? typeName : prototypeTypeName;
     const ghostPath = prototypePath
         .withNewStep(ghostHostPrototypeRawId, ghostHostRawId, ghostRawId);
@@ -184,7 +189,7 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
     outputActions.push(created({
       id, typeName: actualType,
       initialState: { ghostPrototype, ghostOwner: hostId.coupleWith("ghostOwnlings"), },
-      local: { noSubMaterialize: true },
+      meta: { noSubMaterialize: !isEvent },
     }));
     return { id, actualType, ghostPath };
   } catch (error) {

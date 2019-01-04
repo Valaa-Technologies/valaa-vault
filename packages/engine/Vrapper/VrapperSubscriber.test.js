@@ -177,7 +177,7 @@ describe("VrapperSubscriber", () => {
     it("updates on ghost-of-ghost-of-thing property when middle ghost property is modified", () => {
       setUpHarnessAndCallback({ verbosity: 0, claimBaseBlock: true }, [
         created({ id: ["test+1+1"], typeName: "Entity", initialState: {
-          instancePrototype: ["test+1"],
+          owner: ["test_partition"], instancePrototype: ["test+1"],
         }, }),
       ]);
       const creatori1 = entities().creator.getGhostIn(entities()["test+1"]);

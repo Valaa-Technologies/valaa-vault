@@ -6,7 +6,7 @@ import getObjectField from "~/raem/state/getObjectField";
 import { tryObjectTransient } from "~/raem/state/getObjectTransient";
 import { createGhostRawId } from "~/raem/state/GhostPath";
 
-import { createMaterializeGhostPathAction, createMaterializeGhostAction }
+import { createMaterializeGhostPathAction, createMaterializeGhostEvent }
     from "~/raem/tools/denormalized/ghost";
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 
@@ -155,7 +155,7 @@ describe("CREATED with instancePrototype", () => {
         .toEqual(createGhostRawId("A_child2", "A_grandparentInstance"));
     harness.chronicleEvent(transacted({ actions:
         ghostGrandlings.map(
-            ghostGrandling => createMaterializeGhostAction(harness.getValker(), ghostGrandling))
+            ghostGrandling => createMaterializeGhostEvent(harness.getValker(), ghostGrandling))
     }));
     const parentInGrandparentInstanceId = createGhostRawId("A_parent", "A_grandparentInstance");
     expect(tryObjectTransient(harness.getValker(), parentInGrandparentInstanceId, "TestThing"))

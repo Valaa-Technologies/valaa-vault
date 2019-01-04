@@ -168,7 +168,7 @@ export function recurseCreateOrDuplicate (bard: CreateBard, typeName: string, in
       if (isResource) {
         bard.refreshPartition = false;
         setCreatedObjectPartition(bard.objectTransient);
-        if (!(bard.passage.local || {}).noSubMaterialize) {
+        if (!(bard.passage.meta || {}).noSubMaterialize) {
           universalizePartitionMutation(bard, bard.objectId);
         }
       }

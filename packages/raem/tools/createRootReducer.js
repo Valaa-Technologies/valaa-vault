@@ -128,9 +128,7 @@ export default function createRootReducer ({
             `\n\tpassage:${dumpify(rest, { sliceAt: 380 })}`,
             "\n\taction:", dumpify(Object.getPrototypeOf(action)));
       }
-      // TODO(iridian): This is likely incorrect (but harmless): probably should be just
-      //   if (action.isBeingUniversalized)
-      if (action.story && action.story.isBeingUniversalized) {
+      if (action.story && action.story.meta.isBeingUniversalized) {
         // Offers limited protection against programming errors for generated passages especially.
         const validator = validators[action.type];
         if (!validator) throw new Error(`No validator found for sub-action of type ${action.type}`);

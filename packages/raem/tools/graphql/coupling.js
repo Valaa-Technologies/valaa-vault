@@ -38,21 +38,21 @@ export function toOne ({ coupledField, defaultCoupledField, alias, isOwner, when
   return coupledField ? {
     coupledField, alias, isOwner, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId) =>
-        fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
+        fieldsSet({ id, typeName, meta: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: localId },
         }),
     createUncoupleFromRemoteAction: (id, typeName, coupledFieldName) =>
-        fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
+        fieldsSet({ id, typeName, meta: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: null },
         }),
   } : {
     defaultCoupledField, alias, isOwner, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
-        fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
+        fieldsSet({ id, typeName, meta: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: localId.coupleWith(localFieldName) },
         }),
     createUncoupleFromRemoteAction: (id, typeName, coupledFieldName) =>
-        fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
+        fieldsSet({ id, typeName, meta: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: null },
         }),
   };
@@ -66,21 +66,21 @@ export function toMany ({ coupledField, defaultCoupledField, alias, isOwner, whe
   return coupledField ? {
     coupledField, alias, isOwner, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId) =>
-        addedTo({ id, typeName, local: { dontUpdateCouplings: true },
+        addedTo({ id, typeName, meta: { dontUpdateCouplings: true },
           adds: { [coupledFieldName]: [localId] },
         }),
     createUncoupleFromRemoteAction: (id, typeName, coupledFieldName, localId) =>
-        removedFrom({ id, typeName, local: { dontUpdateCouplings: true },
+        removedFrom({ id, typeName, meta: { dontUpdateCouplings: true },
           removes: { [coupledFieldName]: [localId] },
         }),
   } : {
     defaultCoupledField, alias, isOwner, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
-        addedTo({ id, typeName, local: { dontUpdateCouplings: true },
+        addedTo({ id, typeName, meta: { dontUpdateCouplings: true },
           adds: { [coupledFieldName]: [localId.coupleWith(localFieldName)] },
         }),
     createUncoupleFromRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
-        removedFrom({ id, typeName, local: { dontUpdateCouplings: true },
+        removedFrom({ id, typeName, meta: { dontUpdateCouplings: true },
           removes: { [coupledFieldName]: [localId.coupleWith(localFieldName)] },
         }),
   };
@@ -98,11 +98,11 @@ export function toOwner (defaultCoupledField = "unnamedOwnlings") {
   return {
     defaultCoupledField, isOwned: true,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
-        fieldsSet({ id, typeName, local: { dontUpdateCouplings: true },
+        fieldsSet({ id, typeName, meta: { dontUpdateCouplings: true },
           sets: { [coupledFieldName]: localId.coupleWith(localFieldName) },
         }),
     createUncoupleFromRemoteAction: (id) =>
-        destroyed({ id, local: { dontUpdateCouplings: true } }),
+        destroyed({ id, meta: { dontUpdateCouplings: true } }),
   };
 }
 

@@ -78,9 +78,9 @@ export default class RAEMTestHarness extends LogEventGenerator {
         eventResults: events.map(event_ => {
           const event = trivialClone(event_,
               entry => (entry instanceof ValaaURI ? entry : undefined));
-          if (!event.local) event.local = {};
-          if (event.local.isBeingUniversalized === undefined) {
-            event.local.isBeingUniversalized = true;
+          if (!event.meta) event.meta = {};
+          if (event.meta.isBeingUniversalized === undefined) {
+            event.meta.isBeingUniversalized = true;
           }
           const story = this.corpus.dispatch(event);
           return {

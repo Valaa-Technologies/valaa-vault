@@ -20,18 +20,18 @@ export function bardCreateBvobReferenceData (bard, referrerFieldName) {
 
 export function addBvobReferenceRegisterToRootCommand (bard: Bard, bvobId: string,
     referrerFieldName: string) {
-  if (!bard.story.isBeingUniversalized) return;
-  const adds = bard.rootAction.addedBvobReferences
-      || (bard.rootAction.addedBvobReferences = {});
+  const meta = bard.event.meta;
+  if (!meta.isBeingUniversalized) return;
+  const adds = meta.addedBvobReferences || (meta.addedBvobReferences = {});
   (adds[bvobId] || (adds[bvobId] = [])).push(
       bardCreateBvobReferenceData(bard, referrerFieldName));
 }
 
 export function addBvobReferenceUnregisterToRootCommand (bard: Bard, bvobId: string,
     referrerFieldName: string) {
-  if (!bard.story.isBeingUniversalized) return;
-  const removes = bard.rootAction.removedBvobReferences
-      || (bard.rootAction.removedBvobReferences = {});
+  const meta = bard.event.meta;
+  if (!meta.isBeingUniversalized) return;
+  const removes = meta.removedBvobReferences || (meta.removedBvobReferences = {});
   (removes[bvobId] || (removes[bvobId] = [])).push(
       bardCreateBvobReferenceData(bard, referrerFieldName));
 }

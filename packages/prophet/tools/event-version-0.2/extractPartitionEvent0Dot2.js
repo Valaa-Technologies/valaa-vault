@@ -8,13 +8,13 @@ import { dumpObject } from "~/tools";
 
 export default function extractPartitionEvent0Dot2 (connection: PartitionConnection, action: Action,
     partitionKey: string = String(connection.getPartitionURI())) {
-  const local = action.local;
-  if (!local) return action;
-  const partitions = local.partitions;
+  const meta = action.meta || action.local;
+  if (!meta) return action;
+  const partitions = meta.partitions;
   if (partitions && partitionKey && !partitions[partitionKey]) return undefined;
   const ret = { ...action };
   try {
-    delete ret.local;
+    delete ret.meta;
     if (ret.aspects) ret.aspects = { ...ret.aspects };
     if (!partitions) return ret;
     if (Object.keys(partitions).length !== 1) {

@@ -9,17 +9,17 @@ export function isFrozen (bard: Bard, transient: Transient) {
 }
 
 export function universalizeFreezePartitionRoot (bard: Bard, partitionRootTransient: Transient) {
-  if ((bard.rootAction.type !== "TRANSACTED") && (bard.rootAction.type !== "FROZEN")) {
-    throw new Error("Cannot freeze partition root entity without a TRANSACTED rootAction");
+  if ((bard.event.type !== "TRANSACTED") && (bard.event.type !== "FROZEN")) {
+    throw new Error("Cannot freeze partition root entity without a TRANSACTED event");
   }
-  bard.rootAction.type = "FROZEN";
+  bard.event.type = "FROZEN";
   const partitionRawId = partitionRootTransient.get("id").rawId();
-  if (!bard.rootAction.frozenPartitions) bard.rootAction.frozenPartitions = [];
-  else if (bard.rootAction.frozenPartitions.findIndex(partitionRawId) !== -1) {
+  if (!bard.event.frozenPartitions) bard.event.frozenPartitions = [];
+  else if (bard.event.frozenPartitions.findIndex(partitionRawId) !== -1) {
     throw new Error(`Cannot universalize partition root freeze again; ${
         partitionRawId} is already being frozen`);
   }
-  bard.rootAction.frozenPartitions.push(partitionRawId);
+  bard.event.frozenPartitions.push(partitionRawId);
 }
 
 export function freezeOwnlings (bard: Bard, transient: Transient) {

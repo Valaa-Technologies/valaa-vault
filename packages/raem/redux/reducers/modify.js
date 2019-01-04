@@ -46,7 +46,7 @@ import { invariantify, wrapError } from "~/tools";
 export default function modifyResource (bard: Bard) {
   const passage = bard.passage;
   try {
-    bard.shouldUpdateCouplings = !(passage.local || {}).dontUpdateCouplings;
+    bard.shouldUpdateCouplings = !(passage.meta || {}).dontUpdateCouplings;
     bard.denormalized = {};
     bard.fieldsTouched = new Set();
     bard.goToTransientOfPassageObject(); // no-require, non-ghost-lookup
@@ -118,7 +118,7 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
     operationDescription, mutableObject) {
   const sortedKeys = Object.keys(updatesByField || {}).sort();
   let isPrimaryMutation = false;
-  const isBeingUniversalized = bard.story.isBeingUniversalized;
+  const isBeingUniversalized = bard.event.meta.isBeingUniversalized;
   for (const fieldName of sortedKeys) {
     const fieldUpdate = updatesByField[fieldName];
     if (fieldUpdate === undefined) {
@@ -264,7 +264,7 @@ export function handleSets (bard: Bard, fieldInfo, value, oldLocalValue, updateC
   const fieldRemoves = [];
   const universalizedFieldRemoves = [];
   let oldCompleteValue;
-  if (bard.story.isBeingUniversalized && fieldInfo.intro.isResource) {
+  if (bard.event.meta.isBeingUniversalized && fieldInfo.intro.isResource) {
     if (!isCreated && (isSequence || (oldLocalValue === undefined))) {
       // For universalisation we need to create the sub-actions for
       // cross-partition modifications, and for that we need to have
@@ -356,7 +356,8 @@ const customSetFieldHandlers = {
       throw new Error(`Trying to set isFrozen to a non-boolean type '${typeof value}'`);
     }
     if ((oldLocalValue !== true) && (newValue === true)) {
-      if (bard.story.isBeingUniversalized && bard.objectTransient.get("partitionAuthorityURI")) {
+      if (bard.event.meta.isBeingUniversalized
+          && bard.objectTransient.get("partitionAuthorityURI")) {
         universalizeFreezePartitionRoot(bard, bard.objectTransient);
       }
       bard.setState(freezeOwnlings(bard, bard.objectTransient));

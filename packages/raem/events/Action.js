@@ -5,7 +5,7 @@ import invariantify, { invariantifyArray, invariantifyObject, invariantifyString
 
 export default class Action {
   +type: string;
-  local: ?Object;
+  meta: ?Object;
   aspects: ?Object;
 
   unrecognized: ?void;
@@ -21,9 +21,9 @@ export class Command extends EventBase {}
 export class Truth extends EventBase {}
 
 export function validateActionBase (expectedType: string, action: Action, rest: Object) {
-  const { type, local, aspects, ...unrecognized } = rest;
+  const { type, meta, aspects, ...unrecognized } = rest;
   invariantifyString(type, `${expectedType}.type`, { value: expectedType });
-  invariantifyObject(local, `${type}.local`, { allowUndefined: true, allowEmpty: true });
+  invariantifyObject(meta, `${type}.meta`, { allowUndefined: true, allowEmpty: true });
   invariantifyObject(aspects, `${type}.aspects`, { allowUndefined: true, allowEmpty: true });
   if (Object.keys(unrecognized).length) {
     invariantify(false,

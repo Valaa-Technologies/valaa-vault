@@ -16,8 +16,8 @@ import FalseProphet from "./FalseProphet";
 
 export function universalizeEvent (event: EventBase): EventBase {
   const ret = initializeAspects(universalizeAction(event), { version: EVENT_VERSION });
-  if (!ret.local) ret.local = {};
-  ret.local.isBeingUniversalized = true;
+  if (!ret.meta) ret.meta = {};
+  ret.meta.isBeingUniversalized = true;
   return ret;
 }
 

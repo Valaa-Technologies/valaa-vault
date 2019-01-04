@@ -563,6 +563,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         created({ id: ["top"], typeName: "Entity", initialState: {
           name: "TopElement",
+          owner: ["test_partition"],
         }, }),
         created({ id: ["middleA"], typeName: "Entity", initialState: {
           name: "MiddleElementA",

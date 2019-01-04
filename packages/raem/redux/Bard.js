@@ -3,7 +3,7 @@
 import { GraphQLObjectType } from "graphql/type";
 import { List, Map, OrderedMap, OrderedSet } from "immutable";
 
-import { Action } from "~/raem/events";
+import { Action, EventBase } from "~/raem/events";
 
 import ValaaReference from "~/raem/ValaaReference";
 
@@ -49,9 +49,9 @@ export function getActionFromPassage (passage: Passage) {
  */
 export function createBardMiddleware () {
   const bardMiddleware = (grandmaster: Object) => (next: any) =>
-      (action: Action, master: Bard = grandmaster) => {
+      (event: EventBase, master: Bard = grandmaster) => {
         const journeyman = Object.create(master);
-        const story = journeyman.beginStory(master, action);
+        const story = journeyman.beginStory(master, event);
         journeyman.finishStory(next(story, journeyman));
         master.updateState(journeyman.getState());
         return story;
@@ -78,7 +78,7 @@ export function createBardReducer (bardOperation: (bard: Bard) => State,
       }
       return nextState;
     } catch (error) {
-      if (apprentice.story.isBeingUniversalized) {
+      if (apprentice.event.meta.isBeingUniversalized) {
         throw apprentice.wrapErrorEvent(error, `bardOperation(${apprentice.passage.type})`,
             "\n\taction:", ...dumpObject(getActionFromPassage(apprentice.passage)),
             "\n\tpassage:", ...dumpObject(apprentice.passage),
@@ -175,15 +175,13 @@ export default class Bard extends Resolver {
     return `${super.debugId()}(${action.type}${description})`;
   }
 
-  beginStory (store: Object, action: Object) {
+  beginStory (store: Object, event: Object) {
     this.journeyman = this;
-    this.rootAction = action;
+    this.event = event;
     this.preActionState = store.getState();
     this.updateState(this.preActionState);
     this._resourceChapters = {};
-    this.story = this.createPassageFromAction(action);
-    if (!action.local.partitionURI && !action.local.partitions) action.local.partitions = {};
-    this.story.isBeingUniversalized = action.local.isBeingUniversalized;
+    this.story = this.createPassageFromAction(event);
     return this.story;
   }
 
@@ -196,13 +194,12 @@ export default class Bard extends Resolver {
             = chapter.preventsDestroys[0];
         const message = `${remoteTypeName} ${remoteName} destruction blocked due to field '${
             remoteFieldName}' containing a reference to ${typeName} ${name}`;
-        if (this.story.isBeingUniversalized) throw new Error(message);
+        if (this.event.meta.isBeingUniversalized) throw new Error(message);
         console.warn("Suppressing a destroy prevention error (ie. DESTROYED is actually resolved)",
             "for downstream truth:", ...dumpObject(this.story),
             "\n\tsuppressed error:", message);
       }
     });
-    delete this.story.isBeingUniversalized;
     // console.log("finishStory:", beaumpify(getActionFromPassage(this.story)));
     return this.story;
   }
@@ -295,7 +292,7 @@ export default class Bard extends Resolver {
 
   goToResourceTransientTypeIntro (transient: Transient): Object {
     const ret = this.goToTypeIntro(getTransientTypeName(transient, this.schema));
-    if (!isResourceType(ret) && !(this.passage.local || {}).dontUpdateCouplings) {
+    if (!isResourceType(ret) && !(this.passage.meta || {}).dontUpdateCouplings) {
       throw this.wrapErrorEvent(
           new Error(`${this.passage.type} attempted on a non-Resource object`),
           new Error(`goToResourceTransientTypeIntro(${this.passage.type})`),
@@ -314,13 +311,13 @@ export default class Bard extends Resolver {
   correlateReference (action: Action, passage: Passage, propertyName: string) {
     let reference = action[propertyName];
     if (!reference) return reference;
-    if (!this.rootAction.local.isBeingUniversalized) {
+    if (!this.event.meta.isBeingUniversalized) {
       // Downstream reduction
-      if (!this.rootAction.local.partitionURI) {
+      if (!this.event.meta.partitionURI) {
         throw new Error(`INTERNAL ERROR: Cannot correlate downstream event reference (field '${
-            propertyName}') because root action is missing local.partitionURI`);
+            propertyName}') because root action is missing meta.partitionURI`);
       }
-      reference = this.obtainReference(reference, this.rootAction.local.partitionURI);
+      reference = this.obtainReference(reference, this.event.meta.partitionURI);
       passage[propertyName] = reference;
     } else {
       // Universalization of an existing VRef
@@ -366,7 +363,7 @@ export default class Bard extends Resolver {
   deserializeAndReduceOntoField (incomingSequence, fieldInfo, operation, target) {
     return target.withMutations(mutableTarget => {
       const deserializeSingular = _obtainSingularDeserializer(fieldInfo);
-      incomingSequence.forEach(!this.story.isBeingUniversalized
+      incomingSequence.forEach(!this.event.meta.isBeingUniversalized
           ? (serialized => operation(mutableTarget, deserializeSingular(serialized, this)))
           : ((serialized, index) => {
             const deserialized = deserializeSingular(serialized, this);
@@ -422,7 +419,7 @@ function _createResourceVRefDeserializer (fieldInfo) {
   function deserializeResourceVRef (serialized, bard) {
     if (!serialized) return null;
     const resourceId = bard.bindFieldVRef(
-        serialized, fieldInfo, bard.rootAction.local.partitionURI || null);
+        serialized, fieldInfo, bard.event.meta.partitionURI || null);
     // Non-ghosts have the correct partitionURI in the Resource.id itself
     if (resourceId.getPartitionURI() || !resourceId.isGhost()) return resourceId;
     // Ghosts have the correct partitionURI in the host Resource.id
@@ -442,11 +439,11 @@ function _createSingularDataDeserializer (fieldInfo) {
       if (data === null) return null;
       if (typeof data === "string") {
         return bard.bindObjectRawId(data, concreteTypeName || "Data",
-            bard.rootAction.local.partitionURI || null);
+            bard.event.meta.partitionURI || null);
       }
       if (Object.getPrototypeOf(data) !== Object.prototype) {
         return bard.bindObjectIdData(data, concreteTypeName || "Data",
-            bard.rootAction.local.partitionURI || null);
+            bard.event.meta.partitionURI || null);
       }
       const typeName = concreteTypeName || data.typeName;
       if (!typeName) {
@@ -457,7 +454,7 @@ function _createSingularDataDeserializer (fieldInfo) {
       }
       objectIntro = bard.schema.getType(typeName);
       if (!objectIntro) invariantify(objectIntro, `Unknown Data type '${typeName}' in schema`);
-      const isBeingUniversalized = bard.story.isBeingUniversalized;
+      const isBeingUniversalized = bard.event.meta.isBeingUniversalized;
       return OrderedMap().withMutations(mutableExpandedData => {
         const sortedFieldNames = Object.keys(data).sort();
         for (const fieldName of sortedFieldNames) {

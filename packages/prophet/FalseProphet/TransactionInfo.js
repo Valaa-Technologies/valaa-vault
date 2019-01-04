@@ -68,16 +68,6 @@ export default class TransactionInfo {
     return this.stateBefore === previousState;
   }
 
-  setCustomCommand (customCommandCandidate: any, context: string) {
-    if (typeof customCommandCandidate === "undefined") return;
-    invariantify(typeof this.customCommand === "undefined",
-        `While ${context} '${this.transaction.corpus.getName()
-            }' trying to override an existing customCommand`,
-        "\n\tin transactionInfo:", this,
-        "\n\toverriding custom command candidate:", customCommandCandidate);
-    this.customCommand = customCommandCandidate;
-  }
-
   chronicleEvents (events: EventBase[] /* , options: Object = {} */): ChronicleRequest {
     try {
       if (!this.transacted) this._lazyInit();
@@ -104,7 +94,7 @@ export default class TransactionInfo {
       this.actions.push(...this.transacted.actions);
       this.transacted.actions = [];
       this.passages.push(...transactionStory.passages);
-      Object.assign(this.universalPartitions, (transactionStory.local || {}).partitions);
+      Object.assign(this.universalPartitions, (transactionStory.meta || {}).partitions);
       const state = this.transaction.corpus.getState();
       this.transaction.setState(state);
       return {
@@ -140,12 +130,10 @@ export default class TransactionInfo {
       if (this.transacted.actions.length) {
         // this.transaction.logEvent("committing transaction", this.name,
         //    `with ${this.transacted.actions.length} actions:`, this.transacted);
-        command = this._finalCommand = !this.customCommand
-            ? this.transacted
-            : this.customCommand(this.transacted);
-        if (!this.customCommand && !this._finalCommand.actions.length) {
+        command = this._finalCommand = this.transacted;
+        if (!this._finalCommand.actions.length) {
           command = universalizeEvent(this._finalCommand);
-          (command.local || (command.local = {})).partitions = {};
+          (command.meta || (command.meta = {})).partitions = {};
           return {
             event: this._finalCommand, story: command, getPremiereStory () { return command; },
           };
@@ -205,7 +193,7 @@ export default class TransactionInfo {
       ...this.transacted,
       ...this._finalCommand,
       actions: this.passages.map(passage => getActionFromPassage(passage)),
-      local: { partitions: this.universalPartitions },
+      meta: { partitions: this.universalPartitions },
     };
     const story = targetCorpus.createPassageFromAction(universalTransactedLike);
     story.passages = this.passages;

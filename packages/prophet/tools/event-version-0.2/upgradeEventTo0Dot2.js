@@ -54,7 +54,7 @@ export function convertEvent0Dot1To0Dot2 (connection: PartitionConnection,
     delete ret.partitions;
     if (isRoot) {
       const partition = partitions[connection.getPartitionRawId()];
-      ret.local = {};
+      ret.meta = {};
       ret.aspects = {
         version: "0.2",
         command: { id: ret.commandId },

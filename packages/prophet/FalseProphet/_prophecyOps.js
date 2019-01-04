@@ -77,8 +77,8 @@ export function _confirmProphecyCommand (connection: FalseProphetPartitionConnec
     partition.confirmCommand = null;
   }
   prophecy.confirmedCommandCount = (prophecy.confirmedCommandCount || 0) + 1;
-  if (prophecy.confirmedCommandCount
-      < Object.keys((prophecy.local || {}).partitions).length) {
+  if (prophecy.meta && prophecy.meta.partitions
+      && (prophecy.confirmedCommandCount < Object.keys(prophecy.meta.partitions).length)) {
     return false;
   }
   return true;
@@ -145,7 +145,7 @@ export function _reviseSchism (connection: FalseProphetPartitionConnection,
   const recomposedProphecy = _recomposeStoryFromPurgedEvent(connection.getProphet(), schism);
   const partitionURI = String(connection.getPartitionURI());
   if (!recomposedProphecy
-      || (Object.keys((recomposedProphecy.local || {}).partitions).length !== 1)) {
+      || (Object.keys((recomposedProphecy.meta || {}).partitions).length !== 1)) {
     // Can't revise multi-partition commands (for now).
     return undefined;
   }
@@ -280,7 +280,7 @@ class ProphecyOperation extends ProphecyEventResult {
     this._partitions = {};
     this._stages = [];
     const missingConnections = [];
-    const partitions = (this._prophecy.local || {}).partitions;
+    const partitions = (this._prophecy.meta || {}).partitions;
     if (!partitions) {
       throw new Error("prophecy is missing partition information");
     }

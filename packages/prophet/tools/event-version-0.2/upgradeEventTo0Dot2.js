@@ -66,6 +66,7 @@ export function convertEvent0Dot1To0Dot2 (connection: PartitionConnection,
       delete ret.timeStamp;
     }
     delete ret.commandId;
+    if (ret.type === "DESTROYED") delete ret.typeName;
     if (ret.actions) {
       ret.actions = action.actions.map(subAction =>
           convertEvent0Dot1To0Dot2(connection, subAction, false));

@@ -77,9 +77,12 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
   const purgedPartitionURI = String(connection.getPartitionURI());
   const newAndRewrittenStories = [];
   let purgedRecital, purgedStory, reviewedPartitions;
-  for (const newEvent of newEvents) {
-    (newEvent.meta || (newEvent.meta = {})).partitionURI = originatingPartitionURI;
-  }
+  newEvents.forEach((event, index) => {
+    newEvents[index] = {
+      ...event,
+      meta: { ...(event.meta || {}), partitionURI: originatingPartitionURI },
+    };
+  });
 
   // Purge events.
   if (purgedCommands) {

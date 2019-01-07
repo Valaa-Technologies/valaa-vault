@@ -12,8 +12,8 @@ resource model.
 
 ## Community
 
-Valaa Open System is open source software released under an
-[MIT license](https://github.com/ValaaLabs/inspire/blob/master/LICENSE).
+Valaa Open System is open source software released under
+[an MIT license](https://github.com/ValaaLabs/inspire/blob/master/LICENSE).
 
 ### Contributing
 
@@ -23,21 +23,30 @@ For the time being contact iridian at valaa dot com.
 
 Specified in [the shared eslint configuration](packages/toolset-vault/shared/.eslintrc.js)
 
+
 ## @valos/vault repository in github.com/valaatech/vault
 
 @valos/vault repository has three main roles:
 
-- it is the [monorepo](https://medium.com/@luisvieira_gmr/building-large-scale-react-applications-in-a-monorepo-91cd4637c131)
-and the upstream for all the primary `@valos` npmjs.com packages:
-`tools`, `raem`, `script`, `prophet`, `engine` and `inspire`.
-- it provides a locally deployable, locally restricted but otherwise
-complete ValOS Stack for testing and hot-reloading development.
-- it provides `@valos/vault` npm package with the shared tools for
-creating and managing ValOS deployments in general and
-`Inspire Gateway` runtime deployments in specific.
+- it contains all `@valos` ecosystem specification documents (very WIP
+  but can be found at various states of obsolescence at `DEVOPS.md` and
+  the various `packages/*/README.md`).
+- it provides a locally deployable and thusly restricted,
+  non-persisting but fully functional ValOS gateway stack for hot and
+  rapid testing and development purposes.
+- it is a [monorepo](https://medium.com/@luisvieira_gmr/building-large-scale-react-applications-in-a-monorepo-91cd4637c131)
+  of all `@valos` namespace library and devops npmjs.com packages.
+
+The `@valos` namespace library packages consists of the main gateway
+`@valos/inspire` and its dependencies  `@valos/tools`, `@valos/raem`,
+`@valos/script`, `@valos/prophet` and `@valos/engine`.
+The devops packages consists of the valos infrastructure manager tool
+`valma` (sans namespace) and various toolset packages for managing
+development environments, publishing packages and creating deployments
+alike.
 
 
-## Local deployment of a restricted ValOS stack
+## Local deployment of the restricted ValOS stack with local Zero
 
 You need to have yarn installed. If you have npm already then you can
 get it with `sudo npm install -g yarn`.
@@ -45,35 +54,44 @@ get it with `sudo npm install -g yarn`.
 Local development web server can be launched like so:
 ```
 yarn install
-yarn start
+npm start
 ```
 
-This launches webpack dev-server at 0.0.0.0:8080 which serves the
+This launches webpack-dev-server at 0.0.0.0:8080 which serves the
 `Inspire Gateway` javascript runtime to the client browser accessing
 it. The gateway will deliver `Zero Editor` as its `ValaaSpace` entry
-site which is sourced locally from `./revelations/local-zero`.
-
+site (which sourced locally from `./revelations/local-zero`).
 
 ### No remote authority plugins - limited persistence
 
-No remote content can be accessed and all content that is created is
+local-zero supports only `valaa-local:` and `valaa-memory:` schemes, so
+no remote content can be accessed. All content that is created is
 persisted only locally inside the client browser IndexedDB cache.
 `ValaaSpace` content will thus survive page refreshes but can still be
 unpredictably lost. This can happen for example when the browser
 clears its cache for new space.
 
 
-## Overview
+## Overview - what is ValaaSpace
 
 Most of the Valaa infrastructure logic lies within the sub-modules of
-the Inspire client javascript runtime which runs in user browsers.
+the Inspire client gateway. The gateway is a javascript bundle running
+in the user browsers, serving various Valaa applications to the users.
 
-Applications are created on top of this infrastructure in the form of
-Valaa resources, which are stored in a globally shared `ValaaSpace`.
-In order to efficiently show these applications to the user Inspire
+These applications are created as combinations of Valaa resources which
+are stored in a globally shared conceptual `ValaaSpace`. The physical
+storage of individual resources varies based on the implementation of
+their `authority`. But as
+1. the resource identifiers are provably, auditably globally unique,
+2. the resources are locateable,
+3. unrestricted cross-references are possible, and
+4. all ValOS resources share the same object model,
+together these qualities unifies `ValaaSpace` as the most consequential
+domain for all of ValOS content.
+
+In order to efficiently present these applications to the gateway
 loads only small parts of the whole ValaaSpace (called `partitions`)
 inside the user's browser. It accomplishes this using `event streams`.
-
 
 ### Event stream circle of life
 
@@ -95,7 +113,6 @@ Everything that happens or is created in ValaaSpace is created using
 this cycle. Zero, the primary ValaaSpace content editor, is merely
 another Valaa application rendered by Inspire and has indeed been
 primarily developed using itself (after a brief bootstrapping phase).
-
 
 ### Backend authorities can be simple
 

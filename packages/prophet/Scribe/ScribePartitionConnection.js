@@ -84,8 +84,8 @@ export default class ScribePartitionConnection extends PartitionConnection {
       (isIndexedDBConnected) => (!isIndexedDBConnected ? {} : this._readMediaEntries()),
       (mediaEntries) => {
         this._pendingMediaLookup = mediaEntries;
-        for (const [mediaRawId, info] of Object.entries(this._pendingMediaLookup)) {
-          this._prophet._persistedMediaLookup[mediaRawId] = info;
+        for (const [mediaRawId, entry] of Object.entries(this._pendingMediaLookup)) {
+          this._prophet._persistedMediaLookup[mediaRawId] = entry;
         }
       },
       () => ((options.narrateOptions !== false)
@@ -95,9 +95,9 @@ export default class ScribePartitionConnection extends PartitionConnection {
 
   disconnect () {
     const adjusts = {};
-    for (const info of Object.values(this._pendingMediaLookup)) {
-      if (info.isInMemory) adjusts[info.contentId] = -1;
-      delete this._prophet._persistedMediaLookup[info.mediaId];
+    for (const entry of Object.values(this._pendingMediaLookup)) {
+      if (entry.isInMemory) adjusts[entry.contentId] = -1;
+      delete this._prophet._persistedMediaLookup[entry.mediaId];
     }
     this._prophet._adjustInMemoryBvobBufferRefCounts(adjusts);
     this._pendingMediaLookup = {};
@@ -217,15 +217,15 @@ export default class ScribePartitionConnection extends PartitionConnection {
   _reloadCommandQueue (/* conflictingCommandEventId: number */) {}
 
   _determineEventMediaPreOps (mediaEvent: Object, rootEvent: Object) {
-    const mediaId = deserializeVRef(mediaEvent.id);
-    let pendingEntry = this._pendingMediaLookup[mediaId.rawId()];
+    const mediaRef = deserializeVRef(mediaEvent.id);
+    let pendingEntry = this._pendingMediaLookup[mediaRef.rawId()];
     try {
-      return _determineEventMediaPreOps(this, mediaEvent, rootEvent, mediaId, pendingEntry);
+      return _determineEventMediaPreOps(this, mediaEvent, rootEvent, mediaRef, pendingEntry);
     } catch (error) {
-      if (!pendingEntry) pendingEntry = this._pendingMediaLookup[mediaId.rawId()];
+      if (!pendingEntry) pendingEntry = this._pendingMediaLookup[mediaRef.rawId()];
       throw this.wrapErrorEvent(error, `_initiateMediaRetrievals(${
-              ((pendingEntry || {}).mediaInfo || {}).name || ""}/${mediaId.rawId()})`,
-          "\n\tmediaId:", mediaId,
+              ((pendingEntry || {}).mediaInfo || {}).name || ""}/${mediaRef.rawId()})`,
+          "\n\tmediaRef:", mediaRef,
           "\n\tmediaEvent:", ...dumpObject(mediaEvent),
           "\n\tpendingEntry:", ...dumpObject(pendingEntry),
           "\n\troot event:", ...dumpObject(rootEvent),
@@ -260,22 +260,22 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  _getMediaEntry (mediaId: VRef, require_ = true) {
+  _getMediaEntry (mediaRef: VRef, require_ = true) {
     let currentStep;
     try {
       // Fetch from lookups - traverse media prototype chain.
       do {
-        const mediaRawId = currentStep ? currentStep.headRawId() : mediaId.rawId();
+        const mediaRawId = currentStep ? currentStep.headRawId() : mediaRef.rawId();
         const ret = this._pendingMediaLookup[mediaRawId]
             || this._prophet._persistedMediaLookup[mediaRawId];
         if (ret) return ret;
-        currentStep = currentStep ? currentStep.previousStep() : mediaId.previousGhostStep();
+        currentStep = currentStep ? currentStep.previousStep() : mediaRef.previousGhostStep();
       } while (currentStep);
-      if (require_) throw new Error(`Media entry for ${mediaId.toString()} not found`);
+      if (require_) throw new Error(`Media entry for ${mediaRef.toString()} not found`);
       return undefined;
     } catch (error) {
       throw this.wrapErrorEvent(error, `_getMediaEntry(..., require = ${require_})`,
-          "\n\tmediaId:", ...dumpObject(mediaId));
+          "\n\tmediaId:", ...dumpObject(mediaRef));
     }
   }
 

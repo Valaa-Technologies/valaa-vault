@@ -7,7 +7,7 @@ import { getActionFromPassage, Story } from "~/raem/redux/Bard";
 import thenChainEagerly from "~/tools/thenChainEagerly";
 
 export type MediaInfo = {
-  mediaId: VRef,
+  mediaRef: VRef,
   bvobId?: string,
   name?: string,
   sourceURL?: string,

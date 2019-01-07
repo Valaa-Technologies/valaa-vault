@@ -1112,7 +1112,7 @@ export default class Vrapper extends Cog {
       mime = `${mediaInfo.type}/${mediaInfo.subtype}`;
     }
     mediaInfo.mime = mime;
-    mediaInfo.mediaId = this.getId(options);
+    mediaInfo.mediaRef = this.getId(options);
     return mediaInfo;
   }
 
@@ -1156,7 +1156,7 @@ export default class Vrapper extends Cog {
               : Promise.resolve(cachedInterpretation);
         }
       }
-      if (!mediaInfo || !mediaInfo.mediaId) {
+      if (!mediaInfo || !mediaInfo.mediaRef) {
         mediaInfo = this.resolveMediaInfo(Object.create(options));
       }
       let decodedContent = options.decodedContent;

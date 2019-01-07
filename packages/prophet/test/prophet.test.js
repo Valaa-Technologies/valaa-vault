@@ -58,12 +58,12 @@ describe("Prophet", () => {
     const connection = await scribe.acquirePartitionConnection(createPartitionURI("valaa-test:"))
         .getActiveConnection();
 
-    const mediaId = vRef("abcd-0123");
+    const mediaRef = vRef("abcd-0123");
     for (const [bufferContent, mediaInfo, expectedContent] of structuredMediaContents) {
       const preparedBvob = connection.prepareBvob(bufferContent);
       const bvobId = await preparedBvob.persistProcess;
       const decodedContent =
-          await connection.decodeMediaContent({ mediaId, bvobId, ...mediaInfo });
+          await connection.decodeMediaContent({ mediaRef, bvobId, ...mediaInfo });
       expect(decodedContent).toEqual(expectedContent);
     }
   });

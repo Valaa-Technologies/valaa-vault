@@ -221,13 +221,13 @@ export default class EngineKuery extends ValaaScriptKuery {
 
   // Bvob and Media
 
-  bvobContent (mediaId: ?any, remoteURL: ?any, options: Object = {}) {
-    return this.call(this._root.toMethod("bvobContent"), null, mediaId, remoteURL, options);
+  bvobContent (mediaRef: ?any, remoteURL: ?any, options: Object = {}) {
+    return this.call(this._root.toMethod("bvobContent"), null, mediaRef, remoteURL, options);
   }
 
-  blobContent (mediaId: ?any, remoteURL: ?any, options: Object = {}) {
+  blobContent (mediaRef: ?any, remoteURL: ?any, options: Object = {}) {
     console.error("DEPRECATED: VALEK.blobContent\n\tprefer: VALEK.bvobContent");
-    return this.call(this._root.toMethod("bvobContent"), null, mediaId, remoteURL, options);
+    return this.call(this._root.toMethod("bvobContent"), null, mediaRef, remoteURL, options);
   }
 
   mediaURL (options: Kuery = {}) {

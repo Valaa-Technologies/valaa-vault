@@ -297,7 +297,7 @@ export default class PartitionConnection extends Follower {
    * return? Maybe always sync or always aync? Or just delete this
    * whole function?
    *
-   * @param {VRef} mediaId
+   * @param {VRef} mediaRef
    * @param {MediaInfo} mediaInfo
    * @returns
    *
@@ -326,7 +326,7 @@ export default class PartitionConnection extends Follower {
    * This function is convenience forward to alias for
    * requestMediaContents([mediaInfo])[0].
    *
-   * @param {VRef} mediaId
+   * @param {VRef} mediaRef
    * @param {MediaInfo} mediaInfo
    * @returns
    *
@@ -350,12 +350,12 @@ export default class PartitionConnection extends Follower {
   }
 
   /**
-   * Returns a URL for given mediaId pair which can be used in html context for retrieving media
+   * Returns a URL for given mediaRef pair which can be used in html context for retrieving media
    * content.
    *
    * Convenience for requestMediaContents([{ ...mediaInfo, asURL: true }])[0].
    *
-   * @param {VRef} mediaId
+   * @param {VRef} mediaRef
    * @param {MediaInfo} mediaInfo
    * @returns
    *

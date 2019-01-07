@@ -515,14 +515,14 @@ export default class InspireGateway extends LogEventGenerator {
       if (commandQueue && commandQueue.length) {
         throw new Error("commandQueue revelation not implemented yet");
       }
-      const latestMediaInfos = await logs.latestMediaInfos;
+      const latestMediaInfos = await logs.latestMediaInfos; // only used for validation for now
       const upgradedEventLog = truthLog.map(event => upgradeEventTo0Dot2(connection, event));
       const chronicling = connection.chronicleEvents(upgradedEventLog, {
         name: `prologue truths for '${connection.getName()}'`,
         isTruth: true,
         eventIdBegin: eventIdEnd,
         retrieveMediaBuffer (mediaInfo: Object) {
-          const latestInfo = latestMediaInfos[mediaInfo.mediaId];
+          const latestInfo = mediaInfo.mediaRef && latestMediaInfos[mediaInfo.mediaRef.rawId()];
           if (!latestInfo ||
               (mediaInfo.bvobId !== (latestInfo.mediaInfo.bvobId || latestInfo.mediaInfo.blobId))) {
             // Bvob wasn't found in cache and the bvobId doesn't match the latest known bvobId for

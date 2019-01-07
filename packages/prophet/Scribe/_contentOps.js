@@ -1,7 +1,7 @@
 // @flow
 
 import { isCreatedLike } from "~/raem/events";
-import { getRawIdFrom } from "~/raem/ValaaReference";
+import ValaaReference, { getRawIdFrom } from "~/raem/ValaaReference";
 import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import { MediaInfo, RetrieveMediaBuffer } from "~/prophet/api/types";
@@ -128,16 +128,16 @@ async function _prepareBvobUpstreamWithRetries (connection: ScribePartitionConne
 */
 
 export function _determineEventMediaPreOps (connection: ScribePartitionConnection,
-    mediaEvent: Object, rootEvent: Object, mediaId: VRef, currentEntry: MediaEntry) {
-  const mediaRawId = mediaId.rawId();
+    mediaEvent: Object, rootEvent: Object, mediaRef: VRef, currentEntry: MediaEntry) {
+  const mediaId = mediaRef.rawId();
   let mediaInfo;
   let newEntry: MediaEntry;
   if (currentEntry) {
     mediaInfo = { ...currentEntry.mediaInfo };
     newEntry = { ...currentEntry, mediaInfo };
   } else {
-    if (mediaId.isInherited()) {
-      mediaInfo = { ...connection._getMediaEntry(mediaId).mediaInfo };
+    if (mediaRef.isInherited()) {
+      mediaInfo = { ...connection._getMediaEntry(mediaRef).mediaInfo };
     } else if (isCreatedLike(mediaEvent)) {
       mediaInfo = {};
     } else {
@@ -148,14 +148,12 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
       connection.errorEvent(`mediaEvent for media has no previous media entry and ${
               ""}event is not CREATED, DUPLICATED and resource is not ghost`,
           "\n\treplay not blocked but media accesses made against this Media will throw.",
-          "\n\tmediaId:", String(mediaId),
+          "\n\tmediaRef:", String(mediaRef),
           "\n\tmediaEvent:", ...dumpObject(mediaEvent),
           "\n\trootEvent:", ...dumpObject(rootEvent));
       return [];
     }
-    newEntry = {
-      mediaId: mediaRawId, mediaInfo, isPersisted: true, isInMemory: true,
-    };
+    newEntry = { mediaId, mediaInfo, isPersisted: true, isInMemory: true };
   }
   connection._pendingMediaLookup[newEntry.mediaId] = newEntry;
 
@@ -181,7 +179,7 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribePartiti
   let previousBackoff;
   invariantifyString(mediaEntry.mediaId, "_retryingTwoWaySyncMediaContent.mediaEntry.mediaId",
       {}, "\n\tnewEntry", mediaEntry);
-  mediaInfo.mediaId = mediaEntry.mediaId;
+  mediaInfo.mediaRef = new ValaaReference(mediaEntry.mediaId);
   let getNextBackoffSeconds = options.getNextBackoffSeconds;
   if (!getNextBackoffSeconds && (typeof options.retryTimes === "number")) {
     getNextBackoffSeconds = (previousRetries: number, mediaInfo_, error) =>
@@ -246,11 +244,11 @@ export function _requestMediaContents (connection: ScribePartitionConnection,
   const ret = mediaInfos.map(mediaInfo => {
     const onErrorWInfo = error => onError(error, mediaInfo);
     try {
-      const mediaEntry = connection._getMediaEntry(mediaInfo.mediaId, !!mediaInfo.asURL);
+      const mediaEntry = connection._getMediaEntry(mediaInfo.mediaRef, !!mediaInfo.asURL);
       const actualInfo = { ...mediaInfo };
       if (!actualInfo.bvobId) {
         if (!mediaEntry || !mediaEntry.mediaInfo) {
-          throw new Error(`Cannot find Media info for '${String(mediaInfo.mediaId)}'`);
+          throw new Error(`Cannot find Media info for '${String(mediaInfo.mediaRef)}'`);
         }
         Object.assign(actualInfo, mediaEntry.mediaInfo);
       }

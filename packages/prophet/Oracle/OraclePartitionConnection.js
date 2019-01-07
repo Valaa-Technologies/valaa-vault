@@ -123,7 +123,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
       } catch (error) {
         return this.wrapErrorEvent(error, `requestMediaContents().mediaInfo["${
           mediaInfo.name || `unnamed media`}"]`,
-      "\n\tmediaId:", mediaInfo.mediaId,
+      "\n\tmediaRef:", ...dumpObject(mediaInfo.mediaRef),
       "\n\tmediaInfo:", ...dumpObject(mediaInfo));
       }
     });

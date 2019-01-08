@@ -763,7 +763,7 @@ export default class Vrapper extends Cog {
     options.head = this;
     let partitionURI = id.getPartitionURI();
     if (!partitionURI && id.isGhost()) {
-      partitionURI = transaction.bindObjectRawId(id.getGhostPath().headHostRawId(), "Resource")
+      partitionURI = transaction.bindObjectId([id.getGhostPath().headHostRawId()], "Resource")
           .getPartitionURI();
       id = id.immutatePartitionURI(partitionURI);
     }

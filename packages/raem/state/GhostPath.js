@@ -95,9 +95,8 @@ export default class GhostPath {
    * @returns the whole GhostPath object at previous step or null if this is the first step.
    */
   previousStep (): ?GhostPath {
-    const ret: any = Object.getPrototypeOf(this);
-    if (ret === GhostPath.prototype) return undefined;
-    return ret;
+    if (!this.isGhost()) return undefined;
+    return Object.getPrototypeOf(this);
   }
 
   getGhostHostAndObjectRawIdByHostPrototype (hostPrototypeRawId: RawId): [RawId, RawId] {

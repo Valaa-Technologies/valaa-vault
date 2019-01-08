@@ -380,8 +380,8 @@ export default class ValaaEngine extends Cog {
       if (owner instanceof ValaaReference) {
         let partitionURI = owner.getPartitionURI();
         if (!partitionURI && owner.isGhost()) {
-          partitionURI = transaction.bindObjectRawId(
-                  owner.getGhostPath().headHostRawId(), "Resource")
+          partitionURI = transaction
+              .bindObjectId([owner.getGhostPath().headHostRawId()], "Resource")
               .getPartitionURI();
         }
         if (partitionURI) {

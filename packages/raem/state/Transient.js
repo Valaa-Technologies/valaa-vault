@@ -38,7 +38,7 @@ export function createImmaterialTransient (rawId: RawId, ghostPath: GhostPath,
   return ret;
 }
 
-export function createInactiveTransient (id: VRef) {
+export function createIdTransient (id: VRef) {
   return Transient([["id", id]]);
 }
 

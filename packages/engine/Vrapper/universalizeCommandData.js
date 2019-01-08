@@ -51,8 +51,9 @@ export default function universalizeCommandData (object: ?any, options:
         return connectedId.immutatePartitionURI();
       }
     } else if (connectedId.isGhost()) {
-      const ghostPartitionURI = options.transaction.bindObjectRawId(
-          id.getGhostPath().headHostRawId(), "Resource").getPartitionURI();
+      const ghostPartitionURI = options.transaction
+          .bindObjectId([id.getGhostPath().headHostRawId()], "Resource")
+          .getPartitionURI();
       if (ghostPartitionURI.toString() !== options.partitionURIString) {
         return connectedId.immutatePartitionURI(partitionURI);
       }

@@ -424,7 +424,7 @@ function _createResourceVRefDeserializer (fieldInfo) {
     if (resourceId.getPartitionURI() || !resourceId.isGhost()) return resourceId;
     // Ghosts have the correct partitionURI in the host Resource.id
     const ghostPath = resourceId.getGhostPath();
-    const hostId = bard.bindObjectRawId(ghostPath.headHostRawId(), "Resource");
+    const hostId = bard.bindObjectId([ghostPath.headHostRawId()], "Resource");
     return resourceId.immutatePartitionURI(hostId.getPartitionURI());
   }
   return deserializeResourceVRef;
@@ -437,12 +437,10 @@ function _createSingularDataDeserializer (fieldInfo) {
     let objectIntro;
     try {
       if (data === null) return null;
-      if (typeof data === "string") {
-        return bard.bindObjectRawId(data, concreteTypeName || "Data",
-            bard.event.meta.partitionURI || null);
-      }
-      if (Object.getPrototypeOf(data) !== Object.prototype) {
-        return bard.bindObjectIdData(data, concreteTypeName || "Data",
+      if (typeof data === "string" || (Object.getPrototypeOf(data) !== Object.prototype)) {
+        return bard.bindObjectId(
+            (typeof dat === "string") ? [data] : data,
+            concreteTypeName || "Data",
             bard.event.meta.partitionURI || null);
       }
       const typeName = concreteTypeName || data.typeName;

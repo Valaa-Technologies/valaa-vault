@@ -46,7 +46,7 @@ import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import { defaultOwnerCoupledField } from
     "~/engine/ValaaSpace/Valaa/injectSchemaTypeBindings";
 
-import { arrayFromAny, iterableFromAny, dumpify, dumpObject,
+import { arrayFromAny, iterableFromAny, debugObjectType, dumpify, dumpObject,
   invariantify, invariantifyObject, invariantifyString,
   isPromise, thenChainEagerly, outputError, wrapError,
 } from "~/tools";
@@ -155,6 +155,9 @@ export default class Vrapper extends Cog {
     if (typeName === "Blob" || !this.engine) {
       this._phase = NONRESOURCE;
     } else {
+      if (!id.isGhost() && !id.getPartitionURI()) {
+        throw new Error(`Cannot create a non-ghost Vrapper; id is missing partitionURI: <${id}>`);
+      }
       this._phase = isResourceType(this.getTypeIntro()) ? INACTIVE : NONRESOURCE;
       this.engine.addCog(this);
       if (immediateRefresh) {
@@ -861,10 +864,15 @@ export default class Vrapper extends Cog {
         }
         typeName = type.name;
       }
-      const vFieldValue = this.engine.create(typeName, initialState,
-          { ...options, head: this });
-      if (isSet) this.setField(fieldName, vFieldValue, options);
-      else this.addToField(fieldName, vFieldValue, options);
+      const createOptions = { ...options, head: this };
+      if (typeName === "Property") {
+        initialState.owner = this.getId().coupleWith(fieldName);
+      }
+      const vFieldValue = this.engine.create(typeName, initialState, createOptions);
+      if (typeName !== "Property") {
+        if (isSet) this.setField(fieldName, vFieldValue, options);
+        else this.addToField(fieldName, vFieldValue, options);
+      }
       transaction.releaseTransaction();
       return vFieldValue;
     } catch (error) {

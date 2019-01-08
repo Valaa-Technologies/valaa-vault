@@ -184,6 +184,10 @@ export default class FalseProphetDiscourse extends Discourse {
   }
 
   assignNewPartitionlessResourceId (targetAction: EventBase, explicitRawId?: string) {
+    if (targetAction.typeName === "Property") {
+      throw new Error(
+          "Cannot create a resource id for a structural type 'Property' which is missing an owner");
+    }
     targetAction.id = vRef(explicitRawId || valaaUUID());
     /*
     console.log("assignNewPartitionlessResourceId", String(targetAction.id), explicitRawId,

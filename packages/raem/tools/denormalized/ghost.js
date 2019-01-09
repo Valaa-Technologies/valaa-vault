@@ -149,25 +149,27 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
         "perhaps createMaterializeGhostAction.ghostId is missing a ghost path?");
   }
   const ghostHostPrototypeRawId = ghostObjectPath.headHostPrototypeRawId();
-  const [ghostHostRawId, ghostRawId] =
+  const [ghostHostRawId, rawId] =
       ghostObjectPath.getGhostHostAndObjectRawIdByHostPrototype(ghostHostPrototypeRawId);
-  let actualType = state.getIn(["TransientFields", ghostRawId]);
+  let actualType = state.getIn(["TransientFields", rawId]);
   try {
     if (actualType) {
       // Transient found: already materialized ghost or not a ghost to
       // begin with. Still possibly inside an inactive partition.
       // Return without side effects.
-      const transient = state.getIn([actualType, ghostRawId]);
+      const transient = state.getIn([actualType, rawId]);
       const id = transient.get("id");
       return { id, actualType, ghostPath: id.getGhostPath() };
     }
-    if (!ghostHostPrototypeRawId) {
-      // No host prototype means this is the Ghost path base Resource.
-      // No transient means we're inside an unconnected partition or
-      // the referred resource doesn't exist. As it stands there is no
-      // theoretical way to determine the actual partition id reliably,
-      // either. Create an inactive reference for the resource.
-      const id = knownId || vRef(ghostRawId);
+    if (!ghostHostPrototypeRawId || (ghostHostRawId === rawId)) {
+      // No host prototype means this is the Ghost path base Resource
+      // and ghostHostRawId equal to rawId means this is an instance.
+      // In both cases not having a transient means we're inside an
+      // unconnected partition or the referred resource doesn't exist.
+      // As it stands there is no theoretical way to determine the
+      // actual partition id reliably, either.
+      // Create an inactive reference for the resource.
+      const id = knownId || vRef(rawId);
       if (knownId && !knownId.isInactive()) {
         throw new Error("Cannot materialize a non-existent resource (partition is active)");
       }
@@ -184,11 +186,11 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
     // A regular non-root ghost Resource with no transient.
     // Still possibly inside an inactive partition.
     const { id: ghostPrototype, actualType: prototypeTypeName, ghostPath: prototypePath }
-        = _createMaterializeGhostAction(resolver, state, ghostObjectPath.previousStep(), typeName,
-            false, undefined, outputActions);
+        = _createMaterializeGhostAction(resolver, state, ghostObjectPath.previousPrototypeStep(),
+            typeName, false, undefined, outputActions);
     actualType = isInactiveTypeName(prototypeTypeName) ? typeName : prototypeTypeName;
     const ghostPath = prototypePath
-        .withNewStep(ghostHostPrototypeRawId, ghostHostRawId, ghostRawId);
+        .withNewStep(ghostHostPrototypeRawId, ghostHostRawId, rawId);
     const hostType = state.getIn(["TransientFields", ghostHostRawId]);
     const hostId = hostType
         ? state.getIn([hostType, ghostHostRawId]).get("id")
@@ -196,22 +198,22 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
                 ? Object.getPrototypeOf(knownId)
                 : new ValaaReference().initResolverComponent({ inactive: true }))
             .initNSS(ghostHostRawId);
-    const id = Object.create(Object.getPrototypeOf(hostId)).initNSS(ghostRawId);
+    const id = Object.create(Object.getPrototypeOf(hostId)).initNSS(rawId);
     id.connectGhostPath(ghostPath);
     outputActions.push(created({
       id, typeName: actualType,
-      initialState: { ghostPrototype, ghostOwner: hostId.coupleWith("ghostOwnlings"), },
+      initialState: { ghostPrototype, ghostOwner: hostId.coupleWith("ghostOwnlings") },
       meta: { noSubMaterialize: !isEvent },
     }));
     return { id, actualType, ghostPath };
   } catch (error) {
     throw wrapError(error, `During createMaterializeGhostAction(${dumpify(ghostObjectPath)}:${
-        typeName}/${actualType}}), with:`,
+            typeName}/${actualType}}), with:`,
         "\n\ttransientType:", actualType,
         "\n\tknownId:", knownId,
+        "\n\tresource id:", rawId,
         "\n\tghost host prototype:", ghostHostPrototypeRawId,
-        "\n\tghost host:", ghostHostRawId,
-        "\n\tghost id:", ghostRawId);
+        "\n\tghost host:", ghostHostRawId);
   }
 }
 

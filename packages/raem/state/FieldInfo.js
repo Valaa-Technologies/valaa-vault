@@ -5,7 +5,6 @@ import { OrderedSet } from "immutable";
 import ValaaReference, { tryCoupledFieldFrom } from "~/raem/ValaaReference";
 import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
-import { getObjectRawField } from "~/raem/state/getObjectField";
 import GhostPath, { createGhostRawId, GhostElevation } from "~/raem/state/GhostPath";
 import { PartialRemovesTag } from "~/raem/state/partialSequences";
 import Resolver from "~/raem/state/Resolver";
@@ -62,7 +61,7 @@ export function _getFieldGhostElevation (fieldInfo: FieldInfo, elevationInstance
       .obtainGhostElevation(elevationInstanceId.getGhostPath());
 }
 
-function _elevateReference (elevator: Resolver, reference: VRef, fieldInfo: FieldInfo,
+export function _elevateReference (elevator: Resolver, reference: VRef, fieldInfo: FieldInfo,
     elevation: GhostElevation, typeName: string, verbosity: ?number) {
   elevator.tryGoToTransient(reference, typeName);
   let elevatedId;
@@ -138,7 +137,7 @@ function _elevateRawSequence (resolver: Resolver, object: Transient,
       _elevateReference(elevator, reference, fieldInfo, elevation, typeName, verbosity));
 }
 
-function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: GhostPath,
+export function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: GhostPath,
     elevationInstancePath: GhostPath, verbosity: ?number): VRef {
   if (elevationBasePath === elevationInstancePath) return referenceElevator.objectId;
   let elevatedGhostPath: GhostPath = referenceElevator.objectId.getGhostPath();
@@ -157,7 +156,7 @@ function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: Ghost
       // Note: This logic does not hold if some partitions in the target ghost path are
       // not active. But if the top partition of the ghost path is active, then all partitions in
       // the ghost path should be active as well.
-      takeToCurrentObjectOwnerTransient(ownersResolver);
+      ownersResolver.goToCurrentObjectOwnerTransient();
     }
     if (typeof verbosity === "number") {
       console.log("  ".repeat(verbosity), "elevating", referenceElevator.objectId.toString(),
@@ -188,11 +187,11 @@ function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: Ghost
             delvingStep
                 && (delvingStep = delvingStep.getInstanceStepByHostPrototype(ownerRawId))
                 && (delvingStep !== alreadyElevatedStep);
-            delvingStep = delvingStep.previousStep()) {
+            delvingStep = delvingStep.previousGhostStep()) {
           instanceGhostPath = delvingStep;
         }
         if (instanceGhostPath) break;
-        takeToCurrentObjectOwnerTransient(ownersResolver);
+        ownersResolver.goToCurrentObjectOwnerTransient();
         if (!ownersResolver.objectId) {
           if (typeof verbosity === "number") {
             console.log("  ".repeat(verbosity), "final elevated reference",
@@ -254,7 +253,7 @@ function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: Ghost
         // a materialized ghost or once the prototype equals the current ghost host prototype.
         referenceElevator.objectTransient = innermostMaterializedPrototypeOwnerTransient;
         referenceElevator.objectId = innermostMaterializedPrototypeOwnerTransient.get("id");
-        for (; ; takeToCurrentObjectOwnerTransient(referenceElevator)) { // eslint-disable-line
+        for (; ; referenceElevator.goToCurrentObjectOwnerTransient()) { // eslint-disable-line
           if (referenceElevator.objectId.rawId() === ghostHostPrototypeRawId) {
             ownersResolver.goToTransientOfRawId(ghostHostRawId, "Resource");
             break;
@@ -290,23 +289,4 @@ function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: Ghost
         "\n\tnewGhostRawId:", newGhostRawId,
         );
   }
-}
-
-export function takeToCurrentObjectOwnerTransient (resolver: Resolver) {
-  const fieldInfo = { name: "owner" };
-  const elevator = Object.create(resolver);
-  let owner = getObjectRawField(elevator, resolver.objectTransient, "owner", fieldInfo);
-  if (owner) {
-    const elevation = _getFieldGhostElevation(fieldInfo, resolver.objectId);
-    if (elevation) {
-      owner = _elevateReference(elevator, owner, fieldInfo, elevation, "Resource");
-    }
-    if (owner instanceof ValaaReference) return resolver.goToTransient(owner, "Resource");
-    resolver.objectId = owner.get("id");
-    resolver.objectTransient = owner;
-  } else {
-    resolver.objectId = null;
-    resolver.objectTransient = null;
-  }
-  return resolver.objectTransient;
 }

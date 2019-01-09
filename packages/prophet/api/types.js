@@ -61,12 +61,15 @@ export class ChronicleEventResult {
     return this.getPersistedEvent();
   }
 
-  // Get universalized event after it has been processed through local prophet chain.
+  // Get universalized event after it has been processed and reduced
+  // through local prophet chain, including validations, excluding
+  // persistence.
   getLocalEvent (): EventBase | null | Promise<EventBase | null> {
     throw new Error(`getLocalEvent not implemented by ${this.constructor.name}`);
   }
 
-  // Get event after it has been persisted (possibly locally).
+  // Get event after it has been persisted (possibly locally) but not
+  // necessarily authorized.
   getPersistedEvent (): EventBase | Promise<EventBase> {
     return this.getTruthEvent();
   }

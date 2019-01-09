@@ -1489,7 +1489,7 @@ export default class Vrapper extends Cog {
         // materialized Resource's.
 
         // currentRawId and thus current head of ghostPath has already been registered here, so skip
-        while ((ghostPath = ghostPath && ghostPath.previousStep())) {// eslint-disable-line
+        while ((ghostPath = ghostPath && ghostPath.previousGhostStep())) {// eslint-disable-line
           currentRawId = ghostPath.headRawId();
           listenedRawIds.push(currentRawId);
         }

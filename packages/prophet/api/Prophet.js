@@ -18,8 +18,6 @@ import { dumpObject } from "~/tools/wrapError";
    * @param {NarrateOptions} [options={
    *   // If true and a connection (even a non-fully-connected) exists it is returned synchronously.
    *   allowPartialConnection: boolean = false,
-   *   // If true does not initiate new connection and returns undefined instead of any promise.
-   *   synchronous: boolean = false,
    *   // If false does not create a new connection process is one cannot be found.
    *   newConnection: boolean = true,
    *   // If true requests a creation of a new partition and asserts if one exists. If false,
@@ -44,7 +42,6 @@ export type ConnectOptions = {
                                    // if false, throw if no connection exists,
   newPartition?: boolean,          // if true, throw if a partition exists (has persisted events)
                                    // if false, throw if no partition exists (no persisted events)
-  synchronous?: boolean, // if true
   allowPartialConnection?: boolean,       // default: false. If true, return not fully narrated
                                           // connection synchronously
   requireLatestMediaContents?: boolean,   //
@@ -143,12 +140,9 @@ export default class Prophet extends LogEventGenerator {
     }
 
       /*
-      if (options.newPartition || options.synchronous) {
-        if (options.synchronous) return connection;
-        if (connection && connection.getFirstUnusedTruthEventId()) {
-          throw new Error(`Partition already exists when trying to create a new partition '${
-              String(partitionURI)}'`);
-        }
+      if (options.newPartition && connection && connection.getFirstUnusedTruthEventId()) {
+        throw new Error(`Partition already exists when trying to create a new partition '${
+            String(partitionURI)}'`);
       }
 
       if (!ret || (!ret.isActive() && (options.allowPartialConnection === false))) return undefined;

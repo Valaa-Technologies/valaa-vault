@@ -6,7 +6,7 @@ import { isCreatedLike } from "~/raem/events";
 import ValaaReference, { getRawIdFrom } from "~/raem/ValaaReference";
 import { createPartitionURI } from "~/raem/ValaaURI";
 
-import { elevateFieldRawSequence, takeToCurrentObjectOwnerTransient } from "~/raem/state/FieldInfo";
+import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import getObjectField, { fillFieldInfoAndResolveAliases }
     from "~/raem/state/getObjectField";
 import { separatePartialSequence, combineAsPartialSequence, shouldAddAsPartialRemove }
@@ -23,7 +23,7 @@ import { createMaterializeTransientAction } from "~/raem/tools/denormalized/ghos
 
 import Bard from "~/raem/redux/Bard";
 
-import { invariantify, wrapError } from "~/tools";
+import { dumpObject, invariantify, wrapError } from "~/tools";
 
 // TODO(iridian): Well. MODIFIED is stupid, it should be four (or more)
 // different actions: FIELDS_SET, ADDED_TO, REMOVED_FROM, REPLACED_WITHIN.
@@ -96,9 +96,9 @@ export default function modifyResource (bard: Bard) {
         state.setIn([bard.objectTypeIntro.name, passage.id.rawId()], newResource));
   } catch (error) {
     throw wrapError(error, `During ${bard.debugId()}\n .modifyResource(), with:`,
-        "\n\tpassage:", passage,
-        "\n\ttransient:", bard.objectTransient,
-        "\n\tbard:", bard);
+        "\n\tpassage:", ...dumpObject(passage),
+        "\n\ttransient:", ...dumpObject(bard.objectTransient),
+        "\n\tbard:", ...dumpObject(bard));
   }
 }
 
@@ -120,8 +120,8 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
   let isPrimaryMutation = false;
   const isBeingUniversalized = bard.event.meta.isBeingUniversalized;
   for (const fieldName of sortedKeys) {
-    const fieldUpdate = updatesByField[fieldName];
-    if (fieldUpdate === undefined) {
+    const updateClause = updatesByField[fieldName];
+    if (updateClause === undefined) {
       if (isCreatedLike(bard.passage)) continue;
       bard.error(`Invalid ${operationDescription}, trying to update ${
           bard.objectTypeIntro.name}.${fieldName
@@ -143,7 +143,7 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
         oldLocalValue = mutableObject.get(fieldInfo.name);
       }
       updateCoupling = bard.shouldUpdateCouplings && getCoupling(fieldInfo.intro);
-      if (!validateFieldUpdate(bard, fieldInfo.intro, fieldUpdate, operationDescription)) continue;
+      if (!validateFieldUpdate(bard, fieldInfo.intro, updateClause, operationDescription)) continue;
       if (fieldInfo.intro.isPersisted && !fieldInfo.intro.isOwned) {
         // don't mark owning relation updates as primary, so that
         // frozen resources can still be moved
@@ -151,7 +151,7 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
       }
       bard.fieldsTouched.add(fieldInfo.name);
       const newValue = handleFieldUpdate(
-          bard, fieldInfo, fieldUpdate, oldLocalValue, updateCoupling, updatesByField);
+          bard, fieldInfo, updateClause, oldLocalValue, updateCoupling, updatesByField);
       if (isBeingUniversalized && (newValue instanceof ValaaReference)) {
         updatesByField[fieldInfo.name] = newValue.toJSON();
         // Remove alias original
@@ -164,32 +164,33 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
       const aliasInfo = fieldInfo.name !== fieldName ? ` (via its alias '${fieldName}')` : "";
       throw wrapError(error, `During ${bard.debugId()}\n .${operationDescription} on field ${
               bard.objectTypeIntro.name}.${fieldInfo.name}${aliasInfo}, with:`,
-          "\n\told value:", oldLocalValue,
-          "\n\tfield update:", fieldUpdate,
-          "\n\tupdate coupling:", updateCoupling,
-          "\n\tbard:", bard);
+          "\n\tfieldInfo:", ...dumpObject(fieldInfo),
+          "\n\told value:", ...dumpObject(oldLocalValue),
+          "\n\tupdateClause:", ...dumpObject(updateClause),
+          "\n\tupdate coupling:", ...dumpObject(updateCoupling),
+          "\n\tbard:", ...dumpObject(bard));
     }
   }
   return isPrimaryMutation;
 }
 
-export function validateFieldUpdate (bard: Bard, fieldIntro, fieldUpdate, operationDescription) {
+export function validateFieldUpdate (bard: Bard, fieldIntro, updateClause, operationDescription) {
   let ret = true;
   if (fieldIntro.deprecated || fieldIntro.isGenerated) {
-    if (!fieldUpdate || (Array.isArray(fieldUpdate) && !fieldUpdate.length)) {
+    if (!updateClause || (Array.isArray(updateClause) && !updateClause.length)) {
       // bard.warn(`Skipping ${operationDescription} on a deprecated/generated field ${
-      //    bard.objectTypeIntro.name}.${fieldIntro.name} with defaulty value:`, fieldUpdate);
+      //    bard.objectTypeIntro.name}.${fieldIntro.name} with defaulty value:`, updateClause);
       bard.info(`Skipping ${operationDescription} on a deprecated/generated field (name ${
           bard.objectTypeIntro.name}.${fieldIntro.name
               } hidden to allow browser log collapsing) with defaulty value`);
       ret = false;
     } else if (fieldIntro.isGenerated) { // If generated, we'll be throwing an error below
       bard.info(`Performing ${operationDescription} on a generated field ${
-          bard.objectTypeIntro.name}.${fieldIntro.name} with non-defaulty value:`, fieldUpdate);
+          bard.objectTypeIntro.name}.${fieldIntro.name} with non-defaulty value:`, updateClause);
       ret = false;
     } else {
       bard.errorEvent(`Performing ${operationDescription} on a deprecated field ${
-          bard.objectTypeIntro.name}.${fieldIntro.name} with non-defaulty value`, fieldUpdate);
+          bard.objectTypeIntro.name}.${fieldIntro.name} with non-defaulty value`, updateClause);
     }
   }
   return ret;
@@ -329,16 +330,16 @@ const customSetFieldHandlers = {
     if ((newOwnerId && newOwnerId.getPartitionURI()) !== bard.objectId.getPartitionURI()) {
       bard.refreshPartition = true;
     }
+    if (!newOwnerId) return;
     let i = 0;
-    if (newOwnerId) {
-      const ownerBard = Object.create(bard);
-      for (ownerBard.tryGoToTransient(newOwnerId, "Resource"); ownerBard.objectId;
-          takeToCurrentObjectOwnerTransient(ownerBard), ++i) {
-        if (ownerBard.objectId.rawId() === bard.objectId.rawId()) {
-          throw new Error(`Cyclic ownership not allowed while trying to set owner of ${
-              bard.objectId} to ${newOwnerId} (which would make it its own ${
-              !i ? "parent)" : `${"grand".repeat(i)}parent)`}`);
-        }
+    const ownerBard = Object.create(bard);
+    for (ownerBard.tryGoToTransient(newOwnerId, "Resource");
+        ownerBard.objectId;
+        ownerBard.goToCurrentObjectOwnerTransient(), ++i) {
+      if (ownerBard.objectId.rawId() === bard.objectId.rawId()) {
+        throw new Error(`Cyclic ownership not allowed while trying to set owner of ${
+            bard.objectId} to ${newOwnerId} (which would make it its own ${
+            !i ? "parent)" : `${"grand".repeat(i)}parent)`}`);
       }
     }
   },

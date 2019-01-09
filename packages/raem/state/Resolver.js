@@ -2,7 +2,7 @@
 
 import { GraphQLSchema } from "graphql/type";
 
-import ValaaReference, { vRef, obtainVRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
+import ValaaReference, { obtainVRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
 import type { JSONIdData, IdData, RawId, VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import type ValaaURI from "~/raem/ValaaURI";
 
@@ -10,11 +10,14 @@ import GhostPath from "~/raem/state/GhostPath";
 import Transient, { createImmaterialTransient, createIdTransient }
     from "~/raem/state/Transient";
 import type { FieldInfo, State } from "~/raem/state";
+import { getObjectRawField } from "~/raem/state/getObjectField";
 
 import { tryHostRef } from "~/raem/VALK/hostReference";
 
 import { dumpObject, invariantify, invariantifyObject, invariantifyString, LogEventGenerator }
     from "~/tools";
+
+import { _getFieldGhostElevation, _elevateReference } from "./FieldInfo";
 
 /**
  * Resolver is a very low-level component for performing various
@@ -193,7 +196,7 @@ export default class Resolver extends LogEventGenerator {
       throw this.wrapErrorEvent(error, `bindObjectId(${rawId || objectId || idData}:${typeName})`,
           "\n\tidData:", ...dumpObject(idData),
           "\n\tobject:", ...dumpObject(object),
-          "\n\tResolver:", this);
+          "\n\tthis:", ...dumpObject(this));
     }
   }
 
@@ -301,8 +304,8 @@ export default class Resolver extends LogEventGenerator {
       throw this.wrapErrorEvent(error,
           `goToTransientOfRawId(${rawId}:${this.objectTypeName}/${String(ghostPath) || ""})`,
           "\n\trequire:", require,
-          "\n\tghostPath:", String(ghostPath),
-          "\n\tthis:", this,
+          "\n\tghostPath:", ...dumpObject(ghostPath),
+          "\n\tthis:", ...dumpObject(this),
       );
     }
   }
@@ -328,7 +331,7 @@ export default class Resolver extends LogEventGenerator {
     let currentPath;
     try {
       while (true) { // eslint-disable-line no-constant-condition
-        currentPath = nextStep.previousStep();
+        currentPath = nextStep.previousGhostStep();
         if (!currentPath) {
           if (!require) return undefined;
           throw new Error(`GhostPath base or instance reached without finding a materialized ${
@@ -349,10 +352,38 @@ export default class Resolver extends LogEventGenerator {
         nextStep = currentPath;
       }
     } catch (error) {
-      throw this.wrapErrorEvent(error, `goToMostInheritedMaterializedTransient`,
-          "\n\tghostPath:", ghostPath,
-          "\n\tcurrentPath:", currentPath,
+      throw this.wrapErrorEvent(error, new Error(`goToMostInheritedMaterializedTransient`),
+          "\n\tghostPath:", ...dumpObject(ghostPath),
+          "\n\tcurrentPath:", ...dumpObject(currentPath),
           "\n\twithOwnField:", withOwnField);
+    }
+  }
+
+  goToCurrentObjectOwnerTransient () {
+    let owner;
+    try {
+      const fieldInfo = { name: "owner" };
+      const elevator = Object.create(this);
+      owner = getObjectRawField(elevator, this.objectTransient, "owner", fieldInfo);
+      if (owner) {
+        const elevation = _getFieldGhostElevation(fieldInfo, this.objectId);
+        if (elevation) {
+          owner = _elevateReference(elevator, owner, fieldInfo, elevation, "Resource");
+        }
+        if (owner instanceof ValaaReference) return this.goToTransient(owner, "Resource");
+        this.objectId = owner.get("id");
+        this.objectTransient = owner;
+      } else {
+        this.objectId = null;
+        this.objectTransient = null;
+      }
+      return this.objectTransient;
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error(`goToCurrentObjectOwnerTransient`),
+          "\n\nowner:", ...dumpObject(owner),
+          "\n\tobjectTransient:", ...dumpObject(this.objectTransient),
+          "\n\tthis:", ...dumpObject(this),
+      );
     }
   }
 }

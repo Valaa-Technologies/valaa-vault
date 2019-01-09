@@ -52,7 +52,7 @@ export default function duplicate (bard: DuplicateBard) {
     // original is a ghost: the duplication represents a direct instantiation of the ghost
     // prototype, using any materialized fields of the ghost as duplicate base initialState.
     // Any actually provided initialState takes precendence over any entries in this base.
-    const previousGhostStep = ghostPath.previousStep();
+    const previousGhostStep = ghostPath.previousGhostStep();
     bard._duplicationRootGhostHostId = ghostPath.headHostRawId();
     bard._duplicationRootPrototypeId = previousGhostStep.headRawId();
     const prototypeId = vRef(bard._duplicationRootPrototypeId, "instances", previousGhostStep);
@@ -158,7 +158,7 @@ function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalRef: VR
       return recombineOverriddenId;
     }
 
-    originalGhostProtoPath = originalGhostPath && originalGhostPath.previousStep();
+    originalGhostProtoPath = originalGhostPath && originalGhostPath.previousGhostStep();
     if (originalGhostProtoPath) {
       // ownlings are always direct non-ghostPathed instances or ghost ownlings: ie. an ownling
       // reference cannot be a cross-host reference with a ghost path.

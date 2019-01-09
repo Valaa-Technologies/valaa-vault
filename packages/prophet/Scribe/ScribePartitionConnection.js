@@ -269,7 +269,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
         const ret = this._pendingMediaLookup[mediaRawId]
             || this._prophet._persistedMediaLookup[mediaRawId];
         if (ret) return ret;
-        currentStep = currentStep ? currentStep.previousStep() : mediaRef.previousGhostStep();
+        currentStep = currentStep ? currentStep.previousGhostStep() : mediaRef.previousGhostStep();
       } while (currentStep);
       if (require_) throw new Error(`Media entry for ${mediaRef.toString()} not found`);
       return undefined;

@@ -155,7 +155,7 @@ class ValaaReference {
     return connectedGhostPath;
   }
   previousGhostStep (): ?GhostPath {
-    return this._r.ghostPath && this._r.ghostPath.previousStep();
+    return this._r.ghostPath && this._r.ghostPath.previousGhostStep();
   }
 
   isInherited (): ?boolean {

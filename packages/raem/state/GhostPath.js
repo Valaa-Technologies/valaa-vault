@@ -92,10 +92,16 @@ export default class GhostPath {
   }
 
   /**
-   * @returns the whole GhostPath object at previous step or null if this is the first step.
+   * @returns the whole GhostPath object at previous step or null if
+   * this is the first step.
    */
-  previousStep (): ?GhostPath {
+  previousGhostStep (): ?GhostPath {
     if (!this.isGhost()) return undefined;
+    return Object.getPrototypeOf(this);
+  }
+
+  previousPrototypeStep (): ?GhostPath {
+    if (this.isRoot()) return undefined;
     return Object.getPrototypeOf(this);
   }
 
@@ -170,7 +176,7 @@ export default class GhostPath {
   }
 
   toJSON (): JSONGhostPath {
-    const previous = this.previousStep();
+    const previous = this.previousPrototypeStep();
     const ret = previous ? previous.toJSON() : [];
     ret.push(this.toBriefJSON());
     return ret;

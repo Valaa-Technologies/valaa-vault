@@ -83,7 +83,7 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
       actualTypeIntro = typeName && resolver.schema.getType(typeName);
     }
 
-    if (typeof ret !== "undefined") {
+    if (ret !== undefined) {
       fieldInfoOut.name = fieldName;
       if (actualTypeIntro) {
         fillFieldInfoAndResolveAliases(object, actualTypeIntro.getFields(), fieldInfoOut);
@@ -165,7 +165,7 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
       }
 
       ret = resolver.objectTransient.get(fieldInfo.name);
-      if (typeof ret !== "undefined") {
+      if (ret !== undefined) {
         if (fieldInfoOut) fieldInfoOut.sourceTransient = resolver.objectTransient;
         return fieldInfo.name === fieldName
             ? ret
@@ -179,12 +179,12 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
         return denormalizedFromJS(fieldInfo.intro.defaultValue);
       }
       ret = fieldDefaultValue(fieldInfo.intro);
-      if (typeof ret !== "undefined") return ret;
+      if (ret !== undefined) return ret;
     }
     return ret;
   } catch (error) {
-    throw wrapError(error, `During ${resolver && resolver.debugId()}\n .getObjectField(${
-            fieldName}/${(fieldInfo && fieldInfo.name) || fieldName}), with:`,
+    throw resolver.wrapErrorEvent(error,
+        new Error(`getObjectField(${fieldName}/${(fieldInfo && fieldInfo.name) || fieldName})`),
         "\n\tobject", ...dumpObject(object),
         "\n\tfieldGhostPath:", fieldInfo && fieldInfo.fieldGhostPath,
     );
@@ -234,9 +234,9 @@ export function fillFieldInfoAndResolveAliases (object: Transient, objectFields:
     fillFieldInfoAndResolveAliases(object, objectFields, fieldInfo);
   } catch (error) {
     throw wrapError(error, `During fillFieldInfoAndResolveAliases, with:`,
-        "\n\tobject:", object,
-        "\n\tobjectFields:", objectFields,
-        "\n\tfieldInfo:", fieldInfo,
+        "\n\tobject:", ...dumpObject(object),
+        "\n\tobjectFields:", ...dumpObject(objectFields),
+        "\n\tfieldInfo:", ...dumpObject(fieldInfo),
     );
   }
 }

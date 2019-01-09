@@ -173,7 +173,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
       },
       builtinSteppers: this.corpusOptions.builtinSteppers,
       assignCommandId: (command) => {
-        obtainAspect(command, "command").id = `cid-${this.nextCommandIdIndex++}`;
+        obtainAspect(command, "command").id = `test-cid-${this.nextCommandIdIndex++}`;
       },
     }));
   }

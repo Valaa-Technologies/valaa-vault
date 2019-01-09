@@ -3,6 +3,7 @@
 import isPromise from "~/tools/isPromise";
 import { arrayFromAny } from "~/tools/sequenceFromAny";
 import wrapError, { dumpObject } from "~/tools/wrapError";
+import { invariantifyArray } from "~/tools/invariantify";
 
 /**
  * Resolves the chain of then-operations eagerly ie. synchronously if
@@ -42,17 +43,22 @@ import wrapError, { dumpObject } from "~/tools/wrapError";
  * @param {any} callbacks
  * @param {any} onError(error, stepIndex, head, callbacks)
  */
-export default function thenChainEagerly (initialValue: any,
-    functionChain: void | Function | Function[], onRejected?: Function) {
-  return thenChainEagerlyList(initialValue, arrayFromAny(functionChain), onRejected, 0);
-}
 
-// Sequential map on maybePromises which awaits for each entry and each return value of the mapped
-// function eagerly: if no promises are encountered resolves synchronously.
+// Sequential map on maybePromises which awaits for each entry and each
+// return value of the mapped function eagerly: if no promises are
+// encountered resolves synchronously.
 export function mapEagerly (maybePromises: any[], callback: Function, onRejected?: Function,
     startIndex: number = 0, results: Array<any> = []) {
   let currentIndex = startIndex;
   try {
+    if (!Array.isArray(maybePromises)) {
+      if (isPromise(maybePromises)) {
+        return maybePromises.then(
+            inner => mapEagerly(inner, callback, onRejected, startIndex, results),
+            error => errorOnMapEagerly(error, new Error(`During mapEagerly.maybePromises.catch`)));
+      }
+      invariantifyArray(maybePromises, "mapEagerly.maybePromises");
+    }
     for (; currentIndex < maybePromises.length; ++currentIndex) {
       const maybeValue = maybePromises[currentIndex];
       if (!isPromise(maybeValue)) {
@@ -88,10 +94,11 @@ export function mapEagerly (maybePromises: any[], callback: Function, onRejected
   }
 }
 
-export function thenChainEagerlyList (initialValue: any, functionChain: Function[],
-    onRejected: ?Function, startIndex: number = 0) {
+export default function thenChainEagerly (initialValue: any, functions: any | Function[],
+    onRejected: ?Function, startIndex: number) {
+  const functionChain = (startIndex !== undefined) ? functions : arrayFromAny(functions);
   let head = initialValue;
-  let currentIndex = startIndex;
+  let currentIndex = startIndex || 0;
   try {
     for (; !isPromise(head); ++currentIndex) {
       if (currentIndex >= functionChain.length) return head;
@@ -104,7 +111,7 @@ export function thenChainEagerlyList (initialValue: any, functionChain: Function
   return head.then(
       value => (currentIndex >= functionChain.length
           ? value
-          : thenChainEagerlyList(
+          : thenChainEagerly(
               functionChain[currentIndex](value), functionChain, onRejected, currentIndex + 1)),
       (error) => errorOnThenChainEagerly(
           error, new Error(`During thenChainEagerly step #${currentIndex}`)));

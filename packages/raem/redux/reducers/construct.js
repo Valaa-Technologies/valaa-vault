@@ -19,7 +19,7 @@ import { createMaterializeGhostReferenceAction } from "~/raem/tools/denormalized
 import { setCreatedObjectPartition, universalizePartitionMutation }
     from "~/raem/tools/denormalized/partitions";
 
-import { invariantify, invariantifyString, wrapError } from "~/tools";
+import { dumpObject, invariantify, invariantifyString, wrapError } from "~/tools";
 
 export class CreateBard extends Bard {
   getDenormalizedTable: Function;
@@ -80,6 +80,7 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
     bard.objectTypeName = typeName;
     bard.objectTransient = createTransient(passage);
   }
+  if (passage.id.isInactive()) passage.id.setInactive(false);
   return undefined;
 }
 
@@ -89,7 +90,6 @@ function _mergeWithInactiveStub (bard: CreateBard, passage: Object, typeName?: s
         `${passage.type}: Resource already exists with id: ${
           passage.id.rawId()}:${typeName}`, bard.objectTransient);
   }
-  passage.id.setInactive(false);
   if (typeName) {
     // Inactive resource typeName is an inactive type: update it to
     // correct value for CREATEDs.
@@ -180,13 +180,13 @@ export function recurseCreateOrDuplicate (bard: CreateBard, typeName: string, in
         _setDefaultFields(bard, mutableTransient, objectTypeIntro.getFields());
       }
 
-      _connectNonGhostObjectIdGhostPathToPrototype(bard, rawId);
+      _connectNonGhostObjectIdGhostPathToPrototype(bard, bard.objectId);
     });
     bard.getDenormalizedTable(typeName)[rawId] = bard.objectTransient;
   } catch (error) {
     throw wrapError(error, `During ${bard.debugId()}\n .recurseCreateOrDuplicate(), with:`,
-        "\n\tobject:", bard.objectTransient,
-        "\n\tinitialState:", initialState);
+        "\n\tobject:", ...dumpObject(bard.objectTransient),
+        "\n\tinitialState:", ...dumpObject(initialState));
   }
 }
 
@@ -201,27 +201,28 @@ function _setDefaultFields (bard, mutableTransient: Transient, fieldIntros: Arra
   }
 }
 
-function _connectNonGhostObjectIdGhostPathToPrototype (bard: CreateBard, rawId: RawId) {
-  const prototypeId = !bard.objectId.isGhost() && bard.objectTransient.get("prototype");
+function _connectNonGhostObjectIdGhostPathToPrototype (bard: CreateBard, objectId: VRef) {
+  const nonGhostPrototypeId = !objectId.isGhost() && bard.objectTransient.get("prototype");
   let newGhostPath;
   try {
-    if (prototypeId) {
-      invariantify(prototypeId.getCoupledField() !== "materializedGhosts",
-          "object with prototype ghostInstance must have an active ghost path in id");
-      newGhostPath = Object.create(bard).goToTransient(prototypeId, "TransientFields")
+    if (nonGhostPrototypeId) {
+      invariantify(nonGhostPrototypeId.getCoupledField() !== "materializedGhosts",
+          `resource with prototype coupling to 'materializedGhosts' must have an active ghost${
+              ""} path in its id`);
+      newGhostPath = Object.create(bard).goToTransient(nonGhostPrototypeId, "TransientFields")
           .get("id").getGhostPath();
-      if (prototypeId.getCoupledField() === "instances") {
-        newGhostPath = newGhostPath.withNewInstanceStep(rawId);
+      if (nonGhostPrototypeId.getCoupledField() === "instances") {
+        newGhostPath = newGhostPath.withNewInstanceStep(objectId.rawId());
       }
       // else the prototype is a direct prototype: inherit prototype ghost path directly.
-      bard.objectId.connectGhostPath(newGhostPath);
+      objectId.connectGhostPath(newGhostPath);
     }
   } catch (error) {
     throw bard.wrapErrorEvent(error, `_connectNonGhostObjectIdGhostPathToPrototype`,
-        "\n\trawId:", rawId,
-        "\n\tbard.objectId:", bard.objectId.toString(),
-        "\n\tprototypeId:", prototypeId && prototypeId.toString(),
-        "\n\tnewGhostPath:", newGhostPath && newGhostPath.toString(),
+        "\n\tobjectId:", ...dumpObject(objectId),
+        "\n\tbard.objectTransient:", ...dumpObject(bard.objectTransient),
+        "\n\tnonGhostPrototypeId:", ...dumpObject(nonGhostPrototypeId),
+        "\n\tnewGhostPath:", ...dumpObject(newGhostPath),
     );
   }
 }
@@ -283,7 +284,7 @@ export function addDuplicateNonOwnlingFieldPassagesToBard (bard: DuplicateBard) 
           : duplicateId.coupleWith(currentCoupledField);
     } else {
       const ghostPath = tryGhostPathFrom(originalData);
-      if (ghostPath && ghostPath.previousStep() && bard._duplicationRootGhostHostId) {
+      if (ghostPath && ghostPath.previousGhostStep() && bard._duplicationRootGhostHostId) {
         invariantify(ghostPath.headHostRawId() !== bard._duplicationRootId,
             "DUPLICATED: duplicating ghost objects which have internal references to " +
             "non-materialized ghost ownlings inside the same host is not yet implemented");

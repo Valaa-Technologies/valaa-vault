@@ -158,6 +158,7 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
           events, options.retrieveMediaBuffer || _throwOnMediaRequest.bind(null, connection))
       : connection.getReceiveCommands(options.receiveCommands)(
           events, options.retrieveMediaBuffer);
+
   connection._mostRecentReceiveEventsProcess = resultBase.receivedEventsProcess = thenChainEagerly(
       connection._mostRecentReceiveEventsProcess, [
         () => receiveEventsProcess,
@@ -169,6 +170,7 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
         },
       ],
       onError);
+
   if (options.isTruth) {
     resultBase.getTruthEvent = function getTruthEvent () { return this.event; };
   } else {

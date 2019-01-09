@@ -15,7 +15,7 @@ import { duplicateFields } from "~/raem/redux/reducers/duplicate";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import fieldInitialValue from "~/raem/tools/graphql/fieldInitialValue";
 import { addCoupleCouplingPassages } from "~/raem/tools/denormalized/couplings";
-import { createMaterializeGhostPathAction } from "~/raem/tools/denormalized/ghost";
+import { createMaterializeGhostReferenceAction } from "~/raem/tools/denormalized/ghost";
 import { setCreatedObjectPartition, universalizePartitionMutation }
     from "~/raem/tools/denormalized/partitions";
 
@@ -70,7 +70,7 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
     invariantifyString(typeName, "CREATED.typeName required");
     bard.updateState(
         bard.subReduce(bard.state,
-            createMaterializeGhostPathAction(bard, passage.id.getGhostPath(), typeName)));
+            createMaterializeGhostReferenceAction(bard, passage.id, typeName)));
     bard.goToTransientOfRawId(passage.id.rawId());
     passage.id = bard.objectTransient.get("id");
     if (!passage.id) throw new Error("INTERNAL ERROR: no bard.objectTransient.get('id')");

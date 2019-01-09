@@ -81,7 +81,7 @@ export function createGhostVRefInInstance (prototypeId: VRef,
 
 export function createMaterializeGhostEvent (resolver: Resolver, ghostId: VRef): ?Action {
   try {
-    return createMaterializeGhostPathAction(resolver, ghostId.getGhostPath(), undefined, true);
+    return createMaterializeGhostReferenceAction(resolver, ghostId, undefined, true);
   } catch (error) {
     throw wrapError(error, `During createMaterializeGhostEvent(), with:`,
         "\n\tghostId:", ...dumpObject(ghostId));
@@ -100,15 +100,22 @@ export function createMaterializeGhostPathAction (resolver: Resolver, ghostObjec
     typeName: string, isEvent: ?boolean): ?Action {
   const actions = [];
   invariantify(ghostObjectPath.isGhost(), "materializeGhostPathAction.ghostObjectPath.isGhost");
-  _createMaterializeGhostAction(resolver, resolver.getState(), ghostObjectPath, typeName, isEvent,
-      actions);
-  return !actions.length ? undefined
-      : actions.length === 1 ? actions[0]
-      : transacted({ actions });
+  _createMaterializeGhostAction(resolver, resolver.getState(), ghostObjectPath, typeName,
+      isEvent, undefined, actions);
+  return !actions.length ? undefined : actions.length === 1 ? actions[0] : transacted({ actions });
+}
+
+export function createMaterializeGhostReferenceAction (resolver: Resolver, ghostId: VRef,
+    typeName: string, isEvent: ?boolean): ?Action {
+  const actions = [];
+  invariantify(ghostId.isGhost(), "materializeGhostPathAction.ghostObjectPath.isGhost");
+  _createMaterializeGhostAction(resolver, resolver.getState(), ghostId.getGhostPath(), typeName,
+      isEvent, ghostId, actions);
+  return !actions.length ? undefined : actions.length === 1 ? actions[0] : transacted({ actions });
 }
 
 /**
- * Like createMaterializeGhostPathAction but allows creationg of
+ * Like createMaterializeGhostEvent but allows creationg of
  * a transient for non-ghost resources as well.
  *
  * @export
@@ -117,19 +124,18 @@ export function createMaterializeGhostPathAction (resolver: Resolver, ghostObjec
  * @param {string} typeName
  * @returns {?Action}
  */
-export function createMaterializeTransientAction (resolver: Resolver, ghostObjectPath: GhostPath,
-    typeName: string): ?Action {
+export function createMaterializeTransientAction (resolver: Resolver, id: VRef, typeName: string):
+    ?Action {
   const actions = [];
-  _createMaterializeGhostAction(resolver, resolver.getState(), ghostObjectPath, typeName, false,
-      actions);
-  return !actions.length ? undefined
-      : actions.length === 1 ? actions[0]
-      : transacted({ actions });
+  _createMaterializeGhostAction(resolver, resolver.getState(), id.getGhostPath(), typeName,
+      false, id, actions);
+  return !actions.length ? undefined : actions.length === 1 ? actions[0] : transacted({ actions });
 }
 
 function _createMaterializeGhostAction (resolver: Resolver, state: State,
-    ghostObjectPath: GhostPath, typeName: string, isEvent: boolean,
-    outputActions: Array<Action>): { id: string, actualType: string, ghostPath: GhostPath } {
+    ghostObjectPath: GhostPath, typeName: string, isEvent: boolean, knownId: ?VRef,
+    outputActions: Array<Action>,
+): { id: string, actualType: string, ghostPath: GhostPath } {
   // TODO(iridian): This whole segment needs to be re-evaluated now
   // with the introduction of the "ghostOwnlings"/"ghostOwner" coupling
   // introduction. Specifically: owners would not need to be
@@ -161,28 +167,34 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
       // the referred resource doesn't exist. As it stands there is no
       // theoretical way to determine the actual partition id reliably,
       // either. Create an inactive reference for the resource.
-      const id = vRef(ghostRawId);
-      // TODO(iridian): Add inactive partition checks: throw if this partition is in fact active.
+      const id = knownId || vRef(ghostRawId);
+      if (knownId && !knownId.isInactive()) {
+        throw new Error("Cannot materialize a non-existent resource (partition is active)");
+      }
+      // Make also the resource inactive, not the partition reference
+      // prototype. This way only transient merging will activate it.
       id.setInactive();
       actualType = resolver.schema.inactiveType.name;
       outputActions.push(created({
         id, typeName: actualType,
         meta: { noSubMaterialize: !isEvent },
       }));
-      return { id, actualType, ghostPath: id.getGhostPath };
+      return { id, actualType, ghostPath: id.getGhostPath() };
     }
     // A regular non-root ghost Resource with no transient.
     // Still possibly inside an inactive partition.
     const { id: ghostPrototype, actualType: prototypeTypeName, ghostPath: prototypePath }
         = _createMaterializeGhostAction(resolver, state, ghostObjectPath.previousStep(), typeName,
-            false, outputActions);
+            false, undefined, outputActions);
     actualType = isInactiveTypeName(prototypeTypeName) ? typeName : prototypeTypeName;
     const ghostPath = prototypePath
         .withNewStep(ghostHostPrototypeRawId, ghostHostRawId, ghostRawId);
     const hostType = state.getIn(["TransientFields", ghostHostRawId]);
     const hostId = hostType
         ? state.getIn([hostType, ghostHostRawId]).get("id")
-        : Object.create(new ValaaReference().initResolverComponent({ inactive: true }))
+        : Object.create(knownId
+                ? Object.getPrototypeOf(knownId)
+                : new ValaaReference().initResolverComponent({ inactive: true }))
             .initNSS(ghostHostRawId);
     const id = Object.create(Object.getPrototypeOf(hostId)).initNSS(ghostRawId);
     id.connectGhostPath(ghostPath);
@@ -196,6 +208,7 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
     throw wrapError(error, `During createMaterializeGhostAction(${dumpify(ghostObjectPath)}:${
         typeName}/${actualType}}), with:`,
         "\n\ttransientType:", actualType,
+        "\n\tknownId:", knownId,
         "\n\tghost host prototype:", ghostHostPrototypeRawId,
         "\n\tghost host:", ghostHostRawId,
         "\n\tghost id:", ghostRawId);

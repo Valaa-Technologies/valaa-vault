@@ -101,8 +101,8 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
       dumpify(remote, { sliceAt: 100 }), "coupling", dumpify(coupling, { sliceAt: 100 }));
   */
   if (!remote /* || remote.isInactive() */) return;
-  const remoteVRef = bard.obtainReference(remote);
-  let coupledField = remoteVRef.getCoupledField();
+  const remoteRef = bard.obtainReference(remote);
+  let coupledField = remoteRef.getCoupledField();
   let remoteTypeName = remoteType.name;
   let remoteFieldIntro = remoteType.getFields()[coupledField];
   let reverseCoupling;
@@ -121,7 +121,7 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
       return;
     }
     if (!remoteFieldIntro) {
-      remoteTransient = Object.create(bard).goToTransient(remoteVRef, remoteType.name);
+      remoteTransient = Object.create(bard).goToTransient(remoteRef, remoteType.name);
       remoteTypeName = getTransientTypeName(remoteTransient, bard.schema);
       remoteFieldIntro = bard.schema.getType(remoteTypeName).getFields()[coupledField];
       if (!remoteFieldIntro) {
@@ -138,24 +138,25 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
     if (actionType === COUPLE_COUPLING) {
       bard.addPassage(
           reverseCoupling.createCoupleToRemoteAction(
-              remoteVRef, remoteTypeName, coupledField, bard.objectId, fieldIntro.name));
+              remoteRef.getObjectId(), remoteTypeName, coupledField, bard.objectId,
+              fieldIntro.name));
     } else {
       if (coupling.preventsDestroy && (actionType === DESTROY_COUPLING)) {
         // Check if remote is in other partition as they can't prevent destroy, otherwise throw.
-        const partitionURI = remoteVRef.getPartitionURI();
+        const partitionURI = remoteRef.getPartitionURI();
         // Missing partitionURI means local partition reference, so throw.
         if (!partitionURI || (partitionURI.toString() === bard.destroyedResourcePartition)) {
           const nameBard = Object.create(bard);
           const name = bard.objectTypeIntro.getFields().name
               ? `'${getObjectField(nameBard, bard.objectTransient, "name")}' `
               : bard.objectId.rawId();
-          remoteTransient = Object.create(bard).goToTransient(remoteVRef, remoteType.name);
+          remoteTransient = Object.create(bard).goToTransient(remoteRef, remoteType.name);
           const remoteName = bard.schema
                   .getType(getTransientTypeName(remoteTransient, bard.schema))
                   .getFields().name
               ? `'${getObjectField(nameBard, remoteTransient, "name")}' `
-              : remoteVRef.rawId();
-          const remoteChapter = bard.obtainResourceChapter(remoteVRef.rawId());
+              : remoteRef.rawId();
+          const remoteChapter = bard.obtainResourceChapter(remoteRef.rawId());
           (remoteChapter.preventsDestroys || (remoteChapter.preventsDestroys = [])).push({
             // Flips the perspective: from the perspective of remote side, this side is the remote.
             name: remoteName,
@@ -168,7 +169,8 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
       }
       bard.addPassage(
           reverseCoupling.createUncoupleFromRemoteAction(
-              remoteVRef, remoteTypeName, coupledField, bard.objectId, fieldIntro.name));
+              remoteRef.getObjectId(), remoteTypeName, coupledField, bard.objectId,
+              fieldIntro.name));
     }
   } catch (error) {
     throw bard.wrapErrorEvent(error,

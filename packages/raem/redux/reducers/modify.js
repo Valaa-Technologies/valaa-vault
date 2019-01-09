@@ -52,7 +52,7 @@ export default function modifyResource (bard: Bard) {
     bard.goToTransientOfPassageObject(); // no-require, non-ghost-lookup
     if (!bard.objectTransient) { // ghost, inactive transient or fail
       const materializeGhostSubCommand = createMaterializeTransientAction(
-          bard, passage.id.getGhostPath(), passage.typeName);
+          bard, passage.id, passage.typeName);
       bard.updateState(bard.subReduce(bard.state, materializeGhostSubCommand));
       bard.goToTransientOfRawId(passage.id.rawId());
       passage.id = bard.objectId;

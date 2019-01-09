@@ -62,9 +62,6 @@ export default @vdocorate([
  * @class VRef
  */
 class ValaaReference {
-  _isInactive: ?boolean;
-  _mostInheritedMaterializedTransient: Object;
-
   _nss: string; // urn namespace-specific string ie. valos rawId
   // urn components
   _q: Object; // urn q-component ie. query
@@ -104,6 +101,10 @@ class ValaaReference {
     return this;
   }
 
+  getObjectId (): VRef {
+    if (this.hasOwnProperty("_nss")) return this;
+    return this.getObjectId.call(Object.getPrototypeOf(this));
+  }
   getQueryComponent (): Object { return this._q; }
   getResolverComponent (): Object { return this._r; }
   getFragmentComponent (): string { return this._f; }

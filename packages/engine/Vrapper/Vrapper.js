@@ -293,7 +293,12 @@ export default class Vrapper extends Cog {
     const transient = refreshingTransient
         || resolver.goToTransient(this[HostRef], this._typeName);
     this.updateTransient(resolver.state, transient);
-    this[HostRef] = transient.get("id");
+    const id = transient.get("id");
+    if (!id.getPartitionURI() && !id.isGhost() && (this._typeName !== "Blob")) {
+      throw new Error(`Cannot update a non-ghost Vrapper with new id without partitionURI: <${
+          id}>, (current id: <${this[HostRef]}>`);
+    }
+    this[HostRef] = id;
     const connection = this.tryPartitionConnection();
     if (!connection || !connection.isActive()) {
       if (this[HostRef].isInactive()) return this;

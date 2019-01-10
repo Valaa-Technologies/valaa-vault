@@ -34,8 +34,10 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
   const prophecies = events.map(event =>
       falseProphet._composeStoryFromEvent(event, "prophecy-chronicle", timed, transactionInfo));
   const resultBase = new ProphecyOperation(null, {
-    _prophet: falseProphet, _events: events, _options: rest,
-    _reactions: falseProphet._tellStoriesToFollowers(prophecies),
+    _prophet: falseProphet,
+    _events: events,
+    _options: rest,
+    _followerReactions: falseProphet._tellStoriesToFollowers(prophecies),
   });
   resultBase._options.isProphecy = true;
 
@@ -179,9 +181,10 @@ class ProphecyOperation extends ProphecyEventResult {
     confirmCommand?: Function,
     rejectCommand?: Function,
   } };
-  _activePartitions: Object[];
-  _stages: Object;
   _fulfillment: Promise<Object>;
+  _firstStage: Promise<Object>;
+  _persistment: Promise<Object>;
+  _debugPhase: string = "construct";
 
   getCommandOf (partitionURI) {
     return this._partitions[partitionURI].commandEvent;
@@ -192,15 +195,24 @@ class ProphecyOperation extends ProphecyEventResult {
 
   getLocalStory () {
     return thenChainEagerly(
-      mapEagerly(this._activePartitions, ({ chronicling }) => chronicling.getLocalEvent()),
-      () => this._prophecy || this.throwRejectionError(),
-      this.errorOnProphecyOperation.bind(this,
-          new Error(`chronicleEvents.eventResults[${this.index}].getLocalEvent()`)));
+        this._firstStage,
+        () => this._prophecy || this.throwRejectionError(),
+        this.errorOnProphecyOperation.bind(this,
+            new Error(`chronicleEvents.eventResults[${this.index}].getLocalEvent()`)));
   }
 
   getPersistedStory () {
     return thenChainEagerly(
-        mapEagerly(this._activePartitions, ({ chronicling }) => chronicling.getPersistedEvent()),
+        // TODO(iridian, 2019-01): Add also local stage chroniclings to
+        // the waited list, as _firstStage only contains remote
+        // stage chroniclings. This requires refactoring: local
+        // stage persisting currently waits remote truths. This command
+        // must be operable offline, so it cannot rely on remote truths.
+        // Local persisting must thus be refactored to not await on
+        // remote truths, but this needs to have support for discarding
+        // the locally persisted commands if the remotes rejected.
+        this._firstStage
+            && mapEagerly(this._firstStage, ({ chronicling }) => chronicling.getPersistedEvent()),
         () => this._prophecy || this.throwRejectionError(),
         this.errorOnProphecyOperation.bind(this,
             new Error(`chronicleEvents.eventResults[${this.index}].getPersistedStory()`)));
@@ -234,9 +246,14 @@ class ProphecyOperation extends ProphecyEventResult {
 
   errorOnProphecyOperation (errorWrap, error) {
     throw this._prophet.wrapErrorEvent(error, errorWrap,
+        "\n\tduring:", this._debugPhase,
         "\n\tevents:", ...dumpObject(this._events),
         "\n\tevent:", dumpify(this._events[this.index], { indent: 2 }),
         "\n\tprophecy:", dumpify(this.event, { indent: 2 }),
+        "\n\tpartitions:", dumpify(this._partitions, { indent: 2 }),
+        "\n\tremote stage:", ...dumpObject(this._remoteStage),
+        "\n\tlocal stage:", ...dumpObject(this._localStage),
+        "\n\tmemory stage:", ...dumpObject(this._memoryStage),
         "\n\toperation:", ...dumpObject(this),
     );
   }
@@ -247,39 +264,61 @@ class ProphecyOperation extends ProphecyEventResult {
   }
 
   _execute (prophecy: Prophecy, index: number) {
+    this._debugPhase = "execute";
     this.event = getActionFromPassage(prophecy);
     this.index = index;
     this._prophecy = prophecy;
     prophecy[ProphecyOperationTag] = this;
-    Object.assign(this, this._reactions[index]);
-    try {
-      this._prepareStagesAndCommands();
-      this._initiateConnectionValidations();
-      this._fulfillProphecy();
-    } catch (error) {
+    Object.assign(this, this._followerReactions[index]);
+    this._fulfillment = thenChainEagerly(null, [
+      () => this._prepareStagesAndCommands(),
+      () => this._initiateConnectionValidations(),
+      () => (this._remoteStage || this._localStage) && (this._persistsment = thenChainEagerly(
+        (this._firstStage = (thenChainEagerly(
+          this._initiateStage(...(this._remoteStage
+              ? [this._remoteStage, "remote"]
+              : [this._localStage, "local"])),
+          (firstStage) => (this._firstStage = firstStage),
+        ))), [
+          () => this._completeStage(this._firstStage, this._remoteStage ? "remote" : "local"),
+          () => this._initiateStage(this._remoteStage && this._localStage, "local"),
+          () => this._completeStage(this._remoteStage && this._localStage, "local"),
+          () => (this._persistsment = [...(this._remoteStage || []), ...(this._localStage || [])]),
+        ],
+      )),
+      () => this._initiateStage(this._memoryStage, "memory"),
+      () => this._completeStage(this._memoryStage, "memory"),
+      () => {
+        this._prophecy.isTruth = true;
+        (this._fulfillment = this._prophecy);
+      },
+    ], (error, head, phaseIndex) => {
+      this._prophecy.isRejected = true;
+      this._rejectionError = this._prophecy.rejectionReason =
+          this.errorOnProphecyOperation(
+              new Error(`chronicleEvents.eventResults[${index}].execute(phase#${phaseIndex}/${
+                  this._debugPhase})`),
+              error);
+      this._prophecy = null;
       try {
         _rejectLastProphecyAsHeresy(this._prophet, prophecy);
       } catch (innerError) {
         outputError(innerError, `Caught an exception in the exception handler of${
-            ""} chronicleEvents; the resulting purge threw exception of its own:`);
+            ""} chronicleEvents.execute; the resulting purge threw exception of its own:`);
       }
-      this.errorOnProphecyOperation(
-          new Error(`chronicleEvents.eventResults[${index}].preparation`), error);
-    }
+      throw this._rejectionError;
+    });
     return this;
   }
 
   _prepareStagesAndCommands () {
+    this._debugPhase = "prepare stages";
     this._partitions = {};
-    this._stages = [];
     const missingConnections = [];
     const partitions = (this._prophecy.meta || {}).partitions;
     if (!partitions) {
       throw new Error("prophecy is missing partition information");
     }
-    const remotes = [];
-    const locals = [];
-    const memorys = [];
     Object.keys(partitions).forEach((partitionURIString) => {
       const connection = this._prophet._connections[partitionURIString];
       if (!connection) {
@@ -288,64 +327,60 @@ class ProphecyOperation extends ProphecyEventResult {
       }
       const commandEvent = extractPartitionEvent0Dot2(connection,
           getActionFromPassage(this._prophecy));
-      (connection.isRemoteAuthority() ? remotes
-          : connection.isLocallyPersisted() ? locals
-          : memorys
+      (connection.isRemoteAuthority() ? (this._remoteStage || (this._remoteStage = []))
+          : connection.isLocallyPersisted() ? (this._localStage || (this._localStage = []))
+          : (this._memoryStage || (this._memoryStage = []))
       ).push((this._partitions[partitionURIString] = { connection, commandEvent }));
     });
-    if (remotes.length) this._stages.push({ name: "remotes", partitions: remotes });
-    if (locals.length) this._stages.push({ name: "locals", partitions: locals });
-    if (memorys.length) this._stages.push({ name: "memory", partitions: memorys });
     if (missingConnections.length) {
       throw new MissingPartitionConnectionsError(`Missing active partition connections: '${
           missingConnections.map(c => c.toString()).join("', '")}'`, missingConnections);
     }
   }
 
+  getStages () {
+    return this._allStages || (this._allStages =
+        [this._remoteStage, this._localStage, this._memoryStage].filter(s => s));
+  }
+
   _initiateConnectionValidations () {
-    this._stages.forEach(stage => stage.partitions.forEach(partition => {
-      partition.validatedConnection = thenChainEagerly(partition.connection.getActiveConnection(),
-        (connection) => {
-          if (connection.isFrozenConnection()) {
-            throw new Error(`Trying to chronicle events to a frozen partition ${
-                connection.getName()}`);
-          }
-          const commandEventVersion = partition.commandEvent.aspects.version;
-          const connectionEventVersion = connection.getEventVersion();
-          if (!connectionEventVersion || (connectionEventVersion !== commandEventVersion)) {
-            throw new Error(`Command event version "${commandEventVersion
-                }" not supported by connection ${connection.getName()} which only supports "${
-                connectionEventVersion}"`);
-          }
-          // Perform other partition validation
-          // TODO(iridian): extract partition content
-          partition.validatedConnection = connection;
-        },
+    this._debugPhase = `validate partitions`;
+    this.getStages().forEach(stagePartitions => stagePartitions.forEach(partition => {
+      partition.validatedConnection = thenChainEagerly(
+          partition.connection.getActiveConnection(),
+          (connection) => {
+            this._debugPhase = `validate partition ${connection.getName()}`;
+            if (connection.isFrozenConnection()) {
+              throw new Error(`Trying to chronicle events to a frozen partition ${
+                  connection.getName()}`);
+            }
+            const commandEventVersion = partition.commandEvent.aspects.version;
+            const connectionEventVersion = connection.getEventVersion();
+            if (!connectionEventVersion || (connectionEventVersion !== commandEventVersion)) {
+              throw new Error(`Command event version "${commandEventVersion
+                  }" not supported by connection ${connection.getName()} which only supports "${
+                  connectionEventVersion}"`);
+            }
+            // Perform other partition validation
+            // TODO(iridian): extract partition content (EDIT: a what now?)
+            return (partition.validatedConnection = connection);
+          },
       );
     }));
   }
 
-  _fulfillProphecy () {
-    this._fulfillment = mapEagerly(this._stages,
-        stage => this._fulfillStage(stage),
-        (error, stage) => {
-          throw this._prophet.wrapErrorEvent(error,
-              new Error(`chronicleEvents._fulfillStage(${stage.name})`),
-              "\n\toperation:", ...dumpObject(this),
-              "\n\tstage.partitions:", ...dumpObject(stage.partitions));
-        });
-    return this._fulfillment;
-  }
-
-  _fulfillStage (stage: Object) {
-    return thenChainEagerly(stage, [
-      () => mapEagerly(stage.partitions,
+  _initiateStage (stagePartitions: Object, stageName: string) {
+    return stagePartitions && thenChainEagerly(stagePartitions, [
+      () => {
+        this._debugPhase = `await stage '${stageName}' partition validations`;
+        return mapEagerly(stagePartitions,
           partition => partition.validatedConnection,
           (error, partition) => {
             throw this._prophet.wrapErrorEvent(error,
-                new Error(`chronicleEvents.stage["${stage.name}"].connection["${
-                    partition.connection.getName()}"].validate`));
-          }),
+                new Error(`chronicleEvents.initiateStage("${stageName}").validatePartition("${
+                    partition.connection.getName()}")`));
+          });
+      },
       () => {
         // Persist the prophecy and add refs to all associated event bvobs.
         // This is necessary for prophecy reattempts so that the bvobs aren't
@@ -361,76 +396,66 @@ class ProphecyOperation extends ProphecyEventResult {
         // Maybe determine aspects.log.index's beforehand?
 
         // Get aspects.log.index and scribe persist finalizer for each partition
-        this._activePartitions = [];
-        for (const partition of stage.partitions) {
+        this._debugPhase = `chronicle stage '${stageName}' commands`;
+        for (const partition of stagePartitions) {
           try {
+            this._debugPhase = `chronicle stage '${stageName}' command to ${
+                partition.connection.getName()}`;
             partition.chronicling = partition.connection.chronicleEvent(
                 partition.commandEvent, Object.create(this._options));
-            this._activePartitions.push(partition);
           } catch (error) {
             throw this._prophet.wrapErrorEvent(error,
-                new Error(`chronicleEvents.stage["${stage.name}"].connection["${
+                new Error(`chronicleEvents.stage["${stageName}"].connection["${
                     partition.connection.getName()}"].chronicleEvents`),
                 "\n\tcommandEvent:", ...dumpObject(partition.commandEvent),
                 "\n\tchronicling:", ...dumpObject(partition.chronicling),
             );
           }
         }
-        return mapEagerly(this._activePartitions,
-            partition => {
-              const chronicledTruth = partition.chronicling.getTruthEvent();
-              let truthProcess = chronicledTruth;
-              let receivedTruth;
-              if (isPromise(truthProcess)) {
-                receivedTruth = new Promise((resolve, reject) => {
-                  partition.confirmCommand = resolve;
-                  partition.rejectCommand = reject;
-                });
-                truthProcess = Promise.race([receivedTruth, truthProcess]);
-              }
-              return thenChainEagerly(
-                  truthProcess,
-                  truth => {
-                    if (!truth) {
-                      Promise.all([chronicledTruth, receivedTruth]).then(([chrond, received]) => {
-                        partition.connection.errorEvent(
-                          "\n\tnull truth when fulfilling prophecy:", ...dumpObject(this._prophecy),
-                          "\n\tchronicled:", isPromise(chronicledTruth),
-                              ...dumpObject(chrond), ...dumpObject(chronicledTruth),
-                          "\n\treceived:", isPromise(receivedTruth),
-                              ...dumpObject(received), ...dumpObject(receivedTruth));
-                      });
-                    }
-                    if (truth.aspects.log.index !== partition.commandEvent.aspects.log.index) {
-                      // this partition command was/will be revised
-                    }
-                    partition.confirmedTruth = truth;
-                    return truth;
-                  },
-                  error => {
-                    partition.rejectionReason = error;
-                    throw error;
-                  });
-            },
-            (error, { chronicling }, index) => {
-              throw this._prophet.wrapErrorEvent(error,
-                  new Error(`chronicleEvents.stage["${stage.name}"]._activePartitions[${index
-                      }].eventResults[${tryAspect(chronicling && chronicling.event, "log").index
-                      }].getTruthEvent()"`),
-                  "\n\tchroniclings:", ...dumpObject(this._activePartitions));
-            }
-        );
+        return stagePartitions;
       },
-      () => {
-        this._prophecy.isTruth = true;
-        return this._prophecy;
+    ]);
+  }
+
+  _completeStage (stagePartitions: Object[], stageName: string) {
+    return stagePartitions && mapEagerly(stagePartitions, partition => {
+      this._debugPhase = `await stage '${stageName}' truth of ${partition.connection.getName()}`;
+      const chronicledTruth = partition.chronicling.getTruthEvent();
+      let truthProcess = chronicledTruth;
+      let receivedTruth;
+      if (isPromise(chronicledTruth)) {
+        receivedTruth = new Promise((resolve, reject) => {
+          partition.confirmCommand = resolve;
+          partition.rejectCommand = reject;
+        });
+        truthProcess = Promise.race([receivedTruth, chronicledTruth]);
       }
-    ], (error, index) => {
-      this._prophecy.isRejected = true;
-      this._rejectionError = this._prophecy.rejectionReason = this._prophet.wrapErrorEvent(error,
-          new Error(`chronicleEvents.stage["${stage.name}"].step#${index}`));
-      this._prophecy = null;
-      throw this._rejectionError;
+      return thenChainEagerly(truthProcess, truth => {
+        if (!truth) {
+          Promise.all([chronicledTruth, receivedTruth]).then(([chronicled, received]) => {
+            partition.connection.errorEvent(
+              "\n\tnull truth when fulfilling prophecy:", ...dumpObject(this._prophecy),
+              "\n\tchronicled:", isPromise(chronicledTruth),
+                  ...dumpObject(chronicled), ...dumpObject(chronicledTruth),
+              "\n\treceived:", isPromise(receivedTruth),
+                  ...dumpObject(received), ...dumpObject(receivedTruth));
+          });
+        }
+        if (truth.aspects.log.index !== partition.commandEvent.aspects.log.index) {
+          // this partition command was/will be revised
+        }
+        partition.confirmedTruth = truth;
+        return partition;
+      }, error => {
+        partition.rejectionReason = error;
+        throw error;
+      });
+    }, (error, { chronicling }, index) => {
+      throw this._prophet.wrapErrorEvent(error,
+          new Error(`chronicleEvents.completeStage("${stageName}").partition[${index
+              }].eventResults[${tryAspect(chronicling && chronicling.event, "log").index
+              }].getTruthEvent()"`),
+          "\n\tstagePartitions:", ...dumpObject(stagePartitions));
     });
   }
 }

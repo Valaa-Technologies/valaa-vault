@@ -10,10 +10,8 @@ import Prophet from "~/prophet/api/Prophet";
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 import { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult }
     from "~/prophet/api/types";
-import { obtainAspect } from "~/prophet/tools/EventAspects";
 
 import { dumpObject } from "~/tools";
-import valaaUUID from "~/tools/id/valaaUUID";
 
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";

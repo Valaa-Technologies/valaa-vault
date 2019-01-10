@@ -28,7 +28,7 @@ export default class ScriptTestHarness extends RAEMTestHarness {
     const ret = this.run(selfMaybeRef, bodyKuery, options);
     if (options.transaction) {
       const result = options.transaction.releaseTransaction();
-      if (result) return Promise.resolve(result.getLocalEvent()).then(() => ret);
+      if (result) return Promise.resolve(result.getPersistedEvent()).then(() => ret);
     }
     return ret;
   }

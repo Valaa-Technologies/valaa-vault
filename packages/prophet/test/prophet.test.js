@@ -592,7 +592,7 @@ describe("Disjoint clients using paired harnesses", () => {
       initialState: { owner: ["test_partition"], name: "Multi-harness test entity" },
       aspects: { version: "0.2", log: {}, command: { id: "cid-1" } },
     }));
-    await result.getLocalEvent();
+    await result.getPersistedEvent();
     await pairness.receiveTruthsFrom(harness);
     expect(scribeConnection.getFirstCommandEventId())
         .toEqual(1);
@@ -622,7 +622,7 @@ describe("Disjoint clients using paired harnesses", () => {
       initialState: { owner: ["test_partition"], name: "Multi-harness distinct entity" },
       aspects: { version: "0.2", log: {}, command: { id: "cid-p-1" } },
     }));
-    await pairedResult.getLocalEvent();
+    await pairedResult.getPersistedEvent();
     expect(pairedResult.getCommandOf(harness.testPartitionURI).aspects.log.index)
         .toEqual(1);
     // Make paired harness commands into truths first.

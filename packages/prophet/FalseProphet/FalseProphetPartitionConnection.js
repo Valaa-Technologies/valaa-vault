@@ -232,8 +232,8 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     return undefined;
   }
 
-  _checkForFreezeAndNotify (lastEvent: EventBase[]
-    = this._unconfirmedCommands[(this._unconfirmedCommands.length || 1) - 1]) {
+  _checkForFreezeAndNotify (lastEvent: EventBase[] =
+      this._unconfirmedCommands[(this._unconfirmedCommands.length || 1) - 1]) {
     if (lastEvent) this.setIsFrozen(lastEvent.type === "FROZEN");
     this._prophet.setConnectionCommandCount(
         this.getPartitionURI().toString(), this._unconfirmedCommands.length);

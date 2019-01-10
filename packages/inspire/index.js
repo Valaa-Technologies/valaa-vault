@@ -81,9 +81,10 @@ export default (Valaa.createGateway = async function createGateway (gatewayOptio
     return ret;
   } catch (error) {
     outputError((ret || new LogEventGenerator(logger)).wrapErrorEvent(error,
-        `createInspireGateway(), with`,
+            new Error(`createInspireGateway()`),
             "\n\trevelation components:", revelations,
-            "\n\tcombined revelation:", combinedRevelation));
+            "\n\tcombined revelation:", combinedRevelation),
+        "Exception caught during createGateway");
     throw new Error("Failed to initialize Inspire Client. See message log for more details.");
   }
 });

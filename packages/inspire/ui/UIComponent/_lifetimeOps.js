@@ -143,12 +143,12 @@ function _createContextAndSetFocus (component: UIComponent, newFocus: any, newPr
         if (newFocus !== getScopeValue(uiContext, "focus")) return;
         _initiateAttachSubscribers(component, newFocus, newProps);
       } catch (error) {
-        outputError(wrapError(error, `During ${component.debugId()
-                }\n .createContextAndSetFocus, with:`,
-            "\n\tnew focus:", ...dumpObject(newFocus),
-            "\n\tnew props:", ...dumpObject(newProps),
-            "\n\tnew uiContext:", ...dumpObject(uiContext),
-            "\n\tcomponent:", ...dumpObject(component)));
+        outputError(wrapError(error, new Error(`createContextAndSetFocus()`),
+                "\n\tnew focus:", ...dumpObject(newFocus),
+                "\n\tnew props:", ...dumpObject(newProps),
+                "\n\tnew uiContext:", ...dumpObject(uiContext),
+                "\n\tcomponent:", ...dumpObject(component)),
+            "Exception caught during UIComponent._createContextAndSetFocus");
       }
     })();
   };

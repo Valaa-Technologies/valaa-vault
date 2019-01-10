@@ -33,27 +33,35 @@ export default function wrapError (errorIn: Error, ...contextDescriptions) {
         "first argument must be an object with .message property!", "Instead got", error);
     invariantifyObject(error, "wrapError.error", { instanceof: Error });
   }
-  const clippedFrameList = _clipFrameListToCurrentContext(error, error.frameListClipDepth || 4);
   const originalMessage = error.originalMessage || error.message;
-  let ret = contextDescriptions[0];
-  if (!(ret instanceof Error)) ret = new Error("", error.fileName, error.lineNumber);
-  else contextDescriptions[0] = contextDescriptions[0].message;
+  let contextError = contextDescriptions[0];
+  if (!(contextError instanceof Error)) {
+    contextError = new Error("", error.fileName, error.lineNumber);
+  } else contextDescriptions[0] = contextDescriptions[0].message;
+  if (!contextError.tidyFrameList) {
+    contextError.tidyFrameList = contextError.stack.split("\n")
+        .slice(!contextError.message ? 3 : 2);
+  }
+  const outermostError = error.errorContexts
+      ? error.errorContexts[error.errorContexts.length - 1]
+      : error;
+  const clippedFrameList = _clipFrameListToCurrentContext(outermostError, contextError);
   const myTraceAndContext = `${clippedFrameList.join("\n")}
 ${contextDescriptions.map(debugObjectHard).join(" ")}`;
   const allTraceAndContext = `${error.allTraceAndContext || ""}
 ${myTraceAndContext}`;
-  ret.message = `${originalMessage}\n${allTraceAndContext}`;
-  ret.clippedFrameList = clippedFrameList;
-  ret.allTraceAndContext = allTraceAndContext;
-  ret.originalError = error.originalError || error;
-  ret.originalMessage = originalMessage;
-  ret.contextDescriptions = contextDescriptions;
-  ret.errorContexts = (error.errorContexts || []).concat([ret]);
+  contextError.message = `${originalMessage}\n${allTraceAndContext}`;
+  contextError.clippedFrameList = clippedFrameList;
+  contextError.allTraceAndContext = allTraceAndContext;
+  contextError.originalError = error.originalError || error;
+  contextError.originalMessage = originalMessage;
+  contextError.contextDescriptions = contextDescriptions;
+  error.errorContexts = (error.errorContexts || []).concat([contextError]);
 
   // FIXME (thiago) this breaks abstractions
-  ret.sourceStackFrames = errorIn && errorIn.sourceStackFrames;
-  ret.customErrorHandler = errorIn && errorIn.customErrorHandler;
-  return ret;
+  // contextError.sourceStackFrames = errorIn && errorIn.sourceStackFrames;
+  // contextError.customErrorHandler = errorIn && errorIn.customErrorHandler;
+  return error;
 }
 
 const _cooperativeErrorTypes = {
@@ -92,32 +100,51 @@ export function messageFromError (error: any) {
   return message;
 }
 
-function _clipFrameListToCurrentContext (innerError, dummySliceLineCount) {
-  if (!innerError.stack) {
-    console.log("innerError has no .stack:", innerError,
-      "\n\ttoString:", innerError.toString(),
-      "\n\tfilename:", innerError.toString(),
-      "\n\ttoString:", innerError.toString(),
+function _clipFrameListToCurrentContext (innerError, outerError) {
+  if (!outerError.tidyFrameList) {
+    console.log("outerError has no .tidyFrameList:", outerError,
+      "\n\ttoString:", outerError.toString(),
     );
-    return ["<<< inner error stack empty>>>"];
+    return ["<<< outer error tidyFrameList missing>>>"];
   }
-  const typeHeader = innerError.stack.match(/[^:]*: /);
-  const innerTraceList = innerError.stack
-      .slice(((typeHeader && typeHeader[0].length) || 0) + innerError.message.length)
-      .split("\n")
-      .slice(1);
-  if (typeof dummySliceLineCount === "undefined") return innerTraceList;
-  const outerStack = (new Error("dummy")).stack;
-  if (!outerStack) return innerTraceList;
-  const outerTraceList = outerStack.split("\n").slice(dummySliceLineCount);
-  for (let i = Math.max(0, innerTraceList.length - outerTraceList.length);
-      i < innerTraceList.length; i += 1) {
-    let j = 0;
-    while (i + j < innerTraceList.length && j < outerTraceList.length
-        && innerTraceList[i + j] === outerTraceList[j]) ++j;
-    if (i + j === innerTraceList.length) return innerTraceList.slice(0, i);
+  if (!innerError.tidyFrameList) {
+    if (!innerError.stack) {
+      console.log("innerError has no .stack:", innerError,
+        "\n\ttoString:", innerError.toString(),
+      );
+      return ["<<< inner error stack empty>>>"];
+    }
+    const typeHeader = innerError.stack.match(/[^:]*: /);
+    innerError.tidyFrameList = innerError.stack
+        .slice(((typeHeader && typeHeader[0].length) || 0) + innerError.message.length)
+        .split("\n")
+        .slice(1);
   }
-  return innerTraceList.concat(["<<< possibly missing frames >>>"]);
+  const inner = innerError.tidyFrameList;
+  const outer = outerError.tidyFrameList;
+  let skipInner = 0;
+  let skipOuter = 0;
+  let matches;
+  for (; skipOuter !== outer.length; ++skipOuter) {
+    // Find first matching line
+    while ((skipInner !== inner.length) && (inner[skipInner] !== outer[skipOuter])) ++skipInner;
+    // Check that remaining lines match
+    matches = 0;
+    for (; ((skipInner + matches) !== inner.length) && ((skipOuter + matches) !== outer.length);
+        ++matches) {
+      if (inner[skipInner + matches] !== outer[skipOuter + matches]) {
+        matches = undefined;
+        break;
+      }
+    }
+    if (matches !== undefined) break;
+  }
+  if (matches === undefined) inner.push("<<< possibly missing frames >>>");
+  else {
+    inner.splice(skipInner);
+    if (skipOuter) outer.splice(0, skipOuter);
+  }
+  return inner;
 }
 
 export function outputError (error, header = "Exception caught", logger = errorLogger) {
@@ -126,11 +153,13 @@ export function outputError (error, header = "Exception caught", logger = errorL
   if (error.customErrorHandler) {
     error.customErrorHandler(logger);
   }
-  for (const context of (error.errorContexts || [])) {
-    logger.log((context.clippedFrameList).join("\n"));
-    logger.error(...context.contextDescriptions.map(beaumpifyObject));
+  if (error.originalError) {
+    logger.log(error.originalError.tidyFrameList.join("\n"));
   }
-  logger.log(_clipFrameListToCurrentContext(error).slice(1).join("\n"));
+  for (const context of (error.errorContexts || [])) {
+    logger.warn(...context.contextDescriptions.map(beaumpifyObject));
+    logger.log((context.tidyFrameList).join("\n"));
+  }
 }
 
 export function outputCollapsedError (error, header = "Exception caught", logger = errorLogger) {

@@ -236,7 +236,7 @@ function _createImmaterializeGhostAction (state: State, rawId: string,
     if (!object) return;
     outputActions.push(destroyed({ id: rawId }));
   } catch (error) {
-    throw wrapError(error, `During createImmaterializeGhostAction(${rawId}:Resource)`);
+    throw wrapError(error, new Error(`During createImmaterializeGhostAction("${rawId}":Resource)`));
   }
 }
 

@@ -297,12 +297,13 @@ export default class Resolver extends LogEventGenerator {
         this.objectId = this.objectTransient.get("id");
       }
       if (!this.objectTransient && require) {
-        throw new Error(`Could not find non-ghost resource '${rawId}:${this.objectTypeName}'`);
+        throw new Error(`Could not find non-ghost resource "${rawId}":${this.objectTypeName}'`);
       }
       return this.objectTransient;
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          `goToTransientOfRawId(${rawId}:${this.objectTypeName}/${String(ghostPath) || ""})`,
+          new Error(`goToTransientOfRawId("${rawId}":${this.objectTypeName}${
+              ghostPath ? `/${ghostPath}` : ""})`),
           "\n\trequire:", require,
           "\n\tghostPath:", ...dumpObject(ghostPath),
           "\n\tthis:", ...dumpObject(this),

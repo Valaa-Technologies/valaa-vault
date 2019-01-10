@@ -41,8 +41,7 @@ export default class Motor extends Cog {
         }
       } catch (error) {
         errorCounter += 1;
-        outputError(wrapError(error,
-            `Exception #${errorCounter} caught in ${this.debugId()}.advanceTime()`));
+        outputError(error, `Exception #${errorCounter} caught in ${this.debugId()}.advanceTime()`);
       }
       if (errorCounter < 100) {
         requestAnimationFrame(advanceTime);

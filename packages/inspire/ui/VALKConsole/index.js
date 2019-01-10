@@ -96,8 +96,9 @@ class VALKConsole extends UIComponent {
       newValue = "";
     } catch (error) {
       errored = true;
-      outputError(wrapError(error, `Exception caught in ${this.debugId()}\n .handleSubmit():`,
-          "\n\tcommand:", this.state.cmd));
+      outputError(wrapError(error, new Error(`handleSubmit()`),
+          "\n\tcommand:", this.state.cmd),
+          "Exception caught during VALKConsole.handleSubmit");
       result = [
         { txt: error.message, color: "red" },
         { txt: "See browser console for more detailed context information", color: "yellow" },

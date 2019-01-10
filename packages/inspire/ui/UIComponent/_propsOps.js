@@ -98,7 +98,7 @@ export function _checkForInfiniteRenderRecursion (component: UIComponent) {
           "\n\tidentical ancestor focus:", context.focus.debugId(), context.focus,
           "\n\tidentical ancestor props:", context.reactComponent.props,
       );
-      outputError(error);
+      outputError(error, "Exception caught during UIComponent._checkForInfiniteRenderRecursion");
       component.enableError(error);
       return true;
     }

@@ -300,8 +300,8 @@ export default class ValaaEngine extends Cog {
 
       ret = directiveArray.map((directive, index) => {
         if (directive.initialState && directive.initialState.partitionAuthorityURI) {
-          // Create partition(s) before the transaction is committed (and thus before the commands
-          // leave upstream).
+          // Create partition(s) before the transaction is committed (
+          // and thus before the commands leave to upstream).
           this._createNewPartition(directive);
         }
         const id = isRecombine
@@ -312,7 +312,8 @@ export default class ValaaEngine extends Cog {
           Promise.resolve(vResource.activate(transaction.getState()))
               .then(undefined, (error) => {
                 outputCollapsedError(localWrapError(this, error,
-                    `${constructCommand.name}.activate ${vResource.debugId()}`));
+                    `${constructCommand.name}.activate ${vResource.debugId()}`),
+                    `Exception caught during resource activation of ${vResource.debugId()}`);
               });
         }
         if (extractedProperties[index]) {
@@ -459,7 +460,8 @@ export default class ValaaEngine extends Cog {
             Promise.resolve(vProtagonist.activate(story.state))
                 .then(undefined, (error) => {
                   outputCollapsedError(errorOnReceiveCommands.call(this, error,
-                    `receiveCommands(${passage.type} ${vProtagonist.debugId()}).activate`));
+                      `receiveCommands(${passage.type} ${vProtagonist.debugId()}).activate`),
+                      "Exception caught during passage recital");
                 });
           }
         }
@@ -476,14 +478,14 @@ export default class ValaaEngine extends Cog {
       throw errorOnReceiveCommands.call(this, error,
           new Error(`_recitePassage(${passage.type} ${
               vProtagonist ? vProtagonist.debugId() : ""})`),
-          "\n\tstory.state:", story.state && story.state.toJS(),
-          "\n\tstory.previousState:", story.previousState && story.previousState.toJS());
+          "\n\tstory.state:", ...dumpObject(story.state),
+          "\n\tstory.previousState:", ...dumpObject(story.previousState));
     }
     function errorOnReceiveCommands (error, operationName, ...extraContext) {
       return this.wrapErrorEvent(error, operationName,
           "\n\tvProtagonist:", vProtagonist,
-          "\n\tpassage:", passage,
-          "\n\tstory:", story,
+          "\n\tpassage:", ...dumpObject(passage),
+          "\n\tstory:", ...dumpObject(story),
           ...extraContext);
     }
     function _eventTypeString (innerPassage, submostEventType = innerPassage.type) {

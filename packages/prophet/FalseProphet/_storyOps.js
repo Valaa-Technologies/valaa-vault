@@ -227,7 +227,7 @@ export function _recomposeStoryFromPurgedEvent (falseProphet: FalseProphet, purg
         "\n\tpurgedEvent:", ...dumpObject(purgedEvent),
         "\n\tpurgedProphecy:", ...dumpObject(purged));
     if (!purged.needsReview) {
-      outputError(wrappedError);
+      outputError(wrappedError, "Exception caught during _recomposeStoryFromPurgedEvent");
       purged.needsReview = true;
     }
     purged.schismDescription = `a structural schism found when ${

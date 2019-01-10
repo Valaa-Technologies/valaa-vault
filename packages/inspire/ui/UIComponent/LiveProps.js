@@ -91,13 +91,13 @@ export default class LiveProps extends UIComponent {
                 return true;
               } catch (error) {
                 const wrappedError = wrapError(error,
-                    `Exception caught in ${this.debugId()})\n subscriber '${subscriberName}', with:`,
+                    new Error(`attachSubscribers('${subscriberName}')`),
                     "\n\tuiContext:", this.state.uiContext,
                     "\n\tfocus:", this.tryFocus(),
                     "\n\tstate:", this.state,
                     "\n\tprops:", this.props,
                 );
-                outputError(wrappedError);
+                outputError(wrappedError, "Exception caught during LiveProps.attachSubscribers");
                 this.enableError(wrappedError);
               }
               return false;
@@ -262,14 +262,14 @@ export default class LiveProps extends UIComponent {
             () => handleCallbackExceptions(...args));
         if (connectingMissingPartitions) return connectingMissingPartitions;
         const finalError = wrapError(error,
-            `Exception caught in ${component.debugId()})\n .props.${name}, with:`,
+            new Error(`props.${name} ValaaSpace callback`),
             "\n\targs:", args,
             "\n\tcontext:", component.state.uiContext,
             "\n\tstate:", component.state,
             "\n\tprops:", component.props,
         );
 
-        outputError(finalError);
+        outputError(finalError, "Exception caught during LiveProps.handleCallbackExceptions");
         component.enableError(finalError);
       }
       return undefined;

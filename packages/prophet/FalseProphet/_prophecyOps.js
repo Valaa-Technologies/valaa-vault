@@ -303,8 +303,7 @@ class ProphecyOperation extends ProphecyEventResult {
       try {
         _rejectLastProphecyAsHeresy(this._prophet, prophecy);
       } catch (innerError) {
-        outputError(innerError, `Caught an exception in the exception handler of${
-            ""} chronicleEvents.execute; the resulting purge threw exception of its own:`);
+        outputError(innerError, `Exception caught during chronicleEvents.execute.purge`);
       }
       throw this._rejectionError;
     });

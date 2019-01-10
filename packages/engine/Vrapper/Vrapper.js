@@ -343,13 +343,13 @@ export default class Vrapper extends Cog {
       if (this.hasInterface("Scope")) this._setUpScopeFeatures({ state });
     } catch (error) {
       outputError(this.wrapErrorEvent(error,
-          new Error("_finalizeActivate() caught an error post-activation, which will be swallowed"),
-          "\n\ttransient:", ...dumpObject(transient.toJS()),
-          "\n\tpartitionConnection:", ...dumpObject(this._partitionConnection),
-          "\n\tpartitionAuthorityURI:", partitionAuthorityURIString,
-          "\n\tauthorityConnection:", authorityConnection,
-          "\n\tthis:", ...dumpObject(this),
-      ));
+              new Error("_postActivate()"),
+              "\n\ttransient:", ...dumpObject(transient.toJS()),
+              "\n\tpartitionConnection:", ...dumpObject(this._partitionConnection),
+              "\n\tpartitionAuthorityURI:", partitionAuthorityURIString,
+              "\n\tauthorityConnection:", authorityConnection,
+              "\n\tthis:", ...dumpObject(this)),
+          "Exception caught and swallowed in Vrapper._postActivate");
     }
   }
 
@@ -1671,12 +1671,12 @@ export default class Vrapper extends Cog {
           subscriber._triggerUpdateByFieldUpdate(fieldUpdate);
         }
       } catch (error) {
-        outputError(wrapError(error,
-            `Exception caught during ${this.debugId()}\n .delayedNotifyMODIFIEDHandlers('${
-                fieldName}')`,
-            "\n\tfield update:", fieldUpdate,
-            "\n\tfailing field subscriber:", ...dumpObject(subscriber),
-            "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())));
+        outputError(this.wrapErrorEvent(error,
+                new Error(`_notifyMODIFIEDHandlers('${fieldName}')`),
+                "\n\tfield update:", fieldUpdate,
+                "\n\tfailing field subscriber:", ...dumpObject(subscriber),
+                "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())),
+            "Exception caught during Vrapper._notifyMODIFIEDHandlers.subscribers");
       }
     }
     if (filterSubscribers) {
@@ -1688,12 +1688,12 @@ export default class Vrapper extends Cog {
             filterSubscriber._tryTriggerUpdateByFieldUpdate(fieldIntro, fieldUpdate);
           }
         } catch (error) {
-          outputError(wrapError(error,
-              `Exception caught during ${this.debugId()}\n .delayedNotifyMODIFIEDHandlers('${
-                  fieldName}')`,
-              "\n\tfield update:", fieldUpdate,
-              "\n\tfailing filter subscriber:", ...dumpObject(filterSubscriber),
-              "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())));
+          outputError(this.wrapErrorEvent(error,
+                  new Error(`_notifyMODIFIEDHandlers('${fieldName}')`),
+                  "\n\tfield update:", fieldUpdate,
+                  "\n\tfailing filter subscriber:", ...dumpObject(filterSubscriber),
+                  "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())),
+              "Exception caught during Vrapper._notifyMODIFIEDHandlers.filterSubscribers");
         }
       }
     }

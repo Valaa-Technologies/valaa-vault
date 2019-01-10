@@ -13,7 +13,7 @@ import Transient, { getTransientTypeName } from "~/raem/state/Transient";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 
 import { debugObjectType, dumpObject, invariantify, invariantifyString,
-  outputCollapsedError, wrapError,
+  outputCollapsedError, outputError, wrapError,
 } from "~/tools";
 
 /**
@@ -85,12 +85,19 @@ export function createBardReducer (bardOperation: (bard: Bard) => State,
             "\n\tapprentice:", ...dumpObject(apprentice),
         );
       }
-      outputCollapsedError(apprentice.wrapErrorEvent(error,
-          `bardOperation(${apprentice.passage.type}) - sub-event IGNORED, reduction skipped`,
-          "\n\taction:", ...dumpObject(getActionFromPassage(apprentice.passage)),
-          "\n\tpassage:", ...dumpObject(apprentice.passage),
-          "\n\tapprentice:", ...dumpObject(apprentice),
-      ), "Exception caught during event playback (corresponding sub-event IGNORED)");
+      const wrappedError = apprentice.wrapErrorEvent(error,
+        `bardOperation(${apprentice.passage.type}) - sub-event IGNORED, reduction skipped`,
+        "\n\taction:", ...dumpObject(getActionFromPassage(apprentice.passage)),
+        "\n\tpassage:", ...dumpObject(apprentice.passage),
+        "\n\tapprentice:", ...dumpObject(apprentice),
+      );
+      if (!this.getVerbosity()) {
+        outputCollapsedError(wrappedError,
+            "Exception caught during event replay reduction (corresponding sub-event IGNORED)");
+      } else {
+        outputError(wrappedError,
+            "Exception caught during event replay reduction (corresponding sub-event IGNORED)");
+      }
       return state;
     } finally {
       delete apprentice.passage.apprentice;

@@ -86,15 +86,19 @@ export class LogEventGenerator {
   }
 
   wrapErrorEvent (error: Error, functionName: Error | string, ...contexts: any[]) {
-    // Don't rewrap the error if it's already wrapped with the same functionName in the same context
     const actualFunctionName = functionName instanceof Error ? functionName.message : functionName;
     if (error.hasOwnProperty("functionName")
         && (error.functionName === actualFunctionName)
         && (error.contextObject === this)) {
+      // Don't re-wrap the error if it's already wrapped with the same
+      // functionName in the same context.
       return error;
     }
-    if (typeof error === "object") error.frameListClipDepth = 5;
     const wrapperError = (functionName instanceof Error) ? functionName : new Error("");
+    if (!wrapperError.tidyFrameList) {
+      wrapperError.tidyFrameList = wrapperError.stack.split("\n")
+          .slice((functionName instanceof Error) ? 2 : 3);
+    }
     wrapperError.message =
         `During ${this.debugId()}\n .${actualFunctionName}${contexts.length ? ", with:" : ""}`;
     const ret = wrapError(error, wrapperError, ...contexts);

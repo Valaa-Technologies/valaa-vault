@@ -179,12 +179,12 @@ class UIComponent extends React.Component {
       _componentWillMount(this);
     } catch (error) {
       const finalError = wrapError(error,
-          `Exception caught in ${this.debugId()})\n .componentWillMount(), with:`,
+          new Error(`During ${this.debugId()})\n .componentWillMount(), with:`),
           "\n\tuiContext:", this.state.uiContext,
           "\n\tstate:", this.state,
           "\n\tprops:", this.props,
       );
-      outputError(finalError);
+      outputError(finalError, "Exception caught in UIComponent.componentWillMount");
       this.enableError(finalError);
     }
     this._isMounted = true;
@@ -196,13 +196,13 @@ class UIComponent extends React.Component {
       _componentWillReceiveProps(this, nextProps, nextContext, forceReattachListeners);
     } catch (error) {
       const finalError = wrapError(error,
-          `Exception caught in ${this.debugId()})\n .componentWillReceiveProps(), with:`,
+          new Error(`During ${this.debugId()})\n .componentWillReceiveProps(), with:`),
           "\n\tuiContext:", this.state.uiContext,
           "\n\tstate:", this.state,
           "\n\tprops:", this.props,
           "\n\tnextProps:", nextProps,
       );
-      outputError(finalError);
+      outputError(finalError, "Exception caught in UIComponent.componentWillReceiveProps");
       this.enableError(finalError);
     }
   }
@@ -212,7 +212,7 @@ class UIComponent extends React.Component {
       return _shouldComponentUpdate(this, nextProps, nextState, nextContext);
     } catch (error) {
       const finalError = wrapError(error,
-          `Exception caught in ${this.debugId()})\n .shouldComponentUpdate(), with:`,
+          new Error(`During ${this.debugId()})\n .shouldComponentUpdate(), with:`),
           "\n\tprops:", this.props,
           "\n\tnextProps:", nextProps,
           "\n\tstate:", this.state,
@@ -220,7 +220,7 @@ class UIComponent extends React.Component {
           "\n\tcontext:", this.context,
           "\n\tnextContext:", nextContext,
       );
-      outputError(finalError);
+      outputError(finalError, "Exception caught in UIComponent.shouldComponentUpdate");
       this.enableError(finalError);
     }
     return true;
@@ -231,12 +231,12 @@ class UIComponent extends React.Component {
       _componentWillUnmount(this);
     } catch (error) {
       const finalError = wrapError(error,
-          `Exception caught in ${this.debugId()})\n .componentWillUnmount(), with:`,
+          new Error(`During ${this.debugId()})\n .componentWillUnmount(), with:`),
           "\n\tprops:", this.props,
           "\n\tstate:", this.state,
           "\n\tcontext:", this.context,
       );
-      outputError(finalError);
+      outputError(finalError, "Exception caught in UIComponent.componentWillUnmount");
     }
   }
 
@@ -609,7 +609,7 @@ class UIComponent extends React.Component {
           ret = this.tryRenderLensRole(operationInfo.lensRole, operationInfo.params);
           if (isPromise(ret)) {
             throw wrapError(new Error("Invalid render result: 'pendingLens' returned a promise"),
-                `During ${this.debugId()}\n .render().ret.pendingLens, with:`,
+                new Error(`During ${this.debugId()}\n .render().ret.pendingLens, with:`),
                 "\n\tpendingLens ret:", dumpObject(ret),
                 "\n\tcomponent:", dumpObject(this));
           }
@@ -631,13 +631,13 @@ class UIComponent extends React.Component {
     try {
       if (firstPassError) {
         const wrappedError = wrapError(firstPassError,
-            `Exception caught in ${this.debugId()})\n .render(), with:`,
+            new Error(`During ${this.debugId()}\n .render()`),
             "\n\tuiContext:", this.state.uiContext,
             "\n\tfocus:", this.tryFocus(),
             "\n\tstate:", this.state,
             "\n\tprops:", this.props,
         );
-        outputError(wrappedError);
+        outputError(wrappedError, "Exception caught in UIComponent.render");
         this.enableError(wrappedError);
       }
       if (ret === undefined) {

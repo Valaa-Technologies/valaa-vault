@@ -84,7 +84,7 @@ describe("Prophet", () => {
     const prophetConnection = await harness.prophet
         .acquirePartitionConnection(harness.testPartitionURI).getActiveConnection();
     const scribeConnection = prophetConnection.getUpstreamConnection();
-    const database = await openDB(harness.testPartitionURI.toString());
+    const database = await openDB(scribeConnection._db.databaseId);
 
     for (const command of commands) {
       const claimResult = await harness.chronicleEvent(command);
@@ -504,10 +504,8 @@ describe("Cross-partition", () => {
       },
     }), { isTruth: true }).getPersistedEvent();
 
-    const lateConnection = await harness.prophet
-        .acquirePartitionConnection(latePartitionURI).getActiveConnection();
-    const lateScribeConnection = lateConnection.getUpstreamConnection();
-    await Promise.all(lateScribeConnection.chronicleEvents([
+    const lateConnection = harness.prophet.acquirePartitionConnection(latePartitionURI);
+    harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
         id: ["test_late"], typeName: "Entity",
         initialState: { name: "Test Late" },
@@ -518,8 +516,8 @@ describe("Cross-partition", () => {
         initialState: { name: "Late Target" },
         aspects: { version: "0.2", log: { index: 1 }, command: { id: "lid-1" } },
       }),
-    ], { isTruth: true }).eventResults.map(result => result.getPersistedEvent()));
-
+    ]);
+    await lateConnection.getActiveConnection();
     const incomingRelations = harness.run(lateTargetId, "incomingRelations");
     expect(incomingRelations.length)
         .toEqual(1);
@@ -549,10 +547,8 @@ describe("Cross-partition", () => {
         aspects: { version: "0.2", log: { index: index + 1 }, command: { id: "cid-2" } },
       })], { isTruth: true }).eventResults.map(result => result.getPersistedEvent()));
 
-    const lateConnection = await harness.prophet
-        .acquirePartitionConnection(latePartitionURI).getActiveConnection();
-    const lateScribeConnection = lateConnection.getUpstreamConnection();
-    await Promise.all(lateScribeConnection.chronicleEvents([
+    const lateConnection = harness.prophet.acquirePartitionConnection(latePartitionURI);
+    harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
         id: ["test_late"], typeName: "Entity",
         initialState: { name: "Test Late" },
@@ -570,7 +566,8 @@ describe("Cross-partition", () => {
         },
         aspects: { version: "0.2", log: { index: 2 }, command: { id: "lid-3" } },
       }),
-    ], { isTruth: true }).eventResults.map(result => result.getPersistedEvent()));
+    ]);
+    await lateConnection.getActiveConnection();
 
     const properties = harness.run(vRef("CrossEntryInstance_A"),
         ["§->", "properties", ["§map", "name"]]);
@@ -584,8 +581,7 @@ describe("Disjoint clients using paired harnesses", () => {
     const { scribeConnection } = await setUp({ isRemoteAuthority: true, isLocallyPersisted: true },
         { verbosity: 0 });
     const pairness = await createProphetOracleHarness({ verbosity: 0, pairedHarness: harness });
-    const pairedConnection = await pairness.prophet
-        .acquirePartitionConnection(harness.testPartitionURI);
+    const pairedConnection = pairness.prophet.acquirePartitionConnection(harness.testPartitionURI);
 
     const result = harness.chronicleEvent(created({
       id: ["multiharness-entity"], typeName: "Entity",

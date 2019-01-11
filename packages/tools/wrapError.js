@@ -56,6 +56,7 @@ ${myTraceAndContext}`;
   contextError.originalError = error.originalError || error;
   contextError.originalMessage = originalMessage;
   contextError.contextDescriptions = contextDescriptions;
+  error.originalError = error.originalError || error;
   error.errorContexts = (error.errorContexts || []).concat([contextError]);
 
   // FIXME (thiago) this breaks abstractions

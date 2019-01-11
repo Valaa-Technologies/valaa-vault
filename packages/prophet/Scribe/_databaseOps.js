@@ -497,7 +497,7 @@ function _serializeEventAsJSON (event) {
 function _getAllShim (connection: ScribePartitionConnection, database, range: IDBKeyRange,
     resolve: Function, reject: Function) {
   let req;
-  if (typeof database.getAll !== "undefined") {
+  if (database.getAll !== undefined) {
     req = database.getAll(range);
     req.onsuccess = () => {
       try {

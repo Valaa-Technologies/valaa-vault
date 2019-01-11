@@ -13,8 +13,8 @@ afterEach(() => { if (harness) harness.cleanup(); harness = null; });
 describe("Oracle", () => {
   it("sets up a connection and creates a partition", async () => {
     harness = await createProphetOracleHarness({});
-    expect(harness.testPartitionConnection).toBeTruthy();
-    expect(harness.testPartitionConnection.isConnected())
+    expect(harness.testConnection).toBeTruthy();
+    expect(harness.testConnection.isConnected())
         .toEqual(true);
     expect(harness.run(vRef("test_partition"), "name"))
         .toEqual("Automatic Test Partition Root");

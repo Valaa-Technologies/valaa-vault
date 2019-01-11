@@ -52,8 +52,9 @@ describe("Scribe", () => {
     const scribe = createScribe(createTestMockProphet({ isRemoteAuthority: true }));
     await scribe.initiate();
 
-    const connection = await scribe
-        .acquirePartitionConnection(testPartitionURI).getActiveConnection();
+    const connection = scribe.acquirePartitionConnection(testPartitionURI);
+    connection.getUpstreamConnection().addNarrateResults({ eventIdBegin: 0 }, []);
+    await connection.getActiveConnection();
     const database = await openDB(testPartitionURI.toString());
 
     // Adds an entity and checks that it has been stored

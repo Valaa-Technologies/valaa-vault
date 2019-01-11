@@ -75,10 +75,8 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
   };
 
   const ret = createProphetTestHarness(combinedOptions);
-
-  ret.testAuthorityConfig = combinedOptions.oracleOptions.testAuthorityConfig;
   try {
-    ret.testPartitionConnection = await ret.testPartitionConnection;
+    ret.testConnection = await ret.testConnection;
     if (options.acquirePartitions) {
       const partitionURIs = options.acquirePartitions.map(
           partitionId => createPartitionURI("valaa-test:", partitionId));
@@ -110,17 +108,24 @@ export const createdTestPartitionEntity = created({
   },
 });
 
+let dbIsolationAutoPrefix = 0;
+
 export default class ProphetTestHarness extends ScriptTestHarness {
   constructor (options: Object) {
     super(options);
     this.nextCommandIdIndex = 1;
     if (options.oracleOptions) {
       this.upstream = this.oracle = createOracle(options.oracleOptions);
+      this.testAuthorityConfig = options.oracleOptions.testAuthorityConfig;
     } else {
       this.upstream = createTestMockProphet({ isLocallyPersisted: false });
     }
     if (options.scribeOptions) {
-      this.upstream = this.scribe = createScribe(this.upstream, options.scribeOptions);
+      const scribeOptions = { ...options.scribeOptions };
+      if (!scribeOptions.databasePrefix) {
+        scribeOptions.databasePrefix = `test-isolated-${++dbIsolationAutoPrefix}`;
+      }
+      this.upstream = this.scribe = createScribe(this.upstream, scribeOptions);
       this.cleanup = () => clearScribeDatabases(this.scribe);
     } else {
       this.cleanup = () => undefined;
@@ -131,18 +136,30 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     this.testPartitionURI = options.testPartitionURI
         || (options.testAuthorityURI && createPartitionURI(this.testAuthorityURI, "test_partition"))
         || testPartitionURI;
-    const activeTestPartitionConnection = this.prophet.acquirePartitionConnection(
-        this.testPartitionURI, { newPartition: true }).getActiveConnection();
-
-    this.testPartitionConnection = thenChainEagerly(activeTestPartitionConnection, [
-      (connection) => {
-        const testPartitionStory =
-            this.chronicleEvent(createdTestPartitionEntity, { isTruth: true })
-            .getPremiereStory();
-        return Promise.all([connection, testPartitionStory]);
-      },
-      ([connection]) => (this.testPartitionConnection = connection),
-    ]);
+    const testConnection = this.prophet
+        .acquirePartitionConnection(this.testPartitionURI, { newPartition: true });
+    if ((this.testAuthorityConfig || {}).isRemoteAuthority) {
+      // For remote test partitions with oracle we provide the root
+      // entity as a response to the initial narrate request.
+      const testBackend = this.tryGetTestAuthorityConnection(testConnection);
+      testBackend.addNarrateResults({ eventIdBegin: 0 }, [{
+        ...createdTestPartitionEntity,
+        aspects: { version: "0.2", log: { index: 0 }, command: { id: "rid-0" } },
+      }]);
+      this.testConnection = thenChainEagerly(testConnection.getActiveConnection(),
+          connected => (this.testConnection = connected));
+    } else {
+      // For all other cases we chronicle the root entity.
+      this.testConnection = thenChainEagerly(testConnection.getActiveConnection(), [
+        (connection) => {
+          const testPartitionStory =
+              this.chronicleEvent(createdTestPartitionEntity, { isTruth: true })
+              .getPremiereStory();
+          return Promise.all([connection, testPartitionStory]);
+        },
+        ([connection]) => (this.testConnection = connection),
+      ]);
+    }
   }
 
   chronicleEvents (events: EventBase[], ...rest: any) {
@@ -198,14 +215,12 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     clearSourceUpstreamEntries = false,
     clearReceiverUpstreamEntries = false,
     authorizeTruth = (i => i),
+    asNarrateResults = false,
   } = {}) {
     for (const connection of ((source instanceof PartitionConnection)
         ? [source]
         : Object.values((source instanceof Prophet ? source : source.prophet)._connections))) {
-      let testSourceBackend = connection;
-      for (; testSourceBackend; testSourceBackend = testSourceBackend.getUpstreamConnection()) {
-        if (testSourceBackend instanceof TestPartitionConnection) break;
-      }
+      const testSourceBackend = this.tryGetTestAuthorityConnection(connection);
       if (!testSourceBackend) continue;
       const partitionURI = String(testSourceBackend.getPartitionURI());
       const receiver = this.oracle._connections[partitionURI];
@@ -213,8 +228,8 @@ export default class ProphetTestHarness extends ScriptTestHarness {
         if (!requireReceivingConnection) continue;
         throw new Error(`Could not find a receiving connection for <${partitionURI}>`);
       }
-      const receiverBackend = receiver.getUpstreamConnection();
-      if (!receiverBackend || !(receiverBackend instanceof TestPartitionConnection)) {
+      const receiverBackend = this.tryGetTestAuthorityConnection(receiver);
+      if (!receiverBackend) {
         throw new Error(`Receving connection <${partitionURI
             }> has no TestPartitionConnection at the end of the chain`);
       }
@@ -226,8 +241,20 @@ export default class ProphetTestHarness extends ScriptTestHarness {
       if (verbosity) {
         receiver.warnEvent("Receiving truths:", dumpify(truths, { indent: 2 }));
       }
-      await receiverBackend.getReceiveTruths()(truths);
+      if (asNarrateResults) {
+        receiverBackend.addNarrateResults({ eventIdBegin: truths[0].aspects.log.index }, truths);
+      } else {
+        await Promise.all(await receiverBackend.getReceiveTruths()(truths));
+      }
     }
+  }
+
+  tryGetTestAuthorityConnection (connection): PartitionConnection {
+    let ret = connection;
+    for (; ret; ret = ret.getUpstreamConnection()) {
+      if (ret instanceof TestPartitionConnection) break;
+    }
+    return ret;
   }
 
   createMockFollower () {

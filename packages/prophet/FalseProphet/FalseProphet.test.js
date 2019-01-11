@@ -61,12 +61,12 @@ describe("FalseProphet", () => {
     const onCommandCountUpdate = (count) => { commandsCounted = count; };
 
     const falseProphet = createFalseProphet({
-      onCommandCountUpdate, upstream: createTestMockProphet({
-        isLocallyPersisted: false, isRemoteAuthority: true,
-      }),
+      onCommandCountUpdate,
+      upstream: createTestMockProphet({ isLocallyPersisted: false, isRemoteAuthority: true }),
     });
-    const connection = await falseProphet
-        .acquirePartitionConnection(partitionURI).getActiveConnection();
+    let connection = falseProphet.acquirePartitionConnection(partitionURI);
+    connection.getUpstreamConnection().addNarrateResults({ eventIdBegin: 0 }, []);
+    connection = await connection.getActiveConnection();
     expect(commandsCounted).toBe(0);
     const discourse = falseProphet.addFollower(new MockFollower());
 

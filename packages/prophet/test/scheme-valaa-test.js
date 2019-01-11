@@ -3,7 +3,10 @@
 import { EventBase } from "~/raem/events";
 
 import { AuthorityProphet, AuthorityPartitionConnection, EVENT_VERSION } from "~/prophet";
-import { ChronicleRequest, ChronicleOptions, ChronicleEventResult } from "~/prophet/api/types";
+import { ChronicleRequest, ChronicleOptions, ChronicleEventResult, NarrateOptions }
+    from "~/prophet/api/types";
+
+import { dumpObject } from "~/tools";
 
 export default function createValaaTestScheme ({ config, authorityURI } = {}) {
   return {
@@ -24,7 +27,46 @@ export default function createValaaTestScheme ({ config, authorityURI } = {}) {
 }
 
 export class TestPartitionConnection extends AuthorityPartitionConnection {
+  _narrations = {};
   _testUpstreamEntries = [];
+
+  addNarrateResults ({ eventIdBegin }, events) {
+    const narration = this._narrations[eventIdBegin] || (this._narrations[eventIdBegin] = {});
+    if (narration.resultEvents) {
+      throw this.wrapErrorEvent(new Error(`narration result events already exist for ${
+          eventIdBegin}`), new Error("addNarrateResults"));
+    }
+    narration.resultEvents = events;
+    this._tryFulfillNarration(narration);
+  }
+
+  narrateEventLog (options: ?NarrateOptions = {}): Promise<any> {
+    if (!this.isRemoteAuthority()) return super.narrateEventLog(options);
+    const narration = this._narrations[options.eventIdBegin || 0]
+        || (this._narrations[options.eventIdBegin || 0] = {});
+    narration.options = options;
+    return this._tryFulfillNarration(narration) || new Promise((resolve, reject) => {
+      narration.resolve = resolve;
+      narration.reject = reject;
+    });
+  }
+
+  _tryFulfillNarration (narration: Object) {
+    if (!narration.options || !narration.resultEvents) return undefined;
+    const ret = {};
+    try {
+      ret.testAuthorityTruths = !narration.resultEvents.length ? []
+          : narration.options.receiveTruths(narration.resultEvents);
+      if (narration.resolve) narration.resolve(ret);
+      return ret;
+    } catch (error) {
+      const wrapped = this.wrapErrorEvent(error, new Error("tryFulfillNarration()"),
+          "\n\tnarration:", ...dumpObject(narration));
+      if (!narration.reject) throw wrapped;
+      narration.reject(wrapped);
+    }
+    return undefined;
+  }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions): ChronicleRequest {
     if (!this.isRemoteAuthority()) return super.chronicleEvents(events, options);

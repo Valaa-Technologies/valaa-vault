@@ -4,6 +4,7 @@ import { GraphQLList, GraphQLInterfaceType } from "graphql/type";
 import primaryField from "~/raem/tools/graphql/primaryField";
 import { toManyOwnlings } from "~/raem/tools/graphql/coupling";
 import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
+import TransientFields, { transientFields } from "~/raem/schema/TransientFields";
 
 import Property from "./Property";
 
@@ -17,10 +18,13 @@ export function scopeInterface (objectDescription: string = INTERFACE_DESCRIPTIO
 
     description: "A scope of variables by name",
 
+    interfaces: () => [TransientFields],
+
     fields: () => ({
+      ...transientFields(objectDescription).fields(),
       ...primaryField("properties", new GraphQLList(Property),
           `Properties of ${objectDescription} as a list of key-value pairs`,
-          { coupling: toManyOwnlings() },
+          { coupling: toManyOwnlings({ affiliatedType: "Scope" }) },
       ),
     }),
 

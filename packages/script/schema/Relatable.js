@@ -37,7 +37,7 @@ export function relatableInterface (objectDescription: string = INTERFACE_DESCRI
 
       ...primaryField("relations", new GraphQLList(Relation),
           "List of relations that this relatable has",
-          { coupling: toManyOwnlings() },
+          { coupling: toManyOwnlings({ affiliatedType: "Relatable" }) },
       ),
     }),
   };

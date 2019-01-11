@@ -105,6 +105,16 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
   schema.inactiveType = inactiveType || inheritedInactiveType;
   if (!schema.inactiveType) throw new Error(`ContentAPI ${name} is missing .inactiveType`);
 
+  schema.getDefaultCouplingType = (couplingName) => {
+    const ret = schema._couplingToType[couplingName];
+    if (!ret) throw new Error(`Can't find default coupling type for '${couplingName}'`);
+    if (Array.isArray(ret)) {
+      throw new Error(`Can't determine default coupling type for '${couplingName
+          }': there are multiple candidates: ${ret.join(",")}`);
+    }
+    return ret;
+  };
+
   return Object.freeze({
     name,
     schema,
@@ -134,6 +144,7 @@ function _assign (target: Object, ...sources: Object) {
 }
 
 function _validateSchema (schema: GraphQLSchema) {
+  schema._couplingToType = {};
   for (const [typeName, type] of Object.entries(schema.getTypeMap())) {
     const shouldSkip = (typeName.slice(0, 2) === "__")
         || !type.getFields
@@ -146,7 +157,22 @@ function _validateSchema (schema: GraphQLSchema) {
           : fieldIntro;
       invariantifyString(actualFieldIntro.fieldName, `${typeName}.${fieldName}.fieldName`);
       invariantifyObject(actualFieldIntro.namedType, `${typeName}.${fieldName}.namedType`);
+      if (actualFieldIntro.coupling && (actualFieldIntro.coupling.affiliatedType === typeName)) {
+        _registerDefaultCouplingType(schema, fieldName, type);
+      }
     }
   }
   return schema;
+}
+
+function _registerDefaultCouplingType (schema: GraphQLSchema, fieldName: string, type: Object) {
+  let conflicted = schema._couplingToType[fieldName];
+  if (!conflicted) {
+    schema._couplingToType[fieldName] = type;
+    return;
+  }
+  if (!Array.isArray(conflicted)) {
+    conflicted = schema._couplingToType[fieldName] = [conflicted.name];
+  }
+  conflicted.push(type.name);
 }

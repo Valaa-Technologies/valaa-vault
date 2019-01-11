@@ -29,6 +29,6 @@ export default new GraphQLObjectType({
 
     ...transientField("contentReferrers", new GraphQLList(Resource),
         `Incoming references to this Bvob`,
-        { coupling: toMany({ defaultCoupledField: "content" }) }),
+        { coupling: toMany({ defaultCoupledField: "content", affiliatedType: "Blob" }) }),
   }),
 });

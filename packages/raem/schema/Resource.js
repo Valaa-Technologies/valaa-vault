@@ -34,13 +34,13 @@ containing non-nullable references will be cascade destroyed.`,
 
       ...primaryField("owner", Resource,
           `Owner of the resource`,
-          { coupling: toOwner() },
+          { coupling: toOwner({ affiliatedType: "Resource" }) },
       ),
 
       ...primaryField("unnamedOwnlings", new GraphQLList(Resource),
           `Ownling Resource's of this ${objectDescription
               } which are not part of another named owning property`,
-          { coupling: toManyOwnlings() },
+          { coupling: toManyOwnlings({ affiliatedType: "Resource" }) },
       ),
 
       ...primaryField("isFrozen", GraphQLBoolean,
@@ -64,7 +64,7 @@ containing non-nullable references will be cascade destroyed.`,
           `An alias for ghostHost but only set if this ghost ${objectDescription
           } is materialized, otherwise null. This means that for grand-ownling ghosts their ${
           ""} owner and ghostOwner will not be equal (for direct ownlings they are equal).`, {
-            coupling: toOwner({ coupledField: "ghostOwnlings" }),
+            coupling: toOwner({ coupledField: "ghostOwnlings", affiliatedType: "Resource" }),
             immediateDefaultValue: null,
             allowTransientFieldToBeSingular: true,
           },
@@ -73,7 +73,7 @@ containing non-nullable references will be cascade destroyed.`,
       ...transientField("ghostOwnlings", new GraphQLList(Resource),
           `Materialized ghost Resource's which have this ${objectDescription
           } instance as their host`, {
-            coupling: toManyOwnlings({ coupledField: "ghostOwner" }),
+            coupling: toManyOwnlings({ coupledField: "ghostOwner", affiliatedType: "Resource" }),
             immediateDefaultValue: [],
           },
       ),

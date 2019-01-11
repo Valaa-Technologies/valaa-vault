@@ -95,7 +95,7 @@ function checkAndAddCouplingPassages (bard: Bard, fieldIntro,
 }
 
 export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, coupling,
-    actionType, remoteType = fieldIntro.namedType) {
+    actionType, remoteType_) {
   /*
   console.log("addCouplingPassages", actionType, `'${fieldIntro.name}', remote:`,
       dumpify(remote, { sliceAt: 100 }), "coupling", dumpify(coupling, { sliceAt: 100 }));
@@ -103,7 +103,7 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
   if (!remote /* || remote.isInactive() */) return;
   const remoteRef = bard.obtainReference(remote);
   let coupledField = remoteRef.getCoupledField();
-  let remoteTypeName = remoteType.name;
+  let remoteType = remoteType_ || fieldIntro.namedType;
   let remoteFieldIntro = remoteType.getFields()[coupledField];
   let reverseCoupling;
   let remoteTransient;
@@ -138,7 +138,7 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
     if (actionType === COUPLE_COUPLING) {
       bard.addPassage(
           reverseCoupling.createCoupleToRemoteAction(
-              remoteRef.getObjectId(), remoteTypeName, coupledField, bard.objectId,
+              remoteRef.getObjectId(), remoteType.name, coupledField, bard.objectId,
               fieldIntro.name));
     } else {
       if (coupling.preventsDestroy && (actionType === DESTROY_COUPLING)) {
@@ -160,7 +160,7 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
           (remoteChapter.preventsDestroys || (remoteChapter.preventsDestroys = [])).push({
             // Flips the perspective: from the perspective of remote side, this side is the remote.
             name: remoteName,
-            typeName: remoteTypeName,
+            typeName: remoteType.name,
             remoteName: name,
             remoteTypeName: bard.objectTypeIntro.name,
             remoteFieldName: fieldIntro.name,
@@ -169,7 +169,7 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
       }
       bard.addPassage(
           reverseCoupling.createUncoupleFromRemoteAction(
-              remoteRef.getObjectId(), remoteTypeName, coupledField, bard.objectId,
+              remoteRef.getObjectId(), remoteType.name, coupledField, bard.objectId,
               fieldIntro.name));
     }
   } catch (error) {

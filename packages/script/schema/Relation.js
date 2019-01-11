@@ -32,12 +32,12 @@ export default new GraphQLObjectType({
 
     ...aliasField("source", "owner", Relatable,
         "The source entity of this relation",
-        { coupling: toOne({ coupledField: "relations" }) },
+        { coupling: toOne({ coupledField: "relations", affiliatedType: "Relation" }) },
     ),
 
     ...primaryField("target", Relatable,
         "The target entity of this relation",
-        { coupling: toOne({ coupledField: "incomingRelations" }) },
+        { coupling: toOne({ coupledField: "incomingRelations", affiliatedType: "Relation" }) },
     ),
 
     ...primaryField("position", Position,

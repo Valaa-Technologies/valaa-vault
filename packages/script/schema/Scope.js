@@ -24,7 +24,7 @@ export function scopeInterface (objectDescription: string = INTERFACE_DESCRIPTIO
       ...transientFields(objectDescription).fields(),
       ...primaryField("properties", new GraphQLList(Property),
           `Properties of ${objectDescription} as a list of key-value pairs`,
-          { coupling: toManyOwnlings({ affiliatedType: "Scope" }) },
+          { coupling: toManyOwnlings({}), affiliatedType: "Scope" },
       ),
     }),
 

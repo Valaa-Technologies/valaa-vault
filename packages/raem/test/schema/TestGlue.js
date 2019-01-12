@@ -24,16 +24,17 @@ export default new GraphQLObjectType({
 
     ...aliasField("source", "owner", Discoverable,
         "The source partition of the glue",
-        { coupling: toOne({ coupledField: "targetGlues" }) },
+        { coupling: toOne({ coupledField: "targetGlues" }), affiliatedType: "TestGlue" },
     ),
 
     ...primaryField("target", Discoverable,
         "The target partition of the glue",
-        { coupling: toOne({ coupledField: "sourceGlues" }) },
+        { coupling: toOne({ coupledField: "sourceGlues" }), affiliatedType: "TestGlue" },
     ),
 
     ...primaryField("dangling", Discoverable,
         "Reference without named coupling",
+        { affiliatedType: "TestGlue" },
     ),
 
     ...primaryField("position", Position,

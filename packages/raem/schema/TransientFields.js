@@ -13,7 +13,7 @@ import partitionResolver, { partitionURIResolver }
     from "~/raem/tools/graphql/partitionResolver";
 import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
 
-import { toOne, toMany, unspecifiedSingular, unspecifiedPlural }
+import { toOne, toMany, toOwner, toManyOwnlings, unspecifiedSingular, unspecifiedPlural }
     from "~/raem/tools/graphql/coupling";
 
 import Partition from "~/raem/schema/Partition";
@@ -63,10 +63,10 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
       ...primaryField("prototype", TransientFields,
           `The prototype of this ${objectDescription}. All field lookups for which there is no${
             ""} associated value set and whose field descriptors don't have immediateDefaultValue${
-            ""} are forwarded to the prototype.`,
-          { coupling: toOne({
-            defaultCoupledField: "prototypers", affiliatedType: "TransientFields",
-          }) },
+            ""} are forwarded to the prototype.`, {
+            coupling: toOne({ defaultCoupledField: "prototypers" }),
+            affiliatedType: "TransientFields",
+          },
       ),
 
       ...aliasField("prototypeAlias", "prototype", TransientFields,
@@ -84,23 +84,21 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
       ...transientField("prototypers", new GraphQLList(TransientFields),
           `All ${objectDescription}'s which have this ${objectDescription
           } as prototype but which are not instances (direct nor ghost)`, {
-            coupling: toMany({
-              coupledField: "prototype", preventsDestroy: true, affiliatedType: "TransientFields",
-            }),
+            coupling: toMany({ coupledField: "prototype", preventsDestroy: true }),
+            affiliatedType: "TransientFields",
             immediateDefaultValue: [],
           },
       ),
 
       ...aliasField("instancePrototype", "prototype", TransientFields,
           `Instance prototype of this ${objectDescription} instance`,
-          { coupling: toOne({ coupledField: "instances", affiliatedType: "TransientFields" }) },
+          { coupling: toOne({ coupledField: "instances" }), affiliatedType: "TransientFields" },
       ),
 
       ...transientField("instances", new GraphQLList(TransientFields),
           `Instances which have this ${objectDescription} as prototype`, {
-            coupling: toMany({
-              coupledField: "prototype", preventsDestroy: true, affiliatedType: "TransientFields",
-            }),
+            coupling: toMany({ coupledField: "prototype", preventsDestroy: true }),
+            affiliatedType: "TransientFields",
             immediateDefaultValue: [],
           },
       ),
@@ -113,15 +111,16 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
             ""} ghosts in the instance. The instance is called the *ghost host* of all these${
             ""} ghosts. Likewise, the instance prototype is called the ghost host prototype,${
             ""} and the (grand-)ownlings of this ghost host prototype are the ghost prototypes of${
-            ""} the corresponding ghosts (ie. this field).} `,
-          { coupling: toOne({ coupledField: "materializedGhosts", affiliatedType: "TransientFields" }) },
+            ""} the corresponding ghosts (ie. this field).} `, {
+          coupling: toOne({ coupledField: "materializedGhosts" }),
+          affiliatedType: "TransientFields",
+        },
       ),
 
       ...transientField("materializedGhosts", new GraphQLList(TransientFields),
           `Materialized ghosts which have this ${objectDescription} as their ghostPrototype`, {
-            coupling: toMany({
-              coupledField: "prototype", preventsDestroy: true, affiliatedType: "TransientFields",
-            }),
+            coupling: toMany({ coupledField: "prototype", preventsDestroy: true }),
+            affiliatedType: "TransientFields",
             immediateDefaultValue: [],
           },
       ),
@@ -130,8 +129,12 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
           `Referrers without specified coupledField referring this ${objectDescription}`, {
             coupling: toMany({
               whenUnmatched: isPlural => (isPlural ? unspecifiedPlural() : unspecifiedSingular()),
-              affiliatedType: "TransientFields",
             }),
+            affiliatedType: "TransientFields",
+          },
+      ),
+
+
           },
       ),
 

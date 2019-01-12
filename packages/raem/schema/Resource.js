@@ -34,13 +34,13 @@ containing non-nullable references will be cascade destroyed.`,
 
       ...primaryField("owner", Resource,
           `Owner of the resource`,
-          { coupling: toOwner({ affiliatedType: "Resource" }) },
+          { coupling: toOwner({}), affiliatedType: "Resource" },
       ),
 
       ...primaryField("unnamedOwnlings", new GraphQLList(Resource),
           `Ownling Resource's of this ${objectDescription
               } which are not part of another named owning property`,
-          { coupling: toManyOwnlings({ affiliatedType: "Resource" }) },
+          { coupling: toManyOwnlings({}), affiliatedType: "Resource" },
       ),
 
       ...primaryField("isFrozen", GraphQLBoolean,

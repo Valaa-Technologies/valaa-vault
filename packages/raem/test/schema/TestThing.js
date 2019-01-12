@@ -36,17 +36,17 @@ const TestThing = new GraphQLObjectType({
 
     ...aliasField("parent", "owner", TestThing,
         "Non-owning parent test partition",
-        { coupling: toOne({ coupledField: "children" }) },
+        { coupling: toOne({ coupledField: "children" }), affiliatedType: "TestThing" },
     ),
 
     ...primaryField("children", new GraphQLList(TestThing),
         "Ownling child test partitions",
-        { coupling: toManyOwnlings() },
+        { coupling: toManyOwnlings({}), affiliatedType: "TestThing" },
     ),
 
     ...primaryField("siblings", new GraphQLList(TestThing),
         "Sibling test partitions",
-        { coupling: toMany({ coupledField: "siblings" }) },
+        { coupling: toMany({ coupledField: "siblings" }), affiliatedType: "TestThing" },
     ),
 
     ...primaryField("uncoupledField", TestThing,
@@ -56,12 +56,12 @@ const TestThing = new GraphQLObjectType({
 
     ...primaryField("targetGlues", new GraphQLList(TestGlue),
         "Target Glue's",
-        { coupling: toManyOwnlings() },
+        { coupling: toManyOwnlings({}), affiliatedType: "TestThing" },
     ),
 
     ...transientField("sourceGlues", new GraphQLList(TestGlue),
         "Source Glue's",
-        { coupling: toMany({ coupledField: "target" }) },
+        { coupling: toMany({ coupledField: "target" }), affiliatedType: "TestThing" },
     ),
 
     ...primaryField("sourceDataGlues", new GraphQLList(TestDataGlue),

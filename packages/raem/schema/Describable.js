@@ -24,7 +24,7 @@ export function describableInterface (objectDescription: string = INTERFACE_DESC
 
       ...primaryField("description", new GraphQLList(Description),
           `The description of this ${objectDescription}`,
-          { coupling: toManyOwnlings({ affiliatedType: "Describable" }) },
+          { coupling: toManyOwnlings(), affiliatedType: "Describable" },
       ),
     }),
 

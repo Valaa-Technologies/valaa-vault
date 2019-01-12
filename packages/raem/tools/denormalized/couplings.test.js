@@ -259,7 +259,7 @@ describe("Couplings", () => {
         .toEqual(vRef("A_childGlue", "dangling").toJSON());
   });
 
-  it("removes unnamed coupling when other side resource is destroyed", () => {
+  it("removes unnamed coupling when unnamed side resource is destroyed", () => {
     const corpus = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       created({ id: ["A_childGlue"], typeName: "TestGlue", initialState: {
         dangling: vRef("A_child2"),

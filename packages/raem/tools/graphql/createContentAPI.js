@@ -157,7 +157,7 @@ function _validateSchema (schema: GraphQLSchema) {
           : fieldIntro;
       invariantifyString(actualFieldIntro.fieldName, `${typeName}.${fieldName}.fieldName`);
       invariantifyObject(actualFieldIntro.namedType, `${typeName}.${fieldName}.namedType`);
-      if (actualFieldIntro.coupling && (actualFieldIntro.coupling.affiliatedType === typeName)) {
+      if (actualFieldIntro.affiliatedType === typeName) {
         _registerDefaultCouplingType(schema, fieldName, type);
       }
     }

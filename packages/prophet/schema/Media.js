@@ -49,7 +49,7 @@ export default new GraphQLObjectType({
     ...primaryField("content", Blob,
         `Content of the ${OBJECT_DESCRIPTION
             } if known, null otherwise (f.ex. if streaming content)`,
-        { coupling: toOne({ coupledField: "contentReferrers", affiliatedType: "Media" }) }),
+        { coupling: toOne({ coupledField: "contentReferrers" }), affiliatedType: "Media" }),
 
     ...primaryField("extension", GraphQLString,
         `File extension of this ${OBJECT_DESCRIPTION}`),

@@ -15,7 +15,7 @@ import { duplicateFields } from "~/raem/redux/reducers/duplicate";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import fieldInitialValue from "~/raem/tools/graphql/fieldInitialValue";
 import { addCoupleCouplingPassages } from "~/raem/tools/denormalized/couplings";
-import { createMaterializeGhostReferenceAction } from "~/raem/tools/denormalized/ghost";
+import { createMaterializeGhostAction } from "~/raem/tools/denormalized/ghost";
 import { setCreatedObjectPartition, universalizePartitionMutation }
     from "~/raem/tools/denormalized/partitions";
 
@@ -71,7 +71,7 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
     invariantifyString(typeName, "CREATED.typeName required");
     bard.updateState(
         bard.subReduce(bard.state,
-            createMaterializeGhostReferenceAction(bard, passage.id, typeName)));
+            createMaterializeGhostAction(bard, passage.id, typeName, true)));
     bard.goToTransientOfRawId(passage.id.rawId());
     passage.id = bard.objectTransient.get("id");
     if (!passage.id) throw new Error("INTERNAL ERROR: no bard.objectTransient.get('id')");
@@ -131,6 +131,20 @@ export function recurseCreateOrDuplicate (bard: CreateBard, actionTypeName: stri
     bard.goToTypeIntro(actionTypeName);
     const objectTypeIntro: GraphQLObjectType = bard.objectTypeIntro;
     let typeName = actionTypeName;
+    let interfaces;
+    let isResource;
+    let interfaceType;
+    if (typeof objectTypeIntro.getInterfaces === "function") {
+      interfaces = objectTypeIntro.getInterfaces();
+      isResource = isResourceType(objectTypeIntro);
+    } else {
+      // Creation of an interface type means that this is a
+      // materialization of a ghost with inactive prototypes.
+      interfaces = [{ name: actionTypeName }];
+      isResource = false;
+      interfaceType = typeName;
+      typeName = bard.schema.inactiveType.name;
+    }
     // Make the objectId available for all VRef connectors within this Bard.
     bard.setState(bard.state
         .setIn(["TransientFields", rawId], typeName)
@@ -143,14 +157,10 @@ export function recurseCreateOrDuplicate (bard: CreateBard, actionTypeName: stri
         .setIn([typeName, rawId], OrderedMap([["id", bard.objectId], ["typeName", typeName]])));
     bard.objectTransient = bard.objectTransient.withMutations(mutableTransient => {
       bard.objectTransient = mutableTransient;
-      if (typeof objectTypeIntro.getInterfaces !== "function") {
-        bard.error(`Cannot instantiate interface type: ${typeName}`);
-      }
-      (objectTypeIntro.getInterfaces() || []).forEach(classInterface => {
-        bard.getDenormalizedTable(classInterface.name)[rawId] = typeName;
+      interfaces.forEach(interfaceIntro => {
+        bard.getDenormalizedTable(interfaceIntro.name)[rawId] = typeName;
       });
 
-      const isResource = isResourceType(objectTypeIntro);
       if (preOverrides) {
         bard.fieldsTouched = new Set();
         bard.updateCouplings = false;
@@ -178,8 +188,9 @@ export function recurseCreateOrDuplicate (bard: CreateBard, actionTypeName: stri
 
       if (bard._duplicationRootId) {
         duplicateFields(Object.create(bard), mutableTransient, objectTypeIntro.getFields());
-      } else if (!bard.objectTransient.get("prototype")) {
-        // Only fields of resources without prototypes ever get initial values
+      } else if (!interfaceType && !bard.objectTransient.get("prototype")) {
+        // Only fields of resources without prototypes can ever get
+        // initial values
         _setDefaultFields(bard, mutableTransient, objectTypeIntro.getFields());
       }
 

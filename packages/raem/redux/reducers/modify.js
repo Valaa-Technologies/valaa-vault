@@ -19,7 +19,8 @@ import { universalizePartitionMutation,
     from "~/raem/tools/denormalized/partitions";
 import { isFrozen, universalizeFreezePartitionRoot, freezeOwnlings }
     from "~/raem/tools/denormalized/freezes";
-import { createMaterializeTransientAction } from "~/raem/tools/denormalized/ghost";
+import { createMaterializeGhostAction, createInactiveTransientAction }
+    from "~/raem/tools/denormalized/ghost";
 
 import Bard from "~/raem/redux/Bard";
 
@@ -51,8 +52,13 @@ export default function modifyResource (bard: Bard) {
     bard.fieldsTouched = new Set();
     bard.goToTransientOfPassageObject(); // no-require, non-ghost-lookup
     if (!bard.objectTransient) { // ghost, inactive transient or fail
-      const materializeGhostSubCommand = createMaterializeTransientAction(
-          bard, passage.id, passage.typeName);
+      const materializeGhostSubCommand =
+          (bard.updateCouplings !== false)
+              // direct immaterial ghost field modification, materialize
+              ? createMaterializeGhostAction(bard, passage.id, passage.typeName)
+              // coupling-based transient creation for a potentially
+              // inactive resource
+              : createInactiveTransientAction(bard, passage.id);
       bard.updateState(bard.subReduce(bard.state, materializeGhostSubCommand));
       bard.goToTransientOfRawId(passage.id.rawId());
       passage.id = bard.objectId;

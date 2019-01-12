@@ -82,9 +82,17 @@ export function createGhostVRefInInstance (prototypeId: VRef,
 export function createMaterializeGhostAction (resolver: Resolver, ghostId: VRef,
     concreteTypeName: string, isVirtualAction: boolean = false): ?Action {
   try {
-    return createMaterializeGhostReferenceAction(resolver, ghostId, undefined, true);
+    const actions = [];
+    invariantify(ghostId.isGhost(), "createMaterializeGhostAction.ghostObjectPath.isGhost");
+    const typeIntro = concreteTypeName && resolver.schema.getType(concreteTypeName);
+    if (concreteTypeName && (!typeIntro || !typeIntro.getInterfaces)) {
+      throw new Error(`Cannot create materialize action for non-concrete type ${concreteTypeName}`);
+    }
+    _createMaterializeGhostAction(resolver, resolver.getState(), ghostId.getGhostPath(),
+        ghostId, concreteTypeName, isVirtualAction, actions);
+    return !actions.length ? undefined : actions.length === 1 ? actions[0] : transacted({ actions });
   } catch (error) {
-    throw wrapError(error, `During createMaterializeGhostEvent(), with:`,
+    throw wrapError(error, `During createMaterializeGhostAction(), with:`,
         "\n\tghostId:", ...dumpObject(ghostId));
   }
 }
@@ -98,20 +106,12 @@ export function createImmaterializeGhostAction (resolver: Resolver, ghostId: VRe
 }
 
 export function createMaterializeGhostPathAction (resolver: Resolver, ghostObjectPath: GhostPath,
-    typeName: string, isEvent: ?boolean): ?Action {
+    concreteTypeName: string, isVirtualAction: ?boolean = false,
+): ?Action {
   const actions = [];
   invariantify(ghostObjectPath.isGhost(), "materializeGhostPathAction.ghostObjectPath.isGhost");
-  _createMaterializeGhostAction(resolver, resolver.getState(), ghostObjectPath, typeName,
-      isEvent, undefined, actions);
-  return !actions.length ? undefined : actions.length === 1 ? actions[0] : transacted({ actions });
-}
-
-export function createMaterializeGhostReferenceAction (resolver: Resolver, ghostId: VRef,
-    typeName: string, isEvent: ?boolean): ?Action {
-  const actions = [];
-  invariantify(ghostId.isGhost(), "materializeGhostPathAction.ghostObjectPath.isGhost");
-  _createMaterializeGhostAction(resolver, resolver.getState(), ghostId.getGhostPath(), typeName,
-      isEvent, ghostId, actions);
+  _createMaterializeGhostAction(resolver, resolver.getState(),
+      ghostObjectPath, undefined, concreteTypeName, isVirtualAction, actions);
   return !actions.length ? undefined : actions.length === 1 ? actions[0] : transacted({ actions });
 }
 
@@ -125,18 +125,17 @@ export function createMaterializeGhostReferenceAction (resolver: Resolver, ghost
  * @param {string} externalType
  * @returns {?Action}
  */
-export function createMaterializeTransientAction (resolver: Resolver, id: VRef, typeName: string):
-    ?Action {
+export function createInactiveTransientAction (resolver: Resolver, id: VRef): ?Action {
   const actions = [];
-  _createMaterializeGhostAction(resolver, resolver.getState(), id.getGhostPath(), typeName,
-      false, id, actions);
+  _createMaterializeGhostAction(resolver, resolver.getState(), id.getGhostPath(),
+      id, undefined, true, actions);
   return !actions.length ? undefined : actions.length === 1 ? actions[0] : transacted({ actions });
 }
 
 function _createMaterializeGhostAction (resolver: Resolver, state: State,
-    ghostObjectPath: GhostPath, typeName: string, isEvent: boolean, knownId: ?VRef,
-    outputActions: Array<Action>,
-): { id: string, actualType: string, ghostPath: GhostPath } {
+    ghostObjectPath: GhostPath, knownId: ?VRef, externalKnownType: ?string,
+    isVirtualAction: boolean, outputActions: Array<Action>,
+): { id: string, internallyKnownType: ?string, ghostPath: GhostPath } {
   // TODO(iridian): This whole segment needs to be re-evaluated now
   // with the introduction of the "ghostOwnlings"/"ghostOwner" coupling
   // introduction. Specifically: owners would not need to be
@@ -152,20 +151,20 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
   const ghostHostPrototypeRawId = ghostObjectPath.headHostPrototypeRawId();
   const [ghostHostRawId, rawId] =
       ghostObjectPath.getGhostHostAndObjectRawIdByHostPrototype(ghostHostPrototypeRawId);
-  let actualType = state.getIn(["TransientFields", rawId]);
+  let internallyKnownType = state.getIn(["TransientFields", rawId]);
   try {
-    if (actualType) {
+    if (internallyKnownType) {
       // Transient found: already materialized ghost or not a ghost to
       // begin with. Still possibly inside an inactive partition.
       // Return without side effects.
-      const transient = state.getIn([actualType, rawId]);
+      const transient = state.getIn([internallyKnownType, rawId]);
       const id = transient.get("id");
-      return { id, actualType, ghostPath: id.getGhostPath() };
+      return { id, internallyKnownType, ghostPath: id.getGhostPath() };
     }
     if (!ghostHostPrototypeRawId || (ghostHostRawId === rawId)) {
       // No host prototype means this is the Ghost path base Resource
       // and ghostHostRawId equal to rawId means this is an instance.
-      // In both cases not having a transient means we're inside an
+      // In both cases a missing transient means we're either inside an
       // unconnected partition or the referred resource doesn't exist.
       // As it stands there is no theoretical way to determine the
       // actual partition id reliably, either.
@@ -174,27 +173,27 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
       if (knownId && !knownId.isInactive()) {
         throw new Error("Cannot materialize a non-existent resource (partition is active)");
       }
-      // Make also the resource inactive, not the partition reference
+      // Also make the resource inactive, not the partition reference
       // prototype. This way only transient merging will activate it.
       id.setInactive();
-      actualType = resolver.schema.inactiveType.name;
+      internallyKnownType = resolver.schema.inactiveType.name;
       outputActions.push(created({
-        id, typeName: actualType,
-        meta: { isVirtualAction: !isEvent },
+        id, typeName: internallyKnownType,
+        meta: { isVirtualAction },
       }));
-      return { id, actualType, ghostPath: id.getGhostPath() };
+      return { id, internallyKnownType, ghostPath: id.getGhostPath() };
     }
     // A regular non-root ghost Resource with no transient.
     // Still possibly inside an inactive partition.
-    const { id: ghostPrototype, actualType: prototypeTypeName, ghostPath: prototypePath }
-        = _createMaterializeGhostAction(resolver, state, ghostObjectPath.previousPrototypeStep(),
-            typeName, false, undefined, outputActions);
-    actualType = isInactiveTypeName(prototypeTypeName) ? typeName : prototypeTypeName;
+    const { id: ghostPrototype, internallyKnownType: prototypeTypeName, ghostPath: prototypePath }
+        = _createMaterializeGhostAction(resolver, state,
+            ghostObjectPath.previousPrototypeStep(), undefined, undefined,
+            true, outputActions);
     const ghostPath = prototypePath
         .withNewStep(ghostHostPrototypeRawId, ghostHostRawId, rawId);
-    const hostType = state.getIn(["TransientFields", ghostHostRawId]);
-    const hostId = hostType
-        ? state.getIn([hostType, ghostHostRawId]).get("id")
+    const knownHostType = state.getIn(["TransientFields", ghostHostRawId]);
+    const hostId = knownHostType
+        ? state.getIn([knownHostType, ghostHostRawId]).get("id")
         : Object.create(knownId
                 ? Object.getPrototypeOf(knownId)
                 : new ValaaReference().initResolverComponent({ inactive: true }))
@@ -202,15 +201,18 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
     const id = Object.create(Object.getPrototypeOf(hostId)).initNSS(rawId);
     id.connectGhostPath(ghostPath);
     outputActions.push(created({
-      id, typeName: actualType,
+      id,
+      typeName: !externalKnownType || !isInactiveTypeName(prototypeTypeName)
+          ? prototypeTypeName : externalKnownType,
       initialState: { ghostPrototype, ghostOwner: hostId.coupleWith("ghostOwnlings") },
-      meta: { isVirtualAction: !isEvent },
+      meta: { isVirtualAction },
     }));
-    return { id, actualType, ghostPath };
+    return { id, internallyKnownType: prototypeTypeName || externalKnownType, ghostPath };
   } catch (error) {
     throw wrapError(error, `During createMaterializeGhostAction(${dumpify(ghostObjectPath)}:${
-            typeName}/${actualType}}), with:`,
-        "\n\ttransientType:", actualType,
+            internallyKnownType || externalKnownType}}), with:`,
+        "\n\texternalKnownType:", externalKnownType,
+        "\n\tinternallyKnownType:", internallyKnownType,
         "\n\tknownId:", knownId,
         "\n\tresource id:", rawId,
         "\n\tghost host prototype:", ghostHostPrototypeRawId,

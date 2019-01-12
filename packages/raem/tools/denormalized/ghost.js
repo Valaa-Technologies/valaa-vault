@@ -79,7 +79,8 @@ export function createGhostVRefInInstance (prototypeId: VRef,
   return vRef(ghostPath.headRawId(), null, ghostPath);
 }
 
-export function createMaterializeGhostEvent (resolver: Resolver, ghostId: VRef): ?Action {
+export function createMaterializeGhostAction (resolver: Resolver, ghostId: VRef,
+    concreteTypeName: string, isVirtualAction: boolean = false): ?Action {
   try {
     return createMaterializeGhostReferenceAction(resolver, ghostId, undefined, true);
   } catch (error) {
@@ -115,13 +116,13 @@ export function createMaterializeGhostReferenceAction (resolver: Resolver, ghost
 }
 
 /**
- * Like createMaterializeGhostEvent but allows creationg of
- * a transient for non-ghost resources as well.
+ * Like createMaterializeGhostAction but allows creation of
+ * an inactive transient for non-ghost resources as well.
  *
  * @export
  * @param {Resolver} resolver
  * @param {GhostPath} ghostObjectPath
- * @param {string} typeName
+ * @param {string} externalType
  * @returns {?Action}
  */
 export function createMaterializeTransientAction (resolver: Resolver, id: VRef, typeName: string):
@@ -179,7 +180,7 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
       actualType = resolver.schema.inactiveType.name;
       outputActions.push(created({
         id, typeName: actualType,
-        meta: { noSubMaterialize: !isEvent },
+        meta: { isVirtualAction: !isEvent },
       }));
       return { id, actualType, ghostPath: id.getGhostPath() };
     }
@@ -203,7 +204,7 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
     outputActions.push(created({
       id, typeName: actualType,
       initialState: { ghostPrototype, ghostOwner: hostId.coupleWith("ghostOwnlings") },
-      meta: { noSubMaterialize: !isEvent },
+      meta: { isVirtualAction: !isEvent },
     }));
     return { id, actualType, ghostPath };
   } catch (error) {

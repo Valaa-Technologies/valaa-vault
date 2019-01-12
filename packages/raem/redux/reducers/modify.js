@@ -46,7 +46,7 @@ import { dumpObject, invariantify, wrapError } from "~/tools";
 export default function modifyResource (bard: Bard) {
   const passage = bard.passage;
   try {
-    bard.shouldUpdateCouplings = !(passage.meta || {}).dontUpdateCouplings;
+    bard.updateCouplings = ((passage.meta || {}).updateCouplings !== false);
     bard.denormalized = {};
     bard.fieldsTouched = new Set();
     bard.goToTransientOfPassageObject(); // no-require, non-ghost-lookup
@@ -142,7 +142,7 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
       if (!isCreatedLike(bard.passage)) {
         oldLocalValue = mutableObject.get(fieldInfo.name);
       }
-      updateCoupling = bard.shouldUpdateCouplings && getCoupling(fieldInfo.intro);
+      updateCoupling = (bard.updateCouplings !== false) && getCoupling(fieldInfo.intro);
       if (!validateFieldUpdate(bard, fieldInfo.intro, updateClause, operationDescription)) continue;
       if (fieldInfo.intro.isPersisted && !fieldInfo.intro.isOwned) {
         // don't mark owning relation updates as primary, so that
@@ -205,8 +205,9 @@ function handleAdds (bard: Bard, fieldInfo, adds, oldLocalValue, updateCoupling)
       fieldAdds.push(entry);
       return acc.add(entry);
     }
-    if (bard.shouldUpdateCouplings) {
-      // reorder existing entry to end as per ADDED_TO contract unless we're in a coupling update
+    if (bard.updateCouplings !== false) {
+      // reorder existing entry to end as per ADDED_TO contract unless
+      // we're in a coupling update
       fieldMoves.push(entry);
       return acc.remove(entry).add(entry);
     }
@@ -281,11 +282,13 @@ export function handleSets (bard: Bard, fieldInfo, value, oldLocalValue, updateC
 
   if (!isSequence) {
     if (!is(newValue, oldLocalValue)) {
-      if (newValue && bard.shouldUpdateCouplings) fieldAdds.push(newValue);
-      // If both oldLocalValue and new value are set we must update the old value coupling even if
-      // we're in a dontUpdateCouplings passage. This is because the target of the old value is
-      // possibly in a different object than the originating update passage.
-      if ((oldLocalValue || oldCompleteValue) && (bard.shouldUpdateCouplings || newValue)) {
+      if (newValue && (bard.updateCouplings !== false)) fieldAdds.push(newValue);
+      // If both oldLocalValue and new value are set we must update the
+      // old value coupling even if we're in a non-updateCouplings
+      // passage. This is because the target of the old value is
+      // possibly in a different object than the originating update
+      // passage.
+      if ((oldLocalValue || oldCompleteValue) && ((bard.updateCouplings !== false) || newValue)) {
         if (oldLocalValue !== undefined) {
           fieldRemoves.push(oldLocalValue);
         } else {
@@ -330,16 +333,17 @@ const customSetFieldHandlers = {
     if ((newOwnerId && newOwnerId.getPartitionURI()) !== bard.objectId.getPartitionURI()) {
       bard.refreshPartition = true;
     }
-    if (!newOwnerId) return;
-    let i = 0;
-    const ownerBard = Object.create(bard);
-    for (ownerBard.tryGoToTransient(newOwnerId, "Resource");
-        ownerBard.objectId;
-        ownerBard.goToCurrentObjectOwnerTransient(), ++i) {
-      if (ownerBard.objectId.rawId() === bard.objectId.rawId()) {
-        throw new Error(`Cyclic ownership not allowed while trying to set owner of ${
-            bard.objectId} to ${newOwnerId} (which would make it its own ${
-            !i ? "parent)" : `${"grand".repeat(i)}parent)`}`);
+    if (bard.event.meta.isBeingUniversalized && newOwnerId) {
+      let i = 0;
+      const ownerBard = Object.create(bard);
+      for (ownerBard.tryGoToTransient(newOwnerId, "Resource");
+          ownerBard.objectId;
+          ownerBard.goToCurrentObjectOwnerTransient(), ++i) {
+        if (ownerBard.objectId.rawId() === bard.objectId.rawId()) {
+          throw new Error(`Cyclic ownership not allowed while trying to set owner of ${
+              bard.objectId} to ${newOwnerId} (which would make it its own ${
+              !i ? "parent)" : `${"grand".repeat(i)}parent)`}`);
+        }
       }
     }
   },

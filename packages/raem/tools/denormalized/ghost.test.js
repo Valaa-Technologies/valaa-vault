@@ -8,7 +8,7 @@ import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-dup
 import GhostPath from "~/raem/state/GhostPath";
 import { createTransient } from "~/raem/state/Transient";
 
-import { createMaterializeGhostEvent, createImmaterializeGhostAction, isMaterialized,
+import { createMaterializeGhostAction, createImmaterializeGhostAction, isMaterialized,
     createGhostVRefInInstance } from "~/raem/tools/denormalized/ghost";
 
 function _ghostVRef (prototypeRef: VRef, hostRawId: string, hostPrototypeRawId: string): VRef {
@@ -155,7 +155,7 @@ describe("Ghost materialization and immaterialization", () => {
     setUp({ verbosity: 0 });
     const fakeGhost = createTransient({ id: vRef("dummyId"), typeName: "nope" });
     expect(() => {
-      createMaterializeGhostEvent(harness.getValker(), fakeGhost.get("id"));
+      createMaterializeGhostAction(harness.getValker(), fakeGhost.get("id"));
     }).toThrow(/ghostObjectPath.isGhost/);
   });
 
@@ -164,7 +164,7 @@ describe("Ghost materialization and immaterialization", () => {
     assertImmaterialized(getGhostOwnling());
     const grandlingInRoot1 = _ghostVRef(vRef("grandling-1"), "root-1", "root");
     assertImmaterialized(grandlingInRoot1);
-    harness.chronicleEvent(createMaterializeGhostEvent(harness.getValker(),
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(),
         getGrandlingInstanceGhost()));
     assertMaterialized(grandlingInRoot1);
     assertImmaterialized(getGhostOwnling());
@@ -174,7 +174,7 @@ describe("Ghost materialization and immaterialization", () => {
     setUp({ verbosity: 0, commands: [...createGrandlingInstance, ...createRootInstanceInstance] });
     const grandlingInRoot1 = _ghostVRef(vRef("grandling-1"), "root-1", "root");
     const grandlingInRoot11 = _ghostVRef(grandlingInRoot1, "root-1-1", "root-1");
-    harness.chronicleEvent(createMaterializeGhostEvent(harness.getValker(), grandlingInRoot11));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), grandlingInRoot11));
     assertMaterialized(grandlingInRoot11);
     assertMaterialized(grandlingInRoot1);
   });
@@ -192,7 +192,7 @@ describe("Ghost materialization and immaterialization", () => {
     assertImmaterialized(ghostGrandlingInRoot11Child);
 
     harness.chronicleEvent(
-        createMaterializeGhostEvent(harness.getValker(), ghostGrandlingInRoot11Child));
+        createMaterializeGhostAction(harness.getValker(), ghostGrandlingInRoot11Child));
     assertMaterialized(ghostGrandlingInRoot11Child);
 
     assertImmaterialized(ghostGrandlingInRoot11);
@@ -202,10 +202,10 @@ describe("Ghost materialization and immaterialization", () => {
   it("Immaterialization should not immaterialize ownlings", () => {
     setUp({ verbosity: 0, commands: [] });
     assertImmaterialized(getGhostGrandling());
-    harness.chronicleEvent(createMaterializeGhostEvent(harness.getValker(), getGhostGrandling()));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), getGhostGrandling()));
     assertMaterialized(getGhostGrandling());
     assertImmaterialized(getGhostOwnling());
-    harness.chronicleEvent(createMaterializeGhostEvent(harness.getValker(), getGhostOwnling()));
+    harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), getGhostOwnling()));
     assertMaterialized(getGhostOwnling());
 
     harness.chronicleEvent(createImmaterializeGhostAction(harness.getValker(), getGhostOwnling()));
@@ -248,7 +248,7 @@ describe("Ghost materialization and immaterialization", () => {
         vRef("root-1"), ["§->", "children", 0, "children", 0, "name"]
       );
       harness.chronicleEvent(
-          createMaterializeGhostEvent(harness.getValker(), getGhostGrandling()));
+          createMaterializeGhostAction(harness.getValker(), getGhostGrandling()));
       const secondResult = harness.run(
         vRef("root-1"), ["§->", "children", 0, "children", 0, "name"]
       );
@@ -259,7 +259,7 @@ describe("Ghost materialization and immaterialization", () => {
     it("is true on immaterialization", () => {
       setUp({ verbosity: 0 });
       harness.chronicleEvent(
-          createMaterializeGhostEvent(harness.getValker(), getGhostGrandling()));
+          createMaterializeGhostAction(harness.getValker(), getGhostGrandling()));
       const firstResult = harness.run(
         vRef("root-1"), ["§->", "children", 0, "children", 0, "name"]
       );

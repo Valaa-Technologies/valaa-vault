@@ -25,7 +25,7 @@ export default function destroy (bard: Bard) {
     transient.forEach((fieldValue, fieldName) => {
       // Need to process non-default fields only ie. those in store: only they can have couplings.
       if (!fieldValue) return;
-      if ((fieldName !== "owner") || !passage.meta || !passage.meta.dontUpdateCouplings) {
+      if ((fieldName !== "owner") || !passage.meta || (passage.meta.updateCouplings !== false)) {
         const fieldIntro = resourceFieldIntros[fieldName];
         if (!fieldIntro) {
           if (allowedHiddenFields[fieldName]) return;

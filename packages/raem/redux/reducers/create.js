@@ -12,7 +12,7 @@ export default function create (bard: CreateBard) {
   invariantifyString(passage.typeName, "CREATED.typeName required");
 
   let initialState = passage.initialState;
-  if (!passage.meta || !passage.meta.noSubMaterialize) {
+  if (!(passage.meta || {}).isVirtualAction) {
     const bailOut = prepareCreateOrDuplicateObjectTransientAndId(bard, passage.typeName);
     if (bailOut) return bailOut;
     initialState = convertLegacyOwnerField(bard, initialState);

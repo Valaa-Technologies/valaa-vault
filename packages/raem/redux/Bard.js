@@ -299,7 +299,7 @@ export default class Bard extends Resolver {
 
   goToResourceTransientTypeIntro (transient: Transient): Object {
     const ret = this.goToTypeIntro(getTransientTypeName(transient, this.schema));
-    if (!isResourceType(ret) && !(this.passage.meta || {}).dontUpdateCouplings) {
+    if (!isResourceType(ret) && ((this.passage.meta || {}).updateCouplings !== false)) {
       throw this.wrapErrorEvent(
           new Error(`${this.passage.type} attempted on a non-Resource object`),
           new Error(`goToResourceTransientTypeIntro(${this.passage.type})`),

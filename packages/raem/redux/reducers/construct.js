@@ -24,7 +24,7 @@ import { dumpObject, invariantify, invariantifyString, wrapError } from "~/tools
 export class CreateBard extends Bard {
   getDenormalizedTable: Function;
   fieldsTouched: Set;
-  shouldUpdateCouplings: boolean;
+  updateCouplings: boolean; // default value (ie. if undefined) is true.
 }
 
 export class DuplicateBard extends CreateBard {
@@ -54,7 +54,8 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
     //    paths.
     const preActionBard = bard.fork({ state: bard.preActionState });
     if (!preActionBard.tryGoToTransientOfRawId(passage.id.rawId())) {
-      // Object didn't exist before this action, so we can just ignored this CREATED.
+      // Object didn't exist before this action so we can just ignore
+      // this CREATED.
       return bard.state;
     }
     // 3. Inactive object stub transients are created in denormalized
@@ -119,14 +120,17 @@ export function mergeDenormalizedStateToState (bard: CreateBard, denormalizedRoo
   return bard.updateStateWith(state => state.mergeDeep(denormalizedFromJS(denormalizedRoot)));
 }
 
-export function recurseCreateOrDuplicate (bard: CreateBard, typeName: string, initialState: Object,
-    preOverrides?: Object) {
+export function recurseCreateOrDuplicate (bard: CreateBard, actionTypeName: string,
+    initialState: Object, preOverrides?: Object) {
   const rawId = bard.objectId.rawId();
-  if (typeName !== bard.objectTypeName) {
-    throw new Error(`INTERNAL ERROR: mismatching requested construct typeName '${typeName
+  if (actionTypeName !== bard.objectTypeName) {
+    throw new Error(`INTERNAL ERROR: mismatching requested construct typeName '${actionTypeName
         }' with bard.objectTypeName '${bard.objectTypeName}'`);
   }
   try {
+    bard.goToTypeIntro(actionTypeName);
+    const objectTypeIntro: GraphQLObjectType = bard.objectTypeIntro;
+    let typeName = actionTypeName;
     // Make the objectId available for all VRef connectors within this Bard.
     bard.setState(bard.state
         .setIn(["TransientFields", rawId], typeName)
@@ -139,8 +143,6 @@ export function recurseCreateOrDuplicate (bard: CreateBard, typeName: string, in
         .setIn([typeName, rawId], OrderedMap([["id", bard.objectId], ["typeName", typeName]])));
     bard.objectTransient = bard.objectTransient.withMutations(mutableTransient => {
       bard.objectTransient = mutableTransient;
-      bard.goToTypeIntro(typeName);
-      const objectTypeIntro: GraphQLObjectType = bard.objectTypeIntro;
       if (typeof objectTypeIntro.getInterfaces !== "function") {
         bard.error(`Cannot instantiate interface type: ${typeName}`);
       }
@@ -151,16 +153,17 @@ export function recurseCreateOrDuplicate (bard: CreateBard, typeName: string, in
       const isResource = isResourceType(objectTypeIntro);
       if (preOverrides) {
         bard.fieldsTouched = new Set();
-        bard.shouldUpdateCouplings = false;
+        bard.updateCouplings = false;
         processUpdate(bard, preOverrides, handleSets,
             `${bard.passage.type}.processFields.preOverrides`, bard.objectTransient);
         // Allow duplication to process the fields
         delete bard.fieldsTouched;
       }
+
       if (initialState) {
         bard.fieldsTouched = new Set();
         // TODO(iridian): Valaa Data coupling processing unimplemented. See schema/Data.js
-        bard.shouldUpdateCouplings = isResource;
+        bard.updateCouplings = isResource;
         processUpdate(bard, initialState, handleSets,
             `${bard.passage.type}.processFields.initialState`, bard.objectTransient);
       }
@@ -168,7 +171,7 @@ export function recurseCreateOrDuplicate (bard: CreateBard, typeName: string, in
       if (isResource) {
         bard.refreshPartition = false;
         setCreatedObjectPartition(bard.objectTransient);
-        if (!(bard.passage.meta || {}).noSubMaterialize) {
+        if (!(bard.passage.meta || {}).isVirtualAction) {
           universalizePartitionMutation(bard, bard.objectId);
         }
       }
@@ -194,9 +197,9 @@ function _setDefaultFields (bard, mutableTransient: Transient, fieldIntros: Arra
   for (const fieldName of Object.keys(fieldIntros)) {
     const fieldIntro = fieldIntros[fieldName];
     let fieldValue = bard.objectTransient.get(fieldIntro.name);
-    if (typeof fieldValue === "undefined") {
+    if (fieldValue === undefined) {
       fieldValue = fieldInitialValue(fieldIntro);
-      if (typeof fieldValue !== "undefined") mutableTransient.set(fieldIntro.name, fieldValue);
+      if (fieldValue !== undefined) mutableTransient.set(fieldIntro.name, fieldValue);
     }
   }
 }

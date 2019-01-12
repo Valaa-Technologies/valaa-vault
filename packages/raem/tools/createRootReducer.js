@@ -1,6 +1,8 @@
 import { Map } from "immutable";
 
-import { dumpify, invariantifyArray, LogEventGenerator } from "~/tools";
+import { getActionFromPassage } from "~/raem/redux/Bard";
+
+import { dumpify, dumpObject, invariantifyArray, LogEventGenerator } from "~/tools";
 import { arrayFromAny } from "~/tools/sequenceFromAny";
 
 /**
@@ -38,22 +40,21 @@ function mergeActionReducers (reducerDictionaryCreates, context) {
  *
  * Golden rules of reduction: Reducers always succeed.
  *
- * This principle is there to ensure the lookup state is always consistent or blocked.
- * Eventually a reducer will fail in production. This is treated as an internal error, it shall halt
- * the event sourcing so that queries will still work, escalate the issue and initiate recovery
- * mechanisms. Servers should in principle hold minimalistic state to localize the consequences of
- * a corrupted action.
+ * This principle is there to ensure the lookup state is always
+ * consistent or blocked. Eventually a reducer will fail in production.
+ * This is treated as an internal error, it shall halt the event
+ * sourcing so that queries will still work, escalate the issue and
+ * initiate recovery mechanisms. Servers should in principle hold
+ * minimalistic state to localize the consequences of a corrupted
+ * action.
  *
  * The guidelines to help with this rule:
- * 1. Reducers never wait on external resources. External resources can fail.
- * 2. Similarily reducers are never async. Event time is linear so there's no benefit, but risks.
- * 3. Only exceptions allowed are internal errors which will be escalated.
- * 4. Hook function calls must always be done by delayCall(() => doHookCallbackstuff) which will
- *    perform the callback once the reducer has finished executing.
- *
- * To facilitate middleware which does preliminary reduction based validation of actions:
- * 5. All side-effects must be wrapped inside delayCall, so that if a reduction of a new action
- *    fails the delayed calls (and the candidate reduction state head) can be safely discarded.
+ * 1. Reducers never wait on external resources. External resources can
+ *    fail.
+ * 2. Reducers are never async. Event time is linear so there's no
+ *    benefit, but risks.
+ * 3. Only exceptions allowed are internal errors which will be
+ *    escalated.
  */
 export default function createRootReducer ({
   schema, eventLogger, reducers, validators, context = {},
@@ -64,7 +65,6 @@ export default function createRootReducer ({
     ...context,
     schema,
     eventLogger,
-    delayCall,
     mainReduce,
     reducers,
     validators,
@@ -74,37 +74,22 @@ export default function createRootReducer ({
     reducerContext.eventLogger = new LogEventGenerator({ name: "Unnamed reducer" });
   }
 
-  function delayCall (callback) {
-    // The Promise specification guarantees that then() handlers will be executed only after the
-    // execution stack only has platform functions. So we're golden.
-    Promise.resolve().then(callback).catch(error => {
-      (this || reducerContext.eventLogger)
-          .error(`ERROR: While executing delayed call: ${error.message}, for callback ${callback
-              }, in ${error.stack}`);
-    });
-  }
-
-  function mainReduce (state = Map(), action) {
+  function mainReduce (state = Map(), story) {
     const mainLogger = this || reducerContext.eventLogger;
     try {
       if (mainLogger.getVerbosity() >= reduceLogThreshold) {
-        const time = action.timeStamp;
-        const minor = action.typeName ? `${action.typeName} ` : "";
-        // eslint-disable-next-line
-        const { timeStamp, type, typeName, id, passages, parentPassage, bard, ...rest } = action;
-        mainLogger.logEvent(
-            `Reducing @${time} ${action.type} ${minor}${
-                dumpify(action.id || "", { sliceAt: 40, sliceSuffix: "..." })}`,
-            `\n\t${dumpify(rest, { sliceAt: 380 })}`);
+        logActionInfo(mainLogger, `Reducing${story.timeStamp ? ` @${story.timeStamp}` : ""}`,
+            story, mainLogger.getVerbosity() === subReduceLogThreshold);
       }
-      const reducer = reducerByActionType[action.type];
-      if (reducer) return reducer.call(this, state, action);
+      const reducer = reducerByActionType[story.type];
+      if (reducer) return reducer.call(this, state, story);
       mainLogger.warnEvent(
-          `WARNING: While reducing, no reducer for action type ${action.type}, ignoring`);
+          `WARNING: While reducing, no reducer for action type ${story.type}, ignoring`);
       return state;
     } catch (error) {
-      throw mainLogger.wrapErrorEvent(error, `mainReduce(${action.type}, ${action.id || ""})`,
-          "\n\taction:", action,
+      throw mainLogger.wrapErrorEvent(error, `mainReduce(${story.type}, ${story.id || ""})`,
+          "\n\tstory:", ...dumpObject(story),
+          "\n\tevent:", ...dumpObject(getActionFromPassage(story)),
           "\n\tthis:", this);
     }
   }
@@ -115,33 +100,51 @@ export default function createRootReducer ({
    * @param {any} parentPassage
    * @returns
    */
-  function subReduce (state, action) {
+  function subReduce (state, passage) {
     const subEventLogger = this || reducerContext.eventLogger;
     try {
       if (subEventLogger.getVerbosity() >= subReduceLogThreshold) {
-        let minor = action.typeName ? `${action.typeName} ` : "";
-        if (action.id) minor = `${minor}${dumpify(action.id, { sliceAt: 40, sliceSuffix: "..." })}`;
-        // eslint-disable-next-line
-        const { type, typeName, id, passages, parentPassage, bard, ...rest } = action;
-        subEventLogger.logEvent(
-            `Sub-reducing ${action.type} ${minor}`,
-            `\n\tpassage:${dumpify(rest, { sliceAt: 380 })}`,
-            "\n\taction:", dumpify(Object.getPrototypeOf(action)));
+        logActionInfo(subEventLogger, "Sub-reducing",
+            passage, subEventLogger.getVerbosity() === subReduceLogThreshold);
       }
-      if (action.story && action.story.meta.isBeingUniversalized) {
-        // Offers limited protection against programming errors for generated passages especially.
-        const validator = validators[action.type];
-        if (!validator) throw new Error(`No validator found for sub-action of type ${action.type}`);
-        validator(action);
+      if (passage.story && passage.story.meta.isBeingUniversalized) {
+        // Offers limited protection against programming errors for
+        // virtual passages especially.
+        const validator = validators[passage.type];
+        if (!validator) {
+          throw new Error(`No validator found for sub-action of type ${passage.type}`);
+        }
+        validator(passage);
       }
-      const reducer = reducerByActionType[action.type];
-      if (reducer) return reducer.call(this, state, action);
-      throw new Error(`No reducer found for sub-action of type ${action.type}`);
+      const reducer = reducerByActionType[passage.type];
+      if (reducer) return reducer.call(this, state, passage);
+      throw new Error(`No reducer found for sub-action of type ${passage.type}`);
     } catch (error) {
-      throw subEventLogger.wrapErrorEvent(error, `subReduce(${action.typeName})`,
-          "\n\taction:", action,
+      throw subEventLogger.wrapErrorEvent(error, `subReduce(${passage.typeName})`,
+          "\n\tpassage:", ...dumpObject(passage),
+          "\n\taction:", ...dumpObject(getActionFromPassage(passage)),
           "\n\tthis:", this);
     }
+  }
+
+  function logActionInfo (logger, header, passage, shouldSlice) {
+    let idString = "";
+    const isSubReduce = (header === "Sub-reducing");
+    if (passage.id) {
+      idString = `<${
+        dumpify(String(passage.id), { sliceAt: shouldSlice && 60, sliceSuffix: "..." })
+      }>`;
+      if (passage.typeName) idString = `${idString}:${passage.typeName}`;
+    }
+    // eslint-disable-next-line
+    const { type, timeStamp, typeName, id, passages, parentPassage, bard, ...rest } = passage;
+    const action = getActionFromPassage(passage);
+    logger.logEvent(
+        `\n\t${header} ${passage.type} ${idString}`,
+        (isSubReduce ? "\n\tpassage/rest:" : "\n\tstory/rest:"),
+        dumpify(rest, { sliceAt: shouldSlice && 380 }),
+        (isSubReduce ? "\n\taction:" : "\n\tevent:"),
+        dumpify(action && { ...action }, { sliceAt: shouldSlice && 380 }));
   }
   return reducerContext;
 }

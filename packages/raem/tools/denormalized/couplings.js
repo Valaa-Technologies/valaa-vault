@@ -121,13 +121,19 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
       return;
     }
     if (!remoteFieldIntro) {
-      remoteTransient = Object.create(bard).goToTransient(remoteRef, remoteType.name);
-      remoteTypeName = getTransientTypeName(remoteTransient, bard.schema);
-      remoteFieldIntro = bard.schema.getType(remoteTypeName).getFields()[coupledField];
+      remoteTransient = Object.create(bard)
+          .tryGoToTransient(remoteRef, remoteType.name, false, false, true);
+      remoteType = remoteTransient
+          ? bard.schema.getType(getTransientTypeName(remoteTransient, bard.schema))
+          // Remote is an inactive resource or immaterial resource with
+          // inactive prototypes.
+          // TODO(iridian, 2019-01): Verify that the resource is inactive.
+          : bard.schema.getDefaultCouplingType(coupledField);
+      remoteFieldIntro = remoteType.getFields()[coupledField];
       if (!remoteFieldIntro) {
-        throw new Error(`No introspection found for remote field ${remoteType.name}/${
-            remoteTypeName}.${coupledField} when ${actionType} '${remote}' to near field ${
-                bard.objectId}:${bard.objectTypeIntro.name}.${fieldIntro.name}`);
+        throw new Error(`No introspection found for remote field ${remoteType.name}.${coupledField
+            } when ${actionType} <${remote}> via near field ${
+            bard.objectTypeIntro.name}.${fieldIntro.name} of <${bard.objectId}>`);
       }
     }
     reverseCoupling = remoteFieldIntro.coupling
@@ -174,8 +180,8 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
     }
   } catch (error) {
     throw bard.wrapErrorEvent(error,
-        `addCouplingPassages(when ${actionType} through field '${fieldIntro.name
-            }' to reverse field '${remoteType && remoteType.name}.${coupledField}')`,
+        `addCouplingPassages(when ${actionType} via near field '${fieldIntro.name
+            }' to remote field '${remoteType && remoteType.name}.${coupledField}')`,
         "\n\tcoupling:", coupling,
         "\n\ttarget:", ...dumpObject(remote),
         "\n\treverse coupling:", ...dumpObject(reverseCoupling),

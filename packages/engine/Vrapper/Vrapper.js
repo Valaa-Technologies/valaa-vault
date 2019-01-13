@@ -1126,8 +1126,8 @@ export default class Vrapper extends Cog {
 
   static toMediaInfoFields = VALK.fromVAKON({
     bvobId: ["§->", "content", false, "bvobId"],
-    name: "name",
-    sourceURL: "sourceURL",
+    name: ["§->", "name"],
+    sourceURL: ["§->", "sourceURL"],
     type: ["§->", "mediaType", false, "type"],
     subtype: ["§->", "mediaType", false, "subtype"],
   });
@@ -1388,9 +1388,9 @@ export default class Vrapper extends Cog {
   interpretContent (options: VALKOptions = {}) { return this._obtainMediaInterpretation(options); }
 
   static toMediaPrepareBvobInfoFields = VALK.fromVAKON({
-    name: "name",
-    type: ["mediaType", false, "type"],
-    subtype: ["mediaType", false, "subtype"],
+    name: ["§->", "name"],
+    type: ["§->", "mediaType", false, "type"],
+    subtype: ["§->", "mediaType", false, "subtype"],
   });
 
   /**

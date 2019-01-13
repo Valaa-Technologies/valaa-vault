@@ -260,12 +260,17 @@ export function _receiveEvents (
   });
   if (!newActions.length) return receivedActions;
 
-  const requestOptions = { retryTimes: 4, delayBaseSeconds: 5, retrieveMediaBuffer };
+  const syncOptions = {
+    retryTimes: 4, delayBaseSeconds: 5,
+    retrieveMediaBuffer: receivingTruths && retrieveMediaBuffer,
+    prepareBvob: (content, mediaInfo) => connection.prepareBvob(
+        content, { ...mediaInfo, prepareBvobUpstream: !receivingTruths }),
+  };
   const persist = connection.isLocallyPersisted();
 
   const mediaContentSyncs = persist && Promise.all(
       Object.values(mediaPreOps).map(mediaEntry =>
-          _retryingTwoWaySyncMediaContent(connection, mediaEntry, requestOptions)));
+          _retryingTwoWaySyncMediaContent(connection, mediaEntry, syncOptions)));
 
   if (downstreamReceiveTruths) {
     // Send all the truths downstream together after all of their media
@@ -308,9 +313,15 @@ export function _receiveEvents (
     },
     syncedMediaEntries => syncedMediaEntries && connection._updateMediaEntries(syncedMediaEntries),
     () => receivedActions,
-  ], error => {
+  ], (error, stepIndex, head) => {
     if ((error.originalError || error).cacheConflict) error.revise = true;
-    throw error;
+    onError(connection.wrapErrorEvent(error,
+        new Error(`_receiveEvents(${type}).${
+          stepIndex === 0 ? "contentSync" : "updateMediaEntries"}`),
+        "\n\tmediaPreOps:", ...dumpObject(mediaPreOps),
+        "\n\treceivedActions:", ...dumpObject(receivedActions),
+        (stepIndex === 0 ? "\n\twrittenEvents:" : "\n\tsyncedMediaEntries:"), ...dumpObject(head),
+        "\n\tsyncOptions", ...dumpObject(syncOptions)));
   });
 }
 

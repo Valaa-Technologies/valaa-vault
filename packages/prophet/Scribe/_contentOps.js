@@ -86,7 +86,7 @@ export function _prepareBvob (connection: ScribePartitionConnection, content: an
         onError,
     );
   }
-  if (!pendingBvobInfo.prepareBvobUpstreamProcess) {
+  if ((mediaInfo.prepareBvobUpstream !== false) && !pendingBvobInfo.prepareBvobUpstreamProcess) {
     // Begin the retrying Bvob upstream preparation process.
     pendingBvobInfo.prepareBvobUpstreamProcess = thenChainEagerly(
         _prepareBvobUpstreamWithRetries(connection, buffer, mediaInfo),
@@ -172,7 +172,7 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
 export async function _retryingTwoWaySyncMediaContent (connection: ScribePartitionConnection,
     mediaEntry: Object, options: {
       getNextBackoffSeconds?: Function, retryTimes?: number, delayBaseSeconds?: number,
-      retrieveMediaBuffer: RetrieveMediaBuffer,
+      retrieveMediaBuffer: RetrieveMediaBuffer, prepareBvob: Function,
     } = {},
 ) {
   const mediaInfo = mediaEntry.mediaInfo;
@@ -197,9 +197,9 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribePartiti
         content = content
             || connection._prophet.tryGetCachedBvobContent(mediaInfo.bvobId)
             || (options.retrieveMediaBuffer && (await options.retrieveMediaBuffer(mediaInfo)));
-        if (content !== undefined) {
+        if ((content !== undefined) && options.prepareBvob) {
         // TODO(iridian): Determine whether media content should be pre-cached or not.
-          await connection.prepareBvob(content, mediaInfo).persistProcess;
+          await options.prepareBvob(content, mediaInfo).persistProcess;
         }
       }
       return mediaEntry;

@@ -25,7 +25,8 @@ import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
 import type FieldUpdate from "~/engine/Vrapper/FieldUpdate";
 
-import { debugObjectType, dumpify, outputCollapsedError, wrapError } from "~/tools";
+import { debugObjectType, dumpify, outputCollapsedError, thenChainEagerly, wrapError }
+    from "~/tools";
 
 export default class ValaaEngine extends Cog {
   constructor ({ name, logger, prophet, timeDilation = 1.0, verbosity }: Object) {
@@ -321,9 +322,10 @@ export default class ValaaEngine extends Cog {
         }
         return vResource;
       });
-
-      transaction.releaseTransaction();
-      return isRecombine ? ret : ret[0];
+      const vRet = isRecombine ? ret : ret[0];
+      const transactionResult = transaction.releaseTransaction();
+      if (!transactionResult || !options.awaitResult) return vRet;
+      return thenChainEagerly(options.awaitResult(transactionResult, vRet), () => vRet);
     } catch (error) {
       if (transaction) transaction.abortTransaction();
       throw localWrapError(this, error, `${constructCommand.name}()`);
@@ -507,11 +509,11 @@ export default class ValaaEngine extends Cog {
   _pendingTransactions = {};
 
   obtainTransientGroupingTransaction (
-      groupName: string, finalizer: Promise = Promise.resolve(true)) {
+      groupName: string, { setAsGlobal = false, finalizer = Promise.resolve(true) }: Object = {}) {
     let ret = this._pendingTransactions[groupName];
     if (!ret) {
       ret = this._pendingTransactions[groupName] = this.discourse.acquireTransaction(groupName);
-      if (this.discourse.rootDiscourse === this.discourse) {
+      if (setAsGlobal && (this.discourse.rootDiscourse === this.discourse)) {
         // If there is no current transaction as the global discourse
         // set this transaction as the global one.
         this.discourse = ret;

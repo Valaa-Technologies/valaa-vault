@@ -807,7 +807,7 @@ function _advanceCapture (valker, thisArgument, vakon, callScope, capturingValke
       transaction.releaseTransaction();
       return ret;
     }
-    transaction.releaseTransaction({ abort: true });
+    transaction.releaseTransaction({ abort: true, reason: advanceError });
   } catch (error) {
     transactionError = error;
   }
@@ -852,7 +852,7 @@ function _runCapture (valker, thisArgument, vakon, callScope, capturingValker: V
       transaction.releaseTransaction();
       return ret;
     }
-    transaction.releaseTransaction({ abort: true });
+    transaction.releaseTransaction({ abort: true, reason: advanceError });
   } catch (error) {
     transactionError = error;
   }

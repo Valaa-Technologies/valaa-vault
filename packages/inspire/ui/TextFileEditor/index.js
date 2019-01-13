@@ -106,10 +106,11 @@ class TextFileEditor extends MediaContentEditor {
       const createBvob = await target.prepareBvob(text, { transaction });
       target.setField("content", createBvob(), { transaction });
       transaction.releaseTransaction();
-    } finally {
+    } catch (error) {
       if (transaction.isCommittable && transaction.isCommittable()) {
-        transaction.releaseTransaction({ abort: true });
+        transaction.releaseTransaction({ abort: true, reason: error });
       }
+      throw error;
     }
   }
 

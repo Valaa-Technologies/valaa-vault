@@ -37,7 +37,7 @@ export default class TransactionInfo {
   }
 
   isActiveTransaction () {
-    return !this.transacted || this.actions;
+    return !this.transacted || (this._finalCommand === undefined);
   }
 
   obtainRootEvent () {
@@ -68,7 +68,7 @@ export default class TransactionInfo {
   chronicleEvents (events: EventBase[] /* , options: Object = {} */): ChronicleRequest {
     try {
       if (!this.transacted) this._lazyInit();
-      else if (!this.actions) {
+      else if (this._finalCommand !== undefined) {
         throw new Error(`Cannot chronicle new events as actions into the transaction '${
             this.transaction.corpus.getName()}' which has already been ${
                 this._finalCommand ? "committed" : "aborted"}`);
@@ -110,6 +110,8 @@ export default class TransactionInfo {
       throw this.transaction.wrapErrorEvent(error,
           `chronicleEvents(${this.transaction.corpus.getName()})`,
           "\n\tevents:", ...dumpObject(events),
+          "\n\ttransaction:", ...dumpObject(this.transaction),
+          "\n\ttransactionState:", ...dumpObject(this),
       );
     }
   }
@@ -117,14 +119,15 @@ export default class TransactionInfo {
   commit (): ChronicleEventResult {
     let command;
     try {
-      if (!this.actions) {
+      if (this._finalCommand !== undefined) {
         throw new Error(`Cannot commit a transaction '${this.transaction.corpus.getName()
             }' that has already been ${this._finalCommand ? "committed" : "aborted"}`);
       }
-      this.stateAfter = this.transaction.getState();
-      this.transacted.actions = this.actions;
-      this.actions = null;
-      if (this.transacted.actions.length) {
+      if (!Array.isArray(this.actions) || !this.actions.length) {
+        this._finalCommand = this.transacted;
+      } else {
+        this.stateAfter = this.transaction.getState();
+        this.transacted.actions = this.actions;
         // this.transaction.logEvent("committing transaction", this.name,
         //    `with ${this.transacted.actions.length} actions:`, this.transacted);
         command = this._finalCommand = this.transacted;
@@ -148,23 +151,37 @@ export default class TransactionInfo {
       throw this.transaction.wrapErrorEvent(error,
         `transaction(${this.transaction.corpus.getName()}).commit()`,
           "\n\tcommand:", ...dumpObject(command),
+          "\n\ttransaction:", ...dumpObject(this.transaction),
+          "\n\ttransactionState:", ...dumpObject(this),
       );
     }
   }
 
-  markAsAborting () {
-    if (!this.transacted) this.transacted = true; // prevent lazyInit in order to make tx inactive
-    else if (!this.actions && this._finalCommand) {
+  markAsAborting (reason: string = "") {
+    if (this._finalCommand) {
       throw new Error(`Cannot abort a transaction '${this.transaction.corpus.getName()
           }' which has already been committed`);
     }
-    this.actions = null;
+    if (this._finalCommand !== undefined) return false;
+    if (!this.transacted) this.transacted = true; // prevent lazyInit in order to make tx inactive
+    this._finalCommand = false;
+    const messages = [
+      "Aborting transaction", this.transaction.corpus.getName(), reason,
+      "\n\taborted actions:", ...dumpObject(this.actions),
+      "\n\ttransaction state:", ...dumpObject(this),
+    ];
+    if (Array.isArray(this.actions) && this.actions.length) {
+      this.transaction.errorEvent(...messages);
+    } else {
+      this.transaction.logEvent(...messages);
+    }
+    return true;
   }
 
   finalize () {
     if (!this.transacted) this.transacted = true; // prevent lazyInit in order to make tx inactive
     // If the transaction has not yet been explicitly committed or discarded, commit it now.
-    if (this.actions) this.commit();
+    if (this._finalCommand === undefined) this.commit();
     return this._commitChronicleResult;
   }
 

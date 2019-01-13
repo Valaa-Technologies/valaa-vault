@@ -490,7 +490,9 @@ export default class InspireGateway extends LogEventGenerator {
     // Acquire connection without remote narration to determine the current last authorized event
     // so that we can narrate any content in the prologue before any remote activity.
     const connection = await this.falseProphet
-        .acquirePartitionConnection(partitionURI, { subscribe: false, remote: false })
+        .acquirePartitionConnection(partitionURI, {
+          subscribeEvents: false, narrateOptions: { remote: false },
+        })
         .getActiveConnection();
     let prologueTruthCount = await info.truthCount;
     if (!Number.isInteger(prologueTruthCount)) {
@@ -538,7 +540,7 @@ export default class InspireGateway extends LogEventGenerator {
       for (const result of chronicling.eventResults) await result.getLocalEvent();
     }
     // Initiate remote narration.
-    const remoteNarration = connection.narrateEventLog();
+    const remoteNarration = connection.narrateEventLog({ subscribeEvents: true });
     if (!shouldChroniclePrologue && !(eventIdEnd > 0)) await remoteNarration;
     return connection;
   }

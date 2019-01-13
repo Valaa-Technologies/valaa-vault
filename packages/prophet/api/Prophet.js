@@ -35,7 +35,7 @@ import { dumpObject } from "~/tools/wrapError";
    */
 export type ConnectOptions = {
   connect?: boolean,               // default: true. Connect to updates
-  subscribe?: boolean,             // default: true. Subscribe for downstream push events.
+  subscribeEvents?: boolean,       // default: true. Subscribe for downstream push events.
   receiveTruths?: ReceiveEvents,   // The persistent connection callback for downstream push events.
   narrateOptions?: NarrateOptions, // default: {}. Narrate with default options. False to disable.
   newConnection?: boolean,         // if true, throw if a connection exists,

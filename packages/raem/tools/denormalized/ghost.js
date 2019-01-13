@@ -90,7 +90,8 @@ export function createMaterializeGhostAction (resolver: Resolver, ghostId: VRef,
     }
     _createMaterializeGhostAction(resolver, resolver.getState(), ghostId.getGhostPath(),
         ghostId, concreteTypeName, isVirtualAction, actions);
-    return !actions.length ? undefined : actions.length === 1 ? actions[0] : transacted({ actions });
+    return !actions.length ? undefined
+        : actions.length === 1 ? actions[0] : transacted({ actions });
   } catch (error) {
     throw wrapError(error, `During createMaterializeGhostAction(), with:`,
         "\n\tghostId:", ...dumpObject(ghostId));

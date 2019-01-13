@@ -11,7 +11,8 @@ import { addConnectToPartitionToError } from "~/raem/tools/denormalized/partitio
 import Discourse from "~/prophet/api/Discourse";
 import Follower from "~/prophet/api/Follower";
 import Prophet from "~/prophet/api/Prophet";
-import type { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult }
+import type PartitionConnection from "~/prophet/api/PartitionConnection";
+import type { ChronicleOptions, ChroniclePropheciesRequest, ConnectOptions, ProphecyEventResult }
     from "~/prophet/api/types";
 
 import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
@@ -59,6 +60,10 @@ export default class FalseProphetDiscourse extends Discourse {
         this._follower.getName(options)} <-> ${this._prophet.debugId(options)})`;
   }
 
+  setAssignCommandId (assignCommandId) {
+    this._assignCommandId = assignCommandId;
+  }
+
   run (head: any, kuery: any, options: Object): any {
     try {
       if (options && options.transaction && (this !== options.transaction)) {
@@ -69,6 +74,11 @@ export default class FalseProphetDiscourse extends Discourse {
       addConnectToPartitionToError(error, this.connectToMissingPartition);
       throw error;
     }
+  }
+
+  acquirePartitionConnection (partitionURI: ValaaURI,
+      options: ConnectOptions = {}): ?PartitionConnection {
+    return this._prophet.acquirePartitionConnection(partitionURI, options);
   }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):

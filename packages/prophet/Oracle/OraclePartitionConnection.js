@@ -42,7 +42,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
     // proxy/connection creation.
     this.setUpstreamConnection(this._authorityProphet.acquirePartitionConnection(
         this.getPartitionURI(), {
-          subscribe: false, narrateOptions: false,
+          subscribeEvents: false, narrateOptions: false,
           receiveTruths: this.getReceiveTruths(options.receiveTruths),
         }));
     return thenChainEagerly(this._upstreamConnection.getActiveConnection(),

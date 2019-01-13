@@ -2,6 +2,7 @@
 
 import ProphetTestHarness, { createProphetTestHarness, createProphetOracleHarness }
     from "~/prophet/test/ProphetTestHarness";
+import { obtainAspect } from "~/prophet/tools/EventAspects";
 
 import EngineTestAPI from "~/engine/test/EngineTestAPI";
 import ValaaEngine from "~/engine/ValaaEngine";
@@ -47,6 +48,9 @@ export default class EngineTestHarness extends ProphetTestHarness {
     this.engine.addCog(this.createds);
     this.entities = this.createds.Entity;
     this.discourse = this.chronicler = this.engine.discourse;
+    this.discourse.setAssignCommandId((command) => {
+      obtainAspect(command, "command").id = `test-cid-${this.nextCommandIdIndex++}`;
+    });
     return this.engine.discourse;
   }
 
@@ -65,7 +69,7 @@ export class TestCollectCREATEDCog extends Cog {
   }
 
   onEventCREATED (vResource: Vrapper) {
-    (this[vResource.getTypeName()] || (this[vResource.getTypeName()] = {}))[vResource.getRawId()]
-        = vResource;
+    const typeName = vResource.getTypeName({ require: false });
+    (this[typeName] || (this[typeName] = {}))[vResource.getRawId()] = vResource;
   }
 }

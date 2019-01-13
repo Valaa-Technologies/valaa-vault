@@ -153,7 +153,7 @@ export default class ReactRoot extends React.Component {
         .getActiveConnection();
     let vLocalUIRoot = vViewFocus.engine.getVrapperByRawId(localInstanceRawId, { optional: true });
     if (!vLocalUIRoot) {
-      vLocalUIRoot = vViewFocus.engine.create("Entity", {
+      vLocalUIRoot = await vViewFocus.engine.create("Entity", {
         id: localInstanceRawId, owner: null,
         name: `Local UI root view '${viewName}' to '${vViewFocus.debugId()}'`,
         partitionAuthorityURI,

@@ -46,7 +46,7 @@ import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import { defaultOwnerCoupledField } from
     "~/engine/ValaaSpace/Valaa/injectSchemaTypeBindings";
 
-import { arrayFromAny, iterableFromAny, debugObjectType, dumpify, dumpObject,
+import { arrayFromAny, iterableFromAny, dumpify, dumpObject,
   invariantify, invariantifyObject, invariantifyString,
   isPromise, thenChainEagerly, outputError, wrapError,
 } from "~/tools";
@@ -155,13 +155,20 @@ export default class Vrapper extends Cog {
     if (typeName === "Blob" || !this.engine) {
       this._phase = NONRESOURCE;
     } else {
-      if (!id.isGhost() && !id.getPartitionURI()) {
-        throw new Error(`Cannot create a non-ghost Vrapper; id is missing partitionURI: <${id}>`);
-      }
       this._phase = isResourceType(this.getTypeIntro()) ? INACTIVE : NONRESOURCE;
       this.engine.addCog(this);
-      if (immediateRefresh) {
-        this._refreshPhaseOrGetBlocker(...immediateRefresh);
+      if (!id.isGhost() && !id.getPartitionURI()) {
+        if (!id.isInactive()) {
+          throw new Error(`Cannot create an active non-ghost Vrapper without id.partitionURI: <${
+              id}>`);
+        }
+        this.logEvent(1, () => [
+          "non-ghost Vrapper encountered without a partitionURI and which thus cannot be",
+          "activated directly. This is most likely ghost prototype path root resource which",
+          "needs to have all intervening partitions activated first",
+        ]);
+      } else if (immediateRefresh) {
+        this.refreshPhase(...immediateRefresh);
       }
     }
   }
@@ -207,9 +214,12 @@ export default class Vrapper extends Cog {
   }
 
   getTypeIntro () {
-    if (!this._typeIntro) {
+    if (!this._typeIntro && this.engine) {
       const intro = this.engine.discourse.schema.getType(this._typeName);
       if (!intro) throw new Error(`Could not find schema type for '${this._typeName}'`);
+      else if (!intro.getInterfaces) {
+        throw new Error(`Interface type '${this._typeName}' cannot be used as Vrapper type`);
+      }
       this._typeIntro = intro;
     }
     return this._typeIntro;
@@ -229,7 +239,7 @@ export default class Vrapper extends Cog {
    * @memberof Vrapper
    */
   activate (state?: Object) {
-    const initialBlocker = this._refreshPhaseOrGetBlocker(state);
+    const initialBlocker = this.refreshPhase(state);
     if (!initialBlocker) return undefined;
     if (this._activationProcess) return this._activationProcess;
     this._phase = ACTIVATING;
@@ -237,7 +247,7 @@ export default class Vrapper extends Cog {
     this._activationProcess = (async () => {
       let blocker;
       try {
-        for (blocker = initialBlocker; blocker; blocker = this._refreshPhaseOrGetBlocker()) {
+        for (blocker = initialBlocker; blocker; blocker = this.refreshPhase()) {
           if (isNonActivateablePhase(blocker.getPhase())) {
             throw new Error(`Cannot activate ${blocker.debugId()
                 } because it is ${blocker.getPhase()}`);
@@ -266,12 +276,14 @@ export default class Vrapper extends Cog {
   }
 
   /**
-   * Tries to synchronously activate the Vrapper to Active phase from
-   * Inactive or Activating phase (or do nothing if already Active).
+   * Refreshes the Vrapper state to Active phase if the resource and
+   * all of its prototypes (and their connections) have been activated.
+   * Will *not* initiate an activation process by itself.
    * Returns undefined if successful ie. the phase is now Active,
    * otherwise returns the Vrapper blocking the synchronous activation
    * (which might be this Vrapper itself).
-   * Will *not* initiate an activation process by itself.
+   * Finally, if the activation is blocked by a fully inactive
+   * prototype the VRef id of that prototype is returned.
    * The blocking cause can be inspected by blocker.getPhase(): if the
    * phase is Inactive or Activating, the cause is a non-full partition
    * connection. Otherwise the cause is a non-activateable phase
@@ -286,17 +298,22 @@ export default class Vrapper extends Cog {
    *
    * @memberof Vrapper
    */
-  _refreshPhaseOrGetBlocker (refreshingState?: Object, refreshingTransient?: Transient) {
+  refreshPhase (refreshingState?: Object, refreshingTransient?: Transient) {
     if (this._phase === ACTIVE) return undefined;
     if ((this._phase !== INACTIVE) && (this._phase !== ACTIVATING)) return this;
     const resolver = this.engine.discourse.maybeForkWithState(refreshingState);
     const transient = refreshingTransient
-        || resolver.goToTransient(this[HostRef], this._typeName);
+        || resolver.tryGoToTransient(this[HostRef], this._typeName);
+    if (!transient) {
+      this._phase = DESTROYED;
+      return undefined;
+    }
     this.updateTransient(resolver.state, transient);
     const id = transient.get("id");
     if (!id.getPartitionURI() && !id.isGhost() && (this._typeName !== "Blob")) {
-      throw new Error(`Cannot update a non-ghost Vrapper with new id without partitionURI: <${
-          id}>, (current id: <${this[HostRef]}>`);
+      if (id.isInactive()) return this;
+      throw new Error(`Cannot update an active non-ghost Vrapper id with no partitionURI: <${
+          id}>, (current id: <${this[HostRef]}>)`);
     }
     this[HostRef] = id;
     const connection = this.tryPartitionConnection();
@@ -312,10 +329,8 @@ export default class Vrapper extends Cog {
     }
     if (prototypeId) {
       const prototypeVrapper = this.engine.getVrapper(prototypeId, { optional: true });
-      if (!prototypeVrapper) {
-        throw new Error("Ghost prototype dynamic activation not implemented yet");
-      }
-      const blocker = prototypeVrapper._refreshPhaseOrGetBlocker();
+      if (!prototypeVrapper) return prototypeId;
+      const blocker = prototypeVrapper.refreshPhase();
       if (blocker) return blocker;
     }
     this._phase = ACTIVE;
@@ -365,7 +380,7 @@ export default class Vrapper extends Cog {
   requireActive (options?: VALKOptions) {
     if (this._phase === ACTIVE
         || ((options && options.allowActivating) && (this._phase === ACTIVATING))) return;
-    const blocker = this._refreshPhaseOrGetBlocker();
+    const blocker = this.refreshPhase();
     if (!blocker) return;
     if (blocker.isDestroyed() && options) {
       // TODO(iridian): While this takes care of the situation where

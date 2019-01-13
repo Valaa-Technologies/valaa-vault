@@ -190,11 +190,17 @@ export default class Resolver extends LogEventGenerator {
         throw new Error(`Cannot determine the partition of reference <${objectId
             }> to missing transient`);
       }
-      throw new Error(`Cannot find the non-ghost resource <${
-          objectId}> for reference binding inside the active partition ${partitionURI}`);
+      this.warnEvent(`Cannot find the non-ghost resource <${
+        objectId}> for reference binding inside the active partition ${partitionURI}`,
+          "\n\tassuming destroyed, but marking only as inactive");
+      // TODO(iridian, 2019-01): Improve destroyed resource handling
+      objectId.setInactive();
+      return objectId;
     } catch (error) {
       throw this.wrapErrorEvent(error, `bindObjectId(${rawId || objectId || idData}:${typeName})`,
           "\n\tidData:", ...dumpObject(idData),
+          "\n\tcontextPartitionURI:", ...dumpObject(contextPartitionURI),
+          "\n\tobjectId candidate:", ...dumpObject(objectId),
           "\n\tobject:", ...dumpObject(object),
           "\n\tthis:", ...dumpObject(this));
     }

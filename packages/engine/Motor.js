@@ -1,5 +1,5 @@
 import Cog from "~/engine/Cog";
-import wrapError, { outputError } from "~/tools/wrapError";
+import { outputError } from "~/tools/wrapError";
 
 // NOTE(iridian, 2018-03): Motor is currently unused, but the base design of TIMED events it relates
 // I feel is still sound, so it's not being removed yet.

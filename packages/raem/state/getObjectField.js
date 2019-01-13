@@ -12,6 +12,7 @@ import Transient, { tryTransientTypeName, createImmaterialTransient, PrototypeOf
 import denormalizedFromJS from "~/raem/state/denormalizedFromJS";
 
 import fieldDefaultValue from "~/raem/tools/graphql/fieldDefaultValue";
+import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
 import { wrapError, dumpObject } from "~/tools";
 
@@ -78,15 +79,21 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
     if ((ret !== undefined) && !fieldInfoOut) return ret;
 
     let actualTypeIntro = objectTypeIntro;
-    if (!actualTypeIntro) {
+    let fields;
+    // eslint-disable-next-line no-cond-assign
+    if (!actualTypeIntro || !((fields = actualTypeIntro.getFields()))[fieldName]) {
       const typeName = tryTransientTypeName(object, resolver.schema);
-      actualTypeIntro = typeName && resolver.schema.getType(typeName);
+      // actualTypeIntro = typeName && resolver.schema.getType(typeName);
+      actualTypeIntro = !typeName || isInactiveTypeName(typeName)
+          ? resolver.schema.getAffiliatedTypeOfField(fieldName)
+          : resolver.schema.getType(typeName);
+      fields = actualTypeIntro.getFields();
     }
 
     if (ret !== undefined) {
       fieldInfoOut.name = fieldName;
       if (actualTypeIntro) {
-        fillFieldInfoAndResolveAliases(object, actualTypeIntro.getFields(), fieldInfoOut);
+        fillFieldInfoAndResolveAliases(object, fields, fieldInfoOut);
       }
       return ret;
     }
@@ -96,7 +103,7 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
     fieldInfo.name = fieldName;
 
     if (actualTypeIntro) {
-      fillFieldInfoAndResolveAliases(object, actualTypeIntro.getFields(), fieldInfo);
+      fillFieldInfoAndResolveAliases(object, fields, fieldInfo);
       if (fieldInfo.intro && fieldInfo.intro.isGenerated) {
         ret = fieldInfo.intro.resolve(object, undefined, {
           // TODO(iridian): Complete context variable fields

@@ -166,7 +166,7 @@ export default class Bard extends Resolver {
   story: Story; // Story is the top-level passage around the root action
   passage: Passage; // Passages are the individual wrappers around sub-actions
 
-  objectTypeIntro: ?GraphQLObjectType;
+  interfaceIntro: ?GraphQLObjectType;
 
   constructor (options: Object) {
     super(options);
@@ -290,11 +290,11 @@ export default class Bard extends Resolver {
 
 
   goToTypeIntro (typeName: string): Object {
-    this.objectTypeIntro = this.schema.getType(typeName);
-    if (!this.objectTypeIntro) {
+    this.interfaceIntro = this.schema.getType(typeName);
+    if (!this.interfaceIntro) {
       throw new Error(`${this.passage.type} schema type '${typeName}' missing`);
     }
-    return this.objectTypeIntro;
+    return this.interfaceIntro;
   }
 
   goToResourceTransientTypeIntro (transient: Transient): Object {

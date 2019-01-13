@@ -46,25 +46,39 @@ import { dumpObject, invariantify, wrapError } from "~/tools";
  */
 export default function modifyResource (bard: Bard) {
   const passage = bard.passage;
+  let objectTypeName;
   try {
     bard.updateCouplings = ((passage.meta || {}).updateCouplings !== false);
     bard.denormalized = {};
     bard.fieldsTouched = new Set();
     bard.goToTransientOfPassageObject(); // no-require, non-ghost-lookup
-    if (!bard.objectTransient) { // ghost, inactive transient or fail
-      const materializeGhostSubCommand =
-          (bard.updateCouplings !== false)
-              // direct immaterial ghost field modification, materialize
-              ? createMaterializeGhostAction(bard, passage.id, passage.typeName)
-              // coupling-based transient creation for a potentially
-              // inactive resource
-              : createInactiveTransientAction(bard, passage.id);
-      bard.updateState(bard.subReduce(bard.state, materializeGhostSubCommand));
-      bard.goToTransientOfRawId(passage.id.rawId());
+    if (!bard.objectTransient) {
+      // ghost, inactive transient or fail
+      const reifyTransientSubAction = (bard.updateCouplings !== false)
+          // direct immaterial ghost field modification, materialize
+          ? createMaterializeGhostAction(bard, passage.id, passage.typeName)
+          // coupling-based transient creation for a potentially
+          // inactive resource
+          : createInactiveTransientAction(bard, passage.id);
+      if (reifyTransientSubAction) {
+        bard.updateState(bard.subReduce(bard.state, reifyTransientSubAction));
+        objectTypeName = reifyTransientSubAction.typeName
+            || reifyTransientSubAction.actions[0].typeName;
+      } else if (bard.updateCouplings === false) {
+        // An inactive transient itself already exists but there was no
+        // interface type forward from passage.typeName to it.
+        objectTypeName = "TransientFields";
+      } else {
+        throw new Error(`INTERNAL ERROR: passage object transient not found but no transient${
+            ""} reification action could be created either for <${passage.id}>`);
+      }
+      bard.goToTransientOfRawId(passage.id.rawId(), objectTypeName);
+      objectTypeName = bard.objectTypeName;
       passage.id = bard.objectId;
       if (!passage.id) throw new Error("INTERNAL ERROR: no bard.objectId");
     }
-    bard.goToResourceTransientTypeIntro(bard.objectTransient);
+    objectTypeName = bard.objectTypeName;
+    bard.goToTypeIntro(passage.typeName);
 
     invariantify(OrderedMap.isOrderedMap(bard.objectTransient),
         "object Transient must be an OrderedMap");
@@ -98,10 +112,16 @@ export default function modifyResource (bard: Bard) {
       }
       universalizePartitionMutation(bard, passage.id);
     }
-    return bard.updateStateWith(state =>
-        state.setIn([bard.objectTypeIntro.name, passage.id.rawId()], newResource));
+    return bard.updateStateWith(state => {
+      let ret = state.setIn([objectTypeName, passage.id.rawId()], newResource);
+      if (passage.typeName !== objectTypeName) {
+        ret = ret.setIn([passage.typeName, passage.id.rawId()], objectTypeName);
+      }
+      return ret;
+    });
   } catch (error) {
-    throw wrapError(error, `During ${bard.debugId()}\n .modifyResource(), with:`,
+    throw wrapError(error, `During ${bard.debugId()}\n .modifyResource(${
+            objectTypeName}/${passage.typeName}), with:`,
         "\n\tpassage:", ...dumpObject(passage),
         "\n\ttransient:", ...dumpObject(bard.objectTransient),
         "\n\tbard:", ...dumpObject(bard));
@@ -130,7 +150,7 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
     if (updateClause === undefined) {
       if (isCreatedLike(bard.passage)) continue;
       bard.error(`Invalid ${operationDescription}, trying to update ${
-          bard.objectTypeIntro.name}.${fieldName
+          bard.interfaceIntro.name}.${fieldName
           } with 'undefined' (use MODIFIED.removes instead)`);
       return false;
     }
@@ -144,7 +164,7 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
     let updateCoupling;
     try {
       fillFieldInfoAndResolveAliases(
-          bard.objectTransient, bard.objectTypeIntro.getFields(), fieldInfo);
+          bard.objectTransient, bard.interfaceIntro.getFields(), fieldInfo);
       if (!isCreatedLike(bard.passage)) {
         oldLocalValue = mutableObject.get(fieldInfo.name);
       }
@@ -169,7 +189,7 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
     } catch (error) {
       const aliasInfo = fieldInfo.name !== fieldName ? ` (via its alias '${fieldName}')` : "";
       throw wrapError(error, `During ${bard.debugId()}\n .${operationDescription} on field ${
-              bard.objectTypeIntro.name}.${fieldInfo.name}${aliasInfo}, with:`,
+              bard.interfaceIntro.name}.${fieldInfo.name}${aliasInfo}, with:`,
           "\n\tfieldInfo:", ...dumpObject(fieldInfo),
           "\n\told value:", ...dumpObject(oldLocalValue),
           "\n\tupdateClause:", ...dumpObject(updateClause),
@@ -185,18 +205,18 @@ export function validateFieldUpdate (bard: Bard, fieldIntro, updateClause, opera
   if (fieldIntro.deprecated || fieldIntro.isGenerated) {
     if (!updateClause || (Array.isArray(updateClause) && !updateClause.length)) {
       // bard.warn(`Skipping ${operationDescription} on a deprecated/generated field ${
-      //    bard.objectTypeIntro.name}.${fieldIntro.name} with defaulty value:`, updateClause);
+      //    bard.interfaceIntro.name}.${fieldIntro.name} with defaulty value:`, updateClause);
       bard.info(`Skipping ${operationDescription} on a deprecated/generated field (name ${
-          bard.objectTypeIntro.name}.${fieldIntro.name
+          bard.interfaceIntro.name}.${fieldIntro.name
               } hidden to allow browser log collapsing) with defaulty value`);
       ret = false;
     } else if (fieldIntro.isGenerated) { // If generated, we'll be throwing an error below
       bard.info(`Performing ${operationDescription} on a generated field ${
-          bard.objectTypeIntro.name}.${fieldIntro.name} with non-defaulty value:`, updateClause);
+          bard.interfaceIntro.name}.${fieldIntro.name} with non-defaulty value:`, updateClause);
       ret = false;
     } else {
       bard.errorEvent(`Performing ${operationDescription} on a deprecated field ${
-          bard.objectTypeIntro.name}.${fieldIntro.name} with non-defaulty value`, updateClause);
+          bard.interfaceIntro.name}.${fieldIntro.name} with non-defaulty value`, updateClause);
     }
   }
   return ret;

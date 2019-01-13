@@ -115,26 +115,19 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
     } else if (!coupledField) {
       coupledField = coupling.defaultCoupledField;
     }
-    if (typeof remoteType.getFields !== "function") {
-      bard.error("Invalid fieldType when looking for", dumpify(fieldIntro), ":",
-          dumpify(remoteType));
-      return;
-    }
     if (!remoteFieldIntro) {
-      remoteTransient = Object.create(bard)
-          .tryGoToTransient(remoteRef, remoteType.name, false, false, true);
-      remoteType = remoteTransient
-          ? bard.schema.getType(getTransientTypeName(remoteTransient, bard.schema))
-          // Remote is an inactive resource or immaterial resource with
-          // inactive prototypes.
-          // TODO(iridian, 2019-01): Verify that the resource is inactive.
-          : bard.schema.getDefaultCouplingType(coupledField);
+      remoteType = bard.schema.getAffiliatedTypeOfField(coupledField);
       remoteFieldIntro = remoteType.getFields()[coupledField];
       if (!remoteFieldIntro) {
         throw new Error(`No introspection found for remote field ${remoteType.name}.${coupledField
             } when ${actionType} <${remote}> via near field ${
-            bard.objectTypeIntro.name}.${fieldIntro.name} of <${bard.objectId}>`);
+            bard.interfaceIntro.name}.${fieldIntro.name} of <${bard.objectId}>`);
       }
+    }
+    if (typeof remoteType.getFields !== "function") {
+      bard.error("Invalid fieldType when looking for", dumpify(fieldIntro), ":",
+          dumpify(remoteType));
+      return;
     }
     reverseCoupling = remoteFieldIntro.coupling
         || (coupling.whenUnmatched && coupling.whenUnmatched(remoteFieldIntro.isSequence));
@@ -153,7 +146,7 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
         // Missing partitionURI means local partition reference, so throw.
         if (!partitionURI || (partitionURI.toString() === bard.destroyedResourcePartition)) {
           const nameBard = Object.create(bard);
-          const name = bard.objectTypeIntro.getFields().name
+          const name = bard.interfaceIntro.getFields().name
               ? `'${getObjectField(nameBard, bard.objectTransient, "name")}' `
               : bard.objectId.rawId();
           remoteTransient = Object.create(bard).goToTransient(remoteRef, remoteType.name);
@@ -168,7 +161,7 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
             name: remoteName,
             typeName: remoteType.name,
             remoteName: name,
-            remoteTypeName: bard.objectTypeIntro.name,
+            remoteTypeName: bard.interfaceIntro.name,
             remoteFieldName: fieldIntro.name,
           });
         }

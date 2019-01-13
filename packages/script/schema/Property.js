@@ -24,7 +24,7 @@ export default new GraphQLObjectType({
 
     ...primaryField("value", Expression,
         "The target of the property",
-        { initialValue: null, defaultValue: undefined },
+        { initialValue: null, defaultValue: undefined, affiliatedType: "Property" },
     ),
   }),
 });

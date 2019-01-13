@@ -8,6 +8,8 @@ import aliasField from "~/raem/tools/graphql/aliasField";
 import generatedField from "~/raem/tools/graphql/generatedField";
 import primaryField from "~/raem/tools/graphql/primaryField";
 import transientField from "~/raem/tools/graphql/transientField";
+import ghostHostResolver from "~/raem/tools/graphql/ghostHostResolver";
+
 
 import partitionResolver, { partitionURIResolver }
     from "~/raem/tools/graphql/partitionResolver";
@@ -135,6 +137,30 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
       ),
 
 
+      ...generatedField("ghostHost", TransientFields,
+          `The ghost host of this ghost ${objectDescription} or null if not a ghost. ${
+            ""} The ghost host is the innermost direct or indirect non-ghost owner of this ghost, ${
+            ""} or in other words the instance that indirectly created this ghost.`,
+          ghostHostResolver,
+      ),
+
+      ...transientField("ghostOwner", TransientFields,
+          `An alias for ghostHost but only set if this ghost ${objectDescription
+          } is materialized, otherwise null. This means that for grand-ownling ghosts their ${
+          ""} owner and ghostOwner will not be equal (for direct ownlings they are equal).`, {
+            coupling: toOwner({ coupledField: "ghostOwnlings" }),
+            affiliatedType: "TransientFields",
+            immediateDefaultValue: null,
+            allowTransientFieldToBeSingular: true,
+          },
+      ),
+
+      ...transientField("ghostOwnlings", new GraphQLList(TransientFields),
+          `Materialized ghost Resource's which have this ${objectDescription
+          } instance as their host`, {
+            coupling: toManyOwnlings({ coupledField: "ghostOwner" }),
+            affiliatedType: "TransientFields",
+            immediateDefaultValue: [],
           },
       ),
 

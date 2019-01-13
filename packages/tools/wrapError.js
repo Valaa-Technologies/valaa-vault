@@ -58,10 +58,6 @@ ${myTraceAndContext}`;
   contextError.contextDescriptions = contextDescriptions;
   error.originalError = error.originalError || error;
   error.errorContexts = (error.errorContexts || []).concat([contextError]);
-
-  // FIXME (thiago) this breaks abstractions
-  // contextError.sourceStackFrames = errorIn && errorIn.sourceStackFrames;
-  // contextError.customErrorHandler = errorIn && errorIn.customErrorHandler;
   return error;
 }
 

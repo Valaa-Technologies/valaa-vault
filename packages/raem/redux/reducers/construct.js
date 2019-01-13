@@ -129,14 +129,14 @@ export function recurseCreateOrDuplicate (bard: CreateBard, actionTypeName: stri
   }
   try {
     bard.goToTypeIntro(actionTypeName);
-    const objectTypeIntro: GraphQLObjectType = bard.objectTypeIntro;
+    const typeIntro: GraphQLObjectType = bard.interfaceIntro;
     let typeName = actionTypeName;
     let interfaces;
     let isResource;
     let interfaceType;
-    if (typeof objectTypeIntro.getInterfaces === "function") {
-      interfaces = objectTypeIntro.getInterfaces();
-      isResource = isResourceType(objectTypeIntro);
+    if (typeof typeIntro.getInterfaces === "function") {
+      interfaces = typeIntro.getInterfaces();
+      isResource = isResourceType(typeIntro);
     } else {
       // Creation of an interface type means that this is a
       // materialization of a ghost with inactive prototypes.
@@ -187,11 +187,11 @@ export function recurseCreateOrDuplicate (bard: CreateBard, actionTypeName: stri
       }
 
       if (bard._duplicationRootId) {
-        duplicateFields(Object.create(bard), mutableTransient, objectTypeIntro.getFields());
+        duplicateFields(Object.create(bard), mutableTransient, typeIntro.getFields());
       } else if (!interfaceType && !bard.objectTransient.get("prototype")) {
         // Only fields of resources without prototypes can ever get
         // initial values
-        _setDefaultFields(bard, mutableTransient, objectTypeIntro.getFields());
+        _setDefaultFields(bard, mutableTransient, typeIntro.getFields());
       }
 
       _connectNonGhostObjectIdGhostPathToPrototype(bard, bard.objectId);

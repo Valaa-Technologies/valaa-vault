@@ -130,6 +130,9 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
     updates.forEach(entry => {
       const currentEntryReq = medias.get(entry.mediaId);
       currentEntryReq.onsuccess = (/* event */) => {
+        const currentEntry = currentEntryReq.result;
+        // Skip obsolete updates.
+        if (currentEntry && ((currentEntry.logIndex || 0) >= (entry.logIndex || 0))) return;
         const updateEntryReq = medias.put(entry);
         updateEntryReq.onsuccess = () => {
           const newInfo = entry.mediaInfo;
@@ -151,7 +154,7 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
               } when removing old content references`);
             }
           }
-          entry.successfullyPersisted = true;
+          entry.updatePersisted = true;
         };
         updateEntryReq.onerror = (failureEvent) => {
           connection.errorEvent(
@@ -159,17 +162,18 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
                   }") Failed:`, ...dumpObject(failureEvent),
               "\n\terror:", ...dumpObject(updateEntryReq.error),
               "\n\tmediaEntry:", ...dumpObject(entry));
-          // Don't prevent the error from aborting the transaction, which will then roll back and
-          // no refcount updates will be made either.
-          // This line is thus useless and is here only for future reminder: if this error is
-          // selectively ignored and the particular media update skipped
+          // Don't prevent the error from aborting the transaction,
+          // which will then roll back and no refcount updates will be
+          // made either. This line is thus useless and is here only
+          // for future reminder: if this error is selectively ignored
+          // and the particular media update skipped
         };
       };
     });
   }));
   updates.forEach(entry => {
-    if (connection.isLocallyPersisted() && !entry.successfullyPersisted) return;
-    delete entry.successfullyPersisted;
+    if (connection.isLocallyPersisted() && !entry.updatePersisted) return;
+    delete entry.updatePersisted;
     const currentScribeEntry = connection._prophet._persistedMediaLookup[entry.mediaId];
     if ((currentScribeEntry || {}).isInMemory && (currentScribeEntry.mediaInfo || {}).bvobId) {
       _addAdjust(inMemoryRefCountAdjusts, currentScribeEntry.mediaInfo.bvobId, -1);

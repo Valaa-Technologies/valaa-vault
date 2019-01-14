@@ -5,6 +5,7 @@ import ValaaReference, { getRawIdFrom } from "~/raem/ValaaReference";
 import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import { MediaInfo, RetrieveMediaBuffer } from "~/prophet/api/types";
+import { tryAspect } from "~/prophet/tools/EventAspects";
 
 import { DelayedQueue, dumpObject, invariantifyString, mapEagerly, thenChainEagerly, vdon }
     from "~/tools";
@@ -129,7 +130,7 @@ async function _prepareBvobUpstreamWithRetries (connection: ScribePartitionConne
 */
 
 export function _determineEventMediaPreOps (connection: ScribePartitionConnection,
-    mediaEvent: Object, rootEvent: Object, mediaRef: VRef, currentEntry: MediaEntry) {
+    mediaAction: Object, rootEvent: Object, mediaRef: VRef, currentEntry: MediaEntry) {
   const mediaId = mediaRef.rawId();
   let mediaInfo;
   let newEntry: MediaEntry;
@@ -139,7 +140,7 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
   } else {
     if (mediaRef.isInherited()) {
       mediaInfo = { ...connection._getMediaEntry(mediaRef).mediaInfo };
-    } else if (isCreatedLike(mediaEvent)) {
+    } else if (isCreatedLike(mediaAction)) {
       mediaInfo = {};
     } else {
       // FIXME(iridian): This should throw in principle: this is an
@@ -147,19 +148,20 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
       // replay the event logs due to lack of resources for a proper
       // fix - corrupted event logs must be accepted as a fact of life
       // for the time being.
-      connection.errorEvent(`mediaEvent for media has no previous media entry and ${
+      connection.errorEvent(`mediaAction for media has no previous media entry and ${
               ""}event is not CREATED, DUPLICATED and resource is not ghost`,
           "\n\treplay not blocked but media accesses made against this Media will throw.",
           "\n\tmediaRef:", String(mediaRef),
-          "\n\tmediaEvent:", ...dumpObject(mediaEvent),
+          "\n\tmediaAction:", ...dumpObject(mediaAction),
           "\n\trootEvent:", ...dumpObject(rootEvent));
       return [];
     }
     newEntry = { mediaId, mediaInfo, isPersisted: true, isInMemory: true };
   }
+  newEntry.logIndex = tryAspect(rootEvent, "log").index || 0;
   connection._pendingMediaLookup[newEntry.mediaId] = newEntry;
 
-  const update = mediaEvent.initialState || mediaEvent.sets || {};
+  const update = mediaAction.initialState || mediaAction.sets || {};
   if (update.name) mediaInfo.name = update.name;
   if (update.mediaType) {
     const mediaType = (typeof update.mediaType === "string")
@@ -269,11 +271,22 @@ export function _requestMediaContents (connection: ScribePartitionConnection,
     }
   });
   if (!upstreamOperation.length) return ret;
+  const upstreamInfos = [...upstreamOperation];
   return thenChainEagerly(
-      upstreamOperation.resolve(
-          connection.getUpstreamConnection().requestMediaContents([...upstreamOperation])),
-      () => ret,
+      mapEagerly(connection.getUpstreamConnection().requestMediaContents(upstreamInfos),
+          entry => entry,
+          errorOnScribeConnectionMediaInfo,
+      ), [
+        results => upstreamOperation.resolve(results),
+        () => ret,
+      ],
       onError);
+  function errorOnScribeConnectionMediaInfo (error, mediaInfo, index) {
+    error.upstreamRequest = upstreamInfos;
+    error.upstreamIndex = index;
+    error.mediaInfo = mediaInfo;
+    throw error;
+  }
 }
 
 function _getMediaContent (connection: ScribePartitionConnection, mediaInfo: MediaInfo,

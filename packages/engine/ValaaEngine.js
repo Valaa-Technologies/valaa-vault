@@ -459,12 +459,15 @@ export default class ValaaEngine extends Cog {
             vProtagonist = new Vrapper(this, passage.id, passage.typeName);
           } else vProtagonist._setTypeName(passage.typeName);
           if (vProtagonist.isResource()) {
+            // vProtagonist.refreshPhase(story.state);
+            // /*
             Promise.resolve(vProtagonist.activate(story.state))
                 .then(undefined, (error) => {
                   outputCollapsedError(errorOnReceiveCommands.call(this, error,
                       `receiveCommands(${passage.type} ${vProtagonist.debugId()}).activate`),
-                      "Exception caught during passage recital");
+                      "Exception caught during passage recital protagonist activation");
                 });
+            // */
           }
         }
       }

@@ -5,6 +5,8 @@ import React from "react";
 import { denoteValaaBuiltinWithSignature } from "~/raem/VALK";
 import { createPartitionURI } from "~/raem/ValaaURI";
 
+import type { PartitionConnection } from "~/prophet";
+
 import Vrapper from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
 import VALEK, { dumpObject } from "~/engine/VALEK";
@@ -366,7 +368,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
         @param {Object} focus  the Resource to search the lens from.`,
         (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
-        () => function retrievePropertyLensFromFocus (focus: any, component: UIComponent,
+        () => function propertyLensRoleNameGetter (focus: any, component: UIComponent,
             lensRoleName: string) {
           if (component.props.lensName) {
             console.error("DEPRECATED: props.lensName\n\tprefer: props.lensProperty",
@@ -514,7 +516,8 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       () => (prototype: Vrapper, owner: Vrapper, focus: any, lensName: string = "",
           component: UIComponent) => {
         let ownerPart = "";
-        const focusPart = ((focus != null) && (focus instanceof Vrapper) && focus.getRawId()) || "";
+        const vFocus = (focus != null) && (focus instanceof Vrapper) && focus;
+        const focusPart = (vFocus && vFocus.getRawId()) || "";
         let prototypePart = "";
         if (owner != null) {
           if (owner instanceof Vrapper) ownerPart = owner.getRawId();
@@ -533,62 +536,76 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         const vResource = engine.tryVrapper(frameRawId, { optional: true });
         if (vResource !== undefined) return vResource;
 
-        const lensAuthorityProperty = component.getUIContextValue(Valaa.Lens.lensAuthorityProperty);
-        let partitionAuthorityURI;
-        if ((prototype != null) && lensAuthorityProperty && prototype.hasInterface("Scope")) {
-          partitionAuthorityURI = prototype.propertyValue(lensAuthorityProperty);
-        }
-        if ((partitionAuthorityURI === undefined) && (focusPart !== "")) {
-          const currentShadowedFocus = component.getParentUIContextValue(Valaa.Lens.shadowedFocus);
-          if (focus !== currentShadowedFocus) {
-            if (lensAuthorityProperty && (focus.hasInterface("Scope"))) {
-              partitionAuthorityURI = focus.propertyValue(lensAuthorityProperty);
-            }
-            if ((partitionAuthorityURI === undefined) && focus.isPartitionRoot()) {
-              partitionAuthorityURI = component.getUIContextValue(Valaa.Lens.shadowLensAuthority);
-            }
-          }
-        }
-        let connection;
-        if (partitionAuthorityURI) {
-          if (prototypePart && !prototype.hasInterface("Partition")) {
-            partitionAuthorityURI = "";
-          } else {
-            const partitionURI = createPartitionURI(partitionAuthorityURI, frameRawId);
-            connection = engine.getProphet()
-                .acquirePartitionConnection(partitionURI)
-                .getActiveConnection();
-          }
-        }
-        return thenChainEagerly(connection, [
+        const vFocusActivation = vFocus && vFocus.activate();
+        let lensAuthorityURI;
+        let transaction;
+        return thenChainEagerly(prototype && prototype.activate(), [
+          () => vFocusActivation, // This might be redundant, focus could have been waited on.
           () => {
+            const lensAuthorityProperty = component
+                .getUIContextValue(Valaa.Lens.lensAuthorityProperty);
+            if ((prototype != null) && lensAuthorityProperty && prototype.hasInterface("Scope")) {
+              lensAuthorityURI = prototype.propertyValue(lensAuthorityProperty);
+            }
+            if ((lensAuthorityURI === undefined) && (focusPart !== "")) {
+              const currentShadowedFocus =
+                  component.getParentUIContextValue(Valaa.Lens.shadowedFocus);
+              if (vFocus !== currentShadowedFocus) {
+                if (lensAuthorityProperty && (vFocus.hasInterface("Scope"))) {
+                  lensAuthorityURI = vFocus.propertyValue(lensAuthorityProperty);
+                }
+                if ((lensAuthorityURI === undefined) && vFocus.isPartitionRoot()) {
+                  lensAuthorityURI = component.getUIContextValue(Valaa.Lens.shadowLensAuthority);
+                }
+              }
+            }
+          },
+          () => {
+            if (!lensAuthorityURI) return undefined;
+            if (prototypePart && !prototype.hasInterface("Partition")) {
+              lensAuthorityURI = "";
+              return undefined;
+            }
+            if (!lensAuthorityURI && !owner) {
+              throw new Error(`Cannot obtain scope frame: neither partitionAuthorityURI ${
+                  ""}nor owner could be determined`);
+            }
+            const partitionURI = createPartitionURI(lensAuthorityURI, frameRawId);
+            return engine.getProphet().acquirePartitionConnection(partitionURI)
+                .getActiveConnection();
+          },
+          (connection: ?PartitionConnection) => {
             if (connection) {
               const vResource_ = engine.tryVrapper(frameRawId, { optional: true });
               if (vResource_) return vResource_;
-            }
-            if (!partitionAuthorityURI && !owner) {
-              throw new Error(`Cannot obtain scope frame: neither partitionAuthorityURI ${
-                  ""}nor owner could be determined`);
             }
             const initialState = {
               id: frameRawId,
               name: `FRAME-${lensName}=>${
                   prototype ? prototype.get("name") || prototypePart : "Entity"}->${
-                  (focusPart && focus.hasInterface("Scope") && focus.get("name")) || focusPart}`,
+                  (vFocus && vFocus.hasInterface("Scope") && vFocus.get("name")) || focusPart}`,
             };
-            if (partitionAuthorityURI) initialState.partitionAuthorityURI = partitionAuthorityURI;
+            if (lensAuthorityURI) initialState.partitionAuthorityURI = lensAuthorityURI;
             else initialState.owner = owner;
-            const transaction = engine.obtainTransientGroupingTransaction("frame-construction");
-            const ret = (prototype != null)
-                ? prototype.instantiate(initialState, { transaction })
-                : engine.create("Entity", initialState, { transaction });
-            return ret;
+            transaction = engine.obtainTransientGroupingTransaction("frame-construction");
+            // TODO(iridian, 2019-01): Determine whether getPremiereStory
+            // is the desired semantics here. It waits until the
+            // resource creation narration has completed (ie. engine
+            // has received and resolved the recital): this might be
+            // unnecessarily long.
+            // OTOH: TransactionInfo.chronicleEvents.results only
+            // support getPremiereStory so whatever semantics is
+            // desired it needs to be implemented.
+            const options = { transaction, awaitResult: result => result.getPremiereStory() };
+            return (prototype != null)
+                ? prototype.instantiate(initialState, options)
+                : engine.create("Entity", initialState, options);
           },
           (vResource_) => {
-            if ((partitionAuthorityURI !== undefined) && (focusPart != null)) {
-              component.setUIContextValue(Valaa.Lens.shadowedFocus, focus);
+            if ((lensAuthorityURI !== undefined) && vFocus) {
+              component.setUIContextValue(Valaa.Lens.shadowedFocus, vFocus);
               component.setUIContextValue(Valaa.Lens.shadowLensPartitionRoot,
-                  partitionAuthorityURI ? vResource_ : null);
+                  lensAuthorityURI ? vResource_ : null);
             }
             return vResource_;
           },

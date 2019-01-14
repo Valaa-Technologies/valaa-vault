@@ -124,8 +124,9 @@ describe("ValaaScript", () => {
       const head = { myParent: vRef("A_parent"), fieldName: "otherField" };
       const scope = {};
       const temp = evaluateProgram([], head, bodyKuery, scope);
+      temp.field = temp.field.toJSON();
       expect(temp)
-          .toEqual({ key: 10, field: vRef("A_parent"), otherField: "otherValue" });
+          .toEqual({ key: 10, field: ["A_parent"], otherField: "otherValue" });
     });
   });
 

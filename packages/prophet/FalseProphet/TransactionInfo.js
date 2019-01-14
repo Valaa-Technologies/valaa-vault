@@ -157,7 +157,7 @@ export default class TransactionInfo {
     }
   }
 
-  markAsAborting (reason: string = "") {
+  markAsAborting (/* reason: string = "" */) {
     if (this._finalCommand) {
       throw new Error(`Cannot abort a transaction '${this.transaction.corpus.getName()
           }' which has already been committed`);
@@ -165,6 +165,7 @@ export default class TransactionInfo {
     if (this._finalCommand !== undefined) return false;
     if (!this.transacted) this.transacted = true; // prevent lazyInit in order to make tx inactive
     this._finalCommand = false;
+    /*
     const messages = [
       "Aborting transaction", this.transaction.corpus.getName(), reason,
       "\n\taborted actions:", ...dumpObject(this.actions),
@@ -175,6 +176,7 @@ export default class TransactionInfo {
     } else {
       this.transaction.logEvent(...messages);
     }
+    */
     return true;
   }
 

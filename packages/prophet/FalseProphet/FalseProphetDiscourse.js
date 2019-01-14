@@ -23,8 +23,7 @@ import { initializeAspects, obtainAspect, tryAspect } from "~/prophet/tools/Even
 
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
-import { invariantify, invariantifyObject, outputError, outputCollapsedError, trivialClone }
-    from "~/tools";
+import { invariantify, invariantifyObject, trivialClone } from "~/tools";
 import valaaUUID from "~/tools/id/valaaUUID";
 
 export default class FalseProphetDiscourse extends Discourse {
@@ -249,17 +248,8 @@ export default class FalseProphetDiscourse extends Discourse {
       const transactionState = ret._transactionState = new TransactionInfo(ret, name);
       ret.releaseTransaction = function releaseTransaction (
           options: ?{ abort: boolean, reason: Error }) {
-        if (options && options.abort
-            && transactionState.markAsAborting((options.reason || {}).message || options.reason)
-            && options.reason && options.reason.message) {
-          const actionCount = (transactionState.actions || []).length;
-          (actionCount ? outputError : outputCollapsedError)(this.wrapErrorEvent(options.reason,
-                  new Error(`${transactionName}.releaseTransaction({ abort: true }`),
-                  "\n\tactions:", ...dumpObject(transactionState.actions),
-                  "\n\ttransactionState:", ...dumpObject(transactionState),
-              ),
-              `Displaying exception causing transaction abort (with ${actionCount} actions):`,
-          );
+        if (options && options.abort) {
+          transactionState.markAsAborting((options.reason || {}).message || options.reason);
         }
         if (--this._nonFinalizedTransactions) return false;
         if (this._parentTransaction) {

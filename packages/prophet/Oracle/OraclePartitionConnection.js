@@ -70,9 +70,12 @@ export default class OraclePartitionConnection extends PartitionConnection {
   // Coming from downstream: tries scribe first, otherwise forwards the request to authority.
   // In latter case forwards the result received from authority to Scribe for caching.
   requestMediaContents (mediaInfos: MediaInfo[]): any[] {
+    const connection = this;
     const urlRequests = new DelayedQueue();
     const bufferRequests = new DelayedQueue();
     const ret = mediaInfos.map(mediaInfo => {
+      const wrap = new Error(`requestMediaContents().mediaInfo["${
+          mediaInfo.name || `unnamed media`}"]`);
       try {
         if (!mediaInfo.bvobId) {
           if (!mediaInfo.sourceURL) return undefined;
@@ -99,7 +102,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
         let decoder;
         if (mediaInfo.type
             && !((mediaInfo.type === "application") && (mediaInfo.subtype === "octet-stream"))) {
-          decoder = this._decoderArray.findDecoder(mediaInfo);
+          decoder = connection._decoderArray.findDecoder(mediaInfo);
           if (!decoder) throw new Error(`Can't find decoder for ${mediaInfo.mime}`);
           if (mediaInfo.decodingCache) {
             const decoding = mediaInfo.decodingCache.get(decoder);
@@ -116,23 +119,27 @@ export default class OraclePartitionConnection extends PartitionConnection {
               if (!decoder) return buffer;
               const name = mediaInfo.name ? `'${mediaInfo.name}'` : `unnamed media`;
               const decoding = decoder.decode(buffer,
-                  { mediaName: name, partitionName: this.getName() });
+                  { mediaName: name, partitionName: connection.getName() });
               if (mediaInfo.decodingCache) mediaInfo.decodingCache.set(decoder, decoding);
               return decoding;
-            });
+            },
+            errorOnOracleConnectionRequestMediaContentForInfo);
       } catch (error) {
-        return this.wrapErrorEvent(error, `requestMediaContents().mediaInfo["${
-          mediaInfo.name || `unnamed media`}"]`,
-      "\n\tmediaRef:", ...dumpObject(mediaInfo.mediaRef),
-      "\n\tmediaInfo:", ...dumpObject(mediaInfo));
+        return errorOnOracleConnectionRequestMediaContentForInfo(error);
+      }
+      function errorOnOracleConnectionRequestMediaContentForInfo (error) {
+        return Promise.reject(connection.wrapErrorEvent(error, wrap,
+            "\n\tmediaRef:", ...dumpObject(mediaInfo.mediaRef),
+            "\n\tmediaInfo:", ...dumpObject(mediaInfo)));
       }
     });
     if (urlRequests.length) {
-      urlRequests.resolve(this.getUpstreamConnection().requestMediaContents([...urlRequests]));
+      urlRequests.resolve(connection.getUpstreamConnection()
+          .requestMediaContents([...urlRequests]));
     }
     if (bufferRequests.length) {
-      bufferRequests.resolve(
-          this.getUpstreamConnection().requestMediaContents([...bufferRequests]));
+      bufferRequests.resolve(connection.getUpstreamConnection()
+          .requestMediaContents([...bufferRequests]));
     }
     return ret;
   }

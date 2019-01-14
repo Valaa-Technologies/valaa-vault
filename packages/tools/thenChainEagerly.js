@@ -49,48 +49,62 @@ import { invariantifyArray } from "~/tools/invariantify";
 // encountered resolves synchronously.
 export function mapEagerly (maybePromises: any[], callback: Function, onRejected?: Function,
     startIndex: number = 0, results: Array<any> = []) {
-  let currentIndex = startIndex;
+  let index = null;
+  let wrap;
   try {
     if (!Array.isArray(maybePromises)) {
-      if (isPromise(maybePromises)) {
-        return maybePromises.then(
-            inner => mapEagerly(inner, callback, onRejected, startIndex, results),
-            error => errorOnMapEagerly(error, new Error(`During mapEagerly.maybePromises.catch`)));
+      if (!isPromise(maybePromises)) {
+        invariantifyArray(maybePromises, "mapEagerly.maybePromises");
       }
-      invariantifyArray(maybePromises, "mapEagerly.maybePromises");
+      wrap = new Error(`During mapEagerly.maybePromises.catch`);
+      return maybePromises.then(
+          inner => mapEagerly(inner, callback, onRejected, startIndex, results),
+          errorOnMapEagerly);
     }
-    for (; currentIndex < maybePromises.length; ++currentIndex) {
-      const maybeValue = maybePromises[currentIndex];
+    for (index = startIndex; index < maybePromises.length; ++index) {
+      const maybeValue = maybePromises[index];
       if (!isPromise(maybeValue)) {
-        results[currentIndex] = callback(maybeValue, currentIndex, maybePromises);
-        if (!isPromise(results[currentIndex])) continue;
+        try {
+          results[index] = callback(maybeValue, index, maybePromises);
+        } catch (error) {
+          wrap = new Error(getName("callback"));
+          results[index] = errorOnMapEagerly(error);
+        }
+        if (!isPromise(results[index])) continue;
+        wrap = new Error(getName("result promise"));
       } else {
-        results[currentIndex] = maybeValue.then(
-            (value) => callback(value, currentIndex, maybePromises)); // eslint-disable-line
+        results[index] = maybeValue.then(
+            (value) => callback(value, index, maybePromises)); // eslint-disable-line
+        wrap = new Error(getName("promise callback"));
       }
-      return results[currentIndex].then(
-          (value) => { // eslint-disable-line
-            results[currentIndex] = value;
-            return mapEagerly(maybePromises, callback, onRejected, currentIndex + 1, results);
-          },
-          (error) => errorOnMapEagerly( // eslint-disable-line
-              error, new Error(`During mapEagerly step #${currentIndex}`)),
-      );
+      return results[index]
+          .catch(errorOnMapEagerly)
+          .then(value => { // eslint-disable-line
+            results[index] = value;
+            return mapEagerly(maybePromises, callback, onRejected, index + 1, results);
+          });
     }
     return results;
   } catch (error) {
-    return errorOnMapEagerly(error, new Error(`During mapEagerly step #${currentIndex}`));
+    wrap = new Error(getName("handling"));
+    return errorOnMapEagerly(error);
   }
-  function errorOnMapEagerly (error, errorWrap) {
+  function getName (info) {
+    return `During mapEagerly step #${index} ${info} ${
+        !(onRejected && onRejected.name) ? " " : `(with ${onRejected.name})`}`;
+  }
+  function errorOnMapEagerly (error) {
     let innerError = error;
     try {
       if (onRejected) {
-        return onRejected(error, maybePromises[currentIndex], currentIndex, results, maybePromises);
+        return onRejected(error,
+            (index === null) ? maybePromises : maybePromises[index],
+            index, results, maybePromises);
       }
     } catch (onRejectedError) { innerError = onRejectedError; }
-    throw wrapError(innerError, errorWrap,
+    throw wrapError(innerError, wrap,
         "\n\tmaybePromises:", ...dumpObject(maybePromises),
-        "\n\tcurrent entry:", ...dumpObject((maybePromises || [])[currentIndex]));
+        "\n\tcurrent entry:", ...dumpObject((maybePromises || [])[index]));
   }
 }
 
@@ -98,31 +112,40 @@ export default function thenChainEagerly (initialValue: any, functions: any | Fu
     onRejected: ?Function, startIndex: number) {
   const functionChain = (startIndex !== undefined) ? functions : arrayFromAny(functions);
   let head = initialValue;
-  let currentIndex = startIndex || 0;
-  try {
-    for (; !isPromise(head); ++currentIndex) {
-      if (currentIndex >= functionChain.length) return head;
-      head = functionChain[currentIndex](head);
+  let index = startIndex || 0;
+  let wrap;
+  for (; !isPromise(head); ++index) {
+    try {
+      if (index >= functionChain.length) return head;
+      head = functionChain[index](head);
+    } catch (error) {
+      wrap = new Error(getName("callback"));
+      head = errorOnThenChainEagerly(error);
     }
-  } catch (error) {
-    return errorOnThenChainEagerly(
-        error, new Error(`During thenChainEagerly step #${currentIndex}`));
   }
+  wrap = new Error(getName("promise"));
   return head.then(
-      value => (currentIndex >= functionChain.length
-          ? value
-          : thenChainEagerly(
-              functionChain[currentIndex](value), functionChain, onRejected, currentIndex + 1)),
-      (error) => errorOnThenChainEagerly(
-          error, new Error(`During thenChainEagerly step #${currentIndex}`)));
-  function errorOnThenChainEagerly (error, errorWrap) {
+      value => {
+        if ((index < functionChain.length) && (typeof functionChain[index] !== "function")) {
+          console.error("yo not cool:", functionChain[index], functions, "\n\tstack:", new Error().stack);
+        }
+        return (index >= functionChain.length
+            ? value
+            : thenChainEagerly(functionChain[index](value), functionChain, onRejected, index + 1));
+      },
+      errorOnThenChainEagerly);
+  function getName (info) {
+    return `During thenChainEagerly step #${index} ${info} ${
+        !(onRejected && onRejected.name) ? " " : `(with ${onRejected.name})`}`;
+  }
+  function errorOnThenChainEagerly (error) {
     let innerError = error;
     try {
-      if (onRejected) return onRejected(error, currentIndex, head, functionChain);
+      if (onRejected) return onRejected(error, index, head, functionChain);
     } catch (onRejectedError) { innerError = onRejectedError; }
-    throw wrapError(innerError, errorWrap,
+    throw wrapError(innerError, wrap,
         "\n\thead:", ...dumpObject(head),
-        "\n\tcurrent function:", ...dumpObject(functionChain[currentIndex]),
+        "\n\tcurrent function:", ...dumpObject(functionChain[index]),
         "\n\tfunctionChain:", ...dumpObject(functionChain));
   }
 }

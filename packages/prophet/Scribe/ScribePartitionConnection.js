@@ -235,13 +235,16 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   requestMediaContents (mediaInfos: MediaInfo[]): any[] {
+    const connection = this;
+    const wrap = new Error(`requestMediaContents(${this.getName()}`);
     try {
-      return _requestMediaContents(this, mediaInfos, errorOnRequestMediaContents.bind(this));
-    } catch (error) { throw errorOnRequestMediaContents.call(this, error); }
+      return _requestMediaContents(this, mediaInfos, errorOnRequestMediaContents);
+    } catch (error) { return errorOnRequestMediaContents(error); }
     function errorOnRequestMediaContents (error: Object, mediaInfo: MediaInfo = error.mediaInfo) {
-      throw this.wrapErrorEvent(error, new Error(`requestMediaContents(${this.getName()}`),
+      throw connection.wrapErrorEvent(error, wrap,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
           "\n\tmediaInfos:", ...dumpObject(mediaInfos),
+          "\n\tconnection:", ...dumpObject(connection),
       );
     }
   }

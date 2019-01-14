@@ -1202,12 +1202,12 @@ export default class Vrapper extends Cog {
         mediaInfo = this.resolveMediaInfo(Object.create(options));
       }
       let decodedContent = options.decodedContent;
-      if (typeof decodedContent === "undefined") {
+      if (decodedContent === undefined) {
         decodedContent = this._withActiveConnectionChainEagerly(Object.create(options), [
           connection => connection.decodeMediaContent(mediaInfo),
         ], errorOnObtainMediaInterpretation.bind(this,
             new Error(`_obtainMediaInterpretation('${this.get("name", options)
-                }').decodeAs(${String(mediaInfo && mediaInfo.mime)})`))
+                }').connection.decodeMediaContent(as ${String(mediaInfo && mediaInfo.mime)})`))
         );
         if ((options.synchronous === true) && isPromise(decodedContent)) {
           throw new Error(`Media interpretation not immediately available for '${

@@ -296,8 +296,8 @@ export default class ValaaEngine extends Cog {
 
       result = transaction.chronicleEvent(constructCommand(constructParams));
 
-      // FIXME(iridian): If the transaction fails the Vrapper will contain inconsistent data until
-      // the next actual update on it.
+      // FIXME(iridian): If the transaction fails the Vrapper will
+      // contain inconsistent data until the next actual update on it.
 
       ret = directiveArray.map((directive, index) => {
         if (directive.initialState && directive.initialState.partitionAuthorityURI) {
@@ -323,9 +323,9 @@ export default class ValaaEngine extends Cog {
         return vResource;
       });
       const vRet = isRecombine ? ret : ret[0];
-      const transactionResult = transaction.releaseTransaction();
-      if (!transactionResult || !options.awaitResult) return vRet;
-      return thenChainEagerly(options.awaitResult(transactionResult, vRet), () => vRet);
+      transaction.releaseTransaction();
+      return !options.awaitResult ? vRet
+          : thenChainEagerly(options.awaitResult(result, vRet), () => vRet);
     } catch (error) {
       if (transaction) transaction.abortTransaction();
       throw localWrapError(this, error, `${constructCommand.name}()`);

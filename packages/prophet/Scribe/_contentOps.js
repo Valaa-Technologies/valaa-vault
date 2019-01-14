@@ -6,7 +6,8 @@ import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-dup
 
 import { MediaInfo, RetrieveMediaBuffer } from "~/prophet/api/types";
 
-import { DelayedQueue, dumpObject, invariantifyString, thenChainEagerly, vdon } from "~/tools";
+import { DelayedQueue, dumpObject, invariantifyString, mapEagerly, thenChainEagerly, vdon }
+    from "~/tools";
 import { encodeDataURI } from "~/tools/html5/dataURI";
 import { bufferAndContentIdFromNative } from "~/tools/textEncoding";
 
@@ -141,10 +142,11 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
     } else if (isCreatedLike(mediaEvent)) {
       mediaInfo = {};
     } else {
-      // FIXME(iridian): This should throw in principle: this is an indication of a corrupted
-      // event log. For now we accept and replay the event logs due to lack of resources for
-      // a proper fix - corrupted event logs must be accepted as a fact of life for the time
-      // being.
+      // FIXME(iridian): This should throw in principle: this is an
+      // indication of a corrupted event log. For now we accept and
+      // replay the event logs due to lack of resources for a proper
+      // fix - corrupted event logs must be accepted as a fact of life
+      // for the time being.
       connection.errorEvent(`mediaEvent for media has no previous media entry and ${
               ""}event is not CREATED, DUPLICATED and resource is not ghost`,
           "\n\treplay not blocked but media accesses made against this Media will throw.",

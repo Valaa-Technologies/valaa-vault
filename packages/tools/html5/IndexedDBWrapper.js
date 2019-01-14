@@ -83,7 +83,7 @@ export default class IndexedDBWrapper extends LogEventGenerator {
               ? undefined
               : this.databaseAPI.IDBKeyRange.upperBound(eventIdEnd - 1)
           : (typeof eventIdEnd === "undefined")
-              ? this.databaseAPI.IDKeyRange(eventIdBegin)
+              ? this.databaseAPI.IDBKeyRange(eventIdBegin)
           : (eventIdEnd > eventIdBegin)
               ? this.databaseAPI.IDBKeyRange.bound(eventIdBegin, eventIdEnd - 1)
           : null;

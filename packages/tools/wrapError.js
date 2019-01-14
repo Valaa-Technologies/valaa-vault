@@ -121,23 +121,23 @@ function _clipFrameListToCurrentContext (innerError, outerError) {
   const outer = outerError.tidyFrameList;
   let skipInner = 0;
   let skipOuter = 0;
-  let matches;
-  for (; skipOuter !== outer.length; ++skipOuter) {
+  let matches = 0;
+  for (; !matches && (skipOuter !== outer.length); ++skipOuter) {
     // Find first matching line
-    while ((skipInner !== inner.length) && (inner[skipInner] !== outer[skipOuter])) ++skipInner;
+    for (skipInner = 0; (skipInner !== inner.length) && (inner[skipInner] !== outer[skipOuter]);
+        ++skipInner);
     // Check that remaining lines match
-    matches = 0;
     for (; ((skipInner + matches) !== inner.length) && ((skipOuter + matches) !== outer.length);
         ++matches) {
       if (inner[skipInner + matches] !== outer[skipOuter + matches]) {
-        matches = undefined;
+        matches = 0;
         break;
       }
     }
-    if (matches !== undefined) break;
   }
-  if (matches === undefined) inner.push("<<< possibly missing frames >>>");
+  if (!matches) inner.push("<<< possibly missing frames >>>");
   else {
+    if (!skipInner) skipInner = 1;
     inner.splice(skipInner);
     if (skipOuter) outer.splice(0, skipOuter);
   }

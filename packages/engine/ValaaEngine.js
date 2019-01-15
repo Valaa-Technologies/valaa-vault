@@ -277,13 +277,13 @@ export default class ValaaEngine extends Cog {
     let ret;
     const isRecombine = Array.isArray(directives);
     const directiveArray = isRecombine ? directives : [directives];
+    const extractedProperties = [];
     let transaction;
     try {
       transaction = (options.transaction || this.discourse).acquireTransaction("construct");
       options.transaction = transaction;
       if (!options.head) options.head = this;
       constructParams = createConstructParams(options);
-      const extractedProperties = [];
 
       for (const directive of directiveArray) {
         extractedProperties.push(this._extractProperties(directive.initialState, options.head));
@@ -337,6 +337,7 @@ export default class ValaaEngine extends Cog {
               : ["\n\tinitialState:", ...dumpObject(directives.initialState)]),
           "\n\toptions:", ...dumpObject(options),
           "\n\tconstruct params:", ...dumpObject(constructParams),
+          "\n\textractedProperties:", ...dumpObject(extractedProperties),
           "\n\tclaim result:", ...dumpObject(result),
           "\n\tret:", ...dumpObject(ret),
       );
@@ -357,8 +358,18 @@ export default class ValaaEngine extends Cog {
 
   _updateProperties (target: Vrapper, properties: Object, options: VALKOptions) {
     for (const propertyName of Object.keys(properties)) {
-      target.alterProperty(propertyName, VALEK.fromValue(properties[propertyName]),
-          Object.create(options));
+      const kuery = VALEK.fromValue(properties[propertyName]);
+      try {
+        target.alterProperty(propertyName, kuery, Object.create(options));
+      } catch (error) {
+        throw this.wrapErrorEvent(error,
+            new Error(`constructWith._updateProperties(${propertyName})`),
+            "\n\tobject:", ...dumpObject(target),
+            "\n\tvalue:", ...dumpObject(properties[propertyName]),
+            "\n\talter value kuery:", ...dumpObject(kuery),
+            "\n\toptions:", ...dumpObject(options),
+        );
+      }
     }
   }
 

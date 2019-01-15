@@ -970,8 +970,9 @@ export default class Vrapper extends Cog {
     if (vProperty) {
       return vProperty.alterValue(actualAlterationVAKON, options, this);
     }
-    let newValue = this.run(0, ["§->", ["§void"], actualAlterationVAKON],
-        { ...options, scope: this.getLexicalScope() });
+    const alterationOptions = Object.create(options);
+    alterationOptions.scope = this.getLexicalScope();
+    let newValue = this.run(0, ["§->", ["§void"], actualAlterationVAKON], alterationOptions);
     const hostType = this.engine.getRootScope().Valaa[typeName];
     const fieldPrototypeEntry = hostType.hostObjectPrototype[propertyName];
     if ((fieldPrototypeEntry != null) && fieldPrototypeEntry.writableFieldName) {

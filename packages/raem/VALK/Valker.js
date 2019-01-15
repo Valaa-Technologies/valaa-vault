@@ -27,9 +27,18 @@ import { dumpify, isSymbol, wrapError } from "~/tools";
 export type Packer = (unpackedValue: any, valker: Valker) => any;
 export type Unpacker = (packedValue: any, valker: Valker) => any;
 
-// VALKOptions ownership is always given to callee. If you wish to retain the original unchanged
-// pass the options to the callee with Object.create(options).
-// As a rule of thumb, you should wrap _all but last_ call that takes a specific options like this.
+// VALKOptions ownership is always given to callee. If you wish to
+// retain the original unchanged pass the options to the callee with
+// Object.create(options). As a rule of thumb, you should wrap
+// _all but last_ call that takes a specific options like this.
+// This has an important consequence:
+// Do NOT use spread operator with 'options' objects as it will discard
+// options that are buried in the prototype.
+// FIXME(iridian, 2019-01): There are several placed in the codebase
+// which violate this principle. They should be fixed. Alternatively
+// the whole Object.create -idiom should be evaluated and maybe
+// dropped. Its rationale is performance, as sometimes the options
+// are passed deeply.
 export type VALKOptions = {
   scope?: Object,
   state?: Object,

@@ -53,9 +53,10 @@ export default Object.freeze({
     // FIXME(iridian): The implementation of this function is tightly coupled with scriptAPI.js,
     // is thus an extension and should be located with VALEK.
     let Type;
+    let eArgs;
     try {
       const eType = valker.advance(head, newOp[1], scope);
-      const eArgs = new Array(newOp.length - 2);
+      eArgs = new Array(newOp.length - 2);
       for (let index = 0; index + 2 !== newOp.length; ++index) {
         const arg = newOp[index + 2];
         eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
@@ -74,7 +75,8 @@ export default Object.freeze({
           ""} Valaa object creation or a Valaa Resource for instantiation`);
     } catch (error) {
       throw valker.wrapErrorEvent(error, `builtin.§new`,
-          "\n\tType:", ...dumpObject(Type));
+          "\n\tType:", ...dumpObject(Type),
+          "\n\targs:", ...dumpObject(eArgs));
     }
   },
   "§typeof": function _typeof (valker: Valker, head: any, scope: ?Object,

@@ -49,6 +49,7 @@ export default [{
       value: pointer(["ownling"]),
     }, }),
     created({ id: ["test+1"], typeName: "Entity", initialState: {
+      name: "testInstance",
       owner: ["test_partition"],
       instancePrototype: ["test"],
     }, }),

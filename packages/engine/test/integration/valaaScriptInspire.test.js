@@ -908,4 +908,26 @@ describe("@valos/engine - @valos/prophet integrations", () => {
     expect(await harness.runBody(vRef("test_partition"), `this.obj.callbackEntity.result`))
         .toEqual(20);
   });
+
+  describe("Regressions", () => {
+    it("returns $V.partitionURI for root, child, instance and ghosts properly", () => {
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
+      const { rootURI, testURI, instanceURI, ghostURI } = harness.runBody(vRef("test_partition"), `
+        const rootURI = this.$V.partitionURI;
+        const test = this.$V.unnamedOwnlings.find(e => (e.$V.name === "testName"));
+        const instance = this.$V.unnamedOwnlings.find(e => (e.$V.name === "testInstance"));
+        const ghost = instance.$V.unnamedOwnlings.find(e => (e.$V.name === "ownlingCreator"));
+        ({
+          rootURI: this.$V.partitionURI,
+          testURI: test.$V.partitionURI,
+          instanceURI: instance.$V.partitionURI,
+          ghostURI: ghost.$V.partitionURI,
+        });
+      `);
+      expect(rootURI).toEqual(String(harness.testPartitionURI));
+      expect(testURI).toEqual(String(harness.testPartitionURI));
+      expect(instanceURI).toEqual(String(harness.testPartitionURI));
+      expect(ghostURI).toEqual(String(harness.testPartitionURI));
+    });
+  });
 });

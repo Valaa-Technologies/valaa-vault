@@ -181,7 +181,7 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
 export function resolvePartitionURI (resolver: Resolver, resourceId: VRef) {
   return (!resourceId.isGhost()
           ? resourceId
-          : resolver.bindObjectRawId(resourceId.getGhostPath().headHostRawId(), "Resource"))
+          : resolver.bindObjectId([resourceId.getGhostPath().headHostRawId()], "Resource"))
       .getPartitionURI();
 }
 

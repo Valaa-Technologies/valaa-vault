@@ -231,7 +231,7 @@ export default class VrapperSubscriber extends SimpleData {
     // non-final path steps need to be evaluated.
     const head = (rawHead instanceof ValaaReference)
         ? this._emitter.engine.getVrapper(rawHead) : rawHead;
-    const kueryVAKON = kuery instanceof Kuery ? kuery.toVAKON() : kuery;
+    let kueryVAKON = kuery instanceof Kuery ? kuery.toVAKON() : kuery;
     let ret: any;
     if (this._valkOptions.verbosity) {
       console.log(" ".repeat(this._valkOptions.verbosity),
@@ -276,20 +276,24 @@ export default class VrapperSubscriber extends SimpleData {
             }
             return ret;
           }
-          const opName = kueryVAKON[0];
-          if ((typeof opName !== "string") || (opName[0] !== "§") || (opName === "§->")) {
-            // Path.
+          let opName = kueryVAKON[0];
+          if (opName === "§->") {
+            // Path op.
             const pathScope = Object.create(scope);
-            let stepIndex = (opName === "§->") ? 1 : 0;
+            let stepIndex = 1;
             let stepHead = head;
             while (stepIndex < kueryVAKON.length) {
               const step = kueryVAKON[stepIndex];
               stepIndex += 1;
-              if (step === false && (stepHead === null || (typeof stepHead === "undefined"))) break;
+              if (step === false && (stepHead == null)) break;
               stepHead = this._processKuery(stepHead, step, pathScope,
                   (stepIndex < kueryVAKON.length) || evaluateKuery);
             }
             return (ret = stepHead);
+          }
+          if ((typeof opName !== "string") || (opName[0] !== "§")) {
+            // Array op.
+            kueryVAKON = [(opName = "§[]"), ...kueryVAKON];
           }
           // Builtin.
           let handler = customLiveExpressionOpHandlers[opName];
@@ -298,7 +302,7 @@ export default class VrapperSubscriber extends SimpleData {
             if (ret === performFullDefaultProcess) handler = undefined;
             else if (ret !== performDefaultGet) return ret;
           }
-          if (typeof handler === "undefined") {
+          if (handler === undefined) {
             for (let i = 1; i < kueryVAKON.length; ++i) {
               const argument = kueryVAKON[i];
               // Skip non-object, non-path builtin args as they are treated as literals.

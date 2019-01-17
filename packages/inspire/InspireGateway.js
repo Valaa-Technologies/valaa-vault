@@ -34,7 +34,7 @@ import extendValaaSpaceWithInspire from "~/inspire/ValaaSpace";
 import { arrayBufferFromBase64 } from "~/tools/base64";
 
 const { AuthorityNexus, FalseProphet, Oracle, Prophet, Scribe } = valosProphet;
-const { dumpObject, inBrowser, invariantify, LogEventGenerator } = valosTools;
+const { dumpObject, inBrowser, invariantify, LogEventGenerator, thenChainEagerly } = valosTools;
 
 export default class InspireGateway extends LogEventGenerator {
   constructor (options: Object) {
@@ -213,8 +213,10 @@ export default class InspireGateway extends LogEventGenerator {
       rootScope.Valaa.gateway = this;
       rootScope.Valaa.identity = engine.getIdentityManager();
 
-      ret[viewName] = createView({ engine, name: `${viewConfig.name} View` })
-          .attach(viewConfig);
+      ret[viewName] = thenChainEagerly(createView({ engine, name: `${viewConfig.name} View` }), [
+        view => view.attach(viewConfig),
+        attachedView => (ret[viewName] = attachedView),
+      ]);
       this.warnEvent(`Opened View ${viewName}`,
           ...(!this.getVerbosity() ? [] : [", with:",
             "\n\tviewConfig:", ...dumpObject(viewConfig),

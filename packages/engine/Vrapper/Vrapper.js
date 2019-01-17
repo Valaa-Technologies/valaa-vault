@@ -1351,7 +1351,8 @@ export default class Vrapper extends Cog {
    */
   mediaURL (options: VALKOptions = {}) {
     let mediaInfo;
-    const wrapper = new Error("mediaURL");
+    const vrapper = this;
+    const wrap = new Error("mediaURL");
     try {
       this.requireActive(options);
       invariantify(this.hasInterface("Media"),
@@ -1361,7 +1362,7 @@ export default class Vrapper extends Cog {
       mediaInfo = this.resolveMediaInfo(Object.create(options));
       const ret = this._withActiveConnectionChainEagerly(Object.create(options), [
         connection => connection.getMediaURL(mediaInfo),
-      ], errorOnMediaURL.bind(this));
+      ], errorOnMediaURL);
       if (typeof options.synchronous !== "undefined") {
         if (!options.synchronous) return Promise.resolve(ret);
         if (isPromise(ret)) {
@@ -1372,7 +1373,7 @@ export default class Vrapper extends Cog {
       return ret;
     } catch (error) { return errorOnMediaURL(error); }
     function errorOnMediaURL (error) {
-      throw this.wrapErrorEvent(error, wrapper, "\n\tinfo:", ...dumpObject(mediaInfo));
+      throw vrapper.wrapErrorEvent(error, wrap, "\n\tinfo:", ...dumpObject(mediaInfo));
     }
   }
 

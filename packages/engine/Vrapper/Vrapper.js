@@ -538,7 +538,7 @@ export default class Vrapper extends Cog {
   _setTypeName (typeName: string) {
     if (typeName === this._typeName) return;
     this._typeName = typeName;
-    this._typeIntro = this.getTypeIntro();
+    this._typeIntro = null;
   }
 
   setDebug (level: number) { this._debug = level; }
@@ -634,26 +634,31 @@ export default class Vrapper extends Cog {
     return packedSingular(singularTransient, this._typeName || "TransientFields");
   }
 
-  getLexicalScope (obtain: boolean) {
-    if (this._lexicalScope) return this._lexicalScope;
-    if (!obtain) {
-      this.requireActive();
-      return this.engine.getLexicalScope();
+  getLexicalScope (createIfMissing: boolean) {
+    if (!this._lexicalScope) {
+      if (!createIfMissing) {
+        this.requireActive();
+        return this.engine.getLexicalScope();
+      }
+      this._initializeScopes(this.engine);
     }
-    this._lexicalScope = Object.create(this.engine.getLexicalScope());
-    this._nativeScope = Object.create(this.engine.getNativeScope());
     return this._lexicalScope;
   }
 
-  getNativeScope (obtain: boolean) {
-    if (this._nativeScope) return this._nativeScope;
-    if (!obtain) {
-      this.requireActive();
-      return this.engine.getNativeScope();
+  getNativeScope (createIfMissing: boolean) {
+    if (!this._nativeScope) {
+      if (!createIfMissing) {
+        this.requireActive();
+        return this.engine.getNativeScope();
+      }
+      this._initializeScopes(this.engine);
     }
-    this._lexicalScope = Object.create(this.engine.getLexicalScope());
-    this._nativeScope = Object.create(this.engine.getNativeScope());
     return this._nativeScope;
+  }
+
+  _initializeScopes (parent: Object) {
+    this._lexicalScope = Object.create(parent.getLexicalScope(true));
+    this._nativeScope = Object.create(parent.getNativeScope(true));
   }
 
   getHostGlobal () {
@@ -1821,9 +1826,7 @@ export default class Vrapper extends Cog {
     this._scopeOwnerSubscriber = this.subscribeToMODIFIED("owner", (ownerUpdate: FieldUpdate) => {
       const parent = ownerUpdate.value() || this.engine;
       if (!this._lexicalScope) {
-        this._lexicalScope = Object.create(parent.getLexicalScope(true));
-        this._lexicalScope.this = this;
-        this._nativeScope = Object.create(parent.getNativeScope(true));
+        this._initializeScopes(parent);
       } else {
         const dummy = {};
         this._lexicalScope[Vrapper.infiniteLoopTester] = dummy;
@@ -1839,6 +1842,15 @@ export default class Vrapper extends Cog {
           Object.setPrototypeOf(this._nativeScope, parent.getNativeScope(true));
         }
       }
+      // TODO(iridian, 2019-01) 'this' is critical but very dubious.
+      // When a ValaaScript top-level module lambda function accesses
+      // the global 'this' identifier it will resolve to the
+      // _lexicalScope.this of the context resource.
+      // This is very hard to debug as there is no abstraction layer
+      // between: ValaaScript transpiler will omit code for 'this' access
+      // for lambda functions expecting that 'this' is found in the
+      // scope.
+      this._lexicalScope.this = this;
     }, new VrapperSubscriber().setSubscriberInfo(`Vrapper(${this.debugId()}).scope.owner`)
     ).triggerUpdate(options);
     if (!this._lexicalScope) {

@@ -1401,18 +1401,30 @@ export default class Vrapper extends Cog {
   });
 
   /**
-   * Eagerly updates the Bvob cache entry with given content, creates a new Bvob for it and returns
-   * the Bvob id.
-   * If the partition of the Media is not acquired, returns a promise for acquiring the partition
-   * and performing this operation instead.
-   * TODO(iridian): This is quite a sucky API. It was deviced to work nicely with LinkField toValue
-   * etc. but the interaction just feels forced and stupid: it really should just set the content
-   * Bvob field of the Media.
+   * Prepares given content for use within the partition of this
+   * resource in the form of a newly created Bvob object.
+   * Returns a promise which resolves to a `createBvob` function once
+   * the partition is connected and the content has been optimistically
+   * persisted. Calling createBvob will then create and return a new
+   * Bvob resource which represents the given content and which can be
+   * assigned to some Media.content.
+   *
+   * The semantics of optimistic persistence depends on the partition
+   * authority scheme and its configuration. valaa-memory doesn't
+   * support Media content (or stores them in memory). valaa-local
+   * optimistically and fully persists in the local Scribe. Typical
+   * remote partitions optimistically persist on the local Scribe and
+   * fully persist on the remote authority once online.
+   *
+   * In general only the partition of this resource matters. However
+   * if this resource is a Media then its name and mediaType fields are
+   * used as debug information. Even then the final resulting bvob
+   * can be used with any media.
    *
    * @param {*} bvobContent
    * @param {VALKOptions} [options={}]
-   * @returns a function callback which creates the Bvob object inside the transaction specified in
-   * the options.transaction parameter.
+   * @returns a function callback which creates and returns a Bvob
+   * using the transaction specified in options.transaction.
    *
    * @memberof Vrapper
    */
@@ -1426,14 +1438,14 @@ export default class Vrapper extends Cog {
       }
       return this._withActiveConnectionChainEagerly(Object.create(options), [
         connection => connection.prepareBvob(content, mediaInfo),
-        ({ contentId, persistProcess }) => (contentId || persistProcess),
-        (contentId) => {
-          if (!contentId || (typeof contentId !== "string")) {
-            throw new Error(`Invalid contentId '${typeof contentId}', truthy string expected`);
+        ({ contentHash, persistProcess }) => (contentHash || persistProcess),
+        (contentHash) => {
+          if (!contentHash || (typeof contentHash !== "string")) {
+            throw new Error(`Invalid contentHash '${typeof contentHash}', truthy string expected`);
           }
           const engine = this.engine;
           function ret (innerOptions: VALKOptions = Object.create(options)) {
-            innerOptions.id = contentId;
+            innerOptions.id = contentHash;
             const callerValker = this && this.__callerValker__;
             if (callerValker) innerOptions.transaction = callerValker;
             return engine.create("Blob", undefined, innerOptions);

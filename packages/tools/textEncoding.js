@@ -1,20 +1,20 @@
 // @flow
 import { TextEncoder, TextDecoder } from "text-encoding";
-import { contentIdFromArrayBuffer } from "~/tools/id/contentId";
+import { contentHashFromArrayBuffer } from "~/tools/id/contentId";
 
 // FIXME(iridian): This needs to be properly tested, especially on the surrogate pairs an aether
 // planes, so that UCS2String and UCS2Stream give identical results!
 
-export function bufferAndContentIdFromNative (object: any, mediaInfo?: Object) {
+export function bufferAndContentHashFromNative (object: any, mediaInfo?: Object) {
   if (typeof object === "undefined") return undefined;
   const ret = {
     buffer: (typeof object === "string") ? _arrayBufferFromStringAndMediaInfo(object, mediaInfo)
         : (ArrayBuffer.isView(object)) ? object.buffer
         : (object instanceof ArrayBuffer) ? object
         : _arrayBufferFromStringAndMediaInfo(JSON.stringify(object), mediaInfo),
-    contentId: undefined,
+    contentHash: undefined,
   };
-  ret.contentId = contentIdFromArrayBuffer(ret.buffer);
+  ret.contentHash = contentHashFromArrayBuffer(ret.buffer);
   return ret;
 }
 
@@ -60,7 +60,7 @@ function _arrayBufferFromString (encoding: string, stringContent: string): Array
   return enc.encode(stringContent).buffer;
 }
 
-export function contentIdFromUCS2String (contentString: string) {
+export function contentHashFromUCS2String (contentString: string) {
   const buffer = arrayBufferFromUTF8String(contentString);
-  return contentIdFromArrayBuffer(buffer);
+  return contentHashFromArrayBuffer(buffer);
 }

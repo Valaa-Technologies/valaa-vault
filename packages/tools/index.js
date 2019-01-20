@@ -9,8 +9,8 @@ export default Valaa.exportPlugin({ name: "@valos/tools", mediaDecoders });
 export { default as valaaHash } from "./id/valaaHash";
 export { default as valaaUUID } from "./id/valaaUUID";
 
-export const contentIdFromArrayBuffer = require("./id/contentId").contentIdFromArrayBuffer;
-export const contentIdFromNativeStream = require("./id/contentId").contentIdFromNativeStream;
+export const contentHashFromArrayBuffer = require("./id/contentId").contentHashFromArrayBuffer;
+export const contentHashFromNativeStream = require("./id/contentId").contentHashFromNativeStream;
 
 export const derivedId = require("./id/derivedId").default;
 

@@ -27,6 +27,11 @@ export default new GraphQLObjectType({
         bvob => bvob.get("id").rawId(),
     ),
 
+    ...generatedField("contentHash", new GraphQLNonNull(GraphQLString),
+        `The content hash of this Bvob`,
+        bvob => bvob.get("id").rawId(),
+    ),
+
     ...transientField("contentReferrers", new GraphQLList(Resource),
         `Incoming references to this Bvob`,
         { coupling: toMany({ defaultCoupledField: "content" }), affiliatedType: "Blob" }),

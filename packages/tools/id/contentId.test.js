@@ -1,8 +1,8 @@
 import path from "path";
 import fs from "fs";
 
-import { contentIdFromUCS2String } from "~/tools/textEncoding";
-import { contentIdFromArrayBuffer, contentIdFromNativeStream } from "./contentId";
+import { contentHashFromUCS2String } from "~/tools/textEncoding";
+import { contentHashFromArrayBuffer, contentHashFromNativeStream } from "./contentId";
 
 function toArrayBuffer (buf) {
   const ab = new ArrayBuffer(buf.length);
@@ -13,7 +13,7 @@ function toArrayBuffer (buf) {
   return ab;
 }
 
-describe("contentId module", () => {
+describe("contentHash module", () => {
   const testData = [
     // Test vectors from https://www.di-mgt.com.au/sha_testvectors.html
     { msg: "abc", hash: "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f" },
@@ -45,13 +45,13 @@ describe("contentId module", () => {
   describe("Synchronous id generation", () => {
     for (const td of testData) {
       it(`Given input string ${td.msg}, it should calculate ${td.hash}`, () => {
-        expect(contentIdFromUCS2String(td.msg)).toEqual(td.hash);
+        expect(contentHashFromUCS2String(td.msg)).toEqual(td.hash);
       });
     }
 
     for (const tf of testFiles) {
       it(`Given input file ${tf.path}, it should calculate ${tf.hash}`, () => {
-        expect(contentIdFromArrayBuffer(toArrayBuffer(fs.readFileSync(tf.path)))).toEqual(tf.hash);
+        expect(contentHashFromArrayBuffer(toArrayBuffer(fs.readFileSync(tf.path)))).toEqual(tf.hash);
       });
     }
 
@@ -62,7 +62,7 @@ describe("contentId module", () => {
     for (const tf of testFiles) {
       it(`Given input stream ${tf.path}, it should calculate ${tf.hash}`, () => {
         const stream = fs.createReadStream(tf.path);
-        return contentIdFromNativeStream(stream).then(hash => {
+        return contentHashFromNativeStream(stream).then(hash => {
           expect(hash).toEqual(tf.hash);
         });
       });
@@ -72,7 +72,7 @@ describe("contentId module", () => {
       for (const tf of bigFiles) {
         it(`Given input stream ${tf.path}, it should calculate ${tf.hash}`, () => {
           const stream = fs.createReadStream(tf.path);
-          return contentIdFromNativeStream(stream).then(hash => {
+          return contentHashFromNativeStream(stream).then(hash => {
             expect(hash).toEqual(tf.hash);
           });
         }, (2 ** 31) - 1); // last param is maximum timeout for jasmine, Infinity doesnt work

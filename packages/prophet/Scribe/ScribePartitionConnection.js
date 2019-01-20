@@ -96,7 +96,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   disconnect () {
     const adjusts = {};
     for (const entry of Object.values(this._pendingMediaLookup)) {
-      if (entry.isInMemory) adjusts[entry.contentId] = -1;
+      if (entry.isInMemory) adjusts[entry.contentHash] = -1;
       delete this._prophet._persistedMediaLookup[entry.mediaId];
     }
     this._prophet._adjustInMemoryBvobBufferRefCounts(adjusts);
@@ -250,7 +250,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   prepareBvob (content: any, mediaInfo?: MediaInfo):
-      { buffer: ArrayBuffer, contentId: string, persistProcess: ?Promise<any> } {
+      { buffer: ArrayBuffer, contentHash: string, persistProcess: ?Promise<any> } {
     const errorWrap = new Error(`prepareBvob(${
         mediaInfo && mediaInfo.name ? `of Media "${mediaInfo.name}"` : typeof content})`);
     try {

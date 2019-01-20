@@ -18,20 +18,20 @@ export function bardCreateBvobReferenceData (bard, referrerFieldName) {
   };
 }
 
-export function addBvobReferenceRegisterToRootCommand (bard: Bard, bvobId: string,
+export function addBvobReferenceRegisterToRootCommand (bard: Bard, contentHash: string,
     referrerFieldName: string) {
   const meta = bard.event.meta;
   if (!meta.isBeingUniversalized) return;
   const adds = meta.addedBvobReferences || (meta.addedBvobReferences = {});
-  (adds[bvobId] || (adds[bvobId] = [])).push(
+  (adds[contentHash] || (adds[contentHash] = [])).push(
       bardCreateBvobReferenceData(bard, referrerFieldName));
 }
 
-export function addBvobReferenceUnregisterToRootCommand (bard: Bard, bvobId: string,
+export function addBvobReferenceUnregisterToRootCommand (bard: Bard, contentHash: string,
     referrerFieldName: string) {
   const meta = bard.event.meta;
   if (!meta.isBeingUniversalized) return;
   const removes = meta.removedBvobReferences || (meta.removedBvobReferences = {});
-  (removes[bvobId] || (removes[bvobId] = [])).push(
+  (removes[contentHash] || (removes[contentHash] = [])).push(
       bardCreateBvobReferenceData(bard, referrerFieldName));
 }

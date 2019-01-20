@@ -10,7 +10,7 @@ import { tryAspect } from "~/prophet/tools/EventAspects";
 import { DelayedQueue, dumpObject, invariantifyString, mapEagerly, thenChainEagerly, vdon }
     from "~/tools";
 import { encodeDataURI } from "~/tools/html5/dataURI";
-import { bufferAndContentIdFromNative } from "~/tools/textEncoding";
+import { bufferAndContentHashFromNative } from "~/tools/textEncoding";
 
 import Scribe from "./Scribe";
 import ScribePartitionConnection from "./ScribePartitionConnection";
@@ -66,24 +66,24 @@ export function _preCacheBvob (scribe: Scribe, bvobId: string, newInfo: BvobInfo
 
 export function _prepareBvob (connection: ScribePartitionConnection, content: any,
     mediaInfo: MediaInfo = {}, onError: Function) {
-  const { buffer, contentId } = bufferAndContentIdFromNative(content, mediaInfo);
-  if (mediaInfo && mediaInfo.bvobId && (mediaInfo.bvobId !== contentId)) {
+  const { buffer, contentHash } = bufferAndContentHashFromNative(content, mediaInfo);
+  if (mediaInfo && mediaInfo.bvobId && (mediaInfo.bvobId !== contentHash)) {
     connection.errorEvent(`\n\tINTERNAL ERROR: bvobId mismatch when preparing bvob for Media '${
             mediaInfo.name}', CONTENT IS NOT PERSISTED`,
-        "\n\tactual content id:", contentId,
+        "\n\tactual content hash:", contentHash,
         "\n\trequested bvobId:", mediaInfo.bvobId,
         "\n\tmediaInfo:", ...dumpObject(mediaInfo),
         "\n\tcontent:", ...dumpObject({ content }),
     );
     return {};
   }
-  mediaInfo.bvobId = contentId;
+  mediaInfo.bvobId = contentHash;
 
-  const pendingBvobInfo = connection._pendingBvobLookup[contentId]
-      || (connection._pendingBvobLookup[contentId] = {});
+  const pendingBvobInfo = connection._pendingBvobLookup[contentHash]
+      || (connection._pendingBvobLookup[contentHash] = {});
   if (!pendingBvobInfo.persistProcess) {
     pendingBvobInfo.persistProcess = thenChainEagerly(
-        connection._prophet._writeBvobBuffer(buffer, contentId),
+        connection._prophet._writeBvobBuffer(buffer, contentHash),
         (persistedContentId) => (pendingBvobInfo.persistProcess = persistedContentId),
         onError,
     );
@@ -97,7 +97,7 @@ export function _prepareBvob (connection: ScribePartitionConnection, content: an
     );
   }
 
-  return { ...pendingBvobInfo, content, buffer, contentId };
+  return { ...pendingBvobInfo, content, buffer, contentHash };
 }
 
 async function _prepareBvobUpstreamWithRetries (connection: ScribePartitionConnection,

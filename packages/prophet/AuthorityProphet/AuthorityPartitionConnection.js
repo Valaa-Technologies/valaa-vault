@@ -73,7 +73,7 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
   }
 
   prepareBvob (content: any, mediaInfo?: Object):
-      { contentId: string, persistProcess: ?Promise<any> } {
+      { contentHash: string, persistProcess: ?Promise<any> } {
     if (!mediaInfo || !mediaInfo.bvobId) {
       throw new Error("mediaInfo.bvobId not defined in AuthorityProphetConnection");
     }
@@ -83,7 +83,7 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
       error.retryable = false;
       persistProcess = Promise.reject(this.wrapErrorEvent(error, new Error("prepareBvob")));
     }
-    return { contentId: mediaInfo.bvobId, persistProcess };
+    return { contentHash: mediaInfo.bvobId, persistProcess };
   }
 }
 

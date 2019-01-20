@@ -379,30 +379,31 @@ export default class PartitionConnection extends Follower {
 
   /**
    * Prepares the bvob content to be available for this partition,
-   * returning its contentId and a promise to the persist process.
+   * returning its contentHash and a promise to the persist process.
    *
-   * This availability is impermanent. If the contentId is not referred
-   * to by the event log the content will eventually be garbage
-   * collected.
-   * The Prophet chain will define the specific details of garbage
-   * collection (see Scribe for its local content caching semantics).
+   * This availability is impermanent. If the contentHash is not
+   * referred to by the event log the content will eventually be
+   * garbage collected.
+   * The particular Prophet chain of this connection will define the
+   * specific details of garbage collection (see Scribe for its local
+   * content caching semantics).
    *
    * The idiomatic way to make content permanently available is to add
    * a Media.content reference to a Bvob with Bvob.id equal to
-   * the contentId.
+   * the contentHash.
    *
    * mediaInfo is an optional hint containing the expected MediaInfo
    * of a Media where this content is to be used. The upstream is
    * allowed to reject the prepareBvob request based on this hint, most
-   * notably if mediaInfo.bvobId differs from the contentId.
+   * notably if mediaInfo.bvobId differs from the contentHash.
    *
    * @param {*} content
    * @param {MediaInfo} [mediaInfo]
-   * @returns {{ contentId: string, persistProcess: ?Promise<any> }}
+   * @returns {{ contentHash: string, persistProcess: ?Promise<any> }}
    * @memberof PartitionConnection
    */
   prepareBvob (content: any, mediaInfo?: MediaInfo):
-      { contentId: string, persistProcess: ?Promise<any> } {
+      { contentHash: string, persistProcess: ?Promise<any> } {
     return this._upstreamConnection.prepareBvob(content, mediaInfo);
   }
 }

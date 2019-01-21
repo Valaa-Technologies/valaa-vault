@@ -155,8 +155,6 @@ export default class JSXDecoder extends MediaDecoder {
                 throw new Error(
                     `Cannot find instance lens prototype '${type}' from integration scope`);
               }
-              console.warn("instanceLensPrototype:", type, lexicalScope,
-                  actualProps.instanceLensPrototype);
             }
             const actualChildren = !hasComplexChildren ? firstPassChildren
                 : firstPassChildren.map(child => (typeof child !== "function"

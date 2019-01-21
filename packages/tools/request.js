@@ -28,7 +28,7 @@ async function asyncRequest (opts) {
       silentMode = true;
       delete opts.silent;
     }
-    console.info("reqwest promise created", opts);
+    // console.info("reqwest promise created", opts);
     outstandingRequests[opts.url] = opts;
     const ret = await new Promise((resolve, reject) => {
       reqwest({
@@ -70,7 +70,7 @@ async function asyncRequest (opts) {
       });
     });
     delete outstandingRequests[opts.url];
-    console.info("reqwest promise resolved", opts, { content: ret }, outstandingRequests);
+    // console.info("reqwest promise resolved", opts, { content: ret }, outstandingRequests);
     return ret;
   } catch (error) {
     throw wrapError(error, `During request(${opts.url}), with:`,

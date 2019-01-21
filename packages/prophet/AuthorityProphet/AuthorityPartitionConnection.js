@@ -31,7 +31,7 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
 
   _doConnect (/* options: ConnectOptions */) {}
 
-  narrateEventLog (options: ?NarrateOptions = {}): Promise<any> {
+  narrateEventLog (options: ?NarrateOptions = {}): Object | Promise<Object> {
     if (this.isRemoteAuthority()) {
       throw new Error(`Failed to narrate events from ${this.getName()}: ${this.constructor.name
           }.narrateEventLog is not implemented`);

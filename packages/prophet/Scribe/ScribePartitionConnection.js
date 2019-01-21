@@ -114,23 +114,26 @@ export default class ScribePartitionConnection extends PartitionConnection {
   narrateEventLog (options: ?NarrateOptions = {}):
       Promise<{ scribeTruthLog: any, scribeCommandQueue: any }> {
     if (!options) return undefined;
+    if (!this.isLocallyPersisted()) return super.narrateEventLog(options);
+    const connection = this;
+    const wrap = new Error("narrateEventLog()");
     const ret = {};
     return _narrateEventLog(this, options, ret)
-        .catch(errorOnNarrateEventLog.bind(this, new Error("narrateEventLog()")));
-    function errorOnNarrateEventLog (wrapper, error) {
-      throw this.wrapErrorEvent(error, wrapper,
-          "\n\toptions:", ...dumpObject(options),
-          "\n\tcurrent ret:", ...dumpObject(ret));
-    }
+        .catch(function errorOnScribeNarrateEventLog (error) {
+          throw connection.wrapErrorEvent(error, wrap,
+              "\n\toptions:", ...dumpObject(options),
+              "\n\tcurrent ret:", ...dumpObject(ret));
+        });
   }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
-    const contextError = new Error("chronicleEvents");
+    const connection = this;
+    const wrap = new Error("chronicleEvents()");
     try {
-      return _chronicleEvents(this, events, options, errorOnScribeChronicleEvents.bind(this));
-    } catch (error) { return errorOnScribeChronicleEvents.call(this, error); }
+      return _chronicleEvents(this, events, options, errorOnScribeChronicleEvents);
+    } catch (error) { return errorOnScribeChronicleEvents(error); }
     function errorOnScribeChronicleEvents (error) {
-      throw this.wrapErrorEvent(error, contextError,
+      throw connection.wrapErrorEvent(error, wrap,
           "\n\teventLog:", ...dumpObject(events),
           "\n\toptions:", ...dumpObject(options),
       );

@@ -37,22 +37,26 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
       ...generatedField("id", new GraphQLNonNull(GraphQLID),
           `ValaaReference of this ${objectDescription}`,
           resource => resource.get("id"),
+          { affiliatedType: "Transientfields" },
       ),
 
       ...generatedField("rawId", new GraphQLNonNull(GraphQLString),
           `Globally unique identifier of this ${objectDescription}`,
           resource => resource.get("id").rawId(),
+          { affiliatedType: "Transientfields" },
       ),
 
       ...generatedField("typeName", new GraphQLNonNull(GraphQLString),
           `Type name of this ${objectDescription}`,
           getTransientTypeName,
+          { affiliatedType: "Transientfields" },
       ),
 
       ...generatedField("partition", Partition,
           `The partition Resource of this ${objectDescription}, ie. the nearest owner (or self)${
               ""} which is also an active partition.`,
           partitionResolver,
+          { affiliatedType: "Transientfields" },
       ),
 
       ...generatedField("partitionURI", GraphQLString,
@@ -60,6 +64,7 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
               ""} This root resource of this Partition is the innermost owning resource with {
               ""} Partition.partitionAuthorityURI set.`,
           partitionURIResolver,
+          { affiliatedType: "Transientfields" },
       ),
 
       ...primaryField("prototype", TransientFields,
@@ -75,33 +80,37 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
           `The prototype of this ${objectDescription}. This is an alias for ${
               ""} TransientFields.prototype${
               ""} to bypass conflicts with native javascript property 'prototype'.`,
+          { affiliatedType: "Transientfields" },
       ),
 
       ...generatedField("ownFields", TransientFields,
           `A transient version of this object without prototype. All property accesses will only${
             ""}return values owned directly.`,
           object => object.set("prototype", null),
+          { affiliatedType: "Transientfields" },
       ),
 
       ...transientField("prototypers", new GraphQLList(TransientFields),
           `All ${objectDescription}'s which have this ${objectDescription
           } as prototype but which are not instances (direct nor ghost)`, {
             coupling: toMany({ coupledField: "prototype", preventsDestroy: true }),
-            affiliatedType: "TransientFields",
             immediateDefaultValue: [],
+            affiliatedType: "TransientFields",
           },
       ),
 
       ...aliasField("instancePrototype", "prototype", TransientFields,
-          `Instance prototype of this ${objectDescription} instance`,
-          { coupling: toOne({ coupledField: "instances" }), affiliatedType: "TransientFields" },
+          `Instance prototype of this ${objectDescription} instance`, {
+            coupling: toOne({ coupledField: "instances" }),
+            affiliatedType: "TransientFields",
+          },
       ),
 
       ...transientField("instances", new GraphQLList(TransientFields),
           `Instances which have this ${objectDescription} as prototype`, {
             coupling: toMany({ coupledField: "prototype", preventsDestroy: true }),
-            affiliatedType: "TransientFields",
             immediateDefaultValue: [],
+            affiliatedType: "TransientFields",
           },
       ),
 
@@ -122,8 +131,8 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
       ...transientField("materializedGhosts", new GraphQLList(TransientFields),
           `Materialized ghosts which have this ${objectDescription} as their ghostPrototype`, {
             coupling: toMany({ coupledField: "prototype", preventsDestroy: true }),
-            affiliatedType: "TransientFields",
             immediateDefaultValue: [],
+            affiliatedType: "TransientFields",
           },
       ),
 
@@ -141,7 +150,9 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
           `The ghost host of this ghost ${objectDescription} or null if not a ghost. ${
             ""} The ghost host is the innermost direct or indirect non-ghost owner of this ghost, ${
             ""} or in other words the instance that indirectly created this ghost.`,
-          ghostHostResolver,
+          ghostHostResolver, {
+            affiliatedType: "TransientFields",
+          },
       ),
 
       ...transientField("ghostOwner", TransientFields,
@@ -149,9 +160,9 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
           } is materialized, otherwise null. This means that for grand-ownling ghosts their ${
           ""} owner and ghostOwner will not be equal (for direct ownlings they are equal).`, {
             coupling: toOwner({ coupledField: "ghostOwnlings" }),
-            affiliatedType: "TransientFields",
             immediateDefaultValue: null,
             allowTransientFieldToBeSingular: true,
+            affiliatedType: "TransientFields",
           },
       ),
 
@@ -159,8 +170,8 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
           `Materialized ghost Resource's which have this ${objectDescription
           } instance as their host`, {
             coupling: toManyOwnlings({ coupledField: "ghostOwner" }),
-            affiliatedType: "TransientFields",
             immediateDefaultValue: [],
+            affiliatedType: "TransientFields",
           },
       ),
 

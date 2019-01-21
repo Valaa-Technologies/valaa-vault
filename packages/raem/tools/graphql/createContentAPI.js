@@ -105,14 +105,11 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
   schema.inactiveType = inactiveType || inheritedInactiveType;
   if (!schema.inactiveType) throw new Error(`ContentAPI ${name} is missing .inactiveType`);
 
-  schema.getAffiliatedTypeOfField = (couplingName) => {
+  schema.tryAffiliatedTypeOfField = (couplingName) => {
     const ret = schema._couplingToType[couplingName];
-    if (!ret) throw new Error(`Can't find default coupling type for '${couplingName}'`);
-    if (Array.isArray(ret)) {
-      throw new Error(`Can't determine default coupling type for '${couplingName
-          }': there are multiple candidates: ${ret.join(",")}`);
-    }
-    return ret;
+    if (!Array.isArray(ret)) return ret;
+    throw new Error(`Can't determine affiliated type for '${couplingName
+        }' with multiple candidates: ${ret.join(",")}`);
   };
 
   return Object.freeze({

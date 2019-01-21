@@ -32,6 +32,7 @@ creation of new Data objects and mutation of Resource's that contain them.`,
       ...generatedField("contentHash", new GraphQLNonNull(GraphQLID),
           `Alias for 'id' which can be used to differentiate a Data and Resource`,
           contentHashResolver,
+          { affiliatedType: "Data" },
       ),
 
       /* TODO(iridian): Implement data reference fields.

@@ -142,8 +142,10 @@ export function deserializeVRef (serializedRef: string | JSONIdData,
     referencePrototype = connection
         ? connection._referencePrototype
         : falseProphet._inactivePartitionVRefPrototypes[partitionURIString];
+    const ghostPath = resolver.ghostPath;
     if (!referencePrototype) {
       resolver.inactive = true;
+      delete resolver.ghostPath;
       referencePrototype = falseProphet._inactivePartitionVRefPrototypes[partitionURIString] =
           new ValaaReference().initResolverComponent(resolver);
     }
@@ -152,9 +154,9 @@ export function deserializeVRef (serializedRef: string | JSONIdData,
         .initQueryComponent(query)
         .initFragmentComponent(fragment);
     ret._nss = nss;
-    if (resolver.ghostPath) {
-      ret.obtainOwnResolverComponent().ghostPath = (resolver.ghostPath instanceof GhostPath)
-          ? resolver.ghostPath : ghostPathFromJSON(resolver.ghostPath);
+    if (ghostPath) {
+      ret.obtainOwnResolverComponent().ghostPath = (ghostPath instanceof GhostPath)
+          ? ghostPath : ghostPathFromJSON(ghostPath);
     }
     return ret;
   } catch (error) {

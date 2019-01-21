@@ -20,20 +20,25 @@ export default new GraphQLObjectType({
     ...generatedField("blobId", new GraphQLNonNull(GraphQLString),
         `Globally unique identifier string of this Bvob`,
         bvob => bvob.get("id").rawId(),
+        { affiliatedType: "Blob" },
     ),
 
     ...generatedField("bvobId", new GraphQLNonNull(GraphQLString),
         `Globally unique identifier string of this Bvob`,
         bvob => bvob.get("id").rawId(),
+        { affiliatedType: "Blob" },
     ),
 
     ...generatedField("contentHash", new GraphQLNonNull(GraphQLString),
         `The content hash of this Bvob`,
         bvob => bvob.get("id").rawId(),
+        { affiliatedType: "Blob" },
     ),
 
     ...transientField("contentReferrers", new GraphQLList(Resource),
-        `Incoming references to this Bvob`,
-        { coupling: toMany({ defaultCoupledField: "content" }), affiliatedType: "Blob" }),
+        `Incoming references to this Bvob`, {
+          coupling: toMany({ defaultCoupledField: "content" }),
+          affiliatedType: "Blob",
+        }),
   }),
 });

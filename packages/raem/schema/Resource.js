@@ -46,6 +46,7 @@ containing non-nullable references will be cascade destroyed.`,
           ""} the root resource of a partition the whole partition is permanently frozen.`, {
             isDuplicateable: false,
             immediateDefaultValue: false,
+            affiliatedType: "Resource",
           },
       ),
     }),

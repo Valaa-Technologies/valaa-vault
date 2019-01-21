@@ -281,7 +281,7 @@ export default class Resolver extends LogEventGenerator {
       if (this.objectTransient && (!withOwnField || this.objectTransient.has(withOwnField))) {
         this.objectId = this.objectTransient.get("id");
       } else if ((this.objectTypeName === "Blob") || (objectId && objectId.isInactive())) {
-        // Resource uses an id-transient: ie. either Blob or an inactive resource
+        // Blob and inactive resources are given an id-transient
         this.objectId = objectId || new ValaaReference(rawId);
         if (this.objectTypeName !== "Blob") this.objectTypeName = this.schema.inactiveType.name;
         this.objectTransient = createIdTransient(this.objectId);
@@ -313,6 +313,7 @@ export default class Resolver extends LogEventGenerator {
               ghostPath ? `/${ghostPath}` : ""})`),
           "\n\trequire:", require,
           "\n\tghostPath:", ...dumpObject(ghostPath),
+          "\n\tstate:", ...dumpObject(this.state.toJS()),
           "\n\tthis:", ...dumpObject(this),
       );
     }

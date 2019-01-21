@@ -682,79 +682,88 @@ const toProperty = {};
 function liveMember (subscriber: VrapperSubscriber, head: any, kueryVAKON: Array<any>,
     scope: any, evaluateKuery: boolean, isProperty: boolean) {
   const containerVAKON = kueryVAKON[2];
-  const container = (typeof containerVAKON === "undefined")
-      ? (isProperty ? head : scope)
-      : subscriber._run(head, containerVAKON, scope);
-
-  let propertyName = kueryVAKON[1];
-  if ((typeof propertyName !== "string") && !isSymbol(propertyName)
-      && (typeof propertyName !== "number")) {
-    propertyName = subscriber._processKuery(head, propertyName, scope, true);
-    if ((typeof propertyName !== "string") && !isSymbol(propertyName)
-        && (!isProperty || (typeof propertyName !== "number"))) {
-      throw new Error(`Cannot use a value with type '${typeof propertyName}' as ${
-              isProperty ? "property" : "identifier"} name`);
-    }
-  }
-
-  if ((typeof container !== "object") || (container === null)) {
-    return evaluateKuery ? container[propertyName] : undefined;
-  }
-
+  let container;
+  let propertyName;
   let vProperty;
-  if (container[HostRef] === undefined) {
-    const property = container[propertyName];
-    if ((typeof property !== "object") || (property === null)) {
-      if (!isProperty && (typeof property === "undefined") && !(propertyName in container)) {
-        throw new Error(`Cannot find identifier '${propertyName}' in scope`);
+  try {
+    container = (typeof containerVAKON === "undefined")
+        ? (isProperty ? head : scope)
+        : subscriber._run(head, containerVAKON, scope);
+
+    propertyName = kueryVAKON[1];
+    if ((typeof propertyName !== "string") && !isSymbol(propertyName)
+        && (typeof propertyName !== "number")) {
+      propertyName = subscriber._processKuery(head, propertyName, scope, true);
+      if ((typeof propertyName !== "string") && !isSymbol(propertyName)
+          && (!isProperty || (typeof propertyName !== "number"))) {
+        if (propertyName === null) return undefined;
+        throw new Error(`Cannot use a value with type '${typeof propertyName}' as ${
+                isProperty ? "property" : "identifier"} name`);
       }
-      return property;
     }
-    if (isNativeIdentifier(property)) return getNativeIdentifierValue(property);
-    if (!(property instanceof Vrapper) || (property.tryTypeName() !== "Property")) return property;
-    vProperty = property;
-  } else if (container._lexicalScope && container._lexicalScope.hasOwnProperty(propertyName)) {
-    vProperty = container._lexicalScope[propertyName];
-  } else {
-    let vrapper = container[UnpackedHostValue];
-    if (vrapper === undefined) {
-      throw new Error("Invalid container: expected one with valid UnpackedHostValue");
+
+    if ((typeof container !== "object") || (container === null)) {
+      return evaluateKuery ? container[propertyName] : undefined;
     }
-    let propertyKey;
-    if (vrapper === null) { // container itself is the Vrapper.
-      vrapper = container;
-      propertyKey = propertyName;
-    } else { // container is a namespace proxy
-      propertyKey = container[propertyName];
+    if (container[HostRef] === undefined) {
+      const property = container[propertyName];
+      if ((typeof property !== "object") || (property === null)) {
+        if (!isProperty && (typeof property === "undefined") && !(propertyName in container)) {
+          throw new Error(`Cannot find identifier '${propertyName}' in scope`);
+        }
+        return property;
+      }
+      if (isNativeIdentifier(property)) return getNativeIdentifierValue(property);
+      if (!(property instanceof Vrapper) || (property.tryTypeName() !== "Property")) return property;
+      vProperty = property;
+    } else if (container._lexicalScope && container._lexicalScope.hasOwnProperty(propertyName)) {
+      vProperty = container._lexicalScope[propertyName];
+    } else {
+      let vrapper = container[UnpackedHostValue];
+      if (vrapper === undefined) {
+        throw new Error("Invalid container: expected one with valid UnpackedHostValue");
+      }
+      let propertyKey;
+      if (vrapper === null) { // container itself is the Vrapper.
+        vrapper = container;
+        propertyKey = propertyName;
+      } else { // container is a namespace proxy
+        propertyKey = container[propertyName];
+      }
+      const descriptor = vrapper.engine.getHostObjectPrototype(
+          vrapper.getTypeName(subscriber._valkOptions))[propertyKey];
+      if (descriptor) {
+        if (!descriptor.writable || !descriptor.kuery) return performDefaultGet;
+        return subscriber._processKuery(vrapper, descriptor.kuery, scope, true);
+      }
+      vProperty = subscriber._run(container,
+          toProperty[propertyName]
+              || (toProperty[propertyName] = VALEK.property(propertyName).toVAKON()),
+          scope);
+      if (!vProperty && isProperty) {
+        subscriber._processKuery(container, "properties", scope);
+        return undefined;
+      }
     }
-    const descriptor = vrapper.engine.getHostObjectPrototype(
-        vrapper.getTypeName(subscriber._valkOptions))[propertyKey];
-    if (descriptor) {
-      if (!descriptor.writable || !descriptor.kuery) return performDefaultGet;
-      return subscriber._processKuery(vrapper, descriptor.kuery, scope, true);
+    if (!vProperty && !isProperty) {
+      throw new Error(`Cannot find identifier '${String(propertyName)}' in scope`);
     }
-    vProperty = subscriber._run(container,
-        toProperty[propertyName]
-            || (toProperty[propertyName] = VALEK.property(propertyName).toVAKON()),
-        scope);
-    if (!vProperty && isProperty) {
-      subscriber._processKuery(container, "properties", scope);
-      return undefined;
+    subscriber._subscribeToFieldsByFilter(vProperty, true, evaluateKuery);
+    const value = subscriber._run(vProperty, "value", scope);
+    if (value) {
+      switch (value.typeName) {
+        case "Literal": return value.value;
+        case "Identifier": return evaluateKuery ? performDefaultGet : undefined;
+        case "KueryExpression": return subscriber._processKuery(container, value.vakon, scope, true);
+        default:
+          throw new Error(`Unrecognized Property.value.typeName '${value.typeName}' in live kuery`);
+      }
     }
+    return undefined;
+  } catch (error) {
+    throw wrapError(error, new Error(`During ${subscriber.debugId()}\n .liveMember(), with:`),
+        "\n\tcontainer:", ...dumpObject(container),
+        "\n\tpropertyName:", ...dumpObject(propertyName),
+        "\n\tvProperty:", ...dumpObject(vProperty));
   }
-  if (!vProperty && !isProperty) {
-    throw new Error(`Cannot find identifier '${String(propertyName)}' in scope`);
-  }
-  subscriber._subscribeToFieldsByFilter(vProperty, true, evaluateKuery);
-  const value = subscriber._run(vProperty, "value", scope);
-  if (value) {
-    switch (value.typeName) {
-      case "Literal": return value.value;
-      case "Identifier": return evaluateKuery ? performDefaultGet : undefined;
-      case "KueryExpression": return subscriber._processKuery(container, value.vakon, scope, true);
-      default:
-        throw new Error(`Unrecognized Property.value.typeName '${value.typeName}' in live kuery`);
-    }
-  }
-  return undefined;
 }

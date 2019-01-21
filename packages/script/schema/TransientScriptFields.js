@@ -26,8 +26,10 @@ export function transientScriptFields (/* objectDescription: string = INTERFACE_
 
     fields: () => ({
       ...transientField("incomingRelations", new GraphQLList(Relation),
-          "List of relations that are targeting this relatable",
-          { coupling: toMany({ coupledField: "target" }), affiliatedType: "TransientScriptFields" },
+          "List of relations that are targeting this relatable", {
+            coupling: toMany({ coupledField: "target" }),
+            affiliatedType: "TransientScriptFields",
+          },
       ),
     }),
 

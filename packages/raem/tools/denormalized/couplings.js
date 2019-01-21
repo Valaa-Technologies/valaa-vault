@@ -116,7 +116,10 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
       coupledField = coupling.defaultCoupledField;
     }
     if (!remoteFieldIntro) {
-      remoteType = bard.schema.getAffiliatedTypeOfField(coupledField);
+      remoteType = bard.schema.tryAffiliatedTypeOfField(coupledField);
+      if (!remoteType) {
+        throw new Error(`Can't find affiliated type for coupling remote field '${coupledField}'`);
+      }
       remoteFieldIntro = remoteType.getFields()[coupledField];
       if (!remoteFieldIntro) {
         throw new Error(`No introspection found for remote field ${remoteType.name}.${coupledField

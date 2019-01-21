@@ -84,10 +84,14 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
     if (!actualTypeIntro || !((fields = actualTypeIntro.getFields()))[fieldName]) {
       const typeName = tryTransientTypeName(object, resolver.schema);
       // actualTypeIntro = typeName && resolver.schema.getType(typeName);
-      actualTypeIntro = !typeName || isInactiveTypeName(typeName)
-          ? resolver.schema.getAffiliatedTypeOfField(fieldName)
-          : resolver.schema.getType(typeName);
-      fields = actualTypeIntro.getFields();
+      if (typeName && !isInactiveTypeName(typeName)) {
+        actualTypeIntro = resolver.schema.getType(typeName);
+      } else {
+        actualTypeIntro = resolver.schema.tryAffiliatedTypeOfField(fieldName);
+      }
+      // If no type intro can be determined then the field shall not
+      // have aliases, be generated nor have default values.
+      if (actualTypeIntro) fields = actualTypeIntro.getFields();
     }
 
     if (ret !== undefined) {
@@ -116,11 +120,11 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
           // fieldASTs,
           // schema,
         });
-        if (typeof ret !== "undefined") return ret;
+        if (ret !== undefined) return ret;
       }
       if (fieldInfo.name !== fieldName) {
         ret = object.get(fieldInfo.name);
-        if (typeof ret !== "undefined") return _postProcessAlias(ret, fieldInfo);
+        if (ret !== undefined) return _postProcessAlias(ret, fieldInfo);
       }
     }
 

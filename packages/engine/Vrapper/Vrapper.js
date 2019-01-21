@@ -305,7 +305,7 @@ export default class Vrapper extends Cog {
     const transient = refreshingTransient
         || resolver.tryGoToTransient(this[HostRef], this._typeName);
     if (!transient) {
-      this._phase = DESTROYED;
+      this._phase = this[HostRef].isGhost() ? INACTIVE : DESTROYED;
       return undefined;
     }
     this.updateTransient(resolver.state, transient);

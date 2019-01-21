@@ -45,6 +45,7 @@ Resource to always be locateable from anywhere.`,
           ""} generated as per the rules specified by the partition authority URI schema.`, {
             isDuplicateable: false,
             immediateDefaultValue: null,
+            affiliatedType: "Partition",
           },
       ),
 

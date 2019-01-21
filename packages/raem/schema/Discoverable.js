@@ -31,6 +31,7 @@ export function discoverableInterface (objectDescription: string = INTERFACE_DES
           `Primary searchable name of this ${objectDescription}. It is globally non-unique, {
               ""}but possibly context-dependently unique. This is an alias for Discoverable.name ${
               ""}to bypass conflicts with native javascript property 'name'.`,
+          { affiliatedType: "Discoverable" },
       ),
 
       ...primaryField("tags", new GraphQLList(Tag),

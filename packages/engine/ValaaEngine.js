@@ -472,11 +472,11 @@ export default class ValaaEngine extends Cog {
           if (vProtagonist.isResource()) {
             // vProtagonist.refreshPhase(story.state);
             // /*
-            Promise.resolve(vProtagonist.activate(story.state))
+            Promise.resolve(vProtagonist.refreshPhase(story.state))
                 .then(undefined, (error) => {
                   outputCollapsedError(errorOnReceiveCommands.call(this, error,
-                      `receiveCommands(${passage.type} ${vProtagonist.debugId()}).activate`),
-                      "Exception caught during passage recital protagonist activation");
+                      `receiveCommands(${passage.type} ${vProtagonist.debugId()}).refreshPhase`),
+                      "Exception caught during passage recital protagonist refresh phase");
                 });
             // */
           }

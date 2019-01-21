@@ -1167,6 +1167,8 @@ export default class Vrapper extends Cog {
   _obtainMediaInterpretation (options: VALKOptions, vExplicitOwner: ?Vrapper, typeName: ?string) {
     let mediaInfo;
     let mostMaterializedTransient;
+    let wrap;
+    const vrapper = this;
     try {
       const activeTypeName = typeName || this.getTypeName(options);
       if (activeTypeName !== "Media") {
@@ -1209,12 +1211,11 @@ export default class Vrapper extends Cog {
       }
       let decodedContent = options.decodedContent;
       if (decodedContent === undefined) {
+        wrap = new Error(`_obtainMediaInterpretation('${this.get("name", options)
+            }').connection.decodeMediaContent(as ${String(mediaInfo && mediaInfo.mime)})`);
         decodedContent = this._withActiveConnectionChainEagerly(Object.create(options), [
           connection => connection.decodeMediaContent(mediaInfo),
-        ], errorOnObtainMediaInterpretation.bind(this,
-            new Error(`_obtainMediaInterpretation('${this.get("name", options)
-                }').connection.decodeMediaContent(as ${String(mediaInfo && mediaInfo.mime)})`))
-        );
+        ], errorOnObtainMediaInterpretation);
         if ((options.synchronous === true) && isPromise(decodedContent)) {
           throw new Error(`Media interpretation not immediately available for '${
               mediaInfo.name || "<unnamed>"}'`);
@@ -1248,20 +1249,20 @@ export default class Vrapper extends Cog {
       }
       return interpretation;
     } catch (error) {
-      return errorOnObtainMediaInterpretation.call(this, new Error(
-          `_obtainMediaInterpretation('${this.get("name", options)}' as ${
-              String(mediaInfo && mediaInfo.mime)})`), error);
+      wrap = new Error(`_obtainMediaInterpretation('${this.get("name", options)}' as ${
+          String(mediaInfo && mediaInfo.mime)})`);
+      return errorOnObtainMediaInterpretation(error);
     }
-    function errorOnObtainMediaInterpretation (wrapper, error) {
-      throw this.wrapErrorEvent(error, wrapper,
-        "\n\tid:", this.getId(options).toString(),
+    function errorOnObtainMediaInterpretation (error) {
+      throw vrapper.wrapErrorEvent(error, wrap,
+        "\n\tid:", vrapper.getId(options).toString(),
         "\n\toptions:", ...dumpObject(options),
         "\n\tvExplicitOwner:", ...dumpObject(vExplicitOwner),
         "\n\tmediaInfo:", ...dumpObject(mediaInfo),
         "\n\tmostMaterializedTransient:", ...dumpObject(mostMaterializedTransient),
         "\n\tconnection.isActive:", ...dumpObject(
-            this._partitionConnection && this._partitionConnection.isActive()),
-        "\n\tthis:", ...dumpObject(this),
+          vrapper._partitionConnection && vrapper._partitionConnection.isActive()),
+        "\n\tvrapper:", ...dumpObject(vrapper),
       );
     }
   }
@@ -1430,7 +1431,8 @@ export default class Vrapper extends Cog {
    */
   prepareBvob (content: any, options: VALKOptions = {}) {
     let mediaInfo;
-    const wrapper = new Error("prepareBvob()");
+    const vrapper = this;
+    let wrap = new Error("prepareBvob()");
     try {
       this.requireActive(options);
       if (this.hasInterface("Media")) {
@@ -1453,10 +1455,14 @@ export default class Vrapper extends Cog {
           ret._valkCaller = true;
           return ret;
         },
-      ], errorOnPrepareBvob.bind(this));
-    } catch (error) { return errorOnPrepareBvob.call(this, error); }
+      ], errorOnPrepareBvob);
+    } catch (error) {
+      wrap = new Error("prepareBvob()");
+      return errorOnPrepareBvob(error);
+    }
     function errorOnPrepareBvob (error) {
-      throw this.wrapErrorEvent(error, wrapper, "\n\tmediaInfo:", mediaInfo);
+      throw vrapper.wrapErrorEvent(error, wrap,
+          "\n\tmediaInfo:", ...dumpObject(mediaInfo));
     }
   }
 

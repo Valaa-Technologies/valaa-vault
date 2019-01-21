@@ -99,14 +99,14 @@ export function messageFromError (error: any) {
 
 function _clipFrameListToCurrentContext (innerError, outerError) {
   if (!outerError.tidyFrameList) {
-    console.log("outerError has no .tidyFrameList:", outerError,
+    console.error("outerError has no .tidyFrameList:", outerError,
       "\n\ttoString:", outerError.toString(),
     );
     return ["<<< outer error tidyFrameList missing>>>"];
   }
   if (!innerError.tidyFrameList) {
     if (!innerError.stack) {
-      console.log("innerError has no .stack:", innerError,
+      console.error("innerError has no .stack:", innerError,
         "\n\ttoString:", innerError.toString(),
       );
       return ["<<< inner error stack empty>>>"];
@@ -119,28 +119,41 @@ function _clipFrameListToCurrentContext (innerError, outerError) {
   }
   const inner = innerError.tidyFrameList;
   const outer = outerError.tidyFrameList;
+  // console.log("clipping inner:", inner);
+  // console.log("versus context:", outer);
   let skipInner = 0;
   let skipOuter = 0;
   let matches = 0;
-  for (; !matches && (skipOuter !== outer.length); ++skipOuter) {
-    // Find first matching line
-    for (skipInner = 0; (skipInner !== inner.length) && (inner[skipInner] !== outer[skipOuter]);
-        ++skipInner);
-    // Check that remaining lines match
-    for (; ((skipInner + matches) !== inner.length) && ((skipOuter + matches) !== outer.length);
-        ++matches) {
-      if (inner[skipInner + matches] !== outer[skipOuter + matches]) {
-        matches = 0;
-        break;
+  if (inner.length && (inner[inner.length - 1].slice(0, 3) !== "<<<")) {
+    for (; !matches && (skipOuter !== outer.length); ++skipOuter) {
+      // Find first matching line
+      for (skipInner = 0; (skipInner !== inner.length) && (inner[skipInner] !== outer[skipOuter]);
+          ++skipInner);
+      // Check that remaining lines match
+      for (; ((skipInner + matches) !== inner.length) && ((skipOuter + matches) !== outer.length);
+          ++matches) {
+        if (inner[skipInner + matches] !== outer[skipOuter + matches]) {
+          matches = 0;
+          break;
+        }
       }
     }
   }
-  if (!matches) inner.push("<<< possibly missing frames >>>");
-  else {
-    if (!skipInner) skipInner = 1;
-    inner.splice(skipInner);
+  // let innerSplice, outerSplice;
+  if (!matches || (skipOuter > skipInner + 2)) {
+    inner.push("<<< disjoint inner and context error traces >>>");
+  } else {
+    inner.splice(skipInner || 1); // Always keep at least one line in the inner log
+    // If skipOuter is larger than skipInner then this is likely a
+    // disjoint trace with accidentally identical outermost trace.
+    // Keep the whole context trace
     if (skipOuter) outer.splice(0, skipOuter);
   }
+  /*
+  console.log("matched", matches, "lines");
+  console.log("spliced inner from line", skipInner, "onwards:", innerSplice);
+  console.log("spliced outer up to line", skipInner, ":", outerSplice);
+  */
   return inner;
 }
 
@@ -203,7 +216,7 @@ export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
   try {
     if (head === null) return "<null>";
     if (head === undefined) return "<undefined>";
-    if (!head || (!alwaysStringify && inBrowser())) return head;
+    if (!alwaysStringify && inBrowser()) return head;
     if (typeof head === "function") {
       if (head.name) return `<function name="${head.name}">`;
       const lineCount = (head.toString().match(/\n/g) || []).length + 1;
@@ -211,7 +224,8 @@ export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
     }
     if (head instanceof Function) return `<Function name="${head.name}">`;
     if (isSymbol(head)) return `<${head.toString()}>`;
-    if (typeof head !== "object") return head;
+    if (typeof head === "string") return (nest !== false) ? head : `<string length=${head.length}>`;
+    if (typeof head !== "object") return (nest !== false) ? head : `<${typeof head}>`;
     if (!nest) {
       if (Array.isArray(head)) return `<Array length=${head.length} >`;
       if (isIterable(head)) return `<immutable.Iterable size=${head.size}>`;

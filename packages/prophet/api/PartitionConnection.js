@@ -10,8 +10,9 @@ import { ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleR
 import Follower from "~/prophet/api/Follower";
 
 import Logger from "~/tools/Logger";
-import { dumpObject, invariantifyArray, invariantifyObject, isPromise, thenChainEagerly }
-    from "~/tools";
+import {
+  dumpObject, invariantifyArray, invariantifyObject, isPromise, outputError, thenChainEagerly,
+} from "~/tools";
 
 /**
  * Interface for sending commands to upstream and registering for downstream truth updates
@@ -117,14 +118,15 @@ export default class PartitionConnection extends Follower {
    * @memberof OraclePartitionConnection
    */
   connect (options: ConnectOptions) {
-    const onError = errorOnConnect.bind(this, new Error("connect"));
+    const connection = this;
+    const wrap = new Error("connect()");
     try {
       if (this._activeConnection) return this._activeConnection;
       this.warnEvent(1, () => [
         "\n\tBegun connecting with options", ...dumpObject(options), ...dumpObject(this)
       ]);
       return (this._activeConnection = thenChainEagerly(
-          this._doConnect(Object.create(options), onError),
+          this._doConnect(Object.create(options), errorOnConnect),
           (connectResults) => {
             if (options.narrateOptions !== false) {
                 const actionCount = Object.values(connectResults).reduce(
@@ -153,12 +155,11 @@ export default class PartitionConnection extends Follower {
             ]);
             return (this._activeConnection = this);
           },
-          onError,
+          errorOnConnect,
       ));
-    } catch (error) { return onError(error); }
-    function errorOnConnect (wrapper, error) {
-      throw this.wrapErrorEvent(error, wrapper,
-          "\n\toptions:", ...dumpObject(options));
+    } catch (error) { return errorOnConnect(error); }
+    function errorOnConnect (error) {
+      throw connection.wrapErrorEvent(error, wrap, "\n\toptions:", ...dumpObject(options));
     }
   }
 

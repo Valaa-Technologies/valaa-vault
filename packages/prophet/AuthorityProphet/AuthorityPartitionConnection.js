@@ -3,9 +3,11 @@
 import type { EventBase } from "~/raem/events";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import thenChainEagerly from "~/tools/thenChainEagerly";
 import { ChronicleRequest, ChronicleOptions, ChronicleEventResult, MediaInfo, NarrateOptions }
     from "~/prophet/api/types";
+
+import thenChainEagerly from "~/tools/thenChainEagerly";
+import { debugObjectType, dumpObject } from "~/tools/wrapError";
 
 /**
  * The base authority partition connection implementation.
@@ -74,16 +76,28 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
 
   prepareBvob (content: any, mediaInfo?: Object):
       { contentHash: string, persistProcess: ?Promise<any> } {
-    if (!mediaInfo || !mediaInfo.bvobId) {
-      throw new Error("mediaInfo.bvobId not defined in AuthorityProphetConnection");
+    const connection = this;
+    const wrap = new Error(`prepareBvob(${(mediaInfo && mediaInfo.bvobId) || "<undefined>"})`);
+    try {
+      if (!mediaInfo || !mediaInfo.bvobId) {
+        throw new Error("mediaInfo.bvobId not defined");
+      }
+      let persistProcess = mediaInfo.bvobId;
+      if (this.isRemoteAuthority()) {
+        const error = new Error(`prepareBvob not implemented by remote authority partition`);
+        error.retryable = false;
+        persistProcess = Promise
+            .reject(this.wrapErrorEvent(error, new Error("prepareBvob")))
+            .catch(errorOnAuthorityPartitionConnectionPrepareBvob);
+      }
+      return { contentHash: mediaInfo.bvobId, persistProcess };
+    } catch (error) { return errorOnAuthorityPartitionConnectionPrepareBvob(error); }
+    function errorOnAuthorityPartitionConnectionPrepareBvob (error) {
+      throw connection.wrapErrorEvent(error, wrap,
+          "\n\tcontent:", debugObjectType(content),
+          "\n\tmediaInfo:", ...dumpObject(mediaInfo),
+          "\n\tconnection:", ...dumpObject(connection));
     }
-    let persistProcess = mediaInfo.bvobId;
-    if (this.isRemoteAuthority()) {
-      const error = new Error(`prepareBvob not implemented by remote authority partition`);
-      error.retryable = false;
-      persistProcess = Promise.reject(this.wrapErrorEvent(error, new Error("prepareBvob")));
-    }
-    return { contentHash: mediaInfo.bvobId, persistProcess };
   }
 }
 

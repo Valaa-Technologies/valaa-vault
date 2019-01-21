@@ -2,7 +2,7 @@
 
 import isPromise from "~/tools/isPromise";
 import { arrayFromAny } from "~/tools/sequenceFromAny";
-import wrapError, { dumpObject } from "~/tools/wrapError";
+import wrapError, { dumpObject, outputError } from "~/tools/wrapError";
 import { invariantifyArray } from "~/tools/invariantify";
 
 /**
@@ -71,11 +71,10 @@ export function mapEagerly (maybePromises: any[], callback: Function, onRejected
           results[index] = errorOnMapEagerly(error);
         }
         if (!isPromise(results[index])) continue;
-        wrap = new Error(getName("result promise"));
+        wrap = new Error(getName("callback promise resolution"));
       } else {
-        results[index] = maybeValue.then(
-            (value) => callback(value, index, maybePromises)); // eslint-disable-line
-        wrap = new Error(getName("promise callback"));
+        results[index] = maybeValue.then((value) => callback(value, index, maybePromises)); // eslint-disable-line
+        wrap = new Error(getName("head or callback promise resolution"));
       }
       return results[index]
           .catch(errorOnMapEagerly)
@@ -111,41 +110,37 @@ export function mapEagerly (maybePromises: any[], callback: Function, onRejected
 export default function thenChainEagerly (initialValue: any, functions: any | Function[],
     onRejected: ?Function, startIndex: number) {
   const functionChain = (startIndex !== undefined) ? functions : arrayFromAny(functions);
-  let head = initialValue;
+  let next = initialValue;
   let index = startIndex || 0;
   let wrap;
-  for (; !isPromise(head); ++index) {
+  let head;
+  for (; !isPromise(next); ++index) {
+    head = next;
     try {
       if (index >= functionChain.length) return head;
-      head = functionChain[index](head);
+      next = functionChain[index](head);
     } catch (error) {
       wrap = new Error(getName("callback"));
-      head = errorOnThenChainEagerly(error);
+      next = errorOnThenChainEagerly(error);
     }
   }
-  wrap = new Error(getName("promise"));
-  return head.then(
-      value => {
-        if ((index < functionChain.length) && (typeof functionChain[index] !== "function")) {
-          console.error("yo not cool:", functionChain[index], functions, "\n\tstack:", new Error().stack);
-        }
-        return (index >= functionChain.length
-            ? value
-            : thenChainEagerly(functionChain[index](value), functionChain, onRejected, index + 1));
-      },
+  --index;
+  wrap = new Error(getName("promise resolution"));
+  return next.then(
+      newHead => (++index >= functionChain.length
+          ? newHead
+          : thenChainEagerly(newHead, functionChain, onRejected, index)),
       errorOnThenChainEagerly);
   function getName (info) {
-    return `During thenChainEagerly step #${index} ${info} ${
+    return `During thenChainEagerly ${index === -1 ? "initial value" : `#${index}`} ${info} ${
         !(onRejected && onRejected.name) ? " " : `(with ${onRejected.name})`}`;
   }
   function errorOnThenChainEagerly (error) {
-    let innerError = error;
-    try {
-      if (onRejected) return onRejected(error, index, head, functionChain);
-    } catch (onRejectedError) { innerError = onRejectedError; }
-    throw wrapError(innerError, wrap,
+    const wrapped = wrapError(error, wrap,
         "\n\thead:", ...dumpObject(head),
         "\n\tcurrent function:", ...dumpObject(functionChain[index]),
         "\n\tfunctionChain:", ...dumpObject(functionChain));
+    if (!onRejected) throw wrapped;
+    return onRejected(wrapped, index, head, functionChain);
   }
 }

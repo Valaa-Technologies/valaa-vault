@@ -12,7 +12,7 @@ import Corpus from "~/raem/Corpus";
 import Valker from "~/raem/VALK/Valker";
 
 import trivialClone from "~/tools/trivialClone";
-import { dumpObject, LogEventGenerator, wrapError } from "~/tools";
+import { dumpObject, LogEventGenerator, outputError, thenChainEagerly, wrapError } from "~/tools";
 
 const TEST_EVENT_VERSION = "0.2";
 
@@ -33,12 +33,13 @@ export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
 }
 
 export default class RAEMTestHarness extends LogEventGenerator {
-  constructor ({ ContentAPI, name, verbosity, reducerOptions = {}, corpusOptions = {} }) {
+  constructor ({ ContentAPI, name, verbosity, reducerOptions = {}, corpusOptions = {}, ...rest }) {
     super({ name, verbosity });
     this.ContentAPI = ContentAPI;
     this.schema = ContentAPI.schema;
     this.reducerOptions = reducerOptions;
     this.corpusOptions = corpusOptions;
+    Object.assign(this, rest);
     this.corpus = this.createCorpus();
     this.valker = this.createValker();
   }
@@ -125,6 +126,18 @@ export default class RAEMTestHarness extends LogEventGenerator {
         },
         this.corpusOptions.builtinSteppers,
     );
+  }
+
+  interceptErrors (testFunction) {
+    return () => thenChainEagerly(testFunction(), [], this.errorOn(new Error(testFunction.name)));
+  }
+
+  errorOn (wrap, ...rest) {
+    return error => {
+      const wrappedError = this.wrapErrorEvent(error, wrap, ...rest);
+      outputError(wrappedError, "Harness: showing error contexts of the top-level test exception");
+      throw wrappedError;
+    };
   }
 }
 

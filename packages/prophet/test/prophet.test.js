@@ -162,9 +162,9 @@ describe("Prophet", () => {
     await harness.prophet._mostRecentNotification;
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
-    expect(authorityConnection._testUpstreamEntries.length).toEqual(0);
+    expect(authorityConnection._chroniclings.length).toEqual(0);
     await first.getPersistedEvent();
-    expect(authorityConnection._testUpstreamEntries.length).toEqual(1);
+    expect(authorityConnection._chroniclings.length).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
 
     const seconds = harness.chronicleEvents(coupleCommands).eventResults;
@@ -174,12 +174,12 @@ describe("Prophet", () => {
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
     await harness.prophet._mostRecentNotification;
     expect(totalCommandCount).toEqual(3);
-    expect(authorityConnection._testUpstreamEntries.length).toEqual(1);
+    expect(authorityConnection._chroniclings.length).toEqual(1);
     await seconds[0].getPersistedEvent();
     await seconds[1].getPersistedEvent();
-    expect(authorityConnection._testUpstreamEntries.length).toEqual(3);
+    expect(authorityConnection._chroniclings.length).toEqual(3);
 
-    const twoEntries = authorityConnection._testUpstreamEntries.splice(0, 2);
+    const twoEntries = authorityConnection._chroniclings.splice(0, 2);
     const twoTruthEvents = twoEntries.map(entry => roundtripEvent(entry.event));
 
     twoEntries[0].resolveTruthEvent(twoTruthEvents[0]);
@@ -189,7 +189,7 @@ describe("Prophet", () => {
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 3, 4);
 
-    const lastEntry = authorityConnection._testUpstreamEntries.splice(0, 1);
+    const lastEntry = authorityConnection._chroniclings.splice(0, 1);
     const lastTruthEvents = lastEntry.map(entry => roundtripEvent(entry.event));
     lastEntry[0].resolveTruthEvent(lastTruthEvents[0]);
     await authorityConnection.getReceiveTruths()(lastTruthEvents);
@@ -258,7 +258,7 @@ describe("Prophet", () => {
     expect(secondsTruths[1]).toEqual(undefined);
 
 
-    const twoEntries = authorityConnection._testUpstreamEntries.splice(0, 2);
+    const twoEntries = authorityConnection._chroniclings.splice(0, 2);
     const twoTruthEvents = twoEntries.map(entry => roundtripEvent(entry.event));
     // resolve prophecy getTruthEvent via pull
     twoEntries[0].resolveTruthEvent(twoTruthEvents[0]);
@@ -271,7 +271,7 @@ describe("Prophet", () => {
     await authorityConnection.getReceiveTruths()(twoTruthEvents);
     expectConnectionEventIds(scribeConnection, 0, 3, 4);
 
-    const lastEntry = authorityConnection._testUpstreamEntries.splice(0, 1);
+    const lastEntry = authorityConnection._chroniclings.splice(0, 1);
     const lastTruthEvents = lastEntry.map(entry => roundtripEvent(entry.event));
     // skip resolveTruthEvent - rely on downstream push via getReceiveTruths
     // lastEntry[0].resolveTruthEvent(coupleCommands[1]);
@@ -319,13 +319,13 @@ describe("Prophet", () => {
     expect(secondsTruths[1]).toEqual(undefined);
 
     // Remove the first entry.
-    authorityConnection._testUpstreamEntries.splice(0, 1);
+    authorityConnection._chroniclings.splice(0, 1);
 
-    const oneEntries = authorityConnection._testUpstreamEntries.splice(0, 1);
+    const oneEntries = authorityConnection._chroniclings.splice(0, 1);
     const oneTruthEvent = oneEntries.map(entry => roundtripEvent(entry.event));
     obtainAspect(oneTruthEvent[0], "log").index = 1;
     // The original third entry is now malformed, don't confirm it.
-    authorityConnection._testUpstreamEntries.splice(0, 1);
+    authorityConnection._chroniclings.splice(0, 1);
     oneEntries[0].resolveTruthEvent(oneTruthEvent[0]);
     // Mismatching log.index's between sent commands and incoming truths
     // will inhibit prophecy partition command rechronicles and will
@@ -360,9 +360,9 @@ describe("Prophet", () => {
 
     // Check that first command has been properly revised and resent
     expect(rechronicleResults[0].getLogAspectFor(harness.testPartitionURI).index).toEqual(2);
-    expect(authorityConnection._testUpstreamEntries.length).toEqual(2);
+    expect(authorityConnection._chroniclings.length).toEqual(2);
 
-    const lastEntry = authorityConnection._testUpstreamEntries.splice(0, 2);
+    const lastEntry = authorityConnection._chroniclings.splice(0, 2);
     const lastTruthEvents = lastEntry.map(entry => roundtripEvent(entry.event));
     // skip resolveTruthEvent - rely on downstream push only via getReceiveTruths
     // lastEntry[0].resolveTruthEvent(coupleCommands[1]);
@@ -393,8 +393,8 @@ describe("Prophet", () => {
         truthEvent_ => (secondsTruths[index] = truthEvent_),
         failure => (secondsFailures[index] = failure)));
     await seconds[1].getPersistedEvent();
-    const secondsFirstEntries = authorityConnection._testUpstreamEntries.splice(1, 1);
-    authorityConnection._testUpstreamEntries = [];
+    const secondsFirstEntries = authorityConnection._chroniclings.splice(1, 1);
+    authorityConnection._chroniclings = [];
     const secondsFirstTruth = secondsFirstEntries.map(entry => roundtripEvent(entry.event));
     obtainAspect(secondsFirstTruth[0], "log").index = 1; // reordering...
     secondsFirstEntries[0].resolveTruthEvent(secondsFirstTruth[0]);
@@ -407,8 +407,8 @@ describe("Prophet", () => {
     expect(seconds[1].getLogAspectFor(harness.testPartitionURI).index).toEqual(3);
     await seconds[1].getPersistedEvent();
 
-    expect(authorityConnection._testUpstreamEntries.length).toEqual(2);
-    const stageTwoEntries = authorityConnection._testUpstreamEntries.splice(0, 2)
+    expect(authorityConnection._chroniclings.length).toEqual(2);
+    const stageTwoEntries = authorityConnection._chroniclings.splice(0, 2)
         .map(entry => roundtripEvent(entry.event));
     expect(stageTwoEntries[0].aspects.log.index).toEqual(2);
     expect(stageTwoEntries[1].aspects.log.index).toEqual(3);
@@ -447,8 +447,8 @@ describe("Prophet", () => {
             failure => (secondsFailures[index] = failure)));
     await seconds[1].getPersistedEvent();
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
-    expect(authorityConnection._testUpstreamEntries.length).toEqual(3);
-    authorityConnection._testUpstreamEntries = [];
+    expect(authorityConnection._chroniclings.length).toEqual(3);
+    authorityConnection._chroniclings = [];
     const foreignTruth = initializeAspects(created({
       id: ["foreign_entity"], typeName: "Entity", initialState: {
         name: "Simple Entity", owner: ["test_partition"],
@@ -458,8 +458,8 @@ describe("Prophet", () => {
     await seconds[1].getPersistedEvent();
     expectConnectionEventIds(scribeConnection, 0, 2, 5);
 
-    expect(authorityConnection._testUpstreamEntries.length).toEqual(3);
-    const stageTwoEntries = authorityConnection._testUpstreamEntries.splice(0, 3)
+    expect(authorityConnection._chroniclings.length).toEqual(3);
+    const stageTwoEntries = authorityConnection._chroniclings.splice(0, 3)
         .map(entry => roundtripEvent(entry.event));
     expect(stageTwoEntries[0].aspects.log.index).toEqual(2);
     expect(stageTwoEntries[1].aspects.log.index).toEqual(3);

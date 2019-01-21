@@ -29,7 +29,7 @@ export default function createValaaTestScheme ({ config, authorityURI } = {}) {
 export class TestPartitionConnection extends AuthorityPartitionConnection {
   _narrations = {};
   _preparations = {};
-  _testUpstreamEntries = [];
+  _chroniclings = [];
 
   // Test writer API
 
@@ -37,10 +37,18 @@ export class TestPartitionConnection extends AuthorityPartitionConnection {
     const narration = this._narrations[eventIdBegin] || (this._narrations[eventIdBegin] = {});
     if (narration.resultEvents) {
       throw this.wrapErrorEvent(new Error(`narration result events already exist for ${
-          eventIdBegin}`), new Error("addNarrateResults"));
+        eventIdBegin}`), new Error("addNarrateResults"));
     }
     narration.resultEvents = events;
     this._tryFulfillNarration(narration);
+  }
+
+  getNarration (eventIdBegin) {
+    const ret = this._narrations[eventIdBegin];
+    if (!ret) {
+      throw new Error(`Cannot find an existing narration request beginning from "${eventIdBegin}"`);
+    }
+    return ret;
   }
 
   addPrepareBvobResult ({ contentHash }) {
@@ -51,6 +59,12 @@ export class TestPartitionConnection extends AuthorityPartitionConnection {
     }
     preparation.contentHash = contentHash;
     this._tryFulfillPreparation(preparation);
+  }
+
+  getPreparation (contentHash) {
+    const ret = this._preparations[contentHash];
+    if (!ret) throw new Error(`Cannot find an existing prepareBvob request for "${contentHash}"`);
+    return ret;
   }
 
   // PartitionConnection implementation
@@ -73,7 +87,7 @@ export class TestPartitionConnection extends AuthorityPartitionConnection {
     const eventResults = events.map((event, index) => {
       const ret = Object.create(resultBase); ret.event = event; ret.index = index; return ret;
     });
-    this._testUpstreamEntries.push(...eventResults);
+    this._chroniclings.push(...eventResults);
     return { eventResults };
   }
 

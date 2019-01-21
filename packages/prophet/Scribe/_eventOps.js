@@ -192,11 +192,16 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
 }
 
 class ScribeEventResult extends ChronicleEventResult {
-  getPersistedEvent (): Truth { return this.getLocalEvent(); }
   getLocalEvent (): EventBase {
     return thenChainEagerly(this.receivedEventsProcess,
         receivedEvents => receivedEvents[this.index],
         this.onError);
+  }
+  getPersistedEvent (): Truth {
+    // TODO(iridian): Right now getLocalEvent will wait for full media
+    // sync, including uploads. This is because the upload sync is
+    // buried deep down the chain inside _retryingTwoWaySyncMediaContent
+    return this.getLocalEvent();
   }
   getTruthEvent (): EventBase {
     return thenChainEagerly(this.chroniclingProcess, [
@@ -291,10 +296,10 @@ export function _receiveEvents (
         () => downstreamReceiveTruths(newActions, retrieveMediaBuffer),
         onError);
   }
-  let writeProcess;
+  let writeEventsProcess;
   if (!receivingTruths) {
     connection._commandQueueInfo.eventIdEnd += newActions.length;
-    writeProcess = persist
+    writeEventsProcess = persist
         && Promise.all(connection._commandQueueInfo.writeQueue.push(...newActions));
     newActions.forEach(action =>
         connection._commandQueueInfo.commandIds.push(action.aspects.command.id));
@@ -302,12 +307,13 @@ export function _receiveEvents (
   } else {
     const lastTruth = newActions[newActions.length - 1];
     connection._truthLogInfo.eventIdEnd = lastTruth.aspects.log.index + 1;
-    writeProcess = persist && Promise.all(connection._truthLogInfo.writeQueue.push(...newActions));
+    writeEventsProcess = persist
+        && Promise.all(connection._truthLogInfo.writeQueue.push(...newActions));
     connection._triggerTruthLogWrites(lastTruth.aspects.command.id);
   }
 
   const newActionIndex = receivedActions.length - newActions.length;
-  return thenChainEagerly(writeProcess, [
+  return thenChainEagerly(writeEventsProcess, [
     writtenEvents => {
       (writtenEvents || []).forEach(
           (event, index) => { receivedActions[newActionIndex + index] = event; });

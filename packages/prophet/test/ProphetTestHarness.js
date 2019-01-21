@@ -94,8 +94,8 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
       });
     }
     for (const commands of commandBlocks) {
-      await Promise.all(ret.chronicleEvents(commands).eventResults
-          .map(result => result.getPremiereStory()));
+      const results = ret.chronicleEvents(commands).eventResults;
+      await Promise.all(results.map(result => result.getPersistedStory()));
     }
     return ret;
   } catch (error) {
@@ -178,7 +178,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
   createCorpus (corpusOptions: Object = {}) {
     // Called by RAEMTestHarness.constructor (so before oracle/scribe are created)
     const corpus = super.createCorpus(corpusOptions);
-    this.prophet = createFalseProphet({
+    this.prophet = this.falseProphet = createFalseProphet({
       schema: this.schema, corpus, logger: this.getLogger(), ...this.falseProphetOptions,
     });
     this.chronicler = this.prophet;
@@ -245,10 +245,10 @@ export default class ProphetTestHarness extends ScriptTestHarness {
             }> has no TestPartitionConnection at the end of the chain`);
       }
       const truths = JSON.parse(JSON.stringify(
-              (testSourceBackend._testUpstreamEntries || []).map(entry => entry.event)))
+              (testSourceBackend._chroniclings || []).map(entry => entry.event)))
           .map(authorizeTruth);
-      if (clearSourceUpstreamEntries) testSourceBackend._testUpstreamEntries = [];
-      if (clearReceiverUpstreamEntries) receiverBackend._testUpstreamEntries = [];
+      if (clearSourceUpstreamEntries) testSourceBackend._chroniclings = [];
+      if (clearReceiverUpstreamEntries) receiverBackend._chroniclings = [];
       if (verbosity) {
         receiver.warnEvent("Receiving truths:", dumpify(truths, { indent: 2 }));
       }

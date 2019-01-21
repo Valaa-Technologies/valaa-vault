@@ -86,13 +86,13 @@ export function _prepareBvob (connection: ScribePartitionConnection, content: an
       || (connection._pendingBvobLookup[contentHash] = {});
 
   if ((mediaInfo.prepareBvobToUpstream !== false)
-      && (pendingBvobInfo.prepareBvobToUpstreamProcess === undefined)) {
+      && (pendingBvobInfo.upstreamPrepareBvobProcess === undefined)) {
     // Begin the retrying Bvob upstream preparation process.
-    pendingBvobInfo.prepareBvobToUpstreamProcess = thenChainEagerly(
+    pendingBvobInfo.upstreamPrepareBvobProcess = thenChainEagerly(
         _prepareBvobToUpstreamWithRetries(connection, buffer, mediaInfo, mediaName,
             new Error(`_prepareBvobToUpstreamWithRetries(${mediaName})`),
             defaultRetries),
-        (result) => (pendingBvobInfo.prepareBvobToUpstreamProcess = result),
+        (result) => (pendingBvobInfo.upstreamPrepareBvobProcess = result),
         onError,
     );
   }
@@ -103,8 +103,8 @@ export function _prepareBvob (connection: ScribePartitionConnection, content: an
         if (connection.isLocallyPersisted()) {
           return connection._prophet._writeBvobBuffer(buffer, contentHash);
         }
-        if (pendingBvobInfo.prepareBvobToUpstreamProcess !== undefined) {
-          return pendingBvobInfo.prepareBvobToUpstreamProcess;
+        if (pendingBvobInfo.upstreamPrepareBvobProcess !== undefined) {
+          return pendingBvobInfo.upstreamPrepareBvobProcess;
         }
         throw new Error(`Can't prepare bvob locally (partition isLocallyPersisted is falsy) ${
             ""}and upstream prepare is not available.`);
@@ -112,7 +112,6 @@ export function _prepareBvob (connection: ScribePartitionConnection, content: an
       (persistedContentHash) => (pendingBvobInfo.persistProcess = persistedContentHash),
     ], onError);
   }
-
   return { ...pendingBvobInfo, content, buffer, contentHash };
 }
 
@@ -196,7 +195,7 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
 export async function _retryingTwoWaySyncMediaContent (connection: ScribePartitionConnection,
     mediaEntry: Object, options: {
       getNextBackoffSeconds?: Function, retryTimes?: number, delayBaseSeconds?: number,
-      retrieveMediaBuffer: RetrieveMediaBuffer, prepareBvob: Function,
+      retrieveMediaBuffer: RetrieveMediaBuffer, prepareBvob?: Function,
     } = {},
 ) {
   const mediaInfo = mediaEntry.mediaInfo;
@@ -223,7 +222,9 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribePartiti
             || (options.retrieveMediaBuffer && (await options.retrieveMediaBuffer(mediaInfo)));
         if ((content !== undefined) && options.prepareBvob) {
         // TODO(iridian): Determine whether media content should be pre-cached or not.
-          await options.prepareBvob(content, mediaInfo).persistProcess;
+          const preparation = options.prepareBvob(content, mediaInfo);
+          await preparation.persistProcess;
+          await preparation.upstreamPrepareBvobProcess;
         }
       }
       return mediaEntry;

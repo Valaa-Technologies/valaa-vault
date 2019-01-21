@@ -43,7 +43,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   // Contains partition specific bvob state data.
   _pendingBvobLookup: { [bvobId: string]: {
     localPersistProcess: Promise<Object>,
-    prepareBvobToUpstreamProcess: Promise<Object>,
+    upstreamPrepareBvobProcess: Promise<Object>,
   } } = {};
 
   _db: IndexedDBWrapper;

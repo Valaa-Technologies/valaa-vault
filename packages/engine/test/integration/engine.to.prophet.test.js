@@ -24,6 +24,8 @@ describe("Media handling", () => {
     });
     const buffer = arrayBufferFromUTF8String("example content");
     const contentHash = contentHashFromArrayBuffer(buffer);
+    const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    const existingChroniclings = testPartitionBackend._chroniclings.length;
     const { media, contentSetting } = await harness.runBody(vRef("test_partition"), `
       const media = new Media({
           name: "text media",
@@ -37,25 +39,30 @@ describe("Media handling", () => {
     `, { scope: { buffer, console } });
     expect(media.getId().toJSON())
         .toEqual(entities().test_partition.get(["§..", "text"]).getId().toJSON());
-    const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    expect(testPartitionBackend._preparations[contentHash])
+    expect(testPartitionBackend.getPreparation(contentHash))
         .toBeTruthy();
     expect(media.get("content"))
         .toBeFalsy();
+    expect(testPartitionBackend._chroniclings.length)
+        .toEqual(existingChroniclings + 1);
     testPartitionBackend.addPrepareBvobResult({ contentHash });
     const { bvobId } = await contentSetting;
     expect(bvobId.getId().rawId())
         .toEqual(contentHash);
     expect(bvobId.getId().toJSON())
         .toEqual(media.get("content").getId().toJSON());
+    expect(testPartitionBackend._chroniclings.length)
+        .toEqual(existingChroniclings + 2);
   });
 
   it("does an async prepareBvob for locally persisted Media content", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
       oracleOptions: { testAuthorityConfig: { isRemoteAuthority: true,
-        isLocallyPersisted: true, // true
+        isLocallyPersisted: true, // as opposed to false of previous test
       } },
     });
+    const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    const existingChroniclings = testPartitionBackend._chroniclings.length;
     const buffer = arrayBufferFromUTF8String("example content");
     const contentHash = contentHashFromArrayBuffer(buffer);
     const { media, contentSetting } = await harness.runBody(vRef("test_partition"), `
@@ -71,19 +78,30 @@ describe("Media handling", () => {
     `, { scope: { buffer, console } });
     expect(media.getId().toJSON())
         .toEqual(entities().test_partition.get(["§..", "text"]).getId().toJSON());
-    // no remote confirmation! (these lines retained in comments as a diff to above test case)
-    // const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    // expect(testPartitionBackend._preparations[contentHash])
-    //     .toBeTruthy();
-    // expect(media.get("content")).toBeFalsy();
-    // testPartitionBackend.addPrepareBvobResult({ contentHash });
+    expect(testPartitionBackend._chroniclings.length)
+        .toEqual(existingChroniclings + 1);
+    // no remote confirmation!
     const { bvobId } = await contentSetting;
     expect(bvobId.getId().rawId())
         .toEqual(contentHash);
     expect(bvobId.getId().toJSON())
         .toEqual(media.get("content").getId().toJSON());
+    // FIXME(iridian, 2019-01): Replace this ugly prophecy extraction
+    // with transaction introspection API, so that the createBvob
+    // callback in the above VS code will get its own transaction
+    // completion promise and export it to this outer test context.
+    const createBvobProphecy = harness.falseProphet._primaryRecital.getLast();
+    expect((await createBvobProphecy.meta.operation.getLocalStory()).actions.length)
+        .toEqual(2); // good enough...
+    testPartitionBackend.addPrepareBvobResult({ contentHash });
+    expect(testPartitionBackend._chroniclings.length)
+        .toEqual(existingChroniclings + 1);
+    await createBvobProphecy.meta.operation.getPersistedStory();
+    expect(testPartitionBackend._chroniclings.length)
+        .toEqual(existingChroniclings + 2);
   });
 });
+
 describe("Two paired harnesses emulating two gateways connected through event streams", () => {
   it("passes a property value to paired client", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, oracleOptions: {

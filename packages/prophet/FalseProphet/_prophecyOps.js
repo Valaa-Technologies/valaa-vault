@@ -23,8 +23,6 @@ export type Prophecy = Story & {
   isProphecy: true;
 }
 
-const ProphecyOperationTag = Symbol("Prophecy Operation");
-
 // Create prophecies out of provided events and send their partition
 // commands upstream. Aborts all remaining events on first exception
 // and rolls back previous ones.
@@ -49,7 +47,7 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
 
 export function _confirmProphecyCommand (connection: FalseProphetPartitionConnection,
     prophecy: Prophecy, command: Command) {
-  const operation = prophecy[ProphecyOperationTag];
+  const operation = (prophecy.meta || {}).operation;
   if (operation) {
     const partition = operation._partitions[String(connection.getPartitionURI())];
     if (!partition) {
@@ -81,8 +79,7 @@ export function _confirmProphecyCommand (connection: FalseProphetPartitionConnec
 
 export function _reformProphecyCommand (connection: FalseProphetPartitionConnection,
     prophecy: Prophecy, reformedCommand: Command) {
-  const partition = prophecy[ProphecyOperationTag]
-      ._partitions[String(connection.getPartitionURI())];
+  const partition = prophecy.meta.operation._partitions[String(connection.getPartitionURI())];
   const originalCommand = partition.commandEvent;
   connection.warnEvent(1, () => [
     "\n\treforming prophecy", tryAspect(prophecy, "command").id,
@@ -127,7 +124,7 @@ function _checkForSemanticSchism (/* purgedProphecy: Prophecy, revisedProphecy: 
 
 export function _reviseSchism (connection: FalseProphetPartitionConnection,
     schism: Prophecy, purgedStories: Story[], newEvents: EventBase[]) {
-  const operation = schism[ProphecyOperationTag];
+  const operation = (schism.meta || {}).operation;
   // No way to revise non-prophecy schisms: these come from elsewhere so not our job.
   if (!operation) return undefined;
   // First try to revise by prophecy chronicleEvents.options.reviseSchism
@@ -149,7 +146,8 @@ export function _reviseSchism (connection: FalseProphetPartitionConnection,
       connection, revisedProphecyCommand);
   // Can only revise commands belonging to the originating partition
   if (!revisedPartitionCommandEvent) return undefined;
-  recomposedProphecy[ProphecyOperationTag] = operation;
+  (recomposedProphecy.meta || (Object.getPrototypeOf(recomposedProphecy).meta = {})).operation =
+      operation;
   operation._prophecy = recomposedProphecy;
   const operationPartition = operation._partitions[partitionURI];
   operationPartition.commandEvent = revisedPartitionCommandEvent;
@@ -159,7 +157,7 @@ export function _reviseSchism (connection: FalseProphetPartitionConnection,
 }
 
 export function _rejectHereticProphecy (falseProphet: FalseProphet, prophecy: Prophecy) {
-  const operation = prophecy[ProphecyOperationTag];
+  const operation = (prophecy.meta || {}).operation;
   if (!operation || !operation._partitions) return;
   for (const partition of Object.values(operation._partitions)) {
     if (!partition.confirmedTruth) {
@@ -182,10 +180,12 @@ class ProphecyOperation extends ProphecyEventResult {
     rejectCommand?: Function,
   } };
   _fulfillment: Promise<Object>;
+  _stageIndex: number = 0;
   _firstStage: Promise<Object>;
   _persistment: Promise<Object>;
   _debugPhase: string = "construct";
 
+  getDebugPhase () { return this._debugPhase; }
   getCommandOf (partitionURI) {
     return this._partitions[partitionURI].commandEvent;
   }
@@ -268,7 +268,7 @@ class ProphecyOperation extends ProphecyEventResult {
     this.event = getActionFromPassage(prophecy);
     this.index = index;
     this._prophecy = prophecy;
-    prophecy[ProphecyOperationTag] = this;
+    (prophecy.meta || (this.event.meta = {})).operation = this;
     Object.assign(this, this._followerReactions[index]);
     this._fulfillment = thenChainEagerly(null, [
       () => this._prepareStagesAndCommands(),
@@ -371,7 +371,7 @@ class ProphecyOperation extends ProphecyEventResult {
   _initiateStage (stagePartitions: Object, stageName: string) {
     return stagePartitions && thenChainEagerly(stagePartitions, [
       () => {
-        this._debugPhase = `await stage '${stageName}' partition validations`;
+        this._debugPhase = `await stage #${this._stageIndex} '${stageName}' partition validations`;
         return mapEagerly(stagePartitions,
           partition => partition.validatedConnection,
           (error, partition) => {
@@ -395,10 +395,10 @@ class ProphecyOperation extends ProphecyEventResult {
         // Maybe determine aspects.log.index's beforehand?
 
         // Get aspects.log.index and scribe persist finalizer for each partition
-        this._debugPhase = `chronicle stage '${stageName}' commands`;
+        this._debugPhase = `chronicle stage #${this._stageIndex} '${stageName}' commands`;
         for (const partition of stagePartitions) {
           try {
-            this._debugPhase = `chronicle stage '${stageName}' command to ${
+            this._debugPhase = `chronicle stage #${this._stageIndex} '${stageName}' command to ${
                 partition.connection.getName()}`;
             partition.chronicling = partition.connection.chronicleEvent(
                 partition.commandEvent, Object.create(this._options));
@@ -417,8 +417,10 @@ class ProphecyOperation extends ProphecyEventResult {
   }
 
   _completeStage (stagePartitions: Object[], stageName: string) {
+    const stageIndex = this._stageIndex++;
     return stagePartitions && mapEagerly(stagePartitions, partition => {
-      this._debugPhase = `await stage '${stageName}' truth of ${partition.connection.getName()}`;
+      this._debugPhase = `await stage #${stageIndex} '${stageName}' truth of ${
+          partition.connection.getName()}`;
       const chronicledTruth = partition.chronicling.getTruthEvent();
       let truthProcess = chronicledTruth;
       let receivedTruth;

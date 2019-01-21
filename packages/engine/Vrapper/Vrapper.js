@@ -1440,7 +1440,7 @@ export default class Vrapper extends Cog {
       }
       return this._withActiveConnectionChainEagerly(Object.create(options), [
         connection => connection.prepareBvob(content, mediaInfo),
-        ({ contentHash, persistProcess }) => (contentHash || persistProcess),
+        ({ contentHash, persistProcess }) => (persistProcess || contentHash),
         (contentHash) => {
           if (!contentHash || (typeof contentHash !== "string")) {
             throw new Error(`Invalid contentHash '${typeof contentHash}', truthy string expected`);

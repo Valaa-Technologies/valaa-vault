@@ -64,13 +64,7 @@ export async function _initializeSharedIndexedDB (scribe: Scribe) {
       cursor.continue();
     };
   });
-  scribe._bvobLookup = contentLookup;
-  scribe.warnEvent(1, () => [
-    `Content lookup initialization done with ${
-        Object.keys(contentLookup).length} buffers, totaling ${totalBytes} bytes.`,
-    `\n\tcleared ${clearedBuffers} buffers, releasing ${releasedBytes} bytes`,
-  ]);
-  return contentLookup;
+  return { totalBytes, clearedBuffers, releasedBytes, contentLookup };
 }
 
 export async function _initializeConnectionIndexedDB (connection: ScribePartitionConnection) {

@@ -4,7 +4,7 @@ import Prophet from "~/prophet/api/Prophet";
 
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 
-import { dumpObject, invariantifyObject } from "~/tools";
+import { dumpObject, invariantifyObject, thenChainEagerly } from "~/tools";
 import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 import ScribePartitionConnection from "./ScribePartitionConnection";
@@ -67,11 +67,18 @@ export default class Scribe extends Prophet {
 
   // Idempotent: returns a promise until the initialization is complete. await on it.
   initiate () {
-    if (!this._bvobLookup) {
-      this.warnEvent(1, "Initializing bvob content lookups...");
-      this._bvobLookup = _initializeSharedIndexedDB(this);
-    }
-    return this._bvobLookup;
+    return this._bvobLookup || (this._bvobLookup = thenChainEagerly(
+        this.warnEvent(1, "Initializing bvob content lookups..."), [
+          () => _initializeSharedIndexedDB(this),
+          ({ totalBytes, clearedBuffers, releasedBytes, contentLookup }) => {
+            this.warnEvent(1, () => [
+              `Content lookup initialization done with ${
+                  Object.keys(contentLookup).length} buffers, totaling ${totalBytes} bytes.`,
+              `\n\tcleared ${clearedBuffers} buffers, releasing ${releasedBytes} bytes`,
+            ]);
+            return (this._bvobLookup = contentLookup);
+          },
+        ]));
   }
 
   getDatabaseAPI (): DatabaseAPI { return this._databaseAPI; }

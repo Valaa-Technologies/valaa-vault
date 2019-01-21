@@ -57,7 +57,7 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
 
   if ((options.fullNarrate !== true)
       && (options.newPartition
-          || (ret.scribeEventLog || []).length || (ret.scribeCommandQueue || []).length)) {
+          || (ret.scribeTruthLog || []).length || (ret.scribeCommandQueue || []).length)) {
     connection.logEvent(2, () => [
       "Initiated async upstream narration, local narration results:", ret,
     ]);
@@ -79,7 +79,7 @@ async function _narrateLocalLogs (connection: ScribePartitionConnection,
     eventIdEnd: ?number = Math.max(
         connection.getFirstUnusedTruthEventId(), connection.getFirstUnusedCommandEventId()),
     retrieveMediaBuffer: ?RetrieveMediaBuffer,
-): Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
+): Promise<{ scribeTruthLog: any, scribeCommandQueue: any }> {
   const ret = {};
   let currentEventId = eventIdBegin;
   if (receiveTruths) {
@@ -88,7 +88,7 @@ async function _narrateLocalLogs (connection: ScribePartitionConnection,
       eventIdBegin: currentEventId, eventIdEnd: truthEventIdEnd
     })) || [];
     currentEventId = truthEventIdEnd;
-    ret.scribeEventLog = !truths.length ? truths
+    ret.scribeTruthLog = !truths.length ? truths
         : await Promise.all(await receiveTruths(truths, retrieveMediaBuffer));
   }
   if (receiveCommands) {
@@ -114,10 +114,12 @@ async function _waitForRemoteNarration (connection: ScribePartitionConnection,
   // didn't find any truths by waiting for the upstream narration.
   const upstreamResults = await upstreamNarration;
   for (const key of Object.keys(upstreamResults)) {
-    const resultEntries = upstreamResults[key];
+    const resultEntries = (upstreamResults[key] = await upstreamResults[key]);
     if (!Array.isArray(resultEntries)) continue;
     for (let i = 0; i !== resultEntries.length; ++i) {
       const entry = resultEntries[i];
+      // WTF is this? getLocalEvent is a chronicleEvents
+      // eventResults[0].getLocalEvent thing
       if (!entry.getLocalEvent) continue;
       try {
         await entry.getLocalEvent();
@@ -264,7 +266,7 @@ export function _receiveEvents (
     retryTimes: 4, delayBaseSeconds: 5,
     retrieveMediaBuffer: receivingTruths && retrieveMediaBuffer,
     prepareBvob: (content, mediaInfo) => connection.prepareBvob(
-        content, { ...mediaInfo, prepareBvobUpstream: !receivingTruths }),
+        content, { ...mediaInfo, prepareBvobToUpstream: !receivingTruths }),
   };
   const persist = connection.isLocallyPersisted();
 

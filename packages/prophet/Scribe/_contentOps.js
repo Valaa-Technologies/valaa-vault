@@ -64,9 +64,12 @@ export function _preCacheBvob (scribe: Scribe, bvobId: string, newInfo: BvobInfo
           && scribe._writeBvobBuffer(buffer, bvobId, initialPersistRefCount));
 }
 
+const defaultRetries = 3;
+
 export function _prepareBvob (connection: ScribePartitionConnection, content: any,
     mediaInfo: MediaInfo = {}, onError: Function) {
   const { buffer, contentHash } = bufferAndContentHashFromNative(content, mediaInfo);
+  const mediaName = mediaInfo.name ? `"${mediaInfo.name}"` : mediaInfo.bvobId;
   if (mediaInfo && mediaInfo.bvobId && (mediaInfo.bvobId !== contentHash)) {
     connection.errorEvent(`\n\tINTERNAL ERROR: bvobId mismatch when preparing bvob for Media '${
             mediaInfo.name}', CONTENT IS NOT PERSISTED`,
@@ -81,41 +84,58 @@ export function _prepareBvob (connection: ScribePartitionConnection, content: an
 
   const pendingBvobInfo = connection._pendingBvobLookup[contentHash]
       || (connection._pendingBvobLookup[contentHash] = {});
-  if (!pendingBvobInfo.persistProcess) {
-    pendingBvobInfo.persistProcess = thenChainEagerly(
-        connection._prophet._writeBvobBuffer(buffer, contentHash),
-        (persistedContentId) => (pendingBvobInfo.persistProcess = persistedContentId),
+
+  if ((mediaInfo.prepareBvobToUpstream !== false)
+      && (pendingBvobInfo.prepareBvobToUpstreamProcess === undefined)) {
+    // Begin the retrying Bvob upstream preparation process.
+    pendingBvobInfo.prepareBvobToUpstreamProcess = thenChainEagerly(
+        _prepareBvobToUpstreamWithRetries(connection, buffer, mediaInfo, mediaName,
+            new Error(`_prepareBvobToUpstreamWithRetries(${mediaName})`),
+            defaultRetries),
+        (result) => (pendingBvobInfo.prepareBvobToUpstreamProcess = result),
         onError,
     );
   }
-  if ((mediaInfo.prepareBvobUpstream !== false) && !pendingBvobInfo.prepareBvobUpstreamProcess) {
-    // Begin the retrying Bvob upstream preparation process.
-    pendingBvobInfo.prepareBvobUpstreamProcess = thenChainEagerly(
-        _prepareBvobUpstreamWithRetries(connection, buffer, mediaInfo),
-        (result) => (pendingBvobInfo.prepareBvobUpstreamProcess = result),
-        onError,
-    );
+
+  if (pendingBvobInfo.persistProcess === undefined) {
+    pendingBvobInfo.persistProcess = thenChainEagerly(null, [
+      () => {
+        if (connection.isLocallyPersisted()) {
+          return connection._prophet._writeBvobBuffer(buffer, contentHash);
+        }
+        if (pendingBvobInfo.prepareBvobToUpstreamProcess !== undefined) {
+          return pendingBvobInfo.prepareBvobToUpstreamProcess;
+        }
+        throw new Error(`Can't prepare bvob locally (partition isLocallyPersisted is falsy) ${
+            ""}and upstream prepare is not available.`);
+      },
+      (persistedContentHash) => (pendingBvobInfo.persistProcess = persistedContentHash),
+    ], onError);
   }
 
   return { ...pendingBvobInfo, content, buffer, contentHash };
 }
 
-async function _prepareBvobUpstreamWithRetries (connection: ScribePartitionConnection,
+function _prepareBvobToUpstreamWithRetries (connection: ScribePartitionConnection,
     buffer: ArrayBuffer | (() => ArrayBuffer), mediaInfo: MediaInfo,
+    mediaName: string, wrap: Error, retriesRemaining: number,
 ) {
-  let wrappedError;
-  for (let retries = 3; ; --retries) {
-    try {
-      return await connection.getUpstreamConnection().prepareBvob(buffer, mediaInfo).persistProcess;
-    } catch (error) {
-      wrappedError = connection.wrapErrorEvent(error,
-          `prepareBvobUpstreamProcess(${
-              mediaInfo.name ? `"${mediaInfo.name}"` : mediaInfo.bvobId})`,
-          "\n\tmediaInfo:", ...dumpObject(mediaInfo),
-      );
-      if (error.retryable === false || !retries) throw wrappedError;
-      connection.outputErrorEvent(wrappedError, "\n\tretrying upload");
+  return thenChainEagerly(
+      connection.getUpstreamConnection(),
+      upstream => upstream.prepareBvob(buffer, mediaInfo).persistProcess,
+      errorOnScribePrepareBvobToUpstream,
+  );
+  function errorOnScribePrepareBvobToUpstream (error) {
+    const wrappedError = connection.wrapErrorEvent(error, wrap,
+        "\n\tmediaInfo:", ...dumpObject(mediaInfo),
+    );
+    if ((error.retryable !== false) && (retriesRemaining > 0)) {
+      connection.outputErrorEvent(wrappedError, `error while preparing bvob ${mediaName
+          } to upstream (${retriesRemaining} retries remaining):`);
+      return _prepareBvobToUpstreamWithRetries(connection, buffer, mediaInfo, mediaName, wrap,
+          retriesRemaining - 1);
     }
+    throw wrappedError;
   }
 }
 

@@ -43,7 +43,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   // Contains partition specific bvob state data.
   _pendingBvobLookup: { [bvobId: string]: {
     localPersistProcess: Promise<Object>,
-    prepareBvobUpstreamProcess: Promise<Object>,
+    prepareBvobToUpstreamProcess: Promise<Object>,
   } } = {};
 
   _db: IndexedDBWrapper;
@@ -68,7 +68,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   _doConnect (options: ConnectOptions) {
     // ScribePartitionConnection can be active even if the upstream
     // connection isn't, as long as there are any events in the local
-    // cache and the optimistic narration is possible.
+    // cache and thus optimistic narration is possible.
     if (this._prophet._upstream) {
       this.setUpstreamConnection(this._prophet._upstream.acquirePartitionConnection(
           this.getPartitionURI(), {
@@ -112,7 +112,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   getFirstUnusedCommandEventId () { return this._commandQueueInfo.eventIdEnd; }
 
   narrateEventLog (options: ?NarrateOptions = {}):
-      Promise<{ scribeEventLog: any, scribeCommandQueue: any }> {
+      Promise<{ scribeTruthLog: any, scribeCommandQueue: any }> {
     if (!options) return undefined;
     const ret = {};
     return _narrateEventLog(this, options, ret)

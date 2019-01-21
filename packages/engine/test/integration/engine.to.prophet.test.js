@@ -5,13 +5,85 @@ import { vRef } from "~/raem/ValaaReference";
 import { createEngineTestHarness, createEngineOracleHarness }
     from "~/engine/test/EngineTestHarness";
 import { clearAllScribeDatabases } from "~/prophet/test/ProphetTestHarness";
+import { arrayBufferFromUTF8String } from "~/tools/textEncoding";
+import { contentHashFromArrayBuffer } from "~/tools";
 
 let harness: { createds: Object, engine: Object, prophet: Object, testEntities: Object };
+const entities = () => harness.createds.Entity;
 afterEach(async () => {
   await clearAllScribeDatabases();
   harness = null;
 }); // eslint-disable-line no-undef
 
+describe("Media handling", () => {
+  it("does an async prepareBvob for non-locally persisted Media content", async () => {
+    harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
+      oracleOptions: { testAuthorityConfig: { isRemoteAuthority: true,
+        isLocallyPersisted: false,
+      } },
+    });
+    const buffer = arrayBufferFromUTF8String("example content");
+    const contentHash = contentHashFromArrayBuffer(buffer);
+    const { media, contentSetting } = await harness.runBody(vRef("test_partition"), `
+      const media = new Media({
+          name: "text media",
+          owner: this,
+          mediaType: { type: "text", subtype: "plain" },
+      });
+      const contentSetting = media[Valaa.prepareBvob](buffer)
+          .then(createBvob => ({ bvobId: (media[Valaa.Media.content] = createBvob()) }));
+      this.text = media;
+      ({ media, contentSetting });
+    `, { scope: { buffer, console } });
+    expect(media.getId().toJSON())
+        .toEqual(entities().test_partition.get(["§..", "text"]).getId().toJSON());
+    const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    expect(testPartitionBackend._preparations[contentHash])
+        .toBeTruthy();
+    expect(media.get("content"))
+        .toBeFalsy();
+    testPartitionBackend.addPrepareBvobResult({ contentHash });
+    const { bvobId } = await contentSetting;
+    expect(bvobId.getId().rawId())
+        .toEqual(contentHash);
+    expect(bvobId.getId().toJSON())
+        .toEqual(media.get("content").getId().toJSON());
+  });
+
+  it("does an async prepareBvob for locally persisted Media content", async () => {
+    harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
+      oracleOptions: { testAuthorityConfig: { isRemoteAuthority: true,
+        isLocallyPersisted: true, // true
+      } },
+    });
+    const buffer = arrayBufferFromUTF8String("example content");
+    const contentHash = contentHashFromArrayBuffer(buffer);
+    const { media, contentSetting } = await harness.runBody(vRef("test_partition"), `
+      const media = new Media({
+          name: "text media",
+          owner: this,
+          mediaType: { type: "text", subtype: "plain" },
+      });
+      const contentSetting = media[Valaa.prepareBvob](buffer)
+          .then(createBvob => ({ bvobId: (media[Valaa.Media.content] = createBvob()) }));
+      this.text = media;
+      ({ media, contentSetting });
+    `, { scope: { buffer, console } });
+    expect(media.getId().toJSON())
+        .toEqual(entities().test_partition.get(["§..", "text"]).getId().toJSON());
+    // no remote confirmation! (these lines retained in comments as a diff to above test case)
+    // const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    // expect(testPartitionBackend._preparations[contentHash])
+    //     .toBeTruthy();
+    // expect(media.get("content")).toBeFalsy();
+    // testPartitionBackend.addPrepareBvobResult({ contentHash });
+    const { bvobId } = await contentSetting;
+    expect(bvobId.getId().rawId())
+        .toEqual(contentHash);
+    expect(bvobId.getId().toJSON())
+        .toEqual(media.get("content").getId().toJSON());
+  });
+});
 describe("Two paired harnesses emulating two gateways connected through event streams", () => {
   it("passes a property value to paired client", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, oracleOptions: {

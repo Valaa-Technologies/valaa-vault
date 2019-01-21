@@ -17,9 +17,7 @@ import AuthorityPartitionConnection from "./AuthorityPartitionConnection";
 export default class AuthorityProphet extends Prophet {
   static PartitionConnectionType = AuthorityPartitionConnection;
 
-  constructor ({
-    authorityURI, authorityConfig, nexus, ...rest
-  }: Object) {
+  constructor ({ authorityURI, authorityConfig, nexus, ...rest }: Object) {
     super({ ...rest });
     this._nexus = nexus;
     this._authorityURI = authorityURI;

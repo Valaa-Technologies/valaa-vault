@@ -52,7 +52,7 @@ describe("Prophet", () => {
   ];
 
   it("decodes cached bvob buffers based on media type", async () => {
-    const scribe = createScribe(createOracle(createTestMockProphet()));
+    const scribe = createScribe(createOracle());
     await scribe.initiate();
 
     const connection = await scribe.acquirePartitionConnection(createPartitionURI("valaa-test:"))

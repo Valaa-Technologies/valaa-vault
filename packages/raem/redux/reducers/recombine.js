@@ -9,7 +9,7 @@ export default function recombine (bard: DuplicateBard) {
   prepareDuplicationContext(bard);
   bard.setPassages((bard.passage.actions || []).map(action => {
     const passage = bard.createPassageFromAction(action);
-    const duplicateOf = bard.correlateReference(passage, action, "duplicateOf");
+    const duplicateOf = bard.correlateReference(action, passage, "duplicateOf");
     if (!action.id
         || (action.initialState && (action.initialState.owner || action.initialState.source))
         || (action.preOverrides && (action.preOverrides.owner || action.preOverrides.source))) {

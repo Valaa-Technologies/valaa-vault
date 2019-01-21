@@ -6,7 +6,7 @@ import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-dup
 import Transient, { createTransient, getTransientTypeName, PrototypeOfImmaterialTag }
     from "~/raem/state/Transient";
 
-import Bard from "~/raem/redux/Bard";
+import Bard, { getActionFromPassage } from "~/raem/redux/Bard";
 
 import { derivedId, dumpify, dumpObject, invariantify, wrapError } from "~/tools";
 import {
@@ -28,13 +28,18 @@ export default function duplicate (bard: DuplicateBard) {
   bard._duplicationRootId = passage.id.rawId();
 
   const isInsideRecombined = bard._fieldsToPostProcess;
-  if (!isInsideRecombined) prepareDuplicationContext(bard);
+  let duplicateOf;
+  if (isInsideRecombined) {
+    duplicateOf = passage.duplicateOf;
+  } else {
+    prepareDuplicationContext(bard);
+    duplicateOf = bard.correlateReference(getActionFromPassage(passage), passage, "duplicateOf");
+  }
   // else we're a sub-action inside a RECOMBINED operation
 
   const newObjectId = passage.id;
   const newObjectTransient = bard.objectTransient;
 
-  const duplicateOf = passage.duplicateOf = bard.obtainReference(passage.duplicateOf);
   // Specifying "Resource" as opposed to "TransientFields" as this
   // requires the resource to be active: Inactive resources appear only
   // in inactive interface and type tables.

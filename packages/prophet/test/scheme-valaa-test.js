@@ -16,7 +16,7 @@ export default function createValaaTestScheme ({ config, authorityURI } = {}) {
 
     obtainAuthorityConfig: () => ({
       eventVersion: EVENT_VERSION,
-      isLocallyPersisted: false,
+      isLocallyPersisted: true,
       isPrimaryAuthority: true,
       isRemoteAuthority: false,
       ...config,

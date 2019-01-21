@@ -57,7 +57,12 @@ export default class IndexedDBWrapper extends LogEventGenerator {
 
   async transaction (stores: Array<string>, mode: string = "readonly", opsCallback: Function) {
     let result;
+    const database = this.database;
     try {
+      if (!database) {
+        throw new Error(`transaction could not be initiated against a database connection to '${
+            this.databaseId}' that has been detached`);
+      }
       const trans = this.database.transaction(stores, mode);
       const objStores = stores.reduce((container, store) => {
         container[store] = trans.objectStore(store);

@@ -76,6 +76,11 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
 
   const ret = createProphetTestHarness(combinedOptions);
   try {
+    // TODO(iridian, 2019-01): Fix this hack: this await is in a wrong
+    // place. But currently the Scribe creation happens in the
+    // constructor where it cannot be awaited.
+    if (ret.scribe) await ret.scribe.initiate();
+
     ret.testConnection = await ret.testConnection;
     if (options.acquirePartitions) {
       const partitionURIs = options.acquirePartitions.map(

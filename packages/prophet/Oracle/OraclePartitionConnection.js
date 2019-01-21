@@ -35,7 +35,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
     });
   }
 
-  _doConnect (options: ConnectOptions, onError: Function) {
+  _doConnect (options: ConnectOptions) {
     // Handle step 2. of the acquirePartitionConnection first narration
     // logic (defined in PartitionConnection.js) and begin I/O bound(?)
     // scribe event log narration in parallel to the authority
@@ -45,9 +45,9 @@ export default class OraclePartitionConnection extends PartitionConnection {
           subscribeEvents: false, narrateOptions: false,
           receiveTruths: this.getReceiveTruths(options.receiveTruths),
         }));
-    return thenChainEagerly(this._upstreamConnection.getActiveConnection(),
-        () => this.narrateEventLog(options.narrateOptions),
-        onError);
+    return thenChainEagerly(
+        this._upstreamConnection.getActiveConnection(),
+        () => this.narrateEventLog(options.narrateOptions));
   }
 
   receiveTruths (truths: EventBase[], retrieveMediaBuffer: RetrieveMediaBuffer,

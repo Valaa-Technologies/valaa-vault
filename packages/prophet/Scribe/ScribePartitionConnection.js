@@ -65,7 +65,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
     };
   }
 
-  _doConnect (options: ConnectOptions, onError: Function) {
+  _doConnect (options: ConnectOptions) {
     // ScribePartitionConnection can be active even if the upstream
     // connection isn't, as long as there are any events in the local
     // cache and the optimistic narration is possible.
@@ -80,17 +80,18 @@ export default class ScribePartitionConnection extends PartitionConnection {
           }));
     }
 
-    return thenChainEagerly(this.isLocallyPersisted() && _initializeConnectionIndexedDB(this), [
-      (isIndexedDBConnected) => (!isIndexedDBConnected ? {} : this._readMediaEntries()),
-      (mediaEntries) => {
-        this._pendingMediaLookup = mediaEntries;
-        for (const [mediaRawId, entry] of Object.entries(this._pendingMediaLookup)) {
-          this._prophet._persistedMediaLookup[mediaRawId] = entry;
-        }
-      },
-      () => ((options.narrateOptions !== false)
-          && this.narrateEventLog(options.narrateOptions)),
-    ], onError);
+    return thenChainEagerly(
+        this.isLocallyPersisted() && _initializeConnectionIndexedDB(this), [
+          (isIndexedDBConnected) => (!isIndexedDBConnected ? {} : this._readMediaEntries()),
+          (mediaEntries) => {
+            this._pendingMediaLookup = mediaEntries;
+            for (const [mediaRawId, entry] of Object.entries(this._pendingMediaLookup)) {
+              this._prophet._persistedMediaLookup[mediaRawId] = entry;
+            }
+          },
+          () => ((options.narrateOptions !== false)
+              && this.narrateEventLog(options.narrateOptions)),
+        ]);
   }
 
   disconnect () {

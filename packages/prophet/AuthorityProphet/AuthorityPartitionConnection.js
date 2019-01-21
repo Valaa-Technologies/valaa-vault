@@ -29,7 +29,7 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
     return super.isConnected();
   }
 
-  _doConnect (/* options: ConnectOptions, onError: Function */) {}
+  _doConnect (/* options: ConnectOptions */) {}
 
   narrateEventLog (options: ?NarrateOptions = {}): Promise<any> {
     if (this.isRemoteAuthority()) {

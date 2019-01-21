@@ -11,7 +11,7 @@ import Follower from "~/prophet/api/Follower";
 
 import Logger from "~/tools/Logger";
 import {
-  dumpObject, invariantifyArray, invariantifyObject, isPromise, outputError, thenChainEagerly,
+  dumpObject, invariantifyArray, invariantifyObject, isPromise, thenChainEagerly,
 } from "~/tools";
 
 /**
@@ -120,50 +120,48 @@ export default class PartitionConnection extends Follower {
   connect (options: ConnectOptions) {
     const connection = this;
     const wrap = new Error("connect()");
-    try {
-      if (this._activeConnection) return this._activeConnection;
-      this.warnEvent(1, () => [
-        "\n\tBegun connecting with options", ...dumpObject(options), ...dumpObject(this)
-      ]);
-      return (this._activeConnection = thenChainEagerly(
-          this._doConnect(Object.create(options), errorOnConnect),
-          (connectResults) => {
-            if (options.narrateOptions !== false) {
-                const actionCount = Object.values(connectResults).reduce(
-                  (s, log) => s + (Array.isArray(log) ? log.length : 0),
-                  options.eventIdBegin || 0);
-              if (!actionCount && (options.newPartition === false)) {
-                throw new Error(`No events found when connecting to an existing partition '${
-                  this.getPartitionURI().toString()}'`);
-              } else if (actionCount && (options.newPartition === true)) {
-                throw new Error(`Existing events found when trying to create a new partition '${
-                  this.getPartitionURI().toString()}'`);
-              }
-              if ((options.requireLatestMediaContents !== false)
-                  && (connectResults.mediaRetrievalStatus
-                      || { latestFailures: [] }).latestFailures.length) {
-                // FIXME(iridian): This error temporarily demoted to log error
-                this.outputErrorEvent(new Error(`Failed to connect to partition: encountered ${
-                  connectResults.mediaRetrievalStatus.latestFailures.length
-                    } latest media content retrieval failures (and ${
-                    ""}options.requireLatestMediaContents does not equal false).`));
-              }
-            }
-            this.warnEvent(1, () => [
-              "\n\tDone connecting with results:", connectResults,
-              "\n\tstatus:", this.getStatus(),
-            ]);
-            return (this._activeConnection = this);
-          },
-          errorOnConnect,
-      ));
-    } catch (error) { return errorOnConnect(error); }
-    function errorOnConnect (error) {
-      throw connection.wrapErrorEvent(error, wrap, "\n\toptions:", ...dumpObject(options));
-    }
+    if (this._activeConnection) return this._activeConnection;
+    this.warnEvent(1, () => [
+      "\n\tBegun connecting with options", ...dumpObject(options), ...dumpObject(this)
+    ]);
+    return (this._activeConnection = thenChainEagerly(Object.create(options), [
+      (doConnectOptions) => this._doConnect(doConnectOptions),
+      (connectResults) => {
+        if (options.narrateOptions !== false) {
+          const actionCount = Object.values(connectResults).reduce(
+              (s, log) => s + (Array.isArray(log) ? log.length : 0),
+              options.eventIdBegin || 0);
+          if (!actionCount && (options.newPartition === false)) {
+            throw new Error(`No events found when connecting to an existing partition '${
+              this.getPartitionURI().toString()}'`);
+          } else if (actionCount && (options.newPartition === true)) {
+            throw new Error(`Existing events found when trying to create a new partition '${
+              this.getPartitionURI().toString()}'`);
+          }
+          if ((options.requireLatestMediaContents !== false)
+              && (connectResults.mediaRetrievalStatus
+                  || { latestFailures: [] }).latestFailures.length) {
+            // FIXME(iridian): This error temporarily demoted to log error
+            this.outputErrorEvent(new Error(`Failed to connect to partition: encountered ${
+              connectResults.mediaRetrievalStatus.latestFailures.length
+                } latest media content retrieval failures (and ${
+                ""}options.requireLatestMediaContents does not equal false).`));
+          }
+        }
+        this.warnEvent(1, () => [
+          "\n\tDone connecting with results:", connectResults,
+          "\n\tstatus:", this.getStatus(),
+        ]);
+        return (this._activeConnection = this);
+      },
+    ], function errorOnConnect (error, stepIndex, stepHead) {
+      throw connection.wrapErrorEvent(error, wrap,
+          "\n\toptions:", ...dumpObject(options),
+          `\n\tstep #${stepIndex} head:`, ...dumpObject(stepHead));
+    }));
   }
 
-  _doConnect (options: ConnectOptions, onError: Function) {
+  _doConnect (options: ConnectOptions) {
     if (!this._prophet._upstream) {
       throw new Error("Cannot connect using default _doConnect with no upstream");
     }
@@ -173,10 +171,10 @@ export default class PartitionConnection extends Follower {
     options.narrateOptions = false;
     this.setUpstreamConnection(this._prophet._upstream.acquirePartitionConnection(
         this.getPartitionURI(), options));
-    return thenChainEagerly(this._upstreamConnection.getActiveConnection(),
+    return thenChainEagerly(
+        this._upstreamConnection.getActiveConnection(),
         () => ((postponedNarrateOptions !== false)
-            && this.narrateEventLog(postponedNarrateOptions)),
-        onError);
+            && this.narrateEventLog(postponedNarrateOptions)));
   }
 
   /**

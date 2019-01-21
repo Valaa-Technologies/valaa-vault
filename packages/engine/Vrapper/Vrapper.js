@@ -1364,7 +1364,7 @@ export default class Vrapper extends Cog {
       const ret = this._withActiveConnectionChainEagerly(Object.create(options), [
         connection => connection.getMediaURL(mediaInfo),
       ], errorOnMediaURL);
-      if (typeof options.synchronous !== "undefined") {
+      if (options.synchronous !== undefined) {
         if (!options.synchronous) return Promise.resolve(ret);
         if (isPromise(ret)) {
           throw new Error(`Media URL not immediately available for '${

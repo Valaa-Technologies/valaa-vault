@@ -283,7 +283,7 @@ export function _requestMediaContents (connection: ScribePartitionConnection,
       if ((actualInfo.asURL === true)
           || (actualInfo.asURL === "data")
           || ((actualInfo.asURL === "source") && !connection.isRemoteAuthority())) {
-        return _getMediaURL(connection, actualInfo, mediaEntry, onErrorWInfo);
+        return _getMediaURL(connection, actualInfo, upstreamOperation, mediaEntry, onErrorWInfo);
       }
       return undefined;
     } catch (error) {
@@ -337,7 +337,7 @@ function _getMediaContent (connection: ScribePartitionConnection, mediaInfo: Med
 const maxDataURISourceBytes = 48000;
 
 function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
-    onError: Function): any {
+    upstreamOperation: Object, mediaEntry: Object, onError: Function): any {
   // Only use cached in-memory nativeContent if its id matches the requested id.
   const bvobInfo = connection._prophet._bvobLookup[mediaInfo.bvobId || ""];
   // Media's with sourceURL or too large/missing bvobs will be handled by Oracle
@@ -349,7 +349,9 @@ function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaIn
     return undefined;
   }
   if ((mediaInfo.asURL !== "data") && !(bvobInfo.byteLength <= maxDataURISourceBytes)) {
-    if (connection.isRemoteAuthority()) return undefined;
+    if (connection.isRemoteAuthority()) {
+      return upstreamOperation.push(mediaInfo)[0];
+    }
     connection.warnEvent(`getMediaURL requested on a local Media "${mediaInfo.name
         }" of ${bvobInfo.byteLength} bytes, larger than recommended ${maxDataURISourceBytes
         } bytes for data URI's.`,

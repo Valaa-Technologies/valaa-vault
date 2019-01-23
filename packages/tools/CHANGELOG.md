@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.33.0-prerelease.10](https://github.com/valaatech/vault/compare/v0.33.0-prerelease.9...v0.33.0-prerelease.10) (2019-01-23)
+
+
+### Bug Fixes
+
+* indexeddb validations, PartitionConnect.connect streamlining, others ([5f55c71](https://github.com/valaatech/vault/commit/5f55c71))
+* lint ([c7e02d0](https://github.com/valaatech/vault/commit/c7e02d0))
+* several wrapError issues ([2b32faa](https://github.com/valaatech/vault/commit/2b32faa))
+
+
+
+
+
 # [0.33.0-prerelease.9](https://github.com/valaatech/vault/compare/v0.33.0-prerelease.8...v0.33.0-prerelease.9) (2019-01-15)
 
 **Note:** Version bump only for package @valos/tools

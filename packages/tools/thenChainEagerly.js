@@ -2,7 +2,7 @@
 
 import isPromise from "~/tools/isPromise";
 import { arrayFromAny } from "~/tools/sequenceFromAny";
-import wrapError, { dumpObject, outputError } from "~/tools/wrapError";
+import wrapError, { dumpObject } from "~/tools/wrapError";
 import { invariantifyArray } from "~/tools/invariantify";
 
 /**

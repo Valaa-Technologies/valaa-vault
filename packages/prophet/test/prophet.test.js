@@ -9,8 +9,7 @@ import { createPartitionURI } from "~/raem/ValaaURI";
 import VALK from "~/raem/VALK";
 
 import {
-  createScribe, clearAllScribeDatabases, createTestMockProphet, createOracle,
-  createProphetOracleHarness, testPartitionURI,
+  createScribe, clearAllScribeDatabases, createOracle, createProphetOracleHarness, testPartitionURI,
 } from "~/prophet/test/ProphetTestHarness";
 import { initializeAspects, obtainAspect } from "~/prophet/tools/EventAspects";
 

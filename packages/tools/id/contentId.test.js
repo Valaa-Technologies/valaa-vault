@@ -51,7 +51,8 @@ describe("contentHash module", () => {
 
     for (const tf of testFiles) {
       it(`Given input file ${tf.path}, it should calculate ${tf.hash}`, () => {
-        expect(contentHashFromArrayBuffer(toArrayBuffer(fs.readFileSync(tf.path)))).toEqual(tf.hash);
+        expect(contentHashFromArrayBuffer(toArrayBuffer(fs.readFileSync(tf.path))))
+            .toEqual(tf.hash);
       });
     }
 

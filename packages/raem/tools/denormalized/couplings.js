@@ -11,7 +11,7 @@ import { unspecifiedPlural, unspecifiedSingular } from "~/raem/tools/graphql/cou
 
 import Bard from "~/raem/redux/Bard";
 
-import { dumpify, dumpObject, invariantify, wrapError } from "~/tools";
+import { dumpify, dumpObject, wrapError } from "~/tools";
 
 export function getCoupling (fieldIntro) {
   if (fieldIntro.coupling && typeof fieldIntro.coupling !== "string") {

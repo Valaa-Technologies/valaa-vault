@@ -11,7 +11,6 @@ import TransientFields from "~/raem/schema/TransientFields";
 import Resource from "~/raem/schema/Resource";
 
 import Expression from "~/script/schema/Expression";
-import Scope from "~/script/schema/Scope";
 
 const OBJECT_DESCRIPTION = "property";
 

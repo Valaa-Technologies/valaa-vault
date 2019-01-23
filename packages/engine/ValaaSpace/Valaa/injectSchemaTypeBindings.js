@@ -729,23 +729,24 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
   scope.Media.hostObjectPrototype = scope.Media.prototype;
 }
 
-function prepareInitialState (Type: Object, scope: ?Object, initialState: ?Object,
+function prepareInitialState (Type: Object, scope: ?Object, initialState_: ?Object,
     requireOwnerOperation: ?string) {
   invariantifyObject(initialState, "new initialState", { allowEmpty: true, allowUndefined: true });
   // TODO(iridian): Check for non-allowed fields.
+  let initialState = initialState_;
   const initialOwner = initialState && (initialState.owner !== undefined
-      ? initialState.owner : hasOwnerAlias(Type, initialState));
+      ? initialState.owner : tryOwnerAlias(Type, initialState));
   if (!initialOwner) {
     if (initialOwner === null) return initialState;
     if (requireOwnerOperation) {
-      throw new Error(`${requireOwnerOperation} initialState.owner required`);
+      // throw new Error(`${requireOwnerOperation} initialState.owner required`);
+      console.error(`DEPRECATED behaviour: ${requireOwnerOperation} ${Type.name
+          } initialState.owner required`);
+      if (scope && (scope.self != null) && scope.self.this) {
+        if (!initialState) initialState = {};
+        initialState.owner = scope.self.this.getId().coupleWith(Type[defaultOwnerCoupledField]);
+      }
     }
-    /*
-    if (!hasOwnerAlias(Type, initialState)
-        && scope && (typeof scope.self === "object") && scope.self.this) {
-      ret.owner = scope.self.this.getId().coupleWith(Type[defaultOwnerCoupledField]);
-    }
-    */
   } else if (typeof initialOwner !== "object") {
     throw new Error(`${requireOwnerOperation || "duplicate"
         } initialState.owner must be a Resource, got '${typeof initialOwner}'`);
@@ -757,6 +758,6 @@ function prepareInitialState (Type: Object, scope: ?Object, initialState: ?Objec
   return initialState;
 }
 
-function hasOwnerAlias (Type: Object, initialState: Object) {
+function tryOwnerAlias (Type: Object, initialState: Object) {
   return (Type.name === "Relation") && initialState.source;
 }

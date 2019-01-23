@@ -3,12 +3,15 @@ import { GraphQLObjectType } from "graphql/type";
 
 import primaryField from "~/raem/tools/graphql/primaryField";
 
+import { toOwner } from "~/raem/tools/graphql/coupling";
+
 import Describable, { describableInterface } from "~/raem/schema/Describable";
 import Discoverable from "~/raem/schema/Discoverable";
 import TransientFields from "~/raem/schema/TransientFields";
 import Resource from "~/raem/schema/Resource";
 
 import Expression from "~/script/schema/Expression";
+import Scope from "~/script/schema/Scope";
 
 const OBJECT_DESCRIPTION = "property";
 
@@ -21,6 +24,10 @@ export default new GraphQLObjectType({
 
   fields: () => ({
     ...describableInterface(OBJECT_DESCRIPTION).fields(),
+
+    ...primaryField("owner", Resource, `Owner of this Property`, {
+      coupling: toOwner({ defaultCoupledField: "properties" }),
+    }),
 
     ...primaryField("value", Expression,
         "The target of the property",

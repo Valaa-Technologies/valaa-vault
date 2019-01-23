@@ -3,7 +3,7 @@ import { GraphQLObjectType } from "graphql/type";
 
 import aliasField from "~/raem/tools/graphql/aliasField";
 import primaryField from "~/raem/tools/graphql/primaryField";
-import { toOne } from "~/raem/tools/graphql/coupling";
+import { toOne, toOwner } from "~/raem/tools/graphql/coupling";
 
 import Describable from "~/raem/schema/Describable";
 import Discoverable from "~/raem/schema/Discoverable";
@@ -29,6 +29,10 @@ export default new GraphQLObjectType({
 
   fields: () => ({
     ...relatableInterface(OBJECT_DESCRIPTION).fields(),
+
+    ...primaryField("owner", Resource, `Owner of this Property`, {
+      coupling: toOwner({ defaultCoupledField: "relations" }),
+    }),
 
     ...aliasField("source", "owner", Relatable,
         "The source entity of this relation",

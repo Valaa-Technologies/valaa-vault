@@ -86,7 +86,7 @@ module.exports = {
 
     // ## Warning directives
 
-    "complexity": ["warn", 40],
+    "complexity": ["warn", 50],
     "no-warning-comments": ["warn", { "terms": ["fixme"], "location": "anywhere" }],
 
     // ## 2018-12 Migration from eslint 3 to 5+ made several options stricter and

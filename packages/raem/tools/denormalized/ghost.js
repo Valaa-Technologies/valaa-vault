@@ -205,7 +205,7 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
       id,
       typeName: !externalKnownType || !isInactiveTypeName(prototypeTypeName)
           ? prototypeTypeName : externalKnownType,
-      initialState: { ghostPrototype, ghostOwner: hostId.coupleWith("ghostOwnlings") },
+      initialState: { ghostPrototype, ghostOwner: hostId.getObjectId() },
       meta: { isVirtualAction },
     }));
     return { id, internallyKnownType: prototypeTypeName || externalKnownType, ghostPath };

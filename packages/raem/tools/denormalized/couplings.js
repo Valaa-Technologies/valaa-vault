@@ -109,8 +109,11 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
   let remoteTransient;
   try {
     if (coupling.coupledField) {
-      invariantify(!coupledField,
-          `remote.coupledField must be falsy because coupling has coupledField specified`);
+      if (coupledField) {
+        throw new Error(`The dynamic coupledField for an outgoing reference field '${
+            fieldIntro.name}' must be falsy (got '${coupledField
+            }') due static coupling.coupledField definition '${coupling.coupledField}'`);
+      }
       coupledField = coupling.coupledField;
     } else if (!coupledField) {
       coupledField = coupling.defaultCoupledField;
@@ -118,7 +121,13 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
     if (!remoteFieldIntro) {
       remoteType = bard.schema.tryAffiliatedTypeOfField(coupledField);
       if (!remoteType) {
-        throw new Error(`Can't find affiliated type for coupling remote field '${coupledField}'`);
+        if (remoteRef.isInactive()) {
+          throw new Error(`Can't find affiliated type for inactive remote reference coupled to '${
+              coupledField}'`);
+        }
+        remoteTransient = Object.create(bard)
+            .tryGoToTransient(remoteRef, "TransientFields", true, false, true, "typeName");
+        remoteType = bard.schema.getType(remoteTransient.get("typeName"));
       }
       remoteFieldIntro = remoteType.getFields()[coupledField];
       if (!remoteFieldIntro) {
@@ -152,7 +161,8 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
           const name = bard.interfaceIntro.getFields().name
               ? `'${getObjectField(nameBard, bard.objectTransient, "name")}' `
               : bard.objectId.rawId();
-          remoteTransient = Object.create(bard).goToTransient(remoteRef, remoteType.name);
+          remoteTransient = remoteTransient
+              || Object.create(bard).goToTransient(remoteRef, remoteType.name);
           const remoteName = bard.schema
                   .getType(getTransientTypeName(remoteTransient, bard.schema))
                   .getFields().name

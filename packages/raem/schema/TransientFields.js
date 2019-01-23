@@ -156,9 +156,10 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
       ),
 
       ...transientField("ghostOwner", TransientFields,
-          `An alias for ghostHost but only set if this ghost ${objectDescription
-          } is materialized, otherwise null. This means that for grand-ownling ghosts their ${
-          ""} owner and ghostOwner will not be equal (for direct ownlings they are equal).`, {
+          `Refers to ghostHost if this ghost ${objectDescription} is materialized, otherwise null.${
+            ""} Note that for materialized grand-ownling ghosts will have a different owner and${
+            ""} ghostOwner and that destruction of either of them will result in immaterialization${
+            ""} of the grand-ownling ghost.`, {
             coupling: toOwner({ coupledField: "ghostOwnlings" }),
             immediateDefaultValue: null,
             allowTransientFieldToBeSingular: true,

@@ -63,7 +63,7 @@ export function toMany ({ coupledField, defaultCoupledField, alias, isOwner, whe
   invariantify(!Object.keys(rest).length, `toMany: Unrecognized coupling options: ${
       Object.keys(rest).join(", ")}`);
   invariantify(!(coupledField && defaultCoupledField),
-      "Can only specify either coupledField or defaultCoupledField");
+      "Can't specify both coupledField and defaultCoupledField");
   return coupledField ? {
     coupledField, alias, isOwner, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId) =>
@@ -95,9 +95,11 @@ export function toManyOwnlings (fields = {}) {
   return toMany({ coupledField: "owner", isOwner: true, ...fields });
 }
 
-export function toOwner ({ defaultCoupledField = "unnamedOwnlings" }) {
+export function toOwner ({ coupledField, defaultCoupledField, ...rest }) {
+  invariantify(!Object.keys(rest).length, `toOwner: Unrecognized coupling options: ${
+      Object.keys(rest).join(", ")}`);
   return {
-    defaultCoupledField, isOwned: true,
+    coupledField, defaultCoupledField, isOwned: true,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
         fieldsSet({ id, typeName, meta: { updateCouplings: false },
           sets: { [coupledFieldName]: localId.coupleWith(localFieldName) },

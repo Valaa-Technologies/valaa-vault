@@ -28,13 +28,16 @@ containing non-nullable references will be cascade destroyed.`,
     fields: () => ({
       ...transientFields(objectDescription).fields(),
 
-      ...primaryField("owner", Resource,
-          `Owner of the resource`,
-          { coupling: toOwner({}), affiliatedType: "Resource" },
-      ),
+      ...primaryField("owner", Resource, `Owner of this ${objectDescription}`, {
+        coupling: toOwner({ defaultCoupledField: "unnamedOwnlings" }),
+        // Note that by design owner does not have an affiliated type.
+        // This is because different concrete types have different
+        // coupled fields, and thus all manipulation must happen via
+        // run-time known types.
+      }),
 
       ...primaryField("unnamedOwnlings", new GraphQLList(Resource),
-          `Ownling Resource's of this ${objectDescription
+          `Owned resources of this ${objectDescription
               } which are not part of another named owning property`,
           { coupling: toManyOwnlings({}), affiliatedType: "Resource" },
       ),

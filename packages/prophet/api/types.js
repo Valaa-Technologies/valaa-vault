@@ -44,6 +44,10 @@ export type NarrateOptions = {
   receiveCommands?: ReceiveEvents, // default: receiveTruths. Callback for re-narrated commands
   eventIdBegin?: number,
   eventIdEnd?: number,
+  subscribeEvents?: boolean        // if provided will enable or disable event subscriptions.
+                                   // TODO(iridian, 2019-01): This (c|sh)ould be extracted to its
+                                   // own separate function. Now this flag is awkwardly present
+                                   // both here and in ConnectOptions.
 };
 
 export type ChronicleOptions = NarrateOptions & {

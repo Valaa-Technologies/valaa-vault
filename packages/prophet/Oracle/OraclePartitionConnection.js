@@ -40,6 +40,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
     // logic (defined in PartitionConnection.js) and begin I/O bound(?)
     // scribe event log narration in parallel to the authority
     // proxy/connection creation.
+    const subscribeEvents = (options.subscribeEvents !== false);
     this.setUpstreamConnection(this._authorityProphet.acquirePartitionConnection(
         this.getPartitionURI(), {
           subscribeEvents: false, narrateOptions: false,
@@ -47,7 +48,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
         }));
     return thenChainEagerly(
         this._upstreamConnection.getActiveConnection(),
-        () => this.narrateEventLog(options.narrateOptions));
+        () => this.narrateEventLog({ subscribeEvents, ...options.narrateOptions }));
   }
 
   receiveTruths (truths: EventBase[], retrieveMediaBuffer: RetrieveMediaBuffer,

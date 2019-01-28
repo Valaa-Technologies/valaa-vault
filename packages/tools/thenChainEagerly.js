@@ -47,41 +47,46 @@ import { invariantifyArray } from "~/tools/invariantify";
 // Sequential map on maybePromises which awaits for each entry and each
 // return value of the mapped function eagerly: if no promises are
 // encountered resolves synchronously.
-export function mapEagerly (maybePromises: any[], callback: Function, onRejected?: Function,
-    startIndex: number = 0, results: Array<any> = []) {
+export function mapEagerly (maybePromiseToEntries: any[] | Promise<any[]>, callback: Function,
+    onRejected?: Function, startIndex: number = 0, results: Array<any> = []) {
   let index = null;
   let wrap;
+  let entries;
   try {
-    if (!Array.isArray(maybePromises)) {
-      if (!isPromise(maybePromises)) {
-        invariantifyArray(maybePromises, "mapEagerly.maybePromises");
+    if (!Array.isArray(maybePromiseToEntries)) {
+      if (!isPromise(maybePromiseToEntries)) {
+        invariantifyArray(maybePromiseToEntries, "mapEagerly.maybePromises");
       }
       wrap = new Error(`During mapEagerly.maybePromises.catch`);
-      return maybePromises.then(
-          inner => mapEagerly(inner, callback, onRejected, startIndex, results),
+      return maybePromiseToEntries.then(
+          entries_ => mapEagerly(entries_, callback, onRejected, startIndex, results),
           errorOnMapEagerly);
     }
-    for (index = startIndex; index < maybePromises.length; ++index) {
-      const maybeValue = maybePromises[index];
-      if (!isPromise(maybeValue)) {
+    entries = maybePromiseToEntries;
+    let valueCandidate;
+    for (index = startIndex;
+        index < entries.length;
+        results[index++] = valueCandidate) {
+      const head = entries[index];
+      if (!isPromise(head)) {
         try {
-          results[index] = callback(maybeValue, index, maybePromises);
+          valueCandidate = callback(head, index, entries);
         } catch (error) {
           wrap = new Error(getName("callback"));
-          results[index] = errorOnMapEagerly(error);
+          return errorOnMapEagerly(error);
         }
-        if (!isPromise(results[index])) continue;
+        if (!isPromise(valueCandidate)) continue;
         wrap = new Error(getName("callback promise resolution"));
       } else {
-        results[index] = maybeValue.then((value) => callback(value, index, maybePromises)); // eslint-disable-line
+        valueCandidate = head.then(resolvedHead => callback(resolvedHead, index, entries)); // eslint-disable-line no-loop-func
         wrap = new Error(getName("head or callback promise resolution"));
       }
-      return results[index]
-          .catch(errorOnMapEagerly)
-          .then(value => { // eslint-disable-line
+      return valueCandidate.then(
+          value => { // eslint-disable-line no-loop-func
             results[index] = value;
-            return mapEagerly(maybePromises, callback, onRejected, index + 1, results);
-          });
+            return mapEagerly(entries, callback, onRejected, index + 1, results);
+          },
+          errorOnMapEagerly);
     }
     return results;
   } catch (error) {
@@ -97,13 +102,13 @@ export function mapEagerly (maybePromises: any[], callback: Function, onRejected
     try {
       if (onRejected) {
         return onRejected(error,
-            (index === null) ? maybePromises : maybePromises[index],
-            index, results, maybePromises);
+            (index === null) ? entries : entries[index],
+            index, results, entries);
       }
     } catch (onRejectedError) { innerError = onRejectedError; }
     throw wrapError(innerError, wrap,
-        "\n\tmaybePromises:", ...dumpObject(maybePromises),
-        "\n\tcurrent entry:", ...dumpObject((maybePromises || [])[index]));
+        "\n\tmaybePromises:", ...dumpObject(entries || maybePromiseToEntries),
+        "\n\tcurrent entry:", ...dumpObject((entries || maybePromiseToEntries || [])[index]));
   }
 }
 

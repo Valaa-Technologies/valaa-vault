@@ -212,7 +212,7 @@ export function debugObject (head) { return debugObjectNest(head); }
 export function debugObjectHard (head) { return debugObjectNest(head, 1, true); }
 export function debugObjectType (head) { return debugObjectNest(head, false, false); }
 
-export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
+export function debugObjectNest (head, nest = 1, alwaysStringify = false, cache_: ?Object) {
   try {
     if (head === null) return "<null>";
     if (head === undefined) return "<undefined>";
@@ -243,17 +243,23 @@ export function debugObjectNest (head, nest = 1, alwaysStringify = false) {
       return `<${(head.constructor && head.constructor.name) || "no-constructor"} keys.length=${
           Object.keys(head).length}>`;
     }
-    return ((Array.isArray(head)
-            && `[${head.map(entry => debugObjectNest(entry, nest, alwaysStringify)).join(", ")}]`)
-        || (isIterable(head) && debugObjectNest(head.toJS(), nest, alwaysStringify))
-        || (head[Symbol.iterator] && debugObjectNest([...head], nest, alwaysStringify))
+    const cache = cache_ || new Map();
+    const circularIndex = cache.get(head);
+    if (circularIndex) return `<Circular #${circularIndex}: ${debugObjectNest(head, 0)}>`;
+    cache.set(head, (cache.objectIndex = (cache.objectIndex || 0) + 1));
+    return ((Array.isArray(head) && `[${
+            head.map(entry => debugObjectNest(entry, nest, alwaysStringify, cache)).join(", ")}]`)
+        || (isIterable(head) && debugObjectNest(head.toJS(), nest, alwaysStringify, cache))
+        || (head[Symbol.iterator] && debugObjectNest([...head], nest, alwaysStringify, cache))
         || `{ ${Object.keys(head)
               .map(key => `${isSymbol(key) ? key.toString() : key}: ${
-                  debugObjectNest(head[key], nest - 1, alwaysStringify)}`)
+                  debugObjectNest(head[key], nest - 1, alwaysStringify, cache)}`)
               .join(", ")
             } }`);
   } catch (error) {
-    console.error("Suppressed an error in debugObjectNest:", error,
+    console.error("Suppressed an error in debugObjectNest:",
+        "\n\terror.message:", error.message,
+        "\n\terror.stack:", error.stack,
         "\n\treturning head:", head);
   }
   return head;

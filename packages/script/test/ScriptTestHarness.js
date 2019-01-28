@@ -16,7 +16,7 @@ export function createScriptTestHarness (options: Object, ...commandBlocks: any)
 }
 
 export default class ScriptTestHarness extends RAEMTestHarness {
-  runBody (self: any, valaaScriptBody: string, options: Object = {}) {
+  runValaaScript (self: any, valaaScriptBody: string, options: Object = {}) {
     const bodyKuery = transpileValaaScriptBody(valaaScriptBody, {
       verbosity: options.verbosity || 0,
       customVALK: this.ContentAPI.VALK,

@@ -24,7 +24,7 @@ async function setUp (testAuthorityConfig: Object = {}, options: {}) {
 
 afterEach(async () => {
   if (harness) {
-    await harness.cleanup();
+    await harness.cleanupScribe();
     harness = null;
   }
   await clearAllScribeDatabases(/* [testPartitionURI] */);
@@ -44,7 +44,7 @@ describe("Partition load ordering and inactive resource handling", () => {
     harness.tryGetTestAuthorityConnection(laterConnection)
         .addNarrateResults({ eventIdBegin: 0 }, []);
     await creation;
-    const { Prototype, component } = await harness.runBody(vLaterRoot, `
+    const { Prototype, component } = await harness.runValaaScript(vLaterRoot, `
       const Prototype = new Entity({ owner: this });
       Prototype.c = new Entity({
         owner: Prototype, name: "component", properties: { p: "base" },
@@ -55,7 +55,7 @@ describe("Partition load ordering and inactive resource handling", () => {
         .toEqual(vLaterRoot);
     expect(component.get("owner"))
         .toEqual(Prototype);
-    const componentGhost = await harness.runBody(harness.createds.Entity.test_partition, `
+    const componentGhost = await harness.runValaaScript(harness.createds.Entity.test_partition, `
       const instance = new Prototype({ owner: this });
       const componentGhost = instance.c;
       componentGhost.num = 10;
@@ -83,7 +83,7 @@ describe("Partition load ordering and inactive resource handling", () => {
         .toEqual(pairedComponent.getId().rawId());
     expect(componentId !== pairedComponent.getId())
         .toBeTruthy();
-    expect(pairness.runBody(pairedComponent, `
+    expect(pairness.runValaaScript(pairedComponent, `
       this.num;
     `)).toEqual(10);
     // await pairness.prophet.acquirePartitionConnection(laterConnection.getPartitionURI())

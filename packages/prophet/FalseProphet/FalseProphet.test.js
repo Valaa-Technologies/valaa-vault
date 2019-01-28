@@ -14,7 +14,7 @@ const partitionURI = createPartitionURI(testAuthorityURI, "test_partition");
 
 let harness = null;
 afterEach(async () => {
-  if (harness) { await harness.cleanup(); harness = null; }
+  if (harness) { await harness.cleanupScribe(); harness = null; }
 });
 
 const basicCommands = [

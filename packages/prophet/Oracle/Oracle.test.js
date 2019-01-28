@@ -8,7 +8,7 @@ const testAuthorityURI = "valaa-test:";
 // const sharedURI = "valaa-shared-content";
 
 let harness = null;
-afterEach(() => { if (harness) harness.cleanup(); harness = null; });
+afterEach(() => { if (harness) harness.cleanupScribe(); harness = null; });
 
 describe("Oracle", () => {
   it("sets up a connection and creates a partition", async () => {

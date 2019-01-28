@@ -101,7 +101,7 @@ export class ProphecyEventResult extends ChronicleEventResult {
     return this.getPersistedStory();
   }
 
-  // Story of the event after it's persisted (possibly locally) but not yet authorized.
+  // Story of the event after it's either (possibly locally) persisted or confirmed as truth.
   getPersistedStory (): Story | Promise<Story> {
     return this.getTruthStory();
   }

@@ -20,7 +20,7 @@ function vCrossRef (rawId, partitionRawId = rawId) {
 let harness: EngineTestHarness;
 afterEach(() => {
   if (harness) {
-    harness.cleanup();
+    harness.cleanupScribe();
     harness = null;
   }
 });

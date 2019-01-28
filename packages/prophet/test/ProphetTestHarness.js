@@ -35,26 +35,31 @@ export const testAuthorityURI = "valaa-test:";
 export const testPartitionURI = createPartitionURI(testAuthorityURI, "test_partition");
 
 export function createProphetTestHarness (options: Object, ...commandBlocks: any) {
-  const ret = createScriptTestHarness({
+  const wrap = new Error("During createProphetHarness");
+  return thenChainEagerly({
     name: "Prophet Test Harness", ContentAPI: ProphetTestAPI, TestHarness: ProphetTestHarness,
     ...options,
-  });
-  try {
-    commandBlocks.forEach(commands => {
-      ret.chronicleEvents(commands).eventResults.forEach((result, index) => {
-        if (isPromise((result.getTruthEvent || result.getTruthStory).call(result))) {
-          throw new Error(`command #${index} getTruthEvent resolves into a Promise.${
-              ""} Use the asynchronous createProphetOracleHarness instead.`);
-        }
+  }, [
+    prophetOptions => createScriptTestHarness(prophetOptions),
+    harness => {
+      commandBlocks.forEach(commands => {
+        harness.chronicleEvents(commands).eventResults.forEach((result, index) => {
+          if (isPromise((result.getTruthEvent || result.getTruthStory).call(result))) {
+            throw new Error(`command #${index} getTruthEvent resolves into a Promise.${
+                ""} Use the asynchronous createProphetOracleHarness instead.`);
+          }
+        });
       });
-    });
-    return ret;
-  } catch (error) {
-    throw wrapError(error, new Error("During createProphetTestHarness"),
+      return harness;
+    }
+  ], function errorOnCreateProphetHarness (error) {
+    throw wrapError(error, wrap,
         "\n\toptions:", ...dumpObject(options),
         "\n\tcommandBlocks:", ...dumpObject(commandBlocks));
-  }
+  });
 }
+
+let dbIsolationAutoPrefix = 0;
 
 export async function createProphetOracleHarness (options: Object, ...commandBlocks: any) {
   const isPaired = !!options.pairedHarness;
@@ -62,6 +67,7 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
     name: `${isPaired ? "Paired " : ""}Prophet Oracle Harness`,
     ...options,
     oracleOptions: {
+      verbosity: options.verbosity || 0,
       testAuthorityConfig: {
         ...(!isPaired ? {} : options.pairedHarness.testAuthorityConfig),
         ...((options.oracleOptions || {}).testAuthorityConfig || {}),
@@ -69,19 +75,14 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
       ...(options.oracleOptions || {}),
     },
     scribeOptions: {
-      databasePrefix: isPaired ? "paired-" : "",
+      verbosity: options.verbosity || 0,
+      databasePrefix: `${isPaired ? "paired" : "test"}-isolated-${++dbIsolationAutoPrefix}-`,
       ...(options.scribeOptions || {}),
     },
   };
 
-  const ret = createProphetTestHarness(combinedOptions);
+  const ret = await createProphetTestHarness(combinedOptions);
   try {
-    // TODO(iridian, 2019-01): Fix this hack: this await is in a wrong
-    // place. But currently the Scribe creation happens in the
-    // constructor where it cannot be awaited.
-    if (ret.scribe) await ret.scribe.initiate();
-
-    ret.testConnection = await ret.testConnection;
     if (options.acquirePartitions) {
       const partitionURIs = options.acquirePartitions.map(
           partitionId => createPartitionURI("valaa-test:", partitionId));
@@ -95,7 +96,8 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
     }
     for (const commands of commandBlocks) {
       const results = ret.chronicleEvents(commands).eventResults;
-      await Promise.all(results.map(result => result.getPersistedStory()));
+      await Promise.all(results.map(
+          combinedOptions.awaitResult || (result => result.getPersistedStory())));
     }
     return ret;
   } catch (error) {
@@ -113,62 +115,60 @@ export const createdTestPartitionEntity = created({
   },
 });
 
-let dbIsolationAutoPrefix = 0;
-
 export default class ProphetTestHarness extends ScriptTestHarness {
   constructor (options: Object) {
     super(options);
     this.nextCommandIdIndex = 1;
-    if (options.oracleOptions) {
-      this.upstream = this.oracle = createOracle(options.oracleOptions);
-      this.testAuthorityConfig = options.oracleOptions.testAuthorityConfig;
-    } else {
-      this.upstream = createTestMockProphet({ isLocallyPersisted: false });
-    }
-    if (options.scribeOptions) {
-      const scribeOptions = { ...options.scribeOptions };
-      if (!scribeOptions.databasePrefix) {
-        scribeOptions.databasePrefix = `test-isolated-${++dbIsolationAutoPrefix}-`;
-      }
-      this.upstream = this.scribe = createScribe(this.upstream, scribeOptions);
-      this.cleanup = () => clearScribeDatabases(this.scribe);
-    } else {
-      this.cleanup = () => undefined;
-    }
-    this.prophet.setUpstream(this.upstream);
-
+    this.oracleOptions = options.oracleOptions;
+    if (this.oracleOptions) this.testAuthorityConfig = this.oracleOptions.testAuthorityConfig;
+    this.scribeOptions = options.scribeOptions;
+    this.cleanupScribe = () => (this.scribeOptions && clearAllScribeDatabases(this.scribe));
     this.testAuthorityURI = options.testAuthorityURI || testAuthorityURI;
     this.testPartitionURI = options.testPartitionURI
         || (options.testAuthorityURI && createPartitionURI(this.testAuthorityURI, "test_partition"))
         || testPartitionURI;
-    const hasRemoteTestBackend = (this.testAuthorityConfig || {}).isRemoteAuthority;
-    const testConnection = this.prophet
-        .acquirePartitionConnection(this.testPartitionURI, { newPartition: !hasRemoteTestBackend });
-    if (hasRemoteTestBackend) {
-      // For remote test partitions with oracle we provide the root
-      // entity as a response to the initial narrate request.
-      const testBackend = this.tryGetTestAuthorityConnection(testConnection);
-      testBackend.addNarrateResults({ eventIdBegin: 0 }, [{
-        ...createdTestPartitionEntity,
-        aspects: { version: "0.2", log: { index: 0 }, command: { id: "rid-0" } },
-      }]);
-      this.testConnection = thenChainEagerly(testConnection, [
-        connection => connection.getActiveConnection(),
-        activeConnection => (this.testConnection = activeConnection),
-      ], this.errorOn(new Error("testConnection.getActiveConnection()")));
-    } else {
-      // For all other cases we chronicle the root entity.
-      this.testConnection = thenChainEagerly(testConnection, [
-        connection => connection.getActiveConnection(),
-        activeConnection => {
-          const testPartitionStory =
-              this.chronicleEvent(createdTestPartitionEntity, { isTruth: true })
-              .getPremiereStory();
-          return Promise.all([activeConnection, testPartitionStory]);
+  }
+
+  initialize () {
+    let hasRemoteTestBackend;
+    return thenChainEagerly(
+      super.initialize(), [
+        ...(!this.oracleOptions ? [
+          () => createTestMockProphet({ isLocallyPersisted: false }),
+        ] : [
+          () => createOracle(this.oracleOptions),
+          oracle => (this.oracle = oracle),
+        ]),
+        ...(!this.scribeOptions ? [] : [
+          upstream => createScribe(upstream, this.scribeOptions),
+          scribe => (this.scribe = scribe),
+        ]),
+        upstream => this.prophet.setUpstream(upstream),
+        () => {
+          hasRemoteTestBackend = (this.testAuthorityConfig || {}).isRemoteAuthority;
+          const testConnection = this.prophet.acquirePartitionConnection(
+              this.testPartitionURI, { newPartition: !hasRemoteTestBackend });
+          if (hasRemoteTestBackend) {
+            // For remote test partitions with oracle we provide the root
+            // entity as a response to the initial narrate request.
+            const testBackend = this.tryGetTestAuthorityConnection(testConnection);
+            testBackend.addNarrateResults({ eventIdBegin: 0 }, [{
+              ...createdTestPartitionEntity,
+              aspects: { version: "0.2", log: { index: 0 }, command: { id: "rid-0" } },
+            }]);
+          }
+          return testConnection.getActiveConnection();
         },
-        ([connection]) => (this.testConnection = connection),
-      ], this.errorOn(new Error("testConnection.chronicleEvent(createdTestPartitionEntity)")));
-    }
+        (testConnection) => (this.testConnection = testConnection),
+          // For non-remotes we chronicle the root entity explicitly.
+        () => {
+          if (hasRemoteTestBackend) return undefined;
+          const result = this.chronicleEvent(createdTestPartitionEntity, { isTruth: true });
+          return result.getPremiereStory();
+        },
+      ],
+      this.errorOn(new Error("ProphetTestHarness.initialize")),
+    );
   }
 
   chronicleEvents (events: EventBase[], ...rest: any) {
@@ -285,8 +285,7 @@ export function createScribe (upstream: Prophet, options?: Object) {
     ...options,
   });
   activeScribes.push(ret);
-  ret.initiate();
-  return ret;
+  return ret.initiate();
 }
 
 export async function clearAllScribeDatabases () {

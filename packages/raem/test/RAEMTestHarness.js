@@ -12,24 +12,49 @@ import Corpus from "~/raem/Corpus";
 import Valker from "~/raem/VALK/Valker";
 
 import trivialClone from "~/tools/trivialClone";
-import { dumpObject, LogEventGenerator, outputError, thenChainEagerly, wrapError } from "~/tools";
+import {
+  dumpObject, LogEventGenerator, mapEagerly, outputError, thenChainEagerly, wrapError,
+} from "~/tools";
 
 const TEST_EVENT_VERSION = "0.2";
 
 export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
-  try {
-    const TestHarness = options.TestHarness || RAEMTestHarness;
-    const ret = new TestHarness({
-      name: "RAEM Test Harness", ContentAPI: RAEMTestAPI,
-      ...options,
-    });
-    commandBlocks.forEach(events => ret.chronicleEvents(events));
-    return ret;
-  } catch (error) {
-    throw wrapError(error, new Error("During createProphetTestHarness"),
-        "\n\toptions:", ...dumpObject(options),
-        "\n\teventBlocks:", ...dumpObject(commandBlocks));
-  }
+  let harness;
+  const TestHarnessType = options.TestHarness || RAEMTestHarness;
+  const wrap = new Error(`During createRAEMTestHarness/${TestHarnessType.name}`);
+  return thenChainEagerly(TestHarnessType, [
+        // #0
+        (TestHarnessType_) => (harness = new TestHarnessType_({
+          name: "RAEM Test Harness", ContentAPI: RAEMTestAPI,
+          ...options,
+        })),
+        // #1
+        () => harness.initialize(),
+        // Each commandBlock maps to two steps: [#2, #3], [#4, #5], etc.
+        // Event steps set the thenChain head to corresponding commandBlocks events,
+        // odd steps does a chronicleEvents for those. This is for nicer error context messages.
+        ...[].concat(...commandBlocks.map(events => [
+          () => events,
+          (eventsAsHead) => mapEagerly(
+              harness.chronicleEvents(eventsAsHead).eventResults,
+              result => (
+                  result.getPersistedStory
+                      ? result.getPersistedStory()
+                  : result.getLocalStory
+                      ? result.getLocalStory()
+                      : result.getTruthEvent())),
+        ])),
+        () => harness,
+      ],
+      function errorOnCreateRAEMTestHarness (error, index, head) {
+        throw wrapError(error, wrap,
+            `\n\tchain step #${index} head:`, ...dumpObject(head),
+            "\n\t(step #0 = new, #1 = initialize, #3 = commandBlock[0], #5 = commandBlock[1], ...)",
+            "\n\toptions:", ...dumpObject(options),
+            "\n\teventBlocks:", ...dumpObject(commandBlocks),
+            "\n\tharness:", ...dumpObject(harness),
+        );
+      });
 }
 
 export default class RAEMTestHarness extends LogEventGenerator {
@@ -40,8 +65,15 @@ export default class RAEMTestHarness extends LogEventGenerator {
     this.reducerOptions = reducerOptions;
     this.corpusOptions = corpusOptions;
     Object.assign(this, rest);
-    this.corpus = this.createCorpus();
-    this.valker = this.createValker();
+  }
+
+  initialize () {
+    return thenChainEagerly(null, [
+      () => this.createCorpus(),
+      corpus => (this.corpus = corpus),
+      () => this.createValker(),
+      valker => (this.valker = valker),
+    ]);
   }
 
   getState () { return this.corpus.getState(); }
@@ -133,8 +165,16 @@ export default class RAEMTestHarness extends LogEventGenerator {
   }
 
   errorOn (wrap, ...rest) {
-    return error => {
-      const wrappedError = this.wrapErrorEvent(error, wrap, ...rest);
+    return (error, maybeStepIndex, maybeHead) => {
+      const wrappedError = this.wrapErrorEvent(error, wrap,
+          ...(maybeStepIndex === undefined ? []
+              : (typeof maybeStepIndex === "number") ? [
+                `\n\tstep #${maybeStepIndex} head:`, ...dumpObject(maybeHead),
+              ] : [
+                "\n\tsecond error arg:", ...dumpObject(maybeStepIndex),
+                "\n\tthird error arg:", ...dumpObject(maybeHead),
+              ]),
+          ...rest);
       outputError(wrappedError, "Harness: showing error contexts of the top-level test exception");
       throw wrappedError;
     };

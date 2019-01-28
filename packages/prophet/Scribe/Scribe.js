@@ -67,7 +67,7 @@ export default class Scribe extends Prophet {
 
   // Idempotent: returns a promise until the initialization is complete. await on it.
   initiate () {
-    return this._bvobLookup || (this._bvobLookup = thenChainEagerly(
+    return this._initiation || (this._initiation = thenChainEagerly(
         this.warnEvent(1, "Initializing bvob content lookups..."), [
           () => _initializeSharedIndexedDB(this),
           ({ totalBytes, clearedBuffers, releasedBytes, contentLookup }) => {
@@ -76,7 +76,8 @@ export default class Scribe extends Prophet {
                   Object.keys(contentLookup).length} buffers, totaling ${totalBytes} bytes.`,
               `\n\tcleared ${clearedBuffers} buffers, releasing ${releasedBytes} bytes`,
             ]);
-            return (this._bvobLookup = contentLookup);
+            this._bvobLookup = contentLookup;
+            return (this._initiation = this);
           },
         ]));
   }

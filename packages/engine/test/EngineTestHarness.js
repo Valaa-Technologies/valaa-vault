@@ -13,15 +13,22 @@ import extendValaaSpace from "~/engine/ValaaSpace";
 
 import baseEventBlock from "~/engine/test/baseEventBlock";
 
+import { isPromise } from "~/tools";
+
 export function createEngineTestHarness (options: Object, ...commandBlocks: any) {
-  return createProphetTestHarness({
+  const ret = createProphetTestHarness({
     name: "Engine Test Harness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
     corpusOptions: { builtinSteppers },
     ...options,
   }, ...(options.claimBaseBlock ? [baseEventBlock] : []), ...commandBlocks);
+  if (isPromise(ret)) {
+    throw new Error(`createProphetTestHarness returned a promise inside ${
+      ""} createEngineTestHarness. Use createEngineOracleHarness for async support instead.`);
+  }
+  return ret;
 }
 
-export async function createEngineOracleHarness (options: Object, ...commandBlocks: any) {
+export function createEngineOracleHarness (options: Object, ...commandBlocks: any) {
   return createProphetOracleHarness({
     name: "Engine Oracle Harness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
     corpusOptions: { builtinSteppers },
@@ -54,11 +61,11 @@ export default class EngineTestHarness extends ProphetTestHarness {
     return this.engine.discourse;
   }
 
-  runBody (self: any, valaaScriptBody: string, options: Object = {}) {
+  runValaaScript (self: any, valaaScriptBody: string, options: Object = {}) {
     options.scope = Object.assign(
         Object.create(this.engine.getLexicalScope()),
         options.scope || {});
-    return super.runBody(self, valaaScriptBody, options);
+    return super.runValaaScript(self, valaaScriptBody, options);
   }
 }
 

@@ -18,15 +18,16 @@ afterEach(async () => {
 describe("Media handling", () => {
   it("does an async prepareBvob for non-locally persisted Media content", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
-      oracleOptions: { testAuthorityConfig: { isRemoteAuthority: true,
-        isLocallyPersisted: false,
+      oracleOptions: { testAuthorityConfig: {
+        isRemoteAuthority: true, isLocallyPersisted: false,
       } },
+      awaitResult: (result) => result.getLocalStory(),
     });
     const buffer = arrayBufferFromUTF8String("example content");
     const contentHash = contentHashFromArrayBuffer(buffer);
     const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
     const existingChroniclings = testPartitionBackend._chroniclings.length;
-    const { media, contentSetting } = await harness.runBody(vRef("test_partition"), `
+    const { media, contentSetting } = await harness.runValaaScript(vRef("test_partition"), `
       const media = new Media({
           name: "text media",
           owner: this,
@@ -36,7 +37,7 @@ describe("Media handling", () => {
           .then(createBvob => ({ bvobId: (media[Valaa.Media.content] = createBvob()) }));
       this.text = media;
       ({ media, contentSetting });
-    `, { scope: { buffer, console } });
+    `, { scope: { buffer, console }, awaitResult: (result) => result.getLocalEvent() });
     expect(media.getId().toJSON())
         .toEqual(entities().test_partition.get(["§..", "text"]).getId().toJSON());
     expect(testPartitionBackend.getPreparation(contentHash))
@@ -57,15 +58,15 @@ describe("Media handling", () => {
 
   it("does an async prepareBvob for locally persisted Media content", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
-      oracleOptions: { testAuthorityConfig: { isRemoteAuthority: true,
-        isLocallyPersisted: true, // as opposed to false of previous test
+      oracleOptions: { testAuthorityConfig: {
+        isRemoteAuthority: true, isLocallyPersisted: true, // as opposed to false of previous test
       } },
     });
     const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
     const existingChroniclings = testPartitionBackend._chroniclings.length;
     const buffer = arrayBufferFromUTF8String("example content");
     const contentHash = contentHashFromArrayBuffer(buffer);
-    const { media, contentSetting } = await harness.runBody(vRef("test_partition"), `
+    const { media, contentSetting } = await harness.runValaaScript(vRef("test_partition"), `
       const media = new Media({
           name: "text media",
           owner: this,
@@ -109,13 +110,13 @@ describe("Two paired harnesses emulating two gateways connected through event st
     } });
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
 
-    expect(await harness.runBody(vRef("test_partition"), `
+    expect(await harness.runValaaScript(vRef("test_partition"), `
       this.val = "yo";
     `)).toEqual("yo");
 
     await pairness.receiveTruthsFrom(harness);
 
-    expect(pairness.runBody(vRef("test_partition"), `
+    expect(pairness.runValaaScript(vRef("test_partition"), `
       this.val;
     `)).toEqual("yo");
   });
@@ -126,14 +127,14 @@ describe("Two paired harnesses emulating two gateways connected through event st
     } });
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
 
-    expect(await harness.runBody(vRef("test_partition"), `
+    expect(await harness.runValaaScript(vRef("test_partition"), `
       this.thing = new Entity({ owner: this, name: "thingie", properties: { val: "yoyo" } });
       this.thing.$V.name;
     `)).toEqual("thingie");
 
     await pairness.receiveTruthsFrom(harness);
 
-    expect(pairness.runBody(vRef("test_partition"), `
+    expect(pairness.runValaaScript(vRef("test_partition"), `
       [this.thing.$V.name, this.thing.val];
     `)).toEqual(["thingie", "yoyo"]);
   });
@@ -144,7 +145,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
     } });
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
 
-    expect(await harness.runBody(vRef("test_partition"), `
+    expect(await harness.runValaaScript(vRef("test_partition"), `
       const obj = {
         things: [new Entity({ owner: this, name: "thingie", properties: { val: "yoyo" } })],
       };
@@ -158,7 +159,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
 
     await pairness.receiveTruthsFrom(harness, { verbosity: 0 });
 
-    expect(pairness.runBody(vRef("test_partition"), `
+    expect(pairness.runValaaScript(vRef("test_partition"), `
       [
         this.lookup.things[0].$V.name, this.lookup.things[0].val, this.lookup.things[1],
       ];
@@ -171,7 +172,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
     } });
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
 
-    const values = await harness.runBody(vRef("test_partition"), `
+    const values = await harness.runValaaScript(vRef("test_partition"), `
       const callbackEntity = new Entity({ owner: this, name: "Callback Target",
         properties: { result: 10 },
       });
@@ -203,7 +204,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
     //    .toEqual(23); // this works but it's a pita to await for getLocalEvent
     await pairness.receiveTruthsFrom(harness, { verbosity: 0 });
 
-    const pairedValues = await pairness.runBody(vRef("test_partition"), `
+    const pairedValues = await pairness.runValaaScript(vRef("test_partition"), `
       const values = [this.obj.callbackEntity.result];
       values.push(this.obj.callback());
       values.push(this.$V.unnamedOwnlings[0].result);
@@ -218,7 +219,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
     await harness.receiveTruthsFrom(harness, { clearUpstreamEntries: true });
     await harness.receiveTruthsFrom(pairness, { clearUpstreamEntries: true });
 
-    expect(await harness.runBody(vRef("test_partition"), `this.obj.callbackEntity.result`))
+    expect(await harness.runValaaScript(vRef("test_partition"), `this.obj.callbackEntity.result`))
         .toEqual(20);
   });
 });
@@ -226,7 +227,8 @@ describe("Two paired harnesses emulating two gateways connected through event st
 describe("Regressions", () => {
   it("returns $V.partitionURI for root, child, instance and ghosts properly", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
-    const { rootURI, testURI, instanceURI, ghostURI } = harness.runBody(vRef("test_partition"), `
+    const { rootURI, testURI, instanceURI, ghostURI } = harness.runValaaScript(
+        vRef("test_partition"), `
       const rootURI = this.$V.partitionURI;
       const test = this.$V.unnamedOwnlings.find(e => (e.$V.name === "testName"));
       const instance = this.$V.unnamedOwnlings.find(e => (e.$V.name === "testInstance"));

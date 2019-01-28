@@ -23,7 +23,7 @@ import { initializeAspects, obtainAspect, tryAspect } from "~/prophet/tools/Even
 
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
-import { invariantify, invariantifyObject, trivialClone } from "~/tools";
+import { invariantify, invariantifyObject, thenChainEagerly, trivialClone } from "~/tools";
 import valaaUUID from "~/tools/id/valaaUUID";
 
 export default class FalseProphetDiscourse extends Discourse {
@@ -92,10 +92,9 @@ export default class FalseProphetDiscourse extends Discourse {
       ret.eventResults.forEach(eventResult => {
         const getPremiereStory = eventResult.getPremiereStory;
         eventResult.waitOwnReactions = (() => eventResult.getFollowerReactions(this._follower));
-        eventResult.getPremiereStory = (async () => {
-          await eventResult.waitOwnReactions();
-          return getPremiereStory.call(eventResult);
-        });
+        eventResult.getPremiereStory = () => thenChainEagerly(
+            eventResult.waitOwnReactions(),
+            () => getPremiereStory.call(eventResult));
       });
 
       return ret;

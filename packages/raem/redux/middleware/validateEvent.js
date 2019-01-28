@@ -1,4 +1,5 @@
 import wrapError from "~/tools/wrapError";
+import dumpify from "~/tools/dumpify";
 
 export default function createValidateEventMiddleware (validators, defaultVersion: string,
     fixedVersion?: string) {
@@ -22,7 +23,7 @@ export default function createValidateEventMiddleware (validators, defaultVersio
         return validatedAction;
       } catch (error) {
         throw wrapError(error, `During validateAction, with:`,
-            "\n\taction:", JSON.stringify(action, null, 2));
+            "\n\taction:", dumpify(action, { indent: 2 }));
       }
     }
   }, {});

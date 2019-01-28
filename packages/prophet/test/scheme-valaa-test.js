@@ -144,11 +144,14 @@ export class TestPartitionConnection extends AuthorityPartitionConnection {
 class TestEventResult extends ChronicleEventResult {
   getLocalEvent () { return undefined; }
   getTruthEvent () {
-    if (!this.isPrimary) return Promise.reject(new Error("Not primary"));
-    return (this.truthEventProcess = new Promise((resolve, reject) => {
-      this.resolveTruthEvent = resolve;
-      this.rejectTruthEvent = reject;
-    }));
+    if (!this.isPrimary) {
+      return Promise.reject(new Error("Non-primary authority cannot chronicle events"));
+    }
+    return this.truthEventProcess
+        || (this.truthEventProcess = new Promise((resolve, reject) => {
+          this.resolveTruthEvent = resolve;
+          this.rejectTruthEvent = reject;
+        }));
   }
 }
 

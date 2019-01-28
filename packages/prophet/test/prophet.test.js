@@ -36,7 +36,7 @@ async function setUp (testAuthorityConfig: Object = {}, options: {}) {
 
 afterEach(async () => {
   if (harness) {
-    await harness.cleanup();
+    await harness.cleanupScribe();
     harness = null;
   }
   await clearAllScribeDatabases(/* [testPartitionURI] */);
@@ -51,8 +51,7 @@ describe("Prophet", () => {
   ];
 
   it("decodes cached bvob buffers based on media type", async () => {
-    const scribe = createScribe(createOracle());
-    await scribe.initiate();
+    const scribe = await createScribe(createOracle());
 
     const connection = await scribe.acquirePartitionConnection(createPartitionURI("valaa-test:"))
         .getActiveConnection();

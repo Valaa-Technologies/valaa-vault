@@ -119,7 +119,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     }
   }
 
-  receiveTruths (truths: EventBase[]) {
+  receiveTruths (truths: EventBase[], unused1, unused2, rejectedCommand: EventBase) {
     try {
       this._insertEventsToQueue(truths, this._pendingTruths, false,
           (truth, queueIndex, existingTruth) => {
@@ -144,6 +144,11 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
         confirmedCommands = this._pendingTruths.splice(0, confirms);
         if (!purgedCommands) this._unconfirmedCommands.splice(0, confirms);
         // purge clears all unconfirmed commands
+      }
+      if (!purgedCommands && rejectedCommand
+          && (rejectedCommand === this._unconfirmedCommands[0])) {
+        purgedCommands = this._unconfirmedCommands;
+        this._unconfirmedCommands = [];
       }
       let newTruthCount = 0;
       while (this._pendingTruths[newTruthCount]) ++newTruthCount;

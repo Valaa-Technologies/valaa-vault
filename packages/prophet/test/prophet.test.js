@@ -156,7 +156,7 @@ describe("Prophet", () => {
 
     const first = harness.chronicleEvent(simpleCommand);
 
-    expect(first.getLogAspectFor(harness.testPartitionURI).index).toEqual(1);
+    expect(first.getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
     await harness.prophet._mostRecentNotification;
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
@@ -167,8 +167,8 @@ describe("Prophet", () => {
 
     const seconds = harness.chronicleEvents(coupleCommands).eventResults;
 
-    expect(seconds[0].getLogAspectFor(harness.testPartitionURI).index).toEqual(2);
-    expect(seconds[1].getLogAspectFor(harness.testPartitionURI).index).toEqual(3);
+    expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(2);
+    expect(seconds[1].getLogAspectOf(harness.testPartitionURI).index).toEqual(3);
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
     await harness.prophet._mostRecentNotification;
     expect(totalCommandCount).toEqual(3);
@@ -204,7 +204,7 @@ describe("Prophet", () => {
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
     const first = harness.chronicleEvent(simpleCommand);
-    expect(first.getLogAspectFor(harness.testPartitionURI).index).toEqual(1);
+    expect(first.getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
     await harness.prophet._mostRecentNotification;
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
@@ -217,8 +217,8 @@ describe("Prophet", () => {
     expectConnectionEventIds(scribeConnection, 0, 2, 2);
 
     const seconds = harness.chronicleEvents(coupleCommands).eventResults;
-    expect(seconds[0].getLogAspectFor(harness.testPartitionURI).index).toEqual(2);
-    expect(seconds[1].getLogAspectFor(harness.testPartitionURI).index).toEqual(3);
+    expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(2);
+    expect(seconds[1].getLogAspectOf(harness.testPartitionURI).index).toEqual(3);
     await harness.prophet._mostRecentNotification;
     expect(totalCommandCount).toEqual(2);
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
@@ -291,7 +291,7 @@ describe("Prophet", () => {
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
 
     const first = harness.chronicleEvent(simpleCommand, { reviseSchism });
-    expect(first.getLogAspectFor(harness.testPartitionURI).index).toEqual(1);
+    expect(first.getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
 
     let firstTruth, firstFailure;
     const firstTruthProcess = first.getTruthEvent()
@@ -341,7 +341,7 @@ describe("Prophet", () => {
     await secondsTruthProcesses[0];
     await secondsTruthProcesses[1];
 
-    expect(seconds[0].getLogAspectFor(harness.testPartitionURI).index).toEqual(1);
+    expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
     expect(seconds[1].getCommandOf(harness.testPartitionURI)).toEqual(null);
     expect(secondsTruths.length).toEqual(1);
     expect(secondsFailures.length).toEqual(2);
@@ -357,7 +357,7 @@ describe("Prophet", () => {
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
 
     // Check that first command has been properly revised and resent
-    expect(rechronicleResults[0].getLogAspectFor(harness.testPartitionURI).index).toEqual(2);
+    expect(rechronicleResults[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(2);
     expect(authorityConnection._chroniclings.length).toEqual(2);
 
     const lastEntry = authorityConnection._chroniclings.splice(0, 2);
@@ -399,10 +399,10 @@ describe("Prophet", () => {
     await authorityConnection.getReceiveTruths()(secondsFirstTruth);
     // ...until a divergence due to revise-instead-of-reject happens here.
     await seconds[0].getTruthEvent();
-    expect(seconds[0].getLogAspectFor(harness.testPartitionURI).index).toEqual(1);
+    expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
-    expect(first.getLogAspectFor(harness.testPartitionURI).index).toEqual(2);
-    expect(seconds[1].getLogAspectFor(harness.testPartitionURI).index).toEqual(3);
+    expect(first.getLogAspectOf(harness.testPartitionURI).index).toEqual(2);
+    expect(seconds[1].getLogAspectOf(harness.testPartitionURI).index).toEqual(3);
     await seconds[1].getPersistedEvent();
 
     expect(authorityConnection._chroniclings.length).toEqual(2);
@@ -420,7 +420,7 @@ describe("Prophet", () => {
 
     await secondsTruthProcesses[0];
     await secondsTruthProcesses[1];
-    expect(seconds[0].getLogAspectFor(harness.testPartitionURI).index).toEqual(1);
+    expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
     expect(roundtripEvent(seconds[1].getCommandOf(harness.testPartitionURI)))
         .toMatchObject(stageTwoEntries[1]);
 

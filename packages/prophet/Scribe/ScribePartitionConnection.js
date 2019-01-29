@@ -66,32 +66,35 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   _doConnect (options: ConnectOptions) {
-    // ScribePartitionConnection can be active even if the upstream
-    // connection isn't, as long as there are any events in the local
-    // cache and thus optimistic narration is possible.
     if (this._prophet._upstream) {
       this.setUpstreamConnection(this._prophet._upstream.acquirePartitionConnection(
           this.getPartitionURI(), {
-          // Set the permanent receiver without options.receiveTruths,
-          // initiate connection but disable initial narration; perform
-          // the initial optimistic narrateEventLog later below using
-          // options.receiveTruths.
-            ...options, narrateOptions: false, receiveTruths: this.getReceiveTruths(),
+            // Set the permanent receiver without options.receiveTruths,
+            // initiate connection but disable initial narration; perform
+            // the initial optimistic narrateEventLog later below using
+            // options.receiveTruths.
+            ...options,
+            receiveTruths: this.getReceiveTruths(), narrateOptions: false, subscribeEvents: false,
           }));
     }
-
-    return thenChainEagerly(
-        this.isLocallyPersisted() && _initializeConnectionIndexedDB(this), [
-          (isIndexedDBConnected) => (!isIndexedDBConnected ? {} : this._readMediaEntries()),
-          (mediaEntries) => {
-            this._pendingMediaLookup = mediaEntries;
-            for (const [mediaRawId, entry] of Object.entries(this._pendingMediaLookup)) {
-              this._prophet._persistedMediaLookup[mediaRawId] = entry;
-            }
-          },
-          () => ((options.narrateOptions !== false)
-              && this.narrateEventLog(options.narrateOptions)),
-        ]);
+    // ScribePartitionConnection can be active even if the upstream
+    // connection isn't, as long as there are any events in the local
+    // cache and thus optimistic narration is possible.
+    return thenChainEagerly(null, [
+      ...(!this.isLocallyPersisted ? [] : [
+        () => _initializeConnectionIndexedDB(this),
+        () => this._readMediaEntries(),
+        (mediaEntries) => {
+          this._pendingMediaLookup = mediaEntries;
+          for (const [mediaRawId, entry] of Object.entries(this._pendingMediaLookup)) {
+            this._prophet._persistedMediaLookup[mediaRawId] = entry;
+          }
+        },
+      ]),
+      () => ((options.narrateOptions !== false) && this.narrateEventLog({
+        subscribeEvents: options.subscribeEvents, ...options.narrateOptions,
+      })),
+    ]);
   }
 
   disconnect () {
@@ -127,6 +130,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
+    if (!this.isLocallyPersisted()) return super.chronicleEvents(events, options);
     const connection = this;
     const wrap = new Error("chronicleEvents()");
     try {
@@ -145,17 +149,15 @@ export default class ScribePartitionConnection extends PartitionConnection {
       type: ("receiveTruths" | "receiveCommands") = "receiveTruths",
   ) {
     if (!truths.length) return truths;
-    let errorId;
+    const connection = this;
+    const wrap = new Error(`${type}([${tryAspect(truths[0], "log").index}, ${
+        tryAspect(truths[truths.length - 1], "log").index}])`);
     try {
-      errorId = `${type}([${tryAspect(truths[0], "log").index}, ${
-          tryAspect(truths[truths.length - 1], "log").index}])`;
       return _receiveEvents(this, truths, retrieveMediaBuffer, downstreamReceiveTruths,
-          type, errorOnReceiveTruths.bind(this, new Error(errorId)));
-    } catch (error) {
-      throw errorOnReceiveTruths.call(this, new Error(errorId || `${type}()`), error);
-    }
-    function errorOnReceiveTruths (wrapper, error) {
-      throw this.wrapErrorEvent(error, wrapper,
+          type, errorOnReceiveTruths);
+    } catch (error) { throw errorOnReceiveTruths(error); }
+    function errorOnReceiveTruths (error) {
+      throw connection.wrapErrorEvent(error, wrap,
           "\n\ttruths:", ...dumpObject(truths), truths,
           "\n\tthis:", ...dumpObject(this));
     }

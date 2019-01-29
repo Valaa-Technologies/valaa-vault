@@ -187,10 +187,10 @@ class ProphecyOperation extends ProphecyEventResult {
 
   getDebugPhase () { return this._debugPhase; }
   getCommandOf (partitionURI) {
-    return this._partitions[partitionURI].commandEvent;
+    return this._partitions[String(partitionURI)].commandEvent;
   }
-  getLogAspectFor (partitionURI) {
-    return this._partitions[partitionURI].commandEvent.aspects.log;
+  getLogAspectOf (partitionURI) {
+    return this._partitions[String(partitionURI)].commandEvent.aspects.log;
   }
 
   getLocalStory () {
@@ -198,7 +198,7 @@ class ProphecyOperation extends ProphecyEventResult {
         this._firstStage,
         () => this._prophecy || this.throwRejectionError(),
         this.errorOnProphecyOperation.bind(this,
-            new Error(`chronicleEvents.eventResults[${this.index}].getLocalEvent()`)));
+            new Error(`chronicleEvents.eventResults[${this.index}].getLocalStory()`)));
   }
 
   getPersistedStory () {

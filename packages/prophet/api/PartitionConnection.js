@@ -70,10 +70,11 @@ export default class PartitionConnection extends Follower {
 
   getReceiveTruths (downstreamReceiveTruths?: ReceiveEvents = this._downstreamReceiveTruths):
       ReceiveEvents {
-    return (truths, retrieveMediaBuffer) => {
+    return (truths, retrieveMediaBuffer, unused, rejectedEvent) => {
       try {
-        invariantifyArray(truths, "receiveTruths.truths", { min: 1 });
-        return this.receiveTruths(truths, retrieveMediaBuffer, downstreamReceiveTruths);
+        invariantifyArray(truths, "receiveTruths.truths", { min: (rejectedEvent ? 0 : 1) });
+        return this.receiveTruths(truths, retrieveMediaBuffer, downstreamReceiveTruths,
+            rejectedEvent);
       } catch (error) {
         throw this.wrapErrorEvent(error, new Error("receiveTruths()"),
             "\n\ttruths:", ...dumpObject(truths));

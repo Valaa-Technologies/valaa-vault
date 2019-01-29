@@ -151,10 +151,11 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
     events: EventBase[], options: ChronicleOptions = {}, onError: Function,
 ): ChronicleRequest {
   if (!events || !events.length) return { eventResults: events };
-  const resultBase = new ScribeEventResult(null, { events, onError });
-  // the 'mostRecentReceiveEventsProcess' is a kludge to sequentialize the chronicling process so
-  // that waiting for possible media ops doesn't mess up the order.
-  const receiveEventsProcess = options.isTruth
+  const resultBase = new ScribeEventResult(null, { _events: events, onError });
+  // the 'mostRecentReceiveEventsProcess' is a kludge to sequentialize
+  // the chronicling process so that waiting for possible media ops
+  // doesn't mess up the order.
+  const receiveEventsLocallyProcess = options.isTruth
       ? connection.getReceiveTruths(options.receiveTruths)(
         // pre-authorized medias must be preCached, throw on any retrieveMediaBuffer calls.
           events, options.retrieveMediaBuffer || _throwOnMediaRequest.bind(null, connection))
@@ -163,7 +164,7 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
 
   connection._mostRecentReceiveEventsProcess = resultBase.receivedEventsProcess = thenChainEagerly(
       connection._mostRecentReceiveEventsProcess, [
-        () => receiveEventsProcess,
+        () => receiveEventsLocallyProcess,
         (receivedEvents) => {
           if (connection._mostRecentReceiveEventsProcess === resultBase.receivedEventsProcess) {
             connection._mostRecentReceiveEventsProcess = null;

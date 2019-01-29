@@ -103,7 +103,7 @@ export function mapEagerly (maybePromiseToEntries: any[] | Promise<any[]>, callb
       if (onRejected) {
         return onRejected(error,
             (index === null) ? entries : entries[index],
-            index, results, entries);
+            index, results, entries, callback, onRejected);
       }
     } catch (onRejectedError) { innerError = onRejectedError; }
     throw wrapError(innerError, wrap,

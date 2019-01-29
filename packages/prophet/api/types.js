@@ -59,28 +59,41 @@ export class ChronicleEventResult {
   constructor (event, overrides) { this.event = event; Object.assign(this, overrides); }
 
   event: EventBase; // Preliminary event after universalization
+  index: number; // Index of this event result in a result set
+  _forwardResults: ChronicleEventResult[];
 
   // Get a fully universalized event (complete with aspects.log.index if appropriate).
   getUniversalEvent (): EventBase {
-    return this.getPersistedEvent();
+    const forward = this._universalForwardResults || this._forwardResults;
+    return !forward ? this.getLocalEvent() : thenChainEagerly(forward,
+        r => r[this.index - (this._events.length - r.length)].getUniversalEvent(), this.onError);
   }
 
   // Get universalized event after it has been processed and reduced
   // through local prophet chain, including validations, excluding
   // persistence.
   getLocalEvent (): EventBase | null | Promise<EventBase | null> {
-    throw new Error(`getLocalEvent not implemented by ${this.constructor.name}`);
+    const forward = this._localForwardResults || this._forwardResults;
+    return !forward ? this.getPersistedEvent() : thenChainEagerly(forward,
+        r => r[this.index - (this._events.length - r.length)].getLocalEvent(), this.onError);
   }
 
   // Get event after it has been persisted (possibly locally) but not
   // necessarily authorized.
   getPersistedEvent (): EventBase | Promise<EventBase> {
-    return this.getTruthEvent();
+    const forward = this._persistedForwardResults || this._forwardResults;
+    return !forward ? this.getTruthEvent() : thenChainEagerly(forward,
+        r => r[this.index - (this._events.length - r.length)].getPersistedEvent(), this.onError);
   }
 
   // Get event after it has been confirmed as a truth by its authority
   getTruthEvent (): Truth | Promise<Truth> {
-    throw new Error(`getTruthEvent not implemented by ${this.constructor.name}`);
+    const forward = this._truthForwardResults || this._forwardResults;
+    if (!forward) {
+      throw new Error(`getTruthEvent not implemented by ${this.constructor.name}`);
+    }
+    return thenChainEagerly(forward,
+        r => r[this.index - (this._events.length - r.length)].getTruthEvent(), this.onError);
   }
 }
 

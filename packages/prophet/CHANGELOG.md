@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.33.0-prerelease.11](https://github.com/valaatech/vault/compare/v0.33.0-prerelease.10...v0.33.0-prerelease.11) (2019-01-29)
+
+
+### Bug Fixes
+
+* OracleP*C* now provides subscribeEvents: true for post-connect narrate ([c5cfe19](https://github.com/valaatech/vault/commit/c5cfe19))
+
+
+
+
+
 # [0.33.0-prerelease.10](https://github.com/valaatech/vault/compare/v0.33.0-prerelease.9...v0.33.0-prerelease.10) (2019-01-23)
 
 

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.33.0-prerelease.11](https://github.com/valaatech/vault/compare/v0.33.0-prerelease.10...v0.33.0-prerelease.11) (2019-01-29)
+
+
+### Bug Fixes
+
+* mapEagerly to return onRejected result directly (not in results) ([5584432](https://github.com/valaatech/vault/commit/5584432))
+* wrapError to cache objects to deal with circular nesting ([426608e](https://github.com/valaatech/vault/commit/426608e))
+
+
+
+
+
 # [0.33.0-prerelease.10](https://github.com/valaatech/vault/compare/v0.33.0-prerelease.9...v0.33.0-prerelease.10) (2019-01-23)
 
 

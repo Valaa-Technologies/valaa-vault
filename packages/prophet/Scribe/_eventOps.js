@@ -8,7 +8,7 @@ import {
   ReceiveEvents, RetrieveMediaBuffer,
 } from "~/prophet/api/types";
 
-import { dumpObject, thenChainEagerly, vdon } from "~/tools";
+import { dumpObject, mapEagerly, thenChainEagerly, vdon } from "~/tools";
 
 import ScribePartitionConnection from "./ScribePartitionConnection";
 import { _retryingTwoWaySyncMediaContent } from "./_contentOps";
@@ -177,13 +177,29 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
   if (options.isTruth) {
     resultBase.getTruthEvent = function getTruthEvent () { return this.event; };
   } else {
-    options.receiveTruths = connection.getReceiveTruths(options.receiveTruths);
+    const receiveTruths = connection.getReceiveTruths(options.receiveTruths);
+    options.receiveTruths = receiveTruths;
     options.receiveCommands = null;
-    resultBase.chroniclingProcess = thenChainEagerly(
-        resultBase.receivedEventsProcess,
-        (receivedEvents) => (resultBase.chroniclingProcess = connection.getUpstreamConnection()
-            .chronicleEvents(receivedEvents.filter(notNull => notNull), options)),
-        onError);
+    let upstreamEventResults;
+    resultBase._forwardResults = thenChainEagerly(resultBase.receivedEventsProcess, [
+      (receivedEvents) => connection.getUpstreamConnection()
+          .chronicleEvents(receivedEvents.filter(notNull => notNull), options),
+      ({ eventResults }) => mapEagerly((upstreamEventResults = eventResults),
+          result => result.getTruthEvent(),
+          (error, head, index, confirmedTruths) => {
+            // Discard all commands from failing command onwards from the queue.
+            // Downstream will handle reformations and re-chronicles.
+            // No need to wait for delete to finish, in-memory queue gets flushed.
+            const discardedAspects = events[index || 0].aspects;
+            connection._deleteQueuedCommandsOnwardsFrom(
+                discardedAspects.log.index, discardedAspects.command.id);
+            // Eat the error, forward the already-confirmed events for receiveTruths.
+            return confirmedTruths;
+          }
+      ),
+      confirmedTruths => confirmedTruths.length && receiveTruths(confirmedTruths),
+      () => (resultBase._forwardResults = upstreamEventResults),
+    ], onError);
   }
   return {
     eventResults: events.map((event, index) => {
@@ -203,12 +219,6 @@ class ScribeEventResult extends ChronicleEventResult {
     // sync, including uploads. This is because the upload sync is
     // buried deep down the chain inside _retryingTwoWaySyncMediaContent
     return this.getLocalEvent();
-  }
-  getTruthEvent (): EventBase {
-    return thenChainEagerly(this.chroniclingProcess, [
-      ({ eventResults }) => eventResults[this.index - (this.events.length - eventResults.length)]
-          .getTruthEvent(),
-    ], this.onError);
   }
 }
 

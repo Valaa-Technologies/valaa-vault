@@ -109,7 +109,7 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
 
     if (purgedStory === purgedRecital) break;
 
-    if (purgedStory.isProphecy) {
+    if (purgedStory.isProphecy && !purgedStory.schismDescription) {
       for (const partitionURI of Object.keys((purgedStory.meta || {}).partitions)) {
         const reviewedPartition = reviewedPartitions[partitionURI];
         if (!reviewedPartition) continue;
@@ -120,7 +120,7 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
           purgedStory.reorderingSchism = reformingPurgedProphecy;
         } else if (reviewedPartition.isSchismatic) {
           purgedStory.schismDescription = `a prophecy partition contains an earlier schism`;
-          purgedStory.partitionSchism = partitionURI;
+          purgedStory.schismPartition = partitionURI;
         } else continue;
         (purgedStory.schismPartitions || (purgedStory.schismPartitions = [])).push(partitionURI);
       }
@@ -142,7 +142,7 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
       _reformProphecyCommand(connection, purgedStory, reformingEvent);
       if (purgedStory.schismDescription) {
         connection.errorEvent("REFORMATION ERROR: a purged prophecy was reformed by new event but",
-            "is also schismatic as a whole.",
+            "is still schismatic as a whole.",
             "\n\tRecomposing only the new event while rejecting the rest of the original prophecy.",
             "\n\tschism description:", purgedStory.schismDescription,
             "\n\tpurged prophecy:", purgedStory,

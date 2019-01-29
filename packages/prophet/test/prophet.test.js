@@ -261,11 +261,11 @@ describe("Prophet", () => {
     // resolve prophecy getTruthEvent via pull
     twoEntries[0].resolveTruthEvent(twoTruthEvents[0]);
     twoEntries[1].resolveTruthEvent(twoTruthEvents[1]);
+    expectConnectionEventIds(scribeConnection, 0, 1, 4);
     expect(await firstTruthProcess).toMatchObject(simpleCommand);
+    expectConnectionEventIds(scribeConnection, 0, 3, 4);
     expect(await secondsTruthProcesses[0]).toMatchObject(coupleCommands[0]);
     expect(secondsTruths.length).toEqual(1);
-    // pull doesn't store anything to scribe, let push take care of that (really??)
-    expectConnectionEventIds(scribeConnection, 0, 1, 4);
     await authorityConnection.getReceiveTruths()(twoTruthEvents);
     expectConnectionEventIds(scribeConnection, 0, 3, 4);
 
@@ -479,6 +479,73 @@ describe("Prophet", () => {
 
     expect(secondsTruths.length).toEqual(2);
     expect(secondsFailures.length).toEqual(0);
+  });
+
+  it("rejects a prophecy for which its chronicleEvents throws", async () => {
+    const { scribeConnection, authorityConnection } =
+        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+
+    const results = harness.chronicleEvents([simpleCommand, created({
+      id: ["followup_entity"], typeName: "Entity", initialState: {
+        name: "Followup Entity", owner: ["test_partition", {}, {}],
+      }
+    })]).eventResults;
+
+    const truths = [], failures = [];
+    const truthProcesses = results.map((result_, index) => result_.getTruthEvent().then(
+            truthEvent_ => (truths[index] = truthEvent_),
+            failure => (failures[index] = failure)));
+    await results[1].getPersistedEvent();
+    expect(results[1].getLogAspectOf(harness.testPartitionURI).index)
+        .toEqual(2);
+
+    expect(harness.run(vRef("simple_entity"), ["§->", "name"]))
+        .toEqual("Simple Entity");
+    expect(harness.run(vRef("followup_entity"), ["§->", "name"]))
+        .toEqual("Followup Entity");
+    expectConnectionEventIds(scribeConnection, 0, 1, 3);
+    expect(authorityConnection._chroniclings.length).toEqual(2);
+
+    const twoEntries = authorityConnection._chroniclings.splice(0, 2);
+
+    twoEntries[0].rejectTruthEvent(new Error("Not permitted")); // rejected
+    const reviseError = new Error("revise: reorder");
+    reviseError.revise = "reorder";
+    twoEntries[1].rejectTruthEvent(reviseError);
+
+    await expect(results[0].getTruthEvent()).rejects
+        .toThrow(/Not permitted/);
+    expect(failures.length === 1);
+    expect(truths.length === 0);
+    expectConnectionEventIds(scribeConnection, 0, 1, 2);
+    await results[1].getPersistedEvent();
+    expect(results[1].getLogAspectOf(harness.testPartitionURI).index)
+        .toEqual(1);
+    expect(authorityConnection._chroniclings.length).toEqual(1);
+
+    expect(() => harness.run(vRef("simple_entity"), ["§->", "name"]))
+        .toThrow(/Could not find non-ghost.*simple_entity/);
+    expect(harness.run(vRef("followup_entity"), ["§->", "name"]))
+        .toEqual("Followup Entity");
+
+    expect(truths.length === 0);
+
+    const revisedEntry = authorityConnection._chroniclings.splice(0, 1)[0];
+    revisedEntry.resolveTruthEvent(roundtripEvent(revisedEntry.event));
+    await Promise.all(truthProcesses);
+    expectConnectionEventIds(scribeConnection, 0, 2, 2);
+    expect(failures[0].message)
+        .toEqual(expect.stringMatching(/Not permitted/));
+    expect(truths[1].meta.partitions[String(harness.testPartitionURI)].truth.aspects.log.index)
+        .toEqual(1);
+    await results[1].getTruthEvent();
+    expect(results[1].getLogAspectOf(harness.testPartitionURI).index)
+        .toEqual(1);
+
+    expect(() => harness.run(vRef("simple_entity"), ["§->", "name"]))
+        .toThrow(/Could not find non-ghost.*simple_entity/);
+    expect(harness.run(vRef("followup_entity"), ["§->", "name"]))
+        .toEqual("Followup Entity");
   });
 });
 

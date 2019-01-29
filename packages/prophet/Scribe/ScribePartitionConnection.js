@@ -198,21 +198,39 @@ export default class ScribePartitionConnection extends PartitionConnection {
 
   _clampCommandQueueByTruthEvendIdEnd (lastTruthCommandId?: any) {
     const deleteBegin = this._commandQueueInfo.eventIdBegin;
-    if (this._truthLogInfo.eventIdEnd <= deleteBegin) return undefined;
+    if (!(deleteBegin < this._truthLogInfo.eventIdEnd)) return undefined;
     const commandIds = this._commandQueueInfo.commandIds;
     const lastDeletedCommandId = commandIds[this._truthLogInfo.eventIdEnd - deleteBegin - 1];
+    // If the command id of the last truth doesn't match the command id
+    // of the corresponding command then purge all commands.
     this._commandQueueInfo.eventIdBegin = (lastDeletedCommandId !== lastTruthCommandId)
         && lastTruthCommandId && lastDeletedCommandId
-            ? this._commandQueueInfo.eventIdEnd // Purge all commands
+            ? this._commandQueueInfo.eventIdEnd
             : Math.min(this._commandQueueInfo.eventIdEnd, this._truthLogInfo.eventIdEnd);
-    const deleteCommandIds = commandIds.splice(0,
+    const deletedIds = commandIds.splice(0,
         this._commandQueueInfo.eventIdBegin - deleteBegin);
     if (this._commandQueueInfo.eventIdBegin === this._commandQueueInfo.eventIdEnd) {
       this._commandQueueInfo.eventIdBegin = this._commandQueueInfo.eventIdEnd =
           this._truthLogInfo.eventIdEnd;
     }
-    return !deleteCommandIds.length ? undefined : thenChainEagerly(
-        _deleteCommands(this, deleteBegin, deleteBegin + deleteCommandIds.length, deleteCommandIds),
+    return !deletedIds.length ? undefined : thenChainEagerly(
+        _deleteCommands(this, deleteBegin, deleteBegin + deletedIds.length, deletedIds),
+        commands => commands,
+        error => {
+          if (typeof error.conflictingCommandEventId !== "number") throw error;
+          this._reloadCommandQueue(error.conflictingCommandEventId);
+        });
+  }
+
+  _deleteQueuedCommandsOnwardsFrom (fromLogIndex: number, withCommandId: string) {
+    const commandOffset = fromLogIndex - this._commandQueueInfo.eventIdBegin;
+    const commandIds = this._commandQueueInfo.commandIds;
+    if (!((commandOffset >= 0) && (commandOffset < commandIds.length))) return undefined;
+    if (withCommandId !== commandIds[commandOffset]) return undefined;
+    const deletedIds = commandIds.splice(commandOffset);
+    this._commandQueueInfo.eventIdEnd -= deletedIds.length;
+    return !deletedIds.length ? undefined : thenChainEagerly(
+        _deleteCommands(this, fromLogIndex, fromLogIndex + deletedIds.length, deletedIds),
         commands => commands,
         error => {
           if (typeof error.conflictingCommandEventId !== "number") throw error;

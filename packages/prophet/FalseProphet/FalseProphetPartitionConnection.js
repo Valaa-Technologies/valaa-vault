@@ -6,11 +6,11 @@ import ValaaReference from "~/raem/ValaaReference";
 import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import { ChronicleOptions, ChronicleRequest } from "~/prophet/api/types";
+import { ChronicleOptions, ChronicleRequest, ChronicleEventResult } from "~/prophet/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/prophet/tools/EventAspects";
 import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
 
-import { dumpObject, thenChainEagerly } from "~/tools";
+import { dumpObject, mapEagerly, thenChainEagerly } from "~/tools";
 
 import { Prophecy, _reviewPurgedProphecy, _reviseSchism } from "./_prophecyOps";
 import { _confirmCommands, _purgeAndRecomposeStories } from "./_storyOps";
@@ -91,6 +91,10 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
     if (!events || !events.length) return { eventResults: events };
+    const connection = this;
+    const wrap = new Error(`chronicleEvents(${events.length} events: [${
+        tryAspect(events[0], "log").index}, ${
+        tryAspect(events[events.length - 1], "log").index}])`);
     try {
       if (options.isProphecy) {
         // console.log("assigning ids:", this.getName(), this._headEventId,
@@ -107,15 +111,49 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
         throw new Error(`Can't chronicle events without aspects.log.index ${
             ""}(while options.isProphecy is not set)`);
       }
-      options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
+
+      const receiveTruths = this.getReceiveTruths(options.receiveTruths);
+      options.receiveTruths = receiveTruths;
       options.receiveCommands = options.isProphecy ? null
           : this.getReceiveCommands(options.receiveCommands);
-      return this._upstreamConnection.chronicleEvents(events, options);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, `chronicleEvents(${events.length} events: [${
-              tryAspect(events[0], "log").index}, ${
-              tryAspect(events[events.length - 1], "log").index}])`,
-          "\n\toptions:", ...dumpObject(options));
+      const chronicling = this._upstreamConnection.chronicleEvents(events, options);
+
+      const resultBase = new ChronicleEventResult(null, {
+        _events: events,
+        onError: errorOnFalseProphetChronicleEvents,
+      });
+      const primaryRecital = this._prophet._primaryRecital;
+      let leadingTruths;
+      let upstreamEventResults;
+      resultBase._forwardResults = chronicling.eventResults;
+      resultBase._truthForwardResults = thenChainEagerly(chronicling.eventResults, [
+        eventResults => mapEagerly((upstreamEventResults = (eventResults || events)),
+            result => result.getTruthEvent(),
+            (error, head, index, confirmedTruths, entries, callback, onRejected) => {
+              if (!leadingTruths) leadingTruths = confirmedTruths.slice(0, index);
+              const purgedStory = primaryRecital.getStoryBy(events[index].aspects.command.id);
+              if (purgedStory && !error.revise) {
+                purgedStory.schismDescription = `chronicleEvents rejection: ${error.message}`;
+                purgedStory.chronicleErrorSchism = error;
+                purgedStory.schismPartition = this.getPartitionURI();
+              }
+              // Process the remaining entries so that fully
+              // rejected commands will not be needlessly revised
+              return mapEagerly(entries, callback, onRejected, index + 1, confirmedTruths);
+            },
+        ),
+        resultEvents => receiveTruths(leadingTruths || resultEvents, undefined, undefined,
+            leadingTruths && events[leadingTruths.length]),
+        () => (resultBase._forwardResults = upstreamEventResults),
+      ], errorOnFalseProphetChronicleEvents);
+      return {
+        eventResults: events.map((event, index) => {
+          const ret = Object.create(resultBase); ret.event = event; ret.index = index; return ret;
+        }),
+      };
+    } catch (error) { return errorOnFalseProphetChronicleEvents(error); }
+    function errorOnFalseProphetChronicleEvents (error) {
+      throw connection.wrapErrorEvent(error, wrap, "\n\toptions:", ...dumpObject(options));
     }
   }
 

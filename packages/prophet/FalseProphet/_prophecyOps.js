@@ -39,10 +39,62 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
   });
   resultBase._options.isProphecy = true;
 
-  return {
+  const ret = {
     eventResults: prophecies.map(
         (prophecy, index) => Object.create(resultBase)._execute(prophecy, index)),
   };
+  // TODO(iridian): Implement prophecies' partition sub-commands grouping.
+  // Also implement it for purge revision re-chronicles.
+  //
+  // For purge revision re-chronicles this is a potentially crucial
+  // qualitative performance optimization. For _chronicleEvents this is
+  // not crucial, but having both this function and revision
+  // rechronicles use the same multi-event functionality will lead in
+  // improved performance and code quality for both.
+  //
+  // Conflict purges might result in considerable sized revisions in
+  // a high activity, poor latency conditions with authorities not
+  // offering reordering services. If revision commands are being sent
+  // one-by-one, and conflicts occur in more than one client, this
+  // might result in rapidly degrading performance especially if new
+  // commands are being generated and even longer command queues are
+  // constantly being purged.
+  // Grouping the revision commands together will ensure that even
+  // larger revision rechroniclings can be cleared at once.
+  // A naive authority implementation might still leave one client
+  // undergoing a large revisioning in a starved state, if there exists
+  // another client which is constantly chronicling commands.
+  // This however is a problem that can and should be solved on the
+  // authority side.
+  // Various strategies for this can be devised.
+  //
+  // An especially noteworthy candidate is a situation where:
+  // 1. a revision doesn't result in command payload changes, thus
+  // 2. the command payload signatures remain the same even if their
+  //    log.index changes, and
+  // 3. a transport-level session can be maintained between the gateway
+  //    and the authority, allowing
+  // 4. client gateway to inform the partition authority that the
+  //    commands are valid with just a log.index adjustment, this
+  // 5. minimizing latency, bandwith usage and recurring conflicts,
+  //    and maximizing throughput.
+  //
+  // For such eventuality the authority can provide a service where it
+  // retains the events fully in memory for a short duration (on the
+  // order of seconds) while simultaneously blocking other commands.
+  //
+  // Before soft-conflict resolution support is implemented this
+  // situation is, in fact, the only alternative for hard conflict and
+  // as such prominent.
+  //
+  // There are techniques that allow streamlining this process even
+  // further once gateways can handle optimistic commands coming from
+  // authorities: then the authority can choose to send the commands
+  // pending reorder-revision to other clients as optimistic commands;
+  // which can still be retracted.
+  //
+  // resultBase._chronicleAllPropheciesSubCommandsOfAllPartitions
+  return ret;
 }
 
 export function _confirmProphecyCommand (connection: FalseProphetPartitionConnection,
@@ -127,12 +179,12 @@ export function _reviseSchism (connection: FalseProphetPartitionConnection,
   const operation = (schism.meta || {}).operation;
   // No way to revise non-prophecy schisms: these come from elsewhere so not our job.
   if (!operation) return undefined;
-  // First try to revise by prophecy chronicleEvents.options.reviseSchism
+  // First try to revise using the original chronicleEvents options.reviseSchism
   if (operation._options.reviseSchism) {
     return operation._options.reviseSchism(schism, connection, purgedStories, newEvents);
   }
   // Then if the schism is not a semantic schism try basic revise-recompose.
-  if (schism.semanticSchism) return undefined;
+  if (schism.semanticSchism || schism.chronicleErrorSchism) return undefined;
   delete schism.structuralSchism;
   const recomposedProphecy = _recomposeStoryFromPurgedEvent(connection.getProphet(), schism);
   const partitionURI = String(connection.getPartitionURI());
@@ -173,6 +225,7 @@ class ProphecyOperation extends ProphecyEventResult {
   _events: EventBase[];
   _options: Object; // partition command chronicleEvents options
   _partitions: { [partitionURI: string]: {
+    // note: this does _not_ correspond to _prophecy.meta.partitions
     connection: PartitionConnection,
     commandEvent: Command,
     chronicling: ChronicleEventResult,
@@ -418,21 +471,37 @@ class ProphecyOperation extends ProphecyEventResult {
 
   _completeStage (stagePartitions: Object[], stageName: string) {
     const stageIndex = this._stageIndex++;
-    return stagePartitions && mapEagerly(stagePartitions, partition => {
-      this._debugPhase = `await stage #${stageIndex} '${stageName}' truth of ${
-          partition.connection.getName()}`;
-      const chronicledTruth = partition.chronicling.getTruthEvent();
-      let truthProcess = chronicledTruth;
-      let receivedTruth;
-      if (isPromise(chronicledTruth)) {
+    return stagePartitions && mapEagerly(stagePartitions,
+        partition => this._processStagePartition(partition, stageIndex, stageName),
+        (error, { chronicling }, index) => {
+          throw this._prophet.wrapErrorEvent(error,
+              new Error(`chronicleEvents.completeStage("${stageName}").partition[${index
+                  }].eventResults[${tryAspect(chronicling && chronicling.event, "log").index
+                  }].getTruthEvent()"`),
+              "\n\tstagePartitions:", ...dumpObject(stagePartitions));
+        });
+  }
+
+  _processStagePartition (partition: Object, stageIndex: number, stageName: string) {
+    this._debugPhase = `await stage #${stageIndex} '${stageName}' truth of ${
+        partition.connection.getName()}`;
+    const thisChroniclingProcess = partition.chronicling;
+    let chronicledTruth, receivedTruth;
+    return thenChainEagerly(thisChroniclingProcess, [
+      chronicling => {
+        chronicledTruth = chronicling.getTruthEvent();
+        if (!isPromise(chronicledTruth)) return chronicledTruth;
         receivedTruth = new Promise((resolve, reject) => {
           partition.confirmCommand = resolve;
           partition.rejectCommand = reject;
         });
-        truthProcess = Promise.race([receivedTruth, chronicledTruth]);
-      }
-      return thenChainEagerly(truthProcess, truth => {
+        return Promise.race([receivedTruth, chronicledTruth]);
+      },
+      truth => {
         if (!truth) {
+          if (partition.chronicling !== thisChroniclingProcess) { // retry
+            return this._processStagePartition(partition, stageIndex, stageName);
+          }
           Promise.all([chronicledTruth, receivedTruth]).then(([chronicled, received]) => {
             partition.connection.errorEvent(
               "\n\tnull truth when fulfilling prophecy:", ...dumpObject(this._prophecy),
@@ -441,22 +510,19 @@ class ProphecyOperation extends ProphecyEventResult {
               "\n\treceived:", isPromise(receivedTruth),
                   ...dumpObject(received), ...dumpObject(receivedTruth));
           });
-        }
-        if (truth.aspects.log.index !== partition.commandEvent.aspects.log.index) {
+        } else if (truth.aspects.log.index !== partition.commandEvent.aspects.log.index) {
           // this partition command was/will be revised
         }
-        partition.confirmedTruth = truth;
+        this._prophecy.meta.partitions[String(partition.connection.getPartitionURI())].truth
+            = partition.confirmedTruth = truth;
         return partition;
-      }, error => {
-        partition.rejectionReason = error;
-        throw error;
-      });
-    }, (error, { chronicling }, index) => {
-      throw this._prophet.wrapErrorEvent(error,
-          new Error(`chronicleEvents.completeStage("${stageName}").partition[${index
-              }].eventResults[${tryAspect(chronicling && chronicling.event, "log").index
-              }].getTruthEvent()"`),
-          "\n\tstagePartitions:", ...dumpObject(stagePartitions));
+      },
+    ], error => {
+      if (partition.chronicling !== thisChroniclingProcess) { // retry
+        return this._processStagePartition(partition, stageIndex, stageName);
+      }
+      partition.rejectionReason = error;
+      throw error;
     });
   }
 }

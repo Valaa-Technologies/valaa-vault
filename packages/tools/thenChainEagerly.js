@@ -78,7 +78,8 @@ export function mapEagerly (maybePromiseToEntries: any[] | Promise<any[]>, callb
         if (!isPromise(valueCandidate)) continue;
         wrap = new Error(getName("callback promise resolution"));
       } else {
-        valueCandidate = head.then(resolvedHead => callback(resolvedHead, index, entries)); // eslint-disable-line no-loop-func
+        // eslint-disable-next-line no-loop-func
+        valueCandidate = head.then(resolvedHead => callback(resolvedHead, index, entries));
         wrap = new Error(getName("head or callback promise resolution"));
       }
       return valueCandidate.then(

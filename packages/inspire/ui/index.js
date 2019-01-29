@@ -1,4 +1,7 @@
 
+import SimpleBar from "simplebar-react";
+import "simplebar/dist/simplebar.min.css";
+
 import ContextMenu from "./ContextMenu";
 import ContextMenuTrigger, { DefaultContextMenuTrigger } from "./ContextMenuTrigger";
 // import ExpressionFieldEditor from "./ExpressionFieldEditor";
@@ -26,6 +29,7 @@ const Vidgets = {
   InspireClientStatus: InspireGatewayStatus,
 //  LinkFieldEditor,
   MediaEditor,
+  SimpleBar,
 //  TextFieldEditor,
   TextFileEditor,
   UIComponent,

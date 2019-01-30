@@ -1,6 +1,5 @@
 
 import SimpleBar from "simplebar-react";
-import "simplebar/dist/simplebar.min.css";
 
 import ContextMenu from "./ContextMenu";
 import ContextMenuTrigger, { DefaultContextMenuTrigger } from "./ContextMenuTrigger";

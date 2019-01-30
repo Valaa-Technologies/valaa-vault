@@ -16,6 +16,7 @@ import * as mediaDecoders from "./mediaDecoders";
 
 if (inBrowser()) {
   require("./inspire.css");
+  require("./simplebar.min.css");
 }
 
 const logger = new Logger();

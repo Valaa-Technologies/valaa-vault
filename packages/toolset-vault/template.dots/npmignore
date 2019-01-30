@@ -25,6 +25,7 @@ temp
 
 /.babelrc
 /.babelrc.js
+/babel.config.js
 /.editorconfig
 /.eslintignore
 /.eslintrc.js

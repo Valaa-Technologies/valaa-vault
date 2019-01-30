@@ -7,6 +7,18 @@ module.exports = function configureBabel (api) {
   const shared = require("@valos/toolset-vault/shared/babel.config")(api, rootPrefix);
 
   return Object.assign({}, shared, {
-  // Add overrides here
+  // Add overrides and modify typical options:
+    ignore: [
+      // Never babel dependencies
+      "**/node_modules/**/*",
+      // Don't babel valma commands
+      "**/valma/**/*",
+    ],
+    babelrcRoots: [
+      ".",
+      // Resolve nested babel configuration files, merging outer config
+      // files on top of inner ones
+      "packages/**/*",
+    ]
   });
 };

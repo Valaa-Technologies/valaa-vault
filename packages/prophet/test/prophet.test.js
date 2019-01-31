@@ -58,8 +58,8 @@ describe("Prophet", () => {
 
     const mediaRef = vRef("abcd-0123");
     for (const [bufferContent, mediaInfo, expectedContent] of structuredMediaContents) {
-      const preparedBvob = connection.prepareBvob(bufferContent);
-      const bvobId = await preparedBvob.persistProcess;
+      const preparation = await connection.prepareBvob(bufferContent);
+      const bvobId = await preparation.persistProcess;
       const decodedContent =
           await connection.decodeMediaContent({ mediaRef, bvobId, ...mediaInfo });
       expect(decodedContent).toEqual(expectedContent);

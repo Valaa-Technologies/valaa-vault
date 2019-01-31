@@ -75,7 +75,7 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
   }
 
   prepareBvob (content: any, mediaInfo?: Object):
-      { contentHash: string, persistProcess: ?Promise<any> } {
+      Promise<Object> | { contentHash: string, persistProcess: ?Promise<any> } {
     const connection = this;
     const wrap = new Error(`prepareBvob(${(mediaInfo && mediaInfo.bvobId) || "<undefined>"})`);
     try {

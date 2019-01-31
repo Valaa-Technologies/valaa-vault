@@ -119,11 +119,13 @@ function _prepareBvobToUpstreamWithRetries (connection: ScribePartitionConnectio
     buffer: ArrayBuffer | (() => ArrayBuffer), mediaInfo: MediaInfo,
     mediaName: string, wrap: Error, retriesRemaining: number,
 ) {
-  return thenChainEagerly(
-      connection.getUpstreamConnection(),
-      upstream => upstream.prepareBvob(buffer, mediaInfo).persistProcess,
-      errorOnScribePrepareBvobToUpstream,
-  );
+  // TODO(iridian, 2019-01): This should use active connection, but
+  // right at this moment I don't dare to take the risk of deadlock.
+  // return thenChainEagerly(connection.getUpstreamConnection().getActiveConnection(), [
+  return thenChainEagerly(connection.getUpstreamConnection(), [
+    upstream => upstream.prepareBvob(buffer, mediaInfo),
+    preparation => preparation.persistProcess,
+  ], errorOnScribePrepareBvobToUpstream);
   function errorOnScribePrepareBvobToUpstream (error) {
     const wrappedError = connection.wrapErrorEvent(error, wrap,
         "\n\tmediaInfo:", ...dumpObject(mediaInfo),
@@ -222,7 +224,7 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribePartiti
             || (options.retrieveMediaBuffer && (await options.retrieveMediaBuffer(mediaInfo)));
         if ((content !== undefined) && options.prepareBvob) {
         // TODO(iridian): Determine whether media content should be pre-cached or not.
-          const preparation = options.prepareBvob(content, mediaInfo);
+          const preparation = await options.prepareBvob(content, mediaInfo);
           await preparation.persistProcess;
           await preparation.upstreamPrepareBvobProcess;
         }

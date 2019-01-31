@@ -1432,7 +1432,7 @@ export default class Vrapper extends Cog {
   prepareBvob (content: any, options: VALKOptions = {}) {
     let mediaInfo;
     const vrapper = this;
-    let wrap = new Error("prepareBvob()");
+    const wrap = new Error("prepareBvob()");
     try {
       this.requireActive(options);
       if (this.hasInterface("Media")) {
@@ -1456,10 +1456,7 @@ export default class Vrapper extends Cog {
           return ret;
         },
       ], errorOnPrepareBvob);
-    } catch (error) {
-      wrap = new Error("prepareBvob()");
-      return errorOnPrepareBvob(error);
-    }
+    } catch (error) { return errorOnPrepareBvob(error); }
     function errorOnPrepareBvob (error) {
       throw vrapper.wrapErrorEvent(error, wrap,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo));

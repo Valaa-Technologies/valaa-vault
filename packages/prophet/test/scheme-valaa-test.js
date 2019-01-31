@@ -91,7 +91,7 @@ export class TestPartitionConnection extends AuthorityPartitionConnection {
     return { eventResults };
   }
 
-  prepareBvob (content: any, mediaInfo: MediaInfo) {
+  prepareBvob (content: any, mediaInfo: MediaInfo): Object | Promise<Object> {
     if (!this.isRemoteAuthority()) return super.prepareBvob(content, mediaInfo);
     if (!mediaInfo || !mediaInfo.bvobId) throw new Error("mediaInfo.bvobId not defined");
     const preparation = this._preparations[mediaInfo.bvobId]

@@ -86,8 +86,8 @@ describe("Scribe", () => {
     const sharedDB = await openDB(sharedURI);
 
     for (const mediaContent of textMediaContents) {
-      const preparedBvob = connection.prepareBvob(mediaContent, { name: "Some media" });
-      const bvobId = await preparedBvob.persistProcess;
+      const preparation = await connection.prepareBvob(mediaContent, { name: "Some media" });
+      const bvobId = await preparation.persistProcess;
 
       const bvobKeys = await getKeysFromDB(sharedDB, "bvobs");
       expect(bvobKeys).toContain(bvobId);

@@ -275,7 +275,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   prepareBvob (content: any, mediaInfo?: MediaInfo):
-      { buffer: ArrayBuffer, contentHash: string, persistProcess: ?Promise<any> } {
+      Promise<Object> | { buffer: ArrayBuffer, contentHash: string, persistProcess: ?Promise } {
     const connection = this;
     const wrap = new Error(`prepareBvob(${
         mediaInfo && mediaInfo.name ? `of Media "${mediaInfo.name}"` : typeof content})`);

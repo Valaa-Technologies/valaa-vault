@@ -1,21 +1,32 @@
 // @flow
 import { TextEncoder, TextDecoder } from "text-encoding";
 import { contentHashFromArrayBuffer } from "~/tools/id/contentId";
+import thenChainEagerly from "~/tools/thenChainEagerly";
 
 // FIXME(iridian): This needs to be properly tested, especially on the surrogate pairs an aether
 // planes, so that UCS2String and UCS2Stream give identical results!
 
-export function bufferAndContentHashFromNative (object: any, mediaInfo?: Object) {
-  if (typeof object === "undefined") return undefined;
-  const ret = {
-    buffer: (typeof object === "string") ? _arrayBufferFromStringAndMediaInfo(object, mediaInfo)
-        : (ArrayBuffer.isView(object)) ? object.buffer
-        : (object instanceof ArrayBuffer) ? object
-        : _arrayBufferFromStringAndMediaInfo(JSON.stringify(object), mediaInfo),
-    contentHash: undefined,
-  };
-  ret.contentHash = contentHashFromArrayBuffer(ret.buffer);
-  return ret;
+export function bufferAndContentHashFromNative (maybeObject: any, mediaInfo?: Object):
+    Object | Promise<Object> {
+  if (maybeObject === undefined) return undefined;
+  return thenChainEagerly(maybeObject, [
+    object => {
+      if (typeof object === "string") return _arrayBufferFromStringAndMediaInfo(object, mediaInfo);
+      if (ArrayBuffer.isView(object)) return object.buffer;
+      if (object instanceof ArrayBuffer) return object;
+      if ((typeof Blob !== "undefined")
+          && (object != null) && (typeof object === "object") && (object instanceof Blob)) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload(event => resolve(event.target.result));
+          reader.onerror(reject);
+          reader.readAsArrayBuffer(object);
+        });
+      }
+      return _arrayBufferFromStringAndMediaInfo(JSON.stringify(object), mediaInfo);
+    },
+    buffer => ({ buffer, contentHash: contentHashFromArrayBuffer(buffer) }),
+  ]);
 }
 
 function _arrayBufferFromStringAndMediaInfo (text: string, mediaInfo?: Object) {

@@ -67,6 +67,16 @@ export function convertEvent0Dot1To0Dot2 (connection: PartitionConnection,
     }
     delete ret.commandId;
     if (ret.type === "DESTROYED") delete ret.typeName;
+    if (ret.type === "MODIFIED") {
+      if (ret.sets && !ret.adds && !ret.removes) ret.type = "FIELDS_SET";
+      else if (ret.removes && ret.adds && !ret.sets) ret.type = "REPLACED_WITHIN";
+      else if (ret.adds && !ret.removes && !ret.sets) ret.type = "ADDED_TO";
+      else if (ret.removes && !ret.adds && !ret.sets) ret.type = "REMOVED_FROM";
+      else {
+        throw new Error(`Cannot upgrade event type 'MODIFIED' as it has unsupported ${
+          ""} configuration of 'sets', 'adds' and 'removes' fields`);
+      }
+    }
     if (ret.actions) {
       ret.actions = action.actions.map(subAction =>
           convertEvent0Dot1To0Dot2(connection, subAction, false));

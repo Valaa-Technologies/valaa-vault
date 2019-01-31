@@ -11,7 +11,7 @@ export default function ghostHostResolver (source: Transient, args: any[], conte
     // console.log(`Resolving link ${context.parentType.name}.${context.fieldName}: ${
     //    returnType.name}`);
     const ghostPath = source.get("id").tryGhostPath();
-    if (!ghostPath) return null;
+    if (!ghostPath || !ghostPath.isGhost()) return null;
     const ghostHostRawId = ghostPath.headHostRawId();
     if (!ghostHostRawId) return null;
     const resolver = context.rootValue.resolver.fork();

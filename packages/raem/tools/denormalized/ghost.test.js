@@ -318,7 +318,19 @@ describe("Mixing references across instantiation boundaries", () => {
     expect(harness.run(getGhostGrandling(), ["§->", "ghostHost", "rawId"]))
         .toEqual("root-1");
   });
-
+  it("returns the null ghostHost for non-ghosts; instances, plain and non-resources", () => {
+    setUp({ verbosity: 0,
+      commands: [...createGrandlingInstance, ...createGhostGrandlingInstance],
+    });
+    expect(harness.run(vRef("root"), ["§->", "ghostHost"]))
+        .toBeFalsy();
+    expect(harness.run(vRef("root-1"), ["§->", "ghostHost"]))
+        .toBeFalsy();
+    expect(harness.run(vRef("grandling-1"), ["§->", "ghostHost"]))
+        .toBeFalsy();
+    expect(harness.run(vRef("grandling$root-1_-1"), ["§->", "ghostHost"]))
+        .toBeFalsy();
+  });
   it("returns the original resource for complex instantiation chain parents and ghostHost", () => {
     setUp({ verbosity: 0, commands: createGrandlingInstance });
     expect(harness.run(vRef("grandling-1"), ["§->", "parent", "rawId"]))

@@ -112,8 +112,8 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
             ""}(while options.isProphecy is not set)`);
       }
 
-      const receiveTruths = this.getReceiveTruths(options.receiveTruths);
-      options.receiveTruths = receiveTruths;
+      const receiveTruths = !options.isTruth && this.getReceiveTruths(options.receiveTruths);
+      if (receiveTruths) options.receiveTruths = receiveTruths;
       options.receiveCommands = options.isProphecy ? null
           : this.getReceiveCommands(options.receiveCommands);
       const chronicling = this._upstreamConnection.chronicleEvents(events, options);
@@ -142,8 +142,8 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
               return mapEagerly(entries, callback, onRejected, index + 1, confirmedTruths);
             },
         ),
-        resultEvents => receiveTruths(leadingTruths || resultEvents, undefined, undefined,
-            leadingTruths && events[leadingTruths.length]),
+        resultEvents => receiveTruths && receiveTruths(leadingTruths || resultEvents,
+            undefined, undefined, leadingTruths && events[leadingTruths.length]),
         () => (resultBase._forwardResults = upstreamEventResults),
       ], errorOnFalseProphetChronicleEvents);
       return {

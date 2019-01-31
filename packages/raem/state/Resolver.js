@@ -285,8 +285,9 @@ export default class Resolver extends LogEventGenerator {
         this.objectId = objectId || new ValaaReference(rawId);
         if (this.objectTypeName !== "Blob") this.objectTypeName = this.schema.inactiveType.name;
         this.objectTransient = createIdTransient(this.objectId);
-      } else if (!ghostPath || !ghostPath.isGhost()
-          || !this.goToMostInheritedMaterializedTransient(ghostPath, require, withOwnField)) {
+      } else if ((!withOwnField && (!ghostPath || !ghostPath.isGhost()))
+          || !this.goToMostInheritedMaterializedTransient(
+              ghostPath, require, withOwnField, this.objectTransient)) {
         // A missing concrete resource or a ghost resource with its
         // base prototype fully in an inactive partition.
         this.objectId = null;
@@ -294,8 +295,7 @@ export default class Resolver extends LogEventGenerator {
       } else if (onlyMostMaterialized || withOwnField) {
         // A most inherited materialized transient or withOwnField was
         // found but as its id naturally is different from the rawId
-        // that was passed but the id of the matching prototype clear
-        // objectId to denote that.
+        // that was requested, we clear objectId to denote that.
         this.objectId = null;
       } else {
         // Create an immaterial transient which inherits from the most
@@ -335,19 +335,24 @@ export default class Resolver extends LogEventGenerator {
    * @returns {GhostPath} the transient ghostPath
    */
   goToMostInheritedMaterializedTransient (ghostPath: GhostPath, require: boolean = true,
-      withOwnField?: string): GhostPath {
+      withOwnField?: string, initialTransient?: Object): GhostPath {
     let nextStep = ghostPath;
     let currentPath;
+    let transient = initialTransient;
     try {
       while (true) { // eslint-disable-line no-constant-condition
         currentPath = nextStep.previousGhostStep();
+        if (!currentPath && withOwnField && transient) {
+          const nonGhostPrototype = transient.get("prototype");
+          currentPath = nonGhostPrototype && nonGhostPrototype.tryGhostPath();
+        }
         if (!currentPath) {
           if (!require) return undefined;
           throw new Error(`GhostPath base or instance reached without finding a materialized ${
               ""}ghost or concrete object`);
         }
         const rawId = currentPath.headRawId();
-        const transient = this.tryStateTransient(rawId, this.objectTypeName);
+        transient = this.tryStateTransient(rawId, this.objectTypeName);
         if (transient && (!withOwnField || transient.get(withOwnField))) {
           this.objectTransient = transient;
           const transientId = transient.get("id");

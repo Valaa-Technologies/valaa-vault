@@ -167,6 +167,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         }
         if (lens.hasInterface("Media")) {
           ret = _tryRenderMediaLens(component, lens, focus, lensName);
+          if (ret === undefined) throw new Error(`Can't render Media ${lens.debugId()} as lens`);
           if (isPromise(ret)) {
             ret.operationInfo = Object.assign(ret.operationInfo || {},
                 { lensRole: "downloadingLens", params: lens });

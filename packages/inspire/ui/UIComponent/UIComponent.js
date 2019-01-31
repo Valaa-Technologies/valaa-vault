@@ -583,6 +583,7 @@ class UIComponent extends React.Component {
     let firstPassError;
     let ret;
     let mainValidationFaults;
+    let latestRenderRole;
     try {
       if (!this._errorObject && !_checkForInfiniteRenderRecursion(this)) {
         // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
@@ -593,20 +594,21 @@ class UIComponent extends React.Component {
         }
         try {
           // Render the main lens delegate sequence.
-          ret = this.tryRenderLensRole(this.constructor.mainLensRoleName);
+          ret = this.tryRenderLensRole((latestRenderRole = this.constructor.mainLensRoleName));
         } catch (error) {
           // Try to connect to missing partitions.
           if (!tryConnectToMissingPartitionsAndThen(error, () => this.forceUpdate())) {
             throw error;
           }
-          ret = this.tryRenderLensRole("pendingConnectionsLens",
+          ret = this.tryRenderLensRole((latestRenderRole = "pendingConnectionsLens"),
               (error.originalError || error).missingPartitions.map(entry => String(entry)));
         }
         // Try to handle pending promises.
         if (this.enqueueRerenderIfPromise(ret)) {
           const operationInfo = ret.operationInfo
               || { lensRole: "pendingLens", params: { render: ret } };
-          ret = this.tryRenderLensRole(operationInfo.lensRole, operationInfo.params);
+          ret = this.tryRenderLensRole((latestRenderRole = operationInfo.lensRole),
+              operationInfo.params);
           if (isPromise(ret)) {
             throw wrapError(new Error("Invalid render result: 'pendingLens' returned a promise"),
                 new Error(`During ${this.debugId()}\n .render().ret.pendingLens, with:`),
@@ -618,8 +620,11 @@ class UIComponent extends React.Component {
         if (mainValidationFaults === undefined) {
           return ret === undefined ? null : ret;
         }
-        console.error("Validation faults during render of", this.debugId(),
-            "\n\tfaults:", mainValidationFaults);
+        console.error(`Validation faults on render result of '${latestRenderRole}' by`,
+                this.debugId(),
+            "\n\tfaults:", mainValidationFaults,
+            "\n\tcomponent:", this,
+            "\n\tfailing render result:", ret);
         ret = this.renderLensRole("invalidElementLens",
             "see console log for 'Validation faults' details");
       }

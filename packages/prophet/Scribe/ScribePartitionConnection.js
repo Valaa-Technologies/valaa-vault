@@ -74,7 +74,8 @@ export default class ScribePartitionConnection extends PartitionConnection {
             // the initial optimistic narrateEventLog later below using
             // options.receiveTruths.
             ...options,
-            receiveTruths: this.getReceiveTruths(), narrateOptions: false, subscribeEvents: false,
+            receiveTruths: this.getReceiveTruths(), narrateOptions: false,
+            subscribeEvents: (options.narrateOptions === false) && options.subscribeEvents,
           }));
     }
     // ScribePartitionConnection can be active even if the upstream

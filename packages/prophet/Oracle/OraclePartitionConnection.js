@@ -43,8 +43,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
     this.setUpstreamConnection(this._authorityProphet.acquirePartitionConnection(
         this.getPartitionURI(), {
           narrateOptions: false,
-          subscribeEvents:
-              (options.narrateOptions === false) && (options.subscribeEvents !== false),
+          subscribeEvents: (options.narrateOptions === false) && options.subscribeEvents,
           receiveTruths: this.getReceiveTruths(options.receiveTruths),
         }));
     return thenChainEagerly(

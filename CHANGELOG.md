@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.33.0](https://github.com/valaatech/vault/compare/v0.33.0-prerelease.13...v0.33.0) (2019-02-01)
+
+
+### Bug Fixes
+
+* Add missing upgrade path for MODIFIED actions ([3b898ad](https://github.com/valaatech/vault/commit/3b898ad))
+* ghostHost incorrectly returned truthy values for non-ghosts ([d5b5ae4](https://github.com/valaatech/vault/commit/d5b5ae4))
+* Prevent redundant receiveTruths when options.isTruth is set ([6b20fbe](https://github.com/valaatech/vault/commit/6b20fbe))
+* subscribeEvents issue for non-prologue partitions ([7b2fbe8](https://github.com/valaatech/vault/commit/7b2fbe8))
+
+
+
+
+
 # [0.33.0-prerelease.13](https://github.com/valaatech/vault/compare/v0.33.0-prerelease.12...v0.33.0-prerelease.13) (2019-01-31)
 
 

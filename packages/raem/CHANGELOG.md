@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.33.0](https://github.com/valaatech/vault/compare/v0.33.0-prerelease.13...v0.33.0) (2019-02-01)
+
+
+### Bug Fixes
+
+* ghostHost incorrectly returned truthy values for non-ghosts ([d5b5ae4](https://github.com/valaatech/vault/commit/d5b5ae4))
+
+
+
+
+
 # [0.33.0-prerelease.13](https://github.com/valaatech/vault/compare/v0.33.0-prerelease.12...v0.33.0-prerelease.13) (2019-01-31)
 
 

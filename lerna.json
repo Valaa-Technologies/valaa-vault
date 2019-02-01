@@ -1,13 +1,13 @@
 {
-  "version": "0.33.0-prerelease.13",
+  "version": "0.33.0",
   "lerna": "3.4.0",
   "npmClient": "yarn",
   "useWorkspaces": true,
   "command": {
     "version": {
-      "bump": "prerelease",
-      "preid": "prerelease",
-      "allowBranch": "prerelease/0.33"
+      "bump": "minor",
+      "preid": "",
+      "allowBranch": "release/0.34"
     }
   }
 }

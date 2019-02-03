@@ -1,4 +1,4 @@
-/* global jest describe expect beforeEach it */
+/* global jest describe expect it */
 
 import { created } from "~/raem/events";
 import { vRef } from "~/raem/ValaaReference";

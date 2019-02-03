@@ -1,4 +1,4 @@
-/* global jest describe expect beforeEach it */
+/* global describe expect it */
 
 import { vRef } from "~/raem/ValaaReference";
 

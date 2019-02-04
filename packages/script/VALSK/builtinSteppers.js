@@ -6,11 +6,11 @@ import raemBuiltinSteppers, {
 } from "~/raem/VALK/builtinSteppers";
 import type { BuiltinStep } from "~/raem/VALK/builtinSteppers"; // eslint-disable-line no-duplicate-imports
 
-import isSymbol from "~/tools/isSymbol";
-
 import { createNativeIdentifier, isNativeIdentifier, getNativeIdentifierValue,
   setNativeIdentifierValue,
 } from "~/script/denormalized/nativeIdentifier";
+
+const isSymbol = require("~/tools/isSymbol").default;
 
 export default Object.freeze({
   ...raemBuiltinSteppers,

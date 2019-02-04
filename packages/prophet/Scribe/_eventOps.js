@@ -182,22 +182,28 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
     options.receiveCommands = null;
     let upstreamEventResults;
     resultBase._forwardResults = thenChainEagerly(resultBase.receivedEventsProcess, [
-      (receivedEvents) => connection.getUpstreamConnection()
-          .chronicleEvents(receivedEvents.filter(notNull => notNull), options),
-      ({ eventResults }) => mapEagerly((upstreamEventResults = eventResults),
-          result => result.getTruthEvent(),
-          (error, head, index, confirmedTruths) => {
-            // Discard all commands from failing command onwards from the queue.
-            // Downstream will handle reformations and re-chronicles.
-            // No need to wait for delete to finish, in-memory queue gets flushed.
-            const discardedAspects = events[index || 0].aspects;
-            connection._deleteQueuedCommandsOnwardsFrom(
-                discardedAspects.log.index, discardedAspects.command.id);
-            // Eat the error, forward the already-confirmed events for receiveTruths.
-            return confirmedTruths;
-          }
-      ),
-      confirmedTruths => confirmedTruths.length && receiveTruths(confirmedTruths),
+      function _chronicleReceivedEventsUpstream (receivedEvents) {
+        return connection.getUpstreamConnection()
+          .chronicleEvents(receivedEvents.filter(notNull => notNull), options);
+      },
+      function _syncToChronicleResultTruthEvents ({ eventResults }) {
+        upstreamEventResults = eventResults;
+        return mapEagerly(upstreamEventResults,
+            result => result.getTruthEvent(),
+            (error, head, index, confirmedTruths) => {
+              // Discard all commands from failing command onwards from the queue.
+              // Downstream will handle reformations and re-chronicles.
+              // No need to wait for delete to finish, in-memory queue gets flushed.
+              const discardedAspects = events[index || 0].aspects;
+              connection._deleteQueuedCommandsOnwardsFrom(
+                  discardedAspects.log.index, discardedAspects.command.id);
+              // Eat the error, forward the already-confirmed events for receiveTruths.
+              return confirmedTruths;
+            });
+      },
+      function _receiveConfirmedTruthsLocally (confirmedTruths) {
+        return confirmedTruths.length && receiveTruths(confirmedTruths);
+      },
       () => (resultBase._forwardResults = upstreamEventResults),
     ], onError);
   }

@@ -1,8 +1,9 @@
 // @flow
 
-import isSymbol from "~/tools/isSymbol";
 import { getTransientTypeName } from "~/raem/state/Transient";
 import dumpify from "~/tools/dumpify";
+
+const isSymbol = require("~/tools/isSymbol").default;
 
 export default function debugId (object: any, options: any) {
   const short = options && options.short;

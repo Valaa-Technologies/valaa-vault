@@ -1,8 +1,9 @@
 // import StackTrace from "stacktrace-js";
 import beaumpify from "~/tools/beaumpify";
 import { invariantifyObject } from "~/tools/invariantify";
-import isSymbol from "~/tools/isSymbol";
 import inBrowser from "~/tools/inBrowser";
+
+const isSymbol = require("~/tools/isSymbol").default;
 
 if (typeof window !== "undefined") window.beaumpify = beaumpify;
 
@@ -109,7 +110,7 @@ function _clipFrameListToCurrentContext (innerError, outerError) {
       console.error("innerError has no .stack:", innerError,
         "\n\ttoString:", innerError.toString(),
       );
-      return ["<<< inner error stack empty>>>"];
+      return (innerError.tidyFrameList = ["<<< inner error stack empty>>>"]);
     }
     const typeHeader = innerError.stack.match(/[^:]*: /);
     innerError.tidyFrameList = innerError.stack
@@ -218,7 +219,7 @@ export function debugObjectNest (head, nest = 1, alwaysStringify = false, cache_
     if (head === undefined) return "<undefined>";
     if (!alwaysStringify && inBrowser()) return head;
     if (typeof head === "function") {
-      if (head.name) return `<function name="${head.name}">`;
+      if (head.name) return `<function ${head.name}>`;
       const lineCount = (head.toString().match(/\n/g) || []).length + 1;
       return `<lambda body.lines=${lineCount}>`;
     }

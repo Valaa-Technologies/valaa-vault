@@ -81,21 +81,28 @@ export default class ScribePartitionConnection extends PartitionConnection {
     // ScribePartitionConnection can be active even if the upstream
     // connection isn't, as long as there are any events in the local
     // cache and thus optimistic narration is possible.
-    return thenChainEagerly(null, [
+    const connection = this;
+    return thenChainEagerly(this, [
       ...(!this.isLocallyPersisted ? [] : [
-        () => _initializeConnectionIndexedDB(this),
-        () => this._readMediaEntries(),
-        (mediaEntries) => {
-          this._pendingMediaLookup = mediaEntries;
-          for (const [mediaRawId, entry] of Object.entries(this._pendingMediaLookup)) {
-            this._prophet._persistedMediaLookup[mediaRawId] = entry;
+        _initializeConnectionIndexedDB,
+        _readMediaEntries,
+        function _initializeMediaLookups (mediaEntries) {
+          connection._pendingMediaLookup = mediaEntries;
+          for (const [mediaRawId, entry] of Object.entries(connection._pendingMediaLookup)) {
+            connection._prophet._persistedMediaLookup[mediaRawId] = entry;
           }
         },
       ]),
-      () => ((options.narrateOptions !== false) && this.narrateEventLog({
-        subscribeEvents: options.subscribeEvents, ...options.narrateOptions,
-      })),
-    ]);
+      function _postUpstreamConnectNarrate () {
+        if (options.narrateOptions === false) return undefined;
+        return connection.narrateEventLog({
+          subscribeEvents: options.subscribeEvents, ...options.narrateOptions,
+        });
+      },
+    ], function errorOnScribePartitionConnect (error) {
+      throw connection.wrapErrorEvent(error, new Error("_doConnect"),
+          "\n\toptions:", ...dumpObject(options));
+    });
   }
 
   disconnect () {
@@ -133,12 +140,14 @@ export default class ScribePartitionConnection extends PartitionConnection {
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
     if (!this.isLocallyPersisted()) return super.chronicleEvents(events, options);
     const connection = this;
-    const wrap = new Error("chronicleEvents()");
+    let wrap = new Error("chronicleEvents()");
     try {
       return _chronicleEvents(this, events, options, errorOnScribeChronicleEvents);
     } catch (error) { return errorOnScribeChronicleEvents(error); }
     function errorOnScribeChronicleEvents (error) {
-      throw connection.wrapErrorEvent(error, wrap,
+      const cycleWraps = wrap;
+      wrap = new Error("chronicleEvents()");
+      throw connection.wrapErrorEvent(error, cycleWraps,
           "\n\teventLog:", ...dumpObject(events),
           "\n\toptions:", ...dumpObject(options),
       );
@@ -314,17 +323,6 @@ export default class ScribePartitionConnection extends PartitionConnection {
     } catch (error) {
       throw this.wrapErrorEvent(error, `_updateMediaEntries(${updates.length} updates)`,
           "\n\tupdates:", ...dumpObject(updates));
-    }
-  }
-
-  async _readMediaEntries () {
-    const ret = {};
-    try {
-      await _readMediaEntries(this, ret);
-      return ret;
-    } catch (error) {
-      throw this.wrapErrorEvent(error, `_readMediaEntries()`,
-          "\n\tret:", ret);
     }
   }
 

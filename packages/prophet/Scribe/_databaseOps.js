@@ -93,7 +93,7 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
         connection._commandQueueInfo.eventIdEnd - connection._commandQueueInfo.eventIdBegin);
   });
   connection._clampCommandQueueByTruthEvendIdEnd();
-  return true;
+  return this;
 
   function _loadEventId (entries, direction: ?"prev", target, eventIdTargetFieldName) {
     const req = entries.openCursor(...(direction ? [null, direction] : []));
@@ -178,8 +178,9 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
   await connection._prophet._adjustBvobBufferPersistRefCounts(persistRefCountAdjusts);
 }
 
-export function _readMediaEntries (connection: ScribePartitionConnection, results: Object) {
-  if (!connection._db) return undefined;
+export function _readMediaEntries (connection: ScribePartitionConnection) {
+  if (!connection._db) return {};
+  const results = {};
   return connection._db.transaction(["medias"], "readwrite", ({ medias }) =>
       new Promise((resolve, reject) => {
         const req = medias.openCursor();
@@ -187,7 +188,7 @@ export function _readMediaEntries (connection: ScribePartitionConnection, result
           const cursor: IDBCursorWithValue = event.target.result;
           // Cursor is null when end of record set is reached
           if (!cursor) {
-            resolve();
+            resolve(results);
             return;
           }
           const entry = { ...cursor.value, isInMemory: true };
@@ -477,7 +478,7 @@ function _serializeEventAsJSON (event) {
               ""} .${key}:${debugObjectType(value)}`);
         }
         if (typeof value.toJSON === "function") return value.toJSON();
-        if ((value instanceof ValaaURI) || (value instanceof URL)) return value.toString();
+        if (value instanceof ValaaURI) return value.toString();
         return undefined;
       } catch (error) {
         throw wrapError(error, new Error("During serializeEventAsJSON.trivialClone.customizer"),

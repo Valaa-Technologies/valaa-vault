@@ -1,4 +1,4 @@
-import isSymbol from "~/tools/isSymbol";
+const isSymbol = require("@valos/tools/isSymbol").default;
 
 /**
  *  Returns debug dump of a value as a string, including its type.

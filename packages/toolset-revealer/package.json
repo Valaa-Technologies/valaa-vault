@@ -15,7 +15,6 @@
   "bin": {
     ".valma-configure_.toolset_@valos_toolset-revealer": "valma/configure__toolset__toolset-revealer.js",
     "valma-compose-revelation": "valma/compose-revelation.js",
-    "valma-perspire": "valma/perspire.js",
     "valma-rouse-revealer": "valma/rouse-revealer.js"
   },
   "dependencies": {

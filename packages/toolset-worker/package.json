@@ -1,0 +1,20 @@
+{
+  "name": "@valos/toolset-worker",
+  "version": "0.34.0-prerelease.0",
+  "valaa": {
+    "type": "toolset",
+    "domain": "infrastructure"
+  },
+  "description": "A valma toolset for managing worker repositories",
+  "main": "",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    ".valma-configure_.type_.worker_@valos_toolset-worker": "valma/configure__worker__toolset-worker.js",
+    "valma-perspire": "valma/perspire.js"
+  }
+}

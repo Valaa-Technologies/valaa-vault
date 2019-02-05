@@ -1,10 +1,10 @@
 {
   "name": "valma",
+  "version": "0.34.0-prerelease.0",
   "valaa": {
     "type": "toolset",
     "domain": "infrastructure"
   },
-  "version": "0.34.0-prerelease.0",
   "description": "A convenience Valaa CLI tool to context-dependent infrastructure command scripts",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
@@ -34,6 +34,7 @@
     ".valma-configure_.type_tool": "valma/configure/type/tool.js",
     ".valma-configure_.type_toolset": "valma/configure/type/toolset.js",
     ".valma-configure_.type_vault": "valma/configure/type/vault.js",
+    ".valma-configure_.type_worker": "valma/configure/type/worker.js",
     ".valma-status_10-header": "valma/status_10-header.js",
     ".valma-": "valma/this.js"
   },

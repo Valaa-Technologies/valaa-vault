@@ -17,13 +17,14 @@
           }
         </style>
         <link rel="preload" href="/valaa/inspire/valaa-inspire.js" as="script"/>
-        <link rel="preload" href="revela.json" as="fetch"/>
+        <link rel="preload" href="revela.json" as="fetch" crossorigin="anonymous"/>
     </head>
 <body>
     <div id="valaa-inspire--main-container"></div>
     <script src="/valaa/inspire/valaa-inspire.js"></script>
     <script>
-      Valaa.createInspireGateway({ "...": "revela.json" }, {
+      Valaa.createInspireGateway({ "...": { input: "revela.json", crossOrigin: "same-authority" } },
+      {
         gateway: {
           verbosity: 1,
         },

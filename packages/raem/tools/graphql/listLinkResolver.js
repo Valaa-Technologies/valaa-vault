@@ -2,7 +2,7 @@
 
 import getObjectField from "~/raem/state/getObjectField";
 
-import dumpify from "~/tools/dumpify";
+const dumpify = require("~/tools/dumpify").default;
 
 function listLinkResolver (source: any, args: any, context: Object) {
   try {

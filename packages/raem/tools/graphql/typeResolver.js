@@ -3,7 +3,8 @@
 import { getTransientTypeName } from "~/raem/state/Transient";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
-import dumpify from "~/tools/dumpify";
+
+const dumpify = require("~/tools/dumpify").default;
 
 export function typeNameResolver (resource, info) {
   const typeName = getTransientTypeName(resource, info.schema);

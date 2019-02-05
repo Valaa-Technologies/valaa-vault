@@ -10,7 +10,7 @@ exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "in
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all toolset-vault-operations configurations",
+    description: "Reconfigure 'toolset-vault-operations' configurations of this repository.",
   },
 });
 

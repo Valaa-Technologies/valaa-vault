@@ -44,7 +44,7 @@ following strategy is used:
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all authollery domain configurations",
+    description: "Reconfigure all 'authollery' domain configurations of this repository.",
   },
 });
 

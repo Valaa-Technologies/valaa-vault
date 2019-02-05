@@ -14,7 +14,7 @@ exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all toolset-authollery configurations",
+    description: "Reconfigure 'toolset-authollery' configurations of this repository.",
   },
 });
 

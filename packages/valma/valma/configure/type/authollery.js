@@ -14,7 +14,7 @@ Will add '@valos/toolset-authollery' as devDependency.`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all authollery type configurations",
+    description: "Reconfigure all 'authollery' type configurations of this repository.",
   },
 });
 

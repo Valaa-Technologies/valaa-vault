@@ -36,7 +36,7 @@ uses yargs.vlm.toolset as its default value.`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all tool type configurations",
+    description: "Reconfigure all 'tool' type configurations of this repository.",
   },
   brief: {
     type: "string", description: "A brief two-three word description of this tool",

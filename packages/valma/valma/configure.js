@@ -10,7 +10,7 @@ exports.disabled = (yargs) => !yargs.vlm.getPackageConfig("valaa");
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all configurations.",
+    description: "Reconfigure all configurations of this repository.",
   },
 });
 

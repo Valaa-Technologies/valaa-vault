@@ -14,7 +14,7 @@ exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all toolset-vault configurations",
+    description: "Reconfigure 'toolset-vault' configurations of this repository.",
   },
 });
 
@@ -25,8 +25,6 @@ exports.handler = async (yargv) => {
       "(will not clobber existing files)");
   vlm.shell.cp("-n", templates, ".");
   const hardcodedVDONFiles = ["README", "STYLE"];
-  vlm.info("Copying vault template files from ", vlm.theme.path(templates),
-      "(will not clobber existing files)");
   for (const vdonFile of hardcodedVDONFiles) {
     await vlm.shell
         .exec(`vlm --markdown . require @valos/toolset-vault/template.vdon/${vdonFile}.vdon`)

@@ -1,7 +1,8 @@
 // @flow
 
-import dumpify from "~/tools/dumpify";
 import getObjectField from "~/raem/state/getObjectField";
+
+const dumpify = require("~/tools/dumpify").default;
 
 export default function immutableResolver (source: any, args: any, context: Object) {
   try {

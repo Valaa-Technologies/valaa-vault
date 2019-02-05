@@ -2,7 +2,8 @@ import { Map } from "immutable";
 import valaaHash from "~/tools/id/valaaHash";
 
 import { tryRawIdFrom } from "~/raem/ValaaReference";
-import dumpify from "~/tools/dumpify";
+
+const dumpify = require("~/tools/dumpify").default;
 
 export default function contentHashResolver (source, { rootValue }) {
   try {

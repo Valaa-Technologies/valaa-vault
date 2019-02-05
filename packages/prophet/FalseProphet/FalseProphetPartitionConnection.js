@@ -223,7 +223,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
           (command, queueIndex) => {
             purgedCommands = this._unconfirmedCommands.splice(queueIndex);
           });
-      _purgeAndRecomposeStories(this, purgedCommands, newCommands, "receiveCommand");
+      _purgeAndRecomposeStories(this, purgedCommands, newCommands || [], "receiveCommand");
       return commands;
     } catch (error) {
       throw this.wrapErrorEvent(error, `receiveCommand([${

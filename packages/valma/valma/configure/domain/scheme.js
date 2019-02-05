@@ -5,7 +5,7 @@ exports.introduction = `${exports.describe}.`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all scheme domain configurations",
+    description: "Reconfigure all 'scheme' domain configurations of this repository.",
   },
 });
 

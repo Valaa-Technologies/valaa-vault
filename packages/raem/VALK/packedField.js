@@ -4,10 +4,11 @@ import ValaaReference from "~/raem/ValaaReference";
 
 import type { FieldInfo } from "~/raem/state/FieldInfo";
 
-import dumpify from "~/tools/dumpify";
 import { invariantifyString } from "~/tools/invariantify";
 
 import { PackedHostValue, HostRef, tryHostRef } from "~/raem/VALK/hostReference";
+
+const dumpify = require("~/tools/dumpify").default;
 
 // PackedField is a packed, datatype for accessing reference fields lazily. Potentially expensive
 // operations like value elevations and sequence completions will only be performed when needed.

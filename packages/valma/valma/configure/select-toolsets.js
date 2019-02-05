@@ -2,16 +2,28 @@ exports.command = ".configure/.select-toolsets";
 exports.describe = "Grab and stow toolsets from the set available toolsets";
 exports.introduction = `${exports.describe}.
 
-The set of available toolsets is defined by the set of all valma
-'toolset configure' commands listed by the invokation (note the empty
-  selector):
+The set of available toolsets in a given package context is defined via
+the set of all valma toolset configuration commands at that package
+root directory as:
 
-vlm -da '.configure/{,.type/.<type>/,.domain/.<domain>/}.toolset/**/*'
+vlm -N '.configure/{,.type/.<type>/,.domain/.<domain>/}.toolset/**/*'
 
-An invokation 'vlm configure' will invoke these toolset configure
-command for all toolsets that are selected to be in use.
+When a toolset is grabbed to be in use it is always added as a direct
+devDependency for the package if it is not already.
 
-Toolsets are usually sourced via depending on workshop packages.
+After .select-toolsets has been used to grab a subset of the available
+toolsets to be in use then any subsequent 'vlm configure' will invoke
+the corresponding toolset configuration commands for all toolsets that
+are in use.
+
+The simple way to make a toolset available for some package context is
+by adding a direct devDependency to the toolset package itself. In
+addition there are two ways to source in groups of toolsets:
+1. adding a devDependency to a workshop package which aggregates
+  several toolsets together.
+2. packages under a vault sub-directory have access to all the toolsets
+  at vault root devDependencies.
+
 Toolsets from file and global pools can be used but should be avoided
 as such toolsets are not guaranteed to be always available.`;
 
@@ -22,7 +34,7 @@ exports.disabled = (yargs) => {
 exports.builder = (yargs) => {
   const toolsetsConfig = yargs.vlm.getToolsetsConfig();
   if (!toolsetsConfig) throw new Error("toolsets.json missing (maybe run 'vlm init'?)");
-  if (this.disabled(yargs)) throw new Error("package.json missing stanza .valaa.type/.domain");
+  if (this.disabled(yargs)) throw new Error("package.json missing stanza .valaa.(type|domain)");
   const valaa = yargs.vlm.packageConfig.valaa;
   const knownToolsets = yargs.vlm
       .listMatchingCommands(
@@ -36,7 +48,7 @@ exports.builder = (yargs) => {
   return yargs.options({
     reconfigure: {
       alias: "r", type: "boolean",
-      description: "Reconfigure all vault type configurations",
+      description: "Reconfigure all 'vault' type configurations of this repository.",
     },
     toolsets: {
       type: "string", default: usedToolsets, choices: allToolsets,

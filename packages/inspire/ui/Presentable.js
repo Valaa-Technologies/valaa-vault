@@ -1,5 +1,6 @@
-import dumpify from "~/tools/dumpify";
 import { unthunkRepeat } from "~/inspire/ui/thunk";
+
+const dumpify = require("~/tools/dumpify").default;
 
 // TODO(iridian): A lot of this content should be straight-up moved to UIComponent.
 

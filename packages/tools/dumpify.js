@@ -16,7 +16,7 @@ const isSymbol = require("@valos/tools/isSymbol").default;
  *                                       object is a directed graph, so that dumpification doesn't
  *                                       result in circular recursion
  */
-export default function dumpify (value, options: Object = {}) {
+exports.default = function dumpify (value, options = {}) {
   if (!options.cache) options.cache = new Map();
   try {
     const ret = JSON.stringify(value, replacer, options.indent);
@@ -49,4 +49,4 @@ export default function dumpify (value, options: Object = {}) {
     }
     return value_;
   }
-}
+};

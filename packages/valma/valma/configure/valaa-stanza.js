@@ -18,7 +18,7 @@ exports.builder = (yargs) => {
   return yargs.options({
     reconfigure: {
       alias: "r", type: "boolean",
-      description: "Reconfigure all vault type configurations",
+      description: "Reconfigure ValOS type and domain of this repository.",
     },
     type: {
       type: "string", default: valaa.type, choices: typeChoices,

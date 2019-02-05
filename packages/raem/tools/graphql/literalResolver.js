@@ -2,8 +2,9 @@
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
 
 import valaaHash from "~/tools/id/valaaHash";
-import dumpify from "~/tools/dumpify";
 import wrapError from "~/tools/wrapError";
+
+const dumpify = require("~/tools/dumpify").default;
 
 export default function literalResolver (source, args, context) {
   try {

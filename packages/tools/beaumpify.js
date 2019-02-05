@@ -1,4 +1,4 @@
-import dumpify from "~/tools/dumpify";
+const dumpify = require("~/tools/dumpify").default;
 
 // const beautify = require("js-beautify").js_beautify;
 

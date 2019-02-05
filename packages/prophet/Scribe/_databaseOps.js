@@ -92,7 +92,7 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
     connection._commandQueueInfo.commandIds = new Array(
         connection._commandQueueInfo.eventIdEnd - connection._commandQueueInfo.eventIdBegin);
   });
-  connection._clampCommandQueueByTruthEvendIdEnd();
+  connection._clampCommandQueueByTruthEventIdEnd();
   return this;
 
   function _loadEventId (entries, direction: ?"prev", target, eventIdTargetFieldName) {

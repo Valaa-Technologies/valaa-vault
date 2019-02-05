@@ -8,7 +8,8 @@ import { tryObjectTransient } from "~/raem/state/getObjectTransient";
 import { getTransientTypeName } from "~/raem/state/Transient";
 
 import wrapError from "~/tools/wrapError";
-import dumpify from "~/tools/dumpify";
+
+const dumpify = require("~/tools/dumpify").default;
 */
 
 /**

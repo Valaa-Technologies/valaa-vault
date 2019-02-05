@@ -18,7 +18,7 @@ exports.disabled = (yargs) => yargs.vlm.getToolsetsConfig() && "toolsets.json ex
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all repository configurations",
+    description: "Reconfigure all configurations of this repository.",
   },
 });
 

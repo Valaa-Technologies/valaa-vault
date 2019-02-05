@@ -1,9 +1,10 @@
 // @flow
 
 // import { getNullableType } from "graphql/type";
-import dumpify from "~/tools/dumpify";
 
 import type { Transient } from "~/raem/state/Transient";
+
+const dumpify = require("~/tools/dumpify").default;
 
 // context { rootValue, returnType, parentType, fieldName, operation, fragments, fieldASTs, schema }
 export default function ghostHostResolver (source: Transient, args: any[], context: Object) {

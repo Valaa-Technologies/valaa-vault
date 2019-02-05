@@ -1,8 +1,6 @@
 #!/usr/bin/env vlm
 
-const path = require("path");
-
-exports.command = "perspire [revelationPaths..]";
+exports.command = "perspire [revelationPath] [additionalRevelationPaths..]";
 exports.describe = "headless server-side environment";
 
 exports.disabled = (yargs) => !yargs.vlm.packageConfig;
@@ -34,7 +32,7 @@ exports.builder = (yargs) => yargs.option({
   revelationRoot: {
     type: "string",
     description: `Explicit gateway.options.revelationRoot path ${
-        ""}(by default the first revelationPaths dirname)`,
+        ""}(by default path.dirname(revelationPath))`,
   },
 });
 
@@ -44,21 +42,29 @@ exports.handler = async (yargv) => {
   const startNodePerspireServer = require("@valos/inspire/PerspireServer").startNodePerspireServer;
 
   const vlm = yargv.vlm;
-  const revelationPaths = (yargv.revelationPaths || []).length
-      ? yargv.revelationPaths : ["./revela.json"];
+  let revelationPath = yargv.revelationPath || "./revela.json";
+  let revelationRoot = yargv.revelationRoot;
+  if (revelationRoot === undefined) {
+    revelationRoot = vlm.path.dirname(revelationPath);
+    revelationPath = vlm.path.basename(revelationPath);
+  } else {
+    revelationPath = vlm.path.resolve(revelationPath);
+  }
   yargv.plugin.forEach(element => {
-    require(path.join(process.cwd(), element));
+    require(vlm.path.join(process.cwd(), element));
   });
   vlm.shell.mkdir("-p", yargv.cacheRoot);
 
   const server = await startNodePerspireServer({
-    revelationRoot: (yargv.revelationRoot !== undefined)
-        ? yargv.revelationRoot
-        : vlm.path.dirname(revelationPaths[0]),
+    revelationRoot,
     revelations: [
-      ...revelationPaths.map(p => {
-        if (!vlm.shell.test("-f", p)) throw new Error(`Cannot open file '${p}' for reading`);
-        return { "...": p };
+      { "...": revelationPath },
+      ...(yargv.additionalRevelationPaths || []).map(p => {
+        const absolutePath = vlm.path.resolve(p);
+        if (!vlm.shell.test("-f", absolutePath)) {
+          throw new Error(`Cannot open additional revelationpath "${absolutePath}" for reading`);
+        }
+        return { "...": absolutePath };
       }),
       yargv.revelation || {},
     ],

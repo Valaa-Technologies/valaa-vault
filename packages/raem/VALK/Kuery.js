@@ -2,7 +2,6 @@ import { vRef } from "~/raem/ValaaReference";
 import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 
 import beaumpify from "~/tools/beaumpify";
-import dumpify from "~/tools/dumpify";
 import inBrowser from "~/tools/inBrowser";
 import invariantify, { invariantifyArray, invariantifyNumber, invariantifyString,
     invariantifyObject } from "~/tools/invariantify";
@@ -10,6 +9,8 @@ import wrapError, { dumpObject as _dumpObject } from "~/tools/wrapError";
 import trivialClone from "~/tools/trivialClone";
 
 import { isHostRef, tryHostRef } from "./hostReference";
+
+const dumpify = require("~/tools/dumpify").default;
 
 /**
  * VALK - VAlaa Language for Kuerying

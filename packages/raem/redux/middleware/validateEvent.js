@@ -1,5 +1,6 @@
 import wrapError from "~/tools/wrapError";
-import dumpify from "~/tools/dumpify";
+
+const dumpify = require("~/tools/dumpify").default;
 
 export default function createValidateEventMiddleware (validators, defaultVersion: string,
     fixedVersion?: string) {

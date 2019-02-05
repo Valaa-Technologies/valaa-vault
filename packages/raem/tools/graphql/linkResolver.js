@@ -2,7 +2,7 @@
 
 import getObjectField from "~/raem/state/getObjectField";
 
-import dumpify from "~/tools/dumpify";
+const dumpify = require("~/tools/dumpify").default;
 
 // context { rootValue, returnType, parentType, fieldName, operation, fragments, fieldASTs, schema }
 export default function linkResolver (source: any, args: any, context: Object) {

@@ -12,7 +12,7 @@ Create or configure a toolset for building releases from libraries.`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all library type configurations",
+    description: "Reconfigure all 'library' type configurations of this repository.",
   },
 });
 

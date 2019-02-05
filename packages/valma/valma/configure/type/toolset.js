@@ -23,18 +23,19 @@ exports.disabled = (yargs) => !yargs.vlm.getPackageConfig("valaa");
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all toolset type configurations",
+    description: "Reconfigure all 'toolset' type configurations of this repository.",
   },
   restrict: {
     type: "string",
-    description: `Restrict this toolset to a valaa type (clear for no restriction):`,
+    description: `Restrict this toolset to a particular valaa type (clear for no restriction):`,
     default: yargs.vlm.packageConfig.valaa.domain,
     interactive: { type: "input", when: "always" /* : "if-undefined" */ },
   },
   grabbable: {
+    type: "boolean",
     description: `Make this toolset grabbable and stowable (falsy for always-on):`,
     default: true,
-    interactive: { type: "input", when: "always" /* : "if-undefined" */ },
+    interactive: { type: "confirm", when: "always" /* : "if-undefined" */ },
   },
 });
 
@@ -43,12 +44,12 @@ exports.handler = async (yargv) => {
   const simpleName = vlm.packageConfig.name.match(/([^/]*)$/)[1];
   const commandName = `.configure/${yargv.restrict ? `.type/.${yargv.restrict}/` : ""}${
     yargv.grabbable ? ".toolset/" : ""}${vlm.packageConfig.name}`;
-  await vlm.invoke("create-command", [commandName, {
+  await vlm.invoke("create-command", [{
     filename: `configure__${yargv.restrict ? yargv.restrict : ""}${
         yargv.grabbable ? "_toolset_" : "_"}_${simpleName}.js`,
     export: true, skeleton: true,
     brief: "toolset configure",
-    "exports-vlm": `{ toolset: "${vlm.packageConfig.name}" }\n`,
+    "exports-vlm": `{ toolset: "${vlm.packageConfig.name}" }`,
     describe: `Configure the toolset '${simpleName}' for the current ${
         yargv.restrict || "repository"}`,
 
@@ -64,9 +65,9 @@ grabbing by all repositories.`,
     builder: `(yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all toolset ${simpleName} configurations",
+    description: "Reconfigure '${simpleName}' configurations of this repository.",
   },
-});`,
-  }]);
+})`,
+  }, commandName]);
   return vlm.invoke(`.configure/.type/.toolset/**/*`, { reconfigure: yargv.reconfigure });
 };

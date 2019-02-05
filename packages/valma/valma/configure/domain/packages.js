@@ -8,7 +8,7 @@ packages to npm repositories.`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all packages domain configurations",
+    description: "Reconfigure all 'packages' domain configurations of this repository.",
   },
 });
 

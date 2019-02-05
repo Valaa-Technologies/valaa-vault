@@ -198,7 +198,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   // currently in the truth log write queue have been written, or
   // undefined if there are no pending truth writes.
   _triggerTruthLogWrites (lastTruthCommandId?: any) {
-    this._clampCommandQueueByTruthEvendIdEnd(lastTruthCommandId);
+    this._clampCommandQueueByTruthEventIdEnd(lastTruthCommandId);
     if (!this._truthLogInfo.writeQueue.length) return undefined;
     if (this._truthLogInfo.writeProcess) {
       return this._truthLogInfo.writeProcess.then(() => this._truthLogInfo.writeProcess);
@@ -206,7 +206,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
     return _triggerEventQueueWrites(this, this._truthLogInfo, this._writeTruths.bind(this));
   }
 
-  _clampCommandQueueByTruthEvendIdEnd (lastTruthCommandId?: any) {
+  _clampCommandQueueByTruthEventIdEnd (lastTruthCommandId?: any) {
     const deleteBegin = this._commandQueueInfo.eventIdBegin;
     if (!(deleteBegin < this._truthLogInfo.eventIdEnd)) return undefined;
     const commandIds = this._commandQueueInfo.commandIds;
@@ -223,12 +223,18 @@ export default class ScribePartitionConnection extends PartitionConnection {
       this._commandQueueInfo.eventIdBegin = this._commandQueueInfo.eventIdEnd =
           this._truthLogInfo.eventIdEnd;
     }
+    const wrap = new Error(`_clampCommandQueueByTruthEventIdEnd(${lastTruthCommandId})`);
     return !deletedIds.length ? undefined : thenChainEagerly(
         _deleteCommands(this, deleteBegin, deleteBegin + deletedIds.length, deletedIds),
         commands => commands,
         error => {
-          if (typeof error.conflictingCommandEventId !== "number") throw error;
-          this._reloadCommandQueue(error.conflictingCommandEventId);
+          if (typeof error.conflictingCommandEventId === "number") {
+            return this._reloadCommandQueue(error.conflictingCommandEventId);
+          }
+          throw this.wrapErrorEvent(error, wrap,
+              "\n\tdeleteBegin:", deleteBegin,
+              "\n\tdeleteBegin + len:", deleteBegin + deletedIds.length,
+              "\n\tdeletedIds:", deletedIds);
         });
   }
 

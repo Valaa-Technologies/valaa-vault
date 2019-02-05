@@ -16,7 +16,7 @@ exports.builder = (yargs) => {
   return yargs.options({
     reconfigure: {
       alias: "r", type: "boolean",
-      description: "Reconfigure all vault type configurations",
+      description: "Reconfigure all 'vault' type configurations of this repository.",
     },
     workspaces: {
       type: "string", default: current || "packages/*",

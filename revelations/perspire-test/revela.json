@@ -13,11 +13,11 @@
     "partitionInfos": {
       "...": "<partitions/partitionInfos.json>"
     },
-    "blobInfos": {
-      "...": "/revelations/perspire-test/partitions/blobInfos.json"
+    "bvobInfos": {
+      "...": "/revelations/perspire-test/partitions/bvobInfos.json"
     },
-    "blobBuffers": {
-      "...": "./../perspire-test/partitions/blobBuffers.json"
+    "bvobBuffers": {
+      "...": "./../perspire-test/partitions/bvobBuffers.json"
     },
     "authorityConfigs": {
       "...": "authorityConfigs.json"

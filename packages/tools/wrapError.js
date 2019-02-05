@@ -29,6 +29,7 @@ export function dumpObject (value) {
  */
 export default function wrapError (errorIn: Error, ...contextDescriptions) {
   const error = _tryCooperativeError(errorIn) || new Error(errorIn);
+  if (!error.stack) error.stack = (new Error("dummy").stack);
   if ((typeof error !== "object") || !error || (typeof error.message !== "string")) {
     console.error("INVARIANT VIOLATION during wrapError:",
         "first argument must be an object with .message property!", "Instead got", error);

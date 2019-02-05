@@ -14,6 +14,7 @@ const shell = require("shelljs");
 const yargs = require("yargs/yargs");
 const yargsParser = require("yargs-parser").detailed;
 const deepExtend = require("@valos/tools/deepExtend").default;
+const dumpify = require("@valos/tools/dumpify").default;
 
 cardinal.tomorrowNight = require("cardinal/themes/tomorrow-night");
 
@@ -862,7 +863,7 @@ module.exports
     });
 
 process.on("unhandledRejection", error => {
-  _vlm.exception(JSON.stringify(error, null, 2), "unhandledRejection");
+  _vlm.exception(dumpify(error, { indent: 2 }), "unhandledRejection");
 });
 
 // Only function definitions from hereon.
@@ -886,7 +887,7 @@ async function handler (vargv) {
   // node environment or 'vlm' needs to be loaded)
   const forwardPool = contextVLM._refreshActivePools((pool, poolHasVLM, specificEnoughVLMSeen) => {
     const shouldForwardVLM = _vlm.vargv.forward && !fullyBuiltin && poolHasVLM
-        && (!specificEnoughVLMSeen || needForward) && (specificEnoughVLMSeen || vargv.promote);
+        && (specificEnoughVLMSeen ? needForward : vargv.promote);
     contextVLM.ifVerbose(3)
         .babble(`evaluating pool ${pool.path} for VLM forward, result:`, shouldForwardVLM,
             ...(!shouldForwardVLM ? [] : [
@@ -916,19 +917,20 @@ async function handler (vargv) {
     const forwardRealVLM = fs.realpathSync(forwardPool.vlmPath);
     if (myRealVLM !== forwardRealVLM) {
       contextVLM.ifVerbose(1)
-          .info(`forwarding to vlm via require('${contextVLM.theme.path(forwardPool.vlmPath)}')`,
-              "within pool", contextVLM.theme.path(forwardPool.path),
-              "\n\treal path:", contextVLM.theme.path(forwardRealVLM), `(current vlm "${
-                  contextVLM.theme.path(myRealVLM)})"`);
+      .info(`forwarding to vlm in another pool via require('${
+              contextVLM.theme.path(forwardPool.vlmPath)}')`,
+          "\n\ttarget pool path:", contextVLM.theme.path(forwardPool.path),
+          "\n\ttarget vlm real path:", contextVLM.theme.path(forwardRealVLM),
+          "\n\tcurrent vlm real path:", contextVLM.theme.path(myRealVLM));
       // Call is handled by a forward require to another valma.
       process.argv[1] = forwardPool.vlmPath;
       require(forwardPool.vlmPath);
       return undefined;
     }
     contextVLM.ifVerbose(1)
-    .info(`forwarding to vlm requested but skipped because forward target has same real path`,
-        "\n\ttarget real path:", contextVLM.theme.path(forwardRealVLM), `(current vlm "${
-            contextVLM.theme.path(myRealVLM)})"`);
+    .info(`skipping forward to vlm in another pool because forward target is the same`,
+        "\n\ttarget vlm path symlink:", contextVLM.theme.path(forwardPool.vlmPath),
+        "\n\tlinks to current vlm real path:", contextVLM.theme.path(myRealVLM));
   }
 
   if (needNPM) {
@@ -1238,7 +1240,7 @@ async function _invoke (commandSelector, argv) {
   if (!isWildcardCommand) {
     if (!Object.keys(activeCommands).length) {
       this.error(
-          `cannot find command '${this.theme.command(commandSelector)}' from active pools:`,
+          `Cannot find command '${this.theme.command(commandSelector)}' from active pools:`,
           ...this._activePools.map(
               activePool => `\n\t"${this.path.join(activePool.path, commandGlob)}"`));
       return -1;
@@ -1457,13 +1459,21 @@ function _locateDependedPools (initialPoolBase, poolDirectories) {
   return ret;
 }
 
-function _refreshActivePools (tryShortCircuit) {
+function _refreshActivePools (searchForwardPool) {
   // TODO(iridian): same as _locateDependedPools: make _activePools properly context dependent.
   // Now splicing so that only the root _vlm._activePools is affected.
   this._activePools.splice(0, -1);
   let specificEnoughVLMSeen = false;
+  let ret;
   for (const pool of this._availablePools) {
-    if (!pool.path || !shell.test("-d", pool.path)) continue;
+    if (!pool.path || !shell.test("-d", pool.path)) {
+      this.ifVerbose(1)
+          .warn(`Not adding available pool '${pool.name}' to active pools:`,
+              !pool.path
+                  ? `pool.path (${pool.path}) is falsy`
+                  : "path doesn't exist");
+      continue;
+    }
     let poolHasVLM = false;
     pool.listing = shell.ls("-lAR", pool.path)
         .filter(file => {
@@ -1473,11 +1483,9 @@ function _refreshActivePools (tryShortCircuit) {
         });
     this._activePools.push(pool);
     if (process.argv[1].indexOf(pool.path) === 0) specificEnoughVLMSeen = true;
-    const shortCircuit = tryShortCircuit
-        && tryShortCircuit(pool, poolHasVLM, specificEnoughVLMSeen);
-    if (shortCircuit) return shortCircuit;
+    ret = ret || (searchForwardPool && searchForwardPool(pool, poolHasVLM, specificEnoughVLMSeen));
   }
-  return undefined;
+  return ret;
 }
 
 function _selectActiveCommands (commandGlob, argv, introspect) {

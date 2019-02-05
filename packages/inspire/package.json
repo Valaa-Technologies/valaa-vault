@@ -25,12 +25,12 @@
     "jss-preset-default": "^3.0.0",
     "jstransform": "^11.0.3",
     "lodash.isequal": "^4.5.0",
+    "node-fetch": "^2.3.0",
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-ace": "^5.8.0",
     "react-contextmenu": "^2.6.5",
     "react-dom": "^16.2.0",
-    "simplebar-react": "^0.1.4",
-    "xhr2": "^0.1.4"
+    "simplebar-react": "^0.1.4"
   }
 }

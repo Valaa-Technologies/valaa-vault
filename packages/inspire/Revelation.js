@@ -156,12 +156,12 @@ import resolveRevelationSpreaderImport from "~/tools/resolveRevelationSpreaderIm
 
 export type Revelation = any;
 
-// If given object is a string uses it as the URL for an XHR request and returns the response,
-// otherwise returns the given object itself.
+// If given object is a string uses it as the URL for a Window.fetch
+// and returns the response, otherwise returns the given object itself.
 export function expose (object: Revelation) {
   return typeof object === "function" ? object()
       : ((typeof object === "object") && (Object.keys(object).length === 1) && object[""])
-          ? request({ url: object })
+          ? request({ input: object })
       : object;
 }
 
@@ -232,14 +232,15 @@ function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
   const rest = { ...candidate };
   delete rest["..."];
   const isObjectExpandee = (typeof expandee !== "string");
-  let expandeePath = isObjectExpandee ? (expandee.url || expandee.path) : expandee;
-  if (!expandee.url) {
+  let expandeePath = isObjectExpandee
+      ? (expandee.url || expandee.input || expandee.path) : expandee;
+  if (!(expandee.url || expandee.input)) {
     expandeePath = resolveRevelationSpreaderImport(
         expandeePath, gateway.siteRoot, gateway.revelationRoot, gateway.currentRevelationPath);
   }
   let retrievedContent;
   if (inBrowser()) {
-    const requestOptions = { ...(isObjectExpandee ? expandee : {}), url: expandeePath };
+    const requestOptions = { ...(isObjectExpandee ? expandee : {}), input: expandeePath };
     delete requestOptions.path;
     retrievedContent = _markLazy(() => request(requestOptions));
   } else if (typeof expandee !== "string") {
@@ -248,7 +249,8 @@ function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
     try {
       retrievedContent = gateway.require(expandeePath);
     } catch (error) {
-      throw gateway.wrapErrorEvent(error, `_tryExpandExtension('${expandee.url || expandee}')`,
+      throw gateway.wrapErrorEvent(error,
+          `_tryExpandExtension('${expandee.url || expandee.input || expandee}')`,
           "\n\texpandeePath:", expandeePath,
           "\n\tgateway.siteRoot:", gateway.siteRoot,
           "\n\tgateway.revelationRoot:", gateway.revelationRoot,

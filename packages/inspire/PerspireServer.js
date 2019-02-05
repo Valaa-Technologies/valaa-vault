@@ -110,6 +110,8 @@ export async function startNodePerspireServer ({
   global.self = global;
   global.name = "Perspire window";
   global.window = global;
+  global.WebSocket = WebSocket;
+  global.fetch = require("node-fetch");
 
   const jsdom = new JSDOM(`<div id="perspire-gateway--main-container"></div>`,
       { pretendToBeVisual: true });
@@ -118,12 +120,11 @@ export async function startNodePerspireServer ({
   meta.content = "1";
   jsdom.window.document.getElementsByTagName("head")[0].appendChild(meta);
 
-  global.WebSocket = WebSocket;
-
   // re-set after jsdom is set
   global.window = jsdom.window;
   global.document = jsdom.window.document;
   global.navigator = jsdom.window.navigator;
+  global.HTMLIFrameElement = jsdom.window.HTMLIFrameElement;
   global.requestAnimationFrame = (callback) => { setTimeout(callback, 0); };
   global.cancelAnimationFrame = (callback) => { setTimeout(callback, 0); };
 

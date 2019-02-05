@@ -288,7 +288,7 @@ if (typeof process !== "undefined") {
   process.on("unhandledRejection", unhandledRejection);
 }
 
-if ((window || {}).addEventListener) {
+if ((((typeof window !== "undefined") && window) || {}).addEventListener) {
   window.addEventListener("error", event => {
     event.preventDefault();
     unhandledError(event.error);

@@ -439,7 +439,8 @@ export function _deleteCommands (connection: ScribePartitionConnection,
       throw new Error(`Expected expectedCommandIds.length(${expectedCommandIds.length
           }) to equal range ([${eventIdBegin}, ${eventIdEnd}} === ${eventIdEnd - eventIdBegin})`);
     }
-    return new Promise(_getAllShim.bind(null, connection, commands, range)).then(storedCommands => {
+    return new Promise((resolve, reject) => _getAllShim(connection, commands, range,
+        storedCommands => {
       for (let i = 0; i !== expectedCommandIds.length; ++i) {
         const existingCommandId = tryAspect(storedCommands[i], "command").id;
         if (existingCommandId === undefined) {
@@ -454,7 +455,7 @@ export function _deleteCommands (connection: ScribePartitionConnection,
         }
       }
       return _deleteRange(commands, storedCommands);
-    });
+    }, reject));
   });
   function _deleteRange (commands, deletedCommands?: Object[]) {
     return new Promise((resolve, reject) => {
@@ -495,6 +496,10 @@ function _serializeEventAsJSON (event) {
 
 function _getAllShim (connection: ScribePartitionConnection, database, range: IDBKeyRange,
     resolve: Function, reject: Function) {
+  // Important note on IndexedDB transaction semantics: the resolve
+  // callback must _synchronously_ create any follow-up database
+  // request because the transaction active flag is only set during the
+  // handler. https://www.w3.org/TR/IndexedDB/#fire-success-event
   let req;
   if (database.getAll !== undefined) {
     req = database.getAll(range);

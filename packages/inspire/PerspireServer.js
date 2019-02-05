@@ -52,6 +52,7 @@ export default class PerspireServer {
     this.outputPath = outputPath;
     this.test = test;
     this.container = container;
+    this.window = container.window;
   }
 
   async start () {

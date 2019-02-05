@@ -59,7 +59,12 @@ exports.handler = async (yargv) => {
   global.document = container.window.document;
   global.navigator = container.window.navigator;
   global.WebSocket = require("ws"); // For networking in Node environments
-
+  global.requestAnimationFrame = (callback) => {
+    setTimeout(callback, 0);
+  };
+  global.cancelAnimationFrame = (callback) => {
+    setTimeout(callback, 0);
+  };
   const PerspireServer = require("@valos/inspire/PerspireServer").default;
 
   const vlm = yargv.vlm;
@@ -92,6 +97,7 @@ exports.handler = async (yargv) => {
     container
   });
   await server.start();
+
   const interval = (typeof yargv.keepalive === "number") ? yargv.keepalive : (yargv.keepalive && 1);
   if (interval) {
     console.warn("Setting up keepalive render every", interval, "seconds");

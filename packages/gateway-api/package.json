@@ -1,0 +1,16 @@
+{
+  "name": "@valos/gateway-api",
+  "version": "0.34.0-prerelease.0",
+  "valaa": {
+    "type": "library",
+    "domain": "kernel"
+  },
+  "description": "Minimal footprint ValOS Gateway API local forwards",
+  "main": "index.js",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}

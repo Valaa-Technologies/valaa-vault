@@ -76,10 +76,10 @@ exports.handler = async (yargv) => {
       ? yargv.keepalive : (yargv.keepalive && 1);
   if (!keepaliveInterval) {
     vlm.info("No keepalive enabled");
-    return { domString: server.serializeMainDOM() };
+    return { exited: "immediate rendering", domString: server.serializeMainDOM() };
   }
   vlm.info(`Setting up keepalive render every ${keepaliveInterval} seconds`);
-  return server.run(keepaliveInterval, (index) => {
+  return server.run(Math.abs(keepaliveInterval), (index) => {
     const domString = server.serializeMainDOM();
     if (yargv.output) {
       vlm.shell.ShellString(domString).to(yargv.output);
@@ -92,5 +92,7 @@ exports.handler = async (yargv) => {
       .ifVerbose(1).babble(`heartbeat ${index}:`, `discarded ${domString.length} dom string chars`)
       .ifVerbose(2).expound("\tdom string:\n", domString);
     }
+    if (keepaliveInterval >= 0) return undefined;
+    return { exited: "delayed single shot rendering", domString };
   });
 };

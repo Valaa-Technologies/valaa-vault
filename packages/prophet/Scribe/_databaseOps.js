@@ -93,7 +93,7 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
         connection._commandQueueInfo.eventIdEnd - connection._commandQueueInfo.eventIdBegin);
   });
   connection._clampCommandQueueByTruthEventIdEnd();
-  return this;
+  return connection;
 
   function _loadEventId (entries, direction: ?"prev", target, eventIdTargetFieldName) {
     const req = entries.openCursor(...(direction ? [null, direction] : []));
@@ -115,7 +115,7 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
 
 export async function _updateMediaEntries (connection: ScribePartitionConnection,
     updates: Object[]) {
-  if (!updates || !updates.length) return;
+  if (!updates || !updates.length) return {};
   const inMemoryRefCountAdjusts = {};
   const persistRefCountAdjusts = {};
   function _addAdjust (refs, bvobId, adjust) { refs[bvobId] = (refs[bvobId] || 0) + adjust; }
@@ -165,6 +165,7 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
       };
     });
   }));
+  const ret = {};
   updates.forEach(entry => {
     if (connection.isLocallyPersisted() && !entry.updatePersisted) return;
     delete entry.updatePersisted;
@@ -173,9 +174,11 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
       _addAdjust(inMemoryRefCountAdjusts, currentScribeEntry.mediaInfo.bvobId, -1);
     }
     connection._prophet._persistedMediaLookup[entry.mediaId] = entry;
+    ret[entry.mediaId] = entry;
   });
   connection._prophet._adjustInMemoryBvobBufferRefCounts(inMemoryRefCountAdjusts);
   await connection._prophet._adjustBvobBufferPersistRefCounts(persistRefCountAdjusts);
+  return ret;
 }
 
 export function _readMediaEntries (connection: ScribePartitionConnection) {

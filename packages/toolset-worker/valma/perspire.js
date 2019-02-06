@@ -56,6 +56,7 @@ exports.handler = async (yargv) => {
   vlm.shell.mkdir("-p", yargv.cacheRoot);
 
   const server = await startNodePerspireServer({
+    logger: vlm,
     revelationRoot,
     revelations: [
       { "...": revelationPath },
@@ -66,6 +67,7 @@ exports.handler = async (yargv) => {
         }
         return { "...": absolutePath };
       }),
+      { gateway: { verbosity: vlm.verbosity } },
       yargv.revelation || {},
     ],
     databaseBasePath: yargv.cacheRoot,

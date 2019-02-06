@@ -32,6 +32,7 @@ import type { Revelation } from "~/inspire/Revelation";
 import extendValaaSpaceWithInspire from "~/inspire/ValaaSpace";
 
 import { arrayBufferFromBase64 } from "~/tools/base64";
+import { setGlobalLogger } from "~/tools/wrapError";
 
 const { AuthorityNexus, FalseProphet, Oracle, Prophet, Scribe } = valosProphet;
 const { dumpObject, inBrowser, invariantify, LogEventGenerator, thenChainEagerly } = valosTools;
@@ -45,6 +46,7 @@ export default class InspireGateway extends LogEventGenerator {
     if (options.revelationRoot === undefined) {
       throw new Error("Required gateway.options.revelationRoot is undefined");
     }
+    if (options.logger) setGlobalLogger(options.logger);
     this.siteRoot = options.siteRoot;
     this.revelationRoot = options.revelationRoot;
   }

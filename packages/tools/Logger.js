@@ -82,7 +82,12 @@ export class LogEventGenerator {
           : typeof maybeFunction !== "function" ? [maybeFunction, ...messagePieces]
           : messagePieces;
     }
-    return operation(`${this.debugId()}:`, ...pieces);
+    // Prepend the debug id to the first entry if it is a string.
+    // Valma logger gives only the first argument a specific coloring,
+    // this way the actual first piece will get the coloring as well.
+    return (typeof pieces[0] !== "string")
+        ? operation(`${this.debugId()}:`, ...pieces)
+        : operation(`${this.debugId()}: ${pieces[0]}`, ...pieces.slice(1));
   }
 
   wrapErrorEvent (error: Error, functionName: Error | string, ...contexts: any[]) {

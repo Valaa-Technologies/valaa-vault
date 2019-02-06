@@ -2,7 +2,6 @@
 
 import { JSDOM } from "jsdom";
 import WebSocket from "ws"; // For networking in Node environments
-import shell from "shelljs";
 import path from "path";
 
 import createGateway from "~/inspire";
@@ -34,12 +33,13 @@ function _createTestPerspireGateway (gatewayOptions: Object, ...revelations: any
 
 export default class PerspireServer {
   constructor ({
-    isTest, revelationRoot, revelations, pluginPaths, cacheRoot, outputPath, jsdom, container,
+    isTest, logger, revelationRoot, revelations, plugins, cacheRoot, jsdom, container,
   }: Object) {
     invariantifyString(revelationRoot, "PerspireServer.options.revelationRoot",
         { allowEmpty: true });
     this.isTest = isTest;
     this.gatewayOptions = {
+      logger,
       siteRoot: process.cwd(),
       revelationRoot: revelationRoot[0] === "/"
           ? revelationRoot
@@ -104,7 +104,7 @@ export default class PerspireServer {
 }
 
 export async function startNodePerspireServer ({
-  isTest, revelationRoot, revelations, databaseBasePath, pluginPaths, outputPath,
+  isTest, logger, revelationRoot, revelations, databaseBasePath, plugins,
 }: Object) {
   // for jsdom.
   global.self = global;
@@ -129,7 +129,7 @@ export async function startNodePerspireServer ({
   global.cancelAnimationFrame = (callback) => { setTimeout(callback, 0); };
 
   const server = new PerspireServer({
-    isTest, revelationRoot, pluginPaths, outputPath, jsdom,
+    isTest, logger, revelationRoot, plugins, jsdom,
     container: jsdom.window.document.querySelector("#perspire-gateway--main-container"),
     revelations: [
       { gateway: {

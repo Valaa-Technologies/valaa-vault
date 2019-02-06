@@ -284,6 +284,10 @@ let errorLogger = typeof window !== "undefined" || !process
       error (...params) { console.error(...params.map(beaumpifyObject)); },
     };
 
+export function setGlobalLogger (logger) {
+  errorLogger = logger;
+}
+
 let stackFrameCounter = 0;
 
 if (typeof process !== "undefined") {

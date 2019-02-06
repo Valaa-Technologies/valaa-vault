@@ -304,7 +304,7 @@ const _vlm = {
   // As a diagnostic message outputs to stderr where available.
   warn (msg, ...rest) {
     if (this.theme.warning) {
-      console.warn(this.theme.warning(`${this.contextCommand} warns:`, msg), ...rest);
+      console.warn(this.theme.warning(`${this.getContextName()} warns:`, msg), ...rest);
     }
     return this;
   },
@@ -560,11 +560,6 @@ module.exports = {
             "no-expounds"
           ],
         },
-        v: {
-          group: "Valma root options:",
-          alias: "verbose", count: true, global: false,
-          description: "Be noisy. -vv... -> be more noisy.",
-        },
         vlm: {
           group: "Valma root options:",
           type: "object", global: false,
@@ -706,6 +701,10 @@ function __addUniversalOptions (vargs_,
           alias: "help",
           group: hiddenGroup, type: "boolean", global,
           description: "Show the main help of the command",
+        },
+        v: {
+          alias: "verbose", count: true, global,
+          description: "Be noisy. -vv... -> be more noisy.",
         },
         N: {
           alias: theme.argument("show-name"),
@@ -1279,6 +1278,7 @@ async function _invoke (commandSelector, argv) {
 
       const subVLM = activeCommand.vlm;
       subVLM.vargv = subVLM._parseUntilLastPositional(argv, module.command);
+      subVLM.verbosity = subVLM.vargv.verbose;
       const subIntrospect = subVLM._determineIntrospection(module, commandName);
 
       this.ifVerbose(3)
@@ -1346,12 +1346,12 @@ async function _invoke (commandSelector, argv) {
           const simpleCommand = commandName.match(/\.?([^/]*)$/)[1];
           const detailCommandPrefix = commandName.replace(/.?[^/]*$/, `.${simpleCommand}`);
           const preCommands = `${detailCommandPrefix}/.pre/**/*`;
-          if (subVLM.listMatchingCommands(preCommands).length) {
+          if (this.listMatchingCommands(preCommands).length) {
             await subVLM.invoke(preCommands);
           }
           ret.push(await module.handler(subVLM.vargv));
           const postCommands = `${detailCommandPrefix}/.post/**/*`;
-          if (subVLM.listMatchingCommands(preCommands).length) {
+          if (this.listMatchingCommands(preCommands).length) {
             await subVLM.invoke(postCommands);
           }
         } finally {

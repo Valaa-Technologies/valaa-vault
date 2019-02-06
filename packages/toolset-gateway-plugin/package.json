@@ -1,0 +1,19 @@
+{
+  "name": "@valos/toolset-gateway-plugin",
+  "version": "0.34.0-prerelease.0",
+  "valaa": {
+    "type": "toolset",
+    "domain": "infrastructure"
+  },
+  "description": "A valma toolset for managing gateway-plugin repositories",
+  "main": "",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    ".valma-configure_.type_.gateway-plugin_@valos_toolset-gateway-plugin": "valma/configure__worker__toolset-gateway-plugin.js"
+  }
+}

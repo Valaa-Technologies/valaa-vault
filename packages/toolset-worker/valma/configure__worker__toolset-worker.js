@@ -17,10 +17,7 @@ exports.builder = (yargs) => {
     rootPartitionURI: {
       type: "string", default: toolsetConfig.rootPartitionURI || undefined,
       interactive: { type: "input", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
-      summary: "The initial perspire gateway partition URI",
-      description: "The initial view will be spawned based on this as well."
-          + "If the URI contains fragment resource part it will be used as the view root."
-          + "Otherwise the partition root entity will be used.",
+      description: "The partition URI perspire gateway loads and renders first",
     },
     plugin: {
       type: "string", array: true, default: toolsetConfig.plugins || [],
@@ -49,7 +46,7 @@ exports.handler = async (yargv) => {
     toolsetConfigUpdate.commands = toolsetConfigUpdate.commands || {};
     toolsetConfigUpdate.commands.perspire = {
       options: {
-        keepalive: 15,
+        keepalive: 5,
         output: "dist/perspire/vdomSnapshot.html",
       }
     };

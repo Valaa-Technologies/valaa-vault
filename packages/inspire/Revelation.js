@@ -234,34 +234,34 @@ function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
   const isObjectExpandee = (typeof expandee !== "string");
   let expandeePath = isObjectExpandee
       ? (expandee.url || expandee.input || expandee.path) : expandee;
-  if (!(expandee.url || expandee.input)) {
-    expandeePath = resolveRevelationSpreaderImport(
-        expandeePath, gateway.siteRoot, gateway.revelationRoot, gateway.currentRevelationPath);
-  }
   let retrievedContent;
-  if (inBrowser()) {
-    const requestOptions = { ...(isObjectExpandee ? expandee : {}), input: expandeePath };
-    delete requestOptions.path;
-    retrievedContent = _markLazy(() => request(requestOptions));
-  } else if (typeof expandee !== "string") {
-    throw new Error("Non-string expandees are not supported in non-browser Revelation contexts");
-  } else {
-    try {
-      retrievedContent = gateway.require(expandeePath);
-    } catch (error) {
-      throw gateway.wrapErrorEvent(error,
-          `_tryExpandExtension('${expandee.url || expandee.input || expandee}')`,
-          "\n\texpandeePath:", expandeePath,
-          "\n\tgateway.siteRoot:", gateway.siteRoot,
-          "\n\tgateway.revelationRoot:", gateway.revelationRoot,
-          "\n\tgateway.currentRevelationPath:", gateway.currentRevelationPath,
-      );
+  try {
+    if (!(expandee.url || expandee.input)) {
+      expandeePath = resolveRevelationSpreaderImport(
+          expandeePath, gateway.siteRoot, gateway.revelationRoot, gateway.currentRevelationPath);
     }
+    if (inBrowser()) {
+      const requestOptions = { ...(isObjectExpandee ? expandee : {}), input: expandeePath };
+      delete requestOptions.path;
+      retrievedContent = _markLazy(() => request(requestOptions));
+    } else if (typeof expandee !== "string") {
+      throw new Error("Non-string expandees are not supported in non-browser Revelation contexts");
+    } else {
+      retrievedContent = gateway.require(expandeePath);
+    }
+    const subGateway = Object.assign(Object.create(gateway), {
+      currentRevelationPath: path.dirname(expandeePath),
+    });
+    return _markLazy(() => _combineRevelationsLazily(subGateway, base, retrievedContent, rest));
+  } catch (error) {
+    throw gateway.wrapErrorEvent(error,
+        `_tryExpandExtension('${expandee.url || expandee.input || expandee}')`,
+        "\n\texpandeePath:", expandeePath,
+        "\n\tgateway.siteRoot:", gateway.siteRoot,
+        "\n\tgateway.revelationRoot:", gateway.revelationRoot,
+        "\n\tgateway.currentRevelationPath:", gateway.currentRevelationPath,
+    );
   }
-  const subGateway = Object.assign(Object.create(gateway), {
-    currentRevelationPath: path.dirname(expandeePath),
-  });
-  return _markLazy(() => _combineRevelationsLazily(subGateway, base, retrievedContent, rest));
 }
 
 function _extendRevelation (gateway: Object, base: Object, extension: Object,

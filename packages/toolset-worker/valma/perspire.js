@@ -1,5 +1,6 @@
 #!/usr/bin/env vlm
 
+exports.vlm = { toolset: "@valos/toolset-worker" };
 exports.command = "perspire [revelationPath] [additionalRevelationPaths..]";
 exports.describe = "Launch headless worker for performing virtual DOM ValOS computation";
 
@@ -82,12 +83,14 @@ exports.handler = async (yargv) => {
     const domString = server.serializeMainDOM();
     if (yargv.output) {
       vlm.shell.ShellString(domString).to(yargv.output);
-      vlm.ifVerbose(1)
-      .babble(`heartbeat ${index}:`, `wrote ${domString.length} dom string chars to "${
-          yargv.output}"`);
+      vlm
+      .ifVerbose(1).babble(`heartbeat ${index}:`, `wrote ${domString.length} dom string chars to "${
+          yargv.output}"`)
+      .ifVerbose(2).expound("\tdom string:\n", domString);
     } else {
-      vlm.ifVerbose(1)
-      .babble(`heartbeat ${index}:`, `discarded ${domString.length} dom string chars`);
+      vlm
+      .ifVerbose(1).babble(`heartbeat ${index}:`, `discarded ${domString.length} dom string chars`)
+      .ifVerbose(2).expound("\tdom string:\n", domString);
     }
   });
 };

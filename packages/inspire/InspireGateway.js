@@ -35,7 +35,9 @@ import { arrayBufferFromBase64 } from "~/tools/base64";
 import { setGlobalLogger } from "~/tools/wrapError";
 
 const { AuthorityNexus, FalseProphet, Oracle, Prophet, Scribe } = valosProphet;
-const { dumpObject, inBrowser, invariantify, LogEventGenerator, thenChainEagerly } = valosTools;
+const {
+  dumpObject, inBrowser, invariantify, isPromise, LogEventGenerator, thenChainEagerly,
+} = valosTools;
 
 export default class InspireGateway extends LogEventGenerator {
   constructor (options: Object) {
@@ -170,7 +172,11 @@ export default class InspireGateway extends LogEventGenerator {
 
       registerVidgets();
       this.warnEvent(`initialize(): registered builtin Inspire vidgets`);
-      this.warnEvent("InspireGateway initialized, with revelation", ...dumpObject(revelation));
+      this._isInitialized = true;
+      Object.values(this._attachedPlugins)
+          .forEach(plugin => this._notifyPluginGatewayInitialized(plugin));
+      this.warnEvent("InspireGateway initialized with revelation", ...dumpObject(revelation),
+          "\n\tnotified attached plugins with .onGatewayInitialized");
     } catch (error) {
       throw this.wrapErrorEvent(error, "initialize", "\n\tthis:", ...dumpObject(this));
     }
@@ -183,7 +189,7 @@ export default class InspireGateway extends LogEventGenerator {
   createAndConnectViewsToDOM (viewConfigs: {
     [string]: { name: string, size: Object, container: Object, rootId: string, rootLensURI: any }
   }, createView = (options) => new InspireView(options)) {
-    const ret = {};
+    this._views = {};
     for (const [viewName, viewConfig: Object] of Object.entries(viewConfigs)) {
       this.warnEvent(`createView({ name: '${viewConfig.name}', ... })`, ...dumpObject(viewConfig));
       const engineOptions = {
@@ -215,21 +221,24 @@ export default class InspireGateway extends LogEventGenerator {
       rootScope.Valaa.gateway = this;
       rootScope.Valaa.identity = engine.getIdentityManager();
 
-      ret[viewName] = thenChainEagerly(createView({ engine, name: `${viewConfig.name} View` }), [
+      const name = `${viewConfig.name} View`;
+      this._views[viewName] = thenChainEagerly(createView({ engine, name }), [
         view => view.attach(viewConfig),
         attachedView => {
-          ret[viewName] = attachedView;
           attachedView.rootScope = rootScope;
+          this._views[viewName] = attachedView;
+          Object.values(this._attachedPlugins)
+              .forEach(plugin => this._notifyPluginViewAttached(plugin, viewName, attachedView));
           return attachedView;
         },
       ]);
       this.warnEvent(`Opened View ${viewName}`,
           ...(!this.getVerbosity() ? [] : [", with:",
             "\n\tviewConfig:", ...dumpObject(viewConfig),
-            "\n\tview:", ...dumpObject(ret[viewName]),
+            "\n\tview:", ...dumpObject(this._views[viewName]),
           ]));
     }
-    return ret;
+    return this._views;
   }
 
   /**
@@ -401,23 +410,36 @@ export default class InspireGateway extends LogEventGenerator {
     }
   }
 
-  async attachPlugin (plugin: Promise<Object>) { return this.attachPlugins([plugin]); }
+  _attachedPlugins = {};
 
-  async attachPlugins (plugins_: (Promise<Object> | Object)[]) {
-    const plugins = await Promise.all(plugins_);
-    const pluginLookup = {};
-    for (const plugin of plugins) {
-      if (pluginLookup[plugin.name]) {
-        this.errorEvent(`Plugin '${plugin.name}' already being added:`,
-            pluginLookup[plugin.name], "\n\tskipping adding a new duplicate:", ...dumpObject(plugin));
-      }
-      pluginLookup[plugin.name] = plugin;
-    }
-    this.warnEvent(`Attaching ${plugins.length} plugins:`, ...dumpObject(pluginLookup));
-    for (const plugin of plugins) this._attachPlugin(plugin);
+  async attachPlugin (pluginPrototype: Promise<Object>) {
+    return this.attachPlugins([pluginPrototype]);
   }
 
-  _attachPlugin (plugin: Object) {
+  async attachPlugins (pluginPrototypes_: (Promise<Object> | Object)[]) {
+    const pluginPrototypes = await Promise.all(pluginPrototypes_);
+    const newPluginLookup = {};
+    const pluginNames = [];
+    pluginPrototypes.forEach(pluginPrototype => {
+      if (newPluginLookup[pluginPrototype.name]) {
+        this.errorEvent(`Plugin '${pluginPrototype.name}' already being added:`,
+            newPluginLookup[pluginPrototype.name],
+            "\n\tskipping adding a new duplicate:", ...dumpObject(pluginPrototype));
+      }
+      if (this._attachedPlugins[pluginPrototype.name]) {
+        throw new Error(`Plugin '${pluginPrototype.name}' already attached`);
+      }
+      pluginNames.push(pluginPrototype.name);
+      newPluginLookup[pluginPrototype.name] =
+          (pluginPrototype.attach && pluginPrototype.attach(this))
+              || pluginPrototype;
+    });
+    this.warnEvent(`Attaching ${pluginNames.length} plugins:`, ...dumpObject(pluginNames));
+    for (const name of pluginNames) this._attachPlugin(name, newPluginLookup[name]);
+  }
+
+  _attachPlugin (name: string, plugin: Object) {
+    this._attachedPlugins[name] = plugin;
     for (const schemeModule of Object.values(plugin.schemeModules || {})) {
       this.nexus.addSchemeModule(this.callRevelation(schemeModule));
     }
@@ -427,6 +449,24 @@ export default class InspireGateway extends LogEventGenerator {
     for (const MediaDecoder_: any of Object.values(plugin.mediaDecoders || {})) {
       this.oracle.getDecoderArray().addDecoder(this.callRevelation(MediaDecoder_));
     }
+    if (this._isInitialized) {
+      this._notifyPluginGatewayInitialized(plugin);
+    }
+    Object.keys(this._views || {}).forEach(viewName => {
+      if (!isPromise[this._views[viewName]]) {
+        this._notifyPluginViewAttached(plugin, viewName, this._views[viewName]);
+      }
+    });
+  }
+
+  _notifyPluginGatewayInitialized (plugin: Object) {
+    if (!plugin.onGatewayInitialized) return;
+    plugin.onGatewayInitialized(this);
+  }
+
+  _notifyPluginViewAttached (plugin: Object, viewName: string, view: InspireView) {
+    if (!plugin.onViewAttached) return;
+    plugin.onViewAttached(viewName, view);
   }
 
   async _narratePrologues (prologueRevelation: Object) {

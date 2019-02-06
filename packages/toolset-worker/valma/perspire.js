@@ -1,7 +1,7 @@
 #!/usr/bin/env vlm
 
 exports.command = "perspire [revelationPath] [additionalRevelationPaths..]";
-exports.describe = "headless server-side environment";
+exports.describe = "Launch headless worker for performing virtual DOM ValOS computation";
 
 exports.disabled = (yargs) => !yargs.vlm.packageConfig;
 exports.builder = (yargs) => yargs.option({
@@ -12,14 +12,14 @@ exports.builder = (yargs) => yargs.option({
   },
   keepalive: {
     default: false,
-    description: `Keeps server alive after initial run. If a number then the output will be ${
-        ""}rendered every 'keepalive' seconds.`,
+    description: `Keeps server alive after initial run. If keepalive is a number then ${
+        ""}the possible output will be rendered every 'keepalive' seconds.`,
   },
   plugin: {
     type: "string",
     array: true,
     default: [],
-    description: "List of plugin paths to load at start",
+    description: "List of plugin id's which are require'd before gateway creation.",
   },
   cacheRoot: {
     type: "string",
@@ -27,7 +27,7 @@ exports.builder = (yargs) => yargs.option({
     description: "Cache root path for indexeddb sqlite shim and other cache storages",
   },
   revelation: {
-    description: "Direct revelation object applied after all other revelations",
+    description: "Direct revelation object that is placed after all other revelations",
   },
   revelationRoot: {
     type: "string",
@@ -50,9 +50,7 @@ exports.handler = async (yargv) => {
   } else {
     revelationPath = vlm.path.resolve(revelationPath);
   }
-  yargv.plugin.forEach(element => {
-    require(vlm.path.join(process.cwd(), element));
-  });
+  (yargv.plugin || []).forEach(plugin => require(plugin));
   vlm.shell.mkdir("-p", yargv.cacheRoot);
 
   const server = await startNodePerspireServer({
@@ -63,24 +61,33 @@ exports.handler = async (yargv) => {
       ...(yargv.additionalRevelationPaths || []).map(p => {
         const absolutePath = vlm.path.resolve(p);
         if (!vlm.shell.test("-f", absolutePath)) {
-          throw new Error(`Cannot open additional revelationpath "${absolutePath}" for reading`);
+          throw new Error(`Cannot open additional revelation path "${absolutePath}" for reading`);
         }
         return { "...": absolutePath };
       }),
       { gateway: { verbosity: vlm.verbosity } },
       yargv.revelation || {},
     ],
+    // plugins: yargv.plugin,
     databaseBasePath: yargv.cacheRoot,
-    pluginPaths: yargv.plugin,
-    outputPath: yargv.output,
   });
   const keepaliveInterval = (typeof yargv.keepalive === "number")
       ? yargv.keepalive : (yargv.keepalive && 1);
-  if (keepaliveInterval) {
-    console.warn("Setting up keepalive render every", keepaliveInterval, "seconds");
-    await server.run(keepaliveInterval);
-  } else {
-    console.warn("No keepalive enabled");
+  if (!keepaliveInterval) {
+    vlm.info("No keepalive enabled");
+    return { domString: server.serializeMainDOM() };
   }
-  return "Exiting perspire handler";
+  vlm.info(`Setting up keepalive render every ${keepaliveInterval} seconds`);
+  return server.run(keepaliveInterval, (index) => {
+    const domString = server.serializeMainDOM();
+    if (yargv.output) {
+      vlm.shell.ShellString(domString).to(yargv.output);
+      vlm.ifVerbose(1)
+      .babble(`heartbeat ${index}:`, `wrote ${domString.length} dom string chars to "${
+          yargv.output}"`);
+    } else {
+      vlm.ifVerbose(1)
+      .babble(`heartbeat ${index}:`, `discarded ${domString.length} dom string chars`);
+    }
+  });
 };

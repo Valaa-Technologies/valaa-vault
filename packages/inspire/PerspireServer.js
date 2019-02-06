@@ -46,15 +46,14 @@ export default class PerspireServer {
           : path.join(process.cwd(), revelationRoot),
     };
     this.revelations = revelations;
-    this.pluginPaths = pluginPaths;
+    this.plugins = plugins;
     this.cacheRoot = cacheRoot;
-    this.outputPath = outputPath;
     this.jsdom = jsdom;
     this.container = container;
   }
 
   async start () {
-    (this.pluginPaths || []).forEach(pluginPath => require(path.join(process.cwd(), pluginPath)));
+    (this.plugins || []).forEach(plugin => require(plugin));
 
     return (this.gateway = (!this.isTest
         ? _createPerspireGateway
@@ -77,29 +76,30 @@ export default class PerspireServer {
       const views = gateway.createAndConnectViewsToDOM(
           viewOptions, (options) => new PerspireView(options));
       await views.perspireMain;
-      this.serializeToOutputPath();
       this.gateway = gateway;
       this.Valaa = views.perspireMain.rootScope.Valaa;
       return gateway;
     }));
   }
 
-  async run (interval: number) {
-    return new Promise((/* terminate */) => {
-      this.jsdom.window.setInterval(() => {
-        this.serializeToOutputPath();
+  async run (interval: number, heartbeat: Function) {
+    return new Promise((resolve, reject) => {
+      let index = 0;
+      const timeoutObject = this.jsdom.window.setInterval(() => {
+        try {
+          const ret = heartbeat(index++);
+          if (ret === undefined) return;
+          resolve(ret);
+        } catch (error) {
+          reject(error);
+        }
+        this.jsdom.window.clearInterval(timeoutObject);
       }, interval * 1000);
     });
   }
 
   serializeMainDOM () {
     return this.jsdom.serialize();
-  }
-
-  serializeToOutputPath () {
-    if (this.outputPath) {
-      shell.ShellString(this.jsdom.serialize()).to(this.outputPath);
-    }
   }
 }
 

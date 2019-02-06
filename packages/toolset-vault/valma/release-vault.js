@@ -129,8 +129,8 @@ exports.handler = async (yargv) => {
       }
       ret.releaseDescription = `New ${preparation.newBranchGroup} ${type} branch`;
       const patchInc = (yargv.release && currentIsPrerelease) ? 0 : 1;
-      const minorInc = (patchInc || patch) ? 1 : 0;
-      const majorInc = (minorInc || minor) ? 1 : 0;
+      const minorInc = (patchInc || Number(patch)) ? 1 : 0;
+      const majorInc = (minorInc || Number(minor)) ? 1 : 0;
       preparation.branchVersion
           = (preparation.newBranchGroup === "major") ? `${Number(major || 0) + majorInc}`
           : (preparation.newBranchGroup === "minor") ? `${major}.${Number(minor || 0) + minorInc}`
@@ -190,7 +190,7 @@ exports.handler = async (yargv) => {
       await vlm.delegate(`git checkout -b ${targetBranch}`);
       commit.newBranch = targetBranch;
       commit.lernaConfig = JSON.parse(JSON.stringify(lernaConfig));
-      commit.lernaConfig.command.version.bump = isRelease ? newBranchGroup : `pre${newBranchGroup}`;
+      commit.lernaConfig.command.version.bump = isRelease ? newBranchGroup : `prerelease`;
       commit.lernaConfig.command.version.preid = isRelease ? "" : "prerelease";
       commit.lernaConfig.command.version.allowBranch = targetBranch;
       vlm.shell.ShellString(JSON.stringify(commit.lernaConfig, null, 2)).to("./lerna.json");

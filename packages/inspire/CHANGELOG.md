@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.1](https://github.com/valaatech/vault/compare/v0.33.0...v0.34.0-prerelease.1) (2019-02-06)
+
+
+### Bug Fixes
+
+* better support for virtual dom (animationFrame) ([afcd22e](https://github.com/valaatech/vault/commit/afcd22e))
+* instanceof URI check, jsdom creation to perspire.js ([f347ecb](https://github.com/valaatech/vault/commit/f347ecb))
+* valma logging and pool bugs, text changes, toolset command bugs ([2485d9f](https://github.com/valaatech/vault/commit/2485d9f))
+* window set to jsdom.window ([e7f38f2](https://github.com/valaatech/vault/commit/e7f38f2))
+
+
+
+
+
 # [0.34.0-prerelease.0](https://github.com/valaatech/vault/compare/v0.33.0...v0.34.0-prerelease.0) (2019-02-03)
 
 **Note:** Version bump only for package @valos/inspire

@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.1](https://github.com/valaatech/vault/compare/v0.33.0...v0.34.0-prerelease.1) (2019-02-06)
+
+
+### Bug Fixes
+
+* async carryover issue in databaseops ([52728ce](https://github.com/valaatech/vault/commit/52728ce))
+* better support for virtual dom (animationFrame) ([afcd22e](https://github.com/valaatech/vault/commit/afcd22e))
+* demonstrate working revela.json preload on chrome with 'crossorigin' ([29db164](https://github.com/valaatech/vault/commit/29db164))
+* instanceof URI check, jsdom creation to perspire.js ([f347ecb](https://github.com/valaatech/vault/commit/f347ecb))
+* missing try-catch, blob -> bvob revelation transform ([b8a5087](https://github.com/valaatech/vault/commit/b8a5087))
+* release branch name and lerna version bump mismatches ([496bd6c](https://github.com/valaatech/vault/commit/496bd6c))
+* valma logging and pool bugs, text changes, toolset command bugs ([2485d9f](https://github.com/valaatech/vault/commit/2485d9f))
+* window set to jsdom.window ([e7f38f2](https://github.com/valaatech/vault/commit/e7f38f2))
+
+
+
+
+
 # [0.34.0-prerelease.0](https://github.com/valaatech/vault/compare/v0.33.0...v0.34.0-prerelease.0) (2019-02-03)
 
 **Note:** Version bump only for package @valos/vault

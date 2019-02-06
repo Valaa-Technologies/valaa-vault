@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.3](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.2...v0.34.0-prerelease.3) (2019-02-06)
+
+
+### Bug Fixes
+
+* refresh-no-immediate failure, missing fetch in perspire ([27455b6](https://github.com/valaatech/vault/commit/27455b6))
+
+
+
+
+
 # [0.34.0-prerelease.2](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.1...v0.34.0-prerelease.2) (2019-02-06)
 
 

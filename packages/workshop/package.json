@@ -1,6 +1,6 @@
 {
   "name": "@valos/workshop",
-  "version": "0.34.0-prerelease.2",
+  "version": "0.34.0-prerelease.3",
   "valaa": {
     "type": "workshop",
     "domain": "valos"
@@ -13,9 +13,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@valos/toolset-authollery": "^0.34.0-prerelease.2",
-    "@valos/toolset-revealer": "^0.34.0-prerelease.2",
-    "@valos/toolset-vault": "^0.34.0-prerelease.2",
-    "@valos/toolset-vault-operations": "^0.34.0-prerelease.2"
+    "@valos/toolset-authollery": "^0.34.0-prerelease.3",
+    "@valos/toolset-revealer": "^0.34.0-prerelease.3",
+    "@valos/toolset-vault": "^0.34.0-prerelease.3",
+    "@valos/toolset-vault-operations": "^0.34.0-prerelease.3"
   }
 }

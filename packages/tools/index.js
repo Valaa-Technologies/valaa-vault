@@ -2,7 +2,9 @@
 
 import * as mediaDecoders from "./mediaDecoders";
 
-export const Valaa = require("./Valaa").default;
+export const Valaa = require("~/gateway-api/Valaa").default;
+export const inBrowser = require("~/gateway-api/inBrowser").default;
+export const getGlobal = require("~/gateway-api/getGlobal").default;
 
 export default Valaa.exportPlugin({ name: "@valos/tools", mediaDecoders });
 
@@ -24,8 +26,6 @@ export const deepExtend = require("./deepExtend").default;
 
 export const dumpify = require("./dumpify").default;
 
-export { default as getGlobal } from "./getGlobal";
-
 export const immutate = require("./immutate").default;
 
 export const invariantify = require("./invariantify").default;
@@ -35,8 +35,6 @@ export const invariantifyFunction = require("./invariantify").invariantifyFuncti
 export const invariantifyNumber = require("./invariantify").invariantifyNumber;
 export const invariantifyObject = require("./invariantify").invariantifyObject;
 export const invariantifyString = require("./invariantify").invariantifyString;
-
-export const inBrowser = require("./inBrowser").default;
 
 export const isPromise = require("./isPromise").default;
 export const isSymbol = require("./isSymbol").default;

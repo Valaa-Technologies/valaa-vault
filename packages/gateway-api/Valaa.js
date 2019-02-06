@@ -1,12 +1,12 @@
-const getGlobal = require("~/tools/getGlobal").default;
-const inBrowser = require("~/tools/inBrowser").default;
+const getGlobal = require("~/gateway-api/getGlobal").default;
+const inBrowser = require("~/gateway-api/inBrowser").default;
 
 /**
  * The global Valaa namespace object is a shared by protected namespace
  * for cross-communication between ValOS fabric, gateway and ValaaSpace
  * resources.
  * It is available in fabric side via preferred directive:
- * `import Valaa from "@valos/tools/Valaa";`
+ * `const Valaa = require("@valos/gateway-api/Valaa");`
  * or directly by `window.Valaa` or `global.Valaa` (will not be
  * deprecated, but discouraged).
  * It is available in ValaaSpace side as the global Valaa object.
@@ -26,8 +26,8 @@ export default (getGlobal().Valaa || (getGlobal().Valaa = {
    * 1. the Valaa application gateway itself, introducing schemas,
    *    schemes, decoders etc.
    * 2. the Valaa fabric, ie. javascript-side code, libraries and
-   *    for other plugins by using import Valaa directive (preferred) or
-   *    directly through global.Valaa or window.Valaa
+   *    for other plugins by using Valaa require directive (preferred)
+   *    or directly through global.Valaa or window.Valaa
    * 3. the ValaaSpace applications, via its global.Valaa
    *
    * Plugin loading has three phases.

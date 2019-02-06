@@ -1,9 +1,9 @@
 // @flow
 
-import Valaa from "~/tools/Valaa";
-
 import ContentAPI from "./ScriptContentAPI";
 import * as mediaDecoders from "./mediaDecoders";
+
+const Valaa = require("~/gateway-api/Valaa").default;
 
 export default Valaa.exportPlugin({ name: "@valos/script", ContentAPI, mediaDecoders });
 

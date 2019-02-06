@@ -1,7 +1,7 @@
 // @flow
 
 const path = require("path");
-const inBrowser = require("~/tools/inBrowser").default;
+const inBrowser = require("~/gateway-api/inBrowser").default;
 
 export default function resolveRevelationSpreaderImport (reference, siteRoot,
   revelationRoot, currentRevelationPath

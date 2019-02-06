@@ -1,8 +1,8 @@
 // import StackTrace from "stacktrace-js";
 import beaumpify from "~/tools/beaumpify";
 import { invariantifyObject } from "~/tools/invariantify";
-import inBrowser from "~/tools/inBrowser";
 
+const inBrowser = require("~/gateway-api/inBrowser").default;
 const isSymbol = require("~/tools/isSymbol").default;
 
 if (typeof window !== "undefined") window.beaumpify = beaumpify;

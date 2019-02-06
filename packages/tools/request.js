@@ -1,7 +1,6 @@
-import wrapError from "~/tools/wrapError";
-import inBrowser from "~/tools/inBrowser";
-import getGlobal from "~/tools/getGlobal";
-import thenChainEagerly from "~/tools/thenChainEagerly";
+// @flow
+
+import { inBrowser, getGlobal, thenChainEagerly, wrapError } from "~/tools/wrapError";
 
 export default function (opts) { return asyncRequest(opts); }
 

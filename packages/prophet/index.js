@@ -2,10 +2,10 @@
 
 /* eslint-disable */
 
-import Valaa from "~/tools/Valaa";
-
 import ContentAPI from "./ProphetContentAPI";
 import schemeModules from "./schemeModules";
+
+const Valaa = require("~/gateway-api/Valaa").default;
 
 export default Valaa.exportPlugin({ name: "@valos/prophet", ContentAPI, schemeModules });
 

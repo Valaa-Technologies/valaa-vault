@@ -1,11 +1,9 @@
-// @flow
-
-export default function inBrowser () {
+exports.default = function inBrowser () {
   return ((typeof global === "undefined")
           || Object.prototype.toString.call(global.process) !== "[object process]")
-      && !inJest();
-}
+      && !_inJest();
+};
 
-export function inJest () {
+function _inJest () {
   return (typeof window !== "undefined") && window.afterAll;
 }

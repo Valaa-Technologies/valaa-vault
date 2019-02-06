@@ -1,7 +1,8 @@
 // @flow
 
-import Valaa from "~/tools/Valaa";
 import ContentAPI from "./EngineContentAPI";
+
+const Valaa = require("~/gateway-api/Valaa").default;
 
 export default Valaa.exportPlugin({ name: "@valos/engine", ContentAPI });
 

@@ -1,8 +1,8 @@
 // @flow
 
-import Valaa from "~/tools/Valaa";
-
 import ContentAPI from "./RAEMContentAPI";
+
+const Valaa = require("~/gateway-api/Valaa").default;
 
 export default Valaa.exportPlugin({ name: "@valos/raem", ContentAPI });
 

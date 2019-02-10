@@ -222,13 +222,13 @@ export default class InspireGateway extends LogEventGenerator {
       rootScope.Valaa.identity = engine.getIdentityManager();
 
       const name = `${viewConfig.name} View`;
-      this._views[viewName] = thenChainEagerly(createView({ engine, name }), [
+      this._views[viewName] = thenChainEagerly(createView({ gateway: this, engine, name }), [
         view => view.attach(viewConfig),
         attachedView => {
           attachedView.rootScope = rootScope;
           this._views[viewName] = attachedView;
           Object.values(this._attachedPlugins)
-              .forEach(plugin => this._notifyPluginViewAttached(plugin, viewName, attachedView));
+              .forEach(plugin => this._notifyPluginViewAttached(plugin, attachedView, viewName));
           return attachedView;
         },
       ]);
@@ -454,7 +454,7 @@ export default class InspireGateway extends LogEventGenerator {
     }
     Object.keys(this._views || {}).forEach(viewName => {
       if (!isPromise[this._views[viewName]]) {
-        this._notifyPluginViewAttached(plugin, viewName, this._views[viewName]);
+        this._notifyPluginViewAttached(plugin, this._views[viewName], viewName);
       }
     });
   }
@@ -464,9 +464,9 @@ export default class InspireGateway extends LogEventGenerator {
     plugin.onGatewayInitialized(this);
   }
 
-  _notifyPluginViewAttached (plugin: Object, viewName: string, view: InspireView) {
+  _notifyPluginViewAttached (plugin: Object, view: InspireView, viewName: string) {
     if (!plugin.onViewAttached) return;
-    plugin.onViewAttached(viewName, view);
+    plugin.onViewAttached(view, viewName);
   }
 
   async _narratePrologues (prologueRevelation: Object) {

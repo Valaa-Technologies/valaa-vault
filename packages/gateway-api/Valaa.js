@@ -1,12 +1,12 @@
-const getGlobal = require("~/gateway-api/getGlobal").default;
-const inBrowser = require("~/gateway-api/inBrowser").default;
+import getGlobal from "~/gateway-api/getGlobal";
+import inBrowser from "~/gateway-api/inBrowser";
 
 /**
  * The global Valaa namespace object is a shared by protected namespace
  * for cross-communication between ValOS fabric, gateway and ValaaSpace
  * resources.
  * It is available in fabric side via preferred directive:
- * `const Valaa = require("@valos/gateway-api/Valaa");`
+ * `const Valaa = require("@valos/gateway-api/Valaa").default;`
  * or directly by `window.Valaa` or `global.Valaa` (will not be
  * deprecated, but discouraged).
  * It is available in ValaaSpace side as the global Valaa object.

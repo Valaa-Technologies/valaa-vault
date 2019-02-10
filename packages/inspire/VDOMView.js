@@ -12,6 +12,11 @@ import ReactRoot from "~/inspire/ui/ReactRoot";
  * This class is the view entry point
  */
 export default class VDOMView extends Cog {
+  constructor (options) {
+    super(options);
+    this._gateway = options.gateway;
+  }
+
   async attach ({ name, rootLensURI }: Object) {
     try {
       if (!rootLensURI) {

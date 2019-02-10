@@ -1468,7 +1468,7 @@ function _locateDependedPools (initialPoolBase, poolDirectories) {
       const packageJsonPath = this.path.join(pathBase, "package.json");
       if (candidate.match(/^node_modules/) && shell.test("-f", packageJsonPath)) {
         this.warn(`node_modules missing for ${packageJsonPath}!`,
-            "\nSome dependent commands will likely be missing.",
+            "\n\tSome dependent commands will likely be missing.",
             `Run '${this.theme.executable("yarn install")
                 }' to make dependent commands available.\n`);
       }

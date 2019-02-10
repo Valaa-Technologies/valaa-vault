@@ -10,7 +10,7 @@ and immediately available.
 Use --import to make an exported script available for local editing and
 development.`;
 
-exports.disabled = (yargs) => !yargs.vlm.packageConfig;
+exports.disabled = (yargs) => !yargs.vlm.packageConfig && "No package.json found";
 exports.builder = (yargs) => yargs.options({
   filename: {
     type: "string",
@@ -97,12 +97,12 @@ exports.handler = async (yargv) => {
       if (!yargv.import) {
         vlm.shell.ShellString(_createSource(command, yargv)).to(scriptPath);
       } else {
-        const resolvedPath = await vlm.invoke(command, ["-R"]);
-        if ((typeof resolvedPath !== "string") || !vlm.shell.test("-f", resolvedPath)) {
+        const targetPath = await vlm.invoke(command, ["-T"]);
+        if ((typeof targetPath !== "string") || !vlm.shell.test("-f", targetPath)) {
           throw new Error(`Could not find command '${command}' source file for importing`);
         }
-        vlm.info("Importing existing script source:", vlm.theme.path(resolvedPath));
-        vlm.shell.cp(resolvedPath, scriptPath);
+        vlm.info("Importing existing script source:", vlm.theme.path(targetPath));
+        vlm.shell.cp(targetPath, scriptPath);
       }
     } else {
       vlm.warn(`Not overwriting already existing script:`, vlm.theme.path(scriptPath));

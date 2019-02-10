@@ -1,5 +1,5 @@
 exports.command = ".configure/.domain/authollery";
-exports.describe = "Configure a valaa repository to be part of the authollery domain";
+exports.describe = "Configure the 'authollery' domain for this workspace";
 exports.introduction = `${exports.describe}.
 
 Authollery domain includes all toolsets which are meant to be
@@ -41,10 +41,13 @@ following strategy is used:
    a deployment for all dependents complete before their depending
    deployments are initiated.`;
 
+exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "domain") !== "authollery")
+    && `Workspace domain is not 'authollery' (is '${
+        yargs.vlm.getPackageConfig("valaa", "domain")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all 'authollery' domain configurations of this repository.",
+    description: "Reconfigure all 'authollery' domain config of this workspace.",
   },
 });
 

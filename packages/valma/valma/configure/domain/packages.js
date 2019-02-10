@@ -1,14 +1,16 @@
 exports.command = ".configure/.domain/packages";
-exports.describe = "Configure a Valaa repository to be part of the packages utility domain";
+exports.describe = "Configure the 'packages' domain for this workspace";
 exports.introduction = `${exports.describe}.
 
 Packages utility domain provides tools for assembling and publishing
 packages to npm repositories.`;
 
+exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "domain") !== "packages")
+    && `Workspace domain is not 'packages' (is '${yargs.vlm.getPackageConfig("valaa", "domain")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all 'packages' domain configurations of this repository.",
+    description: "Reconfigure all 'packages' domain config of this workspace.",
   },
 });
 

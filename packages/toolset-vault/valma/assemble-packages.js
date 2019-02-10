@@ -34,7 +34,7 @@ This will make the package assemblies available in a local yalc
 how to use such packages by other depending packages. Reassembling
 and pushing those changes through yalc to dependents can be done with:
 
-'vlm assemble-packages --reassemble --post-execute="yalc push"'
+'vlm assemble-packages --reassemble --post-execute="cd $ASSEMBLY_TARGET && yalc push --no-sig"'
 
 This allows packages to be developed iteratively locally while having
 other packages depend and be tested against them.
@@ -60,8 +60,8 @@ exports.builder = (yargs) => yargs.options({
   },
   "only-pending": {
     type: "boolean",
-    description: `Limit the selection to packages currently existing in the target directory.${
-        ""} Causes --overwrite`,
+    description: `Limit the selection to packages currently existing in the target directory.
+Causes --overwrite`,
     causes: ["overwrite"],
   },
   "allow-unchanged": {
@@ -80,13 +80,29 @@ exports.builder = (yargs) => yargs.options({
   },
   reassemble: {
     type: "boolean",
-    description: `Reassembles packages pending publication.${
-        ""} Causes --only-pending --overwrite --no-versioning.`,
+    description: `Reassembles packages pending publication.
+Causes --only-pending --overwrite --no-versioning.`,
     causes: ["only-pending", "overwrite", "no-versioning"],
   },
   "post-execute": {
-    type: "string",
-    description: "The command to execute inside each built package after the assembly",
+    type: "string", array: true,
+    description: `A command to execute after the assembly of each package.
+Replaces $ASSEMBLY_TARGET and $PACKAGE_NAME literals with their appropriate values.`,
+  },
+  "yalc-push": {
+    type: "boolean",
+    description: `Push assembled libraries to local yalc repository after assembly.
+Causes --post-execute="cd $ASSEMBLY_TARGET && yalc push --no-sig"`,
+    causes: [`post-execute=cd $ASSEMBLY_TARGET && yalc push --no-sig`],
+  },
+  "yalc-link": {
+    type: "boolean",
+    description: `Links assembled libraries from local yalc repository after assembly.
+Note: provide --yalc-push before this manually as causes are not transitive yet.
+Causes --post-execute="yalc link $PACKAGE_NAME"`,
+    // FIXME(iridian, 2019-02): yalc-link should cause yalc-push but
+    // causes are (quite inappropriately and surprisingly) not transitive yet.
+    causes: [`post-execute=yalc link $PACKAGE_NAME`],
   },
 });
 
@@ -227,16 +243,22 @@ exports.handler = async (yargv) => {
     }
   }
 
-  if (yargv.postExecute) {
+  if ((yargv.postExecute || []).length) {
     selections.forEach(({ name, targetDirectory, assembled }) => {
       if (!assembled && yargv.assemble) {
-        vlm.info(`Skipping post-execute '${vlm.theme.executable(yargv.postExecute)}' for '${
+        vlm.info(`Skipping post-execute(s) '${
+            yargv.postExecute.map(exec => vlm.theme.executable(exec)).join("', '")}' for '${
           vlm.theme.package(name)}'`,
           `assembly was requested but not successful for this package`);
       } else {
-        vlm.info(`${vlm.theme.argument("--post-execute")} requested:`,
-            `${vlm.theme.path(targetDirectory)}$`, vlm.theme.executable(yargv.postExecute));
-        vlm.shell.exec(`cd ${targetDirectory} && ${yargv.postExecute}`);
+        for (const postExecute of yargv.postExecute) {
+          const command = postExecute
+              .replace(/\$ASSEMBLY_TARGET/g, targetDirectory)
+              .replace(/\$PACKAGE_NAME/g, name);
+          vlm.info(`${vlm.theme.argument("--post-execute")} requested:`,
+              `${vlm.theme.path(targetDirectory)}$`, vlm.theme.executable(command));
+          vlm.shell.exec(command);
+        }
       }
     });
   }

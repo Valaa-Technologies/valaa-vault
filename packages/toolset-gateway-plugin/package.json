@@ -14,6 +14,6 @@
     "access": "public"
   },
   "bin": {
-    ".valma-configure_.type_.gateway-plugin_@valos_toolset-gateway-plugin": "valma/configure__worker__toolset-gateway-plugin.js"
+    ".valma-configure_.type_.worker_@valos_toolset-gateway-plugin": "valma/configure__worker__toolset-gateway-plugin.js"
   }
 }

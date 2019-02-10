@@ -29,7 +29,10 @@ as such toolsets are not guaranteed to be always available.`;
 
 exports.disabled = (yargs) => {
   const valaa = yargs.vlm.getPackageConfig("valaa");
-  return !valaa || !valaa.type || !valaa.domain || !yargs.vlm.getToolsetsConfig();
+  return !valaa ? "No package.json valaa stanza found"
+      : !valaa.type ? "No package.json valaa.type stanza found"
+      : !valaa.domain ? "No package.json valaa.domain stanza found"
+      : !yargs.vlm.getToolsetsConfig() && "No toolsets.json found";
 };
 exports.builder = (yargs) => {
   const toolsetsConfig = yargs.vlm.getToolsetsConfig();
@@ -48,7 +51,7 @@ exports.builder = (yargs) => {
   return yargs.options({
     reconfigure: {
       alias: "r", type: "boolean",
-      description: "Reconfigure all 'vault' type configurations of this repository.",
+      description: "Reconfigure all 'vault' type config of this workspace.",
     },
     toolsets: {
       type: "string", default: usedToolsets, choices: allToolsets,

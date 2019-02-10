@@ -14,11 +14,12 @@ Valma init has following interactive phases:
 4. Selection of in-use toolsets from available toolsets via 'vlm .configure/.select-toolsets'
 5. Configuration of in-use toolsets and tools via 'vlm configure'`;
 
-exports.disabled = (yargs) => yargs.vlm.getToolsetsConfig() && "toolsets.json exists";
+exports.disabled = (yargs) => yargs.vlm.getToolsetsConfig()
+    && "Already initialized (toolsets.json exists)";
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all configurations of this repository.",
+    description: "Reconfigure all config of this workspace.",
   },
 });
 

@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/worker";
-exports.describe = "Configure a ValOS worker repository";
+exports.describe = "Configure a 'worker' workspace";
 exports.introduction = `${exports.describe}.
 
 A worker repository is used to launch and manage a running process.
@@ -25,10 +25,12 @@ A worker repository is fully agnostic to version control solutions:
 
 Will add '@valos/toolset-worker' as devDependency.`;
 
+exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "worker")
+    && `Workspace is not a 'worker' (is '${yargs.vlm.getPackageConfig("valaa", "type")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all 'worker' type configurations of this repository.",
+    description: "Reconfigure all 'worker' type config of this workspace.",
   },
 });
 

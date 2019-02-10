@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/authollery";
-exports.describe = "Configure a Valaa authollery repository";
+exports.describe = "Configure an 'authollery' workspace";
 exports.introduction = `${exports.describe}.
 
 Authollery is a portmanteau of AUTHority contrOLLEr repositoRY.
@@ -11,10 +11,12 @@ Autholleries rely heavily on various toolsets to get their job done.
 
 Will add '@valos/toolset-authollery' as devDependency.`;
 
+exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "authollery")
+    && `Workspace is not an 'authollery' (is '${yargs.vlm.getPackageConfig("valaa", "type")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all 'authollery' type configurations of this repository.",
+    description: "Reconfigure all 'authollery' type config of this workspace.",
   },
 });
 

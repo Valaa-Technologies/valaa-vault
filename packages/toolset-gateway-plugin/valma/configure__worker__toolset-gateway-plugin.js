@@ -1,18 +1,19 @@
 exports.vlm = { toolset: "@valos/toolset-gateway-plugin" };
 exports.command = ".configure/.type/.worker/@valos/toolset-gateway-plugin";
-exports.describe = "Configure the toolset 'toolset-gateway-plugin' for the current repository";
+exports.describe = "Configure an in-use 'toolset-gateway-plugin' for a worker workspace";
 exports.introduction = `${exports.describe}.
 
 `;
 
-exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse");
+exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
+    && "Can't configure 'toolset-gateway-plugin': not inUse or toolset config missing";
 exports.builder = (yargs) => {
   const toolsetConfig = yargs.vlm.getToolsetConfig(yargs.vlm.toolset) || {};
   console.log("current toolset config", toolsetConfig);
   return yargs.options({
     reconfigure: {
       alias: "r", type: "boolean",
-      description: "Reconfigure 'toolset-gateway-plugin' configurations of this repository.",
+      description: "Reconfigure 'toolset-gateway-plugin' config of this workspace.",
     },
   });
 };

@@ -6,6 +6,7 @@ Type determines the localized role and structure of this repository.
 Domain defines the context and the overall purpose of this repository.
 Both affect the available toolsets for the repository.`;
 
+exports.disabled = (yargs) => yargs.vlm.getPackageConfig("valaa") && "Already configured";
 exports.builder = (yargs) => {
   const vlm = yargs.vlm;
   const valaa = vlm.packageConfig.valaa || {};

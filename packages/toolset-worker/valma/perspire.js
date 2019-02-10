@@ -4,7 +4,7 @@ exports.vlm = { toolset: "@valos/toolset-worker" };
 exports.command = "perspire [revelationPath] [additionalRevelationPaths..]";
 exports.describe = "Launch headless worker for performing virtual DOM ValOS computation";
 
-exports.disabled = (yargs) => !yargs.vlm.packageConfig;
+exports.disabled = (yargs) => !yargs.vlm.packageConfig && "No package.json found";
 exports.builder = (yargs) => yargs.option({
   output: {
     type: "string",

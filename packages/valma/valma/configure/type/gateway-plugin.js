@@ -1,13 +1,15 @@
 exports.command = ".configure/.type/gateway-plugin";
-exports.describe = "Configure a ValOS gateway plugin repository";
+exports.describe = "Configure a 'gateway-plugin' workspace";
 exports.introduction = `${exports.describe}.
 
 Will add '@valos/toolset-gateway-plugin' as devDependency.`;
 
+exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "gateway-plugin")
+    && `Workspace is not a 'gateway-plugin' (is '${yargs.vlm.getPackageConfig("valaa", "type")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all 'gateway-plugin' type configurations of this repository.",
+    description: "Reconfigure all 'gateway-plugin' type config of this workspace.",
   },
 });
 

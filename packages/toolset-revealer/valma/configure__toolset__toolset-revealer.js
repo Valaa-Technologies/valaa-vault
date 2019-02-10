@@ -1,6 +1,6 @@
 exports.vlm = { toolset: "@valos/toolset-revealer" };
 exports.command = ".configure/.toolset/@valos/toolset-revealer";
-exports.describe = "Configure this repository for webpack revelation bundling with toolset-revealer";
+exports.describe = "Configure 'toolset-revealer' webpack revelation bundling for this workspace";
 exports.introduction = `${exports.describe}.
 
 Adds valma command 'rouse-revealer'.
@@ -12,11 +12,12 @@ and any customizations in the root webpack.config.js itself.`;
 
 // Example template which displays the command name itself and package name where it is ran
 // Only enabled inside package
-exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse");
+exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
+    && "Can't configure 'toolset-revealer': not inUse or toolset config missing";
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure 'toolset-revealer' configurations of this repository.",
+    description: "Reconfigure 'toolset-revealer' config of this workspace.",
   },
 });
 

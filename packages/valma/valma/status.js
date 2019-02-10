@@ -7,7 +7,7 @@ If toolsetGlob is specified the status is limited to status scripts
 matching '.status/{toolsetGlob}*', otherwise all status scripts by
 '.status/**/*' are used.`;
 
-exports.disabled = (yargs) => !yargs.vlm.packageConfig;
+exports.disabled = (yargs) => !yargs.vlm.packageConfig && "No package.json found";
 exports.builder = (yargs) => yargs.options({
   echos: {
     type: "boolean", default: false,

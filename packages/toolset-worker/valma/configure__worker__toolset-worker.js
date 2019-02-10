@@ -1,18 +1,19 @@
 exports.vlm = { toolset: "@valos/toolset-worker" };
 exports.command = ".configure/.type/.worker/@valos/toolset-worker";
-exports.describe = "Configure the toolset 'toolset-worker' for the current repository";
+exports.describe = "Configure 'toolset-worker' for a worker repository";
 exports.introduction = `${exports.describe}.
 
 This script makes the toolset 'toolset-worker' available for
 grabbing by repositories with valaa type 'worker'.`;
 
-exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse");
+exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "worker")
+    && `Workspace is not a worker (is ${yargs.vlm.getPackageConfig("valaa", "type")})`;
 exports.builder = (yargs) => {
   const toolsetConfig = yargs.vlm.getToolsetConfig(yargs.vlm.toolset) || {};
   return yargs.options({
     reconfigure: {
       alias: "r", type: "boolean",
-      description: "Reconfigure 'toolset-worker' configurations of this repository.",
+      description: "Reconfigure 'toolset-worker' config of this workspace.",
     },
     rootPartitionURI: {
       type: "string", default: toolsetConfig.rootPartitionURI || undefined,
@@ -20,7 +21,8 @@ exports.builder = (yargs) => {
       description: "The partition URI perspire gateway loads and renders first",
     },
     plugin: {
-      type: "string", array: true, default: toolsetConfig.plugins || [],
+      type: "string", array: true,
+      default: (((toolsetConfig.commands || {}).perspire || {}).options || {}).plugin || [],
       description: "List of plugin id's which are require'd before gateway creation.",
     },
   });
@@ -41,13 +43,13 @@ exports.handler = async (yargv) => {
 
   const toolsetConfigUpdate = { ...vlm.getToolsetConfig(vlm.toolset) };
   toolsetConfigUpdate.rootPartitionURI = yargv.rootPartitionURI;
-  toolsetConfigUpdate.plugins = yargv.plugin;
   if (yargv.reconfigure || !(toolsetConfigUpdate.commands || {}).perspire) {
     toolsetConfigUpdate.commands = toolsetConfigUpdate.commands || {};
     toolsetConfigUpdate.commands.perspire = {
       options: {
         keepalive: 5,
         output: "dist/perspire/vdomSnapshot.html",
+        plugin: yargv.plugin,
       }
     };
   }

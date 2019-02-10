@@ -1,9 +1,11 @@
 #!/usr/bin/env vlm
 
 exports.command = ".status/10-header";
-exports.describe = "Display the generic information header for the current repository";
+exports.describe = "Display the generic information header for current workspace";
 exports.introduction = `${exports.describe}.`;
 
+exports.disabled = (yargs) => !yargs.vlm.getPackageConfig("valaa", "type")
+    && `No package.json valaa.type stanza found`;
 exports.builder = (yargs) => yargs;
 
 exports.handler = (yargv) => {

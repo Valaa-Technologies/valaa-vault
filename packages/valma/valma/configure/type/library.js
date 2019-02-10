@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/library";
-exports.describe = "Configure a Valaa library repository";
+exports.describe = "Configure a 'library' workspace";
 exports.introduction = `${exports.describe}.
 
 Libraries are repositories which contain arbitrary ES5 source code and
@@ -9,10 +9,12 @@ While a library can provide valma commands it is not a toolset. Thus it
 can't have repository specific configurations or release builds.
 Create or configure a toolset for building releases from libraries.`;
 
+exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "library")
+    && `Workspace is not a 'library' (is '${yargs.vlm.getPackageConfig("valaa", "type")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all 'library' type configurations of this repository.",
+    description: "Reconfigure all 'library' type config of this workspace.",
   },
 });
 

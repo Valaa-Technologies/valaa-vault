@@ -185,11 +185,11 @@ const _vlm = {
   // forward to node require. Resolve non-absolute paths based on cwd.
   require: (() => {
     const ret = function vlmRequire (path_) {
-      const resolvedPath = require.resolve(path_, { paths: [this.cwd] });
-      if (!resolvedPath) {
+      const targetPath = require.resolve(path_, { paths: [this.cwd] });
+      if (!targetPath) {
         throw new Error(`Could not require.resolve path "${path_}" from cwd "${this.cwd}"`);
       }
-      return require(resolvedPath);
+      return require(targetPath);
     };
     ret.cache = require.cache;
     ret.resolve = (request, options) => require.resolve(request, { paths: [_vlm.cwd], ...options });
@@ -266,7 +266,7 @@ const _vlm = {
     return this;
   },
   result (...rest) {
-    const outputs = this.render(_vlm.vargv.results, ...rest.map(result =>
+    const outputs = this.render(_vlm.vargv.output, ...rest.map(result =>
     // If the result has a heading, wrap the result inside an object so that the heading will be
     // rendered.
         ((typeof result === "object") && ((result || {})["..."] || {}).heading
@@ -600,22 +600,22 @@ module.exports = {
           type: "boolean", global: false, default: true,
           description: "Show expound messages",
         },
-        results: {
+        output: {
           group: "Valma root options:",
           type: "string", global: false, default: "markdown-cli", choices: Object.keys(_renderers),
-          description: "Show result value in output",
+          description: "Result output format",
         },
         json: {
           group: "Valma root options:",
           type: "boolean", global: false,
-          description: "Alias for --results=json for rendering result as JSON into standard output",
-          causes: "results=json",
+          description: "Alias for --output=json for rendering result as JSON into standard output",
+          causes: "output=json",
         },
         markdown: {
           group: "Valma root options:",
           type: "boolean", global: false,
-          description: "Alias for --results=markdown for rendering result as raw unstyled markdown",
-          causes: "results=markdown",
+          description: "Alias for --output=markdown for rendering result as raw unstyled markdown",
+          causes: "output=markdown",
         },
         interactive: {
           group: "Valma root options:",
@@ -716,6 +716,11 @@ function __addUniversalOptions (vargs_,
           group: "Universal options:", type: "boolean", global, hidden,
           description: "Show the command (U)sage column",
         },
+        S: {
+          alias: theme.argument("show-status"),
+          group: "Universal options:", type: "boolean", global, hidden,
+          description: "Show the command (S)tatus (description, disable reason or some state)",
+        },
         D: {
           alias: theme.argument("show-description"),
           group: "Universal options:", type: "boolean", global, hidden,
@@ -736,25 +741,25 @@ function __addUniversalOptions (vargs_,
           group: "Universal options:", type: "boolean", global, hidden,
           description: "Show the command source p(O)ol column",
         },
-        F: {
-          alias: theme.argument("show-file"),
+        L: {
+          alias: theme.argument("show-link"),
           group: "Universal options:", type: "boolean", global, hidden,
-          description: "Show the command (F)ile path column",
+          description: "Show the command (L)ink path column",
         },
-        R: {
-          alias: theme.argument("show-resolved"),
+        T: {
+          alias: theme.argument("show-target"),
           group: "Universal options:", type: "boolean", global, hidden,
-          description: "Show the command symlink-(R)esolved path column",
+          description: "Show the command (T)arget path column",
         },
         I: {
           alias: theme.argument("show-introduction"),
           group: "Universal options:", type: "boolean", global, hidden,
           description: "Output the full (I)ntroduction of the command",
         },
-        S: {
-          alias: theme.argument("show-source"),
+        C: {
+          alias: theme.argument("show-code"),
           group: "Universal options:", type: "boolean", global, hidden,
-          description: "Output the script (S)ource code of the command",
+          description: "Output the command script source (C)ode",
         },
       }));
 }
@@ -1303,6 +1308,10 @@ async function _invoke (commandSelector, argv) {
             .info(`Skipping disabled command '${this.theme.command(commandName)}'`,
                 `during wildcard invokation (${activeCommand.disabled})`);
         continue;
+      } else if (activeCommand.broken) {
+        this.warn(`Cannot invoke a broken command '${commandName}' even explicitly`,
+            `(${activeCommand.broken})`);
+        continue;
       } else {
         if (activeCommand.disabled) {
           this.warn(`Invoking a disabled command '${commandName}' explicitly`,
@@ -1509,8 +1518,8 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
       const normalizedName = __underToSlash(file.name);
       const matches = minimatch(normalizedName, commandGlob, { dot: this.vargv.matchAll });
       this.ifVerbose(3)
-          .babble(`evaluating file ${file.name}`, "matches:", matches, "vs glob:", commandGlob,
-              ", dir:", __isDirectory(file), ", normalizedName:", normalizedName);
+          .expound(`     evaluating file ${file.name}`, "matches:", matches, "vs glob:",
+              commandGlob, ", dir:", __isDirectory(file), ", normalizedName:", normalizedName);
       if (!matches) {
         pool.stats.nonmatching = (pool.stats.nonmatching || 0) + 1;
         return;
@@ -1527,12 +1536,13 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
       if (!poolCommand.module && shell.test("-e", poolCommand.linkPath)) {
         try {
           poolCommand.module = require(poolCommand.linkPath);
-          this.ifVerbose(3)
-              .babble(`    command ${commandName} module found at path`, poolCommand.linkPath);
+          this.ifVerbose(2)
+              .babble(`matching command '${commandName}' module found at path`, poolCommand.linkPath);
         } catch (error) {
           if (!this.isCompleting && !introspect && !this.vargv.dryRun) throw error;
           poolCommand.module = false;
-          poolCommand.requireError = error;
+          poolCommand.disabled = poolCommand.broken = error;
+          poolCommand.explanation = `module require threw: ${String(error)}`;
           this.ifVerbose(this.vargv.dryRun ? 0 : 1)
               .exception(String(error),
                   `    while trying to require command ${commandName} module at path`,
@@ -1545,8 +1555,11 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
           ret[commandName] = { ...poolCommand };
           return;
         }
-        throw new Error(`invalid command '${commandName}' script file '${poolCommand.linkPath
-            }': can't open for reading or exports.command, ...describe or ...handler missing`);
+        throw new Error(`invalid command '${commandName}' (via link '${poolCommand.linkPath}'): ${
+            !module ? String(poolCommand.broken || "can't open target for reading")
+            : !module.command ? "script exports.command is falsy"
+            : !module.describe ? "script exports.describe is falsy"
+            : "script exports.handler is falsy"}`);
       }
 
       const subVargs = __createVargs(argv);
@@ -1560,11 +1573,11 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
       const activeCommand = {
         ...poolCommand,
         vlm: subVargs.vlm,
-        disabled: (module.disabled
-            && ((typeof module.disabled !== "function")
-                    ? `exports.disabled == ${String(module.disabled)}`
-                : (module.disabled(subVargs)
-                    && `exports.disabled => ${String(module.disabled(subVargs))}`))),
+        disabled: poolCommand.disabled || (module.disabled && (
+            (typeof module.disabled !== "function")
+                ? `exports.disabled == ${String(module.disabled)}`
+            : (module.disabled(subVargs)
+                && `exports.disabled => ${String(module.disabled(subVargs))}`))),
       };
       ret[commandName] = activeCommand;
 
@@ -1573,8 +1586,8 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
           if (!activeCommand.disabled) activeCommand.disabled = "exports.builder => falsy";
         }
       } catch (error) {
-        activeCommand.disabled = `exports.builder threw: ${error.message}`;
-        activeCommand.builderError = error;
+        activeCommand.disabled = activeCommand.broken = error;
+        activeCommand.explanation = `exports.builder threw: ${String(error)}`;
       }
       const exportedCommandName = module.command.match(/^([^ ]*)/)[1];
       if (exportedCommandName !== commandName) {
@@ -1590,6 +1603,11 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
       } else {
         pool.stats.disabled = (pool.stats.disabled || 0) + 1;
       }
+      this.ifVerbose(4)
+          .babble(`    with command info:`, {
+              ...activeCommand, vlm: "<hidden>", file: "<hidden>",
+              pool: { ...activeCommand.pool, listing: "<hidden>", commands: "<hidden>" },
+          });
     });
   }
   return ret;
@@ -1705,7 +1723,7 @@ function _determineIntrospection (module, selector, isWildcard, invokeEntry) {
   if (!selector && !ret.entryIntro) { // show default listing
     if (!this.vargv.dryRun) ret.defaultUsage = true;
     ret.show.usage = true;
-    ret.show.description = true;
+    ret.show.status = true;
   }
   ret.displayHeaders = isWildcard && !ret.identityPool;
   if (!ret.show.name && !ret.show.usage) {
@@ -1750,7 +1768,7 @@ function _introspectCommands (introspect, commands_, commandGlob, isWildcard_, m
     if (isWildcard_ && (!isEmpty || _vlm.vargv.pools || matchAll)) {
       poolIntro["..."].heading = {
         style: "bold",
-        text: `${this.path.join(pool.name, commandGlob)} ${
+        text: `'${this.path.join(pool.name, commandGlob)}' ${
             isEmpty ? "has no shown commands" : "commands:"} (${
               this.theme.info(Object.keys(pool.stats || {}).map(
                     s => `${s}: ${pool.stats[s]}`).join(", "))
@@ -1778,22 +1796,19 @@ function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcar
   const missingPackage = "<package_missing>";
   const poolIntro = { "...": {
     stats: pool.stats,
-    elementStyle: { if: [{ property: "disabled" }, "strikethrough"] },
+    elementStyle: { if: [{ property: "broken" }, "strikethrough"] },
     columns: [
       { name: { text: "command", style: "command" } },
       { usage: { style: "command" } },
-      { description: { transform: { defaultValue: { property: "disabledReason" } } } },
+      { status: { text: "status or description" } },
+      { description: { transform: { defaultValue: { property: "explanation" } } } },
       { package: { style: "package" } },
-      { version: {
-        style: "version", transform: { defaultValue: { property: "disabledReason" } }
-      } },
-      { pool: { text: "source pool" } },
-      { file: { text: "script path", style: "path" } },
-      { resolved: {
-        text: "real file path", style: "path", transform: { defaultValue: missingFile }
-      } },
+      { version: { style: "version", transform: { defaultValue: { property: "explanation" } } } },
+      { pool: { text: "pool name" } },
+      { link: { text: "link path", style: "path" } },
+      { target: { text: "target path", style: "path", transform: { defaultValue: missingFile } } },
       { introduction: { oob: true, elementStyle: isWildcard && { prefix: "\n", suffix: "\n" } } },
-      { source: { oob: true, elementStyle: "cardinal" } },
+      { code: { oob: true, elementStyle: "cardinal" } },
     ].filter(c => introspect.show[Object.keys(c)[0]]),
   } };
   const trivialKey = Object.keys(introspect.show).length === 1 && Object.keys(introspect.show)[0];
@@ -1803,28 +1818,31 @@ function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcar
   .forEach(name => {
     const poolCommand = pool.commands[name];
     if (!poolCommand || !introedCommands[name]
-        || (poolCommand.disabled && isWildcard && !matchAll)) return;
+        || (introedCommands[name].disabled && isWildcard && !matchAll)) {
+      return;
+    }
     const info = __commandInfo(poolCommand.linkPath, pool.path);
     const module = (poolCommand.module !== undefined) ? (poolCommand.module || undefined)
-        : (poolCommand.module = info.resolvedPath && require(info.resolvedPath));
+        : (poolCommand.module = info.targetPath && require(info.targetPath));
     const rowData = {};
-    if (poolCommand.disabled) {
-      rowData.disabled = "SELF_DISABLED";
-      rowData.disabledReason = `Command self-disabled: ${poolCommand.disabled}`;
-    } else if (poolCommand.requireError) {
+    if (poolCommand.broken) {
       rowData.moduleMissing = true;
-      rowData.disabled = "REQUIRE_ERROR";
-      rowData.disabledReason = `Error during require: ${poolCommand.requireError}`;
+      rowData.broken = String(poolCommand.broken);
+      rowData.explanation = poolCommand.explanation
+          || `Error during require: ${poolCommand.broken}`;
     } else if (!poolCommand.module) {
       rowData.moduleMissing = true;
-      rowData.disabled = "FILE_MISSING";
-      rowData.disabledReason = `Command link broken: "${poolCommand.linkPath}"`;
+      rowData.broken = "FILE_MISSING";
+      rowData.explanation = `Command link broken: "${poolCommand.linkPath}"`;
     } else if (!module.command || !module.builder || !module.handler) {
       rowData.moduleMissing = true;
-      rowData.disabled = "NOT_A_COMMAND";
-      rowData.disabledReason = `Command module is missing required exports: '${
+      rowData.broken = "NOT_A_COMMAND";
+      rowData.explanation = `Command module is missing required exports: '${
         ["command", "builder", "handler"].filter(v => !module[v]).join("', '")
       }'`;
+    } else if (introedCommands[name].disabled) {
+      rowData.disabled = "DISABLED";
+      rowData.explanation = introedCommands[name].disabled;
     }
     if ((introedCommands[name] || { pool }).pool !== pool) {
       if (!showOverridden) return;
@@ -1833,25 +1851,30 @@ function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcar
     }
     const _addData = (property, data) => introspect.show[property] && (rowData[property] = data);
 
-    _addData("name", rowData.disabled ? `(${name})` : name);
-    _addData("usage", rowData.disabled ? `(${name} <${rowData.disabled}>)` : module.command);
-    _addData("description", module && module.describe);
+    _addData("name", rowData.disabled || rowData.broken ? `(${name})` : name);
+    _addData("usage", rowData.broken ? `(${name} <${rowData.broken}>)`
+        : rowData.disabled ? `(${module.command})`
+        : module.command);
+    _addData("status", module
+        && (rowData.disabled ? rowData.explanation : module.describe));
+    _addData("description", module
+        && (!rowData.disabled ? module.describe : `(${rowData.disabled}) ${module.describe}`));
     _addData("package", info.package);
     _addData("version", info.version || missingPackage);
     _addData("pool", info.poolPath);
-    _addData("file", info.linkPath);
-    _addData("resolved", info.resolvedPath || missingFile);
+    _addData("link", info.linkPath);
+    _addData("target", info.targetPath || missingFile);
     if (introspect.show.introduction) {
       rowData.introduction = !module ? null : (module.introduction || module.describe);
       if (rowData.introduction === null) {
         this.warn(`Cannot read command '${name}' script introduction from:`,
-            info.resolvedPath);
+            info.targetPath);
       }
     }
-    if (introspect.show.source) {
-      rowData.source = !module ? null : String(shell.head({ "-n": 1000000 }, info.resolvedPath));
-      if (rowData.source === null) {
-        this.warn(`Cannot read command '${name}' script source from:`, info.resolvedPath);
+    if (introspect.show.code) {
+      rowData.code = !module ? null : String(shell.head({ "-n": 1000000 }, info.targetPath));
+      if (rowData.code === null) {
+        this.warn(`Cannot read command '${name}' script source code from:`, info.targetPath);
       }
     }
     poolIntro[name] = trivialKey ? rowData[trivialKey] : rowData;
@@ -1862,8 +1885,8 @@ function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcar
 function __commandInfo (linkPath, poolPath) {
   const ret = { linkPath, poolPath };
   if (!linkPath || !shell.test("-e", linkPath)) return ret;
-  ret.resolvedPath = fs.realpathSync(linkPath);
-  let remaining = path.dirname(ret.resolvedPath);
+  ret.targetPath = fs.realpathSync(linkPath);
+  let remaining = path.dirname(ret.targetPath);
   while (remaining !== "/") {
     const packagePath = _vlm.path.join(remaining, "package.json");
     if (shell.test("-f", packagePath)) {

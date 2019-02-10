@@ -1,11 +1,13 @@
 exports.command = ".configure/.domain/kernel";
-exports.describe = "Configure a Valaa repository to be part of the kernel domain";
+exports.describe = "Configure the 'kernel' domain for this workspace";
 exports.introduction = `${exports.describe}.`;
 
+exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "domain") !== "kernel")
+    && `Workspace domain is not 'kernel' (is '${yargs.vlm.getPackageConfig("valaa", "domain")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all 'kernel' domain configurations of this repository.",
+    description: "Reconfigure all 'kernel' domain config of this workspace.",
   },
 });
 

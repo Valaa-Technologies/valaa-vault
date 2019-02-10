@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/vault";
-exports.describe = "Configure a Valaa Vault repository";
+exports.describe = "Configure a 'vault' workspace";
 exports.introduction = `${exports.describe}.
 
 A Valaa Vault is a monorepository containing many sub-packages. Its
@@ -10,13 +10,15 @@ Will add '@valos/toolset-vault' as devDependency.
 Will set package.json .workspaces stanza.
 `;
 
+exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "vault")
+    && `Workspace is not a 'vault' (is '${yargs.vlm.getPackageConfig("valaa", "type")}')`;
 exports.builder = (yargs) => {
   const vlm = yargs.vlm;
   const current = vlm.getPackageConfig("workspaces", 0);
   return yargs.options({
     reconfigure: {
       alias: "r", type: "boolean",
-      description: "Reconfigure all 'vault' type configurations of this repository.",
+      description: "Reconfigure all 'vault' type config of this workspace.",
     },
     workspaces: {
       type: "string", default: current || "packages/*",

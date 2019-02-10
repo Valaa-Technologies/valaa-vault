@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/toolset";
-exports.describe = "Configure a Valma toolset repository";
+exports.describe = "Configure a 'toolset' workspace";
 exports.introduction = `${exports.describe}.
 
 A valma toolset is a package which provides various resources for
@@ -19,11 +19,12 @@ enabled or disabled on a repository.
 A valma toolsets are added as regular devDependencies and configured
 by running 'vlm configure' afterwards.`;
 
-exports.disabled = (yargs) => !yargs.vlm.getPackageConfig("valaa");
+exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "toolset")
+    && `Workspace is not a 'toolset' (is '${yargs.vlm.getPackageConfig("valaa", "type")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all 'toolset' type configurations of this repository.",
+    description: "Reconfigure all 'toolset' type config of this workspace.",
   },
   restrict: {
     type: "string",
@@ -65,7 +66,7 @@ grabbing by all repositories.`,
     builder: `(yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure '${simpleName}' configurations of this repository.",
+    description: "Reconfigure '${simpleName}' config of this workspace.",
   },
 })`,
   }, commandName]);

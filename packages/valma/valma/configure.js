@@ -1,16 +1,17 @@
 #!/usr/bin/env vlm
 
 exports.command = "configure [toolsetGlob]";
-exports.describe = "Configure the current valaa repository and its toolsets";
+exports.describe = "Configure the current ValOS workspace and its toolsets";
 exports.introduction = `${exports.describe}.
 
-Invokes all the in-use toolset configure commands.`;
+Invokes all in-use toolset configure commands.`;
 
-exports.disabled = (yargs) => !yargs.vlm.getPackageConfig("valaa");
+exports.disabled = (yargs) => !yargs.vlm.getPackageConfig("valaa")
+    && "No package.json valaa stanza found (run 'vlm init')";
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all configurations of this repository.",
+    description: "Reconfigure all config of this workspace.",
   },
 });
 

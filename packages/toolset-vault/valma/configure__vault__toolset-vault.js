@@ -1,6 +1,6 @@
 exports.vlm = { toolset: "@valos/toolset-vault" };
 exports.command = ".configure/.type/.vault/@valos/toolset-vault";
-exports.describe = "Configure this vault monorepository with toolset-vault";
+exports.describe = "Configure 'toolset-vault' for a vault workspace";
 exports.introduction = `${exports.describe}.
 
 Adds valma commands 'assemble-packages' and 'publish-packages'.
@@ -10,11 +10,12 @@ root from package @valos/toolset-vault directory templates/.*.`;
 
 // Example template which displays the command name itself and package name where it is ran
 // Only enabled inside package
-exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "vault");
+exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "vault")
+    && `Workspace is not a vault (is ${yargs.vlm.getPackageConfig("valaa", "type")})`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure 'toolset-vault' configurations of this repository.",
+    description: "Reconfigure 'toolset-vault' config of this workspace.",
   },
 });
 

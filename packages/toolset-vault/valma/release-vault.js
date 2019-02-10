@@ -23,7 +23,7 @@ prepares the manual publish command instructions in the results output.
 const cleanDefault = Object.freeze({ yes: true, yarn: true, install: true, dist: true });
 const assembleDefault = Object.freeze({ "allow-unchanged": true });
 
-exports.disabled = (yargs) => !yargs.vlm.packageConfig;
+exports.disabled = (yargs) => !yargs.vlm.packageConfig && "No package.json found";
 exports.builder = (yargs) => yargs.options({
   clean: {
     group: "Active options",

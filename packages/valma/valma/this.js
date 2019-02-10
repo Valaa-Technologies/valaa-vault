@@ -1,16 +1,13 @@
 exports.command = ".";
-exports.describe = "Access valma runtime context object 'vlm'";
+exports.describe = "Access valma runtime context property or call a method";
 exports.introduction = `${exports.describe}.
 
-This command serves as a bridge to the 'vlm' context singleton and all
-of its API's, most notably the 'shell' API.
+This command is a shim to valma script context singleton API object 'vlm'.
 `;
 
 exports.builder = (yargs) => yargs;
 
 exports.handler = async (yargv) => {
-  // Example template which displays the command name itself and package name where it is ran
-  // Only enabled inside package
   const vlm = yargv.vlm;
   const topArgs = [".", ...yargv._.slice(0, (yargv._.indexOf("--") + 1) || undefined)];
   const ret_ = (await _walk(vlm, topArgs)).value;

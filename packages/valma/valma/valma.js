@@ -1028,7 +1028,7 @@ async function execute (args, options = {}) {
   const executeVLM = Object.create(this);
   ++executeVLM.taskDepth;
   return new Promise((resolve, failure) => {
-    this.echo(`${this.getContextIndexText()}>> ${executeVLM.getContextIndexText()}$`,
+    this.echo(`${this.getContextIndexText()}>> ${executeVLM.getContextIndexText()}vlm $`,
         `${this.theme.executable(...argv)}`);
     let maybeOutput, maybeDiagnostics;
     const _onDone = (error, code, signal) => Promise.resolve(maybeOutput)
@@ -1064,7 +1064,7 @@ async function execute (args, options = {}) {
               this.speak(indent, diagnostics.replace(/\n/g, `\n${indent} `));
             }
           }
-          this.echo(`${this.getContextIndexText()}<< ${executeVLM.getContextIndexText()}$`,
+          this.echo(`${this.getContextIndexText()}<< ${executeVLM.getContextIndexText()}vlm $`,
               `${this.theme.executable(argv[0])}:`, this._peekReturnValue(result, 71));
           if (result instanceof Error) {
             result.stdout = processedOutput || output;
@@ -1136,13 +1136,18 @@ async function invoke (commandSelector, args, options = {}) {
   const invokeVLM = Object.create(this);
   ++invokeVLM.taskDepth;
   invokeVLM.contextVLM = this;
-  // Remove everything after space so that exports.command can be given as commandSelector as-is
-  // (these often have yargs usage arguments after the command selector itself).
+  // Remove everything after space so that exports.command can be given
+  // as commandSelector as-is (these often have yargs usage arguments
+  // after the command selector itself).
   const selector = commandSelector && commandSelector.split(" ")[0];
+  // single-quote wildcard selectors so that copy-pasting them does not
+  // have them evaluated by terminal but will be done by valma instead.
+  const maybeSingleQuotedSelector = __isWildcardCommand(commandSelector)
+      ? `'${commandSelector}'` : commandSelector;
   const argv = (options.processArgs !== false) ? __processArgs(args) : args;
   if (!options.suppressOutermostEcho) {
     invokeVLM.echo(`${this.getContextIndexText()}>> ${invokeVLM.getContextIndexText()}${
-        invokeVLM.theme.vlmCommand("vlm", selector, ...argv)}`);
+        invokeVLM.theme.vlmCommand("vlm", maybeSingleQuotedSelector, ...argv)}`);
   }
   let echoResult;
   try {
@@ -1155,7 +1160,7 @@ async function invoke (commandSelector, args, options = {}) {
   } finally {
     if (!options.suppressOutermostEcho) {
       invokeVLM.echo(`${this.getContextIndexText()}<< ${invokeVLM.getContextIndexText()}${
-          invokeVLM.theme.vlmCommand("vlm", selector)}:`, echoResult);
+          invokeVLM.theme.vlmCommand("vlm", maybeSingleQuotedSelector)}:`, echoResult);
     }
     if (options.flushConfigWrites) {
       invokeVLM._flushPendingConfigWrites();
@@ -1196,7 +1201,7 @@ async function _invoke (commandSelector, argv) {
   const commandGlob = __underToSlash((contextVargv.matchAll || this.isCompleting)
       ? __globFromPrefixSelector(commandSelector, contextVargv.matchAll)
       : __globFromExactSelector(commandSelector || "*"));
-  const isWildcardCommand = !commandSelector || (commandSelector.indexOf("*") !== -1);
+  const isWildcardCommand = __isWildcardCommand(commandSelector);
   const introspect = this.contextVLM._determineIntrospection(
       module.exports, commandSelector, isWildcardCommand, true);
 
@@ -1407,6 +1412,12 @@ function _parseUntilLastPositional (argv_, commandUsage) {
 
 // eslint-disable-next-line no-bitwise
 function __isDirectory (candidate) { return candidate.mode & 0x4000; }
+
+function __isWildcardCommand (commandSelector) {
+  return !commandSelector
+      || (commandSelector.indexOf("*") !== -1)
+      || (commandSelector.indexOf("{") !== -1);
+}
 
 // If the command begins with a dot, insert the command prefix _after_ the dot; this is useful
 // as directories beginning with . don't match /**/ and * glob matchers and can be considered

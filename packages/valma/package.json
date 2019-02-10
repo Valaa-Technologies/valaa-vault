@@ -21,6 +21,7 @@
     "valma-create-command": "valma/create-command.js",
     "valma-init": "valma/init.js",
     "valma-status": "valma/status.js",
+    "valma-$": "valma/execute.js",
     ".valma-configure_.valaa-stanza": "valma/configure/valaa-stanza.js",
     ".valma-configure_.select-toolsets": "valma/configure/select-toolsets.js",
     ".valma-configure_.domain_authollery": "valma/configure/domain/authollery.js",

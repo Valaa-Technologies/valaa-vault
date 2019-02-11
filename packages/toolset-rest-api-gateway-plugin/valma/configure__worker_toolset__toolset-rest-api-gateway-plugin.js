@@ -10,7 +10,7 @@ exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "in
     && "Can't configure 'toolset-rest-api-gateway-plugin': not inUse or toolset config missing";
 exports.builder = (yargs) => {
   const toolsetConfig = yargs.vlm.getToolsetConfig(yargs.vlm.toolset) || {};
-  yargs.options({
+  return yargs.options({
     reconfigure: {
       alias: "r", type: "boolean",
       description: "Reconfigure 'toolset-rest-api-gateway-plugin' config of this workspace.",

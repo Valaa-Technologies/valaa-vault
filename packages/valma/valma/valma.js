@@ -782,7 +782,8 @@ let nextContextIndex;
 __addUniversalOptions(globalVargs, { strict: !_vlm.isCompleting, hidden: false });
 module.exports.builder(globalVargs);
 _vlm.vargs = globalVargs;
-_vlm.vargv = _vlm._parseUntilLastPositional(processArgv, module.exports.command);
+_vlm.argv = processArgv;
+_vlm.vargv = _vlm._parseUntilLastPositional(_vlm.argv, module.exports.command);
 
 const _commandPrefix = _vlm.vargv.commandPrefix;
 
@@ -1151,20 +1152,20 @@ async function invoke (commandSelector, args, options = {}) {
       ? `'${commandSelector}'` : commandSelector;
   const argv = (options.processArgs !== false) ? __processArgs(args) : args;
   if (!options.suppressOutermostEcho) {
-    invokeVLM.echo(`${this.getContextIndexText()}>> ${invokeVLM.getContextIndexText()}${
+    this.echo(`${this.getContextIndexText()}>> ${invokeVLM.getContextIndexText()}${
         invokeVLM.theme.vlmCommand("vlm", maybeSingleQuotedSelector, ...argv)}`);
   }
   let echoResult;
   try {
     const ret = await invokeVLM._invoke(selector, argv);
-    echoResult = invokeVLM._peekReturnValue(ret, 71);
+    echoResult = this._peekReturnValue(ret, 71);
     return ret;
   } catch (error) {
-    echoResult = invokeVLM.theme.error("exception:", String(error));
+    echoResult = this.theme.error("exception:", String(error));
     throw error;
   } finally {
     if (!options.suppressOutermostEcho) {
-      invokeVLM.echo(`${this.getContextIndexText()}<< ${invokeVLM.getContextIndexText()}${
+      this.echo(`${this.getContextIndexText()}<< ${invokeVLM.getContextIndexText()}${
           invokeVLM.theme.vlmCommand("vlm", maybeSingleQuotedSelector)}:`, echoResult);
     }
     if (options.flushConfigWrites) {
@@ -1208,7 +1209,7 @@ async function _invoke (commandSelector, argv) {
       : __globFromExactSelector(commandSelector || "*"));
   const isWildcardCommand = __isWildcardCommand(commandSelector);
   const introspect = this.contextVLM._determineIntrospection(
-      module.exports, commandSelector, isWildcardCommand, true);
+      module.exports, commandSelector, isWildcardCommand, true, this.contextVLM.argv);
 
   // Phase 3: filter available command pools against the command glob
 
@@ -1289,7 +1290,8 @@ async function _invoke (commandSelector, argv) {
       const subVLM = activeCommand.vlm;
       subVLM.vargv = subVLM._parseUntilLastPositional(argv, module.command);
       subVLM.verbosity = subVLM.vargv.verbose;
-      const subIntrospect = subVLM._determineIntrospection(module, commandName);
+      const subIntrospect = subVLM._determineIntrospection(
+          module, commandName, undefined, undefined, argv);
 
       this.ifVerbose(3)
           .babble("parsed:", this.theme.command(commandName, ...argv),
@@ -1575,19 +1577,19 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
         vlm: subVargs.vlm,
         disabled: poolCommand.disabled || (module.disabled && (
             (typeof module.disabled !== "function")
-                ? `exports.disabled == ${String(module.disabled)}`
+                ? `.disabled == ${String(module.disabled)}`
             : (module.disabled(subVargs)
-                && `exports.disabled => ${String(module.disabled(subVargs))}`))),
+                && `.disabled => ${String(module.disabled(subVargs))}`))),
       };
       ret[commandName] = activeCommand;
 
       try {
         if (!module.builder || !module.builder(subVargs)) {
-          if (!activeCommand.disabled) activeCommand.disabled = "exports.builder => falsy";
+          if (!activeCommand.disabled) activeCommand.disabled = ".builder => falsy";
         }
       } catch (error) {
         activeCommand.disabled = activeCommand.broken = error;
-        activeCommand.explanation = `exports.builder threw: ${String(error)}`;
+        activeCommand.explanation = `.builder threw: ${String(error)}`;
       }
       const exportedCommandName = module.command.match(/^([^ ]*)/)[1];
       if (exportedCommandName !== commandName) {
@@ -1702,10 +1704,22 @@ function __processArgs (args) {
   }
 }
 
-function _determineIntrospection (module, selector, isWildcard, invokeEntry) {
+function _determineIntrospection (module, selector, isWildcard, invokeEntry, rawArgv) {
   const ret = { module, show: {} };
+  let argvString;
   Object.keys(this.vargv).forEach(key => {
-    if (this.vargv[key] && (key.slice(0, 5) === "show-")) ret.show[key.slice(5)] = this.vargv[key];
+    if (this.vargv[key] && (key.slice(0, 5) === "show-")) {
+      const infoName = key.slice(5);
+      if (!rawArgv || (this.vargv[key] !== true)) ret.show[infoName] = this.vargv[key];
+      else {
+        if (!argvString) argvString = JSON.stringify(rawArgv);
+        const infoChar = (infoName === "pool") ? "O" : infoName[0].toUpperCase();
+        ret.show[infoName] =
+            (argvString.indexOf(infoName) !== -1) ? argvString.indexOf(infoName)
+            : (argvString.indexOf(infoChar) !== -1) ? argvString.indexOf(infoChar)
+            : true;
+      }
+    }
   });
   if ((_vlm.vargv.help || this.vargv.help) && (!selector || !invokeEntry)) {
     return { module, builtinHelp: true };
@@ -1722,13 +1736,13 @@ function _determineIntrospection (module, selector, isWildcard, invokeEntry) {
   }
   if (!selector && !ret.entryIntro) { // show default listing
     if (!this.vargv.dryRun) ret.defaultUsage = true;
-    ret.show.usage = true;
-    ret.show.status = true;
+    ret.show.usage = 1;
+    ret.show.status = 2;
   }
   ret.displayHeaders = isWildcard && !ret.identityPool;
   if (!ret.show.name && !ret.show.usage) {
-    if (!isWildcard && this.vargv.dryRun) ret.show.usage = true;
-    else if (!ret.entryIntro) ret.show.name = true;
+    if (!isWildcard && this.vargv.dryRun) ret.show.usage = 1;
+    else if (!ret.entryIntro) ret.show.name = 1;
   }
   return ret;
 }
@@ -1787,29 +1801,34 @@ function _introspectCommands (introspect, commands_, commandGlob, isWildcard_, m
   if (keys.length !== 1) return command;
   const ret = command[keys[0]];
   if (typeof ret !== "object" || !ret || Array.isArray(ret)) return ret;
-  ret["..."] = Object.assign(ret["..."] || {}, { entries: (command["..."] || {}).columns });
+  Object.assign(ret["..."] || (ret["..."] = { chapters: true }),
+      { entries: (command["..."] || {}).columns });
   return ret;
 }
 
 function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcard, showOverridden) {
-  const missingFile = "<file_missing>";
-  const missingPackage = "<package_missing>";
+  const _missingFile = "<file_missing>";
+  const _missingPackage = "<package_missing>";
+  const _columnTemplates = {
+    name: { text: "command", style: "command" },
+    usage: { style: "command" },
+    status: { text: "status or description" },
+    description: { transform: { defaultValue: { property: "explanation" } } },
+    package: { style: "package" },
+    version: { style: "version", transform: { defaultValue: { property: "explanation" } } },
+    pool: { text: "pool name" },
+    link: { text: "link path", style: "path" },
+    target: { text: "target path", style: "path", transform: { defaultValue: _missingFile } },
+    introduction: { oob: true, elementStyle: { prefix: "\n", suffix: "\n" } },
+    code: { oob: true, elementStyle: "cardinal" },
+  };
+
   const poolIntro = { "...": {
     stats: pool.stats,
     elementStyle: { if: [{ property: "broken" }, "strikethrough"] },
-    columns: [
-      { name: { text: "command", style: "command" } },
-      { usage: { style: "command" } },
-      { status: { text: "status or description" } },
-      { description: { transform: { defaultValue: { property: "explanation" } } } },
-      { package: { style: "package" } },
-      { version: { style: "version", transform: { defaultValue: { property: "explanation" } } } },
-      { pool: { text: "pool name" } },
-      { link: { text: "link path", style: "path" } },
-      { target: { text: "target path", style: "path", transform: { defaultValue: missingFile } } },
-      { introduction: { oob: true, elementStyle: isWildcard && { prefix: "\n", suffix: "\n" } } },
-      { code: { oob: true, elementStyle: "cardinal" } },
-    ].filter(c => introspect.show[Object.keys(c)[0]]),
+    columns: Object.entries(introspect.show)
+        .sort(([, l], [, r]) => (l < r ? -1 : r < l ? 1 : 0))
+        .map(([name]) => ({ [name]: _columnTemplates[name] })),
   } };
   const trivialKey = Object.keys(introspect.show).length === 1 && Object.keys(introspect.show)[0];
   if (trivialKey) poolIntro["..."].columns = [["", poolIntro["..."].columns[0][trivialKey]]];
@@ -1856,26 +1875,31 @@ function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcar
         : rowData.disabled ? `(${module.command})`
         : module.command);
     _addData("status", module
-        && (rowData.disabled ? rowData.explanation : module.describe));
+        && (rowData.disabled ? rowData.explanation
+            : (typeof module.status === "function") ? `.status => ${module.status(this.vargs)}`
+            : module.status ? `.status == ${module.status}`
+            : module.describe));
     _addData("description", module
         && (!rowData.disabled ? module.describe : `(${rowData.disabled}) ${module.describe}`));
     _addData("package", info.package);
-    _addData("version", info.version || missingPackage);
+    _addData("version", info.version || _missingPackage);
     _addData("pool", info.poolPath);
     _addData("link", info.linkPath);
-    _addData("target", info.targetPath || missingFile);
+    _addData("target", info.targetPath || _missingFile);
     if (introspect.show.introduction) {
-      rowData.introduction = !module ? null : (module.introduction || module.describe);
-      if (rowData.introduction === null) {
+      const intro = !module ? null : (module.introduction || module.describe);
+      if (intro === null) {
         this.warn(`Cannot read command '${name}' script introduction from:`,
             info.targetPath);
       }
+      _addData("introduction", intro);
     }
     if (introspect.show.code) {
-      rowData.code = !module ? null : String(shell.head({ "-n": 1000000 }, info.targetPath));
-      if (rowData.code === null) {
+      const code = !module ? null : String(shell.head({ "-n": 1000000 }, info.targetPath));
+      if (code === null) {
         this.warn(`Cannot read command '${name}' script source code from:`, info.targetPath);
       }
+      _addData("code", code);
     }
     poolIntro[name] = trivialKey ? rowData[trivialKey] : rowData;
   });

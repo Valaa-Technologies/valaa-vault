@@ -8,6 +8,7 @@ matching '.status/{toolsetGlob}*', otherwise all status scripts by
 '.status/**/*' are used.`;
 
 exports.disabled = (yargs) => !yargs.vlm.packageConfig && "No package.json found";
+exports.status = (yargs) => "Status ok!";
 exports.builder = (yargs) => yargs.options({
   echos: {
     type: "boolean", default: false,

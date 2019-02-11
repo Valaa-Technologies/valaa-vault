@@ -422,7 +422,7 @@ function _renderChapters (chapters, chapterLookup, chaptersLayout, chaptersTheme
     const chapterText = _renderBlock(chapterBlock, chaptersLayout, sectionTheme);
     const transformer = _getLayoutProperty(lookups, "transform");
     const transformedText = !transformer ? chapterText
-        : chaptersTheme.decoratorOf(transformer).call(chapterBlock, headingText);
+        : chaptersTheme.decoratorOf(transformer).call(chapterBlock, chapterText);
     const style = _getLayoutProperty(lookups, "elementStyle")
         || _getLayoutProperty(lookups, "style");
     retRows.push(!style ? transformedText

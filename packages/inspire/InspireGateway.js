@@ -36,7 +36,7 @@ import { setGlobalLogger } from "~/tools/wrapError";
 
 const { AuthorityNexus, FalseProphet, Oracle, Prophet, Scribe } = valosProphet;
 const {
-  dumpObject, inBrowser, invariantify, isPromise, LogEventGenerator, thenChainEagerly,
+  dumpObject, inBrowser, invariantify, isPromise, LogEventGenerator, mapEagerly, thenChainEagerly,
 } = valosTools;
 
 export default class InspireGateway extends LogEventGenerator {
@@ -164,17 +164,15 @@ export default class InspireGateway extends LogEventGenerator {
 
       // Locate entry point event log (prologue), make it optimally available through scribe,
       // narrate it with false prophet and get the false prophet connection for it.
-      this.prologueConnections = await this._narratePrologues(this.prologueRevelation,
-          this.scribe, this.falseProphet);
-
-      this.entryPartitionConnection =
-          this.prologueConnections[this.prologueConnections.length - 1];
+      ({ connections: this.prologueConnections, rootConnection: this.entryPartitionConnection }
+          = await this._narratePrologues(this.prologueRevelation));
 
       registerVidgets();
       this.warnEvent(`initialize(): registered builtin Inspire vidgets`);
       this._isInitialized = true;
-      Object.values(this._attachedPlugins)
-          .forEach(plugin => this._notifyPluginGatewayInitialized(plugin));
+      for (const plugin of Object.values(this._attachedPlugins)) {
+        await this._notifyPluginGatewayInitialized(plugin);
+      }
       this.warnEvent("InspireGateway initialized with revelation", ...dumpObject(revelation),
           "\n\tnotified attached plugins with .onGatewayInitialized");
     } catch (error) {
@@ -190,7 +188,7 @@ export default class InspireGateway extends LogEventGenerator {
     [string]: { name: string, size: Object, container: Object, rootId: string, rootLensURI: any }
   }, createView = (options) => new InspireView(options)) {
     this._views = {};
-    for (const [viewName, viewConfig: Object] of Object.entries(viewConfigs)) {
+    Object.entries(viewConfigs).forEach(([viewName, viewConfig]) => {
       this.warnEvent(`createView({ name: '${viewConfig.name}', ... })`, ...dumpObject(viewConfig));
       const engineOptions = {
         name: `${viewConfig.name} Engine`,
@@ -227,17 +225,20 @@ export default class InspireGateway extends LogEventGenerator {
         attachedView => {
           attachedView.rootScope = rootScope;
           this._views[viewName] = attachedView;
-          Object.values(this._attachedPlugins)
-              .forEach(plugin => this._notifyPluginViewAttached(plugin, attachedView, viewName));
-          return attachedView;
+          return mapEagerly(
+              Object.values(this._attachedPlugins).filter(plugin => plugin.onViewAttached),
+              plugin => this._notifyPluginViewAttached(plugin, attachedView, viewName));
         },
+        notifys => this.logEvent(1, `notified ${notifys.length} plugins of '${name}' attach`,
+            "\n\tresults:", ...dumpObject(notifys.filter(notNull => notNull))),
+        () => this._views[viewName],
       ]);
       this.warnEvent(`Opened View ${viewName}`,
           ...(!this.getVerbosity() ? [] : [", with:",
             "\n\tviewConfig:", ...dumpObject(viewConfig),
             "\n\tview:", ...dumpObject(this._views[viewName]),
           ]));
-    }
+    });
     return this._views;
   }
 
@@ -435,7 +436,7 @@ export default class InspireGateway extends LogEventGenerator {
               || pluginPrototype;
     });
     this.warnEvent(`Attaching ${pluginNames.length} plugins:`, ...dumpObject(pluginNames));
-    for (const name of pluginNames) this._attachPlugin(name, newPluginLookup[name]);
+    for (const name of pluginNames) await this._attachPlugin(name, newPluginLookup[name]);
   }
 
   _attachPlugin (name: string, plugin: Object) {
@@ -449,39 +450,43 @@ export default class InspireGateway extends LogEventGenerator {
     for (const MediaDecoder_: any of Object.values(plugin.mediaDecoders || {})) {
       this.oracle.getDecoderArray().addDecoder(this.callRevelation(MediaDecoder_));
     }
-    if (this._isInitialized) {
-      this._notifyPluginGatewayInitialized(plugin);
-    }
-    Object.keys(this._views || {}).forEach(viewName => {
-      if (!isPromise[this._views[viewName]]) {
-        this._notifyPluginViewAttached(plugin, this._views[viewName], viewName);
-      }
-    });
+    return thenChainEagerly(null, [
+      () => this._isInitialized && this._notifyPluginGatewayInitialized(plugin),
+      ...Object.keys(this._views || {}).map(viewName =>
+      // Do not block for views to init
+          () => !isPromise(this._views[viewName])
+      // Do wait for plugin itself
+              && this._notifyPluginViewAttached(plugin, this._views[viewName], viewName))
+    ]);
   }
 
   _notifyPluginGatewayInitialized (plugin: Object) {
-    if (!plugin.onGatewayInitialized) return;
-    plugin.onGatewayInitialized(this);
+    return plugin.onGatewayInitialized && plugin.onGatewayInitialized(this);
   }
 
   _notifyPluginViewAttached (plugin: Object, view: InspireView, viewName: string) {
-    if (!plugin.onViewAttached) return;
-    plugin.onViewAttached(view, viewName);
+    return plugin.onViewAttached && plugin.onViewAttached(view, viewName);
   }
 
   async _narratePrologues (prologueRevelation: Object) {
     let prologues;
     try {
-      this.warnEvent(`Extracting revelation prologues`);
-      prologues = await this._loadRevelationEntryPartitionAndPrologues(prologueRevelation);
+      const rootPartitionURI = this.prologueRevelation.rootPartitionURI
+          && createPartitionURI(await this.prologueRevelation.rootPartitionURI);
+      this.warnEvent(`Extracting revelation prologues and root partition (${
+          String(rootPartitionURI)})`);
+      prologues = await this._determineRevelationPrologues(prologueRevelation, rootPartitionURI);
       this.warnEvent(`Extracted ${prologues.length} prologues from the revelation`,
           "\n\tprologue partitions:",
-              `'${prologues.map(({ partitionURI }) => String(partitionURI)).join("', '")}'`);
-      const ret = await Promise.all(prologues.map(this._connectChronicleAndNarratePrologue));
+              `'${prologues.map(({ partitionURI }) => String(partitionURI)).join("', '")}'`,
+          "\n\troot partition:", String(rootPartitionURI));
+      const connections = await Promise.all(prologues.map(this._connectChronicleNarratePrologue));
       this.warnEvent(`Acquired active connections for all revelation prologue partitions:`,
-          ...[].concat(...ret.map(connection =>
-            [`\n\t${connection.getName()}:`, connection.getStatus()])));
-      return ret;
+          ...[].concat(...connections.map(connection =>
+            [`\n\t${connection.getName()}:`, ...dumpObject(connection.getStatus())])));
+      const rootConnection = connections.find(connection =>
+          (String(connection.getPartitionURI()) === String(rootPartitionURI)));
+      return { connections, rootConnection };
     } catch (error) {
       throw this.wrapErrorEvent(error, "narratePrologue",
           "\n\tprologue revelation:", prologueRevelation,
@@ -489,30 +494,19 @@ export default class InspireGateway extends LogEventGenerator {
     }
   }
 
-  async _loadRevelationEntryPartitionAndPrologues (prologueRevelation: Object) {
+  async _determineRevelationPrologues (prologueRevelation: Object,
+      rootPartitionURI: any) {
     const ret = [];
+    let rootPartitionURISeen = false;
     try {
       for (const [uri, info] of (Object.entries((await prologueRevelation.partitionInfos) || {}))) {
-        ret.push({
-          partitionURI: createPartitionURI(uri),
-          info: await info,
-        });
+        const partitionURI = createPartitionURI(uri);
+        ret.push({ partitionURI, info: await info });
+        if (String(partitionURI) === String(rootPartitionURI)) rootPartitionURISeen = true;
       }
-      let partitionURI;
-      if (prologueRevelation.endpoint) {
-        const endpoint = await prologueRevelation.endpoint;
-        const endpoints = (await prologueRevelation.endpoints) || {};
-        if (!endpoints[endpoint]) {
-          throw new Error(`prologue.endpoint '${endpoint}' not found in prologue.endpoints`);
-        }
-        partitionURI = createPartitionURI(await endpoints[endpoint]);
-      } else if (prologueRevelation.rootPartitionURI) {
-        partitionURI = createPartitionURI(await prologueRevelation.rootPartitionURI);
-      }
-      if (partitionURI) {
+      if (rootPartitionURI && !rootPartitionURISeen) {
         ret.push({
-          partitionURI,
-          isNewPartition: false,
+          partitionURI: rootPartitionURI,
           info: {
             commandCount: 0, truthCount: 0,
             logs: { commandQueue: [], truthLog: [] },
@@ -520,8 +514,8 @@ export default class InspireGateway extends LogEventGenerator {
         });
       }
       if (!ret.length) {
-        throw new Error(`Revelation prologue is missing entry point${
-            ""} (either prologue.endpoint or prologue.rootPartitionURI)`);
+        throw new Error(`Revelation prologue is missing an entry point${
+            ""} (last of the prologue.partitionInfos or prologue.rootPartitionURI)`);
       }
       return ret;
     } catch (error) {
@@ -531,7 +525,7 @@ export default class InspireGateway extends LogEventGenerator {
     }
   }
 
-  _connectChronicleAndNarratePrologue = async ({ partitionURI, info }: any) => {
+  _connectChronicleNarratePrologue = async ({ partitionURI, info }: any) => {
     if ((await info.commandId) >= 0 || ((await info.commandCount) > 0)) {
       throw new Error("Command queues in revelation are not supported yet");
     }

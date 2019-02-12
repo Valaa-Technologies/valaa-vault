@@ -7,7 +7,7 @@ import extendValaaWithInspire from "./Valaa";
 
 export default function extendValaaSpaceWithInspire (scope: Object, hostObjectDescriptors: any,
     defaultAuthorityConfig?: Object, engine?: Object) {
-  Object.assign(scope, globalHTML5BuiltinObjects);
+  Object.assign(scope, globalHTML5BuiltinObjects());
   extendValaaWithInspire(scope, hostObjectDescriptors);
 
   let RemoteAuthorityURI = null;

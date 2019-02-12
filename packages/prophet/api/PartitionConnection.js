@@ -150,8 +150,8 @@ export default class PartitionConnection extends Follower {
           }
         }
         this.warnEvent(1, () => [
-          "\n\tDone connecting with results:", connectResults,
-          "\n\tstatus:", this.getStatus(),
+          "\n\tDone connecting with results:", ...dumpObject(connectResults),
+          "\n\tstatus:", ...dumpObject(this.getStatus()),
         ]);
         return (this._activeConnection = this);
       },

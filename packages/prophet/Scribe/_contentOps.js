@@ -160,7 +160,13 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
     newEntry = { ...currentEntry, mediaInfo };
   } else {
     if (mediaRef.isInherited()) {
-      mediaInfo = { ...connection._getMediaEntry(mediaRef).mediaInfo };
+      const mediaEntry = connection._getMediaEntry(mediaRef, false);
+      if (!mediaEntry) {
+        console.warn(`Could not determine media entry for media <${
+            mediaRef}>; most likely a ghost media with inactive prototype partition`);
+        return [];
+      }
+      mediaInfo = { ...mediaEntry.mediaInfo };
     } else if (isCreatedLike(mediaAction)) {
       mediaInfo = {};
     } else {

@@ -110,9 +110,9 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
   try {
     if (coupling.coupledField) {
       if (coupledField) {
-        throw new Error(`The dynamic coupledField for an outgoing reference field '${
-            fieldIntro.name}' must be falsy (got '${coupledField
-            }') due static coupling.coupledField definition '${coupling.coupledField}'`);
+        bard.errorEvent(`Overriding dynamic coupledField for an outgoing reference field '${
+            fieldIntro.name}' which should be falsy (got '${coupledField
+            }') with the static coupling.coupledField definition '${coupling.coupledField}'`);
       }
       coupledField = coupling.coupledField;
     } else if (!coupledField) {

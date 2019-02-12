@@ -7,12 +7,14 @@ export default Valaa.exportPlugin({
 
   onViewAttached (view, viewName) {
     const RestAPIServer = require("./fastify/RestAPIServer").default;
-    const { port, address, routes } = require(`${process.cwd()}/toolsets.json`)[this.name];
-    const actualRoutes = (typeof routes === "string")
-        ? require(`${process.cwd()}/${routes}`) : routes;
-    view._restAPIServer = new RestAPIServer({
-      view, viewName, port, address, routes: actualRoutes,
-    });
-    view._restAPIServer.start();
+    const { port, address, prefix, mappings } =
+        require(`${process.cwd()}/toolsets.json`)[this.name];
+    const { schemas, routes } = (typeof mappings === "string") ? require(mappings) : mappings;
+    const gateway = view._gateway;
+    const options = {
+      view, viewName, gateway, logger: gateway.getLogger(), port, address, prefix, schemas, routes,
+    };
+    view._restAPIServer = new RestAPIServer(options);
+    return view._restAPIServer.start();
   },
 });

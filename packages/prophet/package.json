@@ -1,6 +1,6 @@
 {
   "name": "@valos/prophet",
-  "version": "0.34.0-prerelease.4",
+  "version": "0.34.0-prerelease.5",
   "description": "Valaa Prophet API, schema",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
@@ -14,7 +14,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@valos/script": "^0.34.0-prerelease.4",
+    "@valos/script": "^0.34.0-prerelease.5",
     "graphql": "^0.6.2",
     "jssha": "^2.3.1"
   }

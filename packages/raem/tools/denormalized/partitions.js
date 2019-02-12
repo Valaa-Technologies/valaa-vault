@@ -21,25 +21,32 @@ export class MissingPartitionConnectionsError extends Error {
   }
 }
 
-export function asyncConnectToPartitionsIfMissingAndRetry (call) {
+export function asyncConnectToPartitionsIfMissingAndRetry (call, onError) {
+  if ((typeof call !== "function") || !call.apply) throw new Error("call is not a function");
   return function autoConnectingCall (...args: any[]) {
-    return tryCall.call(this, call, ...args);
+    return tryCall.call(this, call, onError, ...args);
   };
 }
 
-function tryCall (call: any, ...args: any[]) {
+function tryCall (call: any, onError, ...args: any[]) {
   try {
     return call.apply(this, args);
   } catch (error) {
-    if (!(unwrapError(error) instanceof MissingPartitionConnectionsError)) throw error;
+    if (!(unwrapError(error) instanceof MissingPartitionConnectionsError)) {
+      if (onError) return onError(error, ...args);
+      throw error;
+    }
     try {
-      return connectToMissingPartitionsAndThen(error, () => tryCall.call(this, call, ...args));
+      return connectToMissingPartitionsAndThen(error,
+          () => tryCall.call(this, call, onError, ...args));
     } catch (innerError) {
-      throw wrapError(innerError,
+      const wrappedError = wrapError(innerError,
         `During @asyncConnectToPartitionsIfMissingAndRetry(${call.name}):`,
         "\n\thint: use partitions:addConnectToPartitionToError to add it",
         "\n\tcall:", ...dumpObject(call),
         "\n\targs:", ...dumpObject(args));
+      if (onError) return onError(wrappedError, ...args);
+      throw wrappedError;
     }
   }
 }

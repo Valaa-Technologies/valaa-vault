@@ -129,8 +129,9 @@ exports.handler = async (yargv) => {
     }
     updatedPackageNames = JSON.parse(updatedPackages).map(p => p.name);
   }
-  const sourcePackageJSONPaths = vlm.shell.find("-l",
+  let sourcePackageJSONPaths = vlm.shell.find("-l",
       vlm.path.join(yargv.source, "*/package.json"));
+  if (!sourcePackageJSONPaths || !sourcePackageJSONPaths.length) sourcePackageJSONPaths = [];
 
   let selections = sourcePackageJSONPaths.map(sourcePackageJSONPath => {
     const sourceDirectory = sourcePackageJSONPath.match(/^(.*)package.json$/)[1];

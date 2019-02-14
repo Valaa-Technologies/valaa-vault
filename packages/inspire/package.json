@@ -20,6 +20,7 @@
     "graphql": "^0.6.2",
     "immutable": "~3.7.4",
     "indexeddbshim": "^3.8.0",
+    "jsdom": "^13.2.0",
     "jss": "^8.1.0",
     "jss-css": "^3.0.0",
     "jss-preset-default": "^3.0.0",

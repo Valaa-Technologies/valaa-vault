@@ -183,8 +183,9 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
     let upstreamEventResults;
     resultBase._forwardResults = thenChainEagerly(resultBase.receivedEventsProcess, [
       function _chronicleReceivedEventsUpstream (receivedEvents) {
-        return connection.getUpstreamConnection()
-          .chronicleEvents(receivedEvents.filter(notNull => notNull), options);
+        const actuallyReceivedEvents = receivedEvents.filter(notNull => notNull);
+        if (!actuallyReceivedEvents.length) return ({ eventResults: [] });
+        return connection.getUpstreamConnection().chronicleEvents(actuallyReceivedEvents, options);
       },
       function _syncToChronicleResultTruthEvents ({ eventResults }) {
         upstreamEventResults = eventResults;
@@ -363,7 +364,7 @@ function _determineEventPreOps (connection: ScribePartitionConnection, event: Ob
   } else if ((event.initialState !== undefined) || (event.sets !== undefined)) {
     if (getRawIdFrom(event.id) === connection.getPartitionRawId()) {
       const newName = (event.initialState || event.sets || {}).name;
-      if (newName) connection.setName(`'${newName}'/${connection.getPartitionURI().toString()}`);
+      if (newName) connection.setPartitionName(newName);
     }
     if (event.typeName === "Media") {
       ret = connection._determineEventMediaPreOps(event, rootEvent);

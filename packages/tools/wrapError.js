@@ -1,17 +1,27 @@
 // import StackTrace from "stacktrace-js";
-import beaumpify from "~/tools/beaumpify";
-import { invariantifyObject } from "~/tools/invariantify";
 
+const dumpify = require("~/tools/dumpify").default;
 const inBrowser = require("~/gateway-api/inBrowser").default;
 const isSymbol = require("~/tools/isSymbol").default;
 
-if (typeof window !== "undefined") window.beaumpify = beaumpify;
+if (typeof window !== "undefined") window.beaumpify = dumpify;
 
+// TODO(iridian, 2019-02): Sigh... these debug output functions are
+// getting out of hand. They should be streamlined.
+
+// returns an spreadable array with different views to the value.
 export function dumpObject (value) {
   const ret = [];
   if ((value != null) && (typeof value.debugId === "function")) ret.push(`'${value.debugId()}'`);
   ret.push(debugObject(value));
   return ret;
+}
+
+// This is maybe used in node context. I don't remember what special
+// purpose it has
+function dumpifyObject (value) {
+  if (inBrowser() || !value || (typeof value !== "object")) return value;
+  return dumpify(debugObject(value));
 }
 
 /**
@@ -33,7 +43,7 @@ export default function wrapError (errorIn: Error, ...contextDescriptions) {
   if ((typeof error !== "object") || !error || (typeof error.message !== "string")) {
     console.error("INVARIANT VIOLATION during wrapError:",
         "first argument must be an object with .message property!", "Instead got", error);
-    invariantifyObject(error, "wrapError.error", { instanceof: Error });
+    throw new Error("wrapError.error must be an Error object");
   }
   const originalMessage = error.originalMessage || error.message;
   let contextError = contextDescriptions[0];
@@ -160,7 +170,8 @@ function _clipFrameListToCurrentContext (innerError, outerError) {
 }
 
 export function outputError (error, header = "Exception caught", logger = errorLogger) {
-  logger.error(`  ${header} (with ${(error.errorContexts || []).length} contexts):\n\n`,
+  (logger.exception || logger.error).call(logger,
+      `  ${header} (with ${(error.errorContexts || []).length} contexts):\n\n`,
       error.originalMessage || error.message, `\n `);
   if (error.customErrorHandler) {
     error.customErrorHandler(logger);
@@ -169,7 +180,7 @@ export function outputError (error, header = "Exception caught", logger = errorL
     logger.log(error.originalError.tidyFrameList.join("\n"));
   }
   for (const context of (error.errorContexts || [])) {
-    logger.warn(...context.contextDescriptions.map(beaumpifyObject));
+    logger.warn(...context.contextDescriptions.map(dumpifyObject));
     logger.log((context.tidyFrameList).join("\n"));
   }
 }
@@ -271,17 +282,12 @@ function isIterable (candidate) {
   return (typeof candidate === "object") && (typeof candidate.toJS === "function");
 }
 
-function beaumpifyObject (value) {
-  if (inBrowser() || !value || (typeof value !== "object")) return value;
-  return beaumpify(debugObject(value));
-}
-
-let errorLogger = typeof window !== "undefined" || !process
+let errorLogger = (typeof window !== "undefined") || !process
     ? console
     : {
-      log (...params) { console.log(...params.map(beaumpifyObject)); },
-      warn (...params) { console.warn(...params.map(beaumpifyObject)); },
-      error (...params) { console.error(...params.map(beaumpifyObject)); },
+      log (...params) { console.log(...params.map(dumpifyObject)); },
+      warn (...params) { console.warn(...params.map(dumpifyObject)); },
+      error (...params) { console.error(...params.map(dumpifyObject)); },
     };
 
 export function setGlobalLogger (logger) {

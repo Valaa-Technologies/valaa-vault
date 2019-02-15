@@ -15,6 +15,7 @@ const yargs = require("yargs/yargs");
 const yargsParser = require("yargs-parser").detailed;
 const deepExtend = require("@valos/tools/deepExtend").default;
 const dumpify = require("@valos/tools/dumpify").default;
+const outputError = require("@valos/tools/wrapError").outputError;
 
 cardinal.tomorrowNight = require("cardinal/themes/tomorrow-night");
 
@@ -421,7 +422,7 @@ function _setTheme (theme) {
           texts);
     } catch (error) {
       console.log("error while decorating with rule:", rule,
-          "\n\ttexts:", JSON.stringify(texts, null, 2));
+          "\n\ttexts:", dumpify(texts, { indent: 2 }));
       throw error;
     }
   };
@@ -862,7 +863,11 @@ module.exports
     })
     .catch(error => {
       if (error !== undefined) {
-        _vlm.exception(error.stack || error);
+        if (error instanceof Error) {
+          outputError(error, `exception caught at root`, _vlm);
+        } else {
+          _vlm.exception(error.stack || error);
+        }
       }
       process.exit(typeof error === "number" ? error : ((error && error.code) || -1));
     });
@@ -1190,7 +1195,7 @@ function _peekReturnValue (value, clipLength) {
   } else if (typeof value === "function") {
     ret = `<function ${value.name}>`;
   } else {
-    ret = JSON.stringify(value);
+    ret = dumpify(value);
   }
   return this.theme.return(ret.length <= clipLength ? ret : `${ret.slice(0, clipLength)}...`);
 }

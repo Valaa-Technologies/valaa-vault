@@ -23,8 +23,9 @@ export function _composeStoryFromEvent (falseProphet: FalseProphet, event: Event
   if (!story) {
     // If no transaction or transaction is not a fast-forward, do a regular dispatch
     if (transactionInfo) {
-      falseProphet.logEvent(`Committing a diverged transaction '${transactionInfo.name}' normally:`,
-          "\n\trestrictedTransacted:", event);
+      falseProphet.warnEvent(1, () => [
+          `Committing a diverged transaction '${transactionInfo.name}' normally:`,
+          "\n\trestrictedTransacted:", event]);
     }
     story = falseProphet.corpus.dispatch(event, dispatchDescription);
   }

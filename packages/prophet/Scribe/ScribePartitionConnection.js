@@ -61,8 +61,14 @@ export default class ScribePartitionConnection extends PartitionConnection {
   getStatus () {
     return {
       indexedDB: { truthLog: this._truthLogInfo, commandQueue: this._commandQueueInfo },
+      name: this._partitionName,
       ...super.getStatus(),
     };
+  }
+
+  setPartitionName (name: string) {
+    this._partitionName = name;
+    this.setName(`'${name}'/${this.getPartitionURI().toString()}`);
   }
 
   _doConnect (options: ConnectOptions) {
@@ -329,6 +335,14 @@ export default class ScribePartitionConnection extends PartitionConnection {
     } catch (error) {
       throw this.wrapErrorEvent(error, `_updateMediaEntries(${updates.length} updates)`,
           "\n\tupdates:", ...dumpObject(updates));
+    }
+  }
+
+  async _readMediaEntries () {
+    try {
+      return await _readMediaEntries(this);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, `_readMediaEntries()`);
     }
   }
 

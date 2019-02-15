@@ -119,6 +119,10 @@ const _deepExtendOptions = Object.freeze({
     if (typeof source !== "object") return undefined;
     if (source === null) return "";
     if ((source[0] === _spreaderKey) || source[_spreaderKey]) return undefined;
+    if ((Object.getPrototypeOf(source) !== Object.prototype) && !Array.isArray(source)) {
+      throw new Error("Cannot markdownify a complex object with type '"
+          + (source.constructor || { name: "<unknown object>" }).name + "'");
+    }
     const ret = target || {};
     const containerLayout = _getLayout(targetContainer) || {};
     const layout = ret[_layoutKey] = deepExtend(

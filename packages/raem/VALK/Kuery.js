@@ -544,7 +544,7 @@ export default class Kuery {
         return true;
       }
     });
-    return this._addExpression("§$<-", _recurseToVAKON(setters));
+    return this._addExpression("§$<-", setters);
   }
 
   /**
@@ -568,7 +568,7 @@ export default class Kuery {
         return true;
       }
     });
-    return this._addExpression("§.<-", _recurseToVAKON(setters));
+    return this._addExpression("§.<-", setters);
   }
 
   /**
@@ -608,7 +608,7 @@ export default class Kuery {
   object (...setters) {
     return (setters.length === 1) && !Array.isArray(setters[0])
         ? this.toTemplate(setters[0])
-        : this._addExpression("§{}", _recurseToVAKON(setters));
+        : this._addExpression("§{}", setters);
   }
 
   // Valker reference engine flow control host steps

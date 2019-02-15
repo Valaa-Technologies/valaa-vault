@@ -51,6 +51,7 @@ export default class InspireGateway extends LogEventGenerator {
     if (options.logger) setGlobalLogger(options.logger);
     this.siteRoot = options.siteRoot;
     this.revelationRoot = options.revelationRoot;
+    this.domainRoot = options.domainRoot;
   }
 
   callRevelation (Type: Function | any) {
@@ -164,7 +165,7 @@ export default class InspireGateway extends LogEventGenerator {
 
       // Locate entry point event log (prologue), make it optimally available through scribe,
       // narrate it with false prophet and get the false prophet connection for it.
-      ({ connections: this.prologueConnections, rootConnection: this.entryPartitionConnection }
+      ({ connections: this.prologueConnections, rootPartition: this.rootPartition }
           = await this._narratePrologues(this.prologueRevelation));
 
       registerVidgets();
@@ -181,7 +182,7 @@ export default class InspireGateway extends LogEventGenerator {
   }
 
   getRootPartitionURI () {
-    return String(this.entryPartitionConnection.getPartitionURI());
+    return String(this.rootPartition.getPartitionURI());
   }
 
   createAndConnectViewsToDOM (viewConfigs: {
@@ -484,9 +485,9 @@ export default class InspireGateway extends LogEventGenerator {
       this.warnEvent(`Acquired active connections for all revelation prologue partitions:`,
           ...[].concat(...connections.map(connection =>
             [`\n\t${connection.getName()}:`, ...dumpObject(connection.getStatus())])));
-      const rootConnection = connections.find(connection =>
+      const rootPartition = connections.find(connection =>
           (String(connection.getPartitionURI()) === String(rootPartitionURI)));
-      return { connections, rootConnection };
+      return { connections, rootPartition };
     } catch (error) {
       throw this.wrapErrorEvent(error, "narratePrologue",
           "\n\tprologue revelation:", prologueRevelation,

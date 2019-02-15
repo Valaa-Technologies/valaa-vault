@@ -24,11 +24,11 @@ export default class VDOMView extends Cog {
       }
       // Load project
       const lensRef = this.engine.discourse.obtainReference(rootLensURI);
-      this._rootConnection = await this.engine.getProphet()
+      this._viewPartition = await this.engine.getProphet()
           .acquirePartitionConnection(lensRef.getPartitionURI())
           .getActiveConnection();
       this._vViewFocus = await this.engine.getVrapperByRawId(
-          lensRef.rawId() || this._rootConnection.getPartitionRawId());
+          lensRef.rawId() || this._viewPartition.getPartitionRawId());
       await this._vViewFocus.activate();
       this.warnEvent(`attach(): partition '${this._vViewFocus.get("name")}' UI view focus set:`,
           this._vViewFocus.debugId());
@@ -41,6 +41,8 @@ export default class VDOMView extends Cog {
       throw this.wrapErrorEvent(error, `attach('${name}' -> ${rootLensURI})`);
     }
   }
+
+  getViewPartition () { return this._viewPartition; }
 
   getSelfAsHead () {
     return this._vViewFocus.getSelfAsHead();

@@ -8,78 +8,80 @@ import createGateway from "~/inspire";
 import PerspireView from "~/inspire/PerspireView";
 import { invariantifyString } from "~/tools";
 
-function _createPerspireGateway (gatewayOptions: Object, ...revelations: any[]) {
-  const shimLibrary = require("~/tools/indexedDB/getWebSQLShimDatabaseAPI");
-
-  const perspireEnvironmentRevelation = {
-    gateway: { scribe: {
-      getDatabaseAPI () {
-        shimLibrary.configure(this.databaseConfig || {});
-        return shimLibrary.getDatabaseAPI();
-      },
-    } },
-  };
-  return createGateway(gatewayOptions, ...revelations, perspireEnvironmentRevelation);
-}
-
-function _createTestPerspireGateway (gatewayOptions: Object, ...revelations: any[]) {
-  const perspireEnvironmentRevelation = {
-    gateway: { scribe: {
-      getDatabaseAPI: require("~/tools/indexedDB/getInMemoryDatabaseAPI").getDatabaseAPI,
-    }, },
-  };
-  return createGateway(gatewayOptions, ...revelations, perspireEnvironmentRevelation);
-}
-
 export default class PerspireServer {
   constructor ({
-    isTest, logger, revelationRoot, revelations, plugins, cacheRoot, jsdom, container,
+    isTest, logger, siteRoot, domainRoot, revelationRoot, revelations, cacheBasePath, plugins,
   }: Object) {
     invariantifyString(revelationRoot, "PerspireServer.options.revelationRoot",
         { allowEmpty: true });
     this.isTest = isTest;
     this.gatewayOptions = {
       logger,
-      siteRoot: process.cwd(),
+      siteRoot,
+      domainRoot,
       revelationRoot: revelationRoot[0] === "/"
           ? revelationRoot
-          : path.join(process.cwd(), revelationRoot),
+          : path.join(siteRoot, revelationRoot),
     };
-    this.revelations = revelations;
+
+    this.revelations = revelations || [];
+    this.cacheBasePath = cacheBasePath;
     this.plugins = plugins;
-    this.cacheRoot = cacheRoot;
-    this.jsdom = jsdom;
-    this.container = container;
   }
 
-  async start () {
+  async initialize () {
     (this.plugins || []).forEach(plugin => require(plugin));
+    return (this.gateway =
+        (!this.isTest
+            ? this._createWorkerPerspireGateway(this.gatewayOptions, ...this.revelations)
+            : this._createTestPerspireGateway(this.gatewayOptions, ...this.revelations))
+        .then(gateway => (this.gateway = gateway)));
+  }
 
-    return (this.gateway = (!this.isTest
-        ? _createPerspireGateway
-        : _createTestPerspireGateway)(this.gatewayOptions, ...this.revelations)
-    .then(async (gateway) => {
-      const viewOptions = {
-        perspireMain: {
-          name: "Valaa Local Perspire Main",
-          rootLensURI: gateway.getRootPartitionURI(),
-          window: this.jsdom.window,
-          container: this.container,
-          rootId: "perspire-gateway--main-root",
-          size: {
-            width: this.jsdom.window.innerWidth,
-            height: this.jsdom.window.innerHeight,
-            scale: 1
-          },
+  async createMainView () {
+    global.self = global;
+    global.name = "Perspire window";
+    global.window = global;
+    global.WebSocket = WebSocket;
+    global.fetch = require("node-fetch");
+
+    this.jsdom = new JSDOM(`<div id="perspire-gateway--main-container"></div>`,
+        { pretendToBeVisual: true });
+    const meta = this.jsdom.window.document.createElement("meta");
+    meta.httpEquiv = "refresh";
+    meta.content = "1";
+    this.jsdom.window.document.getElementsByTagName("head")[0].appendChild(meta);
+    this.container = this.jsdom.window.document.querySelector("#perspire-gateway--main-container");
+
+    // re-set after jsdom is set
+    global.window = this.jsdom.window;
+    global.document = this.jsdom.window.document;
+    global.navigator = this.jsdom.window.navigator;
+    global.HTMLIFrameElement = this.jsdom.window.HTMLIFrameElement;
+    global.requestAnimationFrame = (callback) => { setTimeout(callback, 0); };
+    global.cancelAnimationFrame = (callback) => { setTimeout(callback, 0); };
+
+    const views = (await this.gateway).createAndConnectViewsToDOM({
+      perspireMain: {
+        name: "Valaa Local Perspire Main",
+        rootLensURI: this.gateway.getRootPartitionURI(),
+        window: this.jsdom.window,
+        container: this.container,
+        rootId: "perspire-gateway--main-root",
+        size: {
+          width: this.jsdom.window.innerWidth,
+          height: this.jsdom.window.innerHeight,
+          scale: 1
         },
-      };
-      const views = gateway.createAndConnectViewsToDOM(
-          viewOptions, (options) => new PerspireView(options));
-      await views.perspireMain;
-      this.gateway = gateway;
-      this.Valaa = views.perspireMain.rootScope.Valaa;
-      return gateway;
-    }));
+      },
+    }, (options) => new PerspireView(options));
+    const ret = await views.perspireMain;
+    this.Valaa = views.perspireMain.rootScope.Valaa;
+    // Creating perspire specific objects and variables.
+    // Please use server.Valaa.Perspire for external packages
+    this.Valaa.Perspire = {};
+    this.Valaa.isServer = true;
+    return ret;
   }
 
   async run (interval: number, heartbeat: Function) {
@@ -101,52 +103,32 @@ export default class PerspireServer {
   serializeMainDOM () {
     return this.jsdom.serialize();
   }
-}
 
-export async function startNodePerspireServer ({
-  isTest, logger, revelationRoot, revelations, databaseBasePath, plugins,
-}: Object) {
-  // for jsdom.
-  global.self = global;
-  global.name = "Perspire window";
-  global.window = global;
-  global.WebSocket = WebSocket;
-  global.fetch = require("node-fetch");
+  _createWorkerPerspireGateway (gatewayOptions: Object, ...revelations: any[]) {
+    const shimLibrary = require("~/tools/indexedDB/getWebSQLShimDatabaseAPI");
 
-  const jsdom = new JSDOM(`<div id="perspire-gateway--main-container"></div>`,
-      { pretendToBeVisual: true });
-  const meta = jsdom.window.document.createElement("meta");
-  meta.httpEquiv = "refresh";
-  meta.content = "1";
-  jsdom.window.document.getElementsByTagName("head")[0].appendChild(meta);
+    const workerEnvironmentRevelation = {
+      gateway: { scribe: {
+        getDatabaseAPI () {
+          shimLibrary.configure(this.databaseConfig || {});
+          return shimLibrary.getDatabaseAPI();
+        },
+        databaseConfig: {
+          // See https://github.com/axemclion/IndexedDBShim for config options
+          databaseBasePath: this.cacheBasePath,
+          checkOrigin: false,
+        },
+      } },
+    };
+    return createGateway(gatewayOptions, ...revelations, workerEnvironmentRevelation);
+  }
 
-  // re-set after jsdom is set
-  global.window = jsdom.window;
-  global.document = jsdom.window.document;
-  global.navigator = jsdom.window.navigator;
-  global.HTMLIFrameElement = jsdom.window.HTMLIFrameElement;
-  global.requestAnimationFrame = (callback) => { setTimeout(callback, 0); };
-  global.cancelAnimationFrame = (callback) => { setTimeout(callback, 0); };
-
-  const server = new PerspireServer({
-    isTest, logger, revelationRoot, plugins, jsdom,
-    container: jsdom.window.document.querySelector("#perspire-gateway--main-container"),
-    revelations: [
-      { gateway: {
-          scribe: {
-            databaseConfig: {
-              // See https://github.com/axemclion/IndexedDBShim for config options
-              databaseBasePath,
-              checkOrigin: false,
-      } } } },
-      ...revelations,
-    ],
-  });
-  await server.start();
-
-  // Creating perspire specific objects and variables.
-  // Please use server.Valaa.Perspire for external packages
-  server.Valaa.Perspire = {};
-  server.Valaa.isServer = true;
-  return server;
+  _createTestPerspireGateway (gatewayOptions: Object, ...revelations: any[]) {
+    const testEnvironmentRevelation = {
+      gateway: { scribe: {
+        getDatabaseAPI: require("~/tools/indexedDB/getInMemoryDatabaseAPI").getDatabaseAPI,
+      } },
+    };
+    return createGateway(gatewayOptions, ...revelations, testEnvironmentRevelation);
+  }
 }

@@ -14,11 +14,11 @@
             box-sizing: inherit;
           }
         </style>
-        <link href="inspire@0.31.0.js" as="script" rel="preload" />
-    </head>
+        <link rel="preload" href="/valaa/inspire/valaa-inspire.js" as="script"/>
+      </head>
     <body>
         <div id="valaa-inspire--main-container"></div>
-        <script src="inspire@0.31.0.js"></script>
+        <script src="/valaa/inspire/valaa-inspire.js"></script>
         <script>
           Valaa.createInspireGateway({ "...": "revela.json" }, {
             gateway: {
@@ -30,7 +30,7 @@
           }).then(function (inspireGateway) {
             Valaa.views = inspireGateway.createAndConnectViewsToDOM({
               inspireMain: {
-                name: "Valaa local Zero Main",
+                name: "Valaa perspire-test Inspire Main",
                 rootLensURI: inspireGateway.getRootPartitionURI(),
                 container: document.querySelector("#valaa-inspire--main-container"),
                 rootId: "valaa-inspire--main-root",

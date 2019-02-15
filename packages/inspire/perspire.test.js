@@ -1,6 +1,6 @@
 // @flow
 
-import { startNodePerspireServer } from "./PerspireServer";
+import PerspireServer from "./PerspireServer";
 
 const revelationRoot = "./revelations/perspire-test";
 const expectedOutputHTML = `<html><head><meta http-equiv="refresh" content="1"></head><body>${""
@@ -15,11 +15,14 @@ beforeEach(() => {});
 describe("testing perspire", () => {
   describe("perspire rendering", () => {
     it("runs a trivial local revelation which renders a proper html dump", async () => {
-      const server = await startNodePerspireServer({
+      const server = new PerspireServer({
         isTest: true,
+        siteRoot: process.cwd(),
         revelationRoot,
         revelations: [{ "...": "revela.json", gateway: { verbosity: 0 } }],
       });
+      await server.initialize();
+      await server.createMainView();
       // This wait should be removeable: however as it stands the creation of frame partitions will
       // cause an asynchronous delay in creation of UI tree, which the above await doesn't catch.
       // So we wait a small bit.

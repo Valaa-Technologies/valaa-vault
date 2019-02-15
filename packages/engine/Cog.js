@@ -3,8 +3,10 @@
 import { Discourse } from "~/prophet";
 
 import type { VALKOptions } from "~/raem";
-import VALEK, { Kuery, dumpKuery } from "~/engine/VALEK";
 
+import { transpileValaaScriptBody } from "~/script/transpileValaaScript";
+
+import VALEK, { Kuery, dumpKuery } from "~/engine/VALEK";
 import VrapperSubscriber from "~/engine/Vrapper/VrapperSubscriber";
 
 import { LogEventGenerator, wrapError, dumpObject } from "~/tools";
@@ -38,6 +40,23 @@ export default class Cog extends LogEventGenerator {
   }
   do (kuery: Kuery, options: VALKOptions) {
     return this.run(this.getSelfAsHead(), kuery, options);
+  }
+
+  doValaaScript (valaaScriptBody: string, options: VALKOptions = {}) {
+    options.transaction = this.engine.discourse.acquireTransaction("do-body");
+    const ret = this.do(transpileValaaScriptBody(valaaScriptBody, {
+      verbosity: options.verbosity || 0,
+      customVALK: VALEK,
+      sourceInfo: options.sourceInfo,
+    }), options);
+    if (options.transaction) {
+      const result = options.transaction.releaseTransaction();
+      if (result) {
+        return Promise.resolve((options.awaitResult || (r => r.getPersistedEvent()))(result))
+            .then(() => ret);
+      }
+    }
+    return ret;
   }
 
   run (head: any, kuery: Kuery, options: any = {}) {

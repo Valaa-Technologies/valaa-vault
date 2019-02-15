@@ -237,8 +237,9 @@ function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
   let retrievedContent;
   try {
     if (!(expandee.url || expandee.input)) {
-      expandeePath = resolveRevelationSpreaderImport(
-          expandeePath, gateway.siteRoot, gateway.revelationRoot, gateway.currentRevelationPath);
+      expandeePath = resolveRevelationSpreaderImport(expandeePath,
+          gateway.siteRoot, gateway.revelationRoot, gateway.domainRoot,
+          gateway.currentRevelationPath);
     }
     if (inBrowser()) {
       const requestOptions = { ...(isObjectExpandee ? expandee : {}), input: expandeePath };

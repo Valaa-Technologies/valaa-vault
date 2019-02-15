@@ -92,17 +92,17 @@ Replaces $ASSEMBLY_TARGET and $PACKAGE_NAME literals with their appropriate valu
   "yalc-push": {
     type: "boolean",
     description: `Push assembled libraries to local yalc repository after assembly.
-Causes --post-execute="cd $ASSEMBLY_TARGET && yalc push --no-sig"`,
-    causes: [`post-execute=cd $ASSEMBLY_TARGET && yalc push --no-sig`],
+Causes --post-execute="cd $ASSEMBLY_TARGET && yalc push --no-pure --no-sig"`,
+    causes: [`post-execute=cd $ASSEMBLY_TARGET && yalc push --no-pure --no-sig`],
   },
-  "yalc-link": {
+  "yalc-add": {
     type: "boolean",
-    description: `Links assembled libraries from local yalc repository after assembly.
-Note: provide --yalc-push before this manually as causes are not transitive yet.
-Causes --post-execute="yalc link $PACKAGE_NAME"`,
+    description: `yalc add --no-pure assembled libraries from local yalc repository after assembly.
+Note: please specify --yalc-push before this manually as causes are not transitive yet.
+Causes --post-execute="yalc add --no-pure $PACKAGE_NAME"`,
     // FIXME(iridian, 2019-02): yalc-link should cause yalc-push but
     // causes are (quite inappropriately and surprisingly) not transitive yet.
-    causes: [`post-execute=yalc link $PACKAGE_NAME`],
+    causes: [`post-execute=yalc add --no-pure $PACKAGE_NAME`],
   },
 });
 

@@ -87,15 +87,15 @@ describe("Scribe", () => {
 
     for (const mediaContent of textMediaContents) {
       const preparation = await connection.prepareBvob(mediaContent, { name: "Some media" });
-      const bvobId = await preparation.persistProcess;
+      const contentHash = await preparation.persistProcess;
 
       const bvobKeys = await getKeysFromDB(sharedDB, "bvobs");
-      expect(bvobKeys).toContain(bvobId);
+      expect(bvobKeys).toContain(contentHash);
 
       const bufferKeys = await getKeysFromDB(sharedDB, "buffers");
-      expect(bufferKeys).toContain(bvobId);
+      expect(bufferKeys).toContain(contentHash);
 
-      const restoredBuffer = await getFromDB(sharedDB, "buffers", bvobId);
+      const restoredBuffer = await getFromDB(sharedDB, "buffers", contentHash);
       const restoredContent = utf8StringFromArrayBuffer(restoredBuffer.buffer);
       expect(restoredContent).toEqual(mediaContent);
     }

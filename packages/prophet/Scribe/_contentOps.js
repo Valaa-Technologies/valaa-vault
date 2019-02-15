@@ -45,23 +45,23 @@ export type MediaLookup = {
 ######     ##     ####   #####
 */
 
-export function _preCacheBvob (scribe: Scribe, bvobId: string, newInfo: BvobInfo,
+export function _preCacheBvob (scribe: Scribe, contentHash: string, newInfo: BvobInfo,
     retrieveBvobContent: Function, initialPersistRefCount: number) {
-  const bvobInfo = scribe._bvobLookup[bvobId];
+  const bvobInfo = scribe._bvobLookup[contentHash];
   if (bvobInfo) {
     // This check produces false positives: if byteLengths match there is no error even if
     // the contents might still be inconsistent.
     if ((bvobInfo.byteLength !== newInfo.byteLength)
         && (bvobInfo.byteLength !== undefined) && (newInfo.byteLength !== undefined)) {
       throw new Error(`byteLength mismatch between new bvob (${newInfo.byteLength
-          }) and existing bvob (${bvobInfo.byteLength}) while precaching bvob "${bvobId}"`);
+          }) and existing bvob (${bvobInfo.byteLength}) while precaching bvob "${contentHash}"`);
     }
     return undefined;
   }
   return thenChainEagerly(
-      retrieveBvobContent(bvobId),
+      retrieveBvobContent(contentHash),
       buffer => (buffer !== undefined)
-          && scribe._writeBvobBuffer(buffer, bvobId, initialPersistRefCount));
+          && scribe._writeBvobBuffer(buffer, contentHash, initialPersistRefCount));
 }
 
 const defaultRetries = 3;
@@ -69,18 +69,20 @@ const defaultRetries = 3;
 export function _prepareBvob (connection: ScribePartitionConnection, content: any,
     mediaInfo: MediaInfo = {}, onError: Function) {
   const { buffer, contentHash } = bufferAndContentHashFromNative(content, mediaInfo);
-  const mediaName = mediaInfo.name ? `"${mediaInfo.name}"` : mediaInfo.bvobId;
-  if (mediaInfo && mediaInfo.bvobId && (mediaInfo.bvobId !== contentHash)) {
-    connection.errorEvent(`\n\tINTERNAL ERROR: bvobId mismatch when preparing bvob for Media '${
+  const expectedContentHash = mediaInfo && (mediaInfo.contentHash || mediaInfo.bvobId);
+  const mediaName = mediaInfo && (mediaInfo.name ? `"${mediaInfo.name}"` : expectedContentHash);
+  if (expectedContentHash && (expectedContentHash !== contentHash)) {
+    connection.errorEvent(
+        `\n\tINTERNAL ERROR: contentHash mismatch when preparing bvob for Media '${
             mediaInfo.name}', CONTENT IS NOT PERSISTED`,
         "\n\tactual content hash:", contentHash,
-        "\n\trequested bvobId:", mediaInfo.bvobId,
+        "\n\texpected contentHash:", expectedContentHash,
         "\n\tmediaInfo:", ...dumpObject(mediaInfo),
         "\n\tcontent:", ...dumpObject({ content }),
     );
     return {};
   }
-  mediaInfo.bvobId = contentHash;
+  mediaInfo.contentHash = mediaInfo.bvobId = contentHash;
 
   const pendingBvobInfo = connection._pendingBvobLookup[contentHash]
       || (connection._pendingBvobLookup[contentHash] = {});
@@ -196,7 +198,9 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
         : update.mediaType;
     Object.assign(mediaInfo, mediaType);
   }
-  if (update.content) mediaInfo.bvobId = getRawIdFrom(update.content);
+  if (update.content) {
+    mediaInfo.contentHash = mediaInfo.bvobId = getRawIdFrom(update.content);
+  }
   return [{ mediaEntry: newEntry }];
 }
 
@@ -224,9 +228,10 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribePartiti
   let content;
   while (++i) {
     try {
-      if (mediaInfo.bvobId) {
+      const contentHash = mediaInfo.contentHash || mediaInfo.bvobId;
+      if (contentHash) {
         content = content
-            || connection._prophet.tryGetCachedBvobContent(mediaInfo.bvobId)
+            || connection._prophet.tryGetCachedBvobContent(contentHash)
             || (options.retrieveMediaBuffer && (await options.retrieveMediaBuffer(mediaInfo)));
         if ((content !== undefined) && options.prepareBvob) {
         // TODO(iridian): Determine whether media content should be pre-cached or not.
@@ -279,7 +284,7 @@ export function _requestMediaContents (connection: ScribePartitionConnection,
     try {
       const mediaEntry = connection._getMediaEntry(mediaInfo.mediaRef, false); // !!mediaInfo.asURL
       const actualInfo = { ...mediaInfo };
-      if (actualInfo.bvobId === undefined) {
+      if ((actualInfo.bvobId || actualInfo.contentHash) === undefined) {
         if (!mediaEntry || !mediaEntry.mediaInfo) {
           throw new Error(`Cannot find Media info for '${String(mediaInfo.mediaRef)}'`);
         }
@@ -321,10 +326,11 @@ export function _requestMediaContents (connection: ScribePartitionConnection,
 function _getMediaContent (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
     upstreamOperation: Object) {
   const actualInfo = { ...mediaInfo };
-  const bvobInfo = connection._prophet._bvobLookup[actualInfo.bvobId || ""];
+  const contentHash = actualInfo.contentHash || actualInfo.bvobId || "";
+  const bvobInfo = connection._prophet._bvobLookup[contentHash];
   if (bvobInfo) {
     actualInfo.buffer = bvobInfo.buffer || bvobInfo.pendingBuffer
-        || (bvobInfo.persistRefCount && connection._prophet.readBvobContent(actualInfo.bvobId));
+        || (bvobInfo.persistRefCount && connection._prophet.readBvobContent(contentHash));
     const isArrayBufferType = !actualInfo.type
         || (actualInfo.type === "application" && actualInfo.subtype === "octet-stream");
     if (isArrayBufferType && actualInfo.buffer) return actualInfo.buffer;
@@ -347,12 +353,13 @@ const maxDataURISourceBytes = 48000;
 function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
     upstreamOperation: Object, onError: Function): any {
   // Only use cached in-memory nativeContent if its id matches the requested id.
-  const bvobInfo = connection._prophet._bvobLookup[mediaInfo.bvobId || ""];
+  const contentHash = mediaInfo.contentHash || mediaInfo.bvobId || "";
+  const bvobInfo = connection._prophet._bvobLookup[contentHash];
   // Media's with sourceURL or too large/missing bvobs will be handled by Oracle
   if (!bvobInfo) {
     if (mediaInfo.asURL === "data") {
       throw new Error(`Cannot create a data URI for Media ${mediaInfo.name
-          }: can't find Bvob info for ${mediaInfo.bvobId}`);
+          }: can't find Bvob info for ${contentHash}`);
     }
     return upstreamOperation.push(mediaInfo)[0];
   }
@@ -370,12 +377,12 @@ function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaIn
   // Otherwise IndexedDB can't be accessed by the web pages directly, but horrible hacks must be
   // used like so:
   // https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
-  return thenChainEagerly(connection._prophet.readBvobContent(mediaInfo.bvobId),
+  return thenChainEagerly(connection._prophet.readBvobContent(contentHash),
       (buffer => {
         if (!buffer) {
           if (mediaInfo.asURL === "data") {
             throw new Error(`Cannot create a data URI for Media ${mediaInfo.name
-                }: can't read Bvob content for ${mediaInfo.bvobId}`);
+                }: can't read Bvob content for ${contentHash}`);
           }
         }
         const { type, subtype } = mediaInfo;

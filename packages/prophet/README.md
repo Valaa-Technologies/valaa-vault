@@ -165,7 +165,7 @@ representation and *integrate* in use site context.
 
 #### 3.3.1. Bvob *retrieve* yields an ArrayBuffer via network download, cache hit, etc.
 
-Persisted octet sequences are typically identified by their *bvobId*,
+Persisted octet sequences are typically identified by their *contentHash*,
 a well-defined content hash of the whole octet sequence (and nothing
 else). Their in-memory representation is shared between all consumers
 inside the same execution environment.

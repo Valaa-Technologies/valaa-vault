@@ -24,7 +24,8 @@ export const vdoc = vdon({
 });
 
 export type BvobInfo = {
-  bvobId: string, // db primary key for "bvobs" and "buffers"
+  bvobId: string, // primary key, to be deprecated, see contentHash,
+  contentHash: string, // future db primary key for "bvobs" and "buffers"
   persistRefCount: number, // db-backed in "bvobs"
   byteLength: number, // db-backed in "bvobs"
   inMemoryRefCount: number, // not db-backed
@@ -118,7 +119,9 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
   if (!updates || !updates.length) return {};
   const inMemoryRefCountAdjusts = {};
   const persistRefCountAdjusts = {};
-  function _addAdjust (refs, bvobId, adjust) { refs[bvobId] = (refs[bvobId] || 0) + adjust; }
+  function _addAdjust (refs, contentHash, adjust) {
+    refs[contentHash] = (refs[contentHash] || 0) + adjust;
+  }
 
   await (connection._db && connection._db.transaction(["medias"], "readwrite", ({ medias }) => {
     updates.forEach(entry => {
@@ -130,22 +133,24 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
         const updateEntryReq = medias.put(entry);
         updateEntryReq.onsuccess = () => {
           const newInfo = entry.mediaInfo;
-          if (newInfo.bvobId) {
-            if (connection._prophet._bvobLookup[newInfo.bvobId]) {
-              if (entry.isInMemory) _addAdjust(inMemoryRefCountAdjusts, newInfo.bvobId, 1);
-              if (entry.isPersisted) _addAdjust(persistRefCountAdjusts, newInfo.bvobId, 1);
+          const contentHash = newInfo.contentHash || newInfo.bvobId;
+          if (contentHash) {
+            if (connection._prophet._bvobLookup[contentHash]) {
+              if (entry.isInMemory) _addAdjust(inMemoryRefCountAdjusts, contentHash, 1);
+              if (entry.isPersisted) _addAdjust(persistRefCountAdjusts, contentHash, 1);
             } else {
-              console.log(`Can't find Media "${newInfo.name}" Bvob info for ${newInfo.bvobId
+              console.log(`Can't find Media "${newInfo.name}" Bvob info for ${contentHash
               } when adding new content references`);
             }
           }
-          const currentBvobId = ((currentEntryReq.result || {}).mediaInfo || {}).bvobId;
-          if (currentBvobId && currentEntryReq.result.isPersisted) {
-            if (connection._prophet._bvobLookup[currentBvobId]) {
-              _addAdjust(persistRefCountAdjusts, currentBvobId, -1);
+          const currentMediaInfo = ((currentEntryReq.result || {}).mediaInfo || {});
+          const currentContentHash = currentMediaInfo.contentHash || currentMediaInfo.bvobId;
+          if (currentContentHash && currentEntryReq.result.isPersisted) {
+            if (connection._prophet._bvobLookup[currentContentHash]) {
+              _addAdjust(persistRefCountAdjusts, currentContentHash, -1);
             } else {
-              console.log(`Can't find Media "${newInfo.name}" Bvob info for ${currentBvobId
-              } when removing old content references`);
+              console.log(`Can't find Media "${newInfo.name}" Bvob info for ${currentContentHash
+                } when removing old content references`);
             }
           }
           entry.updatePersisted = true;
@@ -169,9 +174,11 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
   updates.forEach(entry => {
     if (connection.isLocallyPersisted() && !entry.updatePersisted) return;
     delete entry.updatePersisted;
-    const currentScribeEntry = connection._prophet._persistedMediaLookup[entry.mediaId];
-    if ((currentScribeEntry || {}).isInMemory && (currentScribeEntry.mediaInfo || {}).bvobId) {
-      _addAdjust(inMemoryRefCountAdjusts, currentScribeEntry.mediaInfo.bvobId, -1);
+    const currentScribeEntry = connection._prophet._persistedMediaLookup[entry.mediaId] || {};
+    const contentHash = (currentScribeEntry.mediaInfo || {}).contentHash
+        || (currentScribeEntry.mediaInfo || {}).bvobId;
+    if (currentScribeEntry.isInMemory && contentHash) {
+      _addAdjust(inMemoryRefCountAdjusts, contentHash, -1);
     }
     connection._prophet._persistedMediaLookup[entry.mediaId] = entry;
     ret[entry.mediaId] = entry;
@@ -195,13 +202,13 @@ export function _readMediaEntries (connection: ScribePartitionConnection) {
             return;
           }
           const entry = { ...cursor.value, isInMemory: true };
-          const bvobId = (entry.mediaInfo || {}).bvobId;
-          if (bvobId && entry.isInMemory) {
-            if (connection._prophet._bvobLookup[bvobId]) {
-              connection._prophet._adjustInMemoryBvobBufferRefCounts({ [bvobId]: 1 });
+          const contentHash = (entry.mediaInfo || {}).contentHash || (entry.mediaInfo || {}).bvobId;
+          if (contentHash && entry.isInMemory) {
+            if (connection._prophet._bvobLookup[contentHash]) {
+              connection._prophet._adjustInMemoryBvobBufferRefCounts({ [contentHash]: 1 });
             } else {
               connection.errorEvent(`Can't find Media "${(entry.mediaInfo || {}).name
-                  }" in-memory Bvob info for ${entry.mediaInfo.bvobId
+                  }" in-memory Bvob info for ${entry.mediaInfo.contentHash
                   } when reading partition media infos`);
             }
           }
@@ -222,13 +229,13 @@ export function _destroyMediaInfo (connection: ScribePartitionConnection, mediaR
   return connection._db.transaction(["medias"], "readwrite", ({ medias }) => {
     const req = medias.delete(mediaRawId);
     req.onsuccess = () => {
-      const bvobId = mediaEntry.mediaInfo.bvobId;
-      if (bvobId) {
+      const contentHash = mediaEntry.mediaInfo.contentHash || mediaEntry.mediaInfo.bvobId;
+      if (contentHash) {
         if (mediaEntry.isInMemory) {
-          connection._prophet._adjustInMemoryBvobBufferRefCounts({ [bvobId]: -1 });
+          connection._prophet._adjustInMemoryBvobBufferRefCounts({ [contentHash]: -1 });
         }
         if (mediaEntry.isPersisted) {
-          connection._prophet._adjustBvobBufferPersistRefCounts({ [bvobId]: -1 });
+          connection._prophet._adjustBvobBufferPersistRefCounts({ [contentHash]: -1 });
         }
       }
     };
@@ -245,31 +252,33 @@ export function _destroyMediaInfo (connection: ScribePartitionConnection, mediaR
 */
 
 export function _writeBvobBuffer (scribe: Scribe, buffer: ArrayBuffer,
-    bvobId: string, bvobInfo?: BvobInfo, initialPersistRefCount: number = 0): ?Promise<any> {
+  contentHash: string, bvobInfo?: BvobInfo, initialPersistRefCount: number = 0): ?Promise<any> {
   if (bvobInfo && bvobInfo.persistRefCount) return bvobInfo.persistProcess;
-  // Initiate write (set persistProcess so eventual commands using the bvobId can wait
+  // Initiate write (set persistProcess so eventual commands using the contentHash can wait
   // before being accepted) but leave the bvob persist refcount to zero. Even if the bvob is
   // never actually attached to a metadata, zero-refcount bvobs can be cleared from storage at
   // next _initializeContentLookup.
-  const actualBvobInfo = scribe._bvobLookup[bvobId] = {
-    bvobId,
+  const actualBvobInfo = scribe._bvobLookup[contentHash] = {
+    contentHash,
+    bvobId: contentHash,
     buffer,
     byteLength: buffer.byteLength,
     persistRefCount: initialPersistRefCount,
     inMemoryRefCount: 0,
     persistProcess: scribe._sharedDb.transaction(["bvobs", "buffers"], "readwrite",
         ({ bvobs, buffers }) => {
-          bvobs.get(bvobId).onsuccess = event => {
+          bvobs.get(contentHash).onsuccess = event => {
             const existingRefCount = event.target.result && event.target.result.persistRefCount;
             actualBvobInfo.persistRefCount = existingRefCount || initialPersistRefCount;
             bvobs.put({
-              bvobId,
+              contentHash,
+              bvobId: contentHash,
               byteLength: actualBvobInfo.byteLength,
               persistRefCount: actualBvobInfo.persistRefCount,
             });
-            if (!existingRefCount) buffers.put({ bvobId, buffer });
+            if (!existingRefCount) buffers.put({ contentHash, bvobId: contentHash, buffer });
           };
-          return bvobId;
+          return contentHash;
         })
   };
   return actualBvobInfo.persistProcess;
@@ -293,7 +302,7 @@ export function _readBvobBuffers (scribe: Scribe, bvobInfos: BvobInfo[]):
     scribe._sharedDb.transaction(["buffers"], "readonly", ({ buffers }) => {
       pendingReads.forEach(pendingRead => {
         const bvobInfo = pendingRead.bvobInfo;
-        const req = buffers.get(bvobInfo.bvobId);
+        const req = buffers.get(bvobInfo.contentHash || bvobInfo.bvobId);
         req.onerror = (error) => {
           delete bvobInfo.pendingBuffer;
           pendingRead.reject(error);
@@ -301,7 +310,8 @@ export function _readBvobBuffers (scribe: Scribe, bvobInfos: BvobInfo[]):
         req.onsuccess = () => {
           delete bvobInfo.pendingBuffer;
           if (!req.result || !req.result.buffer) {
-            pendingRead.reject(new Error(`Cannot find bvob '${bvobInfo.bvobId}' from IndexedDB`));
+            pendingRead.reject(new Error(
+                `Cannot find bvob '${bvobInfo.contentHash}' from IndexedDB`));
           } else {
             if (bvobInfo.inMemoryRefCount) bvobInfo.buffer = req.result.buffer;
             pendingRead.resolve(req.result.buffer);
@@ -314,21 +324,21 @@ export function _readBvobBuffers (scribe: Scribe, bvobInfos: BvobInfo[]):
 }
 
 export async function _adjustBvobBufferPersistRefCounts (
-    scribe: Scribe, adjusts: { [bvobId: string]: number },
+    scribe: Scribe, adjusts: { [contentHash: string]: number },
 ) {
   // Check if recently created file does not need in-memory buffer persist but bvobInfo still
   // has it and delete the buffer.
   const newPersistRefcounts = [];
   await scribe._sharedDb.transaction(["bvobs"], "readwrite", ({ bvobs }) => {
-    Object.keys(adjusts).forEach(bvobId => {
-      const adjustment = adjusts[bvobId];
+    Object.keys(adjusts).forEach(contentHash => {
+      const adjustment = adjusts[contentHash];
       if (!adjustment) return;
       // if (!bvobInfo.inMemoryRefCount && bvobInfo.buffer) delete bvobInfo.buffer;
-      const req = bvobs.get(bvobId);
+      const req = bvobs.get(contentHash);
       req.onsuccess = () => {
         if (!req.result) {
           scribe.errorEvent(`While adjusting content buffer persist references, cannot find ${
-              ""}IndexedDB.valaa-shared-content.bvobs entry ${bvobId}, skipping`);
+              ""}IndexedDB.valaa-shared-content.bvobs entry ${contentHash}, skipping`);
           return;
         }
         let persistRefCount = (req.result && req.result.persistRefCount) || 0;
@@ -336,19 +346,21 @@ export async function _adjustBvobBufferPersistRefCounts (
         if (!(persistRefCount > 0)) { // a bit of defensive programming vs NaN and negatives
           persistRefCount = 0;
         }
-        const updateReq = bvobs.put({ bvobId, byteLength: req.result.byteLength, persistRefCount });
-        updateReq.onsuccess = () => newPersistRefcounts.push([bvobId, persistRefCount]);
+        const updateReq = bvobs.put({
+          contentHash, bvobId: contentHash, byteLength: req.result.byteLength, persistRefCount,
+        });
+        updateReq.onsuccess = () => newPersistRefcounts.push([contentHash, persistRefCount]);
         /* Only removing bvob infos and associated buffers on start-up.
         if (!bvobInfo.persistRefCount) {
-          bvobs.delete(bvobInfo.bvobId);
-          buffers.delete(bvobInfo.bvobId);
+          bvobs.delete(bvobInfo.contentHash);
+          buffers.delete(bvobInfo.contentHash);
         }
         */
       };
     });
   });
-  return newPersistRefcounts.map(([bvobId, persistRefCount]) => {
-    const bvobInfo = scribe._bvobLookup[bvobId] || { bvobId };
+  return newPersistRefcounts.map(([contentHash, persistRefCount]) => {
+    const bvobInfo = scribe._bvobLookup[contentHash] || { contentHash, bvobId: contentHash };
     bvobInfo.persistRefCount = persistRefCount;
     return bvobInfo;
   });

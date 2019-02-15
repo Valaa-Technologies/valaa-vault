@@ -382,32 +382,32 @@ if (falseProphet.getVerbosity() === 1) {
 
 function _getOngoingAuthorityPersists (falseProphet: FalseProphet, { command }: Object) {
   const ret = [];
-  for (const bvobId of Object.keys(command.addedBvobReferences || {})) {
-    for (const { referrerId } of command.addedBvobReferences[bvobId]) {
+  for (const contentHash of Object.keys(command.addedBvobReferences || {})) {
+    for (const { referrerId } of command.addedBvobReferences[contentHash]) {
       let connection;
       try {
         const partitionURIString = String(referrerId.getPartitionURI());
         connection = falseProphet._connections[partitionURIString];
         invariantifyObject(connection, `partitionConnections[${partitionURIString}]`);
       } catch (error) {
-        throw errorOnGetOngoingAuthorityPersists.call(falseProphet, bvobId, referrerId, error);
+        throw errorOnGetOngoingAuthorityPersists.call(falseProphet, contentHash, referrerId, error);
       }
       const persistProcess = thenChainEagerly(
           connection.getActiveConnection(),
           () => {
             const authorityConnection = connection.getUpstreamConnection();
-            return authorityConnection && authorityConnection.getContentPersistProcess(bvobId);
+            return authorityConnection && authorityConnection.getContentPersistProcess(contentHash);
           },
-          errorOnGetOngoingAuthorityPersists.bind(falseProphet, bvobId, referrerId),
+          errorOnGetOngoingAuthorityPersists.bind(falseProphet, contentHash, referrerId),
       );
       if (persistProcess) ret.push(persistProcess);
     }
   }
   return ret;
-  function errorOnGetOngoingAuthorityPersists (bvobId, referrerId, error) {
+  function errorOnGetOngoingAuthorityPersists (contentHash, referrerId, error) {
     throw falseProphet.wrapErrorEvent(error, new Error("_getOngoingAuthorityPersists"),
             "\n\tcurrent referrerId:", ...dumpObject(referrerId),
-            "\n\tcurrent bvobId:", ...dumpObject(bvobId),
+            "\n\tcurrent contentHash:", ...dumpObject(contentHash),
             "\n\tret (so far):", ...dumpObject(ret),
             "\n\tcommand:", ...dumpObject(command));
   }

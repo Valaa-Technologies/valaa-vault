@@ -165,20 +165,21 @@ export default class Prophet extends LogEventGenerator {
   }
 
   /**
-   * Returns the bvob buffer for given bvobId as an ArrayBuffer if it is locally available,
-   * undefined otherwise.
+   * Returns the bvob buffer for given contentHash as an ArrayBuffer if
+   * it is locally available, undefined otherwise.
    *
-   * @param {string} bvobId
+   * @param {string} contentHash
    * @returns
    *
    * @memberof Prophet
    */
-  tryGetCachedBvobContent (bvobId: string): ArrayBuffer {
-    return this._upstream.tryGetCachedBvobContent(bvobId);
+  tryGetCachedBvobContent (contentHash: string): ArrayBuffer {
+    return this._upstream.tryGetCachedBvobContent(contentHash);
   }
 
   /**
-   * Returns a map of fully active partition connections keyed by their partition id.
+   * Returns a map of fully active partition connections keyed by their
+   * partition id.
    */
   getActiveConnections (): Map<string, PartitionConnection> {
     const ret = {};
@@ -194,7 +195,8 @@ export default class Prophet extends LogEventGenerator {
   }
 
   /**
-   * Returns a map of still synchronizing partition connections keyed by their partition id.
+   * Returns a map of still synchronizing partition connections keyed
+   * by their partition id.
    */
   getActivatingConnections () : Map<string, Promise<PartitionConnection> > {
     const ret = {};

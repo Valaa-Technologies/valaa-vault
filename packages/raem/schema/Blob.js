@@ -18,13 +18,13 @@ export default new GraphQLObjectType({
     ),
 
     ...generatedField("blobId", new GraphQLNonNull(GraphQLString),
-        `Globally unique identifier string of this Bvob`,
+        `DEPRECATED Globally unique identifier string of this Bvob`,
         bvob => bvob.get("id").rawId(),
         { affiliatedType: "Blob" },
     ),
 
     ...generatedField("bvobId", new GraphQLNonNull(GraphQLString),
-        `Globally unique identifier string of this Bvob`,
+        `DEPRECATED Globally unique identifier string of this Bvob (prefer contentHash)`,
         bvob => bvob.get("id").rawId(),
         { affiliatedType: "Blob" },
     ),

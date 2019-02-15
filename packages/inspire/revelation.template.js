@@ -101,7 +101,8 @@ function partitionInfo () {
         mediaId: "",
         mediaInfo: {
           name: "",
-          bvobId: "",
+          contentHash: "",
+          bvobId: "", // Deprecated since 0.2. Use contentHash instead.
           blobId: "", // Deprecated since 0.2. Use bvobId instead.
         },
         isPersisted: null,

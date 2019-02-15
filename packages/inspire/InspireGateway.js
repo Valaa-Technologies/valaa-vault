@@ -567,16 +567,17 @@ export default class InspireGateway extends LogEventGenerator {
         eventIdBegin: eventIdEnd,
         retrieveMediaBuffer (mediaInfo: Object) {
           const latestInfo = mediaInfo.mediaRef && latestMediaInfos[mediaInfo.mediaRef.rawId()];
-          if (!latestInfo ||
-              (mediaInfo.bvobId !== (latestInfo.mediaInfo.bvobId || latestInfo.mediaInfo.blobId))) {
-            // Bvob wasn't found in cache and the bvobId doesn't match the latest known bvobId for
-            // the requested media. The request for the latest bvob should come later:
-            // Return undefined to silently ignore this request.
+          if (!latestInfo || (mediaInfo.contentHash !==
+              (latestInfo.mediaInfo.contentHash || latestInfo.mediaInfo.bvobId
+                  || latestInfo.mediaInfo.blobId))) {
+            // Bvob wasn't found in cache and the contentHash doesn't match the latest known
+            // contentHash for the requested media. The request for the latest bvob should come
+            // later: Return undefined to silently ignore this request.
             return undefined;
           }
           // Otherwise this is the request for last known bvob, which should have been precached.
           throw new Error(`Cannot find the latest bvob of media "${mediaInfo.name
-              }" during prologue narration, with bvob id "${mediaInfo.bvobId}" `);
+              }" during prologue narration, with bvob id "${mediaInfo.contentHash}" `);
         }
       });
       for (const result of chronicling.eventResults) await result.getLocalEvent();
@@ -591,28 +592,28 @@ export default class InspireGateway extends LogEventGenerator {
   static revelationBvobInitialPersistRefCount = 1;
 
   async _getBvobInfos () {
-    const readRevelationBvobContent = async (bvobId: string) => {
+    const readRevelationBvobContent = async (contentHash: string) => {
       const bvobBuffers = {
         ...await this.prologueRevelation.bvobBuffers,
         ...await this.prologueRevelation.blobBuffers, // deprecated
       };
-      if (typeof bvobBuffers[bvobId] === "undefined") {
-        this.errorEvent("Could not locate precached content for bvob", bvobId,
+      if (bvobBuffers[contentHash] === undefined) {
+        this.errorEvent("Could not locate precached content for bvob", contentHash,
             "from revelation bvobBuffers", ...dumpObject(bvobBuffers));
         return undefined;
       }
-      const container = await bvobBuffers[bvobId];
-      if (typeof container.base64 !== "undefined") return arrayBufferFromBase64(container.base64);
+      const container = await bvobBuffers[contentHash];
+      if (container.base64 !== undefined) return arrayBufferFromBase64(container.base64);
       return container;
     };
     const bvobInfos = {
       ...((await this.prologueRevelation.bvobInfos) || {}),
       ...((await this.prologueRevelation.blobInfos) || {}), // deprecated
     };
-    for (const [bvobId, bvobInfoMaybe] of Object.entries(bvobInfos || {})) {
+    for (const [contentHash, bvobInfoMaybe] of Object.entries(bvobInfos || {})) {
       const bvobInfo = await bvobInfoMaybe;
       if (bvobInfo.persistRefCount !== 0) {
-        await this.scribe.preCacheBvob(bvobId, bvobInfo, readRevelationBvobContent,
+        await this.scribe.preCacheBvob(contentHash, bvobInfo, readRevelationBvobContent,
             InspireGateway.revelationBvobInitialPersistRefCount);
       }
     }

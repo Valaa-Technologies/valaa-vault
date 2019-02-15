@@ -46,7 +46,7 @@ export default class Scribe extends Prophet {
   static PartitionConnectionType = ScribePartitionConnection;
 
   _sharedDb: IndexedDBWrapper;
-  _bvobLookup: { [bvobId: string]: BvobInfo; };
+  _bvobLookup: { [contentHash: string]: BvobInfo; };
   _mediaTypes: { [mediaTypeId: string]: { type: string, subtype: string, parameters: any }};
 
   // Contains the media infos for most recent action for which media
@@ -86,44 +86,44 @@ export default class Scribe extends Prophet {
 
   // bvob content ops
 
-  preCacheBvob (bvobId: string, newInfo: Object, retrieveBvobContent: Function,
+  preCacheBvob (contentHash: string, newInfo: Object, retrieveBvobContent: Function,
       initialPersistRefCount: number = 0) {
     try {
-      return _preCacheBvob(this, bvobId, newInfo, retrieveBvobContent, initialPersistRefCount);
+      return _preCacheBvob(this, contentHash, newInfo, retrieveBvobContent, initialPersistRefCount);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `preCacheBvob('${bvobId}')`,
-          "\n\tbvobInfo:", ...dumpObject(this._bvobLookup[bvobId]));
+      throw this.wrapErrorEvent(error, `preCacheBvob('${contentHash}')`,
+          "\n\tbvobInfo:", ...dumpObject(this._bvobLookup[contentHash]));
     }
   }
 
-  tryGetCachedBvobContent (bvobId: string): ?ArrayBuffer {
-    const bvobInfo = this._bvobLookup[bvobId || ""];
+  tryGetCachedBvobContent (contentHash: string): ?ArrayBuffer {
+    const bvobInfo = this._bvobLookup[contentHash || ""];
     return bvobInfo && bvobInfo.buffer;
   }
 
-  readBvobContent (bvobId: string): ?ArrayBuffer {
-    const bvobInfo = this._bvobLookup[bvobId || ""];
+  readBvobContent (contentHash: string): ?ArrayBuffer {
+    const bvobInfo = this._bvobLookup[contentHash || ""];
     try {
-      if (!bvobInfo) throw new Error(`Can't find Bvob info '${bvobId}'`);
+      if (!bvobInfo) throw new Error(`Can't find Bvob info '${contentHash}'`);
       return _readBvobBuffers(this, [bvobInfo])[0];
     } catch (error) {
-      throw this.wrapErrorEvent(error, `readBvobContent('${bvobId}')`,
+      throw this.wrapErrorEvent(error, `readBvobContent('${contentHash}')`,
           "\n\tbvobInfo:", ...dumpObject(bvobInfo));
     }
   }
 
-  _writeBvobBuffer (buffer: ArrayBuffer, bvobId: string, initialPersistRefCount: number = 0):
+  _writeBvobBuffer (buffer: ArrayBuffer, contentHash: string, initialPersistRefCount: number = 0):
       ?Promise<any> {
-    const bvobInfo = this._bvobLookup[bvobId || ""];
+    const bvobInfo = this._bvobLookup[contentHash || ""];
     try {
-      if ((typeof bvobId !== "string") || !bvobId) {
-        throw new Error(`Invalid bvobId '${bvobId}', expected non-empty string`);
+      if ((typeof contentHash !== "string") || !contentHash) {
+        throw new Error(`Invalid contentHash '${contentHash}', expected non-empty string`);
       }
       invariantifyObject(buffer, "_writeBvobBuffer.buffer",
           { instanceof: ArrayBuffer, allowEmpty: true });
-      return _writeBvobBuffer(this, buffer, bvobId, bvobInfo, initialPersistRefCount);
+      return _writeBvobBuffer(this, buffer, contentHash, bvobInfo, initialPersistRefCount);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_writeBvobBuffer('${bvobId}')`,
+      throw this.wrapErrorEvent(error, `_writeBvobBuffer('${contentHash}')`,
           "\n\tbuffer:", ...dumpObject(buffer),
           "\n\tbvobInfo:", ...dumpObject(bvobInfo));
     }
@@ -131,7 +131,7 @@ export default class Scribe extends Prophet {
 
   /**
    * Adjusts a bvob in-memory buffer reference counts as an immediate
-   * modification to bvobId.inMemoryRefCount. If as a result the ref
+   * modification to bvobInfo.inMemoryRefCount. If as a result the ref
    * count reaches zero frees the cached buffer and all cached
    * decodings.
    *
@@ -143,17 +143,17 @@ export default class Scribe extends Prophet {
    * found in bvobInfo.pendingBuffer, and the function will return a
    * promise.
    *
-   * @param {string} bvobId
+   * @param {object} adjusts
    * @returns {boolean}
    * @memberof Scribe
    */
-  _adjustInMemoryBvobBufferRefCounts (adjusts: { [bvobId: string]: number }): Object[] {
+  _adjustInMemoryBvobBufferRefCounts (adjusts: { [contentHash: string]: number }): Object[] {
     const readBuffers = [];
     try {
-      const ret = Object.keys(adjusts).map(bvobId => {
-        const bvobInfo = this._bvobLookup[bvobId];
-        if (!bvobInfo) throw new Error(`Cannot find Bvob info '${bvobId}'`);
-        return [bvobInfo, adjusts[bvobId]];
+      const ret = Object.keys(adjusts).map(contentHash => {
+        const bvobInfo = this._bvobLookup[contentHash];
+        if (!bvobInfo) throw new Error(`Cannot find Bvob info for '${contentHash}'`);
+        return [bvobInfo, adjusts[contentHash]];
       }).map(([bvobInfo, adjust]) => {
         bvobInfo.inMemoryRefCount = (bvobInfo.inMemoryRefCount || 0) + adjust;
         if (!(bvobInfo.inMemoryRefCount > 0)) {
@@ -181,10 +181,12 @@ export default class Scribe extends Prophet {
     }
   }
 
-  async _adjustBvobBufferPersistRefCounts (adjusts: { [bvobId: string]: number }): Object[] {
+  async _adjustBvobBufferPersistRefCounts (adjusts: { [contentHash: string]: number }): Object[] {
     try {
-      Object.keys(adjusts).forEach(bvobId => {
-        if (!this._bvobLookup[bvobId]) throw new Error(`Cannot find Bvob info '${bvobId}'`);
+      Object.keys(adjusts).forEach(contentHash => {
+        if (!this._bvobLookup[contentHash]) {
+          throw new Error(`Cannot find Bvob info '${contentHash}'`);
+        }
       });
       return await _adjustBvobBufferPersistRefCounts(this, adjusts);
     } catch (error) {

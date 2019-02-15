@@ -93,13 +93,13 @@ export class TestPartitionConnection extends AuthorityPartitionConnection {
 
   prepareBvob (content: any, mediaInfo: MediaInfo): Object | Promise<Object> {
     if (!this.isRemoteAuthority()) return super.prepareBvob(content, mediaInfo);
-    if (!mediaInfo || !mediaInfo.bvobId) throw new Error("mediaInfo.bvobId not defined");
-    const preparation = this._preparations[mediaInfo.bvobId]
-        || (this._preparations[mediaInfo.bvobId] = {});
+    const contentHash = mediaInfo && (mediaInfo.contentHash || mediaInfo.bvobId);
+    if (!contentHash) throw new Error("mediaInfo.contentHash not defined");
+    const preparation = this._preparations[contentHash] || (this._preparations[contentHash] = {});
     preparation.content = content;
     preparation.mediaInfo = mediaInfo;
     return {
-      contentHash: mediaInfo.bvobId,
+      contentHash,
       persistProcess: this._tryFulfillPreparation(preparation) || new Promise((resolve, reject) => {
         preparation.resolve = resolve;
         preparation.reject = reject;

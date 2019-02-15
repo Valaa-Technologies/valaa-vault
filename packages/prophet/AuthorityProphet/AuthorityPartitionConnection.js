@@ -77,12 +77,11 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
   prepareBvob (content: any, mediaInfo?: Object):
       Promise<Object> | { contentHash: string, persistProcess: ?Promise<any> } {
     const connection = this;
-    const wrap = new Error(`prepareBvob(${(mediaInfo && mediaInfo.bvobId) || "<undefined>"})`);
+    const contentHash = mediaInfo && (mediaInfo.contentHash || mediaInfo.bvobId);
+    const wrap = new Error(`prepareBvob(${contentHash || "<undefined>"})`);
     try {
-      if (!mediaInfo || !mediaInfo.bvobId) {
-        throw new Error("mediaInfo.bvobId not defined");
-      }
-      let persistProcess = mediaInfo.bvobId;
+      if (!contentHash) throw new Error("mediaInfo.contentHash not defined");
+      let persistProcess = contentHash;
       if (this.isRemoteAuthority()) {
         const error = new Error(`prepareBvob not implemented by remote authority partition`);
         error.retryable = false;
@@ -90,7 +89,7 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
             .reject(this.wrapErrorEvent(error, new Error("prepareBvob")))
             .catch(errorOnAuthorityPartitionConnectionPrepareBvob);
       }
-      return { contentHash: mediaInfo.bvobId, persistProcess };
+      return { contentHash, persistProcess };
     } catch (error) { return errorOnAuthorityPartitionConnectionPrepareBvob(error); }
     function errorOnAuthorityPartitionConnectionPrepareBvob (error) {
       throw connection.wrapErrorEvent(error, wrap,

@@ -81,7 +81,8 @@ export default class OraclePartitionConnection extends PartitionConnection {
       const wrap = new Error(`requestMediaContents().mediaInfo["${
           mediaInfo.name || `unnamed media`}"]`);
       try {
-        if (!mediaInfo.bvobId) {
+        const contentHash = mediaInfo.contentHash || mediaInfo.bvobId;
+        if (!contentHash) {
           if (!mediaInfo.sourceURL) return undefined;
           const sourceURI = createValaaURI(mediaInfo.sourceURL);
           if (mediaInfo.asURL) {

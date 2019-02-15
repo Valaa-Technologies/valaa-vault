@@ -1131,7 +1131,8 @@ export default class Vrapper extends Cog {
   _mediaInterpretations: WeakMap<Object, { [mime: string]: Object }>;
 
   static toMediaInfoFields = VALK.fromVAKON({
-    bvobId: ["§->", "content", false, "bvobId"],
+    bvobId: ["§->", "content", false, "contentHash"],
+    contentHash: ["§->", "content", false, "contentHash"],
     name: ["§->", "name"],
     sourceURL: ["§->", "sourceURL"],
     type: ["§->", "mediaType", false, "type"],

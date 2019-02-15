@@ -41,7 +41,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   _pendingMediaLookup: { [mediaRawId: string]: MediaEntry };
 
   // Contains partition specific bvob state data.
-  _pendingBvobLookup: { [bvobId: string]: {
+  _pendingBvobLookup: { [contentHash: string]: {
     localPersistProcess: Promise<Object>,
     upstreamPrepareBvobProcess: Promise<Object>,
   } } = {};

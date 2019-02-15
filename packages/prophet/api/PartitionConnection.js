@@ -395,7 +395,7 @@ export default class PartitionConnection extends Follower {
    * mediaInfo is an optional hint containing the expected MediaInfo
    * of a Media where this content is to be used. The upstream is
    * allowed to reject the prepareBvob request based on this hint, most
-   * notably if mediaInfo.bvobId differs from the contentHash.
+   * notably if mediaInfo.contentHash differs from the contentHash.
    *
    * @param {*} content
    * @param {MediaInfo} [mediaInfo]

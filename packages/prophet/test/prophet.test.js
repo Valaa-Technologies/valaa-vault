@@ -59,9 +59,10 @@ describe("Prophet", () => {
     const mediaRef = vRef("abcd-0123");
     for (const [bufferContent, mediaInfo, expectedContent] of structuredMediaContents) {
       const preparation = await connection.prepareBvob(bufferContent);
-      const bvobId = await preparation.persistProcess;
-      const decodedContent =
-          await connection.decodeMediaContent({ mediaRef, bvobId, ...mediaInfo });
+      const contentHash = await preparation.persistProcess;
+      const decodedContent = await connection.decodeMediaContent({
+        mediaRef, contentHash, bvobId: contentHash, ...mediaInfo,
+      });
       expect(decodedContent).toEqual(expectedContent);
     }
   });

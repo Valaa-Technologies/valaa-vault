@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import preset from "jss-preset-default";
 import jss, { SheetsManager } from "jss";
 
-import { createPartitionURI } from "~/raem/ValaaURI";
+import { createNaivePartitionURI } from "~/raem/ValaaURI";
 
 import Vrapper, { getImplicitMediaInterpretation } from "~/engine/Vrapper";
 
@@ -147,7 +147,7 @@ export default class ReactRoot extends React.Component {
 
   async _obtainUIRootFrame (partitionAuthorityURI: string, vViewFocus: Vrapper, viewName: string) {
     const localInstanceRawId = derivedId(vViewFocus.getRawId(), "LOCAL-UIROOT-PARTITION", viewName);
-    const partitionURI = createPartitionURI(partitionAuthorityURI, localInstanceRawId);
+    const partitionURI = createNaivePartitionURI(partitionAuthorityURI, localInstanceRawId);
     await vViewFocus.engine.getProphet()
         .acquirePartitionConnection(partitionURI)
         .getActiveConnection();

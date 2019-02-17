@@ -1,7 +1,7 @@
 // @flow
 
 import { created, transacted } from "~/raem/events/index";
-import { createPartitionURI } from "~/raem/ValaaURI";
+import { createNaivePartitionURI } from "~/raem/ValaaURI";
 
 import {
   createScribe, clearAllScribeDatabases, createTestMockProphet
@@ -16,7 +16,7 @@ import { openDB, getFromDB, getKeysFromDB, expectStoredInDB }
     from "~/tools/html5/InMemoryIndexedDBUtils";
 
 const testAuthorityURI = "valaa-test:";
-const testPartitionURI = createPartitionURI(testAuthorityURI, "test_partition");
+const testPartitionURI = createNaivePartitionURI(testAuthorityURI, "test_partition");
 const sharedURI = "valaa-shared-content";
 
 afterEach(async () => {

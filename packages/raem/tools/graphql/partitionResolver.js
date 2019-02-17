@@ -1,13 +1,13 @@
 // @flow
 
-import { getPartitionRawIdFrom } from "~/raem/ValaaURI";
+import { getNaivePartitionRawIdFrom } from "~/raem/ValaaURI";
 import { resolvePartitionURI } from "~/raem/tools/denormalized/partitions";
 
 export default function partitionResolver (source: any, args: any,
     { rootValue: { resolver } }: Object) {
   const partitionURI = resolvePartitionURI(resolver, source.get("id"));
   return partitionURI && Object.create(resolver)
-      .goToTransientOfRawId(getPartitionRawIdFrom(partitionURI), "TransientFields");
+      .goToTransientOfRawId(getNaivePartitionRawIdFrom(partitionURI), "TransientFields");
 }
 
 export function partitionURIResolver (source: any, args: any,

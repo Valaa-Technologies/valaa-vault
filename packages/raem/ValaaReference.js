@@ -1,6 +1,6 @@
 // @flow
 
-import ValaaURI, { createPartitionURI, createValaaURI, getPartitionRawIdFrom }
+import ValaaURI, { createNaivePartitionURI, getNaivePartitionRawIdFrom }
     from "~/raem/ValaaURI";
 
 import GhostPath, { JSONGhostPath, ghostPathFromJSON } from "~/raem/state/GhostPath";
@@ -78,9 +78,7 @@ class ValaaReference {
     if (!resolver) return this;
     if (!resolver.partition) {
       if (resolver.hasOwnProperty("partition")) delete resolver.partition;
-    } else if (!(resolver.partition instanceof ValaaURI)) {
-      resolver.partition = createValaaURI(resolver.partition);
-    }
+    } else resolver.partition = createNaivePartitionURI(resolver.partition);
     if (!resolver.ghostPath) {
       if (resolver.hasOwnProperty("ghostPath")) delete resolver.ghostPath;
     } else if (!(resolver.ghostPath instanceof GhostPath)) {
@@ -178,7 +176,7 @@ class ValaaReference {
   getPartitionURI (): ?ValaaURI { return this._r.partition; }
   getPartitionRawId (): ?string {
     try {
-      return getPartitionRawIdFrom(this._r.partition);
+      return getNaivePartitionRawIdFrom(this._r.partition);
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .getPartitionRawId(), with:`,
           "\n\tpartitionURI:", this._r.partition);
@@ -190,9 +188,8 @@ class ValaaReference {
         throw new Error(`partitionURI already exists when trying to assign '${
             partitionURI}' into ${this.toString()}`);
       }
-      if ((typeof partitionURI !== "object") || !partitionURI || !partitionURI.href) {
-        invariantifyObject(partitionURI, "setPartitionURI.partitionURI",
-            { instanceof: ValaaURI, allowEmpty: true });
+      if (typeof partitionURI !== "string") {
+        invariantifyString(partitionURI, "setPartitionURI.partitionURI", { allowEmpty: true });
       }
       this.obtainOwnResolverComponent().partition = partitionURI;
     } catch (error) {
@@ -202,7 +199,7 @@ class ValaaReference {
     }
   }
   clearPartitionURI () { this._r.partition = undefined; }
-  immutatePartitionURI (partitionURI?: ValaaURI) {
+  immutateWithPartitionURI (partitionURI?: ValaaURI) {
     const ret = Object.create(this);
     ret._r = Object.create(ret._r);
     ret._r.partition = partitionURI;
@@ -221,12 +218,10 @@ class ValaaReference {
       if (!component) return "";
       return Object.keys(component).sort().reduce((acc, param) => {
         let value = component[param];
-        if (value && (typeof value !== "string")) {
-          if (value instanceof GhostPath) {
-            value = (nest && value.isGhost()) ? value.toURIString() : undefined;
-          } else if (value instanceof ValaaURI) value = encodeURIComponent(String(value));
-          else value = encodeURIComponent(JSON.stringify(value));
-        }
+        if (typeof value === "string") value = encodeURIComponent(value);
+        else if (value instanceof GhostPath) {
+          value = (nest && value.isGhost()) ? value.toURIString() : undefined;
+        } else if (value) value = encodeURIComponent(JSON.stringify(value));
         if (!value) return acc;
         return `${acc ? `${acc}&` : prefix}${param}=${value}`;
       }, "");
@@ -368,8 +363,7 @@ export function vRef (rawId: RawId, coupling: ?string = null, ghostPath: ?GhostP
     invariantifyString(rawId, "vRef.rawId");
     invariantifyString(coupling, "vRef.coupling", { allowNull: true });
     invariantifyObject(ghostPath, "vRef.ghostPath", { allowNull: true, instanceof: GhostPath });
-    invariantifyObject(partitionURI, "vRef.partitionURI",
-        { allowNull: true, allowEmpty: true, instanceof: ValaaURI });
+    invariantifyString(partitionURI, "vRef.partitionURI", { allowNull: true, allowEmpty: true });
     const ret = new ValaaReference(rawId);
     let resolverComponent;
     if (ghostPath) resolverComponent = { ghostPath };
@@ -500,11 +494,11 @@ export const tryPartitionURIFrom = vdocorate(`
   if (idData[1] && (typeof idData[1] === "object")) {
     return (typeof idData[1].partition !== "string")
         ? idData[1].partition
-        : createPartitionURI(idData[1].partition);
+        : createNaivePartitionURI(idData[1].partition);
   }
   if (((typeof idData[1] === "string") || (idData[1] === null))
       && (typeof idData[3] === "string")) {
-    return createPartitionURI(idData[3]);
+    return createNaivePartitionURI(idData[3]);
   }
   return undefined;
 });

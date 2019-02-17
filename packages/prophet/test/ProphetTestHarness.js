@@ -3,7 +3,7 @@
 import { OrderedMap } from "immutable";
 import { created, EventBase } from "~/raem/events";
 
-import { createPartitionURI } from "~/raem/ValaaURI";
+import { createNaivePartitionURI } from "~/raem/ValaaURI";
 
 import { createCorpus } from "~/raem/test/RAEMTestHarness";
 
@@ -32,7 +32,7 @@ import { openDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 import { dumpify, dumpObject, isPromise, wrapError } from "~/tools";
 
 export const testAuthorityURI = "valaa-test:";
-export const testPartitionURI = createPartitionURI(testAuthorityURI, "test_partition");
+export const testPartitionURI = createNaivePartitionURI(testAuthorityURI, "test_partition");
 
 export function createProphetTestHarness (options: Object, ...commandBlocks: any) {
   const wrap = new Error("During createProphetHarness");
@@ -85,7 +85,7 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
   try {
     if (options.acquirePartitions) {
       const partitionURIs = options.acquirePartitions.map(
-          partitionId => createPartitionURI("valaa-test:", partitionId));
+          partitionId => createNaivePartitionURI("valaa-test:", partitionId));
       const connections = partitionURIs.map(uri =>
           ret.prophet.acquirePartitionConnection(uri).getActiveConnection());
       (await Promise.all(connections)).forEach(connection => {
@@ -125,7 +125,8 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     this.cleanupScribe = () => (this.scribeOptions && clearAllScribeDatabases(this.scribe));
     this.testAuthorityURI = options.testAuthorityURI || testAuthorityURI;
     this.testPartitionURI = options.testPartitionURI
-        || (options.testAuthorityURI && createPartitionURI(this.testAuthorityURI, "test_partition"))
+        || (options.testAuthorityURI
+            && createNaivePartitionURI(this.testAuthorityURI, "test_partition"))
         || testPartitionURI;
   }
 
@@ -342,7 +343,7 @@ export function createFalseProphet (options?: Object) {
 
 export function createTestMockProphet (configOverrides: Object = {}) {
   return new TestProphet({
-    authorityURI: createPartitionURI("valaa-test:"),
+    authorityURI: createNaivePartitionURI("valaa-test:"),
     authorityConfig: {
       eventVersion: EVENT_VERSION,
       isLocallyPersisted: true,

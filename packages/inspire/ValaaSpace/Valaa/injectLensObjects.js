@@ -3,7 +3,7 @@
 import React from "react";
 
 import { denoteValaaBuiltinWithSignature } from "~/raem/VALK";
-import { createPartitionURI } from "~/raem/ValaaURI";
+import { createNaivePartitionURI } from "~/raem/ValaaURI";
 
 import type { PartitionConnection } from "~/prophet";
 
@@ -570,7 +570,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
               throw new Error(`Cannot obtain scope frame: neither partitionAuthorityURI ${
                   ""}nor owner could be determined`);
             }
-            const partitionURI = createPartitionURI(lensAuthorityURI, frameRawId);
+            const partitionURI = createNaivePartitionURI(lensAuthorityURI, frameRawId);
             return engine.getProphet().acquirePartitionConnection(partitionURI)
                 .getActiveConnection();
           },

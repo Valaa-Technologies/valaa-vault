@@ -432,7 +432,7 @@ function _createResourceVRefDeserializer (fieldInfo) {
     // Ghosts have the correct partitionURI in the host Resource.id
     const ghostPath = resourceId.getGhostPath();
     const hostId = bard.bindObjectId([ghostPath.headHostRawId()], "Resource");
-    return resourceId.immutatePartitionURI(hostId.getPartitionURI());
+    return resourceId.immutateWithPartitionURI(hostId.getPartitionURI());
   }
   return deserializeResourceVRef;
 }

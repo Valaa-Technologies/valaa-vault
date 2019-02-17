@@ -1,43 +1,58 @@
 import {
-  createPartitionURI, getValaaURI, createValaaURI, getPartitionAuthorityURIStringFrom,
+  createNaivePartitionURI, getHostname, getNaiveAuthorityURIOf,
 } from "~/raem/ValaaURI";
 
 describe("Basic operations", () => {
   it("roundtrips trivial uri 'foo:'", () => {
-    const sourceURIString = "foo:";
-    let roundTripURI;
-    roundTripURI = createValaaURI(sourceURIString);
-    expect(String(roundTripURI))
-        .toEqual(sourceURIString);
+    const sourceURI = "foo:";
+    const roundtripURI = createNaivePartitionURI(sourceURI);
+    expect(String(roundtripURI))
+        .toEqual(sourceURI);
+  });
 
-    roundTripURI = createPartitionURI(sourceURIString);
-    expect(String(roundTripURI))
-        .toEqual(sourceURIString);
+  it("roundtrips non-trivial uri 'foo://bar.com/?id=baz'", () => {
+    const sourceURI = "foo://bar.com/";
+    const roundtripURI = createNaivePartitionURI(sourceURI, "baz");
+    expect(String(roundtripURI))
+        .toEqual(`${sourceURI}?id=baz`);
 
-    const authorityURIString = getPartitionAuthorityURIStringFrom(roundTripURI);
+    const authorityURIString = getNaiveAuthorityURIOf(roundtripURI);
     expect(String(authorityURIString))
-        .toEqual(sourceURIString);
+        .toEqual(sourceURI);
   });
 
-  it("doesn't lose // from string uri with getValaaURI", () => {
-    const uriString = "valaa-test://example.com/developtest?id=8afca35a-e64b-44d4-bc73-8902e609e040";
-    const uri = getValaaURI(uriString);
-    expect(String(uri))
-        .toEqual(uriString);
+  it("adds '/' to path part when host uri 'foo://bar.com' is used as authority URI base", () => {
+    const sourceURI = "foo://bar.com";
+    const roundtripURI = createNaivePartitionURI(sourceURI, "baz");
+    expect(String(roundtripURI))
+        .toEqual(`${sourceURI}/?id=baz`);
+
+    const authorityURIString = getNaiveAuthorityURIOf(roundtripURI);
+    expect(String(authorityURIString))
+        .toEqual(`${sourceURI}/`);
   });
 
-  it("doesn't lose // from string uri with getPartitionAuthorityURIStringFrom", () => {
-    const uriString = "valaa-test://example.com/developtest?id=8afca35a-e64b-44d4-bc73-8902e609e040";
+  it("doesn't add '/' to path part for pathed authority URI 'foo://bar.com/xyz'", () => {
+    const sourceURI = "foo://bar.com/xyz";
+    const roundtripURI = createNaivePartitionURI(sourceURI, "baz");
+    expect(String(roundtripURI))
+        .toEqual(`${sourceURI}?id=baz`);
+
+    const authorityURIString = getNaiveAuthorityURIOf(roundtripURI);
+    expect(String(authorityURIString))
+        .toEqual(sourceURI);
+  });
+
+  it("doesn't lose // from string uri with getNaiveAuthorityURIOf", () => {
+    const uriString = "valaa-test://example.com/developtest?id=aaaaaaa-bbbb-cdef-1234";
     const authorityString = "valaa-test://example.com/developtest";
-    const uri = getValaaURI(uriString);
-    expect(getPartitionAuthorityURIStringFrom(uri))
+    expect(getNaiveAuthorityURIOf(uriString))
         .toEqual(authorityString);
   });
 
   it("parses 'http://brave.com%60x.code-fu.org/' fully as a host instead of host+path", () => {
     const uriString = "http://brave.com%60x.code-fu.org/";
-    const uri = getValaaURI(uriString);
-    expect(uri.hostname)
+    expect(getHostname(uriString))
         .toEqual("brave.com%60x.code-fu.org");
   });
 });

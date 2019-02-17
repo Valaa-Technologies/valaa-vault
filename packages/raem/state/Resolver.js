@@ -4,7 +4,7 @@ import { GraphQLSchema } from "graphql/type";
 
 import ValaaReference, { obtainVRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
 import type { JSONIdData, IdData, RawId, VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
-import type ValaaURI from "~/raem/ValaaURI";
+import type { ValaaURI } from "~/raem/ValaaURI";
 
 import GhostPath from "~/raem/state/GhostPath";
 import Transient, { createImmaterialTransient, createIdTransient }

@@ -11,7 +11,7 @@ import * as valosProphet from "~/prophet";
 import * as valosEngine from "~/engine";
 import * as valosInspire from "~/inspire";
 
-import { createPartitionURI } from "~/raem/ValaaURI";
+import { createNaivePartitionURI } from "~/raem/ValaaURI";
 import createRootReducer from "~/raem/tools/createRootReducer";
 import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent";
 import createProcessCommandIdMiddleware from "~/raem/redux/middleware/processCommandId";
@@ -473,7 +473,7 @@ export default class InspireGateway extends LogEventGenerator {
     let prologues;
     try {
       const rootPartitionURI = this.prologueRevelation.rootPartitionURI
-          && createPartitionURI(await this.prologueRevelation.rootPartitionURI);
+          && createNaivePartitionURI(await this.prologueRevelation.rootPartitionURI);
       this.warnEvent(`Extracting revelation prologues and root partition (${
           String(rootPartitionURI)})`);
       prologues = await this._determineRevelationPrologues(prologueRevelation, rootPartitionURI);
@@ -501,7 +501,7 @@ export default class InspireGateway extends LogEventGenerator {
     let rootPartitionURISeen = false;
     try {
       for (const [uri, info] of (Object.entries((await prologueRevelation.partitionInfos) || {}))) {
-        const partitionURI = createPartitionURI(uri);
+        const partitionURI = createNaivePartitionURI(uri);
         ret.push({ partitionURI, info: await info });
         if (String(partitionURI) === String(rootPartitionURI)) rootPartitionURISeen = true;
       }

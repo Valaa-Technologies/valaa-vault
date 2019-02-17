@@ -1,6 +1,5 @@
 // @flow
 
-import ValaaURI from "~/raem/ValaaURI";
 import type { EventBase } from "~/raem/events";
 
 import { tryAspect, swapAspectRoot } from "~/prophet/tools/EventAspects";
@@ -494,7 +493,6 @@ function _serializeEventAsJSON (event) {
               ""} .${key}:${debugObjectType(value)}`);
         }
         if (typeof value.toJSON === "function") return value.toJSON();
-        if (value instanceof ValaaURI) return value.toString();
         return undefined;
       } catch (error) {
         throw wrapError(error, new Error("During serializeEventAsJSON.trivialClone.customizer"),

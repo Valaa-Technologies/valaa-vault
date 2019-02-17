@@ -4,7 +4,6 @@ import type { EventBase } from "~/raem/events";
 import createRootReducer from "~/raem/tools/createRootReducer";
 import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent";
 import { createBardMiddleware } from "~/raem/redux/Bard";
-import ValaaURI from "~/raem/ValaaURI";
 
 import RAEMTestAPI from "~/raem/test/RAEMTestAPI";
 
@@ -99,7 +98,7 @@ export default class RAEMTestHarness extends LogEventGenerator {
    * chronicleEvents always delegates the operation to corpus.dispatch
    * (handling restricted commands is done via .chronicleEvents, only
    * available in @valos/prophet). Also validates is-restricted for
-   * incoming commands, and for is-universal for resulting stories.
+   * incoming commands, and is-universal for resulting stories.
    *
    * @param {any} rest
    *
@@ -109,8 +108,7 @@ export default class RAEMTestHarness extends LogEventGenerator {
     try {
       return {
         eventResults: events.map(event_ => {
-          const event = trivialClone(event_,
-              entry => (entry instanceof ValaaURI ? entry : undefined));
+          const event = trivialClone(event_);
           if (!event.meta) event.meta = {};
           if (event.meta.isBeingUniversalized === undefined) {
             event.meta.isBeingUniversalized = true;

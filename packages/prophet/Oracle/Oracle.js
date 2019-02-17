@@ -1,6 +1,6 @@
 // @flow
 
-import ValaaURI from "~/raem/ValaaURI";
+import { ValaaURI } from "~/raem/ValaaURI";
 
 import Prophet from "~/prophet/api/Prophet";
 import { ConnectOptions } from "~/prophet/api/types";
@@ -42,7 +42,7 @@ export default class Oracle extends Prophet {
 
   getDecoderArray () { return this._decoderArray; }
 
-  obtainPartitionAuthority (partitionURI: ValaaURI | string) {
+  obtainPartitionAuthority (partitionURI: ValaaURI) {
     const ret = this._authorityNexus.obtainAuthorityProphetOfPartition(partitionURI);
     if (!ret) {
       throw new Error(`Can't obtain authority for partition <${partitionURI}>`);

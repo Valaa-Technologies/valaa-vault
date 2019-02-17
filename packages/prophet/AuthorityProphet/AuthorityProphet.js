@@ -1,6 +1,6 @@
 // @flow
 
-import type ValaaURI from "~/raem/ValaaURI";
+import type { ValaaURI } from "~/raem/ValaaURI";
 
 import Prophet from "~/prophet/api/Prophet";
 

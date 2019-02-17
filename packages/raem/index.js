@@ -34,9 +34,11 @@ export {
 export type {
   VRef,
 } from "./ValaaReference";
+export type {
+                                      ValaaURI,
+} from "./ValaaURI";
 export {
-                           default as ValaaURI,
-                                      getPartitionRawIdFrom,
+                                      getNaivePartitionRawIdFrom,
 } from "./ValaaURI";
 export {
                            default as VALK

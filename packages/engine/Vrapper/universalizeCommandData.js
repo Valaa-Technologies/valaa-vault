@@ -47,15 +47,15 @@ export default function universalizeCommandData (object: ?any, options:
     connectedId = options.transaction.bindFieldVRef(id, {}, null);
     const partitionURI = connectedId.getPartitionURI();
     if (partitionURI) {
-      if (partitionURI.toString() === options.partitionURIString) {
-        return connectedId.immutatePartitionURI();
+      if (String(partitionURI) === options.partitionURIString) {
+        return connectedId.immutateWithPartitionURI();
       }
     } else if (connectedId.isGhost()) {
       const ghostPartitionURI = options.transaction
           .bindObjectId([id.getGhostPath().headHostRawId()], "Resource")
           .getPartitionURI();
       if (ghostPartitionURI.toString() !== options.partitionURIString) {
-        return connectedId.immutatePartitionURI(partitionURI);
+        return connectedId.immutateWithPartitionURI(partitionURI);
       }
     }
     return connectedId;

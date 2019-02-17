@@ -1,6 +1,6 @@
 // @flow
 
-import type ValaaURI from "~/raem/ValaaURI";
+import type { ValaaURI } from "~/raem/ValaaURI";
 
 import { NarrateOptions, ReceiveEvents } from "~/prophet/api/types";
 import Follower from "~/prophet/api/Follower";
@@ -211,7 +211,7 @@ export default class Prophet extends LogEventGenerator {
     return this.getActiveConnections();
   }
 
-  obtainPartitionAuthority (partitionURI: string | ValaaURI) {
+  obtainPartitionAuthority (partitionURI: ValaaURI) {
     return this._upstream.obtainPartitionAuthority(partitionURI);
   }
 }

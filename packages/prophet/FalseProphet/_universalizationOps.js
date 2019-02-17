@@ -1,14 +1,15 @@
 // @flow
 
-import ValaaURI, { createValaaURI } from "~/raem/ValaaURI";
-import ValaaReference, { vRef, JSONIdData } from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+// import ValaaURI, { createValaaURI } from "~/raem/ValaaURI";
+import ValaaReference, { /* vRef, */ JSONIdData } from "~/raem/ValaaReference";
+// import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import GhostPath, { ghostPathFromJSON } from "~/raem/state/GhostPath";
 
 import wrapError, { dumpObject, debugObjectType } from "~/tools/wrapError";
 
 import FalseProphet from "./FalseProphet";
 
+/*
 export function vRefFromURI (uri: ValaaURI | string): VRef {
   const [partitionURI, fragment] = String(uri).split("#");
   if (!fragment) return vRef("", null, null, createValaaURI(partitionURI));
@@ -24,6 +25,7 @@ export function vRefFromURI (uri: ValaaURI | string): VRef {
   }
   return vRef(rawId, coupling, undefined, createValaaURI(partitionURI));
 }
+*/
 
 /*
 export function vRefFromJSON (json: JSONIdData, RefType: Object = VRef): VRef {
@@ -41,7 +43,7 @@ export function vRefFromJSON (json: JSONIdData, RefType: Object = VRef): VRef {
     ret[PackedHostValue][2] = ghostPathFromJSON(ret[PackedHostValue][2]);
   }
   if (ret[PackedHostValue][3] && !(ret[PackedHostValue][3] instanceof ValaaURI)) {
-    ret[PackedHostValue][3] = createPartitionURI(ret[PackedHostValue][3]);
+    ret[PackedHostValue][3] = createNaivePartitionURI(ret[PackedHostValue][3]);
   }
   return ret;
 }

@@ -12,7 +12,7 @@ import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "
 import ValaaReference, { vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom }
     from "~/raem/ValaaReference";
 import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
-import { createPartitionURI, getPartitionRawIdFrom } from "~/raem/ValaaURI";
+import { createNaivePartitionURI, getNaivePartitionRawIdFrom } from "~/raem/ValaaURI";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
 
@@ -187,7 +187,7 @@ export default class Vrapper extends Cog {
   isPartitionRoot () {
     const partitionURI = this[HostRef].getPartitionURI();
     if (!partitionURI) return false;
-    return getPartitionRawIdFrom(partitionURI) === this[HostRef].rawId();
+    return getNaivePartitionRawIdFrom(partitionURI) === this[HostRef].rawId();
   }
 
   toJSON () {
@@ -446,7 +446,7 @@ export default class Vrapper extends Cog {
           if (!partitionURI) {
             const authorityURIString = transient.get("partitionAuthorityURI");
             partitionURI = authorityURIString
-                && createPartitionURI(authorityURIString, transient.get("id").rawId());
+                && createNaivePartitionURI(authorityURIString, transient.get("id").rawId());
           }
         }
       }
@@ -807,9 +807,9 @@ export default class Vrapper extends Cog {
     if (!partitionURI && id.isGhost()) {
       partitionURI = transaction.bindObjectId([id.getGhostPath().headHostRawId()], "Resource")
           .getPartitionURI();
-      id = id.immutatePartitionURI(partitionURI);
+      id = id.immutateWithPartitionURI(partitionURI);
     }
-    options.partitionURIString = partitionURI && partitionURI.toString();
+    options.partitionURIString = partitionURI && String(partitionURI);
     return { transaction, id };
   }
 

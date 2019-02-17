@@ -1,6 +1,6 @@
 // @flow
 
-import ValaaURI, { getPartitionRawIdFrom } from "~/raem/ValaaURI";
+import { ValaaURI, getNaivePartitionRawIdFrom } from "~/raem/ValaaURI";
 import type { EventBase } from "~/raem/events";
 
 import Prophet from "~/prophet/api/Prophet";
@@ -11,7 +11,8 @@ import Follower from "~/prophet/api/Follower";
 
 import Logger from "~/tools/Logger";
 import {
-  dumpObject, invariantifyArray, invariantifyObject, isPromise, thenChainEagerly,
+  dumpObject, invariantifyArray, invariantifyObject, invariantifyString, isPromise,
+  thenChainEagerly,
 } from "~/tools";
 
 /**
@@ -35,8 +36,11 @@ export default class PartitionConnection extends Follower {
     super({ name: name || null, logger: logger || prophet.getLogger(), verbosity });
     invariantifyObject(prophet, "PartitionConnection.constructor.prophet",
         { instanceof: Prophet });
-    invariantifyObject(partitionURI, "PartitionConnection.constructor.partitionURI",
-        { instanceof: ValaaURI, allowEmpty: true });
+
+    if (typeof partitionURI !== "string") {
+      invariantifyString(partitionURI, "PartitionConnection.constructor.partitionURI",
+          { allowEmpty: true });
+    }
 
     this._prophet = prophet;
     this._partitionURI = partitionURI;
@@ -48,12 +52,12 @@ export default class PartitionConnection extends Follower {
   getName (): string {
     return super.getName()
         || (this._upstreamConnection && this._upstreamConnection.getName())
-        || this.getPartitionURI().toString();
+        || String(this.getPartitionURI());
   }
   getProphet (): Prophet { return this._prophet; }
 
   getPartitionURI (): ValaaURI { return this._partitionURI; }
-  getPartitionRawId (): string { return getPartitionRawIdFrom(this._partitionURI); }
+  getPartitionRawId (): string { return getNaivePartitionRawIdFrom(this._partitionURI); }
 
   getStatus (): Object {
     return {

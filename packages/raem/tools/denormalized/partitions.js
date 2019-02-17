@@ -4,7 +4,7 @@ import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-dup
 
 import Bard, { getActionFromPassage } from "~/raem/redux/Bard";
 import { tryHostRef } from "~/raem/VALK/hostReference";
-import ValaaURI, { createPartitionURI } from "~/raem/ValaaURI";
+import { ValaaURI, createNaivePartitionURI } from "~/raem/ValaaURI";
 import { Resolver, Transient } from "~/raem/state";
 
 import traverseMaterializedOwnlings
@@ -69,7 +69,7 @@ export function connectToMissingPartitionsAndThen (error, callback, explicitConn
             "but error.missingPartitions is missing or empty: cannot try connecting");
   }
   const ret = Promise.all(original.missingPartitions.map(missingPartition =>
-      (missingPartition instanceof ValaaURI
+      ((typeof missingPartition === "string")
           ? connectToPartition(missingPartition)
           : missingPartition) // a promise for an already existing connection process
   )).then(() => callback());
@@ -209,18 +209,18 @@ export function setModifiedObjectPartitionAndUpdateOwneeObjectIdPartitions (
   const oldPartitionURI = transientId.getPartitionURI();
   if ((partitionURI && partitionURI.toString()) !==
       (oldPartitionURI && oldPartitionURI.toString())) {
-    mutableTransient.set("id", transientId.immutatePartitionURI(partitionURI));
+    mutableTransient.set("id", transientId.immutateWithPartitionURI(partitionURI));
     bard.setState(_updateOwnlingPartitions(bard, mutableTransient, partitionURI, oldPartitionURI));
   }
 }
 
 export function determineNewObjectPartition (mutableTransient: Transient, transientId: VRef) {
-  const partitionAuthorityURIString = mutableTransient.get("partitionAuthorityURI");
+  const authorityURI = mutableTransient.get("partitionAuthorityURI");
   if (transientId.isGhost()) {
     // Materializing or modifying ghost.
-    if (partitionAuthorityURIString) {
+    if (authorityURI) {
       throw new Error(`Ghost objects cannot be partitions; ${
-          ""}while trying to set partitionAuthorityURI '${partitionAuthorityURIString}' for ${
+          ""}while trying to set partitionAuthorityURI <${authorityURI}> for ${
               transientId}`);
     }
     transientId.clearPartitionURI();
@@ -228,8 +228,8 @@ export function determineNewObjectPartition (mutableTransient: Transient, transi
   }
   let partitionURI;
   const ownerId = mutableTransient.get("owner");
-  if (partitionAuthorityURIString) {
-    partitionURI = createPartitionURI(partitionAuthorityURIString, transientId.rawId());
+  if (authorityURI) {
+    partitionURI = createNaivePartitionURI(authorityURI, transientId.rawId());
   } else if (ownerId) {
     partitionURI = ownerId.getPartitionURI();
   } else {
@@ -250,7 +250,7 @@ function _updateOwnlingPartitions (bard: Bard, transient: Transient,
           || !partitionerBard.tryGoToTransientOfRawId(entryId.rawId(), "Resource")
           || (partitionerBard.objectId.getPartitionURI() !== oldPartitionURI)) return null;
       mutableState.setIn([partitionerBard.objectTypeName, entryId.rawId(), "id"],
-              entryId.immutatePartition(newPartitionURI));
+              entryId.immutateWithPartitionURI(newPartitionURI));
       return partitionerBard.objectTransient;
     });
   });

@@ -1,7 +1,7 @@
 // @flow
 
 import type { EventBase } from "~/raem/events";
-import { createValaaURI } from "~/raem/ValaaURI";
+import { hasScheme } from "~/raem/ValaaURI";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import { ConnectOptions, MediaInfo, ReceiveEvents, RetrieveMediaBuffer } from "~/prophet/api/types";
@@ -84,24 +84,24 @@ export default class OraclePartitionConnection extends PartitionConnection {
         const contentHash = mediaInfo.contentHash || mediaInfo.bvobId;
         if (!contentHash) {
           if (!mediaInfo.sourceURL) return undefined;
-          const sourceURI = createValaaURI(mediaInfo.sourceURL);
+          const sourceURI = mediaInfo.sourceURL;
           if (mediaInfo.asURL) {
             if (mediaInfo.type) {
               throw new Error(`Cannot explicitly decode sourceURL-based content as '${
                   mediaInfo.mime}' typed URL`);
             }
-            if (sourceURI.protocol === "http:" || sourceURI.protocol === "https:") {
+            if (hasScheme(sourceURI, "http") || hasScheme(sourceURI, "https")) {
               return mediaInfo.sourceURL;
             }
             // TODO(iridian): Implement schema-based request forwarding to remote authorities
             throw new Error(`non-http(s) mediaInfo.sourceURL's not implemented, got '${
-                sourceURI.toString()}'`);
+                sourceURI}'`);
           }
           // TODO(iridian): Implement schema-based request forwarding to authorities
           // TODO(iridian): Implement straight mediaInfo.sourceURL retrieval if the field is
           // present, using mediaInfo.type/subtype as the request ContentType.
           throw new Error(`direct retrieval not implemented for mediaInfo.sourceURL '${
-              sourceURI.toString()}'`);
+              sourceURI}'`);
         }
         if (mediaInfo.asURL) return urlRequests.push(mediaInfo)[0];
         let decoder;

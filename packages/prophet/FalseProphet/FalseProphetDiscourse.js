@@ -2,7 +2,7 @@
 
 import { Action, Command, created, duplicated, destroyed, EventBase } from "~/raem/events";
 import type { Corpus } from "~/raem/Corpus";
-import ValaaURI, { createValaaURI, createPartitionURI } from "~/raem/ValaaURI";
+import { ValaaURI, createNaivePartitionURI, hasScheme } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/ValaaReference";
 import { dumpObject } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
@@ -119,13 +119,13 @@ export default class FalseProphetDiscourse extends Discourse {
   }
 
   _universalizeAction (action: Action): Action {
-    return trivialClone(action, entry => (entry instanceof ValaaURI ? entry : undefined));
+    return trivialClone(action);
   }
 
   _implicitlySyncingConnections: Object;
 
   connectToMissingPartition = async (missingPartitionURI: ValaaURI) => {
-    const partitionURIString = missingPartitionURI.toString();
+    const partitionURIString = String(missingPartitionURI);
     if (!this._implicitlySyncingConnections[partitionURIString]) {
       this._implicitlySyncingConnections[partitionURIString] = this._prophet
           .acquirePartitionConnection(missingPartitionURI)
@@ -172,7 +172,7 @@ export default class FalseProphetDiscourse extends Discourse {
             root.aspects.command.id, partitionURI, partition.createIndex++);
       }
     } else {
-      if (partitionURI.slice(0, 13) !== "valaa-memory:") {
+      if (!hasScheme(partitionURI, "valaa-memory")) {
         this.warnEvent(`assignNewResourceId.explicitRawId was explicitly provided for a regular${
             ""} partition resource in non-'valaa-memory:' partition: this will be deprecated`,
             "\n\texplicitrawId:", explicitRawId,
@@ -181,7 +181,8 @@ export default class FalseProphetDiscourse extends Discourse {
       resourceRawId = explicitRawId;
     }
 
-    targetAction.id = vRef(resourceRawId, undefined, undefined, createValaaURI(partitionURI));
+    targetAction.id = vRef(resourceRawId, undefined, undefined,
+        createNaivePartitionURI(partitionURI));
     /*
     console.log("assignNewResourceId", tryAspect(root, "command").id, partitionURI, explicitRawId,
         "\n\tresourceRawId:", resourceRawId,
@@ -206,16 +207,16 @@ export default class FalseProphetDiscourse extends Discourse {
     return targetAction.id;
   }
 
-  assignNewPartitionId (targetAction: EventBase, partitionAuthorityURI: string,
+  assignNewPartitionId (targetAction: EventBase, authorityURI: string,
       explicitPartitionRawId?: string) {
     const root = this._transactionState ? this._transactionState.obtainRootEvent() : targetAction;
     if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
     const partitionRawId = explicitPartitionRawId
-        || createPartitionId0Dot2(root.aspects.command.id, partitionAuthorityURI);
+        || createPartitionId0Dot2(root.aspects.command.id, authorityURI);
     targetAction.id = vRef(partitionRawId, undefined, undefined,
-        createPartitionURI(partitionAuthorityURI, partitionRawId));
+        createNaivePartitionURI(authorityURI, partitionRawId));
     /*
-    console.log("assignNewPartitionId", String(targetAction.id), partitionAuthorityURI,
+    console.log("assignNewPartitionId", String(targetAction.id), authorityURI,
         explicitPartitionRawId, "\n\ttargetAction:", ...dumpObject(targetAction));
     */
     return targetAction.id;

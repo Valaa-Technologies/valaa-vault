@@ -232,7 +232,7 @@ export default class InspireGateway extends LogEventGenerator {
         view => view.attach(viewConfig),
         attachedView => {
           attachedView.rootScope = rootScope;
-          this._views[viewName] = attachedView;
+          this._views[viewName] = rootScope.Valaa.view = attachedView;
           engine.clockEvent(1, `${viewConfig.name}.plugins.notify`);
           return mapEagerly(
               Object.values(this._attachedPlugins).filter(plugin => plugin.onViewAttached),

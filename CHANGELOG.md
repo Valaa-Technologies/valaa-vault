@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.6](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.5...v0.34.0-prerelease.6) (2019-02-18)
+
+
+### Bug Fixes
+
+* Lock yalc to 1.0.0-pre.23 ([5338bb5](https://github.com/valaatech/vault/commit/5338bb5))
+* ValaaScript missing source map issue, other logging ([68a6f01](https://github.com/valaatech/vault/commit/68a6f01))
+
+
+
+
+
 # [0.34.0-prerelease.5](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.4...v0.34.0-prerelease.5) (2019-02-12)
 
 

@@ -178,6 +178,8 @@ export function outputError (error, header = "Exception caught", logger = errorL
   }
   if (error.originalError) {
     logger.log(error.originalError.tidyFrameList.join("\n"));
+  } else {
+    logger.log(error.stack.split("\n").slice(1).join("\n"));
   }
   for (const context of (error.errorContexts || [])) {
     logger.warn(...context.contextDescriptions.map(dumpifyObject));

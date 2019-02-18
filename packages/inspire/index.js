@@ -10,7 +10,8 @@ import { combineRevelationsLazily } from "~/inspire/Revelation";
 
 import revelationTemplate from "~/inspire/revelation.template";
 
-import { dumpObject, Logger, LogEventGenerator, outputError, inBrowser, Valaa } from "~/tools";
+import { dumpify, dumpObject, Logger, LogEventGenerator, outputError, inBrowser, Valaa }
+    from "~/tools";
 
 import * as mediaDecoders from "./mediaDecoders";
 
@@ -60,10 +61,13 @@ export default (Valaa.createGateway = async function createGateway (gatewayOptio
     ret = new InspireGateway({ name: "Uninitialized InspireGateway", logger, ...gatewayOptions });
     Valaa.require = ret.require.bind(ret);
 
-    ret.warnEvent(`Initializing in environment (${
-        String(process.env.NODE_ENV)}) by combining`,
-            ...([].concat(...revelations.map(dumpObject))),
-            ...dumpObject(gatewayPluginsRevelation));
+    ret.clockEvent(1, `gateway.revelations`, `Preparing revelations in environment (${
+        String(process.env.NODE_ENV)})`);
+    ret.warnEvent(0, () => [
+      `Combining ${revelations.length} revelations:`,
+      ...[].concat(...revelations.map(revelation => dumpify(revelation))),
+      "\n\tand the gatewayPluginsRevelation:", ...dumpObject(gatewayPluginsRevelation),
+    ]);
 
     combinedRevelation = await combineRevelationsLazily(
         ret,
@@ -71,14 +75,18 @@ export default (Valaa.createGateway = async function createGateway (gatewayOptio
         ...revelations,
         gatewayPluginsRevelation);
 
+    ret.clockEvent(1, `gateway.initialize`, `Initializing gateway`);
     await ret.initialize(combinedRevelation);
 
     Valaa.gateway = ret;
     ret.warnEvent(`InspireGateway set to window.Valaa.gateway as`, ...dumpObject(ret));
 
+    ret.clockEvent(1, `gateway.plugins.delayed.attach`, `Attaching ${delayedPlugins.length
+        } delayed second stage plugins`);
     while (delayedPlugins.length) await ret.attachPlugins(delayedPlugins.splice(0));
     Valaa.plugins = { push (plugin) { ret.attachPlugin(plugin); } };
 
+    ret.clockEvent(1, "gateway.initialized");
     return ret;
   } catch (error) {
     outputError((ret || new LogEventGenerator(logger)).wrapErrorEvent(error,

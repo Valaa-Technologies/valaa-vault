@@ -54,26 +54,32 @@ export class LogEventGenerator {
 
   infoEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._outputMessageEvent(this._logger.info.bind(this._logger),
-        minVerbosity, maybeFunction, ...messagePieces);
+    return this._outputMessageEvent((this._logger.info || this._logger.log).bind(this._logger),
+        true, minVerbosity, maybeFunction, ...messagePieces);
   }
   logEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
     return this._outputMessageEvent(this._logger.log.bind(this._logger),
-        minVerbosity, maybeFunction, ...messagePieces);
+        true, minVerbosity, maybeFunction, ...messagePieces);
   }
   warnEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
     return this._outputMessageEvent(this._logger.warn.bind(this._logger),
-        minVerbosity, maybeFunction, ...messagePieces);
+        true, minVerbosity, maybeFunction, ...messagePieces);
   }
   errorEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
     return this._outputMessageEvent(this._logger.error.bind(this._logger),
-        minVerbosity, maybeFunction, ...messagePieces);
+        true, minVerbosity, maybeFunction, ...messagePieces);
   }
-  _outputMessageEvent (operation: Function, minVerbosity: any, maybeFunction: any,
-      ...messagePieces: any[]) {
+  clockEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
+    if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
+    return this._outputMessageEvent(
+        (this._logger.clock || this._logger.info || this._logger.log).bind(this._logger),
+        false, minVerbosity, maybeFunction, ...messagePieces);
+  }
+  _outputMessageEvent (operation: Function, joinFirstPieceWithId: boolean,
+      minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     let pieces = (typeof minVerbosity === "number") && !messagePieces.length
             && (typeof maybeFunction === "function") && maybeFunction();
     if (!Array.isArray(pieces)) {
@@ -85,7 +91,7 @@ export class LogEventGenerator {
     // Prepend the debug id to the first entry if it is a string.
     // Valma logger gives only the first argument a specific coloring,
     // this way the actual first piece will get the coloring as well.
-    return (typeof pieces[0] !== "string")
+    return (typeof pieces[0] !== "string" || !joinFirstPieceWithId)
         ? operation(`${this.debugId()}:`, ...pieces)
         : operation(`${this.debugId()}: ${pieces[0]}`, ...pieces.slice(1));
   }

@@ -4,31 +4,36 @@ import { inBrowser, getGlobal, thenChainEagerly, wrapError } from "~/tools";
 
 export default function (opts) { return asyncRequest(opts); }
 
-const fetchingCache = {};
+const _cache = {};
 
-function asyncRequest (options) {
-  return fetchingCache[options.input] || (fetchingCache[options.input] = thenChainEagerly(options, [
-    ({ input, ...rest }) => {
+function asyncRequest ({ input, fetch: fetchOpts }) {
+  return _cache[input] || (_cache[input] = thenChainEagerly({ fetch: { ...(fetchOpts || {}) } }, [
+    state => {
       const fetch = getGlobal().fetch;
       if (!fetch) {
         throw new Error(`window/global.fetch is missing; if running in a non-browser ${
             ""}environment please execute through perspire gateway (or similar)`);
       }
-      if (!input) throw new Error(`missing options.input`);
-      if (!inBrowser()) {
-        rest.crossOrigin = false;
+      if (!input) throw new Error(`missing request.input`);
+      if (!inBrowser() && (state.fetch.crossOrigin === undefined)) {
+        state.fetch.crossOrigin = false;
       }
-      return fetch(input, rest);
+      return fetch(input, state.fetch);
     },
-    response => response.json(),
+    response => {
+      if (response.status >= 400) {
+        throw new Error(`fetch ${response.status}: <${input}> ${response.statusText}`);
+      }
+      return response.json();
+    },
     json => {
-      delete fetchingCache[options.input];
+      delete _cache[input];
       return json;
     },
   ], function errorOnAsyncRequest (error) {
-    delete fetchingCache[options.input];
-    throw wrapError(error, `During request(${options.input}), with:`,
-        "\n\toptions:", options,
+    delete _cache[input];
+    throw wrapError(error, `During request(${input}), with:`,
+        "\n\tfetchOptions:", fetchOpts,
     );
   }));
 }

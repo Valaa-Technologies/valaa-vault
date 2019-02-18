@@ -143,11 +143,11 @@ export default class InspireGateway extends LogEventGenerator {
 
       this.setVerbosity(this.gatewayRevelation.verbosity || 0);
 
-      this.nexus = await this._establishAuthorityNexus(this.gatewayRevelation);
+      this.authorityNexus = await this._establishAuthorityNexus(this.gatewayRevelation);
 
       // Create the stream router ('oracle') which uses scribe as its direct upstream, but which
       // manages the remote authority connections.
-      this.oracle = await this._summonOracle(this.gatewayRevelation, this.nexus);
+      this.oracle = await this._summonOracle(this.gatewayRevelation, this.authorityNexus);
 
       // Create a connector (the 'scribe') to the locally backed event log / bvob indexeddb cache
       // ('scriptures') based on the revelation.
@@ -168,14 +168,17 @@ export default class InspireGateway extends LogEventGenerator {
       ({ connections: this.prologueConnections, rootPartition: this.rootPartition }
           = await this._narratePrologues(this.prologueRevelation));
 
+      this.clockEvent(1, `vidgets.register`, `Registering builtin Inspire vidgets`);
       registerVidgets();
-      this.warnEvent(`initialize(): registered builtin Inspire vidgets`);
-      this._isInitialized = true;
+      const pluginNames = Object.keys(this._attachedPlugins);
+      this.clockEvent(1, `plugins.notify`,
+          `Notifying ${pluginNames.length} plugins about gateway initialized:`,
+          pluginNames.join(", "));
       for (const plugin of Object.values(this._attachedPlugins)) {
         await this._notifyPluginGatewayInitialized(plugin);
       }
-      this.warnEvent("InspireGateway initialized with revelation", ...dumpObject(revelation),
-          "\n\tnotified attached plugins with .onGatewayInitialized");
+      this._isInitialized = true;
+      this.clockEvent(1, `initialized`, "InspireGateway initialized");
     } catch (error) {
       throw this.wrapErrorEvent(error, "initialize", "\n\tthis:", ...dumpObject(this));
     }
@@ -190,15 +193,18 @@ export default class InspireGateway extends LogEventGenerator {
   }, createView = (options) => new InspireView(options)) {
     this._views = {};
     Object.entries(viewConfigs).forEach(([viewName, viewConfig]) => {
-      this.warnEvent(`createView({ name: '${viewConfig.name}', ... })`, ...dumpObject(viewConfig));
+      this.clockEvent(1, `view.${viewName}.create`,
+          `createView({ name: '${viewConfig.name}', ... })`);
       const engineOptions = {
         name: `${viewConfig.name} Engine`,
         logger: this.getLogger(),
+        verbosity: this.verbosity,
         prophet: this.falseProphet,
         revelation: this.revelation,
       };
       const engine = new ValaaEngine(engineOptions);
-      this.warnEvent(`Started ValaaEngine ${engine.debugId()}`,
+      engine.clockEvent(1, `${viewConfig.name}.engine.create`,
+          `Created ValaaEngine ${engine.debugId()}`,
           ...(!this.getVerbosity() ? [] : [", with:",
             "\n\tengineOptions:", ...dumpObject(engineOptions),
             "\n\tengine:", ...dumpObject(engine),
@@ -221,24 +227,28 @@ export default class InspireGateway extends LogEventGenerator {
       rootScope.Valaa.identity = engine.getIdentityManager();
 
       const name = `${viewConfig.name} View`;
+      engine.clockEvent(1, `${viewConfig.name}.view.create`);
       this._views[viewName] = thenChainEagerly(createView({ gateway: this, engine, name }), [
         view => view.attach(viewConfig),
         attachedView => {
           attachedView.rootScope = rootScope;
           this._views[viewName] = attachedView;
+          engine.clockEvent(1, `${viewConfig.name}.plugins.notify`);
           return mapEagerly(
               Object.values(this._attachedPlugins).filter(plugin => plugin.onViewAttached),
               plugin => this._notifyPluginViewAttached(plugin, attachedView, viewName));
         },
-        notifys => this.logEvent(1, `notified ${notifys.length} plugins of '${name}' attach`,
-            "\n\tresults:", ...dumpObject(notifys.filter(notNull => notNull))),
+        notifys => engine.clockEvent(1, `${viewConfig.name}.plugins.reacted`,
+            "\n\tplugin reactions:", ...dumpObject(notifys.filter(notNull => notNull))),
         () => this._views[viewName],
       ]);
-      this.warnEvent(`Opened View ${viewName}`,
-          ...(!this.getVerbosity() ? [] : [", with:",
-            "\n\tviewConfig:", ...dumpObject(viewConfig),
-            "\n\tview:", ...dumpObject(this._views[viewName]),
-          ]));
+      this.warnEvent(1, () => [
+        `Opened View ${viewName}`,
+        ...(this.getVerbosity() <= 1 ? [] : [", with:",
+          "\n\tviewConfig:", ...dumpObject(viewConfig),
+          "\n\tview:", ...dumpObject(this._views[viewName]),
+        ]),
+      ]);
     });
     return this._views;
   }
@@ -253,7 +263,7 @@ export default class InspireGateway extends LogEventGenerator {
    */
   async _interpretRevelation (revelation: Revelation): Object {
     try {
-      this.warnEvent(`Interpreted revelation`, ...dumpObject(revelation));
+      this.warnEvent(1, () => [`Interpreted revelation`, ...dumpObject(revelation)]);
       return revelation;
     } catch (error) {
       throw this.wrapErrorEvent(error, "interpretRevelation", "\n\trevelation:", ...dumpObject(revelation));
@@ -263,12 +273,13 @@ export default class InspireGateway extends LogEventGenerator {
   async _establishAuthorityNexus (gatewayRevelation: Object) {
     let nexusOptions;
     try {
+      this.clockEvent(1, `authorityNexus.create`);
       nexusOptions = {
         name: "Inspire AuthorityNexus",
         authorityConfigs: await gatewayRevelation.authorityConfigs,
       };
       const nexus = new AuthorityNexus(nexusOptions);
-      this.warnEvent(`Established AuthorityNexus '${nexus.debugId()}'`,
+      nexus.clockEvent(1, `create`,
           ...(!this.getVerbosity() ? [] : [", with:",
             "\n\toptions:", ...dumpObject(nexusOptions),
             "\n\tnexus:", ...dumpObject(nexus),
@@ -283,6 +294,7 @@ export default class InspireGateway extends LogEventGenerator {
   async _proselytizeScribe (gatewayRevelation: Object, oracle: Oracle): Promise<Scribe> {
     let scribeOptions;
     try {
+      this.clockEvent(1, `scribe.create`);
       scribeOptions = {
         name: "Inspire Scribe",
         logger: this.getLogger(),
@@ -290,14 +302,17 @@ export default class InspireGateway extends LogEventGenerator {
         databaseAPI: gatewayRevelation.scribe.getDatabaseAPI(),
         ...await gatewayRevelation.scribe,
       };
-      const scribe = await new Scribe(scribeOptions);
+      const scribe = new Scribe(scribeOptions);
+      this.clockEvent(1, `scribe.initiate`);
       await scribe.initiate();
 
-      this.warnEvent(`Proselytized Scribe '${scribe.debugId()}'`,
-          ...(!this.getVerbosity() ? [] : [", with:",
-            "\n\tscribeOptions:", ...dumpObject(scribeOptions),
-            "\n\tscribe:", ...dumpObject(scribe),
-          ]));
+      this.warnEvent(1, () => [
+        `Proselytized Scribe '${scribe.debugId()}'`,
+        ...(!this.getVerbosity() ? [] : [", with:",
+          "\n\tscribeOptions:", ...dumpObject(scribeOptions),
+          "\n\tscribe:", ...dumpObject(scribe),
+        ]),
+      ]);
       return scribe;
     } catch (error) {
       throw this.wrapErrorEvent(error, "proselytizeScribe",
@@ -309,6 +324,7 @@ export default class InspireGateway extends LogEventGenerator {
       Promise<Prophet> {
     let oracleOptions;
     try {
+      this.clockEvent(1, `oracle.create`);
       oracleOptions = {
         name: "Inspire Oracle",
         logger: this.getLogger(),
@@ -316,11 +332,13 @@ export default class InspireGateway extends LogEventGenerator {
         ...await gatewayRevelation.oracle,
       };
       const oracle = new Oracle(oracleOptions);
-      this.warnEvent(`Proselytized Oracle ${oracle.debugId()}`,
-          ...(!this.getVerbosity() ? [] : [", with:",
-            "\n\toracleOptions:", ...dumpObject(oracleOptions),
-            "\n\toracle:", ...dumpObject(oracle),
-          ]));
+      this.warnEvent(1, () => [
+        `Proselytized Oracle ${oracle.debugId()}`,
+        ...(!this.getVerbosity() ? [] : [", with:",
+          "\n\toracleOptions:", ...dumpObject(oracleOptions),
+          "\n\toracle:", ...dumpObject(oracle),
+        ]),
+      ]);
       return oracle;
     } catch (error) {
       throw this.wrapErrorEvent(error, "summonOracle",
@@ -330,6 +348,7 @@ export default class InspireGateway extends LogEventGenerator {
   }
 
   async _incorporateCorpus (gatewayRevelation: Object) {
+    this.clockEvent(1, `corpus.create`);
     const name = "Inspire Corpus";
     const reducerOptions = {
       ...EngineContentAPI, // schema, validators, reducers
@@ -372,6 +391,7 @@ export default class InspireGateway extends LogEventGenerator {
       Promise<Prophet> {
     let falseProphetOptions;
     try {
+      this.clockEvent(1, `falseProphet.create`);
       this._commandCountListeners = new Map();
       falseProphetOptions = {
         name: "Inspire FalseProphet",
@@ -383,12 +403,13 @@ export default class InspireGateway extends LogEventGenerator {
         ...await gatewayRevelation.falseProphet,
       };
       const falseProphet = new FalseProphet(falseProphetOptions);
-      this.warnEvent(`Proselytized FalseProphet ${falseProphet.debugId()}`,
-          ...(!this.getVerbosity() ? [] : [", with:",
-            "\n\tfalseProphetOptions:", ...dumpObject(falseProphetOptions),
-            "\n\tfalseProphet:", ...dumpObject(falseProphet),
-          ]),
-      );
+      this.warnEvent(1, () => [
+        `Proselytized FalseProphet ${falseProphet.debugId()}`,
+        ...(!this.getVerbosity() ? [] : [", with:",
+          "\n\tfalseProphetOptions:", ...dumpObject(falseProphetOptions),
+          "\n\tfalseProphet:", ...dumpObject(falseProphet),
+        ]),
+      ]);
       return falseProphet;
     } catch (error) {
       throw this.wrapErrorEvent(error, "proselytizeFalseProphet",
@@ -419,6 +440,7 @@ export default class InspireGateway extends LogEventGenerator {
   }
 
   async attachPlugins (pluginPrototypes_: (Promise<Object> | Object)[]) {
+    this.clockEvent(1, `plugins.obtain`, `Obtaining ${pluginPrototypes_.length} plugin prototypes`);
     const pluginPrototypes = await Promise.all(pluginPrototypes_);
     const newPluginLookup = {};
     const pluginNames = [];
@@ -436,17 +458,18 @@ export default class InspireGateway extends LogEventGenerator {
           (pluginPrototype.attach && pluginPrototype.attach(this))
               || pluginPrototype;
     });
-    this.warnEvent(`Attaching ${pluginNames.length} plugins:`, ...dumpObject(pluginNames));
+    this.clockEvent(1, `plugins.attach`, `Attaching ${pluginNames.length} plugins:`,
+        pluginNames.join(", "));
     for (const name of pluginNames) await this._attachPlugin(name, newPluginLookup[name]);
   }
 
   _attachPlugin (name: string, plugin: Object) {
     this._attachedPlugins[name] = plugin;
     for (const schemeModule of Object.values(plugin.schemeModules || {})) {
-      this.nexus.addSchemeModule(this.callRevelation(schemeModule));
+      this.authorityNexus.addSchemeModule(this.callRevelation(schemeModule));
     }
     for (const authorityConfig of Object.values(plugin.authorityConfigs || {})) {
-      this.nexus.addAuthorityPreConfig(authorityConfig);
+      this.authorityNexus.addAuthorityPreConfig(authorityConfig);
     }
     for (const MediaDecoder_: any of Object.values(plugin.mediaDecoders || {})) {
       this.oracle.getDecoderArray().addDecoder(this.callRevelation(MediaDecoder_));
@@ -472,19 +495,25 @@ export default class InspireGateway extends LogEventGenerator {
   async _narratePrologues (prologueRevelation: Object) {
     let prologues;
     try {
+      this.clockEvent(1, `prologues.extract`, `Determining prologues and the root partition <${
+          rootPartitionURI}>`);
       const rootPartitionURI = this.prologueRevelation.rootPartitionURI
           && createNaivePartitionURI(await this.prologueRevelation.rootPartitionURI);
-      this.warnEvent(`Extracting revelation prologues and root partition (${
-          String(rootPartitionURI)})`);
       prologues = await this._determineRevelationPrologues(prologueRevelation, rootPartitionURI);
-      this.warnEvent(`Extracted ${prologues.length} prologues from the revelation`,
-          "\n\tprologue partitions:",
-              `'${prologues.map(({ partitionURI }) => String(partitionURI)).join("', '")}'`,
-          "\n\troot partition:", String(rootPartitionURI));
+      this.warnEvent(1, () => [
+        `Extracted ${prologues.length} prologues from the revelation`,
+        "\n\tprologue partitions:",
+            `'${prologues.map(({ partitionURI }) => String(partitionURI)).join("', '")}'`,
+        "\n\troot partition:", rootPartitionURI,
+      ]);
+      this.clockEvent(1, `prologues.connect`, `Narrating and connecting ${prologues.length
+          } prologues and root partition <${rootPartitionURI}>`);
       const connections = await Promise.all(prologues.map(this._connectChronicleNarratePrologue));
-      this.warnEvent(`Acquired active connections for all revelation prologue partitions:`,
-          ...[].concat(...connections.map(connection =>
-            [`\n\t${connection.getName()}:`, ...dumpObject(connection.getStatus())])));
+      this.warnEvent(1, () => [
+        `Acquired active connections for all revelation prologue partitions:`,
+        ...[].concat(...connections.map(connection =>
+            [`\n\t${connection.getName()}:`, ...dumpObject(connection.getStatus())]))
+      ]);
       const rootPartition = connections.find(connection =>
           (String(connection.getPartitionURI()) === String(rootPartitionURI)));
       return { connections, rootPartition };
@@ -532,11 +561,12 @@ export default class InspireGateway extends LogEventGenerator {
     }
     // Acquire connection without remote narration to determine the current last authorized event
     // so that we can narrate any content in the prologue before any remote activity.
-    const connection = await this.falseProphet
+    const connection = this.falseProphet
         .acquirePartitionConnection(partitionURI, {
           subscribeEvents: false, narrateOptions: { remote: false },
-        })
-        .getActiveConnection();
+        });
+    connection.clockEvent(1, "activate", "Activating connection");
+    await connection.getActiveConnection();
     let prologueTruthCount = await info.truthCount;
     if (!Number.isInteger(prologueTruthCount)) {
       // Migration code for eventId deprecation.
@@ -546,6 +576,8 @@ export default class InspireGateway extends LogEventGenerator {
     const eventIdEnd = connection.getFirstUnusedTruthEventId() || 0;
     const shouldChroniclePrologue = ((prologueTruthCount || 0) > eventIdEnd);
     if (shouldChroniclePrologue) {
+      connection.clockEvent(1, `prologue.chronicle`,
+          `Chronicling truths, medias and bvobs from revelation`);
       // If no event logs are replayed, we don't need to precache the bvobs either, so we delay
       // loading them up to this point.
       await (this.bvobInfos || (this.bvobInfos = this._getBvobInfos()));
@@ -581,11 +613,19 @@ export default class InspireGateway extends LogEventGenerator {
               }" during prologue narration, with bvob id "${mediaInfo.contentHash}" `);
         }
       });
+      connection.clockEvent(1, `prologue.chronicle.await.local.results`,
+          `Waiting for chronicle events to resolve locally`);
       for (const result of chronicling.eventResults) await result.getLocalEvent();
     }
     // Initiate remote narration.
+    connection.clockEvent(1, `prologue.narrate`,
+        `Starting full narration and subscribing for events`);
     const remoteNarration = connection.narrateEventLog({ subscribeEvents: true });
-    if (!shouldChroniclePrologue && !(eventIdEnd > 0)) await remoteNarration;
+    if (!shouldChroniclePrologue && !(eventIdEnd > 0)) {
+      connection.clockEvent(1, `prologue.narrate.await`,
+          `Waiting for remote narration`);
+      await remoteNarration;
+    }
     return connection;
   }
 

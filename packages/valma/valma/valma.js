@@ -350,6 +350,29 @@ const _vlm = {
     }
     return this;
   },
+  clock (context, event, ...message) {
+    if (this.theme.clock) {
+      console.warn(this.theme.clock(`${context} clocks:`, event), ...message);
+    }
+    if (this.clockEvents) {
+      let start = process.hrtime(this.clockStartTime);
+      start = start[0] * 1000 + Math.floor(start[1] / 1000000);
+      const previousEvents = this.clockPreviousEvents || (this.clockPreviousEvents = {});
+      const previous = previousEvents[context];
+      if (previous) previous.duration = start - previous.start;
+      this.clockEvents.push((previousEvents[context] = { context, event, start, message }));
+    }
+    return this;
+  },
+  finalizeClock () {
+    if (!this.clockEvents) return;
+    let end = process.hrtime(this.clockStartTime);
+    end = end[0] * 1000 + Math.floor(end[1] / 1000000);
+    Object.values(this.clockPreviousEvents || {}).forEach(pendingEvent => {
+      pendingEvent.duration = end - pendingEvent.start;
+    });
+    delete this.clockPreviousEvents;
+  },
   instruct (msg, ...rest) {
     if (this.theme.instruct) {
       console.warn(this.theme.instruct(`${this.getContextName()} instructs:`, msg), ...rest);
@@ -499,6 +522,7 @@ const themes = {
     error: ["bold", "red"],
     exception: ["newlinesplit", { first: "error", nonfirst: "warning" }],
     info: "cyan",
+    clock: ["italic", "cyan"],
     instruct: ["bold", "cyan"],
     babble: "cyan",
     expound: "cyan",
@@ -622,6 +646,11 @@ module.exports = {
           group: "Valma root options:",
           type: "boolean", default: true, global: false,
           description: "Prompt for missing fields. If false then missing required fields will throw"
+        },
+        clock: {
+          group: "Valma root options:",
+          type: "boolean", default: false, global: false,
+          description: "Collect and time vlm.clock call information in vlm.clockEvents"
         },
         promote: {
           group: "Valma root options:",
@@ -801,6 +830,10 @@ if (!_vlm.vargv.instructs || _vlm.isCompleting) _vlm.instruct = function noIns (
 if (!_vlm.vargv.warnings || _vlm.isCompleting) _vlm.warn = function noWarning () { return this; };
 if (!_vlm.vargv.babbles || _vlm.isCompleting) _vlm.babble = function noBabble () { return this; };
 if (!_vlm.vargv.expounds || _vlm.isCompleting) _vlm.expound = function noExpou () { return this; };
+if (_vlm.vargv.clock) {
+  _vlm.clockEvents = [];
+  _vlm.clockStartTime = process.hrtime();
+}
 
 _vlm.ifVerbose(1).babble("phase 1, init:", "determine global options and available pools.",
     `\n\tcommand: ${_vlm.theme.command(_vlm.vargv.command)

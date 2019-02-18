@@ -79,8 +79,7 @@ module.exports = {
 };
 
 function _getLayout (value, layoutKey = _layoutKey) {
-  if ((typeof value !== "object") || (value === null) || Array.isArray(value)) return undefined;
-  return value[layoutKey];
+  return ((value != null) && value[layoutKey]) || undefined;
   // console.log("\ngetLayout", value, layoutKey, "\nGOT:", layout, "\n");
   // return (typeof layout !== "string") ? layout : require(layout);
 }
@@ -120,8 +119,8 @@ const _deepExtendOptions = Object.freeze({
     if (source === null) return "";
     if ((source[0] === _spreaderKey) || source[_spreaderKey]) return undefined;
     if ((Object.getPrototypeOf(source) !== Object.prototype) && !Array.isArray(source)) {
-      throw new Error("Cannot markdownify a complex object with type '"
-          + (source.constructor || { name: "<unknown object>" }).name + "'");
+      throw new Error(`Cannot markdownify a complex object with type '${
+          (source.constructor || { name: "<unknown object>" }).name}'`);
     }
     const ret = target || {};
     const containerLayout = _getLayout(targetContainer) || {};
@@ -478,7 +477,9 @@ function _renderTable (rowKeys, rowLookup, columns, layout, tableTheme) {
       ]));
   let pendingHeaderRow = headerRow;
   for (const rowKey of rowKeys) {
-    const rowData = (rowKey === null) ? rowLookup : rowLookup[rowKey];
+    const rowData = (rowKey === null) ? rowLookup
+        : (typeof rowKey !== "object") ? rowLookup[rowKey]
+        : rowKey;
     const elementLayouts = (_getLayout(rowData) || {}).elementLayouts || {};
     const _columnElementRenderer = ([columnKey, columnLayout]) => {
       const elementLayout = elementLayouts[columnKey];

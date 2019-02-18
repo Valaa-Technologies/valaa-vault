@@ -156,15 +156,6 @@ import resolveRevelationSpreaderImport from "~/tools/resolveRevelationSpreaderIm
 
 export type Revelation = any;
 
-// If given object is a string uses it as the URL for a Window.fetch
-// and returns the response, otherwise returns the given object itself.
-export function expose (object: Revelation) {
-  return typeof object === "function" ? object()
-      : ((typeof object === "object") && (Object.keys(object).length === 1) && object[""])
-          ? request({ input: object })
-      : object;
-}
-
 export const EntryTemplate = Symbol("EntryTemplate");
 export const Deprecated = Symbol("Deprecated revelation option");
 
@@ -236,7 +227,7 @@ function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
       ? (expandee.url || expandee.input || expandee.path) : expandee;
   let retrievedContent;
   try {
-    if (!(expandee.url || expandee.input)) {
+    if (!expandee.url) {
       expandeePath = resolveRevelationSpreaderImport(expandeePath,
           gateway.siteRoot, gateway.revelationRoot, gateway.domainRoot,
           gateway.currentRevelationPath);
@@ -245,8 +236,16 @@ function _tryExpandExtension (gateway: Object, candidate: any, base: any) {
       const requestOptions = { ...(isObjectExpandee ? expandee : {}), input: expandeePath };
       delete requestOptions.path;
       retrievedContent = _markLazy(() => request(requestOptions));
-    } else if (typeof expandee !== "string") {
-      throw new Error("Non-string expandees are not supported in non-browser Revelation contexts");
+      if ((requestOptions.spread || {}).final) {
+        if (base && !(requestOptions.spread || {}).replace) {
+          throw new Error(`spread.final with existing base content but without ${
+              ""}spread.replace is not implemented`);
+        }
+        return retrievedContent;
+      }
+    } else if (typeof expandee !== "string" && !expandee.require) {
+      throw new Error(`Complex spreads without spread.require section are not supported${
+          ""}in non-browser Revelation contexts`);
     } else {
       retrievedContent = gateway.require(expandeePath);
     }
@@ -270,7 +269,7 @@ function _extendRevelation (gateway: Object, base: Object, extension: Object,
   let key;
   let ret;
   try {
-    if (typeof extension === "undefined") {
+    if (extension === undefined) {
       if (validateeFieldName) {
         throw new Error(`Revelation extension '${extenderName}' is missing required base ${
             typeof base} field '${validateeFieldName}'`);
@@ -278,7 +277,7 @@ function _extendRevelation (gateway: Object, base: Object, extension: Object,
       return (ret = base);
     }
 
-    if ((typeof base === "undefined") || (extension === null)) {
+    if ((base === undefined) || (extension === null)) {
       return (ret = extension);
     }
 
@@ -300,7 +299,7 @@ function _extendRevelation (gateway: Object, base: Object, extension: Object,
             return ret;
           }
           for (const baseKey of Object.keys(base)) {
-            if ((typeof base[baseKey] !== "undefined") && !result.hasOwnProperty(baseKey)) {
+            if ((base[baseKey] !== undefined) && !result.hasOwnProperty(baseKey)) {
               _extendRevelation(gateway, base[baseKey], result[baseKey], baseKey, extension.name);
             }
           }
@@ -345,14 +344,12 @@ function _extendRevelation (gateway: Object, base: Object, extension: Object,
       ret = Object.create(Object.getPrototypeOf(base), Object.getOwnPropertyDescriptors(base));
       for (const [key_, value] of Object.entries(extension)) {
         key = key_;
-        const currentValue = (typeof ret[key] !== "undefined") ? ret[key] : valuePrototype;
-        if (typeof currentValue === "undefined") {
+        const currentValue = (ret[key] !== undefined) ? ret[key] : valuePrototype;
+        if (currentValue === undefined) {
           ret[key] = value;
         } else {
-          ret[key] = _combineRevelationsLazily(gateway, currentValue, value);
-          if (_isLazy(ret[key])) {
-            _setPropertyToGetter(ret, key, ret[key]);
-          }
+          _setMaybeLazyProperty(ret, key,
+              _combineRevelationsLazily(gateway, currentValue, value));
         }
       }
     } else if (!valuePrototype) {
@@ -360,11 +357,8 @@ function _extendRevelation (gateway: Object, base: Object, extension: Object,
     } else {
       ret = [].concat(base);
       for (const entry of [].concat(extension)) {
-        key = ret.length;
-        ret.push(_combineRevelationsLazily(gateway, valuePrototype, entry));
-        if (_isLazy(ret[key])) {
-          _setPropertyToGetter(ret, key, ret[key]);
-        }
+        _setMaybeLazyProperty(ret, ret.length,
+            _combineRevelationsLazily(gateway, valuePrototype, entry));
       }
     }
     return ret;
@@ -383,20 +377,25 @@ function _extendRevelation (gateway: Object, base: Object, extension: Object,
   } */
 }
 
-function _setPropertyToGetter (target: any, key: number | string, getter: Function) {
-  let value;
-  Object.defineProperty(target, key, {
-    enumerable: true,
-    configurable: true,
-    get () {
-      if (typeof value !== "undefined") return value;
-      value = _keepCalling(getter);
-      Object.defineProperty(target, key, { value, writable: true });
-      Promise.resolve(value).then(resolvedValue => {
-        value = resolvedValue;
-        Object.defineProperty(target, key, { value, writable: true });
-      });
-      return value;
-    }
-  });
+function _setMaybeLazyProperty (target: any, key: any, value: any) {
+  if (!_isLazy(value)) {
+    target[key] = value;
+  } else {
+    if (typeof key === "number") target[key] = undefined;
+    let _cachedValue;
+    Object.defineProperty(target, key, {
+      enumerable: true,
+      configurable: true,
+      get () {
+        if (_cachedValue !== undefined) return _cachedValue;
+        _cachedValue = _keepCalling(value);
+        Object.defineProperty(target, key, { value: _cachedValue, writable: true });
+        Promise.resolve(_cachedValue).then(resolvedValue => {
+          _cachedValue = resolvedValue;
+          Object.defineProperty(target, key, { value: resolvedValue, writable: true });
+        });
+        return _cachedValue;
+      }
+    });
+  }
 }

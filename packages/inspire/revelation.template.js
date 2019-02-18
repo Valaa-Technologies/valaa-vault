@@ -14,7 +14,7 @@ export default {
   gateway: {
     name: "@valos/inspire",
     version: "",
-    description: "Inspire - Valaa Browser Gateway",
+    description: "Gateway Revelation Template",
     runtime: "",
 
     verbosity: 0,

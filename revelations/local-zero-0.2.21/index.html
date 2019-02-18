@@ -23,15 +23,17 @@
     <div id="valaa-inspire--main-container"></div>
     <script src="/valaa/inspire/valaa-inspire.js"></script>
     <script>
-      Valaa.createInspireGateway({ "...": { input: "revela.json", crossOrigin: "same-authority" } },
-      {
-        gateway: {
-          verbosity: 1,
-        },
-        prologue: {
-          rootPartitionURI: Valaa.getURIQueryField(document.location, "partition"),
-        },
-      }).then(function (inspireGateway) {
+      Valaa.createInspireGateway(
+          { "...": { input: "revela.json", fetch: { crossOrigin: "same-authority" } } },
+          {
+            gateway: {
+              verbosity: 1,
+            },
+            prologue: {
+              rootPartitionURI: Valaa.getURIQueryField(document.location, "partition"),
+            },
+          }
+      ).then(function (inspireGateway) {
         Valaa.views = inspireGateway.createAndConnectViewsToDOM({
           inspireMain: {
             name: "Valaa local-zero-0.2.21 Main",

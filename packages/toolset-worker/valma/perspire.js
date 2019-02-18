@@ -67,13 +67,36 @@ exports.builder = (yargs) => yargs.option({
 });
 
 exports.handler = async (yargv) => {
+  const vlm = yargv.vlm;
   // revelationPaths parsing
   global.window = global;
+  const state = {
+    "...": { chapters: true },
+    tick: -1,
+  };
+  if (vlm.clockEvents) {
+    state.clockEvents = { "...": {
+      columns: [
+        { context: { text: "context", style: "info" } },
+        { event: { text: "event name", style: "info" } },
+        { start: { text: "start time", style: "info" } },
+        { duration: { text: "duration", style: "info" } },
+        { message: { text: "message string", style: "info" } },
+      ],
+      entries: vlm.clockEvents,
+    } };
+  }
+  vlm.clock("perspire.handler", "gateway.require", `require("@valos/inspire/PerspireServer")`);
   const PerspireServer = require("@valos/inspire/PerspireServer").default;
-  const outputError = require("@valos/tools/wrapError").outputError;
 
-  const vlm = yargv.vlm;
-  let revelationPath = yargv.revelationPath || "./revela.json";
+  let revelationPath = yargv.revelationPath || ".";
+  if (!vlm.shell.test("-f", revelationPath) && !revelationPath.match(/\/revela.json$/)) {
+    revelationPath = vlm.path.join(revelationPath, "revela.json");
+  }
+  if (!vlm.shell.test("-f", revelationPath)) {
+    throw new Error(`Cannot open initial revelation "${revelationPath}" for reading`);
+  }
+
   let revelationRoot = yargv.revelationRoot;
   if (revelationRoot === undefined) {
     revelationRoot = vlm.path.dirname(revelationPath);
@@ -84,13 +107,14 @@ exports.handler = async (yargv) => {
 
   const execBody = yargv.exec && (yargv.exec.body || await vlm.readFile(yargv.exec.path, "utf8"));
   if (yargv.exec && (typeof execBody !== "string")) {
-    console.warn("execBody:", execBody);
+    console.error("Invalid execBody:", execBody);
     throw new Error(`Invalid exec body, expected a string, got: '${typeof execBody}' for path "${
         yargv.exec.path}"`);
   }
 
   vlm.shell.mkdir("-p", yargv.cacheBasePath);
 
+  vlm.clock("perspire.handler", "gateway.create", "server = new PerspireServer");
   const server = new PerspireServer({
     logger: vlm,
     plugins: yargv.plugin,
@@ -112,17 +136,23 @@ exports.handler = async (yargv) => {
     ],
   });
 
+  vlm.clock("perspire.handler", "gateway.initialize", "server.initialize()");
   await server.initialize();
+
+  vlm.clock("perspire.handler", "perspire.partitions",
+      "gateway.acquirePartitionConnections(yargv.partitions)");
   const partitions = { root: server.gateway.rootPartition };
   for (const [key, partitionURI] of Object.entries(yargv.partitions || {})) {
     partitions[key] = await server.gateway.falseProphet
         .acquirePartitionConnection(partitionURI, { newPartition: false })
         .getActiveConnection();
   }
+  vlm.clock("perspire.handler", "gateway.mainView", "server.createMainView");
   const mainView = await server.createMainView();
   partitions.view = mainView.getViewPartition();
 
   mainView.rootScope.Valaa.Perspire.options = yargv;
+  mainView.rootScope.Valaa.Perspire.state = state;
 
   let vExecThis;
   if (yargv.exec) {
@@ -133,34 +163,44 @@ exports.handler = async (yargv) => {
 
   const keepaliveInterval = (typeof yargv.keepalive === "number")
       ? yargv.keepalive : (yargv.keepalive && 1);
+  let ret;
   if (!keepaliveInterval) {
+    vlm.clock("perspire.handler", "perspire.immediate", "falsy keepalive interval");
     vlm.info("No keepalive enabled");
-    return _tick("immediate", 0, "immediate rendering");
+    state.mode = "immediate rendering";
+    ret = await _tick("immediate", 0);
+  } else {
+    vlm.info(`Setting up keepalive render every ${keepaliveInterval} seconds`);
+    state.mode = keepaliveInterval >= 0 ? "keepalive rendering" : "delayed single shot rendering";
+    vlm.clock("perspire.handler", "perspire.delay", `server.run(${keepaliveInterval})`);
+    ret = await server.run(Math.abs(keepaliveInterval), (tickIndex) => {
+      const tickRet = _tick(`heartbeat ${tickIndex}:`, tickIndex);
+      if (keepaliveInterval >= 0) return undefined;
+      return tickRet;
+    });
   }
-  vlm.info(`Setting up keepalive render every ${keepaliveInterval} seconds`);
-  return server.run(Math.abs(keepaliveInterval), (tickIndex) => {
-    const ret = _tick(`heartbeat ${tickIndex}:`, tickIndex, "delayed single shot rendering");
-    if (keepaliveInterval >= 0) return undefined;
-    return ret;
-  });
+  vlm.finalizeClock();
+  return ret;
 
-  function _tick (header, tick, mode) {
-    const domString = server.serializeMainDOM();
-    mainView.rootScope.Valaa.Perspire.state = {
-      "...": { chapters: true },
-      domString,
-      tick,
-      mode,
-    };
-    _writeDomString(domString, header);
-    const sourceInfo = {
-      phase: "perspisre.exec transpilation",
-      source: execBody,
-      mediaName: yargv.exec.path || "exec.body",
-      sourceMap: new Map(),
-    };
-    const execResult = vExecThis && execBody && vExecThis.doValaaScript(execBody, { sourceInfo });
-    return execResult !== undefined ? execResult : mainView.rootScope.Valaa.Perspire.state;
+  function _tick (header, tick) {
+    vlm.clock("perspire.handler", `server.tick(${tick}).dom`,
+        `${header} serialize/write DOM`);
+    state.domString = server.serializeMainDOM();
+    state.tick = tick;
+    _writeDomString(state.domString, header);
+    if (vExecThis && execBody) {
+      const sourceInfo = {
+        phase: "perspire.exec transpilation",
+        source: execBody,
+        mediaName: yargv.exec.path || "exec.body",
+        sourceMap: new Map(),
+      };
+      vlm.clock("perspire.handler", `server.tick(${tick}).exec`,
+          `${header} transpile and execute valaascript`);
+      const execResult = vExecThis && execBody && vExecThis.doValaaScript(execBody, { sourceInfo });
+      if (execResult !== undefined) return execResult;
+    }
+    return state;
   }
 
   function _writeDomString (domString, header) {

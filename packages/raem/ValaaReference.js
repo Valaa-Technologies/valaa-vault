@@ -1,7 +1,6 @@
 // @flow
 
-import ValaaURI, { createNaivePartitionURI, getNaivePartitionRawIdFrom }
-    from "~/raem/ValaaURI";
+import ValaaURI, { naiveURI } from "~/raem/ValaaURI";
 
 import GhostPath, { JSONGhostPath, ghostPathFromJSON } from "~/raem/state/GhostPath";
 
@@ -78,7 +77,7 @@ class ValaaReference {
     if (!resolver) return this;
     if (!resolver.partition) {
       if (resolver.hasOwnProperty("partition")) delete resolver.partition;
-    } else resolver.partition = createNaivePartitionURI(resolver.partition);
+    } else resolver.partition = naiveURI.createPartitionURI(resolver.partition);
     if (!resolver.ghostPath) {
       if (resolver.hasOwnProperty("ghostPath")) delete resolver.ghostPath;
     } else if (!(resolver.ghostPath instanceof GhostPath)) {
@@ -176,7 +175,7 @@ class ValaaReference {
   getPartitionURI (): ?ValaaURI { return this._r.partition; }
   getPartitionRawId (): ?string {
     try {
-      return getNaivePartitionRawIdFrom(this._r.partition);
+      return naiveURI.getPartitionRawId(this._r.partition);
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .getPartitionRawId(), with:`,
           "\n\tpartitionURI:", this._r.partition);
@@ -494,11 +493,11 @@ export const tryPartitionURIFrom = vdocorate(`
   if (idData[1] && (typeof idData[1] === "object")) {
     return (typeof idData[1].partition !== "string")
         ? idData[1].partition
-        : createNaivePartitionURI(idData[1].partition);
+        : naiveURI.createPartitionURI(idData[1].partition);
   }
   if (((typeof idData[1] === "string") || (idData[1] === null))
       && (typeof idData[3] === "string")) {
-    return createNaivePartitionURI(idData[3]);
+    return naiveURI.createPartitionURI(idData[3]);
   }
   return undefined;
 });

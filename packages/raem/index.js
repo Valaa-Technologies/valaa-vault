@@ -38,7 +38,8 @@ export type {
                                       ValaaURI,
 } from "./ValaaURI";
 export {
-                                      getNaivePartitionRawIdFrom,
+                                      genericURI,
+                                      naiveURI,
 } from "./ValaaURI";
 export {
                            default as VALK

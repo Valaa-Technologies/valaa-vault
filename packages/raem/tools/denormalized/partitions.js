@@ -4,7 +4,7 @@ import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-dup
 
 import Bard, { getActionFromPassage } from "~/raem/redux/Bard";
 import { tryHostRef } from "~/raem/VALK/hostReference";
-import { ValaaURI, createNaivePartitionURI } from "~/raem/ValaaURI";
+import { ValaaURI, naiveURI } from "~/raem/ValaaURI";
 import { Resolver, Transient } from "~/raem/state";
 
 import traverseMaterializedOwnlings
@@ -229,7 +229,7 @@ export function determineNewObjectPartition (mutableTransient: Transient, transi
   let partitionURI;
   const ownerId = mutableTransient.get("owner");
   if (authorityURI) {
-    partitionURI = createNaivePartitionURI(authorityURI, transientId.rawId());
+    partitionURI = naiveURI.createPartitionURI(authorityURI, transientId.rawId());
   } else if (ownerId) {
     partitionURI = ownerId.getPartitionURI();
   } else {

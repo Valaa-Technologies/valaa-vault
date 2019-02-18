@@ -5,7 +5,7 @@ import { is as immutableIs } from "immutable";
 import { created } from "~/raem/events";
 import { getActionFromPassage } from "~/raem/redux/Bard";
 import { vRef } from "~/raem/ValaaReference";
-import { createNaivePartitionURI } from "~/raem/ValaaURI";
+import { naiveURI } from "~/raem/ValaaURI";
 import VALK from "~/raem/VALK";
 
 import {
@@ -54,7 +54,7 @@ describe("Prophet", () => {
     const scribe = await createScribe(createOracle());
 
     const connection = await scribe.acquirePartitionConnection(
-            createNaivePartitionURI("valaa-test:"))
+            naiveURI.createPartitionURI("valaa-test:"))
         .getActiveConnection();
 
     const mediaRef = vRef("abcd-0123");
@@ -555,7 +555,7 @@ describe("Cross-partition", () => {
   it("handles out-of-order cross-partition incomingRelations", async () => {
     const { scribeConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
-    const latePartitionURI = createNaivePartitionURI(harness.testAuthorityURI, "test_late");
+    const latePartitionURI = naiveURI.createPartitionURI(harness.testAuthorityURI, "test_late");
 
     const lateTargetId = vRef("late_target", undefined, undefined, latePartitionURI);
 
@@ -593,7 +593,7 @@ describe("Cross-partition", () => {
   it("handles out-of-order instantiation with properties in both partitions", async () => {
     const { scribeConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
-    const latePartitionURI = createNaivePartitionURI(harness.testAuthorityURI, "test_late");
+    const latePartitionURI = naiveURI.createPartitionURI(harness.testAuthorityURI, "test_late");
 
     const latePrototypeId = vRef("late_prototype", undefined, undefined, latePartitionURI);
 

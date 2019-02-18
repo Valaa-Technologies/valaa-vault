@@ -11,7 +11,7 @@ const testAuthorityURI = "valaa-test:";
 
 /*
 function vCrossRef (rawId, partitionRawId = rawId) {
-  const uri = createNaivePartitionURI("valaa-test:", partitionRawId);
+  const uri = naiveURI.createPartitionURI("valaa-test:", partitionRawId);
   return vRef(rawId, null, null, uri);
 }
 */

@@ -3,7 +3,7 @@
 import { OrderedMap } from "immutable";
 import { created, EventBase } from "~/raem/events";
 
-import { createNaivePartitionURI } from "~/raem/ValaaURI";
+import { naiveURI } from "~/raem/ValaaURI";
 
 import { createCorpus } from "~/raem/test/RAEMTestHarness";
 
@@ -32,7 +32,7 @@ import { openDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 import { dumpify, dumpObject, isPromise, wrapError } from "~/tools";
 
 export const testAuthorityURI = "valaa-test:";
-export const testPartitionURI = createNaivePartitionURI(testAuthorityURI, "test_partition");
+export const testPartitionURI = naiveURI.createPartitionURI(testAuthorityURI, "test_partition");
 
 export function createProphetTestHarness (options: Object, ...commandBlocks: any) {
   const wrap = new Error("During createProphetHarness");
@@ -85,7 +85,7 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
   try {
     if (options.acquirePartitions) {
       const partitionURIs = options.acquirePartitions.map(
-          partitionId => createNaivePartitionURI("valaa-test:", partitionId));
+          partitionId => naiveURI.createPartitionURI("valaa-test:", partitionId));
       const connections = partitionURIs.map(uri =>
           ret.prophet.acquirePartitionConnection(uri).getActiveConnection());
       (await Promise.all(connections)).forEach(connection => {
@@ -126,7 +126,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     this.testAuthorityURI = options.testAuthorityURI || testAuthorityURI;
     this.testPartitionURI = options.testPartitionURI
         || (options.testAuthorityURI
-            && createNaivePartitionURI(this.testAuthorityURI, "test_partition"))
+            && naiveURI.createPartitionURI(this.testAuthorityURI, "test_partition"))
         || testPartitionURI;
   }
 
@@ -343,7 +343,7 @@ export function createFalseProphet (options?: Object) {
 
 export function createTestMockProphet (configOverrides: Object = {}) {
   return new TestProphet({
-    authorityURI: createNaivePartitionURI("valaa-test:"),
+    authorityURI: naiveURI.createPartitionURI("valaa-test:"),
     authorityConfig: {
       eventVersion: EVENT_VERSION,
       isLocallyPersisted: true,

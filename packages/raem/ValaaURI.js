@@ -4,7 +4,6 @@ import URLParse from "url-parse";
 
 import { invariantifyString } from "~/tools/invariantify";
 import { vdon } from "~/tools/vdon";
-// import { wrapError } from "~/tools/wrapError";
 
 export const vdoc = vdon({ "...": { heading:
   "ValaaURI's refer to authorities, partitions, resources and their sub-aspects",
@@ -48,78 +47,102 @@ export const vdoc = vdon({ "...": { heading:
 
 export type ValaaURI = string;
 
-/* eslint-disable no-unused-vars */
-
-const _rfc3986URIMatcher =
-    /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?$/;
-//    12            3    4          5       6  7        8 9
-const _protocolIndex = 1; // scheme + ':'
-const _schemeIndex = 2; // without ':'
-const _authorityIndex = 3;
-const _hostIndex = 4;
-const _pathIndex = 5;
-const _queryIndex = 6; // with '?' prefix
-const _paramsIndex = 7;
-const _fragmentIndex = 8; // with '#' prefix
-const _secondaryResourceIndex = 9; // without '#'
+export const genericURI = {
+  regex: /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?$/,
+//         12            3    4          5       6  7        8 9
+  protocolPart: 1, // scheme + ':'
+  schemePart: 2, // without ':'
+  authorityPart: 3,
+  hostPart: 4,
+  pathPart: 5,
+  queryPart: 6, // with '?' prefix
+  paramsPart: 7,
+  fragmentPart: 8, // with '#' prefix
+  secondaryResourcePart: 9, // without '#'
+};
 
 // Naive partition URI is a fixed format URI where first query param is
 // `id` and its value is the partition Id and consequently the raw id
 // of its root resource. Other query arguments
 
-const _naivePartitionURIMatcher =
-    /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?(id=([^#&]+)(&([^#]*))?))(#(([^?]*)(\?(.*)))?)?$/;
-//    12            3    4          5       6  7   8       9 a          b cd      e  f
-// Matching groups are shared with rfc3986matcher up to _paramsIndex
-const _naivePartitionIdIndex = 8;
-const _naiveParamsIndex = 10;
-const _naiveFragmentIndex = 11;
-const _naiveSecondaryResourceIndex = 12;
-const _naiveResourceIdIndex = 13;
-const _naiveSecondaryQueryIndex = 14;
-const _naiveSecondaryParamsIndex = 15;
-// const fragmentIndex = 6;
+export const naiveURI = {
+  // Matching groups are shared with rfc3986matcher up to paramsPart
+  ...genericURI,
+  regex: /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?(id=([^#&]+)(&([^#]*))?))(#(([^?]*)(\?(.*)))?)?$/,
+//           12            3    4          5       6  7   8       9 a          b cd      e  f
+  partitionIdPart: 8,
+  paramsPart: 10,
+  fragmentPart: 11,
+  secondaryResourcePart: 12,
+  resourceIdPart: 13,
+  secondaryQueryPart: 14,
+  secondaryParamsPart: 15,
 
-/* eslint-enable no-unused-vars */
+  /**
+   * Creates a partition URI from one or two string as a native URL object.
+   * If only one string is given it is considered to be the full partition URI string and consumed
+   * as is.
+   * If the optional partitionRawId is specified the baseString is considered to be the partition
+   * authority URI, and the full partition URI is generated as per authority URI schema.
+   *
+   * @export
+   * @param {string} baseString
+   * @param null partitionRawId
+   * @param {any} string
+   * @returns {ValaaURI}
+   */
+  createPartitionURI: function createNaivePartitionURI (
+      baseString: string, partitionRawId: ?string): ValaaURI {
+    if (!baseString || (typeof baseString !== "string")) {
+      invariantifyString(baseString, "naiveURI.createPartitionURI.baseString", { allowEmpty: false });
+    }
+    const baseParts = baseString.match(genericURI.regex);
+    if (!baseParts) {
+      throw new Error(`naiveURI.createPartitionURI.baseString is not a well-formed URI: <${baseString}>`);
+    }
+    if (!baseParts[genericURI.schemePart]) {
+      throw new Error(`naiveURI.createPartitionURI.baseString is missing scheme part: <${baseString}>`);
+    }
+    if (!partitionRawId) {
+      if (partitionRawId === undefined) return baseString;
+      invariantifyString(partitionRawId, "naiveURI.createPartitionURI.partitionRawId",
+          { allowUndefined: true });
+    }
+    return `${baseParts[genericURI.protocolPart]
+        }${baseParts[genericURI.authorityPart] || ""
+        // https://tools.ietf.org/html/rfc3986#section-3.3
+        // If a URI contains an authority component, then the path
+        // component must either be empty or begin with a slash ("/") character.
+        }${baseParts[genericURI.pathPart]
+            || (baseParts[genericURI.authorityPart] ? "/" : "")
+        }?id=${encodeURIComponent(partitionRawId)
+        }${!baseParts[genericURI.paramsPart] ? "" : `&${baseParts[genericURI.paramsPart]}`}`;
+  },
 
-/**
- * Creates a partition URI from one or two string as a native URL object.
- * If only one string is given it is considered to be the full partition URI string and consumed
- * as is.
- * If the optional partitionRawId is specified the baseString is considered to be the partition
- * authority URI, and the full partition URI is generated as per authority URI schema.
- *
- * @export
- * @param {string} baseString
- * @param null partitionRawId
- * @param {any} string
- * @returns {ValaaURI}
- */
-export function createNaivePartitionURI (baseString: string, partitionRawId: ?string): ValaaURI {
-  if (!baseString || (typeof baseString !== "string")) {
-    invariantifyString(baseString, "createNaivePartitionURI.baseString", { allowEmpty: false });
-  }
-  const baseParts = baseString.match(_rfc3986URIMatcher);
-  if (!baseParts) {
-    throw new Error(`createNaivePartitionURI.baseString is not a well-formed URI: <${baseString}>`);
-  }
-  if (!baseParts[_schemeIndex]) {
-    throw new Error(`createNaivePartitionURI.baseString is missing scheme part: <${baseString}>`);
-  }
-  if (!partitionRawId) {
-    if (partitionRawId === undefined) return baseString;
-    invariantifyString(partitionRawId, "createNaivePartitionURI.partitionRawId",
-        { allowUndefined: true });
-  }
-  return `${baseParts[_protocolIndex]
-      }${baseParts[_authorityIndex] || ""
-      // https://tools.ietf.org/html/rfc3986#section-3.3
-      // If a URI contains an authority component, then the path
-      // component must either be empty or begin with a slash ("/") character.
-      }${baseParts[_pathIndex] || (baseParts[_authorityIndex] ? "/" : "")
-      }?id=${encodeURIComponent(partitionRawId)
-      }${!baseParts[_paramsIndex] ? "" : `&${baseParts[_paramsIndex]}`}`;
-}
+  // FIXME(iridian, 2019-02): naive partition URI's must be replaced with
+  // partition schema specific logic and ValaaReference-based API instead
+  // of raw string access API.
+  getPartitionRawId: function getNaivePartitionRawId (naivePartitionURI: ValaaURI): string {
+    if ((typeof naivePartitionURI !== "object") || !naivePartitionURI) {
+      invariantifyString(naivePartitionURI, "naivePartitionURI", { allowEmpty: true });
+    }
+    const parts = naivePartitionURI.match(naiveURI.regex);
+    return decodeURIComponent(parts[naiveURI.partitionIdPart]);
+  },
+
+  getAuthorityURI: function getNaiveAuthorityURI (naivePartitionURI: ValaaURI): ValaaURI {
+    const parts = naivePartitionURI.match(naiveURI.regex);
+    if (!parts) {
+      throw new Error(`Cannot extract authority URI from non-naive partition URI candidate: <${
+          naivePartitionURI}>`);
+    }
+    return `${parts[naiveURI.protocolPart]
+        }${parts[naiveURI.authorityPart]
+        }${parts[naiveURI.pathPart]
+        }${!parts[naiveURI.naiveParamsPart] ? ""
+            : `?${naiveURI.naiveParamsPart}`}`;
+  },
+};
 
 /*
 export function getValaaURI (uri: ValaaURI | string): ValaaURI {
@@ -147,41 +170,20 @@ export function getURIQueryField (uri: ValaaURI, fieldName: string): ?any {
   return uriObject.query && uriObject.query[fieldName];
 }
 
-// FIXME(iridian, 2019-02): naive partition URI's must be replaced with
-// partition schema specific logic and ValaaReference-based API instead
-// of raw string access API.
-export function getNaivePartitionRawIdFrom (naivePartitionURI: ValaaURI): string {
-  if ((typeof naivePartitionURI !== "object") || !naivePartitionURI) {
-    invariantifyString(naivePartitionURI, "naivePartitionURI", { allowEmpty: true });
-  }
-  const parts = naivePartitionURI.match(_naivePartitionURIMatcher);
-  return decodeURIComponent(parts[_naivePartitionIdIndex]);
-}
-
-export function getNaiveAuthorityURIOf (naivePartitionURI: ValaaURI): ValaaURI {
-  const parts = naivePartitionURI.match(_naivePartitionURIMatcher);
-  if (!parts) {
-    throw new Error(`Cannot extract authority URI from non-naive partition URI candidate: <${
-        naivePartitionURI}>`);
-  }
-  return `${parts[_protocolIndex]}${parts[_authorityIndex]}${parts[_pathIndex]
-      }${!parts[_naiveParamsIndex] ? "" : `?${_naiveParamsIndex}`}`;
-}
-
 export function createLocalPartitionURIFromRawId (rawId: string): ValaaURI {
-  return createNaivePartitionURI("valaa-local:", rawId);
+  return naiveURI.createPartitionURI("valaa-local:", rawId);
 }
 
 export function createMemoryPartitionURIFromRawId (rawId: string): ValaaURI {
-  return createNaivePartitionURI("valaa-memory:", rawId);
+  return naiveURI.createPartitionURI("valaa-memory:", rawId);
 }
 
 export function createTransientPartitionURIFromRawId (rawId: string): ValaaURI {
-  return createNaivePartitionURI("valaa-transient:", rawId);
+  return naiveURI.createPartitionURI("valaa-transient:", rawId);
 }
 
 export function createTestPartitionURIFromRawId (rawId: string): ValaaURI {
-  return createNaivePartitionURI("valaa-test:", rawId);
+  return naiveURI.createPartitionURI("valaa-test:", rawId);
 }
 
 export function getScheme (uri: string): string {

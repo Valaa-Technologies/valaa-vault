@@ -1,6 +1,6 @@
 import { created, transacted, fieldsSet } from "~/raem/events/index";
 import { vRef } from "~/raem/ValaaReference";
-import { createNaivePartitionURI } from "~/raem/ValaaURI";
+import { naiveURI } from "~/raem/ValaaURI";
 
 import { createProphetOracleHarness } from "~/prophet/test/ProphetTestHarness";
 
@@ -36,7 +36,7 @@ describe("Oracle", () => {
 
   it("Rejects commands chronicled after a freeze command", async () => {
     harness = await createProphetOracleHarness({});
-    const partitionURI = createNaivePartitionURI(testAuthorityURI, "test_partition");
+    const partitionURI = naiveURI.createPartitionURI(testAuthorityURI, "test_partition");
     await harness.prophet
         .acquirePartitionConnection(partitionURI).getActiveConnection();
 

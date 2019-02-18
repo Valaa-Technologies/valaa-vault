@@ -2,7 +2,7 @@
 
 import { created } from "~/raem/events/index";
 import { vRef } from "~/raem/ValaaReference";
-import { createNaivePartitionURI } from "~/raem/ValaaURI";
+import { naiveURI } from "~/raem/ValaaURI";
 
 import {
   createFalseProphet, createProphetOracleHarness, createTestMockProphet,
@@ -10,7 +10,7 @@ import {
 } from "~/prophet/test/ProphetTestHarness";
 
 const testAuthorityURI = "valaa-test:";
-const partitionURI = createNaivePartitionURI(testAuthorityURI, "test_partition");
+const partitionURI = naiveURI.createPartitionURI(testAuthorityURI, "test_partition");
 
 let harness = null;
 afterEach(async () => {

@@ -12,7 +12,7 @@ import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "
 import ValaaReference, { vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom }
     from "~/raem/ValaaReference";
 import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
-import { createNaivePartitionURI, getNaivePartitionRawIdFrom } from "~/raem/ValaaURI";
+import { naiveURI } from "~/raem/ValaaURI";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
 
@@ -187,7 +187,7 @@ export default class Vrapper extends Cog {
   isPartitionRoot () {
     const partitionURI = this[HostRef].getPartitionURI();
     if (!partitionURI) return false;
-    return getNaivePartitionRawIdFrom(partitionURI) === this[HostRef].rawId();
+    return naiveURI.getPartitionRawId(partitionURI) === this[HostRef].rawId();
   }
 
   toJSON () {
@@ -446,7 +446,7 @@ export default class Vrapper extends Cog {
           if (!partitionURI) {
             const authorityURIString = transient.get("partitionAuthorityURI");
             partitionURI = authorityURIString
-                && createNaivePartitionURI(authorityURIString, transient.get("id").rawId());
+                && naiveURI.create(authorityURIString, transient.get("id").rawId());
           }
         }
       }

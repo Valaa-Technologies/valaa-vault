@@ -25,7 +25,7 @@ export function _composeStoryFromEvent (falseProphet: FalseProphet, event: Event
     if (transactionInfo) {
       falseProphet.warnEvent(1, () => [
           `Committing a diverged transaction '${transactionInfo.name}' normally:`,
-          "\n\trestrictedTransacted:", event]);
+          "\n\trestrictedTransacted:", ...dumpObject(event)]);
     }
     story = falseProphet.corpus.dispatch(event, dispatchDescription);
   }

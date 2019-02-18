@@ -43,7 +43,7 @@ export function vRefFromJSON (json: JSONIdData, RefType: Object = VRef): VRef {
     ret[PackedHostValue][2] = ghostPathFromJSON(ret[PackedHostValue][2]);
   }
   if (ret[PackedHostValue][3] && !(ret[PackedHostValue][3] instanceof ValaaURI)) {
-    ret[PackedHostValue][3] = createNaivePartitionURI(ret[PackedHostValue][3]);
+    ret[PackedHostValue][3] = naiveURI.createPartitionURI(ret[PackedHostValue][3]);
   }
   return ret;
 }

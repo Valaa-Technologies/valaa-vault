@@ -1,5 +1,6 @@
 import getGlobal from "~/gateway-api/getGlobal";
-import inBrowser from "~/gateway-api/inBrowser";
+
+const inBrowser = require("~/gateway-api/inBrowser").default;
 
 /**
  * The global Valaa namespace object is a shared by protected namespace

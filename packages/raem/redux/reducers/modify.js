@@ -4,7 +4,7 @@ import { OrderedMap, is } from "immutable";
 
 import { isCreatedLike } from "~/raem/events";
 import ValaaReference, { getRawIdFrom } from "~/raem/ValaaReference";
-import { createNaivePartitionURI } from "~/raem/ValaaURI";
+import { naiveURI } from "~/raem/ValaaURI";
 
 import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import getObjectField, { fillFieldInfoAndResolveAliases }
@@ -377,7 +377,7 @@ const customSetFieldHandlers = {
   },
   partitionAuthorityURI (bard: Bard, fieldInfo: Object, newAuthorityURI: ?string) {
     const newPartitionURI = newAuthorityURI
-        && createNaivePartitionURI(newAuthorityURI, bard.objectId.rawId());
+        && naiveURI.createPartitionURI(newAuthorityURI, bard.objectId.rawId());
     const oldPartitionURI = bard.objectId.getPartitionURI();
     if ((newPartitionURI && newPartitionURI.toString()) !==
         (oldPartitionURI && oldPartitionURI.toString())) {

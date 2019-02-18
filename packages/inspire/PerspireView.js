@@ -18,7 +18,8 @@ export default class PerspireView extends VDOMView {
           ""} connections complete`);
       return this;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `attach('${options.name}' -> ${options.rootLensURI})`);
+      throw this.wrapErrorEvent(error,
+          `attach('${options.name}' -> ${options.lensURI || options.rootLensURI})`);
     }
   }
 

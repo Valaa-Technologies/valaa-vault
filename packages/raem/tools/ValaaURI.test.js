@@ -1,52 +1,50 @@
-import {
-  createNaivePartitionURI, getHostname, getNaiveAuthorityURIOf,
-} from "~/raem/ValaaURI";
+import { naiveURI, getHostname } from "~/raem/ValaaURI";
 
 describe("Basic operations", () => {
   it("roundtrips trivial uri 'foo:'", () => {
     const sourceURI = "foo:";
-    const roundtripURI = createNaivePartitionURI(sourceURI);
+    const roundtripURI = naiveURI.createPartitionURI(sourceURI);
     expect(String(roundtripURI))
         .toEqual(sourceURI);
   });
 
   it("roundtrips non-trivial uri 'foo://bar.com/?id=baz'", () => {
     const sourceURI = "foo://bar.com/";
-    const roundtripURI = createNaivePartitionURI(sourceURI, "baz");
+    const roundtripURI = naiveURI.createPartitionURI(sourceURI, "baz");
     expect(String(roundtripURI))
         .toEqual(`${sourceURI}?id=baz`);
 
-    const authorityURIString = getNaiveAuthorityURIOf(roundtripURI);
+    const authorityURIString = naiveURI.getAuthorityURI(roundtripURI);
     expect(String(authorityURIString))
         .toEqual(sourceURI);
   });
 
   it("adds '/' to path part when host uri 'foo://bar.com' is used as authority URI base", () => {
     const sourceURI = "foo://bar.com";
-    const roundtripURI = createNaivePartitionURI(sourceURI, "baz");
+    const roundtripURI = naiveURI.createPartitionURI(sourceURI, "baz");
     expect(String(roundtripURI))
         .toEqual(`${sourceURI}/?id=baz`);
 
-    const authorityURIString = getNaiveAuthorityURIOf(roundtripURI);
+    const authorityURIString = naiveURI.getAuthorityURI(roundtripURI);
     expect(String(authorityURIString))
         .toEqual(`${sourceURI}/`);
   });
 
   it("doesn't add '/' to path part for pathed authority URI 'foo://bar.com/xyz'", () => {
     const sourceURI = "foo://bar.com/xyz";
-    const roundtripURI = createNaivePartitionURI(sourceURI, "baz");
+    const roundtripURI = naiveURI.createPartitionURI(sourceURI, "baz");
     expect(String(roundtripURI))
         .toEqual(`${sourceURI}?id=baz`);
 
-    const authorityURIString = getNaiveAuthorityURIOf(roundtripURI);
+    const authorityURIString = naiveURI.getAuthorityURI(roundtripURI);
     expect(String(authorityURIString))
         .toEqual(sourceURI);
   });
 
-  it("doesn't lose // from string uri with getNaiveAuthorityURIOf", () => {
+  it("doesn't lose // from string uri with naiveURI.getAuthorityURI", () => {
     const uriString = "valaa-test://example.com/developtest?id=aaaaaaa-bbbb-cdef-1234";
     const authorityString = "valaa-test://example.com/developtest";
-    expect(getNaiveAuthorityURIOf(uriString))
+    expect(naiveURI.getAuthorityURI(uriString))
         .toEqual(authorityString);
   });
 

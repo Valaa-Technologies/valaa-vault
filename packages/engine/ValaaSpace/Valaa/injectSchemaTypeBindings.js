@@ -5,7 +5,7 @@ import { Valker, denoteValaaBuiltinWithSignature, denoteDeprecatedValaaBuiltin,
 } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
 import type { VRef } from "~/raem/ValaaReference";
-import { createNaivePartitionURI } from "~/raem/ValaaURI";
+import { naiveURI } from "~/raem/ValaaURI";
 
 import { BuiltinTypePrototype, createNativeIdentifier, ValaaPrimitiveTag } from "~/script";
 
@@ -636,9 +636,9 @@ export default function injectSchemaTypeBindings (Valaa: Object, scope: Object) 
     name: "Partition",
     createPartitionURI: denoteValaaBuiltinWithSignature(
         `Creates a URI from given *base* and *partitionId* strings`
-    // TODO(iridian): Replace createNaivePartitionURI with appropriate authority scheme-specific
+    // TODO(iridian): Replace naiveURI.createPartitionURI with appropriate authority scheme-specific
     // implementation dispatcher.
-    )(createNaivePartitionURI),
+    )(naiveURI.createPartitionURI),
     tryPartitionConnection: denoteValaaBuiltinWithSignature(
         `Returns an existing, fully active connection to the partition with given${
           ""} *partitionURI*, undefined otherwise`

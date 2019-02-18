@@ -4,7 +4,7 @@ import { getActionFromPassage } from "~/raem";
 import { Command, EventBase } from "~/raem/events";
 import type { Story } from "~/raem/redux/Bard";
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
-import { createNaivePartitionURI } from "~/raem/ValaaURI";
+import { naiveURI } from "~/raem/ValaaURI";
 
 import { ChronicleEventResult, PartitionConnection, ProphecyChronicleRequest, ProphecyEventResult }
     from "~/prophet/api/types";
@@ -374,7 +374,7 @@ class ProphecyOperation extends ProphecyEventResult {
     Object.keys(partitions).forEach((partitionURIString) => {
       const connection = this._prophet._connections[partitionURIString];
       if (!connection) {
-        missingConnections.push(createNaivePartitionURI(partitionURIString));
+        missingConnections.push(naiveURI.createPartitionURI(partitionURIString));
         return;
       }
       const commandEvent = extractPartitionEvent0Dot2(connection,

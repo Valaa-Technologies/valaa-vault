@@ -2,7 +2,7 @@
 
 import { Action, Command, created, duplicated, destroyed, EventBase } from "~/raem/events";
 import type { Corpus } from "~/raem/Corpus";
-import { ValaaURI, createNaivePartitionURI, hasScheme } from "~/raem/ValaaURI";
+import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/ValaaReference";
 import { dumpObject } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
@@ -182,7 +182,7 @@ export default class FalseProphetDiscourse extends Discourse {
     }
 
     targetAction.id = vRef(resourceRawId, undefined, undefined,
-        createNaivePartitionURI(partitionURI));
+        naiveURI.createPartitionURI(partitionURI));
     /*
     console.log("assignNewResourceId", tryAspect(root, "command").id, partitionURI, explicitRawId,
         "\n\tresourceRawId:", resourceRawId,
@@ -214,7 +214,7 @@ export default class FalseProphetDiscourse extends Discourse {
     const partitionRawId = explicitPartitionRawId
         || createPartitionId0Dot2(root.aspects.command.id, authorityURI);
     targetAction.id = vRef(partitionRawId, undefined, undefined,
-        createNaivePartitionURI(authorityURI, partitionRawId));
+        naiveURI.createPartitionURI(authorityURI, partitionRawId));
     /*
     console.log("assignNewPartitionId", String(targetAction.id), authorityURI,
         explicitPartitionRawId, "\n\ttargetAction:", ...dumpObject(targetAction));

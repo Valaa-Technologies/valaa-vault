@@ -1,6 +1,6 @@
 // @flow
 
-import { ValaaURI, getNaivePartitionRawIdFrom } from "~/raem/ValaaURI";
+import { ValaaURI, naiveURI } from "~/raem/ValaaURI";
 import type { EventBase } from "~/raem/events";
 
 import Prophet from "~/prophet/api/Prophet";
@@ -57,7 +57,7 @@ export default class PartitionConnection extends Follower {
   getProphet (): Prophet { return this._prophet; }
 
   getPartitionURI (): ValaaURI { return this._partitionURI; }
-  getPartitionRawId (): string { return getNaivePartitionRawIdFrom(this._partitionURI); }
+  getPartitionRawId (): string { return naiveURI.getPartitionRawId(this._partitionURI); }
 
   getStatus (): Object {
     return {

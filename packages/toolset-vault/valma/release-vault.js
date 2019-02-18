@@ -101,7 +101,7 @@ exports.handler = async (yargv) => {
     ret.success = ret.preparation.success && ret.commit.success
         && (ret.prePublish || ret.publish).success;
   } catch (error) {
-    vlm.exception(error);
+    vlm.exception(error, "release-vault.handler"));
     ret.error = error.message;
     ret.trace = ["...", { style: { code: "text" } }, error.stack];
   }

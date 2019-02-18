@@ -1,7 +1,7 @@
 // @flow
 
 import MediaDecoder from "~/tools/MediaDecoder";
-import wrapError from "~/tools/wrapError";
+import { wrapError } from "~/tools/wrapError";
 
 export default class JavaScriptDecoder extends MediaDecoder {
   static mediaTypes = [

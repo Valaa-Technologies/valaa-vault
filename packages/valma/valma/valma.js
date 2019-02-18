@@ -320,15 +320,14 @@ const _vlm = {
   },
   // When something is catastrophically wrong and operation terminates immediately.
   // As a diagnostic message outputs to stderr where available.
-  exception (error, ...rest) {
+  exception (error, context, ...rest) {
     if (this.theme.exception) {
-      if (!error) {
-        const dummy = {};
-        Error.captureStackTrace(dummy);
-        console.error(this.theme.exception(`vlm.exception: no error provided! ${dummy.stack}`));
-      } else {
-        console.error(this.theme.exception(`${this.getContextName()} panics: ${error}`), ...rest);
+      let actualError = error || new Error("vlm.exception called without error object");
+      if (!(error instanceof Error)) {
+        actualError = new Error(String(error.message || error));
+        if (error.stack) actualError.stack = error.stack;
       }
+      outputError(actualError, `${this.getContextName()} panics: exception from ${context}`, this);
     }
     return this;
   },
@@ -878,11 +877,11 @@ if (_vlm.vargv.vlmOption) {
 }
 
 process.on("SIGINT", () => {
-  _vlm.exception("interrupted by SIGINT:", "killing all child processes");
+  _vlm.exception("killing all child processes", "SIGINT interrupt handler");
   setTimeout(() => process.exit(-1));
 });
 process.on("SIGTERM", () => {
-  _vlm.exception("terminated by SIGINT:", "killing all child processes");
+  _vlm.exception("killing all child processes", "SIGTERM interrupt handler");
   setTimeout(() => process.exit(-1));
 });
 
@@ -896,17 +895,13 @@ module.exports
     })
     .catch(error => {
       if (error !== undefined) {
-        if (error instanceof Error) {
-          outputError(error, `exception caught at root`, _vlm);
-        } else {
-          _vlm.exception(error.stack || error);
-        }
+        _vlm.exception(error, "vlm root");
       }
       process.exit(typeof error === "number" ? error : ((error && error.code) || -1));
     });
 
 process.on("unhandledRejection", error => {
-  _vlm.exception(dumpify(error, { indent: 2 }), "unhandledRejection");
+  _vlm.exception(error, "unhandledRejection handler");
 });
 
 // Only function definitions from hereon.
@@ -1138,12 +1133,12 @@ async function execute (args, options = {}) {
       subProcess.on("exit", (code, signal) => _onDone(null, code, signal));
       subProcess.on("error", _onDone);
       process.on("SIGINT", () => {
-        this.warn("vlm killing:", this.theme.green(...argv));
+        this.warn(`vlm killing pid ${subProcess.pid} / ${process.getgid()}:`, this.theme.green(...argv));
         process.kill(-subProcess.pid, "SIGTERM");
         process.kill(-subProcess.pid, "SIGKILL");
       });
       process.on("SIGTERM", () => {
-        this.warn("vlm killing:", this.theme.green(...argv));
+        this.warn(`vlm killing pid ${subProcess.pid} / ${process.getgid()}:`, this.theme.green(...argv));
         process.kill(-subProcess.pid, "SIGTERM");
         process.kill(-subProcess.pid, "SIGKILL");
       });
@@ -1584,9 +1579,8 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
           poolCommand.disabled = poolCommand.broken = error;
           poolCommand.explanation = `module require threw: ${String(error)}`;
           this.ifVerbose(this.vargv.dryRun ? 0 : 1)
-              .exception(String(error),
-                  `    while trying to require command ${commandName} module at path`,
-                  poolCommand.linkPath);
+              .exception(error, `require() for command '${commandName}' at "${
+                  poolCommand.linkPath}"`);
         }
       }
       const module = poolCommand.module;
@@ -2023,7 +2017,7 @@ function _reloadPackageAndToolsetsConfigs () {
       _vlm.packageConfig = JSON.parse(shell.head({ "-n": 1000000 }, packageConfigStatus.path));
       __deepFreeze(_vlm.packageConfig);
     } catch (error) {
-      this.exception(String(error), `while reading ${packageConfigStatus.path}`);
+      this.exception(error, `reading "${packageConfigStatus.path}"`);
       throw error;
     }
   }
@@ -2032,7 +2026,7 @@ function _reloadPackageAndToolsetsConfigs () {
       _vlm.toolsetsConfig = JSON.parse(shell.head({ "-n": 1000000 }, toolsetsConfigStatus.path));
       __deepFreeze(_vlm.toolsetsConfig);
     } catch (error) {
-      _vlm.exception(String(error), `while reading ${packageConfigStatus.path}`);
+      _vlm.exception(error, `reading "${packageConfigStatus.path}"`);
       throw error;
     }
   }

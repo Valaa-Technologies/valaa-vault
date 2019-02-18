@@ -1,6 +1,6 @@
 // @flow
 
-import wrapError from "~/tools/wrapError";
+import { wrapError } from "~/tools/wrapError";
 
 // Workaround for "_construct" typo in @babel/runtime 7.0.0-beta.49
 // https://github.com/babel/babel/issues/8061

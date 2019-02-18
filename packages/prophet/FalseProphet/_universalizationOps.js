@@ -5,7 +5,7 @@ import ValaaReference, { /* vRef, */ JSONIdData } from "~/raem/ValaaReference";
 // import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
 import GhostPath, { ghostPathFromJSON } from "~/raem/state/GhostPath";
 
-import wrapError, { dumpObject, debugObjectType } from "~/tools/wrapError";
+import { dumpObject, debugObjectType, wrapError } from "~/tools/wrapError";
 
 import FalseProphet from "./FalseProphet";
 

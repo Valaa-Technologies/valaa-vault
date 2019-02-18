@@ -7,7 +7,7 @@ import GhostPath, { JSONGhostPath, ghostPathFromJSON } from "~/raem/state/GhostP
 
 import { HostRef, tryHostRef } from "~/raem/VALK/hostReference";
 
-import wrapError, { debugObjectType, dumpObject } from "~/tools/wrapError";
+import { debugObjectType, dumpObject, wrapError } from "~/tools/wrapError";
 import invariantify, { invariantifyString, invariantifyObject } from "~/tools/invariantify";
 import { vdocorate } from "~/tools/vdon";
 

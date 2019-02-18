@@ -1,7 +1,7 @@
 // @flow
 
 import SimpleData from "~/tools/SimpleData";
-import wrapError, { outputError } from "~/tools/wrapError";
+import { outputError, wrapError } from "~/tools/wrapError";
 
 export default class Logger extends SimpleData {
   constructor (options: ?any) {

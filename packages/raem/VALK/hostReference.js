@@ -2,7 +2,7 @@
 
 import { Iterable } from "immutable";
 import { vdocorate, vdon } from "~/tools/vdon";
-import wrapError, { debugObjectType, dumpObject } from "~/tools/wrapError";
+import { wrapError, debugObjectType, dumpObject } from "~/tools/wrapError";
 
 export const HostRef = Symbol("HostRef");
 export const PackedHostValue = Symbol("PackedHostValue");

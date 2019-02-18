@@ -4,7 +4,7 @@ import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-dup
 import beaumpify from "~/tools/beaumpify";
 import invariantify, { invariantifyArray, invariantifyNumber, invariantifyString,
     invariantifyObject } from "~/tools/invariantify";
-import wrapError, { dumpObject as _dumpObject } from "~/tools/wrapError";
+import { dumpObject as _dumpObject, wrapError } from "~/tools/wrapError";
 import trivialClone from "~/tools/trivialClone";
 
 import { isHostRef, tryHostRef } from "./hostReference";

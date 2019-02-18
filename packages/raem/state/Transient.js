@@ -6,7 +6,7 @@ import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-dup
 import type GhostPath from "~/raem/state/GhostPath";
 
 import invariantify, { invariantifyObject } from "~/tools/invariantify";
-import wrapError, { dumpObject } from "~/tools/wrapError";
+import { dumpObject, wrapError } from "~/tools/wrapError";
 
 const Transient = OrderedMap;
 // A Transient is an immutable-js denormalized representation of a Valaa object.

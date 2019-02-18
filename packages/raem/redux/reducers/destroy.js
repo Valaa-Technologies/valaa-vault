@@ -8,7 +8,7 @@ import { universalizePartitionMutation } from "~/raem/tools/denormalized/partiti
 
 import Bard from "~/raem/redux/Bard";
 
-import wrapError from "~/tools/wrapError";
+import { wrapError } from "~/tools/wrapError";
 import { invariantifyObject } from "~/tools/invariantify";
 
 const allowedHiddenFields = { typeName: true };

@@ -131,8 +131,7 @@ for the listings in following phases.
           await vlm.interact(["yarn add -W --dev", answer.devDependencies]);
         } catch (error) {
           vlm.speak();
-          vlm.exception(`An exception caught during executable '${
-              vlm.theme.executable(yarnAdd, answer.devDependencies)}':`, error);
+          vlm.exception(error, vlm.theme.executable(yarnAdd, answer.devDependencies));
           wasError = true;
         }
       }

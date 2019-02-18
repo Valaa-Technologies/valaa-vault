@@ -1,16 +1,30 @@
 // import StackTrace from "stacktrace-js";
 
-const dumpify = require("~/tools/dumpify").default;
-const inBrowser = require("~/gateway-api/inBrowser").default;
-const isSymbol = require("~/tools/isSymbol").default;
+const dumpify = require("./dumpify").default;
+const isSymbol = require("./isSymbol").default;
+const inBrowser = require("../gateway-api/inBrowser").default;
 
 if (typeof window !== "undefined") window.beaumpify = dumpify;
+
+module.exports = {
+  debugObject,
+  debugObjectHard,
+  debugObjectType,
+  debugObjectNest,
+  dumpObject,
+  messageFromError,
+  outputCollapsedError,
+  outputError,
+  setGlobalLogger,
+  unwrapError,
+  wrapError,
+};
 
 // TODO(iridian, 2019-02): Sigh... these debug output functions are
 // getting out of hand. They should be streamlined.
 
 // returns an spreadable array with different views to the value.
-export function dumpObject (value) {
+function dumpObject (value) {
   const ret = [];
   if ((value != null) && (typeof value.debugId === "function")) ret.push(`'${value.debugId()}'`);
   ret.push(debugObject(value));
@@ -37,7 +51,7 @@ function dumpifyObject (value) {
  * @param {any} contextDescription
  * @returns
  */
-export default function wrapError (errorIn: Error, ...contextDescriptions) {
+function wrapError (errorIn, ...contextDescriptions) {
   const error = _tryCooperativeError(errorIn) || new Error(errorIn);
   if (!error.stack) error.stack = (new Error("dummy").stack);
   if ((typeof error !== "object") || !error || (typeof error.message !== "string")) {
@@ -84,17 +98,17 @@ const _cooperativeErrorTypes = {
   URIError: true,
 };
 
-function _tryCooperativeError (error: any) {
+function _tryCooperativeError (error) {
   if (error == null) return undefined;
   return ((error instanceof Error) || _cooperativeErrorTypes[(error.constructor || {}).name])
       && error;
 }
 
-export function unwrapError (error: Error) {
+function unwrapError (error) {
   return (error && error.originalError) || error;
 }
 
-export function messageFromError (error: any) {
+function messageFromError (error) {
   if (typeof error !== "object" || !error) return String(error);
   if (!(error instanceof Error)) {
     return `<unrecognized Error object ${
@@ -169,8 +183,9 @@ function _clipFrameListToCurrentContext (innerError, outerError) {
   return inner;
 }
 
-export function outputError (error, header = "Exception caught", logger = errorLogger) {
-  (logger.exception || logger.error).call(logger,
+function outputError (error, header = "Exception caught",
+    logger = errorLogger) {
+  logger.error.call(logger,
       `  ${header} (with ${(error.errorContexts || []).length} contexts):\n\n`,
       error.originalMessage || error.message, `\n `);
   if (error.customErrorHandler) {
@@ -187,7 +202,8 @@ export function outputError (error, header = "Exception caught", logger = errorL
   }
 }
 
-export function outputCollapsedError (error, header = "Exception caught", logger = errorLogger) {
+function outputCollapsedError (error, header = "Exception caught",
+    logger = errorLogger) {
   const collapsedContexts = [];
   const collapsingLogger = {
     log: (...args) => collapsedContexts[collapsedContexts.length - 1].traces.push(
@@ -223,11 +239,21 @@ export function outputCollapsedError (error, header = "Exception caught", logger
 //   displayErrorStackFrameLists(stackFrameLists, error.contextDescriptions, logger);
 // }
 
-export function debugObject (head) { return debugObjectNest(head); }
-export function debugObjectHard (head) { return debugObjectNest(head, 1, true); }
-export function debugObjectType (head) { return debugObjectNest(head, false, false); }
 
-export function debugObjectNest (head, nest = 1, alwaysStringify = false, cache_: ?Object) {
+function debugObject (head) {
+  return debugObjectNest(head);
+}
+
+function debugObjectHard (head) {
+  return debugObjectNest(head, 1, true);
+}
+
+function debugObjectType (head) {
+  return debugObjectNest(head, false, false);
+}
+
+function debugObjectNest (head, nest = 1, alwaysStringify = false,
+    cache_) {
   try {
     if (head === null) return "<null>";
     if (head === undefined) return "<undefined>";
@@ -292,7 +318,7 @@ let errorLogger = (typeof window !== "undefined") || !process
       error (...params) { console.error(...params.map(dumpifyObject)); },
     };
 
-export function setGlobalLogger (logger) {
+function setGlobalLogger (logger) {
   errorLogger = logger;
 }
 

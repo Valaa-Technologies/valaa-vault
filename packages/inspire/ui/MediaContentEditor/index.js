@@ -4,7 +4,7 @@ import Presentable from "~/inspire/ui/Presentable";
 import FieldUpdate from "~/engine/Vrapper/FieldUpdate";
 import VALEK from "~/engine/VALEK";
 
-import wrapError from "~/tools/wrapError";
+import { wrapError } from "~/tools/wrapError";
 
 export default @Presentable(require("./presentation").default, "MediaContentEditor")
 class MediaContentEditor extends UIComponent {

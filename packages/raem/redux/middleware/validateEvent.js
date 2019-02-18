@@ -1,4 +1,4 @@
-import wrapError from "~/tools/wrapError";
+import { wrapError } from "~/tools/wrapError";
 
 const dumpify = require("~/tools/dumpify").default;
 

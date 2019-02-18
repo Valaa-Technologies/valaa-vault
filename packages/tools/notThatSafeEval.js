@@ -1,4 +1,4 @@
-import wrapError from "~/tools/wrapError";
+import { wrapError } from "~/tools/wrapError";
 
 /**
  * evaluates the given code in the given scope. Before running some global variables will

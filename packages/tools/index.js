@@ -54,13 +54,13 @@ export const trivialClone = require("./trivialClone").default;
 
 export { vdon, vdocorate } from "./vdon";
 
-export const wrapError = require("./wrapError").default;
 export const messageFromError = require("./wrapError").messageFromError;
 export const debugObjectType = require("./wrapError").debugObjectType;
 export const dumpObject = require("./wrapError").dumpObject;
 export const outputError = require("./wrapError").outputError;
 export const outputCollapsedError = require("./wrapError").outputCollapsedError;
 export const unwrapError = require("./wrapError").unwrapError;
+export const wrapError = require("./wrapError").wrapError;
 
 export const request = require("./request").default;
 

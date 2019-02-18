@@ -4,7 +4,7 @@ import URLParse from "url-parse";
 
 import { invariantifyString } from "~/tools/invariantify";
 import { vdon } from "~/tools/vdon";
-// import wrapError from "~/tools/wrapError";
+// import { wrapError } from "~/tools/wrapError";
 
 export const vdoc = vdon({ "...": { heading:
   "ValaaURI's refer to authorities, partitions, resources and their sub-aspects",

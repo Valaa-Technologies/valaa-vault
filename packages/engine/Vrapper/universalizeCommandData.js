@@ -5,7 +5,7 @@ import { Kuery } from "~/raem/VALK";
 import Vrapper from "~/engine/Vrapper";
 
 import { invariantifyObject } from "~/tools/invariantify";
-import wrapError, { dumpObject } from "~/tools/wrapError";
+import { dumpObject, wrapError } from "~/tools/wrapError";
 
 export default function universalizeCommandData (object: ?any, options:
     { head?: Vrapper, transaction?: Object, scope?: Object, partitionURIString?: string } = {}) {

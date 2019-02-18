@@ -14,34 +14,31 @@ exports.builder = (yargs) => yargs.option({
     default: "",
     description: "Path of a file to which the view root is rendered as a HTML DOM string",
   },
-  exec: {
-    type: "object",
-    default: null,
-    description: `Execute ValaaScript.\n\texec.body = direct VS content to execute. ${
-        ""}exec.path = path to a VS file to execute.\n\texec.this = the name of the ${
-        ""}resource that is used as 'this' of the VS body; a URI specifies a Resource directly, ${
-        ""}otherwise it is used look up a partition connection root resource.\n\tAll the ${
-        ""}options are available for the script via Valaa.perspire.options object with possible ${
-        ""}expansions.`
-  },
   keepalive: {
     default: false,
     description: `Keeps server alive after initial run. If keepalive is a positive number then ${
         ""}the possible output will be rendered and execute script run every 'keepalive' seconds. ${
         ""}If keepalive is negative the output/run cycle is run once after abs(keepalive) seconds.`,
   },
-  plugin: {
-    type: "string",
-    array: true,
-    default: [],
-    description: `List of plugin id's which are require'd before gateway creation.`,
-  },
   partitions: {
     type: "object",
     description: `A lookup of partition URI's to load before execution.${
         ""}\nThe partitions are loaded after revelation partitions but before view is attached.${
         ""}\nValaa.perspire.partitions contains these partitions connected this way as well as the${
-        ""}"root" and "view" revelation partitions.`
+        ""} "root" and "view" revelation partitions.`
+  },
+  exec: {
+    type: "object", default: null,
+    description: `Execute ValaaScript.\n\texec.body = direct VS content to execute. ${
+        ""}\n\texec.path = path to a VS file to execute.\n\texec.this = the name of the ${
+        ""}resource that is used as 'this' of the VS body; a URI specifies a Resource directly, ${
+        ""}otherwise it is used to look up a partition connection root resource.\n\tAll the ${
+        ""}options are available for the script via Valaa.perspire.options object with possible ${
+        ""}expansions.`
+  },
+  plugin: {
+    type: "string", array: true, default: [],
+    description: `List of plugin id's which are require'd before gateway creation.`,
   },
   cacheBasePath: {
     type: "string",
@@ -51,13 +48,21 @@ exports.builder = (yargs) => yargs.option({
   revelation: {
     description: "Direct revelation object placed after other revelations for gateway init.",
   },
+  root: {
+    type: "string", alias: "revelation.prologue.rootPartitionURI",
+    description: `prologue root partition URI override`,
+  },
+  view: {
+    type: "string", alias: "revelation.prologue.rootLensURI",
+    description: `prologue root lens URI override`,
+  },
   siteRoot: {
     type: "string", default: process.cwd(),
     description: `Explicit gateway.options.siteRoot path`,
   },
   domainRoot: {
     type: "string",
-    description: `Explicit gateway.options.domainRoot path (by default siteRoot)`,
+    description: `Explicit gateway.options.domainRoot path (defaults to siteRoot)`,
   },
   revelationRoot: {
     type: "string",

@@ -11,8 +11,8 @@ export default class PerspireView extends VDOMView {
     try {
       // Renderer
       global.window = options.window; // makes sure that React will use correct window
-      await this._createReactRoot(options.rootId, options.window, options.container,
-          this._vViewFocus, options.name);
+      await this._createReactRoot(options.rootId, options.window, options.container, options.name,
+          this._vViewFocus, this._lensPropertyName);
       await this._waitForConnectionsToActivate();
       this.warnEvent(`attach(): engine running, view attached to DOM and all initial UI partition${
           ""} connections complete`);

@@ -188,8 +188,12 @@ export default class InspireGateway extends LogEventGenerator {
     return String(this.rootPartition.getPartitionURI());
   }
 
+  getRootLensURI () {
+    return this.rootLensURI;
+  }
+
   createAndConnectViewsToDOM (viewConfigs: {
-    [string]: { name: string, size: Object, container: Object, rootId: string, rootLensURI: any }
+    [string]: { name: string, size: Object, container: Object, rootId: string, lensURI: any }
   }, createView = (options) => new InspireView(options)) {
     this._views = {};
     Object.entries(viewConfigs).forEach(([viewName, viewConfig]) => {
@@ -499,6 +503,7 @@ export default class InspireGateway extends LogEventGenerator {
           rootPartitionURI}>`);
       const rootPartitionURI = this.prologueRevelation.rootPartitionURI
           && naiveURI.createPartitionURI(await this.prologueRevelation.rootPartitionURI);
+      this.rootLensURI = await this.prologueRevelation.rootLensURI;
       prologues = await this._determineRevelationPrologues(prologueRevelation, rootPartitionURI);
       this.warnEvent(1, () => [
         `Extracted ${prologues.length} prologues from the revelation`,

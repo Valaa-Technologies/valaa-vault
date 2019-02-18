@@ -33,11 +33,11 @@
               rootPartitionURI: Valaa.getURIQueryField(document.location, "partition"),
             },
           }
-      ).then(function (inspireGateway) {
-        Valaa.views = inspireGateway.createAndConnectViewsToDOM({
+      ).then(function (gateway) {
+        Valaa.views = gateway.createAndConnectViewsToDOM({
           inspireMain: {
             name: "Valaa local-zero-0.2.21 Main",
-            rootLensURI: inspireGateway.getRootPartitionURI(),
+            lensURI: gateway.getRootLensURI() || gateway.getRootPartitionURI(),
             setTitleKuery: "name",
             container: document.querySelector("#valaa-inspire--main-container"),
             rootId: "valaa-inspire--main-root",

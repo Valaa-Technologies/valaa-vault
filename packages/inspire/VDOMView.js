@@ -17,18 +17,23 @@ export default class VDOMView extends Cog {
     this._gateway = options.gateway;
   }
 
-  async attach ({ name, rootLensURI }: Object) {
+  async attach ({ name, lensURI, rootLensURI }: Object) {
+    const actualLensURI = lensURI || rootLensURI;
     try {
-      if (!rootLensURI) {
-        throw new Error(`No options.rootLensURI found for view ${name}`);
+      if (!actualLensURI) {
+        throw new Error(`No options.lensURI found for view ${name}`);
+      }
+      if (rootLensURI) {
+        this.warnEvent(`${name}.rootLensURI is DEPRECATED in favor of lensURI`);
       }
       // Load project
-      const lensRef = this.engine.discourse.obtainReference(rootLensURI);
+      const lensRef = this.engine.discourse.obtainReference(actualLensURI);
       this._viewPartition = await this.engine.getProphet()
           .acquirePartitionConnection(lensRef.getPartitionURI())
           .getActiveConnection();
       this._vViewFocus = await this.engine.getVrapperByRawId(
           lensRef.rawId() || this._viewPartition.getPartitionRawId());
+      this._lensPropertyName = lensRef.getQueryComponent().lens;
       await this._vViewFocus.activate();
       this.warnEvent(`attach(): partition '${this._vViewFocus.get("name")}' UI view focus set:`,
           this._vViewFocus.debugId());
@@ -38,7 +43,7 @@ export default class VDOMView extends Cog {
       this.engine.addCog(this);
       return this;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `attach('${name}' -> ${rootLensURI})`);
+      throw this.wrapErrorEvent(error, `attach('${name}' -> ${actualLensURI})`);
     }
   }
 
@@ -51,18 +56,16 @@ export default class VDOMView extends Cog {
  /**
   * Creates the root UI component with the react context, and connects it to the html container.
   */
-  async _createReactRoot (rootId: string, window: Object, container: Object, vViewFocus: Vrapper,
-      viewName: string) {
+  async _createReactRoot (rootId: string, window: Object, container: Object, viewName: string,
+      vViewFocus: Vrapper, lensPropertyName: ?string) {
     this._rootElement = window.document.createElement("DIV");
     this._rootElement.setAttribute("id", rootId);
     container.appendChild(this._rootElement);
-    this._reactRoot = (
-      <ReactRoot
-        viewName={viewName}
-        vViewFocus={vViewFocus}
-        lensProperty={["ROOT_LENS", "LENS", "EDITOR_LENS"]}
-      />
-    );
+    const lensProperty = lensPropertyName
+        ? [lensPropertyName]
+        : ["ROOT_LENS", "LENS", "EDITOR_LENS"];
+    this._reactRoot =
+        <ReactRoot viewName={viewName} vViewFocus={vViewFocus} lensProperty={lensProperty} />;
     return new Promise(onDone => {
       ReactDOM.render(this._reactRoot, this._rootElement, onDone);
     });

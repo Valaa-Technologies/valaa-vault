@@ -13,8 +13,8 @@ export default class InspireView extends VDOMView {
       if (options.setTitleKuery) this._setTitle(options.setTitleKuery);
 
       // Renderer
-      await this._createReactRoot(options.rootId, window, options.container, this._vViewFocus,
-          options.name);
+      await this._createReactRoot(options.rootId, window, options.container, options.name,
+          this._vViewFocus, this._lensPropertyName);
       this.warnEvent(`attach(): engine running and view attached to DOM (size`,
           options.size, `unused)`);
       return this;

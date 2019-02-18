@@ -324,10 +324,14 @@ const _vlm = {
     if (this.theme.exception) {
       let actualError = error || new Error("vlm.exception called without error object");
       if (!(error instanceof Error)) {
-        actualError = new Error(String(error.message || error));
+        actualError = new Error(String((error && error.message) || error || "error missing"));
         if (error.stack) actualError.stack = error.stack;
       }
-      outputError(actualError, `${this.getContextName()} panics: exception from ${context}`, this);
+      outputError(actualError, `${this.getContextName()} panics: exception from ${context}`, {
+        error: (msg, ...rest_) => console.error(this.theme.error(msg), ...rest_),
+        warn: (msg, ...rest_) => console.warn(this.theme.warn(msg), ...rest_),
+        log: (msg, ...rest_) => console.log(msg, ...rest_),
+      });
     }
     return this;
   },

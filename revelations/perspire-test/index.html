@@ -27,11 +27,11 @@
             prologue: {
               rootPartitionURI: Valaa.getURIQueryField(document.location, "partition"),
             },
-          }).then(function (inspireGateway) {
-            Valaa.views = inspireGateway.createAndConnectViewsToDOM({
+          }).then(function (gateway) {
+            Valaa.views = gateway.createAndConnectViewsToDOM({
               inspireMain: {
                 name: "Valaa perspire-test Inspire Main",
-                rootLensURI: inspireGateway.getRootPartitionURI(),
+                lensURI: gateway.getRootLensURI() || gateway.getRootPartitionURI(),
                 container: document.querySelector("#valaa-inspire--main-container"),
                 rootId: "valaa-inspire--main-root",
                 size: { width: window.innerWidth, height: window.innerHeight, scale: 1 },

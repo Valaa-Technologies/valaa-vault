@@ -12,6 +12,155 @@ import { isHostRef, tryHostRef } from "./hostReference";
 const dumpify = require("~/tools/dumpify").default;
 const inBrowser = require("~/gateway-api/inBrowser").default;
 
+/* TODO(iridian, 2019-02): Simplify design into the steps, ops, paths
+and expressions design described below. Right now the various ops are
+often not clearly one or the other, can be hybrids even. This is
+problematic because the semantics is not clear from just looking at
+syntax. A solution that I recently tried was to just go all-in on
+one or the other (path or express) semantics and require expilcit
+operations for the other variant. But neither is satisfactory: the
+amount of boilerplate for simple operations is near untolerable:
+
+`["§->", ["§$$", "foo"], ["§.", "propname"], ["§.", "bar"]` vs.
+`["§->", ["§$$", "foo"], "propname", "bar"]`
+
+on one hand or
+
+`{ foo: ["§'", "strval"], bar: ["§'", 0] }` vs.
+`{ foo: "strval", bar: 0 }`
+
+on the other hand.
+
+Parameterized op ids might make the former less verbose:
+
+`["§->", ["§$$foo"], ["§.propname"], ["§.bar"]]`
+
+but this does not save one from having to type brackets and sections
+signs constantly.
+And this is also fundamentally dirty. Self-referential meta-operations
+which construct VAKON on-the-fly would require string-manipulation
+primitives. This would be a great waste, because meta-programming is
+a powerful idiom and VAKON has the opportunity make strong use of the
+excellent balance between structure and simplicity that JSON provides
+and skip syntactic string-manipulation completely. So parameterized
+operation identifiers are no good.
+
+Thus my latest and possibly the last design attempt before VAKON gets
+out in the wild is this division into these two modes. It is based on
+the observation that when traversing graphs, trees, it's more likely
+that sub-steps are also traversal steps. This includes array and object
+sub-steps which often aggregate kueries inside them and don't often
+contain literal values.
+On the other hand when passing arguments to function calls,
+constructing values to bind to local variables, it's much more common
+to have a lot of literal values than it is to have field accesses.
+
+They are unfortunately syntactically recursively contextual, in that
+two syntactically identical arrays/objects can have different
+evaluation semantics. This is a nuisance and as such; a hint of
+something being wrong. But I do think that there are two (or more)
+genuinely separate underlying concepts at play here. These would
+ideally would have different syntactic constructs as well just like
+generic languages do.
+The issue is thus more probably a symptom of the constained JSON shoe
+into which VAKON is forced. But as this was a design choice to begin
+with, the nuisance of contextuality might have to be tolerated and
+ameliorated via other means.
+
+
+# 1. A VALK *step* can be an *operation*
+
+A VALK *step* is something that can be evaluated by a VALK execution
+engine or *valker*. For given valid VAKON kuery each of its JSON values
+is also a *VAKON step* with the sole [1] exception of
+*operation identifier*:
+
+> *VAKON operation identifier* (*op id*) is any string value which
+appears as the first entry of a VAKON array and with its first
+character equal to the section sign '§' (U+00A7).
+
+The array surrounding an op id is then *VAKON operation*. While the op
+id is not a step (it is never evaluated) the operation itself is a
+step.
+
+// TODO(iridian, 2019-02): Evaluate the '§' character. It's a giant FU
+// for non-finnish keyboard users, but on the other hand it has the
+// general benefit of minimizing ambiguity for human readers. And the
+// specific benefit of minimizing accidental machine ambiguity which
+// has value at the early stage of ValOS development.
+
+[1]: JSON object keys are another JSON *syntactic construct* which is
+are not VAKON steps. They however are not JSON values either; their
+grammar is restricted to strings.
+
+# 2. VAKON steps have either *TRAVERSE* or *EXPRESS* mode semantics.
+
+These two modes differentiate two main semantic classes for VAKON
+syntactic constructs. Especially the following behaviours are strongly affected:
+- the coupling of sibling steps: dependent and coupled vs. independent and uncoupled
+- the semantics of non-op steps: semantic vs. literal
+
+> The mode is syntactic. The mode of each VAKON syntactic construct is
+determined by the construct itself (for op steps) or by the innermost
+enclosing VAKON op steps.
+
+Specifically this means that syntactic array and object structures
+use the mode for their entry value evaluation. They construct array and
+object values regardless of mode but in express their value entry steps
+are evaluated as direct literals whereas in path mode all entry steps
+are evaluated as semantic operations.
+
+## 2.1. Traverse mode
+
+Traverse operations or *traversals* consists of control flow
+operations, statement sequences, field lookups and other chained
+expressions.
+
+### 2.1.1. Contextual, linear and coupled sibling steps
+
+The evaluation behaviour of traverse sub-steps is specified by
+the traverse operation itself. Traversals (such as if-statements)
+typically specify strict dependent sequencing for particular sub-steps
+and require previous steps to fully complete before evaluating any
+steps depending on them. Linearily chaining operations give the current
+head as input for sub-steps and put the output as the head for
+subsequent sub-steps.
+Thus the traversal sub-steps are often conceptually highly coupled.
+
+### 2.1.2. Semantic non-op sub-steps
+
+Traversal non-op sub-steps are semantically evaluated. While the
+semantics can be specific to the particular traversal the JSON values
+have idiomatic meanings: null is an identity and resolves to head,
+strings and numbers are head field/property accesses, arrays and
+objects will construct arrays and objects, false/true check head for
+falsy/truthy for short-circuiting and assertion purposes.
+
+## 2.2. Express mode
+
+Express operations or *expressions* consists of function calls
+including argument evaluation, unary, binary operator calls and
+other builtin operation calls.
+
+### 2.2.1. Context-free, independent and uncoupled sibling steps
+
+Expression sub-step evaluation behaviour is defined by VALK. The
+the expression itself has no semantic access to its sub-steps, only on
+their evaluated values. Express ops never update the head for any of their
+sub-steps, ie. all sub-steps use the head value of the express op
+itself. Expressions cannot put requirements on the order and
+inter-dependency between sub-steps (unlike traversals, where
+a sub-sequent step can depend on the output of the previous one).
+
+### 2.2.2. Literal non-op sub-steps
+
+Expression sub-steps which are not operations are evaluated as literal
+values. Null is null, string is a string, arrays and objects construct
+array and object values. Note that all operation sub-steps (even those
+nested in arrays and objects constructs) are fully evaluated.
+
+*/
+
 /**
  * VALK - VAlaa Language for Kuerying
  * ==================================

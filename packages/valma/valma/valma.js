@@ -320,7 +320,7 @@ const _vlm = {
   },
   // When something is catastrophically wrong and operation terminates immediately.
   // As a diagnostic message outputs to stderr where available.
-  exception (error, context, ...rest) {
+  exception (error, context /* , ...rest */) {
     if (this.theme.exception) {
       let actualError = error || new Error("vlm.exception called without error object");
       if (!(error instanceof Error)) {
@@ -329,7 +329,7 @@ const _vlm = {
       }
       outputError(actualError, `${this.getContextName()} panics: exception from ${context}`, {
         error: (msg, ...rest_) => console.error(this.theme.error(msg), ...rest_),
-        warn: (msg, ...rest_) => console.warn(this.theme.warn(msg), ...rest_),
+        warn: (msg, ...rest_) => console.warn(this.theme.warning(msg), ...rest_),
         log: (msg, ...rest_) => console.log(msg, ...rest_),
       });
     }
@@ -1384,7 +1384,13 @@ async function _invoke (commandSelector, argv) {
                 this.echo(`${subVLM.getContextIndexText()}<<<? ${header}:`,
                     this._peekReturnValue(requireResult, 51));
               }
-              if (!requireResult) {
+              // Hack. Assumes that empty string is a success, non-empty
+              // is an error for purposes such as this.js functionality
+              // with basic bash commands like 'mkdir' and 'cp'.
+              if (typeof requireResult === "string") {
+                requireResult = !requireResult;
+              }
+              if (typeof requireResult === "string" ? requireResult : !requireResult) {
                 const message = `'${this.theme.command(commandName)
                     }' as it can't satisfy requires[${i}]: ${this.theme.executable(requires[i])}`;
                 if (!isWildcardCommand) {

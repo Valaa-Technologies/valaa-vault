@@ -38,9 +38,13 @@ exports.handler = async (yargv) => {
           return (ret = await _walk(nextHead, argv, nextIndex));
         }
         case "&&":
-        case "||":
-          if (argv[index] === "&&" ? !head : head) return (ret = { value: head, index: undefined });
+        case "||": {
+          const truthy = (typeof head === "string" ? !head : head);
+          if (argv[index] === "&&" ? !truthy : truthy) {
+            return (ret = { value: head, index: undefined });
+          }
           return (ret = await _walk(vlm, argv, index + 1));
+        }
         case "(": {
           let depth = 1;
           let i = index + 1;

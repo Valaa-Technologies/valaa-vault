@@ -111,7 +111,9 @@ export default class RestAPIServer extends LogEventGenerator {
   async listCollectionGETHandler (route) {
     const connection = await this._engine.discourse.acquirePartitionConnection(
         route.config.valos.subject, { newConnection: false }).getActiveConnection();
-    const vRoot = this._engine.getVrapper([connection.getPartitionRawId()]);
+    const vRoot = this._engine.getVrapper([
+      connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) },
+    ]);
     await this._preloadListPartitions(vRoot, route);
 
     const kuery = ["§->"];

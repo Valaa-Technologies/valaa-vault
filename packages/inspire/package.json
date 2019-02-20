@@ -32,6 +32,7 @@
     "react-ace": "^5.8.0",
     "react-contextmenu": "^2.6.5",
     "react-dom": "^16.2.0",
-    "simplebar-react": "^0.1.4"
+    "simplebar-react": "^0.1.4",
+    "ws": "^6.1.4"
   }
 }

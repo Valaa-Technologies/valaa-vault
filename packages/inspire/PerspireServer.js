@@ -1,7 +1,6 @@
 // @flow
 
 import { JSDOM } from "jsdom";
-import WebSocket from "ws"; // For networking in Node environments
 import path from "path";
 
 import createGateway from "~/inspire";
@@ -30,6 +29,11 @@ export default class PerspireServer {
   }
 
   async initialize () {
+    global.window = global.self = global;
+    // Load global node context polyfills and libraries
+    global.WebSocket = require("ws");
+    global.fetch = require("node-fetch");
+
     (this.plugins || []).forEach(plugin => require(plugin));
     return (this.gateway =
         (!this.isTest
@@ -39,11 +43,7 @@ export default class PerspireServer {
   }
 
   async createMainView () {
-    global.self = global;
     global.name = "Perspire window";
-    global.window = global;
-    global.WebSocket = WebSocket;
-    global.fetch = require("node-fetch");
 
     this.jsdom = new JSDOM(`<div id="perspire-gateway--main-container"></div>`,
         { pretendToBeVisual: true });

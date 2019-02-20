@@ -292,11 +292,12 @@ function debugObjectNest (head, nest = 1, alwaysStringify = false,
             head.map(entry => debugObjectNest(entry, nest, alwaysStringify, cache)).join(", ")}]`)
         || (isIterable(head) && debugObjectNest(head.toJS(), nest, alwaysStringify, cache))
         || (head[Symbol.iterator] && debugObjectNest([...head], nest, alwaysStringify, cache))
-        || `{ ${Object.keys(head)
-              .map(key => `${isSymbol(key) ? key.toString() : key}: ${
-                  debugObjectNest(head[key], nest - 1, alwaysStringify, cache)}`)
-              .join(", ")
-            } }`);
+        || `{ ${Object.keys(head).map(key => {
+              const desc = Object.getOwnPropertyDescriptor(head, key);
+              return `${isSymbol(key) ? key.toString() : key}: ${
+                debugObjectNest(desc.value || desc.get, nest - 1, alwaysStringify, cache)
+              }`;
+            }).join(", ")} }`);
   } catch (error) {
     console.error("Suppressed an error in debugObjectNest:",
         "\n\terror.message:", error.message,

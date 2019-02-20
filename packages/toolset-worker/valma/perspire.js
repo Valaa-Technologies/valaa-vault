@@ -94,11 +94,15 @@ exports.handler = async (yargv) => {
   vlm.clock("perspire.handler", "gateway.require", `require("@valos/inspire/PerspireServer")`);
   const PerspireServer = require("@valos/inspire/PerspireServer").default;
 
+  const siteRoot = vlm.path.join(process.cwd(), yargv.siteRoot || ".");
+  const domainRoot = yargv.domainRoot ? vlm.path.join(process.cwd(), yargv.domainRoot) : siteRoot;
+
   let revelationPath = yargv.revelationPath || ".";
-  if (!vlm.shell.test("-f", revelationPath) && !revelationPath.match(/\/revela.json$/)) {
+  if (!vlm.shell.test("-f", vlm.path.join(siteRoot, revelationPath))
+      && !revelationPath.match(/\/revela.json$/)) {
     revelationPath = vlm.path.join(revelationPath, "revela.json");
   }
-  if (!vlm.shell.test("-f", revelationPath)) {
+  if (!vlm.shell.test("-f", vlm.path.join(siteRoot, revelationPath))) {
     throw new Error(`Cannot open initial revelation "${revelationPath}" for reading`);
   }
 
@@ -124,8 +128,8 @@ exports.handler = async (yargv) => {
     logger: vlm,
     plugins: yargv.plugin,
     cacheBasePath: yargv.cacheBasePath,
-    siteRoot: yargv.siteRoot || process.cwd(),
-    domainRoot: yargv.domainRoot,
+    siteRoot,
+    domainRoot,
     revelationRoot,
     revelations: [
       { "...": revelationPath },

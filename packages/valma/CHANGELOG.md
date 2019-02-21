@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.7](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.6...v0.34.0-prerelease.7) (2019-02-21)
+
+
+### Bug Fixes
+
+* Improve vlm.exception and remove es6 code from valma dependencies ([b862b2f](https://github.com/valaatech/vault/commit/b862b2f))
+* **valma:** vlm . ||/&& ops with string results ([eedb981](https://github.com/valaatech/vault/commit/eedb981))
+
+
+
+
+
 # [0.34.0-prerelease.6](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.5...v0.34.0-prerelease.6) (2019-02-18)
 
 

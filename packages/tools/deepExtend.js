@@ -97,9 +97,9 @@ exports.default = function deepExtend (target /* : Object */, source /* : Array<
   if (stack.spreaderKey === undefined) stack.spreaderKey = "...";
   if (stack.spreaderKey && !stack.spread) {
     stack.spread = function spread (spreadee_, target_, source_, targetKey,
-        targetParent, sourceParent /* , stack_ */) {
+        targetParent /* , sourceParent, stack_ */) {
       if ((spreadee_ === null) || (spreadee_ === undefined)) return undefined;
-      if (typeof spreadee_ === "function") return spreadee_(target_);
+      if (typeof spreadee_ === "function") return (targetParent[targetKey] = spreadee_(target_));
       if (typeof spreadee_ === "string") {
         if (!this.require) {
           throw new Error(`No deepExtend.options.require specified (needed by default spread ${
@@ -107,14 +107,13 @@ exports.default = function deepExtend (target /* : Object */, source /* : Array<
         }
         return this.require(spreadee_);
       }
-      if (!Array.isArray(spreadee_)) {
-        return this.extend(target_, spreadee_, targetKey, targetParent, sourceParent);
-      }
+      if (!Array.isArray(spreadee_)) return spreadee_;
       let ret = target_;
       for (const entry of spreadee_) {
         ret = this.extend(ret, entry);
       }
-      return ret;
+      targetParent[targetKey] = ret;
+      return undefined;
     };
   }
   return stack.extend(target, source);
@@ -128,8 +127,9 @@ exports.default = function deepExtend (target /* : Object */, source /* : Array<
       else if (source_ === null) ret = null;
       else if (source_ === target_) throw new Error("Cannot extend to self");
       else if (Array.isArray(source_)) {
-        if (!skipSpread && this.spreaderKey && (source_[0] === this.spreaderKey)) {
-          for (let i = 1; i !== source_.length; ++i) {
+        const isSpreader = !skipSpread && (source_[0] === this.spreaderKey) && this.spreaderKey;
+        if (isSpreader || ((ret !== undefined) && !Array.isArray(ret))) {
+          for (let i = isSpreader ? 1 : 0; i !== source_.length; ++i) {
             if (_setRetFromSpreadAndMaybeBail(this, source_[i])) break;
           }
         } else if (Array.isArray(ret) || !_setRetFromCacheAndMaybeBail()) {
@@ -170,6 +170,9 @@ exports.default = function deepExtend (target /* : Object */, source /* : Array<
       const spreadee = stack_.spread(
           spreaderValue, ret, source_, targetKey, targetParent, sourceParent, stack_);
       if (spreadee === undefined) {
+        // spread callback has handled the whole remaining process and
+        // has possibly replaced 'target' in its targetParent[targetKey]
+        // update ret to refer to this new object accordingly.
         ret = targetParent && targetParent[targetKey];
         return true;
       }

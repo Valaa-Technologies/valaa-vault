@@ -94,15 +94,19 @@ exports.handler = async (yargv) => {
   vlm.clock("perspire.handler", "gateway.require", `require("@valos/inspire/PerspireServer")`);
   const PerspireServer = require("@valos/inspire/PerspireServer").default;
 
-  const siteRoot = vlm.path.join(process.cwd(), yargv.siteRoot || ".");
-  const domainRoot = yargv.domainRoot ? vlm.path.join(process.cwd(), yargv.domainRoot) : siteRoot;
+  const siteRoot = yargv.siteRoot[0] === "/" ? yargv.siteRoot
+      : vlm.path.join(process.cwd(), yargv.siteRoot || ".");
+  const domainRoot = !yargv.domainRoot ? siteRoot
+      : yargv.domainRoot[0] === "/" ? yargv.domainRoot[0]
+      : vlm.path.join(process.cwd(), yargv.domainRoot);
 
-  let revelationPath = yargv.revelationPath || ".";
-  if (!vlm.shell.test("-f", vlm.path.join(siteRoot, revelationPath))
-      && !revelationPath.match(/\/revela.json$/)) {
+  let revelationPath = vlm.path.join(siteRoot, yargv.revelationPath || ".");
+  if (!vlm.shell.test("-f", revelationPath)
+      && !(yargv.revelationPath || "").match(/\/revela.json$/)) {
     revelationPath = vlm.path.join(revelationPath, "revela.json");
   }
-  if (!vlm.shell.test("-f", vlm.path.join(siteRoot, revelationPath))) {
+
+  if (!vlm.shell.test("-f", revelationPath)) {
     throw new Error(`Cannot open initial revelation "${revelationPath}" for reading`);
   }
 

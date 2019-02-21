@@ -18,13 +18,13 @@ export const TimeExtendedISO8601Type = { type: "time" };
 export const ZoneExtendedISO8601Type = { type: "string" };
 export const DateTimeZoneExtendedISO8601Type = { type: "date-time" };
 */
-export const DateExtendedISO8601Type = { type: "string" };
+export const DateExtendedISO8601Type = { type: "string", format: "date" };
 export const TimeExtendedISO8601Type = { type: "string" };
 export const ZoneExtendedISO8601Type = { type: "string" };
-export const DateTimeZoneExtendedISO8601Type = { type: "string" };
+export const DateTimeZoneExtendedISO8601Type = { type: "string", format: "date-time" };
 
 
-export const IdValOSType = { type: "string" };
+export const IdValOSType = { type: "string", pattern: "^[a-zA-Z0-9\\-_.~]+$" };
 // export const ReferenceValOSType = { type: "uri" };
 export const ReferenceValOSType = { type: "string" };
 
@@ -36,16 +36,29 @@ export const $VType = {
 
 /* eslint-disable */
 
-export function RelationType (TargetType, relationNameOrPredicate, relationProperties = {}) {
+export const unreservedWordListPattern = "^([a-zA-Z0-9\\-_.~]*(\,([a-zA-Z0-9\\-_.~])*)*)?$";
+export const unreservedSortListPattern = "^(\-?[a-zA-Z0-9_.~]*(\,\-?([a-zA-Z0-9_.~])*)*)?$";
+
+export function RelationType (TargetType, relationNameOrPredicate, {
+    [ArrayJSONSchema]: arraySchema = {},
+    [ObjectJSONSchema]: objectSchema = {},
+    ...relationProperties
+} = {}) {
   return {
-    [ArrayJSONSchema]: { valos: {
-      predicate: (relationNameOrPredicate.slice(0, 6) !== "valos:")
-          ? `valos:Relation:${relationNameOrPredicate}`
-          : relationNameOrPredicate,
-    } },
-    [ObjectJSONSchema]: {},
+    [ArrayJSONSchema]: {
+      ...arraySchema,
+      valos: {
+        ...(arraySchema.valos || {}),
+        predicate: (relationNameOrPredicate.slice(0, 6) !== "valos:")
+            ? `valos:Relation:${relationNameOrPredicate}`
+            : relationNameOrPredicate,
+      }
+    },
+    [ObjectJSONSchema]: { ...objectSchema },
     $V: {
-      [ObjectJSONSchema]: { valos: { route: TargetType[ObjectJSONSchema].valos.route } },
+      [ObjectJSONSchema]: {
+        valos: { route: TargetType[ObjectJSONSchema].valos.route }
+      },
       href: URIReferenceType,
       rel: StringType,
     },
@@ -59,29 +72,42 @@ export function sharedSchema (name, Type) {
   return schema;
 }
 
-function _genericGETQueryStrings (Type) {
+function _genericGETResourceQueryStringSchema (Type) {
   return {
-    relations: StringType,
-    properies: StringType,
+    fields: { ...StringType,
+      pattern: unreservedWordListPattern,
+    },
   };
 }
 
-export function listCollectionGETRoute (Type, valos, { url }) {
+function _filterQueryStringSchema (Type) {
+  const ret = {};
+  for (const [key, schema] of Object.entries(Type)) {
+    if (((schema[ObjectJSONSchema] || {}).valos || {}).filterable) {
+      ret[`require-${key}`] = IdValOSType;
+    }
+  }
+  return ret;
+}
+
+export function listCollectionGETRoute (schemaName, Type, valos, { url, querystring }) {
   return {
     method: "GET",
     handler: "listCollection",
     url,
     schema: {
       querystring: {
-        ..._genericGETQueryStrings(Type),
+        ..._genericGETResourceQueryStringSchema(Type),
+        ..._filterQueryStringSchema(Type),
         offset: { type: "integer", minimum: 0 },
         limit: { type: "integer", minimum: 0 },
-        id: StringType,
+        sort: { ...StringType, pattern: unreservedSortListPattern },
+        ids: { ...StringType, pattern: unreservedWordListPattern },
       },
       response: {
         200: {
           type: "array",
-          items: _expandSchema(Type),
+          items: schemaName || _expandSchema(Type),
         },
       },
     },
@@ -89,17 +115,19 @@ export function listCollectionGETRoute (Type, valos, { url }) {
   };
 }
 
-export function retrieveResourceGETRoute (Type, valos, { url, idRouteParam }) {
+export function retrieveResourceGETRoute (schemaName, Type, valos,
+    { url, querystring, idRouteParam }) {
   return {
     method: "GET",
     handler: "retrieveResource",
     url,
     schema: {
       querystring: {
-        ..._genericGETQueryStrings(Type),
+        ..._genericGETResourceQueryStringSchema(Type),
+        ...(querystring || {}),
       },
       response: {
-        200: _expandSchema(Type),
+        200: schemaName || _expandSchema(Type),
         404: { type: "string" },
       },
     },
@@ -107,8 +135,8 @@ export function retrieveResourceGETRoute (Type, valos, { url, idRouteParam }) {
   };
 }
 
-export function createResourcePOSTRoute (Type, valos, { url }) {
-  const typeSchema = _expandSchema(Type);
+export function createResourcePOSTRoute (schemaName, Type, valos, { url }) {
+  const typeSchema = schemaName || _expandSchema(Type);
   return {
     method: "POST",
     handler: "createResource",
@@ -124,13 +152,13 @@ export function createResourcePOSTRoute (Type, valos, { url }) {
   };
 }
 
-export function updateResourcePATCHRoute (Type, valos, { url, idRouteParam }) {
+export function updateResourcePATCHRoute (schemaName, Type, valos, { url, idRouteParam }) {
   return {
     method: "PATCH",
     handler: "updateResource",
     url,
     schema: {
-      body: _expandSchema(Type),
+      body: schemaName || _expandSchema(Type),
       response: {
         200: { type: "string" },
         403: { type: "string" },
@@ -141,7 +169,7 @@ export function updateResourcePATCHRoute (Type, valos, { url, idRouteParam }) {
   };
 }
 
-export function destroyResourceDELETERoute (Type, valos, { url, idRouteParam }) {
+export function destroyResourceDELETERoute (schemaName, Type, valos, { url, idRouteParam }) {
   return {
     method: "DELETE",
     handler: "destroyResource",

@@ -168,6 +168,130 @@ export default class RestAPIServer extends LogEventGenerator {
 
 
   listCollectionGETHandler (route) {
+    const kuery = ["§->"];
+    this._buildKuery({ ...route.schema.response[200], valos: route.config.valos }, kuery);
+
+    return (request, reply) => {
+      const {
+        filter, // unimplemented
+        sort, offset, limit, ids, fields,
+        // Assumes all remaining query params are field requirements.
+        // Relies on schema validation to filter out garbage params.
+        ...fieldRequirements
+      } = request.query;
+      this.logEvent(1, () => ["listCollection GET", route.url,
+          "\n\trequest.query:", request.query,
+          "\n\troute.schema.response[200]:", ...dumpObject(route.schema.response[200]),
+          "\n\tkuery:", ...dumpObject(kuery),
+          "\n\troute.config:", ...dumpObject(route.config),
+      ]);
+      let results = route.vRoot.get(kuery, {});
+      if (filter || ids || Object.keys(fieldRequirements).length) {
+        results = this._filterResults(results, filter, ids, fieldRequirements);
+      }
+      if (sort) {
+        results = this._sortResults(results, sort);
+      }
+      if (offset || (limit !== undefined)) {
+        results = this._paginateResults(results, offset || 0, limit);
+      }
+      if (fields) {
+        results = this._pickResultsFields(results, fields);
+      }
+      results = JSON.stringify(results, null, 2);
+          // "\n\tschema:", JSON.stringify(route.schema.response[200], null, 2),
+      this.logEvent(1, () => ["listCollection GET", route.url,
+          "\n\tresults:", ...dumpObject(results)]);
+      reply.send(results);
+      // reply.code(200);
+      // reply.send([]);
+    };
+  }
+
+  _filterResults (results, filter, ids, fieldRequirements) {
+    const idLookup = ids
+        && ids.split(",").reduce((lookup, id) => (lookup[id] = true) && lookup, {});
+    let requirementCount = 0;
+    const requiredFields = [];
+    Object.entries(fieldRequirements).forEach(([fieldName, requirements]) => {
+      if (!requirements) return;
+      const requireFieldName = (fieldName.match(/require-(.*)/) || [])[1];
+      if (!requireFieldName) return;
+      const requiredIds = {};
+      requirements.split(",").forEach(targetId => {
+        const condition = true; // This can have a more elaborate condition in the future
+        if (requiredIds[targetId]) {
+          if (requiredIds[targetId] === condition) return; // just ignore duplicates
+          throw new Error(`Complex compount field requirements for ${fieldName}=${targetId
+              } are not implemented, {${condition}} requested, {${requiredIds[targetId]}
+              } already exists`);
+        }
+        requiredIds[targetId] = condition;
+        ++requirementCount;
+      });
+      requiredFields.push([requireFieldName, requiredIds]);
+    });
+    return results.filter(result => {
+      if (result == null) return false;
+      // TODO(iridian, 2019-02): This is O(n) where n is the number
+      // of all matching route resources in corpus befor filtering,
+      // not the number of requested resources. Improve.
+      if (idLookup && !idLookup[(result.$V || {}).id]) return false;
+
+      let satisfiedRequirements = 0;
+      for (const [fieldName, requiredIds] of requiredFields) {
+        const remainingRequiredIds = Object.create(requiredIds);
+        for (const sequenceEntry of (result[fieldName] || [])) {
+          const currentHref = ((sequenceEntry || {}).$V || {}).href;
+          const currentId = currentHref && (currentHref.match(/\/([a-zA-Z0-9\-_.~]+)$/) || [])[1];
+          // Check for more elaborate condition here in the future
+          if (remainingRequiredIds[currentId]) {
+            // Prevent multiple relations with same target from
+            // incrementing satisfiedRequirements
+            remainingRequiredIds[currentId] = false;
+            ++satisfiedRequirements;
+          }
+        }
+      }
+      return satisfiedRequirements === requirementCount;
+    });
+  }
+
+  _sortResults (results, sort) {
+    const sortKeys = sort.split(",");
+    const order = sortKeys.map((key, index) => {
+      if (key[0] !== "-") return 1;
+      sortKeys[index] = key.slice(1);
+      return -1;
+    });
+    results.sort((l, r) => {
+      for (let i = 0; i !== sortKeys.length; ++i) {
+        const key = sortKeys[i];
+        if (l[key] === r[key]) continue;
+        return ((l[key] < r[key]) ? -1 : 1) * order[i];
+      }
+      return 0;
+    });
+    return results;
+  }
+
+  _paginateResults (results, offset, limit) {
+    return results.slice(offset || 0, limit && ((offset || 0) + limit));
+  }
+
+  _pickResultsFields (results, fields) {
+    const fieldNames = fields.split(",");
+    return results.map(entry => {
+      const ret = {};
+      for (const name of fieldNames) {
+        const value = entry[name];
+        if (value !== undefined) ret[name] = value;
+      }
+      return ret;
+    });
+  }
+
+  retrieveResourceGETHandler (route) {
     // const connection = await this._engine.discourse.acquirePartitionConnection(
     //    route.config.valos.subject, { newConnection: false }).getActiveConnection();
     // const vRoot = this._engine.getVrapper([connection.getPartitionRawId()]);
@@ -184,8 +308,12 @@ export default class RestAPIServer extends LogEventGenerator {
         reply.code(404);
         reply.send(`Resource not found: <${resourceId}>`);
       } else {
-        const results = JSON.stringify(vResource.get(kuery, { verbosity: 0 }), null, 2);
-        reply.send(results);
+        const { fields } = request.query;
+        let result = vResource.get(kuery, { verbosity: 0 });
+        if (fields) {
+          result = this._pickResultsFields([result], fields)[0];
+        }
+        reply.send(JSON.stringify(result, null, 2));
       }
     };
   }

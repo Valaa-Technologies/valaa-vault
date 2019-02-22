@@ -15,11 +15,15 @@ const yargs = require("yargs/yargs");
 const yargsParser = require("yargs-parser").detailed;
 const deepExtend = require("@valos/tools/deepExtend").default;
 const dumpify = require("@valos/tools/dumpify").default;
-const outputError = require("@valos/tools/wrapError").outputError;
+const wrapErrorModule = require("@valos/tools/wrapError");
 
 cardinal.tomorrowNight = require("cardinal/themes/tomorrow-night");
 
 const markdownify = require("../markdownify");
+
+const wrapError = wrapErrorModule.wrapError;
+const outputError = wrapErrorModule.outputError;
+const dumpObject = wrapErrorModule.dumpObject;
 
 Error.stackTraceLimit = Infinity;
 
@@ -1050,7 +1054,7 @@ async function handler (vargv) {
  * Execute given executable as per child_process.spawn.
  * Extra options:
  *   noDryRun: if true this call will be executed even if --dry-run is requested.
- *   dryRunReturn: during dry runs this call will return immediately with the value of this option.
+ *   dryRunResult: during dry runs this call will return immediately with the value of this option.
  *
  * All argv must be strings, all non-strings and falsy values will be filtered out.
  *
@@ -1092,7 +1096,9 @@ async function execute (args, options = {}) {
             } else {
               this._refreshActivePools();
               this._reloadPackageAndToolsetsConfigs();
-              result = processedOutput;
+              result = (options.successResult !== undefined)
+                  ? options.successResult
+                  : processedOutput;
             }
           } catch (parseError) {
             result = parseError;
@@ -1111,7 +1117,10 @@ async function execute (args, options = {}) {
               `${this.theme.executable(argv[0])}:`, this._peekReturnValue(result, 71));
           if (result instanceof Error) {
             result.stdout = processedOutput || output;
-            throw result;
+            throw wrapError(result,
+                new Error(`During vlm.execute(${this.theme.executable(...argv)})`),
+                "\n\toptions:", ...dumpObject(options),
+            );
           }
           return result;
         })
@@ -1119,14 +1128,14 @@ async function execute (args, options = {}) {
 
     if (options.dryRun || (options.dryRun !== false && this.vargv && this.vargv.dryRun)) {
       executeVLM.echo("dry-run: skipping execution and returning:",
-          executeVLM.theme.blue(options.dryRunReturn));
-      maybeOutput = options.dryRunReturn;
+          executeVLM.theme.blue(options.dryRunResult));
+      maybeOutput = options.dryRunResult;
       _onDone(null, 0);
     } else {
       const spawnOptions = {
         stdio: options.delegate
             ? ["ignore", "pipe", "pipe"]
-            : [0, (options.asTTYResult !== undefined) ? 1 : "pipe", 2],
+            : [0, options.asTTY ? 1 : "pipe", 2],
         ...options.spawn,
         detached: false,
       };
@@ -1156,23 +1165,18 @@ async function execute (args, options = {}) {
         stream.on("error", _onDone);
       });
 
-      maybeOutput = (options.asTTYResult !== undefined)
-          ? options.asTTYResult
-          : _readStreamContent(subProcess.stdout);
+      if (!options.asTTY) maybeOutput = _readStreamContent(subProcess.stdout);
       if (options.delegate) maybeDiagnostics = _readStreamContent(subProcess.stderr);
     }
   });
 }
 
 function delegate (args, options = {}) {
-  return execute.call(this, args, { ...options, delegate: true });
+  return execute.call(this, args, { delegate: true, ...options });
 }
 
 function interact (args, options = {}) {
-  return execute.call(this, args, {
-    ...options,
-    asTTYResult: (options.successResult !== undefined) ? options.successResult : true,
-  });
+  return execute.call(this, args, { asTTY: true, successResult: true, ...options });
 }
 
 async function invoke (commandSelector, args, options = {}) {

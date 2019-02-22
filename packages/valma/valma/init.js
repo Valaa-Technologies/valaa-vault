@@ -55,7 +55,7 @@ file for yarn (and for npm, for which yarn is an analogue).
 `);
         continue;
       }
-      return vlm.interact("yarn init", { successResult: true });
+      return vlm.interact("yarn init");
     }
     vlm.info(`Skipped '${vlm.theme.executable("yarn init")}'.`, ...tellIfNoReconfigure);
     return true;

@@ -83,7 +83,7 @@ exports.handler = async (yargv) => {
     ret["./yarn.lock"] = !vlm.shell.error() ? "removed" : result.stderr;
   }
   if (yargv.install) {
-    ret["yarn install"] = (await vlm.interact(["yarn", "install"], "done"));
+    ret["yarn install"] = (await vlm.interact(["yarn", "install"], { successResult: "done" }));
   }
   return ret;
 };

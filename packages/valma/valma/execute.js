@@ -1,8 +1,8 @@
 exports.command = "$ [command]";
-exports.describe = "Execute a non-valma command within valma context";
+exports.describe = "Execute a non-valma command within valma context interactively";
 exports.introduction = `${exports.describe}.
 
-This is the command line shim to valma script vlm.execute.
+This is the command line shim to valma script vlm.interact.
 Like 'npx -c' it executes a regular command exported by some package
 dependency to the node_modules/.bin/ folder.
 
@@ -33,6 +33,5 @@ exports.handler = (yargv) => {
         ((yargv.options || {}).spawn || {}).env || {},
         yargv.env || {});
   }
-  console.log("yargv.command:", yargv.command, ...yargv._);
-  return yargv.vlm.execute([yargv.command, ...yargv._], options);
+  return yargv.vlm.interact([yargv.command, ...yargv._], options);
 };

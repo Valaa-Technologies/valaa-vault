@@ -62,12 +62,20 @@ class UIComponent extends React.Component {
     loadingFailedLens: PropTypes.any,
     internalErrorLens: PropTypes.any,
 
-    pendingConnectionsLens: PropTypes.any,
+    pendingLens: PropTypes.any,
+    failedLens: PropTypes.any,
 
     disabledLens: PropTypes.any,
     nullLens: PropTypes.any,
     undefinedLens: PropTypes.any,
     lens: PropTypes.any,
+
+    pendingConnectionsLens: PropTypes.any,
+    failedConnectionsLens: PropTypes.any,
+    pendingActivationLens: PropTypes.any,
+    failedActivationLens: PropTypes.any,
+    pendingMediaInterpretationLens: PropTypes.any,
+    failedMediaInterpretationLens: PropTypes.any,
 
     resourceLens: PropTypes.any,
     activeLens: PropTypes.any,
@@ -80,11 +88,12 @@ class UIComponent extends React.Component {
     delegateLensProperty: _propertyNames,
     instanceLensProperty: _propertyNames,
 
-    pendingLens: PropTypes.any,
     kueryingFocusLens: PropTypes.any,
     kueryingPropsLens: PropTypes.any,
     pendingPropsLens: PropTypes.any,
+    failedPropsLens: PropTypes.any,
     pendingChildrenLens: PropTypes.any,
+    failedChildrenLens: PropTypes.any,
     lensPropertyNotFoundLens: PropTypes.any,
   }
 
@@ -112,12 +121,20 @@ class UIComponent extends React.Component {
     loadingFailedLens: PropTypes.any,
     internalErrorLens: PropTypes.any,
 
-    pendingConnectionsLens: PropTypes.any,
+    pendingLens: PropTypes.any,
+    failedLens: PropTypes.any,
 
     disabledLens: PropTypes.any,
     nullLens: PropTypes.any,
     undefinedLens: PropTypes.any,
     lens: PropTypes.any,
+
+    pendingConnectionsLens: PropTypes.any,
+    failedConnectionsLens: PropTypes.any,
+    pendingActivationLens: PropTypes.any,
+    failedActivationLens: PropTypes.any,
+    pendingMediaInterpretationLens: PropTypes.any,
+    failedMediaInterpretationLens: PropTypes.any,
 
     resourceLens: PropTypes.any,
     activeLens: PropTypes.any,
@@ -130,11 +147,12 @@ class UIComponent extends React.Component {
     delegateLensProperty: _propertyNames,
     instanceLensProperty: _propertyNames,
 
-    pendingLens: PropTypes.any,
     kueryingFocusLens: PropTypes.any,
     kueryingPropsLens: PropTypes.any,
     pendingPropsLens: PropTypes.any,
+    failedPropsLens: PropTypes.any,
     pendingChildrenLens: PropTypes.any,
+    failedChildrenLens: PropTypes.any,
     lensPropertyNotFoundLens: PropTypes.any,
   }
 
@@ -443,7 +461,7 @@ class UIComponent extends React.Component {
     try {
       return _attachKuerySubscriber(this, subscriberName, head, kuery, options);
     } catch (error) {
-      throw wrapError(error, `during ${this.debugId()}\n .attachKuerySubscriber(${
+      throw wrapError(error, `During ${this.debugId()}\n .attachKuerySubscriber(${
               subscriberName}), with:`,
           "\n\thead:", ...dumpObject(head),
           "\n\tkuery:", ...dumpKuery(kuery),
@@ -575,8 +593,7 @@ class UIComponent extends React.Component {
 
   enqueueRerenderIfPromise (maybePromise: any | Promise) {
     if (!isPromise(maybePromise)) return false;
-    maybePromise.then(() => this.forceUpdate());
-    return true;
+    return maybePromise.then(() => this.forceUpdate());
   }
 
   render (): null | string | React.Element<any> | [] {
@@ -604,11 +621,26 @@ class UIComponent extends React.Component {
               (error.originalError || error).missingPartitions.map(entry => String(entry)));
         }
         // Try to handle pending promises.
-        if (this.enqueueRerenderIfPromise(ret)) {
-          const operationInfo = ret.operationInfo
-              || { lensRole: "pendingLens", params: { render: ret } };
-          ret = this.tryRenderLensRole((latestRenderRole = operationInfo.lensRole),
-              operationInfo.params);
+        const rerenderPromise = this.enqueueRerenderIfPromise(ret);
+        if (rerenderPromise) {
+          const operationInfo = ret.operationInfo || {
+            lensRole: "pendingLens", focus: { render: ret },
+            onError: { lensRole: "failedLens", lens: { render: ret } },
+          };
+          rerenderPromise.catch(error => {
+            if (operationInfo.onError) Object.assign(error, operationInfo.onError);
+            const wrappedError = wrapError(error,
+              new Error(`During ${this.debugId()}\n .render().result.catch`),
+                  "\n\tuiContext:", this.state.uiContext,
+                  "\n\tfocus:", this.tryFocus(),
+                  "\n\tstate:", this.state,
+                  "\n\tprops:", this.props,
+            );
+            outputError(wrappedError, "Exception caught in UIComponent.render.result.catch");
+            this.enableError(wrappedError);
+          });
+          latestRenderRole = operationInfo.lensRole;
+          ret = this.tryRenderLensRole(latestRenderRole, operationInfo.focus);
           if (isPromise(ret)) {
             throw wrapError(new Error("Invalid render result: 'pendingLens' returned a promise"),
                 new Error(`During ${this.debugId()}\n .render().ret.pendingLens, with:`),
@@ -646,9 +678,10 @@ class UIComponent extends React.Component {
         this.enableError(wrappedError);
       }
       if (ret === undefined) {
-        const failure: any = this.renderLensRole("internalErrorLens",
-            this._errorObject || "<error missing>");
-        if (isPromise(failure)) throw new Error("internalErrorLens returned a promise");
+        const errorObject = this._errorObject || "<render result undefined>";
+        const errorLensRole = errorObject.lensRole || "internalErrorLens";
+        const failure: any = this.renderLensRole(errorLensRole, errorObject);
+        if (isPromise(failure)) throw new Error(`${errorLensRole} returned a promise`);
         ret = failure;
       }
       internalErrorValidationFaults = _validateElement(this, ret);

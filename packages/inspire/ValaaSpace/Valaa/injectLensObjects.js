@@ -60,7 +60,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
   };
   const _element = "inspire__lensMessage-infoRow";
   const _message = { className: `${_element} ${_element}_message` };
-  const _parameters = { className: `${_element} ${_element}_parameter` };
+  const _parameter = { className: `${_element} ${_element}_parameter` };
   const _lensChain = { className: `${_element} ${_element}_lensChain` };
   const _component = { className: `${_element} ${_element}_component` };
   const _key = { className: `inspire__lensMessage-infoKey` };
@@ -187,25 +187,37 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
       @param {string|Error} error  the failure description or exception object`,
       true,
-      () => function renderInternalFailure (failure: string | Error, component: UIComponent) {
+      () => function renderInternalFailure () {
         return (
           <div {..._lensMessageInternalFailureProps}>
-            <p>
-              There is an error with component:
-              <button onClick={component.toggleError}>
-                {component.state.errorHidden ? "Show" : "Hide"}
-              </button>
-              <button onClick={component.clearError}>
-                Clear
-              </button>
-            </p>
-            {component.state.errorHidden ? null : (
-              <pre style={{ fontFamily: "monospace" }}>
-                {messageFromError(failure)}
-              </pre>
-            )}
+            Render Error: Component has internal error(s).
+            {Valaa.Lens.toggleableErrorDetailLens}
           </div>
         );
+      }
+  );
+
+  createLensRoleSymbol("toggleableErrorDetailLens",
+      "Lens",
+      `A catch-all lens role for rendering detailed, toggleable error
+      view.
+
+      @param {string|Error} error  the failure description or exception object`,
+      true,
+      () => function renderToggleableErrorDetail (failure: string | Error, component: UIComponent) {
+        return ([
+          <button onClick={component.toggleError}>
+            {component.state.errorHidden ? "Show" : "Hide"}
+          </button>,
+          <button onClick={component.clearError}>
+            Clear
+          </button>,
+          component.state.errorHidden ? null : (
+            <pre style={{ fontFamily: "monospace" }}>
+              {messageFromError(failure)}
+            </pre>
+          )
+        ]);
       }
   );
 
@@ -702,7 +714,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
           <div {..._message}>Component is disabled; focus and context are not available.</div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Disable reason:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
           </div>
@@ -713,9 +725,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
   createLensRoleSymbol("pendingLens",
       "Lens",
-      `Lens role for viewing a description of a dependency which is
-      a pending promise. If the lens assigned to this role returns a
-      promise then 'internalErrorLens' is displayed instead.
+      `Lens role for viewing a description of a generic dependency
+      which is a pending promise. If the lens assigned to this role
+      returns a promise then 'internalErrorLens' is displayed instead.
 
       @param {Object} dependency  a description object of the pending dependency.`,
       true,
@@ -723,7 +735,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
         <div {..._message}>Waiting for a pending dependency Promise to resolve.</div>
-        <div {..._parameters}>
+        <div {..._parameter}>
           <span {..._key}>Dependency:</span>
           <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
         </div>
@@ -732,20 +744,129 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       ] }),
   );
 
+  createLensRoleSymbol("failedLens",
+      "Lens",
+      `Lens role for viewing a generic lens Promise failure.
+
+      @param {string|Error|Object} reason  a description of why the lens Promise failed.`,
+      true,
+      () => ({ delegate: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageInternalFailureProps}>
+          <div {..._message}>
+            Render Error: Lens Promise failed.
+            {Valaa.Lens.toggleableErrorDetailLens}
+          </div>
+          <div {..._parameter}>
+            <span {..._key}>Lens:</span>
+            <span {..._value}>
+              {Valaa.Lens.instrument(error => error.lens, Valaa.Lens.focusDetailLens)}
+            </span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] }),
+  );
+
   createLensRoleSymbol("pendingConnectionsLens",
       "Lens",
-      `Lens role for viewing a description of partition connections
+      `Lens role for viewing a description of partition connection(s)
       that are being acquired.
 
-      @param {Object[]} partitions  the partition connections that are being acquired.`,
+      @param {Object[]} partitions  the partition connection(s) that are being acquired.`,
       true,
       () => ({ delegate: [
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>Acquiring partition connection(s).</div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Partitions:</span>
             <span {..._value}>{Valaa.Lens.focusDescriptionLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] }),
+  );
+
+  createLensRoleSymbol("failedConnectionsLens",
+      "Lens",
+      `Lens role for viewing partition connection failure(s).
+
+      @param {string|Error|Object} reason  a description of why the connection failed.`,
+      true,
+      () => ({ delegate: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageInternalFailureProps}>
+          <div {..._message}>
+            Render Error: Optimistic Partition connection failed.
+            {Valaa.Lens.toggleableErrorDetailLens}
+          </div>
+          <div {..._parameter}>
+            <span {..._key}>Partition:</span>
+            <span {..._value}>
+              {Valaa.Lens.instrument(error => error.resource, Valaa.Lens.focusDescriptionLens)}
+            </span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] }),
+  );
+
+  createLensRoleSymbol("pendingActivationLens",
+      "Lens",
+      `Lens role for viewing a description of pending resource activation.
+
+      @param {Object[]} resource  the resource that is being activated.`,
+      true,
+      () => ({ delegate: [
+        Valaa.Lens.loadingLens,
+        <div {..._lensMessageLoadingProps}>
+          <div {..._message}>Activating resource.</div>
+          <div {..._parameter}>
+            <span {..._key}>Resource:</span>
+            <span {..._value}>{Valaa.Lens.focusDescriptionLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] }),
+  );
+
+  createLensRoleSymbol("failedActivationLens",
+      "Lens",
+      `Lens role for viewing resource activation failure(s).
+
+      @param {string|Error|Object} reason  a description of why the resource activation failed.`,
+      true,
+      () => ({ delegate: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageInternalFailureProps}>
+          <div {..._message}>
+            Render Error: Resource activation failed.
+            {Valaa.Lens.toggleableErrorDetailLens}
+          </div>
+          <div {..._parameter}>
+            <span {..._key}>Resource:</span>
+            <span {..._value}>
+              {Valaa.Lens.instrument(error => error.resource, Valaa.Lens.focusDescriptionLens)}
+            </span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] }),
+  );
+  createLensRoleSymbol("inactiveLens",
+      "Lens",
+      `Lens role for viewing an inactive Resource.
+
+      @param {Object} focus  the inactive Resource focus.`,
+      (focus?: Vrapper) => focus && focus.isInactive(),
+      () => ({ delegate: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageLoadingFailedProps}>
+          <div {..._message}>Focus {Valaa.Lens.focusDescriptionLens} is inactive.</div>
+          <div {..._parameter}>
+            <span {..._key}>Focus resource info:</span>
+            <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
           </div>
           {commonMessageRows}
         </div>
@@ -763,9 +884,59 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>Downloading dependency {Valaa.Lens.focusDetailLens}.</div>
-          <div {..._parameters}>
-            <span {..._key}>Media:</span>
+          <div {..._parameter}>
+            <span {..._key}>Of Media:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] }),
+  );
+
+  createLensRoleSymbol("pendingMediaInterpretationLens",
+      "Lens",
+      `Lens role for viewing a description of Media dependency which
+      is being interpreted: downloaded, decoded and integrated.
+
+      @param {Media} media  the Media being interpreted.`,
+      true,
+      () => ({ delegate: [
+        Valaa.Lens.loadingLens,
+        <div {..._lensMessageLoadingProps}>
+          <div {..._message}>Downloading dependency {Valaa.Lens.focusDetailLens}.</div>
+          <div {..._parameter}>
+            <span {..._key}>Of Media:</span>
+            <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] }),
+  );
+
+  createLensRoleSymbol("failedMediaInterpretationLens",
+      "Lens",
+      `Lens role for viewing a media interpretation failure.
+
+      @param {string|Error|Object} reason  interpretation failure reason.`,
+      true,
+      () => ({ delegate: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageInternalFailureProps}>
+          <div {..._message}>
+            Render Error: Media interpretation failed.
+            {Valaa.Lens.toggleableErrorDetailLens}
+          </div>
+          <div {..._parameter}>
+            <span {..._key}>Of Media:</span>
+            <span {..._value}>
+              {Valaa.Lens.instrument(error => error.media, Valaa.Lens.focusDescriptionLens)}
+            </span>
+          </div>
+          <div {..._parameter}>
+            <span {..._key}>Interpretation info:</span>
+            <span {..._value}>
+              {Valaa.Lens.instrument(error => error.mediaInfo, Valaa.Lens.focusDetail)}
+            </span>
           </div>
           {commonMessageRows}
         </div>
@@ -782,7 +953,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>Waiting for focus kuery to complete.</div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Focus:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
           </div>
@@ -801,7 +972,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>Waiting for props kueries to complete.</div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Props kueries:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
           </div>
@@ -820,9 +991,35 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>Waiting for pending props Promise(s) to resolve.</div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Props promises:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] }),
+  );
+
+  createLensRoleSymbol("failedPropsLens",
+      "Lens",
+      `Lens role for viewing a props Promise failure.
+
+      @param {string|Error|Object} reason  props Promise failure reason.`,
+      true,
+      // TODO(iridian, 2019-02): Filter the props names to only the
+      // failing props.
+      () => ({ delegate: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageInternalFailureProps}>
+          <div {..._message}>
+            Render Error: props Promise failure.
+            {Valaa.Lens.toggleableErrorDetailLens}
+          </div>
+          <div {..._parameter}>
+            <span {..._key}>Props (all) names:</span>
+            <span {..._value}>
+              {Valaa.Lens.instrument(error => error.propsNames, Valaa.Lens.focusDetailLens)}
+            </span>
           </div>
           {commonMessageRows}
         </div>
@@ -839,9 +1036,35 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>  Waiting for a pending children Promise to resolve.</div>
-          <div {..._parameters}>
-            <span {..._key}>Children promise:</span>
+          <div {..._parameter}>
+            <span {..._key}>Children:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          </div>
+          {commonMessageRows}
+        </div>
+      ] }),
+  );
+
+  createLensRoleSymbol("failedChildrenLens",
+      "Lens",
+      `Lens role for viewing a child Promise failure.
+
+      @param {string|Error|Object} reason  child Promise failure reason.`,
+      true,
+      // TODO(iridian, 2019-02): Add a grand-child path description to
+      // the errors.
+      () => ({ delegate: [
+        Valaa.Lens.loadingFailedLens,
+        <div {..._lensMessageInternalFailureProps}>
+          <div {..._message}>
+            Render Error: Child Promise failure.
+            {Valaa.Lens.toggleableErrorDetailLens}
+          </div>
+          <div {..._parameter}>
+            <span {..._key}>Children:</span>
+            <span {..._value}>
+              {Valaa.Lens.instrument(error => error.children, Valaa.Lens.focusDetailLens)}
+            </span>
           </div>
           {commonMessageRows}
         </div>
@@ -862,7 +1085,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.loadingLens,
         <div {..._lensMessageLoadingProps}>
           <div {..._message}>Activating focus {Valaa.Lens.focusDescriptionLens}.</div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Focus resource info:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
           </div>
@@ -881,7 +1104,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
           <div {..._message}>Focus {Valaa.Lens.focusDescriptionLens} is inactive.</div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Focus resource info:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
           </div>
@@ -900,7 +1123,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
           <div {..._message}>Focus {Valaa.Lens.focusDescriptionLens} is unavailable.</div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Focus resource info:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
           </div>
@@ -919,7 +1142,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
           <div {..._message}>Focus {Valaa.Lens.focusDescriptionLens} has been destroyed.</div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Focus resource info:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
           </div>
@@ -941,23 +1164,23 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
           <div {..._message}>
             Cannot find a lens property from the active focus {Valaa.Lens.focusDescriptionLens}.
           </div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>focusLensProperty:</span>
             <span {..._value}>
               {Valaa.Lens.instrument(Valaa.Lens.focusLensProperty, p => JSON.stringify(p))}
             </span>
           </div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>lensProperty:</span>
             <span {..._value}>
               {Valaa.Lens.instrument(Valaa.Lens.lensProperty, p => JSON.stringify(p))}
             </span>
           </div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Focus detail:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
           </div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Focus properties:</span>
             <span {..._value}>
               {Valaa.Lens.instrument(Valaa.Lens.propertyKeysLens, p => JSON.stringify(p))}
@@ -982,23 +1205,23 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
             This is because it is not a valid lens Media file and it does not have a lens property
             that is listed in either delegateLensProperty or lensProperty roles.
           </div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>delegateLensProperty:</span>
             <span {..._value}>
               {Valaa.Lens.instrument(Valaa.Lens.delegateLensProperty, p => JSON.stringify(p))}
             </span>
           </div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>lensProperty:</span>
             <span {..._value}>
               {Valaa.Lens.instrument(Valaa.Lens.lensProperty, p => JSON.stringify(p))}
             </span>
           </div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Resource detail:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
           </div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Resource properties:</span>
             <span {..._value}>
               {Valaa.Lens.instrument(Valaa.Lens.propertyKeysLens, p => JSON.stringify(p))}
@@ -1020,7 +1243,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         Valaa.Lens.loadingFailedLens,
         <div {..._lensMessageLoadingFailedProps}>
           <div {..._message}>props.array {Valaa.Lens.focusDescriptionLens} is not an iterable.</div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>props.array:</span>
             <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
           </div>
@@ -1043,7 +1266,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
                   Valaa.Lens.parentComponentLens, Valaa.Lens.focusDetailLens)}
               returned an invalid element.
           </div>
-          <div {..._parameters}>
+          <div {..._parameter}>
             <span {..._key}>Faults:</span>
             <span {..._value}>{Valaa.Lens.focusDumpLens}</span>
           </div>

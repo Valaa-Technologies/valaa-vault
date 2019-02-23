@@ -1139,28 +1139,32 @@ export default class Vrapper extends Cog {
     subtype: ["§->", "mediaType", false, "subtype"],
   });
 
-  resolveMediaInfo (options: VALKOptions) {
-    let mediaInfo = options && options.mediaInfo && { ...options.mediaInfo };
+  /* Mutates options.mediaInfo */
+  resolveMediaInfo (options: VALKOptions = {}) {
+    const mediaInfo = {};
+    if (options.mediaInfo) Object.assign(mediaInfo, options.mediaInfo);
     function setMediaInfoMIME (mime) {
       const split = mime.split("/");
       mediaInfo.type = split[0];
       mediaInfo.subtype = split[1];
     }
-    let mime = (options && options.mime) || (mediaInfo && mediaInfo.mime);
-    if (!mediaInfo) mediaInfo = this.get(Vrapper.toMediaInfoFields, options);
-    if (typeof mime === "string") setMediaInfoMIME(mime);
-    else {
-      if (!mediaInfo.type || !mediaInfo.subtype) {
-        const fileNameMediaType = mediaTypeFromFilename(mediaInfo.name);
-        if (fileNameMediaType) Object.assign(mediaInfo, fileNameMediaType);
-        else {
-          setMediaInfoMIME((options && options.mimeFallback) || mediaInfo.mimeFallback
-              || "application/octet-stream");
-        }
-      }
-      mime = `${mediaInfo.type}/${mediaInfo.subtype}`;
+    const explicitMime = options.mime || (mediaInfo && mediaInfo.mime);
+    if (explicitMime) {
+      setMediaInfoMIME(explicitMime);
+      mediaInfo.mime = mediaInfo.explicitMime;
     }
-    mediaInfo.mime = mime;
+    if (!mediaInfo.type || !mediaInfo.subtype) {
+      Object.assign(mediaInfo, this.get(Vrapper.toMediaInfoFields, options));
+    }
+    if (!mediaInfo.type || !mediaInfo.subtype) {
+      const fileNameMediaType = mediaTypeFromFilename(mediaInfo.name);
+      if (fileNameMediaType) Object.assign(mediaInfo, fileNameMediaType);
+      else {
+        setMediaInfoMIME((options && options.mimeFallback) || mediaInfo.mimeFallback
+            || "application/octet-stream");
+      }
+    }
+    if (!mediaInfo.mime) mediaInfo.mime = `${mediaInfo.type}/${mediaInfo.subtype}`;
     mediaInfo.mediaRef = this.getId(options);
     return mediaInfo;
   }
@@ -1194,11 +1198,12 @@ export default class Vrapper extends Cog {
               .get(mostMaterializedTransient);
       if (interpretationsByMime) {
         if (!options.mediaInfo) {
-          mediaInfo = { mime: options.mime || "" };
+          mediaInfo = (options.mime ? { mime: options.mime } : {});
         } else {
           mediaInfo = this.resolveMediaInfo(Object.create(options));
         }
-        const cachedInterpretation = interpretationsByMime[mediaInfo.mime];
+        options.mediaInfo = mediaInfo;
+        const cachedInterpretation = mediaInfo.mime && interpretationsByMime[mediaInfo.mime];
         if (cachedInterpretation
             && (mediaInfo.mime || !options.mimeFallback
                 || (cachedInterpretation === interpretationsByMime[options.mimeFallback]))) {
@@ -1208,7 +1213,7 @@ export default class Vrapper extends Cog {
         }
       }
       if (!mediaInfo || !mediaInfo.mediaId) {
-        mediaInfo = this.resolveMediaInfo(Object.create(options));
+        options.mediaInfo = mediaInfo = this.resolveMediaInfo(Object.create(options));
       }
       let decodedContent = options.decodedContent;
       if (decodedContent === undefined) {

@@ -199,7 +199,10 @@ export default class LiveProps extends UIComponent {
               prevState.livePropValues || OrderedMap())
         }));
       });
-      ret.operationInfo = { lensRole: "pendingPropsLens", params: pendingProps };
+      ret.operationInfo = {
+        lensRole: "pendingPropsLens", focus: pendingProps,
+        onError: { lensRole: "failedPropsLens", propsNames: pendingPropsNames },
+      };
       return ret;
     }
 

@@ -161,18 +161,15 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
       } else if (lens instanceof Vrapper) {
         const blocker = lens.activate();
         if (blocker) {
-          blocker.operationInfo = Object.assign(blocker.operationInfo || {},
-              { lensRole: "pendingConnectionsLens" });
+          blocker.operationInfo = Object.assign(blocker.operationInfo || {}, {
+            lensRole: "pendingActivationLens", focus: lens,
+            onError: { lensRole: "failedActivationLens", resource: lens },
+          });
           return blocker;
         }
         if (lens.hasInterface("Media")) {
           ret = _tryRenderMediaLens(component, lens, focus, lensName);
-          if (ret === undefined) throw new Error(`Can't render Media ${lens.debugId()} as lens`);
-          if (isPromise(ret)) {
-            ret.operationInfo = Object.assign(ret.operationInfo || {},
-                { lensRole: "downloadingLens", params: lens });
-            return ret;
-          }
+          if (isPromise(ret)) return ret;
           subLensName = `media-${lensName}`;
         } else {
           console.warn("NEW BEHAVIOUR: non-Media Resources as direct lenses are now in effect.",
@@ -222,10 +219,10 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
   return component.renderLens(ret, focus, subLensName);
 }
 
-function _tryRenderMediaLens (component: UIComponent, lens: any, focus: any) {
-  const kueryKey = `UIComponent.media.${lens.getRawId()}`;
+function _tryRenderMediaLens (component: UIComponent, media: any, focus: any) {
+  const kueryKey = `UIComponent.media.${media.getRawId()}`;
   if (!component.getSubscriber(kueryKey)) {
-    component.attachKuerySubscriber(kueryKey, lens, VALEK.toMediaContentField(), { onUpdate: () => {
+    component.attachKuerySubscriber(kueryKey, media, VALEK.toMediaContentField(), { onUpdate () {
       // detaches the live kuery
       // this is likely uselessly defensive programming: the whole UIComponent state should refresh
       // anyway whenever the focus changes.
@@ -234,14 +231,31 @@ function _tryRenderMediaLens (component: UIComponent, lens: any, focus: any) {
       return undefined;
     } });
   }
-  let content = lens.interpretContent({ mimeFallback: "text/vsx" });
-  if ((content != null) && content.__esModule) {
-    content = content.default;
+  const options = { mimeFallback: "text/vsx" };
+  const onError = {
+    lensRole: "failedMediaInterpretationLens", media, mediaInfo: options.mediaInfo,
+  };
+  try {
+    let content = media.interpretContent(options);
     if (content === undefined) {
-      throw new Error(`Can't find default export from media '${lens.debugId()}'`);
+      throw new Error(`Can't render Media ${media.debugId()} with undefined content`);
     }
+    if ((content != null) && content.__esModule) {
+      content = content.default;
+      if (content === undefined) {
+        throw new Error(`Can't find default export from Media '${media.debugId()}'`);
+      }
+    }
+    if (isPromise(content)) {
+      content.operationInfo = Object.assign(content.operationInfo || {}, {
+        lensRole: "pendingMediaInterpretationLens", focus: media,
+        onError,
+      });
+    }
+    return content;
+  } catch (error) {
+    throw Object.assign(error, onError);
   }
-  return content;
 }
 
 export function _wrapElementInLiveProps (component: UIComponent, element: Object, focus: any,
@@ -314,8 +328,10 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
         children = component.tryRenderLensSequence(props.children, focus);
         if ((key || !lensName) && (children === undefined)) return undefined;
         if (isPromise(children)) {
-          children.operationInfo = Object.assign(children.operationInfo || {},
-              { lensRole: "pendingChildrenLens", params: props.children });
+          children.operationInfo = Object.assign(children.operationInfo || {}, {
+            lensRole: "pendingChildrenLens", focus: props.children,
+            onError: { lensRole: "failedChildrenLens", children: props.children },
+          });
           return children;
         }
       }

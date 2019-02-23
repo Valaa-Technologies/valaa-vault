@@ -54,12 +54,13 @@ export default class FalseProphet extends Prophet {
   _primaryRecital: StoryRecital;
 
   _onCommandCountUpdate: Function<>;
+  _commandNotificationMinDelay: number;
   _partitionCommandCounts: Object = {};
   _totalCommandCount: number = 0;
   _inactivePartitionVRefPrototypes: { [partitionURI: string]: VRef } = {};
 
   constructor ({
-    schema, corpus, upstream, onCommandCountUpdate, ...rest
+    schema, corpus, upstream, onCommandCountUpdate, commandNotificationMinDelay, ...rest
   }: Object) {
     super(rest);
     this.corpus = corpus;
@@ -144,49 +145,63 @@ export default class FalseProphet extends Prophet {
   }
 
   _tellStoriesToFollowers (stories: Story[]) {
-    let releaseNotificationDelayer;
+    const unblockNotifications = this._blockNotifications();
     try {
-      this.setCommandNotificationDelayer(
-          new Promise(resolve => { releaseNotificationDelayer = resolve; }));
       return _tellStoriesToFollowers(this, stories);
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error(`_tellStoriesToFollowers()`),
           "\n\tstories:", ...dumpObject(stories));
     } finally {
-      releaseNotificationDelayer();
+      unblockNotifications();
     }
   }
 
   // command ops
 
   setConnectionCommandCount (connectionName: Object, value: number = 1) {
-    const previous = this._partitionCommandCounts[connectionName] || 0;
+    const previous = this._partitionCommandCounts[connectionName];
+    if (previous === value) return;
     this._partitionCommandCounts[connectionName] = value;
-    this._totalCommandCount += (value - previous);
-    if (!this._onCommandCountUpdate || this._pendingCommandCountUpdateNotification) return;
-    this._pendingCommandCountUpdateNotification = true;
-    if (!this._commandNotificationDelayer) {
-      // Even with no current delayer postpone the notifications to top event handler
-      this.setCommandNotificationDelayer(Promise.resolve(true));
+    this._totalCommandCount += (value - (previous || 0));
+
+    if (!this._onCommandCountUpdate || this._pendingCommandNotification) return;
+    if (!this._commandNotificationBlocker) {
+      // If there no active notification blocker still postpone the
+      // notifications to top event handler via an immediately resolved
+      // promise.
+      this.setCommandNotificationBlocker(Promise.resolve(true));
     }
-    this._mostRecentNotification = this._commandNotificationDelayer.then(() => {
-      // only notify if there is no blocking delayer
-      if (this._commandNotificationDelayer) return;
+    const thisNotification = this._pendingCommandNotification =
+        this._commandNotificationBlocker.then(() => {
       try {
         this._onCommandCountUpdate(this._totalCommandCount, this._partitionCommandCounts);
       } finally {
-        this._pendingCommandCountUpdateNotification = false;
-        this.setCommandNotificationDelayer(new Promise(resolve => setTimeout(resolve, 500)));
+        if (this._pendingCommandNotification === thisNotification) {
+          this._pendingCommandNotification = false;
+        }
+        if (this._commandNotificationMinDelay > 0) {
+          this.setCommandNotificationBlocker(new Promise(resolve =>
+              setTimeout(resolve, this._commandNotificationMinDelay)));
+        }
       }
     });
   }
 
-  setCommandNotificationDelayer (delayer) {
-    const newDelayer = delayer.then(() => {
-      // clear delayer only if this delayer was the latest delayer
-      if (this._commandNotificationDelayer === newDelayer) this._commandNotificationDelayer = null;
+  _blockNotifications () {
+    if (this._commandNotificationBlocker) return () => null;
+    let unblock;
+    this.setCommandNotificationBlocker(new Promise(resolve => { unblock = resolve; }));
+    return unblock;
+  }
+
+  setCommandNotificationBlocker (blocker) {
+    const thisBlocker = blocker.then(() => {
+      // clear blocker only if this blocker was the latest blocker
+      if (this._commandNotificationBlocker === thisBlocker) {
+        this._commandNotificationBlocker = null;
+      }
     });
-    this._commandNotificationDelayer = newDelayer;
+    this._commandNotificationBlocker = thisBlocker;
   }
 
   _dumpStatus () {

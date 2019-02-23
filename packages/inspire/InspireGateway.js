@@ -37,6 +37,7 @@ import { setGlobalLogger } from "~/tools/wrapError";
 const { AuthorityNexus, FalseProphet, Oracle, Prophet, Scribe } = valosProphet;
 const {
   dumpObject, inBrowser, invariantify, isPromise, LogEventGenerator, mapEagerly, thenChainEagerly,
+  outputError,
 } = valosTools;
 
 export default class InspireGateway extends LogEventGenerator {
@@ -396,6 +397,7 @@ export default class InspireGateway extends LogEventGenerator {
     let falseProphetOptions;
     try {
       this.clockEvent(1, `falseProphet.create`);
+
       this._commandCountListeners = new Map();
       falseProphetOptions = {
         name: "Inspire FalseProphet",
@@ -403,7 +405,23 @@ export default class InspireGateway extends LogEventGenerator {
         upstream,
         schema: EngineContentAPI.schema,
         logger: this.getLogger(),
-        onCommandCountUpdate: this._updateCommandCount,
+        commandNotificationMinDelay: 500,
+        onCommandCountUpdate: (totalCount: number, partitionCommandCounts: Object) => {
+          this._totalCommandCount = totalCount;
+          this._partitionCommandCounts = partitionCommandCounts;
+          this._commandCountListeners.forEach((listener, component) => {
+            try {
+              listener(totalCount, partitionCommandCounts);
+            } catch (error) {
+              outputError(this.wrapErrorEvent(error, new Error("onCommandCountUpdate.listener()"),
+                      "\n\tlistener key:", ...dumpObject(component),
+                      "\n\ttotalCount:", totalCount,
+                      "\n\tpartitionCommandcounts:", ...dumpObject(partitionCommandCounts)),
+                  "Exception caught during Gateway.onCommandCountUpdate.listener call",
+                  this.getLogger());
+            }
+          });
+        },
         ...await gatewayRevelation.falseProphet,
       };
       const falseProphet = new FalseProphet(falseProphetOptions);
@@ -420,12 +438,6 @@ export default class InspireGateway extends LogEventGenerator {
           "\n\tfalseProphetOptions:", ...dumpObject(falseProphetOptions),
           "\n\tupstream:", ...dumpObject(upstream));
     }
-  }
-
-  _updateCommandCount = (totalCount: number, partitionCommandCounts: Object) => {
-    this._totalCommandCount = totalCount;
-    this._partitionCommandCounts = partitionCommandCounts;
-    this._commandCountListeners.forEach(listener => listener(totalCount, partitionCommandCounts));
   }
 
   setCommandCountListener (component: Object,

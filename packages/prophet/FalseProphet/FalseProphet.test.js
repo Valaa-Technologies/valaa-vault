@@ -73,20 +73,20 @@ describe("FalseProphet", () => {
     // A transaction counts as one command
     let resolveDelay;
     let delayer = new Promise(resolve => { resolveDelay = resolve; });
-    falseProphet.setCommandNotificationDelayer(delayer);
+    falseProphet.setCommandNotificationBlocker(delayer);
     await discourse.chronicleEvent(createdTestPartitionEntity).getPremiereStory();
     resolveDelay();
-    await falseProphet._mostRecentNotification;
+    await falseProphet._pendingCommandNotification;
     expect(commandsCounted).toBe(1);
 
     delayer = new Promise(resolve => { resolveDelay = resolve; });
-    falseProphet.setCommandNotificationDelayer(delayer);
+    falseProphet.setCommandNotificationBlocker(delayer);
     const results = connection.chronicleEvents(basicCommands, { isProphecy: true });
     const lastStoredEvent = await results.eventResults[2].event;
     expect(lastStoredEvent.aspects.log.index)
         .toEqual(3);
     resolveDelay();
-    await falseProphet._mostRecentNotification;
+    await falseProphet._pendingCommandNotification;
     expect(commandsCounted).toBe(4);
   });
 });

@@ -388,14 +388,13 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
                 "\n\tin component:", component.debugId(), component);
           }
           const lensPropertyNames = [].concat(
-          component.props[lensPropertyRoleName]
-              || component.getUIContextValue(roleSymbol)
-              || component.context[lensPropertyRoleName] || [],
-          // Deprecated.
-          component.props.lensName || [],
-          component.props.lensProperty
-              || component.getUIContextValue(Valaa.Lens.lensProperty)
-              || component.context.lensProperty || []);
+              component.props[lensPropertyRoleName]
+                  || component.getUIContextValue(roleSymbol)
+                  || component.context[lensPropertyRoleName] || [],
+              component.props.lensName || [], // Deprecated.
+              component.props.lensProperty
+                  || component.getUIContextValue(Valaa.Lens.lensProperty)
+                  || component.context.lensProperty || []);
           const focusLexicalScope = focus.getLexicalScope();
           for (const propertyName of lensPropertyNames) {
             let vProperty;
@@ -411,7 +410,8 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
                     noImmediateRun: true,
                     onUpdate: () => component.forceUpdate(),
                   });
-              return vProperty.extractValue();
+              const propertyValue = vProperty.extractValue();
+              if (propertyValue !== undefined) return propertyValue;
             }
           }
           /*

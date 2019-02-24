@@ -124,7 +124,7 @@ exports.handler = async (yargv) => {
   const addAll = yargv.addChanged && yargv.addUnchanged;
   if (addAll) vlm.info("Adding all packages to initial selection.");
   else if (yargv.addChanged || yargv.addUnchanged) {
-    if (!yargv.addChanged) {
+    if (yargv.addChanged) {
       vlm.info("Adding only changed packages to initial selection.");
     } else {
       vlm.info("Adding only unchanged packages to initial selection.");
@@ -158,7 +158,7 @@ exports.handler = async (yargv) => {
     const sourceDirectory = sourcePackageJSONPath.match(/^(.*)package.json$/)[1];
     const packagePath = vlm.path.join(process.cwd(), sourceDirectory);
     const selectionReason = packageSelection[packagePath];
-    if (!selectionReason || (addAll && (selectionReason === false))) return undefined;
+    if (!addAll ? !selectionReason : selectionReason === false) return undefined;
 
     const packageJSONPath = vlm.path.join(packagePath, "package.json");
     // eslint-disable-next-line import/no-dynamic-require

@@ -1088,17 +1088,22 @@ async function execute (args, options = {}) {
             if (error) {
               result = error;
             } else if (code || signal) {
-              result = (typeof diagnostics === "string") && (options.stderr === "erroronly")
-                  ? new Error(diagnostics.split("\n")[0])
-                  : new Error(`received ${signal ? "signal" : "code"} ${signal || code}`);
-              result.code = code;
-              result.signal = signal;
+              if (options.onFailure !== undefined) {
+                result = (typeof options.onFailure !== "function") ? options.onFailure
+                    : options.onFailure(code, signal);
+              } else {
+                result = (typeof diagnostics === "string") && (options.stderr === "erroronly")
+                    ? new Error(diagnostics.split("\n")[0])
+                    : new Error(`received ${signal ? "signal" : "code"} ${signal || code}`);
+                result.code = code;
+                result.signal = signal;
+              }
             } else {
               this._refreshActivePools();
               this._reloadPackageAndToolsetsConfigs();
-              result = (options.successResult !== undefined)
-                  ? options.successResult
-                  : processedOutput;
+              result = (options.onSuccess === undefined) ? processedOutput
+                  : (typeof options.onSuccess !== "function") ? options.onSuccess
+                  : options.onSuccess(processedOutput);
             }
           } catch (parseError) {
             result = parseError;
@@ -1176,7 +1181,7 @@ function delegate (args, options = {}) {
 }
 
 function interact (args, options = {}) {
-  return execute.call(this, args, { asTTY: true, successResult: true, ...options });
+  return execute.call(this, args, { asTTY: true, onSuccess: true, ...options });
 }
 
 async function invoke (commandSelector, args, options = {}) {
@@ -1380,19 +1385,14 @@ async function _invoke (commandSelector, argv) {
                 this.echo(`${subVLM.getContextIndexText()}>>>? ${header}`, "via",
                     ...(tool ? ["tool", this.theme.package(tool), "of"] : []),
                     "toolset", this.theme.package(subVLM.toolset));
-                requireResult = await subVLM.execute(requires[i]);
+                requireResult = await subVLM.execute(
+                    requires[i], { onSuccess: true, onFailure: false });
               } catch (error) {
                 requireResult = this.error(`<exception>: ${String(error)}`);
                 throw error;
               } finally {
                 this.echo(`${subVLM.getContextIndexText()}<<<? ${header}:`,
                     this._peekReturnValue(requireResult, 51));
-              }
-              // Hack. Assumes that empty string is a success, non-empty
-              // is an error for purposes such as this.js functionality
-              // with basic bash commands like 'mkdir' and 'cp'.
-              if (typeof requireResult === "string") {
-                requireResult = !requireResult;
               }
               if (typeof requireResult === "string" ? requireResult : !requireResult) {
                 const message = `'${this.theme.command(commandName)

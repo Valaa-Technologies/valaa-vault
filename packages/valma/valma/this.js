@@ -64,7 +64,8 @@ exports.handler = async (yargv) => {
             return { value, index: index + 1 };
           }
           const args = await _getArgs(argv, index + 1);
-          const result = await vlm.execute([argv[index], ...args.value]);
+          const result = await vlm.execute([argv[index], ...args.value],
+              { onSuccess: true, onFailure: false });
           return (ret = await _walk(result, argv, args.index));
         }
       }

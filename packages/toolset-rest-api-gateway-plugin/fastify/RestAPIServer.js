@@ -146,6 +146,7 @@ export default class RestAPIServer extends LogEventGenerator {
     ]);
     const listKuery = ["§->"];
     if (!this._extractValOSSchemaKuery(route.config.valos, listKuery)) {
+      if (route.config.valos.hardcodedResources) return;
       throw new Error(`Route <${route.url}> is missing valos schema predicate`);
     }
     listKuery.splice(listKuery.indexOf("relations") + 2);
@@ -170,6 +171,9 @@ export default class RestAPIServer extends LogEventGenerator {
   listCollectionGETHandler (route) {
     const kuery = ["§->"];
     this._buildKuery({ ...route.schema.response[200], valos: route.config.valos }, kuery);
+    if (route.config.valos.filter) {
+      kuery.push(["§filter", route.config.valos.filter]);
+    }
 
     return (request, reply) => {
       const {
@@ -298,23 +302,25 @@ export default class RestAPIServer extends LogEventGenerator {
 
     const kuery = ["§->"];
     this._buildKuery(route.schema.response[200], kuery);
+    const hardcodedResources = route.config.valos.hardcodedResources;
 
     return (request, reply) => {
       const resourceId = request.params[route.config.idRouteParam];
       this.logEvent(1, () => ["retrieveResource GET", route.url, resourceId,
           "\n\trequest.query:", request.query]);
       const vResource = this._engine.tryVrapper([resourceId]);
-      if (!vResource) {
+      let result = (vResource && vResource.get(kuery, { verbosity: 0 }))
+          || hardcodedResources[resourceId];
+      if (result === undefined) {
         reply.code(404);
         reply.send(`Resource not found: <${resourceId}>`);
-      } else {
-        const { fields } = request.query;
-        let result = vResource.get(kuery, { verbosity: 0 });
-        if (fields) {
-          result = this._pickResultsFields([result], fields)[0];
-        }
-        reply.send(JSON.stringify(result, null, 2));
+        return;
       }
+      const { fields } = request.query;
+      if (fields) {
+        result = this._pickResultsFields([result], fields)[0];
+      }
+      reply.send(JSON.stringify(result, null, 2));
     };
   }
 
@@ -364,6 +370,11 @@ export default class RestAPIServer extends LogEventGenerator {
         return this._buildKuery(sharedSchema, outerKuery, isValOSFields);
       }
       innerKuery = this._extractValOSSchemaKuery(jsonSchema.valos, outerKuery);
+      const hardcoded = (innerKuery === undefined) && (jsonSchema.valos || {}).hardcodedResources;
+      if (hardcoded) {
+        outerKuery.push(["§'", Object.values(hardcoded).map(e => e)]);
+        return outerKuery;
+      }
       if (jsonSchema.type === "array") {
         if (!innerKuery) {
           throw new Error("json schema valos predicate missing with json schema type 'array'");

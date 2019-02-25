@@ -1,6 +1,6 @@
 {
   "name": "valma",
-  "version": "0.34.0-prerelease.7",
+  "version": "0.34.0-prerelease.8",
   "valaa": {
     "type": "toolset",
     "domain": "infrastructure"

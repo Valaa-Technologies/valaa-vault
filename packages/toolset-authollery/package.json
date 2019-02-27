@@ -20,7 +20,7 @@
     "valma-deploy-release": "valma/deploy-release.js"
   },
   "dependencies": {
-    "@valos/toolset-revealer": "^0.34.0-prerelease.7",
+    "@valos/toolset-revealer": "^0.34.0-prerelease.8",
     "lerna": "^3.4.0",
     "valma": "^0.34.0-prerelease.8"
   }

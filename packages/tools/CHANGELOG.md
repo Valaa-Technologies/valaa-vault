@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.9](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.8...v0.34.0-prerelease.9) (2019-02-28)
+
+
+### Bug Fixes
+
+* **tools:** Adds missing gateway-api dependency, fixes cross-package import ([3b59e36](https://github.com/valaatech/vault/commit/3b59e36))
+* **toolset-vault:** allow-unchanged -> add-unchanged ([b1dd624](https://github.com/valaatech/vault/commit/b1dd624))
+
+
+
+
+
 # [0.34.0-prerelease.7](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.6...v0.34.0-prerelease.7) (2019-02-21)
 
 

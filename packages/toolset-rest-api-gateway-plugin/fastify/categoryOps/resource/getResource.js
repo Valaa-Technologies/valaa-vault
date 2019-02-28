@@ -18,13 +18,13 @@ export function createHandler (server: RestAPIServer, route: Route) {
       "\n\trequest.query:", request.query,
     ]);
     const vResource = server._engine.tryVrapper([resourceId]);
-    let result = (vResource && vResource.get(kuery, { verbosity: 0 }))
-        || hardcodedResources[resourceId];
-    if (result === undefined) {
+    if (!vResource) {
       reply.code(404);
-      reply.send(`Resource not found: <${resourceId}>`);
+      reply.send(`No such ${route.config.resourceTypeName}: ${resourceId}`);
       return;
     }
+    let result = vResource.get(kuery, { verbosity: 0 })
+        || hardcodedResources[resourceId];
     const { fields } = request.query;
     if (fields) {
       result = server._pickResultsFields([result], fields)[0];

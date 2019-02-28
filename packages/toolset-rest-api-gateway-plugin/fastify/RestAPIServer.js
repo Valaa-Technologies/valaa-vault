@@ -5,6 +5,7 @@ import path from "path";
 import { asyncConnectToPartitionsIfMissingAndRetry } from "~/raem/tools/denormalized/partitions";
 import { dumpify, dumpObject, LogEventGenerator, outputError } from "~/tools";
 import VALEK from "~/engine/VALEK";
+import Vrapper from "~/engine/Vrapper";
 
 import * as categoryOps from "./categoryOps";
 
@@ -238,5 +239,24 @@ export default class RestAPIServer extends LogEventGenerator {
       }
       return ret;
     });
+  }
+
+  _patchResource (vResource, request, transaction /* , route */) {
+    _patcher(vResource, request.body);
+    function _patcher (vCurrent, patch) {
+      Object.entries(patch).forEach(([propertyName, value]) => {
+        if (value === undefined) return;
+        if (!value || (typeof value !== "object")) {
+          vCurrent.alterProperty(propertyName, VALEK.fromValue(value), { transaction });
+        } else {
+          const currentValue = vCurrent.propertyValue(propertyName, { transaction });
+          if (!(currentValue instanceof Vrapper)) {
+            throw new Error(`Can't patch a complex object into non-resource-valued property '${
+                propertyName}'`);
+          }
+          _patcher(currentValue, value);
+        }
+      });
+    }
   }
 }

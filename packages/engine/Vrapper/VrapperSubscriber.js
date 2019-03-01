@@ -481,6 +481,7 @@ const customLiveExpressionOpHandlers = {
   "§capture": undefined, // Note: captured function _contents_ are not live-hooked against
   "§apply": liveApply,
   "§call": liveCall,
+  "§invoke": liveInvoke,
   "§new": throwMutationLiveKueryError,
   "§regexp": undefined,
   "§void": undefined,
@@ -667,6 +668,24 @@ function liveCall (subscriber: VrapperSubscriber, head: any, kueryVAKON: Array<a
   // TODO(iridian): Fix this kludge which enables namespace proxies
   eThis = eThis[UnpackedHostValue] || eThis;
   return subscriber._processKuery(eThis, eCallee._valkCreateKuery(...eArgs), scope, evaluateKuery);
+}
+
+function liveInvoke (subscriber: VrapperSubscriber, head: any, kueryVAKON: Array<any>, scope: any,
+    evaluateKuery: boolean) {
+  let eCallee = subscriber._processLiteral(head, ["§..", kueryVAKON[1]], scope, true);
+  if (typeof eCallee !== "function") {
+    eCallee = subscriber._emitter.engine.discourse
+        .advance(eCallee, ["§callableof", null, "liveCall"], scope);
+    invariantify(typeof eCallee === "function",
+        `trying to call a non-function value of type '${typeof eCallee}'`,
+        `\n\tfunction wannabe value:`, eCallee);
+  }
+  const eArgs = [];
+  for (let i = 2; i < kueryVAKON.length; ++i) {
+    eArgs.push(subscriber._processLiteral(head, kueryVAKON[i], scope, true));
+  }
+  if (!eCallee._valkCreateKuery) return performDefaultGet;
+  return subscriber._processKuery(head, eCallee._valkCreateKuery(...eArgs), scope, evaluateKuery);
 }
 
 function liveTypeof (subscriber: VrapperSubscriber, head: any, kueryVAKON: Array<any>) {

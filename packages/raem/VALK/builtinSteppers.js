@@ -53,7 +53,7 @@ export default Object.freeze({
   },
   "§$": function scopeLookup (valker: Valker, head: any, scope: ?Object,
       [, lookupName]: BuiltinStep) {
-    if (typeof lookupName === "undefined") return scope;
+    if (lookupName === undefined) return scope;
     if (typeof scope !== "object" || !scope) {
       throw Error(`Cannot read scope variable '${lookupName}' from non-object scope: '${
           String(scope)}'`);
@@ -193,7 +193,7 @@ export default Object.freeze({
       applyStep: BuiltinStep) {
     const eArgs = (applyStep[3] === undefined) ? []
         : tryUnpackLiteral(valker, head, applyStep[3], scope);
-    return _callOrApply(valker, head, scope, applyStep, "§apply", eArgs);
+    return callOrApply(valker, head, scope, applyStep, "§apply", undefined, undefined, eArgs);
   },
   "§call": function call (valker: Valker, head: any, scope: ?Object,
       callStep: BuiltinStep) {
@@ -202,7 +202,7 @@ export default Object.freeze({
       const arg = callStep[index + 3];
       eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
     }
-    return _callOrApply(valker, head, scope, callStep, "$call", eArgs);
+    return callOrApply(valker, head, scope, callStep, "$call", undefined, undefined, eArgs);
   },
   "§callableof": function callableOf (valker: Valker, head: any, scope: ?Object,
       callableStep: BuiltinStep) {
@@ -456,16 +456,16 @@ export function debugWrapBuiltinSteppers (steppers: { [string]: Function }) {
   for (const [stepName, stepper: Function] of Object.entries(steppers)) {
     ret[stepName] = function ( // eslint-disable-line
         valker: Valker, head: any, scope: ?Object, step: any, ...rest) {
-      valker.log("  ".repeat(valker._indent++),
-          `{ '${stepName}'/${stepper.name}, args:`, ...step.slice(1),
-          ", head:", ...dumpObject(head), ", scope:", dumpScope(scope));
+      valker.info(`{ '${stepName}'/${stepper.name}, args:`, ...valker._dumpObject(step.slice(1), 1),
+          ", head:", ...valker._dumpObject(head), ", scope:", dumpScope(scope));
+      ++valker._indent;
       let nextHead;
       try {
         nextHead = stepper(valker, head, scope, step, ...rest);
         return nextHead;
       } finally {
-        valker.log("  ".repeat(--valker._indent),
-            `} '${stepName}'/${stepper.name} ->`, ...dumpObject(nextHead),
+        --valker._indent;
+        valker.info(`} '${stepName}'/${stepper.name} ->`, ...valker._dumpObject(nextHead),
             ", scope:", dumpScope(scope));
       }
     };
@@ -884,13 +884,15 @@ function _runCapture (valker, thisArgument, vakon, callScope, capturingValker: V
   );
 }
 
-function _callOrApply (valker: Valker, head: any, scope: ?Object, step: BuiltinStep,
-    opName: string, eArgs: any) {
-  let eCallee;
-  let eThis;
+export function callOrApply (valker: Valker, head: any, scope: ?Object, step: BuiltinStep,
+    opName: string, eCallee_: any, eThis_: any, eArgs: any) {
+  let eCallee = eCallee_;
+  let eThis = eThis_;
   let kueryFunction;
   try {
-    eCallee = tryLiteral(valker, head, step[1], scope);
+    if (eCallee === undefined) {
+      eCallee = tryLiteral(valker, head, step[1], scope);
+    }
     if (typeof eCallee !== "function") {
       eCallee = valker._builtinSteppers["§callableof"](
           valker, eCallee, scope, ["§callableof", null, opName]);
@@ -899,18 +901,21 @@ function _callOrApply (valker: Valker, head: any, scope: ?Object, step: BuiltinS
           `\n\tfunction wannabe value:`, eCallee);
     }
     if (eCallee._valkCreateKuery) {
-      eThis = (typeof step[2] === "undefined")
-          ? scope : tryLiteral(valker, head, step[2], scope);
-      // TODO(iridian): Fix this kludge which enables namespace proxies
-      eThis = (eThis[UnpackedHostValue] && tryHostRef(eThis)) || eThis;
+      if (eThis === undefined) {
+        eThis = (step[2] === undefined) ? scope : tryLiteral(valker, head, step[2], scope);
+        // TODO(iridian): Fix this kludge which enables namespace proxies
+        eThis = (eThis[UnpackedHostValue] && tryHostRef(eThis)) || eThis;
+      }
       kueryFunction = eCallee._valkCreateKuery(...eArgs);
       return valker.advance(eThis, kueryFunction, scope);
     }
-    eThis = (typeof step[2] === "undefined")
-        ? scope : tryUnpackLiteral(valker, head, step[2], scope);
-    eThis = (eThis[UnpackedHostValue] && tryUnpackedHostValue(eThis)) || eThis;
+    if (eThis === undefined) {
+      eThis = (step[2] === undefined)
+          ? scope : tryUnpackLiteral(valker, head, step[2], scope);
+      eThis = (eThis[UnpackedHostValue] && tryUnpackedHostValue(eThis)) || eThis;
+    }
     if (eCallee._valkCaller) {
-      if (eThis === null || typeof eThis === "undefined") {
+      if (eThis == null) {
         eThis = { __callerValker__: valker, __callerScope__: scope };
       } else if ((typeof eThis === "object") || (typeof eThis === "function")) {
         eThis = Object.create(eThis);

@@ -2,7 +2,7 @@
 
 import { dumpKuery, dumpObject, Valker } from "~/raem/VALK";
 import raemBuiltinSteppers, {
-  tryLiteral, tryFullLiteral, tryUnpackLiteral, isHostRef, resolveTypeof,
+  tryLiteral, tryFullLiteral, tryUnpackLiteral, isHostRef, resolveTypeof, callOrApply
 } from "~/raem/VALK/builtinSteppers";
 import type { BuiltinStep } from "~/raem/VALK/builtinSteppers"; // eslint-disable-line no-duplicate-imports
 
@@ -27,10 +27,12 @@ export default Object.freeze({
   },
   "§$$": function _identifierValue (valker: Valker, head: any, scope: ?Object,
       getIdentifierOp: any): any {
-    return _getIdentifierOrPropertyValue(valker, head, scope, getIdentifierOp, false);
+    return _getIdentifierOrPropertyValue(
+        valker, head, scope, getIdentifierOp[1], getIdentifierOp[2], false);
   },
   "§..": function _propertyValue (valker: Valker, head: any, scope: ?Object, getPropertyOp: any) {
-    return _getIdentifierOrPropertyValue(valker, head, scope, getPropertyOp, true);
+    return _getIdentifierOrPropertyValue(
+        valker, head, scope, getPropertyOp[1], getPropertyOp[2], true);
   },
   "§$$<-": function _alterIdentifier (valker: Valker, head: any, scope: ?Object,
       alterIdentifierOp: any) {
@@ -47,6 +49,20 @@ export default Object.freeze({
   "§delete..": function _deleteProperty (valker: Valker, head: any, scope: ?Object,
       deletePropertyOp: any) {
     return _deleteIdentifierOrProperty(valker, head, scope, deletePropertyOp, true);
+  },
+  "§invoke": function _invoke (valker: Valker, head: any, scope: ?Object,
+      invokeStep: BuiltinStep) {
+    const eArgs = invokeStep.length <= 2 ? [] : new Array(invokeStep.length - 2);
+    for (let index = 0; index + 2 < invokeStep.length; ++index) {
+      const arg = invokeStep[index + 2];
+      eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
+    }
+    const eCallee = _getIdentifierOrPropertyValue(
+        valker, head, scope, invokeStep[1], undefined, true);
+    if (eCallee === undefined) {
+      throw new Error(`Could not find callee '${invokeStep[1]}' from head`);
+    }
+    return callOrApply(valker, head, scope, invokeStep, "§invoke", eCallee, head, eArgs);
   },
   "§new": function _new (valker: Valker, head: any, scope: ?Object,
       newOp: any) {
@@ -85,7 +101,7 @@ export default Object.freeze({
     const packedObject = typeof object !== "object" ? object
     // typeof must not fail on a missing global identifier, even if plain identifier access fails.
         : (Array.isArray(object) && (object[0] === "§$$"))
-            ? _getIdentifierOrPropertyValue(valker, head, scope, object, false, true)
+            ? _getIdentifierOrPropertyValue(valker, head, scope, object[1], object[2], false, true)
         : tryLiteral(valker, head, object, scope);
     return resolveTypeof(valker, head, scope, typeofStep, packedObject);
   },
@@ -117,12 +133,12 @@ export const BuiltinTypePrototype = { [ValaaPrimitiveTag]: true };
 const _propertyValueMethodStep = ["§method", "propertyValue"];
 
 function _getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Object,
-      [, propertyName, container]: any, isGetProperty: ?boolean,
+      propertyName: string, container: any, isGetProperty: ?boolean,
       allowUndefinedIdentifier: ?boolean): any {
   let eContainer: Object;
   let ePropertyName: string | Symbol;
   try {
-    eContainer = (typeof container === "undefined")
+    eContainer = (container === undefined)
         ? (isGetProperty ? head : scope)
         : tryFullLiteral(valker, head, container, scope);
     ePropertyName = (typeof propertyName !== "object") ? propertyName
@@ -136,7 +152,7 @@ function _getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Objec
     }
     const property = eContainer[ePropertyName];
     if (isGetProperty) return valker.tryPack(property);
-    if ((typeof property === "undefined") && !allowUndefinedIdentifier
+    if ((property === undefined) && !allowUndefinedIdentifier
         && !(ePropertyName in eContainer)) {
       throw new Error(`Cannot find identifier '${ePropertyName}' in scope`);
     }

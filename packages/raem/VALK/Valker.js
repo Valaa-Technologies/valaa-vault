@@ -22,7 +22,8 @@ import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
 import type Logger from "~/tools/Logger";
-import { dumpify, isSymbol, wrapError } from "~/tools";
+import { dumpify, isSymbol } from "~/tools";
+import { debugObjectNest, wrapError } from "~/tools/wrapError";
 
 export type Packer = (unpackedValue: any, valker: Valker) => any;
 export type Unpacker = (packedValue: any, valker: Valker) => any;
@@ -51,6 +52,38 @@ export type VALKOptions = {
   builtinSteppers?: Object,
   coupledField?: string,
 };
+
+// VALK Tilde expansion notation maintains asymmetric compatibility
+// with JSON pointers ( https://tools.ietf.org/html/rfc6901 ):
+// 1. valid JSON pointers are treated unchanged literals when evaluated
+// as VAKON, even if they appear as the first entry of an array. This
+// allows for JSON pointer manipulation and value passing without
+// additional escaping.
+// 2. valid tilde-notation VAKON kueries are always invalid JSON
+// pointer values. This prevents accidental misuse: the leading VAKON
+// operation almost invariably has a semantic meaning that conflicts
+// with JSON pointer semantics.
+export function isTildeStepName (stepName: ?string) {
+  return (typeof stepName === "string") && (stepName[0] === "~")
+      && (stepName[1] !== "0") && (stepName[1] !== "1");
+}
+
+export function expandTildeVAKON (tildeStepName, vakon) {
+  const solidusSplit = tildeStepName.split("/");
+  const expansion = (solidusSplit.length === 1) ? _tildeColonExpand(tildeStepName)
+      : ["§->",
+        ...solidusSplit.map(s => (!isTildeStepName(s) ? ["§..", s] : _tildeColonExpand(s)))
+      ];
+  if (vakon && (vakon.length > 1)) expansion.push(...vakon.slice(1));
+  return expansion;
+  function _tildeColonExpand (substep) {
+    return substep.split(":")
+        .map((s, index) => (!index ? `§${s.slice(1)}`
+            : isTildeStepName(s) ? [`§${s.slice(1)}`]
+            : s));
+  }
+}
+
 
 /**
  * FIXME(iridian): this doc is a bit stale.
@@ -146,7 +179,10 @@ export default class Valker extends Resolver {
   run (head: any, kuery: any, { scope, state, verbosity, pure, sourceInfo }: VALKOptions = {}) {
     const valker = Object.create(this);
     if (pure !== undefined) valker.pure = pure;
-    if (verbosity !== undefined) valker._indent = verbosity - 2;
+    if (verbosity !== undefined) {
+      valker._indent = verbosity >= 2 ? 0 : -2;
+      valker._verbosity = verbosity;
+    }
     if (state !== undefined) valker.setState(state);
     if (sourceInfo !== undefined) valker._sourceInfo = sourceInfo;
 
@@ -160,34 +196,33 @@ export default class Valker extends Resolver {
       }
 
       let ret;
-      if (valker._indent < -1) {
+      if (!(valker._verbosity > 0)) {
         ret = valker.tryUnpack(valker.advance(packedHead, kueryVAKON, scope));
       } else {
         if (packedHead === undefined) throw new Error("Head missing for kuery");
-        const indent = valker._indent < 0 ? 0 : valker._indent;
-        if (valker._indent >= 0) {
+        if (valker._verbosity >= 2) {
           valker._builtinSteppers = debugWrapBuiltinSteppers(valker._builtinSteppers);
-          valker.log("  ".repeat(indent), `${this.debugId()}.run(verbosity: ${verbosity}), using`,
-                  !state ? "intrinsic state:" : "explicit options.state:",
-              "\n", "  ".repeat(indent), "      head:", ...dumpObject(packedHead),
-              "\n", "  ".repeat(indent), "      kuery:", ...dumpKuery(kueryVAKON),
-              "\n", "  ".repeat(indent), "      scope:", dumpScope(scope));
+          valker.info(`${valker.debugId()}\n  .run(verbosity: ${verbosity}), using`,
+                  !state ? "intrinsic 'state':" : "explicit 'options.state':",
+              "\n      head:", ...valker._dumpObject(packedHead),
+              "\n      kuery:", ...dumpKuery(kueryVAKON),
+              "\n      scope:", dumpScope(scope));
         }
 
         const packedResult = valker.advance(packedHead, kueryVAKON, scope);
         ret = valker.tryUnpack(packedResult);
 
-        valker.log("  ".repeat(indent), `${this.debugId()}.run(verbosity: ${
-                verbosity}) result, when using`,
+        valker.info(`${valker.debugId()}.run(verbosity: ${verbosity}) result, when using`,
             !state ? "intrinsic state:" : "explicit options.state:",
-            "\n", "  ".repeat(indent), "      head:", ...dumpObject(packedHead),
-            "\n", "  ".repeat(indent), "      kuery:", ...dumpKuery(kueryVAKON, valker._indent),
-            "\n", "  ".repeat(indent), "      final scope:", dumpScope(scope),
-            "\n", "  ".repeat(indent), "      result (packed):", dumpify(packedResult),
-            "\n", "  ".repeat(indent), "      result:", ...dumpObject(valker.tryUnpack(packedResult,
-                ({ id, typeName, value, objectGhostPath }) => ((value !== undefined)
-                    ? value
-                    : `{${id}:${typeName}/${dumpify(objectGhostPath)}}`))));
+            "\n      head:", ...valker._dumpObject(packedHead),
+            "\n      kuery:", ...dumpKuery(kueryVAKON, valker._indent),
+            "\n      final scope:", dumpScope(scope),
+            "\n      result (packed):", dumpify(packedResult),
+            "\n      result:", ...valker._dumpObject(
+                valker.tryUnpack(packedResult, ({ id, typeName, value, objectGhostPath }) =>
+                    ((value !== undefined)
+                        ? value
+                        : `{${id}:${typeName}/${dumpify(objectGhostPath)}}`))));
       }
       return ret;
     } catch (error) {
@@ -199,6 +234,21 @@ export default class Valker extends Resolver {
           "\n\tbase-state === self-state", this.state === valker.state,
           "\n\targ-state type:", typeof state);
     }
+  }
+
+  _dumpObject (value, nestingAdjustment = 0) {
+    const ret = [];
+    if ((value != null) && (typeof value.debugId === "function")) ret.push(value.debugId());
+    ret.push(debugObjectNest(value, this._verbosity - 2 + nestingAdjustment));
+    return ret;
+  }
+
+  info (...entries) {
+    const indentation = "  ".repeat((this._indent > 0) ? this._indent : 0);
+    return Resolver.prototype.info.call(this, indentation, ...entries.map(
+        entry => ((typeof entry !== "string")
+            ? entry
+            : entry.replace(/\n/g, `\n${indentation}`))));
   }
 
 
@@ -260,6 +310,9 @@ export default class Valker extends Resolver {
                 return builtinStepper(this, head, scope, step, nonFinalStep);
               }
               if (stepName[0] === "§") throw new Error(`Unrecognized builtin step ${stepName}`);
+              if (isTildeStepName(stepName)) {
+                return this.advance(head, expandTildeVAKON(stepName, step), scope, nonFinalStep);
+              }
             }
             if (step instanceof Kuery) {
               throw new Error("Kuery objects must have been expanded as VAKON before valking");
@@ -285,7 +338,7 @@ export default class Valker extends Resolver {
       this.addVALKRuntimeErrorStackFrame(error, step);
       if (this._indent < 0) throw error;
       throw wrapError(error, `During ${this.debugId()}\n .advance(${type}), with:`,
-          "\n\thead:", ...dumpObject(head),
+          "\n\thead:", ...this._dumpObject(head),
           "\n\tkuery:", ...dumpKuery(step),
           "\n\tscope:", dumpScope(scope));
     }
@@ -305,8 +358,9 @@ export default class Valker extends Resolver {
     let nextHead;
     let fieldInfo;
     if (this._indent >= 0) {
-      this.log("  ".repeat(this._indent++), `{ field.'${fieldName}',
-          head:`, ...dumpObject(object), ", scope:", dumpScope(scope));
+      this.info(`{ field.'${fieldName}', head:`, ...this._dumpObject(object),
+          ", scope:", dumpScope(scope));
+      ++this._indent;
     }
     try {
       // Test for improper head values
@@ -338,17 +392,18 @@ export default class Valker extends Resolver {
           "\n\tfieldInfo:", ...dumpObject(fieldInfo));
     } finally {
       if (this._indent >= 0) {
-        this.log("  ".repeat(--this._indent), `} field '${fieldName}' ->`,
-            ...dumpObject(nextHead),
-            ", fieldInfo:", ...dumpObject(fieldInfo), "in scope:", dumpScope(scope));
+        --this._indent;
+        this.info(`} field '${fieldName}' ->`, ...this._dumpObject(nextHead),
+            ", fieldInfo:", ...this._dumpObject(fieldInfo), "in scope:", dumpScope(scope));
       }
     }
   }
 
   index (container: Object, index: number, scope: ?Object) {
     if (this._indent >= 0) {
-      this.log("  ".repeat(this._indent++), `{ index[${index}], head:`, ...dumpObject(container),
+      this.info(`{ index[${index}], head:`, ...this._dumpObject(container),
           ", scope:", dumpScope(scope));
+      this._indent++;
     }
     let nextHead;
     try {
@@ -380,10 +435,11 @@ export default class Valker extends Resolver {
       return nextHead;
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .index(${index}), with:",
-          "\n\tindex head:`, ...dumpObject(container));
+          "\n\tindex head:`, ...this._dumpObject(container));
     } finally {
       if (this._indent >= 0) {
-        this.log("  ".repeat(--this._indent), `} index ${index} ->`, ...dumpObject(nextHead),
+        --this._indent;
+        this.info(`} index ${index} ->`, ...this._dumpObject(nextHead),
             ", scope:", dumpScope(scope));
       }
     }
@@ -391,8 +447,9 @@ export default class Valker extends Resolver {
 
   select (head: any, selectStep: Object, scope: ?Object) {
     if (this._indent >= 0) {
-      this.log("  ".repeat(this._indent++), `selection ${dumpKuery(selectStep)[1]}`,
-          ", head:", ...dumpObject(head), ", scope:", dumpScope(scope));
+      this.info(`selection ${dumpKuery(selectStep)[1]}, head:`, ...this._dumpObject(head),
+          ", scope:", dumpScope(scope));
+      ++this._indent;
     }
     const nextHead = {};
     try {
@@ -423,8 +480,8 @@ export default class Valker extends Resolver {
           "scope:", dumpScope(scope));
     } finally {
       if (this._indent >= 0) {
-        this.log("  ".repeat(--this._indent), "} select ->", ...dumpObject(nextHead),
-            ", scope:", dumpScope(scope));
+        --this._indent;
+        this.info("} select ->", ...this._dumpObject(nextHead), ", scope:", dumpScope(scope));
       }
     }
   }
@@ -440,8 +497,8 @@ export default class Valker extends Resolver {
       throw new MissingPartitionConnectionsError(`Missing active partition connections: '${
           partitionURI.toString()}'`, [partitionURI]);
     }
-    if (this._indent >= 0) {
-      this.log("  ".repeat(this._indent), "getObjectTypeIntro", typeName, ...dumpObject(ret));
+    if (this._verbosity >= 3) {
+      this.info("getObjectTypeIntro", typeName, ...this._dumpObject(ret));
     }
     return ret;
   }
@@ -465,27 +522,28 @@ export default class Valker extends Resolver {
 
   tryUnpack (value: any) {
     try {
+      if (this._verbosity >= 3) {
+        this.info("  unpacking:", ...this._dumpObject(value));
+      }
       if ((typeof value !== "object") || (value === null) || Array.isArray(value)) {
-        if (this._indent >= 0) {
-          this.log("  ".repeat(this._indent), "not unpacking literal/native container:",
-              ...dumpObject(value));
+        if (this._verbosity >= 3) {
+          this.info("    not unpacking literal/native container:", ...this._dumpObject(value));
         }
         return value;
       }
       let ret;
       const singularTransient = this._trySingularTransientFromObject(value, false);
       if (singularTransient !== undefined) {
-        if (this._indent >= 0) {
-          this.log("  ".repeat(this._indent), "unpacking singular:", ...dumpObject(value),
-              "\n\t", "  ".repeat(this._indent), "transient:", ...dumpObject(singularTransient),
-              ...(value._fieldInfo ? [
-                "\n\t", "  ".repeat(this._indent), "fieldInfo:", ...dumpObject(value._fieldInfo),
-              ] : []));
+        if (this._verbosity >= 3) {
+          this.info("    unpacking singular:", ...this._dumpObject(value),
+              "\n\ttransient:", ...this._dumpObject(singularTransient),
+              ...(!value._fieldInfo ? []
+                  : ["\n\tfieldInfo:", ...this._dumpObject(value._fieldInfo)]));
         }
         ret = this.unpack(singularTransient);
       } else if (value._sequence !== undefined) {
-        if (this._indent >= 0) {
-          this.log("  ".repeat(this._indent), "unpacking sequence:", ...dumpObject(value));
+        if (this._verbosity >= 3) {
+          this.info("    unpacking sequence:", ...this._dumpObject(value));
         }
         if (!value._sequence) {
           ret = value._sequence; // undefined or null
@@ -501,21 +559,19 @@ export default class Valker extends Resolver {
         }
       } else if (Iterable.isIterable(value)) {
         // non-native packed sequence: recursively pack its entries.
-        if (this._indent >= 0) {
-          this.log("  ".repeat(this._indent), "unpacking non-native sequence recursively:",
-              ...dumpObject(value));
+        if (this._verbosity >= 3) {
+          this.info("    unpacking non-native sequence recursively:", ...this._dumpObject(value));
         }
         ret = [];
         value.forEach(entry => { ret.push(this.tryUnpack(entry)); });
       } else {
-        if (this._indent >= 0) {
-          this.log("  ".repeat(this._indent), "not unpacking native container:",
-              ...dumpObject(value));
+        if (this._verbosity >= 3) {
+          this.info("    not unpacking native container:", ...this._dumpObject(value));
         }
         ret = value;
       }
-      if (this._indent >= 0) {
-        this.log("  ".repeat(this._indent), "\t->", ...dumpObject(ret));
+      if (this._verbosity >= 2) {
+        this.info("  unpack ->", ...this._dumpObject(ret));
       }
       return ret;
     } catch (error) {
@@ -551,22 +607,19 @@ export default class Valker extends Resolver {
           ret = this.tryGoToTransient(elevatedId, object._type, require, false);
         }
       }
-      if (this._indent >= 1) {
-        this.log("  ".repeat(this._indent + 1),
-                require ? "requireTransientIfSingular:" : "trySingularTransient:",
-            "\n", "  ".repeat(this._indent + 1), "value:", ...dumpObject(object),
-            ...(elevatedId ? [
-              "\n", "  ".repeat(this._indent + 1), "elevatedId:", ...dumpObject(elevatedId)
-            ] : []),
-            "\n", "  ".repeat(this._indent + 1), "ret:", ...dumpObject(ret),
-            "\n", "  ".repeat(this._indent + 1), "ret[PrototypeOfImmaterialTag]:",
-                ...dumpObject(ret && ret[PrototypeOfImmaterialTag]));
+      if (this._verbosity >= 3) {
+        this.info(require ? "  requireTransientIfSingular:" : "  trySingularTransient:",
+            "\n    value:", ...this._dumpObject(object),
+            ...(elevatedId ? ["\n    elevatedId:", ...this._dumpObject(elevatedId)] : []),
+            "\n    ret:", ...this._dumpObject(ret),
+            "\n    ret[PrototypeOfImmaterialTag]:",
+                ...this._dumpObject(ret && ret[PrototypeOfImmaterialTag]));
       }
       return ret;
     } catch (error) {
       throw this.wrapErrorEvent(error,
               require ? "requireTransientIfSingular" : "trySingularTransient",
-          "\n\tobject:", ...dumpObject(object),
+          "\n\tobject:", ...this._dumpObject(object),
           "\n\tstate:", this.getState(),
       );
     }

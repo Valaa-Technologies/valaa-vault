@@ -5,6 +5,7 @@ import { created, fieldsSet } from "~/raem/events";
 import { vRef } from "~/raem/ValaaReference";
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 import RAEMTestAPI from "~/raem/test/RAEMTestAPI";
+import { expandTildeVAKON } from "~/raem/VALK/Valker";
 
 function run (head, kuery, options = {}, ...rest) {
   options.schema = RAEMTestAPI.schema;
@@ -41,6 +42,14 @@ describe("VALK basic functionality tests", () => {
   it("Resolves selection with head to null VAKON", () => {
     expect(VALK.object({ value: VALK.head() }).toVAKON())
         .toEqual({ value: ["§->", null] });
+  });
+
+  if("Expands tilde notation", () => {
+    expect(expandTildeVAKON("~$/scriptRoot", ["~$/scriptRoot", ["~random"]]))
+        .toEqual(["§->", ["§$"], ["§..", "scriptRoot"], ["~random"]]);
+    expect(expandTildeVAKON("~invoke:create",
+            ["~invoke:create", "event", ["~$:source"], ["~$:body/$V/target/name"]]))
+        .toEqual(["§invoke", "create", "event", ["~$:source"], ["~$:body/$V/target/name"]]);
   });
 });
 

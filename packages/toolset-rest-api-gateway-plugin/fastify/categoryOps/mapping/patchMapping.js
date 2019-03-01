@@ -22,29 +22,34 @@ export function createHandler (server: RestAPIServer, route: Route) {
   kuery.splice(-1);
 
   return (request, reply) => {
-    const sourceId = request.params[route.config.sourceIdRouteParam];
-    const targetId = request.params[route.config.targetIdRouteParam];
+    const scope = {};
+    Object.entries(route.config.routeParams)
+        .map(([target, paramName]) => (scope[target] = request.params[paramName]));
     server.logEvent(1, () => [
-      `mapping PATCH ${route.url}:`, sourceId, route.config.mappingName, targetId,
+      `mapping PATCH ${route.url}:`, scope.sourceId, route.config.mappingName, scope.targetId,
       "\n\trequest.query:", request.query,
       "\n\trequest.body:", request.body,
-      "\n\tkuery:", dumpify(kuery, { indent: 2 }),
-      "\n\tmidkuery:", dumpify(midkuery, { indent: 2 }),
     ]);
-    const vSource = server._engine.tryVrapper([sourceId]);
+    if (!route.config.createMapping) {
+      reply.code(405);
+      reply.send(`Route not configured for creating a mapping`);
+      return;
+    }
+
+    const vSource = server._engine.tryVrapper([scope.sourceId]);
     if (!vSource) {
       reply.code(404);
-      reply.send(`No such ${route.config.sourceTypeName} source: ${sourceId}`);
+      reply.send(`No such ${route.config.sourceTypeName} source: ${scope.sourceId}`);
       return;
     }
     let result = vSource.get(kuery, { verbosity: 0 });
-    result = result.filter(entry => (entry.get(["§->", "target", "rawId"]) === targetId))[0];
+    result = result.filter(entry => (entry.get(["§->", "target", "rawId"]) === scope.targetId))[0];
     let vTarget;
     if (result === undefined) {
-      vTarget = server._engine.tryVrapper([targetId]);
+      vTarget = server._engine.tryVrapper([scope.targetId]);
       if (!vTarget) {
         reply.code(404);
-        reply.send(`No such ${route.config.targetTypeName} target: ${targetId}`);
+        reply.send(`No such ${route.config.targetTypeName} target: ${scope.targetId}`);
         return;
       }
     }

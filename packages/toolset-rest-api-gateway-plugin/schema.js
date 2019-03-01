@@ -273,7 +273,7 @@ export function resourceDELETERoute (valos, Type,
 }
 
 export function relationsGETRoute (valos, SourceType, RelationType,
-    { url, querystring, sourceIdRouteParam }) {
+    { url, querystring, routeParams }) {
   try {
     const { mappingName: relationName, TargetType } = _getMappingParams(RelationType);
     // const BaseRelationType = getBaseRelationTypeOf(RelationType);
@@ -295,7 +295,7 @@ export function relationsGETRoute (valos, SourceType, RelationType,
           200: trySharedSchemaName(RelationType) || _convertTypeToSchema(RelationType),
         },
       },
-      config: { valos, sourceTypeName, relationName, targetTypeName, sourceIdRouteParam },
+      config: { valos, sourceTypeName, relationName, targetTypeName, routeParams },
     };
   } catch (error) {
     throw wrapError(error, new Error(`relationsGETRoute(<${url}>)`),
@@ -306,7 +306,7 @@ export function relationsGETRoute (valos, SourceType, RelationType,
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\tquerystring:", dumpify(querystring),
-        "\n\tsourceIdRouteParam:", sourceIdRouteParam,
+        "\n\trouteParams:", routeParams,
     );
   }
 }
@@ -319,7 +319,7 @@ mapping is thus implicitly inferred from the route.
 */
 
 export function mappingPOSTRoute (valos, SourceType, RelationType,
-    { url, querystring, sourceIdRouteParam }) {
+    { url, querystring, routeParams, scope, createResourceAndMapping }) {
   try {
     const { mappingName, TargetType } = _getMappingParams(RelationType);
     const BodyType = getBaseRelationTypeOf(RelationType);
@@ -346,7 +346,10 @@ export function mappingPOSTRoute (valos, SourceType, RelationType,
           403: { type: "string" },
         },
       },
-      config: { valos, sourceTypeName, mappingName, targetTypeName, sourceIdRouteParam },
+      config: {
+        valos, sourceTypeName, mappingName, targetTypeName, routeParams,
+        scope, createResourceAndMapping, RelationTypeSchema: _convertTypeToSchema(RelationType),
+      },
     };
   } catch (error) {
     throw wrapError(error, new Error(`mappingPOSTRoute(<${url}>)`),
@@ -357,13 +360,13 @@ export function mappingPOSTRoute (valos, SourceType, RelationType,
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\tquerystring:", dumpify(querystring),
-        "\n\tsourceIdRouteParam:", sourceIdRouteParam,
+        "\n\trouteParams:", routeParams,
     );
   }
 }
 
 export function mappingGETRoute (valos, SourceType, RelationType,
-    { url, querystring, sourceIdRouteParam, targetIdRouteParam }) {
+    { url, querystring, routeParams }) {
   try {
     const { mappingName, TargetType } = _getMappingParams(RelationType);
     const BaseRelationType = getBaseRelationTypeOf(RelationType);
@@ -386,7 +389,7 @@ export function mappingGETRoute (valos, SourceType, RelationType,
         },
       },
       config: {
-        valos, sourceTypeName, mappingName, targetTypeName, sourceIdRouteParam, targetIdRouteParam,
+        valos, sourceTypeName, mappingName, targetTypeName, routeParams,
         RelationTypeSchema: _convertTypeToSchema(RelationType),
       },
     };
@@ -399,18 +402,19 @@ export function mappingGETRoute (valos, SourceType, RelationType,
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\tquerystring:", dumpify(querystring),
-        "\n\tsourceIdRouteParam:", sourceIdRouteParam,
-        "\n\ttargetIdRouteParam:", targetIdRouteParam,
+        "\n\trouteParams:", routeParams,
     );
   }
 }
 
 export function mappingPATCHRoute (valos, SourceType, RelationType,
-    { url, querystring, sourceIdRouteParam, targetIdRouteParam, prototypeRef }) {
+    { url, querystring, routeParams, createMapping }) {
   try {
-    if (prototypeRef === undefined) {
-      throw new Error("mappingPATCHRoute.prototypeRef is undefined");
+    /*
+    if (createMapping === undefined) {
+      throw new Error("mappingPATCHRoute.createMapping is undefined");
     }
+    */
     const PatchRelationType = {
       ...RelationType,
       [ArrayJSONSchema]: RelationType[ArrayJSONSchema],
@@ -437,8 +441,9 @@ export function mappingPATCHRoute (valos, SourceType, RelationType,
         },
       },
       config: {
-        valos, sourceTypeName, mappingName, targetTypeName, sourceIdRouteParam, targetIdRouteParam,
-        prototypeRef, RelationTypeSchema: _convertTypeToSchema(PatchRelationType),
+        valos, sourceTypeName, mappingName, targetTypeName, routeParams,
+        createMapping,
+        RelationTypeSchema: _convertTypeToSchema(PatchRelationType),
       },
     };
   } catch (error) {
@@ -450,14 +455,13 @@ export function mappingPATCHRoute (valos, SourceType, RelationType,
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\tquerystring:", dumpify(querystring),
-        "\n\tsourceIdRouteParam:", sourceIdRouteParam,
-        "\n\ttargetIdRouteParam:", targetIdRouteParam,
+        "\n\trouteParams:", routeParams,
     );
   }
 }
 
 export function mappingDELETERoute (valos, SourceType, RelationType,
-    { url, querystring, sourceIdRouteParam, targetIdRouteParam }) {
+    { url, querystring, routeParams }) {
   try {
     const { mappingName, TargetType } = _getMappingParams(RelationType);
     const sourceTypeName = trySharedSchemaName(SourceType) || "<SourceType>";
@@ -477,7 +481,7 @@ export function mappingDELETERoute (valos, SourceType, RelationType,
         },
       },
       config: {
-        valos, sourceTypeName, mappingName, targetTypeName, sourceIdRouteParam, targetIdRouteParam,
+        valos, sourceTypeName, mappingName, targetTypeName, routeParams,
         RelationTypeSchema: _convertTypeToSchema(RelationType),
       },
     };
@@ -490,8 +494,7 @@ export function mappingDELETERoute (valos, SourceType, RelationType,
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\tquerystring:", dumpify(querystring),
-        "\n\tsourceIdRouteParam:", sourceIdRouteParam,
-        "\n\ttargetIdRouteParam:", targetIdRouteParam,
+        "\n\trouteParams:", routeParams,
     );
   }
 }

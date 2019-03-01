@@ -11,25 +11,26 @@ export function createHandler (server: RestAPIServer, route: Route) {
   server._buildKuery(route.config.RelationTypeSchema, kuery);
 
   return (request, reply) => {
-    const sourceId = request.params[route.config.sourceIdRouteParam];
-    const targetId = request.params[route.config.targetIdRouteParam];
+    const scope = {};
+    Object.entries(route.config.routeParams)
+        .map(([target, paramName]) => (scope[target] = request.params[paramName]));
     server.logEvent(1, () => [
-      `mapping GET ${route.url}:`, sourceId, route.config.mappingName, targetId,
+      `mapping GET ${route.url}:`, scope.sourceId, route.config.mappingName, scope.targetId,
       "\n\trequest.query:", request.query,
     ]);
-    const vSource = server._engine.tryVrapper([sourceId]);
+    const vSource = server._engine.tryVrapper([scope.sourceId]);
     if (!vSource) {
       reply.code(404);
-      reply.send(`No such ${route.config.sourceTypeName}: ${sourceId}`);
+      reply.send(`No such ${route.config.sourceTypeName}: ${scope.sourceId}`);
       return;
     }
     let result = vSource.get(kuery, { verbosity: 0 });
     result = result.filter(entry => (entry.$V || {}).target
-        && (entry.$V.target.getRawId() === targetId))[0];
+        && (entry.$V.target.getRawId() === scope.targetId))[0];
     if (result === undefined) {
       reply.code(404);
-      reply.send(`No mapping '${route.config.mappingName}' found between ${sourceId} and ${
-            targetId}`);
+      reply.send(`No mapping '${route.config.mappingName}' found between ${scope.sourceId} and ${
+        scope.targetId}`);
       return;
     }
     const { fields } = request.query;

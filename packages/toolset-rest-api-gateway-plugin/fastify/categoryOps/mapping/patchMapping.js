@@ -1,13 +1,11 @@
 // @flow
 
 import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fastify/RestAPIServer";
-import { dumpify, thenChainEagerly } from "~/tools";
+import { thenChainEagerly } from "~/tools";
 
 export async function preload (server: RestAPIServer, route: Route) {
-  await server.getDiscourse()
-      .acquirePartitionConnection(route.config.prototypeRef[1].partition)
-      .getActiveConnection();
-  route.vPrototype = server.getEngine().getVrapper(route.config.prototypeRef);
+  route.vPreloads = server.preloadVAKONRefResources(route.config.createMapping);
+  await Promise.all(route.vPreloads.map(vPreload => vPreload.activate()));
 }
 
 export function createHandler (server: RestAPIServer, route: Route) {
@@ -57,8 +55,11 @@ export function createHandler (server: RestAPIServer, route: Route) {
     thenChainEagerly(transaction, [
       () => {
         if (result) return result;
-        const source = !midkuery ? vSource : vSource.get(midkuery, { transaction });
-        return route.vPrototype.instantiate({ source, target: vTarget }, { transaction });
+        const vMidway = !midkuery ? vSource : vSource.get(midkuery, { transaction });
+        // Replace with createMapping call proper. Now using old idiom
+        // and explicit instantiate.
+        return route.vPreloads[0]
+            .instantiate({ source: vMidway, target: vTarget }, { transaction });
       },
       vMapping => server._patchResource(vMapping, request, transaction, route),
       () => transaction.releaseTransaction(),

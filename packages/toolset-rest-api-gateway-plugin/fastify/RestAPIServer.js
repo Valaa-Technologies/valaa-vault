@@ -241,11 +241,25 @@ export default class RestAPIServer extends LogEventGenerator {
     });
   }
 
+  preloadVAKONRefResources (kuery, resultResources = []) {
+    if ((kuery == null) || (typeof kuery !== "object")) return resultResources;
+    if (!Array.isArray(kuery)) {
+      Object.values(kuery).map(value => this.preloadVAKONRefResources(value, resultResources));
+    } else if (kuery[0] !== "~ref") {
+      kuery.map(value => this.preloadVAKONRefResources(value, resultResources));
+    } else {
+      const vResource = this.getEngine().getVrapper(kuery[1]);
+      resultResources.push(vResource);
+      vResource.activate();
+    }
+    return resultResources;
+  }
+
   _patchResource (vResource, request, transaction /* , route */) {
     _patcher(vResource, request.body);
     function _patcher (vCurrent, patch) {
       Object.entries(patch).forEach(([propertyName, value]) => {
-        if (value === undefined) return;
+        if (value === undefined || (propertyName === "$V")) return;
         if (!value || (typeof value !== "object")) {
           vCurrent.alterProperty(propertyName, VALEK.fromValue(value), { transaction });
         } else {

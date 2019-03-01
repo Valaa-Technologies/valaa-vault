@@ -6,11 +6,13 @@ import VDOMView from "~/inspire/VDOMView";
  * This class is the view entry point
  */
 export default class PerspireView extends VDOMView {
-  async attach (options : Object) {
+  async attach (options: Object) {
     await super.attach(options);
     try {
       // Renderer
       global.window = options.window; // makes sure that React will use correct window
+      options.window.alert = (...rest) => this.warnEvent("window.alert:", ...rest);
+
       await this._createReactRoot(options.rootId, options.window, options.container, options.name,
           this._vViewFocus, this._lensPropertyName);
       await this._waitForConnectionsToActivate();

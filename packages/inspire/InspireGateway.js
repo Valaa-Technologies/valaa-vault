@@ -31,6 +31,7 @@ import { registerVidgets } from "~/inspire/ui";
 import type { Revelation } from "~/inspire/Revelation";
 import extendValaaSpaceWithInspire from "~/inspire/ValaaSpace";
 
+import getGlobal from "~/gateway-api/getGlobal";
 import { arrayBufferFromBase64 } from "~/tools/base64";
 import { setGlobalLogger } from "~/tools/wrapError";
 
@@ -193,9 +194,10 @@ export default class InspireGateway extends LogEventGenerator {
     return this.rootLensURI;
   }
 
-  createAndConnectViewsToDOM (viewConfigs: {
-    [string]: { name: string, size: Object, container: Object, rootId: string, lensURI: any }
-  }, createView = (options) => new InspireView(options)) {
+  createAndConnectViewsToDOM (viewConfigs: { [string]: {
+    name: string, size: Object, container: Object, rootId: string, lensURI: any,
+    hostGlobal: Object,
+  } }, createView = (options) => new InspireView(options)) {
     this._views = {};
     Object.entries(viewConfigs).forEach(([viewName, viewConfig]) => {
       this.clockEvent(1, `view.${viewName}.create`,
@@ -217,16 +219,18 @@ export default class InspireGateway extends LogEventGenerator {
 
       const rootScope = engine.getRootScope();
       const hostDescriptors = engine.getHostObjectDescriptors();
+      const hostGlobal = viewConfig.hostGlobal || getGlobal();
       extendValaaSpaceWithEngine(rootScope, hostDescriptors, engine.discourse.getSchema());
       if (!viewConfig.defaultAuthorityURI) {
-        extendValaaSpaceWithInspire(rootScope, hostDescriptors);
+        extendValaaSpaceWithInspire(rootScope, hostDescriptors, hostGlobal);
       } else {
         // FIXME(iridian): Implement this.schemes - still missing.
         const defaultAuthorityConfig = this.schemes[viewConfig.defaultAuthorityURI];
         invariantify(defaultAuthorityConfig,
             `defaultAuthorityConfig missing when looking for default authority ${
                   String(viewConfig.defaultAuthorityURI)}`);
-        extendValaaSpaceWithInspire(rootScope, hostDescriptors, defaultAuthorityConfig, engine);
+        extendValaaSpaceWithInspire(rootScope, hostDescriptors, hostGlobal,
+              defaultAuthorityConfig, engine);
       }
       rootScope.Valaa.gateway = this;
       rootScope.Valaa.identity = engine.getIdentityManager();

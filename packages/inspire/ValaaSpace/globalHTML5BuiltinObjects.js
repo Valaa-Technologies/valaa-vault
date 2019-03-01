@@ -1,9 +1,6 @@
 // @ flow
 
-import getGlobal from "~/gateway-api/getGlobal";
-
-export default function () {
-  const global = getGlobal();
+export default function (global) {
   const window = global.window || global;
   return {
     window,

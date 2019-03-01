@@ -5,9 +5,10 @@ import { denoteValaaBuiltinWithSignature } from "~/raem/VALK";
 import globalHTML5BuiltinObjects from "./globalHTML5BuiltinObjects";
 import extendValaaWithInspire from "./Valaa";
 
-export default function extendValaaSpaceWithInspire (scope: Object, hostObjectDescriptors: any,
+export default function extendValaaSpaceWithInspire (scope: Object,
+    hostObjectDescriptors: any, hostGlobal: Object,
     defaultAuthorityConfig?: Object, engine?: Object) {
-  Object.assign(scope, globalHTML5BuiltinObjects());
+  Object.assign(scope, globalHTML5BuiltinObjects(hostGlobal));
   extendValaaWithInspire(scope, hostObjectDescriptors);
 
   let RemoteAuthorityURI = null;

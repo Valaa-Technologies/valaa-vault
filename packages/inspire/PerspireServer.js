@@ -47,30 +47,35 @@ export default class PerspireServer {
 
     this.jsdom = new JSDOM(`<div id="perspire-gateway--main-container"></div>`,
         { pretendToBeVisual: true });
-    const meta = this.jsdom.window.document.createElement("meta");
+    const viewWindow = this.jsdom.window;
+    const meta = viewWindow.document.createElement("meta");
     meta.httpEquiv = "refresh";
     meta.content = "1";
-    this.jsdom.window.document.getElementsByTagName("head")[0].appendChild(meta);
-    this.container = this.jsdom.window.document.querySelector("#perspire-gateway--main-container");
+    viewWindow.document.getElementsByTagName("head")[0].appendChild(meta);
+    this.container = viewWindow.document.querySelector("#perspire-gateway--main-container");
 
     // re-set after jsdom is set
-    global.window = this.jsdom.window;
-    global.document = this.jsdom.window.document;
-    global.navigator = this.jsdom.window.navigator;
-    global.HTMLIFrameElement = this.jsdom.window.HTMLIFrameElement;
-    global.requestAnimationFrame = (callback) => { setTimeout(callback, 0); };
-    global.cancelAnimationFrame = (callback) => { setTimeout(callback, 0); };
+    global.window = viewWindow;
+    global.document = viewWindow.document;
+    global.navigator = viewWindow.navigator;
+    global.HTMLIFrameElement = viewWindow.HTMLIFrameElement;
+
+    global.requestAnimationFrame = viewWindow.requestAnimationFrame =
+        (callback) => { setTimeout(callback, 0); };
+    global.cancelAnimationFrame = viewWindow.cancelAnimationFrame =
+        (callback) => { setTimeout(callback, 0); };
 
     const views = (await this.gateway).createAndConnectViewsToDOM({
       perspireMain: {
         name: "Valaa Local Perspire Main",
         lensURI: this.gateway.getRootLensURI() || this.gateway.getRootPartitionURI(),
-        window: this.jsdom.window,
+        hostGlobal: global,
+        window: viewWindow,
         container: this.container,
         rootId: "perspire-gateway--main-root",
         size: {
-          width: this.jsdom.window.innerWidth,
-          height: this.jsdom.window.innerHeight,
+          width: viewWindow.innerWidth,
+          height: viewWindow.innerHeight,
           scale: 1
         },
       },

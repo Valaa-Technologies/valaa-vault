@@ -51,8 +51,6 @@ export default class RestAPIServer extends LogEventGenerator {
     openapi, swaggerPrefix, schemas, routes, ...pluginOptions
   }]) => {
     const server = this;
-    const wrap = new Error(
-        `createPrefixPlugin(${openapi.info.name}@${openapi.info.version}:"${prefix}")`);
     try {
       const prefixedThis = Object.create(this);
       prefixedThis._prefix = prefix;
@@ -64,48 +62,56 @@ export default class RestAPIServer extends LogEventGenerator {
           .filter(notFalsy => notFalsy);
       // https://github.com/fastify/fastify/blob/master/docs/Server.md
       prefixedThis._fastify.register(async (fastify, opts, next) => {
-        try {
-          if (swaggerPrefix) {
-            fastify.register(FastifySwaggerPlugin, {
-              routePrefix: swaggerPrefix,
-              exposeRoute: true,
-              swagger: openapi,
-            });
-          }
-          schemas.forEach(schema => fastify.addSchema(schema));
-          await Promise.all(routeHandlers.map(routeHandler =>
-              routeHandler.prepare && routeHandler.prepare(fastify)));
-          await Promise.all(routeHandlers.map(routeHandler =>
-              routeHandler.preload && routeHandler.preload()));
-          routeHandlers.forEach(routeHandler =>
-              fastify.route(routeHandler.fastifyRoute));
-          fastify.ready(err => {
-            if (err) throw err;
-            fastify.swagger();
+        if (swaggerPrefix) {
+          fastify.register(FastifySwaggerPlugin, {
+            routePrefix: swaggerPrefix,
+            exposeRoute: true,
+            swagger: openapi,
           });
-        } catch (error) {
-          const wrapped = errorOnCreatePrefixPlugin(error);
-          outputError(wrapped, "Exception caught during plugin register");
-          throw wrapped;
-        } finally {
-          next(); // Always install other plugins
         }
+        prefixedThis.infoEvent(1, () => [`${prefix}: adding ${schemas.length} schemas`]);
+        schemas.forEach(schema => fastify.addSchema(schema));
+        prefixedThis.infoEvent(1, () => [
+          `${prefix}: preparing ${routeHandlers.length} route handlers`,
+        ]);
+        await Promise.all(routeHandlers.map(routeHandler =>
+            routeHandler.prepare && routeHandler.prepare(fastify)));
+        prefixedThis.infoEvent(1, () => [
+          `${prefix}: preloading ${routeHandlers.length} route handlers`,
+        ]);
+        await Promise.all(routeHandlers.map(routeHandler =>
+            routeHandler.preload && routeHandler.preload()));
+        prefixedThis.infoEvent(1, () => [
+          `${prefix}: adding ${routeHandlers.length} fastify routes`,
+        ]);
+        routeHandlers.forEach(routeHandler =>
+            fastify.route(routeHandler.fastifyRoute));
+        prefixedThis.infoEvent(1, () => [
+          `${prefix}: plugin ready`,
+        ]);
+        fastify.ready(err => {
+          if (err) throw err;
+          fastify.swagger();
+        });
+        next(); // Always install other plugins
       }, {
         prefix,
         ...pluginOptions,
       });
       prefixedThis._fastify.after(error => {
         if (error) {
-          outputError(errorOnCreatePrefixPlugin(error), "Exception caught after plugin register");
+          outputError(errorOnCreatePrefixPlugin(error), "Exception caught during plugin register");
+          throw error;
         }
       });
     } catch (error) { throw errorOnCreatePrefixPlugin(error); }
     function errorOnCreatePrefixPlugin (error) {
-      return server.wrapErrorEvent(error, wrap,
+      return server.wrapErrorEvent(error, new Error(
+            `createPrefixPlugin(${openapi.info.name}@${openapi.info.version}:"${prefix}")`),
         "\n\topenapi:", ...dumpObject(openapi),
         "\n\tswaggerPrefix:", swaggerPrefix,
         "\n\tschemas:", ...dumpObject(schemas),
-        "\n\troutes:", ...dumpObject(routes));
+        "\n\troutes:", ...dumpObject({ routes }));
     }
   }
 
@@ -151,30 +157,42 @@ export default class RestAPIServer extends LogEventGenerator {
     }
   }
 
-  prepareScopeRules ({ category, method, route, builtinScopeRules, requiredRules }) {
+  prepareScopeRules ({ category, method, fastifyRoute, builtinRules, requiredRules }) {
+    const wrap = new Error(`prepareScopeRules(${category} ${method} ${fastifyRoute.url})`);
     const ret = {
-      scopeBase: { ...(route.config.scope || {}) },
+      scopeBase: { ...(fastifyRoute.config.scope || {}) },
       scopeRequestRules: [],
       requiredRules,
     };
-    [...Object.entries(builtinScopeRules),
-      ...Object.entries(route.config.rules),
-      ...Object.entries(route.config.routeParams).map(([k, v]) => ([k, ["params", v]])),
-    ].forEach(([ruleName, [sectionName, sectionKey]]) => {
-      if (sectionName === "constant") {
-        ret.scopeBase[ruleName] = sectionKey;
-      } else {
-        ret.scopeRequestRules.push([ruleName, sectionName, sectionKey]);
+    try {
+      [...Object.entries(builtinRules || {}),
+        ...Object.entries(fastifyRoute.config.scopeRules || {}),
+        ...Object.entries(fastifyRoute.config.routeParams || {})
+            .map(([k, v]) => ([k, ["params", v]])),
+      ].forEach(([ruleName, [sectionName, sectionKey]]) => {
+        if (sectionName === "constant") {
+          ret.scopeBase[ruleName] = sectionKey;
+        } else {
+          ret.scopeRequestRules.push([ruleName, sectionName, sectionKey]);
+        }
+      });
+      for (const requiredRuleName of requiredRules) {
+        if ((ret.scopeBase[requiredRuleName] === undefined)
+            && !ret.scopeRequestRules.find(([ruleName]) => (ruleName === requiredRuleName))) {
+          throw new Error(`Required ${category} ${method} rule '${requiredRuleName}' is undefined`);
+        }
       }
-    });
-    for (const requiredFieldName of requiredRules) {
-      if ((ret.scopeBase[requiredFieldName] === undefined)
-          && !ret.scopeRules.find(([scopeFieldName]) => (scopeFieldName === requiredFieldName))) {
-        throw new Error(`Required ${category} ${method} rule '${requiredFieldName}' is undefined`);
-      }
+      _recurseFreeze(ret.scopeBase);
+      return ret;
+    } catch (error) {
+      throw this.wrapErrorEvent(error, wrap,
+          "\n\tfastifyRoute:", ...dumpObject(fastifyRoute),
+          "\n\tbuiltinRules:", dumpify(builtinRules),
+          "\n\trequiredRules:", dumpify(requiredRules),
+          "\n\tscopeBase:", dumpify(ret.scopeBase, { indent: 2 }),
+          "\n\tscopeRequestRules:", dumpify(ret.scopeRequestRules, { indent: 2 }),
+      );
     }
-    _recurseFreeze(ret.scopeBase);
-    return ret;
     function _recurseFreeze (value) {
       if (!value || (typeof value !== "object")) return;
       Object.values(value).forEach(_recurseFreeze);
@@ -196,20 +214,12 @@ export default class RestAPIServer extends LogEventGenerator {
     return scope;
   }
 
-  buildKuery (jsonSchema, outerKuery, isValOSFields) {
-    let innerKuery;
+  buildKuery (jsonSchema_, outerKuery, isValOSFields) {
+    let innerKuery, jsonSchema;
+    if (!jsonSchema_) return outerKuery;
     try {
-      if (!jsonSchema) return outerKuery;
-      if (typeof jsonSchema === "string") {
-        if (jsonSchema[(jsonSchema.length || 1) - 1] !== "#") {
-          throw new Error(
-              `String without '#' suffix is not a valid shared schema name: "${jsonSchema}"`);
-        }
-        const sharedSchema = this._fastify.getSchemas()[jsonSchema.slice(0, -1)];
-        if (!sharedSchema) throw new Error(`Can't resolve shared schema "${jsonSchema}"`);
-        return this.buildKuery(sharedSchema, outerKuery, isValOSFields);
-      }
-      innerKuery = this._extractValOSSchemaKuery(jsonSchema.valos, outerKuery);
+      jsonSchema = this._resolveSchemaName(jsonSchema_);
+      innerKuery = this.addSchemaStep(jsonSchema, outerKuery);
       const hardcoded = (innerKuery === undefined) && (jsonSchema.valos || {}).hardcodedResources;
       if (hardcoded) {
         outerKuery.push(["§'", Object.values(hardcoded).map(e => e)]);
@@ -253,18 +263,38 @@ export default class RestAPIServer extends LogEventGenerator {
     }
   }
 
-  getResourceHRefPrefix (jsonSchema) {
-    if (!(jsonSchema.valos.route || {}).name) {
-      throw new Error("href requested without json schema valos route.name");
+  _resolveSchemaName (maybeSchemaName) {
+    if (typeof maybeSchemaName !== "string") return maybeSchemaName;
+    if (maybeSchemaName[(maybeSchemaName.length || 1) - 1] !== "#") {
+      throw new Error(
+          `String without '#' suffix is not a valid shared schema name: "${maybeSchemaName}"`);
     }
-    return path.join("/",  this._prefix, jsonSchema.valos.route.name, "/");
+    const sharedSchema = this._fastify.getSchemas()[maybeSchemaName.slice(0, -1)];
+    if (!sharedSchema) throw new Error(`Can't resolve shared schema "${maybeSchemaName}"`);
+    return sharedSchema;
   }
 
-  _extractValOSSchemaKuery (valosSchema, outerKuery) {
-    const predicate = (valosSchema || {}).predicate;
+  getResourceHRefPrefix (jsonSchema_) {
+    let jsonSchema;
+    try {
+      jsonSchema = this._resolveSchemaName(jsonSchema_);
+      const routeName = ((jsonSchema.valos || {}).route || {}).name;
+      if (typeof routeName !== "string") {
+        throw new Error("href requested without json schema valos route.name");
+      }
+      return path.join("/",  this._prefix, routeName, "/");
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error("getResourceHRefPrefix"),
+          "\n\tjsonSchema:", dumpify(jsonSchema || jsonSchema_, { indent: 2 }));
+    }
+  }
+
+  addSchemaStep (jsonSchema_, outerKuery) {
+    const jsonSchema = this._resolveSchemaName(jsonSchema_);
+    const predicate = (jsonSchema.valos || {}).predicate;
     if (predicate === undefined) return undefined;
     if (predicate === "") return outerKuery;
-    return valosSchema.predicate.split("!").reduce((innerKuery, part) => {
+    return predicate.split("!").reduce((innerKuery, part) => {
       if (innerKuery.length > 1) innerKuery.push(false);
       const fieldName = (part.match(/^(valos:field:|\$V:)(.*)$/) || [])[2];
       if (fieldName) {
@@ -283,7 +313,8 @@ export default class RestAPIServer extends LogEventGenerator {
         innerKuery.push(mapper);
         return mapper;
       }
-      throw new Error(`Unrecognized part <${part}> in valos predicate <${valosSchema.predicate}>`);
+      throw new Error(`Unrecognized part <${part}> in valos predicate <${
+          jsonSchema.valos.predicate}>`);
     }, outerKuery);
   }
 

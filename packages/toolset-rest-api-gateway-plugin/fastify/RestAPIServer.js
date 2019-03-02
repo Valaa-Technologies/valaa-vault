@@ -7,7 +7,7 @@ import { dumpify, dumpObject, LogEventGenerator, outputError } from "~/tools";
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
-import * as categoryOps from "./categoryOps";
+import * as handlers from "./handlers";
 
 const Fastify = require("fastify");
 const FastifySwaggerPlugin = require("fastify-swagger");
@@ -32,8 +32,7 @@ export default class RestAPIServer extends LogEventGenerator {
   async start () {
     const wrap = new Error(`start`);
     try {
-      this._prefixPlugins = await Promise.all(Object.entries(this._prefixes)
-          .map(this._createPrefixPlugin));
+      this._prefixPlugins = Object.entries(this._prefixes).map(this._createPrefixPlugin);
       this._fastify.listen(this._port, this._address || undefined, (error) => {
         if (error) throw error;
         this.infoEvent(1, `listening @`, this._fastify.server.address(), "exposing prefixes:",
@@ -48,7 +47,7 @@ export default class RestAPIServer extends LogEventGenerator {
     }
   }
 
-  _createPrefixPlugin = async ([prefix, {
+  _createPrefixPlugin = ([prefix, {
     openapi, swaggerPrefix, schemas, routes, ...pluginOptions
   }]) => {
     const server = this;
@@ -57,10 +56,14 @@ export default class RestAPIServer extends LogEventGenerator {
     try {
       const prefixedThis = Object.create(this);
       prefixedThis._prefix = prefix;
-      // Create default handlers and preload route resources
-      await Promise.all(routes.map(route => prefixedThis._preloadRouteResources(route)));
+      // Create handlers for all routes before trying to register.
+      // At this stage neither schema nor fastify is available for the
+      // handlers.
+      const routeHandlers = routes
+          .map(route => prefixedThis._createRouteHandler(route))
+          .filter(notFalsy => notFalsy);
       // https://github.com/fastify/fastify/blob/master/docs/Server.md
-      prefixedThis._fastify.register((fastify, opts, next) => {
+      prefixedThis._fastify.register(async (fastify, opts, next) => {
         try {
           if (swaggerPrefix) {
             fastify.register(FastifySwaggerPlugin, {
@@ -70,12 +73,12 @@ export default class RestAPIServer extends LogEventGenerator {
             });
           }
           schemas.forEach(schema => fastify.addSchema(schema));
-          routes.forEach(route => {
-            if (!route.handler) {
-              route.handler = prefixedThis._createRouteHandler(route);
-            }
-            fastify.route(route);
-          });
+          await Promise.all(routeHandlers.map(routeHandler =>
+              routeHandler.prepare && routeHandler.prepare(fastify)));
+          await Promise.all(routeHandlers.map(routeHandler =>
+              routeHandler.preload && routeHandler.preload()));
+          routeHandlers.forEach(routeHandler =>
+              fastify.route(routeHandler.fastifyRoute));
           fastify.ready(err => {
             if (err) throw err;
             fastify.swagger();
@@ -84,8 +87,9 @@ export default class RestAPIServer extends LogEventGenerator {
           const wrapped = errorOnCreatePrefixPlugin(error);
           outputError(wrapped, "Exception caught during plugin register");
           throw wrapped;
+        } finally {
+          next(); // Always install other plugins
         }
-        next();
       }, {
         prefix,
         ...pluginOptions,
@@ -105,57 +109,105 @@ export default class RestAPIServer extends LogEventGenerator {
     }
   }
 
-  _preloadRouteResources (route) {
-    const wrap = new Error(`createRouteHandler(${route.category || "<categoryless>"} ${
-        route.method} ${route.url})`);
-    try {
-      if ((route.preload === undefined) && !route.category) {
-        throw new Error(`Route ${route.method} <${route.url
-            }>: both preload and category undefined (maybe set route.preload = null)`);
-      }
-      const preload = route.preload
-          || ((categoryOps[route.category] || {})[route.method] || {}).preload;
-      return preload && preload(this, route);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, wrap, "\n\troute:", dumpify(route, { indent: 2 }));
-    }
-  }
-
   _createRouteHandler (route) {
     const wrap = new Error(`createRouteHandler(${route.category || "<categoryless>"} ${
         route.method} ${route.url})`);
     try {
-      if (!route.category) {
-        throw new Error(`Route ${route.method} <${route.url
-            }>: both handler and category undefined`);
+      if (!route.category) throw new Error(`Route category undefined`);
+      if (!route.method) throw new Error(`Route method undefined`);
+      if (!route.url) throw new Error(`Route url undefined`);
+      const createRouteHandler = (handlers[route.category] || {})[route.method];
+      if (!createRouteHandler) {
+        throw new Error(`No route handler creators found for '${route.category} ${route.method}'`);
       }
-      const createHandler = ((categoryOps[route.category] || {})[route.method] || {}).createHandler;
-      if (!createHandler) {
-        throw new Error(`Unrecognized handler '${route.category}${route.method}Handler'`);
-      }
-      const handler = createHandler(this, route);
-      const routeErrorMessage = `Exception caught during ${route.method} ${route.url}`;
-      return asyncConnectToPartitionsIfMissingAndRetry(handler, (error, request, reply) => {
-        reply.code(500);
-        reply.send(error.message);
-        outputError(this.wrapErrorEvent(error, new Error(`${route.method} ${route.url}`),
-            "\n\trequest.params:", ...dumpObject(request.params),
-            "\n\trequest.query:", ...dumpObject(request.query),
-            "\n\trequest.body:", ...dumpObject(request.body),
-        ), routeErrorMessage, this.getLogger());
-      });
+      const routeHandler = createRouteHandler(this, route);
+      if (!routeHandler) return undefined;
+      if (!routeHandler.name) routeHandler.name = `${route.category} ${route.method} ${route.url}`;
+      const routeErrorMessage = `Exception caught during: ${routeHandler.name}`;
+      route.handler = asyncConnectToPartitionsIfMissingAndRetry(
+          (request, reply) => {
+            const result = routeHandler.handleRequest(request, reply);
+            if (result === undefined) {
+              this.errorEvent("ERROR: got undefined return value from route:", routeHandler.name,
+                  "\n\texpected true, false or promise (so that exceptions are properly caught)",
+                  "\n\trequest.query:", ...dumpObject(request.query),
+                  "\n\trequest.body:", ...dumpObject(request.body));
+            }
+            return result;
+          },
+          (error, request, reply) => {
+            reply.code(500);
+            reply.send(error.message);
+            outputError(this.wrapErrorEvent(error, new Error(`${routeHandler.name}`),
+                "\n\trequest.params:", ...dumpObject(request.params),
+                "\n\trequest.query:", ...dumpObject(request.query),
+                "\n\trequest.body:", ...dumpObject(request.body),
+            ), routeErrorMessage, this.getLogger());
+          },
+      );
+      return routeHandler;
     } catch (error) {
       throw this.wrapErrorEvent(error, wrap, "\n\troute:", dumpify(route, { indent: 2 }));
     }
   }
 
-  _buildKuery (jsonSchema, outerKuery, isValOSFields) {
+  prepareScopeRules ({ category, method, route, builtinScopeRules, requiredRules }) {
+    const ret = {
+      scopeBase: { ...(route.config.scope || {}) },
+      scopeRequestRules: [],
+      requiredRules,
+    };
+    [...Object.entries(builtinScopeRules),
+      ...Object.entries(route.config.rules),
+      ...Object.entries(route.config.routeParams).map(([k, v]) => ([k, ["params", v]])),
+    ].forEach(([ruleName, [sectionName, sectionKey]]) => {
+      if (sectionName === "constant") {
+        ret.scopeBase[ruleName] = sectionKey;
+      } else {
+        ret.scopeRequestRules.push([ruleName, sectionName, sectionKey]);
+      }
+    });
+    for (const requiredFieldName of requiredRules) {
+      if ((ret.scopeBase[requiredFieldName] === undefined)
+          && !ret.scopeRules.find(([scopeFieldName]) => (scopeFieldName === requiredFieldName))) {
+        throw new Error(`Required ${category} ${method} rule '${requiredFieldName}' is undefined`);
+      }
+    }
+    _recurseFreeze(ret.scopeBase);
+    return ret;
+    function _recurseFreeze (value) {
+      if (!value || (typeof value !== "object")) return;
+      Object.values(value).forEach(_recurseFreeze);
+      Object.freeze(value);
+    }
+  }
+
+  buildRequestScope (request, { scopeBase, scopeRequestRules, requiredRules }) {
+    const scope = Object.create(scopeBase);
+    scope.request = request;
+    for (const [ruleName, requestSection, sectionKey] of scopeRequestRules) {
+      scope[ruleName] = request[requestSection][sectionKey];
+    }
+    for (const ruleName of requiredRules) {
+      if (scope[ruleName] === undefined) {
+        throw new Error(`scope rule '${ruleName}' resolved into undefined`);
+      }
+    }
+    return scope;
+  }
+
+  buildKuery (jsonSchema, outerKuery, isValOSFields) {
     let innerKuery;
     try {
+      if (!jsonSchema) return outerKuery;
       if (typeof jsonSchema === "string") {
+        if (jsonSchema[(jsonSchema.length || 1) - 1] !== "#") {
+          throw new Error(
+              `String without '#' suffix is not a valid shared schema name: "${jsonSchema}"`);
+        }
         const sharedSchema = this._fastify.getSchemas()[jsonSchema.slice(0, -1)];
         if (!sharedSchema) throw new Error(`Can't resolve shared schema "${jsonSchema}"`);
-        return this._buildKuery(sharedSchema, outerKuery, isValOSFields);
+        return this.buildKuery(sharedSchema, outerKuery, isValOSFields);
       }
       innerKuery = this._extractValOSSchemaKuery(jsonSchema.valos, outerKuery);
       const hardcoded = (innerKuery === undefined) && (jsonSchema.valos || {}).hardcodedResources;
@@ -167,28 +219,25 @@ export default class RestAPIServer extends LogEventGenerator {
         if (!innerKuery) {
           throw new Error("json schema valos predicate missing with json schema type 'array'");
         }
-        this._buildKuery(jsonSchema.items, innerKuery);
+        this.buildKuery(jsonSchema.items, innerKuery);
       } else if (jsonSchema.type === "object") {
         const objectKuery = {};
         Object.entries(jsonSchema.properties).forEach(([key, valueSchema]) => {
           let op;
-          if (isValOSFields) {
-            if (key === "id") op = ["§->", "rawId"];
-            else if (key === "href") {
-              if (!(jsonSchema.valos.route || {}).name) {
-                throw new Error("href requested without json schema valos routeName");
-              }
-              op = ["§->", "target", false, "rawId", [
-                "§+", path.join("/", this._prefix, jsonSchema.valos.route.name, "/"), ["§->", null],
-              ]];
+          if (isValOSFields && ((valueSchema.valos || {}).predicate === undefined)) {
+            if (key === "href") {
+              op = ["§->", "target", false, "rawId",
+                ["§+", this.getResourceHRefPrefix(jsonSchema), ["§->", null]]
+              ];
             } else if (key === "rel") op = "self";
             else op = ["§->", key];
           } else if (key === "$V") {
-            this._buildKuery(valueSchema, (op = ["§->"]), true);
+            this.buildKuery(valueSchema, (op = ["§->"]), true);
           } else {
-            this._buildKuery(valueSchema, (op = ["§->"]));
+            this.buildKuery(valueSchema, (op = ["§->"]));
             op = (op.length === 1) ? ["§..", key]
-                : (valueSchema.type === "array") ? op
+                : ((valueSchema.type === "array")
+                    || (valueSchema.valos || {}).predicate !== undefined) ? op
                 : ["§->", ["§..", key], false, ...op.slice(1)];
           }
           objectKuery[key] = op;
@@ -197,15 +246,24 @@ export default class RestAPIServer extends LogEventGenerator {
       }
       return outerKuery;
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error("_buildKuery"),
+      throw this.wrapErrorEvent(error, new Error("buildKuery"),
           "\n\tjsonSchema:", ...dumpObject(jsonSchema),
           "\n\touterKuery:", ...dumpObject(outerKuery),
           "\n\tinnerKuery:", ...dumpObject(innerKuery));
     }
   }
 
+  getResourceHRefPrefix (jsonSchema) {
+    if (!(jsonSchema.valos.route || {}).name) {
+      throw new Error("href requested without json schema valos route.name");
+    }
+    return path.join("/",  this._prefix, jsonSchema.valos.route.name, "/");
+  }
+
   _extractValOSSchemaKuery (valosSchema, outerKuery) {
-    if (!(valosSchema || {}).predicate) return undefined;
+    const predicate = (valosSchema || {}).predicate;
+    if (predicate === undefined) return undefined;
+    if (predicate === "") return outerKuery;
     return valosSchema.predicate.split("!").reduce((innerKuery, part) => {
       if (innerKuery.length > 1) innerKuery.push(false);
       const fieldName = (part.match(/^(valos:field:|\$V:)(.*)$/) || [])[2];
@@ -229,16 +287,17 @@ export default class RestAPIServer extends LogEventGenerator {
     }, outerKuery);
   }
 
-  _pickResultsFields (results, fields) {
+  _pickResultFields (result, fields) {
     const fieldNames = fields.split(",");
-    return results.map(entry => {
+    return !Array.isArray(result) ? _pickFields(result) : result.map(_pickFields);
+    function _pickFields (entry) {
       const ret = {};
       for (const name of fieldNames) {
         const value = entry[name];
         if (value !== undefined) ret[name] = value;
       }
       return ret;
-    });
+    }
   }
 
   preloadVAKONRefResources (kuery, resultResources = []) {
@@ -255,15 +314,18 @@ export default class RestAPIServer extends LogEventGenerator {
     return resultResources;
   }
 
-  _patchResource (vResource, request, transaction /* , route */) {
-    _patcher(vResource, request.body);
-    function _patcher (vCurrent, patch) {
-      Object.entries(patch).forEach(([propertyName, value]) => {
-        if (value === undefined || (propertyName === "$V")) return;
+  patchResource (vResource, patch, { transaction, scope, toPatchTarget } = {}) {
+    const vTarget = !toPatchTarget ? vResource
+        : vResource.get(toPatchTarget, { transaction, scope });
+    _patcher(vTarget, patch);
+    return vTarget;
+    function _patcher (vScope, subpatch) {
+      Object.entries(subpatch).forEach(([propertyName, value]) => {
+        if ((value === undefined) || (propertyName === "$V")) return;
         if (!value || (typeof value !== "object")) {
-          vCurrent.alterProperty(propertyName, VALEK.fromValue(value), { transaction });
+          vScope.alterProperty(propertyName, VALEK.fromValue(value), { transaction, scope });
         } else {
-          const currentValue = vCurrent.propertyValue(propertyName, { transaction });
+          const currentValue = vScope.propertyValue(propertyName, { transaction, scope });
           if (!(currentValue instanceof Vrapper)) {
             throw new Error(`Can't patch a complex object into non-resource-valued property '${
                 propertyName}'`);

@@ -44,7 +44,7 @@ describe("VALK basic functionality tests", () => {
         .toEqual({ value: ["§->", null] });
   });
 
-  if("Expands tilde notation", () => {
+  it("Expands tilde notation", () => {
     expect(expandTildeVAKON("~$/scriptRoot", ["~$/scriptRoot", ["~random"]]))
         .toEqual(["§->", ["§$"], ["§..", "scriptRoot"], ["~random"]]);
     expect(expandTildeVAKON("~invoke:create",

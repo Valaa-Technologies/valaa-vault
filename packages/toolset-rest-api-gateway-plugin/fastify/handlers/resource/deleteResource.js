@@ -1,7 +1,7 @@
 // @flow
 
 import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fastify/RestAPIServer";
-import { dumpObject, thenChainEagerly } from "~/tools";
+// import { dumpObject, thenChainEagerly } from "~/tools";
 
 export default function createRouteHandler (server: RestAPIServer, route: Route) {
   return {
@@ -28,6 +28,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       // Root resource deletion not implemented yet, due to lack of
       // mechanisms for declaring what sub-resources should be
       // destroyed as well.
+      /*
       scope.resource = server._engine.tryVrapper([scope.resourceId]);
       if (!scope.resource) {
         reply.code(404);
@@ -55,6 +56,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
           "\n\tscopeRules:", ...dumpObject(this.scopeRules),
         );
       });
+      */
     },
   };
 }

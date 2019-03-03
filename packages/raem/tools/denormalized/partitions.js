@@ -10,7 +10,7 @@ import { Resolver, Transient } from "~/raem/state";
 import traverseMaterializedOwnlings
     from "~/raem/tools/denormalized/traverseMaterializedOwnlings";
 
-import { dumpObject, invariantifyArray, unwrapError, wrapError } from "~/tools";
+import { dumpObject, invariantifyArray, thenChainEagerly, unwrapError, wrapError } from "~/tools";
 
 export class MissingPartitionConnectionsError extends Error {
   constructor (message, missingPartitions: (ValaaURI | Promise<any>)[]) {
@@ -21,6 +21,11 @@ export class MissingPartitionConnectionsError extends Error {
   }
 }
 
+// Wraps the call inside logic which connects to missing partitions if
+// a MissingPartitionConnectionsError is thrown. The connect callback
+// is extracted from the error.connectToPartition itself. Thus for the
+// autoconnect functionality to work some intervening layer must add
+// this callback into all caught missing partition connection errors.
 export function asyncConnectToPartitionsIfMissingAndRetry (call, onError) {
   if ((typeof call !== "function") || !call.apply) throw new Error("call is not a function");
   return function autoConnectingCall (...args: any[]) {
@@ -29,9 +34,9 @@ export function asyncConnectToPartitionsIfMissingAndRetry (call, onError) {
 }
 
 function tryCall (call: any, onError, ...args: any[]) {
-  try {
-    return call.apply(this, args);
-  } catch (error) {
+  return thenChainEagerly(null, [
+    () => call.apply(this, args),
+  ], error => {
     if (!(unwrapError(error) instanceof MissingPartitionConnectionsError)) {
       if (onError) return onError(error, ...args);
       throw error;
@@ -48,7 +53,7 @@ function tryCall (call: any, onError, ...args: any[]) {
       if (onError) return onError(wrappedError, ...args);
       throw wrappedError;
     }
-  }
+  });
 }
 
 export function tryConnectToMissingPartitionsAndThen (error, callback, explicitConnectToPartition) {

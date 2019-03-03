@@ -46,17 +46,20 @@ export async function _initializeSharedIndexedDB (scribe: Scribe) {
 
   const contentLookup = {};
   let totalBytes = 0;
-  let clearedBuffers = 0;
-  let releasedBytes = 0;
-  await scribe._sharedDb.transaction(["bvobs", "buffers"], "readwrite", ({ bvobs, buffers }) => {
+  const clearedBuffers = 0;
+  const releasedBytes = 0;
+  await scribe._sharedDb.transaction(["bvobs", "buffers"], "readwrite",
+      ({ bvobs, /* buffers */ }) => {
     bvobs.openCursor().onsuccess = event => {
       const cursor: IDBCursorWithValue = event.target.result;
       if (!cursor) return;
       if (cursor.value.persistRefCount <= 0) {
-        if (cursor.value.byteLength) releasedBytes += cursor.value.byteLength;
-        buffers.delete(cursor.key);
-        cursor.delete();
-        ++clearedBuffers;
+        // FIXME(iridian, 2019-03): Deletion disabled until garbage
+        // if (cursor.value.byteLength) releasedBytes += cursor.value.byteLength;
+        // collection becomes an actual issue,
+        // buffers.delete(cursor.key);
+        // cursor.delete();
+        // ++clearedBuffers;
       } else if (!contentLookup[cursor.key]) {
         contentLookup[cursor.key] = { ...cursor.value, inMemoryRefCount: 0 };
         if (cursor.value.byteLength) totalBytes += cursor.value.byteLength;

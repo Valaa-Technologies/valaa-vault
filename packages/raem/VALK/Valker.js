@@ -309,6 +309,7 @@ export default class Valker extends Resolver {
                 type = builtinStepper.name;
                 return builtinStepper(this, head, scope, step, nonFinalStep);
               }
+              if (stepName === "§") return head;
               if (stepName[0] === "§") throw new Error(`Unrecognized builtin step ${stepName}`);
               if (isTildeStepName(stepName)) {
                 return this.advance(head, expandTildeVAKON(stepName, step), scope, nonFinalStep);

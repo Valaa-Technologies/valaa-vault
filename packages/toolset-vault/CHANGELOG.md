@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.11](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.10...v0.34.0-prerelease.11) (2019-03-04)
+
+**Note:** Version bump only for package @valos/toolset-vault
+
+
+
+
+
 # [0.34.0-prerelease.10](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.8...v0.34.0-prerelease.10) (2019-03-03)
 
 

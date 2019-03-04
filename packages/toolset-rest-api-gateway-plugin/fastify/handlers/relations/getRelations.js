@@ -1,7 +1,7 @@
 // @flow
 
 import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fastify/RestAPIServer";
-import { dumpify, dumpObject } from "~/tools";
+import { dumpify, dumpObject, thenChainEagerly } from "~/tools";
 
 import { _addToRelationsSourceSteps } from "../_handlerOps";
 
@@ -34,18 +34,21 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         reply.code(404);
         reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
       }
-      let results = scope.resource.get(this.toRelationsFields, { scope, verbosity: 0 });
       const { fields } = request.query;
-      if (fields) {
-        results = server._pickResultFields(results, fields);
-      }
-      reply.send(JSON.stringify(results, null, 2));
-      reply.code(200);
-      server.infoEvent(2, () => [
-        `${this.name}:`,
-        "\n\tresults:", ...dumpObject(results),
+      return thenChainEagerly(scope.resource, [
+        vResource => vResource.get(this.toRelationsFields, { scope, verbosity: 0 }),
+        (fields)
+            && (results => server._pickResultFields(results, fields, route.schema.response[200])),
+        results => {
+          reply.code(200);
+          reply.send(JSON.stringify(results, null, 2));
+          server.infoEvent(2, () => [
+            `${this.name}:`,
+            "\n\tresults:", ...dumpObject(results),
+          ]);
+          return true;
+        }
       ]);
-      return true;
     },
   };
 }

@@ -318,16 +318,94 @@ export default class RestAPIServer extends LogEventGenerator {
     }, outerKuery);
   }
 
-  _pickResultFields (result, fields) {
-    const fieldNames = fields.split(",");
-    return !Array.isArray(result) ? _pickFields(result) : result.map(_pickFields);
-    function _pickFields (entry) {
-      const ret = {};
-      for (const name of fieldNames) {
-        const value = entry[name];
-        if (value !== undefined) ret[name] = value;
+  _pickResultFields (rootResult, fields /* , resultSchema */) {
+    const FieldSchema = Symbol("FieldSchema");
+    const selectors = { [FieldSchema]: false };
+    fields.split(",").forEach(field => {
+      const steps = field.split("/");
+      const isInject = steps[steps.length - 1] === "*";
+      if (isInject) steps.splice(-1);
+      const fieldSelector = steps.reduce(
+          (nesting, step) => nesting[step] || (nesting[step] = { [FieldSchema]: false }),
+          selectors,
+      );
+      fieldSelector[FieldSchema] = !isInject ? true
+          : {}; /* : steps.reduce((subSchema, step, index) => {
+        let returning;
+        for (let current = subSchema; ;) {
+          if (typeof current === "string") current = this._resolveSchemaName(current);
+          else if (current.type === "array") current = current.items;
+          else if (returning) return current;
+          else if (current.type !== "object") {
+            throw new Error(`Can't access field '${step}' (fields JSON pointer ${
+              JSON.stringify(field)} step #${index}) from non-object schema ${current.type}`);
+          } else {
+            current = current.properties[step];
+            if (!current) {
+              throw new Error(`Can't find field '${step}' (fields JSON pointer ${
+                  JSON.stringify(field)} step #${index}) from object schema properties`);
+            }
+            returning = true;
+          }
+        }
+      }, resultSchema);
+      */
+    });
+    const injects = [];
+    const _pickFields = (result, selector) => {
+      if (!result || (typeof result !== "object")) return;
+      if (Array.isArray(result)) {
+        for (const entry of result) _pickFields(entry, selector);
+        return;
       }
-      return ret;
+      const fieldSchema = selector[FieldSchema];
+      const V = result.$V;
+      for (const [key, value] of Object.entries(result)) {
+        const subSelector = selector[key];
+        if (subSelector) _pickFields(value, subSelector);
+        else if ((fieldSchema === false) && (key !== "$V")) delete result[key];
+      }
+      if (((V || {}).rel === "self")
+          && ((fieldSchema && (fieldSchema !== true)) || Object.keys(selector).length)) {
+        // So this is not exactly kosher. To implement expansion of
+        // nested properties we make virtual GET requests using the
+        // injection API which is primarily intended for testing and
+        // incurs full request overheads for each call. On the other
+        // hand, this is simple, complete and way more efficient than
+        // having clients make separate queries for the entries.
+        const subFields = _gatherSubFields(selector).join(",");
+        injects.push(
+          this._fastify.inject({
+            method: "GET",
+            url: V.href,
+            query: { fields: subFields },
+          }).then(response => {
+            if (response.statusCode === 200) {
+              V.target = JSON.parse(response.payload);
+            } else {
+              V.expansion = { statusCode: response.statusCode, payload: response.payload };
+            }
+            result.$V = V;
+          }).catch(error => {
+            V.expansion = { statusCode: 500, payload: error.message };
+            result.$V = V;
+          }),
+        );
+      }
+    };
+    _pickFields(rootResult, selectors);
+    if (!injects.length) return rootResult;
+    return Promise.all(injects).then(() => rootResult);
+    function _gatherSubFields (selector, currentPath = "", subFields = []) {
+      if (selector[FieldSchema]) {
+        subFields.push((selector[FieldSchema] === true) ? currentPath
+            : !currentPath ? "*"
+            : `${currentPath}/*`);
+      }
+      Object.entries(selector).forEach(([key, subSelector]) =>
+          _gatherSubFields(subSelector, `${currentPath ? `${currentPath}/` : ""}${key}`,
+              subFields));
+      return subFields;
     }
   }
 

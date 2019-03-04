@@ -1,7 +1,7 @@
 // @flow
 
 import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fastify/RestAPIServer";
-import { dumpify, dumpObject } from "~/tools";
+import { dumpify, dumpObject, thenChainEagerly } from "~/tools";
 
 import { _createTargetedToMappingFields } from "./_mappingHandlerOps";
 
@@ -35,24 +35,27 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
         return false;
       }
-      let results = scope.resource.get(this.toMappingFields, { scope, verbosity: 0 });
-      if (!results) {
-        reply.code(404);
-        reply.send(`No mapping '${route.config.mappingName}' found from route resource ${
-          scope.resourceId} to ${scope.targetId}`);
-        return false;
-      }
       const { fields } = request.query;
-      if (fields) {
-        results = server._pickResultFields(results, fields);
-      }
-      reply.code(200);
-      reply.send(JSON.stringify(results, null, 2));
-      server.infoEvent(2, () => [
-        `${this.name}:`,
-        "\n\tresults:", ...dumpObject(results),
+      return thenChainEagerly(scope.resource, [
+        vResource => vResource.get(this.toMappingFields, { scope, verbosity: 0 }),
+        results => ((!fields || !results) ? results
+            : server._pickResultFields(results, fields, route.schema.response[200])),
+        results => {
+          if (!results) {
+            reply.code(404);
+            reply.send(`No mapping '${route.config.mappingName}' found from route resource ${
+              scope.resourceId} to ${scope.targetId}`);
+            return false;
+          }
+          reply.code(200);
+          reply.send(JSON.stringify(results, null, 2));
+          server.infoEvent(2, () => [
+            `${this.name}:`,
+            "\n\tresults:", ...dumpObject(results),
+          ]);
+          return true;
+        }
       ]);
-      return true;
     },
   };
 }

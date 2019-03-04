@@ -401,8 +401,8 @@ export function mappingDELETERoute (valos, ResourceType, RelationType,
   }
 }
 
-const _unreservedWordListPattern = "^([a-zA-Z0-9\\-_.~]*(\\,([a-zA-Z0-9\\-_.~])*)*)?$";
-const _unreservedSortListPattern = "^(\\-?[a-zA-Z0-9_.~]*(\\,\\-?([a-zA-Z0-9_.~])*)*)?$";
+const _unreservedWordListPattern = "^([a-zA-Z0-9\\-_.~/*$]*(\\,([a-zA-Z0-9\\-_.~/*$])*)*)?$";
+const _unreservedSortListPattern = "^(\\-?[a-zA-Z0-9_.~/$]*(\\,\\-?([a-zA-Z0-9_.~/$])*)*)?$";
 
 function _genericGETResourceQueryStringSchema (/* Type */) {
   return {

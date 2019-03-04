@@ -124,7 +124,8 @@ export default function thenChainEagerly (initialValue: any, functions: any | Fu
     head = next;
     try {
       if (index >= functionChain.length) return head;
-      next = functionChain[index](head);
+      const func = functionChain[index];
+      next = !func ? head : func(head);
     } catch (error) {
       wrap = new Error(getName("callback"));
       next = errorOnThenChainEagerly(error);

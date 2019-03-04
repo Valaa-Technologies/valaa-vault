@@ -2,7 +2,7 @@
 
 import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fastify/RestAPIServer";
 
-import { dumpify, dumpObject } from "~/tools";
+import { dumpify, dumpObject, thenChainEagerly } from "~/tools";
 
 export default function createRouteHandler (server: RestAPIServer, route: Route) {
   return {
@@ -74,9 +74,10 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       const scope = server.buildRequestScope(request, this.scopeRules);
       const {
         filter, // unimplemented
-        sort, offset, limit, ids, fields,
+        sort, offset, limit, ids,
+        fields,
         // Assumes all remaining query params are field requirements.
-        // Relies on schema validation to filter out garbage params.
+        // Relies on schema validation to reject garbage params.
         ...fieldRequirements
       } = request.query;
       server.infoEvent(1, () => [
@@ -86,28 +87,27 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         "\n\tkuery:", ...dumpObject(this.toListingFields),
         "\n\troute.config:", ...dumpObject(route.config),
       ]);
-      let results = scope.indexRoot.get(this.toListingFields, { scope });
-      if (filter || ids || Object.keys(fieldRequirements).length) {
-        results = _filterResults(results, filter, ids, fieldRequirements);
-      }
-      if (sort) {
-        results = _sortResults(results, sort);
-      }
-      if (offset || (limit !== undefined)) {
-        results = _paginateResults(results, offset || 0, limit);
-      }
-      if (fields) {
-        results = server._pickResultFields(results, fields);
-      }
-      results = JSON.stringify(results, null, 2);
-          // "\n\tschema:", JSON.stringify(route.schema.response[200], null, 2),
-      reply.code(200);
-      reply.send(results);
-      server.infoEvent(2, () => [
-        `${this.name}:`,
-        "\n\tresults:", ...dumpObject(results),
+      return thenChainEagerly(scope.indexRoot, [
+        vIndexRoot => vIndexRoot.get(this.toListingFields, { scope }),
+        (filter || ids || Object.keys(fieldRequirements).length)
+            && (results => _filterResults(results, filter, ids, fieldRequirements)),
+        (sort)
+            && (results => _sortResults(results, sort)),
+        (offset || (limit !== undefined))
+            && (results => _paginateResults(results, offset || 0, limit)),
+        (fields)
+            && (results => server._pickResultFields(results, fields, route.schema.response[200])),
+        results => JSON.stringify(results, null, 2),
+        results => {
+          reply.code(200);
+          reply.send(results);
+          server.infoEvent(2, () => [
+            `${this.name}:`,
+            "\n\tresults:", ...dumpObject(results),
+          ]);
+          return true;
+        },
       ]);
-      return true;
     },
   };
 }

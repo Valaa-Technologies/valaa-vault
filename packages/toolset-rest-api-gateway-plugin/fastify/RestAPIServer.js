@@ -431,16 +431,19 @@ export default class RestAPIServer extends LogEventGenerator {
     function _patcher (vScope, subpatch) {
       Object.entries(subpatch).forEach(([propertyName, value]) => {
         if ((value === undefined) || (propertyName === "$V")) return;
-        if (!value || (typeof value !== "object")) {
-          vScope.alterProperty(propertyName, VALEK.fromValue(value), { transaction, scope });
-        } else {
+        let newValue;
+        if (value && (typeof value === "object")) {
+          if (Array.isArray(value)) throw new Error("Batch mapping PATCH not implemented yet");
           const currentValue = vScope.propertyValue(propertyName, { transaction, scope });
-          if (!(currentValue instanceof Vrapper)) {
-            throw new Error(`Can't patch a complex object into non-resource-valued property '${
-                propertyName}'`);
+          if (currentValue instanceof Vrapper) {
+            _patcher(currentValue, value);
+            return;
           }
-          _patcher(currentValue, value);
+          newValue = ((currentValue == null) || (typeof currentValue !== "object"))
+              ? value
+              : Object.assign(currentValue, value);
         }
+        vScope.alterProperty(propertyName, VALEK.fromValue(newValue), { transaction, scope });
       });
     }
   }

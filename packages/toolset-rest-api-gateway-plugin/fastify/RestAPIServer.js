@@ -431,19 +431,21 @@ export default class RestAPIServer extends LogEventGenerator {
     function _patcher (vScope, subpatch) {
       Object.entries(subpatch).forEach(([propertyName, value]) => {
         if ((value === undefined) || (propertyName === "$V")) return;
-        let newValue;
-        if (value && (typeof value === "object")) {
-          if (Array.isArray(value)) throw new Error("Batch mapping PATCH not implemented yet");
-          const currentValue = vScope.propertyValue(propertyName, { transaction, scope });
-          if (currentValue instanceof Vrapper) {
-            _patcher(currentValue, value);
-            return;
+        if (Array.isArray(value)) throw new Error("Batch mapping PATCH not implemented yet");
+        const currentValue = vScope.propertyValue(propertyName, { transaction, scope });
+        if (currentValue instanceof Vrapper) {
+          if ((value == null) || (typeof value !== "object")) {
+            throw new Error(`Cannot overwrite a structured property '${propertyName
+                }' with a non-object value of type '${typeof value}'`);
           }
-          newValue = ((currentValue == null) || (typeof currentValue !== "object"))
-              ? value
-              : Object.assign(currentValue, value);
+          _patcher(currentValue, value);
+        } else {
+          const newValue = ((value != null) && (typeof value === "object")
+                  && (currentValue != null) && (typeof currentValue === "object"))
+              ? Object.assign(currentValue, value)
+              : value;
+          vScope.alterProperty(propertyName, VALEK.fromValue(newValue), { transaction, scope });
         }
-        vScope.alterProperty(propertyName, VALEK.fromValue(newValue), { transaction, scope });
       });
     }
   }

@@ -31,7 +31,7 @@ afterEach(async () => {
 });
 
 describe("Partition load ordering and inactive resource handling", () => {
-  xit("handles out-of-order new property creation for an immaterial ghost", async () => {
+  it("handles out-of-order new property creation for an immaterial ghost", async () => {
     // The test is a bit broken with "no events found when connecting":
     // this is not a bug of the payload source, but of arrangement of
     // this test.

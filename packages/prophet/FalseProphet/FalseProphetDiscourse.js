@@ -146,7 +146,7 @@ export default class FalseProphetDiscourse extends Discourse {
   }
 
   rejectHeresy (hereticEvent: EventBase, purgedCorpus: Corpus, revisedEvents: EventBase[]) {
-    return this._follower.rejectHerecy(hereticEvent, purgedCorpus, revisedEvents);
+    return this._follower.rejectHeresy(hereticEvent, purgedCorpus, revisedEvents);
   }
 
   assignNewResourceId (targetAction: EventBase, partitionURI: string, explicitRawId?: string) {

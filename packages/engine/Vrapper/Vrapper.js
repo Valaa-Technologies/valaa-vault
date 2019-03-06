@@ -1728,12 +1728,11 @@ export default class Vrapper extends Cog {
   _notifyMODIFIEDHandlers (fieldUpdate: FieldUpdate, subscribers: any,
     filterSubscribers: any) {
     const fieldName = fieldUpdate.fieldName();
-    const alreadyNotified = fieldUpdate.getPassage()._alreadyNotified
-        || (fieldUpdate.getPassage()._alreadyNotified = new Set());
+    const passageCounter = fieldUpdate.getPassage()._counter;
     for (const subscriber of (subscribers || [])) {
       try {
-        if (!alreadyNotified.has(subscriber)) {
-          alreadyNotified.add(subscriber);
+        if (!(subscriber._seenPassageCounter >= passageCounter)) {
+          subscriber._seenPassageCounter = passageCounter;
           subscriber._triggerUpdateByFieldUpdate(fieldUpdate);
         }
       } catch (error) {
@@ -1749,8 +1748,8 @@ export default class Vrapper extends Cog {
       const fieldIntro = this.getTypeIntro().getFields()[fieldName];
       for (const filterSubscriber of filterSubscribers) {
         try {
-          if (!alreadyNotified.has(filterSubscriber)) {
-            alreadyNotified.add(filterSubscriber);
+          if (!(filterSubscriber._seenPassageCounter >= passageCounter)) {
+            filterSubscriber._seenPassageCounter = passageCounter;
             filterSubscriber._tryTriggerUpdateByFieldUpdate(fieldIntro, fieldUpdate);
           }
         } catch (error) {
@@ -1806,6 +1805,7 @@ export default class Vrapper extends Cog {
         currentSubscribers = new Set();
         this._subscribersByFieldName.set(fieldName, currentSubscribers);
       }
+      subscriber._seenPassageCounter = this.engine._currentPassageCounter;
       currentSubscribers.add(subscriber);
       return currentSubscribers;
     } catch (error) {
@@ -1824,6 +1824,7 @@ export default class Vrapper extends Cog {
       if (this._phase === NONRESOURCE) return undefined;
       this.requireActive();
       if (!this._fieldFilterSubscribers) this._fieldFilterSubscribers = new Set();
+      subscriber._seenPassageCounter = this.engine._currentPassageCounter;
       this._fieldFilterSubscribers.add(subscriber);
       return this._fieldFilterSubscribers;
     } catch (error) {

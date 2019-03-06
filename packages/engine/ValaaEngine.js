@@ -43,6 +43,7 @@ export default class ValaaEngine extends Cog {
     this.addCog(this.motor);
     this.discourse = this._connectWithProphet(prophet);
     this._activeIdentities = {};
+    this._currentPassageCounter = 0;
     this._identityManager = {
       add: (identityPartitionURI: any /* , options: {} */) => {
         try {
@@ -457,6 +458,7 @@ export default class ValaaEngine extends Cog {
           "\n\tpassage:", dumpify(rest));
     }
     passage.timedness = story.timed ? "Timed" : "Timeless";
+    passage._counter = ++this._currentPassageCounter;
     let vProtagonist;
     try {
       if (passage.id) {

@@ -81,7 +81,10 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
   newEvents.forEach((event, index) => {
     newEvents[index] = {
       ...event,
-      meta: { ...(event.meta || {}), partitionURI: originatingPartitionURI },
+      meta: {
+        ...(event.meta || {}),
+        partitionURI: originatingPartitionURI,
+      },
     };
   });
 

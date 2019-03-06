@@ -320,11 +320,11 @@ export default class Bard extends Resolver {
     if (!reference) return reference;
     if (!this.event.meta.isBeingUniversalized) {
       // Downstream reduction
-      if (!this.event.meta.partitionURI) {
+      reference = this.obtainReference(reference, this.event.meta.partitionURI);
+      if (!reference.getPartitionURI() && !this.event.meta.partitionURI) {
         throw new Error(`INTERNAL ERROR: Cannot correlate downstream event reference (field '${
             propertyName}') because root action is missing meta.partitionURI`);
       }
-      reference = this.obtainReference(reference, this.event.meta.partitionURI);
       passage[propertyName] = reference;
     } else {
       // Universalization of an existing VRef

@@ -340,7 +340,7 @@ export function _receiveEvents (
     syncedMediaEntries => syncedMediaEntries && connection._updateMediaEntries(syncedMediaEntries),
     () => receivedActions,
   ], (error, stepIndex, head) => {
-    if ((error.originalError || error).cacheConflict) error.revise = true;
+    if ((error.originalError || error).cacheConflict) error.isCommandReviseable = true;
     onError(connection.wrapErrorEvent(error,
         new Error(`_receiveEvents(${type}).${
           stepIndex === 0 ? "contentSync" : "updateMediaEntries"}`),

@@ -92,9 +92,6 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
     if (!events || !events.length) return { eventResults: events };
     const connection = this;
-    const wrap = new Error(`chronicleEvents(${events.length} events: [${
-        tryAspect(events[0], "log").index}, ${
-        tryAspect(events[events.length - 1], "log").index}])`);
     try {
       if (options.isProphecy) {
         // console.log("assigning ids:", this.getName(), this._headEventId,
@@ -120,7 +117,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
 
       const resultBase = new ChronicleEventResult(null, {
         _events: events,
-        onError: errorOnFalseProphetChronicleEvents,
+        onError: errorOnFalseProphetChronicleEvents.bind(this, new Error("chronicleResultBase")),
       });
       const primaryRecital = this._prophet._primaryRecital;
       let leadingTruths;
@@ -132,7 +129,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
             (error, head, index, confirmedTruths, entries, callback, onRejected) => {
               if (!leadingTruths) leadingTruths = confirmedTruths.slice(0, index);
               const purgedStory = primaryRecital.getStoryBy(events[index].aspects.command.id);
-              if (purgedStory && !error.revise) {
+              if (purgedStory && !error.isCommandReviseable) {
                 purgedStory.schismDescription = `chronicleEvents rejection: ${error.message}`;
                 purgedStory.chronicleErrorSchism = error;
                 purgedStory.schismPartition = this.getPartitionURI();
@@ -145,15 +142,20 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
         resultEvents => receiveTruths && receiveTruths(leadingTruths || resultEvents,
             undefined, undefined, leadingTruths && events[leadingTruths.length]),
         () => (resultBase._forwardResults = upstreamEventResults),
-      ], errorOnFalseProphetChronicleEvents);
+      ], errorOnFalseProphetChronicleEvents.bind(this, new Error("chronicleUpstream")));
       return {
         eventResults: events.map((event, index) => {
           const ret = Object.create(resultBase); ret.event = event; ret.index = index; return ret;
         }),
       };
-    } catch (error) { return errorOnFalseProphetChronicleEvents(error); }
-    function errorOnFalseProphetChronicleEvents (error) {
-      throw connection.wrapErrorEvent(error, wrap, "\n\toptions:", ...dumpObject(options));
+    } catch (error) { return errorOnFalseProphetChronicleEvents.call(this, new Error(""), error); }
+    function errorOnFalseProphetChronicleEvents (wrap, error) {
+      const wrap_ = new Error(`chronicleEvents(${events.length} events).${wrap.message}`);
+      wrap_.stack = wrap.stack;
+      throw connection.wrapErrorEvent(error, wrap_,
+          "\n\toptions:", ...dumpObject(options),
+          "\n\tevents:", tryAspect(events[0], "log").index,
+              tryAspect(events[events.length - 1], "log").index);
     }
   }
 

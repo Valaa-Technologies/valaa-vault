@@ -60,13 +60,12 @@ function wrapError (errorIn, ...contextDescriptions) {
     throw new Error("wrapError.error must be an Error object");
   }
   const originalMessage = error.originalMessage || error.message;
-  let contextError = contextDescriptions[0];
-  if (!(contextError instanceof Error)) {
-    contextError = new Error("", error.fileName, error.lineNumber);
-  } else contextDescriptions[0] = contextDescriptions[0].message;
-  if (!contextError.tidyFrameList) {
-    contextError.tidyFrameList = contextError.stack.split("\n")
-        .slice(!contextError.message ? 3 : 2);
+  const contextError = new Error("", error.fileName, error.lineNumber);
+  if (!(contextDescriptions[0] instanceof Error)) {
+    contextError.tidyFrameList = contextError.stack.split("\n").slice(3);
+  } else {
+    contextError.tidyFrameList = contextDescriptions[0].stack.split("\n").slice(2);
+    contextDescriptions[0] = contextDescriptions[0].message;
   }
   const outermostError = error.errorContexts
       ? error.errorContexts[error.errorContexts.length - 1]

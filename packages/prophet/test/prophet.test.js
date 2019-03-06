@@ -512,7 +512,7 @@ describe("Prophet", () => {
 
     twoEntries[0].rejectTruthEvent(new Error("Not permitted")); // rejected
     const reviseError = new Error("revise: reorder");
-    reviseError.revise = "reorder";
+    reviseError.isCommandReviseable = "reorder";
     twoEntries[1].rejectTruthEvent(reviseError);
 
     await expect(results[0].getTruthEvent()).rejects

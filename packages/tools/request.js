@@ -22,7 +22,10 @@ function asyncRequest ({ input, fetch: fetchOpts }) {
     },
     response => {
       if (response.status >= 400) {
-        throw new Error(`fetch ${response.status}: <${input}> ${response.statusText}`);
+        const error = new Error(`fetch response ${response.status} for ${
+          (fetchOpts || {}).method || "GET"} ${input}: ${response.statusText}`);
+        error.response = response;
+        throw error;
       }
       return response.json();
     },

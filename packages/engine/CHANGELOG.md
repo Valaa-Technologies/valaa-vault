@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.13](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.12...v0.34.0-prerelease.13) (2019-03-06)
+
+
+### Bug Fixes
+
+* **564:** NoScope with promise as focus causes a browser freeze ([4110f76](https://github.com/valaatech/vault/commit/4110f76))
+* **584:** Repointing LENS when it is being rendered freezes browser ([f7b3640](https://github.com/valaatech/vault/commit/f7b3640))
+* **585:** Media writing / reading behaves weirdly - as if media cache in memory lags behind ([9019eb0](https://github.com/valaatech/vault/commit/9019eb0))
+
+
+
+
+
 # [0.34.0-prerelease.12](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.11...v0.34.0-prerelease.12) (2019-03-04)
 
 **Note:** Version bump only for package @valos/engine

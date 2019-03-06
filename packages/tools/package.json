@@ -1,6 +1,6 @@
 {
   "name": "@valos/tools",
-  "version": "0.34.0-prerelease.12",
+  "version": "0.34.0-prerelease.13",
   "description": "Valaa Tools API",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
@@ -16,7 +16,7 @@
   "dependencies": {
     "@babel/runtime": ">7.0.0-rc",
     "@babel/runtime-corejs2": ">7.0.0-rc",
-    "@valos/gateway-api": "^0.34.0-prerelease.12",
+    "@valos/gateway-api": "^0.34.0-prerelease.13",
     "base64-js": "^1.2.3",
     "fake-indexeddb": "^2.0.3",
     "immutable": "~3.7.4",

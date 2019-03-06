@@ -244,6 +244,7 @@ describe("Vrapper", () => {
         testVrapper._obtainMediaInterpretation({ decodedContent: "" }, testVrapper);
         expect(mediaTypeUsed.type).toEqual("meta");
         expect(mediaTypeUsed.subtype).toEqual("data");
+
         testVrapper._obtainMediaInterpretation({ decodedContent: "", mimeFallback: "fall/back" },
             testVrapper);
         expect(mediaTypeUsed.type).toEqual("meta");

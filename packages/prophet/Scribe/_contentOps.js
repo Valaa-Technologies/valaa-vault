@@ -282,9 +282,12 @@ export function _requestMediaContents (connection: ScribePartitionConnection,
   const ret = mediaInfos.map(mediaInfo => {
     const onErrorWInfo = error => onError(error, mediaInfo);
     try {
-      const mediaEntry = connection._getMediaEntry(mediaInfo.mediaRef, false); // !!mediaInfo.asURL
       const actualInfo = { ...mediaInfo };
+      // If contentHash is null or defined then downstream has provided
+      // the full mediaInfo.
       if ((actualInfo.bvobId || actualInfo.contentHash) === undefined) {
+        // the require clause was !!mediaInfo.asURL. Why, though?
+        const mediaEntry = connection._getMediaEntry(mediaInfo.mediaRef, false);
         if (!mediaEntry || !mediaEntry.mediaInfo) {
           throw new Error(`Cannot find Media info for '${String(mediaInfo.mediaRef)}'`);
         }

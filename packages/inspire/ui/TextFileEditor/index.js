@@ -88,8 +88,10 @@ class TextFileEditor extends MediaContentEditor {
     if (!this.state.content) return "";
     if (typeof this.state.content === "string") return this.state.content;
     console.warn(this.debugId(), "TextFileEditor.getContent: invalid non-text content:",
-        this.state.content);
-    console.warn("\t", this.getFocus().get(VALEK.interpretContent({ mime: "text/plain" })));
+        "\n\tstate.content:", this.state.content,
+        "\n\tfocus:", this.getFocus(),
+        `\n\tfocus.get(VALEK.interpretContent({ mime: "text/plain"})):`,
+            this.getFocus().get(VALEK.interpretContent({ mime: "text/plain" })));
     throw new Error(`TextFileEditor given invalid non-string content:\n${
         beaumpify(this.state.content)}`);
   }

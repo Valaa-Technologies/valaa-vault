@@ -308,7 +308,7 @@ export default class Vrapper extends Cog {
       this._phase = this[HostRef].isGhost() ? INACTIVE : DESTROYED;
       return undefined;
     }
-    this.updateTransient(resolver.state, transient);
+    this._updateTransient(resolver.state, transient);
     const id = transient.get("id");
     if (!id.getPartitionURI() && !id.isGhost() && (this._typeName !== "Blob")) {
       if (id.isInactive()) return this;
@@ -596,7 +596,7 @@ export default class Vrapper extends Cog {
           options.require, false, options.mostMaterialized, options.withOwnField);
     }
     if (ret && !explicitState) {
-      this.updateTransient(null, ret);
+      this._updateTransient(null, ret);
     }
     return ret;
   }
@@ -616,17 +616,17 @@ export default class Vrapper extends Cog {
         createMaterializeGhostAction(discourse, this.getId(), this._typeName));
   }
 
-  updateTransient (state: ?Object, object: ?Object) {
+  _updateTransient (state: ?Object, object: ?Object) {
     // TODO(iridian): Storing the transient in the vrapper is silly and useless premature
     // optimization. With the transactions it can't really be used anyway, so yeah. Get rid of it
     // and just store the id VRef in the Vrapper.
     if (object) {
-      invariantifyObject(object, "Vrapper.updateTransient.object", { instanceof: Transient });
+      invariantifyObject(object, "Vrapper._updateTransient.object", { instanceof: Transient });
       this._transient = object;
       this._transientStaledIn = null;
     } else if (this._transient) {
       this._transientStaledIn = state;
-    } else throw new Error(`Must specify object with first updateTransient call`);
+    } else throw new Error(`Must specify object with first _updateTransient call`);
     if (!this.__debugId) this._refreshDebugId(this._transient, { state });
   }
 
@@ -1139,28 +1139,31 @@ export default class Vrapper extends Cog {
     subtype: ["§->", "mediaType", false, "subtype"],
   });
 
-  /* Mutates options.mediaInfo */
+  /* (re-)assigns options.mediaInfo */
   resolveMediaInfo (options: VALKOptions = {}) {
-    const mediaInfo = {};
-    if (options.mediaInfo) Object.assign(mediaInfo, options.mediaInfo);
+    const mediaInfo = Object.assign({},
+        options.mediaInfo || this.get(Vrapper.toMediaInfoFields, options));
     function setMediaInfoMIME (mime) {
       const split = mime.split("/");
       mediaInfo.type = split[0];
       mediaInfo.subtype = split[1];
     }
-    const explicitMime = options.mime || (mediaInfo && mediaInfo.mime);
+    // First try explicitly requested mime
+    const explicitMime = options.mime || ((options.mediaInfo || {}).mime);
     if (explicitMime) {
       setMediaInfoMIME(explicitMime);
       mediaInfo.mime = mediaInfo.explicitMime;
     }
+    // Secondly accept Media.$V.mediaType-based mime
     if (!mediaInfo.type || !mediaInfo.subtype) {
-      Object.assign(mediaInfo, this.get(Vrapper.toMediaInfoFields, options));
-    }
-    if (!mediaInfo.type || !mediaInfo.subtype) {
+      // Thirdly try to determine mime from file type
       const fileNameMediaType = mediaTypeFromFilename(mediaInfo.name);
       if (fileNameMediaType) Object.assign(mediaInfo, fileNameMediaType);
       else {
-        setMediaInfoMIME((options && options.mimeFallback) || mediaInfo.mimeFallback
+        // Fourthly fall back to option.mimeFallback / option.mediaInfo.mimeFallback
+        setMediaInfoMIME((options && options.mimeFallback)
+            || mediaInfo.mimeFallback
+        // Fifthly use octet-stream
             || "application/octet-stream");
       }
     }
@@ -1197,24 +1200,18 @@ export default class Vrapper extends Cog {
           (this._mediaInterpretations || (this._mediaInterpretations = new WeakMap()))
               .get(mostMaterializedTransient);
       if (interpretationsByMime) {
-        if (!options.mediaInfo) {
-          mediaInfo = (options.mime ? { mime: options.mime } : {});
-        } else {
-          mediaInfo = this.resolveMediaInfo(Object.create(options));
-        }
-        options.mediaInfo = mediaInfo;
-        const cachedInterpretation = mediaInfo.mime && interpretationsByMime[mediaInfo.mime];
+        const mime = options.mime
+            || (mediaInfo = this.resolveMediaInfo(Object.create(options))).mime;
+        const cachedInterpretation = mime && interpretationsByMime[mime];
         if (cachedInterpretation
-            && (mediaInfo.mime || !options.mimeFallback
+            && (mime || !options.mimeFallback
                 || (cachedInterpretation === interpretationsByMime[options.mimeFallback]))) {
           return (options.synchronous !== false)
               ? cachedInterpretation
               : Promise.resolve(cachedInterpretation);
         }
       }
-      if (!mediaInfo || !mediaInfo.mediaId) {
-        options.mediaInfo = mediaInfo = this.resolveMediaInfo(Object.create(options));
-      }
+      options.mediaInfo = mediaInfo || (mediaInfo = this.resolveMediaInfo(Object.create(options)));
       let decodedContent = options.decodedContent;
       if (decodedContent === undefined) {
         const name = this.get("name", options);
@@ -1386,13 +1383,16 @@ export default class Vrapper extends Cog {
   }
 
   /**
-   * Eagerly returns an interpretation of this Media with optionally provided media type. Returns
-   * a fully integrated decoded content associated with this resource and the provided media type.
+   * Eagerly returns an interpretation of this Media with optionally
+   * provided media type. Returns a fully integrated decoded content
+   * associated with this resource and the provided media type.
    *
-   * If the interpretation is not immediately available or if the partition of the Media is not
-   * acquired, returns a promise for acquiring the partition and performing this operation instead.
+   * If the interpretation is not immediately available or if the
+   * partition of the Media is not acquired, returns a promise for
+   * acquiring the partition and performing this operation instead.
    *
-   * If options.synchronous equals true and this would return a promise, throws instead.
+   * If options.synchronous equals true and this would return a
+   * promise, throws instead.
    * If options.synchronous equals false always returns a promise.
    *
    * @param {VALKOptions} [options={}]
@@ -1400,7 +1400,9 @@ export default class Vrapper extends Cog {
    *
    * @memberof Vrapper
    */
-  interpretContent (options: VALKOptions = {}) { return this._obtainMediaInterpretation(options); }
+  interpretContent (options: VALKOptions = {}) {
+    return this._obtainMediaInterpretation(options);
+  }
 
   static toMediaPrepareBvobInfoFields = VALK.fromVAKON({
     name: ["§->", "name"],
@@ -1634,8 +1636,14 @@ export default class Vrapper extends Cog {
     return this.engine.getVrapper(ghostVRef, { state });
   }
 
-  onEventCREATED (vResource: Vrapper, passage: Passage, { state }: Story) {
-    this.updateTransient(state);
+  onEventCREATED (vResource: Vrapper, passage: Passage, story: Story) {
+    this._updateTransient(story.state);
+    if (this._subscribersByFieldName) {
+      const transient = this.getTransient({ typeName: passage.typeName, state: story.state });
+      for (const key of transient.keys()) {
+        this.notifyMODIFIEDHandlers(key, passage, story, vResource);
+      }
+    }
   }
 
   onEventMODIFIED (vResource: Vrapper, passage: Passage, story: Story) {
@@ -1643,7 +1651,7 @@ export default class Vrapper extends Cog {
       console.log(`${this.debugId()}.onEventMODIFIED()`, story, this);
     }
     try {
-      this.updateTransient(story.state);
+      this._updateTransient(story.state);
       if (passage.sets && passage.sets.name) {
         this._refreshDebugId(
             this.getTransient({ typeName: passage.typeName, state: story.state }),

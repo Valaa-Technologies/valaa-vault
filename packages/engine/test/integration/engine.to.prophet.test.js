@@ -26,7 +26,7 @@ describe("Media handling", () => {
     const buffer = arrayBufferFromUTF8String("example content");
     const contentHash = contentHashFromArrayBuffer(buffer);
     const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    const existingChroniclings = testPartitionBackend._chroniclings.length;
+    const existingChroniclingCount = testPartitionBackend._chroniclings.length;
     const { media, contentSetting } = await harness.runValaaScript(vRef("test_partition"), `
       const media = new Media({
           name: "text media",
@@ -45,7 +45,7 @@ describe("Media handling", () => {
     expect(media.get("content"))
         .toBeFalsy();
     expect(testPartitionBackend._chroniclings.length)
-        .toEqual(existingChroniclings + 1);
+        .toEqual(existingChroniclingCount + 1);
     testPartitionBackend.addPrepareBvobResult({ contentHash });
     const { bvobId } = await contentSetting;
     expect(bvobId.getId().rawId())
@@ -53,7 +53,7 @@ describe("Media handling", () => {
     expect(bvobId.getId().toJSON())
         .toEqual(media.get("content").getId().toJSON());
     expect(testPartitionBackend._chroniclings.length)
-        .toEqual(existingChroniclings + 2);
+        .toEqual(existingChroniclingCount + 2);
   });
 
   it("does an async prepareBvob for locally persisted Media content", async () => {
@@ -63,7 +63,7 @@ describe("Media handling", () => {
       } },
     });
     const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    const existingChroniclings = testPartitionBackend._chroniclings.length;
+    const existingChroniclingCount = testPartitionBackend._chroniclings.length;
     const buffer = arrayBufferFromUTF8String("example content");
     const contentHash = contentHashFromArrayBuffer(buffer);
     const { media, contentSetting } = await harness.runValaaScript(vRef("test_partition"), `
@@ -80,7 +80,7 @@ describe("Media handling", () => {
     expect(media.getId().toJSON())
         .toEqual(entities().test_partition.get(["§..", "text"]).getId().toJSON());
     expect(testPartitionBackend._chroniclings.length)
-        .toEqual(existingChroniclings + 1);
+        .toEqual(existingChroniclingCount + 1);
     // no remote confirmation!
     const { bvobId } = await contentSetting;
     expect(bvobId.getId().rawId())
@@ -96,10 +96,124 @@ describe("Media handling", () => {
         .toEqual(2); // good enough...
     testPartitionBackend.addPrepareBvobResult({ contentHash });
     expect(testPartitionBackend._chroniclings.length)
-        .toEqual(existingChroniclings + 1);
+        .toEqual(existingChroniclingCount + 1);
     await createBvobProphecy.meta.operation.getPersistedStory();
     expect(testPartitionBackend._chroniclings.length)
-        .toEqual(existingChroniclings + 2);
+        .toEqual(existingChroniclingCount + 2);
+  });
+
+  it("doesn't fetch a media content from the stale lookups when updating content", async () => {
+    harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
+      oracleOptions: { testAuthorityConfig: {
+        isRemoteAuthority: true, isLocallyPersisted: true, // as opposed to false of previous test
+      } },
+    });
+    const undefinedMedia = await harness.runValaaScript(vRef("test_partition"), `
+      new Media({
+        name: "undefined_text_media",
+        owner: this,
+        mediaType: { type: "application", subtype: "octet-stream" },
+      })`, {},
+    );
+    expect(undefinedMedia.get("content"))
+        .toBeNull();
+    expect(undefinedMedia.interpretContent({ synchronous: true }))
+        .toBeUndefined();
+
+    const initialContent = "initial content";
+    const initialBuffer = arrayBufferFromUTF8String(initialContent);
+    const initialContentHash = contentHashFromArrayBuffer(initialBuffer);
+
+    const subscribeToContentUpdate = contentMedia => resolve => {
+      return contentMedia.subscribeToMODIFIED("content", fieldUpdate => {
+        resolve({
+          fieldUpdate,
+          bvobId: contentMedia.get("content"),
+          content: contentMedia.interpretContent({ synchronous: true, mime: "text/plain" }),
+        });
+      });
+    };
+    const { contentMedia, createdProcess } = await harness.runValaaScript(vRef("test_partition"), `
+      this[Valaa.prepareBvob](initialBuffer).then(createBvob => {
+        const contentMedia = new Media({
+          name: "initial_content_media",
+          owner: this,
+          content: createBvob(),
+          mediaType: { type: "application", subtype: "octet-stream" },
+        });
+        return {
+          contentMedia,
+          createdProcess: new Promise(subscribeToContentUpdate(contentMedia)),
+        };
+      })`, { scope: { initialBuffer, console, subscribeToContentUpdate } },
+    );
+    const createdUpdate = await createdProcess;
+
+    expect(createdUpdate.fieldUpdate.value().getRawId())
+        .toEqual(initialContentHash);
+    expect(createdUpdate.bvobId.getRawId())
+        .toEqual(initialContentHash);
+    expect(createdUpdate.content)
+        .toEqual(initialContent);
+
+    expect(contentMedia.get("content").getRawId())
+        .toEqual(initialContentHash);
+    expect(contentMedia.interpretContent({ synchronous: true, mime: "text/plain" }))
+        .toEqual(initialContent);
+
+    const updateContent = "update content";
+    const updateBuffer = arrayBufferFromUTF8String(updateContent);
+    const updateContentHash = contentHashFromArrayBuffer(updateBuffer);
+
+    const { updateBvob, modifiedProcess } = await harness.runValaaScript(
+        undefinedMedia,
+        `this[Valaa.prepareBvob](updateBuffer).then(createBvob => ({
+          modifiedProcess: new Promise(subscribeToContentUpdate(this)),
+          updateBvob: (this.$V.content = createBvob()),
+        }));`,
+        { scope: { updateBuffer, console, subscribeToContentUpdate } },
+    );
+    const modifiedUpdate = await modifiedProcess;
+
+    expect(updateBvob.getRawId())
+        .toEqual(updateContentHash);
+
+    expect(modifiedUpdate.fieldUpdate.value().getRawId())
+        .toEqual(updateContentHash);
+    expect(modifiedUpdate.bvobId.getRawId())
+        .toEqual(updateContentHash);
+    expect(modifiedUpdate.content)
+        .toEqual(updateContent);
+
+    expect(undefinedMedia.get("content").getRawId())
+        .toEqual(updateContentHash);
+    expect(undefinedMedia.interpretContent({ synchronous: true, mime: "text/plain" }))
+        .toEqual(updateContent);
+
+    const { updateAgainBvob, modifiedAgainProcess } = await harness.runValaaScript(
+        contentMedia, // this time we update the contentMedia
+        `this[Valaa.prepareBvob](updateBuffer).then(createBvob => ({
+          modifiedAgainProcess: new Promise(subscribeToContentUpdate(this)),
+          updateAgainBvob: (this.$V.content = createBvob()),
+        }));`,
+        { scope: { updateBuffer, console, subscribeToContentUpdate } },
+    );
+    const modifiedAgainUpdate = await modifiedAgainProcess;
+
+    expect(updateAgainBvob.getRawId())
+        .toEqual(updateContentHash);
+
+    expect(modifiedAgainUpdate.fieldUpdate.value().getRawId())
+        .toEqual(updateContentHash);
+    expect(modifiedAgainUpdate.bvobId.getRawId())
+        .toEqual(updateContentHash);
+    expect(modifiedAgainUpdate.content)
+        .toEqual(updateContent);
+
+    expect(contentMedia.get("content").getRawId())
+        .toEqual(updateContentHash);
+    expect(contentMedia.interpretContent({ synchronous: true, mime: "text/plain" }))
+        .toEqual(updateContent);
   });
 });
 

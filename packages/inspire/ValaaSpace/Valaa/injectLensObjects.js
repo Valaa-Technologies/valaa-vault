@@ -1079,7 +1079,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       (focus?: Vrapper) => focus && focus.isActivating(),
       () => ({ delegate: [
         (focus, component) => {
-          component.enqueueRerenderIfPromise(Promise.resolve(focus.activate()));
+          component.enqueueRerenderIfPromise(Promise
+              .resolve(focus.activate())
+              .then(() => undefined));
           return undefined;
         },
         Valaa.Lens.loadingLens,

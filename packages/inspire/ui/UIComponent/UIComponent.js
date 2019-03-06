@@ -593,16 +593,20 @@ class UIComponent extends React.Component {
 
   enqueueRerenderIfPromise (maybePromise: any | Promise) {
     if (!isPromise(maybePromise)) return false;
-    return maybePromise.then(() => this.forceUpdate());
+    return maybePromise.then(renderValue => {
+      this._pendingRenderValue = renderValue;
+      this.forceUpdate();
+    });
   }
 
   render (): null | string | React.Element<any> | [] {
     let firstPassError;
-    let ret;
+    let ret = this._pendingRenderValue;
+    this._pendingRenderValue = undefined;
     let mainValidationFaults;
     let latestRenderRole;
     try {
-      if (!this._errorObject && !_checkForInfiniteRenderRecursion(this)) {
+      if ((ret === undefined) && !this._errorObject && !_checkForInfiniteRenderRecursion(this)) {
         // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
         if (this.props.hasOwnProperty("styleSheet")) {
           this.setUIContextValue(VSSStyleSheetSymbol, this.props.styleSheet);

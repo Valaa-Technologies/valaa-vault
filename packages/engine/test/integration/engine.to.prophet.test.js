@@ -124,15 +124,12 @@ describe("Media handling", () => {
     const initialBuffer = arrayBufferFromUTF8String(initialContent);
     const initialContentHash = contentHashFromArrayBuffer(initialBuffer);
 
-    const subscribeToContentUpdate = contentMedia => resolve => {
-      return contentMedia.subscribeToMODIFIED("content", fieldUpdate => {
-        resolve({
+    const subscribeToContentUpdate = contentMedia => resolve =>
+        contentMedia.subscribeToMODIFIED("content", fieldUpdate => resolve({
           fieldUpdate,
           bvobId: contentMedia.get("content"),
           content: contentMedia.interpretContent({ synchronous: true, mime: "text/plain" }),
-        });
-      });
-    };
+        }));
     const { contentMedia, createdProcess } = await harness.runValaaScript(vRef("test_partition"), `
       this[Valaa.prepareBvob](initialBuffer).then(createBvob => {
         const contentMedia = new Media({

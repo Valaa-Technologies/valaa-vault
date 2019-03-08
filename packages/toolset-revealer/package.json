@@ -4,7 +4,7 @@
     "type": "toolset",
     "domain": "gateway"
   },
-  "version": "0.34.0-prerelease.14",
+  "version": "0.34.0-prerelease.15",
   "description": "Tools for building revelations both for development and deployment purposes",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",

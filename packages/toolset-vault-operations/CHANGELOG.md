@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.15](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.14...v0.34.0-prerelease.15) (2019-03-08)
+
+**Note:** Version bump only for package @valos/toolset-vault-operations
+
+
+
+
+
 # [0.34.0-prerelease.14](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.13...v0.34.0-prerelease.14) (2019-03-06)
 
 **Note:** Version bump only for package @valos/toolset-vault-operations

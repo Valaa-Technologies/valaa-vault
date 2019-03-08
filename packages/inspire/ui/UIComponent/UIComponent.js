@@ -11,7 +11,8 @@ import { Kuery, dumpKuery, dumpObject } from "~/engine/VALEK";
 
 import Presentable from "~/inspire/ui/Presentable";
 
-import { arrayFromAny, invariantify, isPromise, outputError, wrapError } from "~/tools";
+import { arrayFromAny, invariantify, isPromise, outputError, wrapError }
+    from "~/tools";
 
 import { clearScopeValue, getScopeValue, setScopeValue } from "./scopeValue";
 import { presentationExpander } from "./presentationHelpers";
@@ -76,6 +77,8 @@ class UIComponent extends React.Component {
     failedActivationLens: PropTypes.any,
     pendingMediaInterpretationLens: PropTypes.any,
     failedMediaInterpretationLens: PropTypes.any,
+    unrenderableMediaInterpretationLens: PropTypes.any,
+    mediaInterpretationErrorLens: PropTypes.any,
 
     resourceLens: PropTypes.any,
     activeLens: PropTypes.any,
@@ -135,6 +138,8 @@ class UIComponent extends React.Component {
     failedActivationLens: PropTypes.any,
     pendingMediaInterpretationLens: PropTypes.any,
     failedMediaInterpretationLens: PropTypes.any,
+    unrenderableMediaInterpretationLens: PropTypes.any,
+    mediaInterpretationErrorLens: PropTypes.any,
 
     resourceLens: PropTypes.any,
     activeLens: PropTypes.any,
@@ -552,7 +557,7 @@ class UIComponent extends React.Component {
         : null;
   }
 
-  renderFirstAbleDelegate (delegates: any[], focus: any = this.tryFocus(), lensName: string):
+  renderFirstEnabledDelegate (delegates: any[], focus: any = this.tryFocus(), lensName: string):
       null | string | React.Element<any> | [] | Promise<any> {
     return _renderFirstAbleDelegate(this, delegates, focus, lensName);
   }
@@ -687,6 +692,16 @@ class UIComponent extends React.Component {
         const failure: any = this.renderLensRole(errorLensRole, errorObject);
         if (isPromise(failure)) throw new Error(`${errorLensRole} returned a promise`);
         ret = failure;
+        let isSticky = errorObject.isSticky;
+        if (isSticky === undefined) {
+          const engine = this.context.engine;
+          const errorDescriptor = engine.getHostObjectDescriptor(
+              engine.getRootScope().Valaa.Lens[errorLensRole]);
+          isSticky = (errorDescriptor || {}).isStickyError;
+        }
+        if (!isSticky) {
+          Promise.resolve(true).then(() => { this._errorObject = undefined; });
+        }
       }
       internalErrorValidationFaults = _validateElement(this, ret);
       if (internalErrorValidationFaults) {

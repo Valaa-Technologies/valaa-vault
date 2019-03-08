@@ -9,7 +9,7 @@ import Vrapper from "~/engine/Vrapper";
 import VALEK from "~/engine/VALEK";
 import debugId from "~/engine/debugId";
 
-import { arrayFromAny, isPromise, isSymbol, wrapError } from "~/tools";
+import { arrayFromAny, isPromise, isSymbol, thenChainEagerly, wrapError } from "~/tools";
 
 import UIComponent, { isUIComponentElement } from "./UIComponent";
 import { uiComponentProps } from "./_propsOps";
@@ -35,8 +35,8 @@ export function _locateLensRoleAssignee (component: UIComponent,
   if (onlyIfAble) {
     const descriptor = component.context.engine.getHostObjectDescriptor(roleSymbol);
     if (descriptor
-        && (typeof descriptor.isLensAvailable === "function")
-        && !descriptor.isLensAvailable(focus, component)) {
+        && (typeof descriptor.isEnabled === "function")
+        && !descriptor.isEnabled(focus, component)) {
       return undefined;
     }
   }
@@ -165,18 +165,12 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
             lensRole: "pendingActivationLens", focus: lens,
             onError: { lensRole: "failedActivationLens", resource: lens },
           });
-          return blocker;
+          return blocker.then(() => undefined); // Ensure that re-render is triggered
         }
         if (lens.hasInterface("Media")) {
           ret = _tryRenderMediaLens(component, lens, focus, lensName);
-          if (isPromise(ret)) return ret;
           subLensName = `media-${lensName}`;
         } else {
-          console.warn("NEW BEHAVIOUR: non-Media Resources as direct lenses are now in effect.",
-              "When a Resource is used as a lens, it will be searched for a lens property",
-              "and if found the lens property will be used _while retaining the original focus,",
-              "which likely is not necessarily the lens Resource itself",
-              "\n\tin component:", component.debugId(), component);
           const Valaa = component.getValaa();
           subLensName = `delegate-lens-${lensName}`;
           ret = _locateLensRoleAssignee(component, "delegatePropertyLens",
@@ -186,16 +180,6 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
             return component.renderLensRole("notLensResourceLens", lens, subLensName);
           }
         }
-        /*
-        console.error("DEPRECATED, SUBJECT TO CHANGE:",
-            "VSX notation `{focus.foo}` sets focus.foo as the new focus, for now",
-            "\n\tprefer: `{{ focus: focus.foo }}` (ie no-scope syntax) to set focus",
-            "\n\tchange: the compact notation will be used for rendering focus.foo",
-            "as a _lens_, WITHOUT changing the focus.",
-            "\n\tin component:", component.debugId(), component);
-        return React.createElement(_ValaaScope,
-            component.childProps(`legacy-focus-${lensName}`, { focus: lens }, {}));
-        */
       } else if (Array.isArray(lens)) {
         return _tryRenderLensArray(component, lens, focus);
       } else if (Object.getPrototypeOf(lens) === Object.prototype) {
@@ -214,48 +198,65 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
     case "symbol":
       return component.renderLensRole(lens, focus, undefined, onlyIfAble, onlyOnce);
   }
-  if (React.isValidElement(ret)) return _wrapElementInLiveProps(component, ret, focus, subLensName);
-  if ((ret === undefined) || onlyOnce) return ret;
-  return component.renderLens(ret, focus, subLensName);
+  return thenChainEagerly(ret, resolvedRet => {
+    if (resolvedRet === undefined) return undefined;
+    if (React.isValidElement(resolvedRet)) {
+      return _wrapElementInLiveProps(component, resolvedRet, focus, subLensName);
+    }
+    if (onlyOnce) return resolvedRet;
+    return component.renderLens(resolvedRet, focus, subLensName);
+  });
 }
 
 function _tryRenderMediaLens (component: UIComponent, media: any, focus: any) {
   const kueryKey = `UIComponent.media.${media.getRawId()}`;
   if (!component.getSubscriber(kueryKey)) {
     component.attachKuerySubscriber(kueryKey, media, VALEK.toMediaContentField(), { onUpdate () {
-      // detaches the live kuery
-      // this is likely uselessly defensive programming: the whole UIComponent state should refresh
-      // anyway whenever the focus changes.
+      // If focus has changed detaches the live kuery. This is likely
+      // uselessly defensive programming as the whole UIComponent state
+      // should refresh anyway whenever the focus changes. Nevertheless
+      // return before forceupdate.
       if (component.tryFocus() !== focus) return false;
       component.forceUpdate();
       return undefined;
     } });
   }
   const options = { mimeFallback: "text/vsx" };
-  const onError = {
-    lensRole: "failedMediaInterpretationLens", media, mediaInfo: options.mediaInfo,
-  };
-  try {
-    let content = media.interpretContent(options);
-    if (content === undefined) {
-      throw new Error(`Can't render Media ${media.debugId()} with undefined content`);
-    }
-    if ((content != null) && content.__esModule) {
-      content = content.default;
-      if (content === undefined) {
-        throw new Error(`Can't find default export from Media '${media.debugId()}'`);
+  const ret = thenChainEagerly(null, [
+    () => media.interpretContent(options),
+    content => {
+      let error;
+      if (typeof content !== "object") {
+        if (content !== undefined) return content;
+        error = new Error(`Media interpretation is undefined`);
+      } else if (content.__esModule) {
+        if (content.default !== undefined) return content.default;
+        error = new Error(`Can't find default export from module Media '${media.debugId()}'`);
+      } else if (Array.isArray(content)
+          || (Object.getPrototypeOf(content) === Object.prototype)
+          || React.isValidElement(content)) {
+        return content;
+      } else if (content instanceof Error) {
+        error = content;
+      } else {
+        error = new Error(`Media interpretation is a complex type ${
+          (content.constructor || {}).name || "<unnamed>"}`);
       }
+      error.lensRole = "unrenderableMediaInterpretationLens";
+      throw error;
     }
-    if (isPromise(content)) {
-      content.operationInfo = Object.assign(content.operationInfo || {}, {
-        lensRole: "pendingMediaInterpretationLens", focus: media,
-        onError,
-      });
-    }
-    return content;
-  } catch (error) {
-    throw Object.assign(error, onError);
+  ], function errorOnRenderMediaLens (error) {
+    if (!error.lensRole) error.lensRole = "mediaInterpretationErrorLens";
+    error.media = media;
+    error.mediaInfo = options.mediaInfo;
+    throw error;
+  });
+  if (isPromise(ret)) {
+    ret.operationInfo = Object.assign(ret.operationInfo || {}, {
+      lensRole: "pendingMediaInterpretationLens", focus: media,
+    });
   }
+  return ret;
 }
 
 export function _wrapElementInLiveProps (component: UIComponent, element: Object, focus: any,

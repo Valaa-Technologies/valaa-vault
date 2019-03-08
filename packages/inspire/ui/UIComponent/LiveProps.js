@@ -226,7 +226,7 @@ export default class LiveProps extends UIComponent {
     }
     let ret;
     if (newProps.delegate && (Object.keys(newProps).length === 1)) {
-      ret = this.renderFirstAbleDelegate(newProps.delegate, undefined, "delegate");
+      ret = this.renderFirstEnabledDelegate(newProps.delegate, undefined, "delegate");
     /* Only enable this section for debugging React key warnings; it will break react elsewhere
     if (elementType === ValaaScope) {
       elementType = class DebugValaaScope extends ValaaScope {};

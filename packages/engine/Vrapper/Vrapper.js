@@ -1177,6 +1177,7 @@ export default class Vrapper extends Cog {
     let mostMaterializedTransient;
     let wrap;
     const vrapper = this;
+    let interpretationsByMime;
     try {
       const activeTypeName = typeName || this.getTypeName(options);
       if (activeTypeName !== "Media") {
@@ -1196,7 +1197,7 @@ export default class Vrapper extends Cog {
       // decoders will also not refresh the caches.
       // TODO(iridian): Re-evaluate this if ever we end up having Media properties affect the
       // interpretation. In that case the change of a property should flush this cache.
-      let interpretationsByMime: Object =
+      interpretationsByMime =
           (this._mediaInterpretations || (this._mediaInterpretations = new WeakMap()))
               .get(mostMaterializedTransient);
       if (interpretationsByMime) {
@@ -1219,7 +1220,10 @@ export default class Vrapper extends Cog {
           String(mediaInfo && mediaInfo.mime)})`);
         decodedContent = this._withActiveConnectionChainEagerly(Object.create(options), [
           connection => connection.decodeMediaContent(mediaInfo),
-        ], errorOnObtainMediaInterpretation);
+        ], function errorOnDecodeMediaContent (error) {
+          _setInterPretationByMimeCacheEntry(error);
+          return errorOnObtainMediaInterpretation(error);
+        });
         if ((options.synchronous === true) && isPromise(decodedContent)) {
           throw new Error(`Media interpretation not immediately available for '${
               mediaInfo.name || "<unnamed>"}'`);
@@ -1241,24 +1245,16 @@ export default class Vrapper extends Cog {
       if (!vScope) vScope = this;
       const interpretation = this.engine._integrateDecoding(decodedContent, vScope, mediaInfo,
           options);
-      if (!interpretationsByMime) {
-        this._mediaInterpretations
-            .set(mostMaterializedTransient, interpretationsByMime = {});
-      }
-      interpretationsByMime[mediaInfo.mime] = interpretation;
-      if (!options.mediaInfo && !options.mime
-          && (!options.mimeFallback || (mediaInfo.mime === options.mimeFallback))) {
-        // Set default integration lookup
-        interpretationsByMime[""] = interpretation;
-      }
+      _setInterPretationByMimeCacheEntry(interpretation);
       return interpretation;
     } catch (error) {
+      _setInterPretationByMimeCacheEntry(error);
       wrap = new Error(`_obtainMediaInterpretation('${this.get("name", options)}' as ${
           String(mediaInfo && mediaInfo.mime)})`);
       return errorOnObtainMediaInterpretation(error);
     }
     function errorOnObtainMediaInterpretation (error) {
-      throw vrapper.wrapErrorEvent(error, wrap,
+      const wrapped = vrapper.wrapErrorEvent(error, wrap,
         "\n\tid:", vrapper.getId(options).toString(),
         "\n\toptions:", ...dumpObject(options),
         "\n\tvExplicitOwner:", ...dumpObject(vExplicitOwner),
@@ -1268,6 +1264,20 @@ export default class Vrapper extends Cog {
           vrapper._partitionConnection && vrapper._partitionConnection.isActive()),
         "\n\tvrapper:", ...dumpObject(vrapper),
       );
+      throw wrapped;
+    }
+    function _setInterPretationByMimeCacheEntry (interpretation: any) {
+      if (!mediaInfo.mime || !mostMaterializedTransient) return;
+      if (!interpretationsByMime) {
+        vrapper._mediaInterpretations
+            .set(mostMaterializedTransient, interpretationsByMime = {});
+      }
+      interpretationsByMime[mediaInfo.mime] = interpretation;
+      if (!options.mediaInfo && !options.mime
+          && (!options.mimeFallback || (mediaInfo.mime === options.mimeFallback))) {
+        // Set default integration lookup
+        interpretationsByMime[""] = interpretation;
+      }
     }
   }
 

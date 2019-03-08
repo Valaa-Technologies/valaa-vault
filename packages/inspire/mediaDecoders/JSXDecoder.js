@@ -32,10 +32,23 @@ export default class JSXDecoder extends MediaDecoder {
       sourceMap: new Map(),
     };
     try {
-      sourceInfo.source = `<UIComponent>${this.stringFromBuffer(buffer)}</UIComponent>`;
+      const originalSource = this.stringFromBuffer(buffer);
+      sourceInfo.source = `<UIComponent>\n${originalSource}\n</UIComponent>`;
       sourceInfo.phase = `decode-jsx-transform phase of ${sourceInfo.phaseBase}`;
-      sourceInfo.jsxTransformedSource = _jsxTransformFromString(sourceInfo.source,
+      try {
+        sourceInfo.jsxTransformedSource = _jsxTransformFromString(sourceInfo.source,
           this._getJSXTransformOptions(sourceInfo));
+      } catch (error) {
+        if (!error.column || !error.lineNumber) throw error;
+        sourceInfo.source = originalSource;
+        const loc = {
+          start: { line: error.lineNumber - 1, column: error.column - 1 }, // 3?
+          end: { line: error.lineNumber - 1, column: error.column },
+        };
+        const sourceDummy = {};
+        sourceInfo.sourceMap.set(sourceDummy, { loc });
+        throw addStackFrameToError(error, sourceDummy, sourceInfo);
+      }
       return this._decodeIntoIntegrator(sourceInfo, sourceInfo.jsxTransformedSource);
     } catch (error) {
       throw this.wrapErrorEvent(error, `decode(${sourceInfo.phaseBase})`,

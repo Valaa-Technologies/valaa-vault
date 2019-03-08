@@ -46,6 +46,11 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
         errorText = sourceLines.slice(0, error.loc.line)
             .concat(underline)
             .concat(sourceLines.slice(error.loc.line)).join("\n");
+        const parseDummy = {};
+        actualTranspiler._sourceInfo.sourceMap.set(parseDummy, {
+          loc: { start: error.loc },
+        });
+        addStackFrameToError(error, parseDummy, actualTranspiler._sourceInfo);
       }
       throw actualTranspiler.wrapErrorEvent(error, `transpileKueryFromText`,
           "\n\ttext:", { text: `\n${"```"}\n${errorText}\n${"```"}\n` },

@@ -30,7 +30,7 @@ export function addStackFrameToError (error: Error, sourceObject: Object,
   const stackFrame = { sourceObject, sourceInfo };
   // TODO(iridian): fix hack: grep wrapError.js outputError for "sourceStackFrames"
   error.sourceStackFrames = (error.sourceStackFrames || []).concat(stackFrame);
-  error.customErrorHandler = function (logger) {
+  error.customErrorHandler = function outputValOSStackTrace (logger) {
     logger.error(`Valaa stack trace originating from ${sourceInfo.phase || "unknown context"}:`);
     const messages = parseErrorMessagesFromStackTrace(this.sourceStackFrames);
     messages.forEach(components => components && logger.error("    ", ...components));
@@ -64,7 +64,7 @@ export function parseErrorMessagesFromStackTrace (stackTrace: VALKStackTrace) {
 
     // Gets the error boundaries
     const start = !mapEntry ? { line: -1, column: -1 } : mapEntry.loc.start;
-    const end = !mapEntry ? { line: -1, column: -1 } : mapEntry.loc.end;
+    const end = !mapEntry ? { line: -1, column: -1 } : (mapEntry.loc.end || start);
 
     // Bail out early if this a repeat of the previous error message
     if (latestError.start.line === start.line
@@ -103,7 +103,11 @@ export function parseErrorMessagesFromStackTrace (stackTrace: VALKStackTrace) {
         const underline = `${" ".repeat(start.column)}${"^".repeat(underlineLength)}`;
         latestError.lineInfo = `line ${start.line}, columns ${start.column} to ${end.column} ${
             mediaInfoString}`;
-        latestError.messages = [`\n${snippetLines[0]}\n${underline}\n`];
+        const contextPreceder = start.line >= 2 ? `\n${sourceLines[start.line - 2]}` : "";
+        const contextFollower = end.line < sourceLines.length ? `${sourceLines[end.line]}\n` : "";
+        latestError.messages = [
+          `${contextPreceder}\n${snippetLines[0]}\n${underline}\n${contextFollower}`,
+        ];
       } else if (snippetLines.length > 1) {
         latestError.lineInfo = `lines ${start.line} (col ${start.column}) to ${end.line} (col ${
             end.column}) ${mediaInfoString}`;

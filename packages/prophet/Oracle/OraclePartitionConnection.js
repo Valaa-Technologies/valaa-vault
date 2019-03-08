@@ -133,9 +133,11 @@ export default class OraclePartitionConnection extends PartitionConnection {
         return errorOnOracleConnectionRequestMediaContentForInfo(error);
       }
       function errorOnOracleConnectionRequestMediaContentForInfo (error) {
-        return Promise.reject(connection.wrapErrorEvent(error, wrap,
+        const wrapped = connection.wrapErrorEvent(error, wrap,
             "\n\tmediaRef:", ...dumpObject(mediaInfo.mediaRef),
-            "\n\tmediaInfo:", ...dumpObject(mediaInfo)));
+            "\n\tmediaInfo:", ...dumpObject(mediaInfo));
+        if (mediaInfos.length === 1) throw wrapped;
+        return Promise.reject(wrapped);
       }
     });
     if (urlRequests.length) {

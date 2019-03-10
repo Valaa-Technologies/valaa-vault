@@ -40,12 +40,15 @@ export class LogEventGenerator {
 
   getLogger (): Logger | Object { return this._logger; }
   getName (): string { return this._name; }
+  getRawName (): string { return this._name; }
   setName (name: any) { this._name = name; }
 
   getVerbosity () { return this._verbosity; }
   setVerbosity (value: number) { this._verbosity = value; }
 
-  debugId (): string { return `${this.constructor.name}(${this.getName()})`; }
+  debugId (opts): string {
+    return `${this.constructor.name}(${!(opts || {}).raw ? this.getName() : this.getRawName()})`;
+  }
 
   info (...rest: any[]) { return this._logger.info(...rest); }
   log (...rest: any[]) { return this._logger.log(...rest); }
@@ -92,8 +95,9 @@ export class LogEventGenerator {
     // Valma logger gives only the first argument a specific coloring,
     // this way the actual first piece will get the coloring as well.
     return (typeof pieces[0] !== "string" || !joinFirstPieceWithId)
-        ? operation(`${this.debugId()}:`, ...pieces)
-        : operation(`${this.debugId()}: ${pieces[0]}`, ...pieces.slice(1));
+        ? operation(`${this.debugId({ raw: !joinFirstPieceWithId })}:`, ...pieces)
+        : operation(`${this.debugId({ raw: !joinFirstPieceWithId })}: ${pieces[0]}`,
+            ...pieces.slice(1));
   }
 
   wrapErrorEvent (error: Error, functionName: Error | string, ...contexts: any[]) {
@@ -120,6 +124,21 @@ export class LogEventGenerator {
 
   outputErrorEvent (error: Error, ...rest) {
     return outputError(error, ...rest);
+  }
+
+  addChainClockers (minVerbosity: number, eventPrefix: string, thenChainCallbacks: Function[]) {
+    if (!(this.getVerbosity() >= minVerbosity)) return thenChainCallbacks;
+    return [].concat(...thenChainCallbacks.map((callback, index) => [
+      head => {
+        this.clockEvent(minVerbosity, `${eventPrefix}[${index}]`, callback.name);
+        return head;
+      },
+      callback,
+    ]),
+    result => {
+      this.clockEvent(minVerbosity, `${eventPrefix}.done`, "");
+      return result;
+    });
   }
 }
 

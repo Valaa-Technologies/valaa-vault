@@ -54,6 +54,7 @@ export default class PartitionConnection extends Follower {
         || (this._upstreamConnection && this._upstreamConnection.getName())
         || String(this.getPartitionURI());
   }
+  getRawName (): string { return String(this.getPartitionURI()); }
   getProphet (): Prophet { return this._prophet; }
 
   getPartitionURI (): ValaaURI { return this._partitionURI; }
@@ -129,37 +130,38 @@ export default class PartitionConnection extends Follower {
     this.warnEvent(1, () => [
       "\n\tBegun connecting with options", ...dumpObject(options), ...dumpObject(this)
     ]);
-    return (this._activeConnection = thenChainEagerly(Object.create(options), [
-      (doConnectOptions) => this._doConnect(doConnectOptions),
-      (connectResults) => {
+    return (this._activeConnection = thenChainEagerly(null,
+        this.addChainClockers(1, "connection.connect.ops", [
+      function _doConnect () { return connection._doConnect(Object.create(options)); },
+      function _postProcess (connectResults) {
         if (options.narrateOptions !== false) {
           const actionCount = Object.values(connectResults).reduce(
               (s, log) => s + (Array.isArray(log) ? log.length : 0),
               options.eventIdBegin || 0);
           if (!actionCount && (options.newPartition === false)) {
             throw new Error(`No events found when connecting to an existing partition '${
-              this.getPartitionURI().toString()}'`);
+              connection.getPartitionURI().toString()}'`);
           } else if (actionCount && (options.newPartition === true)) {
             throw new Error(`Existing events found when trying to create a new partition '${
-              this.getPartitionURI().toString()}'`);
+              connection.getPartitionURI().toString()}'`);
           }
           if ((options.requireLatestMediaContents !== false)
               && (connectResults.mediaRetrievalStatus
                   || { latestFailures: [] }).latestFailures.length) {
             // FIXME(iridian): This error temporarily demoted to log error
-            this.outputErrorEvent(new Error(`Failed to connect to partition: encountered ${
+            connection.outputErrorEvent(new Error(`Failed to connect to partition: encountered ${
               connectResults.mediaRetrievalStatus.latestFailures.length
                 } latest media content retrieval failures (and ${
                 ""}options.requireLatestMediaContents does not equal false).`));
           }
         }
-        this.warnEvent(1, () => [
+        connection.warnEvent(1, () => [
           "\n\tDone connecting with results:", ...dumpObject(connectResults),
-          "\n\tstatus:", ...dumpObject(this.getStatus()),
+          "\n\tstatus:", ...dumpObject(connection.getStatus()),
         ]);
-        return (this._activeConnection = this);
+        return (connection._activeConnection = connection);
       },
-    ], function errorOnConnect (error, stepIndex, stepHead) {
+    ]), function errorOnConnect (error, stepIndex, stepHead) {
       throw connection.wrapErrorEvent(error, wrap,
           "\n\toptions:", ...dumpObject(options),
           `\n\tstep #${stepIndex} head:`, ...dumpObject(stepHead));
@@ -176,10 +178,16 @@ export default class PartitionConnection extends Follower {
     options.narrateOptions = false;
     this.setUpstreamConnection(this._prophet._upstream.acquirePartitionConnection(
         this.getPartitionURI(), options));
-    return thenChainEagerly(
-        this._upstreamConnection.getActiveConnection(),
-        () => ((postponedNarrateOptions !== false)
-            && this.narrateEventLog(postponedNarrateOptions)));
+    const connection = this;
+    return thenChainEagerly(null, this.addChainClockers(1, "connection.doConnect.ops", [
+      function _waitActiveUpstream () {
+        return connection._upstreamConnection.getActiveConnection();
+      },
+      function _narrateEventLog () {
+        return (postponedNarrateOptions !== false)
+            && connection.narrateEventLog(postponedNarrateOptions);
+      },
+    ]));
   }
 
   /**

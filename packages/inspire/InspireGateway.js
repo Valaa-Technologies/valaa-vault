@@ -174,7 +174,7 @@ export default class InspireGateway extends LogEventGenerator {
       registerVidgets();
       const pluginNames = Object.keys(this._attachedPlugins);
       this.clockEvent(1, `plugins.notify`,
-          `Notifying ${pluginNames.length} plugins about gateway initialized:`,
+          `Notifying ${pluginNames.length} plugins of gateway initialization:`,
           pluginNames.join(", "));
       for (const plugin of Object.values(this._attachedPlugins)) {
         await this._notifyPluginGatewayInitialized(plugin);
@@ -232,25 +232,25 @@ export default class InspireGateway extends LogEventGenerator {
         extendValaaSpaceWithInspire(rootScope, hostDescriptors, hostGlobal,
               defaultAuthorityConfig, engine);
       }
-      rootScope.Valaa.gateway = this;
+      const gateway = rootScope.Valaa.gateway = this;
       rootScope.Valaa.identity = engine.getIdentityManager();
 
       const name = `${viewConfig.name} View`;
-      engine.clockEvent(1, `${viewConfig.name}.view.create`);
-      this._views[viewName] = thenChainEagerly(createView({ gateway: this, engine, name }), [
-        view => view.attach(viewConfig),
-        attachedView => {
+      engine.clockEvent(1, `view.create`);
+      this._views[viewName] = thenChainEagerly(null, engine.addChainClockers(1, "view.create.ops", [
+        function _createView () { return createView({ gateway, engine, name }); },
+        function _attachView (view) { return view.attach(viewConfig); },
+        function _notifyViewPlugins (attachedView) {
           attachedView.rootScope = rootScope;
-          this._views[viewName] = rootScope.Valaa.view = attachedView;
-          engine.clockEvent(1, `${viewConfig.name}.plugins.notify`);
+          gateway._views[viewName] = rootScope.Valaa.view = attachedView;
           return mapEagerly(
-              Object.values(this._attachedPlugins).filter(plugin => plugin.onViewAttached),
-              plugin => this._notifyPluginViewAttached(plugin, attachedView, viewName));
+              Object.values(gateway._attachedPlugins).filter(plugin => plugin.onViewAttached),
+              plugin => gateway._notifyPluginViewAttached(plugin, attachedView, viewName));
         },
         notifys => engine.clockEvent(1, `${viewConfig.name}.plugins.reacted`,
             "\n\tplugin reactions:", ...dumpObject(notifys.filter(notNull => notNull))),
-        () => this._views[viewName],
-      ]);
+        () => gateway._views[viewName],
+      ]));
       this.warnEvent(1, () => [
         `Opened View ${viewName}`,
         ...(this.getVerbosity() <= 1 ? [] : [", with:",
@@ -272,7 +272,8 @@ export default class InspireGateway extends LogEventGenerator {
    */
   async _interpretRevelation (revelation: Revelation): Object {
     try {
-      this.warnEvent(1, () => [`Interpreted revelation`, ...dumpObject(revelation)]);
+      this.clockEvent(0, () => ["gateway.revelation",
+          `Interpreted revelation`, ...dumpObject(revelation)]);
       return revelation;
     } catch (error) {
       throw this.wrapErrorEvent(error, "interpretRevelation", "\n\trevelation:", ...dumpObject(revelation));
@@ -282,11 +283,13 @@ export default class InspireGateway extends LogEventGenerator {
   async _establishAuthorityNexus (gatewayRevelation: Object) {
     let nexusOptions;
     try {
-      this.clockEvent(1, `authorityNexus.create`);
       nexusOptions = {
         name: "Inspire AuthorityNexus",
         authorityConfigs: await gatewayRevelation.authorityConfigs,
+        ...(await gatewayRevelation.nexus || {}),
       };
+      this.clockEvent(1, () => [`authorityNexus.create`,
+        "new AuthorityNexus", ...dumpObject(nexusOptions)]);
       const nexus = new AuthorityNexus(nexusOptions);
       nexus.clockEvent(1, `create`,
           ...(!this.getVerbosity() ? [] : [", with:",
@@ -303,7 +306,6 @@ export default class InspireGateway extends LogEventGenerator {
   async _proselytizeScribe (gatewayRevelation: Object, oracle: Oracle): Promise<Scribe> {
     let scribeOptions;
     try {
-      this.clockEvent(1, `scribe.create`);
       scribeOptions = {
         name: "Inspire Scribe",
         logger: this.getLogger(),
@@ -311,8 +313,10 @@ export default class InspireGateway extends LogEventGenerator {
         databaseAPI: gatewayRevelation.scribe.getDatabaseAPI(),
         ...await gatewayRevelation.scribe,
       };
+      this.clockEvent(1, () => [`scribe.create`,
+        "new Scribe", ...dumpObject(scribeOptions)]);
       const scribe = new Scribe(scribeOptions);
-      this.clockEvent(1, `scribe.initiate`);
+      this.clockEvent(1, `scribe.initiate`, "scribe.initiate()");
       await scribe.initiate();
 
       this.warnEvent(1, () => [
@@ -333,13 +337,14 @@ export default class InspireGateway extends LogEventGenerator {
       Promise<Prophet> {
     let oracleOptions;
     try {
-      this.clockEvent(1, `oracle.create`);
       oracleOptions = {
         name: "Inspire Oracle",
         logger: this.getLogger(),
         authorityNexus,
         ...await gatewayRevelation.oracle,
       };
+      this.clockEvent(1, () => [`oracle.create`,
+        "new Oracle", ...dumpObject(oracleOptions)]);
       const oracle = new Oracle(oracleOptions);
       this.warnEvent(1, () => [
         `Proselytized Oracle ${oracle.debugId()}`,
@@ -357,7 +362,6 @@ export default class InspireGateway extends LogEventGenerator {
   }
 
   async _incorporateCorpus (gatewayRevelation: Object) {
-    this.clockEvent(1, `corpus.create`);
     const name = "Inspire Corpus";
     const reducerOptions = {
       ...EngineContentAPI, // schema, validators, reducers
@@ -381,6 +385,7 @@ export default class InspireGateway extends LogEventGenerator {
       logger: this.getLogger(),
       ...await gatewayRevelation.corpus,
     };
+    this.clockEvent(1, () => [`corpus.create`, "new Corpus", ...dumpObject(corpusOptions)]);
     return new Corpus(corpusOptions);
 
     function _createProcessCommandVersionMiddleware (version) {
@@ -400,8 +405,6 @@ export default class InspireGateway extends LogEventGenerator {
       Promise<Prophet> {
     let falseProphetOptions;
     try {
-      this.clockEvent(1, `falseProphet.create`);
-
       this._commandCountListeners = new Map();
       falseProphetOptions = {
         name: "Inspire FalseProphet",
@@ -428,6 +431,8 @@ export default class InspireGateway extends LogEventGenerator {
         },
         ...await gatewayRevelation.falseProphet,
       };
+      this.clockEvent(1, () => [`falseProphet.create`,
+        "new FalseProphet", ...dumpObject(falseProphetOptions)]);
       const falseProphet = new FalseProphet(falseProphetOptions);
       this.warnEvent(1, () => [
         `Proselytized FalseProphet ${falseProphet.debugId()}`,
@@ -528,7 +533,7 @@ export default class InspireGateway extends LogEventGenerator {
         "\n\troot partition:", rootPartitionURI,
       ]);
       this.clockEvent(1, `prologues.connect`, `Narrating and connecting ${prologues.length
-          } prologues and root partition <${rootPartitionURI}>`);
+          } prologues and root partition`, `<${rootPartitionURI}>`);
       const connections = await Promise.all(prologues.map(this._connectChronicleNarratePrologue));
       this.warnEvent(1, () => [
         `Acquired active connections for all revelation prologue partitions:`,
@@ -582,11 +587,12 @@ export default class InspireGateway extends LogEventGenerator {
     }
     // Acquire connection without remote narration to determine the current last authorized event
     // so that we can narrate any content in the prologue before any remote activity.
+    this.clockEvent(1, "prologue.acquire", `Acquiring connection <${partitionURI}>`);
     const connection = this.falseProphet
         .acquirePartitionConnection(partitionURI, {
           subscribeEvents: false, narrateOptions: { remote: false },
         });
-    connection.clockEvent(1, "activate", "Activating connection");
+    connection.clockEvent(1, "prologue.activate", "Activating connection");
     await connection.getActiveConnection();
     let prologueTruthCount = await info.truthCount;
     if (!Number.isInteger(prologueTruthCount)) {
@@ -640,13 +646,13 @@ export default class InspireGateway extends LogEventGenerator {
     }
     // Initiate remote narration.
     connection.clockEvent(1, `prologue.narrate`,
-        `Starting full narration and subscribing for events`);
+        `Starting full remote narration and subscribing for events`);
     const remoteNarration = connection.narrateEventLog({ subscribeEvents: true });
     if (!shouldChroniclePrologue && !(eventIdEnd > 0)) {
-      connection.clockEvent(1, `prologue.narrate.await`,
-          `Waiting for remote narration`);
+      connection.clockEvent(1, `prologue.narrate.await`, `Waiting for remote narration`);
       await remoteNarration;
     }
+    connection.clockEvent(1, `prologue.acquire.done`);
     return connection;
   }
 

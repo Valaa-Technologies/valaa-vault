@@ -256,6 +256,7 @@ function debugObjectNest (head, nest = 1, alwaysStringify = false,
   try {
     if (head === null) return "<null>";
     if (head === undefined) return "<undefined>";
+    if (typeof head === "boolean") return `<${head}>`;
     if (!alwaysStringify && inBrowser()) return head;
     if (typeof head === "function") {
       if (head.name) return `<function ${head.name}>`;
@@ -294,7 +295,7 @@ function debugObjectNest (head, nest = 1, alwaysStringify = false,
         || `{ ${Object.keys(head).map(key => {
               const desc = Object.getOwnPropertyDescriptor(head, key);
               return `${isSymbol(key) ? key.toString() : key}: ${
-                debugObjectNest(desc.value || desc.get, nest - 1, alwaysStringify, cache)
+                debugObjectNest(desc.get || desc.value, nest - 1, alwaysStringify, cache)
               }`;
             }).join(", ")} }`);
   } catch (error) {

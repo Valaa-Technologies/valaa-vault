@@ -71,7 +71,9 @@ export function _confirmCommands (connection: FalseProphetPartitionConnection,
 }
 
 export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConnection,
-    purgedCommands: ?Command[], newEvents: Command[], type: string) {
+    newEvents: Command[], type: string, purgedCommands: ?Command[]) {
+  connection.clockEvent(2, () => ["falseProphet.stories",
+      `_purgeAndRecomposeStories(${newEvents.length}, ${type}, ${purgedCommands || []}.length)`]);
   if (purgedCommands && purgedCommands.length) connection.setIsFrozen(false);
   const falseProphet = connection.getProphet();
   const originatingPartitionURI = connection.getPartitionURI();
@@ -90,12 +92,16 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
 
   // Purge events.
   if (purgedCommands) {
+    connection.clockEvent(2, () => ["falseProphet.stories.purge",
+        `_beginPurge(${purgedCommands}.length)`]);
     purgedRecital = _beginPurge(falseProphet, purgedCommands);
     purgedStory = purgedRecital && purgedRecital.next;
     reviewedPartitions = { [purgedPartitionURI]: {} };
   }
   let newEventIndex = 0;
   let reformingPurgedProphecy;
+  connection.clockEvent(2, () => ["falseProphet.stories.compose",
+      `Composing and reforming up to ${newEvents.length} events`]);
   while (true) { // eslint-disable-line
     // Alternate between dispatching new events and purged stories,
     // always preferring new events unless a new event is part of an
@@ -183,16 +189,21 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
 
   // Revise purged events.
   if (purgedRecital && (purgedRecital.next !== purgedRecital)) {
+    connection.clockEvent(2, () => ["falseProphet.stories.revise",
+      `Revising ${purgedRecital.size()} events from event ${newEventIndex} onward`]);
     const revisions = falseProphet._reviseSchismaticRecital(
         purgedRecital, reviewedPartitions, connection, purgedCommands, newEvents);
     if (revisions) newAndRewrittenStories.push(...revisions);
   }
 
+  connection.clockEvent(2, () => ["falseProphet.stories.recite",
+    `_tellStoriesToFollowers(${newAndRewrittenStories.length})`]);
   falseProphet._tellStoriesToFollowers(newAndRewrittenStories);
 
-  _affirmLeadingTruthsToFollowers(falseProphet);
+  _confirmLeadingTruthsToFollowers(falseProphet);
 
   connection._checkForFreezeAndNotify();
+  connection.clockEvent(2, "falseProphet.stories.done");
 }
 
 function _beginPurge (falseProphet: FalseProphet, purgedCommands: Command[]): Story {
@@ -308,20 +319,21 @@ export function _tellStoriesToFollowers (falseProphet: FalseProphet, stories: St
 // permanent truths in chronological order, ie. all stories at the
 // front of the recital marked as isTruth and which thus can no
 // longer be affected by any future purges and revisionings.
-function _affirmLeadingTruthsToFollowers (falseProphet: FalseProphet) {
+function _confirmLeadingTruthsToFollowers (falseProphet: FalseProphet) {
   const truths = [];
   for (let story = falseProphet._primaryRecital.getFirst(); story.isTruth; story = story.next) {
     truths.push(story);
   }
-  if (truths.length) {
-    falseProphet._primaryRecital.extractStoryChain(truths[0], truths[truths.length - 1].next);
-  }
+  falseProphet.clockEvent(2, () => ["falseProphet.truths.confirm",
+    `_confirmLeadingTruthsToFollowers(${truths.length})`]);
+  if (!truths.length) return;
+  falseProphet._primaryRecital.extractStoryChain(truths[0], truths[truths.length - 1].next);
   falseProphet._followers.forEach(discourse => {
     try {
       discourse.receiveTruths(truths);
     } catch (error) {
       falseProphet.outputErrorEvent(falseProphet.wrapErrorEvent(error,
-          "_affirmLeadingTruthsToFollowers",
+          "_confirmLeadingTruthsToFollowers",
           "\n\tstories:", ...dumpObject(truths),
           "\n\ttarget discourse:", ...dumpObject(discourse),
       ));

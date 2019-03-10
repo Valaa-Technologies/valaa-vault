@@ -357,17 +357,18 @@ const _vlm = {
     }
     return this;
   },
-  clock (context, event, ...message) {
+  clock (context, event, ...messages) {
     if (this.theme.clock) {
-      console.warn(this.theme.clock(`${context} clocks:`, event), ...message);
+      console.warn(this.theme.clock(`${context} clocks:`, event), ...messages);
     }
     if (this.clockEvents) {
       let start = process.hrtime(this.clockStartTime);
       start = start[0] * 1000 + Math.floor(start[1] / 1000000);
       const previousEvents = this.clockPreviousEvents || (this.clockPreviousEvents = {});
       const previous = previousEvents[context];
-      if (previous) previous.duration = start - previous.start;
-      this.clockEvents.push((previousEvents[context] = { context, event, start, message }));
+      if (previous && previous.message) previous.duration = start - previous.start;
+      this.clockEvents.push((previousEvents[context] =
+          { context, event, start, message: messages[0] || "" }));
     }
     return this;
   },
@@ -376,7 +377,7 @@ const _vlm = {
     let end = process.hrtime(this.clockStartTime);
     end = end[0] * 1000 + Math.floor(end[1] / 1000000);
     Object.values(this.clockPreviousEvents || {}).forEach(pendingEvent => {
-      pendingEvent.duration = end - pendingEvent.start;
+      if (pendingEvent.message) pendingEvent.duration = end - pendingEvent.start;
     });
     delete this.clockPreviousEvents;
   },

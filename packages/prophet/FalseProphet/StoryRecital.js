@@ -46,6 +46,7 @@ export default class StoryRecital {
     stories.forEach(story => this.addStory(story, beforeFirst));
   }
   shift () { return this.removeStory(this.next); }
+  size () { return Object.keys(this._storyByCommandId).length; }
 
   getFirst () { return this.next; }
   getLast () { return this.prev; }

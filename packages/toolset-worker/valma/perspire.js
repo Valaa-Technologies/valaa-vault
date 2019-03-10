@@ -86,7 +86,7 @@ exports.handler = async (yargv) => {
         { event: { text: "event name", style: "info" } },
         { start: { text: "start time", style: "info" } },
         { duration: { text: "duration", style: "info" } },
-        { message: { text: "message string", style: "info" } },
+        { message: { text: "event message", style: "info" } },
       ],
       entries: vlm.clockEvents,
     } };

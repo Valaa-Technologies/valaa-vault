@@ -413,6 +413,8 @@ export function _readTruths (connection: ScribePartitionConnection, options: Obj
   if (!connection._db) return undefined;
   const range = connection._db.getIDBKeyRange(options);
   if (range === null) return undefined;
+  connection.clockEvent(2, () => ["scribe.database.read.truths",
+    `_readTruths(${range.lower}, ${range.upper})`]);
   return connection._db.transaction(["truths"], "readonly",
       ({ truths }) => new Promise(_getAllShim.bind(null, connection, truths, range)));
 }
@@ -442,6 +444,8 @@ export function _readCommands (connection: ScribePartitionConnection, options: O
   if (!connection._db) return undefined;
   const range = connection._db.getIDBKeyRange(options);
   if (range === null) return undefined;
+  connection.clockEvent(2, () => ["scribe.database.read.commands",
+    `_readCommands(${range.lower}, ${range.upper})`]);
   return connection._db.transaction(["commands"], "readonly",
       ({ commands }) => new Promise(_getAllShim.bind(null, connection, commands, range)));
 }
@@ -521,6 +525,8 @@ function _getAllShim (connection: ScribePartitionConnection, database, range: ID
     req = database.getAll(range);
     req.onsuccess = () => {
       try {
+        connection.clockEvent(2, () => [`scribe.database.${database.name}.read.done`,
+          `resolve(${req.result.length})`]);
         resolve(req.result.map(eventLogRoot => swapAspectRoot("log", eventLogRoot, "event")));
       } catch (error) {
         reject(connection.wrapErrorEvent(error, `getAll("${database.name}", ${range})`,

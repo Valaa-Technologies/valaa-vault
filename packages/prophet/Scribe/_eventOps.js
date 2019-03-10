@@ -47,23 +47,29 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
     connection.chronicleEvents(localResults.scribeCommandQueue, options.rechronicleOptions || {});
   }
 
-  const upstreamNarration = thenChainEagerly(
-      connection.getUpstreamConnection().getActiveConnection(),
-      (connectedUpstream) => connectedUpstream.narrateEventLog({
+  const upstreamNarration = thenChainEagerly(null, connection.addChainClockers(2,
+      "scribe.narrate.remote.ops", [
+    function _waitActiveUpstream () {
+      return connection.getUpstreamConnection().getActiveConnection();
+    },
+    function _narrateUpstreamEventLog (connectedUpstream) {
+      return connectedUpstream.narrateEventLog({
         ...options,
         receiveTruths: connection.getReceiveTruths(options.receiveTruths),
         eventIdBegin: Math.max(options.eventIdBegin || 0, connection.getFirstUnusedTruthEventId()),
-      }));
+      });
+    },
+  ]));
 
   if ((options.fullNarrate !== true)
       && (options.newPartition
           || (ret.scribeTruthLog || []).length || (ret.scribeCommandQueue || []).length)) {
-    connection.logEvent(2, () => [
+    connection.clockEvent(2, () => ["scribe.narrate.local.done",
       "Initiated async upstream narration, local narration results:", ret,
     ]);
   } else {
     const upstreamResults = await _waitForRemoteNarration(connection, upstreamNarration, options);
-    connection.logEvent(2, () => [
+    connection.clockEvent(2, () => ["scribe.narrate.remote.done",
       "Awaited upstream narration, local narration results:", ret,
       "\n\tupstream results:", upstreamResults,
     ]);
@@ -84,15 +90,21 @@ async function _narrateLocalLogs (connection: ScribePartitionConnection,
   let currentEventId = eventIdBegin;
   if (receiveTruths) {
     const truthEventIdEnd = Math.min(connection.getFirstUnusedTruthEventId(), eventIdEnd);
+    connection.clockEvent(2, () => ["scribe.narrate.local.truths.read",
+        `_readTruths(${currentEventId}, ${truthEventIdEnd})`]);
     const truths = ((currentEventId < truthEventIdEnd) && await connection._readTruths({
       eventIdBegin: currentEventId, eventIdEnd: truthEventIdEnd
     })) || [];
     currentEventId = truthEventIdEnd;
+    connection.clockEvent(2, () => ["scribe.narrate.local.truths.receive",
+        `receiveTruths(${truths.length})`]);
     ret.scribeTruthLog = !truths.length ? truths
         : await Promise.all(await receiveTruths(truths, retrieveMediaBuffer));
   }
   if (receiveCommands) {
     const commandEventIdEnd = Math.min(connection.getFirstUnusedCommandEventId(), eventIdEnd);
+    connection.clockEvent(2, () => ["scribe.narrate.local.commands.read",
+      `_readCommands(${currentEventId}, ${commandEventIdEnd})`]);
     const commands = ((currentEventId < commandEventIdEnd) && await connection._readCommands({
       eventIdBegin: currentEventId, eventIdEnd: commandEventIdEnd,
     })) || [];
@@ -101,6 +113,8 @@ async function _narrateLocalLogs (connection: ScribePartitionConnection,
       connection._commandQueueInfo.commandIds[command.aspects.log.index - commandIdBegin]
           = command.aspects.command.id;
     });
+    connection.clockEvent(2, () => ["scribe.narrate.local.commands.receive",
+      `receiveCommands(${commands.length})`]);
     ret.scribeCommandQueue = !commands.length ? commands
         : await Promise.all(await receiveCommands(commands, retrieveMediaBuffer));
   }
@@ -112,7 +126,9 @@ async function _waitForRemoteNarration (connection: ScribePartitionConnection,
 ): Object {
   // Handle step 2 of the opportunistic narration if local narration
   // didn't find any truths by waiting for the upstream narration.
+  connection.clockEvent(2, () => ["scribe.narrate.remote.ops.await"]);
   const upstreamResults = await upstreamNarration;
+  connection.clockEvent(2, () => ["scribe.narrate.remote.results.await"]);
   for (const key of Object.keys(upstreamResults)) {
     const resultEntries = (upstreamResults[key] = await upstreamResults[key]);
     if (!Array.isArray(resultEntries)) continue;

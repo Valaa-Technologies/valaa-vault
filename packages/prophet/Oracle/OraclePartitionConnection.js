@@ -40,18 +40,26 @@ export default class OraclePartitionConnection extends PartitionConnection {
     // logic (defined in PartitionConnection.js) and begin I/O bound(?)
     // scribe event log narration in parallel to the authority
     // proxy/connection creation.
+    this.clockEvent(1, "oracle.doConnect", "_authorityProphet.acquirePartitionConnection");
     this.setUpstreamConnection(this._authorityProphet.acquirePartitionConnection(
         this.getPartitionURI(), {
           narrateOptions: false,
           subscribeEvents: (options.narrateOptions === false) && options.subscribeEvents,
           receiveTruths: this.getReceiveTruths(options.receiveTruths),
         }));
-    return thenChainEagerly(
-        this._upstreamConnection.getActiveConnection(),
-        () => ((options.narrateOptions === false) ? {} : this.narrateEventLog({
+    const connection = this;
+    return thenChainEagerly(null, this.addChainClockers(1, "oracle.doConnect.ops", [
+      function _waitForActiveUpstream () {
+        return connection._upstreamConnection.getActiveConnection();
+      },
+      function _narrateEventLog () {
+        if (options.narrateOptions === false) return {};
+        return connection.narrateEventLog({
           subscribeEvents: options.subscribeEvents,
           ...options.narrateOptions,
-        })));
+        });
+      },
+    ]));
   }
 
   receiveTruths (truths: EventBase[], retrieveMediaBuffer: RetrieveMediaBuffer,

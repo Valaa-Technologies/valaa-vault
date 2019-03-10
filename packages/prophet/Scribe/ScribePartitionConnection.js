@@ -88,8 +88,8 @@ export default class ScribePartitionConnection extends PartitionConnection {
     // connection isn't, as long as there are any events in the local
     // cache and thus optimistic narration is possible.
     const connection = this;
-    return thenChainEagerly(this, [
-      ...(!this.isLocallyPersisted ? [] : [
+    return thenChainEagerly(this, this.addChainClockers(1, "scribe.doConnect.ops", [
+      ...(!this.isLocallyPersisted() ? [] : [
         _initializeConnectionIndexedDB,
         _readMediaEntries,
         function _initializeMediaLookups (mediaEntries) {
@@ -105,7 +105,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
           subscribeEvents: options.subscribeEvents, ...options.narrateOptions,
         });
       },
-    ], function errorOnScribePartitionConnect (error) {
+    ]), function errorOnScribePartitionConnect (error) {
       throw connection.wrapErrorEvent(error, new Error("_doConnect"),
           "\n\toptions:", ...dumpObject(options));
     });
@@ -135,12 +135,15 @@ export default class ScribePartitionConnection extends PartitionConnection {
     const connection = this;
     const wrap = new Error("narrateEventLog()");
     const ret = {};
-    return _narrateEventLog(this, options, ret)
-        .catch(function errorOnScribeNarrateEventLog (error) {
-          throw connection.wrapErrorEvent(error, wrap,
-              "\n\toptions:", ...dumpObject(options),
-              "\n\tcurrent ret:", ...dumpObject(ret));
-        });
+    return thenChainEagerly(null, [
+      () => _narrateEventLog(this, options, ret),
+      () => this.clockEvent(2, () => ["scribe.narrate.done"]),
+      () => ret,
+    ], function errorOnScribeNarrateEventLog (error) {
+      throw connection.wrapErrorEvent(error, wrap,
+          "\n\toptions:", ...dumpObject(options),
+          "\n\tcurrent ret:", ...dumpObject(ret));
+    });
   }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {

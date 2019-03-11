@@ -7,13 +7,13 @@ import VDOMView from "~/inspire/VDOMView";
  * This class is the view entry point
  */
 export default class InspireView extends VDOMView {
-  async attach (options : Object) {
-    await super.attach(options);
+  async attach (container: Object, explicitWindow: Object, options : Object) {
+    await this.preAttach(options);
     try {
       if (options.setTitleKuery) this._setTitle(options.setTitleKuery);
 
       // Renderer
-      await this._createReactRoot(options.rootId, window, options.container, options.name,
+      await this._createReactRoot(options.rootId, explicitWindow || window, container, options.name,
           this._vViewFocus, this._lensPropertyName);
       this.warnEvent(`attach(): engine running and view attached to DOM (size`,
           options.size, `unused)`);

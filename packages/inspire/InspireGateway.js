@@ -35,6 +35,8 @@ import getGlobal from "~/gateway-api/getGlobal";
 import { arrayBufferFromBase64 } from "~/tools/base64";
 import { setGlobalLogger } from "~/tools/wrapError";
 
+const deepExtend = require("@valos/tools/deepExtend").default;
+
 const { AuthorityNexus, FalseProphet, Oracle, Prophet, Scribe } = valosProphet;
 const {
   dumpObject, inBrowser, invariantify, isPromise, LogEventGenerator, mapEagerly, thenChainEagerly,
@@ -195,69 +197,84 @@ export default class InspireGateway extends LogEventGenerator {
   }
 
   createAndConnectViewsToDOM (viewConfigs: { [string]: {
-    name: string, size: Object, container: Object, rootId: string, lensURI: any,
-    hostGlobal: Object,
+    container: Object, hostGlobal: Object, window: Object,
+    name: string, size: Object, rootId: string, lensURI: any, verbosity: ?number,
   } }, createView = (options) => new InspireView(options)) {
+    const gateway = this;
     this._views = {};
-    Object.entries(viewConfigs).forEach(([viewName, viewConfig]) => {
-      this.clockEvent(1, `view.${viewName}.create`,
-          `createView({ name: '${viewConfig.name}', ... })`);
-      const engineOptions = {
-        name: `${viewConfig.name} Engine`,
-        logger: this.getLogger(),
-        verbosity: this.verbosity,
-        prophet: this.falseProphet,
-        revelation: this.revelation,
-      };
-      const engine = new ValaaEngine(engineOptions);
-      engine.clockEvent(1, `${viewConfig.name}.engine.create`,
-          `Created ValaaEngine ${engine.debugId()}`,
-          ...(!this.getVerbosity() ? [] : [", with:",
-            "\n\tengineOptions:", ...dumpObject(engineOptions),
-            "\n\tengine:", ...dumpObject(engine),
-          ]));
-
-      const rootScope = engine.getRootScope();
-      const hostDescriptors = engine.getHostObjectDescriptors();
-      const hostGlobal = viewConfig.hostGlobal || getGlobal();
-      extendValaaSpaceWithEngine(rootScope, hostDescriptors, engine.discourse.getSchema());
-      if (!viewConfig.defaultAuthorityURI) {
-        extendValaaSpaceWithInspire(rootScope, hostDescriptors, hostGlobal);
-      } else {
-        // FIXME(iridian): Implement this.schemes - still missing.
-        const defaultAuthorityConfig = this.schemes[viewConfig.defaultAuthorityURI];
-        invariantify(defaultAuthorityConfig,
-            `defaultAuthorityConfig missing when looking for default authority ${
-                  String(viewConfig.defaultAuthorityURI)}`);
-        extendValaaSpaceWithInspire(rootScope, hostDescriptors, hostGlobal,
-              defaultAuthorityConfig, engine);
-      }
-      const gateway = rootScope.Valaa.gateway = this;
-      rootScope.Valaa.identity = engine.getIdentityManager();
-
-      const name = `${viewConfig.name} View`;
-      engine.clockEvent(1, `view.create`);
-      this._views[viewName] = thenChainEagerly(null, engine.addChainClockers(1, "view.create.ops", [
-        function _createView () { return createView({ gateway, engine, name }); },
-        function _attachView (view) { return view.attach(viewConfig); },
-        function _notifyViewPlugins (attachedView) {
-          attachedView.rootScope = rootScope;
-          gateway._views[viewName] = rootScope.Valaa.view = attachedView;
-          return mapEagerly(
-              Object.values(gateway._attachedPlugins).filter(plugin => plugin.onViewAttached),
-              plugin => gateway._notifyPluginViewAttached(plugin, attachedView, viewName));
+    Object.entries(viewConfigs).forEach(([viewId, {
+      container, hostGlobal, window: explicitWindow, verbosity = this.getVerbosity(),
+      ...paramViewConfig
+    }]) => {
+      const view = createView({ gateway, engine: null, name: viewId, verbosity });
+      view.clockEvent(1, () => [`view.create`,
+          `createView({ name: ${viewId}, verbosity: ${verbosity} })`]);
+      let engine;
+      let rootScope;
+      let viewConfig;
+      this._views[viewId] = thenChainEagerly(view, view.addChainClockers(1, "view.create.ops", [
+        async function _createViewOptions () {
+          const revelationConfig = (await ((await gateway.revelation.views) || {})[viewId]) || {};
+          viewConfig = deepExtend({ verbosity }, [revelationConfig, paramViewConfig]);
+          view.setName(`${viewConfig.name}-View`);
+          view.setVerbosity(viewConfig.verbosity);
         },
-        notifys => engine.clockEvent(1, `${viewConfig.name}.plugins.reacted`,
-            "\n\tplugin reactions:", ...dumpObject(notifys.filter(notNull => notNull))),
-        () => gateway._views[viewName],
-      ]));
-      this.warnEvent(1, () => [
-        `Opened View ${viewName}`,
-        ...(this.getVerbosity() <= 1 ? [] : [", with:",
-          "\n\tviewConfig:", ...dumpObject(viewConfig),
-          "\n\tview:", ...dumpObject(this._views[viewName]),
+        function _createEngine () {
+          const engineOptions = {
+            name: `${viewConfig.name} Engine`,
+            ...(viewConfig.engine || {}),
+            logger: gateway.getLogger(),
+            prophet: gateway.falseProphet,
+            revelation: gateway.revelation,
+          };
+          engine = new ValaaEngine(engineOptions);
+          gateway.clockEvent(1, () => [
+            `${viewConfig.name}.engine.create`,
+            `Created ValaaEngine ${engine.debugId()}`,
+            ...(!gateway.getVerbosity() ? [] : [", with:",
+              "\n\tengineOptions:", ...dumpObject(engineOptions),
+              "\n\tengine:", ...dumpObject(engine),
+            ]),
+          ]);
+          view.setEngine(engine);
+        },
+        function _buildRootScope () {
+          rootScope = engine.getRootScope();
+          const hostDescriptors = engine.getHostObjectDescriptors();
+          extendValaaSpaceWithEngine(rootScope, hostDescriptors, engine.discourse.getSchema());
+          if (!viewConfig.defaultAuthorityURI) {
+            extendValaaSpaceWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal());
+          } else {
+            // FIXME(iridian): Implement this.schemes - still missing.
+            const defaultAuthorityConfig = gateway.schemes[viewConfig.defaultAuthorityURI];
+            invariantify(defaultAuthorityConfig,
+                `defaultAuthorityConfig missing when looking for default authority ${
+                      String(viewConfig.defaultAuthorityURI)}`);
+            extendValaaSpaceWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal(),
+                  defaultAuthorityConfig, engine);
+          }
+          rootScope.Valaa.gateway = gateway;
+          rootScope.Valaa.identity = engine.getIdentityManager();
+        },
+        function _attachView () {
+          return view.attach(container, explicitWindow, viewConfig);
+        },
+        function _notifyViewPlugins (attachedView) {
+          gateway._views[viewId] = rootScope.Valaa.view = attachedView;
+          attachedView.rootScope = rootScope;
+          const attachedViewAwarePlugins = Object.values(gateway._attachedPlugins)
+              .filter(plugin => plugin.onViewAttached);
+          attachedView.clockEvent(1, () => [`view.attach.plugins.notify`,
+            `Notifying ${attachedViewAwarePlugins.length} attached view-aware plugins`,
+          ]);
+          return mapEagerly(attachedViewAwarePlugins,
+              plugin => gateway._notifyPluginViewAttached(plugin, attachedView, viewId));
+        },
+        reactions => gateway._views[viewId].clockEvent(1, () => [`view.attach.plugins.reactions`,
+          "\n\tplugin reactions:", ...dumpObject(reactions.filter(notNull => notNull)),
         ]),
-      ]);
+        () => gateway._views[viewId],
+      ]));
     });
     return this._views;
   }

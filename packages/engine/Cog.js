@@ -30,6 +30,11 @@ export default class Cog extends LogEventGenerator {
 
   // Public API
 
+  setEngine (engine: Object) {
+    this.engine = engine;
+    if (engine && (this.getLogger() === console)) this.setLogger(engine.getLogger());
+  }
+
   VALK () { return VALEK; }
 
   /**

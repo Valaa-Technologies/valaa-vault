@@ -36,7 +36,8 @@ export default {
     bvobBuffers: dictionaryOf(bvobBuffer()),
     blobInfos: dictionaryOf(blobInfo()), // deprecated
     blobBuffers: dictionaryOf(blobBuffer()), // deprecated
-  }
+  },
+  views: dictionaryOf(viewConfig()),
 };
 
 function plugin () {
@@ -183,5 +184,11 @@ function blobBuffer () {
   // deprecated
   return {
     base64: "",
+  };
+}
+
+function viewConfig () {
+  return {
+    verbosity: 0,
   };
 }

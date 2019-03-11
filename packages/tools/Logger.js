@@ -39,6 +39,7 @@ export class LogEventGenerator {
   }
 
   getLogger (): Logger | Object { return this._logger; }
+  setLogger (logger: Logger) { this._logger = logger; }
   getName (): string { return this._name; }
   getRawName (): string { return this._name; }
   setName (name: any) { this._name = name; }
@@ -129,10 +130,10 @@ export class LogEventGenerator {
   addChainClockers (minVerbosity: number, eventPrefix: string, thenChainCallbacks: Function[]) {
     if (!(this.getVerbosity() >= minVerbosity)) return thenChainCallbacks;
     return [].concat(...thenChainCallbacks.map((callback, index) => [
-      head => {
+      ...(!callback.name ? [] : [head => {
         this.clockEvent(minVerbosity, `${eventPrefix}[${index}]`, callback.name);
         return head;
-      },
+      }]),
       callback,
     ]),
     result => {

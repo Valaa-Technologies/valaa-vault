@@ -17,7 +17,7 @@ export default class VDOMView extends Cog {
     this._gateway = options.gateway;
   }
 
-  async attach ({ name, lensURI, rootLensURI }: Object) {
+  async preAttach ({ name, lensURI, rootLensURI }: Object) {
     const actualLensURI = lensURI || rootLensURI;
     try {
       if (!actualLensURI) {
@@ -35,7 +35,7 @@ export default class VDOMView extends Cog {
           lensRef.rawId() || this._viewPartition.getPartitionRawId());
       this._lensPropertyName = lensRef.getQueryComponent().lens;
       await this._vViewFocus.activate();
-      this.warnEvent(`attach(): partition '${this._vViewFocus.get("name")}' UI view focus set:`,
+      this.warnEvent(`preAttach(): partition '${this._vViewFocus.get("name")}' UI view focus set:`,
           this._vViewFocus.debugId());
       // this.warn("\n\n");
       // this.warnEvent(`createView('${name}'): LISTING ENGINE RESOURCES`);
@@ -43,7 +43,7 @@ export default class VDOMView extends Cog {
       this.engine.addCog(this);
       return this;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `attach('${name}' -> ${actualLensURI})`);
+      throw this.wrapErrorEvent(error, `preAttach('${name}' -> ${actualLensURI})`);
     }
   }
 

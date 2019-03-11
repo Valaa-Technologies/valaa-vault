@@ -120,7 +120,11 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
     if (purgedStory === purgedRecital) break;
 
     if (purgedStory.isProphecy && !purgedStory.schismDescription) {
-      for (const partitionURI of Object.keys((purgedStory.meta || {}).partitions)) {
+      const purgedPartitionURIs = !purgedStory.meta ? []
+          : purgedStory.meta.partitions ? Object.keys(purgedStory.meta.partitions)
+          : purgedStory.meta.partitionURI ? [purgedStory.meta.partitionURI]
+          : [];
+      for (const partitionURI of purgedPartitionURIs) {
         const reviewedPartition = reviewedPartitions[partitionURI];
         if (!reviewedPartition) continue;
         purgedStory.needsReview = true;

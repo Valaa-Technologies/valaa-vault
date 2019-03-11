@@ -20,6 +20,10 @@ exports.builder = (yargs) => yargs.option({
         ""}the possible output will be rendered and execute script run every 'keepalive' seconds. ${
         ""}If keepalive is negative the output/run cycle is run once after abs(keepalive) seconds.`,
   },
+  stopClockEvent: {
+    type: "string",
+    description: `The clock event name which stops the worker on next tick`,
+  },
   partitions: {
     type: "object",
     description: `A lookup of partition URI's to load before execution.${
@@ -186,8 +190,15 @@ exports.handler = async (yargv) => {
     vlm.info(`Setting up keepalive render every ${keepaliveInterval} seconds`);
     state.mode = keepaliveInterval >= 0 ? "keepalive rendering" : "delayed single shot rendering";
     vlm.clock("perspire.handler", "perspire.delay", `server.run(${keepaliveInterval})`);
+    let nextUncheckedEvent = 0;
     ret = await server.run(Math.abs(keepaliveInterval), (tickIndex) => {
       const tickRet = _tick(`heartbeat ${tickIndex}:`, tickIndex);
+      const stopEntrySearch = yargv.stopClockEvent && vlm.clockEvents;
+      if (stopEntrySearch) {
+        while (nextUncheckedEvent < stopEntrySearch.length) {
+          if (stopEntrySearch[nextUncheckedEvent++].event === yargv.stopClockEvent) return tickRet;
+        }
+      }
       if (keepaliveInterval >= 0) return undefined;
       return tickRet;
     });

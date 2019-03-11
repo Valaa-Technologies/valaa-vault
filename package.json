@@ -30,5 +30,6 @@
     "@valos/toolset-revealer": ">0.34.0-prerelease",
     "@valos/toolset-vault": ">0.34.0-prerelease",
     "valma": "^0.34.0-prerelease.1"
-  }
+  },
+  "dependencies": {}
 }

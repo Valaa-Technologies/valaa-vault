@@ -144,7 +144,7 @@ exports.handler = async (yargv) => {
     vlm.info("Adding dirty packages to initial selection.");
     (await vlm.execute(`git status --porcelain=v1`))
         .split("\n")
-        .map(line => (line.match(new RegExp("^ M ([^/]*/[^/]*)/")) || [])[1])
+        .map(line => (line.match(new RegExp("^.M ([^/]*/[^/]*)/")) || [])[1])
         .forEach(subPath => subPath
               && (packageSelection[vlm.path.join(process.cwd(), subPath, "/")] = "dirty"));
   }

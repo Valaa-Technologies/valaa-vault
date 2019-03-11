@@ -664,7 +664,8 @@ export default class InspireGateway extends LogEventGenerator {
     // Initiate remote narration.
     connection.clockEvent(1, `prologue.narrate`,
         `Starting full remote narration and subscribing for events`);
-    const remoteNarration = connection.narrateEventLog({ subscribeEvents: true });
+    const remoteNarration = connection.narrateEventLog(
+        { subscribeEvents: true, eventIdBegin: eventIdEnd });
     if (!shouldChroniclePrologue && !(eventIdEnd > 0)) {
       connection.clockEvent(1, `prologue.narrate.await`, `Waiting for remote narration`);
       await remoteNarration;

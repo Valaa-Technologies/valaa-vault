@@ -1,14 +1,1 @@
-{
-  "name": "@valos/revelations",
-  "version": "0.30.0",
-  "description": "Valaa Inspire revelations root",
-  "author": "Valaa Technologies Ltd",
-  "license": "MIT",
-  "private": false,
-
-  "valaa": { "engine": { "name": "@valos/inspire", "version": "0.30.0" } },
-  "gateway": {
-    "version": "0.30.0",
-    "runtime": "/valaa/inspire/valaa-inspire.js"
-  }
-}
+{ "...": "./local-zero-0.2.21/revela.json" }

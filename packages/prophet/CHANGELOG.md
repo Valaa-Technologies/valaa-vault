@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.16](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.15...v0.34.0-prerelease.16) (2019-03-11)
+
+**Note:** Version bump only for package @valos/prophet
+
+
+
+
+
 # [0.34.0-prerelease.15](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.14...v0.34.0-prerelease.15) (2019-03-08)
 
 **Note:** Version bump only for package @valos/prophet

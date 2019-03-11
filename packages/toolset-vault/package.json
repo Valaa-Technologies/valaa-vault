@@ -1,6 +1,6 @@
 {
   "name": "@valos/toolset-vault",
-  "version": "0.34.0-prerelease.15",
+  "version": "0.34.0-prerelease.16",
   "valaa": {
     "type": "toolset",
     "domain": "packages"
@@ -50,7 +50,7 @@
     "jasmine-core": "^2.8.0",
     "jest": "^23.5.0",
     "lerna": "^3.4.0",
-    "valma": "^0.34.0-prerelease.15",
+    "valma": "^0.34.0-prerelease.16",
     "yalc": "1.0.0-pre.23"
   }
 }

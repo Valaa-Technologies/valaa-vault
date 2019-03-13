@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.17](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.16...v0.34.0-prerelease.17) (2019-03-13)
+
+
+### Bug Fixes
+
+* InactiveResource issue with unordered partition load ([d115bcf](https://github.com/valaatech/vault/commit/d115bcf))
+
+
+
+
+
 # [0.34.0-prerelease.16](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.15...v0.34.0-prerelease.16) (2019-03-11)
 
 **Note:** Version bump only for package @valos/raem

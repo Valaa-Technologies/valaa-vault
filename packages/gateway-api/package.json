@@ -1,6 +1,6 @@
 {
   "name": "@valos/gateway-api",
-  "version": "0.34.0-prerelease.16",
+  "version": "0.34.0-prerelease.17",
   "valaa": {
     "type": "library",
     "domain": "kernel"

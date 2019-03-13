@@ -40,7 +40,8 @@ export default class VSXDecoder extends JSXDecoder {
       sourceInfo.phase = `inline VS transpilation at ${start.line}:${start.column} in ${
           sourceInfo.phaseBase}`;
       sourceInfo.sourceMap = new Map();
-      const kuery = transpileValaaScriptBody(`(${embeddedSource})`, VALEK, { sourceInfo });
+      const kuery = transpileValaaScriptBody(`(${embeddedSource})`,
+          { customVALK: VALEK, sourceInfo });
       sourceInfo.phase = `inline VS run at ${start.line}:${start.column} in ${
           sourceInfo.phaseBase}`;
       return super._addKuerySourceInfo(kuery, sourceInfo, start, end);

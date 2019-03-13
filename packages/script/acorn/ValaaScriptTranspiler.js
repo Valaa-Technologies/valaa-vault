@@ -111,8 +111,15 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
             "\n\trules:", this.language.parseRules);
       }
       result = rule(this, ast, options);
-      if ((result instanceof Kuery) && this._sourceInfo) {
-        this._recurseToSourceMap(result.toVAKON(), ast, true);
+      if (this._sourceInfo) {
+        if (result instanceof Kuery) {
+          this._recurseToSourceMap(result.toVAKON(), ast, true);
+        } else if (Array.isArray(result)) {
+          for (const entry of result) {
+            if (entry[0] instanceof Kuery) this._recurseToSourceMap(entry[0].toVAKON(), ast, true);
+            if (entry[1] instanceof Kuery) this._recurseToSourceMap(entry[1].toVAKON(), ast, true);
+          }
+        }
       }
       return result;
     } catch (error) {
@@ -138,8 +145,9 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
     if (typeof vakon !== "object") return undefined;
     const entry = this._sourceInfo.sourceMap.get(vakon);
     if (entry) return entry;
-    // Check if one and only one sub-entry has a source-info entry. If so, we expand it to be the
-    // sourceinfo for this vakon and all its sub-entries. Otherwise we inherit our parent.
+    // Check if one and only one sub-entry has a source-info entry. If
+    // so, we expand it to be the sourceinfo for this vakon and all its
+    // sub-entries. Otherwise we inherit our parent.
     const existingSubEntryAsts = Array.isArray(vakon)
         ? vakon.map(subVAKON => this._recurseToSourceMap(subVAKON, null))
             .filter(subEntry => !!subEntry)

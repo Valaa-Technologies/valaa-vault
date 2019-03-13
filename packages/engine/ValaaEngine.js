@@ -119,7 +119,7 @@ export default class ValaaEngine extends Cog {
     return this._rootScope.Valaa[typeName];
   }
   getHostObjectPrototype (typeName: string) {
-    return this._rootScope.Valaa[typeName].hostObjectPrototype;
+    return (this._rootScope.Valaa[typeName] || {}).hostObjectPrototype;
   }
   getIdentityManager () {
     return this._identityManager;

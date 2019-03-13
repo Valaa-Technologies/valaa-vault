@@ -335,27 +335,33 @@ export default class Vrapper extends Cog {
     }
     this._phase = ACTIVE;
     this._activationProcess = undefined;
-    this._postActivate(resolver.state, transient);
+    this._postActivate(resolver, transient);
     return undefined;
   }
 
-  _postActivate (state: Object, transient: Transient) {
+  _postActivate (resolver: Object, transient: Transient) {
     let partitionAuthorityURIString;
     let authorityConnection;
     try {
       if (!this._typeName || isInactiveTypeName(this._typeName)) {
-        this._setTypeName(transient.get("typeName"));
-        if (this[HostRef].isInactive()) {
+        const ref = this[HostRef];
+        if (ref.isInactive()) {
           this.warnEvent("Activating id explicitly! Should have been activated by reducers");
-          this[HostRef].setInactive(false);
+          ref.setInactive(false);
         }
+        let newTypeName = transient.get("typeName");
+        if (isInactiveTypeName(newTypeName)) {
+          newTypeName = resolver.tryGoToTransient(
+              ref, "TransientFields", true, false, true, "typeName").get("typeName");
+        }
+        this._setTypeName(newTypeName);
       }
       this.setName(`Vrapper/${this.getRawId()}:${this._typeName}`);
       if (!this.isInactive()) {
-        this.registerComplexHandlers(this.engine._storyHandlerRoot, state);
+        this.registerComplexHandlers(this.engine._storyHandlerRoot, resolver.state);
       }
-      this._refreshDebugId(transient, { state });
-      if (this.hasInterface("Scope")) this._setUpScopeFeatures({ state });
+      this._refreshDebugId(transient, { state: resolver.state });
+      if (this.hasInterface("Scope")) this._setUpScopeFeatures({ state: resolver.state });
     } catch (error) {
       outputError(this.wrapErrorEvent(error,
               new Error("_postActivate()"),
@@ -363,7 +369,9 @@ export default class Vrapper extends Cog {
               "\n\tpartitionConnection:", ...dumpObject(this._partitionConnection),
               "\n\tpartitionAuthorityURI:", partitionAuthorityURIString,
               "\n\tauthorityConnection:", authorityConnection,
-              "\n\tthis:", ...dumpObject(this)),
+              "\n\tthis:", ...dumpObject(this),
+              "\n\tresolver.state:", ...dumpObject(resolver.state.toJS()),
+              "\n\tdiscourse.state:", ...dumpObject(this.engine.discourse.getState().toJS())),
           "Exception caught and swallowed in Vrapper._postActivate");
     }
   }
@@ -1930,11 +1938,12 @@ export default class Vrapper extends Cog {
           if (!newName) return;
           if (this._lexicalScope.hasOwnProperty(newName)) { // eslint-disable-line
             if (vActualAdd === this._lexicalScope[newName]) return;
-            console.warn(`Overriding existing Property '${newName}' in Scope ${
-                this.debugId()}, with:`,
+            console.warn(`Overriding existing Property '${newName}' in Scope ${this.debugId()}`);
+            /*
                 "\n\tnew value:", ...dumpObject(vActualAdd),
                 "\n\tprevious value:", ...dumpObject(this._lexicalScope[newName]),
                 "\n\tfull Scope object:", ...dumpObject(this));
+            */
           }
           this._lexicalScope[newName] = vActualAdd;
           Object.defineProperty(this._nativeScope, newName, {

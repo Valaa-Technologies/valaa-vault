@@ -127,7 +127,8 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
         }
         remoteTransient = Object.create(bard)
             .tryGoToTransient(remoteRef, "TransientFields", true, false, true, "typeName");
-        remoteType = bard.schema.getType(remoteTransient.get("typeName"));
+        remoteType = bard.schema.getType((remoteTransient && remoteTransient.get("typeName"))
+            || bard.schema.inactiveType.name);
       }
       remoteFieldIntro = remoteType.getFields()[coupledField];
       if (!remoteFieldIntro) {

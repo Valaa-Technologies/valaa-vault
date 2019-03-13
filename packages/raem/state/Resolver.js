@@ -14,6 +14,8 @@ import { getObjectRawField } from "~/raem/state/getObjectField";
 
 import { tryHostRef } from "~/raem/VALK/hostReference";
 
+import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
+
 import { dumpObject, invariantify, invariantifyObject, invariantifyString, LogEventGenerator }
     from "~/tools";
 
@@ -278,7 +280,8 @@ export default class Resolver extends LogEventGenerator {
     try {
       if (typeName) this.objectTypeName = typeName;
       this.objectTransient = this.tryStateTransient(rawId, this.objectTypeName);
-      if (this.objectTransient && (!withOwnField || this.objectTransient.has(withOwnField))) {
+      if (this.objectTransient
+          && (!withOwnField || this._hasOwnField(this.objectTransient, withOwnField))) {
         this.objectId = this.objectTransient.get("id");
       } else if ((this.objectTypeName === "Blob") || (objectId && objectId.isInactive())) {
         // Blob and inactive resources are given an id-transient
@@ -286,8 +289,8 @@ export default class Resolver extends LogEventGenerator {
         if (this.objectTypeName !== "Blob") this.objectTypeName = this.schema.inactiveType.name;
         this.objectTransient = createIdTransient(this.objectId);
       } else if ((!withOwnField && (!ghostPath || !ghostPath.isGhost()))
-          || !this.goToMostInheritedMaterializedTransient(
-              ghostPath, require, withOwnField, this.objectTransient)) {
+          || !this.goToMostInheritedMaterializedTransient(ghostPath,
+              typeName || this.objectTypeName, require, withOwnField, this.objectTransient)) {
         // A missing concrete resource or a ghost resource with its
         // base prototype fully in an inactive partition.
         this.objectId = null;
@@ -319,6 +322,13 @@ export default class Resolver extends LogEventGenerator {
     }
   }
 
+  _hasOwnField (transient: Object, fieldName: string) {
+    const value = transient.get(fieldName);
+    if (value === undefined) return false;
+    if (fieldName !== "typeName") return true;
+    return !isInactiveTypeName(value);
+  }
+
   /**
    * Resolves the outermost materialized ghost transient and sets it as
    * this.objectTransient, based on given currentPath.
@@ -334,8 +344,8 @@ export default class Resolver extends LogEventGenerator {
    *                                   a match
    * @returns {GhostPath} the transient ghostPath
    */
-  goToMostInheritedMaterializedTransient (ghostPath: GhostPath, require: boolean = true,
-      withOwnField?: string, initialTransient?: Object): GhostPath {
+  goToMostInheritedMaterializedTransient (ghostPath: GhostPath, typeName: string,
+      require: boolean = true, withOwnField?: string, initialTransient?: Object): GhostPath {
     let nextStep = ghostPath;
     let currentPath;
     let transient = initialTransient;
@@ -352,8 +362,8 @@ export default class Resolver extends LogEventGenerator {
               ""}ghost or concrete object`);
         }
         const rawId = currentPath.headRawId();
-        transient = this.tryStateTransient(rawId, this.objectTypeName);
-        if (transient && (!withOwnField || transient.get(withOwnField))) {
+        transient = this.tryStateTransient(rawId, typeName);
+        if (transient && (!withOwnField || this._hasOwnField(transient, withOwnField))) {
           this.objectTransient = transient;
           const transientId = transient.get("id");
           const transientGhostPath = transientId.getGhostPath();

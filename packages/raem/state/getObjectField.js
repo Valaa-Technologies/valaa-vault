@@ -152,7 +152,7 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
         return createImmaterialTransient(
             prototypeGhostPath.headRawId(), prototypeGhostPath, resolver.objectTransient);
       }
-      typeName = resolver.objectTransient.get("typeName");
+      typeName = resolver.objectTransient.get("typeName") || resolver.schema.inactiveType.name;
       resolver.objectTransient = resolver.goToTransient(resolver.objectId, typeName);
       skipFirstPrototypeStep = true;
     } else {

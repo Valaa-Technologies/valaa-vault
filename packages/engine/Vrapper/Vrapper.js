@@ -842,18 +842,20 @@ export default class Vrapper extends Cog {
   }
 
   /**
-   * Creates an instance of this resource with given initialState overrides, by adding this
-   * resource as instancePrototype in the initialState. If the owner is not explicitly set (TODO:
-   * introspect for all owner aliases) in the initialState this sets the owner in the initialState
-   * to be the same as the owner of this resource.
+   * Creates an instance of this resource with given initialState
+   * overrides, by adding this resource as instancePrototype in the
+   * initialState. If the owner is not explicitly set (TODO: introspect
+   * for all owner aliases) in the initialState this sets the owner in
+   * the initialState to be the same as the owner of this resource.
    *
    * @memberof Vrapper
    */
   instantiate (initialState: Object = {}, options: VALKOptions = {}): Vrapper {
     const typeName = this.getTypeName(options);
     initialState.instancePrototype = this;
-    if (typeof initialState.owner === "undefined"
-        && !((typeName === "Relation") && initialState.source)) {
+    if (initialState.owner === undefined
+        && !((typeName === "Relation") && initialState.source)
+        && !initialState.partitionAuthorityURI) {
       initialState.owner = this.get("owner", Object.create(options));
     }
     return this.create(typeName, initialState, options);

@@ -7,7 +7,7 @@ import type { VALKOptions } from "~/raem";
 import { transpileValaaScriptBody } from "~/script/transpileValaaScript";
 
 import VALEK, { Kuery, dumpKuery } from "~/engine/VALEK";
-import VrapperSubscriber from "~/engine/Vrapper/VrapperSubscriber";
+import Subscription from "~/engine/Vrapper/Subscription";
 
 import { LogEventGenerator, wrapError, dumpObject } from "~/tools";
 
@@ -71,15 +71,15 @@ export default class Cog extends LogEventGenerator {
       if (options.onUpdate) {
         // TODO(iridian): Eventually live kuery functionality might need to be moved into Valker.
         // A convenient time to do this is when the asynchronous kuery functionality is added there.
-        const subscriber = new VrapperSubscriber();
+        const subscription = new Subscription();
         const callback = options.onUpdate;
         if (options.transaction) {
           options.state = options.transaction.getState();
           options.transaction = undefined;
         }
         options.onUpdate = undefined;
-        subscriber.initializeKuery(this, head, kuery, callback, options, !options.noImmediateRun);
-        return subscriber;
+        subscription.initializeKuery(this, head, kuery, callback, options, !options.noImmediateRun);
+        return subscription;
       }
       return this.engine.discourse.run(head, kuery, options);
     } catch (error) {

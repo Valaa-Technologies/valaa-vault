@@ -18,7 +18,7 @@ class FieldEditor extends UIComponent {
   attachSubscribers (focus: any, props: Object) {
     try {
       super.attachSubscribers(focus, props);
-      this.attachKuerySubscriber(`FieldEditor["${props.fieldName}"]`, focus,
+      this.subscribeToKuery(`FieldEditor["${props.fieldName}"]`, focus,
           VALEK.to(props.fieldName).nullable(), {
             onUpdate: this.onValueUpdate,
             scope: this.getUIContext(),

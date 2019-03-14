@@ -27,7 +27,7 @@ class LinkFieldEditor extends UIComponent {
     try {
       super.attachSubscribers(focus, props);
 
-      this.attachKuerySubscriber(`LinkFieldEditor["${props.fieldName}"]`, focus,
+      this.subscribeToKuery(`LinkFieldEditor["${props.fieldName}"]`, focus,
           VALEK.to(props.fieldName), {
             onUpdate: this.onValueUpdate,
             scope: this.getUIContext(),
@@ -35,7 +35,7 @@ class LinkFieldEditor extends UIComponent {
 
       // Property case:
       if (focus.tryTypeName() === "Property") {
-        this.attachKuerySubscriber(`LinkFieldEditor["${props.fieldName}"].target`, focus,
+        this.subscribeToKuery(`LinkFieldEditor["${props.fieldName}"].target`, focus,
             VALEK.to(props.fieldName).nullable()
                 .if(VALEK.isOfType("Identifier"), { then: VALEK.to("reference").nullable() }
             ), {
@@ -46,7 +46,7 @@ class LinkFieldEditor extends UIComponent {
 
       // Relations case:
       if (focus.tryTypeName() === "Relation") {
-        this.attachKuerySubscriber(`LinkFieldEditor["${props.fieldName}"].target`, focus,
+        this.subscribeToKuery(`LinkFieldEditor["${props.fieldName}"].target`, focus,
             VALEK.to(props.fieldName).nullable(), {
               onUpdate: this.refreshNameSubscriber,
               scope: this.getUIContext(),
@@ -59,7 +59,7 @@ class LinkFieldEditor extends UIComponent {
       //    { scope: this.getUIContext() });
       //
       // Hack: Workaround to unfiltered results leaking OrderedMap structures
-      this.attachKuerySubscriber(`LinkFieldEditor["Candidates"]`, focus,
+      this.subscribeToKuery(`LinkFieldEditor["Candidates"]`, focus,
       VALEK.to(props.toCandidatesKuery).nullable().filter(VALEK.isTruthy()), {
         onUpdate: this.onCandidatesUpdate,
         scope: this.getUIContext(),
@@ -76,7 +76,7 @@ class LinkFieldEditor extends UIComponent {
     if (!(target instanceof Vrapper) || !(target.isActive() || target.isActivating())) {
       target = undefined;
     }
-    this.attachKuerySubscriber(`LinkFieldEditor["${this.props.fieldName}"].target.name`, target,
+    this.subscribeToKuery(`LinkFieldEditor["${this.props.fieldName}"].target.name`, target,
         VALEK.to("name").nullable(), {
           onUpdate: this.refresh,
           scope: this.getUIContext(),

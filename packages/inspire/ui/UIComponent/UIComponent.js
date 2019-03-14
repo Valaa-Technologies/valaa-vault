@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 
 import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
 
-import { VrapperSubscriber, FieldUpdate } from "~/engine/Vrapper";
+import { Subscription, FieldUpdate } from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
 import { Kuery, dumpKuery, dumpObject } from "~/engine/VALEK";
 
@@ -34,8 +34,8 @@ import {
   VSSStyleSheetSymbol,
 } from "./_styleOps";
 import {
-  _finalizeDetachSubscribers, _attachSubscriber, _getSubscriber, _detachSubscriber,
-  _attachKuerySubscriber
+  _finalizeDetachSubscribers, _attachSubscriber, _getSubscriber, _unsubscribeKuery,
+  _subscribeToKuery
 } from "./_subscriberOps";
 
 export function isUIComponentElement (element: any) {
@@ -189,7 +189,7 @@ class UIComponent extends React.Component {
         ""}: did you forget to inherit super contextTypes somewhere? ${
         ""} (like: static ContextTypes = { ...Super.contextTypes, ...)`);
     this.state = { error: undefined, errorHidden: false };
-    this._attachedSubscribers = {};
+    this._subscriptions = {};
   }
 
   state: Object;
@@ -353,7 +353,7 @@ class UIComponent extends React.Component {
     return this.props.elementKey || this.getUIContextValue("key");
   }
 
-  _attachedSubscribers: Object;
+  _subscriptions: Object;
   style: Object;
 
   rawPresentation () {
@@ -445,10 +445,10 @@ class UIComponent extends React.Component {
    *     subscribes to all fields on a particularily identified relation
    *
    * @param {string} subscriberKey
-   * @param {VrapperSubscriber} subscriber
-   * @returns {VrapperSubscriber}
+   * @param {Subscription} subscriber
+   * @returns {Subscription}
    */
-  attachSubscriber (subscriberKey: string, subscriber: VrapperSubscriber): VrapperSubscriber {
+  attachSubscriber (subscriberKey: string, subscriber: Object): Subscription {
     return _attachSubscriber(this, subscriberKey, subscriber);
   }
 
@@ -457,16 +457,16 @@ class UIComponent extends React.Component {
   }
 
   detachSubscriber (subscriberKey: string, options: { require?: boolean } = {}) {
-    return _detachSubscriber(this, subscriberKey, options);
+    return _unsubscribeKuery(this, subscriberKey, options);
   }
 
-  attachKuerySubscriber (subscriberName: string, head: any, kuery: any, options: {
+  subscribeToKuery (subscriberName: string, head: any, kuery: any, options: {
     onUpdate: (update: FieldUpdate) => void, noImmediateRun?: boolean, // ...rest are VALKOptions
   }) {
     try {
-      return _attachKuerySubscriber(this, subscriberName, head, kuery, options);
+      return _subscribeToKuery(this, subscriberName, head, kuery, options);
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .attachKuerySubscriber(${
+      throw wrapError(error, `During ${this.debugId()}\n .subscribeToKuery(${
               subscriberName}), with:`,
           "\n\thead:", ...dumpObject(head),
           "\n\tkuery:", ...dumpKuery(kuery),

@@ -41,7 +41,7 @@ import VALEK, { Valker, Kuery, dumpKuery, expressionFromProperty } from "~/engin
 import Cog, { extractMagicMemberEventHandlers } from "~/engine/Cog";
 import debugId from "~/engine/debugId";
 import _FieldUpdate from "~/engine/Vrapper/FieldUpdate";
-import _VrapperSubscriber from "~/engine/Vrapper/VrapperSubscriber";
+import _Subscription from "~/engine/Vrapper/Subscription";
 import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import { defaultOwnerCoupledField } from
     "~/engine/ValaaSpace/Valaa/injectSchemaTypeBindings";
@@ -53,7 +53,7 @@ import { arrayFromAny, iterableFromAny, dumpify, dumpObject,
 import { mediaTypeFromFilename } from "~/tools/MediaTypeData";
 
 export const FieldUpdate = _FieldUpdate;
-export const VrapperSubscriber = _VrapperSubscriber;
+export const Subscription = _Subscription;
 
 const INACTIVE = "Inactive";
 const ACTIVATING = "Activating";
@@ -1658,7 +1658,7 @@ export default class Vrapper extends Cog {
 
   onEventCREATED (vResource: Vrapper, passage: Passage, story: Story) {
     this._updateTransient(story.state);
-    if (this._subscribersByFieldName) {
+    if (this._fieldSubscriptions) {
       const transient = this.getTransient({ typeName: passage.typeName, state: story.state });
       for (const key of transient.keys()) {
         this.notifyMODIFIEDHandlers(key, passage, story, vResource);
@@ -1737,121 +1737,122 @@ export default class Vrapper extends Cog {
 
   notifyMODIFIEDHandlers (fieldName: string, passage: Passage, story: Story,
       vProtagonist: Vrapper) {
-    const subscribers = this._subscribersByFieldName && this._subscribersByFieldName.get(fieldName);
-    const filterSubscribers = this._fieldFilterSubscribers;
-    if (!subscribers && !filterSubscribers) return undefined;
+    const subscriptions = this._fieldSubscriptions && this._fieldSubscriptions.get(fieldName);
+    const filterSubscriptions = this._filterSubscriptions;
+    if (!subscriptions && !filterSubscriptions) return undefined;
     const fieldUpdate = new FieldUpdate(this, fieldName, passage,
         { state: story.state, previousState: story.previousState }, undefined, vProtagonist);
-    return this.engine.addDelayedFieldUpdate(fieldUpdate, subscribers, filterSubscribers, story);
+    return this.engine.addDelayedFieldUpdate(
+        fieldUpdate, subscriptions, filterSubscriptions, story);
   }
 
-  _notifyMODIFIEDHandlers (fieldUpdate: FieldUpdate, subscribers: any,
-    filterSubscribers: any) {
+  _notifyMODIFIEDHandlers (fieldUpdate: FieldUpdate, subscriptions: any,
+    filterSubscriptions: any) {
     const fieldName = fieldUpdate.fieldName();
     const passageCounter = fieldUpdate.getPassage()._counter;
-    for (const subscriber of (subscribers || [])) {
+    for (const subscription of (subscriptions || [])) {
       try {
-        if (!(subscriber._seenPassageCounter >= passageCounter)) {
-          subscriber._seenPassageCounter = passageCounter;
-          subscriber._triggerUpdateByFieldUpdate(fieldUpdate);
+        if (!(subscription._seenPassageCounter >= passageCounter)) {
+          subscription._seenPassageCounter = passageCounter;
+          subscription._triggerUpdateByFieldUpdate(fieldUpdate);
         }
       } catch (error) {
         outputError(this.wrapErrorEvent(error,
                 new Error(`_notifyMODIFIEDHandlers('${fieldName}')`),
                 "\n\tfield update:", fieldUpdate,
-                "\n\tfailing field subscriber:", ...dumpObject(subscriber),
+                "\n\tfailing field subscription:", ...dumpObject(subscription),
                 "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())),
-            "Exception caught during Vrapper._notifyMODIFIEDHandlers.subscribers");
+            "Exception caught during Vrapper._notifyMODIFIEDHandlers.subscriptions");
       }
     }
-    if (filterSubscribers) {
+    if (filterSubscriptions) {
       const fieldIntro = this.getTypeIntro().getFields()[fieldName];
-      for (const filterSubscriber of filterSubscribers) {
+      for (const subscription of filterSubscriptions) {
         try {
-          if (!(filterSubscriber._seenPassageCounter >= passageCounter)) {
-            filterSubscriber._seenPassageCounter = passageCounter;
-            filterSubscriber._tryTriggerUpdateByFieldUpdate(fieldIntro, fieldUpdate);
+          if (!(subscription._seenPassageCounter >= passageCounter)) {
+            subscription._seenPassageCounter = passageCounter;
+            subscription._tryTriggerUpdateByFieldUpdate(fieldIntro, fieldUpdate);
           }
         } catch (error) {
           outputError(this.wrapErrorEvent(error,
                   new Error(`_notifyMODIFIEDHandlers('${fieldName}')`),
                   "\n\tfield update:", fieldUpdate,
-                  "\n\tfailing filter subscriber:", ...dumpObject(filterSubscriber),
+                  "\n\tfailing filter subscription:", ...dumpObject(subscription),
                   "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())),
-              "Exception caught during Vrapper._notifyMODIFIEDHandlers.filterSubscribers");
+              "Exception caught during Vrapper._notifyMODIFIEDHandlers.filterSubscriptions");
         }
       }
     }
   }
 
   /**
-   * Adds a new subscriber for modifications on fields filtered by given filter.
+   * Adds a new subscription for modifications on fields filtered by given filter.
    *
    * @param {(boolean | string | (fieldIntro: Object) => boolean | Kuery)} filter
    * @param {(update: FieldUpdate) => void} callback       called on any updates on filtered fields
-   * @param {VrapperSubscriber} [subscriber=new VrapperSubscriber()]
-   * @returns {VrapperSubscriber}
+   * @param {Subscription} [subscription=new Subscription()]
+   * @returns {Subscription}
    *
    * @memberof Vrapper
    */
   subscribeToMODIFIED (filter: boolean | string | (fieldIntro: Object) => boolean | Kuery,
       callback: (update: FieldUpdate) => void,
-      subscriber: VrapperSubscriber = new VrapperSubscriber(),
-      options: VALKOptions = {}): VrapperSubscriber {
+      subscription: Subscription = new Subscription(),
+      options: VALKOptions = {}): Subscription {
     try {
       this.requireActive({ allowActivating: true });
       if (filter instanceof Kuery) {
-        return subscriber.initializeKuery(this, this, filter, callback, options);
+        return subscription.initializeKuery(this, this, filter, callback, options);
       }
-      return subscriber.initializeFilter(this, filter, callback);
+      return subscription.initializeFilter(this, filter, callback);
     } catch (error) {
       throw this.wrapErrorEvent(error, `subscribeToMODIFIED()`,
           "\n\tfilter:", ...(filter instanceof Kuery ? dumpKuery(filter) : dumpObject(filter)),
-          "\n\tsubscriber:", ...dumpObject(subscriber),
+          "\n\tsubscription:", ...dumpObject(subscription),
           "\n\tthis:", ...dumpObject(this));
     }
   }
 
-  _subscribersByFieldName: Map<string, Set<VrapperSubscriber>>;
+  _fieldSubscriptions: Map<string, Set<Subscription>>;
 
-  _registerSubscriberByFieldName (fieldName: string, subscriber: VrapperSubscriber) {
-    let currentSubscribers;
+  _addFieldSubscription (fieldName: string, subscription: Subscription) {
+    let currentSubscriptions;
     try {
       if (this._phase === NONRESOURCE) return undefined;
       this.requireActive({ allowActivating: true });
-      if (!this._subscribersByFieldName) this._subscribersByFieldName = new Map();
-      currentSubscribers = this._subscribersByFieldName.get(fieldName);
-      if (!currentSubscribers) {
-        currentSubscribers = new Set();
-        this._subscribersByFieldName.set(fieldName, currentSubscribers);
+      if (!this._fieldSubscriptions) this._fieldSubscriptions = new Map();
+      currentSubscriptions = this._fieldSubscriptions.get(fieldName);
+      if (!currentSubscriptions) {
+        currentSubscriptions = new Set();
+        this._fieldSubscriptions.set(fieldName, currentSubscriptions);
       }
-      subscriber._seenPassageCounter = this.engine._currentPassageCounter;
-      currentSubscribers.add(subscriber);
-      return currentSubscribers;
+      subscription._seenPassageCounter = this.engine._currentPassageCounter;
+      currentSubscriptions.add(subscription);
+      return currentSubscriptions;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_registerSubscriberByFieldName('${fieldName}')`,
-          "\n\tsubscriber:", ...dumpObject(subscriber),
-          "\n\tcurrent field subscribers:", ...dumpObject(currentSubscribers),
+      throw this.wrapErrorEvent(error, `_addFieldSubscription('${fieldName}')`,
+          "\n\tsubscription:", ...dumpObject(subscription),
+          "\n\tcurrent field subscriptions:", ...dumpObject(currentSubscriptions),
           "\n\tthis:", ...dumpObject(this));
     }
   }
 
-  _fieldFilterSubscribers: Set<VrapperSubscriber>;
+  _filterSubscriptions: Set<Subscription>;
 
-  _registerSubscriberByFieldFilter (fieldFilter: Function | boolean,
-      subscriber: VrapperSubscriber) {
+  _addFilterSubscription (filter: Function | boolean,
+      subscription: Subscription) {
     try {
       if (this._phase === NONRESOURCE) return undefined;
       this.requireActive();
-      if (!this._fieldFilterSubscribers) this._fieldFilterSubscribers = new Set();
-      subscriber._seenPassageCounter = this.engine._currentPassageCounter;
-      this._fieldFilterSubscribers.add(subscriber);
-      return this._fieldFilterSubscribers;
+      if (!this._filterSubscriptions) this._filterSubscriptions = new Set();
+      subscription._seenPassageCounter = this.engine._currentPassageCounter;
+      this._filterSubscriptions.add(subscription);
+      return this._filterSubscriptions;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "_registerSubscriberByFieldFilter()",
-          "\n\tfield filter:", ...dumpObject(fieldFilter),
-          "\n\tsubscriber:", ...dumpObject(subscriber),
-          "\n\tcurrent filter subscribers:", ...dumpObject(this._fieldFilterSubscribers),
+      throw this.wrapErrorEvent(error, "_addFilterSubscription()",
+          "\n\tfilter:", ...dumpObject(filter),
+          "\n\tsubscription:", ...dumpObject(subscription),
+          "\n\tcurrent filter subscriptions:", ...dumpObject(this._filterSubscriptions),
           "\n\tthis:", ...dumpObject(this));
     }
   }
@@ -1875,7 +1876,7 @@ export default class Vrapper extends Cog {
     // Refers all Scope.properties:Property objects in this._lexicalScope to enable scoped script
     // access which uses the owner._lexicalScope as the scope prototype if one exists.
 
-    this._scopeOwnerSubscriber = this.subscribeToMODIFIED("owner", (ownerUpdate: FieldUpdate) => {
+    this._scopeOwnerSubscription = this.subscribeToMODIFIED("owner", (ownerUpdate: FieldUpdate) => {
       const parent = ownerUpdate.value() || this.engine;
       if (!this._lexicalScope) {
         this._initializeScopes(parent);
@@ -1903,21 +1904,21 @@ export default class Vrapper extends Cog {
       // for lambda functions expecting that 'this' is found in the
       // scope.
       this._lexicalScope.this = this;
-    }, new VrapperSubscriber().setSubscriberInfo(`Vrapper(${this.debugId()}).scope.owner`)
+    }, new Subscription().registerWithSubscriberInfo(`Vrapper(${this.debugId()}).scope.owner`)
     ).triggerUpdate(options);
     if (!this._lexicalScope) {
       throw this.wrapErrorEvent(new Error("Vrapper owner is not immediately available"),
           "_setUpScopeFeatures",
           "\n\tthis:", ...dumpObject(this));
     }
-    this._scopeNameSubscribers = {};
+    this._scopeNameSubscriptions = {};
     this._scopePropertiesSub = this.subscribeToMODIFIED("properties", (update: FieldUpdate) => {
       update.actualAdds().forEach(vActualAdd => {
-        // TODO(iridian): Perf opt: this uselessly creates a subscriber in each Property Vrapper.
+        // TODO(iridian): Perf opt: this uselessly creates a subscription in each Property Vrapper.
         // We could just as well have a cog which tracks Property.name changes and
         // updates their owning Scope Vrapper._lexicalScope's.
         // Specifically: it is the call to actualAdds() which does this.
-        this._scopeNameSubscribers[vActualAdd.getRawId()] = vActualAdd.subscribeToMODIFIED("name",
+        this._scopeNameSubscriptions[vActualAdd.getRawId()] = vActualAdd.subscribeToMODIFIED("name",
         nameUpdate => {
           const newName = nameUpdate.value();
           if ((newName === "this") || (newName === "self")) {
@@ -1953,16 +1954,16 @@ export default class Vrapper extends Cog {
             set: (value) => vActualAdd.setField("value", expressionFromProperty(value, newName),
                 { scope: this._lexicalScope }),
           });
-        }, new VrapperSubscriber().setSubscriberInfo(
+        }, new Subscription().registerWithSubscriberInfo(
             `Vrapper(${this.debugId()}).properties(${vActualAdd.getRawId()}).name`)
         ).triggerUpdate(update.valkOptions());
       });
       update.actualRemoves().forEach(vActualRemove => {
         const removedRawId = vActualRemove.getRawId();
-        const subscriber = this._scopeNameSubscribers[removedRawId];
-        if (subscriber) {
-          subscriber.unregister();
-          delete this._scopeNameSubscribers[removedRawId];
+        const subscription = this._scopeNameSubscriptions[removedRawId];
+        if (subscription) {
+          subscription.unregister();
+          delete this._scopeNameSubscriptions[removedRawId];
         }
         const propertyName = vActualRemove.get("name", update.previousStateOptions());
         if (this._lexicalScope[propertyName].getRawId() === removedRawId) {
@@ -1970,7 +1971,7 @@ export default class Vrapper extends Cog {
           delete this._nativeScope[propertyName];
         }
       });
-    }, new VrapperSubscriber().setSubscriberInfo(`Vrapper(${this.debugId()}).properties`)
+    }, new Subscription().registerWithSubscriberInfo(`Vrapper(${this.debugId()}).properties`)
     ).triggerUpdate(options);
   }
 }

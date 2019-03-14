@@ -455,7 +455,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
             vProperty = focus.get(VALEK.property(propertyName));
           }
           if (vProperty) {
-            component.attachKuerySubscriber(`props.${lensPropertyRoleName}-${lensRoleName}`,
+            component.subscribeToKuery(`props.${lensPropertyRoleName}-${lensRoleName}`,
                 vProperty, "value", {
                   scope: component.getUIContext(),
                   noImmediateRun: true,

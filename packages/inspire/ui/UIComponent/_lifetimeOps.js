@@ -3,13 +3,13 @@
 import { dumpKuery, dumpObject } from "~/engine/VALEK";
 import Vrapper, { FieldUpdate } from "~/engine/Vrapper";
 
-import { invariantify, outputError, wrapError } from "~/tools";
+import { invariantify, outputError, thenChainEagerly, wrapError } from "~/tools";
 
 import type UIComponent from "./UIComponent";
 import { getScopeValue, setScopeValue } from "./scopeValue";
 
 import { _comparePropsOrState } from "./_propsOps";
-import { _initiateAttachSubscribers, _finalizeDetachSubscribersExcept } from "./_subscriberOps";
+import { _initiateSubscriptions, _finalizeDetachSubscribersExcept } from "./_subscriberOps";
 
 export function _componentWillMount (component: UIComponent) {
   component._activeParentFocus = _getActiveParentFocus(component, component.props);
@@ -35,12 +35,16 @@ export function _componentWillReceiveProps (component: UIComponent, nextProps: O
 
 // If there is no local props focus, we track parent focus changes for props updates.
 function _getActiveParentFocus (component: UIComponent, props: Object) {
-  if (props.hasOwnProperty("focus") || props.hasOwnProperty("head") || !props.parentUIContext) {
+  if (props.hasOwnProperty("focus") /* || props.hasOwnProperty("head") */
+      || !props.parentUIContext) {
     return undefined;
   }
+  return getScopeValue(props.parentUIContext, "focus");
+  /*
   return props.parentUIContext.hasOwnProperty("focus")
       ? getScopeValue(props.parentUIContext, "focus")
       : getScopeValue(props.parentUIContext, "head");
+  */
 }
 
 function _updateFocus (component: UIComponent, newProps: Object) {
@@ -56,30 +60,37 @@ function _updateFocus (component: UIComponent, newProps: Object) {
     component.detachSubscribers();
     component._errorObject = null;
 
-    invariantify(!(newProps.uiContext && newProps.parentUIContext),
-        `only either ${component.constructor.name
-            }.props.uiContext or ...parentUIContext can be defined at the same time`);
-    const uiContext = newProps.uiContext || newProps.parentUIContext;
-    if (!uiContext) return;
-    const focus =
-        newProps.hasOwnProperty("focus") ? newProps.focus
+    if (newProps.uiContext && newProps.parentUIContext) {
+      invariantify(!(newProps.uiContext && newProps.parentUIContext),
+      `only either ${component.constructor.name
+          }.props.uiContext or ...parentUIContext can be defined at the same time`);
+    }
+
+    const scope = newProps.uiContext || newProps.parentUIContext;
+    if (!scope) return;
+    const focus = newProps.hasOwnProperty("focus")
+        ? newProps.focus : getScopeValue(scope, "focus");
+        /*
         : newProps.hasOwnProperty("head") ? newProps.head
         : (typeof getScopeValue(uiContext, "focus") !== "undefined")
             ? getScopeValue(uiContext, "focus")
         : getScopeValue(uiContext, "head");
-    if (typeof focus === "undefined") return;
-    if (typeof newProps.kuery === "undefined") {
+        */
+    if (focus === undefined) return;
+    if (newProps.kuery === undefined) {
       _createContextAndSetFocus(component, focus, newProps);
       return;
     }
-    invariantify(newProps.parentUIContext, `if ${component.constructor.name
-        }.props.kuery is specified then ...parentUIContext must also be specified`);
+    if (!newProps.parentUIContext) {
+      invariantify(newProps.parentUIContext, `if ${component.constructor.name
+      }.props.kuery is specified then ...parentUIContext must also be specified`);
+    }
     if (component.state.uiContext) {
       component.setUIContextValue("focus", undefined);
-      component.setUIContextValue("head", undefined);
+      // component.setUIContextValue("head", undefined);
     }
-    component.attachKuerySubscriber("UIComponent.focus", focus, newProps.kuery, {
-      scope: uiContext,
+    component.subscribeToKuery("UIComponent.focus", focus, newProps.kuery, {
+      scope,
       onUpdate: (update: FieldUpdate) => {
         _finalizeDetachSubscribersExcept(component, "UIComponent.focus");
         _createContextAndSetFocus(component, update.value(), newProps);
@@ -106,13 +117,15 @@ function _createContextAndSetFocus (component: UIComponent, newFocus: any, newPr
       || Object.create(component.props.parentUIContext);
   uiContext[depthTag] = (component.props.parentUIContext[depthTag] || 0) + 1;
   setScopeValue(uiContext, "focus", newFocus);
-  setScopeValue(uiContext, "head", newFocus);
+  // setScopeValue(uiContext, "head", newFocus);
+  /*
   if (newProps.locals) {
     console.error("DEPRECATED: ValaaScope.locals\n\tprefer: ValaaScope.context");
     for (const key of Object.keys(newProps.locals)) {
       setScopeValue(uiContext, key, newProps.locals[key]);
     }
   }
+  */
   if (newProps.context) {
     for (const name of Object.getOwnPropertyNames(newProps.context)) {
       setScopeValue(uiContext, name, newProps.context[name]);
@@ -122,41 +135,51 @@ function _createContextAndSetFocus (component: UIComponent, newFocus: any, newPr
     }
   }
   uiContext.reactComponent = component;
-  const attachSubscribersWhenDone = () => {
-    if (typeof newFocus === "undefined") return;
-    if ((typeof newFocus !== "object") || !(newFocus instanceof Vrapper) || newFocus.isActive()) {
-      _initiateAttachSubscribers(component, newFocus, newProps);
-      return;
-    }
-    // Exit directly if can not activate: destroyed, non-resource, unavailable etc.
-    if (!newFocus.isInactive() && !newFocus.isActivating()) return;
-    // Otherwise activate the focus and attach subscribers once done.
-    (async () => {
-      try {
-        await newFocus.activate();
-        if (!newFocus.isActive()) {
-          throw new Error(`Resource ${newFocus.getRawId()} did not activate properly; ${
-              ""} expected focus status to be 'Active', got '${newFocus.getPhase()}' instead`);
-        }
-        // Bail out if our newFocus is no longer the uiContext.focus. Some later update has
-        // started a refresh cycle so let it finish the attach process.
-        if (newFocus !== getScopeValue(uiContext, "focus")) return;
-        _initiateAttachSubscribers(component, newFocus, newProps);
-      } catch (error) {
-        outputError(wrapError(error, new Error(`createContextAndSetFocus()`),
-                "\n\tnew focus:", ...dumpObject(newFocus),
-                "\n\tnew props:", ...dumpObject(newProps),
-                "\n\tnew uiContext:", ...dumpObject(uiContext),
-                "\n\tcomponent:", ...dumpObject(component)),
-            "Exception caught during UIComponent._createContextAndSetFocus");
-      }
-    })();
-  };
   if (component.state.uiContext !== uiContext) {
-    component.setState({ uiContext }, attachSubscribersWhenDone);
+    component.setState({ uiContext }, _attachSubscribersWhenDone);
   } else {
-    attachSubscribersWhenDone();
+    _attachSubscribersWhenDone();
     component.forceUpdate();
+  }
+  function _attachSubscribersWhenDone () {
+    if (newFocus === undefined) return;
+    const isResource = (newFocus instanceof Vrapper) && newFocus.isResource();
+    thenChainEagerly(null, [
+      () => isResource && newFocus.activate(),
+      () => {
+        if (!isResource) return component;
+        if (newFocus.isActive()) {
+          // If some later update has updated focus prevent subscriber
+          // attach and let the later update handle it instead.
+          if (newFocus !== getScopeValue(uiContext, "focus")) return undefined;
+          return component;
+        }
+        let error;
+        if (newFocus.isInactive() || newFocus.isActivating()) {
+          error = new Error(`Resource ${newFocus.debugId()} did not activate properly; ${
+            ""} expected focus status to be 'Active', got '${newFocus.getPhase()}' instead`);
+          error.lensRole = newFocus.isInactive() ? "inactiveLens" : "activatingLens";
+        } else if (newFocus.isDestroyed()) {
+          error = new Error(`Resource ${newFocus.debugId()} has been destroyed`);
+          error.lensRole = "destroyedLens";
+        } else if (newFocus.isUnavailable()) {
+          error = new Error(`Resource ${newFocus.debugId()} is unavailable`);
+          error.lensRole = "unavailableLens";
+        } else {
+          error = new Error(`Resource ${newFocus.debugId()} has unrecognized phase '${
+            newFocus.getPhase()}'`);
+        }
+        throw error;
+      },
+      component_ => component_ && _initiateSubscriptions(component, newFocus, newProps),
+    ], function errorOnCreateContextAndSetFocus (error) {
+      outputError(wrapError(error, new Error(`createContextAndSetFocus()`),
+          "\n\tnew focus:", ...dumpObject(newFocus),
+          "\n\tnew props:", ...dumpObject(newProps),
+          "\n\tnew uiContext:", ...dumpObject(uiContext),
+          "\n\tcomponent:", ...dumpObject(component)),
+          "Exception caught during UIComponent._createContextAndSetFocus");
+    });
   }
 }
 

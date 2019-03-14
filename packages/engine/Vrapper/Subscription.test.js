@@ -3,7 +3,7 @@
 import { created } from "~/raem/events";
 
 import VALEK, { Kuery, pointer, literal } from "~/engine/VALEK";
-import Vrapper, { VrapperSubscriber } from "~/engine/Vrapper";
+import Vrapper, { Subscription } from "~/engine/Vrapper";
 
 import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
 
@@ -16,13 +16,13 @@ function idOf (candidate: any) {
   return candidate.getId();
 }
 
-describe("VrapperSubscriber", () => {
+describe("Subscription", () => {
   let harness: { createds: Object, engine: Object, prophet: Object, testEntities: Object };
   const entities = () => harness.createds.Entity;
   const properties = () => harness.createds.Property;
 
   let liveCallback;
-  let subscriber;
+  let subscription;
 
   function setUpHarnessAndCallback (options: Object, ...commandBlocks: any) {
     harness = createEngineTestHarness(options, ...commandBlocks);
@@ -31,14 +31,14 @@ describe("VrapperSubscriber", () => {
 
   function setUpKueryTestHarness (kuery: Kuery, subscriberName: string, options: Object) {
     setUpHarnessAndCallback(options);
-    subscriber = new VrapperSubscriber().setSubscriberInfo(subscriberName, harness);
-    entities().creator.subscribeToMODIFIED(kuery, liveCallback, subscriber, options);
-    subscriber.triggerUpdate();
+    subscription = new Subscription().registerWithSubscriberInfo(subscriberName, harness);
+    entities().creator.subscribeToMODIFIED(kuery, liveCallback, subscription, options);
+    subscription.triggerUpdate();
   }
 
   function setUpPropertyTargetTestHarness (propertyName: string, options: Object) {
     setUpKueryTestHarness(VALEK.propertyTarget(propertyName, { optional: true }),
-        "VALEK.propertyTarget subscriber", options);
+        "VALEK.propertyTarget subscription", options);
   }
 
   describe("Live kuery VALEK.propertyTarget subscribeToMODIFIED callback calls", () => {

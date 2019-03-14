@@ -74,35 +74,33 @@ export default class LiveProps extends UIComponent {
     // Live props are always based on the parent focus.
     // Now uselessly reattaching listeners if the local focus changes.
     let frame = this.getUIContextValue("frame");
-    if (typeof frame === "undefined") frame = {};
+    if (frame === undefined) frame = {};
     for (const kueryId of Object.keys(props.liveProps || {})) {
       const kuery = props.liveProps[kueryId];
       const subscriberName = `LiveProps.liveProps['${kueryId}']`;
-      this.attachKuerySubscriber(subscriberName,
-          frame,
-          kuery, {
-            scope: this.getUIContext(),
-            onUpdate: (update: FieldUpdate) => {
-              try {
-                this.setState((prevState) => ({
-                  livePropValues: (prevState.livePropValues || OrderedMap())
-                      .set(kueryId, update.value())
-                }));
-                return true;
-              } catch (error) {
-                const wrappedError = wrapError(error,
-                    new Error(`attachSubscribers('${subscriberName}')`),
-                    "\n\tuiContext:", this.state.uiContext,
-                    "\n\tfocus:", this.tryFocus(),
-                    "\n\tstate:", this.state,
-                    "\n\tprops:", this.props,
-                );
-                outputError(wrappedError, "Exception caught during LiveProps.attachSubscribers");
-                this.enableError(wrappedError);
-              }
-              return false;
-            },
-          });
+      this.subscribeToKuery(subscriberName, frame, kuery, {
+        scope: this.getUIContext(),
+        onUpdate: (update: FieldUpdate) => {
+          try {
+            this.setState((prevState) => ({
+              livePropValues: (prevState.livePropValues || OrderedMap())
+                  .set(kueryId, update.value())
+            }));
+            return true;
+          } catch (error) {
+            const wrappedError = wrapError(error,
+                new Error(`attachSubscribers('${subscriberName}')`),
+                "\n\tuiContext:", this.state.uiContext,
+                "\n\tfocus:", this.tryFocus(),
+                "\n\tstate:", this.state,
+                "\n\tprops:", this.props,
+            );
+            outputError(wrappedError, "Exception caught during LiveProps.attachSubscribers");
+            this.enableError(wrappedError);
+          }
+          return false;
+        },
+      });
     }
   }
 
@@ -129,7 +127,7 @@ export default class LiveProps extends UIComponent {
     if ((value == null) || !(value instanceof Vrapper)) return value;
     const kueryKey = `props.className.content`;
     if (value.hasInterface("Media") && !this.getSubscriber(kueryKey)) {
-      this.attachKuerySubscriber(kueryKey, value, VALEK.toMediaContentField(), {
+      this.subscribeToKuery(kueryKey, value, VALEK.toMediaContentField(), {
         onUpdate: (update: FieldUpdate) => {
           if (this.tryFocus() !== focus) return false;
           const className = update.value();

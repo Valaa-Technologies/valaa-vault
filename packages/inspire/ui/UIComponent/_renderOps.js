@@ -211,7 +211,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
 function _tryRenderMediaLens (component: UIComponent, media: any, focus: any) {
   const kueryKey = `UIComponent.media.${media.getRawId()}`;
   if (!component.getSubscriber(kueryKey)) {
-    component.attachKuerySubscriber(kueryKey, media, VALEK.toMediaContentField(), { onUpdate () {
+    component.subscribeToKuery(kueryKey, media, VALEK.toMediaContentField(), { onUpdate () {
       // If focus has changed detaches the live kuery. This is likely
       // uselessly defensive programming as the whole UIComponent state
       // should refresh anyway whenever the focus changes. Nevertheless

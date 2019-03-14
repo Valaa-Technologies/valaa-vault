@@ -11,7 +11,7 @@ class MediaContentEditor extends UIComponent {
   attachSubscribers (focus: any, props: Object) {
     try {
       super.attachSubscribers(focus, props);
-      this.attachKuerySubscriber(`FileEditor.content`, focus,
+      this.subscribeToKuery(`FileEditor.content`, focus,
           VALEK.if(VALEK.toMediaContentField(),
               { then: VALEK.interpretContent({ mime: "text/plain" }) }),
               { onUpdate: this.onContentUpdate, scope: this.getUIContext() });

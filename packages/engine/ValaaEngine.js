@@ -437,8 +437,8 @@ export default class ValaaEngine extends Cog {
       story._delayedCogRemovals.forEach(cog => this.removeCog(cog));
       story._delayedCogRemovals = null;
       story._delayedFieldUpdates.forEach(fieldUpdate => {
-        fieldUpdate.getEmitter()._notifyMODIFIEDHandlers(
-            fieldUpdate, fieldUpdate._delayedSubscribers, fieldUpdate._delayedFilterSubscribers);
+        fieldUpdate.getEmitter()._notifyMODIFIEDHandlers(fieldUpdate,
+            fieldUpdate._delayedSubscriptions, fieldUpdate._delayedFilterSubscriptions);
       });
       story._delayedFieldUpdates = null;
 
@@ -516,9 +516,10 @@ export default class ValaaEngine extends Cog {
     story._delayedCogRemovals.push(cog);
   }
 
-  addDelayedFieldUpdate (fieldUpdate: FieldUpdate, subscribers, filterSubscribers, story: Story) {
-    fieldUpdate._delayedSubscribers = subscribers;
-    fieldUpdate._delayedFilterSubscribers = filterSubscribers;
+  addDelayedFieldUpdate (fieldUpdate: FieldUpdate,
+      subscriptions, filterSubscriptions, story: Story) {
+    fieldUpdate._delayedSubscriptions = subscriptions;
+    fieldUpdate._delayedFilterSubscriptions = filterSubscriptions;
     story._delayedFieldUpdates.push(fieldUpdate);
   }
 

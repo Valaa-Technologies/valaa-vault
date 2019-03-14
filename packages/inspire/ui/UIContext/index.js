@@ -41,7 +41,7 @@ class UIContext extends UIComponent {
     invariantify(focus instanceof Vrapper,
         "UIContext(%s).focus(%s) must be a Valaa object", this, focus);
     invariantify(focus.hasInterface("Scope"), "UIContext.focus must implement Scope");
-    this.attachKuerySubscriber("UIContext[DEFAULT_LENS]", focus, UIContext.toDefaultLens, {
+    this.subscribeToKuery("UIContext[DEFAULT_LENS]", focus, UIContext.toDefaultLens, {
       onUpdate: (update) => {
         const lensPropertyNotFoundLens = update.value();
         if (lensPropertyNotFoundLens) {

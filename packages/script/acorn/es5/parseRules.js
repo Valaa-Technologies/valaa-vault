@@ -335,7 +335,7 @@ export function parseSwitchStatement (transpiler: Transpiler, ast: SwitchStateme
               caseIndex, transpiler.VALK().fromScope("__switchCaseIndex__")),
               { then: consequentKuery, else: transpiler.VALK().head() }),
       transpiler.VALK().setScopeValues(["__switchCaseIndex__", transpiler.VALK().switch(
-          transpiler.kueryFromAst(ast.discriminant),
+          transpiler.kueryFromAst(ast.discriminant, options),
           matchCases,
           { default: transpiler.VALK().fromValue(defaultIndex) },
       )])
@@ -475,7 +475,8 @@ function _parseLoopStatement (transpiler: Transpiler, ast: any,
               transpiler.kueryFromAst(ast.test, options),
               transpiler.statements(body).to("looping"),
           ),
-          ...(ast.update ? [transpiler.statements(transpiler.kueryFromAst(ast.update))] : [])
+          ...(ast.update ? [transpiler.statements(
+              transpiler.kueryFromAst(ast.update, options))] : [])
       );
       if (ast.init) {
         const init = transpiler.kueryFromAst(ast.init, options);

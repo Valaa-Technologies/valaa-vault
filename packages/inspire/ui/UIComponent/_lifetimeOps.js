@@ -87,7 +87,7 @@ function _updateFocus (component: UIComponent, newProps: Object) {
     }
     if (component.state.uiContext) {
       component.setUIContextValue("focus", undefined);
-      // component.setUIContextValue("head", undefined);
+      component.setUIContextValue("head", undefined);
     }
     component.subscribeToKuery("UIComponent.focus", focus, newProps.kuery, {
       scope,
@@ -117,7 +117,7 @@ function _createContextAndSetFocus (component: UIComponent, newFocus: any, newPr
       || Object.create(component.props.parentUIContext);
   uiContext[depthTag] = (component.props.parentUIContext[depthTag] || 0) + 1;
   setScopeValue(uiContext, "focus", newFocus);
-  // setScopeValue(uiContext, "head", newFocus);
+  setScopeValue(uiContext, "head", newFocus);
   /*
   if (newProps.locals) {
     console.error("DEPRECATED: ValaaScope.locals\n\tprefer: ValaaScope.context");

@@ -559,7 +559,48 @@ describe("ValaaScript", () => {
           .toThrow(/Cannot delete.*unconfigurable/);
     });
   });
-/*
+  describe("text and kuery caching", () => {
+    it("caches text identical programs without sourceInfo", () => {
+      const cache = {};
+      const body1 = transpileValaaScriptBody(`var temp = 1; temp;`, { cache });
+      const body2 = transpileValaaScriptBody(`var temp = 1; temp;`, { cache });
+      expect(body1).toBe(body2);
+    });
+    it("caches semantically but non-text-identical programs without sourceInfo", () => {
+      const cache = {};
+      const body1 = transpileValaaScriptBody(`var temp = 1; temp;`, { cache });
+      const body2 = transpileValaaScriptBody(`var temp = 1;  temp;`, { cache });
+      expect(body1).toBe(body2);
+    });
+    it("caches text identical programs with sourceInfo", () => {
+      const cache = {};
+      const info1 = { phase: `Test Media 1`, sourceMap: new Map() };
+      const body1 = transpileValaaScriptBody(`var temp = 1; temp;`, { cache, sourceInfo: info1 });
+      const info2 = { phase: `Test Media 2`, sourceMap: new Map() };
+      const body2 = transpileValaaScriptBody(`var temp = 1; temp;`, { cache, sourceInfo: info2 });
+      expect(body1.toVAKON())
+          .toBe(body2.toVAKON());
+      expect(info1.sourceMap)
+          .toBe(info2.sourceMap);
+    });
+    it("caches semantically but non-text-identical programs with sourceInfo", () => {
+      const cache = {};
+      const info1 = { phase: `Test Media 1`, sourceMap: new Map() };
+      const body1 = transpileValaaScriptBody(`var temp = 1; temp;`, { cache, sourceInfo: info1 });
+      const info2 = { phase: `Test Media 2`, sourceMap: new Map() };
+      const body2 = transpileValaaScriptBody(`var temp = 1;  temp;`, { cache, sourceInfo: info2 });
+      expect(body1)
+          .not.toBe(body2);
+      expect(body1.toVAKON())
+          .toBe(body2.toVAKON());
+      const bodykon = body1.toVAKON();
+      expect(info1.sourceMap.get(bodykon[2]).loc.start.column)
+          .toBe(14);
+      expect(info2.sourceMap.get(bodykon[2]).loc.start.column)
+          .toBe(15);
+    });
+  });
+    /*
   describe("VALK lookups", () => {
     it("Should handle arrays", () => {
       expect(transpileValaaScriptBody("[1, 2, 3]"))

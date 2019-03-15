@@ -63,11 +63,11 @@ describe("ValaaScriptECMAScript2015", () => {
 
     it("testing tagged template expressions", () => {
       const bodyKuery = transpileValaaScriptBody(`
-          function foo (strings, key) {
-            let strs = strings.join("");
-            strs += key;
-            return strs;
-          };
+        function foo (strings, key) {
+          let strs = strings.join("");
+          strs += key;
+          return strs;
+        };
         foo\`age \${10}is \`;
       `);
       const testStr = evaluateProgram([], {}, bodyKuery, {});

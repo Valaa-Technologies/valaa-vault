@@ -34,13 +34,47 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
     actualTranspiler._indent = options.verbosity || undefined;
     actualTranspiler._sourceInfo = options.sourceInfo;
     let ast;
+    const cache = options.cache;
     try {
+      let cacheEntry = (cache || {}).bySourceText && cache.bySourceText[source];
+      if (!cacheEntry) {
         ast = parse(source, actualTranspiler.acornParseOptions);
         const scopeAccesses = {};
         const kuery = actualTranspiler.kueryFromAst(ast,
             { scopeAccesses, contextRuleOverrides: {} });
         kuery[ScopeAccessesTag] = scopeAccesses;
         if (options.sourceInfo) kuery[SourceInfoTag] = options.sourceInfo;
+        if (!cache) return kuery;
+
+        const kueryText = JSON.stringify(kuery.toVAKON(), null, 0);
+        cacheEntry = cache.byKueryText && cache.byKueryText[kueryText];
+        if (!cacheEntry) {
+          cacheEntry = {
+            kuery, sourceMap: (options.sourceInfo || {}).sourceMap, refCount: 0,
+          };
+          (cache.byKueryText || (cache.byKueryText = {}))[kueryText] = cacheEntry;
+        } else if (options.sourceInfo) {
+          // Distinct source but identical semantic content. Reuse
+          // the cached kuery to allow deduplication of live kuery
+          // subscriptions with identical semantics. A new sourceMap
+          // is needed with keys of the cached kuery but values of
+          // the freshly parsed kuery sourceMap entries (whose locs
+          // correspond to the fresh file).
+          options.sourceInfo.sourceMap = _combineSourceMap(new Map(),
+              cacheEntry.kuery.toVAKON(), kuery.toVAKON(), options.sourceInfo.sourceMap);
+        }
+        (cache.bySourceText || (cache.bySourceText = {}))[source] = cacheEntry;
+      } else if (options.sourceInfo) {
+        // Exact source match can reuse the sourceInfo directly as
+        // line/columns match straight up. Only need to extend the
+        // cached kuery with the new sourceInfo as it might have
+        // different file name etc.
+        options.sourceInfo.sourceMap = cacheEntry.sourceMap;
+      }
+      ++cacheEntry.refCount;
+      if (!options.sourceInfo) return cacheEntry.kuery;
+      const wrappedKuery = Object.create(cacheEntry.kuery);
+      wrappedKuery[SourceInfoTag] = options.sourceInfo;
       return wrappedKuery;
     } catch (error) {
       let errorText = source;
@@ -61,6 +95,15 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
           "\n\ttext:", { text: `\n${"```"}\n${errorText}\n${"```"}\n` },
           "\n\tast:", ...dumpObject(ast),
       );
+    }
+    function _combineSourceMap (targetSourceMap, kuery, origin, originSourceMap) {
+      if (kuery && (typeof kuery === "object") && origin && (typeof origin === "object")) {
+        const originEntry = originSourceMap.get(origin);
+        if (originEntry) targetSourceMap.set(kuery, originEntry);
+        Object.entries(kuery).forEach(([key, kueryEntry]) =>
+            _combineSourceMap(targetSourceMap, kueryEntry, origin[key], originSourceMap));
+      }
+      return targetSourceMap;
     }
   }
 

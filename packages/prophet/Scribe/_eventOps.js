@@ -302,7 +302,7 @@ export function _receiveEvents (
   if (!newActions.length) return receivedActions;
 
   const syncOptions = {
-    retryTimes: 4, delayBaseSeconds: 5,
+    retryTimes: 4, delayBaseSeconds: 5, blockOnBrokenDownload: false,
     retrieveMediaBuffer: receivingTruths && retrieveMediaBuffer,
     prepareBvob: (content, mediaInfo) => connection.prepareBvob(
         content, { ...mediaInfo, prepareBvobToUpstream: !receivingTruths }),

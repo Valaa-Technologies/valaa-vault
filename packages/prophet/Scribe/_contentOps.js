@@ -208,6 +208,7 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribePartiti
     mediaEntry: Object, options: {
       getNextBackoffSeconds?: Function, retryTimes?: number, delayBaseSeconds?: number,
       retrieveMediaBuffer: RetrieveMediaBuffer, prepareBvob?: Function,
+      blockOnBrokenDownload: boolean,
     } = {},
 ) {
   const mediaInfo = mediaEntry.mediaInfo;
@@ -217,9 +218,12 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribePartiti
   mediaInfo.mediaRef = new ValaaReference(mediaEntry.mediaId);
   let getNextBackoffSeconds = options.getNextBackoffSeconds;
   if (!getNextBackoffSeconds && (typeof options.retryTimes === "number")) {
-    getNextBackoffSeconds = (previousRetries: number, mediaInfo_, error) =>
-        ((previousRetries >= options.retryTimes) || (error && error.noRetry) ? undefined
-            : error && error.instantRetry ? 0
+    getNextBackoffSeconds = (previousRetries: number, mediaInfo_, error = {}) =>
+        ((previousRetries >= options.retryTimes) || (error.retryable === false)
+                || (error.statusCode === 404)
+            ? undefined
+        : error.immediateRetry
+            ? 0
             : (previousBackoff || 0) + (previousRetries * (options.delayBaseSeconds || 1)));
   }
   if (!getNextBackoffSeconds) getNextBackoffSeconds = (() => undefined);
@@ -245,15 +249,27 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribePartiti
       const nextBackoff = getNextBackoffSeconds && getNextBackoffSeconds(i - 1, mediaInfo, error);
       const wrappedError = connection.wrapErrorEvent(error,
           `scribe.retrieveMedia("${mediaInfo.name}") attempt#${i}`,
-          "\n\tmedia name:", mediaInfo.name,
-          "\n\tmediaInfo:", mediaInfo,
+          "\n\terror.statusCode:", error.statusCode, ", retryable:", error.retryable,
+              ", immediateRetry:", error.immediateRetry,
+          "\n\tmedia name:", mediaInfo.name, "mediaInfo:", mediaInfo,
           ...(i > 1 ? ["\n\tbackoff was:", previousBackoff] : []),
-          "\n\terror.noRetry:", error.noRetry, ", error.immediateRetry:", error.immediateRetry,
-          ...(typeof nextBackoff === "undefined"
-              ? ["\n\tthis was final retry attempt"]
-              : ["\n\tnext retry after (seconds):", nextBackoff]),
+          ...((nextBackoff !== undefined)
+                  ? ["\n\tnext retry after (seconds):", nextBackoff]
+              : ((content === undefined) && (options.blockOnBrokenDownload === false))
+                  ? ["\n\tthis was final retry attempt but accepting as broken download",
+                    "\n\tcontinuing playback"]
+                  : ["\n\tthis was final retry attempt, REJECTING broken download",
+                    "\n\tEVENT PLAYBACK BLOCKED"]),
       );
-      if (typeof nextBackoff !== "number") throw wrappedError;
+      if (typeof nextBackoff !== "number") {
+        if ((content === undefined) && (options.blockOnBrokenDownload === false)) {
+          connection.outputErrorEvent(wrappedError,
+              "Error caught for a broken but non-blocking download");
+          mediaEntry.downloadStatus = "broken";
+          return mediaEntry;
+        }
+        throw wrappedError;
+      }
       connection.outputErrorEvent(wrappedError);
       if (i > 1) await _waitBackoff(nextBackoff);
       previousBackoff = nextBackoff;

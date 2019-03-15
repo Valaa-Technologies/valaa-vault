@@ -2,6 +2,8 @@
 
 import { Kuery } from "~/raem/VALK";
 
+export const ScopeAccessesTag = Symbol("VALSK.ExternalScopeAccess");
+
 export default class ValaaScriptKuery extends Kuery {
   /**
    * Do-step which valks the statement steps, discards their results while keeping the head as the

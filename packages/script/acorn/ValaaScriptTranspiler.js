@@ -9,6 +9,7 @@ import { isBuiltinStep, getBuiltinStepName, getBuiltinStepArguments }
     from "~/raem/VALK/builtinSteppers";
 
 import Language from "~/script/acorn/Language";
+import { ScopeAccessesTag } from "~/script/VALSK";
 
 import { invariantify, invariantifyObject, LogEventGenerator } from "~/tools";
 
@@ -28,29 +29,33 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
 
   VALK () { return this._VALK; }
 
-  transpileKueryFromText (expressionText: string, options: Object = {}): Kuery {
+  transpileKueryFromText (source: string, options: Object = {}): Kuery {
     const actualTranspiler = Object.create(this);
     actualTranspiler._indent = options.verbosity || undefined;
     actualTranspiler._sourceInfo = options.sourceInfo;
     let ast;
     try {
-      ast = parse(expressionText, actualTranspiler.acornParseOptions);
-      const ret = actualTranspiler.kueryFromAst(ast);
-      if (options.sourceInfo) ret[SourceInfoTag] = options.sourceInfo;
-      return ret;
+        ast = parse(source, actualTranspiler.acornParseOptions);
+        const scopeAccesses = {};
+        const kuery = actualTranspiler.kueryFromAst(ast,
+            { scopeAccesses, contextRuleOverrides: {} });
+        kuery[ScopeAccessesTag] = scopeAccesses;
+        if (options.sourceInfo) kuery[SourceInfoTag] = options.sourceInfo;
+      return wrappedKuery;
     } catch (error) {
-      let errorText = expressionText;
+      let errorText = source;
       if (error.loc) {
-        const sourceLines = expressionText.split("\n");
+        const sourceLines = source.split("\n");
         const underline = `${" ".repeat(error.loc.column)}^^^`;
         errorText = sourceLines.slice(0, error.loc.line)
             .concat(underline)
             .concat(sourceLines.slice(error.loc.line)).join("\n");
-        const parseDummy = {};
-        actualTranspiler._sourceInfo.sourceMap.set(parseDummy, {
-          loc: { start: error.loc },
-        });
-        addStackFrameToError(error, parseDummy, actualTranspiler._sourceInfo);
+        const sourceInfo = actualTranspiler._sourceInfo;
+        if (sourceInfo) {
+          const parseDummy = {};
+          sourceInfo.sourceMap.set(parseDummy, { loc: { start: error.loc } });
+          addStackFrameToError(error, parseDummy, sourceInfo);
+        }
       }
       throw actualTranspiler.wrapErrorEvent(error, `transpileKueryFromText`,
           "\n\ttext:", { text: `\n${"```"}\n${errorText}\n${"```"}\n` },
@@ -59,8 +64,8 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
     }
   }
 
-  kueryFromAst (ast: Node, options: Object = { scope: {}, contextRuleOverrides: Object },
-      type: string = ast.type) {
+  kueryFromAst (ast: Node, options: Object, type: string = ast.type) {
+    if (!options) throw new Error("kueryFromAst.options missing");
     const ret = this.parseAst(ast, options, type);
     if (ret && !(ret instanceof Kuery)) {
       throw this.parseError(ast, options,
@@ -69,8 +74,8 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
     return ret;
   }
 
-  modifierFromAst (ast: Node, options: Object = { scope: {}, contextRuleOverrides: Object },
-      type: string = ast.type) {
+  modifierFromAst (ast: Node, options: Object, type: string = ast.type) {
+    if (!options) throw new Error("modifierFromAst.options missing");
     const ret = this.parseAst(ast, options, type);
     if (ret && (typeof ret !== "function")) {
       throw this.parseError(ast, options,
@@ -79,8 +84,8 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
     return ret;
   }
 
-  patternSettersFromAst (ast: Node, options: Object = { scope: {}, contextRuleOverrides: Object },
-      type: string = ast.type) {
+  patternSettersFromAst (ast: Node, options: Object, type: string = ast.type) {
+    if (!options) throw new Error("patternSettersFromAst.options missing");
     const patternOptions = { ...options, leftSideRole: "pattern", };
     const ret = this.parseAst(ast, patternOptions, type);
     if (!Array.isArray(ret)) {
@@ -91,7 +96,7 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
     return ret;
   }
 
-  parseAst (ast: Node, options: Object = { scope: {}, contextRuleOverrides: Object },
+  parseAst (ast: Node, options: Object = { scopeAccesses: {}, contextRuleOverrides: {} },
       type: string) {
     let rule = options.contextRuleOverrides && options.contextRuleOverrides[`override${type}`];
     const indent = this._indent;
@@ -102,7 +107,7 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
         this.log(`\n${" ".repeat(indent)}: ${type}, options:`, JSON.stringify(options, null, 0),
             ...(rule ? ["\n\tusing rule override:", rule.name] : []));
       }
-      if (typeof rule === "undefined") {
+      if (rule === undefined) {
         rule = this.language.parseRules[`parse${type}`];
         invariantify(typeof rule === "function",
             `ValaaScriptTranspiler(${this.language.name}).parseAst.ast.type '${type
@@ -245,5 +250,23 @@ export default class ValaaScriptTranspiler extends LogEventGenerator {
 
   argumentsFromArray (args: any, options: Object) {
     return args.map(arg => this.parseAst(arg, options, arg.type));
+  }
+
+  addScopeAccess (scopeAccesses: Object, name: string, type: string) {
+    const currentType = scopeAccesses[name];
+    if (!currentType
+        || (currentType === "read")
+        || ((currentType === "modify") && (type !== "read"))
+        || ((type !== "read") && (type !== "modify"))) {
+      scopeAccesses[name] = type;
+    }
+  }
+
+  exposeOuterScopeAccesses (innerScopeAccesses, outerScopeAccesses) {
+    Object.entries(innerScopeAccesses).forEach(([name, type]) => {
+      if ((type === "read") || (type === "modify")) {
+        this.addScopeAccess(outerScopeAccesses, name, type);
+      }
+    });
   }
 }

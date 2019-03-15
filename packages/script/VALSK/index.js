@@ -7,7 +7,7 @@ import type { VRef } from "~/raem/ValaaReference";
 import { literal as _literal } from "~/script/schema/Literal";
 import { identifier } from "~/script/schema/Identifier";
 
-import ValaaScriptKuery from "./ValaaScriptKuery";
+import ValaaScriptKuery, { ScopeAccessesTag } from "./ValaaScriptKuery";
 
 
 export default new ValaaScriptKuery();
@@ -24,6 +24,7 @@ export {
 
 export {
   Kuery,
+  ScopeAccessesTag,
   ValaaScriptKuery,
 };
 export {

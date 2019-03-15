@@ -35,18 +35,21 @@ export interface Identifier extends Expression, Pattern {
 export function parseIdentifier (transpiler: Transpiler, ast: Identifier,
     options: Object): Kuery {
   if (options.leftSideRole === "pattern") {
+    transpiler.addScopeAccess(options.scopeAccesses, ast.name, "pattern");
     return [[ast.name, !options.leftSideMutable
         ? transpiler.VALK().createConstIdentifier(options.initializer)
         : transpiler.VALK().createLetIdentifier(options.initializer)
     ]];
   }
   if (options.leftSideRole === "modify") {
+    transpiler.addScopeAccess(options.scopeAccesses, ast.name, "modify");
     return (toValueAlterationVAKON: Kuery) =>
         transpiler.VALK().alterIdentifier(ast.name, toValueAlterationVAKON);
   }
   if (options.leftSideRole === "delete") {
     return () => transpiler.VALK().deleteIdentifier(ast.name);
   }
+  transpiler.addScopeAccess(options.scopeAccesses, ast.name, "read");
   return transpiler.VALK().identifierValue(ast.name);
 }
 
@@ -93,23 +96,26 @@ export function parseProgram (transpiler: Transpiler, ast: Program, options: Obj
   if (!ast.body.length) return transpiler.VALK().void();
   const topLevelOptions = { ...options,
     contextRuleOverrides: programContextRuleOverrides,
+    scopeAccesses: {},
     surroundingFunction: {
       topLevel: true,
-      requireScopeThis: false,
-      requireScopeSelf: false,
       requireControlLooping: false,
     },
     surroundingBlock: { requireFlowReturn: 0, requireFlowLooping: 0 },
+    unbreakable: true,
   };
   let globals;
-  if (topLevelOptions.surroundingFunction.requireScopeSelf) {
-    (globals = {}).self = transpiler.VALK().fromScope();
-  }
-  if (topLevelOptions.surroundingFunction.requireScopeThis) {
+  // TODO(iridian, 2019-03): wtf. This is always false, and as such
+  // should probably come after the kueryFromAst(body) has evaluated.
+  // But how does the current system work?
+  // Note: I think it doesn't: the main pathway of VSX arrow functions
+  // works because 'this' gets set in Vrapper._lexicalScope explicitly
+  // but this is why kuery properties don't work.
+  if (topLevelOptions.scopeAccesses.this) {
     (globals || (globals = {})).this = ["§->", null];
   }
-  const topLevelHeader = globals
-      ? transpiler.VALK().setScopeValues(globals) : transpiler.VALK();
+  let ret = transpiler.VALK();
+  if (globals) ret = ret.setScopeValues(globals);
   let lastNode = ast.body.slice(-1)[0];
   let body;
   if (lastNode.type === "ExpressionStatement") {
@@ -121,13 +127,17 @@ export function parseProgram (transpiler: Transpiler, ast: Program, options: Obj
     lastNode = undefined;
     body = ast.body;
   }
-  const programKuery = (body.length > 0)
-      ? topLevelHeader.pathConcat(transpiler.kueryFromAst(
-          { type: "BlockStatement", body }, { ...topLevelOptions, unbreakable: true }))
-      : topLevelHeader;
-  return !lastNode
-      ? programKuery
-      : programKuery.to(transpiler.kueryFromAst(lastNode.expression, topLevelOptions));
+  if (body.length > 0) {
+    ret = ret.pathConcat(transpiler.kueryFromAst(
+        { type: "BlockStatement", body }, topLevelOptions));
+    topLevelOptions.scopeAccesses = topLevelOptions.previousBlockOptions.scopeAccesses;
+  }
+  if (lastNode) {
+    topLevelOptions.unbreakable = false;
+    ret = ret.to(transpiler.kueryFromAst(lastNode.expression, topLevelOptions));
+  }
+  transpiler.exposeOuterScopeAccesses(topLevelOptions.scopeAccesses, options.scopeAccesses);
+  return ret;
 }
 
 // # Functions
@@ -165,7 +175,8 @@ export interface BlockStatement extends Statement {
 // A block statement, i.e., a sequence of statements surrounded by braces.
 export function parseBlockStatement (transpiler: Transpiler, ast: BlockStatement,
     options: Object): Kuery {
-  const blockOptions = { ...options,
+  const blockOptions = options.previousBlockOptions = { ...options,
+    scopeAccesses: {},
     surroundingBlock: {
       hoists: [],
       requireFlowReturn: 0,
@@ -175,11 +186,13 @@ export function parseBlockStatement (transpiler: Transpiler, ast: BlockStatement
   const body = parseStatementList(transpiler, ast.body, blockOptions);
   options.surroundingBlock.requireFlowReturn += blockOptions.surroundingBlock.requireFlowReturn;
   options.surroundingBlock.requireFlowLooping += blockOptions.surroundingBlock.requireFlowLooping;
-  return (blockOptions.surroundingBlock.hoists.length
+  transpiler.exposeOuterScopeAccesses(blockOptions.scopeAccesses, options.scopeAccesses);
+  const ret = (blockOptions.surroundingBlock.hoists.length
           ? transpiler.statements(
               transpiler.VALK().setScopeValues(...blockOptions.surroundingBlock.hoists))
           : transpiler.VALK())
       .to(body);
+  return ret;
 }
 export function parseStatementList (transpiler: Transpiler, statements: Array<Statement>,
     options: Object): Kuery {
@@ -409,9 +422,11 @@ export function parseForStatement (transpiler: Transpiler, ast: ForStatement,
 function _parseLoopStatement (transpiler: Transpiler, ast: any,
     options: Object, loopType: "while" | "doWhile" | "for") {
   const bodyOptions = { ...options,
+    scopeAccesses: {},
     surroundingBlock: { requireFlowReturn: 0, requireFlowLooping: 0 }
   };
   const body = transpiler.kueryFromAst(ast.body, bodyOptions);
+  transpiler.exposeOuterScopeAccesses(bodyOptions.scopeAccesses, options.scopeAccesses);
   if (!bodyOptions.surroundingBlock.requireFlowReturn &&
       !bodyOptions.surroundingBlock.requireFlowLooping) {
     // Loop with no continue, break or return statements inside.
@@ -429,7 +444,7 @@ function _parseLoopStatement (transpiler: Transpiler, ast: any,
             transpiler.kueryFromAst(ast.test, options),
             !ast.update
                 ? transpiler.statements(body)
-                : transpiler.statements(body, transpiler.kueryFromAst(ast.update)));
+                : transpiler.statements(body, transpiler.kueryFromAst(ast.update, options)));
         if (ast.init) {
           const init = transpiler.kueryFromAst(ast.init, options);
           core = ast.init.type !== "VariableDeclaration"
@@ -592,7 +607,7 @@ export interface ThisExpression extends Expression { type: "ThisExpression"; }
 export function parseThisExpression (transpiler: Transpiler, ast: ThisExpression,
     options: Object): Kuery {
   if (options.headIsThis) return transpiler.VALK().head();
-  options.surroundingFunction.requireScopeThis = true;
+  transpiler.addScopeAccess(options.scopeAccesses, "this", "read");
   return transpiler.VALK().fromThis();
 }
 
@@ -666,9 +681,9 @@ export function parseFunctionExpression (transpiler: Transpiler, ast: FunctionEx
 
 export function parseFunctionHelper (transpiler: Transpiler, ast: FunctionExpression,
     options: Object): Kuery {
-  options.surroundingFunction.requireScopeThis = true;
   const functionOptions = {
     ...options,
+    scopeAccesses: {},
     surroundingFunction: {
       topLevel: false,
       hoists: [],
@@ -678,18 +693,20 @@ export function parseFunctionHelper (transpiler: Transpiler, ast: FunctionExpres
     omitThisFromScope: undefined,
   };
   const body = transpiler.kueryFromAst(ast.body, functionOptions);
+  let controlHeader = transpiler.VALK();
+  if (!options.omitThisFromScope) {
+    transpiler.addScopeAccess(functionOptions.scopeAccesses, "this", "hoist");
+    transpiler.addScopeAccess(functionOptions.scopeAccesses, "arguments", "hoist");
+    controlHeader = controlHeader.setScopeValues({ this: transpiler.VALK().head() });
+  }
 
-  const controlHeader =
-      (options.omitThisFromScope
-          ? transpiler.VALK()
-          : transpiler.VALK().setScopeValues({ this: transpiler.VALK().head() }))
-      .to(transpiler.createControlBlock(
-          functionOptions.surroundingFunction.requireControlLooping
-              ? { looping: 1 } : {}));
+  controlHeader = controlHeader.to(transpiler.createControlBlock(
+      functionOptions.surroundingFunction.requireControlLooping ? { looping: 1 } : {}));
   const paramDeclarations = scopeSettersFromParamDeclarators(transpiler, ast, functionOptions);
   const functionScopeHoists = functionOptions.surroundingFunction.hoists.length &&
       transpiler.VALK().setScopeValues(...functionOptions.surroundingFunction.hoists.map(
           hoistName => ({ [hoistName]: { value: transpiler.VALK().void() } })));
+  transpiler.exposeOuterScopeAccesses(functionOptions.scopeAccesses, options.scopeAccesses);
   const captivePath = transpiler.VALK()
       .pathConcat(controlHeader, paramDeclarations, functionScopeHoists)
       .to(transpiler.statements(body))
@@ -700,11 +717,11 @@ export function parseFunctionHelper (transpiler: Transpiler, ast: FunctionExpres
 export function scopeSettersFromParamDeclarators (transpiler: Transpiler,
     { params, /* defaults, */ rest }:
     { params: Pattern[], defaults: ?Expression[], rest: Identifier | null }, options: Object) {
-  // TODO(iridian): What is defaults? Not available in es6+ at least?
   const setters = [].concat(...params.map((pattern: Pattern, index: number) =>
       transpiler.patternSettersFromAst(pattern,
           { ...options, initializer: transpiler.VALK().fromScope("arguments").toIndex(index) })));
   if (rest) {
+    transpiler.addScopeAccess(options.scopeAccesses, rest.name, "hoist");
     setters.push([rest.name, params.length
         ? transpiler.VALK().fromScope("arguments").call("slice", null, params.length)
         : transpiler.VALK().fromScope("arguments")

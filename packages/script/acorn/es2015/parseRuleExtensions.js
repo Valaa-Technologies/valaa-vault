@@ -154,17 +154,20 @@ export function parseArrowFunctionExpression (transpiler: Transpiler, ast: Arrow
   }
   const functionOptions = {
     ...options,
-    surroundingFunction: { topLevel: false, hoists: [] }, // List of 'var' names to hoist.
+    scopeAccesses: {},
+    surroundingFunction: { topLevel: false, hoists: [] },
     contextRuleOverrides: { ...options.contextRuleOverrides, ...es5.functionContextRuleOverrides },
     headIsThis: true,
   };
   const body = transpiler.kueryFromAst(ast.body, functionOptions);
   const paramDeclarations = es5.scopeSettersFromParamDeclarators(transpiler, ast, functionOptions);
+  transpiler.exposeOuterScopeAccesses(functionOptions.scopeAccesses, options.scopeAccesses);
   return transpiler.VALK().capture(transpiler.VALK().fromValue(
       transpiler.VALK().pathConcat(
           transpiler.VALK().fromThis(),
           paramDeclarations,
-          body).toJSON()));
+          body,
+      ).toVAKON()));
 }
 
 export interface YieldExpression extends es5.Expression {
@@ -255,7 +258,7 @@ export function parseAssignmentPattern (transpiler: Transpiler, ast: AssignmentP
         `AssignmentPattern expects 'pattern' as options.leftSideRole, got '${
               options.leftSideRole}'`);
   }
-  if (typeof options.initializer === "undefined") {
+  if (options.initializer === undefined) {
     throw transpiler.parseError(ast, options,
         `AssignmentPattern expects defined options.initializer, got 'undefined'`);
   }

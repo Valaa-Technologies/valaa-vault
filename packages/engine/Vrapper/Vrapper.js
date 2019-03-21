@@ -1656,17 +1656,17 @@ export default class Vrapper extends Cog {
     return this.engine.getVrapper(ghostVRef, { state });
   }
 
-  onEventCREATED (vResource: Vrapper, passage: Passage, story: Story) {
+  onEventCREATED (passage: Passage, story: Story) {
     this._updateTransient(story.state);
     if (this._fieldSubscriptions) {
       const transient = this.getTransient({ typeName: passage.typeName, state: story.state });
       for (const key of transient.keys()) {
-        this.notifyMODIFIEDHandlers(key, passage, story, vResource);
+        this.notifyMODIFIEDHandlers(key, passage, story);
       }
     }
   }
 
-  onEventMODIFIED (vResource: Vrapper, passage: Passage, story: Story) {
+  onEventMODIFIED (passage: Passage, story: Story) {
     if (this._debug) {
       console.log(`${this.debugId()}.onEventMODIFIED()`, story, this);
     }
@@ -1679,23 +1679,24 @@ export default class Vrapper extends Cog {
       }
       if (passage.actualAdds) {
         for (const fieldName of passage.actualAdds.keys()) {
-          this.notifyMODIFIEDHandlers(fieldName, passage, story, vResource);
+          this.notifyMODIFIEDHandlers(fieldName, passage, story);
         }
       }
       if (passage.actualRemoves) {
         for (const fieldName of passage.actualRemoves.keys()) {
           if (!passage.actualAdds || !passage.actualAdds.has(fieldName)) {
             // Only fire modified event once per property.
-            this.notifyMODIFIEDHandlers(fieldName, passage, story, vResource);
+            this.notifyMODIFIEDHandlers(fieldName, passage, story);
           }
         }
       }
       if (passage.actualMoves) {
         for (const fieldName of passage.actualMoves.keys()) {
-          if ((!passage.actualAdds || !passage.actualAdds.has(fieldName))
+            // Only fire modified event once per property, so filter out
+            // entries that were already actualAdded or actualRemoved.
+            if ((!passage.actualAdds || !passage.actualAdds.has(fieldName))
               && (!passage.actualRemoves || !passage.actualRemoves.has(fieldName))) {
-            // Only fire modified event once per property.
-            this.notifyMODIFIEDHandlers(fieldName, passage, story, vResource);
+            this.notifyMODIFIEDHandlers(fieldName, passage, story);
           }
         }
       }
@@ -1705,26 +1706,26 @@ export default class Vrapper extends Cog {
   }
 
   // eslint-disable-next-line camelcase
-  onEventFIELDS_SET (vResource: Vrapper, passage: Passage, story: Story) {
-    return this.onEventMODIFIED(vResource, passage, story);
+  onEventFIELDS_SET (passage: Passage, story: Story) {
+    return this.onEventMODIFIED(passage, story);
   }
 
   // eslint-disable-next-line camelcase
-  onEventADDED_TO (vResource: Vrapper, passage: Passage, story: Story) {
-    return this.onEventMODIFIED(vResource, passage, story);
+  onEventADDED_TO (passage: Passage, story: Story) {
+    return this.onEventMODIFIED(passage, story);
   }
 
   // eslint-disable-next-line camelcase
-  onEventREMOVED_FROM (vResource: Vrapper, passage: Passage, story: Story) {
-    return this.onEventMODIFIED(vResource, passage, story);
+  onEventREMOVED_FROM (passage: Passage, story: Story) {
+    return this.onEventMODIFIED(passage, story);
   }
 
   // eslint-disable-next-line camelcase
-  onEventREPLACED_WITHIN (vResource: Vrapper, passage: Passage, story: Story) {
-    return this.onEventMODIFIED(vResource, passage, story);
+  onEventREPLACED_WITHIN (passage: Passage, story: Story) {
+    return this.onEventMODIFIED(passage, story);
   }
 
-  onEventDESTROYED (vResource: Vrapper, passage: Passage, story: Story) {
+  onEventDESTROYED (passage: Passage, story: Story) {
     (this._destroyedHandlers || []).forEach(handler => handler(story.timed));
     this._phase = DESTROYED;
     return this.engine.addDelayedRemoveCog(this, story);
@@ -1735,8 +1736,7 @@ export default class Vrapper extends Cog {
     this._destroyedHandlers.push(handler);
   }
 
-  notifyMODIFIEDHandlers (fieldName: string, passage: Passage, story: Story,
-      vProtagonist: Vrapper) {
+  notifyMODIFIEDHandlers (fieldName: string, passage: Passage, story: Story) {
     const subscriptions = this._fieldSubscriptions && this._fieldSubscriptions.get(fieldName);
     const filterSubscriptions = this._filterSubscriptions;
     if (!subscriptions && !filterSubscriptions) return undefined;
@@ -1746,8 +1746,8 @@ export default class Vrapper extends Cog {
         fieldUpdate, subscriptions, filterSubscriptions, story);
   }
 
-  _notifyMODIFIEDHandlers (fieldUpdate: FieldUpdate, subscriptions: any,
-    filterSubscriptions: any) {
+  _notifyMODIFIEDHandlers (fieldUpdate: FieldUpdate, specificFieldHandlers: any,
+      filterHandlers: any) {
     const fieldName = fieldUpdate.fieldName();
     const passageCounter = fieldUpdate.getPassage()._counter;
     for (const subscription of (subscriptions || [])) {
@@ -1786,7 +1786,8 @@ export default class Vrapper extends Cog {
   }
 
   /**
-   * Adds a new subscription for modifications on fields filtered by given filter.
+   * Adds a new subscription for modifications on fields filtered by
+   * given liveOperation.
    *
    * @param {(boolean | string | (fieldIntro: Object) => boolean | Kuery)} filter
    * @param {(update: FieldUpdate) => void} callback       called on any updates on filtered fields

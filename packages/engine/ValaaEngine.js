@@ -452,40 +452,40 @@ export default class ValaaEngine extends Cog {
     if (this.getVerbosity() || story.timed) {
       // eslint-disable-next-line
       const { parentPassage, passages, type, state, previousState, next, prev, ...rest } = passage;
-      this.logEvent(`recitePassage`, _eventTypeString(passage), String(passage.id),
+      this.logEvent(`recitePassage`, _eventTypeString(passage),
+          ...[passage.typeName].filter(p => p), String(passage.id),
           (story.timed ? `@ ${story.timed.startTime || "|"}->${story.timed.time}:` : ":"),
           "\n\taction:", dumpify(getActionFromPassage(passage)),
           "\n\tpassage:", dumpify(rest));
     }
     passage.timedness = story.timed ? "Timed" : "Timeless";
     passage._counter = ++this._currentPassageCounter;
-    let vProtagonist;
     try {
       if (passage.id) {
         passage.rawId = passage.id.rawId();
         const protagonistEntry = this._vrappers.get(passage.rawId);
         if (protagonistEntry && protagonistEntry.get(null)) {
-          vProtagonist = protagonistEntry.get(null)[0];
+          passage.vProtagonist = protagonistEntry.get(null)[0];
         }
         if (isCreatedLike(passage)) {
-          if (!vProtagonist) {
-            vProtagonist = new Vrapper(this, passage.id, passage.typeName);
-          } else vProtagonist._setTypeName(passage.typeName);
-          if (vProtagonist.isResource()) {
+          if (!passage.vProtagonist) {
+            passage.vProtagonist = new Vrapper(this, passage.id, passage.typeName);
+          } else passage.vProtagonist._setTypeName(passage.typeName);
+          if (passage.vProtagonist.isResource()) {
             // vProtagonist.refreshPhase(story.state);
             // /*
-            Promise.resolve(vProtagonist.refreshPhase(story.state))
+            Promise.resolve(passage.vProtagonist.refreshPhase(story.state))
                 .then(undefined, (error) => {
                   outputCollapsedError(errorOnReceiveCommands.call(this, error,
-                      `receiveCommands(${passage.type} ${vProtagonist.debugId()}).refreshPhase`),
+                      `receiveCommands(${passage.type} ${
+                        passage.vProtagonist.debugId()}).refreshPhase`),
                       "Exception caught during passage recital protagonist refresh phase");
                 });
             // */
           }
         }
       }
-      const reactions = executeHandlers(this._storyHandlerRoot, passage,
-          [vProtagonist, passage, story]);
+      const reactions = executeHandlers(this._storyHandlerRoot, passage, story);
       if (reactions) allReactionPromises.push(...reactions);
       if (passage.passages) {
         for (const subPassage of passage.passages) {
@@ -495,13 +495,13 @@ export default class ValaaEngine extends Cog {
     } catch (error) {
       throw errorOnReceiveCommands.call(this, error,
           new Error(`_recitePassage(${passage.type} ${
-              vProtagonist ? vProtagonist.debugId() : ""})`),
+            passage.vProtagonist ? passage.vProtagonist.debugId() : ""})`),
           "\n\tstory.state:", ...dumpObject(story.state),
           "\n\tstory.previousState:", ...dumpObject(story.previousState));
     }
     function errorOnReceiveCommands (error, operationName, ...extraContext) {
       return this.wrapErrorEvent(error, operationName,
-          "\n\tvProtagonist:", vProtagonist,
+          "\n\tvProtagonist:", passage.vProtagonist,
           "\n\tpassage:", ...dumpObject(passage),
           "\n\tstory:", ...dumpObject(story),
           ...extraContext);

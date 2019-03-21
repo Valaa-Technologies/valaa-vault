@@ -161,20 +161,20 @@ export function addEventHandler (target, [rule, ...rest]) {
   return [rule, addEventHandler(null, rest)];
 }
 
-export function executeHandlers (rule, passage, args, handlerObject, objectsHandled = new Set()) {
+export function executeHandlers (rule, passage, story, handlerObject, objectsHandled = new Set()) {
   let currentRuleDebugInfo;
   try {
     if (!rule) return false;
     if (typeof rule === "function") {
       currentRuleDebugInfo = rule;
-      const handled = rule.apply(handlerObject, args);
+      const handled = rule.call(handlerObject, passage, story);
       if (handled || typeof handled === "undefined") objectsHandled.add(handlerObject);
       return handled || typeof handled === "undefined";
     }
     if (Array.isArray(rule)) {
       if (!objectsHandled.has(rule[0])) {
         currentRuleDebugInfo = rule;
-        return executeHandlers(rule[1], passage, args, rule[0], objectsHandled);
+        return executeHandlers(rule[1], passage, story, rule[0], objectsHandled);
       }
     } else {
       let promises;
@@ -182,11 +182,11 @@ export function executeHandlers (rule, passage, args, handlerObject, objectsHand
         currentRuleDebugInfo = [clause, passage[clause]];
         const handled = (typeof clause !== "string"
             // Non-string clause is straight-up used as a handler object.
-            ? executeHandlers(subRule, passage, args, clause, objectsHandled)
+            ? executeHandlers(subRule, passage, story, clause, objectsHandled)
             // A string clause (like "id" or "typeName") picks the corresponding selector from
             // passage, which is then used to select the one matching rule from subRules.
             : executeHandlers(
-                subRule.get(passage[clause]), passage, args, handlerObject, objectsHandled));
+                subRule.get(passage[clause]), passage, story, handlerObject, objectsHandled));
         if (handled) {
           if (handlerObject) return handled;
           if (typeof handled === "object") {

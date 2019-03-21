@@ -95,21 +95,20 @@ export default class Motor extends Cog {
     return actualDeltaS;
   }
 
-  onEventTIMED (vResource, story, { timed }) {
+  onEventTIMED (passage, { timed }) {
     if (timed) {
       const offset = typeof timed.startTime !== "undefined" ? timed.startTime : timed.time;
-      if (typeof story.startTime !== "undefined") story.startTime += offset;
-      if (typeof story.time !== "undefined") story.time += offset;
+      if (typeof passage.startTime !== "undefined") passage.startTime += offset;
+      if (typeof passage.time !== "undefined") passage.time += offset;
     }
-    // console.log("TIMED queued", story.startTime || story.time, { story, state, previousState });
-    const time = typeof story.startTime !== "undefined" ? story.startTime : story.time;
+    const time = (passage.startTime !== undefined) ? passage.startTime : passage.time;
     let currentEvents = this.futureEventsByTime.get(time);
     if (currentEvents) currentEvents = currentEvents.value;
     else this.futureEventsByTime.put(time, currentEvents = []);
-    currentEvents.push(story);
+    currentEvents.push(passage);
   }
 
-  onEventTRANSACTED (/* dummy, story */) {
+  onEventTRANSACTED (/* passage */) {
     return undefined;
   }
 }

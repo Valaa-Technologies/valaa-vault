@@ -75,8 +75,9 @@ export class TestCollectCREATEDCog extends Cog {
     this.TestScriptyThing = {};
   }
 
-  onEventCREATED (vResource: Vrapper) {
-    const typeName = vResource.getTypeName({ require: false });
-    (this[typeName] || (this[typeName] = {}))[vResource.getRawId()] = vResource;
+  onEventCREATED (passage: Object) {
+    const typeName = passage.vProtagonist.getTypeName({ require: false });
+    if (!this[typeName]) this[typeName] = {};
+    this[typeName][passage.vProtagonist.getRawId()] = passage.vProtagonist;
   }
 }

@@ -9,179 +9,243 @@ import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/
 
 import { isNativeIdentifier, getNativeIdentifierValue } from "~/script";
 
-import Cog from "~/engine/Cog";
 import Vrapper from "~/engine/Vrapper";
 import VALEK, { Kuery, dumpKuery, dumpObject } from "~/engine/VALEK";
-import FieldUpdate from "~/engine/Vrapper/FieldUpdate";
-
-import SimpleData from "~/tools/SimpleData";
+import FieldUpdate, { LiveUpdate } from "~/engine/Vrapper/FieldUpdate";
 
 import { invariantify, invariantifyObject, isSymbol, thenChainEagerly, wrapError } from "~/tools";
 
-export default class Subscription extends SimpleData {
-  callback: Function;
-  _emitter: Cog;
+/**
+ * Subscription is a shared object which represents a single live kuery
+ * or field listeners. It has two main roles:
+ * 1. a field handler registerer and a listener for specific field
+ *    update notifications on Vrapper's
+ * 2. subscriber tracker for top-level subscriber callback calls
+ *
+ * @export
+ * @class Subscription
+ * @extends {LiveUpdate}
+ */
+export default class Subscription extends LiveUpdate {
+  // _valkOptions: VALKOptions;
 
-  _subscribedKuery: ?Kuery;
-  _subscribedHead: ?any;
-  _subscribedFieldName: ?string | ?Symbol;
-  _subscribedFieldFilter: ?Function | ?boolean;
+  // _fieldName: string; // of LiveUpdate
+  _liveHead: ?any;
+  _liveKuery: ?Kuery;
 
-  _subscriberContainers: Object;
-  _valkOptions: VALKOptions;
+  _fieldFilter: ?Function | ?boolean;
 
-  subscriberKey: string;
-  subscriber: Object;
+  _fieldListeners: Object;
 
-  debugId (options: ?Object): string {
-    return `${this.constructor.name}(${this.subscriberKey}: ${
-        this._emitter && this._emitter.debugId(options)})`;
-  }
-
-  initializeFilter (emitter: Cog, filter: boolean | string | Function, callback: Function) {
-    this.callback = callback;
-    this._emitter = emitter;
-    this._subscriberContainers = new Set();
-    if (!this.subscriberKey) this.subscriberKey = "unknown";
-    try {
-      if ((typeof filter === "string") || isSymbol(filter)) {
-        this._subscribedFieldName = filter;
-        this._subscribeToFieldByName(emitter, filter, false);
-      } else if ((typeof filter === "boolean") || (typeof filter === "function")) {
-        this._subscribedFieldFilter = filter;
-        this._subscribeToFieldsByFilter(emitter, filter, false);
-      } else throw new Error("Unrecognized initializeFilter.filter");
-      return this;
-    } catch (error) {
-      this.unregister();
-      throw wrapError(error, `During ${this.debugId()}\n .initializeFilter(), with:`,
-          "\n\temitter:", emitter,
-          "\n\tfilter:", filter,
-          "\n\tcallback:", callback,
-          "\n\tsubscription:", this);
-    }
-  }
-
-  initializeKuery (emitter: Cog, head: any, kuery: Kuery, callback: Function,
-      options: VALKOptions, shouldTriggerUpdate: boolean) {
-    this.callback = callback;
-    this._emitter = emitter;
-    this._subscriberContainers = new Set();
-    if (!this.subscriberKey) this.subscriberKey = "unknown";
-    try {
-      this._subscribedHead = head;
-      this._subscribedKuery = kuery;
-      this._valkOptions = options;
-      this._valkOptions.noSideEffects = true; // TODO(iridian): Implement this in Valker.
-      if (kuery instanceof Kuery) {
-        this._subscribedKuery = kuery.toVAKON();
-        this._valkOptions.sourceInfo = kuery[SourceInfoTag];
+  constructor (emitter: Vrapper, liveOperation: any, options: ?VALKOptions, head: any) {
+    super(emitter);
+    if ((typeof liveOperation === "object") || (options !== undefined) || (head !== undefined)) {
+      // console.log("Kuery Sub created", emitter && emitter.debugId(), liveOperation);
+      this._liveHead = (head !== undefined) ? head : emitter;
+      this._liveKuery = liveOperation;
+      this._valkOptions = options || {};
+      // this._valkOptions.noSideEffects = true; // TODO(iridian): Implement this in Valker.
+      if (liveOperation instanceof Kuery) {
+        this._liveKueryObject = liveOperation;
+        this._liveKuery = liveOperation.toVAKON();
+        this._valkOptions.sourceInfo = liveOperation[SourceInfoTag];
       }
-      delete this._valkOptions.onUpdate;
-      this._retryProcessKuery(shouldTriggerUpdate
-          && ((value) => this.triggerUpdate(this._valkOptions, value)));
-      return this;
-    } catch (error) {
-      this.unregister();
-      const wrappedError = wrapError(error, `During ${this.debugId()}\n .initializeKuery(), with:`,
-              "\n\temitter:", ...dumpObject(emitter),
-              "\n\thead:", ...dumpObject(head),
-              "\n\tkuery:", ...dumpKuery(kuery),
-              "\n\toptions:", ...dumpObject(options));
-      if (!(kuery instanceof Kuery)) throw wrappedError;
-      throw addStackFrameToError(wrappedError, kuery.toVAKON(), kuery[SourceInfoTag]);
+    } else if ((typeof liveOperation === "string") || isSymbol(liveOperation)) {
+      // console.log("Field Sub created", emitter[0] && emitter[0].debugId(), liveOperation);
+      this._fieldName = liveOperation;
+    } else if ((typeof liveOperation === "boolean") || (typeof liveOperation === "function")) {
+      // console.log("Filter Sub created", emitter[0] && emitter[0].debugId(), liveOperation);
+      this._fieldFilter = liveOperation;
+    } else {
+      throw new Error(`Unrecognized liveOperation of type '${typeof liveOperation
+        }'. Expected object, string, symbol, boolean or function`);
     }
-  }
-
-  registerWithSubscriberInfo (subscriberKey: string, subscriber: Object) {
-    this.subscriberKey = subscriberKey;
-    this.subscriber = subscriber;
     return this;
   }
 
+  _subscribers = new Map();
 
-  /**
-   * triggers an immediate emit.
-   * Does not update live kuery structure.
-   *
-   * @param { valkOptions?: VALKOptions } [options={}]
-   * @returns
-   *
-   * @memberof Subscription
-   */
-  triggerUpdate (valkOptions: VALKOptions, explicitValue?: any) {
-    const update = new FieldUpdate(
-        this._emitter,
-        this._subscribedFieldFilter
-            ? undefined
-            : (this._subscribedFieldName || this._subscribedKuery),
-        undefined,
-        this._valkOptions || valkOptions,
-        explicitValue);
-    try {
-      if (this._subscribedFieldName) {
-        this._sendUpdate(update);
-      } else if (typeof this._subscribedKuery !== "undefined") {
-        this._triggerKueryUpdate(update, valkOptions);
-      } else if (this._subscribedFieldFilter) {
+  addSubscriber (subscriber: Object, callbackKey: string, liveCallback: Function,
+      immediateUpdateState: ?any) {
+    let callbacks = this._subscribers.get(subscriber);
+    if (!callbacks) this._subscribers.set(subscriber, (callbacks = new Map()));
+    callbacks.set(callbackKey, liveCallback);
+    let finalizer;
+    if (immediateUpdateState) {
+      if ((this._valkOptions.state === immediateUpdateState) && (this._value !== undefined)) {
+        liveCallback(this, this);
+      } else {
+        this._valkOptions.state = immediateUpdateState;
+        finalizer = _finalizeAddSubscriber.bind(this);
+      }
+    }
+    if (!this._fieldListeners) {
+      this._registerListeners(finalizer);
+    } else if (finalizer) {
+      finalizer(undefined);
+    }
+    return this;
+    function _finalizeAddSubscriber (explicitValue: any) {
+      if (explicitValue !== undefined) this._value = explicitValue;
+      if (this._fieldName || (this._liveKuery !== undefined)) {
+        this._emitLiveUpdate(this);
+      } else if (this._fieldFilter !== undefined) {
         const fieldIntros = this._emitter.getTypeIntro().getFields();
         for (const fieldName of Object.keys(fieldIntros)) {
           const fieldIntro = fieldIntros[fieldName];
           if (!fieldIntro.isGenerated
-              && ((this._subscribedFieldFilter === true)
-                  || this._subscribedFieldFilter(fieldIntro))) {
-            update._fieldName = fieldName;
-            delete update._value;
-            this._sendUpdate(update);
+              && ((this._fieldFilter === true) || this._fieldFilter(fieldIntro))) {
+            this._fieldName = fieldName;
+            this._value = undefined;
+            this._emitLiveUpdate(this);
           }
         }
-      } else throw new Error("Subscription.triggerUpdate() called before initialize*()");
-      return this;
-    } catch (error) {
-      throw wrapError(error, `During ${this.debugId(valkOptions)}\n .triggerUpdate(), with:`,
-          "\n\tvalkOptions:", valkOptions,
-          "\n\tstate:", valkOptions && valkOptions.state && valkOptions.state.toJS(),
-          "\n\tcurrent update:", update,
-          "\n\tsubscription:", this);
+        this._fieldName = undefined;
+        this._value = undefined;
+      } else throw new Error("Subscription.addSubscriber() called before initialize*()");
     }
   }
 
-  unregister () {
-    for (const container of this._subscriberContainers) { container.delete(this); }
-    this._subscriberContainers = new Set();
-  }
-
-  _triggerKueryUpdate (update: FieldUpdate) {
-    const options: any = update.valkOptions();
-    const verbosity = options.verbosity;
-    options.state = (options && options.state)
-        || this._emitter.engine.discourse.getState();
-    if (verbosity) {
-      options.verbosity = (verbosity > 2) ? verbosity - 2 : undefined;
-      console.log(" ".repeat(options.verbosity),
-          `Subscription(${this.subscriberKey})._triggerKueryUpdate (verbosity: ${
-              options.verbosity}) valking with:`,
-          "\n", " ".repeat(options.verbosity), "head:", ...dumpObject(this._subscribedHead),
-          "\n", " ".repeat(options.verbosity), "kuery:",
-              ...dumpKuery(this._subscribedKuery),
-      );
+  _resolveValue (): ?any {
+    if (this._fieldName !== undefined) return super._resolveValue();
+    if (this._fieldFilter !== undefined) {
+      throw new Error(
+          "Cannot determine the value of a filter subscription as it has no value semantics");
     }
     try {
-      if (!update.hasOwnProperty("_explicitValue")) {
-        update._value = this._run(this._subscribedHead, this._subscribedKuery);
-      }
-      this._sendUpdate(update);
-    } finally {
-      if (verbosity) {
-        console.log(" ".repeat(options.verbosity),
-            `Subscription(${this.subscriberKey})._triggerKueryUpdate result:`,
-            ...dumpObject(update.value()));
-        options.verbosity = verbosity;
-      }
+      return this._run(this._liveHead, this._liveKuery);
+    } catch (error) {
+      const connectingAndThenReresolve = tryConnectToMissingPartitionsAndThen(error, () => {
+        this._valkOptions.state = this._emitter.engine.discourse.getState();
+        return this._resolveValue();
+      });
+      if (connectingAndThenReresolve) return connectingAndThenReresolve;
+      throw error;
     }
   }
 
-  _retryProcessKuery (onComplete: ?any) {
+  removeSubscriber (subscriber: Object, callbackKey: ?string) {
+    const callbacks = this._subscribers.get(subscriber);
+    if (!callbacks) return;
+    callbacks.delete(callbackKey);
+  }
+
+  _registerListeners (onComplete: ?((explicitValue: ?any) => void)) {
+    try {
+      if (this._fieldListeners) throw new Error("Listeners already registered");
+      this._fieldListeners = new Set();
+      if (this._liveKuery !== undefined) {
+        this._autoConnectingBuildLiveKuery(onComplete);
+        return this;
+      }
+      if (this._fieldFilter !== undefined) {
+        this._subscribeToFieldsByFilter(this._emitter, this._fieldFilter, false);
+      } else if (this._fieldName !== undefined) {
+        this._subscribeToFieldByName(this._emitter, this._fieldName, false);
+      } else throw new Error("Subscription is uninitialized, cannot determine listeners");
+      if (onComplete) onComplete();
+      return this;
+    } catch (error) {
+      if (this._fieldListeners) this._unregisterListeners();
+      const wrappedError = wrapError(error,
+          new Error(`During ${this.debugId()}\n ._registerListeners(), with:`),
+          "\n\temitter:", this._emitter,
+          ...(this._liveKuery === undefined ? [
+            "\n\tfilter:", this._fieldFilter || this._fieldName,
+          ] : [
+            "\n\thead:", ...dumpObject(this._liveHead),
+            "\n\tkuery:", ...dumpKuery(this._liveKuery),
+            "\n\toptions:", ...dumpObject(this._valkOptions),
+          ]),
+          "\n\tsubscription:", ...dumpObject(this));
+      if (!this._valkOptions.sourceInfo) throw wrappedError;
+      throw addStackFrameToError(wrappedError, this._liveKuery, this._valkOptions.sourceInfo);
+    }
+  }
+
+  _unregisterListeners () {
+    for (const listenerContainer of this._fieldListeners) { listenerContainer.delete(this); }
+    this._fieldListeners = null;
+  }
+
+  triggerLiveUpdatesByFilterUpdate (fieldUpdate: FieldUpdate, fieldIntro: Object,
+      handlerData: any, passageCounter: number) {
+    if (this._fieldFilter) {
+      if ((typeof this._fieldFilter === "function") && !this._fieldFilter(fieldIntro)) return;
+    } else if (this._fieldName && (this._fieldName !== fieldIntro.name)) return;
+    this.triggerLiveUpdatesByFieldUpdate(fieldUpdate, handlerData, passageCounter);
+  }
+
+  triggerLiveUpdatesByFieldUpdate (fieldUpdate: FieldUpdate, handlerData: any,
+      passageCounter: number) {
+    /*
+    console.log(`got update to field '${fieldUpdate.getEmitter().debugId()}.${
+        fieldUpdate.fieldName()}'`, ", new value:", ...dumpObject(fieldUpdate.value()));
+    // */
+    if (this._seenPassageCounter >= passageCounter) return;
+    this._seenPassageCounter = passageCounter;
+    if (this._liveKuery === undefined) {
+      this._emitLiveUpdate(fieldUpdate);
+      return;
+    }
+    const newState = fieldUpdate.getState();
+    if (this._valkOptions.state === newState) return;
+    this._valkOptions.state = newState;
+    this._value = undefined;
+    if (handlerData === false) {
+      // TODO(iridian, 2019-03): Some of the field handlers are now
+      // properly marked as non-structural using handlerData === false.
+      // Fill the rest too.
+      this._emitLiveUpdate(this);
+      return;
+    }
+    // TODO(iridian): PERFORMANCE CONCERN: Refreshing the kuery
+    // registrations on every update is quite costly. Especially so if
+    // the kuery has property traversals: the current inefficient live
+    // kuery implementation adds subscribers to all _candidate_
+    // properties... so that's a lot of re-registered subscribers.
+    // There are a bunch of algorithmic optimizations that can be done
+    // to improve it. Alas, none of them are both trivial and
+    // comprehensive to warrant doing before the cost becomes an actual
+    // problem.
+    this._unregisterListeners();
+    this._registerListeners(value => {
+      if ((this._valkOptions.state !== newState) || (this._value !== undefined)) return;
+      this._value = value;
+      this._emitLiveUpdate(this);
+    });
+  }
+
+  _emitLiveUpdate (liveUpdate: LiveUpdate) {
+    const wrap = new Error("_emitLiveUpdate");
+    thenChainEagerly(undefined, [
+      () => liveUpdate.value(),
+      (value) => {
+        liveUpdate._value = value;
+        for (const [subscriber, callbacks] of this._subscribers) {
+          for (const [callbackKey, liveCallback] of callbacks) {
+            if (liveCallback(liveUpdate, this) === false) callbacks.delete(callbackKey);
+          }
+          if (!callbacks.size) this._subscribers.delete(subscriber);
+        }
+        if (!this._subscribers.size) this._unregisterListeners();
+      },
+    ], function errorOnEmitLiveUpdate (error) {
+      throw wrapError(error, wrap,
+          "\n\temitter:", liveUpdate.getEmitter(),
+          `\n\tfilter ${this._liveKuery ? "kuery"
+              : this._fieldFilter ? "filter"
+              : "fieldName"}:`, this._liveKuery || this._fieldFilter || this._fieldName,
+          "\n\tliveUpdate:", liveUpdate,
+          "\n\tliveUpdate._value:", ...dumpObject(liveUpdate._value),
+          "\n\tliveUpdate.state:", ...dumpObject(liveUpdate.getState().toJS()),
+          "\n\tthis:", this);
+    }.bind(this));
+  }
+
+  // Live builtinSteppers section
+
+  _autoConnectingBuildLiveKuery (onComplete: ?((value: any) => void)) {
     const options: any = this._valkOptions;
     const verbosity = options.verbosity;
     let ret;
@@ -190,42 +254,43 @@ export default class Subscription extends SimpleData {
       if (verbosity) {
         options.verbosity = (verbosity > 2) ? verbosity - 2 : undefined;
         console.log(" ".repeat(options.verbosity),
-            `Subscription(${this.subscriberKey}).retryProcessKuery (verbosity: ${
+            `Subscription(${this.debugId()})._autoConnectingBuildLiveKuery (verbosity: ${
                 options.verbosity}) ${
                 (typeof onComplete !== "undefined") ? "evaluating" : "processing"} step with:`,
-            "\n", " ".repeat(options.verbosity), "head:", ...dumpObject(this._subscribedHead),
-            "\n", " ".repeat(options.verbosity), "kuery:", ...dumpKuery(this._subscribedKuery),
+            "\n", " ".repeat(options.verbosity), "head:", ...dumpObject(this._liveHead),
+            "\n", " ".repeat(options.verbosity), "kuery:", ...dumpKuery(this._liveKuery),
         );
       }
-      scope = this._valkScope() ? Object.create(this._valkScope()) : {};
-      const packedValue = this._processKuery(this._subscribedHead, this._subscribedKuery,
-          scope, (typeof onComplete !== "undefined"));
+      scope = this._valkOptions.scope ? Object.create(this._valkOptions.scope) : {};
+      const packedValue = this._buildLiveKuery(
+          this._liveHead, this._liveKuery, scope, onComplete !== undefined);
       if (onComplete) {
         ret = this._emitter.engine.discourse.unpack(packedValue);
         onComplete(ret);
       }
     } catch (error) {
-      this.unregister();
-      const isConnecting = tryConnectToMissingPartitionsAndThen(error, () => {
+      this._unregisterListeners();
+      if (tryConnectToMissingPartitionsAndThen(error, () => {
         options.state = this._emitter.engine.discourse.getState();
-        this._retryProcessKuery(onComplete);
-      });
-      if (isConnecting) return;
-      throw wrapError(error, `During ${this.debugId()}\n .retryProcessKuery(), with:`,
-          "\n\thead:", ...dumpObject(this._subscribedHead),
-          "\n\tkuery:", ...dumpKuery(this._subscribedKuery),
-          "\n\tscope:", ...dumpObject(scope));
+        this._registerListeners(onComplete);
+      })) return;
+      throw wrapError(error, `During ${this.debugId()}\n ._autoConnectingBuildLiveKuery(), with:`,
+          "\n\thead:", ...dumpObject(this._liveHead),
+          "\n\tkuery:", ...dumpKuery(this._liveKuery),
+          "\n\tscope:", ...dumpObject(scope),
+          "\n\toptions.state:", ...dumpObject(options.state && options.state.toJS()),
+      );
     } finally {
       if (verbosity) {
         console.log(" ".repeat(options.verbosity),
-            `Subscription(${this.subscriberKey}).retryProcessKuery result:`,
+            `Subscription(${this.debugId()})._autoConnectingBuildLiveKuery result:`,
             ...dumpObject(ret));
         options.verbosity = verbosity;
       }
     }
   }
 
-  _processKuery (rawHead: any, kuery: any, scope: any, evaluateKuery: ?boolean) {
+  _buildLiveKuery (rawHead: any, kuery: any, scope: any, evaluateKuery: ?boolean) {
     // Processing a Kuery for live updates involves walking the kuery tree for all field steps
     // which have a Vrapper as a head and subscribing to those. Effectively this means that only
     // non-final path steps need to be evaluated.
@@ -235,7 +300,7 @@ export default class Subscription extends SimpleData {
     let ret: any;
     if (this._valkOptions.verbosity) {
       console.log(" ".repeat(this._valkOptions.verbosity),
-          `Subscription(${this.subscriberKey}) ${
+          `Subscription(${this.debugId()}) ${
               evaluateKuery ? "evaluating" : "processing"} step with:`,
           "\n", " ".repeat(this._valkOptions.verbosity), "head:", ...dumpObject(head),
           "\n", " ".repeat(this._valkOptions.verbosity), "kuery:", ...dumpKuery(kuery)
@@ -251,7 +316,7 @@ export default class Subscription extends SimpleData {
         case "number":
           if (typeof head !== "object") {
             invariantifyObject(head,
-                "Subscription._processKuery.head (with string or number kuery)");
+                "Subscription._buildLiveKuery.head (with string or number kuery)");
           }
           if (!(head instanceof Vrapper)) {
             return (ret = ((evaluateKuery === true) && head[kueryVAKON]));
@@ -270,7 +335,7 @@ export default class Subscription extends SimpleData {
             for (const key of Object.keys(kueryVAKON)) {
               let value = kueryVAKON[key];
               if ((typeof value === "object") && (value !== null)) {
-                value = this._processKuery(head, kueryVAKON[key], scope, evaluateKuery);
+                value = this._buildLiveKuery(head, kueryVAKON[key], scope, evaluateKuery);
               }
               if (evaluateKuery === true) ret[key] = value;
             }
@@ -286,7 +351,7 @@ export default class Subscription extends SimpleData {
               const step = kueryVAKON[stepIndex];
               stepIndex += 1;
               if (step === false && (stepHead == null)) break;
-              stepHead = this._processKuery(stepHead, step, pathScope,
+              stepHead = this._buildLiveKuery(stepHead, step, pathScope,
                   (stepIndex < kueryVAKON.length) || evaluateKuery);
             }
             return (ret = stepHead);
@@ -307,7 +372,7 @@ export default class Subscription extends SimpleData {
               const argument = kueryVAKON[i];
               // Skip non-object, non-path builtin args as they are treated as literals.
               if ((typeof argument === "object") && (argument !== null)) {
-                this._processKuery(head, argument, scope, evaluateKuery);
+                this._buildLiveKuery(head, argument, scope, evaluateKuery);
               }
             }
           }
@@ -329,7 +394,7 @@ export default class Subscription extends SimpleData {
     } finally {
       if (this._valkOptions.verbosity) {
         console.log(" ".repeat(this._valkOptions.verbosity),
-            `Subscription(${this.subscriberKey}) result:`, ...dumpObject(ret));
+            `Subscription(${this.debugId()}) result:`, ...dumpObject(ret));
         this._valkOptions.verbosity -= 2;
       }
     }
@@ -339,93 +404,35 @@ export default class Subscription extends SimpleData {
     if (typeof vakon !== "object") return vakon;
     if (vakon === null) return head;
     if (vakon[0] === "§'") return vakon[1];
-    return this._processKuery(head, vakon, scope, evaluateKuery);
+    return this._buildLiveKuery(head, vakon, scope, evaluateKuery);
   }
 
-  _subscribeToFieldByName (emitter: Vrapper, fieldName: string | Symbol
-      /* , isStructural: ?boolean */) {
+  _subscribeToFieldByName (emitter: Vrapper, fieldName: string | Symbol, isStructural: ?boolean) {
     /*
-    console.log(`Subscription(${this.subscriberKey})\n ._subscribeToFieldByName ${
-        emitter.debugId()}.${fieldName}`);
+    console.log(`Subscription._subscribeToFieldByName(${emitter.debugId()}.${fieldName})`);
     // */
-    const container = emitter._addFieldSubscription(fieldName, this);
-    if (container) this._subscriberContainers.add(container);
+    const container = emitter._addFieldHandler(fieldName, this, isStructural);
+    if (container) this._fieldListeners.add(container);
   }
 
-  _subscribeToFieldsByFilter (emitter: Vrapper, fieldFilter: Function | boolean/* ,
-      isStructural: ?boolean */) {
+  _subscribeToFieldsByFilter (emitter: Vrapper, fieldFilter: Function | boolean,
+      isStructural: ?boolean) {
     /*
-    console.log(`Subscription(${this.subscriberKey})\n ._subscribeToFieldByName ${
-        emitter.debugId()}.${fieldFilter.constructor.name}`);
+    console.log(`Subscription(_subscribeToFieldByName(${emitter.debugId()}.${
+        fieldFilter.constructor.name})`);
     // */
-    const container = emitter._addFilterSubscription(fieldFilter, this);
-    if (container) this._subscriberContainers.add(container);
-  }
-
-  _tryTriggerUpdateByFieldUpdate (fieldIntro: Object, fieldUpdate: FieldUpdate) {
-    if (this._subscribedFieldFilter && (typeof this._subscribedFieldFilter === "function")
-        && !this._subscribedFieldFilter(fieldIntro)) return;
-    if (this._subscribedFieldName && (this._subscribedFieldName !== fieldIntro.name)) return;
-    this._triggerUpdateByFieldUpdate(fieldUpdate);
-  }
-
-  _triggerUpdateByFieldUpdate (fieldUpdate: FieldUpdate) {
-    /*
-    console.log(this.subscriberKey,
-        `got update to field '${fieldUpdate.getEmitter().debugId()}.${fieldUpdate.fieldName()}'`,
-        ", new value:", ...dumpObject(fieldUpdate.value()));
-    // */
-    const kuery = this._subscribedKuery;
-    if (typeof kuery === "undefined") return this._sendUpdate(fieldUpdate);
-    if (this._valkOptions.state === fieldUpdate.getState()) return undefined;
-    this._valkOptions.state = fieldUpdate.getState();
-    // TODO(iridian): PERFORMANCE CONCERN: Refreshing the kuery registrations on every update is
-    // quite costly. Especially so if the kuery has property traversals: the current inefficient
-    // live kuery implementation adds subscribers to all _candidate_ properties... so that's a lot
-    // of re-registered subscribers.
-    // There are a bunch of algorithmic optimizations that can be done to improve it. Alas, none
-    // of them are both trivial and comprehensive to warrant doing before the cost becomes an
-    // actual problem.
-    this.unregister();
-    this._retryProcessKuery(_value => {
-      this._sendUpdate(fieldUpdate.fork({ _value }));
-    });
-    return undefined;
+    const container = emitter._addFilterSubscription(fieldFilter, this, isStructural);
+    if (container) this._fieldListeners.add(container);
   }
 
   _run (head: any, kuery: any, scope?: any) {
     let options = this._valkOptions;
-    if (typeof scope !== "undefined") {
+    if (scope !== undefined) {
       options = Object.create(options);
       options.scope = scope;
     }
+    if (options.state === undefined) throw new Error("Subscription.state is undefined");
     return this._emitter.engine.discourse.run(head, kuery, options);
-  }
-
-  _valkScope () { return this._valkOptions.scope; }
-
-  _sendUpdate (fieldUpdate: FieldUpdate) {
-    thenChainEagerly(undefined, [
-      () => fieldUpdate.value(),
-      (value) => {
-        fieldUpdate._value = value;
-        const ret = this.callback(fieldUpdate, this);
-        if (ret === false) this.unregister();
-      },
-    ], onError.bind(this));
-    function onError (error) {
-      throw wrapError(error, `During ${this.debugId(fieldUpdate.valkOptions())
-              }\n ._sendUpdate(), with:`,
-          "\n\tsubscriber:", this.subscriber,
-          "\n\temitter:", fieldUpdate.getEmitter(),
-          "\n\tfieldUpdate:", fieldUpdate.getPassage(),
-          `\n\tfilter ${this._subscribedFieldName ? "fieldName"
-              : this._subscribedFieldFilter ? "filter"
-              : "kuery"}:`,
-              this._subscribedFieldName || this._subscribedFieldFilter || this._subscribedKuery,
-          "\n\tfieldUpdate:", fieldUpdate,
-          "\n\tthis:", this);
-    }
   }
 
   _addStackFrameToError (error: Error, sourceVAKON: any) {
@@ -538,7 +545,8 @@ const customLiveExpressionOpHandlers = {
         // Extending support for live list filtering use cases, ie. when the head is an array,
         // should be enabled only when needed and profiled.
         // Expressions which go deeper than that will be incorrectly not live.
-        subscribers.push(head.subscribeToMODIFIED(true, () => this.forceUpdate()));
+        subscribers.push(head.obtainSubscription(true)
+            .addSubscriber({}, "test", () => this.forceUpdate()));
       }
 */
 };
@@ -549,7 +557,7 @@ function liveMap (subscription: Subscription, head: any, kueryVAKON: Array<any>,
   const opVAKON = ["§->", ...kueryVAKON.slice(1)];
   const ret = evaluateKuery ? [] : undefined;
   for (const entry of head) {
-    const result = subscription._processKuery(entry, opVAKON, scope, evaluateKuery);
+    const result = subscription._buildLiveKuery(entry, opVAKON, scope, evaluateKuery);
     ret.push(result);
   }
   return ret;
@@ -561,7 +569,7 @@ function liveFilter (subscription: Subscription, head: any, kueryVAKON: Array<an
   const opVAKON = ["§->", ...kueryVAKON.slice(1)];
   const ret = evaluateKuery ? [] : undefined;
   for (const entry of head) {
-    const result = subscription._processKuery(entry, opVAKON, scope, evaluateKuery);
+    const result = subscription._buildLiveKuery(entry, opVAKON, scope, evaluateKuery);
     if (result) ret.push(entry);
   }
   return ret;
@@ -570,7 +578,7 @@ function liveFilter (subscription: Subscription, head: any, kueryVAKON: Array<an
 function liveTernary (subscription: Subscription, head: any, kueryVAKON: Array<any>, scope: any,
     evaluateKuery: boolean) {
   const conditionVAKON = kueryVAKON[1];
-  const condition = subscription._processKuery(head, conditionVAKON, scope, true);
+  const condition = subscription._buildLiveKuery(head, conditionVAKON, scope, true);
   const clauseTakenVAKON = condition ? kueryVAKON[2] : kueryVAKON[3];
   return subscription._processLiteral(head, clauseTakenVAKON, scope, evaluateKuery);
 }
@@ -623,8 +631,8 @@ function liveFieldOrScopeSet (subscription: Subscription, head: any, kueryVAKON:
 function liveEvalk (subscription: Subscription, head: any, kueryVAKON: Array<any>, scope: any,
     evaluateKuery: boolean) {
   const evaluateeVAKON = typeof kueryVAKON[1] !== "object" ? kueryVAKON[1]
-      : subscription._processKuery(head, kueryVAKON[1], scope, true);
-  return subscription._processKuery(head, evaluateeVAKON, scope, evaluateKuery);
+      : subscription._buildLiveKuery(head, kueryVAKON[1], scope, true);
+  return subscription._buildLiveKuery(head, evaluateeVAKON, scope, evaluateKuery);
 }
 
 function liveApply (subscription: Subscription, head: any, kueryVAKON: Array<any>, scope: any,
@@ -644,7 +652,7 @@ function liveApply (subscription: Subscription, head: any, kueryVAKON: Array<any
   if (!eCallee._valkCreateKuery) return performDefaultGet;
   // TODO(iridian): Fix this kludge which enables namespace proxies
   eThis = eThis[UnpackedHostValue] || eThis;
-  return subscription._processKuery(
+  return subscription._buildLiveKuery(
       eThis, eCallee._valkCreateKuery(...eArgs), scope, evaluateKuery);
 }
 
@@ -668,7 +676,7 @@ function liveCall (subscription: Subscription, head: any, kueryVAKON: Array<any>
   if (!eCallee._valkCreateKuery) return performDefaultGet;
   // TODO(iridian): Fix this kludge which enables namespace proxies
   eThis = eThis[UnpackedHostValue] || eThis;
-  return subscription._processKuery(
+  return subscription._buildLiveKuery(
       eThis, eCallee._valkCreateKuery(...eArgs), scope, evaluateKuery);
 }
 
@@ -687,7 +695,7 @@ function liveInvoke (subscription: Subscription, head: any, kueryVAKON: Array<an
     eArgs.push(subscription._processLiteral(head, kueryVAKON[i], scope, true));
   }
   if (!eCallee._valkCreateKuery) return performDefaultGet;
-  return subscription._processKuery(head, eCallee._valkCreateKuery(...eArgs), scope, evaluateKuery);
+  return subscription._buildLiveKuery(head, eCallee._valkCreateKuery(...eArgs), scope, evaluateKuery);
 }
 
 function liveTypeof (subscription: Subscription, head: any, kueryVAKON: Array<any>) {
@@ -714,7 +722,7 @@ function liveMember (subscription: Subscription, head: any, kueryVAKON: Array<an
     propertyName = kueryVAKON[1];
     if ((typeof propertyName !== "string") && !isSymbol(propertyName)
         && (typeof propertyName !== "number")) {
-      propertyName = subscription._processKuery(head, propertyName, scope, true);
+      propertyName = subscription._buildLiveKuery(head, propertyName, scope, true);
       if ((typeof propertyName !== "string") && !isSymbol(propertyName)
           && (!isProperty || (typeof propertyName !== "number"))) {
         if (propertyName === null) return undefined;
@@ -757,14 +765,14 @@ function liveMember (subscription: Subscription, head: any, kueryVAKON: Array<an
           vrapper.getTypeName(subscription._valkOptions))[propertyKey];
       if (descriptor) {
         if (!descriptor.writable || !descriptor.kuery) return performDefaultGet;
-        return subscription._processKuery(vrapper, descriptor.kuery, scope, true);
+        return subscription._buildLiveKuery(vrapper, descriptor.kuery, scope, true);
       }
       vProperty = subscription._run(container,
           toProperty[propertyName]
               || (toProperty[propertyName] = VALEK.property(propertyName).toVAKON()),
           scope);
       if (!vProperty && isProperty) {
-        subscription._processKuery(container, "properties", scope);
+        subscription._buildLiveKuery(container, "properties", scope);
         return undefined;
       }
     }
@@ -780,7 +788,7 @@ function liveMember (subscription: Subscription, head: any, kueryVAKON: Array<an
         case "Identifier":
           return evaluateKuery ? performDefaultGet : undefined;
         case "KueryExpression":
-          return subscription._processKuery(container, value.vakon, scope, true);
+          return subscription._buildLiveKuery(container, value.vakon, scope, true);
         default:
           throw new Error(`Unrecognized Property.value.typeName '${value.typeName}' in live kuery`);
       }

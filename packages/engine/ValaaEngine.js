@@ -129,7 +129,7 @@ export default class ValaaEngine extends Cog {
   }
 
   run (head: any, kuery: Kuery, options: VALKOptions = {}) {
-    if (typeof options.scope === "undefined") options.scope = this.getLexicalScope();
+    if (options.scope === undefined) options.scope = this.getLexicalScope();
     return super.run(head, kuery, options);
   }
 
@@ -438,7 +438,7 @@ export default class ValaaEngine extends Cog {
       story._delayedCogRemovals = null;
       story._delayedFieldUpdates.forEach(fieldUpdate => {
         fieldUpdate.getEmitter()._notifyMODIFIEDHandlers(fieldUpdate,
-            fieldUpdate._delayedSubscriptions, fieldUpdate._delayedFilterSubscriptions);
+            fieldUpdate._delayedFieldSubscriptions, fieldUpdate._delayedFilterSubscriptions);
       });
       story._delayedFieldUpdates = null;
 
@@ -517,8 +517,8 @@ export default class ValaaEngine extends Cog {
   }
 
   addDelayedFieldUpdate (fieldUpdate: FieldUpdate,
-      subscriptions, filterSubscriptions, story: Story) {
-    fieldUpdate._delayedSubscriptions = subscriptions;
+      fieldSubscriptions, filterSubscriptions, story: Story) {
+    fieldUpdate._delayedFieldSubscriptions = fieldSubscriptions;
     fieldUpdate._delayedFilterSubscriptions = filterSubscriptions;
     story._delayedFieldUpdates.push(fieldUpdate);
   }

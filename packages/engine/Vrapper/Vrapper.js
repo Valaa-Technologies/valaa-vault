@@ -40,8 +40,8 @@ import VALEK, { Valker, Kuery, dumpKuery, expressionFromProperty } from "~/engin
 
 import Cog, { extractMagicMemberEventHandlers } from "~/engine/Cog";
 import debugId from "~/engine/debugId";
-import _FieldUpdate from "~/engine/Vrapper/FieldUpdate";
-import _Subscription from "~/engine/Vrapper/Subscription";
+import FieldUpdate, { LiveUpdate } from "~/engine/Vrapper/FieldUpdate";
+import Subscription from "~/engine/Vrapper/Subscription";
 import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import { defaultOwnerCoupledField } from
     "~/engine/ValaaSpace/Valaa/injectSchemaTypeBindings";
@@ -52,8 +52,7 @@ import { arrayFromAny, iterableFromAny, dumpify, dumpObject,
 } from "~/tools";
 import { mediaTypeFromFilename } from "~/tools/MediaTypeData";
 
-export const FieldUpdate = _FieldUpdate;
-export const Subscription = _Subscription;
+export { FieldUpdate, LiveUpdate, Subscription };
 
 const INACTIVE = "Inactive";
 const ACTIVATING = "Activating";
@@ -361,7 +360,7 @@ export default class Vrapper extends Cog {
         this.registerComplexHandlers(this.engine._storyHandlerRoot, resolver.state);
       }
       this._refreshDebugId(transient, { state: resolver.state });
-      if (this.hasInterface("Scope")) this._setUpScopeFeatures({ state: resolver.state });
+      if (this.hasInterface("Scope")) this._setUpScopeFeatures(resolver.state);
     } catch (error) {
       outputError(this.wrapErrorEvent(error,
               new Error("_postActivate()"),
@@ -1658,7 +1657,7 @@ export default class Vrapper extends Cog {
 
   onEventCREATED (passage: Passage, story: Story) {
     this._updateTransient(story.state);
-    if (this._fieldSubscriptions) {
+    if (this._fieldHandlers) {
       const transient = this.getTransient({ typeName: passage.typeName, state: story.state });
       for (const key of transient.keys()) {
         this.notifyMODIFIEDHandlers(key, passage, story);
@@ -1737,49 +1736,45 @@ export default class Vrapper extends Cog {
   }
 
   notifyMODIFIEDHandlers (fieldName: string, passage: Passage, story: Story) {
-    const subscriptions = this._fieldSubscriptions && this._fieldSubscriptions.get(fieldName);
-    const filterSubscriptions = this._filterSubscriptions;
-    if (!subscriptions && !filterSubscriptions) return undefined;
-    const fieldUpdate = new FieldUpdate(this, fieldName, passage,
-        { state: story.state, previousState: story.previousState }, undefined, vProtagonist);
+    const specificFieldHandlers = this._fieldHandlers && this._fieldHandlers.get(fieldName);
+    const filterHandlers = this._filterHandlers;
+    if (!specificFieldHandlers && !filterHandlers) return undefined;
+    const fieldUpdate = new FieldUpdate(this, fieldName, passage, story);
     return this.engine.addDelayedFieldUpdate(
-        fieldUpdate, subscriptions, filterSubscriptions, story);
+        fieldUpdate, specificFieldHandlers, filterHandlers, story);
   }
 
   _notifyMODIFIEDHandlers (fieldUpdate: FieldUpdate, specificFieldHandlers: any,
       filterHandlers: any) {
     const fieldName = fieldUpdate.fieldName();
     const passageCounter = fieldUpdate.getPassage()._counter;
-    for (const subscription of (subscriptions || [])) {
+    for (const [subscription, handlerData] of (specificFieldHandlers || [])) {
       try {
-        if (!(subscription._seenPassageCounter >= passageCounter)) {
-          subscription._seenPassageCounter = passageCounter;
-          subscription._triggerUpdateByFieldUpdate(fieldUpdate);
-        }
+        // console.log(`Notifying field '${fieldName}' sub on`, this.debugId(), handlerData);
+        subscription.triggerLiveUpdatesByFieldUpdate(fieldUpdate, handlerData, passageCounter);
       } catch (error) {
-        outputError(this.wrapErrorEvent(error,
-                new Error(`_notifyMODIFIEDHandlers('${fieldName}')`),
+        outputError(this.wrapErrorEvent(error, new Error(`_notifyMODIFIEDHandlers('${fieldName}')`),
                 "\n\tfield update:", fieldUpdate,
                 "\n\tfailing field subscription:", ...dumpObject(subscription),
+                "\n\tfailing field handlerData:", ...dumpObject(handlerData),
                 "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())),
             "Exception caught during Vrapper._notifyMODIFIEDHandlers.subscriptions");
       }
     }
-    if (filterSubscriptions) {
+    if (filterHandlers) {
       const fieldIntro = this.getTypeIntro().getFields()[fieldName];
-      for (const subscription of filterSubscriptions) {
+      for (const [subscription, handlerData] of filterHandlers) {
         try {
-          if (!(subscription._seenPassageCounter >= passageCounter)) {
-            subscription._seenPassageCounter = passageCounter;
-            subscription._tryTriggerUpdateByFieldUpdate(fieldIntro, fieldUpdate);
-          }
+          // console.log(`Notifying filter '${fieldName}' sub of`, this.debugId(), handlerData);
+          subscription.triggerLiveUpdatesByFilterUpdate(
+              fieldUpdate, fieldIntro, handlerData, passageCounter);
         } catch (error) {
           outputError(this.wrapErrorEvent(error,
                   new Error(`_notifyMODIFIEDHandlers('${fieldName}')`),
                   "\n\tfield update:", fieldUpdate,
                   "\n\tfailing filter subscription:", ...dumpObject(subscription),
                   "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())),
-              "Exception caught during Vrapper._notifyMODIFIEDHandlers.filterSubscriptions");
+              "Exception caught during Vrapper._notifyMODIFIEDHandlers.filterHandlers");
         }
       }
     }
@@ -1796,64 +1791,59 @@ export default class Vrapper extends Cog {
    *
    * @memberof Vrapper
    */
-  subscribeToMODIFIED (filter: boolean | string | (fieldIntro: Object) => boolean | Kuery,
-      callback: (update: FieldUpdate) => void,
-      subscription: Subscription = new Subscription(),
-      options: VALKOptions = {}): Subscription {
+  obtainSubscription (liveOperation: boolean | string | (fieldIntro: Object) => boolean | Kuery,
+      options: ?VALKOptions): Subscription {
     try {
       this.requireActive({ allowActivating: true });
-      if (filter instanceof Kuery) {
-        return subscription.initializeKuery(this, this, filter, callback, options);
-      }
-      return subscription.initializeFilter(this, filter, callback);
+      return new Subscription(this, liveOperation, options);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `subscribeToMODIFIED()`,
-          "\n\tfilter:", ...(filter instanceof Kuery ? dumpKuery(filter) : dumpObject(filter)),
-          "\n\tsubscription:", ...dumpObject(subscription),
+      throw this.wrapErrorEvent(error, `obtainSubscription()`,
+          "\n\tliveOperation:", ...(liveOperation instanceof Kuery
+              ? dumpKuery(liveOperation) : dumpObject(liveOperation)),
           "\n\tthis:", ...dumpObject(this));
     }
   }
 
-  _fieldSubscriptions: Map<string, Set<Subscription>>;
+  _fieldHandlers: Map<string, Map<Subscription, any>>;
 
-  _addFieldSubscription (fieldName: string, subscription: Subscription) {
-    let currentSubscriptions;
+  _addFieldHandler (fieldName: string, subscription: Subscription, handlerData: any = null) {
+    let specificFieldHandlers;
     try {
       if (this._phase === NONRESOURCE) return undefined;
       this.requireActive({ allowActivating: true });
-      if (!this._fieldSubscriptions) this._fieldSubscriptions = new Map();
-      currentSubscriptions = this._fieldSubscriptions.get(fieldName);
-      if (!currentSubscriptions) {
-        currentSubscriptions = new Set();
-        this._fieldSubscriptions.set(fieldName, currentSubscriptions);
+      if (!this._fieldHandlers) this._fieldHandlers = new Map();
+      specificFieldHandlers = this._fieldHandlers.get(fieldName);
+      if (!specificFieldHandlers) {
+        specificFieldHandlers = new Map();
+        this._fieldHandlers.set(fieldName, specificFieldHandlers);
       }
       subscription._seenPassageCounter = this.engine._currentPassageCounter;
-      currentSubscriptions.add(subscription);
-      return currentSubscriptions;
+      specificFieldHandlers.set(subscription, handlerData);
+      return specificFieldHandlers;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_addFieldSubscription('${fieldName}')`,
+      throw this.wrapErrorEvent(error, `_addFieldHandler('${fieldName}')`,
           "\n\tsubscription:", ...dumpObject(subscription),
-          "\n\tcurrent field subscriptions:", ...dumpObject(currentSubscriptions),
+          "\n\tspecificFieldHandlers:", ...dumpObject(specificFieldHandlers),
           "\n\tthis:", ...dumpObject(this));
     }
   }
 
-  _filterSubscriptions: Set<Subscription>;
+  _filterHandlers: Map<Subscription, any>;
 
   _addFilterSubscription (filter: Function | boolean,
-      subscription: Subscription) {
+      subscription: Subscription, handlerData: any = null) {
     try {
       if (this._phase === NONRESOURCE) return undefined;
       this.requireActive();
-      if (!this._filterSubscriptions) this._filterSubscriptions = new Set();
+      if (!this._filterHandlers) this._filterHandlers = new Map();
       subscription._seenPassageCounter = this.engine._currentPassageCounter;
-      this._filterSubscriptions.add(subscription);
-      return this._filterSubscriptions;
+      this._filterHandlers.set(subscription, handlerData);
+      return this._filterHandlers;
     } catch (error) {
       throw this.wrapErrorEvent(error, "_addFilterSubscription()",
           "\n\tfilter:", ...dumpObject(filter),
           "\n\tsubscription:", ...dumpObject(subscription),
-          "\n\tcurrent filter subscriptions:", ...dumpObject(this._filterSubscriptions),
+          "\n\tfilterHandlers:", ...dumpObject(this._filterHandlers),
           "\n\tthis:", ...dumpObject(this));
     }
   }
@@ -1873,107 +1863,122 @@ export default class Vrapper extends Cog {
 
   static infiniteLoopTester = Symbol("InfiniteLoopTest");
 
-  _setUpScopeFeatures (options: VALKOptions) {
+  _setUpScopeFeatures (state: Object) {
     // Refers all Scope.properties:Property objects in this._lexicalScope to enable scoped script
     // access which uses the owner._lexicalScope as the scope prototype if one exists.
-
-    this._scopeOwnerSubscription = this.subscribeToMODIFIED("owner", (ownerUpdate: FieldUpdate) => {
-      const parent = ownerUpdate.value() || this.engine;
-      if (!this._lexicalScope) {
-        this._initializeScopes(parent);
-      } else {
-        const dummy = {};
-        this._lexicalScope[Vrapper.infiniteLoopTester] = dummy;
-        const parentScope = parent.getLexicalScope(true);
-        const loopedDummy = parentScope[Vrapper.infiniteLoopTester];
-        delete this._lexicalScope[Vrapper.infiniteLoopTester];
-        if (dummy === loopedDummy) {
-          this.errorEvent("INTERNAL ERROR: Vrapper.owner listener detected cyclic owner loop:",
-              "\n\tself:", ...dumpObject(this),
-              "\n\tparent:", ...dumpObject(parent));
-        } else {
-          Object.setPrototypeOf(this._lexicalScope, parentScope);
-          Object.setPrototypeOf(this._nativeScope, parent.getNativeScope(true));
-        }
-      }
-      // TODO(iridian, 2019-01) 'this' is critical but very dubious.
-      // When a ValaaScript top-level module lambda function accesses
-      // the global 'this' identifier it will resolve to the
-      // _lexicalScope.this of the context resource.
-      // This is very hard to debug as there is no abstraction layer
-      // between: ValaaScript transpiler will omit code for 'this' access
-      // for lambda functions expecting that 'this' is found in the
-      // scope.
-      this._lexicalScope.this = this;
-    }, new Subscription().registerWithSubscriberInfo(`Vrapper(${this.debugId()}).scope.owner`)
-    ).triggerUpdate(options);
+    this._scopeOwnerSubscription = this.obtainSubscription("owner").addSubscriber(
+        this, `Vrapper_scope_owner`,
+        (ownerUpdate: FieldUpdate) => {
+          const parent = ownerUpdate.value() || this.engine;
+          if (!this._lexicalScope) {
+            this._initializeScopes(parent);
+          } else {
+            const dummy = {};
+            this._lexicalScope[Vrapper.infiniteLoopTester] = dummy;
+            const parentScope = parent.getLexicalScope(true);
+            const loopedDummy = parentScope[Vrapper.infiniteLoopTester];
+            delete this._lexicalScope[Vrapper.infiniteLoopTester];
+            if (dummy === loopedDummy) {
+              this.errorEvent("INTERNAL ERROR: Vrapper.owner listener detected cyclic owner loop:",
+                  "\n\tself:", ...dumpObject(this),
+                  "\n\tparent:", ...dumpObject(parent));
+            } else {
+              Object.setPrototypeOf(this._lexicalScope, parentScope);
+              Object.setPrototypeOf(this._nativeScope, parent.getNativeScope(true));
+            }
+          }
+          // TODO(iridian, 2019-01) 'this' is critical but very dubious.
+          // When a ValaaScript top-level module lambda function accesses
+          // the global 'this' identifier it will resolve to the
+          // _lexicalScope.this of the context resource.
+          // This is very hard to debug as there is no abstraction layer
+          // between: ValaaScript transpiler will omit code for 'this' access
+          // for lambda functions expecting that 'this' is found in the
+          // scope.
+          // TODO(iridian, 2019-03): Requiring 'this' to be provided by
+          // this code is likely a bug. See TODO note in parseRules:108.
+          this._lexicalScope.this = this;
+        },
+        state);
     if (!this._lexicalScope) {
       throw this.wrapErrorEvent(new Error("Vrapper owner is not immediately available"),
           "_setUpScopeFeatures",
           "\n\tthis:", ...dumpObject(this));
     }
     this._scopeNameSubscriptions = {};
-    this._scopePropertiesSub = this.subscribeToMODIFIED("properties", (update: FieldUpdate) => {
-      update.actualAdds().forEach(vActualAdd => {
-        // TODO(iridian): Perf opt: this uselessly creates a subscription in each Property Vrapper.
-        // We could just as well have a cog which tracks Property.name changes and
-        // updates their owning Scope Vrapper._lexicalScope's.
-        // Specifically: it is the call to actualAdds() which does this.
-        this._scopeNameSubscriptions[vActualAdd.getRawId()] = vActualAdd.subscribeToMODIFIED("name",
-        nameUpdate => {
-          const newName = nameUpdate.value();
-          if ((newName === "this") || (newName === "self")) {
-            this.warnEvent(`Property name '${newName
-                }' is a reserved word and is omitted from scope`);
-            return;
-          }
-          const passage = nameUpdate.getPassage();
-          if (passage && !isCreatedLike(passage)) {
-            for (const propertyName of Object.keys(this._lexicalScope)) {
-              if (this._lexicalScope[propertyName] === vActualAdd) {
-                delete this._lexicalScope[propertyName];
-                delete this._nativeScope[propertyName];
-                break;
+    this._scopePropertiesSubscription = this.obtainSubscription("properties")
+        .addSubscriber(this, `Vrapper_properties`,
+            this._onPropertiesUpdate.bind(this),
+            state);
+  }
+
+  _onPropertiesUpdate (fieldUpdate: FieldUpdate) {
+    fieldUpdate.actualAdds().forEach(vActualAdd => {
+      // TODO(iridian): Perf opt: this uselessly creates a
+      // subscription in each Property Vrapper. We could just as
+      // well have a cog which tracks Property.name changes and
+      // updates their owning Scope Vrapper._lexicalScope's.
+      // Specifically: it is the call to actualAdds() which does this.
+      this._scopeNameSubscriptions[vActualAdd.getRawId()]
+              = vActualAdd.obtainSubscription("name").addSubscriber(
+          this,
+          `Vrapper_properties_name`,
+          nameUpdate => {
+            const newName = nameUpdate.value();
+            if ((newName === "this") || (newName === "self")) {
+              this.warnEvent(`Property name '${newName
+                  }' is a reserved word and is omitted from scope`);
+              return;
+            }
+            const passage = nameUpdate.getPassage();
+            if (passage && !isCreatedLike(passage)) {
+              for (const propertyName of Object.keys(this._lexicalScope)) {
+                if (this._lexicalScope[propertyName] === vActualAdd) {
+                  delete this._lexicalScope[propertyName];
+                  delete this._nativeScope[propertyName];
+                  break;
+                }
               }
             }
-          }
-          if (!newName) return;
-          if (this._lexicalScope.hasOwnProperty(newName)) { // eslint-disable-line
-            if (vActualAdd === this._lexicalScope[newName]) return;
-            console.warn(`Overriding existing Property '${newName}' in Scope ${this.debugId()}`);
-            /*
-                "\n\tnew value:", ...dumpObject(vActualAdd),
-                "\n\tprevious value:", ...dumpObject(this._lexicalScope[newName]),
-                "\n\tfull Scope object:", ...dumpObject(this));
-            */
-          }
-          this._lexicalScope[newName] = vActualAdd;
-          Object.defineProperty(this._nativeScope, newName, {
-            configurable: true,
-            enumerable: true,
-            get: () => vActualAdd.extractValue(undefined, this),
-            set: (value) => vActualAdd.setField("value", expressionFromProperty(value, newName),
-                { scope: this._lexicalScope }),
-          });
-        }, new Subscription().registerWithSubscriberInfo(
-            `Vrapper(${this.debugId()}).properties(${vActualAdd.getRawId()}).name`)
-        ).triggerUpdate(update.valkOptions());
-      });
-      update.actualRemoves().forEach(vActualRemove => {
-        const removedRawId = vActualRemove.getRawId();
-        const subscription = this._scopeNameSubscriptions[removedRawId];
-        if (subscription) {
-          subscription.unregister();
-          delete this._scopeNameSubscriptions[removedRawId];
-        }
-        const propertyName = vActualRemove.get("name", update.previousStateOptions());
-        if (this._lexicalScope[propertyName].getRawId() === removedRawId) {
-          delete this._lexicalScope[propertyName];
-          delete this._nativeScope[propertyName];
-        }
-      });
-    }, new Subscription().registerWithSubscriberInfo(`Vrapper(${this.debugId()}).properties`)
-    ).triggerUpdate(options);
+            if (!newName) return;
+            if (this._lexicalScope.hasOwnProperty(newName)) { // eslint-disable-line
+              if (vActualAdd === this._lexicalScope[newName]) return;
+              console.warn(`Overriding existing Property '${newName}' in Scope ${this.debugId()}`);
+              /*
+              throw this.wrapErrorEvent(
+                  new Error(`Overriding existing Property '${newName}'`),
+                  new Error(`onPropertiesUpdate in Scope ${this.debugId()}`),
+                  "\n\tnew value:", ...dumpObject(vActualAdd),
+                  "\n\tprevious value:", ...dumpObject(this._lexicalScope[newName]),
+                  "\n\tfull Scope object:", ...dumpObject(this),
+                  new Error().stack);
+              */
+            }
+            this._lexicalScope[newName] = vActualAdd;
+            Object.defineProperty(this._nativeScope, newName, {
+              configurable: true,
+              enumerable: true,
+              get: () => vActualAdd.extractValue(undefined, this),
+              set: (value) => vActualAdd.setField("value", expressionFromProperty(value, newName),
+                  { scope: this._lexicalScope }),
+            });
+          },
+          fieldUpdate.valkOptions().state);
+    });
+
+    fieldUpdate.actualRemoves().forEach(vActualRemove => {
+      const removedRawId = vActualRemove.getRawId();
+      const subscription = this._scopeNameSubscriptions[removedRawId];
+      if (subscription) {
+        subscription.removeSubscriber(this, "Vrapper_properties_name");
+        delete this._scopeNameSubscriptions[removedRawId];
+      }
+      const propertyName = vActualRemove.get("name", fieldUpdate.previousStateOptions());
+      if (this._lexicalScope[propertyName].getRawId() === removedRawId) {
+        delete this._lexicalScope[propertyName];
+        delete this._nativeScope[propertyName];
+      }
+    });
   }
 }
 

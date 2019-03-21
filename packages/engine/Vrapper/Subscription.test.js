@@ -3,7 +3,7 @@
 import { created } from "~/raem/events";
 
 import VALEK, { Kuery, pointer, literal } from "~/engine/VALEK";
-import Vrapper, { Subscription } from "~/engine/Vrapper";
+import Vrapper from "~/engine/Vrapper";
 
 import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
 
@@ -31,9 +31,8 @@ describe("Subscription", () => {
 
   function setUpKueryTestHarness (kuery: Kuery, subscriberName: string, options: Object) {
     setUpHarnessAndCallback(options);
-    subscription = new Subscription().registerWithSubscriberInfo(subscriberName, harness);
-    entities().creator.subscribeToMODIFIED(kuery, liveCallback, subscription, options);
-    subscription.triggerUpdate();
+    subscription = entities().creator.obtainSubscription(kuery, options);
+    subscription.addSubscriber(harness, subscriberName, liveCallback, harness.getState());
   }
 
   function setUpPropertyTargetTestHarness (propertyName: string, options: Object) {
@@ -41,8 +40,8 @@ describe("Subscription", () => {
         "VALEK.propertyTarget subscription", options);
   }
 
-  describe("Live kuery VALEK.propertyTarget subscribeToMODIFIED callback calls", () => {
-    it("is called with triggerUpdate", () => {
+  describe("Live kuery VALEK.propertyTarget obtainSubscription callback calls", () => {
+    it("is called with basic setup", () => {
       setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
       expect(idOf(liveCallback.mock.calls[0][0].value()))
@@ -183,24 +182,26 @@ describe("Subscription", () => {
       const creatori1 = entities().creator.getGhostIn(entities()["test+1"]);
       const creatori1i1 = creatori1.getGhostIn(entities()["test+1+1"]);
 
-      creatori1i1.get(VALEK.propertyValue("counter"), { onUpdate: liveCallback });
+      creatori1i1.get(VALEK.propertyValue("counter"), { liveSubscription: true })
+          .addSubscriber(harness, "test", update => liveCallback(update.value()),
+              harness.getState());
 
       expect(liveCallback.mock.calls.length).toBe(1);
-      expect(liveCallback.mock.calls[0][0].value()).toEqual(0);
+      expect(liveCallback.mock.calls[0][0]).toEqual(0);
 
       entities().creator.alterProperty("counter", ["§'", 10]);
 
       expect(creatori1.propertyValue("counter")).toBe(10);
       expect(creatori1i1.propertyValue("counter")).toBe(10);
       expect(liveCallback.mock.calls.length).toBe(2);
-      expect(liveCallback.mock.calls[1][0].value()).toEqual(10);
+      expect(liveCallback.mock.calls[1][0]).toEqual(10);
 
       creatori1.alterProperty("counter", ["§'", 20]);
 
       expect(creatori1.propertyValue("counter")).toBe(20);
       expect(creatori1i1.propertyValue("counter")).toBe(20);
       expect(liveCallback.mock.calls.length).toBe(3);
-      expect(liveCallback.mock.calls[2][0].value()).toEqual(20);
+      expect(liveCallback.mock.calls[2][0]).toEqual(20);
     });
   });
 });

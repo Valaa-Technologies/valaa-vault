@@ -68,18 +68,15 @@ export default class Cog extends LogEventGenerator {
     try {
       options.scope = options.scope ? Object.create(options.scope) : {};
       options.scope.self = options.scope;
-      if (options.onUpdate) {
-        // TODO(iridian): Eventually live kuery functionality might need to be moved into Valker.
-        // A convenient time to do this is when the asynchronous kuery functionality is added there.
-        const subscription = new Subscription();
-        const callback = options.onUpdate;
+      if (options.liveSubscription) {
+        // TODO(iridian): Eventually live kuery functionality might
+        // need to be moved into Valker. A convenient time to do this
+        // is when the asynchronous kuery functionality is added.
         if (options.transaction) {
           options.state = options.transaction.getState();
           options.transaction = undefined;
         }
-        options.onUpdate = undefined;
-        subscription.initializeKuery(this, head, kuery, callback, options, !options.noImmediateRun);
-        return subscription;
+        return new Subscription(this, kuery, options, head);
       }
       return this.engine.discourse.run(head, kuery, options);
     } catch (error) {

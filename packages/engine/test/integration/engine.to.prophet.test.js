@@ -125,11 +125,12 @@ describe("Media handling", () => {
     const initialContentHash = contentHashFromArrayBuffer(initialBuffer);
 
     const subscribeToContentUpdate = contentMedia => resolve =>
-        contentMedia.subscribeToMODIFIED("content", fieldUpdate => resolve({
-          fieldUpdate,
-          bvobId: contentMedia.get("content"),
-          content: contentMedia.interpretContent({ synchronous: true, mime: "text/plain" }),
-        }));
+        contentMedia.obtainSubscription("content")
+            .addSubscriber(harness, "test", liveUpdate => resolve({
+              liveUpdate,
+              bvobId: contentMedia.get("content"),
+              content: contentMedia.interpretContent({ synchronous: true, mime: "text/plain" }),
+            }));
     const { contentMedia, createdProcess } = await harness.runValaaScript(vRef("test_partition"), `
       this[Valaa.prepareBvob](initialBuffer).then(createBvob => {
         const contentMedia = new Media({
@@ -146,7 +147,7 @@ describe("Media handling", () => {
     );
     const createdUpdate = await createdProcess;
 
-    expect(createdUpdate.fieldUpdate.value().getRawId())
+    expect(createdUpdate.liveUpdate.value().getRawId())
         .toEqual(initialContentHash);
     expect(createdUpdate.bvobId.getRawId())
         .toEqual(initialContentHash);
@@ -175,7 +176,7 @@ describe("Media handling", () => {
     expect(updateBvob.getRawId())
         .toEqual(updateContentHash);
 
-    expect(modifiedUpdate.fieldUpdate.value().getRawId())
+    expect(modifiedUpdate.liveUpdate.value().getRawId())
         .toEqual(updateContentHash);
     expect(modifiedUpdate.bvobId.getRawId())
         .toEqual(updateContentHash);
@@ -200,7 +201,7 @@ describe("Media handling", () => {
     expect(updateAgainBvob.getRawId())
         .toEqual(updateContentHash);
 
-    expect(modifiedAgainUpdate.fieldUpdate.value().getRawId())
+    expect(modifiedAgainUpdate.liveUpdate.value().getRawId())
         .toEqual(updateContentHash);
     expect(modifiedAgainUpdate.bvobId.getRawId())
         .toEqual(updateContentHash);

@@ -1,10 +1,9 @@
 import Vrapper from "./Vrapper";
-import _Subscription from "./Subscription";
-import _FieldUpdate from "./FieldUpdate";
+import Subscription from "./Subscription";
+import FieldUpdate, { LiveUpdate } from "./FieldUpdate";
 
 export default Vrapper;
-export const Subscription = _Subscription;
-export const FieldUpdate = _FieldUpdate;
+export { Subscription, FieldUpdate, LiveUpdate };
 
 export { default as getImplicitCallable } from "./getImplicitCallable";
 export { default as getImplicitMediaInterpretation } from "./getImplicitMediaInterpretation";

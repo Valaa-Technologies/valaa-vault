@@ -75,24 +75,23 @@ describe("Vrapper", () => {
   };
 
   const checkVrapperSets = (observedVrapper, { expectFields, targetId, sets, expectUpdates }) => {
-    const notificationValues = {};
+    const updatedValues = {};
     for (const key of Object.keys(expectFields)) {
       expect(observedVrapper.get(key))
           .toEqual(expectFields[key]);
     }
     for (const key of Object.keys(sets || {})) {
-      observedVrapper.subscribeToMODIFIED(key, (update) => {
-        notificationValues[key] = update.value();
-      });
+      observedVrapper.obtainSubscription(key)
+          .addSubscriber(harness, "test", (update) => { updatedValues[key] = update.value(); });
     }
     harness.chronicleEvent({ type: "FIELDS_SET", id: targetId,
       typeName: "TestScriptyThing",
       sets,
     });
-    const actualexpectUpdates = expectUpdates || sets;
-    for (const key of Object.keys(actualexpectUpdates || {})) {
-      expect(notificationValues[key])
-          .toEqual(actualexpectUpdates[key]);
+    const actualExpectUpdates = expectUpdates || sets;
+    for (const key of Object.keys(actualExpectUpdates || {})) {
+      expect(updatedValues[key])
+          .toEqual(actualExpectUpdates[key]);
     }
   };
 
@@ -368,9 +367,8 @@ describe("Vrapper", () => {
         transactionA, createAInstance,
       ]);
       let modCalled = false;
-      testScriptPartitions().child.subscribeToMODIFIED("children", () => {
-        modCalled = true;
-      });
+      testScriptPartitions().child.obtainSubscription("children")
+          .addSubscriber(harness, "test", () => { modCalled = true; });
       harness.chronicleEvent(destroyed({ type: "DESTROYED", id: ["grandChild"] }));
       // children modified subscriber should have been called when the sub-event to remove
       // grandChild from the children list was reduced
@@ -382,9 +380,8 @@ describe("Vrapper", () => {
         transactionA, createAInstance,
       ]);
       let modCalled = false;
-      testScriptPartitions().grandChild.subscribeToMODIFIED("children", () => {
-        modCalled = true;
-      });
+      testScriptPartitions().grandChild.obtainSubscription("children")
+          .addSubscriber(harness, "test", () => { modCalled = true; });
       testScriptPartitions().greatGrandChild.setField("parent",
           testScriptPartitions().grandSibling);
 

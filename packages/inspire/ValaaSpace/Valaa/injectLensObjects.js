@@ -455,12 +455,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
             vProperty = focus.get(VALEK.property(propertyName));
           }
           if (vProperty) {
-            component.subscribeToKuery(`props.${lensPropertyRoleName}-${lensRoleName}`,
-                vProperty, "value", {
-                  scope: component.getUIContext(),
-                  noImmediateRun: true,
-                  onUpdate: () => component.forceUpdate(),
-                });
+            component.bindNewKuerySubscription(`props_${lensPropertyRoleName}_${lensRoleName}`,
+                vProperty, "value", { scope: component.getUIContext(), noImmediateRun: true },
+                () => component.forceUpdate());
             const propertyValue = vProperty.extractValue();
             if (propertyValue !== undefined) return propertyValue;
           }

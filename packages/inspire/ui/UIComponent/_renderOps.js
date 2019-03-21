@@ -209,17 +209,19 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
 }
 
 function _tryRenderMediaLens (component: UIComponent, media: any, focus: any) {
-  const kueryKey = `UIComponent.media.${media.getRawId()}`;
-  if (!component.getSubscriber(kueryKey)) {
-    component.subscribeToKuery(kueryKey, media, VALEK.toMediaContentField(), { onUpdate () {
-      // If focus has changed detaches the live kuery. This is likely
-      // uselessly defensive programming as the whole UIComponent state
-      // should refresh anyway whenever the focus changes. Nevertheless
-      // return before forceupdate.
-      if (component.tryFocus() !== focus) return false;
-      component.forceUpdate();
-      return undefined;
-    } });
+  const bindingSlot = `UIComponent_media_${media.getRawId()}`;
+  if (!component.getBoundSubscription(bindingSlot)) {
+    component.bindNewKuerySubscription(bindingSlot,
+        media, VALEK.toMediaContentField(), {},
+        function onMediaContentUpdate () {
+          // If focus has changed detaches the live kuery. This is likely
+          // uselessly defensive programming as the whole UIComponent state
+          // should refresh anyway whenever the focus changes. Nevertheless
+          // return before forceupdate.
+          if (component.tryFocus() !== focus) return false;
+          component.forceUpdate();
+          return undefined;
+        });
   }
   const options = { mimeFallback: "text/vsx" };
   const ret = thenChainEagerly(null, [

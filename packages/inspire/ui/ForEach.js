@@ -16,8 +16,8 @@ export default class ForEach extends UIComponent {
     entryKeys: PropTypes.object,
   }
 
-  attachSubscribers (focus: any, props: Object) {
-    super.attachSubscribers(focus, props);
+  bindSubscriptions (focus: any, props: Object) {
+    super.bindSubscriptions(focus, props);
     invariantifyArray(focus, "ForEach.focus", {
       allowUndefined: true, allowNull: true,
     });

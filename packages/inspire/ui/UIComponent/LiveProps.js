@@ -7,7 +7,7 @@ import { OrderedMap } from "immutable";
 import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
 import { Kuery } from "~/raem/VALK";
 
-import Vrapper, { FieldUpdate, getImplicitCallable } from "~/engine/Vrapper";
+import Vrapper, { LiveUpdate, getImplicitCallable } from "~/engine/Vrapper";
 import VALEK from "~/engine/VALEK";
 import getImplicitMediaInterpretation from "~/engine/Vrapper/getImplicitMediaInterpretation";
 
@@ -69,43 +69,42 @@ export default class LiveProps extends UIComponent {
     };
   }
 
-  attachSubscribers (focus: any, props: Object) {
-    super.attachSubscribers(focus, props);
+  bindSubscriptions (focus: any, props: Object) {
+    super.bindSubscriptions(focus, props);
     // Live props are always based on the parent focus.
     // Now uselessly reattaching listeners if the local focus changes.
     let frame = this.getUIContextValue("frame");
     if (frame === undefined) frame = {};
     for (const kueryId of Object.keys(props.liveProps || {})) {
       const kuery = props.liveProps[kueryId];
-      const subscriberName = `LiveProps.liveProps['${kueryId}']`;
-      this.subscribeToKuery(subscriberName, frame, kuery, {
-        scope: this.getUIContext(),
-        onUpdate: (update: FieldUpdate) => {
-          try {
-            this.setState((prevState) => ({
-              livePropValues: (prevState.livePropValues || OrderedMap())
-                  .set(kueryId, update.value())
-            }));
-            return true;
-          } catch (error) {
-            const wrappedError = wrapError(error,
-                new Error(`attachSubscribers('${subscriberName}')`),
-                "\n\tuiContext:", this.state.uiContext,
-                "\n\tfocus:", this.tryFocus(),
-                "\n\tstate:", this.state,
-                "\n\tprops:", this.props,
-            );
-            outputError(wrappedError, "Exception caught during LiveProps.attachSubscribers");
-            this.enableError(wrappedError);
-          }
-          return false;
-        },
-      });
+      const bindingSlot = `LiveProps_liveProps_kuery_${kueryId}`;
+      this.bindNewKuerySubscription(bindingSlot,
+          frame, kuery, { scope: this.getUIContext() },
+          (liveUpdate: LiveUpdate) => {
+            try {
+              this.setState((prevState) => ({
+                livePropValues: (prevState.livePropValues || OrderedMap())
+                    .set(kueryId, liveUpdate.value())
+              }));
+              return true;
+            } catch (error) {
+              const wrappedError = wrapError(error,
+                  new Error(`bindSubscriptions('${bindingSlot}')`),
+                  "\n\tuiContext:", this.state.uiContext,
+                  "\n\tfocus:", this.tryFocus(),
+                  "\n\tstate:", this.state,
+                  "\n\tprops:", this.props,
+              );
+              outputError(wrappedError, "Exception caught during LiveProps.bindSubscriptions");
+              this.enableError(wrappedError);
+            }
+            return false;
+          });
     }
   }
 
-  detachSubscribers () {
-    super.detachSubscribers();
+  unbindSubscriptions () {
+    super.unbindSubscriptions();
     this.setState({ livePropValues: null });
   }
 
@@ -125,19 +124,19 @@ export default class LiveProps extends UIComponent {
 
   refreshClassName (focus: any, value: any) {
     if ((value == null) || !(value instanceof Vrapper)) return value;
-    const kueryKey = `props.className.content`;
-    if (value.hasInterface("Media") && !this.getSubscriber(kueryKey)) {
-      this.subscribeToKuery(kueryKey, value, VALEK.toMediaContentField(), {
-        onUpdate: (update: FieldUpdate) => {
-          if (this.tryFocus() !== focus) return false;
-          const className = update.value();
-          if (className !== ((this.state || {}).className || className)) this.forceUpdate();
-          this.setState(() => ({ className }));
-          return undefined;
-        }
-      });
+    const bindingSlot = `props_className_content`;
+    if (value.hasInterface("Media") && !this.getBoundSubscription(bindingSlot)) {
+      this.bindNewKuerySubscription(bindingSlot,
+          value, VALEK.toMediaContentField(), {},
+          (liveUpdate: LiveUpdate) => {
+            if (this.tryFocus() !== focus) return false;
+            const className = liveUpdate.value();
+            if (className !== ((this.state || {}).className || className)) this.forceUpdate();
+            this.setState(() => ({ className }));
+            return undefined;
+          });
     }
-    const sheetContent = getImplicitMediaInterpretation(value, kueryKey, {
+    const sheetContent = getImplicitMediaInterpretation(value, bindingSlot, {
       mimeFallback: "text/css", synchronous: undefined, transaction: this.context.engine.discourse,
     });
     if ((sheetContent == null) || isPromise(sheetContent)) return sheetContent;

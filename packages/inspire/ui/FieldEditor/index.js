@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import UIComponent from "~/inspire/ui/UIComponent";
 import Presentable from "~/inspire/ui/Presentable";
-import FieldUpdate from "~/engine/Vrapper/FieldUpdate";
+import { LiveUpdate } from "~/engine/Vrapper";
 import VALEK from "~/engine/VALEK";
 
 import { wrapError } from "~/tools/wrapError";
@@ -15,22 +15,21 @@ class FieldEditor extends UIComponent {
     fieldName: PropTypes.string
   };
 
-  attachSubscribers (focus: any, props: Object) {
+  bindSubscriptions (focus: any, props: Object) {
     try {
-      super.attachSubscribers(focus, props);
-      this.subscribeToKuery(`FieldEditor["${props.fieldName}"]`, focus,
-          VALEK.to(props.fieldName).nullable(), {
-            onUpdate: this.onValueUpdate,
-            scope: this.getUIContext(),
-          });
+      super.bindSubscriptions(focus, props);
+      this.bindNewKuerySubscription(`FieldEditor_${props.fieldName}`,
+          focus, VALEK.to(props.fieldName).nullable(), { scope: this.getUIContext() },
+          this.onValueUpdate,
+      );
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .attachSubscribers(), with:`,
+      throw wrapError(error, `During ${this.debugId()}\n .bindSubscriptions(), with:`,
           "\n\thead:       ", focus,
           "\n\tthis:       ", this);
     }
   }
 
-  onValueUpdate = (update: FieldUpdate) => {
-    this.setState({ value: update.value() });
+  onValueUpdate = (liveUpdate: LiveUpdate) => {
+    this.setState({ value: liveUpdate.value() });
   }
 }

@@ -8,8 +8,8 @@ import { beaumpify } from "~/tools";
 
 export default @Presentable(require("./presentation").default, "InspireGatewayStatus")
 class InspireGatewayStatus extends UIComponent {
-  attachSubscribers (focus: any, props: Object) {
-    super.attachSubscribers(focus, props);
+  bindSubscriptions (focus: any, props: Object) {
+    super.bindSubscriptions(focus, props);
     const inspireGateway = this.getValaa().gateway;
     if (inspireGateway) {
       inspireGateway.setCommandCountListener(this,
@@ -18,10 +18,10 @@ class InspireGatewayStatus extends UIComponent {
     }
   }
 
-  detachSubscribers () {
+  unbindSubscriptions () {
     const inspireGateway = this.getValaa().gateway;
     if (inspireGateway) inspireGateway.setCommandCountListener(this);
-    super.detachSubscribers();
+    super.unbindSubscriptions();
   }
 
   preRenderFocus () {

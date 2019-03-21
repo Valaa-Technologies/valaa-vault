@@ -10,8 +10,8 @@ import VALEK from "~/engine/VALEK";
 const ItemRelation : string = "Valaa_ContextMenu_Item";
 
 export default class ValaaContextMenu extends UIComponent {
-  attachSubscribers (focus: any, props: Object) {
-    super.attachSubscribers(focus, props);
+  bindSubscriptions (focus: any, props: Object) {
+    super.bindSubscriptions(focus, props);
     // do magic
   }
 

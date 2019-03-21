@@ -5,9 +5,8 @@ import PropTypes from "prop-types";
 import UIComponent from "~/inspire/ui/UIComponent";
 import Presentable from "~/inspire/ui/Presentable";
 import FieldEditor from "~/inspire/ui/FieldEditor";
-import FieldUpdate from "~/engine/Vrapper/FieldUpdate";
 import VALEK, { Kuery, pointer } from "~/engine/VALEK";
-import Vrapper from "~/engine/Vrapper";
+import Vrapper, { LiveUpdate } from "~/engine/Vrapper";
 
 import { dumpObject, wrapError } from "~/tools";
 
@@ -23,34 +22,28 @@ class LinkFieldEditor extends UIComponent {
     toCandidatesKuery: true,
   }
 
-  attachSubscribers (focus: any, props: Object) {
+  bindSubscriptions (focus: any, props: Object) {
     try {
-      super.attachSubscribers(focus, props);
+      super.bindSubscriptions(focus, props);
 
-      this.subscribeToKuery(`LinkFieldEditor["${props.fieldName}"]`, focus,
-          VALEK.to(props.fieldName), {
-            onUpdate: this.onValueUpdate,
-            scope: this.getUIContext(),
-          });
+      this.bindNewKuerySubscription(`LinkFieldEditor_fieldName`,
+          focus, VALEK.to(props.fieldName), { scope: this.getUIContext() },
+          this.onValueUpdate);
 
       // Property case:
       if (focus.tryTypeName() === "Property") {
-        this.subscribeToKuery(`LinkFieldEditor["${props.fieldName}"].target`, focus,
-            VALEK.to(props.fieldName).nullable()
-                .if(VALEK.isOfType("Identifier"), { then: VALEK.to("reference").nullable() }
-            ), {
-              onUpdate: this.refreshNameSubscriber,
-              scope: this.getUIContext(),
-            });
+        this.bindNewKuerySubscription(`LinkFieldEditor_Property_target`,
+            focus, VALEK.to(props.fieldName).nullable()
+                .if(VALEK.isOfType("Identifier"), { then: VALEK.to("reference").nullable() }),
+            { scope: this.getUIContext() },
+            this.refreshNameSubscriber);
       }
 
       // Relations case:
       if (focus.tryTypeName() === "Relation") {
-        this.subscribeToKuery(`LinkFieldEditor["${props.fieldName}"].target`, focus,
-            VALEK.to(props.fieldName).nullable(), {
-              onUpdate: this.refreshNameSubscriber,
-              scope: this.getUIContext(),
-            });
+        this.bindNewKuerySubscription(`LinkFieldEditor_Relation_target`,
+            focus, VALEK.to(props.fieldName).nullable(), { scope: this.getUIContext() },
+            this.refreshNameSubscriber);
       }
 
       // TODO: (thiago) Fix bug that causes the toCandidatesKuery to return OrderedMap structures
@@ -59,36 +52,33 @@ class LinkFieldEditor extends UIComponent {
       //    { scope: this.getUIContext() });
       //
       // Hack: Workaround to unfiltered results leaking OrderedMap structures
-      this.subscribeToKuery(`LinkFieldEditor["Candidates"]`, focus,
-      VALEK.to(props.toCandidatesKuery).nullable().filter(VALEK.isTruthy()), {
-        onUpdate: this.onCandidatesUpdate,
-        scope: this.getUIContext(),
-      });
+      this.bindNewKuerySubscription(`LinkFieldEditor_Candidates`,
+          focus, VALEK.to(props.toCandidatesKuery).nullable().filter(VALEK.isTruthy()),
+          { scope: this.getUIContext() },
+          this.onCandidatesUpdate);
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .attachSubscribers(), with:`,
+      throw wrapError(error, `During ${this.debugId()}\n .bindSubscriptions(), with:`,
           "\n\thead:       ", focus,
           "\n\tthis:       ", this);
     }
   }
 
-  refreshNameSubscriber = (update: FieldUpdate) => {
-    let target = update.value();
+  refreshNameSubscriber = (liveUpdate: LiveUpdate) => {
+    let target = liveUpdate.value();
     if (!(target instanceof Vrapper) || !(target.isActive() || target.isActivating())) {
       target = undefined;
     }
-    this.subscribeToKuery(`LinkFieldEditor["${this.props.fieldName}"].target.name`, target,
-        VALEK.to("name").nullable(), {
-          onUpdate: this.refresh,
-          scope: this.getUIContext(),
-        });
+    this.bindNewKuerySubscription(`LinkFieldEditor_target_name`,
+        target, VALEK.to("name").nullable(), { scope: this.getUIContext() },
+        this.refresh);
   }
 
   refresh = () => {
     this.forceUpdate();
   }
 
-  onValueUpdate = (update: FieldUpdate) => {
-    const updateValue = update.value();
+  onValueUpdate = (liveUpdate: LiveUpdate) => {
+    const updateValue = liveUpdate.value();
     let typeName;
     try {
       if (!updateValue) {
@@ -127,14 +117,14 @@ class LinkFieldEditor extends UIComponent {
       }
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .onValueUpdate(), with:`,
-          "\n\tupdate:", ...dumpObject(update),
+          "\n\tupdate:", ...dumpObject(liveUpdate),
           "\n\tupdateValue:", ...dumpObject(updateValue),
           "\n\ttypeName:", typeName);
     }
   }
 
-  onCandidatesUpdate = (update: FieldUpdate) => {
-    const entries = update.value();
+  onCandidatesUpdate = (liveUpdate: LiveUpdate) => {
+    const entries = liveUpdate.value();
 
     this.entryMap = {};
     for (const entry of entries) {

@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 
 import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
 
-import { Subscription, FieldUpdate } from "~/engine/Vrapper";
+import { Subscription, LiveUpdate } from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
 import { Kuery, dumpKuery, dumpObject } from "~/engine/VALEK";
 
@@ -34,8 +34,8 @@ import {
   VSSStyleSheetSymbol,
 } from "./_styleOps";
 import {
-  _finalizeDetachSubscribers, _attachSubscriber, _getSubscriber, _unsubscribeKuery,
-  _subscribeToKuery
+  _finalizeUnbindSubscriptions, _bindSubscription, _getBoundSubscription, _unbindSubscription,
+  _bindNewKuerySubscription
 } from "./_subscriberOps";
 
 export function isUIComponentElement (element: any) {
@@ -417,26 +417,30 @@ class UIComponent extends React.Component {
   }
 
   /**
-   * Attach a given subscriber with a particular given subscriberKey to this UIComponent.
-   * A possible already existing subscriber with the same subscriberKey is detached.
-   * All subscribers are detached when the component is destroyed or if the focus of this component
-   * changes.
+   * Bind the given subscription to the given bindingSlot of this
+   * UIComponent. A possible existing subscription in that bindingSlot
+   * is unsubscribed. When the component is unmounted, destroyed or if
+   * the focus of this component changes all current bindings are
+   * unsubscribed and possible reattached.
    *
-   * Guide to consistent naming of subscriberKey:
+   * Guide to consistent naming of bindingSlot:
    *
    * Basic fields: `${componentName}.${fieldNameOnHead}.${_subscribedFieldName}`
    *   example: "EditorNode.editTarget.name"
-   *     starts from this.getFocus(), goes to focus.get("editTarget"), subscribes for "name" on it
+   *     starts from this.getFocus(), goes to focus.get("editTarget"),
+   *     subscribes for "name" on it
    *
    * Properties: `${componentName}['${propertyName}']`
    *   example: "DialogueEditor['editTarget']
    *     subscribes implicitly field 'Property.value' if no followup
    *   example: "DialogueEditor['editTarget'].name"
-   *     treats Property.value as Identifier and subscribes to 'name' of the Identifier.reference
+   *     treats Property.value as Identifier and subscribes to 'name'
+   *     of the Identifier.reference
    *
    * Kuery or complex subscribers: `${componentName}.(${ruleName})`
    *   example: "Field.(toShown)"
-   *     subscribes to a complex rule or kuery called toShown of Field focus
+   *     subscribes to a complex rule or kuery called toShown of Field
+   *     focus
    *
    * Others:
    *   example "PropertiesPanel.*"
@@ -444,30 +448,36 @@ class UIComponent extends React.Component {
    *   example `EditorNode.relation#${vAddedRleation.rawId}.*`
    *     subscribes to all fields on a particularily identified relation
    *
-   * @param {string} subscriberKey
+   * @param {string} bindingSlot
    * @param {Subscription} subscriber
    * @returns {Subscription}
    */
-  attachSubscriber (subscriberKey: string, subscriber: Object): Subscription {
-    return _attachSubscriber(this, subscriberKey, subscriber);
+  bindSubscription (bindingSlot: string, subscription: Subscription, onUpdate: Function,
+      immediateUpdateState: ?Object): Subscription {
+    return _bindSubscription(this, bindingSlot, subscription, onUpdate, immediateUpdateState);
   }
 
-  getSubscriber (subscriberKey: string): string {
-    return _getSubscriber(this, subscriberKey);
+  getBoundSubscription (bindingSlot: string): Subscription {
+    return _getBoundSubscription(this, bindingSlot);
   }
 
-  detachSubscriber (subscriberKey: string, options: { require?: boolean } = {}) {
-    return _unsubscribeKuery(this, subscriberKey, options);
+  unbindSubscription (bindingSlot: string, options: { require?: boolean } = {}) {
+    return _unbindSubscription(this, bindingSlot, options);
   }
 
-  subscribeToKuery (subscriberName: string, head: any, kuery: any, options: {
-    onUpdate: (update: FieldUpdate) => void, noImmediateRun?: boolean, // ...rest are VALKOptions
-  }) {
+  /**
+   * Create a new kuery subscription and bind it to the given
+   * bindingSlot of this component. \see bindSubscription.
+   */
+  bindNewKuerySubscription (bindingSlot: string, head: any, kuery: any, options: {
+    noImmediateRun?: boolean,
+    // ...rest are VALKOptions that are forwarded to the kuery runner.
+  }, onUpdate: (liveUpdate: LiveUpdate) => void) {
     try {
-      return _subscribeToKuery(this, subscriberName, head, kuery, options);
+      return _bindNewKuerySubscription(this, bindingSlot, head, kuery, options, onUpdate);
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .subscribeToKuery(${
-              subscriberName}), with:`,
+      throw wrapError(error, `During ${this.debugId()}\n .bindNewKuerySubscription(${
+              bindingSlot}), with:`,
           "\n\thead:", ...dumpObject(head),
           "\n\tkuery:", ...dumpKuery(kuery),
           "\n\toptions:", ...dumpObject(options),
@@ -481,19 +491,20 @@ class UIComponent extends React.Component {
    * Override to update subscribers whenever the focus has changed.
    * If the focus is undefined disables this component.
    * Initiated from "componentWillMount" and "componentWillReceiveProps".
-   * When subscribers are registered to the UIComponent itself using using attachSubscriber
-   * deregistration happens automatically for the previous foci and when "componentWillUnmount".
+   * When subscribers are registered to the UIComponent itself using
+   * bindSubscription deregistration happens automatically for the
+   * previous foci and when "componentWillUnmount".
    */
-  attachSubscribers (focus: any, props: Object) { // eslint-disable-line no-unused-vars
-    this._areSubscribersAttached = true;
+  bindSubscriptions (focus: any, props: Object) { // eslint-disable-line no-unused-vars
+    this._areSubscriptionsBound = true;
   }
 
-  detachSubscribers (/* focus: ?Vrapper */) {
-    return _finalizeDetachSubscribers(this);
+  unbindSubscriptions (/* focus: ?Vrapper */) {
+    return _finalizeUnbindSubscriptions(this);
   }
 
   _isMounted: boolean;
-  _areSubscribersAttached: ?boolean;
+  _areSubscriptionsBound: ?boolean;
 
   // Helpers
 
@@ -553,8 +564,7 @@ class UIComponent extends React.Component {
   renderLensRole (role: string | Symbol, focus: any, rootRoleName?: string, onlyIfAble?: boolean,
       onlyOnce?: boolean): null | string | React.Element<any> | [] | Promise<any> {
     const ret = this.tryRenderLensRole(role, focus, rootRoleName, onlyIfAble, onlyOnce);
-    return (typeof ret !== "undefined") ? ret
-        : null;
+    return (ret !== undefined) ? ret : null;
   }
 
   renderFirstEnabledDelegate (delegates: any[], focus: any = this.tryFocus(), lensName: string):

@@ -1,7 +1,7 @@
 // @flow
 
 import { dumpKuery, dumpObject } from "~/engine/VALEK";
-import Vrapper, { FieldUpdate } from "~/engine/Vrapper";
+import Vrapper, { LiveUpdate } from "~/engine/Vrapper";
 
 import { invariantify, outputError, thenChainEagerly, wrapError } from "~/tools";
 
@@ -9,7 +9,7 @@ import type UIComponent from "./UIComponent";
 import { getScopeValue, setScopeValue } from "./scopeValue";
 
 import { _comparePropsOrState } from "./_propsOps";
-import { _initiateSubscriptions, _finalizeDetachSubscribersExcept } from "./_subscriberOps";
+import { _initiateSubscriptions, _finalizeUnbindSubscribersExcept } from "./_subscriberOps";
 
 export function _componentWillMount (component: UIComponent) {
   component._activeParentFocus = _getActiveParentFocus(component, component.props);
@@ -57,7 +57,7 @@ function _updateFocus (component: UIComponent, newProps: Object) {
         "\n\tnew props.focus:", newProps.focus,
         "\n\tnew props.kuery:", ...dumpKuery(newProps.kuery));
     // */
-    component.detachSubscribers();
+    component.unbindSubscriptions();
     component._errorObject = null;
 
     if (newProps.uiContext && newProps.parentUIContext) {
@@ -89,13 +89,12 @@ function _updateFocus (component: UIComponent, newProps: Object) {
       component.setUIContextValue("focus", undefined);
       component.setUIContextValue("head", undefined);
     }
-    component.subscribeToKuery("UIComponent.focus", focus, newProps.kuery, {
-      scope,
-      onUpdate: (update: FieldUpdate) => {
-        _finalizeDetachSubscribersExcept(component, "UIComponent.focus");
-        _createContextAndSetFocus(component, update.value(), newProps);
-      },
-    });
+    component.bindNewKuerySubscription("UIComponent_focus",
+        focus, newProps.kuery, { scope },
+        (liveUpdate: LiveUpdate) => {
+          _finalizeUnbindSubscribersExcept(component, "UIComponent.focus");
+          _createContextAndSetFocus(component, liveUpdate.value(), newProps);
+        });
   } catch (error) {
     throw wrapError(error, `During ${component.debugId()}\n ._updateFocus:`,
         "\n\tnew props:", newProps,
@@ -194,6 +193,6 @@ export function _shouldComponentUpdate (component: UIComponent, nextProps: Objec
 
 export function _componentWillUnmount (component: UIComponent) {
   component._isMounted = false;
-  component.detachSubscribers();
+  component.unbindSubscriptions();
   if (component.context.releaseVssSheets) component.context.releaseVssSheets(component);
 }

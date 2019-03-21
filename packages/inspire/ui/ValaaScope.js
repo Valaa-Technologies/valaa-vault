@@ -109,8 +109,8 @@ export default class ValaaScope extends UIComponent {
     engine: PropTypes.object,
   };
 
-  attachSubscribers (focus: any, props: Object) {
-    super.attachSubscribers(focus, props);
+  bindSubscriptions (focus: any, props: Object) {
+    super.bindSubscriptions(focus, props);
     const Valaa = this.getValaa();
     this.setUIContextValue(Valaa.Lens.scopeChildren, props.children);
     const vOwner = this.getParentUIContextValue(Valaa.Lens.scopeFrameResource);

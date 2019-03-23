@@ -1,10 +1,20 @@
 # Valaa Open System Security and Attack Model primer
 
-This document is a very rough conceptual dump of ValOS infrastructure
-security considerations as of 2019-02. Reader is expected to have
-familiarity with event sourcing but otherwise the document is intended
-as a high-level stand-alone document and begins by introducing the
-central concepts and how they relate to general web architecture.
+This document is a rough conceptual dump of ValOS infrastructure
+security considerations as of 2019-03. Reader is expected to have
+passing familiarity with event sourcing. Otherwise the document
+purports to be a high-level stand-alone document and begins with an
+introduction to central ValOS concepts and specifically how they relate
+to the general world wide web architecture.
+
+Author's disclaimer: this document is written by a single person and
+I'm not a security professional. I genuinely believe in that the core
+concepts and the overall approach is sound. Non-trivial amounts of both
+real and calendar time, thought and experimentation has gone into the
+ValOS infrastructure taking shape. But even if you read and keep
+agreeing don't let that fool you: there can be gaping maws of black
+holes of omission that I just didn't happen to think of. Security audit
+is pending resources.
 
 # 1. Correspondence between webarch ( https://www.w3.org/TR/webarch/ ) and ValOS infrastructure concepts
 
@@ -13,17 +23,20 @@ terminology directly as far as possible. However, there are fundamental
 differences which require a different name for
 different-yet-corresponding concepts. There are four such major cases:
 
-Correspondence name | webarch concept | ValOS concept    | detail note
+Correspondence name | webarch concept | ValOS concept    | ValOS description
 --------------------|-----------------|------------------|------------
-Document            | Web Document    | Partition        | Event Log with a static URI
-Presentation        | Web Browser     | Inspire Gateway  | Javascript in browser
-Logic               | Web Server      | Perspire Gateway | Javascript on Node.js
-Data                | Database        | Authority        | Event Broker
+Document            | Web Document    | Partition        | Event log container with a fixed URI
+Presentation        | Web Browser     | Inspire Gateway  | JavaScript component in browser
+Logic               | Web Server      | Perspire Gateway | JavaScript component on Node.js
+Data                | Database        | Authority        | Event authorizer and broker
+
+Side note: the two gateways share vast majority of their structure (read:
+they use the exact same codebase).
 
 The three fundamental differences that cause these divergences are
-elaborated in more detail.
+elaborated in more detail:
 
-## 1.1. Three Tier architecture - ValOS flips Service and Backend:
+## 1.1. Three Tier architecture - ValOS flips Logic/Server and Data/Database tiers:
 
 When compared to the traditional three-tier model:
 
@@ -39,7 +52,7 @@ gateways talk to the Data/Authorities.
 ## 1.2. Same ValOS Gateway implementation runs both ValOS `Presentation/Inspire` and `Logic/Perspire` layers
 
 There is very little technical difference between `Presentation/Inspire`
-(in browser) and `Logic/Perspire` (javascript in Node.js) Gateways.
+(in browser) and `Logic/Perspire` (JavaScript in Node.js) Gateways.
 They subscribe to partitions similarily, send new commands to
 partitions similarily and perform computations with the same
 infrastructure codebase.
@@ -57,23 +70,26 @@ needs so dictate is a separate `Logic/Perspire` tier is needed.
 
 ## 1.3. webarch Content is fundamentally static - ValOS Content is fundamentally dynamic
 
-HTML/JSON/etc. based web documents over HTTP are fundamentally static
+HTML/JSON/etc. web documents over HTTP are fundamentally static
 representations. Streaming API's, AJAX etc. do solve most practical
-needs for dynamic content updates but are still conceptually a hack.
+needs for dynamic content updates but are still conceptually a bit of
+a hack. The content itself and the updates to that content are
+described using different paradigms: content is typically an object
+representation of some kind ands update are imperative functions which
+manipulate the object representation.
 
-ValOS partition event streams are dynamic change events from the get-go
-and are used by the gateway to rebuild the application and all data
-representations every time, including realtime changes coming
-downstream.
+In ValOS the state and its changes is purely represented using ValOS
+partition event streams only. These dynamic change events are used
+(`reduced`) by the gateways to build all types of application state,
+_both *logic* and *dynamic* state_ from ground up each time. This does
+not mean that ValOS would eliminate code or files altogether;
+traditional source code is used to perform computation and generate new
+events in response to user (and other) actions. Traditional UI
+presentation files are used to describe how the UI is presented based
+on the internal state.
 
-Note: Setting up a ValOS gateway itself requires HTML boilerplate and
-the final result representation in browser context is naturally a DOM.
-
-Also, while ValOS does distinguish between events and associated blobs
-in order to deliver binary files and source code, a considerable amount
-of application and data structures are constructed using purely events,
-not the source.
-
+Nevertheless this presentation/logic is the most superficial layer only
+and everything below it is converted to and from events.
 
 # 2. Terminology
 
@@ -86,6 +102,11 @@ Redux reduces its events and never called it event sourcing.
 ValOS draws its terminology from Martin Fowler's popularization from
 the year 2005 ( https://martinfowler.com/eaaDev/EventSourcing.html ).
 
+It should be noted that as a fundamental divergence to traditional
+event sourcing 'done right' and to domain driven design specifically
+ValOS event sourcing is a straightforward CRUD event sourcing with
+a limited set of generic event types manipulating a general purpose
+resource model.
 
 ## 2.2. Partition - A globally unique URI which identifies and locates a single event log
 
@@ -109,9 +130,7 @@ An typical early stage web application uses anywhere from four to
 several  dozen partitions which cross-reference each other to render
 the final product to user.
 
-## 2.3. Authority - hosts, authorizes and distributes the events of the multiple partitions
-
-You didn't ask about this but I didn't introduce 'authorities' yet...
+## 2.3. Authority - A Data layer server which hosts, authorizes and distributes the events of multiple partitions
 
 An authority is where gateways connect for event stream(s) of
 partitions owned by that authority.
@@ -124,39 +143,53 @@ perform computation, offer their services via generic, stable API and
 provide persistence services.
 
 
-# 3. What is the attack model against ValOS infrastructure?
+# 3. Attack model against ValOS infrastructure
 
-The central security aspects of the ValOS infrastructure revolve around
-two main domains: *partition behaviors* and *gateway guarantees*.
+The ValOS security model into two major domains based on whether the
+attack is made directly against infrastructure promises
+(`infrastructure integrity security domain`) or whether the attack
+happens indirectly via trying co-opting user computation and/or
+identity (`hapless user protection security domain`).
 
-*Partition behaviors* are a configurable combination of well-defined
-qualities like `isLocallyPersisted`, `restrictedEventSignatures` or
-`forgetful`. Attack models against partition behaviors are specific to
-the semantics of each behavior.
+The third security domain is the authority security domain. This domain
+is intentionally void as on one hand authorities are not automatically
+trusted and on the other hand authorities are expected to secure their
+own systems (`wild west authority security domain`).
 
-Gateway guarantees are mechanisms similar to CORS protections.
-The gateway is similar to browsers, a 'standardized', audited
-executable and it is relied on to restrict and isolate partition
-computations in different ways in different contexts in order to
-prevent malicious or broken partitions from influencing other
-partitions. Attack model against gateway guarantees is centered around
-partition contents; their interpretation by the gateway plugins and
-subsequent execution.
+The dynamics of the first two domains differ considerably. As of
+2019-03 this document primarily focuses on the infrastructure integrity
+domain as 1) without it the hapless user protection domain is largely
+meaningless, 2) there are use cases which don't have any users to
+protected or there is no computation that could be attacked, and 3) at
+early stages of the ecosystem there are practical solutions to mitigate
+hapless user protection issues even without strong protections.
 
-Authorities are the third major domain of the infrastructure but are
-deliberately less central security-wise.
+## 3.1. Infrastructure integrity security domain
 
-## 3.1. Partition behaviors are advertized by authorities, requested by partition creators
+This domain considers attacks that try to break the promises of the
+infrastructure itself.
+
+The central promise category (as of 2019-03, the only category) are the
+various *partition behaviors*.  A partition behaviour is a named (like
+`isLocallyPersisted`, `restrictedEventSignatures` or `forgetful`) and
+well-specified behaviour of the partition or its event a particular
+partition _can have_. The semantics of a partition is fully defined
+as the combination of all partition behaviors it has.
+
+Attack models against partition behaviors are specific to the semantics
+of each behavior.
+
+## 3.1.1. Partition behaviors are advertized by authorities, requested by partition creators
 
 Partition behaviors are customizable parameters which are initially set
-when the partition is created into an authority. Well-behaving
-authorities don't need to support all behaviors and some behaviors can
-come hard-coded if the authority is some speciality authority.
+when the partition is within an authority. Well-behaving authorities
+don't need to support all behaviors and some behaviors can come
+hard-coded if the authority is some speciality authority.
 
 The attack model analysis of each behavior yields a security profile
 of what assumptions must be broken for the overall behavior to break.
 
-### 3.1.1. Behaviour trust grouping from gateway user perspective
+### 3.1.2. Behaviour trust grouping from gateway user perspective
 
 Looking at the security profiles from the perspective of a gateway user
 these behaviors are grouped into three *rough* trust categories in
@@ -167,7 +200,7 @@ This grouping is not definitive but only informative as different
 behaviors are still associated with different types of attack models
 and unique security profiles.
 
-### 3.1.1.1. Capability behaviors relate to semantics, performance or are informative
+### 3.1.2.1. Capability behaviors relate to semantics, performance or are informative
 
 A capability is a behavior that a client can enforce themselves or is
 otherwise trivially true.
@@ -180,7 +213,7 @@ These are usually trivial attributes of the partition:
 - procedural partitions where the event content can be derived from
   the partition URI itself via a publicly known algorithm.
 
-### 3.1.1.2. Cryptographic behaviors
+### 3.1.2.2. Cryptographic behaviors
 
 A cryptographic behavior is one which relies on clients to be able to
 audit the event log when receiving events. This auditing is done using
@@ -209,7 +242,7 @@ implementations but to cryptographically require them to make good on
 these behaviors promise lest clients outright rejecting the event log.
 And do this in a way that is still technically reasonable.
 
-### 3.1.1.3. Social behaviors
+### 3.1.2.3. Social behaviors
 
 Social behavior is one where client needs to trust the authority
 and/or other users without an ability to prove
@@ -223,7 +256,7 @@ and/or other users without an ability to prove
   a (atomic) transaction spanning multiple partitions.
 - etc.
 
-## 3.1.2. Behavior interactions
+## 3.1.3. Behavior interactions
 
 Even separately each one of the promises have different security/trust
 profiles. For example `forgetful` is a promise that cannot be
@@ -240,14 +273,11 @@ creator needs to have on other actors, especially authorities. But even
 this is possible only if there is a jointly trusted third party which
 maintains a list of "truth signatures". Maybe this third party is some
 global block-chain which contains "most recent validated and authorized
-truth hashes of all the world's partitions" (I think I got quite far
-before breaking my promise of no-blockchain...).
+truth hashes of all the world's partitions".
 
 If there is no third party and no event signing then these behaviors
 become social behaviors: the gateway must again solely trust the
 authority.
-
-I won't even start with `crossPartitionTransctions` here.
 
 Finally, when taken together and looking at a particular set of
 behaviors requested of a partition the combinations will get even more
@@ -256,17 +286,46 @@ For example the promise `forgetful` is potentially fundamentally
 incompatible with `mutablePromises`, because there's no way to validate
 the history to see if the promises have changed.
 
-## 3.2. Gateway guarantees
+## 3.2. Hapless user protection security domain
 
-These are guarantees that the Valaa Open System gateway / plugin
-infrastructure makes in limiting partition interactions.
+This domain considers attacks that try to co-opt the computational
+resources and/or identity of a `hapless but reasonable user` in order
+to bring into being 1) infrastructurally valid ValOS events that are
+signed by the hapless user or 2) other computational side effects, yet
+3) which are against reasonable expectations of the hapless user.
 
-This section is not even.
+As a general purpose, decentralized interactive content creation
+platform ValOS cannot be expected to be able protect against all
+attacks in this category. However, all tools and solutions that are in
+line with ValOS philosophy and which help in reducing the prevalence
+and impact of this category of attacks should be aggressively pursued
+and integrated into ValOS core.
 
-## 3.3. Authorities
+Once a technical solution is accepted as part of ValOS core
+infrastructure it becomes part of the infrastructure integrity domain.
 
-The third major component of the infrastructure, Authorities, is of
-lesser importance due to couple of reasons.
+### 3.2.1. Gateway guarantees
+
+Gateway guarantees are mechanisms similar to CORS protections.
+
+The role of a gateway in ValOS ecosystem is similar to browsers. It is
+a 'standardized', audited executable. Its users rely on it to restrict
+and isolate computation and requests made by the partitions (ie.
+documents) it handles and presents to the users in various ways. It
+does this to prevent malicious or broken partition from behaving
+against the interests or expectations of the user.
+
+Gateway guarantees revolve around partition content interpretation,
+computation and presentation by restricting these processes based on
+the origin and other relevant contextual information.
+
+As of 2019-03 There are no gateway guarantees, as they're mostly
+pending the authentication infrastructure.
+
+## 3.3. Wild west authority security domain
+
+The third major component of the ValOS infrastructure, Authorities, is
+of lesser importance due to couple of reasons.
 
 From the perspective of authority owners:
 - authority owners can typically be expected to be in full control of
@@ -279,9 +338,9 @@ From the perspective of authority owners:
   thus implementing code which reaches the security criteria of the
   authority owners is easier
 
-TL;DR: authority owners can take care of themselves if they want to,
-and if they don't want to there's nothing that can be done about that
-besides client-side crypto validation schemas.
+In other words authority owners can take care of themselves if they
+want to, and if they don't want to there's nothing that can be done
+about that besides client-side crypto validation schemas.
 
 From the perspective of clients:
 - technical and cryptographic trust aspects of partitions are provided
@@ -310,6 +369,9 @@ with only the authorities of the institution itself.
 
 # 4. Who is the attacker?
 
+Note: this section is of noticeably lesser quality than the earlier
+sections and truly just a draft starting point.
+
 Everyone is a potential attacker from the general ValOS standpoint.
 The vertical scope of ValOS infrastructure is the OSI
 application/presentation layer as that's where events and their
@@ -322,7 +384,7 @@ Horizontal scope is everyone involved at all stages of the event stream
 handling, including all gateway streaming nodes and the backend
 authorities.
 
-# 4.1 what is the aim of the attacker?
+# 4.1. What is the aim of the attacker?
 
 For partition behaviors the attack target is the specific behaviors
 that ValOS infrastructure allows that particular partition to make.
@@ -344,29 +406,32 @@ and/or by the gateway user. Browsers implement this by deny-all,
 allow-by-CORS, we will have to either co-opt CORS or come up with our
 own.
 
-# 4.2. what are the capabilities of the attacker?
+# 4.2. What are the capabilities of the attacker?
 
-This section not even.
+This section not even started.
 
-NOTE(iridian, 2019-02): Two hilariously general hand-wavy
-principles/wishlist to use as a starting point:
+NOTE(iridian, 2019-02): Two hilariously general hand-wavy principles
+or a wishlist that I dumped here to use as a conceptualization starting
+point:
 - no-cascade principle: when a set of assumptions are broken in a way
   that leads to break-down of a partition behavior or a gateway
   guarantee this shall only result in a sub-sequent breakdown of lesser
-  amount other assumptions. What is lesser must be well-defined as some
-  type of total ordering between over all behaviours/guarantees and
-  their assumptions.
+  amount other assumptions. What is lesser should be well-defined as
+  some type of total ordering between over all behaviours/guarantees
+  and their assumptions.
 - baseline-read-failure-to-no-writes: when an attacker manages to
-  breach for an unencrypted read access to a not-specifically-protected
-  part of the event stream content handling, in-memory execution
-  contexts or to persisted content this breach must not result in the
-  attacker being able to use information to make new events with
-  impersonated identity or elevated privileges against baseline-secured
-  partitions.
+  breach for an unencrypted read access to either a
+  not-specifically-protected part of the event stream content handling,
+  to in-memory execution contexts or to persisted content this breach
+  must not result in the attacker being able to use information to make
+  new events with impersonated identity or elevated privileges against
+  baseline-secured partitions.
 
-  "specifically-protected" could f.ex. be a solution where event
-  signing is done in a process space separate to the javascript
-  execution context (service workers, using crypto API, etc).
+  "specifically-protected" is a provision for storage that contains
+  identity information, security tokens etc. It could f.ex. be a
+  solution where event signing is done in a process space separate to
+  the JavaScript execution context (service workers, using crypto API,
+  etc).
   Alternatively an authority can maintain identity sessions and only
   accepts events which are coming across that particular session _and_
   are signed by an identity affiliated with that session, in a solution

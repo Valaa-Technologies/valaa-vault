@@ -46,7 +46,7 @@ import { _wrapElementInLiveProps } from "./_renderOps";
  * @extends {UIComponent}
  */
 export default class LiveProps extends UIComponent {
-  static mainLensRoleName = "livePropsLens";
+  static mainLensSlotName = "livePropsLens";
 
   static propTypes = {
     ...UIComponent.propTypes,
@@ -69,8 +69,8 @@ export default class LiveProps extends UIComponent {
     };
   }
 
-  bindSubscriptions (focus: any, props: Object) {
-    super.bindSubscriptions(focus, props);
+  bindFocusSubscriptions (focus: any, props: Object) {
+    super.bindFocusSubscriptions(focus, props);
     // Live props are always based on the parent focus.
     // Now uselessly reattaching listeners if the local focus changes.
     let frame = this.getUIContextValue("frame");
@@ -89,13 +89,13 @@ export default class LiveProps extends UIComponent {
               return true;
             } catch (error) {
               const wrappedError = wrapError(error,
-                  new Error(`bindSubscriptions('${bindingSlot}')`),
+                  new Error(`bindFocusSubscriptions('${bindingSlot}')`),
                   "\n\tuiContext:", this.state.uiContext,
                   "\n\tfocus:", this.tryFocus(),
                   "\n\tstate:", this.state,
                   "\n\tprops:", this.props,
               );
-              outputError(wrappedError, "Exception caught during LiveProps.bindSubscriptions");
+              outputError(wrappedError, "Exception caught during LiveProps.bindFocusSubscriptions");
               this.enableError(wrappedError);
             }
             return false;
@@ -166,7 +166,7 @@ export default class LiveProps extends UIComponent {
         }
       }
       if (unfinishedKueries.length) {
-        return this.renderLensRole("kueryingPropsLens", unfinishedKueries);
+        return this.renderSlotAsLens("kueryingPropsLens", unfinishedKueries);
       }
     }
 
@@ -197,8 +197,8 @@ export default class LiveProps extends UIComponent {
         }));
       });
       ret.operationInfo = {
-        lensRole: "pendingPropsLens", focus: pendingProps,
-        onError: { lensRole: "failedPropsLens", propsNames: pendingPropsNames },
+        slotName: "pendingPropsLens", focus: pendingProps,
+        onError: { slotName: "failedPropsLens", propsNames: pendingPropsNames },
       };
       return ret;
     }
@@ -241,7 +241,7 @@ export default class LiveProps extends UIComponent {
     } else {
       const array = newProps.array;
       if ((array == null) || (typeof array[Symbol.iterator] !== "function")) {
-        ret = this.renderLensRole("arrayNotIterableLens", array);
+        ret = this.renderSlotAsLens("arrayNotIterableLens", array);
       } else {
         delete newProps.array;
         if (children.length) newProps.children = children;

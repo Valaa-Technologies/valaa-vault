@@ -79,8 +79,8 @@ export function connectToMissingPartitionsAndThen (error, callback, explicitConn
           : missingPartition) // a promise for an already existing connection process
   )).then(() => callback());
   ret.operationInfo = {
-    lensRole: "pendingConnectionsLens", focus: original.missingPartitions,
-    onError: { lensRole: "failedConnectionsLens", partitions: original.missingPartitions },
+    slotName: "pendingConnectionsLens", focus: original.missingPartitions,
+    onError: { slotName: "failedConnectionsLens", partitions: original.missingPartitions },
   };
   return ret;
 }

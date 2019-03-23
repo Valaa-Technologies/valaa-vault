@@ -11,14 +11,14 @@ const toTextPlainInterpretation =
 
 export default @Presentable(require("./presentation").default, "MediaContentEditor")
 class MediaContentEditor extends UIComponent {
-  bindSubscriptions (focus: any, props: Object) {
+  bindFocusSubscriptions (focus: any, props: Object) {
     try {
-      super.bindSubscriptions(focus, props);
+      super.bindFocusSubscriptions(focus, props);
       this.bindNewKuerySubscription(`FileEditor_content`,
           focus, toTextPlainInterpretation, { scope: this.getUIContext() },
           this.onContentUpdate);
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .bindSubscriptions(), with:`,
+      throw wrapError(error, `During ${this.debugId()}\n .bindFocusSubscriptions(), with:`,
           "\n\thead:       ", focus,
           "\n\tthis:       ", this);
     }

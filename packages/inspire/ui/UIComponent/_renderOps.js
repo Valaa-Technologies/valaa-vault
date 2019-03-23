@@ -29,11 +29,11 @@ export function _renderFirstAbleDelegate (
   return null;
 }
 
-export function _locateLensRoleAssignee (component: UIComponent,
-    roleName: string, roleSymbol: Symbol, focus: any, onlyIfAble?: boolean):
+export function _readSlotValue (component: UIComponent,
+    slotName: string, slotSymbol: Symbol, focus: any, onlyIfAble?: boolean):
     void | null | string | React.Element<any> | [] | Promise<any> {
   if (onlyIfAble) {
-    const descriptor = component.context.engine.getHostObjectDescriptor(roleSymbol);
+    const descriptor = component.context.engine.getHostObjectDescriptor(slotSymbol);
     if (descriptor
         && (typeof descriptor.isEnabled === "function")
         && !descriptor.isEnabled(focus, component)) {
@@ -42,14 +42,14 @@ export function _locateLensRoleAssignee (component: UIComponent,
   }
   let assignee;
   try {
-    assignee = component.props[roleName];
+    assignee = component.props[slotName];
     if (typeof assignee === "undefined") {
-      if (component.props.hasOwnProperty(roleName)) {
-        throw new Error(`Render role props.${roleName} is provided but its value is undefined`);
+      if (component.props.hasOwnProperty(slotName)) {
+        throw new Error(`Render role props.${slotName} is provided but its value is undefined`);
       }
-      assignee = component.getUIContextValue(roleSymbol);
+      assignee = component.getUIContextValue(slotSymbol);
       if (typeof assignee === "undefined") {
-        assignee = component.context[roleName];
+        assignee = component.context[slotName];
         if (typeof assignee === "undefined") return undefined;
       } else if (Array.isArray(assignee) && !Object.isFrozen(assignee)) {
         assignee = [...assignee]; // the lens chain constantly mutates assignee, return a copy
@@ -58,10 +58,10 @@ export function _locateLensRoleAssignee (component: UIComponent,
     return assignee;
   } catch (error) {
     throw wrapError(error,
-        `During ${component.debugId()}\n ._locateLensRoleAssignee, with:`,
+        `During ${component.debugId()}\n ._readSlotValue, with:`,
         "\n\tfocus:", focus,
-        "\n\troleName:", roleName,
-        "\n\troleSymbol:", roleSymbol,
+        "\n\tslotName:", slotName,
+        "\n\tslotSymbol:", slotSymbol,
         "\n\tassignee:", assignee);
   }
 }
@@ -162,8 +162,8 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         const blocker = lens.activate();
         if (blocker) {
           blocker.operationInfo = Object.assign(blocker.operationInfo || {}, {
-            lensRole: "pendingActivationLens", focus: lens,
-            onError: { lensRole: "failedActivationLens", resource: lens },
+            slotName: "pendingActivationLens", focus: lens,
+            onError: { slotName: "failedActivationLens", resource: lens },
           });
           return blocker.then(() => undefined); // Ensure that re-render is triggered
         }
@@ -173,11 +173,11 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         } else {
           const Valaa = component.getValaa();
           subLensName = `delegate-lens-${lensName}`;
-          ret = _locateLensRoleAssignee(component, "delegatePropertyLens",
+          ret = _readSlotValue(component, "delegatePropertyLens",
               Valaa.Lens.delegatePropertyLens, lens, true)(
                   lens, component, lensName);
           if (ret == null || ((ret.delegate || [])[0] === Valaa.Lens.notLensResourceLens)) {
-            return component.renderLensRole("notLensResourceLens", lens, subLensName);
+            return component.renderSlotAsLens("notLensResourceLens", lens, subLensName);
           }
         }
       } else if (Array.isArray(lens)) {
@@ -189,14 +189,14 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         subLensName = `-noscope-${lensName}`;
         ret = React.createElement(_ValaaScope, component.childProps(subLensName, {}, { ...lens }));
       } else if (isSymbol(lens)) {
-        return component.renderLensRole(lens, focus, undefined, onlyIfAble, onlyOnce);
+        return component.renderSlotAsLens(lens, focus, undefined, onlyIfAble, onlyOnce);
       } else {
         throw new Error(`Invalid lens value when trying to render ${lensName
             }, got value of type '${lens.constructor.name}'`);
       }
       break;
     case "symbol":
-      return component.renderLensRole(lens, focus, undefined, onlyIfAble, onlyOnce);
+      return component.renderSlotAsLens(lens, focus, undefined, onlyIfAble, onlyOnce);
   }
   return thenChainEagerly(ret, resolvedRet => {
     if (resolvedRet === undefined) return undefined;
@@ -244,18 +244,18 @@ function _tryRenderMediaLens (component: UIComponent, media: any, focus: any) {
         error = new Error(`Media interpretation is a complex type ${
           (content.constructor || {}).name || "<unnamed>"}`);
       }
-      error.lensRole = "unrenderableMediaInterpretationLens";
+      error.slotName = "unrenderableMediaInterpretationLens";
       throw error;
     }
   ], function errorOnRenderMediaLens (error) {
-    if (!error.lensRole) error.lensRole = "mediaInterpretationErrorLens";
+    if (!error.slotName) error.slotName = "mediaInterpretationErrorLens";
     error.media = media;
     error.mediaInfo = options.mediaInfo;
     throw error;
   });
   if (isPromise(ret)) {
     ret.operationInfo = Object.assign(ret.operationInfo || {}, {
-      lensRole: "pendingMediaInterpretationLens", focus: media,
+      slotName: "pendingMediaInterpretationLens", focus: media,
     });
   }
   return ret;
@@ -332,8 +332,8 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
         if ((key || !lensName) && (children === undefined)) return undefined;
         if (isPromise(children)) {
           children.operationInfo = Object.assign(children.operationInfo || {}, {
-            lensRole: "pendingChildrenLens", focus: props.children,
-            onError: { lensRole: "failedChildrenLens", children: props.children },
+            slotName: "pendingChildrenLens", focus: props.children,
+            onError: { slotName: "failedChildrenLens", children: props.children },
           });
           return children;
         }

@@ -97,7 +97,7 @@ import { thenChainEagerly } from "~/tools";
  * @extends {UIComponent}
  */
 export default class ValaaScope extends UIComponent {
-  static mainLensRoleName = "valaaScopeLens";
+  static mainLensSlotName = "valaaScopeLens";
 
   static propTypes = {
     ...UIComponent.propTypes,
@@ -109,8 +109,8 @@ export default class ValaaScope extends UIComponent {
     engine: PropTypes.object,
   };
 
-  bindSubscriptions (focus: any, props: Object) {
-    super.bindSubscriptions(focus, props);
+  bindFocusSubscriptions (focus: any, props: Object) {
+    super.bindFocusSubscriptions(focus, props);
     const Valaa = this.getValaa();
     this.setUIContextValue(Valaa.Lens.scopeChildren, props.children);
     const vOwner = this.getParentUIContextValue(Valaa.Lens.scopeFrameResource);

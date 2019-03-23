@@ -22,9 +22,9 @@ class LinkFieldEditor extends UIComponent {
     toCandidatesKuery: true,
   }
 
-  bindSubscriptions (focus: any, props: Object) {
+  bindFocusSubscriptions (focus: any, props: Object) {
     try {
-      super.bindSubscriptions(focus, props);
+      super.bindFocusSubscriptions(focus, props);
 
       this.bindNewKuerySubscription(`LinkFieldEditor_fieldName`,
           focus, VALEK.to(props.fieldName), { scope: this.getUIContext() },
@@ -57,7 +57,7 @@ class LinkFieldEditor extends UIComponent {
           { scope: this.getUIContext() },
           this.onCandidatesUpdate);
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .bindSubscriptions(), with:`,
+      throw wrapError(error, `During ${this.debugId()}\n .bindFocusSubscriptions(), with:`,
           "\n\thead:       ", focus,
           "\n\tthis:       ", this);
     }

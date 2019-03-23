@@ -9,9 +9,9 @@ import UIComponent from "./UIComponent";
 
 export function _initiateSubscriptions (component: UIComponent, focus: any, props: Object) {
   if (!component || component._areSubscriptionsBound) return;
-  component.bindSubscriptions(focus, props);
+  component.bindFocusSubscriptions(focus, props);
   invariantify(component._areSubscriptionsBound, `${component.constructor.name
-      }().super.bindSubscriptions not called from derived bindSubscriptions`);
+      }().super.bindFocusSubscriptions not called from derived bindFocusSubscriptions`);
 }
 
 export function _finalizeUnbindSubscriptions (component: UIComponent, /* focus: ?Vrapper */) {

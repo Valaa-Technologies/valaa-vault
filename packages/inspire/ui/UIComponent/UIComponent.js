@@ -28,7 +28,7 @@ import {
 } from "./_propsOps";
 import {
   _renderFocus, _renderFocusAsSequence, _renderFirstAbleDelegate,
-  _tryRenderLens, _locateLensRoleAssignee, _tryRenderLensArray, _validateElement,
+  _tryRenderLens, _readSlotValue, _tryRenderLensArray, _validateElement,
 } from "./_renderOps";
 import {
   VSSStyleSheetSymbol,
@@ -46,7 +46,7 @@ const _propertyNames = PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(
 
 export default @Presentable(require("./presentation").default, "UIComponent")
 class UIComponent extends React.Component {
-  static mainLensRoleName = "uiComponentLens";
+  static mainLensSlotName = "uiComponentLens";
 
   static _defaultPresentation = () => ({ root: {} });
 
@@ -266,13 +266,22 @@ class UIComponent extends React.Component {
   setState (newState: any, callback: any) {
     if (this._isMounted) super.setState(newState, callback);
     else {
-      // Performance optimization: mutate state directly if not mounted or just mounting.
-      // setState calls are queued and could result in costly re-renders when called from
-      // componentWillMount, strangely enough.
-      // TODO(iridian): I find this a bit surprising: I would expect React to precisely to do this
-      // optimization itself in componentWillMount (ie. not calling re-render), so it might be
-      // something else we're doing wrong with the codebase. But adding this here resulted in
-      // cutting the render time fully in half.
+      // Performance optimization: mutate state directly if not mounted
+      // or just mounting. setState calls are queued and could result
+      // in costly re-renders when called from componentWillMount,
+      // strangely enough.
+      //
+      // TODO(iridian): I find this a bit surprising: I would expect
+      // React to precisely to do this optimization itself in
+      // componentWillMount (ie. not calling re-render), so it might be
+      // something else we're doing wrong with the codebase. But adding
+      // this here resulted in cutting the render time fully in half.
+      //
+      // TODO(iridian, 2019-03): We most certainly were doing something
+      // wrong, but as some of the React lifecycle functions are being
+      // deprecated anyway, we should rework the whole system instead
+      // of trying to figure out exactly how we used the deprecated
+      // system wrong.
       Object.assign(this.state,
           typeof newState === "function"
             ? newState(this.state, this.props)
@@ -495,7 +504,7 @@ class UIComponent extends React.Component {
    * bindSubscription deregistration happens automatically for the
    * previous foci and when "componentWillUnmount".
    */
-  bindSubscriptions (focus: any, props: Object) { // eslint-disable-line no-unused-vars
+  bindFocusSubscriptions (focus: any, props: Object) { // eslint-disable-line no-unused-vars
     this._areSubscriptionsBound = true;
   }
 
@@ -561,9 +570,10 @@ class UIComponent extends React.Component {
   }
 
   // defaults to null
-  renderLensRole (role: string | Symbol, focus: any, rootRoleName?: string, onlyIfAble?: boolean,
-      onlyOnce?: boolean): null | string | React.Element<any> | [] | Promise<any> {
-    const ret = this.tryRenderLensRole(role, focus, rootRoleName, onlyIfAble, onlyOnce);
+  renderSlotAsLens (slot: string | Symbol, focus: any, rootSlotName?: string,
+      onlyIfAble?: boolean, onlyOnce?: boolean):
+          null | string | React.Element<any> | [] | Promise<any> {
+    const ret = this.tryRenderSlotAsLens(slot, focus, rootSlotName, onlyIfAble, onlyOnce);
     return (ret !== undefined) ? ret : null;
   }
 
@@ -573,33 +583,33 @@ class UIComponent extends React.Component {
   }
 
 
-  tryRenderLensRole (role: string | Symbol, focus: any = this.tryFocus(), rootRoleName_?: string,
-      onlyIfAble?: boolean, onlyOnce?: boolean):
+  tryRenderSlotAsLens (slot: string | Symbol, focus: any = this.tryFocus(),
+      rootSlotName_?: string, onlyIfAble?: boolean, onlyOnce?: boolean):
           void | null | string | React.Element<any> | [] | Promise<any> {
-    const activeViewRoles = this.getUIContextValue(this.getValaa().Lens.activeViewRoles)
+    const activeLensSlots = this.getUIContextValue(this.getValaa().Lens.activeLensSlots)
         || (this.state.uiContext
-            && this.setUIContextValue(this.getValaa().Lens.activeViewRoles, []))
+            && this.setUIContextValue(this.getValaa().Lens.activeLensSlots, []))
         || [];
-    let assignee; // eslint-disable-line
+    let slotValue; // eslint-disable-line
     const Valaa = this.getValaa();
-    const roleName = typeof role === "string" ? role : Valaa.Lens[role];
-    const roleSymbol = typeof role !== "string" ? role : Valaa.Lens[role];
-    const rootRoleName = rootRoleName_ || roleName;
+    const slotName = typeof slot === "string" ? slot : Valaa.Lens[slot];
+    const slotSymbol = typeof slot !== "string" ? slot : Valaa.Lens[slot];
+    const rootSlotName = rootSlotName_ || slotName;
     try {
-      if (!roleSymbol) throw new Error(`No Valaa.Lens role symbol for '${roleName}'`);
-      if (!roleName) throw new Error(`No Valaa.Lens role name for '${String(roleSymbol)}'`);
-      activeViewRoles.push(roleName);
-      assignee = _locateLensRoleAssignee(this, roleName, roleSymbol, focus, onlyIfAble);
-      return assignee && this.renderLens(assignee, focus, rootRoleName, undefined, onlyOnce);
+      if (!slotSymbol) throw new Error(`No Valaa.Lens slot symbol for '${slotName}'`);
+      if (!slotName) throw new Error(`No Valaa.Lens slot name for '${String(slotSymbol)}'`);
+      activeLensSlots.push(slotName);
+      slotValue = _readSlotValue(this, slotName, slotSymbol, focus, onlyIfAble);
+      return slotValue && this.renderLens(slotValue, focus, rootSlotName, undefined, onlyOnce);
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .renderLensRole(${
-              roleName || String(roleSymbol)}), with:`,
+      throw wrapError(error, `During ${this.debugId()}\n .renderSlotAsLens(${
+              slotName || String(slotSymbol)}), with:`,
           "\n\tfocus:", focus,
-          "\n\trole assignee:", assignee,
-          "\n\trootRoleName:", rootRoleName);
+          "\n\tslot value:", slotValue,
+          "\n\trootSlotName:", rootSlotName);
     } finally {
-      activeViewRoles.pop();
-      if (!activeViewRoles.length) this.clearUIContextValue(this.getValaa().Lens.activeViewRoles);
+      activeLensSlots.pop();
+      if (!activeLensSlots.length) this.clearUIContextValue(this.getValaa().Lens.activeLensSlots);
     }
   }
 
@@ -619,7 +629,7 @@ class UIComponent extends React.Component {
     let ret = this._pendingRenderValue;
     this._pendingRenderValue = undefined;
     let mainValidationFaults;
-    let latestRenderRole;
+    let latestRenderedLensSlot;
     try {
       if ((ret === undefined) && !this._errorObject && !_checkForInfiniteRenderRecursion(this)) {
         // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
@@ -630,21 +640,23 @@ class UIComponent extends React.Component {
         }
         try {
           // Render the main lens delegate sequence.
-          ret = this.tryRenderLensRole((latestRenderRole = this.constructor.mainLensRoleName));
+          latestRenderedLensSlot = this.constructor.mainLensSlotName;
+          ret = this.tryRenderSlotAsLens(latestRenderedLensSlot);
         } catch (error) {
           // Try to connect to missing partitions.
           if (!tryConnectToMissingPartitionsAndThen(error, () => this.forceUpdate())) {
             throw error;
           }
-          ret = this.tryRenderLensRole((latestRenderRole = "pendingConnectionsLens"),
+          latestRenderedLensSlot = "pendingConnectionsLens";
+          ret = this.tryRenderSlotAsLens(latestRenderedLensSlot,
               (error.originalError || error).missingPartitions.map(entry => String(entry)));
         }
         // Try to handle pending promises.
         const rerenderPromise = this.enqueueRerenderIfPromise(ret);
         if (rerenderPromise) {
           const operationInfo = ret.operationInfo || {
-            lensRole: "pendingLens", focus: { render: ret },
-            onError: { lensRole: "failedLens", lens: { render: ret } },
+            slotName: "pendingLens", focus: { render: ret },
+            onError: { slotName: "failedLens", lens: { render: ret } },
           };
           rerenderPromise.catch(error => {
             if (operationInfo.onError) Object.assign(error, operationInfo.onError);
@@ -658,8 +670,8 @@ class UIComponent extends React.Component {
             outputError(wrappedError, "Exception caught in UIComponent.render.result.catch");
             this.enableError(wrappedError);
           });
-          latestRenderRole = operationInfo.lensRole;
-          ret = this.tryRenderLensRole(latestRenderRole, operationInfo.focus);
+          latestRenderedLensSlot = operationInfo.slotName;
+          ret = this.tryRenderSlotAsLens(latestRenderedLensSlot, operationInfo.focus);
           if (isPromise(ret)) {
             throw wrapError(new Error("Invalid render result: 'pendingLens' returned a promise"),
                 new Error(`During ${this.debugId()}\n .render().ret.pendingLens, with:`),
@@ -671,12 +683,12 @@ class UIComponent extends React.Component {
         if (mainValidationFaults === undefined) {
           return ret === undefined ? null : ret;
         }
-        console.error(`Validation faults on render result of '${latestRenderRole}' by`,
+        console.error(`Validation faults on render result of '${latestRenderedLensSlot}' by`,
                 this.debugId(),
             "\n\tfaults:", mainValidationFaults,
             "\n\tcomponent:", this,
             "\n\tfailing render result:", ret);
-        ret = this.renderLensRole("invalidElementLens",
+        ret = this.renderSlotAsLens("invalidElementLens",
             "see console log for 'Validation faults' details");
       }
     } catch (error) {
@@ -698,15 +710,15 @@ class UIComponent extends React.Component {
       }
       if (ret === undefined) {
         const errorObject = this._errorObject || "<render result undefined>";
-        const errorLensRole = errorObject.lensRole || "internalErrorLens";
-        const failure: any = this.renderLensRole(errorLensRole, errorObject);
-        if (isPromise(failure)) throw new Error(`${errorLensRole} returned a promise`);
+        const errorSlotName = errorObject.slotName || "internalErrorLens";
+        const failure: any = this.renderSlotAsLens(errorSlotName, errorObject);
+        if (isPromise(failure)) throw new Error(`${errorSlotName} returned a promise`);
         ret = failure;
         let isSticky = errorObject.isSticky;
         if (isSticky === undefined) {
           const engine = this.context.engine;
           const errorDescriptor = engine.getHostObjectDescriptor(
-              engine.getRootScope().Valaa.Lens[errorLensRole]);
+              engine.getRootScope().Valaa.Lens[errorSlotName]);
           isSticky = (errorDescriptor || {}).isStickyError;
         }
         if (!isSticky) {

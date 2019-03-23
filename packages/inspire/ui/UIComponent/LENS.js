@@ -19,10 +19,11 @@ import type UIComponent from "./UIComponent";
 export default function LENS (lookupLensNames: string[], ...directLenses: any[]) {
   return function lens (scope: any, component: UIComponent) {
     console.error("DEPRECATED: LENS`", lookupLensNames.join("..."), "`",
-        "\n\tprefer: lens role symbols in Valaa.Lens.*");
+        "\n\tprefer: slot symbols found in Valaa.Lens.*");
     for (let i = 0; i !== lookupLensNames.length; ++i) {
       try {
-        const lookedUpLens = lookupLensNames[i] && component.tryRenderLensRole(lookupLensNames[i]);
+        const lookedUpLens = lookupLensNames[i]
+            && component.tryRenderSlotAsLens(lookupLensNames[i]);
         if (typeof lookedUpLens !== "undefined") return lookedUpLens;
         if (i < directLenses.length && typeof directLenses[i] !== "undefined") {
           return component.renderLens(directLenses[i], undefined, `LENS[i]`);

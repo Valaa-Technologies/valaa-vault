@@ -36,8 +36,8 @@ class UIContext extends UIComponent {
   static toDefaultLens = VALEK.propertyValue("DEFAULT_LENS", { optional: true })
         .or(VALEK.propertyValue("DEFAULT_CHILD_UI_JSX", { optional: true }));
 
-  bindSubscriptions (focus: any, props: Object) {
-    super.bindSubscriptions(focus, props);
+  bindFocusSubscriptions (focus: any, props: Object) {
+    super.bindFocusSubscriptions(focus, props);
     invariantify(focus instanceof Vrapper,
         "UIContext(%s).focus(%s) must be a Valaa object", this, focus);
     invariantify(focus.hasInterface("Scope"), "UIContext.focus must implement Scope");

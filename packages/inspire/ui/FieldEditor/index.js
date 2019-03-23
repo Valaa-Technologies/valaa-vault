@@ -15,15 +15,15 @@ class FieldEditor extends UIComponent {
     fieldName: PropTypes.string
   };
 
-  bindSubscriptions (focus: any, props: Object) {
+  bindFocusSubscriptions (focus: any, props: Object) {
     try {
-      super.bindSubscriptions(focus, props);
+      super.bindFocusSubscriptions(focus, props);
       this.bindNewKuerySubscription(`FieldEditor_${props.fieldName}`,
           focus, VALEK.to(props.fieldName).nullable(), { scope: this.getUIContext() },
           this.onValueUpdate,
       );
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .bindSubscriptions(), with:`,
+      throw wrapError(error, `During ${this.debugId()}\n .bindFocusSubscriptions(), with:`,
           "\n\thead:       ", focus,
           "\n\tthis:       ", this);
     }

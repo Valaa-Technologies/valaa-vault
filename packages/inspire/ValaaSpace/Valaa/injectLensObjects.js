@@ -30,7 +30,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
   Valaa.Lens = {};
   const lensDescriptorOptions: { [string]: () => LensParameters } = {};
 
-  function createLensRoleSymbol (name: string, createLensParameters: Object) {
+  function createSlotSymbol (name: string, createLensParameters: Object) {
     lensDescriptorOptions[name] = createLensParameters;
     Valaa.Lens[name] = Symbol(name);
     Valaa.Lens[Valaa.Lens[name]] = name;
@@ -40,7 +40,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
   function finalizeLensDescriptors () {
     const lensDescriptors = {};
     Object.entries(lensDescriptorOptions).forEach(
-        ([lensRoleName, createLensParameters]) => {
+        ([slotName, createLensParameters]) => {
           const { value, type, description, isEnabled, rootValue } = createLensParameters();
           const descriptor = {
             valaa: true, symbol: true,
@@ -48,11 +48,11 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
             writable: false, enumerable: true, configurable: false,
           };
           if (isEnabled !== undefined) {
-            Object.assign(descriptor, { lensRole: true, isEnabled });
+            Object.assign(descriptor, { slotName: true, isEnabled });
           }
-          lensDescriptors[lensRoleName] = Object.freeze(descriptor);
-          hostObjectDescriptors.set(Valaa.Lens[lensRoleName], descriptor);
-          if (rootValue) rootScope[Valaa.Lens[lensRoleName]] = Object.freeze(rootValue);
+          lensDescriptors[slotName] = Object.freeze(descriptor);
+          hostObjectDescriptors.set(Valaa.Lens[slotName], descriptor);
+          if (rootValue) rootScope[Valaa.Lens[slotName]] = Object.freeze(rootValue);
         });
     hostObjectDescriptors.set(Valaa.Lens, lensDescriptors);
   }
@@ -75,13 +75,13 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
   const _value = { className: `inspire__lensMessage-infoValue` };
 
   Valaa.Lens.instrument = denoteValaaBuiltinWithSignature(
-      `function(lens1[, lens2[, ...[, lensN]]])
-      Creates an _instrument lens_ by chaining multiple lenses in
-      sequence. When an instrument lens is assigned into a lens role
-      the instrument passes its focus to the first lens. Then it
-      forwards the output of the first lens to the second lens and so
-      on until the output of the last lens is displayed as the output
-      of the instrument lens itself.`
+      `function(subLens1[, subLens2[, ...[, subLensN]]])
+      Creates an _instrument lens_ which chains multiple sub-lenses in
+      sequence. When the instrument lens is used to view a focus it is
+      first set as the focus subLens1. The results shown by subLens1
+      is then set as the focus of subLens2 and so on until the final
+      results of the last lens are shown as the output of the
+      instrument lens itself.`
   // eslint-disable-next-line
   )(function instrument (...lenses) {
     return (focus: any, component: UIComponent, lensName: string) => {
@@ -99,19 +99,19 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
   // Primitive lenses
 
-  createLensRoleSymbol("activeViewRoles", () => ({
+  const activeLensSlots = createSlotSymbol("activeLensSlots", () => ({
     type: "string[]",
-    description: `Lens role for listing the lens role names that are
-        being used to view this element itself.`,
+    description: `Slot which contains the listing of lens slot names
+        that are currently being used to view the element.`,
   }));
 
-  const niceActiveRoleNames = Valaa.Lens.instrument(
-      Valaa.Lens.activeViewRoles,
-      roleNames => roleNames.slice(0, -1).reverse().join(" <- "));
+  const niceActiveSlotNames = Valaa.Lens.instrument(
+      activeLensSlots,
+      slotNames => slotNames.slice(0, -1).reverse().join(" <- "));
 
-  createLensRoleSymbol("componentChildrenLens", () => ({
-    type: "any[]",
-    description: `Lens role for viewing the child elements of the
+  const componentChildrenLens = createSlotSymbol("componentChildrenLens", () => ({
+    type: "Lens",
+    description: `Slot for viewing the child elements of the
         current parent component.`,
     isEnabled: (u: any, component: UIComponent) => arrayFromAny(component.props.children).length,
     rootValue: function renderComponentChildren (u: any, component: UIComponent) {
@@ -119,21 +119,21 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     },
   }));
 
-  createLensRoleSymbol("parentComponentLens", () => ({
-    type: "any[]",
-    description: `Lens role for viewing the current parent component.
-        As the component itself is not renderable this role should be
-        used in an instrument along with some other role such as
-        'focusDetailLens'.`,
+  const parentComponentLens = createSlotSymbol("parentComponentLens", () => ({
+    type: "() => UIComponent",
+    description: `Slot for accessing the current parent component.
+        As the component itself is not renderable this slot must be
+        used in an instrument before some other slot (such as
+        'focusDetailLens').`,
     isEnabled: true,
-    rootValue: function renderParentComponent (u: any, component: UIComponent) {
+    rootValue: function renderParentComponent (f: any, component: UIComponent) {
       return component;
     },
   }));
 
-  createLensRoleSymbol("focusDescriptionLens", () => ({
+  const focusDescriptionLens = createSlotSymbol("focusDescriptionLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a description of the focus.
+    description: `Slot for viewing a description of the focus.
 
         @focus {any} focus  the focus to describe.`,
     isEnabled: true,
@@ -160,9 +160,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     },
   }));
 
-  createLensRoleSymbol("focusDetailLens", () => ({
+  const focusDetailLens = createSlotSymbol("focusDetailLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a developer-oriented debug
+    description: `Slot for viewing a developer-oriented debug
         introspection of the focus.
 
         @focus {any} focus  the focus to describe.`,
@@ -172,9 +172,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     }
   }));
 
-  createLensRoleSymbol("focusDumpLens", () => ({
+  const focusDumpLens = createSlotSymbol("focusDumpLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a full string dump of the focus.
+    description: `Slot for viewing a full string dump of the focus.
         Replaces circular/duplicates with tags.
 
         @focus {any} focus  the focus to dump.`,
@@ -184,9 +184,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     },
   }));
 
-  createLensRoleSymbol("focusPropertyKeysLens", () => ({
+  createSlotSymbol("focusPropertyKeysLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing the list of property keys of
+    description: `Slot for viewing the list of property keys of
         the focused object or resource (using Object.keys).
 
         @focus {object | Resource} focus  the focus to describe.`,
@@ -198,28 +198,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     },
   }));
 
-  createLensRoleSymbol("internalErrorLens", () => ({
+  const toggleableErrorDetailLens = createSlotSymbol("toggleableErrorDetailLens", () => ({
     type: "Lens",
-    description: `A catch-all lens role for viewing the focused
-        internal error, such as an unhandled exception or a constraint
-        violation like 'pendingLens' resulting in a promise.
-        By default renders the yelling-red screen.
-
-        @focus {string|Error} error  the failure description or exception object`,
-    isEnabled: true,
-    rootValue: function renderInternalFailure () {
-      return (
-        <div {..._lensMessageInternalFailureProps}>
-          Render Error: Component has internal error(s).
-          {Valaa.Lens.toggleableErrorDetailLens}
-        </div>
-      );
-    },
-  }));
-
-  createLensRoleSymbol("toggleableErrorDetailLens", () => ({
-    type: "Lens",
-    description: `A catch-all lens role for rendering a detailed,
+    description: `A catch-all Slot for viewing a detailed,
         toggleable view of the focused error.
 
         @focus {string|Error} error  the failure description or exception object`,
@@ -241,14 +222,60 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     },
   }));
 
+  createSlotSymbol("internalErrorLens", () => ({
+    type: "Lens",
+    description: `A catch-all Slot for viewing the focused
+        internal error, such as an unhandled exception or a constraint
+        violation like 'pendingLens' resulting in a promise.
+        By default renders the yelling-red screen.
+
+        @focus {string|Error} error  the failure description or exception object`,
+    isEnabled: true,
+    rootValue: function renderInternalFailure () {
+      return (
+        <div {..._lensMessageInternalFailureProps}>
+          Render Error: Component has internal error(s).
+          {toggleableErrorDetailLens}
+        </div>
+      );
+    },
+  }));
+
+
+  // User-definable catch-all lenses
+
+  const loadingLens = createSlotSymbol("loadingLens", () => ({
+    type: "Lens",
+    description: `A catch-all slot for viewing a description of a
+        dependency which is still being loaded.
+        Undefined by default; place a lens to this slot to have all
+        the *default* implementations of all other loading -like slots
+        be delegated to it instead of using their own default lens.
+
+        @focus {Object} component  an object description of the dependency being loaded`,
+  }));
+
+  const loadingFailedLens = createSlotSymbol("loadingFailedLens", () => ({
+    type: "Lens",
+    description: `A catch-all slot for viewing a description of a
+        dependency which has failed to load.
+        Undefined by default; place a lens to this slot to have all
+        the *default* implementations of all other loading-failed -like
+        slots be delegated to it instead of using their own default lens.
+
+        @focus {string|Error|Object} reason  the explanation of the loading failure`,
+  }));
+
+
   // Main component lifecycle lens
 
-  createLensRoleSymbol("valaaScopeLens", () => ({
+  createSlotSymbol("valaaScopeLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing the focus via the ValaaScope
-        lens role sequence. ValaaScope is an internal fabric component
-        which delegates the viewing to specialized lens roles based on
-        the current dynamic state and/or value of the focus.
+    description: `Slot for viewing the focus via the ValaaScope
+        lens slot sequence. ValaaScope is an internal fabric component
+        which searches the first enabled lens in the particular
+        sequence of slots (which is defined below) based on the current
+        dynamic state and/or value of the focus.
 
         @focus {any} focus  the focus of the component`,
     isEnabled: true,
@@ -260,18 +287,20 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
       Valaa.Lens.undefinedLens,
       Valaa.Lens.lens,
       Valaa.Lens.nullLens,
-      Valaa.Lens.componentChildrenLens,
+      componentChildrenLens,
       Valaa.Lens.resourceLens,
       Valaa.Lens.loadedLens,
     ]) }),
   }));
 
-  createLensRoleSymbol("livePropsLens", () => ({
+  createSlotSymbol("livePropsLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing the focus via the LiveProps
-        lens role sequence. LiveProps is an internal fabric component
-        which triggers the dynamic update of the UI in response to
-        events coming downstream the prophet chain.
+    description: `Slot for viewing the focus via the LiveProps lens
+        slot sequence. LiveProps is an internal fabric component which
+        wraps a UI component subscribes to prophet event updates that
+        affect the props of that component. It then triggers the
+        dynamic update of the wrapped UI component in response to
+        such events.
 
         @focus {any} focus  the focus of the component`,
     isEnabled: true,
@@ -283,12 +312,12 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     ]) }),
   }));
 
-  createLensRoleSymbol("uiComponentLens", () => ({
+  createSlotSymbol("uiComponentLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing the focus via the UIComponent
-        role sequence. UIComponent is an internal fabric base class
-        and responsible for connecting the lens system into the React
-        implementation.
+    description: `Slot for viewing the focus via the UIComponent lens
+        slot sequence. UIComponent is an internal fabric component base
+        class and responsible for connecting the lens system into
+        the React implementation.
 
         @focus {string|Error|Object} focus  the focus of the component`,
     isEnabled: true,
@@ -301,10 +330,11 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
   }));
 
 
-  createLensRoleSymbol("firstEnabledDelegateLens", () => ({
+  createSlotSymbol("firstEnabledDelegateLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing the focus via the first enabled
-        role in the props.delegate of the current fabric component.
+    description: `Slot for viewing the focus via the first enabled
+        lens listed in the props.delegate of the current fabric
+        component.
 
         @focus {string|Error|Object} focus  the focus of the component`,
     isEnabled: (u, component) => (component.props.delegate !== undefined),
@@ -313,10 +343,10 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     }
   }));
 
-  createLensRoleSymbol("loadedLens", () => ({
+  createSlotSymbol("loadedLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing the focus via the
-        .renderLoaded method of the current fabric component.
+    description: `Slot for viewing the focus via the .renderLoaded
+        fabric method of the current component.
 
         @focus {string|Error|Object} focus  the focus of the component`,
     isEnabled: true,
@@ -327,9 +357,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
   // Content lenses
 
-  createLensRoleSymbol("undefinedLens", () => ({
+  createSlotSymbol("undefinedLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing an undefined focus.`,
+    description: `Slot for viewing an undefined focus.`,
     isEnabled: (focus) => (focus === undefined),
     rootValue: ({ delegate: [
       Valaa.Lens.instrument(
@@ -338,34 +368,34 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     ] }),
   }));
 
-  createLensRoleSymbol("nullLens", () => ({
+  createSlotSymbol("nullLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a null focus.`,
+    description: `Slot for viewing a null focus.`,
     isEnabled: (focus) => (focus === null),
     rootValue: "",
   }));
 
-  createLensRoleSymbol("lens", () => ({
+  createSlotSymbol("lens", () => ({
     type: "Lens",
-    description: `Lens role for explicitly viewing the focus of
-        a fully loaded component. This role is always rendered after
-        focus and all props are active and loaded but only when focus
-        is valid. As this role has no default root value it is only
-        used if the creator of the current component has explicitly
-        specified this role.
+    description: `Slot for viewing the focus of a fully loaded
+        component. This slow is undefined by default. If a lens is
+        placed into this slot it is rendered after focus and all
+        props are loaded and activated but only if the focus is valid.
+        The focus is valid if it is not a resource or if it is
+        an active Resource (not unavailable or destroyed).
 
         @focus {Object} focus  the focus of the component.`,
     isEnabled: true,
     rootValue: undefined,
   }));
 
-  createLensRoleSymbol("resourceLens", () => ({
+  createSlotSymbol("resourceLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing the focused Resource via
-        the connection state lens role sequence. Delegates the viewing
-        to a lens role based on whether the focus is is inactive,
+    description: `Slot for viewing the focused Resource via the
+        connection state lens slot sequence. Delegates the viewing
+        to a lens slot based on whether the focus is is inactive,
         activating, active, destroyer or unavailable.
-        Note: This lens role will initiate the activation of the focus!
+        Note: This lens slot will initiate the activation of the focus!
 
         @focus {Resource} focus  the Resource focus.`,
     // TODO(iridian, 2019-03): Is this actually correct? Semantically
@@ -381,46 +411,47 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     ] }),
   }));
 
-  createLensRoleSymbol("activeLens", () => ({
+  createSlotSymbol("activeLens", () => ({
     type: "Lens",
-    description: `Lens role for explitlty viewing an active focused
-        Resource.
+    description: `Slot for viewing an active focused Resource.
 
         @focus {Object} focus  the active Resource focus.`,
     isEnabled: (focus?: Vrapper) => focus && focus.isActive(),
     rootValue: Valaa.Lens.focusPropertyLens,
   }));
 
-  createLensRoleSymbol("lensProperty", () => ({
+  createSlotSymbol("lensProperty", () => ({
     type: "(string | string[])",
-    description: `Lens role for the name or array of property names that are
-        searched from a Resource when looking for a property lens.
-        This role is shared by all property lenses.`,
+    description: `Slot which contains the property name (or array of
+        names) that is retrieved from a Resource to be used a property
+        lens. This slot is used by all lens property lenses as the
+        default fallback property name.`,
   }));
 
-  _createLensPropertyRoles("focusLensProperty", ["FOCUS_LENS"],
+  _createLensPropertySlots("focusLensProperty", ["FOCUS_LENS"],
       "focusPropertyLens", "lensPropertyNotFoundLens");
-  _createLensPropertyRoles("delegateLensProperty", ["DELEGATE_LENS"],
+  _createLensPropertySlots("delegateLensProperty", ["DELEGATE_LENS"],
       "delegatePropertyLens", "notLensResourceLens");
 
-  function _createLensPropertyRoles (lensPropertyRoleName, defaultLensNames, propertyLensRoleName,
-      notFoundName) {
-    const roleSymbol = createLensRoleSymbol(lensPropertyRoleName, () => ({
+  function _createLensPropertySlots (specificLensPropertySlotName, defaultLensProperties,
+      propertyLensName, notFoundName) {
+    const slotSymbol = createSlotSymbol(specificLensPropertySlotName, () => ({
       type: "(string | string[])",
-      description: `Lens role for the name or array of property names
-          that are searched from the Resource focus when resolving the
-          *${propertyLensRoleName}* role.`,
+      description: `Slot which contains the property name that is
+          searched from the Resource focus when resolving the
+          *${propertyLensName}* lens. Can be an array of property names
+          in which case they are searched in order and the first
+          property with not-undefined value is selected.`,
       isEnabled: undefined,
-      rootValue: defaultLensNames,
+      rootValue: defaultLensProperties,
     }));
 
-    createLensRoleSymbol(propertyLensRoleName, () => ({
+    createSlotSymbol(propertyLensName, () => ({
       type: "Lens",
-      description: `Lens role for viewing the focused Resource via
-          a *property lens* provided by the Resource itself. By default
-          searches the focused Resource for a property with the name
-          specified by props.${lensPropertyRoleName} or
-          context[Valaa.Lens.${lensPropertyRoleName}].
+      description: `Slot for viewing the focused Resource via
+          a *property lens* read from the focus Resource itself. By
+          default searches the focused Resource for a property with the
+          name specified in slot '${specificLensPropertySlotName}'.
           If no lens property is found falls back to searching property
           with name props.lensProperty or context[Valaa.Lens.lensProperty].
           The props/context property name can also be an array, in which
@@ -431,17 +462,17 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
           @focus {Object} focus  the Resource to search the lens from.`,
       isEnabled: (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
-      rootValue: function propertyLensRoleNameGetter (focus: any, component: UIComponent,
-          lensRoleName: string) {
+      rootValue: function propertyLensNameGetter (focus: any, component: UIComponent,
+          currentSlotName: string) {
         if (component.props.lensName) {
           console.error("DEPRECATED: props.lensName\n\tprefer: props.lensProperty",
               "\n\tlensName:", JSON.stringify(component.props.lensName),
               "\n\tin component:", component.debugId(), component);
         }
         const lensPropertyNames = [].concat(
-            component.props[lensPropertyRoleName]
-                || component.getUIContextValue(roleSymbol)
-                || component.context[lensPropertyRoleName] || [],
+            component.props[specificLensPropertySlotName]
+                || component.getUIContextValue(slotSymbol)
+                || component.context[specificLensPropertySlotName] || [],
             component.props.lensName || [], // Deprecated.
             component.props.lensProperty
                 || component.getUIContextValue(Valaa.Lens.lensProperty)
@@ -455,7 +486,8 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
             vProperty = focus.get(VALEK.property(propertyName));
           }
           if (vProperty) {
-            component.bindNewKuerySubscription(`props_${lensPropertyRoleName}_${lensRoleName}`,
+            component.bindNewKuerySubscription(`props_${specificLensPropertySlotName}_${
+                currentSlotName}`,
                 vProperty, "value", { scope: component.getUIContext(), noImmediateRun: true },
                 () => component.forceUpdate());
             const propertyValue = vProperty.extractValue();
@@ -463,7 +495,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
           }
         }
         /*
-        console.error("Can't find resource lens props:", lensPropertyRoleName, roleSymbol,
+        console.error("Can't find resource lens props:", specificLensPropertySlotName, slotSymbol,
             "\n\tnames:", lensPropertyNames,
             "\n\tcomponent:", component,
             "\n\tfocus:", focus);
@@ -476,7 +508,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
   // ValaaScope lenses
 
-  createLensRoleSymbol("scopeChildren", () => ({
+  createSlotSymbol("scopeChildren", () => ({
     type: "any",
     description: `The child element(s) of the innermost enclosing
         ValaaScope-like parent component.`,
@@ -484,9 +516,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
 
   // Instance lenses
 
-  createLensRoleSymbol("unframedLens", () => ({
+  createSlotSymbol("unframedLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a ValaaScope which has not
+    description: `Slot for viewing a ValaaScope which has not
         yet loaded its lens frame.`,
     isEnabled: (focus, component) => !component.state || (component.state.scopeFrame === undefined),
     rootValue: function renderUnframed () {
@@ -494,40 +526,40 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     },
   }));
 
-  createLensRoleSymbol("instanceLens", () => ({
+  createSlotSymbol("instanceLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing the focus through an instance lens.`,
+    description: `Slot for viewing the focus through an instance lens.`,
     isEnabled: (focus, component) => component.props.instanceLensPrototype,
-    rootValue: function renderInstance (focus, component, lensRoleName) {
+    rootValue: function renderInstance (focus, component, currentSlotName) {
       return thenChainEagerly(
           component.state.scopeFrame, [
             (scopeFrame => {
               if ((scopeFrame == null) || !(scopeFrame instanceof Vrapper)) return "";
               if (!scopeFrame.hasInterface("Scope")) return scopeFrame;
-              const instanceRoleName = `instance-${lensRoleName}`;
+              const instanceSlotName = `instance-${currentSlotName}`;
               const instanceLens = component.getUIContextValue(Valaa.Lens.instancePropertyLens)(
-                  scopeFrame, component, instanceRoleName);
+                  scopeFrame, component, instanceSlotName);
               return (instanceLens != null) ? instanceLens : scopeFrame;
             }),
           ]);
     },
   }));
 
-  _createLensPropertyRoles("instanceLensProperty", ["INSTANCE_LENS"], "instancePropertyLens");
+  _createLensPropertySlots("instanceLensProperty", ["INSTANCE_LENS"], "instancePropertyLens");
 
-  createLensRoleSymbol("instanceLensPrototype", () => ({
+  createSlotSymbol("instanceLensPrototype", () => ({
     type: "Resource",
     description: `Lens frame prototype Resource. Only valid when given as component props.`,
   }));
 
-  createLensRoleSymbol("scopeFrameResource", () => ({
+  createSlotSymbol("scopeFrameResource", () => ({
     type: "Resource",
     description: `Current innermost enclosing scope frame which is also
         a Resource. Used as the owner for any scope frames created for
         any of its child components.`,
   }));
 
-  createLensRoleSymbol("obtainScopeFrame", () => ({
+  createSlotSymbol("obtainScopeFrame", () => ({
     type: "(prototype: Resource, owner: Resource, focus: any, lensName: string): Resource",
     description: `Returns an existing or creates a new Resource or object to be
         used as the scope frame for a ValaaScope component. This scope
@@ -680,144 +712,121 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     }
   }));
 
-  createLensRoleSymbol("lensAuthorityProperty", () => ({
+  createSlotSymbol("lensAuthorityProperty", () => ({
     type: "(string)",
-    description: `Lens role for a property name that is used when searching for an
-        authority URI string.
-        This property will be searched for from a lens instance prototype
-        or a Resource focus when obtaining a lens frame. If found the
-        authority URI will be used for the lens partition. If the
-        partition didn't already exist new lens partition is created in
-        that authority URI with a new scope frame resource as its
-        partition root.`,
+    description: `Slot which contains the property name that is used
+        when searching for an authority URI string.
+        This property will be searched for from a lens instance
+        prototype or a Resource focus when obtaining a lens frame.
+        If found the authority URI will be used for the lens partition.
+        If the partition didn't already exist new lens partition is
+        created in that authority URI with a new scope frame resource
+        as its partition root.`,
     isEnabled: undefined,
     rootValue: "LENS_AUTHORITY",
   }));
 
-  createLensRoleSymbol("shadowLensPartitionRoot", () => ({
+  createSlotSymbol("shadowLensPartitionRoot", () => ({
     type: "(Resource | null)",
-    description: `Lens role for the resource which is the root resource of
-        the current a shadow lens partition. A shadow lens partition is
-        the partition which was created to contain lens state for
-        a particular focus resource (which is found in
-        Valaa.Lens.shadowedFocus).`,
+    description: `Slot which contains the resource that is the root
+        resource of the current shadow lens partition. A shadow lens
+        partition is the partition which was created to contain lens
+        states for a particular focus resource. This focused resource
+        is maintained in slot 'shadowedFocus'.`,
   }));
 
-  createLensRoleSymbol("shadowedFocus", () => ({
+  createSlotSymbol("shadowedFocus", () => ({
     type: "(Resource | null)",
-    description: `Lens role for a partition that is being shadowed by a shadow
-        lens partition (which is found in
-        Valaa.Lens.shadowLensPartitionRoot). This role is used to detect
-        if a particular focus is already being shadowed in which case no
-        new shadow partition will needlessly be created.`,
+    description: `Slot which contains a resource that is being shadowed
+        by a shadow lens partition (the root resource of this partition
+        is stored in slot 'shadowLensPartitionRoot'). This slot is used
+        to detect if a particular focus is already being shadowed in
+        which case no new shadow partition will needlessly be created.`,
   }));
 
-  createLensRoleSymbol("shadowLensAuthority", () => ({
+  createSlotSymbol("shadowLensAuthority", () => ({
     type: "(string | null)",
-    description: `Lens role for the default lens authority URI for scope frames
-        which have a partition root Resource as their focus. Used when
-        a lens authority is not defined via other means, such as
-        an explicit instance or focus lens authority property.`,
+    description: `Slot which contains the default lens authority URI
+        for scope frames which have a partition root Resource as their
+        focus. Used when a lens authority is not explicitly provided
+        via property stored 'lensAuthorityProperty' of the instance or
+        of the focus.`,
     isEnabled: undefined,
     rootValue: "valaa-memory:",
-  }));
-
-  // User-definable catch-all lenses
-
-  createLensRoleSymbol("loadingLens", () => ({
-    type: "Lens",
-    description: `A catch-all lens role for viewing a description of a
-        dependency which is still being loaded.
-        Unassigned by default; assign a lens to this role to have all the
-        *default* implementations of all other loading -like roles
-        delegate to this role (instead of using their own default lens).
-
-        @focus {Object} component  an object description of the dependency being loaded`,
-  }));
-
-  createLensRoleSymbol("loadingFailedLens", () => ({
-    type: "Lens",
-    description: `A catch-all lens role for viewing a description of a
-        dependency which has failed to load.
-        Unassigned by default; assign a lens to this role to have all the
-        *default* implementations of all other loading-failed -like roles
-        delegate to this role (instead of using their own default lens).
-
-        @focus {string|Error|Object} reason  the explanation of the loading failure`,
   }));
 
   // Main component lens sequence and failure lenses
 
   const commonMessageRows = [
     <div {..._lensChain}>
-      <span {..._key}>Lens role delegation:</span>
-      <span {..._value}>{niceActiveRoleNames}</span>
+      <span {..._key}>Lens slot delegation:</span>
+      <span {..._value}>{niceActiveSlotNames}</span>
     </div>,
     <div {..._component}>
       <span {..._key}>Containing component:</span>
       <span {..._value}>
-        {Valaa.Lens.instrument(Valaa.Lens.parentComponentLens, Valaa.Lens.focusDetailLens)}
+        {Valaa.Lens.instrument(parentComponentLens, focusDetailLens)}
       </span>
     </div>,
   ];
 
-  createLensRoleSymbol("disabledLens", () => ({
+  createSlotSymbol("disabledLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing an explicitly disabled component.
+    description: `Slot for viewing an explicitly disabled component.
 
         @focus {string|Error|Object} reason  a description of why the component is disabled.`,
     isEnabled: (u, component) => ((component.state || {}).uiContext === undefined),
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>Component is disabled; focus and context are not available.</div>
         <div {..._parameter}>
           <span {..._key}>Disable reason:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("pendingLens", () => ({
+  createSlotSymbol("pendingLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a description of a generic dependency
-        which is a pending promise. If the lens assigned to this role
+    description: `Slot for viewing a description of a generic dependency
+        which is a pending promise. If the lens placed to this slot
         returns a promise then 'internalErrorLens' is displayed instead.
 
         @focus {Object} dependency  a description object of the pending dependency.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingLens,
+      loadingLens,
       <div {..._lensMessageLoadingProps}>
       <div {..._message}>Waiting for a pending dependency Promise to resolve.</div>
       <div {..._parameter}>
         <span {..._key}>Dependency:</span>
-        <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+        <span {..._value}>{focusDetailLens}</span>
       </div>
       {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("failedLens", () => ({
+  createSlotSymbol("failedLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a generic lens Promise failure.
+    description: `Slot for viewing a generic lens Promise failure.
 
         @focus {string|Error|Object} reason  a description of why the lens Promise failed.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
           Render Error: Lens Promise failed.
-          {Valaa.Lens.toggleableErrorDetailLens}
+          {toggleableErrorDetailLens}
         </div>
         <div {..._parameter}>
           <span {..._key}>Lens:</span>
           <span {..._value}>
-            {Valaa.Lens.instrument(error => error.lens, Valaa.Lens.focusDetailLens)}
+            {Valaa.Lens.instrument(error => error.lens, focusDetailLens)}
           </span>
         </div>
         {commonMessageRows}
@@ -825,43 +834,43 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     ] }),
   }));
 
-  createLensRoleSymbol("pendingConnectionsLens", () => ({
+  createSlotSymbol("pendingConnectionsLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a description of partition
+    description: `Slot for viewing a description of partition
         connection(s) that are being acquired.
 
         @focus {Object[]} partitions  the partition connection(s) that are being acquired.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingLens,
+      loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Acquiring partition connection(s).</div>
         <div {..._parameter}>
           <span {..._key}>Partitions:</span>
-          <span {..._value}>{Valaa.Lens.focusDescriptionLens}</span>
+          <span {..._value}>{focusDescriptionLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("failedConnectionsLens", () => ({
+  createSlotSymbol("failedConnectionsLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing partition connection failure(s).
+    description: `Slot for viewing partition connection failure(s).
 
         @focus {string|Error|Object} reason  a description of why the connection failed.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
           Render Error: Optimistic Partition connection failed.
-          {Valaa.Lens.toggleableErrorDetailLens}
+          {toggleableErrorDetailLens}
         </div>
         <div {..._parameter}>
           <span {..._key}>Partition:</span>
           <span {..._value}>
-            {Valaa.Lens.instrument(error => error.resource, Valaa.Lens.focusDescriptionLens)}
+            {Valaa.Lens.instrument(error => error.resource, focusDescriptionLens)}
           </span>
         </div>
         {commonMessageRows}
@@ -869,127 +878,127 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     ] }),
   }));
 
-  createLensRoleSymbol("pendingActivationLens", () => ({
+  createSlotSymbol("pendingActivationLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a description of the focused
+    description: `Slot for viewing a description of the focused
         resource that is pending activation.
 
         @focus {Object[]} resource  the resource that is being activated.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingLens,
+      loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Activating resource.</div>
         <div {..._parameter}>
           <span {..._key}>Resource:</span>
-          <span {..._value}>{Valaa.Lens.focusDescriptionLens}</span>
+          <span {..._value}>{focusDescriptionLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("failedActivationLens", () => ({
+  createSlotSymbol("failedActivationLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing resource activation failure(s).
+    description: `Slot for viewing resource activation failure(s).
 
         @focus {string|Error|Object} reason  a description of why the resource activation failed.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
           Render Error: Resource activation failed.
-          {Valaa.Lens.toggleableErrorDetailLens}
+          {toggleableErrorDetailLens}
         </div>
         <div {..._parameter}>
           <span {..._key}>Resource:</span>
           <span {..._value}>
-            {Valaa.Lens.instrument(error => error.resource, Valaa.Lens.focusDescriptionLens)}
+            {Valaa.Lens.instrument(error => error.resource, focusDescriptionLens)}
           </span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
-  createLensRoleSymbol("inactiveLens", () => ({
+  createSlotSymbol("inactiveLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a focused inactive Resource.
+    description: `Slot for viewing a focused inactive Resource.
 
         @focus {Object} focus  the inactive Resource focus.`,
     isEnabled: (focus?: Vrapper) => focus && focus.isInactive(),
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
-        <div {..._message}>Focus {Valaa.Lens.focusDescriptionLens} is inactive.</div>
+        <div {..._message}>Focus {focusDescriptionLens} is inactive.</div>
         <div {..._parameter}>
           <span {..._key}>Focus resource info:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("downloadingLens", () => ({
+  createSlotSymbol("downloadingLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a description of a focused
+    description: `Slot for viewing a description of a focused
         Media whose content is being downloaded.
 
         @focus {Media} media  the Media being downloaded.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingLens,
+      loadingLens,
       <div {..._lensMessageLoadingProps}>
-        <div {..._message}>Downloading dependency {Valaa.Lens.focusDetailLens}.</div>
+        <div {..._message}>Downloading dependency {focusDetailLens}.</div>
         <div {..._parameter}>
           <span {..._key}>Of Media:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("pendingMediaInterpretationLens", () => ({
+  createSlotSymbol("pendingMediaInterpretationLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a description of a focused
+    description: `Slot for viewing a description of a focused
         Media which is being interpreted (ie. downloaded, decoded and
         integrated).
 
         @focus {Media} media  the Media being interpreted.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingLens,
+      loadingLens,
       <div {..._lensMessageLoadingProps}>
-        <div {..._message}>Downloading dependency {Valaa.Lens.focusDetailLens}.</div>
+        <div {..._message}>Downloading dependency {focusDetailLens}.</div>
         <div {..._parameter}>
           <span {..._key}>Of Media:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("failedMediaInterpretationLens", () => ({
+  createSlotSymbol("failedMediaInterpretationLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing the focused failure on why
+    description: `Slot for viewing the focused failure on why
         a particular media interpretation could not be rendered.
 
         @focus {string|Error|Object} reason  interpretation render failure reason.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>
           Render Error: Failed to render Media interpretation.
-          {Valaa.Lens.toggleableErrorDetailLens}
+          {toggleableErrorDetailLens}
         </div>
         <div {..._parameter}>
           <span {..._key}>Of Media:</span>
           <span {..._value}>
-            {Valaa.Lens.instrument(error => error.media, Valaa.Lens.focusDescriptionLens)}
+            {Valaa.Lens.instrument(error => error.media, focusDescriptionLens)}
           </span>
         </div>
         <div {..._parameter}>
@@ -1003,9 +1012,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     ] }),
   }));
 
-  createLensRoleSymbol("unrenderableMediaInterpretationLens", () => ({
+  createSlotSymbol("unrenderableMediaInterpretationLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a focused media with an
+    description: `Slot for viewing a focused media with an
         interpretation that cannot or should not be rendered (such as
         octet stream, complex native object or an undefined value).
 
@@ -1014,9 +1023,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     rootValue: Valaa.Lens.failedMediaInterpretationLens,
   }));
 
-  createLensRoleSymbol("mediaInterpretationErrorLens", () => ({
+  createSlotSymbol("mediaInterpretationErrorLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a focused error that was
+    description: `Slot for viewing a focused error that was
         encountered during media interpretation.
 
         @focus {string|Error|Object} reason  interpretation error.`,
@@ -1024,84 +1033,84 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     rootValue: Valaa.Lens.failedMediaInterpretationLens,
   }));
 
-  createLensRoleSymbol("kueryingFocusLens", () => ({
+  createSlotSymbol("kueryingFocusLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a component with an unfinished
+    description: `Slot for viewing a component with an unfinished
         focus kuery.
 
         @focus {Object} focus  the focus kuery.`,
     isEnabled: (focus) => (focus === undefined),
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingLens,
+      loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Waiting for focus kuery to complete.</div>
         <div {..._parameter}>
           <span {..._key}>Focus:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("kueryingPropsLens", () => ({
+  createSlotSymbol("kueryingPropsLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a description of one or more
+    description: `Slot for viewing a description of one or more
         unfinished props kueries.
 
         @focus {Object} props  the unfinished props kueries.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingLens,
+      loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Waiting for props kueries to complete.</div>
         <div {..._parameter}>
           <span {..._key}>Props kueries:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("pendingPropsLens", () => ({
+  createSlotSymbol("pendingPropsLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing the description of props which
+    description: `Slot for viewing the description of props which
         are pending Promises.
 
         @focus {Object} props  the pending props Promises.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingLens,
+      loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Waiting for pending props Promise(s) to resolve.</div>
         <div {..._parameter}>
           <span {..._key}>Props promises:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("failedPropsLens", () => ({
+  createSlotSymbol("failedPropsLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a props Promise failure.
+    description: `Slot for viewing a props Promise failure.
 
         @focus {string|Error|Object} reason  props Promise failure reason.`,
     isEnabled: true,
     // TODO(iridian, 2019-02): Limit the props names to only the failing props.
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
           Render Error: props Promise failure.
-          {Valaa.Lens.toggleableErrorDetailLens}
+          {toggleableErrorDetailLens}
         </div>
         <div {..._parameter}>
           <span {..._key}>Props (all) names:</span>
           <span {..._value}>
-            {Valaa.Lens.instrument(error => error.propsNames, Valaa.Lens.focusDetailLens)}
+            {Valaa.Lens.instrument(error => error.propsNames, focusDetailLens)}
           </span>
         </div>
         {commonMessageRows}
@@ -1109,43 +1118,43 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     ] }),
   }));
 
-  createLensRoleSymbol("pendingChildrenLens", () => ({
+  createSlotSymbol("pendingChildrenLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a description of pending children Promise.
+    description: `Slot for viewing a description of pending children Promise.
 
         @focus {Object} children  the pending children Promise.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingLens,
+      loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>  Waiting for a pending children Promise to resolve.</div>
         <div {..._parameter}>
           <span {..._key}>Children:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("failedChildrenLens", () => ({
+  createSlotSymbol("failedChildrenLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a child Promise failure.
+    description: `Slot for viewing a child Promise failure.
 
         @focus {string|Error|Object} reason  child Promise failure reason.`,
     isEnabled: true,
     // TODO(iridian, 2019-02): Add a grand-child path description to the errors.
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
           Render Error: Child Promise failure.
-          {Valaa.Lens.toggleableErrorDetailLens}
+          {toggleableErrorDetailLens}
         </div>
         <div {..._parameter}>
           <span {..._key}>Children:</span>
           <span {..._value}>
-            {Valaa.Lens.instrument(error => error.children, Valaa.Lens.focusDetailLens)}
+            {Valaa.Lens.instrument(error => error.children, focusDetailLens)}
           </span>
         </div>
         {commonMessageRows}
@@ -1153,9 +1162,9 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     ] }),
   }));
 
-  createLensRoleSymbol("activatingLens", () => ({
+  createSlotSymbol("activatingLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing an activating Resource.
+    description: `Slot for viewing an activating Resource.
 
         @focus {Object} focus  the activating Resource focus.`,
     isEnabled: (focus?: Vrapper) => focus && focus.isActivating(),
@@ -1166,87 +1175,87 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
             .then(() => undefined)); // undefined triggers re-render
         return undefined;
       },
-      Valaa.Lens.loadingLens,
+      loadingLens,
       <div {..._lensMessageLoadingProps}>
-        <div {..._message}>Activating focus {Valaa.Lens.focusDescriptionLens}.</div>
+        <div {..._message}>Activating focus {focusDescriptionLens}.</div>
         <div {..._parameter}>
           <span {..._key}>Focus resource info:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("inactiveLens", () => ({
+  createSlotSymbol("inactiveLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing an inactive Resource.
+    description: `Slot for viewing an inactive Resource.
 
         @focus {Object} focus  the inactive Resource focus.`,
     isEnabled: (focus?: Vrapper) => focus && focus.isInactive(),
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
-        <div {..._message}>Focus {Valaa.Lens.focusDescriptionLens} is inactive.</div>
+        <div {..._message}>Focus {focusDescriptionLens} is inactive.</div>
         <div {..._parameter}>
           <span {..._key}>Focus resource info:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("unavailableLens", () => ({
+  createSlotSymbol("unavailableLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing an unavailable Resource.
+    description: `Slot for viewing an unavailable Resource.
 
         @focus {Object} focus  the unavailable Resource focus.`,
     isEnabled: (focus?: Vrapper) => focus && focus.isUnavailable(),
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
-        <div {..._message}>Focus {Valaa.Lens.focusDescriptionLens} is unavailable.</div>
+        <div {..._message}>Focus {focusDescriptionLens} is unavailable.</div>
         <div {..._parameter}>
           <span {..._key}>Focus resource info:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("destroyedLens", () => ({
+  createSlotSymbol("destroyedLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a destroyed Resource.
+    description: `Slot for viewing a destroyed Resource.
 
         @focus {Object} focus  the destroyed Resource focus.`,
     isEnabled: (focus?: Vrapper) => focus && focus.isDestroyed(),
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
-        <div {..._message}>Focus {Valaa.Lens.focusDescriptionLens} has been destroyed.</div>
+        <div {..._message}>Focus {focusDescriptionLens} has been destroyed.</div>
         <div {..._parameter}>
           <span {..._key}>Focus resource info:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("lensPropertyNotFoundLens", () => ({
+  createSlotSymbol("lensPropertyNotFoundLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a description of an active Resource
+    description: `Slot for viewing a description of an active Resource
         focus which does not have a requested lens property.
 
         @focus {Object} focus  the active Resource focus.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>
-          Cannot find a lens property from the active focus {Valaa.Lens.focusDescriptionLens}.
+          Cannot find a lens property from the active focus {focusDescriptionLens}.
         </div>
         <div {..._parameter}>
           <span {..._key}>focusLensProperty:</span>
@@ -1262,7 +1271,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         </div>
         <div {..._parameter}>
           <span {..._key}>Focus detail:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         <div {..._parameter}>
           <span {..._key}>Focus properties:</span>
@@ -1275,19 +1284,20 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     ] }),
   }));
 
-  createLensRoleSymbol("notLensResourceLens", () => ({
+  createSlotSymbol("notLensResourceLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing a Resource which cannot be used as a lens.
+    description: `Slot for viewing a Resource which cannot be used as a lens.
 
         @focus {Object} nonLensResource  the non-lens-able Resource.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>
-          Resource {Valaa.Lens.focusDescriptionLens} cannot be used as a lens.
-          This is because it is not a valid lens Media file and it does not have a lens property
-          that is listed in either delegateLensProperty or lensProperty roles.
+          Resource {focusDescriptionLens} cannot be used as
+          a lens. This is because it is not a valid lens Media file and
+          it does not have a lens property that is listed in either
+          %27delegateLensProperty%27 or %27lensProperty%27 slots.
         </div>
         <div {..._parameter}>
           <span {..._key}>delegateLensProperty:</span>
@@ -1303,7 +1313,7 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
         </div>
         <div {..._parameter}>
           <span {..._key}>Resource detail:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         <div {..._parameter}>
           <span {..._key}>Resource properties:</span>
@@ -1316,43 +1326,42 @@ export default function injectLensObjects (Valaa: Object, rootScope: Object,
     ] }),
   }));
 
-  createLensRoleSymbol("arrayNotIterableLens", () => ({
+  createSlotSymbol("arrayNotIterableLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing an valaaScope props.array which is not
+    description: `Slot for viewing an valaaScope props.array which is not
         an iterable.
 
         @focus {Object} nonArray  the non-iterable value.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
-        <div {..._message}>props.array {Valaa.Lens.focusDescriptionLens} is not an iterable.</div>
+        <div {..._message}>props.array {focusDescriptionLens} is not an iterable.</div>
         <div {..._parameter}>
           <span {..._key}>props.array:</span>
-          <span {..._value}>{Valaa.Lens.focusDetailLens}</span>
+          <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
       </div>
     ] }),
   }));
 
-  createLensRoleSymbol("invalidElementLens", () => ({
+  createSlotSymbol("invalidElementLens", () => ({
     type: "Lens",
-    description: `Lens role for viewing an a description of an invalid UI element.
+    description: `Slot for viewing an a description of an invalid UI element.
 
         @focus {Object} description  string or object description.`,
     isEnabled: true,
     rootValue: ({ delegate: [
-      Valaa.Lens.loadingFailedLens,
+      loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>
-            {Valaa.Lens.instrument(
-                Valaa.Lens.parentComponentLens, Valaa.Lens.focusDetailLens)}
+            {Valaa.Lens.instrument(parentComponentLens, focusDetailLens)}
             returned an invalid element.
         </div>
         <div {..._parameter}>
           <span {..._key}>Faults:</span>
-          <span {..._value}>{Valaa.Lens.focusDumpLens}</span>
+          <span {..._value}>{focusDumpLens}</span>
         </div>
         {commonMessageRows}
       </div>

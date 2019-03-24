@@ -4,7 +4,7 @@ exports.describe = "Configure an in-use 'toolset-rest-api-gateway-plugin' for a 
 exports.introduction = `${exports.describe}.
 
 This script makes the toolset 'toolset-rest-api-gateway-plugin' available for
-grabbing by repositories with valaa type 'worker'.`;
+grabbing by repositories with valos.type 'worker'.`;
 
 exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
     && "Can't configure 'toolset-rest-api-gateway-plugin': not inUse or toolset config missing";

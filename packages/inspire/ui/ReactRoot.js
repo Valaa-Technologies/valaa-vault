@@ -9,10 +9,10 @@ import Vrapper, { getImplicitMediaInterpretation } from "~/engine/Vrapper";
 
 import { uiComponentProps, VSSStyleSheetSymbol } from "~/inspire/ui/UIComponent";
 import { unthunkRepeat } from "~/inspire/ui/thunk";
-import ValaaScope from "~/inspire/ui/ValaaScope";
+import Valoscope from "~/inspire/ui/Valoscope";
 import { VS } from "~/engine/VALEK";
 
-import { derivedId, dumpObject, invariantifyString, traverse, wrapError, valaaHash } from "~/tools";
+import { derivedId, dumpObject, invariantifyString, traverse, wrapError, valosHash } from "~/tools";
 
 jss.setup(preset());
 
@@ -91,7 +91,7 @@ export default class ReactRoot extends React.Component {
   getVSSSheet = (context: Object, user: Object) => {
     let sheetId = _sheetIds.get(context);
     if (!sheetId) {
-      sheetId = valaaHash(context);
+      sheetId = valosHash(context);
       _sheetIds.set(context, sheetId);
     }
     let sheet = this._vssSheetManager.get(sheetId);
@@ -136,10 +136,10 @@ export default class ReactRoot extends React.Component {
 
   async _createRootContext (vViewFocus: Vrapper, viewName: string) {
     const rootContext = Object.create(vViewFocus.engine.getLexicalScope());
-    const Valaa = rootContext.Valaa;
+    const valos = rootContext.valos;
     rootContext.frame = await this._obtainUIRootFrame(
-        rootContext[Valaa.Lens.shadowLensAuthority], vViewFocus, viewName);
-    rootContext[Valaa.Lens.scopeFrameResource] = rootContext.frame;
+        rootContext[valos.Lens.shadowLensAuthority], vViewFocus, viewName);
+    rootContext[valos.Lens.scopeFrameResource] = rootContext.frame;
     rootContext.VSS = this._createVSS(vViewFocus.engine);
     rootContext.VS = VS;
     return rootContext;
@@ -231,13 +231,13 @@ export default class ReactRoot extends React.Component {
     if (!vViewFocus || !this._rootContext) return null;
     return (
       <div style={{ width: "100vw", height: "100vh" }}>
-        <ValaaScope
+        <Valoscope
           {...uiComponentProps({
             name: "root", parentUIContext: this._rootContext, focus: vViewFocus,
           })}
         >
           {this.props.children}
-        </ValaaScope>
+        </Valoscope>
       </div>
     );
   }

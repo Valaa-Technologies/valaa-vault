@@ -1,7 +1,7 @@
 #!/usr/bin/env vlm
 
 exports.command = "init";
-exports.describe = "Initialize the current directory as a Valaa repository from scratch";
+exports.describe = "Initialize the current directory as a ValOS repository from scratch";
 exports.introduction = `${exports.describe}.
 
 This process will walk you through creating and configuring a new
@@ -9,7 +9,7 @@ valma repository in the current working directory from scratch.
 
 Valma init has following interactive phases:
 1. Initialization of package.json via 'yarn init'
-2. Configuration of repository valaa type and domain via 'vlm .configure/.valaa-stanza'
+2. Configuration of repository valos.type and .domain via 'vlm .configure/.valos-stanza'
 3. Addition of new known workshops via 'yarn add -W --dev'
 4. Selection of in-use toolsets from available toolsets via 'vlm .configure/.select-toolsets'
 5. Configuration of in-use toolsets and tools via 'vlm configure'`;
@@ -29,7 +29,7 @@ exports.handler = async (yargv) => {
   const tellIfNoReconfigure = !yargv.reconfigure ? ["(no --reconfigure given)"] : [];
 
   return await _initPackageJSON()
-      && await _selectValaaTypeAndDomain()
+      && await _selectValOSTypeAndDomain()
       && await _addInitialValmaDevDependencies()
       && _configure();
 
@@ -49,7 +49,7 @@ exports.handler = async (yargv) => {
         vlm.info("repository initialization",
 `This phase uses '${vlm.theme.executable("yarn init")}' to initialize package.json via a series of
 interactive questions.
-Valaa repositories use yarn extensively for version, dependency and
+ValOS repositories use yarn extensively for version, dependency and
 script management; ${vlm.theme.path("package.json")} is the central package configuration
 file for yarn (and for npm, for which yarn is an analogue).
 `);
@@ -61,33 +61,33 @@ file for yarn (and for npm, for which yarn is an analogue).
     return true;
   }
 
-  async function _selectValaaTypeAndDomain () {
+  async function _selectValOSTypeAndDomain () {
     let justConfigured = false;
-    while (yargv.reconfigure || !vlm.packageConfig.valaa || justConfigured) {
+    while (yargv.reconfigure || !vlm.packageConfig.valos || justConfigured) {
       const choices = (justConfigured ? ["Confirm", "reconfigure"]
-              : vlm.packageConfig.valaa ? ["Skip", "reconfigure"] : ["Initialize"])
+              : vlm.packageConfig.valos ? ["Skip", "reconfigure"] : ["Initialize"])
           .concat(["help", "quit"]);
       const answer = await vlm.inquire([{
-        message: !vlm.packageConfig.valaa
-            ? "Initialize repository valaa stanza type and domain?"
+        message: !vlm.packageConfig.valos
+            ? "Initialize repository valos stanza type and domain?"
             : `${justConfigured ? "Confirm selection or reconfigure" : "Reconfigure"
-                } valaa stanza: ${JSON.stringify({ ...vlm.packageConfig.valaa })}?`,
+                } valos stanza: ${JSON.stringify({ ...vlm.packageConfig.valos })}?`,
         type: "list", name: "choice", default: choices[0], choices,
       }]);
       if (answer.choice === "Skip") break;
       if (answer.choice === "quit") return false;
       if (answer.choice === "help") {
         vlm.speak();
-        vlm.speak(await vlm.invoke(".configure/.valaa-stanza", ["--show-introduction"]));
+        vlm.speak(await vlm.invoke(".configure/.valos-stanza", ["--show-introduction"]));
         vlm.speak();
         continue;
       }
       if (answer.choice === "Confirm") return true;
       vlm.reconfigure = yargv.reconfigure;
-      await vlm.invoke(".configure/.valaa-stanza", { reconfigure: yargv.reconfigure });
+      await vlm.invoke(".configure/.valos-stanza", { reconfigure: yargv.reconfigure });
       justConfigured = true;
     }
-    vlm.info("Skipped repository valaa type and domain configure.", ...tellIfNoReconfigure);
+    vlm.info("Skipped repository valos type and domain configure.", ...tellIfNoReconfigure);
     return true;
   }
 

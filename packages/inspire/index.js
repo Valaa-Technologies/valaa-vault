@@ -5,12 +5,12 @@
 import "@babel/polyfill";
 import { getURIQueryField } from "~/raem/ValaaURI";
 
-import InspireGateway from "~/inspire/InspireGateway";
+import Gateway from "~/inspire/Gateway";
 import { combineRevelationsLazily } from "~/inspire/Revelation";
 
 import revelationTemplate from "~/inspire/revelation.template";
 
-import { dumpify, dumpObject, Logger, LogEventGenerator, outputError, inBrowser, Valaa }
+import { dumpify, dumpObject, Logger, LogEventGenerator, outputError, inBrowser, valos }
     from "~/tools";
 
 import * as mediaDecoders from "./mediaDecoders";
@@ -25,16 +25,16 @@ const logger = new Logger();
 // TODO(iridian, 2018-12): Oof... this should be moved to @valos/raem
 // plugin initializer. This requires plugin initializers though which
 // don't exist.
-Valaa.getURIQueryField = getURIQueryField;
+valos.getURIQueryField = getURIQueryField;
 
-Valaa.createInspireGateway = function createInspireGateway (...revelations: any[]) {
+valos.createInspireGateway = function createInspireGateway (...revelations: any[]) {
   const inspireBrowserEnvironmentRevelation = {
     gateway: { scribe: {
       getDatabaseAPI: require("~/tools/indexedDB/getBrowserDatabaseAPI").getDatabaseAPI,
     }, },
   };
 
-  const gatewayPromise = Valaa.createGateway({
+  const gatewayPromise = valos.createGateway({
     siteRoot: "/", // TODO(iridian, 2018-12): provide this somehow via index.html
     revelationRoot: window.location.pathname,
   }, ...revelations, inspireBrowserEnvironmentRevelation);
@@ -42,24 +42,24 @@ Valaa.createInspireGateway = function createInspireGateway (...revelations: any[
       document.addEventListener("DOMContentLoaded", () => { resolve(gatewayPromise); }));
 };
 
-export default (Valaa.createGateway = async function createGateway (gatewayOptions: Object = {},
+export default (valos.createGateway = async function createGateway (gatewayOptions: Object = {},
     ...revelations: any) {
   let ret;
   let combinedRevelation;
   const delayedPlugins = [];
   try {
-    Valaa.exportPlugin({ name: "@valos/inspire", mediaDecoders });
-    if (Valaa.gateway) {
-      throw new Error(`Valaa.gateway already exists as ${
-          Valaa.gateway.debugId()}. There can be only one.`);
+    valos.exportPlugin({ name: "@valos/inspire", mediaDecoders });
+    if (valos.gateway) {
+      throw new Error(`valos.gateway already exists as ${
+          valos.gateway.debugId()}. There can be only one.`);
     }
 
-    const gatewayPluginsRevelation = { gateway: { plugins: Valaa.plugins } };
+    const gatewayPluginsRevelation = { gateway: { plugins: valos.plugins } };
 
-    Valaa.plugins = { push (plugin) { delayedPlugins.push(plugin); } };
+    valos.plugins = { push (plugin) { delayedPlugins.push(plugin); } };
 
-    ret = new InspireGateway({ name: "Uninitialized InspireGateway", logger, ...gatewayOptions });
-    Valaa.require = ret.require.bind(ret);
+    ret = new Gateway({ name: "Uninitialized Gateway", logger, ...gatewayOptions });
+    valos.require = ret.require.bind(ret);
 
     ret.clockEvent(1, `gateway.revelations`, `Preparing revelations in environment (${
         String(process.env.NODE_ENV)})`);
@@ -78,19 +78,19 @@ export default (Valaa.createGateway = async function createGateway (gatewayOptio
     ret.clockEvent(1, `gateway.initialize`, `Initializing gateway`);
     await ret.initialize(combinedRevelation);
 
-    Valaa.gateway = ret;
-    ret.warnEvent(`InspireGateway set to window.Valaa.gateway as`, ...dumpObject(ret));
+    valos.gateway = ret;
+    ret.warnEvent(`Gateway set to window.valos.gateway as`, ...dumpObject(ret));
 
     ret.clockEvent(1, `gateway.plugins.delayed.attach`, `Attaching ${delayedPlugins.length
         } delayed second stage plugins`);
     while (delayedPlugins.length) await ret.attachPlugins(delayedPlugins.splice(0));
-    Valaa.plugins = { push (plugin) { ret.attachPlugin(plugin); } };
+    valos.plugins = { push (plugin) { ret.attachPlugin(plugin); } };
 
     ret.clockEvent(1, "gateway.initialized");
     return ret;
   } catch (error) {
     outputError((ret || new LogEventGenerator(logger)).wrapErrorEvent(error,
-            new Error(`createInspireGateway()`),
+            new Error(`createGateway()`),
             "\n\trevelation components:", revelations,
             "\n\tcombined revelation:", combinedRevelation),
         "Exception caught during createGateway");

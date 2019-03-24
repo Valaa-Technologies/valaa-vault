@@ -2,8 +2,7 @@
 import { OrderedMap } from "immutable";
 import { GraphQLObjectType } from "graphql/type";
 
-import { RawId, tryGhostPathFrom } from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL, { RawId, tryGhostPathFrom } from "~/raem/VRL";
 
 import denormalizedFromJS from "~/raem/state/denormalizedFromJS";
 import Transient, { createTransient } from "~/raem/state/Transient";
@@ -28,7 +27,7 @@ export class CreateBard extends Bard {
 }
 
 export class DuplicateBard extends CreateBard {
-  _fieldsToPostProcess: [VRef, string, Object, any][];
+  _fieldsToPostProcess: [VRL, string, Object, any][];
   _duplicationRootId: RawId;
   _duplicationRootGhostHostId: ?RawId;
   _duplicationRootPrototypeId: RawId;
@@ -105,7 +104,7 @@ export function convertLegacyOwnerField (bard: CreateBard, initialState: Object)
       `\n\tprefer: ${bard.passage.type}.initialState.owner`);
   /*
   const actualInitialState = initialState || {};
-  actualInitialState.owner = obtain-VRef(bard.passage.owner.id, bard.passage.owner.property);
+  actualInitialState.owner = obtainVRL(bard.passage.owner.id, bard.passage.owner.property);
   return actualInitialState;
   */
 }
@@ -145,7 +144,7 @@ export function recurseCreateOrDuplicate (bard: CreateBard, actionTypeName: stri
       interfaceType = typeName;
       typeName = bard.schema.inactiveType.name;
     }
-    // Make the objectId available for all VRef connectors within this Bard.
+    // Make the objectId available for all VRL connectors within this Bard.
     bard.setState(bard.state
         .setIn(["TransientFields", rawId], typeName)
         // FIXME(iridian, 2018-12): this breaks abstractions as
@@ -172,7 +171,7 @@ export function recurseCreateOrDuplicate (bard: CreateBard, actionTypeName: stri
 
       if (initialState) {
         bard.fieldsTouched = new Set();
-        // TODO(iridian): Valaa Data coupling processing unimplemented. See schema/Data.js
+        // TODO(iridian): ValOS Data coupling processing unimplemented. See schema/Data.js
         bard.updateCouplings = isResource;
         processUpdate(bard, initialState, handleSets,
             `${bard.passage.type}.processFields.initialState`, bard.objectTransient);
@@ -215,7 +214,7 @@ function _setDefaultFields (bard, mutableTransient: Transient, fieldIntros: Arra
   }
 }
 
-function _connectNonGhostObjectIdGhostPathToPrototype (bard: CreateBard, objectId: VRef) {
+function _connectNonGhostObjectIdGhostPathToPrototype (bard: CreateBard, objectId: VRL) {
   const nonGhostPrototypeId = !objectId.isGhost() && bard.objectTransient.get("prototype");
   let newGhostPath;
   try {

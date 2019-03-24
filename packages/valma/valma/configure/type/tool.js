@@ -33,8 +33,8 @@ different toolsets in a single repository. Because of this all tool
 commands must have an option for '--toolset=@myscope/mytoolset' which
 uses yargs.vlm.toolset as its default value.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "tool")
-    && `Workspace is not a 'tool' (is '${yargs.vlm.getPackageConfig("valaa", "type")}')`;
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "tool")
+    && `Workspace is not a 'tool' (is '${yargs.vlm.getValOSConfig("type")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

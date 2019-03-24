@@ -1,7 +1,7 @@
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
 
-import valaaHash from "~/tools/id/valaaHash";
+import valosHash from "~/tools/id/valosHash";
 import { wrapError } from "~/tools/wrapError";
 
 const dumpify = require("~/tools/dumpify").default;
@@ -48,7 +48,7 @@ export function literalFromValue (value) {
     type,
     value: type === "null" ? null : value,
   };
-  ret.id = valaaHash(ret);
+  ret.id = valosHash(ret);
   return ret;
 }
 

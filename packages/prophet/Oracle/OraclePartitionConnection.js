@@ -142,7 +142,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
       }
       function errorOnOracleConnectionRequestMediaContentForInfo (error) {
         const wrapped = connection.wrapErrorEvent(error, wrap,
-            "\n\tmediaRef:", ...dumpObject(mediaInfo.mediaRef),
+            "\n\tmediaVRL:", ...dumpObject(mediaInfo.mediaVRL),
             "\n\tmediaInfo:", ...dumpObject(mediaInfo));
         if (mediaInfos.length === 1) throw wrapped;
         return Promise.reject(wrapped);

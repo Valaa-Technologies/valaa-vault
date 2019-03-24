@@ -5,7 +5,7 @@ import RAEMTestAPI from "~/raem/test/RAEMTestAPI";
 import TestScriptyThing from "~/script/test/schema/TestScriptyThing";
 
 export default createContentAPI({
-  name: "ValaaScriptTestAPI",
+  name: "ValoscriptTestAPI",
   inherits: [ScriptContentAPI, RAEMTestAPI],
   exposes: [TestScriptyThing],
   inactiveType: ScriptContentAPI.inactiveType,

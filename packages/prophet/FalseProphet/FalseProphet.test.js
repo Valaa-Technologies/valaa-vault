@@ -1,7 +1,7 @@
 // @flow
 
 import { created } from "~/raem/events/index";
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
 
 import {

@@ -2,8 +2,7 @@
 
 import { Iterable } from "immutable";
 
-import ValaaReference from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL from "~/raem/VRL";
 
 import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import { PrototypeOfImmaterialTag } from "~/raem/state/Transient";
@@ -45,8 +44,13 @@ export default Object.freeze({
   "§'": function literal (valker: Valker, head: any, scope: ?Object, [, value]: BuiltinStep) {
     return value;
   },
-  "§ref": function valaaReference (valker: Valker, head: any, scope: ?Object,
-      [, params]: BuiltinStep): VRef {
+  "§vrl": function vrl (valker: Valker, head: any, scope: ?Object,
+      [, params]: BuiltinStep): VRL {
+    return valker.pack(valker.obtainReference(
+        typeof params !== "object" ? params : tryLiteral(valker, head, params, scope),
+        null));
+  },
+  "§ref": function vrl (valker: Valker, head: any, scope: ?Object, [, params]: BuiltinStep): VRL {
     return valker.pack(valker.obtainReference(
         typeof params !== "object" ? params : tryLiteral(valker, head, params, scope),
         null));
@@ -84,7 +88,7 @@ export default Object.freeze({
   "§?": function ternary (valker: Valker, head: any, scope: ?Object,
       [, condition, thenClause, elseClause]: BuiltinStep) {
     const conditionValue = typeof condition === "boolean"
-        ? condition === (typeof head !== "undefined")
+        ? condition === (head !== undefined)
         : valker.advance(head, condition, scope);
     if (scope) scope.__condition__ = conditionValue;
     const resultClause = conditionValue ? thenClause : elseClause;
@@ -114,7 +118,7 @@ export default Object.freeze({
     try {
       return valker.advance(head, expression, scope, true);
     } finally {
-      if (typeof previousIndex === "undefined") delete valker._indent;
+      if (previousIndex === undefined) delete valker._indent;
       else valker._indent = previousIndex;
     }
   },
@@ -168,10 +172,10 @@ export default Object.freeze({
     if (typeof value !== "object") return ["§'", value];
     const eValue = typeof value !== "object" ? value
         : tryLiteral(valker, head, value, scope);
-    if (typeof eValue === "undefined") return ["§void"];
+    if (eValue === undefined) return ["§void"];
     const hostRef = tryHostRef(eValue);
     if (hostRef) {
-      return [`§ref`, hostRef.toJSON()];
+      return [`§vrl`, hostRef.toJSON()];
     }
     return ["§'", eValue];
   },
@@ -180,7 +184,7 @@ export default Object.freeze({
       [, evaluatee]: BuiltinStep) {
     let evaluateeVAKON = typeof evaluatee !== "object" ? evaluatee
         : tryLiteral(valker, head, evaluatee, scope);
-    if (typeof evaluateeVAKON === "undefined") return undefined;
+    if (evaluateeVAKON === undefined) return undefined;
     if (Iterable.isIterable(evaluateeVAKON)) {
       console.warn("§evalk.evaluatee should valk to native VAKON, instead got immutable-js object:",
           evaluateeVAKON, "as evaluatee JSON:", evaluateeVAKON.toJS());
@@ -262,7 +266,7 @@ export default Object.freeze({
       [, object]: BuiltinStep) {
     // TODO(iridian): Now returning false in cases where head is not a Resource. Could throw.
     const transient = valker.trySingularTransient(tryLiteral(valker, head, object, scope));
-    return !transient ? false : (typeof transient[PrototypeOfImmaterialTag] !== "undefined");
+    return !transient ? false : (transient[PrototypeOfImmaterialTag] !== undefined);
   },
 
   "§!": function not (valker: Valker, head: any, scope: ?Object,
@@ -533,7 +537,7 @@ function path_ (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinStep
             break;
           }
         default: // eslint-disable-line no-fallthrough
-          if (typeof pathScope === "undefined") {
+          if (pathScope === undefined) {
             pathScope = !scope ? {} : mustNotMutateScope ? Object.create(scope) : scope;
           }
           stepHead = valker.advance(stepHead, step, pathScope, index + 1 < pathStep.length);
@@ -605,10 +609,14 @@ export function resolveTypeof (valker: Valker, head: any, scope: ?Object,
     [, /* object */, equalTo]: BuiltinStep, packedObject: any) {
   let type = typeof packedObject;
   if ((type === "object") && packedObject) {
-    // FIXME(iridian): This is a mess and definitely broken at the corner cases.
-    // The VRef/packedField etc. system should be streamlined. packedRef is a useful envelope
-    // for the head and could very well be mandatory distinction between Valaa objects and other
-    // types, which it now not quite isn't.
+    // FIXME(iridian): This is a mess and definitely broken at the
+    // corner cases. The VRL/packedField etc. system should be
+    // streamlined. packedRef is a useful envelope for the head and
+    // could very well be mandatory distinction between ValOS objects
+    // and other types, which it now not quite isn't.
+    // TODO(iridian, 2019-03): The [HostRef] symbol is possibly more
+    // useful and generic concept than the packedRef system for
+    // non-sequence heads.
     if (isPackedField(packedObject)) {
       if (packedObject._fieldInfo) {
         type = packedObject._fieldInfo.intro.isResource ? "Resource" : "Data";
@@ -617,7 +625,7 @@ export function resolveTypeof (valker: Valker, head: any, scope: ?Object,
         if (hostRef) type = hostRef.typeof();
         else {
           const id = packedObject._singular.id;
-          type = (id instanceof ValaaReference) ? id.typeof()
+          type = (id instanceof VRL) ? id.typeof()
               : id ? "Resource" : "Data";
         }
       } else type = "Resource";
@@ -627,7 +635,7 @@ export function resolveTypeof (valker: Valker, head: any, scope: ?Object,
       else if (Iterable.isIterable(packedObject)) type = "Resource";
     }
   }
-  if (typeof equalTo === "undefined") return type;
+  if (equalTo === undefined) return type;
   const candidateType = (typeof equalTo !== "object")
       ? equalTo
       : tryLiteral(valker, head, equalTo, scope);
@@ -672,11 +680,11 @@ function _headOrScopeSet (valker: Valker, target: any, head: any, scope: ?Object
 }
 
 
-export const toVAKON = Symbol("Valaa.toVAKON");
+export const toVAKON = Symbol("ValOS.toVAKON");
 
-export function isValaaFunction (callerCandidate: any) { return callerCandidate[toVAKON]; }
+export function isValOSFunction (callerCandidate: any) { return callerCandidate[toVAKON]; }
 
-export function denoteValaaBuiltin (description: any = "") {
+export function denoteValOSBuiltin (description: any = "") {
   return (callee: any) => {
     callee._valkCaller = true;
     callee._valkDescription = description;
@@ -684,15 +692,15 @@ export function denoteValaaBuiltin (description: any = "") {
   };
 }
 
-export function denoteValaaBuiltinWithSignature (description: any = "") {
+export function denoteValOSBuiltinWithSignature (description: any = "") {
   return (callee: any) => {
     const text = callee.toString();
-    return denoteValaaBuiltin(description + text.slice(8, text.indexOf(" {")))(callee);
+    return denoteValOSBuiltin(description + text.slice(8, text.indexOf(" {")))(callee);
   };
 }
 
 /**
- * Creates a decorator for specifying a Valaa kuery function.
+ * Creates a decorator for specifying a ValOS kuery function.
  * Kuery function is a convenience construct for defining builtin functions in terms of Kuery VAKON.
  * A notable convenience aspect of Kuery functions that they accept /already evaluated/ values as
  * arguments and the VAKON they return ephemeral: it is immediately evaluated and discarded.
@@ -707,7 +715,7 @@ export function denoteValaaBuiltinWithSignature (description: any = "") {
  * @param {*} [description=""]
  * @returns
  */
-export function denoteValaaKueryFunction (description: any = "") {
+export function denoteValOSKueryFunction (description: any = "") {
   return (createKuery: any) => {
     function callee (...args: any[]) {
       try {
@@ -730,7 +738,7 @@ export function denoteValaaKueryFunction (description: any = "") {
   };
 }
 
-export function denoteDeprecatedValaaBuiltin (prefer: string, description: any = "") {
+export function denoteDeprecatedValOSBuiltin (prefer: string, description: any = "") {
   return (callee: any) => {
     function deprecated (...rest: any[]) {
       console.error("DEPRECATED: call to builtin operation", callee, "\n\tprefer:", prefer);
@@ -748,13 +756,13 @@ function capture (valker: Valker, head: any, scope: ?Object,
     [, evaluatee, customScope]: BuiltinStep) {
   let capturedVAKON = typeof evaluatee !== "object" ? evaluatee
       : tryLiteral(valker, head, evaluatee, scope);
-  if (typeof capturedVAKON === "undefined") return undefined;
+  if (capturedVAKON === undefined) return undefined;
   if (Iterable.isIterable(capturedVAKON)) {
     console.warn("§capturee.evaluatee should valk to native VAKON, instead got immutable object:",
         capturedVAKON, "as evaluatee JSON:", capturedVAKON.toJS());
     capturedVAKON = capturedVAKON.toJS();
   }
-  const capturedScope = (typeof customScope === "undefined")
+  const capturedScope = (customScope === undefined)
       ? scope
       : tryLiteral(valker, head, customScope, scope);
 

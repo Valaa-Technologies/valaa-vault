@@ -309,11 +309,11 @@ export default class PartitionConnection extends Follower {
    * return? Maybe always sync or always aync? Or just delete this
    * whole function?
    *
-   * @param {VRef} mediaRef
+   * @param {VRL} mediaVRL
    * @param {MediaInfo} mediaInfo
    * @returns
    *
-   * @memberof ValaaEngine
+   * @memberof Engine
    */
   readMediaContent (mediaInfo: MediaInfo): any {
     delete mediaInfo.mime;
@@ -338,11 +338,11 @@ export default class PartitionConnection extends Follower {
    * This function is convenience forward to alias for
    * requestMediaContents([mediaInfo])[0].
    *
-   * @param {VRef} mediaRef
+   * @param {VRL} mediaVRL
    * @param {MediaInfo} mediaInfo
    * @returns
    *
-   * @memberof ValaaEngine
+   * @memberof Engine
    */
   decodeMediaContent (mediaInfo: MediaInfo): any {
     if (!mediaInfo.type) {
@@ -362,16 +362,16 @@ export default class PartitionConnection extends Follower {
   }
 
   /**
-   * Returns a URL for given mediaRef pair which can be used in html context for retrieving media
+   * Returns a URL for given mediaVRL pair which can be used in html context for retrieving media
    * content.
    *
    * Convenience for requestMediaContents([{ ...mediaInfo, asURL: true }])[0].
    *
-   * @param {VRef} mediaRef
+   * @param {VRL} mediaVRL
    * @param {MediaInfo} mediaInfo
    * @returns
    *
-   * @memberof ValaaEngine
+   * @memberof Engine
    */
   getMediaURL (mediaInfo: MediaInfo): any {
     if (!mediaInfo.asURL) mediaInfo.asURL = true;

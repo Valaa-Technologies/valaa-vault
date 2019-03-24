@@ -2,8 +2,8 @@ exports.command = ".configure/.domain/gateway";
 exports.describe = "Configure the 'gateway' domain for this workspace";
 exports.introduction = `${exports.describe}.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "domain") !== "gateway")
-    && `Workspace domain is not 'gateway' (is '${yargs.vlm.getPackageConfig("valaa", "domain")}')`;
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("domain") !== "gateway")
+    && `Workspace domain is not 'gateway' (is '${yargs.vlm.getValOSConfig("domain")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

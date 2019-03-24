@@ -1,6 +1,6 @@
 {
   "name": "@valos/toolset-revealer",
-  "valaa": {
+  "valos": {
     "type": "toolset",
     "domain": "gateway"
   },

@@ -83,12 +83,12 @@ export default Object.freeze({
         return valker.pack(Type[".new"](valker, scope, ...eArgs));
       }
       if (isHostRef(eType)) {
-        const PrototypeType = scope.Valaa[Type.getTypeName({ transaction: valker })];
+        const PrototypeType = scope.valos[Type.getTypeName({ transaction: valker })];
         return valker.pack(PrototypeType[".instantiate"](valker, scope, Type, ...eArgs));
       }
       throw new Error(`'new': cannot create object of type '${typeof Type
-          }', expected either a function for native object construction, a Valaa type for${
-          ""} Valaa object creation or a Valaa Resource for instantiation`);
+          }', expected either a function for native object construction, a ValOS type for${
+          ""} ValOS object creation or a ValOS Resource for instantiation`);
     } catch (error) {
       throw valker.wrapErrorEvent(error, `builtin.§new`,
           "\n\tType:", ...dumpObject(Type),
@@ -126,9 +126,9 @@ export default Object.freeze({
 });
 
 // TODO(iridian): clarify the relationship between raem/VALK/hostReference.HostRef and
-// ValaaPrimitiveTag. ValaaPrimitiveTag might be an alias for it.
-export const ValaaPrimitiveTag = Symbol("Valaa Primitive");
-export const BuiltinTypePrototype = { [ValaaPrimitiveTag]: true };
+// ValOSPrimitiveTag. ValOSPrimitiveTag might be an alias for it.
+export const ValOSPrimitiveTag = Symbol("ValOS Primitive");
+export const BuiltinTypePrototype = { [ValOSPrimitiveTag]: true };
 
 const _propertyValueMethodStep = ["§method", "propertyValue"];
 

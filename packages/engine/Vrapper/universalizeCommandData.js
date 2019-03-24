@@ -1,6 +1,6 @@
 // @flow
 import { Iterable } from "immutable";
-import { isIdData } from "~/raem/ValaaReference";
+import { isIdData } from "~/raem/VRL";
 import { Kuery } from "~/raem/VALK";
 import Vrapper from "~/engine/Vrapper";
 
@@ -42,9 +42,9 @@ export default function universalizeCommandData (object: ?any, options:
       return ret;
     }
 
-    // Valaa reference
+    // ValOS reference
     if (!options.transaction) return id;
-    connectedId = options.transaction.bindFieldVRef(id, {}, null);
+    connectedId = options.transaction.bindFieldVRL(id, {}, null);
     const partitionURI = connectedId.getPartitionURI();
     if (partitionURI) {
       if (String(partitionURI) === options.partitionURIString) {

@@ -4,7 +4,7 @@ import invariantify, {
   invariantifyArray, invariantifyBoolean, invariantifyNumber, invariantifyString,
   invariantifyObject,
 } from "~/tools/invariantify";
-import { invariantifyId, invariantifyTypeName } from "~/raem/ValaaReference";
+import { invariantifyId, invariantifyTypeName } from "~/raem/VRL";
 
 import { dumpObject } from "~/tools";
 

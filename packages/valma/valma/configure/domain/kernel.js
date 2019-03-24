@@ -2,8 +2,8 @@ exports.command = ".configure/.domain/kernel";
 exports.describe = "Configure the 'kernel' domain for this workspace";
 exports.introduction = `${exports.describe}.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "domain") !== "kernel")
-    && `Workspace domain is not 'kernel' (is '${yargs.vlm.getPackageConfig("valaa", "domain")}')`;
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("domain") !== "kernel")
+    && `Workspace domain is not 'kernel' (is '${yargs.vlm.getValOSConfig("domain")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

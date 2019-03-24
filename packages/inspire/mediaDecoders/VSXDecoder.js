@@ -5,7 +5,7 @@ import { addStackFrameToError } from "~/raem/VALK/StackTrace";
 import JSXDecoder from "~/inspire/mediaDecoders/JSXDecoder";
 import VALEK from "~/engine/VALEK";
 
-import { transpileValaaScriptBody } from "~/script";
+import { transpileValoscriptBody } from "~/script";
 
 export default class VSXDecoder extends JSXDecoder {
   static mediaTypes = [
@@ -20,7 +20,7 @@ export default class VSXDecoder extends JSXDecoder {
       sourceInfo.kueries = [];
       ret.transformExpressionText = (embeddedSource: any, start: any = {}, end: any = {}) => {
         sourceInfo.kueries.push(
-            this._transpileEmbeddedValaaScript(embeddedSource, sourceInfo, start, end));
+            this._transpileEmbeddedValoscript(embeddedSource, sourceInfo, start, end));
         return `__kueries[${sourceInfo.kueries.length - 1}]`;
       };
     }
@@ -33,14 +33,14 @@ export default class VSXDecoder extends JSXDecoder {
     return ret;
   }
 
-  _transpileEmbeddedValaaScript (embeddedSource: string, topLevelSourceInfo: Object, start: Object,
+  _transpileEmbeddedValoscript (embeddedSource: string, topLevelSourceInfo: Object, start: Object,
       end: Object) {
     const sourceInfo = Object.create(topLevelSourceInfo);
     try {
       sourceInfo.phase = `inline VS transpilation at ${start.line}:${start.column} in ${
           sourceInfo.phaseBase}`;
       sourceInfo.sourceMap = new Map();
-      const kuery = transpileValaaScriptBody(`(${embeddedSource})`,
+      const kuery = transpileValoscriptBody(`(${embeddedSource})`,
           { customVALK: VALEK, sourceInfo });
       sourceInfo.phase = `inline VS run at ${start.line}:${start.column} in ${
           sourceInfo.phaseBase}`;
@@ -49,7 +49,7 @@ export default class VSXDecoder extends JSXDecoder {
       const sourceDummy = {};
       sourceInfo.sourceMap.set(sourceDummy, { loc: { start, end } });
       throw addStackFrameToError(
-          this.wrapErrorEvent(error, `_transpileEmbeddedValaaScript(${sourceInfo.phaseBase})`,
+          this.wrapErrorEvent(error, `_transpileEmbeddedValoscript(${sourceInfo.phaseBase})`,
               "\n\tsourceInfo:", sourceInfo),
           sourceDummy, sourceInfo);
     } finally {

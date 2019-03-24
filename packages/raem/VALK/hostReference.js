@@ -17,7 +17,7 @@ export const vdoc = vdon({ "...": { heading:
     _PackedValue_ and _UnpackedHostValueTag_.`,
     `Host references come in different forms depending on function but
     they all define the _HostRef_ property. This property contains the
-    canonical host reference object ({link @ValaaReference} by
+    canonical host reference object ({link @VRL} by
     default).`,
     `Packed host references always define _PackedValue_ which contains
     implementation defined data.`,

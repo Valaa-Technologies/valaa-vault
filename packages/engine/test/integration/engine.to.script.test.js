@@ -1,9 +1,9 @@
 /* global describe expect it */
 
 import { created } from "~/raem/events";
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 
-import { createNativeIdentifier, getNativeIdentifierValue, transpileValaaScriptBody }
+import { createNativeIdentifier, getNativeIdentifierValue, transpileValoscriptBody }
     from "~/script";
 
 import Vrapper from "~/engine/Vrapper";
@@ -11,7 +11,7 @@ import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
 import { clearAllScribeDatabases } from "~/prophet/test/ProphetTestHarness";
 import VALEK, { Kuery, literal, pointer } from "~/engine/VALEK";
 
-const valaaScriptBlock = [
+const valoscriptBlock = [
   created({ id: ["creator-myFunc"], typeName: "Property", initialState: {
     name: "myFunc", owner: vRef("creator", "properties"),
     value: literal(VALEK.doStatements(VALEK.apply(
@@ -35,7 +35,7 @@ const entities = () => harness.createds.Entity;
  *
  * @param {any}    corpus
  * @param {Kuery}  parsedKuery
- * @param {VRef}   thisReference
+ * @param {VRL}   thisReference
  * @param {Object} scope
  * @returns                       the resulting value of the expressionKuery
  */
@@ -60,14 +60,14 @@ function extractValueFrom (container: any) {
       : getNativeIdentifierValue(container);
 }
 
-function transpileValaaScriptTestBody (bodyText: string) {
-  return transpileValaaScriptBody(bodyText, { customVALK: VALEK });
+function transpileValoscriptTestBody (bodyText: string) {
+  return transpileValoscriptBody(bodyText, { customVALK: VALEK });
 }
 
 describe("Manipulating existing variables", () => {
   it("assigns existing Resource property variable with 'counter = 75' when valked", () => {
-    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
-    const bodyKuery = transpileValaaScriptTestBody(`
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyKuery = transpileValoscriptTestBody(`
         counter = 75;
     `);
     const updatedCounter = entities().creator.do(bodyKuery, { verbosity: 0 });
@@ -80,7 +80,7 @@ describe("Manipulating existing variables", () => {
 
 describe("delete operator", () => {
   it("deletes a native object property, but doesn't propagate to prototype properties", () => {
-    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
     const programText = `
       const base = new Entity({ owner: this, properties: {
         a: "a", b: "b", c: "c", d: "d", e: "e"
@@ -113,7 +113,7 @@ describe("delete operator", () => {
         e: { has: derived.hasOwnProperty("e"), value: derived.e },
       }]
     `;
-    const bodyKuery = transpileValaaScriptTestBody(programText);
+    const bodyKuery = transpileValoscriptTestBody(programText);
     const [base, derived] = entities().creator.do(bodyKuery, { verbosity: 0 });
     expect(base.a.has).toEqual(false);
     expect(base.a.value).toBe(undefined);
@@ -138,8 +138,8 @@ describe("delete operator", () => {
   });
 
   it("assigns existing Resource property variable with 'counter = 75' when valked", () => {
-    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
-    const bodyKuery = transpileValaaScriptTestBody(`
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyKuery = transpileValoscriptTestBody(`
         counter = 75;
     `);
     const updatedCounter = entities().creator.do(bodyKuery, { verbosity: 0 });
@@ -150,8 +150,8 @@ describe("delete operator", () => {
   });
 
   it("returns undefined for typeof identifiers which are missing, instead of throwing", () => {
-    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
-    const bodyKuery = transpileValaaScriptTestBody(`
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyKuery = transpileValoscriptTestBody(`
         typeof doesntExist;
     `);
     const undefinedString = entities().creator.do(bodyKuery, { verbosity: 0 });
@@ -163,7 +163,7 @@ describe("delete operator", () => {
 function testPropertyByExpressionAssignments (commands, getThisAndScope) {
   it("assigns numbers", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsTen = 1;
     `);
     const { this_, scope } = getThisAndScope();
@@ -176,7 +176,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("assigns strings", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsTen = 'hello';
     `);
     const { this_, scope } = getThisAndScope();
@@ -189,7 +189,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("assigns booleans", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsTen = true;
     `);
     const { this_, scope } = getThisAndScope();
@@ -202,7 +202,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("assigns JSON", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsTen = { prop1: 2, prop2: 1 };
     `);
     const { this_, scope } = getThisAndScope();
@@ -215,7 +215,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("assigns null", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsTen = null;
     `);
     const { this_, scope } = getThisAndScope();
@@ -228,7 +228,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("handles addition", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsUndefined = 1 + 1;
     `);
     const { this_, scope } = getThisAndScope();
@@ -241,7 +241,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("handles subtraction", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsUndefined = 1 - 3;
     `);
     const { this_, scope } = getThisAndScope();
@@ -254,7 +254,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("handles multiplication", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsUndefined = 5 * 3;
     `);
     const { this_, scope } = getThisAndScope();
@@ -267,7 +267,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("handles division", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsUndefined = 5 / 3;
     `);
     const { this_, scope } = getThisAndScope();
@@ -280,7 +280,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("handles modulo", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsUndefined = 999 % 500;
     `);
     const { this_, scope } = getThisAndScope();
@@ -293,7 +293,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("handles unary minus", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsUndefined = -999;
     `);
     const { this_, scope } = getThisAndScope();
@@ -306,7 +306,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("handles exponentiation", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsToOwnling = 5 ** 7;
     `);
     const { this_, scope } = getThisAndScope();
@@ -320,7 +320,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
   /* eslint-disable no-bitwise */
   it("handles bitwise AND", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsToOwnling = 12 & 2;
     `);
     const { this_, scope } = getThisAndScope();
@@ -333,7 +333,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("handles bitwise OR", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsToOwnling = 12 | 2;
     `);
     const { this_, scope } = getThisAndScope();
@@ -346,7 +346,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("handles bitwise XOR", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsToOwnling = 12 ^ 2;
     `);
     const { this_, scope } = getThisAndScope();
@@ -359,7 +359,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("handles bitwise NOT", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsToOwnling = ~2;
     `);
     const { this_, scope } = getThisAndScope();
@@ -372,7 +372,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("handles bit shift left", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsToOwnling = 5 << 3;
     `);
     const { this_, scope } = getThisAndScope();
@@ -385,7 +385,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 
   it("handles bit shift right", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsToOwnling = 5 >> 3;
     `);
     const { this_, scope } = getThisAndScope();
@@ -400,7 +400,7 @@ function testPropertyByExpressionAssignments (commands, getThisAndScope) {
 function testStatementOperations (commands, getThisAndScope) {
   it("handles if and true '>'", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         if (10 > 1) this.startsToOwnling = 'then';
         this.startsToOwnling;
     `);
@@ -414,7 +414,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles if and false '!=='", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         if (2 !== 2); else this.startsToOwnling = 'else';
         this.startsToOwnling;
     `);
@@ -428,7 +428,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles if and true field-to-field with '!=' with block", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         if (this.startsAsTen != this.startsAsUndefined) { this.startsToOwnling = 'then'; }
         this.startsToOwnling;
     `);
@@ -442,7 +442,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles if and true < with 'wrong' block", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         if (9 < this.startsAsTen); else { this.startsToOwnling = 'else'; }
         this.startsToOwnling;
     `);
@@ -456,7 +456,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles if and false <= with content in both blocks", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         if (this.startsAsTen <= null) {
           this.startsToOwnling = 'then';
         } else {
@@ -474,7 +474,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles ternary >=", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsUndefined = (null >= 0) ? 1 : '';
     `);
     const { this_, scope } = getThisAndScope();
@@ -487,7 +487,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles pointer-!", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         if (!this.startsToOwnling) {
           this.startsAsUndefined = 10;
         } else {
@@ -505,7 +505,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles undefined-!! with scope assignment and explicit VALK kuery usage", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         var scopeVar = 10;
         if (!!this.startsAsUndefined) {
           scopeVar = 20;
@@ -522,7 +522,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles && with no short-circuit", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         var scopeVar = true && this.startsToOwnling;
         if (scopeVar) {
           this.startsAsUndefined = scopeVar;
@@ -539,7 +539,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles || with short-circuit", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         const scopeEarlier = this.startsAsTen;
         var scopeVar = this.startsToOwnling || scopeEarlier;
         if (scopeVar) {
@@ -557,7 +557,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles bit shift zero fill right into plain object member", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         let object = { field: 5 >>> 3 };
         this.startsAsUndefined = object.field;
     `);
@@ -571,7 +571,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("assigns scope lookups in place of identifiers", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsUndefined = startsAsTen;
     `);
     const { this_, scope } = getThisAndScope({ startsAsTen: 10 });
@@ -584,7 +584,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("assigns property values in place of this identifiers", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsUndefined = this.startsToOwnling;
     `);
     const { this_, scope } = getThisAndScope();
@@ -597,7 +597,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("assigns property values in place of this identifiers (deep 1)", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsToOwnling.counter = this.startsAsTen;
     `);
     const { this_, scope } = getThisAndScope();
@@ -610,7 +610,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles +=", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         this.startsAsTen += 5;
     `);
     const { this_, scope } = getThisAndScope();
@@ -623,7 +623,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles -=", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         const scopeValue = (this.startsAsTen += 5) + 2;
         scopeValue;
     `);
@@ -637,7 +637,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles *=", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         let scopeValue = this.startsAsTen + 2;
         scopeValue *= this.startsToOwnling.ownling_counter;
         this.startsAsUndefined = scopeValue;
@@ -656,7 +656,7 @@ function testStatementOperations (commands, getThisAndScope) {
 
   it("handles if statements", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         if (startsAsTen !== startsToOwnling) { this.newValue = 1; } else { this.newValue = 2; }
         this.newValue;
     `);
@@ -672,13 +672,13 @@ function testStatementOperations (commands, getThisAndScope) {
 
 describe("Property assignment with scope as this and non-existing fields", () => {
   testPropertyByExpressionAssignments(
-      valaaScriptBlock, (scope = {}) => ({ this_: scope, scope }),
+      valoscriptBlock, (scope = {}) => ({ this_: scope, scope }),
   );
 });
 
 describe("Property assignment with Entity as this and with non-existing Property's", () => {
   testPropertyByExpressionAssignments(
-      valaaScriptBlock, (scope = {}) => ({ this_: entities().creator, scope }),
+      valoscriptBlock, (scope = {}) => ({ this_: entities().creator, scope }),
   );
 });
 
@@ -702,7 +702,7 @@ const createCreatorProperties = [
 
 describe("Property assignment to existing Entity Property's and empty scope", () => {
   const args = [
-    valaaScriptBlock.concat(createCreatorProperties),
+    valoscriptBlock.concat(createCreatorProperties),
     (scope = {}) => ({ this_: entities().creator, scope }),
   ];
   testPropertyByExpressionAssignments(...args);
@@ -712,7 +712,7 @@ describe("Property assignment to existing Entity Property's and empty scope", ()
 function testScopeManipulations (commands, getThisAndScope) {
   it("extracts scope value through identifier", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         startsAsTen;
     `);
     const { this_, scope } = getThisAndScope();
@@ -723,7 +723,7 @@ function testScopeManipulations (commands, getThisAndScope) {
 
   it("sets a scope value through identifier", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         startsAsTen = 20;
     `);
     const { this_, scope } = getThisAndScope({ startsAsTen: createNativeIdentifier(10) });
@@ -736,7 +736,7 @@ function testScopeManipulations (commands, getThisAndScope) {
 
   it("retains the original scope value if a shadowing variable is altered", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, commands);
-    const kuery = transpileValaaScriptTestBody(`
+    const kuery = transpileValoscriptTestBody(`
         let startsAsTen = 10;
         startsAsTen = 20;
     `);
@@ -751,7 +751,7 @@ function testScopeManipulations (commands, getThisAndScope) {
 
 describe("Property assignment with scope as this and existing fields", () => {
   const args = [
-    valaaScriptBlock,
+    valoscriptBlock,
     (scope = {
       startsAsTen: 10,
       startsToOwnling: entities().ownling,
@@ -765,7 +765,7 @@ describe("Property assignment with scope as this and existing fields", () => {
 
 describe("Property assignment to existing Entity Property's and lexical scope", () => {
   const args = [
-    valaaScriptBlock.concat(createCreatorProperties),
+    valoscriptBlock.concat(createCreatorProperties),
     () => ({ this_: entities().creator, scope: entities().creator.getLexicalScope() }),
   ];
   testPropertyByExpressionAssignments(...args);
@@ -775,13 +775,49 @@ describe("Property assignment to existing Entity Property's and lexical scope", 
 
 describe("Regression tests", () => {
   it("array lookup with array length minus 1", () => {
-    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valaaScriptBlock);
-    const bodyKuery = transpileValaaScriptTestBody(`
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyKuery = transpileValoscriptTestBody(`
         const myArray = [0, 1, 2];
         myArray[myArray.length - 1];
     `);
     const lastEntry = entities().creator.do(bodyKuery);
     expect(lastEntry)
         .toEqual(2);
+  });
+  xit("sorts an array containing resources by their name using localCompare comparator", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyKuery = transpileValoscriptTestBody(`
+      const sortFunction = (a,b) => a[valos.name].localeCompare(b[valos.name]);
+      const seq = [
+        new Entity({ name: "foo", owner: this }),
+        new Entity({ name: "bar", owner: this }),
+      ];
+      seq.sort(sortFunction);
+    `);
+    const sorted = entities().creator.do(bodyKuery, { verbosity: 0 });
+    expect(sorted.length)
+        .toEqual(2);
+    expect(sorted[0].get("name")).toEqual("bar");
+    expect(sorted[1].get("name")).toEqual("foo");
+  });
+  it("sorts an array containing Property resources by their name using localCompare comparator", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyKuery = transpileValoscriptTestBody(`
+      const sortFunction = (a,b) => a[valos.name].localeCompare(b[valos.name]);
+      const resource = new Entity({ owner: this, properties: { foo: 1, bar: 0 } });
+      ({
+        original: resource[valos.properties],
+        sorted: [].concat(resource[valos.properties]).sort(sortFunction),
+      });
+    `);
+    const { original, sorted } = entities().creator.do(bodyKuery, { verbosity: 0 });
+    expect(original.length)
+        .toEqual(2);
+    expect(original[0].get("name")).toEqual("foo");
+    expect(original[1].get("name")).toEqual("bar");
+    expect(sorted.length)
+        .toEqual(2);
+    expect(sorted[0].get("name")).toEqual("bar");
+    expect(sorted[1].get("name")).toEqual("foo");
   });
 });

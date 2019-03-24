@@ -3,9 +3,9 @@
     "webpack": {
       "entry": ["./packages/inspire/index.js"],
       "output": {
-        "path": "dist/revealer/valaa/inspire/",
+        "path": "dist/revealer/valos/inspire/",
         "publicPath": "/",
-        "filename": "valaa-inspire.js"
+        "filename": "valos-inspire.js"
       }
     }
   }

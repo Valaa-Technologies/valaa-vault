@@ -3,7 +3,7 @@
 import { Action, Command, created, duplicated, destroyed, EventBase } from "~/raem/events";
 import type { Corpus } from "~/raem/Corpus";
 import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 import { dumpObject } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
 import { addConnectToPartitionToError } from "~/raem/tools/denormalized/partitions";
@@ -24,7 +24,7 @@ import { initializeAspects, obtainAspect, tryAspect } from "~/prophet/tools/Even
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
 
 import { invariantify, invariantifyObject, thenChainEagerly, trivialClone } from "~/tools";
-import valaaUUID from "~/tools/id/valaaUUID";
+import valosUUID from "~/tools/id/valosUUID";
 
 export default class FalseProphetDiscourse extends Discourse {
   _follower: Follower;
@@ -48,7 +48,7 @@ export default class FalseProphetDiscourse extends Discourse {
     this.setState(this._prophet.getState());
     invariantify(this.state, "FalseProphetDiscourse.state");
     this._assignCommandId = assignCommandId || (command => {
-      obtainAspect(command, "command").id = valaaUUID();
+      obtainAspect(command, "command").id = valosUUID();
     });
   }
 
@@ -198,7 +198,7 @@ export default class FalseProphetDiscourse extends Discourse {
       throw new Error(
           "Cannot create a resource id for a structural type 'Property' which is missing an owner");
     }
-    targetAction.id = vRef(explicitRawId || valaaUUID());
+    targetAction.id = vRef(explicitRawId || valosUUID());
     /*
     console.log("assignNewPartitionlessResourceId", String(targetAction.id), explicitRawId,
         "\n\ttargetAction:", ...dumpObject(targetAction),

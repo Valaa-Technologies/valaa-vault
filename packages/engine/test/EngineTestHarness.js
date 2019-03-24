@@ -5,11 +5,10 @@ import ProphetTestHarness, { createProphetTestHarness, createProphetOracleHarnes
 import { obtainAspect } from "~/prophet/tools/EventAspects";
 
 import EngineTestAPI from "~/engine/test/EngineTestAPI";
-import ValaaEngine from "~/engine/ValaaEngine";
-import type Vrapper from "~/engine/Vrapper";
+import Engine from "~/engine/Engine";
 import Cog from "~/engine/Cog";
 import { builtinSteppers } from "~/engine/VALEK";
-import extendValaaSpace from "~/engine/ValaaSpace";
+import extendValospace from "~/engine/valospace";
 
 import baseEventBlock from "~/engine/test/baseEventBlock";
 
@@ -38,16 +37,16 @@ export function createEngineOracleHarness (options: Object, ...commandBlocks: an
 
 export default class EngineTestHarness extends ProphetTestHarness {
   createValker () {
-    this.engine = new ValaaEngine({
-      name: "Test ValaaEngine",
+    this.engine = new Engine({
+      name: "Test Engine",
       logger: this.getLogger(),
       prophet: this.prophet, // created by createCorpus of ProphetTestHarness
       verbosity: this.getVerbosity(),
     });
     const rootScope = this.engine.getRootScope();
-    extendValaaSpace(rootScope, this.engine.getHostObjectDescriptors(), this.schema);
+    extendValospace(rootScope, this.engine.getHostObjectDescriptors(), this.schema);
     // TODOO(iridian): This should be in InspireTestHarness, but there is no such thing.
-    rootScope.Valaa.InspireGateway = {
+    rootScope.valos.GatewayConfig = {
       RemoteAuthorityURI: "valaa-testing:",
       LocalAuthorityURI: "valaa-local:",
     };
@@ -61,11 +60,11 @@ export default class EngineTestHarness extends ProphetTestHarness {
     return this.engine.discourse;
   }
 
-  runValaaScript (self: any, valaaScriptBody: string, options: Object = {}) {
+  runValoscript (self: any, valoscriptBody: string, options: Object = {}) {
     options.scope = Object.assign(
         Object.create(this.engine.getLexicalScope()),
         options.scope || {});
-    return super.runValaaScript(self, valaaScriptBody, options);
+    return super.runValoscript(self, valoscriptBody, options);
   }
 }
 

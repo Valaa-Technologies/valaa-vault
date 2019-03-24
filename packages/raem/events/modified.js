@@ -1,8 +1,7 @@
 // @flow
 
 import Action, { validateActionBase } from "~/raem/events/Action";
-import { invariantifyId, invariantifyTypeName } from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL, { invariantifyId, invariantifyTypeName } from "~/raem/VRL";
 
 import { invariantifyObject, invariantifyArray } from "~/tools/invariantify";
 
@@ -38,7 +37,7 @@ export class ReplacedWithin extends Modified {
 }
 
 function _validateModifiedBase (expectedType: string, action: Action,
-    id: string | VRef, typeName: string, rest: Object): Modified {
+    id: string | VRL, typeName: string, rest: Object): Modified {
   validateActionBase(expectedType, action, rest);
 
   invariantifyId(id, `${expectedType}.id`, {});

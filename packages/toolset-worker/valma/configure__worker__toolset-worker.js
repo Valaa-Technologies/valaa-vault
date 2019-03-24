@@ -4,10 +4,10 @@ exports.describe = "Configure 'toolset-worker' for a worker repository";
 exports.introduction = `${exports.describe}.
 
 This script makes the toolset 'toolset-worker' available for
-grabbing by repositories with valaa type 'worker'.`;
+grabbing by repositories with valos.type 'worker'.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "worker")
-    && `Workspace is not a worker (is ${yargs.vlm.getPackageConfig("valaa", "type")})`;
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
+    && `Workspace is not a worker (is ${yargs.vlm.getValOSConfig("type")})`;
 exports.builder = (yargs) => {
   const toolsetConfig = yargs.vlm.getToolsetConfig(yargs.vlm.toolset) || {};
   return yargs.options({

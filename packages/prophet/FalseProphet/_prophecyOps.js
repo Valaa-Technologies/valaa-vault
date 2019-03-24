@@ -169,7 +169,7 @@ function _checkForSemanticSchism (/* purgedProphecy: Prophecy, revisedProphecy: 
   // new incoming truth(s); this would incorrectly override and discard
   // the change made in the incoming truth. This class of errors does
   // not corrupt the event log so cannot be detected as a reduction
-  // error but still most likely is a ValaaSpace schism and thus should
+  // error but still most likely is a valospace schism and thus should
   // marked as needing revision.
   return undefined;
 }

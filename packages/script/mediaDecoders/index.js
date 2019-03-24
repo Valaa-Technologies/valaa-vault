@@ -1,3 +1,3 @@
 // @flow
 
-export { default as ValaaScriptDecoder } from "./ValaaScriptDecoder";
+export { default as ValoscriptDecoder } from "./ValoscriptDecoder";

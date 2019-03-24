@@ -17,7 +17,7 @@ import { openDB, getFromDB, getKeysFromDB, expectStoredInDB }
 
 const testAuthorityURI = "valaa-test:";
 const testPartitionURI = naiveURI.createPartitionURI(testAuthorityURI, "test_partition");
-const sharedURI = "valaa-shared-content";
+const sharedURI = "valos-shared-content";
 
 afterEach(async () => {
   await clearAllScribeDatabases();

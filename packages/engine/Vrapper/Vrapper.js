@@ -9,9 +9,7 @@ import type { Passage, Story } from "~/raem/redux/Bard";
 import { getHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 
 import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "~/raem/events";
-import ValaaReference, { vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom }
-    from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL, { vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
@@ -21,7 +19,7 @@ import type { State } from "~/raem/state"; // eslint-disable-line no-duplicate-i
 import { tryElevateFieldValue } from "~/raem/state/FieldInfo";
 import { getObjectRawField } from "~/raem/state/getObjectField";
 
-import { createGhostVRefInInstance, isMaterialized, createMaterializeGhostAction }
+import { createGhostVRLInInstance, isMaterialized, createMaterializeGhostAction }
     from "~/raem/tools/denormalized/ghost";
 import { MissingPartitionConnectionsError, addConnectToPartitionToError }
     from "~/raem/tools/denormalized/partitions";
@@ -29,7 +27,7 @@ import { MissingPartitionConnectionsError, addConnectToPartitionToError }
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
-import { ValaaPrimitiveTag } from "~/script";
+import { ValOSPrimitiveTag } from "~/script";
 
 import { Discourse, Transaction, PartitionConnection } from "~/prophet";
 import { ChronicleEventResult } from "~/prophet/api/types";
@@ -43,8 +41,7 @@ import debugId from "~/engine/debugId";
 import FieldUpdate, { LiveUpdate } from "~/engine/Vrapper/FieldUpdate";
 import Subscription from "~/engine/Vrapper/Subscription";
 import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
-import { defaultOwnerCoupledField } from
-    "~/engine/ValaaSpace/Valaa/injectSchemaTypeBindings";
+import { defaultOwnerCoupledField } from "~/engine/valospace/valos/injectSchemaTypeBindings";
 
 import { arrayFromAny, iterableFromAny, dumpify, dumpObject,
   invariantify, invariantifyObject, invariantifyString,
@@ -66,16 +63,16 @@ function isNonActivateablePhase (candidate: string) {
 }
 
 /**
- * Vrapper is a proxy for accessing a specific Valaa Resource in the backend.
- * With the ValaaEngine, these Vrapper instances form the interface between Valaa backend content
+ * Vrapper is a proxy for accessing a specific ValOS Resource in the backend.
+ * With the Engine, these Vrapper instances form the interface between ValOS backend content
  * (through the backing False Prophet in-memory shadow repository) and between local presentation
  * and computation layers.
  *
- * 1. Vrapper as a singular, shared proxy object to single Valaa resource.
+ * 1. Vrapper as a singular, shared proxy object to single ValOS resource.
  *
- * There is zero or one Vrapper objects per one Valaa resource, identified and shared by
+ * There is zero or one Vrapper objects per one ValOS resource, identified and shared by
  * the resource raw id. Vrapper proxies for resources which don't have already are created
- * on-demand; see ValaaEngine.getVrapper.
+ * on-demand; see Engine.getVrapper.
  *
  * By default all Vrapper operations are executed in the context of the most recent state known by
  * ('main line state') the backing False Prophet.
@@ -126,11 +123,11 @@ function isNonActivateablePhase (candidate: string) {
  *   isUnavailable() returns true and getPhase() returns "Unavailable".
  *   Active-operations will throw an exception describing the cause of unavailability.
  *
- * 2.6. NonResource: the Vrapper is a degenerate proxy to a non-Resource Valaa object; Bvob or Data.
+ * 2.6. NonResource: the Vrapper is a degenerate proxy to a non-Resource ValOS object; Bvob or Data.
  *   isUnavailable() returns true and getPhase() returns "NonResource".
  *   Such Vrapper's like their associated backend objects are essentially immutable. They have no
  *   lifecycle and many operations (usually those with side-effects) are not available for them.
- *   They cannot have listeners associated with them and they are not cached by ValaaEngine (this
+ *   They cannot have listeners associated with them and they are not cached by Engine (this
  *   means that these objects can in fact have multiple different Vrapper objects per same id).
  *
  * There are two primary mechanisms for creating Vrapper's:
@@ -143,7 +140,7 @@ function isNonActivateablePhase (candidate: string) {
 export default class Vrapper extends Cog {
   static vrapperIndex = 0;
 
-  constructor (engine: ?Object, id: VRef, typeName: string, immediateRefresh?: [any, any]) {
+  constructor (engine: ?Object, id: VRL, typeName: string, immediateRefresh?: [any, any]) {
     invariantifyId(id, "Vrapper.constructor.id");
     invariantifyString(typeName, "Vrapper.constructor.typeName");
     super({ engine, name: `Vrapper/${id.rawId()}:${typeName}` });
@@ -282,7 +279,7 @@ export default class Vrapper extends Cog {
    * otherwise returns the Vrapper blocking the synchronous activation
    * (which might be this Vrapper itself).
    * Finally, if the activation is blocked by a fully inactive
-   * prototype the VRef id of that prototype is returned.
+   * prototype the VRL id of that prototype is returned.
    * The blocking cause can be inspected by blocker.getPhase(): if the
    * phase is Inactive or Activating, the cause is a non-full partition
    * connection. Otherwise the cause is a non-activateable phase
@@ -517,7 +514,7 @@ export default class Vrapper extends Cog {
    *
    * @returns
    */
-  getId (options?: VALKOptions): VRef {
+  getId (options?: VALKOptions): VRL {
     const transient = options ? this.getTransient(options) : this._transient;
     return transient ? transient.get("id") : this[HostRef];
   }
@@ -626,7 +623,7 @@ export default class Vrapper extends Cog {
   _updateTransient (state: ?Object, object: ?Object) {
     // TODO(iridian): Storing the transient in the vrapper is silly and useless premature
     // optimization. With the transactions it can't really be used anyway, so yeah. Get rid of it
-    // and just store the id VRef in the Vrapper.
+    // and just store the id VRL in the Vrapper.
     if (object) {
       invariantifyObject(object, "Vrapper._updateTransient.object", { instanceof: Transient });
       this._transient = object;
@@ -672,7 +669,7 @@ export default class Vrapper extends Cog {
     this.requireActive();
     if (!this._hostGlobal) {
       this._hostGlobal = createModuleGlobal();
-      this._hostGlobal.Valaa = this._nativeScope;
+      this._hostGlobal.valos = this._hostGlobal.Valaa = this._nativeScope;
     }
     return this._hostGlobal;
   }
@@ -805,7 +802,7 @@ export default class Vrapper extends Cog {
     }
   }
 
-  _primeTransactionAndOptionsAndId (options: VALKOptions): { transaction: Discourse, id: VRef } {
+  _primeTransactionAndOptionsAndId (options: VALKOptions): { transaction: Discourse, id: VRL } {
     const transaction = options.transaction || this.engine.discourse;
     this.requireActive(options);
     let id = transaction.bindObjectId(this.getId(), this._typeName);
@@ -952,7 +949,7 @@ export default class Vrapper extends Cog {
         return ((this._namespaceProxies
             || (this._namespaceProxies = {}))[hostReference.namespace]
                 || (this._namespaceProxies[hostReference.namespace]
-                    = this.engine.getRootScope().Valaa.$valosNamespace._createProxy(this)));
+                    = this.engine.getRootScope().valos.$valosNamespace._createProxy(this)));
       }
       return this.get(hostReference.kuery, options);
     }
@@ -964,7 +961,7 @@ export default class Vrapper extends Cog {
     const ret = this._lexicalScope && this._lexicalScope.hasOwnProperty(propertyName)
           // FIXME(iridian): If a property gets renamed inside a transaction and a new property gets
           // created with (or renamed to) the same name we get a cache issue here:
-          // _lexicalScope only updates on actual ValaaEngine events which have not yet landed.
+          // _lexicalScope only updates on actual Engine events which have not yet landed.
           // Similar issues might arise with herecy rollbacks.
         && this._lexicalScope[propertyName];
     if (ret && !ret.isDestroyed()) return ret;
@@ -987,7 +984,7 @@ export default class Vrapper extends Cog {
     const alterationOptions = Object.create(options);
     alterationOptions.scope = this.getLexicalScope();
     let newValue = this.run(0, ["§->", ["§void"], actualAlterationVAKON], alterationOptions);
-    const hostType = this.engine.getRootScope().Valaa[typeName];
+    const hostType = this.engine.getRootScope().valos[typeName];
     const fieldPrototypeEntry = hostType.hostObjectPrototype[propertyName];
     if ((fieldPrototypeEntry != null) && fieldPrototypeEntry.writableFieldName) {
       newValue = this._preProcessNewReference(newValue, fieldPrototypeEntry, hostType);
@@ -1005,9 +1002,9 @@ export default class Vrapper extends Cog {
     return newValue;
   }
 
-  _preProcessNewReference (newValue: VRef, fieldPrototypeEntry: Object, hostType: Object) {
+  _preProcessNewReference (newValue: VRL, fieldPrototypeEntry: Object, hostType: Object) {
     if (fieldPrototypeEntry.fieldName === "owner"
-        && !((newValue instanceof ValaaReference) && newValue.getCoupledField())) {
+        && !((newValue instanceof VRL) && newValue.getCoupledField())) {
       const defaultCoupledField = hostType[defaultOwnerCoupledField];
       if (defaultCoupledField) {
         return getHostRef(newValue).coupleWith(defaultCoupledField);
@@ -1031,12 +1028,12 @@ export default class Vrapper extends Cog {
    * Gets the native value of this resource.
    * For types other than Property the native value is the resource itself. Otherwise the resource
    * is a property and the native value is contained within and is extracted as follows.
-   * If the property is a a pointer to a ValaaScript Media
-   * this compiles and evaluates the pointed ValaaScript program once (with its program-level
+   * If the property is a a pointer to a valoscript Media
+   * this compiles and evaluates the pointed valoscript program once (with its program-level
    * side-effects) and returns the resulting value of the evaluation (the last statement if it is
    * an expression statement).
    * All further calls will return this same evaluated value until the program is touched or the
-   * evaluation context (surrounding ValaaEngine) is flushed.
+   * evaluation context (surrounding Engine) is flushed.
    *
    * @param {VALKOptions} [options={}]
    * @param null vExplicitOwner
@@ -1077,7 +1074,7 @@ export default class Vrapper extends Cog {
       }
       let state;
       let valueType;
-      const isExpandedTransient = !(valueEntry instanceof ValaaReference);
+      const isExpandedTransient = !(valueEntry instanceof VRL);
       if (isExpandedTransient) {
         valueType = dataFieldValue(valueEntry, "typeName");
       } else {
@@ -1177,7 +1174,7 @@ export default class Vrapper extends Cog {
       }
     }
     if (!mediaInfo.mime) mediaInfo.mime = `${mediaInfo.type}/${mediaInfo.subtype}`;
-    mediaInfo.mediaRef = this.getId(options);
+    mediaInfo.mediaVRL = this.getId(options);
     return mediaInfo;
   }
 
@@ -1648,11 +1645,11 @@ export default class Vrapper extends Cog {
   getGhostIn (vInstance: Vrapper, transaction: ?Transaction) {
     this.requireActive({ transaction });
     const state = (transaction || this.engine.discourse).getState();
-    const ghostVRef = createGhostVRefInInstance(this[HostRef],
+    const ghostVRL = createGhostVRLInInstance(this[HostRef],
         vInstance.getTransient({ transaction }));
     // TODO(iridian): Verify and return null if this object has no ghost in instance, ie. if this
     // object is not a sub-component in the direct prototype of vInstance
-    return this.engine.getVrapper(ghostVRef, { state });
+    return this.engine.getVrapper(ghostVRL, { state });
   }
 
   onEventCREATED (passage: Passage, story: Story) {
@@ -1888,11 +1885,11 @@ export default class Vrapper extends Cog {
             }
           }
           // TODO(iridian, 2019-01) 'this' is critical but very dubious.
-          // When a ValaaScript top-level module lambda function accesses
+          // When a valoscript top-level module lambda function accesses
           // the global 'this' identifier it will resolve to the
           // _lexicalScope.this of the context resource.
           // This is very hard to debug as there is no abstraction layer
-          // between: ValaaScript transpiler will omit code for 'this' access
+          // between: valoscript transpiler will omit code for 'this' access
           // for lambda functions expecting that 'this' is found in the
           // scope.
           // TODO(iridian, 2019-03): Requiring 'this' to be provided by
@@ -1982,7 +1979,7 @@ export default class Vrapper extends Cog {
   }
 }
 
-Vrapper.prototype[ValaaPrimitiveTag] = true;
+Vrapper.prototype[ValOSPrimitiveTag] = true;
 Vrapper.prototype[UnpackedHostValue] = null;
 
 let vrapperEventHandlers;

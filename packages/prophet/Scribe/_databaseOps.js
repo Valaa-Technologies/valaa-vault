@@ -34,7 +34,7 @@ export type BvobInfo = {
 };
 
 export async function _initializeSharedIndexedDB (scribe: Scribe) {
-  scribe._sharedDb = new IndexedDBWrapper(`${scribe._databasePrefix}valaa-shared-content`,
+  scribe._sharedDb = new IndexedDBWrapper(`${scribe._databasePrefix}valos-shared-content`,
     [
       { name: "bvobs", keyPath: "bvobId" },
       { name: "buffers", keyPath: "bvobId" },
@@ -340,7 +340,7 @@ export async function _adjustBvobBufferPersistRefCounts (
       req.onsuccess = () => {
         if (!req.result) {
           scribe.errorEvent(`While adjusting content buffer persist references, cannot find ${
-              ""}IndexedDB.valaa-shared-content.bvobs entry ${contentHash}, skipping`);
+              ""}IndexedDB.valos-shared-content.bvobs entry ${contentHash}, skipping`);
           return;
         }
         let persistRefCount = (req.result && req.result.persistRefCount) || 0;

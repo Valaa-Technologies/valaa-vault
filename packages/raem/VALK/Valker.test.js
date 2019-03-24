@@ -2,7 +2,7 @@ import { OrderedMap } from "immutable";
 import { created, fieldsSet, removedFrom, destroyed } from "~/raem/events";
 import VALK from "~/raem/VALK";
 
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 
 import { tryObjectTransient } from "~/raem/state/getObjectTransient";
 import getObjectField from "~/raem/state/getObjectField";

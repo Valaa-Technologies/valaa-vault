@@ -16,7 +16,7 @@ export function partitionInterface (objectDescription: string = INTERFACE_DESCRI
   return {
     name: "Partition",
 
-    description: `A Partition is a subdivision of the whole Valaa object space into smaller
+    description: `A Partition is a subdivision of the whole ValOS object space into smaller
 recursive wholes. The Partition implementation ${objectDescription} contains Resource's either by
 direct or transitive ownership. Each such contained Resource also knows their containing Partition.
 

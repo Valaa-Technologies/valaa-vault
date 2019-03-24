@@ -126,12 +126,12 @@ export function _tryRenderLensArray (component: UIComponent,
   return ret;
 }
 
-let _ValaaScope;
+let _Valoscope;
 
 export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
     lensName: string, onlyIfAble?: boolean, onlyOnce?: boolean,
 ): void | null | string | React.Element<any> | [] | Promise<any> {
-  if (!_ValaaScope) _ValaaScope = require("../ValaaScope").default;
+  if (!_Valoscope) _Valoscope = require("../Valoscope").default;
 
   let ret;
   let subLensName;
@@ -171,12 +171,11 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
           ret = _tryRenderMediaLens(component, lens, focus, lensName);
           subLensName = `media-${lensName}`;
         } else {
-          const Valaa = component.getValaa();
+          const valos = component.getValos();
           subLensName = `delegate-lens-${lensName}`;
           ret = _readSlotValue(component, "delegatePropertyLens",
-              Valaa.Lens.delegatePropertyLens, lens, true)(
-                  lens, component, lensName);
-          if (ret == null || ((ret.delegate || [])[0] === Valaa.Lens.notLensResourceLens)) {
+              valos.Lens.delegatePropertyLens, lens, true)(lens, component, lensName);
+          if (ret == null || ((ret.delegate || [])[0] === valos.Lens.notLensResourceLens)) {
             return component.renderSlotAsLens("notLensResourceLens", lens, subLensName);
           }
         }
@@ -187,7 +186,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
           return _renderFirstAbleDelegate(component, lens.delegate, focus, lensName);
         }
         subLensName = `-noscope-${lensName}`;
-        ret = React.createElement(_ValaaScope, component.childProps(subLensName, {}, { ...lens }));
+        ret = React.createElement(_Valoscope, component.childProps(subLensName, {}, { ...lens }));
       } else if (isSymbol(lens)) {
         return component.renderSlotAsLens(lens, focus, undefined, onlyIfAble, onlyOnce);
       } else {
@@ -302,10 +301,10 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
           || (elementType.noPostProcess && elementType.noPostProcess[propName])) continue;
       const newProp = _postProcessProp(
           props[propName], livePropLookup, liveProps, propName, component);
-      if (typeof newProp !== "undefined") {
+      if (newProp !== undefined) {
         _obtainLiveElementProps()[propName] = newProp;
-      } else if ((propName === "valaaScope")
-          || ((propName === "array") && isUIComponentElement(element))) {
+      } else if ((propName === "valoscope") || (propName === "valaaScope")
+          || (propName === "vScope") || ((propName === "array") && isUIComponentElement(element))) {
         _obtainLiveElementProps();
       }
     }

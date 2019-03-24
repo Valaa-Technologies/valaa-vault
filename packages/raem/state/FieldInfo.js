@@ -2,8 +2,7 @@
 
 import { OrderedSet } from "immutable";
 
-import { tryCoupledFieldFrom } from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL, { tryCoupledFieldFrom } from "~/raem/VRL";
 
 import GhostPath, { createGhostRawId, GhostElevation } from "~/raem/state/GhostPath";
 import { PartialRemovesTag } from "~/raem/state/partialSequences";
@@ -17,10 +16,10 @@ export type FieldInfo = {
   coupledField: ?string,
   defaultCoupledField: ?string,
   sourceTransient: ?Transient,
-  elevationInstanceId: ?VRef,
+  elevationInstanceId: ?VRL,
 };
 
-export function tryElevateFieldValue (resolver: Resolver, value: VRef | VRef[],
+export function tryElevateFieldValue (resolver: Resolver, value: VRL | VRL[],
     fieldInfo: FieldInfo) {
   const elevation = value && _tryFieldGhostElevation(fieldInfo);
   if (!elevation) return value;
@@ -32,7 +31,7 @@ export function tryElevateFieldValue (resolver: Resolver, value: VRef | VRef[],
           _elevateReference(elevator, entry, fieldInfo, elevation, typeName));
 }
 
-export function elevateFieldReference (resolver: Resolver, reference: VRef, fieldInfo: FieldInfo,
+export function elevateFieldReference (resolver: Resolver, reference: VRL, fieldInfo: FieldInfo,
     elevation: ?GhostElevation = _tryFieldGhostElevation(fieldInfo), typeName: ?string,
     verbosity: ?number) {
   if (!elevation) return reference;
@@ -54,14 +53,14 @@ function _tryFieldGhostElevation (fieldInfo: FieldInfo) {
       || undefined;
 }
 
-export function _getFieldGhostElevation (fieldInfo: FieldInfo, elevationInstanceId: VRef) {
+export function _getFieldGhostElevation (fieldInfo: FieldInfo, elevationInstanceId: VRL) {
   const sourceId = fieldInfo.sourceTransient.get("id");
   if (elevationInstanceId.rawId() === sourceId.rawId()) return undefined;
   return sourceId.getGhostPath()
       .obtainGhostElevation(elevationInstanceId.getGhostPath());
 }
 
-export function _elevateReference (elevator: Resolver, reference: VRef, fieldInfo: FieldInfo,
+export function _elevateReference (elevator: Resolver, reference: VRL, fieldInfo: FieldInfo,
     elevation: GhostElevation, typeName: string, verbosity: ?number) {
   elevator.tryGoToTransient(reference, typeName);
   let elevatedId;
@@ -138,7 +137,7 @@ function _elevateRawSequence (resolver: Resolver, object: Transient,
 }
 
 export function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: GhostPath,
-    elevationInstancePath: GhostPath, verbosity: ?number): VRef {
+    elevationInstancePath: GhostPath, verbosity: ?number): VRL {
   if (elevationBasePath === elevationInstancePath) return referenceElevator.objectId;
   let elevatedGhostPath: GhostPath = referenceElevator.objectId.getGhostPath();
   let ghostHostRawId;

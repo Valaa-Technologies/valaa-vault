@@ -33,9 +33,9 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
     description: `Fields available even for inactive Resource ${objectDescription}.`,
 
     fields: () => ({
-      // TODO(iridian): Change the return type to GraphQLValaaReference (which must be defined).
+      // TODO(iridian): Change the return type to GraphQLValOSReference (which must be defined).
       ...generatedField("id", new GraphQLNonNull(GraphQLID),
-          `ValaaReference of this ${objectDescription}`,
+          `VRL of this ${objectDescription}`,
           resource => resource.get("id"),
           { affiliatedType: "Transientfields" },
       ),

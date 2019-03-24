@@ -1,14 +1,14 @@
 {
   "name": "@valos/tools",
   "version": "0.34.0-prerelease.18",
-  "description": "Valaa Tools API",
+  "description": "ValOS Tools API",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
-  "valaa": {
+  "valos": {
     "type": "library",
     "domain": "kernel"
   },

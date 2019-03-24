@@ -4,7 +4,7 @@ import type { VALKOptions } from "~/raem/VALK";
 import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 
-import ValaaReference from "~/raem/ValaaReference";
+import VRL from "~/raem/VRL";
 import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
 
 import { isNativeIdentifier, getNativeIdentifierValue } from "~/script";
@@ -294,7 +294,7 @@ export default class Subscription extends LiveUpdate {
     // Processing a Kuery for live updates involves walking the kuery tree for all field steps
     // which have a Vrapper as a head and subscribing to those. Effectively this means that only
     // non-final path steps need to be evaluated.
-    const head = (rawHead instanceof ValaaReference)
+    const head = (rawHead instanceof VRL)
         ? this._emitter.engine.getVrapper(rawHead) : rawHead;
     let kueryVAKON = kuery instanceof Kuery ? kuery.toVAKON() : kuery;
     let ret: any;
@@ -459,6 +459,7 @@ function throwMutationLiveKueryError (subscription, head, kueryVAKON) {
 //        otherwise return the value directly.
 const customLiveExpressionOpHandlers = {
   "§'": null,
+  "§vrl": null,
   "§ref": null,
   "§$": undefined,
   "§map": liveMap,
@@ -695,7 +696,8 @@ function liveInvoke (subscription: Subscription, head: any, kueryVAKON: Array<an
     eArgs.push(subscription._processLiteral(head, kueryVAKON[i], scope, true));
   }
   if (!eCallee._valkCreateKuery) return performDefaultGet;
-  return subscription._buildLiveKuery(head, eCallee._valkCreateKuery(...eArgs), scope, evaluateKuery);
+  return subscription._buildLiveKuery(
+      head, eCallee._valkCreateKuery(...eArgs), scope, evaluateKuery);
 }
 
 function liveTypeof (subscription: Subscription, head: any, kueryVAKON: Array<any>) {

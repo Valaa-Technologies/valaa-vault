@@ -10,7 +10,7 @@ module.exports = {
   ...valmaConfigRevealerSection,
   devServer: {
     ...shared.devServer,
-    publicPath: `/valaa/inspire/`,
+    publicPath: `/valos/inspire/`,
   },
   module: {
     ...shared.module,

@@ -1,6 +1,6 @@
 // @flow
 
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 
 import { addedTo, created, fieldsSet, destroyed, removedFrom } from "~/raem/events";
 

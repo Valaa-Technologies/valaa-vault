@@ -5,14 +5,14 @@ exports.introduction = `${exports.describe}.
 Authollery is a portmanteau of AUTHority contrOLLEr repositoRY.
 Autholleries are responsible for configuring, deploying, updating,
 monitoring and diagnosing all types of live infrastructure resources
-which relate to a particular Valaa authority.
+which relate to a particular ValOS authority.
 
 Autholleries rely heavily on various toolsets to get their job done.
 
 Will add '@valos/toolset-authollery' as devDependency.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "authollery")
-    && `Workspace is not an 'authollery' (is '${yargs.vlm.getPackageConfig("valaa", "type")}')`;
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "authollery")
+    && `Workspace is not an 'authollery' (is '${yargs.vlm.getValOSConfig("type")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

@@ -1,7 +1,7 @@
 // @flow
 
-import { transpileValaaScript, isNativeIdentifier, getNativeIdentifierValue } from "~/script";
-import { dumpObject as _dumpObject, Kuery, ValaaScriptKuery, isValaaFunction, toVAKON }
+import { transpileValoscript, isNativeIdentifier, getNativeIdentifierValue } from "~/script";
+import { dumpObject as _dumpObject, Kuery, ValoscriptKuery, isValOSFunction, toVAKON }
     from "~/script/VALSK";
 
 import Vrapper from "~/engine/Vrapper";
@@ -22,7 +22,7 @@ export {
   EngineKuery,
   pointer,
   literal,
-  ValaaScriptKuery,
+  ValoscriptKuery,
 };
 
 export {
@@ -30,7 +30,7 @@ export {
   run,
   dumpScope,
   dumpKuery,
-  isValaaFunction,
+  isValOSFunction,
   toVAKON,
 } from "~/script/VALSK";
 
@@ -59,14 +59,14 @@ export function expressionFromProperty (value: any, property: any, descriptor: ?
     if (!descriptor || descriptor.hasOwnProperty("value")) return null;
     if (!descriptor.get) {
       throw new Error(`Must specify either descriptor.value or descriptor.get${
-        ""} when defining ValaaSpace property '${String(property)}'`);
+        ""} when defining valospace property '${String(property)}'`);
     }
-    const vakon = isValaaFunction(descriptor.get) ? extractFunctionVAKON(descriptor.get)
+    const vakon = isValOSFunction(descriptor.get) ? extractFunctionVAKON(descriptor.get)
         : (descriptor.get instanceof Kuery) ? descriptor.get.toVAKON()
         : undefined;
     if (vakon === undefined) {
       throw new Error(`descriptor.get must be either VAKON kuery or a liveable function${
-        ""} when defining ValaaSpace property '${String(property)}'`);
+        ""} when defining valospace property '${String(property)}'`);
     }
     return { typeName: "KueryExpression", vakon };
   }
@@ -81,18 +81,18 @@ export function expressionFromProperty (value: any, property: any, descriptor: ?
     typeName: "Literal",
     value: trivialClone(value, (clonee, key, object, cloneeDescriptor, recurseClone) => {
       if (typeof clonee === "function") {
-        if (!isValaaFunction(clonee)) {
-          throw new Error(`While universalizing into ValaaSpace resource property '${
-              String(property)}' encountered a non-ValaaSpace function at sub-property ${key}': ${
+        if (!isValOSFunction(clonee)) {
+          throw new Error(`While universalizing into valospace resource property '${
+              String(property)}' encountered a non-valospace function at sub-property ${key}': ${
                 clonee.name}`);
         }
         return ["§capture", ["§'", extractFunctionVAKON(clonee)]];
       }
       /*
       if (cloneeDescriptor && (typeof cloneeDescriptor.get === "function")) {
-        if (!isValaaFunction(cloneeDescriptor.get)) {
-          throw new Error(`While universalizing into ValaaSpace resource property '${
-              String(property)}' encountered a non-ValaaSpace getter for sub-property ${key}': ${
+        if (!isValOSFunction(cloneeDescriptor.get)) {
+          throw new Error(`While universalizing into valospace resource property '${
+              String(property)}' encountered a non-valospace getter for sub-property ${key}': ${
                 cloneeDescriptor.get.name}`);
         }
         cloneeDescriptor.enumerable = true;
@@ -113,7 +113,7 @@ export function expressionFromProperty (value: any, property: any, descriptor: ?
       if (Object.getPrototypeOf(clonee) === Object.prototype) return undefined;
       if (clonee instanceof Kuery) return clonee.toVAKON();
       const cloneeRef = tryHostRef(clonee);
-      if (cloneeRef) return ["§ref", cloneeRef.toJSON()];
+      if (cloneeRef) return ["§vrl", cloneeRef.toJSON()];
       throw new Error(`Cannot universalize non-trivial value ${debugObjectType(value)}`);
     }),
   };
@@ -121,7 +121,7 @@ export function expressionFromProperty (value: any, property: any, descriptor: ?
 }
 
 /**
- * Template literal tag which transpiles the given string into a Valaa Kuery.
+ * Template literal tag which transpiles the given string into a ValOS Kuery.
  *
  * @export
  * @param {string[]} scripts
@@ -144,7 +144,7 @@ export function VS (texts: string[], ...variables: any[]): Kuery {
       mediaName: undefined,
       sourceMap: new Map(),
     };
-    return transpileValaaScript(source, VALEK, { sourceInfo, sourceType: "body" });
+    return transpileValoscript(source, VALEK, { sourceInfo, sourceType: "body" });
   } catch (error) {
     throw wrapError(error, `During VS literal tag, with:`,
         "\n\ttexts:", ...texts,
@@ -155,7 +155,7 @@ export function VS (texts: string[], ...variables: any[]): Kuery {
 }
 
 /**
- * Extracts a standalone VAKON from a ValaaScript function caller thunk.
+ * Extracts a standalone VAKON from a valoscript function caller thunk.
  * Any identifiers of the captured scope of the original function that
  * are referenced to from inside the function body are lifted and
  * embedded in the resulting VAKON.
@@ -169,7 +169,7 @@ export function extractFunctionVAKON (caller: any) {
     const lifts = {};
     let vakon = caller[toVAKON];
     if (!vakon) {
-      throw new Error(`Cannot extract function VAKON from non-valaascript function ${caller.name}`);
+      throw new Error(`Cannot extract function VAKON from non-valoscript function ${caller.name}`);
     }
     if (Array.isArray(vakon) && Array.isArray(vakon[0])
         && (vakon[0][0] === "§$") && (vakon[0][1] === "this")) {

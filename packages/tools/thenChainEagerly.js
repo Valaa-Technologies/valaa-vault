@@ -23,7 +23,7 @@ import { invariantifyArray } from "~/tools/invariantify";
  * value will be returned from the whole call or a thrown value
  * wrapped in context like above.
  *
- * Rationale: in Valaa codebase there are pathways which sometimes need
+ * Rationale: in ValOS codebase there are pathways which sometimes need
  * to work synchronously and sometimes asynchronously, depending on
  * what data can be known to be cached or not.
  * While 'await' keyword can accept non-promise values just fine the

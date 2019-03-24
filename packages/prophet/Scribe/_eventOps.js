@@ -1,7 +1,7 @@
 // @flow
 
 import { isTransactedLike, EventBase, Truth } from "~/raem/events";
-import { getRawIdFrom } from "~/raem/ValaaReference";
+import { getRawIdFrom } from "~/raem/VRL";
 
 import {
   MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest, ChronicleEventResult,

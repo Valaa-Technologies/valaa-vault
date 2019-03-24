@@ -2,14 +2,14 @@
 
 import * as mediaDecoders from "./mediaDecoders";
 
-export const Valaa = require("~/gateway-api/Valaa").default;
+export const valos = require("~/gateway-api/valos").default;
 export const inBrowser = require("~/gateway-api/inBrowser").default;
 export const getGlobal = require("~/gateway-api/getGlobal").default;
 
-export default Valaa.exportPlugin({ name: "@valos/tools", mediaDecoders });
+export default valos.exportPlugin({ name: "@valos/tools", mediaDecoders });
 
-export { default as valaaHash } from "./id/valaaHash";
-export { default as valaaUUID } from "./id/valaaUUID";
+export { default as valosHash } from "./id/valosHash";
+export { default as valosUUID } from "./id/valosUUID";
 
 export const contentHashFromArrayBuffer = require("./id/contentId").contentHashFromArrayBuffer;
 export const contentHashFromNativeStream = require("./id/contentId").contentHashFromNativeStream;

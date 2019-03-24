@@ -3,7 +3,7 @@
 import { Iterable, OrderedMap } from "immutable";
 import { GraphQLSchema, GraphQLObjectType } from "graphql/type";
 
-import ValaaReference, { isIdData } from "~/raem/ValaaReference";
+import VRL, { isIdData } from "~/raem/VRL";
 
 import { elevateFieldReference, elevateFieldRawSequence }
     from "~/raem/state/FieldInfo";
@@ -272,7 +272,7 @@ export default class Valker extends Resolver {
    * Following values are considered loosely packed: in themselves they're considered packed, but
    * they are accepted as unpacked inputs without implicit packing:
    *
-   * 5. Valaa references: (value instanceof ValaaReference)
+   * 5. ValOS references: (value instanceof VRL)
    *
    * All remaining values are considered strictly unpacked and Valker will try to pack them with
    * when
@@ -597,7 +597,7 @@ export default class Valker extends Resolver {
       let elevatedId;
       if (Iterable.isKeyed(object)) {
         ret = object;
-      } else if (object instanceof ValaaReference) {
+      } else if (object instanceof VRL) {
         ret = this.tryGoToTransient(object, "TransientFields", require, false);
       } else if (object._singular !== undefined) {
         if (!isIdData(object._singular)) {

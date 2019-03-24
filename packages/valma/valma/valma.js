@@ -125,7 +125,8 @@ const _vlm = {
   toolsetsConfig: undefined,
 
   getPackageConfig,
-  getValmaConfig,
+  getValOSConfig,
+  // getValmaConfig,
   getToolsetsConfig,
 
   // Registers pending updates to the package.json config file (immediately updates
@@ -2048,8 +2049,12 @@ function _reloadPackageAndToolsetsConfigs () {
 }
 
 function getPackageConfig (...keys) { return this._getConfigAtPath(this.packageConfig, keys); }
+function getValOSConfig (...keys) {
+  const ret = this._getConfigAtPath(this.packageConfig, ["valos", ...keys]);
+  return ret !== undefined ? ret : this._getConfigAtPath(this.packageConfig, ["valaa", ...keys]);
+}
 function getToolsetsConfig (...keys) { return this._getConfigAtPath(this.toolsetsConfig, keys); }
-function getValmaConfig (...keys) { return this._getConfigAtPath(this.toolsetsConfig, keys); }
+// function getValmaConfig (...keys) { return this._getConfigAtPath(this.toolsetsConfig, keys); }
 
 function _getConfigAtPath (root, keys) {
   return [].concat(...keys)
@@ -2184,6 +2189,7 @@ function _flushPendingConfigWrites () {
     reorderedConfig.name = _vlm.packageConfig.name;
     reorderedConfig.version = _vlm.packageConfig.version;
     if (_vlm.packageConfig.valaa !== undefined) reorderedConfig.valaa = _vlm.packageConfig.valaa;
+    if (_vlm.packageConfig.valos !== undefined) reorderedConfig.valos = _vlm.packageConfig.valos;
     Object.keys(_vlm.packageConfig).forEach(key => {
       if (reorderedConfig[key] === undefined) reorderedConfig[key] = _vlm.packageConfig[key];
     });

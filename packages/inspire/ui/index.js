@@ -6,14 +6,14 @@ import ContextMenuTrigger, { DefaultContextMenuTrigger } from "./ContextMenuTrig
 // import ExpressionFieldEditor from "./ExpressionFieldEditor";
 import ForEach from "./ForEach";
 import If from "./If";
-import InspireGatewayStatus from "./InspireGatewayStatus";
+import GatewayStatus from "./GatewayStatus";
 // import LinkFieldEditor from "./LinkFieldEditor";
 import MediaEditor from "./MediaEditor";
 // import TextFieldEditor from "./TextFieldEditor";
 import TextFileEditor from "./TextFileEditor";
 import UIComponent from "./UIComponent";
 import UIContext from "./UIContext";
-import ValaaScope from "./ValaaScope";
+import Valoscope from "./Valoscope";
 
 // List of Vidgets available for Editor JSX files
 
@@ -24,8 +24,9 @@ const Vidgets = {
 //  ExpressionFieldEditor,
   ForEach,
   If,
-  InspireGatewayStatus,
-  InspireClientStatus: InspireGatewayStatus,
+  GatewayStatus,
+  InspireGatewayStatus: GatewayStatus,
+  InspireClientStatus: GatewayStatus,
 //  LinkFieldEditor,
   MediaEditor,
   SimpleBar,
@@ -34,7 +35,9 @@ const Vidgets = {
   UIComponent,
   UIContext,
 //  ValaaNode,
-  ValaaScope,
+  ValaaScope: Valoscope,
+  Valoscope,
+  VScope: Valoscope,
 };
 
 export default Vidgets;

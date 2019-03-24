@@ -59,7 +59,7 @@ npm start
 
 This launches webpack-dev-server at 0.0.0.0:8080 which serves the
 `Inspire Gateway` javascript runtime to the client browser accessing
-it. The gateway will deliver `Zero Editor` as its `ValaaSpace` entry
+it. The gateway will deliver `Zero Editor` as its `valospace` entry
 site (which sourced locally from `./revelations/local-zero`).
 
 ### No remote authority plugins - limited persistence
@@ -67,37 +67,37 @@ site (which sourced locally from `./revelations/local-zero`).
 local-zero supports only `valaa-local:` and `valaa-memory:` schemes, so
 no remote content can be accessed. All content that is created is
 persisted only locally inside the client browser IndexedDB cache.
-`ValaaSpace` content will thus survive page refreshes but can still be
+`valospace` content will thus survive page refreshes but can still be
 unpredictably lost. This can happen for example when the browser
 clears its cache for new space.
 
 
-## Overview - what is ValaaSpace
+## Overview - what is valospace
 
-Most of the Valaa infrastructure logic lies within the sub-modules of
+Most of the ValOS infrastructure logic lies within the sub-modules of
 the Inspire client gateway. The gateway is a javascript bundle running
-in the user browsers, serving various Valaa applications to the users.
+in the user browsers, serving various ValOS applications to the users.
 
-These applications are created as combinations of Valaa resources which
-are stored in a globally shared conceptual `ValaaSpace`. The physical
+These applications are created as combinations of ValOS resources which
+are stored in a globally shared conceptual `valospace`. The physical
 storage of individual resources varies based on the implementation of
 their `authority`. But as
 1. the resource identifiers are provably, auditably globally unique,
 2. the resources are locateable,
 3. unrestricted cross-references are possible, and
 4. all ValOS resources share the same object model,
-together these qualities unifies `ValaaSpace` as the most consequential
+together these qualities unifies `valospace` as the most consequential
 domain for all of ValOS content.
 
 In order to efficiently present these applications to the gateway
-loads only small parts of the whole ValaaSpace (called `partitions`)
+loads only small parts of the whole valospace (called `partitions`)
 inside the user's browser. It accomplishes this using `event streams`.
 
 ### Event stream circle of life
 
 Inspire client connects to selected partitions inside remote
 `authorities` to receive application and content event streams. It
-then locally interprets these events as Valaa resources which contain
+then locally interprets these events as ValOS resources which contain
 the structure, code, UI components and data all together making up the
 application. Inspire then renders these to the user as a fully locally
 interactive web page.
@@ -109,9 +109,9 @@ then authorize this command as a new event as part of its event stream.
 When doing so the authority sends the new event to all other clients
 who were registered to the content, thus completing the circle.
 
-Everything that happens or is created in ValaaSpace is created using
-this cycle. Zero, the primary ValaaSpace content editor, is merely
-another Valaa application rendered by Inspire and has indeed been
+Everything that happens or is created in valospace is created using
+this cycle. Zero, the primary valospace content editor, is merely
+another ValOS application rendered by Inspire and has indeed been
 primarily developed using itself (after a brief bootstrapping phase).
 
 ### Backend authorities can be simple
@@ -129,7 +129,7 @@ A minimal but complete backend authority needs to be two things:
 Backend authorities are allowed and in fact expected to be much more
 than this. Nevertheless, when even such minimal authorities are
 combined with a way to deliver the Inspire runtime to users this
-completes Valaa as a fully self-contained platform.
+completes ValOS as a fully self-contained platform.
 
 Note: tools for managing reference authority deplyoments will likely
 be contained in a separate repository (as valma).
@@ -154,16 +154,16 @@ provide an incremental test harness under */test/*TestHarness.
 - concepts: `event sourcing`, `distributed infrastructure`, `es6`
 
 
-### @valos/raem provides Valaa Resources And Events Model `ValOS-RAEM` (/vælɑːɹɛem/)
+### @valos/raem provides ValOS Resources And Events Model `ValOS-RAEM` (/vælɑːɹɛem/)
 
-Provides the central Valaa technologies: the Valaa Resource Model and
-the Valaa Event Model. Provides the connection between these in the
-form of `reducers` which convert event streams into in-memory Valaa
+Provides the central ValOS technologies: the ValOS Resource Model and
+the ValOS Event Model. Provides the connection between these in the
+form of `reducers` which convert event streams into in-memory ValOS
 resources and their updates. Provides schema definitions for `Resource`
-and other essential Valaa resource model interfaces. Provides a kuery
+and other essential ValOS resource model interfaces. Provides a kuery
 language `VALK` for accessing and making limited manipulations to the
 resources. Provides the low level APIs for manipulating partitions.
-Implements `ghost instancing` for the Valaa resource model;
+Implements `ghost instancing` for the ValOS resource model;
 a generalization extension of the traditional prototypical inheritance
 which recursively inherits the sub-components of the prototype as
 transparent but selectively modifiable `ghosts`. Provides referential
@@ -171,21 +171,21 @@ integrity to the resource model via `couplings`.
 
 - depends: `@valos/tools`, `immutable`
 - exports: `Corpus`, `Command`, `VALK`, `RAEMContentAPI`
-- ValaaSpace: `Resource`, `TransientFields`, `Bvob`, `Partition`
+- valospace: `Resource`, `TransientFields`, `Bvob`, `Partition`
 - concepts: `ghost instancing`, `partitions`, `couplings`
 
 
-### @valos/script extends Javascript with ValOS-RAEM as `ValaaScript`
+### @valos/script extends JavaScript with ValOS-RAEM as `valoscript`
 
-ValaaScript is a semantic, non-syntactic extension of Javascript which
-seamlessly integrates Valaa resources with the Javascript object model.
-Bridges the gap between Javascript model and ValOS-RAEM by considerably
-extending the schema. Provides an implementation for ValaaScript via
+Valoscript is a semantic, non-syntactic extension of JavaScript which
+seamlessly integrates ValOS resources with the JavaScript object model.
+Bridges the gap between JavaScript model and ValOS-RAEM by considerably
+extending the schema. Provides an implementation for valoscript via
 transpiling into VALK kueries as an intermediate language.
 
 - depends: `@valos/raem`, `acorn`
-- exports: `transpileValaaScript`, `VALSK`, `ScriptContentAPI`
-- ValaaSpace: `Scope`, `Property`
+- exports: `transpileValoscript`, `VALSK`, `ScriptContentAPI`
+- valospace: `Scope`, `Property`
 - concepts: `ECMAScript2015`, `scope`, `transpilation`
 
 
@@ -196,7 +196,7 @@ authorities but also to local browser `IndexedDB` storage. Provides
 a non-authoritative in-memory repository `FalseProphet`, which wraps
 @valos/raem and @valos/script. Provides command queueing and reformation
 capabilities. Provides a client-side `ACID` `transaction` framework
-with transparent ValaaScript integration. Provides bvob content
+with transparent valoscript integration. Provides bvob content
 caching and management pathways. Extends the schema with folder-like
 structure as well as relation-like connectivity. Together these
 provide fully offline mode readiness. Provides the backend event
@@ -205,48 +205,48 @@ REST lambdas and the AWS mqtt IoT as event pub-sub.
 
 - depends: `@valos/script`, `IndexedDB`, `AWS IoT/S3/DynamoDB`
 - exports: `FalseProphet`, `PartitionConnection`, `ProphetContentAPI`
-- ValaaSpace: `Relatable`, `Entity`, `Media`, `Relation`,
+- valospace: `Relatable`, `Entity`, `Media`, `Relation`,
   `TransientProphetFields`
 - concepts: `ACID`, `authorities`, `pub-sub`, `offline readiness`
 
 
 ### @valos/engine provides the ValOS-RAEM object mapper and computation engine
 
-Provides the live proxies (`Vrappers`) to ValaaSpace resources with
-`ValaaEngine`. Completes the modifcation and transaction frameworks
+Provides the live proxies (`Vrappers`) to valospace resources with
+`Engine`. Completes the modifcation and transaction frameworks
 with the ability to create commands with the proxy objects. Provides
 Media content decoder framework, which allows converting
-ValaaScript content inside ValaaSpace into executable code. This also
-allows integrating existing javascript code through ValaaScript
+valoscript content inside valospace into executable code. This also
+allows integrating existing javascript code through valoscript
 seamless integration. Converts events into subscriber callbacks calls.
-Together these enable fully live-updating ValaaScript code via VALK
-kueries as intermediate language. Exposes ValaaScript standard API
-into ValaaSpace as `Valaa` execution environment global scope
-primitive, with which ValaaScript programs have full control over
+Together these enable fully live-updating valoscript code via VALK
+kueries as intermediate language. Exposes valoscript standard API
+into valospace as `valos` execution environment global scope
+primitive, with which valoscript programs have full control over
 computation, stream connectivity and rendering environment inside the
 browser.
 
 - depends: `@valos/prophet`
-- exports: `ValaaEngine`, `Vrapper`, `VALEK`
-- ValaaSpace: `Valaa.*`, `Object integration`
+- exports: `Engine`, `Vrapper`, `VALEK`
+- valospace: `valos.*`, `Object integration`
 - concepts: `live kuery`, `code-as-content`, `3rd party libraries`
 
 
 ### @valos/inspire provides the ValOS browser gateway and DOM UI renderer
 
 Provides the runtime entry point and UI rendering integration using
-`React`. Sets up the full ValaaStack. Manages initial authentication
-and connects to the entry partition. Sets up the rendering module,
-attaches it to DOM and renders the entry partition `LENS`. Renders
-resources using attached `lens` Media files. Introduces a Media type
-`VSX` (similar to `JSX`) specifically for this purpose, which allows
-writing natural HTML but also embedding it with fully live ValaaScript
-snippets. With promise-enabled rendering enables fully dynamic
-ValaaSpace integration with the UI.
+`React`. Sets up the full ValOS gateway stack. Manages initial
+authentication and connects to the entry partition. Sets up the
+rendering module, attaches it to DOM and renders the entry partition
+`LENS`. Renders resources using attached `lens` Media files. Introduces
+a Media type `VSX` (similar to `JSX`) specifically for this purpose,
+which allows writing natural HTML but also embedding it with fully live
+valoscript snippets. With promise-enabled rendering enables fully
+dynamic valospace integration with the UI.
 
 - depends: `@valos/engine`, `React`, `brace`
 - exports: `createInspireClient`,
-- ValaaSpace: `ValaaScope`, `If`, `ForEach`, `TextFileEditor`
+- valospace: `Valoscope`, `If`, `ForEach`, `TextFileEditor`
 - concepts: `model-view`, `HTML5/CSS/JS`, `rapid devevelopment`
 
 

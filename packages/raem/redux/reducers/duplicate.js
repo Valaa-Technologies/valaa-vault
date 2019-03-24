@@ -1,7 +1,6 @@
 import { OrderedSet } from "immutable";
 
-import { vRef } from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL, { vRef } from "~/raem/VRL";
 
 import Transient, { createTransient, getTransientTypeName, PrototypeOfImmaterialTag }
     from "~/raem/state/Transient";
@@ -80,7 +79,7 @@ export default function duplicate (bard: DuplicateBard) {
       : postProcessDuplicationContext(bard);
 }
 
-function _createDuplicate (bard: DuplicateBard, duplicateId: VRef, typeName: string,
+function _createDuplicate (bard: DuplicateBard, duplicateId: VRL, typeName: string,
     initialState: Object, preOverrides?: Object, newObjectTransient: Object) {
   // Assumes that the original ie. duplicate source object is bard.objectTransient/Id
   bard._duplicateIdByOriginalRawId[bard.objectId.rawId()] = duplicateId;
@@ -144,7 +143,7 @@ export function duplicateFields (bard: DuplicateBard, mutableTransient: Transien
   }
 }
 
-function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalRef: VRef, ownerId: VRef) {
+function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalRef: VRL, ownerId: VRL) {
   let originalOwnlingRawId;
   let originalGhostPath;
   let originalGhostProtoPath;

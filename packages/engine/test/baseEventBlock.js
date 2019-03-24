@@ -1,7 +1,7 @@
 // @flow
 
 import { created } from "~/raem/events";
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 import VALEK, { literal, pointer, kueryExpression } from "~/engine/VALEK";
 
 export default [{

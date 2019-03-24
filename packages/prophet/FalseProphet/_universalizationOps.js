@@ -1,8 +1,7 @@
 // @flow
 
 // import ValaaURI, { createValaaURI } from "~/raem/ValaaURI";
-import ValaaReference, { /* vRef, */ JSONIdData } from "~/raem/ValaaReference";
-// import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL, { /* vRef, */ JSONIdData } from "~/raem/VRL";
 import GhostPath, { ghostPathFromJSON } from "~/raem/state/GhostPath";
 
 import { dumpObject, debugObjectType, wrapError } from "~/tools/wrapError";
@@ -10,7 +9,7 @@ import { dumpObject, debugObjectType, wrapError } from "~/tools/wrapError";
 import FalseProphet from "./FalseProphet";
 
 /*
-export function vRefFromURI (uri: ValaaURI | string): VRef {
+export function vRefFromURI (uri: ValaaURI | string): VRL {
   const [partitionURI, fragment] = String(uri).split("#");
   if (!fragment) return vRef("", null, null, createValaaURI(partitionURI));
   const [rawId, referenceOptions] = fragment.split("?");
@@ -21,19 +20,19 @@ export function vRefFromURI (uri: ValaaURI | string): VRef {
   let coupling;
   for (const [key, value] of referenceOptions.split("&").map(pair => pair.split("="))) {
     if (key === "coupling") coupling = value;
-    else throw new Error(`ValaaReference option '${key}' not implemented yet`);
+    else throw new Error(`VRL option '${key}' not implemented yet`);
   }
   return vRef(rawId, coupling, undefined, createValaaURI(partitionURI));
 }
 */
 
 /*
-export function vRefFromJSON (json: JSONIdData, RefType: Object = VRef): VRef {
+export function vRefFromJSON (json: JSONIdData, RefType: Object = VRL): VRL {
   const ret = new RefType(json);
   if ((typeof ret[PackedHostValue][2] === "string")
       || (ret[PackedHostValue][1] && typeof ret[PackedHostValue][1] === "object")) {
     // Flip obsolete coupledField / ghostPath order.
-    console.warn("Encounted obsolete ValaaReference field order, expected " +
+    console.warn("Encounted obsolete VRL field order, expected " +
         "[rawId, coupledField, ghostPath], got [rawId, ghostPath, coupledField]");
     const temp = ret[PackedHostValue][1];
     ret[PackedHostValue][1] = ret[PackedHostValue][2];
@@ -59,7 +58,7 @@ const valOSURIRegExp = new RegExp(valOSURIRegExpString);
 const oldRawIdRegExpString = "^([a-zA-Z0-9+/_-]*)$";
 const oldRawIdRegExp = new RegExp(oldRawIdRegExpString);
 
-export function deserializeVRef (serializedRef: string | JSONIdData,
+export function deserializeVRL (serializedRef: string | JSONIdData,
     currentPartitionURI?: string, falseProphet: ?FalseProphet, isInRefClause: ?boolean) {
   let nss, resolver, query, fragment;
   try {
@@ -99,8 +98,8 @@ export function deserializeVRef (serializedRef: string | JSONIdData,
     } else if (!Array.isArray(serializedRef)) {
       throw new Error(`Malformed urn:valos reference ${debugObjectType(serializedRef)
           }, expected URI string or an array expansion`);
-    } else if (serializedRef[0] === "§ref") {
-      return deserializeVRef(serializedRef[1], currentPartitionURI, falseProphet, true);
+    } else if ((serializedRef[0] === "§vrl") || (serializedRef[0] === "§ref")) {
+      return deserializeVRL(serializedRef[1], currentPartitionURI, falseProphet, true);
     } else if ((serializedRef.length === 1)
         || (serializedRef[1] && (typeof serializedRef[1] === "object"))) {
       // new-style array expansion: [nss, resolverComponent, queryComponent, fragmentComponent]
@@ -115,7 +114,7 @@ export function deserializeVRef (serializedRef: string | JSONIdData,
       /*
       if (falseProphet) {
         falseProphet.warnEvent(1, () => [
-          "deserializeVRef encountered an old-style reference which will be deprecated:",
+          "deserializeVRL encountered an old-style reference which will be deprecated:",
           ...dumpObject(serializedRef),
         ]);
       }
@@ -129,7 +128,7 @@ export function deserializeVRef (serializedRef: string | JSONIdData,
     }
 
     if (!falseProphet || ((currentPartitionURI === null) && !partitionURIString)) {
-      return new ValaaReference(nss)
+      return new VRL(nss)
           .initResolverComponent(resolver)
           .initQueryComponent(query)
           .initFragmentComponent(fragment);
@@ -143,13 +142,13 @@ export function deserializeVRef (serializedRef: string | JSONIdData,
     const connection = falseProphet._connections[partitionURIString];
     referencePrototype = connection
         ? connection._referencePrototype
-        : falseProphet._inactivePartitionVRefPrototypes[partitionURIString];
+        : falseProphet._inactivePartitionVRLPrototypes[partitionURIString];
     const ghostPath = resolver.ghostPath;
     if (!referencePrototype) {
       resolver.inactive = true;
       delete resolver.ghostPath;
-      referencePrototype = falseProphet._inactivePartitionVRefPrototypes[partitionURIString] =
-          new ValaaReference().initResolverComponent(resolver);
+      referencePrototype = falseProphet._inactivePartitionVRLPrototypes[partitionURIString] =
+          new VRL().initResolverComponent(resolver);
     }
     const ret = Object.create(referencePrototype)
         .initNSS(nss)
@@ -163,7 +162,7 @@ export function deserializeVRef (serializedRef: string | JSONIdData,
     return ret;
   } catch (error) {
     throw (falseProphet ? falseProphet.wrapErrorEvent.bind(falseProphet) : wrapError)(error,
-        new Error("deserializeVRef()"),
+        new Error("deserializeVRL()"),
             "\n\tserializedReference:", serializedRef,
             "\n\tcurrentPartitionURI:", currentPartitionURI,
             "\n\tnss:", nss,

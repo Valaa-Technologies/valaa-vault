@@ -1,2 +1,2 @@
-# @valos/toolset-vault contains tools for managing Valaa vaults
+# @valos/toolset-vault contains tools for managing ValOS vaults
 

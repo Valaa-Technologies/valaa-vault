@@ -10,8 +10,8 @@ root from package @valos/toolset-vault directory templates/.*.`;
 
 // Example template which displays the command name itself and package name where it is ran
 // Only enabled inside package
-exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "vault")
-    && `Workspace is not a vault (is ${yargs.vlm.getPackageConfig("valaa", "type")})`;
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
+    && `Workspace is not a vault (is ${yargs.vlm.getValOSConfig("type")})`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

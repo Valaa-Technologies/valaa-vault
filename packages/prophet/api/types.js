@@ -1,13 +1,13 @@
 // @flow
 
 import { Command, EventBase, Truth } from "~/raem/events";
-import type { VRef } from "~/raem/ValaaReference";
+import type { VRL } from "~/raem/VRL";
 import { getActionFromPassage, Story } from "~/raem/redux/Bard";
 
 import thenChainEagerly from "~/tools/thenChainEagerly";
 
 export type MediaInfo = {
-  mediaRef: VRef,
+  mediaVRL: VRL,
   bvobId?: string,
   name?: string,
   sourceURL?: string,

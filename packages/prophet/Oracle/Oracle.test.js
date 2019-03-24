@@ -1,11 +1,11 @@
 import { created, transacted, fieldsSet } from "~/raem/events/index";
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
 
 import { createProphetOracleHarness } from "~/prophet/test/ProphetTestHarness";
 
 const testAuthorityURI = "valaa-test:";
-// const sharedURI = "valaa-shared-content";
+// const sharedURI = "valos-shared-content";
 
 let harness = null;
 afterEach(() => { if (harness) harness.cleanupScribe(); harness = null; });

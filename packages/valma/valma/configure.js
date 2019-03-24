@@ -6,8 +6,8 @@ exports.introduction = `${exports.describe}.
 
 Invokes all in-use toolset configure commands.`;
 
-exports.disabled = (yargs) => !yargs.vlm.getPackageConfig("valaa")
-    && "No package.json valaa stanza found (run 'vlm init')";
+exports.disabled = (yargs) => !yargs.vlm.getValOSConfig()
+    && "No package.json valos stanza found (run 'vlm init')";
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
@@ -17,10 +17,10 @@ exports.builder = (yargs) => yargs.options({
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const valaa = vlm.getPackageConfig("valaa");
-  if (!valaa || !valaa.type || !valaa.domain) {
-    throw new Error("valma-configure: current directory is not a valaa repository; "
-        + "no package.json with valaa stanza with both type and domain set"
+  const valos = vlm.getValOSConfig();
+  if (!valos || !valos.type || !valos.domain) {
+    throw new Error("valma-configure: current directory is not a valos repository; "
+        + "no package.json with valos stanza with both type and domain set"
         + "(maybe run 'vlm init' to initialize?)");
   }
   if (!vlm.getToolsetsConfig()) {
@@ -30,11 +30,11 @@ exports.handler = async (yargv) => {
   const rest = [{ reconfigure: yargv.reconfigure }, ...yargv._];
 
   if (!yargv.toolsetGlob) {
-    await vlm.invoke(`.configure/.domain/${valaa.domain}`, rest);
-    await vlm.invoke(`.configure/.type/${valaa.type}`, rest);
+    await vlm.invoke(`.configure/.domain/${valos.domain}`, rest);
+    await vlm.invoke(`.configure/.type/${valos.type}`, rest);
     await vlm.interact("yarn install");
     await vlm.invoke(`.configure/.select-toolsets`, rest);
   }
-  return vlm.invoke(`.configure/{.domain/.${valaa.domain}/,.type/.${valaa.type}/,}.toolset/${
+  return vlm.invoke(`.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}.toolset/${
       yargv.toolsetGlob || ""}{*/**/,}*`, rest);
 };

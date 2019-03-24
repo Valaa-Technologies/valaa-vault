@@ -12,10 +12,10 @@ Additional files specifying formal style rules:
 Note: while formal ValOS linter rules are formally based on airbnb
 style there is a lot of divergence in practice.
 
-Like all ValOS specifications this style guide applies only to Valaa
-Open System packages. Other Valaa ecosystem packages and projects are
+Like all ValOS specifications this style guide applies only to ValOS
+core packages. Other ValOS ecosystem packages and projects are
 free to deviate or use their own styles and principles without
-affecting Valaa compatibility.
+affecting ValOS compatibility.
 
 ## 1. Semantic principles
 This section lists generic semantic ValOS design principles and their
@@ -23,7 +23,7 @@ rationales.
 
 ### 1.1. Use ECMAScript everywhere
 ECMAScript should be used as the text-based turing language of choice
-in all ValOS contexts (ValaaScript is acceptable as an ECMAScript
+in all ValOS contexts (valoscript is acceptable as an ECMAScript
 derivative).
 
 ValOS ecosystem as a distributed, multitenant architecture is complex
@@ -40,23 +40,23 @@ maximize code reuse.
 When solutions necessitate other languages, they should be implemented
 in following order of preference:
 1. Transpiled into ECMAScript. This allows full native reuse of the
-   solution throughout all of Valaa ecosystem and potentially provides
+   solution throughout all of ValOS ecosystem and potentially provides
    value for the JS community at large too. Unfortunately not often
    feasible due to lack of isolation or maintenance reasons.
 2. Embedded within ECMAScript-based service or library. This allows
    the API layer to reuse existing validation, (de)serialization and
    similar code, reducing code duplication and minimizing bugs.
-3. As a service with a ValaaSpace API. This is usually done as a
+3. As a service with a valospace API. This is usually done as a
    plugin of some existing ValOS authority with a plugin API
    specifically built for this purpose. This can also be done by
    implementing the event stream API of some authority. Or this can be
-   done as a full Valaa (non-ValOS) authority. Note that while
-   ValaaSpace API is most useful for end users the transpilation and
+   done as a full ValOS (non-core) authority. Note that while
+   valospace API is most useful for end users the transpilation and
    embeddment solutions are still higher priority. This is because they
-   can also be easily exposed via ValaaSpace API's but they providing
+   can also be easily exposed via valospace API's but they providing
    other benefits as well.
 4. As a RESTful service which consumes and produces I-JSON. While
-   perfectly acceptable solution as part of the larger Valaa ecosystem
+   perfectly acceptable solution as part of the larger ValOS ecosystem
    this is least likely to be accepted as part of ValOS actual. At the
    very least this solution should prove that it reduces overall
    complexity. See next chapter about I-JSON.
@@ -96,7 +96,7 @@ Some dialects make use of some shared tooling like
 (a base64 variant) must be used when binary content needs to be encoded
 as text. While main binary content is stored inside Media resources
 which has its dedicated pathways this need can still arise. This is
-recommended by I-JSON and a notable Valaa example is derived resource
+recommended by I-JSON and a notable valos example is derived resource
 ID creation via hash algorithms (which operate on binary content) which
 should be url-compatible.
 

@@ -1,11 +1,11 @@
 {
   "name": "valma",
   "version": "0.34.0-prerelease.18",
-  "valaa": {
+  "valos": {
     "type": "toolset",
     "domain": "infrastructure"
   },
-  "description": "A convenience Valaa CLI tool to context-dependent infrastructure command scripts",
+  "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
   "private": false,
@@ -22,7 +22,7 @@
     "valma-init": "valma/init.js",
     "valma-status": "valma/status.js",
     "valma-$": "valma/execute.js",
-    ".valma-configure_.valaa-stanza": "valma/configure/valaa-stanza.js",
+    ".valma-configure_.valos-stanza": "valma/configure/valos-stanza.js",
     ".valma-configure_.select-toolsets": "valma/configure/select-toolsets.js",
     ".valma-configure_.domain_authollery": "valma/configure/domain/authollery.js",
     ".valma-configure_.domain_gateway": "valma/configure/domain/gateway.js",

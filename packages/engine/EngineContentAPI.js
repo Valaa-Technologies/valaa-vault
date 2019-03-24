@@ -3,7 +3,7 @@ import createContentAPI from "~/raem/tools/graphql/createContentAPI";
 import ProphetContentAPI from "~/prophet/ProphetContentAPI";
 
 export default createContentAPI({
-  name: "ValaaEngineContentAPI",
+  name: "ValOSEngineContentAPI",
   inherits: [ProphetContentAPI],
   exposes: [],
 });

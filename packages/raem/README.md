@@ -31,19 +31,19 @@ This library provides:
   for ValOS resources.
 - `ValOSURL` specification which allows for universal locating of
   resources.
-- `ValaaSpace` definition as a distributed set of resources containing
-  references to each other using the ValaaURIs.
+- `valospace` definition as a distributed set of resources containing
+  references to each other using the VRLs.
 - `partitions` mechanism which allows for unlimited scalability of the
-  `ValaaSpace` into a singular globally distributed and unified object
+  `valospace` into a singular globally distributed and unified object
   space.
 
-[//]: # (TODO(iridian): ValaaSpace and partitions should in principle be inside @ValOS/prophet)
+[//]: # (TODO(iridian): valospace and partitions should in principle be inside @ValOS/prophet)
 [//]: # (TODO(iridian): This refactoring effort would be valuable otherwise as well as it would clarify Valker API's and simplify its implementation)
 [//]: # (TODO(iridian): However that's gonna be a damn of a refactoring process to fully abstract and excise them from @ValOS/raem)
 
 - depends: `@ValOS/tools`, `immutable`
 - exports: `Corpus`, `Command`, `VALK`, `Valker`, `RAEMContentAPI`
-- ValaaSpace: `Resource`, `TransientFields`, `Bvob`, `Partition`
+- valospace: `Resource`, `TransientFields`, `Bvob`, `Partition`
 - concepts: `ghost instancing`, `partitions`, `couplings`
 
 
@@ -111,9 +111,9 @@ By the nature of its distributed event sourcing architecture ValOS
 focuses heavily on the frontend. The cross-compatibility between
 components is driven by how new backends can integrate and talk with
 existing front-end clients. This is facilitated by front-end plugin
-systems which enables new valaa URI schemes to specify new routing
+systems which enables new ValOS URI schemes to specify new routing
 solutions and fundamentally new backend infrastructures, as long as
-said infrastructures can route valaa event streams to clients. This
+said infrastructures can route ValOS event streams to clients. This
 corresponds to how ValOS doesn't specify how a *partition URI*
 identifies and locates partitions and authorities but leaves it to
 the scheme specifications and their reference implementations of
@@ -210,7 +210,7 @@ Resources identified by these parts are tightly bound to the resource
 identified by the primary part (which must exist). They must be always
 directly or indirectly owned by the primary resource.
 
-### 1.3. ValaaReference
+### 1.3. VRL
 
 Javascript class which implements ValOS reference URI and associated
 operations.

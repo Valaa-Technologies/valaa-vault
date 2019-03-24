@@ -1,7 +1,7 @@
 // @flow
 
 import type { EventBase } from "~/raem/events";
-import type { VRef } from "~/raem/ValaaReference";
+import type { VRL } from "~/raem/VRL";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import {
@@ -9,7 +9,7 @@ import {
   ReceiveEvents, RetrieveMediaBuffer,
 } from "~/prophet/api/types";
 import { tryAspect } from "~/prophet/tools/EventAspects";
-import { deserializeVRef } from "~/prophet/FalseProphet";
+import { deserializeVRL } from "~/prophet/FalseProphet";
 
 import { DelayedQueue, dumpObject, thenChainEagerly } from "~/tools";
 
@@ -266,15 +266,15 @@ export default class ScribePartitionConnection extends PartitionConnection {
   _reloadCommandQueue (/* conflictingCommandEventId: number */) {}
 
   _determineEventMediaPreOps (mediaEvent: Object, rootEvent: Object) {
-    const mediaRef = deserializeVRef(mediaEvent.id);
-    let pendingEntry = this._pendingMediaLookup[mediaRef.rawId()];
+    const mediaVRL = deserializeVRL(mediaEvent.id);
+    let pendingEntry = this._pendingMediaLookup[mediaVRL.rawId()];
     try {
-      return _determineEventMediaPreOps(this, mediaEvent, rootEvent, mediaRef, pendingEntry);
+      return _determineEventMediaPreOps(this, mediaEvent, rootEvent, mediaVRL, pendingEntry);
     } catch (error) {
-      if (!pendingEntry) pendingEntry = this._pendingMediaLookup[mediaRef.rawId()];
+      if (!pendingEntry) pendingEntry = this._pendingMediaLookup[mediaVRL.rawId()];
       throw this.wrapErrorEvent(error, `_initiateMediaRetrievals(${
-              ((pendingEntry || {}).mediaInfo || {}).name || ""}/${mediaRef.rawId()})`,
-          "\n\tmediaRef:", mediaRef,
+              ((pendingEntry || {}).mediaInfo || {}).name || ""}/${mediaVRL.rawId()})`,
+          "\n\tmediaVRL:", mediaVRL,
           "\n\tmediaEvent:", ...dumpObject(mediaEvent),
           "\n\tpendingEntry:", ...dumpObject(pendingEntry),
           "\n\troot event:", ...dumpObject(rootEvent),
@@ -313,22 +313,22 @@ export default class ScribePartitionConnection extends PartitionConnection {
     }
   }
 
-  _getMediaEntry (mediaRef: VRef, require_ = true) {
+  _getMediaEntry (mediaVRL: VRL, require_ = true) {
     let currentStep;
     try {
       // Fetch from lookups - traverse media prototype chain.
       do {
-        const mediaRawId = currentStep ? currentStep.headRawId() : mediaRef.rawId();
+        const mediaRawId = currentStep ? currentStep.headRawId() : mediaVRL.rawId();
         const ret = this._pendingMediaLookup[mediaRawId]
             || this._prophet._persistedMediaLookup[mediaRawId];
         if (ret) return ret;
-        currentStep = currentStep ? currentStep.previousGhostStep() : mediaRef.previousGhostStep();
+        currentStep = currentStep ? currentStep.previousGhostStep() : mediaVRL.previousGhostStep();
       } while (currentStep);
-      if (require_) throw new Error(`Media entry for ${mediaRef.toString()} not found`);
+      if (require_) throw new Error(`Media entry for ${mediaVRL.toString()} not found`);
       return undefined;
     } catch (error) {
       throw this.wrapErrorEvent(error, `_getMediaEntry(..., require = ${require_})`,
-          "\n\tmediaId:", ...dumpObject(mediaRef));
+          "\n\tmediaId:", ...dumpObject(mediaVRL));
     }
   }
 

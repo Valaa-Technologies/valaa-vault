@@ -2,10 +2,10 @@
 
 import { Seq, Iterable } from "immutable";
 
-import ValaaReference from "~/raem/ValaaReference";
+import VRL from "~/raem/VRL";
 
 export default function denormalizedFromJS (data) {
-  if ((typeof data !== "object") || (data === null) || (data instanceof ValaaReference)) {
+  if ((typeof data !== "object") || (data === null) || (data instanceof VRL)) {
     return data;
   }
   if (Array.isArray(data)) return Seq(data).map(denormalizedFromJS).toList();

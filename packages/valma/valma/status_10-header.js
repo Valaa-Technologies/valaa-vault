@@ -4,18 +4,19 @@ exports.command = ".status/10-header";
 exports.describe = "Display the generic information header for current workspace";
 exports.introduction = `${exports.describe}.`;
 
-exports.disabled = (yargs) => !yargs.vlm.getPackageConfig("valaa", "type")
-    && `No package.json valaa.type stanza found`;
+exports.disabled = (yargs) => !yargs.vlm.getPackageConfig("valos", "type")
+    && !yargs.vlm.getValOSConfig("type")
+    && `No package.json valos.type stanza found`;
 exports.builder = (yargs) => yargs;
 
 exports.handler = (yargv) => {
   const vlm = yargv.vlm;
   const config = yargv.vlm.packageConfig;
-  const valaa = config && config.valaa;
-  if (!valaa || !valaa.type || !valaa.domain) {
+  const valos = config && (config.valos || config.valaa);
+  if (!valos || !valos.type || !valos.domain) {
     vlm.warn(
 `package '${yargv.vlm.theme.package(config && config.name)}' is not a
-valaa repository. Either package.json doesn't have the .valaa stanza or
+valos workspace. Either package.json doesn't have the .valos stanza or
 its .domain or .type is not set.
 Call '${yargv.vlm.theme.command("vlm init")}' to initialize.
 `);
@@ -25,7 +26,7 @@ Call '${yargv.vlm.theme.command("vlm init")}' to initialize.
     "": { entries: [{ header: {
       heading: {
         style: "bold",
-        text: `${valaa.domain} ${valaa.type} ${vlm.theme.package(config.name)}@${
+        text: `${valos.domain} ${valos.type} ${vlm.theme.package(config.name)}@${
             vlm.theme.version(config.version)}` }
     } }] },
     header: [],

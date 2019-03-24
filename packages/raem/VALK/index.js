@@ -1,14 +1,17 @@
 // @flow
 
 /**
- * VALK = VAlaa Language for Kuerying.
+ * VALK = VAlos Language for Kuerying.
  * Collection of top-level chainable kuery operations.
- * Default export is an empty kuery root object. It's the starting point for building kueries:
+ * Default export is an empty kuery root object. It's the starting
+ * point for building kueries:
  * `const toOwner = VALK.toField("owner");`.
- * Note the lack of function call parentheses around VALK. This works because VALK kuery objects are
- * immutable. Each kuery member convenience operation returns a new kuery object which represents
- * the new operation added to the previous kuery object. The actual JSON representation of the kuery
- * or VAKON (VAlaa Kuery Object Notation) can be extracted from such a Kuery with toVAKON.
+ * Note the lack of function call parentheses around VALK. This works
+ * because VALK kuery objects are immutable. Each kuery member
+ * convenience operation returns a new kuery object which represents
+ * the new operation added to the previous kuery object. The actual
+ * JSON representation of the kuery or VAKON (VAlos Kuery Object
+ * Notation) can be extracted from such a Kuery with toVAKON.
  */
 export default from "./VALK";
 
@@ -18,12 +21,12 @@ export type { VALKOptions } from "./Valker";
 
 export {
   default as builtinSteppers,
-  isValaaFunction,
+  isValOSFunction,
   toVAKON,
-  denoteValaaBuiltin,
-  denoteValaaBuiltinWithSignature,
-  denoteDeprecatedValaaBuiltin,
-  denoteValaaKueryFunction,
+  denoteValOSBuiltin,
+  denoteValOSBuiltinWithSignature,
+  denoteDeprecatedValOSBuiltin,
+  denoteValOSKueryFunction,
 } from "./builtinSteppers";
 export type {
   BuiltinStep,

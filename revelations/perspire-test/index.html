@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>perspireWorld 1.0.0</title>
         <style>
-          html, body, #valaa-inspire--main-container {
+          html, body, #valos-inspire--main-container {
             margin: 0px;
             padding: 0px;
             box-sizing: border-box;
@@ -14,26 +14,26 @@
             box-sizing: inherit;
           }
         </style>
-        <link rel="preload" href="/valaa/inspire/valaa-inspire.js" as="script"/>
+        <link rel="preload" href="/valos/inspire/valos-inspire.js" as="script"/>
       </head>
     <body>
-        <div id="valaa-inspire--main-container"></div>
-        <script src="/valaa/inspire/valaa-inspire.js"></script>
+        <div id="valos-inspire--main-container"></div>
+        <script src="/valos/inspire/valos-inspire.js"></script>
         <script>
-          Valaa.createInspireGateway({ "...": "revela.json" }, {
+          valos.createInspireGateway({ "...": "revela.json" }, {
             gateway: {
               verbosity: 0,
             },
             prologue: {
-              rootPartitionURI: Valaa.getURIQueryField(document.location, "partition"),
+              rootPartitionURI: valos.getURIQueryField(document.location, "partition"),
             },
           }).then(function (gateway) {
-            Valaa.views = gateway.createAndConnectViewsToDOM({
+            valos.views = gateway.createAndConnectViewsToDOM({
               inspireMain: {
-                name: "Valaa perspire-test Inspire Main",
+                name: "ValOS perspire-test Inspire Main",
                 lensURI: gateway.getRootLensURI() || gateway.getRootPartitionURI(),
-                container: document.querySelector("#valaa-inspire--main-container"),
-                rootId: "valaa-inspire--main-root",
+                container: document.querySelector("#valos-inspire--main-container"),
+                rootId: "valos-inspire--main-root",
                 size: { width: window.innerWidth, height: window.innerHeight, scale: 1 },
               },
             });

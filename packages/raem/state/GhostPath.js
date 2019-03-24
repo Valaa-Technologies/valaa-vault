@@ -1,6 +1,6 @@
 // @flow
 
-import type { RawId } from "~/raem/ValaaReference";
+import type { RawId } from "~/raem/VRL";
 
 import { invariantifyString } from "~/tools/invariantify";
 import derivedId from "~/tools/id/derivedId";

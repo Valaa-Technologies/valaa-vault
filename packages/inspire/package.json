@@ -1,14 +1,14 @@
 {
   "name": "@valos/inspire",
   "version": "0.34.0-prerelease.18.2",
-  "description": "Valaa Inspire application gateway",
+  "description": "ValOS Inspire application gateway",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
-  "valaa": {
+  "valos": {
     "type": "library",
     "domain": "gateway"
   },

@@ -1,7 +1,7 @@
 {
   "name": "@valos/toolset-rest-api-gateway-plugin",
   "version": "0.34.0-prerelease.18",
-  "valaa": {
+  "valos": {
     "type": "toolset",
     "domain": "gateway"
   },

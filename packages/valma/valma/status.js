@@ -24,13 +24,13 @@ exports.handler = async (yargv) => {
         "doesn't exist or is not valid.");
     return false;
   }
-  const valaa = vlm.packageConfig.valaa;
+  const valos = vlm.packageConfig.valos || vlm.packageConfig.valaa;
   const statusCommandInvokations = [{},
     vlm.invoke(`.status/${yargv.toolsetGlob || "**/"}*`, yargv._),
-    !(valaa && valaa.type) ? [] :
-        vlm.invoke(`.status/.type/.${valaa.type}/${yargv.toolsetGlob || "**/"}*`, yargv._),
-    !(valaa && valaa.domain) ? [] :
-        vlm.invoke(`.status/.domain/.${valaa.domain}/${yargv.toolsetGlob || "**/"}*`, yargv._),
+    !(valos && valos.type) ? [] :
+        vlm.invoke(`.status/.type/.${valos.type}/${yargv.toolsetGlob || "**/"}*`, yargv._),
+    !(valos && valos.domain) ? [] :
+        vlm.invoke(`.status/.domain/.${valos.domain}/${yargv.toolsetGlob || "**/"}*`, yargv._),
   ];
   const resolveds = [].concat(...await Promise.all(statusCommandInvokations))
       .filter(e => e && (typeof e === "object"));

@@ -1,7 +1,7 @@
 // @flow
 
 import Action, { validateActionBase } from "~/raem/events/Action";
-import { invariantifyId } from "~/raem/ValaaReference";
+import { invariantifyId } from "~/raem/VRL";
 
 export const DESTROYED = "DESTROYED";
 

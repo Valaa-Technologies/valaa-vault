@@ -3,7 +3,7 @@
 import { OrderedMap, is } from "immutable";
 
 import { isCreatedLike } from "~/raem/events";
-import ValaaReference, { getRawIdFrom } from "~/raem/ValaaReference";
+import VRL, { getRawIdFrom } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
 
 import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
@@ -180,7 +180,7 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
       bard.fieldsTouched.add(fieldInfo.name);
       const newValue = handleFieldUpdate(
           bard, fieldInfo, updateClause, oldLocalValue, updateCoupling, updatesByField);
-      if (isBeingUniversalized && (newValue instanceof ValaaReference)) {
+      if (isBeingUniversalized && (newValue instanceof VRL)) {
         updatesByField[fieldInfo.name] = newValue.toJSON();
         // Remove alias original
         if (fieldInfo.name !== fieldName) delete updatesByField[fieldName];

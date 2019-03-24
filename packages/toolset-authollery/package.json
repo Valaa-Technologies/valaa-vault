@@ -1,6 +1,6 @@
 {
   "name": "@valos/toolset-authollery",
-  "valaa": {
+  "valos": {
     "type": "toolset",
     "domain": "authollery"
   },

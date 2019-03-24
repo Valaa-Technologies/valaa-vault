@@ -1,6 +1,6 @@
 // @flow
 
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import type { VRL } from "~/raem/VRL"; // eslint-disable-line no-duplicate-imports
 
 import Bard, { getActionFromPassage } from "~/raem/redux/Bard";
 import { tryHostRef } from "~/raem/VALK/hostReference";
@@ -97,11 +97,11 @@ export function addConnectToPartitionToError (error, connectToPartition) {
  * The partition of a Resource is the innermost owning object (or self)
  * which has Partition.partitionAuthorityURI defined. For all non-ghost
  * Resource's the partition is also cached in the
- * id:ValaaReference.getPartitionURI. For ghosts the partition can be
+ * id:VRL.getPartitionURI. For ghosts the partition can be
  * fetched from the ghost host.
  */
 
-export function universalizePartitionMutation (bard: Bard, id: VRef) {
+export function universalizePartitionMutation (bard: Bard, id: VRL) {
   let partitionURI;
   let partitionsUpdate;
   const ref = tryHostRef(id);
@@ -193,7 +193,7 @@ export function universalizePartitionMutation (bard: Bard, id: VRef) {
   }
 }
 
-export function resolvePartitionURI (resolver: Resolver, resourceId: VRef) {
+export function resolvePartitionURI (resolver: Resolver, resourceId: VRL) {
   return (!resourceId.isGhost()
           ? resourceId
           : resolver.bindObjectId([resourceId.getGhostPath().headHostRawId()], "Resource"))
@@ -222,7 +222,7 @@ export function setModifiedObjectPartitionAndUpdateOwneeObjectIdPartitions (
   }
 }
 
-export function determineNewObjectPartition (mutableTransient: Transient, transientId: VRef) {
+export function determineNewObjectPartition (mutableTransient: Transient, transientId: VRL) {
   const authorityURI = mutableTransient.get("partitionAuthorityURI");
   if (transientId.isGhost()) {
     // Materializing or modifying ghost.

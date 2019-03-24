@@ -292,7 +292,7 @@ class UIComponent extends React.Component {
 
   // Public API
 
-  getValaa () { return this.context.engine.getRootScope().Valaa; }
+  getValos () { return this.context.engine.getRootScope().valos; }
 
   getStyle () {
     return Object.assign({},
@@ -586,18 +586,18 @@ class UIComponent extends React.Component {
   tryRenderSlotAsLens (slot: string | Symbol, focus: any = this.tryFocus(),
       rootSlotName_?: string, onlyIfAble?: boolean, onlyOnce?: boolean):
           void | null | string | React.Element<any> | [] | Promise<any> {
-    const activeLensSlots = this.getUIContextValue(this.getValaa().Lens.activeLensSlots)
+    const activeLensSlots = this.getUIContextValue(this.getValos().Lens.activeLensSlots)
         || (this.state.uiContext
-            && this.setUIContextValue(this.getValaa().Lens.activeLensSlots, []))
+            && this.setUIContextValue(this.getValos().Lens.activeLensSlots, []))
         || [];
     let slotValue; // eslint-disable-line
-    const Valaa = this.getValaa();
-    const slotName = typeof slot === "string" ? slot : Valaa.Lens[slot];
-    const slotSymbol = typeof slot !== "string" ? slot : Valaa.Lens[slot];
+    const valos = this.getValos();
+    const slotName = typeof slot === "string" ? slot : valos.Lens[slot];
+    const slotSymbol = typeof slot !== "string" ? slot : valos.Lens[slot];
     const rootSlotName = rootSlotName_ || slotName;
     try {
-      if (!slotSymbol) throw new Error(`No Valaa.Lens slot symbol for '${slotName}'`);
-      if (!slotName) throw new Error(`No Valaa.Lens slot name for '${String(slotSymbol)}'`);
+      if (!slotSymbol) throw new Error(`No valos.Lens slot symbol for '${slotName}'`);
+      if (!slotName) throw new Error(`No valos.Lens slot name for '${String(slotSymbol)}'`);
       activeLensSlots.push(slotName);
       slotValue = _readSlotValue(this, slotName, slotSymbol, focus, onlyIfAble);
       return slotValue && this.renderLens(slotValue, focus, rootSlotName, undefined, onlyOnce);
@@ -609,7 +609,7 @@ class UIComponent extends React.Component {
           "\n\trootSlotName:", rootSlotName);
     } finally {
       activeLensSlots.pop();
-      if (!activeLensSlots.length) this.clearUIContextValue(this.getValaa().Lens.activeLensSlots);
+      if (!activeLensSlots.length) this.clearUIContextValue(this.getValos().Lens.activeLensSlots);
     }
   }
 
@@ -718,7 +718,7 @@ class UIComponent extends React.Component {
         if (isSticky === undefined) {
           const engine = this.context.engine;
           const errorDescriptor = engine.getHostObjectDescriptor(
-              engine.getRootScope().Valaa.Lens[errorSlotName]);
+              engine.getRootScope().valos.Lens[errorSlotName]);
           isSticky = (errorDescriptor || {}).isStickyError;
         }
         if (!isSticky) {

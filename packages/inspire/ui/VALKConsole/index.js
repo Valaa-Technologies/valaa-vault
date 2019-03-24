@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import ValaaReference from "~/raem/ValaaReference";
+import VRL from "~/raem/VRL";
 
 import VALEK from "~/engine/VALEK";
 import UIComponent from "~/inspire/ui/UIComponent";
@@ -86,7 +86,7 @@ class VALKConsole extends UIComponent {
         fields: this.fields,
       };
       let evalResult = notThatSafeEval(evalScope, `return ${this.state.cmd}`);
-      if (evalResult instanceof ValaaReference) {
+      if (evalResult instanceof VRL) {
         evalResult = this.context.engine.getVrapper(evalResult);
       }
       const txt = (evalResult instanceof Vrapper)

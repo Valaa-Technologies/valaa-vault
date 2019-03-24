@@ -9,8 +9,8 @@ While a library can provide valma commands it is not a toolset. Thus it
 can't have repository specific configurations or release builds.
 Create or configure a toolset for building releases from libraries.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "library")
-    && `Workspace is not a 'library' (is '${yargs.vlm.getPackageConfig("valaa", "type")}')`;
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "library")
+    && `Workspace is not a 'library' (is '${yargs.vlm.getValOSConfig("type")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

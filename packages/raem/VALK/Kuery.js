@@ -1,5 +1,5 @@
-import { vRef } from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import { vRef } from "~/raem/VRL";
+import type { VRL } from "~/raem/VRL"; // eslint-disable-line no-duplicate-imports
 
 import beaumpify from "~/tools/beaumpify";
 import invariantify, { invariantifyArray, invariantifyNumber, invariantifyString,
@@ -162,7 +162,7 @@ nested in arrays and objects constructs) are fully evaluated.
 */
 
 /**
- * VALK - VAlaa Language for Kuerying
+ * VALK - VAlos Language for Kuerying
  * ==================================
  *
  * VALK Kuery is a generic graph query that can be `run` starting from a value called `head`,
@@ -178,7 +178,7 @@ nested in arrays and objects constructs) are fully evaluated.
  *     .select(["x", "y"]);
  * ```
  *
- * The corresponding JSON for this Kuery ('VAKON' from hereon, VAlaa Kuery Object Notation) is:
+ * The corresponding JSON for this Kuery ('VAKON' from hereon, VAlos Kuery Object Notation) is:
  * ```
  * const to5thDistantCoords = ["$->",
  *   "positions",
@@ -416,7 +416,7 @@ export default class Kuery {
   fromValue (value: any, headType: ?string): Kuery {
     const hostRef = tryHostRef(value);
     return this._addRawVAKON(
-        hostRef ? [`§ref`, hostRef.toJSON()]
+        hostRef ? [`§vrl`, hostRef.toJSON()]
             : (value === undefined) ? this._root.void()
             : ["§'", value],
         headType);
@@ -429,11 +429,11 @@ export default class Kuery {
   /**
    * Core from-step which sets the current head to the given object.
    *
-   * @param {string | VRef} object The idData describing the object to refer to.
+   * @param {string | VRL} object The idData describing the object to refer to.
    * @param {string} typeName The type of the object described by the given idData.
    * @returns {Kuery}
    */
-  fromObject (object: string | VRef, headType: ?string) {
+  fromObject (object: string | VRL, headType: ?string) {
     const ref = tryHostRef(object) || ((typeof object === "string") ? vRef(object) : undefined);
     if (!ref && (object !== null)) {
       throw new Error(`VALK.fromObject.object is not a valid object reference, got: ${object}`);
@@ -1268,12 +1268,12 @@ export default class Kuery {
 
   /**
    * To-step which advances to the type string of the valked operand.
-   * The type string is defined as per ValaaScript semantics which extends the ecma-262 spec as
+   * The type string is defined as per valoscript semantics which extends the ecma-262 spec as
    * follows:
    * Operand type                                  Result
-   * Valaa Resource reference                      "Resource"
-   * Valaa Data reference or expanded Data object  "Data"
-   * Valaa Bvob reference                          "Blob"
+   * ValOS Resource reference                      "Resource"
+   * ValOS Data reference or expanded Data object  "Data"
+   * ValOS Bvob reference                          "Blob"
    * Other                                         as per ecma-262
    *
    * Sugar for unary("§typeof", operand). See unary
@@ -1415,7 +1415,7 @@ export default class Kuery {
 
   /**
    * Sugar for binary("§===", operand). See binary
-   * Comparisons which access manipulate ValaaReference's directly must use \see looseEqualTo.
+   * Comparisons which access manipulate VRL's directly must use \see looseEqualTo.
    *
    * @param {primitive || Kuery} operand
    * @returns {Kuery}
@@ -1424,7 +1424,7 @@ export default class Kuery {
 
   /**
    * Sugar for binary("§!==", operand). See binary
-   * Comparisons which access ValaaReference's directly must use \see looseNotEqualTo.
+   * Comparisons which access VRL's directly must use \see looseNotEqualTo.
    *
    * @param {primitive || Kuery} operand
    * @returns {Kuery}
@@ -1432,7 +1432,7 @@ export default class Kuery {
   notEqualTo (left: any, right: ?any): Kuery { return this.binary("§!==", left, right); }
 
   /**
-   * Sugar for binary("§==", operand). ValaaReference comparisons must use this. See binary
+   * Sugar for binary("§==", operand). VRL comparisons must use this. See binary
    *
    * @param {primitive || Kuery} operand
    * @returns {Kuery}
@@ -1440,7 +1440,7 @@ export default class Kuery {
   looseEqualTo (left: any, right: ?any): Kuery { return this.binary("§==", left, right); }
 
   /**
-   * Sugar for binary("§!=", operand). ValaaReference comparisons must use this. See binary
+   * Sugar for binary("§!=", operand). VRL comparisons must use this. See binary
    *
    * @param {primitive || Kuery} operand
    * @returns {Kuery}
@@ -1826,7 +1826,7 @@ function _recurseToVAKON (kuery: Kuery | any) {
     }
     if (value instanceof Kuery) return value.toVAKON();
     const hostRef = tryHostRef(value);
-    if (hostRef) return ["§ref", hostRef.toJSON()];
+    if (hostRef) return ["§vrl", hostRef.toJSON()];
     return value;
   });
 }

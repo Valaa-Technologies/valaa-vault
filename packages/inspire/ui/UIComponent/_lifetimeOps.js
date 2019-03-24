@@ -119,7 +119,7 @@ function _createContextAndSetFocus (component: UIComponent, newFocus: any, newPr
   setScopeValue(uiContext, "head", newFocus);
   /*
   if (newProps.locals) {
-    console.error("DEPRECATED: ValaaScope.locals\n\tprefer: ValaaScope.context");
+    console.error("DEPRECATED: Valoscope.locals\n\tprefer: Valoscope.context");
     for (const key of Object.keys(newProps.locals)) {
       setScopeValue(uiContext, key, newProps.locals[key]);
     }

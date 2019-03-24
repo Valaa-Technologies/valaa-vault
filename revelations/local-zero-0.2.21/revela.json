@@ -1,13 +1,13 @@
 {
   "name": "@valos/revelation-local-zero",
   "version": "0.31.1",
-  "description": "Valaa local Zero revelation, lands at valaa-local: Zero",
+  "description": "ValOS local Zero revelation, lands at valaa-local: Zero",
   "author": "Valaa Technologies Ltd",
   "license": "MIT",
   "private": false,
   "gateway": {
     "version": "0.31.1",
-    "runtime": "/valaa/inspire/valaa-inspire.js",
+    "runtime": "/valos/inspire/valos-inspire.js",
     "authorityConfigs": {},
     "verbosity": 1,
     "falseProphet": { "verbosity": 1 },

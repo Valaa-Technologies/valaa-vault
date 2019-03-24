@@ -22,12 +22,12 @@ export const vdoc = vdon({ "...": { heading:
     partition part at all but instead delegates the definition to
     particular Valaa URI schemes (which are identified by the Valaa URI
     scheme part).`,
-    `The resource part is used to not just refer to ValaaSpace
+    `The resource part is used to not just refer to valospace
     Resources and their sub-aspects (like lens names) but also to
-    communicate parameterized information to ValaaSpace applications.
+    communicate parameterized information to valospace applications.
     The ValOS spec fully specifies the structure of the resource part
     and also much of its semantic meaning. Where it doesn't fully
-    specify the semantics the information is intended for ValaaSpace
+    specify the semantics the information is intended for valospace
     applications to interpret.`,
 /*
     * URI scheme part: is used to identify the specification for the rest . One of the following:
@@ -120,7 +120,7 @@ export const naiveURI = {
   },
 
   // FIXME(iridian, 2019-02): naive partition URI's must be replaced with
-  // partition schema specific logic and ValaaReference-based API instead
+  // partition schema specific logic and VRL-based API instead
   // of raw string access API.
   getPartitionRawId: function getNaivePartitionRawId (naivePartitionURI: ValaaURI): string {
     if ((typeof naivePartitionURI !== "object") || !naivePartitionURI) {
@@ -145,7 +145,7 @@ export const naiveURI = {
 };
 
 /*
-export function getValaaURI (uri: ValaaURI | string): ValaaURI {
+export function getValosURI (uri: ValaaURI | string): ValaaURI {
   if (typeof uri === "string") return createValaaURI(uri);
   return uri;
 }

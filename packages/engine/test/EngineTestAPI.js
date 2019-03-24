@@ -6,7 +6,7 @@ import ProphetTestAPI from "~/prophet/test/ProphetTestAPI";
 import TestScriptyThing from "~/script/test/schema/TestScriptyThing";
 
 export default createContentAPI({
-  name: "ValaaEngineTestAPI",
+  name: "ValOSEngineTestAPI",
   inherits: [EngineContentAPI, ProphetTestAPI],
   exposes: [TestScriptyThing],
 });

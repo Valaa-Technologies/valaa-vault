@@ -8,7 +8,7 @@ import type UIComponent from "./UIComponent";
  * A template literal tag for referring to UI elements by name.
  *
  * Useful for forwarding UI mode implementations:
- * For example: <ValaaScope activeLens={LENS`lensPropertyNotFoundLens`}> means that if activeLens is
+ * For example: <Valoscope activeLens={LENS`lensPropertyNotFoundLens`}> means that if activeLens is
  * requested the lensPropertyNotFoundLens implementation is used for it.
  *
  * @export
@@ -19,7 +19,7 @@ import type UIComponent from "./UIComponent";
 export default function LENS (lookupLensNames: string[], ...directLenses: any[]) {
   return function lens (scope: any, component: UIComponent) {
     console.error("DEPRECATED: LENS`", lookupLensNames.join("..."), "`",
-        "\n\tprefer: slot symbols found in Valaa.Lens.*");
+        "\n\tprefer: slot symbols found in valos.Lens.*");
     for (let i = 0; i !== lookupLensNames.length; ++i) {
       try {
         const lookedUpLens = lookupLensNames[i]

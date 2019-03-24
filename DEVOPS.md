@@ -7,8 +7,8 @@ documents must be understood as strong speculation and as an
 architectural exercise (although a very serious one) on what-could-be.
 
 This rings especially true for the primary focus of this document, ie.
-for `Valaa Open System` as the fully functional open source core around
-which the often proprietary Valaa ecosystem would expand. This is an
+for `ValOS Core` as the fully functional open source core around
+which the often proprietary ValOS ecosystem would expand. This is an
 ambitious, even presumptuous attempt to facilitate the fruitful
 side-by-side living of open source communities as well as private
 enterprises as a combination of technical and social architecture.
@@ -40,8 +40,8 @@ ValOS specification is provided as quoted and numbered ValOS rules.
 > rules take precedence.
 
 > `valos-vault-1.5`: All packages which conform to ValOS specification
-> are called `Valaa packages`. These packages are inclusively
-> considered part of the `Valaa ecosystem`.
+> are called `ValOS packages`. These packages are inclusively
+> considered part of the `ValOS ecosystem`.
 
 The system is structured into a plethora of purpose-oriented vertical
 `domains` and into four content oriented horizontal `utility layers`.
@@ -51,7 +51,7 @@ builds or depends on the previous layers.
 - `files` layer provides files via git repositories
 - `packages` layer provides npm packages via npm registry.
    These packages are created by git repositories called `vaults`.
-- `authorities` layer provides the Valaa live authority service APIs.
+- `authorities` layer provides the ValOS live authority service APIs.
    Authorities are controlled by git repositories called `autholleries`.
 - `partitions` layer provides the resource content as partition
    events and bvobs. These are served via authority service APIs.
@@ -60,7 +60,7 @@ TODO(iridian): Figure out and describe the concrete role of domains.
 
 A DevOp manages these layers by scripts that are delivered inside the
 packages alongside their main content. A command line tool called
-Valaa Manager or `valma` is used to discover and `invoke` these
+ValOS Manager or `valma` is used to discover and `invoke` these
 scripts as `valma commands`.
 
 From a DevOps perspective `valma`, `vault` and `authollery` are the
@@ -81,15 +81,15 @@ after all the brief descriptions.
 > producers and consumers and should provide a direction for technical
 > and operational structure as well.
 
-For example the `kernel` domain provides the essential central Valaa
-code for developing new Valaa infrastructure software. Its main
+For example the `kernel` domain provides the essential central ValOS
+code for developing new ValOS infrastructure software. Its main
 producers are the kernel software developers and its consumers are the
 infrastructure software developers. It revolves around developing code
 as library packages.
 
-On the other hand the `infrastructure` domain provides Valaa services
+On the other hand the `infrastructure` domain provides ValOS services
 on various infrastructure platforms. Its main producers are the DevOps
-agents and its consumers are the ValaaSpace users. It revolves around
+agents and its consumers are the valospace users. It revolves around
 assembling, configuring and deploying components on live systems.
 
 #### Of kernel and infrastructure, of software devs and DevOps agents, of roles and tasks, of extremes and continuums, or when an entrepreneur holds too many hats at once and everything transcends into facets of one grand abstraction
@@ -116,10 +116,11 @@ continuum.
 
 ## 3. `valma` - a convenience CLI to context-dependent command scripts
 
-valma (`vlm` in CLI) is a convenience tool for executing valaa scripts
-in package and repository contexts. It is a generalization of 'npx -c'
-behaviour, adding discoverability, ability to invoke global scripts
-and the ability to invoke multiple scripts at once using glob matching.
+valma (`vlm` in CLI) is a convenience tool for executing command
+scripts exported by packages in valos workspace contexts. It is a
+generalization of 'npx -c' behaviour, adding discoverability, ability
+to invoke global scripts and the ability to invoke multiple scripts at
+once using glob matching.
 
 > `valos-vault-3.1`: valma is installed with `npm install -g valma` or
 > as a package dependency.
@@ -261,12 +262,12 @@ valma package commands: `vlm assemble-packages` `vlm publish-packages`
 
 ## 4.4. Authorities utility layer has the authority deployments on infrastructure services
 
-> `valos-vault-4.4.1`: A Valaa `authority` is uniquely identified by an
+> `valos-vault-4.4.1`: A ValOS `authority` is uniquely identified by an
 > `authority URI`.
 
-[Read more about Valaa URIs](packages/raem/README.md).
+[Read more about valos URIs](packages/raem/README.md).
 
-> `valos-vault-4.4.2`: A Valaa `authority` can contain Valaa
+> `valos-vault-4.4.2`: A ValOS `authority` can contain ValOS
 > `partitions` and must provide a mechanism for accessing event logs
 > and bvob content as well as for accepting and authorizing incoming
 > commands into authorized partition events.
@@ -286,14 +287,14 @@ upstream and with empty payload).
 
 The payload here refers to the service deployments and their live APIs
 themselves and not any dynamic content delivered through them. Such
-dynamic content belongs to other domains (notably ValaaSpace content
+dynamic content belongs to other domains (notably valospace content
 resides in the `partitions` utility layer, see below).
 
 The static content includes HTTP landing pages, site routes and their
 configurations, ValOS gateway and plugin runtimes and any other similar
 statically configured files.
 
-> `valos-vault-4.4.4`: An authority may have a valaa AUTHority
+> `valos-vault-4.4.4`: An authority may have a valos AUTHority
 > contrOLLERr repositoRY (`authollery`) as its upstream for managing
 > its payload.
 
@@ -328,27 +329,29 @@ instead have upstream only contain the necessary code and credentials
 to access this content.
 
 Note: this applies to architectural decisions and automations only.
-Interactive content in ValaaSpace is not limited from using an
+Interactive content in valospace is not limited from using an
 authollery to update authorities (although it is still recommended to
-keep such ValaaSpace applications deployments separate from the
+keep such valospace applications deployments separate from the
 authorities they are used to control).
 
 valma authollery commands: `vlm build-release` `vlm deploy-release`
 
 
-### 4.4.1. Valaa authorities vs. ValOS authorities
+### 4.4.1. ValOS core vs. auxiliary authorities
 
-Valaa authorities and any partition content they provide do not need to
-be public. A Valaa authority is an authority which can be accessed
-using a pure ValOS gateway with no plugins or with a gateway plugin
-which conforms to the gateway plugin requirements (Note: these
-requirements must be specified in such a way that gateway plugins
-cannot interfere with other 'reasonably' written plugins).
-A ValOS authority is a Valaa authority which can be accessed using
-only ValOS plugins (including no plugins at all).
+ValOS authorities and any partition content they provide do not need to
+be public. A ValOS core authority is an authority which can be accessed
+using only ValOS core plugins (including no plugins at all). A ValOS
+auxiliary authority is an authority which requires a conforming but
+non-core ValOS gateway plugin in order to be accessed.
+(Design Note 2019-03: the plugin conformance requirements are
+unspecified. When they are specified they must be lenient enough to
+enable sophisticated protocols but constrained/sandboxed enough that
+gateway plugins cannot interfere with other reasonably written
+plugins).
 
 
-## 4.5. Partitions utility layer - the foundation of ValaaSpace
+## 4.5. Partitions utility layer - the foundation of valospace
 
 Event logs and bvob content are the partitions payload and are consumed
 by ValOS gateways. It is more extensively covered elsewhere and is
@@ -362,15 +365,15 @@ Eventually various partition diagnostics tools will come in handy:
 - etc.
 
 
-### 4.5.1. Valaa partitions vs. ValOS partitions
+### 4.5.1. ValOS public vs protected partitions
 
-All partitions provided by Valaa authorities are Valaa partitions.
-Additionally ValOS partitions are partitions which are both
-1. provided by ValOS authorities, and
-2. provided for an anonymous consumer with nothing but a client
-   capable of running the ValOS gateway runtime the authority provides
-   (with reasonable concessions for the authority to prevent DDOS
-   attacks)
+All partitions provided by ValOS authorities are ValOS partitions.
+Additionally ValOS public partitions are partitions which are both
+1. provided by ValOS core authorities, and
+2. are available for an anonymous consumer with nothing but a client
+   capable of running the ValOS gateway runtime which the authority
+   itself provides (with reasonable concessions for the authority to
+   prevent DDOS attacks)
 
 TODO(iridian): Figure out whether this is the actually most meaningful
                place to put this semantic border. A specific term for

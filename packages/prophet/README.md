@@ -5,13 +5,13 @@
 This package is likely the most important package of Valaa Open System.
 @valos/prophet specifications and components provide the foundation for
 event stream and bvob content delivery network. All the rest of the
-Valaa infrastructure and by extension of the whole ecosystem build on
+ValOS infrastructure and by extension of the whole ecosystem build on
 top of this fabric.
 
-The dense definition of Valaa ecosystem is:
-  1. All content is stored inside *Valaa Resources*, which act as
+The dense definition of ValOS ecosystem is:
+  1. All content is stored inside *ValOS Resources*, which act as
      nodes inside
-  2. a unified, global, immense *ValaaSpace* network, which is
+  2. a unified, global, immense *valospace* network, which is
      segmented into
   3. smaller, non-divisible but fully cross-connected groups of
      Resources called *Partition*s, each of which is owned by
@@ -36,15 +36,15 @@ Medias and other Entitys.
 This package also extends command/truth event semantics defined in
 @valos/raem with the concepts of restricted and universal commands.
 
-This package also provides various Prophet component javascript
-implementations which can be used to implement the full valaa
+This package also provides various Prophet component JavaScript
+implementations which can be used to implement the full valos
 application stream gateway inside a client browser. Some of
 the components generalize to non-browser contexts, some are fully
 browser specific.
 
 - depends: `@valos/script`, `IndexedDB`, `AWS IoT/S3/DynamoDB`
 - exports: `FalseProphet`, `PartitionConnection`, `ProphetContentAPI`
-- ValaaSpace: `Relatable`, `Entity`, `Media`, `Relation`,
+- valospace: `Relatable`, `Entity`, `Media`, `Relation`,
 - concepts: `ACID`, `authorities`, `pub-sub`, `offline readiness`
 
 ### 1.1. Note on naming and of the importance of history
@@ -78,9 +78,9 @@ and appreciates the knowledge of history at the front and center.
 
 ## 2. Deconstruction of the dense definition
 
-### 2.1. *Valaa Resource*s are the basic building blocks and defined by package schemas
+### 2.1. *ValOS Resource*s are the basic building blocks and defined by package schemas
 
-### 2.2. *ValaaSpace* contains everything
+### 2.2. *valospace* contains everything
 
 ### 2.3. *Partition*s allow loading resources and requesting updates selectively
 
@@ -88,11 +88,11 @@ Event sourcing, for all its expressive power and architectural
 simplicity, has a major glaring weakness: loading a single resource
 means loading all other resources in the event log. This is fine in
 limited contexts like singular projects of a desktop application. But
-ValaaSpace as a unified, global repository is immense. In order to not
+valospace as a unified, global repository is immense. In order to not
 be useless it cannot be a trivial singular event log.
 
-The Valaa solves this problem with *Partition*s which divide
-the ValaaSpace into smaller pieces.
+ValOS solves this problem with *Partition*s which divide the valospace
+into smaller pieces.
 
 
 #### 2.3.1. Partition rules
@@ -176,7 +176,7 @@ inside the same execution environment.
 The octet stream is decoded by decoder plugins associated with
 the requested mime type into some runtime object representation. This
 object representation can range anything from a flat text decoding,
-through a complex javascript composite object representation into a
+through a complex JavaScript composite object representation into a
 full-blown component with rich, asynchronous API's for accessing
 the content piece-meal. The requirement is that the resulting dedoded
 object must be shareable and reusable between different consumers in
@@ -184,9 +184,9 @@ unspecified contexts. This implies that the decoded object should be
 immutable or provide an immutable API.
 
 
-##### 3.3.2.1. decoding "application/valaascript"
+##### 3.3.2.1. decoding "application/valoscript"
 
-The application/valaascript decoder transpiles the octet stream into
+The application/valoscript decoder transpiles the octet stream into
 a *module program Kuery*. This Kuery contains the rules for setting up
 an ES6-like module exports. The kuery can thus be shared between
 different integration contexts (different ghosts of the same base media
@@ -198,14 +198,14 @@ in different instances, etc.)
 The application/javascript decoder wraps the octet stream text into
 a native function. This function accepts a contextual global scope
 object as an argument, and when called sets up an ES6-like module
-exports based on the octet content interpreted as a javascript module.
+exports based on the octet content interpreted as a JavaScript module.
 Like with other interpretations, this outermost native function will be
 shared between contexts.
 
 
 #### 3.3.3. Decoded representation is *integrated* into a specific context
 
-#### 3.3.3.1. integrating "application/valaascript"
+#### 3.3.3.1. integrating "application/valoscript"
 
 When the kuery is valked against a resource and some context the valk
 result is an object with ES6-style bindings of the exported symbols as
@@ -221,7 +221,7 @@ for some starting inspiration.
 
 #### 3.3.3.2. integrating  "application/javascript"
 
-The contextual global scope for the integration is a javascript global
+The contextual global scope for the integration is a JavaScript global
 host object associated with the context resource.
 
 

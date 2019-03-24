@@ -28,16 +28,16 @@ exports.builder = (yargs) => yargs.option({
     type: "object",
     description: `A lookup of partition URI's to load before execution.${
         ""}\nThe partitions are loaded after revelation partitions but before view is attached.${
-        ""}\nValaa.perspire.partitions contains these partitions connected this way as well as the${
+        ""}\nvalos.perspire.partitions contains these partitions connected this way as well as the${
         ""} "root" and "view" revelation partitions.`
   },
   exec: {
     type: "object", default: null,
-    description: `Execute ValaaScript.\n\texec.body = direct VS content to execute. ${
+    description: `Execute valoscript.\n\texec.body = direct VS content to execute. ${
         ""}\n\texec.path = path to a VS file to execute.\n\texec.this = the name of the ${
         ""}resource that is used as 'this' of the VS body; a URI specifies a Resource directly, ${
         ""}otherwise it is used to look up a partition connection root resource.\n\tAll the ${
-        ""}options are available for the script via Valaa.perspire.options object with possible ${
+        ""}options are available for the script via valos.perspire.options object with possible ${
         ""}expansions.`
   },
   plugin: {
@@ -168,8 +168,8 @@ exports.handler = async (yargv) => {
   const mainView = await server.createMainView();
   partitions.view = mainView.getViewPartition();
 
-  mainView.rootScope.Valaa.Perspire.options = yargv;
-  mainView.rootScope.Valaa.Perspire.state = state;
+  mainView.rootScope.valos.Perspire.options = yargv;
+  mainView.rootScope.valos.Perspire.state = state;
 
   let vExecThis;
   if (yargv.exec) {
@@ -220,8 +220,8 @@ exports.handler = async (yargv) => {
         sourceMap: new Map(),
       };
       vlm.clock("perspire.handler", `server.tick(${tick}).exec`,
-          `${header} transpile and execute valaascript`);
-      const execResult = vExecThis && execBody && vExecThis.doValaaScript(execBody, { sourceInfo });
+          `${header} transpile and execute valoscript`);
+      const execResult = vExecThis && execBody && vExecThis.doValoscript(execBody, { sourceInfo });
       if (execResult !== undefined) return execResult;
     }
     return state;

@@ -2,7 +2,7 @@
 import { Iterable } from "immutable";
 import { GraphQLList, isLeafType, getNamedType } from "graphql/type";
 
-import { tryRawIdFrom } from "~/raem/ValaaReference";
+import { tryRawIdFrom } from "~/raem/VRL";
 import { getTransientTypeName } from "~/raem/state/Transient";
 import collectFields from "~/raem/tools/denormalized/collectFields";
 import isResourceType from "~/raem/tools/graphql/isResourceType";

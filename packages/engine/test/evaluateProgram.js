@@ -1,7 +1,7 @@
 // @flow
 
 import type { Kuery } from "~/engine/VALEK";
-import type ValaaEngine from "~/engine/ValaaEngine";
+import type Engine from "~/engine/Engine";
 
 /**
  * Calls given expressionKuery against given corpus, setting given thisReference as the call this
@@ -10,11 +10,11 @@ import type ValaaEngine from "~/engine/ValaaEngine";
  *
  * @param {any}    corpus
  * @param {Kuery}  parsedKuery
- * @param {VRef}   thisReference
+ * @param {VRL}   thisReference
  * @param {Object} scope
  * @returns                       the resulting value of the expressionKuery
  */
-export default function evaluateProgram (engine: ValaaEngine, programKuery: Kuery, head: any,
+export default function evaluateProgram (engine: Engine, programKuery: Kuery, head: any,
     scope: ?Object, options: Object = {}) {
   if (scope) {
     options.scope = scope;

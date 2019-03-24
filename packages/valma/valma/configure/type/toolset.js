@@ -19,8 +19,8 @@ enabled or disabled on a repository.
 A valma toolsets are added as regular devDependencies and configured
 by running 'vlm configure' afterwards.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "toolset")
-    && `Workspace is not a 'toolset' (is '${yargs.vlm.getPackageConfig("valaa", "type")}')`;
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "toolset")
+    && `Workspace is not a 'toolset' (is '${yargs.vlm.getValOSConfig("type")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
@@ -28,8 +28,8 @@ exports.builder = (yargs) => yargs.options({
   },
   restrict: {
     type: "string",
-    description: `Restrict this toolset to a particular valaa type (clear for no restriction):`,
-    default: yargs.vlm.packageConfig.valaa.domain,
+    description: `Restrict this toolset to a particular valos type (clear for no restriction):`,
+    default: yargs.vlm.packageConfig.valos.domain,
     interactive: { type: "input", when: "always" /* : "if-undefined" */ },
   },
   grabbable: {
@@ -57,7 +57,7 @@ exports.handler = async (yargv) => {
     introduction: yargv.restrict
         ?
 `This script makes the toolset '${simpleName}' available for
-grabbing by repositories with valaa type '${yargv.restrict}'.`
+grabbing by repositories with valos type '${yargv.restrict}'.`
         :
 `This script makes the toolset ${simpleName} available for
 grabbing by all repositories.`,

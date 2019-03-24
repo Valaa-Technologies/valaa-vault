@@ -9,7 +9,7 @@ import type { ProphecyEventResult } from "~/prophet/api/types";
 export default class Discourse extends Valker {
   static isDiscourse = true;
 
-  obtainId (rawId: string): VRef { // eslint-disable-line
+  obtainId (rawId: string): VRL { // eslint-disable-line
     throw new Error(`${this.constructor.name}/Discourse.obtainId not implemented`);
   }
 
@@ -18,7 +18,7 @@ export default class Discourse extends Valker {
    *
    * @returns {type} a new id for the object
    */
-  assignNewResourceId (targetAction: EventBase, partitionURI: string): VRef { // eslint-disable-line
+  assignNewResourceId (targetAction: EventBase, partitionURI: string): VRL { // eslint-disable-line
     throw new Error(`${this.constructor.name}/Discourse.assignNewResourceId not implemented`);
   }
 

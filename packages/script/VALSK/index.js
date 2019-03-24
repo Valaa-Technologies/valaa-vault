@@ -2,15 +2,15 @@
 
 import { Kuery } from "~/raem/VALK";
 
-import type { VRef } from "~/raem/ValaaReference";
+import type { VRL } from "~/raem/VRL";
 
 import { literal as _literal } from "~/script/schema/Literal";
 import { identifier } from "~/script/schema/Identifier";
 
-import ValaaScriptKuery, { ScopeAccessesTag } from "./ValaaScriptKuery";
+import ValoscriptKuery, { ScopeAccessesTag } from "./ValoscriptKuery";
 
 
-export default new ValaaScriptKuery();
+export default new ValoscriptKuery();
 
 export {
   Valker,
@@ -18,14 +18,14 @@ export {
   dumpScope,
   dumpKuery,
   dumpObject,
-  isValaaFunction,
+  isValOSFunction,
   toVAKON,
 } from "~/raem/VALK";
 
 export {
   Kuery,
   ScopeAccessesTag,
-  ValaaScriptKuery,
+  ValoscriptKuery,
 };
 export {
   default as builtinSteppers,
@@ -37,9 +37,9 @@ export {
 // really only useful with the mutations.
 
 /**
- * Returns an expanded ValaaScript Literal with given value.
+ * Returns an expanded valoscript Literal with given value.
  *
- * An expanded ValaaScript Literal behaves like @valos/script/schema/Literal.literal except that it
+ * An expanded valoscript Literal behaves like @valos/script/schema/Literal.literal except that it
  * can only be used as part of an mutation (which recurses and evaluates any nested Kuery's,
  * \see universalizeCommandData).
  *
@@ -53,7 +53,7 @@ export function literal (value: Kuery | Object | Array<any> | boolean | string |
 }
 
 /**
- * Returns an expanded ValaaScript Identifier with given target.
+ * Returns an expanded valoscript Identifier with given target.
  *
  * Like @valos/script/schema/Identifier.identifier, but can only be used as part of a mutation.
  * \see literal for more details.
@@ -62,7 +62,7 @@ export function literal (value: Kuery | Object | Array<any> | boolean | string |
  * @param {(Kuery | Vrapper)} target
  * @returns
  */
-export function pointer (target: Kuery | VRef) {
+export function pointer (target: Kuery | VRL) {
   if (!(target instanceof Kuery)) return identifier(target);
   return { typeName: "Identifier", reference: target };
 }

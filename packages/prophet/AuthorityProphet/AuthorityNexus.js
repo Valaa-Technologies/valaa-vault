@@ -118,7 +118,7 @@ export default class AuthorityNexus extends LogEventGenerator {
       authorityConfig = schemeModule.obtainAuthorityConfig(authorityURI,
           this._authorityPreConfigs[String(authorityURI)]);
       if (!authorityConfig) {
-        throw new Error(`No Valaa authority config found for "${String(authorityURI)}"`);
+        throw new Error(`No ValOS authority config found for "${String(authorityURI)}"`);
       }
       return schemeModule.createAuthorityProphet({
         authorityURI, authorityConfig, nexus: this,

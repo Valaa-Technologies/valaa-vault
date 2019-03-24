@@ -1,6 +1,6 @@
 // @flow
 
-import { IdData } from "~/raem/ValaaReference";
+import { IdData } from "~/raem/VRL";
 
 import { getTransientTypeName } from "~/raem/state/Transient";
 import getObjectField from "~/raem/state/getObjectField";

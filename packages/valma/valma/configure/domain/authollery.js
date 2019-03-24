@@ -41,9 +41,9 @@ following strategy is used:
    a deployment for all dependents complete before their depending
    deployments are initiated.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "domain") !== "authollery")
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("domain") !== "authollery")
     && `Workspace domain is not 'authollery' (is '${
-        yargs.vlm.getPackageConfig("valaa", "domain")}')`;
+        yargs.vlm.getValOSConfig("domain")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
@@ -53,7 +53,7 @@ exports.builder = (yargs) => yargs.options({
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const type = vlm.getPackageConfig("valaa", "type");
+  const type = vlm.getValOSConfig("type");
   const isTool = (type === "tool") ? true : undefined;
   const name = vlm.packageConfig.name;
   const simpleName = name.match(/([^/]*)$/)[1];

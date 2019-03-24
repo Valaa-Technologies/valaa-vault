@@ -5,8 +5,8 @@ exports.introduction = `${exports.describe}.
 Packages utility domain provides tools for assembling and publishing
 packages to npm repositories.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "domain") !== "packages")
-    && `Workspace domain is not 'packages' (is '${yargs.vlm.getPackageConfig("valaa", "domain")}')`;
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("domain") !== "packages")
+    && `Workspace domain is not 'packages' (is '${yargs.vlm.getValOSConfig("domain")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

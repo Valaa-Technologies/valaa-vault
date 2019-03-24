@@ -3,7 +3,7 @@
 import { Command, EventBase } from "~/raem/events";
 import type { Story } from "~/raem/redux/Bard";
 import type { State } from "~/raem/state";
-import type { JSONIdData, VRef } from "~/raem/ValaaReference";
+import type { JSONIdData, VRL } from "~/raem/VRL";
 
 import Follower from "~/prophet/api/Follower";
 import Prophet from "~/prophet/api/Prophet";
@@ -19,7 +19,7 @@ import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
 import { Prophecy, _chronicleEvents } from "./_prophecyOps";
 import { _composeStoryFromEvent, _reviseSchismaticRecital, _tellStoriesToFollowers }
     from "./_storyOps";
-import { deserializeVRef } from "./_universalizationOps";
+import { deserializeVRL } from "./_universalizationOps";
 import StoryRecital from "./StoryRecital";
 
 type FalseProphetChronicleOptions = ChronicleOptions & {
@@ -57,7 +57,7 @@ export default class FalseProphet extends Prophet {
   _commandNotificationMinDelay: number;
   _partitionCommandCounts: Object = {};
   _totalCommandCount: number = 0;
-  _inactivePartitionVRefPrototypes: { [partitionURI: string]: VRef } = {};
+  _inactivePartitionVRLPrototypes: { [partitionURI: string]: VRL } = {};
 
   constructor ({
     schema, corpus, upstream, onCommandCountUpdate, commandNotificationMinDelay, ...rest
@@ -210,7 +210,7 @@ export default class FalseProphet extends Prophet {
 
   deserializeReference = (serializedReference: JSONIdData, currentPartitionURI?: string) => {
     try {
-      return deserializeVRef(serializedReference, currentPartitionURI, this);
+      return deserializeVRL(serializedReference, currentPartitionURI, this);
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error("deserializeReference"),
           "\n\tserializedReference:", ...dumpObject(serializedReference),

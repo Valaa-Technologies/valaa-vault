@@ -3,7 +3,7 @@
 import { Kuery } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
-import { ValaaScriptKuery, pointer as _pointer, literal } from "~/script/VALSK";
+import { ValoscriptKuery, pointer as _pointer, literal } from "~/script/VALSK";
 
 export function pointer (target: Kuery | Vrapper) {
   if (!(target instanceof Vrapper)) return _pointer(target);
@@ -12,7 +12,7 @@ export function pointer (target: Kuery | Vrapper) {
 
 export { literal };
 
-export default class EngineKuery extends ValaaScriptKuery {
+export default class EngineKuery extends ValoscriptKuery {
   fromValue (value: any, headType: ?string) {
     if (value instanceof Vrapper) return this.fromObject(value, headType);
     return super.fromValue(value, headType);
@@ -69,17 +69,19 @@ export default class EngineKuery extends ValaaScriptKuery {
         .find(this.hasName(name, ...additionalConditions));
   }
 
-  // VALK Method ie. abstraction piercing, mutations, and extension and integration access helpers.
-  // These structures are used to make calls to Vrapper members and thus incite mutations.
+  // VALK Method ie. abstraction piercing, mutations, and extension and
+  // integration access helpers. These structures are used to make
+  // calls to Vrapper members and thus incite mutations.
 
   /**
-   * To-step which sets the new head to true if current head has an interface with given
-   * interfaceName. Requires VALSK.toMethod.
+   * To-step which sets the new head to true if current head has an
+   * interface with given interfaceName. Requires VALSK.toMethod.
    *
-   * Be mindful about the difference to VALK.typeof (and typeofEqualTo): hasInterface at the moment
-   * only works in engine abstraction piercing context and is only applicable for Valaa
-   * objects but can be used to inspect any interfaces. typeof only returns "Resource" "Data" or
-   * "Bvob" but can be used on any values.
+   * Be mindful about the difference to VALK.typeof (and typeofEqualTo):
+   * hasInterface at the moment only works in engine abstraction
+   * piercing context and is only applicable for valos objects but can
+   * be used to inspect any interfaces. typeof only returns "Resource"
+   * "Data" or "Bvob" but can be used on any values.
    *
    * @param {Kuery} mutationKuery
    * @returns
@@ -221,13 +223,13 @@ export default class EngineKuery extends ValaaScriptKuery {
 
   // Bvob and Media
 
-  bvobContent (mediaRef: ?any, remoteURL: ?any, options: Object = {}) {
-    return this.call(this._root.toMethod("bvobContent"), null, mediaRef, remoteURL, options);
+  bvobContent (mediaVRL: ?any, remoteURL: ?any, options: Object = {}) {
+    return this.call(this._root.toMethod("bvobContent"), null, mediaVRL, remoteURL, options);
   }
 
-  blobContent (mediaRef: ?any, remoteURL: ?any, options: Object = {}) {
+  blobContent (mediaVRL: ?any, remoteURL: ?any, options: Object = {}) {
     console.error("DEPRECATED: VALEK.blobContent\n\tprefer: VALEK.bvobContent");
-    return this.call(this._root.toMethod("bvobContent"), null, mediaRef, remoteURL, options);
+    return this.call(this._root.toMethod("bvobContent"), null, mediaVRL, remoteURL, options);
   }
 
   mediaURL (options: Kuery = {}) {

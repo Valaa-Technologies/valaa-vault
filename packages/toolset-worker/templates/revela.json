@@ -1,7 +1,7 @@
 {
   "name": { "...": ["§get", "package.json", "name"] },
   "description": { "...": ["§get", "package.json", "description"] },
-  "valaa": {
+  "valos": {
     "type": "site"
   },
   "gateway": {

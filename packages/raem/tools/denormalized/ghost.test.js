@@ -2,16 +2,15 @@ import { created, fieldsSet } from "~/raem/events";
 import VALK from "~/raem/VALK";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
-import { vRef } from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL, { vRef } from "~/raem/VRL";
 
 import GhostPath from "~/raem/state/GhostPath";
 import { createTransient } from "~/raem/state/Transient";
 
 import { createMaterializeGhostAction, createImmaterializeGhostAction, isMaterialized,
-    createGhostVRefInInstance } from "~/raem/tools/denormalized/ghost";
+    createGhostVRLInInstance } from "~/raem/tools/denormalized/ghost";
 
-function _ghostVRef (prototypeRef: VRef, hostRawId: string, hostPrototypeRawId: string): VRef {
+function _ghostVRL (prototypeRef: VRL, hostRawId: string, hostPrototypeRawId: string): VRL {
   const ghostPath = prototypeRef.getGhostPath().withNewGhostStep(hostPrototypeRawId, hostRawId);
   return vRef(ghostPath.headRawId(), null, ghostPath);
 }
@@ -54,18 +53,18 @@ const createGrandlingInstance = [
 
 const createGhostGrandlingInstance = [
   created({ id: ["grandling$root-1_-1"], typeName: "TestThing", initialState: {
-    parent: _ghostVRef(vRef("ownling"), "root-1", "root"),
-    instancePrototype: _ghostVRef(vRef("grandling"), "root-1", "root"),
+    parent: _ghostVRL(vRef("ownling"), "root-1", "root"),
+    instancePrototype: _ghostVRL(vRef("grandling"), "root-1", "root"),
   } }),
 ];
 
 /*
 const createGhostGhostGrandlingInstance = [
   created({ id: ["grandling$root-1-1_-1"], typeName: "TestThing", initialState: {
-    parent: _ghostVRef(
-        _ghostVRef(vRef("ownling"), "root-1", "root"), "root-1-1", "root-1"),
-    instancePrototype: _ghostVRef(
-        _ghostVRef(vRef("grandling"), "root-1", "root"), "root-1-1", "root-1")
+    parent: _ghostVRL(
+        _ghostVRL(vRef("ownling"), "root-1", "root"), "root-1-1", "root-1"),
+    instancePrototype: _ghostVRL(
+        _ghostVRL(vRef("grandling"), "root-1", "root"), "root-1-1", "root-1")
   } }),
 ];
 */
@@ -162,7 +161,7 @@ describe("Ghost materialization and immaterialization", () => {
   it("Materialization should not materialize the owner", () => {
     setUp({ verbosity: 0, commands: createGrandlingInstance });
     assertImmaterialized(getGhostOwnling());
-    const grandlingInRoot1 = _ghostVRef(vRef("grandling-1"), "root-1", "root");
+    const grandlingInRoot1 = _ghostVRL(vRef("grandling-1"), "root-1", "root");
     assertImmaterialized(grandlingInRoot1);
     harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(),
         getGrandlingInstanceGhost()));
@@ -172,8 +171,8 @@ describe("Ghost materialization and immaterialization", () => {
 
   it("should materialize a trivial ghost prototype of a ghost which is being materialized", () => {
     setUp({ verbosity: 0, commands: [...createGrandlingInstance, ...createRootInstanceInstance] });
-    const grandlingInRoot1 = _ghostVRef(vRef("grandling-1"), "root-1", "root");
-    const grandlingInRoot11 = _ghostVRef(grandlingInRoot1, "root-1-1", "root-1");
+    const grandlingInRoot1 = _ghostVRL(vRef("grandling-1"), "root-1", "root");
+    const grandlingInRoot11 = _ghostVRL(grandlingInRoot1, "root-1-1", "root-1");
     harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), grandlingInRoot11));
     assertMaterialized(grandlingInRoot11);
     assertMaterialized(grandlingInRoot1);
@@ -185,7 +184,7 @@ describe("Ghost materialization and immaterialization", () => {
     });
     const ghostGrandlingChild = harness.run(getGhostGrandling(), ["§->", "children", 0]);
     assertImmaterialized(ghostGrandlingChild);
-    const ghostGrandlingInRoot11 = _ghostVRef(getGhostGrandling(), "root-1-1", "root-1");
+    const ghostGrandlingInRoot11 = _ghostVRL(getGhostGrandling(), "root-1-1", "root-1");
     assertImmaterialized(ghostGrandlingInRoot11);
     const ghostGrandlingInRoot11Child =
         harness.run(ghostGrandlingInRoot11, ["§->", "children", 0]);
@@ -217,23 +216,23 @@ describe("Ghost materialization and immaterialization", () => {
   it("materializes a ghost of a ghost when its mutated", () => {
     setUp({ verbosity: 0, commands: createGrandlingInstance });
     const greatGrandling1 = harness.run(getTestPartition("grandling-1"), VALK.to("children").to(0));
-    const greatGrandling1InRoot1VRef =
-        createGhostVRefInInstance(greatGrandling1, getTestPartition("root-1"));
-    const grandlingInRoot1VRef =
-        createGhostVRefInInstance(vRef("grandling-1"), getTestPartition("root-1"));
-    expect(getTestPartition(greatGrandling1InRoot1VRef.rawId()))
+    const greatGrandling1InRoot1VRL =
+        createGhostVRLInInstance(greatGrandling1, getTestPartition("root-1"));
+    const grandlingInRoot1VRL =
+        createGhostVRLInInstance(vRef("grandling-1"), getTestPartition("root-1"));
+    expect(getTestPartition(greatGrandling1InRoot1VRL.rawId()))
         .toBeFalsy();
-    expect(harness.run(greatGrandling1InRoot1VRef, "name"))
+    expect(harness.run(greatGrandling1InRoot1VRL, "name"))
         .toEqual("Harambaby");
-    harness.chronicleEvent(fieldsSet({ id: greatGrandling1InRoot1VRef, typeName: "TestThing",
+    harness.chronicleEvent(fieldsSet({ id: greatGrandling1InRoot1VRL, typeName: "TestThing",
       sets: { name: "ghostGhostBaby" },
     }));
-    const greatGrandling1InRoot1 = harness.run(greatGrandling1InRoot1VRef, null);
+    const greatGrandling1InRoot1 = harness.run(greatGrandling1InRoot1VRL, null);
     expect(greatGrandling1InRoot1)
         .toBeTruthy();
     expect(harness.run(getGhostOwnling(), ["§->", "children", 1]))
-        .toEqual(grandlingInRoot1VRef);
-    expect(harness.run(grandlingInRoot1VRef, ["§->", "children", 0], { verbosity: 0 }))
+        .toEqual(grandlingInRoot1VRL);
+    expect(harness.run(grandlingInRoot1VRL, ["§->", "children", 0], { verbosity: 0 }))
         .toEqual(greatGrandling1InRoot1);
     expect(harness.run(greatGrandling1InRoot1, "name"))
         .toEqual("ghostGhostBaby");
@@ -336,31 +335,31 @@ describe("Mixing references across instantiation boundaries", () => {
     expect(harness.run(vRef("grandling-1"), ["§->", "parent", "rawId"]))
         .toEqual("ownling");
 
-    const grandling1InRoot1VRef =
-        createGhostVRefInInstance(vRef("grandling-1"), getTestPartition("root-1"));
-    expect(harness.run(grandling1InRoot1VRef, ["§->", "ghostHost", "rawId"]))
+    const grandling1InRoot1VRL =
+        createGhostVRLInInstance(vRef("grandling-1"), getTestPartition("root-1"));
+    expect(harness.run(grandling1InRoot1VRL, ["§->", "ghostHost", "rawId"]))
         .toEqual("root-1");
-    expect(harness.run(grandling1InRoot1VRef, ["§->", "parent", "rawId"]))
+    expect(harness.run(grandling1InRoot1VRL, ["§->", "parent", "rawId"]))
         .toEqual(getGhostOwnling().rawId());
 
-    const grandling1InRoot1ChildVRef = harness.run(grandling1InRoot1VRef, ["§->", "children", 0]);
-    expect(harness.run(grandling1InRoot1ChildVRef, ["§->", "ghostHost", "rawId"]))
+    const grandling1InRoot1ChildVRL = harness.run(grandling1InRoot1VRL, ["§->", "children", 0]);
+    expect(harness.run(grandling1InRoot1ChildVRL, ["§->", "ghostHost", "rawId"]))
         .toEqual("root-1");
-    expect(harness.run(grandling1InRoot1ChildVRef, ["§->", "parent", "rawId"]))
-        .toEqual(grandling1InRoot1VRef.rawId());
-    expect(harness.run(grandling1InRoot1ChildVRef, ["§->", "parent", "parent", "rawId"]))
+    expect(harness.run(grandling1InRoot1ChildVRL, ["§->", "parent", "rawId"]))
+        .toEqual(grandling1InRoot1VRL.rawId());
+    expect(harness.run(grandling1InRoot1ChildVRL, ["§->", "parent", "parent", "rawId"]))
         .toEqual(getGhostOwnling().rawId());
-    expect(harness.run(grandling1InRoot1ChildVRef, ["§->", "parent", "parent", "parent", "rawId"]))
+    expect(harness.run(grandling1InRoot1ChildVRL, ["§->", "parent", "parent", "parent", "rawId"]))
         .toEqual("root-1");
   });
 
   it("returns the original resource for child of an instance of a ghost", () => {
     setUp({ verbosity: 0 });
-    const ownlingInRoot1VRef =
-        createGhostVRefInInstance(vRef("ownling"), getTestPartition("root-1"));
+    const ownlingInRoot1VRL =
+        createGhostVRLInInstance(vRef("ownling"), getTestPartition("root-1"));
     harness.chronicleEvent(created({ id: ["ownlingIn1-1"], typeName: "TestThing", initialState: {
       parent: ["root-1"],
-      instancePrototype: ownlingInRoot1VRef,
+      instancePrototype: ownlingInRoot1VRL,
     } }));
     expect(harness.run(vRef("ownlingIn1-1"), ["§->", "children", 0, "owner", "rawId"]))
         .toEqual("ownlingIn1-1");

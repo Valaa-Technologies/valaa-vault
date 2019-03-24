@@ -2,8 +2,7 @@
 
 import { EventBase } from "~/raem/events";
 import type { Story } from "~/raem/redux/Bard";
-import ValaaReference from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL from "~/raem/VRL";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
 import { ChronicleOptions, ChronicleRequest, ChronicleEventResult } from "~/prophet/api/types";
@@ -37,16 +36,16 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   _unconfirmedCommands: EventBase[] = [];
   _firstUnconfirmedEventId = 0;
   _isFrozen: ?boolean;
-  _referencePrototype: VRef;
+  _referencePrototype: VRL;
 
   constructor (options) {
     super(options);
-    const existingRef = this._prophet._inactivePartitionVRefPrototypes[String(this._partitionURI)];
+    const existingRef = this._prophet._inactivePartitionVRLPrototypes[String(this._partitionURI)];
     if (existingRef) {
       this._referencePrototype = existingRef;
-      delete this._prophet._inactivePartitionVRefPrototypes[String(this._partitionURI)];
+      delete this._prophet._inactivePartitionVRLPrototypes[String(this._partitionURI)];
     } else {
-      this._referencePrototype = new ValaaReference()
+      this._referencePrototype = new VRL()
           .initResolverComponent({ inactive: true, partition: this._partitionURI });
     }
   }

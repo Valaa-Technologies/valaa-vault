@@ -3,9 +3,9 @@
 import ContentAPI from "./ScriptContentAPI";
 import * as mediaDecoders from "./mediaDecoders";
 
-const Valaa = require("~/gateway-api/Valaa").default;
+const valos = require("~/gateway-api/valos").default;
 
-export default Valaa.exportPlugin({ name: "@valos/script", ContentAPI, mediaDecoders });
+export default valos.exportPlugin({ name: "@valos/script", ContentAPI, mediaDecoders });
 
 
 export {
@@ -13,10 +13,10 @@ export {
                         ContentAPI as ScriptContentAPI
 };
 export {
-                           default as transpileValaaScript,
-                                      transpileValaaScriptBody,
-                                      transpileValaaScriptModule,
-} from "./transpileValaaScript";
+                           default as transpileValoscript,
+                                      transpileValoscriptBody,
+                                      transpileValoscriptModule,
+} from "./transpileValoscript";
 export {
                            default as addExportsContainerToScope
 } from "./denormalized/addExportsContainerToScope";
@@ -29,5 +29,5 @@ export {
 } from "./denormalized/nativeIdentifier";
 export {
                                       BuiltinTypePrototype,
-                                      ValaaPrimitiveTag,
+                                      ValOSPrimitiveTag,
 } from "./VALSK/builtinSteppers";

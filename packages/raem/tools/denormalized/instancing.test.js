@@ -1,6 +1,6 @@
 import { created, fieldsSet, transacted } from "~/raem/events";
 
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 
 import getObjectField from "~/raem/state/getObjectField";
 import { tryObjectTransient } from "~/raem/state/getObjectTransient";

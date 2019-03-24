@@ -2,7 +2,7 @@
 import { GraphQLObjectType, getNamedType } from "graphql/type";
 
 export default function isResourceType (typeIntro: GraphQLObjectType) {
-  let ret = typeIntro.__isValaaResource;
+  let ret = typeIntro.__isValOSResource;
   if (typeof ret === "undefined") {
     let value = false;
     const intro = getNamedType(typeIntro);
@@ -17,7 +17,7 @@ export default function isResourceType (typeIntro: GraphQLObjectType) {
         || interfaces.find(iface => (iface.name === "TransientFields"))) {
       value = true;
     }
-    ret = typeIntro.__isValaaResource = value;
+    ret = typeIntro.__isValOSResource = value;
   }
   return ret;
 }

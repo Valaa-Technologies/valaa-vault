@@ -62,8 +62,7 @@
  * references.
  */
 import { Action, created, destroyed, transacted } from "~/raem/events";
-import ValaaReference, { vRef } from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL, { vRef } from "~/raem/VRL";
 import { GhostPath, Resolver } from "~/raem/state";
 import type { State, Transient } from "~/raem/state"; // eslint-disable-line no-duplicate-imports
 
@@ -71,15 +70,15 @@ import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
 import { dumpify, dumpObject, invariantify, invariantifyObject, wrapError } from "~/tools";
 
-export function createGhostVRefInInstance (prototypeId: VRef,
-    instanceTransient: Transient): VRef {
+export function createGhostVRLInInstance (prototypeId: VRL,
+    instanceTransient: Transient): VRL {
   const ghostPath = prototypeId.getGhostPath().withNewGhostStep(
       instanceTransient.get("prototype").rawId(),
       instanceTransient.get("id").rawId());
   return vRef(ghostPath.headRawId(), null, ghostPath);
 }
 
-export function createMaterializeGhostAction (resolver: Resolver, ghostId: VRef,
+export function createMaterializeGhostAction (resolver: Resolver, ghostId: VRL,
     concreteTypeName: string, isVirtualAction: boolean = false): ?Action {
   try {
     const actions = [];
@@ -98,7 +97,7 @@ export function createMaterializeGhostAction (resolver: Resolver, ghostId: VRef,
   }
 }
 
-export function createImmaterializeGhostAction (resolver: Resolver, ghostId: VRef): ?Action {
+export function createImmaterializeGhostAction (resolver: Resolver, ghostId: VRL): ?Action {
   const actions = [];
   _createImmaterializeGhostAction(resolver.getState(), ghostId.rawId(), actions);
   return !actions.length ? undefined
@@ -126,7 +125,7 @@ export function createMaterializeGhostPathAction (resolver: Resolver, ghostObjec
  * @param {string} externalType
  * @returns {?Action}
  */
-export function createInactiveTransientAction (resolver: Resolver, id: VRef): ?Action {
+export function createInactiveTransientAction (resolver: Resolver, id: VRL): ?Action {
   const actions = [];
   _createMaterializeGhostAction(resolver, resolver.getState(), id.getGhostPath(),
       id, undefined, true, actions);
@@ -134,7 +133,7 @@ export function createInactiveTransientAction (resolver: Resolver, id: VRef): ?A
 }
 
 function _createMaterializeGhostAction (resolver: Resolver, state: State,
-    ghostObjectPath: GhostPath, knownId: ?VRef, externalKnownType: ?string,
+    ghostObjectPath: GhostPath, knownId: ?VRL, externalKnownType: ?string,
     isVirtualAction: boolean, outputActions: Array<Action>,
 ): { id: string, internallyKnownType: ?string, ghostPath: GhostPath } {
   // TODO(iridian): This whole segment needs to be re-evaluated now
@@ -197,7 +196,7 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
         ? state.getIn([knownHostType, ghostHostRawId]).get("id")
         : Object.create(knownId
                 ? Object.getPrototypeOf(knownId)
-                : new ValaaReference().initResolverComponent({ inactive: true }))
+                : new VRL().initResolverComponent({ inactive: true }))
             .initNSS(ghostHostRawId);
     const id = Object.create(Object.getPrototypeOf(hostId)).initNSS(rawId);
     id.connectGhostPath(ghostPath);
@@ -244,6 +243,6 @@ function _createImmaterializeGhostAction (state: State, rawId: string,
   }
 }
 
-export function isMaterialized (state: State, id: VRef): boolean {
+export function isMaterialized (state: State, id: VRL): boolean {
   return !!state.getIn(["Resource", id.rawId()]);
 }

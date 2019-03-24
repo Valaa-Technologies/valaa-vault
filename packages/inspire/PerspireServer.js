@@ -67,7 +67,7 @@ export default class PerspireServer {
 
     const views = (await this.gateway).createAndConnectViewsToDOM({
       perspireMain: {
-        name: "Valaa Local Perspire Main",
+        name: "ValOS Local Perspire Main",
         lensURI: this.gateway.getRootLensURI() || this.gateway.getRootPartitionURI(),
         hostGlobal: global,
         window: viewWindow,
@@ -81,11 +81,11 @@ export default class PerspireServer {
       },
     }, (options) => new PerspireView(options));
     const ret = await views.perspireMain;
-    this.Valaa = views.perspireMain.rootScope.Valaa;
+    this.valos = views.perspireMain.rootScope.valos;
     // Creating perspire specific objects and variables.
-    // Please use server.Valaa.Perspire for external packages
-    this.Valaa.Perspire = {};
-    this.Valaa.isServer = true;
+    // Please use server.valos.Perspire for external packages
+    this.valos.Perspire = {};
+    this.valos.isServer = true;
     return ret;
   }
 

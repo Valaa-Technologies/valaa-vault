@@ -33,10 +33,10 @@ exports.handler = async (yargv) => {
   if (!toolsetWebpackConfig) {
     vlm.updateToolsetConfig(vlm.toolset, {
       webpack: {
-        entry: { "valaa-inspire": "./node_modules/@valos/inspire/index.js" },
+        entry: { "valos-inspire": "./node_modules/@valos/inspire/index.js" },
         output: {
-          path: "dist/revealer/valaa/inspire/",
-          publicPath: "/valaa/inspire/",
+          path: "dist/revealer/valos/inspire/",
+          publicPath: "/valos/inspire/",
           filename: "[name].js"
         }
       }

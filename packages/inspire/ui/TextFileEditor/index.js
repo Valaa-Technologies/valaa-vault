@@ -121,6 +121,7 @@ class TextFileEditor extends MediaContentEditor {
     if (mediaType) {
       switch (mediaType.subtype) {
         // Inspire extensions:
+        case "valoscript": return "javascript";
         case "valaascript": return "javascript";
         case "vsx": return "jsx";
         default: return mediaType.subtype;

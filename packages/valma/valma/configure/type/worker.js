@@ -25,8 +25,8 @@ A worker repository is fully agnostic to version control solutions:
 
 Will add '@valos/toolset-worker' as devDependency.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "worker")
-    && `Workspace is not a 'worker' (is '${yargs.vlm.getPackageConfig("valaa", "type")}')`;
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
+    && `Workspace is not a 'worker' (is '${yargs.vlm.getValOSConfig("type")}')`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

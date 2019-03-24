@@ -28,20 +28,20 @@ Toolsets from file and global pools can be used but should be avoided
 as such toolsets are not guaranteed to be always available.`;
 
 exports.disabled = (yargs) => {
-  const valaa = yargs.vlm.getPackageConfig("valaa");
-  return !valaa ? "No package.json valaa stanza found"
-      : !valaa.type ? "No package.json valaa.type stanza found"
-      : !valaa.domain ? "No package.json valaa.domain stanza found"
+  const valos = yargs.vlm.getValOSConfig();
+  return !valos ? "No package.json valos stanza found"
+      : !valos.type ? "No package.json valos.type stanza found"
+      : !valos.domain ? "No package.json valos.domain stanza found"
       : !yargs.vlm.getToolsetsConfig() && "No toolsets.json found";
 };
 exports.builder = (yargs) => {
   const toolsetsConfig = yargs.vlm.getToolsetsConfig();
   if (!toolsetsConfig) throw new Error("toolsets.json missing (maybe run 'vlm init'?)");
-  if (this.disabled(yargs)) throw new Error("package.json missing stanza .valaa.(type|domain)");
-  const valaa = yargs.vlm.packageConfig.valaa;
+  if (this.disabled(yargs)) throw new Error("package.json missing stanza .valos.(type|domain)");
+  const valos = yargs.vlm.packageConfig.valos || yargs.vlm.packageConfig.valaa;
   const knownToolsets = yargs.vlm
       .listMatchingCommands(
-          `.configure/{,.type/.${valaa.type}/,.domain/.${valaa.domain}/}.toolset/**/*`)
+          `.configure/{,.type/.${valos.type}/,.domain/.${valos.domain}/}.toolset/**/*`)
       .map(name => name.match(/\/.toolset\/(.*)$/)[1]);
   const configuredToolsets = Object.keys(toolsetsConfig || {});
   const usedToolsets = configuredToolsets

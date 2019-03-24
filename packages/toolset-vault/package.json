@@ -1,11 +1,11 @@
 {
   "name": "@valos/toolset-vault",
   "version": "0.34.0-prerelease.18",
-  "valaa": {
+  "valos": {
     "type": "toolset",
     "domain": "packages"
   },
-  "description": "A valma toolset for managing valaa vault package monorepositories",
+  "description": "A valma toolset for managing valos vault monorepository workspaces",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
   "private": false,

@@ -31,7 +31,7 @@ import { dumpObject, wrapError } from "~/tools";
  * @param {VALKOptions} options
  * @returns
  *
- * @memberof ValaaEngine
+ * @memberof Engine
  */
 export default function integrateDecoding (decodedContent: any, vScope: Vrapper,
     mediaInfo: MediaInfo, options: VALKOptions) {
@@ -64,7 +64,7 @@ function _integrateKuery (moduleKuery: Kuery, vScope: Vrapper, mediaInfo: MediaI
   const scopeDescriptor = scopeName ? `in Scope "${scopeName}"` : "in unnamed Scope";
   const sourceInfo = moduleKuery[SourceInfoTag] && {
     ...moduleKuery[SourceInfoTag],
-    phase: `ValaaScript module "${mediaInfo.name}" integration ${scopeDescriptor}`,
+    phase: `valoscript module "${mediaInfo.name}" integration ${scopeDescriptor}`,
   };
   options.scope = Object.create(vScope.getLexicalScope());
   const moduleExports = addExportsContainerToScope(options.scope);
@@ -74,7 +74,7 @@ function _integrateKuery (moduleKuery: Kuery, vScope: Vrapper, mediaInfo: MediaI
   // phase information during subsequent calls. Update it to "runtime".
   sourceInfo.phase = `VALK runtime (within VS module "${mediaInfo.name}" ${scopeDescriptor})`;
   if (!Object.keys(moduleExports).length) {
-    // TODO(iridian): This feels a bit shady, maybe the transpileValaaScriptModule could tell us
+    // TODO(iridian): This feels a bit shady, maybe the transpileValoscriptModule could tell us
     // if there were no exports in the module?
     moduleExports.default = moduleResult;
   }

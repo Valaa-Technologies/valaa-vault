@@ -31,7 +31,7 @@ export function addStackFrameToError (error: Error, sourceObject: Object,
   // TODO(iridian): fix hack: grep wrapError.js outputError for "sourceStackFrames"
   error.sourceStackFrames = (error.sourceStackFrames || []).concat(stackFrame);
   error.customErrorHandler = function outputValOSStackTrace (logger) {
-    logger.error(`Valaa stack trace originating from ${sourceInfo.phase || "unknown context"}:`);
+    logger.error(`ValOS stack trace originating from ${sourceInfo.phase || "unknown context"}:`);
     const messages = parseErrorMessagesFromStackTrace(this.sourceStackFrames);
     messages.forEach(components => components && logger.error("    ", ...components));
   };

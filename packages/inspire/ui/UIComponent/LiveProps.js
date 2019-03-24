@@ -11,7 +11,7 @@ import Vrapper, { LiveUpdate, getImplicitCallable } from "~/engine/Vrapper";
 import VALEK from "~/engine/VALEK";
 import getImplicitMediaInterpretation from "~/engine/Vrapper/getImplicitMediaInterpretation";
 
-import ValaaScope from "~/inspire/ui/ValaaScope";
+import Valoscope from "~/inspire/ui/Valoscope";
 import UIComponent from "~/inspire/ui/UIComponent";
 
 import { arrayFromAny, deepExtend, isPromise, outputError, wrapError } from "~/tools";
@@ -209,26 +209,29 @@ export default class LiveProps extends UIComponent {
     }
     for (const propName of Object.getOwnPropertyNames(newProps)) {
       if (typeof newProps[propName] === "function") {
-        newProps[propName] = this._wrapInValaaExceptionProcessor(newProps[propName], propName);
+        newProps[propName] = this._wrapInValOSExceptionProcessor(newProps[propName], propName);
       }
     }
     let children = arrayFromAny(this.props.children);
     let elementType = this.props.elementType;
-    if (newProps.valaaScope) {
+    const valoscopeProps = newProps.valoscope || newProps.vScope || newProps.valaaScope;
+    if (valoscopeProps) {
       const subProps = newProps;
-      newProps = newProps.valaaScope;
+      newProps = valoscopeProps;
+      delete subProps.valoscope;
+      delete subProps.vScope;
       delete subProps.valaaScope;
-      elementType = ValaaScope;
+      elementType = Valoscope;
       children = [React.createElement(elementType, subProps, ...children)];
     }
     let ret;
     if (newProps.delegate && (Object.keys(newProps).length === 1)) {
       ret = this.renderFirstEnabledDelegate(newProps.delegate, undefined, "delegate");
     /* Only enable this section for debugging React key warnings; it will break react elsewhere
-    if (elementType === ValaaScope) {
-      elementType = class DebugValaaScope extends ValaaScope {};
+    if (elementType === Valoscope) {
+      elementType = class DebugValoscope extends Valoscope {};
       Object.defineProperty(elementType, "name", {
-        value: `ValaaScope_${newProps.className || ""}${this.getUIContextValue("key")}`,
+        value: `Valoscope_${newProps.className || ""}${this.getUIContextValue("key")}`,
       });
     }
     /* */
@@ -252,7 +255,7 @@ export default class LiveProps extends UIComponent {
     return ret;
   }
 
-  _wrapInValaaExceptionProcessor (callback: Function, name: string) {
+  _wrapInValOSExceptionProcessor (callback: Function, name: string) {
     const component = this;
     const ret = function handleCallbackExceptions (...args: any[]) {
       try {
@@ -262,7 +265,7 @@ export default class LiveProps extends UIComponent {
             () => handleCallbackExceptions(...args));
         if (connectingMissingPartitions) return connectingMissingPartitions;
         const finalError = wrapError(error,
-            new Error(`props.${name} ValaaSpace callback`),
+            new Error(`props.${name} valospace callback`),
             "\n\targs:", args,
             "\n\tcontext:", component.state.uiContext,
             "\n\tstate:", component.state,

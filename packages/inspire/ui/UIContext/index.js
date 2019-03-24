@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 import Presentable from "~/inspire/ui/Presentable";
 import UIComponent, { LENS } from "~/inspire/ui/UIComponent";
-import ValaaScope from "~/inspire/ui/ValaaScope";
+import Valoscope from "~/inspire/ui/Valoscope";
 
 import Vrapper from "~/engine/Vrapper";
 
@@ -39,7 +39,7 @@ class UIContext extends UIComponent {
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
     invariantify(focus instanceof Vrapper,
-        "UIContext(%s).focus(%s) must be a Valaa object", this, focus);
+        "UIContext(%s).focus(%s) must be a ValOS resource", this, focus);
     invariantify(focus.hasInterface("Scope"), "UIContext.focus must implement Scope");
     this.bindNewKuerySubscription("UIContext_DEFAULT_LENS",
         focus, UIContext.toDefaultLens, {},
@@ -103,7 +103,7 @@ class UIContext extends UIComponent {
   createUIRootElement (focus: Object) {
     const renderedChildren = super.renderLoaded(focus);
     const defaultJSXElement = this.state.lensPropertyNotFoundLens && (
-      <ValaaScope
+      <Valoscope
         {...this.childProps("uiRootDefault")}
         activeLens={LENS`lensPropertyNotFoundLens`}
       />

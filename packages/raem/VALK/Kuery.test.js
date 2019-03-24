@@ -2,7 +2,7 @@
 
 import VALK, { run as unwrappedRun } from "~/raem/VALK";
 import { created, fieldsSet } from "~/raem/events";
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 import RAEMTestAPI from "~/raem/test/RAEMTestAPI";
 import { expandTildeVAKON } from "~/raem/VALK/Valker";
@@ -119,7 +119,7 @@ describe("VALK corpus kueries", () => {
   it("Converts basic VALK.equalTo into VAKON", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("id").looseEqualTo(vRef("A_parentGlue"));
-    expect(kuery.toVAKON()).toEqual(["§==", ["§->", "id"], ["§ref", ["A_parentGlue"]]]);
+    expect(kuery.toVAKON()).toEqual(["§==", ["§->", "id"], ["§vrl", ["A_parentGlue"]]]);
     expect(harness.run(vRef("A_parentGlue"), kuery))
         .toEqual(true);
     expect(harness.run(vRef("A_childGlue"), kuery))
@@ -138,7 +138,7 @@ describe("VALK corpus kueries", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.if(VALK.to("id").looseEqualTo(vRef("A_child1")));
     expect(kuery.toVAKON())
-        .toEqual(["§?", ["§==", ["§->", "id"], ["§ref", ["A_child1"]]], null]);
+        .toEqual(["§?", ["§==", ["§->", "id"], ["§vrl", ["A_child1"]]], null]);
     expect(harness.run(vRef("A_child1"), "rawId"))
         .toEqual("A_child1");
     expect(harness.run(vRef("A_child2"), kuery))
@@ -183,7 +183,7 @@ describe("VALK corpus kueries", () => {
     const kuery = VALK.to("children").filter(VALK.to("id").looseEqualTo(vRef("A_child1")));
     expect(kuery.toVAKON())
         .toEqual(["§->", "children",
-            ["§filter", ["§==", ["§->", "id"], ["§ref", ["A_child1"]]]]]);
+            ["§filter", ["§==", ["§->", "id"], ["§vrl", ["A_child1"]]]]]);
     expect(harness.run(vRef("A_parent"), kuery.toIndex(0).to("rawId")))
         .toEqual("A_child1");
   });

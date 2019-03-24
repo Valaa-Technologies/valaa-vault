@@ -2,8 +2,7 @@
 
 import { GraphQLObjectType } from "graphql/type";
 
-import ValaaReference from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL from "~/raem/VRL";
 
 import { FieldInfo, elevateFieldReference, elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import Resolver from "~/raem/state/Resolver";
@@ -20,7 +19,7 @@ import { wrapError, dumpObject } from "~/tools";
  * Return the fully evaluated value of the field with given fieldName from given object transient,
  * using given resolver and its state.
  * Returned value is a native value (primitive, Array or an object) with any possible links as
- * fully elevated ValaaReference's.
+ * fully elevated VRL's.
  * In order to access link targets they must be converted into transients using getObjectTransient.
  *
  * @export
@@ -29,10 +28,10 @@ import { wrapError, dumpObject } from "~/tools";
  * @param {any} fieldName
  * @param {any} objectFields
  * @param {any} fieldInfoOut
- * @returns {any | VRef | Transient}
+ * @returns {any | VRL | Transient}
  */
 export default function getObjectField (resolver: Resolver, object: Transient, fieldName: string,
-    fieldInfo: FieldInfo = {}): any | ?VRef | ?Transient {
+    fieldInfo: FieldInfo = {}): any | ?VRL | ?Transient {
   const rawField = getObjectRawField(resolver, object, fieldName, fieldInfo);
   if (!rawField || !fieldInfo.intro || !fieldInfo.intro.isComposite) return rawField;
   if (!fieldInfo.elevationInstanceId) fieldInfo.elevationInstanceId = object.get("id");
@@ -70,7 +69,7 @@ export default function getObjectField (resolver: Resolver, object: Transient, f
  */
 export function getObjectRawField (resolver: Resolver, object: Transient,
     fieldName: string, fieldInfoOut: FieldInfo, objectTypeIntro?: GraphQLObjectType):
-    ?VRef | ?Transient {
+    ?VRL | ?Transient {
   let fieldInfo = fieldInfoOut;
   try {
     // Direct access section. A value which matches the requested fieldName is always directly
@@ -134,7 +133,7 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
     if (!typeName) {
       // Immaterial transient access. Treat the transient as a prototype, except for
       // 'prototype' field access which requires special treatment.
-      const transientId: VRef = object.get("id");
+      const transientId: VRL = object.get("id");
       resolver.objectTransient = object[PrototypeOfImmaterialTag];
       if (!resolver.objectTransient) {
         // an immaterial ghost which has its prototype nulled via Resource.ownFields
@@ -253,7 +252,7 @@ export function fillFieldInfoAndResolveAliases (object: Transient, objectFields:
 }
 
 function _postProcessAlias (ret: any, fieldInfo: FieldInfo) {
-  if (!fieldInfo.coupledField || !(ret instanceof ValaaReference) || fieldInfo.skipAliasPostProcess
+  if (!fieldInfo.coupledField || !(ret instanceof VRL) || fieldInfo.skipAliasPostProcess
       || (ret.getCoupledField() === fieldInfo.coupledField)) {
     return ret;
   }

@@ -23,7 +23,7 @@ import createValaaLocalScheme from "~/prophet/schemeModules/valaa-local";
 import createValaaMemoryScheme from "~/prophet/schemeModules/valaa-memory";
 import createValaaTransientScheme from "~/prophet/schemeModules/valaa-transient";
 
-import * as ValaaScriptDecoders from "~/script/mediaDecoders";
+import * as ValoscriptDecoders from "~/script/mediaDecoders";
 import * as ToolsDecoders from "~/tools/mediaDecoders";
 
 import thenChainEagerly from "~/tools/thenChainEagerly";
@@ -324,7 +324,7 @@ export function createOracle (options?: Object) {
   authorityNexus.addSchemeModule(createValaaTestScheme({
     logger: ret.getLogger(), config: (options || {}).testAuthorityConfig,
   }));
-  for (const Decoder: any of Object.values({ ...ToolsDecoders, ...ValaaScriptDecoders })) {
+  for (const Decoder: any of Object.values({ ...ToolsDecoders, ...ValoscriptDecoders })) {
     if (Decoder.mediaTypes) {
       ret.getDecoderArray().addDecoder(new Decoder({ logger: ret.getLogger() }));
     }

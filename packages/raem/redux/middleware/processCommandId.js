@@ -1,7 +1,7 @@
 /*
 import { CREATED, isCreatedLike, isTransactedLike } from "~/raem/events";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
-import { getRawIdFrom } from "~/raem/ValaaReference";
+import { getRawIdFrom } from "~/raem/VRL";
 
 import { dumpify, createId, invariantify } from "~/tools";
 */

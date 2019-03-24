@@ -4,7 +4,7 @@ exports.describe = "Configure 'toolset-vault-operations' for a vault workspace";
 exports.introduction = `${exports.describe}.
 
 This script makes the toolset 'toolset-vault-operations' available for
-grabbing by repositories with valaa type 'vault'.`;
+grabbing by repositories with valos.type 'vault'.`;
 
 exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
     && "Can't configure 'toolset-vault-operations': not inUse or toolset config missing";

@@ -1,6 +1,6 @@
 // @flow
 
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 
 import { addedTo, created, fieldsSet, removedFrom, replacedWithin } from "~/raem/events";
 
@@ -87,7 +87,7 @@ describe("MODIFIED action class", () => {
           .toEqual("A_child2");
     });
 
-    it("adds and traverses non-expanded ValaaReference Data", () => {
+    it("adds and traverses non-expanded VRL Data", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
       const dataGlue = harness.chronicleEvent(created({ id: vRef("glue1"), typeName: "TestDataGlue",
         initialState: { source: ["A_child1"], target: ["A_child2"] },

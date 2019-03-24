@@ -4,7 +4,7 @@
 
 import { Kuery } from "~/script/VALSK";
 
-import Transpiler from "~/script/acorn/ValaaScriptTranspiler";
+import Transpiler from "~/script/acorn/ValoscriptTranspiler";
 import * as es5 from "~/script/acorn/es5/parseRules";
 
 /* eslint-disable max-len */

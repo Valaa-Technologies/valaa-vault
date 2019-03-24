@@ -1,13 +1,13 @@
 // @flow
 import { created, addedTo, transacted } from "~/raem/events";
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 import { createLocalPartitionURIFromRawId, createMemoryPartitionURIFromRawId }
     from "~/raem/ValaaURI";
 
 const testAuthorityURI = "valaa-test:";
-// const sharedURI = "valaa-shared-content";
+// const sharedURI = "valos-shared-content";
 
 /*
 function vCrossRef (rawId, partitionRawId = rawId) {

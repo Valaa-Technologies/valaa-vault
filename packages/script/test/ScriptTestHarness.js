@@ -5,7 +5,7 @@ import RAEMTestHarness, { createRAEMTestHarness } from "~/raem/test/RAEMTestHarn
 
 import ScriptTestAPI from "~/script/test/ScriptTestAPI";
 import { Kuery, builtinSteppers } from "~/script/VALSK";
-import { transpileValaaScriptBody } from "~/script/transpileValaaScript";
+import { transpileValoscriptBody } from "~/script/transpileValoscript";
 
 export function createScriptTestHarness (options: Object, ...commandBlocks: any) {
   return createRAEMTestHarness({
@@ -16,8 +16,8 @@ export function createScriptTestHarness (options: Object, ...commandBlocks: any)
 }
 
 export default class ScriptTestHarness extends RAEMTestHarness {
-  runValaaScript (self: any, valaaScriptBody: string, options: Object = {}) {
-    const bodyKuery = transpileValaaScriptBody(valaaScriptBody, {
+  runValoscript (self: any, valoscriptBody: string, options: Object = {}) {
+    const bodyKuery = transpileValoscriptBody(valoscriptBody, {
       verbosity: options.verbosity || 0,
       customVALK: this.ContentAPI.VALK,
       sourceInfo: options.sourceInfo,
@@ -43,7 +43,7 @@ export default class ScriptTestHarness extends RAEMTestHarness {
  *
  * @param {any}    corpus
  * @param {Kuery}  programKuery
- * @param {VRef}   thisReference
+ * @param {VRL}   thisReference
  * @param {Object} scope
  * @returns                       the resulting value of the expressionKuery
  */

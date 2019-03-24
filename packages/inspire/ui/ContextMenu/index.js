@@ -7,7 +7,7 @@ import Vrapper, { getImplicitCallable } from "~/engine/Vrapper";
 import UIComponent from "~/inspire/ui/UIComponent";
 import VALEK from "~/engine/VALEK";
 
-const ItemRelation : string = "Valaa_ContextMenu_Item";
+const ItemRelation: string = "Valaa_ContextMenu_Item";
 
 export default class ValaaContextMenu extends UIComponent {
   bindFocusSubscriptions (focus: any, props: Object) {

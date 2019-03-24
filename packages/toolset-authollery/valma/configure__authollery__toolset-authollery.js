@@ -10,8 +10,8 @@ root from package @valos/toolset-authollery directory templates/.*.`;
 
 // Example template which displays the command name itself and package name where it is ran
 // Only enabled inside package
-exports.disabled = (yargs) => (yargs.vlm.getPackageConfig("valaa", "type") !== "authollery")
-    && `Workspace is not an authollery (is ${yargs.vlm.getPackageConfig("valaa", "type")})`;
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "authollery")
+    && `Workspace is not an authollery (is ${yargs.vlm.getValOSConfig("type")})`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

@@ -2,8 +2,8 @@
 
 import { GraphQLSchema } from "graphql/type";
 
-import ValaaReference, { obtainVRef, tryCoupledFieldFrom } from "~/raem/ValaaReference";
-import type { JSONIdData, IdData, RawId, VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL, { obtainVRL, tryCoupledFieldFrom } from "~/raem/VRL";
+import type { JSONIdData, IdData, RawId } from "~/raem/VRL"; // eslint-disable-line no-duplicate-imports
 import type { ValaaURI } from "~/raem/ValaaURI";
 
 import GhostPath from "~/raem/state/GhostPath";
@@ -26,18 +26,18 @@ import { _getFieldGhostElevation, _elevateReference } from "./FieldInfo";
  * resolutions against a specific known state.
  *
  * Three main types of resolutions are:
- * 1. resolving ValaaReference's (VRef's) to find corresponding
+ * 1. resolving VRL's (VRL's) to find corresponding
  *    Transient's from the state
- * 2. binding external, possibly serialized VRef data to existing VRef
+ * 2. binding external, possibly serialized VRL data to existing VRL
  *    objects with the same identity in the state
  * 3. resolving Transient field lookups, including ghost elevation
  *    proceduce
  *
- * All references in corpus state must be VRef's, and those VRef's must
+ * All references in corpus state must be VRL's, and those VRL's must
  * be bound, meaning that the same conceptual reference uses the same
  * object and can thus be compared with '==='.
  * Binding means that before storing their target Transient is looked
- * up, and the VRef is replaced with that of the transient "id" field
+ * up, and the VRL is replaced with that of the transient "id" field
  * (with appropriate coupledField). This enables both internal
  * consistency (no invalid references to void) as well as better
  * performance.
@@ -46,7 +46,7 @@ import { _getFieldGhostElevation, _elevateReference } from "./FieldInfo";
  * @class Resolver
  */
 export default class Resolver extends LogEventGenerator {
-  deserializeReference: (idData: IdData, originatingPartitionURI?: ValaaURI) => VRef;
+  deserializeReference: (idData: IdData, originatingPartitionURI?: ValaaURI) => VRL;
 
   constructor (options: ?Object) {
     if (!options.name) options.name = "Resolver";
@@ -65,7 +65,7 @@ export default class Resolver extends LogEventGenerator {
         && (tryHostRef(params)
             || (this._deserializeReference
                 && this._deserializeReference(params, originatingPartitionURI))
-            || obtainVRef(params, undefined, undefined, originatingPartitionURI || undefined));
+            || obtainVRL(params, undefined, undefined, originatingPartitionURI || undefined));
   }
 
   setDeserializeReference (deserializeReference: Function) {
@@ -94,7 +94,7 @@ export default class Resolver extends LogEventGenerator {
   // object section
   objectTypeName: ?string;
 
-  setObject (id: VRef, typeName: string) {
+  setObject (id: VRL, typeName: string) {
     this.objectId = id;
     this.objectTypeName = typeName;
   }
@@ -110,13 +110,13 @@ export default class Resolver extends LogEventGenerator {
 
 
   /**
-   * Returns a bound field-VRef object.
-   * Similar to bindObjectId but sets the coupled field name for the returned field-VRef based
+   * Returns a bound field-VRL object.
+   * Similar to bindObjectId but sets the coupled field name for the returned field-VRL based
    * on given options and the given fieldRef.
-   * Note that the mapping [corpus, rawId, coupledField] -> [fieldVRef1, fieldVRef2, ...] is not
-   * unique so field VRef comparisons cannot be done using strict object equality.
+   * Note that the mapping [corpus, rawId, coupledField] -> [fieldVRL1, fieldVRL2, ...] is not
+   * unique so field VRL comparisons cannot be done using strict object equality.
    *
-   * TODO(iridian): Add convenience for retrieving the associated id-VRef from a field-VRef.
+   * TODO(iridian): Add convenience for retrieving the associated id-VRL from a field-VRL.
    *
    * The rules for determining the coupled field:
    * 1. options.coupledField
@@ -129,7 +129,7 @@ export default class Resolver extends LogEventGenerator {
    * @param {any} [{ coupledField, defaultCoupledField }={}]    accepts a fieldInfo structure
    * @returns
    */
-  bindFieldVRef (fieldRef: VRef | JSONIdData, fieldInfo: FieldInfo,
+  bindFieldVRL (fieldRef: VRL | JSONIdData, fieldInfo: FieldInfo,
       contextPartitionURI?: ValaaURI) {
     const coupledField = fieldInfo.coupledField
         || tryCoupledFieldFrom(fieldRef)
@@ -139,7 +139,7 @@ export default class Resolver extends LogEventGenerator {
   }
 
   /**
-   * Returns a bound id-VRef object. Bound id means that the id VRef
+   * Returns a bound id-VRL object. Bound id means that the id VRL
    * object is retrieved from an existing resource 'id' property.
    * Binding gives three benefits:
    *
@@ -147,7 +147,7 @@ export default class Resolver extends LogEventGenerator {
    *    the Corpus
    * 2. for commands going upstream the correct partition URI is made
    *    available
-   * 3. it applies flyweight pattern on the non-trivial id VRef
+   * 3. it applies flyweight pattern on the non-trivial id VRL
    *    construct, improving performance
    *
    * Step 1. is pre-validation for upstream commands, but also serves
@@ -155,10 +155,10 @@ export default class Resolver extends LogEventGenerator {
    * the backend, offering an opportunity for escalating diagnostics
    * alarms.
    *
-   * The mapping [corpus, rawId] -> id-VRef is unique (within single
-   * state, see below), so VRef equality comparisons between bound id's
+   * The mapping [corpus, rawId] -> id-VRL is unique (within single
+   * state, see below), so VRL equality comparisons between bound id's
    * in the context of the corpus can use strict object equality. Note
-   * that this only applies to id-VRef, ie. VRef's with undefined
+   * that this only applies to id-VRL, ie. VRL's with undefined
    * coupledField.
    *
    * TODO(iridian): modify/construct variants/destroy don't actually
@@ -166,8 +166,8 @@ export default class Resolver extends LogEventGenerator {
    * goToTransientOfRawId directly. This duplicate logic could be
    * simplified.
    *
-   * @param {JSONIdData} id             serialized JSONIdData or plain VRef
-   * @returns {VRef}
+   * @param {JSONIdData} id             serialized JSONIdData or plain VRL
+   * @returns {VRL}
    */
   bindObjectId (idData: IdData, typeName: string, contextPartitionURI?: ValaaURI) {
     let object;
@@ -210,17 +210,17 @@ export default class Resolver extends LogEventGenerator {
   }
 
   objectTransient: Transient;
-  objectId: VRef;
+  objectId: VRL;
 
-  goToTransient (id: VRef, typeName: string) {
+  goToTransient (id: VRL, typeName: string) {
     return this.tryGoToTransient(id, typeName, true, false);
   }
 
-  tryGoToNonGhostTransient (id: VRef, typeName: string) {
+  tryGoToNonGhostTransient (id: VRL, typeName: string) {
     return this.tryGoToTransient(id, typeName, false, true);
   }
 
-  goToNonGhostTransient (id: VRef, typeName: string) {
+  goToNonGhostTransient (id: VRL, typeName: string) {
     return this.tryGoToTransient(id, typeName, true, true);
   }
 
@@ -236,15 +236,15 @@ export default class Resolver extends LogEventGenerator {
    * @returns
    * @memberof Resolver
    */
-  tryGoToTransient (objectId: VRef, typeName: string, require: ?boolean,
+  tryGoToTransient (objectId: VRL, typeName: string, require: ?boolean,
       nonGhostLookup: ?boolean, onlyMostMaterialized?: any, withOwnField?: string) {
     try {
       if (typeof typeName !== "string") {
         invariantifyString(typeName, "tryGoToTransient.typeName");
       }
-      if (!(objectId instanceof ValaaReference)) {
+      if (!(objectId instanceof VRL)) {
         if (objectId || require) {
-          throw new Error("tryGoToTransient.objectId must be a valid ValaaReference");
+          throw new Error("tryGoToTransient.objectId must be a valid VRL");
         }
         this.objectId = null;
         this.objectTypeName = null;
@@ -276,7 +276,7 @@ export default class Resolver extends LogEventGenerator {
    * @memberof Resolver
    */
   tryGoToTransientOfRawId (rawId: RawId, typeName?: string, require?: boolean = false,
-      ghostPath?: GhostPath, onlyMostMaterialized?: any, withOwnField?: string, objectId?: VRef) {
+      ghostPath?: GhostPath, onlyMostMaterialized?: any, withOwnField?: string, objectId?: VRL) {
     try {
       if (typeName) this.objectTypeName = typeName;
       this.objectTransient = this.tryStateTransient(rawId, this.objectTypeName);
@@ -285,7 +285,7 @@ export default class Resolver extends LogEventGenerator {
         this.objectId = this.objectTransient.get("id");
       } else if ((this.objectTypeName === "Blob") || (objectId && objectId.isInactive())) {
         // Blob and inactive resources are given an id-transient
-        this.objectId = objectId || new ValaaReference(rawId);
+        this.objectId = objectId || new VRL(rawId);
         if (this.objectTypeName !== "Blob") this.objectTypeName = this.schema.inactiveType.name;
         this.objectTransient = createIdTransient(this.objectId);
       } else if ((!withOwnField && (!ghostPath || !ghostPath.isGhost()))
@@ -394,7 +394,7 @@ export default class Resolver extends LogEventGenerator {
         if (elevation) {
           owner = _elevateReference(elevator, owner, fieldInfo, elevation, "Resource");
         }
-        if (owner instanceof ValaaReference) return this.goToTransient(owner, "Resource");
+        if (owner instanceof VRL) return this.goToTransient(owner, "Resource");
         this.objectId = owner.get("id");
         this.objectTransient = owner;
       } else {

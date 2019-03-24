@@ -6,8 +6,8 @@
  * nothing else, it is understood to refer to the quite permissive
  * https://spdx.org/licenses/0BSD.html or "BSD Zero Clause License".
  *
- * The library is stripped for the needs of Valaa VSX and JSX transpilation and linted with Valaa
- * style.
+ * The library is stripped for the needs of ValOS VSX and JSX
+ * transpilation and linted with ValOS style.
  */
 
 import { transform as jstransform, Syntax } from "jstransform";

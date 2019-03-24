@@ -23,15 +23,15 @@ export function tagInterface (/* objectDescription: string = INTERFACE_DESCRIPTI
         // it turns out to be bad. Con: in principle a schema should be complete and never change.
         // Pro: alternative, more user-readable schemas can be introduced on the side.
         // Con: adds possibly useless complexity. Keeping the option open in principle, although
-        // aiming to have Valaa Tags be unambiguous and directly string-comparable.
+        // aiming to have ValOS Tags be unambiguous and directly string-comparable.
         `The tag URI as per https://tools.ietf.org/html/rfc4151. Tags never form a part
 of the content id. This allows tag URI schemas to refer to the same Tag separately or internally
 using different sub-schemas. The tag URI must be complete against the GraphQL schema that defines
 it so that a fully expanded GraphQL Tag data object can be created from the URI.
-Valaa schema tags are of the form tag://valaa.com,2017:dataType(:subType)/content where
+ValOS schema tags are of the form tag://valaa.com,2017:dataType(:subType)/content where
 dataType is the particular Tag data type string (such as Literal or Identifier) subType is an
 additional optional qualifier for the dataType and content is in a format determined by the data
-type. Valaa schema does not allow for sub-schemas and thus two valaa tags are the same if and only
+type. ValOS schema does not allow for sub-schemas and thus two ValOS tags are the same if and only
 if they compare the same as per RFC (have same machine representation, ie. equal by typical string
 comparison).`
       ),

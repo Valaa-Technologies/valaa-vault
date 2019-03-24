@@ -13,7 +13,7 @@ import Relatable from "~/script/schema/Relatable";
 import Scope from "~/script/schema/Scope";
 
 export default createContentAPI({
-  name: "ValaaScriptContentAPI",
+  name: "ValoscriptContentAPI",
   inherits: [RAEMContentAPI],
 
   exposes: [

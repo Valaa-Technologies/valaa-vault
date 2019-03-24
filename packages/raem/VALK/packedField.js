@@ -1,6 +1,6 @@
 import { Iterable } from "immutable";
 
-import ValaaReference from "~/raem/ValaaReference";
+import VRL from "~/raem/VRL";
 
 import type { FieldInfo } from "~/raem/state/FieldInfo";
 
@@ -10,18 +10,23 @@ import { PackedHostValue, HostRef, tryHostRef } from "~/raem/VALK/hostReference"
 
 const dumpify = require("~/tools/dumpify").default;
 
-// PackedField is a packed, datatype for accessing reference fields lazily. Potentially expensive
-// operations like value elevations and sequence completions will only be performed when needed.
+// PackedField is a packed, datatype for accessing reference fields
+// lazily. Potentially expensive operations like value elevations and
+// sequence completions will only be performed when needed.
 
-// TODO(iridian): Evaluate the whole concept of PackedField's. Before partially materialized
-// sequence properties were a thing this lazy structure was properly defensible due to sequence
-// indexing accesses: the internally stored raw sequence could be indexed and then only the indexed
-// value could be elevated instead of having to elevate all entries of the sequence field. But now
-// with partially materialized sequences the whole sequence needs to be elevated anyway.
-// Optimization solutions will most likely rely on caching and reusing these elevated sequences.
-// This means that discarding the packed field system is a potential option and it would allow
-// simplifying the packed valaa object reference values to be strictly limited to direct and
-// native-array-contained VRef's (for singular and sequence packed values respectively).
+// TODO(iridian): Evaluate the whole concept of PackedField's. Before
+// partially materialized sequence properties were a thing this lazy
+// structure was properly defensible due to sequence indexing accesses:
+// the internally stored raw sequence could be indexed and then only
+// the indexed value could be elevated instead of having to elevate all
+// entries of the sequence field. But now with partially materialized
+// sequences the whole sequence needs to be elevated anyway.
+// Optimization solutions will most likely rely on caching and reusing
+// these elevated sequences. This means that discarding the packed
+// field system is a potential option and it would allow simplifying
+// the packed valos object reference values to be strictly limited to
+// direct and native-array-contained VRL's (for singular and sequence
+// packed values respectively).
 
 export type PackedField = {
   _singular?: any,
@@ -32,7 +37,7 @@ export type PackedField = {
 };
 
 export function isPackedField (candidate: any) {
-  return typeof candidate._type !== "undefined";
+  return candidate._type !== undefined;
 }
 
 export function tryPackedField (value: any, fieldInfo: FieldInfo) {
@@ -50,7 +55,7 @@ export function packedSingular (value, typeName, fieldInfo) {
   invariantifyString(typeName, "packed.typeName");
   return {
     [HostRef]: tryHostRef(value)
-        || ((typeof value === "string") && new ValaaReference(value))
+        || ((typeof value === "string") && new VRL(value))
         || null,
     [PackedHostValue]: value,
     _singular: value,

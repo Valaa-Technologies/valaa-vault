@@ -394,7 +394,7 @@ if (falseProphet.getVerbosity() === 1) {
   const authorityURIs = Object.keys(operation.authorities);
   if (!authorityURIs.length) throw new Error("command is missing authority information");
   else if (authorityURIs.length > 1) {
-    throw new Error(`Valaa FalseProphet: multi-authority commands not supported, authorities:"${
+    throw new Error(`ValOS FalseProphet: multi-authority commands not supported, authorities:"${
         authorityURIs.join(`", "`)}"`);
   }
 

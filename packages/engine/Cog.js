@@ -4,7 +4,7 @@ import { Discourse } from "~/prophet";
 
 import type { VALKOptions } from "~/raem";
 
-import { transpileValaaScriptBody } from "~/script/transpileValaaScript";
+import { transpileValoscriptBody } from "~/script/transpileValoscript";
 
 import VALEK, { Kuery, dumpKuery } from "~/engine/VALEK";
 import Subscription from "~/engine/Vrapper/Subscription";
@@ -47,9 +47,9 @@ export default class Cog extends LogEventGenerator {
     return this.run(this.getSelfAsHead(), kuery, options);
   }
 
-  doValaaScript (valaaScriptBody: string, options: VALKOptions = {}) {
+  doValoscript (valoscriptBody: string, options: VALKOptions = {}) {
     options.transaction = this.engine.discourse.acquireTransaction("do-body");
-    const ret = this.do(transpileValaaScriptBody(valaaScriptBody, {
+    const ret = this.do(transpileValoscriptBody(valoscriptBody, {
       verbosity: options.verbosity || 0,
       customVALK: VALEK,
       sourceInfo: options.sourceInfo,

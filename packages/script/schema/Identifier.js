@@ -11,7 +11,7 @@ import Discoverable from "~/raem/schema/Discoverable";
 import LiteralValue from "~/raem/schema/LiteralValue";
 import Tag from "~/raem/schema/Tag";
 
-import { invariantifyId } from "~/raem/ValaaReference";
+import { invariantifyId } from "~/raem/VRL";
 
 import Expression, { expressionInterface } from "./Expression";
 

@@ -7,7 +7,7 @@ import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
 import { tryLiteral, /* tryFullLiteral, */ tryUnpackLiteral }
     from "~/raem/VALK/builtinSteppers";
 
-import valaaScriptBuiltinSteppers from "~/script/VALSK/builtinSteppers";
+import valoscriptBuiltinSteppers from "~/script/VALSK/builtinSteppers";
 
 import getImplicitCallable from "~/engine/Vrapper/getImplicitCallable";
 
@@ -16,7 +16,7 @@ import getImplicitCallable from "~/engine/Vrapper/getImplicitCallable";
 import { wrapError, dumpObject } from "~/tools";
 
 export default Object.freeze({
-  ...valaaScriptBuiltinSteppers,
+  ...valoscriptBuiltinSteppers,
   "§callableof": callableOf,
   "§argumentof": argumentOf,
   "§method": toMethod,
@@ -53,7 +53,8 @@ function argumentOf (valker: Valker, head: any /* , scope: ?Object,
       const vrapper = tryUnpackedHostValue(eHostValue);
       if (vrapper && (vrapper.tryTypeName() === "Media")) {
         const mime = vrapper.resolveMediaInfo({ transaction: valker }).mime;
-        if ((mime === "application/javascript") || (mime === "application/valaascript")) {
+        if ((mime === "application/javascript")
+            || (mime === "application/valaascript") || (mime === "application/valoscript")) {
           const ret = vrapper.extractValue({ transaction: valker, synchronous: true });
           if (ret !== undefined) {
             if ((ret != null) && (typeof ret.default === "function")) return ret.default;
@@ -90,7 +91,7 @@ function toMethod (valker: Valker, head: any, scope: ?Object, [, callableName]: 
   // constructs a native function which uses them, so that the native function can pretend to be
   // a normal javascript function.
   // So we get to keep some of the expressive power at the cost of both complexity and performance.
-  // Luckily with ValaaScript no external interface exposes these details anymore so they can
+  // Luckily with valoscript no external interface exposes these details anymore so they can
   // eventually be simplified and made performant.
   const transient = valker.trySingularTransient(head);
   const actualHostHead = hostHead || valker.unpack(transient) || head;

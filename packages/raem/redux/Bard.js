@@ -5,7 +5,7 @@ import { List, Map, OrderedMap, OrderedSet } from "immutable";
 
 import { Action, EventBase } from "~/raem/events";
 
-import ValaaReference from "~/raem/ValaaReference";
+import VRL from "~/raem/VRL";
 
 import { Resolver } from "~/raem/state";
 import type { FieldInfo, State } from "~/raem/state"; // eslint-disable-line no-duplicate-imports
@@ -327,11 +327,11 @@ export default class Bard extends Resolver {
       }
       passage[propertyName] = reference;
     } else {
-      // Universalization of an existing VRef
+      // Universalization of an existing VRL
       // TODO(iridian, 2018-12): If the event never gets persisted
       // (f.ex. with valaa-memory scheme) universalization can be
       // completely skipped.
-      if (!(reference instanceof ValaaReference)) reference = this.obtainReference(reference, null);
+      if (!(reference instanceof VRL)) reference = this.obtainReference(reference, null);
       passage[propertyName] = reference;
       action[propertyName] = reference.toJSON();
     }
@@ -374,7 +374,7 @@ export default class Bard extends Resolver {
           ? (serialized => operation(mutableTarget, deserializeSingular(serialized, this)))
           : ((serialized, index) => {
             const deserialized = deserializeSingular(serialized, this);
-            if (deserialized instanceof ValaaReference) {
+            if (deserialized instanceof VRL) {
               incomingSequence[index] = deserialized.toJSON();
             }
             operation(mutableTarget, deserialized);
@@ -400,13 +400,13 @@ export default class Bard extends Resolver {
 }
 
 function _obtainSingularDeserializer (fieldInfo) {
-  const ret = fieldInfo._valaaSingularDeserializer;
+  const ret = fieldInfo._valosSingularDeserializer;
   if (ret) return ret;
-  return (fieldInfo._valaaSingularDeserializer =
+  return (fieldInfo._valosSingularDeserializer =
       fieldInfo.intro.isLeaf
           ? _createDeserializeLeafValue(fieldInfo)
       : fieldInfo.intro.isResource
-          ? _createResourceVRefDeserializer(fieldInfo)
+          ? _createResourceVRLDeserializer(fieldInfo)
           : _createSingularDataDeserializer(fieldInfo));
 }
 
@@ -422,10 +422,10 @@ function _createDeserializeLeafValue (fieldInfo) {
   };
 }
 
-function _createResourceVRefDeserializer (fieldInfo) {
-  function deserializeResourceVRef (serialized, bard) {
+function _createResourceVRLDeserializer (fieldInfo) {
+  function deserializeResourceVRL (serialized, bard) {
     if (!serialized) return null;
-    const resourceId = bard.bindFieldVRef(
+    const resourceId = bard.bindFieldVRL(
         serialized, fieldInfo, bard.event.meta.partitionURI || null);
     // Non-ghosts have the correct partitionURI in the Resource.id itself
     if (resourceId.getPartitionURI() || !resourceId.isGhost()) return resourceId;
@@ -434,7 +434,7 @@ function _createResourceVRefDeserializer (fieldInfo) {
     const hostId = bard.bindObjectId([ghostPath.headHostRawId()], "Resource");
     return resourceId.immutateWithPartitionURI(hostId.getPartitionURI());
   }
-  return deserializeResourceVRef;
+  return deserializeResourceVRL;
 }
 
 function _createSingularDataDeserializer (fieldInfo) {
@@ -478,7 +478,7 @@ function _createSingularDataDeserializer (fieldInfo) {
                     debugObjectType(serializedValue)}`);
               }
               deserializedValue = bard.deserializeField(serializedValue, { intro });
-              if (isBeingUniversalized && (deserializedValue instanceof ValaaReference)) {
+              if (isBeingUniversalized && (deserializedValue instanceof VRL)) {
                 data[fieldName] = deserializedValue.toJSON();
               }
             }

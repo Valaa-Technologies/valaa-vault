@@ -5,9 +5,9 @@
 import ContentAPI from "./ProphetContentAPI";
 import schemeModules from "./schemeModules";
 
-const Valaa = require("~/gateway-api/Valaa").default;
+const valos = require("~/gateway-api/valos").default;
 
-export default Valaa.exportPlugin({ name: "@valos/prophet", ContentAPI, schemeModules });
+export default valos.exportPlugin({ name: "@valos/prophet", ContentAPI, schemeModules });
 
 export {                   default as EVENT_VERSION } from "./tools/EVENT_VERSION";
 
@@ -23,7 +23,7 @@ export                           type Transaction = Object;
 
 export {
                            default as FalseProphet,
-                                      deserializeVRef,
+                                      deserializeVRL,
 } from "./FalseProphet";
 export {
                            default as FalseProphetDiscourse

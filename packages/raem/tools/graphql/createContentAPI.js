@@ -23,7 +23,7 @@ function contentAPIField (targetFieldName, type, description,
 }
 
 /**
- *  Creates the public Valaa API for a module.
+ *  Creates the public ValOS API for a module.
  *
  * @export
  * @param {any} name            name of the exported module

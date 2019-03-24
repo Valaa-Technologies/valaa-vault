@@ -1,6 +1,6 @@
 // @flow
 
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 
 import { created, destroyed } from "~/raem/events";
 import { createGhostRawId } from "~/raem/state/GhostPath";
@@ -182,11 +182,11 @@ describe("Vrapper", () => {
         });
         testVrapper.addToField("tags", {
           typeName: "Tag",
-          tagURI: "tag:valaa.com,2017-07-21-date:mediaType#application/valaascript"
+          tagURI: "tag:valaa.com,2017-07-21-date:mediaType#application/valoscript"
         });
         expect(testVrapper._getMediaTypeFromTags()).toEqual({
           type: "application",
-          subtype: "valaascript"
+          subtype: "valoscript"
         });
       });
 
@@ -253,11 +253,11 @@ describe("Vrapper", () => {
         testVrapperMediaInfo.subtype = "";
         testVrapper._obtainMediaInterpretation({ decodedContent: "" }, testVrapper);
         expect(mediaTypeUsed.type).toEqual("application");
-        expect(mediaTypeUsed.subtype).toEqual("valaascript");
+        expect(mediaTypeUsed.subtype).toEqual("valoscript");
         testVrapper._obtainMediaInterpretation({ decodedContent: "", mimeFallback: "fall/back" },
             testVrapper);
         expect(mediaTypeUsed.type).toEqual("application");
-        expect(mediaTypeUsed.subtype).toEqual("valaascript");
+        expect(mediaTypeUsed.subtype).toEqual("valoscript");
 
         testVrapperMediaInfo.name = "file";
         testVrapper._obtainMediaInterpretation({ decodedContent: "" }, testVrapper);

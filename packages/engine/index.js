@@ -2,9 +2,9 @@
 
 import ContentAPI from "./EngineContentAPI";
 
-const Valaa = require("~/gateway-api/Valaa").default;
+const valos = require("~/gateway-api/valos").default;
 
-export default Valaa.exportPlugin({ name: "@valos/engine", ContentAPI });
+export default valos.exportPlugin({ name: "@valos/engine", ContentAPI });
 
 
 export {
@@ -15,8 +15,8 @@ export {
                            default as VALEK,
 } from "./VALEK";
 export {
-                           default as ValaaEngine,
-} from "./ValaaEngine";
+                           default as Engine,
+} from "./Engine";
 export {
                            default as Vrapper,
 } from "./Vrapper/Vrapper";

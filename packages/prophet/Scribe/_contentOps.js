@@ -1,8 +1,7 @@
 // @flow
 
 import { isCreatedLike } from "~/raem/events";
-import ValaaReference, { getRawIdFrom } from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL, { getRawIdFrom } from "~/raem/VRL";
 
 import { MediaInfo, RetrieveMediaBuffer } from "~/prophet/api/types";
 import { tryAspect } from "~/prophet/tools/EventAspects";
@@ -153,19 +152,19 @@ function _prepareBvobToUpstreamWithRetries (connection: ScribePartitionConnectio
 */
 
 export function _determineEventMediaPreOps (connection: ScribePartitionConnection,
-    mediaAction: Object, rootEvent: Object, mediaRef: VRef, currentEntry: MediaEntry) {
-  const mediaId = mediaRef.rawId();
+    mediaAction: Object, rootEvent: Object, mediaVRL: VRL, currentEntry: MediaEntry) {
+  const mediaId = mediaVRL.rawId();
   let mediaInfo;
   let newEntry: MediaEntry;
   if (currentEntry) {
     mediaInfo = { ...currentEntry.mediaInfo };
     newEntry = { ...currentEntry, mediaInfo };
   } else {
-    if (mediaRef.isInherited()) {
-      const mediaEntry = connection._getMediaEntry(mediaRef, false);
+    if (mediaVRL.isInherited()) {
+      const mediaEntry = connection._getMediaEntry(mediaVRL, false);
       if (!mediaEntry) {
         console.warn(`Could not determine media entry for media <${
-            mediaRef}>; most likely a ghost media with inactive prototype partition`);
+            mediaVRL}>; most likely a ghost media with inactive prototype partition`);
         return [];
       }
       mediaInfo = { ...mediaEntry.mediaInfo };
@@ -180,7 +179,7 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
       connection.errorEvent(`mediaAction for media has no previous media entry and ${
               ""}event is not CREATED, DUPLICATED and resource is not ghost`,
           "\n\treplay not blocked but media accesses made against this Media will throw.",
-          "\n\tmediaRef:", String(mediaRef),
+          "\n\tmediaVRL:", String(mediaVRL),
           "\n\tmediaAction:", ...dumpObject(mediaAction),
           "\n\trootEvent:", ...dumpObject(rootEvent));
       return [];
@@ -215,7 +214,7 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribePartiti
   let previousBackoff;
   invariantifyString(mediaEntry.mediaId, "_retryingTwoWaySyncMediaContent.mediaEntry.mediaId",
       {}, "\n\tnewEntry", mediaEntry);
-  mediaInfo.mediaRef = new ValaaReference(mediaEntry.mediaId);
+  mediaInfo.mediaVRL = new VRL(mediaEntry.mediaId);
   let getNextBackoffSeconds = options.getNextBackoffSeconds;
   if (!getNextBackoffSeconds && (typeof options.retryTimes === "number")) {
     getNextBackoffSeconds = (previousRetries: number, mediaInfo_, error = {}) =>
@@ -303,9 +302,9 @@ export function _requestMediaContents (connection: ScribePartitionConnection,
       // the full mediaInfo.
       if ((actualInfo.bvobId || actualInfo.contentHash) === undefined) {
         // the require clause was !!mediaInfo.asURL. Why, though?
-        const mediaEntry = connection._getMediaEntry(mediaInfo.mediaRef, false);
+        const mediaEntry = connection._getMediaEntry(mediaInfo.mediaVRL, false);
         if (!mediaEntry || !mediaEntry.mediaInfo) {
-          throw new Error(`Cannot find Media info for '${String(mediaInfo.mediaRef)}'`);
+          throw new Error(`Cannot find Media info for '${String(mediaInfo.mediaVRL)}'`);
         }
         Object.assign(actualInfo, mediaEntry.mediaInfo);
       }

@@ -2,9 +2,9 @@
 
 import ContentAPI from "./RAEMContentAPI";
 
-const Valaa = require("~/gateway-api/Valaa").default;
+const valos = require("~/gateway-api/valos").default;
 
-export default Valaa.exportPlugin({ name: "@valos/raem", ContentAPI });
+export default valos.exportPlugin({ name: "@valos/raem", ContentAPI });
 
 
 export {
@@ -28,12 +28,9 @@ export {
                                       EventBase,
 } from "./events/Action";
 export {
-                           default as ValaaReference,
+                           default as VRL,
                                       vRef,
-} from "./ValaaReference";
-export type {
-  VRef,
-} from "./ValaaReference";
+} from "./VRL";
 export type {
                                       ValaaURI,
 } from "./ValaaURI";

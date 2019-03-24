@@ -1,11 +1,11 @@
 
 import { created } from "~/raem/events";
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 
 import { createEngineTestHarness, createEngineOracleHarness } from "~/engine/test/EngineTestHarness";
 import VALEK, { literal, pointer } from "~/engine/VALEK";
 
-import { transpileValaaScriptBody } from "~/script";
+import { transpileValoscriptBody } from "~/script";
 
 let harness: { createds: Object, engine: Object, prophet: Object, testEntities: Object };
 afterEach(() => { harness = null; }); // eslint-disable-line no-undef
@@ -116,7 +116,7 @@ describe("Engine bug tests", async () => {
         }
       }
     `;
-    const moduleKuery = transpileValaaScriptBody(bodyText, { customVALK: VALEK });
+    const moduleKuery = transpileValoscriptBody(bodyText, { customVALK: VALEK });
     const ownlingPrototypeDestroyer = entities().test.do(moduleKuery);
     expect(entities().test.get("unnamedOwnlings").length)
         .toEqual(3);
@@ -129,7 +129,7 @@ describe("Engine bug tests", async () => {
         .toBeFalsy();
   });
 
-  it("0000087: ValaaScript has unexpected behaviour with conditional branches and returns", () => {
+  it("0000087: Valoscript has unexpected behaviour with conditional branches and returns", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const bodyText = `
       const entity = {
@@ -180,7 +180,7 @@ describe("Engine bug tests", async () => {
 
       unthunk(entity);
     `;
-    const bodyKuery = transpileValaaScriptBody(bodyText, { customVALK: VALEK });
+    const bodyKuery = transpileValoscriptBody(bodyText, { customVALK: VALEK });
     const unthunkedResult = entities().test.do(bodyKuery, { verbosity: 0 });
     expect(unthunkedResult)
         .toEqual({ a: 1, b: 2, c: { A: 3, B: 4 }, d: { x: 5, y: 6 } });
@@ -191,19 +191,19 @@ describe("Engine bug tests", async () => {
     const bodyText = `
       const test = () => {
         const owner = this;
-        const relationToOwnedEntity = new Valaa.Relation({
+        const relationToOwnedEntity = new valos.Relation({
             name: "Relation To Owned Entity", owner,
         });
-        const ownedEntity = new Valaa.Entity({
+        const ownedEntity = new valos.Entity({
             name: "Owned Entity", owner: relationToOwnedEntity,
         });
-        relationToOwnedEntity[Valaa.Relation.target] = ownedEntity;
+        relationToOwnedEntity[valos.Relation.target] = ownedEntity;
         ownedEntity.pointerToRelationThatOwnsIt = relationToOwnedEntity;
         return ownedEntity.pointerToRelationThatOwnsIt === relationToOwnedEntity;
       }
       test();
     `;
-    const bodyKuery = transpileValaaScriptBody(bodyText, { customVALK: VALEK });
+    const bodyKuery = transpileValoscriptBody(bodyText, { customVALK: VALEK });
     const result = entities().test.do(bodyKuery, { verbosity: 0 });
     expect(result).toEqual(true);
   });
@@ -217,7 +217,7 @@ describe("Engine bug tests", async () => {
       delete instance.foo;
       instance.foo;
     `;
-    const bodyKuery = transpileValaaScriptBody(bodyText, { customVALK: VALEK });
+    const bodyKuery = transpileValoscriptBody(bodyText, { customVALK: VALEK });
     const result = entities().test.do(bodyKuery, { verbosity: 0 });
     expect(result).toEqual(10);
   });
@@ -228,7 +228,7 @@ describe("Engine bug tests", async () => {
       const foo = this;
       Object.assign({}, { counter: this.counter });
     `;
-    const bodyKuery = transpileValaaScriptBody(bodyText, { customVALK: VALEK, verbosity: 0 });
+    const bodyKuery = transpileValoscriptBody(bodyText, { customVALK: VALEK, verbosity: 0 });
     const result = entities().creator.do(bodyKuery, { verbosity: 0 });
     expect(result.counter).toEqual(0);
   });

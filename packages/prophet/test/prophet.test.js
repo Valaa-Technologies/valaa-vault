@@ -4,7 +4,7 @@ import { is as immutableIs } from "immutable";
 
 import { created } from "~/raem/events";
 import { getActionFromPassage } from "~/raem/redux/Bard";
-import { vRef } from "~/raem/ValaaReference";
+import { vRef } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
 import VALK from "~/raem/VALK";
 
@@ -57,12 +57,12 @@ describe("Prophet", () => {
             naiveURI.createPartitionURI("valaa-test:"))
         .getActiveConnection();
 
-    const mediaRef = vRef("abcd-0123");
+    const mediaVRL = vRef("abcd-0123");
     for (const [bufferContent, mediaInfo, expectedContent] of structuredMediaContents) {
       const preparation = await connection.prepareBvob(bufferContent);
       const contentHash = await preparation.persistProcess;
       const decodedContent = await connection.decodeMediaContent({
-        mediaRef, contentHash, bvobId: contentHash, ...mediaInfo,
+        mediaVRL, contentHash, bvobId: contentHash, ...mediaInfo,
       });
       expect(decodedContent).toEqual(expectedContent);
     }

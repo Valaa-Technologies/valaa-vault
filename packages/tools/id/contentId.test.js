@@ -38,8 +38,8 @@ describe("contentHash module", () => {
   ];
 
   // Set these env variables to test using a big file.
-  const bigFiles = (process.env.VALAA_TEST_BIG_FILE && process.env.VALAA_TEST_BIG_FILE_HASH) ? [
-    { path: process.env.VALAA_TEST_BIG_FILE, hash: process.env.VALAA_TEST_BIG_FILE_HASH }
+  const bigFiles = (process.env.VALOS_TEST_BIG_FILE && process.env.VALOS_TEST_BIG_FILE_HASH) ? [
+    { path: process.env.VALOS_TEST_BIG_FILE, hash: process.env.VALOS_TEST_BIG_FILE_HASH }
   ] : null;
 
   describe("Synchronous id generation", () => {

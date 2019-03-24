@@ -8,7 +8,7 @@ import VALEK, { Kuery, EngineKuery, VS } from "~/engine/VALEK";
 
 import { LENS } from "~/inspire/ui/UIComponent";
 import vidgets from "~/inspire/ui";
-import ValaaScope from "~/inspire/ui/ValaaScope";
+import Valoscope from "~/inspire/ui/Valoscope";
 import _jsxTransformFromString from "~/inspire/mediaDecoders/_jsxTransformFromString";
 
 import MediaDecoder from "~/tools/MediaDecoder";
@@ -124,7 +124,7 @@ export default class JSXDecoder extends MediaDecoder {
           if (type[0] !== type[0].toLowerCase()) {
             hasComplexType = true;
             isInstanceLensType = !vidgets[type];
-            actualType = vidgets[type] || ValaaScope;
+            actualType = vidgets[type] || Valoscope;
           }
         }
         if (props_.class) {
@@ -159,7 +159,7 @@ export default class JSXDecoder extends MediaDecoder {
         if (actualType.isUIComponent && !props_.elementKey) props_.elementKey = props_.key;
         return (integrationHostGlobal: Object, mediaInfo: Object) => {
           try {
-            const lexicalScope = integrationHostGlobal.Valaa;
+            const lexicalScope = integrationHostGlobal.valos;
             const actualProps = (!hasComplexProps && !isInstanceLensType) ? props_ : { ...props_ };
             if (isInstanceLensType) {
               actualProps.instanceLensPrototype =

@@ -1,19 +1,18 @@
 // @flow
 import { OrderedMap } from "immutable";
 
-import ValaaReference, { RawId, vRef } from "~/raem/ValaaReference";
-import type { VRef } from "~/raem/ValaaReference"; // eslint-disable-line no-duplicate-imports
+import VRL, { RawId, vRef } from "~/raem/VRL";
 import type GhostPath from "~/raem/state/GhostPath";
 
 import invariantify, { invariantifyObject } from "~/tools/invariantify";
 import { dumpObject, wrapError } from "~/tools/wrapError";
 
 const Transient = OrderedMap;
-// A Transient is an immutable-js denormalized representation of a Valaa object.
+// A Transient is an immutable-js denormalized representation of a ValOS object.
 export default Transient;
 
 export function createTransient (
-    initialValues: { id?: VRef, typeName?: string, owner?: VRef, prototype?: VRef } = {}) {
+    initialValues: { id?: VRL, typeName?: string, owner?: VRL, prototype?: VRL } = {}) {
   let ret = Transient();
   if (initialValues.id) ret = _validateAndSet(ret, "id", initialValues.id);
   if (initialValues.typeName) ret = ret.set("typeName", initialValues.typeName);
@@ -22,9 +21,9 @@ export function createTransient (
   return ret;
 }
 
-function _validateAndSet (transient: Transient, fieldName: string, value: VRef) {
-  if (!(value instanceof ValaaReference)) {
-    invariantifyObject(value, `createTransient.${fieldName}`, { instanceof: ValaaReference });
+function _validateAndSet (transient: Transient, fieldName: string, value: VRL) {
+  if (!(value instanceof VRL)) {
+    invariantifyObject(value, `createTransient.${fieldName}`, { instanceof: VRL });
   }
   return transient.set(fieldName, value);
 }
@@ -38,7 +37,7 @@ export function createImmaterialTransient (rawId: RawId, ghostPath: GhostPath,
   return ret;
 }
 
-export function createIdTransient (id: VRef) {
+export function createIdTransient (id: VRL) {
   return Transient([["id", id]]);
 }
 

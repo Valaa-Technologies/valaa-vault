@@ -1,7 +1,7 @@
 import { Map } from "immutable";
-import valaaHash from "~/tools/id/valaaHash";
+import valosHash from "~/tools/id/valosHash";
 
-import { tryRawIdFrom } from "~/raem/ValaaReference";
+import { tryRawIdFrom } from "~/raem/VRL";
 
 const dumpify = require("~/tools/dumpify").default;
 
@@ -9,7 +9,7 @@ export default function contentHashResolver (source, { rootValue }) {
   try {
     // TODO(iridian): Promising v5 uuid, so implement it as such.
     const id = tryRawIdFrom(source.get("id"));
-    return id || valaaHash(source.toJS(), {
+    return id || valosHash(source.toJS(), {
       // Replace direct references to objects with their id's
       replacer: value => (Map.isMap(value) ? contentHashResolver(value) : value),
     });

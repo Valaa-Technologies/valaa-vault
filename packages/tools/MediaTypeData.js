@@ -353,9 +353,13 @@ function createMimeLookup () {
   // Explicitly added
   primary("jsx").push("text/jsx");
   primary("vsx").push("text/vsx");
-  primary("vs").push("application/valaascript");
+  primary("vs").push("application/valoscript");
+  alt("vs").push("application/valaascript");
+  alt("vs").push("text/valoscript");
   alt("vs").push("text/valaascript");
-  primary("vss").push("application/valaascript");
+  primary("vss").push("application/valoscript");
+  alt("vss").push("application/valaascript");
+  alt("vss").push("text/valoscript");
   alt("vss").push("text/valaascript");
   primary("json").push("application/json");
   alt("json").push("application/x-javascript");

@@ -1,7 +1,7 @@
 // @flow
 
 /* eslint-disable max-len */
-import Transpiler from "~/script/acorn/ValaaScriptTranspiler";
+import Transpiler from "~/script/acorn/ValoscriptTranspiler";
 import { Kuery } from "~/script/VALSK";
 
 import { dumpObject } from "~/tools";
@@ -122,7 +122,7 @@ export function parseProgram (transpiler: Transpiler, ast: Program, options: Obj
     body = ast.body.slice(0, -1);
   } else if (transpiler.acornParseOptions.sourceType === "script") {
     throw transpiler.parseError(lastNode, options,
-        "The last top-level statement in a ValaaScript inline body must be an expression");
+        "The last top-level statement in a valoscript inline body must be an expression");
   } else {
     lastNode = undefined;
     body = ast.body;
@@ -252,7 +252,7 @@ export interface WithStatement extends Statement {
 export function parseWithStatement (transpiler: Transpiler, ast: WithStatement,
     options: Object): Kuery {
   throw transpiler.parseError(ast, options,
-      "'with' is disabled in strict mode (the only mode ValaaScript allows)");
+      "'with' is disabled in strict mode (the only mode valoscript allows)");
 }
 
 

@@ -1,8 +1,8 @@
 // @flow
 
-const Valaa = require("~/tools").Valaa;
+const valos = require("~/tools").valos;
 
-export default Valaa.exportPlugin({
+export default valos.exportPlugin({
   name: "@valos/toolset-rest-api-gateway-plugin",
 
   onViewAttached (view, viewName) {

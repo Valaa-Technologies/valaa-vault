@@ -527,20 +527,26 @@ class UIComponent extends React.Component {
   renderLens (lens: any, focus?: any, lensName: string, onlyIfAble?: boolean, onlyOnce?: boolean):
       null | string | React.Element<any> | [] | Promise<any> {
     const ret = this.tryRenderLens(lens, focus, lensName, onlyIfAble, onlyOnce);
-    return (typeof ret !== "undefined") ? ret
-        : lens;
+    return (ret !== undefined) ? ret : lens;
   }
 
   tryRenderLens (lens: any, focus: any = this.tryFocus(), lensName: string, onlyIfAble?: boolean,
       onlyOnce?: boolean): void | null | string | React.Element<any> | [] | Promise<any> {
+    const lensAssembly = this.getUIContextValue(this.getValos().Lens.lensAssembly) || [];
+    const assemblyLength = lensAssembly.length;
+    let ret;
     try {
-      return _tryRenderLens(this, lens, focus, lensName, onlyIfAble, onlyOnce);
+      lensAssembly.push(lensName);
+      return (ret = _tryRenderLens(this, lens, focus, lensName, onlyIfAble, onlyOnce));
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .renderLens, with:`,
           "\n\tlensName:", lensName,
           "\n\tlens:", lens,
           "\n\ttypeof lens:", typeof lens,
           "\n\tfocus:", ...dumpObject(focus));
+    } finally {
+      if (ret === null) lensAssembly.splice(assemblyLength);
+      // else lensAssembly[assemblyLength] = { [lensName]: ret };
     }
   }
 
@@ -582,34 +588,26 @@ class UIComponent extends React.Component {
     return _renderFirstAbleDelegate(this, delegates, focus, lensName);
   }
 
-
   tryRenderSlotAsLens (slot: string | Symbol, focus: any = this.tryFocus(),
       rootSlotName_?: string, onlyIfAble?: boolean, onlyOnce?: boolean):
           void | null | string | React.Element<any> | [] | Promise<any> {
-    const activeLensSlots = this.getUIContextValue(this.getValos().Lens.activeLensSlots)
-        || (this.state.uiContext
-            && this.setUIContextValue(this.getValos().Lens.activeLensSlots, []))
-        || [];
-    let slotValue; // eslint-disable-line
-    const valos = this.getValos();
-    const slotName = typeof slot === "string" ? slot : valos.Lens[slot];
-    const slotSymbol = typeof slot !== "string" ? slot : valos.Lens[slot];
+    const valosLens = this.getValos().Lens;
+    let slotValue, ret; // eslint-disable-line
+    const slotName = typeof slot === "string" ? slot : valosLens[slot];
+    const slotSymbol = typeof slot !== "string" ? slot : valosLens[slot];
     const rootSlotName = rootSlotName_ || slotName;
     try {
       if (!slotSymbol) throw new Error(`No valos.Lens slot symbol for '${slotName}'`);
       if (!slotName) throw new Error(`No valos.Lens slot name for '${String(slotSymbol)}'`);
-      activeLensSlots.push(slotName);
       slotValue = _readSlotValue(this, slotName, slotSymbol, focus, onlyIfAble);
-      return slotValue && this.renderLens(slotValue, focus, rootSlotName, undefined, onlyOnce);
+      ret = slotValue && this.renderLens(slotValue, focus, rootSlotName, undefined, onlyOnce);
+      return ret;
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .renderSlotAsLens(${
               slotName || String(slotSymbol)}), with:`,
           "\n\tfocus:", focus,
           "\n\tslot value:", slotValue,
           "\n\trootSlotName:", rootSlotName);
-    } finally {
-      activeLensSlots.pop();
-      if (!activeLensSlots.length) this.clearUIContextValue(this.getValos().Lens.activeLensSlots);
     }
   }
 
@@ -630,8 +628,11 @@ class UIComponent extends React.Component {
     this._pendingRenderValue = undefined;
     let mainValidationFaults;
     let latestRenderedLensSlot;
+    if (this.state.uiContext) this.setUIContextValue(this.getValos().Lens.lensAssembly, []);
     try {
-      if ((ret === undefined) && !this._errorObject && !_checkForInfiniteRenderRecursion(this)) {
+      const renderNormally = (ret === undefined) && !this._errorObject
+          && !_checkForInfiniteRenderRecursion(this);
+      if (renderNormally) {
         // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
         if (this.props.hasOwnProperty("styleSheet")) {
           this.setUIContextValue(VSSStyleSheetSymbol, this.props.styleSheet);
@@ -679,10 +680,13 @@ class UIComponent extends React.Component {
                 "\n\tcomponent:", dumpObject(this));
           }
         }
+
+        if (ret === undefined) return null;
         mainValidationFaults = _validateElement(this, ret);
-        if (mainValidationFaults === undefined) {
-          return ret === undefined ? null : ret;
-        }
+
+        // Main return line
+        if (mainValidationFaults === undefined) return ret;
+
         console.error(`Validation faults on render result of '${latestRenderedLensSlot}' by`,
                 this.debugId(),
             "\n\tfaults:", mainValidationFaults,

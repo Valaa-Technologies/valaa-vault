@@ -35,16 +35,13 @@ export function _componentWillReceiveProps (component: UIComponent, nextProps: O
 
 // If there is no local props focus, we track parent focus changes for props updates.
 function _getActiveParentFocus (component: UIComponent, props: Object) {
-  if (props.hasOwnProperty("focus") /* || props.hasOwnProperty("head") */
+  if (props.hasOwnProperty("focus") || props.hasOwnProperty("head")
       || !props.parentUIContext) {
     return undefined;
   }
-  return getScopeValue(props.parentUIContext, "focus");
-  /*
   return props.parentUIContext.hasOwnProperty("focus")
       ? getScopeValue(props.parentUIContext, "focus")
       : getScopeValue(props.parentUIContext, "head");
-  */
 }
 
 function _updateFocus (component: UIComponent, newProps: Object) {
@@ -59,23 +56,23 @@ function _updateFocus (component: UIComponent, newProps: Object) {
     // */
     component.unbindSubscriptions();
     component._errorObject = null;
+    const newUIContext = newProps.uiContext;
 
-    if (newProps.uiContext && newProps.parentUIContext) {
-      invariantify(!(newProps.uiContext && newProps.parentUIContext),
+    if (newUIContext && newProps.parentUIContext) {
+      invariantify(!(newUIContext && newProps.parentUIContext),
       `only either ${component.constructor.name
           }.props.uiContext or ...parentUIContext can be defined at the same time`);
     }
 
-    const scope = newProps.uiContext || newProps.parentUIContext;
+    const scope = newUIContext || newProps.parentUIContext;
     if (!scope) return;
     const focus = newProps.hasOwnProperty("focus")
-        ? newProps.focus : getScopeValue(scope, "focus");
-        /*
-        : newProps.hasOwnProperty("head") ? newProps.head
-        : (typeof getScopeValue(uiContext, "focus") !== "undefined")
-            ? getScopeValue(uiContext, "focus")
-        : getScopeValue(uiContext, "head");
-        */
+            ? newProps.focus
+        : newProps.hasOwnProperty("head")
+            ? newProps.head
+        : (getScopeValue(scope, "focus") !== undefined)
+            ? getScopeValue(scope, "focus")
+            : getScopeValue(scope, "head");
     if (focus === undefined) return;
     if (newProps.kuery === undefined) {
       _createContextAndSetFocus(component, focus, newProps);
@@ -87,7 +84,7 @@ function _updateFocus (component: UIComponent, newProps: Object) {
     }
     if (component.state.uiContext) {
       component.setUIContextValue("focus", undefined);
-      component.setUIContextValue("head", undefined);
+      // component.setUIContextValue("head", undefined);
     }
     component.bindNewKuerySubscription("UIComponent_focus",
         focus, newProps.kuery, { scope },
@@ -108,13 +105,12 @@ function _updateFocus (component: UIComponent, newProps: Object) {
   }
 }
 
-const depthTag = Symbol("ContextDepth");
-
 function _createContextAndSetFocus (component: UIComponent, newFocus: any, newProps: Object) {
   const uiContext = newProps.uiContext
       || component.state.uiContext
       || Object.create(component.props.parentUIContext);
-  uiContext[depthTag] = (component.props.parentUIContext[depthTag] || 0) + 1;
+  const currentDepthSlot = component.getValos().Lens.currentRenderDepth;
+  uiContext[currentDepthSlot] = (component.props.parentUIContext[currentDepthSlot] || 0) + 1;
   setScopeValue(uiContext, "focus", newFocus);
   setScopeValue(uiContext, "head", newFocus);
   /*

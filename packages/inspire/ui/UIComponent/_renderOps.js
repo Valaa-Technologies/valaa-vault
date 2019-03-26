@@ -132,7 +132,6 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
     lensName: string, onlyIfAble?: boolean, onlyOnce?: boolean,
 ): void | null | string | React.Element<any> | [] | Promise<any> {
   if (!_Valoscope) _Valoscope = require("../Valoscope").default;
-
   let ret;
   let subLensName;
   switch (typeof lens) {
@@ -165,7 +164,8 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
             slotName: "pendingActivationLens", focus: lens,
             onError: { slotName: "failedActivationLens", resource: lens },
           });
-          return blocker.then(() => undefined); // Ensure that re-render is triggered
+          // Ensure that re-render is triggered by top level _render
+          return blocker.then(() => undefined);
         }
         if (lens.hasInterface("Media")) {
           ret = _tryRenderMediaLens(component, lens, focus, lensName);
@@ -175,7 +175,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
           subLensName = `delegate-lens-${lensName}`;
           ret = _readSlotValue(component, "delegatePropertyLens",
               valos.Lens.delegatePropertyLens, lens, true)(lens, component, lensName);
-          if (ret == null || ((ret.delegate || [])[0] === valos.Lens.notLensResourceLens)) {
+          if ((ret == null) || ((ret.delegate || [])[0] === valos.Lens.notLensResourceLens)) {
             return component.renderSlotAsLens("notLensResourceLens", lens, subLensName);
           }
         }

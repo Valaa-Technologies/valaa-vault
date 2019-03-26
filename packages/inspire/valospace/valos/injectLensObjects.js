@@ -99,14 +99,13 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
 
   // Primitive lenses
 
-  const activeLensSlots = createSlotSymbol("activeLensSlots", () => ({
+  const lensAssembly = createSlotSymbol("lensAssembly", () => ({
     type: "string[]",
-    description: `Slot which contains the listing of lens slot names
-        that are currently being used to view the element.`,
+    description: `Slot which contains the lens slot assembly that is used by the component.`,
   }));
 
   const niceActiveSlotNames = valos.Lens.instrument(
-      activeLensSlots,
+      lensAssembly,
       slotNames => slotNames.slice(0, -1).reverse().join(" <- "));
 
   const componentChildrenLens = createSlotSymbol("componentChildrenLens", () => ({
@@ -241,6 +240,48 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
     },
   }));
 
+  const currentRenderDepth = createSlotSymbol("currentRenderDepth", () => ({
+    type: "number",
+    description: `Slot which contains the number of ancestor components
+        that exist between this component and the root (inclusive). If
+        the value of this slot is explicitly set it is used as the new
+        base value for all nested child components of this component.`,
+    rootValue: 0,
+  }));
+
+  const maximumRenderDepth = createSlotSymbol("maximumRenderDepth", () => ({
+    type: "number",
+    description: `Slot which contains for the maximum allowed value for
+        currentRenderDepth.`,
+    rootValue: 200,
+  }));
+
+  const maximumRenderDepthExceededLens = createSlotSymbol("maximumRenderDepthExceededLens", () => ({
+    type: "Lens",
+    description: `Slot for viewing the focus if the slot value of
+        'currentRenderDepth' is greater than the slot value of
+        'maximumRenderDepth'.
+
+        @focus {Object} focus  currently focused value.`,
+    isEnabled: (u, component) =>
+      (component.getUIContextValue(currentRenderDepth) >
+          component.getUIContextValue(maximumRenderDepth)),
+    rootValue:
+      <div {..._lensMessageInternalFailureProps}>
+        <div {..._message}>
+            Maximum render depth ({maximumRenderDepth}) exceeded.
+        </div>
+        <div {..._parameter}>
+          <span {..._key}>currentRenderDepth:</span>
+          <span {..._value}>{currentRenderDepth}</span>
+        </div>
+        <div {..._parameter}>
+          <span {..._key}>maximumRenderDepth:</span>
+          <span {..._value}>{maximumRenderDepth}</span>
+        </div>
+        {commonMessageRows}
+      </div>,
+  }));
 
   // User-definable catch-all lenses
 
@@ -283,6 +324,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
       valos.Lens.firstEnabledDelegateLens,
       valos.Lens.disabledLens,
       valos.Lens.unframedLens,
+      maximumRenderDepthExceededLens,
       valos.Lens.instanceLens,
       valos.Lens.undefinedLens,
       valos.Lens.lens,
@@ -486,8 +528,8 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
             vProperty = focus.get(VALEK.property(propertyName));
           }
           if (vProperty) {
-            component.bindNewKuerySubscription(`props_${specificLensPropertySlotName}_${
-                currentSlotName}`,
+            component.bindNewKuerySubscription(
+                `props_${specificLensPropertySlotName}_${currentSlotName}`,
                 vProperty, "value", { scope: component.getUIContext(), noImmediateRun: true },
                 () => component.forceUpdate());
             const propertyValue = vProperty.extractValue();

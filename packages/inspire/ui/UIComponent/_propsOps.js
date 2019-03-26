@@ -76,32 +76,38 @@ export function _checkForInfiniteRenderRecursion (component: UIComponent) {
   const newKey = component.getUIContextValue("key");
   // eslint-disable-next-line
   while ((context = Object.getPrototypeOf(context))) {
-    if ((context.focus === newFocus) && (context.key === newKey)
-        && context.reactComponent && (context.reactComponent.constructor === component.constructor)
-        && !_comparePropsOrState(context.reactComponent.props, component.props, "onelevelshallow",
-            component.constructor.propsCompareModesOnComponentUpdate, "props")) {
-      console.log("Infinite render recursion match found in component", component,
-              component.state.uiContext,
-          "\n\tancestor props:", context.reactComponent.props,
-          "\n\telement props:", component.props);
-      const currentContext =
-          Object.assign(Object.create(Object.getPrototypeOf(component.state.uiContext)),
-              component.state.uiContext);
-      const error = wrapError(new Error("Infinite component render recursion detected"),
-          `Exception caught in ${
-              component.debugId()})\n ._checkForInfiniteRenderRecursion(), with:`,
-          "\n\tcurrent component UI context:", currentContext,
-          "\n\tnew candidate focus:", newFocus && newFocus.debugId(), newFocus,
-          "\n\tnew candidate key:", newKey,
-          "\n\tnew candidate props:", component.props,
-          "\n\tidentical ancestor UI context:", context,
-          "\n\tidentical ancestor focus:", context.focus.debugId(), context.focus,
-          "\n\tidentical ancestor props:", context.reactComponent.props,
-      );
-      outputError(error, "Exception caught during UIComponent._checkForInfiniteRenderRecursion");
-      component.enableError(error);
-      return true;
+    if (context.key !== newKey || !context.reactComponent
+        || (context.reactComponent.constructor !== component.constructor)) {
+      continue;
     }
+    if (context.focus !== newFocus) {
+      continue;
+    }
+    if (_comparePropsOrState(context.reactComponent.props, component.props, "onelevelshallow",
+        component.constructor.propsCompareModesOnComponentUpdate, "props")) {
+      continue;
+    }
+    console.log("Infinite render recursion match found in component", component,
+            component.state.uiContext,
+        "\n\tancestor props:", context.reactComponent.props,
+        "\n\telement props:", component.props);
+    const currentContext = Object.assign(
+        Object.create(Object.getPrototypeOf(component.state.uiContext)),
+        component.state.uiContext);
+    const error = wrapError(new Error("Infinite component render recursion detected"),
+        `Exception caught in ${
+            component.debugId()})\n ._checkForInfiniteRenderRecursion(), with:`,
+        "\n\tcurrent component UI context:", currentContext,
+        "\n\tnew candidate focus:", newFocus && newFocus.debugId(), newFocus,
+        "\n\tnew candidate key:", newKey,
+        "\n\tnew candidate props:", component.props,
+        "\n\tidentical ancestor UI context:", context,
+        "\n\tidentical ancestor focus:", context.focus.debugId(), context.focus,
+        "\n\tidentical ancestor props:", context.reactComponent.props,
+    );
+    outputError(error, "Exception caught during UIComponent._checkForInfiniteRenderRecursion");
+    component.enableError(error);
+    return true;
   }
   return false;
 }

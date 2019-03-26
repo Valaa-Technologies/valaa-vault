@@ -141,6 +141,7 @@ export default class Valoscope extends UIComponent {
     if (Array.isArray(focus)) {
       return this.renderFocusAsSequence(focus, this.props.forEach, Valoscope);
     }
+    // Render using current focus as the lens and null as the focus.
     return this.renderLens(focus, null, "focus");
   }
 }

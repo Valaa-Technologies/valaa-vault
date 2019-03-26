@@ -197,7 +197,7 @@ export default class Valker extends Resolver {
 
       let ret;
       if (!(valker._verbosity > 0)) {
-        ret = valker.tryUnpack(valker.advance(packedHead, kueryVAKON, scope));
+        ret = valker.tryUnpack(valker.advance(packedHead, kueryVAKON, scope), true);
       } else {
         if (packedHead === undefined) throw new Error("Head missing for kuery");
         if (valker._verbosity >= 2) {
@@ -210,7 +210,7 @@ export default class Valker extends Resolver {
         }
 
         const packedResult = valker.advance(packedHead, kueryVAKON, scope);
-        ret = valker.tryUnpack(packedResult);
+        ret = valker.tryUnpack(packedResult, true);
 
         valker.info(`${valker.debugId()}.run(verbosity: ${verbosity}) result, when using`,
             !state ? "intrinsic state:" : "explicit options.state:",
@@ -218,11 +218,7 @@ export default class Valker extends Resolver {
             "\n      kuery:", ...dumpKuery(kueryVAKON, valker._indent),
             "\n      final scope:", dumpScope(scope),
             "\n      result (packed):", dumpify(packedResult),
-            "\n      result:", ...valker._dumpObject(
-                valker.tryUnpack(packedResult, ({ id, typeName, value, objectGhostPath }) =>
-                    ((value !== undefined)
-                        ? value
-                        : `{${id}:${typeName}/${dumpify(objectGhostPath)}}`))));
+            "\n      result:", ...valker._dumpObject(ret));
       }
       return ret;
     } catch (error) {
@@ -521,19 +517,19 @@ export default class Valker extends Resolver {
     return this._packFromHost(value, this);
   }
 
-  tryUnpack (value: any) {
-    try {
+  tryUnpack (value: any, requireIfRef: ?boolean) {
+    if (this._verbosity >= 3) {
+      this.info("  unpacking:", ...this._dumpObject(value));
+    }
+    if (value == null || (typeof value !== "object") || Array.isArray(value)) {
       if (this._verbosity >= 3) {
-        this.info("  unpacking:", ...this._dumpObject(value));
+        this.info("    not unpacking literal/native container:", ...this._dumpObject(value));
       }
-      if ((typeof value !== "object") || (value === null) || Array.isArray(value)) {
-        if (this._verbosity >= 3) {
-          this.info("    not unpacking literal/native container:", ...this._dumpObject(value));
-        }
-        return value;
-      }
+      return value;
+    }
+    try {
       let ret;
-      const singularTransient = this._trySingularTransientFromObject(value, false);
+      const singularTransient = this._trySingularTransientFromObject(value, requireIfRef);
       if (singularTransient !== undefined) {
         if (this._verbosity >= 3) {
           this.info("    unpacking singular:", ...this._dumpObject(value),
@@ -554,7 +550,8 @@ export default class Valker extends Resolver {
           // TODO(iridian): Do we allow undefined entries in our unpacked arrays? Now we do.
               .forEach(entry => {
                 const hostRef = tryHostRef(entry);
-                const transient = !hostRef ? entry : this.tryGoToTransient(hostRef, value._type);
+                const transient = !hostRef ? entry
+                    : this.tryGoToTransient(hostRef, value._type, requireIfRef);
                 ret.push(this.unpack(transient));
               });
         }
@@ -564,7 +561,7 @@ export default class Valker extends Resolver {
           this.info("    unpacking non-native sequence recursively:", ...this._dumpObject(value));
         }
         ret = [];
-        value.forEach(entry => { ret.push(this.tryUnpack(entry)); });
+        value.forEach(entry => { ret.push(this.tryUnpack(entry, requireIfRef)); });
       } else {
         if (this._verbosity >= 3) {
           this.info("    not unpacking native container:", ...this._dumpObject(value));
@@ -576,7 +573,7 @@ export default class Valker extends Resolver {
       }
       return ret;
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .tryUnpack(`, value, `):`,
+      throw wrapError(error, `During ${this.debugId()}\n .tryUnpack(`, value, requireIfRef, `):`,
           "\n\tfieldInfo:", (typeof value === "object") ? value._fieldInfo : undefined);
     }
   }
@@ -591,25 +588,25 @@ export default class Valker extends Resolver {
     return this._trySingularTransientFromObject(value, false);
   }
 
-  _trySingularTransientFromObject (object: Object, require?: boolean) {
+  _trySingularTransientFromObject (object: Object, requireIfRef?: boolean) {
     try {
       let ret;
       let elevatedId;
       if (Iterable.isKeyed(object)) {
         ret = object;
       } else if (object instanceof VRL) {
-        ret = this.tryGoToTransient(object, "TransientFields", require, false);
+        ret = this.tryGoToTransient(object, "TransientFields", requireIfRef, false);
       } else if (object._singular !== undefined) {
         if (!isIdData(object._singular)) {
           ret = object._singular;
         } else {
           elevatedId = elevateFieldReference(this, object._singular, object._fieldInfo,
               undefined, object._type, this._indent < 2 ? undefined : this._indent);
-          ret = this.tryGoToTransient(elevatedId, object._type, require, false);
+          ret = this.tryGoToTransient(elevatedId, object._type, requireIfRef, false);
         }
       }
       if (this._verbosity >= 3) {
-        this.info(require ? "  requireTransientIfSingular:" : "  trySingularTransient:",
+        this.info(requireIfRef ? "  requireTransientIfSingular:" : "  trySingularTransient:",
             "\n    value:", ...this._dumpObject(object),
             ...(elevatedId ? ["\n    elevatedId:", ...this._dumpObject(elevatedId)] : []),
             "\n    ret:", ...this._dumpObject(ret),
@@ -619,7 +616,7 @@ export default class Valker extends Resolver {
       return ret;
     } catch (error) {
       throw this.wrapErrorEvent(error,
-              require ? "requireTransientIfSingular" : "trySingularTransient",
+          requireIfRef ? "requireTransientIfSingular" : "trySingularTransient",
           "\n\tobject:", ...this._dumpObject(object),
           "\n\tstate:", this.getState(),
       );

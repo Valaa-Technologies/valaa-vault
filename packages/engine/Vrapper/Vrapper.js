@@ -1477,7 +1477,7 @@ export default class Vrapper extends Cog {
             if (callerValker) innerOptions.transaction = callerValker;
             return engine.create("Blob", undefined, innerOptions);
           }
-          ret._valkCaller = true;
+          ret._valkThunk = true;
           return ret;
         },
       ], errorOnPrepareBvob);

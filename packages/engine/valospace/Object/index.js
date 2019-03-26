@@ -46,7 +46,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
           .apply(this, rest);
     };
     ret._valkDescription = description;
-    ret._valkCaller = true;
+    ret._valkThunk = true;
     return ret;
   }
 
@@ -60,7 +60,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
       return (!isValos0 && !isValos1 ? objectOperation : valosOperation).apply(this, rest);
     };
     ret._valkDescription = description;
-    ret._valkCaller = true;
+    ret._valkThunk = true;
     return ret;
   }
 
@@ -152,7 +152,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
     return target;
   }
   assignValOS._valkDescription = "";
-  assignValOS._valkCaller = true;
+  assignValOS._valkThunk = true;
 
   const toValOSKeys = VALEK.to("properties")
       .filter(VALEK.isImmaterial().not()).map(VALEK.to("name"));
@@ -288,9 +288,10 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
     if (descriptor.sequence) {
       const removesEntry = (typeof localValue === "object") && (localValue !== null)
           && localValue[PartialRemovesTag];
-      removes = (removesEntry && valker.tryUnpack(removesEntry)) || [];
+      removes = (removesEntry && valker.tryUnpack(removesEntry, true)) || [];
     }
-    return createHostMaterializedFieldDescriptor(valker.tryUnpack(localValue), descriptor, removes);
+    return createHostMaterializedFieldDescriptor(
+        valker.tryUnpack(localValue, true), descriptor, removes);
   }
 
   function getOwnPropertyDescriptorWithBuiltin (Type: Object, property: string) {

@@ -67,7 +67,7 @@ export default Object.freeze({
         : tryLiteral(valker, head, lookupName, scope);
     return valker.tryPack(scope[eLookupName]);
   },
-  "§->": path_,
+  "§->": _path,
   "§map": map,
   "§filter": filter,
   "§@": function doStatements (valker: Valker, head: any, scope: ?Object,
@@ -517,14 +517,14 @@ export function tryFullLiteral (valker: Valker, head: any, vakon: any, scope: ?O
 export function tryUnpackLiteral (valker: Valker, head: any, vakon: any, scope: ?Object,
     nonFinalStep: ?boolean): ?any {
   if (typeof vakon !== "object") return vakon;
-  if (vakon === null) return (typeof head === "object") ? valker.tryUnpack(head) : head;
+  if (vakon === null) return (typeof head === "object") ? valker.tryUnpack(head, true) : head;
   if (vakon[0] === "§'") return vakon[1];
   const ret = valker.advance(head, vakon, scope, nonFinalStep);
   if (typeof ret !== "object") return ret;
-  return valker.tryUnpack(ret);
+  return valker.tryUnpack(ret, true);
 }
 
-function path_ (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinStep,
+function _path (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinStep,
     mustNotMutateScope: ?boolean, initialIndex: number = 1) {
   let index = initialIndex;
   let stepHead = head;
@@ -541,15 +541,17 @@ function path_ (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinStep
         case "number":
           stepHead = valker.index(stepHead, step, pathScope || scope);
           break;
-        case "boolean":
-          if (stepHead == null) {
+        case "boolean": {
+          const unpacked = valker.tryUnpack(stepHead, false);
+          if (unpacked == null) {
             if (step) {
-              throw new Error(`Valk path step head is '${stepHead}' at notNull assertion`);
+              throw new Error(`Valk path step head unpacks to '${unpacked}' at notNull assertion`);
             }
             stepHead = undefined;
             index = pathStep.length;
           }
           break;
+        }
         case "object":
           if (step === null) continue;
           if (isSymbol(step)) {
@@ -565,7 +567,7 @@ function path_ (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinStep
     }
     return stepHead;
   } catch (error) {
-    throw wrapError(error, `During ${valker.debugId()}\n .path_, step #${index}, with:`,
+    throw wrapError(error, `During ${valker.debugId()}\n ._path, step #${index}, with:`,
         "\n\tstep head:", ...dumpObject(stepHead),
         "\n\tstep:", ...dumpKuery(step),
         "\n\tpath head:", ...dumpObject(head),
@@ -587,7 +589,7 @@ function map (valker: Valker, head: any, scope: ?Object, mapStep: any, nonFinalS
     // mapScope.index = index;
     try {
       const result = valker._builtinSteppers["§->"](valker, entryHead, mapScope, mapStep);
-      ret.push(valker.tryUnpack(result));
+      ret.push(valker.tryUnpack(result, true));
     } catch (error) {
       throw wrapError(error, `During ${valker.debugId()}\n .map, with:`,
           "\n\tmap head", ...dumpObject(sequence),
@@ -613,7 +615,7 @@ function filter (valker: Valker, head: any, scope: ?Object, filterStep: any,
     // filterScope.index = index;
     try {
       const result = valker._builtinSteppers["§->"](valker, entryHead, filterScope, filterStep);
-      if (result) ret.push(isPackedSequence ? valker.tryUnpack(entry) : entry);
+      if (result) ret.push(isPackedSequence ? valker.tryUnpack(entry, true) : entry);
     } catch (error) {
       throw wrapError(error, `During ${valker.debugId()}\n .filter, with:`,
           "\n\tfilter head:", ...dumpObject(sequence),
@@ -690,7 +692,6 @@ function _headOrScopeSet (valker: Valker, target: any, head: any, scope: ?Object
         target[key] = (typeof value !== "object") || (value === null) ? value
             : tryUnpackLiteral(valker, head, value, scope);
       }
-      // Object.assign(target, valker.tryUnpack(valker.advance(head, setter, scope)));
     } else {
       invariantifyObject(setter, `${settersStep[0]}.setter#${index - 1
           } must be an object or a key-value pair, got '${typeof setter}':`, setter);
@@ -706,7 +707,7 @@ export function isValOSFunction (callerCandidate: any) { return callerCandidate[
 
 export function denoteValOSBuiltin (description: any = "") {
   return (callee: any) => {
-    callee._valkCaller = true;
+    callee._valkThunk = true;
     callee._valkDescription = description;
     return callee;
   };
@@ -750,7 +751,7 @@ export function denoteValOSKueryFunction (description: any = "") {
         throw wrapError(error, `During ${createKuery.name}`);
       }
     }
-    callee._valkCaller = true;
+    callee._valkThunk = true;
     callee._valkCreateKuery = createKuery;
     const text = callee.toString();
     callee._valkDescription = description + text.slice(8, text.indexOf(" {"));
@@ -764,7 +765,7 @@ export function denoteDeprecatedValOSBuiltin (prefer: string, description: any =
       console.error("DEPRECATED: call to builtin operation", callee, "\n\tprefer:", prefer);
       return callee.apply(this, rest);
     }
-    deprecated._valkCaller = true;
+    deprecated._valkThunk = true;
     const text = callee.toString();
     deprecated._valkDeprecatedPrefer = prefer;
     deprecated._valkDescription = description + text.slice(8, text.indexOf(" {"));
@@ -807,7 +808,7 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
           transaction = Object.create(transaction);
           transaction._sourceInfo = sourceInfo;
         }
-        ret = transaction.tryUnpack(transaction.advance(head, vakon, scope, true));
+        ret = transaction.advance(head, vakon, scope, true);
       } else {
         // Direct caller is not valk context: this is a callback thunk
         // that is being called by fabric/javascript code.
@@ -859,7 +860,7 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
     if (sourceInfo) addStackFrameToError(wrap, vakon, sourceInfo);
     throw wrap;
   };
-  caller._valkCaller = true;
+  caller._valkThunk = true;
   caller[toVAKON] = vakon;
   caller[SourceInfoTag] = sourceInfo;
   caller._capturedScope = capturedScope;
@@ -896,7 +897,7 @@ export function callOrApply (valker: Valker, head: any, scope: ?Object, step: Bu
           ? scope : tryUnpackLiteral(valker, head, step[2], scope);
       eThis = (eThis[UnpackedHostValue] && tryUnpackedHostValue(eThis)) || eThis;
     }
-    if (eCallee._valkCaller) {
+    if (eCallee._valkThunk) {
       if (eThis == null) {
         eThis = { __callerValker__: valker, __callerScope__: scope };
       } else if ((typeof eThis === "object") || (typeof eThis === "function")) {
@@ -915,21 +916,22 @@ export function callOrApply (valker: Valker, head: any, scope: ?Object, step: Bu
     const ret = (opName === "§apply")
         ? eCallee.apply(eThis, eArgs)
         : eCallee.call(eThis, ...eArgs);
-    if ((typeof ret === "object") && (ret !== null) && ret.catch && isPromise(ret)) {
+    if ((ret != null) && ret.then && isPromise(ret)) {
       ret.catch(error => {
         outputCollapsedError(onError(error),
             `Exception re-raised by VALK.${opName}('${eCallee.name}').ret:Promise.catch`);
         throw error;
       });
     }
-    return valker.tryPack(ret);
+    const ret2 = eCallee._capturedScope ? ret : valker.tryPack(ret);
+    return ret2;
   } catch (error) {
     throw onError(error);
   }
   function onError (error) {
     return valker.wrapErrorEvent(error, `builtin.${opName}`,
         "\n\thead:", ...dumpObject(head),
-        "\n\tcallee (is valk):", (eCallee != null) && eCallee._valkCaller, ...dumpObject(eCallee),
+        "\n\tcallee (is valk):", (eCallee != null) && eCallee._valkThunk, ...dumpObject(eCallee),
         "(via kuery:", ...dumpKuery(step[1]), ")",
         "\n\tthis:", ...dumpObject(eThis),
         "(via kuery:", ...dumpKuery(step[2]), ")",

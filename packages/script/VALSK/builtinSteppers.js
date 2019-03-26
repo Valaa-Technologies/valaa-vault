@@ -77,7 +77,7 @@ export default Object.freeze({
         const arg = newOp[index + 2];
         eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
       }
-      Type = valker.tryUnpack(eType);
+      Type = valker.tryUnpack(eType, true);
       if (typeof Type === "function") return valker.pack(new Type(...eArgs));
       if ((typeof Type === "object") && BuiltinTypePrototype.isPrototypeOf(Type)) {
         return valker.pack(Type[".new"](valker, scope, ...eArgs));
@@ -144,7 +144,7 @@ function _getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Objec
     ePropertyName = (typeof propertyName !== "object") ? propertyName
         : tryLiteral(valker, head, propertyName, scope);
     if (eContainer._sequence) {
-      eContainer = valker.tryUnpack(eContainer);
+      eContainer = valker.tryUnpack(eContainer, true);
     } else if (isHostRef(eContainer)) {
       const ret = valker.tryPack(valker._builtinSteppers["§method"](
           valker, eContainer, scope, _propertyValueMethodStep)(ePropertyName));
@@ -215,14 +215,14 @@ function _alterIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Obj
     const property = eContainer[ePropertyName];
     if (isAlterProperty) {
       const packedNewValue = valker.advance(valker.pack(property), eAlterationVAKON, scope);
-      eContainer[ePropertyName] = valker.tryUnpack(packedNewValue);
+      eContainer[ePropertyName] = valker.tryUnpack(packedNewValue, true);
       return packedNewValue;
     }
     if ((typeof property === "object") && (property !== null)) {
       if (isNativeIdentifier(property)) {
         const packedNewValue = valker.advance(
             valker.tryPack(getNativeIdentifierValue(property)), eAlterationVAKON, scope);
-        setNativeIdentifierValue(property, valker.tryUnpack(packedNewValue));
+        setNativeIdentifierValue(property, valker.tryUnpack(packedNewValue, true));
         return packedNewValue;
       }
       if ((typeof property.alterValue === "function") && isHostRef(valker.tryPack(property))) {

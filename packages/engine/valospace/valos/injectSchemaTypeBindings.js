@@ -126,13 +126,14 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
           ""}transaction. Otherwise a regular, by default unhandled exception is thrown.`
     )(function getActiveResource (id: string | VRL) {
       try {
-        const ret = this.__callerValker__.run({}, VALEK.fromObject(id));
+        const ret = this.__callerValker__.run({}, VALEK.fromObject(id).notNull());
         if (!ret) {
           throw new Error(`Could not find resource '${String(id)}' in the False Prophet corpus`);
         }
         ret.requireActive();
         return ret;
       } catch (error) {
+        const ret = this.__callerValker__.run({}, VALEK.fromObject(id).nullable());
         this.__callerValker__.errorEvent(
             "\n\tDEPRECATED, SUBJECT TO CHANGE:",
             "Resource.getActiveResource returns null if no active resource is found, for now",
@@ -144,8 +145,8 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
             "\n\tvalker:", ...dumpObject(this.__callerValker__),
         ), `Caught exception (collapsed and ignored during deprecation period: ${
             ""}\n\n\tEVENTUALLY THIS WILL BECOME AN ACTUAL ERROR\n\n)`);
+        return ret;
       }
-      return this.__callerValker__.run({}, VALEK.fromObject(id).nullable());
     }),
 
     tryActiveResource: denoteValOSBuiltinWithSignature(

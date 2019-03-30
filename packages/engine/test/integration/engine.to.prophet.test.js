@@ -130,7 +130,7 @@ describe("Media handling", () => {
               liveUpdate,
               bvobId: contentMedia.get("content"),
               content: contentMedia.interpretContent({ synchronous: true, mime: "text/plain" }),
-            }));
+            }), false);
     const { contentMedia, createdProcess } = await harness.runValoscript(vRef("test_partition"), `
       this[valos.prepareBvob](initialBuffer).then(createBvob => {
         const contentMedia = new Media({

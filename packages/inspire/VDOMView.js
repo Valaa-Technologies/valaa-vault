@@ -53,6 +53,10 @@ export default class VDOMView extends Cog {
     return this._vViewFocus.getSelfAsHead();
   }
 
+  run (head: any, kuery: Object, options: Object) {
+    return this._vViewFocus.run(head, kuery, options);
+  }
+
  /**
   * Creates the root UI component with the react context, and connects it to the html container.
   */

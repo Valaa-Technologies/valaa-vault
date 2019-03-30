@@ -618,7 +618,7 @@ export default class Valker extends Resolver {
       throw this.wrapErrorEvent(error,
           requireIfRef ? "requireTransientIfSingular" : "trySingularTransient",
           "\n\tobject:", ...this._dumpObject(object),
-          "\n\tstate:", this.getState(),
+          "\n\tstate:", ...this._dumpObject(this.getJSState()),
       );
     }
   }

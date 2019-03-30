@@ -210,22 +210,23 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
 function _tryRenderMediaLens (component: UIComponent, media: any, focus: any) {
   const bindingSlot = `UIComponent_media_${media.getRawId()}`;
   if (!component.getBoundSubscription(bindingSlot)) {
-    component.bindNewKuerySubscription(bindingSlot,
-        media, VALEK.toMediaContentField(), {},
-        function onMediaContentUpdate () {
-          // If focus has changed detaches the live kuery. This is likely
-          // uselessly defensive programming as the whole UIComponent state
-          // should refresh anyway whenever the focus changes. Nevertheless
-          // return before forceupdate.
-          if (component.tryFocus() !== focus) return false;
-          component.forceUpdate();
-          return undefined;
-        });
+    component.bindLiveKuery(bindingSlot, media, VALEK.toMediaContentField(), {
+      onUpdate: function onMediaContentUpdate () {
+        // If focus has changed detaches the live kuery. This is likely
+        // uselessly defensive programming as the whole UIComponent state
+        // should refresh anyway whenever the focus changes. Nevertheless
+        // return before triggering forceupdate as we're obsolete.
+        if (component.tryFocus() !== focus) return false;
+        component.forceUpdate();
+        return undefined;
+      },
+      updateImmediately: false,
+    });
   }
   const options = { mimeFallback: "text/vsx" };
   const ret = thenChainEagerly(null, [
-    () => media.interpretContent(options),
-    content => {
+    media.interpretContent.bind(media, options),
+    function postProcessInterpretedMediaContent (content) {
       let error;
       if (typeof content !== "object") {
         if (content !== undefined) return content;
@@ -393,7 +394,7 @@ function _postProcessProp (prop: any, livePropLookup: Object, liveProps: Object,
   if ((typeof prop !== "object") || (prop === null)) return undefined;
   if (prop instanceof Kuery) {
     let ret = livePropLookup.get(prop.kueryId());
-    if (typeof ret === "undefined") {
+    if (ret === undefined) {
       const liveKueryName = `props#${liveProps.currentIndex++}.${name}`;
       liveProps[liveKueryName] = prop;
       ret = function fetchLiveProp (livePropValues: OrderedMap) {

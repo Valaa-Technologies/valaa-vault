@@ -31,8 +31,9 @@ describe("Subscription", () => {
 
   function setUpKueryTestHarness (kuery: Kuery, subscriberName: string, options: Object) {
     setUpHarnessAndCallback(options);
-    subscription = entities().creator.obtainSubscription(kuery, options);
-    subscription.addSubscriber(harness, subscriberName, liveCallback, harness.getState());
+    subscription = entities().creator.obtainSubscription(
+        kuery, { ...options, state: harness.getState() });
+    subscription.addSubscriber(harness, subscriberName, liveCallback);
   }
 
   function setUpPropertyTargetTestHarness (propertyName: string, options: Object) {
@@ -182,9 +183,9 @@ describe("Subscription", () => {
       const creatori1 = entities().creator.getGhostIn(entities()["test+1"]);
       const creatori1i1 = creatori1.getGhostIn(entities()["test+1+1"]);
 
-      creatori1i1.get(VALEK.propertyValue("counter"), { liveSubscription: true })
-          .addSubscriber(harness, "test", update => liveCallback(update.value()),
-              harness.getState());
+      creatori1i1.get(VALEK.propertyValue("counter"), {
+        obtainSubscriptionTransaction: () => harness.engine.discourse,
+      }).addSubscriber(harness, "test", update => liveCallback(update.value()));
 
       expect(liveCallback.mock.calls.length).toBe(1);
       expect(liveCallback.mock.calls[0][0]).toEqual(0);

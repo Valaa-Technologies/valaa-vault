@@ -4,7 +4,7 @@ import Presentable from "~/inspire/ui/Presentable";
 import { LiveUpdate } from "~/engine/Vrapper";
 import VALEK from "~/engine/VALEK";
 
-import { wrapError } from "~/tools/wrapError";
+import { dumpObject, thenChainEagerly, wrapError } from "~/tools";
 
 const toTextPlainInterpretation =
     VALEK.if(VALEK.toMediaContentField(), { then: VALEK.interpretContent({ mime: "text/plain" }) });
@@ -12,16 +12,20 @@ const toTextPlainInterpretation =
 export default @Presentable(require("./presentation").default, "MediaContentEditor")
 class MediaContentEditor extends UIComponent {
   bindFocusSubscriptions (focus: any, props: Object) {
-    try {
-      super.bindFocusSubscriptions(focus, props);
-      this.bindNewKuerySubscription(`FileEditor_content`,
-          focus, toTextPlainInterpretation, { scope: this.getUIContext() },
-          this.onContentUpdate);
-    } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .bindFocusSubscriptions(), with:`,
-          "\n\thead:       ", focus,
-          "\n\tthis:       ", this);
-    }
+    super.bindFocusSubscriptions(focus, props);
+    return thenChainEagerly(null, [
+      this.bindLiveKuery.bind(this, `FileEditor_content`,
+          focus, toTextPlainInterpretation,
+          { asRepeathenable: true, scope: this.getUIContext() }),
+      this.onContentUpdate,
+    ], function errorOnMediaContentEditorSubscriptions (error) {
+      throw wrapError(error,
+          new Error(`During ${this.debugId()
+              }\n .bindFocusSubscriptions.FileEditor_content(), with:`),
+          "\n\tfocus:", ...dumpObject(focus),
+          "\n\tprops:", ...dumpObject(props),
+          "\n\tmediaEditor:", ...dumpObject(this));
+    }.bind(this));
   }
 
   onContentUpdate = async (liveUpdate: LiveUpdate) => {

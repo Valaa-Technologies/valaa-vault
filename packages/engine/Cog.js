@@ -9,7 +9,7 @@ import { transpileValoscriptBody } from "~/script/transpileValoscript";
 import VALEK, { Kuery, dumpKuery } from "~/engine/VALEK";
 import Subscription from "~/engine/Vrapper/Subscription";
 
-import { LogEventGenerator, wrapError, dumpObject } from "~/tools";
+import { LogEventGenerator, wrapError, dumpObject, thenChainEagerly } from "~/tools";
 
 
 /**
@@ -57,8 +57,9 @@ export default class Cog extends LogEventGenerator {
     if (options.transaction) {
       const result = options.transaction.releaseTransaction();
       if (result) {
-        return Promise.resolve((options.awaitResult || (r => r.getPersistedEvent()))(result))
-            .then(() => ret);
+        return thenChainEagerly(
+            (options.awaitResult || (r => r.getPersistedEvent()))(result),
+            () => ret);
       }
     }
     return ret;
@@ -68,14 +69,7 @@ export default class Cog extends LogEventGenerator {
     try {
       options.scope = options.scope ? Object.create(options.scope) : {};
       options.scope.self = options.scope;
-      if (options.liveSubscription) {
-        // TODO(iridian): Eventually live kuery functionality might
-        // need to be moved into Valker. A convenient time to do this
-        // is when the asynchronous kuery functionality is added.
-        if (options.transaction) {
-          options.state = options.transaction.getState();
-          options.transaction = undefined;
-        }
+      if (options.obtainSubscriptionTransaction) {
         return new Subscription(this, kuery, options, head);
       }
       return this.engine.discourse.run(head, kuery, options);

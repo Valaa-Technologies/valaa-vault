@@ -86,12 +86,13 @@ function _updateFocus (component: UIComponent, newProps: Object) {
       component.setUIContextValue("focus", undefined);
       // component.setUIContextValue("head", undefined);
     }
-    component.bindNewKuerySubscription("UIComponent_focus",
-        focus, newProps.kuery, { scope },
-        (liveUpdate: LiveUpdate) => {
-          _finalizeUnbindSubscribersExcept(component, "UIComponent.focus");
-          _createContextAndSetFocus(component, liveUpdate.value(), newProps);
-        });
+    component.bindLiveKuery("UIComponent_focus", focus, newProps.kuery, {
+      scope,
+      onUpdate: function updateFocusDependents (liveUpdate: LiveUpdate) {
+        _finalizeUnbindSubscribersExcept(component, "UIComponent.focus");
+        _createContextAndSetFocus(component, liveUpdate.value(), newProps);
+      },
+    });
   } catch (error) {
     throw wrapError(error, `During ${component.debugId()}\n ._updateFocus:`,
         "\n\tnew props:", newProps,

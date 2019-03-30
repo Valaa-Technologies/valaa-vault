@@ -357,7 +357,7 @@ export default class Vrapper extends Cog {
         this.registerComplexHandlers(this.engine._storyHandlerRoot, resolver.state);
       }
       this._refreshDebugId(transient, { state: resolver.state });
-      if (this.hasInterface("Scope")) this._setUpScopeFeatures(resolver.state);
+      if (this.hasInterface("Scope")) this._setUpScopeFeatures(resolver);
     } catch (error) {
       outputError(this.wrapErrorEvent(error,
               new Error("_postActivate()"),
@@ -367,7 +367,7 @@ export default class Vrapper extends Cog {
               "\n\tauthorityConnection:", authorityConnection,
               "\n\tthis:", ...dumpObject(this),
               "\n\tresolver.state:", ...dumpObject(resolver.state.toJS()),
-              "\n\tdiscourse.state:", ...dumpObject(this.engine.discourse.getState().toJS())),
+              "\n\tengine.discourse.state:", ...dumpObject(this.engine.discourse.getState().toJS())),
           "Exception caught and swallowed in Vrapper._postActivate");
     }
   }
@@ -1654,7 +1654,7 @@ export default class Vrapper extends Cog {
 
   onEventCREATED (passage: Passage, story: Story) {
     this._updateTransient(story.state);
-    if (this._fieldHandlers) {
+    if (this._fieldHooks) {
       const transient = this.getTransient({ typeName: passage.typeName, state: story.state });
       for (const key of transient.keys()) {
         this.notifyMODIFIEDHandlers(key, passage, story);
@@ -1722,57 +1722,56 @@ export default class Vrapper extends Cog {
   }
 
   onEventDESTROYED (passage: Passage, story: Story) {
-    (this._destroyedHandlers || []).forEach(handler => handler(story.timed));
+    (this._destroyedHooks || []).forEach(hook => hook(story.timed));
     this._phase = DESTROYED;
     return this.engine.addDelayedRemoveCog(this, story);
   }
 
-  addDESTROYEDHandler (handler: Function) {
-    if (!this._destroyedHandlers) this._destroyedHandlers = [];
-    this._destroyedHandlers.push(handler);
+  addDESTROYEDHandler (hook: Function) {
+    if (!this._destroyedHooks) this._destroyedHooks = [];
+    this._destroyedHooks.push(hook);
   }
 
   notifyMODIFIEDHandlers (fieldName: string, passage: Passage, story: Story) {
-    const specificFieldHandlers = this._fieldHandlers && this._fieldHandlers.get(fieldName);
-    const filterHandlers = this._filterHandlers;
-    if (!specificFieldHandlers && !filterHandlers) return undefined;
-    const fieldUpdate = new FieldUpdate(this, fieldName, passage, story);
-    return this.engine.addDelayedFieldUpdate(
-        fieldUpdate, specificFieldHandlers, filterHandlers, story);
+    const specificFieldHooks = this._fieldHooks && this._fieldHooks.get(fieldName);
+    const filterHooks = this._filterHooks;
+    if (!specificFieldHooks && !filterHooks) return undefined;
+    return this.engine.addDelayedFieldUpdate(this, fieldName,
+        specificFieldHooks, filterHooks, passage, story);
   }
 
-  _notifyMODIFIEDHandlers (fieldUpdate: FieldUpdate, specificFieldHandlers: any,
-      filterHandlers: any) {
+  _notifyMODIFIEDHandlers (fieldUpdate: FieldUpdate, specificFieldHooks: any, filterHooks: any) {
     const fieldName = fieldUpdate.fieldName();
     const passageCounter = fieldUpdate.getPassage()._counter;
-    for (const [subscription, handlerData] of (specificFieldHandlers || [])) {
+    for (const [subscription, hookData] of (specificFieldHooks || [])) {
       try {
-        // console.log(`Notifying field '${fieldName}' sub on`, this.debugId(), handlerData);
-        subscription.triggerLiveUpdatesByFieldUpdate(fieldUpdate, handlerData, passageCounter);
+        // console.log(`Notifying field '${fieldName}' sub on`, this.debugId(), hookData);
+        subscription.triggerLiveUpdateByFieldHook(fieldUpdate, hookData, passageCounter);
       } catch (error) {
         outputError(this.wrapErrorEvent(error, new Error(`_notifyMODIFIEDHandlers('${fieldName}')`),
                 "\n\tfield update:", fieldUpdate,
+                "\n\tfield update options:", fieldUpdate.getOptions(),
                 "\n\tfailing field subscription:", ...dumpObject(subscription),
-                "\n\tfailing field handlerData:", ...dumpObject(handlerData),
+                "\n\tfailing field hookData:", ...dumpObject(hookData),
                 "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())),
             "Exception caught during Vrapper._notifyMODIFIEDHandlers.subscriptions");
       }
     }
-    if (filterHandlers) {
-      const fieldIntro = this.getTypeIntro().getFields()[fieldName];
-      for (const [subscription, handlerData] of filterHandlers) {
-        try {
-          // console.log(`Notifying filter '${fieldName}' sub of`, this.debugId(), handlerData);
-          subscription.triggerLiveUpdatesByFilterUpdate(
-              fieldUpdate, fieldIntro, handlerData, passageCounter);
-        } catch (error) {
-          outputError(this.wrapErrorEvent(error,
-                  new Error(`_notifyMODIFIEDHandlers('${fieldName}')`),
-                  "\n\tfield update:", fieldUpdate,
-                  "\n\tfailing filter subscription:", ...dumpObject(subscription),
-                  "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())),
-              "Exception caught during Vrapper._notifyMODIFIEDHandlers.filterHandlers");
-        }
+    if (!filterHooks) return;
+    const fieldIntro = this.getTypeIntro().getFields()[fieldName];
+    for (const [subscription, hookData] of filterHooks) {
+      try {
+        // console.log(`Notifying filter '${fieldName}' sub of`, this.debugId(), hookData);
+        subscription.triggerLiveUpdateByFilterHook(
+            fieldUpdate, fieldIntro, hookData, passageCounter);
+      } catch (error) {
+        outputError(this.wrapErrorEvent(error,
+                new Error(`_notifyMODIFIEDHandlers('${fieldName}')`),
+                "\n\tfield update:", fieldUpdate,
+                "\n\tfield update options:", fieldUpdate.getOptions(),
+                "\n\tfailing filter subscription:", ...dumpObject(subscription),
+                "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())),
+            "Exception caught during Vrapper._notifyMODIFIEDHandlers.filterHooks");
       }
     }
   }
@@ -1801,46 +1800,45 @@ export default class Vrapper extends Cog {
     }
   }
 
-  _fieldHandlers: Map<string, Map<Subscription, any>>;
+  _fieldHooks: Map<string, Map<Subscription, any>>;
 
-  _addFieldHandler (fieldName: string, subscription: Subscription, handlerData: any = null) {
-    let specificFieldHandlers;
+  _addFieldHook (fieldName: string, subscription: Subscription, hookData: any = null) {
+    let specificFieldHooks;
     try {
       if (this._phase === NONRESOURCE) return undefined;
       this.requireActive({ allowActivating: true });
-      if (!this._fieldHandlers) this._fieldHandlers = new Map();
-      specificFieldHandlers = this._fieldHandlers.get(fieldName);
-      if (!specificFieldHandlers) {
-        specificFieldHandlers = new Map();
-        this._fieldHandlers.set(fieldName, specificFieldHandlers);
+      if (!this._fieldHooks) this._fieldHooks = new Map();
+      specificFieldHooks = this._fieldHooks.get(fieldName);
+      if (!specificFieldHooks) {
+        specificFieldHooks = new Map();
+        this._fieldHooks.set(fieldName, specificFieldHooks);
       }
       subscription._seenPassageCounter = this.engine._currentPassageCounter;
-      specificFieldHandlers.set(subscription, handlerData);
-      return specificFieldHandlers;
+      specificFieldHooks.set(subscription, hookData);
+      return specificFieldHooks;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_addFieldHandler('${fieldName}')`,
+      throw this.wrapErrorEvent(error, `_addFieldHook('${fieldName}')`,
           "\n\tsubscription:", ...dumpObject(subscription),
-          "\n\tspecificFieldHandlers:", ...dumpObject(specificFieldHandlers),
+          "\n\tspecificFieldHooks:", ...dumpObject(specificFieldHooks),
           "\n\tthis:", ...dumpObject(this));
     }
   }
 
-  _filterHandlers: Map<Subscription, any>;
+  _filterHooks: Map<Subscription, any>;
 
-  _addFilterSubscription (filter: Function | boolean,
-      subscription: Subscription, handlerData: any = null) {
+  _addFilterHook (filter: Function | boolean, subscription: Subscription, hookData: any = null) {
     try {
       if (this._phase === NONRESOURCE) return undefined;
       this.requireActive();
-      if (!this._filterHandlers) this._filterHandlers = new Map();
+      if (!this._filterHooks) this._filterHooks = new Map();
       subscription._seenPassageCounter = this.engine._currentPassageCounter;
-      this._filterHandlers.set(subscription, handlerData);
-      return this._filterHandlers;
+      this._filterHooks.set(subscription, hookData);
+      return this._filterHooks;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "_addFilterSubscription()",
+      throw this.wrapErrorEvent(error, "_addFilterHook()",
           "\n\tfilter:", ...dumpObject(filter),
           "\n\tsubscription:", ...dumpObject(subscription),
-          "\n\tfilterHandlers:", ...dumpObject(this._filterHandlers),
+          "\n\tfilterHandlers:", ...dumpObject(this._filterHooks),
           "\n\tthis:", ...dumpObject(this));
     }
   }
@@ -1860,12 +1858,12 @@ export default class Vrapper extends Cog {
 
   static infiniteLoopTester = Symbol("InfiniteLoopTest");
 
-  _setUpScopeFeatures (state: Object) {
+  _setUpScopeFeatures (resolver: Object) {
     // Refers all Scope.properties:Property objects in this._lexicalScope to enable scoped script
     // access which uses the owner._lexicalScope as the scope prototype if one exists.
-    this._scopeOwnerSubscription = this.obtainSubscription("owner").addSubscriber(
-        this, `Vrapper_scope_owner`,
-        (ownerUpdate: FieldUpdate) => {
+    this._scopeOwnerSubscription = this
+        .obtainSubscription("owner", { state: resolver.getState() })
+        .addSubscriber(this, `Vrapper_scope_owner`, (ownerUpdate: FieldUpdate) => {
           const parent = ownerUpdate.value() || this.engine;
           if (!this._lexicalScope) {
             this._initializeScopes(parent);
@@ -1895,16 +1893,16 @@ export default class Vrapper extends Cog {
           // TODO(iridian, 2019-03): Requiring 'this' to be provided by
           // this code is likely a bug. See TODO note in parseRules:108.
           this._lexicalScope.this = this;
-        },
-        state);
+        });
     if (!this._lexicalScope) {
       throw this.wrapErrorEvent(new Error("Vrapper owner is not immediately available"),
           "_setUpScopeFeatures",
           "\n\tthis:", ...dumpObject(this));
     }
     this._scopeNameSubscriptions = {};
-    this._scopePropertiesSubscription = this.obtainSubscription("properties")
-        .addSubscriber(this, `Vrapper_properties`, this._onPropertiesUpdate.bind(this), state);
+    this._scopePropertiesSubscription = this
+        .obtainSubscription("properties", { state: resolver.getState() })
+        .addSubscriber(this, `Vrapper_properties`, this._onPropertiesUpdate.bind(this));
   }
 
   _onPropertiesUpdate (fieldUpdate: FieldUpdate) {
@@ -1914,11 +1912,11 @@ export default class Vrapper extends Cog {
       // well have a cog which tracks Property.name changes and
       // updates their owning Scope Vrapper._lexicalScope's.
       // Specifically: it is the call to actualAdds() which does this.
-      this._scopeNameSubscriptions[vActualAdd.getRawId()]
-              = vActualAdd.obtainSubscription("name").addSubscriber(
-          this,
-          `Vrapper_properties_name`,
-          nameUpdate => {
+      // TODO(iridian, 2019-03): Property renames are going to be
+      // disabled very shortly. This whole sequence can be dropped.
+      this._scopeNameSubscriptions[vActualAdd.getRawId()] = vActualAdd
+          .obtainSubscription("name", { state: fieldUpdate.getState() })
+          .addSubscriber(this, `Vrapper_properties_name`, nameUpdate => {
             const newName = nameUpdate.value();
             if ((newName === "this") || (newName === "self")) {
               this.warnEvent(`Property name '${newName
@@ -1957,8 +1955,7 @@ export default class Vrapper extends Cog {
               set: (value) => vActualAdd.setField("value", expressionFromProperty(value, newName),
                   { scope: this._lexicalScope }),
             });
-          },
-          fieldUpdate.valkOptions().state);
+          });
     });
 
     fieldUpdate.actualRemoves().forEach(vActualRemove => {

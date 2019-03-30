@@ -23,8 +23,9 @@ export class LiveUpdate {
   }
 
   getEmitter (): Vrapper { return this._emitter; }
-  valkOptions (): ?VALKOptions { return this._valkOptions; }
+  getOptions (): ?VALKOptions { return this._valkOptions; }
   getState (): Object { return this._valkOptions.state; }
+  getJSState (): Object { return this._valkOptions.state && this._valkOptions.state.toJS(); }
   value (): ?any {
     return (this._value !== undefined) ? this._value : (this._value = this._resolveValue());
   }

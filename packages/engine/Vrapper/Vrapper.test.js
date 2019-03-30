@@ -82,7 +82,9 @@ describe("Vrapper", () => {
     }
     for (const key of Object.keys(sets || {})) {
       observedVrapper.obtainSubscription(key)
-          .addSubscriber(harness, "test", (update) => { updatedValues[key] = update.value(); });
+          .addSubscriber(harness, "test", (update) => {
+            updatedValues[key] = update.value();
+          }, false);
     }
     harness.chronicleEvent({ type: "FIELDS_SET", id: targetId,
       typeName: "TestScriptyThing",
@@ -368,7 +370,7 @@ describe("Vrapper", () => {
       ]);
       let modCalled = false;
       testScriptPartitions().child.obtainSubscription("children")
-          .addSubscriber(harness, "test", () => { modCalled = true; });
+          .addSubscriber(harness, "test", () => { modCalled = true; }, false);
       harness.chronicleEvent(destroyed({ type: "DESTROYED", id: ["grandChild"] }));
       // children modified subscriber should have been called when the sub-event to remove
       // grandChild from the children list was reduced
@@ -381,7 +383,7 @@ describe("Vrapper", () => {
       ]);
       let modCalled = false;
       testScriptPartitions().grandChild.obtainSubscription("children")
-          .addSubscriber(harness, "test", () => { modCalled = true; });
+          .addSubscriber(harness, "test", () => { modCalled = true; }, false);
       testScriptPartitions().greatGrandChild.setField("parent",
           testScriptPartitions().grandSibling);
 
@@ -686,8 +688,9 @@ describe("Vrapper", () => {
           .toEqual("testOwned.testField");
       testScriptPartitions().test.get(VALEK.property("testField"))
           .setField("name", "renamedField");
-      expect(() => testScriptPartitions().test.get(VALEK.fromScope("testField").toValueLiteral()))
-          .toThrow(/'undefined' at notNull assertion/);
+      expect(() => testScriptPartitions().test
+              .get(VALEK.fromScope("testField").toValueLiteral(), { verbosity: 0 }))
+          .toThrow(/Valk path step head unpacks to 'undefined' at notNull assertion/);
     });
 
     it("fails to access a removed Scope value", async () => {
@@ -700,7 +703,7 @@ describe("Vrapper", () => {
       await vTest.get(VALEK.property("testField"))
           .destroy().getPremiereStory();
       expect(() => vTest.get(VALEK.fromScope("testField").toValueLiteral(), { verbosity: 0 }))
-          .toThrow(/'undefined' at notNull assertion/);
+          .toThrow(/Valk path step head unpacks to 'undefined' at notNull assertion/);
     });
 
     it("updates lexicalScope when reparented", () => {
@@ -718,7 +721,7 @@ describe("Vrapper", () => {
           .toEqual("grandChildOwned.testField");
       expect(() => testScriptPartitions().greatGrandChild.get(
               VALEK.fromScope("siblingField").toValueLiteral()))
-          .toThrow(/'undefined' at notNull assertion/);
+          .toThrow(/Valk path step head unpacks to 'undefined' at notNull assertion/);
       testScriptPartitions().greatGrandChild.setField(
           "parent", testScriptPartitions().grandSibling);
       expect(testScriptPartitions().greatGrandChild.get(
@@ -742,7 +745,7 @@ describe("Vrapper", () => {
         }, }),
       ]);
       expect(() => testScriptPartitions().test.get(VALEK.fromScope("").toValueLiteral()))
-          .toThrow(/'undefined' at notNull assertion/);
+          .toThrow(/Valk path step head unpacks to 'undefined' at notNull assertion/);
     });
   });
 });

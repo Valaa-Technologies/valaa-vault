@@ -23,7 +23,7 @@ import Motor from "~/engine/Motor";
 import Vrapper from "~/engine/Vrapper";
 import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
-import type FieldUpdate from "~/engine/Vrapper/FieldUpdate";
+import FieldUpdate from "~/engine/Vrapper/FieldUpdate";
 
 import { debugObjectType, dumpify, outputCollapsedError, thenChainEagerly, wrapError }
     from "~/tools";
@@ -425,26 +425,30 @@ export default class Engine extends Cog {
 
   receiveCommands (stories: Command[]) {
     const allReactionPromises = [];
-    stories.forEach(story => {
+    const finalizer = { then (finalize) { this.finalize = finalize; } };
+    this.obtainGroupTransaction("local-events", { setAsGlobal: true, finalizer });
+    // TODO(iridian, 2019-03): Mark UI-transactions as local-only. It
+    // is acceptable that UI operations manage in-memory/local state
+    // but remote updates should be explicitly performed in
+    // a separate (via Promise.resolve().then or via explicit
+    // valosheath API)
+    for (const story of stories) {
       story._delayedCogRemovals = [];
       story._delayedFieldUpdates = [];
-
-      const discourse = this.discourse;
-      const transaction = this.discourse = discourse.acquireTransaction("receive-events");
-
-      this._recitePassage(story, story, allReactionPromises);
-
-      story._delayedCogRemovals.forEach(cog => this.removeCog(cog));
-      story._delayedCogRemovals = null;
-      story._delayedFieldUpdates.forEach(fieldUpdate => {
-        fieldUpdate.getEmitter()._notifyMODIFIEDHandlers(fieldUpdate,
-            fieldUpdate._delayedFieldSubscriptions, fieldUpdate._delayedFilterSubscriptions);
-      });
-      story._delayedFieldUpdates = null;
-
-      this.discourse = discourse;
-      transaction.releaseTransaction();
-    });
+      try {
+        this._recitePassage(story, story, allReactionPromises);
+        story._delayedCogRemovals.forEach(cog => this.removeCog(cog));
+        story._delayedCogRemovals = null;
+        story._delayedFieldUpdates.forEach(fieldUpdate => {
+          fieldUpdate.getEmitter()._notifyMODIFIEDHandlers(
+              fieldUpdate, fieldUpdate._delayedFieldHooks, fieldUpdate._delayedFilterHooks);
+        });
+        story._delayedFieldUpdates = null;
+      } catch (error) {
+        outputCollapsedError(error, "Exception caught during Engine.receiveCommands");
+      }
+    }
+    finalizer.finalize(true);
     return allReactionPromises.length ? allReactionPromises : undefined;
   }
 
@@ -516,19 +520,24 @@ export default class Engine extends Cog {
     story._delayedCogRemovals.push(cog);
   }
 
-  addDelayedFieldUpdate (fieldUpdate: FieldUpdate,
-      fieldSubscriptions, filterSubscriptions, story: Story) {
-    fieldUpdate._delayedFieldSubscriptions = fieldSubscriptions;
-    fieldUpdate._delayedFilterSubscriptions = filterSubscriptions;
+  addDelayedFieldUpdate (vrapper: Vrapper, fieldName: string,
+      fieldHooks, filterHooks, passage: Passage, story: Story) {
+    const fieldUpdate = new FieldUpdate(vrapper, fieldName, passage, story);
+    fieldUpdate._delayedFieldHooks = fieldHooks;
+    fieldUpdate._delayedFilterHooks = filterHooks;
     story._delayedFieldUpdates.push(fieldUpdate);
   }
 
   _pendingTransactions = {};
 
-  obtainTransientGroupingTransaction (
-      groupName: string, { setAsGlobal = false, finalizer = Promise.resolve(true) }: Object = {}) {
+  obtainGroupTransaction (groupName: string, {
+    setAsGlobal = false,
+    finalizer = Promise.resolve(true),
+  }: Object = {}) {
     let ret = this._pendingTransactions[groupName];
-    if (!ret) {
+    if (ret) {
+      finalizer.then(() => undefined);
+    } else {
       ret = this._pendingTransactions[groupName] = this.discourse.acquireTransaction(groupName);
       if (setAsGlobal && (this.discourse.rootDiscourse === this.discourse)) {
         // If there is no current transaction as the global discourse
@@ -544,6 +553,11 @@ export default class Engine extends Cog {
     }
     return ret;
   }
+
+  getActiveGlobalOrNewLocalEventGroupTransaction = () =>
+      ((this.discourse !== this.discourse.rootDiscourse)
+          ? this.discourse
+          : this.obtainGroupTransaction("local-events", { setAsGlobal: true, }))
 
   receiveTruths () {}
 

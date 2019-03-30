@@ -1,9 +1,8 @@
 // @flow
 
-import Vrapper, { Subscription, LiveUpdate } from "~/engine/Vrapper";
-import { Kuery } from "~/engine/VALEK";
+import Vrapper from "~/engine/Vrapper";
 
-import { invariantify, invariantifyObject, invariantifyFunction } from "~/tools";
+import { invariantify } from "~/tools";
 
 import UIComponent from "./UIComponent";
 
@@ -29,41 +28,26 @@ export function _finalizeUnbindSubscribersExcept (component: UIComponent, except
   component._subscriptions = newSubscriptions;
 }
 
-export function _bindNewKuerySubscription (component: UIComponent, bindingSlot: string, head: any,
-  kuery: any, options: { noImmediateRun?: boolean },
-  onUpdate: (liveUpdate: LiveUpdate) => void,
+export function _bindLiveKuery (component: UIComponent, bindingSlot: string,
+  head: any, kuery: any, options: Object,
 ) {
-  let subscription;
-  if (head === undefined) {
-    component.unbindSubscription(bindingSlot, { require: false });
-    return undefined;
-  }
-  const engine = component.context.engine;
-  invariantifyFunction(onUpdate, "bindNewKuerySubscription_onUpdate");
-  if ((typeof kuery === "object") && (kuery instanceof Kuery)) {
-    options.liveSubscription = true;
-    subscription = (head instanceof Vrapper ? head : engine)
-        .run(head, kuery, options);
-  } else {
-    invariantifyObject(head, "bindNewKuerySubscription.head (when kuery is a filter)",
-        { instanceof: Vrapper });
-    subscription = head.obtainSubscription(kuery, options);
-  }
-  component.bindSubscription(bindingSlot, subscription, onUpdate,
-      !options.noImmediateRun && engine.discourse.getState());
-  return subscription;
-}
-
-export function _bindSubscription (component: UIComponent, bindingSlot: string,
-    subscription: Subscription, onUpdate: Function, immediateUpdateState: ?Object) {
-  if (!(subscription instanceof Subscription)) {
-    throw new Error(
-        "_bindSubscription.subscriber must be valid subscriber object (must have .triggerUpdate)");
-  }
   component.unbindSubscription(bindingSlot, { require: false });
+  if (head === undefined) return undefined;
+  const engine = component.context.engine;
+  if (!options.onUpdate && !options.asRepeathenable) {
+    throw new Error("bindLiveKuery.options must specify either onUpdate or asRepeathenable");
+  }
+  let subscription;
+  if ((typeof kuery !== "object") && (head instanceof Vrapper)) {
+    if (!options.state) options.state = engine.discourse.getState();
+    subscription = head.obtainSubscription(kuery, options);
+  } else {
+    options.obtainSubscriptionTransaction = engine.getActiveGlobalOrNewLocalEventGroupTransaction;
+    subscription = (head instanceof Vrapper ? head : engine).run(head, kuery, options);
+  }
   component._subscriptions[bindingSlot] = subscription;
-  subscription.addSubscriber(component, bindingSlot, onUpdate, immediateUpdateState);
-  return subscription;
+  return subscription.addSubscriber(component, bindingSlot,
+      options.onUpdate, options.updateImmediately, options.asRepeathenable);
 }
 
 export function _getBoundSubscription (component: UIComponent, bindingSlot: string) {

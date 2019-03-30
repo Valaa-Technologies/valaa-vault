@@ -56,7 +56,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   debugId (options: ?Object): string {
     return `${this.constructor.name}(${this._transactionState
-            ? (this._transactionState.name || "stub-transaction") : "non-transactional"}: ${
+            ? (this._transactionName || "stub-transaction") : "non-transactional"}: ${
         this._follower.getName(options)} <-> ${this._prophet.debugId(options)})`;
   }
 
@@ -267,7 +267,11 @@ export default class FalseProphetDiscourse extends Discourse {
   static nestIndex = 0;
 
   isActiveTransaction () {
-    return this._transactionState && this._transactionState.isActiveTransaction();
+    return !!this._nonFinalizedTransactions;
+  }
+
+  pendingTransactionActions () {
+    return ((this._transactionState || {}).actions || []).length;
   }
 
   create ({ typeName, initialState, id }: Object): ProphecyEventResult {

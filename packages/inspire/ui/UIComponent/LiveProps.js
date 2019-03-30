@@ -14,7 +14,9 @@ import getImplicitMediaInterpretation from "~/engine/Vrapper/getImplicitMediaInt
 import Valoscope from "~/inspire/ui/Valoscope";
 import UIComponent from "~/inspire/ui/UIComponent";
 
-import { arrayFromAny, deepExtend, isPromise, outputError, wrapError } from "~/tools";
+import {
+  arrayFromAny, deepExtend, dumpObject, isPromise, outputError, thenChainEagerly, wrapError,
+} from "~/tools";
 
 import { _wrapElementInLiveProps } from "./_renderOps";
 
@@ -75,32 +77,30 @@ export default class LiveProps extends UIComponent {
     // Now uselessly reattaching listeners if the local focus changes.
     let frame = this.getUIContextValue("frame");
     if (frame === undefined) frame = {};
-    for (const kueryId of Object.keys(props.liveProps || {})) {
+    (Object.keys(props.liveProps) || []).forEach(kueryId => {
+      const bindingSlot = `LiveProps_propskuery_${kueryId}`;
       const kuery = props.liveProps[kueryId];
-      const bindingSlot = `LiveProps_liveProps_kuery_${kueryId}`;
-      this.bindNewKuerySubscription(bindingSlot,
-          frame, kuery, { scope: this.getUIContext() },
-          (liveUpdate: LiveUpdate) => {
-            try {
-              this.setState((prevState) => ({
-                livePropValues: (prevState.livePropValues || OrderedMap())
-                    .set(kueryId, liveUpdate.value())
-              }));
-              return true;
-            } catch (error) {
-              const wrappedError = wrapError(error,
-                  new Error(`bindFocusSubscriptions('${bindingSlot}')`),
-                  "\n\tuiContext:", this.state.uiContext,
-                  "\n\tfocus:", this.tryFocus(),
-                  "\n\tstate:", this.state,
-                  "\n\tprops:", this.props,
-              );
-              outputError(wrappedError, "Exception caught during LiveProps.bindFocusSubscriptions");
-              this.enableError(wrappedError);
-            }
-            return false;
-          });
-    }
+      thenChainEagerly(null, [
+        this.bindLiveKuery.bind(this, bindingSlot, frame, kuery,
+            { asRepeathenable: true, scope: this.getUIContext() }),
+        (liveUpdate: LiveUpdate) => this.setState((prevState) => ({
+          livePropValues: (prevState.livePropValues || OrderedMap())
+              .set(kueryId, liveUpdate.value())
+        })),
+      ], this._errorOnBindFocusSubscriptions.bind(this, bindingSlot, kuery));
+    });
+  }
+
+  _errorOnBindFocusSubscriptions (bindingSlot, kuery, error) {
+    const wrappedError = wrapError(error, new Error(`subscription('${bindingSlot}')`),
+        "\n\tuiContext:", ...dumpObject(this.state.uiContext),
+        "\n\tfocus:", ...dumpObject(this.tryFocus()),
+        "\n\tkuery:", ...dumpObject(kuery),
+        "\n\tstate:", ...dumpObject(this.state),
+        "\n\tprops:", ...dumpObject(this.props),
+    );
+    outputError(wrappedError, `Exception caught during LiveProps.subscription('${bindingSlot}')`);
+    this.enableError(wrappedError);
   }
 
   unbindSubscriptions () {
@@ -126,15 +126,16 @@ export default class LiveProps extends UIComponent {
     if ((value == null) || !(value instanceof Vrapper)) return value;
     const bindingSlot = `props_className_content`;
     if (value.hasInterface("Media") && !this.getBoundSubscription(bindingSlot)) {
-      this.bindNewKuerySubscription(bindingSlot,
-          value, VALEK.toMediaContentField(), {},
-          (liveUpdate: LiveUpdate) => {
-            if (this.tryFocus() !== focus) return false;
-            const className = liveUpdate.value();
-            if (className !== ((this.state || {}).className || className)) this.forceUpdate();
-            this.setState(() => ({ className }));
-            return undefined;
-          });
+      this.bindLiveKuery(bindingSlot, value, VALEK.toMediaContentField(), {
+        onUpdate: function updateClassContent (liveUpdate: LiveUpdate) {
+          if (this.tryFocus() !== focus) return false;
+          const newClassName = liveUpdate.value();
+          const currentClassName = (this.state || {}).className;
+          if (currentClassName && (newClassName !== currentClassName)) this.forceUpdate();
+          this.setState(() => ({ className: newClassName }));
+          return undefined;
+        }.bind(this),
+      });
     }
     const sheetContent = getImplicitMediaInterpretation(value, bindingSlot, {
       mimeFallback: "text/css", synchronous: undefined, transaction: this.context.engine.discourse,

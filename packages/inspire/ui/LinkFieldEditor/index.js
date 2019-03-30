@@ -8,7 +8,7 @@ import FieldEditor from "~/inspire/ui/FieldEditor";
 import VALEK, { Kuery, pointer } from "~/engine/VALEK";
 import Vrapper, { LiveUpdate } from "~/engine/Vrapper";
 
-import { dumpObject, wrapError } from "~/tools";
+import { dumpObject, thenChainEagerly, wrapError } from "~/tools";
 
 export default @Presentable(require("./presentation").default, "LinkFieldEditor")
 class LinkFieldEditor extends UIComponent {
@@ -23,54 +23,64 @@ class LinkFieldEditor extends UIComponent {
   }
 
   bindFocusSubscriptions (focus: any, props: Object) {
-    try {
-      super.bindFocusSubscriptions(focus, props);
+    super.bindFocusSubscriptions(focus, props);
 
-      this.bindNewKuerySubscription(`LinkFieldEditor_fieldName`,
-          focus, VALEK.to(props.fieldName), { scope: this.getUIContext() },
-          this.onValueUpdate);
+    thenChainEagerly(null, [
+      this.bindLiveKuery.bind(this, `LinkFieldEditor_fieldName`,
+          focus, VALEK.to(props.fieldName),
+          { asRepeathenable: true, scope: this.getUIContext() }),
+      this.onValueUpdate,
+    ], errorOnLinkFieldEditorSubscriptions.bind(this, "LinkFieldEditor_fieldName"));
 
-      // Property case:
-      if (focus.tryTypeName() === "Property") {
-        this.bindNewKuerySubscription(`LinkFieldEditor_Property_target`,
-            focus, VALEK.to(props.fieldName).nullable()
-                .if(VALEK.isOfType("Identifier"), { then: VALEK.to("reference").nullable() }),
-            { scope: this.getUIContext() },
-            this.refreshNameSubscriber);
-      }
+    thenChainEagerly(null, [
+      () => {
+        const focusTypeName = focus.tryTypeName();
+        let binding, kuery;
+        if (focusTypeName === "Property") {
+          // Property case:
+          // TODO: (thiago) Fix bug that causes the toCandidatesKuery
+          // to return OrderedMap structures
+          // const entries = this.getFocus().do(
+          //    VALEK.to(nextProps.toCandidatesKuery).nullable(),
+          //    { scope: this.getUIContext() });
+          //
+          binding = `LinkFieldEditor_Property_target`;
+          kuery = VALEK.to(props.fieldName).nullable()
+              .if(VALEK.isOfType("Identifier"), { then: VALEK.to("reference").nullable() });
+        } else if (focusTypeName === "Relation") {
+          binding = `LinkFieldEditor_Relation_target`;
+          kuery = VALEK.to(props.fieldName).nullable();
+        } else return undefined;
+        return this.bindLiveKuery(binding, focus, kuery,
+            { asRepeathenable: true, scope: this.getUIContext() });
+      },
+      this.refreshNameSubscriber,
+    ], errorOnLinkFieldEditorSubscriptions.bind(this, "LinkFieldEditor_target"));
 
-      // Relations case:
-      if (focus.tryTypeName() === "Relation") {
-        this.bindNewKuerySubscription(`LinkFieldEditor_Relation_target`,
-            focus, VALEK.to(props.fieldName).nullable(), { scope: this.getUIContext() },
-            this.refreshNameSubscriber);
-      }
-
-      // TODO: (thiago) Fix bug that causes the toCandidatesKuery to return OrderedMap structures
-      // const entries = this.getFocus().do(
-      //    VALEK.to(nextProps.toCandidatesKuery).nullable(),
-      //    { scope: this.getUIContext() });
-      //
-      // Hack: Workaround to unfiltered results leaking OrderedMap structures
-      this.bindNewKuerySubscription(`LinkFieldEditor_Candidates`,
+    thenChainEagerly(null, [
+      this.bindLiveKuery.bind(this, `LinkFieldEditor_Candidates`,
           focus, VALEK.to(props.toCandidatesKuery).nullable().filter(VALEK.isTruthy()),
-          { scope: this.getUIContext() },
-          this.onCandidatesUpdate);
-    } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .bindFocusSubscriptions(), with:`,
-          "\n\thead:       ", focus,
-          "\n\tthis:       ", this);
+          { asRepeathenable: true, scope: this.getUIContext() }),
+      this.onCandidatesUpdate,
+    ], errorOnLinkFieldEditorSubscriptions.bind(this, "LinkFieldEditor_Candidates"));
+
+    function errorOnLinkFieldEditorSubscriptions (name, error) {
+      throw wrapError(error, new Error(`${this.debugId()}\n .subscription.${name}, with:`),
+          "\n\tfocus:", ...dumpObject(focus),
+          "\n\tprops:", ...dumpObject(props),
+          "\n\tthis:", ...dumpObject(this));
     }
   }
 
   refreshNameSubscriber = (liveUpdate: LiveUpdate) => {
+    if (!liveUpdate) return;
     let target = liveUpdate.value();
     if (!(target instanceof Vrapper) || !(target.isActive() || target.isActivating())) {
       target = undefined;
     }
-    this.bindNewKuerySubscription(`LinkFieldEditor_target_name`,
-        target, VALEK.to("name").nullable(), { scope: this.getUIContext() },
-        this.refresh);
+    this.bindLiveKuery(`LinkFieldEditor_target_name`,
+        target, VALEK.to("name").nullable(),
+        { scope: this.getUIContext(), onUpdate: this.refresh, updateImmediately: false });
   }
 
   refresh = () => {

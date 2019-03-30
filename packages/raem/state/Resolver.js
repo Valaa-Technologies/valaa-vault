@@ -80,6 +80,7 @@ export default class Resolver extends LogEventGenerator {
   state: State;
 
   getState () { return this.state; }
+  getJSState () { return this.state.toJS(); }
 
   setState (state: State) {
     if (!state) invariantify(state, "state must be truthy");

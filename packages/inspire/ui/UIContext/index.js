@@ -41,30 +41,32 @@ class UIContext extends UIComponent {
     invariantify(focus instanceof Vrapper,
         "UIContext(%s).focus(%s) must be a ValOS resource", this, focus);
     invariantify(focus.hasInterface("Scope"), "UIContext.focus must implement Scope");
-    this.bindNewKuerySubscription("UIContext_DEFAULT_LENS",
-        focus, UIContext.toDefaultLens, {},
-        (update) => {
-          const lensPropertyNotFoundLens = update.value();
-          if (lensPropertyNotFoundLens) {
-            // UIContext always waits for the lensPropertyNotFoundLens
-            // context to be available before setting it for the children.
-            thenChainEagerly(
-                (lensPropertyNotFoundLens instanceof Vrapper)
-                    && lensPropertyNotFoundLens.hasInterface("Media")
-                    && lensPropertyNotFoundLens.interpretContent({ mimeFallback: "text/vsx" }),
-                (lensMediaContent) => {
-                  this.setState({ lensPropertyNotFoundLens, active: true });
-                  this.outputDiagnostic(lensMediaContent, lensPropertyNotFoundLens);
-                });
-          } else {
-            invariantify(typeof this.context.lensPropertyNotFoundLens !== "undefined",
-                "UIContext.context.lensPropertyNotFoundLens (when no DEFAULT_LENS is given)");
-            this.setState({
-              lensPropertyNotFoundLens: this.context.lensPropertyNotFoundLens, active: true,
-            });
-            this.outputDiagnostic(undefined, this.context.lensPropertyNotFoundLens);
-          }
-        });
+    this.bindLiveKuery("UIContext_DEFAULT_LENS", focus, UIContext.toDefaultLens, {
+      onUpdate: function updateUIContextDefaultLens (update) {
+        // TODO(iridian, 2019-03): Remove this almost certainly dead
+        // code after verifying its dead.
+        const lensPropertyNotFoundLens = update.value();
+        if (lensPropertyNotFoundLens) {
+          // UIContext always waits for the lensPropertyNotFoundLens
+          // context to be available before setting it for the children.
+          thenChainEagerly(
+              (lensPropertyNotFoundLens instanceof Vrapper)
+                  && lensPropertyNotFoundLens.hasInterface("Media")
+                  && lensPropertyNotFoundLens.interpretContent({ mimeFallback: "text/vsx" }),
+              (lensMediaContent) => {
+                this.setState({ lensPropertyNotFoundLens, active: true });
+                this.outputDiagnostic(lensMediaContent, lensPropertyNotFoundLens);
+              });
+        } else {
+          invariantify(typeof this.context.lensPropertyNotFoundLens !== "undefined",
+              "UIContext.context.lensPropertyNotFoundLens (when no DEFAULT_LENS is given)");
+          this.setState({
+            lensPropertyNotFoundLens: this.context.lensPropertyNotFoundLens, active: true,
+          });
+          this.outputDiagnostic(undefined, this.context.lensPropertyNotFoundLens);
+        }
+      }.bind(this),
+    });
   }
 
   outputDiagnostic (fallbackLensText: ?string, lensPropertyNotFoundLens: any) {

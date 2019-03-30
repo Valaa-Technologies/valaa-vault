@@ -51,7 +51,8 @@ export default Object.freeze({
         typeof params !== "object" ? params : tryLiteral(valker, head, params, scope),
         null));
   },
-  "§ref": function vrl (valker: Valker, head: any, scope: ?Object, [, params]: BuiltinStep): VRL {
+  "§ref": function vrl (valker: Valker, head: any, scope: ?Object,
+      [, params]: BuiltinStep): VRL {
     return valker.pack(valker.obtainReference(
         typeof params !== "object" ? params : tryLiteral(valker, head, params, scope),
         null));
@@ -107,7 +108,7 @@ export default Object.freeze({
       throw wrapError(error, "\n-\nKUERY NOTE:", commentText, "\n-\n");
     }
   },
-  "§debug": function debug (valker: Valker, head: any, scope: ? Object,
+  "§debug": function debug (valker: Valker, head: any, scope: ?Object,
       [, level, expression]: BuiltinStep) {
     const eLevel = typeof level !== "object" ? level
         : tryLiteral(valker, head, level, scope, true);
@@ -938,6 +939,7 @@ export function callOrApply (valker: Valker, head: any, scope: ?Object, step: Bu
         "\n\targs:", ...dumpObject(eArgs),
         "(via VAKONs:", ...dumpKuery(opName === "§apply" ? step[3] : step.slice(3)), ")",
         ...(kueryFunction ? ["\n\tkueryFunction VAKON:", ...dumpKuery(kueryFunction)] : []),
+        "\n\tstate:", ...dumpObject(valker.getState().toJS()),
     );
   }
 }

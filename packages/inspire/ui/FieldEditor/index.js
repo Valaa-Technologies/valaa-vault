@@ -6,7 +6,7 @@ import Presentable from "~/inspire/ui/Presentable";
 import { LiveUpdate } from "~/engine/Vrapper";
 import VALEK from "~/engine/VALEK";
 
-import { wrapError } from "~/tools/wrapError";
+import { dumpObject, thenChainEagerly, wrapError } from "~/tools";
 
 export default @Presentable(require("./presentation").default, "FieldEditor")
 class FieldEditor extends UIComponent {
@@ -16,20 +16,22 @@ class FieldEditor extends UIComponent {
   };
 
   bindFocusSubscriptions (focus: any, props: Object) {
-    try {
-      super.bindFocusSubscriptions(focus, props);
-      this.bindNewKuerySubscription(`FieldEditor_${props.fieldName}`,
-          focus, VALEK.to(props.fieldName).nullable(), { scope: this.getUIContext() },
-          this.onValueUpdate,
+    super.bindFocusSubscriptions(focus, props);
+    const fieldEditor = this;
+    return thenChainEagerly(null, [
+      this.bindLiveKuery.bind(this, `FieldEditor_${props.fieldName}`,
+          focus, VALEK.to(props.fieldName).nullable(),
+          { asRepeathenable: true, scope: this.getUIContext() }),
+      function updateFieldEditorValue (liveUpdate: LiveUpdate) {
+        fieldEditor.setState({ value: liveUpdate.value() });
+      },
+    ], function errorOnFieldEditorSubscription (error) {
+      throw wrapError(error, `During ${
+          fieldEditor.debugId()}\n .bindFocusSubscriptions.FieldEditor_${props.fieldName}, with:`,
+          "\n\tfocus:", ...dumpObject(focus),
+          "\n\tprops:", ...dumpObject(props),
+          "\n\tthis:", ...dumpObject(fieldEditor),
       );
-    } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .bindFocusSubscriptions(), with:`,
-          "\n\thead:       ", focus,
-          "\n\tthis:       ", this);
-    }
-  }
-
-  onValueUpdate = (liveUpdate: LiveUpdate) => {
-    this.setState({ value: liveUpdate.value() });
+    });
   }
 }

@@ -528,10 +528,12 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
             vProperty = focus.get(VALEK.property(propertyName));
           }
           if (vProperty) {
-            component.bindNewKuerySubscription(
-                `props_${specificLensPropertySlotName}_${currentSlotName}`,
-                vProperty, "value", { scope: component.getUIContext(), noImmediateRun: true },
-                () => component.forceUpdate());
+            component.bindLiveKuery(
+                `props_${specificLensPropertySlotName}_${currentSlotName}`, vProperty, "value", {
+                  scope: component.getUIContext(),
+                  onUpdate: function updateLensPropertyComponent () { component.forceUpdate(); },
+                  updateImmediately: false,
+                });
             const propertyValue = vProperty.extractValue();
             if (propertyValue !== undefined) return propertyValue;
           }
@@ -728,7 +730,12 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
           };
           if (lensAuthorityURI) initialState.partitionAuthorityURI = lensAuthorityURI;
           else initialState.owner = owner;
-          transaction = engine.obtainTransientGroupingTransaction("frame-construction");
+          transaction = engine.getActiveGlobalOrNewLocalEventGroupTransaction();
+          /*
+          transaction = engine.obtainGroupTransaction("receive-events", {
+            finalizer: Promise.resolve(),
+          });
+          */
           // TODO(iridian, 2019-01): Determine whether getPremiereStory
           // is the desired semantics here. It waits until the
           // resource creation narration has completed (ie. engine

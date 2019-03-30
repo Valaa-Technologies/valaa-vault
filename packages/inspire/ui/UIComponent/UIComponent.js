@@ -35,7 +35,7 @@ import {
 } from "./_styleOps";
 import {
   _finalizeUnbindSubscriptions, _bindSubscription, _getBoundSubscription, _unbindSubscription,
-  _bindNewKuerySubscription
+  _bindLiveKuery
 } from "./_subscriberOps";
 
 export function isUIComponentElement (element: any) {
@@ -461,11 +461,6 @@ class UIComponent extends React.Component {
    * @param {Subscription} subscriber
    * @returns {Subscription}
    */
-  bindSubscription (bindingSlot: string, subscription: Subscription, onUpdate: Function,
-      immediateUpdateState: ?Object): Subscription {
-    return _bindSubscription(this, bindingSlot, subscription, onUpdate, immediateUpdateState);
-  }
-
   getBoundSubscription (bindingSlot: string): Subscription {
     return _getBoundSubscription(this, bindingSlot);
   }
@@ -478,14 +473,15 @@ class UIComponent extends React.Component {
    * Create a new kuery subscription and bind it to the given
    * bindingSlot of this component. \see bindSubscription.
    */
-  bindNewKuerySubscription (bindingSlot: string, head: any, kuery: any, options: {
-    noImmediateRun?: boolean,
+  bindLiveKuery (bindingSlot: string, head: any, kuery: any, options: {
+    asRepeathenable: boolean, onUpdate: (liveUpdate: LiveUpdate) => ?boolean,
+    updateImmediately?: boolean,
     // ...rest are VALKOptions that are forwarded to the kuery runner.
-  }, onUpdate: (liveUpdate: LiveUpdate) => void) {
+  }) {
     try {
-      return _bindNewKuerySubscription(this, bindingSlot, head, kuery, options, onUpdate);
+      return _bindLiveKuery(this, bindingSlot, head, kuery, options);
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .bindNewKuerySubscription(${
+      throw wrapError(error, `During ${this.debugId()}\n .bindLiveKuery(${
               bindingSlot}), with:`,
           "\n\thead:", ...dumpObject(head),
           "\n\tkuery:", ...dumpKuery(kuery),

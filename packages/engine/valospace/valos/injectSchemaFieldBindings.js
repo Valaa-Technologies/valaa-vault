@@ -7,6 +7,8 @@ import { addNamespaceField } from "~/engine/valospace/namespace";
 import { createHostFunctionDescriptor, createHostSymbolDescriptor }
     from "~/engine/valospace/hostPropertyDescriptors";
 
+import { ValoscriptType } from "~/script";
+
 /**
  * Iterates over all ValOS host types and for each, iterates over all
  * the fields of that type found in the given schema and inserts the
@@ -24,9 +26,10 @@ export default function injectSchemaFieldBindings (valos: Object,
   addNamespaceField(valos, "valos", "name", valos.Discoverable.nameAlias);
   addNamespaceField(valos, "valos", "prototype", valos.Discoverable.prototypeAlias);
   function processType (hostTypeDescriptor: any) {
-    if (!hostTypeDescriptor || (typeof hostTypeDescriptor !== "object")
-        || !hostTypeDescriptor.hasOwnProperty("name")
-        || alreadyProcessed.has(hostTypeDescriptor)) return;
+    if ((hostTypeDescriptor == null) || !ValoscriptType.isPrototypeOf(hostTypeDescriptor)
+        || alreadyProcessed.has(hostTypeDescriptor)) {
+      return;
+    }
     const typeIntro = schema.getType(hostTypeDescriptor.name);
     if (!typeIntro) {
       throw new Error(`No type introspection found for '${hostTypeDescriptor.name}' in schema`);

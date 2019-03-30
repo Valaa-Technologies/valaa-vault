@@ -50,51 +50,8 @@ export default Object.freeze({
       deletePropertyOp: any) {
     return _deleteIdentifierOrProperty(valker, head, scope, deletePropertyOp, true);
   },
-  "§invoke": function _invoke (valker: Valker, head: any, scope: ?Object,
-      invokeStep: BuiltinStep) {
-    const eArgs = invokeStep.length <= 2 ? [] : new Array(invokeStep.length - 2);
-    for (let index = 0; index + 2 < invokeStep.length; ++index) {
-      const arg = invokeStep[index + 2];
-      eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
-    }
-    const eCallee = _getIdentifierOrPropertyValue(
-        valker, head, scope, invokeStep[1], undefined, true);
-    if (eCallee === undefined) {
-      throw new Error(`Could not find callee '${invokeStep[1]}' from head`);
-    }
-    return callOrApply(valker, head, scope, invokeStep, "§invoke", eCallee, head, eArgs);
-  },
-  "§new": function _new (valker: Valker, head: any, scope: ?Object,
-      newOp: any) {
-    // FIXME(iridian): The implementation of this function is tightly coupled with scriptAPI.js,
-    // is thus an extension and should be located with VALEK.
-    let Type;
-    let eArgs;
-    try {
-      const eType = valker.advance(head, newOp[1], scope);
-      eArgs = new Array(newOp.length - 2);
-      for (let index = 0; index + 2 !== newOp.length; ++index) {
-        const arg = newOp[index + 2];
-        eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
-      }
-      Type = valker.tryUnpack(eType, true);
-      if (typeof Type === "function") return valker.pack(new Type(...eArgs));
-      if ((typeof Type === "object") && BuiltinTypePrototype.isPrototypeOf(Type)) {
-        return valker.pack(Type[".new"](valker, scope, ...eArgs));
-      }
-      if (isHostRef(eType)) {
-        const PrototypeType = scope.valos[Type.getTypeName({ transaction: valker })];
-        return valker.pack(PrototypeType[".instantiate"](valker, scope, Type, ...eArgs));
-      }
-      throw new Error(`'new': cannot create object of type '${typeof Type
-          }', expected either a function for native object construction, a ValOS type for${
-          ""} ValOS object creation or a ValOS Resource for instantiation`);
-    } catch (error) {
-      throw valker.wrapErrorEvent(error, `builtin.§new`,
-          "\n\tType:", ...dumpObject(Type),
-          "\n\targs:", ...dumpObject(eArgs));
-    }
-  },
+  "§invoke": _invoke,
+  "§new": _new,
   "§typeof": function _typeof (valker: Valker, head: any, scope: ?Object,
       typeofStep: BuiltinStep) {
     const object = typeofStep[1];
@@ -124,11 +81,6 @@ export default Object.freeze({
     return stepHead;
   },
 });
-
-// TODO(iridian): clarify the relationship between raem/VALK/hostReference.HostRef and
-// ValOSPrimitiveTag. ValOSPrimitiveTag might be an alias for it.
-export const ValOSPrimitiveTag = Symbol("ValOS Primitive");
-export const BuiltinTypePrototype = { [ValOSPrimitiveTag]: true };
 
 const _propertyValueMethodStep = ["§method", "propertyValue"];
 
@@ -322,5 +274,75 @@ function _deleteIdentifierOrProperty (valker: Valker, head: any, scope: ?Object,
         "\n\tpropertyName:", ...dumpObject(ePropertyName),
         "(via kuery:", ...dumpKuery(propertyName), ")",
     );
+  }
+}
+
+// TODO(iridian): clarify the relationship between raem/VALK/hostReference.HostRef and
+// ValoscriptPrimitiveKind. ValoscriptPrimitiveKind might be an alias for it.
+export const ValoscriptPrimitiveKind = Symbol("Valoscript.PrimitiveKind");
+export const ValoscriptPrimitive = {
+  [ValoscriptPrimitiveKind]: null, // must be overridden
+};
+
+export const ValoscriptInterface = Object.assign(Object.create(ValoscriptPrimitive), {
+  [ValoscriptPrimitiveKind]: "Interface",
+});
+
+export const ValoscriptNew = Symbol("Valoscript.constructor");
+export const ValoscriptType = Object.assign(Object.create(ValoscriptPrimitive), {
+  [ValoscriptPrimitiveKind]: "Type",
+  [ValoscriptNew] () {
+    throw new Error(`Valoscript constructor not defined for type ${
+        this.name || (this.constructor || { name: "unnamed" }).name}`);
+  },
+});
+
+export const ValoscriptPrototype = Object.assign(Object.create(ValoscriptPrimitive), {
+  [ValoscriptPrimitiveKind]: "Prototype",
+});
+
+function _invoke (valker: Valker, head: any, scope: ?Object, invokeStep: BuiltinStep) {
+  const eArgs = invokeStep.length <= 2 ? [] : new Array(invokeStep.length - 2);
+  for (let index = 0; index + 2 < invokeStep.length; ++index) {
+    const arg = invokeStep[index + 2];
+    eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
+  }
+  const eCallee = _getIdentifierOrPropertyValue(
+      valker, head, scope, invokeStep[1], undefined, true);
+  if (eCallee === undefined) {
+    throw new Error(`Could not find callee '${invokeStep[1]}' from head`);
+  }
+  return callOrApply(valker, head, scope, invokeStep, "§invoke", eCallee, head, eArgs);
+}
+
+function _new (valker: Valker, head: any, scope: ?Object, newOp: any) {
+  let Type;
+  let eArgs;
+  try {
+    const eType = valker.advance(head, newOp[1], scope);
+    eArgs = new Array(newOp.length - 2);
+    for (let index = 0; index + 2 !== newOp.length; ++index) {
+      const arg = newOp[index + 2];
+      eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
+    }
+    Type = valker.tryUnpack(eType, true);
+    if (typeof Type === "function") {
+      return valker.pack(new Type(...eArgs));
+    }
+    const constructor = (Type != null) && Type[ValoscriptNew];
+    if (constructor) {
+      return valker.pack(Type[ValoscriptNew](valker, scope, ...eArgs));
+    }
+    if (isHostRef(eType)) {
+      const PrototypeType = scope.valos[Type.getTypeName({ transaction: valker })];
+      return valker.pack(PrototypeType[".instantiate"](valker, scope, Type, ...eArgs));
+    }
+    throw new Error(`'new': cannot create object of type '${typeof Type
+        }', expected either a function for native object construction, a ValOS type for${
+        ""} ValOS object creation or a ValOS Resource for instantiation`);
+  } catch (error) {
+    throw valker.wrapErrorEvent(error, `builtin.§new`,
+        "\n\tType:", ...dumpObject(Type),
+        "\n\targs:", ...dumpObject(eArgs));
   }
 }

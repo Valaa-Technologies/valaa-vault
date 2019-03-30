@@ -1,23 +1,17 @@
 // @flow
 
-import { ValOSPrimitiveTag } from "~/script";
-import { toVAKON } from "~/script/VALSK";
-
-import { beaumpify, isSymbol } from "~/tools";
+import { isSymbol } from "~/tools";
 
 import injectSchemaFieldBindings from "./injectSchemaFieldBindings";
 import injectSchemaTypeBindings from "./injectSchemaTypeBindings";
+import injectValosheathBindings from "./injectValosheathBindings";
 
 /*
  * Creates the ValOS introspection object.
  */
 export default function extendValOS (scope: any, hostObjectDescriptors: any, schema: any) {
-  const valos = Object.assign(scope.valos || (scope.Valaa = scope.valos = {}), {
-    beautify: beaumpify,
-    toVAKON,
-    Primitive: ValOSPrimitiveTag,
-    Lens: null,
-  });
+  const valos = scope.valos || (scope.Valaa = scope.valos = {});
+  injectValosheathBindings(valos);
   injectSchemaTypeBindings(valos, scope);
   if (schema) {
     injectSchemaFieldBindings(valos, hostObjectDescriptors, schema);

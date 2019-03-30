@@ -2,7 +2,7 @@
 
 import { PartialRemovesTag } from "~/raem/state/partialSequences";
 
-import { BuiltinTypePrototype, ValOSPrimitiveTag } from "~/script";
+import { ValoscriptType, ValoscriptPrimitiveKind } from "~/script";
 
 import VALEK, { expressionFromProperty } from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
@@ -38,10 +38,10 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
       valosPrototypeOperation = objectOperation) {
     const ret = function objectDecoratorArg0Dispatcher (...rest) {
       const isValos0 = (typeof rest[0] === "object") && (rest[0] !== null)
-          && rest[0][ValOSPrimitiveTag];
+          && rest[0][ValoscriptPrimitiveKind];
       return (!isValos0 ? objectOperation
               : rest[0] instanceof Vrapper ? valosOperation
-              : BuiltinTypePrototype.isPrototypeOf(rest[0]) ? valosTypeOperation
+              : ValoscriptType.isPrototypeOf(rest[0]) ? valosTypeOperation
               : valosPrototypeOperation)
           .apply(this, rest);
     };
@@ -54,9 +54,9 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
       valosOperation: () => any) {
     const ret = function objectDecoratorArg01Dispatcher (...rest) {
       const isValos0 = (typeof rest[0] === "object") && (rest[0] !== null)
-          && rest[0][ValOSPrimitiveTag];
+          && rest[0][ValoscriptPrimitiveKind];
       const isValos1 = (typeof rest[1] === "object") && (rest[1] !== null)
-          && rest[1][ValOSPrimitiveTag];
+          && rest[1][ValoscriptPrimitiveKind];
       return (!isValos0 && !isValos1 ? objectOperation : valosOperation).apply(this, rest);
     };
     ret._valkDescription = description;

@@ -7,7 +7,9 @@ import { getHostRef } from "~/raem/VALK/hostReference";
 import type { VRL } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
 
-import { BuiltinTypePrototype, createNativeIdentifier, ValOSPrimitiveTag } from "~/script";
+import {
+  createNativeIdentifier, ValoscriptNew, ValoscriptType, ValoscriptPrototype,
+} from "~/script";
 
 import VALEK, { extractFunctionVAKON } from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
@@ -20,9 +22,9 @@ import { derivedId, dumpObject, invariantifyObject, outputCollapsedError, wrapEr
 export const defaultOwnerCoupledField = Symbol("valos.defaultOwnerCoupledField");
 
 export default function injectSchemaTypeBindings (valos: Object, scope: Object) {
-  scope.Bvob = Object.assign(Object.create(BuiltinTypePrototype), {
+  scope.Bvob = Object.assign(Object.create(ValoscriptType), {
     name: "Bvob",
-    ".new": function new_ (valker: Valker, innerScope: ?Object, initialState: ?Object) {
+    [ValoscriptNew]: function new_ (valker: Valker, innerScope: ?Object, initialState: ?Object) {
       if (!initialState || !initialState.id) {
         throw new Error("initialState.id missing when trying to create a Bvob");
       }
@@ -33,19 +35,18 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
   scope.Blob = scope.Bvob;
 
   scope.TransientFields = valos.TransientFields =
-      Object.assign(Object.create(BuiltinTypePrototype), { name: "TransientFields" });
+      Object.assign(Object.create(ValoscriptType), { name: "TransientFields" });
 
-  scope.TransientFields.prototype = Object.assign(Object.create(Object.prototype), {
+  scope.TransientFields.prototype = Object.assign(Object.create(ValoscriptPrototype), {
     constructor: scope.TransientFields,
   });
   scope.TransientFields.hostObjectPrototype = scope.TransientFields.prototype;
-  scope.TransientFields.prototype[ValOSPrimitiveTag] = true;
 
   scope.ResourceStub = valos.ResourceStub = scope.TransientFields;
 
   scope.Resource = valos.Resource = Object.assign(Object.create(scope.TransientFields), {
     name: "Resource",
-    ".new": function new_ (valker: Valker, innerScope: ?Object, initialState: ?Object) {
+    [ValoscriptNew]: function new_ (valker: Valker, innerScope: ?Object, initialState: ?Object) {
       const actualInitialState = prepareInitialState(this, innerScope, initialState, "new");
       // TODO(iridian): Replace valker._follower with some builtinStep when moving valospace to
       // @valos/script. Now this relies on valker always being a FalseProphetDiscourse/transaction.
@@ -363,8 +364,6 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
     }),
   });
   scope.Resource.hostObjectPrototype = scope.Resource.prototype;
-
-  scope.Resource.prototype[ValOSPrimitiveTag] = true;
 
   scope.Discoverable = valos.Discoverable = Object.assign(Object.create(scope.Resource), {
     name: "Discoverable",

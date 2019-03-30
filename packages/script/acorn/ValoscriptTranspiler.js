@@ -75,6 +75,7 @@ export default class ValoscriptTranspiler extends LogEventGenerator {
       if (!options.sourceInfo) return cacheEntry.kuery;
       const wrappedKuery = Object.create(cacheEntry.kuery);
       wrappedKuery[SourceInfoTag] = options.sourceInfo;
+      options.sourceInfo.cacheEntry = cacheEntry;
       return wrappedKuery;
     } catch (error) {
       let errorText = source;

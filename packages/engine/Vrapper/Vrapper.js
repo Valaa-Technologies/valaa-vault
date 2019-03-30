@@ -27,7 +27,7 @@ import { MissingPartitionConnectionsError, addConnectToPartitionToError }
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
-import { ValOSPrimitiveTag } from "~/script";
+import { ValoscriptPrimitiveKind } from "~/script";
 
 import { Discourse, Transaction, PartitionConnection } from "~/prophet";
 import { ChronicleEventResult } from "~/prophet/api/types";
@@ -1904,9 +1904,7 @@ export default class Vrapper extends Cog {
     }
     this._scopeNameSubscriptions = {};
     this._scopePropertiesSubscription = this.obtainSubscription("properties")
-        .addSubscriber(this, `Vrapper_properties`,
-            this._onPropertiesUpdate.bind(this),
-            state);
+        .addSubscriber(this, `Vrapper_properties`, this._onPropertiesUpdate.bind(this), state);
   }
 
   _onPropertiesUpdate (fieldUpdate: FieldUpdate) {
@@ -1979,7 +1977,7 @@ export default class Vrapper extends Cog {
   }
 }
 
-Vrapper.prototype[ValOSPrimitiveTag] = true;
+Vrapper.prototype[ValoscriptPrimitiveKind] = "Vrapper";
 Vrapper.prototype[UnpackedHostValue] = null;
 
 let vrapperEventHandlers;

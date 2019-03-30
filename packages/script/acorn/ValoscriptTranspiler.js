@@ -6,7 +6,7 @@ import type { Node } from "~/script/acorn/es5/grammar";
 import { Kuery, dumpObject } from "~/raem/VALK";
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 import { isBuiltinStep, getBuiltinStepName, getBuiltinStepArguments }
-    from "~/raem/VALK/builtinSteppers";
+    from "~/raem/VALK/raemSteppers";
 
 import Language from "~/script/acorn/Language";
 import { ScopeAccessesTag } from "~/script/VALSK";

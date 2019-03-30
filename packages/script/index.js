@@ -34,4 +34,4 @@ export {
                                       ValoscriptPrimitiveKind,
                                       ValoscriptPrototype,
                                       ValoscriptType,
-} from "./VALSK/builtinSteppers";
+} from "./VALSK/valoscriptSteppers";

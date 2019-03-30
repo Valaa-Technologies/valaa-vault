@@ -4,10 +4,9 @@ import { Valker } from "~/raem/VALK";
 import type { BuiltinStep } from "~/raem/VALK"; // eslint-disable-line no-duplicate-imports
 import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
 
-import { tryLiteral, /* tryFullLiteral, */ tryUnpackLiteral }
-    from "~/raem/VALK/builtinSteppers";
+import { tryLiteral, /* tryFullLiteral, */ tryUnpackLiteral } from "~/raem/VALK/raemSteppers";
 
-import valoscriptBuiltinSteppers from "~/script/VALSK/builtinSteppers";
+import valoscriptSteppers from "~/script/VALSK/valoscriptSteppers";
 
 import getImplicitCallable from "~/engine/Vrapper/getImplicitCallable";
 
@@ -16,7 +15,7 @@ import getImplicitCallable from "~/engine/Vrapper/getImplicitCallable";
 import { wrapError, dumpObject } from "~/tools";
 
 export default Object.freeze({
-  ...valoscriptBuiltinSteppers,
+  ...valoscriptSteppers,
   "§callableof": callableOf,
   "§argumentof": argumentOf,
   "§method": toMethod,

@@ -33,11 +33,11 @@ export default class FalseProphetDiscourse extends Discourse {
   _assignCommandId: (command: Command, discourse: FalseProphetDiscourse) => string;
 
   constructor ({
-    follower, prophet, verbosity, logger, packFromHost, unpackToHost, builtinSteppers,
+    follower, prophet, verbosity, logger, packFromHost, unpackToHost, steppers,
     assignCommandId,
   }: Object) {
     // goes to Valker
-    super(prophet.corpus.schema, verbosity, logger, packFromHost, unpackToHost, builtinSteppers);
+    super(prophet.corpus.schema, verbosity, logger, packFromHost, unpackToHost, steppers);
     invariantifyObject(follower, "FalseProphetDiscourse.constructor.follower");
     this.setDeserializeReference(prophet.deserializeReference);
     this.rootDiscourse = this;

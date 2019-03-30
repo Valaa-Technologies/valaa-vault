@@ -200,7 +200,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
         if (!id || (id.typeof() !== "Resource")) return value;
         return id;
       },
-      builtinSteppers: this.corpusOptions.builtinSteppers,
+      steppers: this.corpusOptions.steppers,
       assignCommandId: (command) => {
         obtainAspect(command, "command").id = `test-cid-${this.nextCommandIdIndex++}`;
       },

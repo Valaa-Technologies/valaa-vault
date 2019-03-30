@@ -3,9 +3,7 @@
 import { Iterable } from "immutable";
 import type { Passage, Story, VALKOptions } from "~/raem";
 
-import VALEK, { Kuery, dumpObject, rootScopeSelf,
-  builtinSteppers as engineBuiltinSteppers,
-} from "~/engine/VALEK";
+import VALEK, { Kuery, dumpObject, rootScopeSelf, engineSteppers } from "~/engine/VALEK";
 
 import { Command, created, duplicated, recombined, isCreatedLike } from "~/raem/events";
 
@@ -100,7 +98,7 @@ export default class Engine extends Cog {
       if (!id) return Iterable.isIterable(value) ? value.toJS() : value;
       return this.getVrapper(id, { state: valker.getState() }, Iterable.isKeyed(value) && value);
     });
-    ret.setBuiltinSteppers(engineBuiltinSteppers);
+    ret.setSteppers(engineSteppers);
     return ret;
   }
 

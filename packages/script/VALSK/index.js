@@ -28,8 +28,8 @@ export {
   ValoscriptKuery,
 };
 export {
-  default as builtinSteppers,
-} from "./builtinSteppers";
+  default as valoscriptSteppers,
+} from "./valoscriptSteppers";
 
 // TODO(iridian): literal/pointer could be streamlined into actual Kuery objects, like
 // VALEK.expandToLiteral/Identifier, which would return Kuery's that evaluate to expanded

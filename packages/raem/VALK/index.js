@@ -20,17 +20,17 @@ export { default as Valker, run } from "./Valker";
 export type { VALKOptions } from "./Valker";
 
 export {
-  default as builtinSteppers,
+  default as raemSteppers,
   isValOSFunction,
   toVAKON,
   denoteValOSBuiltin,
   denoteValOSBuiltinWithSignature,
   denoteDeprecatedValOSBuiltin,
   denoteValOSKueryFunction,
-} from "./builtinSteppers";
+} from "./raemSteppers";
 export type {
   BuiltinStep,
-} from "./builtinSteppers";
+} from "./raemSteppers";
 export {
   dumpObject,
   dumpScope,

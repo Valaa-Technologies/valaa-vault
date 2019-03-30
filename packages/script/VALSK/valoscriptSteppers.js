@@ -1,10 +1,10 @@
 // @flow
 
 import { dumpKuery, dumpObject, Valker } from "~/raem/VALK";
-import raemBuiltinSteppers, {
+import raemSteppers, {
   tryLiteral, tryFullLiteral, tryUnpackLiteral, isHostRef, resolveTypeof, callOrApply
-} from "~/raem/VALK/builtinSteppers";
-import type { BuiltinStep } from "~/raem/VALK/builtinSteppers"; // eslint-disable-line no-duplicate-imports
+} from "~/raem/VALK/raemSteppers";
+import type { BuiltinStep } from "~/raem/VALK/raemSteppers"; // eslint-disable-line no-duplicate-imports
 
 import { createNativeIdentifier, isNativeIdentifier, getNativeIdentifierValue,
   setNativeIdentifierValue,
@@ -13,7 +13,7 @@ import { createNativeIdentifier, isNativeIdentifier, getNativeIdentifierValue,
 const isSymbol = require("~/tools/isSymbol").default;
 
 export default Object.freeze({
-  ...raemBuiltinSteppers,
+  ...raemSteppers,
   // @valos/script property builtin steppers
   "§let$$": function _createLetIdentifier (valker: Valker, head: any, scope: ?Object,
       [, value]: Object) {
@@ -98,7 +98,7 @@ function _getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Objec
     if (eContainer._sequence) {
       eContainer = valker.tryUnpack(eContainer, true);
     } else if (isHostRef(eContainer)) {
-      const ret = valker.tryPack(valker._builtinSteppers["§method"](
+      const ret = valker.tryPack(valker._steppers["§method"](
           valker, eContainer, scope, _propertyValueMethodStep)(ePropertyName));
       return ret;
     }
@@ -111,7 +111,7 @@ function _getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Objec
     if ((typeof property !== "object") || (property === null)) return property;
     const ret = isNativeIdentifier(property) ? getNativeIdentifierValue(property)
         // FIXME(iridian): Leaking abstractions like there's no tomorrow. This (among many other
-        // parts of this file) belong to the @valos/engine builtinSteppers-extension, which
+        // parts of this file) belong to the @valos/engine steppers-extension, which
         // doesn't exist, which is the reason these are not there.
         : (property._typeName === "Property") && isHostRef(valker.tryPack(property))
             ? property.extractValue({ transaction: valker }, eContainer.this)
@@ -158,7 +158,7 @@ function _alterIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Obj
         : tryLiteral(valker, head, alterationVAKON, scope);
     if (isHostRef(eContainer)) {
       if (!eContainer._sequence) {
-        return valker.tryPack(valker._builtinSteppers["§method"](
+        return valker.tryPack(valker._steppers["§method"](
             valker, eContainer, scope, _alterPropertyMethodStep)(ePropertyName, eAlterationVAKON));
       }
       // TODO(iridian): Implement host sequence entry manipulation.
@@ -233,7 +233,7 @@ function _deleteIdentifierOrProperty (valker: Valker, head: any, scope: ?Object,
         // TODO(iridian): Implement host sequence entry manipulation.
         throw new Error(`Deleting host sequence entries via index not implemented yet`);
       }
-      return valker._builtinSteppers["§method"](
+      return valker._steppers["§method"](
           valker, eContainer, scope, _deletePropertyMethodStep)(ePropertyName);
     }
     if (isPropertyNotIdentifier) {

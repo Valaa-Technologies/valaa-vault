@@ -4,13 +4,13 @@ import { tryHostRef } from "~/raem/VALK/hostReference";
 import RAEMTestHarness, { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 
 import ScriptTestAPI from "~/script/test/ScriptTestAPI";
-import { Kuery, builtinSteppers } from "~/script/VALSK";
+import { Kuery, valoscriptSteppers } from "~/script/VALSK";
 import { transpileValoscriptBody } from "~/script/transpileValoscript";
 
 export function createScriptTestHarness (options: Object, ...commandBlocks: any) {
   return createRAEMTestHarness({
     name: "Script Test Harness", ContentAPI: ScriptTestAPI, TestHarness: ScriptTestHarness,
-    corpusOptions: { builtinSteppers },
+    corpusOptions: { steppers: valoscriptSteppers },
     ...options,
   }, ...commandBlocks);
 }

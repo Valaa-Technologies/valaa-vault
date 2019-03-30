@@ -154,7 +154,7 @@ export default class RAEMTestHarness extends LogEventGenerator {
           if (!id || (id.typeof() !== "Resource")) return value;
           return id;
         },
-        this.corpusOptions.builtinSteppers,
+        this.corpusOptions.steppers,
     );
   }
 

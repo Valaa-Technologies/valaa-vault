@@ -14,7 +14,7 @@ import Transient, { tryTransientTypeName, PrototypeOfImmaterialTag }
 
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
 
-import raemBuiltinSteppers, { debugWrapBuiltinSteppers } from "~/raem/VALK/builtinSteppers";
+import raemSteppers, { debugWrapBuiltinSteppers } from "~/raem/VALK/raemSteppers";
 import Kuery, { dumpKuery, dumpScope, dumpObject } from "~/raem/VALK/Kuery";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import { tryPackedField, packedSingular } from "~/raem/VALK/packedField";
@@ -49,7 +49,7 @@ export type VALKOptions = {
   pure?: boolean,
   packFromHost?: Packer,
   unpackToHost?: Unpacker,
-  builtinSteppers?: Object,
+  steppers?: Object,
   coupledField?: string,
 };
 
@@ -113,7 +113,7 @@ export function expandTildeVAKON (tildeStepName, vakon) {
  */
 export function run (head: any, kuery: any, options: Object = {}) {
   return (new Valker(options.schema, options.verbosity, options.logger, options.packFromHost,
-          options.unpackToHost, options.builtinSteppers))
+          options.unpackToHost, options.steppers))
       .run(head, kuery, options);
 }
 
@@ -125,18 +125,18 @@ export function run (head: any, kuery: any, options: Object = {}) {
  */
 export default class Valker extends Resolver {
   constructor (schema: GraphQLSchema, verbosity: number = 0, logger: Logger, packFromHost?: Packer,
-      unpackToHost?: Unpacker, builtinSteppers?: Object) {
+      unpackToHost?: Unpacker, steppers?: Object) {
     super({ schema, logger });
     this._indent = verbosity - 2;
     this.setHostValuePacker(packFromHost);
     this.setHostValueUnpacker(unpackToHost);
-    this.setBuiltinSteppers(builtinSteppers);
+    this.setSteppers(steppers);
   }
 
   static identityPacker (value: any) { return value; }
   static identityUnpacker (value: any) { return value; }
 
-  _builtinSteppers: Object = raemBuiltinSteppers;
+  _steppers: Object = raemSteppers;
 
   /**
    * Sets the callback to pack unpacked input values into packed VALK objects when there's no direct
@@ -172,8 +172,8 @@ export default class Valker extends Resolver {
     this._unpackToHost = unpackToHost || this.constructor.identityUnpacker;
   }
 
-  setBuiltinSteppers (builtinSteppers?: Object) {
-    this._builtinSteppers = builtinSteppers || raemBuiltinSteppers;
+  setSteppers (steppers?: Object) {
+    this._steppers = steppers || raemSteppers;
   }
 
   run (head: any, kuery: any, { scope, state, verbosity, pure, sourceInfo }: VALKOptions = {}) {
@@ -201,7 +201,7 @@ export default class Valker extends Resolver {
       } else {
         if (packedHead === undefined) throw new Error("Head missing for kuery");
         if (valker._verbosity >= 2) {
-          valker._builtinSteppers = debugWrapBuiltinSteppers(valker._builtinSteppers);
+          valker._steppers = debugWrapBuiltinSteppers(valker._steppers);
           valker.info(`${valker.debugId()}\n  .run(verbosity: ${verbosity}), using`,
                   !state ? "intrinsic 'state':" : "explicit 'options.state':",
               "\n      head:", ...valker._dumpObject(packedHead),
@@ -300,7 +300,7 @@ export default class Valker extends Resolver {
           if (!isSymbol(step)) {
             const stepName = step[0];
             if (typeof stepName === "string") {
-              const builtinStepper = this._builtinSteppers[stepName];
+              const builtinStepper = this._steppers[stepName];
               if (typeof builtinStepper === "function") {
                 type = builtinStepper.name;
                 return builtinStepper(this, head, scope, step, nonFinalStep);
@@ -316,12 +316,12 @@ export default class Valker extends Resolver {
             }
             if (!Array.isArray(step)) {
               type = "object";
-              return this._builtinSteppers["§{}"](this, head, scope, ["§{}", step], nonFinalStep);
+              return this._steppers["§{}"](this, head, scope, ["§{}", step], nonFinalStep);
               // type = "select";
               // return this.select(head, step, scope, nonFinalStep);
             }
             type = "array";
-            return this._builtinSteppers["§[]"](this, head, scope, step, nonFinalStep, 0);
+            return this._steppers["§[]"](this, head, scope, step, nonFinalStep, 0);
           }
         }
         // eslint-disable-line no-fallthrough

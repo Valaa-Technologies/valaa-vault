@@ -589,7 +589,7 @@ function map (valker: Valker, head: any, scope: ?Object, mapStep: any, nonFinalS
     const entryHead = !head._sequence ? valker.tryPack(entry) : entry;
     // mapScope.index = index;
     try {
-      const result = valker._builtinSteppers["§->"](valker, entryHead, mapScope, mapStep);
+      const result = valker._steppers["§->"](valker, entryHead, mapScope, mapStep);
       ret.push(valker.tryUnpack(result, true));
     } catch (error) {
       throw wrapError(error, `During ${valker.debugId()}\n .map, with:`,
@@ -615,7 +615,7 @@ function filter (valker: Valker, head: any, scope: ?Object, filterStep: any,
     const entryHead = isPackedSequence ? entry : valker.tryPack(entry);
     // filterScope.index = index;
     try {
-      const result = valker._builtinSteppers["§->"](valker, entryHead, filterScope, filterStep);
+      const result = valker._steppers["§->"](valker, entryHead, filterScope, filterStep);
       if (result) ret.push(isPackedSequence ? valker.tryUnpack(entry, true) : entry);
     } catch (error) {
       throw wrapError(error, `During ${valker.debugId()}\n .filter, with:`,
@@ -677,6 +677,14 @@ function _headOrScopeSet (valker: Valker, target: any, head: any, scope: ?Object
       const eKey = (typeof setter[0] !== "object") ? setter[0]
           : tryLiteral(valker, head, setter[0], scope);
       const setterValue = setter[setter.length - 1];
+      /*
+      if (eKey === "a" || eKey === "b") {
+        console.log("setting scope", eKey, "from kuery:", setterValue, "and scope.arguments",
+            scope && [...(scope.arguments || [])], valker.getState().toJS());
+        valker._indent = (valker._indent || 0) + 4;
+        valker._verbosity = (valker._verbosity || 0) + 4;
+      }
+      */
       const eValue = (typeof setterValue !== "object") || (setterValue === null) ? setterValue
           : tryUnpackLiteral(valker, head, setterValue, scope);
       if ((typeof eKey !== "string") && !isSymbol(eKey) && (typeof eKey !== "number")) {
@@ -810,12 +818,14 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
           transaction._sourceInfo = sourceInfo;
         }
         ret = transaction.advance(head, vakon, scope, true);
+        // if (ret === null) console.log("advance-capture null", transaction, head, vakon, scope);
       } else {
         // Direct caller is not valk context: this is a callback thunk
         // that is being called by fabric/javascript code.
         if (!head) head = capturedScope.this || {};
         transaction = capturingValker.acquireTransaction("run-capture");
         ret = transaction.run(head, vakon, { scope, sourceInfo });
+        if (ret === null) console.log("run-capture null", transaction, head, vakon, { scope, sourceInfo });
       }
     } catch (error) {
       advanceError = error;
@@ -857,6 +867,8 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
         "\n\tscope:", ...dumpObject(scope),
         "\n\tret:", ...dumpObject(ret),
         "\n\ttransaction:", ...dumpObject(transaction),
+        "\n\ttransaction.state:", ...dumpObject(transaction.getState().toJS()),
+        "\n\tcapturingValker.state:", ...dumpObject(capturingValker.getState().toJS()),
     );
     if (sourceInfo) addStackFrameToError(wrap, vakon, sourceInfo);
     throw wrap;
@@ -878,7 +890,7 @@ export function callOrApply (valker: Valker, head: any, scope: ?Object, step: Bu
       eCallee = tryLiteral(valker, head, step[1], scope);
     }
     if (typeof eCallee !== "function") {
-      eCallee = valker._builtinSteppers["§callableof"](
+      eCallee = valker._steppers["§callableof"](
           valker, eCallee, scope, ["§callableof", null, opName]);
       invariantify(typeof eCallee === "function",
           `trying to call a non-function value of type '${typeof eCallee}'`,
@@ -909,7 +921,7 @@ export function callOrApply (valker: Valker, head: any, scope: ?Object, step: Bu
     } else {
       for (let i = 0; i !== eArgs.length; ++i) {
         if (isHostRef(eArgs[i])) {
-          eArgs[i] = valker._builtinSteppers["§argumentof"](
+          eArgs[i] = valker._steppers["§argumentof"](
               valker, eArgs[i], scope, ["§argumentof", null, opName]);
         }
       }
@@ -925,6 +937,7 @@ export function callOrApply (valker: Valker, head: any, scope: ?Object, step: Bu
       });
     }
     const ret2 = eCallee._capturedScope ? ret : valker.tryPack(ret);
+    // if (ret2 === null) console.log("ret2:", ret, ret2);
     return ret2;
   } catch (error) {
     throw onError(error);

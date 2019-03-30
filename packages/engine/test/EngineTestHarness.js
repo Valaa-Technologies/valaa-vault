@@ -7,7 +7,7 @@ import { obtainAspect } from "~/prophet/tools/EventAspects";
 import EngineTestAPI from "~/engine/test/EngineTestAPI";
 import Engine from "~/engine/Engine";
 import Cog from "~/engine/Cog";
-import { builtinSteppers } from "~/engine/VALEK";
+import { engineSteppers } from "~/engine/VALEK";
 import extendValospace from "~/engine/valospace";
 
 import baseEventBlock from "~/engine/test/baseEventBlock";
@@ -17,7 +17,7 @@ import { isPromise } from "~/tools";
 export function createEngineTestHarness (options: Object, ...commandBlocks: any) {
   const ret = createProphetTestHarness({
     name: "Engine Test Harness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
-    corpusOptions: { builtinSteppers },
+    corpusOptions: { steppers: engineSteppers },
     ...options,
   }, ...(options.claimBaseBlock ? [baseEventBlock] : []), ...commandBlocks);
   if (isPromise(ret)) {
@@ -30,7 +30,7 @@ export function createEngineTestHarness (options: Object, ...commandBlocks: any)
 export function createEngineOracleHarness (options: Object, ...commandBlocks: any) {
   return createProphetOracleHarness({
     name: "Engine Oracle Harness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
-    corpusOptions: { builtinSteppers },
+    corpusOptions: { steppers: engineSteppers },
     ...options,
   }, ...(options.claimBaseBlock ? [baseEventBlock] : []), ...commandBlocks);
 }

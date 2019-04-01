@@ -57,7 +57,7 @@ export default function modifyResource (bard: Bard) {
       // ghost, inactive transient or fail
       reifyTransientSubAction = (bard.updateCouplings !== false)
           // direct immaterial ghost field modification, materialize
-          ? createMaterializeGhostAction(bard, passage.id, passage.typeName)
+          ? createMaterializeGhostAction(bard, passage.id, passage.typeName, true)
           // coupling-based transient creation for a potentially
           // inactive resource
           : createInactiveTransientAction(bard, passage.id);

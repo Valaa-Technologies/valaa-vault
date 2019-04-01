@@ -102,8 +102,7 @@ export function addConnectToPartitionToError (error, connectToPartition) {
  */
 
 export function universalizePartitionMutation (bard: Bard, id: VRL) {
-  let partitionURI;
-  let partitionsUpdate;
+  let partitionURI, targetMeta, enclosingPassage, enclosingPartitionURI;
   const ref = tryHostRef(id);
   try {
     const eventMeta = bard.event.meta;
@@ -137,29 +136,32 @@ export function universalizePartitionMutation (bard: Bard, id: VRL) {
     // structure as values. The partition info corresponding to a
     // partitionURI is shared between all actions.
 
-    let enclosingPassage = bard.passage;
-    let enclosingPartitionURI;
+    enclosingPassage = bard.passage;
     while (enclosingPassage) {
       enclosingPartitionURI = (enclosingPassage.meta || {}).partitionURI;
       if (enclosingPartitionURI) break;
       enclosingPassage = enclosingPassage.parentPassage;
     }
-    if (enclosingPartitionURI === partitionURI) return undefined;
-    if (!partitionInfo) {
-      partitionInfo = {}; // bard.createMutationPartitionInfo(partitionURI);
+    if (!enclosingPassage && eventMeta.partitionURI) {
+      // This action is materialization or inactive transient creation
+      // event. Disregard.
+      return undefined;
     }
-    let targetMeta = eventMeta;
-    if (enclosingPartitionURI) {
+    if (enclosingPartitionURI === partitionURI) return undefined;
+    if (!partitionInfo) partitionInfo = {};
+    if (!enclosingPartitionURI) {
+      targetMeta = eventMeta;
+    } else {
       const action = getActionFromPassage(bard.passage);
       // only modify non-virtual actions
       targetMeta = action && (action.meta || (action.meta = {}));
       // do fill all parents
       const enclosingPartitionInfo = enclosingPassage.meta.partitions[enclosingPartitionURI];
-      let parentMeta;
       let parentFiller = bard.passage.parentPassage;
       for (; // eslint-disable-line no-cond-assign
-          !(parentMeta = parentFiller.meta) || !parentMeta.partitionURI;
+          !parentFiller.meta || !parentFiller.meta.partitionURI;
           parentFiller = parentFiller.parentPassage) {
+        let parentMeta = parentFiller.meta;
         if (!parentMeta) {
           const parentAction = getActionFromPassage(parentFiller);
           if (!parentAction) continue;
@@ -177,6 +179,9 @@ export function universalizePartitionMutation (bard: Bard, id: VRL) {
       }
     }
     if (targetMeta) {
+      if (targetMeta.partitionURI) {
+        throw new Error("Cannot overwrite existing target.meta.partitionURI");
+      }
       targetMeta.partitionURI = partitionURI;
       (targetMeta.partitions || (targetMeta.partitions = {}))[partitionURI] = partitionInfo;
       // TODO(iridian): handle the case where a purged prophecy
@@ -189,7 +194,10 @@ export function universalizePartitionMutation (bard: Bard, id: VRL) {
         "\n\tid:", id,
         "\n\tref:", ...dumpObject(ref),
         "\n\tpartitionURI:", partitionURI,
-        "\n\tpartitionsUpdate:", ...dumpObject(partitionsUpdate));
+        "\n\tbard.passage:", ...dumpObject(bard.passage),
+        "\n\tenclosingPassage:", ...dumpObject(enclosingPassage), enclosingPartitionURI,
+        "\n\ttarget.meta:", ...dumpObject(targetMeta),
+      );
   }
 }
 

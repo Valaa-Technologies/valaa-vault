@@ -262,7 +262,7 @@ export default class Bard extends Resolver {
       } catch (error) {
         throw this.wrapErrorEvent(error, `updateStateWithPassages(#${index})`,
             "\n\tpassage:", ...dumpObject(passage),
-            "\n\tparentPassage:", ...dumpObject(passage));
+            "\n\tparentPassage:", ...dumpObject(parentPassage));
       }
     }
     return this.updateState(nextState);

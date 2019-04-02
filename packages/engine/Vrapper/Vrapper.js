@@ -694,7 +694,7 @@ export default class Vrapper extends Cog {
 
   do (kuery: any, options: VALKOptions = {}) {
     try {
-      return this.run(this.getId(), kuery, options);
+      return this.run(this[HostRef], kuery, options);
     } catch (error) {
       throw this.wrapErrorEvent(error, "do",
           "\n\tkuery:", ...dumpKuery(kuery),
@@ -705,6 +705,13 @@ export default class Vrapper extends Cog {
   run (head: any, kuery: Kuery, options: VALKOptions = {}) {
     if (this._phase === ACTIVE) {
       if (options.scope === undefined) options.scope = this.getLexicalScope();
+      const valker = options.transaction;
+      if (valker && valker._runOptions && !options.state) {
+        return valker.tryUnpack(valker.advance(
+            valker.tryPack(head),
+            (kuery instanceof Kuery) ? kuery.toVAKON() : kuery,
+            options.scope));
+      }
     } else if (!options.state && !options.transaction && this.isResource()) {
       this.requireActive();
     }
@@ -943,13 +950,12 @@ export default class Vrapper extends Cog {
       return vProperty.extractValue(options, this);
     }
     const hostReference = this.engine.getHostObjectPrototype(typeName)[propertyName];
-    if ((typeof hostReference === "object") && (hostReference !== null)
-        && hostReference.isHostField) {
-      if (hostReference.namespace) {
-        return ((this._namespaceProxies
-            || (this._namespaceProxies = {}))[hostReference.namespace]
-                || (this._namespaceProxies[hostReference.namespace]
-                    = this.engine.getRootScope().valos.$valosNamespace._createProxy(this)));
+    if ((hostReference != null) && hostReference.isHostField) {
+      const namespace = hostReference.namespace;
+      if (namespace) {
+        return ((this._namespaceProxies || (this._namespaceProxies = {}))[namespace]
+            || (this._namespaceProxies[namespace]
+                = this.engine.getRootScope().valos.$valosNamespace._createProxy(this)));
       }
       return this.get(hostReference.kuery, options);
     }
@@ -1066,6 +1072,11 @@ export default class Vrapper extends Cog {
     let valueEntry;
     let ret;
     try {
+      const subscription = options.transaction && options.transaction._runOptions
+          && options.transaction._runOptions.subscription;
+      if (subscription) {
+        subscription._subscribeToFieldByName(this, "value", true);
+      }
       valueEntry = explicitValueEntry || this._getFieldTransient("value", options);
       if (!valueEntry) return undefined;
       if (!this._extractedPropertyValues) this._extractedPropertyValues = new WeakMap();
@@ -1082,7 +1093,8 @@ export default class Vrapper extends Cog {
         valueType = state.getIn(["Expression", valueEntry.rawId()]);
       }
       if (valueType === "Identifier") {
-        ({ ret, valueEntry } = this._extractPointerValue(options, vExplicitOwner, valueEntry));
+        ({ ret, valueEntry } =
+            this._extractPointerValue(options, vExplicitOwner, valueEntry, subscription));
       } else if ((valueType === "Literal") || (valueType === "KueryExpression")) {
         const fieldName = (valueType === "Literal") ? "value" : "vakon";
         const vakon = isExpandedTransient
@@ -1101,7 +1113,7 @@ export default class Vrapper extends Cog {
         throw new Error(
             `Vrapper(${this.debugId()}).extractValue: unsupported value type '${valueType}'`);
       }
-      if (typeof valueEntry !== "undefined") {
+      if (valueEntry !== undefined) {
         this._extractedPropertyValues.set(valueEntry, ret);
       }
       return ret;
@@ -1192,6 +1204,11 @@ export default class Vrapper extends Cog {
             "\n\ttype:", activeTypeName,
             "\n\tobject:", this);
       }
+      const subscription = options.transaction && options.transaction._runOptions
+          && options.transaction._runOptions.subscription;
+      if (subscription) {
+        subscription._subscribeToFieldsByFilter(this, true, true);
+      }
       mostMaterializedTransient = this.getTransient(Object.assign(Object.create(options), {
         mostMaterialized: true, require: false, withOwnField: "content",
       }));
@@ -1273,7 +1290,7 @@ export default class Vrapper extends Cog {
       throw wrapped;
     }
     function _setInterPretationByMimeCacheEntry (interpretation: any) {
-      if (!mediaInfo.mime || !mostMaterializedTransient) return;
+      if (!(mediaInfo || {}).mime || !mostMaterializedTransient) return;
       if (!interpretationsByMime) {
         vrapper._mediaInterpretations
             .set(mostMaterializedTransient, interpretationsByMime = {});

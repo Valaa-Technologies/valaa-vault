@@ -44,7 +44,7 @@ export function getBuiltinStepName (kuery: any) {
 
 export function getBuiltinStepArguments (kuery: any) { return kuery.slice(1); }
 
-export default Object.freeze({
+export default {
   "§'": function literal (valker: Valker, head: any, scope: ?Object, [, value]: BuiltinStep) {
     return value;
   },
@@ -476,7 +476,7 @@ export default Object.freeze({
     const eRight = (typeof right !== "object") ? right : tryLiteral(valker, head, right, scope);
     return eLeft >>> eRight;
   },
-});
+};
 
 const debugWrappedBuiltinSteppers = new WeakMap();
 
@@ -577,7 +577,8 @@ function _access (valker: Valker, head: Object | Transient, scope: ?Object,
 }
 
 function _advance (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinStep,
-    nonFinalStep: ?boolean, index: number = 1, finalIndex: number = pathStep.length) {
+    nonFinalStep: ?boolean, initialIndex: number = 1, finalIndex: number = pathStep.length) {
+  let index = initialIndex;
   let stepHead = head;
   let step, pathScope, type;
   try {
@@ -656,7 +657,7 @@ function _advance (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinS
         "\n\tstep head:", ...dumpObject(stepHead),
         "\n\tstep:", type, ...dumpKuery(step),
         "\n\tpath head:", ...dumpObject(head),
-        "\n\tpath:", ...dumpKuery(pathStep),
+        "\n\tpath:", ...dumpObject([...pathStep].slice(initialIndex, finalIndex)),
         "\n\tpath length:", pathStep.length,
         "\n\tscope:", dumpScope(pathScope));
   }
@@ -886,56 +887,57 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
     let ret;
     let head = this;
     let advanceError;
+    const valkCaller = head && head.__callerValker__;
     try {
-      if (head && head.__callerValker__) {
-        transaction = head.__callerValker__.acquireTransaction("advance-capture");
-        if (sourceInfo) {
-          transaction = Object.create(transaction);
-          transaction._sourceInfo = sourceInfo;
-        }
-        ret = transaction.advance(head, vakon, scope, true);
-        // if (ret === null) console.log("advance-capture null", transaction, head, vakon, scope);
+      if (valkCaller) {
+        transaction = valkCaller.acquireTransaction("advance-capture");
+        if (sourceInfo) transaction._sourceInfo = sourceInfo;
+        const nonliveSteppers = transaction._steppers["§nonlive"];
+        if (nonliveSteppers) transaction.setSteppers(nonliveSteppers);
+          ret = transaction.advance(head, vakon, scope, true);
       } else {
         // Direct caller is not valk context: this is a callback thunk
         // that is being called by fabric/javascript code.
         if (!head) head = capturedScope.this || {};
         transaction = capturingValker.acquireTransaction("run-capture");
-        ret = transaction.run(head, vakon, { scope, sourceInfo });
-        if (ret === null) console.log("run-capture null", transaction, head, vakon, { scope, sourceInfo });
+        ret = transaction.run(head, vakon,
+            { scope, sourceInfo, steppers: transaction._steppers["§nonlive"] });
       }
     } catch (error) {
       advanceError = error;
       // ? if (outerTransaction) throw error;
     }
     let transactionError;
-    try {
-      if (!advanceError) {
-        transaction.releaseTransaction();
-        return ret;
+    if (transaction) {
+      try {
+        if (!advanceError) {
+          transaction.releaseTransaction();
+          return ret;
+        }
+        transaction.releaseTransaction({ abort: true, reason: advanceError });
+      } catch (error) {
+        transactionError = error;
       }
-      transaction.releaseTransaction({ abort: true, reason: advanceError });
-    } catch (error) {
-      transactionError = error;
     }
+    const contextText = valkCaller ? " (valk caller)"
+        : activeTransaction ? " (non-valk caller with active capture transaction)"
+        : " (non-valk non-transactional context)";
     let opName;
-    if (this && this.__callerValker__) {
-      opName = !transactionError
-          ? `call/advance (valk caller): aborting transaction`
-          : `call/releaseTransaction ${advanceError ? "({ abort: true })" : "()"} (valk caller)`;
+    if (!transaction) {
+      opName = `call/acquireTransaction ${contextText}`;
     } else if (transactionError) {
-      const prefix = `call/releaseTransaction ${advanceError ? "({ abort: true })" : "()"}`;
-      opName = activeTransaction
-          ? `${prefix} (non-valk caller in active transactional callback context)`
-          : `${prefix} (non-valk caller as outermost context)`;
-    } else if (activeTransaction) {
-      opName = `call/run (non-valk caller in active transactional callback context)`;
+      opName = `call/releaseTransaction ${advanceError ? "({ abort: true })" : "()"}${contextText}`;
     } else {
-      opName = `call/run (non-valk caller as outermost context)`;
-      const connectingMissingPartitions = tryConnectToMissingPartitionsAndThen(
+      opName = `call/${valkCaller ? "advance" : "run"}${contextText}`;
+      if (!valkCaller) {
+        const connectingMissingPartitions = tryConnectToMissingPartitionsAndThen(
           advanceError, () => caller.apply(this, arguments));
-      if (connectingMissingPartitions) return connectingMissingPartitions;
+        if (connectingMissingPartitions) return connectingMissingPartitions;
+      }
     }
-    const wrap = transaction.wrapErrorEvent(transactionError || advanceError, opName,
+    const wrap = (transaction || capturingValker).wrapErrorEvent(
+        transactionError || advanceError,
+        opName,
         ...((transactionError && advanceError)
             ? ["\n\t\tadvance abort cause:", ...dumpObject(advanceError)] : []),
         "\n\tthis:", ...dumpObject(head),
@@ -943,8 +945,10 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
         "\n\tscope:", ...dumpObject(scope),
         "\n\tret:", ...dumpObject(ret),
         "\n\ttransaction:", ...dumpObject(transaction),
-        "\n\ttransaction.state:", ...dumpObject(transaction.getState().toJS()),
-        "\n\tcapturingValker.state:", ...dumpObject(capturingValker.getState().toJS()),
+        "\n\ttransaction.state:", ...dumpObject(transaction && transaction.getState().toJS()),
+        "\n\tcapturingValker:", ...dumpObject(capturingValker),
+        "\n\tcapturingValker.state:", ...dumpObject(
+            capturingValker && capturingValker.getState().toJS()),
     );
     if (sourceInfo) addStackFrameToError(wrap, vakon, sourceInfo);
     throw wrap;

@@ -143,15 +143,17 @@ export default class Valker extends Resolver {
     this._steppers = steppers || raemSteppers;
   }
 
-  run (head: any, kuery: any, { scope, state, verbosity, pure, sourceInfo }: VALKOptions = {}) {
+  run (head: any, kuery: any,
+      { scope, state, verbosity, pure, sourceInfo, steppers, ...runOptions }: VALKOptions = {}) {
     const valker = Object.create(this);
     if (pure !== undefined) valker.pure = pure;
     if (verbosity !== undefined) {
       valker._indent = verbosity >= 2 ? 0 : -2;
       valker._verbosity = verbosity;
     }
-    if (state !== undefined) valker.setState(state);
-    if (sourceInfo !== undefined) valker._sourceInfo = sourceInfo;
+    if (state !== undefined) valker.setState(state, "valker.run");
+    if (steppers !== undefined) valker.setSteppers(steppers);
+    if (runOptions !== undefined) valker._runOptions = runOptions;
 
     const packedHead = valker.tryPack(head);
     let kueryVAKON = kuery;
@@ -160,6 +162,8 @@ export default class Valker extends Resolver {
       if (kuery instanceof Kuery) {
         kueryVAKON = kuery.toVAKON();
         valker._sourceInfo = sourceInfo || kuery[SourceInfoTag];
+      } else if (sourceInfo !== undefined) {
+        valker._sourceInfo = sourceInfo;
       }
 
       let ret;
@@ -195,7 +199,8 @@ export default class Valker extends Resolver {
           "\n\tscope:", scope,
           "\n\tstate:", ...dumpObject(valker.state && valker.state.toJS()),
           "\n\tbase-state === self-state", this.state === valker.state,
-          "\n\targ-state type:", typeof state);
+          "\n\targ-state type:", typeof state,
+          "\n\trunOptions:", ...dumpObject(runOptions));
     }
   }
 

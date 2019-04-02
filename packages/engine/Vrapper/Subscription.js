@@ -243,7 +243,7 @@ export default class Subscription extends LiveUpdate {
           "Cannot resolve the value of a filter subscription as it has no value semantics");
     }
     try {
-      return this._run(this._liveHead, this._liveKuery);
+      return this._getDiscourse().run(this._liveHead, this._liveKuery, this._valkOptions);
     } catch (error) {
       this._invalidateState();
       const connecting = tryConnectToMissingPartitionsAndThen(error, () => this._resolveValue());
@@ -315,6 +315,33 @@ export default class Subscription extends LiveUpdate {
 
   _activateLiveKueryHooks (triggerBroadcast: ?boolean) {
     const options: any = this._valkOptions;
+    let scope;
+    try {
+      scope = this._valkOptions.scope ? Object.create(this._valkOptions.scope) : {};
+      this._value = this._getDiscourse().run(this._liveHead, this._liveKuery,
+          { ...options, scope, steppers: liveKuerySteppers, subscription: this });
+      if (triggerBroadcast) {
+        this._triggerOnUpdate();
+      }
+    } catch (error) {
+      this._inactivateHooks();
+      if (tryConnectToMissingPartitionsAndThen(error, () => {
+        this._invalidateState();
+        this._activateHooks(triggerBroadcast);
+      })) return;
+      throw wrapError(error, `During ${this.debugId()}\n ._activateLiveKueryHooks(), with:`,
+          "\n\thead:", ...dumpObject(this._liveHead),
+          "\n\tkuery:", ...dumpKuery(this._liveKuery),
+          "\n\tscope:", ...dumpObject(scope),
+          "\n\toptions.state:", ...dumpObject(options.state && options.state.toJS()),
+      );
+    } finally {
+      if (options.transaction) options.transaction = null;
+    }
+  }
+/*
+  _activateLiveKueryHooksOld (triggerBroadcast: ?boolean) {
+    const options: any = this._valkOptions;
     const verbosity = options.verbosity;
     let scope;
     try {
@@ -357,134 +384,5 @@ export default class Subscription extends LiveUpdate {
       }
     }
   }
-
-  _buildLiveKuery (rawHead: any, kuery: any, scope: any, evaluateKuery: ?boolean) {
-    // Processing a Kuery for live updates involves walking the kuery tree for all field steps
-    // which have a Vrapper as a head and subscribing to those. Effectively this means that only
-    // non-final path steps need to be evaluated.
-    const head = (rawHead instanceof VRL)
-        ? this._emitter.engine.getVrapper(rawHead) : rawHead;
-    let kueryVAKON = kuery instanceof Kuery ? kuery.toVAKON() : kuery;
-    let ret: any;
-    if (this._valkOptions.verbosity) {
-      console.log(" ".repeat(this._valkOptions.verbosity),
-          `Subscription(${this.debugId()}) ${
-              evaluateKuery ? "evaluating" : "processing"} step with:`,
-          "\n", " ".repeat(this._valkOptions.verbosity), "head:", ...dumpObject(head),
-          "\n", " ".repeat(this._valkOptions.verbosity), "kuery:", ...dumpKuery(kuery)
-      );
-      this._valkOptions.verbosity += 2;
-    }
-    try {
-      switch (typeof kueryVAKON) {
-        case "boolean": return (ret = head);
-        case "function": break;  // Builtin function call just uses default .run below.
-        case "string":
-        case "symbol":
-        case "number":
-          if (typeof head !== "object") {
-            invariantifyObject(head,
-                "Subscription._buildLiveKuery.head (with string or number kuery)");
-          }
-          if (!(head instanceof Vrapper)) {
-            return (ret = ((evaluateKuery === true) && head[kueryVAKON]));
-          }
-          this._subscribeToFieldByName(head, kueryVAKON, evaluateKuery);
-          break;
-        case "object": {
-          if (kueryVAKON === null) return (ret = head);
-          if (!Array.isArray(kueryVAKON)) {
-            // Select.
-            if (Object.getPrototypeOf(kueryVAKON) !== Object.prototype) {
-              throw new Error(
-                  "Invalid kuery VAKON object: only plain data objects and arrays are valid");
-            }
-            ret = (evaluateKuery === true) ? {} : undefined;
-            for (const key of Object.keys(kueryVAKON)) {
-              let value = kueryVAKON[key];
-              if ((typeof value === "object") && (value !== null)) {
-                value = this._buildLiveKuery(head, kueryVAKON[key], scope, evaluateKuery);
-              }
-              if (evaluateKuery === true) ret[key] = value;
-            }
-            return ret;
-          }
-          let opName = kueryVAKON[0];
-          if (opName === "§->") {
-            // Path op.
-            const pathScope = Object.create(scope);
-            let stepIndex = 1;
-            let stepHead = head;
-            while (stepIndex < kueryVAKON.length) {
-              const step = kueryVAKON[stepIndex];
-              stepIndex += 1;
-              if (step === false && (stepHead == null)) break;
-              stepHead = this._buildLiveKuery(stepHead, step, pathScope,
-                  (stepIndex < kueryVAKON.length) || evaluateKuery);
-            }
-            return (ret = stepHead);
-          }
-          if ((typeof opName !== "string") || (opName[0] !== "§")) {
-            // Array op.
-            kueryVAKON = [(opName = "§[]"), ...kueryVAKON];
-          }
-          // Builtin.
-          let handler = liveKuerySteppers[opName];
-          if (handler) {
-            ret = handler(this, head, scope, kueryVAKON, evaluateKuery);
-            if (ret === performFullDefaultProcess) handler = undefined;
-            else if (ret !== performDefaultGet) return ret;
-          }
-          if (handler === undefined) {
-            for (let i = 1; i < kueryVAKON.length; ++i) {
-              const argument = kueryVAKON[i];
-              // Skip non-object, non-path builtin args as they are treated as literals.
-              if ((typeof argument === "object") && (argument !== null)) {
-                this._buildLiveKuery(head, argument, scope, evaluateKuery);
-              }
-            }
-          }
-          break;
-        }
-        default:
-      }
-      return (ret = (evaluateKuery !== true)
-          ? undefined
-      // TODO(iridian): The non-pure kueries should be replaced with pure kueries?
-          : this._run(head, kueryVAKON, scope));
-    } catch (error) {
-      throw this._addStackFrameToError(
-          wrapError(error, `During ${this.debugId()}\n .processKuery(), with:`,
-              "\n\thead:", head,
-              "\n\tkuery VAKON:", ...dumpKuery(kueryVAKON),
-              "\n\tscope:", ...dumpObject(scope)),
-          kueryVAKON);
-    } finally {
-      if (this._valkOptions.verbosity) {
-        console.log(" ".repeat(this._valkOptions.verbosity),
-            `Subscription(${this.debugId()}) result:`, ...dumpObject(ret));
-        this._valkOptions.verbosity -= 2;
-      }
-    }
-  }
-
-  _processLiteral (head: any, vakon: any, scope: any, evaluateKuery: ?boolean) {
-    if (typeof vakon !== "object") return vakon;
-    if (vakon === null) return head;
-    if (vakon[0] === "§'") return vakon[1];
-    return this._buildLiveKuery(head, vakon, scope, evaluateKuery);
-  }
-
-  _run (head: any, kuery: any, scope?: any) {
-    let options = this._valkOptions;
-    if (scope !== undefined) {
-      options = Object.create(options);
-      options.scope = scope;
-    }
-    return this._getDiscourse().run(head, kuery, options);
-  }
-
-  _addStackFrameToError (error: Error, sourceVAKON: any) {
-    return addStackFrameToError(error, sourceVAKON, this._valkOptions.sourceInfo);
-  }
+  */
 }

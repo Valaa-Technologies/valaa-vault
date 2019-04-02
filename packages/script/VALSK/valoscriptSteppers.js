@@ -12,7 +12,7 @@ import { createNativeIdentifier, isNativeIdentifier, getNativeIdentifierValue,
 
 const isSymbol = require("~/tools/isSymbol").default;
 
-export default Object.freeze({
+export default Object.assign(Object.create(raemSteppers), {
   ...raemSteppers,
   // @valos/script property builtin steppers
   "§let$$": function _createLetIdentifier (valker: Valker, head: any, scope: ?Object,
@@ -27,28 +27,32 @@ export default Object.freeze({
   },
   "§$$": function _identifierValue (valker: Valker, head: any, scope: ?Object,
       getIdentifierOp: any): any {
-    return _getIdentifierOrPropertyValue(
+    return _getIdentifierOrPropertyValue(this,
         valker, head, scope, getIdentifierOp[1], getIdentifierOp[2], false);
   },
   "§..": function _propertyValue (valker: Valker, head: any, scope: ?Object, getPropertyOp: any) {
-    return _getIdentifierOrPropertyValue(
+    return _getIdentifierOrPropertyValue(this,
         valker, head, scope, getPropertyOp[1], getPropertyOp[2], true);
   },
   "§$$<-": function _alterIdentifier (valker: Valker, head: any, scope: ?Object,
       alterIdentifierOp: any) {
-    return _alterIdentifierOrPropertyValue(valker, head, scope, alterIdentifierOp, false);
+    return _alterIdentifierOrPropertyValue(this,
+        valker, head, scope, alterIdentifierOp, false);
   },
   "§..<-": function _alterProperty (valker: Valker, head: any, scope: ?Object,
       alterPropertyOp: any) {
-    return _alterIdentifierOrPropertyValue(valker, head, scope, alterPropertyOp, true);
+    return _alterIdentifierOrPropertyValue(this,
+        valker, head, scope, alterPropertyOp, true);
   },
   "§delete$$": function _deleteIdentifier (valker: Valker, head: any, scope: ?Object,
       deletePropertyOp: any) {
-    return _deleteIdentifierOrProperty(valker, head, scope, deletePropertyOp, false);
+    return _deleteIdentifierOrProperty(this,
+        valker, head, scope, deletePropertyOp, false);
   },
   "§delete..": function _deleteProperty (valker: Valker, head: any, scope: ?Object,
       deletePropertyOp: any) {
-    return _deleteIdentifierOrProperty(valker, head, scope, deletePropertyOp, true);
+    return _deleteIdentifierOrProperty(this,
+        valker, head, scope, deletePropertyOp, true);
   },
   "§invoke": _invoke,
   "§new": _new,
@@ -58,7 +62,8 @@ export default Object.freeze({
     const packedObject = typeof object !== "object" ? object
     // typeof must not fail on a missing global identifier, even if plain identifier access fails.
         : (Array.isArray(object) && (object[0] === "§$$"))
-            ? _getIdentifierOrPropertyValue(valker, head, scope, object[1], object[2], false, true)
+            ? _getIdentifierOrPropertyValue(this,
+                valker, head, scope, object[1], object[2], false, true)
         : tryLiteral(valker, head, object, scope);
     return resolveTypeof(valker, head, scope, typeofStep, packedObject);
   },
@@ -84,7 +89,7 @@ export default Object.freeze({
 
 const _propertyValueMethodStep = ["§method", "propertyValue"];
 
-function _getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Object,
+function _getIdentifierOrPropertyValue (steppers: Object, valker: Valker, head: any, scope: ?Object,
       propertyName: string, container: any, isGetProperty: ?boolean,
       allowUndefinedIdentifier: ?boolean): any {
   let eContainer: Object;
@@ -98,7 +103,7 @@ function _getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Objec
     if (eContainer._sequence) {
       eContainer = valker.tryUnpack(eContainer, true);
     } else if (isHostRef(eContainer)) {
-      const ret = valker.tryPack(valker._steppers["§method"](
+      const ret = valker.tryPack(steppers["§method"](
           valker, eContainer, scope, _propertyValueMethodStep)(ePropertyName));
       return ret;
     }
@@ -143,8 +148,8 @@ function _getIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Objec
 
 const _alterPropertyMethodStep = ["§method", "alterProperty"];
 
-function _alterIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Object,
-      [, propertyName, alterationVAKON, container]: any, isAlterProperty: ?boolean) {
+function _alterIdentifierOrPropertyValue (steppers: Object, valker: Valker, head: any,
+    scope: ?Object, [, propertyName, alterationVAKON, container]: any, isAlterProperty: ?boolean) {
   let eContainer: Object;
   let ePropertyName;
   let eAlterationVAKON;
@@ -158,7 +163,7 @@ function _alterIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Obj
         : tryLiteral(valker, head, alterationVAKON, scope);
     if (isHostRef(eContainer)) {
       if (!eContainer._sequence) {
-        return valker.tryPack(valker._steppers["§method"](
+        return valker.tryPack(steppers["§method"](
             valker, eContainer, scope, _alterPropertyMethodStep)(ePropertyName, eAlterationVAKON));
       }
       // TODO(iridian): Implement host sequence entry manipulation.
@@ -218,7 +223,7 @@ function _alterIdentifierOrPropertyValue (valker: Valker, head: any, scope: ?Obj
 
 const _deletePropertyMethodStep = ["§method", "deleteProperty"];
 
-function _deleteIdentifierOrProperty (valker: Valker, head: any, scope: ?Object,
+function _deleteIdentifierOrProperty (steppers: Object, valker: Valker, head: any, scope: ?Object,
       [, propertyName, container]: any, isPropertyNotIdentifier: ?boolean) {
   let eContainer: Object;
   let ePropertyName;
@@ -233,7 +238,7 @@ function _deleteIdentifierOrProperty (valker: Valker, head: any, scope: ?Object,
         // TODO(iridian): Implement host sequence entry manipulation.
         throw new Error(`Deleting host sequence entries via index not implemented yet`);
       }
-      return valker._steppers["§method"](
+      return steppers["§method"](
           valker, eContainer, scope, _deletePropertyMethodStep)(ePropertyName);
     }
     if (isPropertyNotIdentifier) {

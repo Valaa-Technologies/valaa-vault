@@ -56,7 +56,7 @@ export function packedSingular (value, typeName, fieldInfo) {
   return {
     [HostRef]: tryHostRef(value)
         || ((typeof value === "string") && new VRL(value))
-        || null,
+        || undefined,
     [PackedHostValue]: value,
     _singular: value,
     _type: typeName,
@@ -79,7 +79,7 @@ function _dumpifyPackedSingular (options?: any) {
 export function packedSequence (denormalizedSequence, entryTypeName, fieldInfo) {
   invariantifyString(entryTypeName, "packedSeq.entryTypeName");
   return {
-    [HostRef]: null,
+    [HostRef]: undefined,
     [PackedHostValue]: denormalizedSequence,
     _sequence: denormalizedSequence,
     _type: entryTypeName,

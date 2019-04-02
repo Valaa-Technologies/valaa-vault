@@ -16,17 +16,11 @@ export function addNamespaceField (target: Object, namespaceName: string, fieldN
   namespace._addProxyPrototypeFieldShortcut(fieldName, fieldSymbol);
 }
 
+export const NamespaceInterfaceTag = Symbol("NamespaceInterfaceTag");
+
 export function createHostNamespace (name: string) {
-  return {
+  const namespace = {
     name,
-
-    _namespaceFields: {
-      tryTypeName () { return this[UnpackedHostValue].tryTypeName(); },
-      getVALKMethod (methodName: string, valker: Valker, transient: Transient, scope: Object) {
-        return this[UnpackedHostValue].getVALKMethod(methodName, valker, transient, scope, this);
-      },
-    },
-
     _createProxy (vrapper: Vrapper) {
       const ret = Object.create(this._namespaceFields);
       ret[HostRef] = vrapper.getId();
@@ -53,4 +47,12 @@ export function createHostNamespace (name: string) {
       } });
     },
   };
+  namespace._namespaceFields = {
+    [NamespaceInterfaceTag]: namespace,
+    tryTypeName () { return this[UnpackedHostValue].tryTypeName(); },
+    getVALKMethod (methodName: string, valker: Valker, transient: Transient, scope: Object) {
+      return this[UnpackedHostValue].getVALKMethod(methodName, valker, transient, scope, this);
+    },
+  };
+  return namespace;
 }

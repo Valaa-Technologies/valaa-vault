@@ -1931,7 +1931,18 @@ export default class Vrapper extends Cog {
       // Specifically: it is the call to actualAdds() which does this.
       // TODO(iridian, 2019-03): Property renames are going to be
       // disabled very shortly. This whole sequence can be dropped.
-      this._scopeNameSubscriptions[vActualAdd.getRawId()] = vActualAdd
+      const propertyRawId = vActualAdd.getRawId();
+      const structuralName = (propertyRawId.match(/\.:(.*)$/) || [])[1];
+      if (structuralName) {
+        if ((structuralName === "this") || (structuralName === "self")) {
+          this.warnEvent(`Structural property name '${
+              structuralName}' is a reserved word and is omitted from scope`);
+          return;
+        }
+        this._defineProperty(decodeURIComponent(structuralName), vActualAdd);
+        return;
+      }
+      this._scopeNameSubscriptions[propertyRawId] = vActualAdd
           .obtainSubscription("name", { state: fieldUpdate.getState() })
           .addSubscriber(this, `Vrapper_properties_name`, nameUpdate => {
             const newName = nameUpdate.value();
@@ -1964,14 +1975,7 @@ export default class Vrapper extends Cog {
                   new Error().stack);
               */
             }
-            this._lexicalScope[newName] = vActualAdd;
-            Object.defineProperty(this._nativeScope, newName, {
-              configurable: true,
-              enumerable: true,
-              get: () => vActualAdd.extractValue(undefined, this),
-              set: (value) => vActualAdd.setField("value", expressionFromProperty(value, newName),
-                  { scope: this._lexicalScope }),
-            });
+            this._defineProperty(newName, vActualAdd);
           });
     });
 
@@ -1987,6 +1991,17 @@ export default class Vrapper extends Cog {
         delete this._lexicalScope[propertyName];
         delete this._nativeScope[propertyName];
       }
+    });
+  }
+
+  _defineProperty (name: string, vProperty) {
+    this._lexicalScope[name] = vProperty;
+    Object.defineProperty(this._nativeScope, name, {
+      configurable: true,
+      enumerable: true,
+      get: () => vProperty.extractValue(undefined, this),
+      set: (value) => vProperty
+          .setField("value", expressionFromProperty(value, name), { scope: this._lexicalScope }),
     });
   }
 }

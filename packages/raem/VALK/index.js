@@ -45,3 +45,7 @@ export {
 export {
   SourceInfoTag,
 } from "./StackTrace";
+export {
+  isTildeStepName,
+  expandTildeVAKON,
+} from "./_tildeOps";

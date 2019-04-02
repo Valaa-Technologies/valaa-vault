@@ -1,13 +1,12 @@
 // @flow
 
-import { Iterable, OrderedMap } from "immutable";
-import { GraphQLSchema, GraphQLObjectType } from "graphql/type";
+import { Iterable } from "immutable";
+import { GraphQLSchema } from "graphql/type";
 
 import VRL, { isIdData } from "~/raem/VRL";
 
 import { elevateFieldReference, elevateFieldRawSequence }
     from "~/raem/state/FieldInfo";
-import { getObjectRawField } from "~/raem/state/getObjectField";
 import Resolver from "~/raem/state/Resolver";
 import Transient, { tryTransientTypeName, PrototypeOfImmaterialTag }
     from "~/raem/state/Transient";
@@ -17,12 +16,11 @@ import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/part
 import raemSteppers, { debugWrapBuiltinSteppers } from "~/raem/VALK/raemSteppers";
 import Kuery, { dumpKuery, dumpScope, dumpObject } from "~/raem/VALK/Kuery";
 import { tryHostRef } from "~/raem/VALK/hostReference";
-import { tryPackedField, packedSingular } from "~/raem/VALK/packedField";
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
 import type Logger from "~/tools/Logger";
-import { dumpify, isSymbol } from "~/tools";
+import { dumpify } from "~/tools";
 import { debugObjectNest, wrapError } from "~/tools/wrapError";
 
 export type Packer = (unpackedValue: any, valker: Valker) => any;
@@ -52,37 +50,6 @@ export type VALKOptions = {
   steppers?: Object,
   coupledField?: string,
 };
-
-// VALK Tilde expansion notation maintains asymmetric compatibility
-// with JSON pointers ( https://tools.ietf.org/html/rfc6901 ):
-// 1. valid JSON pointers are treated unchanged literals when evaluated
-// as VAKON, even if they appear as the first entry of an array. This
-// allows for JSON pointer manipulation and value passing without
-// additional escaping.
-// 2. valid tilde-notation VAKON kueries are always invalid JSON
-// pointer values. This prevents accidental misuse: the leading VAKON
-// operation almost invariably has a semantic meaning that conflicts
-// with JSON pointer semantics.
-export function isTildeStepName (stepName: ?string) {
-  return (typeof stepName === "string") && (stepName[0] === "~")
-      && (stepName[1] !== "0") && (stepName[1] !== "1");
-}
-
-export function expandTildeVAKON (tildeStepName, vakon) {
-  const solidusSplit = tildeStepName.split("/");
-  const expansion = (solidusSplit.length === 1) ? _tildeColonExpand(tildeStepName)
-      : ["§->",
-        ...solidusSplit.map(s => (!isTildeStepName(s) ? ["§..", s] : _tildeColonExpand(s)))
-      ];
-  if (vakon && (vakon.length > 1)) expansion.push(...vakon.slice(1));
-  return expansion;
-  function _tildeColonExpand (substep) {
-    return substep.split(":")
-        .map((s, index) => (!index ? `§${s.slice(1)}`
-            : isTildeStepName(s) ? [`§${s.slice(1)}`]
-            : s));
-  }
-}
 
 
 /**
@@ -282,204 +249,15 @@ export default class Valker extends Resolver {
    * @returns
    */
   advance (head: any, step: any, scope: ?Object, nonFinalStep: ?boolean) {
-    let type = typeof step;
     try {
-      switch (type) {
-        case "function":
-          // Inline call, delegate handling to it completely, including packing and unpacking.
-          return step(head, scope, this, nonFinalStep);
-        case "number": // Index lookup
-          return this.index(head, step, nonFinalStep ? scope : undefined);
-        case "boolean": // nonNull op. nullable only makes a difference in paths.
-          if (step === true && ((head === null) || (head === undefined))) {
-            throw new Error(`Valk head is '${head}' at notNull assertion`);
-          }
-          return head;
-        case "object": {
-          if (step === null) return head;
-          if (!isSymbol(step)) {
-            const stepName = step[0];
-            if (typeof stepName === "string") {
-              const builtinStepper = this._steppers[stepName];
-              if (typeof builtinStepper === "function") {
-                type = builtinStepper.name;
-                return builtinStepper(this, head, scope, step, nonFinalStep);
-              }
-              if (stepName === "§") return head;
-              if (stepName[0] === "§") throw new Error(`Unrecognized builtin step ${stepName}`);
-              if (isTildeStepName(stepName)) {
-                return this.advance(head, expandTildeVAKON(stepName, step), scope, nonFinalStep);
-              }
-            }
-            if (step instanceof Kuery) {
-              throw new Error("Kuery objects must have been expanded as VAKON before valking");
-            }
-            if (!Array.isArray(step)) {
-              type = "object";
-              return this._steppers["§{}"](this, head, scope, ["§{}", step], nonFinalStep);
-              // type = "select";
-              // return this.select(head, step, scope, nonFinalStep);
-            }
-            type = "array";
-            return this._steppers["§[]"](this, head, scope, step, nonFinalStep, 0);
-          }
-        }
-        // eslint-disable-line no-fallthrough
-        case "string": // Field lookup
-        case "symbol":
-          return this.field(head, step, nonFinalStep ? scope : undefined, undefined);
-        default:
-          throw new Error(`INTERNAL ERROR: Unrecognized step ${dumpify(step)}`);
-      }
+      return this._steppers["§->"](this, head, scope, arguments, nonFinalStep, 1, 2);
     } catch (error) {
       this.addVALKRuntimeErrorStackFrame(error, step);
       if (this._indent < 0) throw error;
-      throw wrapError(error, `During ${this.debugId()}\n .advance(${type}), with:`,
+      throw wrapError(error, `During ${this.debugId()}\n .advance(), with:`,
           "\n\thead:", ...this._dumpObject(head),
           "\n\tkuery:", ...dumpKuery(step),
           "\n\tscope:", dumpScope(scope));
-    }
-  }
-
-  field (object: Object | Transient, fieldName: string, scope: ?Object) {
-    const singularTransient = this.requireTransientIfSingular(object);
-    let objectTypeIntro;
-    if (singularTransient) {
-      objectTypeIntro = this.getObjectTypeIntro(singularTransient, object);
-    }
-    return this.fieldOrSelect(object, fieldName, scope, singularTransient, objectTypeIntro);
-  }
-
-  fieldOrSelect (object: Object | Transient, fieldName: string, scope: ?Object,
-      singularTransient: ?Transient, objectTypeIntro: ?GraphQLObjectType) {
-    let nextHead;
-    let fieldInfo;
-    if (this._indent >= 0) {
-      this.info(`{ field.'${fieldName}', head:`, ...this._dumpObject(object),
-          ", scope:", dumpScope(scope));
-      ++this._indent;
-    }
-    try {
-      // Test for improper head values
-      if (!singularTransient) {
-        // Object is a scope or a selection, not a denormalized resource.
-        // Plain lookup is enough, but we must pack the result for the new head.
-        if (!object || (typeof object !== "object") || Array.isArray(object) || object._sequence) {
-          const description = !object ? `'${object}'`
-              : Array.isArray(object) ? "array"
-              : typeof object !== "object" || !object._sequence ? "non-keyed"
-              : "indexable";
-          throw new Error(`Cannot access ${description} head for field '${fieldName}'`);
-        }
-        nextHead = this.tryPack(object[fieldName]);
-      } else {
-        const resolvedObjectId = singularTransient.get("id");
-        fieldInfo = resolvedObjectId
-            ? { name: fieldName, elevationInstanceId: resolvedObjectId }
-            : { ...object._fieldInfo, name: fieldName };
-        nextHead = tryPackedField(
-            getObjectRawField(this, singularTransient, fieldName, fieldInfo, objectTypeIntro),
-            fieldInfo);
-      }
-      return nextHead;
-    } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .field('${fieldName}'), with:`,
-          "\n\tfield head:", ...dumpObject(object),
-          "\n\tnext head:", ...dumpObject(nextHead),
-          "\n\tfieldInfo:", ...dumpObject(fieldInfo));
-    } finally {
-      if (this._indent >= 0) {
-        --this._indent;
-        this.info(`} field '${fieldName}' ->`, ...this._dumpObject(nextHead),
-            ", fieldInfo:", ...this._dumpObject(fieldInfo), "in scope:", dumpScope(scope));
-      }
-    }
-  }
-
-  index (container: Object, index: number, scope: ?Object) {
-    if (this._indent >= 0) {
-      this.info(`{ index[${index}], head:`, ...this._dumpObject(container),
-          ", scope:", dumpScope(scope));
-      this._indent++;
-    }
-    let nextHead;
-    try {
-      if (!container || (typeof container !== "object")) {
-        const description = !container ? container : "non-indexable";
-        throw new Error(`head is ${description} when trying to index it with '${index
-            }'`);
-      }
-      if (Array.isArray(container)) {
-        const entry = container[index];
-        nextHead = this.tryPack(entry);
-        // if (scope) scope.index = index;
-      } else {
-        const indexedImmutable = (Iterable.isIndexed(container) && container)
-            || (OrderedMap.isOrderedMap(container) && container.toIndexedSeq())
-            || (container._sequence && elevateFieldRawSequence(
-                this, container._sequence, container._fieldInfo, undefined,
-                    this._indent >= 0 ? this._indent : undefined)
-                    .toIndexedSeq());
-        if (indexedImmutable) {
-          const result = indexedImmutable.get(index);
-          if (!container._type || container._fieldInfo.intro.isResource) nextHead = result;
-          else nextHead = packedSingular(result, container._type, container._fieldInfo);
-        } else {
-          throw new Error(`Cannot index non-array, non-indexable container object with ${index}`);
-        }
-        // if (scope) scope.index = index;
-      }
-      return nextHead;
-    } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .index(${index}), with:",
-          "\n\tindex head:`, ...this._dumpObject(container));
-    } finally {
-      if (this._indent >= 0) {
-        --this._indent;
-        this.info(`} index ${index} ->`, ...this._dumpObject(nextHead),
-            ", scope:", dumpScope(scope));
-      }
-    }
-  }
-
-  select (head: any, selectStep: Object, scope: ?Object) {
-    if (this._indent >= 0) {
-      this.info(`selection ${dumpKuery(selectStep)[1]}, head:`, ...this._dumpObject(head),
-          ", scope:", dumpScope(scope));
-      ++this._indent;
-    }
-    const nextHead = {};
-    try {
-      const singularTransient = this.requireTransientIfSingular(head);
-      let headObjectIntro;
-      if (singularTransient) {
-        headObjectIntro = this.getObjectTypeIntro(singularTransient, head);
-      }
-      for (const key in selectStep) { // eslint-disable-line guard-for-in, no-restricted-syntax
-        const step = selectStep[key];
-        let result;
-        try {
-          result = ((typeof step === "string") || isSymbol(step))
-              ? this.fieldOrSelect(head, step, undefined, singularTransient, headObjectIntro)
-              : this.advance(singularTransient || head, step, scope);
-          nextHead[key] = this.tryUnpack(result);
-        } catch (error) {
-          throw wrapError(error, `During ${this.debugId()}\n .select for field '${key}', with:`,
-              "\n\tfield step:", ...dumpKuery(step),
-              "\n\tresult:", ...dumpObject(result));
-        }
-      }
-      return nextHead;
-    } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .select, with:`,
-          "select head:", ...dumpObject(head),
-          "selection:", ...dumpKuery(selectStep),
-          "scope:", dumpScope(scope));
-    } finally {
-      if (this._indent >= 0) {
-        --this._indent;
-        this.info("} select ->", ...this._dumpObject(nextHead), ", scope:", dumpScope(scope));
-      }
     }
   }
 
@@ -529,7 +307,7 @@ export default class Valker extends Resolver {
     }
     try {
       let ret;
-      const singularTransient = this._trySingularTransientFromObject(value, requireIfRef);
+      const singularTransient = this.trySingularTransient(value, requireIfRef);
       if (singularTransient !== undefined) {
         if (this._verbosity >= 3) {
           this.info("    unpacking singular:", ...this._dumpObject(value),
@@ -578,35 +356,27 @@ export default class Valker extends Resolver {
     }
   }
 
-  requireTransientIfSingular (value: any) {
-    if ((typeof value !== "object") || (value === null)) return undefined;
-    return this._trySingularTransientFromObject(value, true);
-  }
-
-  trySingularTransient (value: any) {
-    if ((typeof value !== "object") || (value === null)) return undefined;
-    return this._trySingularTransientFromObject(value, false);
-  }
-
-  _trySingularTransientFromObject (object: Object, requireIfRef?: boolean) {
+  trySingularTransient (object: any, requireIfRef?: boolean) {
     try {
       let ret;
       let elevatedId;
-      if (Iterable.isKeyed(object)) {
-        ret = object;
-      } else if (object instanceof VRL) {
-        ret = this.tryGoToTransient(object, "TransientFields", requireIfRef, false);
-      } else if (object._singular !== undefined) {
-        if (!isIdData(object._singular)) {
-          ret = object._singular;
-        } else {
-          elevatedId = elevateFieldReference(this, object._singular, object._fieldInfo,
-              undefined, object._type, this._indent < 2 ? undefined : this._indent);
-          ret = this.tryGoToTransient(elevatedId, object._type, requireIfRef, false);
+      if (typeof object === "object") {
+        if (Iterable.isKeyed(object)) {
+          ret = object;
+        } else if (object instanceof VRL) {
+          ret = this.tryGoToTransient(object, "TransientFields", requireIfRef, false);
+        } else if (object._singular !== undefined) {
+          if (!isIdData(object._singular)) {
+            ret = object._singular;
+          } else {
+            elevatedId = elevateFieldReference(this, object._singular, object._fieldInfo,
+                undefined, object._type, this._indent < 2 ? undefined : this._indent);
+            ret = this.tryGoToTransient(elevatedId, object._type, requireIfRef, false);
+          }
         }
       }
       if (this._verbosity >= 3) {
-        this.info(requireIfRef ? "  requireTransientIfSingular:" : "  trySingularTransient:",
+        this.info(`  trySingularTransient(${requireIfRef ? "require-if-ref" : ""}):`,
             "\n    value:", ...this._dumpObject(object),
             ...(elevatedId ? ["\n    elevatedId:", ...this._dumpObject(elevatedId)] : []),
             "\n    ret:", ...this._dumpObject(ret),
@@ -616,7 +386,7 @@ export default class Valker extends Resolver {
       return ret;
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          requireIfRef ? "requireTransientIfSingular" : "trySingularTransient",
+          `trySingularTransient(${requireIfRef ? "require-if-ref" : ""}):`,
           "\n\tobject:", ...this._dumpObject(object),
           "\n\tstate:", ...this._dumpObject(this.getJSState()),
       );

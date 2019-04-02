@@ -1,11 +1,10 @@
 // @flow
 
-import VALK, { run as unwrappedRun } from "~/raem/VALK";
+import VALK, { run as unwrappedRun, expandTildeVAKON } from "~/raem/VALK";
 import { created, fieldsSet } from "~/raem/events";
 import { vRef } from "~/raem/VRL";
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 import RAEMTestAPI from "~/raem/test/RAEMTestAPI";
-import { expandTildeVAKON } from "~/raem/VALK/Valker";
 
 function run (head, kuery, options = {}, ...rest) {
   options.schema = RAEMTestAPI.schema;

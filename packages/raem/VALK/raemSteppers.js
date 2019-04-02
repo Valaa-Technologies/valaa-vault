@@ -1,20 +1,23 @@
 // @flow
 
-import { Iterable } from "immutable";
+import { Iterable, OrderedMap } from "immutable";
 
 import VRL from "~/raem/VRL";
 
 import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
-import { PrototypeOfImmaterialTag } from "~/raem/state/Transient";
+import Transient, { PrototypeOfImmaterialTag } from "~/raem/state/Transient";
+import { getObjectRawField } from "~/raem/state/getObjectField";
 
 import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
 
 import Valker from "~/raem/VALK/Valker";
 import Kuery, { dumpObject, dumpKuery, dumpScope } from "~/raem/VALK/Kuery";
-import { isPackedField } from "~/raem/VALK/packedField";
+import { isPackedField, tryPackedField, packedSingular } from "~/raem/VALK/packedField";
 import { UnpackedHostValue, isHostRef, tryHostRef, tryUnpackedHostValue }
     from "~/raem/VALK/hostReference";
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
+
+import { isTildeStepName, expandTildeVAKON } from "./_tildeOps";
 
 import { dumpify, invariantify, invariantifyObject, invariantifyArray, isPromise, isSymbol,
   outputCollapsedError, wrapError,
@@ -45,6 +48,7 @@ export default Object.freeze({
   "§'": function literal (valker: Valker, head: any, scope: ?Object, [, value]: BuiltinStep) {
     return value;
   },
+  "§.": _access,
   "§vrl": function vrl (valker: Valker, head: any, scope: ?Object,
       [, params]: BuiltinStep): VRL {
     return valker.pack(valker.obtainReference(
@@ -68,9 +72,9 @@ export default Object.freeze({
         : tryLiteral(valker, head, lookupName, scope);
     return valker.tryPack(scope[eLookupName]);
   },
-  "§->": _path,
-  "§map": map,
-  "§filter": filter,
+  "§->": _advance,
+  "§map": _map,
+  "§filter": _filter,
   "§@": function doStatements (valker: Valker, head: any, scope: ?Object,
       statementsStep: BuiltinStep) {
     let index = 0;
@@ -218,7 +222,8 @@ export default Object.freeze({
       applyStep: BuiltinStep) {
     const eArgs = (applyStep[3] === undefined) ? []
         : tryUnpackLiteral(valker, head, applyStep[3], scope);
-    return callOrApply(valker, head, scope, applyStep, "§apply", undefined, undefined, eArgs);
+    return callOrApply.call(this, valker, head, scope, applyStep,
+        "§apply", undefined, undefined, eArgs);
   },
   "§call": function call (valker: Valker, head: any, scope: ?Object,
       callStep: BuiltinStep) {
@@ -227,7 +232,8 @@ export default Object.freeze({
       const arg = callStep[index + 3];
       eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
     }
-    return callOrApply(valker, head, scope, callStep, "$call", undefined, undefined, eArgs);
+    return callOrApply.call(this, valker, head, scope, callStep, "$call",
+        undefined, undefined, eArgs);
   },
   "§callableof": function callableOf (valker: Valker, head: any, scope: ?Object,
       callableStep: BuiltinStep) {
@@ -481,12 +487,14 @@ export function debugWrapBuiltinSteppers (steppers: { [string]: Function }) {
   for (const [stepName, stepper: Function] of Object.entries(steppers)) {
     ret[stepName] = function ( // eslint-disable-line
         valker: Valker, head: any, scope: ?Object, step: any, ...rest) {
-      valker.info(`{ '${stepName}'/${stepper.name}, args:`, ...valker._dumpObject(step.slice(1), 1),
+      valker.info(`{ '${stepName}'/${stepper.name}, step:`,
+          ...valker._dumpObject([...step].slice(1), 1),
+          ", rest:", ...rest,
           ", head:", ...valker._dumpObject(head), ", scope:", dumpScope(scope));
       ++valker._indent;
       let nextHead;
       try {
-        nextHead = stepper(valker, head, scope, step, ...rest);
+        nextHead = stepper.call(this, valker, head, scope, step, ...rest);
         return nextHead;
       } finally {
         --valker._indent;
@@ -525,60 +533,136 @@ export function tryUnpackLiteral (valker: Valker, head: any, vakon: any, scope: 
   return valker.tryUnpack(ret, true);
 }
 
-function _path (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinStep,
-    mustNotMutateScope: ?boolean, initialIndex: number = 1) {
-  let index = initialIndex;
+function _access (valker: Valker, head: Object | Transient, scope: ?Object,
+    accessorStep: any) {
+  const accessor = accessorStep[1];
+  const isIndex = typeof accessor === "number";
+  if (!isIndex) {
+    const transient = valker.trySingularTransient(head, true);
+    if (transient) {
+      const resolvedObjectId = transient.get("id");
+      const fieldInfo = resolvedObjectId
+          ? { name: accessor, elevationInstanceId: resolvedObjectId }
+          : { ...head._fieldInfo, name: accessor };
+      return tryPackedField(
+          getObjectRawField(valker, transient, accessor, fieldInfo,
+            valker.getObjectTypeIntro(transient, head)),
+          fieldInfo);
+    }
+    if ((head == null) || Array.isArray(head) || head._sequence) {
+      throw new Error(`Cannot access ${
+          (head == null) ? head : Array.isArray(head) ? "an array" : "sequence"
+        } head with non-index <${accessor}>`);
+    }
+  } else if (head == null) {
+    throw new Error(`Cannot access <${head}> head for <${accessor}>`);
+  } else if (!Array.isArray(head)) {
+    const indexedImmutable = (Iterable.isIndexed(head) && head)
+        || (OrderedMap.isOrderedMap(head) && head.toIndexedSeq())
+        || (head._sequence && elevateFieldRawSequence(
+                valker, head._sequence, head._fieldInfo, undefined,
+                valker._indent >= 0 ? valker._indent : undefined)
+            .toIndexedSeq());
+    if (!indexedImmutable) {
+      throw new Error(`Cannot access non-array, non-sequence head with index <${accessor}>`);
+    }
+    const result = indexedImmutable.get(accessor);
+    return (!head._type || head._fieldInfo.intro.isResource)
+        ? result
+        : packedSingular(result, head._type, head._fieldInfo);
+  }
+  // Object is a scope or a selection, not a denormalized resource.
+  // Plain lookup is enough, but we must pack the result for the new head.
+  return valker.tryPack(head[accessor]);
+}
+
+function _advance (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinStep,
+    nonFinalStep: ?boolean, index: number = 1, finalIndex: number = pathStep.length) {
   let stepHead = head;
-  let step;
-  let pathScope;
+  let step, pathScope, type;
   try {
-    for (; index < pathStep.length; ++index) {
+    // eslint-disable-next-line no-param-reassign
+    for (; index < finalIndex; ++index) {
+      // eslint-disable-next-line no-param-reassign
+      if (index + 1 === finalIndex) nonFinalStep = false;
       step = pathStep[index];
-      switch (typeof step) {
-        case "string":
-        case "symbol":
-          stepHead = valker.field(stepHead, step, pathScope || scope);
-          break;
-        case "number":
-          stepHead = valker.index(stepHead, step, pathScope || scope);
-          break;
+      type = typeof step;
+      switch (type) {
+        case "function":
+          // Inline call, delegate handling to it completely, including packing and unpacking.
+          if (pathScope === undefined) {
+            pathScope = !scope ? {} : nonFinalStep ? Object.create(scope) : scope;
+          }
+          stepHead = step(stepHead, pathScope || scope, valker, index + 1 < pathStep.length);
+          continue;
         case "boolean": {
           const unpacked = valker.tryUnpack(stepHead, false);
-          if (unpacked == null) {
-            if (step) {
-              throw new Error(`Valk path step head unpacks to '${unpacked}' at notNull assertion`);
-            }
-            stepHead = undefined;
-            index = pathStep.length;
+          if (unpacked != null) continue;
+          if (step) {
+            throw new Error(`Valk path step head unpacks to '${unpacked}' at notNull assertion`);
           }
-          break;
+          return undefined;
         }
-        case "object":
+        case "object": {
           if (step === null) continue;
-          if (isSymbol(step)) {
-            stepHead = valker.field(stepHead, step, pathScope || scope);
-            break;
+          if (!isSymbol(step)) {
+            if (pathScope === undefined) {
+              pathScope = !scope ? {} : nonFinalStep ? Object.create(scope) : scope;
+            }
+            const stepName = step[0];
+            if (typeof stepName === "string") {
+              if (typeof this[stepName] === "function") {
+                type = this[stepName].name;
+                stepHead = this[stepName](valker, stepHead, pathScope, step, nonFinalStep);
+                continue;
+              } else if (stepName === "§") {
+                continue;
+              } else if (stepName[0] === "§") {
+                throw new Error(`Unrecognized step ${stepName}`);
+              } else if (isTildeStepName(stepName)) {
+                stepHead = this["§->"](
+                    valker, stepHead, pathScope, expandTildeVAKON(stepName, step), nonFinalStep);
+                continue;
+              }
+            }
+            if (Array.isArray(step)) {
+              type = "array";
+              stepHead = this["§[]"](valker, stepHead, pathScope, step, nonFinalStep, 0);
+            } else if (Object.getPrototypeOf(step) === Object.prototype) {
+              type = "object";
+              stepHead = this["§{}"](valker, stepHead, pathScope, ["§{}", step], nonFinalStep);
+            } else if (step instanceof Kuery) {
+              throw new Error("Kuery objects must have been expanded as VAKON before valking");
+            } else {
+              throw new Error("Object steps must have Object.prototype as their prototype");
+            }
+            continue;
           }
-        default: // eslint-disable-line no-fallthrough
-          if (pathScope === undefined) {
-            pathScope = !scope ? {} : mustNotMutateScope ? Object.create(scope) : scope;
-          }
-          stepHead = valker.advance(stepHead, step, pathScope, index + 1 < pathStep.length);
+        }
+        // type === "object" implementations of Symbol must be allowed to fall through.
+        // eslint-disable-line no-fallthrough
+        case "string":
+        case "symbol":
+        case "number":
+          stepHead = this["§."](valker, stepHead, pathScope || scope, ["§.", step], nonFinalStep);
+          continue;
+        default:
+          throw new Error(`INTERNAL ERROR: Unrecognized step ${dumpify(step)}`);
       }
     }
     return stepHead;
   } catch (error) {
-    throw wrapError(error, `During ${valker.debugId()}\n ._path, step #${index}, with:`,
+    throw wrapError(error, `During ${valker.debugId()}\n ._advance, step #${index}: ${type}, with:`,
         "\n\tstep head:", ...dumpObject(stepHead),
-        "\n\tstep:", ...dumpKuery(step),
+        "\n\tstep:", type, ...dumpKuery(step),
         "\n\tpath head:", ...dumpObject(head),
-        "\n\tpath step:", ...dumpKuery(pathStep),
+        "\n\tpath:", ...dumpKuery(pathStep),
         "\n\tpath length:", pathStep.length,
         "\n\tscope:", dumpScope(pathScope));
   }
 }
 
-function map (valker: Valker, head: any, scope: ?Object, mapStep: any, nonFinalStep: ?boolean) {
+function _map (valker: Valker, head: any, scope: ?Object, mapStep: any, nonFinalStep: ?boolean) {
   const ret = [];
   const mapScope = !scope ? {} : !nonFinalStep ? scope : Object.create(scope);
   const sequence = !head._sequence
@@ -589,7 +673,7 @@ function map (valker: Valker, head: any, scope: ?Object, mapStep: any, nonFinalS
     const entryHead = !head._sequence ? valker.tryPack(entry) : entry;
     // mapScope.index = index;
     try {
-      const result = valker._steppers["§->"](valker, entryHead, mapScope, mapStep);
+      const result = this["§->"](valker, entryHead, mapScope, mapStep);
       ret.push(valker.tryUnpack(result, true));
     } catch (error) {
       throw wrapError(error, `During ${valker.debugId()}\n .map, with:`,
@@ -602,7 +686,7 @@ function map (valker: Valker, head: any, scope: ?Object, mapStep: any, nonFinalS
   return ret;
 }
 
-function filter (valker: Valker, head: any, scope: ?Object, filterStep: any,
+function _filter (valker: Valker, head: any, scope: ?Object, filterStep: any,
     nonFinalStep: ?boolean) {
   const ret = [];
   const filterScope = !scope ? {} : !nonFinalStep ? scope : Object.create(scope);
@@ -615,7 +699,7 @@ function filter (valker: Valker, head: any, scope: ?Object, filterStep: any,
     const entryHead = isPackedSequence ? entry : valker.tryPack(entry);
     // filterScope.index = index;
     try {
-      const result = valker._steppers["§->"](valker, entryHead, filterScope, filterStep);
+      const result = this["§->"](valker, entryHead, filterScope, filterStep);
       if (result) ret.push(isPackedSequence ? valker.tryUnpack(entry, true) : entry);
     } catch (error) {
       throw wrapError(error, `During ${valker.debugId()}\n .filter, with:`,
@@ -677,14 +761,6 @@ function _headOrScopeSet (valker: Valker, target: any, head: any, scope: ?Object
       const eKey = (typeof setter[0] !== "object") ? setter[0]
           : tryLiteral(valker, head, setter[0], scope);
       const setterValue = setter[setter.length - 1];
-      /*
-      if (eKey === "a" || eKey === "b") {
-        console.log("setting scope", eKey, "from kuery:", setterValue, "and scope.arguments",
-            scope && [...(scope.arguments || [])], valker.getState().toJS());
-        valker._indent = (valker._indent || 0) + 4;
-        valker._verbosity = (valker._verbosity || 0) + 4;
-      }
-      */
       const eValue = (typeof setterValue !== "object") || (setterValue === null) ? setterValue
           : tryUnpackLiteral(valker, head, setterValue, scope);
       if ((typeof eKey !== "string") && !isSymbol(eKey) && (typeof eKey !== "number")) {
@@ -890,8 +966,7 @@ export function callOrApply (valker: Valker, head: any, scope: ?Object, step: Bu
       eCallee = tryLiteral(valker, head, step[1], scope);
     }
     if (typeof eCallee !== "function") {
-      eCallee = valker._steppers["§callableof"](
-          valker, eCallee, scope, ["§callableof", null, opName]);
+      eCallee = this["§callableof"](valker, eCallee, scope, ["§callableof", null, opName]);
       invariantify(typeof eCallee === "function",
           `trying to call a non-function value of type '${typeof eCallee}'`,
           `\n\tfunction wannabe value:`, eCallee);
@@ -921,8 +996,7 @@ export function callOrApply (valker: Valker, head: any, scope: ?Object, step: Bu
     } else {
       for (let i = 0; i !== eArgs.length; ++i) {
         if (isHostRef(eArgs[i])) {
-          eArgs[i] = valker._steppers["§argumentof"](
-              valker, eArgs[i], scope, ["§argumentof", null, opName]);
+          eArgs[i] = this["§argumentof"](valker, eArgs[i], scope, ["§argumentof", null, opName]);
         }
       }
     }

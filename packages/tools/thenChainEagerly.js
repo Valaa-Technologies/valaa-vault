@@ -131,7 +131,6 @@ export default function thenChainEagerly (initialValue: any, functions: any | Fu
     }
   }
   --index;
-  wrap = new Error(getName("thenable resolution"));
   return next.then(
       newHead => (index + 1 >= functionChain.length
           ? newHead
@@ -142,7 +141,7 @@ export default function thenChainEagerly (initialValue: any, functions: any | Fu
         !(onRejected && onRejected.name) ? " " : `(with ${onRejected.name})`}`;
   }
   function errorOnThenChainEagerly (error) {
-    const wrapped = wrapError(error, wrap,
+    const wrapped = wrapError(error, wrap || new Error(getName("thenable resolution")),
         "\n\thead:", ...dumpObject(head),
         "\n\tcurrent function:", ...dumpObject(functionChain[index]),
         "\n\tfunctionChain:", ...dumpObject(functionChain));

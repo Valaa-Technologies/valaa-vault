@@ -14,6 +14,8 @@ export default class VSXDecoder extends JSXDecoder {
 
   static columnOffset = -1;
 
+  _transpilationCache = {};
+
   _getJSXTransformOptions (sourceInfo?: Object): Object {
     const ret = super._getJSXTransformOptions(sourceInfo);
     if (sourceInfo) {
@@ -41,7 +43,7 @@ export default class VSXDecoder extends JSXDecoder {
           sourceInfo.phaseBase}`;
       sourceInfo.sourceMap = new Map();
       const kuery = transpileValoscriptBody(`(${embeddedSource})`,
-          { customVALK: VALEK, sourceInfo });
+          { customVALK: VALEK, sourceInfo, cache: this._transpilationCache });
       sourceInfo.phase = `inline VS run at ${start.line}:${start.column} in ${
           sourceInfo.phaseBase}`;
       return super._addKuerySourceInfo(kuery, sourceInfo, start, end);

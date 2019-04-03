@@ -52,9 +52,9 @@ export default class MediaDecoder extends LogEventGenerator {
    *
    * @memberof MediaDecoder
    */
-  decode (buffer: ArrayBuffer, { mediaName, partitionName }: Object = {}): any {
+  decode (buffer: ArrayBuffer, { mediaName, partitionName, contentHash }: Object = {}): any {
     throw new Error(`${this.constructor.name}.decode not implemented, when trying to decode${
-        ""} '${mediaName}' in '${partitionName}`);
+        ""} '${mediaName}' in '${partitionName} with content hash ${contentHash}`);
   }
 
   stringFromBuffer (buffer: ArrayBuffer) {

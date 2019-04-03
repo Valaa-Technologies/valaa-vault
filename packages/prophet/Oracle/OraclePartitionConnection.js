@@ -132,7 +132,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
               if (!decoder) return buffer;
               const name = mediaInfo.name ? `'${mediaInfo.name}'` : `unnamed media`;
               const decoding = decoder.decode(buffer,
-                  { mediaName: name, partitionName: connection.getName() });
+                  { mediaName: name, partitionName: connection.getName(), contentHash });
               if (mediaInfo.decodingCache) mediaInfo.decodingCache.set(decoder, decoding);
               return decoding;
             },

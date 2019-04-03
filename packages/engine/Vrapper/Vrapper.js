@@ -27,7 +27,8 @@ import { MissingPartitionConnectionsError, addConnectToPartitionToError }
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
-import { ValoscriptPrimitiveKind } from "~/script";
+import { ValoscriptPrimitiveKind, NativeIdentifierTag } from "~/script";
+import { ScopeAccessesTag } from "~/script/VALSK";
 
 import { Discourse, Transaction, PartitionConnection } from "~/prophet";
 import { ChronicleEventResult } from "~/prophet/api/types";
@@ -1776,6 +1777,7 @@ export default class Vrapper extends Cog {
       options: ?VALKOptions, head: any): Subscription {
     try {
       if ((head !== this) && (head !== undefined)) {
+        // console.log("mismatching head", typeof liveOperation, ++Vrapper.mismatchingHead);
         return super.obtainSubscription(liveOperation, options, head);
       }
       let ret;
@@ -1785,8 +1787,26 @@ export default class Vrapper extends Cog {
       } else {
         if (this._phase === NONRESOURCE) return undefined;
         this.requireActive({ allowActivating: true });
+        // if (!this._kuerySubscriptions) this._kuerySubscriptions = new Map();
+        //ret = this._kuerySubscriptions.get(liveOperation);
+        // if (!ret || !matchScope(ret.getOptions().scope, (options || {}).scope, liveOperation)) {
+          /*
+          ++Vrapper.cacheMissComplex;
+          if (ret) {
+            console.log("kuery", typeof liveOperation, "scope miss", ++Vrapper.scopeMissComplex,
+                "/", Vrapper.cacheMissComplex + Vrapper.cacheHitComplex, this.debugId());
+          }
+          */
           const subscription = new Subscription(this, options).initializeKuery(liveOperation, this);
+          // if (!ret) this._kuerySubscriptions.set(liveOperation, subscription);
           return subscription;
+        //}
+        /*
+        console.log("KUERY HIT", typeof liveOperation, ++Vrapper.cacheHitComplex, "/",
+            Vrapper.cacheMissComplex + Vrapper.cacheHitComplex, this.debugId(),
+            "\n\tkuery:", JSON.stringify((liveOperation.toVAKON && liveOperation.toVAKON())
+                || liveOperation));
+        */
       }
       if (options) {
         const target = ret.getOptions();
@@ -1804,10 +1824,48 @@ export default class Vrapper extends Cog {
               ? dumpKuery(liveOperation) : dumpObject(liveOperation)),
           "\n\tthis:", ...dumpObject(this));
     }
+    function matchScope (subscope, newscope, kuery) {
+      const scopeAccesses = kuery[ScopeAccessesTag];
+      if (!scopeAccesses || !subscope || !newscope) {
+        console.log("no scope access info for:",
+            JSON.stringify((kuery.toVAKON && kuery.toVAKON()) || kuery));
+        return false;
+      }
+      for (const [name, type] of Object.entries(scopeAccesses)) {
+        if (type !== "read") {
+          console.log("non-read access encountered for:", name, type, "in", JSON.stringify(scopeAccesses),
+              "\n\tkuery:", JSON.stringify((kuery.toVAKON && kuery.toVAKON()) || kuery));
+          return false;
+        }
+        const subval = subscope[name];
+        const newval = newscope[name];
+        if (subval !== newval) {
+          if ((subval == null) || (newval == null) || (subval[NativeIdentifierTag] === undefined)
+              || (subval[NativeIdentifierTag] !== newval[NativeIdentifierTag])) {
+            /*
+            console.log("mismatching scope values encountered for:", name,
+                "\n\tbetween subscope:", subscope[name], "and newscope:", newscope[name],
+                "\n\tkuery:", JSON.stringify((kuery.toVAKON && kuery.toVAKON()) || kuery));
+            */
+            return false;
+          }
+        }
+      }
+      return true;
+    }
   }
 
+  _kuerySubscriptions: Map<any, Subscription>;
+
+  static mismatchingHead = 0;
+  static cacheHitComplex = 0;
+  static cacheMissComplex = 0;
+  static scopeMissComplex = 0;
 
   _fieldSubscriptions: Map<string, Subscription>;
+
+  static cacheHitFields = 0;
+  static cacheMissFields = 0;
 
   obtainFieldSubscription (fieldName: string, options: ?VALKOptions): ?Subscription {
     let fieldSubscription;
@@ -1817,9 +1875,12 @@ export default class Vrapper extends Cog {
       if (!this._fieldSubscriptions) this._fieldSubscriptions = new Map();
       fieldSubscription = this._fieldSubscriptions.get(fieldName);
       if (!fieldSubscription) {
+        // console.log("field", fieldName, "cache miss", ++Vrapper.cacheMissFields);
         fieldSubscription = new Subscription(this, options)
             .initialize(fieldName);
         this._fieldSubscriptions.set(fieldName, fieldSubscription);
+      } else {
+        // console.log("FIELD HIT", fieldName, ++Vrapper.cacheHitFields);
       }
       return fieldSubscription;
     } catch (error) {

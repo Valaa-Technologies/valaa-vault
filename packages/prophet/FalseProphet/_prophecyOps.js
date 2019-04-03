@@ -194,6 +194,7 @@ export function _reviseSchism (connection: FalseProphetPartitionConnection,
     return undefined;
   }
   const revisedProphecyCommand = getActionFromPassage(recomposedProphecy);
+  if (!revisedProphecyCommand.meta) throw new Error("revisedProphecy.meta missing");
   const revisedPartitionCommandEvent = extractPartitionEvent0Dot2(
       connection, revisedProphecyCommand);
   // Can only revise commands belonging to the originating partition
@@ -377,6 +378,7 @@ class ProphecyOperation extends ProphecyEventResult {
         missingConnections.push(naiveURI.createPartitionURI(partitionURIString));
         return;
       }
+      if (!this._prophecy.meta) throw new Error("prophecy.meta missing");
       const commandEvent = extractPartitionEvent0Dot2(connection,
           getActionFromPassage(this._prophecy));
       (connection.isRemoteAuthority() ? (this._remoteStage || (this._remoteStage = []))

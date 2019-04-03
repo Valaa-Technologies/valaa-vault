@@ -383,10 +383,10 @@ export default class Vrapper extends Cog {
    * @memberof Vrapper
    */
   requireActive (options?: VALKOptions) {
-    if (this._phase === ACTIVE
-        || ((options && options.allowActivating) && (this._phase === ACTIVATING))) return;
-    const blocker = this.refreshPhase();
-    if (!blocker) return;
+    if (this._phase === ACTIVE) return;
+    const blocker = (options && options.allowActivating) ? this.activate() : this.refreshPhase();
+    const phase = this._phase;
+    if (!blocker || (options && options.allowActivating && (phase === ACTIVATING))) return;
     if (blocker.isDestroyed() && options) {
       // TODO(iridian): While this takes care of the situation where
       // a Resource is destroyed in the main line but not destroyed in
@@ -409,12 +409,12 @@ export default class Vrapper extends Cog {
         : this.isUnavailable() ?
             new Error(`Cannot operate on an Unavailable ${this.debugId()}`)
         : addConnectToPartitionToError(new MissingPartitionConnectionsError(
-                `Missing or not fully narrated partition connection for an Activating ${
-                    blocker.debugId()}`,
+                `Missing or not fully narrated partition connection for ${blocker.debugId()}`,
                 [this.activate()]),
             this.engine.discourse.connectToMissingPartition);
     throw this.wrapErrorEvent(error, "requireActive",
         "\n\toptions:", ...dumpObject(options),
+        "\n\tphase was:", phase,
         "\n\tactivation blocker is",
             (blocker === this) ? "this object itself" : "some prototype of this",
         "\n\tthis[HostRef]:", ...dumpObject(this[HostRef]),
@@ -1135,10 +1135,12 @@ export default class Vrapper extends Cog {
         fieldName);
   }
 
+  static toValueReference = VALK.fromVAKON(["§->", "value", "reference"]);
+
   _extractPointerValue (options: VALKOptions = {}, vExplicitOwner: ?Vrapper,
       valueEntry: Transient) {
     this.requireActive(options);
-    const target = this.get(["§->", "value", "reference"], Object.create(options));
+    const target = this.get(Vrapper.toValueReference, Object.create(options));
     if (!target) {
       console.warn(`Vrapper(${this.debugId()
           }).extractValue: Cannot resolve pointed resource from Property.value:`, valueEntry);

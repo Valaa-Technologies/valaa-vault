@@ -159,7 +159,9 @@ export default class RAEMTestHarness extends LogEventGenerator {
   }
 
   interceptErrors (testFunction) {
-    return () => thenChainEagerly(testFunction(), [], this.errorOn(new Error(testFunction.name)));
+    return () => thenChainEagerly(null,
+        () => testFunction(),
+        this.errorOn(new Error(testFunction.name)));
   }
 
   errorOn (wrap, ...rest) {

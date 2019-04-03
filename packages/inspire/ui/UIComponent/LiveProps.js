@@ -128,14 +128,10 @@ export default class LiveProps extends UIComponent {
     const bindingSlot = `props_className_content`;
     if (value.hasInterface("Media") && !this.getBoundSubscription(bindingSlot)) {
       this.bindLiveKuery(bindingSlot, value, VALEK.toMediaContentField(), {
-        onUpdate: function updateClassContent (liveUpdate: LiveUpdate) {
-          if (this.tryFocus() !== focus) return false;
-          const newClassName = liveUpdate.value();
-          const currentClassName = (this.state || {}).className;
-          if (currentClassName && (newClassName !== currentClassName)) this.forceUpdate();
-          this.setState(() => ({ className: newClassName }));
-          return undefined;
+        onUpdate: function updateClassContent () {
+          return (this.tryFocus() !== focus) ? false : this.forceUpdate() || undefined;
         }.bind(this),
+        updateImmediately: false,
       });
     }
     const sheetContent = getImplicitMediaInterpretation(value, bindingSlot, {

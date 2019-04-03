@@ -483,8 +483,10 @@ const debugWrappedBuiltinSteppers = new WeakMap();
 export function debugWrapBuiltinSteppers (steppers: { [string]: Function }) {
   let ret = debugWrappedBuiltinSteppers.get(steppers);
   if (ret) return ret;
-  ret = {};
-  for (const [stepName, stepper: Function] of Object.entries(steppers)) {
+  ret = Object.create(steppers);
+  for (const stepName in steppers) { // eslint-disable-line guard-for-in
+    const stepper = steppers[stepName];
+    if (typeof stepper !== "function") continue;
     ret[stepName] = function ( // eslint-disable-line
         valker: Valker, head: any, scope: ?Object, step: any, ...rest) {
       valker.info(`{ '${stepName}'/${stepper.name}, step:`,

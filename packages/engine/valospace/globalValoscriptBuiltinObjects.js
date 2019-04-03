@@ -1,5 +1,5 @@
 import { vRef } from "~/raem/VRL";
-import VALEK from "~/engine/VALEK";
+// import VALEK from "~/engine/VALEK";
 import { request } from "~/tools";
 
 // TODO(iridian): I think this is dead code. Verify and remove or at least deprecate, using
@@ -7,6 +7,8 @@ import { request } from "~/tools";
 
 export default {
   vRef,
+  asyncRequest: request,
+  /*
   setField: VALEK.setField(VALEK.fromScope("$1"), VALEK.fromScope("$2")),
   addToField: VALEK.addToField(VALEK.fromScope("$1"), VALEK.fromScope("$2")),
   removeFromField: VALEK.removeFromField(VALEK.fromScope("$1"), VALEK.fromScope("$2")),
@@ -23,6 +25,5 @@ export default {
   interpretContent: VALEK.interpretContent(VALEK.fromScope("$1")),
   prepareBvob: VALEK.prepareBvob(VALEK.fromScope("$1"), VALEK.fromScope("$1")),
   prepareBlob: VALEK.prepareBvob(VALEK.fromScope("$1"), VALEK.fromScope("$1")),
-
-  asyncRequest: request,
+  */
 };

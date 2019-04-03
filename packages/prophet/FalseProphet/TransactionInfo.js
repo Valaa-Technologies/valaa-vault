@@ -88,21 +88,28 @@ export default class TransactionInfo {
           this.transacted, this.transactionDescription);
       // Only alter transaction internals after the dispatch has
       // performed the content validations.
+      const existingActionCount = this.actions.length;
       this.actions.push(...this.transacted.actions);
       this.transacted.actions = [];
       this.passages.push(...transactionStory.passages);
       Object.assign(this.universalPartitions, (transactionStory.meta || {}).partitions);
       const state = this.transaction.corpus.getState();
       this.transaction.setState(state);
+      const info = this;
       return {
         eventResults: events.map((event, index) => {
-          const result = new Promise(
-              (succeed, fail) => this.resultPromises.push({ succeed, fail }));
-          this.passages[index].state = state;
-          this.passages[index].previousState = previousState;
+          let result;
+          transactionStory.passages[index].state = state;
+          transactionStory.passages[index].previousState = previousState;
           return new ChronicleEventResult(event, {
             story: transactionStory.passages[index],
-            getPremiereStory: () => result,
+            getLocalStory () { return this.story; },
+            getPremiereStory () {
+              if (info._finalCommand !== undefined) return this.story;
+              return result || (result = new Promise((succeed, fail) => {
+                info.resultPromises[existingActionCount + index] = { succeed, fail };
+              }));
+            },
           });
         })
       };
@@ -142,8 +149,9 @@ export default class TransactionInfo {
         Promise.resolve(this._commitChronicleResult.getPremiereStory()).then(
           // TODO(iridian): Implement returning results. What should they be anyway?
           transactionStoryResult => this.resultPromises.forEach((promise, index) =>
-              promise.succeed((transactionStoryResult.actions || [])[index])),
-          failure => this.resultPromises.forEach((promise) => promise.fail(failure)),
+              promise && promise.succeed((transactionStoryResult.actions || [])[index])),
+          failure => this.resultPromises.forEach((promise) =>
+              promise && promise.fail(failure)),
         );
       }
       return this._commitChronicleResult;
@@ -188,8 +196,10 @@ export default class TransactionInfo {
   }
 
   /**
-   * Tries to fast-forward this transaction on top of the given targetCorpus.
-   * Returns a story of the transaction if successfull, undefined if fast forward was not possible.
+   * Tries to fast-forward this transaction on top of the given
+   * targetCorpus.
+   * Returns a story of the transaction if successful, undefined if
+   * fast forward was not possible.
    *
    * @param {Corpus} corpus
    * @returns
@@ -207,7 +217,10 @@ export default class TransactionInfo {
       ...this.transacted,
       ...this._finalCommand,
       actions: this.passages.map(passage => getActionFromPassage(passage)),
-      meta: { partitions: this.universalPartitions },
+      meta: {
+        ...(this.transacted.meta || {}),
+        partitions: this.universalPartitions,
+      },
     };
     const story = targetCorpus.createPassageFromAction(universalTransactedLike);
     story.passages = this.passages;

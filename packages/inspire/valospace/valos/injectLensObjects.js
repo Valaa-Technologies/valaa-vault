@@ -744,7 +744,8 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
           // OTOH: TransactionInfo.chronicleEvents.results only
           // support getPremiereStory so whatever semantics is
           // desired it needs to be implemented.
-          const options = { transaction, awaitResult: result => result.getPremiereStory() };
+          // const options = { transaction, awaitResult: result => result.getPremiereStory() };
+          const options = { transaction, awaitResult: result => result.getLocalStory() };
           return (prototype != null)
               ? prototype.instantiate(initialState, options)
               : engine.create("Entity", initialState, options);

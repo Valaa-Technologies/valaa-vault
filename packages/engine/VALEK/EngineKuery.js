@@ -237,7 +237,7 @@ export default class EngineKuery extends ValoscriptKuery {
   }
 
   toMediaContentField () {
-    return this.toField("content").or("sourceURL");
+    return this.toField("content").or(this._root.toField("sourceURL"));
   }
 
   mediaContent (options: Kuery = {}) {

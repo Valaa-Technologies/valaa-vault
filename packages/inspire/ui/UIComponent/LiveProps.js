@@ -92,14 +92,15 @@ export default class LiveProps extends UIComponent {
   }
 
   _errorOnBindFocusSubscriptions (bindingSlot, kuery, error) {
-    const wrappedError = wrapError(error, new Error(`subscription('${bindingSlot}')`),
+    const wrappedError = wrapError(error, new Error(`bindFocusSubscriptions('${bindingSlot}')`),
         "\n\tuiContext:", ...dumpObject(this.state.uiContext),
         "\n\tfocus:", ...dumpObject(this.tryFocus()),
         "\n\tkuery:", ...dumpObject(kuery),
         "\n\tstate:", ...dumpObject(this.state),
         "\n\tprops:", ...dumpObject(this.props),
     );
-    outputError(wrappedError, `Exception caught during LiveProps.subscription('${bindingSlot}')`);
+    outputError(wrappedError, `Exception caught during LiveProps.bindFocusSubscriptions('${
+        bindingSlot}')`);
     this.enableError(wrappedError);
   }
 

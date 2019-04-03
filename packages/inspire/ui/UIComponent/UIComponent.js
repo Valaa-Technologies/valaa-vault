@@ -34,8 +34,7 @@ import {
   VSSStyleSheetSymbol,
 } from "./_styleOps";
 import {
-  _finalizeUnbindSubscriptions, _bindSubscription, _getBoundSubscription, _unbindSubscription,
-  _bindLiveKuery
+  _finalizeUnbindSubscriptions, _getBoundSubscription, _unbindSubscription, _bindLiveKuery
 } from "./_subscriberOps";
 
 export function isUIComponentElement (element: any) {

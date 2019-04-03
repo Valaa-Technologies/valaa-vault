@@ -85,6 +85,7 @@ export default function modifyResource (bard: Bard) {
         "object Transient must be an OrderedMap");
     let isPrimaryMutation = false;
     const wasFrozen = isFrozen(bard, bard.objectTransient); // transient modifications are allowed.
+    passage.previousState = bard.state;
     const newResource = bard.objectTransient.withMutations(mutableObject => {
       if (passage.sets) {
         isPrimaryMutation = processUpdate(bard,
@@ -118,6 +119,7 @@ export default function modifyResource (bard: Bard) {
       if (passage.typeName !== objectTypeName) {
         ret = ret.setIn([passage.typeName, passage.id.rawId()], objectTypeName);
       }
+      passage.state = ret;
       return ret;
     });
   } catch (error) {

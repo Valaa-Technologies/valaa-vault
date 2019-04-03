@@ -12,6 +12,8 @@ export class LiveUpdate {
   _emitter: Vrapper;
   _valkOptions: ?Object;
   _value: ?any;
+  _fieldName: string;
+  _passage: ?Passage;
 
   constructor (emitter: Vrapper, valkOptions: ?VALKOptions) {
     this._emitter = emitter;
@@ -24,21 +26,28 @@ export class LiveUpdate {
 
   getEmitter (): Vrapper { return this._emitter; }
   getOptions (): ?VALKOptions { return this._valkOptions; }
-  getState (): Object { return this._valkOptions.state; }
-  getJSState (): Object { return this._valkOptions.state && this._valkOptions.state.toJS(); }
+  getDiscourse () { return this._valkOptions.transaction || this._emitter.engine.discourse; }
+  getState (): Object { return this._valkOptions.state || this.getDiscourse().getState(); }
+  getJSState (): Object { return this.getState().toJS(); }
   value (): ?any {
     return (this._value !== undefined) ? this._value : (this._value = this._resolveValue());
   }
 
   // FieldUpdate / field Subscription properties
 
-  _fieldName: string;
-  _passage: ?Passage;
-
   fieldName (): string { return this._fieldName; }
   getPassage (): ?Story { return this._passage; }
   previousStateOptions (extraOptions: Object = {}): VALKOptions {
-    return { ...this._valkOptions, state: this._valkOptions.previousState, ...extraOptions };
+    return {
+      ...this._valkOptions,
+      state: this._passage ? this._passage.previousState : this._valkOptions.previousState,
+      ...extraOptions,
+    };
+  }
+  clearPassageTemporaries () {
+    this._passage = null;
+    if (this._passages) this._passages = null;
+    if (this._cachedAddsAndRemoves) this._cachedAddsAndRemoves = null;
   }
 
   _resolveValue (): ?any {
@@ -65,16 +74,48 @@ export class LiveUpdate {
   */
 
   actualAdds () {
-    if (!this._passage || isCreatedLike(this._passage)) {
+    return (this._cachedAddsAndRemoves || this._resolveAddsAndRemoves()).adds || [];
+  }
+
+  actualRemoves () {
+    return (this._cachedAddsAndRemoves || this._resolveAddsAndRemoves()).removes || [];
+  }
+
+  _resolveAddsAndRemoves () {
+    if (!this._passage) {
+      return { adds: this._actualAddsOfPassage({ state: this.getState() }) };
+    }
+    if (!this._passages) {
+      return this._cachedAddsAndRemoves = {
+        adds: this._actualAddsOfPassage(this._passage),
+        removes: this._actualRemovesOfPassage(this._passage),
+      };
+    }
+    const cache = this._cachedAddsAndRemoves = { adds: new Set(), removes: new Set() };
+    for (const passage of this._passages) {
+      for (const remove of (this._actualRemovesOfPassage(passage) || [])) {
+        cache.adds.delete(remove); cache.removes.add(remove);
+      }
+      for (const add of (this._actualAddsOfPassage(passage) || [])) {
+        cache.removes.delete(add); cache.adds.add(add);
+      }
+    }
+    return cache;
+  }
+
+  _actualAddsOfPassage (passage: Object) {
+    if (!passage.type || isCreatedLike(passage)) {
       const value = this.value();
-      return arrayFromAny(value || undefined);
+      if (value) return arrayFromAny(value);
+    } else if (passage.actualAdds) {
+      const adds = passage.actualAdds.get(this._fieldName);
+      if (adds && adds.length) {
+        const ids = this._emitter._tryElevateFieldValueFrom(
+            passage.state, this._fieldName, adds, passage.vProtagonist);
+        return this._emitter.engine.getVrappers(ids, passage);
+      }
     }
-    if (this._passage.actualAdds) {
-      const ids = this._emitter._tryElevateFieldValueFrom(this.getState(), this._fieldName,
-          this._passage.actualAdds.get(this._fieldName), this._passage.vProtagonist);
-      return this._emitter.engine.getVrappers(ids, this._valkOptions);
-    }
-    return [];
+    return undefined;
   }
 
   // FIXME(iridian): sometimes actualRemoves returns vrappers of the
@@ -87,29 +128,22 @@ export class LiveUpdate {
   // The reason the new Vrapper is not pointing to new state is that if
   // the resource was DESTROYED the new state will not have
   // corresponding data.
-  actualRemoves () {
-    if (!this._passage) return [];
-    if (this._passage.actualRemoves) {
-      return this._emitter.engine.getVrappers(
-          this._passage.actualRemoves.get(this._fieldName), this.previousStateOptions());
-    }
-    if (this._passage.type === "DESTROYED") {
+  _actualRemovesOfPassage (passage: Object) {
+    if (!passage.type) return undefined;
+    if (passage.actualRemoves) {
+      const removes = passage.actualRemoves.get(this._fieldName);
+      if (removes && removes.length) {
+        return this._emitter.engine.getVrappers(removes, { state: passage.previousState });
+      }
+    } else if (passage.type === "DESTROYED") {
       // TODO(iridian): .get is getting called twice, redundantly, in
       // the DESTROYED branch. The first call in createFieldUpdate is
       // useless as no actualAdds get made.
       // TODO(iridian): The non-pure kueries should be replaced with
       // pure kueries?
-      const value = this._emitter.do(this._fieldName, this.previousStateOptions());
-      return arrayFromAny(value || undefined);
+      const value = this._emitter.do(this._fieldName, { state: passage.previousState });
+      if (value) return arrayFromAny(value);
     }
-    return [];
-  }
-}
-
-export default class FieldUpdate extends LiveUpdate {
-  constructor (emitter: Vrapper, fieldName: string, passage: ?Passage, story: ?Story) {
-    super(emitter, story);
-    this._fieldName = fieldName;
-    this._passage = passage;
+    return undefined;
   }
 }

@@ -1,9 +1,9 @@
 import Vrapper from "./Vrapper";
 import Subscription from "./Subscription";
-import FieldUpdate, { LiveUpdate } from "./FieldUpdate";
+import { LiveUpdate } from "./FieldUpdate";
 
 export default Vrapper;
-export { Subscription, FieldUpdate, LiveUpdate };
+export { Subscription, LiveUpdate };
 
 export { default as getImplicitCallable } from "./getImplicitCallable";
 export { default as getImplicitMediaInterpretation } from "./getImplicitMediaInterpretation";

@@ -5,21 +5,6 @@ import Valker from "~/raem";
 
 import engineSteppers from "~/engine/VALEK/engineSteppers";
 
-/* eslint-disable prefer-rest-params */
-
-export const performDefaultGet = {};
-export const performFullDefaultProcess = {};
-
-function _throwUnimplementedLiveKueryError (subscription, head, scope, kueryVAKON) {
-  throw new Error(`Live kuery not implemented yet for complex step: ${
-      JSON.stringify(kueryVAKON)}`);
-}
-
-function _throwMutationLiveKueryError (subscription, head, scope, kueryVAKON) {
-  throw new Error(`Cannot make a kuery with side-effects live. Offending step: ${
-      JSON.stringify(kueryVAKON)}`);
-}
-
 // undefined: use default behaviour ie. walk all arguments
 // null: completely disabled
 // other: call corresponding function callback, if it returns performDefaultGet then use default,
@@ -35,16 +20,28 @@ export default Object.assign(Object.create(engineSteppers), {
   "§delete..": _throwMutationLiveKueryError,
 });
 
-function _liveAccess (valker: Valker, head: any, scope: any, accessStep: any[]) {
+function _throwUnimplementedLiveKueryError (subscription, head, scope, kueryVAKON) {
+  throw new Error(`Live kuery not implemented yet for complex step: ${
+      JSON.stringify(kueryVAKON)}`);
+}
+
+function _throwMutationLiveKueryError (subscription, head, scope, kueryVAKON) {
+  throw new Error(`Cannot make a kuery with side-effects live. Offending step: ${
+      JSON.stringify(kueryVAKON)}`);
+}
+
+function _liveAccess (valker: Valker, head: any, scope: any,
+    accessStep: any[], nonFinalStep: ?boolean) {
   const hostRef = tryHostRef(head);
   if (hostRef) {
-    const subscription = valker._runOptions.subscription;
-    const vrapper = subscription._emitter.engine.getVrapper(hostRef, subscription._valkOptions);
+    const kuerySubscription = valker._runOptions.kuerySubscription;
+    const vrapper = kuerySubscription._emitter.engine
+        .getVrapper(hostRef, kuerySubscription._valkOptions);
     // TODO(iridian, 2019-04): Replace the 'true' with false if this is
     // a leaf property access. This will mark this hook as
     // non-structural, preventing unnecessary rehooking of the whole
     // subscription when this field updates.
-    subscription._subscribeToFieldByName(vrapper, accessStep[1], true);
+    kuerySubscription.attachKueryFieldHook(vrapper, accessStep[1], true);
   }
-  return engineSteppers["§."].apply(this, arguments);
+  return engineSteppers["§."].apply(this, arguments); // eslint-disable-line prefer-rest-params
 }

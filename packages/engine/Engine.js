@@ -21,7 +21,7 @@ import Motor from "~/engine/Motor";
 import Vrapper from "~/engine/Vrapper";
 import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
-import FieldUpdate from "~/engine/Vrapper/FieldUpdate";
+import { LiveUpdate } from "~/engine/Vrapper/FieldUpdate";
 
 import { debugObjectType, dumpify, outputCollapsedError, thenChainEagerly, wrapError }
     from "~/tools";
@@ -432,15 +432,14 @@ export default class Engine extends Cog {
     // valosheath API)
     for (const story of stories) {
       story._delayedCogRemovals = [];
-      story._delayedFieldUpdates = [];
+      story._delayedFieldUpdates = new Set();
       try {
         this._recitePassage(story, story, allReactionPromises);
         story._delayedCogRemovals.forEach(cog => this.removeCog(cog));
         story._delayedCogRemovals = null;
-        story._delayedFieldUpdates.forEach(fieldUpdate => {
-          fieldUpdate.getEmitter()._notifyMODIFIEDHandlers(
-              fieldUpdate, fieldUpdate._delayedFieldHooks, fieldUpdate._delayedFilterHooks);
-        });
+        for (const fieldUpdate of story._delayedFieldUpdates) {
+          fieldUpdate.triggerFieldUpdate(story.state, story.previousState);
+        }
         story._delayedFieldUpdates = null;
       } catch (error) {
         outputCollapsedError(error, "Exception caught during Engine.receiveCommands");
@@ -518,12 +517,8 @@ export default class Engine extends Cog {
     story._delayedCogRemovals.push(cog);
   }
 
-  addDelayedFieldUpdate (vrapper: Vrapper, fieldName: string,
-      fieldHooks, filterHooks, passage: Passage, story: Story) {
-    const fieldUpdate = new FieldUpdate(vrapper, fieldName, passage, story);
-    fieldUpdate._delayedFieldHooks = fieldHooks;
-    fieldUpdate._delayedFilterHooks = filterHooks;
-    story._delayedFieldUpdates.push(fieldUpdate);
+  addDelayedFieldUpdate (fieldUpdate: LiveUpdate, story: Story) {
+    story._delayedFieldUpdates.add(fieldUpdate);
   }
 
   _pendingTransactions = {};

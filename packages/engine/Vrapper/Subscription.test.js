@@ -29,11 +29,11 @@ describe("Subscription", () => {
     liveCallback = jest.fn(); // eslint-disable-line
   }
 
-  function setUpKueryTestHarness (kuery: Kuery, subscriberName: string, options: Object) {
+  function setUpKueryTestHarness (kuery: Kuery, listenerKey: string, options: Object) {
     setUpHarnessAndCallback(options);
-    subscription = entities().creator.obtainSubscription(
-        kuery, { ...options, state: harness.getState() });
-    subscription.addSubscriber(harness, subscriberName, liveCallback);
+    subscription = entities().creator
+        .obtainSubscription(kuery, { ...options, state: harness.getState() });
+    subscription.addListenerCallback(harness, listenerKey, liveCallback);
   }
 
   function setUpPropertyTargetTestHarness (propertyName: string, options: Object) {
@@ -102,7 +102,7 @@ describe("Subscription", () => {
           .toBe(idOf(entities().ownling));
     });
 
-    it("properly refreshes subscribers on structural updates", () => {
+    it("properly refreshes listeners on structural updates", () => {
       setUpPropertyTargetTestHarness("template_matching", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
 
@@ -120,7 +120,7 @@ describe("Subscription", () => {
           .toBe(idOf(entities().ownling));
     });
 
-    it("properly deregisters subscribers on structural updates", () => {
+    it("properly deregisters listeners on structural updates", () => {
       setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
 
@@ -148,7 +148,7 @@ describe("Subscription", () => {
           options);
     }
 
-    it("property refreshes subscribers to updated property itself", () => {
+    it("property refreshes listeners to updated property itself", () => {
       setUpPropertyTargetValueTestHarness("pointer_to_ownling", "ownling_counter",
           { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
@@ -160,7 +160,7 @@ describe("Subscription", () => {
       expect(liveCallback.mock.calls[1][0].value()).toEqual(1);
     });
 
-    it("kuery expression property refreshes subscribers on updates to a depended property", () => {
+    it("kuery expression property refreshes listeners on updates to a depended property", () => {
       setUpPropertyTargetValueTestHarness("pointer_to_ownling", "ownling_counter_plus_seven",
           { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
@@ -185,7 +185,7 @@ describe("Subscription", () => {
 
       creatori1i1.get(VALEK.propertyValue("counter"), {
         obtainSubscriptionTransaction: () => harness.engine.discourse,
-      }).addSubscriber(harness, "test", update => liveCallback(update.value()));
+      }).addListenerCallback(harness, "test", update => liveCallback(update.value()));
 
       expect(liveCallback.mock.calls.length).toBe(1);
       expect(liveCallback.mock.calls[0][0]).toEqual(0);

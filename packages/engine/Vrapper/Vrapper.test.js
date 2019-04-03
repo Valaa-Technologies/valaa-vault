@@ -82,7 +82,7 @@ describe("Vrapper", () => {
     }
     for (const key of Object.keys(sets || {})) {
       observedVrapper.obtainSubscription(key)
-          .addSubscriber(harness, "test", (update) => {
+          .addListenerCallback(harness, "test", (update) => {
             updatedValues[key] = update.value();
           }, false);
     }
@@ -370,7 +370,7 @@ describe("Vrapper", () => {
       ]);
       let modCalled = false;
       testScriptPartitions().child.obtainSubscription("children")
-          .addSubscriber(harness, "test", () => { modCalled = true; }, false);
+          .addListenerCallback(harness, "test", () => { modCalled = true; }, false);
       harness.chronicleEvent(destroyed({ type: "DESTROYED", id: ["grandChild"] }));
       // children modified subscriber should have been called when the sub-event to remove
       // grandChild from the children list was reduced
@@ -383,7 +383,7 @@ describe("Vrapper", () => {
       ]);
       let modCalled = false;
       testScriptPartitions().grandChild.obtainSubscription("children")
-          .addSubscriber(harness, "test", () => { modCalled = true; }, false);
+          .addListenerCallback(harness, "test", () => { modCalled = true; }, false);
       testScriptPartitions().greatGrandChild.setField("parent",
           testScriptPartitions().grandSibling);
 

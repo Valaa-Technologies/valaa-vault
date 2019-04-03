@@ -124,13 +124,13 @@ describe("Media handling", () => {
     const initialBuffer = arrayBufferFromUTF8String(initialContent);
     const initialContentHash = contentHashFromArrayBuffer(initialBuffer);
 
-    const subscribeToContentUpdate = contentMedia => resolve =>
-        contentMedia.obtainSubscription("content")
-            .addSubscriber(harness, "test", liveUpdate => resolve({
-              liveUpdate,
-              bvobId: contentMedia.get("content"),
-              content: contentMedia.interpretContent({ synchronous: true, mime: "text/plain" }),
-            }), false);
+    const subscribeToContentUpdate = contentMedia => resolve => contentMedia
+        .obtainSubscription("content")
+        .addListenerCallback(harness, "test", liveUpdate => resolve({
+          liveUpdate,
+          bvobId: contentMedia.get("content"),
+          content: contentMedia.interpretContent({ synchronous: true, mime: "text/plain" }),
+        }), false);
     const { contentMedia, createdProcess } = await harness.runValoscript(vRef("test_partition"), `
       this[valos.prepareBvob](initialBuffer).then(createBvob => {
         const contentMedia = new Media({

@@ -65,7 +65,8 @@ class LinkFieldEditor extends UIComponent {
     ], errorOnLinkFieldEditorSubscriptions.bind(this, "LinkFieldEditor_Candidates"));
 
     function errorOnLinkFieldEditorSubscriptions (name, error) {
-      throw wrapError(error, new Error(`${this.debugId()}\n .subscription.${name}, with:`),
+      throw wrapError(error, new Error(`${this.debugId()}\n .bindFocusSubscriptions.${
+              name}, with:`),
           "\n\tfocus:", ...dumpObject(focus),
           "\n\tprops:", ...dumpObject(props),
           "\n\tthis:", ...dumpObject(this));

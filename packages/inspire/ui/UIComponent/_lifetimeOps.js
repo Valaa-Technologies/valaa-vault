@@ -11,15 +11,32 @@ import { getScopeValue, setScopeValue } from "./scopeValue";
 import { _comparePropsOrState } from "./_propsOps";
 import { _initiateSubscriptions, _finalizeUnbindSubscribersExcept } from "./_subscriberOps";
 
+// const _timings = {};
+
+// function _addTiming (/* component, name, start, ...rest */) {
+  /*
+  return;
+  const duration = performance.now() - start;
+  const timing = _timings[name] || (_timings[name] = { total: 0, count: 0 });
+  timing.total += duration;
+  ++timing.count;
+  console.log(component.constructor.name, component.getKey(), name, ...rest,
+      "duration:", duration, "count:", timing.count, "total:", timing.total);
+  */
+// }
+
 export function _componentWillMount (component: UIComponent) {
+  // const start = performance.now();
   component._activeParentFocus = _getActiveParentFocus(component, component.props);
   _updateFocus(component, component.props);
+  // _addTiming(component, "componentWillMount.updateFocus", start);
 }
 
 export function _componentWillReceiveProps (component: UIComponent, nextProps: Object,
     nextContext: Object, forceReattachListeners: ?boolean) {
+  // const start = performance.now();
   const nextActiveParentFocus = _getActiveParentFocus(component, nextProps);
-  if ((forceReattachListeners === true)
+  const shouldUpdateFocus = (forceReattachListeners === true)
       || (nextProps.uiContext !== component.props.uiContext)
       || (nextProps.parentUIContext !== component.props.parentUIContext)
       || (component._activeParentFocus !== nextActiveParentFocus)
@@ -27,9 +44,13 @@ export function _componentWillReceiveProps (component: UIComponent, nextProps: O
       || (nextProps.head !== component.props.head)
       || (nextProps.kuery !== component.props.kuery)
       || _comparePropsOrState(nextProps.context, component.props.context, "shallow")
-      || _comparePropsOrState(nextProps.locals, component.props.locals, "shallow")) {
+      || _comparePropsOrState(nextProps.locals, component.props.locals, "shallow");
+  // _addTiming(component, "componentWillReceiveProps.check", start, shouldUpdateFocus);
+  if (shouldUpdateFocus) {
     component._activeParentFocus = nextActiveParentFocus;
+    // const startUpdate = performance.now();
     _updateFocus(component, nextProps);
+    // _addTiming(component, "componentWillReceiveProps.updateFocus", startUpdate);
   }
 }
 
@@ -181,15 +202,19 @@ function _createContextAndSetFocus (component: UIComponent, newFocus: any, newPr
 
 export function _shouldComponentUpdate (component: UIComponent, nextProps: Object,
     nextState: Object, nextContext: Object): boolean { // eslint-disable-line
+  // const start = performance.now();
   const ret = _comparePropsOrState(component.props, nextProps, "deep",
           component.constructor.propsCompareModesOnComponentUpdate, "props")
       || _comparePropsOrState(component.state, nextState, "deep",
           component.constructor.stateCompareModesOnComponentUpdate, "state");
+  // _addTiming(component, "shouldComponentUpdate.check", start, ret);
   return ret;
 }
 
 export function _componentWillUnmount (component: UIComponent) {
+  // const start = performance.now();
   component._isMounted = false;
   component.unbindSubscriptions();
   if (component.context.releaseVssSheets) component.context.releaseVssSheets(component);
+  // _addTiming(component, "componentWillUnmount", start);
 }

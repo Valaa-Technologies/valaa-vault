@@ -31,7 +31,7 @@ function _throwMutationLiveKueryError (subscription, head, scope, kueryVAKON) {
 }
 
 function _liveAccess (valker: Valker, head: any, scope: any,
-    accessStep: any[], nonFinalStep: ?boolean) {
+    accessStep: any[] /* , nonFinalStep: ?boolean */) {
   const hostRef = tryHostRef(head);
   if (hostRef) {
     const kuerySubscription = valker._runOptions.kuerySubscription;

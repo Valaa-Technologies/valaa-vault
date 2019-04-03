@@ -27,8 +27,8 @@ import { MissingPartitionConnectionsError, addConnectToPartitionToError }
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
-import { ValoscriptPrimitiveKind, NativeIdentifierTag } from "~/script";
-import { ScopeAccessesTag } from "~/script/VALSK";
+import { ValoscriptPrimitiveKind /* , NativeIdentifierTag */ } from "~/script";
+// import { ScopeAccessesTag } from "~/script/VALSK";
 
 import { Discourse, Transaction, PartitionConnection } from "~/prophet";
 import { ChronicleEventResult } from "~/prophet/api/types";
@@ -1790,7 +1790,7 @@ export default class Vrapper extends Cog {
         if (this._phase === NONRESOURCE) return undefined;
         this.requireActive({ allowActivating: true });
         // if (!this._kuerySubscriptions) this._kuerySubscriptions = new Map();
-        //ret = this._kuerySubscriptions.get(liveOperation);
+        // ret = this._kuerySubscriptions.get(liveOperation);
         // if (!ret || !matchScope(ret.getOptions().scope, (options || {}).scope, liveOperation)) {
           /*
           ++Vrapper.cacheMissComplex;
@@ -1802,7 +1802,7 @@ export default class Vrapper extends Cog {
           const subscription = new Subscription(this, options).initializeKuery(liveOperation, this);
           // if (!ret) this._kuerySubscriptions.set(liveOperation, subscription);
           return subscription;
-        //}
+        // }
         /*
         console.log("KUERY HIT", typeof liveOperation, ++Vrapper.cacheHitComplex, "/",
             Vrapper.cacheMissComplex + Vrapper.cacheHitComplex, this.debugId(),
@@ -1826,6 +1826,7 @@ export default class Vrapper extends Cog {
               ? dumpKuery(liveOperation) : dumpObject(liveOperation)),
           "\n\tthis:", ...dumpObject(this));
     }
+    /*
     function matchScope (subscope, newscope, kuery) {
       const scopeAccesses = kuery[ScopeAccessesTag];
       if (!scopeAccesses || !subscope || !newscope) {
@@ -1835,7 +1836,8 @@ export default class Vrapper extends Cog {
       }
       for (const [name, type] of Object.entries(scopeAccesses)) {
         if (type !== "read") {
-          console.log("non-read access encountered for:", name, type, "in", JSON.stringify(scopeAccesses),
+          console.log("non-read access encountered for:", name, type, "in",
+              JSON.stringify(scopeAccesses),
               "\n\tkuery:", JSON.stringify((kuery.toVAKON && kuery.toVAKON()) || kuery));
           return false;
         }
@@ -1844,17 +1846,16 @@ export default class Vrapper extends Cog {
         if (subval !== newval) {
           if ((subval == null) || (newval == null) || (subval[NativeIdentifierTag] === undefined)
               || (subval[NativeIdentifierTag] !== newval[NativeIdentifierTag])) {
-            /*
-            console.log("mismatching scope values encountered for:", name,
-                "\n\tbetween subscope:", subscope[name], "and newscope:", newscope[name],
-                "\n\tkuery:", JSON.stringify((kuery.toVAKON && kuery.toVAKON()) || kuery));
-            */
+            // console.log("mismatching scope values encountered for:", name,
+            //     "\n\tbetween subscope:", subscope[name], "and newscope:", newscope[name],
+            //    "\n\tkuery:", JSON.stringify((kuery.toVAKON && kuery.toVAKON()) || kuery));
             return false;
           }
         }
       }
       return true;
     }
+    */
   }
 
   _kuerySubscriptions: Map<any, Subscription>;

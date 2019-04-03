@@ -255,6 +255,7 @@ export default class Valker extends Resolver {
    */
   advance (head: any, step: any, scope: ?Object, nonFinalStep: ?boolean) {
     try {
+      // eslint-disable-next-line prefer-rest-params
       return this._steppers["§->"](this, head, scope, arguments, nonFinalStep, 1, 2);
     } catch (error) {
       this.addVALKRuntimeErrorStackFrame(error, step);

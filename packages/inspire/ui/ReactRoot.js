@@ -168,7 +168,7 @@ export default class ReactRoot extends React.Component {
       try {
         const ret = { data: "" };
         const rootSheet = getImplicitMediaInterpretation(this[VSSStyleSheetSymbol],
-            "VSS.rootStyleSheet", { mimeFallback: "text/css", transaction: engine.discourse });
+            "VSS.rootStyleSheet", { mimeFallback: "text/css", discourse: engine.discourse });
         const contextSheet = rootSheet
             && reactRoot.getVSSSheet(rootSheet, this.reactComponent).classes;
         reactRoot._resolveVSSOption(this, ret, contextSheet, rest);
@@ -214,7 +214,7 @@ export default class ReactRoot extends React.Component {
             this._resolveVSSOption(localContext, result, activeSheet, singularOption), sheet);
       } else {
         const newSheet = getImplicitMediaInterpretation(option, "VSS.option",
-            { transaction: this.props.vViewFocus.engine.discourse, mime: "text/css" });
+            { discourse: this.props.vViewFocus.engine.discourse, mime: "text/css" });
         return this.getVSSSheet(newSheet, localContext.reactComponent).classes;
       }
       return sheet;

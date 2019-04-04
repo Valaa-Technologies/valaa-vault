@@ -17,7 +17,6 @@ import StoryRecital from "./StoryRecital";
 
 export function _composeStoryFromEvent (falseProphet: FalseProphet, event: EventBase,
     dispatchDescription: string, timed: ?EventBase, transactionInfo?: TransactionInfo) {
-  const previousState = falseProphet.getState();
   if (!event.aspects) initializeAspects(event, { version: EVENT_VERSION });
   let story = (transactionInfo && transactionInfo._tryFastForwardOnCorpus(falseProphet.corpus));
   if (!story) {
@@ -30,8 +29,6 @@ export function _composeStoryFromEvent (falseProphet: FalseProphet, event: Event
     story = falseProphet.corpus.dispatch(event, dispatchDescription);
   }
   story.timed = timed;
-  story.state = falseProphet.getState();
-  story.previousState = previousState;
   if (dispatchDescription.slice(0, 8) === "prophecy") story.isProphecy = true;
   if (dispatchDescription === "receiveTruth") story.isTruth = true;
   // story.id = story.aspects.command.id; TODO(iridian): what was this?

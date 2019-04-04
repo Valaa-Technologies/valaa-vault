@@ -30,7 +30,7 @@ import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 import { ValoscriptPrimitiveKind /* , NativeIdentifierTag */ } from "~/script";
 // import { ScopeAccessesTag } from "~/script/VALSK";
 
-import { Discourse, Transaction, PartitionConnection } from "~/prophet";
+import { Discourse, PartitionConnection } from "~/prophet";
 import { ChronicleEventResult } from "~/prophet/api/types";
 
 import { createModuleGlobal } from "~/tools/mediaDecoders/JavaScriptDecoder";
@@ -79,7 +79,7 @@ function isNonActivateablePhase (candidate: string) {
  * ('main line state') the backing False Prophet.
  *
  * Transactions can have differing states for this same resource. To make it possible to share
- * the same Vrapper object possible, all operations accept options: { transaction: Transaction }.
+ * the same Vrapper object possible, all operations accept options: { discourse: Discourse }.
  * This can be used to override the operation execution context and must be used whenever operations
  * are being performed inside a transactional context; see FalseProphetDiscourse.acquireTransaction.
  *
@@ -396,7 +396,7 @@ export default class Vrapper extends Cog {
       // any illegal operations will still be caught by FalseProphet
       // and backend validations. But nevertheless the lack of symmetry
       // and dirty caching is unclean. Caching is hard.
-      const resolver = options.transaction
+      const resolver = options.discourse
           || (!options.state && this.engine.discourse)
           || Object.create(this.engine.discourse).setState(options.state);
       if (resolver.tryGoToTransient(this[HostRef], this._typeName)) return;
@@ -432,7 +432,7 @@ export default class Vrapper extends Cog {
   }
 
   getPartitionConnection (options:
-      { require?: boolean, transaction?: Transaction, newConnection?: boolean }
+      { require?: boolean, discourse?: Discourse, newConnection?: boolean }
           = { require: true }): ?PartitionConnection {
     if (this._partitionConnection) return this._partitionConnection;
     let partitionURI;
@@ -442,10 +442,10 @@ export default class Vrapper extends Cog {
         throw new Error(`Non-resource Vrapper's cannot have partition connections`);
       }
       partitionURI = this[HostRef].getPartitionURI();
-      const transaction = options.transaction || this.engine.discourse;
+      const discourse = options.discourse || this.engine.discourse;
       if (!partitionURI) {
         nonGhostOwnerRawId = this[HostRef].getGhostPath().headHostRawId() || this[HostRef].rawId();
-        const transient = transaction.tryGoToTransientOfRawId(nonGhostOwnerRawId, "Resource");
+        const transient = discourse.tryGoToTransientOfRawId(nonGhostOwnerRawId, "Resource");
         if (transient) {
           partitionURI = transient && transient.get("id").getPartitionURI();
           if (!partitionURI) {
@@ -456,7 +456,7 @@ export default class Vrapper extends Cog {
         }
       }
       this._partitionConnection = partitionURI
-          && transaction.acquirePartitionConnection(partitionURI, {
+          && discourse.acquirePartitionConnection(partitionURI, {
             newPartition: false, newConnection: options.newConnection, require: options.require,
           });
       if (!this._partitionConnection) {
@@ -579,16 +579,16 @@ export default class Vrapper extends Cog {
   }
 
   getTransient (options: ?{
-    state?: Object, transaction?: Transaction, typeName?: string, mostMaterialized?: any,
+    state?: Object, discourse?: Discourse, typeName?: string, mostMaterialized?: any,
     withOwnField?: string,
   } = {}) {
     const explicitState = options.state
-        || (options.transaction ? options.transaction.getState()
+        || (options.discourse ? options.discourse.getState()
             : options.withOwnField ? this.engine.discourse.getState()
             : undefined);
     const state = explicitState || this._transientStaledIn;
     if (!state) return this._transient;
-    const discourse = options.transaction || this.engine.discourse;
+    const discourse = options.discourse || this.engine.discourse;
     const typeName = options.typeName || this.getTypeName(options);
     let ret = state.getIn([typeName, this.getRawId()]);
     if (!ret || (options.withOwnField && !ret.has(options.withOwnField))) {
@@ -608,17 +608,17 @@ export default class Vrapper extends Cog {
 
   isGhost () { return this[HostRef].isGhost(); }
 
-  isMaterialized (transaction: ?Transaction) {
-    const state = (transaction || this.engine.discourse).getState();
+  isMaterialized (discourse: ?Discourse) {
+    const state = (discourse || this.engine.discourse).getState();
     this.requireActive({ state });
     return isMaterialized(state, this.getId());
   }
 
-  materialize (transaction: ?Transaction): ChronicleEventResult {
-    const discourse = (transaction || this.engine.discourse);
-    this.requireActive({ state: discourse.getState() });
-    return discourse.chronicleEvent(
-        createMaterializeGhostAction(discourse, this.getId(), this._typeName));
+  materialize (discourse: ?Discourse): ChronicleEventResult {
+    const innerDiscourse = (discourse || this.engine.discourse);
+    this.requireActive({ state: innerDiscourse.getState() });
+    return innerDiscourse.chronicleEvent(
+        createMaterializeGhostAction(innerDiscourse, this.getId(), this._typeName));
   }
 
   _updateTransient (state: ?Object, object: ?Object) {
@@ -704,16 +704,16 @@ export default class Vrapper extends Cog {
   }
 
   run (head: any, kuery: Kuery, options: VALKOptions = {}) {
+    const discourse = options.discourse;
     if (this._phase === ACTIVE) {
       if (options.scope === undefined) options.scope = this.getLexicalScope();
-      const valker = options.transaction;
-      if (valker && valker._runOptions && !options.state) {
-        return valker.tryUnpack(valker.advance(
-            valker.tryPack(head),
+      if (discourse && discourse._runOptions && !options.state) {
+        return discourse.tryUnpack(discourse.advance(
+            discourse.tryPack(head),
             (kuery instanceof Kuery) ? kuery.toVAKON() : kuery,
             options.scope));
       }
-    } else if (!options.state && !options.transaction && this.isResource()) {
+    } else if (!discourse && !options.state && this.isResource()) {
       this.requireActive();
     }
     return super.run(head, kuery, options);
@@ -723,9 +723,9 @@ export default class Vrapper extends Cog {
   setField (fieldName: string, value: any, options: VALKOptions = {}) {
     let commandValue;
     try {
-      const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
+      const { discourse, id } = this._primeTransactionAndOptionsAndId(options);
       commandValue = universalizeCommandData(value, options);
-      return transaction.chronicleEvent(fieldsSet({ id, typeName: this._typeName,
+      return discourse.chronicleEvent(fieldsSet({ id, typeName: this._typeName,
         sets: { [fieldName]: commandValue },
       }));
     } catch (error) {
@@ -741,9 +741,9 @@ export default class Vrapper extends Cog {
   addToField (fieldName: string, value: any, options: VALKOptions = {}) {
     let commandValue;
     try {
-      const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
+      const { discourse, id } = this._primeTransactionAndOptionsAndId(options);
       commandValue = universalizeCommandData(value, options);
-      return transaction.chronicleEvent(addedTo({ id, typeName: this._typeName,
+      return discourse.chronicleEvent(addedTo({ id, typeName: this._typeName,
         adds: { [fieldName]: arrayFromAny(commandValue || undefined) },
       }));
     } catch (error) {
@@ -759,9 +759,9 @@ export default class Vrapper extends Cog {
   removeFromField (fieldName: string, value: any, options: VALKOptions = {}) {
     let commandValue;
     try {
-      const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
+      const { discourse, id } = this._primeTransactionAndOptionsAndId(options);
       commandValue = universalizeCommandData(value, options);
-      return transaction.chronicleEvent(removedFrom({ id, typeName: this._typeName,
+      return discourse.chronicleEvent(removedFrom({ id, typeName: this._typeName,
         removes: { [fieldName]: (commandValue === null) ? null : arrayFromAny(commandValue) },
       }));
     } catch (error) {
@@ -784,7 +784,7 @@ export default class Vrapper extends Cog {
     let universalAddedValues;
     const addedValues = new Set(withValues);
     try {
-      const { transaction, id } = this._primeTransactionAndOptionsAndId(options);
+      const { discourse, id } = this._primeTransactionAndOptionsAndId(options);
       universalRemovedValues = arrayFromAny(
           universalizeCommandData(
                   replacedValues.filter(replacedValue => !addedValues.has(replacedValue)), options)
@@ -792,7 +792,7 @@ export default class Vrapper extends Cog {
       universalAddedValues = arrayFromAny(
           universalizeCommandData(withValues, options)
               || undefined);
-      return transaction.chronicleEvent(replacedWithin({ id, typeName: this._typeName,
+      return discourse.chronicleEvent(replacedWithin({ id, typeName: this._typeName,
         removes: { [fieldName]: universalRemovedValues },
         adds: { [fieldName]: universalAddedValues },
       }));
@@ -810,19 +810,19 @@ export default class Vrapper extends Cog {
     }
   }
 
-  _primeTransactionAndOptionsAndId (options: VALKOptions): { transaction: Discourse, id: VRL } {
-    const transaction = options.transaction || this.engine.discourse;
+  _primeTransactionAndOptionsAndId (options: VALKOptions): { discourse: Discourse, id: VRL } {
+    const discourse = options.discourse || this.engine.discourse;
     this.requireActive(options);
-    let id = transaction.bindObjectId(this.getId(), this._typeName);
+    let id = discourse.bindObjectId(this.getId(), this._typeName);
     options.head = this;
     let partitionURI = id.getPartitionURI();
     if (!partitionURI && id.isGhost()) {
-      partitionURI = transaction.bindObjectId([id.getGhostPath().headHostRawId()], "Resource")
+      partitionURI = discourse.bindObjectId([id.getGhostPath().headHostRawId()], "Resource")
           .getPartitionURI();
       id = id.immutateWithPartitionURI(partitionURI);
     }
     options.partitionURIString = partitionURI && String(partitionURI);
-    return { transaction, id };
+    return { discourse, id };
   }
 
   /**
@@ -833,7 +833,7 @@ export default class Vrapper extends Cog {
    *
    * @param {any} typeName
    * @param {any} [initialState={}]
-   * @param {{ transaction?: Object, scope: ?} [options=Object]
+   * @param {{ discourse?: Object, scope: ?} [options=Object]
    * @param {any} Object
    * @param {any} Number
    */
@@ -873,9 +873,9 @@ export default class Vrapper extends Cog {
     return this.create(typeName, initialState, options);
   }
 
-  destroy (options: { transaction?: Transaction } = {}) {
+  destroy (options: { discourse?: Discourse } = {}) {
     this.requireActive(options);
-    return (options.transaction || this.engine.discourse).destroy({ id: this.getId(options) });
+    return (options.discourse || this.engine.discourse).destroy({ id: this.getId(options) });
   }
 
   /**
@@ -902,10 +902,10 @@ export default class Vrapper extends Cog {
       VALKOptions = {}) {
     this.requireActive(options);
     let typeName = options.typeName;
-    let transaction;
+    let discourse;
     try {
-      transaction = (options.transaction || this.engine.discourse).acquireTransaction("emplace");
-      options.transaction = transaction;
+      discourse = (options.discourse || this.engine.discourse).acquireTransaction("emplace");
+      options.discourse = discourse;
       if (!typeName) {
         const fieldIntro = this.getTypeIntro().getFields()[fieldName];
         invariantifyObject(fieldIntro, `no such field '${fieldName}' in ${
@@ -926,10 +926,10 @@ export default class Vrapper extends Cog {
         if (isSet) this.setField(fieldName, vFieldValue, options);
         else this.addToField(fieldName, vFieldValue, options);
       }
-      transaction.releaseTransaction();
+      discourse.releaseTransaction();
       return vFieldValue;
     } catch (error) {
-      transaction.releaseTransaction({ abort: true, reason: error });
+      discourse.releaseTransaction({ abort: true, reason: error });
       throw this.wrapErrorEvent(error, `emplace${isSet ? "SetField" : "AddToField"}(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tinitialState:", initialState,
@@ -966,13 +966,15 @@ export default class Vrapper extends Cog {
   _getProperty (propertyName: string | Symbol, options: VALKOptions) {
     if (typeof propertyName !== "string") return undefined;
     const ret = this._lexicalScope && this._lexicalScope.hasOwnProperty(propertyName)
-          // FIXME(iridian): If a property gets renamed inside a transaction and a new property gets
-          // created with (or renamed to) the same name we get a cache issue here:
-          // _lexicalScope only updates on actual Engine events which have not yet landed.
-          // Similar issues might arise with herecy rollbacks.
+    // FIXME(iridian): If a property gets renamed inside a transaction
+    // and a new property gets created with (or renamed to) the same
+    // name we get a cache issue here: _lexicalScope only updates on
+    // actual Engine events which have not yet landed. Similar issues
+    // might arise with heresy rollbacks.
         && this._lexicalScope[propertyName];
     if (ret && !ret.isDestroyed()) return ret;
-    // New properties which don't exist in _lexicalScope work fine as they get kueried here.
+    // New properties which don't exist in _lexicalScope work fine as
+    // they get kueried here.
     return this.get(VALEK.property(propertyName), options);
   }
 
@@ -1073,8 +1075,8 @@ export default class Vrapper extends Cog {
     let valueEntry;
     let ret;
     try {
-      const kuerySubscription = options.transaction && options.transaction._runOptions
-          && options.transaction._runOptions.kuerySubscription;
+      const kuerySubscription = options.discourse && options.discourse._runOptions
+          && options.discourse._runOptions.kuerySubscription;
       if (kuerySubscription) {
         kuerySubscription.attachKueryFieldHook(this, "value", true);
       }
@@ -1090,7 +1092,7 @@ export default class Vrapper extends Cog {
       if (isExpandedTransient) {
         valueType = dataFieldValue(valueEntry, "typeName");
       } else {
-        state = (options.transaction || this.engine.discourse).getState();
+        state = (options.discourse || this.engine.discourse).getState();
         valueType = state.getIn(["Expression", valueEntry.rawId()]);
       }
       if (valueType === "Identifier") {
@@ -1131,7 +1133,7 @@ export default class Vrapper extends Cog {
     const valueEntry = thisTransient.get(fieldName);
     if (valueEntry) return valueEntry;
     // This is kludgish handling of immaterial properties.
-    return getObjectRawField(options.transaction || this.engine.discourse, thisTransient,
+    return getObjectRawField(options.discourse || this.engine.discourse, thisTransient,
         fieldName);
   }
 
@@ -1207,8 +1209,8 @@ export default class Vrapper extends Cog {
             "\n\ttype:", activeTypeName,
             "\n\tobject:", this);
       }
-      const kuerySubscription = options.transaction && options.transaction._runOptions
-          && options.transaction._runOptions.kuerySubscription;
+      const kuerySubscription = options.discourse && options.discourse._runOptions
+          && options.discourse._runOptions.kuerySubscription;
       if (kuerySubscription) {
         kuerySubscription.attachFilterHook(this, true, true);
       }
@@ -1470,7 +1472,7 @@ export default class Vrapper extends Cog {
    * @param {*} bvobContent
    * @param {VALKOptions} [options={}]
    * @returns a function callback which creates and returns a Bvob
-   * using the transaction specified in options.transaction.
+   * using the transaction specified in options.discourse.
    *
    * @memberof Vrapper
    */
@@ -1494,7 +1496,7 @@ export default class Vrapper extends Cog {
           function ret (innerOptions: VALKOptions = Object.create(options)) {
             innerOptions.id = contentHash;
             const callerValker = this && this.__callerValker__;
-            if (callerValker) innerOptions.transaction = callerValker;
+            if (callerValker) innerOptions.discourse = callerValker;
             return engine.create("Blob", undefined, innerOptions);
           }
           ret._valkThunk = true;
@@ -1528,7 +1530,7 @@ export default class Vrapper extends Cog {
         "Vrapper.recurseMaterializedFieldResources only available for Resource objects");
     const ret = new Map();
     const state = options.state
-        || (options.transaction && options.transaction.getState())
+        || (options.discourse && options.discourse.getState())
         || this.engine.discourse.getState();
     this._accumulateMaterializedFieldResources(state,
         state.getIn([this.getTypeName(), this.getRawId()]), fieldNames, ret);
@@ -1658,15 +1660,15 @@ export default class Vrapper extends Cog {
  * to obtain similar proxy objects.
  * Partition proxies and partition instances are disjoint even for same prototypes.
  * @param {any} partition
- * @param {any} transaction If given, the proxy lookup and possible creation are performed in the
- *   transaction context. Otherwise, the lookup and creation are immediately performed against the
+ * @param {any} discourse If given, the proxy lookup and possible creation are performed in the
+ *   discourse context. Otherwise, the lookup and creation are immediately performed against the
  *   backing engine and its false prophet.
  */
-  getGhostIn (vInstance: Vrapper, transaction: ?Transaction) {
-    this.requireActive({ transaction });
-    const state = (transaction || this.engine.discourse).getState();
+  getGhostIn (vInstance: Vrapper, discourse: ?Discourse) {
+    this.requireActive({ discourse });
+    const state = (discourse || this.engine.discourse).getState();
     const ghostVRL = createGhostVRLInInstance(this[HostRef],
-        vInstance.getTransient({ transaction }));
+        vInstance.getTransient({ discourse }));
     // TODO(iridian): Verify and return null if this object has no ghost in instance, ie. if this
     // object is not a sub-component in the direct prototype of vInstance
     return this.engine.getVrapper(ghostVRL, { state });
@@ -1811,12 +1813,12 @@ export default class Vrapper extends Cog {
         */
       }
       if (options) {
-        const target = ret.getOptions();
-        if (options.state && (target.state !== undefined)) {
-          target.state = options.state;
+        const targetOptions = ret.getOptions();
+        if (options.state && (targetOptions.state !== undefined)) {
+          targetOptions.state = options.state;
         }
-        if (options.transaction && (target.transaction !== undefined)) {
-          target.transaction = options.transaction;
+        if (options.discourse && (targetOptions.discourse !== undefined)) {
+          targetOptions.discourse = options.discourse;
         }
       }
       return ret;
@@ -2114,7 +2116,7 @@ function createApplicatorWithNoOptions (vrapper: Vrapper, methodName: string) {
 function createApplicatorWithOptionsFirst (vrapper: Vrapper, methodName: string, valker: Valker) {
   return (options: Object = {}, ...rest) => {
     try {
-      options.transaction = valker;
+      options.discourse = valker;
       return vrapper[methodName](options, ...rest);
     } catch (error) {
       throw wrapError(error, `During ${vrapper.debugId()}\n .getVALKMethod(${
@@ -2128,7 +2130,7 @@ function createApplicatorWithOptionsFirst (vrapper: Vrapper, methodName: string,
 function createApplicatorWithOptionsSecond (vrapper: Vrapper, methodName: string, valker: Valker) {
   return (first: any, options: Object = {}, ...rest) => {
     try {
-      options.transaction = valker;
+      options.discourse = valker;
       return vrapper[methodName](first, options, ...rest);
     } catch (error) {
       throw wrapError(error, `During ${vrapper.debugId()}\n .getVALKMethod(${
@@ -2143,7 +2145,7 @@ function createApplicatorWithOptionsSecond (vrapper: Vrapper, methodName: string
 function createApplicatorWithOptionsThird (vrapper: Vrapper, methodName: string, valker: Valker) {
   return (first: any, second: any, options: Object = {}, ...rest) => {
     try {
-      options.transaction = valker;
+      options.discourse = valker;
       return vrapper[methodName](first, second, options, ...rest);
     } catch (error) {
       throw wrapError(error, `During ${vrapper.debugId()}\n .getVALKMethod(${
@@ -2166,7 +2168,7 @@ function createApplicatorWithNamespaceFieldFirstOptionsSecond (vrapper: Vrapper,
         throw new Error(`${debugId(vrapper, { brief: true })
             } does not implement host field '${fieldName}'`);
       }
-      options.transaction = valker;
+      options.discourse = valker;
       return vrapper[methodName](fieldSymbol, options, ...rest);
     } catch (error) {
       throw wrapError(error, `During ${vrapper.debugId()}\n .getVALKMethod(${
@@ -2189,7 +2191,7 @@ function createApplicatorWithNamespaceFieldFirstOptionsThird (vrapper: Vrapper, 
         throw new Error(`${debugId(vrapper, { brief: true })
             } does not implement host field '${fieldName}'`);
       }
-      options.transaction = valker;
+      options.discourse = valker;
       return vrapper[methodName](fieldSymbol, second, options, ...rest);
     } catch (error) {
       throw wrapError(error, `During ${vrapper.debugId()}\n .getVALKMethod(${

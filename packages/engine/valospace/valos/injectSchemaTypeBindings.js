@@ -1,7 +1,7 @@
 // @flow
 
-import { Valker, denoteValOSBuiltinWithSignature, denoteDeprecatedValOSBuiltin,
-  denoteValOSKueryFunction,
+import {
+  denoteValOSBuiltinWithSignature, denoteDeprecatedValOSBuiltin, denoteValOSKueryFunction,
 } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
 import type { VRL } from "~/raem/VRL";
@@ -10,6 +10,8 @@ import { naiveURI } from "~/raem/ValaaURI";
 import {
   createNativeIdentifier, ValoscriptNew, ValoscriptType, ValoscriptPrototype,
 } from "~/script";
+
+import Discourse from "~/prophet";
 
 import VALEK, { extractFunctionVAKON } from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
@@ -24,12 +26,12 @@ export const defaultOwnerCoupledField = Symbol("valos.defaultOwnerCoupledField")
 export default function injectSchemaTypeBindings (valos: Object, scope: Object) {
   scope.Bvob = Object.assign(Object.create(ValoscriptType), {
     name: "Bvob",
-    [ValoscriptNew]: function new_ (valker: Valker, innerScope: ?Object, initialState: ?Object) {
+    [ValoscriptNew]: function new_ (
+        discourse: Discourse, innerScope: ?Object, initialState: ?Object) {
       if (!initialState || !initialState.id) {
         throw new Error("initialState.id missing when trying to create a Bvob");
       }
-      return valker._follower.create("Blob", undefined,
-          { transaction: valker, id: initialState.id });
+      return discourse._follower.create("Blob", undefined, { discourse, id: initialState.id });
     },
   });
   scope.Blob = scope.Bvob;
@@ -46,12 +48,10 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
 
   scope.Resource = valos.Resource = Object.assign(Object.create(scope.TransientFields), {
     name: "Resource",
-    [ValoscriptNew]: function new_ (valker: Valker, innerScope: ?Object, initialState: ?Object) {
+    [ValoscriptNew]: function new_ (
+        discourse: Discourse, innerScope: ?Object, initialState: ?Object) {
       const actualInitialState = prepareInitialState(this, innerScope, initialState, "new");
-      // TODO(iridian): Replace valker._follower with some builtinStep when moving valospace to
-      // @valos/script. Now this relies on valker always being a FalseProphetDiscourse/transaction.
-      const resource = valker._follower.create(this.name, actualInitialState,
-          { transaction: valker });
+      const resource = discourse._follower.create(this.name, actualInitialState, { discourse });
       return resource;
     },
 
@@ -75,7 +75,7 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
         "returns the value of the host field with given *fieldName* of the given *resource*"
     )(function getFieldOf (resource, fieldVAKON) {
       try {
-        return resource.get(fieldVAKON, { transaction: this.__callerValker__ });
+        return resource.get(fieldVAKON, { discourse: this.__callerValker__ });
       } catch (error) {
         throw wrapError(error, `During ${this.constructor.name}\n .getFieldOf, with:`,
             "\n\tresource:", ...dumpObject(resource));
@@ -88,7 +88,7 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
     setFieldOf: denoteDeprecatedValOSBuiltin("[Resource.setField](fieldName, newValue)",
         "sets the host field with given *fieldName* of the given *resource* to given *newValue*"
     )(function setFieldOf (resource, fieldName, newValue) {
-      return resource.setField(fieldName, newValue, { transaction: this.__callerValker__ });
+      return resource.setField(fieldName, newValue, { discourse: this.__callerValker__ });
     }),
 
     addToField: Symbol("Resource.addToField"),
@@ -159,10 +159,10 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
     }),
 
     instantiate: Symbol("Resource.instantiate"),
-    ".instantiate": function _instantiate (valker: Valker, innerScope: ?Object,
+    ".instantiate": function _instantiate (discourse: Discourse, innerScope: ?Object,
         resource: any, initialState: ?Object) {
       return resource.instantiate(prepareInitialState(
-          this, innerScope, initialState, "instantiate"), { transaction: valker });
+          this, innerScope, initialState, "instantiate"), { discourse });
     },
 
     duplicate: Symbol("Resource.duplicate"),
@@ -189,16 +189,14 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
             ""} allows spreading the duplicates to separate partitions (at least insofar a${
             ""} multi-partition commands between said partitions is possible).`
     )(function recombine (...duplicationDirectives) {
-      // TODO(iridian): Replace valker._follower with some builtinStep when moving valospace to
-      // @valos/script. Now this relies on valker always being a FalseProphetDiscourse/transaction.
       return this.__callerValker__._follower.recombine(duplicationDirectives,
-          { transaction: this.__callerValker__ });
+          { discourse: this.__callerValker__ });
     }),
 
     destroy: denoteValOSBuiltinWithSignature(
         `destroys the given *resource* and recursively all resources owned by it`
     )(function destroy (resource) {
-      return resource.destroy({ transaction: this.__callerValker__ });
+      return resource.destroy({ discourse: this.__callerValker__ });
     }),
 
     prepareBlob: Symbol("Resource.prepareBlob"),
@@ -247,7 +245,7 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
     [scope.Resource.setField]: denoteValOSBuiltinWithSignature(
         `sets the value of the host field with given *fieldName* of *this* Resource`
     )(function setField (fieldName: string, newValue: any) {
-      return this.setField(fieldName, newValue, { transaction: this.__callerValker__ });
+      return this.setField(fieldName, newValue, { discourse: this.__callerValker__ });
     }),
 
     [scope.Resource.addToField]: denoteValOSBuiltinWithSignature(
@@ -256,14 +254,14 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
             ""} All added values will be placed to the end of the sequence, even if they already${
             ""} exist.`
     )(function addToField (fieldName: string, value: any) {
-      return this.addToField(fieldName, value, { transaction: this.__callerValker__ });
+      return this.addToField(fieldName, value, { discourse: this.__callerValker__ });
     }),
 
     [scope.Resource.removeFromField]: denoteValOSBuiltinWithSignature(
         `removes the given *value* from the host field with given *fieldName* of *this* Resource.${
             ""} If the *value* is an iterable all the entries will be removed.`
     )(function removeFromField (fieldName: string, value: any) {
-      return this.removeFromField(fieldName, value, { transaction: this.__callerValker__ });
+      return this.removeFromField(fieldName, value, { discourse: this.__callerValker__ });
     }),
 
     [scope.Resource.replaceWithinField]: denoteValOSBuiltinWithSignature(
@@ -273,7 +271,7 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
             ""} in *replacedValues* and addedTo is given *withValues* as-is.`
     )(function replaceWithinField (fieldName: string, replacedValues: any[], withValues: any[]) {
       return this.replaceWithinField(fieldName, replacedValues, withValues,
-          { transaction: this.__callerValker__ });
+          { discourse: this.__callerValker__ });
     }),
 
     [scope.Resource.setOwner]: denoteValOSBuiltinWithSignature(
@@ -283,7 +281,7 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
     )(function setOwner (owner, coupledField
         = (scope[this.name] && scope[this.name][defaultOwnerCoupledField]) || "unnamedOwnlings") {
       return this.setField("owner", owner.getId().coupleWith(coupledField),
-          { transaction: this.__callerValker__ });
+          { discourse: this.__callerValker__ });
     }),
 
     [scope.Resource.getEntity]: denoteValOSKueryFunction(
@@ -305,14 +303,14 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
             ""} specified the current global context *self* is used as the default owner`
     )(function instantiate (initialState) {
       return this.instantiate(prepareInitialState(this, this.__callerScope__, initialState,
-          "instantiate"), { transaction: this.__callerValker__ }, true);
+          "instantiate"), { discourse: this.__callerValker__ }, true);
     }),
 
     [scope.Resource.duplicate]: denoteValOSBuiltinWithSignature(
         `duplicates *this* Resource with given *initialState*.`
     )(function duplicate (initialState) {
       return this.duplicate(prepareInitialState(this, this.__callerScope__, initialState, false),
-          { transaction: this.__callerValker__ });
+          { discourse: this.__callerValker__ });
     }),
 
     [scope.Resource.createDerivedId]: denoteValOSBuiltinWithSignature(
@@ -341,7 +339,7 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
     [scope.Resource.prepareBlob]: denoteDeprecatedValOSBuiltin("[Resource.prepareBlob](content)",
         "Returns a promise to a Bvob creator callback. See Resource.prepareBvob.",
     )(function prepareBlob (content: any) {
-      return Promise.resolve(this.prepareBvob(content, { transaction: this.__callerValker__ }));
+      return Promise.resolve(this.prepareBvob(content, { discourse: this.__callerValker__ }));
     }),
     [scope.Resource.prepareBvob]: denoteValOSBuiltinWithSignature(
         `Returns a promise to a Bvob creator callback based on given *content*. This promise${
@@ -360,7 +358,7 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
             ""} 2. the execution context is reset (ie. on a browser/tab refresh).${
             ""} 3. local bvob cache is explicitly flushed (which is unimplemented).`
     )(function prepareBvob (content: any) {
-      return Promise.resolve(this.prepareBvob(content, { transaction: this.__callerValker__ }));
+      return Promise.resolve(this.prepareBvob(content, { discourse: this.__callerValker__ }));
     }),
   });
   scope.Resource.hostObjectPrototype = scope.Resource.prototype;
@@ -563,8 +561,8 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
     )(function setRelations (name, newRelations: any[]) {
       try {
         return this.replaceWithinField("relations",
-            this.get(VALEK.relations(name), { transaction: this.__callerValker__ }),
-            newRelations, { transaction: this.__callerValker__ });
+            this.get(VALEK.relations(name), { discourse: this.__callerValker__ }),
+            newRelations, { discourse: this.__callerValker__ });
       } catch (error) {
         throw wrapError(error, `During ${this.constructor.name}\n .setRelations('${name}'), with:`,
             "\n\tnewRelations:", ...dumpObject(newRelations));
@@ -604,8 +602,8 @@ export default function injectSchemaTypeBindings (valos: Object, scope: Object) 
     )(function setIncomingRelations (name, newIncomingRelations: any[]) {
       try {
         return this.replaceWithinField("incomingRelations",
-            this.get(VALEK.incomingRelations(name), { transaction: this.__callerValker__ }),
-            newIncomingRelations, { transaction: this.__callerValker__ });
+            this.get(VALEK.incomingRelations(name), { discourse: this.__callerValker__ }),
+            newIncomingRelations, { discourse: this.__callerValker__ });
       } catch (error) {
         throw wrapError(error, `During ${this.constructor.name}\n .setIncomingRelations('${name
             }'), with:`,

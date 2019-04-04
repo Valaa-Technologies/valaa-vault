@@ -118,8 +118,8 @@ export function universalizePartitionMutation (bard: Bard, id: VRL) {
       partitionURI = smallestNonGhostId.getPartitionURI();
     }
     // Resources without partitions are allowed but they must be
-    // subsequently used in a transaction and assigned partition to be
-    // valid.
+    // subsequently used in the same transactional event and assigned
+    // partition to be valid.
     // TODO(iridian): Actually add the validations for detecting
     // dangling partitionless resources.
     if (!partitionURI) return undefined;

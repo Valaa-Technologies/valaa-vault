@@ -43,11 +43,13 @@ export default class Discourse extends Valker {
   // }
 
   /**
-   * transaction - Creates a transaction object for grouping resource manipulations together.
+   * acquireTransaction - Creates a transaction object for grouping
+   * resource manipulations together.
    * @returns {Discourse}  transaction object
    */
-  transaction (): Discourse {
-    throw new Error(`${this.constructor.name}/Discourse.transaction not implemented`);
+  acquireTransaction (name: string): Discourse {
+    throw new Error(
+        `${this.constructor.name}/Discourse.acquireTransaction(${name}) not implemented`);
   }
 
   /**

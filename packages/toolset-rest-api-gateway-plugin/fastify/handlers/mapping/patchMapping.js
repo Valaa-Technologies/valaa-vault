@@ -57,21 +57,21 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       }
 
       const wrap = new Error(this.name);
-      const transaction = server.getDiscourse().acquireTransaction();
-      return thenChainEagerly(transaction, [
+      const discourse = server.getDiscourse().acquireTransaction();
+      return thenChainEagerly(discourse, [
         () => {
           if (vExistingMapping) return vExistingMapping;
           // vSource is not needed if the mapping was found already
           scope.source = !this.toSource ? scope.resource
-              : scope.resource.get(this.toSource, { scope, transaction });
+              : scope.resource.get(this.toSource, { scope, discourse });
           // Replace with createMapping call proper. Now using old idiom
           // and explicit instantiate.
           return this.vPreloads[0].instantiate(
-              { source: scope.source, target: scope.target }, { transaction });
+              { source: scope.source, target: scope.target }, { discourse });
         },
         vMapping => server.patchResource((scope.mapping = vMapping), request.body,
-            { transaction, scope, route }),
-        () => transaction.releaseTransaction(),
+            { discourse, scope, route }),
+        () => discourse.releaseTransaction(),
         eventResult => eventResult
             && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
@@ -96,7 +96,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
           return true;
         },
       ], (error) => {
-        transaction.abortTransaction();
+        discourse.abortTransaction();
         throw server.wrapErrorEvent(error, wrap,
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\trequest.body:", ...dumpObject(request.body),

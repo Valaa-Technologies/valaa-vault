@@ -4,20 +4,21 @@ import { getActionFromPassage } from "~/raem";
 
 import { transacted, EventBase } from "~/raem/events";
 import type { Corpus } from "~/raem/Corpus";
+import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 
 import { ChronicleRequest, ChronicleEventResult } from "~/prophet/api/types";
-import type { Transaction } from "~/prophet/api/Transaction";
+import Discourse from "~/prophet/api/Discourse";
 
 import { dumpObject } from "~/tools";
 
 let transactionCounter = 0;
 
 export default class TransactionInfo {
-  constructor (transaction: Transaction, name: string) {
-    this.transaction = transaction;
+  constructor (discourse: Discourse, name: string) {
+    this.discourse = discourse;
     this.name = name;
-    transaction._parentTransaction = null;
-    transaction.setState(this.stateBefore = transaction.getState());
+    discourse._parentTransaction = null;
+    discourse.setState(this.stateBefore = discourse.getState());
   }
 
   _lazyInit () {
@@ -25,13 +26,14 @@ export default class TransactionInfo {
     // actions is set to null when the transaction has been committed.
     this.actions = [];
     this.passages = [];
-    this.transacted = this.transaction._universalizeEvent(transacted({ actions: [] }));
+    this.transacted = this.discourse._universalizeEvent(transacted({ actions: [] }));
     this.universalPartitions = {};
     this.resultPromises = [];
-    const corpus = this.transaction.corpus = Object.create(this.transaction.corpus);
+    const corpus = this.discourse.corpus = Object.create(this.discourse.corpus);
+    this.storyIndex = (corpus.getState()[StoryIndexTag] || 0) + 1;
     transactionCounter += 1;
     this.transactionDescription = `tx#${transactionCounter} sub-chronicle`;
-    corpus.setName(`${this.transaction.corpus.getName()}/tx#${transactionCounter}:${this.name}`);
+    corpus.setName(`${this.discourse.corpus.getName()}/tx#${transactionCounter}:${this.name}`);
     corpus.setState(this.stateBefore);
     return this;
   }
@@ -44,7 +46,7 @@ export default class TransactionInfo {
     return this.transacted || this._lazyInit().transacted;
   }
 
-  createNestedTransaction (nestingTransaction: Transaction) {
+  createNestedTransaction (nestingTransaction: Discourse) {
     if (!this.transacted) this._lazyInit();
     let parentTransaction = nestingTransaction;
     while (!parentTransaction.hasOwnProperty("_nonFinalizedTransactions")) {
@@ -70,7 +72,7 @@ export default class TransactionInfo {
       if (!this.transacted) this._lazyInit();
       else if (this._finalCommand !== undefined) {
         throw new Error(`Cannot chronicle new events as actions into the transaction '${
-            this.transaction.corpus.getName()}' which has already been ${
+            this.discourse.corpus.getName()}' which has already been ${
                 this._finalCommand ? "committed" : "aborted"}`);
       }
       // What goes on here is an incremental construction and
@@ -81,10 +83,8 @@ export default class TransactionInfo {
       // universal TRANSACTED. This is an awkward way to incrementally
       // construct the transacted.
       // Maybe javascript generators could somehow be useful here?
-      this.transacted.actions = events.map(action => this.transaction._universalizeAction(action));
-
-      const previousState = this.transaction.state;
-      const transactionStory = this.transaction.corpus.dispatch(
+      this.transacted.actions = events.map(action => this.discourse._universalizeAction(action));
+      const transactionStory = this.discourse.corpus.dispatch(
           this.transacted, this.transactionDescription);
       // Only alter transaction internals after the dispatch has
       // performed the content validations.
@@ -93,16 +93,17 @@ export default class TransactionInfo {
       this.transacted.actions = [];
       this.passages.push(...transactionStory.passages);
       Object.assign(this.universalPartitions, (transactionStory.meta || {}).partitions);
-      const state = this.transaction.corpus.getState();
-      this.transaction.setState(state);
+      const state = this.discourse.corpus.getState();
+      state[StoryIndexTag] = this.storyIndex;
+      state[PassageIndexTag] = existingActionCount + events.length;
+      this.discourse.setState(state);
       const info = this;
       return {
         eventResults: events.map((event, index) => {
           let result;
-          transactionStory.passages[index].state = state;
-          transactionStory.passages[index].previousState = previousState;
+          const passage = transactionStory.passages[index];
           return new ChronicleEventResult(event, {
-            story: transactionStory.passages[index],
+            story: passage,
             getLocalStory () { return this.story; },
             getPremiereStory () {
               if (info._finalCommand !== undefined) return this.story;
@@ -114,10 +115,10 @@ export default class TransactionInfo {
         })
       };
     } catch (error) {
-      throw this.transaction.wrapErrorEvent(error,
-          `chronicleEvents(${this.transaction.corpus.getName()})`,
+      throw this.discourse.wrapErrorEvent(error,
+          `chronicleEvents(${this.discourse.corpus.getName()})`,
           "\n\tevents:", ...dumpObject(events),
-          "\n\ttransaction:", ...dumpObject(this.transaction),
+          "\n\ttransaction:", ...dumpObject(this.discourse),
           "\n\ttransactionState:", ...dumpObject(this),
       );
     }
@@ -127,15 +128,15 @@ export default class TransactionInfo {
     let command;
     try {
       if (this._finalCommand !== undefined) {
-        throw new Error(`Cannot commit a transaction '${this.transaction.corpus.getName()
+        throw new Error(`Cannot commit a transaction '${this.discourse.corpus.getName()
             }' that has already been ${this._finalCommand ? "committed" : "aborted"}`);
       }
       if (!Array.isArray(this.actions) || !this.actions.length) {
         this._finalCommand = this.transacted;
       } else {
-        this.stateAfter = this.transaction.getState();
+        this.stateAfter = this.discourse.getState();
         this.transacted.actions = this.actions;
-        // this.transaction.logEvent("committing transaction", this.name,
+        // this.discourse.logEvent("committing transaction", this.name,
         //    `with ${this.transacted.actions.length} actions:`, this.transacted);
         command = this._finalCommand = this.transacted;
         if (!this._finalCommand.actions.length) {
@@ -143,7 +144,7 @@ export default class TransactionInfo {
             event: this._finalCommand, story: command, getPremiereStory () { return command; },
           };
         }
-        this._commitChronicleResult = this.transaction._prophet.chronicleEvent(
+        this._commitChronicleResult = this.discourse._prophet.chronicleEvent(
             this._finalCommand, { transactionInfo: this });
 
         Promise.resolve(this._commitChronicleResult.getPremiereStory()).then(
@@ -156,10 +157,10 @@ export default class TransactionInfo {
       }
       return this._commitChronicleResult;
     } catch (error) {
-      throw this.transaction.wrapErrorEvent(error,
-        `transaction(${this.transaction.corpus.getName()}).commit()`,
+      throw this.discourse.wrapErrorEvent(error,
+        `transaction(${this.discourse.corpus.getName()}).commit()`,
           "\n\tcommand:", ...dumpObject(command),
-          "\n\ttransaction:", ...dumpObject(this.transaction),
+          "\n\ttransaction:", ...dumpObject(this.discourse),
           "\n\ttransactionState:", ...dumpObject(this),
       );
     }
@@ -167,7 +168,7 @@ export default class TransactionInfo {
 
   markAsAborting (/* reason: string = "" */) {
     if (this._finalCommand) {
-      throw new Error(`Cannot abort a transaction '${this.transaction.corpus.getName()
+      throw new Error(`Cannot abort a transaction '${this.discourse.corpus.getName()
           }' which has already been committed`);
     }
     if (this._finalCommand !== undefined) return false;
@@ -175,14 +176,14 @@ export default class TransactionInfo {
     this._finalCommand = false;
     /*
     const messages = [
-      "Aborting transaction", this.transaction.corpus.getName(), reason,
+      "Aborting transaction", this.discourse.corpus.getName(), reason,
       "\n\taborted actions:", ...dumpObject(this.actions),
       "\n\ttransaction state:", ...dumpObject(this),
     ];
     if (Array.isArray(this.actions) && this.actions.length) {
-      this.transaction.errorEvent(...messages);
+      this.discourse.errorEvent(...messages);
     } else {
-      this.transaction.logEvent(...messages);
+      this.discourse.logEvent(...messages);
     }
     */
     return true;
@@ -210,20 +211,20 @@ export default class TransactionInfo {
     // this.logEvent(`Committing fast-forward transaction '${transactionInfo.name}'`);
     const previousState = targetCorpus.getState();
     if (!this.isFastForwardFrom(previousState)) return undefined;
-    targetCorpus.reinitialize(this.stateAfter);
     // this.logEvent(`Committed '${transactionInfo.name}'`, story);
-
-    const universalTransactedLike = {
-      ...this.transacted,
+    const story = targetCorpus.createStoryFromEvent({
       ...this._finalCommand,
       actions: this.passages.map(passage => getActionFromPassage(passage)),
       meta: {
         ...(this.transacted.meta || {}),
         partitions: this.universalPartitions,
       },
-    };
-    const story = targetCorpus.createPassageFromAction(universalTransactedLike);
+    });
     story.passages = this.passages;
+    story.state = this.stateAfter;
+    story.state[StoryIndexTag] = story.storyIndex;
+
+    targetCorpus.reinitialize(this.stateAfter);
     return story;
   }
 }

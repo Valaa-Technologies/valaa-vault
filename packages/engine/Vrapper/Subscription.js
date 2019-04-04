@@ -96,9 +96,9 @@ export default class Subscription extends LiveUpdate {
 
   _refreshState () {
     const options = this._valkOptions;
-    if ((options.transaction === null)
-        || (options.transaction && !options.transaction.isActiveTransaction())) {
-      options.transaction = options.obtainSubscriptionTransaction
+    if ((options.discourse === null)
+        || (options.discourse && !options.discourse.isActiveTransaction())) {
+      options.discourse = options.obtainSubscriptionTransaction
           ? options.obtainSubscriptionTransaction()
           : this._emitter.engine.discourse;
     }
@@ -109,7 +109,7 @@ export default class Subscription extends LiveUpdate {
 
   _invalidateState () {
     if (this._valkOptions.state) this._valkOptions.state = null;
-    if (this._valkOptions.transaction) this._valkOptions.transaction = null;
+    if (this._valkOptions.discourse) this._valkOptions.discourse = null;
   }
 
   _resolveValue (): ?any {
@@ -124,7 +124,7 @@ export default class Subscription extends LiveUpdate {
         if (connecting) return connecting;
         throw error;
       } finally {
-        if (this._valkOptions.transaction !== undefined) this._valkOptions.transaction = null;
+        if (this._valkOptions.discourse !== undefined) this._valkOptions.discourse = null;
       }
     }
     throw new Error(`Cannot resolve value: ${this._fieldFilter !== undefined
@@ -335,7 +335,7 @@ export default class Subscription extends LiveUpdate {
           "\n\toptions.state:", ...dumpObject(options.state && options.state.toJS()),
       );
     } finally {
-      if (options.transaction) options.transaction = null;
+      if (options.discourse) options.discourse = null;
     }
   }
 

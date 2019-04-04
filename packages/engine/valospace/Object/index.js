@@ -116,7 +116,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
   }
 
   function getPrototypeOfWithResource (vResource: Vrapper) {
-    const options = this.__callerValker__ && { transaction: this.__callerValker__ };
+    const options = this.__callerValker__ && { discourse: this.__callerValker__ };
     const ret = vResource.get("prototype", options);
     if (ret) return ret;
     return valos[vResource.getTypeName(options)].hostObjectPrototype;
@@ -127,7 +127,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
   }
 
   function assignValOS (target: any, ...rest: any[]) {
-    const options = { transaction: this.__callerValker__ };
+    const options = { discourse: this.__callerValker__ };
     let combinedSources;
     if (rest.length === 1 && !(rest[0] instanceof Vrapper)) {
       combinedSources = rest[0];
@@ -158,36 +158,36 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
       .filter(VALEK.isImmaterial().not()).map(VALEK.to("name"));
   function keysWithResource (vResource: Vrapper) {
     if (!vResource.hasInterface("Scope")) return [];
-    return vResource.get(toValOSKeys, { transaction: this.__callerValker__ });
+    return vResource.get(toValOSKeys, { discourse: this.__callerValker__ });
   }
 
   const toValOSValues = VALEK.to("properties")
       .filter(VALEK.isImmaterial().not()).map(VALEK.extractValue());
   function valuesWithResource (vResource: Vrapper) {
     if (!vResource.hasInterface("Scope")) return [];
-    return vResource.get(toValOSValues, { transaction: this.__callerValker__ });
+    return vResource.get(toValOSValues, { discourse: this.__callerValker__ });
   }
 
   const toEntriesWithResource = VALEK.to("properties")
       .filter(VALEK.isImmaterial().not()).map(VALEK.array(VALEK.to("name"), VALEK.extractValue()));
   function entriesWithResource (vResource: Vrapper) {
     if (!vResource.hasInterface("Scope")) return [];
-    return vResource.get(toEntriesWithResource, { transaction: this.__callerValker__ });
+    return vResource.get(toEntriesWithResource, { discourse: this.__callerValker__ });
   }
 
 
   function isFrozenWithResource (vResource: Vrapper) {
-    return vResource.get("isFrozen", { transaction: this.__callerValker__ });
+    return vResource.get("isFrozen", { discourse: this.__callerValker__ });
   }
 
   function freezeWithResource (vResource: Vrapper) {
-    vResource.setField("isFrozen", true, { transaction: this.__callerValker__ });
+    vResource.setField("isFrozen", true, { discourse: this.__callerValker__ });
     return vResource;
   }
 
   function isSealedWithResource (vResource: Vrapper) {
     // TODO(iridian): This only works as long as sealWithResource is not implemented.
-    return vResource.get("isFrozen", { transaction: this.__callerValker__ });
+    return vResource.get("isFrozen", { discourse: this.__callerValker__ });
   }
 
   function sealWithResource (/* vResource: Vrapper */) {
@@ -196,7 +196,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
 
   function isExtensibleWithResource (vResource: Vrapper) {
     // TODO(iridian): This only works as long as preventExtensionsWithResource is not implemented.
-    return !vResource.get("isFrozen", { transaction: this.__callerValker__ });
+    return !vResource.get("isFrozen", { discourse: this.__callerValker__ });
   }
 
   function preventExtensionsWithResource (/* vResource: Vrapper */) {
@@ -209,7 +209,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
 
   function definePropertyWithResource (vResource: Vrapper, property: string | Symbol,
       descriptor: Object) {
-    const options = { transaction: this.__callerValker__ };
+    const options = { discourse: this.__callerValker__ };
     const Type = valos[vResource.getTypeName(options)];
     const prototypeEntry = Type.hostObjectPrototype[property];
     try {
@@ -222,7 +222,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
               String(property)}'`);
         }
         vResource.setField(prototypeEntry.writableFieldName, descriptor.value,
-            { transaction: this.__callerValker__ });
+            { discourse: this.__callerValker__ });
       } else if (!vResource.hasInterface("Scope")) {
         throw new Error(`Cannot define valospace property '${String(property)
             }' for an object which doesn't implement Scope`);
@@ -258,7 +258,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
   }
 
   function getOwnPropertyDescriptorWithResource (vResource: Vrapper, property: string | Symbol) {
-    const options = { transaction: this.__callerValker__ };
+    const options = { discourse: this.__callerValker__ };
     const Type = valos[vResource.getTypeName(options)];
     const prototypeEntry = Type.hostObjectPrototype[property];
     if ((typeof prototypeEntry === "object") && (prototypeEntry !== null)
@@ -316,7 +316,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
       .filter(VALEK.toField("ownFields").toField("value").ifDefined({ then: true }));
   function getOwnPropertyDescriptorsWithResource (vResource: Vrapper) {
     const ret = {};
-    const options = { transaction: this.__callerValker__ };
+    const options = { discourse: this.__callerValker__ };
     const transient = vResource.getTransient(options);
     if (transient) {
       const Type = valos[vResource.getTypeName(options)];
@@ -325,7 +325,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
         if ((typeof prototypeEntry === "object") && (prototypeEntry !== null)
             && prototypeEntry.writableFieldName) {
           ret[fieldValue] = createHostMaterializedFieldDescriptorFromLocal(
-              options.transaction, fieldValue, prototypeEntry);
+              options.discourse, fieldValue, prototypeEntry);
         }
       });
     }
@@ -363,7 +363,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
   const toOwnPropertyNames = toOwnProperties.map(VALEK.toField("name"));
   function getOwnPropertyNamesWithResource (vResource: Vrapper) {
     if (!vResource.hasInterface("Scope")) return [];
-    return vResource.get(toOwnPropertyNames, { transaction: this.__callerValker__ });
+    return vResource.get(toOwnPropertyNames, { discourse: this.__callerValker__ });
   }
 
   function getOwnPropertyNamesWithBuiltin (Type: Object) {
@@ -379,7 +379,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
 
   function getOwnPropertySymbolsWithResource (vResource: Vrapper) {
     const ret = [];
-    const options = { transaction: this.__callerValker__ };
+    const options = { discourse: this.__callerValker__ };
     const transient = vResource.getTransient(options);
     if (transient) {
       const Type = valos[vResource.getTypeName(options)];

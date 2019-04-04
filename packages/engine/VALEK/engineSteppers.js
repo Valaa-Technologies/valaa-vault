@@ -40,7 +40,7 @@ function callableOf (valker: Valker, head: any, scope: ?Object,
     const roleName = tryUnpackLiteral(valker, head, toRoleName, scope);
     const vrapper = tryUnpackedHostValue(eCandidate);
     if (vrapper && (vrapper.tryTypeName() === "Media")) {
-      return getImplicitCallable(vrapper, roleName, { transaction: valker });
+      return getImplicitCallable(vrapper, roleName, { discourse: valker });
     }
     throw new Error(`Can't convert ${typeof eCandidate} callee to a function for ${roleName}`);
   } catch (error) {
@@ -61,10 +61,10 @@ function argumentOf (valker: Valker, head: any /* , scope: ?Object,
     if (eHostValue != null) {
       const vrapper = tryUnpackedHostValue(eHostValue);
       if (vrapper && (vrapper.tryTypeName() === "Media")) {
-        const mime = vrapper.resolveMediaInfo({ transaction: valker }).mime;
+        const mime = vrapper.resolveMediaInfo({ discourse: valker }).mime;
         if ((mime === "application/javascript")
             || (mime === "application/valaascript") || (mime === "application/valoscript")) {
-          const ret = vrapper.extractValue({ transaction: valker, synchronous: true });
+          const ret = vrapper.extractValue({ discourse: valker, synchronous: true });
           if (ret !== undefined) {
             if ((ret != null) && (typeof ret.default === "function")) return ret.default;
             return ret;
@@ -85,23 +85,34 @@ function argumentOf (valker: Valker, head: any /* , scope: ?Object,
 function toMethod (valker: Valker, head: any, scope: ?Object, [, callableName]: any,
     hostHead?: Object) {
   if (valker.pure) {
-    // TODO(iridian): kuery protection is disabled as it's not semantically pure (pun intended).
-    // It was intended to denote kueries which have no side effects and could thus be called
-    // freely. This relevant for kueries performing UI rendering, for example. However the theory
-    // of abstraction piercing methods and purity being congruent did not hold for a day.
-    // This system should be re-thought: idempotency and abstraction piercing are separate concepts.
+    // TODO(iridian): kuery protection is disabled as it's not
+    // semantically pure (pun intended). It was intended to denote
+    // kueries which have no side effects and could thus be called
+    // freely. This relevant for kueries performing UI rendering, for
+    // example. However the theory of abstraction piercing methods and
+    // purity being congruent did not hold for a day.
+    // This system should be re-thought: idempotency and abstraction
+    // piercing are separate concepts.
     // throw new Error("'`getHostCallable' VALK abstraction piercing found in pure kuery");
   }
-  // FIXME(iridian) So messy... the big idea here was to treat the abstraction piercing host methods
-  // as first class objects, so that they can be given to §call/§apply. But the annoying thing with
-  // that is that there needs to be a way to forward the valker as a transaction to the Vrapper
-  // methods so that they can keep accessing and modifying the transactional state. So
-  // getVALKMethod below encapsulates the valker, transient and scope etc. in a closure and then
-  // constructs a native function which uses them, so that the native function can pretend to be
-  // a normal javascript function.
-  // So we get to keep some of the expressive power at the cost of both complexity and performance.
-  // Luckily with valoscript no external interface exposes these details anymore so they can
-  // eventually be simplified and made performant.
+  // FIXME(iridian) So messy... the big idea here was to treat the
+  // abstraction piercing host methods as first class objects, so that
+  // they can be given to §call/§apply. But the annoying thing with
+  // that is that there needs to be a way to forward the valker as
+  // a discourse to the Vrapper methods so that they can keep accessing
+  // and modifying any possible transactional state. So getVALKMethod
+  // below encapsulates the valker, transient and scope etc. in
+  // a closure and then constructs a native function which uses them,
+  // so that the native function can pretend to be a normal javascript
+  // function.
+  // So we get to keep some of the expressive power at the cost of both
+  // complexity and performance. Luckily with valoscript no external
+  // interface exposes these details anymore so they can eventually be
+  // simplified and made performant.
+  // TODO(iridian, 2019-04): This simplification process was implemented
+  // for property and identifier accesses with
+  // the _engineIdentifierOrPropertyValue function below, which no
+  // longer uses this toMethod (unlike the valoscript alternative).
   const transient = valker.trySingularTransient(head);
   const actualHostHead = hostHead || valker.unpack(transient) || head;
   if (!actualHostHead || !actualHostHead.getVALKMethod) {
@@ -141,7 +152,7 @@ function _engineIdentifierOrPropertyValue (steppers: Object, valker: Valker, hea
         }
         ePropertyName = symbol;
       }
-      return valker.tryPack(vContainer.propertyValue(ePropertyName, { transaction: valker }));
+      return valker.tryPack(vContainer.propertyValue(ePropertyName, { discourse: valker }));
     }
     ret = eContainer[ePropertyName];
     if (!isGetProperty) {
@@ -152,7 +163,7 @@ function _engineIdentifierOrPropertyValue (steppers: Object, valker: Valker, hea
       if ((typeof ret !== "object") || (ret === null)) return ret;
       ret = isNativeIdentifier(ret) ? getNativeIdentifierValue(ret)
           : (ret._typeName === "Property") && isHostRef(valker.tryPack(ret))
-              ? ret.extractValue({ transaction: valker }, eContainer.this)
+              ? ret.extractValue({ discourse: valker }, eContainer.this)
               : ret;
     }
     return valker.tryPack(ret);

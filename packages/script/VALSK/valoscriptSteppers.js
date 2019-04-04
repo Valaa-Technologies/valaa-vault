@@ -119,7 +119,7 @@ function _getIdentifierOrPropertyValue (steppers: Object, valker: Valker, head: 
         // parts of this file) belong to the @valos/engine steppers-extension, which
         // doesn't exist, which is the reason these are not there.
         : (property._typeName === "Property") && isHostRef(valker.tryPack(property))
-            ? property.extractValue({ transaction: valker }, eContainer.this)
+            ? property.extractValue({ discourse: valker }, eContainer.this)
             : property;
     return valker.tryPack(ret);
   } catch (error) {
@@ -184,7 +184,7 @@ function _alterIdentifierOrPropertyValue (steppers: Object, valker: Valker, head
       }
       if ((typeof property.alterValue === "function") && isHostRef(valker.tryPack(property))) {
         return valker.tryPack(
-            property.alterValue(eAlterationVAKON, { transaction: valker }, eContainer.this));
+            property.alterValue(eAlterationVAKON, { discourse: valker }, eContainer.this));
       }
     }
     throw new Error(`Cannot modify read only or non-existent scope identifier '${
@@ -252,7 +252,7 @@ function _deleteIdentifierOrProperty (steppers: Object, valker: Valker, head: an
             `Cannot delete regular variable '${String(ePropertyName)}' from scope`);
       }
       if ((typeof property.deleteValue === "function") && isHostRef(valker.tryPack(property))) {
-        property.destroy({ transaction: valker });
+        property.destroy({ discourse: valker });
         return true;
       }
     }
@@ -339,7 +339,7 @@ function _new (valker: Valker, head: any, scope: ?Object, newOp: any) {
       return valker.pack(Type[ValoscriptNew](valker, scope, ...eArgs));
     }
     if (isHostRef(eType)) {
-      const PrototypeType = scope.valos[Type.getTypeName({ transaction: valker })];
+      const PrototypeType = scope.valos[Type.getTypeName({ discourse: valker })];
       return valker.pack(PrototypeType[".instantiate"](valker, scope, Type, ...eArgs));
     }
     throw new Error(`'new': cannot create object of type '${typeof Type

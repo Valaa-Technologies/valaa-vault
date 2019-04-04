@@ -135,7 +135,7 @@ export default class LiveProps extends UIComponent {
       });
     }
     const sheetContent = getImplicitMediaInterpretation(value, bindingSlot, {
-      mimeFallback: "text/css", synchronous: undefined, transaction: this.context.engine.discourse,
+      mimeFallback: "text/css", synchronous: undefined, discourse: this.context.engine.discourse,
     });
     if ((sheetContent == null) || isPromise(sheetContent)) return sheetContent;
     if (this._currentSheetContent !== sheetContent) {

@@ -20,10 +20,17 @@ import { debugObjectType, dumpObject, invariantify, invariantifyString,
  * Bard subsystem.
  */
 
-export type Passage = Action;
+export const StoryIndexTag = Symbol("StoryIndex");
+export const PassageIndexTag = Symbol("PassageIndex");
+
+export type Passage = Action & {
+  passageIndex: number;
+};
+
 export type Story = Passage & {
   state: ?Object;
   previousState: ?Object;
+  storyIndex: number;
 };
 
 export function getActionFromPassage (passage: Passage) {
@@ -176,10 +183,9 @@ export default class Bard extends Resolver {
   debugId () {
     const action = this.passage || this.story;
     if (!action) return super.debugId();
-    const description = action.id
-        ? ` ${action.typeName} ${String(action.id).slice(0, 13)}...`
-        : "";
-    return `${super.debugId()}(${action.type}${description})`;
+    const description = action.id ? ` ${action.typeName} ${String(action.id).slice(0, 17)}...` : "";
+    return `${super.debugId()
+        }(#${this.story.storyIndex}/${action.passageIndex} ${action.type}${description})`;
   }
 
   beginStory (store: Object, event: Object) {
@@ -188,7 +194,8 @@ export default class Bard extends Resolver {
     this.preActionState = store.getState();
     this.updateState(this.preActionState);
     this._resourceChapters = {};
-    this.story = this.createPassageFromAction(event);
+    this.storyIndex = (this.preActionState[StoryIndexTag] || 0) + 1;
+    this.story = this.createStoryFromEvent(event);
     return this.story;
   }
 
@@ -207,6 +214,8 @@ export default class Bard extends Resolver {
             "\n\tsuppressed error:", message);
       }
     });
+    this.story.state = this.state;
+    this.state[StoryIndexTag] = this.story.storyIndex;
     // console.log("finishStory:", beaumpify(getActionFromPassage(this.story)));
     return this.story;
   }
@@ -226,6 +235,15 @@ export default class Bard extends Resolver {
   createPassageFromAction (action: Action) {
     const ret = Object.create(action);
     this.correlateReference(action, ret, "id");
+    ret.previousState = this.state;
+    ret.passageIndex = this.nextPassageIndex++;
+    return ret;
+  }
+
+  createStoryFromEvent (event: Action) {
+    this.nextPassageIndex = 0;
+    const ret = this.createPassageFromAction(event);
+    ret.storyIndex = this.storyIndex || 0;
     return ret;
   }
 
@@ -258,7 +276,10 @@ export default class Bard extends Resolver {
     let nextState = this.state;
     for (const [index, passage] of passages.entries()) {
       try {
-        nextState = this.updateState(this.subReduce(nextState, passage));
+        passage.previousState = nextState;
+        passage.state = nextState = this.updateState(this.subReduce(nextState, passage));
+        nextState[StoryIndexTag] = this.story.storyIndex;
+        nextState[PassageIndexTag] = passage.passageIndex;
       } catch (error) {
         throw this.wrapErrorEvent(error, `updateStateWithPassages(#${index})`,
             "\n\tpassage:", ...dumpObject(passage),

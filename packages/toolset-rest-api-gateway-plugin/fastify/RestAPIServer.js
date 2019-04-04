@@ -423,16 +423,16 @@ export default class RestAPIServer extends LogEventGenerator {
     return resultResources;
   }
 
-  patchResource (vResource, patch, { transaction, scope, toPatchTarget } = {}) {
+  patchResource (vResource, patch, { discourse, scope, toPatchTarget } = {}) {
     const vTarget = !toPatchTarget ? vResource
-        : vResource.get(toPatchTarget, { transaction, scope });
+        : vResource.get(toPatchTarget, { discourse, scope });
     _patcher(vTarget, patch);
     return vTarget;
     function _patcher (vScope, subpatch) {
       Object.entries(subpatch).forEach(([propertyName, value]) => {
         if ((value === undefined) || (propertyName === "$V")) return;
         if (Array.isArray(value)) throw new Error("Batch mapping PATCH not implemented yet");
-        const currentValue = vScope.propertyValue(propertyName, { transaction, scope });
+        const currentValue = vScope.propertyValue(propertyName, { discourse, scope });
         if (currentValue instanceof Vrapper) {
           if ((value == null) || (typeof value !== "object")) {
             throw new Error(`Cannot overwrite a structured property '${propertyName
@@ -444,7 +444,7 @@ export default class RestAPIServer extends LogEventGenerator {
                   && (currentValue != null) && (typeof currentValue === "object"))
               ? Object.assign(currentValue, value)
               : value;
-          vScope.alterProperty(propertyName, VALEK.fromValue(newValue), { transaction, scope });
+          vScope.alterProperty(propertyName, VALEK.fromValue(newValue), { discourse, scope });
         }
       });
     }

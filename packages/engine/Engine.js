@@ -180,7 +180,7 @@ export default class Engine extends Cog {
     if (vExisting) return vExisting;
     let typeName;
     let transient;
-    const discourse = options.transaction || this.discourse;
+    const discourse = options.discourse || this.discourse;
     const state = options.state || discourse.getState();
     const id = discourse.obtainReference(idData);
     try {
@@ -277,10 +277,10 @@ export default class Engine extends Cog {
     const isRecombine = Array.isArray(directives);
     const directiveArray = isRecombine ? directives : [directives];
     const extractedProperties = [];
-    let transaction;
+    let discourse;
     try {
-      transaction = (options.transaction || this.discourse).acquireTransaction("construct");
-      options.transaction = transaction;
+      discourse = (options.discourse || this.discourse).acquireTransaction("construct");
+      options.discourse = discourse;
       if (!options.head) options.head = this;
       constructParams = createConstructParams(options);
 
@@ -293,7 +293,7 @@ export default class Engine extends Cog {
           options);
       }
 
-      result = transaction.chronicleEvent(constructCommand(constructParams));
+      result = discourse.chronicleEvent(constructCommand(constructParams));
 
       // FIXME(iridian): If the transaction fails the Vrapper will
       // contain inconsistent data until the next actual update on it.
@@ -307,9 +307,9 @@ export default class Engine extends Cog {
         const id = isRecombine
             ? result.story.passages[index].id
             : result.story.id;
-        const vResource = this.getVrapper(id, { transaction });
+        const vResource = this.getVrapper(id, { discourse });
         if (vResource.isResource()) {
-          Promise.resolve(vResource.activate(transaction.getState()))
+          Promise.resolve(vResource.activate(discourse.getState()))
               .then(undefined, (error) => {
                 outputCollapsedError(localWrapError(this, error,
                     `${constructCommand.name}.activate ${vResource.debugId()}`),
@@ -317,16 +317,16 @@ export default class Engine extends Cog {
               });
         }
         if (extractedProperties[index]) {
-          this._updateProperties(vResource, extractedProperties[index], { transaction });
+          this._updateProperties(vResource, extractedProperties[index], { discourse });
         }
         return vResource;
       });
       const vRet = isRecombine ? ret : ret[0];
-      transaction.releaseTransaction();
+      discourse.releaseTransaction();
       return !options.awaitResult ? vRet
           : thenChainEagerly(options.awaitResult(result, vRet), () => vRet);
     } catch (error) {
-      if (transaction) transaction.abortTransaction();
+      if (discourse) discourse.abortTransaction();
       throw localWrapError(this, error, `${constructCommand.name}()`);
     }
     function localWrapError (self, error, operationName) {
@@ -379,12 +379,12 @@ export default class Engine extends Cog {
   }
 
   _resolveIdForConstructDirective (directive, options: VALKOptions) {
-    const transaction = options.transaction;
+    const discourse = options.discourse;
     const initialState = directive.initialState || {};
     const explicitRawId = options.id || initialState.id;
     delete initialState.id;
     if (initialState.partitionAuthorityURI) {
-      return transaction.assignNewPartitionId(directive,
+      return discourse.assignNewPartitionId(directive,
           initialState.partitionAuthorityURI, explicitRawId);
     }
     let owner = initialState.owner || initialState.source;
@@ -393,16 +393,16 @@ export default class Engine extends Cog {
       if (owner instanceof VRL) {
         let partitionURI = owner.getPartitionURI();
         if (!partitionURI && owner.isGhost()) {
-          partitionURI = transaction
+          partitionURI = discourse
               .bindObjectId([owner.getGhostPath().headHostRawId()], "Resource")
               .getPartitionURI();
         }
         if (partitionURI) {
-          return transaction.assignNewResourceId(directive, String(partitionURI), explicitRawId);
+          return discourse.assignNewResourceId(directive, String(partitionURI), explicitRawId);
         }
       }
     }
-    return transaction.assignNewPartitionlessResourceId(directive, explicitRawId);
+    return discourse.assignNewPartitionlessResourceId(directive, explicitRawId);
   }
 
   outputStatus (output = console) {

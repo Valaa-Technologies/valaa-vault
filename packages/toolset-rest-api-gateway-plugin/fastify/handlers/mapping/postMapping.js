@@ -70,27 +70,27 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       }
 
       const wrap = new Error(`mapping POST ${route.url}`);
-      const transaction = undefined; // server.getDiscourse().acquireTransaction();
-      return thenChainEagerly(transaction, [
+      const discourse = undefined; // server.getDiscourse().acquireTransaction();
+      return thenChainEagerly(discourse, [
         () => {
           scope.source = !this.toSource
               ? scope.resource
-              : scope.resource.get(this.toSource, { transaction, scope });
+              : scope.resource.get(this.toSource, { discourse, scope });
           // Replace with createMapping call proper. Now using old idiom
           // and explicit instantiate.
           console.log("POST stuff:", scope.createResourceAndMapping,
               "\n\tscriptRoot:", scope.scriptRoot && scope.scriptRoot.debugId(),
               "\n\tsource:", scope.source && scope.source.debugId(),
               "\n\tname:", targetName);
-          return scope.scriptRoot.do(scope.createResourceAndMapping, { transaction, scope });
+          return scope.scriptRoot.do(scope.createResourceAndMapping, { discourse, scope });
         },
         vMapping => {
           scope.mapping = server.patchResource(vMapping, request.body,
-              { transaction, scope, route });
+              { discourse, scope, route });
           scope.target = server.patchResource(vMapping, request.body.$V.target,
-              { transaction, scope, route, toPatchTarget: this.toPatchTarget });
+              { discourse, scope, route, toPatchTarget: this.toPatchTarget });
         },
-        () => transaction && transaction.releaseTransaction(),
+        () => discourse && discourse.releaseTransaction(),
         eventResult => eventResult
             && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
@@ -115,7 +115,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
           return true;
         },
       ], (error) => {
-        if (transaction) transaction.abortTransaction();
+        if (discourse) discourse.abortTransaction();
         throw server.wrapErrorEvent(error, wrap,
             "\n\trequest.query:", ...dumpObject(request.query),
             "\n\trequest.body:", ...dumpObject(request.body),

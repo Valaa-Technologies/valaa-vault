@@ -681,7 +681,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
 
       const vFocusActivation = vFocus && vFocus.activate();
       let lensAuthorityURI;
-      let transaction;
+      let discourse;
       return thenChainEagerly(prototype && prototype.activate(), [
         () => vFocusActivation, // This might be redundant, focus could have been waited on.
         () => {
@@ -730,9 +730,9 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
           };
           if (lensAuthorityURI) initialState.partitionAuthorityURI = lensAuthorityURI;
           else initialState.owner = owner;
-          transaction = engine.getActiveGlobalOrNewLocalEventGroupTransaction();
+          discourse = engine.getActiveGlobalOrNewLocalEventGroupTransaction();
           /*
-          transaction = engine.obtainGroupTransaction("receive-events", {
+          discourse = engine.obtainGroupTransaction("receive-events", {
             finalizer: Promise.resolve(),
           });
           */
@@ -744,8 +744,8 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
           // OTOH: TransactionInfo.chronicleEvents.results only
           // support getPremiereStory so whatever semantics is
           // desired it needs to be implemented.
-          // const options = { transaction, awaitResult: result => result.getPremiereStory() };
-          const options = { transaction, awaitResult: result => result.getLocalStory() };
+          // const options = { discourse, awaitResult: result => result.getPremiereStory() };
+          const options = { discourse, awaitResult: result => result.getLocalStory() };
           return (prototype != null)
               ? prototype.instantiate(initialState, options)
               : engine.create("Entity", initialState, options);

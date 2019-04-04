@@ -2,6 +2,7 @@
 
 import { Action, Command, created, duplicated, destroyed, EventBase } from "~/raem/events";
 import type { Corpus } from "~/raem/Corpus";
+import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/VRL";
 import { dumpObject } from "~/raem/VALK";
@@ -56,8 +57,9 @@ export default class FalseProphetDiscourse extends Discourse {
 
   debugId (options: ?Object): string {
     return `${this.constructor.name}(${this._transactionState
-            ? (this._transactionName || "stub-transaction") : "non-transactional"}: ${
-        this._follower.getName(options)} <-> ${this._prophet.debugId(options)})`;
+            ? (this._transactionName || "stub-transactional") : "non-transactional"
+        }: #${this.state[StoryIndexTag]}/${this.state[PassageIndexTag]
+        } ${this._follower.getName(options)})`;
   }
 
   setAssignCommandId (assignCommandId) {
@@ -66,8 +68,8 @@ export default class FalseProphetDiscourse extends Discourse {
 
   run (head: any, kuery: any, options: Object): any {
     try {
-      if (options && options.transaction && (this !== options.transaction)) {
-        return options.transaction.run(head, kuery, options);
+      if (options && options.discourse && (this !== options.discourse)) {
+        return options.discourse.run(head, kuery, options);
       }
       return super.run(head, kuery, options);
     } catch (error) {
@@ -223,39 +225,36 @@ export default class FalseProphetDiscourse extends Discourse {
   }
 
   /**
-   * Returns a new valid transaction which wraps this Discourse and
-   * forks its corpus. The returned transaction prototypically inherits
-   * the wrapped object and thus all of its API; all chroniclings are
-   * intercepted in an internal transaction event log.
+   * Returns a new valid transaction discourse which wraps this
+   * Discourse as prototype and forks its corpus. The returned
+   * discourse thus inherits all of false prophet discourse API, but
+   * in addition all chroniclings are intercepted in an internal
+   * transaction event log.
    * These events are resolved immediately against the forked corpus,
-   * but only claimed forward to the wrapped object once the
-   * transaction is committed using 'outermost' releaseTransaction.
+   * but only claimed forward as commands once the transaction is
+   * committed. This happens when the transaction discourse is released
+   * usind releaseTransaction.
    *
-   * Transaction objects can be nested. Calling releaseTransaction on
-   * an inner transaction is a no-op.
-   *
-   * A transaction is committed using TRANSACTED by default. A custom
-   * command can be specified in any transaction, releaseTransaction or
-   * commit call as a function which takes the list of transaction
-   * actions as the first parameter and returns the final command that
-   * is then sent upstream.
+   * Transaction discourses can be nested by calling acquireTransaction
+   * again on an existing transaction discourse. The main transaction
+   * is committed only when all nested transactions have been released.
    */
   acquireTransaction (name: string): FalseProphetDiscourse {
     let ret;
     const transactionName = `${name}/${++FalseProphetDiscourse.nestIndex}`;
     if (!this._transactionState) {
       ret = Object.create(this);
-      const transactionState = ret._transactionState = new TransactionInfo(ret, name);
+      const transaction = ret._transactionState = new TransactionInfo(ret, name);
       ret.releaseTransaction = function releaseTransaction (
           options: ?{ abort: boolean, reason: Error }) {
         if (options && options.abort) {
-          transactionState.markAsAborting((options.reason || {}).message || options.reason);
+          transaction.markAsAborting((options.reason || {}).message || options.reason);
         }
         if (--this._nonFinalizedTransactions) return false;
         if (this._parentTransaction) {
           return this._parentTransaction.releaseTransaction();
         }
-        return transactionState.finalize();
+        return transaction.finalize();
       };
     } else {
       ret = this._transactionState.createNestedTransaction(this, name);

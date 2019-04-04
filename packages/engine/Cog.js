@@ -48,14 +48,14 @@ export default class Cog extends LogEventGenerator {
   }
 
   doValoscript (valoscriptBody: string, options: VALKOptions = {}) {
-    options.transaction = this.engine.discourse.acquireTransaction("do-body");
+    options.discourse = this.engine.discourse.acquireTransaction("do-body");
     const ret = this.do(transpileValoscriptBody(valoscriptBody, {
       verbosity: options.verbosity || 0,
       customVALK: VALEK,
       sourceInfo: options.sourceInfo,
     }), options);
-    if (options.transaction) {
-      const result = options.transaction.releaseTransaction();
+    if (options.discourse) {
+      const result = options.discourse.releaseTransaction();
       if (result) {
         return thenChainEagerly(
             (options.awaitResult || (r => r.getPersistedEvent()))(result),

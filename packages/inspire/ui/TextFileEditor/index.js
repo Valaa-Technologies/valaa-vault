@@ -99,18 +99,18 @@ class TextFileEditor extends MediaContentEditor {
   saveContent = async (text: string) => {
     const target = this.getFocus();
     if (!target) throw new Error(`TextfileEditor.saveContent called with '${typeof target}' focus`);
-    const transaction = target.acquireTransaction("save-text-content");
+    const discourse = target.acquireTransaction("save-text-content");
     try {
       if ((this.props.confirmSave && !this.props.confirmSave(text, (this.state || {}).content))
           || (this.state.content === text)) {
         return;
       }
-      const createBvob = await target.prepareBvob(text, { transaction });
-      target.setField("content", createBvob(), { transaction });
-      transaction.releaseTransaction();
+      const createBvob = await target.prepareBvob(text, { discourse });
+      target.setField("content", createBvob(), { discourse });
+      discourse.releaseTransaction();
     } catch (error) {
-      if (transaction.isCommittable && transaction.isCommittable()) {
-        transaction.releaseTransaction({ abort: true, reason: error });
+      if (discourse.isCommittable && discourse.isCommittable()) {
+        discourse.releaseTransaction({ abort: true, reason: error });
       }
       throw error;
     }

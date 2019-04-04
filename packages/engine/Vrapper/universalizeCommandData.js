@@ -8,7 +8,7 @@ import { invariantifyObject } from "~/tools/invariantify";
 import { dumpObject, wrapError } from "~/tools/wrapError";
 
 export default function universalizeCommandData (object: ?any, options:
-    { head?: Vrapper, transaction?: Object, scope?: Object, partitionURIString?: string } = {}) {
+    { head?: Vrapper, discourse?: Object, scope?: Object, partitionURIString?: string } = {}) {
   let id, connectedId;
   try {
     if ((typeof object !== "object") || (object === null)) {
@@ -43,15 +43,15 @@ export default function universalizeCommandData (object: ?any, options:
     }
 
     // ValOS reference
-    if (!options.transaction) return id;
-    connectedId = options.transaction.bindFieldVRL(id, {}, null);
+    if (!options.discourse) return id;
+    connectedId = options.discourse.bindFieldVRL(id, {}, null);
     const partitionURI = connectedId.getPartitionURI();
     if (partitionURI) {
       if (String(partitionURI) === options.partitionURIString) {
         return connectedId.immutateWithPartitionURI();
       }
     } else if (connectedId.isGhost()) {
-      const ghostPartitionURI = options.transaction
+      const ghostPartitionURI = options.discourse
           .bindObjectId([id.getGhostPath().headHostRawId()], "Resource")
           .getPartitionURI();
       if (ghostPartitionURI.toString() !== options.partitionURIString) {

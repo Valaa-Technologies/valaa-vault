@@ -834,7 +834,7 @@ export function denoteValOSKueryFunction (description: any = "") {
               }' returns a VALK Kuery object and not VAKON${
               ""} (did you forget a '.toVAKON()' from the return value?)`);
         }
-        return this.get(vakon, { transaction: this.__callerValker__ });
+        return this.get(vakon, { discourse: this.__callerValker__ });
       } catch (error) {
         throw wrapError(error, `During ${createKuery.name}`);
       }

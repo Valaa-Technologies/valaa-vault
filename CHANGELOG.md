@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.19](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.18...v0.34.0-prerelease.19) (2019-04-04)
+
+
+### Bug Fixes
+
+* "sourceURL", allowActivating, dead code removal, className content ([17a6ddf](https://github.com/valaatech/vault/commit/17a6ddf))
+* remove "wrap = new Error" idiom from thenChainEagerly for 5% perf boost ([a86ae43](https://github.com/valaatech/vault/commit/a86ae43))
+* **592:** Valaa-memory gets stored to cloud ([2400896](https://github.com/valaatech/vault/commit/2400896))
+* **inspire:** revert 'head' removal from scope ([0117aba](https://github.com/valaatech/vault/commit/0117aba))
+* **script:** missing kueryFromAst.options call sites ([2296d16](https://github.com/valaatech/vault/commit/2296d16))
+
+
+
+
+
 # [0.34.0-prerelease.18](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.17...v0.34.0-prerelease.18) (2019-03-15)
 
 

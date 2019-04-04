@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.19](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.18...v0.34.0-prerelease.19) (2019-04-04)
+
+
+### Bug Fixes
+
+* **script:** missing kueryFromAst.options call sites ([2296d16](https://github.com/valaatech/vault/commit/2296d16))
+
+
+
+
+
 # [0.34.0-prerelease.18](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.17...v0.34.0-prerelease.18) (2019-03-15)
 
 **Note:** Version bump only for package @valos/script

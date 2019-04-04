@@ -10,6 +10,7 @@ import { elevateFieldReference, elevateFieldRawSequence }
 import Resolver from "~/raem/state/Resolver";
 import Transient, { tryTransientTypeName, PrototypeOfImmaterialTag }
     from "~/raem/state/Transient";
+import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 
 import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
 
@@ -95,6 +96,7 @@ export default class Valker extends Resolver {
       unpackToHost?: Unpacker, steppers?: Object) {
     super({ schema, logger });
     this._indent = verbosity - 2;
+    this.setVerbosity(verbosity);
     this.setHostValuePacker(packFromHost);
     this.setHostValueUnpacker(unpackToHost);
     this.setSteppers(steppers);
@@ -182,14 +184,21 @@ export default class Valker extends Resolver {
 
         const packedResult = valker.advance(packedHead, kueryVAKON, scope);
         ret = valker.tryUnpack(packedResult, true);
-
-        valker.info(`${valker.debugId()}.run(verbosity: ${verbosity}) result, when using`,
-            !state ? "intrinsic state:" : "explicit options.state:",
-            "\n      head:", ...valker._dumpObject(packedHead),
-            "\n      kuery:", ...dumpKuery(kueryVAKON, valker._indent),
-            "\n      final scope:", dumpScope(scope),
-            "\n      result (packed):", dumpify(packedResult),
-            "\n      result:", ...valker._dumpObject(ret));
+        if (valker._verbosity === 1) {
+          valker[state ? "warnEvent" : "infoEvent"](`run()`,
+              (state && `options.state #${state[StoryIndexTag]}/${state[PassageIndexTag]}:`) || "",
+              ", head:", ...valker._dumpObject(packedHead),
+              ", kuery:", ...dumpKuery(kueryVAKON, valker._indent),
+              ", result:", ...valker._dumpObject(ret));
+        } else if (valker._verbosity >= 2) {
+          valker.info(`${valker.debugId()}.run(verbosity: ${verbosity}) result, when using`,
+              !state ? "intrinsic state:" : "explicit options.state:",
+              "\n      head:", ...valker._dumpObject(packedHead),
+              "\n      kuery:", ...dumpKuery(kueryVAKON, valker._indent),
+              "\n      final scope:", dumpScope(scope),
+              "\n      result (packed):", dumpify(packedResult),
+              "\n      result:", ...valker._dumpObject(ret));
+        }
       }
       return ret;
     } catch (error) {

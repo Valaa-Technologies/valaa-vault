@@ -55,11 +55,10 @@ export default class FalseProphetDiscourse extends Discourse {
 
   getProphet () { return this._prophet; }
 
-  debugId (options: ?Object): string {
+  debugId (): string {
     return `${this.constructor.name}(${this._transactionState
             ? (this._transactionName || "stub-transactional") : "non-transactional"
-        }: #${this.state[StoryIndexTag]}/${this.state[PassageIndexTag]
-        } ${this._follower.getName(options)})`;
+        }: #${this.state[StoryIndexTag]}/${this.state[PassageIndexTag]})`;
   }
 
   setAssignCommandId (assignCommandId) {
@@ -85,6 +84,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
       ChroniclePropheciesRequest {
+    this.logEvent(1, () => ["chronicling", events.length, "events:", events]);
     if (this._transactionState) return this._transactionState.chronicleEvents(events, options);
     try {
       options.discourse = this;
@@ -241,12 +241,17 @@ export default class FalseProphetDiscourse extends Discourse {
    */
   acquireTransaction (name: string): FalseProphetDiscourse {
     let ret;
-    const transactionName = `${name}/${++FalseProphetDiscourse.nestIndex}`;
     if (!this._transactionState) {
       ret = Object.create(this);
       const transaction = ret._transactionState = new TransactionInfo(ret, name);
+      this.logEvent(1, () => [
+        "acquired NEW TX", name, ":", { discourse: ret, transaction },
+      ]);
       ret.releaseTransaction = function releaseTransaction (
           options: ?{ abort: boolean, reason: Error }) {
+        this.logEvent(1, () => [
+          "released TX", name, ":", { discourse: this, root: ret, transaction },
+        ]);
         if (options && options.abort) {
           transaction.markAsAborting((options.reason || {}).message || options.reason);
         }
@@ -256,14 +261,18 @@ export default class FalseProphetDiscourse extends Discourse {
         }
         return transaction.finalize();
       };
+      ret._transactionName = `${name}#${++FalseProphetDiscourse.nextIndex}`;
     } else {
       ret = this._transactionState.createNestedTransaction(this, name);
+      this.logEvent(1, () => [
+        "acquired nested TX", name, ":", { discourse: ret, transaction: ret._transactionState },
+      ]);
+      ret._transactionName = `${this._transactionName}/${this._nonFinalizedTransactions}`;
     }
-    ret._transactionName = transactionName;
     ret._nonFinalizedTransactions = 1;
     return ret;
   }
-  static nestIndex = 0;
+  static nextIndex = 0;
 
   isActiveTransaction () {
     return !!this._nonFinalizedTransactions;

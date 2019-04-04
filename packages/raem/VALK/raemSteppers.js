@@ -507,7 +507,7 @@ export function debugWrapBuiltinSteppers (steppers: { [string]: Function }) {
     Object.defineProperty(ret[stepName], "name", { value: `${stepper.name}-debug` });
   }
   debugWrappedBuiltinSteppers.set(steppers, ret);
-  return Object.freeze(ret);
+  return ret;
 }
 
 export function tryLiteral (valker: Valker, head: any, vakon: any, scope: ?Object,

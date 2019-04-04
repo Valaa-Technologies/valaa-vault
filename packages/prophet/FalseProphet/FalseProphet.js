@@ -86,8 +86,10 @@ export default class FalseProphet extends Prophet {
     this.corpus.reinitialize(newState);
   }
 
-  _createDiscourse (follower: Follower) {
-    return new FalseProphetDiscourse({ prophet: this, follower });
+  _createDiscourse (follower: Follower, options: ?Object = {}) {
+    return new FalseProphetDiscourse({
+      prophet: this, follower, verbosity: follower.getVerbosity(), ...options,
+    });
   }
 
   // Split a command and transmit resulting partition commands towards upstream.

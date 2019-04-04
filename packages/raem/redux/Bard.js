@@ -194,8 +194,8 @@ export default class Bard extends Resolver {
     this.preActionState = store.getState();
     this.updateState(this.preActionState);
     this._resourceChapters = {};
-    this.storyIndex = (this.preActionState[StoryIndexTag] || 0) + 1;
     this.story = this.createStoryFromEvent(event);
+    this.storyIndex = this.story.storyIndex;
     return this.story;
   }
 
@@ -243,7 +243,11 @@ export default class Bard extends Resolver {
   createStoryFromEvent (event: Action) {
     this.nextPassageIndex = 0;
     const ret = this.createPassageFromAction(event);
-    ret.storyIndex = this.storyIndex || 0;
+    ret.storyIndex = this.state[StoryIndexTag] || 0;
+    // if (typeof ret.storyIndex !== "number") {
+    //   throw new Error("createStoryFromEvent: current state is missing StoryIndexTag");
+    // }
+    ++ret.storyIndex;
     return ret;
   }
 

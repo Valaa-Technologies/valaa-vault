@@ -3,7 +3,7 @@
 import { invariantifyObject, invariantifyFunction } from "~/tools/invariantify";
 
 import type { Action } from "~/raem/events";
-import Bard from "~/raem/redux/Bard";
+import Bard, { StoryIndexTag } from "~/raem/redux/Bard";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
 
 import { dumpify } from "~/tools";
@@ -44,6 +44,7 @@ export default class Corpus extends Bard {
           corpus.updateState(newState);
           return action;
         });
+    initialState[StoryIndexTag] = -1;
     this.reinitialize(initialState);
   }
 

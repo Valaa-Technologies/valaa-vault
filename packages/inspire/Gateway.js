@@ -255,6 +255,14 @@ export default class Gateway extends LogEventGenerator {
           }
           rootScope.valos.gateway = gateway;
           rootScope.valos.identity = engine.getIdentityManager();
+          if (engine.getVerbosity()) {
+            rootScope.console = Object.assign(Object.create(engine), {
+              info: function verboseInfoEvent (...rest) { this.infoEvent(0, ...rest); },
+              log: function verboseLogEvent (...rest) { this.logEvent(0, ...rest); },
+              warn: function verboseWarnEvent (...rest) { this.warnEvent(0, ...rest); },
+              error: function verboseErrorEvent (...rest) { this.errorEvent(0, ...rest); },
+            });
+          }
         },
         function _attachView () {
           return view.attach(container, explicitWindow, viewConfig);

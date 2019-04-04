@@ -30,7 +30,11 @@ export default class TransactionInfo {
     this.universalPartitions = {};
     this.resultPromises = [];
     const corpus = this.discourse.corpus = Object.create(this.discourse.corpus);
-    this.storyIndex = (corpus.getState()[StoryIndexTag] || 0) + 1;
+    this.storyIndex = corpus.getState()[StoryIndexTag] || 0;
+    // if (typeof this.storyIndex !== "number") {
+    //   throw new Error("corpus.state[StoryIndexTag] missing");
+    // }
+    ++this.storyIndex;
     transactionCounter += 1;
     this.transactionDescription = `tx#${transactionCounter} sub-chronicle`;
     corpus.setName(`${this.discourse.corpus.getName()}/tx#${transactionCounter}:${this.name}`);
@@ -95,7 +99,7 @@ export default class TransactionInfo {
       Object.assign(this.universalPartitions, (transactionStory.meta || {}).partitions);
       const state = this.discourse.corpus.getState();
       state[StoryIndexTag] = this.storyIndex;
-      state[PassageIndexTag] = existingActionCount + events.length;
+      state[PassageIndexTag] = this.actions.length;
       this.discourse.setState(state);
       const info = this;
       return {

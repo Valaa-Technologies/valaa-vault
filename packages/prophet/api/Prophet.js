@@ -66,8 +66,8 @@ export default class Prophet extends LogEventGenerator {
 
   initiate (): Promise<Prophet> | Prophet {}
 
-  addFollower (follower: Follower): Follower {
-    const discourse = this._createDiscourse(follower);
+  addFollower (follower: Follower, options: ?Object): Follower {
+    const discourse = this._createDiscourse(follower, options);
     this._followers.set(follower, discourse);
     return discourse;
   }

@@ -23,7 +23,7 @@ import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
 
 import Engine from "~/engine/Engine";
 import EngineContentAPI from "~/engine/EngineContentAPI";
-import extendValospaceWithEngine from "~/engine/valospace";
+import extendValosheathWithEngine from "~/engine/valosheath";
 
 import InspireView from "~/inspire/InspireView";
 
@@ -240,8 +240,8 @@ export default class Gateway extends LogEventGenerator {
         },
         function _buildRootScope () {
           rootScope = engine.getRootScope();
-          const hostDescriptors = engine.getHostObjectDescriptors();
-          extendValospaceWithEngine(rootScope, hostDescriptors, engine.discourse.getSchema());
+          const hostDescriptors = engine.getHostDescriptors();
+          extendValosheathWithEngine(rootScope, hostDescriptors, engine.discourse.getSchema());
           if (!viewConfig.defaultAuthorityURI) {
             extendValosheathWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal());
           } else {
@@ -250,7 +250,7 @@ export default class Gateway extends LogEventGenerator {
             invariantify(defaultAuthorityConfig,
                 `defaultAuthorityConfig missing when looking for default authority ${
                       String(viewConfig.defaultAuthorityURI)}`);
-            extendValospaceWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal(),
+            extendValosheathWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal(),
                   defaultAuthorityConfig, engine);
           }
           rootScope.valos.gateway = gateway;

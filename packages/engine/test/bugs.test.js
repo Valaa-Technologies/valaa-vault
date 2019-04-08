@@ -2,7 +2,8 @@
 import { created } from "~/raem/events";
 import { vRef } from "~/raem/VRL";
 
-import { createEngineTestHarness, createEngineOracleHarness } from "~/engine/test/EngineTestHarness";
+import { createEngineTestHarness, createEngineOracleHarness }
+    from "~/engine/test/EngineTestHarness";
 import VALEK, { literal, pointer } from "~/engine/VALEK";
 
 import { transpileValoscriptBody } from "~/script";
@@ -184,6 +185,75 @@ describe("Engine bug tests", async () => {
     const unthunkedResult = entities().test.do(bodyKuery, { verbosity: 0 });
     expect(unthunkedResult)
         .toEqual({ a: 1, b: 2, c: { A: 3, B: 4 }, d: { x: 5, y: 6 } });
+  });
+
+  it("0000599: incomingrelations fail", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
+    const bodyText = `
+      const destroyedThing = new Entity({ owner: this });
+
+      const defaultThing = new Entity({ owner: this });
+      // [defaultThing.$V.incomingRelations];
+
+      const oneThing = new Entity({ owner: this });
+      new Relation({ name: "TO_ONE", source: defaultThing, target: oneThing,
+        properties: { v: 0 },
+      });
+
+      const clearedThing = new Entity({ owner: this });
+      new Relation({ name: "TO_CLEARED", source: destroyedThing, target: clearedThing,
+        properties: { v: 1 },
+      });
+
+      const defaultInstance = new defaultThing({ owner: this });
+      const oneInstance = new oneThing({ owner: this });
+      const clearedInstance = new clearedThing({ owner: this });
+
+      const defaultManipulated = new defaultThing({ owner: this });
+      const oneManipulated = new oneThing({ owner: this });
+      const clearedManipulated = new clearedThing({ owner: this });
+      new Relation({ name: "TO_CLEARED", source: destroyedThing, target: defaultManipulated,
+        properties: { v: 2 },
+      });
+      new Relation({ name: "TO_CLEARED", source: destroyedThing, target: oneManipulated,
+        properties: { v: 3 },
+      });
+      new Relation({ name: "TO_CLEARED", source: destroyedThing, target: clearedManipulated,
+        properties: { v: 4 },
+      });
+
+      valos.Resource.destroy(destroyedThing);
+
+      new Relation({ name: "TO_ONE", source: defaultThing, target: defaultManipulated,
+        properties: { v: 5 },
+      });
+      new Relation({ name: "TO_ONE", source: defaultThing, target: oneManipulated,
+        properties: { v: 6 },
+      });
+      new Relation({ name: "TO_ONE", source: defaultThing, target: clearedManipulated,
+        properties: { v: 7 },
+      });
+      [
+        defaultThing, oneThing, clearedThing,
+        defaultInstance, oneInstance, clearedInstance,
+        defaultManipulated, oneManipulated, clearedManipulated,
+      ].map(e => (e.$V.incomingRelations || []).map(r => ({ name: r.$V.name, v: r.v })));
+    `;
+    const bodyKuery = transpileValoscriptBody(bodyText, { customVALK: VALEK });
+    const [
+      defaultThingIR, oneThingIR, clearedThingIR,
+      defaultInstanceIR, oneInstanceIR, clearedInstanceIR,
+      defaultManipulatedIR, oneManipulatedIR, clearedManipulatedIR,
+    ] = entities().test.do(bodyKuery, { verbosity: 0 });
+    expect(defaultThingIR).toEqual([]);
+    expect(oneThingIR).toEqual([{ name: "TO_ONE", v: 0 }]);
+    expect(clearedThingIR).toEqual([]);
+    expect(defaultInstanceIR).toEqual([]);
+    expect(oneInstanceIR).toEqual([{ name: "TO_ONE", v: 0 }]);
+    expect(clearedInstanceIR).toEqual([]);
+    expect(defaultManipulatedIR).toEqual([{ name: "TO_ONE", v: 5 }]);
+    expect(oneManipulatedIR).toEqual([{ name: "TO_ONE", v: 0 }, { name: "TO_ONE", v: 6 }]);
+    expect(clearedManipulatedIR).toEqual([{ name: "TO_ONE", v: 7 }]);
   });
 
   it("Allows both low-level and high manipulation of transient objects", () => {

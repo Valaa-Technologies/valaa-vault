@@ -42,7 +42,10 @@ import debugId from "~/engine/debugId";
 import { LiveUpdate } from "~/engine/Vrapper/FieldUpdate";
 import Subscription from "~/engine/Vrapper/Subscription";
 import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
-import { defaultOwnerCoupledField } from "~/engine/valospace/valos/injectSchemaTypeBindings";
+
+import {
+  OwnerDefaultCouplingTag, PrototypeFieldDescriptorsTag, PropertyDescriptorsTag,
+} from "~/engine/valosheath";
 
 import { arrayFromAny, iterableFromAny, dumpify, dumpObject,
   invariantify, invariantifyObject, invariantifyString,
@@ -220,6 +223,10 @@ export default class Vrapper extends Cog {
       this._typeIntro = intro;
     }
     return this._typeIntro;
+  }
+
+  getValospaceType () {
+    return this.engine.getRootScope().valos[this.getTypeName()];
   }
 
   getFieldIntro (fieldName: string): Object { return this.getTypeIntro().getFields()[fieldName]; }
@@ -950,17 +957,25 @@ export default class Vrapper extends Cog {
     if (vProperty) {
       return vProperty.extractValue(options, this);
     }
-    const hostReference = this.engine.getHostObjectPrototype(typeName)[propertyName];
-    if ((hostReference != null) && hostReference.isHostField) {
-      const namespace = hostReference.namespace;
-      if (namespace) {
-        return ((this._namespaceProxies || (this._namespaceProxies = {}))[namespace]
-            || (this._namespaceProxies[namespace]
-                = this.engine.getRootScope().valos.$valosNamespace._createProxy(this)));
+    const typePrototype = this.engine.getValospaceTypePrototype(typeName);
+    const fieldDescriptor = typePrototype[PropertyDescriptorsTag][propertyName];
+
+    if (fieldDescriptor != null) {
+      if (fieldDescriptor.isHostField) {
+        const namespace = fieldDescriptor.namespace;
+        if (namespace) {
+          // console.log("hostref", fieldDescriptor, fieldDescriptor.isHostField, namespace);
+          return ((this._namespaceProxies || (this._namespaceProxies = {}))[namespace]
+              || (this._namespaceProxies[namespace]
+                  = this.engine.getRootScope().valos.$valosNamespace._createProxy(this)));
+        }
+        const ret = this.get(fieldDescriptor.kuery, options);
+        // console.log("hostref", fieldDescriptor.kuery, ret);
+        return ret;
       }
-      return this.get(hostReference.kuery, options);
+      if (fieldDescriptor.value !== undefined) return fieldDescriptor.value;
     }
-    return hostReference;
+    return typePrototype[propertyName];
   }
 
   _getProperty (propertyName: string | Symbol, options: VALKOptions) {
@@ -994,12 +1009,12 @@ export default class Vrapper extends Cog {
     alterationOptions.scope = this.getLexicalScope();
     let newValue = this.run(0, ["§->", ["§void"], actualAlterationVAKON], alterationOptions);
     const hostType = this.engine.getRootScope().valos[typeName];
-    const fieldPrototypeEntry = hostType.hostObjectPrototype[propertyName];
-    if ((fieldPrototypeEntry != null) && fieldPrototypeEntry.writableFieldName) {
-      newValue = this._preProcessNewReference(newValue, fieldPrototypeEntry, hostType);
+    const fieldDescriptor = hostType[PrototypeFieldDescriptorsTag][propertyName];
+    if ((fieldDescriptor != null) && fieldDescriptor.writableFieldName) {
+      newValue = this._preProcessNewReference(newValue, fieldDescriptor, hostType);
       // TODO(iridian): Make this solution semantically consistent host field access.
       // Now stupidly trying to setField even if the field is not a primaryField.
-      this.setField(fieldPrototypeEntry.writableFieldName, newValue, options);
+      this.setField(fieldDescriptor.writableFieldName, newValue, options);
       return newValue;
     }
     options.head = this;
@@ -1014,7 +1029,7 @@ export default class Vrapper extends Cog {
   _preProcessNewReference (newValue: VRL, fieldPrototypeEntry: Object, hostType: Object) {
     if (fieldPrototypeEntry.fieldName === "owner"
         && !((newValue instanceof VRL) && newValue.getCoupledField())) {
-      const defaultCoupledField = hostType[defaultOwnerCoupledField];
+      const defaultCoupledField = hostType[OwnerDefaultCouplingTag];
       if (defaultCoupledField) {
         return getHostRef(newValue).coupleWith(defaultCoupledField);
       }

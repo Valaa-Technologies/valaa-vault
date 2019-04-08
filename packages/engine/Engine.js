@@ -79,7 +79,7 @@ export default class Engine extends Cog {
       },
     };
 
-    this._hostObjectDescriptors = new Map();
+    this._hostDescriptors = new Map();
     this._rootScope = {};
     this._rootScope[rootScopeSelf] = this._rootScope;
   }
@@ -111,14 +111,11 @@ export default class Engine extends Cog {
   getRootScope () { return this._rootScope; }
   getLexicalScope () { return this.getRootScope(); }
   getNativeScope () { return this.getRootScope(); }
-  getHostObjectDescriptors () { return this._hostObjectDescriptors; }
-  getHostObjectDescriptor (objectKey: any) { return this._hostObjectDescriptors.get(objectKey); }
+  getHostDescriptors () { return this._hostDescriptors; }
+  getHostObjectDescriptor (objectKey: any) { return this._hostDescriptors.get(objectKey); }
 
-  getTypeDescriptor (typeName: string) {
-    return this._rootScope.valos[typeName];
-  }
-  getHostObjectPrototype (typeName: string) {
-    return (this._rootScope.valos[typeName] || {}).hostObjectPrototype;
+  getValospaceTypePrototype (typeName: string) {
+    return (this._rootScope.valos[typeName] || {}).prototype;
   }
   getIdentityManager () {
     return this._identityManager;

@@ -1,6 +1,6 @@
 // @flow
 
-import { ValoscriptInterface, ValoscriptPrimitiveKind } from "~/script";
+import { valoscriptInterfacePrototype, ValoscriptPrimitiveKind } from "~/script";
 import { toVAKON } from "~/script/VALSK";
 
 import { beaumpify } from "~/tools";
@@ -9,7 +9,7 @@ import { denoteValOSBuiltinWithSignature } from "~/raem/VALK";
 
 /* eslint-disable prefer-arrow-callback */
 
-export default function injectSchemaTypeBindings (valos: Object) {
+export default function enfoldGatewaySheath (valos: Object) {
   Object.assign(valos, {
     beautify: beaumpify,
     toVAKON,
@@ -17,7 +17,7 @@ export default function injectSchemaTypeBindings (valos: Object) {
     Lens: null,
   });
 
-  valos.Discourse = Object.assign(Object.create(ValoscriptInterface), {
+  valos.Discourse = Object.assign(Object.create(valoscriptInterfacePrototype), {
     name: "Discourse",
 
     getContextDiscourse: denoteValOSBuiltinWithSignature(

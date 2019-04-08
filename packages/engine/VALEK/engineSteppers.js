@@ -10,7 +10,7 @@ import valoscriptSteppers from "~/script/VALSK/valoscriptSteppers";
 import { isNativeIdentifier, getNativeIdentifierValue } from "~/script";
 
 import getImplicitCallable from "~/engine/Vrapper/getImplicitCallable";
-import { NamespaceInterfaceTag } from "~/engine/valospace/namespace";
+import { NamespaceInterfaceTag } from "~/engine/valosheath/namespace";
 
 // import { createNativeIdentifier } from "~/script/denormalized/nativeIdentifier";
 

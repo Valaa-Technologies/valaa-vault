@@ -13,11 +13,16 @@
  * scope, DOM, execution engine builtin operations, etc.)
  */
 
+export const PropertyDescriptorsTag = Symbol("valos.PropertyDescriptors");
+export const TypeFieldDescriptorsTag = Symbol("valos.TypeFieldDescriptors");
+export const PrototypeFieldDescriptorsTag = Symbol("valos.PrototypeFieldDescriptors");
+
 export function createHostPrototypeFieldDescriptor (field: Object) {
   return Object.freeze({
-    writable: field.writable, enumerable: field.enumerable, configurable: field.configurable,
-    valos: true, host: true, field: true, description: field.description,
-    namespace: field.namespace, persisted: field.persisted,
+    ...field,
+    // writable: field.writable, enumerable: field.enumerable, configurable: field.configurable,
+    valos: true, host: true, field: true,
+    // description: field.description, namespace: field.namespace, persisted: field.persisted,
   });
 }
 
@@ -25,9 +30,8 @@ export function createHostMaterializedFieldDescriptor (value: any, field: Object
   const ret = {
     value,
     writable: field.writable, enumerable: field.enumerable, configurable: field.configurable,
-    valos: true, host: true, field: true, description: field.description,
-    persisted: field.persisted,
-    ...(removes ? { removes } : {}),
+    valos: true, host: true, field: true,
+    description: field.description, persisted: field.persisted, ...(removes ? { removes } : {}),
   };
   if (removes) ret.removes = removes;
   return Object.freeze(ret);

@@ -2,16 +2,18 @@
 
 import { PartialRemovesTag } from "~/raem/state/partialSequences";
 
-import { ValoscriptType, ValoscriptPrimitiveKind } from "~/script";
+import { ValoscriptPrimitiveKind } from "~/script";
 
 import VALEK, { expressionFromProperty } from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 import {
-  createHostPrototypeFieldDescriptor, createHostMaterializedFieldDescriptor,
-  createHostFunctionDescriptor, createHostPropertyDescriptor,
-} from "~/engine/valospace/hostPropertyDescriptors";
+  createHostMaterializedFieldDescriptor, createHostPropertyDescriptor,
+  PropertyDescriptorsTag,
+} from "~/engine/valosheath/hostDescriptors";
 
 import { wrapError, dumpObject } from "~/tools";
+
+/* eslint-disable prefer-rest-params */
 
 /**
  * Creates a ValOS-decorated Object constructor for use inside
@@ -24,7 +26,7 @@ import { wrapError, dumpObject } from "~/tools";
  * @param {Object} valos
  * @returns
  */
-export default function extendObject (scope: Object, hostObjectDescriptors: Map<any, Object>,
+export default function extendObject (scope: Object, hostDescriptors: Map<any, Object>,
     valos: Object) {
   const UndecoratedObject = scope.Object || Object;
   scope.Object = function DecoratedObject (...rest) {
@@ -32,32 +34,42 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
   };
   scope.Object.prototype = Object.prototype;
 
-
-  function _createArg0Dispatcher (description: string, objectOperation: () => any,
-      valosOperation, valosTypeOperation = objectOperation,
+  function _createArg0Dispatcher (description: string,
+      objectOperation: () => any,
+      valosOperation,
+      valosTypeOperation = objectOperation,
       valosPrototypeOperation = objectOperation) {
-    const ret = function objectDecoratorArg0Dispatcher (...rest) {
-      const isValos0 = (typeof rest[0] === "object") && (rest[0] !== null)
-          && rest[0][ValoscriptPrimitiveKind];
-      return (!isValos0 ? objectOperation
-              : rest[0] instanceof Vrapper ? valosOperation
-              : ValoscriptType.isPrototypeOf(rest[0]) ? valosTypeOperation
-              : valosPrototypeOperation)
-          .apply(this, rest);
+    const dispatchers = {
+      "": objectOperation,
+      Vrapper: valosOperation,
+      Type: valosTypeOperation,
+      Prototype: valosPrototypeOperation,
     };
+    const ret = function valosArg0Dispatch () {
+      return dispatchers[((arguments[0] != null) && arguments[0][ValoscriptPrimitiveKind]) || ""]
+          .apply(this, arguments);
+    };
+    Object.defineProperty(ret, "name", { value: `valoscript_Object_${objectOperation.name}` });
     ret._valkDescription = description;
     ret._valkThunk = true;
     return ret;
   }
 
-  function _createArg01Dispatcher (description: string, objectOperation: () => any,
-      valosOperation: () => any) {
-    const ret = function objectDecoratorArg01Dispatcher (...rest) {
-      const isValos0 = (typeof rest[0] === "object") && (rest[0] !== null)
-          && rest[0][ValoscriptPrimitiveKind];
-      const isValos1 = (typeof rest[1] === "object") && (rest[1] !== null)
-          && rest[1][ValoscriptPrimitiveKind];
-      return (!isValos0 && !isValos1 ? objectOperation : valosOperation).apply(this, rest);
+  function _createArg01Dispatcher (description: string,
+      objectOperation: () => any,
+      valosOperation,
+      valosTypeOperation = objectOperation,
+      valosPrototypeOperation = objectOperation) {
+    const dispatchers = {
+      "": objectOperation,
+      Vrapper: valosOperation,
+      Type: valosTypeOperation,
+      Prototype: valosPrototypeOperation,
+    };
+    const ret = function objectDecoratorArg01Dispatcher () {
+      const arg0Kind = (arguments[0] != null) && arguments[0][ValoscriptPrimitiveKind];
+      const arg1Kind = (arguments[1] != null) && arguments[1][ValoscriptPrimitiveKind];
+      return dispatchers[arg0Kind || arg1Kind || ""].apply(this, arguments);
     };
     ret._valkDescription = description;
     ret._valkThunk = true;
@@ -95,10 +107,10 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
 
   scope.Object.getOwnPropertyDescriptor = _createArg0Dispatcher("",
       Object.getOwnPropertyDescriptor, getOwnPropertyDescriptorWithResource,
-      getOwnPropertyDescriptorWithBuiltin, getOwnPropertyDescriptorWithPrototype);
+      getOwnPropertyDescriptorWithAny, getOwnPropertyDescriptorWithAny);
   scope.Object.getOwnPropertyDescriptors = _createArg0Dispatcher("",
       Object.getOwnPropertyDescriptors, getOwnPropertyDescriptorsWithResource,
-      getOwnPropertyDescriptorsWithBuiltin, getOwnPropertyDescriptorsWithPrototype);
+      getOwnPropertyDescriptorsWithAny, getOwnPropertyDescriptorsWithAny);
   scope.Object.getOwnPropertyNames = _createArg0Dispatcher("",
       Object.getOwnPropertyNames, getOwnPropertyNamesWithResource,
       getOwnPropertyNamesWithBuiltin, getOwnPropertyNamesWithPrototype);
@@ -119,7 +131,7 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
     const options = this.__callerValker__ && { discourse: this.__callerValker__ };
     const ret = vResource.get("prototype", options);
     if (ret) return ret;
-    return valos[vResource.getTypeName(options)].hostObjectPrototype;
+    return valos[vResource.getTypeName(options)].prototype;
   }
 
   function setPrototypeOfWithResource (/* vResource: Vrapper, vPrototype: Vrapper */) {
@@ -210,18 +222,17 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
   function definePropertyWithResource (vResource: Vrapper, property: string | Symbol,
       descriptor: Object) {
     const options = { discourse: this.__callerValker__ };
-    const Type = valos[vResource.getTypeName(options)];
-    const prototypeEntry = Type.hostObjectPrototype[property];
+    const valospaceType = valos[vResource.getTypeName(options)];
+    const fieldDescriptor = valospaceType.prototype[PropertyDescriptorsTag][property];
     try {
-      if ((typeof prototypeEntry === "object") && (prototypeEntry !== null)
-          && prototypeEntry.writableFieldName) {
+      if ((fieldDescriptor != null) && fieldDescriptor.writableFieldName) {
         // Define a native field value
         // TODO(iridian): handle other descriptor parameters (at least check they're valid).
         if (!descriptor.hasOwnProperty("value")) {
           throw new Error(`descriptor.value is missing when trying to define a native field '${
               String(property)}'`);
         }
-        vResource.setField(prototypeEntry.writableFieldName, descriptor.value,
+        vResource.setField(fieldDescriptor.writableFieldName, descriptor.value,
             { discourse: this.__callerValker__ });
       } else if (!vResource.hasInterface("Scope")) {
         throw new Error(`Cannot define valospace property '${String(property)
@@ -248,36 +259,46 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
   }
 
   function definePropertyWithBuiltin (builtinType: Object) {
-    throw new Error(`Object.defineProperty not implemented for builtin ValOS types (here '${
+    throw new Error(`Object.defineProperty not implemented for builtin valoscript types (here '${
         builtinType.name}'`);
   }
 
   function definePropertyWithPrototype (prototype: Object) {
-    throw new Error(`Object.defineProperty not implemented for ValOS Resource prototypes (here '${
+    throw new Error(`Object.defineProperty not implemented for Resource prototypes (here '${
         prototype.constructor.name}')`);
+  }
+
+  function getOwnPropertyDescriptorWithAny (valospaceValue: Object, property: string) {
+    // TODO(iridian, 2019-04): possibly wrong semantics, might need to throw
+    if (valospaceValue == null) return undefined;
+    const descriptorBase = (valospaceValue[PropertyDescriptorsTag] || {})[property];
+    if (!descriptorBase) return Object.getOwnPropertyDescriptor(valospaceValue, property);
+    return { ...descriptorBase, value: valospaceValue[property] };
   }
 
   function getOwnPropertyDescriptorWithResource (vResource: Vrapper, property: string | Symbol) {
     const options = { discourse: this.__callerValker__ };
-    const Type = valos[vResource.getTypeName(options)];
-    const prototypeEntry = Type.hostObjectPrototype[property];
-    if ((typeof prototypeEntry === "object") && (prototypeEntry !== null)
-        && prototypeEntry.writableFieldName) {
-      const transient = vResource.getTransient(options);
-      if (!transient.has(prototypeEntry.writableFieldName)) return undefined;
-      return createHostMaterializedFieldDescriptorFromLocal(
-          this.__callerValker__, transient.get(prototypeEntry.writableFieldName), prototypeEntry);
+    const valospaceType = valos[vResource.getTypeName(options)];
+    const descriptorBase = valospaceType.prototype[PropertyDescriptorsTag][property];
+    if (!descriptorBase) {
+      if (!vResource.hasInterface("Scope")) return undefined;
+      const vProperty = vResource._getProperty(property, options);
+      if (!vProperty || !vProperty.isMaterialized()) return undefined;
+      return createHostPropertyDescriptorFromProperty(vProperty, vResource, options);
     }
-    if (!vResource.hasInterface("Scope")) return undefined;
-    const vProperty = vResource._getProperty(property, options);
-    if (!vProperty || !vProperty.isMaterialized()) return undefined;
-    return createHostPropertyDescriptorFromProperty(vProperty, vResource, options);
+    const writableFieldName = descriptorBase.writableFieldName;
+    if (!writableFieldName) return { ...descriptorBase, value: valospaceType.prototype[property] };
+    const transient = vResource.getTransient(options);
+    const value = transient.get(writableFieldName);
+    if ((value === undefined) && !transient.has(writableFieldName)) return undefined;
+    return createHostMaterializedFieldDescriptorFromLocal(
+        this.__callerValker__, value, descriptorBase);
   }
 
   function createHostPropertyDescriptorFromProperty (vProperty: Vrapper, vResource: Vrapper,
       options: Object) {
     const valueEntry = vProperty.getTransient(options).get("value");
-    if (typeof valueEntry === "undefined") return undefined;
+    if (valueEntry === undefined) return undefined;
     return createHostPropertyDescriptor(
         vProperty.extractPropertyValue(options, vResource, valueEntry));
   }
@@ -294,24 +315,6 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
         valker.tryUnpack(localValue, true), descriptor, removes);
   }
 
-  function getOwnPropertyDescriptorWithBuiltin (Type: Object, property: string) {
-    if (!Type.hasOwnProperty(property)) return undefined;
-    // 'name' value is a string but is not a native field symbol. Skip.
-    if ((typeof property === "string") && (property !== "name")) {
-      const typeDescriptor = hostObjectDescriptors.get(Type);
-      const propertyDescriptor = typeDescriptor && typeDescriptor[property];
-      if (propertyDescriptor) return propertyDescriptor;
-    }
-    return Object.getOwnPropertyDescriptor(Type, property);
-  }
-
-  function getOwnPropertyDescriptorWithPrototype (hostObjectPrototype: Object,
-      property: string | Symbol) {
-    const field = hostObjectPrototype[property];
-    return (field && field.isHostField && createHostPrototypeFieldDescriptor(field))
-        || (field && createHostFunctionDescriptor(field));
-  }
-
   const toOwnProperties = VALEK.toField("properties")
       .filter(VALEK.toField("ownFields").toField("value").ifDefined({ then: true }));
   function getOwnPropertyDescriptorsWithResource (vResource: Vrapper) {
@@ -319,46 +322,38 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
     const options = { discourse: this.__callerValker__ };
     const transient = vResource.getTransient(options);
     if (transient) {
-      const Type = valos[vResource.getTypeName(options)];
+      const valospaceType = valos[vResource.getTypeName(options)];
       transient.forEach((fieldValue, fieldName) => {
-        const prototypeEntry = Type.hostObjectPrototype[Type[fieldName] || ""];
-        if ((typeof prototypeEntry === "object") && (prototypeEntry !== null)
-            && prototypeEntry.writableFieldName) {
-          ret[fieldValue] = createHostMaterializedFieldDescriptorFromLocal(
-              options.discourse, fieldValue, prototypeEntry);
+        const fieldSymbol = valospaceType[fieldName] || "";
+        const fieldDescriptor = valospaceType.prototype[PropertyDescriptorsTag][fieldSymbol];
+        if ((fieldDescriptor != null) && fieldDescriptor.writableFieldName) {
+          ret[fieldSymbol] = createHostMaterializedFieldDescriptorFromLocal(
+              options.discourse, fieldValue, fieldDescriptor);
         }
       });
-    }
-    if (transient.get("properties")) {
-      // TODO(iridian): This could be done with one query, but passing extractValue.vExplicitOwner
-      // is a bit tricky.
-      const properties = vResource.get(toOwnProperties, options);
-      for (const vProperty of properties) {
-        ret[vProperty.get("name", options)] =
-            createHostPropertyDescriptorFromProperty(vProperty, vResource, options);
+      if (transient.get("properties")) {
+        // TODO(iridian): This could be done with one query, but
+        // passing extractValue.vExplicitOwner is a bit tricky.
+        const properties = vResource.get(toOwnProperties, options);
+        for (const vProperty of properties) {
+          ret[vProperty.get("name", options)] =
+              createHostPropertyDescriptorFromProperty(vProperty, vResource, options);
+        }
       }
     }
     return ret;
   }
 
-  function getOwnPropertyDescriptorsWithBuiltin (Type: Object) {
+  function getOwnPropertyDescriptorsWithAny (valospaceType: Object) {
     const ret = {};
-    for (const property of Object.getOwnPropertyNames(Type)
-        .concat(Object.getOwnPropertySymbols(Type))) {
-      ret[property] = getOwnPropertyDescriptorWithBuiltin(Type, property);
+    for (const name of Object.getOwnPropertyNames(valospaceType)) {
+      ret[name] = getOwnPropertyDescriptorWithAny(valospaceType, name);
+    }
+    for (const symbol of Object.getOwnPropertySymbols(valospaceType)) {
+      ret[symbol] = getOwnPropertyDescriptorWithAny(valospaceType, symbol);
     }
     return ret;
   }
-
-  function getOwnPropertyDescriptorsWithPrototype (hostObjectPrototype: Object) {
-    const ret = {};
-    for (const property of Object.getOwnPropertyNames(hostObjectPrototype)
-        .concat(Object.getOwnPropertySymbols(hostObjectPrototype))) {
-      ret[property] = getOwnPropertyDescriptorWithPrototype(hostObjectPrototype, property);
-    }
-    return ret;
-  }
-
 
   const toOwnPropertyNames = toOwnProperties.map(VALEK.toField("name"));
   function getOwnPropertyNamesWithResource (vResource: Vrapper) {
@@ -366,14 +361,14 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
     return vResource.get(toOwnPropertyNames, { discourse: this.__callerValker__ });
   }
 
-  function getOwnPropertyNamesWithBuiltin (Type: Object) {
+  function getOwnPropertyNamesWithBuiltin (valospaceType: Object) {
     // TODO(iridian): Might not work if symbols are polyfilled. Should!
-    return Object.getOwnPropertyNames(Type);
+    return Object.getOwnPropertyNames(valospaceType);
   }
 
-  function getOwnPropertyNamesWithPrototype (hostObjectPrototype: Object) {
+  function getOwnPropertyNamesWithPrototype (valospacePrototype: Object) {
     // TODO(iridian): Might not work if symbols are polyfilled. Should!
-    return Object.getOwnPropertyNames(hostObjectPrototype);
+    return Object.getOwnPropertyNames(valospacePrototype);
   }
 
 
@@ -382,32 +377,33 @@ export default function extendObject (scope: Object, hostObjectDescriptors: Map<
     const options = { discourse: this.__callerValker__ };
     const transient = vResource.getTransient(options);
     if (transient) {
-      const Type = valos[vResource.getTypeName(options)];
+      const valospaceType = valos[vResource.getTypeName(options)];
+      const fieldDescriptors = valospaceType.prototype[PropertyDescriptorsTag];
       transient.forEach((fieldValue, fieldName) => {
-        let fieldSymbol = Type[fieldName];
-        let fieldIntro = fieldSymbol && Type.hostObjectPrototype[fieldSymbol];
-        if (!fieldIntro) {
+        let fieldSymbol = valospaceType[fieldName];
+        let fieldDescriptor = fieldDescriptors[fieldSymbol];
+        if (!fieldDescriptor) {
           if (fieldName === "name") {
-            fieldSymbol = Type.nameAlias;
+            fieldSymbol = valospaceType.nameAlias;
           } else if (fieldName === "prototype") {
-            fieldSymbol = Type.prototypeAlias;
+            fieldSymbol = valospaceType.prototypeAlias;
           }
-          fieldIntro = Type.hostObjectPrototype[fieldSymbol];
-          if (!fieldIntro) return;
+          fieldDescriptor = fieldDescriptors[fieldSymbol];
+          if (!fieldDescriptor) return;
         }
-        if (fieldIntro.writableFieldName) ret.push(fieldSymbol);
+        if (fieldDescriptor.writableFieldName) ret.push(fieldSymbol);
       });
     }
     return ret;
   }
 
-  function getOwnPropertySymbolsWithBuiltin (type: Object) {
+  function getOwnPropertySymbolsWithBuiltin (valospaceType: Object) {
     // TODO(iridian): Might not work if symbols are polyfilled. Should!
-    return Object.getOwnPropertySymbols(type);
+    return Object.getOwnPropertySymbols(valospaceType);
   }
 
-  function getOwnPropertySymbolsWithPrototype (hostObjectPrototype: Object) {
+  function getOwnPropertySymbolsWithPrototype (valospacePrototype: Object) {
     // TODO(iridian): Might not work if symbols are polyfilled. Should!
-    return Object.getOwnPropertySymbols(hostObjectPrototype);
+    return Object.getOwnPropertySymbols(valospacePrototype);
   }
 }

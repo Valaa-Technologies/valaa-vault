@@ -285,16 +285,17 @@ function _deleteIdentifierOrProperty (steppers: Object, valker: Valker, head: an
 // TODO(iridian): clarify the relationship between raem/VALK/hostReference.HostRef and
 // ValoscriptPrimitiveKind. ValoscriptPrimitiveKind might be an alias for it.
 export const ValoscriptPrimitiveKind = Symbol("Valoscript.PrimitiveKind");
-export const ValoscriptPrimitive = {
+export const valoscriptPrimitivePrototype = {
   [ValoscriptPrimitiveKind]: null, // must be overridden
 };
 
-export const ValoscriptInterface = Object.assign(Object.create(ValoscriptPrimitive), {
+export const valoscriptInterfacePrototype = Object.assign(
+    Object.create(valoscriptPrimitivePrototype), {
   [ValoscriptPrimitiveKind]: "Interface",
 });
 
-export const ValoscriptNew = Symbol("Valoscript.constructor");
-export const ValoscriptType = Object.assign(Object.create(ValoscriptPrimitive), {
+export const ValoscriptNew = Symbol("valos.constructor");
+export const valoscriptTypePrototype = Object.assign(Object.create(valoscriptPrimitivePrototype), {
   [ValoscriptPrimitiveKind]: "Type",
   [ValoscriptNew] () {
     throw new Error(`Valoscript constructor not defined for type ${
@@ -302,7 +303,10 @@ export const ValoscriptType = Object.assign(Object.create(ValoscriptPrimitive), 
   },
 });
 
-export const ValoscriptPrototype = Object.assign(Object.create(ValoscriptPrimitive), {
+export const ValoscriptInstantiate = Symbol("valos.instantiate");
+
+export const valoscriptResourcePrototype = Object.assign(
+    Object.create(valoscriptPrimitivePrototype), {
   [ValoscriptPrimitiveKind]: "Prototype",
 });
 
@@ -339,8 +343,8 @@ function _new (valker: Valker, head: any, scope: ?Object, newOp: any) {
       return valker.pack(Type[ValoscriptNew](valker, scope, ...eArgs));
     }
     if (isHostRef(eType)) {
-      const PrototypeType = scope.valos[Type.getTypeName({ discourse: valker })];
-      return valker.pack(PrototypeType[".instantiate"](valker, scope, Type, ...eArgs));
+      const valospaceType = scope.valos[Type.getTypeName({ discourse: valker })];
+      return valker.pack(valospaceType[ValoscriptInstantiate](valker, scope, Type, ...eArgs));
     }
     throw new Error(`'new': cannot create object of type '${typeof Type
         }', expected either a function for native object construction, a ValOS type for${

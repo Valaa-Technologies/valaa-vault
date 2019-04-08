@@ -643,7 +643,6 @@ function testStatementOperations (commands, getThisAndScope) {
         this.startsAsUndefined = scopeValue;
         ({ result: this.startsAsUndefined, closure: $fromScope() });
     `);
-    // console.log("kuery", dumpify(kuery.toJSON()));
     const { this_, scope } = getThisAndScope();
     const { result, closure } = evaluateProgram(kuery, this_, scope, { verbosity: 0 });
     expect(result)

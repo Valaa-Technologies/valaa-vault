@@ -1,9 +1,10 @@
 import { createNativeIdentifier } from "~/script";
 
-// TODO(iridian): Some/a lot of these built-in objects require custom implementations to deal with
-// Vrapper's that are passed in as parameters. Alternatively we need to implement native proxy
-// objects for them; this might not be such a bad idea anyway to improve scripting system
-// performance (can run VS as native JS).
+// TODO(iridian): Some/a lot of these built-in objects require custom
+// implementations to deal with Vrapper's that are passed in as
+// parameters. Alternatively we need to implement native proxy objects
+// for them; this might not be such a bad idea anyway to improve
+// scripting system performance (can run VS as native JS).
 export default {
   Array,
   ArrayBuffer,

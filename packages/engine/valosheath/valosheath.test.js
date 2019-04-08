@@ -36,6 +36,38 @@ function transpileValoscriptTestBody (bodyText: string) {
   return transpileValoscriptBody(bodyText, { customVALK: VALEK });
 }
 
+describe("scheme valosheath", () => {
+  it("scope valos.<Type>.getRelations", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        new Entity({ name: "myEntity", owner: this, properties: { foo: 10 } });
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const myEntity = entities().creator.do(bodyKuery);
+    const scope = myEntity.getLexicalScope().valos;
+    const relatableGetRelationsSymbol = scope.Relatable.getRelations;
+    expect(relatableGetRelationsSymbol)
+        .toBeTruthy();
+    expect(relatableGetRelationsSymbol)
+        .toEqual(myEntity.getLexicalScope().valos.Entity.getRelations);
+    const prototypeGetRelations = scope.Entity.prototype[relatableGetRelationsSymbol];
+    expect(prototypeGetRelations)
+        .toBeTruthy();
+  });
+  it("scope valos.Relation.target", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        new Relation({ name: "myEntity", owner: this, properties: { foo: 10 } });
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const myEntity = entities().creator.do(bodyKuery);
+    const scope = myEntity.getLexicalScope().valos;
+    const relationTarget = scope.Relation.target;
+    expect(relationTarget)
+        .toBeTruthy();
+  });
+});
+
 describe("transpileValoscriptBody with Engine scriptAPI", () => {
   describe("Creating and instancing with 'new' keyword", () => {
     it("creates with 'new' a new Entity", () => {
@@ -105,6 +137,7 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
           instanceRelation[Relation.target].secondPayload = "more data";
           instance;
       `;
+      harness.interceptErrors(() => {
       const bodyKuery = transpileValoscriptTestBody(bodyText);
 
       const instance = entities().creator.do(bodyKuery);
@@ -141,6 +174,7 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
           .toEqual("more data");
       expect(instanceRelation.get(VALEK.to("target").propertyLiteral("secondPayload")))
           .toEqual("more data");
+      })();
     });
     it("returns the result of an expression with properties correctly", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
@@ -210,7 +244,6 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
       const bodyText = `
           function functionA () {
-            // console.log("inner this:", this);
             const foo = new Entity({ name: "foo", owner: this });
             if (foo.bar !== undefined) return "very much not ok";
             else return functionB(foo);
@@ -369,22 +402,25 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
       `;
       const bodyKuery = transpileValoscriptTestBody(bodyText);
       const descriptors = entities().creator.do(bodyKuery);
-      function objectPropertyDescriptor (value: any) {
+      function objectPropertyDescriptor (value: any, object: ?Object = {}) {
         return {
           value,
           writable: true, enumerable: true, configurable: true,
+          ...object,
         };
       }
-      function resourcePropertyDescriptor (value: any) {
+      function resourcePropertyDescriptor (value: any, object: ?Object = {}) {
         return {
           value, valos: true, property: true, persisted: true,
           writable: true, enumerable: true, configurable: true,
+          ...object,
         };
       }
-      function hostFieldDescriptor (value: any) {
+      function hostFieldDescriptor (value: any, object: ?Object = {}) {
         return {
           value, valos: true, host: true, persisted: true,
           writable: true, enumerable: false, configurable: false,
+          ...object,
         };
       }
       expect(descriptors.propertyA).toMatchObject(objectPropertyDescriptor(1));
@@ -392,6 +428,8 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
       expect(descriptors.propertyC).toEqual(undefined);
       expect(descriptors.propertyD.value).toBe(entities().creator);
       expect(descriptors.entityId).toEqual(undefined);
+          // .toMatchObject(hostFieldDescriptor(undefined,
+          //     { name: "id", persisted: undefined, writable: undefined }));
       expect(descriptors.entityOwner.value).toBe(entities().creator);
       expect(descriptors.entityName).toMatchObject(hostFieldDescriptor("entity"));
       expect(descriptors.entityA).toMatchObject(resourcePropertyDescriptor(1));
@@ -403,6 +441,8 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
       expect(descriptors.overriddenPropertyC).toMatchObject(objectPropertyDescriptor(4));
       expect(descriptors.overriddenPropertyD).toEqual(undefined);
       expect(descriptors.instanceId).toEqual(undefined);
+          // .toMatchObject(hostFieldDescriptor(undefined,
+          //     { name: "id", persisted: undefined, writable: undefined }));
       expect(descriptors.instanceOwner.value).toBe(entities().creator);
       expect(descriptors.instanceName).toEqual(undefined);
       expect(descriptors.instanceA).toMatchObject(resourcePropertyDescriptor(3));

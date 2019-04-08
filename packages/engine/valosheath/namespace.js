@@ -3,9 +3,12 @@
 import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 import Transient from "~/raem/state/Transient";
 
+
 // import debugId from "~/engine/debugId";
 import { Valker } from "~/engine/VALEK";
 import type Vrapper from "~/engine/Vrapper";
+
+import { isSymbol } from "~/tools";
 
 export function addNamespaceField (target: Object, namespaceName: string, fieldName: string,
     fieldSymbol: Symbol) {
@@ -14,6 +17,17 @@ export function addNamespaceField (target: Object, namespaceName: string, fieldN
   const namespace = (target[namespaceKey]
       || (target[namespaceKey] = createHostNamespace(namespaceName)));
   namespace._addProxyPrototypeFieldShortcut(fieldName, fieldSymbol);
+}
+
+export function addNamespaceFieldAlias (target: Object,
+    namespaceName: string, name: string, symbol: ?Symbol) {
+  if (!isSymbol(symbol)) return;
+  if (target[name] === undefined) {
+    addNamespaceField(target, namespaceName, name, symbol);
+  } else {
+    throw new Error(`Cannot create a symbol alias from valos.${name} for ${String(symbol)
+      } because targetScope.${name} already exists with value: ${String(target[name])}`);
+  }
 }
 
 export const NamespaceInterfaceTag = Symbol("NamespaceInterfaceTag");

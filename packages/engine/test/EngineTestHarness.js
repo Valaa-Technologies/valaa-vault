@@ -8,7 +8,7 @@ import EngineTestAPI from "~/engine/test/EngineTestAPI";
 import Engine from "~/engine/Engine";
 import Cog from "~/engine/Cog";
 import { engineSteppers } from "~/engine/VALEK";
-import extendValospace from "~/engine/valospace";
+import extendValosheath from "~/engine/valosheath";
 
 import baseEventBlock from "~/engine/test/baseEventBlock";
 
@@ -44,7 +44,7 @@ export default class EngineTestHarness extends ProphetTestHarness {
       verbosity: this.getVerbosity(),
     });
     const rootScope = this.engine.getRootScope();
-    extendValospace(rootScope, this.engine.getHostObjectDescriptors(), this.schema);
+    extendValosheath(rootScope, this.engine.getHostDescriptors(), this.schema);
     // TODOO(iridian): This should be in InspireTestHarness, but there is no such thing.
     rootScope.valos.GatewayConfig = {
       RemoteAuthorityURI: "valaa-testing:",

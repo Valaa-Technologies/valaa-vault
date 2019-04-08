@@ -28,10 +28,11 @@ export {
                                       setNativeIdentifierValue,
 } from "./denormalized/nativeIdentifier";
 export {
-                                      ValoscriptInterface,
                                       ValoscriptNew,
-                                      ValoscriptPrimitive,
+                                      ValoscriptInstantiate,
                                       ValoscriptPrimitiveKind,
-                                      ValoscriptPrototype,
-                                      ValoscriptType,
+                                      valoscriptInterfacePrototype,
+                                      valoscriptPrimitivePrototype,
+                                      valoscriptResourcePrototype,
+                                      valoscriptTypePrototype,
 } from "./VALSK/valoscriptSteppers";

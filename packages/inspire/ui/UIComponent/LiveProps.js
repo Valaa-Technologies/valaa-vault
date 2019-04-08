@@ -15,7 +15,7 @@ import Valoscope from "~/inspire/ui/Valoscope";
 import UIComponent from "~/inspire/ui/UIComponent";
 
 import {
-  arrayFromAny, deepExtend, dumpObject, isPromise, outputError, thenChainEagerly, wrapError,
+  arrayFromAny, deepExtend, dumpObject, isPromise, thenChainEagerly, wrapError,
 } from "~/tools";
 
 import { _wrapElementInLiveProps } from "./_renderOps";
@@ -92,16 +92,14 @@ export default class LiveProps extends UIComponent {
   }
 
   _errorOnBindFocusSubscriptions (bindingSlot, kuery, error) {
-    const wrappedError = wrapError(error, new Error(`bindFocusSubscriptions('${bindingSlot}')`),
-        "\n\tuiContext:", ...dumpObject(this.state.uiContext),
-        "\n\tfocus:", ...dumpObject(this.tryFocus()),
-        "\n\tkuery:", ...dumpObject(kuery),
-        "\n\tstate:", ...dumpObject(this.state),
-        "\n\tprops:", ...dumpObject(this.props),
-    );
-    outputError(wrappedError, `Exception caught during LiveProps.bindFocusSubscriptions('${
-        bindingSlot}')`);
-    this.enableError(wrappedError);
+    this.enableError(wrapError(error,
+            new Error(`bindFocusSubscriptions('${bindingSlot}')`),
+            "\n\tuiContext:", ...dumpObject(this.state.uiContext),
+            "\n\tfocus:", ...dumpObject(this.tryFocus()),
+            "\n\tkuery:", ...dumpObject(kuery),
+            "\n\tstate:", ...dumpObject(this.state),
+            "\n\tprops:", ...dumpObject(this.props)),
+        `Exception caught during LiveProps.bindFocusSubscriptions('${bindingSlot}')`);
   }
 
   unbindSubscriptions () {
@@ -270,8 +268,8 @@ export default class LiveProps extends UIComponent {
             "\n\tprops:", component.props,
         );
 
-        outputError(finalError, "Exception caught during LiveProps.handleCallbackExceptions");
-        component.enableError(finalError);
+        component.enableError(finalError,
+            "Exception caught during LiveProps.handleCallbackExceptions");
       }
       return undefined;
     };

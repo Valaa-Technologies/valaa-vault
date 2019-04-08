@@ -3,7 +3,7 @@
 import { dumpKuery, dumpObject } from "~/engine/VALEK";
 import Vrapper, { LiveUpdate } from "~/engine/Vrapper";
 
-import { invariantify, outputError, thenChainEagerly, wrapError } from "~/tools";
+import { invariantify, thenChainEagerly, wrapError } from "~/tools";
 
 import type UIComponent from "./UIComponent";
 import { getScopeValue, setScopeValue } from "./scopeValue";
@@ -190,11 +190,12 @@ function _createContextAndSetFocus (component: UIComponent, newFocus: any, newPr
       },
       component_ => component_ && _initiateSubscriptions(component, newFocus, newProps),
     ], function errorOnCreateContextAndSetFocus (error) {
-      outputError(wrapError(error, new Error(`createContextAndSetFocus()`),
-          "\n\tnew focus:", ...dumpObject(newFocus),
-          "\n\tnew props:", ...dumpObject(newProps),
-          "\n\tnew uiContext:", ...dumpObject(uiContext),
-          "\n\tcomponent:", ...dumpObject(component)),
+      component.enableError(
+          wrapError(error, new Error(`createContextAndSetFocus()`),
+              "\n\tnew focus:", ...dumpObject(newFocus),
+              "\n\tnew props:", ...dumpObject(newProps),
+              "\n\tnew uiContext:", ...dumpObject(uiContext),
+              "\n\tcomponent:", ...dumpObject(component)),
           "Exception caught during UIComponent._createContextAndSetFocus");
     });
   }

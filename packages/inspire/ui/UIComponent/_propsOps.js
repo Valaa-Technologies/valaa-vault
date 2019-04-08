@@ -6,7 +6,7 @@ import { Kuery } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
 
-import { invariantify, invariantifyObject, outputError, wrapError } from "~/tools";
+import { invariantify, invariantifyObject, wrapError } from "~/tools";
 
 import type UIComponent from "./UIComponent";
 import { getScopeValue } from "./scopeValue";
@@ -105,8 +105,7 @@ export function _checkForInfiniteRenderRecursion (component: UIComponent) {
         "\n\tidentical ancestor focus:", context.focus.debugId(), context.focus,
         "\n\tidentical ancestor props:", context.reactComponent.props,
     );
-    outputError(error, "Exception caught during UIComponent._checkForInfiniteRenderRecursion");
-    component.enableError(error);
+    component.enableError(error, "UIComponent._checkForInfiniteRenderRecursion");
     return true;
   }
   return false;

@@ -245,12 +245,17 @@ export default class FalseProphetDiscourse extends Discourse {
       ret = Object.create(this);
       const transaction = ret._transactionState = new TransactionInfo(ret, name);
       this.logEvent(1, () => [
-        "acquired NEW TX", name, ":", { discourse: ret, transaction },
+        "acquired NEW TX", name, ":", {
+          discourse: dumpObject(ret), transaction: dumpObject(transaction),
+        },
       ]);
       ret.releaseTransaction = function releaseTransaction (
           options: ?{ abort: boolean, reason: Error }) {
         this.logEvent(1, () => [
-          "released TX", name, ":", { discourse: this, root: ret, transaction },
+          "released TX", name, ":", {
+            discourse: dumpObject(this), root: dumpObject(ret),
+            transaction: dumpObject(transaction),
+          },
         ]);
         if (options && options.abort) {
           transaction.markAsAborting((options.reason || {}).message || options.reason);
@@ -265,7 +270,9 @@ export default class FalseProphetDiscourse extends Discourse {
     } else {
       ret = this._transactionState.createNestedTransaction(this, name);
       this.logEvent(1, () => [
-        "acquired nested TX", name, ":", { discourse: ret, transaction: ret._transactionState },
+        "acquired nested TX", name, ":", {
+          discourse: dumpObject(ret), transaction: dumpObject(ret._transactionState),
+        },
       ]);
       ret._transactionName = `${this._transactionName}/${this._nonFinalizedTransactions}`;
     }

@@ -168,7 +168,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
           return result.getPremiereStory();
         },
       ],
-      this.errorOn(new Error("ProphetTestHarness.initialize")),
+      ProphetTestHarness.errorOn(new Error("ProphetTestHarness.initialize")),
     );
   }
 

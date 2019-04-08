@@ -216,7 +216,6 @@ export default class Bard extends Resolver {
     });
     this.story.state = this.state;
     this.state[StoryIndexTag] = this.story.storyIndex;
-    // console.log("finishStory:", beaumpify(getActionFromPassage(this.story)));
     return this.story;
   }
 
@@ -441,7 +440,6 @@ function _createDeserializeLeafValue (fieldInfo) {
   }
   return (serialized) => {
     if ((typeof serialized !== "object") || (serialized === null)) return serialized;
-    console.log("failing intro:", fieldInfo.intro);
     throw new Error(`Cannot deserialize value for leaf field ${fieldInfo.name
       }: expected primitive, got ${debugObjectType(serialized)}`);
   };

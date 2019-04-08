@@ -200,14 +200,12 @@ class UIComponent extends React.Component {
     try {
       _componentWillMount(this);
     } catch (error) {
-      const finalError = wrapError(error,
-          new Error(`During ${this.debugId()})\n .componentWillMount(), with:`),
-          "\n\tuiContext:", this.state.uiContext,
-          "\n\tstate:", this.state,
-          "\n\tprops:", this.props,
-      );
-      outputError(finalError, "Exception caught in UIComponent.componentWillMount");
-      this.enableError(finalError);
+      this.enableError(wrapError(error,
+              new Error(`During ${this.debugId()})\n .componentWillMount(), with:`),
+              "\n\tuiContext:", this.state.uiContext,
+              "\n\tstate:", this.state,
+              "\n\tprops:", this.props,
+          ), "UIComponent.componentWillMount");
     }
     this._isMounted = true;
   }
@@ -217,15 +215,13 @@ class UIComponent extends React.Component {
     try {
       _componentWillReceiveProps(this, nextProps, nextContext, forceReattachListeners);
     } catch (error) {
-      const finalError = wrapError(error,
-          new Error(`During ${this.debugId()})\n .componentWillReceiveProps(), with:`),
-          "\n\tuiContext:", this.state.uiContext,
-          "\n\tstate:", this.state,
-          "\n\tprops:", this.props,
-          "\n\tnextProps:", nextProps,
-      );
-      outputError(finalError, "Exception caught in UIComponent.componentWillReceiveProps");
-      this.enableError(finalError);
+      this.enableError(wrapError(error,
+              new Error(`During ${this.debugId()})\n .componentWillReceiveProps(), with:`),
+              "\n\tuiContext:", this.state.uiContext,
+              "\n\tstate:", this.state,
+              "\n\tprops:", this.props,
+              "\n\tnextProps:", nextProps,
+          ), "UIComponent.componentWillReceiveProps");
     }
   }
 
@@ -233,17 +229,15 @@ class UIComponent extends React.Component {
     try {
       return _shouldComponentUpdate(this, nextProps, nextState, nextContext);
     } catch (error) {
-      const finalError = wrapError(error,
-          new Error(`During ${this.debugId()})\n .shouldComponentUpdate(), with:`),
-          "\n\tprops:", this.props,
-          "\n\tnextProps:", nextProps,
-          "\n\tstate:", this.state,
-          "\n\tnextState:", nextState,
-          "\n\tcontext:", this.context,
-          "\n\tnextContext:", nextContext,
-      );
-      outputError(finalError, "Exception caught in UIComponent.shouldComponentUpdate");
-      this.enableError(finalError);
+      this.enableError(wrapError(error,
+              new Error(`During ${this.debugId()})\n .shouldComponentUpdate(), with:`),
+              "\n\tprops:", this.props,
+              "\n\tnextProps:", nextProps,
+              "\n\tstate:", this.state,
+              "\n\tnextState:", nextState,
+              "\n\tcontext:", this.context,
+              "\n\tnextContext:", nextContext,
+          ), "UIComponent.shouldComponentUpdate");
     }
     return true;
   }
@@ -252,13 +246,12 @@ class UIComponent extends React.Component {
     try {
       _componentWillUnmount(this);
     } catch (error) {
-      const finalError = wrapError(error,
-          new Error(`During ${this.debugId()})\n .componentWillUnmount(), with:`),
-          "\n\tprops:", this.props,
-          "\n\tstate:", this.state,
-          "\n\tcontext:", this.context,
-      );
-      outputError(finalError, "Exception caught in UIComponent.componentWillUnmount");
+      outputError(wrapError(error,
+              new Error(`During ${this.debugId()})\n .componentWillUnmount(), with:`),
+              "\n\tprops:", this.props,
+              "\n\tstate:", this.state,
+              "\n\tcontext:", this.context,
+          ), "Exception caught in UIComponent.componentWillUnmount");
     }
   }
 
@@ -514,7 +507,11 @@ class UIComponent extends React.Component {
 
   _errorObject: ?any;
 
-  enableError = (error: string | Error) => _enableError(this, error)
+  enableError = (error: string | Error, outputHeader: ?string) => {
+    const ret = _enableError(this, error);
+    if (outputHeader) outputError(error, `Exception caught in ${outputHeader}`);
+    return ret;
+  }
   toggleError = () => _toggleError(this)
   clearError = () => _clearError(this)
 
@@ -656,15 +653,13 @@ class UIComponent extends React.Component {
           };
           rerenderPromise.catch(error => {
             if (operationInfo.onError) Object.assign(error, operationInfo.onError);
-            const wrappedError = wrapError(error,
-              new Error(`During ${this.debugId()}\n .render().result.catch`),
-                  "\n\tuiContext:", this.state.uiContext,
-                  "\n\tfocus:", this.tryFocus(),
-                  "\n\tstate:", this.state,
-                  "\n\tprops:", this.props,
-            );
-            outputError(wrappedError, "Exception caught in UIComponent.render.result.catch");
-            this.enableError(wrappedError);
+            this.enableError(wrapError(error,
+                    new Error(`During ${this.debugId()}\n .render().result.catch`),
+                    "\n\tuiContext:", this.state.uiContext,
+                    "\n\tfocus:", this.tryFocus(),
+                    "\n\tstate:", this.state,
+                    "\n\tprops:", this.props,
+                ), "UIComponent.render.result.catch");
           });
           latestRenderedLensSlot = operationInfo.slotName;
           ret = this.tryRenderSlotAsLens(latestRenderedLensSlot, operationInfo.focus);
@@ -697,15 +692,13 @@ class UIComponent extends React.Component {
     let internalErrorValidationFaults;
     try {
       if (firstPassError) {
-        const wrappedError = wrapError(firstPassError,
-            new Error(`During ${this.debugId()}\n .render()`),
-            "\n\tuiContext:", this.state.uiContext,
-            "\n\tfocus:", this.tryFocus(),
-            "\n\tstate:", this.state,
-            "\n\tprops:", this.props,
-        );
-        outputError(wrappedError, "Exception caught in UIComponent.render");
-        this.enableError(wrappedError);
+        this.enableError(wrapError(firstPassError,
+                new Error(`During ${this.debugId()}\n .render()`),
+                "\n\tuiContext:", this.state.uiContext,
+                "\n\tfocus:", this.tryFocus(),
+                "\n\tstate:", this.state,
+                "\n\tprops:", this.props,
+            ), "Exception caught in UIComponent.render");
       }
       if (ret === undefined) {
         const errorObject = this._errorObject || "<render result undefined>";
@@ -764,7 +757,8 @@ class UIComponent extends React.Component {
           ret = UIComponent.thirdPassErrorElement;
         } catch (fourthPassError) {
           console.warn("INTERNAL ERROR: Exception caught on render() fourth pass:", fourthPassError,
-              "\n\tGiving up, rendering null. You get candy if you ever genuinely encounter this.");
+              "\n\tGiving up, rendering null.",
+              "\n\tYou can ask iridian for candy if you ever genuinely encounter this.");
           ret = null;
         }
       }

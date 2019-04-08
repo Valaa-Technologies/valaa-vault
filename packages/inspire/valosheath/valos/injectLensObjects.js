@@ -26,7 +26,7 @@ type LensParameters = {
 };
 
 export default function injectLensObjects (valos: Object, rootScope: Object,
-    hostObjectDescriptors: Object) {
+    hostDescriptors: Object) {
   valos.Lens = {};
   const lensDescriptorOptions: { [string]: () => LensParameters } = {};
 
@@ -51,10 +51,10 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
             Object.assign(descriptor, { slotName: true, isEnabled });
           }
           lensDescriptors[slotName] = Object.freeze(descriptor);
-          hostObjectDescriptors.set(valos.Lens[slotName], descriptor);
+          hostDescriptors.set(valos.Lens[slotName], descriptor);
           if (rootValue) rootScope[valos.Lens[slotName]] = Object.freeze(rootValue);
         });
-    hostObjectDescriptors.set(valos.Lens, lensDescriptors);
+    hostDescriptors.set(valos.Lens, lensDescriptors);
   }
 
   const _lensMessageLoadingProps = {

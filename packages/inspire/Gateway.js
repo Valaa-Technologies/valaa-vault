@@ -29,7 +29,7 @@ import InspireView from "~/inspire/InspireView";
 
 import { registerVidgets } from "~/inspire/ui";
 import type { Revelation } from "~/inspire/Revelation";
-import extendValospaceWithInspire from "~/inspire/valospace";
+import extendValosheathWithInspire from "~/inspire/valosheath";
 
 import getGlobal from "~/gateway-api/getGlobal";
 import { arrayBufferFromBase64 } from "~/tools/base64";
@@ -243,7 +243,7 @@ export default class Gateway extends LogEventGenerator {
           const hostDescriptors = engine.getHostObjectDescriptors();
           extendValospaceWithEngine(rootScope, hostDescriptors, engine.discourse.getSchema());
           if (!viewConfig.defaultAuthorityURI) {
-            extendValospaceWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal());
+            extendValosheathWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal());
           } else {
             // FIXME(iridian): Implement this.schemes - still missing.
             const defaultAuthorityConfig = gateway.schemes[viewConfig.defaultAuthorityURI];

@@ -63,16 +63,16 @@ module.exports = {
           (de)serialization and similar code, reducing code duplication
           and minimizing bugs.`,
         ],
-        3: [`As a service with a valospace API.`,
+        3: [`As a service with a valosheath API.`,
           `This is usually done as a plugin of some existing ValOS
           authority with a plugin API specifically built for this
           purpose. This can also be done by implementing the event
           stream API of some authority. Or this can be done as a full
           ValOS non-core authority.`,
-          `Note that while valospace API is most useful for end users
+          `Note that while valosheath API is most useful for end users
           the transpilation and embeddment solutions are still higher
           priority. This is because they can also be easily exposed via
-          valospace API's but they providing other benefits as well.`,
+          valosheath API's but they providing other benefits as well.`,
         ],
         4: [`As a RESTful service which consumes and produces I-JSON.`,
           `While perfectly acceptable solution as part of the larger

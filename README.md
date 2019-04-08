@@ -171,7 +171,7 @@ integrity to the resource model via `couplings`.
 
 - depends: `@valos/tools`, `immutable`
 - exports: `Corpus`, `Command`, `VALK`, `RAEMContentAPI`
-- valospace: `Resource`, `TransientFields`, `Bvob`, `Partition`
+- valosheath: `Resource`, `TransientFields`, `Bvob`, `Partition`
 - concepts: `ghost instancing`, `partitions`, `couplings`
 
 
@@ -185,7 +185,7 @@ transpiling into VALK kueries as an intermediate language.
 
 - depends: `@valos/raem`, `acorn`
 - exports: `transpileValoscript`, `VALSK`, `ScriptContentAPI`
-- valospace: `Scope`, `Property`
+- valosheath: `Scope`, `Property`
 - concepts: `ECMAScript2015`, `scope`, `transpilation`
 
 
@@ -205,7 +205,7 @@ REST lambdas and the AWS mqtt IoT as event pub-sub.
 
 - depends: `@valos/script`, `IndexedDB`, `AWS IoT/S3/DynamoDB`
 - exports: `FalseProphet`, `PartitionConnection`, `ProphetContentAPI`
-- valospace: `Relatable`, `Entity`, `Media`, `Relation`,
+- valosheath: `Relatable`, `Entity`, `Media`, `Relation`,
   `TransientProphetFields`
 - concepts: `ACID`, `authorities`, `pub-sub`, `offline readiness`
 
@@ -228,7 +228,7 @@ browser.
 
 - depends: `@valos/prophet`
 - exports: `Engine`, `Vrapper`, `VALEK`
-- valospace: `valos.*`, `Object integration`
+- valosheath: `valos.*`, `Object integration`
 - concepts: `live kuery`, `code-as-content`, `3rd party libraries`
 
 
@@ -246,7 +246,7 @@ dynamic valospace integration with the UI.
 
 - depends: `@valos/engine`, `React`, `brace`
 - exports: `createInspireClient`,
-- valospace: `Valoscope`, `If`, `ForEach`, `TextFileEditor`
+- valosheath: `Valoscope`, `If`, `ForEach`, `TextFileEditor`
 - concepts: `model-view`, `HTML5/CSS/JS`, `rapid devevelopment`
 
 

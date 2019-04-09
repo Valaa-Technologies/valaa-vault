@@ -156,6 +156,7 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
   const mediaId = mediaVRL.rawId();
   let mediaInfo;
   let newEntry: MediaEntry;
+  const isPersisted = connection.isLocallyPersisted();
   if (currentEntry) {
     mediaInfo = { ...currentEntry.mediaInfo };
     newEntry = { ...currentEntry, mediaInfo };
@@ -184,7 +185,7 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
           "\n\trootEvent:", ...dumpObject(rootEvent));
       return [];
     }
-    newEntry = { mediaId, mediaInfo, isPersisted: true, isInMemory: true };
+    newEntry = { mediaId, mediaInfo, isPersisted, isInMemory: true };
   }
   newEntry.logIndex = tryAspect(rootEvent, "log").index || 0;
   connection._pendingMediaLookup[newEntry.mediaId] = newEntry;

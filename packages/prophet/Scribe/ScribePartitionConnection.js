@@ -38,7 +38,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
   // This lookup is updated whenever the media retrievers are created for the action, which is
   // before any medias are downloaded and before media info is persisted.
   // See Scribe._persistedMediaLookup for contrast.
-  _pendingMediaLookup: { [mediaRawId: string]: MediaEntry };
+  _pendingMediaLookup: { [mediaRawId: string]: MediaEntry } = {};
 
   // Contains partition specific bvob state data.
   _pendingBvobLookup: { [contentHash: string]: {
@@ -115,7 +115,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
     const adjusts = {};
     for (const entry of Object.values(this._pendingMediaLookup)) {
       if (entry.isInMemory) adjusts[entry.contentHash] = -1;
-      delete this._prophet._persistedMediaLookup[entry.mediaId];
+      if (entry.isPersisted) delete this._prophet._persistedMediaLookup[entry.mediaId];
     }
     this._prophet._adjustInMemoryBvobBufferRefCounts(adjusts);
     this._pendingMediaLookup = {};

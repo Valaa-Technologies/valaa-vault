@@ -10,10 +10,11 @@ import Vrapper from "~/engine/Vrapper";
 import { newResource, instantiateResource } from "~/engine/valosheath/valos/_resourceLifetimeOps";
 
 const symbols = {
-  immediateContent: Symbol("Media.immediateContent"),
-  readContent: Symbol("Media.readContent"),
   interpretContent: Symbol("Media.interpretContent"),
+  readContent: Symbol("Media.readContent"),
+  immediateContent: Symbol("Media.immediateContent"),
   getURL: Symbol("Media.getURL"),
+  immediateURL: Symbol("Media.immediateURL"),
 };
 
 export default {
@@ -25,7 +26,11 @@ export default {
   },
   prototypeFields: {
     [symbols.immediateContent]: denoteValOSKueryFunction(
-        `returns the Media content if it is immediately available.`
+        `returns the Media content if it is immediately available,${
+        ""} otherwise throws an error. This error can be a missing${
+        ""} partition connection error which triggers an implicit${
+        ""} connection process.${
+        ""} See Media.interpretContent for more details.`
     )(function immediateContent (options: any) {
       return VALEK.interpretContent({
         synchronous: true,
@@ -44,7 +49,13 @@ export default {
       return ret;
     }),
     [symbols.interpretContent]: denoteValOSKueryFunction(
-        `returns a promise to the Media content.`
+        `returns a promise to an interpretation of the Media content${
+        ""} with a particular media type. This media type is${
+        ""} determined by the first valid entry from the list:${
+        ""} 1. options.mime argument of this call${
+        ""} 2. Media.mediaType field of this Media resource${
+        ""} 3. inferred from the Media name extension${
+        ""} 4. options.mimeFallback of this call`
     )(function interpretContent (options: any) {
       const ret = VALEK.interpretContent({
         synchronous: false,
@@ -53,9 +64,26 @@ export default {
       }).toVAKON();
       return ret;
     }),
+    [symbols.immediateURL]: denoteValOSKueryFunction(
+        `returns a Media URL to access the Media content if one is${
+        ""} is immediately available, otherwise throws an error.${
+        ""} This error can be a missing partition connection error${
+        ""} which triggers an implicit connection process.${
+        ""} See Media.getURL for more details.`
+    )(function immediateURL (options: any) {
+      return VALEK.mediaURL({
+        synchronous: true,
+        mediaInfo: Vrapper.toMediaInfoFields,
+        ...(options || {}),
+      }).toVAKON();
+    }),
     [symbols.getURL]: denoteValOSKueryFunction(
-        `returns a promise to a transient Media URL which can be used in the local${
-        ""} context (ie. browser HTML) to access the Media content.`
+        `returns a promise to a transient Media URL which can be used${
+        ""} to retrieve the Media content in a presentation context.
+        ""} By default this URL is only guaranteed to be usable for${
+        ""} a limited period of time and only in the current${
+        ""} presentation context (ie. current HTML render context or${
+        ""} similar).`
     )(function getURL (options: any) {
       return VALEK.mediaURL({
         synchronous: false,

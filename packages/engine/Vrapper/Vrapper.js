@@ -2001,6 +2001,7 @@ export default class Vrapper extends Cog {
       // TODO(iridian, 2019-03): Property renames are going to be
       // disabled very shortly. This whole sequence can be dropped.
       const propertyRawId = vActualAdd.getRawId();
+      /*
       const structuralName = (propertyRawId.match(/\.:(.*)$/) || [])[1];
       if (structuralName) {
         if ((structuralName === "this") || (structuralName === "self")) {
@@ -2011,6 +2012,7 @@ export default class Vrapper extends Cog {
         this._defineProperty(decodeURIComponent(structuralName), vActualAdd);
         return;
       }
+      */
       const nameSub = this._scopeNameSubs[propertyRawId] = vActualAdd
           .obtainSubscription("name", { state: fieldUpdate.getState() });
       nameSub.addListenerCallback(this, `Vrapper_properties_name`, nameUpdate => {

@@ -67,7 +67,7 @@ export default class Engine extends Cog {
                 debugObjectType(identityPartitionURI)}`);
           }
           const uriString = String(identityPartitionURI);
-          if (this._activeIdentities[uriString]) {
+          if (!this._activeIdentities[uriString]) {
             throw new Error(`No such active identity: <${uriString}>`);
           }
           delete this._activeIdentities[uriString];

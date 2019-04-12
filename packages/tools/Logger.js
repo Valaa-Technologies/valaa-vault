@@ -127,17 +127,20 @@ export class LogEventGenerator {
     return outputError(error, ...rest);
   }
 
+  static _clockerId = 0;
+
   addChainClockers (minVerbosity: number, eventPrefix: string, thenChainCallbacks: Function[]) {
     if (!(this.getVerbosity() >= minVerbosity)) return thenChainCallbacks;
+    const clockerId = LogEventGenerator._clockerId++;
     return [].concat(...thenChainCallbacks.map((callback, index) => [
       ...(!callback.name ? [] : [head => {
-        this.clockEvent(minVerbosity, `${eventPrefix}[${index}]`, callback.name);
+        this.clockEvent(minVerbosity, `${eventPrefix}#${clockerId}[${index}]`, callback.name);
         return head;
       }]),
       callback,
     ]),
     result => {
-      this.clockEvent(minVerbosity, `${eventPrefix}.done`, "");
+      this.clockEvent(minVerbosity, `${eventPrefix}#${clockerId}.done`, "");
       return result;
     });
   }

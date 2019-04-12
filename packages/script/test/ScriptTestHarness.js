@@ -10,7 +10,7 @@ import { transpileValoscriptBody } from "~/script/transpileValoscript";
 export function createScriptTestHarness (options: Object, ...commandBlocks: any) {
   return createRAEMTestHarness({
     name: "Script Test Harness", ContentAPI: ScriptTestAPI, TestHarness: ScriptTestHarness,
-    corpusOptions: { steppers: valoscriptSteppers },
+    corpus: { steppers: valoscriptSteppers },
     ...options,
   }, ...commandBlocks);
 }

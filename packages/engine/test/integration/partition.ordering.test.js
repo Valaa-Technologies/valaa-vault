@@ -7,7 +7,7 @@ let harness = null;
 
 async function setUp (testAuthorityConfig: Object = {}, options: {}) {
   harness = await createEngineOracleHarness({ verbosity: 0,
-    oracleOptions: { testAuthorityConfig },
+    oracle: { testAuthorityConfig },
     ...options,
   });
   const ret = {

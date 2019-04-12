@@ -66,18 +66,18 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
   const combinedOptions = {
     name: `${isPaired ? "Paired " : ""}Prophet Oracle Harness`,
     ...options,
-    oracleOptions: {
+    oracle: {
       verbosity: options.verbosity || 0,
       testAuthorityConfig: {
         ...(!isPaired ? {} : options.pairedHarness.testAuthorityConfig),
-        ...((options.oracleOptions || {}).testAuthorityConfig || {}),
+        ...((options.oracle || {}).testAuthorityConfig || {}),
       },
-      ...(options.oracleOptions || {}),
+      ...(options.oracle || {}),
     },
-    scribeOptions: {
+    scribe: {
       verbosity: options.verbosity || 0,
       databasePrefix: `${isPaired ? "paired" : "test"}-isolated-${++dbIsolationAutoPrefix}-`,
-      ...(options.scribeOptions || {}),
+      ...(options.scribe || {}),
     },
   };
 
@@ -119,10 +119,12 @@ export default class ProphetTestHarness extends ScriptTestHarness {
   constructor (options: Object) {
     super(options);
     this.nextCommandIdIndex = 1;
-    this.oracleOptions = options.oracleOptions;
+    this.oracleOptions = options.oracle;
     if (this.oracleOptions) this.testAuthorityConfig = this.oracleOptions.testAuthorityConfig;
-    this.scribeOptions = options.scribeOptions;
+    this.scribeOptions = options.scribe;
     this.cleanupScribe = () => (this.scribeOptions && clearAllScribeDatabases(this.scribe));
+    this.falseProphetOptions = options.falseProphet;
+    this.nexusOptions = options.nexus;
     this.testAuthorityURI = options.testAuthorityURI || testAuthorityURI;
     this.testPartitionURI = options.testPartitionURI
         || (options.testAuthorityURI
@@ -137,7 +139,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
         ...(!this.oracleOptions ? [
           () => createTestMockProphet({ isLocallyPersisted: false }),
         ] : [
-          () => createOracle(this.oracleOptions),
+          () => createOracle(this.oracleOptions, this.nexusOptions),
           oracle => (this.oracle = oracle),
         ]),
         ...(!this.scribeOptions ? [] : [
@@ -180,7 +182,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     // Called by RAEMTestHarness.constructor (so before oracle/scribe are created)
     const corpus = super.createCorpus(corpusOptions);
     this.prophet = this.falseProphet = createFalseProphet({
-      schema: this.schema, corpus, logger: this.getLogger(), ...this.falseProphetOptions,
+      schema: this.schema, corpus, logger: this.getLogger(), ...(this.falseProphetOptions || {}),
     });
     this.chronicler = this.prophet;
     return corpus;
@@ -311,8 +313,8 @@ async function clearScribeDatabases (scribe: Scribe) {
   }
 }
 
-export function createOracle (options?: Object) {
-  const authorityNexus = new AuthorityNexus();
+export function createOracle (options?: Object, nexusOptions?: Object) {
+  const authorityNexus = new AuthorityNexus(nexusOptions);
   const ret = new Oracle({
     name: "Test Oracle",
     authorityNexus,

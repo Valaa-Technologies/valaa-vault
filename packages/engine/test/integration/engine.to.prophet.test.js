@@ -18,7 +18,7 @@ afterEach(async () => {
 describe("Media handling", () => {
   it("does an async prepareBvob for non-locally persisted Media content", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
-      oracleOptions: { testAuthorityConfig: {
+      oracle: { testAuthorityConfig: {
         isRemoteAuthority: true, isLocallyPersisted: false,
       } },
       awaitResult: (result) => result.getLocalStory(),
@@ -58,7 +58,7 @@ describe("Media handling", () => {
 
   it("does an async prepareBvob for locally persisted Media content", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
-      oracleOptions: { testAuthorityConfig: {
+      oracle: { testAuthorityConfig: {
         isRemoteAuthority: true, isLocallyPersisted: true, // as opposed to false of previous test
       } },
     });
@@ -104,7 +104,7 @@ describe("Media handling", () => {
 
   it("doesn't fetch a media content from the stale lookups when updating content", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
-      oracleOptions: { testAuthorityConfig: {
+      oracle: { testAuthorityConfig: {
         isRemoteAuthority: true, isLocallyPersisted: true, // as opposed to false of previous test
       } },
     });
@@ -217,7 +217,7 @@ describe("Media handling", () => {
 
 describe("Two paired harnesses emulating two gateways connected through event streams", () => {
   it("passes a property value to paired client", async () => {
-    harness = await createEngineOracleHarness({ verbosity: 0, oracleOptions: {
+    harness = await createEngineOracleHarness({ verbosity: 0, oracle: {
       testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true },
     } });
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
@@ -234,7 +234,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
   });
 
   it("passes a property reference to a newly created Entity to paired client", async () => {
-    harness = await createEngineOracleHarness({ verbosity: 0, oracleOptions: {
+    harness = await createEngineOracleHarness({ verbosity: 0, oracle: {
       testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true },
     } });
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
@@ -252,7 +252,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
   });
 
   it("passes a complex property with a Resource reference to paired client", async () => {
-    harness = await createEngineOracleHarness({ verbosity: 0, oracleOptions: {
+    harness = await createEngineOracleHarness({ verbosity: 0, oracle: {
       testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true },
     } });
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
@@ -279,7 +279,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
   });
 
   it("passes a function inside property to paired client", async () => {
-    harness = await createEngineOracleHarness({ verbosity: 0, oracleOptions: {
+    harness = await createEngineOracleHarness({ verbosity: 0, oracle: {
       testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true },
     } });
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });

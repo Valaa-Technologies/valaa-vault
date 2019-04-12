@@ -57,12 +57,12 @@ export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
 }
 
 export default class RAEMTestHarness extends LogEventGenerator {
-  constructor ({ ContentAPI, name, verbosity, reducerOptions = {}, corpusOptions = {}, ...rest }) {
+  constructor ({ ContentAPI, name, verbosity, reducer = {}, corpus = {}, ...rest }) {
     super({ name, verbosity });
     this.ContentAPI = ContentAPI;
     this.schema = ContentAPI.schema;
-    this.reducerOptions = reducerOptions;
-    this.corpusOptions = corpusOptions;
+    this.reducerOptions = reducer;
+    this.corpusOptions = corpus;
     Object.assign(this, rest);
   }
 

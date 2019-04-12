@@ -17,7 +17,7 @@ import { isPromise } from "~/tools";
 export function createEngineTestHarness (options: Object, ...commandBlocks: any) {
   const ret = createProphetTestHarness({
     name: "Engine Test Harness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
-    corpusOptions: { steppers: engineSteppers },
+    corpus: { steppers: engineSteppers },
     ...options,
   }, ...(options.claimBaseBlock ? [baseEventBlock] : []), ...commandBlocks);
   if (isPromise(ret)) {
@@ -30,7 +30,7 @@ export function createEngineTestHarness (options: Object, ...commandBlocks: any)
 export function createEngineOracleHarness (options: Object, ...commandBlocks: any) {
   return createProphetOracleHarness({
     name: "Engine Oracle Harness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
-    corpusOptions: { steppers: engineSteppers },
+    corpus: { steppers: engineSteppers },
     ...options,
   }, ...(options.claimBaseBlock ? [baseEventBlock] : []), ...commandBlocks);
 }

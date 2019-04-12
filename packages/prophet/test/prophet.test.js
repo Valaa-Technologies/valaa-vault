@@ -19,8 +19,8 @@ let harness = null;
 
 async function setUp (testAuthorityConfig: Object = {}, options: {}) {
   harness = await createProphetOracleHarness({ verbosity: 0,
-    oracleOptions: { testAuthorityConfig },
     ...options,
+    oracle: { ...(options.oracle || {}), testAuthorityConfig },
   });
   const ret = {
     connection: await harness.prophet.acquirePartitionConnection(
@@ -79,7 +79,7 @@ describe("Prophet", () => {
 
   it("stores the contents of the actions on the scribe correctly", async () => {
     harness = await createProphetOracleHarness({ verbosity: 0,
-      oracleOptions: { testAuthorityConfig: { isLocallyPersisted: true, isRemoteAuthority: true } },
+      oracle: { testAuthorityConfig: { isLocallyPersisted: true, isRemoteAuthority: true } },
     });
     const prophetConnection = await harness.prophet
         .acquirePartitionConnection(harness.testPartitionURI).getActiveConnection();
@@ -97,7 +97,7 @@ describe("Prophet", () => {
 
   it("assigns proper eventIds for commands", async () => {
     harness = await createProphetOracleHarness({ verbosity: 0,
-      oracleOptions: { testAuthorityConfig: { isLocallyPersisted: true } },
+      oracle: { testAuthorityConfig: { isLocallyPersisted: true } },
     });
     const prophetConnection = await harness.prophet
         .acquirePartitionConnection(harness.testPartitionURI).getActiveConnection();

@@ -117,7 +117,6 @@ export default function thenChainEagerly (initialValue: any, functions: any | Fu
       : [functions];
   let next = initialValue;
   let index = startIndex || 0;
-  let wrap;
   let head;
   for (; (next == null) || (typeof next.then !== "function"); ++index) {
     head = next;
@@ -126,8 +125,12 @@ export default function thenChainEagerly (initialValue: any, functions: any | Fu
       const func = functionChain[index];
       next = !func ? head : func(head);
     } catch (error) {
-      wrap = new Error(getName("callback"));
-      next = errorOnThenChainEagerly(error);
+      const wrapped = wrapError(error, new Error(getName("callback")),
+          "\n\thead:", ...dumpObject(head),
+          "\n\tcurrent function:", ...dumpObject(functionChain[index]),
+          "\n\tfunctionChain:", ...dumpObject(functionChain));
+      if (!onRejected) throw wrapped;
+      next = onRejected(wrapped, index, head, functionChain, onRejected);
     }
   }
   --index;
@@ -135,17 +138,16 @@ export default function thenChainEagerly (initialValue: any, functions: any | Fu
       newHead => (index + 1 >= functionChain.length
           ? newHead
           : thenChainEagerly(newHead, functionChain, onRejected, index + 1)),
-      errorOnThenChainEagerly);
+      error => {
+        const wrapped = wrapError(error, new Error(getName("thenable resolution")),
+            "\n\thead:", ...dumpObject(head),
+            "\n\tcurrent function:", ...dumpObject(functionChain[index]),
+            "\n\tfunctionChain:", ...dumpObject(functionChain));
+        if (!onRejected) throw wrapped;
+        return onRejected(wrapped, index, head, functionChain, onRejected);
+      });
   function getName (info) {
     return `During thenChainEagerly ${index === -1 ? "initial value" : `#${index}`} ${info} ${
         !(onRejected && onRejected.name) ? " " : `(with ${onRejected.name})`}`;
-  }
-  function errorOnThenChainEagerly (error) {
-    const wrapped = wrapError(error, wrap || new Error(getName("thenable resolution")),
-        "\n\thead:", ...dumpObject(head),
-        "\n\tcurrent function:", ...dumpObject(functionChain[index]),
-        "\n\tfunctionChain:", ...dumpObject(functionChain));
-    if (!onRejected) throw wrapped;
-    return onRejected(wrapped, index, head, functionChain);
   }
 }

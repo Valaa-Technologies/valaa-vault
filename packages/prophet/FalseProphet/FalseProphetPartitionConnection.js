@@ -91,6 +91,8 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
     if (!events || !events.length) return { eventResults: events };
     const connection = this;
+    let chronicling, resultBase, leadingTruths, firstSchismaticCommand, upstreamResults,
+        renarration, rechronicle;
     try {
       this.clockEvent(2, () => ["falseProphet.chronicle", `chronicleEvents(${events.length})`]);
       if (options.isProphecy) {
@@ -115,43 +117,90 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
           : this.getReceiveCommands(options.receiveCommands);
       this.clockEvent(2, () => ["falseProphet.chronicle.upstream",
         `upstream.chronicleEvents(${events.length})`]);
-      const chronicling = this._upstreamConnection.chronicleEvents(events, options);
 
-      const resultBase = new ChronicleEventResult(null, {
+      chronicling = this._upstreamConnection.chronicleEvents(events, options);
+
+      resultBase = new ChronicleEventResult(null, {
         _events: events,
         onError: errorOnFalseProphetChronicleEvents.bind(this, new Error("chronicleResultBase")),
       });
       const primaryRecital = this._prophet._primaryRecital;
-      let leadingTruths;
-      let upstreamEventResults;
       const partitionURI = this.getPartitionURI();
+
       resultBase._truthForwardResults = thenChainEagerly(null, this.addChainClockers(2,
           "falseProphet.chronicle.upstream.ops", [
         function _awaitUpstreamChronicling () {
           return (resultBase._forwardResults = chronicling.eventResults);
         },
         function _awaitUpstreamTruths (eventResults) {
-          return mapEagerly((upstreamEventResults = (eventResults || events)),
+          return mapEagerly((upstreamResults = (eventResults || events)),
               result => result.getTruthEvent(),
-              (error, head, index, confirmedTruths, entries, callback, onRejected) => {
-                if (!leadingTruths) leadingTruths = confirmedTruths.slice(0, index);
+              (error, head, index, truthResults, entries, callback, onRejected) => {
+                if (!leadingTruths) leadingTruths = truthResults.slice(0, index);
                 const purgedStory = primaryRecital.getStoryBy(events[index].aspects.command.id);
-                if (purgedStory && !error.isCommandReviseable) {
-                  purgedStory.schismDescription = `chronicleEvents rejection: ${error.message}`;
-                  purgedStory.chronicleErrorSchism = error;
+                if (((error.retry || {}).when === "narrated") && (renarration === undefined)) {
+                  renarration = connection.narrateEventLog({
+                    eventIdBegin: connection._headEventId,
+                    receiveTruths: null,
+                  });
+                }
+                if (purgedStory && (error.isSchismatic !== false)) {
+                  if (firstSchismaticCommand === undefined) firstSchismaticCommand = events[index];
                   purgedStory.schismPartition = partitionURI;
+                  if (error.isReviseable) {
+                    purgedStory.schismDescription =
+                        `chronicleEvents reviseable schism: ${error.message}`;
+                  } else {
+                    purgedStory.schismDescription =
+                        `chronicleEvents schism rejection: ${error.message}`;
+                    purgedStory.unreviseableSchismError = error;
+                  }
                 }
                 // Process the remaining entries so that fully
                 // rejected commands will not be needlessly revised
-                return mapEagerly(entries, callback, onRejected, index + 1, confirmedTruths);
+                return mapEagerly(entries, callback, onRejected, index + 1, truthResults);
               });
         },
-        function _receiveTruths (resultEvents) {
-          return receiveTruths && receiveTruths(leadingTruths || resultEvents,
-              undefined, undefined, leadingTruths && events[leadingTruths.length]);
+        function _awaitPossibleRenarration (truthResults) {
+          if (!leadingTruths) leadingTruths = truthResults;
+          return renarration;
         },
-        () => (resultBase._forwardResults = upstreamEventResults),
-      ]), errorOnFalseProphetChronicleEvents.bind(this, new Error("chronicleUpstream")));
+        function _receiveTruthsLocally (renarratedEvents = []) {
+          let receivableTruths = (!leadingTruths.length && !renarratedEvents.length) ? []
+              : !leadingTruths.length ? renarratedEvents
+              : !renarratedEvents.length && leadingTruths;
+          if (!receivableTruths) {
+            // TODO(iridian): Check that the truths -> narratedLog
+            // log.index transition is monotonous
+            receivableTruths = leadingTruths.concat(renarratedEvents);
+          }
+          if (!receivableTruths.length && renarration && connection._unconfirmedCommands.length) {
+            if (!rechronicle) {
+              rechronicle = new Error();
+              rechronicle.headIndex = events[0].aspects.log.index;
+            }
+            throw rechronicle;
+          }
+          return receiveTruths && receiveTruths(
+              receivableTruths, undefined, undefined, firstSchismaticCommand);
+        },
+        function _finalizeChronicleResults () {
+          return (resultBase._truthForwardResults = !rechronicle ? upstreamResults
+              : upstreamResults.slice(
+                  rechronicle.headIndex - upstreamResults[0].aspects.log.index));
+        },
+      ]), (error, index, head, functionChain, onRejected) => {
+        if (error !== rechronicle) {
+          return errorOnFalseProphetChronicleEvents(new Error("chronicleUpstream"), error);
+        }
+        leadingTruths = undefined;
+        renarration = undefined;
+        events = connection._unconfirmedCommands; // eslint-disable-line no-param-reassign
+        chronicling = connection._upstreamConnection.chronicleEvents(events, {
+          isLocallyPersisted: false, ...options,
+        });
+        return thenChainEagerly(null, functionChain, onRejected);
+      });
       return {
         eventResults: events.map((event, index) => {
           const ret = Object.create(resultBase); ret.event = event; ret.index = index; return ret;
@@ -164,11 +213,16 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       throw connection.wrapErrorEvent(error, wrap_,
           "\n\toptions:", ...dumpObject(options),
           "\n\tevents:", tryAspect(events[0], "log").index,
-              tryAspect(events[events.length - 1], "log").index);
+              tryAspect(events[events.length - 1], "log").index,
+          "\n\tinternal:", ...dumpObject({
+            connection, chronicling, resultBase, leadingTruths, firstSchismaticCommand,
+            upstreamResults, renarration, rechronicle,
+          }));
     }
   }
 
-  receiveTruths (truths: EventBase[], unused1, unused2, rejectedCommand: EventBase) {
+  receiveTruths (truths: EventBase[], unused1, unused2, schismaticCommand: EventBase) {
+    let purgedCommands, confirms = 0, confirmedCommands, newTruthCount = 0, newTruths;
     try {
       this.clockEvent(2, () => ["falseProphet.receive.truths", `receiveTruths(${truths.length})`]);
       this._insertEventsToQueue(truths, this._pendingTruths, false,
@@ -179,8 +233,6 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
                 truth.aspects.command.id}'`,
                 "\n\tresolution: overwriting with incoming truth");
           });
-      let purgedCommands;
-      let confirms = 0;
       for (; this._unconfirmedCommands[confirms] && this._pendingTruths[confirms]; ++confirms) {
         if (this._pendingTruths[confirms].aspects.command.id !==
             this._unconfirmedCommands[confirms].aspects.command.id) {
@@ -189,22 +241,20 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
           break;
         }
       }
-      let confirmedCommands;
       if (confirms) {
         confirmedCommands = this._pendingTruths.splice(0, confirms);
         if (!purgedCommands) this._unconfirmedCommands.splice(0, confirms);
         // purge clears all unconfirmed commands
       }
-      if (!purgedCommands && rejectedCommand
-          && (rejectedCommand === this._unconfirmedCommands[0])) {
+      if (!purgedCommands && schismaticCommand
+          && (schismaticCommand === this._unconfirmedCommands[0])) {
         purgedCommands = this._unconfirmedCommands;
         this._unconfirmedCommands = [];
       }
-      let newTruthCount = 0;
       while (this._pendingTruths[newTruthCount]) ++newTruthCount;
       this._headEventId += confirms + newTruthCount;
       if (confirmedCommands) _confirmCommands(this, confirmedCommands);
-      const newTruths = this._pendingTruths.splice(0, newTruthCount);
+      newTruths = this._pendingTruths.splice(0, newTruthCount);
       /*
       this.logEvent(1, () => ["receiveTruths.confirm&purge",
         "\n\tconfirmedCommands:", ...dumpObject(confirmedCommands),
@@ -221,7 +271,9 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
           "\n\treceived truths:", ...dumpObject(truths),
           "\n\tpendingTruths:", ...dumpObject([...this._pendingTruths]),
           "\n\tunconfirmedCommands:", ...dumpObject([...this._unconfirmedCommands]),
-          "\n\tthis:", ...dumpObject(this)
+          "\n\tinternal:", ...dumpObject({
+            this: this, purgedCommands, confirms, confirmedCommands, newTruthCount, newTruths,
+          }),
       );
     }
   }

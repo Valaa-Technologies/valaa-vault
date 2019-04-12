@@ -170,7 +170,7 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
       // If schismatic all subsequent commands on these partitions
       // need to be fully, possibly interactively revised as they're
       // likely to depend on the first schismatic change.
-      for (const partitionURI of Object.keys((purgedStory.meta || {}).partitions)) {
+      for (const partitionURI of Object.keys((purgedStory.meta || {}).partitions || {})) {
         const partition = reviewedPartitions[partitionURI]
             || (reviewedPartitions[partitionURI] = {});
         if (purgedStory.schismDescription) {

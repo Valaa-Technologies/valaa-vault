@@ -487,11 +487,14 @@ describe("Prophet", () => {
     const { scribeConnection, authorityConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
 
-    const results = harness.chronicleEvents([simpleCommand, created({
-      id: ["followup_entity"], typeName: "Entity", initialState: {
-        name: "Followup Entity", owner: ["test_partition", {}, {}],
-      }
-    })]).eventResults;
+    const results = harness.chronicleEvents([
+      simpleCommand,
+      created({
+        id: ["followup_entity"], typeName: "Entity", initialState: {
+          name: "Followup Entity", owner: ["test_partition", {}, {}],
+        }
+      }),
+    ]).eventResults;
 
     const truths = [], failures = [];
     const truthProcesses = results.map((result_, index) => result_.getTruthEvent().then(
@@ -511,9 +514,8 @@ describe("Prophet", () => {
     const twoEntries = authorityConnection._chroniclings.splice(0, 2);
 
     twoEntries[0].rejectTruthEvent(new Error("Not permitted")); // rejected
-    const reviseError = new Error("revise: reorder");
-    reviseError.isCommandReviseable = "reorder";
-    twoEntries[1].rejectTruthEvent(reviseError);
+    twoEntries[1].rejectTruthEvent(
+        Object.assign(new Error("revise: reorder"), { isReviseable: "reorder" }));
 
     await expect(results[0].getTruthEvent()).rejects
         .toThrow(/Not permitted/);

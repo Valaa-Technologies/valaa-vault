@@ -65,8 +65,10 @@ export class ChronicleEventResult {
   // Get a fully universalized event (complete with aspects.log.index if appropriate).
   getUniversalEvent (): EventBase {
     const forward = this._universalForwardResults || this._forwardResults;
-    return !forward ? this.getLocalEvent() : thenChainEagerly(forward,
-        r => r[this.index - (this._events.length - r.length)].getUniversalEvent(), this.onError);
+    return thenChainEagerly(forward, r => {
+      const forwardedResult = r[this.index - (this._events.length - r.length)];
+      return forwardedResult && forwardedResult.getUniversalEvent();
+    }, this.onError);
   }
 
   // Get universalized event after it has been processed and reduced
@@ -74,16 +76,20 @@ export class ChronicleEventResult {
   // persistence.
   getLocalEvent (): EventBase | null | Promise<EventBase | null> {
     const forward = this._localForwardResults || this._forwardResults;
-    return !forward ? this.getPersistedEvent() : thenChainEagerly(forward,
-        r => r[this.index - (this._events.length - r.length)].getLocalEvent(), this.onError);
+    return thenChainEagerly(forward, r => {
+      const forwardedResult = r[this.index - (this._events.length - r.length)];
+      return forwardedResult && forwardedResult.getLocalEvent();
+    }, this.onError);
   }
 
   // Get event after it has been persisted (possibly locally) but not
   // necessarily authorized.
   getPersistedEvent (): EventBase | Promise<EventBase> {
     const forward = this._persistedForwardResults || this._forwardResults;
-    return !forward ? this.getTruthEvent() : thenChainEagerly(forward,
-        r => r[this.index - (this._events.length - r.length)].getPersistedEvent(), this.onError);
+    return thenChainEagerly(forward, r => {
+      const forwardedResult = r[this.index - (this._events.length - r.length)];
+      return forwardedResult && forwardedResult.getPersistedEvent();
+    }, this.onError);
   }
 
   // Get event after it has been confirmed as a truth by its authority
@@ -92,8 +98,10 @@ export class ChronicleEventResult {
     if (!forward) {
       throw new Error(`getTruthEvent not implemented by ${this.constructor.name}`);
     }
-    return thenChainEagerly(forward,
-        r => r[this.index - (this._events.length - r.length)].getTruthEvent(), this.onError);
+    return thenChainEagerly(forward, r => {
+      const forwardedResult = r[this.index - (this._events.length - r.length)];
+      return forwardedResult && forwardedResult.getTruthEvent();
+    }, this.onError);
   }
 }
 

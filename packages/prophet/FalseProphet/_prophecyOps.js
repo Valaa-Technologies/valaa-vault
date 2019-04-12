@@ -12,7 +12,7 @@ import extractPartitionEvent0Dot2
     from "~/prophet/tools/event-version-0.2/extractPartitionEvent0Dot2";
 import { tryAspect } from "~/prophet/tools/EventAspects";
 
-import { dumpify, dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
+import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
 import { _rejectLastProphecyAsHeresy, _recomposeStoryFromPurgedEvent } from "./_storyOps";
@@ -184,7 +184,7 @@ export function _reviseSchism (connection: FalseProphetPartitionConnection,
     return operation._options.reviseSchism(schism, connection, purgedStories, newEvents);
   }
   // Then if the schism is not a semantic schism try basic revise-recompose.
-  if (schism.semanticSchism || schism.chronicleErrorSchism) return undefined;
+  if (schism.semanticSchism || schism.unreviseableSchismError) return undefined;
   delete schism.structuralSchism;
   const recomposedProphecy = _recomposeStoryFromPurgedEvent(connection.getProphet(), schism);
   const partitionURI = String(connection.getPartitionURI());
@@ -214,7 +214,8 @@ export function _rejectHereticProphecy (falseProphet: FalseProphet, prophecy: Pr
   if (!operation || !operation._partitions) return;
   for (const partition of Object.values(operation._partitions)) {
     if (!partition.confirmedTruth) {
-      partition.rejectCommand(partition.rejectionReason || new Error(prophecy.schismDescription));
+      partition.rejectCommand(partition.rejectionReason
+          || prophecy.unreviseableSchismError || new Error(prophecy.schismDescription));
       partition.commandEvent = null;
     }
   }
@@ -302,9 +303,9 @@ class ProphecyOperation extends ProphecyEventResult {
     throw this._prophet.wrapErrorEvent(error, errorWrap,
         "\n\tduring:", this._debugPhase,
         "\n\tevents:", ...dumpObject(this._events),
-        "\n\tevent:", dumpify(this._events[this.index], { indent: 2 }),
-        "\n\tprophecy:", dumpify(this.event, { indent: 2 }),
-        "\n\tpartitions:", dumpify(this._partitions, { indent: 2 }),
+        "\n\tevent:", ...dumpObject(this._events[this.index]),
+        "\n\tprophecy:", ...dumpObject(this.event),
+        "\n\tpartitions:", ...dumpObject(this._partitions),
         "\n\tremote stage:", ...dumpObject(this._remoteStage),
         "\n\tlocal stage:", ...dumpObject(this._localStage),
         "\n\tmemory stage:", ...dumpObject(this._memoryStage),

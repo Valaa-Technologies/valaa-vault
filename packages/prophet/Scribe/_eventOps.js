@@ -207,7 +207,12 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
         upstreamEventResults = eventResults;
         return mapEagerly(upstreamEventResults,
             result => result.getTruthEvent(),
-            (error, head, index, confirmedTruths) => {
+            (error, head, index, getTruthResults, entries, callback, onRejected) => {
+              if (error.isSchismatic === false) {
+                // For non-schismatic errors just swallow the error but
+                // leave content to local cache
+                return mapEagerly(entries, callback, onRejected, index + 1, getTruthResults);
+              }
               // Discard all commands from failing command onwards from the queue.
               // Downstream will handle reformations and re-chronicles.
               // No need to wait for delete to finish, in-memory queue gets flushed.
@@ -215,11 +220,12 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
               connection._deleteQueuedCommandsOnwardsFrom(
                   discardedAspects.log.index, discardedAspects.command.id);
               // Eat the error, forward the already-confirmed events for receiveTruths.
-              return confirmedTruths;
+              return getTruthResults;
             });
       },
-      function _receiveConfirmedTruthsLocally (confirmedTruths) {
-        return confirmedTruths.length && receiveTruths(confirmedTruths);
+      function _receiveConfirmedTruthsLocally (getTruthResults) {
+        const confirmedTruths = getTruthResults && getTruthResults.filter(notNull => notNull);
+        return confirmedTruths && confirmedTruths.length && receiveTruths(confirmedTruths);
       },
       () => (resultBase._forwardResults = upstreamEventResults),
     ], onError);
@@ -356,7 +362,8 @@ export function _receiveEvents (
     syncedMediaEntries => syncedMediaEntries && connection._updateMediaEntries(syncedMediaEntries),
     () => receivedActions,
   ], (error, stepIndex, head) => {
-    if ((error.originalError || error).cacheConflict) error.isCommandReviseable = true;
+    error.isSchismatic = true;
+    if ((error.originalError || error).cacheConflict) error.isReviseable = true;
     onError(connection.wrapErrorEvent(error,
         new Error(`_receiveEvents(${type}).${
           stepIndex === 0 ? "contentSync" : "updateMediaEntries"}`),

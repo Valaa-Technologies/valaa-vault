@@ -147,7 +147,9 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
-    if (!this.isLocallyPersisted()) return super.chronicleEvents(events, options);
+    if (!this.isLocallyPersisted() || (options.isLocallyPersisted === false)) {
+      return super.chronicleEvents(events, options);
+    }
     const connection = this;
     let wrap = new Error("chronicleEvents()");
     try {

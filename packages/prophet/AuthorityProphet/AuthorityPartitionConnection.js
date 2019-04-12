@@ -6,7 +6,7 @@ import PartitionConnection from "~/prophet/api/PartitionConnection";
 import { ChronicleRequest, ChronicleOptions, ChronicleEventResult, MediaInfo, NarrateOptions }
     from "~/prophet/api/types";
 
-import thenChainEagerly from "~/tools/thenChainEagerly";
+import thenChainEagerly, { mapEagerly } from "~/tools/thenChainEagerly";
 import { debugObjectType, dumpObject } from "~/tools/wrapError";
 
 /**
@@ -40,25 +40,42 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
   }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions): ChronicleRequest {
-    if (this.isRemoteAuthority() && !options.remoteChronicleEventsProcess) {
+    if (this.isRemoteAuthority() && !options.remoteEventsProcess) {
       throw new Error(`Failed to chronicle events to ${this.getName()}: ${this.constructor.name
-          }.chronicleEvents not overridden and options.remoteChronicleEventsProcess not defined`);
+          }.chronicleEvents not overridden and options.remoteEventsProcess not defined`);
     }
-    const receiveTruths = this.getReceiveTruths(options.receivedTruths);
+    let rejectedIndex;
     const resultBase = new AuthorityEventResult(null, {
       connection: this,
+      remoteResults: null,
       isPrimary: this.isPrimaryAuthority(),
-      remoteChronicleEventsProcess: options.remoteChronicleEventsProcess,
-      receiveTruthsProcess:
-          options.remoteChronicleEventsProcess
-              ? thenChainEagerly(options.remoteChronicleEventsProcess, [
-                individualRemoteEventProcesses => Promise.all(individualRemoteEventProcesses),
-                remoteEvents => receiveTruths(remoteEvents),
-              ])
-          : this.isPrimaryAuthority()
-              ? receiveTruths(events)
-          : [],
     });
+    resultBase.localProcess = thenChainEagerly(null, this.addChainClockers(2,
+        "authority.chronicle.localProcess.ops", [
+      function _processRemoteEvents () {
+        if (!options.remoteEventsProcess) return undefined;
+        return mapEagerly(options.remoteEventsProcess,
+            remoteEvent => remoteEvent,
+            (error, head, index, remoteEvents, entries, callback, onRejected) => {
+              if (rejectedIndex === undefined) rejectedIndex = index;
+              remoteEvents[index] = Promise.reject(error);
+              return mapEagerly(entries, callback, onRejected, index + 1, remoteEvents);
+            });
+      },
+      function _receiveTruthsLocally (remoteResults) {
+        resultBase.remoteResults = remoteResults;
+        const truths = (rejectedIndex !== undefined) ? remoteResults.slice(0, rejectedIndex)
+            : remoteResults || events;
+        if (!truths || !truths.length) return [];
+        return resultBase.connection.getReceiveTruths(options.receivedTruths)(truths);
+      },
+      function _finalizeLocallyReceivedTruths (receivedTruths) {
+        return (resultBase.localProcess = receivedTruths);
+      },
+    ]));
+    resultBase.truthsProcess = thenChainEagerly(resultBase.localProcess,
+        (receivedTruths) => (resultBase.truthsProcess =
+            (this.isPrimaryAuthority() && (receivedTruths || events)) || []));
     return {
       eventResults: events.map((event, index) => {
         const ret = Object.create(resultBase); ret.event = event; ret.index = index; return ret;
@@ -84,7 +101,7 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
       let persistProcess = contentHash;
       if (this.isRemoteAuthority()) {
         const error = new Error(`prepareBvob not implemented by remote authority partition`);
-        error.retryable = false;
+        error.isRetryable = false;
         persistProcess = Promise
             .reject(this.wrapErrorEvent(error, new Error("prepareBvob")))
             .catch(errorOnAuthorityPartitionConnectionPrepareBvob);
@@ -102,8 +119,8 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
 
 export class AuthorityEventResult extends ChronicleEventResult {
   getLocalEvent () {
-    return thenChainEagerly(this.receiveTruthsProcess,
-        receivedTruths => receivedTruths[this.index],
+    return thenChainEagerly(this.localProcess,
+        receivedEvents => receivedEvents[this.index],
         this.onError);
   }
   getTruthEvent () {
@@ -111,9 +128,9 @@ export class AuthorityEventResult extends ChronicleEventResult {
       throw new Error(`Non-primary authority '${this.connection.getName()
           }' cannot deliver truths (by default)`);
     }
-    if (!this.remoteChronicleEventsProcess) return this.getLocalEvent(); // implies: not remote
-    return thenChainEagerly(this.remoteChronicleEventsProcess,
-        chronicledEvents => chronicledEvents[this.index],
+    if (!this.truthsProcess) return this.getLocalEvent(); // implies: not remote
+    return thenChainEagerly(this.truthsProcess,
+        truthEvents => (this.remoteResults || truthEvents)[this.index],
         this.onError);
   }
 }

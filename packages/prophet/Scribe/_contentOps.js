@@ -131,7 +131,7 @@ function _prepareBvobToUpstreamWithRetries (connection: ScribePartitionConnectio
     const wrappedError = connection.wrapErrorEvent(error, wrap,
         "\n\tmediaInfo:", ...dumpObject(mediaInfo),
     );
-    if ((error.retryable !== false) && (retriesRemaining > 0)) {
+    if ((error.isRetryable !== false) && (retriesRemaining > 0)) {
       connection.outputErrorEvent(wrappedError, `error while preparing bvob ${mediaName
           } to upstream (${retriesRemaining} retries remaining):`);
       return _prepareBvobToUpstreamWithRetries(connection, buffer, mediaInfo, mediaName, wrap,
@@ -219,7 +219,7 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribePartiti
   let getNextBackoffSeconds = options.getNextBackoffSeconds;
   if (!getNextBackoffSeconds && (typeof options.retryTimes === "number")) {
     getNextBackoffSeconds = (previousRetries: number, mediaInfo_, error = {}) =>
-        ((previousRetries >= options.retryTimes) || (error.retryable === false)
+        ((previousRetries >= options.retryTimes) || (error.isRetryable === false)
                 || (error.statusCode === 404)
             ? undefined
         : error.immediateRetry
@@ -249,7 +249,7 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribePartiti
       const nextBackoff = getNextBackoffSeconds && getNextBackoffSeconds(i - 1, mediaInfo, error);
       const wrappedError = connection.wrapErrorEvent(error,
           `scribe.retrieveMedia("${mediaInfo.name}") attempt#${i}`,
-          "\n\terror.statusCode:", error.statusCode, ", retryable:", error.retryable,
+          "\n\terror.statusCode:", error.statusCode, ", isRetryable:", error.isRetryable,
               ", immediateRetry:", error.immediateRetry,
           "\n\tmedia name:", mediaInfo.name, "mediaInfo:", mediaInfo,
           ...(i > 1 ? ["\n\tbackoff was:", previousBackoff] : []),

@@ -47,7 +47,7 @@ export default class FalseProphetDiscourse extends Discourse {
     this._follower = follower;
     this._prophet = prophet;
     this._implicitlySyncingConnections = {};
-    this._identityManager = new IdentityManager(this);
+    this._identityManager = new IdentityManager(prophet);
     this.setState(this._prophet.getState());
     invariantify(this.state, "FalseProphetDiscourse.state");
     this._assignCommandId = assignCommandId || (command => {

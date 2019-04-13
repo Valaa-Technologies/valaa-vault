@@ -19,9 +19,9 @@ export default class IdentityManager extends LogEventGenerator {
         throw new Error(`identityPartition required, got: ${
             debugObjectType(identityPartitionURI)}`);
       }
-      const identityAuthority = this._prophet.obtainPartitionAuthority(identityPartitionURI);
-      if (!identityAuthority) {
-        throw new Error(`Can't locate the authority for identityPartition: <${
+      options.authority = this._prophet.obtainPartitionAuthority(identityPartitionURI);
+      if (!options.authority) {
+        throw new Error(`Can't locate the authority for identity partition: <${
             identityPartitionURI}>`);
       }
       this._activeIdentities[String(identityPartitionURI)] = options;
@@ -31,6 +31,8 @@ export default class IdentityManager extends LogEventGenerator {
           "\n\tidentityPartitionURI:", ...dumpObject(identityPartitionURI));
     }
   }
+
+  get (identityPartitionURI: any) { return this._activeIdentities[identityPartitionURI]; }
 
   remove (identityPartitionURI: any) {
     try {

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.20](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.19...v0.34.0-prerelease.20) (2019-04-13)
+
+
+### Bug Fixes
+
+* Merge outputError into enableError via optional second argument ([0255588](https://github.com/valaatech/vault/commit/0255588))
+* **593:** Add renarration/rechronicle FalseProphetP*C* semantics ([bf187b5](https://github.com/valaatech/vault/commit/bf187b5))
+
+
+
+
+
 # [0.34.0-prerelease.19](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.18...v0.34.0-prerelease.19) (2019-04-04)
 
 

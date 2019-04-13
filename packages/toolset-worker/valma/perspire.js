@@ -160,6 +160,8 @@ exports.handler = async (yargv) => {
       "gateway.acquirePartitionConnections(yargv.partitions)");
   const partitions = { root: server.gateway.rootPartition };
   for (const [key, partitionURI] of Object.entries(yargv.partitions || {})) {
+    // Note: direct falseProphet.acquire (without discourse) doesn't
+    // have identity manager.
     partitions[key] = await server.gateway.falseProphet
         .acquirePartitionConnection(partitionURI, { newPartition: false })
         .getActiveConnection();

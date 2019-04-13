@@ -139,7 +139,8 @@ identifies a *referenced resource*:
 The first, non-optional *primary* part globally uniquely identifies a
 freely movable *primary* resource. If no secondary part exists this
 resource is also the referenced resource. If the secondary part exists
-it identifies a sub-resource strictly relative to the primary resource.
+it identifies a structural sub-resource which is deterministic to
+the primary resource.
 The referenced resource is then this sub-resource.
 
 Two resource ids refer to the same resource iff their canonical string

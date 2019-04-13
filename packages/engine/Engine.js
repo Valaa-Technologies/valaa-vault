@@ -23,7 +23,7 @@ import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
 import { LiveUpdate } from "~/engine/Vrapper/FieldUpdate";
 
-import { debugObjectType, outputCollapsedError, thenChainEagerly, wrapError } from "~/tools";
+import { outputCollapsedError, thenChainEagerly, wrapError } from "~/tools";
 
 export default class Engine extends Cog {
   constructor ({ name, logger, prophet, timeDilation = 1.0, verbosity }: Object) {
@@ -39,46 +39,7 @@ export default class Engine extends Cog {
     this.motor = new Motor({ engine: this, name: `${name}/Motor`, prophet, timeDilation });
     this.addCog(this.motor);
     this.discourse = this._connectWithProphet(prophet);
-    this._activeIdentities = {};
     this._currentPassageCounter = 0;
-    this._identityManager = {
-      add: (identityPartitionURI: any /* , options: {} */) => {
-        try {
-          if (!identityPartitionURI) {
-            throw new Error(`identityPartition required, got: ${
-                debugObjectType(identityPartitionURI)}`);
-          }
-          const identityAuthority = prophet.obtainPartitionAuthority(identityPartitionURI);
-          if (!identityAuthority) {
-            throw new Error(`Can't locate the authority for identityPartition: <${
-                identityPartitionURI}>`);
-          }
-          this._activeIdentities[String(identityPartitionURI)] = true;
-          return true;
-        } catch (error) {
-          throw this.wrapErrorEvent(error, new Error("valos.identity.add"),
-              "\n\tidentityPartitionURI:", ...dumpObject(identityPartitionURI));
-        }
-      },
-      remove: (identityPartitionURI: any) => {
-        try {
-          if (!identityPartitionURI) {
-            throw new Error(`identityPartition required, got: ${
-                debugObjectType(identityPartitionURI)}`);
-          }
-          const uriString = String(identityPartitionURI);
-          if (!this._activeIdentities[uriString]) {
-            throw new Error(`No such active identity: <${uriString}>`);
-          }
-          delete this._activeIdentities[uriString];
-          return true;
-        } catch (error) {
-          throw this.wrapErrorEvent(error, new Error("valos.identity.remove"),
-              "\n\tidentityPartitionURI:", ...dumpObject(identityPartitionURI));
-        }
-      },
-    };
-
     this._hostDescriptors = new Map();
     this._rootScope = {};
     this._rootScope[rootScopeSelf] = this._rootScope;
@@ -118,7 +79,7 @@ export default class Engine extends Cog {
     return (this._rootScope.valos[typeName] || {}).prototype;
   }
   getIdentityManager () {
-    return this._identityManager;
+    return this.discourse._identityManager;
   }
   setRootScopeEntry (entryName: string, value: any) {
     this._rootScope[entryName] = value;
@@ -298,9 +259,11 @@ export default class Engine extends Cog {
 
       ret = directiveArray.map((directive, index) => {
         if (directive.initialState && directive.initialState.partitionAuthorityURI) {
-          // Create partition(s) before the transaction is committed (
-          // and thus before the commands leave to upstream).
-          this._createNewPartition(directive);
+          // Create partition(s) before the transaction is committed
+          // (and thus before the commands leave upstream).
+          discourse
+              .acquirePartitionConnection(directive.id.getPartitionURI(), { newPartition: true })
+              .getActiveConnection();
         }
         const id = isRecombine
             ? result.story.passages[index].id
@@ -368,12 +331,6 @@ export default class Engine extends Cog {
         );
       }
     }
-  }
-
-  _createNewPartition (directive: Object) {
-    this.engine.getProphet()
-        .acquirePartitionConnection(directive.id.getPartitionURI(), { newPartition: true })
-        .getActiveConnection();
   }
 
   _resolveIdForConstructDirective (directive, options: VALKOptions) {

@@ -1,13 +1,17 @@
 // @flow
 
-import { EventBase } from "~/raem/events";
-import type { Story } from "~/raem/redux/Bard";
+import { Command, EventBase } from "~/raem/events";
+import { Story } from "~/raem/redux/Bard";
 import VRL from "~/raem/VRL";
 
 import PartitionConnection from "~/prophet/api/PartitionConnection";
-import { ChronicleOptions, ChronicleRequest, ChronicleEventResult } from "~/prophet/api/types";
+import { ChronicleOptions, ChronicleRequest, ChronicleEventResult, ConnectOptions, NarrateOptions }
+    from "~/prophet/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/prophet/tools/EventAspects";
 import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
+import extractPartitionEvent0Dot2
+    from "~/prophet/tools/event-version-0.2/extractPartitionEvent0Dot2";
+import IdentityManager from "~/prophet/FalseProphet/IdentityManager";
 
 import { dumpObject, mapEagerly, thenChainEagerly } from "~/tools";
 
@@ -37,6 +41,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
   _firstUnconfirmedEventId = 0;
   _isFrozen: ?boolean;
   _referencePrototype: VRL;
+  _originatingIdentity: IdentityManager;
 
   constructor (options) {
     super(options);
@@ -50,8 +55,9 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     }
   }
 
-  _doConnect (...rest: any[]) {
-    return thenChainEagerly(super._doConnect(...rest),
+  _doConnect (options: ConnectOptions, onError: Function) {
+    this._originatingIdentity = options.identity;
+    return thenChainEagerly(super._doConnect(options, onError),
         ret => {
           this._referencePrototype.setInactive(false);
           return ret;
@@ -88,6 +94,12 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
 
   isFrozenConnection (): boolean { return !!this._isFrozen; }
 
+  narrateEventLog (options: ?NarrateOptions = {}): Promise<Object> {
+    if (!options) return undefined;
+    if (options.identity === undefined) options.identity = this._originatingIdentity;
+    return super.narrateEventLog(options);
+  }
+
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
     if (!events || !events.length) return { eventResults: events };
     const connection = this;
@@ -115,6 +127,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       if (receiveTruths) options.receiveTruths = receiveTruths;
       options.receiveCommands = options.isProphecy ? null
           : this.getReceiveCommands(options.receiveCommands);
+      if (options.identity === undefined) options.identity = this._originatingIdentity;
       this.clockEvent(2, () => ["falseProphet.chronicle.upstream",
         `upstream.chronicleEvents(${events.length})`]);
 
@@ -339,6 +352,19 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
       }
     }
     return undefined;
+  }
+
+  extractPartitionEvent (command: Command) {
+    return extractPartitionEvent0Dot2(this, command);
+  }
+
+  createCommandPartitionInfo (/* action: Object, command: Command , bard: Bard */) {
+    if (this._isFrozen) {
+      throw new Error(`Cannot chronicle a command to frozen partition: <${
+          this.getPartitionURI()}>`);
+    }
+    return {};
+    // const identity = command.meta.identity;
   }
 
   _checkForFreezeAndNotify (lastEvent: EventBase[] =

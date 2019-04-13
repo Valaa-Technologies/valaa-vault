@@ -15,7 +15,7 @@ export default {
         `Returns an existing, fully active connection to the partition with given${
           ""} *partitionURI*, undefined otherwise`
     )(function tryPartitionConnection (partitionURI) {
-      const ret = this.__callerValker__.getProphet()
+      const ret = this.__callerValker__
           .acquirePartitionConnection(partitionURI, { require: false, newConnection: false });
       return (ret && ret.isActive()) ? ret : undefined;
     }),
@@ -24,7 +24,7 @@ export default {
             ""} *options*. If no full connection exists, waits on a possibly existing on-going ${
             ""} connection process. If none exists creates a new connection process.`
     )(function acquirePartitionConnection (partitionURI, options = {}) {
-      return Promise.resolve(this.__callerValker__.getProphet()
+      return Promise.resolve(this.__callerValker__
           .acquirePartitionConnection(partitionURI, options)
           .getActiveConnection());
     }),

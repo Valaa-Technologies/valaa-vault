@@ -148,8 +148,9 @@ export default class TransactionInfo {
             event: this._finalCommand, story: command, getPremiereStory () { return command; },
           };
         }
-        this._commitChronicleResult = this.discourse._prophet.chronicleEvent(
-            this._finalCommand, { transactionInfo: this });
+        this._commitChronicleResult = this.discourse._prophet.chronicleEvent(this._finalCommand, {
+          transactionInfo: this, identity: this.discourse._identityManager,
+        });
 
         Promise.resolve(this._commitChronicleResult.getPremiereStory()).then(
           // TODO(iridian): Implement returning results. What should they be anyway?

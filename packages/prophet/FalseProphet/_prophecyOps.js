@@ -8,8 +8,6 @@ import { naiveURI } from "~/raem/ValaaURI";
 
 import { ChronicleEventResult, PartitionConnection, ProphecyChronicleRequest, ProphecyEventResult }
     from "~/prophet/api/types";
-import extractPartitionEvent0Dot2
-    from "~/prophet/tools/event-version-0.2/extractPartitionEvent0Dot2";
 import { tryAspect } from "~/prophet/tools/EventAspects";
 
 import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
@@ -195,8 +193,7 @@ export function _reviseSchism (connection: FalseProphetPartitionConnection,
   }
   const revisedProphecyCommand = getActionFromPassage(recomposedProphecy);
   if (!revisedProphecyCommand.meta) throw new Error("revisedProphecy.meta missing");
-  const revisedPartitionCommandEvent = extractPartitionEvent0Dot2(
-      connection, revisedProphecyCommand);
+  const revisedPartitionCommandEvent = connection.extractPartitionEvent(revisedProphecyCommand);
   // Can only revise commands belonging to the originating partition
   if (!revisedPartitionCommandEvent) return undefined;
   (recomposedProphecy.meta || (Object.getPrototypeOf(recomposedProphecy).meta = {})).operation =
@@ -380,8 +377,7 @@ class ProphecyOperation extends ProphecyEventResult {
         return;
       }
       if (!this._prophecy.meta) throw new Error("prophecy.meta missing");
-      const commandEvent = extractPartitionEvent0Dot2(connection,
-          getActionFromPassage(this._prophecy));
+      const commandEvent = connection.extractPartitionEvent(getActionFromPassage(this._prophecy));
       (connection.isRemoteAuthority() ? (this._remoteStage || (this._remoteStage = []))
           : connection.isLocallyPersisted() ? (this._localStage || (this._localStage = []))
           : (this._memoryStage || (this._memoryStage = []))

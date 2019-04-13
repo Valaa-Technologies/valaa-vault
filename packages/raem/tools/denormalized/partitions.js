@@ -148,11 +148,14 @@ export function universalizePartitionMutation (bard: Bard, id: VRL) {
       return undefined;
     }
     if (enclosingPartitionURI === partitionURI) return undefined;
-    if (!partitionInfo) partitionInfo = {};
+    const action = getActionFromPassage(bard.passage);
+    if (!partitionInfo) {
+      partitionInfo = !bard.createCommandPartitionInfo ? {}
+          : bard.createCommandPartitionInfo(partitionURI, action, bard.event, bard);
+    }
     if (!enclosingPartitionURI) {
       targetMeta = eventMeta;
     } else {
-      const action = getActionFromPassage(bard.passage);
       // only modify non-virtual actions
       targetMeta = action && (action.meta || (action.meta = {}));
       // do fill all parents

@@ -178,6 +178,11 @@ export default class Bard extends Resolver {
   constructor (options: Object) {
     super(options);
     this.subReduce = options.subReduce;
+    this.createCommandPartitionInfo = () => ({});
+  }
+
+  setCreateCommandPartitionInfo (createCommandPartitionInfo: Function) {
+    this.createCommandPartitionInfo = createCommandPartitionInfo;
   }
 
   debugId () {

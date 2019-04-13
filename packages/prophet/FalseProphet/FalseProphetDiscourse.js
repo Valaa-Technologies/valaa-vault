@@ -23,6 +23,7 @@ import createResourceId0Dot2, { createPartitionId0Dot2 }
 import { initializeAspects, obtainAspect, tryAspect } from "~/prophet/tools/EventAspects";
 
 import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
+import IdentityManager from "~/prophet/FalseProphet/IdentityManager";
 
 import { invariantify, invariantifyObject, thenChainEagerly, trivialClone } from "~/tools";
 import valosUUID from "~/tools/id/valosUUID";
@@ -46,14 +47,13 @@ export default class FalseProphetDiscourse extends Discourse {
     this._follower = follower;
     this._prophet = prophet;
     this._implicitlySyncingConnections = {};
+    this._identityManager = new IdentityManager(this);
     this.setState(this._prophet.getState());
     invariantify(this.state, "FalseProphetDiscourse.state");
     this._assignCommandId = assignCommandId || (command => {
       obtainAspect(command, "command").id = valosUUID();
     });
   }
-
-  getProphet () { return this._prophet; }
 
   debugId (): string {
     return `${this.constructor.name}(${this._transactionState
@@ -79,6 +79,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   acquirePartitionConnection (partitionURI: ValaaURI,
       options: ConnectOptions = {}): ?PartitionConnection {
+    options.identity = this._identityManager;
     return this._prophet.acquirePartitionConnection(partitionURI, options);
   }
 
@@ -88,8 +89,9 @@ export default class FalseProphetDiscourse extends Discourse {
     if (this._transactionState) return this._transactionState.chronicleEvents(events, options);
     try {
       options.discourse = this;
-      const ret = this._prophet
-          .chronicleEvents(events.map(event => this._universalizeEvent(event)), options);
+      options.identity = this._identityManager;
+      const ret = this._prophet.chronicleEvents(
+          events.map(event => this._universalizeEvent(event)), options);
 
       ret.eventResults.forEach(eventResult => {
         const getPremiereStory = eventResult.getPremiereStory;
@@ -116,6 +118,7 @@ export default class FalseProphetDiscourse extends Discourse {
     if (!ret.meta) ret.meta = {};
     // This communicates with @valos/raem reducers somewhat awkwardly.
     ret.meta.isBeingUniversalized = true;
+    ret.meta.identity = this._identityManager;
     if (!tryAspect(ret, "command").id) this._assignCommandId(ret, this);
     return ret;
   }
@@ -129,7 +132,7 @@ export default class FalseProphetDiscourse extends Discourse {
   connectToMissingPartition = async (missingPartitionURI: ValaaURI) => {
     const partitionURIString = String(missingPartitionURI);
     if (!this._implicitlySyncingConnections[partitionURIString]) {
-      this._implicitlySyncingConnections[partitionURIString] = this._prophet
+      this._implicitlySyncingConnections[partitionURIString] = this
           .acquirePartitionConnection(missingPartitionURI)
           .getActiveConnection();
     }

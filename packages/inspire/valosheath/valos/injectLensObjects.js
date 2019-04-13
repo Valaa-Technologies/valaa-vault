@@ -714,7 +714,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
                 ""}nor owner could be determined`);
           }
           const partitionURI = naiveURI.createPartitionURI(lensAuthorityURI, frameRawId);
-          return engine.getProphet().acquirePartitionConnection(partitionURI)
+          return engine.discourse.acquirePartitionConnection(partitionURI)
               .getActiveConnection();
         },
         (connection: ?PartitionConnection) => {

@@ -219,4 +219,14 @@ export default class FalseProphet extends Prophet {
           "\n\tcurrentPartitionURI:", ...dumpObject(currentPartitionURI));
     }
   }
+
+  createCommandPartitionInfo = (partitionURI: string, action: Object, command: Command,
+      bard: Object) => {
+    const connection = this._connections[partitionURI];
+    if (!connection) {
+      throw new Error(`Cannot chronicle a command: no partition connection found for partition <${
+        partitionURI}>`);
+    }
+    return connection.createCommandPartitionInfo(action, command, bard);
+  }
 }

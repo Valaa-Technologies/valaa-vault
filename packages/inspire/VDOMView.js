@@ -28,7 +28,7 @@ export default class VDOMView extends Cog {
       }
       // Load project
       const lensRef = this.engine.discourse.obtainReference(actualLensURI);
-      this._viewPartition = await this.engine.getProphet()
+      this._viewPartition = await this.engine.discourse
           .acquirePartitionConnection(lensRef.getPartitionURI())
           .getActiveConnection();
       this._vViewFocus = await this.engine.getVrapperByRawId(

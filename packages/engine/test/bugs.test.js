@@ -302,4 +302,16 @@ describe("Engine bug tests", async () => {
     const result = entities().creator.do(bodyKuery, { verbosity: 0 });
     expect(result.counter).toEqual(0);
   });
+
+  it("renames and modifies $V.name of an Entity resource", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
+    const bodyText = `
+      const foo = new Entity({ name: "text", owner: this });
+      foo.$V.name = "prefix";
+      foo.$V.name += "suffix";
+    `;
+    const bodyKuery = transpileValoscriptBody(bodyText, { customVALK: VALEK, verbosity: 0 });
+    const result = entities().creator.do(bodyKuery, { verbosity: 0 });
+    expect(result).toEqual("prefixsuffix");
+  });
 });

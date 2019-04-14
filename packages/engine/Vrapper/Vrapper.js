@@ -43,9 +43,7 @@ import { LiveUpdate } from "~/engine/Vrapper/FieldUpdate";
 import Subscription from "~/engine/Vrapper/Subscription";
 import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 
-import {
-  OwnerDefaultCouplingTag, PrototypeFieldDescriptorsTag, PropertyDescriptorsTag,
-} from "~/engine/valosheath";
+import { OwnerDefaultCouplingTag, PropertyDescriptorsTag } from "~/engine/valosheath";
 
 import { arrayFromAny, iterableFromAny, dumpify, dumpObject,
   invariantify, invariantifyObject, invariantifyString,
@@ -1007,23 +1005,27 @@ export default class Vrapper extends Cog {
     }
     const alterationOptions = Object.create(options);
     alterationOptions.scope = this.getLexicalScope();
-    let newValue = this.run(0, ["§->", ["§void"], actualAlterationVAKON], alterationOptions);
     const hostType = this.engine.getRootScope().valos[typeName];
-    const fieldDescriptor = hostType[PrototypeFieldDescriptorsTag][propertyName];
-    if ((fieldDescriptor != null) && fieldDescriptor.writableFieldName) {
-      newValue = this._preProcessNewReference(newValue, fieldDescriptor, hostType);
+    const fieldDescriptor = hostType.prototype[PropertyDescriptorsTag][propertyName];
+    let ret;
+    const writableFieldName = (fieldDescriptor != null) && fieldDescriptor.writableFieldName;
+    if (writableFieldName) {
+      ret = this._preProcessNewReference(
+          this.get(["§->", writableFieldName, actualAlterationVAKON], alterationOptions),
+          fieldDescriptor, hostType);
       // TODO(iridian): Make this solution semantically consistent host field access.
       // Now stupidly trying to setField even if the field is not a primaryField.
-      this.setField(fieldDescriptor.writableFieldName, newValue, options);
-      return newValue;
+      this.setField(writableFieldName, ret, options);
+    } else {
+      options.head = this;
+      ret = this.run(0, ["§->", ["§void"], actualAlterationVAKON], alterationOptions);
+      this.engine.create("Property", {
+        owner: this.getId().coupleWith("properties"),
+        name: propertyName,
+        value: expressionFromProperty(ret, propertyName),
+      }, options);
     }
-    options.head = this;
-    this.engine.create("Property", {
-      owner: this.getId().coupleWith("properties"),
-      name: propertyName,
-      value: expressionFromProperty(newValue, propertyName),
-    }, options);
-    return newValue;
+    return ret;
   }
 
   _preProcessNewReference (newValue: VRL, fieldPrototypeEntry: Object, hostType: Object) {

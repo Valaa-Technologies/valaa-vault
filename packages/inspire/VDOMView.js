@@ -49,6 +49,8 @@ export default class VDOMView extends Cog {
 
   getViewPartition () { return this._viewPartition; }
 
+  getViewFocus () { return this._vViewFocus;  }
+
   getSelfAsHead () {
     return this._vViewFocus.getSelfAsHead();
   }

@@ -42,7 +42,7 @@ export function listingGETRoute (valos, ResourceType,
 }
 
 export function resourcePOSTRoute (valos, ResourceType,
-    { url, querystring, scopeRules }) {
+    { url, querystring, scopeRules, scope, createResource }) {
   try {
     const resourceSchema = schemaReference(ResourceType);
     const resourceTypeName = trySharedSchemaName(ResourceType) || "<Type>";
@@ -59,7 +59,7 @@ export function resourcePOSTRoute (valos, ResourceType,
           403: { type: "string" },
         },
       },
-      config: { valos, scopeRules, resourceSchema, resourceTypeName },
+      config: { valos, scopeRules, resourceSchema, resourceTypeName, scope, createResource },
     };
   } catch (error) {
     throw wrapError(error, new Error(`resourcePOSTRoute(<${url}>)`),

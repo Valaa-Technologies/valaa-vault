@@ -10,6 +10,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
     builtinRules: {},
     prepare (/* fastify */) {
       this.scopeRules = server.prepareScopeRules(this);
+
       const toPatchTarget = ["§->"];
       server.buildKuery(route.config.resourceSchema, toPatchTarget);
       if (toPatchTarget.length > 1) this.toPatchTarget = toPatchTarget.slice(0, -1);

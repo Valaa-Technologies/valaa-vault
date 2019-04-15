@@ -193,7 +193,7 @@ export default class Gateway extends LogEventGenerator {
   }
 
   getRootLensURI () {
-    return this.rootLensURI;
+    return this.rootLensURI || this.getRootPartitionURI();
   }
 
   createAndConnectViewsToDOM (viewConfigs: { [string]: {

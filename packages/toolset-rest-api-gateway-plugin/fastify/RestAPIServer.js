@@ -28,6 +28,7 @@ export default class RestAPIServer extends LogEventGenerator {
 
   getEngine () { return this._engine; }
   getDiscourse () { return this._engine.discourse; }
+  getViewFocus () { return this._view.getViewFocus(); }
 
   async start () {
     const wrap = new Error(`start`);
@@ -424,6 +425,7 @@ export default class RestAPIServer extends LogEventGenerator {
   }
 
   patchResource (vResource, patch, { discourse, scope, toPatchTarget } = {}) {
+    if (!vResource) throw new Error("Target resource missing when trying to PATCH fields");
     const vTarget = !toPatchTarget ? vResource
         : vResource.get(toPatchTarget, { discourse, scope });
     _patcher(vTarget, patch);

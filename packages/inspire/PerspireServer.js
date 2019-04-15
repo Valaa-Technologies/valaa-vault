@@ -68,7 +68,7 @@ export default class PerspireServer {
     const views = (await this.gateway).createAndConnectViewsToDOM({
       perspireMain: {
         name: "ValOS Local Perspire Main",
-        lensURI: this.gateway.getRootLensURI() || this.gateway.getRootPartitionURI(),
+        lensURI: this.gateway.getRootLensURI(),
         hostGlobal: global,
         window: viewWindow,
         container: this.container,

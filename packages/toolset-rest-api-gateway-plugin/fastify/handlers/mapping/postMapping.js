@@ -32,7 +32,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       this.vPreloads = server.preloadVAKONRefResources(route.config.scope);
       server.preloadVAKONRefResources(route.config.createResourceAndMapping, this.vPreloads);
       await Promise.all(this.vPreloads.map(vPreload => vPreload.activate()));
-      const scriptRoot = this.vPreloads[0];
+      const scriptRoot = this.vPreloads[0] || server.getViewFocus();
       if (!scriptRoot) throw new Error(`Can't locate scriptRoot for route: ${this.name}`);
       this.scopeRules.scopeBase = Object.freeze({
         ...this.scopeRules.scopeBase,

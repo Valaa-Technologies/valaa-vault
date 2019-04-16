@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.21](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.20...v0.34.0-prerelease.21) (2019-04-16)
+
+
+### Bug Fixes
+
+* IdentityManager partition authority bug, adds .get ([048efa1](https://github.com/valaatech/vault/commit/048efa1))
+
+
+
+
+
 # [0.34.0-prerelease.20](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.19...v0.34.0-prerelease.20) (2019-04-13)
 
 

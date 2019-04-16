@@ -316,12 +316,12 @@ function _invoke (valker: Valker, head: any, scope: ?Object, invokeStep: Builtin
     const arg = invokeStep[index + 2];
     eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
   }
-  const eCallee = _getIdentifierOrPropertyValue(
+  const eCallee = _getIdentifierOrPropertyValue(this,
       valker, head, scope, invokeStep[1], undefined, true);
   if (eCallee === undefined) {
     throw new Error(`Could not find callee '${invokeStep[1]}' from head`);
   }
-  return callOrApply(valker, head, scope, invokeStep, "§invoke", eCallee, head, eArgs);
+  return callOrApply(this, valker, head, scope, invokeStep, "§invoke", eCallee, head, eArgs);
 }
 
 function _new (valker: Valker, head: any, scope: ?Object, newOp: any) {

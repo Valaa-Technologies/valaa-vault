@@ -50,7 +50,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         server.warnEvent("Activating route:", this.name,
             "\n\tresources:", ...[].concat(...vTargets.map(vTarget => (!vTarget ? ["\n\t: <null>"]
                 : ["\n\t:", vTarget.debugId()]))));
-        await Promise.all(vTargets.map(vTarget => vTarget.activate()));
+        await Promise.all(vTargets.map(vTarget => vTarget && vTarget.activate()));
         server.infoEvent("Done preloading route:", this.name,
             "\n\tresources:", ...[].concat(...vTargets.map(vTarget => (!vTarget
                 ? ["\n\t: <null>"] : [

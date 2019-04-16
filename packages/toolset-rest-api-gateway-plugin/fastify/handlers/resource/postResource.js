@@ -1,5 +1,7 @@
 // @flow
 
+import { Vrapper } from "~/engine";
+
 import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fastify/RestAPIServer";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
@@ -15,7 +17,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
 
       const toPatchTarget = ["§->"];
       server.buildKuery(route.config.resourceSchema, toPatchTarget);
-      if (toPatchTarget.length > 1) this.toPatchTarget = toPatchTarget;
+      // if (toPatchTarget.length > 1) this.toPatchTarget = toPatchTarget;
     },
     async preload () {
       this.vPreloads = server.preloadVAKONRefResources(route.config.scope);
@@ -41,19 +43,25 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         return false;
       }
       const wrap = new Error(`resource POST ${route.url}`);
-      const discourse = undefined; // server.getDiscourse().acquireTransaction();
+      const discourse = server.getDiscourse().acquireTransaction();
       return thenChainEagerly(discourse, [
         () => {
           // Replace with createMapping call proper. Now using old idiom
           // and explicit instantiate.
           console.log("resource POST:", scope.createResource,
-              "\n\tscriptRoot:", scope.scriptRoot && scope.scriptRoot.debugId());
+              "\n\tscriptRoot:", scope.scriptRoot && scope.scriptRoot.debugId(),
+              "\n\ttoPatchTarget:", ...dumpObject(this.toPatchTarget));
           return scope.scriptRoot.do(scope.createResource, { discourse, scope });
         },
         vResource => {
-          scope.resource = !request.body ? vResource
-              : server.patchResource(vResource, request.body,
+          if (!vResource || !(vResource instanceof Vrapper)) {
+            throw new Error(`${this.name} createResource didn't return a resource value`);
+          }
+          scope.resource = vResource;
+          if (request.body) {
+            server.patchResource(vResource, request.body,
                   { discourse, scope, route, toPatchTarget: this.toPatchTarget });
+          }
         },
         () => discourse && discourse.releaseTransaction(),
         eventResult => eventResult

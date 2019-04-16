@@ -222,8 +222,7 @@ export default {
       applyStep: BuiltinStep) {
     const eArgs = (applyStep[3] === undefined) ? []
         : tryUnpackLiteral(valker, head, applyStep[3], scope);
-    return callOrApply.call(this, valker, head, scope, applyStep,
-        "§apply", undefined, undefined, eArgs);
+    return callOrApply(this, valker, head, scope, applyStep, "§apply", undefined, undefined, eArgs);
   },
   "§call": function call (valker: Valker, head: any, scope: ?Object,
       callStep: BuiltinStep) {
@@ -232,8 +231,7 @@ export default {
       const arg = callStep[index + 3];
       eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
     }
-    return callOrApply.call(this, valker, head, scope, callStep, "$call",
-        undefined, undefined, eArgs);
+    return callOrApply(this, valker, head, scope, callStep, "$call", undefined, undefined, eArgs);
   },
   "§callableof": function callableOf (valker: Valker, head: any, scope: ?Object,
       callableStep: BuiltinStep) {
@@ -623,8 +621,8 @@ function _advance (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinS
               } else if (stepName[0] === "§") {
                 throw new Error(`Unrecognized step ${stepName}`);
               } else if (isTildeStepName(stepName)) {
-                stepHead = this["§->"](
-                    valker, stepHead, pathScope, expandTildeVAKON(stepName, step), nonFinalStep);
+                stepHead = _advance.call(this, valker, stepHead, pathScope,
+                    [expandTildeVAKON(stepName, step)], nonFinalStep, 0);
                 continue;
               }
             }
@@ -962,8 +960,8 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
   return caller;
 }
 
-export function callOrApply (valker: Valker, head: any, scope: ?Object, step: BuiltinStep,
-    opName: string, eCallee_: any, eThis_: any, eArgs: any) {
+export function callOrApply (steppers: Object, valker: Valker, head: any, scope: ?Object,
+    step: BuiltinStep, opName: string, eCallee_: any, eThis_: any, eArgs: any) {
   let eCallee = eCallee_;
   let eThis = eThis_;
   let kueryFunction;
@@ -972,7 +970,7 @@ export function callOrApply (valker: Valker, head: any, scope: ?Object, step: Bu
       eCallee = tryLiteral(valker, head, step[1], scope);
     }
     if (typeof eCallee !== "function") {
-      eCallee = this["§callableof"](valker, eCallee, scope, ["§callableof", null, opName]);
+      eCallee = steppers["§callableof"](valker, eCallee, scope, ["§callableof", null, opName]);
       invariantify(typeof eCallee === "function",
           `trying to call a non-function value of type '${typeof eCallee}'`,
           `\n\tfunction wannabe value:`, eCallee);
@@ -1002,7 +1000,8 @@ export function callOrApply (valker: Valker, head: any, scope: ?Object, step: Bu
     } else {
       for (let i = 0; i !== eArgs.length; ++i) {
         if (isHostRef(eArgs[i])) {
-          eArgs[i] = this["§argumentof"](valker, eArgs[i], scope, ["§argumentof", null, opName]);
+          eArgs[i] = steppers["§argumentof"](
+              valker, eArgs[i], scope, ["§argumentof", null, opName]);
         }
       }
     }

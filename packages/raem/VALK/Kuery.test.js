@@ -49,6 +49,9 @@ describe("VALK basic functionality tests", () => {
     expect(expandTildeVAKON("~invoke:create",
             ["~invoke:create", "event", ["~$:source"], ["~$:body/$V/target/name"]]))
         .toEqual(["§invoke", "create", "event", ["~$:source"], ["~$:body/$V/target/name"]]);
+    expect(expandTildeVAKON("~invoke:create",
+            ["~invoke:create", ["~$:body/$V/target/name"]]))
+        .toEqual(["§invoke", "create", ["~$:body/$V/target/name"]]);
   });
 });
 

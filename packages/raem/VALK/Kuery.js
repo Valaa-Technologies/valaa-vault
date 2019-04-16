@@ -482,7 +482,7 @@ export default class Kuery {
    */
   toField (fieldName: string | Object, headType: ?string): Kuery {
     if (typeof fieldName === "object") return this.evalk(fieldName).setHeadType(headType);
-    invariantifyString(name, "VALK.toField.name");
+    invariantifyString(fieldName, "VALK.toField.name");
     return this._addPathRawVAKON(fieldName, headType);
   }
 

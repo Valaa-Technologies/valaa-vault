@@ -934,7 +934,7 @@ export default class Vrapper extends Cog {
       discourse.releaseTransaction();
       return vFieldValue;
     } catch (error) {
-      discourse.releaseTransaction({ abort: true, reason: error });
+      discourse.releaseTransaction({ rollback: error });
       throw this.wrapErrorEvent(error, `emplace${isSet ? "SetField" : "AddToField"}(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tinitialState:", initialState,

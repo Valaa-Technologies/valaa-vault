@@ -110,7 +110,7 @@ class TextFileEditor extends MediaContentEditor {
       discourse.releaseTransaction();
     } catch (error) {
       if (discourse.isCommittable && discourse.isCommittable()) {
-        discourse.releaseTransaction({ abort: true, reason: error });
+        discourse.releaseTransaction({ rollback: error });
       }
       throw error;
     }

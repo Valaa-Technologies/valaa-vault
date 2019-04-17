@@ -253,15 +253,21 @@ export default class FalseProphetDiscourse extends Discourse {
         },
       ]);
       ret.releaseTransaction = function releaseTransaction (
-          options: ?{ abort: boolean, reason: Error }) {
+          options: ?{ abort: any, rollback: any }) {
         this.logEvent(1, () => [
           "released TX", name, ":", {
             discourse: dumpObject(this), root: dumpObject(ret),
             transaction: dumpObject(transaction),
+            options: dumpObject(options),
           },
         ]);
-        if (options && options.abort) {
-          transaction.markAsAborting((options.reason || {}).message || options.reason);
+        if (options) {
+          if (options.abort) {
+            transaction.markAsAborting(options.abort.message || options.abort);
+          } else if (options.rollback) {
+            transaction.rollbackNestedTransaction(this,
+                options.rollback.message || options.rollback);
+          }
         }
         if (--this._nonFinalizedTransactions) return false;
         if (this._parentTransaction) {

@@ -287,7 +287,7 @@ export default class Engine extends Cog {
       return !options.awaitResult ? vRet
           : thenChainEagerly(options.awaitResult(result, vRet), () => vRet);
     } catch (error) {
-      if (discourse) discourse.abortTransaction();
+      if (discourse) discourse.releaseTransaction({ rollback: error });
       throw localWrapError(this, error, `${constructCommand.name}()`);
     }
     function localWrapError (self, error, operationName) {

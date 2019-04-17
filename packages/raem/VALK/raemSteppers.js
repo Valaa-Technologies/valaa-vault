@@ -914,7 +914,7 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
           transaction.releaseTransaction();
           return ret;
         }
-        transaction.releaseTransaction({ abort: true, reason: advanceError });
+        transaction.releaseTransaction({ rollback: advanceError });
       } catch (error) {
         transactionError = error;
       }
@@ -926,7 +926,8 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
     if (!transaction) {
       opName = `call/acquireTransaction ${contextText}`;
     } else if (transactionError) {
-      opName = `call/releaseTransaction ${advanceError ? "({ abort: true })" : "()"}${contextText}`;
+      opName = `call/releaseTransaction ${
+          advanceError ? "({ rollback: true })" : "()"}${contextText}`;
     } else {
       opName = `call/${valkCaller ? "advance" : "run"}${contextText}`;
       if (!valkCaller) {

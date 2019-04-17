@@ -83,7 +83,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
           return true;
         },
       ], (error) => {
-        if (discourse) discourse.abortTransaction();
+        if (discourse) discourse.releaseTransaction({ abort: error });
         throw server.wrapErrorEvent(error, wrap,
             "\n\trequest.query:", ...dumpObject(request.query),
             "\n\trequest.body:", ...dumpObject(request.body),

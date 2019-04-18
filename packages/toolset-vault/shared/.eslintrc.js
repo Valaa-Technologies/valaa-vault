@@ -83,6 +83,7 @@ module.exports = {
     "import/no-extraneous-dependencies": 0,
     "import/no-unresolved": 0,
     "import/prefer-default-export": 0, // lambda's and flow often necessitate a single named export
+    "import/no-cycle": 0, // This is unacceptably disabled as it is an excellent flag, but there was too much to fix at once...
 
     // ## Warning directives
 

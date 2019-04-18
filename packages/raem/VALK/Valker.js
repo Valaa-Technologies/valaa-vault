@@ -155,7 +155,9 @@ export default class Valker extends Resolver {
     }
     if (state !== undefined) valker.setState(state, "valker.run");
     if (steppers !== undefined) valker.setSteppers(steppers);
-    if (runOptions !== undefined) valker._runOptions = runOptions;
+    if (runOptions !== undefined) {
+      valker._runOptions = Object.assign(Object.create(valker._runOptions || null), runOptions);
+    }
 
     const packedHead = valker.tryPack(head);
     let kueryVAKON = kuery;
@@ -163,9 +165,9 @@ export default class Valker extends Resolver {
     try {
       if (kuery instanceof Kuery) {
         kueryVAKON = kuery.toVAKON();
-        valker._sourceInfo = sourceInfo || kuery[SourceInfoTag];
+        valker[SourceInfoTag] = sourceInfo || kuery[SourceInfoTag];
       } else if (sourceInfo !== undefined) {
-        valker._sourceInfo = sourceInfo;
+        valker[SourceInfoTag] = sourceInfo;
       }
 
       let ret;
@@ -202,14 +204,16 @@ export default class Valker extends Resolver {
       }
       return ret;
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .run(), with:`,
+      throw wrapError(error,
+          `During ${this.debugId()}\n .run(), with:`,
           "\n\tvalk head:", ...dumpObject(packedHead),
           "\n\tvalk kuery:", ...dumpKuery(kuery),
           "\n\tscope:", scope,
           "\n\tstate:", ...dumpObject(valker.state && valker.state.toJS()),
           "\n\tbase-state === self-state", this.state === valker.state,
           "\n\targ-state type:", typeof state,
-          "\n\trunOptions:", ...dumpObject(runOptions));
+          "\n\tvalker:", ...dumpObject(valker),
+      );
     }
   }
 
@@ -267,9 +271,11 @@ export default class Valker extends Resolver {
       // eslint-disable-next-line prefer-rest-params
       return this._steppers["§->"](this, head, scope, arguments, nonFinalStep, 1, 2);
     } catch (error) {
-      this.addVALKRuntimeErrorStackFrame(error, step);
+      const sourceInfo = this[SourceInfoTag];
+      const origin = `${this.debugId()}.advance(${Array.isArray(step) ? step[0] : step})`;
+      if (sourceInfo) addStackFrameToError(error, step, sourceInfo, origin, this);
       if (this._indent < 0) throw error;
-      throw wrapError(error, `During ${this.debugId()}\n .advance(), with:`,
+      throw wrapError(error, new Error(`During ${origin}, with:`),
           "\n\thead:", ...this._dumpObject(head),
           "\n\tkuery:", ...dumpKuery(step),
           "\n\tscope:", dumpScope(scope));
@@ -410,9 +416,5 @@ export default class Valker extends Resolver {
 
   // Transaction base API stubs for systems which dont implement them.
   acquireTransaction () { return this; }
-  releaseTransaction (options: { abort: any, rollback: any }) {}
-
-  addVALKRuntimeErrorStackFrame (error: Error, vakon: any) {
-    return !this._sourceInfo ? error : addStackFrameToError(error, vakon, this._sourceInfo);
-  }
+  releaseTransaction (/* options: { abort: any, rollback: any } */) {}
 }

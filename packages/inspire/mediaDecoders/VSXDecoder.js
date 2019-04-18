@@ -50,10 +50,10 @@ export default class VSXDecoder extends JSXDecoder {
     } catch (error) {
       const sourceDummy = {};
       sourceInfo.sourceMap.set(sourceDummy, { loc: { start, end } });
+      const origin = new Error(`_transpileEmbeddedValoscript(${sourceInfo.phaseBase})`);
       throw addStackFrameToError(
-          this.wrapErrorEvent(error, `_transpileEmbeddedValoscript(${sourceInfo.phaseBase})`,
-              "\n\tsourceInfo:", sourceInfo),
-          sourceDummy, sourceInfo);
+          this.wrapErrorEvent(error, origin, "\n\tsourceInfo:", sourceInfo),
+          sourceDummy, sourceInfo, origin);
     } finally {
       for (const entry of sourceInfo.sourceMap) topLevelSourceInfo.sourceMap.set(...entry);
     }

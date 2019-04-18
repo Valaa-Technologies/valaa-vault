@@ -21,13 +21,13 @@ type VALKStackTrace = Array<VALKStackFrame>;
 export const SourceInfoTag = Symbol("VALK.SourceInfo");
 
 export function addStackFrameToError (error: Error, sourceObject: Object,
-    sourceInfo: Object): Error {
+    sourceInfo: Object, origin: any = sourceInfo.phase, discourse: Object): Error {
   if (!sourceInfo || (error == null) || (typeof error !== "object")) return error;
   invariantifyString(sourceInfo.mediaName, "(!sourceInfo || sourceInfo.mediaName)");
   invariantifyString(sourceInfo.source, "(!sourceInfo || sourceInfo.source)");
   invariantifyObject(sourceInfo.sourceMap, "(!sourceInfo || sourceInfo.sourceMap)",
       { allowEmpty: true });
-  const stackFrame = { sourceObject, sourceInfo };
+  const stackFrame = { sourceObject, sourceInfo, origin, discourse };
   // TODO(iridian): fix hack: grep wrapError.js outputError for "sourceStackFrames"
   error.sourceStackFrames = (error.sourceStackFrames || []).concat(stackFrame);
   error.customErrorHandler = function outputValOSStackTrace (logger) {
@@ -80,6 +80,9 @@ export function parseErrorMessagesFromStackTrace (stackTrace: VALKStackTrace) {
       latestError.messages = [
         `indeterminate lines (no source mapping found) ${mediaInfoString} for source component`,
         ...dumpObject(frame.sourceObject.toJSON ? frame.sourceObject.toJSON() : frame.sourceObject),
+        "\n\tsourceInfo:", ...dumpObject(frame.sourceInfo),
+        "\n\tframe origin:", ...dumpObject(frame.origin),
+        ...(!frame.discourse ? [] : ["\n\tframe discourse:", ...dumpObject(frame.discourse)]),
       ];
       return;
     }

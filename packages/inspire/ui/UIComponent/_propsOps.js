@@ -2,6 +2,7 @@
 import React from "react";
 import isEqual from "lodash.isequal";
 
+import { SourceInfoTag } from "~/raem/VALK/StackTrace";
 import { Kuery } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
@@ -184,7 +185,7 @@ function _isSimplyEqual (left, right) {
   const isLeftReactElement = React.isValidElement(left);
   if (isLeftReactElement !== React.isValidElement(right)) return false;
   if (isLeftReactElement) {
-    if (left._sourceInfo || right._sourceInfo) return false;
+    if (left[SourceInfoTag] || right[SourceInfoTag]) return false;
   }
   return undefined;
 }

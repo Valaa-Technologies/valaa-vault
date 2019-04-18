@@ -174,10 +174,10 @@ export default class JSXDecoder extends MediaDecoder {
                     ? child : child(integrationHostGlobal, mediaInfo)));
             const elementWOSourceInfo = React.createElement(
                 actualType, actualProps, ...(actualChildren.length ? [actualChildren] : []));
-            const ret = Object.create( // unfreeze-hack so that we can write the _sourceInfo
+            const ret = Object.create( // unfreeze-hack so that we can write the [SourceInfoTag]
                 Object.getPrototypeOf(elementWOSourceInfo),
                 Object.getOwnPropertyDescriptors(elementWOSourceInfo));
-            ret._sourceInfo = sourceInfo;
+            ret[SourceInfoTag] = sourceInfo;
             return ret;
           } catch (error) {
             throw wrapError(error, `During ${sourceInfo.mediaName} integration, with`,

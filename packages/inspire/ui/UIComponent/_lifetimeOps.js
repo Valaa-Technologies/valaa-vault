@@ -196,7 +196,7 @@ function _createContextAndSetFocus (component: UIComponent, newFocus: any, newPr
               "\n\tnew props:", ...dumpObject(newProps),
               "\n\tnew uiContext:", ...dumpObject(uiContext),
               "\n\tcomponent:", ...dumpObject(component)),
-          "Exception caught during UIComponent._createContextAndSetFocus");
+          "UIComponent._createContextAndSetFocus");
     });
   }
 }

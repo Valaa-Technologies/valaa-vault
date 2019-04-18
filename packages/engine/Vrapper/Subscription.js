@@ -230,8 +230,9 @@ export default class Subscription extends LiveUpdate {
       if (triggerBroadcast !== false) this._triggerOnUpdate();
     } catch (error) {
       if (this._attachedHooks) this.detachHooks();
-      const wrappedError = wrapError(error,
-          new Error(`During ${this.debugId()}\n .attachHooks(${triggerBroadcast}), with:`),
+      const origin = new Error(
+          `During ${this.debugId()}\n .attachHooks(${triggerBroadcast}), with:`);
+      const wrappedError = wrapError(error, origin,
           "\n\temitter:", this._emitter,
           ...(this._liveKuery === undefined ? [
             "\n\tfilter:", this._fieldFilter || this._fieldName,
@@ -245,7 +246,8 @@ export default class Subscription extends LiveUpdate {
           ]),
           "\n\tsubscription:", ...dumpObject(this));
       if (this._valkOptions.sourceInfo) {
-        addStackFrameToError(wrappedError, this._liveKuery, this._valkOptions.sourceInfo);
+        addStackFrameToError(wrappedError, this._liveKuery,
+            this._valkOptions.sourceInfo, origin, this._valkOptions.discourse);
       }
       throw wrappedError;
     }

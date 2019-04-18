@@ -712,11 +712,9 @@ export default class Vrapper extends Cog {
     const discourse = options.discourse;
     if (this._phase === ACTIVE) {
       if (options.scope === undefined) options.scope = this.getLexicalScope();
-      if (discourse && discourse._runOptions && !options.state) {
-        return discourse.tryUnpack(discourse.advance(
-            discourse.tryPack(head),
-            (kuery instanceof Kuery) ? kuery.toVAKON() : kuery,
-            options.scope));
+      if (discourse && discourse._runOptions && !options.state && !(kuery instanceof Kuery)) {
+        return discourse.tryUnpack(Object.create(discourse)
+            .advance(discourse.tryPack(head), kuery, options.scope));
       }
     } else if (!discourse && !options.state && this.isResource()) {
       this.requireActive();
@@ -986,7 +984,7 @@ export default class Vrapper extends Cog {
     // might arise with heresy rollbacks.
         && this._lexicalScope[propertyName];
     if (ret && !ret.isDestroyed()) return ret;
-    // New properties which don't exist in _lexicalScope work fine as
+    // New properties which don't exist in _lexicalScope still work as
     // they get kueried here.
     return this.get(VALEK.property(propertyName), options);
   }

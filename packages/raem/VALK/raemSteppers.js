@@ -192,14 +192,14 @@ export default {
         : tryLiteral(valker, head, evaluatee, scope);
     if (capturedVAKON === undefined) return undefined;
     if (Iterable.isIterable(capturedVAKON)) {
-      console.warn("§capturee.evaluatee should valk to native VAKON, instead got immutable object:",
+      console.warn("§capture.evaluatee should valk to native VAKON, instead got immutable object:",
           capturedVAKON, "as evaluatee JSON:", capturedVAKON.toJS());
       capturedVAKON = capturedVAKON.toJS();
     }
     return _createCaller(
         valker,
         capturedVAKON,
-        valker.hasOwnProperty("_sourceInfo") && valker._sourceInfo,
+        valker[SourceInfoTag],
         ((customScope === undefined)
                 ? scope
                 : tryLiteral(valker, head, customScope, scope))
@@ -890,20 +890,19 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
     const valkCaller = head && head.__callerValker__;
     try {
       if (valkCaller) {
-        transaction = valkCaller.acquireTransaction("advance-capture");
-        if (sourceInfo) transaction._sourceInfo = sourceInfo;
-        const nonliveSteppers = transaction._steppers["§nonlive"];
-        if (nonliveSteppers) transaction.setSteppers(nonliveSteppers);
-          ret = transaction.advance(head, vakon, scope, true);
+        transaction = valkCaller.acquireTransaction("valkcall-capture");
       } else {
         // Direct caller is not valk context: this is a callback thunk
         // that is being called by fabric/javascript code.
         if (!head) head = capturedScope.this || {};
-        transaction = capturingValker.acquireTransaction("run-capture");
-        ret = transaction.run(head, vakon,
-            { scope, sourceInfo, steppers: transaction._steppers["§nonlive"] });
+        transaction = capturingValker.acquireTransaction("extcall-capture");
+        head = transaction.tryPack(head);
       }
-    } catch (error) {
+      if (sourceInfo) transaction[SourceInfoTag] = sourceInfo;
+      const nonliveSteppers = transaction._steppers["§nonlive"];
+      if (nonliveSteppers) transaction.setSteppers(nonliveSteppers);
+      ret = transaction.advance(head, vakon, scope, true);
+  } catch (error) {
       advanceError = error;
       // ? if (outerTransaction) throw error;
     }
@@ -912,7 +911,7 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
       try {
         if (!advanceError) {
           transaction.releaseTransaction();
-          return ret;
+          return valkCaller ? ret : transaction.tryUnpack(ret, true);
         }
         transaction.releaseTransaction({ rollback: advanceError });
       } catch (error) {
@@ -920,8 +919,8 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
       }
     }
     const contextText = valkCaller ? " (valk caller)"
-        : activeTransaction ? " (non-valk caller with active capture transaction)"
-        : " (non-valk non-transactional context)";
+        : activeTransaction ? " (external caller with active capture transaction)"
+        : " (external non-transactional caller)";
     let opName;
     if (!transaction) {
       opName = `call/acquireTransaction ${contextText}`;
@@ -940,7 +939,7 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
         transactionError || advanceError,
         opName,
         ...((transactionError && advanceError)
-            ? ["\n\t\tadvance abort cause:", ...dumpObject(advanceError)] : []),
+            ? ["\n\t\tadvance rollback cause:", ...dumpObject(advanceError)] : []),
         "\n\tthis:", ...dumpObject(head),
         "\n\tcallee vakon:", ...dumpKuery(vakon),
         "\n\tscope:", ...dumpObject(scope),
@@ -951,7 +950,7 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
         "\n\tcapturingValker.state:", ...dumpObject(
             capturingValker && capturingValker.getState().toJS()),
     );
-    if (sourceInfo) addStackFrameToError(wrap, vakon, sourceInfo);
+    if (sourceInfo) addStackFrameToError(wrap, vakon, sourceInfo, opName, transaction);
     throw wrap;
   };
   caller._valkThunk = true;

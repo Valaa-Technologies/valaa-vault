@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.22](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.21...v0.34.0-prerelease.22) (2019-04-18)
+
+
+### Bug Fixes
+
+* broken vs/vsx error traces ([f385944](https://github.com/valaatech/vault/commit/f385944))
+
+
+
+
+
 # [0.34.0-prerelease.21](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.20...v0.34.0-prerelease.21) (2019-04-16)
 
 

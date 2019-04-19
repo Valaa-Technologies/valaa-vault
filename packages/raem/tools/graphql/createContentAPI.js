@@ -41,7 +41,7 @@ function contentAPIField (targetFieldName, type, description,
  *              reducers        incoming mutation reducers (fallthrough from the param reducers)
  */
 export default function createContentAPI ({ name, inherits = [], exposes, mutations, validators,
-  reducers, inactiveType,
+  reducers, inactiveType, destroyedType,
 }) {
   const exposedAccessPoints = exposes.reduce((accessPoints, exposedTypeEntry) => {
     const typeName = !Array.isArray(exposedTypeEntry) ? exposedTypeEntry.name : exposedTypeEntry[0];
@@ -70,7 +70,7 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
     subAPI.reducers.forEach(reducer => reducer && actualReducers.add(reducer));
   }
 
-  let inheritedInactiveType;
+  let inheritedInactiveType, inheritedDestroyedType;
 
   for (const inheritedContentAPI of (inherits || [])) {
     Object.values(inheritedContentAPI.subAPIs).forEach(tryToAddSubAPI);
@@ -84,6 +84,15 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
                 } (from ${inheritedContentAPI.name}) and no explicit inactiveType was provided`);
       }
       inheritedInactiveType = subInactiveType;
+    }
+    const subDestroyedType = inheritedContentAPI.schema.destroyedType;
+    if (!destroyedType && subDestroyedType) {
+      if (inheritedDestroyedType && (inheritedDestroyedType !== subDestroyedType)) {
+        throw new Error(`Mismatching ${name} inherited destroyedType ${
+          inheritedDestroyedType.name} !== ${subDestroyedType
+                } (from ${inheritedContentAPI.name}) and no explicit destroyedType was provided`);
+      }
+      inheritedDestroyedType = subDestroyedType;
     }
   }
   Object.freeze(subAPIs);
@@ -104,6 +113,8 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
   }));
   schema.inactiveType = inactiveType || inheritedInactiveType;
   if (!schema.inactiveType) throw new Error(`ContentAPI ${name} is missing .inactiveType`);
+  schema.destroyedType = destroyedType || inheritedDestroyedType;
+  if (!schema.destroyedType) throw new Error(`ContentAPI ${name} is missing .destroyedType`);
 
   schema.tryAffiliatedTypeOfField = (couplingName) => {
     const ret = schema._couplingToType[couplingName];
@@ -128,6 +139,7 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
         }
     ),
     inactiveType,
+    destroyedType,
     subAPIs,
   });
 }

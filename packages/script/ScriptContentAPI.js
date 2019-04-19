@@ -5,6 +5,7 @@ import { RAEMContentAPI } from "~/raem";
 import Expression from "~/script/schema/Expression";
 import Identifier from "~/script/schema/Identifier";
 import InactiveScriptResource from "~/script/schema/InactiveScriptResource";
+import DestroyedScriptResource from "~/script/schema/DestroyedScriptResource";
 import KueryExpression from "~/script/schema/KueryExpression";
 import Literal from "~/script/schema/Literal";
 import Property from "~/script/schema/Property";
@@ -18,7 +19,8 @@ export default createContentAPI({
 
   exposes: [
     Expression, Identifier, KueryExpression, Literal, Property, Relation, Relatable, Scope,
-    InactiveScriptResource,
+    InactiveScriptResource, DestroyedScriptResource,
   ],
   inactiveType: InactiveScriptResource,
+  destroyedType: DestroyedScriptResource,
 });

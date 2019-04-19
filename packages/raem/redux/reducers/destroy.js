@@ -8,17 +8,17 @@ import { universalizePartitionMutation } from "~/raem/tools/denormalized/partiti
 
 import Bard from "~/raem/redux/Bard";
 
-import { wrapError } from "~/tools/wrapError";
-import { invariantifyObject } from "~/tools/invariantify";
+import { wrapError, invariantifyObject, dumpObject } from "~/tools";
 
 const allowedHiddenFields = { typeName: true };
 
 export default function destroy (bard: Bard) {
-  let transient: Object;
+  let transient, rawId, objectTypeIntro;
   const passage = bard.passage;
   try {
+    rawId = passage.id.rawId();
     transient = bard.goToTransientOfPassageObject("Resource", true, true); // require, ghost-lookup
-    const objectTypeIntro = bard.goToResourceTransientTypeIntro(transient);
+    objectTypeIntro = bard.goToResourceTransientTypeIntro(transient);
     const partitionURI = universalizePartitionMutation(bard, passage.id);
     bard.destroyedResourcePartition = partitionURI && partitionURI.toString();
     const resourceFieldIntros = objectTypeIntro.getFields();
@@ -36,18 +36,32 @@ export default function destroy (bard: Bard) {
         addDestroyCouplingPassages(bard, fieldIntro, fieldValue);
       }
     });
-    const rawId = passage.id.rawId();
     bard.obtainResourceChapter(rawId).destroyed = true;
     removeGhostElevationsFromPrototypeChain(bard, passage.id.getGhostPath(), transient);
     bard.updateStateWithPassages();
-    bard.updateStateWith(state => (objectTypeIntro.getInterfaces() || [])
-        .reduce((innerState, classInterface) => innerState.deleteIn([classInterface.name, rawId]),
-            state));
-    return bard.updateStateWith(state => state.deleteIn([objectTypeIntro.name, rawId]));
+    const destroyedTypeName = bard.schema.destroyedType.name;
+    return bard.updateStateWith(state => {
+      const destroyedTransient = state.getIn([objectTypeIntro.name, rawId]);
+      if (passage.id.isGhost()) {
+        if (!destroyedTransient) return state; // redundant ghost immaterialization
+        return (objectTypeIntro.getInterfaces() || [])
+            .reduce((subState, interface_) => subState.deleteIn([interface_.name, rawId]), state)
+            .deleteIn([objectTypeIntro.name, rawId]);
+      }
+      return (objectTypeIntro.getInterfaces() || [])
+          .reduce(
+              (subState, interface_) => subState.setIn([interface_.name, rawId], destroyedTypeName),
+              state)
+          .deleteIn([objectTypeIntro.name, rawId])
+          .setIn([destroyedTypeName, rawId], destroyedTransient.set("typeName", destroyedTypeName));
+    });
   } catch (error) {
-    throw wrapError(error, `During ${bard.debugId()}\n .destroy(), with:`,
+    throw wrapError(error, `During ${bard.debugId()}\n .destroy(${rawId}), with:`,
         "\n\tid:", passage.id,
-        "\n\towner:", transient && transient.get("owner"));
+        "\n\towner:", transient && transient.get("owner"),
+        "\n\ttransient:", ...dumpObject(transient),
+        "\n\tintro type:", objectTypeIntro.name,
+        "\n\tstate:", JSON.stringify(bard.getState().toJS(), null, 2));
   }
 }
 

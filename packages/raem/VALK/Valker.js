@@ -392,7 +392,7 @@ export default class Valker extends Resolver {
           } else {
             elevatedId = elevateFieldReference(this, object._singular, object._fieldInfo,
                 undefined, object._type, this._indent < 2 ? undefined : this._indent);
-            ret = this.tryGoToTransient(elevatedId, object._type, requireIfRef, false);
+            ret = this.tryGoToTransient(elevatedId, "TransientFields", requireIfRef, false);
           }
         }
       }

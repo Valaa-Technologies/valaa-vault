@@ -9,4 +9,5 @@ export default createContentAPI({
   inherits: [ScriptContentAPI, RAEMTestAPI],
   exposes: [TestScriptyThing],
   inactiveType: ScriptContentAPI.inactiveType,
+  destroyedType: ScriptContentAPI.destroyedType,
 });

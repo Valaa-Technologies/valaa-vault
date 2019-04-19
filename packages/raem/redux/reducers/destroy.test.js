@@ -33,8 +33,8 @@ describe("CREATED/DUPLICATED", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, [
       destroyed({ id: ["A_child1"] }),
     ]);
-    expect(tryObjectTransient(harness.getValker(), "A_child1", "Resource"))
-        .toEqual(null);
+    expect(tryObjectTransient(harness.getValker(), "A_child1", "Resource").get("typeName"))
+        .toEqual("DestroyedResource");
   });
 
   it("prevents DESTROYED if the resource has active instances", () => {

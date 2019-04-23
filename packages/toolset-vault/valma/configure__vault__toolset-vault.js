@@ -37,4 +37,13 @@ exports.handler = async (yargv) => {
   for (const dotFile of hardcodedDotFiles) {
     vlm.shell.cp("-n", vlm.path.join(__dirname, "../template.dots", dotFile), `.${dotFile}`);
   }
+  if (!vlm.shell.test("-d", ".git") && await vlm.inquireConfirm(
+      "Initialize git repository and create the release branch structure?")) {
+    const config = await vlm.getPackageConfig();
+    vlm.interact("git init");
+    vlm.interact("git add -A");
+    vlm.interact(`git commit -a -m "v${config.version}"`);
+    vlm.interact(`git tag -a v${config.version} "v${config.version}"`);
+    vlm.interact(`git checkout -b release/${config.version.split(".").slice(0, 2).join(".")}`);
+  }
 };

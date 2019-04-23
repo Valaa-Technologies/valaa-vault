@@ -51,9 +51,39 @@ exports.handler = async (yargv) => {
 interactive questions.
 ValOS repositories use yarn extensively for version, dependency and
 script management; ${vlm.theme.path("package.json")} is the central package configuration
-file for yarn (and for npm, for which yarn is an analogue).
+file for yarn (and also for npm, which yarn is based on).
 `);
         continue;
+      }
+      let vaultConfig = await vlm.tryReadFile(vlm.path.join("..", "..", "package.json"), "utf8");
+      if (vaultConfig !== undefined) {
+        // rather brittle name default. Only works for workspaces
+        // precisely two nestings under a vault package.json (which is
+        // vast majority of them though).
+        vaultConfig = JSON.parse(vaultConfig);
+        const parts = vlm.path.resolve().split("/").slice(-2);
+        let isPrivate = true;
+        let publishConfigLine = "";
+        let name = vaultConfig.name;
+        if (name[name.length - 1] !== "/") name += "_";
+        if (parts[0] === "packages") {
+          parts.shift();
+          isPrivate = false;
+          publishConfigLine = `,
+  "publishConfig": {
+    "access": "${(await vlm.inquireConfirm(
+        "Is this a 'public' published package? ('n' for 'restricted')")) ? "public" : "restricted"}"
+  }`;
+        } else if (parts[0][parts[0].length - 1] === "s") parts[0] = parts[0].slice(0, -1);
+        vlm.shell.ShellString(
+`{
+  "name": "${name}${parts.join("_")}",
+  "version": "${vaultConfig.version}",
+  "author": "${vaultConfig.author}",
+  "license": "${vaultConfig.license}",
+  "private": ${isPrivate ? "true" : "false"}${
+  publishConfigLine}
+}`).to("package.json");
       }
       return vlm.interact("yarn init");
     }

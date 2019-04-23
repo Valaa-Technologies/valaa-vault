@@ -14,7 +14,7 @@ exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
     && `Workspace is not a 'vault' (is '${yargs.vlm.getValOSConfig("type")}')`;
 exports.builder = (yargs) => {
   const vlm = yargs.vlm;
-  const current = vlm.getPackageConfig("workspaces", 0);
+  const current = (vlm.getPackageConfig("workspaces") || []).join(",");
   return yargs.options({
     reconfigure: {
       alias: "r", type: "boolean",
@@ -24,7 +24,7 @@ exports.builder = (yargs) => {
       type: "string", default: current || "packages/*",
       interactive: {
         type: "input", when: !current ? "always" : "if-undefined",
-        message: "Set package.json .workspaces stanza glob for yarn to manage.",
+        message: "Set package.json .workspaces stanza globs as a comma-separated list.",
       }
     },
   });
@@ -35,9 +35,9 @@ exports.handler = async (yargv) => {
   if (!vlm.getPackageConfig("devDependencies", "@valos/toolset-vault")) {
     await vlm.interact("yarn add -W --dev @valos/toolset-vault");
   }
-  if (vlm.getPackageConfig("workspaces", 0) !== yargv.workspaces) {
+  if ((vlm.getPackageConfig("workspaces") || []).join(",") !== yargv.workspaces) {
     await vlm.updatePackageConfig({ workspaces: [yargv.workspaces] });
-    await vlm.interact("yarn install");
+    // await vlm.interact("yarn install");
   }
   return vlm.invoke(`.configure/.type/.vault/**/*`, { reconfigure: yargv.reconfigure });
 };

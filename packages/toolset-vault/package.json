@@ -17,7 +17,8 @@
     "valma-assemble-packages": "valma/assemble-packages.js",
     "valma-publish-packages": "valma/publish-packages.js",
     "valma-clean-vault": "valma/clean-vault.js",
-    "valma-release-vault": "valma/release-vault.js"
+    "valma-release-vault": "valma/release-vault.js",
+    ".valma-configure_.type_.library_@valos_toolset-vault_enable-babel": "valma/configure_.type_.library_@valos_toolset-vault_enable-babel.js"
   },
   "dependencies": {
     "@babel/cli": ">7.0.0-rc",

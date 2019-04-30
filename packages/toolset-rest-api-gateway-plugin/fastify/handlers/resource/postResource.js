@@ -27,9 +27,13 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       await Promise.all(this.vPreloads.map(vPreload => vPreload.activate()));
       const scriptRoot = this.vPreloads[0] || server.getViewFocus();
       if (!scriptRoot) throw new Error(`Can't locate scriptRoot for route: ${this.name}`);
+      const connection = await server.getDiscourse().acquirePartitionConnection(
+          route.config.valos.subject, { newPartition: false }).getActiveConnection();
       this.scopeRules.scopeBase = Object.freeze({
         ...this.scopeRules.scopeBase,
         scriptRoot,
+        subject: server.getEngine().getVrapper(
+            [connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) }]),
       });
     },
     handleRequest (request, reply) {

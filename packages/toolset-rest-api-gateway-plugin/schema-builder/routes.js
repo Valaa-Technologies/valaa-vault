@@ -1,6 +1,7 @@
 // @flow
 
 import { wrapError, dumpify, dumpObject } from "~/tools";
+import valosheath from "~/gateway-api/valosheath";
 
 import {
   ArrayJSONSchema, ObjectJSONSchema, StringType, XWWWFormURLEncodedStringType, IdValOSType,
@@ -392,6 +393,58 @@ export function mappingDELETERoute (valos, ResourceType, RelationType,
     );
   }
 }
+
+export function sessionGETRoute (clientURI,
+    { url, querystring, clientRedirectPath, ...rest }) {
+  try {
+    return {
+      category: "session",
+      method: "GET",
+      url,
+      schema: {
+        description: `Get a session redirection via a ValOS OpenId Connect authorization response`,
+        querystring: {
+          code: { ...XWWWFormURLEncodedStringType },
+          state: { ...XWWWFormURLEncodedStringType },
+          error: StringType, // ASCII,
+          error_description: StringType,
+          // Values for the "error_description" parameter MUST NOT include
+          // characters outside the set %x20-21 / %x23-5B / %x5D-7E.
+          error_uri: StringType,
+          // Values for the "error_uri" parameter MUST conform to the
+          // URI-reference syntax and thus MUST NOT include characters
+          // outside the set %x21 / %x23-5B / %x5D-7E.
+          ...(querystring || {}),
+        },
+        response: {
+          302: StringType,
+          404: { type: "string" },
+        },
+      },
+      config: {
+        ...rest,
+        constantRules: {
+          ...(rest.constantRules || {}),
+          clientRedirectPath,
+        },
+        queryRules: {
+          ...(rest.queryRules || {}),
+          authorizationGrant: "code", grantProviderState: "state",
+          error: "error", errorDescription: "error_description", errorURI: "error_uri",
+        },
+        cookieRules: {
+          ...(rest.cookieRules || {}),
+          userAgentState: valosheath.identity.getClientCookieName({ clientURI }),
+        },
+      },
+    };
+  } catch (error) {
+    throw wrapError(error, new Error(`sessionGETRoute(<${url}>)`),
+        "\n\tquerystring:", dumpify(querystring),
+    );
+  }
+}
+
 
 const _unreservedWordListPattern = "^([a-zA-Z0-9\\-_.~/*$]*(\\,([a-zA-Z0-9\\-_.~/*$])*)*)?$";
 const _unreservedSortListPattern = "^(\\-?[a-zA-Z0-9_.~/$]*(\\,\\-?([a-zA-Z0-9_.~/$])*)*)?$";

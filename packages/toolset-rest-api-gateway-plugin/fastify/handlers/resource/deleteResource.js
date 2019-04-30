@@ -12,10 +12,14 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
     prepare (/* fastify */) {
       this.scopeRules = server.prepareScopeRules(this);
     },
-    preload () {
-      // const connection = await server.getDiscourse().acquirePartitionConnection(
-      //    route.config.valos.subject, { newPartition: false }).getActiveConnection();
-      // const vRoot = server.getEngine().getVrapper([connection.getPartitionRawId()]);
+    async preload () {
+      const connection = await server.getDiscourse().acquirePartitionConnection(
+          route.config.valos.subject, { newPartition: false }).getActiveConnection();
+      this.scopeRules.scopeBase = Object.freeze({
+        ...this.scopeRules.scopeBase,
+        subject: server.getEngine().getVrapper(
+            [connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) }]),
+      });
     },
     handleRequest (request, reply) {
       const scope = server.buildScope(request, this.scopeRules);

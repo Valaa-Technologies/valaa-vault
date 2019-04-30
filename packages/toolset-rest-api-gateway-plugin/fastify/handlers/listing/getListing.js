@@ -4,6 +4,8 @@ import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fas
 
 import { dumpify, dumpObject, thenChainEagerly } from "~/tools";
 
+import { _verifyResourceAuthorization } from "../resource/_resourceHandlerOps";
+
 export default function createRouteHandler (server: RestAPIServer, route: Route) {
   return {
     category: "listing", method: "GET", fastifyRoute: route,
@@ -88,6 +90,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         "\n\tkuery:", ...dumpObject(this.toListingFields),
         "\n\troute.config:", ...dumpObject(route.config),
       ]);
+      if (!_verifyResourceAuthorization(server, route, request, reply, scope)) return false;
       return thenChainEagerly(scope.indexRoot, [
         vIndexRoot => vIndexRoot.get(this.toListingFields, { scope }),
         (filter || ids || Object.keys(fieldRequirements).length)

@@ -41,6 +41,7 @@ export default class RestAPIServer extends LogEventGenerator {
   getEngine () { return this._engine; }
   getDiscourse () { return this._engine.discourse; }
   getViewFocus () { return this._view.getViewFocus(); }
+  getSessionDuration () { return 86400 * 1.5; }
 
   async start () {
     const wrap = new Error(`start`);
@@ -61,12 +62,19 @@ export default class RestAPIServer extends LogEventGenerator {
   }
 
   _createPrefixPlugin = ([prefix, {
-    openapi, swaggerPrefix, schemas, routes, ...pluginOptions
+    openapi, swaggerPrefix, schemas, routes, clientURI, clientSecret, sessionDuration,
+    ...pluginOptions
   }]) => {
     const server = this;
     try {
       const prefixedThis = Object.create(this);
       prefixedThis.getRoutePrefix = () => prefix;
+      prefixedThis.getClientURI = () => clientURI;
+      prefixedThis.getClientCookieName = () =>
+          valosheath.identity.getClientCookieName({ clientURI });
+      prefixedThis.getClientSecret = () => clientSecret;
+      prefixedThis.getSessionDuration = () => (sessionDuration || this.getSessionDuration());
+
       // Create handlers for all routes before trying to register.
       // At this stage neither schema nor fastify is available for the
       // handlers.

@@ -1,5 +1,7 @@
 // @flow
 
+import { verifySessionAuthorization } from "~/toolset-rest-api-gateway-plugin/fastify/security";
+
 import { _addToRelationsSourceSteps } from "../_handlerOps";
 
 export function _resolveMappingResource (server, route, request, reply, scope) {
@@ -9,6 +11,7 @@ export function _resolveMappingResource (server, route, request, reply, scope) {
     reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
     return false;
   }
+  return verifySessionAuthorization(server, route, request, reply, scope, scope.resource);
 }
 
 export function _createTargetedToMapping (server, route, toTargetId) {

@@ -1,16 +1,20 @@
 // @flow
 
 import path from "path";
+import fs from "fs";
 
 import { asyncConnectToPartitionsIfMissingAndRetry } from "~/raem/tools/denormalized/partitions";
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
 import { dumpify, dumpObject, LogEventGenerator, outputError } from "~/tools";
+import valosheath from "~/gateway-api/valos";
+
 import * as handlers from "./handlers";
 
 const Fastify = require("fastify");
 const FastifySwaggerPlugin = require("fastify-swagger");
+const FastifyCookiePlugin = require("fastify-cookie");
 
 export default class RestAPIServer extends LogEventGenerator {
   constructor ({ view, viewName, port, address, fastify, prefixes, ...rest }) {
@@ -23,6 +27,14 @@ export default class RestAPIServer extends LogEventGenerator {
     this._port = port;
     this._address = address;
     this._prefixes = prefixes;
+    const options = { ...fastify };
+    if (options.https) {
+      options.https = {
+        ...options.https,
+        key: fs.readFileSync(path.join(process.cwd(), options.https.key), "utf8"),
+        cert: fs.readFileSync(path.join(process.cwd(), options.https.cert), "utf8"),
+      };
+    }
     this._rootify = Fastify(options || {});
   }
 
@@ -64,6 +76,7 @@ export default class RestAPIServer extends LogEventGenerator {
       // https://github.com/fastify/fastify/blob/master/docs/Server.md
       prefixedThis._rootify.register(async (fastify, opts, next) => {
         prefixedThis._fastify = fastify;
+        fastify.register(FastifyCookiePlugin);
         if (swaggerPrefix) {
           fastify.register(FastifySwaggerPlugin, {
             routePrefix: swaggerPrefix,

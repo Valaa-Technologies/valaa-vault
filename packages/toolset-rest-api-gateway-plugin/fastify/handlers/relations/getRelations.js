@@ -1,7 +1,7 @@
 // @flow
 
 import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fastify/RestAPIServer";
-import { dumpify, dumpObject, thenChainEagerly } from "~/tools";
+import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _addToRelationsSourceSteps } from "../_handlerOps";
 

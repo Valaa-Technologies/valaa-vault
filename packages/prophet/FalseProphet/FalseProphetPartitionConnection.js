@@ -194,8 +194,8 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
             }
             throw rechronicle;
           }
-          return receiveTruths && receiveTruths(
-              receivableTruths, undefined, undefined, firstSchismaticCommand);
+          return receiveTruths && (receivableTruths.length || firstSchismaticCommand)
+              && receiveTruths(receivableTruths, undefined, undefined, firstSchismaticCommand);
         },
         function _finalizeChronicleResults () {
           return (resultBase._truthForwardResults = !rechronicle ? upstreamResults

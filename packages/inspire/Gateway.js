@@ -31,9 +31,10 @@ import { registerVidgets } from "~/inspire/ui";
 import type { Revelation } from "~/inspire/Revelation";
 import extendValosheathWithInspire from "~/inspire/valosheath";
 
-import getGlobal from "~/gateway-api/getGlobal";
-import { arrayBufferFromBase64 } from "~/tools/base64";
 import { setGlobalLogger } from "~/tools/wrapError";
+
+import getGlobal from "~/gateway-api/getGlobal";
+import { byteArrayFromBase64 } from "~/gateway-api/base64";
 
 const deepExtend = require("@valos/tools/deepExtend").default;
 
@@ -255,6 +256,7 @@ export default class Gateway extends LogEventGenerator {
           }
           rootScope.valos.gateway = gateway;
           rootScope.valos.identity = engine.getIdentityManager();
+          rootScope.valos.view = {};
           if (engine.getVerbosity()) {
             rootScope.console = Object.assign(Object.create(engine), {
               info: function verboseInfoEvent (...rest) { this.infoEvent(0, ...rest); },
@@ -697,7 +699,7 @@ export default class Gateway extends LogEventGenerator {
         return undefined;
       }
       const container = await bvobBuffers[contentHash];
-      if (container.base64 !== undefined) return arrayBufferFromBase64(container.base64);
+      if (container.base64 !== undefined) return byteArrayFromBase64(container.base64).buffer;
       return container;
     };
     const bvobInfos = {

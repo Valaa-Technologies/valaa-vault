@@ -1773,7 +1773,7 @@ export default class Vrapper extends Cog {
     let fieldUpdate = this._fieldSubscriptions && this._fieldSubscriptions.get(fieldName);
     if (!fieldUpdate && !this._filterHooks) return undefined;
     if (!fieldUpdate) {
-      fieldUpdate = new LiveUpdate(this, story).initializeField(fieldName);
+      fieldUpdate = new Subscription(this, story).initializeField(fieldName);
     }
     if (fieldUpdate._passage) {
       if (!fieldUpdate._passages) fieldUpdate._passages = [fieldUpdate._passage];

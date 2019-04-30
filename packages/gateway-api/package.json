@@ -12,5 +12,9 @@
   "private": false,
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "base64-js": "^1.3.0",
+    "text-encoding": "^0.7.0"
   }
 }

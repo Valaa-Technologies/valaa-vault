@@ -254,14 +254,16 @@ export default class Subscription extends LiveUpdate {
   }
 
   detachHooks () {
-    for (const [hookTarget, callbackKey] of this._attachedHooks) {
-      if (callbackKey) {
-        // Remove all callbacks at once, no need to remove them one by
-        // one even if we encounter multiple callbacks on the same hookTarget.
-        hookTarget.removeListenerCallback(this /* , callbackKey */);
-      } else hookTarget.delete(this);
+    if (this._attachedHooks) {
+      for (const [hookTarget, callbackKey] of this._attachedHooks) {
+        if (callbackKey) {
+          // Remove all callbacks at once, no need to remove them one by
+          // one even if we encounter multiple callbacks on the same hookTarget.
+          hookTarget.removeListenerCallback(this /* , callbackKey */);
+        } else hookTarget.delete(this);
+      }
+      this._attachedHooks = null;
     }
-    this._attachedHooks = null;
     this._invalidateState();
   }
 

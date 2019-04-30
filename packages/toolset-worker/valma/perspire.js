@@ -168,7 +168,7 @@ exports.handler = async (yargv) => {
   }
   vlm.clock("perspire.handler", "gateway.mainView", "server.createMainView");
   const mainView = await server.createMainView();
-  partitions.view = mainView.getViewPartition();
+  mainView.rootScope.valos.view = partitions.view = mainView.getViewPartition();
 
   mainView.rootScope.valos.Perspire.options = yargv;
   mainView.rootScope.valos.Perspire.state = state;

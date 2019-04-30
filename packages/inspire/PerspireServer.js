@@ -33,6 +33,8 @@ export default class PerspireServer {
     // Load global node context polyfills and libraries
     global.WebSocket = require("ws");
     global.fetch = require("node-fetch");
+    global.atob = (str) => Buffer.from(str, "base64").toString("binary");
+    global.btoa = (str) => Buffer.from(str, "binary").toString("base64");
 
     (this.plugins || []).forEach(plugin => require(plugin));
     return (this.gateway =

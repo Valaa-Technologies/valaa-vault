@@ -17,8 +17,9 @@
     ".valma-configure_.type_.worker_.toolset_@valos_toolset-rest-api-gateway-plugin": "valma/configure__worker_toolset__toolset-rest-api-gateway-plugin.js"
   },
   "dependencies": {
-    "fastify": "^1.14.1",
-    "fastify-swagger": "^1.2.0"
+    "fastify": "^2.3.0",
+    "fastify-cookie": "^3.0.2",
+    "fastify-swagger": "^2.3.2"
   },
   "peerDependencies": {
     "@valos/inspire": "^0.34.0-prerelease.3"

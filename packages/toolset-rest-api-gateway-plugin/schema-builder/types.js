@@ -7,6 +7,7 @@ export const ArrayJSONSchema = Symbol("Array-JSONSchema");
 export const EmailType = { type: "string" };
 export const BooleanType = { type: "boolean" };
 export const StringType = { type: "string" };
+export const XWWWFormURLEncodedStringType = { type: "string" };
 export const NumberType = { type: "number" };
 // export const URIReferenceType = { type: "uri-reference" };
 export const URIReferenceType = { type: "string" };

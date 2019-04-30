@@ -8,7 +8,7 @@ import { _addToRelationsSourceSteps } from "../_handlerOps";
 export default function createRouteHandler (server: RestAPIServer, route: Route) {
   return {
     category: "relations", method: "GET", fastifyRoute: route,
-    requiredRules: ["resourceId"],
+    requiredRuntimeRules: ["resourceId"],
     builtinRules: {},
     prepare (/* fastify */) {
       this.scopeRules = server.prepareScopeRules(this);
@@ -23,11 +23,10 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       // const vRoot = server.getEngine().getVrapper([connection.getPartitionRawId()]);
     // }
     handleRequest (request, reply) {
-      const scope = server.buildRequestScope(request, this.scopeRules);
+      const scope = server.buildScope(request, this.scopeRules);
       server.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId,
         "\n\trequest.query:", request.query,
-        "\n\ttoRelationsFields:", dumpify(this.toRelationsFields),
       ]);
       scope.resource = server._engine.tryVrapper([scope.resourceId]);
       if (!scope.resource) {

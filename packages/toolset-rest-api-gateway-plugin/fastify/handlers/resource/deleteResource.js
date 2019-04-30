@@ -2,11 +2,12 @@
 
 import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fastify/RestAPIServer";
 // import { dumpObject, thenChainEagerly } from "~/tools";
+import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
 
 export default function createRouteHandler (server: RestAPIServer, route: Route) {
   return {
     category: "resource", method: "DELETE", fastifyRoute: route,
-    requiredRules: ["resourceId"],
+    requiredRuntimeRules: ["resourceId"],
     builtinRules: {},
     prepare (/* fastify */) {
       this.scopeRules = server.prepareScopeRules(this);
@@ -17,13 +18,14 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       // const vRoot = server.getEngine().getVrapper([connection.getPartitionRawId()]);
     },
     handleRequest (request, reply) {
-      const scope = server.buildRequestScope(request, this.scopeRules);
+      const scope = server.buildScope(request, this.scopeRules);
       server.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId,
         "\n\trequest.query:", request.query,
       ]);
       reply.code(501);
       reply.send("Unimplemented");
+      if (!_verifyResourceAuthorization(server, route, request, reply, scope)) return false;
       return false;
       // Root resource deletion not implemented yet, due to lack of
       // mechanisms for declaring what sub-resources should be

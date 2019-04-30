@@ -2,6 +2,15 @@
 
 import { _addToRelationsSourceSteps } from "../_handlerOps";
 
+export function _resolveMappingResource (server, route, request, reply, scope) {
+  scope.resource = server._engine.tryVrapper([scope.resourceId]);
+  if (!scope.resource) {
+    reply.code(404);
+    reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
+    return false;
+  }
+}
+
 export function _createTargetedToMapping (server, route, toTargetId) {
   const { toMappingFields, relationsStepIndex } =
       _createTargetedToMappingFields(server, route, toTargetId);

@@ -3,12 +3,11 @@
 import { wrapError, dumpify, dumpObject } from "~/tools";
 
 import {
-  ArrayJSONSchema, ObjectJSONSchema, StringType, IdValOSType,
+  ArrayJSONSchema, ObjectJSONSchema, StringType, XWWWFormURLEncodedStringType, IdValOSType,
   getBaseRelationTypeOf, schemaReference, trySharedSchemaName,
 } from "./types";
 
-export function listingGETRoute (valos, ResourceType,
-    { url, querystring }) {
+export function listingGETRoute (valos, ResourceType, { url, querystring, ...rest }) {
   try {
     const resourceSchema = schemaReference(ResourceType);
     const resourceTypeName = trySharedSchemaName(ResourceType) || "<Type>";
@@ -30,7 +29,7 @@ export function listingGETRoute (valos, ResourceType,
           },
         },
       },
-      config: { valos, resourceSchema, resourceTypeName },
+      config: { valos, resourceSchema, resourceTypeName, ...rest },
     };
   } catch (error) {
     throw wrapError(error, new Error(`listingGETRoute(<${url}>)`),
@@ -42,7 +41,7 @@ export function listingGETRoute (valos, ResourceType,
 }
 
 export function resourcePOSTRoute (valos, ResourceType,
-    { url, querystring, scopeRules, scope, createResource }) {
+    { url, querystring, createResource, ...rest }) {
   try {
     const resourceSchema = schemaReference(ResourceType);
     const resourceTypeName = trySharedSchemaName(ResourceType) || "<Type>";
@@ -59,7 +58,7 @@ export function resourcePOSTRoute (valos, ResourceType,
           403: { type: "string" },
         },
       },
-      config: { valos, scopeRules, resourceSchema, resourceTypeName, scope, createResource },
+      config: { valos, resourceSchema, resourceTypeName, createResource, ...rest },
     };
   } catch (error) {
     throw wrapError(error, new Error(`resourcePOSTRoute(<${url}>)`),
@@ -70,8 +69,7 @@ export function resourcePOSTRoute (valos, ResourceType,
   }
 }
 
-export function resourceGETRoute (valos, ResourceType,
-    { url, querystring, scopeRules }) {
+export function resourceGETRoute (valos, ResourceType, { url, querystring, ...rest }) {
   try {
     const resourceSchema = schemaReference(ResourceType);
     const resourceTypeName = trySharedSchemaName(ResourceType) || "<Type>";
@@ -91,20 +89,18 @@ export function resourceGETRoute (valos, ResourceType,
           404: { type: "string", resourceTypeName },
         },
       },
-      config: { valos, scopeRules, resourceSchema },
+      config: { valos, resourceSchema, ...rest },
     };
   } catch (error) {
     throw wrapError(error, new Error(`resourceGETRoute(<${url}>)`),
         "\n\tvalos:", dumpify(valos),
         "\n\tResourceType:", ...dumpObject(ResourceType),
         "\n\tquerystring:", dumpify(querystring),
-        "\n\trules:", scopeRules,
     );
   }
 }
 
-export function resourcePATCHRoute (valos, ResourceType,
-    { url, querystring, scopeRules }) {
+export function resourcePATCHRoute (valos, ResourceType, { url, querystring, ...rest }) {
   try {
     const resourceSchema = schemaReference(ResourceType);
     const resourceTypeName = trySharedSchemaName(ResourceType) || "<Type>";
@@ -122,20 +118,19 @@ export function resourcePATCHRoute (valos, ResourceType,
           404: { type: "string" },
         },
       },
-      config: { valos, scopeRules, resourceSchema, resourceTypeName },
+      config: { valos, resourceSchema, resourceTypeName, ...rest },
     };
   } catch (error) {
     throw wrapError(error, new Error(`resourcePATCHRoute(<${url}>)`),
         "\n\tvalos:", dumpify(valos),
         "\n\tResourceType:", ...dumpObject(ResourceType),
         "\n\tquerystring:", dumpify(querystring),
-        "\n\trules:", scopeRules,
     );
   }
 }
 
 export function resourceDELETERoute (valos, Type,
-    { url, querystring, scopeRules }) {
+    { url, querystring, ...rest }) {
   try {
     const resourceTypeName = trySharedSchemaName(Type) || "<Type>";
     return {
@@ -151,20 +146,19 @@ export function resourceDELETERoute (valos, Type,
           404: { type: "string" },
         },
       },
-      config: { valos, scopeRules, resourceTypeName },
+      config: { valos, resourceTypeName, ...rest },
     };
   } catch (error) {
     throw wrapError(error, new Error(`resourceDELETERoute(<${url}>)`),
         "\n\tvalos:", dumpify(valos),
         "\n\tType:", ...dumpObject(Type),
         "\n\tquerystring:", dumpify(querystring),
-        "\n\trules:", scopeRules,
     );
   }
 }
 
 export function relationsGETRoute (valos, ResourceType, RelationType,
-    { url, querystring, scopeRules }) {
+    { url, querystring, ...rest }) {
   try {
     const { mappingName: relationName, TargetType } = _getMappingParams(RelationType);
     // const BaseRelationType = getBaseRelationTypeOf(RelationType);
@@ -187,8 +181,9 @@ export function relationsGETRoute (valos, ResourceType, RelationType,
         },
       },
       config: {
-        valos, scopeRules, resourceTypeName, relationName, targetTypeName,
+        valos, resourceTypeName, relationName, targetTypeName,
         resourceSchema: schemaReference(ResourceType),
+        ...rest,
       },
     };
   } catch (error) {
@@ -200,7 +195,6 @@ export function relationsGETRoute (valos, ResourceType, RelationType,
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\tquerystring:", dumpify(querystring),
-        "\n\trules:", scopeRules,
     );
   }
 }
@@ -213,7 +207,7 @@ mapping is thus implicitly inferred from the route.
 */
 
 export function mappingPOSTRoute (valos, ResourceType, RelationType,
-    { url, querystring, scopeRules, scope, createResourceAndMapping }) {
+    { url, querystring, createResourceAndMapping, ...rest }) {
   try {
     const { mappingName, TargetType } = _getMappingParams(RelationType);
     const BodyType = getBaseRelationTypeOf(RelationType);
@@ -241,11 +235,11 @@ export function mappingPOSTRoute (valos, ResourceType, RelationType,
         },
       },
       config: {
-        valos, scopeRules, resourceTypeName, mappingName, targetTypeName,
-        scope, createResourceAndMapping,
+        valos, resourceTypeName, mappingName, targetTypeName, createResourceAndMapping,
         resourceSchema: schemaReference(ResourceType),
         relationSchema: schemaReference(RelationType),
         targetSchema: schemaReference(TargetType),
+        ...rest,
       },
     };
   } catch (error) {
@@ -257,13 +251,12 @@ export function mappingPOSTRoute (valos, ResourceType, RelationType,
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\tquerystring:", dumpify(querystring),
-        "\n\tscopeRules:", scopeRules,
     );
   }
 }
 
 export function mappingGETRoute (valos, ResourceType, RelationType,
-    { url, querystring, scopeRules }) {
+    { url, querystring, ...rest }) {
   try {
     const { mappingName, TargetType } = _getMappingParams(RelationType);
     const BaseRelationType = getBaseRelationTypeOf(RelationType);
@@ -286,9 +279,10 @@ export function mappingGETRoute (valos, ResourceType, RelationType,
         },
       },
       config: {
-        valos, scopeRules, resourceTypeName, mappingName, targetTypeName,
+        valos, resourceTypeName, mappingName, targetTypeName,
         resourceSchema: schemaReference(ResourceType),
         relationSchema: schemaReference(RelationType),
+        ...rest,
       },
     };
   } catch (error) {
@@ -300,13 +294,12 @@ export function mappingGETRoute (valos, ResourceType, RelationType,
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\tquerystring:", dumpify(querystring),
-        "\n\tscopeRules:", scopeRules,
     );
   }
 }
 
 export function mappingPATCHRoute (valos, ResourceType, RelationType,
-    { url, querystring, scopeRules, createMapping }) {
+    { url, querystring, createMapping, ...rest }) {
   try {
     /*
     if (createMapping === undefined) {
@@ -340,11 +333,11 @@ export function mappingPATCHRoute (valos, ResourceType, RelationType,
         },
       },
       config: {
-        valos, scopeRules, resourceTypeName, mappingName, targetTypeName,
-        createMapping,
+        valos, resourceTypeName, mappingName, targetTypeName, createMapping,
         resourceSchema: schemaReference(ResourceType),
         relationSchema: schemaReference(PatchRelationType),
         targetSchema: schemaReference(TargetType),
+        ...rest,
       },
     };
   } catch (error) {
@@ -356,13 +349,12 @@ export function mappingPATCHRoute (valos, ResourceType, RelationType,
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\tquerystring:", dumpify(querystring),
-        "\n\tscopeRules:", scopeRules,
     );
   }
 }
 
 export function mappingDELETERoute (valos, ResourceType, RelationType,
-    { url, querystring, scopeRules }) {
+    { url, querystring, ...rest }) {
   try {
     const { mappingName, TargetType } = _getMappingParams(RelationType);
     const resourceTypeName = trySharedSchemaName(ResourceType) || "<ResourceType>";
@@ -382,9 +374,10 @@ export function mappingDELETERoute (valos, ResourceType, RelationType,
         },
       },
       config: {
-        valos, scopeRules, resourceTypeName, mappingName, targetTypeName,
+        valos, resourceTypeName, mappingName, targetTypeName,
         resourceSchema: schemaReference(ResourceType),
         relationSchema: schemaReference(RelationType),
+        ...rest,
       },
     };
   } catch (error) {
@@ -396,7 +389,6 @@ export function mappingDELETERoute (valos, ResourceType, RelationType,
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\tquerystring:", dumpify(querystring),
-        "\n\tscopeRules:", scopeRules,
     );
   }
 }

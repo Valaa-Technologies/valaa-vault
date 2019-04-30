@@ -3,12 +3,12 @@
 import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fastify/RestAPIServer";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
-import { _createToMappingsParts } from "./_mappingHandlerOps";
+import { _createToMappingsParts, _resolveMappingResource } from "./_mappingHandlerOps";
 
 export default function createRouteHandler (server: RestAPIServer, route: Route) {
   return {
     category: "mapping", method: "POST", fastifyRoute: route,
-    requiredRules: ["resourceId", "mappingName"],
+    requiredRuntimeRules: ["resourceId", "mappingName"],
     builtinRules: {
       mappingName: ["constant", route.config.mappingName],
       createResourceAndMapping: ["constant", route.config.createResourceAndMapping],
@@ -40,14 +40,11 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       });
     },
     handleRequest (request, reply) {
-      const scope = server.buildRequestScope(request, this.scopeRules);
-
+      const scope = server.buildScope(request, this.scopeRules);
       server.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId, scope.mappingName,
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
-        "\n\ttoSource:", ...dumpObject(this.toSource),
-        "\n\ttoPatchTarget:", ...dumpObject(this.toPatchTarget),
       ]);
       if (!scope.createResourceAndMapping) {
         reply.code(405);
@@ -62,12 +59,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         return false;
       }
 
-      scope.resource = server._engine.tryVrapper([scope.resourceId]);
-      if (!scope.resource) {
-        reply.code(404);
-        reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
-        return false;
-      }
+      if (!_resolveMappingResource(server, route, request, reply, scope)) return false;
 
       const wrap = new Error(`mapping POST ${route.url}`);
       const discourse = undefined; // server.getDiscourse().acquireTransaction();

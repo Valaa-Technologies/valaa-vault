@@ -3,10 +3,12 @@
 import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fastify/RestAPIServer";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
+import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
+
 export default function createRouteHandler (server: RestAPIServer, route: Route) {
   return {
     category: "resource", method: "PATCH", fastifyRoute: route,
-    requiredRules: ["resourceId"],
+    requiredRuntimeRules: ["resourceId"],
     builtinRules: {},
     prepare (/* fastify */) {
       this.scopeRules = server.prepareScopeRules(this);
@@ -15,26 +17,29 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       server.buildKuery(route.config.resourceSchema, toPatchTarget);
       if (toPatchTarget.length > 1) this.toPatchTarget = toPatchTarget.slice(0, -1);
     },
-    preload () {
-      // const connection = await server.getDiscourse().acquirePartitionConnection(
-      //    route.config.valos.subject, { newPartition: false }).getActiveConnection();
-      // const vRoot = server.getEngine().getVrapper([connection.getPartitionRawId()]);
+    async preload () {
+      const connection = await server.getDiscourse().acquirePartitionConnection(
+          route.config.valos.subject, { newPartition: false }).getActiveConnection();
+      this.scopeRules.scopeBase = Object.freeze({
+        ...this.scopeRules.scopeBase,
+        subject: server.getEngine().getVrapper(
+            [connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) }]),
+      });
     },
     handleRequest (request, reply) {
-      const scope = server.buildRequestScope(request, this.scopeRules);
+      const scope = server.buildScope(request, this.scopeRules);
       server.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId,
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
-        "\n\ttoPatchTarget:", this.toPatchTarget,
       ]);
+      if (!_verifyResourceAuthorization(server, route, request, reply, scope)) return false;
       scope.resource = server._engine.tryVrapper([scope.resourceId]);
       if (!scope.resource) {
         reply.code(404);
         reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
         return false;
       }
-
       const wrap = new Error(this.name);
       const discourse = server.getDiscourse().acquireTransaction();
       return thenChainEagerly(discourse, [

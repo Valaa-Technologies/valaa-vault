@@ -3,12 +3,12 @@
 import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fastify/RestAPIServer";
 import { dumpify, dumpObject, thenChainEagerly } from "~/tools";
 
-import { _createTargetedToMappingFields } from "./_mappingHandlerOps";
+import { _createTargetedToMappingFields, _resolveMappingResource } from "./_mappingHandlerOps";
 
 export default function createRouteHandler (server: RestAPIServer, route: Route) {
   return {
     category: "mapping", method: "PATCH", fastifyRoute: route,
-    requiredRules: ["resourceId", "mappingName", "targetId"],
+    requiredRuntimeRules: ["resourceId", "mappingName", "targetId"],
     builtinRules: {
       mappingName: ["constant", route.config.mappingName],
       createMapping: ["constant", route.config.createMapping],
@@ -28,19 +28,13 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       return Promise.all(this.vPreloads.map(vPreload => vPreload.activate()));
     },
     handleRequest (request, reply) {
-      const scope = server.buildRequestScope(request, this.scopeRules);
+      const scope = server.buildScope(request, this.scopeRules);
       server.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId, scope.mappingName, scope.targetId,
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
-        "\n\ttoMapping:", dumpify(this.toMapping),
       ]);
-      scope.resource = server._engine.tryVrapper([scope.resourceId]);
-      if (!scope.resource) {
-        reply.code(404);
-        reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
-        return false;
-      }
+      if (!_resolveMappingResource(server, route, request, reply, scope)) return false;
       const vExistingMapping = scope.resource.get(this.toMapping, { scope });
       if (!vExistingMapping) {
         if (!scope.createMapping) {
@@ -55,7 +49,6 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
           return false;
         }
       }
-
       const wrap = new Error(this.name);
       const discourse = server.getDiscourse().acquireTransaction();
       return thenChainEagerly(discourse, [

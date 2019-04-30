@@ -5,10 +5,12 @@ import { Vrapper } from "~/engine";
 import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fastify/RestAPIServer";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
+import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
+
 export default function createRouteHandler (server: RestAPIServer, route: Route) {
   return {
     category: "resource", method: "POST", fastifyRoute: route,
-    requiredRules: [],
+    requiredRuntimeRules: [],
     builtinRules: {
       createResource: ["constant", route.config.createResource],
     },
@@ -31,12 +33,13 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       });
     },
     handleRequest (request, reply) {
-      const scope = server.buildRequestScope(request, this.scopeRules);
+      const scope = server.buildScope(request, this.scopeRules);
       server.infoEvent(1, () => [
         `${this.name}:`,
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
       ]);
+      if (!_verifyResourceAuthorization(server, route, request, reply, scope)) return false;
       if (!scope.createResource) {
         reply.code(405);
         reply.send(`${this.name} is disabled: no scope.createResource defined`);

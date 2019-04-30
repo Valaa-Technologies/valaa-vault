@@ -7,7 +7,7 @@ import { dumpify, dumpObject, thenChainEagerly } from "~/tools";
 export default function createRouteHandler (server: RestAPIServer, route: Route) {
   return {
     category: "listing", method: "GET", fastifyRoute: route,
-    requiredRules: [],
+    requiredRuntimeRules: [],
     builtinRules: {},
     prepare (/* fastify */) {
       try {
@@ -60,6 +60,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
             ]))));
         this.scopeRules.scopeBase = Object.freeze({
           ...this.scopeRules.scopeBase,
+          subject: vIndexRoot,
           indexRoot: vIndexRoot,
         });
       } catch (error) {
@@ -71,7 +72,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       }
     },
     handleRequest (request, reply) {
-      const scope = server.buildRequestScope(request, this.scopeRules);
+      const scope = server.buildScope(request, this.scopeRules);
       const {
         filter, // unimplemented
         sort, offset, limit, ids,

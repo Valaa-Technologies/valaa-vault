@@ -394,8 +394,7 @@ export function mappingDELETERoute (valos, ResourceType, RelationType,
   }
 }
 
-export function sessionGETRoute (clientURI,
-    { url, querystring, clientRedirectPath, ...rest }) {
+export function sessionGETRoute ({ url, querystring, clientRedirectPath, ...rest }) {
   try {
     return {
       category: "session",
@@ -431,10 +430,6 @@ export function sessionGETRoute (clientURI,
           ...(rest.queryRules || {}),
           authorizationGrant: "code", grantProviderState: "state",
           error: "error", errorDescription: "error_description", errorURI: "error_uri",
-        },
-        cookieRules: {
-          ...(rest.cookieRules || {}),
-          userAgentState: valosheath.identity.getClientCookieName({ clientURI }),
         },
       },
     };

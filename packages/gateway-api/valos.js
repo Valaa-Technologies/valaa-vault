@@ -60,23 +60,29 @@ export default (getGlobal().valos ||
   plugins: [],
 
   identity: {
+    getClientCookieName (options = {}) {
+      if (!options.client_id) options.client_id = options.clientURI || this.clientURI;
+      if (!options.client_id) throw new Error("getClientCookieName.(clientURI|client_id) missing");
+      return `__Secure-valos-client-${encodeURIComponent(options.client_id)}`;
+    },
+
+    getSessionCookieName (options = {}) {
+      if (!options.client_id) options.client_id = options.clientURI || this.clientURI;
+      if (!options.client_id) throw new Error("getSessionCookieName.(clientURI|client_id) missing");
+      return `__Secure-valos-session-token-${encodeURIComponent(options.client_id)}`;
+    },
+
     getSessionClaims (options = {}) {
-      const sessionCookieName = this.getClientCookieName(options);
+      const clientCookieName = this.getClientCookieName(options);
       for (const line of window.document.cookie.split(";")) {
         const [name, value] = line.split("=");
-        if (name.trim() === sessionCookieName) {
+        if (name.trim() === clientCookieName) {
           const payload = value.trim().split(".")[1];
           const claims = payload && JSON.parse(base64URLDecode(payload));
           return claims;
         }
       }
       return undefined;
-    },
-
-    getClientCookieName (options) {
-      if (!options.client_id) options.client_id = options.clientURI || this._clientURI;
-      if (!options.client_id) throw new Error("getClientCookieName.(clientURI|client_id) missing");
-      return `__Secure-valos-client-${encodeURIComponent(options.client_id)}`;
     },
 
     authorizeSession ({ clientURI, grantProvider, sessionURI, ...rest }) {
@@ -101,22 +107,24 @@ export default (getGlobal().valos ||
         window.document.cookie = `${clientCookieName}=${encodeURIComponent(params.state)
           }; max-age=900; Secure; SameSite=Lax`;
       }
-      let redirector = `${grantProvider}?response_type=code`;
+      let requestAuthorization = `${grantProvider}?response_type=code`;
       Object.keys(params).forEach(k => {
-        if (params[k]) redirector += `&${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`;
+        if (params[k]) {
+          requestAuthorization += `&${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`;
+        }
       });
-      window.location.replace(redirector);
+      window.location.replace(requestAuthorization);
     },
 
     finalizeSession (options = {}) {
       if (!inBrowser()) throw new Error("Cannot finalize a session in non-browser context");
       if (!options.sessionURI) throw new Error("finalizeSession.sessionURI missing");
-      window.document.cookie = `${this.getClientCookieName(options)}=;max-age=0`;
-      window.document.cookie = `__Secure-valos-session-token-${
-        encodeURIComponent(options.client_id)}=;max-age=0`;
-      window.fetch(options.sessionURI, {
+      const ret = window.fetch(options.sessionURI, {
         method: "DELETE", credentials: "same-origin", mode: "same-origin", redirect: "error",
       });
+      window.document.cookie = `${this.getClientCookieName(options)}=;max-age=0`;
+      window.document.cookie = `${this.getSessionCookieName(options)}=;max-age=0`;
+      return ret;
     }
   },
 }));

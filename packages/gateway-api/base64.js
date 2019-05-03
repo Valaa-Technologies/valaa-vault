@@ -3,7 +3,7 @@
 import base64js from "base64-js";
 
 export function base64URLFromBase64 (base64: string) {
-  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace("=", "");
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
 export function base64FromBase64URL (base64URL: string) {

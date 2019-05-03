@@ -1,8 +1,24 @@
 // @flow
 
 /**
- * Deep extends the given mutable target with the given immutable source value like a recursive
- * generalization of the es6 spread operation.
+ * Extends the target object with the source recursively.
+ * Any nested source object with the key "..." is treated as a link to
+ * an external resource and is spread before extension.
+ *
+ * deepExtend semantics are defined by callbacks:
+ * - options.customizer can be used to fully replace an extend
+ *   operation at some nesting level with the final result value (with
+ *   semantics identical to lodash.mergeWith customizer)
+ * - options.spreader resolves link location, retrieves the resource
+ *   and interprets the resource as a native object
+ * - options.postProcessor is called after customizer/extend steps to
+ *   finalize the extend at some depth (identical parameters with
+ *   customizer)
+ *
+ * The default options.spread semantics is to call options.require for
+ * the link location.
+ * The default options.extend semantics is to treat link parameters as
+ * spread source property data overrides.
  *
  * Additionally deepExtend introduces the *spread operation* and the *spreader properties*.
  * As first class properties (default key "...") these spreader properties can be used to /describe/

@@ -62,18 +62,14 @@ export default class RestAPIServer extends LogEventGenerator {
   }
 
   _createPrefixPlugin = ([prefix, {
-    openapi, swaggerPrefix, schemas, routes, clientURI, clientSecret, sessionDuration,
-    ...pluginOptions
+    openapi, swaggerPrefix, schemas, routes, identity, sessionDuration, ...pluginOptions,
   }]) => {
     const server = this;
     try {
-      const prefixedThis = Object.create(this);
-      prefixedThis.getRoutePrefix = () => prefix;
-      prefixedThis.getClientURI = () => clientURI;
-      prefixedThis.getClientCookieName = () =>
-          valosheath.identity.getClientCookieName({ clientURI });
-      prefixedThis.getClientSecret = () => clientSecret;
-      prefixedThis.getSessionDuration = () => (sessionDuration || this.getSessionDuration());
+      const prefixServer = Object.create(this);
+      prefixServer.getRoutePrefix = () => prefix;
+      prefixServer.getSessionDuration = () => (sessionDuration || this.getSessionDuration());
+      prefixServer.getIdentity = () => identity;
 
       // Create handlers for all routes before trying to register.
       // At this stage neither schema nor fastify is available for the
@@ -156,16 +152,15 @@ export default class RestAPIServer extends LogEventGenerator {
       if (!routeHandler) return undefined;
       if (!routeHandler.name) routeHandler.name = `${route.category} ${route.method} ${route.url}`;
       const routeErrorMessage = `Exception caught during: ${routeHandler.name}`;
-      route.handler = asyncConnectToPartitionsIfMissingAndRetry(
+      const handle = asyncConnectToPartitionsIfMissingAndRetry(
           (request, reply) => {
-            const result = routeHandler.handleRequest(request, reply);
-            if (result === undefined) {
-              this.errorEvent("ERROR: got undefined return value from route:", routeHandler.name,
-                  "\n\texpected true, false or promise, to ensure that exceptions are caught",
-                  "\n\trequest.query:", ...dumpObject(request.query),
-                  "\n\trequest.body:", ...dumpObject(request.body));
+            if (routeHandler.handleRequest(request, reply) === undefined) {
+              throw this.wrapErrorEvent(
+                  new Error("INTERNAL SERVER ERROR: undefined route return value"),
+                  new Error(`handleRequest result handler`),
+                  "Note: routeHandler.handleRequest must return a boolean or a Promise.",
+                  "This ensures that exceptions are always caught and logged properly");
             }
-            return result;
           },
           (error, request, reply) => {
             reply.code(500);

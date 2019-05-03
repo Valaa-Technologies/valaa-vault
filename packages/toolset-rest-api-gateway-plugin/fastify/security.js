@@ -4,7 +4,7 @@
 import crypto from "crypto";
 import { VALEK, Vrapper } from "~/engine";
 
-import { dumpObject, wrapError } from "~/tools";
+import { dumpObject } from "~/tools";
 import {
   base64URLDecode, base64URLEncode, base64URLFromBuffer, byteArrayFromBase64URL,
   base64URLFromBase64,
@@ -15,73 +15,24 @@ const _normalizeAlg = Object.assign(Object.create(null), {
   "aes-256-gcm": "aes-256-gcm",
 });
 
-export function getSessionCookieName (server) {
-  return `__Secure-valos-session-token-${encodeURIComponent(server.getClientURI())}`;
-}
-
-export function authorizeSessionWithGrant (server, request, reply, authorizationGrant,
-    clientRedirectPath, grantExpirationDelay = 60, tokenExpirationDelay = 86400) {
-  let iv, alg, grantTimeStamp, nonce, identityPartition, loggedInAs, sessionToken, clientToken;
-  const timeStamp = Math.floor(Date.now() / 1000);
-  try {
-    const secret = server.getClientSecret();
-    const clientURI = server.getClientURI();
-    ({ iv, alg, payload: { nonce, identityPartition, timeStamp: grantTimeStamp, loggedInAs } } =
-        burlaesgDecode(authorizationGrant, secret));
-
-    if (!(timeStamp < Number(grantTimeStamp) + grantExpirationDelay)) {
-      reply.code(401);
-      reply.send("Authorization session request has expired");
-      throw new Error("Expired");
-      // return false;
-    }
-
-    sessionToken = burlaesgEncode({ timeStamp, nonce, identityPartition }, secret, iv);
-    reply.setCookie(getSessionCookieName(server), sessionToken, {
-      maxAge: tokenExpirationDelay, httpOnly: true, secure: true, path: clientRedirectPath,
-    });
-    clientToken = hs256JWTEncode({
-      iss: clientURI, sub: loggedInAs || identityPartition,
-      iat: timeStamp, exp: timeStamp + tokenExpirationDelay,
-      // aud: "", nbf: "", jti: "",
-    }, secret);
-    reply.setCookie(server.getClientCookieName(), clientToken, {
-      httpOnly: false, secure: true, maxAge: tokenExpirationDelay, path: clientRedirectPath,
-    });
-    return true;
-  } catch (error) {
-    throw wrapError(error, new Error("authorizeSessionWithGrant()"),
-        "\n\ttimeStamp:", timeStamp,
-        "\n\tauthorizationGrant:", authorizationGrant,
-        "\n\tclientRedirectPath:", clientRedirectPath,
-        "\n\tgrantExpirationDelay:", grantExpirationDelay,
-        "\n\ttokenExpirationDelay:", tokenExpirationDelay,
-        "\n\tiv:", iv,
-        "\n\talg:", alg,
-        "\n\tgrantTimeStamp:", grantTimeStamp,
-        "\n\tnonce:", nonce,
-        "\n\tidentityPartition:", identityPartition,
-        "\n\tloggedInAs:", loggedInAs,
-        "\n\tsessionToken:", sessionToken,
-        "\n\tclientToken:", clientToken);
-  }
-}
-
 export function verifySessionAuthorization (server, route, request, reply, scope: Object,
     accessRoot: Vrapper) {
   try {
-    if (!accessRoot || !(accessRoot instanceof Vrapper)) throw new Error("Invalid route access root");
+    const identity = server.getIdentity();
+    if (!identity) {
+      throw new Error("Cannot verify session authorization: valosheath identity not configured");
+    }
     const rights = accessRoot.get(toRIGHTSFields);
     // const permissions = accessRoot.get(toPERMISSIONSFields);
     // console.log("rights:", accessRoot.getId(), rights, permissions);
     if ((rights == null) || !rights.length) {
       if (route.method === "GET") return true;
     } else {
-      const accessToken = request.cookies[getSessionCookieName(server)];
+      const accessToken = request.cookies[identity.getSessionCookieName()];
       let timeStamp, identityPartition;
       if (accessToken) {
         ({ identityPartition, timeStamp } =
-            burlaesgDecode(accessToken, server.getClientSecret()).payload);
+            burlaesgDecode(accessToken, identity.clientSecret).payload);
         if (!(Math.floor(Date.now() / 1000) < Number(timeStamp) + server.getSessionDuration())) {
           console.log("Session expired:", Math.floor(Date.now() / 1000), ">=", timeStamp,
                   server.getSessionDuration(),
@@ -91,8 +42,8 @@ export function verifySessionAuthorization (server, route, request, reply, scope
           return false;
         }
       }
-      console.log("scanning rights for partition:", route.method, identityPartition,
-          "\n\trights:", rights);
+      // console.log("scanning rights for partition:", route.method, identityPartition,
+      //    "\n\trights:", rights);
       for (const right of rights) {
         if (right.partition && (right.partition !== identityPartition)) continue;
         if ((route.method === "GET") && (right.read !== false)) return true;

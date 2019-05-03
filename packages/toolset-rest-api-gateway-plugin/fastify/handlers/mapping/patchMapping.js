@@ -34,19 +34,19 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
       ]);
-      if (!_resolveMappingResource(server, route, request, reply, scope)) return false;
+      if (_resolveMappingResource(server, route, request, reply, scope)) return true;
       const vExistingMapping = scope.resource.get(this.toMapping, { scope });
       if (!vExistingMapping) {
         if (!scope.createMapping) {
           reply.code(405);
           reply.send(`${this.name} CREATE is disabled: no configuration for mapping creation`);
-          return false;
+          return true;
         }
         scope.target = server._engine.tryVrapper([scope.targetId]);
         if (!scope.target) {
           reply.code(404);
           reply.send(`No such ${route.config.targetTypeName} route target: ${scope.targetId}`);
-          return false;
+          return true;
         }
       }
       const wrap = new Error(this.name);

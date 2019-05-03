@@ -34,13 +34,13 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         `${this.name}:`, scope.resourceId, scope.mappingName, scope.targetId,
         "\n\trequest.query:", request.query,
       ]);
-      if (!_resolveMappingResource(server, route, request, reply, scope)) return false;
+      if (_resolveMappingResource(server, route, request, reply, scope)) return true;
       scope.mapping = scope.resource.get(this.toMapping, { scope });
       if (scope.mapping === undefined) {
         reply.code(404);
         reply.send(`No mapping '${route.config.mappingName}' found from ${
           scope.resourceId} to ${scope.targetId}`);
-        return false;
+        return true;
       }
 
       const wrap = new Error(this.name);

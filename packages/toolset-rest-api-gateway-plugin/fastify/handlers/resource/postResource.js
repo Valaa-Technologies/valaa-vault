@@ -43,7 +43,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
       ]);
-      if (!_verifyResourceAuthorization(server, route, request, reply, scope)) return false;
+      if (_verifyResourceAuthorization(server, route, request, reply, scope)) return true;
       if (!scope.createResource) {
         reply.code(405);
         reply.send(`${this.name} is disabled: no scope.createResource defined`);

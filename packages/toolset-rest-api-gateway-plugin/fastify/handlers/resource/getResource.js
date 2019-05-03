@@ -27,16 +27,16 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
     },
     handleRequest (request, reply) {
       const scope = server.buildScope(request, this.scopeRules);
-      server.infoEvent(1, () => [
+      server.infoEvent(2, () => [
         `${this.name}:`, scope.resourceId,
         "\n\trequest.query:", request.query,
       ]);
-      if (!_verifyResourceAuthorization(server, route, request, reply, scope)) return false;
+      if (_verifyResourceAuthorization(server, route, request, reply, scope)) return true;
       scope.resource = server._engine.tryVrapper([scope.resourceId]);
       if (!scope.resource) {
         reply.code(404);
         reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
-        return false;
+        return true;
       }
       const { fields } = request.query;
       return thenChainEagerly(scope.resource, [

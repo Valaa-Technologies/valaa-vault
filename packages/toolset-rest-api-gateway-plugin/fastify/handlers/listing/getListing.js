@@ -90,7 +90,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         "\n\tkuery:", ...dumpObject(this.toListingFields),
         "\n\troute.config:", ...dumpObject(route.config),
       ]);
-      if (!_verifyResourceAuthorization(server, route, request, reply, scope)) return false;
+      if (_verifyResourceAuthorization(server, route, request, reply, scope)) return true;
       return thenChainEagerly(scope.indexRoot, [
         vIndexRoot => vIndexRoot.get(this.toListingFields, { scope }),
         (filter || ids || Object.keys(fieldRequirements).length)
@@ -103,12 +103,12 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
             && (results => server._pickResultFields(results, fields, route.schema.response[200])),
         results => JSON.stringify(results, null, 2),
         results => {
-          reply.code(200);
-          reply.send(results);
           server.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),
           ]);
+          reply.code(200);
+          reply.send(results);
           return true;
         },
       ]);

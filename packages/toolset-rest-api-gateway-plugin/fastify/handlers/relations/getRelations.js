@@ -32,6 +32,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       if (!scope.resource) {
         reply.code(404);
         reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
+        return true;
       }
       const { fields } = request.query;
       return thenChainEagerly(scope.resource, [

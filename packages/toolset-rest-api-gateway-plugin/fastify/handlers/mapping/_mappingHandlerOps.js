@@ -1,15 +1,17 @@
 // @flow
 
+import { Vrapper } from "~/engine";
+
 import { verifySessionAuthorization } from "~/toolset-rest-api-gateway-plugin/fastify/security";
 
 import { _addToRelationsSourceSteps } from "../_handlerOps";
 
 export function _resolveMappingResource (server, route, request, reply, scope) {
   scope.resource = server._engine.tryVrapper([scope.resourceId]);
-  if (!scope.resource) {
+  if (!scope.resource || !(scope.resource instanceof Vrapper)) {
     reply.code(404);
     reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
-    return false;
+    return true;
   }
   return verifySessionAuthorization(server, route, request, reply, scope, scope.resource);
 }

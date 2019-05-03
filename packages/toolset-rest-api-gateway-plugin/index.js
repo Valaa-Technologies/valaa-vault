@@ -1,5 +1,7 @@
 // @flow
 
+import path from "path";
+
 const valosheath = require("~/gateway-api/valosheath").default;
 
 export default valosheath.exportPlugin({
@@ -8,13 +10,15 @@ export default valosheath.exportPlugin({
   onViewAttached (view, viewName) {
     const deepExtend = require("@valos/tools/deepExtend").default;
     const RestAPIServer = require("./fastify/RestAPIServer").default;
+    const configRequire = (module) =>
+        valosheath.require(path.isAbsolute(module) ? module : path.join(process.cwd(), module));
 
     const { server, prefixes } = require(`${process.cwd()}/toolsets.json`)[this.name];
     const options = deepExtend({
       name: `${viewName} REST API Server`,
       prefixes: {},
     }, server, {
-      require: valosheath.require,
+      require: configRequire,
     });
     options.view = view;
     options.viewName = viewName;
@@ -25,7 +29,7 @@ export default valosheath.exportPlugin({
             ? extension
             : require(extension).api)),
       ], {
-        require: valosheath.require,
+        require: configRequire,
       });
       if (prefixAPI.identity) {
         prefixAPI.identity = Object.assign(Object.create(valosheath.identity), prefixAPI.identity);

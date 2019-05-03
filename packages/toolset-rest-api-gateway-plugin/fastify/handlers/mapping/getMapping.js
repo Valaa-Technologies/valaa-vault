@@ -28,7 +28,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         `${this.name}:`, scope.resourceId, scope.mappingName, scope.targetId,
         "\n\trequest.query:", request.query,
       ]);
-      if (!_resolveMappingResource(server, route, request, reply, scope)) return false;
+      if (_resolveMappingResource(server, route, request, reply, scope)) return true;
       const { fields } = request.query;
       return thenChainEagerly(scope.resource, [
         vResource => vResource.get(this.toMappingFields, { scope, verbosity: 0 }),
@@ -39,7 +39,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
             reply.code(404);
             reply.send(`No mapping '${route.config.mappingName}' found from route resource ${
               scope.resourceId} to ${scope.targetId}`);
-            return false;
+            return true;
           }
           reply.code(200);
           reply.send(JSON.stringify(results, null, 2));

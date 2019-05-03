@@ -29,12 +29,12 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       ]);
       reply.code(501);
       reply.send("Unimplemented");
-      if (!_verifyResourceAuthorization(server, route, request, reply, scope)) return false;
-      return false;
+      return true;
       // Root resource deletion not implemented yet, due to lack of
       // mechanisms for declaring what sub-resources should be
       // destroyed as well.
       /*
+      if (_verifyResourceAuthorization(server, route, request, reply, scope)) return true;
       scope.resource = server._engine.tryVrapper([scope.resourceId]);
       if (!scope.resource) {
         reply.code(404);

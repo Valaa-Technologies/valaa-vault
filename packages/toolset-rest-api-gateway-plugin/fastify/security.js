@@ -26,7 +26,7 @@ export function verifySessionAuthorization (server, route, request, reply, scope
     // const permissions = accessRoot.get(toPERMISSIONSFields);
     // console.log("rights:", accessRoot.getId(), rights, permissions);
     if ((rights == null) || !rights.length) {
-      if (route.method === "GET") return true;
+      if (route.method === "GET") return false;
     } else {
       const accessToken = request.cookies[identity.getSessionCookieName()];
       let timeStamp, identityPartition;
@@ -39,20 +39,20 @@ export function verifySessionAuthorization (server, route, request, reply, scope
               "\n\tpayload:", timeStamp, identityPartition);
           reply.code(401);
           reply.send("Session has expired");
-          return false;
+          return true;
         }
       }
       // console.log("scanning rights for partition:", route.method, identityPartition,
       //    "\n\trights:", rights);
       for (const right of rights) {
         if (right.partition && (right.partition !== identityPartition)) continue;
-        if ((route.method === "GET") && (right.read !== false)) return true;
-        if (right.write !== false) return true;
+        if ((route.method === "GET") && (right.read !== false)) return false;
+        if (right.write !== false) return false;
       }
     }
     reply.code(403);
     reply.send("Unauthorized");
-    return false;
+    return true;
   } catch (error) {
     throw server.wrapErrorEvent(error, new Error("verifySessionAuthorization"),
         "\n\taccessRoot:", ...dumpObject(accessRoot));

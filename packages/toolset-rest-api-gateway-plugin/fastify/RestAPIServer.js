@@ -7,8 +7,7 @@ import { asyncConnectToPartitionsIfMissingAndRetry } from "~/raem/tools/denormal
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
-import { dumpify, dumpObject, LogEventGenerator, outputError } from "~/tools";
-import valosheath from "~/gateway-api/valos";
+import { dumpify, dumpObject, LogEventGenerator, outputError, thenChainEagerly } from "~/tools";
 
 import * as handlers from "./handlers";
 
@@ -75,11 +74,11 @@ export default class RestAPIServer extends LogEventGenerator {
       // At this stage neither schema nor fastify is available for the
       // handlers.
       const routeHandlers = routes
-          .map(route => prefixedThis._createRouteHandler(route))
+          .map(route => prefixServer._createRouteHandler(route))
           .filter(notFalsy => notFalsy);
       // https://github.com/fastify/fastify/blob/master/docs/Server.md
-      prefixedThis._rootify.register(async (fastify, opts, next) => {
-        prefixedThis._fastify = fastify;
+      prefixServer._rootify.register(async (fastify, opts, next) => {
+        prefixServer._fastify = fastify;
         fastify.register(FastifyCookiePlugin);
         if (swaggerPrefix) {
           fastify.register(FastifySwaggerPlugin, {
@@ -88,27 +87,27 @@ export default class RestAPIServer extends LogEventGenerator {
             swagger: openapi,
           });
         }
-        prefixedThis.infoEvent(1, () => [
+        prefixServer.infoEvent(1, () => [
           `${prefix}: adding ${schemas.length} schemas:`,
           ...schemas.map(schema => schema.schemaName),
         ]);
         schemas.forEach(schema => fastify.addSchema(schema));
-        prefixedThis.infoEvent(1, () => [
+        prefixServer.infoEvent(1, () => [
           `${prefix}: preparing ${routeHandlers.length} route handlers`,
         ]);
         await Promise.all(routeHandlers.map(routeHandler =>
             routeHandler.prepare && routeHandler.prepare(fastify)));
-        prefixedThis.infoEvent(1, () => [
+        prefixServer.infoEvent(1, () => [
           `${prefix}: preloading ${routeHandlers.length} route handlers`,
         ]);
         await Promise.all(routeHandlers.map(routeHandler =>
             routeHandler.preload && routeHandler.preload()));
-        prefixedThis.infoEvent(1, () => [
+        prefixServer.infoEvent(1, () => [
           `${prefix}: adding ${routeHandlers.length} fastify routes`,
         ]);
         routeHandlers.forEach(routeHandler =>
             fastify.route(routeHandler.fastifyRoute));
-        prefixedThis.infoEvent(1, () => [
+        prefixServer.infoEvent(1, () => [
           `${prefix}: plugin ready`,
         ]);
         fastify.ready(err => {
@@ -120,7 +119,7 @@ export default class RestAPIServer extends LogEventGenerator {
         prefix,
         ...pluginOptions,
       });
-      prefixedThis._rootify.after(error => {
+      prefixServer._rootify.after(error => {
         if (error) {
           outputError(errorOnCreatePrefixPlugin(error), "Exception caught during plugin register");
           throw error;
@@ -144,6 +143,7 @@ export default class RestAPIServer extends LogEventGenerator {
       if (!route.category) throw new Error(`Route category undefined`);
       if (!route.method) throw new Error(`Route method undefined`);
       if (!route.url) throw new Error(`Route url undefined`);
+      if (!route.config) throw new Error(`Route config undefined`);
       const createRouteHandler = (handlers[route.category] || {})[route.method];
       if (!createRouteHandler) {
         throw new Error(`No route handler creators found for '${route.category} ${route.method}'`);
@@ -153,15 +153,19 @@ export default class RestAPIServer extends LogEventGenerator {
       if (!routeHandler.name) routeHandler.name = `${route.category} ${route.method} ${route.url}`;
       const routeErrorMessage = `Exception caught during: ${routeHandler.name}`;
       const handle = asyncConnectToPartitionsIfMissingAndRetry(
-          (request, reply) => {
-            if (routeHandler.handleRequest(request, reply) === undefined) {
-              throw this.wrapErrorEvent(
-                  new Error("INTERNAL SERVER ERROR: undefined route return value"),
-                  new Error(`handleRequest result handler`),
-                  "Note: routeHandler.handleRequest must return a boolean or a Promise.",
-                  "This ensures that exceptions are always caught and logged properly");
-            }
-          },
+          (request, reply) => thenChainEagerly(
+              routeHandler.handleRequest(request, reply),
+              result => {
+                if (result !== true) {
+                  throw this.wrapErrorEvent(
+                      new Error("INTERNAL SERVER ERROR: invalid route handler return value"),
+                      new Error(`handleRequest return value validator`),
+                      "\n\treturn value:", ...dumpObject(result),
+                      "Note: routeHandler.handleRequest must explicitly call reply.code/send",
+                      "and return true or return a Promise which resolves to true.",
+                      "This ensures that exceptions are always caught and logged properly");
+                }
+              }),
           (error, request, reply) => {
             reply.code(500);
             reply.send(error.message);
@@ -172,6 +176,7 @@ export default class RestAPIServer extends LogEventGenerator {
             ), routeErrorMessage, this.getLogger());
           },
       );
+      route.handler = (request, reply) => { handle(request, reply); };
       return routeHandler;
     } catch (error) {
       throw this.wrapErrorEvent(error, wrap, "\n\troute:", dumpify(route, { indent: 2 }));
@@ -182,13 +187,14 @@ export default class RestAPIServer extends LogEventGenerator {
     category, method, fastifyRoute, builtinRules, requiredRules, requiredRuntimeRules,
   }) {
     const wrap = new Error(`prepareScopeRules(${category} ${method} ${fastifyRoute.url})`);
-    const ret = {
-      scopeBase: { ...(fastifyRoute.config.staticRules || {}) },
-      requestRules: [],
-      // kueryRules: [],
-      requiredRuntimeRules: requiredRuntimeRules || [],
-    };
+    let ret;
     try {
+      ret = {
+        scopeBase: { ...(fastifyRoute.config.staticRules || {}) },
+        requestRules: [],
+        // kueryRules: [],
+        requiredRuntimeRules: requiredRuntimeRules || [],
+      };
       [..._entriesOf(builtinRules || {}),
         ..._entriesOf(fastifyRoute.config.constantRules || {})
             .map(([k, v]) => ([k, ["constant", v]])),
@@ -223,8 +229,8 @@ export default class RestAPIServer extends LogEventGenerator {
           "\n\tbuiltinRules:", dumpify(builtinRules),
           "\n\trequiredRules:", dumpify(requiredRules),
           "\n\trequiredRuntimeRules:", dumpify(requiredRuntimeRules),
-          "\n\tscopeBase:", dumpify(ret.scopeBase, { indent: 2 }),
-          "\n\trequestRules:", dumpify(ret.requestRules, { indent: 2 }),
+          "\n\tscopeBase:", dumpify(ret && ret.scopeBase, { indent: 2 }),
+          "\n\trequestRules:", dumpify(ret && ret.requestRules, { indent: 2 }),
           // "\n\tkueryRules:", dumpify(ret.kueryRules, { indent: 2 }),
       );
     }

@@ -33,12 +33,12 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
       ]);
-      if (!_verifyResourceAuthorization(server, route, request, reply, scope)) return false;
+      if (_verifyResourceAuthorization(server, route, request, reply, scope)) return true;
       scope.resource = server._engine.tryVrapper([scope.resourceId]);
       if (!scope.resource) {
         reply.code(404);
         reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
-        return false;
+        return true;
       }
       const wrap = new Error(this.name);
       const discourse = server.getDiscourse().acquireTransaction();

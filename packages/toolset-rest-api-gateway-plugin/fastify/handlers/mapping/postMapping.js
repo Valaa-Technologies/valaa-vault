@@ -49,17 +49,17 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       if (!scope.createResourceAndMapping) {
         reply.code(405);
         reply.send(`${this.name} is disabled: no configuration for resource and mapping creation`);
-        return false;
+        return true;
       }
       const targetName = ((request.body.$V || {}).target || {}).name;
 
       if (typeof targetName !== "string") {
         reply.code(400);
         reply.send(`Required body.$V.target.name string field is missing or malformed`);
-        return false;
+        return true;
       }
 
-      if (!_resolveMappingResource(server, route, request, reply, scope)) return false;
+      if (_resolveMappingResource(server, route, request, reply, scope)) return true;
 
       const wrap = new Error(`mapping POST ${route.url}`);
       const discourse = undefined; // server.getDiscourse().acquireTransaction();

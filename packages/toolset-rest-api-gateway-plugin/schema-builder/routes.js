@@ -440,6 +440,37 @@ export function sessionGETRoute ({ url, querystring, clientRedirectPath, ...rest
   }
 }
 
+export function sessionDELETERoute ({ url, querystring, clientRedirectPath, ...rest }) {
+  try {
+    return {
+      category: "session",
+      method: "DELETE",
+      url,
+      schema: {
+        description: `Close an active session specified by the client${
+          ""} and session token cookies and also clear those cookies.`,
+        querystring: querystring ? { ...querystring } : undefined,
+        response: {
+          303: StringType,
+          400: { type: "string" },
+          404: { type: "string" },
+        },
+      },
+      config: {
+        ...(rest || {}),
+        constantRules: {
+          ...(rest.constantRules || {}),
+          clientRedirectPath,
+        },
+        queryRules: { ...(rest.queryRules || {}) },
+      },
+    };
+  } catch (error) {
+    throw wrapError(error, new Error(`sessionDELETERoute(<${url}>)`),
+        "\n\tquerystring:", dumpify(querystring),
+    );
+  }
+}
 
 const _unreservedWordListPattern = "^([a-zA-Z0-9\\-_.~/*$]*(\\,([a-zA-Z0-9\\-_.~/*$])*)*)?$";
 const _unreservedSortListPattern = "^(\\-?[a-zA-Z0-9_.~/$]*(\\,\\-?([a-zA-Z0-9_.~/$])*)*)?$";

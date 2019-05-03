@@ -1,7 +1,6 @@
 // @flow
 
 import { Action, Command, created, duplicated, destroyed, EventBase } from "~/raem/events";
-import type { Corpus } from "~/raem/Corpus";
 import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/VRL";
@@ -140,18 +139,14 @@ export default class FalseProphetDiscourse extends Discourse {
         await this._implicitlySyncingConnections[partitionURIString]);
   }
 
-  receiveCommands (commands: Command[]): ?Command[] {
+  receiveCommands (commands: Command[], purgedRecital: ?Object): ?Command[] {
     if (!commands.length) return undefined;
     this.setState(commands[commands.length - 1].state);
-    return this._follower.receiveCommands(commands);
+    return this._follower.receiveCommands(commands, purgedRecital);
   }
 
   receiveTruths (truthEvents: EventBase[]) {
     return this._follower.receiveTruths(truthEvents);
-  }
-
-  rejectHeresy (hereticEvent: EventBase, purgedCorpus: Corpus, revisedEvents: EventBase[]) {
-    return this._follower.rejectHeresy(hereticEvent, purgedCorpus, revisedEvents);
   }
 
   assignNewResourceId (targetAction: EventBase, partitionURI: string, explicitRawId?: string) {

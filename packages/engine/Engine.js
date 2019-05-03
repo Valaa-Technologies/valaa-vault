@@ -15,6 +15,7 @@ import Transient, { createTransient, getTransientTypeName } from "~/raem/state/T
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
 
 import type { Prophet } from "~/prophet";
+import { StoryRecital } from "~/prophet/FalseProphet/StoryRecital";
 
 import Cog, { executeHandlers } from "~/engine/Cog";
 import Motor from "~/engine/Motor";
@@ -376,7 +377,7 @@ export default class Engine extends Cog {
     }
   }
 
-  receiveCommands (stories: Command[]) {
+  receiveCommands (stories: Command[], purgedRecital: ?StoryRecital) {
     const allReactionPromises = [];
     const finalizer = { then (finalize) { this.finalize = finalize; } };
     const tx = this.obtainGroupTransaction("local-events", { setAsGlobal: true, finalizer });
@@ -385,6 +386,12 @@ export default class Engine extends Cog {
     // but remote updates should be explicitly performed in
     // a separate (via Promise.resolve().then or via explicit
     // valosheath API)
+    if (purgedRecital && (purgedRecital.getFirst() !== purgedRecital)) {
+      this.logEvent(0, () => [
+        "purging", purgedRecital.size(), "stories in", tx.debugId(),
+            ":", ...dumpObject({ purgedRecital: [...purgedRecital] }),
+      ]);
+    }
     this.logEvent(1, () => [
       "reciting", stories.length, "stories in", tx.debugId(), ":", stories,
     ]);
@@ -525,10 +532,6 @@ export default class Engine extends Cog {
           : this.obtainGroupTransaction("local-events", { setAsGlobal: true, }))
 
   receiveTruths () {}
-
-  rejectHeresy (/* rejectedEvent, purgedCorpus, revisedEvents */) {
-    // console.log("HERESY Rejected", rejectedEvent);
-  }
 
   start () { return this.motor.start(); }
   setTimeOrigin (timeOrigin) { return this.motor.setTimeOrigin(timeOrigin); }

@@ -146,13 +146,14 @@ export default class FalseProphet extends Prophet {
     }
   }
 
-  _tellStoriesToFollowers (stories: Story[]) {
+  _tellStoriesToFollowers (stories: Story[], purgedRecital: ?StoryRecital) {
     const unblockNotifications = this._blockNotifications();
     try {
-      return _tellStoriesToFollowers(this, stories);
+      return _tellStoriesToFollowers(this, stories, purgedRecital);
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error(`_tellStoriesToFollowers()`),
-          "\n\tstories:", ...dumpObject(stories));
+          "\n\tstories:", ...dumpObject(stories),
+          "\n\tpurgedRecital:", ...dumpObject(purgedRecital));
     } finally {
       unblockNotifications();
     }

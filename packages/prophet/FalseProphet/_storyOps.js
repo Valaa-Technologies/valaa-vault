@@ -76,7 +76,7 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
   const originatingPartitionURI = connection.getPartitionURI();
   const purgedPartitionURI = String(connection.getPartitionURI());
   const newAndRewrittenStories = [];
-  let purgedRecital, purgedStory, reviewedPartitions;
+  let schismaticRecital, schismaticStory, reviewedPartitions;
   newEvents.forEach((event, index) => {
     newEvents[index] = {
       ...event,
@@ -91,8 +91,8 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
   if (purgedCommands) {
     connection.clockEvent(2, () => ["falseProphet.stories.purge",
         `_beginPurge(${purgedCommands}.length)`]);
-    purgedRecital = _beginPurge(falseProphet, purgedCommands);
-    purgedStory = purgedRecital && purgedRecital.next;
+    schismaticRecital = _beginPurge(falseProphet, purgedCommands);
+    schismaticStory = schismaticRecital && schismaticRecital.next;
     reviewedPartitions = { [purgedPartitionURI]: {} };
   }
   let newEventIndex = 0;
@@ -107,56 +107,57 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
     // to dispatching new events.
     for (; !reformingPurgedProphecy && (newEventIndex !== newEvents.length); ++newEventIndex) {
       const newEvent = newEvents[newEventIndex];
-      reformingPurgedProphecy = purgedRecital
-          && purgedRecital.getStoryBy(newEvent.aspects.command.id);
+      reformingPurgedProphecy = schismaticRecital
+          && schismaticRecital.getStoryBy(newEvent.aspects.command.id);
       if (!reformingPurgedProphecy) {
         newAndRewrittenStories.push(falseProphet._composeStoryFromEvent(newEvent, type));
       }
     }
 
-    if (purgedStory === purgedRecital) break;
+    if (schismaticStory === schismaticRecital) break;
 
-    if (purgedStory.isProphecy && !purgedStory.schismDescription) {
-      const purgedPartitionURIs = !purgedStory.meta ? []
-          : purgedStory.meta.partitions ? Object.keys(purgedStory.meta.partitions)
-          : purgedStory.meta.partitionURI ? [purgedStory.meta.partitionURI]
+    if (schismaticStory.isProphecy && !schismaticStory.schismDescription) {
+      const purgedPartitionURIs = !schismaticStory.meta ? []
+          : schismaticStory.meta.partitions ? Object.keys(schismaticStory.meta.partitions)
+          : schismaticStory.meta.partitionURI ? [schismaticStory.meta.partitionURI]
           : [];
       for (const partitionURI of purgedPartitionURIs) {
         const reviewedPartition = reviewedPartitions[partitionURI];
         if (!reviewedPartition) continue;
-        purgedStory.needsReview = true;
+        schismaticStory.needsReview = true;
         if (partitionURI === purgedPartitionURI) {
-          if (purgedStory === reformingPurgedProphecy) continue;
-          purgedStory.schismDescription = `schism created by a prophecy reordering reformation`;
-          purgedStory.reorderingSchism = reformingPurgedProphecy;
+          if (schismaticStory === reformingPurgedProphecy) continue;
+          schismaticStory.schismDescription = `schism created by a prophecy reordering reformation`;
+          schismaticStory.reorderingSchism = reformingPurgedProphecy;
         } else if (reviewedPartition.isSchismatic) {
-          purgedStory.schismDescription = `a prophecy partition contains an earlier schism`;
-          purgedStory.schismPartition = partitionURI;
+          schismaticStory.schismDescription = `a prophecy partition contains an earlier schism`;
+          schismaticStory.schismPartition = partitionURI;
         } else continue;
-        (purgedStory.schismPartitions || (purgedStory.schismPartitions = [])).push(partitionURI);
+        (schismaticStory.schismPartitions || (schismaticStory.schismPartitions = []))
+            .push(partitionURI);
       }
     }
 
     let recomposedStory;
-    if (!purgedStory.schismDescription) {
-      recomposedStory = _recomposeStoryFromPurgedEvent(connection.getProphet(), purgedStory);
-      if (recomposedStory && purgedStory.needsReview) {
-        const revisedProphecy = connection._reviewPurgedProphecy(purgedStory, recomposedStory);
+    if (!schismaticStory.schismDescription) {
+      recomposedStory = _recomposeStoryFromPurgedEvent(connection.getProphet(), schismaticStory);
+      if (recomposedStory && schismaticStory.needsReview) {
+        const revisedProphecy = connection._reviewPurgedProphecy(schismaticStory, recomposedStory);
         if (!revisedProphecy) _rejectLastProphecyAsHeresy(connection.getProphet(), recomposedStory);
         recomposedStory = revisedProphecy;
       }
       if (recomposedStory) newAndRewrittenStories.push(recomposedStory);
     }
 
-    if (purgedStory === reformingPurgedProphecy) {
+    if (schismaticStory === reformingPurgedProphecy) {
       const reformingEvent = newEvents[newEventIndex - 1];
-      _reformProphecyCommand(connection, purgedStory, reformingEvent);
-      if (purgedStory.schismDescription) {
+      _reformProphecyCommand(connection, schismaticStory, reformingEvent);
+      if (schismaticStory.schismDescription) {
         connection.errorEvent("REFORMATION ERROR: a purged prophecy was reformed by new event but",
             "is still schismatic as a whole.",
             "\n\tRecomposing only the new event while rejecting the rest of the original prophecy.",
-            "\n\tschism description:", purgedStory.schismDescription,
-            "\n\tpurged prophecy:", purgedStory,
+            "\n\tschism description:", schismaticStory.schismDescription,
+            "\n\tpurged prophecy:", schismaticStory,
             "\n\treforming event:", reformingEvent,
             "\n\trecomposed prophecy:", recomposedStory);
         newAndRewrittenStories.push(
@@ -165,41 +166,42 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
       reformingPurgedProphecy = null;
     }
 
-    if (purgedStory.schismDescription || purgedStory.needsReview) {
+    if (schismaticStory.schismDescription || schismaticStory.needsReview) {
       // Mark all partitions of the old prophecy as schismatic/revisioned.
       // If schismatic all subsequent commands on these partitions
       // need to be fully, possibly interactively revised as they're
       // likely to depend on the first schismatic change.
-      for (const partitionURI of Object.keys((purgedStory.meta || {}).partitions || {})) {
+      for (const partitionURI of Object.keys((schismaticStory.meta || {}).partitions || {})) {
         const partition = reviewedPartitions[partitionURI]
             || (reviewedPartitions[partitionURI] = {});
-        if (purgedStory.schismDescription) {
+        if (schismaticStory.schismDescription) {
           partition.isSchismatic = true;
-          partition.originalSchism = purgedStory;
-          (partition.purgedProphecies || (partition.purgedProphecies = [])).push(purgedStory);
+          partition.originalSchism = schismaticStory;
+          (partition.purgedProphecies || (partition.purgedProphecies = [])).push(schismaticStory);
         }
       }
     }
 
     // Remove successfully repeated/reviewed stories from the purged
     // recital so that only schismatic ones remain.
-    purgedStory = !purgedStory.schismDescription
-        ? purgedRecital.removeStory(purgedStory) // Also advances to next
-        : purgedStory.next; // Keep it, just advance to next
+    schismaticStory = !schismaticStory.schismDescription
+        ? schismaticRecital.removeStory(schismaticStory) // Also advances to next
+        : schismaticStory.next; // Keep it, just advance to next
   }
 
   // Revise purged events.
-  if (purgedRecital && (purgedRecital.next !== purgedRecital)) {
+  if (schismaticRecital && (schismaticRecital.getFirst() !== schismaticRecital)) {
     connection.clockEvent(2, () => ["falseProphet.stories.revise",
-      `Revising ${purgedRecital.size()} events from event ${newEventIndex} onward`]);
+      `Revising ${schismaticRecital.size()} events from event ${newEventIndex} onward`]);
     const revisions = falseProphet._reviseSchismaticRecital(
-        purgedRecital, reviewedPartitions, connection, purgedCommands, newEvents);
+        schismaticRecital, reviewedPartitions, connection, purgedCommands, newEvents);
     if (revisions) newAndRewrittenStories.push(...revisions);
   }
 
   connection.clockEvent(2, () => ["falseProphet.stories.recite",
-    `_tellStoriesToFollowers(${newAndRewrittenStories.length})`]);
-  falseProphet._tellStoriesToFollowers(newAndRewrittenStories);
+    `_tellStoriesToFollowers(${
+      newAndRewrittenStories.length}, ${schismaticRecital ? schismaticRecital.size() : 0})`]);
+  falseProphet._tellStoriesToFollowers(newAndRewrittenStories, schismaticRecital);
 
   _confirmLeadingTruthsToFollowers(falseProphet);
 
@@ -219,8 +221,6 @@ function _beginPurge (falseProphet: FalseProphet, purgedCommands: Command[]): St
   falseProphet._primaryRecital.extractStoryChain(firstPurgedProphecy);
   const purgedState = firstPurgedProphecy.previousState;
   falseProphet.recreateCorpus(purgedState);
-  falseProphet._followers.forEach(discourse =>
-      discourse.rejectHeresy(firstPurgedProphecy, purgedState, []));
   return new StoryRecital(firstPurgedProphecy, `purge-${firstPurgedProphecy.aspects.command.id}`);
 }
 
@@ -260,10 +260,17 @@ export function _reviseSchismaticRecital (falseProphet: FalseProphet,
     newEvents: EventBase[]) {
   const ret = [];
   const rejectedSchisms = [];
-  for (const schism of schismaticRecital) {
-    const revisedProphecies = originatingConnection._reviseSchism(schism, purgedStories, newEvents);
-    if (revisedProphecies) ret.push(...revisedProphecies);
-    else rejectedSchisms.push(schism);
+  let schismaticStory = schismaticRecital.getFirst();
+  while (schismaticStory !== schismaticRecital) {
+    const revisedProphecies = originatingConnection._reviseSchism(
+        schismaticStory, purgedStories, newEvents);
+    if (revisedProphecies) {
+      ret.push(...revisedProphecies);
+      schismaticStory = schismaticRecital.removeStory(schismaticStory);
+    } else {
+      rejectedSchisms.push(schismaticStory);
+      schismaticStory = schismaticStory.next;
+    }
   }
   if (rejectedSchisms.length) {
     rejectedSchisms.forEach(herecy => _rejectHereticProphecy(falseProphet, herecy));
@@ -280,12 +287,13 @@ export function _reviseSchismaticRecital (falseProphet: FalseProphet,
   return ret;
 }
 
-export function _tellStoriesToFollowers (falseProphet: FalseProphet, stories: Story[]) {
+export function _tellStoriesToFollowers (falseProphet: FalseProphet, stories: Story[],
+    purgedRecital: ?StoryRecital) {
   let followerReactions;
   falseProphet._followers.forEach((discourse, follower) => {
     let reactions;
     try {
-      reactions = discourse.receiveCommands(stories);
+      reactions = discourse.receiveCommands(stories, purgedRecital);
       if (reactions !== undefined) {
         if (!followerReactions) followerReactions = new Map();
         followerReactions.set(follower, reactions);

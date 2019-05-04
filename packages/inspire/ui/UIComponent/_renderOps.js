@@ -155,8 +155,20 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
       if (lens instanceof Kuery) {
         // Delegates the kuery resolution to LiveProps.
         subLensName = `kuery-${lensName}`;
-        ret = React.createElement(UIComponent,
-            component.childProps(subLensName, {}, { delegate: [lens] }));
+        const delayed = thenChainEagerly(
+            component.bindLiveKuery(subLensName, component.getUIContextValue("frame"), lens,
+                { asRepeathenable: true, scope: component.getUIContext() }),
+            update => {
+              const newLensValue = update.value();
+              if (ret === undefined) {
+                ret = (newLensValue === undefined) ? null : newLensValue;
+              } else if (ret !== newLensValue) {
+                component.forceUpdate();
+              }
+            });
+        if (ret === undefined) ret = delayed || null;
+        // ret = React.createElement(UIComponent,
+        //    component.childProps(subLensName, {}, { delegate: [lens] }));
       } else if (lens instanceof Vrapper) {
         const blocker = lens.activate();
         if (blocker) {

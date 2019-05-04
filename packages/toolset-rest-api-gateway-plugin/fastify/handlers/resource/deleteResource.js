@@ -2,7 +2,7 @@
 
 import type RestAPIServer, { Route } from "~/toolset-rest-api-gateway-plugin/fastify/RestAPIServer";
 // import { dumpObject, thenChainEagerly } from "~/tools";
-import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
+// import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
 
 export default function createRouteHandler (server: RestAPIServer, route: Route) {
   return {

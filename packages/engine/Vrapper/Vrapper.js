@@ -1944,7 +1944,7 @@ export default class Vrapper extends Cog {
                 "\n\tlive update:", fieldUpdate,
                 "\n\tlive update options:", fieldUpdate.getOptions(),
                 "\n\tfailing filter subscription:", ...dumpObject(subscription),
-                "\n\tstate:", ...dumpObject(trigger.getState().toJS())),
+                "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())),
             `Exception caught during Subscription.triggerFilterHooks('${fieldUpdate._fieldName}')`);
       }
     }

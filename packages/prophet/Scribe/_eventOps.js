@@ -201,7 +201,8 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
       function _chronicleReceivedEventsUpstream (receivedEvents) {
         newLocallyReceivedEvents = receivedEvents.filter(notNull => notNull);
         if (!newLocallyReceivedEvents.length) return ({ eventResults: [] });
-        return connection.getUpstreamConnection().chronicleEvents(newLocallyReceivedEvents, options);
+        return connection.getUpstreamConnection()
+            .chronicleEvents(newLocallyReceivedEvents, options);
       },
       function _syncToChronicleResultTruthEvents ({ eventResults }) {
         upstreamEventResults = eventResults;

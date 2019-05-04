@@ -1,7 +1,6 @@
 // @flow
 
 import { wrapError, dumpify, dumpObject } from "~/tools";
-import valosheath from "~/gateway-api/valosheath";
 
 import {
   ArrayJSONSchema, ObjectJSONSchema, StringType, XWWWFormURLEncodedStringType, IdValOSType,

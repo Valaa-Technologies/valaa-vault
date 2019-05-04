@@ -43,8 +43,7 @@ export default class Subscription extends LiveUpdate {
   _attachedHooks: Object;
 
   constructor (emitter: Vrapper, options: ?VALKOptions) {
-    super(emitter);
-    this._valkOptions = options ? { ...options } : {};
+    super(emitter, options);
     if (options && options.obtainSubscriptionTransaction && (options.state !== undefined)) {
       throw new Error(
           "Subscription.options cannot contain both obtainSubscriptionTransaction and state");
@@ -167,9 +166,9 @@ export default class Subscription extends LiveUpdate {
     this._listeners.delete(listener);
   }
 
-  _broadcastUpdate = (liveUpdate: LiveUpdate) => {
+  _broadcastUpdate = (liveUpdate: LiveUpdate, passageCounter: number) => {
     thenChainEagerly(undefined, [
-      () => liveUpdate.value(),
+      () => ((liveUpdate._fieldFilter !== undefined) ? undefined : liveUpdate.value()),
       (value) => {
         liveUpdate._value = value;
         for (const [listener, callbacks] of this._listeners) {
@@ -177,7 +176,7 @@ export default class Subscription extends LiveUpdate {
           for (let i = 0; i !== maxlen; ++i) {
             let keepCallback;
             try {
-              keepCallback = callbacks[i][1](liveUpdate, this);
+              keepCallback = callbacks[i][1](liveUpdate, passageCounter);
             } catch (error) {
               outputError(errorOnEmitLiveUpdate.call(
                       this, error, 1, listener, (callbacks[i] || [])[0]),
@@ -193,7 +192,7 @@ export default class Subscription extends LiveUpdate {
       },
     ], (error, stage) => { throw errorOnEmitLiveUpdate.call(this, error, stage); });
     function errorOnEmitLiveUpdate (error, stage, listener, callbackKey) {
-      return wrapError(error, new Error(`_broadcastUpdate(stage #${stage})`),
+      return wrapError(error, new Error(`_broadcastUpdate(stage #${stage}, ${passageCounter})`),
           "\n\temitter:", liveUpdate.getEmitter(),
           `\n\t${this._liveKuery ? "kuery"
               : this._fieldFilter ? "filter"
@@ -267,36 +266,16 @@ export default class Subscription extends LiveUpdate {
     this._invalidateState();
   }
 
-  triggerFieldUpdate (state: Object, previousState: Object) {
-    const passageCounter = this._passage._counter;
+  triggerFieldUpdate (state: Object, previousState: Object, passageCounter: ?number) {
     // console.log("triggerFieldUpdate", this.debugId(), passageCounter, this._seenPassageCounter);
-    if (this._seenPassageCounter >= passageCounter) return;
-    this._seenPassageCounter = passageCounter;
-    this._value = undefined;
-    this._valkOptions.state = this._passage.state || state;
-    this._valkOptions.previousState = previousState;
-    this._broadcastUpdate(this);
-
-    if (this._emitter._filterHooks) {
-      const fieldIntro = this._emitter.getTypeIntro().getFields()[this._fieldName];
-      for (const [subscription, [filter, isStructural]] of this._emitter._filterHooks) {
-        try {
-          if (filter && ((typeof filter !== "function") || filter(fieldIntro))) {
-            subscription.triggerFilterUpdate(isStructural, this, passageCounter);
-          }
-        } catch (error) {
-          outputError(this._emitter.wrapErrorEvent(error,
-                  new Error(`Subscription.triggerFieldUpdate('${this._fieldName
-                      }').filterHook(${subscription.debugId()}, [${filter}, ${isStructural}])`),
-                  "\n\tlive update:", this,
-                  "\n\tlive update options:", this.getOptions(),
-                  "\n\tfailing filter subscription:", ...dumpObject(subscription),
-                  "\n\tstate:", ...dumpObject(this.getState().toJS())),
-              `Exception caught during Subscription.triggerFieldUpdate('${this._fieldName}')`);
-        }
-      }
+    if (passageCounter !== undefined) {
+      if (this._seenPassageCounter >= passageCounter) return;
+      this._seenPassageCounter = passageCounter;
     }
-    this.clearPassageTemporaries();
+    this._value = undefined;
+    this._valkOptions.state = state;
+    this._valkOptions.previousState = previousState;
+    this._broadcastUpdate(this, passageCounter);
   }
 
   attachFilterHook (emitter: Vrapper, filter: Function | boolean, isStructural: ?boolean) {
@@ -306,14 +285,17 @@ export default class Subscription extends LiveUpdate {
     if (hookContainer) this._attachedHooks.set(hookContainer, null);
   }
 
-  triggerFilterUpdate (isStructural: any, fieldUpdate: LiveUpdate, passageCounter: number) {
+  triggerFilterUpdate (isStructural: any, fieldUpdate: LiveUpdate, passageCounter: ?number) {
     // console.log("triggerFieldUpdate", this.debugId(), isStructural, passageCounter);
     if (this._liveKuery !== undefined) {
-      this.triggerKueryUpdate(isStructural, fieldUpdate, fieldUpdate);
-    } else if (this._seenPassageCounter < passageCounter) {
-      this._seenPassageCounter = passageCounter;
-      this._broadcastUpdate(fieldUpdate);
+      this.triggerKueryUpdate(isStructural, fieldUpdate, passageCounter);
+      return;
     }
+    if (passageCounter !== undefined) {
+      if (this._seenPassageCounter >= passageCounter) return;
+      this._seenPassageCounter = passageCounter;
+    }
+    this._broadcastUpdate(fieldUpdate, passageCounter);
   }
 
   attachLiveKueryHooks (triggerBroadcast: ?boolean) {
@@ -357,8 +339,11 @@ export default class Subscription extends LiveUpdate {
     }
   }
 
-  triggerKueryUpdate (isStructural: any, fieldUpdate: LiveUpdate) {
-    const passageCounter = fieldUpdate._passage._counter;
+  triggerKueryUpdate (isStructural: any, fieldUpdate: LiveUpdate, passageCounter) {
+    if (passageCounter !== undefined) {
+      if (this._seenPassageCounter >= passageCounter) return;
+      this._seenPassageCounter = passageCounter;
+    }
     /*
     console.log("triggerKueryUpdate", this.debugId(),
         "\n\tstructural/update:", isStructural, fieldUpdate.debugId(),
@@ -366,8 +351,6 @@ export default class Subscription extends LiveUpdate {
         "\n\t:", !this._valkOptions.obtainSubscriptionTransaction, !!this._valkOptions.state,
             this._valkOptions.state === fieldUpdate.getState());
     */
-    if (this._seenPassageCounter >= passageCounter) return;
-    this._seenPassageCounter = passageCounter;
     if (!this._valkOptions.obtainSubscriptionTransaction) {
       const newState = fieldUpdate.getState();
       if (this._valkOptions.state === newState) return;
@@ -378,7 +361,7 @@ export default class Subscription extends LiveUpdate {
       // TODO(iridian, 2019-03): Some of the field handlers are now
       // properly marked as non-structural with hookData === false.
       // Fill the rest too.
-      this._broadcastUpdate(this);
+      this._broadcastUpdate(this, passageCounter);
       return;
     }
     // TODO(iridian): PERFORMANCE CONCERN: Refreshing the kuery
@@ -394,9 +377,9 @@ export default class Subscription extends LiveUpdate {
     this.attachHooks(true);
   }
 
-  _triggerOnUpdate (onUpdate = this._broadcastUpdate) {
+  _triggerOnUpdate (onUpdate = this._broadcastUpdate, passageCounter) {
     if (this._fieldFilter === undefined) {
-      onUpdate(this, this);
+      onUpdate(this, passageCounter);
       return;
     }
     const fieldIntros = this._emitter.getTypeIntro().getFields();
@@ -404,7 +387,7 @@ export default class Subscription extends LiveUpdate {
       if (!intro.isGenerated && ((this._fieldFilter === true) || this._fieldFilter(intro))) {
         this._fieldName = fieldName;
         this._value = undefined;
-        onUpdate(this, this);
+        onUpdate(this, passageCounter);
       }
     }
     this._fieldName = undefined;

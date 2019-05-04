@@ -197,6 +197,9 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
         schismaticRecital, reviewedPartitions, connection, purgedCommands, newEvents);
     if (revisions) newAndRewrittenStories.push(...revisions);
   }
+  if (schismaticRecital && (schismaticRecital.getFirst() === schismaticRecital)) {
+    schismaticRecital = undefined;
+  }
 
   connection.clockEvent(2, () => ["falseProphet.stories.recite",
     `_tellStoriesToFollowers(${

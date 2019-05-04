@@ -23,6 +23,7 @@ import Vrapper from "~/engine/Vrapper";
 import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
 import { LiveUpdate } from "~/engine/Vrapper/FieldUpdate";
+import Subscription from "~/engine/Vrapper/Subscription";
 
 import { outputCollapsedError, thenChainEagerly, wrapError } from "~/tools";
 
@@ -377,45 +378,63 @@ export default class Engine extends Cog {
     }
   }
 
-  receiveCommands (stories: Command[], purgedRecital: ?StoryRecital) {
-    const allReactionPromises = [];
+  receiveCommands (stories: Command[], purgedRecital: ?StoryRecital, purgedProtagonists: ?Set) {
+    const recitalReactionPromises = !purgedProtagonists && [];
     const finalizer = { then (finalize) { this.finalize = finalize; } };
-    const tx = this.obtainGroupTransaction("local-events", { setAsGlobal: true, finalizer });
+    const tx = !purgedProtagonists
+        && this.obtainGroupTransaction("local-events", { setAsGlobal: true, finalizer });
     // TODO(iridian, 2019-03): Mark UI-transactions as local-only. It
     // is acceptable that UI operations manage in-memory/local state
     // but remote updates should be explicitly performed in
     // a separate (via Promise.resolve().then or via explicit
     // valosheath API)
-    if (purgedRecital && (purgedRecital.getFirst() !== purgedRecital)) {
-      this.logEvent(0, () => [
-        "purging", purgedRecital.size(), "stories in", tx.debugId(),
-            ":", ...dumpObject({ purgedRecital: [...purgedRecital] }),
-      ]);
+    if (purgedRecital) {
+      const vProtagonists = this.receiveCommands(purgedRecital, null, new Set());
+      const rollbackState = purgedRecital.getFirst().previousState;
+      const purgeUpdate = new Subscription(null, { state: rollbackState })
+          .initializeFilter(true);
+      for (const vProtagonist of vProtagonists) {
+        if (vProtagonist._fieldSubscriptions) {
+          for (const subscription of vProtagonist._fieldSubscriptions.values()) {
+            subscription.triggerFieldUpdate(rollbackState, null, this._currentPassageCounter);
+          }
+        }
+        purgeUpdate._emitter = vProtagonist;
+        vProtagonist.triggerFilterHooks(purgeUpdate, this._currentPassageCounter);
+      }
     }
     this.logEvent(1, () => [
-      "reciting", stories.length, "stories in", tx.debugId(), ":", stories,
+      !purgedProtagonists ? "reciting" : "purging",
+      stories.length, "stories in", tx.debugId(), ":", stories,
     ]);
     for (const story of stories) {
       story._delayedCogRemovals = [];
       story._delayedFieldUpdates = new Set();
       try {
-        this._recitePassage(story, story, allReactionPromises);
+        this._recitePassage(story, story, recitalReactionPromises, purgedProtagonists);
         story._delayedCogRemovals.forEach(cog => this.removeCog(cog));
         story._delayedCogRemovals = null;
         for (const fieldUpdate of story._delayedFieldUpdates) {
-          fieldUpdate.triggerFieldUpdate(story.state, story.previousState);
+          const passage = fieldUpdate._passage;
+          fieldUpdate.triggerFieldUpdate(passage.state || story.state,
+              passage.previousState || story.previousState, passage._counter);
+          fieldUpdate._emitter.triggerFilterHooks(fieldUpdate, passage._counter);
+          fieldUpdate.clearPassageTemporaries();
         }
         story._delayedFieldUpdates = null;
       } catch (error) {
-        outputCollapsedError(error, "Exception caught during Engine.receiveCommands");
+        outputCollapsedError(error, "Exception caught during Engine.receiveCommands recital");
       }
     }
-    this.logEvent(1, () => ["recited", stories.length, "stories in", tx.debugId()]);
+    this.logEvent(1, () => [
+      !purgedProtagonists ? "recited" : "purged", stories.length, "stories in", tx.debugId(),
+    ]);
+    if (purgedProtagonists) return purgedProtagonists;
     finalizer.finalize(true);
-    return allReactionPromises.length ? allReactionPromises : undefined;
+    return recitalReactionPromises.length ? recitalReactionPromises : undefined;
   }
 
-  _recitePassage (passage: Passage, story: Story, allReactionPromises) {
+  _recitePassage (passage: Passage, story: Story, recitalReactionPromises, purges: ?Set) {
     passage.timedness = story.timed ? "Timed" : "Timeless";
     passage._counter = ++this._currentPassageCounter;
     if (this.getVerbosity() || story.timed) {
@@ -424,42 +443,46 @@ export default class Engine extends Cog {
       this.logEvent(passage !== story ? 3 : 2, () => [
         passage !== story ? "recitePassage" : "reciteStory", `#${this._currentPassageCounter}`,
         `#${story.storyIndex}/${passage.passageIndex}`,
-        _eventTypeString(passage), ...[passage.typeName].filter(p => p), String(passage.id),
+        this._eventTypeString(passage), ...[passage.typeName].filter(p => p), String(passage.id),
         (story.timed ? `@ ${story.timed.startTime || "|"}->${story.timed.time}:` : ":"),
         "\n\taction:", ...dumpObject(getActionFromPassage(passage)),
         "\n\tpassage:", ...dumpObject(rest),
       ]);
     }
     try {
-      if (passage.id) {
-        passage.rawId = passage.id.rawId();
-        const protagonistEntry = this._vrappers.get(passage.rawId);
-        if (protagonistEntry && protagonistEntry.get(null)) {
-          passage.vProtagonist = protagonistEntry.get(null)[0];
-        }
-        if (isCreatedLike(passage)) {
-          if (!passage.vProtagonist) {
-            passage.vProtagonist = new Vrapper(this, passage.id, passage.typeName);
-          } else passage.vProtagonist._setTypeName(passage.typeName);
-          if (passage.vProtagonist.isResource()) {
-            // vProtagonist.refreshPhase(story.state);
-            // /*
-            Promise.resolve(passage.vProtagonist.refreshPhase(story.state))
-                .then(undefined, (error) => {
-                  outputCollapsedError(errorOnReceiveCommands.call(this, error,
-                      `receiveCommands(${passage.type} ${
-                        passage.vProtagonist.debugId()}).refreshPhase`),
-                      "Exception caught during passage recital protagonist refresh phase");
-                });
-            // */
+      if (!purges) {
+        if (passage.id) {
+          passage.rawId = passage.id.rawId();
+          const protagonistEntry = this._vrappers.get(passage.rawId);
+          if (protagonistEntry && protagonistEntry.get(null)) {
+            passage.vProtagonist = protagonistEntry.get(null)[0];
+          }
+          if (isCreatedLike(passage)) {
+            if (!passage.vProtagonist) {
+              passage.vProtagonist = new Vrapper(this, passage.id, passage.typeName);
+            } else passage.vProtagonist._setTypeName(passage.typeName);
+            if (passage.vProtagonist.isResource()) {
+              // vProtagonist.refreshPhase(story.state);
+              // /*
+              Promise.resolve(passage.vProtagonist.refreshPhase(story.state))
+                  .then(undefined, (error) => {
+                    outputCollapsedError(errorOnReceiveCommands.call(this, error,
+                        `receiveCommands(${passage.type} ${
+                          passage.vProtagonist.debugId()}).refreshPhase`),
+                        "Exception caught during passage recital protagonist refresh phase");
+                  });
+              // */
+            }
           }
         }
+        const reactions = executeHandlers(this._storyHandlerRoot, passage, story);
+        if (reactions) recitalReactionPromises.push(...reactions);
+      } else if (passage.vProtagonist) {
+        purges.add(passage.vProtagonist);
       }
-      const reactions = executeHandlers(this._storyHandlerRoot, passage, story);
-      if (reactions) allReactionPromises.push(...reactions);
       if (passage.passages) {
         for (const subPassage of passage.passages) {
-          this._recitePassage(subPassage, story, allReactionPromises);
+          this._recitePassage(subPassage, story, recitalReactionPromises, purges);
         }
       }
     } catch (error) {
@@ -476,10 +499,11 @@ export default class Engine extends Cog {
           "\n\tstory:", ...dumpObject(story),
           ...extraContext);
     }
-    function _eventTypeString (innerPassage, submostEventType = innerPassage.type) {
-      if (!innerPassage.parentPassage) return submostEventType;
-      return `sub-${_eventTypeString(innerPassage.parentPassage, submostEventType)}`;
-    }
+  }
+
+  _eventTypeString (innerPassage, submostEventType = innerPassage.type) {
+    if (!innerPassage.parentPassage) return submostEventType;
+    return `sub-${this._eventTypeString(innerPassage.parentPassage, submostEventType)}`;
   }
 
   addDelayedRemoveCog (cog, story: Story) {

@@ -83,7 +83,7 @@ export class LiveUpdate {
 
   _resolveAddsAndRemoves () {
     if (!this._passage) {
-      return { adds: this._actualAddsOfPassage({ state: this.getState() }) };
+      return { adds: this._actualAddsOfPassage({}) };
     }
     if (!this._passages) {
       return this._cachedAddsAndRemoves = {

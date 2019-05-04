@@ -196,12 +196,12 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
     const receiveTruths = connection.getReceiveTruths(options.receiveTruths);
     options.receiveTruths = receiveTruths;
     options.receiveCommands = null;
-    let upstreamEventResults;
+    let upstreamEventResults, newLocallyReceivedEvents;
     resultBase._forwardResults = thenChainEagerly(resultBase.receivedEventsProcess, [
       function _chronicleReceivedEventsUpstream (receivedEvents) {
-        const actuallyReceivedEvents = receivedEvents.filter(notNull => notNull);
-        if (!actuallyReceivedEvents.length) return ({ eventResults: [] });
-        return connection.getUpstreamConnection().chronicleEvents(actuallyReceivedEvents, options);
+        newLocallyReceivedEvents = receivedEvents.filter(notNull => notNull);
+        if (!newLocallyReceivedEvents.length) return ({ eventResults: [] });
+        return connection.getUpstreamConnection().chronicleEvents(newLocallyReceivedEvents, options);
       },
       function _syncToChronicleResultTruthEvents ({ eventResults }) {
         upstreamEventResults = eventResults;
@@ -228,7 +228,16 @@ export function _chronicleEvents (connection: ScribePartitionConnection,
         return confirmedTruths && confirmedTruths.length && receiveTruths(confirmedTruths);
       },
       () => (resultBase._forwardResults = upstreamEventResults),
-    ], onError);
+    ], function errorOnScribeChronicleEvents (error) {
+      if ((newLocallyReceivedEvents || []).length) {
+        const discard = newLocallyReceivedEvents[0].aspects;
+        connection._deleteQueuedCommandsOnwardsFrom(discard.log.index, discard.command.id);
+      }
+      throw connection.wrapErrorEvent(error, new Error("chronicleEvents()"),
+          "\n\teventLog:", ...dumpObject(events),
+          "\n\toptions:", ...dumpObject(options),
+      );
+    });
   }
   return {
     eventResults: events.map((event, index) => {

@@ -1875,7 +1875,7 @@ export default class Vrapper extends Cog {
     */
   }
 
-  _kuerySubscriptions: Map<any, Subscription>;
+  // _kuerySubscriptions: Map<any, Subscription>;
 
   static mismatchingHead = 0;
   static cacheHitComplex = 0;
@@ -1926,6 +1926,27 @@ export default class Vrapper extends Cog {
           "\n\thookData:", ...dumpObject(hookData),
           "\n\tfilterHandlers:", ...dumpObject(this._filterHooks),
           "\n\tthis:", ...dumpObject(this));
+    }
+  }
+
+  triggerFilterHooks (fieldUpdate: LiveUpdate, passageCounter: ?number) {
+    if (!this._filterHooks) return;
+    const fieldIntro = this.getTypeIntro().getFields()[fieldUpdate._fieldName];
+    for (const [subscription, [filter, isStructural]] of this._filterHooks) {
+      try {
+        if (filter && ((typeof filter !== "function") || filter(fieldIntro))) {
+          subscription.triggerFilterUpdate(isStructural, fieldUpdate, passageCounter);
+        }
+      } catch (error) {
+        outputError(this.wrapErrorEvent(error,
+                new Error(`Subscription.triggerFilterHooks('${fieldUpdate._fieldName
+                    }').filterHook(${subscription.debugId()}, [${filter}, ${isStructural}])`),
+                "\n\tlive update:", fieldUpdate,
+                "\n\tlive update options:", fieldUpdate.getOptions(),
+                "\n\tfailing filter subscription:", ...dumpObject(subscription),
+                "\n\tstate:", ...dumpObject(trigger.getState().toJS())),
+            `Exception caught during Subscription.triggerFilterHooks('${fieldUpdate._fieldName}')`);
+      }
     }
   }
 

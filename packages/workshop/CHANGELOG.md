@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.25](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.24...v0.34.0-prerelease.25) (2019-05-04)
+
+**Note:** Version bump only for package @valos/workshop
+
+
+
+
+
 # [0.34.0-prerelease.24](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.23...v0.34.0-prerelease.24) (2019-05-03)
 
 **Note:** Version bump only for package @valos/workshop

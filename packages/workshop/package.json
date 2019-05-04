@@ -1,6 +1,6 @@
 {
   "name": "@valos/workshop",
-  "version": "0.34.0-prerelease.24",
+  "version": "0.34.0-prerelease.25",
   "valos": {
     "type": "workshop",
     "domain": "valos"
@@ -13,12 +13,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@valos/toolset-authollery": "^0.34.0-prerelease.24",
-    "@valos/toolset-gateway-plugin": "^0.34.0-prerelease.24",
-    "@valos/toolset-rest-api-gateway-plugin": "^0.34.0-prerelease.24",
-    "@valos/toolset-revealer": "^0.34.0-prerelease.24",
-    "@valos/toolset-vault": "^0.34.0-prerelease.24",
-    "@valos/toolset-vault-operations": "^0.34.0-prerelease.24",
-    "@valos/toolset-worker": "^0.34.0-prerelease.24"
+    "@valos/toolset-authollery": "^0.34.0-prerelease.25",
+    "@valos/toolset-gateway-plugin": "^0.34.0-prerelease.25",
+    "@valos/toolset-rest-api-gateway-plugin": "^0.34.0-prerelease.25",
+    "@valos/toolset-revealer": "^0.34.0-prerelease.25",
+    "@valos/toolset-vault": "^0.34.0-prerelease.25",
+    "@valos/toolset-vault-operations": "^0.34.0-prerelease.25",
+    "@valos/toolset-worker": "^0.34.0-prerelease.25"
   }
 }

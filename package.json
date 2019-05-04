@@ -1,6 +1,6 @@
 {
   "name": "@valos/vault",
-  "version": "0.34.0-prerelease.24",
+  "version": "0.34.0-prerelease.25",
   "valos": {
     "type": "vault",
     "domain": "kernel"

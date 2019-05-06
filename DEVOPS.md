@@ -196,7 +196,7 @@ Utility    |Tool          |Payload                    |Providers   |Consumed via
 files      |`git`         |files in `./*`             |github.com  |`git clone`       |N/A     |`.git/*`      |`branch` `commit`   |`git push` & PR    |human      |merge PR to & `git push master`
 packages   |`vlm`, `yarn` |files in `/node_modules/..`|npmjs.com   |`depend` `require`|`files` |`package.json`|ups. `src/*` `bin/*`|upstream           |hybrid     |`assemble-packages` `publish-packages`
 authorities|`vlm`         |APIs, site & gateway files |IaaS, custom|browsers, various |`files` |upstream *    |upstream *          |upstream           |hybrid     |`build-release` `deploy-release`
-partitions |`vlm`, gateway|event logs, bvobs          |authorities |event & bvob APIs |N/A     |N/A           |gateway prophet     |command & bvob APIs|authorities|automatic, custom
+partitions |`vlm`, gateway|event logs, bvobs          |authorities |event & bvob APIs |N/A     |N/A           |gateway             |command & bvob APIs|authorities|automatic, custom
 
 - `Utility` - the utility layer which is being described
 - `Tool` - the name of the tool used to manipulate the payload and/or metadata
@@ -279,7 +279,7 @@ Stateless or in some way non-infrastructural authorities also exist but
 are specified elsewhere (they are considered degenerate, without
 upstream and with empty payload).
 
-[Read more about authorities](packages/prophet/README.md).
+[Read more about authorities](packages/sourcerer/README.md).
 
 > `valos-vault-4.4.3`: Authorities utility layer payload
 > (`authority payload`) is a set of deployed authority service APIs and

@@ -3,7 +3,7 @@ import FakeIndexedDB from "fake-indexeddb";
 import FDBDatabase from "fake-indexeddb/lib/FDBDatabase";
 
 import { dumpObject, wrapError } from "~/tools";
-import { swapAspectRoot } from "../../prophet/tools/EventAspects";
+import { swapAspectRoot } from "../../sourcerer/tools/EventAspects";
 
 export async function openDB (uri: string) {
   let database;

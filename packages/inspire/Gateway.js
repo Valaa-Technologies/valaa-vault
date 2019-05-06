@@ -7,7 +7,7 @@ import { Map as ImmutableMap } from "immutable";
 import * as valosRaem from "~/raem";
 import * as valosTools from "~/tools";
 import * as valosScript from "~/script";
-import * as valosSourcerer from "~/prophet";
+import * as valosSourcerer from "~/sourcerer";
 import * as valosEngine from "~/engine";
 import * as valosInspire from "~/inspire";
 
@@ -18,8 +18,8 @@ import createProcessCommandIdMiddleware from "~/raem/redux/middleware/processCom
 import { createBardMiddleware } from "~/raem/redux/Bard";
 import Corpus from "~/raem/Corpus";
 
-import upgradeEventTo0Dot2 from "~/prophet/tools/event-version-0.2/upgradeEventTo0Dot2";
-import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
+import upgradeEventTo0Dot2 from "~/sourcerer/tools/event-version-0.2/upgradeEventTo0Dot2";
+import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
 
 import Engine from "~/engine/Engine";
 import EngineContentAPI from "~/engine/EngineContentAPI";
@@ -117,7 +117,7 @@ export default class Gateway extends LogEventGenerator {
       //    be replaced with most specific imports possible.
       if (library === "engine") ret = valosEngine;
       else if (library === "inspire") ret = valosInspire;
-      else if (library === "prophet") ret = valosSourcerer;
+      else if (library === "sourcerer") ret = valosSourcerer;
       else if (library === "raem") ret = valosRaem;
       else if (library === "script") ret = valosScript;
       else if (library === "tools") ret = valosTools;

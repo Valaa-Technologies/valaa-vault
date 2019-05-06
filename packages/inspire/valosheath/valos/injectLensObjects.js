@@ -5,7 +5,7 @@ import React from "react";
 import { denoteValOSBuiltinWithSignature } from "~/raem/VALK";
 import { naiveURI } from "~/raem/ValaaURI";
 
-import type { Connection } from "~/prophet";
+import type { Connection } from "~/sourcerer";
 
 import Vrapper from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";

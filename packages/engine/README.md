@@ -14,7 +14,7 @@ primitive, with which valoscript programs have full control over
 computation, stream connectivity and rendering environment inside the
 browser.
 
-- depends: `@valos/prophet`
+- depends: `@valos/sourcerer`
 - exports: `Engine`, `Vrapper`, `VALEK`
 - valospace: `valos.*`, `Object integration`
 - concepts: `live kuery`, `code-as-content`, `3rd party libraries`

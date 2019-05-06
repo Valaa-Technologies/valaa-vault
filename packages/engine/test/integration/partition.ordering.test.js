@@ -1,7 +1,7 @@
 // @flow
 
 import { createEngineOracleHarness } from "~/engine/test/EngineTestHarness";
-import { clearAllScribeDatabases } from "~/prophet/test/SourcererTestHarness";
+import { clearAllScribeDatabases } from "~/sourcerer/test/SourcererTestHarness";
 
 let harness = null;
 

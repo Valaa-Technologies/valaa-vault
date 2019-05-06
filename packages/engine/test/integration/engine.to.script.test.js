@@ -8,7 +8,7 @@ import { createNativeIdentifier, getNativeIdentifierValue, transpileValoscriptBo
 
 import Vrapper from "~/engine/Vrapper";
 import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
-import { clearAllScribeDatabases } from "~/prophet/test/SourcererTestHarness";
+import { clearAllScribeDatabases } from "~/sourcerer/test/SourcererTestHarness";
 import VALEK, { Kuery, literal, pointer } from "~/engine/VALEK";
 
 const valoscriptBlock = [

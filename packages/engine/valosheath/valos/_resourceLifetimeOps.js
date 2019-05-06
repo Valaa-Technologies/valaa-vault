@@ -2,7 +2,7 @@
 
 import { getHostRef } from "~/raem/VALK/hostReference";
 
-import Discourse from "~/prophet";
+import Discourse from "~/sourcerer";
 
 import { OwnerDefaultCouplingTag } from "~/engine/valosheath/valos/enfoldSchemaSheath";
 

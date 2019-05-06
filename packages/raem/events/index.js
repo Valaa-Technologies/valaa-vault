@@ -89,7 +89,7 @@
  *
  * ### Prophecies - non-universal, multi-partition command stories
  *
- * FalseProphet (in @valos/prophet) component introduces transactions.
+ * FalseProphet (in @valos/sourcerer) component introduces transactions.
  * These allow the grouping of a several resource changes together into
  * a single command. Prophecy is the Story of such a command, an
  * internal helper object which FalseProphet splits into per-partition

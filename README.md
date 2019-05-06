@@ -39,7 +39,7 @@ Specified in [the shared eslint configuration](packages/toolset-vault/shared/.es
 
 The `@valos` namespace library packages consists of the main gateway
 `@valos/inspire` and its dependencies  `@valos/tools`, `@valos/raem`,
-`@valos/script`, `@valos/prophet` and `@valos/engine`.
+`@valos/script`, `@valos/sourcerer` and `@valos/engine`.
 The devops packages consists of the valos infrastructure manager tool
 `valma` (sans namespace) and various toolset packages for managing
 development environments, publishing packages and creating deployments
@@ -189,7 +189,7 @@ transpiling into VALK kueries as an intermediate language.
 - concepts: `ECMAScript2015`, `scope`, `transpilation`
 
 
-### @valos/prophet provides ValOS-RAEM stream components
+### @valos/sourcerer provides ValOS-RAEM stream components
 
 Provides event stream connectivity. This is not just to remote
 authorities but also to local browser `IndexedDB` storage. Provides
@@ -226,7 +226,7 @@ primitive, with which valoscript programs have full control over
 computation, stream connectivity and rendering environment inside the
 browser.
 
-- depends: `@valos/prophet`
+- depends: `@valos/sourcerer`
 - exports: `Engine`, `Vrapper`, `VALEK`
 - valosheath: `valos.*`, `Object integration`
 - concepts: `live kuery`, `code-as-content`, `3rd party libraries`

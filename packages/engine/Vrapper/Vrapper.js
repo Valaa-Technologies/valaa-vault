@@ -30,8 +30,8 @@ import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 import { ValoscriptPrimitiveKind /* , NativeIdentifierTag */ } from "~/script";
 // import { ScopeAccessesTag } from "~/script/VALSK";
 
-import { Discourse, Connection } from "~/prophet";
-import { ChronicleEventResult } from "~/prophet/api/types";
+import { Discourse, Connection } from "~/sourcerer";
+import { ChronicleEventResult } from "~/sourcerer/api/types";
 
 import { createModuleGlobal } from "~/tools/mediaDecoders/JavaScriptDecoder";
 

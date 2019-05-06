@@ -97,7 +97,7 @@ export default class RAEMTestHarness extends LogEventGenerator {
   /**
    * chronicleEvents always delegates the operation to corpus.dispatch
    * (handling restricted commands is done via .chronicleEvents, only
-   * available in @valos/prophet). Also validates is-restricted for
+   * available in @valos/sourcerer). Also validates is-restricted for
    * incoming commands, and is-universal for resulting stories.
    *
    * @param {any} rest

@@ -14,7 +14,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@valos/prophet": "^0.34.0-prerelease.25",
+    "@valos/sourcerer": "^0.34.0-prerelease.25",
     "graphql": "^0.6.2",
     "immutable": "~3.7.4"
   }

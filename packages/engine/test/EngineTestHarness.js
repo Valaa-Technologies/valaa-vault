@@ -1,8 +1,8 @@
 // @flow
 
 import SourcererTestHarness, { createSourcererTestHarness, createSourcererOracleHarness }
-    from "~/prophet/test/SourcererTestHarness";
-import { obtainAspect } from "~/prophet/tools/EventAspects";
+    from "~/sourcerer/test/SourcererTestHarness";
+import { obtainAspect } from "~/sourcerer/tools/EventAspects";
 
 import EngineTestAPI from "~/engine/test/EngineTestAPI";
 import Engine from "~/engine/Engine";

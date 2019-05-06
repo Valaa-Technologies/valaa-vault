@@ -37,7 +37,7 @@ This library provides:
   `valospace` into a singular globally distributed and unified object
   space.
 
-[//]: # (TODO(iridian): valospace and partitions should in principle be inside @ValOS/prophet)
+[//]: # (TODO(iridian): valospace and partitions should in principle be inside @ValOS/sourcerer)
 [//]: # (TODO(iridian): This refactoring effort would be valuable otherwise as well as it would clarify Valker API's and simplify its implementation)
 [//]: # (TODO(iridian): However that's gonna be a damn of a refactoring process to fully abstract and excise them from @ValOS/raem)
 

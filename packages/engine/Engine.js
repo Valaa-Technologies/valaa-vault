@@ -14,8 +14,8 @@ import { getActionFromPassage } from "~/raem/redux/Bard";
 import Transient, { createTransient, getTransientTypeName } from "~/raem/state/Transient";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
 
-import type { Sourcerer } from "~/prophet";
-import { StoryRecital } from "~/prophet/FalseProphet/StoryRecital";
+import type { Sourcerer } from "~/sourcerer";
+import { StoryRecital } from "~/sourcerer/FalseProphet/StoryRecital";
 
 import Cog, { executeHandlers } from "~/engine/Cog";
 import Motor from "~/engine/Motor";

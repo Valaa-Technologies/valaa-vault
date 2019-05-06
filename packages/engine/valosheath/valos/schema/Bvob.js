@@ -2,7 +2,7 @@
 
 import { ValoscriptNew } from "~/script";
 
-import Discourse from "~/prophet";
+import Discourse from "~/sourcerer";
 
 export default {
   schemaTypeName: "Blob",

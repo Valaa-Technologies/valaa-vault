@@ -10,7 +10,7 @@ const OBJECT_DESCRIPTION = "inactive script resource";
 export default new GraphQLObjectType({
   name: "InactiveScriptResource",
 
-  description: `An InactiveScriptResource is a @valos/prophet ${
+  description: `An InactiveScriptResource is a @valos/sourcerer ${
       ""}resource whose partition has not yet been fully loaded. It ${
       ""}has only the limited set of fields of TransientFields and ${
       ""}TransientScriptFields available. The transition from ${

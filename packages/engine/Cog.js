@@ -1,6 +1,6 @@
 // @flow
 
-import { Discourse } from "~/prophet";
+import { Discourse } from "~/sourcerer";
 
 import type { VALKOptions } from "~/raem";
 

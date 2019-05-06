@@ -10,7 +10,7 @@ const OBJECT_DESCRIPTION = "inactive script resource";
 export default new GraphQLObjectType({
   name: "DestroyedScriptResource",
 
-  description: `An DestroyedScriptResource is a @valos/prophet${
+  description: `An DestroyedScriptResource is a @valos/sourcerer${
     ""}Resource that has been destroyed and only provides the${
     ""}external fields listed in TransientScripFields and${
     ""}TransientFields interfaces.`,

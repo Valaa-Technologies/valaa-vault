@@ -1,7 +1,7 @@
 import createContentAPI from "~/raem/tools/graphql/createContentAPI";
 
 import EngineContentAPI from "~/engine/EngineContentAPI";
-import SourcererTestAPI from "~/prophet/test/SourcererTestAPI";
+import SourcererTestAPI from "~/sourcerer/test/SourcererTestAPI";
 
 import TestScriptyThing from "~/script/test/schema/TestScriptyThing";
 

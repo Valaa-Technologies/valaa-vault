@@ -1,6 +1,6 @@
 {
   "name": "@valos/toolset-vault-operations",
-  "version": "0.34.0-prerelease.25",
+  "version": "0.34.0-prerelease.26",
   "valos": {
     "type": "toolset",
     "domain": "files"

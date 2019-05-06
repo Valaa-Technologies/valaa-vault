@@ -39,7 +39,7 @@ export default class Follower extends LogEventGenerator {
    *
    * @param {ChronicleOptions} [options={}]
    * @returns {Promise<Object>}
-   * @memberof PartitionConnection
+   * @memberof Connection
    */
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest { // eslint-disable-line
     throw new Error(`chronicleEvents not implemented by ${this.constructor.name}`);

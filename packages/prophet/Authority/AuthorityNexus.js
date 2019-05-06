@@ -2,7 +2,7 @@
 
 import { ValaaURI, getScheme } from "~/raem/ValaaURI";
 
-import Prophet from "~/prophet/api/Prophet";
+import Sourcerer from "~/prophet/api/Sourcerer";
 
 import { invariantify, LogEventGenerator } from "~/tools";
 
@@ -13,7 +13,7 @@ export type AuthorityConfig = {
   isRemoteAuthority: boolean,
 };
 
-export type AuthorityProphetOptions = {
+export type AuthorityOptions = {
   authorityConfig: AuthorityConfig,
   authorityURI: ValaaURI,
   nexus: AuthorityNexus,
@@ -24,20 +24,20 @@ export type SchemeModule = {
   getAuthorityURIFromPartitionURI: (partitionURI: ValaaURI) => ValaaURI,
   obtainAuthorityConfig:
       (partitionURI: ValaaURI, authorityPreConfig: ?AuthorityConfig) => ?AuthorityConfig,
-  createAuthorityProphet: (options: AuthorityProphetOptions) => Prophet,
+  createAuthority: (options: AuthorityOptions) => Sourcerer,
 };
 
 export default class AuthorityNexus extends LogEventGenerator {
-  _authorityProphets: Object;
+  _authoritySourcerers: Object;
   _schemeModules: { [scheme: string]: SchemeModule };
   _authorityPreConfigs: { [authorityURI: string]: AuthorityConfig };
-  _authorityProphets: { [authorityURI: string]: Prophet };
+  _authoritySourcerers: { [authorityURI: string]: Sourcerer };
 
   constructor (options: Object = {}) {
     super(options);
     this._schemeModules = {};
     this._authorityPreConfigs = options.authorityConfigs || {};
-    this._authorityProphets = {};
+    this._authoritySourcerers = {};
   }
 
   addSchemeModule (schemeModule: SchemeModule) {
@@ -65,26 +65,26 @@ export default class AuthorityNexus extends LogEventGenerator {
     throw new Error(`Unrecognized URI scheme "${uriScheme}"`);
   }
 
-  getAuthorityProphet (authorityURI: ValaaURI) {
-    return this.tryAuthorityProphet(authorityURI, { require: true });
+  getAuthority (authorityURI: ValaaURI) {
+    return this.tryAuthority(authorityURI, { require: true });
   }
 
-  tryAuthorityProphet (authorityURI: ValaaURI, { require } = {}) {
-    const ret = this._authorityProphets[String(authorityURI)];
+  tryAuthority (authorityURI: ValaaURI, { require } = {}) {
+    const ret = this._authoritySourcerers[String(authorityURI)];
     if (!require || (ret !== undefined)) return ret;
-    throw new Error(`Cannot find authority prophet for "${String(authorityURI)}"`);
+    throw new Error(`Cannot find authority for "${String(authorityURI)}"`);
   }
 
-  obtainAuthorityProphetOfPartition (partitionURI: ValaaURI) {
-    return this.obtainAuthorityProphet(
+  obtainAuthorityOfPartition (partitionURI: ValaaURI) {
+    return this.obtainAuthority(
         this.getAuthorityURIFromPartitionURI(partitionURI));
   }
 
-  obtainAuthorityProphet (authorityURI: ValaaURI): Prophet {
-    let ret = this._authorityProphets[String(authorityURI)];
+  obtainAuthority (authorityURI: ValaaURI): Sourcerer {
+    let ret = this._authoritySourcerers[String(authorityURI)];
     if (ret === undefined) {
-      ret = this._authorityProphets[String(authorityURI)]
-          = this._createAuthorityProphet(authorityURI);
+      ret = this._authoritySourcerers[String(authorityURI)]
+          = this._createAuthority(authorityURI);
     }
     return ret;
   }
@@ -110,7 +110,7 @@ export default class AuthorityNexus extends LogEventGenerator {
     }
   }
 
-  _createAuthorityProphet (authorityURI: ValaaURI): Prophet {
+  _createAuthority (authorityURI: ValaaURI): Sourcerer {
     let schemeModule;
     let authorityConfig;
     try {
@@ -120,13 +120,13 @@ export default class AuthorityNexus extends LogEventGenerator {
       if (!authorityConfig) {
         throw new Error(`No ValOS authority config found for "${String(authorityURI)}"`);
       }
-      return schemeModule.createAuthorityProphet({
+      return schemeModule.createAuthority({
         authorityURI, authorityConfig, nexus: this,
         verbosity: authorityConfig.hasOwnProperty("verbosity")
             ? authorityConfig.verbosity : this.getVerbosity(),
       });
     } catch (error) {
-      throw this.wrapErrorEvent(error, `createAuthorityProphet("${String(authorityURI)}")`,
+      throw this.wrapErrorEvent(error, `createAuthority("${String(authorityURI)}")`,
           "\n\tschemeModule:", schemeModule,
           "\n\tauthorityConfig:", authorityConfig,
           "\n\tconfigs:", this._authorityPreConfigs);

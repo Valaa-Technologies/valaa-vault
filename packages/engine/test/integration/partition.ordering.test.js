@@ -1,7 +1,7 @@
 // @flow
 
 import { createEngineOracleHarness } from "~/engine/test/EngineTestHarness";
-import { clearAllScribeDatabases } from "~/prophet/test/ProphetTestHarness";
+import { clearAllScribeDatabases } from "~/prophet/test/SourcererTestHarness";
 
 let harness = null;
 
@@ -11,12 +11,12 @@ async function setUp (testAuthorityConfig: Object = {}, options: {}) {
     ...options,
   });
   const ret = {
-    connection: await harness.prophet.acquirePartitionConnection(
-        harness.testPartitionURI).getActiveConnection(),
-    scribeConnection: await harness.scribe.acquirePartitionConnection(
-        harness.testPartitionURI, { newConnection: false }).getActiveConnection(),
-    oracleConnection: await harness.oracle.acquirePartitionConnection(
-        harness.testPartitionURI, { newConnection: false }).getActiveConnection(),
+    connection: await harness.sourcerer.acquireConnection(
+        harness.testPartitionURI).asActiveConnection(),
+    scribeConnection: await harness.scribe.acquireConnection(
+        harness.testPartitionURI, { newConnection: false }).asActiveConnection(),
+    oracleConnection: await harness.oracle.acquireConnection(
+        harness.testPartitionURI, { newConnection: false }).asActiveConnection(),
   };
   ret.authorityConnection = ret.oracleConnection.getUpstreamConnection();
   return ret;
@@ -40,7 +40,7 @@ describe("Partition load ordering and inactive resource handling", () => {
     const creation = harness.engine.create("Entity",
         { partitionAuthorityURI: String(harness.testAuthorityURI) },
         { awaitResult (result, vRet) { vLaterRoot = vRet; return result.getPremiereStory(); } });
-    const laterConnection = vLaterRoot.getPartitionConnection();
+    const laterConnection = vLaterRoot.getConnection();
     harness.tryGetTestAuthorityConnection(laterConnection)
         .addNarrateResults({ eventIdBegin: 0 }, []);
     await creation;
@@ -68,14 +68,14 @@ describe("Partition load ordering and inactive resource handling", () => {
         .toEqual(component);
 
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
-    await pairness.prophet.acquirePartitionConnection(harness.testPartitionURI)
-        .getActiveConnection();
+    await pairness.sourcerer.acquireConnection(harness.testPartitionURI)
+        .asActiveConnection();
     await pairness.receiveTruthsFrom(harness.testConnection, { verbosity: 0 });
 
-    const pairedLaterConnection = pairness.prophet
-        .acquirePartitionConnection(laterConnection.getPartitionURI());
+    const pairedLaterConnection = pairness.sourcerer
+        .acquireConnection(laterConnection.getPartitionURI());
     await pairness.receiveTruthsFrom(laterConnection, { verbosity: 0, asNarrateResults: true });
-    await pairedLaterConnection.getActiveConnection();
+    await pairedLaterConnection.asActiveConnection();
 
     const componentId = componentGhost.getId();
     const pairedComponent = pairness.run(componentId, null);
@@ -86,11 +86,11 @@ describe("Partition load ordering and inactive resource handling", () => {
     expect(pairness.runValoscript(pairedComponent, `
       this.num;
     `)).toEqual(10);
-    // await pairness.prophet.acquirePartitionConnection(laterConnection.getPartitionURI())
-    //    .getActiveConnection();
+    // await pairness.sourcerer.acquireConnection(laterConnection.getPartitionURI())
+    //    .asActiveConnection();
     /*
 
-    await pairness.prophet.acquirePartitionConnection(harness.testPartitionURI);
+    await pairness.sourcerer.acquireConnection(harness.testPartitionURI);
     */
   });
 });

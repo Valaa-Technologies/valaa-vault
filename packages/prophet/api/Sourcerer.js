@@ -4,7 +4,7 @@ import type { ValaaURI } from "~/raem/ValaaURI";
 
 import { NarrateOptions, ReceiveEvents } from "~/prophet/api/types";
 import Follower from "~/prophet/api/Follower";
-import type PartitionConnection from "~/prophet/api/PartitionConnection";
+import type Connection from "~/prophet/api/Connection";
 
 import { LogEventGenerator } from "~/tools/Logger";
 import { dumpObject } from "~/tools/wrapError";
@@ -52,10 +52,10 @@ export type ConnectOptions = {
 /**
  * Interface for sending commands to upstream.
  */
-export default class Prophet extends LogEventGenerator {
-  _upstream: Prophet;
+export default class Sourcerer extends LogEventGenerator {
+  _upstream: Sourcerer;
   _followers: Follower;
-  _connections: { [partitionURIString: string]: PartitionConnection };
+  _connections: { [partitionURIString: string]: Connection };
 
   constructor ({ upstream, ...rest }: Object = {}) {
     super({ ...rest });
@@ -64,7 +64,7 @@ export default class Prophet extends LogEventGenerator {
     this.setUpstream(upstream);
   }
 
-  initiate (): Promise<Prophet> | Prophet {}
+  initiate (): Promise<Sourcerer> | Sourcerer {}
 
   addFollower (follower: Follower, options: ?Object): Follower {
     const discourse = this._createDiscourse(follower, options);
@@ -113,12 +113,12 @@ export default class Prophet extends LogEventGenerator {
    * authority if available.
    *
    * @param {ValaaURI} partitionURI
-   * @returns {PartitionConnection}
+   * @returns {Connection}
    *
-   * @memberof Prophet
+   * @memberof Sourcerer
    */
-  acquirePartitionConnection (partitionURI: ValaaURI,
-      options: ConnectOptions = {}): ?PartitionConnection {
+  acquireConnection (partitionURI: ValaaURI,
+      options: ConnectOptions = {}): ?Connection {
     try {
       let connection = this._connections[String(partitionURI)];
       if (connection) return connection;
@@ -127,7 +127,7 @@ export default class Prophet extends LogEventGenerator {
         throw new Error(
             "Can't create new partition connection with options.newConnection === false");
       }
-      connection = this._createPartitionConnection(partitionURI, { ...options, connect: false });
+      connection = this._createConnection(partitionURI, { ...options, connect: false });
       if (!connection) return undefined;
       connection.addReference();
       this._connections[String(partitionURI)] = connection;
@@ -135,7 +135,7 @@ export default class Prophet extends LogEventGenerator {
       return connection;
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          new Error(`acquirePartitionConnection(${String(partitionURI)})`),
+          new Error(`acquireConnection(${String(partitionURI)})`),
           "\n\toptions:", ...dumpObject(options));
     }
 
@@ -152,13 +152,13 @@ export default class Prophet extends LogEventGenerator {
       */
   }
 
-  _createPartitionConnection (partitionURI: ValaaURI, options: ConnectOptions) {
-    const PartitionConnectionType = this.constructor.PartitionConnectionType;
-    if (!PartitionConnectionType) {
-      return this._upstream.acquirePartitionConnection(partitionURI, options);
+  _createConnection (partitionURI: ValaaURI, options: ConnectOptions) {
+    const ConnectionType = this.constructor.ConnectionType;
+    if (!ConnectionType) {
+      return this._upstream.acquireConnection(partitionURI, options);
     }
-    return new PartitionConnectionType({
-      partitionURI, prophet: this, verbosity: this.getVerbosity(),
+    return new ConnectionType({
+      partitionURI, sourcerer: this, verbosity: this.getVerbosity(),
       receiveTruths: options.receiveTruths, receiveCommands: options.receiveCommands,
       ...(options.createConnectionOptions || {}),
     });
@@ -171,7 +171,7 @@ export default class Prophet extends LogEventGenerator {
    * @param {string} contentHash
    * @returns
    *
-   * @memberof Prophet
+   * @memberof Sourcerer
    */
   tryGetCachedBvobContent (contentHash: string): ArrayBuffer {
     return this._upstream.tryGetCachedBvobContent(contentHash);
@@ -181,16 +181,16 @@ export default class Prophet extends LogEventGenerator {
    * Returns a map of fully active partition connections keyed by their
    * partition id.
    */
-  getActiveConnections (): Map<string, PartitionConnection> {
+  getActiveConnections (): Map<string, Connection> {
     const ret = {};
     Object.entries(this._connections).forEach(([key, connection]) => {
       if (connection.isActive()) ret[key] = connection;
     });
     return ret;
   }
-  getFullPartitionConnections () : Map<string, PartitionConnection> {
+  getFullConnections () : Map<string, Connection> {
     this.warnEvent(
-        "DEPRECATED: prefer getActiveConnections instead of getFullPartitionConnections");
+        "DEPRECATED: prefer getActiveConnections instead of getFullConnections");
     return this.getActiveConnections();
   }
 
@@ -198,20 +198,20 @@ export default class Prophet extends LogEventGenerator {
    * Returns a map of still synchronizing partition connections keyed
    * by their partition id.
    */
-  getActivatingConnections () : Map<string, Promise<PartitionConnection> > {
+  getActivatingConnections () : Map<string, Promise<Connection> > {
     const ret = {};
     Object.entries(this._connections).forEach(([key, connection]) => {
-      if (!connection.isActive()) ret[key] = connection.getActiveConnection();
+      if (!connection.isActive()) ret[key] = connection.asActiveConnection();
     });
     return ret;
   }
-  getPendingPartitionConnections () : Map<string, PartitionConnection> {
+  getPendingConnections () : Map<string, Connection> {
     this.warnEvent(
-        "DEPRECATED: prefer getActivatingConnections instead of getPendingPartitionConnections");
+        "DEPRECATED: prefer getActivatingConnections instead of getPendingConnections");
     return this.getActiveConnections();
   }
 
-  obtainPartitionAuthority (partitionURI: ValaaURI) {
-    return this._upstream.obtainPartitionAuthority(partitionURI);
+  obtainoAuthorityOfPartition (partitionURI: ValaaURI) {
+    return this._upstream.obtainoAuthorityOfPartition(partitionURI);
   }
 }

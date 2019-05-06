@@ -40,8 +40,8 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       let vIndexRoot, vTargets;
       try {
         const connection = await server.getDiscourse()
-            .acquirePartitionConnection(route.config.valos.subject, { newPartition: false })
-            .getActiveConnection();
+            .acquireConnection(route.config.valos.subject, { newPartition: false })
+            .asActiveConnection();
         vIndexRoot = server.getEngine().getVrapper([
           connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) },
         ]);
@@ -57,8 +57,8 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
             "\n\tresources:", ...[].concat(...vTargets.map(vTarget => (!vTarget
                 ? ["\n\t: <null>"] : [
               "\n\t:", vTarget.debugId(),
-              "\n\t\t:", vTarget.getPartitionConnection().isActive(),
-                  String(vTarget.getPartitionConnection().getPartitionURI()),
+              "\n\t\t:", vTarget.getConnection().isActive(),
+                  String(vTarget.getConnection().getPartitionURI()),
             ]))));
         this.scopeRules.scopeBase = Object.freeze({
           ...this.scopeRules.scopeBase,

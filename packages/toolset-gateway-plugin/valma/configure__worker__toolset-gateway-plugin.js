@@ -7,16 +7,12 @@ exports.introduction = `${exports.describe}.
 
 exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
     && "Can't configure 'toolset-gateway-plugin': not inUse or toolset config missing";
-exports.builder = (yargs) => {
-  const toolsetConfig = yargs.vlm.getToolsetConfig(yargs.vlm.toolset) || {};
-  console.log("current toolset config", toolsetConfig);
-  return yargs.options({
-    reconfigure: {
-      alias: "r", type: "boolean",
-      description: "Reconfigure 'toolset-gateway-plugin' config of this workspace.",
-    },
-  });
-};
+exports.builder = (yargs) => yargs.options({
+  reconfigure: {
+    alias: "r", type: "boolean",
+    description: "Reconfigure 'toolset-gateway-plugin' config of this workspace.",
+  },
+});
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;

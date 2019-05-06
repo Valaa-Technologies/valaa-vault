@@ -5,7 +5,7 @@ import React from "react";
 import { denoteValOSBuiltinWithSignature } from "~/raem/VALK";
 import { naiveURI } from "~/raem/ValaaURI";
 
-import type { PartitionConnection } from "~/prophet";
+import type { Connection } from "~/prophet";
 
 import Vrapper from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
@@ -339,7 +339,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
     type: "Lens",
     description: `Slot for viewing the focus via the LiveProps lens
         slot sequence. LiveProps is an internal fabric component which
-        wraps a UI component subscribes to prophet event updates that
+        wraps a UI component subscribes to sourcerer event updates that
         affect the props of that component. It then triggers the
         dynamic update of the wrapped UI component in response to
         such events.
@@ -714,10 +714,10 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
                 ""}nor owner could be determined`);
           }
           const partitionURI = naiveURI.createPartitionURI(lensAuthorityURI, frameRawId);
-          return engine.discourse.acquirePartitionConnection(partitionURI)
-              .getActiveConnection();
+          return engine.discourse.acquireConnection(partitionURI)
+              .asActiveConnection();
         },
-        (connection: ?PartitionConnection) => {
+        (connection: ?Connection) => {
           if (connection) {
             const vResource_ = engine.tryVrapper(frameRawId, { optional: true });
             if (vResource_) return vResource_;
@@ -741,7 +741,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
           // resource creation narration has completed (ie. engine
           // has received and resolved the recital): this might be
           // unnecessarily long.
-          // OTOH: TransactionInfo.chronicleEvents.results only
+          // OTOH: TransactionState.chronicleEvents.results only
           // support getPremiereStory so whatever semantics is
           // desired it needs to be implemented.
           // const options = { discourse, awaitResult: result => result.getPremiereStory() };

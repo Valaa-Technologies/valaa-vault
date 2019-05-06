@@ -14,7 +14,7 @@ import { getActionFromPassage } from "~/raem/redux/Bard";
 import Transient, { createTransient, getTransientTypeName } from "~/raem/state/Transient";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
 
-import type { Prophet } from "~/prophet";
+import type { Sourcerer } from "~/prophet";
 import { StoryRecital } from "~/prophet/FalseProphet/StoryRecital";
 
 import Cog, { executeHandlers } from "~/engine/Cog";
@@ -28,27 +28,27 @@ import Subscription from "~/engine/Vrapper/Subscription";
 import { outputCollapsedError, thenChainEagerly, wrapError } from "~/tools";
 
 export default class Engine extends Cog {
-  constructor ({ name, logger, prophet, timeDilation = 1.0, verbosity }: Object) {
+  constructor ({ name, logger, sourcerer, timeDilation = 1.0, verbosity }: Object) {
     super({ name: `${name}/Engine`, logger, verbosity });
     this.engine = this;
-    this._prophet = prophet;
+    this._sourcerer = sourcerer;
     this.cogs = new Set();
     this._vrappers = new Map();
     this._storyHandlerRoot = new Map();
     this._storyHandlerRoot.set("rawId", this._vrappers);
 
     this.addCog(this);
-    this.motor = new Motor({ engine: this, name: `${name}/Motor`, prophet, timeDilation });
+    this.motor = new Motor({ engine: this, name: `${name}/Motor`, sourcerer, timeDilation });
     this.addCog(this.motor);
-    this.discourse = this._connectWithProphet(prophet);
+    this.discourse = this._connectWithSourcerer(sourcerer);
     this._currentPassageCounter = 0;
     this._hostDescriptors = new Map();
     this._rootScope = {};
     this._rootScope[rootScopeSelf] = this._rootScope;
   }
 
-  _connectWithProphet (prophet: Prophet) {
-    const ret = prophet.addFollower(this, { verbosity: this.getVerbosity() - 1 });
+  _connectWithSourcerer (sourcerer: Sourcerer) {
+    const ret = sourcerer.addFollower(this, { verbosity: this.getVerbosity() - 1 });
     ret.setHostValuePacker(packFromHost);
     function packFromHost (value) {
       if (value instanceof Vrapper) return value.getSelfAsHead(value.getId());
@@ -69,7 +69,7 @@ export default class Engine extends Cog {
   getSelfAsHead () {
     return this._enginePartitionId ? vRef(this._enginePartitionId) : {};
   }
-  getProphet () { return this._prophet; }
+  getSourcerer () { return this._sourcerer; }
 
   getRootScope () { return this._rootScope; }
   getLexicalScope () { return this.getRootScope(); }
@@ -264,8 +264,8 @@ export default class Engine extends Cog {
           // Create partition(s) before the transaction is committed
           // (and thus before the commands leave upstream).
           discourse
-              .acquirePartitionConnection(directive.id.getPartitionURI(), { newPartition: true })
-              .getActiveConnection();
+              .acquireConnection(directive.id.getPartitionURI(), { newPartition: true })
+              .asActiveConnection();
         }
         const id = isRecombine
             ? result.story.passages[index].id
@@ -364,14 +364,14 @@ export default class Engine extends Cog {
 
   outputStatus (output = console) {
     output.log(`${this.name}: Resources:`,
-        layoutByObjectField(this.getProphet().getState(), "name"));
+        layoutByObjectField(this.getSourcerer().getState(), "name"));
     output.log(`${this.name}: Handlers:`, this._storyHandlerRoot);
     output.log(`${this.name}: Cogs:`);
     for (const cog of this.cogs) if (cog !== this) cog.outputStatus(output);
   }
 
   requestFullScreen () {
-    // TODO(iridian): This should happen through prophet to reach the cogs in uniform
+    // TODO(iridian): This should happen through sourcerer to reach the cogs in uniform
     // manner.
     for (const cog of this.cogs) {
       if (cog !== this && cog.requestFullScreen) cog.requestFullScreen();

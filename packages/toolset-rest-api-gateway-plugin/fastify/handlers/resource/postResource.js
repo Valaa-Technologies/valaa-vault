@@ -27,8 +27,8 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       await Promise.all(this.vPreloads.map(vPreload => vPreload.activate()));
       const scriptRoot = this.vPreloads[0] || server.getViewFocus();
       if (!scriptRoot) throw new Error(`Can't locate scriptRoot for route: ${this.name}`);
-      const connection = await server.getDiscourse().acquirePartitionConnection(
-          route.config.valos.subject, { newPartition: false }).getActiveConnection();
+      const connection = await server.getDiscourse().acquireConnection(
+          route.config.valos.subject, { newPartition: false }).asActiveConnection();
       this.scopeRules.scopeBase = Object.freeze({
         ...this.scopeRules.scopeBase,
         scriptRoot,

@@ -72,7 +72,7 @@ export class ChronicleEventResult {
   }
 
   // Get universalized event after it has been processed and reduced
-  // through local prophet chain, including validations, excluding
+  // through local sourcerer chain, including validations, excluding
   // persistence.
   getLocalEvent (): EventBase | null | Promise<EventBase | null> {
     const forward = this._localForwardResults || this._forwardResults;

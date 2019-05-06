@@ -13,7 +13,7 @@ import { dumpObject } from "~/tools";
 
 let transactionCounter = 0;
 
-export default class TransactionInfo {
+export default class TransactionState {
   constructor (discourse: Discourse, name: string) {
     this._discourse = discourse;
     this.name = name;
@@ -149,8 +149,9 @@ export default class TransactionInfo {
             event: this._finalCommand, story: command, getPremiereStory () { return command; },
           };
         }
-        this._commitChronicleResult = this._discourse._prophet.chronicleEvent(this._finalCommand, {
-          transactionInfo: this, identity: this._discourse._identityManager,
+        this._commitChronicleResult = this._discourse._sourcerer.chronicleEvent(
+            this._finalCommand, {
+          transactionState: this, identity: this._discourse._identityManager,
         });
 
         Promise.resolve(this._commitChronicleResult.getPremiereStory()).then(
@@ -230,13 +231,13 @@ export default class TransactionInfo {
    * @param {Corpus} corpus
    * @returns
    *
-   * @memberof TransactionInfo
+   * @memberof TransactionState
    */
   _tryFastForwardOnCorpus (targetCorpus: Corpus) {
-    // this.logEvent(`Committing fast-forward transaction '${transactionInfo.name}'`);
+    // this.logEvent(`Committing fast-forward transaction '${transactionState.name}'`);
     const previousState = targetCorpus.getState();
     if (!this.isFastForwardFrom(previousState)) return undefined;
-    // this.logEvent(`Committed '${transactionInfo.name}'`, story);
+    // this.logEvent(`Committed '${transactionState.name}'`, story);
     const story = targetCorpus.createStoryFromEvent({
       ...this._finalCommand,
       actions: this._passages.map(passage => getActionFromPassage(passage)),

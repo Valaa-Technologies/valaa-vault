@@ -2,7 +2,7 @@ import { created, transacted, fieldsSet } from "~/raem/events/index";
 import { vRef } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
 
-import { createProphetOracleHarness } from "~/prophet/test/ProphetTestHarness";
+import { createSourcererOracleHarness } from "~/prophet/test/SourcererTestHarness";
 
 const testAuthorityURI = "valaa-test:";
 // const sharedURI = "valos-shared-content";
@@ -12,7 +12,7 @@ afterEach(() => { if (harness) harness.cleanupScribe(); harness = null; });
 
 describe("Oracle", () => {
   it("sets up a connection and creates a partition", async () => {
-    harness = await createProphetOracleHarness({});
+    harness = await createSourcererOracleHarness({});
     expect(harness.testConnection).toBeTruthy();
     expect(harness.testConnection.isConnected())
         .toEqual(true);
@@ -35,10 +35,10 @@ describe("Oracle", () => {
   });
 
   it("Rejects commands chronicled after a freeze command", async () => {
-    harness = await createProphetOracleHarness({});
+    harness = await createSourcererOracleHarness({});
     const partitionURI = naiveURI.createPartitionURI(testAuthorityURI, "test_partition");
-    await harness.prophet
-        .acquirePartitionConnection(partitionURI).getActiveConnection();
+    await harness.sourcerer
+        .acquireConnection(partitionURI).asActiveConnection();
 
     const commandsUpToFreeze = [freezePartitionEvent];
     for (const command of commandsUpToFreeze) {

@@ -2,11 +2,11 @@
 
 import { Action, isTransactedLike } from "~/raem/events";
 
-import PartitionConnection from "~/prophet/api/PartitionConnection";
+import Connection from "~/prophet/api/Connection";
 
 import { dumpObject } from "~/tools";
 
-export default function extractPartitionEvent0Dot2 (connection: PartitionConnection, action: Action,
+export default function extractPartitionEvent0Dot2 (connection: Connection, action: Action,
     partitionKey: string = String(connection.getPartitionURI()), excludeMetaless: ?boolean) {
   const meta = action.meta || action.local;
   if (!meta) return excludeMetaless ? undefined : action;

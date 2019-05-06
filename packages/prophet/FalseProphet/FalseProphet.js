@@ -6,15 +6,15 @@ import type { State } from "~/raem/state";
 import type { JSONIdData, VRL } from "~/raem/VRL";
 
 import Follower from "~/prophet/api/Follower";
-import Prophet from "~/prophet/api/Prophet";
-import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
+import Sourcerer from "~/prophet/api/Sourcerer";
+import TransactionState from "~/prophet/FalseProphet/TransactionState";
 import { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult }
     from "~/prophet/api/types";
 
 import { dumpObject } from "~/tools";
 
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
-import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
+import FalseProphetConnection from "./FalseProphetConnection";
 
 import { Prophecy, _chronicleEvents } from "./_prophecyOps";
 import { _composeStoryFromEvent, _reviseSchismaticRecital, _tellStoriesToFollowers }
@@ -23,7 +23,7 @@ import { deserializeVRL } from "./_universalizationOps";
 import StoryRecital from "./StoryRecital";
 
 type FalseProphetChronicleOptions = ChronicleOptions & {
-  reviseSchism?: (schism: Prophecy, connection: FalseProphetPartitionConnection,
+  reviseSchism?: (schism: Prophecy, connection: FalseProphetConnection,
       purgedCommands: Command[], newEvents: Command[]) => Prophecy,
 };
 
@@ -46,8 +46,8 @@ type FalseProphetChronicleOptions = ChronicleOptions & {
  * clients. This process is carried out and more closely documented by
  * @valos/raem/redux/Bard and the reducers contained within the corpus.
  */
-export default class FalseProphet extends Prophet {
-  static PartitionConnectionType = FalseProphetPartitionConnection;
+export default class FalseProphet extends Sourcerer {
+  static ConnectionType = FalseProphetConnection;
 
   _totalCommandCount: number;
 
@@ -88,7 +88,7 @@ export default class FalseProphet extends Prophet {
 
   _createDiscourse (follower: Follower, options: ?Object = {}) {
     return new FalseProphetDiscourse({
-      prophet: this, follower, verbosity: follower.getVerbosity(), ...options,
+      sourcerer: this, follower, verbosity: follower.getVerbosity(), ...options,
     });
   }
 
@@ -120,9 +120,9 @@ export default class FalseProphet extends Prophet {
    * @returns {type}          description
    */
   _composeStoryFromEvent (event: EventBase, dispatchDescription: string, timed: ?EventBase,
-      transactionInfo?: TransactionInfo) {
+      transactionState?: TransactionState) {
     try {
-      return _composeStoryFromEvent(this, event, dispatchDescription, timed, transactionInfo);
+      return _composeStoryFromEvent(this, event, dispatchDescription, timed, transactionState);
     } catch (error) {
       throw this.wrapErrorEvent(error, `_composeStoryFromEvent(${dispatchDescription})`,
           "\n\tevent:", ...dumpObject(event),
@@ -131,7 +131,7 @@ export default class FalseProphet extends Prophet {
   }
 
   _reviseSchismaticRecital (schismaticRecital: Prophecy, reviewedPartitions: Object,
-      originatingConnection: FalseProphetPartitionConnection, purgedCommands: Command[],
+      originatingConnection: FalseProphetConnection, purgedCommands: Command[],
       newEvents: Command[]): Story[] {
     try {
       return _reviseSchismaticRecital(this, schismaticRecital, reviewedPartitions,

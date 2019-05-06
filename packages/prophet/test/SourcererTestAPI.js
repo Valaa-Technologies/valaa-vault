@@ -1,10 +1,10 @@
 import createContentAPI from "~/raem/tools/graphql/createContentAPI";
 
-import ProphetContentAPI from "~/prophet/ProphetContentAPI";
+import SourcererContentAPI from "~/prophet/SourcererContentAPI";
 import ScriptTestAPI from "~/script/test/ScriptTestAPI";
 
 export default createContentAPI({
-  name: "ValOSProphetTestAPI",
-  inherits: [ProphetContentAPI, ScriptTestAPI],
+  name: "ValOSSourcererTestAPI",
+  inherits: [SourcererContentAPI, ScriptTestAPI],
   exposes: [],
 });

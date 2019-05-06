@@ -4,11 +4,11 @@ import { vRef } from "~/raem/VRL";
 
 import { createEngineTestHarness, createEngineOracleHarness }
     from "~/engine/test/EngineTestHarness";
-import { clearAllScribeDatabases } from "~/prophet/test/ProphetTestHarness";
+import { clearAllScribeDatabases } from "~/prophet/test/SourcererTestHarness";
 import { arrayBufferFromUTF8String } from "~/tools/textEncoding";
 import { contentHashFromArrayBuffer } from "~/tools";
 
-let harness: { createds: Object, engine: Object, prophet: Object, testEntities: Object };
+let harness: { createds: Object, engine: Object, sourcerer: Object, testEntities: Object };
 const entities = () => harness.createds.Entity;
 afterEach(async () => {
   await clearAllScribeDatabases();

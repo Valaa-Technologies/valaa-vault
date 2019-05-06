@@ -5,9 +5,9 @@ import type FalseProphet from "~/prophet/FalseProphet/FalseProphet";
 import { debugObjectType, dumpObject, LogEventGenerator } from "~/tools";
 
 export default class IdentityManager extends LogEventGenerator {
-  constructor (prophet: FalseProphet) {
+  constructor (sourcerer: FalseProphet) {
     super();
-    this._prophet = prophet;
+    this._sourcerer = sourcerer;
     this._activeIdentities = {};
   }
 
@@ -19,7 +19,7 @@ export default class IdentityManager extends LogEventGenerator {
         throw new Error(`identityPartition required, got: ${
             debugObjectType(identityPartitionURI)}`);
       }
-      options.authority = this._prophet.obtainPartitionAuthority(identityPartitionURI);
+      options.authority = this._sourcerer.obtainoAuthorityOfPartition(identityPartitionURI);
       if (!options.authority) {
         throw new Error(`Can't locate the authority for identity partition: <${
             identityPartitionURI}>`);

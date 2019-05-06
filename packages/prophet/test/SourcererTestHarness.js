@@ -10,14 +10,14 @@ import { createCorpus } from "~/raem/test/RAEMTestHarness";
 import ScriptTestHarness, { createScriptTestHarness } from "~/script/test/ScriptTestHarness";
 
 import {
-  AuthorityNexus, FalseProphet, FalseProphetDiscourse, Oracle, PartitionConnection, Prophet,
+  AuthorityNexus, FalseProphet, FalseProphetDiscourse, Oracle, Connection, Sourcerer,
   Scribe, Follower,
 } from "~/prophet";
 import { obtainAspect } from "~/prophet/tools/EventAspects";
 import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
 
-import ProphetTestAPI from "~/prophet/test/ProphetTestAPI";
-import createValaaTestScheme, { TestProphet, TestPartitionConnection }
+import SourcererTestAPI from "~/prophet/test/SourcererTestAPI";
+import createValaaTestScheme, { TestSourcerer, TestConnection }
     from "~/prophet/test/scheme-valaa-test";
 import createValaaLocalScheme from "~/prophet/schemeModules/valaa-local";
 import createValaaMemoryScheme from "~/prophet/schemeModules/valaa-memory";
@@ -34,25 +34,25 @@ import { dumpify, dumpObject, isPromise, wrapError } from "~/tools";
 export const testAuthorityURI = "valaa-test:";
 export const testPartitionURI = naiveURI.createPartitionURI(testAuthorityURI, "test_partition");
 
-export function createProphetTestHarness (options: Object, ...commandBlocks: any) {
-  const wrap = new Error("During createProphetHarness");
+export function createSourcererTestHarness (options: Object, ...commandBlocks: any) {
+  const wrap = new Error("During createSourcererHarness");
   return thenChainEagerly({
-    name: "Prophet Test Harness", ContentAPI: ProphetTestAPI, TestHarness: ProphetTestHarness,
+    name: "Sourcerer Test Harness", ContentAPI: SourcererTestAPI, TestHarness: SourcererTestHarness,
     ...options,
   }, [
-    prophetOptions => createScriptTestHarness(prophetOptions),
+    sourcererOptions => createScriptTestHarness(sourcererOptions),
     harness => {
       commandBlocks.forEach(commands => {
         harness.chronicleEvents(commands).eventResults.forEach((result, index) => {
           if (isPromise((result.getTruthEvent || result.getTruthStory).call(result))) {
             throw new Error(`command #${index} getTruthEvent resolves into a Promise.${
-                ""} Use the asynchronous createProphetOracleHarness instead.`);
+                ""} Use the asynchronous createSourcererOracleHarness instead.`);
           }
         });
       });
       return harness;
     }
-  ], function errorOnCreateProphetHarness (error) {
+  ], function errorOnCreateSourcererHarness (error) {
     throw wrapError(error, wrap,
         "\n\toptions:", ...dumpObject(options),
         "\n\tcommandBlocks:", ...dumpObject(commandBlocks));
@@ -61,10 +61,10 @@ export function createProphetTestHarness (options: Object, ...commandBlocks: any
 
 let dbIsolationAutoPrefix = 0;
 
-export async function createProphetOracleHarness (options: Object, ...commandBlocks: any) {
+export async function createSourcererOracleHarness (options: Object, ...commandBlocks: any) {
   const isPaired = !!options.pairedHarness;
   const combinedOptions = {
-    name: `${isPaired ? "Paired " : ""}Prophet Oracle Harness`,
+    name: `${isPaired ? "Paired " : ""}Sourcerer Oracle Harness`,
     ...options,
     oracle: {
       verbosity: options.verbosity || 0,
@@ -81,16 +81,16 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
     },
   };
 
-  const ret = await createProphetTestHarness(combinedOptions);
+  const ret = await createSourcererTestHarness(combinedOptions);
   try {
     if (options.acquirePartitions) {
       const partitionURIs = options.acquirePartitions.map(
           partitionId => naiveURI.createPartitionURI("valaa-test:", partitionId));
       const connections = partitionURIs.map(uri =>
-          ret.prophet.acquirePartitionConnection(uri).getActiveConnection());
+          ret.sourcerer.acquireConnection(uri).asActiveConnection());
       (await Promise.all(connections)).forEach(connection => {
-        if (ret.prophet.getVerbosity() >= 1) {
-          console.log("PartitionConnection fully active:", connection.debugId());
+        if (ret.sourcerer.getVerbosity() >= 1) {
+          console.log("Connection fully active:", connection.debugId());
         }
       });
     }
@@ -101,7 +101,7 @@ export async function createProphetOracleHarness (options: Object, ...commandBlo
     }
     return ret;
   } catch (error) {
-    throw ret.wrapErrorEvent(error, new Error("During createProphetOracleHarness"),
+    throw ret.wrapErrorEvent(error, new Error("During createSourcererOracleHarness"),
         "\n\toptions:", ...dumpObject(options),
         "\n\tcommandBlocks:", ...dumpObject(commandBlocks));
   }
@@ -115,7 +115,7 @@ export const createdTestPartitionEntity = created({
   },
 });
 
-export default class ProphetTestHarness extends ScriptTestHarness {
+export default class SourcererTestHarness extends ScriptTestHarness {
   constructor (options: Object) {
     super(options);
     this.nextCommandIdIndex = 1;
@@ -137,7 +137,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     return thenChainEagerly(
       super.initialize(), [
         ...(!this.oracleOptions ? [
-          () => createTestMockProphet({ isLocallyPersisted: false }),
+          () => createTestMockSourcerer({ isLocallyPersisted: false }),
         ] : [
           () => createOracle(this.oracleOptions, this.nexusOptions),
           oracle => (this.oracle = oracle),
@@ -146,10 +146,10 @@ export default class ProphetTestHarness extends ScriptTestHarness {
           upstream => createScribe(upstream, this.scribeOptions),
           scribe => (this.scribe = scribe),
         ]),
-        upstream => this.prophet.setUpstream(upstream),
+        upstream => this.sourcerer.setUpstream(upstream),
         () => {
           hasRemoteTestBackend = (this.testAuthorityConfig || {}).isRemoteAuthority;
-          const testConnection = this.prophet.acquirePartitionConnection(
+          const testConnection = this.sourcerer.acquireConnection(
               this.testPartitionURI, { newPartition: !hasRemoteTestBackend });
           if (hasRemoteTestBackend) {
             // For remote test partitions with oracle we provide the root
@@ -160,7 +160,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
               aspects: { version: "0.2", log: { index: 0 }, command: { id: "rid-0" } },
             }]);
           }
-          return testConnection.getActiveConnection();
+          return testConnection.asActiveConnection();
         },
         (testConnection) => (this.testConnection = testConnection),
           // For non-remotes we chronicle the root entity explicitly.
@@ -170,7 +170,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
           return result.getPremiereStory();
         },
       ],
-      ProphetTestHarness.errorOn(new Error("ProphetTestHarness.initialize")),
+      SourcererTestHarness.errorOn(new Error("SourcererTestHarness.initialize")),
     );
   }
 
@@ -181,16 +181,16 @@ export default class ProphetTestHarness extends ScriptTestHarness {
   createCorpus (corpusOptions: Object = {}) {
     // Called by RAEMTestHarness.constructor (so before oracle/scribe are created)
     const corpus = super.createCorpus(corpusOptions);
-    this.prophet = this.falseProphet = createFalseProphet({
+    this.sourcerer = this.falseProphet = createFalseProphet({
       schema: this.schema, corpus, logger: this.getLogger(), ...(this.falseProphetOptions || {}),
     });
-    this.chronicler = this.prophet;
+    this.chronicler = this.sourcerer;
     return corpus;
   }
 
   createValker () {
     return (this.discourse = this.chronicler = new FalseProphetDiscourse({
-      prophet: this.prophet,
+      sourcerer: this.sourcerer,
       follower: new MockFollower(),
       schema: this.schema,
       verbosity: this.getVerbosity(),
@@ -214,16 +214,16 @@ export default class ProphetTestHarness extends ScriptTestHarness {
    * converts them into truths and then has corresponding active
    * connections in this harness receive them via their receiveTruths.
    *
-   * @param {(Prophet | PartitionConnection)} source
+   * @param {(Sourcerer | Connection)} source
    * @param {*} [{
    *     requireReceivingConnection = true,
    *     clearSourceUpstreamEntries = false,
    *     clearReceiverUpstreamEntries = false,
    *     authorizeTruth = (i => i),
    *   }={}]
-   * @memberof ProphetTestHarness
+   * @memberof SourcererTestHarness
    */
-  async receiveTruthsFrom (source: Prophet | PartitionConnection, {
+  async receiveTruthsFrom (source: Sourcerer | Connection, {
     verbosity = 0,
     requireReceivingConnection = true,
     clearSourceUpstreamEntries = false,
@@ -231,9 +231,9 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     authorizeTruth = (i => i),
     asNarrateResults = false,
   } = {}) {
-    for (const connection of ((source instanceof PartitionConnection)
+    for (const connection of ((source instanceof Connection)
         ? [source]
-        : Object.values((source instanceof Prophet ? source : source.prophet)._connections))) {
+        : Object.values((source instanceof Sourcerer ? source : source.sourcerer)._connections))) {
       const testSourceBackend = this.tryGetTestAuthorityConnection(connection);
       if (!testSourceBackend) continue;
       const partitionURI = String(testSourceBackend.getPartitionURI());
@@ -245,7 +245,7 @@ export default class ProphetTestHarness extends ScriptTestHarness {
       const receiverBackend = this.tryGetTestAuthorityConnection(receiver);
       if (!receiverBackend) {
         throw new Error(`Receving connection <${partitionURI
-            }> has no TestPartitionConnection at the end of the chain`);
+            }> has no TestConnection at the end of the chain`);
       }
       const truths = JSON.parse(JSON.stringify(
               (testSourceBackend._chroniclings || []).map(entry => entry.event)))
@@ -263,24 +263,24 @@ export default class ProphetTestHarness extends ScriptTestHarness {
     }
   }
 
-  tryGetTestAuthorityConnection (connection): PartitionConnection {
+  tryGetTestAuthorityConnection (connection): Connection {
     let ret = connection;
     for (; ret; ret = ret.getUpstreamConnection()) {
-      if (ret instanceof TestPartitionConnection) break;
+      if (ret instanceof TestConnection) break;
     }
     return ret;
   }
 
   createMockFollower () {
     const ret = MockFollower();
-    ret.discourse = ret.prophet.addFollower(ret);
+    ret.discourse = ret.sourcerer.addFollower(ret);
     return ret;
   }
 }
 
 const activeScribes = [];
 
-export function createScribe (upstream: Prophet, options?: Object) {
+export function createScribe (upstream: Sourcerer, options?: Object) {
   const ret = new Scribe({
     name: "Test Scribe",
     databaseAPI: getDatabaseAPI(),
@@ -335,7 +335,7 @@ export function createOracle (options?: Object, nexusOptions?: Object) {
 }
 
 export function createFalseProphet (options?: Object) {
-  const corpus = (options && options.corpus) || createCorpus(ProphetTestAPI, {}, {});
+  const corpus = (options && options.corpus) || createCorpus(SourcererTestAPI, {}, {});
   return new FalseProphet({
     name: "Test FalseProphet",
     corpus,
@@ -343,8 +343,8 @@ export function createFalseProphet (options?: Object) {
   });
 }
 
-export function createTestMockProphet (configOverrides: Object = {}) {
-  return new TestProphet({
+export function createTestMockSourcerer (configOverrides: Object = {}) {
+  return new TestSourcerer({
     authorityURI: naiveURI.createPartitionURI("valaa-test:"),
     authorityConfig: {
       eventVersion: EVENT_VERSION,

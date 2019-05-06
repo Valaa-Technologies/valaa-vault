@@ -17,9 +17,9 @@ The dense definition of ValOS ecosystem is:
      Resources called *Partition*s, each of which is owned by
   4. *Authorities*, which also govern, host and serve those partitions
      to downstream users via
-  5. a distributed network of high-level *Prophet* nodes, which provide
+  5. a distributed network of high-level *Sourcerer* nodes, which provide
      the concrete
-  6. *PartitionConnection* access points which enable users to access
+  6. *Connection* access points which enable users to access
     the upstream partitions.
 
 With these concepts this specification aims to implement the
@@ -28,22 +28,22 @@ consumers and many independent upstream authorities comprehensively,
 scalably and robustly.
 
 This package also extends the @valos/script schema with Media and
-Entity. Media is a file-like content container. Via Prophets and
-PartitionConnections it allows reading, writing and interpreting
+Entity. Media is a file-like content container. Via Sourcerers and
+Connections it allows reading, writing and interpreting
 the content. Entity in turn provides directory-like hierarchies for
 Medias and other Entitys.
 
 This package also extends command/truth event semantics defined in
 @valos/raem with the concepts of restricted and universal commands.
 
-This package also provides various Prophet component JavaScript
+This package also provides various Sourcerer component JavaScript
 implementations which can be used to implement the full valos
 application stream gateway inside a client browser. Some of
 the components generalize to non-browser contexts, some are fully
 browser specific.
 
 - depends: `@valos/script`, `IndexedDB`, `AWS IoT/S3/DynamoDB`
-- exports: `FalseProphet`, `PartitionConnection`, `ProphetContentAPI`
+- exports: `FalseProphet`, `Connection`, `SourcererContentAPI`
 - valosheath: `Relatable`, `Entity`, `Media`, `Relation`,
 - concepts: `ACID`, `authorities`, `pub-sub`, `offline readiness`
 
@@ -140,12 +140,12 @@ latency and overheads of repeated consequtive requests.
 
 ### 2.4. *Authority*s implement the infrastructure and authorize new events for their partitions
 
-### 2.5. *Prophet*s are software components which connect to each other and form information streams
+### 2.5. *Sourcerer*s are software components which connect to each other and form information streams
 
-### 2.6. *PartitionConnection* provides an API for accessing an individual partition
+### 2.6. *Connection* provides an API for accessing an individual partition
 
 Receiving and sending information to a partition is done using
-a *PartitionConnection*. With the the Prophet that provided
+a *Connection*. With the the Sourcerer that provided
 the connection it manages four types of information streams:
   1. commands sent towards upstream
   2. truths received towards downstream

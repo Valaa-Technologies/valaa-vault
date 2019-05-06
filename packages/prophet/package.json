@@ -1,7 +1,7 @@
 {
   "name": "@valos/prophet",
   "version": "0.34.0-prerelease.25",
-  "description": "ValOS Prophet API, schema",
+  "description": "ValOS Sourcerer API, schema",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
   "private": false,

@@ -15,8 +15,8 @@ import FDBKeyRange from "fake-indexeddb/lib/FDBKeyRange";
 import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 /**
- * Returns a mocked IndexedDB API that can be passed around to the Scribe section of the prophet
- * stack. This is used in jest tests.
+ * Returns a mocked IndexedDB API that can be passed around to the
+ * Scribe section of the sourcerer stack. This is used in jest tests.
  */
 
 export function getDatabaseAPI (): DatabaseAPI {

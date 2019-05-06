@@ -28,14 +28,14 @@ export default class PerspireView extends VDOMView {
   async _waitForConnectionsToActivate () {
     let pendingConnections;
     while (true) {
-      pendingConnections = this._vViewFocus.engine.getProphet().getActivatingConnections();
+      pendingConnections = this._vViewFocus.engine.getSourcerer().getActivatingConnections();
       const keys = Object.keys(pendingConnections);
       if (!keys.length) break;
       this.warnEvent(`attach(): acquiring pending UI-initiated connections:`, ...keys);
       await Promise.all(Object.values(pendingConnections));
     }
     this.warnEvent(`attach(): all connections acquired:`,
-        ...Object.values(this._vViewFocus.engine.getProphet().getActiveConnections())
+        ...Object.values(this._vViewFocus.engine.getSourcerer().getActiveConnections())
             .map(connection => `\n\t${connection.debugId()}`));
   }
 }

@@ -3,7 +3,7 @@
 import type { EventBase } from "~/raem/events";
 import { hasScheme } from "~/raem/ValaaURI";
 
-import PartitionConnection from "~/prophet/api/PartitionConnection";
+import Connection from "~/prophet/api/Connection";
 import { ConnectOptions, MediaInfo, ReceiveEvents, RetrieveMediaBuffer } from "~/prophet/api/types";
 
 import DecoderArray from "~/prophet/Oracle/DecoderArray";
@@ -22,26 +22,26 @@ import { DelayedQueue, dumpObject, thenChainEagerly } from "~/tools";
  * to be added.
  *
  * @export
- * @class OraclePartitionConnection
- * @extends {PartitionConnection}
+ * @class OracleConnection
+ * @extends {Connection}
  */
-export default class OraclePartitionConnection extends PartitionConnection {
-  constructor ({ authorityProphet, ...rest }: Object) {
+export default class OracleConnection extends Connection {
+  constructor ({ authoritySourcerer, ...rest }: Object) {
     super(rest);
-    this._authorityProphet = authorityProphet;
+    this._authoritySourcerer = authoritySourcerer;
     this._decoderArray = new DecoderArray({
       name: `Decoders of ${this.getName()}`,
-      fallbackArray: this.getProphet().getDecoderArray(),
+      fallbackArray: this.getSourcerer().getDecoderArray(),
     });
   }
 
   _doConnect (options: ConnectOptions) {
-    // Handle step 2. of the acquirePartitionConnection first narration
-    // logic (defined in PartitionConnection.js) and begin I/O bound(?)
+    // Handle step 2. of the acquireConnection first narration
+    // logic (defined in Connection.js) and begin I/O bound(?)
     // scribe event log narration in parallel to the authority
     // proxy/connection creation.
-    this.clockEvent(1, "oracle.doConnect", "_authorityProphet.acquirePartitionConnection");
-    this.setUpstreamConnection(this._authorityProphet.acquirePartitionConnection(
+    this.clockEvent(1, "oracle.doConnect", "_authoritySourcerer.acquireConnection");
+    this.setUpstreamConnection(this._authoritySourcerer.acquireConnection(
         this.getPartitionURI(), {
           narrateOptions: false,
           subscribeEvents: (options.narrateOptions === false) && options.subscribeEvents,
@@ -50,7 +50,7 @@ export default class OraclePartitionConnection extends PartitionConnection {
     const connection = this;
     return thenChainEagerly(null, this.addChainClockers(1, "oracle.doConnect.ops", [
       function _waitForActiveUpstream () {
-        return connection._upstreamConnection.getActiveConnection();
+        return connection._upstreamConnection.asActiveConnection();
       },
       function _narrateEventLog () {
         if (options.narrateOptions === false) return {};

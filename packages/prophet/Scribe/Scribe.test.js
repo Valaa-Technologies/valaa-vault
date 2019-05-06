@@ -4,8 +4,8 @@ import { created, transacted } from "~/raem/events/index";
 import { naiveURI } from "~/raem/ValaaURI";
 
 import {
-  createScribe, clearAllScribeDatabases, createTestMockProphet
-} from "~/prophet/test/ProphetTestHarness";
+  createScribe, clearAllScribeDatabases, createTestMockSourcerer
+} from "~/prophet/test/SourcererTestHarness";
 // @flow
 
 import { initializeAspects } from "~/prophet/tools/EventAspects";
@@ -49,11 +49,11 @@ describe("Scribe", () => {
   });
 
   it("stores truths/commands in the database", async () => {
-    const scribe = await createScribe(createTestMockProphet({ isRemoteAuthority: true }));
+    const scribe = await createScribe(createTestMockSourcerer({ isRemoteAuthority: true }));
 
-    const connection = scribe.acquirePartitionConnection(testPartitionURI);
+    const connection = scribe.acquireConnection(testPartitionURI);
     connection.getUpstreamConnection().addNarrateResults({ eventIdBegin: 0 }, []);
-    await connection.getActiveConnection();
+    await connection.asActiveConnection();
     const database = await openDB(testPartitionURI.toString());
 
     // Adds an entity and checks that it has been stored
@@ -79,10 +79,10 @@ describe("Scribe", () => {
   ];
 
   it("stores (and returns) utf-8 strings correctly", async () => {
-    const scribe = await createScribe(createTestMockProphet());
+    const scribe = await createScribe(createTestMockSourcerer());
 
-    const connection = await scribe.acquirePartitionConnection(testPartitionURI)
-        .getActiveConnection();
+    const connection = await scribe.acquireConnection(testPartitionURI)
+        .asActiveConnection();
     const sharedDB = await openDB(sharedURI);
 
     for (const mediaContent of textMediaContents) {
@@ -102,10 +102,10 @@ describe("Scribe", () => {
   });
 
   it("populates a new connection to an existing partition with its cached commands", async () => {
-    const scribe = await createScribe(createTestMockProphet());
+    const scribe = await createScribe(createTestMockSourcerer());
 
-    const firstConnection = await scribe.acquirePartitionConnection(testPartitionURI)
-        .getActiveConnection();
+    const firstConnection = await scribe.acquireConnection(testPartitionURI)
+        .asActiveConnection();
 
     await firstConnection.chronicleEvent(simpleCommand).getLocalEvent();
 
@@ -116,16 +116,16 @@ describe("Scribe", () => {
     expect(firstUnusedCommandEventId).toBeGreaterThan(1);
     firstConnection.disconnect();
 
-    const secondConnection = await scribe.acquirePartitionConnection(testPartitionURI)
-        .getActiveConnection();
+    const secondConnection = await scribe.acquireConnection(testPartitionURI)
+        .asActiveConnection();
     expect(secondConnection.getFirstUnusedCommandEventId()).toBe(firstUnusedCommandEventId);
   });
 
   it("ensures commands are stored in a proper ascending order", async () => {
-    const scribe = await createScribe(createTestMockProphet());
+    const scribe = await createScribe(createTestMockSourcerer());
 
-    const connection = await scribe.acquirePartitionConnection(testPartitionURI)
-        .getActiveConnection();
+    const connection = await scribe.acquireConnection(testPartitionURI)
+        .asActiveConnection();
     let oldUnusedCommandId;
     let newUnusedCommandId = connection.getFirstUnusedCommandEventId();
 
@@ -141,10 +141,10 @@ describe("Scribe", () => {
   });
 
   it("writes multiple commands in a single go gracefully", async () => {
-    const scribe = await createScribe(createTestMockProphet());
+    const scribe = await createScribe(createTestMockSourcerer());
 
-    const connection = await scribe.acquirePartitionConnection(testPartitionURI)
-        .getActiveConnection();
+    const connection = await scribe.acquireConnection(testPartitionURI)
+        .asActiveConnection();
 
     const chronicling = connection.chronicleEvents(simpleCommandList);
     const lastLocal = await chronicling.eventResults[simpleCommandList.length - 1].getLocalEvent();

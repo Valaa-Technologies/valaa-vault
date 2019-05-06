@@ -25,7 +25,7 @@ const valoscriptBlock = [
   }, }),
 ];
 
-let harness: { createds: Object, engine: Object, prophet: Object, testEntities: Object };
+let harness: { createds: Object, engine: Object, sourcerer: Object, testEntities: Object };
 afterEach(() => { harness = null; }); // eslint-disable-line no-undef
 
 const entities = () => harness.createds.Entity;

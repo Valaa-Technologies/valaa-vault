@@ -1,7 +1,7 @@
 // @flow
 
-import ProphetTestHarness, { createProphetTestHarness, createProphetOracleHarness }
-    from "~/prophet/test/ProphetTestHarness";
+import SourcererTestHarness, { createSourcererTestHarness, createSourcererOracleHarness }
+    from "~/prophet/test/SourcererTestHarness";
 import { obtainAspect } from "~/prophet/tools/EventAspects";
 
 import EngineTestAPI from "~/engine/test/EngineTestAPI";
@@ -15,32 +15,32 @@ import baseEventBlock from "~/engine/test/baseEventBlock";
 import { isPromise } from "~/tools";
 
 export function createEngineTestHarness (options: Object, ...commandBlocks: any) {
-  const ret = createProphetTestHarness({
+  const ret = createSourcererTestHarness({
     name: "Engine Test Harness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
     corpus: { steppers: engineSteppers },
     ...options,
   }, ...(options.claimBaseBlock ? [baseEventBlock] : []), ...commandBlocks);
   if (isPromise(ret)) {
-    throw new Error(`createProphetTestHarness returned a promise inside ${
+    throw new Error(`createSourcererTestHarness returned a promise inside ${
       ""} createEngineTestHarness. Use createEngineOracleHarness for async support instead.`);
   }
   return ret;
 }
 
 export function createEngineOracleHarness (options: Object, ...commandBlocks: any) {
-  return createProphetOracleHarness({
+  return createSourcererOracleHarness({
     name: "Engine Oracle Harness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
     corpus: { steppers: engineSteppers },
     ...options,
   }, ...(options.claimBaseBlock ? [baseEventBlock] : []), ...commandBlocks);
 }
 
-export default class EngineTestHarness extends ProphetTestHarness {
+export default class EngineTestHarness extends SourcererTestHarness {
   createValker () {
     this.engine = new Engine({
       name: "Test Engine",
       logger: this.getLogger(),
-      prophet: this.prophet, // created by createCorpus of ProphetTestHarness
+      sourcerer: this.sourcerer, // created by createCorpus of SourcererTestHarness
       verbosity: this.getVerbosity(),
     });
     const rootScope = this.engine.getRootScope();

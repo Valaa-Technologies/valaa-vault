@@ -5,9 +5,9 @@ import { vRef } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
 
 import {
-  createFalseProphet, createProphetOracleHarness, createTestMockProphet,
+  createFalseProphet, createSourcererOracleHarness, createTestMockSourcerer,
   createdTestPartitionEntity, MockFollower,
-} from "~/prophet/test/ProphetTestHarness";
+} from "~/prophet/test/SourcererTestHarness";
 
 const testAuthorityURI = "valaa-test:";
 const partitionURI = naiveURI.createPartitionURI(testAuthorityURI, "test_partition");
@@ -37,11 +37,11 @@ const basicCommands = [
 
 describe("FalseProphet", () => {
   it("assigns proper eventIds for chronicled commands", async () => {
-    harness = await createProphetOracleHarness({});
+    harness = await createSourcererOracleHarness({});
 
-    const prophetConnection = await harness.prophet
-        .acquirePartitionConnection(partitionURI).getActiveConnection();
-    const scribeConnection = prophetConnection.getUpstreamConnection();
+    const connection = await harness.sourcerer
+        .acquireConnection(partitionURI).asActiveConnection();
+    const scribeConnection = connection.getUpstreamConnection();
 
     let oldCommandId;
     let newCommandId = scribeConnection.getFirstUnusedCommandEventId() - 1;
@@ -62,11 +62,11 @@ describe("FalseProphet", () => {
 
     const falseProphet = createFalseProphet({
       onCommandCountUpdate,
-      upstream: createTestMockProphet({ isLocallyPersisted: false, isRemoteAuthority: true }),
+      upstream: createTestMockSourcerer({ isLocallyPersisted: false, isRemoteAuthority: true }),
     });
-    let connection = falseProphet.acquirePartitionConnection(partitionURI);
+    let connection = falseProphet.acquireConnection(partitionURI);
     connection.getUpstreamConnection().addNarrateResults({ eventIdBegin: 0 }, []);
-    connection = await connection.getActiveConnection();
+    connection = await connection.asActiveConnection();
     expect(commandsCounted).toBe(0);
     const discourse = falseProphet.addFollower(new MockFollower());
 

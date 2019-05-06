@@ -8,7 +8,7 @@ import { createNativeIdentifier, getNativeIdentifierValue, transpileValoscriptBo
 
 import Vrapper from "~/engine/Vrapper";
 import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
-import { clearAllScribeDatabases } from "~/prophet/test/ProphetTestHarness";
+import { clearAllScribeDatabases } from "~/prophet/test/SourcererTestHarness";
 import VALEK, { Kuery, literal, pointer } from "~/engine/VALEK";
 
 const valoscriptBlock = [
@@ -19,7 +19,7 @@ const valoscriptBlock = [
   }, }),
 ];
 
-let harness: { createds: Object, engine: Object, prophet: Object, testEntities: Object };
+let harness: { createds: Object, engine: Object, sourcerer: Object, testEntities: Object };
 afterEach(async () => {
   await clearAllScribeDatabases();
   harness = null;

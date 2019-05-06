@@ -61,7 +61,7 @@ const createMedia = {
 
 
 describe("Vrapper", () => {
-  let harness: { createds: Object, engine: Object, prophet: Object, testEntities: Object };
+  let harness: { createds: Object, engine: Object, sourcerer: Object, testEntities: Object };
   const testScriptPartitions = () => harness.createds.TestScriptyThing;
   const medias = () => harness.createds.Media;
   const entities = () => harness.createds.Entity;

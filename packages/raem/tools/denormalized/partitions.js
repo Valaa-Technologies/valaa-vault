@@ -12,17 +12,17 @@ import traverseMaterializedOwnlings
 
 import { dumpObject, invariantifyArray, thenChainEagerly, unwrapError, wrapError } from "~/tools";
 
-export class MissingPartitionConnectionsError extends Error {
+export class MissingConnectionsError extends Error {
   constructor (message, missingPartitions: (ValaaURI | Promise<any>)[]) {
     super(message);
-    invariantifyArray(missingPartitions, "MissingPartitionConnectionsError.missingPartitions",
+    invariantifyArray(missingPartitions, "MissingConnectionsError.missingPartitions",
         { elementInvariant: value => value });
     this.missingPartitions = missingPartitions;
   }
 }
 
 // Wraps the call inside logic which connects to missing partitions if
-// a MissingPartitionConnectionsError is thrown. The connect callback
+// a MissingConnectionsError is thrown. The connect callback
 // is extracted from the error.connectToPartition itself. Thus for the
 // autoconnect functionality to work some intervening layer must add
 // this callback into all caught missing partition connection errors.
@@ -37,7 +37,7 @@ function tryCall (call: any, onError, ...args: any[]) {
   return thenChainEagerly(null, [
     () => call.apply(this, args),
   ], error => {
-    if (!(unwrapError(error) instanceof MissingPartitionConnectionsError)) {
+    if (!(unwrapError(error) instanceof MissingConnectionsError)) {
       if (onError) return onError(error, ...args);
       throw error;
     }
@@ -66,11 +66,11 @@ export function connectToMissingPartitionsAndThen (error, callback, explicitConn
   const original = error.originalError || error;
   const connectToPartition = original.connectToPartition || explicitConnectToPartition;
   if (!connectToPartition) {
-    throw wrapError(error, "caught MissingPartitionConnectionsError",
+    throw wrapError(error, "caught MissingConnectionsError",
         "but no error.connectToPartition found: cannot try connecting");
   }
   if (!original.missingPartitions || !original.missingPartitions.length) {
-    throw wrapError(error, "caught MissingPartitionConnectionsError",
+    throw wrapError(error, "caught MissingConnectionsError",
             "but error.missingPartitions is missing or empty: cannot try connecting");
   }
   const ret = Promise.all(original.missingPartitions.map(missingPartition =>

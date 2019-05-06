@@ -21,8 +21,8 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       this.toMapping = toMappingFields.slice(0, -2).concat(0);
     },
     async preload () {
-      // const connection = await server.getDiscourse().acquirePartitionConnection(
-      //    route.config.valos.subject, { newPartition: false }).getActiveConnection();
+      // const connection = await server.getDiscourse().acquireConnection(
+      //    route.config.valos.subject, { newPartition: false }).asActiveConnection();
       // const vRoot = server.getEngine().getVrapper([connection.getPartitionRawId()]);
       this.vPreloads = server.preloadVAKONRefResources(route.config.createMapping);
       return Promise.all(this.vPreloads.map(vPreload => vPreload.activate()));

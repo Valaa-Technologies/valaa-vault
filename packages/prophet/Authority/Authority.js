@@ -2,20 +2,20 @@
 
 import type { ValaaURI } from "~/raem/ValaaURI";
 
-import Prophet from "~/prophet/api/Prophet";
+import Sourcerer from "~/prophet/api/Sourcerer";
 
-import AuthorityPartitionConnection from "./AuthorityPartitionConnection";
+import AuthorityConnection from "./AuthorityConnection";
 
 /**
- * AuthorityProphet is the base Prophet implementation for various
+ * Authority is the base Sourcerer implementation for various
  * types of authorities.
  *
  * @export
  * @class Oracle
- * @extends {Prophet}
+ * @extends {Sourcerer}
  */
-export default class AuthorityProphet extends Prophet {
-  static PartitionConnectionType = AuthorityPartitionConnection;
+export default class Authority extends Sourcerer {
+  static ConnectionType = AuthorityConnection;
 
   constructor ({ authorityURI, authorityConfig, nexus, ...rest }: Object) {
     super({ ...rest });

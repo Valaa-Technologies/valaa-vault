@@ -2,7 +2,7 @@
 
 /* eslint-disable */
 
-import ContentAPI from "./ProphetContentAPI";
+import ContentAPI from "./SourcererContentAPI";
 import schemeModules from "./schemeModules";
 
 const valos = require("~/gateway-api/valos").default;
@@ -17,8 +17,8 @@ export {
 };
 export {                   default as Discourse } from "./api/Discourse";
 export {                   default as Follower } from "./api/Follower";
-export {                   default as PartitionConnection } from "./api/PartitionConnection";
-export {                   default as Prophet } from "./api/Prophet";
+export {                   default as Connection } from "./api/Connection";
+export {                   default as Sourcerer } from "./api/Sourcerer";
 export                           type Transaction = Object;
 
 export {
@@ -34,14 +34,14 @@ export {                   default as DecoderArray } from "./Oracle/DecoderArray
 
 export {                   default as Scribe } from "./Scribe";
 
-export {                   default as AuthorityProphet } from "./AuthorityProphet";
+export {                   default as Authority } from "./Authority";
 export {
-                           default as AuthorityPartitionConnection,
+                           default as AuthorityConnection,
                                       AuthorityEventResult,
-} from "./AuthorityProphet/AuthorityPartitionConnection";
-export {                   default as AuthorityNexus } from "./AuthorityProphet/AuthorityNexus";
+} from "./Authority/AuthorityConnection";
+export {                   default as AuthorityNexus } from "./Authority/AuthorityNexus";
 export type {
                                       AuthorityConfig,
-                                      AuthorityProphetOptions,
+                                      AuthorityOptions,
                                       SchemeModule,
 } from "./AuthorityNexus";

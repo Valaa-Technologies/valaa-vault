@@ -157,14 +157,14 @@ exports.handler = async (yargv) => {
   await server.initialize();
 
   vlm.clock("perspire.handler", "perspire.partitions",
-      "gateway.acquirePartitionConnections(yargv.partitions)");
+      "gateway.acquireConnections(yargv.partitions)");
   const partitions = { root: server.gateway.rootPartition };
   for (const [key, partitionURI] of Object.entries(yargv.partitions || {})) {
     // Note: direct falseProphet.acquire (without discourse) doesn't
     // have identity manager.
     partitions[key] = await server.gateway.falseProphet
-        .acquirePartitionConnection(partitionURI, { newPartition: false })
-        .getActiveConnection();
+        .acquireConnection(partitionURI, { newPartition: false })
+        .asActiveConnection();
   }
   vlm.clock("perspire.handler", "gateway.mainView", "server.createMainView");
   const mainView = await server.createMainView();

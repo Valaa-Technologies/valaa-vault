@@ -10,8 +10,8 @@ import { addConnectToPartitionToError } from "~/raem/tools/denormalized/partitio
 
 import Discourse from "~/prophet/api/Discourse";
 import Follower from "~/prophet/api/Follower";
-import Prophet from "~/prophet/api/Prophet";
-import type PartitionConnection from "~/prophet/api/PartitionConnection";
+import Sourcerer from "~/prophet/api/Sourcerer";
+import type Connection from "~/prophet/api/Connection";
 import type { ChronicleOptions, ChroniclePropheciesRequest, ConnectOptions, ProphecyEventResult }
     from "~/prophet/api/types";
 
@@ -21,7 +21,7 @@ import createResourceId0Dot2, { createPartitionId0Dot2 }
     from "~/prophet/tools/event-version-0.2/createResourceId0Dot2";
 import { initializeAspects, obtainAspect, tryAspect } from "~/prophet/tools/EventAspects";
 
-import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
+import TransactionState from "~/prophet/FalseProphet/TransactionState";
 import IdentityManager from "~/prophet/FalseProphet/IdentityManager";
 
 import { invariantify, invariantifyObject, thenChainEagerly, trivialClone } from "~/tools";
@@ -29,25 +29,25 @@ import valosUUID from "~/tools/id/valosUUID";
 
 export default class FalseProphetDiscourse extends Discourse {
   _follower: Follower;
-  _prophet: Prophet;
-  _transactionState: ?TransactionInfo = null;
+  _sourcerer: Sourcerer;
+  _transactionState: ?TransactionState = null;
   _assignCommandId: (command: Command, discourse: FalseProphetDiscourse) => string;
 
   constructor ({
-    follower, prophet, verbosity, logger, packFromHost, unpackToHost, steppers,
+    follower, sourcerer, verbosity, logger, packFromHost, unpackToHost, steppers,
     assignCommandId,
   }: Object) {
     // goes to Valker
-    super(prophet.corpus.schema, verbosity, logger, packFromHost, unpackToHost, steppers);
+    super(sourcerer.corpus.schema, verbosity, logger, packFromHost, unpackToHost, steppers);
     invariantifyObject(follower, "FalseProphetDiscourse.constructor.follower");
-    this.setDeserializeReference(prophet.deserializeReference);
+    this.setDeserializeReference(sourcerer.deserializeReference);
     this.rootDiscourse = this;
-    this.corpus = prophet.corpus;
+    this.corpus = sourcerer.corpus;
     this._follower = follower;
-    this._prophet = prophet;
+    this._sourcerer = sourcerer;
     this._implicitlySyncingConnections = {};
-    this._identityManager = new IdentityManager(prophet);
-    this.setState(this._prophet.getState());
+    this._identityManager = new IdentityManager(sourcerer);
+    this.setState(this._sourcerer.getState());
     invariantify(this.state, "FalseProphetDiscourse.state");
     this._assignCommandId = assignCommandId || (command => {
       obtainAspect(command, "command").id = valosUUID();
@@ -76,10 +76,10 @@ export default class FalseProphetDiscourse extends Discourse {
     }
   }
 
-  acquirePartitionConnection (partitionURI: ValaaURI,
-      options: ConnectOptions = {}): ?PartitionConnection {
+  acquireConnection (partitionURI: ValaaURI,
+      options: ConnectOptions = {}): ?Connection {
     options.identity = this._identityManager;
-    return this._prophet.acquirePartitionConnection(partitionURI, options);
+    return this._sourcerer.acquireConnection(partitionURI, options);
   }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
@@ -89,7 +89,7 @@ export default class FalseProphetDiscourse extends Discourse {
     try {
       options.discourse = this;
       options.identity = this._identityManager;
-      const ret = this._prophet.chronicleEvents(
+      const ret = this._sourcerer.chronicleEvents(
           events.map(event => this._universalizeEvent(event)), options);
 
       ret.eventResults.forEach(eventResult => {
@@ -132,8 +132,8 @@ export default class FalseProphetDiscourse extends Discourse {
     const partitionURIString = String(missingPartitionURI);
     if (!this._implicitlySyncingConnections[partitionURIString]) {
       this._implicitlySyncingConnections[partitionURIString] = this
-          .acquirePartitionConnection(missingPartitionURI)
-          .getActiveConnection();
+          .acquireConnection(missingPartitionURI)
+          .asActiveConnection();
     }
     return (this._implicitlySyncingConnections[partitionURIString] =
         await this._implicitlySyncingConnections[partitionURIString]);
@@ -241,7 +241,7 @@ export default class FalseProphetDiscourse extends Discourse {
     let ret;
     if (!this._transactionState) {
       ret = Object.create(this);
-      const transaction = ret._transactionState = new TransactionInfo(ret, name);
+      const transaction = ret._transactionState = new TransactionState(ret, name);
       this.logEvent(1, () => [
         "acquired NEW TX", name, ":", {
           discourse: dumpObject(ret), transaction: dumpObject(transaction),

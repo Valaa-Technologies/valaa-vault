@@ -1,9 +1,9 @@
 import createContentAPI from "~/raem/tools/graphql/createContentAPI";
 
-import ProphetContentAPI from "~/prophet/ProphetContentAPI";
+import SourcererContentAPI from "~/prophet/SourcererContentAPI";
 
 export default createContentAPI({
   name: "ValOSEngineContentAPI",
-  inherits: [ProphetContentAPI],
+  inherits: [SourcererContentAPI],
   exposes: [],
 });

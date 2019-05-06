@@ -1,6 +1,6 @@
 // @flow
 
-import { AuthorityProphet, EVENT_VERSION } from "~/prophet";
+import { Authority, EVENT_VERSION } from "~/prophet";
 import type { SchemeModule } from "~/prophet";
 
 export default function createValaaLocalScheme (/* { logger } */): SchemeModule {
@@ -16,6 +16,6 @@ export default function createValaaLocalScheme (/* { logger } */): SchemeModule 
       isRemoteAuthority: false,
     }),
 
-    createAuthorityProphet: (options: Object) => new AuthorityProphet(options),
+    createAuthority: (options: Object) => new Authority(options),
   };
 }

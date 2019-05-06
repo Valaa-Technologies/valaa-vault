@@ -2,7 +2,7 @@
 
 import { EventBase } from "~/raem/events";
 
-import { AuthorityProphet, AuthorityPartitionConnection, EVENT_VERSION } from "~/prophet";
+import { Authority, AuthorityConnection, EVENT_VERSION } from "~/prophet";
 import { ChronicleRequest, ChronicleOptions, ChronicleEventResult, MediaInfo, NarrateOptions }
     from "~/prophet/api/types";
 
@@ -22,11 +22,11 @@ export default function createValaaTestScheme ({ config, authorityURI } = {}) {
       ...config,
     }),
 
-    createAuthorityProphet: (options: Object) => new TestProphet(options),
+    createAuthority: (options: Object) => new TestSourcerer(options),
   };
 }
 
-export class TestPartitionConnection extends AuthorityPartitionConnection {
+export class TestConnection extends AuthorityConnection {
   _narrations = {};
   _preparations = {};
   _chroniclings = [];
@@ -67,7 +67,7 @@ export class TestPartitionConnection extends AuthorityPartitionConnection {
     return ret;
   }
 
-  // PartitionConnection implementation
+  // Connection implementation
 
   narrateEventLog (options: ?NarrateOptions = {}): Promise<any> {
     if (!this.isRemoteAuthority()) return super.narrateEventLog(options);
@@ -155,8 +155,8 @@ class TestEventResult extends ChronicleEventResult {
   }
 }
 
-export class TestProphet extends AuthorityProphet {
-  static PartitionConnectionType = TestPartitionConnection;
+export class TestSourcerer extends Authority {
+  static ConnectionType = TestConnection;
 
   addFollower (/* falseProphet */) {
     const connectors = {};

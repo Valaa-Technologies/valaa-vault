@@ -2,7 +2,7 @@
 
 import type { EventBase } from "~/raem/events";
 
-import PartitionConnection from "~/prophet/api/PartitionConnection";
+import Connection from "~/prophet/api/Connection";
 import { ChronicleRequest, ChronicleOptions, ChronicleEventResult, MediaInfo, NarrateOptions }
     from "~/prophet/api/types";
 
@@ -15,14 +15,14 @@ import { debugObjectType, dumpObject } from "~/tools/wrapError";
  * Remote authorities extend this class
  *
  * @export
- * @class AuthorityPartitionConnection
- * @extends {PartitionConnection}
+ * @class AuthorityConnection
+ * @extends {Connection}
  */
-export default class AuthorityPartitionConnection extends PartitionConnection {
-  isLocallyPersisted () { return this._prophet.isLocallyPersisted(); }
-  isPrimaryAuthority () { return this._prophet.isPrimaryAuthority(); }
-  isRemoteAuthority () { return this._prophet.isRemoteAuthority(); }
-  getEventVersion () { return this._prophet.getEventVersion(); }
+export default class AuthorityConnection extends Connection {
+  isLocallyPersisted () { return this._sourcerer.isLocallyPersisted(); }
+  isPrimaryAuthority () { return this._sourcerer.isPrimaryAuthority(); }
+  isRemoteAuthority () { return this._sourcerer.isRemoteAuthority(); }
+  getEventVersion () { return this._sourcerer.getEventVersion(); }
 
   isConnected () {
     if (!this.isRemoteAuthority()) return true;
@@ -104,11 +104,11 @@ export default class AuthorityPartitionConnection extends PartitionConnection {
         error.isRetryable = false;
         persistProcess = Promise
             .reject(this.wrapErrorEvent(error, new Error("prepareBvob")))
-            .catch(errorOnAuthorityPartitionConnectionPrepareBvob);
+            .catch(errorOnAuthorityConnectionPrepareBvob);
       }
       return { contentHash, persistProcess };
-    } catch (error) { return errorOnAuthorityPartitionConnectionPrepareBvob(error); }
-    function errorOnAuthorityPartitionConnectionPrepareBvob (error) {
+    } catch (error) { return errorOnAuthorityConnectionPrepareBvob(error); }
+    function errorOnAuthorityConnectionPrepareBvob (error) {
       throw connection.wrapErrorEvent(error, wrap,
           "\n\tcontent:", debugObjectType(content),
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),

@@ -2,12 +2,12 @@
 
 import { ValaaURI } from "~/raem/ValaaURI";
 
-import Prophet from "~/prophet/api/Prophet";
+import Sourcerer from "~/prophet/api/Sourcerer";
 import { ConnectOptions } from "~/prophet/api/types";
 
 import DecoderArray from "~/prophet/Oracle/DecoderArray";
 
-import OraclePartitionConnection from "./OraclePartitionConnection";
+import OracleConnection from "./OracleConnection";
 
 /**
  * TODO(iridian): Outdated, clean up.
@@ -28,9 +28,9 @@ import OraclePartitionConnection from "./OraclePartitionConnection";
  *
  * @export
  * @class Oracle
- * @extends {Prophet}
+ * @extends {Sourcerer}
  */
-export default class Oracle extends Prophet {
+export default class Oracle extends Sourcerer {
   constructor ({ authorityNexus, ...rest }: Object) {
     super({ ...rest });
     this._authorityNexus = authorityNexus;
@@ -42,22 +42,22 @@ export default class Oracle extends Prophet {
 
   getDecoderArray () { return this._decoderArray; }
 
-  obtainPartitionAuthority (partitionURI: ValaaURI) {
-    const ret = this._authorityNexus.obtainAuthorityProphetOfPartition(partitionURI);
+  obtainoAuthorityOfPartition (partitionURI: ValaaURI) {
+    const ret = this._authorityNexus.obtainAuthorityOfPartition(partitionURI);
     if (!ret) {
       throw new Error(`Can't obtain authority for partition <${partitionURI}>`);
     }
     return ret;
   }
 
-  _createPartitionConnection (partitionURI: ValaaURI, options: ConnectOptions) {
-    const authorityProphet = this._authorityNexus.obtainAuthorityProphetOfPartition(partitionURI);
-    if (!authorityProphet) {
+  _createConnection (partitionURI: ValaaURI, options: ConnectOptions) {
+    const authoritySourcerer = this._authorityNexus.obtainAuthorityOfPartition(partitionURI);
+    if (!authoritySourcerer) {
       throw new Error(`Can't obtain authority for partition <${partitionURI}>`);
     }
-    return new OraclePartitionConnection({
-      partitionURI, prophet: this, verbosity: this.getVerbosity(),
-      receiveTruths: options.receiveTruths, authorityProphet,
+    return new OracleConnection({
+      partitionURI, sourcerer: this, verbosity: this.getVerbosity(),
+      receiveTruths: options.receiveTruths, authoritySourcerer,
     });
   }
 }

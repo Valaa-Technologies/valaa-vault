@@ -18,8 +18,8 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
           .toMappingFields;
     },
     preload () {
-      // const connection = await server.getDiscourse().acquirePartitionConnection(
-      //    route.config.valos.subject, { newPartition: false }).getActiveConnection();
+      // const connection = await server.getDiscourse().acquireConnection(
+      //    route.config.valos.subject, { newPartition: false }).asActiveConnection();
       // const vRoot = server.getEngine().getVrapper([connection.getPartitionRawId()]);
     },
     handleRequest (request, reply) {

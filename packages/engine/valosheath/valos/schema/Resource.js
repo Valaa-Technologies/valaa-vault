@@ -97,7 +97,7 @@ export default {
       try {
         const ret = this.__callerValker__.run({}, VALEK.fromObject(id).notNull());
         if (!ret) {
-          throw new Error(`Could not find resource '${String(id)}' in the False Prophet corpus`);
+          throw new Error(`Could not find resource '${String(id)}' in the False Sourcerer corpus`);
         }
         ret.requireActive();
         return ret;

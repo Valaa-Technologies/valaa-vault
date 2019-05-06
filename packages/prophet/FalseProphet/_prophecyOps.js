@@ -3,10 +3,10 @@
 import { getActionFromPassage } from "~/raem";
 import { Command, EventBase } from "~/raem/events";
 import type { Story } from "~/raem/redux/Bard";
-import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
+import { MissingConnectionsError } from "~/raem/tools/denormalized/partitions";
 import { naiveURI } from "~/raem/ValaaURI";
 
-import { ChronicleEventResult, PartitionConnection, ProphecyChronicleRequest, ProphecyEventResult }
+import { ChronicleEventResult, Connection, ProphecyChronicleRequest, ProphecyEventResult }
     from "~/prophet/api/types";
 import { tryAspect } from "~/prophet/tools/EventAspects";
 
@@ -14,7 +14,7 @@ import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from
 
 import FalseProphet from "./FalseProphet";
 import { _rejectLastProphecyAsHeresy, _recomposeStoryFromPurgedEvent } from "./_storyOps";
-import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
+import FalseProphetConnection from "./FalseProphetConnection";
 
 export type Prophecy = Story & {
   timed: ?Object;
@@ -25,12 +25,12 @@ export type Prophecy = Story & {
 // commands upstream. Aborts all remaining events on first exception
 // and rolls back previous ones.
 export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[],
-    { timed, transactionInfo, discourse, ...rest } = {}): ProphecyChronicleRequest {
+    { timed, transactionState, discourse, ...rest } = {}): ProphecyChronicleRequest {
   if (timed) throw new Error("timed events not supported yet");
   const prophecies = events.map(event =>
-      falseProphet._composeStoryFromEvent(event, "prophecy-chronicle", timed, transactionInfo));
+      falseProphet._composeStoryFromEvent(event, "prophecy-chronicle", timed, transactionState));
   const resultBase = new ProphecyOperation(null, {
-    _prophet: falseProphet,
+    _sourcerer: falseProphet,
     _events: events,
     _options: rest,
     _followerReactions: falseProphet._tellStoriesToFollowers(prophecies),
@@ -95,7 +95,7 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
   return ret;
 }
 
-export function _confirmProphecyCommand (connection: FalseProphetPartitionConnection,
+export function _confirmProphecyCommand (connection: FalseProphetConnection,
     prophecy: Prophecy, command: Command) {
   const operation = (prophecy.meta || {}).operation;
   if (operation) {
@@ -127,7 +127,7 @@ export function _confirmProphecyCommand (connection: FalseProphetPartitionConnec
   return true;
 }
 
-export function _reformProphecyCommand (connection: FalseProphetPartitionConnection,
+export function _reformProphecyCommand (connection: FalseProphetConnection,
     prophecy: Prophecy, reformedCommand: Command) {
   const partition = prophecy.meta.operation._partitions[String(connection.getPartitionURI())];
   const originalCommand = partition.commandEvent;
@@ -142,7 +142,7 @@ export function _reformProphecyCommand (connection: FalseProphetPartitionConnect
   partition.commandEvent = reformedCommand;
 }
 
-export function _reviewPurgedProphecy (connection: FalseProphetPartitionConnection,
+export function _reviewPurgedProphecy (connection: FalseProphetConnection,
     purged: Prophecy, reviewed: Prophecy) {
   const semanticSchism = _checkForSemanticSchism(purged, reviewed);
   if (semanticSchism) {
@@ -172,7 +172,7 @@ function _checkForSemanticSchism (/* purgedProphecy: Prophecy, revisedProphecy: 
   return undefined;
 }
 
-export function _reviseSchism (connection: FalseProphetPartitionConnection,
+export function _reviseSchism (connection: FalseProphetConnection,
     schism: Prophecy, purgedStories: Story[], newEvents: EventBase[]) {
   const operation = (schism.meta || {}).operation;
   // No way to revise non-prophecy schisms: these come from elsewhere so not our job.
@@ -184,7 +184,7 @@ export function _reviseSchism (connection: FalseProphetPartitionConnection,
   // Then if the schism is not a semantic schism try basic revise-recompose.
   if (schism.semanticSchism || schism.unreviseableSchismError) return undefined;
   delete schism.structuralSchism;
-  const recomposedProphecy = _recomposeStoryFromPurgedEvent(connection.getProphet(), schism);
+  const recomposedProphecy = _recomposeStoryFromPurgedEvent(connection.getSourcerer(), schism);
   const partitionURI = String(connection.getPartitionURI());
   if (!recomposedProphecy
       || (Object.keys((recomposedProphecy.meta || {}).partitions).length !== 1)) {
@@ -220,12 +220,12 @@ export function _rejectHereticProphecy (falseProphet: FalseProphet, prophecy: Pr
 
 class ProphecyOperation extends ProphecyEventResult {
   _prophecy: Prophecy;
-  _prophet: FalseProphet;
+  _sourcerer: FalseProphet;
   _events: EventBase[];
   _options: Object; // partition command chronicleEvents options
   _partitions: { [partitionURI: string]: {
     // note: this does _not_ correspond to _prophecy.meta.partitions
-    connection: PartitionConnection,
+    connection: Connection,
     commandEvent: Command,
     chronicling: ChronicleEventResult,
     confirmCommand?: Function,
@@ -297,7 +297,7 @@ class ProphecyOperation extends ProphecyEventResult {
   }
 
   errorOnProphecyOperation (errorWrap, error) {
-    throw this._prophet.wrapErrorEvent(error, errorWrap,
+    throw this._sourcerer.wrapErrorEvent(error, errorWrap,
         "\n\tduring:", this._debugPhase,
         "\n\tevents:", ...dumpObject(this._events),
         "\n\tevent:", ...dumpObject(this._events[this.index]),
@@ -353,7 +353,7 @@ class ProphecyOperation extends ProphecyEventResult {
               error);
       this._prophecy = null;
       try {
-        _rejectLastProphecyAsHeresy(this._prophet, prophecy);
+        _rejectLastProphecyAsHeresy(this._sourcerer, prophecy);
       } catch (innerError) {
         outputError(innerError, `Exception caught during chronicleEvents.execute.purge`);
       }
@@ -371,7 +371,7 @@ class ProphecyOperation extends ProphecyEventResult {
       throw new Error("prophecy is missing partition information");
     }
     Object.keys(partitions).forEach((partitionURIString) => {
-      const connection = this._prophet._connections[partitionURIString];
+      const connection = this._sourcerer._connections[partitionURIString];
       if (!connection) {
         missingConnections.push(naiveURI.createPartitionURI(partitionURIString));
         return;
@@ -384,7 +384,7 @@ class ProphecyOperation extends ProphecyEventResult {
       ).push((this._partitions[partitionURIString] = { connection, commandEvent }));
     });
     if (missingConnections.length) {
-      throw new MissingPartitionConnectionsError(`Missing active partition connections: '${
+      throw new MissingConnectionsError(`Missing active partition connections: '${
           missingConnections.map(c => c.toString()).join("', '")}'`, missingConnections);
     }
   }
@@ -398,7 +398,7 @@ class ProphecyOperation extends ProphecyEventResult {
     this._debugPhase = `validate partitions`;
     this.getStages().forEach(stagePartitions => stagePartitions.forEach(partition => {
       partition.validatedConnection = thenChainEagerly(
-          partition.connection.getActiveConnection(),
+          partition.connection.asActiveConnection(),
           (connection) => {
             this._debugPhase = `validate partition ${connection.getName()}`;
             if (connection.isFrozenConnection()) {
@@ -427,7 +427,7 @@ class ProphecyOperation extends ProphecyEventResult {
         return mapEagerly(stagePartitions,
           partition => partition.validatedConnection,
           (error, partition) => {
-            throw this._prophet.wrapErrorEvent(error,
+            throw this._sourcerer.wrapErrorEvent(error,
                 new Error(`chronicleEvents.initiateStage("${stageName}").validatePartition("${
                     partition.connection.getName()}")`));
           });
@@ -455,7 +455,7 @@ class ProphecyOperation extends ProphecyEventResult {
             partition.chronicling = partition.connection.chronicleEvent(
                 partition.commandEvent, Object.create(this._options));
           } catch (error) {
-            throw this._prophet.wrapErrorEvent(error,
+            throw this._sourcerer.wrapErrorEvent(error,
                 new Error(`chronicleEvents.stage["${stageName}"].connection["${
                     partition.connection.getName()}"].chronicleEvents`),
                 "\n\tcommandEvent:", ...dumpObject(partition.commandEvent),
@@ -473,7 +473,7 @@ class ProphecyOperation extends ProphecyEventResult {
     return stagePartitions && mapEagerly(stagePartitions,
         partition => this._processStagePartition(partition, stageIndex, stageName),
         (error, { chronicling }, index) => {
-          throw this._prophet.wrapErrorEvent(error,
+          throw this._sourcerer.wrapErrorEvent(error,
               new Error(`chronicleEvents.completeStage("${stageName}").partition[${index
                   }].eventResults[${tryAspect(chronicling && chronicling.event, "log").index
                   }].getTruthEvent()"`),

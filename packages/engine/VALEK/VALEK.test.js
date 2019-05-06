@@ -4,7 +4,7 @@ import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
 import VALEK from "~/engine/VALEK";
 
 describe("VALEK extensions", () => {
-  let harness: { createds: Object, engine: Object, prophet: Object, testEntities: Object };
+  let harness: { createds: Object, engine: Object, sourcerer: Object, testEntities: Object };
   const entities = () => harness.createds.Entity;
 
 

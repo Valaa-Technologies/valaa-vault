@@ -3,27 +3,27 @@
 import { Command, EventBase } from "~/raem/events";
 import { getActionFromPassage, Story } from "~/raem/redux/Bard";
 
-import TransactionInfo from "~/prophet/FalseProphet/TransactionInfo";
+import TransactionState from "~/prophet/FalseProphet/TransactionState";
 import { initializeAspects } from "~/prophet/tools/EventAspects";
 import EVENT_VERSION from "~/prophet/tools/EVENT_VERSION";
 
 import { dumpObject, outputError } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
-import FalseProphetPartitionConnection from "./FalseProphetPartitionConnection";
+import FalseProphetConnection from "./FalseProphetConnection";
 import { Prophecy, _confirmProphecyCommand, _reformProphecyCommand, _rejectHereticProphecy }
     from "./_prophecyOps";
 import StoryRecital from "./StoryRecital";
 
 export function _composeStoryFromEvent (falseProphet: FalseProphet, event: EventBase,
-    dispatchDescription: string, timed: ?EventBase, transactionInfo?: TransactionInfo) {
+    dispatchDescription: string, timed: ?EventBase, transactionState?: TransactionState) {
   if (!event.aspects) initializeAspects(event, { version: EVENT_VERSION });
-  let story = (transactionInfo && transactionInfo._tryFastForwardOnCorpus(falseProphet.corpus));
+  let story = (transactionState && transactionState._tryFastForwardOnCorpus(falseProphet.corpus));
   if (!story) {
     // If no transaction or transaction is not a fast-forward, do a regular dispatch
-    if (transactionInfo) {
+    if (transactionState) {
       falseProphet.warnEvent(1, () => [
-          `Committing a diverged transaction '${transactionInfo.name}' normally:`,
+          `Committing a diverged transaction '${transactionState.name}' normally:`,
           "\n\trestrictedTransacted:", ...dumpObject(event)]);
     }
     story = falseProphet.corpus.dispatch(event, dispatchDescription);
@@ -49,9 +49,9 @@ export function _rejectLastProphecyAsHeresy (falseProphet: FalseProphet, heretic
   falseProphet.recreateCorpus(hereticProphecy.previousState);
 }
 
-export function _confirmCommands (connection: FalseProphetPartitionConnection,
+export function _confirmCommands (connection: FalseProphetConnection,
     confirmedCommands: Command[]) {
-  const falseProphet = connection.getProphet();
+  const falseProphet = connection.getSourcerer();
   for (const confirmed of confirmedCommands) {
     const story = falseProphet._primaryRecital.getStoryBy(confirmed.aspects.command.id);
     if (story) {
@@ -67,12 +67,12 @@ export function _confirmCommands (connection: FalseProphetPartitionConnection,
   }
 }
 
-export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConnection,
+export function _purgeAndRecomposeStories (connection: FalseProphetConnection,
     newEvents: Command[], type: string, purgedCommands: ?Command[]) {
   connection.clockEvent(2, () => ["falseProphet.stories",
       `_purgeAndRecomposeStories(${newEvents.length}, ${type}, ${purgedCommands || []}.length)`]);
   if (purgedCommands && purgedCommands.length) connection.setIsFrozen(false);
-  const falseProphet = connection.getProphet();
+  const falseProphet = connection.getSourcerer();
   const originatingPartitionURI = connection.getPartitionURI();
   const purgedPartitionURI = String(connection.getPartitionURI());
   const newAndRewrittenStories = [];
@@ -140,10 +140,12 @@ export function _purgeAndRecomposeStories (connection: FalseProphetPartitionConn
 
     let recomposedStory;
     if (!schismaticStory.schismDescription) {
-      recomposedStory = _recomposeStoryFromPurgedEvent(connection.getProphet(), schismaticStory);
+      recomposedStory = _recomposeStoryFromPurgedEvent(connection.getSourcerer(), schismaticStory);
       if (recomposedStory && schismaticStory.needsReview) {
         const revisedProphecy = connection._reviewPurgedProphecy(schismaticStory, recomposedStory);
-        if (!revisedProphecy) _rejectLastProphecyAsHeresy(connection.getProphet(), recomposedStory);
+        if (!revisedProphecy) {
+          _rejectLastProphecyAsHeresy(connection.getSourcerer(), recomposedStory);
+        }
         recomposedStory = revisedProphecy;
       }
       if (recomposedStory) newAndRewrittenStories.push(recomposedStory);
@@ -259,7 +261,7 @@ export function _recomposeStoryFromPurgedEvent (falseProphet: FalseProphet, purg
 
 export function _reviseSchismaticRecital (falseProphet: FalseProphet,
     schismaticRecital: StoryRecital, reviewedPartitions: Object,
-    originatingConnection: FalseProphetPartitionConnection, purgedStories: Story[],
+    originatingConnection: FalseProphetConnection, purgedStories: Story[],
     newEvents: EventBase[]) {
   const ret = [];
   const rejectedSchisms = [];
@@ -416,12 +418,12 @@ function _getOngoingAuthorityPersists (falseProphet: FalseProphet, { command }: 
       try {
         const partitionURIString = String(referrerId.getPartitionURI());
         connection = falseProphet._connections[partitionURIString];
-        invariantifyObject(connection, `partitionConnections[${partitionURIString}]`);
+        invariantifyObject(connection, `connections[${partitionURIString}]`);
       } catch (error) {
         throw errorOnGetOngoingAuthorityPersists.call(falseProphet, contentHash, referrerId, error);
       }
       const persistProcess = thenChainEagerly(
-          connection.getActiveConnection(),
+          connection.asActiveConnection(),
           () => {
             const authorityConnection = connection.getUpstreamConnection();
             return authorityConnection && authorityConnection.getContentPersistProcess(contentHash);

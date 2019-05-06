@@ -21,7 +21,7 @@ import { getObjectRawField } from "~/raem/state/getObjectField";
 
 import { createGhostVRLInInstance, isMaterialized, createMaterializeGhostAction }
     from "~/raem/tools/denormalized/ghost";
-import { MissingPartitionConnectionsError, addConnectToPartitionToError }
+import { MissingConnectionsError, addConnectToPartitionToError }
     from "~/raem/tools/denormalized/partitions";
 
 import isResourceType from "~/raem/tools/graphql/isResourceType";
@@ -30,7 +30,7 @@ import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 import { ValoscriptPrimitiveKind /* , NativeIdentifierTag */ } from "~/script";
 // import { ScopeAccessesTag } from "~/script/VALSK";
 
-import { Discourse, PartitionConnection } from "~/prophet";
+import { Discourse, Connection } from "~/prophet";
 import { ChronicleEventResult } from "~/prophet/api/types";
 
 import { createModuleGlobal } from "~/tools/mediaDecoders/JavaScriptDecoder";
@@ -67,7 +67,7 @@ function isNonActivateablePhase (candidate: string) {
 /**
  * Vrapper is a proxy for accessing a specific ValOS Resource in the backend.
  * With the Engine, these Vrapper instances form the interface between ValOS backend content
- * (through the backing False Prophet in-memory shadow repository) and between local presentation
+ * (through the backing FalseProphet in-memory shadow repository) and between local presentation
  * and computation layers.
  *
  * 1. Vrapper as a singular, shared proxy object to single ValOS resource.
@@ -77,7 +77,7 @@ function isNonActivateablePhase (candidate: string) {
  * on-demand; see Engine.getVrapper.
  *
  * By default all Vrapper operations are executed in the context of the most recent state known by
- * ('main line state') the backing False Prophet.
+ * ('main line state') the backing FalseProphet.
  *
  * Transactions can have differing states for this same resource. To make it possible to share
  * the same Vrapper object possible, all operations accept options: { discourse: Discourse }.
@@ -101,14 +101,14 @@ function isNonActivateablePhase (candidate: string) {
  *   is not being acquired (note: Resource itself is considered part of the prototype chain here)
  *   or some prototype chain resource is destroyed.
  *   isInactive() returns true and getPhase() returns "Inactive".
- *   Active-operations will throw MissingPartitionConnectionsError.
+ *   Active-operations will throw MissingConnectionsError.
  *   Calling activate() will transfer the Vrapper into 'Activating' by acquiring the connections
  *   to all the partitions of all the Resource's in the prototype chain.
  *
  * 2.2. Activating: all partitions of prototype chain Resource's are being connected or already have
  *   a connection.
  *   isActivating() returns true and getPhase() returns "Activating".
- *   Active-operations will throw MissingPartitionConnectionsError.
+ *   Active-operations will throw MissingConnectionsError.
  *   Calling activate() will return a Promise which resolves once Vrapper enters 'Active'
  *   state, or throws if the Vrapper enters 'Unavailable' state but won't cause other changes.
  *
@@ -254,9 +254,9 @@ export default class Vrapper extends Cog {
             throw new Error(`Cannot activate ${blocker.debugId()
                 } because it is ${blocker.getPhase()}`);
           }
-          if (!blocker._partitionConnection || !blocker._partitionConnection.isActive()) {
-            await (operationInfo.pendingConnection = blocker.getPartitionConnection())
-                .getActiveConnection();
+          if (!blocker._connection || !blocker._connection.isActive()) {
+            await (operationInfo.pendingConnection = blocker.getConnection())
+                .asActiveConnection();
           }
         }
         operationInfo.pendingConnection = null;
@@ -292,7 +292,7 @@ export default class Vrapper extends Cog {
    * (Destroyed, Unavailable, NonResource).
    * Unavailable indicates an error on the partition connection sync
    * which can be extracted with
-   * `Promise.resolve(conn.getActiveConnection()).catch(onError);`
+   * `Promise.resolve(conn.asActiveConnection()).catch(onError);`
    *
    * @param {Object} state
    * @param {Transient} transient
@@ -318,7 +318,7 @@ export default class Vrapper extends Cog {
           id}>, (current id: <${this[HostRef]}>)`);
     }
     this[HostRef] = id;
-    const connection = this.tryPartitionConnection();
+    const connection = this.tryConnection();
     if (!connection || !connection.isActive()) {
       if (this[HostRef].isInactive()) return this;
     }
@@ -368,7 +368,7 @@ export default class Vrapper extends Cog {
       outputError(this.wrapErrorEvent(error,
               new Error("_postActivate()"),
               "\n\ttransient:", ...dumpObject(transient.toJS()),
-              "\n\tpartitionConnection:", ...dumpObject(this._partitionConnection),
+              "\n\tconnection:", ...dumpObject(this._connection),
               "\n\tpartitionAuthorityURI:", partitionAuthorityURIString,
               "\n\tauthorityConnection:", authorityConnection,
               "\n\tthis:", ...dumpObject(this),
@@ -413,7 +413,7 @@ export default class Vrapper extends Cog {
             new Error(`Cannot operate on a Destroyed ${this.debugId()}`)
         : this.isUnavailable() ?
             new Error(`Cannot operate on an Unavailable ${this.debugId()}`)
-        : addConnectToPartitionToError(new MissingPartitionConnectionsError(
+        : addConnectToPartitionToError(new MissingConnectionsError(
                 `Missing or not fully narrated partition connection for ${blocker.debugId()}`,
                 [this.activate()]),
             this.engine.discourse.connectToMissingPartition);
@@ -423,23 +423,23 @@ export default class Vrapper extends Cog {
         "\n\tactivation blocker is",
             (blocker === this) ? "this object itself" : "some prototype of this",
         "\n\tthis[HostRef]:", ...dumpObject(this[HostRef]),
-        "\n\tthis._partitionConnection:", ...dumpObject(this._partitionConnection),
+        "\n\tthis._connection:", ...dumpObject(this._connection),
         "\n\tblocker:", ...dumpObject(blocker),
-        "\n\tblocker._partitionConnection:", ...dumpObject(blocker._partitionConnection),
+        "\n\tblocker._connection:", ...dumpObject(blocker._connection),
         "\n\tthis:", ...dumpObject(this));
   }
 
-  tryPartitionConnection (options: Object = {}): ?PartitionConnection {
+  tryConnection (options: Object = {}): ?Connection {
     options.require = false;
     options.newConnection = false;
-    const ret = this.getPartitionConnection(options);
+    const ret = this.getConnection(options);
     return ret && ret.isActive() ? ret : undefined;
   }
 
-  getPartitionConnection (options:
+  getConnection (options:
       { require?: boolean, discourse?: Discourse, newConnection?: boolean }
-          = { require: true }): ?PartitionConnection {
-    if (this._partitionConnection) return this._partitionConnection;
+          = { require: true }): ?Connection {
+    if (this._connection) return this._connection;
     let partitionURI;
     let nonGhostOwnerRawId;
     try {
@@ -460,21 +460,21 @@ export default class Vrapper extends Cog {
           }
         }
       }
-      this._partitionConnection = partitionURI
-          && discourse.acquirePartitionConnection(partitionURI, {
+      this._connection = partitionURI
+          && discourse.acquireConnection(partitionURI, {
             newPartition: false, newConnection: options.newConnection, require: options.require,
           });
-      if (!this._partitionConnection) {
+      if (!this._connection) {
         if (!options.require) return undefined;
         throw new Error(`Failed to acquire the partition connection of ${this.debugId()}`);
       }
-      if (!this._partitionConnection.isActive()) {
-        this._partitionConnection.getActiveConnection().catch(onError.bind(this,
-            new Error(`getPartitionConnection.acquire.getActiveConnection()`)));
+      if (!this._connection.isActive()) {
+        this._connection.asActiveConnection().catch(onError.bind(this,
+            new Error(`getConnection.acquire.asActiveConnection()`)));
       }
-      return this._partitionConnection;
+      return this._connection;
     } catch (error) {
-      return onError.call(this, new Error(`getPartitionConnection(${
+      return onError.call(this, new Error(`getConnection(${
           options.require ? "require" : "optional"})`), error);
     }
     function onError (wrapper, error) {
@@ -490,7 +490,7 @@ export default class Vrapper extends Cog {
   _withActiveConnectionChainEagerly (options: VALKOptions,
       chainOperations: ((prev: any) => any)[], onError?: Function) {
     return thenChainEagerly(
-        this.getPartitionConnection(options).getActiveConnection(options.synchronous),
+        this.getConnection(options).asActiveConnection(options.synchronous),
         chainOperations,
         onError);
   }
@@ -1304,7 +1304,7 @@ export default class Vrapper extends Cog {
         "\n\tmediaInfo:", ...dumpObject(mediaInfo),
         "\n\tmostMaterializedTransient:", ...dumpObject(mostMaterializedTransient),
         "\n\tconnection.isActive:", ...dumpObject(
-          vrapper._partitionConnection && vrapper._partitionConnection.isActive()),
+          vrapper._connection && vrapper._connection.isActive()),
         "\n\tvrapper:", ...dumpObject(vrapper),
       );
       throw wrapped;
@@ -1384,7 +1384,7 @@ export default class Vrapper extends Cog {
           "Vrapper.bvobContent only available for objects of Bvob type",
           "\n\ttype:", this._typeName,
           "\n\tobject:", this);
-      const buffer = this.engine.getProphet().tryGetCachedBvobContent(this.getRawId());
+      const buffer = this.engine.getSourcerer().tryGetCachedBvobContent(this.getRawId());
       if (typeof buffer !== "undefined") return buffer;
       throw new Error(`Cannot locate Bvob buffer directly from caches (with id '${
           this.getRawId()}'`);
@@ -1527,7 +1527,7 @@ export default class Vrapper extends Cog {
 
   recurseConnectedPartitionMaterializedFieldResources (fieldNames: Array<string>,
       options: Kuery = {}) {
-    const activeConnections = this.engine.getProphet().getActiveConnections();
+    const activeConnections = this.engine.getSourcerer().getActiveConnections();
     const result = [];
     for (const partitionRawId of Object.keys(activeConnections)) {
       const partition = this.engine.tryVrapper(partitionRawId);

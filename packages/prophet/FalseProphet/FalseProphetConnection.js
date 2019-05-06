@@ -4,7 +4,7 @@ import { Command, EventBase } from "~/raem/events";
 import { Story } from "~/raem/redux/Bard";
 import VRL from "~/raem/VRL";
 
-import PartitionConnection from "~/prophet/api/PartitionConnection";
+import Connection from "~/prophet/api/Connection";
 import { ChronicleOptions, ChronicleRequest, ChronicleEventResult, ConnectOptions, NarrateOptions }
     from "~/prophet/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/prophet/tools/EventAspects";
@@ -20,10 +20,10 @@ import { _confirmCommands, _purgeAndRecomposeStories } from "./_storyOps";
 
 /**
  * @export
- * @class FalseProphetPartitionConnection
- * @extends {PartitionConnection}
+ * @class FalseProphetConnection
+ * @extends {Connection}
  */
-export default class FalseProphetPartitionConnection extends PartitionConnection {
+export default class FalseProphetConnection extends Connection {
   // _headEventId is the aspects.log.index of the first unconfirmed truth.
   // penndingTruths and unconfirmedCommands are based on this, ie.
   // their 0th entry aspects.log.index is always equal to this.
@@ -45,10 +45,10 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
 
   constructor (options) {
     super(options);
-    const existingRef = this._prophet._inactivePartitionVRLPrototypes[String(this._partitionURI)];
+    const existingRef = this._sourcerer._inactivePartitionVRLPrototypes[String(this._partitionURI)];
     if (existingRef) {
       this._referencePrototype = existingRef;
-      delete this._prophet._inactivePartitionVRLPrototypes[String(this._partitionURI)];
+      delete this._sourcerer._inactivePartitionVRLPrototypes[String(this._partitionURI)];
     } else {
       this._referencePrototype = new VRL()
           .initResolverComponent({ inactive: true, partition: this._partitionURI });
@@ -137,7 +137,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
         _events: events,
         onError: errorOnFalseProphetChronicleEvents.bind(this, new Error("chronicleResultBase")),
       });
-      const primaryRecital = this._prophet._primaryRecital;
+      const primaryRecital = this._sourcerer._primaryRecital;
       const partitionURI = this.getPartitionURI();
 
       resultBase._truthForwardResults = thenChainEagerly(null, this.addChainClockers(2,
@@ -372,7 +372,7 @@ export default class FalseProphetPartitionConnection extends PartitionConnection
     this.clockEvent(2, () => ["falseProphet.unconfirmed.notify",
       `_checkForFreezeAndNotify(${this._unconfirmedCommands.length})`]);
     if (lastEvent) this.setIsFrozen(lastEvent.type === "FROZEN");
-    this._prophet.setConnectionCommandCount(
+    this._sourcerer.setConnectionCommandCount(
         this.getPartitionURI().toString(), this._unconfirmedCommands.length);
   }
 

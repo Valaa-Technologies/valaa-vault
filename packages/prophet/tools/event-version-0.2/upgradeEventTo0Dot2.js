@@ -3,17 +3,17 @@
 import { Action, EventBase } from "~/raem/events";
 import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent";
 
-import ProphetContentAPI from "~/prophet/ProphetContentAPI";
-import PartitionConnection from "~/prophet/api/PartitionConnection";
+import SourcererContentAPI from "~/prophet/SourcererContentAPI";
+import Connection from "~/prophet/api/Connection";
 
 import { dumpify, dumpObject } from "~/tools";
 
 import extractPartitionEvent0Dot2 from "./extractPartitionEvent0Dot2";
 
 const validateAnyVersion = createValidateEventMiddleware(
-    ProphetContentAPI.validators, "0.2")()(event => event);
+    SourcererContentAPI.validators, "0.2")()(event => event);
 
-export default function upgradeEventTo0Dot2 (connection: PartitionConnection, event: EventBase) {
+export default function upgradeEventTo0Dot2 (connection: Connection, event: EventBase) {
   let ret;
   try {
     validateAnyVersion(event);
@@ -42,7 +42,7 @@ export default function upgradeEventTo0Dot2 (connection: PartitionConnection, ev
   }
 }
 
-export function convertEvent0Dot1To0Dot2 (connection: PartitionConnection,
+export function convertEvent0Dot1To0Dot2 (connection: Connection,
     action: Action, isRoot: boolean = true) {
   let ret;
   try {

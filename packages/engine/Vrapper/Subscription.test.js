@@ -17,7 +17,7 @@ function idOf (candidate: any) {
 }
 
 describe("Subscription", () => {
-  let harness: { createds: Object, engine: Object, prophet: Object, testEntities: Object };
+  let harness: { createds: Object, engine: Object, sourcerer: Object, testEntities: Object };
   const entities = () => harness.createds.Entity;
   const properties = () => harness.createds.Property;
 

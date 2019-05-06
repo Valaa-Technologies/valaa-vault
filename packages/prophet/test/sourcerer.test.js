@@ -9,8 +9,9 @@ import { naiveURI } from "~/raem/ValaaURI";
 import VALK from "~/raem/VALK";
 
 import {
-  createScribe, clearAllScribeDatabases, createOracle, createProphetOracleHarness, testPartitionURI,
-} from "~/prophet/test/ProphetTestHarness";
+  createScribe, clearAllScribeDatabases, createOracle, createSourcererOracleHarness,
+  testPartitionURI,
+} from "~/prophet/test/SourcererTestHarness";
 import { initializeAspects, obtainAspect } from "~/prophet/tools/EventAspects";
 
 import { openDB, expectStoredInDB } from "~/tools/html5/InMemoryIndexedDBUtils";
@@ -18,17 +19,17 @@ import { openDB, expectStoredInDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 let harness = null;
 
 async function setUp (testAuthorityConfig: Object = {}, options: {}) {
-  harness = await createProphetOracleHarness({ verbosity: 0,
+  harness = await createSourcererOracleHarness({ verbosity: 0,
     ...options,
     oracle: { ...(options.oracle || {}), testAuthorityConfig },
   });
   const ret = {
-    connection: await harness.prophet.acquirePartitionConnection(
-        harness.testPartitionURI).getActiveConnection(),
-    scribeConnection: await harness.scribe.acquirePartitionConnection(
-        harness.testPartitionURI, { newConnection: false }).getActiveConnection(),
-    oracleConnection: await harness.oracle.acquirePartitionConnection(
-        harness.testPartitionURI, { newConnection: false }).getActiveConnection(),
+    connection: await harness.sourcerer.acquireConnection(
+        harness.testPartitionURI).asActiveConnection(),
+    scribeConnection: await harness.scribe.acquireConnection(
+        harness.testPartitionURI, { newConnection: false }).asActiveConnection(),
+    oracleConnection: await harness.oracle.acquireConnection(
+        harness.testPartitionURI, { newConnection: false }).asActiveConnection(),
   };
   ret.authorityConnection = ret.oracleConnection.getUpstreamConnection();
   return ret;
@@ -42,7 +43,7 @@ afterEach(async () => {
   await clearAllScribeDatabases(/* [testPartitionURI] */);
 });
 
-describe("Prophet", () => {
+describe("Sourcerer", () => {
   const structuredMediaContents = [
     [`"Hello world"`, { name: "hello.txt", type: "text", subtype: "plain" }, `"Hello world"`],
     [`"Hello world"`, { name: "hello.txt", type: "text", subtype: "whatevs" }, `"Hello world"`],
@@ -53,9 +54,9 @@ describe("Prophet", () => {
   it("decodes cached bvob buffers based on media type", async () => {
     const scribe = await createScribe(createOracle());
 
-    const connection = await scribe.acquirePartitionConnection(
+    const connection = await scribe.acquireConnection(
             naiveURI.createPartitionURI("valaa-test:"))
-        .getActiveConnection();
+        .asActiveConnection();
 
     const mediaVRL = vRef("abcd-0123");
     for (const [bufferContent, mediaInfo, expectedContent] of structuredMediaContents) {
@@ -78,12 +79,12 @@ describe("Prophet", () => {
   ];
 
   it("stores the contents of the actions on the scribe correctly", async () => {
-    harness = await createProphetOracleHarness({ verbosity: 0,
+    harness = await createSourcererOracleHarness({ verbosity: 0,
       oracle: { testAuthorityConfig: { isLocallyPersisted: true, isRemoteAuthority: true } },
     });
-    const prophetConnection = await harness.prophet
-        .acquirePartitionConnection(harness.testPartitionURI).getActiveConnection();
-    const scribeConnection = prophetConnection.getUpstreamConnection();
+    const connection = await harness.sourcerer
+        .acquireConnection(harness.testPartitionURI).asActiveConnection();
+    const scribeConnection = connection.getUpstreamConnection();
     const database = await openDB(scribeConnection._db.databaseId);
 
     for (const command of commands) {
@@ -96,12 +97,12 @@ describe("Prophet", () => {
   });
 
   it("assigns proper eventIds for commands", async () => {
-    harness = await createProphetOracleHarness({ verbosity: 0,
+    harness = await createSourcererOracleHarness({ verbosity: 0,
       oracle: { testAuthorityConfig: { isLocallyPersisted: true } },
     });
-    const prophetConnection = await harness.prophet
-        .acquirePartitionConnection(harness.testPartitionURI).getActiveConnection();
-    const scribeConnection = prophetConnection.getUpstreamConnection();
+    const connection = await harness.sourcerer
+        .acquireConnection(harness.testPartitionURI).asActiveConnection();
+    const scribeConnection = connection.getUpstreamConnection();
 
     let oldCommandId;
     let newCommandId = scribeConnection.getFirstUnusedCommandEventId() - 1;
@@ -117,7 +118,7 @@ describe("Prophet", () => {
   });
 });
 
-describe("Prophet", () => {
+describe("Sourcerer", () => {
   const simpleCommand = created({
     id: ["simple_entity"], typeName: "Entity", initialState: {
       name: "Simple Entity", owner: ["test_partition", {}, {}],
@@ -152,14 +153,14 @@ describe("Prophet", () => {
     const { scribeConnection, authorityConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
     let totalCommandCount;
-    harness.prophet.setCommandCountCallback((total) => { totalCommandCount = total; });
+    harness.sourcerer.setCommandCountCallback((total) => { totalCommandCount = total; });
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
 
     const first = harness.chronicleEvent(simpleCommand);
 
     expect(first.getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
-    await harness.prophet._pendingCommandNotification;
+    await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
     expect(authorityConnection._chroniclings.length).toEqual(0);
@@ -172,7 +173,7 @@ describe("Prophet", () => {
     expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(2);
     expect(seconds[1].getLogAspectOf(harness.testPartitionURI).index).toEqual(3);
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
-    await harness.prophet._pendingCommandNotification;
+    await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(3);
     expect(authorityConnection._chroniclings.length).toEqual(1);
     await seconds[0].getPersistedEvent();
@@ -185,7 +186,7 @@ describe("Prophet", () => {
     twoEntries[0].resolveTruthEvent(twoTruthEvents[0]);
     twoEntries[1].resolveTruthEvent(twoTruthEvents[1]);
     await authorityConnection.getReceiveTruths()(twoTruthEvents);
-    await harness.prophet._pendingCommandNotification;
+    await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 3, 4);
 
@@ -193,7 +194,7 @@ describe("Prophet", () => {
     const lastTruthEvents = lastEntry.map(entry => roundtripEvent(entry.event));
     lastEntry[0].resolveTruthEvent(lastTruthEvents[0]);
     await authorityConnection.getReceiveTruths()(lastTruthEvents);
-    await harness.prophet._pendingCommandNotification;
+    await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
   });
@@ -201,19 +202,19 @@ describe("Prophet", () => {
   it("automatically confirms local partition commands as truths", async () => {
     const { scribeConnection } = await setUp({ isLocallyPersisted: true }, { verbosity: 0 });
     let totalCommandCount;
-    harness.prophet.setCommandCountCallback((total) => { totalCommandCount = total; });
-    await harness.prophet._pendingCommandNotification;
+    harness.sourcerer.setCommandCountCallback((total) => { totalCommandCount = total; });
+    await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
     const first = harness.chronicleEvent(simpleCommand);
     expect(first.getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
-    await harness.prophet._pendingCommandNotification;
+    await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
     const persisted = first.getPersistedEvent();
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
     await persisted;
-    await harness.prophet._pendingCommandNotification;
+    await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(0);
     await first.getTruthEvent();
     expectConnectionEventIds(scribeConnection, 0, 2, 2);
@@ -221,11 +222,11 @@ describe("Prophet", () => {
     const seconds = harness.chronicleEvents(coupleCommands).eventResults;
     expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(2);
     expect(seconds[1].getLogAspectOf(harness.testPartitionURI).index).toEqual(3);
-    await harness.prophet._pendingCommandNotification;
+    await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(2);
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
     await seconds[1].getPersistedEvent();
-    await harness.prophet._pendingCommandNotification;
+    await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
   });
@@ -573,7 +574,7 @@ describe("Cross-partition", () => {
       },
     }), { isTruth: true }).getPersistedEvent();
 
-    const lateConnection = harness.prophet.acquirePartitionConnection(latePartitionURI);
+    const lateConnection = harness.sourcerer.acquireConnection(latePartitionURI);
     harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
         id: ["test_late"], typeName: "Entity",
@@ -586,7 +587,7 @@ describe("Cross-partition", () => {
         aspects: { version: "0.2", log: { index: 1 }, command: { id: "lid-1" } },
       }),
     ]);
-    await lateConnection.getActiveConnection();
+    await lateConnection.asActiveConnection();
     const incomingRelations = harness.run(lateTargetId, "incomingRelations");
     expect(incomingRelations.length)
         .toEqual(1);
@@ -616,7 +617,7 @@ describe("Cross-partition", () => {
         aspects: { version: "0.2", log: { index: index + 1 }, command: { id: "cid-2" } },
       })], { isTruth: true }).eventResults.map(result => result.getPersistedEvent()));
 
-    const lateConnection = harness.prophet.acquirePartitionConnection(latePartitionURI);
+    const lateConnection = harness.sourcerer.acquireConnection(latePartitionURI);
     harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
         id: ["test_late"], typeName: "Entity",
@@ -636,7 +637,7 @@ describe("Cross-partition", () => {
         aspects: { version: "0.2", log: { index: 2 }, command: { id: "lid-3" } },
       }),
     ]);
-    await lateConnection.getActiveConnection();
+    await lateConnection.asActiveConnection();
 
     const properties = harness.run(vRef("CrossEntryInstance_A"),
         ["§->", "properties", ["§map", "name"]]);
@@ -649,8 +650,8 @@ describe("Disjoint clients using paired harnesses", () => {
   it("delivers commands from one harness as events to another harness", async () => {
     const { scribeConnection } = await setUp({ isRemoteAuthority: true, isLocallyPersisted: true },
         { verbosity: 0 });
-    const pairness = await createProphetOracleHarness({ verbosity: 0, pairedHarness: harness });
-    const pairedConnection = pairness.prophet.acquirePartitionConnection(harness.testPartitionURI);
+    const pairness = await createSourcererOracleHarness({ verbosity: 0, pairedHarness: harness });
+    const pairedConnection = pairness.sourcerer.acquireConnection(harness.testPartitionURI);
 
     const result = harness.chronicleEvent(created({
       id: ["multiharness-entity"], typeName: "Entity",
@@ -670,8 +671,8 @@ describe("Disjoint clients using paired harnesses", () => {
 
   it("reorders conflicting commands between harnesses", async () => {
     await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
-    const pairness = await createProphetOracleHarness({ verbosity: 0, pairedHarness: harness });
-    await pairness.prophet.acquirePartitionConnection(harness.testPartitionURI);
+    const pairness = await createSourcererOracleHarness({ verbosity: 0, pairedHarness: harness });
+    await pairness.sourcerer.acquireConnection(harness.testPartitionURI);
 
     const result = harness.chronicleEvent(created({
       id: ["multiharness-entity"], typeName: "Entity",

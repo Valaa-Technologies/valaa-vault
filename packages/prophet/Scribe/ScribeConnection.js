@@ -3,7 +3,7 @@
 import type { EventBase } from "~/raem/events";
 import type { VRL } from "~/raem/VRL";
 
-import PartitionConnection from "~/prophet/api/PartitionConnection";
+import Connection from "~/prophet/api/Connection";
 import {
   MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest, ConnectOptions,
   ReceiveEvents, RetrieveMediaBuffer,
@@ -26,7 +26,7 @@ import {
   _narrateEventLog, _chronicleEvents, _receiveEvents, _triggerEventQueueWrites
 } from "./_eventOps";
 
-export default class ScribePartitionConnection extends PartitionConnection {
+export default class ScribeConnection extends Connection {
   // Info structures
 
   // If not eventLogInfo eventIdBegin is not 0, it means the oldest
@@ -72,8 +72,8 @@ export default class ScribePartitionConnection extends PartitionConnection {
   }
 
   _doConnect (options: ConnectOptions) {
-    if (this._prophet._upstream) {
-      this.setUpstreamConnection(this._prophet._upstream.acquirePartitionConnection(
+    if (this._sourcerer._upstream) {
+      this.setUpstreamConnection(this._sourcerer._upstream.acquireConnection(
           this.getPartitionURI(), {
             // Set the permanent receiver without options.receiveTruths,
             // initiate connection but disable initial narration; perform
@@ -84,7 +84,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
             subscribeEvents: (options.narrateOptions === false) && options.subscribeEvents,
           }));
     }
-    // ScribePartitionConnection can be active even if the upstream
+    // ScribeConnection can be active even if the upstream
     // connection isn't, as long as there are any events in the local
     // cache and thus optimistic narration is possible.
     const connection = this;
@@ -95,7 +95,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
         function _initializeMediaLookups (mediaEntries) {
           connection._pendingMediaLookup = mediaEntries;
           for (const [mediaRawId, entry] of Object.entries(connection._pendingMediaLookup)) {
-            connection._prophet._persistedMediaLookup[mediaRawId] = entry;
+            connection._sourcerer._persistedMediaLookup[mediaRawId] = entry;
           }
         },
       ]),
@@ -115,9 +115,9 @@ export default class ScribePartitionConnection extends PartitionConnection {
     const adjusts = {};
     for (const entry of Object.values(this._pendingMediaLookup)) {
       if (entry.isInMemory) adjusts[entry.contentHash] = -1;
-      if (entry.isPersisted) delete this._prophet._persistedMediaLookup[entry.mediaId];
+      if (entry.isPersisted) delete this._sourcerer._persistedMediaLookup[entry.mediaId];
     }
-    this._prophet._adjustInMemoryBvobBufferRefCounts(adjusts);
+    this._sourcerer._adjustInMemoryBvobBufferRefCounts(adjusts);
     this._pendingMediaLookup = {};
     super.disconnect();
   }
@@ -322,7 +322,7 @@ export default class ScribePartitionConnection extends PartitionConnection {
       do {
         const mediaRawId = currentStep ? currentStep.headRawId() : mediaVRL.rawId();
         const ret = this._pendingMediaLookup[mediaRawId]
-            || this._prophet._persistedMediaLookup[mediaRawId];
+            || this._sourcerer._persistedMediaLookup[mediaRawId];
         if (ret) return ret;
         currentStep = currentStep ? currentStep.previousGhostStep() : mediaVRL.previousGhostStep();
       } while (currentStep);

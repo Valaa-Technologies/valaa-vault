@@ -7,7 +7,7 @@ import { Map as ImmutableMap } from "immutable";
 import * as valosRaem from "~/raem";
 import * as valosTools from "~/tools";
 import * as valosScript from "~/script";
-import * as valosProphet from "~/prophet";
+import * as valosSourcerer from "~/prophet";
 import * as valosEngine from "~/engine";
 import * as valosInspire from "~/inspire";
 
@@ -38,7 +38,7 @@ import { byteArrayFromBase64 } from "~/gateway-api/base64";
 
 const deepExtend = require("@valos/tools/deepExtend").default;
 
-const { AuthorityNexus, FalseProphet, Oracle, Prophet, Scribe } = valosProphet;
+const { AuthorityNexus, FalseProphet, Oracle, Sourcerer, Scribe } = valosSourcerer;
 const {
   dumpObject, inBrowser, invariantify, isPromise, LogEventGenerator, mapEagerly, thenChainEagerly,
   outputError,
@@ -117,7 +117,7 @@ export default class Gateway extends LogEventGenerator {
       //    be replaced with most specific imports possible.
       if (library === "engine") ret = valosEngine;
       else if (library === "inspire") ret = valosInspire;
-      else if (library === "prophet") ret = valosProphet;
+      else if (library === "prophet") ret = valosSourcerer;
       else if (library === "raem") ret = valosRaem;
       else if (library === "script") ret = valosScript;
       else if (library === "tools") ret = valosTools;
@@ -225,7 +225,7 @@ export default class Gateway extends LogEventGenerator {
             name: `${viewConfig.name} Engine`,
             ...(viewConfig.engine || {}),
             logger: gateway.getLogger(),
-            prophet: gateway.falseProphet,
+            sourcerer: gateway.falseProphet,
             revelation: gateway.revelation,
           };
           engine = new Engine(engineOptions);
@@ -361,7 +361,7 @@ export default class Gateway extends LogEventGenerator {
   }
 
   async _summonOracle (gatewayRevelation: Object, authorityNexus: AuthorityNexus):
-      Promise<Prophet> {
+      Promise<Sourcerer> {
     let oracleOptions;
     try {
       oracleOptions = {
@@ -428,8 +428,8 @@ export default class Gateway extends LogEventGenerator {
     }
   }
 
-  async _proselytizeFalseProphet (gatewayRevelation: Object, corpus: Corpus, upstream: Prophet):
-      Promise<Prophet> {
+  async _proselytizeFalseProphet (gatewayRevelation: Object, corpus: Corpus, upstream: Sourcerer):
+      Promise<Sourcerer> {
     let falseProphetOptions;
     try {
       this._commandCountListeners = new Map();
@@ -616,11 +616,11 @@ export default class Gateway extends LogEventGenerator {
     // so that we can narrate any content in the prologue before any remote activity.
     this.clockEvent(1, "prologue.acquire", `Acquiring connection <${partitionURI}>`);
     const connection = this.falseProphet
-        .acquirePartitionConnection(partitionURI, {
+        .acquireConnection(partitionURI, {
           subscribeEvents: false, narrateOptions: { remote: false },
         });
     connection.clockEvent(1, "prologue.activate", "Activating connection");
-    await connection.getActiveConnection();
+    await connection.asActiveConnection();
     let prologueTruthCount = await info.truthCount;
     if (!Number.isInteger(prologueTruthCount)) {
       // Migration code for eventId deprecation.

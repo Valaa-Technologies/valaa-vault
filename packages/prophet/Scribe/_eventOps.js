@@ -10,7 +10,7 @@ import {
 
 import { dumpObject, mapEagerly, thenChainEagerly, vdon } from "~/tools";
 
-import ScribePartitionConnection from "./ScribePartitionConnection";
+import ScribeConnection from "./ScribeConnection";
 import { _retryingTwoWaySyncMediaContent } from "./_contentOps";
 
 export const vdoc = vdon({
@@ -18,7 +18,7 @@ export const vdoc = vdon({
     "Event ops manage truth and command events",
   },
   0: [
-    `Event ops are detail of ScribePartitionConnection.`,
+    `Event ops are detail of ScribeConnection.`,
   ],
 });
 
@@ -32,7 +32,7 @@ export const vdoc = vdon({
 #     #  #    #  #    #  #    #  #    #     #    ######
 */
 
-export async function _narrateEventLog (connection: ScribePartitionConnection,
+export async function _narrateEventLog (connection: ScribeConnection,
     options: NarrateOptions, ret: Object) {
   const localResults = await _narrateLocalLogs(connection,
       options.receiveTruths, options.receiveCommands, options.eventIdBegin, options.eventIdEnd,
@@ -50,7 +50,7 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
   const upstreamNarration = thenChainEagerly(null, connection.addChainClockers(2,
       "scribe.narrate.remote.ops", [
     function _waitActiveUpstream () {
-      return connection.getUpstreamConnection().getActiveConnection();
+      return connection.getUpstreamConnection().asActiveConnection();
     },
     function _narrateUpstreamEventLog (connectedUpstream) {
       return connectedUpstream.narrateEventLog({
@@ -78,7 +78,7 @@ export async function _narrateEventLog (connection: ScribePartitionConnection,
   return ret;
 }
 
-async function _narrateLocalLogs (connection: ScribePartitionConnection,
+async function _narrateLocalLogs (connection: ScribeConnection,
     receiveTruths: ?ReceiveEvents = connection._downstreamReceiveTruths,
     receiveCommands: ?ReceiveEvents = connection._downstreamReceiveCommands,
     eventIdBegin: ?number = connection.getFirstTruthEventId(),
@@ -121,7 +121,7 @@ async function _narrateLocalLogs (connection: ScribePartitionConnection,
   return ret;
 }
 
-async function _waitForRemoteNarration (connection: ScribePartitionConnection,
+async function _waitForRemoteNarration (connection: ScribeConnection,
     upstreamNarration: Object, options: NarrateOptions,
 ): Object {
   // Handle step 2 of the opportunistic narration if local narration
@@ -163,7 +163,7 @@ async function _waitForRemoteNarration (connection: ScribePartitionConnection,
  #####   #    #  #    #   ####   #    #     #     ####   ######  ######
 */
 
-export function _chronicleEvents (connection: ScribePartitionConnection,
+export function _chronicleEvents (connection: ScribeConnection,
     events: EventBase[], options: ChronicleOptions = {}, onError: Function,
 ): ChronicleRequest {
   if (!events || !events.length) return { eventResults: events };
@@ -261,7 +261,7 @@ class ScribeEventResult extends ChronicleEventResult {
   }
 }
 
-export function _throwOnMediaRequest (connection: ScribePartitionConnection,
+export function _throwOnMediaRequest (connection: ScribeConnection,
     mediaInfo: MediaInfo) {
   throw connection.wrapErrorEvent(
       new Error(`Cannot retrieve media '${mediaInfo.name}' content through partition '${
@@ -284,7 +284,7 @@ export function _throwOnMediaRequest (connection: ScribePartitionConnection,
 */
 
 export function _receiveEvents (
-    connection: ScribePartitionConnection,
+    connection: ScribeConnection,
     events: EventBase,
     retrieveMediaBuffer: RetrieveMediaBuffer = connection.readMediaContent.bind(connection),
     downstreamReceiveTruths: ReceiveEvents,
@@ -384,7 +384,7 @@ export function _receiveEvents (
   });
 }
 
-function _determineEventPreOps (connection: ScribePartitionConnection, event: Object,
+function _determineEventPreOps (connection: ScribeConnection, event: Object,
     rootEvent: Object = event) {
   let ret;
   if (isTransactedLike(event)) {
@@ -393,7 +393,7 @@ function _determineEventPreOps (connection: ScribePartitionConnection, event: Ob
         .map(action => _determineEventPreOps(connection, action, rootEvent))
         .filter(notFalsy => notFalsy));
   } else if (event.typeName === "MediaType") {
-    connection._prophet._mediaTypes[getRawIdFrom(event.id)] = event.initialState;
+    connection._sourcerer._mediaTypes[getRawIdFrom(event.id)] = event.initialState;
   } else if ((event.initialState !== undefined) || (event.sets !== undefined)) {
     if (getRawIdFrom(event.id) === connection.getPartitionRawId()) {
       const newName = (event.initialState || event.sets || {}).name;
@@ -414,7 +414,7 @@ function _determineEventPreOps (connection: ScribePartitionConnection, event: Ob
 // promise directly.
 // If there are new entries in the write queue and onComplete didn't
 // throw an error, a new write operation will then be initiated.
-export function _triggerEventQueueWrites (connection: ScribePartitionConnection, eventsInfo: Object,
+export function _triggerEventQueueWrites (connection: ScribeConnection, eventsInfo: Object,
     writeEvents: Function, onComplete?: Function, onError?: Function) {
   const myQueue = eventsInfo.writeQueue;
   if (!myQueue.length || eventsInfo.writeProcess) return eventsInfo.writeProcess;

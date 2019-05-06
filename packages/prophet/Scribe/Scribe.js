@@ -1,13 +1,13 @@
 // @flow
 
-import Prophet from "~/prophet/api/Prophet";
+import Sourcerer from "~/prophet/api/Sourcerer";
 
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 
 import { dumpObject, invariantifyObject, thenChainEagerly } from "~/tools";
 import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
-import ScribePartitionConnection from "./ScribePartitionConnection";
+import ScribeConnection from "./ScribeConnection";
 
 import {
   BvobInfo, _initializeSharedIndexedDB, _writeBvobBuffer, _readBvobBuffers,
@@ -21,7 +21,7 @@ import {
 /**
  * Scribe handles all local event and content caching, providing both
  * new semantic functionality as well as performance improvements of
- * Prophet chain functionality.
+ * Sourcerer chain functionality.
  *
  * Main Semantic functionalities are:
  * 1. synchronous in-memory bvob caching and retrieval
@@ -36,14 +36,14 @@ import {
  * manipulate ArrayBuffer-based data are shared between all partitions
  * and thus handled by Scribe object itself. All Media operations which
  * associate metadata to bvods are partition specific and handled by
- * ScribePartitionConnection's.
+ * ScribeConnection's.
  *
  * @export
  * @class Scribe
- * @extends {Prophet}
+ * @extends {Sourcerer}
  */
-export default class Scribe extends Prophet {
-  static PartitionConnectionType = ScribePartitionConnection;
+export default class Scribe extends Sourcerer {
+  static ConnectionType = ScribeConnection;
 
   _sharedDb: IndexedDBWrapper;
   _bvobLookup: { [contentHash: string]: BvobInfo; };
@@ -52,7 +52,7 @@ export default class Scribe extends Prophet {
   // Contains the media infos for most recent action for which media
   // retrieval is successful and whose media info is successfully
   // persisted.
-  // See ScribePartitionConnection._pendingMediaLookup.
+  // See ScribeConnection._pendingMediaLookup.
   _persistedMediaLookup: { [mediaId: string]: Object };
   _databaseAPI: DatabaseAPI;
   _databasePrefix: string;

@@ -12,7 +12,7 @@ import Transient, { tryTransientTypeName, PrototypeOfImmaterialTag }
     from "~/raem/state/Transient";
 import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 
-import { MissingPartitionConnectionsError } from "~/raem/tools/denormalized/partitions";
+import { MissingConnectionsError } from "~/raem/tools/denormalized/partitions";
 
 import raemSteppers, { debugWrapBuiltinSteppers } from "~/raem/VALK/raemSteppers";
 import Kuery, { dumpKuery, dumpScope, dumpObject } from "~/raem/VALK/Kuery";
@@ -290,7 +290,7 @@ export default class Valker extends Resolver {
     const ret = typeName && this.getTypeIntro(typeName);
     if ((ret === undefined) && typeName && isInactiveTypeName(typeName)) {
       const partitionURI = object.get("id").getPartitionURI();
-      throw new MissingPartitionConnectionsError(`Missing active partition connections: '${
+      throw new MissingConnectionsError(`Missing active partition connections: '${
           partitionURI.toString()}'`, [partitionURI]);
     }
     if (this._verbosity >= 3) {

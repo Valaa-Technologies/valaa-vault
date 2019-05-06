@@ -3,8 +3,12 @@ import Valker from "~/raem/VALK/Valker";
 import type { ProphecyEventResult } from "~/prophet/api/types";
 
 /**
- * Discourse is a fancy name for a one-to-one communication connection between a single Prophet and
- * a single Follower.
+ * Discourse is a fancy name for a one-to-one communication connection
+ * between a single Sourcerer and a single Follower.
+ *
+ * @export
+ * @class Discourse
+ * @extends {Valker}
  */
 export default class Discourse extends Valker {
   static isDiscourse = true;

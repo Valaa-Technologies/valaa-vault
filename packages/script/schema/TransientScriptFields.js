@@ -10,7 +10,7 @@ import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
 
 import Relation from "~/script/schema/Relation";
 
-// const INTERFACE_DESCRIPTION = "inactive prophet resource fields";
+// const INTERFACE_DESCRIPTION = "inactive resource fields";
 
 const TransientScriptFields = new GraphQLInterfaceType(transientScriptFields());
 
@@ -20,7 +20,7 @@ export function transientScriptFields (/* objectDescription: string = INTERFACE_
   return {
     name: "TransientScriptFields",
 
-    description: `Fields available for all prophet resources, even inactive ones.`,
+    description: `Fields available for all resources, even inactive ones.`,
 
     interfaces: () => [TransientFields],
 

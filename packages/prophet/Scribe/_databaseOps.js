@@ -10,7 +10,7 @@ import type MediaDecoder from "~/tools/MediaDecoder";
 import trivialClone from "~/tools/trivialClone";
 
 import Scribe from "./Scribe";
-import ScribePartitionConnection from "./ScribePartitionConnection";
+import ScribeConnection from "./ScribeConnection";
 
 export const vdoc = vdon({
   "...": { heading:
@@ -18,7 +18,7 @@ export const vdoc = vdon({
   },
   0: [
     `Database ops are detail of both Scribe and
-    ScribePartitionConnection.`,
+    ScribeConnection.`,
   ],
 });
 
@@ -70,18 +70,18 @@ export async function _initializeSharedIndexedDB (scribe: Scribe) {
   return { totalBytes, clearedBuffers, releasedBytes, contentLookup };
 }
 
-export async function _initializeConnectionIndexedDB (connection: ScribePartitionConnection) {
+export async function _initializeConnectionIndexedDB (connection: ScribeConnection) {
   // TODO(iridian): Implement initialNarrateOptions
   // TODO(iridian): Load info structures from indexed_db. These are member fields described above.
   // Also create Scribe._contentLookup entries for contents referenced by the _pendingMediaLookup
   // entries, including the in-memory contents.
   // If the partition does not exist, create it and its structures.
   connection._db = new IndexedDBWrapper(
-      `${connection._prophet._databasePrefix}${connection._partitionURI.toString()}`, [
+      `${connection._sourcerer._databasePrefix}${connection._partitionURI.toString()}`, [
         { name: "truths", keyPath: "index" },
         { name: "commands", keyPath: "index" },
         { name: "medias", keyPath: "mediaId" },
-      ], connection.getLogger(), connection._prophet.getDatabaseAPI());
+      ], connection.getLogger(), connection._sourcerer.getDatabaseAPI());
   await connection._db.initialize();
 
   // Populate _truthLogInfo with first and last events
@@ -116,7 +116,7 @@ export async function _initializeConnectionIndexedDB (connection: ScribePartitio
  #    #  ######  #####      #    #    #
 */
 
-export async function _updateMediaEntries (connection: ScribePartitionConnection,
+export async function _updateMediaEntries (connection: ScribeConnection,
     updates: Object[]) {
   if (!updates || !updates.length) return {};
   const inMemoryRefCountAdjusts = {};
@@ -137,7 +137,7 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
           const newInfo = entry.mediaInfo;
           const contentHash = newInfo.contentHash || newInfo.bvobId;
           if (contentHash) {
-            if (connection._prophet._bvobLookup[contentHash]) {
+            if (connection._sourcerer._bvobLookup[contentHash]) {
               if (entry.isInMemory) _addAdjust(inMemoryRefCountAdjusts, contentHash, 1);
               if (entry.isPersisted) _addAdjust(persistRefCountAdjusts, contentHash, 1);
             } else {
@@ -148,7 +148,7 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
           const currentMediaInfo = ((currentEntryReq.result || {}).mediaInfo || {});
           const currentContentHash = currentMediaInfo.contentHash || currentMediaInfo.bvobId;
           if (currentContentHash && currentEntryReq.result.isPersisted) {
-            if (connection._prophet._bvobLookup[currentContentHash]) {
+            if (connection._sourcerer._bvobLookup[currentContentHash]) {
               _addAdjust(persistRefCountAdjusts, currentContentHash, -1);
             } else {
               console.log(`Can't find Media "${newInfo.name}" Bvob info for ${currentContentHash
@@ -176,21 +176,21 @@ export async function _updateMediaEntries (connection: ScribePartitionConnection
   updates.forEach(entry => {
     if (connection.isLocallyPersisted() && !entry.updatePersisted) return;
     delete entry.updatePersisted;
-    const currentScribeEntry = connection._prophet._persistedMediaLookup[entry.mediaId] || {};
+    const currentScribeEntry = connection._sourcerer._persistedMediaLookup[entry.mediaId] || {};
     const contentHash = (currentScribeEntry.mediaInfo || {}).contentHash
         || (currentScribeEntry.mediaInfo || {}).bvobId;
     if (currentScribeEntry.isInMemory && contentHash) {
       _addAdjust(inMemoryRefCountAdjusts, contentHash, -1);
     }
-    connection._prophet._persistedMediaLookup[entry.mediaId] = entry;
+    connection._sourcerer._persistedMediaLookup[entry.mediaId] = entry;
     ret[entry.mediaId] = entry;
   });
-  connection._prophet._adjustInMemoryBvobBufferRefCounts(inMemoryRefCountAdjusts);
-  await connection._prophet._adjustBvobBufferPersistRefCounts(persistRefCountAdjusts);
+  connection._sourcerer._adjustInMemoryBvobBufferRefCounts(inMemoryRefCountAdjusts);
+  await connection._sourcerer._adjustBvobBufferPersistRefCounts(persistRefCountAdjusts);
   return ret;
 }
 
-export function _readMediaEntries (connection: ScribePartitionConnection) {
+export function _readMediaEntries (connection: ScribeConnection) {
   if (!connection._db) return {};
   const results = {};
   return connection._db.transaction(["medias"], "readwrite", ({ medias }) =>
@@ -206,8 +206,8 @@ export function _readMediaEntries (connection: ScribePartitionConnection) {
           const entry = { ...cursor.value, isInMemory: true };
           const contentHash = (entry.mediaInfo || {}).contentHash || (entry.mediaInfo || {}).bvobId;
           if (contentHash && entry.isInMemory) {
-            if (connection._prophet._bvobLookup[contentHash]) {
-              connection._prophet._adjustInMemoryBvobBufferRefCounts({ [contentHash]: 1 });
+            if (connection._sourcerer._bvobLookup[contentHash]) {
+              connection._sourcerer._adjustInMemoryBvobBufferRefCounts({ [contentHash]: 1 });
             } else {
               connection.errorEvent(`Can't find Media "${(entry.mediaInfo || {}).name
                   }" in-memory Bvob info for ${entry.mediaInfo.contentHash
@@ -222,11 +222,11 @@ export function _readMediaEntries (connection: ScribePartitionConnection) {
       }));
 }
 
-export function _destroyMediaInfo (connection: ScribePartitionConnection, mediaRawId: string) {
+export function _destroyMediaInfo (connection: ScribeConnection, mediaRawId: string) {
   const mediaEntry = connection._pendingMediaLookup[mediaRawId];
   if (!mediaEntry || !connection._db) return undefined;
   delete connection._pendingMediaLookup[mediaRawId];
-  delete connection._prophet._persistedMediaLookup[mediaRawId];
+  delete connection._sourcerer._persistedMediaLookup[mediaRawId];
 
   return connection._db.transaction(["medias"], "readwrite", ({ medias }) => {
     const req = medias.delete(mediaRawId);
@@ -234,10 +234,10 @@ export function _destroyMediaInfo (connection: ScribePartitionConnection, mediaR
       const contentHash = mediaEntry.mediaInfo.contentHash || mediaEntry.mediaInfo.bvobId;
       if (contentHash) {
         if (mediaEntry.isInMemory) {
-          connection._prophet._adjustInMemoryBvobBufferRefCounts({ [contentHash]: -1 });
+          connection._sourcerer._adjustInMemoryBvobBufferRefCounts({ [contentHash]: -1 });
         }
         if (mediaEntry.isPersisted) {
-          connection._prophet._adjustBvobBufferPersistRefCounts({ [contentHash]: -1 });
+          connection._sourcerer._adjustBvobBufferPersistRefCounts({ [contentHash]: -1 });
         }
       }
     };
@@ -377,7 +377,7 @@ export async function _adjustBvobBufferPersistRefCounts (
  ######    ##    ######  #    #     #
 */
 
-export function _writeTruths (connection: ScribePartitionConnection, truthLog: EventBase[]) {
+export function _writeTruths (connection: ScribeConnection, truthLog: EventBase[]) {
   if (!connection._db) return undefined;
   return connection._db.transaction(["truths"], "readwrite", ({ truths }) => {
     truthLog.forEach(truth => {
@@ -409,7 +409,7 @@ export function _writeTruths (connection: ScribePartitionConnection, truthLog: E
   });
 }
 
-export function _readTruths (connection: ScribePartitionConnection, options: Object) {
+export function _readTruths (connection: ScribeConnection, options: Object) {
   if (!connection._db) return undefined;
   const range = connection._db.getIDBKeyRange(options);
   if (range === null) return undefined;
@@ -419,7 +419,7 @@ export function _readTruths (connection: ScribePartitionConnection, options: Obj
       ({ truths }) => new Promise(_getAllShim.bind(null, connection, truths, range)));
 }
 
-export function _writeCommands (connection: ScribePartitionConnection,
+export function _writeCommands (connection: ScribeConnection,
     commandLog: EventBase[]) {
   if (!connection._db) return undefined;
   return connection._db.transaction(["commands"], "readwrite", ({ commands }) => {
@@ -440,7 +440,7 @@ export function _writeCommands (connection: ScribePartitionConnection,
   });
 }
 
-export function _readCommands (connection: ScribePartitionConnection, options: Object) {
+export function _readCommands (connection: ScribeConnection, options: Object) {
   if (!connection._db) return undefined;
   const range = connection._db.getIDBKeyRange(options);
   if (range === null) return undefined;
@@ -450,7 +450,7 @@ export function _readCommands (connection: ScribePartitionConnection, options: O
       ({ commands }) => new Promise(_getAllShim.bind(null, connection, commands, range)));
 }
 
-export function _deleteCommands (connection: ScribePartitionConnection,
+export function _deleteCommands (connection: ScribeConnection,
     eventIdBegin: string, eventIdEnd: string, expectedCommandIds?: string[]) {
   if (!connection._db) return undefined;
   const range = connection._db.getIDBKeyRange({ eventIdBegin, eventIdEnd });
@@ -514,7 +514,7 @@ function _serializeEventAsJSON (event) {
   }
 }
 
-function _getAllShim (connection: ScribePartitionConnection, database, range: IDBKeyRange,
+function _getAllShim (connection: ScribeConnection, database, range: IDBKeyRange,
     resolve: Function, reject: Function) {
   // Important note on IndexedDB transaction semantics: the resolve
   // callback must _synchronously_ create any follow-up database

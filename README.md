@@ -204,9 +204,9 @@ stream  connectivity reference implementation with AWS using simple
 REST lambdas and the AWS mqtt IoT as event pub-sub.
 
 - depends: `@valos/script`, `IndexedDB`, `AWS IoT/S3/DynamoDB`
-- exports: `FalseProphet`, `PartitionConnection`, `ProphetContentAPI`
+- exports: `FalseProphet`, `Connection`, `SourcererContentAPI`
 - valosheath: `Relatable`, `Entity`, `Media`, `Relation`,
-  `TransientProphetFields`
+  `TransientSourcererFields`
 - concepts: `ACID`, `authorities`, `pub-sub`, `offline readiness`
 
 

@@ -12,7 +12,7 @@ import { encodeDataURI } from "~/tools/html5/dataURI";
 import { bufferAndContentHashFromNative } from "~/tools/textEncoding";
 
 import Scribe from "./Scribe";
-import ScribePartitionConnection from "./ScribePartitionConnection";
+import ScribeConnection from "./ScribeConnection";
 
 import { BvobInfo } from "./_databaseOps";
 
@@ -20,7 +20,7 @@ export const vdoc = vdon({
   "...": { heading:
     "Content ops manage shared media content and bvob buffer storage lifetimes and decoding",
   },
-  0: [`Content ops are detail of Scribe and ScribePartitionConnection.`],
+  0: [`Content ops are detail of Scribe and ScribeConnection.`],
 });
 
 export type MediaEntry = {
@@ -65,7 +65,7 @@ export function _preCacheBvob (scribe: Scribe, contentHash: string, newInfo: Bvo
 
 const defaultRetries = 3;
 
-export function _prepareBvob (connection: ScribePartitionConnection, content: any,
+export function _prepareBvob (connection: ScribeConnection, content: any,
     mediaInfo: MediaInfo = {}, onError: Function) {
   const { buffer, contentHash } = bufferAndContentHashFromNative(content, mediaInfo);
   const expectedContentHash = mediaInfo && (mediaInfo.contentHash || mediaInfo.bvobId);
@@ -102,7 +102,7 @@ export function _prepareBvob (connection: ScribePartitionConnection, content: an
     pendingBvobInfo.persistProcess = thenChainEagerly(null, [
       () => {
         if (connection.isLocallyPersisted()) {
-          return connection._prophet._writeBvobBuffer(buffer, contentHash);
+          return connection._sourcerer._writeBvobBuffer(buffer, contentHash);
         }
         if (pendingBvobInfo.upstreamPrepareBvobProcess !== undefined) {
           return pendingBvobInfo.upstreamPrepareBvobProcess;
@@ -116,13 +116,13 @@ export function _prepareBvob (connection: ScribePartitionConnection, content: an
   return { ...pendingBvobInfo, content, buffer, contentHash };
 }
 
-function _prepareBvobToUpstreamWithRetries (connection: ScribePartitionConnection,
+function _prepareBvobToUpstreamWithRetries (connection: ScribeConnection,
     buffer: ArrayBuffer | (() => ArrayBuffer), mediaInfo: MediaInfo,
     mediaName: string, wrap: Error, retriesRemaining: number,
 ) {
   // TODO(iridian, 2019-01): This should use active connection, but
   // right at this moment I don't dare to take the risk of deadlock.
-  // return thenChainEagerly(connection.getUpstreamConnection().getActiveConnection(), [
+  // return thenChainEagerly(connection.getUpstreamConnection().asActiveConnection(), [
   return thenChainEagerly(connection.getUpstreamConnection(), [
     upstream => upstream.prepareBvob(buffer, mediaInfo),
     preparation => preparation.persistProcess,
@@ -151,7 +151,7 @@ function _prepareBvobToUpstreamWithRetries (connection: ScribePartitionConnectio
 #######    ##    ######  #    #     #
 */
 
-export function _determineEventMediaPreOps (connection: ScribePartitionConnection,
+export function _determineEventMediaPreOps (connection: ScribeConnection,
     mediaAction: Object, rootEvent: Object, mediaVRL: VRL, currentEntry: MediaEntry) {
   const mediaId = mediaVRL.rawId();
   let mediaInfo;
@@ -194,7 +194,7 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
   if (update.name) mediaInfo.name = update.name;
   if (update.mediaType) {
     const mediaType = (typeof update.mediaType === "string")
-        ? connection._prophet._mediaTypes[getRawIdFrom(update.mediaType)]
+        ? connection._sourcerer._mediaTypes[getRawIdFrom(update.mediaType)]
         : update.mediaType;
     Object.assign(mediaInfo, mediaType);
   }
@@ -204,7 +204,7 @@ export function _determineEventMediaPreOps (connection: ScribePartitionConnectio
   return [{ mediaEntry: newEntry }];
 }
 
-export async function _retryingTwoWaySyncMediaContent (connection: ScribePartitionConnection,
+export async function _retryingTwoWaySyncMediaContent (connection: ScribeConnection,
     mediaEntry: Object, options: {
       getNextBackoffSeconds?: Function, retryTimes?: number, delayBaseSeconds?: number,
       retrieveMediaBuffer: RetrieveMediaBuffer, prepareBvob?: Function,
@@ -235,7 +235,7 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribePartiti
       const contentHash = mediaInfo.contentHash || mediaInfo.bvobId;
       if (contentHash) {
         content = content
-            || connection._prophet.tryGetCachedBvobContent(contentHash)
+            || connection._sourcerer.tryGetCachedBvobContent(contentHash)
             || (options.retrieveMediaBuffer && (await options.retrieveMediaBuffer(mediaInfo)));
         if ((content !== undefined) && options.prepareBvob) {
         // TODO(iridian): Determine whether media content should be pre-cached or not.
@@ -292,7 +292,7 @@ async function _waitBackoff (backoffSeconds: number) {
 #     #  ######   ### #   ####   ######   ####      #
 */
 
-export function _requestMediaContents (connection: ScribePartitionConnection,
+export function _requestMediaContents (connection: ScribeConnection,
     mediaInfos: MediaInfo[], onError: Function) {
   const upstreamOperation = new DelayedQueue();
   const ret = mediaInfos.map(mediaInfo => {
@@ -342,14 +342,14 @@ export function _requestMediaContents (connection: ScribePartitionConnection,
   }
 }
 
-function _getMediaContent (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
+function _getMediaContent (connection: ScribeConnection, mediaInfo: MediaInfo,
     upstreamOperation: Object) {
   const actualInfo = { ...mediaInfo };
   const contentHash = actualInfo.contentHash || actualInfo.bvobId || "";
-  const bvobInfo = connection._prophet._bvobLookup[contentHash];
+  const bvobInfo = connection._sourcerer._bvobLookup[contentHash];
   if (bvobInfo) {
     actualInfo.buffer = bvobInfo.buffer || bvobInfo.pendingBuffer
-        || (bvobInfo.persistRefCount && connection._prophet.readBvobContent(contentHash));
+        || (bvobInfo.persistRefCount && connection._sourcerer.readBvobContent(contentHash));
     const isArrayBufferType = !actualInfo.type
         || (actualInfo.type === "application" && actualInfo.subtype === "octet-stream");
     if (isArrayBufferType && actualInfo.buffer) return actualInfo.buffer;
@@ -369,11 +369,11 @@ function _getMediaContent (connection: ScribePartitionConnection, mediaInfo: Med
 
 const maxDataURISourceBytes = 48000;
 
-function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaInfo,
+function _getMediaURL (connection: ScribeConnection, mediaInfo: MediaInfo,
     upstreamOperation: Object, onError: Function): any {
   // Only use cached in-memory nativeContent if its id matches the requested id.
   const contentHash = mediaInfo.contentHash || mediaInfo.bvobId || "";
-  const bvobInfo = connection._prophet._bvobLookup[contentHash];
+  const bvobInfo = connection._sourcerer._bvobLookup[contentHash];
   // Media's with sourceURL or too large/missing bvobs will be handled by Oracle
   if (!bvobInfo) {
     if (mediaInfo.asURL === "data") {
@@ -396,7 +396,7 @@ function _getMediaURL (connection: ScribePartitionConnection, mediaInfo: MediaIn
   // Otherwise IndexedDB can't be accessed by the web pages directly, but horrible hacks must be
   // used like so:
   // https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
-  return thenChainEagerly(connection._prophet.readBvobContent(contentHash),
+  return thenChainEagerly(connection._sourcerer.readBvobContent(contentHash),
       (buffer => {
         if (!buffer) {
           if (mediaInfo.asURL === "data") {

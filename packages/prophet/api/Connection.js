@@ -3,7 +3,7 @@
 import { ValaaURI, naiveURI } from "~/raem/ValaaURI";
 import type { EventBase } from "~/raem/events";
 
-import Prophet from "~/prophet/api/Prophet";
+import Sourcerer from "~/prophet/api/Sourcerer";
 import { ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest,
   ReceiveEvents, RetrieveMediaBuffer,
 } from "~/prophet/api/types";
@@ -18,31 +18,31 @@ import {
 /**
  * Interface for sending commands to upstream and registering for downstream truth updates
  */
-export default class PartitionConnection extends Follower {
-  _prophet: Prophet;
+export default class Connection extends Follower {
+  _sourcerer: Sourcerer;
   _partitionURI: ValaaURI;
 
   _refCount: number;
-  _upstreamConnection: PartitionConnection;
-  _activeConnection: PartitionConnection | Promise<PartitionConnection>;
+  _upstreamConnection: Connection;
+  _activeConnection: Connection | Promise<Connection>;
 
   constructor ({
-    name, prophet, partitionURI, receiveTruths, receiveCommands, logger, verbosity
+    name, sourcerer, partitionURI, receiveTruths, receiveCommands, logger, verbosity
   }: {
-    name: any, prophet: Prophet, partitionURI: ValaaURI,
+    name: any, sourcerer: Sourcerer, partitionURI: ValaaURI,
     receiveTruths?: ReceiveEvents, receiveCommands?: ReceiveEvents,
     logger?: Logger, verbosity?: number,
   }) {
-    super({ name: name || null, logger: logger || prophet.getLogger(), verbosity });
-    invariantifyObject(prophet, "PartitionConnection.constructor.prophet",
-        { instanceof: Prophet });
+    super({ name: name || null, logger: logger || sourcerer.getLogger(), verbosity });
+    invariantifyObject(sourcerer, "Connection.constructor.sourcerer",
+        { instanceof: Sourcerer });
 
     if (typeof partitionURI !== "string") {
-      invariantifyString(partitionURI, "PartitionConnection.constructor.partitionURI",
+      invariantifyString(partitionURI, "Connection.constructor.partitionURI",
           { allowEmpty: true });
     }
 
-    this._prophet = prophet;
+    this._sourcerer = sourcerer;
     this._partitionURI = partitionURI;
     this._refCount = 0;
     this._downstreamReceiveTruths = receiveTruths;
@@ -55,7 +55,7 @@ export default class PartitionConnection extends Follower {
         || String(this.getPartitionURI());
   }
   getRawName (): string { return String(this.getPartitionURI()); }
-  getProphet (): Prophet { return this._prophet; }
+  getSourcerer (): Sourcerer { return this._sourcerer; }
 
   getPartitionURI (): ValaaURI { return this._partitionURI; }
   getPartitionRawId (): string { return naiveURI.getPartitionRawId(this._partitionURI); }
@@ -121,7 +121,7 @@ export default class PartitionConnection extends Follower {
    *
    * @param {ConnectOptions} options
    *
-   * @memberof OraclePartitionConnection
+   * @memberof OracleConnection
    */
   connect (options: ConnectOptions) {
     const connection = this;
@@ -169,19 +169,19 @@ export default class PartitionConnection extends Follower {
   }
 
   _doConnect (options: ConnectOptions) {
-    if (!this._prophet._upstream) {
+    if (!this._sourcerer._upstream) {
       throw new Error("Cannot connect using default _doConnect with no upstream");
     }
     options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
     options.receiveCommands = this.getReceiveCommands(options.receiveCommands);
     const postponedNarrateOptions = options.narrateOptions;
     options.narrateOptions = false;
-    this.setUpstreamConnection(this._prophet._upstream.acquirePartitionConnection(
+    this.setUpstreamConnection(this._sourcerer._upstream.acquireConnection(
         this.getPartitionURI(), options));
     const connection = this;
     return thenChainEagerly(null, this.addChainClockers(1, "connection.doConnect.ops", [
       function _waitActiveUpstream () {
-        return connection._upstreamConnection.getActiveConnection();
+        return connection._upstreamConnection.asActiveConnection();
       },
       function _narrateEventLog () {
         return (postponedNarrateOptions !== false)
@@ -208,7 +208,7 @@ export default class PartitionConnection extends Follower {
     return this._upstreamConnection;
   }
 
-  setUpstreamConnection (connection: PartitionConnection) {
+  setUpstreamConnection (connection: Connection) {
     if (isPromise(connection)) throw new Error("setUpstreamConnection must not be a promise");
     this._upstreamConnection = connection;
   }
@@ -219,7 +219,7 @@ export default class PartitionConnection extends Follower {
    * upstream.
    *
    * @returns
-   * @memberof PartitionConnection
+   * @memberof Connection
    */
   isActive () {
     if (this._activeConnection !== undefined) return (this._activeConnection === this);
@@ -227,8 +227,8 @@ export default class PartitionConnection extends Follower {
     return false;
   }
 
-  getActiveConnection (requireSynchronous: ?boolean):
-      null | Promise<PartitionConnection> | PartitionConnection {
+  asActiveConnection (requireSynchronous: ?boolean):
+      null | Promise<Connection> | Connection {
     try {
       if (requireSynchronous && (this._activeConnection !== this)) {
         throw new Error(`Active connection required but not synchronously available for ${
@@ -238,7 +238,7 @@ export default class PartitionConnection extends Follower {
       throw new Error(
           `Cannot get an active connection promise from connection which is not being activated`);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`getActiveConnection(${
+      throw this.wrapErrorEvent(error, new Error(`asActiveConnection(${
           requireSynchronous ? "sync" : "async"})`));
     }
   }
@@ -249,7 +249,7 @@ export default class PartitionConnection extends Follower {
    *
    * @param {NarrateOptions} [options={}]
    * @returns {Promise<Object>}
-   * @memberof PartitionConnection
+   * @memberof Connection
    */
   narrateEventLog (options: ?NarrateOptions = {}): Promise<Object> {
     if (!options) return undefined;
@@ -263,7 +263,7 @@ export default class PartitionConnection extends Follower {
    *
    * @param {ChronicleOptions} [options={}]
    * @returns {Promise<Object>}
-   * @memberof PartitionConnection
+   * @memberof Connection
    */
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
     if (!options) return undefined;
@@ -396,7 +396,7 @@ export default class PartitionConnection extends Follower {
    * This availability is impermanent. If the contentHash is not
    * referred to by the event log the content will eventually be
    * garbage collected.
-   * The particular Prophet chain of this connection will define the
+   * The particular Sourcerer chain of this connection will define the
    * specific details of garbage collection (see Scribe for its local
    * content caching semantics).
    *
@@ -412,7 +412,7 @@ export default class PartitionConnection extends Follower {
    * @param {*} content
    * @param {MediaInfo} [mediaInfo]
    * @returns {{ contentHash: string, persistProcess: ?Promise<any> }}
-   * @memberof PartitionConnection
+   * @memberof Connection
    */
   prepareBvob (content: any, mediaInfo?: MediaInfo):
       { contentHash: string, persistProcess: ?Promise<any> } {

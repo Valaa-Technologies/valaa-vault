@@ -1220,9 +1220,8 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
     isEnabled: (focus?: Vrapper) => focus && focus.isActivating(),
     rootValue: ({ delegate: [
       (focus, component) => {
-        component.enqueueRerenderIfPromise(Promise
-            .resolve(focus.activate())
-            .then(() => undefined)); // undefined triggers re-render
+        const activation = focus.activate();
+        if (activation) activation.then(() => component.forceUpdate());
         return undefined;
       },
       loadingLens,

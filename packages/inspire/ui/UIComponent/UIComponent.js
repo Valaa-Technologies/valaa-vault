@@ -609,7 +609,7 @@ class UIComponent extends React.Component {
   enqueueRerenderIfPromise (maybePromise: any | Promise) {
     if (!isPromise(maybePromise)) return false;
     return maybePromise.then(renderValue => {
-      this._pendingRenderValue = renderValue;
+      this._pendingRenderValue = (renderValue === undefined) ? null : renderValue;
       this.forceUpdate();
     });
   }

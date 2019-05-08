@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.27](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.26...v0.34.0-prerelease.27) (2019-05-08)
+
+
+### Bug Fixes
+
+* 601, 602 - Desync when refreshing browser while media write to authority not completed ([ba59e88](https://github.com/valaatech/vault/commit/ba59e88))
+
+
+
+
+
 # [0.34.0-prerelease.26](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.25...v0.34.0-prerelease.26) (2019-05-06)
 
 **Note:** Version bump only for package @valos/tools

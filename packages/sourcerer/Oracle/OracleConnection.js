@@ -54,10 +54,8 @@ export default class OracleConnection extends Connection {
       },
       function _narrateEventLog () {
         if (options.narrateOptions === false) return {};
-        return connection.narrateEventLog({
-          subscribeEvents: options.subscribeEvents,
-          ...options.narrateOptions,
-        });
+        options.narrateOptions.subscribeEvents = options.subscribeEvents;
+        return connection.narrateEventLog(options.narrateOptions);
       },
     ]));
   }

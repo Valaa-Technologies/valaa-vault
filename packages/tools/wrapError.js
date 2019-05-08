@@ -191,13 +191,13 @@ function outputError (error, header = "Exception caught",
     error.customErrorHandler(logger);
   }
   if (error.originalError) {
-    logger.log(error.originalError.tidyFrameList.join("\n"));
+    logger.log((error.originalError.tidyFrameList || []).join("\n"));
   } else {
     logger.log(error.stack.split("\n").slice(1).join("\n"));
   }
   for (const context of (error.errorContexts || [])) {
     logger.warn(...context.contextDescriptions.map(dumpifyObject));
-    logger.log((context.tidyFrameList).join("\n"));
+    logger.log((context.tidyFrameList || []).join("\n"));
   }
 }
 

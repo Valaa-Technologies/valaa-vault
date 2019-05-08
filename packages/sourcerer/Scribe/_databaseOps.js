@@ -53,6 +53,11 @@ export async function _initializeSharedIndexedDB (scribe: Scribe) {
     bvobs.openCursor().onsuccess = event => {
       const cursor: IDBCursorWithValue = event.target.result;
       if (!cursor) return;
+      /*
+       * FIXME(iridian, 2019-05): Fix a race condition: a command can
+       * be persisted to queue before its ref count is. A refresh will
+       * leave the db in inconsistent state with the refcount as 0.
+       * Thus we now record all entries even if ref count is 0.
       if (cursor.value.persistRefCount <= 0) {
         // FIXME(iridian, 2019-03): Deletion disabled until garbage
         // if (cursor.value.byteLength) releasedBytes += cursor.value.byteLength;
@@ -60,7 +65,9 @@ export async function _initializeSharedIndexedDB (scribe: Scribe) {
         // buffers.delete(cursor.key);
         // cursor.delete();
         // ++clearedBuffers;
-      } else if (!contentLookup[cursor.key]) {
+      } else
+      */
+      if (!contentLookup[cursor.key]) {
         contentLookup[cursor.key] = { ...cursor.value, inMemoryRefCount: 0 };
         if (cursor.value.byteLength) totalBytes += cursor.value.byteLength;
       }

@@ -87,9 +87,10 @@ export default class FalseProphet extends Sourcerer {
   }
 
   _createDiscourse (follower: Follower, options: ?Object = {}) {
-    return new FalseProphetDiscourse({
-      sourcerer: this, follower, verbosity: follower.getVerbosity(), ...options,
-    });
+    options.sourcerer = this;
+    options.follower = follower;
+    if (options.verbosity === undefined) options.verbosity = follower.getVerbosity();
+    return new FalseProphetDiscourse(options);
   }
 
   // Split a command and transmit resulting partition commands towards upstream.

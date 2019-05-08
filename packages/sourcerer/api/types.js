@@ -38,7 +38,7 @@ export type NarrateOptions = {
   snapshots?: boolean,             // default: true, currently ignored. Start narration from most
                                    // recent snapshot within provided event range
   commands?: boolean,              // default: true. Narrate pending commands as well.
-  rechronicleOptions?: boolean,    // default: {}. Chronicle pending commands on the side.
+  rechronicleOptions?: ChronicleOptions, // default: {}. Chronicle pending commands on the side.
   receiveTruths?: ReceiveEvents,   // default: connection receiveTruths.
                                    //   Callback for downstream truth events.
   receiveCommands?: ReceiveEvents, // default: receiveTruths. Callback for re-narrated commands

@@ -73,16 +73,17 @@ export default class ScribeConnection extends Connection {
 
   _doConnect (options: ConnectOptions) {
     if (this._sourcerer._upstream) {
-      this.setUpstreamConnection(this._sourcerer._upstream.acquireConnection(
-          this.getPartitionURI(), {
-            // Set the permanent receiver without options.receiveTruths,
-            // initiate connection but disable initial narration; perform
-            // the initial optimistic narrateEventLog later below using
-            // options.receiveTruths.
-            ...options,
-            receiveTruths: this.getReceiveTruths(), narrateOptions: false,
-            subscribeEvents: (options.narrateOptions === false) && options.subscribeEvents,
-          }));
+      const upstreamOptions = Object.create(options);
+      // Set the permanent receiver without options.receiveTruths,
+      // initiate connection but disable initial narration; perform
+      // the initial optimistic narrateEventLog later below using
+      // options.receiveTruths.
+      upstreamOptions.receiveTruths = this.getReceiveTruths();
+      upstreamOptions.narrateOptions = false;
+      upstreamOptions.subscribeEvents = (options.narrateOptions === false)
+          && options.subscribeEvents;
+      this.setUpstreamConnection(
+          this._sourcerer._upstream.acquireConnection(this.getPartitionURI(), upstreamOptions));
     }
     // ScribeConnection can be active even if the upstream
     // connection isn't, as long as there are any events in the local
@@ -101,9 +102,9 @@ export default class ScribeConnection extends Connection {
       ]),
       function _postUpstreamConnectNarrate () {
         if (options.narrateOptions === false) return undefined;
-        return connection.narrateEventLog({
-          subscribeEvents: options.subscribeEvents, ...options.narrateOptions,
-        });
+        const narrateOptions = (options.narrateOptions || {});
+        narrateOptions.subscribeEvents = options.subscribeEvents;
+        return connection.narrateEventLog(narrateOptions);
       },
     ]), function errorOnScribePartitionConnect (error) {
       throw connection.wrapErrorEvent(error, new Error("_doConnect"),
@@ -135,15 +136,12 @@ export default class ScribeConnection extends Connection {
     const connection = this;
     const wrap = new Error("narrateEventLog()");
     const ret = {};
-    return thenChainEagerly(null, [
-      () => _narrateEventLog(this, options, ret),
-      () => this.clockEvent(2, () => ["scribe.narrate.done"]),
-      () => ret,
-    ], function errorOnScribeNarrateEventLog (error) {
-      throw connection.wrapErrorEvent(error, wrap,
-          "\n\toptions:", ...dumpObject(options),
-          "\n\tcurrent ret:", ...dumpObject(ret));
-    });
+    return _narrateEventLog(this, options, ret,
+        function errorOnScribeNarrateEventLog (error) {
+          throw connection.wrapErrorEvent(error, wrap,
+              "\n\toptions:", ...dumpObject(options),
+              "\n\tcurrent ret:", ...dumpObject(ret));
+        });
   }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {

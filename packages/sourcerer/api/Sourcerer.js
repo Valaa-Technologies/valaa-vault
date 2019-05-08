@@ -117,8 +117,7 @@ export default class Sourcerer extends LogEventGenerator {
    *
    * @memberof Sourcerer
    */
-  acquireConnection (partitionURI: ValaaURI,
-      options: ConnectOptions = {}): ?Connection {
+  acquireConnection (partitionURI: ValaaURI, options: ConnectOptions = {}): ?Connection {
     try {
       let connection = this._connections[String(partitionURI)];
       if (connection) return connection;
@@ -127,7 +126,8 @@ export default class Sourcerer extends LogEventGenerator {
         throw new Error(
             "Can't create new partition connection with options.newConnection === false");
       }
-      connection = this._createConnection(partitionURI, { ...options, connect: false });
+      connection = this._createConnection(partitionURI,
+          Object.assign(Object.create(options), { connect: false }));
       if (!connection) return undefined;
       connection.addReference();
       this._connections[String(partitionURI)] = connection;

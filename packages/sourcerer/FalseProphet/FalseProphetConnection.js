@@ -97,6 +97,9 @@ export default class FalseProphetConnection extends Connection {
   narrateEventLog (options: ?NarrateOptions = {}): Promise<Object> {
     if (!options) return undefined;
     if (options.identity === undefined) options.identity = this._originatingIdentity;
+    if (options.rechronicleOptions !== false) {
+      (options.rechronicleOptions || (options.rechronicleOptions = {})).identity = options.identity;
+    }
     return super.narrateEventLog(options);
   }
 
@@ -209,9 +212,8 @@ export default class FalseProphetConnection extends Connection {
         leadingTruths = undefined;
         renarration = undefined;
         events = connection._unconfirmedCommands; // eslint-disable-line no-param-reassign
-        chronicling = connection._upstreamConnection.chronicleEvents(events, {
-          isLocallyPersisted: false, ...options,
-        });
+        options.isLocallyPersisted = false;
+        chronicling = connection._upstreamConnection.chronicleEvents(events, options);
         return thenChainEagerly(null, functionChain, onRejected);
       });
       return {

@@ -236,7 +236,8 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribeConnect
       if (contentHash) {
         content = content
             || connection._sourcerer.tryGetCachedBvobContent(contentHash)
-            || (options.retrieveMediaBuffer && (await options.retrieveMediaBuffer(mediaInfo)));
+            || (!options.retrieveMediaBuffer ? undefined
+                : (await options.retrieveMediaBuffer(mediaInfo)));
         if ((content !== undefined) && options.prepareBvob) {
         // TODO(iridian): Determine whether media content should be pre-cached or not.
           const preparation = await options.prepareBvob(content, mediaInfo);
@@ -349,7 +350,11 @@ function _getMediaContent (connection: ScribeConnection, mediaInfo: MediaInfo,
   const bvobInfo = connection._sourcerer._bvobLookup[contentHash];
   if (bvobInfo) {
     actualInfo.buffer = bvobInfo.buffer || bvobInfo.pendingBuffer
-        || (bvobInfo.persistRefCount && connection._sourcerer.readBvobContent(contentHash));
+    // TODO(iridian, 2019-05): even ref count 0 is persisted at the
+    // moment. Once finalizing the ref count persistence system, fix
+    // this site as well.
+        || ((bvobInfo.persistRefCount !== undefined)
+          && connection._sourcerer.readBvobContent(contentHash));
     const isArrayBufferType = !actualInfo.type
         || (actualInfo.type === "application" && actualInfo.subtype === "octet-stream");
     if (isArrayBufferType && actualInfo.buffer) return actualInfo.buffer;

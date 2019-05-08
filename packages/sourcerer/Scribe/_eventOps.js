@@ -32,50 +32,64 @@ export const vdoc = vdon({
 #     #  #    #  #    #  #    #  #    #     #    ######
 */
 
-export async function _narrateEventLog (connection: ScribeConnection,
-    options: NarrateOptions, ret: Object) {
-  const localResults = await _narrateLocalLogs(connection,
-      options.receiveTruths, options.receiveCommands, options.eventIdBegin, options.eventIdEnd,
-      options.retrieveMediaBuffer);
-
-  Object.assign(ret, localResults);
-
-  if ((options.remote === false) || !connection.getUpstreamConnection()) return ret;
-
-  if ((options.rechronicleOptions !== false) && (localResults.scribeCommandQueue || []).length) {
-    // Resend all cached commands to remote on the side. Do not wait for success or results.
-    connection.chronicleEvents(localResults.scribeCommandQueue, options.rechronicleOptions || {});
-  }
-
-  const upstreamNarration = thenChainEagerly(null, connection.addChainClockers(2,
-      "scribe.narrate.remote.ops", [
-    function _waitActiveUpstream () {
-      return connection.getUpstreamConnection().asActiveConnection();
-    },
-    function _narrateUpstreamEventLog (connectedUpstream) {
-      return connectedUpstream.narrateEventLog({
-        ...options,
-        receiveTruths: connection.getReceiveTruths(options.receiveTruths),
-        eventIdBegin: Math.max(options.eventIdBegin || 0, connection.getFirstUnusedTruthEventId()),
-      });
-    },
-  ]));
-
-  if ((options.fullNarrate !== true)
-      && (options.newPartition
-          || (ret.scribeTruthLog || []).length || (ret.scribeCommandQueue || []).length)) {
-    connection.clockEvent(2, () => ["scribe.narrate.local.done",
-      "Initiated async upstream narration, local narration results:", ret,
-    ]);
-  } else {
-    const upstreamResults = await _waitForRemoteNarration(connection, upstreamNarration, options);
-    connection.clockEvent(2, () => ["scribe.narrate.remote.done",
-      "Awaited upstream narration, local narration results:", ret,
-      "\n\tupstream results:", upstreamResults,
-    ]);
-    Object.assign(ret, upstreamResults);
-  }
-  return ret;
+export function _narrateEventLog (connection: ScribeConnection,
+    options: NarrateOptions, ret: Object, onError: Function) {
+  const upstream = connection.getUpstreamConnection();
+  return thenChainEagerly(null, connection.addChainClockers(2, "scribe.narrate.ops", [
+    _narrateLocalLogs.bind(null, connection,
+        options.receiveTruths, options.receiveCommands,
+        options.eventIdBegin, options.eventIdEnd,
+        options.retrieveMediaBuffer),
+    function _receiveLocalResults (localResults) { Object.assign(ret, localResults); },
+    ...(upstream && (options.remote !== false) ? [
+      function _activateUpstream () { return upstream.asActiveConnection(); },
+      function _maybeInitiateRechronicleCommands () {
+        if (options.rechronicleOptions === false || !(ret.scribeCommandQueue || []).length) return;
+        // Resend all cached commands to remote on the side.
+        // Do not wait for success or results, ie. don't return this sub-chain.
+        thenChainEagerly(ret.scribeCommandQueue, [
+          commands => _receiveEvents(
+              connection, commands, null, null, "rechronicleCommands", onError),
+          receivedCommands => connection.getUpstreamConnection()
+              .chronicleEvents(receivedCommands, options.rechronicleOptions || {}),
+        ], onError);
+      },
+      function _narrateUpstreamEventLog () {
+        // Initiate upstream narration in any case...
+        const upstreamNarration = upstream.narrateEventLog(Object.assign(Object.create(options), {
+          receiveTruths: connection.getReceiveTruths(options.receiveTruths),
+          eventIdBegin: Math.max(
+              options.eventIdBegin || 0,
+              connection.getFirstUnusedTruthEventId()),
+        }));
+        // ...but only wait for it if requested or if we didn't find any local events
+        return ((options.fullNarrate === true)
+                || !(options.newPartition
+                    || (ret.scribeTruthLog || []).length || (ret.scribeCommandQueue || []).length))
+            && upstreamNarration;
+      },
+      function _processUpstreamNarrationResults (upstreamNarration) {
+        // Handle step 2 of the opportunistic narration if local narration
+        // didn't find any truths by waiting for the upstream narration.
+        const sectionNames = upstreamNarration && Object.keys(upstreamNarration);
+        if (!sectionNames || !sectionNames.length) return undefined;
+        return mapEagerly(sectionNames.map(name => upstreamNarration[name]),
+            (section, index) => (ret[sectionNames[index]] = !Array.isArray(section)
+                ? section
+                : mapEagerly(section, entry => entry,
+                    function _onResultEventError (error, entry, entryIndex) {
+                      entry.localPersistError = error;
+                      const wrapped = connection.wrapErrorEvent(error,
+                          `narrateEventLog.upstreamResults[${name}][${entryIndex}]`,
+                          "\n\toptions:", ...dumpObject(options),
+                          "\n\tsection:", ...dumpObject(section));
+                      if (error.blocksNarration) throw wrapped;
+                      connection.outputErrorEvent(wrapped);
+                    })));
+      },
+    ] : []),
+    () => ret,
+  ]), onError);
 }
 
 async function _narrateLocalLogs (connection: ScribeConnection,
@@ -121,37 +135,6 @@ async function _narrateLocalLogs (connection: ScribeConnection,
   return ret;
 }
 
-async function _waitForRemoteNarration (connection: ScribeConnection,
-    upstreamNarration: Object, options: NarrateOptions,
-): Object {
-  // Handle step 2 of the opportunistic narration if local narration
-  // didn't find any truths by waiting for the upstream narration.
-  connection.clockEvent(2, () => ["scribe.narrate.remote.ops.await"]);
-  const upstreamResults = await upstreamNarration;
-  connection.clockEvent(2, () => ["scribe.narrate.remote.results.await"]);
-  for (const key of Object.keys(upstreamResults)) {
-    const resultEntries = (upstreamResults[key] = await upstreamResults[key]);
-    if (!Array.isArray(resultEntries)) continue;
-    for (let i = 0; i !== resultEntries.length; ++i) {
-      const entry = resultEntries[i];
-      // WTF is this? getLocalEvent is a chronicleEvents
-      // eventResults[0].getLocalEvent thing
-      if (!entry.getLocalEvent) continue;
-      try {
-        await entry.getLocalEvent();
-      } catch (error) {
-        entry.localPersistError = error;
-        const wrapped = connection.wrapErrorEvent(error,
-            `narrateEventLog.upstreamResults[${key}][${i}]`,
-            "\n\toptions:", ...dumpObject(options),
-            "\n\tupstreamResults:", ...dumpObject(upstreamResults));
-        if (error.blocksNarration) throw wrapped;
-        connection.outputErrorEvent(wrapped);
-      }
-    }
-  }
-  return upstreamResults;
-}
 
 /*
  #####
@@ -288,11 +271,12 @@ export function _receiveEvents (
     events: EventBase,
     retrieveMediaBuffer: RetrieveMediaBuffer = connection.readMediaContent.bind(connection),
     downstreamReceiveTruths: ReceiveEvents,
-    type: "receiveTruths" | "receiveCommands",
+    type: "receiveTruths" | "receiveCommands" | "rechronicleCommands",
     onError: Function,
 ) {
-  const receivingTruths = (type === "receiveTruths");
-  let actionIdLowerBound = receivingTruths
+  const isReceivingTruths = (type === "receiveTruths");
+  const isRechronicling = (type === "rechronicleCommands");
+  let actionIdLowerBound = (isReceivingTruths || isRechronicling)
       ? connection.getFirstUnusedTruthEventId() : connection.getFirstUnusedCommandEventId();
   const mediaPreOps = {};
   const newActions = [];
@@ -319,9 +303,12 @@ export function _receiveEvents (
 
   const syncOptions = {
     retryTimes: 4, delayBaseSeconds: 5, blockOnBrokenDownload: false,
-    retrieveMediaBuffer: receivingTruths && retrieveMediaBuffer,
+    retrieveMediaBuffer:
+        isReceivingTruths ? retrieveMediaBuffer
+        : isRechronicling ? ({ contentHash }) => connection._sourcerer.readBvobContent(contentHash)
+        : undefined,
     prepareBvob: (content, mediaInfo) => connection.prepareBvob(
-        content, { ...mediaInfo, prepareBvobToUpstream: !receivingTruths }),
+        content, { ...mediaInfo, prepareBvobToUpstream: !isReceivingTruths }),
   };
   const persist = connection.isLocallyPersisted();
 
@@ -347,19 +334,19 @@ export function _receiveEvents (
         onError);
   }
   let writeEventsProcess;
-  if (!receivingTruths) {
+  if (isReceivingTruths) {
+    const lastTruth = newActions[newActions.length - 1];
+    connection._truthLogInfo.eventIdEnd = lastTruth.aspects.log.index + 1;
+    writeEventsProcess = persist
+        && Promise.all(connection._truthLogInfo.writeQueue.push(...newActions));
+    connection._triggerTruthLogWrites(lastTruth.aspects.command.id);
+  } else if (!isRechronicling) {
     connection._commandQueueInfo.eventIdEnd += newActions.length;
     writeEventsProcess = persist
         && Promise.all(connection._commandQueueInfo.writeQueue.push(...newActions));
     newActions.forEach(action =>
         connection._commandQueueInfo.commandIds.push(action.aspects.command.id));
     connection._triggerCommandQueueWrites();
-  } else {
-    const lastTruth = newActions[newActions.length - 1];
-    connection._truthLogInfo.eventIdEnd = lastTruth.aspects.log.index + 1;
-    writeEventsProcess = persist
-        && Promise.all(connection._truthLogInfo.writeQueue.push(...newActions));
-    connection._triggerTruthLogWrites(lastTruth.aspects.command.id);
   }
 
   const newActionIndex = receivedActions.length - newActions.length;
@@ -374,7 +361,7 @@ export function _receiveEvents (
   ], (error, stepIndex, head) => {
     error.isSchismatic = true;
     if ((error.originalError || error).cacheConflict) error.isReviseable = true;
-    onError(connection.wrapErrorEvent(error,
+    return onError(connection.wrapErrorEvent(error,
         new Error(`_receiveEvents(${type}).${
           stepIndex === 0 ? "contentSync" : "updateMediaEntries"}`),
         "\n\tmediaPreOps:", ...dumpObject(mediaPreOps),

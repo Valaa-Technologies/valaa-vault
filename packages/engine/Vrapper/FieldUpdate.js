@@ -8,6 +8,8 @@ import Vrapper from "~/engine/Vrapper";
 
 import { arrayFromAny } from "~/tools";
 
+const _unsetValue = Symbol("LiveUpdate.UnsetValue");
+
 export class LiveUpdate {
   _emitter: Vrapper;
   _valkOptions: ?Object;
@@ -30,7 +32,24 @@ export class LiveUpdate {
   getState (): Object { return this._valkOptions.state || this.getDiscourse().getState(); }
   getJSState (): Object { return this.getState().toJS(); }
   value (): ?any {
-    return (this._value !== undefined) ? this._value : (this._value = this._resolveValue());
+    return (this._value !== _unsetValue) ? this._value : (this._value = this._resolveValue());
+  }
+  clearValue () { this._value = _unsetValue; }
+  refreshValue () {
+    const newValue = this._resolveValue();
+    const oldValue = this._value;
+    if (newValue === this._value) return false;
+    if (typeof newValue === typeof oldValue) {
+      if (Array.isArray(newValue) && Array.isArray(this._value)) {
+        if (newValue.length === this._value.length) {
+          let i = 0;
+          for (; i !== newValue.length; ++i) if (newValue[i] !== oldValue[i]) break;
+          if (i === newValue.length) return false;
+        }
+      }
+    }
+    this._value = newValue;
+    return true;
   }
 
   // FieldUpdate / field Subscription properties
@@ -147,3 +166,5 @@ export class LiveUpdate {
     return undefined;
   }
 }
+
+LiveUpdate.prototype._value = _unsetValue;

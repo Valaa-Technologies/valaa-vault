@@ -10,6 +10,7 @@ import engineSteppers from "~/engine/VALEK/engineSteppers";
 // other: call corresponding function callback, if it returns performDefaultGet then use default,
 //        otherwise return the value directly.
 export default Object.assign(Object.create(engineSteppers), {
+  kuerySubscription: null,
   "§nonlive": engineSteppers,
   "§.": _liveAccess,
   "§new": _throwMutationLiveKueryError,
@@ -34,7 +35,7 @@ function _liveAccess (valker: Valker, head: any, scope: any,
     accessStep: any[] /* , nonFinalStep: ?boolean */) {
   const hostRef = tryHostRef(head);
   if (hostRef) {
-    const kuerySubscription = valker._runOptions.kuerySubscription;
+    const kuerySubscription = this.kuerySubscription;
     const vrapper = kuerySubscription._emitter.engine
         .getVrapper(hostRef, kuerySubscription._valkOptions);
     // TODO(iridian, 2019-04): Replace the 'true' with false if this is

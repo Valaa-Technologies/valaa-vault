@@ -142,12 +142,12 @@ export default class Subscription extends LiveUpdate {
     const subscription = this;
     if (onUpdate) then(onUpdate);
     return asRepeathenable && { then };
-    function then (thenOnUpdate) {
-      callbacks.push([callbackKey, thenOnUpdate]);
+    function then (callback) {
+      callbacks.push([callbackKey, callback]);
       if (!subscription._attachedHooks) {
         subscription.attachHooks(immediateUpdate !== false);
       } else if (immediateUpdate !== false) {
-        subscription._triggerOnUpdate(thenOnUpdate);
+        subscription._triggerPostUpdate(callback);
       }
     }
   }
@@ -167,30 +167,24 @@ export default class Subscription extends LiveUpdate {
   }
 
   _broadcastUpdate = (liveUpdate: LiveUpdate, passageCounter: number) => {
-    thenChainEagerly(undefined, [
-      () => ((liveUpdate._fieldFilter !== undefined) ? undefined : liveUpdate.value()),
-      (value) => {
-        liveUpdate._value = value;
-        for (const [listener, callbacks] of this._listeners) {
-          let maxlen = callbacks.length;
-          for (let i = 0; i !== maxlen; ++i) {
-            let keepCallback;
-            try {
-              keepCallback = callbacks[i][1](liveUpdate, passageCounter);
-            } catch (error) {
-              outputError(errorOnEmitLiveUpdate.call(
-                      this, error, 1, listener, (callbacks[i] || [])[0]),
-                  `Exception caught during broadcastUpdate, removing listener callback`);
-              keepCallback = false;
-            }
-            if (keepCallback === false) callbacks[i--] = callbacks[--maxlen];
-          }
-          callbacks.length = maxlen;
-          if (!callbacks.length) this._listeners.delete(listener);
+    for (const [listener, callbacks] of this._listeners) {
+      let maxlen = callbacks.length;
+      for (let i = 0; i !== maxlen; ++i) {
+        let keepCallback;
+        try {
+          keepCallback = callbacks[i][1](liveUpdate, passageCounter);
+        } catch (error) {
+          outputError(errorOnEmitLiveUpdate.call(
+                  this, error, 1, listener, (callbacks[i] || [])[0]),
+              `Exception caught during broadcastUpdate, removing listener callback`);
+          keepCallback = false;
         }
-        if (!this._listeners.size) this.detachHooks();
-      },
-    ], (error, stage) => { throw errorOnEmitLiveUpdate.call(this, error, stage); });
+        if (keepCallback === false) callbacks[i--] = callbacks[--maxlen];
+      }
+      callbacks.length = maxlen;
+      if (!callbacks.length) this._listeners.delete(listener);
+    }
+    if (!this._listeners.size) this.detachHooks();
     function errorOnEmitLiveUpdate (error, stage, listener, callbackKey) {
       return wrapError(error, new Error(`_broadcastUpdate(stage #${stage}, ${passageCounter})`),
           "\n\temitter:", liveUpdate.getEmitter(),
@@ -222,11 +216,11 @@ export default class Subscription extends LiveUpdate {
         this.attachFilterHook(this._emitter, this._fieldFilter, false);
       } else if (this._liveKuery !== undefined) {
         this.attachLiveKueryHooks(triggerBroadcast !== false);
-        return; // skip _triggerOnUpdate below
+        return; // skip _triggerPostUpdate below
       } else if (this._fieldName === undefined) {
         throw new Error("Subscription is uninitialized, cannot determine listeners");
       }
-      if (triggerBroadcast !== false) this._triggerOnUpdate();
+      if (triggerBroadcast !== false) this._triggerPostUpdate();
     } catch (error) {
       if (this._attachedHooks) this.detachHooks();
       const origin = new Error(
@@ -268,14 +262,16 @@ export default class Subscription extends LiveUpdate {
 
   triggerFieldUpdate (state: Object, previousState: Object, passageCounter: ?number) {
     // console.log("triggerFieldUpdate", this.debugId(), passageCounter, this._seenPassageCounter);
+    const previousCounter = this._seenPassageCounter;
     if (passageCounter !== undefined) {
       if (this._seenPassageCounter >= passageCounter) return;
       this._seenPassageCounter = passageCounter;
     }
-    this._value = undefined;
     this._valkOptions.state = state;
     this._valkOptions.previousState = previousState;
-    this._broadcastUpdate(this, passageCounter);
+    const previousValue = this._value;
+    const refreshed = this.refreshValue();
+    if (refreshed) this._broadcastUpdate(this, passageCounter);
   }
 
   attachFilterHook (emitter: Vrapper, filter: Function | boolean, isStructural: ?boolean) {
@@ -299,14 +295,15 @@ export default class Subscription extends LiveUpdate {
   }
 
   attachLiveKueryHooks (triggerBroadcast: ?boolean) {
-    const options: any = this._valkOptions;
+    const options: any = Object.create(this._valkOptions);
     let scope;
     try {
-      scope = this._valkOptions.scope ? Object.create(this._valkOptions.scope) : {};
-      this._value = this.getDiscourse().run(this._liveHead, this._liveKuery,
-          { ...options, scope, steppers: liveKuerySteppers, kuerySubscription: this });
+      options.scope = this._valkOptions.scope ? Object.create(this._valkOptions.scope) : {};
+      options.steppers = Object.create(liveKuerySteppers);
+      options.steppers.kuerySubscription = this;
+      this._value = this.getDiscourse().run(this._liveHead, this._liveKuery, options);
       if (triggerBroadcast) {
-        this._triggerOnUpdate();
+        this._triggerPostUpdate();
       }
     } catch (error) {
       this.detachHooks();
@@ -356,12 +353,11 @@ export default class Subscription extends LiveUpdate {
       if (this._valkOptions.state === newState) return;
       this._valkOptions.state = newState;
     }
-    this._value = undefined;
     if (isStructural === false) {
       // TODO(iridian, 2019-03): Some of the field handlers are now
       // properly marked as non-structural with hookData === false.
       // Fill the rest too.
-      this._broadcastUpdate(this, passageCounter);
+      if (this.refreshValue()) this._broadcastUpdate(this, passageCounter);
       return;
     }
     // TODO(iridian): PERFORMANCE CONCERN: Refreshing the kuery
@@ -377,7 +373,7 @@ export default class Subscription extends LiveUpdate {
     this.attachHooks(true);
   }
 
-  _triggerOnUpdate (onUpdate = this._broadcastUpdate, passageCounter) {
+  _triggerPostUpdate (onUpdate = this._broadcastUpdate, passageCounter) {
     if (this._fieldFilter === undefined) {
       onUpdate(this, passageCounter);
       return;
@@ -386,11 +382,11 @@ export default class Subscription extends LiveUpdate {
     for (const [fieldName, intro] of Object.entries(fieldIntros)) {
       if (!intro.isGenerated && ((this._fieldFilter === true) || this._fieldFilter(intro))) {
         this._fieldName = fieldName;
-        this._value = undefined;
+        this.refreshValue();
         onUpdate(this, passageCounter);
       }
     }
     this._fieldName = undefined;
-    this._value = undefined;
+    this.clearValue();
   }
 }

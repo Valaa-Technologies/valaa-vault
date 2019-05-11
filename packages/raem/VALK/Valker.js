@@ -146,7 +146,7 @@ export default class Valker extends Resolver {
   }
 
   run (head: any, kuery: any,
-      { scope, state, verbosity, pure, sourceInfo, steppers, ...runOptions }: VALKOptions = {}) {
+      { scope, state, verbosity, pure, sourceInfo, steppers }: VALKOptions = {}) {
     const valker = Object.create(this);
     if (pure !== undefined) valker.pure = pure;
     if (verbosity !== undefined) {
@@ -155,9 +155,6 @@ export default class Valker extends Resolver {
     }
     if (state !== undefined) valker.setState(state, "valker.run");
     if (steppers !== undefined) valker.setSteppers(steppers);
-    if (runOptions !== undefined) {
-      valker._runOptions = Object.assign(Object.create(valker._runOptions || null), runOptions);
-    }
 
     const packedHead = valker.tryPack(head);
     let kueryVAKON = kuery;

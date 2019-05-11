@@ -712,7 +712,8 @@ export default class Vrapper extends Cog {
     const discourse = options.discourse;
     if (this._phase === ACTIVE) {
       if (options.scope === undefined) options.scope = this.getLexicalScope();
-      if (discourse && discourse._runOptions && !options.state && !(kuery instanceof Kuery)) {
+      if (discourse && discourse._steppers.kuerySubscription
+          && !options.state && !(kuery instanceof Kuery)) {
         return discourse.tryUnpack(Object.create(discourse)
             .advance(discourse.tryPack(head), kuery, options.scope));
       }
@@ -1090,8 +1091,7 @@ export default class Vrapper extends Cog {
     let valueEntry;
     let ret;
     try {
-      const kuerySubscription = options.discourse && options.discourse._runOptions
-          && options.discourse._runOptions.kuerySubscription;
+      const kuerySubscription = options.discourse && options.discourse._steppers.kuerySubscription;
       if (kuerySubscription) {
         kuerySubscription.attachKueryFieldHook(this, "value", true);
       }
@@ -1224,8 +1224,7 @@ export default class Vrapper extends Cog {
             "\n\ttype:", activeTypeName,
             "\n\tobject:", this);
       }
-      const kuerySubscription = options.discourse && options.discourse._runOptions
-          && options.discourse._runOptions.kuerySubscription;
+      const kuerySubscription = options.discourse && options.discourse._steppers.kuerySubscription;
       if (kuerySubscription) {
         kuerySubscription.attachFilterHook(this, true, true);
       }

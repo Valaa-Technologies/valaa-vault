@@ -37,9 +37,9 @@ export function _bindLiveKuery (component: UIComponent, bindingSlot: string,
   if (!options.onUpdate && !options.asRepeathenable) {
     throw new Error("bindLiveKuery.options must specify either onUpdate or asRepeathenable");
   }
-  options.obtainSubscriptionTransaction = engine.getActiveGlobalOrNewLocalEventGroupTransaction;
   const subscription = (head instanceof Vrapper ? head : engine)
-      .obtainSubscription(kuery, options, head);
+      .obtainSubscription(
+          kuery, options, engine.getActiveGlobalOrNewLocalEventGroupTransaction, head);
   component._subscriptions[bindingSlot] = subscription;
   return subscription.addListenerCallback(component, bindingSlot,
       options.onUpdate, options.updateImmediately, options.asRepeathenable);
@@ -57,14 +57,14 @@ export function _unbindSubscription (component: UIComponent, bindingSlot: string
     _removeSubscriptions(component, subscriptions, bindingSlot);
     component._subscriptions[bindingSlot] = undefined;
   } else if (options.require !== false) {
-    console.warn("UIComponent.unbindSubscription, cannot find subscriber", bindingSlot);
+    console.warn("UIComponent.unbindSubscription, no subscription in slot", bindingSlot);
   }
 }
 
-function _removeSubscriptions (component: UIComponent, subscriptions: Object, bindingSlot: string) {
+function _removeSubscriptions (component: UIComponent, subscriptions: Object, slot: string) {
   if (!subscriptions) return;
-  if (!Array.isArray(subscriptions)) subscriptions.removeListenerCallback(this, bindingSlot);
+  if (!Array.isArray(subscriptions)) subscriptions.removeListenerCallback(component, slot);
   else {
-    subscriptions.forEach(subscription => subscription.removeListenerCallback(this, bindingSlot));
+    subscriptions.forEach(subscription => subscription.removeListenerCallback(component, slot));
   }
 }

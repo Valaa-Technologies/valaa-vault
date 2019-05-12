@@ -77,17 +77,35 @@ export default class LiveProps extends UIComponent {
     // Now uselessly reattaching listeners if the local focus changes.
     let frame = this.getUIContextValue("frame");
     if (frame === undefined) frame = {};
+    let livePropValues = OrderedMap();
     (Object.keys(props.liveProps) || []).forEach(kueryId => {
       const bindingSlot = `LiveProps_propskuery_${kueryId}`;
       const kuery = props.liveProps[kueryId];
       thenChainEagerly(null, [
         this.bindLiveKuery.bind(this, bindingSlot, frame, kuery,
             { asRepeathenable: true, scope: this.getUIContext() }),
-        (liveUpdate: LiveUpdate) => this.setState((prevState) => ({
-          livePropValues: (prevState.livePropValues || OrderedMap())
-              .set(kueryId, liveUpdate.value())
-        })),
+        (liveUpdate: LiveUpdate) => {
+          const update = value => {
+            const current = livePropValues || this.state.livePropValues || OrderedMap();
+            if ((value === current.get(kueryId))
+                && ((value !== undefined) || current.has(kueryId))) {
+              return;
+            }
+            this.setState((prevState) => ({
+              livePropValues: (prevState.livePropValues || OrderedMap()).set(kueryId, value),
+            }));
+          };
+          const maybePromise = liveUpdate.value();
+          if (livePropValues) livePropValues = livePropValues.set(kueryId, maybePromise);
+          if (isPromise(maybePromise)) maybePromise.then(update);
+          else if (!livePropValues) update(maybePromise);
+        },
       ], this._errorOnBindFocusSubscriptions.bind(this, bindingSlot, kuery));
+    });
+    this.setState(prev => {
+      const ret = { livePropValues: (prev.livePropValues || OrderedMap()).merge(livePropValues) };
+      livePropValues = undefined;
+      return ret;
     });
   }
 
@@ -127,7 +145,8 @@ export default class LiveProps extends UIComponent {
     if (value.hasInterface("Media") && !this.getBoundSubscription(bindingSlot)) {
       this.bindLiveKuery(bindingSlot, value, VALEK.toMediaContentField(), {
         onUpdate: function updateClassContent () {
-          return (this.tryFocus() !== focus) ? false : this.forceUpdate() || undefined;
+          if (this.tryFocus() !== focus) return false;
+          return this.forceUpdate() || undefined;
         }.bind(this),
         updateImmediately: false,
       });
@@ -158,7 +177,7 @@ export default class LiveProps extends UIComponent {
       const livePropValues = this.state.livePropValues || OrderedMap();
       for (const kueryId of Object.keys(this.props.liveProps)) {
         if (!livePropValues.has(kueryId)) {
-          unfinishedKueries.push({ name: kueryId, kuery: this.props.liveProps[kueryId] });
+          unfinishedKueries.push({ [kueryId]: this.props.liveProps[kueryId] });
         }
       }
       if (unfinishedKueries.length) {

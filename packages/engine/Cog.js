@@ -68,9 +68,7 @@ export default class Cog extends LogEventGenerator {
   run (head: any, kuery: Kuery, options: any = {}) {
     try {
       options.scope = options.scope ? Object.create(options.scope) : {};
-      return options.obtainSubscriptionTransaction
-          ? this.obtainSubscription(kuery, options, head)
-          : this.engine.discourse.run(head, kuery, options);
+      return this.engine.discourse.run(head, kuery, options);
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .run(), with:`,
           "\n\thead:", ...dumpObject(head),
@@ -83,8 +81,9 @@ export default class Cog extends LogEventGenerator {
     return this.engine.discourse.acquireTransaction(name);
   }
 
-  obtainSubscription (liveOperation: any, options: ?Object, head: ?any) {
-    return new Subscription(this, options).initialize(liveOperation, head);
+  obtainSubscription (liveOperation: any, options: ?Object, obtainDiscourse: Function, head: ?any) {
+    return new Subscription(this, options, obtainDiscourse)
+        .initialize(liveOperation, head);
   }
 
   // Implementation

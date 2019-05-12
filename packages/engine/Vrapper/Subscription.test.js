@@ -183,9 +183,9 @@ describe("Subscription", () => {
       const creatori1 = entities().creator.getGhostIn(entities()["test+1"]);
       const creatori1i1 = creatori1.getGhostIn(entities()["test+1+1"]);
 
-      creatori1i1.get(VALEK.propertyValue("counter"), {
-        obtainSubscriptionTransaction: () => harness.engine.discourse,
-      }).addListenerCallback(harness, "test", update => liveCallback(update.value()));
+      creatori1i1.obtainSubscription(
+              VALEK.propertyValue("counter"), {}, () => harness.engine.discourse)
+          .addListenerCallback(harness, "test", update => liveCallback(update.value()));
 
       expect(liveCallback.mock.calls.length).toBe(1);
       expect(liveCallback.mock.calls[0][0]).toEqual(0);

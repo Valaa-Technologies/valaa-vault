@@ -9,7 +9,7 @@ import { isBuiltinStep, getBuiltinStepName, getBuiltinStepArguments }
     from "~/raem/VALK/raemSteppers";
 
 import Language from "~/script/acorn/Language";
-import { ScopeAccessesTag } from "~/script/VALSK";
+import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
 
 import { invariantify, invariantifyObject, LogEventGenerator } from "~/tools";
 
@@ -43,6 +43,7 @@ export default class ValoscriptTranspiler extends LogEventGenerator {
         const kuery = actualTranspiler.kueryFromAst(ast,
             { scopeAccesses, contextRuleOverrides: {} });
         kuery[ScopeAccessesTag] = scopeAccesses;
+        kuery[ScopeAccessKeysTag] = Object.keys(scopeAccesses);
         if (options.sourceInfo) kuery[SourceInfoTag] = options.sourceInfo;
         if (!cache) return kuery;
 

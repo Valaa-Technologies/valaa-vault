@@ -606,14 +606,6 @@ class UIComponent extends React.Component {
   static thirdPassErrorElement =
       <div>Error caught while rendering error, see console for more details</div>;
 
-  enqueueRerenderIfPromise (maybePromise: any | Promise) {
-    if (!isPromise(maybePromise)) return false;
-    return maybePromise.then(renderValue => {
-      this._pendingRenderValue = (renderValue === undefined) ? null : renderValue;
-      this.forceUpdate();
-    });
-  }
-
   render (): null | string | React.Element<any> | [] {
     let firstPassError;
     let ret = this._pendingRenderValue;
@@ -645,13 +637,15 @@ class UIComponent extends React.Component {
               (error.originalError || error).missingPartitions.map(entry => String(entry)));
         }
         // Try to handle pending promises.
-        const rerenderPromise = this.enqueueRerenderIfPromise(ret);
-        if (rerenderPromise) {
+        if (isPromise(ret)) {
           const operationInfo = ret.operationInfo || {
-            slotName: "pendingLens", focus: { render: ret },
+            slotName: "pendingLens", focus: { render: ret, latestRenderedLensSlot },
             onError: { slotName: "failedLens", lens: { render: ret } },
           };
-          rerenderPromise.catch(error => {
+          ret.then(renderValue => {
+            this._pendingRenderValue = renderValue;
+            this.forceUpdate();
+          }).catch(error => {
             if (operationInfo.onError) Object.assign(error, operationInfo.onError);
             this.enableError(wrapError(error,
                     new Error(`During ${this.debugId()}\n .render().result.catch`),

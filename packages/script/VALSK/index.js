@@ -7,7 +7,7 @@ import type { VRL } from "~/raem/VRL";
 import { literal as _literal } from "~/script/schema/Literal";
 import { identifier } from "~/script/schema/Identifier";
 
-import ValoscriptKuery, { ScopeAccessesTag } from "./ValoscriptKuery";
+import ValoscriptKuery, { ScopeAccessesTag, ScopeAccessKeysTag } from "./ValoscriptKuery";
 
 
 export default new ValoscriptKuery();
@@ -25,6 +25,7 @@ export {
 export {
   Kuery,
   ScopeAccessesTag,
+  ScopeAccessKeysTag,
   ValoscriptKuery,
 };
 export {

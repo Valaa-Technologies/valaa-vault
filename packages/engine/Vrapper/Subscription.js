@@ -10,7 +10,9 @@ import Vrapper from "~/engine/Vrapper";
 import { Kuery, dumpKuery, dumpObject } from "~/engine/VALEK";
 import { LiveUpdate } from "~/engine/Vrapper/FieldUpdate";
 
-import { isSymbol, outputError, thenChainEagerly, wrapError } from "~/tools";
+import { ScopeAccessKeysTag } from "~/script/VALSK";
+
+import { isSymbol, outputError, wrapError } from "~/tools";
 
 /**
  * Subscription is a shared object which represents a single live kuery
@@ -20,13 +22,16 @@ import { isSymbol, outputError, thenChainEagerly, wrapError } from "~/tools";
  * 2. listener tracker for top-level listener callback calls
  *
  * It also has two modes: immediate state mode and transactional mode.
- * Immediate mode is enabled if options.obtainSubscriptionTransaction
- * is not specified. In this mode the subscription value and listener
- * notifications are based on the internal getState() of this
- * subscription. refreshState will fetch the state from the currently
- * active top-level engine.discourse
+ * Immediate mode is enabled if obtainDiscourse is not specified.
+ * In this mode the subscription value and listener notifications are
+ * based on the internal getState() of this subscription. refreshState
+ * will fetch the state from the currently active top-level
+ * engine.discourse
  *
- * Otherwise transactional mode is enabled
+ * Otherwise transactional mode is enabled. In this mode the
+ * obtainDiscourse callback is called to retrieve a new discourse
+ * whenever the current discourse is outdated and all operations are
+ * performed inside it.
  *
  * @export
  * @class Subscription
@@ -40,13 +45,17 @@ export default class Subscription extends LiveUpdate {
 
   _fieldFilter: ?Function | ?boolean;
 
+  _obtainDiscourse: Function;
   _attachedHooks: Object;
 
-  constructor (emitter: Vrapper, options: ?VALKOptions) {
+  constructor (emitter: Vrapper, options: ?VALKOptions, obtainDiscourse: ?Function) {
     super(emitter, options);
-    if (options && options.obtainSubscriptionTransaction && (options.state !== undefined)) {
-      throw new Error(
-          "Subscription.options cannot contain both obtainSubscriptionTransaction and state");
+    if (obtainDiscourse !== undefined) {
+      if (options && (options.state !== undefined)) {
+        throw new Error(
+            "Subscription cannot be configured with both obtainDiscourse and options.state");
+      }
+      this._obtainDiscourse = obtainDiscourse;
     }
   }
 
@@ -86,6 +95,42 @@ export default class Subscription extends LiveUpdate {
     return this;
   }
 
+  matchesKueryOptions (options: ?VALKOptions, obtainDiscourse: ?Function) {
+    if (this._obtainDiscourse !== obtainDiscourse) return false;
+    const scopeAccessKeys = (this._liveKueryObject || {})[ScopeAccessKeysTag];
+    if (!scopeAccessKeys || !scopeAccessKeys.length) return true;
+    const candidateScope = options.scope;
+    const ownScope = this._valkOptions.scope;
+    if (!candidateScope || !ownScope) {
+      console.log(
+          !scopeAccessKeys ? "no scope access info for:"
+          : !candidateScope ? "no candidate options.scope"
+          : "no own scope",
+          JSON.stringify(this._liveKuery));
+      return false;
+    }
+    for (const name of scopeAccessKeys) {
+      if (ownScope[name] !== candidateScope[name]) return false;
+      /*
+        if (type !== "read") {
+          console.log("non-read access encountered for:", name, type, "in",
+              JSON.stringify(scopeAccesses),
+              "\n\tkuery:", JSON.stringify((kuery.toVAKON && kuery.toVAKON()) || kuery));
+          return false;
+        }
+        if ((subval == null) || (newval == null) || (subval[NativeIdentifierTag] === undefined)
+            || (subval[NativeIdentifierTag] !== newval[NativeIdentifierTag])) {
+          // console.log("mismatching scope values encountered for:", name,
+          //     "\n\tbetween subscope:", subscope[name], "and newscope:", newscope[name],
+          //    "\n\tkuery:", JSON.stringify((kuery.toVAKON && kuery.toVAKON()) || kuery));
+          return false;
+        }
+      }
+      */
+    }
+    return true;
+  }
+
   debugId (options: ?Object): string {
     const name = this._liveKuery !== undefined ? "<kuery>" : this._fieldName || this._fieldFilter;
     return `${this.constructor.name}(${name}, ${this._emitter && this._emitter.debugId(options)})`;
@@ -97,8 +142,8 @@ export default class Subscription extends LiveUpdate {
     const options = this._valkOptions;
     if ((options.discourse === null)
         || (options.discourse && !options.discourse.isActiveTransaction())) {
-      options.discourse = options.obtainSubscriptionTransaction
-          ? options.obtainSubscriptionTransaction()
+      options.discourse = this._obtainDiscourse
+          ? this._obtainDiscourse()
           : this._emitter.engine.discourse;
     }
     if (options.state === null) {
@@ -164,6 +209,7 @@ export default class Subscription extends LiveUpdate {
       if (maxlen) return;
     }
     this._listeners.delete(listener);
+    if (!this._listeners.size) this.detachHooks();
   }
 
   _broadcastUpdate = (liveUpdate: LiveUpdate, passageCounter: number) => {
@@ -205,6 +251,7 @@ export default class Subscription extends LiveUpdate {
   // detect changes to subscription upstream data.
 
   attachHooks (triggerBroadcast: ?boolean) {
+    if (!this._listeners.size) return;
     let prestate, state;
     try {
       prestate = this._valkOptions.state;
@@ -247,29 +294,27 @@ export default class Subscription extends LiveUpdate {
   }
 
   detachHooks () {
-    if (this._attachedHooks) {
-      for (const [hookTarget, callbackKey] of this._attachedHooks) {
-        if (callbackKey) {
-          // Remove all callbacks at once, no need to remove them one by
-          // one even if we encounter multiple callbacks on the same hookTarget.
-          hookTarget.removeListenerCallback(this /* , callbackKey */);
-        } else hookTarget.delete(this);
-      }
-      this._attachedHooks = null;
-    }
     this._invalidateState();
+    if (!this._attachedHooks) return false;
+    for (const [hookTarget, callbackKey] of this._attachedHooks) {
+      if (callbackKey) {
+        // Remove all callbacks at once, no need to remove them one by
+        // one even if we encounter multiple callbacks on the same hookTarget.
+        hookTarget.removeListenerCallback(this /* , callbackKey */);
+      } else hookTarget.delete(this);
+    }
+    this._attachedHooks = null;
+    return true;
   }
 
   triggerFieldUpdate (state: Object, previousState: Object, passageCounter: ?number) {
     // console.log("triggerFieldUpdate", this.debugId(), passageCounter, this._seenPassageCounter);
-    const previousCounter = this._seenPassageCounter;
     if (passageCounter !== undefined) {
       if (this._seenPassageCounter >= passageCounter) return;
       this._seenPassageCounter = passageCounter;
     }
     this._valkOptions.state = state;
     this._valkOptions.previousState = previousState;
-    const previousValue = this._value;
     const refreshed = this.refreshValue();
     if (refreshed) this._broadcastUpdate(this, passageCounter);
   }
@@ -345,10 +390,10 @@ export default class Subscription extends LiveUpdate {
     console.log("triggerKueryUpdate", this.debugId(),
         "\n\tstructural/update:", isStructural, fieldUpdate.debugId(),
         "\n\tpassageCounters:", passageCounter, this._seenPassageCounter,
-        "\n\t:", !this._valkOptions.obtainSubscriptionTransaction, !!this._valkOptions.state,
+        "\n\t:", !this._obtainDiscourse, !!this._valkOptions.state,
             this._valkOptions.state === fieldUpdate.getState());
     */
-    if (!this._valkOptions.obtainSubscriptionTransaction) {
+    if (!this._obtainDiscourse) {
       const newState = fieldUpdate.getState();
       if (this._valkOptions.state === newState) return;
       this._valkOptions.state = newState;

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.29](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.28...v0.34.0-prerelease.29) (2019-05-13)
+
+**Note:** Version bump only for package @valos/inspire
+
+
+
+
+
 # [0.34.0-prerelease.28](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.27...v0.34.0-prerelease.28) (2019-05-08)
 
 

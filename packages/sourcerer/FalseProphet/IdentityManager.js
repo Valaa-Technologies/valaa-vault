@@ -19,7 +19,7 @@ export default class IdentityManager extends LogEventGenerator {
         throw new Error(`identityPartition required, got: ${
             debugObjectType(identityPartitionURI)}`);
       }
-      options.authority = this._sourcerer.obtainoAuthorityOfPartition(identityPartitionURI);
+      options.authority = this._sourcerer.obtainAuthorityOfPartition(identityPartitionURI);
       if (!options.authority) {
         throw new Error(`Can't locate the authority for identity partition: <${
             identityPartitionURI}>`);
@@ -41,7 +41,7 @@ export default class IdentityManager extends LogEventGenerator {
             debugObjectType(identityPartitionURI)}`);
       }
       const uriString = String(identityPartitionURI);
-      if (this._activeIdentities[uriString]) {
+      if (!this._activeIdentities[uriString]) {
         throw new Error(`No such active identity: <${uriString}>`);
       }
       delete this._activeIdentities[uriString];

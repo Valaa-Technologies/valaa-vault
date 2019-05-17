@@ -79,7 +79,7 @@ export default function createRootReducer ({
     try {
       if (mainLogger.getVerbosity() >= reduceLogThreshold) {
         logActionInfo(mainLogger, `Reducing${story.timeStamp ? ` @${story.timeStamp}` : ""}`,
-            story, mainLogger.getVerbosity() === subReduceLogThreshold);
+            story, mainLogger.getVerbosity() === reduceLogThreshold);
       }
       const reducer = reducerByActionType[story.type];
       if (reducer) return reducer.call(this, state, story);
@@ -131,9 +131,7 @@ export default function createRootReducer ({
     let idString = "";
     const isSubReduce = (header === "Sub-reducing");
     if (passage.id) {
-      idString = `<${
-        dumpify(String(passage.id), { sliceAt: shouldSlice && 60, sliceSuffix: "..." })
-      }>`;
+      idString = `<${passage.id}>`;
       if (passage.typeName) idString = `${idString}:${passage.typeName}`;
     }
     // eslint-disable-next-line

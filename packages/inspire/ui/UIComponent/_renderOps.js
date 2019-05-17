@@ -159,9 +159,10 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
             component.bindLiveKuery(subLensName, component.getUIContextValue("frame"), lens,
                 { asRepeathenable: true, scope: component.getUIContext() }),
             update => {
-              const newLensValue = update.value();
+              let newLensValue = update.value();
+              if (newLensValue === undefined) newLensValue = null;
               if (ret === undefined) {
-                ret = (newLensValue === undefined) ? null : newLensValue;
+                ret = newLensValue;
               } else if (ret !== newLensValue) {
                 component.forceUpdate();
               }

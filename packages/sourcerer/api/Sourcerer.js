@@ -211,7 +211,7 @@ export default class Sourcerer extends LogEventGenerator {
     return this.getActiveConnections();
   }
 
-  obtainoAuthorityOfPartition (partitionURI: ValaaURI) {
-    return this._upstream.obtainoAuthorityOfPartition(partitionURI);
+  obtainAuthorityOfPartition (partitionURI: ValaaURI) {
+    return this._upstream.obtainAuthorityOfPartition(partitionURI);
   }
 }

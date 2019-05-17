@@ -800,8 +800,8 @@ export function denoteValOSBuiltin (description: any = "") {
 }
 
 export function denoteValOSBuiltinWithSignature (description: any = "") {
-  return (callee: any) => {
-    const text = callee.toString();
+  return (callee: Function, calleeBody: Function = callee) => {
+    const text = calleeBody.toString();
     return denoteValOSBuiltin(description + text.slice(8, text.indexOf(" {")))(callee);
   };
 }
@@ -851,11 +851,8 @@ export function denoteDeprecatedValOSBuiltin (prefer: string, description: any =
       console.error("DEPRECATED: call to builtin operation", callee, "\n\tprefer:", prefer);
       return callee.apply(this, rest);
     }
-    deprecated._valkThunk = true;
-    const text = callee.toString();
     deprecated._valkDeprecatedPrefer = prefer;
-    deprecated._valkDescription = description + text.slice(8, text.indexOf(" {"));
-    return deprecated;
+    return denoteValOSBuiltinWithSignature(description)(deprecated, callee);
   };
 }
 

@@ -42,7 +42,7 @@ export default class Oracle extends Sourcerer {
 
   getDecoderArray () { return this._decoderArray; }
 
-  obtainoAuthorityOfPartition (partitionURI: ValaaURI) {
+  obtainAuthorityOfPartition (partitionURI: ValaaURI) {
     const ret = this._authorityNexus.obtainAuthorityOfPartition(partitionURI);
     if (!ret) {
       throw new Error(`Can't obtain authority for partition <${partitionURI}>`);

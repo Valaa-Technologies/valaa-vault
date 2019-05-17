@@ -17,14 +17,13 @@ import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetConnection from "./FalseProphetConnection";
 
 import { Prophecy, _chronicleEvents } from "./_prophecyOps";
-import { _composeStoryFromEvent, _reviseSchismaticRecital, _tellStoriesToFollowers }
-    from "./_storyOps";
+import { _composeRecitalStoryFromEvent, _deliverStoriesToFollowers } from "./_recitalOps";
 import { deserializeVRL } from "./_universalizationOps";
 import StoryRecital from "./StoryRecital";
 
 type FalseProphetChronicleOptions = ChronicleOptions & {
-  reviseSchism?: (schism: Prophecy, connection: FalseProphetConnection,
-      purgedCommands: Command[], newEvents: Command[]) => Prophecy,
+  reformHeresy?: (schism: Prophecy, connection: FalseProphetConnection,
+      newEvents: Command[], purgedCommands: Command[]) => Prophecy,
 };
 
 /**
@@ -120,39 +119,23 @@ export default class FalseProphet extends Sourcerer {
    * @param  {type} event     an command to go upstream
    * @returns {type}          description
    */
-  _composeStoryFromEvent (event: EventBase, dispatchDescription: string, timed: ?EventBase,
+  _composeRecitalStoryFromEvent (event: EventBase, dispatchDescription: string, timed: ?EventBase,
       transactionState?: TransactionState) {
     try {
-      return _composeStoryFromEvent(this, event, dispatchDescription, timed, transactionState);
+      return _composeRecitalStoryFromEvent(this, event, dispatchDescription, timed, transactionState);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_composeStoryFromEvent(${dispatchDescription})`,
+      throw this.wrapErrorEvent(error, `_composeRecitalStoryFromEvent(${dispatchDescription})`,
           "\n\tevent:", ...dumpObject(event),
           "\n\ttimed:", ...dumpObject(timed));
     }
   }
 
-  _reviseSchismaticRecital (schismaticRecital: Prophecy, reviewedPartitions: Object,
-      originatingConnection: FalseProphetConnection, purgedCommands: Command[],
-      newEvents: Command[]): Story[] {
-    try {
-      return _reviseSchismaticRecital(this, schismaticRecital, reviewedPartitions,
-          originatingConnection, purgedCommands, newEvents);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, `_reviseSchismaticRecital(${schismaticRecital.id})`,
-          "\n\tschismatic recital:", ...dumpObject(schismaticRecital),
-          "\n\treviewed partitions:", ...dumpObject(reviewedPartitions),
-          "\n\toriginating connection:", ...dumpObject(originatingConnection),
-          "\n\tpurged commands:", ...dumpObject(purgedCommands),
-          "\n\tnew events:", ...dumpObject(newEvents));
-    }
-  }
-
-  _tellStoriesToFollowers (stories: Story[], purgedRecital: ?StoryRecital) {
+  _deliverStoriesToFollowers (stories: Story[], purgedRecital: ?StoryRecital) {
     const unblockNotifications = this._blockNotifications();
     try {
-      return _tellStoriesToFollowers(this, stories, purgedRecital);
+      return _deliverStoriesToFollowers(this, stories, purgedRecital);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`_tellStoriesToFollowers()`),
+      throw this.wrapErrorEvent(error, new Error(`_deliverStoriesToFollowers()`),
           "\n\tstories:", ...dumpObject(stories),
           "\n\tpurgedRecital:", ...dumpObject(purgedRecital));
     } finally {

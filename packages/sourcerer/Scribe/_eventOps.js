@@ -360,7 +360,7 @@ export function _receiveEvents (
     () => receivedActions,
   ], (error, stepIndex, head) => {
     error.isSchismatic = true;
-    if ((error.originalError || error).cacheConflict) error.isReviseable = true;
+    if ((error.originalError || error).cacheConflict) error.isRevisable = true;
     return onError(connection.wrapErrorEvent(error,
         new Error(`_receiveEvents(${type}).${
           stepIndex === 0 ? "contentSync" : "updateMediaEntries"}`),

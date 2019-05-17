@@ -5,6 +5,7 @@ import { Story } from "~/raem/redux/Bard";
 import VRL from "~/raem/VRL";
 
 import Connection from "~/sourcerer/api/Connection";
+import FabricatorEvent from "~/sourcerer/api/FabricatorEvent";
 import { ChronicleOptions, ChronicleRequest, ChronicleEventResult, ConnectOptions, NarrateOptions }
     from "~/sourcerer/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/EventAspects";
@@ -15,8 +16,10 @@ import IdentityManager from "~/sourcerer/FalseProphet/IdentityManager";
 
 import { dumpObject, mapEagerly, thenChainEagerly } from "~/tools";
 
-import { Prophecy, _reviewPurgedProphecy, _reviseSchism } from "./_prophecyOps";
-import { _confirmCommands, _purgeAndRecomposeStories } from "./_storyOps";
+import { Prophecy, _reviseRecomposedSchism, _reformHeresy } from "./_prophecyOps";
+import {
+  _confirmLeadingTruthsToFollowers, _confirmRecitalStories, _synthesizeRecital,
+} from "./_recitalOps";
 
 /**
  * @export
@@ -106,8 +109,8 @@ export default class FalseProphetConnection extends Connection {
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
     if (!events || !events.length) return { eventResults: events };
     const connection = this;
-    let chronicling, resultBase, leadingTruths, firstSchismaticCommand, upstreamResults,
-        renarration, rechronicle;
+    let chronicling, resultBase, leadingTruths, initialSchism, upstreamResults, renarration,
+        rechronicle;
     try {
       this.clockEvent(2, () => ["falseProphet.chronicle", `chronicleEvents(${events.length})`]);
       if (options.isProphecy) {
@@ -141,35 +144,52 @@ export default class FalseProphetConnection extends Connection {
         onError: errorOnFalseProphetChronicleEvents.bind(this, new Error("chronicleResultBase")),
       });
       const primaryRecital = this._sourcerer._primaryRecital;
-      const partitionURI = this.getPartitionURI();
-
+      const ret = {
+        eventResults: events.map((event, index) => {
+          const result = Object.create(resultBase);
+          result.event = event;
+          result.index = index;
+          return result;
+        }),
+      };
       resultBase._truthForwardResults = thenChainEagerly(null, this.addChainClockers(2,
           "falseProphet.chronicle.upstream.ops", [
         function _awaitUpstreamChronicling () {
           return (resultBase._forwardResults = chronicling.eventResults);
         },
-        function _awaitUpstreamTruths (eventResults) {
-          return mapEagerly((upstreamResults = (eventResults || events)),
+        function _awaitUpstreamTruths (upstreamEventResults) {
+          return mapEagerly((upstreamResults = (upstreamEventResults || events)),
               result => result.getTruthEvent(),
               (error, head, index, truthResults, entries, callback, onRejected) => {
                 if (!leadingTruths) leadingTruths = truthResults.slice(0, index);
-                const purgedStory = primaryRecital.getStoryBy(events[index].aspects.command.id);
+                const command = events[index];
+                const prophecy = primaryRecital.getStoryBy(command.aspects.command.id);
                 if (((error.retry || {}).when === "narrated") && (renarration === undefined)) {
                   renarration = connection.narrateEventLog({
                     eventIdBegin: connection._headEventId,
                     receiveTruths: null,
                   });
                 }
-                if (purgedStory && (error.isSchismatic !== false)) {
-                  if (firstSchismaticCommand === undefined) firstSchismaticCommand = events[index];
-                  purgedStory.schismPartition = partitionURI;
-                  if (error.isReviseable) {
-                    purgedStory.schismDescription =
-                        `chronicleEvents reviseable schism: ${error.message}`;
-                  } else {
-                    purgedStory.schismDescription =
-                        `chronicleEvents schism rejection: ${error.message}`;
-                    purgedStory.unreviseableSchismError = error;
+                if (prophecy) {
+                  const review = prophecy.review = new FabricatorEvent("chronicleerror", this, {
+                    prophecy, error, command,
+                    isSchismatic: error.isSchismatic !== false,
+                    isRevisable: error.isRevisable !== false,
+                    isReformable: error.isReformable !== false,
+                  });
+                  if (error.retry) review.retryWhen = error.retry.when;
+                  if (renarration) review.renarration = renarration;
+                  if (options.discourse && !options.discourse.dispatchEvent(review)) {
+                    Object.assign(review,
+                        { isSchismatic: true, isRevisable: false, isReformable: false });
+                  }
+                  if (review.isSchismatic !== false) {
+                    if (initialSchism === undefined) initialSchism = events[index];
+                    review.message = `chronicleEvents${
+                      review.isRevisable ? "; reviseable schism"
+                      : review.isReformable ? "; reformable schism"
+                      : "; schism rejection"
+                    }: ${error.message}`;
                   }
                 }
                 // Process the remaining entries so that fully
@@ -197,8 +217,8 @@ export default class FalseProphetConnection extends Connection {
             }
             throw rechronicle;
           }
-          return receiveTruths && (receivableTruths.length || firstSchismaticCommand)
-              && receiveTruths(receivableTruths, undefined, undefined, firstSchismaticCommand);
+          return receiveTruths && (receivableTruths.length || initialSchism)
+              && receiveTruths(receivableTruths, undefined, undefined, initialSchism);
         },
         function _finalizeChronicleResults () {
           return (resultBase._truthForwardResults = !rechronicle ? upstreamResults
@@ -216,11 +236,7 @@ export default class FalseProphetConnection extends Connection {
         chronicling = connection._upstreamConnection.chronicleEvents(events, options);
         return thenChainEagerly(null, functionChain, onRejected);
       });
-      return {
-        eventResults: events.map((event, index) => {
-          const ret = Object.create(resultBase); ret.event = event; ret.index = index; return ret;
-        }),
-      };
+      return ret;
     } catch (error) { return errorOnFalseProphetChronicleEvents.call(this, new Error(""), error); }
     function errorOnFalseProphetChronicleEvents (wrap, error) {
       const wrap_ = new Error(`chronicleEvents(${events.length} events).${wrap.message}`);
@@ -230,14 +246,14 @@ export default class FalseProphetConnection extends Connection {
           "\n\tevents:", tryAspect(events[0], "log").index,
               tryAspect(events[events.length - 1], "log").index,
           "\n\tinternal:", ...dumpObject({
-            connection, chronicling, resultBase, leadingTruths, firstSchismaticCommand,
+            connection, chronicling, resultBase, leadingTruths, initialSchism,
             upstreamResults, renarration, rechronicle,
           }));
     }
   }
 
   receiveTruths (truths: EventBase[], unused1, unused2, schismaticCommand: EventBase) {
-    let purgedCommands, confirms = 0, confirmedCommands, newTruthCount = 0, newTruths;
+    let schismaticCommands, confirmCount = 0, confirmations, newTruthCount = 0, newTruths;
     try {
       this.clockEvent(2, () => ["falseProphet.receive.truths", `receiveTruths(${truths.length})`]);
       this._insertEventsToQueue(truths, this._pendingTruths, false,
@@ -248,36 +264,44 @@ export default class FalseProphetConnection extends Connection {
                 truth.aspects.command.id}'`,
                 "\n\tresolution: overwriting with incoming truth");
           });
-      for (; this._unconfirmedCommands[confirms] && this._pendingTruths[confirms]; ++confirms) {
-        if (this._pendingTruths[confirms].aspects.command.id !==
-            this._unconfirmedCommands[confirms].aspects.command.id) {
-          purgedCommands = this._unconfirmedCommands.slice(confirms);
+      for (; this._unconfirmedCommands[confirmCount] && this._pendingTruths[confirmCount];
+          ++confirmCount) {
+        if (this._pendingTruths[confirmCount].aspects.command.id !==
+            this._unconfirmedCommands[confirmCount].aspects.command.id) {
+          schismaticCommands = this._unconfirmedCommands.slice(confirmCount);
           this._unconfirmedCommands = [];
           break;
         }
       }
-      if (confirms) {
-        confirmedCommands = this._pendingTruths.splice(0, confirms);
-        if (!purgedCommands) this._unconfirmedCommands.splice(0, confirms);
+      if (confirmCount) {
+        confirmations = this._pendingTruths.splice(0, confirmCount);
+        if (!schismaticCommands) this._unconfirmedCommands.splice(0, confirmCount);
         // purge clears all unconfirmed commands
       }
-      if (!purgedCommands && schismaticCommand
+      if (!schismaticCommands && schismaticCommand
           && (schismaticCommand === this._unconfirmedCommands[0])) {
-        purgedCommands = this._unconfirmedCommands;
+        schismaticCommands = this._unconfirmedCommands;
         this._unconfirmedCommands = [];
       }
       while (this._pendingTruths[newTruthCount]) ++newTruthCount;
-      this._headEventId += confirms + newTruthCount;
-      if (confirmedCommands) _confirmCommands(this, confirmedCommands);
+      this._headEventId += confirmCount + newTruthCount;
       newTruths = this._pendingTruths.splice(0, newTruthCount);
+      if (confirmations) {
+        _confirmRecitalStories(this, confirmations);
+        if (!newTruths.length && !(schismaticCommands || []).length) {
+          _confirmLeadingTruthsToFollowers(this.getSourcerer());
+          this._checkForFreezeAndNotify();
+          return truths;
+        }
+      }
       /*
       this.logEvent(1, () => ["receiveTruths.confirm&purge",
         "\n\tconfirmedCommands:", ...dumpObject(confirmedCommands),
-        "\n\tpurgedCommands:", ...dumpObject(purgedCommands),
+        "\n\tschismaticCommands:", ...dumpObject(schismaticCommands),
         "\n\tnewTruths:", ...dumpObject(newTruths)
       ]);
       */
-      _purgeAndRecomposeStories(this, newTruths, "receiveTruth", purgedCommands);
+      _synthesizeRecital(this, newTruths, "receive-truth", schismaticCommands);
       return truths;
     } catch (error) {
       throw this.wrapErrorEvent(error, `receiveTruths([${
@@ -287,7 +311,7 @@ export default class FalseProphetConnection extends Connection {
           "\n\tpendingTruths:", ...dumpObject([...this._pendingTruths]),
           "\n\tunconfirmedCommands:", ...dumpObject([...this._unconfirmedCommands]),
           "\n\tinternal:", ...dumpObject({
-            this: this, purgedCommands, confirms, confirmedCommands, newTruthCount, newTruths,
+            this: this, schismaticCommands, confirmCount, confirmations, newTruthCount, newTruths,
           }),
       );
     }
@@ -296,15 +320,15 @@ export default class FalseProphetConnection extends Connection {
   receiveCommands (commands: EventBase[]) {
     // This is not called by chronicle, but either by command recall on
     // startup or to update a conflicting command read from another tab.
-    let purgedCommands;
+    let schismaticCommands;
     try {
       this.clockEvent(2, () => ["falseProphet.receive.commands",
         `receiveTruths(${commands.length})`]);
       const newCommands = this._insertEventsToQueue(commands, this._unconfirmedCommands, true,
           (command, queueIndex) => {
-            purgedCommands = this._unconfirmedCommands.splice(queueIndex);
+            schismaticCommands = this._unconfirmedCommands.splice(queueIndex);
           });
-      _purgeAndRecomposeStories(this, newCommands || [], "receiveCommand", purgedCommands);
+      _synthesizeRecital(this, newCommands || [], "receive-command", schismaticCommands);
       return commands;
     } catch (error) {
       throw this.wrapErrorEvent(error, `receiveCommand([${
@@ -378,24 +402,24 @@ export default class FalseProphetConnection extends Connection {
         this.getPartitionURI().toString(), this._unconfirmedCommands.length);
   }
 
-  _reviewPurgedProphecy (purged: Prophecy, newProphecy: Prophecy) {
+  _reviseRecomposedSchism (purged: Prophecy, newProphecy: Prophecy) {
     try {
-      return _reviewPurgedProphecy(this, purged, newProphecy);
+      return _reviseRecomposedSchism(this, purged, newProphecy);
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          new Error(`_reviewPurgedProphecy(${tryAspect(purged, "command").id} -> ${
+          new Error(`_reviseRecomposedSchism(${tryAspect(purged, "command").id} -> ${
               tryAspect(newProphecy, "command").id})`),
           "\n\tpurged prophecy:", ...dumpObject(purged),
           "\n\tnew prophecy:", ...dumpObject(newProphecy));
     }
   }
 
-  _reviseSchism (schism: Prophecy, purgedStories: Story[], newEvents: EventBase[]) {
+  _reformHeresy (schism: Prophecy, purgedStories: Story[], newEvents: EventBase[]) {
     try {
-      return _reviseSchism(this, schism, purgedStories, newEvents);
+      return _reformHeresy(this, schism, purgedStories, newEvents);
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          new Error(`_reviseSchism(${tryAspect(schism, "command").id})`),
+          new Error(`_reformHeresy(${tryAspect(schism, "command").id})`),
           "\n\tschism:", ...dumpObject(schism),
           "\n\tpurged stories:", ...dumpObject(purgedStories),
           "\n\tnew events:", ...dumpObject(newEvents));

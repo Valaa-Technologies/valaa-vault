@@ -182,7 +182,8 @@ export default class SourcererTestHarness extends ScriptTestHarness {
     // Called by RAEMTestHarness.constructor (so before oracle/scribe are created)
     const corpus = super.createCorpus(corpusOptions);
     this.sourcerer = this.falseProphet = createFalseProphet({
-      schema: this.schema, corpus, logger: this.getLogger(), ...(this.falseProphetOptions || {}),
+      schema: this.schema, corpus, logger: this.getLogger(), verbosity: this.getVerbosity(),
+      ...(this.falseProphetOptions || {}),
     });
     this.chronicler = this.sourcerer;
     return corpus;

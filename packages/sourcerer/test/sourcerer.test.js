@@ -287,13 +287,13 @@ describe("Sourcerer", () => {
     const { scribeConnection, authorityConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
 
-    const rejectedSchisms = [];
-    // Reject all schisms
-    const reviseSchism = (schism) => { rejectedSchisms.push(schism); };
+    const purgedHeresies = [];
+    // Purge all heresies
+    const reformHeresy = (heresy) => { purgedHeresies.push(heresy); };
 
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
 
-    const first = harness.chronicleEvent(simpleCommand, { reviseSchism });
+    const first = harness.chronicleEvent(simpleCommand, { reformHeresy });
     expect(first.getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
 
     let firstTruth, firstFailure;
@@ -304,7 +304,7 @@ describe("Sourcerer", () => {
 
     expect(firstTruth).toEqual(undefined);
 
-    const seconds = harness.chronicleEvents(coupleCommands, { reviseSchism }).eventResults;
+    const seconds = harness.chronicleEvents(coupleCommands, { reformHeresy }).eventResults;
 
     const secondsTruths = [], secondsFailures = [];
     const secondsTruthProcesses = seconds.map((result_, index) => result_.getTruthEvent().then(
@@ -336,7 +336,7 @@ describe("Sourcerer", () => {
     await authorityConnection.getReceiveTruths()(oneTruthEvent);
     expectConnectionEventIds(scribeConnection, 0, 2, 2);
 
-    expect(rejectedSchisms.length).toEqual(2);
+    expect(purgedHeresies.length).toEqual(2);
 
     await firstTruthProcess;
     expect(firstFailure).not.toEqual(undefined);
@@ -353,7 +353,7 @@ describe("Sourcerer", () => {
     // Re-chronicle manually
 
     const rechronicleResults = harness.chronicleEvents(
-        [...rejectedSchisms].map(getActionFromPassage)).eventResults;
+        [...purgedHeresies].map(getActionFromPassage)).eventResults;
     expect(await rechronicleResults[0].getPersistedEvent()).toMatchObject(simpleCommand);
     expect(await rechronicleResults[1].getPersistedEvent()).toMatchObject(coupleCommands[1]);
 
@@ -514,9 +514,12 @@ describe("Sourcerer", () => {
 
     const twoEntries = authorityConnection._chroniclings.splice(0, 2);
 
-    twoEntries[0].rejectTruthEvent(new Error("Not permitted")); // rejected
+    twoEntries[0].rejectTruthEvent(
+        Object.assign(new Error("Not permitted"), { isRevisable: false, isReformable: false })); // rejected
     twoEntries[1].rejectTruthEvent(
-        Object.assign(new Error("revise: reorder"), { isReviseable: "reorder" }));
+        Object.assign(new Error("revise: reorder"), { isRevisable: false, isReformable: true }));
+
+    harness.clockEvent(1, () => ["sourcerer.test:10.await.not-permitted"]);
 
     await expect(results[0].getTruthEvent()).rejects
         .toThrow(/Not permitted/);

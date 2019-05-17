@@ -13,7 +13,7 @@ import { tryAspect } from "~/sourcerer/tools/EventAspects";
 import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
-import { _rejectLastProphecyAsHeresy, _recomposeStoryFromPurgedEvent } from "./_storyOps";
+import { _purgeLatestRecitedStory, _recomposeSchismaticRecitalStory } from "./_recitalOps";
 import FalseProphetConnection from "./FalseProphetConnection";
 
 export type Prophecy = Story & {
@@ -27,13 +27,13 @@ export type Prophecy = Story & {
 export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[],
     { timed, transactionState, discourse, ...rest } = {}): ProphecyChronicleRequest {
   if (timed) throw new Error("timed events not supported yet");
-  const prophecies = events.map(event =>
-      falseProphet._composeStoryFromEvent(event, "prophecy-chronicle", timed, transactionState));
+  const prophecies = events.map(event => falseProphet
+      ._composeRecitalStoryFromEvent(event, "prophecy-chronicle", timed, transactionState));
   const resultBase = new ProphecyOperation(null, {
     _sourcerer: falseProphet,
     _events: events,
     _options: rest,
-    _followerReactions: falseProphet._tellStoriesToFollowers(prophecies),
+    _followerReactions: falseProphet._deliverStoriesToFollowers(prophecies),
   });
   resultBase._options.isProphecy = true;
 
@@ -95,7 +95,7 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
   return ret;
 }
 
-export function _confirmProphecyCommand (connection: FalseProphetConnection,
+export function _confirmProphecyPartitionCommand (connection: FalseProphetConnection,
     prophecy: Prophecy, command: Command) {
   const operation = (prophecy.meta || {}).operation;
   if (operation) {
@@ -139,17 +139,23 @@ export function _reformProphecyCommand (connection: FalseProphetConnection,
     "\n\treformed command:", ...dumpObject(reformedCommand),
     "\n\treformed prophecy:", ...dumpObject(prophecy),
   ]);
-  partition.commandEvent = reformedCommand;
+  return (partition.commandEvent = reformedCommand);
 }
 
-export function _reviewPurgedProphecy (connection: FalseProphetConnection,
-    purged: Prophecy, reviewed: Prophecy) {
-  const semanticSchism = _checkForSemanticSchism(purged, reviewed);
-  if (semanticSchism) {
-    purged.schismDescription = semanticSchism;
-    purged.semanticSchismWithReviewedProphecy = reviewed;
-    return undefined;
+export function _reviseRecomposedSchism (connection: FalseProphetConnection, schism: Prophecy,
+    recomposition: Prophecy) {
+  const semanticSchismReason = _checkForSemanticSchism(schism, recomposition);
+  if (!semanticSchismReason) {
+    schism.review.isSchismatic = false;
+    return recomposition;
   }
+  const review = schism.review;
+  review.type = "semanticSchism";
+  review.schism = schism;
+  review.recomposition = recomposition;
+  review.isSemanticSchism = true;
+  review.message = semanticSchismReason;
+  return undefined;
   /*
   connection.warnEvent(1, () => [
     "\n\treviewed prophecy", tryAspect(reviewed, "command").id,
@@ -158,7 +164,6 @@ export function _reviewPurgedProphecy (connection: FalseProphetConnection,
     "\n\tbase command:", getActionFromPassage(purged),
   ]);
   */
-  return reviewed;
 }
 
 function _checkForSemanticSchism (/* purgedProphecy: Prophecy, revisedProphecy: Prophecy */) {
@@ -172,19 +177,18 @@ function _checkForSemanticSchism (/* purgedProphecy: Prophecy, revisedProphecy: 
   return undefined;
 }
 
-export function _reviseSchism (connection: FalseProphetConnection,
-    schism: Prophecy, purgedStories: Story[], newEvents: EventBase[]) {
+export function _reformHeresy (connection: FalseProphetConnection,
+    schism: Prophecy, newEvents: EventBase[], purgedStories: Story[]) {
   const operation = (schism.meta || {}).operation;
   // No way to revise non-prophecy schisms: these come from elsewhere so not our job.
   if (!operation) return undefined;
-  // First try to revise using the original chronicleEvents options.reviseSchism
-  if (operation._options.reviseSchism) {
-    return operation._options.reviseSchism(schism, connection, purgedStories, newEvents);
+  // First try to revise using the original chronicleEvents options.reformHeresy
+  if (operation._options.reformHeresy) {
+    return operation._options.reformHeresy(schism, connection, newEvents, purgedStories);
   }
   // Then if the schism is not a semantic schism try basic revise-recompose.
-  if (schism.semanticSchism || schism.unreviseableSchismError) return undefined;
-  delete schism.structuralSchism;
-  const recomposedProphecy = _recomposeStoryFromPurgedEvent(connection.getSourcerer(), schism);
+  if (schism.review.isSemanticSchism || (schism.review.isReformable === false)) return undefined;
+  const recomposedProphecy = _recomposeSchismaticRecitalStory(connection.getSourcerer(), schism);
   const partitionURI = String(connection.getPartitionURI());
   if (!recomposedProphecy
       || (Object.keys((recomposedProphecy.meta || {}).partitions).length !== 1)) {
@@ -206,13 +210,14 @@ export function _reviseSchism (connection: FalseProphetConnection,
   return [recomposedProphecy];
 }
 
-export function _rejectHereticProphecy (falseProphet: FalseProphet, prophecy: Prophecy) {
-  const operation = (prophecy.meta || {}).operation;
+export function _purgeHeresy (falseProphet: FalseProphet, hereticProphecy: Prophecy) {
+  const operation = (hereticProphecy.meta || {}).operation;
   if (!operation || !operation._partitions) return;
+  const error = (hereticProphecy.review || {}).error
+      || new Error((hereticProphecy.review || {}).message);
   for (const partition of Object.values(operation._partitions)) {
     if (!partition.confirmedTruth) {
-      partition.rejectCommand(partition.rejectionReason
-          || prophecy.unreviseableSchismError || new Error(prophecy.schismDescription));
+      partition.rejectCommand(partition.rejectionReason || error);
       partition.commandEvent = null;
     }
   }
@@ -353,7 +358,7 @@ class ProphecyOperation extends ProphecyEventResult {
               error);
       this._prophecy = null;
       try {
-        _rejectLastProphecyAsHeresy(this._sourcerer, prophecy);
+        _purgeLatestRecitedStory(this._sourcerer, prophecy);
       } catch (innerError) {
         outputError(innerError, `Exception caught during chronicleEvents.execute.purge`);
       }

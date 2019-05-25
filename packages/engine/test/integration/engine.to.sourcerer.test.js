@@ -21,7 +21,7 @@ describe("Media handling", () => {
       oracle: { testAuthorityConfig: {
         isRemoteAuthority: true, isLocallyPersisted: false,
       } },
-      awaitResult: (result) => result.getLocalStory(),
+      awaitResult: (result) => result.getComposedStory(),
     });
     const buffer = arrayBufferFromUTF8String("example content");
     const contentHash = contentHashFromArrayBuffer(buffer);
@@ -37,7 +37,7 @@ describe("Media handling", () => {
           .then(createBvob => ({ bvobId: (media[valos.Media.content] = createBvob()) }));
       this.text = media;
       ({ media, contentSetting });
-    `, { scope: { buffer, console }, awaitResult: (result) => result.getLocalEvent() });
+    `, { scope: { buffer, console }, awaitResult: (result) => result.getComposedEvent() });
     expect(media.getId().toJSON())
         .toEqual(entities().test_partition.get(["§..", "text"]).getId().toJSON());
     expect(testPartitionBackend.getPreparation(contentHash))
@@ -313,7 +313,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
     expect(values.slice(0, -1))
         .toEqual([12, 12, 2, 16, 18, 18, -2, -18]);
     // expect(values[values.length - 1].call({ increment: 3 }))
-    //    .toEqual(23); // this works but it's a pita to await for getLocalEvent
+    //    .toEqual(23); // this works but it's a pita to await for getComposedEvent
     await pairness.receiveTruthsFrom(harness, { verbosity: 0 });
 
     const pairedValues = await pairness.runValoscript(vRef("test_partition"), `

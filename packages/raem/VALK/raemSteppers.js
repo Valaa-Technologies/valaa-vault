@@ -862,10 +862,12 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
     const scope = Object.create(capturedScope);
     scope.arguments = Array.prototype.slice.call(arguments);
     let activeTransaction;
-    // TODO(iridian): Fix Undocumented dependency on
+    // FIXME(iridian, 2019-05): Fix Undocumented dependency on
     // FalseProphetDiscourse transaction internal details.
-    if (capturingValker._transactionState !== undefined) {
-      if (capturingValker.isActiveTransaction()) {
+    // Both valk §capture/§call and the Transactor/Fabricator systems
+    // should probably be moved to @valos/script.
+    if (capturingValker._transactorState !== undefined) {
+      if (capturingValker.isActiveFabricator()) {
         activeTransaction = capturingValker;
       } else {
         // Reset the transaction context to top level for
@@ -877,7 +879,7 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
         // Captures with closures referring to completed transactions
         // but whose callbacks never get called retain memory
         // references indefinitely.
-        capturingValker = capturingValker.rootDiscourse; // eslint-disable-line no-param-reassign
+        capturingValker = capturingValker.getRootDiscourse(); // eslint-disable-line no-param-reassign
       }
     }
     let transaction;
@@ -887,12 +889,12 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
     const valkCaller = head && head.__callerValker__;
     try {
       if (valkCaller) {
-        transaction = valkCaller.acquireTransaction("valkcall-capture");
+        transaction = valkCaller.acquireFabricator("valkcall-capture");
       } else {
         // Direct caller is not valk context: this is a callback thunk
         // that is being called by fabric/javascript code.
         if (!head) head = capturedScope.this || {};
-        transaction = capturingValker.acquireTransaction("extcall-capture");
+        transaction = capturingValker.acquireFabricator("extcall-capture");
         head = transaction.tryPack(head);
       }
       if (sourceInfo) transaction[SourceInfoTag] = sourceInfo;
@@ -907,10 +909,10 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
     if (transaction) {
       try {
         if (!advanceError) {
-          transaction.releaseTransaction();
+          transaction.releaseFabricator();
           return valkCaller ? ret : transaction.tryUnpack(ret, true);
         }
-        transaction.releaseTransaction({ rollback: advanceError });
+        transaction.releaseFabricator({ rollback: advanceError });
       } catch (error) {
         transactionError = error;
       }
@@ -920,9 +922,9 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
         : " (external non-transactional caller)";
     let opName;
     if (!transaction) {
-      opName = `call/acquireTransaction ${contextText}`;
+      opName = `call/acquireFabricator ${contextText}`;
     } else if (transactionError) {
-      opName = `call/releaseTransaction ${
+      opName = `call/releaseFabricator ${
           advanceError ? "({ rollback: true })" : "()"}${contextText}`;
     } else {
       opName = `call/${valkCaller ? "advance" : "run"}${contextText}`;

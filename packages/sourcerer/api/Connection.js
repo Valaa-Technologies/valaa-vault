@@ -81,7 +81,8 @@ export default class Connection extends Follower {
         return this.receiveTruths(truths, retrieveMediaBuffer, downstreamReceiveTruths,
             rejectedEvent);
       } catch (error) {
-        throw this.wrapErrorEvent(error, new Error("receiveTruths()"),
+        throw this.wrapErrorEvent(error,
+            new Error(`receiveTruths(${this._dumpEventIds(truths)})`),
             "\n\ttruths:", ...dumpObject(truths));
       }
     };
@@ -93,10 +94,18 @@ export default class Connection extends Follower {
         invariantifyArray(commands, "receiveTruths.commands", { min: 1 });
         return this.receiveCommands(commands, retrieveMediaBuffer, downstreamReceiveCommands);
       } catch (error) {
-        throw this.wrapErrorEvent(error, new Error(`receiveCommands()`),
+        throw this.wrapErrorEvent(error,
+            new Error(`receiveCommands(${this._dumpEventIds(commands)})`),
             "\n\tcommands:", ...dumpObject(commands));
       }
     };
+  }
+
+  _dumpEventIds (events) {
+    return `[${
+      events.map(event => `#${(event.aspects.log || {}).index}:${(event.aspects.command || {}).id}`)
+          .join(",")
+    }]`;
   }
 
   isConnected () {
@@ -289,7 +298,8 @@ export default class Connection extends Follower {
       }
       return downstreamReceiveTruths(truths, retrieveMediaBuffer);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(type),
+      throw this.wrapErrorEvent(error,
+          new Error(`${type}(${this._dumpEventIds(truths)})`),
           "\n\ttruths:", ...dumpObject(truths),
           "\n\tretrieveMediaBuffer:", ...dumpObject(retrieveMediaBuffer));
     }

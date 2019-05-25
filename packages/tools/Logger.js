@@ -3,6 +3,8 @@
 import SimpleData from "~/tools/SimpleData";
 import { outputError, wrapError } from "~/tools/wrapError";
 
+const inBrowser = require("~/gateway-api/inBrowser").default;
+
 export default class Logger extends SimpleData {
   constructor (options: ?any) {
     super(options);
@@ -10,11 +12,13 @@ export default class Logger extends SimpleData {
     if (!this.warn) this.warn = console.warn.bind(console);
     if (!this.error) this.error = console.error.bind(console);
     if (!this.info) this.info = console.info.bind(console);
+    if (!this.clock) this.clock = (inBrowser() ? console.log : console.warn).bind(console);
   }
   log: Function;
   warn: Function;
   error: Function;
   info: Function;
+  clock: Function;
 }
 
 let counter = 0;
@@ -51,35 +55,40 @@ export class LogEventGenerator {
     return `${this.constructor.name}(${!(opts || {}).raw ? this.getName() : this.getRawName()})`;
   }
 
-  info (...rest: any[]) { return this._logger.info(...rest); }
+  info (...rest: any[]) {
+    return (this._logger.info || this._logger.log).apply(this._logger, rest);
+  }
   log (...rest: any[]) { return this._logger.log(...rest); }
   warn (...rest: any[]) { return this._logger.warn(...rest); }
   error (...rest: any[]) { return this._logger.error(...rest); }
+  clock (...rest: any[]) {
+    return (this._logger.clock || (inBrowser() ? this._logger.log : this._logger.warn))
+        .apply(this._logger, rest);
+  }
 
   infoEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._outputMessageEvent((this._logger.info || this._logger.log).bind(this._logger),
+    return this._outputMessageEvent(this.info.bind(this),
         true, minVerbosity, maybeFunction, ...messagePieces);
   }
   logEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._outputMessageEvent(this._logger.log.bind(this._logger),
+    return this._outputMessageEvent(this.log.bind(this),
         true, minVerbosity, maybeFunction, ...messagePieces);
   }
   warnEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._outputMessageEvent(this._logger.warn.bind(this._logger),
+    return this._outputMessageEvent(this.warn.bind(this),
         true, minVerbosity, maybeFunction, ...messagePieces);
   }
   errorEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._outputMessageEvent(this._logger.error.bind(this._logger),
+    return this._outputMessageEvent(this.error.bind(this),
         true, minVerbosity, maybeFunction, ...messagePieces);
   }
   clockEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._outputMessageEvent(
-        (this._logger.clock || this._logger.info || this._logger.log).bind(this._logger),
+    return this._outputMessageEvent(this.clock.bind(this),
         false, minVerbosity, maybeFunction, ...messagePieces);
   }
   _outputMessageEvent (operation: Function, joinFirstPieceWithId: boolean,
@@ -147,7 +156,7 @@ export class LogEventGenerator {
 }
 
 export function createForwardLogger ({ name, enableLog = true, enableWarn = true,
-    enableError = true, enableInfo = true, target = console }: Object): Logger {
+    enableError = true, enableInfo = true, enableClock = true, target = console }: Object): Logger {
   const getName = () => (typeof name === "string" ? name : name.name);
   return new Logger(name
       ? {
@@ -155,11 +164,13 @@ export function createForwardLogger ({ name, enableLog = true, enableWarn = true
         warn (...rest: any[]) { if (enableWarn) target.warn(`${getName()}:`, ...rest); },
         error (...rest: any[]) { if (enableError) target.error(`${getName()}:`, ...rest); },
         info (...rest: any[]) { if (enableInfo) target.info(`${getName()}:`, ...rest); },
+        clock (...rest: any[]) { if (enableClock) target.clock(`${getName()}:`, ...rest); },
       } : {
         log (...rest: any[]) { if (enableLog) target.log(...rest); },
         warn (...rest: any[]) { if (enableWarn) target.warn(...rest); },
         error (...rest: any[]) { if (enableError) target.error(...rest); },
         info (...rest: any[]) { if (enableInfo) target.info(...rest); },
+        clock (...rest: any[]) { if (enableClock) target.clock(...rest); },
       }
   );
 }

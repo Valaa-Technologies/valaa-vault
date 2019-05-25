@@ -240,7 +240,7 @@ export default class Engine extends Cog {
     const extractedProperties = [];
     let discourse;
     try {
-      discourse = (options.discourse || this.discourse).acquireTransaction("construct");
+      discourse = (options.discourse || this.discourse).acquireFabricator("construct");
       options.discourse = discourse;
       if (!options.head) options.head = this;
       constructParams = createConstructParams(options);
@@ -285,11 +285,11 @@ export default class Engine extends Cog {
         return vResource;
       });
       const vRet = isRecombine ? ret : ret[0];
-      discourse.releaseTransaction();
+      discourse.releaseFabricator();
       return !options.awaitResult ? vRet
           : thenChainEagerly(options.awaitResult(result, vRet), () => vRet);
     } catch (error) {
-      if (discourse) discourse.releaseTransaction({ rollback: error });
+      if (discourse) discourse.releaseFabricator({ rollback: error });
       throw localWrapError(this, error, `${constructCommand.name}()`);
     }
     function localWrapError (self, error, operationName) {
@@ -405,7 +405,7 @@ export default class Engine extends Cog {
     }
     this.logEvent(1, () => [
       !purgedProtagonists ? "reciting" : "purging",
-      stories.length, "stories in", tx.debugId(), ":", stories,
+      stories.length, "stories in", tx.debugId(), ":", ...dumpObject(stories),
     ]);
     for (const story of stories) {
       story._delayedCogRemovals = [];
@@ -525,11 +525,11 @@ export default class Engine extends Cog {
       this.logEvent(1, () => [`obtained existing group transaction '${groupName}'`, ret.debugId()]);
       finalizer.then(() => undefined);
     } else {
-      ret = this._pendingTransactions[groupName] = this.discourse.acquireTransaction(groupName);
+      ret = this._pendingTransactions[groupName] = this.discourse.acquireFabricator(groupName);
       this.logEvent(1, () => [
         `created new ${setAsGlobal ? "global " : ""}group transaction '${groupName}'`, ret.debugId()
       ]);
-      if (setAsGlobal && (this.discourse.rootDiscourse === this.discourse)) {
+      if (setAsGlobal && (this.discourse.getRootDiscourse() === this.discourse)) {
         // If there is no current transaction as the global discourse
         // set this transaction as the global one.
         this.discourse = ret;
@@ -537,21 +537,21 @@ export default class Engine extends Cog {
       finalizer.then(() => {
         this.logEvent(1, () => [
           `finalized ${
-            !setAsGlobal ? "" : this.discourse === ret ? "still global " : "no longer global "
-          } group transaction '${groupName}'`,
+            !setAsGlobal ? "" : this.discourse === ret ? "still-global " : "no longer global "
+          }group transaction '${groupName}'`,
           ret.debugId(),
         ]);
         delete this._pendingTransactions[groupName];
-        // If the global discourse is us, revert it back to the rootDiscourse.
-        if (this.discourse === ret) this.discourse = ret.rootDiscourse;
-        ret.releaseTransaction();
+        // If the global discourse is us, revert it back to the root discourse.
+        if (this.discourse === ret) this.discourse = ret.getRootDiscourse();
+        ret.releaseFabricator();
       });
     }
     return ret;
   }
 
   getActiveGlobalOrNewLocalEventGroupTransaction = () =>
-      ((this.discourse !== this.discourse.rootDiscourse)
+      ((this.discourse !== this.discourse.getRootDiscourse())
           ? this.discourse
           : this.obtainGroupTransaction("local-events", { setAsGlobal: true, }))
 

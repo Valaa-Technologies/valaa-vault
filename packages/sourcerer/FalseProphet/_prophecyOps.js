@@ -250,12 +250,12 @@ class ProphecyOperation extends ProphecyEventResult {
     return this._partitions[String(partitionURI)].commandEvent.aspects.log;
   }
 
-  getLocalStory () {
+  getComposedStory () {
     return thenChainEagerly(
         this._firstStage,
         () => this._prophecy || this.throwRejectionError(),
         this.errorOnProphecyOperation.bind(this,
-            new Error(`chronicleEvents.eventResults[${this.index}].getLocalStory()`)));
+            new Error(`chronicleEvents.eventResults[${this.index}].getComposedStory()`)));
   }
 
   getPersistedStory () {
@@ -296,7 +296,7 @@ class ProphecyOperation extends ProphecyEventResult {
     // and possible heresy: we should catch and have logic for
     // either retrying the operation or for full rejection.
     // Nevertheless flushing the corpus is needed.
-        () => this.getLocalEvent(),
+        () => this.getComposedEvent(),
         this.errorOnProphecyOperation.bind(this,
             new Error(`chronicleEvents.eventResults[${this.index}].getPremiereStory()`)));
   }

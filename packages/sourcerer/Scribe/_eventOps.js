@@ -231,13 +231,13 @@ export function _chronicleEvents (connection: ScribeConnection,
 }
 
 class ScribeEventResult extends ChronicleEventResult {
-  getLocalEvent (): EventBase {
+  getComposedEvent (): EventBase {
     return thenChainEagerly(this.receivedEventsProcess,
         receivedEvents => receivedEvents[this.index],
         this.onError);
   }
   getPersistedEvent (): Truth {
-    // TODO(iridian): Right now getLocalEvent will wait for full media
+    // TODO(iridian): Right now getComposedEvent will wait for full media
     // sync, including uploads. This is because the upload sync is
     // buried deep down the chain inside _retryingTwoWaySyncMediaContent
     return this.getLocalEvent();

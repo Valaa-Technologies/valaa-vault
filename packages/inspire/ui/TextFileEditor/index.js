@@ -99,7 +99,7 @@ class TextFileEditor extends MediaContentEditor {
   saveContent = async (text: string) => {
     const target = this.getFocus();
     if (!target) throw new Error(`TextfileEditor.saveContent called with '${typeof target}' focus`);
-    const discourse = target.acquireTransaction("save-text-content");
+    const discourse = target.acquireFabricator("save-text-content");
     try {
       if ((this.props.confirmSave && !this.props.confirmSave(text, (this.state || {}).content))
           || (this.state.content === text)) {
@@ -107,10 +107,10 @@ class TextFileEditor extends MediaContentEditor {
       }
       const createBvob = await target.prepareBvob(text, { discourse });
       target.setField("content", createBvob(), { discourse });
-      discourse.releaseTransaction();
+      discourse.releaseFabricator();
     } catch (error) {
       if (discourse.isCommittable && discourse.isCommittable()) {
-        discourse.releaseTransaction({ rollback: error });
+        discourse.releaseFabricator({ rollback: error });
       }
       throw error;
     }

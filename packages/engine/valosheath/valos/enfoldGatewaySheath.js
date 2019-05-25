@@ -3,13 +3,15 @@
 import { valoscriptInterfacePrototype, ValoscriptPrimitiveKind } from "~/script";
 import { toVAKON } from "~/script/VALSK";
 
+import type { Discourse } from "~/sourcerer/api/types";
+
 import { beaumpify } from "~/tools";
 
-import { denoteValOSBuiltinWithSignature } from "~/raem/VALK";
+import { denoteDeprecatedValOSBuiltin, denoteValOSBuiltinWithSignature } from "~/raem/VALK";
 
 /* eslint-disable prefer-arrow-callback */
 
-export default function enfoldGatewaySheath (valos: Object) {
+export default function enfoldGatewaySheath (valos: Object, rootDiscourse: Discourse) {
   Object.assign(valos, {
     beautify: beaumpify,
     toVAKON,
@@ -20,7 +22,8 @@ export default function enfoldGatewaySheath (valos: Object) {
   valos.Discourse = Object.assign(Object.create(valoscriptInterfacePrototype), {
     name: "Discourse",
 
-    getContextDiscourse: denoteValOSBuiltinWithSignature(
+    getContextDiscourse: denoteDeprecatedValOSBuiltin(
+        "valos.getFrame",
         `returns the discourse of the current execution context. If the
         execution context is not transactional the discourse is the
         top-level discourse between engine and the upstream false
@@ -32,5 +35,23 @@ export default function enfoldGatewaySheath (valos: Object) {
     )(function getContextDiscourse () {
       return this && this.__callerValker__;
     }),
+  });
+
+  valos.getRootDiscourse = denoteValOSBuiltinWithSignature(
+      `returns the root discourse of this global execution context.
+      This discourse is non-transactional and its lifetime is tied to
+      the global execution context.`
+  )(function getRootDiscourse () { return rootDiscourse; });
+
+  valos.getFabricator = denoteValOSBuiltinWithSignature(
+      `returns the current fabricator.`
+  )(function getFrame () {
+    return this && this.__callerValker__;
+  });
+
+  valos.getTransactor = denoteValOSBuiltinWithSignature(
+      `returns the current transactor.`
+  )(function getTransactor () {
+    return this && this.__callerValker__ && this.__callerValker__.getTransactor();
   });
 }

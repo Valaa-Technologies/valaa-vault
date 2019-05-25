@@ -141,7 +141,7 @@ export default class Subscription extends LiveUpdate {
   _refreshState () {
     const options = this._valkOptions;
     if ((options.discourse === null)
-        || (options.discourse && !options.discourse.isActiveTransaction())) {
+        || (options.discourse && !options.discourse.isActiveFabricator())) {
       options.discourse = this._obtainDiscourse
           ? this._obtainDiscourse()
           : this._emitter.engine.discourse;

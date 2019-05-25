@@ -17,7 +17,7 @@ export default class FabricatorEvent {
 
   target: EventTarget;
 
-  eventPhase: string;
+  eventPhase: number;
 
   currentTarget: EventTarget;
   // deepPath: Object[];
@@ -32,8 +32,10 @@ export default class FabricatorEvent {
   // FabricatorEvent fields
   connection: Connection;
   command: Object;
+  prophecy: Object;
+
+  // FabricatorEvent fields
   action: ?Object;
-  prophecy: ?Object;
 
   // 'error' type fields
   message: string;
@@ -130,7 +132,7 @@ export const prototypeTreeEventTargetOps = {
     }
     domEvent.dispatch = false;
     const ret = !domEvent.defaultPrevented;
-    domEvent.initEvent(domEvent.type, domEvent.bubbles, domEvent.cancleable, domEvent.detail);
+    domEvent.initEvent(domEvent.type, domEvent.bubbles, domEvent.cancelable, domEvent.detail);
     return ret;
   },
 };

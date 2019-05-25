@@ -112,7 +112,6 @@ export default class FalseProphetConnection extends Connection {
     let chronicling, resultBase, leadingTruths, initialSchism, upstreamResults, renarration,
         rechronicle;
     try {
-      this.clockEvent(2, () => ["falseProphet.chronicle", `chronicleEvents(${events.length})`]);
       if (options.isProphecy) {
         // console.log("assigning ids:", this.getName(), this._headEventId,
         //     this._unconfirmedCommands.length, "\n\tevents:", ...dumpObject(events));
@@ -128,6 +127,9 @@ export default class FalseProphetConnection extends Connection {
         throw new Error(`Can't chronicle events without aspects.log.index ${
             ""}(while options.isProphecy is not set)`);
       }
+      this.clockEvent(2, () => [
+        "falseProphet.chronicle", `chronicleEvents(${this._dumpEventIds(events)})`,
+      ]);
 
       const receiveTruths = !options.isTruth && this.getReceiveTruths(options.receiveTruths);
       if (receiveTruths) options.receiveTruths = receiveTruths;
@@ -255,7 +257,9 @@ export default class FalseProphetConnection extends Connection {
   receiveTruths (truths: EventBase[], unused1, unused2, schismaticCommand: EventBase) {
     let schismaticCommands, confirmCount = 0, confirmations, newTruthCount = 0, newTruths;
     try {
-      this.clockEvent(2, () => ["falseProphet.receive.truths", `receiveTruths(${truths.length})`]);
+      this.clockEvent(2, () => [
+        "falseProphet.receive.truths", `receiveTruths(${this._dumpEventIds(truths)})`,
+      ]);
       this._insertEventsToQueue(truths, this._pendingTruths, false,
           (truth, queueIndex, existingTruth) => {
             this.errorEvent(
@@ -304,9 +308,7 @@ export default class FalseProphetConnection extends Connection {
       _synthesizeRecital(this, newTruths, "receive-truth", schismaticCommands);
       return truths;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `receiveTruths([${
-              tryAspect(truths[0], "log").index}, ${
-              tryAspect(truths[(truths.length || 1) - 1], "log").index}])`,
+      throw this.wrapErrorEvent(error, `receiveTruths(${this._dumpEventIds(truths)})`,
           "\n\treceived truths:", ...dumpObject(truths),
           "\n\tpendingTruths:", ...dumpObject([...this._pendingTruths]),
           "\n\tunconfirmedCommands:", ...dumpObject([...this._unconfirmedCommands]),
@@ -331,9 +333,7 @@ export default class FalseProphetConnection extends Connection {
       _synthesizeRecital(this, newCommands || [], "receive-command", schismaticCommands);
       return commands;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `receiveCommand([${
-              tryAspect(commands[0], "log").index}, ${
-              tryAspect(commands[(commands.length || 1) - 1], "log").index}])`,
+      throw this.wrapErrorEvent(error, `receiveCommand(${this._dumpEventIds(commands)})`,
           "\n\treceived commands:", ...dumpObject(commands),
           "\n\tpendingTruths:", ...dumpObject([...this._pendingTruths]),
           "\n\tunconfirmedCommands:", ...dumpObject([...this._unconfirmedCommands]),
@@ -407,7 +407,7 @@ export default class FalseProphetConnection extends Connection {
       return _reviseRecomposedSchism(this, purged, newProphecy);
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          new Error(`_reviseRecomposedSchism(${tryAspect(purged, "command").id} -> ${
+          new Error(`_reviewRecomposedSchism(${tryAspect(purged, "command").id} -> ${
               tryAspect(newProphecy, "command").id})`),
           "\n\tpurged prophecy:", ...dumpObject(purged),
           "\n\tnew prophecy:", ...dumpObject(newProphecy));

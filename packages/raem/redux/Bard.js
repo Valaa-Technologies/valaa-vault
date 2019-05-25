@@ -188,9 +188,9 @@ export default class Bard extends Resolver {
   debugId () {
     const action = this.passage || this.story;
     if (!action) return super.debugId();
-    const description = action.id ? ` ${action.typeName} ${String(action.id).slice(0, 17)}...` : "";
-    return `${super.debugId()
-        }(#${this.story.storyIndex}/${action.passageIndex} ${action.type}${description})`;
+    const description = action.id ? ` ${action.typeName} <${String(action.id)}>` : "";
+    return `${super.debugId()}(#${this.story.storyIndex}/${action.passageIndex} ${
+        action.type}${description})`;
   }
 
   beginStory (store: Object, event: Object) {

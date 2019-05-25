@@ -41,11 +41,11 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         return true;
       }
       const wrap = new Error(this.name);
-      const discourse = server.getDiscourse().acquireTransaction();
+      const discourse = server.getDiscourse().acquireFabricator();
       return thenChainEagerly(discourse, [
         () => server.patchResource(scope.resource, request.body,
             { discourse, scope, route, toPatchTarget: this.toPatchTarget }),
-        () => discourse.releaseTransaction(),
+        () => discourse.releaseFabricator(),
         eventResult => eventResult
             && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
@@ -59,7 +59,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
           return true;
         },
       ], (error) => {
-        discourse.releaseTransaction({ abort: error });
+        discourse.releaseFabricator({ abort: error });
         throw server.wrapErrorEvent(error, wrap,
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\trequest.body:", ...dumpObject(request.body),

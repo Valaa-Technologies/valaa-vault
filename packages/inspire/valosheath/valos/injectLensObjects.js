@@ -745,7 +745,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
           // support getPremiereStory so whatever semantics is
           // desired it needs to be implemented.
           // const options = { discourse, awaitResult: result => result.getPremiereStory() };
-          const options = { discourse, awaitResult: result => result.getLocalStory() };
+          const options = { discourse, awaitResult: result => result.getComposedStory() };
           return (prototype != null)
               ? prototype.instantiate(initialState, options)
               : engine.create("Entity", initialState, options);

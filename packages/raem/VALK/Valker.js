@@ -184,7 +184,7 @@ export default class Valker extends Resolver {
         const packedResult = valker.advance(packedHead, kueryVAKON, scope);
         ret = valker.tryUnpack(packedResult, true);
         if (valker._verbosity === 1) {
-          valker[state ? "warnEvent" : "infoEvent"](`run()`,
+          valker.infoEvent(`run()`,
               (state && `options.state #${state[StoryIndexTag]}/${state[PassageIndexTag]}:`) || "",
               ", head:", ...valker._dumpObject(packedHead),
               ", kuery:", ...dumpKuery(kueryVAKON, valker._indent),
@@ -411,7 +411,7 @@ export default class Valker extends Resolver {
     }
   }
 
-  // Transaction base API stubs for systems which dont implement them.
-  acquireTransaction () { return this; }
-  releaseTransaction (/* options: { abort: any, rollback: any } */) {}
+  // Transactor base API stubs for systems which dont implement them.
+  acquireFabricator () { return this; }
+  releaseFabricator (/* options: { abort: any, rollback: any } */) {}
 }

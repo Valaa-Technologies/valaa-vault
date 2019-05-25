@@ -783,7 +783,7 @@ describe("Regression tests", () => {
     expect(lastEntry)
         .toEqual(2);
   });
-  xit("sorts an array containing resources by their name using localCompare comparator", () => {
+  it("sorts an array containing resources by their name using localCompare comparator", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
     const bodyKuery = transpileValoscriptTestBody(`
       const sortFunction = (a,b) => a[valos.name].localeCompare(b[valos.name]);
@@ -799,7 +799,7 @@ describe("Regression tests", () => {
     expect(sorted[0].get("name")).toEqual("bar");
     expect(sorted[1].get("name")).toEqual("foo");
   });
-  it("sorts an array containing Property resources by their name using localCompare comparator", () => {
+  it("sorts an array containing Property resources by using localCompare comparator", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
     const bodyKuery = transpileValoscriptTestBody(`
       const sortFunction = (a,b) => a[valos.name].localeCompare(b[valos.name]);

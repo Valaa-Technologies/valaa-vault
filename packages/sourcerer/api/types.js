@@ -74,11 +74,11 @@ export class ChronicleEventResult {
   // Get universalized event after it has been processed and reduced
   // through local sourcerer chain, including validations, excluding
   // persistence.
-  getLocalEvent (): EventBase | null | Promise<EventBase | null> {
+  getComposedEvent (): EventBase | null | Promise<EventBase | null> {
     const forward = this._localForwardResults || this._forwardResults;
     return thenChainEagerly(forward, r => {
       const forwardedResult = r[this.index - (this._events.length - r.length)];
-      return forwardedResult && forwardedResult.getLocalEvent();
+      return forwardedResult && forwardedResult.getComposedEvent();
     }, this.onError);
   }
 
@@ -138,8 +138,8 @@ export class ProphecyEventResult extends ChronicleEventResult {
     return thenChainEagerly(this.getPremiereStory(), getActionFromPassage);
   }
 
-  getLocalEvent (): EventBase {
-    return thenChainEagerly(this.getLocalStory(), getActionFromPassage);
+  getComposedEvent (): EventBase {
+    return thenChainEagerly(this.getComposedStory(), getActionFromPassage);
   }
 
   // Get event after it has been persisted (possibly locally).

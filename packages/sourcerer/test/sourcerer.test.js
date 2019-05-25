@@ -387,25 +387,30 @@ describe("Sourcerer", () => {
     let firstTruth, firstFailure;
     const firstTruthProcess = first.getTruthEvent()
         .then(truthEvent_ => (firstTruth = truthEvent_), failure => (firstFailure = failure));
+    harness.clockEvent(1, () => ["sourcerer.test.first.getPersistedEvent"]);
     await first.getPersistedEvent();
     const seconds = harness.chronicleEvents(coupleCommands).eventResults;
     const secondsTruths = [], secondsFailures = [];
     const secondsTruthProcesses = seconds.map((result_, index) => result_.getTruthEvent().then(
         truthEvent_ => (secondsTruths[index] = truthEvent_),
         failure => (secondsFailures[index] = failure)));
+    harness.clockEvent(1, () => ["sourcerer.test.seconds[1].getPersistedEvent"]);
     await seconds[1].getPersistedEvent();
     const secondsFirstEntries = authorityConnection._chroniclings.splice(1, 1);
     authorityConnection._chroniclings = [];
     const secondsFirstTruth = secondsFirstEntries.map(entry => roundtripEvent(entry.event));
-    obtainAspect(secondsFirstTruth[0], "log").index = 1; // reordering...
+    obtainAspect(secondsFirstTruth[0], "log").index = 1; // reordering from index = 2
     secondsFirstEntries[0].resolveTruthEvent(secondsFirstTruth[0]);
+    harness.clockEvent(1, () => ["sourcerer.test.auth.getReceiveTruths(secondsFirstTruth)"]);
     await authorityConnection.getReceiveTruths()(secondsFirstTruth);
     // ...until a divergence due to revise-instead-of-reject happens here.
+    harness.clockEvent(1, () => ["sourcerer.test.seconds[0].getTruthEvent"]);
     await seconds[0].getTruthEvent();
     expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
     expect(first.getLogAspectOf(harness.testPartitionURI).index).toEqual(2);
     expect(seconds[1].getLogAspectOf(harness.testPartitionURI).index).toEqual(3);
+    harness.clockEvent(1, () => ["sourcerer.test.seconds[1].getPersistedEvent"]);
     await seconds[1].getPersistedEvent();
 
     expect(authorityConnection._chroniclings.length).toEqual(2);
@@ -413,15 +418,19 @@ describe("Sourcerer", () => {
         .map(entry => roundtripEvent(entry.event));
     expect(stageTwoEntries[0].aspects.log.index).toEqual(2);
     expect(stageTwoEntries[1].aspects.log.index).toEqual(3);
+    harness.clockEvent(1, () => ["sourcerer.test.auth.getReceivedTruths(stageTwoEntries)"]);
     await authorityConnection.getReceiveTruths()(stageTwoEntries);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
 
+    harness.clockEvent(1, () => ["sourcerer.test.firstTruthProcess"]);
     await firstTruthProcess;
     expect(firstTruth).toMatchObject(simpleCommand);
     expect(firstFailure).toEqual(undefined);
     expect(first.getCommandOf(harness.testPartitionURI)).toMatchObject(stageTwoEntries[0]);
 
+    harness.clockEvent(1, () => ["sourcerer.test.secondsTruthProcesses[0]"]);
     await secondsTruthProcesses[0];
+    harness.clockEvent(1, () => ["sourcerer.test.secondsTruthProcesses[1]"]);
     await secondsTruthProcesses[1];
     expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
     expect(roundtripEvent(seconds[1].getCommandOf(harness.testPartitionURI)))
@@ -682,7 +691,7 @@ describe("Disjoint clients using paired harnesses", () => {
       initialState: { owner: ["test_partition"], name: "Multi-harness test entity" },
       aspects: { version: "0.2", log: {}, command: { id: "cid-1" } },
     }));
-    await result.getLocalEvent();
+    await result.getComposedEvent();
     expect(result.getCommandOf(harness.testPartitionURI).aspects.log.index)
         .toEqual(1);
 

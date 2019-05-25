@@ -39,8 +39,8 @@ export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
               result => (
                   result.getPersistedStory
                       ? result.getPersistedStory()
-                  : result.getLocalStory
-                      ? result.getLocalStory()
+                  : result.getComposedStory
+                      ? result.getComposedStory()
                       : result.getTruthEvent())),
         ])),
         () => harness,

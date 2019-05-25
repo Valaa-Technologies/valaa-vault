@@ -7,42 +7,49 @@ import type { Corpus } from "~/raem/Corpus";
 import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 
 import { ChronicleRequest, ChronicleEventResult } from "~/sourcerer/api/types";
-import Discourse from "~/sourcerer/api/Discourse";
+import Fabricator, { fabricatorEventTypes } from "~/sourcerer/api/Fabricator";
+import type Transactor from "~/sourcerer/api/Transactor";
+
+import type FalseProphetDiscourse from "~/sourcerer/FalseProphet/FalseProphetDiscourse";
 
 import { dumpObject } from "~/tools";
 
 let transactionCounter = 0;
+let activeTransactionCounter = 0;
+
 
 export default class TransactionState {
-  constructor (discourse: Discourse, name: string) {
-    this._discourse = discourse;
+  constructor (transactor: Transactor, name: string) {
+    this._transactor = transactor;
     this.name = name;
-    discourse._parentTransaction = null;
-    discourse.setState(this._stateBefore = discourse.getState());
+    transactor._parentFabricator = null;
+    transactor.setState(this._stateBefore = transactor.getState());
   }
 
   _lazyInit () {
+    const transactor = this._transactor;
     this._stateAfter = null;
     // actions is set to null when the transaction has been committed.
     this._actions = [];
     this._passages = [];
-    this._transacted = this._discourse._universalizeEvent(transacted({ actions: [] }));
+    this._transacted = transactor._universalizeEvent(transacted({ actions: [] }));
     this._universalPartitions = {};
     this._resultPromises = [];
-    const corpus = this._discourse.corpus = Object.create(this._discourse.corpus);
+    const corpus = transactor.corpus = Object.create(transactor.corpus);
     this._storyIndex = corpus.getState()[StoryIndexTag] || 0;
     // if (typeof this._storyIndex !== "number") {
     //   throw new Error("corpus.state[StoryIndexTag] missing");
     // }
     ++this._storyIndex;
-    transactionCounter += 1;
-    this._transactionDescription = `tx#${transactionCounter} sub-chronicle`;
-    corpus.setName(`${this._discourse.corpus.getName()}/tx#${transactionCounter}:${this.name}`);
+    activeTransactionCounter += 1;
+    this._transactionDescription = `tx#${activeTransactionCounter} sub-chronicle`;
+    corpus.setName(`${transactor.corpus.getName()}/tx#${activeTransactionCounter}:${this.name}:${
+      this._transacted.aspects.command.id}`);
     corpus.setState(this._stateBefore);
     return this;
   }
 
-  isActiveTransaction () {
+  isActiveFabricator () {
     return !this._transacted || (this._finalCommand === undefined);
   }
 
@@ -50,22 +57,22 @@ export default class TransactionState {
     return this._transacted || this._lazyInit()._transacted;
   }
 
-  createNestedTransaction (nestingTransaction: Discourse) {
+  createFabricator (nestingFabricator: Fabricator) {
     if (!this._transacted) this._lazyInit();
-    let parentTransaction = nestingTransaction;
-    while (!parentTransaction.hasOwnProperty("_nonFinalizedTransactions")) {
-      parentTransaction = Object.getPrototypeOf(parentTransaction);
+    let parentFabricator = nestingFabricator;
+    while (!parentFabricator.hasOwnProperty("_activeFabricators")) {
+      parentFabricator = Object.getPrototypeOf(parentFabricator);
     }
-    const parentTransactionCount = parentTransaction._nonFinalizedTransactions;
-    if (!parentTransactionCount) {
+    const parentFabricatorCount = parentFabricator._activeFabricators;
+    if (!parentFabricatorCount) {
       throw new Error(`Cannot nest a transaction for an already-finalized parent transaction: ${
-          parentTransaction._transactionName}`);
+          parentFabricator._fabricatorName}`);
     }
-    parentTransaction._nonFinalizedTransactions = parentTransactionCount + 1;
-    const nestedTransaction = Object.create(nestingTransaction);
-    nestedTransaction._parentTransaction = parentTransaction;
-    nestedTransaction._firstActionIndex = this._actions.length;
-    return nestedTransaction;
+    parentFabricator._activeFabricators = parentFabricatorCount + 1;
+    const nestedFabricator = Object.create(nestingFabricator);
+    nestedFabricator._parentFabricator = parentFabricator;
+    nestedFabricator._firstActionIndex = this._actions.length;
+    return nestedFabricator;
   }
 
   isFastForwardFrom (previousState: Object) {
@@ -77,7 +84,7 @@ export default class TransactionState {
       if (!this._transacted) this._lazyInit();
       else if (this._finalCommand !== undefined) {
         throw new Error(`Cannot chronicle new events as actions into the transaction '${
-            this._discourse.corpus.getName()}' which has already been ${
+            this._transactor.corpus.getName()}' which has already been ${
                 this._finalCommand ? "committed" : "aborted"}`);
       }
       // What goes on here is an incremental construction and
@@ -88,8 +95,8 @@ export default class TransactionState {
       // universal TRANSACTED. This is an awkward way to incrementally
       // construct the transacted.
       // Maybe javascript generators could somehow be useful here?
-      this._transacted.actions = events.map(action => this._discourse._universalizeAction(action));
-      const transactionStory = this._discourse.corpus.dispatch(
+      this._transacted.actions = events.map(action => this._transactor._universalizeAction(action));
+      const transactionStory = this._transactor.corpus.dispatch(
           this._transacted, this._transactionDescription);
       // Only alter transaction internals after the dispatch has
       // performed the content validations.
@@ -98,10 +105,10 @@ export default class TransactionState {
       this._transacted.actions = [];
       this._passages.push(...transactionStory.passages);
       Object.assign(this._universalPartitions, (transactionStory.meta || {}).partitions);
-      const state = this._discourse.corpus.getState();
+      const state = this._transactor.corpus.getState();
       state[StoryIndexTag] = this._storyIndex;
       state[PassageIndexTag] = this._actions.length;
-      this._discourse.setState(state);
+      this._transactor.setState(state);
       const info = this;
       return {
         eventResults: events.map((event, index) => {
@@ -109,7 +116,7 @@ export default class TransactionState {
           const passage = transactionStory.passages[index];
           return new ChronicleEventResult(event, {
             story: passage,
-            getLocalStory () { return this.story; },
+            getComposedStory () { return this.story; },
             getPremiereStory () {
               if (info._finalCommand !== undefined) return this.story;
               return result || (result = new Promise((succeed, fail) => {
@@ -120,10 +127,10 @@ export default class TransactionState {
         })
       };
     } catch (error) {
-      throw this._discourse.wrapErrorEvent(error,
-          `chronicleEvents(${this._discourse.corpus.getName()})`,
+      throw this._transactor.wrapErrorEvent(error,
+          `chronicleEvents(${this._transactor.corpus.getName()})`,
           "\n\tevents:", ...dumpObject(events),
-          "\n\ttransaction:", ...dumpObject(this._discourse),
+          "\n\ttransaction:", ...dumpObject(this._transactor),
           "\n\ttransactionState:", ...dumpObject(this),
       );
     }
@@ -133,15 +140,15 @@ export default class TransactionState {
     let command;
     try {
       if (this._finalCommand !== undefined) {
-        throw new Error(`Cannot commit a transaction '${this._discourse.corpus.getName()
+        throw new Error(`Cannot commit a transaction '${this._transactor.corpus.getName()
             }' that has already been ${this._finalCommand ? "committed" : "aborted"}`);
       }
       if (!Array.isArray(this._actions) || !this._actions.length) {
         this._finalCommand = this._transacted;
       } else {
-        this._stateAfter = this._discourse.getState();
+        this._stateAfter = this._transactor.getState();
         this._transacted.actions = this._actions;
-        // this._discourse.logEvent("committing transaction", this.name,
+        // this._transactor.logEvent("committing transaction", this.name,
         //    `with ${this._transacted.actions.length} actions:`, this._transacted);
         command = this._finalCommand = this._transacted;
         if (!this._finalCommand.actions.length) {
@@ -149,9 +156,9 @@ export default class TransactionState {
             event: this._finalCommand, story: command, getPremiereStory () { return command; },
           };
         }
-        this._commitChronicleResult = this._discourse._sourcerer.chronicleEvent(
+        this._commitChronicleResult = this._transactor._sourcerer.chronicleEvent(
             this._finalCommand, {
-          transactionState: this, identity: this._discourse._identityManager,
+          transactionState: this, identity: this._transactor._identityManager,
         });
 
         Promise.resolve(this._commitChronicleResult.getPremiereStory()).then(
@@ -164,23 +171,23 @@ export default class TransactionState {
       }
       return this._commitChronicleResult;
     } catch (error) {
-      throw this._discourse.wrapErrorEvent(error,
-        `transaction(${this._discourse.corpus.getName()}).commit()`,
+      throw this._transactor.wrapErrorEvent(error,
+        `transaction(${this._transactor.corpus.getName()}).commit()`,
           "\n\tcommand:", ...dumpObject(command),
-          "\n\ttransaction:", ...dumpObject(this._discourse),
+          "\n\ttransaction:", ...dumpObject(this._transactor),
           "\n\ttransactionState:", ...dumpObject(this),
       );
     }
   }
 
-  rollbackNestedTransaction (nestedTransaction: Discourse /* , reason: any */) {
+  rollbackFabricator (fabricator: Fabricator /* , reason: any */) {
     if (!this._transacted) return; // Not lazy-inited yet even
     if (this._finalCommand !== undefined) {
       if (!this._finalCommand) return;
-      throw new Error(`Cannot rollback a transaction '${this._discourse.corpus.getName()
+      throw new Error(`Cannot rollback a transaction '${this._transactor.corpus.getName()
           }' which has already been committed`);
     }
-    const actionsAfterRollback = nestedTransaction._firstActionIndex || 0;
+    const actionsAfterRollback = fabricator._firstActionIndex || 0;
     const initialPassage = this._passages[actionsAfterRollback];
     if (initialPassage === undefined) return;
     const rollbackState = initialPassage.previousState;
@@ -189,33 +196,33 @@ export default class TransactionState {
     }
     this._passages.length = actionsAfterRollback;
     this._actions.length = actionsAfterRollback;
-    this._discourse.setState(rollbackState);
+    this._transactor.setState(rollbackState);
   }
 
   markAsAborting (/* reason: string = "" */) {
     if (this._finalCommand !== undefined) {
       if (!this._finalCommand) return false;
-      throw new Error(`Cannot abort a transaction '${this._discourse.corpus.getName()
+      throw new Error(`Cannot abort a transaction '${this._transactor.corpus.getName()
           }' which has already been committed`);
     }
     if (!this._transacted) this._transacted = true; // prevent lazyInit in order to make tx inactive
     this._finalCommand = false;
     /*
     const messages = [
-      "Aborting transaction", this._discourse.corpus.getName(), reason,
+      "Aborting transaction", this._transactor.corpus.getName(), reason,
       "\n\taborted actions:", ...dumpObject(this._actions),
       "\n\ttransaction state:", ...dumpObject(this),
     ];
     if (Array.isArray(this._actions) && this._actions.length) {
-      this._discourse.errorEvent(...messages);
+      this._transactor.errorEvent(...messages);
     } else {
-      this._discourse.logEvent(...messages);
+      this._transactor.logEvent(...messages);
     }
     */
     return true;
   }
 
-  finalize () {
+  finalizeTransactor () {
     if (!this._transacted) this._transacted = true; // prevent lazyInit in order to make tx inactive
     // If the transaction has not yet been explicitly committed or discarded, commit it now.
     if (this._finalCommand === undefined) this.commit();

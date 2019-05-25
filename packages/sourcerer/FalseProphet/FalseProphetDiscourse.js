@@ -30,7 +30,7 @@ import valosUUID from "~/tools/id/valosUUID";
 export default class FalseProphetDiscourse extends Discourse {
   _follower: Follower;
   _sourcerer: Sourcerer;
-  _transactionState: ?TransactionState = null;
+  _transactorState: ?TransactionState = null;
   _assignCommandId: (command: Command, discourse: FalseProphetDiscourse) => string;
 
   constructor ({
@@ -41,8 +41,8 @@ export default class FalseProphetDiscourse extends Discourse {
     super(sourcerer.corpus.schema, verbosity, logger, packFromHost, unpackToHost, steppers);
     invariantifyObject(follower, "FalseProphetDiscourse.constructor.follower");
     this.setDeserializeReference(sourcerer.deserializeReference);
-    this.rootDiscourse = this;
     this.corpus = sourcerer.corpus;
+    this._rootDiscourse = this;
     this._follower = follower;
     this._sourcerer = sourcerer;
     this._implicitlySyncingConnections = {};
@@ -55,11 +55,13 @@ export default class FalseProphetDiscourse extends Discourse {
   }
 
   debugId (): string {
-    return `${this.constructor.name}(${this._transactionState
-            ? (this._transactionName || "stub-transactional") : "non-transactional"
+    return `${this.constructor.name}(${this._transactorState
+            ? (this._fabricatorName || "stub-transactional") : "non-transactional"
         }: #${this.state[StoryIndexTag]}/${this.state[PassageIndexTag]})`;
   }
 
+  getRootDiscourse () { return this._rootDiscourse; }
+  getTransactor () { return this._transactorState && this._transactorState._transactor; }
   setAssignCommandId (assignCommandId) {
     this._assignCommandId = assignCommandId;
   }
@@ -85,7 +87,7 @@ export default class FalseProphetDiscourse extends Discourse {
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
       ChroniclePropheciesRequest {
     this.logEvent(1, () => ["chronicling", events.length, "events:", events]);
-    if (this._transactionState) return this._transactionState.chronicleEvents(events, options);
+    if (this._transactorState) return this._transactorState.chronicleEvents(events, options);
     try {
       options.discourse = this;
       options.identity = this._identityManager;
@@ -149,9 +151,27 @@ export default class FalseProphetDiscourse extends Discourse {
     return this._follower.receiveTruths(truthEvents);
   }
 
+  create ({ typeName, initialState, id }: Object): ProphecyEventResult {
+    const command = created({ id, typeName, initialState });
+    if (!command.id) command.id = this.assignNewResourceId(command);
+    return this.chronicleEvent(command, {});
+  }
+
+  duplicate ({
+    duplicateOf, initialState, id,
+  }: Object): ProphecyEventResult {
+    const command = duplicated({ id, duplicateOf, initialState });
+    if (!command.id) command.id = this.assignNewResourceId(command);
+    return this.chronicleEvent(command, {});
+  }
+
+  destroy ({ id }: Object): ProphecyEventResult {
+    return this.chronicleEvent(destroyed({ id }), {});
+  }
+
   assignNewResourceId (targetAction: EventBase, partitionURI: string, explicitRawId?: string) {
     if (!partitionURI) throw new Error("assignNewResourceId.partitionURI missing");
-    const root = this._transactionState ? this._transactionState.obtainRootEvent() : targetAction;
+    const root = this._transactorState ? this._transactorState.obtainRootEvent() : targetAction;
     if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
     const partitions = (root.meta || (root.meta = {})).partitions || (root.meta.partitions = {});
     const partition = partitions[partitionURI] || (partitions[partitionURI] = {});
@@ -209,7 +229,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   assignNewPartitionId (targetAction: EventBase, authorityURI: string,
       explicitPartitionRawId?: string) {
-    const root = this._transactionState ? this._transactionState.obtainRootEvent() : targetAction;
+    const root = this._transactorState ? this._transactorState.obtainRootEvent() : targetAction;
     if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
     const partitionRawId = explicitPartitionRawId
         || createPartitionId0Dot2(root.aspects.command.id, authorityURI);
@@ -284,30 +304,4 @@ export default class FalseProphetDiscourse extends Discourse {
     return ret;
   }
   static nextIndex = 0;
-
-  isActiveTransaction () {
-    return !!this._nonFinalizedTransactions;
-  }
-
-  pendingTransactionActions () {
-    return ((this._transactionState || {}).actions || []).length;
-  }
-
-  create ({ typeName, initialState, id }: Object): ProphecyEventResult {
-    const command = created({ id, typeName, initialState });
-    if (!command.id) command.id = this.assignNewResourceId(command);
-    return this.chronicleEvent(command, {});
-  }
-
-  duplicate ({
-    duplicateOf, initialState, id,
-  }: Object): ProphecyEventResult {
-    const command = duplicated({ id, duplicateOf, initialState });
-    if (!command.id) command.id = this.assignNewResourceId(command);
-    return this.chronicleEvent(command, {});
-  }
-
-  destroy ({ id }: Object): ProphecyEventResult {
-    return this.chronicleEvent(destroyed({ id }), {});
-  }
 }

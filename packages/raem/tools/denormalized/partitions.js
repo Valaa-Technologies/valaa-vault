@@ -188,7 +188,7 @@ export function universalizePartitionMutation (bard: Bard, id: VRL) {
       targetMeta.partitionURI = partitionURI;
       (targetMeta.partitions || (targetMeta.partitions = {}))[partitionURI] = partitionInfo;
       // TODO(iridian): handle the case where a purged prophecy
-      // recomposition results in some partitions being removed.
+      // refabrication results in some partitions being removed.
     }
     return partitionURI;
   } catch (error) {

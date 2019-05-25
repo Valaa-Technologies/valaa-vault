@@ -50,7 +50,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         }
       }
       const wrap = new Error(this.name);
-      const discourse = server.getDiscourse().acquireTransaction();
+      const discourse = server.getDiscourse().acquireFabricator();
       return thenChainEagerly(discourse, [
         () => {
           if (vExistingMapping) return vExistingMapping;
@@ -64,7 +64,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         },
         vMapping => server.patchResource((scope.mapping = vMapping), request.body,
             { discourse, scope, route }),
-        () => discourse.releaseTransaction(),
+        () => discourse.releaseFabricator(),
         eventResult => eventResult
             && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
@@ -89,7 +89,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
           return true;
         },
       ], (error) => {
-        discourse.releaseTransaction({ abort: error });
+        discourse.releaseFabricator({ abort: error });
         throw server.wrapErrorEvent(error, wrap,
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\trequest.body:", ...dumpObject(request.body),

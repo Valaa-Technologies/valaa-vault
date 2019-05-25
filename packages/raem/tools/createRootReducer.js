@@ -127,7 +127,7 @@ export default function createRootReducer ({
     }
   }
 
-  function logActionInfo (logger, header, passage, shouldSlice) {
+  function logActionInfo (logger, header, passage) {
     let idString = "";
     const isSubReduce = (header === "Sub-reducing");
     if (passage.id) {
@@ -140,9 +140,10 @@ export default function createRootReducer ({
     logger.logEvent(
         `\n\t${header} ${passage.type} ${idString}`,
         (isSubReduce ? "\n\tpassage/rest:" : "\n\tstory/rest:"),
-        dumpify(rest, { sliceAt: shouldSlice && 380 }),
+        ...dumpObject(rest),
         (isSubReduce ? "\n\taction:" : "\n\tevent:"),
-        dumpify(action && { ...action }, { sliceAt: shouldSlice && 380 }));
+        ...dumpObject(action),
+      );
   }
   return reducerContext;
 }

@@ -19,7 +19,7 @@ export {                   default as Discourse } from "./api/Discourse";
 export {                   default as Follower } from "./api/Follower";
 export {                   default as Connection } from "./api/Connection";
 export {                   default as Sourcerer } from "./api/Sourcerer";
-export                           type Transaction = Object;
+export                           type Transactor = Object;
 
 export {
                            default as FalseProphet,

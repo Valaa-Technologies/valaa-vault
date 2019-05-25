@@ -62,7 +62,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       if (_resolveMappingResource(server, route, request, reply, scope)) return true;
 
       const wrap = new Error(`mapping POST ${route.url}`);
-      const discourse = undefined; // server.getDiscourse().acquireTransaction();
+      const discourse = undefined; // server.getDiscourse().acquireFabricator();
       return thenChainEagerly(discourse, [
         () => {
           scope.source = !this.toSource
@@ -82,7 +82,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
           scope.target = server.patchResource(vMapping, request.body.$V.target,
               { discourse, scope, route, toPatchTarget: this.toPatchTarget });
         },
-        () => discourse && discourse.releaseTransaction(),
+        () => discourse && discourse.releaseFabricator(),
         eventResult => eventResult
             && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
@@ -107,7 +107,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
           return true;
         },
       ], (error) => {
-        if (discourse) discourse.releaseTransaction({ abort: error });
+        if (discourse) discourse.releaseFabricator({ abort: error });
         throw server.wrapErrorEvent(error, wrap,
             "\n\trequest.query:", ...dumpObject(request.query),
             "\n\trequest.body:", ...dumpObject(request.body),

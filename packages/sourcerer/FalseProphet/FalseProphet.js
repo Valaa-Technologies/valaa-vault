@@ -89,6 +89,7 @@ export default class FalseProphet extends Sourcerer {
     options.sourcerer = this;
     options.follower = follower;
     if (options.verbosity === undefined) options.verbosity = follower.getVerbosity();
+    if (options.logger === undefined) options.logger = follower.getLogger();
     return new FalseProphetDiscourse(options);
   }
 

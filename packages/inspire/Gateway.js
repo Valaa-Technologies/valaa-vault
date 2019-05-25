@@ -242,7 +242,7 @@ export default class Gateway extends LogEventGenerator {
         function _buildRootScope () {
           rootScope = engine.getRootScope();
           const hostDescriptors = engine.getHostDescriptors();
-          extendValosheathWithEngine(rootScope, hostDescriptors, engine.discourse.getSchema());
+          extendValosheathWithEngine(rootScope, hostDescriptors, engine.discourse.getRootDiscourse());
           if (!viewConfig.defaultAuthorityURI) {
             extendValosheathWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal());
           } else {
@@ -669,7 +669,7 @@ export default class Gateway extends LogEventGenerator {
       });
       connection.clockEvent(1, `prologue.chronicle.await.local.results`,
           `Waiting for chronicle events to resolve locally`);
-      for (const result of chronicling.eventResults) await result.getLocalEvent();
+      for (const result of chronicling.eventResults) await result.getComposedEvent();
     }
     // Initiate remote narration.
     connection.clockEvent(1, `prologue.narrate`,

@@ -81,7 +81,7 @@ function isNonActivateablePhase (candidate: string) {
  * Transactions can have differing states for this same resource. To make it possible to share
  * the same Vrapper object possible, all operations accept options: { discourse: Discourse }.
  * This can be used to override the operation execution context and must be used whenever operations
- * are being performed inside a transactional context; see FalseProphetDiscourse.acquireTransaction.
+ * are being performed inside a transactional context; see FalseProphetDiscourse.acquireFabricator.
  *
  * 2. Vrapper lifecycle and active operations.
  *
@@ -907,7 +907,7 @@ export default class Vrapper extends Cog {
     let typeName = options.typeName;
     let discourse;
     try {
-      discourse = (options.discourse || this.engine.discourse).acquireTransaction("emplace");
+      discourse = (options.discourse || this.engine.discourse).acquireFabricator("emplace");
       options.discourse = discourse;
       if (!typeName) {
         const fieldIntro = this.getTypeIntro().getFields()[fieldName];
@@ -929,10 +929,10 @@ export default class Vrapper extends Cog {
         if (isSet) this.setField(fieldName, vFieldValue, options);
         else this.addToField(fieldName, vFieldValue, options);
       }
-      discourse.releaseTransaction();
+      discourse.releaseFabricator();
       return vFieldValue;
     } catch (error) {
-      discourse.releaseTransaction({ rollback: error });
+      discourse.releaseFabricator({ rollback: error });
       throw this.wrapErrorEvent(error, `emplace${isSet ? "SetField" : "AddToField"}(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tinitialState:", initialState,

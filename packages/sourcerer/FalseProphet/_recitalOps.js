@@ -3,12 +3,12 @@
 import { Command, EventBase } from "~/raem/events";
 import { getActionFromPassage, Story } from "~/raem/redux/Bard";
 
-import TransactionState from "~/sourcerer/FalseProphet/TransactionState";
 import FabricatorEvent from "~/sourcerer/api/FabricatorEvent";
+import TransactionState from "~/sourcerer/FalseProphet/TransactionState";
 import { initializeAspects } from "~/sourcerer/tools/EventAspects";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
 
-import { dumpObject, outputError } from "~/tools";
+import { dumpObject } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
 import FalseProphetConnection from "./FalseProphetConnection";
@@ -17,6 +17,17 @@ import {
 } from "./_prophecyOps";
 import StoryRecital from "./StoryRecital";
 
+/**
+ * Dispatches given event to the corpus and get the corresponding
+ * story. This event can be a downstream-bound truth, a fresh
+ * upstream-bound command, cached command narration or an existing
+ * prophecy revision.
+ * Returns a story which contains the action itself and the corpus
+ * state before and after the action.
+ *
+ * @param  {type} event     an command to go upstream
+ * @returns {type}          description
+ */
 export function _composeRecitalStoryFromEvent (falseProphet: FalseProphet, event: EventBase,
     dispatchDescription: string, timed: ?EventBase, transactionState?: TransactionState) {
   if (!event.aspects) initializeAspects(event, { version: EVENT_VERSION });
@@ -35,7 +46,6 @@ export function _composeRecitalStoryFromEvent (falseProphet: FalseProphet, event
   if (dispatchDescription === "receive-truth") story.isTruth = true;
   // story.id = story.aspects.command.id; TODO(iridian): what was this?
   falseProphet._primaryRecital.addStory(story);
-  // console.log("Added dispatched event:", event, story, { state: story.state.toJS() });
   return story;
 }
 
@@ -333,6 +343,9 @@ function _finalizeReformation (reformation: Object, newEvents: EventBase[], schi
 export function _deliverStoriesToFollowers (falseProphet: FalseProphet, stories: Story[],
     purgedRecital: ?StoryRecital) {
   let followerReactions;
+  falseProphet.clockEvent(2, () => ["falseProphet.recital.deliver",
+    `_deliverStoriesToFollowers(${stories.length}, ${purgedRecital ? purgedRecital.size : 0})`,
+  ]);
   falseProphet._followers.forEach((discourse, follower) => {
     let reactions;
     try {

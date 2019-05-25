@@ -142,7 +142,7 @@ export class TestConnection extends AuthorityConnection {
 }
 
 class TestEventResult extends ChronicleEventResult {
-  getLocalEvent () { return undefined; }
+  getComposedEvent () { return undefined; }
   getTruthEvent () {
     if (!this.isPrimary) {
       return Promise.reject(new Error("Non-primary authority cannot chronicle events"));

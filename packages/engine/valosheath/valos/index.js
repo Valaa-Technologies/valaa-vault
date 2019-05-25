@@ -1,5 +1,7 @@
 // @flow
 
+import type { Discourse } from "~/sourcerer/api/types";
+
 import schemaTypeSheaths from "./schema";
 
 import enfoldGatewaySheath from "./enfoldGatewaySheath";
@@ -10,11 +12,11 @@ export { OwnerDefaultCouplingTag };
 /*
  * Creates the ValOS introspection object.
  */
-export default function extendValOS (scope: any, hostDescriptors: any, schema: any) {
+export default function extendValOS (scope: any, hostDescriptors: any, rootDiscourse: Discourse) {
   const valos = scope.valos || (scope.Valaa = scope.valos = {});
-  enfoldGatewaySheath(valos);
-  if (schema) {
-    enfoldSchemaSheath(scope, valos, hostDescriptors, schema, schemaTypeSheaths);
+  enfoldGatewaySheath(valos, rootDiscourse);
+  if (rootDiscourse.schema) {
+    enfoldSchemaSheath(scope, valos, hostDescriptors, rootDiscourse.getSchema(), schemaTypeSheaths);
   }
   return valos;
 }

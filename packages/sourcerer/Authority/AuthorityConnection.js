@@ -118,7 +118,7 @@ export default class AuthorityConnection extends Connection {
 }
 
 export class AuthorityEventResult extends ChronicleEventResult {
-  getLocalEvent () {
+  getComposedEvent () {
     return thenChainEagerly(this.localProcess,
         receivedEvents => receivedEvents[this.index],
         this.onError);
@@ -128,7 +128,7 @@ export class AuthorityEventResult extends ChronicleEventResult {
       throw new Error(`Non-primary authority '${this.connection.getName()
           }' cannot deliver truths (by default)`);
     }
-    if (!this.truthsProcess) return this.getLocalEvent(); // implies: not remote
+    if (!this.truthsProcess) return this.getComposedEvent(); // implies: not remote
     return thenChainEagerly(this.truthsProcess,
         truthEvents => (this.remoteResults || truthEvents)[this.index],
         this.onError);

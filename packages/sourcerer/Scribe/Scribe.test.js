@@ -57,14 +57,14 @@ describe("Scribe", () => {
     const database = await openDB(testPartitionURI.toString());
 
     // Adds an entity and checks that it has been stored
-    let storedEvent = await connection.chronicleEvent(simpleCommand).getLocalEvent();
+    let storedEvent = await connection.chronicleEvent(simpleCommand).getComposedEvent();
     expect(storedEvent.aspects.log.index)
         .toEqual(connection.getFirstUnusedCommandEventId() - 1);
     await expectStoredInDB(simpleCommand, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
 
     // Runs a transaction and confirms that it has been stored
-    storedEvent = await connection.chronicleEvent(followupTransaction).getLocalEvent();
+    storedEvent = await connection.chronicleEvent(followupTransaction).getComposedEvent();
     expect(storedEvent.aspects.log.index)
         .toEqual(connection.getFirstUnusedCommandEventId() - 1);
     await expectStoredInDB(followupTransaction, database, "commands",
@@ -107,9 +107,9 @@ describe("Scribe", () => {
     const firstConnection = await scribe.acquireConnection(testPartitionURI)
         .asActiveConnection();
 
-    await firstConnection.chronicleEvent(simpleCommand).getLocalEvent();
+    await firstConnection.chronicleEvent(simpleCommand).getComposedEvent();
 
-    const storedEvent = await firstConnection.chronicleEvent(followupTransaction).getLocalEvent();
+    const storedEvent = await firstConnection.chronicleEvent(followupTransaction).getComposedEvent();
 
     const firstUnusedCommandEventId = firstConnection.getFirstUnusedCommandEventId();
     expect(firstUnusedCommandEventId).toEqual(storedEvent.aspects.log.index + 1);
@@ -130,7 +130,7 @@ describe("Scribe", () => {
     let newUnusedCommandId = connection.getFirstUnusedCommandEventId();
 
     for (const command of simpleCommandList) {
-      const storedEvent = await connection.chronicleEvent(command).getLocalEvent();
+      const storedEvent = await connection.chronicleEvent(command).getComposedEvent();
       expect(storedEvent.aspects.log.index)
           .toEqual(newUnusedCommandId);
 
@@ -147,7 +147,7 @@ describe("Scribe", () => {
         .asActiveConnection();
 
     const chronicling = connection.chronicleEvents(simpleCommandList);
-    const lastLocal = await chronicling.eventResults[simpleCommandList.length - 1].getLocalEvent();
+    const lastLocal = await chronicling.eventResults[simpleCommandList.length - 1].getComposedEvent();
     expect(lastLocal.aspects.log.index + 1)
         .toEqual(connection.getFirstUnusedCommandEventId());
     const lastTruth = await chronicling.eventResults[simpleCommandList.length - 1].getTruthEvent();

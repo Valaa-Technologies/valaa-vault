@@ -3,8 +3,14 @@ import Valker from "~/raem/VALK/Valker";
 import type { ProphecyEventResult } from "~/sourcerer/api/types";
 
 /**
- * Discourse is a fancy name for a one-to-one communication connection
- * between a single Sourcerer and a single Follower.
+ * Discourse is a fancy name for a two-directional communication
+ * channel between a single Sourcerer and a single Follower.
+ * It is optimistic: downstream events can be either confirmed truths
+ * or unconfirmed optimistic commands.
+ * It is partition agnostic: downstream events can be multi-partition
+ * and it can fabricate multi-partition commands towards upstream.
+ * It manages an the identities of the Follower towards the sourcerer
+ * fabric.
  *
  * @export
  * @class Discourse
@@ -47,13 +53,13 @@ export default class Discourse extends Valker {
   // }
 
   /**
-   * acquireTransaction - Creates a transaction object for grouping
+   * acquireFabricator - Creates a transaction object for grouping
    * resource manipulations together.
    * @returns {Discourse}  transaction object
    */
-  acquireTransaction (name: string): Discourse {
+  acquireFabricator (name: string): Discourse {
     throw new Error(
-        `${this.constructor.name}/Discourse.acquireTransaction(${name}) not implemented`);
+        `${this.constructor.name}/Discourse.acquireFabricator(${name}) not implemented`);
   }
 
   /**

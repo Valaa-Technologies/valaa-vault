@@ -51,13 +51,8 @@ export default class Corpus extends Bard {
   dispatch (event: Action, description: string) {
     const prevName = this.getName();
     try {
-      this.setName(!(event.meta || {}).partitions
-          ? `${description}`
-          : `${description}: ${
-              Object.entries(event.meta.partitions)
-                  .map(([id]) => `${id.slice(0, 26)}...}`)
-                  .join(", ")
-              }`);
+      this.setName(`${description}:${
+        ((event.aspects || {}).command || {}).id || "<command.id missing>"}`);
       this.logEvent(1, () => ["dispatching event:", ...dumpObject(event)]);
       return this._dispatch(event, this);
     } catch (error) {

@@ -29,13 +29,15 @@ export default class FabricatorEvent {
   stopPropagation () { this._stopPropagation = true; }
   stopImmediatePropagation () { this._stopPropagation = true; this._stopImmediate = true; }
 
-  // FabricatorEvent fields
-  connection: Connection;
+  // TransactorEvent fields
   command: Object;
   prophecy: Object;
 
   // FabricatorEvent fields
   action: ?Object;
+
+  preConditions: ?Function[];
+  postConditions: ?Function[];
 
   // 'error' type fields
   message: string;
@@ -43,19 +45,25 @@ export default class FabricatorEvent {
   lineno: number;
   colno: number;
   error: Error;
+  errorOrigin: string;
+  instigatorConnection: Connection;
 
   // reformation fields
-  isSchismatic: ?boolean;
-  isRevisable: ?boolean;
-  retryWhen: ?string;
+  schismaticCommand: Connection;
 
-  constructor (type: string, connection: ?Connection, fields: Object) {
-    this.dispatch = false;
+  isSchismatic: ?boolean; // If not set to false the prophecy will undergo reformation.
+                          // If true at the end of the reformation the prophecy will be extracted
+                          // from the primary recital as heresy.
+  isRevisable: ?boolean; // If set to false, schism cannot by synchronously revised
+  isReformable: ?boolean; // If set to false, a heresy cannot be reformed even asynchronously
+  isRefabricateable: ?boolean; // If set to false, the command cannot be refabricated
+
+  constructor (type: string, fields: Object) {
     this.type = type;
-    this.connection = connection;
+    this.dispatch = false;
     this.bubbles = true;
     this.cancelable = true;
-    Object.assign(this, fields);
+    if (fields) Object.assign(this, fields);
   }
 
   initEvent (type: string, bubbles: boolean, cancelable: boolean, detail: any) {
@@ -73,10 +81,16 @@ export default class FabricatorEvent {
   }
 }
 
+export const EventTypesTag = Symbol("Fabricator.EventTypes");
+
 const EventTargetTag = Symbol("FabricatorEvent.EventListener.EventTarget");
 
 export const prototypeTreeEventTargetOps = {
-  addEventListener (type: String, callback: Function | Object, options: ?(boolean | Object)) {
+  addEventListener (type: String, callback: Function | Object, options: ?(boolean | Object) = {}) {
+    const eventType = this[EventTypesTag][type];
+    if (!eventType) {
+      throw new Error(`${this.constructor.name} doesn't implement event type '${type}'`);
+    }
     const listenerName = `on${type}`;
     let listeners = this[listenerName];
     if (!listeners || (listeners[EventTargetTag] !== this)) {
@@ -135,6 +149,59 @@ export const prototypeTreeEventTargetOps = {
     domEvent.initEvent(domEvent.type, domEvent.bubbles, domEvent.cancelable, domEvent.detail);
     return ret;
   },
+
+  obtainDispatchAndDefaultActEvent (reuseEvent: Event, type: string, updateFields: Object) {
+    const eventType = this[EventTypesTag][type];
+    if (!eventType) {
+      throw new Error(`${this.constructor.name} doesn't implement event type '${type}'`);
+    }
+    const domEvent = reuseEvent || new FabricatorEvent(type);
+    domEvent.initEvent(type, eventType.bubbles, eventType.cancelable);
+    if (updateFields) Object.assign(domEvent, updateFields);
+    this.dispatchAndDefaultActEvent(domEvent, eventType);
+    return domEvent;
+  },
+
+  dispatchAndDefaultActEvent (domEvent: FabricatorEvent,
+      eventType = this[EventTypesTag][domEvent.type]) {
+    if (!eventType) {
+      throw new Error(`${this.constructor.name} doesn't implement event type '${domEvent.type}'`);
+    }
+    if (!this.dispatchEvent(domEvent)) return false;
+    const defaultAction = eventType.defaultAction;
+    if (defaultAction) {
+      if (defaultAction.setIfUndefined) {
+        for (const key of Object.keys(defaultAction.setIfUndefined)) {
+          if (domEvent[key] === undefined) domEvent[key] = defaultAction.setIfUndefined[key];
+        }
+      }
+      if (defaultAction.setAlways) {
+        for (const key of Object.keys(defaultAction.setAlways)) {
+          domEvent[key] = defaultAction.setAlways[key];
+        }
+      }
+      if (defaultAction.call) {
+        for (const entry of defaultAction.call) {
+          const func = Array.isArray(entry) ? entry[0] : entry;
+          const args = Array.isArray(entry) ? entry.slice(1) : [];
+          if (typeof func === "string") this[func](domEvent, ...args);
+          else if (typeof func === "function") func.call(this, domEvent, ...args);
+        }
+      }
+    }
+    return true;
+  },
+
+  addPreCondition (name: String, validator: Function) {
+    throw new Error(`addPrediction(${name}, ${validator.name}) not implemented`);
+  },
+
+  addPostCondition (name: String, validator: Function) {
+    throw new Error(`addPrediction(${name}, ${validator.name}) not implemented`);
+  },
+
+  validatePreConditions (/* event: Event */) {},
+  validatePostConditions (/* event: Event */) {},
 };
 
 function _createListener (type, callback, options) {

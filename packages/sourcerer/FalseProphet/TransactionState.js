@@ -9,6 +9,7 @@ import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 import { ChronicleRequest, ChronicleEventResult } from "~/sourcerer/api/types";
 import Fabricator, { fabricatorEventTypes } from "~/sourcerer/api/Fabricator";
 import type Transactor from "~/sourcerer/api/Transactor";
+import { prototypeTreeEventTargetOps, EventTypesTag } from "~/sourcerer/api/FabricatorEvent";
 
 import type FalseProphetDiscourse from "~/sourcerer/FalseProphet/FalseProphetDiscourse";
 
@@ -17,6 +18,80 @@ import { dumpObject } from "~/tools";
 let transactionCounter = 0;
 let activeTransactionCounter = 0;
 
+export const fabricatorOps = {
+  ...prototypeTreeEventTargetOps,
+  [EventTypesTag]: fabricatorEventTypes,
+
+  isActiveFabricator () {
+    return !!this._activeFabricators;
+  },
+
+  /**
+   * Returns a new valid transaction discourse which wraps this
+   * Discourse as prototype and forks its corpus. The returned
+   * discourse thus inherits all of false prophet discourse API, but
+   * in addition all chroniclings are intercepted in an internal
+   * transaction event log.
+   * These events are resolved immediately against the forked corpus,
+   * but only claimed forward as commands once the transaction is
+   * committed. This happens when the transaction discourse is released
+   * usind releaseFabricator.
+   *
+   * Transactors can be nested by calling acquireFabricator
+   * again on an existing transaction discourse. The main transaction
+   * is committed only when all nested transactions have been released.
+   */
+  acquireFabricator (name: string): FalseProphetDiscourse & Fabricator {
+    let ret;
+    if (!this._transactorState) {
+      ret = Object.create(this);
+      const transactorState = ret._transactorState = new TransactionState(ret, name);
+      ret._fabricatorName = `${name}#${++transactionCounter}`;
+      this.logEvent(1, () => [
+        "acquired NEW TX", name, ":",
+        "\n\tdiscourse:", ...dumpObject(ret),
+        "\n\ttransaction:", ...dumpObject(transactorState),
+      ]);
+    } else {
+      ret = this._transactorState.createFabricator(this, name);
+      this.logEvent(1, () => [
+        "acquired fabricator", name, ":", {
+          discourse: dumpObject(ret), transaction: dumpObject(ret._transactorState),
+        },
+      ]);
+      ret._fabricatorName = `${this._fabricatorName}/${this._activeFabricators}`;
+    }
+    ret._activeFabricators = 1;
+    return ret;
+  },
+
+  releaseFabricator (options: ?{ abort: any, rollback: any }) {
+    const transactorState = this._transactorState;
+    if (!transactorState) {
+      throw new Error("Invalid call to releaseFabricator from outside Fabricator");
+    }
+    this.logEvent(1, () => [
+      "released fabricator", name, ":",
+      "\n\tdiscourse:", ...dumpObject(this.getRootDiscourse()),
+      "\n\ttransactor:", ...dumpObject(transactorState._transactor),
+      "\n\tfabricator:", ...dumpObject(this),
+      "\n\toptions:", ...dumpObject(options),
+    ]);
+    if (options) {
+      if (options.abort) {
+        transactorState.markAsAborting(options.abort.message || options.abort);
+      } else if (options.rollback) {
+        transactorState.rollbackFabricator(this,
+            options.rollback.message || options.rollback);
+      }
+    }
+    if (--this._activeFabricators) return false;
+    if (this._parentFabricator) {
+      return this._parentFabricator.releaseFabricator();
+    }
+    return transactorState.finalizeTransactor();
+  },
+};
 
 export default class TransactionState {
   constructor (transactor: Transactor, name: string) {
@@ -33,6 +108,7 @@ export default class TransactionState {
     this._actions = [];
     this._passages = [];
     this._transacted = transactor._universalizeEvent(transacted({ actions: [] }));
+    this._transacted.meta.transactor = transactor;
     this._universalPartitions = {};
     this._resultPromises = [];
     const corpus = transactor.corpus = Object.create(transactor.corpus);
@@ -46,6 +122,17 @@ export default class TransactionState {
     corpus.setName(`${transactor.corpus.getName()}/tx#${activeTransactionCounter}:${this.name}:${
       this._transacted.aspects.command.id}`);
     corpus.setState(this._stateBefore);
+    if (transactor.getVerbosity() >= 2) {
+      Object.keys(fabricatorEventTypes).forEach(type => {
+        transactor.addEventListener(type, event => {
+          transactor.clockEvent(2, () => [
+            `transactor.on${type}`,
+            event.command.aspects.command.id,
+            event.instigatorConnection && event.instigatorConnection.getPartitionURI(),
+          ]);
+        });
+      });
+    }
     return this;
   }
 

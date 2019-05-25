@@ -21,7 +21,7 @@ import createResourceId0Dot2, { createPartitionId0Dot2 }
     from "~/sourcerer/tools/event-version-0.2/createResourceId0Dot2";
 import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/EventAspects";
 
-import TransactionState from "~/sourcerer/FalseProphet/TransactionState";
+import TransactionState, { fabricatorOps } from "~/sourcerer/FalseProphet/TransactionState";
 import IdentityManager from "~/sourcerer/FalseProphet/IdentityManager";
 
 import { invariantify, invariantifyObject, thenChainEagerly, trivialClone } from "~/tools";
@@ -62,16 +62,21 @@ export default class FalseProphetDiscourse extends Discourse {
 
   getRootDiscourse () { return this._rootDiscourse; }
   getTransactor () { return this._transactorState && this._transactorState._transactor; }
+  getIdentityManager () { return this._identityManager; }
+
   setAssignCommandId (assignCommandId) {
     this._assignCommandId = assignCommandId;
   }
 
-  run (head: any, kuery: any, options: Object): any {
+  run (head: any, kuery: any, options: Object = {}): any {
     try {
       if (options && options.discourse && (this !== options.discourse)) {
         return options.discourse.run(head, kuery, options);
       }
-      return super.run(head, kuery, options);
+      return super.run(head, kuery,
+          !options ? { discourse: this }
+          : !options.discourse ? { ...options, discourse: this }
+          : options);
     } catch (error) {
       addConnectToPartitionToError(error, this.connectToMissingPartition);
       throw error;
@@ -80,7 +85,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   acquireConnection (partitionURI: ValaaURI,
       options: ConnectOptions = {}): ?Connection {
-    options.identity = this._identityManager;
+    options.discourse = this;
     return this._sourcerer.acquireConnection(partitionURI, options);
   }
 
@@ -90,7 +95,6 @@ export default class FalseProphetDiscourse extends Discourse {
     if (this._transactorState) return this._transactorState.chronicleEvents(events, options);
     try {
       options.discourse = this;
-      options.identity = this._identityManager;
       const ret = this._sourcerer.chronicleEvents(
           events.map(event => this._universalizeEvent(event)), options);
 
@@ -110,6 +114,7 @@ export default class FalseProphetDiscourse extends Discourse {
       );
     }
   }
+
   chronicleEvent (event: EventBase, options: ChronicleOptions = {}): ProphecyEventResult {
     return this.chronicleEvents([event], options).eventResults[0];
   }
@@ -119,7 +124,6 @@ export default class FalseProphetDiscourse extends Discourse {
     if (!ret.meta) ret.meta = {};
     // This communicates with @valos/raem reducers somewhat awkwardly.
     ret.meta.isBeingUniversalized = true;
-    ret.meta.identity = this._identityManager;
     if (!tryAspect(ret, "command").id) this._assignCommandId(ret, this);
     return ret;
   }
@@ -241,67 +245,6 @@ export default class FalseProphetDiscourse extends Discourse {
     */
     return targetAction.id;
   }
-
-  /**
-   * Returns a new valid transaction discourse which wraps this
-   * Discourse as prototype and forks its corpus. The returned
-   * discourse thus inherits all of false prophet discourse API, but
-   * in addition all chroniclings are intercepted in an internal
-   * transaction event log.
-   * These events are resolved immediately against the forked corpus,
-   * but only claimed forward as commands once the transaction is
-   * committed. This happens when the transaction discourse is released
-   * usind releaseTransaction.
-   *
-   * Transaction discourses can be nested by calling acquireTransaction
-   * again on an existing transaction discourse. The main transaction
-   * is committed only when all nested transactions have been released.
-   */
-  acquireTransaction (name: string): FalseProphetDiscourse {
-    let ret;
-    if (!this._transactionState) {
-      ret = Object.create(this);
-      const transaction = ret._transactionState = new TransactionState(ret, name);
-      this.logEvent(1, () => [
-        "acquired NEW TX", name, ":", {
-          discourse: dumpObject(ret), transaction: dumpObject(transaction),
-        },
-      ]);
-      ret.releaseTransaction = function releaseTransaction (
-          options: ?{ abort: any, rollback: any }) {
-        this.logEvent(1, () => [
-          "released TX", name, ":", {
-            discourse: dumpObject(this), root: dumpObject(ret),
-            transaction: dumpObject(transaction),
-            options: dumpObject(options),
-          },
-        ]);
-        if (options) {
-          if (options.abort) {
-            transaction.markAsAborting(options.abort.message || options.abort);
-          } else if (options.rollback) {
-            transaction.rollbackNestedTransaction(this,
-                options.rollback.message || options.rollback);
-          }
-        }
-        if (--this._nonFinalizedTransactions) return false;
-        if (this._parentTransaction) {
-          return this._parentTransaction.releaseTransaction();
-        }
-        return transaction.finalize();
-      };
-      ret._transactionName = `${name}#${++FalseProphetDiscourse.nextIndex}`;
-    } else {
-      ret = this._transactionState.createNestedTransaction(this, name);
-      this.logEvent(1, () => [
-        "acquired nested TX", name, ":", {
-          discourse: dumpObject(ret), transaction: dumpObject(ret._transactionState),
-        },
-      ]);
-      ret._transactionName = `${this._transactionName}/${this._nonFinalizedTransactions}`;
-    }
-    ret._nonFinalizedTransactions = 1;
-    return ret;
-  }
-  static nextIndex = 0;
 }
+
+Object.assign(FalseProphetDiscourse.prototype, fabricatorOps);

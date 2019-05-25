@@ -17,7 +17,7 @@ import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetConnection from "./FalseProphetConnection";
 
 import { Prophecy, _chronicleEvents } from "./_prophecyOps";
-import { _composeRecitalStoryFromEvent, _deliverStoriesToFollowers } from "./_recitalOps";
+import { _deliverStoriesToFollowers } from "./_recitalOps";
 import { deserializeVRL } from "./_universalizationOps";
 import StoryRecital from "./StoryRecital";
 
@@ -106,29 +106,6 @@ export default class FalseProphet extends Sourcerer {
 
   chronicleEvent (event: EventBase, options: Object = {}): ProphecyEventResult {
     return this.chronicleEvents([event], options).eventResults[0];
-  }
-
-
-  /**
-   * Dispatches given event to the corpus and get the corresponding
-   * story. This event can be a downstream-bound truth, a fresh
-   * upstream-bound command, cached command narration or an existing
-   * prophecy revision.
-   * Returns a story which contains the action itself and the corpus
-   * state before and after the action.
-   *
-   * @param  {type} event     an command to go upstream
-   * @returns {type}          description
-   */
-  _composeRecitalStoryFromEvent (event: EventBase, dispatchDescription: string, timed: ?EventBase,
-      transactionState?: TransactionState) {
-    try {
-      return _composeRecitalStoryFromEvent(this, event, dispatchDescription, timed, transactionState);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, `_composeRecitalStoryFromEvent(${dispatchDescription})`,
-          "\n\tevent:", ...dumpObject(event),
-          "\n\ttimed:", ...dumpObject(timed));
-    }
   }
 
   _deliverStoriesToFollowers (stories: Story[], purgedRecital: ?StoryRecital) {

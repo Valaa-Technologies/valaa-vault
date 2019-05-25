@@ -66,38 +66,45 @@ describe("Media handling", () => {
     const existingChroniclingCount = testPartitionBackend._chroniclings.length;
     const buffer = arrayBufferFromUTF8String("example content");
     const contentHash = contentHashFromArrayBuffer(buffer);
-    const { media, contentSetting } = await harness.runValoscript(vRef("test_partition"), `
+    const { media, contentSetting, newMediaPersist } = await harness.runValoscript(
+        vRef("test_partition"), `
       const media = new Media({
           name: "text media",
           owner: this,
           mediaType: { type: "text", subtype: "plain" },
       });
       const contentSetting = media[valos.prepareBvob](buffer)
-          .then(createBvob => ({ bvobId: (media[valos.Media.content] = createBvob()) }));
+          .then(createBvob => ({
+            bvobId: (media[valos.Media.content] = createBvob()),
+            bvobComposed: new Promise(resolve =>
+                valos.getTransactor().addEventListener("aftercompose", resolve)),
+            bvobPersisted: new Promise(resolve =>
+                valos.getTransactor().addEventListener("persist", resolve)),
+          }));
       this.text = media;
-      ({ media, contentSetting });
+      ({
+        media, contentSetting,
+        newMediaPersist: new Promise(resolve =>
+            valos.getTransactor().addEventListener("persist", resolve)),
+      });
     `, { scope: { buffer, console } });
+    await newMediaPersist;
     expect(media.getId().toJSON())
         .toEqual(entities().test_partition.get(["§..", "text"]).getId().toJSON());
     expect(testPartitionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     // no remote confirmation!
-    const { bvobId } = await contentSetting;
+    const { bvobId, bvobComposed, bvobPersisted } = await contentSetting;
     expect(bvobId.getId().rawId())
         .toEqual(contentHash);
     expect(bvobId.getId().toJSON())
         .toEqual(media.get("content").getId().toJSON());
-    // FIXME(iridian, 2019-01): Replace this ugly prophecy extraction
-    // with transaction introspection API, so that the createBvob
-    // callback in the above VS code will get its own transaction
-    // completion promise and export it to this outer test context.
-    const createBvobProphecy = harness.falseProphet._primaryRecital.getLast();
-    expect((await createBvobProphecy.meta.operation.getLocalStory()).actions.length)
-        .toEqual(2); // good enough...
+    const bvobComposedEvent = await bvobComposed;
+    expect(bvobComposedEvent.command.actions.length).toEqual(2);
     testPartitionBackend.addPrepareBvobResult({ contentHash });
     expect(testPartitionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
-    await createBvobProphecy.meta.operation.getPersistedStory();
+    await bvobPersisted;
     expect(testPartitionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
   });

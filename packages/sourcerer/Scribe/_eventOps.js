@@ -179,14 +179,15 @@ export function _chronicleEvents (connection: ScribeConnection,
     const receiveTruths = connection.getReceiveTruths(options.receiveTruths);
     options.receiveTruths = receiveTruths;
     options.receiveCommands = null;
-    let upstreamEventResults, newLocallyReceivedEvents;
-    resultBase._forwardResults = thenChainEagerly(resultBase.receivedEventsProcess, [
-      function _chronicleReceivedEventsUpstream (receivedEvents) {
-        newLocallyReceivedEvents = receivedEvents.filter(notNull => notNull);
-        if (!newLocallyReceivedEvents.length) return ({ eventResults: [] });
-        return connection.getUpstreamConnection()
-            .chronicleEvents(newLocallyReceivedEvents, options);
-      },
+    let upstreamEventResults;
+    resultBase._persistedForwardResults = thenChainEagerly(resultBase.receivedEventsProcess,
+        function _chronicleReceivedEventsUpstream (receivedEvents) {
+          resultBase._locallyReceivedEvents = receivedEvents.filter(notNull => notNull);
+          if (!resultBase._locallyReceivedEvents.length) return ({ eventResults: [] });
+          return connection.getUpstreamConnection()
+              .chronicleEvents(resultBase._locallyReceivedEvents, options);
+        });
+    resultBase._forwardResults = thenChainEagerly(resultBase._persistedForwardResults, [
       function _syncToChronicleResultTruthEvents ({ eventResults }) {
         upstreamEventResults = eventResults;
         return mapEagerly(upstreamEventResults,
@@ -213,8 +214,8 @@ export function _chronicleEvents (connection: ScribeConnection,
       },
       () => (resultBase._forwardResults = upstreamEventResults),
     ], function errorOnScribeChronicleEvents (error) {
-      if ((newLocallyReceivedEvents || []).length) {
-        const discard = newLocallyReceivedEvents[0].aspects;
+      if ((resultBase._locallyReceivedEvents || []).length) {
+        const discard = resultBase._locallyReceivedEvents[0].aspects;
         connection._deleteQueuedCommandsOnwardsFrom(discard.log.index, discard.command.id);
       }
       throw connection.wrapErrorEvent(error, new Error("chronicleEvents()"),
@@ -240,7 +241,11 @@ class ScribeEventResult extends ChronicleEventResult {
     // TODO(iridian): Right now getComposedEvent will wait for full media
     // sync, including uploads. This is because the upload sync is
     // buried deep down the chain inside _retryingTwoWaySyncMediaContent
-    return this.getLocalEvent();
+    return !this._persistedForwardResults
+        ? this.getComposedEvent()
+        : thenChainEagerly(this._persistedForwardResults,
+            () => this._locallyReceivedEvents[this.index],
+            this.onError);
   }
 }
 

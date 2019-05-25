@@ -23,6 +23,10 @@ export default class Discourse extends Valker {
     throw new Error(`${this.constructor.name}/Discourse.obtainId not implemented`);
   }
 
+  getIdentityManager (): Object {
+    throw new Error(`${this.constructor.name}/Discourse.getIdentityManager not implemented`);
+  }
+
   /**
    * assignNewResourceId - Creates a new resource id and assigns it to targetAction.
    *

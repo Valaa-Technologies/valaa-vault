@@ -5,7 +5,6 @@ import { Story } from "~/raem/redux/Bard";
 import VRL from "~/raem/VRL";
 
 import Connection from "~/sourcerer/api/Connection";
-import FabricatorEvent from "~/sourcerer/api/FabricatorEvent";
 import { ChronicleOptions, ChronicleRequest, ChronicleEventResult, ConnectOptions, NarrateOptions }
     from "~/sourcerer/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/EventAspects";
@@ -16,9 +15,9 @@ import IdentityManager from "~/sourcerer/FalseProphet/IdentityManager";
 
 import { dumpObject, mapEagerly, thenChainEagerly } from "~/tools";
 
-import { Prophecy, _reviseRecomposedSchism, _reformHeresy } from "./_prophecyOps";
+import { Prophecy, _reviewRecomposedSchism, _reformHeresy } from "./_prophecyOps";
 import {
-  _confirmLeadingTruthsToFollowers, _confirmRecitalStories, _synthesizeRecital,
+  _confirmLeadingTruthsToFollowers, _confirmRecitalStories, _refineRecital,
 } from "./_recitalOps";
 
 /**
@@ -59,7 +58,7 @@ export default class FalseProphetConnection extends Connection {
   }
 
   _doConnect (options: ConnectOptions, onError: Function) {
-    this._originatingIdentity = options.identity;
+    this._originatingIdentity = options.discourse && options.discourse.getIdentityManager();
     return thenChainEagerly(super._doConnect(options, onError),
         ret => {
           this._referencePrototype.setInactive(false);
@@ -99,11 +98,20 @@ export default class FalseProphetConnection extends Connection {
 
   narrateEventLog (options: ?NarrateOptions = {}): Promise<Object> {
     if (!options) return undefined;
-    if (options.identity === undefined) options.identity = this._originatingIdentity;
+    this._resolveOptionsIdentity(options);
     if (options.rechronicleOptions !== false) {
-      (options.rechronicleOptions || (options.rechronicleOptions = {})).identity = options.identity;
+      if (!options.rechronicleOptions) options.rechronicleOptions = {};
+      options.rechronicleOptions.discourse = options.discourse;
+      options.rechronicleOptions.identity = options.identity;
     }
     return super.narrateEventLog(options);
+  }
+
+  _resolveOptionsIdentity (options) {
+    if (options.identity !== undefined) return;
+    options.identity = options.discourse
+        ? options.discourse.getIdentityManager()
+        : this._originatingIdentity;
   }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
@@ -135,10 +143,9 @@ export default class FalseProphetConnection extends Connection {
       if (receiveTruths) options.receiveTruths = receiveTruths;
       options.receiveCommands = options.isProphecy ? null
           : this.getReceiveCommands(options.receiveCommands);
-      if (options.identity === undefined) options.identity = this._originatingIdentity;
+      this._resolveOptionsIdentity(options);
       this.clockEvent(2, () => ["falseProphet.chronicle.upstream",
         `upstream.chronicleEvents(${events.length})`]);
-
       chronicling = this._upstreamConnection.chronicleEvents(events, options);
 
       resultBase = new ChronicleEventResult(null, {
@@ -173,25 +180,26 @@ export default class FalseProphetConnection extends Connection {
                   });
                 }
                 if (prophecy) {
-                  const review = prophecy.review = new FabricatorEvent("chronicleerror", this, {
-                    prophecy, error, command,
+                  const progress = prophecy.meta.operation.getProgress({
+                    type: "error", error, errorOrigin: "chronicle", instigatorConnection: this,
                     isSchismatic: error.isSchismatic !== false,
                     isRevisable: error.isRevisable !== false,
                     isReformable: error.isReformable !== false,
+                    isRefabricateable: error.isRefabricateable !== false,
                   });
-                  if (error.retry) review.retryWhen = error.retry.when;
-                  if (renarration) review.renarration = renarration;
-                  if (options.discourse && !options.discourse.dispatchEvent(review)) {
-                    Object.assign(review,
-                        { isSchismatic: true, isRevisable: false, isReformable: false });
+                  if (options.discourse) {
+                    options.discourse.dispatchAndDefaultActEvent(progress);
                   }
-                  if (review.isSchismatic !== false) {
+                  if (progress.isSchismatic !== false) {
                     if (initialSchism === undefined) initialSchism = events[index];
-                    review.message = `chronicleEvents${
-                      review.isRevisable ? "; reviseable schism"
-                      : review.isReformable ? "; reformable schism"
-                      : "; schism rejection"
-                    }: ${error.message}`;
+                    progress.type = "schism";
+                    progress.schismaticCommand = events[index];
+                    progress.message = `chronicleEvents error as ${
+                      progress.isRevisable ? "reviseable"
+                      : progress.isReformable ? "reformable"
+                      : progress.isRefabricateable ? "refabricateable"
+                      : "to-be-rejected"
+                    } schism: ${error.message}`;
                   }
                 }
                 // Process the remaining entries so that fully
@@ -305,7 +313,7 @@ export default class FalseProphetConnection extends Connection {
         "\n\tnewTruths:", ...dumpObject(newTruths)
       ]);
       */
-      _synthesizeRecital(this, newTruths, "receive-truth", schismaticCommands);
+      _refineRecital(this, newTruths, "receive-truth", schismaticCommands);
       return truths;
     } catch (error) {
       throw this.wrapErrorEvent(error, `receiveTruths(${this._dumpEventIds(truths)})`,
@@ -330,7 +338,7 @@ export default class FalseProphetConnection extends Connection {
           (command, queueIndex) => {
             schismaticCommands = this._unconfirmedCommands.splice(queueIndex);
           });
-      _synthesizeRecital(this, newCommands || [], "receive-command", schismaticCommands);
+      _refineRecital(this, newCommands || [], "receive-command", schismaticCommands);
       return commands;
     } catch (error) {
       throw this.wrapErrorEvent(error, `receiveCommand(${this._dumpEventIds(commands)})`,
@@ -390,7 +398,6 @@ export default class FalseProphetConnection extends Connection {
           this.getPartitionURI()}>`);
     }
     return {};
-    // const identity = command.meta.identity;
   }
 
   _checkForFreezeAndNotify (lastEvent: EventBase[] =
@@ -402,9 +409,9 @@ export default class FalseProphetConnection extends Connection {
         this.getPartitionURI().toString(), this._unconfirmedCommands.length);
   }
 
-  _reviseRecomposedSchism (purged: Prophecy, newProphecy: Prophecy) {
+  _reviewRecomposedSchism (purged: Prophecy, newProphecy: Prophecy) {
     try {
-      return _reviseRecomposedSchism(this, purged, newProphecy);
+      return _reviewRecomposedSchism(this, purged, newProphecy);
     } catch (error) {
       throw this.wrapErrorEvent(error,
           new Error(`_reviewRecomposedSchism(${tryAspect(purged, "command").id} -> ${

@@ -9,11 +9,14 @@ import { naiveURI } from "~/raem/ValaaURI";
 import { ChronicleEventResult, Connection, ProphecyChronicleRequest, ProphecyEventResult }
     from "~/sourcerer/api/types";
 import { tryAspect } from "~/sourcerer/tools/EventAspects";
+import FabricatorEvent from "~/sourcerer/api/FabricatorEvent";
 
 import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
-import { _purgeLatestRecitedStory, _recomposeSchismaticRecitalStory } from "./_recitalOps";
+import {
+  _composeRecitalStoryFromEvent, _purgeLatestRecitedStory, _recomposeSchismaticStory,
+} from "./_recitalOps";
 import FalseProphetConnection from "./FalseProphetConnection";
 
 export type Prophecy = Story & {
@@ -25,22 +28,35 @@ export type Prophecy = Story & {
 // commands upstream. Aborts all remaining events on first exception
 // and rolls back previous ones.
 export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[],
-    { timed, transactionState, discourse, ...rest } = {}): ProphecyChronicleRequest {
+    { timed, transactionState, ...rest } = {}): ProphecyChronicleRequest {
   if (timed) throw new Error("timed events not supported yet");
-  const prophecies = events.map(event => falseProphet
-      ._composeRecitalStoryFromEvent(event, "prophecy-chronicle", timed, transactionState));
   const resultBase = new ProphecyOperation(null, {
     _sourcerer: falseProphet,
     _events: events,
     _options: rest,
-    _followerReactions: falseProphet._deliverStoriesToFollowers(prophecies),
   });
   resultBase._options.isProphecy = true;
-
+  const prophecies = [];
   const ret = {
-    eventResults: prophecies.map(
-        (prophecy, index) => Object.create(resultBase)._execute(prophecy, index)),
+    eventResults: events.map((event, index) => {
+      const operation = Object.create(resultBase);
+      operation.event = event;
+      operation.index = index;
+      (event.meta || (event.meta = {})).operation = operation;
+      const prophecy = _composeRecitalStoryFromEvent(
+          falseProphet, event, "prophecy-chronicle", timed, transactionState);
+      prophecies.push(prophecy);
+      if (!prophecy) return undefined;
+      operation._prophecy = prophecy;
+      return operation;
+    }),
   };
+  resultBase._followerReactions = falseProphet._deliverStoriesToFollowers(prophecies);
+
+  for (const operation of ret.eventResults) {
+    if (operation) operation._execute();
+  }
+
   // TODO(iridian): Implement prophecies' partition sub-commands grouping.
   // Also implement it for purge revision re-chronicles.
   //
@@ -127,7 +143,7 @@ export function _confirmProphecyPartitionCommand (connection: FalseProphetConnec
   return true;
 }
 
-export function _reformProphecyCommand (connection: FalseProphetConnection,
+export function _rewriteProphecyPartitionCommand (connection: FalseProphetConnection,
     prophecy: Prophecy, reformedCommand: Command) {
   const partition = prophecy.meta.operation._partitions[String(connection.getPartitionURI())];
   const originalCommand = partition.commandEvent;
@@ -142,20 +158,21 @@ export function _reformProphecyCommand (connection: FalseProphetConnection,
   return (partition.commandEvent = reformedCommand);
 }
 
-export function _reviseRecomposedSchism (connection: FalseProphetConnection, schism: Prophecy,
+export function _reviewRecomposedSchism (connection: FalseProphetConnection, schism: Prophecy,
     recomposition: Prophecy) {
   const semanticSchismReason = _checkForSemanticSchism(schism, recomposition);
+  const progress = schism.meta.operation.getProgress();
   if (!semanticSchismReason) {
-    schism.review.isSchismatic = false;
+    progress.isSchismatic = false;
     return recomposition;
   }
-  const review = schism.review;
-  review.type = "semanticSchism";
-  review.schism = schism;
-  review.recomposition = recomposition;
-  review.isSemanticSchism = true;
-  review.message = semanticSchismReason;
+  progress.type = "semanticSchism";
+  progress.schism = schism;
+  progress.recomposition = recomposition;
+  progress.isSemanticSchism = true;
+  progress.message = semanticSchismReason;
   return undefined;
+
   /*
   connection.warnEvent(1, () => [
     "\n\treviewed prophecy", tryAspect(reviewed, "command").id,
@@ -187,8 +204,10 @@ export function _reformHeresy (connection: FalseProphetConnection,
     return operation._options.reformHeresy(schism, connection, newEvents, purgedStories);
   }
   // Then if the schism is not a semantic schism try basic revise-recompose.
-  if (schism.review.isSemanticSchism || (schism.review.isReformable === false)) return undefined;
-  const recomposedProphecy = _recomposeSchismaticRecitalStory(connection.getSourcerer(), schism);
+  if (operation._progress.isSemanticSchism || (operation._progress.isReformable === false)) {
+    return undefined;
+  }
+  const recomposedProphecy = _recomposeSchismaticStory(connection.getSourcerer(), schism);
   const partitionURI = String(connection.getPartitionURI());
   if (!recomposedProphecy
       || (Object.keys((recomposedProphecy.meta || {}).partitions).length !== 1)) {
@@ -203,6 +222,13 @@ export function _reformHeresy (connection: FalseProphetConnection,
   (recomposedProphecy.meta || (Object.getPrototypeOf(recomposedProphecy).meta = {})).operation =
       operation;
   operation._prophecy = recomposedProphecy;
+  operation._reformationAttempt = (operation._reformationAttempt || 0) + 1;
+  operation._persistedStory = null;
+  const progress = operation._progress;
+  if (progress) {
+    progress.previousProphecy = progress.prophecy;
+    progress.prophecy = recomposedProphecy;
+  }
   const operationPartition = operation._partitions[partitionURI];
   operationPartition.commandEvent = revisedPartitionCommandEvent;
   operationPartition.chronicling = connection.chronicleEvent(
@@ -210,11 +236,15 @@ export function _reformHeresy (connection: FalseProphetConnection,
   return [recomposedProphecy];
 }
 
-export function _purgeHeresy (falseProphet: FalseProphet, hereticProphecy: Prophecy) {
-  const operation = (hereticProphecy.meta || {}).operation;
+export function _purgeHeresy (falseProphet: FalseProphet, heresy: Prophecy) {
+  const meta = heresy.meta || {};
+  const operation = meta.operation;
   if (!operation || !operation._partitions) return;
-  const error = (hereticProphecy.review || {}).error
-      || new Error((hereticProphecy.review || {}).message);
+  const progress = operation.getProgress({ type: "purge", isSchismatic: true });
+  const error = progress.error || new Error(progress.message);
+  if (meta.transactor && meta.transactor.onpurge) {
+    meta.transactor.dispatchAndDefaultActEvent(progress);
+  }
   for (const partition of Object.values(operation._partitions)) {
     if (!partition.confirmedTruth) {
       partition.rejectCommand(partition.rejectionReason || error);
@@ -249,6 +279,13 @@ class ProphecyOperation extends ProphecyEventResult {
   getLogAspectOf (partitionURI) {
     return this._partitions[String(partitionURI)].commandEvent.aspects.log;
   }
+  getProgress (fields) {
+    const ret = this._progress || (this._progress = new FabricatorEvent("", {
+      command: this.event, prophecy: this._prophecy,
+    }));
+    if (fields) Object.assign(ret, fields);
+    return ret;
+  }
 
   getComposedStory () {
     return thenChainEagerly(
@@ -259,7 +296,8 @@ class ProphecyOperation extends ProphecyEventResult {
   }
 
   getPersistedStory () {
-    return thenChainEagerly(
+    let reformationAttempt = this._reformationAttempt;
+    return this._persistedStory || (this._persistedStory = thenChainEagerly(
         // TODO(iridian, 2019-01): Add also local stage chroniclings to
         // the waited list, as _firstStage only contains remote
         // stage chroniclings. This requires refactoring: local
@@ -270,17 +308,43 @@ class ProphecyOperation extends ProphecyEventResult {
         // the locally persisted commands if the remotes rejected.
         this._firstStage
             && mapEagerly(this._firstStage, ({ chronicling }) => chronicling.getPersistedEvent()),
-        () => this._prophecy || this.throwRejectionError(),
-        this.errorOnProphecyOperation.bind(this,
-            new Error(`chronicleEvents.eventResults[${this.index}].getPersistedStory()`)));
+        () => {
+          if (reformationAttempt !== this._reformationAttempt) {
+            throw ({ retry: true }); // eslint-disable-line no-throw-literal
+          }
+          const prophecy = this._prophecy || this.throwRejectionError();
+          const transactor = this.event.meta.transactor;
+          if (transactor && transactor.onpersist) {
+            Promise.resolve(this._persistedStory).then(() =>
+                transactor.dispatchAndDefaultActEvent(this.getProgress({ type: "persist" })));
+          }
+          return (this._persistedStory = prophecy);
+        },
+        (error, index, head, functionChain, onRejected) => {
+          if (error.retry && (reformationAttempt !== this._reformationAttempt)) {
+            reformationAttempt = this._reformationAttempt;
+            return thenChainEagerly(head, functionChain, onRejected);
+          }
+          return this.errorOnProphecyOperation(this,
+            new Error(`chronicleEvents.eventResults[${this.index}].getPersistedStory()`));
+        },
+      ));
   }
 
   getTruthStory () {
-    return thenChainEagerly(
+    return this._truthStory || (this._truthStory = thenChainEagerly(
         this._fulfillment,
-        () => this._prophecy || this.throwRejectionError(),
+        () => {
+          const prophecy = this._prophecy || this.throwRejectionError();
+          const transactor = this.event.meta.transactor;
+          if (transactor && transactor.ontruth) {
+            Promise.resolve(this._truthStory).then(() =>
+                transactor.dispatchAndDefaultActEvent(this.getProgress({ type: "truth" })));
+          }
+          return (this._truthStory = prophecy);
+        },
         this.errorOnProphecyOperation.bind(this,
-            new Error(`chronicleEvents.eventResults[${this.index}].getTruthStory()`)));
+            new Error(`chronicleEvents.eventResults[${this.index}].getTruthStory()`))));
   }
 
   getPremiereStory () {
@@ -320,23 +384,26 @@ class ProphecyOperation extends ProphecyEventResult {
         "INTERNAL ERROR: ProphecyOperation._prophecy and _rejectionReason are both missing");
   }
 
-  _execute (prophecy: Prophecy, index: number) {
+  _execute () {
     this._debugPhase = "execute";
-    this.event = getActionFromPassage(prophecy);
-    this.index = index;
-    this._prophecy = prophecy;
-    (prophecy.meta || (this.event.meta = {})).operation = this;
-    Object.assign(this, this._followerReactions[index]);
+    const prophecy = this._prophecy;
+    const meta = prophecy.meta;
+    Object.assign(this, this._followerReactions[this.index]);
     this._fulfillment = thenChainEagerly(null, [
       () => this._prepareStagesAndCommands(),
       () => this._initiateConnectionValidations(),
       () => (this._remoteStage || this._localStage) && (this._persistsment = thenChainEagerly(
-        (this._firstStage = (thenChainEagerly(
-          this._initiateStage(...(this._remoteStage
-              ? [this._remoteStage, "remote"]
-              : [this._localStage, "local"])),
-          (firstStage) => (this._firstStage = firstStage),
-        ))), [
+        null, [
+          () => {
+            this._firstStage = thenChainEagerly(
+              this._initiateStage(...(this._remoteStage
+                  ? [this._remoteStage, "remote"]
+                  : [this._localStage, "local"])),
+              firstStage => (this._firstStage = firstStage),
+            );
+            if (meta.transactor && meta.transactor.onpersist) this.getPersistedStory();
+            return this._firstStage;
+          },
           () => this._completeStage(this._firstStage, this._remoteStage ? "remote" : "local"),
           () => this._initiateStage(this._remoteStage && this._localStage, "local"),
           () => this._completeStage(this._remoteStage && this._localStage, "local"),
@@ -348,12 +415,14 @@ class ProphecyOperation extends ProphecyEventResult {
       () => {
         this._prophecy.isTruth = true;
         (this._fulfillment = this._prophecy);
+        if (meta.transactor && meta.transactor.ontruth) this.getTruthStory();
+        return this._fulfillment;
       },
     ], (error, head, phaseIndex) => {
       this._prophecy.isRejected = true;
       this._rejectionError = this._prophecy.rejectionReason =
           this.errorOnProphecyOperation(
-              new Error(`chronicleEvents.eventResults[${index}].execute(phase#${phaseIndex}/${
+              new Error(`chronicleEvents.eventResults[${this.index}].execute(phase#${phaseIndex}/${
                   this._debugPhase})`),
               error);
       this._prophecy = null;

@@ -253,8 +253,7 @@ export default class FalseProphetConnection extends Connection {
       wrap_.stack = wrap.stack;
       throw connection.wrapErrorEvent(error, wrap_,
           "\n\toptions:", ...dumpObject(options),
-          "\n\tevents:", tryAspect(events[0], "log").index,
-              tryAspect(events[events.length - 1], "log").index,
+          "\n\tevents:", ...dumpObject(connection._dumpEventIds(events)),
           "\n\tinternal:", ...dumpObject({
             connection, chronicling, resultBase, leadingTruths, initialSchism,
             upstreamResults, renarration, rechronicle,
@@ -266,7 +265,8 @@ export default class FalseProphetConnection extends Connection {
     let schismaticCommands, confirmCount = 0, confirmations, newTruthCount = 0, newTruths;
     try {
       this.clockEvent(2, () => [
-        "falseProphet.receive.truths", `receiveTruths(${this._dumpEventIds(truths)})`,
+        "falseProphet.receive.truths",
+        `receiveTruths(${this._dumpEventIds(truths)},${this._dumpEventIds(schismaticCommand)})`,
       ]);
       this._insertEventsToQueue(truths, this._pendingTruths, false,
           (truth, queueIndex, existingTruth) => {
@@ -290,10 +290,14 @@ export default class FalseProphetConnection extends Connection {
         if (!schismaticCommands) this._unconfirmedCommands.splice(0, confirmCount);
         // purge clears all unconfirmed commands
       }
-      if (!schismaticCommands && schismaticCommand
-          && (schismaticCommand === this._unconfirmedCommands[0])) {
-        schismaticCommands = this._unconfirmedCommands;
-        this._unconfirmedCommands = [];
+      if (!schismaticCommands && schismaticCommand) {
+        const index = this._unconfirmedCommands.indexOf(schismaticCommand);
+        if (index < 0) {
+          console.error(
+              "schismatic command notificed but not in queue", this._unconfirmedCommands);
+        } else {
+          schismaticCommands = this._unconfirmedCommands.splice(index);
+        }
       }
       while (this._pendingTruths[newTruthCount]) ++newTruthCount;
       this._headEventId += confirmCount + newTruthCount;

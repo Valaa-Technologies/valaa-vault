@@ -102,8 +102,9 @@ export default class Connection extends Follower {
 
   _dumpEventIds (events) {
     return `[${
-      events.map(event => `#${(event.aspects.log || {}).index}:${(event.aspects.command || {}).id}`)
-          .join(",")
+      [].concat(events || []).map(event =>
+              `#${(event.aspects.log || {}).index}:${(event.aspects.command || {}).id}`
+          ).join(",")
     }]`;
   }
 

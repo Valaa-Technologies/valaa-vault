@@ -242,7 +242,8 @@ export default class Gateway extends FabricEventTarget {
         function _buildRootScope () {
           rootScope = engine.getRootScope();
           const hostDescriptors = engine.getHostDescriptors();
-          extendValosheathWithEngine(rootScope, hostDescriptors, engine.discourse.getRootDiscourse());
+          extendValosheathWithEngine(
+              rootScope, hostDescriptors, engine.discourse.getRootDiscourse());
           if (!viewConfig.defaultAuthorityURI) {
             extendValosheathWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal());
           } else {

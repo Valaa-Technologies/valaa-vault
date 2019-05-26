@@ -81,8 +81,10 @@ export function createGhostVRLInInstance (prototypeId: VRL,
 export function createMaterializeGhostAction (resolver: Resolver, ghostId: VRL,
     concreteTypeName: string, isVirtualAction: boolean = false): ?Action {
   try {
+    if (!ghostId.isGhost()) {
+      throw new Error(`${concreteTypeName || "Resource"} does not exist: <${String(ghostId)}>`);
+    }
     const actions = [];
-    invariantify(ghostId.isGhost(), "createMaterializeGhostAction.ghostObjectPath.isGhost");
     const typeIntro = concreteTypeName && resolver.schema.getType(concreteTypeName);
     if (concreteTypeName && (!typeIntro || !typeIntro.getInterfaces)) {
       throw new Error(`Cannot create materialize action for non-concrete type ${concreteTypeName}`);

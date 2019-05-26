@@ -158,7 +158,7 @@ export function thisChainEagerly (this_: any, initialParams: any,
   let arrayPromise;
   for (;;) {
     if ((params == null) || (typeof params !== "object")) {
-      params = params === undefined ? [] : [params];
+      params = (params === undefined) ? [] : [params];
     } else if (Array.isArray(params)) {
       for (let i = 0; i !== params.length; ++i) {
         if ((params[i] != null) && (typeof params[i].then === "function")) {
@@ -192,6 +192,7 @@ export function thisChainEagerly (this_: any, initialParams: any,
     if (!func) continue;
     try {
       params = func.apply(this_, params);
+      ++index;
     } catch (error) {
       const wrapped = wrapError(error, new Error(getName("callback")),
           "\n\tthis:", ...dumpObject(this_),
@@ -200,8 +201,8 @@ export function thisChainEagerly (this_: any, initialParams: any,
           "\n\tfunctions:", ...dumpObject(functions));
       if (!onRejected) throw wrapped;
       params = onRejected.call(this_, wrapped, index, params, functions, onRejected);
+      index = functions.length;
     }
-    ++index;
   }
   --index;
   return params.then(

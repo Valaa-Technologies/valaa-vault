@@ -126,8 +126,17 @@ export default class TransactionState {
           transactor.clockEvent(1, () => [
             `transactor.on${type}`,
             event.command.aspects.command.id,
-            event.instigatorConnection && event.instigatorConnection.getPartitionURI(),
+            event.instigatorConnection ? event.instigatorConnection.getPartitionURI() : "",
             event.error && event.error.message,
+            event.defaultPrevented ? "canceled" : "",
+            event.isSchismatic === undefined ? ""
+                : event.isSchismatic ? "schismatic" : "non-schismatic",
+            event.isRevisable === undefined ? ""
+                : event.isRevisable ? "revisable" : "non-revisable",
+            event.isReformable === undefined ? ""
+                : event.isReformable ? "reformable" : "non-reformable",
+            event.isRefabricateable === undefined ? ""
+                : event.isRefabricateable ? "refabricateable" : "non-refabricateable",
           ]);
         });
       });

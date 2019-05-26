@@ -5,7 +5,6 @@ import type FalseProphet from "~/sourcerer/FalseProphet/FalseProphet";
 import { debugObjectType, dumpObject, FabricEventTarget } from "~/tools";
 
 export default class IdentityManager extends FabricEventTarget {
-
   constructor (sourcerer: FalseProphet) {
     super(undefined, sourcerer.getVerbosity(), sourcerer);
     this._sourcerer = sourcerer;

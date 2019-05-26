@@ -109,7 +109,8 @@ describe("Scribe", () => {
 
     await firstConnection.chronicleEvent(simpleCommand).getComposedEvent();
 
-    const storedEvent = await firstConnection.chronicleEvent(followupTransaction).getComposedEvent();
+    const storedEvent = await firstConnection
+        .chronicleEvent(followupTransaction).getComposedEvent();
 
     const firstUnusedCommandEventId = firstConnection.getFirstUnusedCommandEventId();
     expect(firstUnusedCommandEventId).toEqual(storedEvent.aspects.log.index + 1);
@@ -147,10 +148,12 @@ describe("Scribe", () => {
         .asActiveConnection();
 
     const chronicling = connection.chronicleEvents(simpleCommandList);
-    const lastLocal = await chronicling.eventResults[simpleCommandList.length - 1].getComposedEvent();
+    const lastLocal = await chronicling.eventResults[simpleCommandList.length - 1]
+        .getComposedEvent();
     expect(lastLocal.aspects.log.index + 1)
         .toEqual(connection.getFirstUnusedCommandEventId());
-    const lastTruth = await chronicling.eventResults[simpleCommandList.length - 1].getTruthEvent();
+    const lastTruth = await chronicling.eventResults[simpleCommandList.length - 1]
+        .getTruthEvent();
     expect(lastTruth.aspects.log.index + 1)
         .toEqual(connection.getFirstUnusedTruthEventId());
   });

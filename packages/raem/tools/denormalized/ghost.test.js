@@ -155,7 +155,7 @@ describe("Ghost materialization and immaterialization", () => {
     const fakeGhost = createTransient({ id: vRef("dummyId"), typeName: "nope" });
     expect(() => {
       createMaterializeGhostAction(harness.getValker(), fakeGhost.get("id"));
-    }).toThrow(/ghostObjectPath.isGhost/);
+    }).toThrow(/Resource does not exist/);
   });
 
   it("Materialization should not materialize the owner", () => {

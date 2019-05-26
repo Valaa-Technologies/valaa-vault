@@ -283,7 +283,7 @@ describe("Sourcerer", () => {
     expect(secondsTruths.length).toEqual(2);
   });
 
-  it("resolves getTruthEvent when command is reordered and others rejected", async () => {
+  it("resolves getTruthEvent when a command is reordered and others rejected", async () => {
     const { scribeConnection, authorityConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
 
@@ -300,6 +300,7 @@ describe("Sourcerer", () => {
     const firstTruthProcess = first.getTruthEvent()
         .then(truthEvent_ => (firstTruth = truthEvent_), failure => (firstFailure = failure));
 
+    harness.clockEvent(2, () => ["test.first.getPersistedEvent"]);
     await first.getPersistedEvent();
 
     expect(firstTruth).toEqual(undefined);
@@ -311,6 +312,7 @@ describe("Sourcerer", () => {
             truthEvent_ => (secondsTruths[index] = truthEvent_),
             failure => (secondsFailures[index] = failure)));
 
+    harness.clockEvent(2, () => ["test.seconds[1].getPersistedEvent"]);
     await seconds[1].getPersistedEvent();
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
 
@@ -333,15 +335,19 @@ describe("Sourcerer", () => {
     // delay prophecy resolutions but otherwise has no other effect.
     expect(secondsTruths.length).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
+    harness.clockEvent(2, () => ["test.getReceiveTruths(oneTruthEvent)"]);
     await authorityConnection.getReceiveTruths()(oneTruthEvent);
     expectConnectionEventIds(scribeConnection, 0, 2, 2);
 
     expect(purgedHeresies.length).toEqual(2);
 
+    harness.clockEvent(2, () => ["test.firstTruthProcess"]);
     await firstTruthProcess;
     expect(firstFailure).not.toEqual(undefined);
 
+    harness.clockEvent(2, () => ["test.secondsTruthProcesses[0]"]);
     await secondsTruthProcesses[0];
+    harness.clockEvent(2, () => ["test.secondsTruthProcesses[1]"]);
     await secondsTruthProcesses[1];
 
     expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
@@ -354,7 +360,9 @@ describe("Sourcerer", () => {
 
     const rechronicleResults = harness.chronicleEvents(
         [...purgedHeresies].map(getActionFromPassage)).eventResults;
+    harness.clockEvent(2, () => ["test.rechronicleResults[0].getPersistedEvent"]);
     expect(await rechronicleResults[0].getPersistedEvent()).toMatchObject(simpleCommand);
+    harness.clockEvent(2, () => ["test.rechronicleResults[1].getPersistedEvent"]);
     expect(await rechronicleResults[1].getPersistedEvent()).toMatchObject(coupleCommands[1]);
 
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
@@ -367,10 +375,13 @@ describe("Sourcerer", () => {
     const lastTruthEvents = lastEntry.map(entry => roundtripEvent(entry.event));
     // skip resolveTruthEvent - rely on downstream push only via getReceiveTruths
     // lastEntry[0].resolveTruthEvent(coupleCommands[1]);
+    harness.clockEvent(2, () => ["test.getReceiveTruths(lastTruthEvents)"]);
     await authorityConnection.getReceiveTruths()(lastTruthEvents);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
 
+    harness.clockEvent(2, () => ["test.rechronicleResults[0].getTruthEvent"]);
     expect(await rechronicleResults[0].getTruthEvent()).toMatchObject(simpleCommand);
+    harness.clockEvent(2, () => ["test.rechronicleResults[1].getTruthEvent"]);
     expect(await rechronicleResults[1].getTruthEvent()).toMatchObject(coupleCommands[1]);
 
     expect(harness.run(vRef("simple_entity"),

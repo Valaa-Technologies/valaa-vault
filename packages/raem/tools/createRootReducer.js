@@ -2,7 +2,7 @@ import { Map } from "immutable";
 
 import { getActionFromPassage } from "~/raem/redux/Bard";
 
-import { dumpify, dumpObject, invariantifyArray, FabricEventTarget } from "~/tools";
+import { dumpObject, invariantifyArray, FabricEventTarget } from "~/tools";
 import { arrayFromAny } from "~/tools/sequenceFromAny";
 
 /**

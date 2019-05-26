@@ -879,7 +879,7 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
         // Captures with closures referring to completed transactions
         // but whose callbacks never get called retain memory
         // references indefinitely.
-        capturingValker = capturingValker.getRootDiscourse(); // eslint-disable-line no-param-reassign
+        capturingValker = capturingValker.getRootDiscourse(); // eslint-disable-line
       }
     }
     let transaction;

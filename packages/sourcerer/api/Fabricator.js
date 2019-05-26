@@ -66,6 +66,7 @@ export class FabricatorEvent extends FabricEvent {
 
   refabricateWhenTruthy (...maybeAsyncConditions) {
     this.proceedWhenTruthy(...maybeAsyncConditions);
+    this.isReformable = false;
     this.isRefabricateable = true;
   }
 }

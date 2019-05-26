@@ -29,9 +29,7 @@ describe("Media handling", () => {
     const existingChroniclingCount = testPartitionBackend._chroniclings.length;
     const { media, contentSetting } = await harness.runValoscript(vRef("test_partition"), `
       const media = new Media({
-          name: "text media",
-          owner: this,
-          mediaType: { type: "text", subtype: "plain" },
+        name: "text media", owner: this, mediaType: { type: "text", subtype: "plain" },
       });
       const contentSetting = media[valos.prepareBvob](buffer)
           .then(createBvob => ({ bvobId: (media[valos.Media.content] = createBvob()) }));
@@ -69,9 +67,7 @@ describe("Media handling", () => {
     const { media, contentSetting, newMediaPersist } = await harness.runValoscript(
         vRef("test_partition"), `
       const media = new Media({
-          name: "text media",
-          owner: this,
-          mediaType: { type: "text", subtype: "plain" },
+        name: "text media", owner: this, mediaType: { type: "text", subtype: "plain" },
       });
       const contentSetting = media[valos.prepareBvob](buffer)
           .then(createBvob => ({
@@ -84,8 +80,7 @@ describe("Media handling", () => {
       this.text = media;
       ({
         media, contentSetting,
-        newMediaPersist: new Promise(resolve =>
-            valos.getTransactor().addEventListener("persist", resolve)),
+        newMediaPersist: new Promise(resolve => (valos.getTransactor().onpersist = resolve)),
       });
     `, { scope: { buffer, console } });
     await newMediaPersist;

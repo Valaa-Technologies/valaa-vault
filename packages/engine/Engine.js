@@ -405,7 +405,7 @@ export default class Engine extends Cog {
     }
     this.logEvent(1, () => [
       !purgedProtagonists ? "reciting" : "purging",
-      stories.length, "stories in", tx.debugId(), ":", ...dumpObject(stories),
+      stories.length, "stories in", tx && tx.debugId(), ":", ...dumpObject(stories),
     ]);
     for (const story of stories) {
       story._delayedCogRemovals = [];
@@ -427,7 +427,7 @@ export default class Engine extends Cog {
       }
     }
     this.logEvent(1, () => [
-      !purgedProtagonists ? "recited" : "purged", stories.length, "stories in", tx.debugId(),
+      !purgedProtagonists ? "recited" : "purged", stories.length, "stories in", tx && tx.debugId(),
     ]);
     if (purgedProtagonists) return purgedProtagonists;
     finalizer.finalize(true);

@@ -124,22 +124,22 @@ export class FabricEventTarget {
 
   infoEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._outputMessageEvent(this.info.bind(this),
+    return this._outputMessageEvent((this._logger || this).info.bind(this._logger || this),
         true, minVerbosity, maybeFunction, ...messagePieces);
   }
   logEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._outputMessageEvent(this.log.bind(this),
+    return this._outputMessageEvent((this._logger || this).log.bind(this._logger || this),
         true, minVerbosity, maybeFunction, ...messagePieces);
   }
   warnEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._outputMessageEvent(this.warn.bind(this),
+    return this._outputMessageEvent((this._logger || this).warn.bind(this._logger || this),
         true, minVerbosity, maybeFunction, ...messagePieces);
   }
   errorEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
     if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
-    return this._outputMessageEvent(this.error.bind(this),
+    return this._outputMessageEvent((this._logger || this).error.bind(this._logger || this),
         true, minVerbosity, maybeFunction, ...messagePieces);
   }
   clockEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {

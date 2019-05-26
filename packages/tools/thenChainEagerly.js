@@ -151,3 +151,76 @@ export default function thenChainEagerly (initialValue: any, functions: any | Fu
         !(onRejected && onRejected.name) ? " " : `(with ${onRejected.name})`}`;
   }
 }
+
+export function thisChainEagerly (this_: any, initialParams: any,
+    functions: any | Function[], onRejected: ?Function, startIndex: number) {
+  let index = startIndex || 0, params = initialParams;
+  let arrayPromise;
+  for (;;) {
+    if ((params == null) || (typeof params !== "object")) {
+      params = params === undefined ? [] : [params];
+    } else if (Array.isArray(params)) {
+      for (let i = 0; i !== params.length; ++i) {
+        if ((params[i] != null) && (typeof params[i].then === "function")) {
+          params = Promise.all(arrayPromise = params);
+          break;
+        }
+      }
+      if (typeof params.then === "function") break;
+    } else if (typeof params.then === "function") break;
+    else {
+      const keys = Object.keys(params);
+      if (keys.length !== 1) {
+        throw new Error("thisChainEagerly redirection object must have exactly one field");
+      }
+      const forward = keys[0];
+      params = params[forward];
+      let lookup = functions[forward];
+      if (typeof lookup === "number") index = lookup;
+      else if (typeof lookup === "function") index = Number(forward);
+      else {
+        lookup = !forward ? functions.length : functions.findIndex(f => (f.name === forward));
+        if (lookup === -1) {
+          throw new Error(`thisChainEagerly can't find rediction function with name '${forward}'`);
+        }
+        index = functions[forward] = lookup;
+      }
+      continue;
+    }
+    if (index >= functions.length) return params;
+    const func = functions[index];
+    if (!func) continue;
+    try {
+      params = func.apply(this_, params);
+    } catch (error) {
+      const wrapped = wrapError(error, new Error(getName("callback")),
+          "\n\tthis:", ...dumpObject(this_),
+          "\n\tparams:", ...dumpObject(params),
+          "\n\tcurrent function:", ...dumpObject(func),
+          "\n\tfunctions:", ...dumpObject(functions));
+      if (!onRejected) throw wrapped;
+      params = onRejected.call(this_, wrapped, index, params, functions, onRejected);
+    }
+    ++index;
+  }
+  --index;
+  return params.then(
+      newParams => thisChainEagerly(this_, newParams, functions, onRejected, index + 1),
+      error => {
+        const wrapped = wrapError(error, new Error(getName("thenable resolution")),
+            "\n\tthis:", ...dumpObject(this_),
+            "\n\tparams:", ...dumpObject(params),
+            "\n\tcurrent function:", ...dumpObject(functions[index]),
+            "\n\tfunctions:", ...dumpObject(functions),
+            "\n\tonRejected:", ...dumpObject(onRejected),
+        );
+        if (!onRejected) throw wrapped;
+        return thisChainEagerly(this_,
+            onRejected.call(this_, wrapped, index, arrayPromise || params, functions, onRejected),
+            functions, onRejected, functions.length);
+      });
+  function getName (info) {
+    return `During thenChainEagerly ${index === -1 ? "initial params" : `#${index}`} ${info} ${
+        !(onRejected && onRejected.name) ? "(no handler)" : `(with ${onRejected.name})`}`;
+  }
+}

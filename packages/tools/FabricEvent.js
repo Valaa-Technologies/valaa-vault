@@ -1,6 +1,7 @@
 // @flow
 
 import { dumpObject, outputError, wrapError } from "~/tools/wrapError";
+import { thisChainEagerly } from "~/tools/thenChainEagerly";
 
 const inBrowser = require("~/gateway-api/inBrowser").default;
 
@@ -192,19 +193,41 @@ export class FabricEventTarget {
     return outputError(error, ...rest);
   }
 
-  addChainClockers (minVerbosity: number, eventPrefix: string, thenChainCallbacks: Function[]) {
+  performChain (params: any, staticChainName: string, staticErrorHandlerName: string,
+      customVerbosity: ?number) {
+    let chain = this.constructor[staticChainName];
+    if (!chain) {
+      throw new Error(`performChain can't find chain '${staticChainName}' from ${
+          this.constructor.name} statics`);
+    }
+    let errorHandler;
+    if (staticErrorHandlerName) {
+      errorHandler = this[staticErrorHandlerName];
+      if (!errorHandler) {
+        throw new Error(`performChain can't find error handler '${
+            staticErrorHandlerName}' from ${this.constructor.name} non-statics`);
+      }
+    }
+    if (this._verbosity >= (customVerbosity || 2)) {
+      chain = this.addChainClockers(customVerbosity || 2, staticChainName, chain, true);
+    }
+    return thisChainEagerly(this, params, chain, errorHandler);
+  }
+
+  addChainClockers (minVerbosity: number, eventPrefix: string, thenChainCallbacks: Function[],
+      isThisChain: boolean) {
     if (!(this.getVerbosity() >= minVerbosity)) return thenChainCallbacks;
     const clockerId = _clockerId++;
     return [].concat(...thenChainCallbacks.map((callback, index) => [
-      ...(!callback.name ? [] : [head => {
-        this.clockEvent(minVerbosity, `${eventPrefix}#${clockerId}[${index}]`, callback.name);
-        return head;
+      ...(!callback.name ? [] : [(...params) => {
+        this.clockEvent(minVerbosity, `${eventPrefix}#[${index}]:${callback.name}`, clockerId);
+        return isThisChain ? params : params[0];
       }]),
       callback,
     ]),
-    result => {
-      this.clockEvent(minVerbosity, `${eventPrefix}#${clockerId}.done`, "");
-      return result;
+    (...params) => {
+      this.clockEvent(minVerbosity, `${eventPrefix}.done`, clockerId);
+      return isThisChain ? params : params[0];
     });
   }
 

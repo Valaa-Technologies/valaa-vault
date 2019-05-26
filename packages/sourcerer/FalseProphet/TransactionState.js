@@ -200,7 +200,7 @@ export default class TransactionState {
         eventResults: events.map((event, index) => {
           let result;
           const passage = transactionStory.passages[index];
-          return new ChronicleEventResult(event, {
+          return new ChronicleEventResult(event, this._transactor, {
             story: passage,
             getComposedStory () { return this.story; },
             getPremiereStory () {
@@ -216,7 +216,7 @@ export default class TransactionState {
       throw this._transactor.wrapErrorEvent(error,
           `chronicleEvents(${this._transactor.corpus.getName()})`,
           "\n\tevents:", ...dumpObject(events),
-          "\n\ttransaction:", ...dumpObject(this._transactor),
+          "\n\ttransactor:", ...dumpObject(this._transactor),
           "\n\ttransactionState:", ...dumpObject(this),
       );
     }

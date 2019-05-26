@@ -7,7 +7,6 @@ import type { JSONIdData, VRL } from "~/raem/VRL";
 
 import Follower from "~/sourcerer/api/Follower";
 import Sourcerer from "~/sourcerer/api/Sourcerer";
-import TransactionState from "~/sourcerer/FalseProphet/TransactionState";
 import { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult }
     from "~/sourcerer/api/types";
 

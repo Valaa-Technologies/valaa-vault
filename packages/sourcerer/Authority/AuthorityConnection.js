@@ -45,8 +45,7 @@ export default class AuthorityConnection extends Connection {
           }.chronicleEvents not overridden and options.remoteEventsProcess not defined`);
     }
     let rejectedIndex;
-    const resultBase = new AuthorityEventResult(null, {
-      connection: this,
+    const resultBase = new AuthorityEventResult(null, this, {
       remoteResults: null,
       isPrimary: this.isPrimaryAuthority(),
     });
@@ -67,7 +66,7 @@ export default class AuthorityConnection extends Connection {
         const truths = (rejectedIndex !== undefined) ? remoteResults.slice(0, rejectedIndex)
             : remoteResults || events;
         if (!truths || !truths.length) return [];
-        return resultBase.connection.getReceiveTruths(options.receivedTruths)(truths);
+        return resultBase.chronicler.getReceiveTruths(options.receivedTruths)(truths);
       },
       function _finalizeLocallyReceivedTruths (receivedTruths) {
         return (resultBase.localProcess = receivedTruths);
@@ -125,7 +124,7 @@ export class AuthorityEventResult extends ChronicleEventResult {
   }
   getTruthEvent () {
     if (!this.isPrimary) {
-      throw new Error(`Non-primary authority '${this.connection.getName()
+      throw new Error(`Non-primary authority '${this.chronicler.getName()
           }' cannot deliver truths (by default)`);
     }
     if (!this.truthsProcess) return this.getComposedEvent(); // implies: not remote

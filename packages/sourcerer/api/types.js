@@ -5,6 +5,7 @@ import type { VRL } from "~/raem/VRL";
 import { getActionFromPassage, Story } from "~/raem/redux/Bard";
 
 import thenChainEagerly from "~/tools/thenChainEagerly";
+import { FabricEventTarget } from "~/tools/FabricEvent";
 
 export type MediaInfo = {
   mediaVRL: VRL,
@@ -55,8 +56,15 @@ export type ChronicleOptions = NarrateOptions & {
   retrieveMediaBuffer?: RetrieveMediaBuffer,
 };
 
-export class ChronicleEventResult {
-  constructor (event, overrides) { this.event = event; Object.assign(this, overrides); }
+export class ChronicleEventResult extends FabricEventTarget {
+  constructor (event, chronicler, overrides) {
+    super(overrides.name,
+        overrides.verbosity !== undefined ? overrides.verbosity : chronicler.getVerbosity(),
+        overrides.logger || chronicler.getLogger());
+    this.chronicler = chronicler;
+    this.event = event;
+    Object.assign(this, overrides);
+  }
 
   event: EventBase; // Preliminary event after universalization
   index: number; // Index of this event result in a result set

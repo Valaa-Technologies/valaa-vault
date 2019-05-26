@@ -148,7 +148,7 @@ export default class FalseProphetConnection extends Connection {
         `upstream.chronicleEvents(${events.length})`]);
       chronicling = this._upstreamConnection.chronicleEvents(events, options);
 
-      resultBase = new ChronicleEventResult(null, {
+      resultBase = new ChronicleEventResult(null, this, {
         _events: events,
         onError: errorOnFalseProphetChronicleEvents.bind(this, new Error("chronicleResultBase")),
       });

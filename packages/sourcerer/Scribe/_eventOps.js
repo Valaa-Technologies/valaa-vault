@@ -150,7 +150,7 @@ export function _chronicleEvents (connection: ScribeConnection,
     events: EventBase[], options: ChronicleOptions = {}, onError: Function,
 ): ChronicleRequest {
   if (!events || !events.length) return { eventResults: events };
-  const resultBase = new ScribeEventResult(null, { _events: events, onError });
+  const resultBase = new ScribeEventResult(null, connection, { _events: events, onError });
   // the 'mostRecentReceiveEventsProcess' is a kludge to sequentialize
   // the chronicling process so that waiting for possible media ops
   // doesn't mess up the order.

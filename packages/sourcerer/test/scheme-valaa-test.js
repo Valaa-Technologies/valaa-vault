@@ -83,7 +83,7 @@ export class TestConnection extends AuthorityConnection {
   chronicleEvents (events: EventBase[], options: ChronicleOptions): ChronicleRequest {
     if (!this.isRemoteAuthority()) return super.chronicleEvents(events, options);
     this._mostRecentChronicleOptions = options;
-    const resultBase = new TestEventResult(null, { isPrimary: this.isPrimaryAuthority() });
+    const resultBase = new TestEventResult(null, this, { isPrimary: this.isPrimaryAuthority() });
     const eventResults = events.map((event, index) => {
       const ret = Object.create(resultBase); ret.event = event; ret.index = index; return ret;
     });

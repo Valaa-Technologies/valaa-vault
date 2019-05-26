@@ -30,7 +30,7 @@ export type Prophecy = Story & {
 export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[],
     { timed, transactionState, ...rest } = {}): ProphecyChronicleRequest {
   if (timed) throw new Error("timed events not supported yet");
-  const resultBase = new ProphecyOperation(null, {
+  const resultBase = new ProphecyOperation(null, falseProphet, {
     _sourcerer: falseProphet,
     _events: events,
     _options: rest,

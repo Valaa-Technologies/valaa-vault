@@ -3,7 +3,7 @@
 import { Command, EventBase } from "~/raem/events";
 import { getActionFromPassage, Story } from "~/raem/redux/Bard";
 
-import FabricatorEvent from "~/sourcerer/api/FabricatorEvent";
+import { FabricatorEvent } from "~/sourcerer/api/Fabricator";
 import TransactionState from "~/sourcerer/FalseProphet/TransactionState";
 import { initializeAspects } from "~/sourcerer/tools/EventAspects";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";

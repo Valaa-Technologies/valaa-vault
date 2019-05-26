@@ -9,7 +9,7 @@ import { naiveURI } from "~/raem/ValaaURI";
 import { ChronicleEventResult, Connection, ProphecyChronicleRequest, ProphecyEventResult }
     from "~/sourcerer/api/types";
 import { tryAspect } from "~/sourcerer/tools/EventAspects";
-import FabricatorEvent from "~/sourcerer/api/FabricatorEvent";
+import { FabricatorEvent } from "~/sourcerer/api/Fabricator";
 
 import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
 

@@ -2,7 +2,7 @@ import { Map } from "immutable";
 
 import { getActionFromPassage } from "~/raem/redux/Bard";
 
-import { dumpify, dumpObject, invariantifyArray, LogEventGenerator } from "~/tools";
+import { dumpify, dumpObject, invariantifyArray, FabricEventTarget } from "~/tools";
 import { arrayFromAny } from "~/tools/sequenceFromAny";
 
 /**
@@ -71,7 +71,7 @@ export default function createRootReducer ({
   };
   const reducerByActionType = mergeActionReducers(reducers, reducerContext);
   if (!reducerContext.eventLogger) {
-    reducerContext.eventLogger = new LogEventGenerator({ name: "Unnamed reducer" });
+    reducerContext.eventLogger = new FabricEventTarget({ name: "Unnamed reducer" });
   }
 
   function mainReduce (state = Map(), story) {

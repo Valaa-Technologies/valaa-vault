@@ -7,7 +7,7 @@ import { asyncConnectToPartitionsIfMissingAndRetry } from "~/raem/tools/denormal
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
-import { dumpify, dumpObject, LogEventGenerator, outputError, thenChainEagerly } from "~/tools";
+import { dumpify, dumpObject, FabricEventTarget, outputError, thenChainEagerly } from "~/tools";
 
 import * as handlers from "./handlers";
 
@@ -15,9 +15,9 @@ const Fastify = require("fastify");
 const FastifySwaggerPlugin = require("fastify-swagger");
 const FastifyCookiePlugin = require("fastify-cookie");
 
-export default class RestAPIServer extends LogEventGenerator {
+export default class RestAPIServer extends FabricEventTarget {
   constructor ({ view, viewName, port, address, fastify, prefixes, ...rest }) {
-    super({ logger: view._gateway.getLogger(), ...rest });
+    super(rest.name, rest.verbosity, view._gateway.getLogger());
     this._view = view;
     this._viewName = viewName;
     this._engine  = view.engine;

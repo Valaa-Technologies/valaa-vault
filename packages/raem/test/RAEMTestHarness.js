@@ -12,7 +12,7 @@ import Valker from "~/raem/VALK/Valker";
 
 import trivialClone from "~/tools/trivialClone";
 import {
-  dumpObject, LogEventGenerator, mapEagerly, outputError, thenChainEagerly, wrapError,
+  dumpObject, FabricEventTarget, mapEagerly, outputError, thenChainEagerly, wrapError,
 } from "~/tools";
 
 const TEST_EVENT_VERSION = "0.2";
@@ -56,9 +56,9 @@ export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
       });
 }
 
-export default class RAEMTestHarness extends LogEventGenerator {
-  constructor ({ ContentAPI, name, verbosity, reducer = {}, corpus = {}, ...rest }) {
-    super({ name, verbosity });
+export default class RAEMTestHarness extends FabricEventTarget {
+  constructor ({ ContentAPI, name, verbosity, logger, reducer = {}, corpus = {}, ...rest }) {
+    super(name, verbosity, logger);
     this.ContentAPI = ContentAPI;
     this.schema = ContentAPI.schema;
     this.reducerOptions = reducer;

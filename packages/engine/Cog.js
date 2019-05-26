@@ -9,7 +9,7 @@ import { transpileValoscriptBody } from "~/script/transpileValoscript";
 import VALEK, { Kuery, dumpKuery } from "~/engine/VALEK";
 import Subscription from "~/engine/Vrapper/Subscription";
 
-import { LogEventGenerator, wrapError, dumpObject, thenChainEagerly } from "~/tools";
+import { FabricEventTarget, wrapError, dumpObject, thenChainEagerly } from "~/tools";
 
 
 /**
@@ -19,11 +19,11 @@ import { LogEventGenerator, wrapError, dumpObject, thenChainEagerly } from "~/to
  *
  * @export
  * @class Cog
- * @extends {LogEventGenerator}
+ * @extends {FabricEventTarget}
  */
-export default class Cog extends LogEventGenerator {
+export default class Cog extends FabricEventTarget {
   constructor ({ name, engine, parent, logger, verbosity }: Object) {
-    super({ name, verbosity, logger: logger || (engine && engine.getLogger()) });
+    super(name, verbosity, logger || (engine && engine.getLogger()));
     if (engine) this.engine = engine;
     if (parent) this.parent = parent;
   }

@@ -4,16 +4,14 @@ import { MediaInfo } from "~/sourcerer/api/types";
 
 import MediaDecoder from "~/tools/MediaDecoder";
 import { mergeDeepWith } from "~/tools/mergeDeep";
-import { arrayFromAny, LogEventGenerator } from "~/tools";
+import { arrayFromAny, FabricEventTarget } from "~/tools";
 
-export default class DecoderArray extends LogEventGenerator {
+export default class DecoderArray extends FabricEventTarget {
   _decodersByType: ?{ [string]: { [string]: Object } };
 
   constructor (options: Object = {}) {
-    if (!options.logger && options.fallbackArray) {
-      options.logger = options.fallbackArray.getLogger();
-    }
-    super(options);
+    super(options.name, options.verbosity,
+        options.logger || (options.fallbackArray && options.fallbackArray.getLogger()));
     this._fallbackArray = options.fallbackArray;
   }
 

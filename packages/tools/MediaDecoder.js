@@ -1,6 +1,6 @@
 // @flow
 
-import { LogEventGenerator } from "~/tools/Logger";
+import { FabricEventTarget } from "~/tools/FabricEvent";
 import { utf8StringFromArrayBuffer } from "~/tools/textEncoding";
 
 /**
@@ -8,13 +8,13 @@ import { utf8StringFromArrayBuffer } from "~/tools/textEncoding";
  * All media decoders must return the same decoded representation for the same incoming buffer, as
  * the result will get cached.
  */
-export default class MediaDecoder extends LogEventGenerator {
+export default class MediaDecoder extends FabricEventTarget {
   static mediaTypes: Object[] = [];
 
   _lookup: { [string]: { [string]: Object | Object[] } };
 
   constructor (options: Object = {}) {
-    super(options);
+    super(options.name, options.verbosity, options.logger);
     this.mediaTypes = this.constructor.mediaTypes;
     const { type, subtype } = this.mediaTypes[0];
     this.type = type;

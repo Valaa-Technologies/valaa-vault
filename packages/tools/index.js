@@ -41,9 +41,9 @@ export const isSymbol = require("./isSymbol").default;
 
 export { default as inProduction } from "./inProduction";
 
-export const Logger = require("./Logger").default;
-export const LogEventGenerator = require("./Logger").LogEventGenerator;
-export const createForwardLogger = require("./Logger").createForwardLogger;
+export const FabricEvent = require("./FabricEvent").default;
+export const FabricEventLogger = require("./FabricEvent").FabricEventLogger;
+export const FabricEventTarget = require("./FabricEvent").FabricEventTarget;
 
 export const SimpleData = require("./SimpleData").default;
 

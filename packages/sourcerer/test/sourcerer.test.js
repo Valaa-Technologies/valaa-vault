@@ -524,7 +524,7 @@ describe("Sourcerer", () => {
     const twoEntries = authorityConnection._chroniclings.splice(0, 2);
 
     twoEntries[0].rejectTruthEvent(
-        Object.assign(new Error("Not permitted"), { isRevisable: false, isReformable: false })); // rejected
+        Object.assign(new Error("Not permitted"), { isRevisable: false, isReformable: false }));
     twoEntries[1].rejectTruthEvent(
         Object.assign(new Error("revise: reorder"), { isRevisable: false, isReformable: true }));
 

@@ -40,13 +40,13 @@ const deepExtend = require("@valos/tools/deepExtend").default;
 
 const { AuthorityNexus, FalseProphet, Oracle, Sourcerer, Scribe } = valosSourcerer;
 const {
-  dumpObject, inBrowser, invariantify, isPromise, LogEventGenerator, mapEagerly, thenChainEagerly,
+  dumpObject, inBrowser, invariantify, isPromise, FabricEventTarget, mapEagerly, thenChainEagerly,
   outputError,
 } = valosTools;
 
-export default class Gateway extends LogEventGenerator {
+export default class Gateway extends FabricEventTarget {
   constructor (options: Object) {
-    super(options);
+    super(options.name, options.verbosity, options.logger);
     if (options.siteRoot === undefined) {
       throw new Error("Required gateway.options.siteRoot is undefined");
     }

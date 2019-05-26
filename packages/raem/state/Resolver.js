@@ -16,7 +16,7 @@ import { tryHostRef } from "~/raem/VALK/hostReference";
 
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
-import { dumpObject, invariantify, invariantifyObject, invariantifyString, LogEventGenerator }
+import { dumpObject, invariantify, invariantifyObject, invariantifyString, FabricEventTarget }
     from "~/tools";
 
 import { _getFieldGhostElevation, _elevateReference } from "./FieldInfo";
@@ -45,12 +45,11 @@ import { _getFieldGhostElevation, _elevateReference } from "./FieldInfo";
  * @export
  * @class Resolver
  */
-export default class Resolver extends LogEventGenerator {
+export default class Resolver extends FabricEventTarget {
   deserializeReference: (idData: IdData, originatingPartitionURI?: ValaaURI) => VRL;
 
   constructor (options: ?Object) {
-    if (!options.name) options.name = "Resolver";
-    super(options);
+    super(options.name, options.verbosity, options.logger);
     this.state = options.state;
     this.schema = options.schema;
     if (!(this.schema instanceof GraphQLSchema)) {

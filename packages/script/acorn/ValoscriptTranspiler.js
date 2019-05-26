@@ -11,14 +11,14 @@ import { isBuiltinStep, getBuiltinStepName, getBuiltinStepArguments }
 import Language from "~/script/acorn/Language";
 import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
 
-import { invariantify, invariantifyObject, LogEventGenerator } from "~/tools";
+import { invariantify, invariantifyObject, FabricEventTarget } from "~/tools";
 
-export default class ValoscriptTranspiler extends LogEventGenerator {
+export default class ValoscriptTranspiler extends FabricEventTarget {
   language: Language;
   acornParseOptions: Object;
 
   constructor (language: Language, acornParseOptions: Object) {
-    super({ name: language.name });
+    super(language.name);
     invariantifyObject(language, "ValoscriptTranspiler.language", { instanceOf: Language });
     invariantifyObject(acornParseOptions.VALK, "ValoscriptTranspiler.language",
         { instanceOf: Kuery });

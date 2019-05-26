@@ -9,10 +9,9 @@ import { ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleR
 } from "~/sourcerer/api/types";
 import Follower from "~/sourcerer/api/Follower";
 
-import Logger from "~/tools/Logger";
 import {
-  dumpObject, invariantifyArray, invariantifyObject, invariantifyString, isPromise,
-  thenChainEagerly,
+  dumpObject, FabricEventLogger, invariantifyArray, invariantifyObject, invariantifyString,
+  isPromise, thenChainEagerly,
 } from "~/tools";
 
 /**
@@ -31,9 +30,9 @@ export default class Connection extends Follower {
   }: {
     name: any, sourcerer: Sourcerer, partitionURI: ValaaURI,
     receiveTruths?: ReceiveEvents, receiveCommands?: ReceiveEvents,
-    logger?: Logger, verbosity?: number,
+    logger?: FabricEventLogger, verbosity?: number,
   }) {
-    super({ name: name || null, logger: logger || sourcerer.getLogger(), verbosity });
+    super(name || null, verbosity, logger || sourcerer.getLogger());
     invariantifyObject(sourcerer, "Connection.constructor.sourcerer",
         { instanceof: Sourcerer });
 

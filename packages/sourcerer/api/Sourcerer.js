@@ -6,7 +6,7 @@ import { NarrateOptions, ReceiveEvents } from "~/sourcerer/api/types";
 import Follower from "~/sourcerer/api/Follower";
 import type Connection from "~/sourcerer/api/Connection";
 
-import { LogEventGenerator } from "~/tools/Logger";
+import { FabricEventTarget } from "~/tools/FabricEvent";
 import { dumpObject } from "~/tools/wrapError";
 
   /**
@@ -52,16 +52,16 @@ export type ConnectOptions = {
 /**
  * Interface for sending commands to upstream.
  */
-export default class Sourcerer extends LogEventGenerator {
+export default class Sourcerer extends FabricEventTarget {
   _upstream: Sourcerer;
   _followers: Follower;
   _connections: { [partitionURIString: string]: Connection };
 
-  constructor ({ upstream, ...rest }: Object = {}) {
-    super({ ...rest });
+  constructor (options: Object = {}) {
+    super(options.name, options.verbosity, options.logger);
     this._followers = new Map();
     this._connections = {};
-    this.setUpstream(upstream);
+    this.setUpstream(options.upstream);
   }
 
   initiate (): Promise<Sourcerer> | Sourcerer {}

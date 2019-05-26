@@ -4,7 +4,7 @@ import { ValaaURI, getScheme } from "~/raem/ValaaURI";
 
 import Sourcerer from "~/sourcerer/api/Sourcerer";
 
-import { invariantify, LogEventGenerator } from "~/tools";
+import { invariantify, FabricEventTarget } from "~/tools";
 
 export type AuthorityConfig = {
   eventVersion: string,
@@ -27,14 +27,14 @@ export type SchemeModule = {
   createAuthority: (options: AuthorityOptions) => Sourcerer,
 };
 
-export default class AuthorityNexus extends LogEventGenerator {
+export default class AuthorityNexus extends FabricEventTarget {
   _authoritySourcerers: Object;
   _schemeModules: { [scheme: string]: SchemeModule };
   _authorityPreConfigs: { [authorityURI: string]: AuthorityConfig };
   _authoritySourcerers: { [authorityURI: string]: Sourcerer };
 
   constructor (options: Object = {}) {
-    super(options);
+    super(options.name, options.verbosity, options.logger);
     this._schemeModules = {};
     this._authorityPreConfigs = options.authorityConfigs || {};
     this._authoritySourcerers = {};

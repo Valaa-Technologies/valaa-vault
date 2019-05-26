@@ -10,7 +10,7 @@ import { combineRevelationsLazily } from "~/inspire/Revelation";
 
 import revelationTemplate from "~/inspire/revelation.template";
 
-import { dumpify, dumpObject, Logger, LogEventGenerator, outputError, inBrowser, valos }
+import { dumpify, dumpObject, FabricEventLogger, FabricEventTarget, outputError, inBrowser, valos }
     from "~/tools";
 
 import * as mediaDecoders from "./mediaDecoders";
@@ -20,7 +20,7 @@ if (inBrowser()) {
   require("./simplebar.min.css");
 }
 
-const logger = new Logger();
+const logger = new FabricEventLogger();
 
 // TODO(iridian, 2018-12): Oof... this should be moved to @valos/raem
 // plugin initializer. This requires plugin initializers though which
@@ -89,7 +89,7 @@ export default (valos.createGateway = async function createGateway (gatewayOptio
     ret.clockEvent(1, "gateway.initialized");
     return ret;
   } catch (error) {
-    outputError((ret || new LogEventGenerator(logger)).wrapErrorEvent(error,
+    outputError((ret || new FabricEventTarget(logger)).wrapErrorEvent(error,
             new Error(`createGateway()`),
             "\n\trevelation components:", revelations,
             "\n\tcombined revelation:", combinedRevelation),

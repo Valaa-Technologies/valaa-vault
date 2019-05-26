@@ -7,10 +7,9 @@ import type { Corpus } from "~/raem/Corpus";
 import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 
 import { ChronicleRequest, ChronicleEventResult } from "~/sourcerer/api/types";
-import Fabricator, { fabricatorEventTypes } from "~/sourcerer/api/Fabricator";
+import Fabricator, { fabricatorEventTypes, fabricatorMixinOps }
+    from "~/sourcerer/api/Fabricator";
 import type Transactor from "~/sourcerer/api/Transactor";
-import { prototypeTreeEventTargetOps, EventTypesTag } from "~/sourcerer/api/FabricatorEvent";
-
 import type FalseProphetDiscourse from "~/sourcerer/FalseProphet/FalseProphetDiscourse";
 
 import { dumpObject } from "~/tools";
@@ -19,8 +18,7 @@ let transactionCounter = 0;
 let activeTransactionCounter = 0;
 
 export const fabricatorOps = {
-  ...prototypeTreeEventTargetOps,
-  [EventTypesTag]: fabricatorEventTypes,
+  ...fabricatorMixinOps,
 
   isActiveFabricator () {
     return !!this._activeFabricators;
@@ -122,13 +120,14 @@ export default class TransactionState {
     corpus.setName(`${transactor.corpus.getName()}/tx#${activeTransactionCounter}:${this.name}:${
       this._transacted.aspects.command.id}`);
     corpus.setState(this._stateBefore);
-    if (transactor.getVerbosity() >= 2) {
+    if (transactor.getVerbosity() >= 1) {
       Object.keys(fabricatorEventTypes).forEach(type => {
         transactor.addEventListener(type, event => {
-          transactor.clockEvent(2, () => [
+          transactor.clockEvent(1, () => [
             `transactor.on${type}`,
             event.command.aspects.command.id,
             event.instigatorConnection && event.instigatorConnection.getPartitionURI(),
+            event.error && event.error.message,
           ]);
         });
       });

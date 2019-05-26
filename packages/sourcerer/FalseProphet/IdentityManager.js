@@ -2,11 +2,12 @@
 
 import type FalseProphet from "~/sourcerer/FalseProphet/FalseProphet";
 
-import { debugObjectType, dumpObject, LogEventGenerator } from "~/tools";
+import { debugObjectType, dumpObject, FabricEventTarget } from "~/tools";
 
-export default class IdentityManager extends LogEventGenerator {
+export default class IdentityManager extends FabricEventTarget {
+
   constructor (sourcerer: FalseProphet) {
-    super();
+    super(undefined, sourcerer.getVerbosity(), sourcerer);
     this._sourcerer = sourcerer;
     this._activeIdentities = {};
   }

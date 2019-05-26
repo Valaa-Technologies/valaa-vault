@@ -20,7 +20,7 @@ import { tryHostRef } from "~/raem/VALK/hostReference";
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
-import type Logger from "~/tools/Logger";
+import type { FabricEventLogger } from "~/tools/FabricEventLogger";
 import { dumpify } from "~/tools";
 import { debugObjectNest, wrapError } from "~/tools/wrapError";
 
@@ -92,8 +92,8 @@ export function run (head: any, kuery: any, options: Object = {}) {
  * @class Valker
  */
 export default class Valker extends Resolver {
-  constructor (schema: GraphQLSchema, verbosity: number = 0, logger: Logger, packFromHost?: Packer,
-      unpackToHost?: Unpacker, steppers?: Object) {
+  constructor (schema: GraphQLSchema, verbosity: number = 0, logger: FabricEventLogger,
+      packFromHost?: Packer, unpackToHost?: Unpacker, steppers?: Object) {
     super({ schema, logger });
     this._indent = verbosity - 2;
     this.setVerbosity(verbosity);

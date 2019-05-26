@@ -2,14 +2,14 @@
 
 import { Command, EventBase, Truth } from "~/raem/events";
 
-import { LogEventGenerator } from "~/tools/Logger";
+import { FabricEventTarget } from "~/tools/FabricEvent";
 
 import type { ChronicleOptions, ChronicleRequest, ChronicleEventResult } from "./types";
 
 /**
  * Interface for events flowing downstream
  */
-export default class Follower extends LogEventGenerator {
+export default class Follower extends FabricEventTarget {
   /**
    * receiveTruths - receive truth events coming from the upstream
    *

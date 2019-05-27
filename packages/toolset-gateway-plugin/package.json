@@ -1,6 +1,6 @@
 {
   "name": "@valos/toolset-gateway-plugin",
-  "version": "0.34.0-prerelease.29",
+  "version": "0.34.0-prerelease.30",
   "valos": {
     "type": "toolset",
     "domain": "infrastructure"

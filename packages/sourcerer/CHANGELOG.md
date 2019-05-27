@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-prerelease.30](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.29...v0.34.0-prerelease.30) (2019-05-27)
+
+
+### Bug Fixes
+
+* **606:** infinite forceUpdate loop with undefined live kuery value ([c8b4da9](https://github.com/valaatech/vault/commit/c8b4da9))
+
+
+
+
+
 # [0.34.0-prerelease.29](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.28...v0.34.0-prerelease.29) (2019-05-13)
 
 **Note:** Version bump only for package @valos/sourcerer

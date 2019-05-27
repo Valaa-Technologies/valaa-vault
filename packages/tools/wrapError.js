@@ -274,6 +274,7 @@ function debugObjectNest (head, nest = 1, alwaysStringify = false,
       if (head instanceof WeakMap) return `<WeakMap size=${head.size}>`;
       if (head instanceof Set) return `<Set size=${head.size}>`;
       if (head[Symbol.iterator]) return `<Iterable ${head.constructor.name}>`;
+      if (head.then) return `<${String(head)}>`;
     }
     if (head.toString && (typeof nest === "number")
         && (head.toString !== Object.prototype.toString)

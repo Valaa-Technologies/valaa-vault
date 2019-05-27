@@ -217,6 +217,7 @@ export function _refineRecital (instigatorConnection: FalseProphetConnection,
 
   reformation.falseProphet
       ._deliverStoriesToFollowers(reformation.newRecitalStories, reformation.schismaticRecital);
+  reformation.isComplete = true;
 
   _confirmLeadingTruthsToFollowers(reformation.falseProphet);
 
@@ -398,7 +399,7 @@ function _finalizeReformation (reformation: Object, newEvents: EventBase[], schi
   const purgedHeresies = [];
   for (let heresy = hereticRecital.getFirst(); heresy !== hereticRecital;) {
     const reformedHeresyParts = reformation.instigatorConnection
-        ._reformHeresy(heresy, newEvents, schismaticCommands);
+        ._reformHeresy(heresy, reformation, newEvents, schismaticCommands);
     if (reformedHeresyParts) {
       reformedHeresies.push(...reformedHeresyParts);
       heresy = hereticRecital.removeStory(heresy);

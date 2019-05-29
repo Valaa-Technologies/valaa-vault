@@ -20,6 +20,11 @@ exports.builder = (yargs) => yargs.option({
         ""}the possible output will be rendered and execute script run every 'keepalive' seconds. ${
         ""}If keepalive is negative the output/run cycle is run once after abs(keepalive) seconds.`,
   },
+  heartbeat: {
+    type: "string",
+    default: true,
+    description: `Outputs a heartbeat message everytime the keepalive heartbeat is emitted.`,
+  },
   stopClockEvent: {
     type: "string",
     description: `The clock event name which stops the worker on next tick`,
@@ -172,6 +177,7 @@ exports.handler = async (yargv) => {
 
   mainView.rootScope.valos.Perspire.options = yargv;
   mainView.rootScope.valos.Perspire.state = state;
+  const mainViewName = `worker.view.${mainView.getRawName()}`;
 
   let vExecThis;
   if (yargv.exec) {
@@ -184,17 +190,20 @@ exports.handler = async (yargv) => {
       ? yargv.keepalive : (yargv.keepalive && 1);
   let ret;
   if (!keepaliveInterval) {
-    vlm.clock("perspire.handler", "perspire.immediate", "falsy keepalive interval");
+    vlm.clock(mainViewName, "perspire.immediate", "falsy keepalive interval");
     vlm.info("No keepalive enabled");
     state.mode = "immediate rendering";
     ret = await _tick("immediate", 0);
   } else {
     vlm.info(`Setting up keepalive render every ${keepaliveInterval} seconds`);
     state.mode = keepaliveInterval >= 0 ? "keepalive rendering" : "delayed single shot rendering";
-    vlm.clock("perspire.handler", "perspire.delay", `server.run(${keepaliveInterval})`);
+    vlm.clock(mainViewName, "perspire.delay", `server.run(${keepaliveInterval})`);
     let nextUncheckedEvent = 0;
     ret = await server.run(Math.abs(keepaliveInterval), (tickIndex) => {
-      const tickRet = _tick(`heartbeat ${tickIndex}:`, tickIndex);
+      const tickRet = _tick(
+          typeof yargv.heartbeat === "string" ? { info: yargv.heartbeat }
+              : yargv.heartbeat ? {} : undefined,
+          tickIndex);
       const stopEntrySearch = yargv.stopClockEvent && vlm.clockEvents;
       if (stopEntrySearch) {
         while (nextUncheckedEvent < stopEntrySearch.length) {
@@ -208,12 +217,15 @@ exports.handler = async (yargv) => {
   vlm.finalizeClock();
   return ret;
 
-  function _tick (header, tick) {
-    vlm.clock("perspire.handler", `server.tick(${tick}).dom`,
-        `${header} serialize/write DOM`);
+  function _tick (heartbeatClockFields, tick) {
+    if (heartbeatClockFields) {
+      vlm.clock(mainViewName, `worker.heartbeat.dom`,
+          { tick, ...heartbeatClockFields, action: `serializing DOM` });
+    }
     state.domString = server.serializeMainDOM();
     state.tick = tick;
-    _writeDomString(state.domString, header);
+    _writeDomString(state.domString,
+        heartbeatClockFields ? JSON.stringify(heartbeatClockFields) : "<no heartbeat fields>");
     if (vExecThis && execBody) {
       const sourceInfo = {
         phase: "perspire.exec transpilation",
@@ -221,8 +233,10 @@ exports.handler = async (yargv) => {
         mediaName: yargv.exec.path || "exec.body",
         sourceMap: new Map(),
       };
-      vlm.clock("perspire.handler", `server.tick(${tick}).exec`,
-          `${header} transpile and execute valoscript`);
+      if (heartbeatClockFields) {
+        vlm.clock(mainViewName, `worker.heartbeat.exec`,
+            { tick, ...heartbeatClockFields, action: `executing '${sourceInfo.mediaName}'` });
+      }
       const execResult = vExecThis && execBody && vExecThis.doValoscript(execBody, { sourceInfo });
       if (execResult !== undefined) return execResult;
     }

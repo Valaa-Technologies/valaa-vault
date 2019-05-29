@@ -360,7 +360,8 @@ const _vlm = {
   },
   clock (context, event, ...messages) {
     if (this.theme.clock) {
-      console.warn(this.theme.clock(`${context} clocks:`, event), ...messages);
+      console.warn(this.theme.clock(`${context} clocks:`, event),
+          ...messages.map(msg => ((typeof msg === "string") ? msg : dumpify(msg, { indent: 0 }))));
     }
     if (this.clockEvents) {
       let start = process.hrtime(this.clockStartTime);

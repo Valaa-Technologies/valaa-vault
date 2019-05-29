@@ -15,7 +15,7 @@ import Valoscope from "~/inspire/ui/Valoscope";
 import UIComponent from "~/inspire/ui/UIComponent";
 
 import {
-  arrayFromAny, deepExtend, dumpObject, isPromise, thenChainEagerly, wrapError,
+  arrayFromAny, patchWith, dumpObject, isPromise, thenChainEagerly, wrapError,
 } from "~/tools";
 
 import { _wrapElementInLiveProps } from "./_renderOps";
@@ -159,8 +159,8 @@ export default class LiveProps extends UIComponent {
       if (this._currentSheetContent) this.context.releaseVssSheets(this);
       this._currentSheetContent = sheetContent;
       const sheet = {};
-      if (sheetContent.html) deepExtend(sheet, sheetContent.html);
-      if (sheetContent.body) deepExtend(sheet, sheetContent.body);
+      if (sheetContent.html) patchWith(sheet, sheetContent.html);
+      if (sheetContent.body) patchWith(sheet, sheetContent.body);
       for (const [selector, styles] of Object.entries(sheetContent)) {
         if ((selector !== "body") && (selector !== "html")) {
           sheet[`& .${selector}`] = styles;

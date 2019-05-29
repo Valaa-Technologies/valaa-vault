@@ -36,7 +36,7 @@ import { setGlobalLogger } from "~/tools/wrapError";
 import getGlobal from "~/gateway-api/getGlobal";
 import { byteArrayFromBase64 } from "~/gateway-api/base64";
 
-const deepExtend = require("@valos/tools/deepExtend").default;
+const patchWith = require("@valos/tools/patchWith").default;
 
 const { AuthorityNexus, FalseProphet, Oracle, Sourcerer, Scribe } = valosSourcerer;
 const {
@@ -216,7 +216,8 @@ export default class Gateway extends FabricEventTarget {
       this._views[viewId] = thenChainEagerly(view, view.addChainClockers(1, "view.create.ops", [
         async function _createViewOptions () {
           const revelationConfig = (await ((await gateway.revelation.views) || {})[viewId]) || {};
-          viewConfig = deepExtend({ verbosity }, [revelationConfig, paramViewConfig]);
+          viewConfig = patchWith({ verbosity }, [revelationConfig, paramViewConfig]);
+          view.setRawName(viewId);
           view.setName(`${viewConfig.name}-View`);
           view.setVerbosity(viewConfig.verbosity);
         },

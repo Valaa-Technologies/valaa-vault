@@ -1,4 +1,4 @@
-const deepExtend = require("@valos/tools/deepExtend").default;
+const patchWith = require("@valos/tools/patchWith").default;
 
 const _layoutKey = "";
 const _spreaderKey = "...";
@@ -61,13 +61,13 @@ function markdownify (value, theme, context) {
 }
 
 function extendWithLayouts (value, target) {
-  return deepExtend(target, value, createDeepExtendOptions());
+  return patchWith(target, value, createPatchOptions());
 }
 
 module.exports = {
   default: markdownify,
   extendWithLayouts,
-  createDeepExtendOptions,
+  createPatchOptions,
   createRenderTheme,
   render: _renderBlock,
   addLayoutOrderedProperty (target, name, entry, customLayout) {
@@ -93,7 +93,7 @@ function _getLayout (value, layoutKey = _layoutKey) {
   ######  #    #     #    ######  #    #  #####
 */
 
-function createDeepExtendOptions (customizations) {
+function createPatchOptions (customizations) {
   return Object.assign(Object.create(_deepExtendOptions), customizations);
 }
 
@@ -112,7 +112,7 @@ const _deepExtendOptions = Object.freeze({
     targetContainer[key] = inter;
     return undefined; // Stop further spread-extending
   },
-  customizer (target, source, key, targetContainer) {
+  preExtend (target, source, key, targetContainer) {
     // console.log("target:", target, "\nsource:", source, "\nkey:", key, "\n");
     if (typeof source === "function") return `<function ${source.name}>`;
     if (typeof source !== "object") return undefined;
@@ -124,7 +124,7 @@ const _deepExtendOptions = Object.freeze({
     }
     const ret = target || {};
     const containerLayout = _getLayout(targetContainer) || {};
-    const layout = ret[_layoutKey] = deepExtend(
+    const layout = ret[_layoutKey] = patchWith(
         _getLayout(ret) || { trivial: true, height: 0, depth: (containerLayout.depth || 0) + 1 },
         _getLayout(source));
     // TODO(iridian): Make the markdownify extend idempotent so that an already extended structure
@@ -133,7 +133,7 @@ const _deepExtendOptions = Object.freeze({
         ? this._extendArrayBlock(ret, source, layout, containerLayout)
         : this._extendObjectBlock(ret, source, layout, containerLayout);
   },
-  postProcessor (block, source, key, targetContainer) {
+  postExtend (block, source, key, targetContainer) {
     const layout = _getLayout(block);
     const contextLayout = _getLayout(targetContainer);
     if (contextLayout) {

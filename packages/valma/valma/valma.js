@@ -13,7 +13,7 @@ const semver = require("semver");
 const shell = require("shelljs");
 const yargs = require("yargs/yargs");
 const yargsParser = require("yargs-parser").detailed;
-const deepExtend = require("@valos/tools/deepExtend").default;
+const patchWith = require("@valos/tools/patchWith").default;
 const dumpify = require("@valos/tools/dumpify").default;
 const wrapErrorModule = require("@valos/tools/wrapError");
 
@@ -883,7 +883,7 @@ const toolsetsConfigStatus = {
 
 // Allow --vlm to override any implicit vlm modifications (ie. --vlm.verbosity=100 overrides -v)
 if (_vlm.vargv.vlmOption) {
-  deepExtend(_vlm, _vlm.vargv.vlmOption);
+  patchWith(_vlm, _vlm.vargv.vlmOption);
 }
 
 process.on("SIGINT", () => {

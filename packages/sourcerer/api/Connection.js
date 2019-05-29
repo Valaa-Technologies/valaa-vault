@@ -46,6 +46,7 @@ export default class Connection extends Follower {
     this._refCount = 0;
     this._downstreamReceiveTruths = receiveTruths;
     this._downstreamReceiveCommands = receiveCommands;
+    this.setRawName(String(partitionURI));
   }
 
   getName (): string {
@@ -53,7 +54,6 @@ export default class Connection extends Follower {
         || (this._upstreamConnection && this._upstreamConnection.getName())
         || String(this.getPartitionURI());
   }
-  getRawName (): string { return String(this.getPartitionURI()); }
   getSourcerer (): Sourcerer { return this._sourcerer; }
 
   getPartitionURI (): ValaaURI { return this._partitionURI; }

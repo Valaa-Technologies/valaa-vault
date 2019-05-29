@@ -8,13 +8,13 @@ export default valosheath.exportPlugin({
   name: "@valos/toolset-rest-api-gateway-plugin",
 
   onViewAttached (view, viewName) {
-    const deepExtend = require("@valos/tools/deepExtend").default;
+    const patchWith = require("@valos/tools/patchWith").default;
     const RestAPIServer = require("./fastify/RestAPIServer").default;
     const configRequire = (module) =>
         valosheath.require(path.isAbsolute(module) ? module : path.join(process.cwd(), module));
 
     const { server, prefixes } = require(`${process.cwd()}/toolsets.json`)[this.name];
-    const options = deepExtend({
+    const options = patchWith({
       name: `${viewName} REST API Server`,
       prefixes: {},
     }, server, {
@@ -23,7 +23,7 @@ export default valosheath.exportPlugin({
     options.view = view;
     options.viewName = viewName;
     Object.entries(prefixes).forEach(([prefix, { api, extensions }]) => {
-      const prefixAPI = options.prefixes[prefix] = deepExtend(options.prefixes[prefix] || {}, [
+      const prefixAPI = options.prefixes[prefix] = patchWith(options.prefixes[prefix] || {}, [
         api,
         ...[].concat(extensions).map(extension => (typeof extension !== "string"
             ? extension

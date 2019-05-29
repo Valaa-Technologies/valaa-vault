@@ -22,7 +22,7 @@ export { arrayFromAny, iterableFromAny } from "./sequenceFromAny";
 
 export const beaumpify = require("./beaumpify").default;
 
-export const deepExtend = require("./deepExtend").default;
+export const patchWith = require("./patchWith").default;
 
 export const dumpify = require("./dumpify").default;
 

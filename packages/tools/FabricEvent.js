@@ -101,8 +101,9 @@ export class FabricEventTarget {
   getLogger (): FabricEventLogger | Object { return this._logger; }
   setLogger (logger: FabricEventLogger) { this._logger = logger; }
   getName (): string { return this._name; }
-  getRawName (): string { return this._name; }
+  getRawName (): string { return this._rawName || this._name; }
   setName (name: any) { this._name = name; }
+  setRawName (rawName: any) { this._rawName = rawName; }
 
   getVerbosity () { return this._verbosity; }
   setVerbosity (value: number) { this._verbosity = value; }

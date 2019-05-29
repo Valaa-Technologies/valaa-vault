@@ -1,5 +1,7 @@
 import { arrayFromAny } from "~/tools/sequenceFromAny";
 
+// TODO(iridian, 2019-05): Obsolete in favor of patchWith
+
 export default function mergeDeep (target: any, sources: any[]) {
   return mergeDeepWith(target, sources);
 }

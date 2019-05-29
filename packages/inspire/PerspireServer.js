@@ -91,19 +91,22 @@ export default class PerspireServer {
     return ret;
   }
 
-  async run (interval: number, heartbeat: Function) {
+  async run (interval: number, heartbeat: Function, options: Object) {
     return new Promise((resolve, reject) => {
       let index = 0;
-      const timeoutObject = this.jsdom.window.setInterval(() => {
+      if (options.tickOnceImmediately && !callback()) return;
+      const timeoutObject = this.jsdom.window.setInterval(callback, interval * 1000);
+      function callback () {
         try {
           const ret = heartbeat(index++);
-          if (ret === undefined) return;
+          if (ret === undefined) return true;
           resolve(ret);
         } catch (error) {
           reject(error);
         }
-        this.jsdom.window.clearInterval(timeoutObject);
-      }, interval * 1000);
+        if (timeoutObject) this.jsdom.window.clearInterval(timeoutObject);
+        return false;
+      }
     });
   }
 

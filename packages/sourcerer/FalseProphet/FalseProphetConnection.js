@@ -84,12 +84,16 @@ export default class FalseProphetConnection extends Connection {
     return this._eventVersion !== undefined ? this._eventVersion
         : (this._eventVersion = this._upstreamConnection.getEventVersion());
   }
+  getMostRecentError () {
+    return (this._mostRecentError || {}).message;
+  }
 
   getStatus () {
     return {
       truths: this._headEventId,
       commands: this._unconfirmedCommands.length,
       frozen: this.isFrozenConnection(),
+      ...(this.getMostRecentError() ? { error: this.getMostRecentError() } : {}),
       ...super.getStatus(),
     };
   }
@@ -175,6 +179,7 @@ export default class FalseProphetConnection extends Connection {
                 if (!leadingTruths) leadingTruths = truthResults.slice(0, index);
                 const command = events[index];
                 const prophecy = primaryRecital.getStoryBy(command.aspects.command.id);
+                if (error) connection._mostRecentError = error;
                 if (((error.proceed || {}).when === "narrated") && (renarration === undefined)) {
                   renarration = connection.narrateEventLog({
                     eventIdBegin: connection._headEventId,
@@ -183,7 +188,7 @@ export default class FalseProphetConnection extends Connection {
                 }
                 if (prophecy) {
                   const progress = prophecy.meta.operation.getErroringProgress(error, {
-                    instigatorConnection: this,
+                    instigatorConnection: connection,
                     isSchismatic: error.isSchismatic !== false,
                     isRevisable: error.isRevisable !== false,
                     isReformable: error.isReformable !== false,

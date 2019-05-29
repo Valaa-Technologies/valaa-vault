@@ -262,13 +262,23 @@ export default class Gateway extends FabricEventTarget {
           rootScope.valos.gateway = gateway;
           rootScope.valos.identity = engine.getIdentityManager();
           rootScope.valos.view = {};
-          if (engine.getVerbosity()) {
-            rootScope.console = Object.assign(Object.create(engine), {
-              info: function verboseInfoEvent (...rest) { this.infoEvent(0, ...rest); },
-              log: function verboseLogEvent (...rest) { this.logEvent(0, ...rest); },
-              warn: function verboseWarnEvent (...rest) { this.warnEvent(0, ...rest); },
-              error: function verboseErrorEvent (...rest) { this.errorEvent(0, ...rest); },
-            });
+          rootScope.console = Object.assign(Object.create(engine), {
+            info: function verboseInfoEvent (...rest) {
+              this.infoEvent(0, ...[].concat(...rest.map(_trimObjects)));
+            },
+            log: function verboseLogEvent (...rest) {
+              this.logEvent(0, ...[].concat(...rest.map(_trimObjects)));
+            },
+            warn: function verboseWarnEvent (...rest) {
+              this.warnEvent(0, ...[].concat(...rest.map(_trimObjects)));
+            },
+            error: function verboseErrorEvent (...rest) {
+              this.errorEvent(0, ...[].concat(...rest.map(_trimObjects)));
+            },
+          });
+          function _trimObjects (entry) {
+            if (entry && (typeof entry === "object") && !inBrowser()) return dumpObject(entry);
+            return entry;
           }
         },
         function _attachView () {
@@ -479,6 +489,24 @@ export default class Gateway extends FabricEventTarget {
           "\n\tfalseProphetOptions:", ...dumpObject(falseProphetOptions),
           "\n\tupstream:", ...dumpObject(upstream));
     }
+  }
+
+  getTotalCommandCount () { return this._totalCommandCount || 0; }
+  getPartitionStatuses (options: { listEmpty: boolean }) {
+    if (!this._partitionCommandCounts) return {};
+    if (options && options.listEmpty) return this._partitionCommandCounts;
+    const ret = {};
+    for (const [key, count] of Object.entries(this._partitionCommandCounts)) {
+      if (count) {
+        try {
+          const connection = this.falseProphet.acquireConnection(key, { newConnection: false });
+          ret[key] = connection.getStatus();
+        } catch (error) {
+          ret[key] = { commands: count };
+        }
+      }
+    }
+    return ret;
   }
 
   setCommandCountListener (component: Object,

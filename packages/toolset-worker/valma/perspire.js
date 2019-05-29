@@ -212,15 +212,20 @@ exports.handler = async (yargv) => {
       }
       if (keepaliveInterval >= 0) return undefined;
       return tickRet;
-    });
+    }, { tickOnceImmediately: keepaliveInterval >= 0 });
   }
   vlm.finalizeClock();
   return ret;
 
   function _tick (heartbeatClockFields, tick) {
+    const status = { tick, ...heartbeatClockFields };
+    if (server.gateway.getTotalCommandCount()) {
+      status.commandCount = server.gateway.getTotalCommandCount();
+      status.partitions = server.gateway.getPartitionStatuses();
+    }
     if (heartbeatClockFields) {
-      vlm.clock(mainViewName, `worker.heartbeat.dom`,
-          { tick, ...heartbeatClockFields, action: `serializing DOM` });
+      status.action = `serializing DOM`;
+      vlm.clock(mainViewName, `worker.heartbeat.dom`, status);
     }
     state.domString = server.serializeMainDOM();
     state.tick = tick;
@@ -234,8 +239,8 @@ exports.handler = async (yargv) => {
         sourceMap: new Map(),
       };
       if (heartbeatClockFields) {
-        vlm.clock(mainViewName, `worker.heartbeat.exec`,
-            { tick, ...heartbeatClockFields, action: `executing '${sourceInfo.mediaName}'` });
+        status.action = `executing '${sourceInfo.mediaName}'`;
+        vlm.clock(mainViewName, `worker.heartbeat.exec`, status);
       }
       const execResult = vExecThis && execBody && vExecThis.doValoscript(execBody, { sourceInfo });
       if (execResult !== undefined) return execResult;

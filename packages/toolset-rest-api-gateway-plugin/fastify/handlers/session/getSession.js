@@ -28,9 +28,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       this._secret = this._identity.clientSecret;
     },
     preload () {
-      // const connection = await server.getDiscourse().acquireConnection(
-      //    route.config.valos.subject, { newPartition: false }).asActiveConnection();
-      // const vRoot = server.getEngine().getVrapper([connection.getPartitionRawId()]);
+      return server.preloadScopeRules(this.scopeRules);
     },
     handleRequest (request, reply) {
       const scope = server.buildScope(request, this.scopeRules);
@@ -56,7 +54,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
           nonce, identityPartition, timeStamp: grantTimeStamp,
           claims: { email, preferred_username },
         } = payload);
-        console.log("authorizing session with payload:", payload);
+        console.log("Authorizing session with payload:", payload);
 
         if (!(timeStamp < Number(grantTimeStamp) + (scope.grantExpirationDelay || 60))) {
           reply.code(401);

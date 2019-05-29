@@ -7,7 +7,9 @@ import { asyncConnectToPartitionsIfMissingAndRetry } from "~/raem/tools/denormal
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
-import { dumpify, dumpObject, FabricEventTarget, outputError, thenChainEagerly } from "~/tools";
+import {
+  patchWith, dumpify, dumpObject, FabricEventTarget, outputError, thenChainEagerly,
+} from "~/tools";
 
 import * as handlers from "./handlers";
 
@@ -221,7 +223,6 @@ export default class RestAPIServer extends FabricEventTarget {
           throw new Error(`Required ${category} ${method} rule '${requiredRuleName}' is undefined`);
         }
       }
-      _recurseFreeze(ret.scopeBase);
       return ret;
     } catch (error) {
       throw this.wrapErrorEvent(error, wrap,
@@ -236,11 +237,6 @@ export default class RestAPIServer extends FabricEventTarget {
     }
     function _entriesOf (object) {
       return Array.isArray(object) ? object : Object.entries(object);
-    }
-    function _recurseFreeze (value) {
-      if (!value || (typeof value !== "object")) return;
-      Object.values(value).forEach(_recurseFreeze);
-      Object.freeze(value);
     }
   }
 
@@ -457,6 +453,23 @@ export default class RestAPIServer extends FabricEventTarget {
               subFields));
       return subFields;
     }
+  }
+
+  async preloadScopeRules (scopeRules) {
+    const activations =  [];
+    scopeRules.scopeBase = patchWith({}, scopeRules.scopeBase, {
+      preExtend: (tgt, patch) => {
+        if (!Array.isArray(patch) || (patch[0] !== "~ref")) return undefined;
+        const vResource = this.getEngine().getVrapper(patch[1]);
+        const activation = vResource.activate();
+        if (activation) activations.push(activation);
+        return vResource;
+      },
+      postExtend: (tgt) => {
+        if (tgt && (typeof tgt === "object") && !(tgt instanceof Vrapper)) Object.freeze(tgt);
+      },
+    });
+    await Promise.all(activations);
   }
 
   preloadVAKONRefResources (kuery, resultResources = []) {

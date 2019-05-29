@@ -20,10 +20,11 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
     async preload () {
       const connection = await server.getDiscourse().acquireConnection(
           route.config.valos.subject, { newPartition: false }).asActiveConnection();
+      await server.preloadScopeRules(this.scopeRules);
       this.scopeRules.scopeBase = Object.freeze({
-        ...this.scopeRules.scopeBase,
         subject: server.getEngine().getVrapper(
             [connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) }]),
+        ...this.scopeRules.scopeBase,
       });
     },
     handleRequest (request, reply) {

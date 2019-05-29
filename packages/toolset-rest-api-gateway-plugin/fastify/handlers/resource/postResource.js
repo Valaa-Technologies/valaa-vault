@@ -22,18 +22,16 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       // if (toPatchTarget.length > 1) this.toPatchTarget = toPatchTarget;
     },
     async preload () {
-      this.vPreloads = server.preloadVAKONRefResources(route.config.scope);
-      server.preloadVAKONRefResources(route.config.createResource, this.vPreloads);
-      await Promise.all(this.vPreloads.map(vPreload => vPreload.activate()));
-      const scriptRoot = this.vPreloads[0] || server.getViewFocus();
-      if (!scriptRoot) throw new Error(`Can't locate scriptRoot for route: ${this.name}`);
+      const viewFocus = server.getViewFocus();
+      if (!viewFocus) throw new Error(`Can't locate viewFocus for route: ${this.name}`);
+      await server.preloadScopeRules(this.scopeRules);
       const connection = await server.getDiscourse().acquireConnection(
           route.config.valos.subject, { newPartition: false }).asActiveConnection();
       this.scopeRules.scopeBase = Object.freeze({
-        ...this.scopeRules.scopeBase,
-        scriptRoot,
+        viewFocus,
         subject: server.getEngine().getVrapper(
             [connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) }]),
+        ...this.scopeRules.scopeBase,
       });
     },
     handleRequest (request, reply) {
@@ -53,12 +51,10 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       const discourse = server.getDiscourse().acquireFabricator();
       return thenChainEagerly(discourse, [
         () => {
-          // Replace with createMapping call proper. Now using old idiom
-          // and explicit instantiate.
-          console.log("resource POST:", scope.createResource,
-              "\n\tscriptRoot:", scope.scriptRoot && scope.scriptRoot.debugId(),
+          console.log("resource POST dump:", ...dumpObject(scope.createResource),
+              "\n\tviewFocus:", ...dumpObject(scope.viewFocus),
               "\n\ttoPatchTarget:", ...dumpObject(this.toPatchTarget));
-          return scope.scriptRoot.do(scope.createResource, { discourse, scope });
+          return scope.viewFocus.do(scope.createResource, { discourse, scope });
         },
         vResource => {
           if (!vResource || !(vResource instanceof Vrapper)) {

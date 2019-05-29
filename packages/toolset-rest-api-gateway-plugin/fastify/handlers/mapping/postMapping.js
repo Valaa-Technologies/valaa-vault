@@ -26,17 +26,12 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       this.toPatchTarget.splice(-1);
     },
     async preload () {
-      // const connection = await server.getDiscourse().acquireConnection(
-      //    route.config.valos.subject, { newPartition: false }).asActiveConnection();
-      // const vRoot = server.getEngine().getVrapper([connection.getPartitionRawId()]);
-      this.vPreloads = server.preloadVAKONRefResources(route.config.scope);
-      server.preloadVAKONRefResources(route.config.createResourceAndMapping, this.vPreloads);
-      await Promise.all(this.vPreloads.map(vPreload => vPreload.activate()));
-      const scriptRoot = this.vPreloads[0] || server.getViewFocus();
-      if (!scriptRoot) throw new Error(`Can't locate scriptRoot for route: ${this.name}`);
+      const viewFocus = server.getViewFocus();
+      if (!viewFocus) throw new Error(`Can't locate viewFocus for route: ${this.name}`);
+      await server.preloadScopeRules(this.scopeRules);
       this.scopeRules.scopeBase = Object.freeze({
+        viewFocus,
         ...this.scopeRules.scopeBase,
-        scriptRoot,
       });
     },
     handleRequest (request, reply) {
@@ -68,13 +63,11 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
           scope.source = !this.toSource
               ? scope.resource
               : scope.resource.get(this.toSource, { discourse, scope });
-          // Replace with createMapping call proper. Now using old idiom
-          // and explicit instantiate.
-          console.log("POST stuff:", scope.createResourceAndMapping,
-              "\n\tscriptRoot:", scope.scriptRoot && scope.scriptRoot.debugId(),
-              "\n\tsource:", scope.source && scope.source.debugId(),
+          console.log("mapping POST dump:", ...dumpObject(scope.createResourceAndMapping),
+              "\n\tviewFocus:", ...dumpObject(scope.viewFocus),
+              "\n\tsource:", ...dumpObject(scope.source),
               "\n\tname:", targetName);
-          return scope.scriptRoot.do(scope.createResourceAndMapping, { discourse, scope });
+          return scope.viewFocus.do(scope.createResourceAndMapping, { discourse, scope });
         },
         vMapping => {
           scope.mapping = server.patchResource(vMapping, request.body,

@@ -52,7 +52,9 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         server.warnEvent("Activating route:", this.name,
             "\n\tresources:", ...[].concat(...vTargets.map(vTarget => (!vTarget ? ["\n\t: <null>"]
                 : ["\n\t:", vTarget.debugId()]))));
-        await Promise.all(vTargets.map(vTarget => vTarget && vTarget.activate()));
+        await Promise.all(vTargets.map(vTarget => vTarget && vTarget.activate())
+            .concat(server.preloadScopeRules(this.scopeRules)));
+
         server.infoEvent("Done preloading route:", this.name,
             "\n\tresources:", ...[].concat(...vTargets.map(vTarget => (!vTarget
                 ? ["\n\t: <null>"] : [
@@ -61,9 +63,9 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
                   String(vTarget.getConnection().getPartitionURI()),
             ]))));
         this.scopeRules.scopeBase = Object.freeze({
-          ...this.scopeRules.scopeBase,
           subject: vIndexRoot,
           indexRoot: vIndexRoot,
+          ...this.scopeRules.scopeBase,
         });
       } catch (error) {
         throw server.wrapErrorEvent(error, new Error(`preload(${this.name})`),

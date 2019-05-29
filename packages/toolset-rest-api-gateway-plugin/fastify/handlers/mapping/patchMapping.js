@@ -21,11 +21,13 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       this.toMapping = toMappingFields.slice(0, -2).concat(0);
     },
     async preload () {
-      // const connection = await server.getDiscourse().acquireConnection(
-      //    route.config.valos.subject, { newPartition: false }).asActiveConnection();
-      // const vRoot = server.getEngine().getVrapper([connection.getPartitionRawId()]);
-      this.vPreloads = server.preloadVAKONRefResources(route.config.createMapping);
-      return Promise.all(this.vPreloads.map(vPreload => vPreload.activate()));
+      const viewFocus = server.getViewFocus();
+      if (!viewFocus) throw new Error(`Can't locate viewFocus for route: ${this.name}`);
+      await server.preloadScopeRules(this.scopeRules);
+      this.scopeRules.scopeBase = Object.freeze({
+        viewFocus,
+        ...this.scopeRules.scopeBase,
+      });
     },
     handleRequest (request, reply) {
       const scope = server.buildScope(request, this.scopeRules);
@@ -59,8 +61,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
               : scope.resource.get(this.toSource, { scope, discourse });
           // Replace with createMapping call proper. Now using old idiom
           // and explicit instantiate.
-          return this.vPreloads[0].instantiate(
-              { source: scope.source, target: scope.target }, { discourse });
+          return scope.viewFocus.do(scope.createMapping, { discourse, scope });
         },
         vMapping => server.patchResource((scope.mapping = vMapping), request.body,
             { discourse, scope, route }),

@@ -24,9 +24,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       */
     },
     preload () {
-      // const connection = await server.getDiscourse().acquireConnection(
-      //    route.config.valos.subject, { newPartition: false }).asActiveConnection();
-      // const vRoot = server.getEngine().getVrapper([connection.getPartitionRawId()]);
+      return server.preloadScopeRules(this.scopeRules);
     },
     handleRequest (request, reply) {
       const scope = server.buildScope(request, this.scopeRules);

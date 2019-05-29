@@ -67,7 +67,7 @@ export default class Sourcerer extends FabricEventTarget {
   initiate (): Promise<Sourcerer> | Sourcerer {}
 
   addFollower (follower: Follower, options: ?Object): Follower {
-    const discourse = this._createDiscourse(follower, options);
+    const discourse = this.createDiscourse(follower, options);
     this._followers.set(follower, discourse);
     return discourse;
   }
@@ -77,7 +77,7 @@ export default class Sourcerer extends FabricEventTarget {
     if (upstream) upstream.addFollower(this);
   }
 
-  _createDiscourse (follower: Follower) {
+  createDiscourse (follower: Follower) {
     return follower;
   }
 

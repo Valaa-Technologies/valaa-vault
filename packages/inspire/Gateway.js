@@ -164,6 +164,9 @@ export default class Gateway extends FabricEventTarget {
       this.falseProphet = await this._proselytizeFalseProphet(this.gatewayRevelation,
           this.corpus, this.scribe);
 
+      // Create a connection and an identity for the gateway towards false prophet
+      this.discourse = await this._initiateDiscourse(this.gatewayRevelation, this.falseProphet);
+
       await this.attachPlugins(await this.gatewayRevelation.plugins);
 
       this.prologueRevelation = await this.revelation.prologue;
@@ -487,6 +490,32 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
+  async _initiateDiscourse (gatewayRevelation: Object, falseProphet: FalseProphet) {
+    let discourseOptions, discourse;
+    try {
+      discourseOptions = {
+        ...((await gatewayRevelation.discourse) || {}),
+      };
+      this.clockEvent(1, () => [`falseProphet.discourse.create`,
+        "new FalseProphetDiscourse", ...dumpObject(discourseOptions)]);
+      discourse = falseProphet.createDiscourse(this, discourseOptions);
+      // TODO(iridian, 2019-05): Add provisions for gateway initialization identity acquisition
+      this.warnEvent(1, () => [
+        `Initiated FalseProphetDiscourse ${discourse.debugId()}`,
+        ...(!this.getVerbosity() ? [] : [", with:",
+          "\n\tdiscourseOptions:", ...dumpObject(discourseOptions),
+          "\n\tdiscourse:", ...dumpObject(discourse),
+        ]),
+      ]);
+      return discourse;
+    } catch (error) {
+      throw this.wrapErrorEvent(error, "initiateDiscourse",
+          "\n\tdiscourseOptions:", ...dumpObject(discourseOptions),
+          "\n\tfalseProphet:", ...dumpObject(falseProphet),
+          "\n\tdiscourse:", ...dumpObject(discourse));
+    }
+  }
+
   _attachedPlugins = {};
 
   async attachPlugin (pluginPrototype: Promise<Object>) {
@@ -617,7 +646,7 @@ export default class Gateway extends FabricEventTarget {
     // Acquire connection without remote narration to determine the current last authorized event
     // so that we can narrate any content in the prologue before any remote activity.
     this.clockEvent(1, "prologue.acquire", `Acquiring connection <${partitionURI}>`);
-    const connection = this.falseProphet
+    const connection = this.discourse
         .acquireConnection(partitionURI, {
           subscribeEvents: false, narrateOptions: { remote: false },
         });

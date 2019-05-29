@@ -84,7 +84,7 @@ export default class FalseProphet extends Sourcerer {
     this.corpus.reinitialize(newState);
   }
 
-  _createDiscourse (follower: Follower, options: ?Object = {}) {
+  createDiscourse (follower: Follower, options: ?Object = {}) {
     options.sourcerer = this;
     options.follower = follower;
     if (options.verbosity === undefined) options.verbosity = follower.getVerbosity();

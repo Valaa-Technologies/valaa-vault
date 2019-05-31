@@ -543,17 +543,17 @@ class UIComponent extends React.Component {
   }
 
   // defaults to arrayFromAny(sequence)
-  renderLensSequence (sequence: any, focus: any = this.tryFocus()):
+  renderLensSequence (sequence: any, focus: any = this.tryFocus(), lensName: ?string):
       [] | Promise<any[]> {
     const array = arrayFromAny(sequence !== null ? sequence : undefined);
-    const ret = _tryRenderLensArray(this, array, focus);
+    const ret = _tryRenderLensArray(this, array, focus, lensName);
     return (typeof ret !== "undefined") ? ret
         : array;
   }
 
-  tryRenderLensSequence (sequence: any, focus: any = this.tryFocus()):
+  tryRenderLensSequence (sequence: any, focus: any = this.tryFocus(), lensName: ?string):
       void | [] | Promise<any[]> {
-    return _tryRenderLensArray(this, arrayFromAny(sequence), focus);
+    return _tryRenderLensArray(this, arrayFromAny(sequence), focus, lensName);
   }
 
   renderLoaded (focus: any):
@@ -568,10 +568,10 @@ class UIComponent extends React.Component {
   }
 
   // defaults to null
-  renderSlotAsLens (slot: string | Symbol, focus: any, rootSlotName?: string,
+  renderSlotAsLens (slot: string | Symbol, focus: any, rootSlotName?: string, lensName: ??string,
       onlyIfAble?: boolean, onlyOnce?: boolean):
           null | string | React.Element<any> | [] | Promise<any> {
-    const ret = this.tryRenderSlotAsLens(slot, focus, rootSlotName, onlyIfAble, onlyOnce);
+    const ret = this.tryRenderSlotAsLens(slot, focus, rootSlotName, lensName, onlyIfAble, onlyOnce);
     return (ret !== undefined) ? ret : null;
   }
 
@@ -581,7 +581,7 @@ class UIComponent extends React.Component {
   }
 
   tryRenderSlotAsLens (slot: string | Symbol, focus: any = this.tryFocus(),
-      rootSlotName_?: string, onlyIfAble?: boolean, onlyOnce?: boolean):
+      rootSlotName_?: string, lensName: ?string, onlyIfAble?: boolean, onlyOnce?: boolean):
           void | null | string | React.Element<any> | [] | Promise<any> {
     const valosLens = this.getValos().Lens;
     let slotValue, ret; // eslint-disable-line
@@ -592,7 +592,8 @@ class UIComponent extends React.Component {
       if (!slotSymbol) throw new Error(`No valos.Lens slot symbol for '${slotName}'`);
       if (!slotName) throw new Error(`No valos.Lens slot name for '${String(slotSymbol)}'`);
       slotValue = _readSlotValue(this, slotName, slotSymbol, focus, onlyIfAble);
-      ret = slotValue && this.renderLens(slotValue, focus, rootSlotName, undefined, onlyOnce);
+      ret = slotValue && this.renderLens(
+          slotValue, focus, `${rootSlotName}-${lensName || ""}`, undefined, onlyOnce);
       return ret;
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .renderSlotAsLens(${

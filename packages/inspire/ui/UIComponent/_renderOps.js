@@ -97,10 +97,10 @@ export function _renderFocus (component: UIComponent,
     focus: any
 ): null | string | React.Element<any> | [] | Promise<any> {
   if (!component.preRenderFocus) {
-    return component.renderLensSequence(component.props.children, focus);
+    return component.renderLensSequence(component.props.children, focus, "focus");
   }
   const preRendered = component.preRenderFocus(focus);
-  const ret = component.tryRenderLens(preRendered, focus, "renderRoot");
+  const ret = component.tryRenderLens(preRendered, focus, "focus");
   if (typeof ret !== "undefined") return ret;
   if (typeof preRendered === "object") return preRendered;
   const key = component.getUIContextValue("key");
@@ -189,11 +189,11 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
           ret = _readSlotValue(component, "delegatePropertyLens",
               valos.Lens.delegatePropertyLens, lens, true)(lens, component, lensName);
           if ((ret == null) || ((ret.delegate || [])[0] === valos.Lens.notLensResourceLens)) {
-            return component.renderSlotAsLens("notLensResourceLens", lens, subLensName);
+            return component.renderSlotAsLens("notLensResourceLens", lens, undefined, subLensName);
           }
         }
       } else if (Array.isArray(lens)) {
-        return _tryRenderLensArray(component, lens, focus);
+        return _tryRenderLensArray(component, lens, focus, lensName);
       } else if (Object.getPrototypeOf(lens) === Object.prototype) {
         if (lens.delegate && (Object.keys(lens).length === 1)) {
           return _renderFirstAbleDelegate(component, lens.delegate, focus, lensName);
@@ -201,14 +201,14 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         subLensName = `-noscope-${lensName}`;
         ret = React.createElement(_Valoscope, component.childProps(subLensName, {}, { ...lens }));
       } else if (isSymbol(lens)) {
-        return component.renderSlotAsLens(lens, focus, undefined, onlyIfAble, onlyOnce);
+        return component.renderSlotAsLens(lens, focus, undefined, lensName, onlyIfAble, onlyOnce);
       } else {
         throw new Error(`Invalid lens value when trying to render ${lensName
             }, got value of type '${lens.constructor.name}'`);
       }
       break;
     case "symbol":
-      return component.renderSlotAsLens(lens, focus, undefined, onlyIfAble, onlyOnce);
+      return component.renderSlotAsLens(lens, focus, undefined, lensName, onlyIfAble, onlyOnce);
   }
   return thenChainEagerly(ret, resolvedRet => {
     if (resolvedRet === undefined) return undefined;
@@ -341,7 +341,7 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
         if (!hasUIContext) parentUIContext = component.getUIContext();
       } else {
         // non-UIComponent element with no live props: post-process its children directly here.
-        children = component.tryRenderLensSequence(props.children, focus);
+        children = component.tryRenderLensSequence(props.children, focus, lensName);
         if ((key || !lensName) && (children === undefined)) return undefined;
         if (isPromise(children)) {
           children.operationInfo = Object.assign(children.operationInfo || {}, {

@@ -178,7 +178,7 @@ export default class FalseProphetConnection extends Connection {
               (error, head, index, truthResults, entries, callback, onRejected) => {
                 if (!leadingTruths) leadingTruths = truthResults.slice(0, index);
                 const command = events[index];
-                const prophecy = primaryRecital.getStoryBy(command.aspects.command.id);
+                const prophecy = command && primaryRecital.getStoryBy(command.aspects.command.id);
                 if (error) connection._mostRecentError = error;
                 if (((error.proceed || {}).when === "narrated") && (renarration === undefined)) {
                   renarration = connection.narrateEventLog({

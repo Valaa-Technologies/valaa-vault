@@ -125,6 +125,7 @@ export default class FalseProphetDiscourse extends Discourse {
     // This communicates with @valos/raem reducers somewhat awkwardly.
     ret.meta.isBeingUniversalized = true;
     if (!tryAspect(ret, "command").id) this._assignCommandId(ret, this);
+    obtainAspect(ret, "command").timeStamp = Date.now();
     return ret;
   }
 

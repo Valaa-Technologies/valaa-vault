@@ -15,6 +15,10 @@ afterEach(async () => {
   harness = null;
 }); // eslint-disable-line no-undef
 
+const exampleContent = "example content";
+const exampleBuffer = arrayBufferFromUTF8String(exampleContent);
+const exampleContentHash = contentHashFromArrayBuffer(exampleBuffer);
+
 describe("Media handling", () => {
   it("does an async prepareBvob for non-locally persisted Media content", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
@@ -23,35 +27,36 @@ describe("Media handling", () => {
       } },
       awaitResult: (result) => result.getComposedStory(),
     });
-    const buffer = arrayBufferFromUTF8String("example content");
-    const contentHash = contentHashFromArrayBuffer(buffer);
     const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
     const existingChroniclingCount = testPartitionBackend._chroniclings.length;
-    const { media, contentSetting } = await harness.runValoscript(vRef("test_partition"), `
+    const { media, contentUpdateStarted } = await harness.runValoscript(vRef("test_partition"), `
       const media = new Media({
         name: "text media", owner: this, mediaType: { type: "text", subtype: "plain" },
       });
-      const contentSetting = media[valos.prepareBvob](buffer)
+      const contentUpdateStarted = media[valos.prepareBvob](exampleBuffer)
           .then(createBvob => ({ bvobId: (media[valos.Media.content] = createBvob()) }));
       this.text = media;
-      ({ media, contentSetting });
-    `, { scope: { buffer, console }, awaitResult: (result) => result.getComposedEvent() });
+      ({ media, contentUpdateStarted });
+    `, { scope: { exampleBuffer, console }, awaitResult: (result) => result.getComposedEvent() });
     expect(media.getId().toJSON())
         .toEqual(entities().test_partition.get(["§..", "text"]).getId().toJSON());
-    expect(testPartitionBackend.getPreparation(contentHash))
+    expect(testPartitionBackend.getPreparation(exampleContentHash))
         .toBeTruthy();
     expect(media.get("content"))
         .toBeFalsy();
     expect(testPartitionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
-    testPartitionBackend.addPrepareBvobResult({ contentHash });
-    const { bvobId } = await contentSetting;
+    testPartitionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
+    const { bvobId } = await contentUpdateStarted;
     expect(bvobId.getId().rawId())
-        .toEqual(contentHash);
+        .toEqual(exampleContentHash);
     expect(bvobId.getId().toJSON())
         .toEqual(media.get("content").getId().toJSON());
     expect(testPartitionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
+
+    await expect(media.extractValue()).rejects
+        .toThrow(/content not found in local cache/);
   });
 
   it("does an async prepareBvob for locally persisted Media content", async () => {
@@ -62,14 +67,12 @@ describe("Media handling", () => {
     });
     const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
     const existingChroniclingCount = testPartitionBackend._chroniclings.length;
-    const buffer = arrayBufferFromUTF8String("example content");
-    const contentHash = contentHashFromArrayBuffer(buffer);
-    const { media, contentSetting, newMediaPersist } = await harness.runValoscript(
+    const { media, contentUpdateStarted, newMediaPersist } = await harness.runValoscript(
         vRef("test_partition"), `
       const media = new Media({
         name: "text media", owner: this, mediaType: { type: "text", subtype: "plain" },
       });
-      const contentSetting = media[valos.prepareBvob](buffer)
+      const contentUpdateStarted = media[valos.prepareBvob](exampleBuffer)
           .then(createBvob => ({
             bvobId: (media[valos.Media.content] = createBvob()),
             bvobComposed: new Promise(resolve =>
@@ -79,29 +82,36 @@ describe("Media handling", () => {
           }));
       this.text = media;
       ({
-        media, contentSetting,
+        media, contentUpdateStarted,
         newMediaPersist: new Promise(resolve => (valos.getTransactor().onpersist = resolve)),
       });
-    `, { scope: { buffer, console } });
+    `, { scope: { exampleBuffer, console } });
     await newMediaPersist;
     expect(media.getId().toJSON())
         .toEqual(entities().test_partition.get(["§..", "text"]).getId().toJSON());
     expect(testPartitionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
-    // no remote confirmation!
-    const { bvobId, bvobComposed, bvobPersisted } = await contentSetting;
+    // local bvob persisted internally but not remotely
+    const { bvobId, bvobComposed, bvobPersisted } = await contentUpdateStarted;
     expect(bvobId.getId().rawId())
-        .toEqual(contentHash);
+        .toEqual(exampleContentHash);
     expect(bvobId.getId().toJSON())
         .toEqual(media.get("content").getId().toJSON());
     const bvobComposedEvent = await bvobComposed;
+
+    expect(await media.extractValue())
+        .toEqual(exampleContent);
+
     expect(bvobComposedEvent.command.actions.length).toEqual(2);
-    testPartitionBackend.addPrepareBvobResult({ contentHash });
+    testPartitionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
     expect(testPartitionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     await bvobPersisted;
     expect(testPartitionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
+
+    expect(await media.extractValue())
+        .toEqual(exampleContent);
   });
 
   it("rejects async prepareBvob command recomposition after Media command is purged", async () => {
@@ -109,19 +119,17 @@ describe("Media handling", () => {
       oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
       awaitResult: (result) => result.getPersistedStory(),
     });
-    const buffer = arrayBufferFromUTF8String("example content");
-    const contentHash = contentHashFromArrayBuffer(buffer);
     const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
     const existingChroniclingCount = testPartitionBackend._chroniclings.length;
     let reformCause;
     const onReform = e => { reformCause = e.error; e.preventDefault(); };
     harness.clockEvent(1, () => ["test.runValoscript"]);
-    const { contentSetting, newMediaPersist } = await harness.runValoscript(
+    const { media, contentUpdateStarted, newMediaPersist } = await harness.runValoscript(
         vRef("test_partition"), `
       const media = new Media({
         name: "text media", owner: this, mediaType: { type: "text", subtype: "plain" },
       });
-      const contentSetting = media[valos.prepareBvob](buffer)
+      const contentUpdateStarted = media[valos.prepareBvob](exampleBuffer)
           .then(createBvob => ({
             bvobId: (media[valos.Media.content] = createBvob()),
             bvobPersisted: new Promise(resolve =>
@@ -132,22 +140,26 @@ describe("Media handling", () => {
       this.text = media;
       valos.getTransactor().addEventListener("reform", onReform);
       ({
-        media, contentSetting,
+        media, contentUpdateStarted,
         newMediaPersist: new Promise(resolve => (valos.getTransactor().onpersist = resolve)),
       });
     `, {
-      scope: { buffer, console, onReform },
+      scope: { exampleBuffer, console, onReform },
       awaitResult: (result) => result.getComposedEvent(),
     });
     harness.clockEvent(1, () => ["test.newMediaPersist"]);
     await newMediaPersist;
     expect(testPartitionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
-    harness.clockEvent(1, () => ["test.contentSetting"]);
-        const { bvobPersisted, bvobPurged } = await contentSetting;
-    testPartitionBackend.addPrepareBvobResult({ contentHash });
+    harness.clockEvent(1, () => ["test.contentUpdateStarted"]);
+    const { bvobPersisted, bvobPurged } = await contentUpdateStarted;
+    testPartitionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
     harness.clockEvent(1, () => ["test.bvobPersisted"]);
     await bvobPersisted;
+
+    expect(await media.extractValue())
+        .toEqual(exampleContent);
+
     expect(testPartitionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
     testPartitionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
@@ -162,9 +174,77 @@ describe("Media handling", () => {
     expect(purgeEvent.isComposeSchism)
         .toBeTruthy();
     expect(reformCause.message).toEqual("Not permitted");
+
+    expect(() => media.extractValue())
+        .toThrow(/Cannot operate on a non-Created/);
   });
 
-  it("delays depending reformation when dependent heretic reformation is delayed", async () => {
+  it("does not reform nor rechronicle when only non-schismatic errors are thrown", async () => {
+    harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
+      oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
+      awaitResult: (result) => result.getPersistedStory(),
+    });
+    const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    const existingChroniclingCount = testPartitionBackend._chroniclings.length;
+    let reformCause;
+    const onReform = e => { reformCause = e.error; e.preventDefault(); };
+    harness.clockEvent(1, () => ["test.runValoscript"]);
+    const { media, contentUpdateStarted, newMediaPersist, newMediaError } =
+        await harness.runValoscript(vRef("test_partition"), `
+      const media = new Media({
+        name: "text media", owner: this, mediaType: { type: "text", subtype: "plain" },
+      });
+      const contentUpdateStarted = media[valos.prepareBvob](exampleBuffer)
+          .then(createBvob => ({
+            bvobId: (media[valos.Media.content] = createBvob()),
+            bvobPersisted: new Promise(resolve =>
+                valos.getTransactor().addEventListener("persist", resolve)),
+          }));
+      this.text = media;
+      valos.getTransactor().addEventListener("reform", onReform);
+      ({
+        media, contentUpdateStarted,
+        newMediaPersist: new Promise(resolve => (valos.getTransactor().onpersist = resolve)),
+        newMediaError: new Promise(resolve => (valos.getTransactor().onerror = resolve)),
+      });
+    `, {
+      scope: { exampleBuffer, console, onReform },
+      awaitResult: (result) => result.getComposedEvent(),
+    });
+    harness.clockEvent(1, () => ["test.newMediaPersist"]);
+    await newMediaPersist;
+    expect(testPartitionBackend._chroniclings.length)
+        .toEqual(existingChroniclingCount + 1);
+    harness.clockEvent(1, () => ["test.contentUpdateStarted"]);
+    const { bvobPersisted } = await contentUpdateStarted;
+    testPartitionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
+    harness.clockEvent(1, () => ["test.bvobPersisted"]);
+    await bvobPersisted;
+
+    expect(await media.extractValue())
+        .toEqual(exampleContent);
+
+    expect(testPartitionBackend._chroniclings.length)
+        .toEqual(existingChroniclingCount + 2);
+    testPartitionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
+        .rejectTruthEvent(Object.assign(new Error("Connection lost"),
+            { isSchismatic: false }));
+    harness.clockEvent(1, () => ["test.newMediaError"]);
+    const errorEvent = await newMediaError;
+    expect(errorEvent.error.message)
+        .toMatch(/Connection lost/);
+    expect(errorEvent.typePrecedingError)
+        .toEqual("persist");
+    expect(errorEvent.isComposeSchism)
+        .toBeFalsy();
+    expect(reformCause)
+        .toEqual(undefined);
+
+    expect(await media.extractValue())
+        .toEqual(exampleContent);
+  });
+
+  it("delays a depending reformation when dependent heretic reformation is delayed", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
       oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
       awaitResult: (result) => result.getPersistedStory(),
@@ -181,12 +261,12 @@ describe("Media handling", () => {
     };
     const onPurge = e => (mediaPurgeEvent = e);
     harness.clockEvent(1, () => ["test.runValoscript"]);
-    const { contentSetting, newMediaPersist } = await harness.runValoscript(
+    const { media, contentUpdateStarted, newMediaPersist } = await harness.runValoscript(
         vRef("test_partition"), `
       const media = new Media({
         name: "text media", owner: this, mediaType: { type: "text", subtype: "plain" },
       });
-      const contentSetting = media[valos.prepareBvob](buffer)
+      const contentUpdateStarted = media[valos.prepareBvob](buffer)
           .then(createBvob => ({
             bvobId: (media[valos.Media.content] = createBvob()),
             bvobPersisted: new Promise(resolve =>
@@ -198,7 +278,7 @@ describe("Media handling", () => {
       valos.getTransactor().addEventListener("reform", onReform);
       valos.getTransactor().addEventListener("purge", onPurge);
       ({
-        media, contentSetting,
+        media, contentUpdateStarted,
         newMediaPersist: new Promise(resolve => (valos.getTransactor().onpersist = resolve)),
       });
     `, {
@@ -209,8 +289,8 @@ describe("Media handling", () => {
     await newMediaPersist;
     expect(testPartitionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
-    harness.clockEvent(1, () => ["test.contentSetting"]);
-        const { bvobPersisted, bvobPurged } = await contentSetting;
+    harness.clockEvent(1, () => ["test.contentUpdateStarted"]);
+        const { bvobPersisted, bvobPurged } = await contentUpdateStarted;
     testPartitionBackend.addPrepareBvobResult({ contentHash });
     harness.clockEvent(1, () => ["test.bvobPersisted"]);
     await bvobPersisted;
@@ -255,6 +335,10 @@ describe("Media handling", () => {
     // implementation is partial. This test does not make sure that the
     // depending reformation gets run: in fact the bvob command remains
     // purged.
+    expect(await media.extractValue())
+    // This is expected but wrong in the big picture: bvob command
+    // should be reformed along the media
+        .toEqual(undefined);
   });
 
   it("doesn't fetch a media content from the stale lookups when updating content", async () => {

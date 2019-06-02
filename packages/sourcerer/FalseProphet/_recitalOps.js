@@ -81,7 +81,7 @@ export function _purgeLatestRecitedStory (falseProphet: FalseProphet, heresy: Ev
       return; // Already purged.
     }
     throw new Error(`_purgeLatestRecitedStory.heresy.aspects.command.id ('${
-        heresy.aspects.command.id}') recital prophecy was found is not the latest recited story ('${
+        heresy.aspects.command.id}') prophecy was found in recital but not as the latest story ('${
         latestStory.aspects.command.id}')`);
   }
   const transactor = latestStory.meta.transactor;

@@ -147,8 +147,13 @@ export default class FalseProphetDiscourse extends Discourse {
   }
 
   receiveCommands (commands: Command[], purgedRecital: ?Object): ?Command[] {
-    if (!commands.length) return undefined;
-    this.setState(commands[commands.length - 1].state);
+    if (commands.length) {
+      this.setState(commands[commands.length - 1].state);
+    } else if (purgedRecital) {
+      this.setState(purgedRecital.getFirst().previousState);
+    } else {
+      return undefined;
+    }
     return this._follower.receiveCommands(commands, purgedRecital);
   }
 

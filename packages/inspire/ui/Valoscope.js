@@ -51,7 +51,7 @@ import { thenChainEagerly } from "~/tools";
  * 6.1.3. If UI focus is an Unavailable valos resource, ie. if some of its partitions connections
  *    have failed (due to networks issues, permission issues etc.):
  *    value-renders props/context "unavailableLens" or "disabledLens".
- * 6.1.4. If UI focus is a Destroyed valos resource:
+ * 6.1.4. If UI focus is a NonCreated valos resource:
  *    value-renders props/context "destroyedLens" or "disabledLens".
  * 6.2. If props.activeLens or context.activeLens is defined:
  *    value-renders props/context "activeLens".

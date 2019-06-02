@@ -462,23 +462,26 @@ export default class Engine extends Cog {
               passage.vProtagonist = new Vrapper(this, passage.id, passage.typeName);
             } else passage.vProtagonist._setTypeName(passage.typeName);
             if (passage.vProtagonist.isResource()) {
-              // vProtagonist.refreshPhase(story.state);
-              // /*
-              Promise.resolve(passage.vProtagonist.refreshPhase(story.state))
-                  .then(undefined, (error) => {
-                    outputCollapsedError(errorOnReceiveCommands.call(this, error,
-                        `receiveCommands(${passage.type} ${
-                          passage.vProtagonist.debugId()}).refreshPhase`),
-                        "Exception caught during passage recital protagonist refresh phase");
-                  });
-              // */
+              const blocker = passage.vProtagonist.refreshPhase(story.state);
+              if (blocker !== undefined) {
+                Promise.resolve(blocker).then(undefined, (error) => {
+                  outputCollapsedError(errorOnReceiveCommands.call(this, error,
+                      `receiveCommands(${passage.type} ${
+                        passage.vProtagonist.debugId()}).refreshPhase`),
+                      "Exception caught during passage recital protagonist refresh phase");
+                });
+              }
             }
           }
         }
         const reactions = executeHandlers(this._storyHandlerRoot, passage, story);
         if (reactions) recitalReactionPromises.push(...reactions);
       } else if (passage.vProtagonist) {
-        purges.add(passage.vProtagonist);
+        if (passage.vProtagonist.purgePassage(passage)) {
+          purges.add(passage.vProtagonist);
+        } else {
+          purges.delete(passage.vProtagonist);
+        }
       }
       if (passage.passages) {
         for (const subPassage of passage.passages) {

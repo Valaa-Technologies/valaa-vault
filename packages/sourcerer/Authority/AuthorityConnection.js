@@ -86,8 +86,8 @@ export default class AuthorityConnection extends Connection {
   // In latter case forwards the result received from authority to Scribe for caching.
   requestMediaContents (mediaInfos: MediaInfo[]): any[] {
     return mediaInfos.map(mediaInfo => Promise.reject(new Error(
-        `Authority connection '${this.getName()}' doesn't implement media content requests ('${
-            mediaInfo.name}' requested)`)));
+        `Authority connection '${this.getName()}' doesn't implement content requests (for Media '${
+            mediaInfo.name}') and content not found in local cache`)));
   }
 
   prepareBvob (content: any, mediaInfo?: Object):

@@ -528,7 +528,13 @@ class ProphecyOperation extends ProphecyEventResult {
       partition.confirmCommand = resolve;
       partition.rejectCommand = reject;
     });
-    const truthProcesses = [chronicledTruth, receivedTruth];
+    const truthProcesses = [
+      chronicledTruth.catch(reason => {
+        if (reason.isSchismatic === false) return receivedTruth;
+        throw reason;
+      }),
+      receivedTruth,
+    ];
     return [partition, Promise.race(truthProcesses), truthProcesses];
   }
 

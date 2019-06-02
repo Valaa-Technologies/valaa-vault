@@ -145,7 +145,7 @@ export class LiveUpdate {
   // is returned and its transient will be updated.
   // Otherwise a new Vrapper corresponding to previousState is returned.
   // The reason the new Vrapper is not pointing to new state is that if
-  // the resource was DESTROYED the new state will not have
+  // the resource was destroyed the new state will not have
   // corresponding data.
   _actualRemovesOfPassage (passage: Object) {
     if (!passage.type) return undefined;

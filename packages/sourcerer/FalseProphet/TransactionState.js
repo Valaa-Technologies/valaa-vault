@@ -253,7 +253,7 @@ export default class TransactionState {
         }
         this._commitChronicleResult = this._transactor._sourcerer.chronicleEvent(
             this._finalCommand, {
-          transactionState: this, identity: this._transactor._identityManager,
+          transactionState: this, discourse: this._transactor,
         });
 
         Promise.resolve(this._commitChronicleResult.getPremiereStory()).then(

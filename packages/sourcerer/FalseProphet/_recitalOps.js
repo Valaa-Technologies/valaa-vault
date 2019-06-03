@@ -232,6 +232,7 @@ function _launchReformation (reformation: Object, schismaticCommands: Command[])
     const prophecy = prophet._primaryRecital.getStoryBy(command.aspects.command.id);
     if (!prophecy) continue;
     if (!initialSchism) initialSchism = prophecy;
+    if (!prophecy.meta || !prophecy.meta.operation) continue;
     const progress = prophecy.meta.operation.getProgress({
       type: "schism", schismaticCommand: command,
     });

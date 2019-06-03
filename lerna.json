@@ -6,7 +6,7 @@
   "command": {
     "version": {
       "bump": "prerelease",
-      "preid": "prerelease",
+      "preid": "rc",
       "allowBranch": "prerelease/0.34"
     }
   }

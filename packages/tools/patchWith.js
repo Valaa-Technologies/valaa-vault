@@ -156,78 +156,79 @@ exports.default = function patchWith (target /* : Object */, patch /* : Array<an
     };
   }
   return stack.extend(target, patch);
+};
 
-  function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSpread = false) {
-    let ret = this.preExtend
-        && this.preExtend(target_, patch_, keyInParent, targetParent, patchParent);
-    if (ret === undefined) {
-      ret = target_;
-      if (typeof patch_ !== "object") ret = (patch_ === undefined ? target_ : patch_);
-      else if (patch_ === null) ret = null;
-      else if (patch_ === target_) throw new Error("Cannot extend to self");
-      else if (Array.isArray(patch_)) {
-        const isSpreader = !skipSpread && (patch_[0] === this.spreaderKey) && this.spreaderKey;
-        if (isSpreader || ((ret !== undefined) && !Array.isArray(ret))) {
-          for (let i = isSpreader ? 1 : 0; i !== patch_.length; ++i) {
-            if (_setRetFromSpreadAndMaybeBail(this, patch_[i])) break;
-          }
-        } else if (Array.isArray(ret) || !_setRetFromCacheAndMaybeBail()) {
-          const newKeyPath = this.keyPath && [...this.keyPath, 0];
-          for (const entry of patch_) {
-            if (newKeyPath) (this.keyPath = newKeyPath)[newKeyPath.length - 1] = ret.length;
-            const newEntry = this.extend(undefined, entry, ret.length, ret, patch_);
-            if (newEntry !== undefined) ret.push(newEntry);
-          }
+function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSpread = false) {
+  if (this.keyPath) this.keyPath.push(keyInParent);
+  let ret = this.preExtend
+      && this.preExtend(target_, patch_, keyInParent, targetParent, patchParent);
+  if (ret === undefined) {
+    ret = target_;
+    if (typeof patch_ !== "object") ret = (patch_ === undefined ? target_ : patch_);
+    else if (patch_ === null) ret = null;
+    else if (patch_ === target_) throw new Error("Cannot extend to self");
+    else if (Array.isArray(patch_)) {
+      const isSpreader = !skipSpread && (patch_[0] === this.spreaderKey) && this.spreaderKey;
+      if (isSpreader || ((ret !== undefined) && !Array.isArray(ret))) {
+        for (let i = isSpreader ? 1 : 0; i !== patch_.length; ++i) {
+          if (_setRetFromSpreadAndMaybeBail(this, patch_[i])) break;
         }
-      } else if (!skipSpread && this.spreaderKey && patch_.hasOwnProperty(this.spreaderKey)) {
-        if (!_setRetFromSpreadAndMaybeBail(this, patch_[this.spreaderKey])) {
-          const src = !this.preExtend ? patch_ : { ...patch_ };
-          if (this.preExtend) delete src[this.spreaderKey];
-          ret = this.extend(ret, src, keyInParent, targetParent, patchParent, true);
-        }
-      } else {
-        const targetIsArray = Array.isArray(ret);
-        const updateOpKeyPath = this.keyPath && [...this.keyPath, ""];
-        for (const key of Object.keys(patch_)) {
-          if (key === this.spreaderKey) continue;
-          if (((ret === null) || (typeof ret !== "object")) && _setRetFromCacheAndMaybeBail()) break;
-          if (updateOpKeyPath) (this.keyPath = updateOpKeyPath)[updateOpKeyPath.length - 1] = key;
-          const newValue = this.extend(ret[key], patch_[key], key, ret, patch_);
-          if (newValue !== undefined) ret[key] = newValue;
-          else if (!targetIsArray) delete ret[key];
-        }
-        if (targetIsArray) {
-          for (let i = 0; i !== ret.length; ++i) if (ret[i] === undefined) ret.splice(i--, 1);
+      } else if (Array.isArray(ret) || !_setRetFromCacheAndMaybeBail(this)) {
+        for (const entry of patch_) {
+          const newEntry = this.extend(undefined, entry, ret.length, ret, patch_);
+          if (newEntry !== undefined) ret.push(newEntry);
         }
       }
-    }
-    const post = this.postExtend
-        && this.postExtend(ret, patch_, keyInParent, targetParent, patchParent, this);
-    return (post !== undefined) ? post : ret;
-
-    function _setRetFromSpreadAndMaybeBail (stack_, spreaderValue) {
-      const spreadee = stack_.spread(
-          spreaderValue, ret, patch_, keyInParent, targetParent, patchParent, stack_);
-      if (spreadee === undefined) {
-        // spread callback has handled the whole remaining process and
-        // has possibly replaced 'target' in its targetParent[keyInParent]
-        // update ret to refer to this new object accordingly.
-        ret = targetParent && targetParent[keyInParent];
-        return true;
+    } else if (!skipSpread && this.spreaderKey && patch_.hasOwnProperty(this.spreaderKey)) {
+      if (!_setRetFromSpreadAndMaybeBail(this, patch_[this.spreaderKey])) {
+        const src = !this.preExtend ? patch_ : { ...patch_ };
+        if (this.preExtend) delete src[this.spreaderKey];
+        ret = this.extend(ret, src, keyInParent, targetParent, patchParent, true);
       }
-      ret = stack_.extend(ret, spreadee, keyInParent, targetParent, patchParent);
-      return false;
-    }
-    // Returns true on cache hit for synchronous return: patch has already extended the target
-    function _setRetFromCacheAndMaybeBail () {
-      const cache = stack.cache || (stack.cache = new Map());
-      const cacheHit = cache.get(patch_);
-      if (cacheHit) {
-        ret = cacheHit;
-        return true;
+    } else {
+      const targetIsArray = Array.isArray(ret);
+      for (const key of Object.keys(patch_)) {
+        if (key === this.spreaderKey) continue;
+        if (((ret === null) || (typeof ret !== "object")) && _setRetFromCacheAndMaybeBail(this)) {
+          break;
+        }
+        const newValue = this.extend(ret[key], patch_[key], key, ret, patch_);
+        if (newValue !== undefined) ret[key] = newValue;
+        else if (!targetIsArray) delete ret[key];
       }
-      cache.set(patch_, (ret = (Array.isArray(patch_) ? [] : {})));
-      return false;
+      if (targetIsArray) {
+        for (let i = 0; i !== ret.length; ++i) if (ret[i] === undefined) ret.splice(i--, 1);
+      }
     }
   }
-};
+  const post = this.postExtend
+      && this.postExtend(ret, patch_, keyInParent, targetParent, patchParent, this);
+  if (this.keyPath) this.keyPath.pop();
+  return (post !== undefined) ? post : ret;
+
+  function _setRetFromSpreadAndMaybeBail (stack, spreaderValue) {
+    const spreadee = stack.spread(
+        spreaderValue, ret, patch_, keyInParent, targetParent, patchParent, stack);
+    if (spreadee === undefined) {
+      // spread callback has handled the whole remaining process and
+      // has possibly replaced 'target' in its targetParent[keyInParent]
+      // update ret to refer to this new object accordingly.
+      ret = targetParent && targetParent[keyInParent];
+      return true;
+    }
+    ret = stack.extend(ret, spreadee, keyInParent, targetParent, patchParent);
+    return false;
+  }
+
+  // Returns true on cache hit for synchronous return: patch has already extended the target
+  function _setRetFromCacheAndMaybeBail (stack) {
+    const cache = stack.cache || (stack.cache = new Map());
+    const cacheHit = cache.get(patch_);
+    if (cacheHit) {
+      ret = cacheHit;
+      return true;
+    }
+    cache.set(patch_, (ret = (Array.isArray(patch_) ? [] : {})));
+    return false;
+  }
+}

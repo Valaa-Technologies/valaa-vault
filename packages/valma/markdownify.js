@@ -1,4 +1,6 @@
 const patchWith = require("@valos/tools/patchWith").default;
+const debugObjectType = require("@valos/tools/wrapError").debugObjectType;
+const dumpObject = require("@valos/tools/wrapError").dumpObject;
 
 const _layoutKey = "";
 const _spreaderKey = "...";
@@ -54,14 +56,17 @@ const _spreaderKey = "...";
  * @param {*} context
  * @returns
  */
-function markdownify (value, theme, context) {
-  const laidOutJSON = extendWithLayouts(value);
+function markdownify (value, theme, context, options) {
+  const laidOutJSON = extendWithLayouts(value, undefined, options);
   const markdownifyTheme = createRenderTheme(theme);
   return _renderBlock(laidOutJSON, context || {}, markdownifyTheme);
 }
 
-function extendWithLayouts (value, target) {
-  return patchWith(target, value, createPatchOptions());
+function extendWithLayouts (value, target, options) {
+  const actualOptions = options || {};
+  actualOptions.keyPath = [];
+  const patchOptions = createPatchOptions(actualOptions);
+  return patchWith(target, value, patchOptions);
 }
 
 module.exports = {
@@ -119,8 +124,10 @@ const _deepExtendOptions = Object.freeze({
     if (source === null) return "";
     if ((source[0] === _spreaderKey) || source[_spreaderKey]) return undefined;
     if ((Object.getPrototypeOf(source) !== Object.prototype) && !Array.isArray(source)) {
-      throw new Error(`Cannot markdownify a complex object with type '${
-          (source.constructor || { name: "<unknown object>" }).name}'`);
+      return this.errorOn("preExtend",
+          new Error(`Cannot markdownify a complex object with type '${
+            (source.constructor || { name: "<unknown object>" }).name}'`),
+          target, source, key, targetContainer);
     }
     const ret = target || {};
     const containerLayout = _getLayout(targetContainer) || {};
@@ -146,6 +153,16 @@ const _deepExtendOptions = Object.freeze({
       if (layout.type !== "object") delete layout.depth;
     }
     */
+  },
+  errorOn (opName, error, target, source) {
+    if (opName === "preExtend") {
+      if (source && (source instanceof Error)) return `Error thrown: ${source.message}`;
+      (this.logger || console).error("markdownify error:", error.message,
+          "\n\tkeyPath:", ...dumpObject(this.keyPath),
+          "\n\tsource:", ...dumpObject(source));
+      return debugObjectType(source);
+    }
+    throw error;
   },
   _extendArrayBlock,
   _extendObjectBlock,

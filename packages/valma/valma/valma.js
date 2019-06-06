@@ -251,7 +251,7 @@ const _vlm = {
 
   render (type, ...rest) {
     const renderer = _renderers[type || ""];
-    return renderer && rest.map(renderer);
+    return renderer && rest.map(value => renderer(value, this));
   },
 
   ifVerbose (minimumVerbosity, callback) {
@@ -568,9 +568,9 @@ const _renderers = {
   omit: null,
   json: (value) => JSON.stringify(value, null, 2),
   "json-compact": (value) => JSON.stringify(value),
-  "markdown-cli": (value) => markdownify.default(value, _vlm.theme),
-  "markdown-json": (value) => markdownify.extendWithLayouts(value),
-  markdown: (value) => markdownify.default(value, themes.codeless),
+  "markdown-cli": (value, logger) => markdownify.default(value, _vlm.theme, undefined, { logger }),
+  "markdown-json": (value, logger) => markdownify.extendWithLayouts(value, undefined, { logger }),
+  markdown: (value, logger) => markdownify.default(value, themes.codeless, undefined, { logger }),
 };
 
 module.exports = {

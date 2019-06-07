@@ -55,7 +55,7 @@ exports.builder = (yargs) => yargs.options({
         + " (used for packages with babel configuration in their root)",
   },
   overwrite: {
-    type: "boolean",
+    type: "boolean", default: true,
     description: "Allow overwriting existing builds in the target directory",
   },
   "add-changed": {
@@ -71,7 +71,7 @@ exports.builder = (yargs) => yargs.options({
     description: `Add packages that have non-committed local modifications to the selection`,
   },
   versioning: {
-    type: "any", default: true, choices: [false, true, "amend"],
+    type: "any", default: false, choices: [false, true, "amend"],
     description: `Bump the version, make a git commit and a git tag with ${
         yargs.vlm.theme.executable("lerna version")}.
 'amend' will amend the most recent commit instead of creating a new one.`,
@@ -79,8 +79,8 @@ exports.builder = (yargs) => yargs.options({
   reassemble: {
     type: "boolean",
     description: `Reassembles packages with only dirty changes.
-Causes --no-add-changed --add-dirty --overwrite --no-versioning.`,
-    causes: ["no-add-changed", "add-dirty", "overwrite", "no-versioning"],
+Causes --no-add-changed --add-dirty.`,
+    causes: ["no-add-changed", "add-dirty"],
   },
   assemble: {
     type: "boolean", default: true,

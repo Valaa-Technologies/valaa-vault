@@ -86,16 +86,11 @@ export class FabricEventTarget {
   _verbosity: ?number;
   _logger: FabricEventLogger | Object;
 
-  constructor (name, verbosity, logger) {
-    this._name = name || `${this.constructor.name}#${++_eventTargetCounter}`;
-    this._verbosity = verbosity || 0;
+  constructor (
+      name = `${this.constructor.name}#${++_eventTargetCounter}`, verbosity = 0, logger) {
+    this._name = name;
+    this._verbosity = verbosity;
     this._logger = logger || console;
-  }
-
-  fork (overrides: any) {
-    const ret = Object.create(this);
-    if (overrides) Object.assign(ret, overrides);
-    return ret;
   }
 
   getLogger (): FabricEventLogger | Object { return this._logger; }

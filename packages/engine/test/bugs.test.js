@@ -58,7 +58,7 @@ describe("Engine bug tests", async () => {
     const foo = entities().Foo;
     const fooInst = foo.duplicate();
 
-    const noUnpackEngine = harness.engine.discourse.fork();
+    const noUnpackEngine = Object.create(harness.engine.discourse);
     noUnpackEngine.setHostValueUnpacker(null);
 
     expect(foo.get(VALEK.to("properties")).length)

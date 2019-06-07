@@ -23,7 +23,7 @@ export function tryElevateFieldValue (resolver: Resolver, value: VRL | VRL[],
     fieldInfo: FieldInfo) {
   const elevation = value && _tryFieldGhostElevation(fieldInfo);
   if (!elevation) return value;
-  const elevator = resolver.fork();
+  const elevator = Object.create(resolver);
   const typeName = fieldInfo.intro.namedType.name;
   return !fieldInfo.intro.isSequence
       ? _elevateReference(elevator, value, fieldInfo, elevation, typeName)
@@ -35,7 +35,7 @@ export function elevateFieldReference (resolver: Resolver, reference: VRL, field
     elevation: ?GhostElevation = _tryFieldGhostElevation(fieldInfo), typeName: ?string,
     verbosity: ?number) {
   if (!elevation) return reference;
-  return _elevateReference(resolver.fork(), reference, fieldInfo, elevation,
+  return _elevateReference(Object.create(resolver), reference, fieldInfo, elevation,
       typeName || fieldInfo.intro.namedType.name, verbosity);
 }
 
@@ -142,7 +142,7 @@ export function _elevateObjectId (referenceElevator: Resolver, elevationBasePath
   let elevatedGhostPath: GhostPath = referenceElevator.objectId.getGhostPath();
   let ghostHostRawId;
   let newGhostRawId;
-  const ownersResolver = referenceElevator.fork();
+  const ownersResolver = Object.create(referenceElevator);
   let currentReferencePath = elevationBasePath;
   let instanceGhostPath;
   let mostMaterializedTransientForImmaterialGhost;

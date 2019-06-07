@@ -29,6 +29,10 @@ export default class AuthorityConnection extends Connection {
     return super.isConnected();
   }
 
+  getName () {
+    return this.getRawName();
+  }
+
   _doConnect (/* options: ConnectOptions */) {}
 
   narrateEventLog (options: ?NarrateOptions = {}): Object | Promise<Object> {

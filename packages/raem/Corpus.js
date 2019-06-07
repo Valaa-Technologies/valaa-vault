@@ -48,6 +48,10 @@ export default class Corpus extends Bard {
     this.reinitialize(initialState);
   }
 
+  reinitialize (newInitialState) {
+    this.setState(newInitialState);
+  }
+
   dispatch (event: Action, description: string) {
     const prevName = this.getName();
     try {
@@ -68,15 +72,5 @@ export default class Corpus extends Bard {
   dumpListing () {
     this.warn("Resources denormalized", this.getState().toJS());
     this.warn("Resources by name", layoutByObjectField(this.getState(), "name", ""));
-  }
-
-  reinitialize (newInitialState) {
-    this.setState(newInitialState);
-  }
-
-  fork (overrides) {
-    const ret = super.fork(overrides);
-    ret.reinitialize(this.getState());
-    return ret;
   }
 }

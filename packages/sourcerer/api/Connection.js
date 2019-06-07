@@ -50,9 +50,8 @@ export default class Connection extends Follower {
   }
 
   getName (): string {
-    return super.getName()
-        || (this._upstreamConnection && this._upstreamConnection.getName())
-        || String(this.getPartitionURI());
+    return (this._upstreamConnection && this._upstreamConnection.getName())
+        || super.getName() || super.getRawName();
   }
   getSourcerer (): Sourcerer { return this._sourcerer; }
 

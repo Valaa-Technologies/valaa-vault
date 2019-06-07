@@ -8,11 +8,11 @@ import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/
 import liveKuerySteppers from "~/engine/Vrapper/liveKuerySteppers";
 import Vrapper from "~/engine/Vrapper";
 import { Kuery, dumpKuery, dumpObject } from "~/engine/VALEK";
-import { LiveUpdate } from "~/engine/Vrapper/FieldUpdate";
+import LiveUpdate from "~/engine/Vrapper/LiveUpdate";
 
 import { ScopeAccessKeysTag } from "~/script/VALSK";
 
-import { isSymbol, outputError, wrapError } from "~/tools";
+import { debugObject, isSymbol, outputError } from "~/tools";
 
 /**
  * Subscription is a shared object which represents a single live kuery
@@ -95,6 +95,14 @@ export default class Subscription extends LiveUpdate {
     return this;
   }
 
+  debugId (): string {
+    return `${this.constructor.name}(${
+      this._fieldName ? `field: ${this._fieldName}`
+      : this._fieldFilter ? `filter: ${debugObject(this._fieldName)}`
+      : `kuery: ${debugObject(this._liveKuery)}`
+    })`;
+  }
+
   matchesKueryOptions (options: ?VALKOptions, obtainDiscourse: ?Function) {
     if (this._obtainDiscourse !== obtainDiscourse) return false;
     const scopeAccessKeys = (this._liveKueryObject || {})[ScopeAccessKeysTag];
@@ -129,11 +137,6 @@ export default class Subscription extends LiveUpdate {
       */
     }
     return true;
-  }
-
-  debugId (options: ?Object): string {
-    const name = this._liveKuery !== undefined ? "<kuery>" : this._fieldName || this._fieldFilter;
-    return `${this.constructor.name}(${name}, ${this._emitter && this._emitter.debugId(options)})`;
   }
 
   // Value section
@@ -232,13 +235,12 @@ export default class Subscription extends LiveUpdate {
     }
     if (!this._listeners.size) this.detachHooks();
     function errorOnEmitLiveUpdate (error, stage, listener, callbackKey) {
-      return wrapError(error, new Error(`_broadcastUpdate(stage #${stage}, ${passageCounter})`),
-          "\n\temitter:", liveUpdate.getEmitter(),
-          `\n\t${this._liveKuery ? "kuery"
-              : this._fieldFilter ? "filter"
-              : "fieldName"}:`, this._liveKuery || this._fieldFilter || this._fieldName,
-          "\n\tliveUpdate:", liveUpdate,
+      return this._emitter.wrapErrorEvent(error,
+          new Error(`${this.debugId()}\n ._broadcastUpdate(stage #${stage}, ${passageCounter})`),
+          "\n\tliveUpdate:", ...dumpObject(liveUpdate),
+          "\n\tliveUpdate.emitter:", ...dumpObject(liveUpdate.getEmitter()),
           "\n\tliveUpdate._value:", ...dumpObject(liveUpdate._value),
+          "\n\tliveUpdate.state:", ...dumpObject(liveUpdate.getState().toJS()),
           ...(!listener ? [] : [
             "\n\tlistener:", ...dumpObject(listener),
             "\n\tcallbackKey:", callbackKey || "<missing callback>",
@@ -271,8 +273,9 @@ export default class Subscription extends LiveUpdate {
     } catch (error) {
       if (this._attachedHooks) this.detachHooks();
       const origin = new Error(
-          `During ${this.debugId()}\n .attachHooks(${triggerBroadcast}), with:`);
-      const wrappedError = wrapError(error, origin,
+          `${this.debugId()}\n .attachHooks(${triggerBroadcast})`);
+      const wrappedError = this._emitter.wrapErrorEvent(error,
+          origin,
           "\n\temitter:", this._emitter,
           ...(this._liveKuery === undefined ? [
             "\n\tfilter:", this._fieldFilter || this._fieldName,
@@ -356,7 +359,8 @@ export default class Subscription extends LiveUpdate {
         this._invalidateState();
         this.attachHooks(triggerBroadcast);
       })) return;
-      throw wrapError(error, `During ${this.debugId()}\n .attachLiveKueryHooks(), with:`,
+      throw this._emitter.wrapErrorEvent(error,
+          `${this.debugId()}\n .attachLiveKueryHooks()`,
           "\n\thead:", ...dumpObject(this._liveHead),
           "\n\tkuery:", ...dumpKuery(this._liveKuery),
           "\n\tscope:", ...dumpObject(scope),

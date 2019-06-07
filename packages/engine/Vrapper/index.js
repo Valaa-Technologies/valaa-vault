@@ -1,6 +1,6 @@
 import Vrapper from "./Vrapper";
 import Subscription from "./Subscription";
-import { LiveUpdate } from "./FieldUpdate";
+import LiveUpdate from "./LiveUpdate";
 
 export default Vrapper;
 export { Subscription, LiveUpdate };

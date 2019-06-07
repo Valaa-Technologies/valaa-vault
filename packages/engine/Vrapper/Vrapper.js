@@ -38,7 +38,7 @@ import VALEK, { Valker, Kuery, dumpKuery, expressionFromProperty } from "~/engin
 
 import Cog, { extractMagicMemberEventHandlers } from "~/engine/Cog";
 import debugId from "~/engine/debugId";
-import { LiveUpdate } from "~/engine/Vrapper/FieldUpdate";
+import LiveUpdate from "~/engine/Vrapper/LiveUpdate";
 import Subscription from "~/engine/Vrapper/Subscription";
 import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 
@@ -231,8 +231,9 @@ export default class Vrapper extends Cog {
 
 
   /**
-   * Returns a newly initiated or an already existing activation process if the current phase is
-   * Inactive or Activating. Returns falsy if already Active.
+   * Returns a newly initiated or an already existing activation
+   * process if the current phase is Inactive or Activating. Returns
+   * falsy if already Active.
    * Otherwise the resource itself is inactivateable and throws.
    *
    * @param {Object} [state]
@@ -260,6 +261,9 @@ export default class Vrapper extends Cog {
           if (!blocker._connection || !blocker._connection.isActive()) {
             await (operationInfo.pendingConnection = blocker.getConnection())
                 .asActiveConnection();
+          } else if (blocker === this) {
+            throw new Error(
+                `Connection is active but blocker is still this ${this._phase} Vrapper itself`);
           }
         }
         operationInfo.pendingConnection = null;
@@ -270,8 +274,8 @@ export default class Vrapper extends Cog {
             : this.isActivating() ? UNAVAILABLE
             : this._phase; // no change.
         throw this.wrapErrorEvent(error, "activate.process",
-            "\n\tproxy:", this,
-            "\n\tblocker:", blocker);
+            "\n\tthis:", ...dumpObject(this),
+            "\n\tblocker:", ...dumpObject(blocker));
       } finally {
         delete this._activationProcess;
       }
@@ -351,7 +355,7 @@ export default class Vrapper extends Cog {
     if (prototypeId) {
       const prototypeVrapper = this.engine.getVrapper(prototypeId, { optional: true });
       if (!prototypeVrapper) return prototypeId;
-      const blocker = prototypeVrapper.refreshPhase();
+      const blocker = prototypeVrapper.refreshPhase(refreshingState);
       if (blocker) return blocker;
     }
     this._phase = ACTIVE;
@@ -408,7 +412,9 @@ export default class Vrapper extends Cog {
    */
   requireActive (options?: VALKOptions) {
     if (this._phase === ACTIVE) return;
-    const blocker = (options && options.allowActivating) ? this.activate() : this.refreshPhase();
+    const blocker = (options && options.activate)
+        ? this.activate(options.state)
+        : this.refreshPhase(options && options.state);
     const phase = this._phase;
     if (!blocker || (options && options.allowActivating && (phase === ACTIVATING))) return;
     if (this.isNonCreated() && options) {
@@ -1823,7 +1829,9 @@ export default class Vrapper extends Cog {
         ret = this.obtainFieldSubscription(liveOperation, options, obtainDiscourse);
       } else {
         if (this._phase === NONRESOURCE) return undefined;
-        this.requireActive({ allowActivating: true });
+        // this.requireActive({
+        //  state: options && options.state, allowActivating: true, /* activate: true, */
+        // });
         if (!this._kuerySubscriptions) this._kuerySubscriptions = new Map();
         ret = this._kuerySubscriptions.get(liveOperation);
         if (!ret || !ret.matchesKueryOptions(options, obtainDiscourse)) {
@@ -1882,7 +1890,9 @@ export default class Vrapper extends Cog {
     let fieldSubscription;
     try {
       if (this._phase === NONRESOURCE) return undefined;
-      this.requireActive({ allowActivating: true });
+      // this.requireActive({
+      //   state: options && options.state, allowActivating: true, /* activate: true, */
+      // });
       if (!this._fieldSubscriptions) this._fieldSubscriptions = new Map();
       fieldSubscription = this._fieldSubscriptions.get(fieldName);
       if (!fieldSubscription) {

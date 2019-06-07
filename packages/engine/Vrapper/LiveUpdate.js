@@ -10,7 +10,7 @@ import { arrayFromAny } from "~/tools";
 
 const _unsetValue = Symbol("LiveUpdate.UnsetValue");
 
-export class LiveUpdate {
+export default class LiveUpdate {
   _emitter: Vrapper;
   _valkOptions: ?Object;
   _value: ?any;
@@ -22,9 +22,7 @@ export class LiveUpdate {
     this._valkOptions = !valkOptions ? {} : { ...valkOptions };
   }
 
-  debugId (options: ?Object): string {
-    return `${this.constructor.name}(${this._emitter && this._emitter.debugId(options)})`;
-  }
+  debugId (): string { return `${this.constructor.name}(field: ${this._fieldName})`; }
 
   getEmitter (): Vrapper { return this._emitter; }
   getOptions (): ?VALKOptions { return this._valkOptions; }
@@ -52,7 +50,7 @@ export class LiveUpdate {
     return true;
   }
 
-  // FieldUpdate / field Subscription properties
+  // LiveUpdate / field Subscription properties
 
   fieldName (): string { return this._fieldName; }
   getPassage (): ?Story { return this._passage; }

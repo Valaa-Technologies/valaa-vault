@@ -22,7 +22,7 @@ import Motor from "~/engine/Motor";
 import Vrapper from "~/engine/Vrapper";
 import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
-import { LiveUpdate } from "~/engine/Vrapper/FieldUpdate";
+import LiveUpdate from "~/engine/Vrapper/LiveUpdate";
 import Subscription from "~/engine/Vrapper/Subscription";
 
 import { outputCollapsedError, thenChainEagerly, wrapError } from "~/tools";

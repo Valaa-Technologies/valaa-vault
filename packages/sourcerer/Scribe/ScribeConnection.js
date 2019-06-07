@@ -71,6 +71,11 @@ export default class ScribeConnection extends Connection {
     this.setName(`'${name}'/${this.getPartitionURI().toString()}`);
   }
 
+  getName () {
+    if (this._partitionName) return `'${this._partitionName}'/${this.getRawName()}`;
+    return super.getName();
+  }
+
   _doConnect (options: ConnectOptions) {
     if (this._sourcerer._upstream) {
       const upstreamOptions = Object.create(options);

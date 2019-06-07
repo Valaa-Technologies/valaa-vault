@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import UIComponent from "~/inspire/ui/UIComponent";
 import Presentable from "~/inspire/ui/Presentable";
-import { LiveUpdate } from "~/engine/Vrapper";
+import type LiveUpdate from "~/engine/Vrapper/LiveUpdate";
 import VALEK from "~/engine/VALEK";
 
 import { dumpObject, thenChainEagerly, wrapError } from "~/tools";

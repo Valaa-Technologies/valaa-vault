@@ -51,7 +51,8 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
     //    materialization can arrive and materialize the same owner or
     //    prototype Resource multiple times through separate diamond
     //    paths.
-    const preActionBard = bard.fork({ state: bard.preActionState });
+    const preActionBard = Object.create(bard);
+    preActionBard.state = bard.preActionState;
     if (!preActionBard.tryGoToTransientOfRawId(passage.id.rawId())) {
       // Object didn't exist before this action so we can just ignore
       // this CREATED.

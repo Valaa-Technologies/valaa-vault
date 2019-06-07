@@ -1,6 +1,6 @@
 {
   "name": "@valos/toolset-rest-api-gateway-plugin",
-  "version": "0.34.0-rc.0",
+  "version": "0.34.0-rc.1",
   "valos": {
     "type": "toolset",
     "domain": "gateway"

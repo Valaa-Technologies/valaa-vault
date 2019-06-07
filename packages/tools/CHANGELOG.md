@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0-rc.1](https://github.com/valaatech/vault/compare/v0.34.0-rc.0...v0.34.0-rc.1) (2019-06-07)
+
+
+### Bug Fixes
+
+* proper partition command extraction for upgradeEventTo0Dot2 ([09caea3](https://github.com/valaatech/vault/commit/09caea3))
+* vlm catastrophic error with -da when builder throws ([55b8d1c](https://github.com/valaatech/vault/commit/55b8d1c))
+
+
+
+
+
 # [0.34.0-rc.0](https://github.com/valaatech/vault/compare/v0.34.0-prerelease.32...v0.34.0-rc.0) (2019-06-03)
 
 **Note:** Version bump only for package @valos/tools

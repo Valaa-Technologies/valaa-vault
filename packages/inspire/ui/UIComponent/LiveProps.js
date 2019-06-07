@@ -139,6 +139,14 @@ export default class LiveProps extends UIComponent {
   _currentSheetContent: ?Object;
   _currentSheetObject: ?Object;
 
+  readSlotValue (slotName: string, slotSymbol: Symbol, focus: any, onlyIfAble?: boolean) {
+    // Use the props slots of the parent component because LiveProps
+    // cannot be explicitly passed any props.
+    // These slot props should probably be passed to LiveProps inside props, though...
+    return super.readSlotValue(slotName, slotSymbol, focus, onlyIfAble,
+        ((this.props.parentUIContext || {}).reactComponent || this).props);
+  }
+
   refreshClassName (focus: any, value: any) {
     if ((value == null) || !(value instanceof Vrapper)) return value;
     const bindingSlot = `props_className_content`;

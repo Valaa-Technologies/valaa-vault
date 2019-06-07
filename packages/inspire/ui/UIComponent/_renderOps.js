@@ -29,43 +29,6 @@ export function _renderFirstAbleDelegate (
   return null;
 }
 
-export function _readSlotValue (component: UIComponent,
-    slotName: string, slotSymbol: Symbol, focus: any, onlyIfAble?: boolean):
-    void | null | string | React.Element<any> | [] | Promise<any> {
-  if (onlyIfAble) {
-    const descriptor = component.context.engine.getHostObjectDescriptor(slotSymbol);
-    if (descriptor
-        && (typeof descriptor.isEnabled === "function")
-        && !descriptor.isEnabled(focus, component)) {
-      return undefined;
-    }
-  }
-  let assignee;
-  try {
-    assignee = component.props[slotName];
-    if (typeof assignee === "undefined") {
-      if (component.props.hasOwnProperty(slotName)) {
-        throw new Error(`Render role props.${slotName} is provided but its value is undefined`);
-      }
-      assignee = component.getUIContextValue(slotSymbol);
-      if (typeof assignee === "undefined") {
-        assignee = component.context[slotName];
-        if (typeof assignee === "undefined") return undefined;
-      } else if (Array.isArray(assignee) && !Object.isFrozen(assignee)) {
-        assignee = [...assignee]; // the lens chain constantly mutates assignee, return a copy
-      }
-    }
-    return assignee;
-  } catch (error) {
-    throw wrapError(error,
-        `During ${component.debugId()}\n ._readSlotValue, with:`,
-        "\n\tfocus:", focus,
-        "\n\tslotName:", slotName,
-        "\n\tslotSymbol:", slotSymbol,
-        "\n\tassignee:", assignee);
-  }
-}
-
 export function _renderFocusAsSequence (component: UIComponent,
     foci: any[], EntryElement: Object, entryProps: Object,
     keyFromFocus?: (focus: any, index: number) => string,
@@ -186,7 +149,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         } else {
           const valos = component.getValos();
           subLensName = `delegate-lens-${lensName}`;
-          ret = _readSlotValue(component, "delegatePropertyLens",
+          ret = component.readSlotValue("delegatePropertyLens",
               valos.Lens.delegatePropertyLens, lens, true)(lens, component, lensName);
           if ((ret == null) || ((ret.delegate || [])[0] === valos.Lens.notLensResourceLens)) {
             return component.renderSlotAsLens("notLensResourceLens", lens, undefined, subLensName);

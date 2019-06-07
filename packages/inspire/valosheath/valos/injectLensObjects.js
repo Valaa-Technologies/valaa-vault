@@ -99,14 +99,14 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
 
   // Primitive lenses
 
-  const lensAssembly = createSlotSymbol("lensAssembly", () => ({
+  const slotAssembly = createSlotSymbol("slotAssembly", () => ({
     type: "string[]",
     description: `Slot which contains the lens slot assembly that is used by the component.`,
   }));
 
   const niceActiveSlotNames = valos.Lens.instrument(
-      lensAssembly,
-      slotNames => slotNames.slice(0, -1).reverse().join(" <- "));
+      slotAssembly,
+      slotNames => slotNames.slice(0, -1).reverse().join(" <| "));
 
   const componentChildrenLens = createSlotSymbol("componentChildrenLens", () => ({
     type: "Lens",
@@ -850,12 +850,12 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
     rootValue: ({ delegate: [
       loadingLens,
       <div {..._lensMessageLoadingProps}>
-      <div {..._message}>Waiting for a pending dependency Promise to resolve.</div>
-      <div {..._parameter}>
-        <span {..._key}>Dependency:</span>
-        <span {..._value}>{focusDetailLens}</span>
-      </div>
-      {commonMessageRows}
+        <div {..._message}>Waiting for a pending dependency Promise to resolve.</div>
+        <div {..._parameter}>
+          <span {..._key}>Dependency:</span>
+          <span {..._value}>{focusDetailLens}</span>
+        </div>
+        {commonMessageRows}
       </div>
     ] }),
   }));

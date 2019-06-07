@@ -28,7 +28,7 @@ import {
 } from "./_propsOps";
 import {
   _renderFocus, _renderFocusAsSequence, _renderFirstAbleDelegate,
-  _tryRenderLens, _readSlotValue, _tryRenderLensArray, _validateElement,
+  _tryRenderLens, _tryRenderLensArray, _validateElement,
 } from "./_renderOps";
 import {
   VSSStyleSheetSymbol,
@@ -354,6 +354,43 @@ class UIComponent extends React.Component {
     return this.props.elementKey || this.getUIContextValue("key");
   }
 
+  readSlotValue (slotName: string, slotSymbol: Symbol, focus: any, onlyIfAble?: boolean,
+      props = this.props):
+    void | null | string | React.Element<any> | [] | Promise<any> {
+    if (onlyIfAble) {
+      const descriptor = this.context.engine.getHostObjectDescriptor(slotSymbol);
+      if (descriptor
+          && (typeof descriptor.isEnabled === "function")
+          && !descriptor.isEnabled(focus, this)) {
+        return undefined;
+      }
+    }
+    let assignee;
+    try {
+      assignee = props[slotName];
+      if (assignee === undefined) {
+        if (props.hasOwnProperty(slotName)) {
+          throw new Error(`Render role props.${slotName} is provided but its value is undefined`);
+        }
+        assignee = this.getUIContextValue(slotSymbol);
+        if (assignee === undefined) {
+          assignee = this.context[slotName];
+          if (assignee === undefined) return undefined;
+        } else if (Array.isArray(assignee) && !Object.isFrozen(assignee)) {
+          assignee = [...assignee]; // the lens chain constantly mutates assignee, return a copy
+        }
+      }
+      return assignee;
+    } catch (error) {
+      throw wrapError(error,
+          `During ${this.debugId()}\n .readSlotValue, with:`,
+          "\n\tfocus:", focus,
+          "\n\tslotName:", slotName,
+          "\n\tslotSymbol:", slotSymbol,
+          "\n\tassignee:", assignee);
+    }
+  }
+
   _subscriptions: Object;
   style: Object;
 
@@ -524,21 +561,14 @@ class UIComponent extends React.Component {
 
   tryRenderLens (lens: any, focus: any = this.tryFocus(), lensName: string, onlyIfAble?: boolean,
       onlyOnce?: boolean): void | null | string | React.Element<any> | [] | Promise<any> {
-    const lensAssembly = this.getUIContextValue(this.getValos().Lens.lensAssembly) || [];
-    const assemblyLength = lensAssembly.length;
-    let ret;
     try {
-      lensAssembly.push(lensName);
-      return (ret = _tryRenderLens(this, lens, focus, lensName, onlyIfAble, onlyOnce));
+      return _tryRenderLens(this, lens, focus, lensName, onlyIfAble, onlyOnce);
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .renderLens, with:`,
           "\n\tlensName:", lensName,
           "\n\tlens:", lens,
           "\n\ttypeof lens:", typeof lens,
           "\n\tfocus:", ...dumpObject(focus));
-    } finally {
-      if (ret === null) lensAssembly.splice(assemblyLength);
-      // else lensAssembly[assemblyLength] = { [lensName]: ret };
     }
   }
 
@@ -588,10 +618,13 @@ class UIComponent extends React.Component {
     const slotName = typeof slot === "string" ? slot : valosLens[slot];
     const slotSymbol = typeof slot !== "string" ? slot : valosLens[slot];
     const rootSlotName = rootSlotName_ || slotName;
+    const slotAssembly = this.getUIContextValue(this.getValos().Lens.slotAssembly) || [];
+    const assemblyLength = slotAssembly.length;
+    slotAssembly.push(slotName);
     try {
       if (!slotSymbol) throw new Error(`No valos.Lens slot symbol for '${slotName}'`);
       if (!slotName) throw new Error(`No valos.Lens slot name for '${String(slotSymbol)}'`);
-      slotValue = _readSlotValue(this, slotName, slotSymbol, focus, onlyIfAble);
+      slotValue = this.readSlotValue(slotName, slotSymbol, focus, onlyIfAble);
       ret = slotValue && this.renderLens(
           slotValue, focus, `${rootSlotName}-${lensName || ""}`, undefined, onlyOnce);
       return ret;
@@ -601,6 +634,8 @@ class UIComponent extends React.Component {
           "\n\tfocus:", focus,
           "\n\tslot value:", slotValue,
           "\n\trootSlotName:", rootSlotName);
+    } finally {
+      if (assemblyLength < slotAssembly.length) slotAssembly.splice(assemblyLength);
     }
   }
 
@@ -613,7 +648,7 @@ class UIComponent extends React.Component {
     this._pendingRenderValue = undefined;
     let mainValidationFaults;
     let latestRenderedLensSlot;
-    if (this.state.uiContext) this.setUIContextValue(this.getValos().Lens.lensAssembly, []);
+    if (this.state.uiContext) this.setUIContextValue(this.getValos().Lens.slotAssembly, []);
     try {
       const renderNormally = (ret === undefined) && !this._errorObject
           && !_checkForInfiniteRenderRecursion(this);

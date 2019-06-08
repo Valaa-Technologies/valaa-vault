@@ -90,7 +90,7 @@ class UIComponent extends React.Component {
     delegateLensProperty: _propertyNames,
     instanceLensProperty: _propertyNames,
 
-    kueryingFocusLens: PropTypes.any,
+    pendingFocusLens: PropTypes.any,
     kueryingPropsLens: PropTypes.any,
     pendingPropsLens: PropTypes.any,
     failedPropsLens: PropTypes.any,
@@ -151,7 +151,7 @@ class UIComponent extends React.Component {
     delegateLensProperty: _propertyNames,
     instanceLensProperty: _propertyNames,
 
-    kueryingFocusLens: PropTypes.any,
+    pendingFocusLens: PropTypes.any,
     kueryingPropsLens: PropTypes.any,
     pendingPropsLens: PropTypes.any,
     failedPropsLens: PropTypes.any,

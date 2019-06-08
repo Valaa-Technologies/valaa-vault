@@ -133,16 +133,6 @@ function _createContextAndSetFocus (component: UIComponent, newFocus: any, newPr
       || Object.create(component.props.parentUIContext);
   const currentDepthSlot = component.getValos().Lens.currentRenderDepth;
   uiContext[currentDepthSlot] = (component.props.parentUIContext[currentDepthSlot] || 0) + 1;
-  setScopeValue(uiContext, "focus", newFocus);
-  setScopeValue(uiContext, "head", newFocus);
-  /*
-  if (newProps.locals) {
-    console.error("DEPRECATED: Valoscope.locals\n\tprefer: Valoscope.context");
-    for (const key of Object.keys(newProps.locals)) {
-      setScopeValue(uiContext, key, newProps.locals[key]);
-    }
-  }
-  */
   if (newProps.context) {
     for (const name of Object.getOwnPropertyNames(newProps.context)) {
       setScopeValue(uiContext, name, newProps.context[name]);
@@ -160,10 +150,14 @@ function _createContextAndSetFocus (component: UIComponent, newFocus: any, newPr
   }
   function _attachSubscribersWhenDone () {
     if (newFocus === undefined) return;
-    const isResource = (newFocus instanceof Vrapper) && newFocus.isResource();
-    thenChainEagerly(null, [
-      () => isResource && newFocus.activate(),
-      () => {
+    thenChainEagerly(newFocus, [
+      resolvedNewFocus => {
+        setScopeValue(uiContext, "focus", resolvedNewFocus);
+        setScopeValue(uiContext, "head", resolvedNewFocus);
+        const isResource = (newFocus instanceof Vrapper) && newFocus.isResource();
+        return isResource && (newFocus.activate() || true);
+      },
+      (isResource) => {
         if (!isResource) return component;
         if (newFocus.isActive()) {
           // If some later update has updated focus prevent subscriber

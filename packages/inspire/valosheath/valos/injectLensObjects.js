@@ -406,7 +406,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
     rootValue: ({ delegate: [
       valos.Lens.instrument(
           (u, component) => (component.props.kuery || component.props.focus),
-          valos.Lens.kueryingFocusLens),
+          valos.Lens.pendingFocusLens),
     ] }),
   }));
 
@@ -1083,7 +1083,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
     rootValue: valos.Lens.failedMediaInterpretationLens,
   }));
 
-  createSlotSymbol("kueryingFocusLens", () => ({
+  createSlotSymbol("pendingFocusLens", () => ({
     type: "Lens",
     description: `Slot for viewing a component with an unfinished
         focus kuery.

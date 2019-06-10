@@ -12,7 +12,7 @@ import { createNativeIdentifier, isNativeIdentifier, getNativeIdentifierValue,
 
 const isSymbol = require("~/tools/isSymbol").default;
 
-export default Object.assign(Object.create(raemSteppers), {
+const valoscriptSteppers = Object.assign(Object.create(raemSteppers), {
   ...raemSteppers,
   // @valos/script property builtin steppers
   "§let$$": function _createLetIdentifier (valker: Valker, head: any, scope: ?Object,
@@ -86,6 +86,9 @@ export default Object.assign(Object.create(raemSteppers), {
     return stepHead;
   },
 });
+
+valoscriptSteppers["§nonlive"] = valoscriptSteppers;
+export default valoscriptSteppers;
 
 const _propertyValueMethodStep = ["§method", "propertyValue"];
 

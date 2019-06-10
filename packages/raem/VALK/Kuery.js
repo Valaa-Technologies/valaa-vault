@@ -1038,10 +1038,13 @@ export default class Kuery {
    *
    * @memberof Kuery
    */
-  capture (toIntermediateVAKON: any, toScope: ?any) {
+  capture (toIntermediateVAKON: any, toForwardSteppersStepName: ?any, toScope: ?any) {
     return this._addExpression("§capture", [
       this._root.to(toIntermediateVAKON),
-      ...(typeof toScope !== "undefined" ? [this._root.to(toScope)] : []),
+      ...(toForwardSteppersStepName !== undefined ? [this._root.to(toForwardSteppersStepName)]
+          : toScope !== undefined ? [this._root.void()]
+          : []),
+      ...(toScope !== undefined ? [this._root.to(toScope)] : [])
     ]);
   }
 

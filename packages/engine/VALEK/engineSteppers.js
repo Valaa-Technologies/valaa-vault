@@ -16,7 +16,7 @@ import { NamespaceInterfaceTag } from "~/engine/valosheath/namespace";
 
 import { isSymbol, wrapError, dumpObject } from "~/tools";
 
-export default Object.assign(Object.create(valoscriptSteppers), {
+const engineSteppers = Object.assign(Object.create(valoscriptSteppers), {
   "§callableof": callableOf,
   "§argumentof": argumentOf,
   "§method": toMethod,
@@ -30,6 +30,9 @@ export default Object.assign(Object.create(valoscriptSteppers), {
         valker, head, scope, getPropertyOp[1], getPropertyOp[2], true);
   },
 });
+
+engineSteppers["§nonlive"] = engineSteppers;
+export default engineSteppers;
 
 function callableOf (valker: Valker, head: any, scope: ?Object,
     [, callee, toRoleName]: BuiltinStep) {

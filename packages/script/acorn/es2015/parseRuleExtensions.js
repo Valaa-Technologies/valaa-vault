@@ -162,12 +162,13 @@ export function parseArrowFunctionExpression (transpiler: Transpiler, ast: Arrow
   const body = transpiler.kueryFromAst(ast.body, functionOptions);
   const paramDeclarations = es5.scopeSettersFromParamDeclarators(transpiler, ast, functionOptions);
   transpiler.exposeOuterScopeAccesses(functionOptions.scopeAccesses, options.scopeAccesses);
-  return transpiler.VALK().capture(transpiler.VALK().fromValue(
-      transpiler.VALK().pathConcat(
+  return transpiler.VALK().capture(
+      transpiler.VALK().fromValue(transpiler.VALK().pathConcat(
           transpiler.VALK().fromThis(),
           paramDeclarations,
-          body,
-      ).toVAKON()));
+          body).toVAKON()),
+      // transpiler.VALK().fromValue("§nonlive"),
+    );
 }
 
 export interface YieldExpression extends es5.Expression {

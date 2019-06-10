@@ -712,7 +712,9 @@ export function parseFunctionHelper (transpiler: Transpiler, ast: FunctionExpres
       .pathConcat(controlHeader, paramDeclarations, functionScopeHoists)
       .to(transpiler.statements(body))
       .to("return").nullable().to("result");
-  return transpiler.VALK().capture(transpiler.VALK().fromValue(captivePath.toVAKON()));
+  return transpiler.VALK().capture(
+      transpiler.VALK().fromValue(captivePath.toVAKON()),
+      transpiler.VALK().fromValue("§nonlive"));
 }
 
 export function scopeSettersFromParamDeclarators (transpiler: Transpiler,

@@ -11,7 +11,7 @@ import engineSteppers from "~/engine/VALEK/engineSteppers";
 //        otherwise return the value directly.
 export default Object.assign(Object.create(engineSteppers), {
   kuerySubscription: null,
-  "§nonlive": engineSteppers,
+  // "§nonlive": engineSteppers,
   "§.": _liveAccess,
   "§new": _throwMutationLiveKueryError,
   "§while": _throwUnimplementedLiveKueryError,

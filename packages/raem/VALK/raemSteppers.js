@@ -186,7 +186,7 @@ export default {
     return ["§'", eValue];
   },
   "§capture": function capture (valker: Valker, head: any, scope: ?Object,
-      [, evaluatee, customScope]: BuiltinStep) {
+      [, evaluatee, forwardSteppersStepName, customScope]: BuiltinStep) {
     let capturedVAKON = typeof evaluatee !== "object"
         ? evaluatee
         : tryLiteral(valker, head, evaluatee, scope);
@@ -203,7 +203,9 @@ export default {
         ((customScope === undefined)
                 ? scope
                 : tryLiteral(valker, head, customScope, scope))
-            || null);
+            || null,
+        forwardSteppersStepName
+            && tryFullLiteral(valker, head, forwardSteppersStepName, scope));
   },
   "§evalk": function evalk (valker: Valker, head: any, scope: ?Object,
       [, evaluatee]: BuiltinStep) {
@@ -857,7 +859,7 @@ export function denoteDeprecatedValOSBuiltin (prefer: string, description: any =
 }
 
 function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object,
-    capturedScope: any) {
+    capturedScope: any, forwardSteppersStepName: ?string) {
   const caller = function caller () {
     const scope = Object.create(capturedScope);
     scope.arguments = Array.prototype.slice.call(arguments);
@@ -898,8 +900,10 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
         head = transaction.tryPack(head);
       }
       if (sourceInfo) transaction[SourceInfoTag] = sourceInfo;
-      const nonliveSteppers = transaction._steppers["§nonlive"];
-      if (nonliveSteppers) transaction.setSteppers(nonliveSteppers);
+      if (forwardSteppersStepName) {
+        const callerSteppers = transaction._steppers[forwardSteppersStepName];
+        if (callerSteppers) transaction.setSteppers(callerSteppers);
+      }
       ret = transaction.advance(head, vakon, scope, true);
   } catch (error) {
       advanceError = error;

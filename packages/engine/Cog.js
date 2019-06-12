@@ -67,7 +67,8 @@ export default class Cog extends FabricEventTarget {
 
   run (head: any, kuery: Kuery, options: any = {}) {
     try {
-      options.scope = options.scope ? Object.create(options.scope) : {};
+      options.scope = options.mutableScope ||
+          (options.scope ? Object.create(options.scope) : {});
       return this.engine.discourse.run(head, kuery, options);
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .run(), with:`,

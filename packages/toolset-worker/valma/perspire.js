@@ -1,5 +1,4 @@
 #!/usr/bin/env vlm
-
 exports.vlm = { toolset: "@valos/toolset-worker" };
 exports.command = "perspire [revelationPath] [additionalRevelationPaths..]";
 exports.describe = "Launch a headless worker for performing virtual DOM ValOS computation";
@@ -44,6 +43,11 @@ exports.builder = (yargs) => yargs.option({
         ""}otherwise it is used to look up a partition connection root resource.\n\tAll the ${
         ""}options are available for the script via valos.perspire.options object with possible ${
         ""}expansions.`
+  },
+  interactive: {
+    type: "boolean", default: true,
+    description: `Enable interactive console. Console input is interpreted as valoscript and ${
+        ""} executed using the exec.this as 'this' (or view if exec is not specified)`,
   },
   plugin: {
     type: "string", array: true, default: [],
@@ -127,7 +131,8 @@ exports.handler = async (yargv) => {
     revelationPath = vlm.path.resolve(revelationPath);
   }
 
-  const execBody = yargv.exec && (yargv.exec.body || await vlm.readFile(yargv.exec.path, "utf8"));
+  const execBody = yargv.exec
+      && (yargv.exec.body || (yargv.exec.path && await vlm.readFile(yargv.exec.path, "utf8")));
   if (yargv.exec && (typeof execBody !== "string")) {
     console.error("Invalid execBody:", execBody);
     throw new Error(`Invalid exec body, expected a string, got: '${typeof execBody}' for path "${
@@ -179,11 +184,46 @@ exports.handler = async (yargv) => {
   mainView.rootScope.valos.Perspire.state = state;
   const mainViewName = `worker.view.${mainView.getRawName()}`;
 
-  let vExecThis;
-  if (yargv.exec) {
-    const vThisConnection = partitions[yargv.exec.this || "view"];
+  let vExecThis, mutableScope;
+  if (yargv.exec || yargv.interactive) {
+    const vThisConnection = partitions[(yargv.exec || {}).this || "view"];
     // TODO(iridian, 2019-02): Add support for URI form exec.this
     vExecThis = mainView.engine.getVrapperByRawId(vThisConnection.getPartitionRawId());
+    mutableScope = Object.create(vExecThis.getLexicalScope());
+  }
+
+  if (yargv.interactive) {
+    const readline = require("readline");
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+    rl.on("line", (command) => {
+      if (!command) return;
+      vlm.clock(mainViewName, `worker.interactive.command`, {
+        action: `executing interactive command`, command,
+      });
+      const sourceInfo = {
+        phase: "interactive command transpilation",
+        source: command,
+        mediaName: "worker.interactive.command",
+        sourceMap: new Map(),
+      };
+      try {
+        vlm.clock(mainViewName, `worker.interactive.result`, {
+          action: "executed interactive command", command,
+          result: vExecThis && vExecThis.doValoscript(command, { sourceInfo, mutableScope }),
+        });
+      } catch (error) {
+        vlm.clock(mainViewName, `worker.interactive.error`, {
+          action: "caught exception during interactive command", command,
+          message: error.message, error,
+        });
+      }
+    }).on("close", () => {
+      vlm.info("Closing perspire interactive");
+      process.exit(0);
+    });
   }
 
   const keepaliveInterval = (typeof yargv.keepalive === "number")
@@ -242,8 +282,16 @@ exports.handler = async (yargv) => {
         status.action = `executing '${sourceInfo.mediaName}'`;
         vlm.clock(mainViewName, `worker.heartbeat.exec`, status);
       }
-      const execResult = vExecThis && execBody && vExecThis.doValoscript(execBody, { sourceInfo });
-      if (execResult !== undefined) return execResult;
+      try {
+        const execResult = vExecThis && execBody
+            && vExecThis.doValoscript(execBody, { sourceInfo });
+        if (execResult !== undefined) return execResult;
+      } catch (error) {
+        status.action = `caught exception: ${error.message}`;
+        status.message = error.message;
+        status.error = error;
+        vlm.clock(mainViewName, `worker.heartbeat.exec.error`, status);
+      }
     }
     return state;
   }

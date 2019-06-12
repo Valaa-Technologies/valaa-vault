@@ -86,6 +86,7 @@ export default class PerspireServer {
     this.valos = views.perspireMain.rootScope.valos;
     // Creating perspire specific objects and variables.
     // Please use server.valos.Perspire for external packages
+    this.valos.views = views;
     this.valos.Perspire = {};
     this.valos.isServer = true;
     return ret;

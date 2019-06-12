@@ -269,6 +269,7 @@ exports.handler = async (yargv) => {
     }
     state.domString = server.serializeMainDOM();
     state.tick = tick;
+    state.timeStamp = Date.now();
     _writeDomString(state.domString,
         heartbeatClockFields ? JSON.stringify(heartbeatClockFields) : "<no heartbeat fields>");
     if (vExecThis && execBody) {

@@ -51,7 +51,8 @@ export default class IndexedDBWrapper extends FabricEventTarget {
     this.database = event.target.result;
     this.database.onerror = (evt: Event) => {
       throw this.wrapErrorEvent(evt.target.error, `IDB.onerror`,
-          "\n\tstores:", this.storeDescriptors.map(({ name }) => name).join(", "));
+          "\n\tstores:", this.storeDescriptors
+              .map(descriptor => (descriptor ? descriptor.name : "<no descriptor>")).join(", "));
     };
   }
 

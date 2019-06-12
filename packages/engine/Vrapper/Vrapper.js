@@ -617,21 +617,23 @@ export default class Vrapper extends Cog {
             : options.withOwnField ? this.engine.discourse.getState()
             : undefined);
     const state = explicitState || this._transientStaledIn;
-    if (!state) return this._transient;
-    const discourse = options.discourse || this.engine.discourse;
-    const typeName = options.typeName || this.getTypeName(options);
-    let ret = state.getIn([typeName, this.getRawId()]);
-    if (!ret || (options.withOwnField && !ret.has(options.withOwnField))) {
-      let resolver = discourse;
-      if (discourse.state !== state) {
-        resolver = Object.create(discourse);
-        resolver.state = state;
+    let ret = !state && this._transient;
+    if (!ret) {
+      const discourse = options.discourse || this.engine.discourse;
+      const typeName = options.typeName || this.getTypeName(options);
+      ret = state.getIn([typeName, this.getRawId()]);
+      if (!ret || (options.withOwnField && !ret.has(options.withOwnField))) {
+        let resolver = discourse;
+        if (discourse.state !== state) {
+          resolver = Object.create(discourse);
+          resolver.state = state;
+        }
+        ret = resolver.tryGoToTransient(this[HostRef], typeName,
+            options.require, false, options.mostMaterialized, options.withOwnField);
       }
-      ret = resolver.tryGoToTransient(this[HostRef], typeName,
-          options.require, false, options.mostMaterialized, options.withOwnField);
-    }
-    if (ret && !explicitState) {
-      this._updateTransient(null, ret);
+      if (ret && !explicitState) {
+        this._updateTransient(null, ret);
+      }
     }
     return ret;
   }
@@ -1120,8 +1122,17 @@ export default class Vrapper extends Cog {
       if (kuerySubscription) {
         kuerySubscription.attachKueryFieldHook(this, "value", true);
       }
-      valueEntry = explicitValueEntry || this._getFieldTransient("value", options);
-      if (!valueEntry) return undefined;
+      valueEntry = explicitValueEntry;
+      if (!valueEntry) {
+        const thisTransient = this.getTransient(options);
+        valueEntry = thisTransient.get("value");
+        if (!valueEntry) {
+          // immaterial property kludge
+          valueEntry = getObjectRawField(
+              options.discourse || this.engine.discourse, thisTransient, "value");
+          if (!valueEntry) return undefined;
+        }
+      }
       if (!this._extractedPropertyValues) this._extractedPropertyValues = new WeakMap();
       if (this._extractedPropertyValues.has(valueEntry)) {
         return this._extractedPropertyValues.get(valueEntry);
@@ -1161,20 +1172,12 @@ export default class Vrapper extends Cog {
       }
       return ret;
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .extractValue(), with:`,
+      throw wrapError(error, `During ${this.debugId()}\n .extractPropertyValue(), with:`,
+          "\n\toptions:", ...dumpObject(options),
           "\n\tvalueEntry:", ...dumpObject(valueEntry),
           "\n\tret:", ...dumpObject(ret),
       );
     }
-  }
-
-  _getFieldTransient (fieldName: string, options: VALKOptions) {
-    const thisTransient = this.getTransient(options);
-    const valueEntry = thisTransient.get(fieldName);
-    if (valueEntry) return valueEntry;
-    // This is kludgish handling of immaterial properties.
-    return getObjectRawField(options.discourse || this.engine.discourse, thisTransient,
-        fieldName);
   }
 
   static toValueReference = VALK.fromVAKON(["§->", "value", "reference"]);

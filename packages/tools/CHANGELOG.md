@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0](https://github.com/valaatech/vault/compare/v0.34.0-rc.3...v0.34.0) (2019-06-14)
+
+
+### Bug Fixes
+
+* missing perspire log timeStamp, support null store descriptor ([5f85519](https://github.com/valaatech/vault/commit/5f85519))
+
+
+
+
+
 # [0.34.0-rc.3](https://github.com/valaatech/vault/compare/v0.34.0-rc.2...v0.34.0-rc.3) (2019-06-12)
 
 **Note:** Version bump only for package @valos/tools

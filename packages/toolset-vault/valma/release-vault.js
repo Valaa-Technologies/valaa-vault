@@ -49,6 +49,7 @@ exports.builder = (yargs) => yargs.options({
   release: {
     type: "any", choices: [true, "major", "minor", "patch"],
     description: `Create a new release branch based on the current branch.
+Prevent yarn lock rebuild by clean.
 Bump the version section based on the given value (default to current branch section)`,
   },
   prerelease: {
@@ -151,7 +152,8 @@ exports.handler = async (yargv) => {
     }
 
     preparation["vlm clean-vault"] = !yargv.clean ? "skipped"
-        : await vlm.invoke("clean-vault", Object.assign({}, cleanDefault, yargv.clean));
+        : await vlm.invoke("clean-vault", Object.assign({},
+            cleanDefault, yargv.clean, preparation.isRelease ? { yarn: false } : {}));
 
     const runAllTests = yargv.test.includes("*");
     preparation.success = true; // maybe...

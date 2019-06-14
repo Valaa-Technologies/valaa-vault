@@ -192,7 +192,7 @@ exports.handler = async (yargv) => {
       await vlm.delegate(`git checkout -b ${targetBranch}`);
       commit.newBranch = targetBranch;
       commit.lernaConfig = JSON.parse(JSON.stringify(lernaConfig));
-      commit.lernaConfig.command.version.bump = isRelease ? newBranchGroup : `prerelease`;
+      commit.lernaConfig.command.version.bump = isRelease ? newBranchGroup : `pre${newBranchGroup}`;
       commit.lernaConfig.command.version.preid = isRelease ? "" : "prerelease";
       commit.lernaConfig.command.version.allowBranch = targetBranch;
       vlm.shell.ShellString(JSON.stringify(commit.lernaConfig, null, 2)).to("./lerna.json");

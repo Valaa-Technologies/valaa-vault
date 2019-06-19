@@ -467,6 +467,7 @@ export default class RestAPIServer extends FabricEventTarget {
       },
       postExtend: (tgt) => {
         if (tgt && (typeof tgt === "object") && !(tgt instanceof Vrapper)) Object.freeze(tgt);
+        return tgt;
       },
     });
     await Promise.all(activations);

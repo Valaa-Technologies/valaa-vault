@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>Valos document interchange specification</title>
+    <script
+      src='https://www.w3.org/Tools/respec/respec-w3c-common'
+      class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"http://valospace.org/fabric/editors/iridian","github":"http://github.com/valospace"}],"shortName":"vdoc"};
+    </script>
+  </head>
+  <body>
+
+  <section id="abstract"> This document specifies <a href="https://www.w3.org/TR/json-ld11/"> a JSON-LD -based </a> documentation human-machine-valospace interchange format.
+  </section>
+
+  <section id="sotd"> This document has not been reviewed. This is a draft document
+    and may be updated, replaced or obsoleted by other documents at
+    any time.  This document is part of the <a href="@valos/vault"> ValOS core specification </a> .  The format is implemented and supported by <a href="@valos/toolset-vault"> @valos/toolset-vault npm package </a> .
+  </section>
+
+  <section id="introduction">
+    <h2>Introduction</h2>
+<a href="#vdoc" style="bold"> VDoc </a> is a extensible JSON-LD interchange
+      specification for extracting documents from varying sources,
+      passing the now-machine-manipulable interchange document around
+      and subsequently producing documents of specific formats such
+      as Valospace resources, markdown, ReSpec HTML and browser and
+      ansi-colored console outputs.  Motivation for this specification is to provide the foundation
+    for documentation <a href="@valos/hypertwin"> Valospace hypertwins </a> by supporting the ValOS resources as an emission target. This
+    allows all kinds of documentation to be accessible from within
+    Valospace with minimal additional tooling. This is not made
+    an explicit design goal unto itself; instead the design goals are
+    chosen to be generic in a way that satisfies this goal as the
+    original author believes this leads to better design.
+  </section>
+
+  <section id="goals_and_non_goals">
+    <h2>Goals and non-goals</h2>
+  VDoc design goals are:
+    <ol>
+      <li> Manual writing VDoc should be robust and must rely on minimal
+        number of intuitive rules. The more there is to remember the
+        higher the threshold to writing docs. </li>
+      <li> VDoc should be programmatically manipulable with minimal
+        boilerplate. Complex array and other wrapper nestings make
+        introspection and comprehension harder for a less than
+        dedicated developer. </li>
+      <li> VDoc should have semantic structure with a globally
+        referenceable underlying model. Documents should be combinable
+        and allowed to evolve; identifying document parts by their
+        position in a document is brittle. </li>
+      <li> VDoc should be contextually extensible. Formats often have
+        details which resist universalization but must still be
+        accessible during document emission. </li>
+    </ol>
+  Design non-goals are:
+    <ol>
+      <li> VDoc does not attempt at providing a unified ontology.
+        Documentation formats are contextual and often evolve. Common
+        structures may be represented in unified manner using existing
+        ontologies where possible but providing an interchange ontology
+        is outside the scope of this document. </li>
+      <li> Documentation formats are contextual. Not all information
+        needs to survive the roundtrip via the underlying unified
+        model and back. As a corollary a specific format generator can
+        know about other formats explicitly and consumer their
+        contextual data. </li>
+    </ol>
+  To satisfy the goals VDoc chooses JSON-LD as the format for
+      primary source of truth and RDF as the underlying object model.  Additionally VDoc provides extensibility via custom <a href="#formats"> VDoc extension formats </a> which
+      can introduce domain-specific namespaces and ontologies,
+      extraction and transformation operations and product document
+      formats.
+  </section>
+
+  <section id="document_flow">
+    <h2>Document phases and transformations</h2>
+  VDoc defines the central document flow in terms of three
+      document phases:
+    <ol>
+      <li><a href="#source_graph" style="bold"> Source graph </a> is a cyclic graph of
+        native objects with some of its sub-graphs matching some of the <a href="#extension_extraction_rules"> VDoc extraction rules </a> .  It can be manually hand-written, programmatically generated
+      or even dynamically introspected. </li>
+      <li><a href="#vsonldoc" style="bold"> A VSONLDoc </a> is a JSON-LD construct and the
+        primary VDoc interchange format. It is a normalized, complete
+        and self-contained structure with potentially multiple
+        different format-specific @context(s). </li>
+      <li><a href="#extension_output" style="bold"> Emission output </a> is a format specific
+        output that is produced by <a href="#emission"> emission </a> from a VSONLDoc and format specific set of emission parameters. </li>
+    </ol>
+  VDoc defines two transformations between the phases:
+    <ol>
+      <li><a href="#extraction" style="bold"> Extraction </a> transforms a source graph into
+        a VSONLDoc by applying the idempotent <a href="#extension_extraction_rules"> VDoc extraction rules </a> until the output no longer changes.  Due to idempotence the source graph can wildly different or
+      arbitrarily close to the resulting VSONLDoc; in fact a VSONLDoc is
+      always its own source graph. </li>
+      <li><a href="#emission" style="bold"> Emission </a> is a format specific transformation
+        which emits the <a href="#output_format"> format specific output </a> from VSONLDoc. </li>
+    </ol>
+  In addition to these phases and transformations VDoc makes use of <a href="https://www.w3.org/TR/json-ld11/"> JSON-LD 1.1 format </a> , its <a href="https://www.w3.org/TR/json-ld11-api/"> API and algorithms </a> and (maybe) <a href="https://www.w3.org/TR/json-ld11-framing/"> its framing </a> for providing a mapping from VSONLDoc to RDF model.
+  </section>
+
+  <section id="vsonldoc">
+    <h2>VSONLDoc - primary interchange format</h2>
+  VSONLDoc is a JSON-LD document with a well-formed tree
+      structure consisting of three types of nodes, corresponding to
+      the first, second and remaining levels of the tree:
+    <ol>
+      <li><a href="#document_node" style="bold"> Document node </a> is an always-first-level
+        node identified by a <a href="#document_iri"> a global document IRI </a> as its <a href="https://www.w3.org/TR/json-ld11/#node-identifiers"> JSON-LD @id </a> . </li>
+      <li><a href="#resource_node" style="bold"> Resource node </a> is an always-second-level
+        node which is directly accessible from the first-level document
+        node which owns it by using its <a href="#resource_id"> resource identifier </a> as the dictionary key. </li>
+      <li><a href="#element_node" style="bold"> Element node </a> is a third-or-more-level
+        node. These nodes don't have identifiers that are stable over
+        time nor necessarily even unique within the document. </li>
+    </ol>
+  There can be multiple first-level document nodes in a single
+      VSONLDoc (as per JSON-LD). <a href="#root_node" style="bold"> The tree root node </a> is the singular,
+        implicit '0th-level' VSONLDoc node without semantics defined by
+        VDoc itself.
+  <section id="node_keys">
+    <h2>Node keys</h2>
+  The keys of the VSONLDoc nodes have four categories
+        depending on whether the key is an IRI or not and whether an
+        IRI key has semantics defined VDoc or extension format
+        specifications:
+    <ol>
+      <li><a href="#vdoc_key" style="bold"> VDoc node key </a> is any IRI which matches
+          a VDoc ontology context term. Its semantics are defined by
+          this specification. </li>
+      <li><a href="#extension_key" style="bold"> Extension node key </a> is any IRI which
+          matches an extension ontology context term. Its semantics
+          are defined by the corresponding extension specification </li>
+      <li><a href="#generic_key" style="bold"> Generic IRI key </a> is any IRI key without
+          recognized ontology. It has no semantics in addition to what
+          JSON-LD specifies. </li>
+      <li><a href="#identifier_key" style="bold"> Identifier key </a> is any non-IRI key.
+          The semantics of an identifier key is defined by the node. </li>
+    </ol>
+
+  </section>
+
+  <section id="document_node">
+    <h2>Document nodes</h2>
+<a href="#document_iri" style="bold"> The document IRI </a> is a global
+        identifier of a document. It must not have a fragment part.  All <a href="#identifier_key"> identifier keys </a> of a
+      document node must have a resource node as their value.
+  </section>
+
+  <section id="resource_node">
+    <h2>Resource nodes</h2>
+<a href="#resource_id" style="bold"> The resource identifier </a> is a
+        'identifier-restricted' string which is unique within
+        a document and identifies a resource node inside that document.  When the resource identifier is appended to <a href="#document_iri"> the document IRI </a> as an IRI fragment part the resource node has a stable,
+      global identity over time.
+  </section>
+
+  <section id="element_node">
+    <h2>Element nodes</h2>
+  Element nodes are structural document building blocks which
+      lack a stable identity even within the document.
+  </section>
+
+  </section>
+
+  <section id="extraction_transformation">
+    <h2>Document extraction transformation</h2>
+
+  </section>
+
+  <section id="emission_transformation">
+    <h2>Document emission transformation</h2>
+
+  </section>
+
+  <section id="formats">
+    <h2>Core and extension ontologies</h2>
+
+  <section id="extension_prefixes">
+  </section>
+
+  <section id="extension_context">
+  </section>
+
+  <section id="extension_vocabulary">
+  </section>
+
+  <section id="extension_extraction_rules">
+    <h2>Extraction transformation rules</h2>
+
+  </section>
+
+  <section id="extension_output">
+    <h2>Emission output</h2>
+
+  </section>
+
+  <section id="extension_emission">
+    <h2>Emission transformation</h2>
+
+  </section>
+
+  </section>
+
+  <section id="ontology">
+    <h2>VDoc Core ontology</h2>
+
+  <section id="prefixes">
+    <h2>VDoc Core JSON-LD prefixes</h2>
+
+    <table>
+      <thead>
+        <th> Prefix </th>
+        <th> IRI </th>
+      </thead>
+      <tbody>
+        <tr><td>dc</td><td> http://purl.org/dc/elements/1.1/ </td></tr>
+        <tr><td>owl</td><td> http://www.w3.org/2002/07/owl# </td></tr>
+        <tr><td>rdf</td><td> http://www.w3.org/1999/02/22-rdf-syntax-ns# </td></tr>
+        <tr><td>rdfs</td><td> http://www.w3.org/2000/01/rdf-schema# </td></tr>
+        <tr><td>vdoc</td><td> http://valospace.org/vdoc# </td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="context">
+    <h2>VDoc Core JSON-LD context</h2>
+
+    <table>
+      <thead>
+        <th> Term </th>
+        <th> Definition </th>
+      </thead>
+      <tbody>
+        <tr><td>a</td><td> revdoc:Document </td></tr>
+        <tr><td>vdoc:entries</td><td></td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="vocabulary">
+    <h2>VDoc Core JSON-LD vocabulary</h2>
+
+    <table>
+      <thead>
+        <th> rdfs:label </th>
+        <th> rdf:type </th>
+        <th> rdf:subClassOf </th>
+        <th> rdf:domain </th>
+        <th> rdf:range </th>
+        <th> rdfs:comment </th>
+      </thead>
+      <tbody>
+        <tr><td>Node</td><td> rdfs:Class </td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>title</td><td> rdf:Property </td><td></td><td> vdoc:Node </td><td> rdfs:Literal </td><td></td></tr>
+        <tr><td>entries</td><td> rdf:Property </td><td></td><td> vdoc:Node </td><td> rdf:List </td><td></td></tr>
+        <tr><td>Chapter</td><td> rdfs:Class </td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>BulletList</td><td> rdfs:Class </td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>NumberedList</td><td> rdfs:Class </td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>Table</td><td> rdfs:Class </td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>Reference</td><td> rdfs:Class </td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="extraction_rules">
+    <h2>VDoc Core extraction rules</h2>
+
+    <table>
+      <thead>
+        <th> Rule name </th>
+        <th> Node rdf:type </th>
+        <th> Extraction property </th>
+        <th> Comment </th>
+      </thead>
+      <tbody>
+        <tr><td></td><td></td><td></td><td> Basic Node </td></tr>
+        <tr><td>chapter</td><td> vdoc:Chapter </td><td></td><td> Numbered, titled chapter </td></tr>
+        <tr><td>bulleted</td><td> vdoc:BulletList </td><td></td><td> Bulleted list </td></tr>
+        <tr><td>numbered</td><td> vdoc:NumberedList </td><td></td><td> Numbered list </td></tr>
+        <tr><td>table</td><td> vdoc:Table </td><td></td><td> Table </td></tr>
+        <tr><td>column</td><td> vdoc:Column </td><td></td><td> Column </td></tr>
+        <tr><td>data</td><td></td><td></td><td> Data lookup </td></tr>
+        <tr><td>ontology</td><td> vdoc:Chapter </td><td></td><td> Ontology specification chapter </td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="output">
+    <h2>VDoc Core output format</h2>
+
+  </section>
+
+  <section id="emission">
+    <h2>VDoc Core emission rules</h2>
+
+  </section>
+
+  </section>
+
+  </body>
+</html>

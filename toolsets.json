@@ -8,5 +8,16 @@
         "filename": "valos-inspire.js"
       }
     }
+  },
+  "@valos/toolset-vault": {
+    "revdoc": {
+      "editors": {
+        "iridian": {
+          "name": "Iridian Kiiskinen",
+          "url": "http://valospace.org/fabric/editors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      }
+    }
   }
 }

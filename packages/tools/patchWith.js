@@ -159,7 +159,7 @@ exports.default = function patchWith (target /* : Object */, patch /* : Array<an
 };
 
 function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSpread = false) {
-  if (this.keyPath) this.keyPath.push(keyInParent);
+  if (this.keyPath && (keyInParent !== undefined)) this.keyPath.push(keyInParent);
   let ret = this.preExtend
       && this.preExtend(target_, patch_, keyInParent, targetParent, patchParent);
   if (ret === undefined) {
@@ -203,8 +203,8 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
   }
   const post = this.postExtend
       && this.postExtend(ret, patch_, keyInParent, targetParent, patchParent, this);
-  if (this.keyPath) this.keyPath.pop();
-  return (post !== undefined) ? post : ret;
+  if (this.keyPath && (keyInParent !== undefined)) this.keyPath.pop();
+  return this.postExtend ? post : ret;
 
   function _setRetFromSpreadAndMaybeBail (stack, spreaderValue) {
     const spreadee = stack.spread(

@@ -153,6 +153,7 @@ const _deepExtendOptions = Object.freeze({
       if (layout.type !== "object") delete layout.depth;
     }
     */
+   return block;
   },
   errorOn (opName, error, target, source) {
     if (opName === "preExtend") {

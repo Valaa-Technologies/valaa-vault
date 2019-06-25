@@ -220,9 +220,15 @@ const _vlm = {
     return Object.assign(Object.create(this), ...customizations);
   },
 
-  readFile: util.promisify(fs.readFile),
-  async tryReadFile (...rest) {
-    try { return await this.readFile(...rest); } catch (error) {
+  _readFile: util.promisify(fs.readFile),
+  readFile: function readFile (filename, encoding = "utf8", ...rest) {
+    return this._readFile(filename, encoding, ...rest);
+  },
+
+  async tryReadFile (filename, encoding = "utf8", ...rest) {
+    try {
+      return await this._readFile(filename, encoding, ...rest);
+    } catch (error) {
       return undefined;
     }
   },
@@ -1068,6 +1074,7 @@ async function handler (vargv) {
  */
 async function execute (args, options = {}) {
   this._flushPendingConfigWrites();
+  this._refreshActivePools();
   const argv = __processArgs(args);
   if ((argv[0] === "vlm") && !Object.keys(options).length) {
     argv.shift();
@@ -1087,7 +1094,6 @@ async function execute (args, options = {}) {
           let result;
           let processedOutput = output;
           try {
-            if (options.stdout === "json") processedOutput = JSON.parse(output);
             if (error) {
               result = error;
             } else if (code || signal) {
@@ -1102,6 +1108,7 @@ async function execute (args, options = {}) {
                 result.signal = signal;
               }
             } else {
+              if (options.stdout === "json") processedOutput = JSON.parse(output);
               this._refreshActivePools();
               this._reloadPackageAndToolsetsConfigs();
               result = (options.onSuccess === undefined) ? processedOutput

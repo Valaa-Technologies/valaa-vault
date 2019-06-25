@@ -22,6 +22,6 @@
     "fastify-swagger": "^2.3.2"
   },
   "peerDependencies": {
-    "@valos/inspire": "^0.34.0-prerelease.3"
+    "@valos/inspire": "^0.35.0-prerelease.0"
   }
 }

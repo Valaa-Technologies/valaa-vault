@@ -132,7 +132,7 @@ exports.handler = async (yargv) => {
   }
 
   const execBody = yargv.exec
-      && (yargv.exec.body || (yargv.exec.path && await vlm.readFile(yargv.exec.path, "utf8")));
+      && (yargv.exec.body || (yargv.exec.path && await vlm.readFile(yargv.exec.path)));
   if (yargv.exec && (typeof execBody !== "string")) {
     console.error("Invalid execBody:", execBody);
     throw new Error(`Invalid exec body, expected a string, got: '${typeof execBody}' for path "${

@@ -111,11 +111,17 @@ exports.handler = async (yargv) => {
   async function _prepare (preparation) {
     const branches = ((await vlm.delegate("git branch --list --no-color release/* prerelease/*"))
             || "").split("\n")
-        .map(name => name.match(/^((\* )| {2})((pre)?release\/([0-9]*)(\.[0-9]+)?(\.[0-9]+)?)$/))
-        .filter(match => match);
+        .map(name => name.match(
+            /^((\* )| {2})(master|((pre)?release\/([0-9]*)(\.[0-9]+)?(\.[0-9]+)?))$/
+        )).filter(match => match);
     const currentBranchMatch = branches.find(match => match[2]); // 2 <=> search for "* "
-    if (!currentBranchMatch) throw new Error("Current branch is not a (pre)release branch");
-    const [,,, branchName, currentIsPrerelease, major, dotMinor, dotPatch] = currentBranchMatch;
+    if (!currentBranchMatch) throw new Error("Current branch is not master or (pre)release branch");
+    const [,,, branchName, currentIsNotMaster, currentIsPrerelease, major, dotMinor, dotPatch]
+        = currentBranchMatch;
+    if (!currentIsNotMaster && (!yargv.release && !yargv.prerelease)) {
+      throw new Error(
+          "No explicit --release or --prerelease given when trying to release from 'master'");
+    }
     preparation.lernaConfig = require(vlm.path.join(process.cwd(), "lerna.json"));
     const [, minor, patch] = preparation.lernaConfig.version.match(/^[0-9]*\.([0-9]+)\.([0-9]+)/);
     preparation.isRelease = !!yargv.release || !(yargv.prerelease || currentIsPrerelease);

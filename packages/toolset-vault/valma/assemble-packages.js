@@ -183,8 +183,8 @@ exports.handler = async (yargv) => {
         entry => entry && !orderedSelections.includes(entry) && vlm.minimatch(entry.name, glob))));
     selections = orderedSelections;
   }
-  if (!selections.length) {
-    vlm.warn("Assembly selection empty, exiting");
+  if (!selections.length && !yargv.versioning) {
+    vlm.warn("Assembly selection empty and no versioning requested, exiting");
     return {
       selectedAssemblies: selections.length, successfulAssemblies: 0, failedAssemblies: 0,
       success: true,
@@ -237,22 +237,29 @@ exports.handler = async (yargv) => {
     vlm.info(`${assemblyErrors || "No"} errors found during assembly`);
   }
 
+  let oldVersion, newVersion;
   if (!yargv.versioning) {
     vlm.info(`${vlm.theme.argument("--no-versioning")} requested:`,
         `no version update, no git commit, no git tag, no ${vlm.theme.path("package.json")
         } finalizer copying`);
   } else {
-    if (assemblyErrors) throw new Error("Versioning requested and errors found during assembly");
-    vlm.info("Updating version, making git commit, creating a lerna git tag and",
-        `updating target ${vlm.theme.path("package.json")}'s`);
+    if (assemblyErrors) throw new Error("Errors found during assembly when trying to bump version");
+    vlm.info("Updating version, making git commit, creating a lerna git tag and/or",
+        `updating assembly target ${vlm.theme.path("package.json")}'s`);
+    let lernaConfig = await vlm.tryReadFile("lerna.json");
+    oldVersion = lernaConfig && JSON.parse(lernaConfig).version;
     await vlm.delegate([
       "lerna version", {
         "conventional-commits": true, amend: (yargv.versioning === "amend"), push: false, yes: true,
-        "force-publish": selections.map(({ name }) => name).join(","),
+        ...(!selections.length ? {} : {
+          "force-publish": selections.map(({ name }) => name).join(","),
+        }),
       },
     ]);
+    lernaConfig = await vlm.tryReadFile("lerna.json");
+    newVersion = lernaConfig && JSON.parse(lernaConfig).version;
     if (!yargv.assemble && !yargv.overwrite) {
-      vlm.info(`Skipping ${vlm.theme.path("package.json")} version updates`, "as",
+      vlm.info(`Skipping assembly target ${vlm.theme.path("package.json")} version updates`, "as",
           vlm.theme.argument(!yargv.assemble ? "--no-assemble" : "--no-overwrite"),
           "was specified");
     } else {
@@ -309,6 +316,8 @@ exports.handler = async (yargv) => {
     }],
     success: false,
   };
+  if (oldVersion) ret.oldVersion = oldVersion;
+  if (newVersion) ret.version = newVersion;
   ret.assemblyBreakdown.push(...selections.map(
       ({ name, packageConfig, packageJSONPath, failure }) => {
     const newConfig = JSON.parse(vlm.shell.head({ "-n": 1000000 }, packageJSONPath));
@@ -330,7 +339,7 @@ exports.handler = async (yargv) => {
     ret.success = true;
     // TODO(iridian): This is less than ideal way to determine the released version. We should be
     // able to get it from lerna directly somehow.
-    ret.version = ret.assemblyBreakdown[2].version;
+    if (!ret.version) ret.version = ret.assemblyBreakdown[2].version;
     vlm.info(vlm.theme.green(`Successfully assembled all packages`), "out of",
         ret.selectedAssemblies, "selected packages");
   } else if (!ret.successfulAssemblies) {

@@ -55,7 +55,7 @@ file for yarn (and also for npm, which yarn is based on).
 `);
         continue;
       }
-      let vaultConfig = await vlm.tryReadFile(vlm.path.join("..", "..", "package.json"), "utf8");
+      let vaultConfig = await vlm.tryReadFile(vlm.path.join("..", "..", "package.json"));
       if (vaultConfig !== undefined) {
         // rather brittle name default. Only works for workspaces
         // precisely two nestings under a vault package.json (which is

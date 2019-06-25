@@ -37,13 +37,36 @@ exports.handler = async (yargv) => {
   for (const dotFile of hardcodedDotFiles) {
     vlm.shell.cp("-n", vlm.path.join(__dirname, "../template.dots", dotFile), `.${dotFile}`);
   }
-  if (!vlm.shell.test("-d", ".git") && await vlm.inquireConfirm(
-      "Initialize git repository and create the release branch structure?")) {
-    const config = await vlm.getPackageConfig();
-    vlm.interact("git init");
-    vlm.interact("git add -A");
-    vlm.interact(`git commit -a -m "v${config.version}"`);
-    vlm.interact(`git tag -a v${config.version} "v${config.version}"`);
-    vlm.interact(`git checkout -b release/${config.version.split(".").slice(0, 2).join(".")}`);
+
+  const config = await vlm.getPackageConfig();
+  const [version, preid] = config.version.split("-");
+  const branchName = preid ? "prerelease" : "release";
+
+  if (!vlm.shell.test("-f", "lerna.json")) {
+    const lerna = {
+      version: config.version,
+      lerna: "3.15.0",
+      npmClient: "yarn",
+      useWorkspaces: true,
+      command: {
+        // If patch version is specified and not 0, set up (pre)patch bump.
+        // Otherwise bump (pre)minor.
+        bump: `${preid ? "pre" : ""}${(version.split(".")[2] || "0") !== "0" ? "patch" : "minor"}`,
+        preid: preid || "",
+        allowBranch: `${branchName}/*`,
+      },
+    };
+    vlm.shell.ShellString(JSON.stringify(lerna)).to("./lerna.json");
+  }
+
+  if (!vlm.shell.test("-d", ".git") && await vlm.inquireConfirm("Initialize git repository?")) {
+    await vlm.interact("git init");
+    await vlm.interact("git add -A");
+    await vlm.interact(`git commit -a -m v${config.version}`);
+    if (await vlm.inquireConfirm(`Set up initial ${branchName} branch and its annotated tag?`)) {
+      await vlm.interact(`git tag -a -m v${config.version} v${config.version}`);
+      await vlm.interact(`git checkout -b ${branchName}/${
+          config.version.split(".").slice(0, 2).join(".")}`);
+    }
   }
 };

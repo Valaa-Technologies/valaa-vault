@@ -1709,15 +1709,15 @@ async function __loadNPMConfigVariables () {
   }
 }
 
-function listMatchingCommands (commandSelector, matchAll = false) {
+function listMatchingCommands (commandSelector, { matchDots } = {}) {
   const minimatcher = __underToSlash(__globFromExactSelector(commandSelector || "*"));
   const ret = [].concat(...this._activePools.map(pool => pool.listing
       .map(file => __underToSlash(file.name))
-      .filter(name => minimatch(name, minimatcher, { dot: matchAll }))
+      .filter(name => minimatch(name, minimatcher, { dot: matchDots || false }))
       .map(name => __valmaCommandFromPath(name))
   )).filter((v, i, a) => (a.indexOf(v) === i));
   this.ifVerbose(1)
-      .expound(matchAll ? "listMatchingCommands:" : "listAllMatchingCommands:",
+      .expound(matchDots ? "listAllMatchingCommands:" : "listMatchingCommands:",
           this.theme.command(commandSelector),
           ...(this.verbosity > 1 ? [", minimatcher:", minimatcher] : []),
           "\n\tresults:", ret);
@@ -1725,7 +1725,7 @@ function listMatchingCommands (commandSelector, matchAll = false) {
 }
 
 function listAllMatchingCommands (commandSelector) {
-  return listMatchingCommands.call(this, commandSelector, true);
+  return listMatchingCommands.call(this, commandSelector, { matchDots: true });
 }
 
 // All nulls and undefines are filtered out.
@@ -1745,18 +1745,18 @@ function __processArgs (args) {
         ? entry.split(" ")
     : Array.isArray(entry)
         ? entry.map(e => ((typeof e === "string") ? e : JSON.stringify(e))).join("")
-    : (!entry || (typeof entry !== "object"))
-        ? _toArgString(entry)
-        : [].concat(...Object.keys(entry).map(
-            key => _toArgString(entry[key], key))))
-  ));
+    : _toArgString(entry))));
 
-  function _toArgString (value, key) {
+  function _toArgString (value, keys) {
     if ((value === undefined) || (value === null)) return [];
-    if (typeof value === "string") return !key ? value : [`--${key}=${value}`];
-    if (typeof value === "boolean") return !key ? [] : value ? `--${key}` : `--no-${key}`;
-    if (Array.isArray(value)) return [].concat(...value.map(entry => _toArgString(entry, key)));
-    return JSON.stringify(value);
+    if (typeof value === "string") return !keys ? value : [`--${keys.join(".")}=${value}`];
+    if (typeof value === "boolean") return !keys ? [] : `--${value ? "" : "no-"}${keys.join(".")}`;
+    if (Array.isArray(value)) return [].concat(...value.map(entry => _toArgString(entry, keys)));
+    if (typeof value !== "object") {
+      return !keys ? JSON.stringify(value) : `--${keys.join(".")}=${JSON.stringify(value)}`;
+    }
+    return [].concat(...Object.keys(value)
+        .map(key => ((key[0] === ".") ? [] : _toArgString(value[key], [...(keys || []), key]))));
   }
 }
 
@@ -1990,6 +1990,10 @@ async function _fillVargvInteractively () {
     const option = interactiveOptions[optionName];
     const question = Object.assign({}, option.interactive);
     if (question.when !== "always") {
+      if ((question.when === "if-undefined") && option.type === "boolean") {
+        this.warn(`boolean option '${optionName}' interactive.when = "if-undefined" is degenerate.`,
+            "Boolean options default to false. Remove the option.type to have if-undefined work.");
+      }
       if ((question.when !== "if-undefined") || (typeof this.vargv[optionName] !== "undefined")) {
         continue;
       }

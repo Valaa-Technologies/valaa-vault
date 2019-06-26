@@ -34,10 +34,11 @@ exports.handler = async (yargv) => {
   vlm.info("Copying missing worker config files", " from templates at:",
       vlm.theme.path(templates), "(will not clobber existing files)");
   vlm.shell.cp("-n", templates, ".");
+  const devDependencies = { "@valos/toolset-worker": true };
 
   if (!vlm.getPackageConfig("devDependencies", "@valos/inspire")) {
     if (await vlm.inquireConfirm(`Install @valos/inspire in devDependencies?`)) {
-      await vlm.interact("yarn add -W --dev @valos/inspire");
+      devDependencies["@valos/inspire"] = true;
     }
   }
 
@@ -53,5 +54,6 @@ exports.handler = async (yargv) => {
       }
     };
   }
-  return vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
+  await vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
+  return { command: exports.command, devDependencies };
 };

@@ -48,4 +48,5 @@ exports.handler = (yargv) => {
         "Please remove the plugin manually");
     // TODO(iridian, 2019-02): Removing values using the updateToolsetConfig is not implemented yet.
   }
+  return { command: exports.command };
 };

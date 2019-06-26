@@ -27,8 +27,9 @@ exports.handler = async (yargv) => {
   vlm.shell.cp("-n", templates, ".");
   const hardcodedVDONFiles = ["README", "STYLE"];
   for (const vdonFile of hardcodedVDONFiles) {
-    await vlm.shell
-        .exec(`vlm --markdown . require @valos/toolset-vault/template.vdon/${vdonFile}.vdon`)
+    vlm.shell
+        .exec(`vlm --markdown . require @valos/toolset-vault/template.vdon/${vdonFile}.vdon`,
+            { silent: true })
         .to(`${vdonFile}.md`);
   }
 
@@ -56,7 +57,7 @@ exports.handler = async (yargv) => {
         allowBranch: `${branchName}/*`,
       },
     };
-    vlm.shell.ShellString(JSON.stringify(lerna)).to("./lerna.json");
+    vlm.shell.ShellString(JSON.stringify(lerna, null, 2)).to("./lerna.json");
   }
 
   if (!vlm.shell.test("-d", ".git") && await vlm.inquireConfirm("Initialize git repository?")) {
@@ -69,4 +70,5 @@ exports.handler = async (yargv) => {
           config.version.split(".").slice(0, 2).join(".")}`);
     }
   }
+  return { command: exports.command, devDependencies: { "@valos/toolset-vault": true } };
 };

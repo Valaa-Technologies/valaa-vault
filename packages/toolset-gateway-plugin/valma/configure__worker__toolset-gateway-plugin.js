@@ -21,9 +21,11 @@ exports.handler = async (yargv) => {
       vlm.theme.path(templates), "(will not clobber existing files)");
   vlm.shell.cp("-n", templates, ".");
 
+  const devDependencies = { "@valos/toolset-gateway-plugin": true };
   if (!vlm.getPackageConfig("devDependencies", "@valos/tools")) {
     if (await vlm.inquireConfirm(`Install @valos/tools in devDependencies?`)) {
-      await vlm.interact("yarn add -W --dev @valos/tools");
+      devDependencies["@valos/tools"] = true;
     }
   }
+  return { command: exports.command, devDependencies };
 };

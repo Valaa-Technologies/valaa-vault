@@ -17,5 +17,8 @@ exports.builder = (yargs) => yargs.options({
 
 exports.handler = (yargv) => {
   const vlm = yargv.vlm;
-  return vlm && true;
+  return vlm && {
+    command: exports.command,
+    devDependencies: { "@valos/toolset-vault-operations": true },
+  };
 };

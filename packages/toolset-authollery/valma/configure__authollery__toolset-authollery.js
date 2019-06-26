@@ -25,4 +25,5 @@ exports.handler = (yargv) => {
   vlm.info("Copying missing authollery config files", " from templates at:",
       vlm.theme.path(templates), "(will not clobber existing files)");
   vlm.shell.cp("-n", templates, ".");
+  return { command: exports.command, devDependencies: { "@valos/toolset-authollery": true } };
 };

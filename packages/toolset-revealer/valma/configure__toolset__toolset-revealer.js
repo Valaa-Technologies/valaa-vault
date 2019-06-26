@@ -44,10 +44,11 @@ exports.handler = async (yargv) => {
     vlm.instruct(`! Edit toolsets.json:['${vlm.theme.package(vlm.toolset
         )}'].webpack to further configure webpack entry and output locations.`);
   }
+  const devDependencies = { "@valos/toolset-revealer": true };
   if (!vlm.getPackageConfig("devDependencies", "@valos/inspire")) {
     if (await vlm.inquireConfirm(`Install @valos/inspire in devDependencies?`)) {
-      await vlm.interact("yarn add -W --dev @valos/inspire");
+      devDependencies["@valos/inspire"] = true;
     }
   }
-  return true;
+  return { command: exports.command, devDependencies };
 };

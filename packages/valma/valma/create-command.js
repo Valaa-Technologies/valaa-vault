@@ -96,6 +96,7 @@ exports.handler = async (yargv) => {
       vlm.shell.mkdir("-p", vlm.path.dirname(scriptPath));
       if (!yargv.import) {
         vlm.shell.ShellString(_createSource(command, yargv)).to(scriptPath);
+        vlm.shell.chmod("+x", scriptPath);
       } else {
         const targetPath = await vlm.invoke(command, ["-T"]);
         if ((typeof targetPath !== "string") || !vlm.shell.test("-f", targetPath)) {

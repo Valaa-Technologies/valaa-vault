@@ -51,7 +51,7 @@ exports.builder = (yargs) => {
   return yargs.options({
     reconfigure: {
       alias: "r", type: "boolean",
-      description: "Reconfigure all 'vault' type config of this workspace.",
+      description: "Reconfigure all newly grabbed toolsets even if they are already configured.",
     },
     toolsets: {
       type: "string", default: usedToolsets, choices: allToolsets,
@@ -64,6 +64,7 @@ exports.builder = (yargs) => {
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
+  const valos = vlm.packageConfig.valos || vlm.packageConfig.valaa;
   const toolsetsConfig = vlm.getToolsetsConfig();
   if (!toolsetsConfig) return undefined;
 
@@ -72,28 +73,37 @@ exports.handler = async (yargv) => {
   const ret = {};
 
   const stowToolsets = Object.keys(toolsetsConfig)
-      .filter(name => (!newToolsets.includes(name) && !toolsetsConfig[name].inUse));
+      .filter(name => (!newToolsets.includes(name) && toolsetsConfig[name].inUse));
   // TODO: add confirmation for configurations that are about to be eliminated with null
   if (stowToolsets.length) {
     vlm.info(`Stowing toolsets:`, vlm.theme.package(...stowToolsets));
     stowToolsets.forEach(name => { toolsets[name] = { inUse: false }; });
     ret.stowed = stowToolsets;
   }
-  const grabToolsets = newToolsets
-      .filter(name => (toolsetsConfig[name] || { inUse: true }).inUse);
-  if (grabToolsets.length) {
-    vlm.info(`Grabbing toolsets:`, vlm.theme.package(...grabToolsets));
-    const installAsDevDeps = grabToolsets
-        .filter(toolsetName => !vlm.getPackageConfig("devDependencies", toolsetName)
-            && !vlm.getPackageConfig("dependencies", toolsetName));
-    if (installAsDevDeps.length) {
-      vlm.info(`Installing toolsets as direct devDependencies:`,
-          vlm.theme.package(...installAsDevDeps));
-      await vlm.interact(["yarn add -W --dev", ...installAsDevDeps]);
-    }
-    grabToolsets.forEach(name => { toolsets[name] = { inUse: true }; });
-    ret.grabbed = grabToolsets;
+  const grabbedToolsets = newToolsets
+      .filter(name => !(toolsetsConfig[name] || { inUse: false }).inUse);
+  if (grabbedToolsets.length) {
+    vlm.info(`Grabbing toolsets:`, vlm.theme.package(...grabbedToolsets));
+    grabbedToolsets.forEach(name => { toolsets[name] = { inUse: true }; });
+    ret.grabbed = grabbedToolsets;
   }
   await vlm.updateToolsetsConfig(toolsets);
+  const devDependencies = {};
+  for (const toolsetName of (yargv.reconfigure ? newToolsets : grabbedToolsets)) {
+    const configureResults = await vlm.invoke(
+        `.configure/{,.type/.${valos.type}/,.domain/.${valos.domain}/}.toolset/${toolsetName}`,
+        { reconfigure: yargv.reconfigure || false });
+    for (const result of configureResults) {
+      Object.assign(devDependencies, (result || {}).devDependencies || {});
+    }
+  }
+  const newDevDependencies = Object.keys(devDependencies)
+      .filter(devDependencyName => !vlm.getPackageConfig("devDependencies", devDependencyName)
+          && !vlm.getPackageConfig("dependencies", devDependencyName));
+  if (newDevDependencies.length) {
+    vlm.info(`Installing toolset devDependencies:`,
+        vlm.theme.package(...newDevDependencies));
+    await vlm.interact(["yarn add -W --dev", ...newDevDependencies]);
+  }
   return ret;
 };

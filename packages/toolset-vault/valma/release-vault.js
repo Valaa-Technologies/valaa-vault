@@ -18,12 +18,19 @@ Once preparation is done creates a new release commit and tag using
 If --publish is not explicitly given then the final publish step must
 be manually performed. In this case a pre-publish phase is done which
 prepares the manual publish command instructions in the results output.
+
+Will invoke valma command hooks between stages as per:
+1. 'vlm .release-vault/.prepared-hooks/{**/,}* --summary=<obj>' after successful preparation
+2. 'vlm .release-vault/.committed-hooks/{**/,}* --summary=<obj>' after successful commit
+3. 'vlm .release-vault/.pre-published-hooks/{**/,}* --summary=<obj>' after successful pre-publish
+4. 'vlm .release-vault/.published-hooks/{**/,}* --summary=<obj>' after successful publish
 `;
 
 const cleanDefault = Object.freeze({ yes: true, yarn: true, install: true, dist: true });
 const assembleDefault = Object.freeze({ "add-unchanged": true });
 
-exports.disabled = (yargs) => !yargs.vlm.packageConfig && "No package.json found";
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
+    && `Workspace is not a vault (is ${yargs.vlm.getValOSConfig("type")})`;
 exports.builder = (yargs) => yargs.options({
   clean: {
     group: "Active options",
@@ -80,12 +87,20 @@ exports.handler = async (yargv) => {
     vlm.info(`${ret.releaseDescription} preparation phase`, ret.preparation.success
         ? vlm.theme.success("successful") : vlm.theme.failure("FAILED"),
             "into target branch", vlm.theme.name(ret.preparation.targetBranch));
+    if (ret.preparation.success) {
+      ret.preparation.hooks = await vlm.invoke(`.release-vault/.prepared-hooks/{**/,}*`,
+          [{ summary: ret.preparation }]);
+    }
 
     ret.commit = { "...": { indexAfter: "preparation" } };
     await _commit(ret.preparation, ret.commit);
     vlm.info(`${ret.releaseDescription} commit phase`, ret.commit.success
         ? vlm.theme.success("successful") : vlm.theme.failure("FAILED"),
             "as a new version", vlm.theme.version(ret.commit.version));
+    if (ret.commit.success) {
+      ret.commit.hooks = await vlm.invoke(`.release-vault/.committed-hooks/{**/,}*`,
+          [{ summary: ret.commit }]);
+    }
 
     if (!yargv.publish) {
       ret.prePublish = { "...": { indexAfter: "commit" } };
@@ -93,11 +108,19 @@ exports.handler = async (yargv) => {
       vlm.info(`${ret.releaseDescription} pre-publish phase`, ret.prePublish.success
           ? vlm.theme.success("successful") : vlm.theme.failure("FAILED"),
             vlm.theme.instruct("see result output for the manual publish step instructions"));
+      if (ret.prePublish.success) {
+        ret.prePublish.hooks = await vlm.invoke(`.release-vault/.pre-published-hooks/{**/,}*`,
+            [{ summary: ret.prePublish }]);
+      }
     } else {
       ret.publish = { "...": { indexAfter: "commit" } };
       await _publish(ret.preparation, ret.commit, ret.publish);
       vlm.info(`${ret.releaseDescription} publish phase`, ret.publish.success
           ? vlm.theme.success("successful") : vlm.theme.failure("FAILED"));
+      if (ret.publish.success) {
+        ret.publish.hooks = await vlm.invoke(`.release-vault/.published-hooks/{**/,}*`,
+            [{ summary: ret.publish }]);
+      }
     }
     ret.success = ret.preparation.success && ret.commit.success
         && (ret.prePublish || ret.publish).success;

@@ -1,10 +1,8 @@
-// @flow
-
-const { ontology } = require("~/toolset-vault/vdoc");
+const { ontology } = require("@valos/toolset-vault/vdoc");
 
 module.exports = {
   prefixes: {
-    revdoc: "http://valospace.org/revdoc#",
+    revdoc: "https://valaatech.github.io/vault/revdoc#",
   },
   context: {
   },
@@ -23,18 +21,19 @@ module.exports = {
   },
   emitters: {
     html: {
+      "vdoc:Document": emitReVDocHTML,
       "revdoc:Document": emitReVDocHTML,
       "vdoc:Chapter": emitReVDocChapter,
     },
-  }
+  },
 };
 
-function emitReVDocHTML (emission, node, document, emitNode /* , vsonldoc, emitters */) {
+function emitReVDocHTML (emission, node, document, emitNode /* , vdocson, emitters */) {
   return `<!DOCTYPE html>
 <html>
   <head>
     <meta charset='utf-8'>
-    <title>${node.title}</title>
+    <title>${node["vdoc:title"]}</title>
     <script
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
@@ -43,14 +42,14 @@ function emitReVDocHTML (emission, node, document, emitNode /* , vsonldoc, emitt
     </script>
   </head>
   <body>
-    ${emitNode("", node["vdoc:entries"], document)}
+    ${emitNode("", node["vdoc:content"], document)}
   </body>
 </html>
 `;
 }
 
-function emitReVDocChapter (emission, node, document, emitNode, vsonldoc, emitters) {
+function emitReVDocChapter (emission, node, document, emitNode, vdocson, emitters) {
   return ontology.emitters.html["vdoc:Chapter"](
       emission, Object.assign({}, node, { "vdoc:element": "section" }),
-      document, emitNode, vsonldoc, emitters);
+      document, emitNode, vdocson, emitters);
 }

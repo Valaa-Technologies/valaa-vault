@@ -1,6 +1,4 @@
-// @flow
-
-const vdoc = require("~/toolset-vault/vdoc");
+const vdoc = require("@valos/toolset-vault/vdoc");
 const ontology = require("./ontology");
 
 module.exports = {
@@ -31,13 +29,21 @@ module.exports = {
       "column#2;extraction": "Extraction property",
       "column#3;comment": "Comment",
     },
-  }
+  },
+  extract: function extract (documentIRI, sourceGraphs,
+      ontologies = [ontology, vdoc.ontology]) {
+    return vdoc.extract(documentIRI, sourceGraphs, ontologies);
+  },
+  emit: function emit (emission, vdocson, formatName,
+      ontologies = [ontology, vdoc.ontology]) {
+    return vdoc.emit(emission, vdocson, formatName, ontologies);
+  },
 };
 
 function dfn (text, definitionId, ...explanation) {
   return {
     "revdoc:dfn": definitionId,
-    "vdoc:entries": [vdoc.ref(text, definitionId, "bold"), ...explanation],
+    "vdoc:content": [vdoc.ref(text, definitionId, "bold"), ...explanation],
   };
 }
 

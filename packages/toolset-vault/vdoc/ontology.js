@@ -7,18 +7,18 @@ module.exports = {
     owl: "http://www.w3.org/2002/07/owl#",
     rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-    vdoc: "http://valospace.org/vdoc#",
+    vdoc: "https://valaatech.github.io/vault/vdoc#",
   },
 
   context: {
     a: { "@id": "rdf:type", "@type": "@id" },
-    "vdoc:entries": { "@id": "http://valospace.org/vdoc#entries", "@container": "@list" },
+    "vdoc:content": { "@id": "https://valaatech.github.io/vault/vdoc#content", "@container": "@list" },
   },
 
   vocabulary: {
     Node: { a: "rdfs:Class" },
     title: { a: "rdf:Property", "rdf:domain": "vdoc:Node", "rdf:range": "rdfs:Literal" },
-    entries: { a: "rdf:Property", "rdf:domain": "vdoc:Node", "rdf:range": "rdf:List" },
+    content: { a: "rdf:Property", "rdf:domain": "vdoc:Node", "rdf:range": "rdf:List" },
     Chapter: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node" },
     BulletList: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node" },
     NumberedList: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node" },
@@ -86,19 +86,20 @@ module.exports = {
         if (!resourceId && !Object.keys(node).length) {
           node = patch;
         } else {
-          node["vdoc:entries"] = this.extend([], [patch]);
+          node["vdoc:content"] = this.extend([], [patch]);
         }
       } else if (Array.isArray(patch)) {
-        if (!resourceId && !Object.keys(node).length) {
+        if (rule.hidden || (!resourceId && !Object.keys(node).length)) {
           node = this.extend([], patch);
+          if (resourceId) this.documentNode[resourceId] = node;
         } else {
-          node["vdoc:entries"] = this.extend([], patch);
+          node["vdoc:content"] = this.extend([], patch);
         }
       } else {
         this.extend(node, patch);
       }
       if (!rule.hidden) {
-        (targetObject["vdoc:pre_entries"] || (targetObject["vdoc:pre_entries"] = [])).push([
+        (targetObject["vdoc:pre_content"] || (targetObject["vdoc:pre_content"] = [])).push([
           (orderId && `${orderId}\uFFFF`) || (orderElement && (Number(orderElement) + 0.5))
               || resourceId || (elementId && Number(elementId)),
           resourceId ? { "@id": resourceId } : node,
@@ -107,11 +108,11 @@ module.exports = {
       return null;
     },
     postExtend (target) {
-      const unorderedEntries = (target != null) && target["vdoc:pre_entries"];
+      const unorderedEntries = (target != null) && target["vdoc:pre_content"];
       if (unorderedEntries) {
-        target["vdoc:entries"] = []
+        target["vdoc:content"] = []
             .concat(...unorderedEntries.sort(_compareWithOrderQualifier).map(e => e[1]));
-        delete target["vdoc:pre_entries"];
+        delete target["vdoc:pre_content"];
       }
     },
   },
@@ -137,23 +138,23 @@ function _compareWithOrderQualifier (l, r) {
   return (l[0] < r[0]) ? -1 : (l[0] > r[0]) ? 1 : 0;
 }
 
-function emitBreakHTML (emission /* , node, document, emitNode, vsonldoc, emitters */) {
+function emitBreakHTML (emission /* , node, document, emitNode, vdocson, emitters */) {
   return `${emission}<br>`;
 }
 
-function emitValueHTML (emission, value /* , document, emitNode, vsonldoc, emitters */) {
+function emitValueHTML (emission, value /* , document, emitNode, vdocson, emitters */) {
   return `${emission} ${value} `;
 }
 
-function emitNodeHTML (emission, node, document, emitNode /* , vsonldoc, emitters */) {
+function emitNodeHTML (emission, node, document, emitNode /* , vdocson, emitters */) {
   let body = "";
   if (node["vdoc:title"]) {
     body += `\n    <h2>${node["vdoc:title"]}</h2>\n`;
   }
-  const entries = node["vdoc:entries"]
+  const content = node["vdoc:content"]
       || (node["@id"] && document[node["@id"]]);
-  if (entries) {
-    body += emitNode("", entries, document);
+  if (content) {
+    body += emitNode("", content, document);
     const attributes = emitAttributes(node);
     if (node["vdoc:element"] || attributes) {
       const elem = node["vdoc:element"] || "div";
@@ -173,14 +174,14 @@ function emitAttributes (node) {
   return ret;
 }
 
-function emitArrayHTML (emission, entries, document, emitNode, vsonldoc, emitters) {
+function emitArrayHTML (emission, content, document, emitNode, vdocson, emitters) {
   let paragraphBegin = 0;
   let ret = emission;
-  for (let i = 0; i <= entries.length; ++i) {
-    if (i < entries.length ? !entries[i] : paragraphBegin) {
+  for (let i = 0; i <= content.length; ++i) {
+    if (i < content.length ? !content[i] : paragraphBegin) {
       if (i > paragraphBegin) {
         ret += `      <p>${emitArrayHTML(
-            "", entries.slice(paragraphBegin, i), document, emitNode, vsonldoc, emitters)
+            "", content.slice(paragraphBegin, i), document, emitNode, vdocson, emitters)
         }</p>\n`;
       }
       paragraphBegin = i + 1;
@@ -188,35 +189,35 @@ function emitArrayHTML (emission, entries, document, emitNode, vsonldoc, emitter
   }
   if (paragraphBegin) return ret;
   let lis = "";
-  for (const entry of entries) lis += emitNode("", entry, document);
+  for (const entry of content) lis += emitNode("", entry, document);
   return `${ret}${lis}`;
 }
 
-// function emitChapterHTML (emission, node, document, emitNode /* , vsonldoc, emitters */) {}
+// function emitChapterHTML (emission, node, document, emitNode /* , vdocson, emitters */) {}
 
-function emitBulletListHTML (emission, node, document, emitNode /* , vsonldoc, emitters */) {
+function emitBulletListHTML (emission, node, document, emitNode /* , vdocson, emitters */) {
   let lis = "";
-  for (const entry of (node["vdoc:entries"] || [])) {
+  for (const entry of (node["vdoc:content"] || [])) {
     lis += `      <li>${emitNode("", entry, document)}</li>\n`;
   }
   return `${emission}\n    <ul>\n${lis}    </ul>\n`;
 }
 
-function emitNumberedListHTML (emission, node, document, emitNode /* , vsonldoc, emitters */) {
+function emitNumberedListHTML (emission, node, document, emitNode /* , vdocson, emitters */) {
   let lis = "";
-  for (const entry of (node["vdoc:entries"] || [])) {
+  for (const entry of (node["vdoc:content"] || [])) {
     lis += `      <li>${emitNode("", entry, document)}</li>\n`;
   }
   return `${emission}\n    <ol>\n${lis}    </ol>\n`;
 }
 
-function emitTableHTML (emission, node, document, emitNode /* , vsonldoc, emitters */) {
+function emitTableHTML (emission, node, document, emitNode /* , vdocson, emitters */) {
   const keys = [];
   const headers = [];
-  for (const header of node["vdoc:entries"]) {
+  for (const header of node["vdoc:content"]) {
     keys.push(header["vdoc:key"]);
     headers.push(`<th${emitAttributes(header)}>${
-      emitNode("", header["vdoc:entries"], document)
+      emitNode("", header["vdoc:content"], document)
     }</th>`);
   }
   const rows = [];
@@ -248,9 +249,9 @@ function emitTableHTML (emission, node, document, emitNode /* , vsonldoc, emitte
 `;
 }
 
-function emitReferenceHTML (emission, node, document, emitNode /* , vsonldoc, emitters */) {
+function emitReferenceHTML (emission, node, document, emitNode /* , vdocson, emitters */) {
   const head = `${emission}<a href="${node["vdoc:ref"]}"${emitAttributes(node)}`;
-  return node["vdoc:entries"]
-      ? `${head}>${emitNode("", node["vdoc:entries"], document)}</a>`
+  return node["vdoc:content"]
+      ? `${head}>${emitNode("", node["vdoc:content"], document)}</a>`
       : `${head} />`;
 }

@@ -10,7 +10,7 @@ exports.builder = (yargs) => yargs.options({
     description: `Reconfigure '${exports.command}' config of this workspace.`,
   },
   "enable-babel": {
-    type: "boolean", description: "enable babel transpilation for this library",
+    description: "enable babel transpilation for this library",
     interactive: { type: "confirm", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
   },
 });

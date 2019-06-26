@@ -4,20 +4,20 @@
     <meta charset='utf-8'>
     <title>Valos document interchange specification</title>
     <script
-      src='https://www.w3.org/Tools/respec/respec-w3c-common'
-      class='remove'></script>
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"http://valospace.org/fabric/editors/iridian","github":"http://github.com/valospace"}],"shortName":"vdoc"};
+      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/editors/iridian","github":"http://github.com/valospace"}],"shortName":"vdoc"};
     </script>
   </head>
   <body>
-
-  <section id="abstract"> This document specifies <a href="https://www.w3.org/TR/json-ld11/"> a JSON-LD -based </a> documentation human-machine-valospace interchange format.
+    
+  <section id="abstract"> This document specifies <a href="https://www.w3.org/TR/json-ld11/"> a JSON-LD -based </a> documentation human-machine-valospace interchange format. 
   </section>
 
   <section id="sotd"> This document has not been reviewed. This is a draft document
     and may be updated, replaced or obsoleted by other documents at
-    any time.  This document is part of the <a href="@valos/vault"> ValOS core specification </a> .  The format is implemented and supported by <a href="@valos/toolset-vault"> @valos/toolset-vault npm package </a> .
+    any time.  This document is part of the <a href="@valos/vault"> ValOS core specification </a> .  The format is implemented and supported by <a href="@valos/toolset-vault"> @valos/toolset-vault npm package </a> . 
   </section>
 
   <section id="introduction">
@@ -33,12 +33,12 @@
     Valospace with minimal additional tooling. This is not made
     an explicit design goal unto itself; instead the design goals are
     chosen to be generic in a way that satisfies this goal as the
-    original author believes this leads to better design.
+    original author believes this leads to better design. 
   </section>
 
   <section id="goals_and_non_goals">
     <h2>Goals and non-goals</h2>
-  VDoc design goals are:
+ VDoc design goals are: 
     <ol>
       <li> Manual writing VDoc should be robust and must rely on minimal
         number of intuitive rules. The more there is to remember the
@@ -55,7 +55,7 @@
         details which resist universalization but must still be
         accessible during document emission. </li>
     </ol>
-  Design non-goals are:
+ Design non-goals are: 
     <ol>
       <li> VDoc does not attempt at providing a unified ontology.
         Documentation formats are contextual and often evolve. Common
@@ -68,29 +68,29 @@
         know about other formats explicitly and consumer their
         contextual data. </li>
     </ol>
-  To satisfy the goals VDoc chooses JSON-LD as the format for
+ To satisfy the goals VDoc chooses JSON-LD as the format for
       primary source of truth and RDF as the underlying object model.  Additionally VDoc provides extensibility via custom <a href="#formats"> VDoc extension formats </a> which
       can introduce domain-specific namespaces and ontologies,
       extraction and transformation operations and product document
-      formats.
+      formats. 
   </section>
 
   <section id="document_flow">
     <h2>Document phases and transformations</h2>
-  VDoc defines the central document flow in terms of three
-      document phases:
+ VDoc defines the central document flow in terms of three
+      document phases: 
     <ol>
       <li><a href="#source_graph" style="bold"> Source graph </a> is a cyclic graph of
         native objects with some of its sub-graphs matching some of the <a href="#extension_extraction_rules"> VDoc extraction rules </a> .  It can be manually hand-written, programmatically generated
       or even dynamically introspected. </li>
-      <li><a href="#vsonldoc" style="bold"> A VSONLDoc </a> is a JSON-LD construct and the
+      <li><a href="#vdocson" style="bold"> A VSONLDoc </a> is a JSON-LD construct and the
         primary VDoc interchange format. It is a normalized, complete
         and self-contained structure with potentially multiple
         different format-specific @context(s). </li>
       <li><a href="#extension_output" style="bold"> Emission output </a> is a format specific
         output that is produced by <a href="#emission"> emission </a> from a VSONLDoc and format specific set of emission parameters. </li>
     </ol>
-  VDoc defines two transformations between the phases:
+ VDoc defines two transformations between the phases: 
     <ol>
       <li><a href="#extraction" style="bold"> Extraction </a> transforms a source graph into
         a VSONLDoc by applying the idempotent <a href="#extension_extraction_rules"> VDoc extraction rules </a> until the output no longer changes.  Due to idempotence the source graph can wildly different or
@@ -99,14 +99,14 @@
       <li><a href="#emission" style="bold"> Emission </a> is a format specific transformation
         which emits the <a href="#output_format"> format specific output </a> from VSONLDoc. </li>
     </ol>
-  In addition to these phases and transformations VDoc makes use of <a href="https://www.w3.org/TR/json-ld11/"> JSON-LD 1.1 format </a> , its <a href="https://www.w3.org/TR/json-ld11-api/"> API and algorithms </a> and (maybe) <a href="https://www.w3.org/TR/json-ld11-framing/"> its framing </a> for providing a mapping from VSONLDoc to RDF model.
+ In addition to these phases and transformations VDoc makes use of <a href="https://www.w3.org/TR/json-ld11/"> JSON-LD 1.1 format </a> , its <a href="https://www.w3.org/TR/json-ld11-api/"> API and algorithms </a> and (maybe) <a href="https://www.w3.org/TR/json-ld11-framing/"> its framing </a> for providing a mapping from VSONLDoc to RDF model. 
   </section>
 
-  <section id="vsonldoc">
+  <section id="vdocson">
     <h2>VSONLDoc - primary interchange format</h2>
-  VSONLDoc is a JSON-LD document with a well-formed tree
+ VSONLDoc is a JSON-LD document with a well-formed tree
       structure consisting of three types of nodes, corresponding to
-      the first, second and remaining levels of the tree:
+      the first, second and remaining levels of the tree: 
     <ol>
       <li><a href="#document_node" style="bold"> Document node </a> is an always-first-level
         node identified by a <a href="#document_iri"> a global document IRI </a> as its <a href="https://www.w3.org/TR/json-ld11/#node-identifiers"> JSON-LD @id </a> . </li>
@@ -117,16 +117,16 @@
         node. These nodes don't have identifiers that are stable over
         time nor necessarily even unique within the document. </li>
     </ol>
-  There can be multiple first-level document nodes in a single
+ There can be multiple first-level document nodes in a single
       VSONLDoc (as per JSON-LD). <a href="#root_node" style="bold"> The tree root node </a> is the singular,
         implicit '0th-level' VSONLDoc node without semantics defined by
-        VDoc itself.
+        VDoc itself. 
   <section id="node_keys">
     <h2>Node keys</h2>
-  The keys of the VSONLDoc nodes have four categories
+ The keys of the VSONLDoc nodes have four categories
         depending on whether the key is an IRI or not and whether an
         IRI key has semantics defined VDoc or extension format
-        specifications:
+        specifications: 
     <ol>
       <li><a href="#vdoc_key" style="bold"> VDoc node key </a> is any IRI which matches
           a VDoc ontology context term. Its semantics are defined by
@@ -147,7 +147,7 @@
     <h2>Document nodes</h2>
 <a href="#document_iri" style="bold"> The document IRI </a> is a global
         identifier of a document. It must not have a fragment part.  All <a href="#identifier_key"> identifier keys </a> of a
-      document node must have a resource node as their value.
+      document node must have a resource node as their value. 
   </section>
 
   <section id="resource_node">
@@ -155,13 +155,13 @@
 <a href="#resource_id" style="bold"> The resource identifier </a> is a
         'identifier-restricted' string which is unique within
         a document and identifies a resource node inside that document.  When the resource identifier is appended to <a href="#document_iri"> the document IRI </a> as an IRI fragment part the resource node has a stable,
-      global identity over time.
+      global identity over time. 
   </section>
 
   <section id="element_node">
     <h2>Element nodes</h2>
-  Element nodes are structural document building blocks which
-      lack a stable identity even within the document.
+ Element nodes are structural document building blocks which
+      lack a stable identity even within the document. 
   </section>
 
   </section>
@@ -221,7 +221,7 @@
         <tr><td>owl</td><td> http://www.w3.org/2002/07/owl# </td></tr>
         <tr><td>rdf</td><td> http://www.w3.org/1999/02/22-rdf-syntax-ns# </td></tr>
         <tr><td>rdfs</td><td> http://www.w3.org/2000/01/rdf-schema# </td></tr>
-        <tr><td>vdoc</td><td> http://valospace.org/vdoc# </td></tr>
+        <tr><td>vdoc</td><td> https://valaatech.github.io/vault/vdoc# </td></tr>
       </tbody>
     </table>
 
@@ -237,7 +237,7 @@
       </thead>
       <tbody>
         <tr><td>a</td><td> revdoc:Document </td></tr>
-        <tr><td>vdoc:entries</td><td></td></tr>
+        <tr><td>vdoc:content</td><td></td></tr>
       </tbody>
     </table>
 
@@ -258,7 +258,7 @@
       <tbody>
         <tr><td>Node</td><td> rdfs:Class </td><td></td><td></td><td></td><td></td></tr>
         <tr><td>title</td><td> rdf:Property </td><td></td><td> vdoc:Node </td><td> rdfs:Literal </td><td></td></tr>
-        <tr><td>entries</td><td> rdf:Property </td><td></td><td> vdoc:Node </td><td> rdf:List </td><td></td></tr>
+        <tr><td>content</td><td> rdf:Property </td><td></td><td> vdoc:Node </td><td> rdf:List </td><td></td></tr>
         <tr><td>Chapter</td><td> rdfs:Class </td><td></td><td></td><td></td><td></td></tr>
         <tr><td>BulletList</td><td> rdfs:Class </td><td></td><td></td><td></td><td></td></tr>
         <tr><td>NumberedList</td><td> rdfs:Class </td><td></td><td></td><td></td><td></td></tr>

@@ -1,6 +1,7 @@
-import { Command } from "~/raem/events";
 import FakeIndexedDB from "fake-indexeddb";
 import FDBDatabase from "fake-indexeddb/lib/FDBDatabase";
+
+import { Command } from "~/raem/events";
 
 import { dumpObject, wrapError } from "~/tools";
 import { swapAspectRoot } from "../../sourcerer/tools/EventAspects";

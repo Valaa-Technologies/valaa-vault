@@ -1,13 +1,12 @@
 // @flow
 
-const { extract, ontology: vdocOntology } = require("../packages/toolset-vault/vdoc");
 const {
-  editors, ref, dfn, ontologyTables,
+  editors, extract, ref, /* dfn, */ ontologyTables,
   ontology: revdocOntology,
 } = require("../packages/toolset-vault/revdoc");
 
-module.exports = extract("http://valospace.org/revdoc", {
-  title: "ReVDoc - ReSpec document VDoc extension",
+module.exports = extract("https://valaatech.github.io/vault/revdoc", {
+  "vdoc:title": "ReVDoc - ReSpec document VDoc extension",
   respecConfig: {
     specStatus: "unofficial",
     editors: editors("iridian"),
@@ -30,7 +29,7 @@ module.exports = extract("http://valospace.org/revdoc", {
     ref("@valos/toolset-vault npm package", "@valos/toolset-vault"), ".",
   ],
   "chapter#introduction>2": [
-    `ReVDoc is a VDox extension which can produce ReSpec documents.`
+    `ReVDoc is a VDoc extension which can produce ReSpec documents.`
   ],
   "chapter#ontology>9;ReVDoc ontology": {
     "chapter#prefixes>0;ReVDoc JSON-LD prefixes": {
@@ -60,4 +59,4 @@ module.exports = extract("http://valospace.org/revdoc", {
       "#0": [],
     },
   },
-}, [revdocOntology, vdocOntology]);
+});

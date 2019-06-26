@@ -1,13 +1,12 @@
 // @flow
 
-const { extract, ontology: vdocOntology } = require("../packages/toolset-vault/vdoc");
+const { ontology: vdocOntology } = require("../packages/toolset-vault/vdoc");
 const {
-  editors, ref, dfn, ontologyTables,
-  ontology: revdocOntology,
+  editors, extract, ref, dfn, ontologyTables,
 } = require("../packages/toolset-vault/revdoc");
 
-module.exports = extract("http://valospace.org/vdoc", {
-  title: "Valos document interchange specification",
+module.exports = extract("https://valaatech.github.io/vault/vdoc", {
+  "vdoc:title": "Valos document interchange specification",
   respecConfig: {
     specStatus: "unofficial",
     editors: editors("iridian"),
@@ -103,7 +102,7 @@ module.exports = extract("http://valospace.org/vdoc", {
       ), `It can be manually hand-written, programmatically generated
       or even dynamically introspected.`,
     ], [
-      dfn("A VSONLDoc", "#vsonldoc", `is a JSON-LD construct and the
+      dfn("A VSONLDoc", "#vdocson", `is a JSON-LD construct and the
         primary VDoc interchange format. It is a normalized, complete
         and self-contained structure with potentially multiple
         different format-specific @context(s).`,
@@ -138,7 +137,7 @@ module.exports = extract("http://valospace.org/vdoc", {
       "for providing a mapping from VSONLDoc to RDF model.",
     ],
   },
-  "chapter#vsonldoc>5;VSONLDoc - primary interchange format": {
+  "chapter#vdocson>5;VSONLDoc - primary interchange format": {
     "#0": `VSONLDoc is a JSON-LD document with a well-formed tree
       structure consisting of three types of nodes, corresponding to
       the first, second and remaining levels of the tree:`,
@@ -255,4 +254,4 @@ module.exports = extract("http://valospace.org/vdoc", {
       "#0": [],
     },
   },
-}, [revdocOntology, vdocOntology]);
+});

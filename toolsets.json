@@ -1,7 +1,9 @@
 {
   "@valos/toolset-revealer": {
     "webpack": {
-      "entry": ["./packages/inspire/index.js"],
+      "entry": [
+        "./packages/inspire/index.js"
+      ],
       "output": {
         "path": "dist/revealer/valos/inspire/",
         "publicPath": "/",
@@ -11,13 +13,25 @@
   },
   "@valos/toolset-vault": {
     "revdoc": {
+      "docs": ["vdoc", "revdoc", "sbomdoc"],
       "editors": {
         "iridian": {
           "name": "Iridian Kiiskinen",
-          "url": "http://valospace.org/fabric/editors/iridian",
+          "url": "https://valaatech.github.io/fabric/editors/iridian",
           "github": "http://github.com/valospace"
         }
       }
-    }
+    },
+    "inUse": false
+  },
+  "@valos/toolset-vault-sbom": {
+    "inUse": true,
+    "commands": {
+      ".configure/.type/.vault/.toolset/@valos/toolset-vault-sbom": {
+        "release-regenerate": true
+      }
+    },
+    "documentURIBase": "https://valaatech.github.io/vault/",
+    "introduction": []
   }
 }

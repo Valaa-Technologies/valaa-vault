@@ -707,6 +707,15 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
+"@cyclonedx/bom@^0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@cyclonedx/bom/-/bom-0.2.6.tgz#b98d34b8298f3e984c1cd68459756f92a00765b6"
+  dependencies:
+    parse-packagejson-name "^1.0.1"
+    prettify-xml "^1.2.0"
+    read-installed "^4.0.3"
+    ssri "^6.0.0"
+
 "@evocateur/libnpmaccess@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@evocateur/libnpmaccess/-/libnpmaccess-3.1.0.tgz#e546ee4e4bedca54ed9303948ec54c985cec33e4"
@@ -1476,6 +1485,63 @@
 "@types/swagger-schema-official@^2.0.15":
   version "2.0.17"
   resolved "https://registry.yarnpkg.com/@types/swagger-schema-official/-/swagger-schema-official-2.0.17.tgz#c9086ec36ce00ae21e5a73a507c8fc94938f17e1"
+
+"@valos/gateway-api@^0.34.0":
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/@valos/gateway-api/-/gateway-api-0.34.0.tgz#4fb1a116f913f56e2fba4fb1bdefec1c3bc1d2d6"
+  dependencies:
+    base64-js "^1.3.0"
+    text-encoding "^0.7.0"
+
+"@valos/tools@^0.34.0":
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/@valos/tools/-/tools-0.34.0.tgz#5d985f4c24945bfc720304611523bd63325a2b28"
+  dependencies:
+    "@babel/runtime" ">7.0.0-rc"
+    "@babel/runtime-corejs2" ">7.0.0-rc"
+    "@valos/gateway-api" "^0.34.0"
+    fake-indexeddb "^2.0.3"
+    immutable "~3.7.4"
+    jssha "^2.3.1"
+    object-hash "^1.1.3"
+    uuid "^3.2.1"
+
+"@valos/toolset-vault@^0.34.0-prerelease.0":
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/@valos/toolset-vault/-/toolset-vault-0.34.0.tgz#0b9c9553b50d083b9d92b3f7af9d96ac6f2ca5c6"
+  dependencies:
+    "@babel/cli" ">7.0.0-rc"
+    "@babel/core" "^7.0.0-rc"
+    "@babel/plugin-proposal-class-properties" "^7.0.0-rc"
+    "@babel/plugin-proposal-decorators" "^7.0.0-rc"
+    "@babel/plugin-proposal-export-default-from" "^7.0.0-rc"
+    "@babel/plugin-transform-flow-strip-types" "^7.0.0-rc"
+    "@babel/plugin-transform-runtime" ">7.0.0-rc"
+    "@babel/polyfill" ">7.0.0-rc"
+    "@babel/preset-env" ">7.0.0-rc"
+    "@babel/preset-react" ">7.0.0-rc"
+    "@babel/preset-stage-0" ">7.0.0-rc"
+    "@babel/runtime" ">7.0.0-rc"
+    "@babel/runtime-corejs2" ">7.0.0-rc"
+    babel-core "^7.0.0-0"
+    babel-eslint "^10.0.1"
+    babel-jest "^23.6.0"
+    babel-loader "^8.0.4"
+    babel-plugin-module-resolver "^3.1.1"
+    babel-plugin-root-import "^6.1.0"
+    eslint "^5.11.1"
+    eslint-config-airbnb "^17.1.0"
+    eslint-import-resolver-babel-plugin-root-import "^1.1.1"
+    eslint-plugin-flowtype "^3.2.0"
+    eslint-plugin-import "^2.14.0"
+    eslint-plugin-jsx-a11y "^6.1.2"
+    eslint-plugin-react "^7.12.0"
+    flow-bin "^0.89.0"
+    jasmine-core "^2.8.0"
+    jest "^23.5.0"
+    lerna "^3.4.0"
+    valma "^0.34.0"
+    yalc "1.0.0-pre.23"
 
 "@webassemblyjs/ast@1.8.5":
   version "1.8.5"
@@ -7134,6 +7200,10 @@ parse-json@^4.0.0:
     error-ex "^1.3.1"
     json-parse-better-errors "^1.0.1"
 
+parse-packagejson-name@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/parse-packagejson-name/-/parse-packagejson-name-1.0.1.tgz#ab5b322cd38c87b4a01620683cca56ad74c006a0"
+
 parse-passwd@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/parse-passwd/-/parse-passwd-1.0.0.tgz#6d5b934a456993b23d37f40a382d6f1666a8e5c6"
@@ -7402,6 +7472,10 @@ prettier@^1.17.0:
   version "1.18.2"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.18.2.tgz#6823e7c5900017b4bd3acf46fe9ac4b4d7bda9ea"
 
+prettify-xml@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/prettify-xml/-/prettify-xml-1.2.0.tgz#46dcf1ee8a8d8b73db30b7e06ef26dc9cf3f6f18"
+
 pretty-bytes@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/pretty-bytes/-/pretty-bytes-4.0.2.tgz#b2bf82e7350d65c6c33aa95aaa5a4f6327f61cd9"
@@ -7656,6 +7730,19 @@ read-cmd-shim@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/read-cmd-shim/-/read-cmd-shim-1.0.1.tgz#2d5d157786a37c055d22077c32c53f8329e91c7b"
   dependencies:
+    graceful-fs "^4.1.2"
+
+read-installed@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/read-installed/-/read-installed-4.0.3.tgz#ff9b8b67f187d1e4c29b9feb31f6b223acd19067"
+  dependencies:
+    debuglog "^1.0.1"
+    read-package-json "^2.0.0"
+    readdir-scoped-modules "^1.0.0"
+    semver "2 || 3 || 4 || 5"
+    slide "~1.1.3"
+    util-extend "^1.0.1"
+  optionalDependencies:
     graceful-fs "^4.1.2"
 
 "read-package-json@1 || 2", read-package-json@^2.0.0, read-package-json@^2.0.13:
@@ -8357,7 +8444,7 @@ slice-ansi@^2.1.0:
     astral-regex "^1.0.0"
     is-fullwidth-code-point "^2.0.0"
 
-slide@^1.1.6:
+slide@^1.1.6, slide@~1.1.3:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/slide/-/slide-1.1.6.tgz#56eb027d65b4d2dce6cb2e2d32c4d4afc9e1d707"
 
@@ -9172,6 +9259,10 @@ util-deprecate@^1.0.1, util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
 
+util-extend@^1.0.1:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/util-extend/-/util-extend-1.0.3.tgz#a7c216d267545169637b3b6edc6ca9119e2ff93f"
+
 util.promisify@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/util.promisify/-/util.promisify-1.0.0.tgz#440f7165a459c9a16dc145eb8e72f35687097030"
@@ -9219,6 +9310,20 @@ validate-npm-package-name@^3.0.0:
   resolved "https://registry.yarnpkg.com/validate-npm-package-name/-/validate-npm-package-name-3.0.0.tgz#5fa912d81eb7d0c74afc140de7317f0ca7df437e"
   dependencies:
     builtins "^1.0.3"
+
+valma@^0.34.0:
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/valma/-/valma-0.34.0.tgz#29af0befec927dc2ba178b544365d42cb98c22ab"
+  dependencies:
+    "@valos/tools" "^0.34.0"
+    cardinal "^2.1.1"
+    colors "1.3.0"
+    glob-to-regexp "^0.4.0"
+    inquirer "^5.2.0"
+    minimatch "^3.0.4"
+    semver "^5.5.0"
+    shelljs "^0.8.2"
+    yargs "^11.0.0"
 
 vary@~1.1.2:
   version "1.1.2"
@@ -9552,6 +9657,12 @@ ws@^6.1.2, ws@^6.1.4:
   resolved "https://registry.yarnpkg.com/ws/-/ws-6.2.1.tgz#442fdf0a47ed64f59b6a5d8ff130f4748ed524fb"
   dependencies:
     async-limiter "~1.0.0"
+
+xml-js@^1.6.11:
+  version "1.6.11"
+  resolved "https://registry.yarnpkg.com/xml-js/-/xml-js-1.6.11.tgz#927d2f6947f7f1c19a316dd8eea3614e8b18f8e9"
+  dependencies:
+    sax "^1.2.4"
 
 xml-name-validator@^3.0.0:
   version "3.0.0"

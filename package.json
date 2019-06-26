@@ -27,9 +27,11 @@
     "publish-packages": "vlm publish-packages "
   },
   "devDependencies": {
+    "@cyclonedx/bom": "^0.2.6",
     "@valos/toolset-revealer": "^0.35.0-prerelease.0",
     "@valos/toolset-vault": "^0.34.0-prerelease.0",
-    "valma": "^0.35.0-prerelease.0"
+    "valma": "^0.35.0-prerelease.0",
+    "xml-js": "^1.6.11"
   },
   "dependencies": {}
 }

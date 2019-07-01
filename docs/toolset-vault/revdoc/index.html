@@ -12,45 +12,45 @@
   </head>
   <body>
     
-  <section id="abstract"> This document specifies <a href="vdoc"> a VDoc extension </a> for generating <a href="https://github.com/w3c/respec"> ReSpec </a> documents. 
+  <section id="abstract" class="vdoc type-vdoc-chapter">This document specifies<a href="vdoc" class="vdoc type-vdoc-reference">a VDoc extension</a>for generating<a href="https://github.com/w3c/respec" class="vdoc type-vdoc-reference">ReSpec</a>documents.
   </section>
 
-  <section id="sotd"> This document has not been reviewed. This is a draft document and
+  <section id="sotd" class="vdoc type-vdoc-chapter">This document has not been reviewed. This is a draft document and
     may be updated, replaced or obsoleted by other documents at any
-    time.  This document is part of the  <a href="@valos/vault/spec"> ValOS core specification </a> .  The format is implemented and supported by  <a href="@valos/toolset-vault"> @valos/toolset-vault npm package </a> . 
+    time.This document is part of the <a href="@valos/vault/spec" class="vdoc type-vdoc-reference">ValOS core specification</a>.The format is implemented and supported by <a href="@valos/toolset-vault" class="vdoc type-vdoc-reference">@valos/toolset-vault npm package</a>.
   </section>
 
-  <section id="introduction"> ReVDoc is a VDoc extension which can produce ReSpec documents. 
+  <section id="introduction" class="vdoc type-vdoc-chapter">ReVDoc is a VDoc extension which can produce ReSpec documents.
   </section>
 
-  <section id="ontology">
+  <section id="ontology" class="vdoc type-vdoc-chapter">
     <h2>ReVDoc ontology</h2>
 
-  <section id="prefixes">
+  <section id="prefixes" class="vdoc type-vdoc-chapter">
     <h2>ReVDoc JSON-LD prefixes</h2>
 
-    <table>
+    <table class="vdoc type-vdoc-table">
       <thead>
-        <th> Prefix </th>
-        <th> IRI </th>
+        <th class="vdoc type-vdoc-column">Prefix</th>
+        <th class="vdoc type-vdoc-column">IRI</th>
       </thead>
       <tbody>
-        <tr><td>revdoc</td><td> https://valaatech.github.io/vault/revdoc# </td></tr>
+        <tr><td>revdoc</td><td>https://valaatech.github.io/vault/toolset-vault/revdoc#</td></tr>
       </tbody>
     </table>
 
   </section>
 
-  <section id="context">
+  <section id="context" class="vdoc type-vdoc-chapter">
     <h2>ReVDoc JSON-LD context</h2>
 
-    <table>
+    <table class="vdoc type-vdoc-table">
       <thead>
-        <th> Term </th>
-        <th> Definition </th>
-        <th> @id </th>
-        <th> @type </th>
-        <th> @container </th>
+        <th class="vdoc type-vdoc-column">Term</th>
+        <th class="vdoc type-vdoc-column">Definition</th>
+        <th class="vdoc type-vdoc-column">@id</th>
+        <th class="vdoc type-vdoc-column">@type</th>
+        <th class="vdoc type-vdoc-column">@container</th>
       </thead>
       <tbody>
         
@@ -59,54 +59,54 @@
 
   </section>
 
-  <section id="vocabulary">
+  <section id="vocabulary" class="vdoc type-vdoc-chapter">
     <h2>ReVDoc JSON-LD vocabulary</h2>
 
-    <table>
+    <table class="vdoc type-vdoc-table">
       <thead>
-        <th> rdfs:label </th>
-        <th> rdf:type </th>
-        <th> rdfs:subClassOf </th>
-        <th> rdfs:domain </th>
-        <th> rdfs:range </th>
-        <th> rdfs:comment </th>
+        <th class="vdoc type-vdoc-column">rdfs:label</th>
+        <th class="vdoc type-vdoc-column">rdf:type</th>
+        <th class="vdoc type-vdoc-column">rdfs:subClassOf</th>
+        <th class="vdoc type-vdoc-column">rdfs:domain</th>
+        <th class="vdoc type-vdoc-column">rdfs:range</th>
+        <th class="vdoc type-vdoc-column">rdfs:comment</th>
       </thead>
       <tbody>
-        <tr><td>Document</td><td> rdfs:Class </td><td> vdoc:Chapter </td><td></td><td></td><td> A ReSpec specification document </td></tr>
-        <tr><td>Definition</td><td> rdfs:Class </td><td> vdoc:Node </td><td></td><td></td><td> A ReSpec term definition document node </td></tr>
-        <tr><td>Package</td><td> rdfs:Class </td><td> vdoc:Reference </td><td></td><td></td><td> A package reference document node </td></tr>
-        <tr><td>Command</td><td> rdfs:Class </td><td> vdoc:Node </td><td></td><td></td><td> A command invokation document node </td></tr>
-        <tr><td>CommandLineInteraction</td><td> rdfs:Class </td><td> vdoc:Node </td><td></td><td></td><td> A command line interaction sequence document node </td></tr>
+        <tr><td>Document</td><td>rdfs:Class</td><td>vdoc:Chapter</td><td></td><td></td><td>A ReSpec specification document</td></tr>
+        <tr><td>Definition</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td>A ReSpec term definition document node</td></tr>
+        <tr><td>Package</td><td>rdfs:Class</td><td>vdoc:Reference</td><td></td><td></td><td>A package reference document node</td></tr>
+        <tr><td>Command</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td>A command invokation document node</td></tr>
+        <tr><td>CommandLineInteraction</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td>A command line interaction sequence document node</td></tr>
       </tbody>
     </table>
 
   </section>
 
-  <section id="extraction_rules">
+  <section id="extraction_rules" class="vdoc type-vdoc-chapter">
     <h2>ReVDoc extraction rules</h2>
 
-    <table>
+    <table class="vdoc type-vdoc-table">
       <thead>
-        <th> Rule name </th>
-        <th> Node rdf:type </th>
-        <th> primary target </th>
-        <th> ';rest' target </th>
-        <th> Comment </th>
+        <th class="vdoc type-vdoc-column">Rule name</th>
+        <th class="vdoc type-vdoc-column">Node rdf:type</th>
+        <th class="vdoc type-vdoc-column">primary target</th>
+        <th class="vdoc type-vdoc-column">';rest' target</th>
+        <th class="vdoc type-vdoc-column">Comment</th>
       </thead>
       <tbody>
-        <tr><td>ontology</td><td> vdoc:Chapter </td><td> vdoc:content </td><td> vdoc:title </td><td> Ontology specification chapter </td></tr>
+        <tr><td>ontology</td><td>vdoc:Chapter</td><td>vdoc:content</td><td>vdoc:title</td><td>Ontology specification chapter</td></tr>
       </tbody>
     </table>
 
   </section>
 
-  <section id="extractee_api">
+  <section id="extractee_api" class="vdoc type-vdoc-chapter">
     <h2>ReVDoc extractee API</h2>
 
-    <table>
+    <table class="vdoc type-vdoc-table">
       <thead>
-        <th> API identifier </th>
-        <th> rdf:type </th>
+        <th class="vdoc type-vdoc-column">API identifier</th>
+        <th class="vdoc type-vdoc-column">rdf:type</th>
       </thead>
       <tbody>
         
@@ -115,12 +115,12 @@
 
   </section>
 
-  <section id="output">
+  <section id="output" class="vdoc type-vdoc-chapter">
     <h2>ReVDoc output format</h2>
 
   </section>
 
-  <section id="emission">
+  <section id="emission" class="vdoc type-vdoc-chapter">
     <h2>ReVDoc emission rules</h2>
 
   </section>

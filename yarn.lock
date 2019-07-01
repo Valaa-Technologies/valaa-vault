@@ -1486,63 +1486,6 @@
   version "2.0.17"
   resolved "https://registry.yarnpkg.com/@types/swagger-schema-official/-/swagger-schema-official-2.0.17.tgz#c9086ec36ce00ae21e5a73a507c8fc94938f17e1"
 
-"@valos/gateway-api@^0.34.0":
-  version "0.34.0"
-  resolved "https://registry.yarnpkg.com/@valos/gateway-api/-/gateway-api-0.34.0.tgz#4fb1a116f913f56e2fba4fb1bdefec1c3bc1d2d6"
-  dependencies:
-    base64-js "^1.3.0"
-    text-encoding "^0.7.0"
-
-"@valos/tools@^0.34.0":
-  version "0.34.0"
-  resolved "https://registry.yarnpkg.com/@valos/tools/-/tools-0.34.0.tgz#5d985f4c24945bfc720304611523bd63325a2b28"
-  dependencies:
-    "@babel/runtime" ">7.0.0-rc"
-    "@babel/runtime-corejs2" ">7.0.0-rc"
-    "@valos/gateway-api" "^0.34.0"
-    fake-indexeddb "^2.0.3"
-    immutable "~3.7.4"
-    jssha "^2.3.1"
-    object-hash "^1.1.3"
-    uuid "^3.2.1"
-
-"@valos/toolset-vault@^0.34.0-prerelease.0":
-  version "0.34.0"
-  resolved "https://registry.yarnpkg.com/@valos/toolset-vault/-/toolset-vault-0.34.0.tgz#0b9c9553b50d083b9d92b3f7af9d96ac6f2ca5c6"
-  dependencies:
-    "@babel/cli" ">7.0.0-rc"
-    "@babel/core" "^7.0.0-rc"
-    "@babel/plugin-proposal-class-properties" "^7.0.0-rc"
-    "@babel/plugin-proposal-decorators" "^7.0.0-rc"
-    "@babel/plugin-proposal-export-default-from" "^7.0.0-rc"
-    "@babel/plugin-transform-flow-strip-types" "^7.0.0-rc"
-    "@babel/plugin-transform-runtime" ">7.0.0-rc"
-    "@babel/polyfill" ">7.0.0-rc"
-    "@babel/preset-env" ">7.0.0-rc"
-    "@babel/preset-react" ">7.0.0-rc"
-    "@babel/preset-stage-0" ">7.0.0-rc"
-    "@babel/runtime" ">7.0.0-rc"
-    "@babel/runtime-corejs2" ">7.0.0-rc"
-    babel-core "^7.0.0-0"
-    babel-eslint "^10.0.1"
-    babel-jest "^23.6.0"
-    babel-loader "^8.0.4"
-    babel-plugin-module-resolver "^3.1.1"
-    babel-plugin-root-import "^6.1.0"
-    eslint "^5.11.1"
-    eslint-config-airbnb "^17.1.0"
-    eslint-import-resolver-babel-plugin-root-import "^1.1.1"
-    eslint-plugin-flowtype "^3.2.0"
-    eslint-plugin-import "^2.14.0"
-    eslint-plugin-jsx-a11y "^6.1.2"
-    eslint-plugin-react "^7.12.0"
-    flow-bin "^0.89.0"
-    jasmine-core "^2.8.0"
-    jest "^23.5.0"
-    lerna "^3.4.0"
-    valma "^0.34.0"
-    yalc "1.0.0-pre.23"
-
 "@webassemblyjs/ast@1.8.5":
   version "1.8.5"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.8.5.tgz#51b1c5fe6576a34953bf4b253df9f0d490d9e359"
@@ -9353,20 +9296,6 @@ validate-npm-package-name@^3.0.0:
   resolved "https://registry.yarnpkg.com/validate-npm-package-name/-/validate-npm-package-name-3.0.0.tgz#5fa912d81eb7d0c74afc140de7317f0ca7df437e"
   dependencies:
     builtins "^1.0.3"
-
-valma@^0.34.0:
-  version "0.34.0"
-  resolved "https://registry.yarnpkg.com/valma/-/valma-0.34.0.tgz#29af0befec927dc2ba178b544365d42cb98c22ab"
-  dependencies:
-    "@valos/tools" "^0.34.0"
-    cardinal "^2.1.1"
-    colors "1.3.0"
-    glob-to-regexp "^0.4.0"
-    inquirer "^5.2.0"
-    minimatch "^3.0.4"
-    semver "^5.5.0"
-    shelljs "^0.8.2"
-    yargs "^11.0.0"
 
 vary@~1.1.2:
   version "1.1.2"

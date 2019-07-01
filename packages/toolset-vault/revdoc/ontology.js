@@ -2,10 +2,10 @@ const { ontology } = require("@valos/toolset-vault/vdoc");
 
 module.exports = {
   prefix: "revdoc",
-  base: "https://valaatech.github.io/vault/revdoc#",
+  base: "https://valaatech.github.io/vault/toolset-vault/revdoc#",
 
   prefixes: {
-    revdoc: "https://valaatech.github.io/vault/revdoc#",
+    revdoc: "https://valaatech.github.io/vault/toolset-vault/revdoc#",
   },
   context: {
   },

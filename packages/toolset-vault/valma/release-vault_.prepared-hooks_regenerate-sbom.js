@@ -47,14 +47,15 @@ exports.handler = async (yargv) => {
 
     for (const revdocPath of packageRevdocPaths) {
       const [, workspaceBase, packageDir,, docName] = revdocPath
-        .match(/^(packages|autholleries|workers)\/(.*\/)?(([^/]*)\.)revdoc.js$/);
+          .match(/^(packages|autholleries|workers)\/(.*\/)?(([^/]*)\.)?revdoc.js$/);
       await generateRevdocAndWriteToDocs(
           revdocPath,
-          vlm.path.join(...(workspaceBase !== "packages" ? [workspaceBase] : []), packageDir),
+          vlm.path.join(...(workspaceBase !== "packages" ? [workspaceBase] : []), packageDir || ""),
           docName,
           yargv.revdocs === "vdocson");
     }
   }
+  await vlm.execute("git add docs/*");
   return true;
 
   async function generateFormatsAndWriteToDocs () {
@@ -77,7 +78,7 @@ exports.handler = async (yargv) => {
       revdocPath, targetDocPath, targetDocName, emitReVDocSON) {
     const revdocSource = require(vlm.path.join(process.cwd(), revdocPath));
     const revdocson = extract(
-        vlm.path.join(toolset.documentURIBase || "", targetDocPath, targetDocName),
+        vlm.path.join(toolset.documentURIBase || "", targetDocPath, targetDocName || ""),
         revdocSource);
     const revdocHTML = await emitHTML(revdocson);
     const targetDir = vlm.path.join("docs", targetDocPath);
@@ -144,7 +145,8 @@ exports.handler = async (yargv) => {
       ],
       "chapter#introduction>2": toolset.introduction || [
         `Configure @valos/toolset-vault-sbom.introduction section using`,
-        ref("VDoc source graph syntax", "https://valaatech.github.io/vault/vdoc#source_graph"),
+        ref("VDoc source graph syntax",
+            "https://valaatech.github.io/vault/toolset-vault/vdoc#source_graph"),
         "to define the content of this section."
       ],
       "chapter#>3;Components table": {

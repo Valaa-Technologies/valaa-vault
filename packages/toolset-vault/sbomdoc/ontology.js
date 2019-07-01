@@ -4,10 +4,10 @@
 
 module.exports = {
   prefix: "sbomdoc",
-  base: "https://valaatech.github.io/vault/sbomdoc#",
+  base: "https://valaatech.github.io/vault/toolset-vault/sbomdoc#",
 
   prefixes: {
-    sbomdoc: "https://valaatech.github.io/vault/sbomdoc#",
+    sbomdoc: "https://valaatech.github.io/vault/toolset-vault/sbomdoc#",
   },
   context: {
   },

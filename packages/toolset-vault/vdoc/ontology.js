@@ -3,21 +3,27 @@ const extractionRuleRegex = /([^#]*)#(([0-9]+)|([^#>;]+))?(>([0-9]+)|([^#>;]*))?
 
 module.exports = {
   prefix: "vdoc",
-  base: "https://valaatech.github.io/vault/vdoc#",
+  base: "https://valaatech.github.io/vault/toolset-vault/vdoc#",
 
   prefixes: {
     dc: "http://purl.org/dc/elements/1.1/",
     owl: "http://www.w3.org/2002/07/owl#",
     rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-    vdoc: "https://valaatech.github.io/vault/vdoc#",
+    vdoc: "https://valaatech.github.io/vault/toolset-vault/vdoc#",
   },
 
   context: {
     a: { "@id": "rdf:type", "@type": "@id" },
-    "vdoc:content": { "@id": "https://valaatech.github.io/vault/vdoc#content", "@container": "@list" },
-    "vdoc:words": { "@id": "https://valaatech.github.io/vault/vdoc#words", "@container": "@list" },
-    "vdoc:rows": { "@id": "https://valaatech.github.io/vault/vdoc#rows", "@container": "@list" },
+    "vdoc:content": {
+      "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#content", "@container": "@list",
+    },
+    "vdoc:words": {
+      "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#words", "@container": "@list",
+    },
+    "vdoc:rows": {
+      "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#rows", "@container": "@list",
+    },
   },
 
   vocabulary: {
@@ -217,7 +223,7 @@ function emitAttributes (node) {
   let typeClasses = node["vdoc:class"] || "";
   if (node["rdf:type"]) {
     if (node["@id"]) ret += ` id="${node["@id"]}"`;
-    typeClasses += `type-${_classify(node["rdf:type"])}`;
+    typeClasses += `vdoc type-${_classify(node["rdf:type"])}`;
   }
   if (typeClasses) ret += ` class="${typeClasses}"`;
   if (node["vdoc:style"]) ret += ` style="${node["vdoc:style"]}"`;

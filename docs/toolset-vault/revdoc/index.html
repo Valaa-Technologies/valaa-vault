@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>ReVDoc - ReSpec document VDoc extension</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/editors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc"};
+    </script>
+  </head>
+  <body>
+    
+  <section id="abstract"> This document specifies <a href="vdoc"> a VDoc extension </a> for generating <a href="https://github.com/w3c/respec"> ReSpec </a> documents. 
+  </section>
+
+  <section id="sotd"> This document has not been reviewed. This is a draft document and
+    may be updated, replaced or obsoleted by other documents at any
+    time.  This document is part of the  <a href="@valos/vault/spec"> ValOS core specification </a> .  The format is implemented and supported by  <a href="@valos/toolset-vault"> @valos/toolset-vault npm package </a> . 
+  </section>
+
+  <section id="introduction"> ReVDoc is a VDoc extension which can produce ReSpec documents. 
+  </section>
+
+  <section id="ontology">
+    <h2>ReVDoc ontology</h2>
+
+  <section id="prefixes">
+    <h2>ReVDoc JSON-LD prefixes</h2>
+
+    <table>
+      <thead>
+        <th> Prefix </th>
+        <th> IRI </th>
+      </thead>
+      <tbody>
+        <tr><td>revdoc</td><td> https://valaatech.github.io/vault/revdoc# </td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="context">
+    <h2>ReVDoc JSON-LD context</h2>
+
+    <table>
+      <thead>
+        <th> Term </th>
+        <th> Definition </th>
+        <th> @id </th>
+        <th> @type </th>
+        <th> @container </th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="vocabulary">
+    <h2>ReVDoc JSON-LD vocabulary</h2>
+
+    <table>
+      <thead>
+        <th> rdfs:label </th>
+        <th> rdf:type </th>
+        <th> rdfs:subClassOf </th>
+        <th> rdfs:domain </th>
+        <th> rdfs:range </th>
+        <th> rdfs:comment </th>
+      </thead>
+      <tbody>
+        <tr><td>Document</td><td> rdfs:Class </td><td> vdoc:Chapter </td><td></td><td></td><td> A ReSpec specification document </td></tr>
+        <tr><td>Definition</td><td> rdfs:Class </td><td> vdoc:Node </td><td></td><td></td><td> A ReSpec term definition document node </td></tr>
+        <tr><td>Package</td><td> rdfs:Class </td><td> vdoc:Reference </td><td></td><td></td><td> A package reference document node </td></tr>
+        <tr><td>Command</td><td> rdfs:Class </td><td> vdoc:Node </td><td></td><td></td><td> A command invokation document node </td></tr>
+        <tr><td>CommandLineInteraction</td><td> rdfs:Class </td><td> vdoc:Node </td><td></td><td></td><td> A command line interaction sequence document node </td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="extraction_rules">
+    <h2>ReVDoc extraction rules</h2>
+
+    <table>
+      <thead>
+        <th> Rule name </th>
+        <th> Node rdf:type </th>
+        <th> primary target </th>
+        <th> ';rest' target </th>
+        <th> Comment </th>
+      </thead>
+      <tbody>
+        <tr><td>ontology</td><td> vdoc:Chapter </td><td> vdoc:content </td><td> vdoc:title </td><td> Ontology specification chapter </td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="extractee_api">
+    <h2>ReVDoc extractee API</h2>
+
+    <table>
+      <thead>
+        <th> API identifier </th>
+        <th> rdf:type </th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="output">
+    <h2>ReVDoc output format</h2>
+
+  </section>
+
+  <section id="emission">
+    <h2>ReVDoc emission rules</h2>
+
+  </section>
+
+  </section>
+
+  </body>
+</html>

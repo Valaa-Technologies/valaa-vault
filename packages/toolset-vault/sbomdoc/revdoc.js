@@ -1,9 +1,9 @@
 // @flow
 
-const { ontology: sbomdocOntology } = require("../packages/toolset-vault/sbomdoc");
+const { ontology: sbomdocOntology } = require("@valos/toolset-vault/sbomdoc");
 const {
-  editors, extract, ref, /* dfn, */ ontologyTables,
-} = require("../packages/toolset-vault/revdoc");
+  ontologyTables, extractee: { editors, ref, /* dfn, */ },
+} = require("@valos/toolset-vault/revdoc");
 
 module.exports = {
   "vdoc:title": "SBoMDoc - Software Bill of Materials VDoc extension",
@@ -53,10 +53,15 @@ module.exports = {
       "table#>0;extraction_rules_data": ontologyTables.extractionRules,
       "data#extraction_rules_data": sbomdocOntology.extractionRules,
     },
-    "chapter#output>4;SBoMDoc output format": {
+    "chapter#extractee_api>4;SBoMDoc extractee API": {
+      "#0": [],
+      "table#>0;extractee_api_lookup": ontologyTables.extracteeAPI,
+      "data#extractee_api_lookup": sbomdocOntology.extracteeAPI,
+    },
+    "chapter#output>5;SBoMDoc output format": {
       "#0": [],
     },
-    "chapter#emission>5;SBoMDoc emission rules": {
+    "chapter#emission>6;SBoMDoc emission rules": {
       "#0": [],
     },
   },

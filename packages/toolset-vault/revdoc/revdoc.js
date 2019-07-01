@@ -1,9 +1,8 @@
 // @flow
 
 const {
-  editors, extract, ref, /* dfn, */ ontologyTables,
-  ontology: revdocOntology,
-} = require("../packages/toolset-vault/revdoc");
+  ontologyTables, ontology: revdocOntology, extractee: { editors, ref, /* dfn, */  },
+} = require("@valos/toolset-vault/revdoc");
 
 module.exports = {
   "vdoc:title": "ReVDoc - ReSpec document VDoc extension",
@@ -51,6 +50,11 @@ module.exports = {
       "#0": [],
       "table#>0;extraction_rules_data": ontologyTables.extractionRules,
       "data#extraction_rules_data": revdocOntology.extractionRules,
+    },
+    "chapter#extractee_api>4;ReVDoc extractee API": {
+      "#0": [],
+      "table#>0;extractee_api_lookup": ontologyTables.extracteeAPI,
+      "data#extractee_api_lookup": revdocOntology.extracteeAPI,
     },
     "chapter#output>4;ReVDoc output format": {
       "#0": [],

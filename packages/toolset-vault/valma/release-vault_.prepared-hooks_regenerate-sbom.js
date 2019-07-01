@@ -9,31 +9,55 @@ exports.disabled = (yargs) =>
     : !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "commands",
             ".configure/.type/.vault/.toolset/@valos/toolset-vault-sbom", "release-regenerate")
         && "release-regenerate not enabled in @valos/toolset-vault-sbom config");
+
 exports.builder = (yargs) => yargs.options({
   summary: {
     type: "object", description: "Preparation summary",
+  },
+  sbom: {
+    type: "boolean", default: true,
+    description: "Generate Software Bill of Materials documents",
+  },
+  revdocs: {
+    default: true,
+    description: "Generate revdocs from all vault **/*revdoc.js files",
   },
 });
 
 exports.handler = async (yargv) => {
   const convert = require("xml-js");
   const patchWith = require("@valos/tools/patchWith").default;
-  const { ref, extract, ontologyTables } = require("@valos/toolset-vault/sbomdoc");
-  const { emit, editors } = require("@valos/toolset-vault/revdoc");
+  const { extract, ontologyTables, extractee: { ref } } = require("@valos/toolset-vault/sbomdoc");
+  const { emit, extractee: { editors } } = require("@valos/toolset-vault/revdoc");
 
   const vlm = yargv.vlm;
   const config = vlm.getPackageConfig();
   const toolset = vlm.getToolsetConfig(exports.vlm.toolset);
   const vaultToolset = vlm.getToolsetConfig("@valos/toolset-vault");
 
-  await generateFormatsAndWriteToDocs();
-  for (const revdoc of ((vaultToolset.revdoc || {}).docs || [])) {
-    await generateRevdocAndWriteToDocs(revdoc);
+  vlm.shell.mkdir("-p", "docs");
+
+  if (yargv.sbom) {
+    await generateFormatsAndWriteToDocs();
+  }
+
+  if (yargv.revdocs) {
+    const packageRevdocPaths = vlm.shell.find("-l",
+        "{packages,autholleries,workers}/**/*revdoc.js") || [];
+
+    for (const revdocPath of packageRevdocPaths) {
+      const [, workspaceBase, packageDir,, docName] = revdocPath
+        .match(/^(packages|autholleries|workers)\/(.*\/)?(([^/]*)\.)revdoc.js$/);
+      await generateRevdocAndWriteToDocs(
+          revdocPath,
+          vlm.path.join(...(workspaceBase !== "packages" ? [workspaceBase] : []), packageDir),
+          docName,
+          yargv.revdocs === "vdocson");
+    }
   }
   return true;
 
   async function generateFormatsAndWriteToDocs () {
-    vlm.shell.mkdir("-p", "docs");
     const sbomxml = await scrapeCycloneDXXML();
     await vlm.shell.ShellString(sbomxml)
         .to("docs/sbom.cyclonedx.xml");
@@ -49,11 +73,22 @@ exports.handler = async (yargv) => {
     return { sbomxml, sbomvdocson, sbomhtml, sbommarkdown };
   }
 
-  async function generateRevdocAndWriteToDocs (revdocName) {
-    const revdocson = require(vlm.path.join(process.cwd(), `./revdoc/${revdocName}.revdoc`));
-    const revdochtml = await emitHTML(revdocson);
-    await vlm.shell.ShellString(revdochtml)
-        .to(`docs/${revdocName}.html`);
+  async function generateRevdocAndWriteToDocs (
+      revdocPath, targetDocPath, targetDocName, emitReVDocSON) {
+    const revdocSource = require(vlm.path.join(process.cwd(), revdocPath));
+    const revdocson = extract(
+        vlm.path.join(toolset.documentURIBase || "", targetDocPath, targetDocName),
+        revdocSource);
+    const revdocHTML = await emitHTML(revdocson);
+    const targetDir = vlm.path.join("docs", targetDocPath);
+    const targetFileName = `${targetDocName || "index"}.html`;
+    await vlm.shell.mkdir("-p", targetDir);
+    await vlm.shell.ShellString(revdocHTML)
+        .to(vlm.path.join(targetDir, targetFileName));
+    if (emitReVDocSON) {
+      await vlm.shell.ShellString(JSON.stringify(revdocson, null, 2))
+          .to(vlm.path.join(targetDir, `${targetDocName || "index"}.jsonld`));
+    }
   }
 
   async function scrapeCycloneDXXML () {

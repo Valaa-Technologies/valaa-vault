@@ -12,8 +12,8 @@
     }
   },
   "@valos/toolset-vault": {
+    "inUse": true,
     "revdoc": {
-      "docs": ["vdoc", "revdoc", "sbomdoc"],
       "editors": {
         "iridian": {
           "name": "Iridian Kiiskinen",
@@ -21,8 +21,7 @@
           "github": "http://github.com/valospace"
         }
       }
-    },
-    "inUse": false
+    }
   },
   "@valos/toolset-vault-sbom": {
     "inUse": true,

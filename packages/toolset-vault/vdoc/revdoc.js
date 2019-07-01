@@ -1,9 +1,9 @@
 // @flow
 
-const { ontology: vdocOntology } = require("../packages/toolset-vault/vdoc");
+const { ontology: vdocOntology } = require("@valos/toolset-vault/vdoc");
 const {
-  editors, extract, ref, dfn, ontologyTables,
-} = require("../packages/toolset-vault/revdoc");
+  ontologyTables, extractee: { editors, ref, dfn },
+} = require("@valos/toolset-vault/revdoc");
 
 module.exports = {
   "vdoc:title": "ValOS document interchange specification",
@@ -148,11 +148,15 @@ module.exports = {
         "."),
       dfn("Resource node", "#resource_node", `is an always-second-level
         node which is directly accessible from the first-level document
-        node which owns it by using its`, ref("resource identifier", "#resource_id"),
+        via its document relative`, ref("resource identifier", "#resource_id"),
         `as the dictionary key.`),
       dfn("Element node", "#element_node", `is a third-or-more-level
-        node. These nodes don't have identifiers that are stable over
-        time nor necessarily even unique within the document.`),
+        node. It might be anonymous and lacks a stable and unique
+        identifiers. It MAY have a locally unique identifier. If the
+        element node and all its parent element nodes have locally
+        unique identifier then the ordered set of those identifiers
+        can be considered a document local unique identifier of the
+        element node, similar to `, ref("the resource identifier", "#resource_id")),
     ],
     "#1": [
       `There can be multiple first-level document nodes in a single
@@ -205,8 +209,10 @@ module.exports = {
   "chapter#emission_transformation>7;Document emission transformation": {
     "#0": [],
   },
-  "chapter#formats>8;Core and extension ontologies": {
-    "#0": [],
+  "chapter#formats>8;VDoc ontologies": {
+    "#0": [
+      `A VDoc ontology is a collection `
+    ],
     "chapter#extension_prefixes>0": {
       "#0": [],
     },
@@ -216,10 +222,47 @@ module.exports = {
     "chapter#extension_vocabulary>2": {
       "#0": [],
     },
-    "chapter#extension_extraction_rules>3;Extraction transformation rules": {
-      "#0": [],
-    },
-    "chapter#extension_output>4;Emission output": {
+    "chapter#extension_extraction_rules>3;Extraction transformation rules": [
+      `Extraction transformation rules specify how a source graph is
+      interpreted as mutations against a given target vdocson document.
+      The idiomatic transformation rule consists of two parts:`,
+      { "bulleted#": [
+        dfn("key matching pattern", "#transformation_key_pattern", `is
+            matched against source graph node dictionary key to see if
+            the rule applies in that `, ref("transformation context")),
+        dfn("transformation rule", "#transformation_rule", `specifies
+            how the `, ref("transformation context"), ` is interpreted
+            as a set of mutations on the current target vdocson
+            document node`),
+      ] },
+      dfn("Transformation context", "#transformation_context", `is
+          defined as a collection of `, ...[].concat(...[
+            "transformation key",
+            "source graph parent node",
+            "source graph node value",
+            "target document parent node",
+            "target document value"
+          ].map((k, i, a) => (!i ? [ref(k)] : [(i + 1 === a.length) ? " and " : ", ", ref(k)])))),
+    ],
+    "chapter#extension_extractee_apis>4;Extraction extractee tool APIs": [
+      `An extension MAY specify an extractee API as a collection
+      of `, ref("WebIDL interfaces", "https://www.w3.org/TR/WebIDL-1/"),
+      `for constructing of extension extraction source graphs. By doing
+      this the native implementations gain the benefits of integrated
+      toolchains:`,
+      { "bulleted#0": [
+        `Improved discoverability via integrated documentation and code
+        completion`,
+        `Implicitly well-formed primitives and structures where
+        possible, validation of input where not`,
+        `Improved readability of the document in contexts where the
+        primary document source graph is expressed in native code`
+      ] },
+      `Altogether the extraction APIs are intended to lower the
+      threshold of adoption of new extensions and as such make the
+      introduction of new extensions easier.`
+    ],
+    "chapter#extension_output>4;Emission outputs": {
       "#0": [],
     },
     "chapter#extension_emission>5;Emission transformation": {
@@ -227,6 +270,15 @@ module.exports = {
     },
   },
   "chapter#ontology>9;VDoc Core ontology": {
+    "#0": [
+      `VDoc core ontology specifies the vocabulary for the human facing
+      document structure by means of primitives which are sufficiently
+      common and meaningful across all types documents.
+      These primitives include constructs such as chapters, titles,
+      lists, tables, cross-references, etc.`,
+      `VDoc core ontology explicitly does not specify any semantic
+      meanings outside the document structure itself.`,
+    ],
     "chapter#prefixes>0;VDoc Core JSON-LD prefixes": {
       "#0": [],
       "table#>0;prefixes_data": ontologyTables.prefixes,
@@ -244,13 +296,18 @@ module.exports = {
     },
     "chapter#extraction_rules>3;VDoc Core extraction rules": {
       "#0": [],
-      "table#>0;extraction_rules_data": ontologyTables.extractionRules,
-      "data#extraction_rules_data": vdocOntology.extractionRules,
+      "table#>0;extraction_rules_lookup": ontologyTables.extractionRules,
+      "data#extraction_rules_lookup": vdocOntology.extractionRules,
     },
-    "chapter#output>4;VDoc Core output format": {
+    "chapter#extractee_api>4;VDoc Core extractee API": {
+      "#0": [],
+      "table#>0;extractee_api_lookup": ontologyTables.extracteeAPI,
+      "data#extractee_api_lookup": vdocOntology.extracteeAPI,
+    },
+    "chapter#output>5;VDoc Core output formats": {
       "#0": [],
     },
-    "chapter#emission>5;VDoc Core emission rules": {
+    "chapter#emission>6;VDoc Core emission rules": {
       "#0": [],
     },
   },

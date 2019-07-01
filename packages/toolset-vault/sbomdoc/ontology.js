@@ -3,16 +3,22 @@
 // const { ontology } = require("~/toolset-vault/vdoc");
 
 module.exports = {
+  prefix: "sbomdoc",
+  base: "https://valaatech.github.io/vault/sbomdoc#",
+
   prefixes: {
     sbomdoc: "https://valaatech.github.io/vault/sbomdoc#",
   },
   context: {
   },
   vocabulary: {
-    Document: { "rdfs:subClassOf": "vdoc:Chapter" },
+    Document: { a: "rdfs:class", "rdfs:subClassOf": "vdoc:Chapter",
+      "rdfs:comment": "A Software Bill of Materials document",
+    },
   },
   extractionRules: {
   },
+  extracteeAPI: {},
   extractor: {
     preExtend (target, /* patch, key, targetObject, patchObject */) {
       if (target && (this.keyPath.length === 1)) {

@@ -5,7 +5,7 @@ const {
   editors, extract, ref, /* dfn, */ ontologyTables,
 } = require("../packages/toolset-vault/revdoc");
 
-module.exports = extract("https://valaatech.github.io/vault/sbomdoc", {
+module.exports = {
   "vdoc:title": "SBoMDoc - Software Bill of Materials VDoc extension",
   respecConfig: {
     specStatus: "unofficial",
@@ -60,4 +60,4 @@ module.exports = extract("https://valaatech.github.io/vault/sbomdoc", {
       "#0": [],
     },
   },
-});
+};

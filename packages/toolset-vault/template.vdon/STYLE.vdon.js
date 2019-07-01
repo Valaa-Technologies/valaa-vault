@@ -114,7 +114,7 @@ module.exports = {
       revelations and Events VSON for the universal command and truth
       events.`,
       `All ValOS JSON dialects (and only them) follow this convention:
-      'V*ON' or 'name + VSON' ('Valos System Object Notation'). Only
+      'V*ON' or 'name + VSON' ('ValOS System Object Notation'). Only
       the fundamental dialects get their own abbreviation.`,
       `Some dialects make use of some shared tooling like
       @valos/tools/deepExpand`,

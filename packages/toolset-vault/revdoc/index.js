@@ -1,10 +1,13 @@
 const vdoc = require("@valos/toolset-vault/vdoc");
 const ontology = require("./ontology");
+const extractee = require("./extractee");
 
 module.exports = {
   ...vdoc,
-  dfn,
-  editors,
+  extractee: {
+    ...vdoc.extractee,
+    ...extractee,
+  },
   ontology,
   ontologyTables: {
     prefixes: {
@@ -14,49 +17,36 @@ module.exports = {
     context: {
       "column#0;vdoc:key": "Term",
       "column#1;vdoc:value": "Definition",
+      "column#2;@id": "@id",
+      "column#3;@type": "@type",
+      "column#3;@container": "@container",
     },
     vocabulary: {
       "column#0;vdoc:key": "rdfs:label",
       "column#1;a": "rdf:type",
-      "column#2;rdf:subClassOf": "rdf:subClassOf",
-      "column#3;rdf:domain": "rdf:domain",
-      "column#4;rdf:range": "rdf:range",
+      "column#2;rdfs:subClassOf": "rdfs:subClassOf",
+      "column#3;rdfs:domain": "rdfs:domain",
+      "column#4;rdfs:range": "rdfs:range",
       "column#5;rdfs:comment": "rdfs:comment",
     },
     extractionRules: {
       "column#0;vdoc:key": "Rule name",
       "column#1;range": "Node rdf:type",
-      "column#2;extraction": "Extraction property",
-      "column#3;comment": "Comment",
+      "column#2;target": "primary target",
+      "column#3;rest": "';rest' target",
+      "column#4;comment": "Comment",
+    },
+    extracteeAPI: {
+      "column#0;vdoc:key": "API identifier",
+      "column#1;vdoc:value": "rdf:type",
     },
   },
-  extract: function extract (documentIRI, sourceGraphs,
+  extract (documentIRI, sourceGraphs,
       ontologies = [ontology, vdoc.ontology]) {
     return vdoc.extract(documentIRI, sourceGraphs, ontologies);
   },
-  emit: function emit (emission, vdocson, formatName,
+  emit (emission, vdocson, formatName,
       ontologies = [ontology, vdoc.ontology]) {
     return vdoc.emit(emission, vdocson, formatName, ontologies);
   },
 };
-
-function dfn (text, definitionId, ...explanation) {
-  return {
-    "revdoc:dfn": definitionId,
-    "vdoc:content": [vdoc.ref(text, definitionId, "bold"), ...explanation],
-  };
-}
-
-function editors (...editorNames) {
-  const editorsPath = `${process.cwd()}/toolsets.json`;
-  const editorLookup = ((require(editorsPath)["@valos/toolset-vault"] || {})
-      .revdoc || {}).editors || {};
-  return (editorNames || []).map(editorName => {
-    const editor = editorLookup[editorName];
-    if (!editor) {
-      throw new Error(`Cannot find editor '${editorName}' from toolsetConfig("${
-        editorsPath}")["@valos/toolset-vault"].revdoc.editors`);
-    }
-    return editor;
-  });
-}

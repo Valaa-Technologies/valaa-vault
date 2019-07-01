@@ -5,8 +5,8 @@ const {
   editors, extract, ref, dfn, ontologyTables,
 } = require("../packages/toolset-vault/revdoc");
 
-module.exports = extract("https://valaatech.github.io/vault/vdoc", {
-  "vdoc:title": "Valos document interchange specification",
+module.exports = {
+  "vdoc:title": "ValOS document interchange specification",
   respecConfig: {
     specStatus: "unofficial",
     editors: editors("iridian"),
@@ -254,4 +254,4 @@ module.exports = extract("https://valaatech.github.io/vault/vdoc", {
       "#0": [],
     },
   },
-});
+};

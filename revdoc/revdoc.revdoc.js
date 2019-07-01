@@ -5,7 +5,7 @@ const {
   ontology: revdocOntology,
 } = require("../packages/toolset-vault/revdoc");
 
-module.exports = extract("https://valaatech.github.io/vault/revdoc", {
+module.exports = {
   "vdoc:title": "ReVDoc - ReSpec document VDoc extension",
   respecConfig: {
     specStatus: "unofficial",
@@ -59,4 +59,4 @@ module.exports = extract("https://valaatech.github.io/vault/revdoc", {
       "#0": [],
     },
   },
-});
+};

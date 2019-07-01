@@ -2,6 +2,9 @@
 const extractionRuleRegex = /([^#]*)#(([0-9]+)|([^#>;]+))?(>([0-9]+)|([^#>;]*))?(;([^#>;]*))?/;
 
 module.exports = {
+  prefix: "vdoc",
+  base: "https://valaatech.github.io/vault/vdoc#",
+
   prefixes: {
     dc: "http://purl.org/dc/elements/1.1/",
     owl: "http://www.w3.org/2002/07/owl#",
@@ -13,52 +16,89 @@ module.exports = {
   context: {
     a: { "@id": "rdf:type", "@type": "@id" },
     "vdoc:content": { "@id": "https://valaatech.github.io/vault/vdoc#content", "@container": "@list" },
+    "vdoc:words": { "@id": "https://valaatech.github.io/vault/vdoc#words", "@container": "@list" },
+    "vdoc:rows": { "@id": "https://valaatech.github.io/vault/vdoc#rows", "@container": "@list" },
   },
 
   vocabulary: {
-    Node: { a: "rdfs:Class" },
-    title: { a: "rdf:Property", "rdf:domain": "vdoc:Node", "rdf:range": "rdfs:Literal" },
-    content: { a: "rdf:Property", "rdf:domain": "vdoc:Node", "rdf:range": "rdf:List" },
-    Chapter: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node" },
-    BulletList: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node" },
-    NumberedList: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node" },
-    Table: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node" },
-    Reference: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node" },
+    Node: { a: "rdfs:Class",
+      "rdfs:comment": "A document tree Node",
+    },
+    content: { a: "rdf:Property",
+      "rdfs:domain": "vdoc:Node", "rdfs:range": "rdfs:List",
+      "rdfs:comment": "The primary visible content of a Node",
+    },
+    words: { a: "rdf:Property", "rdfs:subPropertyOf": "vdoc:content",
+      "rdfs:domain": "vdoc:Node", "rdfs:range": "rdfs:List",
+      "rdfs:comment": "A visible list of visually separate words",
+    },
+    rows: { a: "rdf:Property", "rdfs:subPropertyOf": "vdoc:content",
+      "rdfs:domain": "vdoc:Node", "rdfs:range": "rdfs:List",
+      "rdfs:comment": "A visible list of vertically stacked rows",
+    },
+    title: { a: "rdf:Property", "rdfs:domain": "vdoc:Node", "rdfs:range": "rdfs:Resource",
+      "rdfs:comment": "Human readable name of a Node",
+    },
+    Chapter: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node",
+      "rdfs:comment": "A titled, possibly numbered chapter document node",
+    },
+    BulletList: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node",
+      "rdfs:comment": "A bullet list document node",
+    },
+    NumberedList: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node",
+      "rdfs:comment": "A numbered list document node",
+    },
+    Table: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node",
+      "rdfs:comment": "A two-dimensional table document node",
+    },
+    CharacterData: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node",
+      "rdfs:comment": "A CDATA document node",
+    },
+    Reference: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node",
+      "rdfs:comment": "A reference document node",
+    },
+    ContextPath: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node",
+      "rdfs:comment": "A context-based path document node",
+    },
+    context: { a: "rdf:Property", "rdfs:domain": "vdoc:ContextPath", "rdfs:range": "rdfs:Resource",
+      "rdfs:comment": "Non-visible context base (absolute or relative to current base)",
+    },
+    ContextBase: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:ContextPath",
+      "rdfs:comment": "A context base setting document node",
+    },
   },
 
   extractionRules: {
     "": {
-      comment: "Basic Node",
+      comment: "Basic Node", target: "vdoc:content",
     },
     chapter: {
-      range: "vdoc:Chapter", rest: "vdoc:title",
+      range: "vdoc:Chapter", target: "vdoc:content", rest: "vdoc:title",
       comment: "Numbered, titled chapter",
     },
     bulleted: {
-      range: "vdoc:BulletList",
+      range: "vdoc:BulletList", target: "vdoc:rows",
       comment: "Bulleted list",
     },
     numbered: {
-      range: "vdoc:NumberedList",
+      range: "vdoc:NumberedList", target: "vdoc:rows",
       comment: "Numbered list",
     },
     table: {
-      range: "vdoc:Table", rest: "vdoc:data",
+      range: "vdoc:Table", target: "vdoc:columns", rest: "vdoc:lookup",
       comment: "Table",
     },
     column: {
-      range: "vdoc:Column", rest: "vdoc:key",
+      range: "vdoc:Column", target: "vdoc:content", rest: "vdoc:key",
       comment: "Column",
     },
     data: {
-      hidden: true,
+      hidden: true, target: "vdoc:content",
       comment: "Data lookup",
     },
-    ontology: {
-      range: "vdoc:Chapter", rest: "vdoc:title",
-      comment: "Ontology specification chapter",
-    },
   },
+
+  extracteeAPI: {},
 
   extractor: {
     preExtend (target, patch, key, targetObject /* , patchObject */) {
@@ -86,17 +126,19 @@ module.exports = {
         if (!resourceId && !Object.keys(node).length) {
           node = patch;
         } else {
-          node["vdoc:content"] = this.extend([], [patch]);
+          node[rule.target] = this.extend([], [patch]);
         }
       } else if (Array.isArray(patch)) {
         if (rule.hidden || (!resourceId && !Object.keys(node).length)) {
           node = this.extend([], patch);
           if (resourceId) this.documentNode[resourceId] = node;
         } else {
-          node["vdoc:content"] = this.extend([], patch);
+          node[rule.target] = this.extend([], patch);
         }
       } else {
+        node["vdoc:pre_target"] = rule.target;
         this.extend(node, patch);
+        delete node["vdoc:pre_target"];
       }
       if (!rule.hidden) {
         (targetObject["vdoc:pre_content"] || (targetObject["vdoc:pre_content"] = [])).push([
@@ -110,7 +152,7 @@ module.exports = {
     postExtend (target) {
       const unorderedEntries = (target != null) && target["vdoc:pre_content"];
       if (unorderedEntries) {
-        target["vdoc:content"] = []
+        target[target["vdoc:pre_target"] || "vdoc:content"] = []
             .concat(...unorderedEntries.sort(_compareWithOrderQualifier).map(e => e[1]));
         delete target["vdoc:pre_content"];
       }
@@ -125,7 +167,7 @@ module.exports = {
       array: emitArrayHTML,
       object: emitNodeHTML,
       "vdoc:Node": emitNodeHTML,
-      "vdoc:Chapter": emitNodeHTML, // emitChapterHTML,
+      "vdoc:Chapter": emitChapterHTML,
       "vdoc:BulletList": emitBulletListHTML,
       "vdoc:NumberedList": emitNumberedListHTML,
       "vdoc:Table": emitTableHTML,
@@ -143,7 +185,7 @@ function emitBreakHTML (emission /* , node, document, emitNode, vdocson, emitter
 }
 
 function emitValueHTML (emission, value /* , document, emitNode, vdocson, emitters */) {
-  return `${emission} ${value} `;
+  return `${emission}${value}`;
 }
 
 function emitNodeHTML (emission, node, document, emitNode /* , vdocson, emitters */) {
@@ -152,13 +194,17 @@ function emitNodeHTML (emission, node, document, emitNode /* , vdocson, emitters
     body += `\n    <h2>${node["vdoc:title"]}</h2>\n`;
   }
   const content = node["vdoc:content"]
+      || (node["vdoc:words"] && [].concat(...node["vdoc:words"]
+          .map((word, index) => (!index ? [word] : [" ", word]))))
+      || (node["vdoc:rows"] && [].concat(...node["vdoc:rows"]
+          .map((line, index) => (!index ? [line] : [null, line]))))
       || (node["@id"] && document[node["@id"]]);
   if (content) {
     body += emitNode("", content, document);
     const attributes = emitAttributes(node);
     if (node["vdoc:element"] || attributes) {
-      const elem = node["vdoc:element"] || "div";
-      body = `
+      const elem = node["vdoc:element"] || (node["vdoc:rows"] ? "div" : "span");
+      body = (elem === "span") ? `<${elem}${attributes}>${body}</${elem}>\n` : `
   <${elem}${attributes}>${body}
   </${elem}>\n`;
     }
@@ -168,36 +214,48 @@ function emitNodeHTML (emission, node, document, emitNode /* , vdocson, emitters
 
 function emitAttributes (node) {
   let ret = "";
-  if (node["@id"] && node["rdf:type"]) ret += ` id="${node["@id"]}"`;
+  let typeClasses = node["vdoc:class"] || "";
+  if (node["rdf:type"]) {
+    if (node["@id"]) ret += ` id="${node["@id"]}"`;
+    typeClasses += `type-${_classify(node["rdf:type"])}`;
+  }
+  if (typeClasses) ret += ` class="${typeClasses}"`;
   if (node["vdoc:style"]) ret += ` style="${node["vdoc:style"]}"`;
-  if (node["vdoc:class"]) ret += ` class="${node["vdoc:class"]}"`;
   return ret;
+}
+
+function _classify (typeString) {
+  return typeString.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase().split(":").join("-");
 }
 
 function emitArrayHTML (emission, content, document, emitNode, vdocson, emitters) {
   let paragraphBegin = 0;
   let ret = emission;
   for (let i = 0; i <= content.length; ++i) {
-    if (i < content.length ? !content[i] : paragraphBegin) {
+    if (i < content.length ? (content[i] === null) : paragraphBegin) {
       if (i > paragraphBegin) {
-        ret += `      <p>${emitArrayHTML(
-            "", content.slice(paragraphBegin, i), document, emitNode, vdocson, emitters)
-        }</p>\n`;
+        const body = emitArrayHTML("", content.slice(paragraphBegin, i),
+            document, emitNode, vdocson, emitters);
+        ret += ((i === content.length) && !paragraphBegin)
+            ? body
+            : `      <p>${body}</p>\n`;
       }
       paragraphBegin = i + 1;
     }
   }
   if (paragraphBegin) return ret;
-  let lis = "";
-  for (const entry of content) lis += emitNode("", entry, document);
-  return `${ret}${lis}`;
+  let listitems = "";
+  for (const entry of content) listitems += emitNode("", entry, document);
+  return `${ret}${listitems}`;
 }
 
-// function emitChapterHTML (emission, node, document, emitNode /* , vdocson, emitters */) {}
+function emitChapterHTML (emission, node, document, emitNode, vdocson, emitters) {
+  return emitNodeHTML(emission, node, document, emitNode, vdocson, emitters);
+}
 
 function emitBulletListHTML (emission, node, document, emitNode /* , vdocson, emitters */) {
   let lis = "";
-  for (const entry of (node["vdoc:content"] || [])) {
+  for (const entry of (node["vdoc:rows"] || [])) {
     lis += `      <li>${emitNode("", entry, document)}</li>\n`;
   }
   return `${emission}\n    <ul>\n${lis}    </ul>\n`;
@@ -205,7 +263,7 @@ function emitBulletListHTML (emission, node, document, emitNode /* , vdocson, em
 
 function emitNumberedListHTML (emission, node, document, emitNode /* , vdocson, emitters */) {
   let lis = "";
-  for (const entry of (node["vdoc:content"] || [])) {
+  for (const entry of (node["vdoc:rows"] || [])) {
     lis += `      <li>${emitNode("", entry, document)}</li>\n`;
   }
   return `${emission}\n    <ol>\n${lis}    </ol>\n`;
@@ -214,26 +272,32 @@ function emitNumberedListHTML (emission, node, document, emitNode /* , vdocson, 
 function emitTableHTML (emission, node, document, emitNode /* , vdocson, emitters */) {
   const keys = [];
   const headers = [];
-  for (const header of node["vdoc:content"]) {
-    keys.push(header["vdoc:key"]);
-    headers.push(`<th${emitAttributes(header)}>${
-      emitNode("", header["vdoc:content"], document)
-    }</th>`);
+  if (!node["vdoc:columns"]) {
+    throw new Error("vdoc:Table missing columns");
   }
-  const rows = [];
-  const data = (typeof node["vdoc:data"] === "string")
-      ? document[node["vdoc:data"]] : node["vdoc:data"];
-  for (const [rowKey, rowData] of Object.entries(data || {})) {
+  for (const column of node["vdoc:columns"]) {
+    keys.push(column["vdoc:key"]);
+    const headerText = emitNode("", column["vdoc:content"], document);
+    headers.push(`<th${emitAttributes(column)}>${headerText}</th>`);
+  }
+  const rowTexts = [];
+  const lookup = (typeof node["vdoc:lookup"] !== "string") ? node["vdoc:lookup"]
+      : document[node["vdoc:lookup"]];
+  const rows = !node["vdoc:rows"]
+      ? Object.entries(lookup || {})
+      : node["vdoc:rows"].map((row, index) =>
+          (!lookup || (typeof row === "object") ? [index, row] : [row, lookup[row]]));
+  for (const [rowKey, rowData] of rows) {
     if (rowKey === "@id") continue;
-    let row = "";
+    let rowText = "";
     for (const key of keys) {
-      row += `<td>${(key === "vdoc:key") ? rowKey
+      rowText += `<td>${(key === "vdoc:key") ? rowKey
           : emitNode("",
               (key === "vdoc:value") ? rowData : (rowData != null) && rowData[key],
               document)
       }</td>`;
     }
-    rows.push(`<tr>${row}</tr>`);
+    rowTexts.push(`<tr>${rowText}</tr>`);
   }
   return `${emission}
     <table${emitAttributes(node)}>
@@ -242,7 +306,7 @@ function emitTableHTML (emission, node, document, emitNode /* , vdocson, emitter
         `)}
       </thead>
       <tbody>
-        ${rows.join(`
+        ${rowTexts.join(`
         `)}
       </tbody>
     </table>

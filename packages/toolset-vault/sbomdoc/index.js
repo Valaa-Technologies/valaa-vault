@@ -1,9 +1,14 @@
 const vdoc = require("@valos/toolset-vault/vdoc");
 
 const ontology = require("./ontology");
+const extractee = require("./extractee");
 
 module.exports = {
   ...vdoc,
+  extractee: {
+    ...vdoc.extractee,
+    ...extractee,
+  },
   ontology,
   ontologyTables: {
     components: {
@@ -17,10 +22,10 @@ module.exports = {
       "column#7;description": "Description",
     },
   },
-  extract: function extract (documentIRI, sourceGraphs, ontologies = [ontology, vdoc.ontology]) {
+  extract (documentIRI, sourceGraphs, ontologies = [ontology, vdoc.ontology]) {
     return vdoc.extract(documentIRI, sourceGraphs, ontologies);
   },
-  emit: function emit (emission, vdocson, formatName, ontologies = [ontology, vdoc.ontology]) {
+  emit (emission, vdocson, formatName, ontologies = [ontology, vdoc.ontology]) {
     return vdoc.emit(emission, vdocson, formatName, ontologies);
   },
 };

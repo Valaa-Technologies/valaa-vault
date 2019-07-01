@@ -20,6 +20,10 @@ exports.builder = (yargs) => yargs.options({
     type: "string", default: "npm",
     description: `The command used to publish individual packages assemblies.`,
   },
+  tag: {
+    type: "string",
+    description: `A --tag option which is forwarded to the publisher command.`,
+  },
 });
 
 exports.handler = (yargv) => {
@@ -39,7 +43,8 @@ exports.handler = (yargv) => {
             vlm.theme.executable(yargv.publisher)}':\n\t`,
         vlm.theme.package(...assemblyPaths.map(p => p.match(nameRegex)[1])));
     for (const packagePath of assemblyPaths) {
-      const executable = `${yargv.publisher} publish ${packagePath}`;
+      const executable = `${yargv.publisher} publish ${
+        yargv.tag ? `--tag ${yargv.tag} ` : ""}${packagePath}`;
       const publishResult = vlm.shell.exec(executable);
       if (!publishResult.code && packagePath) {
         vlm.info(`Successfully published with '${vlm.theme.executable(executable)}'`);

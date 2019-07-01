@@ -262,11 +262,13 @@ exports.handler = async (yargv) => {
     commit["..."].heading = `${ret.releaseDescription} commit ${commit.success
         ? "successful" : "FAILED"}: changes to local git and prepared publishables under dist/`;
     commit.publishFiles = `git push --tags origin master ${targetBranch}`;
-    commit.vlmPublishPackages = `publish-packages`;
     if (previousPrereleaseBranch) {
       commit.publishFiles += ` :${previousPrereleaseBranch}`;
       commit.deletePrerelease = `git branch -d ${previousPrereleaseBranch}`;
     }
+    commit.vlmPublishPackages = isRelease
+        ? `publish-packages`
+        : `publish-packages --tag=prerelease`;
   }
 
   async function _prePublish ({ success: preparationSuccess },

@@ -881,11 +881,16 @@ _vlm._availablePools.push({ name: "global", path: _vlm.vargv.globalPool });
 _vlm.ifVerbose(2)
     .expound("available pools:", _vlm._availablePools);
 
+let packageBase = process.cwd();
+while (packageBase && !_vlm.shell.test("-f", _vlm.path.join(packageBase, "package.json"))) {
+  packageBase = (packageBase === "/") ? "" : _vlm.path.join(packageBase, "..");
+}
+
 const packageConfigStatus = {
-  path: _vlm.path.join(process.cwd(), "package.json"), updated: false,
+  path: _vlm.path.join(packageBase || "./", "package.json"), updated: false,
 };
 const toolsetsConfigStatus = {
-  path: _vlm.path.join(process.cwd(), "toolsets.json"), updated: false,
+  path: _vlm.path.join(packageBase || "./", "toolsets.json"), updated: false,
 };
 
 // Allow --vlm to override any implicit vlm modifications (ie. --vlm.verbosity=100 overrides -v)
@@ -1989,6 +1994,7 @@ async function _fillVargvInteractively () {
   for (const optionName of Object.keys(interactiveOptions)) {
     const option = interactiveOptions[optionName];
     const question = Object.assign({}, option.interactive);
+    question.array = option.array;
     if (question.when !== "always") {
       if ((question.when === "if-undefined") && option.type === "boolean") {
         this.warn(`boolean option '${optionName}' interactive.when = "if-undefined" is degenerate.`,
@@ -2000,7 +2006,10 @@ async function _fillVargvInteractively () {
     }
     delete question.when;
     if (!question.name) question.name = optionName;
-    if (!question.message) question.message = option.description;
+    if (!question.message) {
+      question.message = option.description;
+      if (question.array) question.message += " (comma-separated)";
+    }
     if (!question.choices && option.choices) question.choices = [...option.choices];
     if (option.default !== undefined) {
       if (!["list", "checkbox"].includes(question.type)) {
@@ -2030,6 +2039,9 @@ async function _fillVargvInteractively () {
   for (const question of questions) {
     do {
       Object.assign(answers, await this.inquire([question]));
+      if (question.array && (typeof answers[question.name] === "string")) {
+        answers[question.name] = !answers[question.name] ? [] : answers[question.name].split(",");
+      }
     } while (question.confirm && !await question.confirm(answers[question.name], answers));
   }
   // FIXME(iridian): handle de-hyphenations, camelcases etc. all other option variants.
@@ -2040,7 +2052,7 @@ async function _fillVargvInteractively () {
 
 function _reloadPackageAndToolsetsConfigs () {
   // TODO(iridian): Implement locally pending config writes. See _flushPendingConfigWrites
-  if (shell.test("-f", packageConfigStatus.path)) {
+  if (packageConfigStatus.path && shell.test("-f", packageConfigStatus.path)) {
     try {
       _vlm.packageConfig = JSON.parse(shell.head({ "-n": 1000000 }, packageConfigStatus.path));
       __deepFreeze(_vlm.packageConfig);
@@ -2049,7 +2061,7 @@ function _reloadPackageAndToolsetsConfigs () {
       throw error;
     }
   }
-  if (shell.test("-f", toolsetsConfigStatus.path)) {
+  if (toolsetsConfigStatus.path && shell.test("-f", toolsetsConfigStatus.path)) {
     try {
       _vlm.toolsetsConfig = JSON.parse(shell.head({ "-n": 1000000 }, toolsetsConfigStatus.path));
       __deepFreeze(_vlm.toolsetsConfig);

@@ -1,0 +1,16 @@
+{
+  "name": "@valos/hypertwin",
+  "version": "0.34.0-rc.0",
+  "valos": {
+    "type": "library",
+    "domain": "kernel"
+  },
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "ValOS Hypertwin Specifications and Tools Library",
+  "main": "index.js"
+}

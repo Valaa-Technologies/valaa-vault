@@ -28,12 +28,13 @@ exports.handler = async (yargv) => {
   const convert = require("xml-js");
   const patchWith = require("@valos/tools/patchWith").default;
   const { extract, ontologyTables, extractee: { ref } } = require("@valos/toolset-vault/sbomdoc");
-  const { emit, extractee: { editors } } = require("@valos/toolset-vault/revdoc");
+  const { emit, extractee: { authors } } = require("@valos/toolset-vault/revdoc");
 
   const vlm = yargv.vlm;
   const config = vlm.getPackageConfig();
   const toolset = vlm.getToolsetConfig(exports.vlm.toolset);
-  const vaultToolset = vlm.getToolsetConfig("@valos/toolset-vault");
+  const vaultToolsetReVDoc = vlm.getToolsetConfig("@valos/toolset-vault", "revdoc") || {};
+  const docsBaseURI = vaultToolsetReVDoc.docsBaseURI;
 
   vlm.shell.mkdir("-p", "docs");
 
@@ -42,17 +43,24 @@ exports.handler = async (yargv) => {
   }
 
   if (yargv.revdocs) {
-    const packageRevdocPaths = vlm.shell.find("-l",
-        "{packages,autholleries,workers}/**/*revdoc.js") || [];
-
+    const packageRevdocPaths = [...(vlm.shell.find("-l",
+        "{packages,autholleries,workers}/**/{*.,}revdoc.js") || [])];
     for (const revdocPath of packageRevdocPaths) {
-      const [, workspaceBase, packageDir,, docName] = revdocPath
-          .match(/^(packages|autholleries|workers)\/(.*\/)?(([^/]*)\.)?revdoc.js$/);
+      const [, workspaceBase, workspaceName, docDir,, docName] = revdocPath
+          .match(/^(packages|autholleries|workers)\/([^/]*)\/(.*\/)?(([^/]*)\.)?revdoc\.js/);
+      let targetDocName = docName;
+      const targetWorkspaceBase = (workspaceBase !== "packages") ? [workspaceBase] : [];
+      let targetDocPath = vlm.path.join(...targetWorkspaceBase, workspaceName, docDir || "");
+      if (!targetDocName) {
+        targetDocName = vlm.path.basename(targetDocPath);
+        targetDocPath = vlm.path.join(targetDocPath, "..");
+      }
+      if (docsBaseURI) {
+        await updateReVDocContainingPackageDocsBaseURI(
+            workspaceBase, workspaceName, targetWorkspaceBase);
+      }
       await generateRevdocAndWriteToDocs(
-          revdocPath,
-          vlm.path.join(...(workspaceBase !== "packages" ? [workspaceBase] : []), packageDir || ""),
-          docName,
-          yargv.revdocs === "vdocson");
+          revdocPath, targetDocPath, targetDocName, yargv.revdocs === "vdocson");
     }
   }
   await vlm.execute("git add docs/*");
@@ -74,21 +82,36 @@ exports.handler = async (yargv) => {
     return { sbomxml, sbomvdocson, sbomhtml, sbommarkdown };
   }
 
+  async function updateReVDocContainingPackageDocsBaseURI (
+      workspaceBase, workspaceName, targetWorkspaceBase) {
+    const packageJSONPath = vlm.path.join(workspaceBase, workspaceName, "package.json");
+    const packageJSONText = await vlm.tryReadFile(packageJSONPath);
+    if (packageJSONText) {
+      const packageJSON = JSON.parse(packageJSONText);
+      if (packageJSON.valos && !packageJSON.valos.docs) {
+        packageJSON.valos.docs = vlm.path.join(
+            docsBaseURI, ...targetWorkspaceBase, workspaceName);
+        vlm.shell.ShellString(`${JSON.stringify(packageJSON, null, 2)}\n`)
+            .to(packageJSONPath);
+      }
+    }
+  }
+
   async function generateRevdocAndWriteToDocs (
       revdocPath, targetDocPath, targetDocName, emitReVDocSON) {
     const revdocSource = require(vlm.path.join(process.cwd(), revdocPath));
     const revdocson = extract(
-        vlm.path.join(toolset.documentURIBase || "", targetDocPath, targetDocName || ""),
+        vlm.path.join(docsBaseURI || "", targetDocPath, targetDocName),
         revdocSource);
     const revdocHTML = await emitHTML(revdocson);
     const targetDir = vlm.path.join("docs", targetDocPath);
-    const targetFileName = `${targetDocName || "index"}.html`;
+    const targetFileName = `${targetDocName}.html`;
     await vlm.shell.mkdir("-p", targetDir);
     await vlm.shell.ShellString(revdocHTML)
         .to(vlm.path.join(targetDir, targetFileName));
     if (emitReVDocSON) {
       await vlm.shell.ShellString(JSON.stringify(revdocson, null, 2))
-          .to(vlm.path.join(targetDir, `${targetDocName || "index"}.jsonld`));
+          .to(vlm.path.join(targetDir, `${targetDocName}.jsonld`));
     }
   }
 
@@ -122,11 +145,11 @@ exports.handler = async (yargv) => {
         return (tgt !== null) ? tgt : undefined;
       },
     });
-    const sbomvdocson = extract(`${toolset.documentURIBase || ""}sbom`, {
+    const sbomvdocson = extract(`${docsBaseURI || ""}sbom`, {
       "vdoc:title": `${config.name}@${config.version} Software Bill of Materials`,
       respecConfig: {
         specStatus: "unofficial",
-        editors: editors(...Object.keys((vaultToolset.revdoc || {}).editors || {})),
+        editors: authors(...Object.keys(vaultToolsetReVDoc.authors || {})),
         shortName: "sbom",
       },
       "chapter#abstract>0": [

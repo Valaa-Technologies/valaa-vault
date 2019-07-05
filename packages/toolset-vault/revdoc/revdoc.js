@@ -1,14 +1,14 @@
 // @flow
 
 const {
-  ontologyTables, ontology: revdocOntology, extractee: { editors, ref, /* dfn, */  },
+  ontologyTables, ontology: revdocOntology, extractee: { authors, ref, /* dfn, */  },
 } = require("@valos/toolset-vault/revdoc");
 
 module.exports = {
   "vdoc:title": "ReVDoc - ReSpec document VDoc extension",
   respecConfig: {
     specStatus: "unofficial",
-    editors: editors("iridian"),
+    editors: authors("iridian"),
     shortName: "revdoc",
   },
   "chapter#abstract>0": [
@@ -21,7 +21,7 @@ module.exports = {
     may be updated, replaced or obsoleted by other documents at any
     time.`,
     null,
-    `This document is part of the `, ref("ValOS core specification", "@valos/vault/spec"),
+    `This document is part of the `, ref("ValOS core specification", "@valos/workshop/spec"),
     ".",
     null,
     `The format is implemented and supported by `,

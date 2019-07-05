@@ -14,10 +14,11 @@
   "@valos/toolset-vault": {
     "inUse": true,
     "revdoc": {
-      "editors": {
+      "docsBaseURI": "https://valaatech.github.io/vault/",
+      "authors": {
         "iridian": {
           "name": "Iridian Kiiskinen",
-          "url": "https://valaatech.github.io/fabric/editors/iridian",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
           "github": "http://github.com/valospace"
         }
       }
@@ -30,7 +31,6 @@
         "release-regenerate": true
       }
     },
-    "documentURIBase": "https://valaatech.github.io/vault/",
     "introduction": []
   }
 }

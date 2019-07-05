@@ -45,6 +45,7 @@ module.exports = {
       "vdoc:Document": emitReVDocHTML,
       "revdoc:Document": emitReVDocHTML,
       "vdoc:Chapter": emitReVDocChapter,
+      "vdoc:Reference": emitReVDocReference,
     },
   },
 };
@@ -73,4 +74,17 @@ function emitReVDocChapter (emission, node, document, emitNode, vdocson, emitter
   return ontology.emitters.html["vdoc:Chapter"](
       emission, Object.assign({}, node, { "vdoc:element": "section" }),
       document, emitNode, vdocson, emitters);
+}
+
+function emitReVDocReference (emission, node, document, emitNode, vdocson, emitters) {
+  let node_ = node;
+  if ((node["vdoc:ref"] || "")[0] === "@") {
+    const nodePath = node["vdoc:ref"].split("/");
+    const packageName = nodePath.slice(0, 2).join("/");
+    const packageJSON = require(`${packageName}/package.json`);
+    const docsBase = (packageJSON.valos || {}).docs || packageName;
+    node_ = Object.assign({}, node, { "vdoc:ref": `${docsBase}/${nodePath.slice(2).join("/")}` });
+  }
+  return ontology.emitters.html["vdoc:Reference"](
+      emission, node_, document, emitNode, vdocson, emitters);
 }

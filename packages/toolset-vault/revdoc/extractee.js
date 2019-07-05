@@ -2,23 +2,23 @@ const { extractee: { ref } } = require("@valos/toolset-vault/vdoc");
 
 module.exports = {
   /**
-   * Construct ReSpec editors section based on the @valos/toolset-vault
+   * Construct ReSpec authors section based on the @valos/toolset-vault
    * valma configuration of the current working directory.
    *
-   * @param {*} editorNames
+   * @param {*} authorNames
    * @returns
    */
-  editors (...editorNames) {
-    const editorsPath = `${process.cwd()}/toolsets.json`;
-    const editorLookup = ((require(editorsPath)["@valos/toolset-vault"] || {})
-        .revdoc || {}).editors || {};
-    return (editorNames || []).map(editorName => {
-      const editor = editorLookup[editorName];
-      if (!editor) {
-        throw new Error(`Cannot find editor '${editorName}' from toolsetConfig("${
-          editorsPath}")["@valos/toolset-vault"].revdoc.editors`);
+  authors (...authorNames) {
+    const toolsetsPath = `${process.cwd()}/toolsets.json`;
+    const authorLookup = ((require(toolsetsPath)["@valos/toolset-vault"] || {})
+        .revdoc || {}).authors || {};
+    return (authorNames || []).map(authorName => {
+      const author = authorLookup[authorName];
+      if (!author) {
+        throw new Error(`Cannot find author '${authorName}' from toolsetConfig("${
+          toolsetsPath}")["@valos/toolset-vault"].revdoc.authors`);
       }
-      return editor;
+      return author;
     });
   },
 

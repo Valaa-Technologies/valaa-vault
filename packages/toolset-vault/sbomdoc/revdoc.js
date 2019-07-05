@@ -2,14 +2,14 @@
 
 const { ontology: sbomdocOntology } = require("@valos/toolset-vault/sbomdoc");
 const {
-  ontologyTables, extractee: { editors, ref, /* dfn, */ },
+  ontologyTables, extractee: { authors, ref, /* dfn, */ },
 } = require("@valos/toolset-vault/revdoc");
 
 module.exports = {
   "vdoc:title": "SBoMDoc - Software Bill of Materials VDoc extension",
   respecConfig: {
     specStatus: "unofficial",
-    editors: editors("iridian"),
+    editors: authors("iridian"),
     shortName: "sbomdoc",
   },
   "chapter#abstract>0": [
@@ -22,7 +22,7 @@ module.exports = {
     may be updated, replaced or obsoleted by other documents at any
     time.`,
     null,
-    `This document is part of the `, ref("ValOS core specification", "@valos/vault/spec"),
+    `This document is part of the `, ref("ValOS core specification", "@valos/workshop/spec"),
     ".",
     null,
     `The format is implemented and supported by `,

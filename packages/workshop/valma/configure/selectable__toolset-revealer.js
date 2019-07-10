@@ -1,6 +1,6 @@
 exports.vlm = { toolset: "@valos/toolset-revealer" };
-exports.command = ".configure/.toolset/@valos/toolset-revealer";
-exports.describe = "Configure 'toolset-revealer' webpack revelation bundling for this workspace";
+exports.command = ".configure/.selectable/@valos/toolset-revealer";
+exports.describe = "Configure the workspace toolset 'toolset-revealer'";
 exports.introduction = `${exports.describe}.
 
 Adds valma command 'rouse-revealer'.
@@ -50,5 +50,8 @@ exports.handler = async (yargv) => {
       devDependencies["@valos/inspire"] = true;
     }
   }
-  return { command: exports.command, devDependencies };
+  return {
+    command: exports.command,
+    devDependencies,
+  };
 };

@@ -13,9 +13,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "bin": {
-    ".valma-configure_.type_.worker_.toolset_@valos_toolset-rest-api-gateway-plugin": "valma/configure__worker_toolset__toolset-rest-api-gateway-plugin.js"
-  },
   "dependencies": {
     "fastify": "^2.3.0",
     "fastify-cookie": "^3.0.2",

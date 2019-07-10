@@ -16,7 +16,7 @@ exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "authollery"
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all 'authollery' type config of this workspace.",
+    description: "Reconfigure all 'authollery' configurations of this workspace.",
   },
 });
 

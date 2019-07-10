@@ -9,7 +9,7 @@ exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "gateway-plu
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all 'gateway-plugin' type config of this workspace.",
+    description: "Reconfigure all 'gateway-plugin' configurations of this workspace.",
   },
 });
 

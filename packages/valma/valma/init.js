@@ -47,11 +47,12 @@ exports.handler = async (yargv) => {
       if (answer.choice === "help") {
         vlm.speak();
         vlm.info("repository initialization",
-`This phase uses '${vlm.theme.executable("yarn init")}' to initialize package.json via a series of
-interactive questions.
-ValOS repositories use yarn extensively for version, dependency and
-script management; ${vlm.theme.path("package.json")} is the central package configuration
-file for yarn (and also for npm, which yarn is based on).
+`This phase uses '${vlm.theme.executable("yarn init")}' to initialize
+package.json via a series of interactive questions.
+ValOS workspaces use yarn extensively for version, dependency and
+script management; ${vlm.theme.path("package.json")} is the central
+package configuration file for yarn (and also for npm, which yarn is
+  based on).
 `);
         continue;
       }

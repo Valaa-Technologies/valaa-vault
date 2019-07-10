@@ -1,5 +1,5 @@
 exports.vlm = { toolset: "@valos/toolset-vault-sbom" };
-exports.command = ".configure/.type/.vault/.toolset/@valos/toolset-vault-sbom";
+exports.command = ".configure/.type/.vault/.selectable/@valos/toolset-vault-sbom";
 exports.describe = "Configure generation of software bill of materials dependency summary";
 exports.introduction = `${exports.describe}.`;
 

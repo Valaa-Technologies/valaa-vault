@@ -19,12 +19,12 @@ code with a naive deployment logic would trigger code deployments even
 if only a single configuration flag changed. Developing efficient
 deployment logic on the other hand is error prone and not robust.
 
-Tool repositories allows splitting complex toolsets into separate
+Tool workspaces allows splitting complex toolsets into separate
 tools with different deployment logic. Infrastructure code which
 changes rarily can be placed in tool repositorires with naive
 deployment logic which relies on the tool version number only.
 Frequently changing configs can be managed by the toolset repository
-itself but even it can then use tool repositories to source in
+itself but even it can then use tool workspaces to source in
 commands and other resources to help with the deployment management.
 
 Additionally because the tool configuration is always inside its
@@ -38,7 +38,7 @@ exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "tool")
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all 'tool' type config of this workspace.",
+    description: "Reconfigure all 'tool' configurations of this workspace.",
   },
   brief: {
     type: "string", description: "A brief two-three word description of this tool",

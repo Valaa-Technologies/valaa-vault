@@ -17,7 +17,7 @@ A worker repository is fully agnostic to version control solutions:
   represents the process. Worker repository shards (there can be many
   if the computation is parallelizable) are still cloned from the
   versioned upstream. Unlike with clone-and-forget workers the
-  synchronized worker repositories keep themselves in sync with
+  synchronized worker workspaces keep themselves in sync with
   upstream configuration and data changes and adjust their computation
   accordingly.
   Sync workers shards can even push results back to the versioned
@@ -30,7 +30,7 @@ exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all 'worker' type config of this workspace.",
+    description: "Reconfigure all 'worker' configurations of this workspace.",
   },
 });
 

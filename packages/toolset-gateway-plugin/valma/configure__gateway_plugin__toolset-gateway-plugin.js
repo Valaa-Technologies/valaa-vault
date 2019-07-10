@@ -1,6 +1,6 @@
 exports.vlm = { toolset: "@valos/toolset-gateway-plugin" };
-exports.command = ".configure/.type/.worker/@valos/toolset-gateway-plugin";
-exports.describe = "Configure an in-use 'toolset-gateway-plugin' for a worker workspace";
+exports.command = ".configure/.type/.gateway-plugin/@valos/toolset-gateway-plugin";
+exports.describe = "Configure a 'toolset-gateway-plugin' workspace";
 exports.introduction = `${exports.describe}.
 
 `;
@@ -21,7 +21,7 @@ exports.handler = async (yargv) => {
       vlm.theme.path(templates), "(will not clobber existing files)");
   vlm.shell.cp("-n", templates, ".");
 
-  const devDependencies = { "@valos/toolset-gateway-plugin": true };
+  const devDependencies = {};
   if (!vlm.getPackageConfig("devDependencies", "@valos/tools")) {
     if (await vlm.inquireConfirm(`Install @valos/tools in devDependencies?`)) {
       devDependencies["@valos/tools"] = true;

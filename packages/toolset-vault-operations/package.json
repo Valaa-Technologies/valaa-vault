@@ -11,8 +11,5 @@
   "private": false,
   "publishConfig": {
     "access": "public"
-  },
-  "bin": {
-    ".valma-configure_.type_.vault_.toolset_@valos_toolset-vault-operations": "valma/configure__vault_toolset__toolset-vault-operations.js"
   }
 }

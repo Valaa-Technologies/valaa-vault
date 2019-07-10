@@ -10,11 +10,13 @@ exports.disabled = (yargs) => yargs.vlm.getValOSConfig() && "Already configured"
 exports.builder = (yargs) => {
   const vlm = yargs.vlm;
   const valos = vlm.packageConfig.valos || {};
-  const typeChoices = vlm.listMatchingCommands(".configure/.type/*")
-      .map(n => n.match(/^.configure\/.type\/([^/]*)/)[1])
+  const typeChoices = vlm.listMatchingCommands(".configure/.type/{,*/**/}*")
+      .map(n => n.match(/^.configure\/.type\/([^/]*|@[^/]*\/[^/]*)/)[1])
+      .filter(n => n)
       .concat("<custom>");
-  const domainChoices = vlm.listMatchingCommands(".configure/.domain/*")
-      .map(n => n.match(/^.configure\/.domain\/([^/]*)/)[1])
+  const domainChoices = vlm.listMatchingCommands(".configure/.domain/{,*/**/}*")
+      .map(n => n.match(/^.configure\/.domain\/([^/]*|@[^/]*\/[^/]*)/)[1])
+      .filter(n => n)
       .concat("<custom>");
   return yargs.options({
     reconfigure: {

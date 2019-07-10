@@ -24,7 +24,7 @@ exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "toolset")
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all 'toolset' type config of this workspace.",
+    description: "Reconfigure all 'toolset' configurations of this workspace.",
   },
   restrict: {
     type: "string",
@@ -32,7 +32,7 @@ exports.builder = (yargs) => yargs.options({
     default: yargs.vlm.packageConfig.valos.domain,
     interactive: { type: "input", when: "always" /* : "if-undefined" */ },
   },
-  grabbable: {
+  selectable: {
     type: "boolean",
     description: `Make this toolset grabbable and stowable (falsy for always-on):`,
     default: true,
@@ -44,10 +44,10 @@ exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const simpleName = vlm.packageConfig.name.match(/([^/]*)$/)[1];
   const commandName = `.configure/${yargv.restrict ? `.type/.${yargv.restrict}/` : ""}${
-    yargv.grabbable ? ".toolset/" : ""}${vlm.packageConfig.name}`;
+    yargv.selectable ? ".selectable/" : ""}${vlm.packageConfig.name}`;
   await vlm.invoke("create-command", [{
     filename: `configure__${yargv.restrict ? yargv.restrict : ""}${
-        yargv.grabbable ? "_toolset_" : "_"}_${simpleName}.js`,
+        yargv.selectable ? "_toolset_" : "_"}_${simpleName}.js`,
     export: true, skeleton: true,
     brief: "toolset configure",
     "exports-vlm": `{ toolset: "${vlm.packageConfig.name}" }`,
@@ -55,12 +55,9 @@ exports.handler = async (yargv) => {
         yargv.restrict || "repository"}`,
 
     introduction: yargv.restrict
-        ?
-`This script makes the toolset '${simpleName}' available for
-grabbing by repositories with valos type '${yargv.restrict}'.`
-        :
-`This script makes the toolset ${simpleName} available for
-grabbing by all repositories.`,
+        ? `This script makes the toolset '${simpleName}' selectable by ${
+          yargv.restrict} workspaces.`
+        : `This script makes the toolset '${simpleName}' selectable by all workspaces.`,
 
     disabled: `(yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")`,
     builder: `(yargs) => yargs.options({

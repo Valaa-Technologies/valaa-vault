@@ -1,10 +1,9 @@
 exports.vlm = { toolset: "@valos/toolset-rest-api-gateway-plugin" };
-exports.command = ".configure/.type/.worker/.toolset/@valos/toolset-rest-api-gateway-plugin";
-exports.describe = "Configure an in-use 'toolset-rest-api-gateway-plugin' for a worker workspace";
+exports.command = ".configure/.type/.worker/.selectable/@valos/toolset-rest-api-gateway-plugin";
+exports.describe = "Configure the worker toolset 'toolset-rest-api-gateway-plugin'";
 exports.introduction = `${exports.describe}.
 
-This script makes the toolset 'toolset-rest-api-gateway-plugin' available for
-grabbing by repositories with valos.type 'worker'.`;
+`;
 
 exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
     && "Can't configure 'toolset-rest-api-gateway-plugin': not inUse or toolset config missing";
@@ -48,5 +47,8 @@ exports.handler = (yargv) => {
         "Please remove the plugin manually");
     // TODO(iridian, 2019-02): Removing values using the updateToolsetConfig is not implemented yet.
   }
-  return { command: exports.command };
+  return {
+    command: exports.command,
+    devDependencies: { "@valos/toolset-rest-api-gateway-plugin": true },
+  };
 };

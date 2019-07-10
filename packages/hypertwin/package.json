@@ -3,7 +3,7 @@
   "version": "0.34.0-rc.0",
   "valos": {
     "type": "library",
-    "domain": "kernel"
+    "domain": "@valos/kernel"
   },
   "author": "Valaa Technologies Ltd",
   "license": "MIT",

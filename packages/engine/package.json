@@ -10,7 +10,7 @@
   },
   "valos": {
     "type": "library",
-    "domain": "kernel"
+    "domain": "@valos/kernel"
   },
   "main": "index.js",
   "dependencies": {

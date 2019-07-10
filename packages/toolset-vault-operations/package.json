@@ -3,7 +3,7 @@
   "version": "0.35.0-prerelease.2",
   "valos": {
     "type": "toolset",
-    "domain": "files"
+    "domain": "@valos/kernel"
   },
   "description": "Vault toolset for authollery operations",
   "license": "MIT",

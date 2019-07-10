@@ -3,7 +3,7 @@
   "version": "0.35.0-prerelease.2",
   "valos": {
     "type": "toolset",
-    "domain": "infrastructure"
+    "domain": "@valos/kernel"
   },
   "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
   "license": "MIT",

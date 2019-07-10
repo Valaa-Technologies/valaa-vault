@@ -3,8 +3,7 @@ exports.command = ".configure/.type/.worker/@valos/toolset-worker";
 exports.describe = "Configure 'toolset-worker' for a worker repository";
 exports.introduction = `${exports.describe}.
 
-This script makes the toolset 'toolset-worker' available for
-grabbing by repositories with valos.type 'worker'.`;
+`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
     && `Workspace is not a worker (is ${yargs.vlm.getValOSConfig("type")})`;

@@ -51,4 +51,47 @@ module.exports = {
       ],
     ] }
   ],
+  "chapter#feature_branch_lifecycle_git>3;Feature branch lifecycle in Git": [
+    "This chapter briefly describes the lifecycle of a feature branch step-by-step using Git.",
+    "Chapter works as a guide.",
+    { "numbered#": [
+      ["After ensuring you are in a prerelease branch, creating new branch is as easy as running: ",
+        cli("git checkout -b path/to/your/branch"),
+      ],
+      "Now you have your branch, so it's time for edits.",
+      "TO BE CONTINUED (rebase, commit, push etc.)",
+    ] }
+  ],
+  "chapter#creating_new_library_valma>3;Creating a new library with valma": [
+    "Guide on how to create a new library using valma. ",
+    "Note: Scope of this guide covers only the creation of a public library. ",
+    "It does not cover all of the different options while initalizing.",
+    "As of now does not cover other use cases either.",
+    { "numbered#": [
+      ["Create a folder for your new library and navigate to there. Run the following command: ",
+        cli("vlm init"),
+        " Script will prompt you multiple times to choose, right options are listed here."
+      ],
+      { "numbered#": [
+        `Select "Initialize" when it asks about package.json initialization.`,
+        `Select "Yes" for whether the package is public.`,
+        `Select "Initialize" when it asks about initializing repository info.`,
+        `Select "Library" as the valos.type and confirm it.`,
+        `Select "@valos/kernel" for the valos.domain and confirm twice.`,
+        `Select "skip" for whether to add initial workshops or toolsets as devDependencies`,
+        [`Select "configure" for whether to configure the repository with `,
+          cli("vlm configure")
+        ],
+        `Select "@valos/toolset-vault/enable-babel" to use from abailable toolsets.`,
+        `Select "Yes" for whether to enable babel transpilation for the library`,
+      ] },
+      ["Your library is now created. ",
+        ref("You can now continue by getting your library ready for testing.",
+          "#getting_ready_for_testing"),
+      ]
+    ] }
+  ],
+  "chapter#getting_ready_for_testing>3;Getting ready for testing": [
+    "Guide on how to get your library ready for testing."
+  ],
 };

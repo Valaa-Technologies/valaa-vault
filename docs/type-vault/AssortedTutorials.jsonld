@@ -227,6 +227,141 @@
       ]
     },
     "@type": "revdoc:Document",
+    "feature_branch_lifecycle_git": {
+      "@id": "feature_branch_lifecycle_git",
+      "dc:title": "Feature branch lifecycle in Git",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This chapter briefly describes the lifecycle of a feature branch step-by-step using Git.",
+        "Chapter works as a guide.",
+        {
+          "vdoc:content": [
+            {
+              "rdf:type": "vdoc:NumberedList",
+              "vdoc:rows": [
+                [
+                  "After ensuring you are in a prerelease branch, creating new branch is as easy as running: ",
+                  {
+                    "rdf:type": "revdoc:CommandLineInteraction",
+                    "vdoc:rows": [
+                      [
+                        "",
+                        "$ ",
+                        {
+                          "rdf:type": "revdoc:Command",
+                          "vdoc:words": [
+                            "git",
+                            "checkout",
+                            "-b",
+                            "path/to/your/branch"
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ],
+                "Now you have your branch, so it's time for edits.",
+                "TO BE CONTINUED (rebase, commit, push etc.)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "creating_new_library_valma": {
+      "@id": "creating_new_library_valma",
+      "dc:title": "Creating a new library with valma",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Guide on how to create a new library using valma. ",
+        "Note: Scope of this guide covers only the creation of a public library. ",
+        "It does not cover all of the different options while initalizing.",
+        "As of now does not cover other use cases either.",
+        {
+          "vdoc:content": [
+            {
+              "rdf:type": "vdoc:NumberedList",
+              "vdoc:rows": [
+                [
+                  "Create a folder for your new library and navigate to there. Run the following command: ",
+                  {
+                    "rdf:type": "revdoc:CommandLineInteraction",
+                    "vdoc:rows": [
+                      [
+                        "",
+                        "$ ",
+                        {
+                          "rdf:type": "revdoc:Command",
+                          "vdoc:words": [
+                            "vlm",
+                            "init"
+                          ]
+                        }
+                      ]
+                    ]
+                  },
+                  " Script will prompt you multiple times to choose, right options are listed here."
+                ],
+                {
+                  "vdoc:content": [
+                    {
+                      "rdf:type": "vdoc:NumberedList",
+                      "vdoc:rows": [
+                        "Select \"Initialize\" when it asks about package.json initialization.",
+                        "Select \"Yes\" for whether the package is public.",
+                        "Select \"Initialize\" when it asks about initializing repository info.",
+                        "Select \"Library\" as the valos.type and confirm it.",
+                        "Select \"@valos/kernel\" for the valos.domain and confirm twice.",
+                        "Select \"skip\" for whether to add initial workshops or toolsets as devDependencies",
+                        [
+                          "Select \"configure\" for whether to configure the repository with ",
+                          {
+                            "rdf:type": "revdoc:CommandLineInteraction",
+                            "vdoc:rows": [
+                              [
+                                "",
+                                "$ ",
+                                {
+                                  "rdf:type": "revdoc:Command",
+                                  "vdoc:words": [
+                                    "vlm",
+                                    "configure"
+                                  ]
+                                }
+                              ]
+                            ]
+                          }
+                        ],
+                        "Select \"@valos/toolset-vault/enable-babel\" to use from abailable toolsets.",
+                        "Select \"Yes\" for whether to enable babel transpilation for the library"
+                      ]
+                    }
+                  ]
+                },
+                [
+                  "Your library is now created. ",
+                  {
+                    "rdf:type": "vdoc:Reference",
+                    "vdoc:content": [
+                      "You can now continue by getting your library ready for testing."
+                    ],
+                    "vdoc:ref": "#getting_ready_for_testing"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "getting_ready_for_testing": {
+      "@id": "getting_ready_for_testing",
+      "dc:title": "Getting ready for testing",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Guide on how to get your library ready for testing."
+      ]
+    },
     "vdoc:content": [
       {
         "@id": "abstract"
@@ -236,6 +371,15 @@
       },
       {
         "@id": "how_to_create_revdoc"
+      },
+      {
+        "@id": "feature_branch_lifecycle_git"
+      },
+      {
+        "@id": "creating_new_library_valma"
+      },
+      {
+        "@id": "getting_ready_for_testing"
       }
     ]
   }

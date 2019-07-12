@@ -1,11 +1,11 @@
 {
-  "name": "@valos/toolset-authollery",
+  "name": "@valos/toolset-opspace",
   "valos": {
     "type": "toolset",
     "domain": "@valos/kernel"
   },
   "version": "0.35.0-prerelease.3",
-  "description": "A valma toolset for managing autholleries",
+  "description": "A valma toolset for managing opspace workspaces",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
   "private": false,
@@ -14,8 +14,8 @@
   },
   "main": "index.js",
   "bin": {
-    ".valma-configure_.type_.authollery_@valos_toolset-authollery": "valma/configure__authollery__toolset-authollery.js",
-    ".valma-status_.type_.authollery_10-authollery": "valma/status_.type_.authollery_10-authollery.js",
+    ".valma-configure_.type_.opspace_@valos_toolset-opspace": "valma/configure__opspace__toolset-opspace.js",
+    ".valma-status_.type_.opspace_10-opspace": "valma/status__opspace_10-opspace.js",
     "valma-build-release": "valma/build-release.js",
     "valma-deploy-release": "valma/deploy-release.js"
   },

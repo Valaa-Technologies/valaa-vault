@@ -13,7 +13,7 @@
     "access": "public"
   },
   "bin": {
-    ".valma-configure_.type_authollery": "valma/configure/type/authollery.js",
+    ".valma-configure_.type_opspace": "valma/configure/type/opspace.js",
     ".valma-configure_.type_gateway-plugin": "valma/configure/type/gateway-plugin.js",
     ".valma-configure_.type_library": "valma/configure/type/library.js",
     ".valma-configure_.type_tool": "valma/configure/type/tool.js",

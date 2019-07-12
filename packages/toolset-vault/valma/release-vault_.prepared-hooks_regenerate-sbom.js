@@ -44,10 +44,10 @@ exports.handler = async (yargv) => {
 
   if (yargv.revdocs) {
     const packageRevdocPaths = [...(vlm.shell.find("-l",
-        "{packages,autholleries,workers}/**/{*.,}revdoc.js") || [])];
+        "{packages,opspaces,workers}/**/{*.,}revdoc.js") || [])];
     for (const revdocPath of packageRevdocPaths) {
       const [, workspaceBase, workspaceName, docDir,, docName] = revdocPath
-          .match(/^(packages|autholleries|workers)\/([^/]*)\/(.*\/)?(([^/]*)\.)?revdoc\.js/);
+          .match(/^(packages|opspaces|workers)\/([^/]*)\/(.*\/)?(([^/]*)\.)?revdoc\.js/);
       let targetDocName = docName;
       const targetWorkspaceBase = (workspaceBase !== "packages") ? [workspaceBase] : [];
       let targetDocPath = vlm.path.join(...targetWorkspaceBase, workspaceName, docDir || "");

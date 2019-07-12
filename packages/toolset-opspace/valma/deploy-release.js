@@ -2,7 +2,7 @@
 
 // 'deploy' first so tab-completion is instant. Everything else 'release' first so build and
 // deploy commands get listed next to each other.
-exports.vlm = { toolset: "@valos/toolset-authollery" };
+exports.vlm = { toolset: "@valos/toolset-opspace" };
 exports.command = "deploy-release [toolsetGlob]";
 exports.describe = "Deploy previously built releases to their deployment targets";
 exports.introduction = `${exports.describe}.`;

@@ -52,7 +52,7 @@ builds or depends on the previous layers.
 - `packages` layer provides npm packages via npm registry.
    These packages are created by git repositories called `vaults`.
 - `authorities` layer provides the ValOS live authority service APIs.
-   Authorities are controlled by git repositories called `autholleries`.
+   Authorities are deployed and managed with `opspace` workspaces.
 - `partitions` layer provides the resource content as partition
    events and bvobs. These are served via authority service APIs.
 
@@ -63,7 +63,7 @@ packages alongside their main content. A command line tool called
 ValOS Manager or `valma` is used to discover and `invoke` these
 scripts as `valma commands`.
 
-From a DevOps perspective `valma`, `vault` and `authollery` are the
+From a DevOps perspective `valma`, `vault` and `opspace` are the
 three concrete core mechanisms that everything else ties into.
 
 Valma and specific domains are specified in other documents and as such
@@ -294,26 +294,24 @@ The static content includes HTTP landing pages, site routes and their
 configurations, ValOS gateway and plugin runtimes and any other similar
 statically configured files.
 
-> `valos-vault-4.4.4`: An authority may have a valos AUTHority
-> contrOLLERr repositoRY (`authollery`) as its upstream for managing
-> its payload.
+> `valos-vault-4.4.4`: An authority may have an operations workspace
+> (`opspace`) as its upstream for managing its payload.
 
 Particular authorities are naturally free to implement their
-operational architectures in any way they like. This said autholleries
+operational architectures in any way they like. This said opspaces
 have a well-defined structure which valma authority tools make use of.
 
 Updates to the authority payloads are primarily done as modifications
-to the corresponding authollery and then distributing those via release
+to the corresponding opspace and then distributing those via release
 deployments.
 
-> `valos-vault-4.4.5`: An autholleriy should not be published as a
-> package.
+> `valos-vault-4.4.5`: An opspace should not be published as a package.
 
-While autholleries make use of package.json and the npm dependency
+While opspaces make use of package.json and the npm dependency
 management this provides, they can also contain considerable amounts of
 static content. Also, there should be no reason to depend on
-an authollery. Automatic release deployment systems should have access
-to a authollery directly for building the release.
+an opspace. Automatic release deployment systems should have access
+to a opspace directly for building the release.
 
 > `valos-vault-4.4.6`: Information must not move from deployed
 > authorities back to authority utility layer upstream.
@@ -330,11 +328,11 @@ to access this content.
 
 Note: this applies to architectural decisions and automations only.
 Interactive content in valospace is not limited from using an
-authollery to update authorities (although it is still recommended to
+opspace to update authorities (although it is still recommended to
 keep such valospace applications deployments separate from the
 authorities they are used to control).
 
-valma authollery commands: `vlm build-release` `vlm deploy-release`
+valma opspace commands: `vlm build-release` `vlm deploy-release`
 
 
 ### 4.4.1. ValOS core vs. auxiliary authorities

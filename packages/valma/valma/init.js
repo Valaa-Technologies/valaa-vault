@@ -14,8 +14,15 @@ Valma init has following interactive phases:
 4. Selection of in-use toolsets from available toolsets via 'vlm .configure/.select-toolsets'
 5. Configuration of in-use toolsets and tools via 'vlm configure'`;
 
-exports.disabled = (yargs) => yargs.vlm.getToolsetsConfig()
-    && "Already initialized (toolsets.json exists)";
+exports.disabled = (yargs) => {
+  try {
+    const packageJSON = require(yargs.vlm.path.join(process.cwd(), "package"));
+    if ((packageJSON || {}).valos !== undefined) {
+      return "Already initialized (package.json:valos section exists)";
+    }
+  } catch (error) { /* */ }
+  return false;
+};
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
@@ -28,17 +35,22 @@ exports.handler = async (yargv) => {
   vlm.speak(exports.introduction.match(/[^\n]*\n(.*)/)[1]);
   const tellIfNoReconfigure = !yargv.reconfigure ? ["(no --reconfigure given)"] : [];
 
-  return await _initPackageJSON()
-      && await _selectValOSTypeAndDomain()
+  let packageJSON;
+  try { packageJSON = require(vlm.path.join(process.cwd(), "package")); } catch (error) { /* */ }
+  if (!await _initPackageJSON()) return false;
+  if (!packageJSON) {
+    return vlm.interact("vlm init");
+  }
+  return await _selectValOSTypeAndDomain()
       && await _addInitialValmaDevDependencies()
       && _configure();
 
   async function _initPackageJSON () {
-    while (yargv.reconfigure || !vlm.packageConfig) {
-      const choices = (vlm.packageConfig ? ["Skip", "reconfigure"] : ["Initialize"])
+    while (yargv.reconfigure || !packageJSON) {
+      const choices = (packageJSON ? ["Skip", "reconfigure"] : ["Initialize"])
           .concat(["help", "quit"]);
       const answer = await vlm.inquire([{
-        message: `${vlm.packageConfig ? "Reconfigure the existing" : "Initialize"
+        message: `${packageJSON ? "Reconfigure the existing" : "Initialize"
             } package.json with 'yarn init'?`,
         type: "list", name: "choice", default: choices[0], choices,
       }]);
@@ -56,40 +68,50 @@ package configuration file for yarn (and also for npm, which yarn is
 `);
         continue;
       }
-      let vaultConfig = await vlm.tryReadFile(vlm.path.join("..", "..", "package.json"));
-      if (vaultConfig !== undefined) {
-        // rather brittle name default. Only works for workspaces
-        // precisely two nestings under a vault package.json (which is
-        // vast majority of them though).
-        vaultConfig = JSON.parse(vaultConfig);
-        const parts = vlm.path.resolve().split("/").slice(-2);
-        let isPrivate = true;
-        let publishConfigLine = "";
-        let name = vaultConfig.name;
-        if (name[name.length - 1] !== "/") name += "_";
-        if (parts[0] === "packages") {
-          parts.shift();
-          isPrivate = false;
-          publishConfigLine = `,
-  "publishConfig": {
-    "access": "${(await vlm.inquireConfirm(
-        "Is this a 'public' published package? ('n' for 'restricted')")) ? "public" : "restricted"}"
-  }`;
-        } else if (parts[0][parts[0].length - 1] === "s") parts[0] = parts[0].slice(0, -1);
-        vlm.shell.ShellString(
-`{
-  "name": "${name}${parts.join("_")}",
-  "version": "${vaultConfig.version}",
-  "author": "${vaultConfig.author}",
-  "license": "${vaultConfig.license}",
-  "private": ${isPrivate ? "true" : "false"}${
-  publishConfigLine}
-}`).to("package.json");
-      }
+      await _updatePackageWithVaultDefaults();
       return vlm.interact("yarn init");
     }
     vlm.info(`Skipped '${vlm.theme.executable("yarn init")}'.`, ...tellIfNoReconfigure);
     return true;
+  }
+
+  async function _updatePackageWithVaultDefaults () {
+    let vaultConfig;
+    let candidatePath = process.cwd();
+    do {
+      candidatePath = vlm.path.join(candidatePath, "..");
+      vaultConfig = await vlm.tryReadFile(vlm.path.join(candidatePath, "package.json"));
+      if (vaultConfig !== undefined) {
+        vaultConfig = JSON.parse(vaultConfig);
+        if (((vaultConfig || {}).valos || {}).type === "vault") {
+          // rather brittle name default. Only works for workspaces
+          // precisely two nestings under a vault package.json (which is
+          // vast majority of them though).
+          const parts = vlm.path.resolve().split("/").slice(-2);
+          let isPrivate = true;
+          let publishConfigLine = "";
+          if (parts[0] === "packages") {
+            parts.shift();
+            isPrivate = false;
+            publishConfigLine = `,
+"publishConfig": {
+  "access": "${(await vlm.inquireConfirm(
+      "Is this a 'public' published package? ('n' for 'restricted')")) ? "public" : "restricted"}"
+}`;
+      } else if (parts[0][parts[0].length - 1] === "s") parts[0] = parts[0].slice(0, -1);
+      vlm.shell.ShellString(
+`{
+"name": "${vaultConfig.name}${parts.join("_")}",
+"version": "${vaultConfig.version}",
+"author": "${vaultConfig.author}",
+"license": "${vaultConfig.license}",
+"private": ${isPrivate ? "true" : "false"}${
+publishConfigLine}
+}`).to("package.json");
+          return;
+        }
+      }
+    } while (candidatePath && (candidatePath !== "/"));
   }
 
   async function _selectValOSTypeAndDomain () {
@@ -135,7 +157,7 @@ package configuration file for yarn (and also for npm, which yarn is
         message: wasError
             ? "Retry adding workshops (or direct toolsets) as devDependencies?"
             : `${vlm.theme.executable("yarn add")} ${
-                vlm.packageConfig.devDependencies ? "more" : "initial"
+              vlm.packageConfig.devDependencies ? "more" : "initial"
               } workshops (or direct toolsets) as devDependencies?`,
         type: "list", name: "choice", default: choices[0], choices,
       }]);
@@ -173,10 +195,15 @@ for the listings in following phases.
 
   async function _configure () {
     while (yargv.reconfigure || !vlm.getToolsetsConfig()) {
-      const choices = (vlm.getToolsetsConfig() ? ["Skip", "reconfigure"] : ["Configure"])
+      let toolsetsConfig;
+      try {
+        toolsetsConfig = require(vlm.path.join(process.cwd(), "toolsets"));
+        if (toolsetsConfig && !yargv.reconfigure) return false;
+      } catch (error) { /* */ }
+      const choices = (toolsetsConfig ? ["Skip", "reconfigure"] : ["Configure"])
           .concat(["help", "quit"]);
       const answer = await vlm.inquire([{
-        message: `${vlm.getToolsetsConfig() ? "Reconfigure" : "Configure"} repository with '${
+        message: `${toolsetsConfig ? "Reconfigure" : "Configure"} repository with '${
             vlm.theme.command("vlm configure")}'?`,
         type: "list", name: "choice", default: choices[0], choices,
       }]);

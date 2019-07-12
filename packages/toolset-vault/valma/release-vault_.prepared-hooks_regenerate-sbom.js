@@ -146,7 +146,7 @@ exports.handler = async (yargv) => {
       },
     });
     const sbomvdocson = extract(`${docsBaseURI || ""}sbom`, {
-      "vdoc:title": `${config.name}@${config.version} Software Bill of Materials`,
+      "dc:title": `${config.name}@${config.version} Software Bill of Materials`,
       respecConfig: {
         specStatus: "unofficial",
         editors: authors(...Object.keys(vaultToolsetReVDoc.authors || {})),
@@ -186,7 +186,7 @@ exports.handler = async (yargv) => {
   }
 
   async function emitMarkdown (sbomvdocson) {
-    const sbommarkdown = `# ${sbomvdocson[0]["vdoc:title"]}
+    const sbommarkdown = `# ${sbomvdocson[0]["dc:title"]}
 
 Markdown VDoc extension not implemented yet.
 `;

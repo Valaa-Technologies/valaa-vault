@@ -6,7 +6,7 @@ const {
 } = require("@valos/toolset-vault/revdoc");
 
 module.exports = {
-  "vdoc:title": "ValOS document interchange specification",
+  "dc:title": "ValOS document interchange specification",
   respecConfig: {
     specStatus: "unofficial",
     editors: authors("iridian"),
@@ -21,7 +21,7 @@ module.exports = {
     and may be updated, replaced or obsoleted by other documents at
     any time.`,
     null,
-    `This document is part of the`, ref("ValOS core specification", "@valos/workshop"), ".",
+    `This document is part of the`, ref("ValOS core specification", "@valos/kernel"), ".",
     null,
     `The format is implemented and supported by`,
     ref("@valos/toolset-vault npm package", "@valos/toolset-vault"), ".",

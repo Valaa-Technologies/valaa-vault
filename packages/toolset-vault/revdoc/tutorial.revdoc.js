@@ -4,7 +4,7 @@ const {
 } = require("@valos/toolset-vault/revdoc");
 
 module.exports = {
-  "vdoc:title": "ReVDoc Tutorial",
+  "dc:title": "ReVDoc Tutorial",
   respecConfig: {
     specStatus: "unofficial",
     editors: authors("iridian"),

@@ -11,11 +11,11 @@ exports.builder = (yargs) => {
   const vlm = yargs.vlm;
   const valos = vlm.packageConfig.valos || {};
   const typeChoices = vlm.listMatchingCommands(".configure/.type/{,*/**/}*")
-      .map(n => n.match(/^.configure\/.type\/([^/]*|@[^/]*\/[^/]*)/)[1])
+      .map(n => n.match(/^.configure\/.type\/(@[^/@]*\/[^/@]*|[^/@]*)/)[1])
       .filter(n => n)
       .concat("<custom>");
   const domainChoices = vlm.listMatchingCommands(".configure/.domain/{,*/**/}*")
-      .map(n => n.match(/^.configure\/.domain\/([^/]*|@[^/]*\/[^/]*)/)[1])
+      .map(n => n.match(/^.configure\/.domain\/(@[^/@]*\/[^/@]*|[^/@]*)/)[1])
       .filter(n => n)
       .concat("<custom>");
   return yargs.options({

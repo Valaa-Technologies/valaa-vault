@@ -28,7 +28,7 @@ module.exports = {
   },
   extractionRules: {
     ontology: {
-      range: "vdoc:Chapter", target: "vdoc:content", rest: "vdoc:title",
+      range: "vdoc:Chapter", target: "vdoc:content", rest: "dc:title",
       comment: "Ontology specification chapter",
     },
   },
@@ -55,7 +55,7 @@ function emitReVDocHTML (emission, node, document, emitNode /* , vdocson, emitte
 <html>
   <head>
     <meta charset='utf-8'>
-    <title>${node["vdoc:title"]}</title>
+    <title>${node["dc:title"]}</title>
     <script
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>

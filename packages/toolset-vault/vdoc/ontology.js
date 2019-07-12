@@ -42,9 +42,6 @@ module.exports = {
       "rdfs:domain": "vdoc:Node", "rdfs:range": "rdfs:List",
       "rdfs:comment": "A visible list of vertically stacked rows",
     },
-    title: { a: "rdf:Property", "rdfs:domain": "vdoc:Node", "rdfs:range": "rdfs:Resource",
-      "rdfs:comment": "Human readable name of a Node",
-    },
     Chapter: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node",
       "rdfs:comment": "A titled, possibly numbered chapter document node",
     },
@@ -79,7 +76,7 @@ module.exports = {
       comment: "Basic Node", target: "vdoc:content",
     },
     chapter: {
-      range: "vdoc:Chapter", target: "vdoc:content", rest: "vdoc:title",
+      range: "vdoc:Chapter", target: "vdoc:content", rest: "dc:title",
       comment: "Numbered, titled chapter",
     },
     bulleted: {
@@ -196,8 +193,8 @@ function emitValueHTML (emission, value /* , document, emitNode, vdocson, emitte
 
 function emitNodeHTML (emission, node, document, emitNode /* , vdocson, emitters */) {
   let body = "";
-  if (node["vdoc:title"]) {
-    body += `\n    <h2>${node["vdoc:title"]}</h2>\n`;
+  if (node["dc:title"]) {
+    body += `\n    <h2>${node["dc:title"]}</h2>\n`;
   }
   const content = node["vdoc:content"]
       || (node["vdoc:words"] && [].concat(...node["vdoc:words"]

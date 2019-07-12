@@ -6,7 +6,7 @@ const {
 } = require("@valos/toolset-vault/revdoc");
 
 module.exports = {
-  "vdoc:title": "SBoMDoc - Software Bill of Materials VDoc extension",
+  "dc:title": "SBoMDoc - Software Bill of Materials VDoc extension",
   respecConfig: {
     specStatus: "unofficial",
     editors: authors("iridian"),
@@ -22,7 +22,7 @@ module.exports = {
     may be updated, replaced or obsoleted by other documents at any
     time.`,
     null,
-    `This document is part of the `, ref("ValOS core specification", "@valos/workshop/spec"),
+    `This document is part of the `, ref("ValOS core specification", "@valos/kernel/spec"),
     ".",
     null,
     `The format is implemented and supported by `,

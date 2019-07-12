@@ -39,7 +39,7 @@ function emitSBoMDocHTML (emission, node, document, emitNode /* , vdocson, emitt
 <html>
   <head>
     <meta charset='utf-8'>
-    <title>${node["vdoc:title"]}</title>
+    <title>${node["dc:title"]}</title>
   </head>
   <body>
     ${emitNode("", node["vdoc:content"], document)}

@@ -8,7 +8,7 @@ exports.disabled = () => false;
 exports.builder = (yargs) => yargs.options({
   title: {
     type: "string",
-    description: "The vdoc:title of the document",
+    description: "The dc:title of the document",
     interactive: { type: "input", when: "if-undefined" },
   },
   shortName: {
@@ -64,7 +64,7 @@ const {
 } = require("@valos/toolset-vault/revdoc");
 
 module.exports = {
-  "vdoc:title": "${title || ""}",
+  "dc:title": "${title || ""}",
   respecConfig: {
     specStatus: "unofficial",
     editors: authors(${editors.map(editorName => `"${editorName}"`).join(", ")}),

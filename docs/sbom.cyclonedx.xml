@@ -367,7 +367,7 @@
         </component>
         <component type="library">
             <name>spdx-license-ids</name>
-            <version>3.0.4</version>
+            <version>3.0.5</version>
             <description>
                 <![CDATA[A list of SPDX license identifiers]]>
             </description>
@@ -376,7 +376,7 @@
                     <id>CC0-1.0</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/spdx-license-ids@3.0.4</purl>
+            <purl>pkg:npm/spdx-license-ids@3.0.5</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -551,7 +551,7 @@
         <component type="library">
             <group>valos</group>
             <name>toolset-revealer</name>
-            <version>0.35.0-prerelease.2</version>
+            <version>0.35.0-prerelease.3</version>
             <description>
                 <![CDATA[Tools for building revelations both for development and deployment purposes]]>
             </description>
@@ -560,12 +560,12 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.2</purl>
+            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.3</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <name>valma</name>
-            <version>0.35.0-prerelease.2</version>
+            <version>0.35.0-prerelease.3</version>
             <description>
                 <![CDATA[A ValOS CLI tool for discovering and executing context-dependent command scripts]]>
             </description>
@@ -574,7 +574,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/valma@0.35.0-prerelease.2</purl>
+            <purl>pkg:npm/valma@0.35.0-prerelease.3</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -664,7 +664,7 @@
         <component type="library">
             <group>valos</group>
             <name>toolset-vault</name>
-            <version>0.35.0-prerelease.2</version>
+            <version>0.35.0-prerelease.3</version>
             <description>
                 <![CDATA[A valma toolset for managing valos vault monorepository workspaces]]>
             </description>
@@ -673,7 +673,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/toolset-vault@0.35.0-prerelease.2</purl>
+            <purl>pkg:npm/%40valos/toolset-vault@0.35.0-prerelease.3</purl>
             <modified>false</modified>
         </component>
         <component type="library">

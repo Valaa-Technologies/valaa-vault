@@ -306,7 +306,6 @@ VDoc core ontology specifies the vocabulary for the human facing
         <tr><td>content</td><td>rdf:Property</td><td></td><td>vdoc:Node</td><td>rdfs:List</td><td>The primary visible content of a Node</td></tr>
         <tr><td>words</td><td>rdf:Property</td><td></td><td>vdoc:Node</td><td>rdfs:List</td><td>A visible list of visually separate words</td></tr>
         <tr><td>rows</td><td>rdf:Property</td><td></td><td>vdoc:Node</td><td>rdfs:List</td><td>A visible list of vertically stacked rows</td></tr>
-        <tr><td>title</td><td>rdf:Property</td><td></td><td>vdoc:Node</td><td>rdfs:Resource</td><td>Human readable name of a Node</td></tr>
         <tr><td>Chapter</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td>A titled, possibly numbered chapter document node</td></tr>
         <tr><td>BulletList</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td>A bullet list document node</td></tr>
         <tr><td>NumberedList</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td>A numbered list document node</td></tr>
@@ -334,7 +333,7 @@ VDoc core ontology specifies the vocabulary for the human facing
       </thead>
       <tbody>
         <tr><td></td><td></td><td>vdoc:content</td><td></td><td>Basic Node</td></tr>
-        <tr><td>chapter</td><td>vdoc:Chapter</td><td>vdoc:content</td><td>vdoc:title</td><td>Numbered, titled chapter</td></tr>
+        <tr><td>chapter</td><td>vdoc:Chapter</td><td>vdoc:content</td><td>dc:title</td><td>Numbered, titled chapter</td></tr>
         <tr><td>bulleted</td><td>vdoc:BulletList</td><td>vdoc:rows</td><td></td><td>Bulleted list</td></tr>
         <tr><td>numbered</td><td>vdoc:NumberedList</td><td>vdoc:rows</td><td></td><td>Numbered list</td></tr>
         <tr><td>table</td><td>vdoc:Table</td><td>vdoc:columns</td><td>vdoc:lookup</td><td>Table</td></tr>

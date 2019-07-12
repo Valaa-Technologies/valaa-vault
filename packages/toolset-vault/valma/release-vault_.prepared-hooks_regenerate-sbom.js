@@ -22,6 +22,10 @@ exports.builder = (yargs) => yargs.options({
     default: true,
     description: "Generate revdocs from all vault **/*revdoc.js files",
   },
+  vdocsons: {
+    default: true,
+    description: "Generate vdocsons from all vault **/*revdoc.js files",
+  },
 });
 
 exports.handler = async (yargv) => {
@@ -60,7 +64,7 @@ exports.handler = async (yargv) => {
             workspaceBase, workspaceName, targetWorkspaceBase);
       }
       await generateRevdocAndWriteToDocs(
-          revdocPath, targetDocPath, targetDocName, yargv.revdocs === "vdocson");
+          revdocPath, targetDocPath, targetDocName, yargv.vdocsons);
     }
   }
   await vlm.execute("git add docs/*");

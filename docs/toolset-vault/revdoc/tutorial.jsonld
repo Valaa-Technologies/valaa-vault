@@ -1,0 +1,126 @@
+[
+  {
+    "@context": {
+      "@base": "https:/valaatech.github.io/vault/toolset-vault/revdoc/tutorial#",
+      "sbomdoc": "https://valaatech.github.io/vault/toolset-vault/sbomdoc#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "vdoc": "https://valaatech.github.io/vault/toolset-vault/vdoc#",
+      "a": {
+        "@id": "rdf:type",
+        "@type": "@id"
+      },
+      "vdoc:content": {
+        "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#content",
+        "@container": "@list"
+      },
+      "vdoc:words": {
+        "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#words",
+        "@container": "@list"
+      },
+      "vdoc:rows": {
+        "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#rows",
+        "@container": "@list"
+      }
+    },
+    "@id": "https:/valaatech.github.io/vault/toolset-vault/revdoc/tutorial",
+    "rdf:type": "vdoc:Document",
+    "dc:title": "ReVDoc Tutorial",
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "tutorial"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is a revdoc template document 'tutorial' created by create-revdoc."
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is part of the toolset workspace ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "@valos/toolset-vault"
+          ],
+          "vdoc:ref": "@valos/toolset-vault"
+        },
+        " (of domain ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "packages"
+          ],
+          "vdoc:ref": "packages"
+        },
+        ") which is ",
+        "A valma toolset for managing valos vault monorepository workspaces"
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReSpec boilerplate"
+          ],
+          "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+        },
+        "See ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReVDoc tutorial"
+          ],
+          "vdoc:ref": "@valos/toolset-vault/revdoc/tutorial"
+        },
+        " for instructions on how to write revdoc source documents.",
+        "See also ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReVdoc specification"
+          ],
+          "vdoc:ref": "@valos/toolset-vault/revdoc"
+        },
+        " and ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "VDoc specification"
+          ],
+          "vdoc:ref": "@valos/toolset-vault/vdoc"
+        },
+        " for reference documentation."
+      ]
+    },
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      }
+    ]
+  }
+]

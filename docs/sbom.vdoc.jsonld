@@ -27,7 +27,7 @@
     },
     "@id": "https://valaatech.github.io/vault/sbom",
     "rdf:type": "vdoc:Document",
-    "vdoc:title": "@valos/kernel@0.35.0-prerelease.2 Software Bill of Materials",
+    "dc:title": "@valos/kernel_@0.35.0-prerelease.3 Software Bill of Materials",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -65,7 +65,7 @@
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
         "This document was automatically generated on",
-        "2019-07-10T11:49:39.327Z",
+        "2019-07-12T08:17:29.500Z",
         ".",
         "This SBoM document is available in following formats:",
         {
@@ -345,10 +345,10 @@
       {
         "type": "library",
         "name": "spdx-license-ids",
-        "version": "3.0.4",
+        "version": "3.0.5",
         "description": "A list of SPDX license identifiers",
         "licenses": "CC0-1.0",
-        "purl": "pkg:npm/spdx-license-ids@3.0.4",
+        "purl": "pkg:npm/spdx-license-ids@3.0.5",
         "modified": false
       },
       {
@@ -464,19 +464,19 @@
         "type": "library",
         "group": "valos",
         "name": "toolset-revealer",
-        "version": "0.35.0-prerelease.2",
+        "version": "0.35.0-prerelease.3",
         "description": "Tools for building revelations both for development and deployment purposes",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.2",
+        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.3",
         "modified": false
       },
       {
         "type": "library",
         "name": "valma",
-        "version": "0.35.0-prerelease.2",
+        "version": "0.35.0-prerelease.3",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "licenses": "MIT",
-        "purl": "pkg:npm/valma@0.35.0-prerelease.2",
+        "purl": "pkg:npm/valma@0.35.0-prerelease.3",
         "modified": false
       },
       {
@@ -537,10 +537,10 @@
         "type": "library",
         "group": "valos",
         "name": "toolset-vault",
-        "version": "0.35.0-prerelease.2",
+        "version": "0.35.0-prerelease.3",
         "description": "A valma toolset for managing valos vault monorepository workspaces",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/toolset-vault@0.35.0-prerelease.2",
+        "purl": "pkg:npm/%40valos/toolset-vault@0.35.0-prerelease.3",
         "modified": false
       },
       {
@@ -573,7 +573,7 @@
         "@id": "introduction"
       },
       {
-        "vdoc:title": "Components table",
+        "dc:title": "Components table",
         "rdf:type": "vdoc:Chapter",
         "vdoc:content": [
           {

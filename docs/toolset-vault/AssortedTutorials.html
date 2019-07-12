@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>Assorted tutorials</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Jaradacl","url":"https://valaatech.github.io/fabric/authors/Jaradacl","github":"http://github.com/valospace"}],"authors":[],"shortName":"assortedTutorials"};
+    </script>
+  </head>
+  <body>
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter">This document is a collection of tutorials and possibly other notes created by Jaradacl based on the tasks given. (During first few days at least)
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter">This document is part of the toolset workspace <a href="https:/valaatech.github.io/vault/toolset-vault/" class="vdoc type-vdoc-reference">@valos/toolset-vault</a> (of domain <a href="@valos/kernel/" class="vdoc type-vdoc-reference">@valos/kernel</a>) which is A valma toolset for managing valos vault monorepository workspaces
+  </section>
+
+  <section id="how_to_create_revdoc" class="vdoc type-vdoc-chapter">
+    <h2>How to create RevDoc</h2>
+This is a step-by-step guide on how to create RevDoc using cli.
+    <ol>
+      <li>Ensure you have python installed.</li>
+      <li>Navigate to the folder you want your revdoc.js to reside and run the following command: 
+  <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">vlm create-revdoc YOUR_DOCUMENT_NAME_WITHOUT_FILE_EXTENSION</span>
+
+  </div>
+ Note: If you create your RevDoc under the revdocs/ folder, your HTML and JSONLD files will be generated to the project root</li>
+      <li>You will now be asked the following information: 
+    <ul>
+      <li>Title of the document: This is human-readable title of the document.</li>
+      <li>ReSpec short name</li>
+      <li>Document editors: Comma-separated value of the editors of your document.</li>
+      <li>Document authors: Comma-separated value of the authors of your document.</li>
+    </ul>
+</li>
+      <li>Next navigate to the root of your project and run the following command 
+  <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">vlm .release-vault/.prepared-hooks/regenerate-sbom</span>
+
+  </div>
+ This will create HTML and JSONLD files based on your RevDoc</li>
+      <li>Now run the following command 
+  <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">python -m SimpleHTTPServer</span>
+
+  </div>
+</li>
+      <li>Open browser and navigate to the localhost in the port you just opened. (8000 by default)</li>
+      <li>Your HTML and JSONLD files can now be found under docs/ in the same path as where you saved your RevDoc file; for example if you saved your RevDoc under packages/toolset-vault it can now be found under docs/packages/toolset-vault.</li>
+    </ol>
+
+  </section>
+
+  </body>
+</html>

@@ -32,6 +32,9 @@ exports.handler = async (yargv) => {
   if (!yargv.toolsetGlob) {
     await vlm.invoke(`.configure/.domain/${valos.domain}`, rest);
     await vlm.invoke(`.configure/.type/${valos.type}`, rest);
+    await vlm.invoke(`.configure/.domain/.${valos.domain}/**/*`,
+        { reconfigure: yargv.reconfigure });
+    await vlm.invoke(`.configure/.type/.${valos.type}/**/*`, { reconfigure: yargv.reconfigure });
     await vlm.interact("yarn install");
     await vlm.invoke(`.configure/.select-toolsets`, rest);
   } else {

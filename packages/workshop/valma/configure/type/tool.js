@@ -10,7 +10,7 @@ more toolsets and its toolsets.json config stanzas are placed under
 its parent toolset stanzas.
 
 The main case for tools and toolsets separation came from the release
-deployment system of autholleries, where the modularity and granular
+deployment system of opspaces, where the modularity and granular
 semantic versioning of tool packages allows for more efficient and
 robust deployments.
 
@@ -46,6 +46,7 @@ exports.builder = (yargs) => yargs.options({
 });
 
 exports.handler = async (yargv) => {
+  const createReleaseSubCommand = require("./toolset").createReleaseSubCommand;
   const vlm = yargv.vlm;
   const simpleName = vlm.packageConfig.name.match(/([^/]*)$/)[1];
   await vlm.invoke("create-command", [`.configure/.tool/${vlm.packageConfig.name}`, {
@@ -75,5 +76,9 @@ vlm.updateToolConfig(yargv.toolset, toolName, configUpdate);
 };
 `,
   }]);
+  if (await vlm.inquireConfirm("Create build and deploy release sub-commands?")) {
+    await createReleaseSubCommand(vlm, "tool", vlm.packageConfig.name, "build");
+    await createReleaseSubCommand(vlm, "tool", vlm.packageConfig.name, "deploy");
+  }
   return vlm.invoke(`.configure/.type/.tool/**/*`, { reconfigure: yargv.reconfigure });
 };

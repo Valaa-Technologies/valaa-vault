@@ -24,12 +24,6 @@
     "valma-$": "valma/execute.js",
     ".valma-configure_.valos-stanza": "valma/configure/valos-stanza.js",
     ".valma-configure_.select-toolsets": "valma/configure/select-toolsets.js",
-    ".valma-configure_.domain_authollery": "valma/configure/domain/authollery.js",
-    ".valma-configure_.domain_gateway": "valma/configure/domain/gateway.js",
-    ".valma-configure_.domain_infrastructure": "valma/configure/domain/infrastructure.js",
-    ".valma-configure_.domain_kernel": "valma/configure/domain/kernel.js",
-    ".valma-configure_.domain_packages": "valma/configure/domain/packages.js",
-    ".valma-configure_.domain_scheme": "valma/configure/domain/scheme.js",
     ".valma-status_10-header": "valma/status_10-header.js",
     ".valma-": "valma/this.js"
   },

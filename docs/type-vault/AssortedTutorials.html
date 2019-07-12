@@ -103,5 +103,56 @@
 
   </section>
 
+  <section id="feature_branch_lifecycle_git" class="vdoc type-vdoc-chapter">
+    <h2>Feature branch lifecycle in Git</h2>
+This chapter briefly describes the lifecycle of a feature branch step-by-step using Git.Chapter works as a guide.
+    <ol>
+      <li>After ensuring you are in a prerelease branch, creating new branch is as easy as running: 
+  <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">git checkout -b path/to/your/branch</span>
+
+  </div>
+</li>
+      <li>Now you have your branch, so it's time for edits.</li>
+      <li>TO BE CONTINUED (rebase, commit, push etc.)</li>
+    </ol>
+
+  </section>
+
+  <section id="creating_new_library_valma" class="vdoc type-vdoc-chapter">
+    <h2>Creating a new library with valma</h2>
+Guide on how to create a new library using valma. Note: Scope of this guide covers only the creation of a public library. It does not cover all of the different options while initalizing.As of now does not cover other use cases either.
+    <ol>
+      <li>Create a folder for your new library and navigate to there. Run the following command: 
+  <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">vlm init</span>
+
+  </div>
+ Script will prompt you multiple times to choose, right options are listed here.</li>
+      <li>
+    <ol>
+      <li>Select "Initialize" when it asks about package.json initialization.</li>
+      <li>Select "Yes" for whether the package is public.</li>
+      <li>Select "Initialize" when it asks about initializing repository info.</li>
+      <li>Select "Library" as the valos.type and confirm it.</li>
+      <li>Select "@valos/kernel" for the valos.domain and confirm twice.</li>
+      <li>Select "skip" for whether to add initial workshops or toolsets as devDependencies</li>
+      <li>Select "configure" for whether to configure the repository with 
+  <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">vlm configure</span>
+
+  </div>
+</li>
+      <li>Select "@valos/toolset-vault/enable-babel" to use from abailable toolsets.</li>
+      <li>Select "Yes" for whether to enable babel transpilation for the library</li>
+    </ol>
+</li>
+      <li>Your library is now created. <a href="#getting_ready_for_testing" class="vdoc type-vdoc-reference">You can now continue by getting your library ready for testing.</a></li>
+    </ol>
+
+  </section>
+
+  <section id="getting_ready_for_testing" class="vdoc type-vdoc-chapter">
+    <h2>Getting ready for testing</h2>
+Guide on how to get your library ready for testing.
+  </section>
+
   </body>
 </html>

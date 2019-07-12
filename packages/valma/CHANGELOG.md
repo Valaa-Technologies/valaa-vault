@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.4](https://github.com/valaatech/vault/compare/v0.35.0-prerelease.3...v0.35.0-prerelease.4) (2019-07-12)
+
+
+### Bug Fixes
+
+* **toolset-vault:** Rename @valos/workshop to ..kernel, vdoc:title -> dc:title ([f0043bf](https://github.com/valaatech/vault/commit/f0043bf))
+
+
+
+
+
 # [0.35.0-prerelease.3](https://github.com/valaatech/vault/compare/v0.35.0-prerelease.2...v0.35.0-prerelease.3) (2019-07-10)
 
 **Note:** Version bump only for package valma

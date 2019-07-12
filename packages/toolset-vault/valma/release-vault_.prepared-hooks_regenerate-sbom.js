@@ -48,18 +48,19 @@ exports.handler = async (yargv) => {
 
   if (yargv.revdocs) {
     const packageRevdocPaths = [...(vlm.shell.find("-l",
-        "{packages,opspaces,workers}/**/{*.,}revdoc.js") || [])];
+        "{revdocs,packages,opspaces,workers}/**/{*.,}revdoc.js") || [])];
     for (const revdocPath of packageRevdocPaths) {
-      const [, workspaceBase, workspaceName, docDir,, docName] = revdocPath
-          .match(/^(packages|opspaces|workers)\/([^/]*)\/(.*\/)?(([^/]*)\.)?revdoc\.js/);
+      const [, workspaceBase, workspaceName, docDir,, docName] = revdocPath.match(
+          /^(revdocs|packages\/|opspaces\/|workers\/)([^/]*)\/(.*\/)?(([^/]*)\.)?revdoc\.js/);
       let targetDocName = docName;
-      const targetWorkspaceBase = (workspaceBase !== "packages") ? [workspaceBase] : [];
-      let targetDocPath = vlm.path.join(...targetWorkspaceBase, workspaceName, docDir || "");
+      const targetWorkspaceBase = (workspaceBase !== "packages/" && workspaceBase !== "revdocs") 
+          ? [workspaceBase] : [];
+      let targetDocPath = vlm.path.join(...targetWorkspaceBase, workspaceName || ".", docDir || "");
       if (!targetDocName) {
         targetDocName = vlm.path.basename(targetDocPath);
         targetDocPath = vlm.path.join(targetDocPath, "..");
       }
-      if (docsBaseURI) {
+      if (docsBaseURI && workspaceName) {
         await updateReVDocContainingPackageDocsBaseURI(
             workspaceBase, workspaceName, targetWorkspaceBase);
       }

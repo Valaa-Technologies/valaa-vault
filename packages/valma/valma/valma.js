@@ -1754,11 +1754,11 @@ function __processArgs (args) {
 
   function _toArgString (value, keys) {
     if ((value === undefined) || (value === null)) return [];
-    if (typeof value === "string") return !keys ? value : [`--${keys.join(".")}=${value}`];
     if (typeof value === "boolean") return !keys ? [] : `--${value ? "" : "no-"}${keys.join(".")}`;
     if (Array.isArray(value)) return [].concat(...value.map(entry => _toArgString(entry, keys)));
     if (typeof value !== "object") {
-      return !keys ? JSON.stringify(value) : `--${keys.join(".")}=${JSON.stringify(value)}`;
+      const valueString = (typeof value === "string") ? value : JSON.stringify(value);
+      return keys ? `--${keys.join(".")}=${valueString}` : valueString;
     }
     return [].concat(...Object.keys(value)
         .map(key => ((key[0] === ".") ? [] : _toArgString(value[key], [...(keys || []), key]))));

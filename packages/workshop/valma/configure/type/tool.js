@@ -46,10 +46,10 @@ exports.builder = (yargs) => yargs.options({
 });
 
 exports.handler = async (yargv) => {
-  const createReleaseSubCommand = require("./toolset").createReleaseSubCommand;
+  const { createStatusSubCommand, createReleaseSubCommand } = require("./toolset");
   const vlm = yargv.vlm;
   const simpleName = vlm.packageConfig.name.match(/([^/]*)$/)[1];
-  await vlm.invoke("create-command", [`.configure/.tool/${vlm.packageConfig.name}`, {
+  await vlm.invoke("create-command", [{
     filename: `configure_tool__${simpleName}.js`,
     brief: `${yargv.brief || "simple"} configure`,
     header: `const toolName = "${vlm.packageConfig.name}";\n\n`,
@@ -75,10 +75,13 @@ const configUpdate = {};
 vlm.updateToolConfig(yargv.toolset, toolName, configUpdate);
 };
 `,
-  }]);
+  }, `.configure/.tool/${vlm.packageConfig.name}`]);
+  if (await vlm.inquireConfirm("Create toolset status sub-command skeleton?")) {
+    await createStatusSubCommand(vlm, "tool", vlm.packageConfig.name, simpleName, ".tool/");
+  }
   if (await vlm.inquireConfirm("Create build and deploy release sub-commands?")) {
-    await createReleaseSubCommand(vlm, "tool", vlm.packageConfig.name, "build");
-    await createReleaseSubCommand(vlm, "tool", vlm.packageConfig.name, "deploy");
+    await createReleaseSubCommand(vlm, "tool", vlm.packageConfig.name, simpleName, "build");
+    await createReleaseSubCommand(vlm, "tool", vlm.packageConfig.name, simpleName, "deploy");
   }
   return vlm.invoke(`.configure/.type/.tool/**/*`, { reconfigure: yargv.reconfigure });
 };

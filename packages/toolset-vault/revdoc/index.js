@@ -41,9 +41,9 @@ module.exports = {
       "column#1;vdoc:value": "rdf:type",
     },
   },
-  extract (documentIRI, sourceGraphs,
-      ontologies = [ontology, vdoc.ontology]) {
-    return vdoc.extract(documentIRI, sourceGraphs, ontologies);
+  extract (sourceGraphs, options = {}) {
+    if (options.ontologies === undefined) options.ontologies = [ontology, vdoc.ontology];
+    return vdoc.extract(sourceGraphs, options);
   },
   emit (emission, vdocson, formatName,
       ontologies = [ontology, vdoc.ontology]) {

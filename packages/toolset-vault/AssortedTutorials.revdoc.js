@@ -12,7 +12,7 @@ module.exports = {
     shortName: "assortedTutorials",
   },
   "chapter#abstract>0": [
-    "This document is a collection of tutorials and possibly other notes", 
+    "This document is a collection of tutorials and possibly other notes",
     " created by Jaradacl based on the tasks given. (During first few days at least)",
   ],
   "chapter#sotd>1": [

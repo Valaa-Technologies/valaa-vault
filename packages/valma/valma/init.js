@@ -98,10 +98,10 @@ package configuration file for yarn (and also for npm, which yarn is
   "access": "${(await vlm.inquireConfirm(
       "Is this a 'public' published package? ('n' for 'restricted')")) ? "public" : "restricted"}"
 }`;
-      } else if (parts[0][parts[0].length - 1] === "s") parts[0] = parts[0].slice(0, -1);
-      vlm.shell.ShellString(
+          } else if (parts[0][parts[0].length - 1] === "s") parts[0] = parts[0].slice(0, -1);
+          vlm.shell.ShellString(
 `{
-"name": "${vaultConfig.name}${parts.join("_")}",
+"name": "${vaultConfig.name}-${parts.join("-")}",
 "version": "${vaultConfig.version}",
 "author": "${vaultConfig.author}",
 "license": "${vaultConfig.license}",

@@ -21,9 +21,7 @@ A worker repository is fully agnostic to version control solutions:
   upstream configuration and data changes and adjust their computation
   accordingly.
   Sync workers shards can even push results back to the versioned
-  repository if appropriate.
-
-Will add '@valos/toolset-worker' as devDependency.`;
+  repository if appropriate.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
     && `Workspace is not a 'worker' (is '${yargs.vlm.getValOSConfig("type")}')`;

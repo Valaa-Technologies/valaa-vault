@@ -7,10 +7,10 @@ exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "opspace")
 exports.builder = (yargs) => yargs;
 
 exports.handler = (yargv) => {
-  const opspace = yargv.vlm.getValmaConfig("opspace");
-  if (opspace) {
-    console.log(`opspace stack: ${opspace.stack}`);
+  const opspaceConfig = yargv.vlm.getToolsetConfig("opspace");
+  if (!opspaceConfig) {
+    console.error(`valma-status: valma toolset opspace section not found (run 'vlm configure')`);
   } else {
-    console.error(`valma-status: valma config opspace section not found (run 'vlm configure')`);
+    console.log(`opspace stack: ${opspaceConfig.stack}`);
   }
 };

@@ -25,19 +25,19 @@ exports.builder = (yargs) => {
     },
     type: {
       type: "string", default: valos.type, choices: typeChoices,
+      description: "Select repository package.json stanza valos.type",
       interactive: {
         type: "list", when: vlm.reconfigure ? "always" : "if-undefined", pageSize: 10,
         confirm: _inquireIfCustomThenAlwaysConfirm.bind(null, vlm, "type"),
       },
-      description: "Select repository package.json stanza valos.type",
     },
     domain: {
       type: "string", default: valos.domain, choices: domainChoices,
+      description: "Select repository package.json stanza valos.domain",
       interactive: {
         type: "list", when: vlm.reconfigure ? "always" : "if-undefined", pageSize: 10,
         confirm: _inquireIfCustomThenAlwaysConfirm.bind(null, vlm, "domain"),
       },
-      description: "Select repository package.json stanza valos.domain",
     },
   });
 };
@@ -46,8 +46,8 @@ async function _inquireIfCustomThenAlwaysConfirm (vlm, category, selection, answ
   if (selection === "<custom>") {
     answers[category] = await vlm.inquireText(`Enter custom valos.${category}:`);
   }
-  vlm.speak(
-      await vlm.invoke(`.configure/.${category}/${answers[category]}`, ["--show-introduction"]));
+  vlm.speak(await vlm.invoke(
+      `.configure/.${category}/${answers[category]}`, ["--show-introduction"]));
   return vlm.inquireConfirm(`Confirm valos.${category} selection: '${answers[category]}'?`);
 }
 

@@ -53,7 +53,7 @@ exports.handler = async (yargv) => {
       const [, workspaceBase, workspaceName, docDir,, docName] = revdocPath.match(
           /^(revdocs|packages\/|opspaces\/|workers\/)([^/]*)\/(.*\/)?(([^/]*)\.)?revdoc\.js/);
       let targetDocName = docName;
-      const targetWorkspaceBase = (workspaceBase !== "packages/" && workspaceBase !== "revdocs") 
+      const targetWorkspaceBase = (workspaceBase !== "packages/" && workspaceBase !== "revdocs")
           ? [workspaceBase] : [];
       let targetDocPath = vlm.path.join(...targetWorkspaceBase, workspaceName || ".", docDir || "");
       if (!targetDocName) {
@@ -105,9 +105,9 @@ exports.handler = async (yargv) => {
   async function generateRevdocAndWriteToDocs (
       revdocPath, targetDocPath, targetDocName, emitReVDocSON) {
     const revdocSource = require(vlm.path.join(process.cwd(), revdocPath));
-    const revdocson = extract(
-        vlm.path.join(docsBaseURI || "", targetDocPath, targetDocName),
-        revdocSource);
+    const revdocson = extract(revdocSource, {
+      documentURI: vlm.path.join(docsBaseURI || "", targetDocPath, targetDocName),
+    });
     const revdocHTML = await emitHTML(revdocson);
     const targetDir = vlm.path.join("docs", targetDocPath);
     const targetFileName = `${targetDocName}.html`;
@@ -150,7 +150,7 @@ exports.handler = async (yargv) => {
         return (tgt !== null) ? tgt : undefined;
       },
     });
-    const sbomvdocson = extract(`${docsBaseURI || ""}sbom`, {
+    const sbomSource = {
       "dc:title": `${config.name}@${config.version} Software Bill of Materials`,
       respecConfig: {
         specStatus: "unofficial",
@@ -181,8 +181,8 @@ exports.handler = async (yargv) => {
         "table#>0;components_data": ontologyTables.components,
         "data#components_data": sbomgraph.bom.components,
       },
-    });
-    return sbomvdocson;
+    };
+    return extract(sbomSource, { documentURI: `${docsBaseURI || ""}sbom` });
   }
 
   async function emitHTML (sbomvdocson) {

@@ -4,11 +4,7 @@ exports.introduction = `${exports.describe}.
 
 A ValOS Vault is a monorepository containing many sub-packages. Its
 main responsibility is to handle the development, assembly and
-publishing of those packages.
-
-Will add '@valos/toolset-vault' as devDependency.
-Will set package.json .workspaces stanza.
-`;
+publishing of those packages.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
     && `Workspace is not a 'vault' (is '${yargs.vlm.getValOSConfig("type")}')`;

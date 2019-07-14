@@ -29,7 +29,7 @@ exports.builder = (yargs) => yargs.options({
     description: "Copy an existing, accessible command script as the new script",
   },
   skeleton: {
-    type: "boolean",
+    type: "boolean", default: true,
     description: "If true will only create a minimal script skeleton",
   },
   header: {
@@ -58,6 +58,7 @@ exports.builder = (yargs) => yargs.options({
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const command = yargv.commandName;
+  if (!command) throw new Error("commandName missing");
   const commandParts = command.replace(/\//g, "_").match(/^(\.)?(.*)$/);
   const commandExportName = `${commandParts[1] || ""}valma-${commandParts[2]}`;
   const scriptPath = `valma/${yargv.filename || `${commandParts[2]}.js`}`;
@@ -74,7 +75,7 @@ exports.handler = async (yargv) => {
         : `'package.json':bin["${commandExportName}"]`;
     const answer = await vlm.inquire([{
       message: `${import_ ? "Import" : local ? "Create" : "Export"
-          } ${yargv.brief
+          } ${(yargv.brief && `'${yargv.brief}'`)
               || (import_ ? "an existing command" : local ? "a local command" : "a command")
           } script ${import_ ? "copy" : yargv.skeleton ? "skeleton" : "template"
           } as ${linkMessage} -> '${scriptPath}'?`,
@@ -92,21 +93,22 @@ exports.handler = async (yargv) => {
     }
     if (answer.choice === "export instead") { local = false; continue; }
     if (answer.choice === "local instead") { local = true; continue; }
-    if (!vlm.shell.test("-e", scriptPath)) {
+    if (vlm.shell.test("-e", scriptPath)
+        && !await vlm.inquireConfirm(`Overwrite existing target '${scriptPath}' source?`)) {
+      vlm.warn(`Not overwriting already existing script:`, vlm.theme.path(scriptPath));
+    } else {
       vlm.shell.mkdir("-p", vlm.path.dirname(scriptPath));
       if (!yargv.import) {
         vlm.shell.ShellString(_createSource(command, yargv)).to(scriptPath);
         vlm.shell.chmod("+x", scriptPath);
       } else {
-        const targetPath = await vlm.invoke(command, ["-T"]);
-        if ((typeof targetPath !== "string") || !vlm.shell.test("-f", targetPath)) {
+        const sourcePath = await vlm.invoke(command, ["-T"]);
+        if ((typeof sourcePath !== "string") || !vlm.shell.test("-f", sourcePath)) {
           throw new Error(`Could not find command '${command}' source file for importing`);
         }
-        vlm.info("Importing existing script source:", vlm.theme.path(targetPath));
-        vlm.shell.cp(targetPath, scriptPath);
+        vlm.info("Importing existing script source:", vlm.theme.path(sourcePath));
+        vlm.shell.cp(sourcePath, scriptPath);
       }
-    } else {
-      vlm.warn(`Not overwriting already existing script:`, vlm.theme.path(scriptPath));
     }
     const symlinkPath = vlm.path.join("valma.bin", commandExportName);
     if (!local) {

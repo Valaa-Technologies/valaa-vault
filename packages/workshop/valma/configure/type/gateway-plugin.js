@@ -2,7 +2,9 @@ exports.command = ".configure/.type/gateway-plugin";
 exports.describe = "Configure a 'gateway-plugin' workspace";
 exports.introduction = `${exports.describe}.
 
-Will add '@valos/toolset-gateway-plugin' as devDependency.`;
+Gateway-plugin extends inspire/perspire gateways with various types of
+functionalities, including new type schemas, media decoders, protocol
+schemes, external APIs, valosheath APIs, etc.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "gateway-plugin")
     && `Workspace is not a 'gateway-plugin' (is '${yargs.vlm.getValOSConfig("type")}')`;

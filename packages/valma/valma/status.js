@@ -1,10 +1,10 @@
 #!/usr/bin/env vlm
 exports.command = "status [toolsetGlob]";
-exports.describe = "Display the status of the current package repository";
+exports.describe = "Display the status of the current repository";
 exports.introduction = `${exports.describe}.
 
 If toolsetGlob is specified the status is limited to status scripts
-matching '.status/{toolsetGlob}*', otherwise all status scripts by
+matching '.status/*{toolsetGlob}*/**/*', otherwise all status scripts by
 '.status/**/*' are used.`;
 
 exports.disabled = (yargs) => !yargs.vlm.packageConfig && "No package.json found";
@@ -12,7 +12,7 @@ exports.status = (/* yargs */) => "Status ok!";
 exports.builder = (yargs) => yargs.options({
   echos: {
     type: "boolean", default: false,
-    describe: "Status disables the echos by default",
+    describe: "Echo sub-command invokations to log",
   },
 });
 
@@ -25,14 +25,15 @@ exports.handler = async (yargv) => {
     return false;
   }
   const valos = vlm.packageConfig.valos || vlm.packageConfig.valaa;
-  const statusCommandInvokations = [{},
-    vlm.invoke(`.status/${yargv.toolsetGlob || "**/"}*`, yargv._),
+  const subCommandGlob = yargv.toolsetGlob ? `*${yargv.toolsetGlob}*/**/*` : "**/*";
+  const pendingSubCommandInvokations = [
+    vlm.invoke(`.status/${subCommandGlob}`, yargv._),
     !(valos && valos.type) ? [] :
-        vlm.invoke(`.status/.type/.${valos.type}/${yargv.toolsetGlob || "**/"}*`, yargv._),
+        vlm.invoke(`.status/.type/.${valos.type}/${subCommandGlob}`, yargv._),
     !(valos && valos.domain) ? [] :
-        vlm.invoke(`.status/.domain/.${valos.domain}/${yargv.toolsetGlob || "**/"}*`, yargv._),
+        vlm.invoke(`.status/.domain/.${valos.domain}/${subCommandGlob}`, yargv._),
   ];
-  const resolveds = [].concat(...await Promise.all(statusCommandInvokations))
+  const resolveds = [].concat(...await Promise.all(pendingSubCommandInvokations))
       .filter(e => e && (typeof e === "object"));
   const patchWith = require("@valos/tools/patchWith").default;
 

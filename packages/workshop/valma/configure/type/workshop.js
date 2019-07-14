@@ -14,8 +14,7 @@ Notably the package (de)registration should provide means for newly
 domain toolset packages to request the addition of their toolset
 configure command to the domain workshop. Idiomatic example is a guided
 issuance of a PR against the source control repository of the workshop
-package.
-`;
+package.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "workshop")
     && `Workspace is not a 'workshop' (is '${yargs.vlm.getValOSConfig("type")}')`;

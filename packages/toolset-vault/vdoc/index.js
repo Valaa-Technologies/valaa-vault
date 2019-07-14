@@ -10,20 +10,26 @@ module.exports = {
   emit,
 };
 
-function extract (documentIRI, sourceGraphs, ontologies = [vdocOntology]) {
+function extract (sourceGraphs, {
+  target, documentIRI, ontologies = [vdocOntology], omitContext,
+} = {}) {
   const vdocson = [];
   return patchWith(vdocson, [].concat(sourceGraphs), {
     keyPath: [],
-    preExtend (target, patch, key, targetObject, patchObject) {
+    preExtend (innerTarget, patch, key, targetObject, patchObject) {
       if (this.keyPath.length === 1) {
-        if (!target) {
-          const documentContext = { "@base": `${documentIRI}#` };
-          for (const ontology of ontologies) {
-            Object.assign(documentContext, ontology.prefixes, ontology.context);
+        if (!innerTarget) {
+          const root = target || {};
+          if (documentIRI !== undefined) root["@id"] = documentIRI;
+          if (!omitContext) {
+            root["@context"] = { "@base": `${documentIRI || ""}#` };
+            for (const ontology of ontologies) {
+              Object.assign(root["@context"], ontology.prefixes, ontology.context);
+            }
           }
-          return this.extend({ "@context": documentContext, "@id": documentIRI }, patch);
+          return this.extend(root, patch);
         }
-        this.documentNode = target;
+        this.documentNode = innerTarget;
       }
       for (const ontology of ontologies) {
         if (!ontology.extractor.preExtend) continue;
@@ -33,16 +39,16 @@ function extract (documentIRI, sourceGraphs, ontologies = [vdocOntology]) {
       }
       return undefined;
     },
-    postExtend (target, patch, key, targetObject, patchObject) {
-      if ((this.keyPath <= 1) && (key === undefined)) return target;
+    postExtend (innerTarget, patch, key, targetObject, patchObject) {
+      if ((this.keyPath <= 1) && (key === undefined)) return innerTarget;
       let ret;
       for (const ontology of ontologies) {
         if (!ontology.extractor.postExtend) continue;
         ret = ontology.extractor.postExtend.call(
-            this, target, patch, key, targetObject, patchObject);
+            this, innerTarget, patch, key, targetObject, patchObject);
         if (ret !== undefined) break;
       }
-      if (ret === undefined) ret = target;
+      if (ret === undefined) ret = innerTarget;
       return (ret === null) ? undefined : ret;
     },
   });

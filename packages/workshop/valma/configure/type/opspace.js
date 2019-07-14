@@ -5,9 +5,7 @@ exports.introduction = `${exports.describe}.
 Opspaces are responsible for configuring, deploying, updating,
 monitoring and diagnosing all types of live infrastructure resources.
 
-Opspaces rely heavily on various toolsets to get their job done.
-
-Will add '@valos/toolset-opspace' as devDependency.`;
+Opspaces rely heavily on various toolsets to get their job done.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "opspace")
     && `Workspace is not an 'opspace' (is '${yargs.vlm.getValOSConfig("type")}')`;

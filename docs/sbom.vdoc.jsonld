@@ -1,7 +1,7 @@
 [
   {
     "@context": {
-      "@base": "https://valaatech.github.io/vault/sbom#",
+      "@base": "#",
       "sbomdoc": "https://valaatech.github.io/vault/toolset-vault/sbomdoc#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "owl": "http://www.w3.org/2002/07/owl#",
@@ -25,9 +25,7 @@
         "@container": "@list"
       }
     },
-    "@id": "https://valaatech.github.io/vault/sbom",
-    "rdf:type": "vdoc:Document",
-    "dc:title": "@valos/kernel_@0.35.0-prerelease.4 Software Bill of Materials",
+    "dc:title": "@valos/kernel@0.35.0-prerelease.4 Software Bill of Materials",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -70,7 +68,7 @@
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
         "This document was automatically generated on",
-        "2019-07-12T12:44:20.548Z",
+        "2019-07-14T13:30:24.306Z",
         ".",
         "This SBoM document is available in following formats:",
         {

@@ -1,7 +1,7 @@
 [
   {
     "@context": {
-      "@base": "https:/valaatech.github.io/vault/toolset-vault/revdoc#",
+      "@base": "#",
       "sbomdoc": "https://valaatech.github.io/vault/toolset-vault/sbomdoc#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "owl": "http://www.w3.org/2002/07/owl#",
@@ -25,8 +25,6 @@
         "@container": "@list"
       }
     },
-    "@id": "https:/valaatech.github.io/vault/toolset-vault/revdoc",
-    "rdf:type": "vdoc:Document",
     "dc:title": "ReVDoc - ReSpec document VDoc extension",
     "respecConfig": {
       "specStatus": "unofficial",

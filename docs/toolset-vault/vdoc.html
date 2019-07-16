@@ -1,33 +1,49 @@
-
-    <h2>ValOS document interchange specification</h2>
-
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>ValOS document interchange specification</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"vdoc"};
+    </script>
+  </head>
+  <body>
+    
   <section id="abstract" class="vdoc type-vdoc-chapter">This document specifies<a href="https://www.w3.org/TR/json-ld11/" class="vdoc type-vdoc-reference">a JSON-LD -based</a>documentation human-machine-valospace interchange format.
   </section>
 
-  <section id="sotd" class="vdoc type-vdoc-chapter">This document has not been reviewed. This is a draft document
+  <section id="sotd" class="vdoc type-vdoc-chapter">      <p>This document has not been reviewed. This is a draft document
     and may be updated, replaced or obsoleted by other documents at
-    any time.This document is part of the<a href="@valos/kernel/" class="vdoc type-vdoc-reference">ValOS core specification</a>.The format is implemented and supported by<a href="https:/valaatech.github.io/vault/toolset-vault/" class="vdoc type-vdoc-reference">@valos/toolset-vault npm package</a>.
+    any time.</p>
+      <p>This document is part of the<a href="@valos/kernel" class="vdoc type-vdoc-reference">ValOS core specification</a>.</p>
+      <p>The format is implemented and supported by<a href="https:/valaatech.github.io/vault/toolset-vault" class="vdoc type-vdoc-reference">@valos/toolset-vault npm package</a>.</p>
+
   </section>
 
   <section id="introduction" class="vdoc type-vdoc-chapter">
     <h2>Introduction</h2>
-<a href="#vdoc" class="vdoc type-vdoc-reference" style="bold">VDoc</a>is a extensible JSON-LD interchange
+      <p><a href="#vdoc" class="vdoc type-vdoc-reference" style="bold">VDoc</a>is a extensible JSON-LD interchange
       specification for extracting documents from varying sources,
       passing the now-machine-manipulable interchange document around
       and subsequently producing documents of specific formats such
       as Valospace resources, markdown, ReSpec HTML and browser and
-      ansi-colored console outputs.Motivation for this specification is to provide the foundation
-    for documentation<a href="@valos/hypertwin/" class="vdoc type-vdoc-reference">Valospace hypertwins</a>by supporting the ValOS resources as an emission target. This
+      ansi-colored console outputs.</p>
+      <p>Motivation for this specification is to provide the foundation
+    for documentation<a href="@valos/hypertwin" class="vdoc type-vdoc-reference">Valospace hypertwins</a>by supporting the ValOS resources as an emission target. This
     allows all kinds of documentation to be accessible from within
     Valospace with minimal additional tooling. This is not made
     an explicit design goal unto itself; instead the design goals are
     chosen to be generic in a way that satisfies this goal as the
-    original author believes this leads to better design.
+    original author believes this leads to better design.</p>
+
   </section>
 
   <section id="goals_and_non_goals" class="vdoc type-vdoc-chapter">
     <h2>Goals and non-goals</h2>
-VDoc design goals are:
+      <p>VDoc design goals are:
     <ol>
       <li>Manual writing VDoc should be robust and must rely on minimal
         number of intuitive rules. The more there is to remember the
@@ -58,10 +74,12 @@ Design non-goals are:
         contextual data.</li>
     </ol>
 To satisfy the goals VDoc chooses JSON-LD as the format for
-      primary source of truth and RDF as the underlying object model.Additionally VDoc provides extensibility via custom<a href="#formats" class="vdoc type-vdoc-reference">VDoc extension formats</a>which
+      primary source of truth and RDF as the underlying object model.</p>
+      <p>Additionally VDoc provides extensibility via custom<a href="#formats" class="vdoc type-vdoc-reference">VDoc extension formats</a>which
       can introduce domain-specific namespaces and ontologies,
       extraction and transformation operations and product document
-      formats.
+      formats.</p>
+
   </section>
 
   <section id="document_flow" class="vdoc type-vdoc-chapter">
@@ -269,7 +287,7 @@ VDoc core ontology specifies the vocabulary for the human facing
         <th class="vdoc type-vdoc-column">@container</th>
       </thead>
       <tbody>
-        <tr><td>a</td><td></td><td>rdf:type</td><td>@id</td><td></td></tr>
+        <tr><td>a</td><td>revdoc:Document</td><td>rdf:type</td><td>@id</td><td></td></tr>
         <tr><td>vdoc:content</td><td></td><td>https://valaatech.github.io/vault/toolset-vault/vdoc#content</td><td></td><td>@list</td></tr>
         <tr><td>vdoc:words</td><td></td><td>https://valaatech.github.io/vault/toolset-vault/vdoc#words</td><td></td><td>@list</td></tr>
         <tr><td>vdoc:rows</td><td></td><td>https://valaatech.github.io/vault/toolset-vault/vdoc#rows</td><td></td><td>@list</td></tr>
@@ -359,3 +377,6 @@ VDoc core ontology specifies the vocabulary for the human facing
   </section>
 
   </section>
+
+  </body>
+</html>

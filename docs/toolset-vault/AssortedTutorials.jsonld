@@ -1,8 +1,10 @@
 [
   {
+    "@id": "https:/valaatech.github.io/vault/toolset-vault/AssortedTutorials",
     "@context": {
-      "@base": "#",
+      "@base": "https:/valaatech.github.io/vault/toolset-vault/AssortedTutorials#",
       "sbomdoc": "https://valaatech.github.io/vault/toolset-vault/sbomdoc#",
+      "revdoc": "https://valaatech.github.io/vault/toolset-vault/revdoc#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -173,6 +175,7 @@
         }
       ]
     },
+    "rdf:type": "revdoc:Document",
     "vdoc:content": [
       {
         "@id": "abstract"

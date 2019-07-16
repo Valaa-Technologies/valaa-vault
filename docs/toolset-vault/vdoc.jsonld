@@ -1,8 +1,10 @@
 [
   {
+    "@id": "https:/valaatech.github.io/vault/toolset-vault/vdoc",
     "@context": {
-      "@base": "#",
+      "@base": "https:/valaatech.github.io/vault/toolset-vault/vdoc#",
       "sbomdoc": "https://valaatech.github.io/vault/toolset-vault/sbomdoc#",
+      "revdoc": "https://valaatech.github.io/vault/toolset-vault/revdoc#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -57,6 +59,7 @@
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
         "This document has not been reviewed. This is a draft document\n    and may be updated, replaced or obsoleted by other documents at\n    any time.",
+        null,
         "This document is part of the",
         {
           "rdf:type": "vdoc:Reference",
@@ -66,6 +69,7 @@
           "vdoc:ref": "@valos/kernel"
         },
         ".",
+        null,
         "The format is implemented and supported by",
         {
           "rdf:type": "vdoc:Reference",
@@ -96,6 +100,7 @@
             "is a extensible JSON-LD interchange\n      specification for extracting documents from varying sources,\n      passing the now-machine-manipulable interchange document around\n      and subsequently producing documents of specific formats such\n      as Valospace resources, markdown, ReSpec HTML and browser and\n      ansi-colored console outputs."
           ]
         },
+        null,
         "Motivation for this specification is to provide the foundation\n    for documentation",
         {
           "rdf:type": "vdoc:Reference",
@@ -121,6 +126,7 @@
           "@id": "design_non_goals"
         },
         "To satisfy the goals VDoc chooses JSON-LD as the format for\n      primary source of truth and RDF as the underlying object model.",
+        null,
         "Additionally VDoc provides extensibility via custom",
         {
           "rdf:type": "vdoc:Reference",
@@ -1222,6 +1228,7 @@
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": []
     },
+    "rdf:type": "revdoc:Document",
     "vdoc:content": [
       {
         "@id": "abstract"

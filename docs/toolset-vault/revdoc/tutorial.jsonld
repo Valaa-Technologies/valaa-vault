@@ -1,8 +1,10 @@
 [
   {
+    "@id": "https:/valaatech.github.io/vault/toolset-vault/revdoc/tutorial",
     "@context": {
-      "@base": "#",
+      "@base": "https:/valaatech.github.io/vault/toolset-vault/revdoc/tutorial#",
       "sbomdoc": "https://valaatech.github.io/vault/toolset-vault/sbomdoc#",
+      "revdoc": "https://valaatech.github.io/vault/toolset-vault/revdoc#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -81,6 +83,7 @@
           ],
           "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
         },
+        null,
         "See ",
         {
           "rdf:type": "vdoc:Reference",
@@ -90,6 +93,7 @@
           "vdoc:ref": "@valos/toolset-vault/revdoc/tutorial"
         },
         " for instructions on how to write revdoc source documents.",
+        null,
         "See also ",
         {
           "rdf:type": "vdoc:Reference",
@@ -109,6 +113,7 @@
         " for reference documentation."
       ]
     },
+    "rdf:type": "revdoc:Document",
     "vdoc:content": [
       {
         "@id": "abstract"

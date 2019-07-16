@@ -1,5 +1,5 @@
 exports.vlm = { toolset: "@valos/toolset-revealer" };
-exports.command = ".configure/.selectable/@valos/toolset-revealer";
+exports.command = ".configure/.select/@valos/toolset-revealer";
 exports.describe = "Configure the workspace toolset 'toolset-revealer'";
 exports.introduction = `${exports.describe}.
 

@@ -46,6 +46,10 @@ exports.builder = (yargs) => {
       description: `Make this toolset grabbable and stowable (falsy for always-on):`,
       interactive: { type: "confirm", when: "if-undefined" },
     },
+    brief: {
+      type: "string",
+      description: "A brief two-three word description of this toolset",
+    },
   });
 };
 
@@ -66,34 +70,11 @@ exports.handler = async (yargv) => {
   const simpleName = vlm.packageConfig.name.match(/([^/]*)$/)[1];
   const restrict = (yargv.restrict && (yargv.restrict !== "<none>") && yargv.restrict) || "";
   const restrictToTypeGlob = yargv.restrict ? `.type/.${yargv.restrict}/` : "";
-  const commandName = `.configure/${restrictToTypeGlob}${
-    yargv.selectable ? ".selectable/" : ""}${vlm.packageConfig.name}`;
-  await vlm.invoke("create-command", [{
-    filename: `configure__${restrict}${yargv.selectable ? "_selectable_" : "_"}_${simpleName}.js`,
-    export: true,
-    skeleton: true,
-    brief: "toolset configure",
-    "exports-vlm": `{ toolset: "${vlm.packageConfig.name}" }`,
-    describe: `Configure the toolset '${simpleName}' for the current ${restrict || "repository"}`,
-
-    introduction: restrict
-        ? `This script makes the toolset '${simpleName}' selectable by ${restrict} workspaces.`
-        : `This script makes the toolset '${simpleName}' selectable by all workspaces.`,
-
-    disabled: `(yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
-        && \`Toolset '\${yargs.vlm.toolset}' not in use\``,
-
-    builder: `(yargs) => yargs.options({
-  reconfigure: {
-    alias: "r", type: "boolean",
-    description: "Reconfigure '${simpleName}' config of this workspace.",
-  },
-})`,
-    handler: `async (yargv) => {
-  const vlm = yargv.vlm;
-  return { success: true, devDependencies: { [exports.vlm.toolset]: true };
-}`,
-  }, commandName]);
+  await createConfigureCommand(vlm, "toolset", vlm.packageConfig.name, simpleName, yargv.brief);
+  if (yargv.selectable) {
+    await createSelectToolsetCommand(
+        vlm, vlm.packageConfig.name, simpleName, restrict, restrictToTypeGlob);
+  }
   if (await vlm.inquireConfirm("Create toolset status sub-command skeleton?")) {
     await createStatusSubCommand(vlm, "toolset", vlm.packageConfig.name,
         `${restrict ? `${restrict}_` : ""}_toolset__${simpleName}`,
@@ -106,6 +87,79 @@ exports.handler = async (yargv) => {
   }
   return vlm.invoke(`.configure/.type/.toolset/**/*`, { reconfigure: yargv.reconfigure });
 };
+
+exports.createConfigureCommand = createConfigureCommand;
+function createConfigureCommand (vlm, type, name, simpleName, brief) {
+  const isTool = (type === "tool") ? true : ""; // else toolset.
+  return vlm.invoke("create-command", [{
+    filename: `configure_${type}__${simpleName}.js`,
+    export: true,
+    skeleton: true,
+    brief: `configure ${brief || type}`,
+    "exports-vlm": `{ ${type}: "${name}" }`,
+    describe: `Configure the ${type} '${simpleName}' within the current workspace`,
+
+    introduction: !isTool
+        ? `As a toolset this script is automatically called by configure.`
+        : `As a tool this script is not automatically called. The parent
+toolset or tool which uses this tool must explicit invoke this command.`,
+
+    disabled: !isTool && `(yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
+    && \`Toolset '\${yargs.vlm.toolset}' not in use\``,
+
+    builder: `(yargs) => yargs.options({${isTool && `
+  toolset: yargs.vlm.createStandardToolsetOption(
+      "The containing toolset of the tool to configure."),`}
+  reconfigure: {
+    alias: "r", type: "boolean",
+    description: "Reconfigure all even already configured options.",
+  },
+})`,
+    handler: !isTool
+        ? `async (yargv) => {
+  const vlm = yargv.vlm;
+  const toolsetConfig = vlm.getToolsetConfig(vlm.toolset) || {};
+  const toolsetConfigUpdate = {}; // Construct a toolset config update or bail out.
+  vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
+  return { success: true };
+}`
+        : `async (yargv) => {
+  const vlm = yargv.vlm;
+  const toolConfig = vlm.getToolConfig(yargv.toolset, vlm.tool) || {};
+  const toolConfigUpdate = {}; // Construct a tool config update or bail out.
+  vlm.updateToolConfig(yargv.toolset, vlm.tool, toolConfigUpdate);
+  return { success: true };
+}`,
+  }, `.configure/.${type}/${name}`]);
+}
+
+exports.createSelectToolsetCommand = createSelectToolsetCommand;
+function createSelectToolsetCommand (vlm, name, simpleName, restrict, restrictToTypeGlob) {
+  return vlm.invoke("create-command", [{
+    filename: `configure_${restrict ? `_${restrict}_` : ""}select__${simpleName}.js`,
+    export: true,
+    skeleton: true,
+    brief: "select toolset",
+    "exports-vlm": `{ toolset: "${name}" }`,
+    describe: `Select the toolset '${simpleName}' for the current ${restrict || "workspace"}`,
+
+    introduction: `This script makes the toolset '${simpleName}' selectable by ${
+      restrict || "all"} workspaces.`,
+
+    disabled: restrict && `(yargs) => yargs.vlm.getValOSConfig("type") !== "${restrict}"
+    && \`Toolset is restricted to '${restrict}' workspaces\``,
+
+    builder: `(yargs) => yargs.options({})`,
+    handler: `async (yargv) => {
+  // Note: this file and the command should be moved to the workshop of
+  // this domain. Otherwise the toolset will not be visible in
+  // vlm select-toolsets.
+  const vlm = yargv.vlm;
+  vlm.updateToolsetConfig(vlm.toolset, { inUse: true });
+  return { success: true, devDependencies: { [exports.vlm.toolset]: true } };
+}`,
+  }, `.configure/${restrictToTypeGlob}.select/${name}`]);
+}
 
 exports.createStatusSubCommand = createStatusSubCommand;
 function createStatusSubCommand (vlm, type, name, simpleName, commandPath) {
@@ -139,16 +193,17 @@ function createStatusSubCommand (vlm, type, name, simpleName, commandPath) {
   const { extract, extractee: { ref } } = require("@valos/toolset-vault/vdoc");
   const patchWith = require("@valos/tools/patchWith").default;
   const vlm = yargv.vlm;
-  const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset);
+  const toolsetConfig = vlm.getToolsetConfig(vlm.toolset);
   const warnings = [];
   const failures = [];
   const target = {};
+  const underscoredToolset = vlm.toolset.replace(/[/@-]/g, "_");
   for (const [tool/* , toolConfig */] of Object.entries((toolsetConfig || {}).tools || {})) {
     const toolStatuses = await yargv.vlm.invoke(
-        \`.status/.tool/\${tool}*\`, [{ toolset: exports.vlm.toolset }]);
+        \`.status/.tool/\${tool}*\`, [{ toolset: vlm.toolset }]);
     for (const results of [].concat(...(toolStatuses || []))) {
       if (yargv["include-tools"]) patchWith(target, results);
-      const toolResult = results[\`status_toolset_\${exports.vlm.toolset}_tools\`][tool];
+      const toolResult = results[\`status_toolset_\${underscoredToolset}_tools\`][tool];
       if (toolResult.warnings) warnings.push(...toolResult.warnings.map(w => \`\${tool}: \${w}\`));
       if (toolResult.failures) failures.push(...toolResult.failures.map(f => \`\${tool}: \${f}\`));
     }
@@ -174,7 +229,7 @@ function createStatusSubCommand (vlm, type, name, simpleName, commandPath) {
       : !failures.length ? { warnings }
       : { failures, warnings };
   return extract(
-      { [\`data#status_toolset_\${yargv.toolset}_tools\`]: {
+      { [\`data#status_toolset_\${yargv.toolset.replace(/[/@-]/g, "_")}_tools\`]: {
         "${name}": status,
       } },
       { omitContext: true });

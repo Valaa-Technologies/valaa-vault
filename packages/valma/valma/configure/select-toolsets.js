@@ -6,7 +6,7 @@ The set of available toolsets in a given package context is defined via
 the set of all valma toolset configuration commands at that package
 root directory as:
 
-vlm -N '.configure/{,.type/.<type>/,.domain/.<domain>/}.selectable/**/*'
+vlm -N '.configure/{,.type/.<type>/,.domain/.<domain>/}.select/**/*'
 
 When a toolset is grabbed to be in use it is always added as a direct
 devDependency for the package if it is not already.
@@ -41,8 +41,8 @@ exports.builder = (yargs) => {
   const valos = yargs.vlm.packageConfig.valos || yargs.vlm.packageConfig.valaa;
   const knownToolsets = yargs.vlm
       .listMatchingCommands(
-          `.configure/{,.type/.${valos.type}/,.domain/.${valos.domain}/}.selectable/**/*`)
-      .map(name => name.match(/\/.selectable\/(.*)$/)[1]);
+          `.configure/{,.type/.${valos.type}/,.domain/.${valos.domain}/}.select/**/*`)
+      .map(name => name.match(/\/.select\/(.*)$/)[1]);
   const configuredToolsets = Object.keys(toolsetsConfig || {});
   const usedToolsets = configuredToolsets
       .filter(name => (toolsetsConfig[name] || {}).inUse);
@@ -91,7 +91,7 @@ exports.handler = async (yargv) => {
   const devDependencies = {};
   for (const toolsetName of (yargv.reconfigure ? newToolsets : grabbedToolsets)) {
     const configureResults = await vlm.invoke(
-        `.configure/{,.type/.${valos.type}/,.domain/.${valos.domain}/}.selectable/${toolsetName}`,
+        `.configure/{,.type/.${valos.type}/,.domain/.${valos.domain}/}.select/${toolsetName}`,
         { reconfigure: yargv.reconfigure || false });
     for (const result of configureResults) {
       Object.assign(devDependencies, (result || {}).devDependencies || {});

@@ -21,8 +21,8 @@
     ".valma-configure_.type_vault": "valma/configure/type/vault.js",
     ".valma-configure_.type_worker": "valma/configure/type/worker.js",
     ".valma-configure_.type_workshop": "valma/configure/type/workshop.js",
-    ".valma-configure_.selectable_@valos_toolset-revealer": "valma/configure/selectable__toolset-revealer.js",
-    ".valma-configure_.type_.worker_.selectable_@valos_toolset-rest-api-gateway-plugin": "valma/configure/worker_selectable__toolset-rest-api-gateway-plugin.js",
+    ".valma-configure_.select_@valos_toolset-revealer": "valma/configure/select__toolset-revealer.js",
+    ".valma-configure_.type_.worker_.select_@valos_toolset-rest-api-gateway-plugin": "valma/configure/worker_select__toolset-rest-api-gateway-plugin.js",
     ".valma-configure_.domain_@valos_kernel": "valma/configure/domain__kernel.js"
   },
   "dependencies": {

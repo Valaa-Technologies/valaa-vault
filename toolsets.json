@@ -32,7 +32,7 @@
   "@valos/toolset-vault-sbom": {
     "inUse": true,
     "commands": {
-      ".configure/.type/.vault/.selectable/@valos/toolset-vault-sbom": {
+      ".configure/.type/.vault/.select/@valos/toolset-vault-sbom": {
         "release-regenerate": true
       }
     },

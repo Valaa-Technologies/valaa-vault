@@ -7,7 +7,7 @@ exports.disabled = (yargs) =>
     (!yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
         ? "@valos/toolset-vault-sbom is not configured to be inUse"
     : !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "commands",
-            ".configure/.type/.vault/.selectable/@valos/toolset-vault-sbom", "release-regenerate")
+            ".configure/.type/.vault/.select/@valos/toolset-vault-sbom", "release-regenerate")
         && "release-regenerate not enabled in @valos/toolset-vault-sbom config");
 
 exports.builder = (yargs) => yargs.options({

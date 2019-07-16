@@ -1,5 +1,5 @@
 exports.vlm = { toolset: "@valos/toolset-rest-api-gateway-plugin" };
-exports.command = ".configure/.type/.worker/.selectable/@valos/toolset-rest-api-gateway-plugin";
+exports.command = ".configure/.type/.worker/.select/@valos/toolset-rest-api-gateway-plugin";
 exports.describe = "Configure the worker toolset 'toolset-rest-api-gateway-plugin'";
 exports.introduction = `${exports.describe}.
 

@@ -1,4 +1,5 @@
-exports.command = ".configure/.type/.library/.selectable/@valos/toolset-vault/enable-babel";
+exports.vlm = { toolset: "@valos/toolset-vault" };
+exports.command = ".configure/.type/.library/.select/@valos/toolset-vault/enable-babel";
 exports.describe =
     "Configure a vault library workspace to be transpiled using vault babel.config.js";
 exports.introduction = `${exports.describe}.`;

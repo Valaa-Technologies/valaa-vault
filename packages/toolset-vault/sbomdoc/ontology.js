@@ -19,13 +19,7 @@ module.exports = {
   extractionRules: {
   },
   extracteeAPI: {},
-  extractor: {
-    preExtend (target, /* patch, key, targetObject, patchObject */) {
-      if (target && (this.keyPath.length === 1)) {
-        target["rdf:type"] = "vdoc:Document";
-      }
-    },
-  },
+  extractor: {},
   emitters: {
     html: {
       "vdoc:Document": emitSBoMDocHTML,

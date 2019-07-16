@@ -124,6 +124,7 @@ exports.default = function patchWith (target /* : Object */, patch /* : Array<an
   keyPath?: Array<any>,
 } */) {
   const stack = options || {};
+  stack.returnUndefined = _returnUndefined;
   if (stack.customizer) {
     stack.preExtend = stack.customizer;
     console.warn("patchWith.options.customizer DEPRECATED in favor of options.preExtend");
@@ -157,6 +158,8 @@ exports.default = function patchWith (target /* : Object */, patch /* : Array<an
   }
   return stack.extend(target, patch);
 };
+
+const _returnUndefined = Symbol("returnUndefined");
 
 function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSpread = false) {
   if (this.keyPath && (keyInParent !== undefined)) this.keyPath.push(keyInParent);
@@ -201,10 +204,11 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
       }
     }
   }
-  const post = this.postExtend
-      && this.postExtend(ret, patch_, keyInParent, targetParent, patchParent, this);
+  if (this.postExtend) {
+    ret = this.postExtend(ret, patch_, keyInParent, targetParent, patchParent, this);
+  }
   if (this.keyPath && (keyInParent !== undefined)) this.keyPath.pop();
-  return this.postExtend ? post : ret;
+  return ret === _returnUndefined ? undefined : ret;
 
   function _setRetFromSpreadAndMaybeBail (stack, spreaderValue) {
     const spreadee = stack.spread(

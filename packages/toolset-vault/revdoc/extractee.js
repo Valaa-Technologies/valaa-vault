@@ -89,5 +89,23 @@ module.exports = {
       "rdf:type": "revdoc:CommandLineInteraction",
       "vdoc:rows": contextedRows,
     };
+  },
+
+  emphasis (...entries) {
+    return {
+      "vdoc:content": entries,
+    };
+  },
+
+  strong (...entries) {
+    return {
+      "vdoc:content": entries,
+    };
+  },
+
+  strikethrough (...entries) {
+    return {
+      "vdoc:content": entries,
+    };
   }
 };

@@ -1,12 +1,15 @@
 const vdoc = require("@valos/toolset-vault/vdoc");
+const revdoc = require("@valos/toolset-vault/revdoc");
 
 const ontology = require("./ontology");
 const extractee = require("./extractee");
 
 module.exports = {
   ...vdoc,
+  ...revdoc,
   extractee: {
     ...vdoc.extractee,
+    ...revdoc.extractee,
     ...extractee,
   },
   ontology,
@@ -23,10 +26,12 @@ module.exports = {
     },
   },
   extract (sourceGraphs, options = {}) {
-    if (options.ontologies === undefined) options.ontologies = [ontology, vdoc.ontology];
-    return vdoc.extract(sourceGraphs, options);
+    if (options.ontologies === undefined) {
+      options.ontologies = [ontology, revdoc.ontology, vdoc.ontology];
+    }
+    return revdoc.extract(sourceGraphs, options);
   },
-  emit (emission, vdocson, formatName, ontologies = [ontology, vdoc.ontology]) {
-    return vdoc.emit(emission, vdocson, formatName, ontologies);
+  emit (emission, vdocson, formatName, ontologies = [ontology, revdoc.ontology, vdoc.ontology]) {
+    return revdoc.emit(emission, vdocson, formatName, ontologies);
   },
 };

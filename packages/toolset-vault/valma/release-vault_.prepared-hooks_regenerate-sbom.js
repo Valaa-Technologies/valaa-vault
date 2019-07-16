@@ -31,8 +31,9 @@ exports.builder = (yargs) => yargs.options({
 exports.handler = async (yargv) => {
   const convert = require("xml-js");
   const patchWith = require("@valos/tools/patchWith").default;
-  const { extract, ontologyTables, extractee: { ref } } = require("@valos/toolset-vault/sbomdoc");
-  const { emit, extractee: { authors } } = require("@valos/toolset-vault/revdoc");
+  const {
+    extract, emit, ontologyTables, extractee: { ref, authors },
+  } = require("@valos/toolset-vault/sbomdoc");
 
   const vlm = yargv.vlm;
   const config = vlm.getPackageConfig();
@@ -106,7 +107,7 @@ exports.handler = async (yargv) => {
       revdocPath, targetDocPath, targetDocName, emitReVDocSON) {
     const revdocSource = require(vlm.path.join(process.cwd(), revdocPath));
     const revdocson = extract(revdocSource, {
-      documentURI: vlm.path.join(docsBaseURI || "", targetDocPath, targetDocName),
+      documentIRI: vlm.path.join(docsBaseURI || "", targetDocPath, targetDocName),
     });
     const revdocHTML = await emitHTML(revdocson);
     const targetDir = vlm.path.join("docs", targetDocPath);
@@ -182,7 +183,7 @@ exports.handler = async (yargv) => {
         "data#components_data": sbomgraph.bom.components,
       },
     };
-    return extract(sbomSource, { documentURI: `${docsBaseURI || ""}sbom` });
+    return extract(sbomSource, { documentIRI: `${docsBaseURI || ""}sbom` });
   }
 
   async function emitHTML (sbomvdocson) {

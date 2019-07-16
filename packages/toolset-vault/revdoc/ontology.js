@@ -1,3 +1,4 @@
+const path = require("path");
 const { ontology } = require("@valos/toolset-vault/vdoc");
 
 module.exports = {
@@ -34,8 +35,8 @@ module.exports = {
   },
   extracteeAPI: {},
   extractor: {
-    preExtend (target, /* patch, key, targetObject, patchObject */) {
-      if (target && (this.keyPath.length === 1)) {
+    postExtend (target, /* patch, key, targetObject, patchObject */) {
+      if (target && (this.keyPath.length === 1) && !target["rdf:type"]) {
         target["rdf:type"] = "revdoc:Document";
       }
     },
@@ -83,7 +84,9 @@ function emitReVDocReference (emission, node, document, emitNode, vdocson, emitt
     const packageName = nodePath.slice(0, 2).join("/");
     const packageJSON = require(`${packageName}/package.json`);
     const docsBase = (packageJSON.valos || {}).docs || packageName;
-    node_ = Object.assign({}, node, { "vdoc:ref": `${docsBase}/${nodePath.slice(2).join("/")}` });
+    node_ = Object.assign({}, node, {
+      "vdoc:ref": path.posix.join(docsBase, ...nodePath.slice(2)),
+    });
   }
   return ontology.emitters.html["vdoc:Reference"](
       emission, node_, document, emitNode, vdocson, emitters);

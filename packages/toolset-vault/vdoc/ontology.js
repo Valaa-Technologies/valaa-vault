@@ -125,7 +125,7 @@ module.exports = {
         node[rule.rest] = rest;
       }
       if (rule.range) node["rdf:type"] = rule.range;
-      if (typeof patch !== "object") {
+      if ((typeof patch !== "object") || (patch === null)) {
         if (!resourceId && !Object.keys(node).length) {
           node = patch;
         } else {
@@ -150,15 +150,17 @@ module.exports = {
           resourceId ? { "@id": resourceId } : node,
         ]);
       }
-      return null;
+      return this.returnUndefined;
     },
     postExtend (target) {
-      const unorderedEntries = (target != null) && target["vdoc:pre_content"];
+      if ((target == null) || (target === this.returnUndefined)) return target;
+      const unorderedEntries = target["vdoc:pre_content"];
       if (unorderedEntries) {
         target[target["vdoc:pre_target"] || "vdoc:content"] = []
             .concat(...unorderedEntries.sort(_compareWithOrderQualifier).map(e => e[1]));
         delete target["vdoc:pre_content"];
       }
+      return target;
     },
   },
 

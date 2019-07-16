@@ -46,10 +46,9 @@ function extract (sourceGraphs, {
         if (!ontology.extractor.postExtend) continue;
         ret = ontology.extractor.postExtend.call(
             this, innerTarget, patch, key, targetObject, patchObject);
-        if (ret !== undefined) break;
+        if (ret !== undefined) return ret;
       }
-      if (ret === undefined) ret = innerTarget;
-      return (ret === null) ? undefined : ret;
+      return innerTarget;
     },
   });
 }

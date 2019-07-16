@@ -45,8 +45,7 @@ module.exports = {
     if (options.ontologies === undefined) options.ontologies = [ontology, vdoc.ontology];
     return vdoc.extract(sourceGraphs, options);
   },
-  emit (emission, vdocson, formatName,
-      ontologies = [ontology, vdoc.ontology]) {
+  emit (emission, vdocson, formatName, ontologies = [ontology, vdoc.ontology]) {
     return vdoc.emit(emission, vdocson, formatName, ontologies);
   },
 };

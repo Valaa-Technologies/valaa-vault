@@ -230,7 +230,7 @@ export default class ReactRoot extends React.Component {
     const vViewFocus = this.props.vViewFocus;
     if (!vViewFocus || !this._rootContext) return null;
     return (
-      <div style={{ width: "100vw", height: "100vh" }}>
+      <div>
         <Valoscope
           {...uiComponentProps({
             name: "root", parentUIContext: this._rootContext, focus: vViewFocus,

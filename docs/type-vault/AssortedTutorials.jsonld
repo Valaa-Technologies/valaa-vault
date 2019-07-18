@@ -332,7 +332,7 @@
                             ]
                           }
                         ],
-                        "Select \"@valos/toolset-vault/enable-babel\" to use from abailable toolsets.",
+                        "Select \"@valos/toolset-vault/enable-babel\" to use from available toolsets.",
                         "Select \"Yes\" for whether to enable babel transpilation for the library"
                       ]
                     }
@@ -356,10 +356,76 @@
     },
     "getting_ready_for_testing": {
       "@id": "getting_ready_for_testing",
-      "dc:title": "Getting ready for testing",
+      "dc:title": "Getting ready for testing with Jest",
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
-        "Guide on how to get your library ready for testing."
+        "Guide on how to get your library ready for testing with Jest.",
+        {
+          "vdoc:content": [
+            {
+              "rdf:type": "vdoc:NumberedList",
+              "vdoc:rows": [
+                [
+                  "Create the following files into your library folder: ",
+                  {
+                    "vdoc:content": [
+                      {
+                        "rdf:type": "vdoc:BulletList",
+                        "vdoc:rows": [
+                          "your-library-name.test.js",
+                          "index.js"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                [
+                  "Add the following code snippet to your \"your-library-name.test.js\" file:",
+                  "import foo from \"./index.js\";\n\n          describe(\"your-library-name\", () => {\n            it(\"*\", () => {\n              expect(foo())\n                  .toEqual(true);\n            });\n          });"
+                ],
+                [
+                  "And then thé following snippet to the  \"index.js\" file:\"",
+                  "// @flow\n\n          export default function foo () {\n            return true;\n          }"
+                ],
+                [
+                  "And lastly ensure that you have the following section in your \"package.json",
+                  "{\n            \"scripts\": {\n              \"test\": \"jest\"\n            }\n          }"
+                ],
+                "Before trying out your test environment, ensure you have Jest installed using yarn.",
+                [
+                  "Finally, you can test your test environment by navigating ",
+                  "to the project root and running the following command:",
+                  {
+                    "rdf:type": "revdoc:CommandLineInteraction",
+                    "vdoc:rows": [
+                      [
+                        "",
+                        "$ ",
+                        {
+                          "rdf:type": "revdoc:Command",
+                          "vdoc:words": [
+                            "yarn",
+                            "test",
+                            "your-library-name"
+                          ]
+                        }
+                      ]
+                    ]
+                  },
+                  "If all tests pass, your test environment is up and running! ",
+                  "You can find more on Jest ",
+                  {
+                    "rdf:type": "vdoc:Reference",
+                    "vdoc:content": [
+                      "here"
+                    ],
+                    "vdoc:ref": "https://jestjs.io"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
       ]
     },
     "vdoc:content": [

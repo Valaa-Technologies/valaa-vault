@@ -37,5 +37,20 @@
     "valma": "^0.35.0-prerelease.10",
     "xml-js": "^1.6.11"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@valos/engine": "file:.yalc/@valos/engine",
+    "@valos/gateway-api": "file:.yalc/@valos/gateway-api",
+    "@valos/hypertwin": "file:.yalc/@valos/hypertwin",
+    "@valos/inspire": "file:.yalc/@valos/inspire",
+    "@valos/kernel": "file:.yalc/@valos/kernel",
+    "@valos/query-authority": "file:.yalc/@valos/query-authority",
+    "@valos/raem": "file:.yalc/@valos/raem",
+    "@valos/script": "file:.yalc/@valos/script",
+    "@valos/sourcerer": "file:.yalc/@valos/sourcerer",
+    "@valos/tools": "file:.yalc/@valos/tools",
+    "@valos/toolset-gateway-plugin": "file:.yalc/@valos/toolset-gateway-plugin",
+    "@valos/toolset-opspace": "file:.yalc/@valos/toolset-opspace",
+    "@valos/toolset-rest-api-gateway-plugin": "file:.yalc/@valos/toolset-rest-api-gateway-plugin",
+    "@valos/toolset-worker": "file:.yalc/@valos/toolset-worker"
+  }
 }

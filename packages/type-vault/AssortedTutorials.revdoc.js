@@ -1,4 +1,3 @@
-
 const {
   extractee: { authors, cli, pkg, },
 } = require("@valos/revdoc");
@@ -82,7 +81,7 @@ module.exports = {
         [`Select "configure" for whether to configure the repository with `,
           cli("vlm configure")
         ],
-        `Select "@valos/toolset-vault/enable-babel" to use from abailable toolsets.`,
+        `Select "@valos/toolset-vault/enable-babel" to use from available toolsets.`,
         `Select "Yes" for whether to enable babel transpilation for the library`,
       ] },
       ["Your library is now created. ",
@@ -91,7 +90,49 @@ module.exports = {
       ]
     ] }
   ],
-  "chapter#getting_ready_for_testing>3;Getting ready for testing": [
-    "Guide on how to get your library ready for testing."
+  "chapter#getting_ready_for_testing>3;Getting ready for testing with Jest": [
+    "Guide on how to get your library ready for testing with Jest.",
+    { "numbered#": [
+        ["Create the following files into your library folder: ",
+          { "bulleted#": [
+            "your-library-name.test.js",
+            "index.js"
+          ] },
+        ],
+        [`Add the following code snippet to your "your-library-name.test.js" file:`,
+          null,
+          `import foo from "./index.js";
+
+          describe("your-library-name", () => {
+            it("*", () => {
+              expect(foo())
+                  .toEqual(true);
+            });
+          });`,
+        ],
+        [`And then thé following snippet to the  "index.js" file:"`,
+          null,
+          `// @flow
+
+          export default function foo () {
+            return true;
+          }`,
+        ],
+        [`And lastly ensure that you have the following section in your "package.json`,
+          `{
+            "scripts": {
+              "test": "jest"
+            }
+          }`,
+        ],
+        "Before trying out your test environment, ensure you have Jest installed using yarn.",
+        ["Finally, you can test your test environment by navigating ",
+          "to the project root and running the following command:",
+          cli("yarn test your-library-name"),
+          "If all tests pass, your test environment is up and running! ",
+          "You can find more on Jest ",
+          ref("here", "https://jestjs.io")
+        ]
+      ] },
   ],
 };

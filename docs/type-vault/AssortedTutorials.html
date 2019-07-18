@@ -100,7 +100,7 @@ Guide on how to create a new library using valma. Note: Scope of this guide cove
 
   </div>
 </li>
-      <li>Select "@valos/toolset-vault/enable-babel" to use from abailable toolsets.</li>
+      <li>Select "@valos/toolset-vault/enable-babel" to use from available toolsets.</li>
       <li>Select "Yes" for whether to enable babel transpilation for the library</li>
     </ol>
 </li>
@@ -110,8 +110,41 @@ Guide on how to create a new library using valma. Note: Scope of this guide cove
   </section>
 
   <section id="getting_ready_for_testing" class="vdoc type-vdoc-chapter">
-    <h2>Getting ready for testing</h2>
-Guide on how to get your library ready for testing.
+    <h2>Getting ready for testing with Jest</h2>
+Guide on how to get your library ready for testing with Jest.
+    <ol>
+      <li>Create the following files into your library folder: 
+    <ul>
+      <li>your-library-name.test.js</li>
+      <li>index.js</li>
+    </ul>
+</li>
+      <li>Add the following code snippet to your "your-library-name.test.js" file:import foo from "./index.js";
+
+          describe("your-library-name", () => {
+            it("*", () => {
+              expect(foo())
+                  .toEqual(true);
+            });
+          });</li>
+      <li>And then thé following snippet to the  "index.js" file:"// @flow
+
+          export default function foo () {
+            return true;
+          }</li>
+      <li>And lastly ensure that you have the following section in your "package.json{
+            "scripts": {
+              "test": "jest"
+            }
+          }</li>
+      <li>Before trying out your test environment, ensure you have Jest installed using yarn.</li>
+      <li>Finally, you can test your test environment by navigating to the project root and running the following command:
+  <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">yarn test your-library-name</span>
+
+  </div>
+If all tests pass, your test environment is up and running! You can find more on Jest <a href="https://jestjs.io" class="vdoc type-vdoc-reference">here</a></li>
+    </ol>
+
   </section>
 
   </body>

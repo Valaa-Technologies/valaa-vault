@@ -379,6 +379,15 @@
       },
       {
         "type": "library",
+        "name": "parse-packagejson-name",
+        "version": "1.0.1",
+        "description": "Parse an npm package name and returns some mildly interesting details about it",
+        "licenses": "MIT",
+        "purl": "pkg:npm/parse-packagejson-name@1.0.1",
+        "modified": false
+      },
+      {
+        "type": "library",
         "name": "prettify-xml",
         "version": "1.2.0",
         "description": "Pretty-print XML.",
@@ -456,15 +465,6 @@
         "description": "Standard Subresource Integrity library --  parses, serializes, generates, and verifies integrity metadata according to the SRI spec.",
         "licenses": "ISC",
         "purl": "pkg:npm/ssri@6.0.1",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "parse-packagejson-name",
-        "version": "1.0.1",
-        "description": "Parse an npm package name and returns some mildly interesting details about it",
-        "licenses": "MIT",
-        "purl": "pkg:npm/parse-packagejson-name@1.0.1",
         "modified": false
       },
       {

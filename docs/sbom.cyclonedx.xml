@@ -380,6 +380,20 @@
             <modified>false</modified>
         </component>
         <component type="library">
+            <name>parse-packagejson-name</name>
+            <version>1.0.1</version>
+            <description>
+                <![CDATA[Parse an npm package name and returns some mildly interesting details about it]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/parse-packagejson-name@1.0.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
             <name>prettify-xml</name>
             <version>1.2.0</version>
             <description>
@@ -503,20 +517,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/ssri@6.0.1</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>parse-packagejson-name</name>
-            <version>1.0.1</version>
-            <description>
-                <![CDATA[Parse an npm package name and returns some mildly interesting details about it]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/parse-packagejson-name@1.0.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">

@@ -1,29 +1,29 @@
 [
   {
-    "@id": "https:/valaatech.github.io/vault/toolset-vault/vdoc",
+    "@id": "https:/valaatech.github.io/vault/type-vault/vdoc",
     "@context": {
-      "@base": "https:/valaatech.github.io/vault/toolset-vault/vdoc#",
-      "sbomdoc": "https://valaatech.github.io/vault/toolset-vault/sbomdoc#",
-      "revdoc": "https://valaatech.github.io/vault/toolset-vault/revdoc#",
+      "@base": "https:/valaatech.github.io/vault/type-vault/vdoc#",
+      "sbomdoc": "https://valaatech.github.io/vault/type-vault/sbomdoc#",
+      "revdoc": "https://valaatech.github.io/vault/type-vault/revdoc#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-      "vdoc": "https://valaatech.github.io/vault/toolset-vault/vdoc#",
+      "vdoc": "https://valaatech.github.io/vault/type-vault/vdoc#",
       "a": {
         "@id": "rdf:type",
         "@type": "@id"
       },
       "vdoc:content": {
-        "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#content",
+        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#content",
         "@container": "@list"
       },
       "vdoc:words": {
-        "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#words",
+        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#words",
         "@container": "@list"
       },
       "vdoc:rows": {
-        "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#rows",
+        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#rows",
         "@container": "@list"
       }
     },
@@ -74,9 +74,9 @@
         {
           "rdf:type": "vdoc:Reference",
           "vdoc:content": [
-            "@valos/toolset-vault npm package"
+            "@valos/type-vault npm package"
           ],
-          "vdoc:ref": "@valos/toolset-vault"
+          "vdoc:ref": "@valos/type-vault"
         },
         "."
       ]
@@ -901,7 +901,7 @@
       "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-      "vdoc": "https://valaatech.github.io/vault/toolset-vault/vdoc#"
+      "vdoc": "https://valaatech.github.io/vault/type-vault/vdoc#"
     },
     "context": {
       "@id": "context",
@@ -958,15 +958,15 @@
         "@type": "@id"
       },
       "vdoc:content": {
-        "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#content",
+        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#content",
         "@container": "@list"
       },
       "vdoc:words": {
-        "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#words",
+        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#words",
         "@container": "@list"
       },
       "vdoc:rows": {
-        "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#rows",
+        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#rows",
         "@container": "@list"
       }
     },

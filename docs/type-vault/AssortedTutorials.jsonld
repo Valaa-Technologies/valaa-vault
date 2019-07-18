@@ -1,29 +1,29 @@
 [
   {
-    "@id": "https:/valaatech.github.io/vault/toolset-vault/AssortedTutorials",
+    "@id": "https:/valaatech.github.io/vault/type-vault/AssortedTutorials",
     "@context": {
-      "@base": "https:/valaatech.github.io/vault/toolset-vault/AssortedTutorials#",
-      "sbomdoc": "https://valaatech.github.io/vault/toolset-vault/sbomdoc#",
-      "revdoc": "https://valaatech.github.io/vault/toolset-vault/revdoc#",
+      "@base": "https:/valaatech.github.io/vault/type-vault/AssortedTutorials#",
+      "sbomdoc": "https://valaatech.github.io/vault/type-vault/sbomdoc#",
+      "revdoc": "https://valaatech.github.io/vault/type-vault/revdoc#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-      "vdoc": "https://valaatech.github.io/vault/toolset-vault/vdoc#",
+      "vdoc": "https://valaatech.github.io/vault/type-vault/vdoc#",
       "a": {
         "@id": "rdf:type",
         "@type": "@id"
       },
       "vdoc:content": {
-        "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#content",
+        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#content",
         "@container": "@list"
       },
       "vdoc:words": {
-        "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#words",
+        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#words",
         "@container": "@list"
       },
       "vdoc:rows": {
-        "@id": "https://valaatech.github.io/vault/toolset-vault/vdoc#rows",
+        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#rows",
         "@container": "@list"
       }
     },
@@ -56,9 +56,9 @@
         {
           "rdf:type": "vdoc:Reference",
           "vdoc:content": [
-            "@valos/toolset-vault"
+            "@valos/type-vault"
           ],
-          "vdoc:ref": "@valos/toolset-vault"
+          "vdoc:ref": "@valos/type-vault"
         },
         " (of domain ",
         {
@@ -134,7 +134,7 @@
                           "rdf:type": "revdoc:Command",
                           "vdoc:words": [
                             "vlm",
-                            ".release-vault/.prepared-hooks/regenerate-sbom"
+                            "regenerate-docs"
                           ]
                         }
                       ]
@@ -166,8 +166,8 @@
                 [
                   "Your HTML and JSONLD files can now be found ",
                   "under docs/ in the same path as where you saved your RevDoc file; ",
-                  "for example if you saved your RevDoc under packages/toolset-vault ",
-                  "it can now be found under docs/packages/toolset-vault."
+                  "for example if you saved your RevDoc under packages/type-vault ",
+                  "it can now be found under docs/packages/type-vault."
                 ]
               ]
             }

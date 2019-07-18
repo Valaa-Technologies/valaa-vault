@@ -28,12 +28,13 @@ exports.builder = (yargs) => {
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  if (!vlm.getPackageConfig("devDependencies", "@valos/type-vault")) {
-    await vlm.interact("yarn add -W --dev @valos/type-vault");
-  }
   if ((vlm.getPackageConfig("workspaces") || []).join(",") !== yargv.workspaces) {
     await vlm.updatePackageConfig({ workspaces: [yargv.workspaces] });
     // await vlm.interact("yarn install");
   }
-  return vlm.invoke(`.configure/.type/.vault/**/*`, { reconfigure: yargv.reconfigure });
+  return {
+    devDependencies: { "@valos/type-vault": true },
+    toolsetsUpdate: { "@valos/type-vault": { inUse: "always" } },
+    success: true,
+  };
 };

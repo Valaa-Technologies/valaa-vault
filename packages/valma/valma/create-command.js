@@ -147,6 +147,7 @@ function _createSource (command, yargv) {
 }${yargv.header || ""
 }${!yargv.exportsVlm ? "" : `exports.vlm = ${yargv.exportsVlm};\n`
 }exports.command = "${command}";
+exports.brief = "${yargv.brief || ""}";
 exports.describe = "${yargv.describe || yargv.brief || ""}";
 exports.introduction = \`\${exports.describe}.${
     yargv.introduction ? `\n\n${yargv.introduction}` : ""}\`;

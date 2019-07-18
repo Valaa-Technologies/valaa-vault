@@ -54,5 +54,5 @@ exports.handler = async (yargv) => {
     await createReleaseSubCommand(vlm, "tool", vlm.packageConfig.name, simpleName, "build");
     await createReleaseSubCommand(vlm, "tool", vlm.packageConfig.name, simpleName, "deploy");
   }
-  return vlm.invoke(`.configure/.type/.tool/**/*`, { reconfigure: yargv.reconfigure });
+  return { success: true };
 };

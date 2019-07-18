@@ -27,11 +27,11 @@ exports.handler = async (yargv) => {
   const valos = vlm.packageConfig.valos || vlm.packageConfig.valaa;
   const subCommandGlob = yargv.toolsetGlob ? `*${yargv.toolsetGlob}*/**/*` : "**/*";
   const pendingSubCommandInvokations = [
-    vlm.invoke(`.status/${subCommandGlob}`, yargv._),
-    !(valos && valos.type) ? [] :
-        vlm.invoke(`.status/.type/.${valos.type}/${subCommandGlob}`, yargv._),
     !(valos && valos.domain) ? [] :
         vlm.invoke(`.status/.domain/.${valos.domain}/${subCommandGlob}`, yargv._),
+    !(valos && valos.type) ? [] :
+        vlm.invoke(`.status/.type/.${valos.type}/${subCommandGlob}`, yargv._),
+    vlm.invoke(`.status/${subCommandGlob}`, yargv._),
   ];
   const resolveds = [].concat(...await Promise.all(pendingSubCommandInvokations))
       .filter(e => e && (typeof e === "object"));

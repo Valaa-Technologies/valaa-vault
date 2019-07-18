@@ -5,15 +5,12 @@ exports.introduction = `${exports.describe}.
 
 `;
 
-exports.disabled = (yargs) => !yargs.vlm.getToolsetsConfig()
-    && "Can't select 'toolset-rest-api-gateway-plugin': toolsets config missing";
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
+    && `Workspace is not a worker (is ${yargs.vlm.getValOSConfig("type")})`;
 exports.builder = (yargs) => {
   const toolsetConfig = yargs.vlm.getToolsetConfig(yargs.vlm.toolset) || {};
   return yargs.options({
-    reconfigure: {
-      alias: "r", type: "boolean",
-      description: "Reconfigure 'toolset-rest-api-gateway-plugin' config of this workspace.",
-    },
+    ...yargs.vlm.createConfigureToolsetOptions(exports),
     port: {
       type: "string", default: toolsetConfig.port || undefined,
       interactive: { type: "input", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
@@ -27,7 +24,7 @@ exports.builder = (yargs) => {
   });
 };
 
-exports.handler = (yargv) => {
+exports.handler = async (yargv) => {
   // This script is outdated: it combines select and configure script.
   // The configure script should be extracted and moved under
   // @valos/toolset-rest-api-gateway-plugin actual.
@@ -51,8 +48,11 @@ exports.handler = (yargv) => {
         "Please remove the plugin manually");
     // TODO(iridian, 2019-02): Removing values using the updateToolsetConfig is not implemented yet.
   }
+  const selectionResult = await vlm.configureToolSelection(
+      yargv, vlm.getToolsetConfig(vlm.toolset));
   return {
     command: exports.command,
     devDependencies: { "@valos/toolset-rest-api-gateway-plugin": true },
+    ...selectionResult,
   };
 };

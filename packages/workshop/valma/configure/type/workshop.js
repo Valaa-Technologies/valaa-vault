@@ -28,8 +28,8 @@ exports.builder = (yargs) => yargs.options({
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   /*
-  if (!vlm.getPackageConfig("devDependencies", "@valos/toolset-workshop")) {
-    await vlm.interact("yarn add -W --dev @valos/toolset-workshop");
+  if (!vlm.getPackageConfig("devDependencies", "@valos/type-workshop")) {
+    await vlm.interact("yarn add -W --dev @valos/type-workshop");
   }
   */
   return vlm.invoke(`.configure/.type/.workshop/**/*`, { reconfigure: yargv.reconfigure });

@@ -20,6 +20,7 @@ const wrapErrorModule = require("@valos/tools/wrapError");
 cardinal.tomorrowNight = require("cardinal/themes/tomorrow-night");
 
 const markdownify = require("../markdownify");
+const { buildSelectorOption, configureToolSelection } = require("./configure/select-toolsets");
 
 const wrapError = wrapErrorModule.wrapError;
 const outputError = wrapErrorModule.outputError;
@@ -150,7 +151,10 @@ const _vlm = {
   confirmToolsetExists,
   updateToolsetConfig,
   updateToolConfig,
+  createConfigureToolsetOptions,
+  createConfigureToolOptions,
   createStandardToolsetOption,
+  configureToolSelection,
 
   // Returns a list of available sub-command names which match the given command glob.
   listMatchingCommands,
@@ -1653,7 +1657,8 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
         activeCommand.explanation = `.builder threw: ${String(error)}`;
       }
       const exportedCommandName = module.command.match(/^([^ ]*)/)[1];
-      if (exportedCommandName !== commandName) {
+      const lengthDiff = commandName.length - exportedCommandName.length;
+      if ((lengthDiff < 0) || (commandName.slice(lengthDiff) !== exportedCommandName)) {
         this.warn(`Command name mismatch between exported command name '${
             this.theme.command(exportedCommandName)}' and command name '${
             this.theme.command(commandName)}' inferred from file:`, file.name);
@@ -2165,6 +2170,26 @@ function updateToolConfig (toolsetName, toolName, updates) {
         typeof toolsetName}|${typeof toolName}|${typeof updates}`);
   }
   return this.updateToolsetsConfig({ [toolsetName]: { tools: { [toolName]: updates } } });
+}
+
+function createConfigureToolsetOptions (/* toolsetExports */) {
+  return {
+    tools: buildSelectorOption(this, "tool"),
+    reconfigure: {
+      alias: "r", type: "boolean",
+      description: "Reconfigure all even already configured toolset and tool options.",
+    },
+  };
+}
+
+function createConfigureToolOptions (toolExports) {
+  return {
+    toolset: this.createStandardToolsetOption(`the toolset for which to ${toolExports.brief}`),
+    reconfigure: {
+      alias: "r", type: "boolean",
+      description: "Reconfigure all even already configured tool options.",
+    },
+  };
 }
 
 function createStandardToolsetOption (description) {

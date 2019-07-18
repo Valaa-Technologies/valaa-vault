@@ -17,7 +17,7 @@
     ".valma-configure_.type_.worker_@valos_type-worker": "valma/configure__worker__type-worker.js",
     "valma-perspire": "valma/perspire.js"
   },
-  "devDependencies": {
+  "dependencies": {
     "@valos/inspire": "^0.35.0-prerelease.6"
   }
 }

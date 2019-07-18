@@ -85,7 +85,7 @@ exports.handler = async (yargv) => {
     await createReleaseSubCommand(vlm, "toolset", vlm.packageConfig.name, simpleName, "build");
     await createReleaseSubCommand(vlm, "toolset", vlm.packageConfig.name, simpleName, "deploy");
   }
-  return vlm.invoke(`.configure/.type/.toolset/**/*`, { reconfigure: yargv.reconfigure });
+  return { success: true };
 };
 
 exports.createConfigureCommand = createConfigureCommand;
@@ -107,13 +107,8 @@ toolset or tool which uses this tool must explicit invoke this command.`,
     disabled: !isTool && `(yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
     && \`Toolset '\${yargs.vlm.toolset}' not in use\``,
 
-    builder: `(yargs) => yargs.options({${isTool && `
-  toolset: yargs.vlm.createStandardToolsetOption(
-      "The containing toolset of the tool to configure."),`}
-  reconfigure: {
-    alias: "r", type: "boolean",
-    description: "Reconfigure all even already configured options.",
-  },
+    builder: `(yargs) => yargs.options({
+  ...yargs.vlm.createConfigureTool${isTool ? "" : "set"}Options(exports),
 })`,
     handler: !isTool
         ? `async (yargv) => {
@@ -121,7 +116,8 @@ toolset or tool which uses this tool must explicit invoke this command.`,
   const toolsetConfig = vlm.getToolsetConfig(vlm.toolset) || {};
   const toolsetConfigUpdate = {}; // Construct a toolset config update or bail out.
   vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
-  return { success: true };
+  const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);
+  return { success: true, ...selectionResult };
 }`
         : `async (yargv) => {
   const vlm = yargv.vlm;

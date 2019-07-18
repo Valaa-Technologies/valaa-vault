@@ -25,5 +25,4 @@ exports.builder = (yargs) => yargs.options({
   },
 });
 
-exports.handler = (yargv) =>
-    yargv.vlm.invoke(`.configure/.type/.library/**/*`, { reconfigure: yargv.reconfigure });
+exports.handler = () => ({ success: true });

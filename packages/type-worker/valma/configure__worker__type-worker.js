@@ -10,10 +10,7 @@ exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
 exports.builder = (yargs) => {
   const toolsetConfig = yargs.vlm.getToolsetConfig(yargs.vlm.toolset) || {};
   return yargs.options({
-    reconfigure: {
-      alias: "r", type: "boolean",
-      description: "Reconfigure 'type-worker' config of this workspace.",
-    },
+    ...yargs.vlm.createConfigureToolsetOptions(exports),
     rootPartitionURI: {
       type: "string", default: toolsetConfig.rootPartitionURI || undefined,
       interactive: { type: "input", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
@@ -29,18 +26,13 @@ exports.builder = (yargs) => {
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
+  const toolsetConfig = vlm.getToolsetConfig(vlm.toolset);
+  if (!toolsetConfig) return undefined;
+
   const templates = vlm.path.join(__dirname, "../templates/{.,}*");
   vlm.info("Copying missing worker config files", " from templates at:",
       vlm.theme.path(templates), "(will not clobber existing files)");
   vlm.shell.cp("-n", templates, ".");
-  const devDependencies = { "@valos/type-worker": true };
-
-  if (!vlm.getPackageConfig("devDependencies", "@valos/inspire")) {
-    if (await vlm.inquireConfirm(`Install @valos/inspire in devDependencies?`)) {
-      devDependencies["@valos/inspire"] = true;
-    }
-  }
-
   const toolsetConfigUpdate = { ...vlm.getToolsetConfig(vlm.toolset) };
   toolsetConfigUpdate.rootPartitionURI = yargv.rootPartitionURI;
   if (yargv.reconfigure || !(toolsetConfigUpdate.commands || {}).perspire) {
@@ -54,5 +46,7 @@ exports.handler = async (yargv) => {
     };
   }
   await vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
-  return { command: exports.command, devDependencies };
+
+  const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);
+  return { command: exports.command, ...selectionResult };
 };

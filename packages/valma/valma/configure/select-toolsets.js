@@ -34,79 +34,115 @@ exports.disabled = (yargs) => {
       : !valos.domain ? "No package.json valos.domain stanza found"
       : !yargs.vlm.getToolsetsConfig() && "No toolsets.json found";
 };
-exports.builder = (yargs) => {
-  const toolsetsConfig = yargs.vlm.getToolsetsConfig();
-  if (!toolsetsConfig) throw new Error("toolsets.json missing (maybe run 'vlm init'?)");
-  if (this.disabled(yargs)) throw new Error("package.json missing stanza .valos.(type|domain)");
-  const valos = yargs.vlm.packageConfig.valos || yargs.vlm.packageConfig.valaa;
-  const knownToolsets = yargs.vlm
+exports.builder = (yargs) => yargs.options({
+  toolsets: buildSelectorOption(yargs.vlm, "toolset"),
+  reconfigure: {
+    alias: "r", type: "boolean",
+    description: "Reconfigure all toolsets even if they are already selected or configured.",
+  },
+});
+
+exports.buildSelectorOption = buildSelectorOption;
+function buildSelectorOption (vlm, type) {
+  const selectionConfig = (type === "toolset")
+      ? vlm.getToolsetsConfig()
+      : vlm.getToolsetConfig(vlm.toolset, "tools") || {};
+  if (!selectionConfig) throw new Error("toolsets.json missing (maybe run 'vlm init'?)");
+  const valos = vlm.packageConfig.valos || vlm.packageConfig.valaa;
+  const toolsetGlob = (type !== "tool") ? "" : `{,.${vlm.toolset}/}.tools/`;
+  const knownCandidates = vlm
       .listMatchingCommands(
-          `.configure/{,.type/.${valos.type}/,.domain/.${valos.domain}/}.select/**/*`)
+          `.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}${toolsetGlob}.select/**/*`)
       .map(name => name.match(/\/.select\/(.*)$/)[1]);
-  const configuredToolsets = Object.keys(toolsetsConfig || {});
-  const usedToolsets = configuredToolsets
-      .filter(name => (toolsetsConfig[name] || {}).inUse);
-  const allToolsets = knownToolsets.concat(
-      configuredToolsets.filter(toolset => !knownToolsets.includes(toolset)));
-  return yargs.options({
-    reconfigure: {
-      alias: "r", type: "boolean",
-      description: "Reconfigure all newly grabbed toolsets even if they are already configured.",
-    },
-    toolsets: {
-      type: "string", default: usedToolsets, choices: allToolsets,
-      interactive: { type: "checkbox", when: "always" },
-      description:
-          "Grab toolsets to use from the available toolsets (check to grab, uncheck to stow)",
-    },
-  });
-};
+  const configuredNames = Object.keys(selectionConfig || {});
+  const inUseSelection = configuredNames
+      .filter(name => (selectionConfig[name] || {}).inUse === true);
+  const choices = knownCandidates.concat(
+          configuredNames.filter(configuredName => !knownCandidates.includes(configuredName)))
+      .filter(name => (selectionConfig[name] || {}).inUse !== "always");
+  return {
+    type: "string", default: inUseSelection, choices,
+    interactive: { type: "checkbox", when: choices.length ? "always" : "if-undefined" },
+    description: `Select ${type}s to use for the ${
+      type === "toolset" ? valos.type : `toolset ${vlm.toolset}`}`,
+  };
+}
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const valos = vlm.packageConfig.valos || vlm.packageConfig.valaa;
   const toolsetsConfig = vlm.getToolsetsConfig();
   if (!toolsetsConfig) return undefined;
+  return _configureSelections(vlm, undefined,
+      yargv.reconfigure, yargv.toolsets || [], toolsetsConfig, yargv._);
+};
 
-  const newToolsets = yargv.toolsets || [];
-  const toolsets = {};
-  const ret = {};
+exports.configureToolSelection = configureToolSelection;
+function configureToolSelection (yargv, toolsetConfig) {
+  return _configureSelections(this, this.toolset, yargv.reconfigure, yargv.tools,
+      toolsetConfig.tools || {});
+}
 
-  const stowToolsets = Object.keys(toolsetsConfig)
-      .filter(name => (!newToolsets.includes(name) && toolsetsConfig[name].inUse));
+async function _configureSelections (
+    vlm, toolsetOfTool, reconfigure, newSelection, currentSelectionConfig, rest = []) {
+  const { updateResultSideEffects } = require("../configure");
+  const type = toolsetOfTool ? "tool" : "toolset";
+  const valos = vlm.packageConfig.valos || vlm.packageConfig.valaa;
+  const configUpdate = {};
+  const ret = { success: true };
+  vlm.reconfigure = reconfigure;
+
+  const stowed = Object.keys(currentSelectionConfig)
+      .filter(name => (!newSelection.includes(name)
+          && (currentSelectionConfig[name].inUse === true)));
   // TODO: add confirmation for configurations that are about to be eliminated with null
-  if (stowToolsets.length) {
-    vlm.info(`Stowing toolsets:`, vlm.theme.package(...stowToolsets));
-    stowToolsets.forEach(name => { toolsets[name] = { inUse: false }; });
-    ret.stowed = stowToolsets;
+  if (stowed.length) {
+    vlm.info(`Stowing ${type}:`, vlm.theme.package(...stowed));
+    stowed.forEach(name => { configUpdate[name] = { inUse: false }; });
+    ret.stowed = stowed;
   }
-  const grabbedToolsets = newToolsets
-      .filter(name => !(toolsetsConfig[name] || { inUse: false }).inUse);
-  if (grabbedToolsets.length) {
-    vlm.info(`Grabbing toolsets:`, vlm.theme.package(...grabbedToolsets));
-    grabbedToolsets.forEach(name => { toolsets[name] = { inUse: true }; });
-    ret.grabbed = grabbedToolsets;
+  const grabbed = newSelection
+      .filter(name => !(currentSelectionConfig[name] || { inUse: false }).inUse);
+  if (grabbed.length) {
+    vlm.info(`Grabbing ${type}:`, vlm.theme.package(...grabbed));
+    grabbed.forEach(name => { configUpdate[name] = { inUse: true }; });
+    ret.grabbed = grabbed;
   }
-  await vlm.updateToolsetsConfig(toolsets);
+  if (!reconfigure && !grabbed.length && !stowed.length) return ret;
+  if (!toolsetOfTool) {
+    await vlm.updateToolsetsConfig(configUpdate);
+  } else {
+    await vlm.updateToolsetConfig(toolsetOfTool, { tools: configUpdate });
+  }
   const devDependencies = {};
-  for (const toolsetName of (yargv.reconfigure ? newToolsets : grabbedToolsets)) {
-    const configureResults = await vlm.invoke(
-        `.configure/{,.type/.${valos.type}/,.domain/.${valos.domain}/}.select/${toolsetName}`);
-    for (const result of configureResults) {
-      Object.assign(devDependencies, (result || {}).devDependencies || {});
-    }
+  const toolsetGlob = toolsetOfTool ? `{,.${toolsetOfTool}/}.tools/` : "";
+  ret.selectionConfigures = [];
+  for (const grabName of (reconfigure ? newSelection : grabbed)) {
+    ret.selectionConfigures.push(...await vlm.invoke(
+        `.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}${toolsetGlob
+          }.select/${grabName}`, [{ reconfigure: true }, ...rest]));
   }
+  Object.assign(ret, await updateResultSideEffects(vlm, ...ret.selectionConfigures));
   const newDevDependencies = Object.keys(devDependencies)
       .filter(devDependencyName => !vlm.getPackageConfig("devDependencies", devDependencyName)
           && !vlm.getPackageConfig("dependencies", devDependencyName));
   if (newDevDependencies.length) {
-    vlm.info(`Installing new toolset devDependencies:`,
+    vlm.info(`Installing new devDependencies:`,
         vlm.theme.package(...newDevDependencies));
     await vlm.interact(["yarn add -W --dev", ...newDevDependencies]);
   }
-  const rest = [{ reconfigure: yargv.reconfigure || false }, ...yargv._];
-  vlm.info(`Configuring all toolsets:`);
-  ret.toolsets = await vlm.invoke(
-      `.configure/{,.type/.${valos.type}/,.domain/.${valos.domain}/}.toolset/**/*`, rest);
+  if (!reconfigure) {
+    vlm.info(`Configuring all ${type}s:`);
+    // TODO(iridian, 2019-07): should really only configure new selections.
+    ret[`${type}Configures`] = await vlm.invoke(
+        `.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}${
+            toolsetGlob || ".toolset/"}/**/*`,
+        [{ reconfigure: false }, ...rest]);
+  } else {
+    vlm.info(`Reconfiguring all ${type}s:`);
+    ret[`${type}Reconfigures`] = await vlm.invoke(
+        `.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}${
+            toolsetGlob || ".toolset/"}**/*`,
+        [{ reconfigure: true }, ...rest]);
+  }
   return ret;
-};
+}

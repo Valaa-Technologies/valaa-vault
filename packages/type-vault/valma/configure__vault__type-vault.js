@@ -13,14 +13,14 @@ root from package @valos/type-vault directory templates/.*.`;
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
     && `Workspace is not a vault (is ${yargs.vlm.getValOSConfig("type")})`;
 exports.builder = (yargs) => yargs.options({
-  reconfigure: {
-    alias: "r", type: "boolean",
-    description: "Reconfigure 'type-vault' config of this workspace.",
-  },
+  ...yargs.vlm.createConfigureToolsetOptions(exports),
 });
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
+  const toolsetConfig = vlm.getToolsetConfig(vlm.toolset);
+  if (!toolsetConfig) return undefined;
+
   const templates = vlm.path.join(__dirname, "../templates/{.,}*");
   vlm.info("Copying vault template files from ", vlm.theme.path(templates),
       "(will not clobber existing files)");
@@ -70,5 +70,7 @@ exports.handler = async (yargv) => {
           config.version.split(".").slice(0, 2).join(".")}`);
     }
   }
-  return { command: exports.command, devDependencies: { "@valos/type-vault": true } };
+
+  const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);
+  return { command: exports.command, ...selectionResult };
 };

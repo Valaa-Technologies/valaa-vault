@@ -28,6 +28,9 @@ exports.builder = (yargs) => yargs.options({
     alias: "r", type: "boolean",
     description: "Reconfigure all config of this workspace.",
   },
+  breakdown: {
+    type: "boolean", description: "Show full breakdown of the init process even if successful.",
+  },
 });
 
 exports.handler = async (yargv) => {
@@ -37,13 +40,14 @@ exports.handler = async (yargv) => {
 
   let packageJSON;
   try { packageJSON = require(vlm.path.join(process.cwd(), "package")); } catch (error) { /* */ }
-  if (!await _initPackageJSON()) return false;
-  if (!packageJSON) {
-    return vlm.interact("vlm init");
-  }
-  return await _selectValOSTypeAndDomain()
-      && await _addInitialValmaDevDependencies()
-      && _configure();
+  const ret = { success: true };
+  Object.assign(await _initPackageJSON());
+  if (ret.success === false) return ret;
+  if (!packageJSON) return vlm.interact("vlm init");
+  if (ret.success !== false) Object.assign(ret, await _addInitialValmaDevDependencies());
+  if (ret.success !== false) Object.assign(ret, await _selectValOSTypeAndDomain());
+  if (ret.success !== false) Object.assign(ret, await _configure());
+  return yargv.breakdown || (ret.success === false) ? ret : { success: ret.success };
 
   async function _initPackageJSON () {
     while (yargv.reconfigure || !packageJSON) {
@@ -55,7 +59,7 @@ exports.handler = async (yargv) => {
         type: "list", name: "choice", default: choices[0], choices,
       }]);
       if (answer.choice === "Skip") break;
-      if (answer.choice === "quit") return false;
+      if (answer.choice === "quit") return { success: false, reason: answer };
       if (answer.choice === "help") {
         vlm.speak();
         vlm.info("workspace initialization",
@@ -69,10 +73,10 @@ package configuration file for yarn (and also for npm, which yarn is
         continue;
       }
       await _updatePackageWithVaultDefaults();
-      return vlm.interact("yarn init");
+      return { success: vlm.interact("yarn init") || true };
     }
     vlm.info(`Skipped '${vlm.theme.executable("yarn init")}'.`, ...tellIfNoReconfigure);
-    return true;
+    return {};
   }
 
   async function _updatePackageWithVaultDefaults () {
@@ -128,21 +132,21 @@ publishConfigLine}
         type: "list", name: "choice", default: choices[0], choices,
       }]);
       if (answer.choice === "Skip") break;
-      if (answer.choice === "quit") return false;
+      if (answer.choice === "quit") return { success: false, reason: answer };
       if (answer.choice === "help") {
         vlm.speak();
         vlm.speak(await vlm.invoke(".configure/.valos-stanza", ["--show-introduction"]));
         vlm.speak();
         continue;
       }
-      if (answer.choice === "Confirm") return true;
+      if (answer.choice === "Confirm") return {};
       vlm.reconfigure = yargv.reconfigure;
       await vlm.invoke(".configure/.valos-stanza", { reconfigure: yargv.reconfigure });
       justConfigured = true;
     }
     vlm.info("Skipped configuring valos type and domain of this workspace.",
         ...tellIfNoReconfigure);
-    return true;
+    return {};
   }
 
   async function _addInitialValmaDevDependencies () {
@@ -159,18 +163,18 @@ publishConfigLine}
             ? "Retry adding workshops (or direct toolsets) as devDependencies?"
             : `${vlm.theme.executable("yarn add")} ${
               vlm.packageConfig.devDependencies ? "more" : "initial"
-              } workshops (or direct toolsets) as devDependencies?`,
+              } workshops as devDependencies directly to this workspace?`,
         type: "list", name: "choice", default: choices[0], choices,
       }]);
       wasError = false;
       if (answer.choice === "Skip" || answer.choice === "skip") break;
-      if (answer.choice === "quit") return false;
+      if (answer.choice === "quit") return { success: false, reason: answer };
       if (answer.choice === "help") {
         vlm.speak();
         vlm.info("workshop registration",
 `This phase uses '${coloredYarnAdd}' to add workshops as devDependencies.
-This makes the toolsets in those workshops to be immediately available
-for the listings in following phases.
+This makes the domains, types and toolsets provided by those workshops
+available for the listings in following phases.
 `);
         continue;
       }
@@ -191,7 +195,7 @@ for the listings in following phases.
       }
     }
     vlm.info(`Skipped '${coloredYarnAdd}'.`, ...tellIfNoReconfigure);
-    return true;
+    return {};
   }
 
   async function _configure () {
@@ -199,7 +203,12 @@ for the listings in following phases.
       let toolsetsConfig;
       try {
         toolsetsConfig = require(vlm.path.join(process.cwd(), "toolsets"));
-        if (toolsetsConfig && !yargv.reconfigure) return false;
+        if (toolsetsConfig && !yargv.reconfigure) {
+          return {
+            success: false,
+            reason: "trying to configure an existing toolset without --reconfigure",
+          };
+        }
       } catch (error) { /* */ }
       const choices = (toolsetsConfig ? ["Skip", "reconfigure"] : ["Configure"])
           .concat(["help", "quit"]);
@@ -209,7 +218,7 @@ for the listings in following phases.
         type: "list", name: "choice", default: choices[0], choices,
       }]);
       if (answer.choice === "Skip") break;
-      if (answer.choice === "quit") return false;
+      if (answer.choice === "quit") return { success: false, reason: answer };
       if (answer.choice === "help") {
         vlm.speak();
         vlm.speak(await vlm.invoke("configure", ["--show-introduction"]));
@@ -219,6 +228,6 @@ for the listings in following phases.
       return vlm.invoke("configure", { reconfigure: yargv.reconfigure });
     }
     vlm.info("Skipped 'vlm configure'.", ...tellIfNoReconfigure);
-    return true;
+    return {};
   }
 };

@@ -15,10 +15,7 @@ and any customizations in the root webpack.config.js itself.`;
 exports.disabled = (yargs) => !yargs.vlm.getToolsetsConfig()
     && "Can't select 'toolset-revealer': toolset config missing";
 exports.builder = (yargs) => yargs.options({
-  reconfigure: {
-    alias: "r", type: "boolean",
-    description: "Reconfigure 'toolset-revealer' config of this workspace.",
-  },
+  ...yargs.vlm.createConfigureToolsetOptions(exports),
 });
 
 exports.handler = async (yargv) => {
@@ -27,14 +24,14 @@ exports.handler = async (yargv) => {
   // @valos/toolset-revealer actual. See type/toolsets.js for how new
   // select/configure scripts are created.
   const vlm = yargv.vlm;
-  const toolsetWebpackConfig = vlm.getToolsetConfig(vlm.toolset, "webpack");
+  const toolsetConfig = vlm.getToolsetConfig(vlm.toolset);
   const templates = vlm.path.join(__dirname, "../templates/{.,}*");
   vlm.info("Copying revealer template files from ", vlm.theme.path(templates),
       "(will not clobber existing files)");
   vlm.shell.cp("-n", templates, ".");
   vlm.instruct(`! Edit ${vlm.theme.path("webpack.config.js")
       } to configure webpack entry and output locations.`);
-  if (!toolsetWebpackConfig) {
+  if (!toolsetConfig.webpack) {
     vlm.updateToolsetConfig(vlm.toolset, {
       webpack: {
         entry: { "valos-inspire": "./node_modules/@valos/inspire/index.js" },
@@ -50,12 +47,11 @@ exports.handler = async (yargv) => {
   }
   const devDependencies = { "@valos/toolset-revealer": true };
   if (!vlm.getPackageConfig("devDependencies", "@valos/inspire")) {
-    if (await vlm.inquireConfirm(`Install @valos/inspire in devDependencies?`)) {
+    if (await vlm.inquireConfirm(`rouse-revealer requires @valos/inspire as a peerDependency.${
+        ""} Install it in workspace devDependencies?`)) {
       devDependencies["@valos/inspire"] = true;
     }
   }
-  return {
-    command: exports.command,
-    devDependencies,
-  };
+  const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);
+  return { command: exports.command, devDependencies, ...selectionResult };
 };

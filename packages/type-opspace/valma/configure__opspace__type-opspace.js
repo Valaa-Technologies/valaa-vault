@@ -51,17 +51,19 @@ following strategy is used:
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "opspace")
     && `Workspace is not an opspace (is ${yargs.vlm.getValOSConfig("type")})`;
 exports.builder = (yargs) => yargs.options({
-  reconfigure: {
-    alias: "r", type: "boolean",
-    description: "Reconfigure 'type-opspace' config of this workspace.",
-  },
+  ...yargs.vlm.createConfigureToolsetOptions(exports),
 });
 
-exports.handler = (yargv) => {
+exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
+  const toolsetConfig = vlm.getToolsetConfig(vlm.toolset);
+  if (!toolsetConfig) return undefined;
+
   const templates = vlm.path.join(__dirname, "../templates/{.,}*");
   vlm.info("Copying missing opspace config files", " from templates at:",
       vlm.theme.path(templates), "(will not clobber existing files)");
   vlm.shell.cp("-n", templates, ".");
-  return { command: exports.command };
+
+  const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);
+  return { command: exports.command, ...selectionResult };
 };

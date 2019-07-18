@@ -16,10 +16,8 @@ exports.builder = (yargs) => yargs.options({
   },
 });
 
-exports.handler = async (yargv) => {
-  const vlm = yargv.vlm;
-  if (!vlm.getPackageConfig("devDependencies", "@valos/type-opspace")) {
-    await vlm.interact("yarn add -W --dev @valos/type-opspace");
-  }
-  return vlm.invoke(`.configure/.type/.opspace/**/*`, { reconfigure: yargv.reconfigure });
-};
+exports.handler = () => ({
+  devDependencies: { "@valos/type-opspace": true },
+  toolsetsUpdate: { "@valos/type-opspace": { inUse: "always" } },
+  success: true,
+});

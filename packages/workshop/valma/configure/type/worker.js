@@ -32,10 +32,8 @@ exports.builder = (yargs) => yargs.options({
   },
 });
 
-exports.handler = async (yargv) => {
-  const vlm = yargv.vlm;
-  if (!vlm.getPackageConfig("devDependencies", "@valos/type-worker")) {
-    await vlm.interact("yarn add -W --dev @valos/type-worker");
-  }
-  return vlm.invoke(`.configure/.type/.worker/**/*`, { reconfigure: yargv.reconfigure });
-};
+exports.handler = () => ({
+  devDependencies: { "@valos/type-worker": true },
+  toolsetsUpdate: { "@valos/type-worker": { inUse: "always" } },
+  success: true,
+});

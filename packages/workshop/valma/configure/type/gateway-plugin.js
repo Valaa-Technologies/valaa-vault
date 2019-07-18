@@ -15,10 +15,8 @@ exports.builder = (yargs) => yargs.options({
   },
 });
 
-exports.handler = async (yargv) => {
-  const vlm = yargv.vlm;
-  if (!vlm.getPackageConfig("devDependencies", "@valos/type-gateway-plugin")) {
-    await vlm.interact("yarn add -W --dev @valos/type-gateway-plugin");
-  }
-  return vlm.invoke(`.configure/.type/.gateway-plugin/**/*`, { reconfigure: yargv.reconfigure });
-};
+exports.handler = () => ({
+  devDependencies: { "@valos/type-gateway-plugin": true },
+  toolsetsUpdate: { "@valos/type-gateway-plugin": { inUse: "always" } },
+  success: true,
+});

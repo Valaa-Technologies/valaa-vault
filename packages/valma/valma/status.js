@@ -1,6 +1,6 @@
 #!/usr/bin/env vlm
 exports.command = "status [toolsetGlob]";
-exports.describe = "Display the status of the current repository";
+exports.describe = "Display the status of the current workspace";
 exports.introduction = `${exports.describe}.
 
 If toolsetGlob is specified the status is limited to status scripts
@@ -20,7 +20,7 @@ exports.handler = async (yargv) => {
   const vlm = yargv.echos ? yargv.vlm
       : Object.assign(Object.create(yargv.vlm), { echo: function noEcho () { return this; } });
   if (!vlm.packageConfig) {
-    vlm.error("Current directory is not a package repository;", vlm.theme.path("package.json"),
+    vlm.error("Current directory is not a workspace;", vlm.theme.path("package.json"),
         "doesn't exist or is not valid.");
     return false;
   }

@@ -1,20 +1,20 @@
 exports.command = ".configure/.type/toolset";
-exports.describe = "Configure a 'toolset' workspace";
+exports.describe = "Initialize toolset workspace";
 exports.introduction = `${exports.describe}.
 
 A valma toolset is a package which provides various resources for
-a depending repository with the ability to have repository specific
+a depending workspace with the ability to have workspace specific
 configurations in their 'toolsets.json'.
 These resources might be new valma commands, file templates,
 dependencies to other valma toolsets and tools, to external tools or
 to plain javascript libraries; anything that can be expressed in a
 package really.
 
-The defining quality of a toolset is its ability to have repository
+The defining quality of a toolset is its ability to have workspace
 specific configuration which all toolset commands and even other
 javascript files can access to customize their behaviour. Additionally
 toolsets appear in configuration listings and can be selectively
-enabled or disabled on a repository.
+enabled or disabled on a workspace.
 
 A valma toolsets are added as regular devDependencies and configured
 by running 'vlm configure' afterwards.`;
@@ -190,7 +190,7 @@ function createStatusSubCommand (vlm, type, name, simpleName, commandPath) {
 
   function _createToolsetHandlerBody () {
     return `async (yargv) => {
-  const { extract, extractee: { ref } } = require("@valos/toolset-vault/vdoc");
+  const { extract, extractee: { ref } } = require("@valos/type-vault/vdoc");
   const patchWith = require("@valos/tools/patchWith").default;
   const vlm = yargv.vlm;
   const toolsetConfig = vlm.getToolsetConfig(vlm.toolset);
@@ -219,7 +219,7 @@ function createStatusSubCommand (vlm, type, name, simpleName, commandPath) {
 
   function _createToolHandlerBody () {
     return `async (yargv) => {
-  const { extract, extractee: { ref } } = require("@valos/toolset-vault/vdoc");
+  const { extract, extractee: { ref } } = require("@valos/type-vault/vdoc");
   const vlm = yargv.vlm;
   const toolConfig = vlm.getToolsetConfig(yargv.toolset, exports.vlm.tool);
   const warnings = [];
@@ -245,7 +245,7 @@ function createReleaseSubCommand (vlm, type, name, simpleName, subName) {
     filename: `release-${subName}_${isTool && "tool_"}_${simpleName}.js`,
     brief: `${isBuild ? "Build" : "Deploy"} a sub-release`,
     export: true,
-    header: `const opspace = require("@valos/toolset-opspace");\n\n`,
+    header: `const opspace = require("@valos/type-opspace");\n\n`,
     "exports-vlm": `{ ${type}: "${name}" }`,
     describe: `${isBuild ? "Build" : "Deploy"} a sub-release of ${name}`,
     introduction: isTool

@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/tool";
-exports.describe = "Configure a 'tool' workspace";
+exports.describe = "Initialize tool workspace";
 exports.introduction = `${exports.describe}.
 
 Tools are a toolset implementation detail. A tool is similar to

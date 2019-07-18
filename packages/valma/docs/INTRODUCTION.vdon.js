@@ -4,9 +4,9 @@ module.exports = { "...": { heading:
   0: [
     `Any npm package can export new valma commands by exporting .js
     command scripts via its package.json .bin stanza. When such a
-    package is added as a devDependency for a repository valma will
+    package is added as a devDependency for a workspace valma will
     then be able to locate and invoke those commands from anywhere
-    inside the repository.`,
+    inside the workspace.`,
     "",
     `Valma commands are hierarchical and can contain '/' in their
     names. Valma invokations can use glob matching to make full use of

@@ -1,0 +1,27 @@
+{
+  "name": "@valos/type-opspace",
+  "valos": {
+    "type": "toolset",
+    "domain": "@valos/kernel"
+  },
+  "version": "0.35.0-prerelease.6",
+  "description": "The ValOS type toolset for opspace workspaces",
+  "license": "MIT",
+  "author": "Valaa Technologies Ltd",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "bin": {
+    ".valma-configure_.type_.opspace_@valos_type-opspace": "valma/configure__opspace__type-opspace.js",
+    ".valma-status_.type_.opspace_10-opspace": "valma/status__opspace_10-opspace.js",
+    "valma-build-release": "valma/build-release.js",
+    "valma-deploy-release": "valma/deploy-release.js"
+  },
+  "dependencies": {
+    "@valos/toolset-revealer": "^0.35.0-prerelease.6",
+    "lerna": "^3.4.0",
+    "valma": "^0.35.0-prerelease.6"
+  }
+}

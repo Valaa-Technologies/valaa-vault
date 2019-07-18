@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/gateway-plugin";
-exports.describe = "Configure a 'gateway-plugin' workspace";
+exports.describe = "Initialize gateway-plugin workspace";
 exports.introduction = `${exports.describe}.
 
 Gateway-plugin extends inspire/perspire gateways with various types of
@@ -17,8 +17,8 @@ exports.builder = (yargs) => yargs.options({
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  if (!vlm.getPackageConfig("devDependencies", "@valos/toolset-gateway-plugin")) {
-    await vlm.interact("yarn add -W --dev @valos/toolset-gateway-plugin");
+  if (!vlm.getPackageConfig("devDependencies", "@valos/type-gateway-plugin")) {
+    await vlm.interact("yarn add -W --dev @valos/type-gateway-plugin");
   }
   return vlm.invoke(`.configure/.type/.gateway-plugin/**/*`, { reconfigure: yargv.reconfigure });
 };

@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/library";
-exports.describe = "Configure a 'library' workspace";
+exports.describe = "Initialize library workspace";
 exports.introduction = `${exports.describe}.
 
 Libraries are workspaces which contain arbitrary ES5 source code and

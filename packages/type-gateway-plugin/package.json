@@ -1,0 +1,19 @@
+{
+  "name": "@valos/type-gateway-plugin",
+  "version": "0.35.0-prerelease.6",
+  "valos": {
+    "type": "toolset",
+    "domain": "@valos/kernel"
+  },
+  "description": "The ValOS type toolset for 'gateway-plugin' workspaces",
+  "main": "",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    ".valma-configure_.type_.worker_@valos_type-gateway-plugin": "valma/configure__worker__type-gateway-plugin.js"
+  }
+}

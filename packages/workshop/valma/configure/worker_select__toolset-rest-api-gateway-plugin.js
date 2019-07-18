@@ -1,6 +1,6 @@
 exports.vlm = { toolset: "@valos/toolset-rest-api-gateway-plugin" };
 exports.command = ".configure/.type/.worker/.select/@valos/toolset-rest-api-gateway-plugin";
-exports.describe = "Configure the worker toolset 'toolset-rest-api-gateway-plugin'";
+exports.describe = "Select the toolset 'toolset-rest-api-gateway-plugin'";
 exports.introduction = `${exports.describe}.
 
 `;
@@ -39,15 +39,15 @@ exports.handler = (yargv) => {
   toolsetConfigUpdate.address = yargv.address;
   vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
 
-  // Add/remove the rest API plugin to toolset-worker config
-  const workerToolsetPlugins = vlm.getToolsetConfig("@valos/toolset-worker",
+  // Add/remove the rest API plugin to type-worker config
+  const workerToolsetPlugins = vlm.getToolsetConfig("@valos/type-worker",
       "commands", "perspire", "options", "plugin") || [];
   if (toolsetConfigUpdate.inUse && !workerToolsetPlugins.includes(vlm.toolset)) {
-    vlm.updateToolsetConfig("@valos/toolset-worker",
+    vlm.updateToolsetConfig("@valos/type-worker",
         { commands: { perspire: { options: { plugin: [vlm.toolset] } } } });
   } else if (!toolsetConfigUpdate.inUse && (workerToolsetPlugins.includes(vlm.toolset))) {
     vlm.warn(`Removing stowed toolset '${vlm.toolset
-        }' from '@valos/toolset-worker' config plugins not implemented yet.`,
+        }' from '@valos/type-worker' config plugins not implemented yet.`,
         "Please remove the plugin manually");
     // TODO(iridian, 2019-02): Removing values using the updateToolsetConfig is not implemented yet.
   }

@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/workshop";
-exports.describe = "Configure 'workshop' workspace";
+exports.describe = "Initialize workshop workspace";
 exports.introduction = `${exports.describe}.
 
 Each valos domain provides a workshop package which provides a set of
@@ -10,11 +10,11 @@ valma commands for defining and managing the domain. The workshops then:
 3. can provide new toolsets via
    .configure/{,.type/.<type>/,.domain/.<domain>/}.toolset/**/*
 
-Notably the package (de)registration should provide means for newly
+Notably the package (de)registration should provide means for any new
 domain toolset packages to request the addition of their toolset
-configure command to the domain workshop. Idiomatic example is a guided
-issuance of a PR against the source control repository of the workshop
-package.`;
+configure command to the domain workshop.
+Idiomatic way to implement this is a workshop command which issues a PR
+against the source control repository of the workshop package.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "workshop")
     && `Workspace is not a 'workshop' (is '${yargs.vlm.getValOSConfig("type")}')`;

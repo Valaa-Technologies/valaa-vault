@@ -2,9 +2,9 @@ exports.command = ".configure/.valos-stanza";
 exports.describe = "Configure valos stanza type and domain from the available options";
 exports.introduction = `${exports.describe}.
 
-Type determines the localized role and structure of this repository.
-Domain defines the context and the overall purpose of this repository.
-Both affect the available toolsets for the repository.`;
+Type determines the localized role and structure of this workspace.
+Domain defines the context and the overall purpose of this workspace.
+Both affect the available toolsets for the workspace.`;
 
 exports.disabled = (yargs) => yargs.vlm.getValOSConfig() && "Already configured";
 exports.builder = (yargs) => {
@@ -21,11 +21,11 @@ exports.builder = (yargs) => {
   return yargs.options({
     reconfigure: {
       alias: "r", type: "boolean",
-      description: "Reconfigure ValOS type and domain of this repository.",
+      description: "Reconfigure ValOS type and domain of this workspace.",
     },
     type: {
       type: "string", default: valos.type, choices: typeChoices,
-      description: "Select repository package.json stanza valos.type",
+      description: "Select workspace package.json stanza valos.type",
       interactive: {
         type: "list", when: vlm.reconfigure ? "always" : "if-undefined", pageSize: 10,
         confirm: _inquireIfCustomThenAlwaysConfirm.bind(null, vlm, "type"),
@@ -33,7 +33,7 @@ exports.builder = (yargs) => {
     },
     domain: {
       type: "string", default: valos.domain, choices: domainChoices,
-      description: "Select repository package.json stanza valos.domain",
+      description: "Select workspace package.json stanza valos.domain",
       interactive: {
         type: "list", when: vlm.reconfigure ? "always" : "if-undefined", pageSize: 10,
         confirm: _inquireIfCustomThenAlwaysConfirm.bind(null, vlm, "domain"),

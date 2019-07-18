@@ -107,7 +107,6 @@ exports.handler = async (yargv) => {
   const rest = [{ reconfigure: yargv.reconfigure || false }, ...yargv._];
   vlm.info(`Configuring all toolsets:`);
   ret.toolsets = await vlm.invoke(
-      `.configure/{.domain/.${valos.domain}/,.type/.${valos.type
-        }/,}.toolset/${yargv.toolsetGlob}{*/**/,}*`, rest);
+      `.configure/{,.type/.${valos.type}/,.domain/.${valos.domain}/}.toolset/**/*`, rest);
   return ret;
 };

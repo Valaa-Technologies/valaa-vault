@@ -1,13 +1,13 @@
 
 # ValOS style guide
-[//]: # (don't edit auto-generated file - generated at @valos/vault root with)
-[//]: # (vlm --markdown . require packages/toolset-vault/template.vdon/STYLE.vdon > STYLE.md)
+[//]: # (don't edit auto-generated file - generated at @valos/kernel root with)
+[//]: # (vlm --markdown . require packages/type-vault/template.vdon/STYLE.vdon > STYLE.md)
 The ValOS style is split into three main sections: general semantic
 principles, informal text production guidelines and formal
 linter-enforceable style rules.
 Additional files specifying formal style rules:
-- @valos/toolset-vault/shared/.eslintrc.js
-- @valos/toolset-vault/templates/.editorconfig
+- @valos/type-vault/shared/.eslintrc.js
+- @valos/type-vault/templates/.editorconfig
 
 Note: while formal ValOS linter rules are formally based on airbnb
 style there is a lot of divergence in practice.

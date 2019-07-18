@@ -1,15 +1,15 @@
 #!/usr/bin/env vlm
 
 exports.command = "init";
-exports.describe = "Initialize the current directory as a ValOS repository from scratch";
+exports.describe = "Initialize the current directory as a ValOS workspace from scratch";
 exports.introduction = `${exports.describe}.
 
 This process will walk you through creating and configuring a new
-valma repository in the current working directory from scratch.
+valma workspace in the current working directory from scratch.
 
 Valma init has following interactive phases:
 1. Initialization of package.json via 'yarn init'
-2. Configuration of repository valos.type and .domain via 'vlm .configure/.valos-stanza'
+2. Configuration of workspace valos.type and .domain via 'vlm .configure/.valos-stanza'
 3. Addition of new known workshops via 'yarn add -W --dev'
 4. Selection of in-use toolsets from available toolsets via 'vlm .configure/.select-toolsets'
 5. Configuration of in-use toolsets and tools via 'vlm configure'`;
@@ -58,7 +58,7 @@ exports.handler = async (yargv) => {
       if (answer.choice === "quit") return false;
       if (answer.choice === "help") {
         vlm.speak();
-        vlm.info("repository initialization",
+        vlm.info("workspace initialization",
 `This phase uses '${vlm.theme.executable("yarn init")}' to initialize
 package.json via a series of interactive questions.
 ValOS workspaces use yarn extensively for version, dependency and
@@ -122,7 +122,7 @@ publishConfigLine}
           .concat(["help", "quit"]);
       const answer = await vlm.inquire([{
         message: !vlm.packageConfig.valos
-            ? "Initialize repository valos stanza type and domain?"
+            ? "Initialize workspace valos stanza type and domain?"
             : `${justConfigured ? "Confirm selection or reconfigure" : "Reconfigure"
                 } valos stanza: ${JSON.stringify({ ...vlm.packageConfig.valos })}?`,
         type: "list", name: "choice", default: choices[0], choices,
@@ -140,7 +140,8 @@ publishConfigLine}
       await vlm.invoke(".configure/.valos-stanza", { reconfigure: yargv.reconfigure });
       justConfigured = true;
     }
-    vlm.info("Skipped repository valos type and domain configure.", ...tellIfNoReconfigure);
+    vlm.info("Skipped configuring valos type and domain of this workspace.",
+        ...tellIfNoReconfigure);
     return true;
   }
 
@@ -203,7 +204,7 @@ for the listings in following phases.
       const choices = (toolsetsConfig ? ["Skip", "reconfigure"] : ["Configure"])
           .concat(["help", "quit"]);
       const answer = await vlm.inquire([{
-        message: `${toolsetsConfig ? "Reconfigure" : "Configure"} repository with '${
+        message: `${toolsetsConfig ? "Reconfigure" : "Configure"} workspace with '${
             vlm.theme.command("vlm configure")}'?`,
         type: "list", name: "choice", default: choices[0], choices,
       }]);

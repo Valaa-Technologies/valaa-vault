@@ -1,12 +1,12 @@
 exports.vlm = { toolset: "@valos/toolset-revealer" };
 exports.command = ".configure/.select/@valos/toolset-revealer";
-exports.describe = "Configure the workspace toolset 'toolset-revealer'";
+exports.describe = "Select the toolset 'toolset-revealer'";
 exports.introduction = `${exports.describe}.
 
 Adds valma command 'rouse-revealer'.
 
 Sets up the webpack entry and output config as webpack.config.js in
-the repository root, which combines shared revealer config from
+the workspace root, which combines shared revealer config from
 @valos/toolset-revealer/shared/webpack.config.js, local toolset config
 and any customizations in the root webpack.config.js itself.`;
 

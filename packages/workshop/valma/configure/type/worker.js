@@ -1,12 +1,12 @@
 exports.command = ".configure/.type/worker";
-exports.describe = "Configure a 'worker' workspace";
+exports.describe = "Initialize worker workspace";
 exports.introduction = `${exports.describe}.
 
-A worker repository is used to launch and manage a running process.
-The repository files contain configuration and data used by the
+A worker workspace is used to launch and manage a running process.
+The workspace files contain configuration and data used by the
 process. This data can include even dynamic runtime data.
 
-A worker repository is fully agnostic to version control solutions:
+A worker workspace is fully agnostic to version control solutions:
 - script-generated workers, where worker is locally spawned by scripts
 - clone-and-forget workers, where worker is cloned from a versioned
   upstream repository, has its configuration locally customized and
@@ -14,8 +14,8 @@ A worker repository is fully agnostic to version control solutions:
   expected nor will workers push updates back upstream. Each clone
   represents its own computation.
 - synchronized workers, where the versioned repository itself
-  represents the process. Worker repository shards (there can be many
-  if the computation is parallelizable) are still cloned from the
+  represents the worker process. Worker workspace shards (there can be
+  many if the computation is parallelizable) are still cloned from the
   versioned upstream. Unlike with clone-and-forget workers the
   synchronized worker workspaces keep themselves in sync with
   upstream configuration and data changes and adjust their computation
@@ -34,8 +34,8 @@ exports.builder = (yargs) => yargs.options({
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  if (!vlm.getPackageConfig("devDependencies", "@valos/toolset-worker")) {
-    await vlm.interact("yarn add -W --dev @valos/toolset-worker");
+  if (!vlm.getPackageConfig("devDependencies", "@valos/type-worker")) {
+    await vlm.interact("yarn add -W --dev @valos/type-worker");
   }
   return vlm.invoke(`.configure/.type/.worker/**/*`, { reconfigure: yargv.reconfigure });
 };

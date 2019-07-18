@@ -11,7 +11,7 @@
       }
     }
   },
-  "@valos/toolset-vault": {
+  "@valos/type-vault": {
     "inUse": true,
     "revdoc": {
       "docsBaseURI": "https://valaatech.github.io/vault/",

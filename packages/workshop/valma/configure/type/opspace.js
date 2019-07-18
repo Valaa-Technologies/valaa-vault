@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/opspace";
-exports.describe = "Configure an 'opspace' workspace";
+exports.describe = "Initialize opspace workspace";
 exports.introduction = `${exports.describe}.
 
 Opspaces are responsible for configuring, deploying, updating,
@@ -18,8 +18,8 @@ exports.builder = (yargs) => yargs.options({
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  if (!vlm.getPackageConfig("devDependencies", "@valos/toolset-opspace")) {
-    await vlm.interact("yarn add -W --dev @valos/toolset-opspace");
+  if (!vlm.getPackageConfig("devDependencies", "@valos/type-opspace")) {
+    await vlm.interact("yarn add -W --dev @valos/type-opspace");
   }
   return vlm.invoke(`.configure/.type/.opspace/**/*`, { reconfigure: yargv.reconfigure });
 };

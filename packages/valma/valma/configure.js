@@ -19,7 +19,7 @@ exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const valos = vlm.getValOSConfig();
   if (!valos || !valos.type || !valos.domain) {
-    throw new Error("valma-configure: current directory is not a valos repository; "
+    throw new Error("valma-configure: current directory is not a valos workspace; "
         + "no package.json with valos stanza with both type and domain set"
         + "(maybe run 'vlm init' to initialize?)");
   }
@@ -28,18 +28,17 @@ exports.handler = async (yargv) => {
   }
 
   const rest = [{ reconfigure: yargv.reconfigure }, ...yargv._];
+  await vlm.invoke(`.configure/.domain/${valos.domain}`, rest);
+  await vlm.invoke(`.configure/.type/${valos.type}`, rest);
+  await vlm.invoke(`.configure/.domain/.${valos.domain}/**/*`, rest);
+  await vlm.invoke(`.configure/.type/.${valos.type}/**/*`, rest);
+  await vlm.interact("yarn install");
 
   if (!yargv.toolsetGlob) {
-    await vlm.invoke(`.configure/.domain/${valos.domain}`, rest);
-    await vlm.invoke(`.configure/.type/${valos.type}`, rest);
-    await vlm.invoke(`.configure/.domain/.${valos.domain}/**/*`,
-        { reconfigure: yargv.reconfigure });
-    await vlm.invoke(`.configure/.type/.${valos.type}/**/*`, { reconfigure: yargv.reconfigure });
-    await vlm.interact("yarn install");
     await vlm.invoke(`.configure/.select-toolsets`, rest);
   } else {
-    await vlm.invoke(`.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}.toolset/${
-      yargv.toolsetGlob}{*/**/,}*`, rest);
+    await vlm.invoke(`.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,
+      }.toolset/${yargv.toolsetGlob || ""}{*/**/,}*`, rest);
   }
   return {};
 };

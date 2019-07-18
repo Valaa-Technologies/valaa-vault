@@ -4,7 +4,7 @@ const packageConfig = require("./package");
 const rootPrefix = packageConfig.name.match(/((.*)\/)?.*/)[2] || "";
 
 module.exports = function configureBabel (api) {
-  const shared = require("@valos/toolset-vault/shared/babel.config")(api, rootPrefix);
+  const shared = require("@valos/type-vault/shared/babel.config")(api, rootPrefix);
 
   return Object.assign({}, shared, {
   // Add overrides here

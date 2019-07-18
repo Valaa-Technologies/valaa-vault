@@ -37,7 +37,7 @@ module.exports = vdocorate({ "...": { heading:
     particular deployment entry point webpack.config.js files.
     These entry configurations can then override and customize these
     base rules. (The template webpack.config.js)[templates/webpack.config.js]
-    is deployed automatically to any repository which grabs and
+    is deployed automatically to any workspace which grabs and
     configures toolset-revealer as an in-use toolset.`
   ],
 })({

@@ -1,4 +1,4 @@
-# @valos/vault provides `ValOS` - the Valaa Open System
+# @valos/kernel provides `ValOS` - the Valaa Open System
 
 Distributed platform of platforms, with minimal threshold of entry
 for creating applications with familiar HTML5/CSS/JS and then
@@ -21,12 +21,12 @@ For the time being contact iridian at valaa dot com.
 
 ### Style guide is a combination of machine and human readable rules
 
-Specified in [the shared eslint configuration](packages/toolset-vault/shared/.eslintrc.js)
+Specified in [the shared eslint configuration](packages/type-vault/shared/.eslintrc.js)
 
 
-## @valos/vault repository in github.com/valaatech/vault
+## @valos/kernel vault as github.com/valaatech/vault
 
-@valos/vault repository has three main roles:
+@valos/kernel vault has three main roles:
 
 - it contains all `@valos` ecosystem specification documents (very WIP
   but can be found at various states of obsolescence at `DEVOPS.md` and

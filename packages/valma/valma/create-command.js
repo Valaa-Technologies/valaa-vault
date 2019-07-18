@@ -126,7 +126,7 @@ exports.handler = async (yargv) => {
       break;
     }
   }
-  const message = `This repository ${vlm.theme.bold(verb)} valma command '${
+  const message = `This workspace ${vlm.theme.bold(verb)} valma command '${
       vlm.theme.command(command)}'.`;
   if (verb === "already exports") {
     vlm.warn(message);

@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/vault";
-exports.describe = "Configure a 'vault' workspace";
+exports.describe = "Initialize vault workspace";
 exports.introduction = `${exports.describe}.
 
 A ValOS Vault is a monorepository containing many sub-packages. Its
@@ -28,8 +28,8 @@ exports.builder = (yargs) => {
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  if (!vlm.getPackageConfig("devDependencies", "@valos/toolset-vault")) {
-    await vlm.interact("yarn add -W --dev @valos/toolset-vault");
+  if (!vlm.getPackageConfig("devDependencies", "@valos/type-vault")) {
+    await vlm.interact("yarn add -W --dev @valos/type-vault");
   }
   if ((vlm.getPackageConfig("workspaces") || []).join(",") !== yargv.workspaces) {
     await vlm.updatePackageConfig({ workspaces: [yargv.workspaces] });

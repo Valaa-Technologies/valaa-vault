@@ -5,8 +5,8 @@ exports.introduction = `${exports.describe}.
 
 `;
 
-exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
-    && "Can't configure 'toolset-rest-api-gateway-plugin': not inUse or toolset config missing";
+exports.disabled = (yargs) => !yargs.vlm.getToolsetsConfig()
+    && "Can't select 'toolset-rest-api-gateway-plugin': toolsets config missing";
 exports.builder = (yargs) => {
   const toolsetConfig = yargs.vlm.getToolsetConfig(yargs.vlm.toolset) || {};
   return yargs.options({
@@ -28,6 +28,10 @@ exports.builder = (yargs) => {
 };
 
 exports.handler = (yargv) => {
+  // This script is outdated: it combines select and configure script.
+  // The configure script should be extracted and moved under
+  // @valos/toolset-rest-api-gateway-plugin actual.
+  // See type/toolsets.js for how new select/configure scripts are created.
   const vlm = yargv.vlm;
 
   const toolsetConfigUpdate = { ...vlm.getToolsetConfig(vlm.toolset) };

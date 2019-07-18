@@ -12,8 +12,8 @@ and any customizations in the root webpack.config.js itself.`;
 
 // Example template which displays the command name itself and package name where it is ran
 // Only enabled inside package
-exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
-    && "Can't configure 'toolset-revealer': not inUse or toolset config missing";
+exports.disabled = (yargs) => !yargs.vlm.getToolsetsConfig()
+    && "Can't select 'toolset-revealer': toolset config missing";
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
@@ -22,6 +22,10 @@ exports.builder = (yargs) => yargs.options({
 });
 
 exports.handler = async (yargv) => {
+  // This script is outdated: it combines select and configure script.
+  // The configure script should be extracted and moved under
+  // @valos/toolset-revealer actual. See type/toolsets.js for how new
+  // select/configure scripts are created.
   const vlm = yargv.vlm;
   const toolsetWebpackConfig = vlm.getToolsetConfig(vlm.toolset, "webpack");
   const templates = vlm.path.join(__dirname, "../templates/{.,}*");

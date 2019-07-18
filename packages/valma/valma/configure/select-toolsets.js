@@ -91,8 +91,7 @@ exports.handler = async (yargv) => {
   const devDependencies = {};
   for (const toolsetName of (yargv.reconfigure ? newToolsets : grabbedToolsets)) {
     const configureResults = await vlm.invoke(
-        `.configure/{,.type/.${valos.type}/,.domain/.${valos.domain}/}.select/${toolsetName}`,
-        { reconfigure: yargv.reconfigure || false });
+        `.configure/{,.type/.${valos.type}/,.domain/.${valos.domain}/}.select/${toolsetName}`);
     for (const result of configureResults) {
       Object.assign(devDependencies, (result || {}).devDependencies || {});
     }
@@ -105,7 +104,7 @@ exports.handler = async (yargv) => {
         vlm.theme.package(...newDevDependencies));
     await vlm.interact(["yarn add -W --dev", ...newDevDependencies]);
   }
-  const rest = [{ reconfigure: yargv.reconfigure }, ...yargv._];
+  const rest = [{ reconfigure: yargv.reconfigure || false }, ...yargv._];
   vlm.info(`Configuring all toolsets:`);
   ret.toolsets = await vlm.invoke(
       `.configure/{.domain/.${valos.domain}/,.type/.${valos.type

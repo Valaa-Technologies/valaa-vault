@@ -1,14 +1,16 @@
-exports.vlm = { toolset: "@valos/type-vault-sbom" };
-exports.command = ".release-vault/.prepared-hooks/regenerate-sbom";
-exports.describe = "Generate software bill of materials summary on vault (pre)release";
-exports.introduction = `${exports.describe}.`;
+exports.vlm = { toolset: "@valos/type-vault" };
+exports.command = "regenerate-docs";
+exports.describe = "Regenerate all configured /docs content";
+exports.introduction = `${exports.describe}.
 
-exports.disabled = (yargs) =>
-    (!yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
-        ? "@valos/type-vault-sbom is not configured to be inUse"
-    : !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "commands",
-            ".configure/.type/.vault/.select/@valos/type-vault-sbom", "release-regenerate")
-        && "release-regenerate not enabled in @valos/type-vault-sbom config");
+.`;
+
+exports.disabled = (yargs) => (!yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "inUse")
+        ? "@valos/type-vault tool 'docs' is not configured to be inUse"
+    : ((yargs.vlm.commandName === ".release-vault/.prepared-hooks/regenerate-docs")
+            && !yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "regenerateOnRelease"))
+        ? "@valos/type-vault tool 'docs' is not configured to be regenerated on release"
+    : false);
 
 exports.builder = (yargs) => yargs.options({
   summary: {
@@ -38,8 +40,8 @@ exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const config = vlm.getPackageConfig();
   const toolset = vlm.getToolsetConfig(exports.vlm.toolset);
-  const vaultToolsetReVDoc = vlm.getToolsetConfig("@valos/type-vault", "revdoc") || {};
-  const docsBaseURI = vaultToolsetReVDoc.docsBaseURI;
+  const vaultDocsConfig = vlm.getToolConfig("@valos/type-vault", "docs") || {};
+  const docsBaseIRI = vaultDocsConfig.docsBaseIRI;
 
   vlm.shell.mkdir("-p", "docs");
 
@@ -61,8 +63,8 @@ exports.handler = async (yargv) => {
         targetDocName = vlm.path.basename(targetDocPath);
         targetDocPath = vlm.path.join(targetDocPath, "..");
       }
-      if (docsBaseURI && workspaceName) {
-        await updateReVDocContainingPackageDocsBaseURI(
+      if (docsBaseIRI && workspaceName) {
+        await updateReVDocContainingPackagedocsBaseIRI(
             workspaceBase, workspaceName, targetWorkspaceBase);
       }
       await generateRevdocAndWriteToDocs(
@@ -88,7 +90,7 @@ exports.handler = async (yargv) => {
     return { sbomxml, sbomvdocson, sbomhtml, sbommarkdown };
   }
 
-  async function updateReVDocContainingPackageDocsBaseURI (
+  async function updateReVDocContainingPackagedocsBaseIRI (
       workspaceBase, workspaceName, targetWorkspaceBase) {
     const packageJSONPath = vlm.path.join(workspaceBase, workspaceName, "package.json");
     const packageJSONText = await vlm.tryReadFile(packageJSONPath);
@@ -96,7 +98,7 @@ exports.handler = async (yargv) => {
       const packageJSON = JSON.parse(packageJSONText);
       if (packageJSON.valos && !packageJSON.valos.docs) {
         packageJSON.valos.docs = vlm.path.join(
-            docsBaseURI, ...targetWorkspaceBase, workspaceName);
+            docsBaseIRI, ...targetWorkspaceBase, workspaceName);
         vlm.shell.ShellString(`${JSON.stringify(packageJSON, null, 2)}\n`)
             .to(packageJSONPath);
       }
@@ -107,7 +109,7 @@ exports.handler = async (yargv) => {
       revdocPath, targetDocPath, targetDocName, emitReVDocSON) {
     const revdocSource = require(vlm.path.join(process.cwd(), revdocPath));
     const revdocson = extract(revdocSource, {
-      documentIRI: vlm.path.join(docsBaseURI || "", targetDocPath, targetDocName),
+      documentIRI: vlm.path.join(docsBaseIRI || "", targetDocPath, targetDocName),
     });
     const revdocHTML = await emitHTML(revdocson);
     const targetDir = vlm.path.join("docs", targetDocPath);
@@ -155,7 +157,7 @@ exports.handler = async (yargv) => {
       "dc:title": `${config.name}@${config.version} Software Bill of Materials`,
       respecConfig: {
         specStatus: "unofficial",
-        editors: authors(...Object.keys(vaultToolsetReVDoc.authors || {})),
+        editors: authors(...Object.keys(vaultDocsConfig.authors || {})),
         shortName: "sbom",
       },
       "chapter#abstract>0": [
@@ -183,7 +185,7 @@ exports.handler = async (yargv) => {
         "data#components_data": sbomgraph.bom.components,
       },
     };
-    return extract(sbomSource, { documentIRI: `${docsBaseURI || ""}sbom` });
+    return extract(sbomSource, { documentIRI: `${docsBaseIRI || ""}sbom` });
   }
 
   async function emitHTML (sbomvdocson) {

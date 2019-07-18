@@ -20,8 +20,9 @@
     "valma-clean-vault": "valma/clean-vault.js",
     "valma-release-vault": "valma/release-vault.js",
     ".valma-configure_.type_.library_.select_@valos_type-vault_enable-babel": "valma/configure_.type_.library_.select_@valos_type-vault_enable-babel.js",
-    ".valma-configure_.type_.vault_.select_@valos_type-vault-sbom": "valma/configure_.type_.vault_.select_@valos_type-vault-sbom.js",
-    ".valma-release-vault_.prepared-hooks_regenerate-sbom": "valma/release-vault_.prepared-hooks_regenerate-sbom.js",
+    ".valma-configure_.@valos_type-vault_.tools_.select_docs": "valma/configure__type-vault_.tools_.select_docs.js",
+    "valma-regenerate-docs": "valma/regenerate-docs.js",
+    ".valma-release-vault_.prepared-hooks_regenerate-docs": "valma/regenerate-docs.js",
     "valma-create-revdoc": "valma/create-revdoc.js"
   },
   "dependencies": {

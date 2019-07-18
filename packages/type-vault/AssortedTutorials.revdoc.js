@@ -39,7 +39,7 @@ module.exports = {
         ] }
       ],
       ["Next navigate to the root of your project and run the following command ",
-      cli("vlm .release-vault/.prepared-hooks/regenerate-sbom"),
+      cli("vlm regenerate-docs"),
       " This will create HTML and JSONLD files based on your RevDoc"],
       ["Now run the following command ",
       cli("python -m SimpleHTTPServer")],

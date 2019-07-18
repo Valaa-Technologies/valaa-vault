@@ -1,17 +1,19 @@
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = ".configure/.type/.library/.select/@valos/type-vault/enable-babel";
-exports.describe =
-    "Configure a vault library workspace to be transpiled using vault babel.config.js";
-exports.introduction = `${exports.describe}.`;
+exports.describe = "Select the workspace to be transpiled using vault babel.config.js";
+exports.introduction = `${exports.describe}.
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "library");
+`;
+
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "library")
+    && `Workspace is not a library (is ${yargs.vlm.getValOSConfig("type")})`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
     description: `Reconfigure '${exports.command}' config of this workspace.`,
   },
   "enable-babel": {
-    description: "enable babel transpilation for this library",
+    description: "Enable babel transpilation for this library",
     interactive: { type: "confirm", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
   },
 });

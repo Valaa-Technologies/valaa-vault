@@ -18,12 +18,12 @@ exports.builder = (yargs) => yargs.options({
   },
   editors: {
     type: "string", array: true,
-    description: "The revdoc editors' names as specified in type-vault.revdoc.authors",
+    description: "The revdoc editors' names as specified in type-vault.tools.docs.authors",
     interactive: { type: "input", when: "if-undefined" },
   },
   authors: {
     type: "string", array: true,
-    description: "The revdoc authors' names as listed in type-vault.revdoc.authors",
+    description: "The revdoc authors' names as listed in type-vault.tools.docs.authors",
     interactive: { type: "input", when: "if-undefined" },
   },
   tutorial: {

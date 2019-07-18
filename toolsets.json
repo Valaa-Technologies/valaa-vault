@@ -1,5 +1,6 @@
 {
   "@valos/toolset-revealer": {
+    "inUse": true,
     "webpack": {
       "entry": [
         "./packages/inspire/index.js"
@@ -9,33 +10,30 @@
         "publicPath": "/",
         "filename": "valos-inspire.js"
       }
-    }
+    },
+    "tools": {}
   },
   "@valos/type-vault": {
-    "inUse": true,
-    "revdoc": {
-      "docsBaseURI": "https://valaatech.github.io/vault/",
-      "authors": {
-        "iridian": {
-          "name": "Iridian Kiiskinen",
-          "url": "https://valaatech.github.io/fabric/authors/iridian",
-          "github": "http://github.com/valospace"
+    "tools": {
+      "docs": {
+        "docsBaseIRI": "https://valaatech.github.io/vault/",
+        "regenerateOnRelease": true,
+        "authors": {
+          "iridian": {
+            "name": "Iridian Kiiskinen",
+            "url": "https://valaatech.github.io/fabric/authors/iridian",
+            "github": "http://github.com/valospace"
+          },
+          "Jaradacl": {
+            "name": "Jaradacl",
+            "url": "https://valaatech.github.io/fabric/authors/Jaradacl",
+            "github": "http://github.com/valospace"
+          }
         },
-        "Jaradacl": {
-          "name": "Jaradacl",
-          "url": "https://valaatech.github.io/fabric/authors/Jaradacl",
-          "github": "http://github.com/valospace"
-        }
-      }
-    }
-  },
-  "@valos/toolset-vault-sbom": {
-    "inUse": true,
-    "commands": {
-      ".configure/.type/.vault/.select/@valos/toolset-vault-sbom": {
-        "release-regenerate": true
+        "introduction": [],
+        "inUse": true
       }
     },
-    "introduction": []
+    "inUse": "always"
   }
 }

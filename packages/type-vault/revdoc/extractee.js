@@ -10,13 +10,13 @@ module.exports = {
    */
   authors (...authorNames) {
     const toolsetsPath = `${process.cwd()}/toolsets.json`;
-    const authorLookup = ((require(toolsetsPath)["@valos/type-vault"] || {})
-        .revdoc || {}).authors || {};
+    const authorLookup = (((require(toolsetsPath)["@valos/type-vault"] || {})
+        .tools || {}).docs || {}).authors || {};
     return (authorNames || []).map(authorName => {
       const author = authorLookup[authorName];
       if (!author) {
         throw new Error(`Cannot find author '${authorName}' from toolsetConfig("${
-          toolsetsPath}")["@valos/type-vault"].revdoc.authors`);
+          toolsetsPath}")["@valos/type-vault"].tools.docs.authors`);
       }
       return author;
     });

@@ -73,7 +73,7 @@ package configuration file for yarn (and also for npm, which yarn is
         continue;
       }
       await _updatePackageWithVaultDefaults();
-      return { success: vlm.interact("yarn init") || true };
+      return { success: await vlm.interact("yarn init") || true };
     }
     vlm.info(`Skipped '${vlm.theme.executable("yarn init")}'.`, ...tellIfNoReconfigure);
     return {};
@@ -120,6 +120,7 @@ publishConfigLine}
 
   async function _selectValOSTypeAndDomain () {
     let justConfigured = false;
+    const ret = {};
     while (yargv.reconfigure || !vlm.packageConfig.valos || justConfigured) {
       const choices = (justConfigured ? ["Confirm", "reconfigure"]
               : vlm.packageConfig.valos ? ["Skip", "reconfigure"] : ["Initialize"])
@@ -132,21 +133,21 @@ publishConfigLine}
         type: "list", name: "choice", default: choices[0], choices,
       }]);
       if (answer.choice === "Skip") break;
-      if (answer.choice === "quit") return { success: false, reason: answer };
+      if (answer.choice === "quit") return Object.assign(ret, { success: false, reason: answer });
       if (answer.choice === "help") {
         vlm.speak();
         vlm.speak(await vlm.invoke(".configure/.valos-stanza", ["--show-introduction"]));
         vlm.speak();
         continue;
       }
-      if (answer.choice === "Confirm") return {};
+      if (answer.choice === "Confirm") return ret;
       vlm.reconfigure = yargv.reconfigure;
-      await vlm.invoke(".configure/.valos-stanza", { reconfigure: yargv.reconfigure });
+      ret.stanza = await vlm.invoke(".configure/.valos-stanza", { reconfigure: yargv.reconfigure });
       justConfigured = true;
     }
     vlm.info("Skipped configuring valos type and domain of this workspace.",
         ...tellIfNoReconfigure);
-    return {};
+    return ret;
   }
 
   async function _addInitialValmaDevDependencies () {

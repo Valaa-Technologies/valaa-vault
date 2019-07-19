@@ -60,15 +60,16 @@ exports.handler = async (yargv) => {
 exports.updateResultSideEffects = updateResultSideEffects;
 async function updateResultSideEffects (vlm, ...results) {
   const resultBreakdown = {};
-  const devDependencies = Object.assign({}, ...results.map(r => r.devDependencies || {}));
-  const devDependencyNames = Object.entries(devDependencies).filter(([name]) =>
-      !(vlm.packageConfig.dependencies || {})[name]
-      && !(vlm.packageConfig.devDependencies || {})[name]);
+  const devDependencies = Object.assign({}, ...results.map(r => (r || {}).devDependencies || {}));
+  const devDependencyNames = Object.keys(devDependencies)
+      .filter(name =>
+          !(vlm.packageConfig.dependencies || {})[name]
+          && !(vlm.packageConfig.devDependencies || {})[name]);
   if (devDependencyNames.length) {
     resultBreakdown.newDevDependencies = devDependencyNames;
     await vlm.interact(["yarn add -W --dev", ...devDependencyNames]);
   }
-  results.forEach(res => res.toolsetsUpdate && vlm.updateToolsetsConfig(res.toolsetsUpdate));
-  resultBreakdown.success = results.reduce((a, result) => a && (result.success !== false), true);
+  results.forEach(r => (r || {}).toolsetsUpdate && vlm.updateToolsetsConfig(r.toolsetsUpdate));
+  resultBreakdown.success = results.reduce((a, r) => a && ((r || {}).success !== false), true);
   return resultBreakdown;
 }

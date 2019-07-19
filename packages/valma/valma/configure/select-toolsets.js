@@ -113,7 +113,6 @@ async function _configureSelections (
   } else {
     await vlm.updateToolsetConfig(toolsetOfTool, { tools: configUpdate });
   }
-  const devDependencies = {};
   const toolsetGlob = toolsetOfTool ? `{,.${toolsetOfTool}/}.tools/` : "";
   ret.selectionConfigures = [];
   for (const grabName of (reconfigure ? newSelection : grabbed)) {
@@ -122,20 +121,12 @@ async function _configureSelections (
           }.select/${grabName}`, [{ reconfigure: true }, ...rest]));
   }
   Object.assign(ret, await updateResultSideEffects(vlm, ...ret.selectionConfigures));
-  const newDevDependencies = Object.keys(devDependencies)
-      .filter(devDependencyName => !vlm.getPackageConfig("devDependencies", devDependencyName)
-          && !vlm.getPackageConfig("dependencies", devDependencyName));
-  if (newDevDependencies.length) {
-    vlm.info(`Installing new devDependencies:`,
-        vlm.theme.package(...newDevDependencies));
-    await vlm.interact(["yarn add -W --dev", ...newDevDependencies]);
-  }
   if (!reconfigure) {
     vlm.info(`Configuring all ${type}s:`);
     // TODO(iridian, 2019-07): should really only configure new selections.
     ret[`${type}Configures`] = await vlm.invoke(
         `.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}${
-            toolsetGlob || ".toolset/"}/**/*`,
+            toolsetGlob || ".toolset/"}**/*`,
         [{ reconfigure: false }, ...rest]);
   } else {
     vlm.info(`Reconfiguring all ${type}s:`);

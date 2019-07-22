@@ -384,7 +384,7 @@
                   "import foo from \"./index.js\";\n\n          describe(\"your-library-name\", () => {\n            it(\"*\", () => {\n              expect(foo())\n                  .toEqual(true);\n            });\n          });"
                 ],
                 [
-                  "And then thé following snippet to the  \"index.js\" file:\"",
+                  "And then the following snippet to the  \"index.js\" file:\"",
                   "// @flow\n\n          export default function foo () {\n            return true;\n          }"
                 ],
                 [
@@ -428,6 +428,75 @@
         }
       ]
     },
+    "adding_bash_completion_vlm_commands": {
+      "@id": "adding_bash_completion_vlm_commands",
+      "dc:title": "Adding bash completion for Valma commands",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Just run the following command:",
+        {
+          "rdf:type": "revdoc:CommandLineInteraction",
+          "vdoc:rows": [
+            [
+              "",
+              "$ ",
+              {
+                "rdf:type": "revdoc:Command",
+                "vdoc:words": [
+                  "/path/to/your/project/node_modules/.bin/vlm",
+                  "bash-completion",
+                  ">>",
+                  "~/.bashrc"
+                ]
+              }
+            ]
+          ]
+        },
+        "This adds the bash-completion script inside you .bashrc.",
+        "Now you can complete your vlm commands as you would",
+        " e.g. your paths by just pressing tab."
+      ]
+    },
+    "assembling_local_packages": {
+      "@id": "assembling_local_packages",
+      "dc:title": "How to assemble local packages for local use",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Sometimes you may need to use your own packages with your project. ",
+        "To do this you need to assemble the packages and add them to a local repository ",
+        "from which they can then be used. ",
+        "To assemble your packages and add them ",
+        "to a local repository, run the following command inside your project root:",
+        {
+          "rdf:type": "revdoc:CommandLineInteraction",
+          "vdoc:rows": [
+            [
+              "",
+              "$ ",
+              {
+                "rdf:type": "revdoc:Command",
+                "vdoc:words": [
+                  "vlm",
+                  "assemble-packages",
+                  "--add-unchanged",
+                  "--yalc-push",
+                  "--yalc-add"
+                ]
+              }
+            ]
+          ]
+        },
+        "This assembles your packages and adds them to a local Yalc repository. ",
+        "Find out more about Yalc ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "here"
+          ],
+          "vdoc:ref": "https://github.com/whitecolor/yalc"
+        }
+      ]
+    },
     "vdoc:content": [
       {
         "@id": "abstract"
@@ -446,6 +515,12 @@
       },
       {
         "@id": "getting_ready_for_testing"
+      },
+      {
+        "@id": "adding_bash_completion_vlm_commands"
+      },
+      {
+        "@id": "assembling_local_packages"
       }
     ]
   }

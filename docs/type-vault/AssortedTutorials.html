@@ -127,7 +127,7 @@ Guide on how to get your library ready for testing with Jest.
                   .toEqual(true);
             });
           });</li>
-      <li>And then thé following snippet to the  "index.js" file:"// @flow
+      <li>And then the following snippet to the  "index.js" file:"// @flow
 
           export default function foo () {
             return true;
@@ -145,6 +145,24 @@ Guide on how to get your library ready for testing with Jest.
 If all tests pass, your test environment is up and running! You can find more on Jest <a href="https://jestjs.io" class="vdoc type-vdoc-reference">here</a></li>
     </ol>
 
+  </section>
+
+  <section id="adding_bash_completion_vlm_commands" class="vdoc type-vdoc-chapter">
+    <h2>Adding bash completion for Valma commands</h2>
+Just run the following command:
+  <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">/path/to/your/project/node_modules/.bin/vlm bash-completion >> ~/.bashrc</span>
+
+  </div>
+This adds the bash-completion script inside you .bashrc.Now you can complete your vlm commands as you would e.g. your paths by just pressing tab.
+  </section>
+
+  <section id="assembling_local_packages" class="vdoc type-vdoc-chapter">
+    <h2>How to assemble local packages for local use</h2>
+Sometimes you may need to use your own packages with your project. To do this you need to assemble the packages and add them to a local repository from which they can then be used. To assemble your packages and add them to a local repository, run the following command inside your project root:
+  <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">vlm assemble-packages --add-unchanged --yalc-push --yalc-add</span>
+
+  </div>
+This assembles your packages and adds them to a local Yalc repository. Find out more about Yalc <a href="https://github.com/whitecolor/yalc" class="vdoc type-vdoc-reference">here</a>
   </section>
 
   </body>

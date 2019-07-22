@@ -3,7 +3,8 @@
   "version": "0.35.0-prerelease.4",
   "valos": {
     "type": "library",
-    "domain": "@valos/kernel"
+    "domain": "@valos/kernel",
+    "docs": "https:/valaatech.github.io/vault/query-authority"
   },
   "author": "Valaa Technologies Ltd",
   "license": "MIT",
@@ -12,5 +13,8 @@
     "access": "public"
   },
   "description": "Query authority serves virtual event logs based on various queries.",
-  "main": "index.js"
+  "main": "index.js",
+  "dependencies": {
+    "@valos/engine": "^0.35.0-prerelease.4"
+  }
 }

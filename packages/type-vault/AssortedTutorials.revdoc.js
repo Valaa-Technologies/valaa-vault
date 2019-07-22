@@ -61,7 +61,7 @@ module.exports = {
       "TO BE CONTINUED (rebase, commit, push etc.)",
     ] }
   ],
-  "chapter#creating_new_library_valma>3;Creating a new library with valma": [
+  "chapter#creating_new_library_valma>4;Creating a new library with valma": [
     "Guide on how to create a new library using valma. ",
     "Note: Scope of this guide covers only the creation of a public library. ",
     "It does not cover all of the different options while initalizing.",
@@ -90,7 +90,7 @@ module.exports = {
       ]
     ] }
   ],
-  "chapter#getting_ready_for_testing>3;Getting ready for testing with Jest": [
+  "chapter#getting_ready_for_testing>5;Getting ready for testing with Jest": [
     "Guide on how to get your library ready for testing with Jest.",
     { "numbered#": [
         ["Create the following files into your library folder: ",
@@ -110,7 +110,7 @@ module.exports = {
             });
           });`,
         ],
-        [`And then thé following snippet to the  "index.js" file:"`,
+        [`And then the following snippet to the  "index.js" file:"`,
           null,
           `// @flow
 
@@ -133,6 +133,24 @@ module.exports = {
           "You can find more on Jest ",
           ref("here", "https://jestjs.io")
         ]
-      ] },
+    ] },
+  ],
+  "chapter#adding_bash_completion_vlm_commands>6;Adding bash completion for Valma commands": [
+    "Just run the following command:",
+    cli("/path/to/your/project/node_modules/.bin/vlm bash-completion >> ~/.bashrc"),
+    "This adds the bash-completion script inside you .bashrc.",
+    "Now you can complete your vlm commands as you would",
+    " e.g. your paths by just pressing tab.",
+  ],
+  "chapter#assembling_local_packages>7;How to assemble local packages for local use": [
+    "Sometimes you may need to use your own packages with your project. ",
+    "To do this you need to assemble the packages and add them to a local repository ",
+    "from which they can then be used. ",
+    "To assemble your packages and add them ",
+    "to a local repository, run the following command inside your project root:",
+    cli("vlm assemble-packages --add-unchanged --yalc-push --yalc-add"),
+    "This assembles your packages and adds them to a local Yalc repository. ",
+    "Find out more about Yalc ",
+    ref("here", "https://github.com/whitecolor/yalc"),
   ],
 };

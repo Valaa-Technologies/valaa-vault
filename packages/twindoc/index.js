@@ -1,4 +1,4 @@
-const vdoc = require("@valos/type-vault/vdoc");
+const vdoc = require("@valos/vdoc");
 
 module.exports = {
   extension: {

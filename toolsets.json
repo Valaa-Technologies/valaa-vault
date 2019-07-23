@@ -16,7 +16,7 @@
   "@valos/type-vault": {
     "tools": {
       "docs": {
-        "docsBaseIRI": "https://valaatech.github.io/vault/",
+        "docsBaseIRI": "https://valospace.org/kernel/",
         "regenerateOnRelease": true,
         "authors": {
           "iridian": {

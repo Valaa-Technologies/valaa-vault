@@ -34,7 +34,7 @@ exports.handler = async (yargv) => {
   const convert = require("xml-js");
   const patchWith = require("@valos/tools/patchWith").default;
   const { sbomTables, extractee: { ref, authors }, extension }
-      = require("@valos/type-vault/sbomdoc");
+      = require("@valos/sbomdoc");
 
   const vlm = yargv.vlm;
   const config = vlm.getPackageConfig();
@@ -59,8 +59,12 @@ exports.handler = async (yargv) => {
           ? [workspaceBase] : [];
       let targetDocPath = vlm.path.join(...targetWorkspaceBase, workspaceName || ".", docDir || "");
       if (!targetDocName) {
-        targetDocName = vlm.path.basename(targetDocPath);
-        targetDocPath = vlm.path.join(targetDocPath, "..");
+        if (workspaceBase === "revdocs") {
+          targetDocName = "index";
+        } else {
+          targetDocName = vlm.path.basename(targetDocPath);
+          targetDocPath = vlm.path.join(targetDocPath, "..");
+        }
       }
       if (docsBaseIRI && workspaceName) {
         await updateReVDocContainingPackagedocsBaseIRI(
@@ -96,8 +100,7 @@ exports.handler = async (yargv) => {
     if (packageJSONText) {
       const packageJSON = JSON.parse(packageJSONText);
       if (packageJSON.valos && !packageJSON.valos.docs) {
-        packageJSON.valos.docs = vlm.path.join(
-            docsBaseIRI, ...targetWorkspaceBase, workspaceName);
+        packageJSON.valos.docs = _combineIRI(docsBaseIRI, ...targetWorkspaceBase, workspaceName);
         vlm.shell.ShellString(`${JSON.stringify(packageJSON, null, 2)}\n`)
             .to(packageJSONPath);
       }
@@ -108,7 +111,7 @@ exports.handler = async (yargv) => {
       revdocPath, targetDocPath, targetDocName, emitReVDocSON) {
     const revdocSource = require(vlm.path.join(process.cwd(), revdocPath));
     const revdocson = extension.extract(revdocSource, {
-      documentIRI: vlm.path.join(docsBaseIRI || "", targetDocPath, targetDocName),
+      documentIRI: _combineIRI(docsBaseIRI, targetDocPath, targetDocName),
     });
     const revdocHTML = await emitHTML(revdocson);
     const targetDir = vlm.path.join("docs", targetDocPath);
@@ -120,6 +123,11 @@ exports.handler = async (yargv) => {
       await vlm.shell.ShellString(JSON.stringify(revdocson, null, 2))
           .to(vlm.path.join(targetDir, `${targetDocName}.jsonld`));
     }
+  }
+
+  function _combineIRI (base, ...rest) {
+    const tail = !base ? "" : base[base.length - 1];
+    return `${!base ? "" : base.slice(0, -1)}${vlm.path.join(tail, ...rest)}`;
   }
 
   async function scrapeCycloneDXXML () {
@@ -175,8 +183,7 @@ exports.handler = async (yargv) => {
       ],
       "chapter#introduction>2": toolset.introduction || [
         `Configure @valos/type-vault-sbom.introduction section using`,
-        ref("VDoc source graph syntax",
-            "https://valaatech.github.io/vault/type-vault/vdoc#source_graph"),
+        ref("VDoc source graph syntax", "@valos/vdoc#source_graph"),
         "to define the content of this section."
       ],
       "chapter#>3;Components table": {

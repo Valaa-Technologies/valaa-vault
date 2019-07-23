@@ -186,7 +186,7 @@ function createStatusSubCommand (vlm, type, name, simpleName, commandPath) {
 
   function _createToolsetHandlerBody () {
     return `async (yargv) => {
-  const { extension, extractee: { ref } } = require("@valos/type-vault/vdoc");
+  const { extension, extractee: { ref } } = require("@valos/vdoc");
   const patchWith = require("@valos/tools/patchWith").default;
   const vlm = yargv.vlm;
   const toolsetConfig = vlm.getToolsetConfig(vlm.toolset);
@@ -215,7 +215,7 @@ function createStatusSubCommand (vlm, type, name, simpleName, commandPath) {
 
   function _createToolHandlerBody () {
     return `async (yargv) => {
-  const { extension, extractee: { ref } } = require("@valos/type-vault/vdoc");
+  const { extension, extractee: { ref } } = require("@valos/vdoc");
   const vlm = yargv.vlm;
   const toolConfig = vlm.getToolsetConfig(yargv.toolset, exports.vlm.tool);
   const warnings = [];

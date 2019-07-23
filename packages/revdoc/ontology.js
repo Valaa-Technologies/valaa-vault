@@ -1,9 +1,9 @@
 module.exports = {
   prefix: "revdoc",
-  base: "https://valaatech.github.io/vault/type-vault/revdoc#",
+  base: "https://valospace.org/kernel/revdoc#",
 
   prefixes: {
-    revdoc: "https://valaatech.github.io/vault/type-vault/revdoc#",
+    revdoc: "https://valospace.org/kernel/revdoc#",
   },
   context: {
   },

@@ -1,5 +1,5 @@
-const vdoc = require("@valos/type-vault/vdoc");
-const revdoc = require("@valos/type-vault/revdoc");
+const vdoc = require("@valos/vdoc");
+const revdoc = require("@valos/revdoc");
 
 const extractee = require("./extractee");
 

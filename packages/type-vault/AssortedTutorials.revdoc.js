@@ -1,7 +1,7 @@
 
 const {
   extractee: { authors, cli, ref, },
-} = require("@valos/type-vault/revdoc");
+} = require("@valos/revdoc");
 
 module.exports = {
   "dc:title": "Assorted tutorials",
@@ -16,8 +16,7 @@ module.exports = {
     " created by Jaradacl based on the tasks given. (During first few days at least)",
   ],
   "chapter#sotd>1": [
-    "This document is part of the toolset workspace ",
-    ref("@valos/type-vault"),
+    "This document is part of the toolset workspace ", ref("@valos/type-vault"),
     " (of domain ", ref("@valos/kernel"), ") which is ",
     "A valma toolset for managing valos vault monorepository workspaces",
   ],

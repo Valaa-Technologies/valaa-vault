@@ -1,4 +1,4 @@
-const { extractee: { ref } } = require("@valos/type-vault/vdoc");
+const { extractee: { ref } } = require("@valos/vdoc");
 
 module.exports = {
   /**

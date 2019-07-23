@@ -1,5 +1,5 @@
 const path = require("path");
-const { extension: vdocExtension } = require("@valos/type-vault/vdoc");
+const { extension: vdocExtension } = require("@valos/vdoc");
 
 module.exports = {
   html: {
@@ -39,12 +39,12 @@ function emitReVDocChapter (emission, node, document, emitNode, vdocson, extensi
 function emitReVDocReference (emission, node, document, emitNode, vdocson, extensions) {
   let node_ = node;
   if ((node["vdoc:ref"] || "")[0] === "@") {
-    const nodePath = node["vdoc:ref"].split("/");
-    const packageName = nodePath.slice(0, 2).join("/");
+    const nodePath = node["vdoc:ref"].match(/([^/#]*)\/([^/#]*)(.*)/);
+    const packageName = nodePath.slice(1, 3).join("/");
     const packageJSON = require(`${packageName}/package.json`);
     const docsBase = (packageJSON.valos || {}).docs || packageName;
     node_ = Object.assign({}, node, {
-      "vdoc:ref": path.posix.join(docsBase, ...nodePath.slice(2)),
+      "vdoc:ref": path.posix.join(docsBase, ...nodePath.slice(3)),
     });
   }
   return vdocExtension.emitters.html["vdoc:Reference"](

@@ -2,12 +2,12 @@
 
 const {
   ontologyTables, extension, extractee: { authors, ref, /* dfn, */  },
-} = require("@valos/type-vault/revdoc");
+} = require("@valos/revdoc");
 
-const { version } = require("../package");
+const { version, description } = require("./package");
 
 module.exports = {
-  "dc:title": "ReVDoc - ReSpec document VDoc extension",
+  "dc:title": description,
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -17,7 +17,7 @@ module.exports = {
   },
   "chapter#abstract>0": [
     `This document specifies ReVDoc, a `,
-    ref("VDoc extension", "@valos/type-vault/vdoc#extension"),
+    ref("VDoc extension", "@valos/vdoc#extension"),
     ` for extracting and emitting `, ref("ReSpec documents", "https://github.com/w3c/respec"),
     `.`,
   ],
@@ -30,7 +30,7 @@ module.exports = {
     ".",
     null,
     `The format is implemented and supported by `,
-    ref("@valos/type-vault npm package", "@valos/type-vault"), ".",
+    ref("@valos/revdoc npm package", "@valos/revdoc"), ".",
   ],
   "chapter#introduction>2": [
     `ReVDoc is a VDoc extension which can produce ReSpec documents.`

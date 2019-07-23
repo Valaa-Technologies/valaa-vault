@@ -1,0 +1,94 @@
+[
+  {
+    "@id": "https://valospace.org/kernel/index",
+    "@context": {
+      "@base": "https://valospace.org/kernel/index#",
+      "sbomdoc": "https://valospace.org/kernel/sbomdoc#",
+      "revdoc": "https://valospace.org/kernel/revdoc#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "vdoc": "https://valospace.org/kernel/vdoc#",
+      "a": {
+        "@id": "rdf:type",
+        "@type": "@id"
+      },
+      "vdoc:content": {
+        "@id": "https://valospace.org/kernel/vdoc#content",
+        "@container": "@list"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/kernel/vdoc#words",
+        "@container": "@list"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/kernel/vdoc#entries",
+        "@container": "@list"
+      }
+    },
+    "dc:title": "@valos/kernel domain",
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "kernel-domain"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "@valos/kernel domain hosts all core infrastructure components of\n    ValOS - the Valaa Open System."
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is part of the vault workspace ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "@valos/kernel"
+          ],
+          "vdoc:ref": "@valos/kernel"
+        },
+        " (of domain ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "@valos/kernel"
+          ],
+          "vdoc:ref": "@valos/kernel"
+        },
+        ") which is ",
+        "ValOS common infrastructure tools and libraries monorepo."
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "No content yet."
+      ]
+    },
+    "rdf:type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      }
+    ]
+  }
+]

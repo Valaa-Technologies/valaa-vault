@@ -1,29 +1,29 @@
 [
   {
-    "@id": "https:/valaatech.github.io/vault/type-vault/AssortedTutorials",
+    "@id": "https://valospace.org/kernel/type-vault/AssortedTutorials",
     "@context": {
-      "@base": "https:/valaatech.github.io/vault/type-vault/AssortedTutorials#",
-      "sbomdoc": "https://valaatech.github.io/vault/type-vault/sbomdoc#",
-      "revdoc": "https://valaatech.github.io/vault/type-vault/revdoc#",
+      "@base": "https://valospace.org/kernel/type-vault/AssortedTutorials#",
+      "sbomdoc": "https://valospace.org/kernel/sbomdoc#",
+      "revdoc": "https://valospace.org/kernel/revdoc#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-      "vdoc": "https://valaatech.github.io/vault/type-vault/vdoc#",
+      "vdoc": "https://valospace.org/kernel/vdoc#",
       "a": {
         "@id": "rdf:type",
         "@type": "@id"
       },
       "vdoc:content": {
-        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#content",
+        "@id": "https://valospace.org/kernel/vdoc#content",
         "@container": "@list"
       },
       "vdoc:words": {
-        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#words",
+        "@id": "https://valospace.org/kernel/vdoc#words",
         "@container": "@list"
       },
-      "vdoc:rows": {
-        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#rows",
+      "vdoc:entries": {
+        "@id": "https://valospace.org/kernel/vdoc#entries",
         "@container": "@list"
       }
     },
@@ -82,13 +82,13 @@
           "vdoc:content": [
             {
               "rdf:type": "vdoc:NumberedList",
-              "vdoc:rows": [
+              "vdoc:entries": [
                 "Ensure you have python installed.",
                 [
                   "Navigate to the folder you want your revdoc.js to reside and run the following command: ",
                   {
                     "rdf:type": "revdoc:CommandLineInteraction",
-                    "vdoc:rows": [
+                    "vdoc:entries": [
                       [
                         "",
                         "$ ",
@@ -112,7 +112,7 @@
                     "vdoc:content": [
                       {
                         "rdf:type": "vdoc:BulletList",
-                        "vdoc:rows": [
+                        "vdoc:entries": [
                           "Title of the document: This is human-readable title of the document.",
                           "ReSpec short name",
                           "Document editors: Comma-separated value of the editors of your document.",
@@ -126,7 +126,7 @@
                   "Next navigate to the root of your project and run the following command ",
                   {
                     "rdf:type": "revdoc:CommandLineInteraction",
-                    "vdoc:rows": [
+                    "vdoc:entries": [
                       [
                         "",
                         "$ ",
@@ -146,7 +146,7 @@
                   "Now run the following command ",
                   {
                     "rdf:type": "revdoc:CommandLineInteraction",
-                    "vdoc:rows": [
+                    "vdoc:entries": [
                       [
                         "",
                         "$ ",

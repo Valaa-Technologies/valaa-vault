@@ -1,0 +1,414 @@
+[
+  {
+    "@id": "https://valospace.org/kernel/sbomdoc",
+    "@context": {
+      "@base": "https://valospace.org/kernel/sbomdoc#",
+      "sbomdoc": "https://valospace.org/kernel/sbomdoc#",
+      "revdoc": "https://valospace.org/kernel/revdoc#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "vdoc": "https://valospace.org/kernel/vdoc#",
+      "a": {
+        "@id": "rdf:type",
+        "@type": "@id"
+      },
+      "vdoc:content": {
+        "@id": "https://valospace.org/kernel/vdoc#content",
+        "@container": "@list"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/kernel/vdoc#words",
+        "@container": "@list"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/kernel/vdoc#entries",
+        "@container": "@list"
+      }
+    },
+    "dc:title": "SBoMDoc - Software Bill of Materials VDoc extension",
+    "respecConfig": {
+      "subtitle": "0.35.0-prerelease.7",
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "shortName": "sbomdoc",
+      "alternateFormats": [
+        {
+          "label": "VDoc",
+          "uri": "sbomdoc.jsonld"
+        }
+      ]
+    },
+    "abstract": {
+      "@id": "abstract",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document specifies SBomDoc, a ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "VDoc extension"
+          ],
+          "vdoc:ref": "@valos/vdoc#extension"
+        },
+        "for extracting and emitting ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "CycloneDX BOM documents"
+          ],
+          "vdoc:ref": "https://cyclonedx.org/"
+        },
+        "in various formats."
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document has not been reviewed. This is a draft document and\n    may be updated, replaced or obsoleted by other documents at any\n    time.",
+        null,
+        "This document is part of the ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ValOS core specification"
+          ],
+          "vdoc:ref": "@valos/kernel/spec"
+        },
+        ".",
+        null,
+        "The format is implemented and supported by ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "@valos/sbomdoc npm package"
+          ],
+          "vdoc:ref": "@valos/sbomdoc"
+        },
+        "."
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "SBoMDoc is a VDoc extension which uses CycloneDX namespaces and\n    can emit BOM documents in various formats."
+      ]
+    },
+    "ontology": {
+      "@id": "ontology",
+      "dc:title": "SBoMDoc ontology",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@id": "prefixes"
+        },
+        {
+          "@id": "vocabulary"
+        },
+        {
+          "@id": "context"
+        }
+      ]
+    },
+    "prefixes": {
+      "@id": "prefixes",
+      "dc:title": "SBoMDoc IRI prefixes",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "prefixes_data",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:key": "vdoc:key",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "Prefix"
+              ]
+            },
+            {
+              "vdoc:key": "vdoc:value",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "IRI"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "prefixes_data": {
+      "@id": "prefixes_data",
+      "sbomdoc": "https://valospace.org/kernel/sbomdoc#"
+    },
+    "vocabulary": {
+      "@id": "vocabulary",
+      "dc:title": "SBoMDoc RDF vocabulary with prefix sbomdoc:",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary_data",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:key": "vdoc:key",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdfs:label"
+              ]
+            },
+            {
+              "vdoc:key": "a",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdf:type"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:subClassOf",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdfs:subClassOf"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:subPropertyOf",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdfs:subPropertyOf"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:domain",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdfs:domain"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:range",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdfs:range"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:comment",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdfs:comment"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "vocabulary_data": {
+      "@id": "vocabulary_data",
+      "Document": {
+        "a": "rdfs:class",
+        "rdfs:subClassOf": "vdoc:Chapter",
+        "rdfs:comment": "A Software Bill of Materials document"
+      }
+    },
+    "context": {
+      "@id": "context",
+      "dc:title": "SBoMDoc JSON-LD context term definitions",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "context_data",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:key": "vdoc:key",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "Term"
+              ]
+            },
+            {
+              "vdoc:key": "vdoc:value",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "Definition"
+              ]
+            },
+            {
+              "vdoc:key": "@id",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "@id"
+              ]
+            },
+            {
+              "vdoc:key": "@type",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "@type"
+              ]
+            },
+            {
+              "vdoc:key": "@container",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "@container"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "context_data": {
+      "@id": "context_data"
+    },
+    "transformations": {
+      "@id": "transformations",
+      "dc:title": "SBoMDoc transformations",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@id": "extraction_rules"
+        },
+        {
+          "@id": "extractee_api"
+        },
+        {
+          "@id": "emission_output"
+        },
+        {
+          "@id": "emission_rules"
+        }
+      ]
+    },
+    "extraction_rules": {
+      "@id": "extraction_rules",
+      "dc:title": "SBoMDoc extraction rules",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "extraction_rules_data",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:key": "vdoc:key",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "Rule name"
+              ]
+            },
+            {
+              "vdoc:key": "range",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "Node rdf:type"
+              ]
+            },
+            {
+              "vdoc:key": "target",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "primary target"
+              ]
+            },
+            {
+              "vdoc:key": "rest",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "';rest' target"
+              ]
+            },
+            {
+              "vdoc:key": "comment",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "Comment"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "extraction_rules_data": {
+      "@id": "extraction_rules_data"
+    },
+    "extractee_api": {
+      "@id": "extractee_api",
+      "dc:title": "SBoMDoc extractee API",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "extractee_api_lookup",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:key": "vdoc:key",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "API identifier"
+              ]
+            },
+            {
+              "vdoc:key": "vdoc:value",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdf:type"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "extractee_api_lookup": {
+      "@id": "extractee_api_lookup",
+      "vdoc:content": []
+    },
+    "emission_output": {
+      "@id": "emission_output",
+      "dc:title": "SBoMDoc emission output",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "emission_rules": {
+      "@id": "emission_rules",
+      "dc:title": "SBoMDoc emission rules",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "ReVDoc provides html emission overrides for ",
+        {
+          "vdoc:words": [
+            "vdoc:Document",
+            "sbomdoc:Document"
+          ]
+        }
+      ]
+    },
+    "rdf:type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "ontology"
+      },
+      {
+        "@id": "transformations"
+      }
+    ]
+  }
+]

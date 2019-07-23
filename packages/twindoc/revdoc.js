@@ -3,7 +3,7 @@
 const { extension } = require("@valos/twindoc");
 const {
   ontologyTables, extractee: { authors, ref, pkg, /* dfn, */  }
-} = require("@valos/type-vault/revdoc");
+} = require("@valos/revdoc");
 
 const { description, version } = require("./package");
 
@@ -18,7 +18,7 @@ module.exports = {
   },
   "chapter#abstract>0": [
     `This document specifies TwinDoc, a `,
-    ref("VDoc extension", "@valos/type-vault/vdoc#extension"),
+    ref("VDoc extension", "@valos/vdoc#extension"),
     ` which specifies an isomorphism and synchronization
     transformations between VDoc documents and valospace resources.`,
     null,

@@ -1,14 +1,14 @@
 // @flow
 
-const { extension } = require("@valos/type-vault/vdoc");
+const { extension } = require("@valos/vdoc");
 const {
   ontologyTables, extractee: { authors, ref, dfn },
-} = require("@valos/type-vault/revdoc");
+} = require("@valos/revdoc");
 
-const { version } = require("../package");
+const { version, description } = require("./package");
 
 module.exports = {
-  "dc:title": "ValOS document interchange specification",
+  "dc:title": description,
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -28,7 +28,7 @@ module.exports = {
     `This document is part of the `, ref("ValOS core specification", "@valos/kernel"), ".",
     null,
     `The format is implemented and supported by `,
-    ref("@valos/type-vault npm package", "@valos/type-vault"), ".",
+    ref("@valos/vdoc npm package", "@valos/vdoc"), ".",
   ],
   "chapter#introduction>2;Introduction": [
     dfn(`VDoc`, "#vdoc", `is a extensible JSON-LD interchange

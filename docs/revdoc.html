@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>ReVDoc - ReSpec document VDoc extension</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"subtitle":"0.35.0-prerelease.7","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
+    </script>
+  </head>
+  <body>
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter">This document specifies ReVDoc, a <a href="https:/valospace.org/kernel/vdoc/#extension" class="vdoc type-vdoc-reference">VDoc extension</a> for extracting and emitting <a href="https://github.com/w3c/respec" class="vdoc type-vdoc-reference">ReSpec documents</a>.
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter">      <p>This document has not been reviewed. This is a draft document and
+    may be updated, replaced or obsoleted by other documents at any
+    time.</p>
+      <p>This document is part of the <a href="@valos/kernel/spec" class="vdoc type-vdoc-reference">ValOS core specification</a>.</p>
+      <p>The format is implemented and supported by <a href="https:/valospace.org/kernel/revdoc" class="vdoc type-vdoc-reference">@valos/revdoc npm package</a>.</p>
+
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter">ReVDoc is a VDoc extension which can produce ReSpec documents.
+  </section>
+
+  <section id="ontology" class="vdoc type-vdoc-chapter">
+    <h2>ReVDoc ontology</h2>
+
+  <section id="prefixes" class="vdoc type-vdoc-chapter">
+    <h2>ReVDoc IRI prefixes</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-column">Prefix</th>
+        <th class="vdoc type-vdoc-column">IRI</th>
+      </thead>
+      <tbody>
+        <tr><td>revdoc</td><td>https://valospace.org/kernel/revdoc#</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="vocabulary" class="vdoc type-vdoc-chapter">
+    <h2>ReVDoc RDF vocabulary with prefix revdoc:</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-column">rdfs:label</th>
+        <th class="vdoc type-vdoc-column">rdf:type</th>
+        <th class="vdoc type-vdoc-column">rdfs:subClassOf</th>
+        <th class="vdoc type-vdoc-column">rdfs:subPropertyOf</th>
+        <th class="vdoc type-vdoc-column">rdfs:domain</th>
+        <th class="vdoc type-vdoc-column">rdfs:range</th>
+        <th class="vdoc type-vdoc-column">rdfs:comment</th>
+      </thead>
+      <tbody>
+        <tr><td>Document</td><td>rdfs:Class</td><td>vdoc:Chapter</td><td></td><td></td><td></td><td>A ReSpec specification document</td></tr>
+        <tr><td>Definition</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td></td><td>A ReSpec term definition document node</td></tr>
+        <tr><td>Package</td><td>rdfs:Class</td><td>vdoc:Reference</td><td></td><td></td><td></td><td>A package reference document node</td></tr>
+        <tr><td>Command</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td></td><td>A command invokation document node</td></tr>
+        <tr><td>CommandLineInteraction</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td></td><td>A command line interaction sequence document node</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="context" class="vdoc type-vdoc-chapter">
+    <h2>ReVDoc JSON-LD context term definitions</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-column">Term</th>
+        <th class="vdoc type-vdoc-column">Definition</th>
+        <th class="vdoc type-vdoc-column">@id</th>
+        <th class="vdoc type-vdoc-column">@type</th>
+        <th class="vdoc type-vdoc-column">@container</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  </section>
+
+  <section id="transformations" class="vdoc type-vdoc-chapter">ReVDoc lightly extends basic VDoc extraction with some
+      ReSpec specific primitives and specifies a ReSpec html emission
+      transformation.
+  <section id="extraction_rules" class="vdoc type-vdoc-chapter">
+    <h2>ReVDoc extraction rules</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-column">Rule name</th>
+        <th class="vdoc type-vdoc-column">Node rdf:type</th>
+        <th class="vdoc type-vdoc-column">primary target</th>
+        <th class="vdoc type-vdoc-column">';rest' target</th>
+        <th class="vdoc type-vdoc-column">Comment</th>
+      </thead>
+      <tbody>
+        <tr><td>ontology</td><td>vdoc:Chapter</td><td>vdoc:content</td><td>dc:title</td><td>Ontology specification chapter</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="extractee_api" class="vdoc type-vdoc-chapter">
+    <h2>ReVDoc extractee API</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-column">API identifier</th>
+        <th class="vdoc type-vdoc-column">rdf:type</th>
+      </thead>
+      <tbody>
+        <tr><td>authors</td><td></td></tr>
+        <tr><td>dfn</td><td></td></tr>
+        <tr><td>pkg</td><td></td></tr>
+        <tr><td>command</td><td></td></tr>
+        <tr><td>cli</td><td></td></tr>
+        <tr><td>emphasis</td><td></td></tr>
+        <tr><td>strong</td><td></td></tr>
+        <tr><td>strikethrough</td><td></td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="emission_output" class="vdoc type-vdoc-chapter">
+    <h2>ReVDoc emission output</h2>
+ReVDoc emits html which makes use of ReSpec primitives.
+  </section>
+
+  <section id="emission_rules" class="vdoc type-vdoc-chapter">
+    <h2>ReVDoc emission rules</h2>
+ReVDoc provides html emission overrides for vdoc:Document revdoc:Document vdoc:Chapter vdoc:Reference
+  </section>
+
+  </section>
+
+  </body>
+</html>

@@ -1,0 +1,119 @@
+[
+  {
+    "@id": "https://valospace.org/kernel/revdoc/tutorial",
+    "@context": {
+      "@base": "https://valospace.org/kernel/revdoc/tutorial#",
+      "sbomdoc": "https://valospace.org/kernel/sbomdoc#",
+      "revdoc": "https://valospace.org/kernel/revdoc#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "vdoc": "https://valospace.org/kernel/vdoc#",
+      "a": {
+        "@id": "rdf:type",
+        "@type": "@id"
+      },
+      "vdoc:content": {
+        "@id": "https://valospace.org/kernel/vdoc#content",
+        "@container": "@list"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/kernel/vdoc#words",
+        "@container": "@list"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/kernel/vdoc#entries",
+        "@container": "@list"
+      }
+    },
+    "dc:title": "ReVDoc Tutorial",
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "tutorial"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is a revdoc template document 'tutorial' created by create-revdoc."
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is part of the library workspace ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "@valos/revdoc"
+          ],
+          "vdoc:ref": "@valos/revdoc"
+        }
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReSpec boilerplate"
+          ],
+          "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+        },
+        null,
+        "See ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReVDoc tutorial"
+          ],
+          "vdoc:ref": "@valos/revdoc/tutorial"
+        },
+        " for instructions on how to write revdoc source documents.",
+        null,
+        "See also ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReVdoc specification"
+          ],
+          "vdoc:ref": "@valos/revdoc"
+        },
+        " and ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "VDoc specification"
+          ],
+          "vdoc:ref": "@valos/vdoc"
+        },
+        " for reference documentation."
+      ]
+    },
+    "rdf:type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      }
+    ]
+  }
+]

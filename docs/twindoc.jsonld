@@ -1,0 +1,417 @@
+[
+  {
+    "@id": "https://valospace.org/kernel/twindoc",
+    "@context": {
+      "@base": "https://valospace.org/kernel/twindoc#",
+      "sbomdoc": "https://valospace.org/kernel/sbomdoc#",
+      "revdoc": "https://valospace.org/kernel/revdoc#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "vdoc": "https://valospace.org/kernel/vdoc#",
+      "a": {
+        "@id": "rdf:type",
+        "@type": "@id"
+      },
+      "vdoc:content": {
+        "@id": "https://valospace.org/kernel/vdoc#content",
+        "@container": "@list"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/kernel/vdoc#words",
+        "@container": "@list"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/kernel/vdoc#entries",
+        "@container": "@list"
+      }
+    },
+    "dc:title": "TwinDoc - Valospace Hypertwin VDoc extension",
+    "respecConfig": {
+      "subtitle": "0.35.0-prerelease.7",
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "shortName": "twindoc",
+      "alternateFormats": [
+        {
+          "label": "VDoc",
+          "uri": "index.jsonld"
+        }
+      ]
+    },
+    "abstract": {
+      "@id": "abstract",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document specifies TwinDoc, a ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "VDoc extension"
+          ],
+          "vdoc:ref": "@valos/vdoc#extension"
+        },
+        " which specifies an isomorphism and synchronization\n    transformations between VDoc documents and valospace resources.",
+        null,
+        "More specifically TwinDoc allows for the serialization and\n    deserialization of an arbitrary selection of valospace resources\n    into a VDoc document array and back even if the source resources\n    are not a representation of a VDoc document nor use any VDoc core\n    or extension ontologies."
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document has not been reviewed. This is a draft document and\n    may be updated, replaced or obsoleted by other documents at any\n    time.",
+        null,
+        "This document is part of the ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ValOS core specification"
+          ],
+          "vdoc:ref": "@valos/kernel/spec"
+        },
+        ".",
+        null,
+        "The extension is specified and supported by ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "@valos/twindoc npm package"
+          ],
+          "vdoc:ref": "@valos/twindoc"
+        },
+        "."
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "TwinDoc provides both full isomorphic synchronization as well as\n    incremental, additive updates between VDoc documents and valospace\n    resources.\n    The fully isomoprhic extraction and emission transformations to\n    valospace resources provide lossless roundtrips to both directions:",
+        {
+          "vdoc:content": [
+            {
+              "rdf:type": "vdoc:NumberedList",
+              "vdoc:entries": [
+                "emit + extract: a roundtrip starting from vdocson into valospace back into vdocson",
+                "extract + emit: a roundtrip starting from valospace into vdocson back into valospace"
+              ]
+            }
+          ]
+        },
+        null,
+        "TwinDoc also specifies incremental transformations which are given\n    a diff base in addition to the source and which compute a diffset\n    and then merge the resulting diffset to the pre-existing\n    transformation target.\n    This not only gives performance advantages but also makes it\n    possible to have the final document be a combination of several\n    partial primary sources."
+      ]
+    },
+    "ontology": {
+      "@id": "ontology",
+      "dc:title": "TwinDoc ontology",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@id": "prefixes"
+        },
+        {
+          "@id": "vocabulary"
+        },
+        {
+          "@id": "context"
+        }
+      ]
+    },
+    "prefixes": {
+      "@id": "prefixes",
+      "dc:title": "TwinDoc IRI prefixes",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "prefixes_data",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:key": "vdoc:key",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "Prefix"
+              ]
+            },
+            {
+              "vdoc:key": "vdoc:value",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "IRI"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "prefixes_data": {
+      "@id": "prefixes_data",
+      "twindoc": "https://valospace.org/kernel/twindoc#"
+    },
+    "vocabulary": {
+      "@id": "vocabulary",
+      "dc:title": "TwinDoc RDF vocabulary with prefix twindoc:",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary_data",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:key": "vdoc:key",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdfs:label"
+              ]
+            },
+            {
+              "vdoc:key": "a",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdf:type"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:subClassOf",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdfs:subClassOf"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:subPropertyOf",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdfs:subPropertyOf"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:domain",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdfs:domain"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:range",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdfs:range"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:comment",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdfs:comment"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "vocabulary_data": {
+      "@id": "vocabulary_data"
+    },
+    "context": {
+      "@id": "context",
+      "dc:title": "TwinDoc JSON-LD context term definitions",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "context_data",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:key": "vdoc:key",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "Term"
+              ]
+            },
+            {
+              "vdoc:key": "vdoc:value",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "Definition"
+              ]
+            },
+            {
+              "vdoc:key": "@id",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "@id"
+              ]
+            },
+            {
+              "vdoc:key": "@type",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "@type"
+              ]
+            },
+            {
+              "vdoc:key": "@container",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "@container"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "context_data": {
+      "@id": "context_data"
+    },
+    "transformations": {
+      "@id": "transformations",
+      "dc:title": "TwinDoc transformations",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@id": "extraction_rules"
+        },
+        {
+          "@id": "extractee_api"
+        },
+        {
+          "@id": "emission_output"
+        },
+        {
+          "@id": "emission_rules"
+        }
+      ]
+    },
+    "extraction_rules": {
+      "@id": "extraction_rules",
+      "dc:title": "TwinDoc extraction rules",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "extraction_rules_data",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:key": "vdoc:key",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "Rule name"
+              ]
+            },
+            {
+              "vdoc:key": "range",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "Node rdf:type"
+              ]
+            },
+            {
+              "vdoc:key": "target",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "primary target"
+              ]
+            },
+            {
+              "vdoc:key": "rest",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "';rest' target"
+              ]
+            },
+            {
+              "vdoc:key": "comment",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "Comment"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "extraction_rules_data": {
+      "@id": "extraction_rules_data"
+    },
+    "extractee_api": {
+      "@id": "extractee_api",
+      "dc:title": "TwinDoc extractee API",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "extractee_api_lookup",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:key": "vdoc:key",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "API identifier"
+              ]
+            },
+            {
+              "vdoc:key": "vdoc:value",
+              "rdf:type": "vdoc:Column",
+              "vdoc:content": [
+                "rdf:type"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "extractee_api_lookup": {
+      "@id": "extractee_api_lookup"
+    },
+    "emission_output": {
+      "@id": "emission_output",
+      "dc:title": "TwinDoc emission output",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "TwinDoc emits event log updates into valospace resources.",
+        {
+          "rdf:type": "revdoc:Package",
+          "vdoc:content": [
+            "@valos/hypertwin"
+          ],
+          "vdoc:ref": "@valos/hypertwin"
+        },
+        " provides tools which implement this\n        transformation using the gateway API."
+      ]
+    },
+    "emission_rules": {
+      "@id": "emission_rules",
+      "dc:title": "TwinDoc emission rules",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "rdf:type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "ontology"
+      },
+      {
+        "@id": "transformations"
+      }
+    ]
+  }
+]

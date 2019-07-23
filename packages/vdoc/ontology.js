@@ -1,26 +1,26 @@
 
 module.exports = {
   prefix: "vdoc",
-  base: "https://valaatech.github.io/vault/type-vault/vdoc#",
+  base: "https://valospace.org/kernel/vdoc#",
 
   prefixes: {
     dc: "http://purl.org/dc/elements/1.1/",
     owl: "http://www.w3.org/2002/07/owl#",
     rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-    vdoc: "https://valaatech.github.io/vault/type-vault/vdoc#",
+    vdoc: "https://valospace.org/kernel/vdoc#",
   },
 
   context: {
     a: { "@id": "rdf:type", "@type": "@id" },
     "vdoc:content": {
-      "@id": "https://valaatech.github.io/vault/type-vault/vdoc#content", "@container": "@list",
+      "@id": "https://valospace.org/kernel/vdoc#content", "@container": "@list",
     },
     "vdoc:words": {
-      "@id": "https://valaatech.github.io/vault/type-vault/vdoc#words", "@container": "@list",
+      "@id": "https://valospace.org/kernel/vdoc#words", "@container": "@list",
     },
     "vdoc:entries": {
-      "@id": "https://valaatech.github.io/vault/type-vault/vdoc#entries", "@container": "@list",
+      "@id": "https://valospace.org/kernel/vdoc#entries", "@container": "@list",
     },
   },
 

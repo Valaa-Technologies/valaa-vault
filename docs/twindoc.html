@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>TwinDoc - Valospace Hypertwin VDoc extension</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"subtitle":"0.35.0-prerelease.7","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"twindoc","alternateFormats":[{"label":"VDoc","uri":"index.jsonld"}]};
+    </script>
+  </head>
+  <body>
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter">      <p>This document specifies TwinDoc, a <a href="https:/valospace.org/kernel/vdoc/#extension" class="vdoc type-vdoc-reference">VDoc extension</a> which specifies an isomorphism and synchronization
+    transformations between VDoc documents and valospace resources.</p>
+      <p>More specifically TwinDoc allows for the serialization and
+    deserialization of an arbitrary selection of valospace resources
+    into a VDoc document array and back even if the source resources
+    are not a representation of a VDoc document nor use any VDoc core
+    or extension ontologies.</p>
+
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter">      <p>This document has not been reviewed. This is a draft document and
+    may be updated, replaced or obsoleted by other documents at any
+    time.</p>
+      <p>This document is part of the <a href="@valos/kernel/spec" class="vdoc type-vdoc-reference">ValOS core specification</a>.</p>
+      <p>The extension is specified and supported by <a href="https:/valospace.org/kernel/twindoc" class="vdoc type-vdoc-reference">@valos/twindoc npm package</a>.</p>
+
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter">      <p>TwinDoc provides both full isomorphic synchronization as well as
+    incremental, additive updates between VDoc documents and valospace
+    resources.
+    The fully isomoprhic extraction and emission transformations to
+    valospace resources provide lossless roundtrips to both directions:
+    <ol>
+      <li>emit + extract: a roundtrip starting from vdocson into valospace back into vdocson</li>
+      <li>extract + emit: a roundtrip starting from valospace into vdocson back into valospace</li>
+    </ol>
+</p>
+      <p>TwinDoc also specifies incremental transformations which are given
+    a diff base in addition to the source and which compute a diffset
+    and then merge the resulting diffset to the pre-existing
+    transformation target.
+    This not only gives performance advantages but also makes it
+    possible to have the final document be a combination of several
+    partial primary sources.</p>
+
+  </section>
+
+  <section id="ontology" class="vdoc type-vdoc-chapter">
+    <h2>TwinDoc ontology</h2>
+
+  <section id="prefixes" class="vdoc type-vdoc-chapter">
+    <h2>TwinDoc IRI prefixes</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-column">Prefix</th>
+        <th class="vdoc type-vdoc-column">IRI</th>
+      </thead>
+      <tbody>
+        <tr><td>twindoc</td><td>https://valospace.org/kernel/twindoc#</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="vocabulary" class="vdoc type-vdoc-chapter">
+    <h2>TwinDoc RDF vocabulary with prefix twindoc:</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-column">rdfs:label</th>
+        <th class="vdoc type-vdoc-column">rdf:type</th>
+        <th class="vdoc type-vdoc-column">rdfs:subClassOf</th>
+        <th class="vdoc type-vdoc-column">rdfs:subPropertyOf</th>
+        <th class="vdoc type-vdoc-column">rdfs:domain</th>
+        <th class="vdoc type-vdoc-column">rdfs:range</th>
+        <th class="vdoc type-vdoc-column">rdfs:comment</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="context" class="vdoc type-vdoc-chapter">
+    <h2>TwinDoc JSON-LD context term definitions</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-column">Term</th>
+        <th class="vdoc type-vdoc-column">Definition</th>
+        <th class="vdoc type-vdoc-column">@id</th>
+        <th class="vdoc type-vdoc-column">@type</th>
+        <th class="vdoc type-vdoc-column">@container</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  </section>
+
+  <section id="transformations" class="vdoc type-vdoc-chapter">
+    <h2>TwinDoc transformations</h2>
+
+  <section id="extraction_rules" class="vdoc type-vdoc-chapter">
+    <h2>TwinDoc extraction rules</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-column">Rule name</th>
+        <th class="vdoc type-vdoc-column">Node rdf:type</th>
+        <th class="vdoc type-vdoc-column">primary target</th>
+        <th class="vdoc type-vdoc-column">';rest' target</th>
+        <th class="vdoc type-vdoc-column">Comment</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="extractee_api" class="vdoc type-vdoc-chapter">
+    <h2>TwinDoc extractee API</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-column">API identifier</th>
+        <th class="vdoc type-vdoc-column">rdf:type</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="emission_output" class="vdoc type-vdoc-chapter">
+    <h2>TwinDoc emission output</h2>
+TwinDoc emits event log updates into valospace resources.<a href="@valos/hypertwin" class="vdoc type-revdoc-package">@valos/hypertwin</a> provides tools which implement this
+        transformation using the gateway API.
+  </section>
+
+  <section id="emission_rules" class="vdoc type-vdoc-chapter">
+    <h2>TwinDoc emission rules</h2>
+
+  </section>
+
+  </section>
+
+  </body>
+</html>

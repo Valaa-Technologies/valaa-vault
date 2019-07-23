@@ -1,13 +1,13 @@
 // @flow
 
-// const { ontology } = require("~/type-vault/vdoc");
+// const { ontology } = require("~/vdoc");
 
 module.exports = {
   prefix: "sbomdoc",
-  base: "https://valaatech.github.io/vault/type-vault/sbomdoc#",
+  base: "https://valospace.org/kernel/sbomdoc#",
 
   prefixes: {
-    sbomdoc: "https://valaatech.github.io/vault/type-vault/sbomdoc#",
+    sbomdoc: "https://valospace.org/kernel/sbomdoc#",
   },
   context: {
   },

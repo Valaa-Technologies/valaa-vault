@@ -1,14 +1,14 @@
 // @flow
 
-const { extension } = require("@valos/type-vault/sbomdoc");
+const { extension } = require("@valos/sbomdoc");
 const {
   ontologyTables, extractee: { authors, ref, /* dfn, */ },
-} = require("@valos/type-vault/revdoc");
+} = require("@valos/revdoc");
 
-const { version } = require("../package");
+const { version, description } = require("./package");
 
 module.exports = {
-  "dc:title": "SBoMDoc - Software Bill of Materials VDoc extension",
+  "dc:title": description,
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -18,7 +18,7 @@ module.exports = {
   },
   "chapter#abstract>0": [
     `This document specifies SBomDoc, a `,
-    ref("VDoc extension", "@valos/type-vault/vdoc#extension"),
+    ref("VDoc extension", "@valos/vdoc#extension"),
     `for extracting and emitting `, ref("CycloneDX BOM documents", "https://cyclonedx.org/"),
     `in various formats.`,
   ],
@@ -31,7 +31,7 @@ module.exports = {
     ".",
     null,
     `The format is implemented and supported by `,
-    ref("@valos/type-vault npm package", "@valos/type-vault"), ".",
+    ref("@valos/sbomdoc npm package", "@valos/sbomdoc"), ".",
   ],
   "chapter#introduction>2": [
     `SBoMDoc is a VDoc extension which uses CycloneDX namespaces and

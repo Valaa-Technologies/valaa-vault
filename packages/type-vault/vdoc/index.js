@@ -1,21 +1,28 @@
 const patchWith = require("@valos/tools/patchWith").default;
 
-const vdocOntology = require("./ontology");
 const extractee = require("./extractee");
 
 module.exports = {
+  extension: {
+    extends: [],
+    ontology: require("./ontology"),
+    extractors: require("./extractors"),
+    emitters: require("./emitters"),
+    extractee,
+    extract,
+    emit,
+  },
   extractee,
-  ontology: vdocOntology,
-  extract,
-  emit,
 };
 
 function extract (sourceGraphs, {
-  target, documentIRI, ontologies = [vdocOntology], omitContext,
+  target, documentIRI, extensions = [this, ...this.extends], omitContext,
 } = {}) {
   const vdocson = [];
   return patchWith(vdocson, [].concat(sourceGraphs), {
     keyPath: [],
+    extractionRules: extensions.reduce((a, { ontology }) =>
+        Object.assign(a, ontology.extractionRules || {}), {}),
     preExtend (innerTarget, patch, key, targetObject, patchObject) {
       if (this.keyPath.length === 1) {
         if (!innerTarget) {
@@ -23,18 +30,20 @@ function extract (sourceGraphs, {
           if (documentIRI !== undefined) root["@id"] = documentIRI;
           if (!omitContext) {
             root["@context"] = { "@base": `${documentIRI || ""}#` };
-            for (const ontology of ontologies) {
-              Object.assign(root["@context"], ontology.prefixes, ontology.context);
+            for (const extension of extensions) {
+              Object.assign(root["@context"],
+                  extension.ontology.prefixes,
+                  extension.ontology.context);
             }
           }
           return this.extend(root, patch);
         }
         this.documentNode = innerTarget;
       }
-      for (const ontology of ontologies) {
-        if (!ontology.extractor.preExtend) continue;
-        const ret = ontology.extractor.preExtend.call(
-            this, target, patch, key, targetObject, patchObject);
+      for (const extension of extensions) {
+        const preExtend = (extension.extractors.native || {}).preExtend;
+        if (!preExtend) continue;
+        const ret = preExtend.call(this, target, patch, key, targetObject, patchObject);
         if (ret !== undefined) return ret;
       }
       return undefined;
@@ -42,10 +51,10 @@ function extract (sourceGraphs, {
     postExtend (innerTarget, patch, key, targetObject, patchObject) {
       if ((this.keyPath <= 1) && (key === undefined)) return innerTarget;
       let ret;
-      for (const ontology of ontologies) {
-        if (!ontology.extractor.postExtend) continue;
-        ret = ontology.extractor.postExtend.call(
-            this, innerTarget, patch, key, targetObject, patchObject);
+      for (const extension of extensions) {
+        const postExtend = (extension.extractors.native || {}).postExtend;
+        if (!postExtend) continue;
+        ret = postExtend.call(this, innerTarget, patch, key, targetObject, patchObject);
         if (ret !== undefined) return ret;
       }
       return innerTarget;
@@ -53,7 +62,7 @@ function extract (sourceGraphs, {
   });
 }
 
-function emit (emission, vdocson, formatName, ontologies = [vdocOntology]) {
+function emit (emission, vdocson, formatName, extensions = [this, ...this.extends]) {
   return _emitNode(emission, vdocson[0], vdocson[0]);
   function _emitNode (emission_, node, document, explicitType_) {
     const type = explicitType_
@@ -61,15 +70,15 @@ function emit (emission, vdocson, formatName, ontologies = [vdocOntology]) {
         || (Array.isArray(node) && "array")
         || typeof node;
     let subClassOf;
-    for (const ontology of ontologies) {
-      const emitter = ontology.emitters[formatName];
+    for (const extension of extensions) {
+      const emitter = extension.emitters[formatName];
       const newEmission = emitter && emitter[type]
-          && emitter[type](emission_, node, document, _emitNode, vdocson, ontologies);
+          && emitter[type](emission_, node, document, _emitNode, vdocson, extensions);
       if (newEmission !== undefined) return newEmission;
       if (!subClassOf) {
         const [prefix, ontologyType] = type.split(":");
-        if (prefix === ontology.prefix) {
-          subClassOf = (ontology.vocabulary[ontologyType] || {})["rdfs:subClassOf"];
+        if (prefix === extension.ontology.prefix) {
+          subClassOf = (extension.ontology.vocabulary[ontologyType] || {})["rdfs:subClassOf"];
         }
       }
     }

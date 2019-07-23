@@ -18,26 +18,4 @@ module.exports = {
   },
   extractionRules: {
   },
-  extracteeAPI: {},
-  extractor: {},
-  emitters: {
-    html: {
-      "vdoc:Document": emitSBoMDocHTML,
-      "sbomdoc:Document": emitSBoMDocHTML,
-    },
-  },
 };
-
-function emitSBoMDocHTML (emission, node, document, emitNode /* , vdocson, emitters */) {
-  return `<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset='utf-8'>
-    <title>${node["dc:title"]}</title>
-  </head>
-  <body>
-    ${emitNode("", node["vdoc:content"], document)}
-  </body>
-</html>
-`;
-}

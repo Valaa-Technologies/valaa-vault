@@ -1,20 +1,25 @@
 // @flow
 
-const { ontology: sbomdocOntology } = require("@valos/type-vault/sbomdoc");
+const { extension } = require("@valos/type-vault/sbomdoc");
 const {
   ontologyTables, extractee: { authors, ref, /* dfn, */ },
 } = require("@valos/type-vault/revdoc");
 
+const { version } = require("../package");
+
 module.exports = {
   "dc:title": "SBoMDoc - Software Bill of Materials VDoc extension",
   respecConfig: {
+    subtitle: version,
     specStatus: "unofficial",
     editors: authors("iridian"),
     shortName: "sbomdoc",
+    alternateFormats: [{ label: "VDoc", uri: "sbomdoc.jsonld" }],
   },
   "chapter#abstract>0": [
-    `This document specifies`, ref("a VDoc extension", "vdoc"),
-    `for generating`, ref("CycloneDX BOM documents", "https://cyclonedx.org/"),
+    `This document specifies SBomDoc, a `,
+    ref("VDoc extension", "@valos/type-vault/vdoc#extension"),
+    `for extracting and emitting `, ref("CycloneDX BOM documents", "https://cyclonedx.org/"),
     `in various formats.`,
   ],
   "chapter#sotd>1": [
@@ -32,37 +37,44 @@ module.exports = {
     `SBoMDoc is a VDoc extension which uses CycloneDX namespaces and
     can emit BOM documents in various formats.`,
   ],
-  "chapter#ontology>9;SBoMDoc ontology": {
-    "chapter#prefixes>0;SBoMDoc JSON-LD prefixes": {
+  "chapter#ontology>8;SBoMDoc ontology": {
+    "#0": [],
+    "chapter#prefixes>0;SBoMDoc IRI prefixes": {
       "#0": [],
       "table#>0;prefixes_data": ontologyTables.prefixes,
-      "data#prefixes_data": sbomdocOntology.prefixes,
+      "data#prefixes_data": extension.ontology.prefixes,
     },
-    "chapter#context>1;SBoMDoc JSON-LD context": {
-      "#0": [],
-      "table#>0;context_data": ontologyTables.context,
-      "data#context_data": sbomdocOntology.context,
-    },
-    "chapter#vocabulary>2;SBoMDoc JSON-LD vocabulary": {
+    [`chapter#vocabulary>1;SBoMDoc RDF vocabulary with prefix ${extension.ontology.prefix}:`]: {
       "#0": [],
       "table#>0;vocabulary_data": ontologyTables.vocabulary,
-      "data#vocabulary_data": sbomdocOntology.vocabulary,
+      "data#vocabulary_data": extension.ontology.vocabulary,
     },
-    "chapter#extraction_rules>3;SBoMDoc extraction rules": {
+    "chapter#context>2;SBoMDoc JSON-LD context term definitions": {
+      "#0": [],
+      "table#>0;context_data": ontologyTables.context,
+      "data#context_data": extension.ontology.context,
+    },
+  },
+  "chapter#transformations>9;SBoMDoc transformations": {
+    "#0": [],
+    "chapter#extraction_rules>0;SBoMDoc extraction rules": {
       "#0": [],
       "table#>0;extraction_rules_data": ontologyTables.extractionRules,
-      "data#extraction_rules_data": sbomdocOntology.extractionRules,
+      "data#extraction_rules_data": extension.ontology.extractionRules,
     },
-    "chapter#extractee_api>4;SBoMDoc extractee API": {
+    "chapter#extractee_api>1;SBoMDoc extractee API": {
       "#0": [],
-      "table#>0;extractee_api_lookup": ontologyTables.extracteeAPI,
-      "data#extractee_api_lookup": sbomdocOntology.extracteeAPI,
+      "table#>0;extractee_api_lookup": ontologyTables.extractee,
+      "data#extractee_api_lookup": extension.ontology.extractee,
     },
-    "chapter#output>5;SBoMDoc output format": {
+    "chapter#emission_output>2;SBoMDoc emission output": {
       "#0": [],
     },
-    "chapter#emission>6;SBoMDoc emission rules": {
-      "#0": [],
+    "chapter#emission_rules>3;SBoMDoc emission rules": {
+      "#0": [
+        `ReVDoc provides html emission overrides for `,
+        { "vdoc:words": Object.keys(extension.emitters.html) },
+      ],
     },
   },
 };

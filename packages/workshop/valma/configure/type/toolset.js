@@ -186,7 +186,7 @@ function createStatusSubCommand (vlm, type, name, simpleName, commandPath) {
 
   function _createToolsetHandlerBody () {
     return `async (yargv) => {
-  const { extract, extractee: { ref } } = require("@valos/type-vault/vdoc");
+  const { extension, extractee: { ref } } = require("@valos/type-vault/vdoc");
   const patchWith = require("@valos/tools/patchWith").default;
   const vlm = yargv.vlm;
   const toolsetConfig = vlm.getToolsetConfig(vlm.toolset);
@@ -207,7 +207,7 @@ function createStatusSubCommand (vlm, type, name, simpleName, commandPath) {
   const status = !warnings.length && !failures.length ? { success: "OK" }
       : !failures.length ? { warnings }
       : { failures, warnings };
-  return extract(
+  return extension.extract(
       { "data#status_toolsets": { "${name}": status } },
       { target, omitContext: true });
 }`;
@@ -215,7 +215,7 @@ function createStatusSubCommand (vlm, type, name, simpleName, commandPath) {
 
   function _createToolHandlerBody () {
     return `async (yargv) => {
-  const { extract, extractee: { ref } } = require("@valos/type-vault/vdoc");
+  const { extension, extractee: { ref } } = require("@valos/type-vault/vdoc");
   const vlm = yargv.vlm;
   const toolConfig = vlm.getToolsetConfig(yargv.toolset, exports.vlm.tool);
   const warnings = [];
@@ -224,7 +224,7 @@ function createStatusSubCommand (vlm, type, name, simpleName, commandPath) {
   const status = !warnings.length && !failures.length ? { success: "OK" }
       : !failures.length ? { warnings }
       : { failures, warnings };
-  return extract(
+  return extension.extract(
       { [\`data#status_toolset_\${yargv.toolset.replace(/[/@-]/g, "_")}_tools\`]: {
         "${name}": status,
       } },

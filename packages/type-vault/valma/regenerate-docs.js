@@ -33,9 +33,8 @@ exports.builder = (yargs) => yargs.options({
 exports.handler = async (yargv) => {
   const convert = require("xml-js");
   const patchWith = require("@valos/tools/patchWith").default;
-  const {
-    extract, emit, ontologyTables, extractee: { ref, authors },
-  } = require("@valos/type-vault/sbomdoc");
+  const { sbomTables, extractee: { ref, authors }, extension }
+      = require("@valos/type-vault/sbomdoc");
 
   const vlm = yargv.vlm;
   const config = vlm.getPackageConfig();
@@ -108,7 +107,7 @@ exports.handler = async (yargv) => {
   async function generateRevdocAndWriteToDocs (
       revdocPath, targetDocPath, targetDocName, emitReVDocSON) {
     const revdocSource = require(vlm.path.join(process.cwd(), revdocPath));
-    const revdocson = extract(revdocSource, {
+    const revdocson = extension.extract(revdocSource, {
       documentIRI: vlm.path.join(docsBaseIRI || "", targetDocPath, targetDocName),
     });
     const revdocHTML = await emitHTML(revdocson);
@@ -181,15 +180,15 @@ exports.handler = async (yargv) => {
         "to define the content of this section."
       ],
       "chapter#>3;Components table": {
-        "table#>0;components_data": ontologyTables.components,
+        "table#>0;components_data": sbomTables.components,
         "data#components_data": sbomgraph.bom.components,
       },
     };
-    return extract(sbomSource, { documentIRI: `${docsBaseIRI || ""}sbom` });
+    return extension.extract(sbomSource, { documentIRI: `${docsBaseIRI || ""}sbom` });
   }
 
   async function emitHTML (sbomvdocson) {
-    const sbomhtml = emit("", sbomvdocson, "html");
+    const sbomhtml = extension.emit("", sbomvdocson, "html");
     return sbomhtml;
   }
 

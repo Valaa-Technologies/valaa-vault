@@ -87,7 +87,7 @@ module.exports = {
     }
     return {
       "rdf:type": "revdoc:CommandLineInteraction",
-      "vdoc:rows": contextedRows,
+      "vdoc:entries": contextedRows,
     };
   },
 

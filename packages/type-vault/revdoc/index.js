@@ -1,14 +1,19 @@
 const vdoc = require("@valos/type-vault/vdoc");
-const ontology = require("./ontology");
 const extractee = require("./extractee");
 
 module.exports = {
-  ...vdoc,
+  extension: {
+    ...vdoc.extension,
+    extends: [vdoc.extension],
+    ontology: require("./ontology"),
+    extractors: require("./extractors"),
+    emitters: require("./emitters"),
+    extractee,
+  },
   extractee: {
     ...vdoc.extractee,
     ...extractee,
   },
-  ontology,
   ontologyTables: {
     prefixes: {
       "column#0;vdoc:key": "Prefix",
@@ -19,15 +24,16 @@ module.exports = {
       "column#1;vdoc:value": "Definition",
       "column#2;@id": "@id",
       "column#3;@type": "@type",
-      "column#3;@container": "@container",
+      "column#4;@container": "@container",
     },
     vocabulary: {
       "column#0;vdoc:key": "rdfs:label",
       "column#1;a": "rdf:type",
       "column#2;rdfs:subClassOf": "rdfs:subClassOf",
-      "column#3;rdfs:domain": "rdfs:domain",
-      "column#4;rdfs:range": "rdfs:range",
-      "column#5;rdfs:comment": "rdfs:comment",
+      "column#3;rdfs:subPropertyOf": "rdfs:subPropertyOf",
+      "column#4;rdfs:domain": "rdfs:domain",
+      "column#5;rdfs:range": "rdfs:range",
+      "column#6;rdfs:comment": "rdfs:comment",
     },
     extractionRules: {
       "column#0;vdoc:key": "Rule name",
@@ -36,16 +42,9 @@ module.exports = {
       "column#3;rest": "';rest' target",
       "column#4;comment": "Comment",
     },
-    extracteeAPI: {
+    extractee: {
       "column#0;vdoc:key": "API identifier",
       "column#1;vdoc:value": "rdf:type",
     },
-  },
-  extract (sourceGraphs, options = {}) {
-    if (options.ontologies === undefined) options.ontologies = [ontology, vdoc.ontology];
-    return vdoc.extract(sourceGraphs, options);
-  },
-  emit (emission, vdocson, formatName, ontologies = [ontology, vdoc.ontology]) {
-    return vdoc.emit(emission, vdocson, formatName, ontologies);
   },
 };

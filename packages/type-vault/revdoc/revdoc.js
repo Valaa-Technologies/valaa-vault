@@ -1,20 +1,25 @@
 // @flow
 
 const {
-  ontologyTables, ontology: revdocOntology, extractee: { authors, ref, /* dfn, */  },
+  ontologyTables, extension, extractee: { authors, ref, /* dfn, */  },
 } = require("@valos/type-vault/revdoc");
+
+const { version } = require("../package");
 
 module.exports = {
   "dc:title": "ReVDoc - ReSpec document VDoc extension",
   respecConfig: {
+    subtitle: version,
     specStatus: "unofficial",
     editors: authors("iridian"),
     shortName: "revdoc",
+    alternateFormats: [{ label: "VDoc", uri: "revdoc.jsonld" }],
   },
   "chapter#abstract>0": [
-    `This document specifies`, ref("a VDoc extension", "vdoc"),
-    `for generating`, ref("ReSpec", "https://github.com/w3c/respec"),
-    `documents.`,
+    `This document specifies ReVDoc, a `,
+    ref("VDoc extension", "@valos/type-vault/vdoc#extension"),
+    ` for extracting and emitting `, ref("ReSpec documents", "https://github.com/w3c/respec"),
+    `.`,
   ],
   "chapter#sotd>1": [
     `This document has not been reviewed. This is a draft document and
@@ -30,37 +35,49 @@ module.exports = {
   "chapter#introduction>2": [
     `ReVDoc is a VDoc extension which can produce ReSpec documents.`
   ],
-  "chapter#ontology>9;ReVDoc ontology": {
-    "chapter#prefixes>0;ReVDoc JSON-LD prefixes": {
+  "chapter#ontology>8;ReVDoc ontology": {
+    "chapter#prefixes>0;ReVDoc IRI prefixes": {
       "#0": [],
       "table#>0;prefixes_data": ontologyTables.prefixes,
-      "data#prefixes_data": revdocOntology.prefixes,
+      "data#prefixes_data": extension.ontology.prefixes,
     },
-    "chapter#context>1;ReVDoc JSON-LD context": {
-      "#0": [],
-      "table#>0;context_data": ontologyTables.context,
-      "data#context_data": revdocOntology.context,
-    },
-    "chapter#vocabulary>2;ReVDoc JSON-LD vocabulary": {
+    [`chapter#vocabulary>1;ReVDoc RDF vocabulary with prefix ${extension.ontology.prefix}:`]: {
       "#0": [],
       "table#>0;vocabulary_data": ontologyTables.vocabulary,
-      "data#vocabulary_data": revdocOntology.vocabulary,
+      "data#vocabulary_data": extension.ontology.vocabulary,
     },
-    "chapter#extraction_rules>3;ReVDoc extraction rules": {
+    "chapter#context>2;ReVDoc JSON-LD context term definitions": {
+      "#0": [],
+      "table#>0;context_data": ontologyTables.context,
+      "data#context_data": extension.ontology.context,
+    },
+  },
+  "chapter#transformations>9:ReVDoc transformations": {
+    "#0": [
+      `ReVDoc lightly extends basic VDoc extraction with some
+      ReSpec specific primitives and specifies a ReSpec html emission
+      transformation.`,
+    ],
+    "chapter#extraction_rules>0;ReVDoc extraction rules": {
       "#0": [],
       "table#>0;extraction_rules_data": ontologyTables.extractionRules,
-      "data#extraction_rules_data": revdocOntology.extractionRules,
+      "data#extraction_rules_data": extension.ontology.extractionRules,
     },
-    "chapter#extractee_api>4;ReVDoc extractee API": {
+    "chapter#extractee_api>1;ReVDoc extractee API": {
       "#0": [],
-      "table#>0;extractee_api_lookup": ontologyTables.extracteeAPI,
-      "data#extractee_api_lookup": revdocOntology.extracteeAPI,
+      "table#>0;extractee_api_lookup": ontologyTables.extractee,
+      "data#extractee_api_lookup": extension.extractee,
     },
-    "chapter#output>4;ReVDoc output format": {
-      "#0": [],
+    "chapter#emission_output>2;ReVDoc emission output": {
+      "#0": [
+        `ReVDoc emits html which makes use of ReSpec primitives.`
+      ],
     },
-    "chapter#emission>5;ReVDoc emission rules": {
-      "#0": [],
+    "chapter#emission_rules>3;ReVDoc emission rules": {
+      "#0": [
+        `ReVDoc provides html emission overrides for `,
+        { "vdoc:words": Object.keys(extension.emitters.html) },
+      ],
     },
   },
 };

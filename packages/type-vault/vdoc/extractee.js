@@ -16,7 +16,7 @@ module.exports = {
    * @returns
    */
   bulleted (...entries) {
-    return { "rdf:type": "vdoc:BulletList", "vdoc:rows": entries };
+    return { "rdf:type": "vdoc:BulletList", "vdoc:entries": entries };
   },
 
   /**
@@ -26,7 +26,7 @@ module.exports = {
    * @returns
    */
   numbered (...entries) {
-    return { "rdf:type": "vdoc:NumberedList", "vdoc:rows": entries };
+    return { "rdf:type": "vdoc:NumberedList", "vdoc:entries": entries };
   },
 
   /**

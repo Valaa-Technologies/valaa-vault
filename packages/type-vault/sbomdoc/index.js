@@ -1,19 +1,24 @@
 const vdoc = require("@valos/type-vault/vdoc");
 const revdoc = require("@valos/type-vault/revdoc");
 
-const ontology = require("./ontology");
 const extractee = require("./extractee");
 
 module.exports = {
-  ...vdoc,
-  ...revdoc,
+  extension: {
+    ...vdoc.extension,
+    ...revdoc.extension,
+    extends: [revdoc.extension, vdoc.extension],
+    ontology: require("./ontology"),
+    extractors: {},
+    emitters: require("./emitters"),
+    extractee,
+  },
   extractee: {
     ...vdoc.extractee,
     ...revdoc.extractee,
     ...extractee,
   },
-  ontology,
-  ontologyTables: {
+  sbomTables: {
     components: {
       "column#0;name": "Name",
       "column#1;group": "Group",
@@ -24,14 +29,5 @@ module.exports = {
       "column#6;purl": "PURL",
       "column#7;description": "Description",
     },
-  },
-  extract (sourceGraphs, options = {}) {
-    if (options.ontologies === undefined) {
-      options.ontologies = [ontology, revdoc.ontology, vdoc.ontology];
-    }
-    return revdoc.extract(sourceGraphs, options);
-  },
-  emit (emission, vdocson, formatName, ontologies = [ontology, revdoc.ontology, vdoc.ontology]) {
-    return revdoc.emit(emission, vdocson, formatName, ontologies);
   },
 };

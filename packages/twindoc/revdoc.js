@@ -2,7 +2,7 @@
 
 const { extension } = require("@valos/twindoc");
 const {
-  ontologyTables, extractee: { authors, ref, pkg, /* dfn, */  }
+  ontologyTables, extractee: { authors, ref, pkg, /* dfn, */ filterVocabulary, filterVocabularyNot }
 } = require("@valos/revdoc");
 
 const { description, version } = require("./package");
@@ -64,12 +64,25 @@ module.exports = {
       "table#>0;prefixes_data": ontologyTables.prefixes,
       "data#prefixes_data": extension.ontology.prefixes,
     },
-    [`chapter#vocabulary>1;TwinDoc RDF vocabulary with prefix ${extension.ontology.prefix}:`]: {
+    [`chapter#classes>1;TwinDoc rdfs:Class vocabulary, prefix ${extension.ontology.prefix}:`]: {
+      "#0": [],
+      "table#>0;classes_data": ontologyTables.classes,
+      "data#classes_data": filterVocabulary("a", "rdfs:Class",
+          extension.ontology.vocabulary),
+    },
+    [`chapter#properties>2;TwinDoc rdf:Property vocabulary, prefix ${extension.ontology.prefix}:`]: {
+      "#0": [],
+      "table#>0;properties_data": ontologyTables.properties,
+      "data#properties_data": filterVocabulary("a", "rdf:Property",
+          extension.ontology.vocabulary),
+    },
+    [`chapter#vocabulary>3;TwinDoc remaining vocabulary, prefix ${extension.ontology.prefix}:`]: {
       "#0": [],
       "table#>0;vocabulary_data": ontologyTables.vocabulary,
-      "data#vocabulary_data": extension.ontology.vocabulary,
+      "data#vocabulary_data": filterVocabularyNot("a", ["rdfs:Class", "rdf:Property"],
+          extension.ontology.vocabulary),
     },
-    "chapter#context>2;TwinDoc JSON-LD context term definitions": {
+    "chapter#context>4;TwinDoc JSON-LD context term definitions": {
       "#0": [],
       "table#>0;context_data": ontologyTables.context,
       "data#context_data": extension.ontology.context,

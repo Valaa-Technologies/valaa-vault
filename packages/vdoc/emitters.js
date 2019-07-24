@@ -109,10 +109,10 @@ function emitTableHTML (emission, node, document, emitNode /* , vdocson, extensi
   if (!node["vdoc:headers"]) {
     throw new Error("vdoc:Table is missing headers");
   }
-  for (const column of node["vdoc:headers"]) {
-    keys.push(column["vdoc:key"]);
-    const headerText = emitNode("", column["vdoc:content"], document);
-    headers.push(`<th${emitAttributes(column)}>${headerText}</th>`);
+  for (const header of node["vdoc:headers"]) {
+    keys.push(header["vdoc:key"]);
+    const headerText = emitNode("", header["vdoc:content"], document);
+    headers.push(`<th${emitAttributes(header)}>${headerText}</th>`);
   }
   const entryTexts = [];
   const lookup = (typeof node["vdoc:lookup"] !== "string") ? node["vdoc:lookup"]
@@ -124,14 +124,16 @@ function emitTableHTML (emission, node, document, emitNode /* , vdocson, extensi
   for (const [entryKey, entryData] of entries) {
     if (entryKey === "@id") continue;
     let entryText = "";
+    let id;
     for (const key of keys) {
-      entryText += `<td>${(key === "vdoc:key") ? entryKey
+      if (key === "vdoc:id") id = entryKey;
+      entryText += `<td>${(key === "vdoc:key") || (key === "vdoc:id") ? entryKey
           : emitNode("",
               (key === "vdoc:value") ? entryData : (entryData != null) && entryData[key],
               document)
       }</td>`;
     }
-    entryTexts.push(`<tr>${entryText}</tr>`);
+    entryTexts.push(`<tr${id ? ` id="${id}"` : ""}>${entryText}</tr>`);
   }
   return `${emission}
     <table${emitAttributes(node)}>

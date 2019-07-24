@@ -2,7 +2,7 @@
 
 const { extension } = require("@valos/sbomdoc");
 const {
-  ontologyTables, extractee: { authors, ref, /* dfn, */ },
+  ontologyTables, extractee: { authors, ref, /* dfn, */ filterVocabulary, filterVocabularyNot },
 } = require("@valos/revdoc");
 
 const { version, description } = require("./package");
@@ -44,12 +44,25 @@ module.exports = {
       "table#>0;prefixes_data": ontologyTables.prefixes,
       "data#prefixes_data": extension.ontology.prefixes,
     },
-    [`chapter#vocabulary>1;SBoMDoc RDF vocabulary with prefix ${extension.ontology.prefix}:`]: {
+    [`chapter#classes>1;SBoMDoc rdfs:Class vocabulary, prefix ${extension.ontology.prefix}:`]: {
+      "#0": [],
+      "table#>0;classes_data": ontologyTables.classes,
+      "data#classes_data": filterVocabulary("a", "rdfs:Class",
+          extension.ontology.vocabulary),
+    },
+    [`chapter#properties>2;SBoMDoc rdf:Property vocabulary, prefix ${extension.ontology.prefix}:`]: {
+      "#0": [],
+      "table#>0;properties_data": ontologyTables.properties,
+      "data#properties_data": filterVocabulary("a", "rdf:Property",
+          extension.ontology.vocabulary),
+    },
+    [`chapter#vocabulary>3;SBoMDoc remaining vocabulary, prefix ${extension.ontology.prefix}:`]: {
       "#0": [],
       "table#>0;vocabulary_data": ontologyTables.vocabulary,
-      "data#vocabulary_data": extension.ontology.vocabulary,
+      "data#vocabulary_data": filterVocabularyNot("a", ["rdfs:Class", "rdf:Property"],
+          extension.ontology.vocabulary),
     },
-    "chapter#context>2;SBoMDoc JSON-LD context term definitions": {
+    "chapter#context>4;SBoMDoc JSON-LD context term definitions": {
       "#0": [],
       "table#>0;context_data": ontologyTables.context,
       "data#context_data": extension.ontology.context,

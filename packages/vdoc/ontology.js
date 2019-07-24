@@ -96,9 +96,9 @@ module.exports = {
       range: "vdoc:Table", target: "vdoc:headers", rest: "vdoc:lookup",
       comment: "Table",
     },
-    column: {
-      range: "vdoc:Column", target: "vdoc:content", rest: "vdoc:key",
-      comment: "Column",
+    header: {
+      range: "vdoc:Header", target: "vdoc:content", rest: "vdoc:key",
+      comment: "Header",
     },
     data: {
       hidden: true, target: "vdoc:content",

@@ -107,5 +107,23 @@ module.exports = {
     return {
       "vdoc:content": entries,
     };
-  }
+  },
+
+  filterVocabulary (predicate, objectOrObjects, vocabulary) {
+    const ret = {};
+    const objects = [].concat(objectOrObjects);
+    for (const [key, value] of Object.entries(vocabulary)) {
+      if (objects.includes(value[predicate])) ret[key] = value;
+    }
+    return ret;
+  },
+
+  filterVocabularyNot (predicate, objectOrObjects, vocabulary) {
+    const ret = {};
+    const objects = [].concat(objectOrObjects);
+    for (const [key, value] of Object.entries(vocabulary)) {
+      if (!objects.includes(value[predicate])) ret[key] = value;
+    }
+    return ret;
+  },
 };

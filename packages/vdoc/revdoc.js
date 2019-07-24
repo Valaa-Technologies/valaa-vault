@@ -2,7 +2,7 @@
 
 const { extension } = require("@valos/vdoc");
 const {
-  ontologyTables, extractee: { authors, ref, dfn },
+  ontologyTables, extractee: { authors, ref, dfn, filterVocabulary, filterVocabularyNot },
 } = require("@valos/revdoc");
 
 const { version, description } = require("./package");
@@ -31,7 +31,7 @@ module.exports = {
     ref("@valos/vdoc npm package", "@valos/vdoc"), ".",
   ],
   "chapter#introduction>2;Introduction": [
-    dfn(`VDoc`, "#vdoc", `is a extensible JSON-LD interchange
+    dfn(`VDoc`, "#vdoc", ` is an extensible JSON-LD interchange
       specification for extracting documents from varying sources,
       passing the now-machine-manipulable interchange document around
       and subsequently producing documents of specific formats such
@@ -39,9 +39,9 @@ module.exports = {
       ansi-colored console outputs.`),
     null,
     `Motivation for this specification is to provide the foundation
-    for documentation `, ref("Valospace hypertwins", "@valos/hypertwin"),
-    `by supporting the ValOS resources as an emission target. This
-    allows all kinds of documentation to be accessible from within
+    for document `, ref("Valospace hypertwins", "@valos/hypertwin"),
+    ` by supporting the ValOS resources as an emission target. This
+    allows all kinds of documents to be accessible from within
     Valospace with minimal additional tooling. This is not made
     an explicit design goal unto itself; instead the design goals are
     chosen to be generic in a way that satisfies this goal as the
@@ -100,27 +100,27 @@ module.exports = {
       `VDoc defines the central document flow in terms of three
       document phases:`,
     "numbered#document_phases>0": [[
-      dfn("Source graph", "#source_graph", `is a cyclic graph of
+      dfn("Source graph", "#source_graph", ` is a cyclic graph of
         native objects with some of its sub-graphs matching some of the `,
         ref("VDoc extraction rules", "#extension_extraction_rules"), ".",
-      ), `It can be manually hand-written, programmatically generated
+      ), ` It can be manually hand-written, programmatically generated
       or even dynamically introspected.`,
     ], [
-      dfn("A VDocsON", "#vdocson", `is a JSON-LD construct and the
+      dfn("A VDocsON", "#vdocson", ` is a JSON-LD construct and the
         primary VDoc interchange format. It is a normalized, complete
         and self-contained structure with potentially multiple
         different format-specific @context(s).`,
       ),
     ], [
-      dfn("Emission output", "#extension_output", `is a format specific
+      dfn("Emission output", "#extension_output", ` is a format specific
         output that is produced by `, ref("emission", "#emission"),
-        `from a VDocsON and format specific set of emission parameters.`
+        ` from a VDocsON and format specific set of emission parameters.`
       ),
     ]],
     "#1":
       `VDoc defines two transformations between the phases:`,
     "numbered#document_transformations>1": [[
-      dfn("Extraction", "#extraction", `transforms a source graph into
+      dfn("Extraction", "#extraction", ` transforms a source graph into
         a VDocsON by applying the idempotent `,
         ref("VDoc extraction rules", "#extension_extraction_rules"),
         " until the output no longer changes.",
@@ -128,7 +128,7 @@ module.exports = {
       arbitrarily close to the resulting VDocsON; in fact a VDocsON is
       always its own source graph.`,
     ], [
-      dfn("Emission", "#emission", `is a format specific transformation
+      dfn("Emission", "#emission", ` is a format specific transformation
         which emits the `, ref("format specific output", "#output_format"),
         " from VDocsON.",
       ),
@@ -137,8 +137,8 @@ module.exports = {
       `In addition to these phases and transformations VDoc makes use of `,
       ref("JSON-LD 1.1 format", "https://www.w3.org/TR/json-ld11/"),
       `, its `, ref("API and algorithms", "https://www.w3.org/TR/json-ld11-api/"),
-      `and (maybe) `, ref("its framing", "https://www.w3.org/TR/json-ld11-framing/"),
-      "for providing a mapping from VDocsON to RDF model.",
+      ` and (maybe) `, ref("its framing", "https://www.w3.org/TR/json-ld11-framing/"),
+      " for providing a mapping from VDocsON to RDF model.",
     ],
   },
   "chapter#vdocson>5;VDocsON - primary interchange format": {
@@ -146,15 +146,15 @@ module.exports = {
       structure consisting of three types of nodes, corresponding to
       the first, second and remaining levels of the tree:`,
     "numbered#node_types>0": [
-      dfn("Document node", "#document_node", `is an always-first-level
+      dfn("Document node", "#document_node", ` is an always-first-level
         node identified by a `, ref("a global document IRI", "#document_iri"),
         "as its ", ref("JSON-LD @id", "https://www.w3.org/TR/json-ld11/#node-identifiers"),
         "."),
-      dfn("Resource node", "#resource_node", `is an always-second-level
+      dfn("Resource node", "#resource_node", ` is an always-second-level
         node which is directly accessible from the first-level document
         via its document relative `, ref("resource identifier", "#resource_id"),
         `as the dictionary key.`),
-      dfn("Element node", "#element_node", `is a third-or-more-level
+      dfn("Element node", "#element_node", ` is a third-or-more-level
         node. It might be anonymous and lacks a stable and unique
         identifiers. It MAY have a locally unique identifier. If the
         element node and all its parent element nodes have locally
@@ -164,8 +164,8 @@ module.exports = {
     ],
     "#1": [
       `There can be multiple first-level document nodes in a single
-      VDocsON (as per JSON-LD).`,
-      dfn("The tree root node", "#root_node", `is the singular,
+      VDocsON (as per JSON-LD). `,
+      dfn("The tree root node", "#root_node", ` is the singular,
         implicit '0th-level' VDocsON node without semantics defined by
         VDoc itself.`),
     ],
@@ -175,32 +175,32 @@ module.exports = {
         IRI key has semantics defined VDoc or extension format
         specifications:`,
       "numbered#node_key_categories>0": [
-        dfn("VDoc node key", "#vdoc_key", `is any IRI which matches
+        dfn("VDoc node key", "#vdoc_key", ` is any IRI which matches
           a VDoc ontology context term. Its semantics are defined by
           this specification.`),
-        dfn("Extension node key", "#extension_key", `is any IRI which
+        dfn("Extension node key", "#extension_key", ` is any IRI which
           matches an extension ontology context term. Its semantics
           are defined by the corresponding extension specification`),
-        dfn("Generic IRI key", "#generic_key", `is any IRI key lacking
+        dfn("Generic IRI key", "#generic_key", ` is any IRI key lacking
           recognized ontology. It has no semantics in addition to what
           JSON-LD specifies.`),
-        dfn("Identifier key", "#identifier_key", `is any non-IRI key.
+        dfn("Identifier key", "#identifier_key", ` is any non-IRI key.
           The semantics of an identifier key is defined by the node.`),
       ],
     },
     "chapter#document_node>2;Document nodes": [
-      dfn(`The document IRI`, "#document_iri", `is a global
+      dfn(`The document IRI`, "#document_iri", ` is a global
         identifier of a document. It must not have a fragment part.`),
-      `All `, ref("identifier keys", "#identifier_key"), `of a
+      `All `, ref("identifier keys", "#identifier_key"), ` of a
       document node must have a resource node as their value.`,
     ],
     "chapter#resource_node>3;Resource nodes": [
-      dfn(`The resource identifier`, "#resource_id", `is a string using
+      dfn(`The resource identifier`, "#resource_id", ` is a string using
       character set restricted to valid javascript identifiers, is
       unique within a document and which identifies a resource node
       inside that document.`),
       `When the resource identifier is appended to `, ref("the document IRI", "#document_iri"),
-      `as an IRI fragment part the resource node has a stable,
+      ` as an IRI fragment part the resource node has a stable,
       global identity over time.`,
     ],
     "chapter#element_node>4;Element nodes": [
@@ -208,13 +208,16 @@ module.exports = {
       lack a stable identity even within the document.`
     ],
   },
-  "chapter#extraction_transformation>6;Document extraction transformation": {
+  "chapter#transformations_spec>6;Transformations convert documents to and from VDocsON": {
     "#0": [],
+    "chapter#extraction_transformation>6;Extraction transformation from source graphs": {
+      "#0": [],
+    },
+    "chapter#emission_transformation>7;Emission transformation into output targets": {
+      "#0": [],
+    },
   },
-  "chapter#emission_transformation>7;Document emission transformation": {
-    "#0": [],
-  },
-  "chapter#extension>8;VDoc extensions and their ontologies": {
+  "chapter#extension>7;Extensions provide new ontologies and transformations": {
     "#0": [
       `A VDoc extension is a specification which can extend the VDoc
       specification in different ways in the different transformation
@@ -275,15 +278,15 @@ module.exports = {
         interpreted as mutations against a given target vdocson document.
         The idiomatic transformation rule consists of two parts:`,
         { "bulleted#": [
-          dfn("key matching pattern", "#transformation_key_pattern", `is
+          dfn("key matching pattern", "#transformation_key_pattern", ` is
               matched against source graph node dictionary key to see if
               the rule applies in that `, ref("transformation context")),
-          dfn("transformation rule", "#transformation_rule", `specifies
+          dfn("transformation rule", "#transformation_rule", ` specifies
               how the `, ref("transformation context"), ` is interpreted
               as a set of mutations on the current target vdocson
               document node`),
         ] },
-        dfn("Transformation context", "#transformation_context", `is
+        dfn("Transformation context", "#transformation_context", ` is
             defined as a collection of `, ...[].concat(...[
               "transformation key",
               "source graph parent node",
@@ -318,7 +321,7 @@ module.exports = {
       },
     },
   },
-  "chapter#ontology>9;VDoc Core ontology": {
+  "chapter#ontology>8;VDoc Core ontology": {
     "#0": [
       `VDoc core ontology specifies the vocabulary for the human facing
       document structure by means of primitives which are sufficiently
@@ -333,19 +336,31 @@ module.exports = {
       "table#>0;prefixes_data": ontologyTables.prefixes,
       "data#prefixes_data": extension.ontology.prefixes,
     },
-    [`chapter#vocabulary>1;VDoc Core RDF vocabulary with prefix ${
-        extension.ontology.prefix}:`]: {
+    [`chapter#classes>1;VDoc rdfs:Class vocabulary, prefix ${extension.ontology.prefix}:`]: {
+      "#0": [],
+      "table#>0;classes_data": ontologyTables.classes,
+      "data#classes_data": filterVocabulary("a", "rdfs:Class",
+          extension.ontology.vocabulary),
+    },
+    [`chapter#properties>2;VDoc rdf:Property vocabulary, prefix ${extension.ontology.prefix}:`]: {
+      "#0": [],
+      "table#>0;properties_data": ontologyTables.properties,
+      "data#properties_data": filterVocabulary("a", "rdf:Property",
+          extension.ontology.vocabulary),
+    },
+    [`chapter#vocabulary>3;VDoc remaining vocabulary, prefix ${extension.ontology.prefix}:`]: {
       "#0": [],
       "table#>0;vocabulary_data": ontologyTables.vocabulary,
-      "data#vocabulary_data": extension.ontology.vocabulary,
+      "data#vocabulary_data": filterVocabularyNot("a", ["rdfs:Class", "rdf:Property"],
+          extension.ontology.vocabulary),
     },
-    "chapter#context>2;VDoc Core JSON-LD context term definitions": {
+    "chapter#context>4;VDoc Core JSON-LD context term definitions": {
       "#0": [],
       "table#>0;context_data": ontologyTables.context,
       "data#context_data": extension.ontology.context,
     },
   },
-  "chapter#transformations>10;VDoc Core extractions": {
+  "chapter#transformations>9;VDoc Core transformations": {
     "#0": [
       `VDoc defines a single extraction transformation from a native
       javascript source graph. To support this VDoc defines an `,

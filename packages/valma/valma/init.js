@@ -40,14 +40,14 @@ exports.handler = async (yargv) => {
 
   let packageJSON;
   try { packageJSON = require(vlm.path.join(process.cwd(), "package")); } catch (error) { /* */ }
-  const ret = { success: true };
+  const ret_ = { success: true };
   Object.assign(await _initPackageJSON());
-  if (ret.success === false) return ret;
+  if (ret_.success === false) return ret_;
   if (!packageJSON) return vlm.interact("vlm init");
-  if (ret.success !== false) Object.assign(ret, await _addInitialValmaDevDependencies());
-  if (ret.success !== false) Object.assign(ret, await _selectValOSTypeAndDomain());
-  if (ret.success !== false) Object.assign(ret, await _configure());
-  return yargv.breakdown || (ret.success === false) ? ret : { success: ret.success };
+  if (ret_.success !== false) Object.assign(ret_, await _addInitialValmaDevDependencies());
+  if (ret_.success !== false) Object.assign(ret_, await _selectValOSTypeAndDomain());
+  if (ret_.success !== false) Object.assign(ret_, await _configure());
+  return yargv.breakdown || (ret_.success === false) ? ret_ : { success: ret_.success };
 
   async function _initPackageJSON () {
     while (yargv.reconfigure || !packageJSON) {

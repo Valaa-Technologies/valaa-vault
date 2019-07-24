@@ -25,15 +25,15 @@
 
   <section id="introduction" class="vdoc type-vdoc-chapter">
     <h2>Introduction</h2>
-      <p><a href="#vdoc" class="vdoc type-vdoc-reference" style="bold">VDoc</a>is a extensible JSON-LD interchange
+      <p><a href="#vdoc" class="vdoc type-vdoc-reference" style="bold">VDoc</a> is an extensible JSON-LD interchange
       specification for extracting documents from varying sources,
       passing the now-machine-manipulable interchange document around
       and subsequently producing documents of specific formats such
       as Valospace resources, markdown, ReSpec HTML and browser and
       ansi-colored console outputs.</p>
       <p>Motivation for this specification is to provide the foundation
-    for documentation <a href="@valos/hypertwin" class="vdoc type-vdoc-reference">Valospace hypertwins</a>by supporting the ValOS resources as an emission target. This
-    allows all kinds of documentation to be accessible from within
+    for document <a href="@valos/hypertwin" class="vdoc type-vdoc-reference">Valospace hypertwins</a> by supporting the ValOS resources as an emission target. This
+    allows all kinds of documents to be accessible from within
     Valospace with minimal additional tooling. This is not made
     an explicit design goal unto itself; instead the design goals are
     chosen to be generic in a way that satisfies this goal as the
@@ -86,26 +86,26 @@ To satisfy the goals VDoc chooses <a href="https://www.w3.org/TR/json-ld11/" cla
 VDoc defines the central document flow in terms of three
       document phases:
     <ol>
-      <li><a href="#source_graph" class="vdoc type-vdoc-reference" style="bold">Source graph</a>is a cyclic graph of
-        native objects with some of its sub-graphs matching some of the <a href="#extension_extraction_rules" class="vdoc type-vdoc-reference">VDoc extraction rules</a>.It can be manually hand-written, programmatically generated
+      <li><a href="#source_graph" class="vdoc type-vdoc-reference" style="bold">Source graph</a> is a cyclic graph of
+        native objects with some of its sub-graphs matching some of the <a href="#extension_extraction_rules" class="vdoc type-vdoc-reference">VDoc extraction rules</a>. It can be manually hand-written, programmatically generated
       or even dynamically introspected.</li>
-      <li><a href="#vdocson" class="vdoc type-vdoc-reference" style="bold">A VDocsON</a>is a JSON-LD construct and the
+      <li><a href="#vdocson" class="vdoc type-vdoc-reference" style="bold">A VDocsON</a> is a JSON-LD construct and the
         primary VDoc interchange format. It is a normalized, complete
         and self-contained structure with potentially multiple
         different format-specific @context(s).</li>
-      <li><a href="#extension_output" class="vdoc type-vdoc-reference" style="bold">Emission output</a>is a format specific
-        output that is produced by <a href="#emission" class="vdoc type-vdoc-reference">emission</a>from a VDocsON and format specific set of emission parameters.</li>
+      <li><a href="#extension_output" class="vdoc type-vdoc-reference" style="bold">Emission output</a> is a format specific
+        output that is produced by <a href="#emission" class="vdoc type-vdoc-reference">emission</a> from a VDocsON and format specific set of emission parameters.</li>
     </ol>
 VDoc defines two transformations between the phases:
     <ol>
-      <li><a href="#extraction" class="vdoc type-vdoc-reference" style="bold">Extraction</a>transforms a source graph into
+      <li><a href="#extraction" class="vdoc type-vdoc-reference" style="bold">Extraction</a> transforms a source graph into
         a VDocsON by applying the idempotent <a href="#extension_extraction_rules" class="vdoc type-vdoc-reference">VDoc extraction rules</a> until the output no longer changes.Due to idempotence the source graph can wildly different or
       arbitrarily close to the resulting VDocsON; in fact a VDocsON is
       always its own source graph.</li>
-      <li><a href="#emission" class="vdoc type-vdoc-reference" style="bold">Emission</a>is a format specific transformation
+      <li><a href="#emission" class="vdoc type-vdoc-reference" style="bold">Emission</a> is a format specific transformation
         which emits the <a href="#output_format" class="vdoc type-vdoc-reference">format specific output</a> from VDocsON.</li>
     </ol>
-In addition to these phases and transformations VDoc makes use of <a href="https://www.w3.org/TR/json-ld11/" class="vdoc type-vdoc-reference">JSON-LD 1.1 format</a>, its <a href="https://www.w3.org/TR/json-ld11-api/" class="vdoc type-vdoc-reference">API and algorithms</a>and (maybe) <a href="https://www.w3.org/TR/json-ld11-framing/" class="vdoc type-vdoc-reference">its framing</a>for providing a mapping from VDocsON to RDF model.
+In addition to these phases and transformations VDoc makes use of <a href="https://www.w3.org/TR/json-ld11/" class="vdoc type-vdoc-reference">JSON-LD 1.1 format</a>, its <a href="https://www.w3.org/TR/json-ld11-api/" class="vdoc type-vdoc-reference">API and algorithms</a> and (maybe) <a href="https://www.w3.org/TR/json-ld11-framing/" class="vdoc type-vdoc-reference">its framing</a> for providing a mapping from VDocsON to RDF model.
   </section>
 
   <section id="vdocson" class="vdoc type-vdoc-chapter">
@@ -114,12 +114,12 @@ VDocsON is a JSON-LD document with a well-formed tree
       structure consisting of three types of nodes, corresponding to
       the first, second and remaining levels of the tree:
     <ol>
-      <li><a href="#document_node" class="vdoc type-vdoc-reference" style="bold">Document node</a>is an always-first-level
+      <li><a href="#document_node" class="vdoc type-vdoc-reference" style="bold">Document node</a> is an always-first-level
         node identified by a <a href="#document_iri" class="vdoc type-vdoc-reference">a global document IRI</a>as its <a href="https://www.w3.org/TR/json-ld11/#node-identifiers" class="vdoc type-vdoc-reference">JSON-LD @id</a>.</li>
-      <li><a href="#resource_node" class="vdoc type-vdoc-reference" style="bold">Resource node</a>is an always-second-level
+      <li><a href="#resource_node" class="vdoc type-vdoc-reference" style="bold">Resource node</a> is an always-second-level
         node which is directly accessible from the first-level document
         via its document relative <a href="#resource_id" class="vdoc type-vdoc-reference">resource identifier</a>as the dictionary key.</li>
-      <li><a href="#element_node" class="vdoc type-vdoc-reference" style="bold">Element node</a>is a third-or-more-level
+      <li><a href="#element_node" class="vdoc type-vdoc-reference" style="bold">Element node</a> is a third-or-more-level
         node. It might be anonymous and lacks a stable and unique
         identifiers. It MAY have a locally unique identifier. If the
         element node and all its parent element nodes have locally
@@ -128,7 +128,7 @@ VDocsON is a JSON-LD document with a well-formed tree
         element node, similar to <a href="#resource_id" class="vdoc type-vdoc-reference">the resource identifier</a></li>
     </ol>
 There can be multiple first-level document nodes in a single
-      VDocsON (as per JSON-LD).<a href="#root_node" class="vdoc type-vdoc-reference" style="bold">The tree root node</a>is the singular,
+      VDocsON (as per JSON-LD). <a href="#root_node" class="vdoc type-vdoc-reference" style="bold">The tree root node</a> is the singular,
         implicit '0th-level' VDocsON node without semantics defined by
         VDoc itself.
   <section id="node_keys" class="vdoc type-vdoc-chapter">
@@ -138,16 +138,16 @@ The keys of the VDocsON nodes have four categories
         IRI key has semantics defined VDoc or extension format
         specifications:
     <ol>
-      <li><a href="#vdoc_key" class="vdoc type-vdoc-reference" style="bold">VDoc node key</a>is any IRI which matches
+      <li><a href="#vdoc_key" class="vdoc type-vdoc-reference" style="bold">VDoc node key</a> is any IRI which matches
           a VDoc ontology context term. Its semantics are defined by
           this specification.</li>
-      <li><a href="#extension_key" class="vdoc type-vdoc-reference" style="bold">Extension node key</a>is any IRI which
+      <li><a href="#extension_key" class="vdoc type-vdoc-reference" style="bold">Extension node key</a> is any IRI which
           matches an extension ontology context term. Its semantics
           are defined by the corresponding extension specification</li>
-      <li><a href="#generic_key" class="vdoc type-vdoc-reference" style="bold">Generic IRI key</a>is any IRI key lacking
+      <li><a href="#generic_key" class="vdoc type-vdoc-reference" style="bold">Generic IRI key</a> is any IRI key lacking
           recognized ontology. It has no semantics in addition to what
           JSON-LD specifies.</li>
-      <li><a href="#identifier_key" class="vdoc type-vdoc-reference" style="bold">Identifier key</a>is any non-IRI key.
+      <li><a href="#identifier_key" class="vdoc type-vdoc-reference" style="bold">Identifier key</a> is any non-IRI key.
           The semantics of an identifier key is defined by the node.</li>
     </ol>
 
@@ -155,17 +155,17 @@ The keys of the VDocsON nodes have four categories
 
   <section id="document_node" class="vdoc type-vdoc-chapter">
     <h2>Document nodes</h2>
-<a href="#document_iri" class="vdoc type-vdoc-reference" style="bold">The document IRI</a>is a global
-        identifier of a document. It must not have a fragment part.All <a href="#identifier_key" class="vdoc type-vdoc-reference">identifier keys</a>of a
+<a href="#document_iri" class="vdoc type-vdoc-reference" style="bold">The document IRI</a> is a global
+        identifier of a document. It must not have a fragment part.All <a href="#identifier_key" class="vdoc type-vdoc-reference">identifier keys</a> of a
       document node must have a resource node as their value.
   </section>
 
   <section id="resource_node" class="vdoc type-vdoc-chapter">
     <h2>Resource nodes</h2>
-<a href="#resource_id" class="vdoc type-vdoc-reference" style="bold">The resource identifier</a>is a string using
+<a href="#resource_id" class="vdoc type-vdoc-reference" style="bold">The resource identifier</a> is a string using
       character set restricted to valid javascript identifiers, is
       unique within a document and which identifies a resource node
-      inside that document.When the resource identifier is appended to <a href="#document_iri" class="vdoc type-vdoc-reference">the document IRI</a>as an IRI fragment part the resource node has a stable,
+      inside that document.When the resource identifier is appended to <a href="#document_iri" class="vdoc type-vdoc-reference">the document IRI</a> as an IRI fragment part the resource node has a stable,
       global identity over time.
   </section>
 
@@ -177,18 +177,23 @@ Element nodes are structural document building blocks which
 
   </section>
 
+  <section id="transformations_spec" class="vdoc type-vdoc-chapter">
+    <h2>Transformations convert documents to and from VDocsON</h2>
+
   <section id="extraction_transformation" class="vdoc type-vdoc-chapter">
-    <h2>Document extraction transformation</h2>
+    <h2>Extraction transformation from source graphs</h2>
 
   </section>
 
   <section id="emission_transformation" class="vdoc type-vdoc-chapter">
-    <h2>Document emission transformation</h2>
+    <h2>Emission transformation into output targets</h2>
+
+  </section>
 
   </section>
 
   <section id="extension" class="vdoc type-vdoc-chapter">
-    <h2>VDoc extensions and their ontologies</h2>
+    <h2>Extensions provide new ontologies and transformations</h2>
       <p>A VDoc extension is a specification which can extend the VDoc
       specification in different ways in the different transformation
       stages. An extension has two main parts; the extension ontology
@@ -240,15 +245,15 @@ Extraction transformation rules specify how a source graph is
         interpreted as mutations against a given target vdocson document.
         The idiomatic transformation rule consists of two parts:
     <ul>
-      <li><a href="#transformation_key_pattern" class="vdoc type-vdoc-reference" style="bold">key matching pattern</a>is
+      <li><a href="#transformation_key_pattern" class="vdoc type-vdoc-reference" style="bold">key matching pattern</a> is
               matched against source graph node dictionary key to see if
               the rule applies in that <a href="transformation context" class="vdoc type-vdoc-reference">transformation context</a></li>
-      <li><a href="#transformation_rule" class="vdoc type-vdoc-reference" style="bold">transformation rule</a>specifies
+      <li><a href="#transformation_rule" class="vdoc type-vdoc-reference" style="bold">transformation rule</a> specifies
               how the <a href="transformation context" class="vdoc type-vdoc-reference">transformation context</a> is interpreted
               as a set of mutations on the current target vdocson
               document node</li>
     </ul>
-<a href="#transformation_context" class="vdoc type-vdoc-reference" style="bold">Transformation context</a>is
+<a href="#transformation_context" class="vdoc type-vdoc-reference" style="bold">Transformation context</a> is
             defined as a collection of <a href="transformation key" class="vdoc type-vdoc-reference">transformation key</a>, <a href="source graph parent node" class="vdoc type-vdoc-reference">source graph parent node</a>, <a href="source graph node value" class="vdoc type-vdoc-reference">source graph node value</a>, <a href="target document parent node" class="vdoc type-vdoc-reference">target document parent node</a> and <a href="target document value" class="vdoc type-vdoc-reference">target document value</a>
   </section>
 
@@ -299,8 +304,8 @@ VDoc core ontology specifies the vocabulary for the human facing
 
     <table class="vdoc type-vdoc-table">
       <thead>
-        <th class="vdoc type-vdoc-column">Prefix</th>
-        <th class="vdoc type-vdoc-column">IRI</th>
+        <th class="vdoc type-vdoc-header">Prefix</th>
+        <th class="vdoc type-vdoc-header">IRI</th>
       </thead>
       <tbody>
         <tr><td>dc</td><td>http://purl.org/dc/elements/1.1/</td></tr>
@@ -313,35 +318,64 @@ VDoc core ontology specifies the vocabulary for the human facing
 
   </section>
 
-  <section id="vocabulary" class="vdoc type-vdoc-chapter">
-    <h2>VDoc Core RDF vocabulary with prefix vdoc:</h2>
+  <section id="classes" class="vdoc type-vdoc-chapter">
+    <h2>VDoc rdfs:Class vocabulary, prefix vdoc:</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
-        <th class="vdoc type-vdoc-column">rdfs:label</th>
-        <th class="vdoc type-vdoc-column">rdf:type</th>
-        <th class="vdoc type-vdoc-column">rdfs:subClassOf</th>
-        <th class="vdoc type-vdoc-column">rdfs:subPropertyOf</th>
-        <th class="vdoc type-vdoc-column">rdfs:domain</th>
-        <th class="vdoc type-vdoc-column">rdfs:range</th>
-        <th class="vdoc type-vdoc-column">rdfs:comment</th>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
+        <th class="vdoc type-vdoc-header">rdfs:comment</th>
       </thead>
       <tbody>
-        <tr><td>Node</td><td>rdfs:Class</td><td></td><td></td><td></td><td></td><td>A document tree Node</td></tr>
-        <tr><td>content</td><td>rdf:Property</td><td></td><td></td><td>vdoc:Node</td><td>rdfs:List</td><td>The primary visible content of a Node</td></tr>
-        <tr><td>words</td><td>rdf:Property</td><td></td><td>vdoc:content</td><td>vdoc:Node</td><td>rdfs:List</td><td>A visible list of visually separate words</td></tr>
-        <tr><td>entries</td><td>rdf:Property</td><td></td><td>vdoc:content</td><td>vdoc:Node</td><td>rdfs:List</td><td>A visible list of vertically or horizontally segmented entries</td></tr>
-        <tr><td>Chapter</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td></td><td>A titled, possibly numbered chapter document node</td></tr>
-        <tr><td>BulletList</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td></td><td>A bullet list document node</td></tr>
-        <tr><td>NumberedList</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td></td><td>A numbered list document node</td></tr>
-        <tr><td>Table</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td></td><td>A two-dimensional table document node</td></tr>
-        <tr><td>Header</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td></td><td>A table cross-entry-section header node</td></tr>
-        <tr><td>headers</td><td>rdf:Property</td><td></td><td></td><td>vdoc:Table</td><td>rdfs:List</td><td>A list of table cross-entry-section headers</td></tr>
-        <tr><td>CharacterData</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td></td><td>A CDATA document node</td></tr>
-        <tr><td>Reference</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td></td><td>A reference document node</td></tr>
-        <tr><td>ContextPath</td><td>rdfs:Class</td><td>vdoc:Node</td><td></td><td></td><td></td><td>A context-based path document node</td></tr>
-        <tr><td>context</td><td>rdf:Property</td><td></td><td></td><td>vdoc:ContextPath</td><td>rdfs:Resource</td><td>Non-visible context base (absolute or relative to current base)</td></tr>
-        <tr><td>ContextBase</td><td>rdfs:Class</td><td>vdoc:ContextPath</td><td></td><td></td><td></td><td>A context base setting document node</td></tr>
+        <tr id="Node"><td>Node</td><td></td><td>A document tree Node</td></tr>
+        <tr id="Chapter"><td>Chapter</td><td>vdoc:Node</td><td>A titled, possibly numbered chapter document node</td></tr>
+        <tr id="BulletList"><td>BulletList</td><td>vdoc:Node</td><td>A bullet list document node</td></tr>
+        <tr id="NumberedList"><td>NumberedList</td><td>vdoc:Node</td><td>A numbered list document node</td></tr>
+        <tr id="Table"><td>Table</td><td>vdoc:Node</td><td>A two-dimensional table document node</td></tr>
+        <tr id="Header"><td>Header</td><td>vdoc:Node</td><td>A table cross-entry-section header node</td></tr>
+        <tr id="CharacterData"><td>CharacterData</td><td>vdoc:Node</td><td>A CDATA document node</td></tr>
+        <tr id="Reference"><td>Reference</td><td>vdoc:Node</td><td>A reference document node</td></tr>
+        <tr id="ContextPath"><td>ContextPath</td><td>vdoc:Node</td><td>A context-based path document node</td></tr>
+        <tr id="ContextBase"><td>ContextBase</td><td>vdoc:ContextPath</td><td>A context base setting document node</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="properties" class="vdoc type-vdoc-chapter">
+    <h2>VDoc rdf:Property vocabulary, prefix vdoc:</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:subPropertyOf</th>
+        <th class="vdoc type-vdoc-header">rdfs:domain</th>
+        <th class="vdoc type-vdoc-header">rdfs:range</th>
+        <th class="vdoc type-vdoc-header">rdfs:comment</th>
+      </thead>
+      <tbody>
+        <tr id="content"><td>content</td><td></td><td>vdoc:Node</td><td>rdfs:List</td><td>The primary visible content of a Node</td></tr>
+        <tr id="words"><td>words</td><td>vdoc:content</td><td>vdoc:Node</td><td>rdfs:List</td><td>A visible list of visually separate words</td></tr>
+        <tr id="entries"><td>entries</td><td>vdoc:content</td><td>vdoc:Node</td><td>rdfs:List</td><td>A visible list of vertically or horizontally segmented entries</td></tr>
+        <tr id="headers"><td>headers</td><td></td><td>vdoc:Table</td><td>rdfs:List</td><td>A list of table cross-entry-section headers</td></tr>
+        <tr id="context"><td>context</td><td></td><td>vdoc:ContextPath</td><td>rdfs:Resource</td><td>Non-visible context base (absolute or relative to current base)</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="vocabulary" class="vdoc type-vdoc-chapter">
+    <h2>VDoc remaining vocabulary, prefix vdoc:</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdf:type</th>
+        <th class="vdoc type-vdoc-header">rdfs:comment</th>
+      </thead>
+      <tbody>
+        
       </tbody>
     </table>
 
@@ -352,11 +386,11 @@ VDoc core ontology specifies the vocabulary for the human facing
 
     <table class="vdoc type-vdoc-table">
       <thead>
-        <th class="vdoc type-vdoc-column">Term</th>
-        <th class="vdoc type-vdoc-column">Definition</th>
-        <th class="vdoc type-vdoc-column">@id</th>
-        <th class="vdoc type-vdoc-column">@type</th>
-        <th class="vdoc type-vdoc-column">@container</th>
+        <th class="vdoc type-vdoc-header">Term</th>
+        <th class="vdoc type-vdoc-header">Definition</th>
+        <th class="vdoc type-vdoc-header">@id</th>
+        <th class="vdoc type-vdoc-header">@type</th>
+        <th class="vdoc type-vdoc-header">@container</th>
       </thead>
       <tbody>
         <tr><td>a</td><td>revdoc:Document</td><td>rdf:type</td><td>@id</td><td></td></tr>
@@ -371,7 +405,7 @@ VDoc core ontology specifies the vocabulary for the human facing
   </section>
 
   <section id="transformations" class="vdoc type-vdoc-chapter">
-    <h2>VDoc Core extractions</h2>
+    <h2>VDoc Core transformations</h2>
       <p>VDoc defines a single extraction transformation from a native
       javascript source graph. To support this VDoc defines an <a href="#extractee_api" class="vdoc type-vdoc-reference" style="bold">extractee API</a> as native javascript
       convenience functions and libraries which construct typical
@@ -384,11 +418,11 @@ VDoc core ontology specifies the vocabulary for the human facing
 
     <table class="vdoc type-vdoc-table">
       <thead>
-        <th class="vdoc type-vdoc-column">Rule name</th>
-        <th class="vdoc type-vdoc-column">Node rdf:type</th>
-        <th class="vdoc type-vdoc-column">primary target</th>
-        <th class="vdoc type-vdoc-column">';rest' target</th>
-        <th class="vdoc type-vdoc-column">Comment</th>
+        <th class="vdoc type-vdoc-header">Rule name</th>
+        <th class="vdoc type-vdoc-header">Node rdf:type</th>
+        <th class="vdoc type-vdoc-header">primary target</th>
+        <th class="vdoc type-vdoc-header">';rest' target</th>
+        <th class="vdoc type-vdoc-header">Comment</th>
       </thead>
       <tbody>
         <tr><td></td><td></td><td>vdoc:content</td><td></td><td>Basic Node</td></tr>
@@ -396,7 +430,7 @@ VDoc core ontology specifies the vocabulary for the human facing
         <tr><td>bulleted</td><td>vdoc:BulletList</td><td>vdoc:entries</td><td></td><td>Bulleted list</td></tr>
         <tr><td>numbered</td><td>vdoc:NumberedList</td><td>vdoc:entries</td><td></td><td>Numbered list</td></tr>
         <tr><td>table</td><td>vdoc:Table</td><td>vdoc:headers</td><td>vdoc:lookup</td><td>Table</td></tr>
-        <tr><td>column</td><td>vdoc:Column</td><td>vdoc:content</td><td>vdoc:key</td><td>Column</td></tr>
+        <tr><td>header</td><td>vdoc:Header</td><td>vdoc:content</td><td>vdoc:key</td><td>Header</td></tr>
         <tr><td>data</td><td></td><td>vdoc:content</td><td></td><td>Data lookup</td></tr>
       </tbody>
     </table>
@@ -408,8 +442,8 @@ VDoc core ontology specifies the vocabulary for the human facing
 
     <table class="vdoc type-vdoc-table">
       <thead>
-        <th class="vdoc type-vdoc-column">API identifier</th>
-        <th class="vdoc type-vdoc-column">rdf:type</th>
+        <th class="vdoc type-vdoc-header">API identifier</th>
+        <th class="vdoc type-vdoc-header">rdf:type</th>
       </thead>
       <tbody>
         <tr><td>cdata</td><td></td></tr>

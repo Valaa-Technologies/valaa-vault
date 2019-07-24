@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.8](https://github.com/valaatech/vault/compare/v0.35.0-prerelease.7...v0.35.0-prerelease.8) (2019-07-24)
+
+
+### Bug Fixes
+
+* lint ([2056ebf](https://github.com/valaatech/vault/commit/2056ebf))
+* vlm configure, init bugs ([1f6793f](https://github.com/valaatech/vault/commit/1f6793f))
+
+
+
+
+
 # [0.35.0-prerelease.7](https://github.com/valaatech/vault/compare/v0.35.0-prerelease.6...v0.35.0-prerelease.7) (2019-07-18)
 
 

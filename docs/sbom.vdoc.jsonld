@@ -1,33 +1,33 @@
 [
   {
-    "@id": "https://valaatech.github.io/vault/sbom",
+    "@id": "https://valospace.org/kernel/sbom",
     "@context": {
-      "@base": "https://valaatech.github.io/vault/sbom#",
-      "sbomdoc": "https://valaatech.github.io/vault/type-vault/sbomdoc#",
-      "revdoc": "https://valaatech.github.io/vault/type-vault/revdoc#",
+      "@base": "https://valospace.org/kernel/sbom#",
+      "sbomdoc": "https://valospace.org/kernel/sbomdoc#",
+      "revdoc": "https://valospace.org/kernel/revdoc#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-      "vdoc": "https://valaatech.github.io/vault/type-vault/vdoc#",
+      "vdoc": "https://valospace.org/kernel/vdoc#",
       "a": {
         "@id": "rdf:type",
         "@type": "@id"
       },
       "vdoc:content": {
-        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#content",
+        "@id": "https://valospace.org/kernel/vdoc#content",
         "@container": "@list"
       },
       "vdoc:words": {
-        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#words",
+        "@id": "https://valospace.org/kernel/vdoc#words",
         "@container": "@list"
       },
-      "vdoc:rows": {
-        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#rows",
+      "vdoc:entries": {
+        "@id": "https://valospace.org/kernel/vdoc#entries",
         "@container": "@list"
       }
     },
-    "dc:title": "@valos/kernel@0.35.0-prerelease.6 Software Bill of Materials",
+    "dc:title": "@valos/kernel@0.35.0-prerelease.7 Software Bill of Materials",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -70,7 +70,7 @@
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
         "This document was automatically generated on",
-        "2019-07-18T23:49:43.923Z",
+        "2019-07-24T01:55:56.716Z",
         ".",
         null,
         "This SBoM document is available in following formats:",
@@ -118,7 +118,7 @@
           "vdoc:content": [
             "VDoc source graph syntax"
           ],
-          "vdoc:ref": "https://valaatech.github.io/vault/type-vault/vdoc#source_graph"
+          "vdoc:ref": "@valos/vdoc#source_graph"
         },
         "to define the content of this section."
       ]
@@ -480,29 +480,29 @@
         "type": "library",
         "group": "valos",
         "name": "inspire",
-        "version": "0.35.0-prerelease.6",
+        "version": "0.35.0-prerelease.7",
         "description": "ValOS Inspire application gateway",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/inspire@0.35.0-prerelease.6",
+        "purl": "pkg:npm/%40valos/inspire@0.35.0-prerelease.7",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "toolset-revealer",
-        "version": "0.35.0-prerelease.6",
+        "version": "0.35.0-prerelease.7",
         "description": "Tools for building revelations both for development and deployment purposes",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.6",
+        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.7",
         "modified": false
       },
       {
         "type": "library",
         "name": "valma",
-        "version": "0.35.0-prerelease.6",
+        "version": "0.35.0-prerelease.7",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "licenses": "MIT",
-        "purl": "pkg:npm/valma@0.35.0-prerelease.6",
+        "purl": "pkg:npm/valma@0.35.0-prerelease.7",
         "modified": false
       },
       {
@@ -563,10 +563,10 @@
         "type": "library",
         "group": "valos",
         "name": "type-vault",
-        "version": "0.35.0-prerelease.6",
+        "version": "0.35.0-prerelease.7",
         "description": "The ValOS type toolset for vault workspaces",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/type-vault@0.35.0-prerelease.6",
+        "purl": "pkg:npm/%40valos/type-vault@0.35.0-prerelease.7",
         "modified": false
       },
       {
@@ -606,59 +606,59 @@
           {
             "vdoc:lookup": "components_data",
             "rdf:type": "vdoc:Table",
-            "vdoc:columns": [
+            "vdoc:headers": [
               {
                 "vdoc:key": "name",
-                "rdf:type": "vdoc:Column",
+                "rdf:type": "vdoc:Header",
                 "vdoc:content": [
                   "Name"
                 ]
               },
               {
                 "vdoc:key": "group",
-                "rdf:type": "vdoc:Column",
+                "rdf:type": "vdoc:Header",
                 "vdoc:content": [
                   "Group"
                 ]
               },
               {
                 "vdoc:key": "type",
-                "rdf:type": "vdoc:Column",
+                "rdf:type": "vdoc:Header",
                 "vdoc:content": [
                   "Type"
                 ]
               },
               {
                 "vdoc:key": "version",
-                "rdf:type": "vdoc:Column",
+                "rdf:type": "vdoc:Header",
                 "vdoc:content": [
                   "Version"
                 ]
               },
               {
                 "vdoc:key": "modified",
-                "rdf:type": "vdoc:Column",
+                "rdf:type": "vdoc:Header",
                 "vdoc:content": [
                   "Modified"
                 ]
               },
               {
                 "vdoc:key": "licenses",
-                "rdf:type": "vdoc:Column",
+                "rdf:type": "vdoc:Header",
                 "vdoc:content": [
                   "Licenses"
                 ]
               },
               {
                 "vdoc:key": "purl",
-                "rdf:type": "vdoc:Column",
+                "rdf:type": "vdoc:Header",
                 "vdoc:content": [
                   "PURL"
                 ]
               },
               {
                 "vdoc:key": "description",
-                "rdf:type": "vdoc:Column",
+                "rdf:type": "vdoc:Header",
                 "vdoc:content": [
                   "Description"
                 ]

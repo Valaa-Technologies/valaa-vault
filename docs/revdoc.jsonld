@@ -112,6 +112,12 @@
           "@id": "prefixes"
         },
         {
+          "@id": "classes"
+        },
+        {
+          "@id": "properties"
+        },
+        {
           "@id": "vocabulary"
         },
         {
@@ -130,14 +136,14 @@
           "vdoc:headers": [
             {
               "vdoc:key": "vdoc:key",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "Prefix"
               ]
             },
             {
               "vdoc:key": "vdoc:value",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "IRI"
               ]
@@ -150,60 +156,32 @@
       "@id": "prefixes_data",
       "revdoc": "https://valospace.org/kernel/revdoc#"
     },
-    "vocabulary": {
-      "@id": "vocabulary",
-      "dc:title": "ReVDoc RDF vocabulary with prefix revdoc:",
+    "classes": {
+      "@id": "classes",
+      "dc:title": "ReVDoc rdfs:Class vocabulary, prefix revdoc:",
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
         {
-          "vdoc:lookup": "vocabulary_data",
+          "vdoc:lookup": "classes_data",
           "rdf:type": "vdoc:Table",
           "vdoc:headers": [
             {
-              "vdoc:key": "vdoc:key",
-              "rdf:type": "vdoc:Column",
+              "vdoc:key": "vdoc:id",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "rdfs:label"
               ]
             },
             {
-              "vdoc:key": "a",
-              "rdf:type": "vdoc:Column",
-              "vdoc:content": [
-                "rdf:type"
-              ]
-            },
-            {
               "vdoc:key": "rdfs:subClassOf",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "rdfs:subClassOf"
               ]
             },
             {
-              "vdoc:key": "rdfs:subPropertyOf",
-              "rdf:type": "vdoc:Column",
-              "vdoc:content": [
-                "rdfs:subPropertyOf"
-              ]
-            },
-            {
-              "vdoc:key": "rdfs:domain",
-              "rdf:type": "vdoc:Column",
-              "vdoc:content": [
-                "rdfs:domain"
-              ]
-            },
-            {
-              "vdoc:key": "rdfs:range",
-              "rdf:type": "vdoc:Column",
-              "vdoc:content": [
-                "rdfs:range"
-              ]
-            },
-            {
               "vdoc:key": "rdfs:comment",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "rdfs:comment"
               ]
@@ -212,8 +190,8 @@
         }
       ]
     },
-    "vocabulary_data": {
-      "@id": "vocabulary_data",
+    "classes_data": {
+      "@id": "classes_data",
       "Document": {
         "a": "rdfs:Class",
         "rdfs:subClassOf": "vdoc:Chapter",
@@ -240,6 +218,94 @@
         "rdfs:comment": "A command line interaction sequence document node"
       }
     },
+    "properties": {
+      "@id": "properties",
+      "dc:title": "ReVDoc rdf:Property vocabulary, prefix revdoc:",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "properties_data",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:key": "vdoc:id",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "rdfs:label"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:subPropertyOf",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "rdfs:subPropertyOf"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:domain",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "rdfs:domain"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:range",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "rdfs:range"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:comment",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "rdfs:comment"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "properties_data": {
+      "@id": "properties_data"
+    },
+    "vocabulary": {
+      "@id": "vocabulary",
+      "dc:title": "ReVDoc remaining vocabulary, prefix revdoc:",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary_data",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:key": "vdoc:id",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "rdfs:label"
+              ]
+            },
+            {
+              "vdoc:key": "a",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "rdf:type"
+              ]
+            },
+            {
+              "vdoc:key": "rdfs:comment",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "rdfs:comment"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "vocabulary_data": {
+      "@id": "vocabulary_data"
+    },
     "context": {
       "@id": "context",
       "dc:title": "ReVDoc JSON-LD context term definitions",
@@ -251,35 +317,35 @@
           "vdoc:headers": [
             {
               "vdoc:key": "vdoc:key",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "Term"
               ]
             },
             {
               "vdoc:key": "vdoc:value",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "Definition"
               ]
             },
             {
               "vdoc:key": "@id",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "@id"
               ]
             },
             {
               "vdoc:key": "@type",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "@type"
               ]
             },
             {
               "vdoc:key": "@container",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "@container"
               ]
@@ -321,35 +387,35 @@
           "vdoc:headers": [
             {
               "vdoc:key": "vdoc:key",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "Rule name"
               ]
             },
             {
               "vdoc:key": "range",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "Node rdf:type"
               ]
             },
             {
               "vdoc:key": "target",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "primary target"
               ]
             },
             {
               "vdoc:key": "rest",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "';rest' target"
               ]
             },
             {
               "vdoc:key": "comment",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "Comment"
               ]
@@ -378,14 +444,14 @@
           "vdoc:headers": [
             {
               "vdoc:key": "vdoc:key",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "API identifier"
               ]
             },
             {
               "vdoc:key": "vdoc:value",
-              "rdf:type": "vdoc:Column",
+              "rdf:type": "vdoc:Header",
               "vdoc:content": [
                 "rdf:type"
               ]

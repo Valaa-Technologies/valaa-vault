@@ -2,10 +2,12 @@
 const {
   extractee: { authors, ref },
 } = require("@valos/revdoc");
+const { version, repository } = require("../package");
 
 module.exports = {
   "dc:title": "@valos/kernel domain",
   respecConfig: {
+    subtitle: version,
     specStatus: "unofficial",
     editors: authors("iridian"),
     authors: authors(),

@@ -4,10 +4,10 @@
 
 module.exports = {
   prefix: "sbomdoc",
-  base: "https://valospace.org/kernel/sbomdoc#",
+  base: "https://valospace.org/sbomdoc#",
 
   prefixes: {
-    sbomdoc: "https://valospace.org/kernel/sbomdoc#",
+    sbomdoc: "https://valospace.org/sbomdoc#",
   },
   context: {
   },
@@ -16,6 +16,5 @@ module.exports = {
       "rdfs:comment": "A Software Bill of Materials document",
     },
   },
-  extractionRules: {
-  },
+  extractionRules: {},
 };

@@ -2,10 +2,12 @@
 
 const { extension } = require("@valos/vdoc");
 const {
-  ontologyTables, extractee: { authors, ref, dfn, filterVocabulary, filterVocabularyNot },
+  headers, extractee: { authors, ref, dfn, filterVocabulary, filterVocabularyNot },
 } = require("@valos/revdoc");
 
 const { version, description } = require("./package");
+
+const prefix = extension.ontology.prefix;
 
 module.exports = {
   "dc:title": description,
@@ -210,10 +212,10 @@ module.exports = {
   },
   "chapter#transformations_spec>6;Transformations convert documents to and from VDocsON": {
     "#0": [],
-    "chapter#extraction_transformation>6;Extraction transformation from source graphs": {
+    "chapter#extraction_transformation>6;Extraction transforms source graphs into vdocson": {
       "#0": [],
     },
-    "chapter#emission_transformation>7;Emission transformation into output targets": {
+    "chapter#emission_transformation>7;Emission transforms vdocson into output targets": {
       "#0": [],
     },
   },
@@ -274,26 +276,31 @@ module.exports = {
         output formats.`,
       ],
       "chapter#extension_extraction_rules>4;Extraction transformation rules": [
-        `Extraction transformation rules specify how a source graph is
-        interpreted as mutations against a given target vdocson document.
-        The idiomatic transformation rule consists of two parts:`,
+        `Extraction rules specify how a source graph is interpreted as
+        mutations (usually additions) to a given target vdocson document.
+        An extraction rule consists of two parts:`,
         { "bulleted#": [
-          dfn("key matching pattern", "#transformation_key_pattern", ` is
-              matched against source graph node dictionary key to see if
-              the rule applies in that `, ref("transformation context")),
-          dfn("transformation rule", "#transformation_rule", ` specifies
-              how the `, ref("transformation context"), ` is interpreted
-              as a set of mutations on the current target vdocson
-              document node`),
+          dfn("key pattern matcher", "#extraction_key_pattern", ` is
+              matched against each source graph node dictionary key to
+              see if the key matches the rule and to parse the
+              extraction rule parameters`),
+          dfn("extraction action", "#extraction_action", ` specifies
+              how the extraction rule parameters and `, ref("extraction context"),
+              ` is interpreted as a set of mutations on the current
+              target vdocson document node`),
         ] },
-        dfn("Transformation context", "#transformation_context", ` is
+        dfn("Extraction context", "#extraction_context", ` is
             defined as a collection of `, ...[].concat(...[
-              "transformation key",
+              "rule key",
               "source graph parent node",
               "source graph node value",
               "target document parent node",
               "target document value"
             ].map((k, i, a) => (!i ? [ref(k)] : [(i + 1 === a.length) ? " and " : ", ", ref(k)])))),
+        `Typical extraction rule creates a new Node, adds it to target
+        document parent (directly or as a reference depending on the `,
+        ref("Node type", "#node_type"), `) and adds the source node
+        value to some specific property of the new Node.`,
       ],
       "chapter#extension_extractee_apis>5;Extraction extractee tool APIs": [
         `An extension MAY specify an extractee API as a collection
@@ -331,33 +338,38 @@ module.exports = {
       `VDoc core ontology explicitly does not specify any semantic
       meanings outside the document structure itself.`,
     ],
-    "chapter#prefixes>0;VDoc Core IRI prefixes": {
+    "data#prefixes": extension.ontology.prefixes,
+    "data#vocabulary": extension.ontology.vocabulary,
+    "data#context": extension.ontology.context,
+    "chapter#ch_prefixes>0;VDoc Core IRI prefixes": {
       "#0": [],
-      "table#>0;prefixes_data": ontologyTables.prefixes,
-      "data#prefixes_data": extension.ontology.prefixes,
+      "table#>0;prefixes": headers.prefixes,
     },
-    [`chapter#classes>1;VDoc rdfs:Class vocabulary, prefix ${extension.ontology.prefix}:`]: {
+    [`chapter#ch_classes>1;VDoc rdfs:Class vocabulary, prefix ${prefix}:`]: {
       "#0": [],
-      "table#>0;classes_data": ontologyTables.classes,
-      "data#classes_data": filterVocabulary("a", "rdfs:Class",
-          extension.ontology.vocabulary),
+      "table#>0;vocabulary": {
+        "vdoc:headers": headers.classes,
+        "vdoc:entries": filterVocabulary("a", "rdfs:Class", extension.ontology.vocabulary),
+      },
     },
-    [`chapter#properties>2;VDoc rdf:Property vocabulary, prefix ${extension.ontology.prefix}:`]: {
+    [`chapter#ch_properties>2;VDoc rdf:Property vocabulary, prefix ${prefix}:`]: {
       "#0": [],
-      "table#>0;properties_data": ontologyTables.properties,
-      "data#properties_data": filterVocabulary("a", "rdf:Property",
-          extension.ontology.vocabulary),
+      "table#>0;vocabulary": {
+        "vdoc:headers": headers.properties,
+        "vdoc:entries": filterVocabulary("a", "rdf:Property", extension.ontology.vocabulary),
+      },
     },
-    [`chapter#vocabulary>3;VDoc remaining vocabulary, prefix ${extension.ontology.prefix}:`]: {
+    [`chapter#ch_remaining_vocabulary>3;VDoc remaining vocabulary, prefix ${prefix}:`]: {
       "#0": [],
-      "table#>0;vocabulary_data": ontologyTables.vocabulary,
-      "data#vocabulary_data": filterVocabularyNot("a", ["rdfs:Class", "rdf:Property"],
-          extension.ontology.vocabulary),
+      "table#>0;vocabulary": {
+        "vdoc:headers": headers.vocabulary,
+        "vdoc:entries": filterVocabularyNot("a", ["rdfs:Class", "rdf:Property"],
+            extension.ontology.vocabulary),
+      },
     },
-    "chapter#context>4;VDoc Core JSON-LD context term definitions": {
+    "chapter#ch_context>4;VDoc Core JSON-LD context term definitions": {
       "#0": [],
-      "table#>0;context_data": ontologyTables.context,
-      "data#context_data": extension.ontology.context,
+      "table#>0;context": headers.context,
     },
   },
   "chapter#transformations>9;VDoc Core transformations": {
@@ -375,12 +387,12 @@ module.exports = {
     ],
     "chapter#extraction_rules>0;VDoc Core extraction rules": {
       "#0": [],
-      "table#>0;extraction_rules_lookup": ontologyTables.extractionRules,
+      "table#>0;extraction_rules_lookup": headers.extractionRules,
       "data#extraction_rules_lookup": extension.ontology.extractionRules,
     },
     "chapter#extractee_api>1;VDoc Core extractee API": {
       "#0": [],
-      "table#>0;extractee_api_lookup": ontologyTables.extractee,
+      "table#>0;extractee_api_lookup": headers.extractee,
       "data#extractee_api_lookup": extension.extractee,
     },
     "chapter#emission_output>2;VDoc Core emission output": {

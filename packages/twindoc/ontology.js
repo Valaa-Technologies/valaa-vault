@@ -1,8 +1,8 @@
 module.exports = {
   prefix: "twindoc",
-  base: "https://valospace.org/kernel/twindoc#",
+  base: "https://valospace.org/twindoc#",
   prefixes: {
-    twindoc: "https://valospace.org/kernel/twindoc#",
+    twindoc: "https://valospace.org/twindoc#",
   },
   context: {},
   vocabulary: {},

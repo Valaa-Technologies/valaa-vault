@@ -1,9 +1,9 @@
 module.exports = {
   prefix: "revdoc",
-  base: "https://valospace.org/kernel/revdoc#",
+  base: "https://valospace.org/revdoc#",
 
   prefixes: {
-    revdoc: "https://valospace.org/kernel/revdoc#",
+    revdoc: "https://valospace.org/revdoc#",
   },
   context: {
   },
@@ -26,7 +26,7 @@ module.exports = {
   },
   extractionRules: {
     ontology: {
-      range: "vdoc:Chapter", target: "vdoc:content", rest: "dc:title",
+      range: "vdoc:Chapter", owner: "vdoc:content", body: "vdoc:content", rest: "dc:title",
       comment: "Ontology specification chapter",
     },
   },

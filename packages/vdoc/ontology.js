@@ -1,26 +1,26 @@
 
 module.exports = {
   prefix: "vdoc",
-  base: "https://valospace.org/kernel/vdoc#",
+  base: "https://valospace.org/vdoc#",
 
   prefixes: {
     dc: "http://purl.org/dc/elements/1.1/",
     owl: "http://www.w3.org/2002/07/owl#",
     rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-    vdoc: "https://valospace.org/kernel/vdoc#",
+    vdoc: "https://valospace.org/vdoc#",
   },
 
   context: {
     a: { "@id": "rdf:type", "@type": "@id" },
     "vdoc:content": {
-      "@id": "https://valospace.org/kernel/vdoc#content", "@container": "@list",
+      "@id": "https://valospace.org/vdoc#content", "@container": "@list",
     },
     "vdoc:words": {
-      "@id": "https://valospace.org/kernel/vdoc#words", "@container": "@list",
+      "@id": "https://valospace.org/vdoc#words", "@container": "@list",
     },
     "vdoc:entries": {
-      "@id": "https://valospace.org/kernel/vdoc#entries", "@container": "@list",
+      "@id": "https://valospace.org/vdoc#entries", "@container": "@list",
     },
   },
 
@@ -78,31 +78,31 @@ module.exports = {
 
   extractionRules: {
     "": {
-      comment: "Basic Node", target: "vdoc:content",
+      comment: "Basic Node", owner: "vdoc:content", body: "vdoc:content",
     },
     chapter: {
-      range: "vdoc:Chapter", target: "vdoc:content", rest: "dc:title",
+      range: "vdoc:Chapter", owner: "vdoc:content", body: "vdoc:content", rest: "dc:title",
       comment: "Numbered, titled chapter",
     },
     bulleted: {
-      range: "vdoc:BulletList", target: "vdoc:entries",
+      range: "vdoc:BulletList", owner: "vdoc:content", body: "vdoc:entries",
       comment: "Bulleted list",
     },
     numbered: {
-      range: "vdoc:NumberedList", target: "vdoc:entries",
+      range: "vdoc:NumberedList", owner: "vdoc:content", body: "vdoc:entries",
       comment: "Numbered list",
     },
     table: {
-      range: "vdoc:Table", target: "vdoc:headers", rest: "vdoc:lookup",
+      range: "vdoc:Table", owner: "vdoc:content", body: "vdoc:headers", rest: "vdoc:lookup",
       comment: "Table",
     },
     header: {
-      range: "vdoc:Header", target: "vdoc:content", rest: "vdoc:key",
+      range: "vdoc:Header", owner: "vdoc:entries", body: "vdoc:content", rest: "vdoc:key",
       comment: "Header",
     },
     data: {
-      hidden: true, target: "vdoc:content",
-      comment: "Data lookup",
+      range: null, owner: null, body: null,
+      comment: "Hidden data",
     },
   },
 };

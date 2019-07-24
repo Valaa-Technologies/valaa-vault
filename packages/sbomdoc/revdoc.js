@@ -2,10 +2,12 @@
 
 const { extension } = require("@valos/sbomdoc");
 const {
-  ontologyTables, extractee: { authors, ref, /* dfn, */ filterVocabulary, filterVocabularyNot },
+  headers, extractee: { authors, ref, /* dfn, */ filterVocabulary, filterVocabularyNot },
 } = require("@valos/revdoc");
 
 const { version, description } = require("./package");
+
+const prefix = extension.ontology.prefix;
 
 module.exports = {
   "dc:title": description,
@@ -39,45 +41,50 @@ module.exports = {
   ],
   "chapter#ontology>8;SBoMDoc ontology": {
     "#0": [],
-    "chapter#prefixes>0;SBoMDoc IRI prefixes": {
+    "data#prefixes": extension.ontology.prefixes,
+    "data#vocabulary": extension.ontology.vocabulary,
+    "data#context": extension.ontology.context,
+    "chapter#ch_prefixes>0;SBoMDoc IRI prefixes": {
       "#0": [],
-      "table#>0;prefixes_data": ontologyTables.prefixes,
-      "data#prefixes_data": extension.ontology.prefixes,
+      "table#>0;prefixes": headers.prefixes,
     },
-    [`chapter#classes>1;SBoMDoc rdfs:Class vocabulary, prefix ${extension.ontology.prefix}:`]: {
+    [`chapter#ch_classes>1;SBoMDoc rdfs:Class vocabulary, prefix ${prefix}:`]: {
       "#0": [],
-      "table#>0;classes_data": ontologyTables.classes,
-      "data#classes_data": filterVocabulary("a", "rdfs:Class",
-          extension.ontology.vocabulary),
+      "table#>0;vocabulary": {
+        "vdoc:headers": headers.classes,
+        "vdoc:entries": filterVocabulary("a", "rdfs:Class", extension.ontology.vocabulary),
+      },
     },
-    [`chapter#properties>2;SBoMDoc rdf:Property vocabulary, prefix ${extension.ontology.prefix}:`]: {
+    [`chapter#ch_properties>2;SBoMDoc rdf:Property vocabulary, prefix ${prefix}:`]: {
       "#0": [],
-      "table#>0;properties_data": ontologyTables.properties,
-      "data#properties_data": filterVocabulary("a", "rdf:Property",
-          extension.ontology.vocabulary),
+      "table#>0;vocabulary": {
+        "vdoc:headers": headers.properties,
+        "vdoc:entries": filterVocabulary("a", "rdf:Property", extension.ontology.vocabulary),
+      },
     },
-    [`chapter#vocabulary>3;SBoMDoc remaining vocabulary, prefix ${extension.ontology.prefix}:`]: {
+    [`chapter#ch_remaining_vocabulary>3;SBoMDoc remaining vocabulary, prefix ${prefix}:`]: {
       "#0": [],
-      "table#>0;vocabulary_data": ontologyTables.vocabulary,
-      "data#vocabulary_data": filterVocabularyNot("a", ["rdfs:Class", "rdf:Property"],
-          extension.ontology.vocabulary),
+      "table#>0;vocabulary": {
+        "vdoc:headers": headers.vocabulary,
+        "vdoc:entries": filterVocabularyNot("a", ["rdfs:Class", "rdf:Property"],
+            extension.ontology.vocabulary),
+      },
     },
-    "chapter#context>4;SBoMDoc JSON-LD context term definitions": {
+    "chapter#ch_context>4;SBoMDoc JSON-LD context term definitions": {
       "#0": [],
-      "table#>0;context_data": ontologyTables.context,
-      "data#context_data": extension.ontology.context,
+      "table#>0;context": headers.context,
     },
   },
   "chapter#transformations>9;SBoMDoc transformations": {
     "#0": [],
     "chapter#extraction_rules>0;SBoMDoc extraction rules": {
       "#0": [],
-      "table#>0;extraction_rules_data": ontologyTables.extractionRules,
+      "table#>0;extraction_rules_data": headers.extractionRules,
       "data#extraction_rules_data": extension.ontology.extractionRules,
     },
     "chapter#extractee_api>1;SBoMDoc extractee API": {
       "#0": [],
-      "table#>0;extractee_api_lookup": ontologyTables.extractee,
+      "table#>0;extractee_api_lookup": headers.extractee,
       "data#extractee_api_lookup": extension.ontology.extractee,
     },
     "chapter#emission_output>2;SBoMDoc emission output": {

@@ -110,20 +110,16 @@ module.exports = {
   },
 
   filterVocabulary (predicate, objectOrObjects, vocabulary) {
-    const ret = {};
     const objects = [].concat(objectOrObjects);
-    for (const [key, value] of Object.entries(vocabulary)) {
-      if (objects.includes(value[predicate])) ret[key] = value;
-    }
-    return ret;
+    return Object.entries(vocabulary)
+        .filter(([, entry]) => objects.includes(entry[predicate]))
+        .map(([label]) => label);
   },
 
   filterVocabularyNot (predicate, objectOrObjects, vocabulary) {
-    const ret = {};
     const objects = [].concat(objectOrObjects);
-    for (const [key, value] of Object.entries(vocabulary)) {
-      if (!objects.includes(value[predicate])) ret[key] = value;
-    }
-    return ret;
+    return Object.entries(vocabulary)
+        .filter(([, entry]) => !objects.includes(entry[predicate]))
+        .map(([label]) => label);
   },
 };

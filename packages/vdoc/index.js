@@ -66,7 +66,8 @@ function emit (emission, vdocson, formatName, extensions = [this, ...this.extend
   return _emitNode(emission, vdocson[0], vdocson[0]);
   function _emitNode (emission_, node, document, explicitType_) {
     const type = explicitType_
-        || ((node != null) && node["rdf:type"])
+        || ((node == null) && "null")
+        || node["rdf:type"]
         || (Array.isArray(node) && "array")
         || typeof node;
     let subClassOf;

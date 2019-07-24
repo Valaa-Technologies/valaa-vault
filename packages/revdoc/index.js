@@ -14,7 +14,7 @@ module.exports = {
     ...vdoc.extractee,
     ...extractee,
   },
-  ontologyTables: {
+  headers: {
     prefixes: {
       "header#0;vdoc:key": "Prefix",
       "header#1;vdoc:value": "IRI",
@@ -45,10 +45,11 @@ module.exports = {
     },
     extractionRules: {
       "header#0;vdoc:key": "Rule name",
-      "header#1;range": "Node rdf:type",
-      "header#2;target": "primary target",
-      "header#3;rest": "';rest' target",
-      "header#4;comment": "Comment",
+      "header#1;range": "rdf:type",
+      "header#2;owner": "owner property",
+      "header#3;body": "body property",
+      "header#4;rest": "';rest' property",
+      "header#5;comment": "Comment",
     },
     extractee: {
       "header#0;vdoc:key": "API identifier",

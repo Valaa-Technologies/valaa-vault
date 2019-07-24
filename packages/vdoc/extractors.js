@@ -25,22 +25,24 @@ module.exports = {
         if (!resourceId && !Object.keys(node).length) {
           node = patch;
         } else {
-          node[rule.target] = this.extend([], [patch]);
+          node[rule.body] = this.extend([], [patch]);
         }
       } else if (Array.isArray(patch)) {
-        if (rule.hidden || (!resourceId && !Object.keys(node).length)) {
+        if (!rule.owner || (!resourceId && !Object.keys(node).length)) {
           node = this.extend([], patch);
           if (resourceId) this.documentNode[resourceId] = node;
         } else {
-          node[rule.target] = this.extend([], patch);
+          node[rule.body] = this.extend([], patch);
         }
       } else {
-        node["vdoc:pre_target"] = rule.target;
+        node["vdoc:pre_body"] = rule.body;
         this.extend(node, patch);
-        delete node["vdoc:pre_target"];
+        delete node["vdoc:pre_body"];
       }
-      if (!rule.hidden) {
-        (targetObject["vdoc:pre_content"] || (targetObject["vdoc:pre_content"] = [])).push([
+      if (rule.owner) {
+        const preOwnees = (targetObject["vdoc:pre_ownees"]
+            || (targetObject["vdoc:pre_ownees"] = {}));
+        (preOwnees[rule.owner] || (preOwnees[rule.owner] = [])).push([
           (orderId && `${orderId}\uFFFF`) || (orderElement && (Number(orderElement) + 0.5))
               || resourceId || (elementId && Number(elementId)),
           resourceId ? { "@id": resourceId } : node,
@@ -50,11 +52,13 @@ module.exports = {
     },
     postExtend (target) {
       if ((target == null) || (target === this.returnUndefined)) return target;
-      const unorderedEntries = target["vdoc:pre_content"];
-      if (unorderedEntries) {
-        target[target["vdoc:pre_target"] || "vdoc:content"] = []
-            .concat(...unorderedEntries.sort(_compareWithOrderQualifier).map(e => e[1]));
-        delete target["vdoc:pre_content"];
+      const unorderedOwnees = target["vdoc:pre_ownees"];
+      if (unorderedOwnees) {
+        for (const [owningProperty, ownees] of Object.entries(unorderedOwnees)) {
+          target[target["vdoc:pre_body"] || owningProperty] =
+              [].concat(...ownees.sort(_compareWithOrderQualifier).map(e => e[1]));
+        }
+        delete target["vdoc:pre_ownees"];
       }
       return target;
     },

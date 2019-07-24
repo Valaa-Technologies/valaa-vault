@@ -5,10 +5,11 @@
     "type": "vault",
     "domain": "@valos/kernel"
   },
-  "description": "ValOS common infrastructure tools and libraries monorepo.",
+  "description": "ValOS common infrastructure tools and libraries monorepository.",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
   "private": true,
+  "repository": "https://github.com/valaatech/kernel",
   "workspaces": [
     "packages/*"
   ],

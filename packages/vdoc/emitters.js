@@ -105,14 +105,17 @@ function emitNumberedListHTML (emission, node, document, emitNode /* , vdocson, 
 
 function emitTableHTML (emission, node, document, emitNode /* , vdocson, extensions */) {
   const keys = [];
-  const headers = [];
-  if (!node["vdoc:headers"]) {
-    throw new Error("vdoc:Table is missing headers");
+  const headerTexts = [];
+  let headers = node["vdoc:headers"];
+  if (!headers) throw new Error("vdoc:Table is missing headers");
+  if (!Array.isArray(headers)) {
+    if (headers["vdoc:entries"]) headers = headers["vdoc:entries"];
+    else throw new Error("vdoc:Table vdoc:headers is not an array nor doesn't have vdoc:entries");
   }
-  for (const header of node["vdoc:headers"]) {
+  for (const header of headers) {
     keys.push(header["vdoc:key"]);
     const headerText = emitNode("", header["vdoc:content"], document);
-    headers.push(`<th${emitAttributes(header)}>${headerText}</th>`);
+    headerTexts.push(`<th${emitAttributes(header)}>${headerText}</th>`);
   }
   const entryTexts = [];
   const lookup = (typeof node["vdoc:lookup"] !== "string") ? node["vdoc:lookup"]
@@ -138,7 +141,7 @@ function emitTableHTML (emission, node, document, emitNode /* , vdocson, extensi
   return `${emission}
     <table${emitAttributes(node)}>
       <thead>
-        ${headers.join(`
+        ${headerTexts.join(`
         `)}
       </thead>
       <tbody>

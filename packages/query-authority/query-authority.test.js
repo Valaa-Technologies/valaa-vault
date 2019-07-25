@@ -1,79 +1,174 @@
-/* global describe expect it */
+// @flow
 
-import { created } from "~/raem/events";
-import { vRef } from "~/raem/VRL";
-
-import { createNativeIdentifier, getNativeIdentifierValue, transpileValoscriptBody }
-    from "~/script";
-
-import Vrapper from "~/engine/Vrapper";
+import { newEngine } from "@comunica/actor-init-sparql-rdfjs";
+import { CorpusQuadSource, dataTypes } from "./CorpusQuadSource.js";
 import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
-import { clearAllScribeDatabases } from "~/sourcerer/test/SourcererTestHarness";
-import VALEK, { Kuery, literal, pointer } from "~/engine/VALEK";
+import queryTestResources from "./queryTestResources";
 
-const valoscriptBlock = [
-  created({ id: ["creator-myFunc"], typeName: "Property", initialState: {
-    name: "myFunc", owner: vRef("creator", "properties"),
-    value: literal(VALEK.doStatements(VALEK.apply(
-        VALEK.fromScope("propertyCallback").notNull(), VALEK.fromScope("this"))).toJSON()),
-  }, }),
-];
+const harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, queryTestResources);
+const source = new CorpusQuadSource(harness);
+const SPARQLEngine = newEngine();
 
-let harness: { createds: Object, engine: Object, sourcerer: Object, testEntities: Object };
-afterEach(async () => {
-  await clearAllScribeDatabases();
-  harness = null;
-}); // eslint-disable-line no-undef
+function engineQuery (query: String, done: Function, callBack: Function) {
+  SPARQLEngine.query(query,
+    { sources: [{ type: "rdfjsSource", value: source }] })
+    .then((result) => {
+      result.bindingsStream.on("data", (data) => {
+        // console.log("data", data._root.entries);
+        callBack(data);
+      });
 
-const entities = () => harness.createds.Entity;
-// const properties = () => harness.createds.Property;
+      result.bindingsStream.on("end", () => { console.log("done"); done(); });
+      result.bindingsStream.on("error", (e) => {
+        console.log("Error with matching: ", e);
+        throw new Error("Error with matching: ", e);
+      });
+    }).catch((err) => {
+      console.log("Error with SPARQL query engine", err);
+      throw new Error("Error with SPARQL query engine", err);
+    });
+}
 
-/**
- * Calls given expressionKuery against given corpus, setting given thisReference as the call this
- * and given scope as the lexical scope of the call.
- * Sets up the global harness variable.
- *
- * @param {any}    corpus
- * @param {Kuery}  parsedKuery
- * @param {VRL}   thisReference
- * @param {Object} scope
- * @returns                       the resulting value of the expressionKuery
- */
-function evaluateProgram (programKuery: Kuery, head, scope: ?Object,
-    options: Object = {}) {
-  if (scope) {
-    options.scope = scope;
-    scope.this = head;
+function _checkVariables (data: any, variables: Object) {
+  expect(data).not.toBeFalsy();
+
+  for (const key in variables) {
+    if (variables.hasOwnProperty(key)) {
+      const variableData = data.get(key);
+      expect(variableData).not.toBeFalsy();
+
+      expect(variableData.termType).not.toBeFalsy();
+      expect(variableData.value).toEqual(
+        (typeof variables[key] === "object" && variables[key] !== null)
+          ? variables[key].value : variables[key]
+      );
+
+      if (variableData.termType === "Literal") {
+        const datatype = variableData.datatype;
+
+        expect(datatype).not.toBeFalsy();
+        expect(datatype.termType).toEqual("NamedNode");
+        expect(datatype.value).toEqual(dataTypes[
+          (typeof variables[key] === "object" && variables[key] !== null)
+            ? variables[key].valosType : typeof variables[key]
+        ]);
+      }
+    }
   }
-  return harness.engine.run(head, programKuery, options);
 }
 
-function getFieldOf (object: any, name: string, options = {}) {
-  return (object instanceof Vrapper)
-      ? object.propertyValue(name, options)
-      : object[name];
-}
 
-function extractValueFrom (container: any) {
-  return container instanceof Vrapper
-      ? container.extractValue()
-      : getNativeIdentifierValue(container);
-}
+describe("Property queries", () => {
+  it(`queries for value of single entity's property
+    where value is string literal`, (done) => {
+    const query = `SELECT ?o WHERE {
+      <http://valospace.org/Entity#query-test-entity>
+      <http://valospace.org/Property#test_string>
+      ?o .
+    }`;
 
-function transpileValoscriptTestBody (bodyText: string) {
-  return transpileValoscriptBody(bodyText, { customVALK: VALEK });
-}
+    engineQuery(query, done, (data) => {
+      _checkVariables(data, { "?o": "hello world" });
+    });
+  });
 
-describe("Manipulating existing variables", () => {
-  it("assigns existing Resource property variable with 'counter = 75' when valked", () => {
-    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-    const bodyKuery = transpileValoscriptTestBody(`
-        counter = 75;
-    `);
-    const updatedCounter = entities().creator.do(bodyKuery, { verbosity: 0 });
-    expect(updatedCounter)
-        .toEqual(75);
-    expect(entities().creator.get(VALEK.propertyLiteral("counter")))
-        .toEqual(75);
+  it(`queries for value of single entity's property
+    where value is int literal`, async (done) => {
+    const query = `SELECT ?o WHERE {
+      <http://valospace.org/Entity#query-test-entity>
+      <http://valospace.org/Property#test_int>
+      ?o .
+    }`;
+
+    engineQuery(query, done, (data) => {
+      _checkVariables(data, { "?o": 42 });
+    });
+  });
+
+  it(`queries for value of single entity's property
+    where value is boolean literal`, async (done) => {
+    const query = `SELECT ?o WHERE {
+      <http://valospace.org/Entity#query-test-entity>
+      <http://valospace.org/Property#test_boolean>
+      ?o .
+    }`;
+
+    engineQuery(query, done, (data) => {
+      _checkVariables(data, { "?o": true });
+    });
+  });
+
+  it(`queries for value of single entity's property
+    where value is null`, async (done) => {
+    const query = `SELECT ?o WHERE {
+      <http://valospace.org/Entity#query-test-entity>
+      <http://valospace.org/Property#test_null>
+      ?o .
+    }`;
+
+    engineQuery(query, done, (data) => {
+      _checkVariables(data, { "?o": { value: "", valosType: "null" } });
+    });
+  });
+
+  it(`queries for value of single entity's property
+    where value is string literal`, async (done) => {
+    const query = `SELECT ?o WHERE {
+      <http://valospace.org/Entity#query-test-entity>
+      <http://valospace.org/Property#test_object>
+      ?o .
+    }`;
+
+    engineQuery(query, done, (data) => {
+      _checkVariables(data, { "?o": { value: `{"hello":"world"}`, valosType: "object" } });
+    });
+  });
+
+  it(`queries for value of single entity's property
+    where value is pointer`, async (done) => {
+    const query = `SELECT ?o WHERE {
+      <http://valospace.org/Entity#query-test-entity>
+      <http://valospace.org/Property#pointer_to_test_ownling>
+      ?o .
+    }`;
+
+    engineQuery(query, done, (data) => {
+      _checkVariables(data, { "?o": { value: "<valos:id:test-ownling>" } });
+    });
+  });
+
+  xit(`queries for values of single entity's
+    multiple properties`, async (done) => {
+    const query = `SELECT ?o WHERE {
+      { <http://valospace.org/Entity#query-test-entity>
+      <http://valospace.org/Property#string>
+      ?o } UNION
+      { <http://valospace.org/Entity#query-test-entity>
+      <http://valospace.org/Property#int>
+      ?o } UNION
+      { <http://valospace.org/Entity#query-test-entity>
+        <http://valospace.org/Property#boolean>
+      ?o }
+    }`;
+
+    engineQuery(query, done, (data) => {
+      console.log(data);
+    });
+  });
+
+  it(`queries for values of single entity's
+    multiple properties where value is same`, async (done) => {
+    const query = `SELECT ?o WHERE {
+      <http://valospace.org/Entity#query-test-entity>
+      <http://valospace.org/Property#test_string>
+      ?o .
+      <http://valospace.org/Entity#query-test-entity>
+      <http://valospace.org/Property#test_anotherstring>
+      ?o
+    }`;
+
+    engineQuery(query, done, (data) => {
+      _checkVariables(data, { "?o": "hello world" });
+    });
   });
 });

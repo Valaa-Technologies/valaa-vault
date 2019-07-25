@@ -10,8 +10,8 @@
   "editor.rulers": [71, 100],
   "files.trimTrailingWhitespace": true,
   "search.exclude": {
-    "dist/**": true,
-    ".yalc/**": true
+    ".yalc/**": true,
+    "dist/**": true
   },
   "[markdown]": {
     "editor.rulers": [71]

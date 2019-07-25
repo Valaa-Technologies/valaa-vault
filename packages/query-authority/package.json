@@ -15,6 +15,7 @@
   "description": "Query authority serves virtual event logs based on various queries.",
   "main": "index.js",
   "dependencies": {
+    "@comunica/actor-init-sparql-rdfjs": "^1.8.0",
     "@valos/engine": "^0.35.0-prerelease.4"
   }
 }

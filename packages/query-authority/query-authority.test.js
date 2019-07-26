@@ -13,12 +13,22 @@ function engineQuery (query: String, done: Function, callBack: Function) {
   SPARQLEngine.query(query,
     { sources: [{ type: "rdfjsSource", value: source }] })
     .then((result) => {
+      const resultSet = {};
+
       result.bindingsStream.on("data", (data) => {
-        // console.log("data", data._root.entries);
-        callBack(data);
+        if (data && data._root && Array.isArray(data._root.entries)) {
+          for (let i = 0; i < data._root.entries.length; i++) {
+            const dataEntry = data._root.entries[i];
+            if (Array.isArray(dataEntry)) resultSet[dataEntry[0]] = dataEntry[1];
+          }
+        }
       });
 
-      result.bindingsStream.on("end", () => { console.log("done"); done(); });
+      result.bindingsStream.on("end", () => {
+        callBack(resultSet);
+        done();
+      });
+
       result.bindingsStream.on("error", (e) => {
         console.log("Error with matching: ", e);
         throw new Error("Error with matching: ", e);
@@ -34,7 +44,7 @@ function _checkVariables (data: any, variables: Object) {
 
   for (const key in variables) {
     if (variables.hasOwnProperty(key)) {
-      const variableData = data.get(key);
+      const variableData = data[key];
       expect(variableData).not.toBeFalsy();
 
       expect(variableData.termType).not.toBeFalsy();
@@ -112,7 +122,7 @@ describe("Property queries", () => {
   });
 
   it(`queries for value of single entity's property
-    where value is string literal`, async (done) => {
+    where value is object`, async (done) => {
     const query = `SELECT ?o WHERE {
       <http://valospace.org/Entity#query-test-entity>
       <http://valospace.org/Property#test_object>
@@ -139,25 +149,25 @@ describe("Property queries", () => {
 
   xit(`queries for values of single entity's
     multiple properties`, async (done) => {
-    const query = `SELECT ?o WHERE {
+    const query = `SELECT ?so ?io ?bo WHERE {
       { <http://valospace.org/Entity#query-test-entity>
       <http://valospace.org/Property#string>
-      ?o } UNION
+      ?so } UNION
       { <http://valospace.org/Entity#query-test-entity>
       <http://valospace.org/Property#int>
-      ?o } UNION
+      ?io } UNION
       { <http://valospace.org/Entity#query-test-entity>
         <http://valospace.org/Property#boolean>
-      ?o }
+      ?bo }
     }`;
 
     engineQuery(query, done, (data) => {
-      console.log(data);
+      console.log("DATA", data._root.entries);
     });
   });
 
   it(`queries for values of single entity's
-    multiple properties where value is same`, async (done) => {
+    multiple properties where value is same (JOIN)`, async (done) => {
     const query = `SELECT ?o WHERE {
       <http://valospace.org/Entity#query-test-entity>
       <http://valospace.org/Property#test_string>

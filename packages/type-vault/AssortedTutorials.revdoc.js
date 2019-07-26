@@ -81,7 +81,7 @@ module.exports = {
         [`Select "configure" for whether to configure the repository with `,
           cli("vlm configure")
         ],
-        `Select "@valos/toolset-vault/enable-babel" to use from available toolsets.`,
+        `Select "@valos/type-vault/enable-babel" to use from available toolsets.`,
         `Select "Yes" for whether to enable babel transpilation for the library`,
       ] },
       ["Your library is now created. ",

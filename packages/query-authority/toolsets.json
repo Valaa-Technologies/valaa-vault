@@ -1,5 +1,5 @@
 {
-  "@valos/toolset-vault/enable-babel": {
+  "@valos/type-vault/enable-babel": {
     "inUse": true
   }
 }

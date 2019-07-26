@@ -45,12 +45,16 @@
     "@valos/kernel": "file:.yalc/@valos/kernel",
     "@valos/query-authority": "file:.yalc/@valos/query-authority",
     "@valos/raem": "file:.yalc/@valos/raem",
+    "@valos/revdoc": "file:.yalc/@valos/revdoc",
+    "@valos/sbomdoc": "file:.yalc/@valos/sbomdoc",
     "@valos/script": "file:.yalc/@valos/script",
     "@valos/sourcerer": "file:.yalc/@valos/sourcerer",
     "@valos/tools": "file:.yalc/@valos/tools",
-    "@valos/toolset-gateway-plugin": "file:.yalc/@valos/toolset-gateway-plugin",
-    "@valos/toolset-opspace": "file:.yalc/@valos/toolset-opspace",
     "@valos/toolset-rest-api-gateway-plugin": "file:.yalc/@valos/toolset-rest-api-gateway-plugin",
-    "@valos/toolset-worker": "file:.yalc/@valos/toolset-worker"
+    "@valos/twindoc": "file:.yalc/@valos/twindoc",
+    "@valos/type-gateway-plugin": "file:.yalc/@valos/type-gateway-plugin",
+    "@valos/type-opspace": "file:.yalc/@valos/type-opspace",
+    "@valos/type-worker": "file:.yalc/@valos/type-worker",
+    "@valos/vdoc": "file:.yalc/@valos/vdoc"
   }
 }

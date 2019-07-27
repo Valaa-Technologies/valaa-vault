@@ -265,11 +265,11 @@ const _vlm = {
   },
 
   ifVerbose (minimumVerbosity, callback) {
-    function ssh () { return this; }
+    function hush () { return this; }
     if (this.verbosity < minimumVerbosity) {
       return {
-        ifVerbose: ssh, log: ssh, echo: ssh, warn: ssh, error: ssh, exception: ssh, info: ssh,
-        babble: ssh, expound: ssh,
+        ifVerbose: hush, log: hush, echo: hush, warn: hush, error: hush, exception: hush,
+        info: hush, babble: hush, expound: hush,
       };
     }
     if (callback) callback.call(this);
@@ -594,7 +594,7 @@ module.exports = {
         p: {
           group: "Valma root options:",
           alias: "pools", type: "boolean", global: false,
-          description: "Show overridden pool commands and empty pool headers.",
+          description: "Show separate pool breakdown, including empty pools.",
         },
         s: {
           group: "Valma root options:",
@@ -672,6 +672,11 @@ module.exports = {
           type: "boolean", default: false, global: false,
           description: "Collect and time vlm.clock call information in vlm.clockEvents"
         },
+        broken: {
+          group: "Valma root options:",
+          type: "boolean", default: true, global: false,
+          description: "Call broken commands in selections (which will throw)",
+        },
         promote: {
           group: "Valma root options:",
           type: "boolean", default: true, global: false,
@@ -690,7 +695,7 @@ module.exports = {
         forward: {
           group: "Valma root options:",
           type: "boolean", default: true, global: false,
-          description: "Allow vlm forwarding due to promote, node-env or need to load vlm path",
+          description: "Allow vlm forwarding due to promote, node-env or having to load vlm path",
         },
         "command-prefix": {
           group: "Valma root options:",
@@ -737,11 +742,6 @@ function __addUniversalOptions (vargs_,
       .version(false)
       .wrap(vargs_.terminalWidth() < 140 ? vargs_.terminalWidth() : 140)
       .option(_postProcess({
-        a: {
-          alias: theme.argument("match-all"),
-          group: hiddenGroup, type: "boolean", global,
-          description: "Include hidden and disabled commands in /all/ matchings",
-        },
         d: {
           alias: theme.argument("dry-run"),
           group: hiddenGroup, type: "boolean", global,
@@ -755,6 +755,22 @@ function __addUniversalOptions (vargs_,
         v: {
           alias: "verbose", count: true, global,
           description: "Be noisy. -vv... -> be more noisy.",
+        },
+        a: {
+          alias: theme.argument("match-all"),
+          group: hiddenGroup, type: "boolean", global,
+          description: "Match (a)ll hidden and disabled commands in the selection",
+          causes: ["enable-disabled", "reveal-hidden"],
+        },
+        e: {
+          alias: theme.argument("enable-disabled"),
+          group: hiddenGroup, type: "boolean", global,
+          description: "Explicitly (e)nable disabled command(s) in the selection",
+        },
+        r: {
+          alias: theme.argument("reveal-hidden"),
+          group: hiddenGroup, type: "boolean", global,
+          description: "Explicitly (r)eveal all dot-prefixed paths in the selection",
         },
         N: {
           alias: theme.argument("show-name"),
@@ -866,8 +882,9 @@ _vlm.ifVerbose(1).babble("phase 1, init:", "determine global options and availab
     "\n\tdefaultPaths:", JSON.stringify(defaultPaths)
 ).ifVerbose(3).expound("global options:", JSON.stringify({ ..._vlm.vargv, vlm: "<hidden>" }));
 
-// When a command begins with ./ or contains the command prefix (if it is non-empty) it is
-// considered a direct file valma command. It's parent directory is made the initial "file" pool.
+// When a command begins with ./ or contains the command prefix (if it
+// is non-empty) it is considered a direct file valma command.
+// Its parent directory is made the initial "file" pool.
 let poolBase = _vlm.vargv.poolBase;
 if ((_commandPrefix && (_vlm.vargv.command || "").includes(_commandPrefix))
     || (_vlm.vargv.command || "").slice(0, 2) === "./") {
@@ -879,7 +896,8 @@ if ((_commandPrefix && (_vlm.vargv.command || "").includes(_commandPrefix))
   _vlm._availablePools.push({ name: "file", path: filePoolPath });
   poolBase = filePoolPath;
 }
-_vlm._availablePools.push(..._vlm._locateDependedPools(poolBase, _vlm.vargv.poolDirectories));
+_vlm._availablePools.push(..._vlm._locateDependedPools(
+    poolBase, _vlm.vargv.poolDirectories, poolBase === path.posix.resolve(".") ? "." : poolBase));
 _vlm._availablePools.push({ name: "global", path: _vlm.vargv.globalPool });
 
 _vlm.ifVerbose(2)
@@ -1269,8 +1287,8 @@ async function _invoke (commandSelector, argv) {
   }
 
   const contextVargv = this.contextVLM.vargv;
-  const commandGlob = __underToSlash((contextVargv.matchAll || this.isCompleting)
-      ? __globFromPrefixSelector(commandSelector, contextVargv.matchAll)
+  const commandGlob = __underToSlash((contextVargv.revealHidden || this.isCompleting)
+      ? __globFromPrefixSelector(commandSelector, contextVargv.revealHidden)
       : __globFromExactSelector(commandSelector || "*"));
   const isWildcardCommand = __isWildcardCommand(commandSelector);
   const introspect = this.contextVLM._determineIntrospection(
@@ -1289,10 +1307,10 @@ async function _invoke (commandSelector, argv) {
 
   if (this.isCompleting || contextVargv.bashCompletion) {
     globalVargs.completion("bash-completion", (current, argvSoFar) => {
-      const rule = __underToSlash(__globFromPrefixSelector(argvSoFar._[1], argvSoFar.matchAll));
+      const rule = __underToSlash(__globFromPrefixSelector(argvSoFar._[1], argvSoFar.revealHidden));
       const ret = [].concat(...this._activePools.map(pool => pool.listing
           .filter(node => !__isDirectory(node) && minimatch(__underToSlash(node.name || ""), rule,
-              { dot: argvSoFar.matchAll }))
+              { dot: argvSoFar.revealHidden }))
           .map(node => __valmaCommandFromPath(node.name))));
       return ret;
     });
@@ -1309,7 +1327,7 @@ async function _invoke (commandSelector, argv) {
     return introspect.builtinHelp
         ? this._renderBuiltinHelp(introspect)
         : this._introspectCommands(introspect, activeCommands, commandGlob,
-            isWildcardCommand, contextVargv.matchAll);
+            isWildcardCommand, contextVargv.enableDisabled);
   }
 
   if (!isWildcardCommand) {
@@ -1355,8 +1373,7 @@ async function _invoke (commandSelector, argv) {
       const subVLM = activeCommand.vlm;
       subVLM.vargv = subVLM._parseUntilLastPositional(argv, module.command);
       subVLM.verbosity = subVLM.vargv.verbose;
-      const subIntrospect = subVLM._determineIntrospection(
-          module, commandName, undefined, undefined, argv);
+      const subIntrospect = subVLM._determineIntrospection(module, commandName, false, false, argv);
 
       this.ifVerbose(3)
           .babble("parsed:", this.theme.command(commandName, ...argv),
@@ -1369,15 +1386,20 @@ async function _invoke (commandSelector, argv) {
         ret = ret.concat(subIntrospect.builtinHelp
             ? activeCommand.vlm._renderBuiltinHelp(subIntrospect)
             : this._introspectCommands(subIntrospect, { [commandName]: activeCommand },
-                commandSelector, isWildcardCommand, subVLM.vargv.matchAll));
+                commandSelector, isWildcardCommand, subVLM.vargv.enableDisabled));
       } else if (isWildcardCommand && activeCommand.disabled) {
         this.ifVerbose(1)
             .info(`Skipping disabled command '${this.theme.command(commandName)}'`,
                 `during wildcard invokation (${activeCommand.disabled})`);
         continue;
       } else if (activeCommand.broken) {
-        this.warn(`Cannot invoke a broken command '${commandName}' even explicitly`,
-            `(${activeCommand.broken})`);
+        if (!_vlm.vargv.broken) {
+          this.warn(`Skipping invokation of broken command '${commandName}':`,
+              `${activeCommand.broken}`);
+        } else {
+          throw new Error(`Trying to invoke broken command '${commandName}': ${
+              activeCommand.broken}`);
+        }
         continue;
       } else {
         if (activeCommand.disabled) {
@@ -1452,7 +1474,7 @@ async function _invoke (commandSelector, argv) {
   }
   if (dryRunCommands) {
     this._introspectCommands(this.contextVLM._determineIntrospection(module),
-        dryRunCommands, commandSelector, isWildcardCommand, contextVargv.matchAll);
+        dryRunCommands, commandSelector, isWildcardCommand, contextVargv.enableDisabled);
   }
   return isWildcardCommand ? ret : ret[0];
 }
@@ -1505,8 +1527,8 @@ function __globFromExactSelector (commandBody) {
       : `${_commandPrefix}${commandBody}`;
 }
 
-function __globFromPrefixSelector (partialCommand = "", matchAll) {
-  return matchAll && !((partialCommand || "")[0] === ".")
+function __globFromPrefixSelector (partialCommand = "", revealHidden) {
+  return revealHidden && !((partialCommand || "")[0] === ".")
       ? `{.,}${_commandPrefix}${partialCommand || ""}{,*/**/}*`
       : `${__globFromExactSelector(partialCommand)}{,*/**/}*`;
 }
@@ -1521,16 +1543,21 @@ function __underToSlash (text = "") {
   return text.replace(/_/g, "/");
 }
 
-function _locateDependedPools (initialPoolBase, poolDirectories) {
+function _locateDependedPools (initialPoolBase, poolDirectories, relativePoolBase) {
   // TODO(iridian): eventually make less singletony to allow for different sub-invokation
   // current working diretory execution contexts (now fixed in the initial cwd)
-  let pathBase = initialPoolBase;
+  let pathBase = initialPoolBase, relativePathBase = relativePoolBase;
   const ret = [];
   while (pathBase) {
     poolDirectories.forEach(candidate => {
       const poolPath = this.path.join(pathBase, candidate);
       if (shell.test("-d", poolPath)) {
-        ret.push({ name: `${pathBase.match(/([^/]*)\/?$/)[1]}/${candidate}`, path: poolPath });
+        const dirName = pathBase.match(/([^/]*)\/?$/)[1];
+        ret.push({
+          name: `${dirName}/${candidate}`,
+          path: poolPath,
+          relativePath: this.path.join(relativePathBase, "..", dirName),
+        });
         return;
       }
       const packageJsonPath = this.path.join(pathBase, "package.json");
@@ -1543,6 +1570,7 @@ function _locateDependedPools (initialPoolBase, poolDirectories) {
     });
     if (pathBase === "/") break;
     pathBase = this.path.join(pathBase, "..");
+    relativePathBase = this.path.join(relativePathBase, "..");
   }
   return ret;
 }
@@ -1577,14 +1605,14 @@ function _refreshActivePools (searchForwardPool) {
 }
 
 function _selectActiveCommands (commandGlob, argv, introspect) {
-  if (introspect && introspect.identityPool) return introspect.identityPool.commands;
+  if (((introspect || {}).aggregatePool || {}).commands) return introspect.aggregatePool.commands;
   const ret = {};
   for (const pool of this._activePools) {
     if (!pool.commands) pool.commands = {};
     pool.stats = {};
     pool.listing.forEach(file => {
       const normalizedName = __underToSlash(file.name);
-      const matches = minimatch(normalizedName, commandGlob, { dot: this.vargv.matchAll });
+      const matches = minimatch(normalizedName, commandGlob, { dot: this.vargv.revealHidden });
       this.ifVerbose(3)
           .expound(`     evaluating file ${file.name}`, "matches:", matches, "vs glob:",
               commandGlob, ", dir:", __isDirectory(file), ", normalizedName:", normalizedName);
@@ -1665,7 +1693,8 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
       }
 
       subVargs.usage(module.command.replace(exportedCommandName, "$0"), module.describe);
-      if (!activeCommand.disabled || this.vargv.matchAll) {
+      if (!activeCommand.disabled
+          || (activeCommand.broken ? this.vargv.broken : this.vargv.enableDisabled)) {
         globalVargs.command(module.command, module.describe,
             ...(!activeCommand.disabled && module.builder ? [module.builder] : []), () => {});
       } else {
@@ -1781,7 +1810,7 @@ function _determineIntrospection (module, selector, isWildcard, invokeEntry, raw
         if (!argvString) argvString = JSON.stringify(rawArgv);
         const infoChar = (infoName === "pool") ? "O" : infoName[0].toUpperCase();
         ret.show[infoName] =
-            (argvString.indexOf(infoName) !== -1) ? argvString.indexOf(infoName)
+            (argvString.indexOf(`--${key} `) !== -1) ? argvString.indexOf(`--${key} `)
             : (argvString.indexOf(infoChar) !== -1) ? argvString.indexOf(infoChar)
             : true;
       }
@@ -1792,22 +1821,28 @@ function _determineIntrospection (module, selector, isWildcard, invokeEntry, raw
   }
   ret.entryIntro = Object.keys(ret.show).length;
 
-  if (selector && !ret.entryIntro) return undefined;
-  if (!selector && ret.entryIntro && !this.vargv.dryRun && !this.vargv.matchAll) {
+  if (!ret.entryIntro) {
+    // show default listing
+    if (!this.vargv.dryRun) {
+      if (selector) return undefined;
+      ret.defaultUsage = true;
+    }
+    ret.show.pool = 1;
+    ret.show.usage = 2;
+    ret.show.status = 3;
+  } else if (!selector && !this.vargv.dryRun && !this.vargv.matchAll) {
     // Introspect context
-    ret.identityPool = { path: path.dirname(process.argv[1]), commands: {} };
-    ret.identityPool.commands.vlm = {
-      name: "vlm", module, linkPath: __filename, pool: ret.identityPool,
+    ret.aggregatePool = { isAggregate: true, path: path.dirname(process.argv[1]), commands: {} };
+    ret.aggregatePool.commands.vlm = {
+      name: "vlm", module, linkPath: __filename, pool: ret.aggregatePool,
     };
   }
-  if (!selector && !ret.entryIntro) { // show default listing
-    if (!this.vargv.dryRun) ret.defaultUsage = true;
-    ret.show.usage = 1;
-    ret.show.status = 2;
+  if (!this.vargv.pools && !ret.aggregatePool) {
+    ret.aggregatePool = { isAggregate: true, relativePath: "." };
   }
-  ret.displayHeaders = isWildcard && !ret.identityPool;
+  ret.displayHeaders = !ret.aggregatePool && isWildcard;
   if (!ret.show.name && !ret.show.usage) {
-    if (!isWildcard && this.vargv.dryRun) ret.show.usage = 1;
+    if (this.vargv.dryRun && !isWildcard) ret.show.usage = 1;
     else if (!ret.entryIntro) ret.show.name = 1;
   }
   return ret;
@@ -1820,59 +1855,70 @@ function _renderBuiltinHelp (introspect) {
   return [];
 }
 
-function _introspectCommands (introspect, commands_, commandGlob, isWildcard_, matchAll) {
-  if (introspect.identityPool) {
-    const poolIntro = this._introspectPool(
-        introspect, introspect.identityPool, introspect.identityPool.commands, matchAll);
-    if ((poolIntro["..."] || {}).columns.length === 1) poolIntro["..."].hideHeaders = true;
-    return poolIntro;
-  }
-  const chapters = { "...": { chapters: true } };
-  const pools = { "...": { chapters: true, heading: { style: "bold" } } };
-  markdownify.addLayoutOrderedProperty(chapters, "pools", pools);
+function _introspectCommands (introspect, commands_, commandGlob, isWildcard_, enableDisabled) {
+  const chapters = { "...": { chapters: true, entries: [] } };
+  const commandsText = `${enableDisabled ? "All known" : "Enabled"} commands${
+      introspect.aggregatePool ? "" : " by pool"}:`;
 
-  if (introspect.defaultUsage) {
-    chapters.pools["..."].heading.text = `${matchAll ? "All known" : "Visible"} commands by pool:`;
-    if (!matchAll) {
-      chapters["..."].entries.unshift({
-        usage: { heading: { text: `Usage: ${introspect.module.command}`, style: "bold" } }
-      });
-      chapters.usage = "";
-    }
+  if (introspect.defaultUsage && !enableDisabled) {
+    chapters["..."].entries.push({
+      usage: { heading: { text: `Usage: ${introspect.module.command}`, style: "bold" } }
+    });
+    chapters.usage = "";
   }
-  for (const pool of [...this._activePools].reverse()) {
-    const poolIntro = this._introspectPool(introspect, pool, commands_, matchAll,
-        isWildcard_, _vlm.vargv.pools);
-    markdownify.addLayoutOrderedProperty(pools, pool.name, poolIntro);
-    const isEmpty = !Object.keys(poolIntro).filter(k => (k !== "...")).length;
-    if (isWildcard_ && (!isEmpty || _vlm.vargv.pools || matchAll)) {
-      poolIntro["..."].heading = {
-        style: "bold",
-        text: `'${this.path.join(pool.name, commandGlob)}' ${
-            isEmpty ? "has no shown commands" : "commands:"} (${
-              this.theme.info(Object.keys(pool.stats || {}).map(
-                    s => `${s}: ${pool.stats[s]}`).join(", "))
-            })`
-      };
-    } else if (isEmpty) {
-      poolIntro["..."].hide = true;
+
+  let poolIntro;
+  if (introspect.aggregatePool) {
+    if (!introspect.aggregatePool.commands) introspect.aggregatePool.commands = commands_;
+    poolIntro = this._introspectPool(introspect,
+        introspect.aggregatePool, introspect.aggregatePool.commands,
+        isWildcard_, enableDisabled);
+    if ((poolIntro["..."] || {}).columns.length === 1) poolIntro["..."].hideHeaders = true;
+    if (introspect.defaultUsage) {
+      markdownify.addLayoutOrderedProperty(chapters, commandsText, poolIntro);
+      return chapters;
     }
+  } else {
+    const pools = { "...": {
+      chapters: true,
+      heading: { style: "bold", text: introspect.defaultUsage ? commandsText : undefined },
+    } };
+    markdownify.addLayoutOrderedProperty(chapters, "pools", pools);
+
+    for (const pool of [...this._activePools].reverse()) {
+      const subPoolIntro = this._introspectPool(introspect,
+          pool, commands_, isWildcard_, enableDisabled);
+      markdownify.addLayoutOrderedProperty(pools, pool.name, subPoolIntro);
+      const isEmpty = !Object.keys(subPoolIntro).filter(k => (k !== "...")).length;
+      if (isWildcard_ && (!isEmpty || _vlm.vargv.pools || enableDisabled)) {
+        subPoolIntro["..."].heading = {
+          style: "bold",
+          text: `'${this.path.join(pool.name, commandGlob)}' ${
+              isEmpty ? "has no shown commands" : "commands:"} (${
+                this.theme.info(Object.keys(pool.stats || {}).map(
+                      s => `${s}: ${pool.stats[s]}`).join(", "))
+              })`
+        };
+      } else if (isEmpty) {
+        subPoolIntro["..."].hide = true;
+      }
+    }
+    if (isWildcard_) return chapters;
+    const visiblePoolName = Object.keys(pools).find(
+        key => (key !== "...") && !(pools[key]["..."] || {}).hide);
+    if (!visiblePoolName) return undefined;
+    poolIntro = pools[visiblePoolName];
   }
-  if (isWildcard_) return chapters;
-  const visiblePoolName = Object.keys(pools).find(
-      key => (key !== "...") && !(pools[key]["..."] || {}).hide);
-  if (!visiblePoolName) return undefined;
-  const command = pools[visiblePoolName];
-  const keys = Object.keys(command).filter(k => (k !== "..."));
-  if (keys.length !== 1) return command;
-  const ret = command[keys[0]];
+  const keys = Object.keys(poolIntro).filter(k => (k !== "..."));
+  if (keys.length !== 1) return poolIntro;
+  const ret = poolIntro[keys[0]];
   if (typeof ret !== "object" || !ret || Array.isArray(ret)) return ret;
   Object.assign(ret["..."] || (ret["..."] = { chapters: true }),
-      { entries: (command["..."] || {}).columns });
+      { entries: (poolIntro["..."] || {}).columns });
   return ret;
 }
 
-function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcard, showOverridden) {
+function _introspectPool (introspect, pool, selectedCommands, isWildcard, enableDisabled) {
   const _missingFile = "<file_missing>";
   const _missingPackage = "<package_missing>";
   const _columnTemplates = {
@@ -1882,31 +1928,34 @@ function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcar
     description: { transform: { defaultValue: { property: "explanation" } } },
     package: { style: "package" },
     version: { style: "version", transform: { defaultValue: { property: "explanation" } } },
-    pool: { text: "pool name" },
+    pool: { text: "pool", order: "reverse" },
     link: { text: "link path", style: "path" },
     target: { text: "target path", style: "path", transform: { defaultValue: _missingFile } },
     introduction: { oob: true, elementStyle: { prefix: "\n", suffix: "\n" } },
     code: { oob: true, elementStyle: "cardinal" },
   };
+  const trivialKey = Object.keys(introspect.show).length === 1 && Object.keys(introspect.show)[0];
+  const columns = trivialKey
+      ? [["", _columnTemplates[trivialKey]]]
+      : Object.entries(introspect.show)
+          .sort(([, l], [, r]) => (l < r ? -1 : r < l ? 1 : 0))
+          .map(([name]) => ([name, _columnTemplates[name]]));
 
   const poolIntro = { "...": {
-    stats: pool.stats,
-    elementStyle: { if: [{ property: "broken" }, "strikethrough"] },
-    columns: Object.entries(introspect.show)
-        .sort(([, l], [, r]) => (l < r ? -1 : r < l ? 1 : 0))
-        .map(([name]) => ({ [name]: _columnTemplates[name] })),
+    columns, stats: pool.stats, elementStyle: { if: [{ property: "broken" }, "strikethrough"] },
   } };
-  const trivialKey = Object.keys(introspect.show).length === 1 && Object.keys(introspect.show)[0];
-  if (trivialKey) poolIntro["..."].columns = [["", poolIntro["..."].columns[0][trivialKey]]];
-  Object.keys(pool.commands)
-  .sort()
-  .forEach(name => {
+  poolIntro["..."].entries = Object.keys(pool.commands)
+  .map(name => {
+    const selectedCommand = selectedCommands[name];
     const poolCommand = pool.commands[name];
-    if (!poolCommand || !introedCommands[name]
-        || (introedCommands[name].disabled && isWildcard && !matchAll)) {
-      return;
+    const relevantPool = pool.isAggregate ? selectedCommand.pool : pool;
+    if (!poolCommand || !selectedCommand
+        || (selectedCommand.disabled && isWildcard
+            && (poolCommand.broken ? !_vlm.vargv.broken : !enableDisabled))) {
+      return undefined;
     }
-    const info = __commandInfo(poolCommand.linkPath, pool.path);
+    const info = __commandInfo(poolCommand.linkPath,
+        relevantPool.relativePath || relevantPool.path);
     const module = (poolCommand.module !== undefined) ? (poolCommand.module || undefined)
         : (poolCommand.module = info.targetPath && require(info.targetPath));
     const rowData = {};
@@ -1925,12 +1974,11 @@ function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcar
       rowData.explanation = `Command module is missing required exports: '${
         ["command", "builder", "handler"].filter(v => !module[v]).join("', '")
       }'`;
-    } else if (introedCommands[name].disabled) {
+    } else if (selectedCommand.disabled) {
       rowData.disabled = "DISABLED";
-      rowData.explanation = introedCommands[name].disabled;
+      rowData.explanation = selectedCommand.disabled;
     }
-    if ((introedCommands[name] || { pool }).pool !== pool) {
-      if (!showOverridden) return;
+    if (!pool.isAggregate && (selectedCommand || { pool }).pool !== pool) {
       rowData.overridden = true;
       rowData.entries = { name: { style: "overridden", }, usage: { style: "overridden " } };
     }
@@ -1945,8 +1993,7 @@ function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcar
             : (typeof module.status === "function") ? `.status => ${module.status(this.vargs)}`
             : module.status ? `.status == ${module.status}`
             : module.describe));
-    _addData("description", module
-        && (!rowData.disabled ? module.describe : `(${rowData.disabled}) ${module.describe}`));
+    _addData("description", module && module.describe);
     _addData("package", info.package);
     _addData("version", info.version || _missingPackage);
     _addData("pool", info.poolPath);
@@ -1967,7 +2014,21 @@ function _introspectPool (introspect, pool, introedCommands, matchAll, isWildcar
       }
       _addData("code", code);
     }
-    poolIntro[name] = trivialKey ? rowData[trivialKey] : rowData;
+    return ([name, trivialKey ? rowData[trivialKey] : rowData]);
+  })
+  .filter(row => (row !== undefined))
+  .sort(([, lData], [, rData]) => {
+    if (trivialKey) return lData < rData ? -1 : lData > rData ? 1 : 0;
+    for (const [cKey, cTemplate] of columns) {
+      if (lData[cKey] !== rData[cKey]) {
+        return (lData[cKey] < rData[cKey] ? -1 : 1) * (cTemplate.order === "reverse" ? -1 : 1);
+      }
+    }
+    return 0;
+  })
+  .map(([name, entry]) => {
+    poolIntro[name] = entry;
+    return name;
   });
   return poolIntro;
 }

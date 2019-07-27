@@ -1,0 +1,23 @@
+{
+  "name": "@valos/toolset-domain",
+  "version": "0.35.0-prerelease.8",
+  "valos": {
+    "type": "toolset",
+    "domain": "@valos/kernel"
+  },
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "ValOS Toolset for managing ValOS workspace domains",
+  "main": "index.js",
+  "bin": {
+    "valma-generate-domain-summary": "valma/generate-domain-summary.js",
+    ".valma-release-vault_.prepared-hooks_00-generate-domain-summary": "valma/generate-domain-summary.js",
+    ".valma-configure_.toolset_@valos_toolset-domain": "valma/configure_toolset__toolset-domain.js",
+    ".valma-status_40-toolsets_@valos_toolset-domain": "valma/status___toolset__toolset-domain.js",
+    ".valma-configure_.@valos_toolset-domain_.tools_.select_summary": "valma/configure__toolset-domain_.tools_.select_summary.js"
+  }
+}

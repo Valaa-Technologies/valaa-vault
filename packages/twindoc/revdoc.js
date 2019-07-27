@@ -16,7 +16,7 @@ module.exports = {
     specStatus: "unofficial",
     editors: authors("iridian"),
     shortName: "twindoc",
-    alternateFormats: [{ label: "VDoc", uri: "index.jsonld" }],
+    alternateFormats: [{ label: "VDoc", uri: "index.vdocld" }],
   },
   "chapter#abstract>0": [
     `This document specifies TwinDoc, a `,
@@ -48,8 +48,8 @@ module.exports = {
     The fully isomoprhic extraction and emission transformations to
     valospace resources provide lossless roundtrips to both directions:`,
     { "numbered#": [
-      `emit + extract: a roundtrip starting from vdocson into valospace back into vdocson`,
-      `extract + emit: a roundtrip starting from valospace into vdocson back into valospace`,
+      `emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD`,
+      `extract + emit: a roundtrip starting from valospace into VDocLD back into valospace`,
     ], },
     null,
     `TwinDoc also specifies incremental transformations which are given

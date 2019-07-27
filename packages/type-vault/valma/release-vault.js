@@ -1,7 +1,7 @@
 #!/usr/bin/env vlm
 
 exports.command = "release-vault";
-exports.describe = "Prepares, commits and potentially publishes a new release";
+exports.describe = "Prepare, commit and potentially publish a new release of vault packages";
 exports.introduction = `${exports.describe}.
 
 Based on given options and current environment will create a new

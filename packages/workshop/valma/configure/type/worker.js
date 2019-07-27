@@ -1,9 +1,8 @@
 exports.command = ".configure/.type/worker";
 exports.describe = "Initialize worker workspace";
-exports.introduction = `${exports.describe}.
-
-A worker workspace is used to launch and manage a running process.
-The workspace files contain configuration and data used by the
+exports.introduction =
+`A worker workspace is used to launch and manage a particular service
+process. The workspace files contain configuration and data used by the
 process. This data can include even dynamic runtime data.
 
 A worker workspace is fully agnostic to version control solutions:

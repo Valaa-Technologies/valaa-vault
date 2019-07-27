@@ -23,7 +23,7 @@
       "@valos/type-opspace": "./packages/type-opspace/package",
       "@valos/type-vault": "./packages/type-vault/package",
       "@valos/type-worker": "./packages/type-worker/package",
-      "@valos/vdoc": "./packages/vdoc/package",
+      "@valos/vdoc": "./packages/vdoc/package"
     },
     "tools": {
       "summary": {
@@ -50,7 +50,7 @@
   "@valos/type-vault": {
     "tools": {
       "docs": {
-        "docsBaseIRI": "https://valospace.org/kernel/",
+        "docsBaseIRI": "https://valospace.org/",
         "regenerateOnRelease": true,
         "authors": {
           "iridian": {

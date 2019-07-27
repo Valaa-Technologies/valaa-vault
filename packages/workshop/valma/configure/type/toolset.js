@@ -1,23 +1,14 @@
 exports.command = ".configure/.type/toolset";
 exports.describe = "Initialize toolset workspace";
-exports.introduction = `${exports.describe}.
+exports.introduction =
+`A toolset workspace can be 'selected' by another workspace so that:
+1. The toolset is added as a devDependency to the target workspace,
+2. A configuration section is added for the toolset in the target
+   workspace root 'toolsets.json'
 
-A valma toolset is a package which provides various resources for
-a depending workspace with the ability to have workspace specific
-configurations in their 'toolsets.json'.
-These resources might be new valma commands, file templates,
-dependencies to other valma toolsets and tools, to external tools or
-to plain javascript libraries; anything that can be expressed in a
-package really.
-
-The defining quality of a toolset is its ability to have workspace
-specific configuration which all toolset commands and even other
-javascript files can access to customize their behaviour. Additionally
-toolsets appear in configuration listings and can be selectively
-enabled or disabled on a workspace.
-
-A valma toolsets are added as regular devDependencies and configured
-by running 'vlm configure' afterwards.`;
+This makes all valma scripts of the toolset available for the target
+workspace and allows these commands to easily access and manipulate
+their local configuration in the target workspace.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "toolset")
     && `Workspace is not a 'toolset' (is '${yargs.vlm.getValOSConfig("type")}')`;

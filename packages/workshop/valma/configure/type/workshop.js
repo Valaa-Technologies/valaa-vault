@@ -1,9 +1,8 @@
 exports.command = ".configure/.type/workshop";
 exports.describe = "Initialize workshop workspace";
-exports.introduction = `${exports.describe}.
-
-Each valos domain provides a workshop package which provides a set of
-valma commands for defining and managing the domain. The workshops then:
+exports.introduction =
+`A workshop package provides a set of valma commands for defining and
+managing a ValOS domain. The workshops then:
 1. shall provide domain package (de)registration via
    .configure/.<domain>/{,de}register-package
 2. can provide new workspace types via .configure/.type/*

@@ -2,9 +2,9 @@
   "name": "@valos/vdoc",
   "version": "0.35.0-prerelease.8",
   "valos": {
-    "type": "library",
+    "type": "vdoc-extension",
     "domain": "@valos/kernel",
-    "docs": "https:/valospace.org/kernel/vdoc"
+    "docs": "https://valospace.org/vdoc"
   },
   "author": "Valaa Technologies Ltd",
   "license": "MIT",

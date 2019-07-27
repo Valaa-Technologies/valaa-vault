@@ -16,7 +16,7 @@ module.exports = {
     specStatus: "unofficial",
     editors: authors("iridian"),
     shortName: "revdoc",
-    alternateFormats: [{ label: "VDoc", uri: "revdoc.jsonld" }],
+    alternateFormats: [{ label: "VDoc", uri: "revdoc.vdocld" }],
   },
   "chapter#abstract>0": [
     `This document specifies ReVDoc, a `,

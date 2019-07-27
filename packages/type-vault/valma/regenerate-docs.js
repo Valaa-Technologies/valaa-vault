@@ -24,9 +24,9 @@ exports.builder = (yargs) => yargs.options({
     default: true,
     description: "Generate revdocs from all vault **/*revdoc.js files",
   },
-  vdocsons: {
+  vdocld: {
     default: true,
-    description: "Generate vdocsons from all vault **/*revdoc.js files",
+    description: "Generate vdocld documents from all vault **/*revdoc.js files",
   },
 });
 
@@ -71,7 +71,7 @@ exports.handler = async (yargv) => {
             workspaceBase, workspaceName, targetWorkspaceBase);
       }
       await generateRevdocAndWriteToDocs(
-          revdocPath, targetDocPath, targetDocName, yargv.vdocsons);
+          revdocPath, targetDocPath, targetDocName, yargv.vdocld);
     }
   }
   await vlm.execute("git add docs/*");
@@ -81,16 +81,16 @@ exports.handler = async (yargv) => {
     const sbomxml = await scrapeCycloneDXXML();
     await vlm.shell.ShellString(sbomxml)
         .to("docs/sbom.cyclonedx.xml");
-    const sbomvdocson = await extractVDocSON(sbomxml);
-    await vlm.shell.ShellString(JSON.stringify(sbomvdocson, null, 2))
-        .to("docs/sbom.vdoc.jsonld");
-    const sbomhtml = await emitHTML(sbomvdocson);
+    const sbomvdocld = await extractVDocLD(sbomxml);
+    await vlm.shell.ShellString(JSON.stringify(sbomvdocld, null, 2))
+        .to("docs/sbom.vdocld");
+    const sbomhtml = await emitHTML(sbomvdocld);
     await vlm.shell.ShellString(sbomhtml)
         .to("docs/sbom.html");
-    const sbommarkdown = await emitMarkdown(sbomvdocson);
+    const sbommarkdown = await emitMarkdown(sbomvdocld);
     await vlm.shell.ShellString(sbommarkdown)
         .to("docs/sbom.md");
-    return { sbomxml, sbomvdocson, sbomhtml, sbommarkdown };
+    return { sbomxml, sbomvdocld, sbomhtml, sbommarkdown };
   }
 
   async function updateReVDocContainingPackagedocsBaseIRI (
@@ -101,6 +101,7 @@ exports.handler = async (yargv) => {
       const packageJSON = JSON.parse(packageJSONText);
       if (packageJSON.valos && !packageJSON.valos.docs) {
         packageJSON.valos.docs = _combineIRI(docsBaseIRI, ...targetWorkspaceBase, workspaceName);
+        if (!packageJSON.homepage) packageJSON.homepage = packageJSON.valos.docs;
         vlm.shell.ShellString(`${JSON.stringify(packageJSON, null, 2)}\n`)
             .to(packageJSONPath);
       }
@@ -108,20 +109,22 @@ exports.handler = async (yargv) => {
   }
 
   async function generateRevdocAndWriteToDocs (
-      revdocPath, targetDocPath, targetDocName, emitReVDocSON) {
+      revdocPath, targetDocPath, targetDocName, emitReVDocLD) {
     const revdocSource = require(vlm.path.join(process.cwd(), revdocPath));
-    const revdocson = extension.extract(revdocSource, {
+    const revdocld = extension.extract(revdocSource, {
       documentIRI: _combineIRI(docsBaseIRI, targetDocPath, targetDocName),
     });
-    const revdocHTML = await emitHTML(revdocson);
+    const revdocHTML = await emitHTML(revdocld);
     const targetDir = vlm.path.join("docs", targetDocPath);
     const targetFileName = `${targetDocName}.html`;
     await vlm.shell.mkdir("-p", targetDir);
     await vlm.shell.ShellString(revdocHTML)
         .to(vlm.path.join(targetDir, targetFileName));
-    if (emitReVDocSON) {
-      await vlm.shell.ShellString(JSON.stringify(revdocson, null, 2))
-          .to(vlm.path.join(targetDir, `${targetDocName}.jsonld`));
+    if (emitReVDocLD) {
+      const vdocLDPath = vlm.path.join(targetDir, `${targetDocName}.vdocld`);
+      await vlm.shell.ShellString(JSON.stringify(revdocld, null, 2))
+          .to(vdocLDPath);
+      vdocldListing.push(vdocLDPath);
     }
   }
 
@@ -135,7 +138,7 @@ exports.handler = async (yargv) => {
     return sbomxml;
   }
 
-  async function extractVDocSON (sbomxml) {
+  async function extractVDocLD (sbomxml) {
     const sbomgraph = patchWith({}, convert.xml2js(sbomxml, { compact: true, nativeType: true }), {
       preExtend (target, patch, key, targetObject) {
         if (patch == null || Array.isArray(patch)) return undefined;
@@ -177,7 +180,7 @@ exports.handler = async (yargv) => {
         null,
         "This SBoM document is available in following formats:",
         ref("CycloneDX XML", "sbom.cyclonedx.xml"), ",",
-        ref("VDoc JSON-LD", "sbom.vdoc.jsonld"), ",",
+        ref("VDoc JSON-LD", "sbom.vdocld"), ",",
         ref("SBoM HTML", "sbom.html"), "and",
         ref("markdown", "sbom.md"), ".",
       ],
@@ -194,13 +197,13 @@ exports.handler = async (yargv) => {
     return extension.extract(sbomSource, { documentIRI: `${docsBaseIRI || ""}sbom` });
   }
 
-  async function emitHTML (sbomvdocson) {
-    const sbomhtml = extension.emit("", sbomvdocson, "html");
+  async function emitHTML (sbomvdocld) {
+    const sbomhtml = extension.emit("", sbomvdocld, "html");
     return sbomhtml;
   }
 
-  async function emitMarkdown (sbomvdocson) {
-    const sbommarkdown = `# ${sbomvdocson[0]["dc:title"]}
+  async function emitMarkdown (sbomvdocld) {
+    const sbommarkdown = `# ${sbomvdocld[0]["dc:title"]}
 
 Markdown VDoc extension not implemented yet.
 `;

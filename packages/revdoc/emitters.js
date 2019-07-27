@@ -10,7 +10,7 @@ module.exports = {
   },
 };
 
-function emitReVDocHTML (emission, node, document, emitNode /* , vdocson, extensions */) {
+function emitReVDocHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
   return `<!DOCTYPE html>
 <html>
   <head>
@@ -30,13 +30,13 @@ function emitReVDocHTML (emission, node, document, emitNode /* , vdocson, extens
 `;
 }
 
-function emitReVDocChapter (emission, node, document, emitNode, vdocson, extensions) {
+function emitReVDocChapter (emission, node, document, emitNode, vdocld, extensions) {
   return vdocExtension.emitters.html["vdoc:Chapter"](
       emission, Object.assign({}, node, { "vdoc:element": "section" }),
-      document, emitNode, vdocson, extensions);
+      document, emitNode, vdocld, extensions);
 }
 
-function emitReVDocReference (emission, node, document, emitNode, vdocson, extensions) {
+function emitReVDocReference (emission, node, document, emitNode, vdocld, extensions) {
   let node_ = node;
   if ((node["vdoc:ref"] || "")[0] === "@") {
     const nodePath = node["vdoc:ref"].match(/([^/#]*)\/([^/#]*)(.*)/);
@@ -48,5 +48,5 @@ function emitReVDocReference (emission, node, document, emitNode, vdocson, exten
     });
   }
   return vdocExtension.emitters.html["vdoc:Reference"](
-      emission, node_, document, emitNode, vdocson, extensions);
+      emission, node_, document, emitNode, vdocld, extensions);
 }

@@ -2233,9 +2233,9 @@ function updateToolConfig (toolsetName, toolName, updates) {
   return this.updateToolsetsConfig({ [toolsetName]: { tools: { [toolName]: updates } } });
 }
 
-function createConfigureToolsetOptions (/* toolsetExports */) {
+function createConfigureToolsetOptions (toolsetExports, { toolSelectorName = "tool" } = {}) {
   return {
-    tools: buildSelectorOption(this, "tool"),
+    ...(!toolSelectorName ? {} : { tools: buildSelectorOption(this, toolSelectorName) }),
     reconfigure: {
       alias: "r", type: "boolean",
       description: "Reconfigure all even already configured toolset and tool options.",

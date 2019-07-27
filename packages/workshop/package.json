@@ -19,6 +19,7 @@
     ".valma-configure_.type_tool": "valma/configure/type/tool.js",
     ".valma-configure_.type_toolset": "valma/configure/type/toolset.js",
     ".valma-configure_.type_vault": "valma/configure/type/vault.js",
+    ".valma-configure_.type_vdoc-extension": "valma/configure/type/vdoc-extension.js",
     ".valma-configure_.type_worker": "valma/configure/type/worker.js",
     ".valma-configure_.type_workshop": "valma/configure/type/workshop.js",
     ".valma-configure_.select_@valos_toolset-domain": "valma/configure/select__toolset-domain.js",

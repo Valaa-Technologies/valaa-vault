@@ -1,20 +1,14 @@
 exports.command = ".configure/.type/library";
 exports.describe = "Initialize library workspace";
-exports.introduction = `${exports.describe}.
+exports.introduction =
+`A library workspace contains arbitrary ES5 source code and exposes a
+API via package.json .main stanza (usually index.js).
 
-Libraries are workspaces which contain arbitrary ES5 source code and
-expose an API via package.json .main stanza (usually index.js).
+A library can provide convenience valma commands but unlike toolsets
+a library cannot have workspace local configurations.
 
-Libraries are intended to be published as packages.
-
-A typical valos library workspace resides in a packages/* workspace
-directory of some vault.
-
-While a library can provide convenience valma commands it is not
-a toolset. This means that another workspace which dev-depends on
-a library package (directly or indirectly) won't have a valma toolset
-config for it; this in turn means that its valma commands cannot use
-vlm.getTool(set)Config and are essentially 'stateless'.`;
+Library workspaces are almost always published as a packages and
+typically reside in "packages/*" vault workspace directory.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "library")
     && `Workspace is not a 'library' (is '${yargs.vlm.getValOSConfig("type")}')`;

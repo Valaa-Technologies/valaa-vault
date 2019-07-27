@@ -1453,8 +1453,8 @@
     once "^1.4.0"
 
 "@octokit/request@^5.0.0":
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/@octokit/request/-/request-5.0.1.tgz#6705c9a883db0ac0f58cee717e806b6575d4a199"
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@octokit/request/-/request-5.0.2.tgz#59a920451f24811c016ddc507adcc41aafb2dca5"
   dependencies:
     "@octokit/endpoint" "^5.1.0"
     "@octokit/request-error" "^1.0.1"
@@ -1465,8 +1465,8 @@
     universal-user-agent "^3.0.0"
 
 "@octokit/rest@^16.28.4":
-  version "16.28.6"
-  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.28.6.tgz#9e73104077c9c06cf3b1628603b4b0c55a117809"
+  version "16.28.7"
+  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.28.7.tgz#a2c2db5b318da84144beba82d19c1a9dbdb1a1fa"
   dependencies:
     "@octokit/request" "^5.0.0"
     "@octokit/request-error" "^1.0.2"
@@ -1505,6 +1505,9 @@
 "@types/swagger-schema-official@^2.0.15":
   version "2.0.18"
   resolved "https://registry.yarnpkg.com/@types/swagger-schema-official/-/swagger-schema-official-2.0.18.tgz#5ce35ec9949ff5b5bfec69b83f5bc3dd63a4dd97"
+
+"@valos/toolset-domain@file:./packages/toolset-domain":
+  version "0.35.0-prerelease.8"
 
 "@webassemblyjs/ast@1.8.5":
   version "1.8.5"
@@ -2606,8 +2609,8 @@ can-use-dom@^0.1.0:
   resolved "https://registry.yarnpkg.com/can-use-dom/-/can-use-dom-0.1.0.tgz#22cc4a34a0abc43950f42c6411024a3f6366b45a"
 
 caniuse-lite@^1.0.30000844, caniuse-lite@^1.0.30000864, caniuse-lite@^1.0.30000984:
-  version "1.0.30000985"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000985.tgz#0eb40f6c8a8c219155cbe43c4975c0efb4a0f77f"
+  version "1.0.30000986"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000986.tgz#f34350e367cc900509511574817ac092112bf7ab"
 
 capture-exit@^1.2.0:
   version "1.2.0"
@@ -3514,8 +3517,8 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
 
 electron-to-chromium@^1.3.191, electron-to-chromium@^1.3.47:
-  version "1.3.199"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.199.tgz#f9a62a74cda77854310a2abffde8b75591ea09a1"
+  version "1.3.201"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.201.tgz#b516e941baf01a7cf8abd33af537a39e1e0096db"
 
 elliptic@^6.0.0:
   version "6.5.0"
@@ -4110,8 +4113,8 @@ fastify-swagger@^2.3.2:
     js-yaml "^3.12.1"
 
 fastify@^2.3.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/fastify/-/fastify-2.6.0.tgz#45397b760f75278633fe0dcb30fcb4a26d1f66f6"
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/fastify/-/fastify-2.7.0.tgz#088f0123f6e85e0d64bdce79fcb577ba6603e213"
   dependencies:
     abstract-logging "^1.0.0"
     ajv "^6.9.2"
@@ -9580,8 +9583,8 @@ webpack-sources@^1.0.1, webpack-sources@^1.3.0:
     source-map "~0.6.1"
 
 webpack@^4.28.2:
-  version "4.37.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.37.0.tgz#3508ef10f7996612c2be6026076d89760f776f54"
+  version "4.38.0"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.38.0.tgz#6d77108404b08883c78f4e7e45a43c4e5c47c931"
   dependencies:
     "@webassemblyjs/ast" "1.8.5"
     "@webassemblyjs/helper-module-context" "1.8.5"

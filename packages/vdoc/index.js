@@ -18,8 +18,8 @@ module.exports = {
 function extract (sourceGraphs, {
   target, documentIRI, extensions = [this, ...this.extends], omitContext,
 } = {}) {
-  const vdocson = [];
-  return patchWith(vdocson, [].concat(sourceGraphs), {
+  const vdocld = [];
+  return patchWith(vdocld, [].concat(sourceGraphs), {
     keyPath: [],
     extractionRules: extensions.reduce((a, { ontology }) =>
         Object.assign(a, ontology.extractionRules || {}), {}),
@@ -62,8 +62,8 @@ function extract (sourceGraphs, {
   });
 }
 
-function emit (emission, vdocson, formatName, extensions = [this, ...this.extends]) {
-  return _emitNode(emission, vdocson[0], vdocson[0]);
+function emit (emission, vdocld, formatName, extensions = [this, ...this.extends]) {
+  return _emitNode(emission, vdocld[0], vdocld[0]);
   function _emitNode (emission_, node, document, explicitType_) {
     const type = explicitType_
         || ((node == null) && "null")
@@ -74,7 +74,7 @@ function emit (emission, vdocson, formatName, extensions = [this, ...this.extend
     for (const extension of extensions) {
       const emitter = extension.emitters[formatName];
       const newEmission = emitter && emitter[type]
-          && emitter[type](emission_, node, document, _emitNode, vdocson, extensions);
+          && emitter[type](emission_, node, document, _emitNode, vdocld, extensions);
       if (newEmission !== undefined) return newEmission;
       if (!subClassOf) {
         const [prefix, ontologyType] = type.split(":");

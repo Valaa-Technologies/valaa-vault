@@ -14,15 +14,15 @@ module.exports = {
   },
 };
 
-function emitBreakHTML (emission /* , node, document, emitNode, vdocson, extensions */) {
+function emitBreakHTML (emission /* , node, document, emitNode, vdocld, extensions */) {
   return `${emission}<br>`;
 }
 
-function emitValueHTML (emission, value /* , document, emitNode, vdocson, extensions */) {
+function emitValueHTML (emission, value /* , document, emitNode, vdocld, extensions */) {
   return `${emission}${value}`;
 }
 
-function emitNodeHTML (emission, node, document, emitNode /* , vdocson, extensions */) {
+function emitNodeHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
   let body = "";
   if (node["dc:title"]) {
     body += `\n    <h2>${node["dc:title"]}</h2>\n`;
@@ -62,14 +62,14 @@ function _classify (typeString) {
   return typeString.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase().split(":").join("-");
 }
 
-function emitArrayHTML (emission, content, document, emitNode, vdocson, extensions) {
+function emitArrayHTML (emission, content, document, emitNode, vdocld, extensions) {
   let paragraphBegin = 0;
   let ret = emission;
   for (let i = 0; i <= content.length; ++i) {
     if (i < content.length ? (content[i] === null) : paragraphBegin) {
       if (i > paragraphBegin) {
         const body = emitArrayHTML("", content.slice(paragraphBegin, i),
-            document, emitNode, vdocson, extensions);
+            document, emitNode, vdocld, extensions);
         ret += ((i === content.length) && !paragraphBegin)
             ? body
             : `      <p>${body}</p>\n`;
@@ -83,11 +83,11 @@ function emitArrayHTML (emission, content, document, emitNode, vdocson, extensio
   return `${ret}${listitems}`;
 }
 
-function emitChapterHTML (emission, node, document, emitNode, vdocson, extensions) {
-  return emitNodeHTML(emission, node, document, emitNode, vdocson, extensions);
+function emitChapterHTML (emission, node, document, emitNode, vdocld, extensions) {
+  return emitNodeHTML(emission, node, document, emitNode, vdocld, extensions);
 }
 
-function emitBulletListHTML (emission, node, document, emitNode /* , vdocson, extensions */) {
+function emitBulletListHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
   let lis = "";
   for (const entry of (node["vdoc:entries"] || [])) {
     lis += `      <li>${emitNode("", entry, document)}</li>\n`;
@@ -95,7 +95,7 @@ function emitBulletListHTML (emission, node, document, emitNode /* , vdocson, ex
   return `${emission}\n    <ul>\n${lis}    </ul>\n`;
 }
 
-function emitNumberedListHTML (emission, node, document, emitNode /* , vdocson, extensions */) {
+function emitNumberedListHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
   let lis = "";
   for (const entry of (node["vdoc:entries"] || [])) {
     lis += `      <li>${emitNode("", entry, document)}</li>\n`;
@@ -103,7 +103,7 @@ function emitNumberedListHTML (emission, node, document, emitNode /* , vdocson, 
   return `${emission}\n    <ol>\n${lis}    </ol>\n`;
 }
 
-function emitTableHTML (emission, node, document, emitNode /* , vdocson, extensions */) {
+function emitTableHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
   const keys = [];
   const headerTexts = [];
   let headers = node["vdoc:headers"];
@@ -152,7 +152,7 @@ function emitTableHTML (emission, node, document, emitNode /* , vdocson, extensi
 `;
 }
 
-function emitReferenceHTML (emission, node, document, emitNode /* , vdocson, extensions */) {
+function emitReferenceHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
   const head = `${emission}<a href="${node["vdoc:ref"]}"${emitAttributes(node)}`;
   return node["vdoc:content"]
       ? `${head}>${emitNode("", node["vdoc:content"], document)}</a>`

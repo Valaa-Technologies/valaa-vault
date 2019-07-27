@@ -5,7 +5,7 @@ module.exports = {
   },
 };
 
-function emitSBoMDocHTML (emission, node, document, emitNode /* , vdocson, extensions */) {
+function emitSBoMDocHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
   return `<!DOCTYPE html>
 <html>
   <head>

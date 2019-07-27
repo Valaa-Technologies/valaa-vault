@@ -4,7 +4,7 @@
   "valos": {
     "type": "toolset",
     "domain": "@valos/kernel",
-    "docs": "https://valospace.org/kernel/type-vault"
+    "docs": "https://valospace.org/type-vault"
   },
   "description": "The ValOS type toolset for vault workspaces",
   "license": "MIT",

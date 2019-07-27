@@ -1,10 +1,10 @@
 exports.command = ".configure/.type/vault";
 exports.describe = "Initialize vault workspace";
-exports.introduction = `${exports.describe}.
-
-A ValOS Vault is a monorepository containing many sub-packages. Its
-main responsibility is to handle the development, assembly and
-publishing of those packages.`;
+exports.introduction =
+`A vault is a monorepository which contains multiple workspaces of
+various types. Vaults are used to group packages with high cohesion
+together so that typical feature development, testing and deployment
+workflows can be done within a single repository when feasible.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
     && `Workspace is not a 'vault' (is '${yargs.vlm.getValOSConfig("type")}')`;

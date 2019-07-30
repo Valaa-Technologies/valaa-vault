@@ -1,3 +1,5 @@
+const patchWith = require("@valos/tools/patchWith").default;
+
 module.exports = {
   html: {
     null: emitBreakHTML,
@@ -104,18 +106,25 @@ function emitNumberedListHTML (emission, node, document, emitNode /* , vdocld, e
 }
 
 function emitTableHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
-  const keys = [];
+  const cellContents = [];
+  const wideRowContents = [];
   const headerTexts = [];
   let headers = node["vdoc:headers"];
-  if (!headers) throw new Error("vdoc:Table is missing headers");
+  if (!headers) {
+    throw new Error("vdoc:Table is missing headers");
+  }
   if (!Array.isArray(headers)) {
     if (headers["vdoc:entries"]) headers = headers["vdoc:entries"];
     else throw new Error("vdoc:Table vdoc:headers is not an array nor doesn't have vdoc:entries");
   }
   for (const header of headers) {
-    keys.push(header["vdoc:key"]);
     const headerText = emitNode("", header["vdoc:content"], document);
-    headerTexts.push(`<th${emitAttributes(header)}>${headerText}</th>`);
+    if ([].concat(header["vdoc:layout"] || []).includes("vdoc:wide")) {
+      wideRowContents.push({ headerText, cellContent: header["vdoc:cellContent"] });
+    } else {
+      cellContents.push(header["vdoc:cellContent"]);
+      headerTexts.push(`<th${emitAttributes(header)}>${headerText}</th>`);
+    }
   }
   const entryTexts = [];
   const lookup = (typeof node["vdoc:lookup"] !== "string") ? node["vdoc:lookup"]
@@ -128,15 +137,16 @@ function emitTableHTML (emission, node, document, emitNode /* , vdocld, extensio
     if (entryKey === "@id") continue;
     let entryText = "";
     let id;
-    for (const key of keys) {
-      if (key === "vdoc:id") id = entryKey;
-      entryText += `<td>${(key === "vdoc:key") || (key === "vdoc:id") ? entryKey
-          : emitNode("",
-              (key === "vdoc:value") ? entryData : (entryData != null) && entryData[key],
-              document)
-      }</td>`;
+    for (const cellContent of cellContents) {
+      if (cellContent === "vdoc:id") id = entryKey;
+      entryText += `<td>${_generateCellText(cellContent, entryKey, entryData)}</td>`;
     }
     entryTexts.push(`<tr${id ? ` id="${id}"` : ""}>${entryText}</tr>`);
+    for (const { headerText, cellContent } of wideRowContents) {
+      entryTexts.push(`<tr><td style="vertical-align: top;">${headerText
+        }</td><td colspan=${headers.length - 1 || 1
+        }>${_generateCellText(cellContent, entryKey, entryData)}</td></tr>`);
+    }
   }
   return `${emission}
     <table${emitAttributes(node)}>
@@ -150,6 +160,29 @@ function emitTableHTML (emission, node, document, emitNode /* , vdocld, extensio
       </tbody>
     </table>
 `;
+  function _generateCellText (cellContent, entryKey, entryData) {
+    const select = {
+      "vdoc:selectKey": entryKey,
+      "vdoc:id": entryKey,
+      "vdoc:selectValue": entryData,
+    };
+    let entry;
+    if (typeof cellContent === "string") {
+      entry = select[cellContent];
+      if (entry === undefined) entry = entryData[cellContent];
+    } else {
+      entry = patchWith({}, cellContent, {
+        preExtend (tgt, patch) {
+          if (typeof patch === "string") {
+            return select[patch] !== undefined ? select[patch] : patch;
+          }
+          return undefined;
+        },
+      });
+    }
+    if (typeof entry !== "object") return entry;
+    return emitNode("", entry, document);
+  }
 }
 
 function emitReferenceHTML (emission, node, document, emitNode /* , vdocld, extensions */) {

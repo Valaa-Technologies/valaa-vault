@@ -1,6 +1,6 @@
 module.exports = {
   prefix: "revdoc",
-  base: "https://valospace.org/revdoc#",
+  prefixIRI: "https://valospace.org/revdoc#",
 
   prefixes: {
     revdoc: "https://valospace.org/revdoc#",
@@ -22,6 +22,22 @@ module.exports = {
     },
     CommandLineInteraction: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node",
       "rdfs:comment": "A command line interaction sequence document node",
+    },
+    prefix: { a: "rdf:Property",
+      "rdfs:domain": "revdoc:Document", "rdfs:range": "rdfs:Literal",
+      "rdfs:comment": "The preferred prefix of an ontology document",
+    },
+    prefixIRI: { a: "rdf:Property",
+      "rdfs:domain": "revdoc:Document", "rdfs:range": "rdfs:Resource",
+      "rdfs:comment": "The IRI associated with the preferred prefix of an ontology",
+    },
+    package: { a: "rdf:Property",
+      "rdfs:domain": "vdoc:Node", "rdfs:range": "rdfs:Literal",
+      "rdfs:comment": "A package name",
+    },
+    version: { a: "rdf:Property",
+      "rdfs:domain": "vdoc:Node", "rdfs:range": "rdfs:Literal",
+      "rdfs:comment": "A semver string",
     },
   },
   extractionRules: {

@@ -16,12 +16,12 @@ module.exports = {
   },
   headers: {
     prefixes: {
-      "header#0;vdoc:key": "Prefix",
-      "header#1;vdoc:value": "IRI",
+      "header#0;vdoc:selectKey": "Prefix",
+      "header#1;vdoc:selectValue": "IRI",
     },
     context: {
-      "header#0;vdoc:key": "Term",
-      "header#1;vdoc:value": "Definition",
+      "header#0;vdoc:selectKey": "Term",
+      "header#1;vdoc:selectValue": "Definition",
       "header#2;@id": "@id",
       "header#3;@type": "@type",
       "header#4;@container": "@container",
@@ -29,7 +29,8 @@ module.exports = {
     vocabulary: {
       "header#0;vdoc:id": "rdfs:label",
       "header#1;a": "rdf:type",
-      "header#2;rdfs:comment": "rdfs:comment",
+      "header#2;rdfs:subClassOf": "rdfs:subClassOf",
+      "header#3;rdfs:comment": "rdfs:comment",
     },
     properties: {
       "header#0;vdoc:id": "rdfs:label",
@@ -44,7 +45,7 @@ module.exports = {
       "header#2;rdfs:comment": "rdfs:comment",
     },
     extractionRules: {
-      "header#0;vdoc:key": "Rule name",
+      "header#0;vdoc:selectKey": "Rule name",
       "header#1;range": "rdf:type",
       "header#2;owner": "owner property",
       "header#3;body": "body property",
@@ -52,8 +53,8 @@ module.exports = {
       "header#5;comment": "Comment",
     },
     extractee: {
-      "header#0;vdoc:key": "API identifier",
-      "header#1;vdoc:value": "rdf:type",
+      "header#0;vdoc:selectKey": "API identifier",
+      "header#1;vdoc:selectValue": "rdf:type",
     },
   },
 };

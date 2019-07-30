@@ -1,4 +1,5 @@
 const patchWith = require("@valos/tools/patchWith").default;
+const { wrapError, dumpObject } = require("@valos/tools/wrapError");
 
 const extractee = require("./extractee");
 
@@ -71,17 +72,22 @@ function emit (emission, vdocld, formatName, extensions = [this, ...this.extends
         || (Array.isArray(node) && "array")
         || typeof node;
     let subClassOf;
-    for (const extension of extensions) {
-      const emitter = extension.emitters[formatName];
-      const newEmission = emitter && emitter[type]
-          && emitter[type](emission_, node, document, _emitNode, vdocld, extensions);
-      if (newEmission !== undefined) return newEmission;
-      if (!subClassOf) {
-        const [prefix, ontologyType] = type.split(":");
-        if (prefix === extension.ontology.prefix) {
-          subClassOf = (extension.ontology.vocabulary[ontologyType] || {})["rdfs:subClassOf"];
+    try {
+      for (const extension of extensions) {
+        const emitter = extension.emitters[formatName];
+        const newEmission = emitter && emitter[type]
+            && emitter[type](emission_, node, document, _emitNode, vdocld, extensions);
+        if (newEmission !== undefined) return newEmission;
+        if (!subClassOf) {
+          const [prefix, ontologyType] = type.split(":");
+          if (prefix === extension.ontology.prefix) {
+            subClassOf = (extension.ontology.vocabulary[ontologyType] || {})["rdfs:subClassOf"];
+          }
         }
       }
+    } catch (error) {
+      throw wrapError(error, new Error(`During emitNode(${formatName}, ${type})`),
+          "\n\tnode:", ...dumpObject(node));
     }
     return !subClassOf
         ? emission_

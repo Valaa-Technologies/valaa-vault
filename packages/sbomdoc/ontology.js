@@ -4,7 +4,7 @@
 
 module.exports = {
   prefix: "sbomdoc",
-  base: "https://valospace.org/sbomdoc#",
+  prefixIRI: "https://valospace.org/sbomdoc#",
 
   prefixes: {
     sbomdoc: "https://valospace.org/sbomdoc#",

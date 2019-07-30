@@ -2,15 +2,19 @@
 
 const {
   headers, extension,
-  extractee: { authors, ref, /* dfn, */ filterVocabulary, filterVocabularyNot },
+  extractee: { authors, ref, /* dfn, */ filterKeysWithAnyOf, filterKeysWithNoneOf },
 } = require("@valos/revdoc");
 
-const { version, description } = require("./package");
+const { name, version, description } = require("./package");
 
-const prefix = extension.ontology.prefix;
+const { prefix, prefixIRI } = extension.ontology;
 
 module.exports = {
   "dc:title": description,
+  "revdoc:package": name,
+  "revdoc:prefix": prefix,
+  "revdoc:prefixIRI": prefixIRI,
+  "revdoc:version": version,
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -42,33 +46,33 @@ module.exports = {
     "data#prefixes": extension.ontology.prefixes,
     "data#vocabulary": extension.ontology.vocabulary,
     "data#context": extension.ontology.context,
-    "chapter#ch_prefixes>0;ReVDoc IRI prefixes": {
+    "chapter#section_prefixes>0;ReVDoc IRI prefixes": {
       "#0": [],
       "table#>0;prefixes": headers.prefixes,
     },
-    [`chapter#ch_classes>1;ReVDoc rdfs:Class vocabulary, prefix ${prefix}:`]: {
+    [`chapter#section_classes>1;ReVDoc rdfs:Class vocabulary, prefix ${prefix}:`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.classes,
-        "vdoc:entries": filterVocabulary("a", "rdfs:Class", extension.ontology.vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("a", "rdfs:Class", extension.ontology.vocabulary),
       },
     },
-    [`chapter#ch_properties>2;ReVDoc rdf:Property vocabulary, prefix ${prefix}:`]: {
+    [`chapter#section_properties>2;ReVDoc rdf:Property vocabulary, prefix ${prefix}:`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.properties,
-        "vdoc:entries": filterVocabulary("a", "rdf:Property", extension.ontology.vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("a", "rdf:Property", extension.ontology.vocabulary),
       },
     },
-    [`chapter#ch_remaining_vocabulary>3;ReVDoc remaining vocabulary, prefix ${prefix}:`]: {
+    [`chapter#section_other_vocabulary>3;Other ReVDoc vocabulary, prefix ${prefix}:`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.vocabulary,
-        "vdoc:entries": filterVocabularyNot("a", ["rdfs:Class", "rdf:Property"],
+        "vdoc:entries": filterKeysWithNoneOf("a", ["rdfs:Class", "rdf:Property"],
             extension.ontology.vocabulary),
       },
     },
-    "chapter#ch_context>4;ReVDoc JSON-LD context term definitions": {
+    "chapter#section_context>4;ReVDoc JSON-LD context term definitions": {
       "#0": [],
       "table#>0;context": headers.context,
     },

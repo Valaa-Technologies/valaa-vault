@@ -109,17 +109,34 @@ module.exports = {
     };
   },
 
-  filterVocabulary (predicate, objectOrObjects, vocabulary) {
-    const objects = [].concat(objectOrObjects);
-    return Object.entries(vocabulary)
-        .filter(([, entry]) => objects.includes(entry[predicate]))
-        .map(([label]) => label);
+  filterKeysWithAnyOf (entryFieldName, searchedValueOrValues = [], container) {
+    return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
+        (a, [field, searched]) => a || field.includes(searched));
   },
 
-  filterVocabularyNot (predicate, objectOrObjects, vocabulary) {
-    const objects = [].concat(objectOrObjects);
-    return Object.entries(vocabulary)
-        .filter(([, entry]) => !objects.includes(entry[predicate]))
-        .map(([label]) => label);
+  filterKeysWithAllOf (entryFieldName, searchedValueOrValues = [], container) {
+    return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
+        (a, [field, searched]) => a && field.includes(searched), true);
   },
+
+  filterKeysWithNoneOf (entryFieldName, searchedValueOrValues = [], container) {
+    return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
+        (a, [field, searched]) => a && !field.includes(searched), true);
+  },
+
+  filterKeysWithFieldReduction,
 };
+
+function filterKeysWithFieldReduction (entryFieldName, searchedValueOrValues, container,
+    reduction, initial) {
+  const searchedValues = [].concat(
+      searchedValueOrValues !== undefined ? searchedValueOrValues : []);
+  return Object.entries(container)
+      .filter(([, entry]) => searchedValues
+          .reduce((a, searchedValue) => reduction(a, [
+            [].concat(entry[entryFieldName] !== undefined ? entry[entryFieldName] : []),
+            searchedValue,
+          ]), initial))
+      .map(([key]) => key);
+}
+

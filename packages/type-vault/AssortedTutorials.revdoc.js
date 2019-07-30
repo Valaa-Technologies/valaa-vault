@@ -5,6 +5,7 @@ const {
 
 module.exports = {
   "dc:title": "Assorted tutorials",
+  "vdoc:tags": ["PRIMARY", "HOW_TO"],
   respecConfig: {
     specStatus: "unofficial",
     editors: authors("Jaradacl"),

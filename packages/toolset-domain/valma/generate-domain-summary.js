@@ -16,27 +16,26 @@ exports.disabled = (yargs) => (!yargs.vlm.getToolConfig(yargs.vlm.toolset, "summ
 
 exports.builder = (yargs) => yargs.options({
   target: {
-    type: "string", default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "summary", "summaryTarget"),
+    type: "string", default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "summary", "target"),
     description: "Target for domain component summary",
   },
 });
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const { domain, workspaces } = vlm.getToolsetConfig(vlm.toolset) || {};
-  if (!domain || !workspaces) {
+  const { domain, workspaceIds } = vlm.getToolsetConfig(vlm.toolset) || {};
+  if (!domain || !workspaceIds) {
     return { success: false, reason: "Invalid @valos/toolset-domain config" };
   }
   vlm.shell.mkdir("-p", vlm.path.dirname(yargv.target));
-  const breakdown = {};
-  Object.entries(workspaces).forEach(([name, requirePath]) => {
+  const workspaces = {};
+  Object.entries(workspaceIds).forEach(([name, requireId]) => {
     const {
       version, valos, description, homepage, license, repository,
-    } = require(requirePath.slice(0, 2) === "./"
-        ? vlm.path.join(process.cwd(), requirePath, "package")
-        : requirePath) || {};
+    } = require(vlm.path.join(
+        requireId.slice(0, 2) !== "./" ? "" : process.cwd(), requireId, "package")) || {};
     if (!valos) return;
-    const byType = breakdown[valos.type] || (breakdown[valos.type] = {});
+    const byType = workspaces[valos.type] || (workspaces[valos.type] = {});
     byType[name] = { version, description, homepage: homepage || valos.docs, license, repository };
   });
   const types = await _invokeAndFilter("PVDI", ".configure/.type/*",
@@ -46,13 +45,13 @@ exports.handler = async (yargv) => {
   const tools = await _invokeAndFilter("PVDI", ".configure/{,.*/{,.*,**}/}.tools/.select/**/*",
       name => name.match(/.configure\/\.(.*)\/.tools\/.select\/(.*)$/).slice(1, 3).join("/"));
   const commands = await _invokeAndFilter("PVDI", "*");
-  const summary = { workspaces: breakdown, types, toolsets, tools, commands };
+  const summary = { workspaces, types, toolsets, tools, commands };
   await vlm.shell.ShellString(JSON.stringify(summary, null, 2)).to(yargv.target);
   return {
     domain,
-    listing: Object.keys(workspaces),
+    workspaces: Object.keys(workspaceIds),
     success: `Generated a summary of ${
-      Object.keys(workspaces).length} workspaces of ${
+      Object.keys(workspaceIds).length} workspaces of ${
       Object.keys(summary.workspaces).length} types, ${
       Object.keys(summary.types).length} types, ${
       Object.keys(summary.toolsets).length} toolsets, ${
@@ -64,7 +63,7 @@ exports.handler = async (yargv) => {
     const ret = {};
     Object.entries(await vlm.delegate(`vlm -de${columns} --json ${command}`, { stdout: "json" }))
         .forEach(([name, entry]) => {
-      if ((name !== "...") && workspaces[entry.package]) {
+      if ((name !== "...") && workspaceIds[entry.package]) {
         ret[convertName(name, entry)] = convertEntry(entry, name);
       }
     });

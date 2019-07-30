@@ -1,3 +1,5 @@
+const { wrapError } = require("@valos/tools/wrapError");
+
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = "regenerate-docs";
 exports.describe = "Regenerate all configured /docs content";
@@ -26,6 +28,10 @@ exports.builder = (yargs) => yargs.options({
     default: true,
     description: "Generate vdocld documents from all vault **/*revdoc.js files",
   },
+  "listing-target": {
+    type: "string", default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "listingTarget"),
+    description: "Target path for document listing",
+  },
 });
 
 exports.handler = async (yargv) => {
@@ -39,6 +45,17 @@ exports.handler = async (yargv) => {
   const toolset = vlm.getToolsetConfig(exports.vlm.toolset);
   const vaultDocsConfig = vlm.getToolConfig("@valos/type-vault", "docs") || {};
   const docsBaseIRI = vaultDocsConfig.docsBaseIRI;
+  const listing = {};
+  function _addDocumentToListing (documentPath, vdocld, { tags = [], ...rest }) {
+    listing[documentPath] = {
+      "@id": vdocld[0]["@id"],
+      tags: (vdocld[0]["vdoc:tags"] || []).concat(...tags)
+          .filter((v, i, a) => a.indexOf(v) === i),
+      title: vdocld[0]["dc:title"] || documentPath,
+      abstract: { ...(vdocld[0].abstract || {}), "@id": undefined },
+      ...rest,
+    };
+  }
 
   vlm.shell.mkdir("-p", "docs");
 
@@ -50,27 +67,48 @@ exports.handler = async (yargv) => {
     const packageRevdocPaths = [...(vlm.shell.find("-l",
         "{revdocs,packages,opspaces,workers}/**/{*.,}revdoc.js") || [])];
     for (const revdocPath of packageRevdocPaths) {
-      const [, workspaceBase, workspaceName, docDir,, docName] = revdocPath.match(
-          /^(revdocs|packages\/|opspaces\/|workers\/)([^/]*)\/(.*\/)?(([^/]*)\.)?revdoc\.js/);
-      let targetDocName = docName;
-      const targetWorkspaceBase = (workspaceBase !== "packages/" && workspaceBase !== "revdocs")
-          ? [workspaceBase] : [];
-      let targetDocPath = vlm.path.join(...targetWorkspaceBase, workspaceName || ".", docDir || "");
-      if (!targetDocName) {
-        if (workspaceBase === "revdocs") {
-          targetDocName = "index";
-        } else {
-          targetDocName = vlm.path.basename(targetDocPath);
-          targetDocPath = vlm.path.join(targetDocPath, "..");
+      try {
+        const [, workspaceBase, workspaceName, docDir,, docName] = revdocPath.match(
+            /^(revdocs|packages\/|opspaces\/|workers\/)([^/]*)\/(.*\/)?(([^/]*)\.)?revdoc\.js/);
+        let targetDocName = docName;
+        const targetWorkspaceBase = (workspaceBase !== "packages/" && workspaceBase !== "revdocs")
+            ? [workspaceBase] : [];
+        let targetDocPath = vlm.path.join(
+            ...targetWorkspaceBase, workspaceName || ".", docDir || "");
+        if (!targetDocName) {
+          if (workspaceBase === "revdocs") {
+            targetDocName = "index";
+          } else {
+            targetDocName = vlm.path.basename(targetDocPath);
+            targetDocPath = vlm.path.join(targetDocPath, "..");
+          }
         }
+        const packageJSONPath = !workspaceName ? "package.json"
+            : vlm.path.join(workspaceBase, workspaceName, "package.json");
+        const packageJSON = JSON.parse(await vlm.tryReadFile(packageJSONPath));
+        if (docsBaseIRI && workspaceName) {
+          await updateReVDocParentPackageValOSDocsBaseIRI(
+              workspaceName, targetWorkspaceBase, packageJSON, packageJSONPath);
+        }
+        const { revdocld } = await generateRevdocAndWriteToDocs(
+            revdocPath, targetDocPath, targetDocName, yargv.vdocld);
+        if (revdocld) {
+          const documentName = targetDocName === "index"
+              ? config.name
+              : vlm.path.join(targetDocPath, targetDocName);
+          _addDocumentToListing(documentName, revdocld, {
+            package: packageJSON.name, version: packageJSON.version,
+          });
+        }
+      } catch (error) {
+        throw wrapError(error, new Error(`During vlm regenerate-docs`),
+            "revdocPath:", revdocPath);
       }
-      if (docsBaseIRI && workspaceName) {
-        await updateReVDocContainingPackagedocsBaseIRI(
-            workspaceBase, workspaceName, targetWorkspaceBase);
-      }
-      await generateRevdocAndWriteToDocs(
-          revdocPath, targetDocPath, targetDocName, yargv.vdocld);
     }
+  }
+  if (yargv["listing-target"]) {
+    vlm.shell.ShellString(JSON.stringify(listing, null, 2))
+        .to(vlm.path.join(process.cwd(), yargv["listing-target"]));
   }
   await vlm.execute("git add docs/*");
   return true;
@@ -82,6 +120,9 @@ exports.handler = async (yargv) => {
     const sbomvdocld = await extractVDocLD(sbomxml);
     await vlm.shell.ShellString(JSON.stringify(sbomvdocld, null, 2))
         .to("docs/sbom.vdocld");
+    _addDocumentToListing("sbom", sbomvdocld, {
+      package: config.name, version: config.version, tags: ["PRIMARY", "SBOM"],
+    });
     const sbomhtml = await emitHTML(sbomvdocld);
     await vlm.shell.ShellString(sbomhtml)
         .to("docs/sbom.html");
@@ -91,18 +132,13 @@ exports.handler = async (yargv) => {
     return { sbomxml, sbomvdocld, sbomhtml, sbommarkdown };
   }
 
-  async function updateReVDocContainingPackagedocsBaseIRI (
-      workspaceBase, workspaceName, targetWorkspaceBase) {
-    const packageJSONPath = vlm.path.join(workspaceBase, workspaceName, "package.json");
-    const packageJSONText = await vlm.tryReadFile(packageJSONPath);
-    if (packageJSONText) {
-      const packageJSON = JSON.parse(packageJSONText);
-      if (packageJSON.valos && !packageJSON.valos.docs) {
-        packageJSON.valos.docs = _combineIRI(docsBaseIRI, ...targetWorkspaceBase, workspaceName);
-        if (!packageJSON.homepage) packageJSON.homepage = packageJSON.valos.docs;
-        vlm.shell.ShellString(`${JSON.stringify(packageJSON, null, 2)}\n`)
-            .to(packageJSONPath);
-      }
+  async function updateReVDocParentPackageValOSDocsBaseIRI (
+      workspaceName, targetWorkspaceBase, packageJSON, packageJSONPath) {
+    if (packageJSON.valos && !packageJSON.valos.docs) {
+      packageJSON.valos.docs = _combineIRI(docsBaseIRI, ...targetWorkspaceBase, workspaceName);
+      if (!packageJSON.homepage) packageJSON.homepage = packageJSON.valos.docs;
+      vlm.shell.ShellString(`${JSON.stringify(packageJSON, null, 2)}\n`)
+          .to(packageJSONPath);
     }
   }
 
@@ -114,16 +150,15 @@ exports.handler = async (yargv) => {
     });
     const revdocHTML = await emitHTML(revdocld);
     const targetDir = vlm.path.join("docs", targetDocPath);
-    const targetFileName = `${targetDocName}.html`;
     await vlm.shell.mkdir("-p", targetDir);
+    const targetDocumentPath = vlm.path.join(targetDir, targetDocName);
     await vlm.shell.ShellString(revdocHTML)
-        .to(vlm.path.join(targetDir, targetFileName));
+        .to(`${targetDocumentPath}.html`);
     if (emitReVDocLD) {
-      const vdocLDPath = vlm.path.join(targetDir, `${targetDocName}.vdocld`);
       await vlm.shell.ShellString(JSON.stringify(revdocld, null, 2))
-          .to(vdocLDPath);
-      vdocldListing.push(vdocLDPath);
+          .to(`${targetDocumentPath}.vdocld`);
     }
+    return { revdocld };
   }
 
   function _combineIRI (base, ...rest) {

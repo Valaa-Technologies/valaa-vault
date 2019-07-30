@@ -15,10 +15,10 @@ exports.builder = (yargs) => yargs.options({
     description: "Regenerate domain summary revdoc on each vault (pre)release",
     interactive: { type: "confirm", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
   },
-  "summary-target": {
-    default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "summary", "summaryTarget")
+  target: {
+    default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "summary", "target")
         || "revdocs/domain-summary.json",
-    description: "Target file for the domain summary regeneration",
+    description: "Target domain summary JSON path",
     interactive: { type: "confirm", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
   },
 });
@@ -28,6 +28,6 @@ exports.handler = (yargv) => ({
   toolsetsUpdate: { [yargv.vlm.toolset]: { tools: { summary: {
     inUse: true,
     regenerateOnRelease: yargv["regenerate-on-release"] || false,
-    summaryTarget: yargv["summary-target"] || false,
+    target: yargv.target || "",
   } } } },
 });

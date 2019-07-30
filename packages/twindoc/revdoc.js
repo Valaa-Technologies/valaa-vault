@@ -11,6 +11,7 @@ const { prefix, prefixIRI } = extension.ontology;
 
 module.exports = {
   "dc:title": description,
+  "vdoc:tags": ["PRIMARY", "ONTOLOGY"],
   "revdoc:package": name,
   "revdoc:prefix": prefix,
   "revdoc:prefixIRI": prefixIRI,

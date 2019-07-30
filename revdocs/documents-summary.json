@@ -1,0 +1,183 @@
+{
+  "revdoc": {
+    "@id": "https://valospace.org/revdoc",
+    "tags": [
+      "PRIMARY",
+      "ONTOLOGY"
+    ],
+    "title": "ReVDoc - ReSpec document VDoc extension",
+    "abstract": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document specifies ReVDoc, a ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "VDoc extension"
+          ],
+          "vdoc:ref": "@valos/vdoc#extension"
+        },
+        " for extracting and emitting ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReSpec documents"
+          ],
+          "vdoc:ref": "https://github.com/w3c/respec"
+        },
+        "."
+      ]
+    },
+    "package": "@valos/revdoc",
+    "version": "0.35.0-prerelease.8"
+  },
+  "revdoc/tutorial": {
+    "@id": "https://valospace.org/revdoc/tutorial",
+    "tags": [],
+    "title": "ReVDoc Tutorial",
+    "abstract": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is a revdoc template document 'tutorial' created by create-revdoc."
+      ]
+    },
+    "package": "@valos/revdoc",
+    "version": "0.35.0-prerelease.8"
+  },
+  "sbomdoc": {
+    "@id": "https://valospace.org/sbomdoc",
+    "tags": [
+      "PRIMARY",
+      "ONTOLOGY"
+    ],
+    "title": "SBoMDoc - Software Bill of Materials VDoc extension",
+    "abstract": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document specifies SBomDoc, a ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "VDoc extension"
+          ],
+          "vdoc:ref": "@valos/vdoc#extension"
+        },
+        "for extracting and emitting ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "CycloneDX BOM documents"
+          ],
+          "vdoc:ref": "https://cyclonedx.org/"
+        },
+        "in various formats."
+      ]
+    },
+    "package": "@valos/sbomdoc",
+    "version": "0.35.0-prerelease.8"
+  },
+  "twindoc": {
+    "@id": "https://valospace.org/twindoc",
+    "tags": [
+      "PRIMARY",
+      "ONTOLOGY"
+    ],
+    "title": "TwinDoc - Valospace Hypertwin VDoc extension",
+    "abstract": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document specifies TwinDoc, a ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "VDoc extension"
+          ],
+          "vdoc:ref": "@valos/vdoc#extension"
+        },
+        " which specifies an isomorphism and synchronization\n    transformations between VDoc documents and valospace resources.",
+        null,
+        "More specifically TwinDoc allows for the serialization and\n    deserialization of an arbitrary selection of valospace resources\n    into a VDoc document array and back even if the source resources\n    are not a representation of a VDoc document nor use any VDoc core\n    or extension ontologies."
+      ]
+    },
+    "package": "@valos/twindoc",
+    "version": "0.35.0-prerelease.8"
+  },
+  "type-vault/AssortedTutorials": {
+    "@id": "https://valospace.org/type-vault/AssortedTutorials",
+    "tags": [
+      "PRIMARY",
+      "HOW_TO"
+    ],
+    "title": "Assorted tutorials",
+    "abstract": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is a collection of tutorials and possibly other notes",
+        " created by Jaradacl based on the tasks given. (During first few days at least)"
+      ]
+    },
+    "package": "@valos/type-vault",
+    "version": "0.35.0-prerelease.8"
+  },
+  "vdoc": {
+    "@id": "https://valospace.org/vdoc",
+    "tags": [
+      "PRIMARY",
+      "ONTOLOGY"
+    ],
+    "title": "VDoc - ValOS document interchange specification",
+    "abstract": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document specifies VDoc, a ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "a JSON-LD"
+          ],
+          "vdoc:ref": "https://www.w3.org/TR/json-ld11/"
+        },
+        "-based documentation human-machine-valospace interchange format."
+      ]
+    },
+    "package": "@valos/vdoc",
+    "version": "0.35.0-prerelease.8"
+  },
+  "@valos/kernel": {
+    "@id": "https://valospace.org/index",
+    "tags": [
+      "PRIMARY",
+      "ONTOLOGY"
+    ],
+    "title": "@valos/kernel domain",
+    "abstract": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "@valos/kernel domain ",
+        "includes all core infrastructure components of ValOS - the Valaa Open System.",
+        null,
+        "These components are hosted from ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "the @valos namespace of npmjs repository"
+          ],
+          "vdoc:ref": "https://www.npmjs.com/search?q=%40valos"
+        },
+        ".",
+        null,
+        "These components are developed at the ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "valos git repository"
+          ],
+          "vdoc:ref": "https://github.com/valaatech/kernel"
+        },
+        "."
+      ]
+    },
+    "package": "@valos/kernel",
+    "version": "0.35.0-prerelease.8"
+  }
+}

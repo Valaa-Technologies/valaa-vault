@@ -43,6 +43,10 @@ module.exports = {
     return ret;
   },
 
+  identifize (str) {
+    return str.replace(/[^a-zA-Z0-9_]/g, "_");
+  },
+
   /**
    * Construct vdoc:ContextPath node
    *

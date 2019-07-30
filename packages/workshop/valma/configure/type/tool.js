@@ -1,8 +1,7 @@
 exports.command = ".configure/.type/tool";
 exports.describe = "Initialize tool workspace";
-exports.introduction = `${exports.describe}.
-
-Tools are a toolset implementation detail. A tool is similar to
+exports.introduction =
+`Tools are a toolset implementation detail. A tool is similar to
 a toolset in that it can have its own workspace specific
 configurations. A tool differs from a toolset in that it cannot be
 standalone; it doesn't appear in listings, its always part of one or

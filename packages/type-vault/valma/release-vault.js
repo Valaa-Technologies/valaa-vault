@@ -2,10 +2,9 @@
 
 exports.command = "release-vault";
 exports.describe = "Prepare, commit and potentially publish a new release of vault packages";
-exports.introduction = `${exports.describe}.
-
-Based on given options and current environment will create a new
-release/prerelease branch or extend an existing one.
+exports.introduction =
+`Create a new release/prerelease branch or extend an existing one
+based on given options and current environment.
 
 Prepares the release by first running sanity checks, then cleaning and
 reinstalling intermediate files like node_modules, yarn workspaces,

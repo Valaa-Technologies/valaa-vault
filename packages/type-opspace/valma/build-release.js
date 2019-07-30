@@ -5,11 +5,11 @@
 exports.vlm = { toolset: "@valos/type-opspace" };
 exports.command = "build-release [toolsetGlob]";
 exports.describe = "Build all toolset sub-releases which have source modifications";
-exports.introduction = `${exports.describe}.
+exports.introduction =
+`The sub-releases are placed under the provided dist target path.
 
-These sub-releases are placed under the provided dist target. This
-command is first part of the two-part deployment with deploy-release
-making the actual deployment.`;
+This command is first part of the two-part deployment with
+deploy-release making the actual deployment.`;
 
 exports.builder = (yargs) => yargs.options({
   target: {

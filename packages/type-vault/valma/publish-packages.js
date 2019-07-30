@@ -5,7 +5,7 @@
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = "publish-packages";
 exports.describe = "Publish package assemblies to their registries";
-exports.introduction = `${exports.describe}.`;
+exports.introduction = ``;
 
 exports.builder = (yargs) => yargs.options({
   source: {

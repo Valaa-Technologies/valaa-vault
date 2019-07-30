@@ -2,9 +2,9 @@
 
 exports.command = "configure [toolsetGlob]";
 exports.describe = "Configure the current ValOS workspace and its toolsets";
-exports.introduction = `${exports.describe}.
-
-Invokes all in-use toolset configure commands.`;
+exports.introduction =
+`Allows grabbing and stowing of available toolsets and their tools and
+then invokes all in-use toolset configure commands.`;
 
 exports.disabled = (yargs) => !yargs.vlm.getValOSConfig()
     && "No package.json valos stanza found (run 'vlm init')";

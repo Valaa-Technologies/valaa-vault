@@ -3,9 +3,8 @@
 exports.vlm = { toolset: "@valos/toolset-revealer" };
 exports.command = "rouse-revealer";
 exports.describe = "Launch a webpack-dev-server at localhost serving a local revelation";
-exports.introduction = `${exports.describe}.
-
-The revelation consists of two parts: webpack output and static files.
+exports.introduction =
+`The revelation consists of two parts: webpack output and static files.
 Webpack output is configured by the project root webpack.config.js and
 the static files are served from --content-base. If this --content-base
 doesn't exist it is created by copying all files from the directory(s)

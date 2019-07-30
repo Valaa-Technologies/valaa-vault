@@ -2000,7 +2000,8 @@ function _introspectPool (introspect, pool, selectedCommands, isWildcard, enable
     _addData("link", info.linkPath);
     _addData("target", info.targetPath || _missingFile);
     if (introspect.show.introduction) {
-      const intro = !module ? null : (module.introduction || module.describe);
+      const intro = !module ? null
+          : (module.introduction !== undefined ? module.introduction : module.describe);
       if (intro === null) {
         this.warn(`Cannot read command '${name}' script introduction from:`,
             info.targetPath);
@@ -2272,8 +2273,8 @@ function __deepFreeze (object) {
 }
 
 function __deepAssign (target, source) {
-  if (typeof source === "undefined") return target;
-  if (Array.isArray(target)) return target.concat(source);
+  if (source === undefined) return target;
+  if (Array.isArray(target) && (source !== null)) return target.concat(source);
   if ((typeof source !== "object") || (source === null)
       || (typeof target !== "object") || (target === null)) return source;
   let objectTarget = target;

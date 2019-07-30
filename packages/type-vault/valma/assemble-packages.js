@@ -5,9 +5,8 @@
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = "assemble-packages [packageNameGlobs..]";
 exports.describe = "Assemble all current modified vault packages (preparing for publish)";
-exports.introduction = `${exports.describe}.
-
-Uses lerna to handle the monorepo sub-packages update detection,
+exports.introduction =
+`Uses lerna to handle the monorepo sub-packages update detection,
 versioning, and git interactions. Configuration for lerna is in
 lerna.json: notably the version increase semantics is configured there.
 

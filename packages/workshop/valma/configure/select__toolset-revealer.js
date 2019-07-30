@@ -1,9 +1,9 @@
 exports.vlm = { toolset: "@valos/toolset-revealer" };
 exports.command = ".configure/.select/@valos/toolset-revealer";
 exports.describe = "Select the toolset 'toolset-revealer'";
-exports.introduction = `${exports.describe}.
-
-Adds valma command 'rouse-revealer'.
+exports.introduction =
+`This toolset enables valma command 'rouse-revealer' for deploying a
+local dev environment for inspire gateway revelations.
 
 Sets up the webpack entry and output config as webpack.config.js in
 the workspace root, which combines shared revealer config from

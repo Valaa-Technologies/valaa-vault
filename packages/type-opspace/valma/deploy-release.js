@@ -5,7 +5,9 @@
 exports.vlm = { toolset: "@valos/type-opspace" };
 exports.command = "deploy-release [toolsetGlob]";
 exports.describe = "Deploy previously built releases to their deployment targets";
-exports.introduction = `${exports.describe}.`;
+exports.introduction =
+`This command is second part of the two-part deployment with
+build-release building the release.`;
 
 exports.builder = (yargs) => yargs.options({
   source: {

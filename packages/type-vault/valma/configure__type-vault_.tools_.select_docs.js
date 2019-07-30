@@ -1,9 +1,12 @@
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = ".configure/.@valos/type-vault/.tools/.select/docs";
 exports.describe = "Select vault /docs generation tool";
-exports.introduction = `${exports.describe}.
-
-`;
+exports.introduction =
+`This type-vault tool provides commands for (re)generating the /docs
+folder from document sources present in the local workspaces, notably
+all revdoc documents matching pattern '*.revdoc.js'.
+Additionally this tool can be configured to regenerate all docs on
+(pre)release time.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
     && `Workspace is not a vault (is ${yargs.vlm.getValOSConfig("type")})`;
@@ -17,7 +20,7 @@ exports.builder = (yargs) => yargs.options({
   "docs-base-iri": {
     type: "string",
     default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "docsBaseIRI"),
-    description: "The public base URI of the final published vault documents",
+    description: "The public base IRI of the final published vault documents",
     interactive: { type: "input", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
   },
 });

@@ -1,9 +1,7 @@
 exports.command = ".";
 exports.describe = "Access valma runtime context property or call a method";
-exports.introduction = `${exports.describe}.
-
-This command is a shim to valma script context singleton API object 'vlm'.
-`;
+exports.introduction =
+`This command is a shim to valma script context singleton API object 'vlm'.`;
 
 exports.builder = (yargs) => yargs;
 

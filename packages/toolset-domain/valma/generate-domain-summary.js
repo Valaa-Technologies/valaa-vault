@@ -4,7 +4,7 @@ exports.vlm = { toolset: "@valos/toolset-domain" };
 exports.command = "generate-domain-summary";
 exports.brief = "";
 exports.describe = "Generate the domain components summary file for the domain root revdoc";
-exports.introduction = `${exports.describe}.`;
+exports.introduction = ``;
 
 exports.disabled = (yargs) => (!yargs.vlm.getToolConfig(yargs.vlm.toolset, "summary", "inUse")
         ? "@valos/toolset-domain tool 'summary' is not configured to be inUse"

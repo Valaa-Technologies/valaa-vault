@@ -3,8 +3,7 @@
 exports.vlm = { toolset: "@valos/toolset-revealer" };
 exports.command = "compose-revelation";
 exports.describe = "Compose revealer bundles based on the revealer toolset config";
-exports.introduction = `${exports.describe}.
-`;
+exports.introduction = ``;
 
 // Example template which displays the command name itself and package name where it is ran
 // Only enabled inside package

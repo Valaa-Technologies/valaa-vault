@@ -1,11 +1,10 @@
 #!/usr/bin/env vlm
 exports.command = "status [toolsetGlob]";
 exports.describe = "Display the status of the current workspace";
-exports.introduction = `${exports.describe}.
-
-If toolsetGlob is specified the status is limited to status scripts
-matching '.status/*{toolsetGlob}*/**/*', otherwise all status scripts by
-'.status/**/*' are used.`;
+exports.introduction =
+`If toolsetGlob is specified the status is limited to status scripts
+matching '.status/*{toolsetGlob}*/**/*', otherwise all status scripts
+by '.status/**/*' are used.`;
 
 exports.disabled = (yargs) => !yargs.vlm.packageConfig && "No package.json found";
 exports.status = (/* yargs */) => "Status ok!";

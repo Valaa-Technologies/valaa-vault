@@ -2,10 +2,10 @@
 
 exports.command = "init";
 exports.describe = "Initialize the current directory as a ValOS workspace from scratch";
-exports.introduction = `${exports.describe}.
-
-This process will walk you through creating and configuring a new
-valma workspace in the current working directory from scratch.
+exports.introduction =
+`This command will interactively walk through the process of creating
+and configuring a new valma workspace in the current working directory
+from scratch.
 
 Valma init has following interactive phases:
 1. Initialization of package.json via 'yarn init'

@@ -1,10 +1,8 @@
 #!/usr/bin/env vlm
 exports.vlm = { toolset: "@valos/type-worker" };
 exports.command = "perspire [revelationPath] [additionalRevelationPaths..]";
-exports.describe = "Launch a headless worker for performing virtual DOM ValOS computation";
-exports.introduction = `${exports.describe}.
-
-.`;
+exports.describe = "Launch a headless worker gateway for persistent virtual DOM ValOS computation";
+exports.introduction = ``;
 
 exports.disabled = (yargs) => !yargs.vlm.packageConfig && "No package.json found";
 exports.builder = (yargs) => yargs.option({

@@ -2,7 +2,7 @@
 
 exports.command = "create-revdoc [revdocName]";
 exports.describe = "Create a revdoc source code file";
-exports.introduction = `${exports.describe}.`;
+exports.introduction = ``;
 
 exports.disabled = () => false;
 exports.builder = (yargs) => yargs.options({

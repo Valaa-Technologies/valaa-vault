@@ -1,9 +1,7 @@
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = "regenerate-docs";
 exports.describe = "Regenerate all configured /docs content";
-exports.introduction = `${exports.describe}.
-
-.`;
+exports.introduction = ``;
 
 exports.disabled = (yargs) => (!yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "inUse")
         ? "@valos/type-vault tool 'docs' is not configured to be inUse"

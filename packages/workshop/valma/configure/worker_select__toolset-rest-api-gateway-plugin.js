@@ -1,9 +1,9 @@
 exports.vlm = { toolset: "@valos/toolset-rest-api-gateway-plugin" };
 exports.command = ".configure/.type/.worker/.select/@valos/toolset-rest-api-gateway-plugin";
 exports.describe = "Select the toolset 'toolset-rest-api-gateway-plugin'";
-exports.introduction = `${exports.describe}.
-
-`;
+exports.introduction =
+`This toolset extends a perspire worker workspaces with REST-style
+configurable and extensible web service plugin.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
     && `Workspace is not a worker (is ${yargs.vlm.getValOSConfig("type")})`;

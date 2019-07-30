@@ -4,10 +4,11 @@ exports.brief = "select toolset";
 exports.describe =
     "Select and configure 'toolset-domain' for the current vault or workshop workspace";
 const enabledTypes = ["vault", "workshop"];
-exports.introduction = `${exports.describe}.
+exports.introduction =
+`This workspace type provides configuration template and commands for
+managing a ValOS domain.
 
-This script makes the toolset 'toolset-domain' selectable by '${
-  enabledTypes.join("', '")}' workspaces.`;
+The toolset 'toolset-domain' is selectable by '${enabledTypes.join("', '")}' workspaces.`;
 
 exports.disabled = (yargs) => !enabledTypes.includes(yargs.vlm.getValOSConfig("type"))
     && `Workspace is not '${enabledTypes.join("', '")}' (is ${yargs.vlm.getValOSConfig("type")})`;

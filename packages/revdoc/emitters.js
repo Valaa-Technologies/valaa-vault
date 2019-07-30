@@ -39,12 +39,17 @@ function emitReVDocChapter (emission, node, document, emitNode, vdocld, extensio
 function emitReVDocReference (emission, node, document, emitNode, vdocld, extensions) {
   let node_ = node;
   if ((node["vdoc:ref"] || "")[0] === "@") {
-    const nodePath = node["vdoc:ref"].match(/([^/#]*)\/([^/#]*)(.*)/);
-    const packageName = nodePath.slice(1, 3).join("/");
-    const packageJSON = require(`${packageName}/package.json`);
+    const refParts = node["vdoc:ref"].match(/^([^/#]*)\/([^/#]*)\/?(#?.*)?$/);
+    const packageName = (refParts[1] === "@")
+        ? refParts[2]
+        : refParts.slice(1, 3).join("/");
+    const packageJSON = require(`${packageName}/package`);
     const docsBase = (packageJSON.valos || {}).docs || packageName;
+    const subPath = refParts[3] || "";
     node_ = Object.assign({}, node, {
-      "vdoc:ref": path.posix.join(docsBase, ...nodePath.slice(3)),
+      "vdoc:ref": (!refParts[3] || (subPath[0] === "#") || (docsBase[docsBase.length - 1] === "/"))
+          ? `${docsBase}${refParts[3] || ""}`
+          : `${docsBase}/${refParts[3]}`,
     });
   }
   return vdocExtension.emitters.html["vdoc:Reference"](

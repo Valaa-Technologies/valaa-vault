@@ -2,9 +2,8 @@
 
 exports.command = "clean-vault";
 exports.describe = "Clean various more or less transient vault files and subdirectories";
-exports.introduction = `${exports.describe}.
-
-By default the three elements installed by 'yarn install' are cleaned:
+exports.introduction =
+`By default the three elements installed by 'yarn install' are cleaned:
 1. workspace packages by 'lerna clean --yes'
 2. yalc local dependencies by 'yalc remove --all'
 3. vault root node_modules by 'rm -rf'

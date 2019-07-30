@@ -1,14 +1,13 @@
 #!/usr/bin/env vlm
 
 exports.command = "create-command [commandName]";
-exports.describe = "Create a valma command script with given name";
-exports.introduction = `${exports.describe}.
-
-By default the new command is created as a local valma.bin/ command
-with the source file in valma/, making it the highest priority command
-and immediately available.
-Use --import to make an exported script available for local editing and
-development.`;
+exports.describe = "Create and possibly export a new valma command script";
+exports.introduction =
+`The new command is created as a local valma.bin/ command with the
+source file in valma/, making it the highest priority command and
+immediately available.
+With --import a existing exported script is copied for local editing
+and development.`;
 
 exports.disabled = (yargs) => !yargs.vlm.packageConfig && "No package.json found";
 exports.builder = (yargs) => yargs.options({

@@ -2,7 +2,9 @@ exports.vlm = { toolset: "@valos/toolset-domain" };
 exports.command = ".configure/.@valos/toolset-domain/.tools/.select/summary";
 exports.brief = "";
 exports.describe = "Select domain summary revdoc generation tool for a vault workspace";
-exports.introduction = `${exports.describe}.`;
+exports.introduction =
+`This toolset-domain tool enables the (re)generation of docs/index.html
+domain summary revdoc document.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
     && `Workspace is not a vault (is ${yargs.vlm.getValOSConfig("type")})`;

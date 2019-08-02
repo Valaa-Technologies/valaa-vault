@@ -1,6 +1,6 @@
 
 const {
-  extractee: { authors, cli, ref, },
+  extractee: { authors, cli, pkg, },
 } = require("@valos/revdoc");
 
 module.exports = {
@@ -17,8 +17,8 @@ module.exports = {
     " created by Jaradacl based on the tasks given. (During first few days at least)",
   ],
   "chapter#sotd>1": [
-    "This document is part of the toolset workspace ", ref("@valos/type-vault"),
-    " (of domain ", ref("@valos/kernel"), ") which is ",
+    "This document is part of the toolset workspace ", pkg("@valos/type-vault"),
+    " (of domain ", pkg("@valos/kernel"), ") which is ",
     "A valma toolset for managing valos vault monorepository workspaces",
   ],
   "chapter#how_to_create_revdoc>2;How to create RevDoc": [

@@ -2,11 +2,37 @@ module.exports = {
   /**
    * Construct vdoc:CharacterData node
    *
+   * @param {string} [language]
+   * @param {string} characters
+   * @param {Object} [options]
+   * @returns
+   */
+  c (languageOrCharacters, charactersOrOptions, options) {
+    return {
+      "rdf:type": "vdoc:CharacterData",
+      ...(typeof charactersOrOptions === "string" ? {
+        "vdoc:language": languageOrCharacters,
+        "vdoc:content": [charactersOrOptions],
+        ...(options || {}),
+      } : {
+        "vdoc:content": [languageOrCharacters],
+        ...(charactersOrOptions || {}),
+      }),
+    };
+  },
+
+  /**
+   * Construct vdoc:CharacterData node with explicit vdoc:language.
+   *
    * @param {*} characters
    * @returns
    */
-  cdata (characters) {
-    return { "rdf:type": "vdoc:CharacterData", "vdoc:content": [characters] };
+  language (language, characters) {
+    return {
+      "rdf:type": "vdoc:CharacterData",
+      "vdoc:language": language,
+      "vdoc:content": [characters],
+    };
   },
 
   /**

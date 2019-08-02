@@ -231,7 +231,7 @@ exports.handler = async (yargv) => {
   }
 
   async function emitHTML (sbomvdocld) {
-    const sbomhtml = extension.emit("", sbomvdocld, "html");
+    const sbomhtml = extension.emit(sbomvdocld, "html", { css: yargv.css });
     return sbomhtml;
   }
 

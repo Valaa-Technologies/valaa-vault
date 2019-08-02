@@ -5,7 +5,7 @@ module.exports = {
   },
 };
 
-function emitSBoMDocHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
+function emitSBoMDocHTML (node, emission, stack) {
   return `<!DOCTYPE html>
 <html>
   <head>
@@ -13,7 +13,7 @@ function emitSBoMDocHTML (emission, node, document, emitNode /* , vdocld, extens
     <title>${node["dc:title"]}</title>
   </head>
   <body>
-    ${emitNode("", node["vdoc:content"], document)}
+    ${stack.emitNode(node["vdoc:content"], "")}
   </body>
 </html>
 `;

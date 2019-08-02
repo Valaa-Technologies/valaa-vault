@@ -85,6 +85,9 @@ module.exports = {
     selectValue: { a: "vdoc:ContentSelector",
       "rdfs:comment": "A content selector literal denoting the whole entry value",
     },
+    selectField: { a: "rdf:Property", "rdfs:domain": "rdfs:Resource", "rdfs:range": "rdfs:Literal",
+      "rdfs:comment": "A content selector for the entry field denoted by the object of this triple",
+    },
     /*
     TemplateSelector: { a: "rdfs:Class", "rdfs:subClassOf": "ContentSelector",
       "rdfs:comment": "The class of selectors for building content using recursive selectors",
@@ -95,7 +98,7 @@ module.exports = {
     },
     */
     CharacterData: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node",
-      "rdfs:comment": "A CDATA document node",
+      "rdfs:comment": "A character data document node",
     },
     Reference: { a: "rdfs:Class", "rdfs:subClassOf": "vdoc:Node",
       "rdfs:comment": "A reference document node",
@@ -118,6 +121,10 @@ module.exports = {
     chapter: {
       range: "vdoc:Chapter", owner: "vdoc:content", body: "vdoc:content", rest: "dc:title",
       comment: "Numbered, titled chapter",
+    },
+    c: {
+      range: "vdoc:CharacterData", owner: "vdoc:content", body: "vdoc:content",
+      rest: "vdoc:language", comment: "Character data",
     },
     bulleted: {
       range: "vdoc:BulletList", owner: "vdoc:content", body: "vdoc:entries",

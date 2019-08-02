@@ -60,7 +60,7 @@ exports.handler = async (yargv) => {
 function _createReVDocSource ({ title, shortName, editors, authors, packageConfig, chapters }) {
   return `
 const {
-  extractee: { cdata, authors, ref, context, cli, command, cpath, bulleted, pkg },
+  extractee: { c, authors, ref, context, cli, command, cpath, bulleted, pkg },
 } = require("@valos/revdoc");
 
 module.exports = {
@@ -76,8 +76,8 @@ module.exports = {
   ],
   "chapter#sotd>1": [
     "This document is part of the ${packageConfig.valos.type} workspace ",
-    ref("${packageConfig.name}"),
-    " (of domain ", ref("${packageConfig.valos.domain}"), ") which is ",
+    pkg("${packageConfig.name}"),
+    " (of domain ", pkg("${packageConfig.valos.domain}"), ") which is ",
     "${packageConfig.description}",
   ],
 ${chapters}};

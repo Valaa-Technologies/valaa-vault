@@ -1,4 +1,3 @@
-const path = require("path");
 const { extension: vdocExtension } = require("@valos/vdoc");
 
 module.exports = {
@@ -10,7 +9,7 @@ module.exports = {
   },
 };
 
-function emitReVDocHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
+function emitReVDocHTML (node, emission, stack) {
   return `<!DOCTYPE html>
 <html>
   <head>
@@ -24,19 +23,18 @@ function emitReVDocHTML (emission, node, document, emitNode /* , vdocld, extensi
     </script>
   </head>
   <body>
-    ${emitNode("", node["vdoc:content"], document)}
+    ${stack.emitNode(node["vdoc:content"], "")}
   </body>
 </html>
 `;
 }
 
-function emitReVDocChapter (emission, node, document, emitNode, vdocld, extensions) {
+function emitReVDocChapter (node, emission, stack) {
   return vdocExtension.emitters.html["vdoc:Chapter"](
-      emission, Object.assign({}, node, { "vdoc:element": "section" }),
-      document, emitNode, vdocld, extensions);
+      Object.assign({}, node, { "vdoc:element": "section" }), emission, stack);
 }
 
-function emitReVDocReference (emission, node, document, emitNode, vdocld, extensions) {
+function emitReVDocReference (node, emission, stack) {
   let node_ = node;
   if ((node["vdoc:ref"] || "")[0] === "@") {
     const refParts = node["vdoc:ref"].match(/^([^/#]*)\/([^/#]*)\/?(#?.*)?$/);
@@ -52,6 +50,5 @@ function emitReVDocReference (emission, node, document, emitNode, vdocld, extens
           : `${docsBase}/${refParts[3]}`,
     });
   }
-  return vdocExtension.emitters.html["vdoc:Reference"](
-      emission, node_, document, emitNode, vdocld, extensions);
+  return vdocExtension.emitters.html["vdoc:Reference"](node_, emission, stack);
 }

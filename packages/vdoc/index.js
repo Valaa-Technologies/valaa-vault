@@ -63,20 +63,22 @@ function extract (sourceGraphs, {
   });
 }
 
-function emit (emission, vdocld, formatName, extensions = [this, ...this.extends]) {
-  return _emitNode(emission, vdocld[0], vdocld[0]);
-  function _emitNode (emission_, node, document, explicitType_) {
-    const type = explicitType_
+function emit (vdocld, formatName, options) {
+  if (options.extensions === undefined) options.extensions = [this, ...this.extends];
+  if (options.document === undefined) options.document = vdocld[0];
+  if (options.vdocld === undefined) options.vdocld = vdocld;
+  options.emitNode = function emitNode (node, target, explicitType) {
+    const type = explicitType
         || ((node == null) && "null")
         || node["rdf:type"]
         || (Array.isArray(node) && "array")
         || typeof node;
     let subClassOf;
     try {
-      for (const extension of extensions) {
+      for (const extension of this.extensions) {
         const emitter = extension.emitters[formatName];
         const newEmission = emitter && emitter[type]
-            && emitter[type](emission_, node, document, _emitNode, vdocld, extensions);
+            && emitter[type](node, target, this);
         if (newEmission !== undefined) return newEmission;
         if (!subClassOf) {
           const [prefix, ontologyType] = type.split(":");
@@ -89,8 +91,8 @@ function emit (emission, vdocld, formatName, extensions = [this, ...this.extends
       throw wrapError(error, new Error(`During emitNode(${formatName}, ${type})`),
           "\n\tnode:", ...dumpObject(node));
     }
-    return !subClassOf
-        ? emission_
-        : _emitNode(emission_, node, document, subClassOf);
-  }
+    if (!subClassOf) return target;
+    return this.emitNode(node, target, subClassOf);
+  };
+  return options.emitNode(vdocld[0], options.target);
 }

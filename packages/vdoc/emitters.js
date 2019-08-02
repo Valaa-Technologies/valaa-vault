@@ -16,27 +16,27 @@ module.exports = {
   },
 };
 
-function emitBreakHTML (emission /* , node, document, emitNode, vdocld, extensions */) {
+function emitBreakHTML (node, emission) {
   return `${emission}<br>`;
 }
 
-function emitValueHTML (emission, value /* , document, emitNode, vdocld, extensions */) {
+function emitValueHTML (value, emission) {
   return `${emission}${value}`;
 }
 
-function emitNodeHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
+function emitNodeHTML (node, emission, stack) {
   let body = "";
   if (node["dc:title"]) {
     body += `\n    <h2>${node["dc:title"]}</h2>\n`;
   }
   const content = node["vdoc:content"]
-      || (node["vdoc:words"] && [].concat(...node["vdoc:words"]
+      || (node["vdoc:words"] && [].concat(...[].concat(node["vdoc:words"] || [])
           .map((word, index) => (!index ? [word] : [" ", word]))))
-      || (node["vdoc:entries"] && [].concat(...node["vdoc:entries"]
+      || (node["vdoc:entries"] && [].concat(...[].concat(node["vdoc:entries"] || [])
           .map((line, index) => (!index ? [line] : [null, line]))))
-      || (node["@id"] && document[node["@id"]]);
+      || (node["@id"] && stack.document[node["@id"]]);
   if (content) {
-    body += emitNode("", content, document);
+    body += stack.emitNode(content, "");
     const attributes = emitAttributes(node);
     if (node["vdoc:element"] || attributes) {
       const elem = node["vdoc:element"] || (node["vdoc:entries"] ? "div" : "span");
@@ -48,13 +48,14 @@ function emitNodeHTML (emission, node, document, emitNode /* , vdocld, extension
   return `${emission}${body}`;
 }
 
-function emitAttributes (node) {
+function emitAttributes (node, classes) {
   let ret = "";
   let typeClasses = node["vdoc:class"] || "";
   if (node["rdf:type"]) {
     if (node["@id"]) ret += ` id="${node["@id"]}"`;
     typeClasses += `vdoc type-${_classify(node["rdf:type"])}`;
   }
+  if (classes) [].concat(typeClasses || [], classes).join(" ");
   if (typeClasses) ret += ` class="${typeClasses}"`;
   if (node["vdoc:style"]) ret += ` style="${node["vdoc:style"]}"`;
   return ret;
@@ -64,14 +65,13 @@ function _classify (typeString) {
   return typeString.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase().split(":").join("-");
 }
 
-function emitArrayHTML (emission, content, document, emitNode, vdocld, extensions) {
+function emitArrayHTML (content, emission, stack) {
   let paragraphBegin = 0;
   let ret = emission;
   for (let i = 0; i <= content.length; ++i) {
     if (i < content.length ? (content[i] === null) : paragraphBegin) {
       if (i > paragraphBegin) {
-        const body = emitArrayHTML("", content.slice(paragraphBegin, i),
-            document, emitNode, vdocld, extensions);
+        const body = emitArrayHTML(content.slice(paragraphBegin, i), "", stack);
         ret += ((i === content.length) && !paragraphBegin)
             ? body
             : `      <p>${body}</p>\n`;
@@ -81,31 +81,31 @@ function emitArrayHTML (emission, content, document, emitNode, vdocld, extension
   }
   if (paragraphBegin) return ret;
   let listitems = "";
-  for (const entry of content) listitems += emitNode("", entry, document);
+  for (const entry of content) listitems += stack.emitNode(entry, "");
   return `${ret}${listitems}`;
 }
 
-function emitChapterHTML (emission, node, document, emitNode, vdocld, extensions) {
-  return emitNodeHTML(emission, node, document, emitNode, vdocld, extensions);
+function emitChapterHTML (node, emission, stack) {
+  return emitNodeHTML(node, emission, stack);
 }
 
-function emitBulletListHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
+function emitBulletListHTML (node, emission, stack) {
   let lis = "";
   for (const entry of (node["vdoc:entries"] || [])) {
-    lis += `      <li>${emitNode("", entry, document)}</li>\n`;
+    lis += `      <li>${stack.emitNode(entry, "")}</li>\n`;
   }
   return `${emission}\n    <ul>\n${lis}    </ul>\n`;
 }
 
-function emitNumberedListHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
+function emitNumberedListHTML (node, emission, stack) {
   let lis = "";
   for (const entry of (node["vdoc:entries"] || [])) {
-    lis += `      <li>${emitNode("", entry, document)}</li>\n`;
+    lis += `      <li>${stack.emitNode(entry, "")}</li>\n`;
   }
   return `${emission}\n    <ol>\n${lis}    </ol>\n`;
 }
 
-function emitTableHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
+function emitTableHTML (node, emission, stack) {
   const cellContents = [];
   const wideRowContents = [];
   const headerTexts = [];
@@ -118,7 +118,7 @@ function emitTableHTML (emission, node, document, emitNode /* , vdocld, extensio
     else throw new Error("vdoc:Table vdoc:headers is not an array nor doesn't have vdoc:entries");
   }
   for (const header of headers) {
-    const headerText = emitNode("", header["vdoc:content"], document);
+    const headerText = stack.emitNode(header["vdoc:content"], "");
     if ([].concat(header["vdoc:layout"] || []).includes("vdoc:wide")) {
       wideRowContents.push({ headerText, cellContent: header["vdoc:cellContent"] });
     } else {
@@ -128,7 +128,7 @@ function emitTableHTML (emission, node, document, emitNode /* , vdocld, extensio
   }
   const entryTexts = [];
   const lookup = (typeof node["vdoc:lookup"] !== "string") ? node["vdoc:lookup"]
-      : document[node["vdoc:lookup"]];
+      : stack.document[node["vdoc:lookup"]];
   const entries = !node["vdoc:entries"]
       ? Object.entries(lookup || {})
       : node["vdoc:entries"].map((entry, index) =>
@@ -176,18 +176,22 @@ function emitTableHTML (emission, node, document, emitNode /* , vdocld, extensio
           if (typeof patch === "string") {
             return select[patch] !== undefined ? select[patch] : patch;
           }
+          if (patch != null && patch["vdoc:selectField"]) {
+            const ret = entryData[patch["vdoc:selectField"]];
+            return ret !== undefined ? ret : null;
+          }
           return undefined;
         },
       });
     }
     if (typeof entry !== "object") return entry;
-    return emitNode("", entry, document);
+    return stack.emitNode(entry, "");
   }
 }
 
-function emitReferenceHTML (emission, node, document, emitNode /* , vdocld, extensions */) {
+function emitReferenceHTML (node, emission, stack) {
   const head = `${emission}<a href="${node["vdoc:ref"]}"${emitAttributes(node)}`;
   return node["vdoc:content"]
-      ? `${head}>${emitNode("", node["vdoc:content"], document)}</a>`
+      ? `${head}>${stack.emitNode(node["vdoc:content"], "")}</a>`
       : `${head} />`;
 }

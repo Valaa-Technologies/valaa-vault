@@ -52,9 +52,19 @@ exports.handler = async (yargv) => {
       tags: (vdocld[0]["vdoc:tags"] || []).concat(...tags)
           .filter((v, i, a) => a.indexOf(v) === i),
       title: vdocld[0]["dc:title"] || documentPath,
-      abstract: { ...(vdocld[0].abstract || {}), "@id": undefined },
+      ..._embedSection("abstract", vdocld[0].abstract),
+      ..._embedSection("introduction", vdocld[0].introduction),
+      ..._embedSection("apiAbstract", vdocld[0].section_api_abstract),
+      ..._embedSection("ontologyAbstract", vdocld[0].section_ontology_abstract),
       ...rest,
     };
+  }
+
+  function _embedSection (target, source) {
+    if (source === undefined) return {};
+    const ret = { [target]: { ...source } };
+    delete ret[target]["@id"];
+    return ret;
   }
 
   vlm.shell.mkdir("-p", "docs");

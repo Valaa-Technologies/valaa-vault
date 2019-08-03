@@ -1,13 +1,13 @@
 // @flow
 
-const { extension } = require("@valos/vdoc");
+const { extension: { ontology, extractee, emitters } } = require("@valos/vdoc");
 const {
-  headers, extractee: { authors, ref, dfn, filterKeysWithAnyOf, filterKeysWithNoneOf },
+  headers, extractee: { authors, ref, dfn, pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
 } = require("@valos/revdoc");
 
 const { name, version, description } = require("./package");
 
-const { prefix, prefixIRI } = extension.ontology;
+const { prefix, prefixIRI, prefixes, vocabulary, context, extractionRules } = ontology;
 
 module.exports = {
   "dc:title": description,
@@ -34,8 +34,8 @@ module.exports = {
     null,
     `This document is part of the `, ref("ValOS core specification", "@valos/kernel"), ".",
     null,
-    `The format is implemented and supported by `,
-    ref("@valos/vdoc npm package", "@valos/vdoc"), ".",
+    `The format is implemented and supported by `, pkg("@valos/vdoc"),
+    " npm package.",
   ],
   "chapter#introduction>2;Introduction": [
     dfn(`VDoc`, "#vdoc", ` is an extensible JSON-LD interchange
@@ -333,7 +333,10 @@ module.exports = {
     },
   },
   "chapter#ontology>8;VDoc Core ontology": {
-    "#0": [
+    "data#prefixes": prefixes,
+    "data#vocabulary": vocabulary,
+    "data#context": context,
+    "#section_ontology_abstract>0": [
       `VDoc core ontology specifies the vocabulary for the human facing
       document structure by means of primitives which are sufficiently
       common and meaningful across all types of documents.
@@ -342,41 +345,39 @@ module.exports = {
       `VDoc core ontology explicitly does not specify any semantic
       meanings outside the document structure itself.`,
     ],
-    "data#prefixes": extension.ontology.prefixes,
-    "data#vocabulary": extension.ontology.vocabulary,
-    "data#context": extension.ontology.context,
-    "chapter#section_prefixes>0;VDoc Core IRI prefixes": {
+    "chapter#section_prefixes>1;VDoc Core IRI prefixes": {
       "#0": [],
       "table#>0;prefixes": headers.prefixes,
     },
-    [`chapter#section_classes>1;VDoc rdfs:Class vocabulary, prefix ${prefix}:`]: {
+    [`chapter#section_classes>2;<em>${prefix}:* a vdoc:Class</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.classes,
-        "vdoc:entries": filterKeysWithAnyOf("a", "rdfs:Class", extension.ontology.vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("a", "rdfs:Class", vocabulary),
       },
     },
-    [`chapter#section_properties>2;VDoc rdf:Property vocabulary, prefix ${prefix}:`]: {
+    [`chapter#section_properties>3;<em>${prefix}:* a vdoc:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.properties,
-        "vdoc:entries": filterKeysWithAnyOf("a", "rdf:Property", extension.ontology.vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("a", "rdf:Property", vocabulary),
       },
     },
-    [`chapter#section_other_vocabulary>3;Other VDoc vocabulary, prefix ${prefix}:`]: {
+    [`chapter#section_other_vocabulary>4;Other VDoc vocabulary, prefix ${prefix}:`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.vocabulary,
-        "vdoc:entries": filterKeysWithNoneOf("a", ["rdfs:Class", "rdf:Property"],
-            extension.ontology.vocabulary),
+        "vdoc:entries": filterKeysWithNoneOf("a", ["rdfs:Class", "rdf:Property"], vocabulary),
       },
     },
-    "chapter#section_context>4;VDoc Core JSON-LD context term definitions": {
+    "chapter#section_context>9;VDoc Core JSON-LD context term definitions": {
       "#0": [],
       "table#>0;context": headers.context,
     },
   },
   "chapter#transformations>9;VDoc Core transformations": {
+    "data#extraction_rules_lookup": extractionRules,
+    "data#extractee_api_lookup": extractee,
     "#0": [
       `VDoc defines a single extraction transformation from a native
       javascript source graph. To support this VDoc defines an `,
@@ -392,18 +393,19 @@ module.exports = {
     "chapter#extraction_rules>0;VDoc Core extraction rules": {
       "#0": [],
       "table#>0;extraction_rules_lookup": headers.extractionRules,
-      "data#extraction_rules_lookup": extension.ontology.extractionRules,
     },
     "chapter#extractee_api>1;VDoc Core extractee API": {
       "#0": [],
       "table#>0;extractee_api_lookup": headers.extractee,
-      "data#extractee_api_lookup": extension.extractee,
     },
     "chapter#emission_output>2;VDoc Core emission output": {
       "#0": [],
     },
     "chapter#emission_rules>3;VDoc Core emission rules": {
-      "#0": [],
+      "#0": [
+        `ReVDoc provides html emission rules for `,
+        { "vdoc:words": Object.keys(emitters.html) },
+      ],
     },
   }
 };

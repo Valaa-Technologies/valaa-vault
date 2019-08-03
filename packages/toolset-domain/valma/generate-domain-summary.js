@@ -43,7 +43,7 @@ exports.handler = async (yargv) => {
   const toolsets = await _invokeAndFilter("PVDI", ".configure/{,.*/{,.*,**}/}.select/**/*",
       name => name.match(/.select\/(.*)$/)[1]);
   const tools = await _invokeAndFilter("PVDI", ".configure/{,.*/{,.*,**}/}.tools/.select/**/*",
-      name => name.match(/.configure\/\.(.*)\/.tools\/.select\/(.*)$/).slice(1, 3).join("/"));
+      name => name.match(/.configure\/\.(.*)\/.tools\/.select\/(.*)$/).slice(1, 3).join("#"));
   const commands = await _invokeAndFilter("PVDI", "*");
   const summary = { workspaces, types, toolsets, tools, commands };
   await vlm.shell.ShellString(JSON.stringify(summary, null, 2)).to(yargv.target);

@@ -54,6 +54,7 @@
       "@valos/engine": {
         "version": "0.35.0-prerelease.8",
         "description": "ValOS Engine API and Schema",
+        "homepage": "https://valospace.org/engine",
         "license": "MIT"
       },
       "@valos/gateway-api": {
@@ -73,7 +74,8 @@
       },
       "@valos/raem": {
         "version": "0.35.0-prerelease.8",
-        "description": "ValOS Resources And Events Model (ValOS-RAEM) API, Schema",
+        "description": "ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology",
+        "homepage": "https://valospace.org/raem",
         "license": "MIT"
       },
       "@valos/script": {
@@ -222,13 +224,13 @@
     }
   },
   "tools": {
-    "@valos/toolset-domain/summary": {
+    "@valos/toolset-domain#summary": {
       "description": "Select domain summary revdoc generation tool for a vault workspace",
       "package": "@valos/toolset-domain",
       "version": "0.35.0-prerelease.8",
       "introduction": "This toolset-domain tool enables the (re)generation of docs/index.html\ndomain summary revdoc document."
     },
-    "@valos/type-vault/docs": {
+    "@valos/type-vault#docs": {
       "description": "Select vault /docs generation tool",
       "package": "@valos/type-vault",
       "version": "0.35.0-prerelease.8",

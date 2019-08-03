@@ -2,7 +2,7 @@
 const {
   headers: revdocHeaders,
   extractee: {
-    authors, ref, identifize, filterKeysWithAnyOf, filterKeysWithAllOf, filterKeysWithNoneOf,
+    authors, ref, identifize, pkg, filterKeysWithAnyOf, filterKeysWithAllOf, filterKeysWithNoneOf,
   },
 } = require("@valos/revdoc");
 const { headers: domainHeaders } = require("@valos/toolset-domain");
@@ -13,7 +13,7 @@ const documents = require("./documents-summary") || {};
 const { workspaces, types, toolsets, tools, commands } = require("./domain-summary");
 const { prefix, prefixIRI, prefixes, vocabulary, context } = require("./ontology");
 
-const introductionDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "INTRO"], documents);
+const introductionDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "INTRODUCTORY"], documents);
 const apiReferenceDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "API"], documents);
 const ontologyDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "ONTOLOGY"], documents);
 const otherPrimaryDocuments = filterKeysWithAllOf("tags", "PRIMARY", documents)
@@ -55,8 +55,8 @@ module.exports = {
     `These components are developed at the `, ref("valos git repository", repository), ".",
   ],
   "chapter#sotd>1": [
-    "This document is part of the vault workspace ", ref(name),
-    " (of domain ", ref(name), ") which is ",
+    "This document is part of the vault workspace ", pkg(name),
+    " (of domain ", pkg(name), ") which is ",
     "ValOS common infrastructure tools and libraries monorepo.",
   ],
   "chapter#introduction>2": [
@@ -100,26 +100,26 @@ module.exports = {
       `This domain introduces the following `, ref("workspaces", "@/valma#workspace"),
       ` and workspace infrastructure components.`,
     ],
-    [`chapter#section_workspace_types>0;Workspace types, ${Object.keys(types).length} new`]: {
+    [`chapter#section_new_types>0;Workspace types, ${Object.keys(types).length} new`]: {
       "#0": [
         `This domain introduces the following `, ref("workspace types", "@/valma#type"), ".",
       ],
       "table#>0;types": domainHeaders.types,
     },
-    [`chapter#section_workspace_toolsets>1;Workspace toolsets, ${
+    [`chapter#section_new_toolsets>1;Workspace toolsets, ${
         Object.keys(toolsets).length} new`]: {
       "#0": [
         `This domain introduces the following `, ref("workspace toolsets", "@/valma#toolset"), ":",
       ],
       "table#>0;toolsets": domainHeaders.toolsets,
     },
-    [`chapter#section_workspace_tools>2;Workspace tools, ${Object.keys(tools).length} new`]: {
+    [`chapter#section_new_tools>2;Workspace tools, ${Object.keys(tools).length} new`]: {
       "#0": [
         `This domain introduces the following `, ref("workspace tools", "@/valma#tool"), ":",
       ],
       "table#>0;tools": domainHeaders.tools,
     },
-    [`chapter#section_workspace_commands>3;Valma commands, ${Object.keys(commands).length} new`]: {
+    [`chapter#section_new_commands>3;Valma commands, ${Object.keys(commands).length} new`]: {
       "#0": [
         `This domain introduces the following top-level `,
         ref("valma commands", "@/valma#command"), ":",
@@ -127,8 +127,8 @@ module.exports = {
       "table#>0;commands": domainHeaders.commands,
     },
     ...Object.entries(workspaces).map(([type, typeWorkspaces], index) => ({
-      [`chapter#section_${identifize(type)}_workspaces>${4 + index};Type '${type}' workspaces, ${
-          Object.keys(typeWorkspaces).length} new`]: {
+      [`chapter#section_new_${identifize(type)}_workspaces>${4 + index
+          };Type '${type}' workspaces, ${Object.keys(typeWorkspaces).length} new`]: {
         "#0": [
           (types[type] || {}).introduction || "",
           null,
@@ -148,36 +148,40 @@ module.exports = {
     })).reduce((a, t) => Object.assign(a, t), {}),
   },
   [`chapter#ontology>8;${name} domain root ontology`]: {
+    "#section_ontology_abstract>0": [
+      `@valos/kernel ontology provides vocabulary and definitions of
+      the ValOS core concepts.`
+    ],
     "#0": [
       `All labels have implicit prefix IRI "${prefixIRI}" (typically
       abbreviated as prefix "${prefix}:")`,
     ],
-    [`chapter#section_prefixes>0;IRI prefixes`]: {
+    [`chapter#section_prefixes>1;IRI prefixes`]: {
       "#0": [],
       "table#>0;prefixes": revdocHeaders.prefixes,
     },
-    [`chapter#section_classes>1;rdfs:Class vocabulary`]: {
+    [`chapter#section_classes>2;<em>${prefix}:* a valos:Class</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": revdocHeaders.classes,
         "vdoc:entries": filterKeysWithAnyOf("a", "rdfs:Class", vocabulary),
       },
     },
-    [`chapter#section_properties>2;rdf:Property vocabulary`]: {
+    [`chapter#section_properties>3;<em>${prefix}:* a valos:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": revdocHeaders.properties,
         "vdoc:entries": filterKeysWithAnyOf("a", "rdf:Property", vocabulary),
       },
     },
-    [`chapter#section_vocabulary_rest>3;Rest of the vocabulary`]: {
+    [`chapter#section_vocabulary_other>8;<em>${prefix}:</em> other vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": revdocHeaders.vocabulary,
         "vdoc:entries": filterKeysWithNoneOf("a", ["rdfs:Class", "rdf:Property"], vocabulary),
       },
     },
-    [`chapter#section_context>4;JSON-LD context term definitions`]: {
+    [`chapter#section_context>9;JSON-LD context term definitions`]: {
       "#0": [],
       "table#>0;context": revdocHeaders.context,
     },

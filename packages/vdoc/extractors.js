@@ -1,3 +1,5 @@
+const _extractionRuleRegex = /([^#]*)#(([0-9]+)|([^>;]+))?(>([0-9]+)|([^;]*))?(;(.*))?/;
+
 module.exports = {
   native: {
     preExtend (target, patch, key, targetObject /* , patchObject */) {
@@ -64,8 +66,6 @@ module.exports = {
     },
   },
 };
-
-const _extractionRuleRegex = /([^#]*)#(([0-9]+)|([^#>;]+))?(>([0-9]+)|([^#>;]*))?(;([^#>;]*))?/;
 
 function _compareWithOrderQualifier (l, r) {
   return (l[0] < r[0]) ? -1 : (l[0] > r[0]) ? 1 : 0;

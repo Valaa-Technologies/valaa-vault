@@ -1,13 +1,13 @@
 // @flow
 
-const { extension } = require("@valos/twindoc");
+const { extension: { ontology, extractee } } = require("@valos/twindoc");
 const {
   headers, extractee: { authors, ref, pkg, /* dfn, */ filterKeysWithAnyOf, filterKeysWithNoneOf }
 } = require("@valos/revdoc");
 
 const { name, description, version } = require("./package");
 
-const { prefix, prefixIRI } = extension.ontology;
+const { prefix, prefixIRI, prefixes, vocabulary, context, extractionRules } = ontology;
 
 module.exports = {
   "dc:title": description,
@@ -43,8 +43,8 @@ module.exports = {
     `This document is part of the `, ref("ValOS core specification", "@valos/kernel/spec"),
     ".",
     null,
-    `The extension is specified and supported by `,
-    ref("@valos/twindoc npm package", "@valos/twindoc"), ".",
+    `The extension is specified and supported by `, pkg("@valos/twindoc"),
+    " npm package.",
   ],
   "chapter#introduction>2": [
     `TwinDoc provides both full isomorphic synchronization as well as
@@ -66,36 +66,41 @@ module.exports = {
     partial primary sources.`
   ],
   "chapter#ontology>8;TwinDoc ontology": {
-    "data#prefixes": extension.ontology.prefixes,
-    "data#vocabulary": extension.ontology.vocabulary,
-    "data#context": extension.ontology.context,
-    "chapter#section_prefixes>0;TwinDoc IRI prefixes": {
+    "data#prefixes": prefixes,
+    "data#vocabulary": vocabulary,
+    "data#context": context,
+    "#section_ontology_abstract>0": [
+      `TwinDoc ontology provides vocabulary for defining hypertwin
+      mappings and configurations; actual hypertwin content is
+      represented using the valos core ontologies and possible
+      extension content ontologies.`
+    ],
+    "chapter#section_prefixes>1;TwinDoc IRI prefixes": {
       "#0": [],
       "table#>0;prefixes": headers.prefixes,
     },
-    [`chapter#section_classes>1;TwinDoc rdfs:Class vocabulary, prefix ${prefix}:`]: {
+    [`chapter#section_classes>2;<em>${prefix}:* a vdoc:Class</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.classes,
-        "vdoc:entries": filterKeysWithAnyOf("a", "rdfs:Class", extension.ontology.vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("a", "rdfs:Class", vocabulary),
       },
     },
-    [`chapter#section_properties>2;TwinDoc rdf:Property vocabulary, prefix ${prefix}:`]: {
+    [`chapter#section_properties>3;<em>${prefix}:* a vdoc:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.properties,
-        "vdoc:entries": filterKeysWithAnyOf("a", "rdf:Property", extension.ontology.vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("a", "rdf:Property", vocabulary),
       },
     },
-    [`chapter#section_other_vocabulary>3;Other TwinDoc vocabulary, prefix ${prefix}:`]: {
+    [`chapter#section_vocabulary_other>8;<em>${prefix}:</em> other vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.vocabulary,
-        "vdoc:entries": filterKeysWithNoneOf("a", ["rdfs:Class", "rdf:Property"],
-            extension.ontology.vocabulary),
+        "vdoc:entries": filterKeysWithNoneOf("a", ["rdfs:Class", "rdf:Property"], vocabulary),
       },
     },
-    "chapter#section_context>4;TwinDoc JSON-LD context term definitions": {
+    "chapter#section_context>9;TwinDoc JSON-LD context term definitions": {
       "#0": [],
       "table#>0;context": headers.context,
     },
@@ -104,12 +109,12 @@ module.exports = {
     "chapter#extraction_rules>0;TwinDoc extraction rules": {
       "#0": [],
       "table#>0;extraction_rules_data": headers.extractionRules,
-      "data#extraction_rules_data": extension.ontology.extractionRules,
+      "data#extraction_rules_data": extractionRules,
     },
     "chapter#extractee_api>1;TwinDoc extractee API": {
       "#0": [],
       "table#>0;extractee_api_lookup": headers.extractee,
-      "data#extractee_api_lookup": extension.extractee,
+      "data#extractee_api_lookup": extractee,
     },
     "chapter#emission_output>2;TwinDoc emission output": {
       "#0": [

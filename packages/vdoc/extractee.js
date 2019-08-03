@@ -41,8 +41,8 @@ module.exports = {
    * @param {*} entries
    * @returns
    */
-  bulleted (...entries) {
-    return { "rdf:type": "vdoc:BulletList", "vdoc:entries": entries };
+  bulleted () {
+    return { "rdf:type": "vdoc:BulletList", "vdoc:entries": [].slice.call(arguments) };
   },
 
   /**
@@ -51,8 +51,8 @@ module.exports = {
    * @param {*} entries
    * @returns
    */
-  numbered (...entries) {
-    return { "rdf:type": "vdoc:NumberedList", "vdoc:entries": entries };
+  numbered () {
+    return { "rdf:type": "vdoc:NumberedList", "vdoc:entries": [].slice.call(arguments) };
   },
 
   /**

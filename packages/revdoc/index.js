@@ -29,7 +29,10 @@ module.exports = {
     vocabulary: {
       "header#0;vdoc:id": "rdfs:label",
       "header#1;a": "rdf:type",
-      "header#2;rdfs:subClassOf": "rdfs:subClassOf",
+      "header#2": {
+        "vdoc:cellContent": { "vdoc:words": { "vdoc:selectField": "rdfs:subClassOf" } },
+        "vdoc:content": ["rdfs:subClassOf"],
+      },
       "header#3;rdfs:comment": "rdfs:comment",
     },
     properties: {
@@ -41,7 +44,10 @@ module.exports = {
     },
     classes: {
       "header#0;vdoc:id": "rdfs:label",
-      "header#1;rdfs:subClassOf": "rdfs:subClassOf",
+      "header#1": {
+        "vdoc:cellContent": { "vdoc:words": { "vdoc:selectField": "rdfs:subClassOf" } },
+        "vdoc:content": ["rdfs:subClassOf"],
+      },
       "header#2;rdfs:comment": "rdfs:comment",
     },
     extractionRules: {

@@ -1,13 +1,13 @@
 // @flow
 
-const { extension } = require("@valos/sbomdoc");
+const { extension: { ontology, extractee, emitters } } = require("@valos/sbomdoc");
 const {
-  headers, extractee: { authors, ref, /* dfn, */ filterKeysWithAnyOf, filterKeysWithNoneOf },
+  headers, extractee: { authors, ref, /* dfn, */ pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
 } = require("@valos/revdoc");
 
 const { name, version, description } = require("./package");
 
-const { prefix, prefixIRI } = extension.ontology;
+const { prefix, prefixIRI, prefixes, vocabulary, context, extractionRules } = ontology;
 
 module.exports = {
   "dc:title": description,
@@ -37,8 +37,8 @@ module.exports = {
     `This document is part of the `, ref("ValOS core specification", "@valos/kernel/spec"),
     ".",
     null,
-    `The format is implemented and supported by `,
-    ref("@valos/sbomdoc npm package", "@valos/sbomdoc"), ".",
+    `The format is implemented and supported by `, pkg("@valos/sbomdoc"),
+    " npm package.",
   ],
   "chapter#introduction>2": [
     `SBoMDoc is a VDoc extension which uses CycloneDX namespaces and
@@ -46,36 +46,40 @@ module.exports = {
   ],
   "chapter#ontology>8;SBoMDoc ontology": {
     "#0": [],
-    "data#prefixes": extension.ontology.prefixes,
-    "data#vocabulary": extension.ontology.vocabulary,
-    "data#context": extension.ontology.context,
-    "chapter#section_prefixes>0;SBoMDoc IRI prefixes": {
+    "data#prefixes": prefixes,
+    "data#vocabulary": vocabulary,
+    "data#context": context,
+    "#section_ontology_abstract>0": [
+      `SBoMDoc ontology provides vocabulary and definitions which are
+      tailored for representing CycloneDX SBoM analysis semantic
+      content.`
+    ],
+    "chapter#section_prefixes>1;SBoMDoc IRI prefixes": {
       "#0": [],
       "table#>0;prefixes": headers.prefixes,
     },
-    [`chapter#section_classes>1;SBoMDoc rdfs:Class vocabulary, prefix ${prefix}:`]: {
+    [`chapter#section_classes>2;<em>${prefix}:* a vdoc:Class</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.classes,
-        "vdoc:entries": filterKeysWithAnyOf("a", "rdfs:Class", extension.ontology.vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("a", "rdfs:Class", vocabulary),
       },
     },
-    [`chapter#section_properties>2;SBoMDoc rdf:Property vocabulary, prefix ${prefix}:`]: {
+    [`chapter#section_properties>3;<em>${prefix}:* a vdoc:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.properties,
-        "vdoc:entries": filterKeysWithAnyOf("a", "rdf:Property", extension.ontology.vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("a", "rdf:Property", vocabulary),
       },
     },
-    [`chapter#section_other_vocabulary>3;Other SBoMDoc vocabulary, prefix ${prefix}:`]: {
+    [`chapter#section_vocabulary_other>8;<em>${prefix}:</em> other vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.vocabulary,
-        "vdoc:entries": filterKeysWithNoneOf("a", ["rdfs:Class", "rdf:Property"],
-            extension.ontology.vocabulary),
+        "vdoc:entries": filterKeysWithNoneOf("a", ["rdfs:Class", "rdf:Property"], vocabulary),
       },
     },
-    "chapter#section_context>4;SBoMDoc JSON-LD context term definitions": {
+    "chapter#section_context>9;SBoMDoc JSON-LD context term definitions": {
       "#0": [],
       "table#>0;context": headers.context,
     },
@@ -85,20 +89,20 @@ module.exports = {
     "chapter#extraction_rules>0;SBoMDoc extraction rules": {
       "#0": [],
       "table#>0;extraction_rules_data": headers.extractionRules,
-      "data#extraction_rules_data": extension.ontology.extractionRules,
+      "data#extraction_rules_data": extractionRules,
     },
     "chapter#extractee_api>1;SBoMDoc extractee API": {
       "#0": [],
       "table#>0;extractee_api_lookup": headers.extractee,
-      "data#extractee_api_lookup": extension.ontology.extractee,
+      "data#extractee_api_lookup": extractee,
     },
     "chapter#emission_output>2;SBoMDoc emission output": {
       "#0": [],
     },
     "chapter#emission_rules>3;SBoMDoc emission rules": {
       "#0": [
-        `ReVDoc provides html emission overrides for `,
-        { "vdoc:words": Object.keys(extension.emitters.html) },
+        `ReVDoc provides html emission rules for `,
+        { "vdoc:words": Object.keys(emitters.html) },
       ],
     },
   },

@@ -1,6 +1,6 @@
 
 const {
-  extractee: { authors, ref, /* cdata, context, cli, command, cpath, bulleted, pkg */ },
+  extractee: { authors, ref, pkg, /* c, context, cli, command, cpath, bulleted */ },
 } = require("@valos/revdoc");
 
 module.exports = {
@@ -15,7 +15,7 @@ module.exports = {
     "This document is a revdoc template document 'tutorial' created by create-revdoc.",
   ],
   "chapter#sotd>1": [
-    "This document is part of the library workspace ", ref("@valos/revdoc"),
+    "This document is part of the library workspace ", pkg("@valos/revdoc"),
   ],
   "chapter#introduction>2": [
   "Edit me - this is the first payload chapter. Abstract and SOTD are essential",

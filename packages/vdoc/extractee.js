@@ -1,4 +1,32 @@
+/**
+ * Aggregates given aggregatees into the given aggregateProperty of
+ * the given parent. If there is only a single aggregatees entry and
+ * it is a non-array object, its contents are merged into parent by
+ * choosing all fields that are missing from it.
+ *
+ * @param {*} parent
+ * @param {*} aggregatedField
+ * @param {*} aggregatees
+ * @returns
+ */
+function aggregate (parent, aggregatedField, ...aggregatees) {
+  if (!aggregatees.length) return parent;
+  const first = aggregatees[0];
+  let ret = parent, aggregatees_ = aggregatees;
+  if ((first != null) && (typeof first === "object") && !Array.isArray(first)) {
+    ret = Object.assign({}, first, parent);
+    aggregatees_ = (first[aggregatedField] == null) ? [] : [first[aggregatedField]];
+  }
+  const aggregated = [].concat(
+      (parent[aggregatedField] == null) ? [] : parent[aggregatedField],
+      ...aggregatees_);
+  if (aggregated.length) ret[aggregatedField] = aggregated;
+  return ret;
+}
+
 module.exports = {
+  aggregate,
+
   /**
    * Construct vdoc:CharacterData node
    *
@@ -18,20 +46,6 @@ module.exports = {
         "vdoc:content": [languageOrCharacters],
         ...(charactersOrOptions || {}),
       }),
-    };
-  },
-
-  /**
-   * Construct vdoc:CharacterData node with explicit vdoc:language.
-   *
-   * @param {*} characters
-   * @returns
-   */
-  language (language, characters) {
-    return {
-      "rdf:type": "vdoc:CharacterData",
-      "vdoc:language": language,
-      "vdoc:content": [characters],
     };
   },
 
@@ -60,13 +74,12 @@ module.exports = {
    *
    * @param {*} text
    * @param {*} [ref_=text]
-   * @param {*} [{ style }={}]
    * @returns
    */
-  ref (text, ref_ = text, { style } = {}) {
-    const ret = { "rdf:type": "vdoc:Reference", "vdoc:content": [text], "vdoc:ref": ref_ };
-    if (style) ret["vdoc:style"] = style;
-    return ret;
+  ref (text, ref_ = text) {
+    return aggregate({
+      "rdf:type": "vdoc:Reference", "vdoc:content": [text], "vdoc:ref": ref_,
+    }, "vdoc:content", ...[].slice.call(arguments, 2));
   },
 
   identifize (str) {
@@ -103,4 +116,63 @@ module.exports = {
       "rdf:type": "vdoc:ContextBase",
     };
   },
+
+  /**
+   * Construct a node with vdoc:em property, making node content
+   * <em>emphasised</em> (as per html5 'em')
+   *
+   * @param {*} entries
+   * @returns
+   */
+  em () { return _htmlElement({ "vdoc:em": true }, arguments); },
+
+  /**
+   * Construct a node with vdoc:strong property, making node content
+   * <strong>strong</strong> (as per html5 'strong')
+   *
+   * @param {*} entries
+   * @returns
+   */
+  strong () { return _htmlElement({ "vdoc:strong": true }, arguments); },
+
+  /**
+   * Construct a node with vdoc:ins property, marking node content
+   * <ins>as a new insertion</ins> (as per html5 'ins')
+   *
+   * @param {*} entries
+   * @returns
+   */
+  ins () { return _htmlElement({ "vdoc:ins": true }, arguments); },
+
+  /**
+   * Construct a node with vdoc:del property, marking node content
+   * <del>as deleted</del> (as per html5 'del')
+   *
+   * @param {*} entries
+   * @returns
+   */
+  del () { return _htmlElement({ "vdoc:del": true }, arguments); },
+
+  /**
+   * Construct a node with vdoc:quote property, making node content
+   * <q>quoted</q> (as per html5 'q')
+   *
+   * @param {*} entries
+   * @returns
+   */
+  quote () { return _htmlElement({ "vdoc:quote": true }, arguments); },
+
+  /**
+   * Construct a node with vdoc:blockquote property, making node content
+   * <blockquote>blockquoted</blockquote> (as per html5 'blockquote')
+   *
+   * @param {*} entries
+   * @returns
+   */
+  blockquote () { return _htmlElement({ "vdoc:blockquote": true }, arguments); },
 };
+
+function _htmlElement (htmlNode, args) {
+  return aggregate(aggregate(htmlNode, "vdoc:content", [].slice.call(args)),
+      { "rdf:type": "vdoc:Node" });
+}

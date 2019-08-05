@@ -1,4 +1,5 @@
 const patchWith = require("@valos/tools/patchWith").default;
+const ontology = require("./ontology");
 
 module.exports = {
   html: {
@@ -24,6 +25,10 @@ function emitValueHTML (value, emission) {
   return `${emission}${value}`;
 }
 
+const htmlElements = Object.entries(ontology.vocabulary)
+    .filter(([, entry]) => entry["vdoc:elementName"])
+    .reduce((a, [vdocName, entry]) => { a[`vdoc:${vdocName}`] = entry; return a; }, {});
+
 function emitNodeHTML (node, emission, stack) {
   let body = "";
   if (node["dc:title"]) {
@@ -37,7 +42,17 @@ function emitNodeHTML (node, emission, stack) {
       || (node["@id"] && stack.document[node["@id"]]);
   if (content) {
     body += stack.emitNode(content, "");
-    const attributes = emitAttributes(node);
+
+    let openers = "", closers = "";
+    Object.entries(node).forEach(([key, value]) => {
+      const elem = htmlElements[key];
+      if (!value || !elem) return;
+      openers += `<${elem["vdoc:elementName"]}>`;
+      closers = `</${elem["vdoc:elementName"]}>${closers}`;
+    });
+    if (openers) body = `${openers}${body}${closers}`;
+
+    const attributes = nodeAttributes(node);
     if (node["vdoc:element"] || attributes) {
       const elem = node["vdoc:element"] || (node["vdoc:entries"] ? "div" : "span");
       body = (elem === "span") ? `<${elem}${attributes}>${body}</${elem}>\n` : `
@@ -48,15 +63,16 @@ function emitNodeHTML (node, emission, stack) {
   return `${emission}${body}`;
 }
 
-function emitAttributes (node, classes) {
+function nodeAttributes (node, ...classes) {
   let ret = "";
-  let typeClasses = node["vdoc:class"] || "";
+  const typeClasses = [].concat(node["vdoc:class"] || [], ...classes);
   if (node["rdf:type"]) {
     if (node["@id"]) ret += ` id="${node["@id"]}"`;
-    typeClasses += `vdoc type-${_classify(node["rdf:type"])}`;
+    typeClasses.push(`type-${node["rdf:type"]}`);
   }
-  if (classes) [].concat(typeClasses || [], classes).join(" ");
-  if (typeClasses) ret += ` class="${typeClasses}"`;
+  if (typeClasses.length) {
+    ret += ` class="${["vdoc"].concat(typeClasses).map(_classify).join(" ")}"`;
+  }
   if (node["vdoc:style"]) ret += ` style="${node["vdoc:style"]}"`;
   return ret;
 }
@@ -106,7 +122,7 @@ function emitNumberedListHTML (node, emission, stack) {
 }
 
 function emitTableHTML (node, emission, stack) {
-  const cellContents = [];
+  const cellDatas = [];
   const wideRowContents = [];
   const headerTexts = [];
   let headers = node["vdoc:headers"];
@@ -118,12 +134,15 @@ function emitTableHTML (node, emission, stack) {
     else throw new Error("vdoc:Table vdoc:headers is not an array nor doesn't have vdoc:entries");
   }
   for (const header of headers) {
-    const headerText = stack.emitNode(header["vdoc:content"], "");
-    if ([].concat(header["vdoc:layout"] || []).includes("vdoc:wide")) {
-      wideRowContents.push({ headerText, cellContent: header["vdoc:cellContent"] });
+    const cellData = {
+      headerText: stack.emitNode(header["vdoc:content"], ""),
+      cell: header["vdoc:cell"],
+    };
+    if (header["vdoc:wide"]) {
+      wideRowContents.push(cellData);
     } else {
-      cellContents.push(header["vdoc:cellContent"]);
-      headerTexts.push(`<th${emitAttributes(header)}>${headerText}</th>`);
+      cellDatas.push(cellData);
+      headerTexts.push(`<th${nodeAttributes(header)}>${cellData.headerText}</th>`);
     }
   }
   const entryTexts = [];
@@ -133,23 +152,29 @@ function emitTableHTML (node, emission, stack) {
       ? Object.entries(lookup || {})
       : node["vdoc:entries"].map((entry, index) =>
           (!lookup || (typeof entry === "object") ? [index, entry] : [entry, lookup[entry]]));
-  for (const [entryKey, entryData] of entries) {
-    if (entryKey === "@id") continue;
+  entries.forEach(([entryKey, entryData], entryIndex) => {
+    if (entryKey === "@id") return;
     let entryText = "";
+    const rowNthNess = entryIndex % 2 ? "" : " vdoc-nth-child-2n";
     let id;
-    for (const cellContent of cellContents) {
-      if (cellContent === "vdoc:id") id = entryKey;
-      entryText += `<td>${_generateCellText(cellContent, entryKey, entryData)}</td>`;
+    for (const { cell } of cellDatas) {
+      const instance = _instantiateCell(cell, entryKey, entryData);
+      if (instance["vdoc:resourceId"]) id = instance["vdoc:resourceId"];
+      entryText += `<td>${
+        (typeof instance !== "object") ? instance : stack.emitNode(instance, "")}</td>`;
     }
-    entryTexts.push(`<tr${id ? ` id="${id}"` : ""}>${entryText}</tr>`);
-    for (const { headerText, cellContent } of wideRowContents) {
-      entryTexts.push(`<tr><td style="vertical-align: top;">${headerText
+    entryTexts.push(`<tr${id ? ` id="${id}"` : ""}${rowNthNess && `class="${rowNthNess}"`}>${
+      entryText
+    }</tr>`);
+    for (const { headerText, cell } of wideRowContents) {
+      const instance = _instantiateCell(cell, entryKey, entryData);
+      entryTexts.push(`<tr class="vdoc vdoc-wide${rowNthNess}"><td>${headerText
         }</td><td colspan=${headers.length - 1 || 1
-        }>${_generateCellText(cellContent, entryKey, entryData)}</td></tr>`);
+        }>${(typeof instance !== "object") ? instance : stack.emitNode(instance, "")}</td></tr>`);
     }
-  }
+  });
   return `${emission}
-    <table${emitAttributes(node)}>
+    <table${nodeAttributes(node)}>
       <thead>
         ${headerTexts.join(`
         `)}
@@ -160,37 +185,36 @@ function emitTableHTML (node, emission, stack) {
       </tbody>
     </table>
 `;
-  function _generateCellText (cellContent, entryKey, entryData) {
+  function _instantiateCell (cell, entryKey, entryData) {
     const select = {
       "vdoc:selectKey": entryKey,
-      "vdoc:id": entryKey,
       "vdoc:selectValue": entryData,
     };
     let entry;
-    if (typeof cellContent === "string") {
-      entry = select[cellContent];
-      if (entry === undefined) entry = entryData[cellContent];
+    if (typeof cell === "string") {
+      entry = select[cell];
+      if (entry === undefined) entry = (entryData == null) ? undefined : entryData[cell];
     } else {
-      entry = patchWith({}, cellContent, {
+      entry = patchWith({}, cell, {
         preExtend (tgt, patch) {
           if (typeof patch === "string") {
             return select[patch] !== undefined ? select[patch] : patch;
           }
-          if (patch != null && patch["vdoc:selectField"]) {
-            const ret = entryData[patch["vdoc:selectField"]];
+          if ((patch != null) && patch["vdoc:selectField"]) {
+            const ret = (entryData == null) ? undefined : entryData[patch["vdoc:selectField"]];
             return ret !== undefined ? ret : null;
           }
           return undefined;
         },
       });
     }
-    if (typeof entry !== "object") return entry;
-    return stack.emitNode(entry, "");
+    if (entry == null) return "";
+    return entry;
   }
 }
 
 function emitReferenceHTML (node, emission, stack) {
-  const head = `${emission}<a href="${node["vdoc:ref"]}"${emitAttributes(node)}`;
+  const head = `${emission}<a href="${node["vdoc:ref"]}"${nodeAttributes(node)}`;
   return node["vdoc:content"]
       ? `${head}>${stack.emitNode(node["vdoc:content"], "")}</a>`
       : `${head} />`;

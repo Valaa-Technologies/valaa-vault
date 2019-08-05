@@ -353,21 +353,44 @@ module.exports = {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.classes,
-        "vdoc:entries": filterKeysWithAnyOf("a", "rdfs:Class", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:Class", vocabulary),
       },
     },
     [`chapter#section_properties>3;<em>${prefix}:* a vdoc:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.properties,
-        "vdoc:entries": filterKeysWithAnyOf("a", "rdf:Property", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:Property", vocabulary),
       },
     },
-    [`chapter#section_other_vocabulary>4;Other VDoc vocabulary, prefix ${prefix}:`]: {
+    [`chapter#section_html_element_properties>3;<em>${
+        prefix}: a vdoc:HTMLElementProperty</em> vocabulary`]: {
+      "#0": [
+`Properties instanced from `, ref("vdoc:HTMLElementProperty", "#HTMLElementProperty"),
+` inherit HTML5 element semantics directly. Only those HTMl5 elements
+with structural semantic meaning are exposed via VDoc core ontology.`,
+        null,
+      ],
+      "table#>0;vocabulary": {
+        "vdoc:headers": {
+          ...headers.properties,
+          "header#1;rdfs:subPropertyOf": undefined,
+          "header#1": {
+            "vdoc:content": ["HTML5 element"],
+            "vdoc:cell": ref(
+                { "vdoc:selectField": "vdoc:elementName" },
+                { "vdoc:selectField": "vdoc:elementSpec" }),
+          },
+        },
+        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:HTMLElementProperty", vocabulary),
+      },
+    },
+    [`chapter#section_vocabulary_other>8;<em>${prefix}:*</em> other vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": headers.vocabulary,
-        "vdoc:entries": filterKeysWithNoneOf("a", ["rdfs:Class", "rdf:Property"], vocabulary),
+        "vdoc:headers": headers.vocabularyOther,
+        "vdoc:entries": filterKeysWithNoneOf(
+            "rdf:type", ["vdoc:Class", "vdoc:Property", "vdoc:HTMLElementProperty"], vocabulary),
       },
     },
     "chapter#section_context>9;VDoc Core JSON-LD context term definitions": {

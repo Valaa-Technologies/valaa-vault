@@ -164,14 +164,14 @@ module.exports = {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": revdocHeaders.classes,
-        "vdoc:entries": filterKeysWithAnyOf("a", "rdfs:Class", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "valos:Class", vocabulary),
       },
     },
     [`chapter#section_properties>3;<em>${prefix}:* a valos:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": revdocHeaders.properties,
-        "vdoc:entries": filterKeysWithAnyOf("a", "rdf:Property", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "valos:Property", vocabulary),
       },
     },
     [`chapter#section_vocabulary_other>8;<em>${prefix}:</em> other vocabulary`]: {

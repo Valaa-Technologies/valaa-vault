@@ -20,47 +20,54 @@ function extract (sourceGraphs, {
   target, documentIRI, extensions = [this, ...this.extends], omitContext,
 } = {}) {
   const vdocld = [];
-  return patchWith(vdocld, [].concat(sourceGraphs), {
-    keyPath: [],
-    extractionRules: extensions.reduce((a, { ontology }) =>
-        Object.assign(a, ontology.extractionRules || {}), {}),
-    preExtend (innerTarget, patch, key, targetObject, patchObject) {
-      if (this.keyPath.length === 1) {
-        if (!innerTarget) {
-          const root = target || {};
-          if (documentIRI !== undefined) root["@id"] = documentIRI;
-          if (!omitContext) {
-            root["@context"] = { "@base": `${documentIRI || ""}#` };
-            for (const extension of extensions) {
-              Object.assign(root["@context"],
-                  extension.ontology.prefixes,
-                  extension.ontology.context);
+  try {
+    return patchWith(vdocld, [].concat(sourceGraphs), {
+      keyPath: [],
+      extractionRules: extensions.reduce((a, { ontology }) =>
+          Object.assign(a, ontology.extractionRules || {}), {}),
+      preExtend (innerTarget, patch, key, targetObject, patchObject) {
+        if (this.keyPath.length === 1) {
+          if (!innerTarget) {
+            const root = target || {};
+            if (documentIRI !== undefined) root["@id"] = documentIRI;
+            if (!omitContext) {
+              root["@context"] = { "@base": `${documentIRI || ""}#` };
+              for (const extension of extensions) {
+                Object.assign(root["@context"],
+                    extension.ontology.prefixes,
+                    extension.ontology.context);
+              }
             }
+            return this.extend(root, patch);
           }
-          return this.extend(root, patch);
+          this.documentNode = innerTarget;
         }
-        this.documentNode = innerTarget;
-      }
-      for (const extension of extensions) {
-        const preExtend = (extension.extractors.native || {}).preExtend;
-        if (!preExtend) continue;
-        const ret = preExtend.call(this, target, patch, key, targetObject, patchObject);
-        if (ret !== undefined) return ret;
-      }
-      return undefined;
-    },
-    postExtend (innerTarget, patch, key, targetObject, patchObject) {
-      if ((this.keyPath <= 1) && (key === undefined)) return innerTarget;
-      let ret;
-      for (const extension of extensions) {
-        const postExtend = (extension.extractors.native || {}).postExtend;
-        if (!postExtend) continue;
-        ret = postExtend.call(this, innerTarget, patch, key, targetObject, patchObject);
-        if (ret !== undefined) return ret;
-      }
-      return innerTarget;
-    },
-  });
+        for (const extension of extensions) {
+          const preExtend = (extension.extractors.native || {}).preExtend;
+          if (!preExtend) continue;
+          const ret = preExtend.call(this, target, patch, key, targetObject, patchObject);
+          if (ret !== undefined) return ret;
+        }
+        return undefined;
+      },
+      postExtend (innerTarget, patch, key, targetObject, patchObject) {
+        if ((this.keyPath <= 1) && (key === undefined)) return innerTarget;
+        let ret;
+        for (const extension of extensions) {
+          const postExtend = (extension.extractors.native || {}).postExtend;
+          if (!postExtend) continue;
+          ret = postExtend.call(this, innerTarget, patch, key, targetObject, patchObject);
+          if (ret !== undefined) return ret;
+        }
+        return innerTarget;
+      },
+    });
+  } catch (error) {
+    throw wrapError(error, new Error(`During extract("${(this.ontology || {}).prefix}")`),
+        "\n\tdocumentIRI:", documentIRI,
+        "\n\textensions:", ...dumpObject(extensions),
+        "\n\tsourceGraphs:", ...dumpObject(sourceGraphs));
+  }
 }
 
 function emit (vdocld, formatName, options) {

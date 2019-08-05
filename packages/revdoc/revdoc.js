@@ -60,21 +60,22 @@ module.exports = {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.classes,
-        "vdoc:entries": filterKeysWithAnyOf("a", "rdfs:Class", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:Class", vocabulary),
       },
     },
     [`chapter#section_properties>3;<em>${prefix}:* a vdoc:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": headers.properties,
-        "vdoc:entries": filterKeysWithAnyOf("a", "rdf:Property", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:Property", vocabulary),
       },
     },
     [`chapter#section_vocabulary_other>8;<em>${prefix}:</em> other vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": headers.vocabulary,
-        "vdoc:entries": filterKeysWithNoneOf("a", ["rdfs:Class", "rdf:Property"], vocabulary),
+        "vdoc:headers": headers.vocabularyOther,
+        "vdoc:entries": filterKeysWithNoneOf(
+            "rdf:type", ["vdoc:Class", "vdoc:Property"], vocabulary),
       },
     },
     "chapter#section_context>9;ReVDoc JSON-LD context term definitions": {

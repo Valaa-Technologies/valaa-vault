@@ -1,4 +1,4 @@
-const { extractee: { ref } } = require("@valos/vdoc");
+const { extractee: { aggregate, em, ref, strong } } = require("@valos/vdoc");
 
 module.exports = {
   /**
@@ -31,10 +31,10 @@ module.exports = {
    * @returns
    */
   dfn (text, definitionId, ...explanation) {
-    return {
+    return aggregate({
       "revdoc:dfn": definitionId,
-      "vdoc:content": [ref(text, definitionId, { style: "bold" }), ...explanation],
-    };
+      "vdoc:content": [strong(ref(text, definitionId))],
+    }, "vdoc:content", ...explanation);
   },
 
   /**
@@ -46,7 +46,7 @@ module.exports = {
    */
   pkg (packageName, ...rest) {
     return {
-      ...ref(packageName, ...rest),
+      ...ref(em(packageName), packageName, ...rest),
       "rdf:type": "revdoc:Package",
     };
   },
@@ -91,24 +91,6 @@ module.exports = {
     };
   },
 
-  emphasis (...entries) {
-    return {
-      "vdoc:content": entries,
-    };
-  },
-
-  strong (...entries) {
-    return {
-      "vdoc:content": entries,
-    };
-  },
-
-  strikethrough (...entries) {
-    return {
-      "vdoc:content": entries,
-    };
-  },
-
   filterKeysWithAnyOf (entryFieldName, searchedValueOrValues = [], container) {
     return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
         (a, [field, searched]) => a || field.includes(searched));
@@ -139,4 +121,3 @@ function filterKeysWithFieldReduction (entryFieldName, searchedValueOrValues, co
           ]), initial))
       .map(([key]) => key);
 }
-

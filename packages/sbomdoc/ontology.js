@@ -12,7 +12,7 @@ module.exports = {
   context: {
   },
   vocabulary: {
-    Document: { a: "rdfs:class", "rdfs:subClassOf": "vdoc:Chapter",
+    Document: { "rdf:type": "rdfs:class", "rdfs:subClassOf": "vdoc:Chapter",
       "rdfs:comment": "A Software Bill of Materials document",
     },
   },

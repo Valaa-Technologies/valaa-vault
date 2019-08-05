@@ -154,21 +154,28 @@ exports.handler = async (yargv) => {
 
   async function generateRevdocAndWriteToDocs (
       revdocPath, targetDocPath, targetDocName, emitReVDocLD) {
-    const revdocSource = require(vlm.path.join(process.cwd(), revdocPath));
-    const revdocld = extension.extract(revdocSource, {
-      documentIRI: _combineIRI(docsBaseIRI, targetDocPath, targetDocName),
-    });
-    const revdocHTML = await emitHTML(revdocld);
-    const targetDir = vlm.path.join("docs", targetDocPath);
-    await vlm.shell.mkdir("-p", targetDir);
-    const targetDocumentPath = vlm.path.join(targetDir, targetDocName);
-    await vlm.shell.ShellString(revdocHTML)
-        .to(`${targetDocumentPath}.html`);
-    if (emitReVDocLD) {
-      await vlm.shell.ShellString(JSON.stringify(revdocld, null, 2))
-          .to(`${targetDocumentPath}.vdocld`);
+    try {
+      const revdocSource = require(vlm.path.join(process.cwd(), revdocPath));
+      const revdocld = extension.extract(revdocSource, {
+        documentIRI: _combineIRI(docsBaseIRI, targetDocPath, targetDocName),
+      });
+      const revdocHTML = await emitHTML(revdocld);
+      const targetDir = vlm.path.join("docs", targetDocPath);
+      await vlm.shell.mkdir("-p", targetDir);
+      const targetDocumentPath = vlm.path.join(targetDir, targetDocName);
+      await vlm.shell.ShellString(revdocHTML)
+          .to(`${targetDocumentPath}.html`);
+      if (emitReVDocLD) {
+        await vlm.shell.ShellString(JSON.stringify(revdocld, null, 2))
+            .to(`${targetDocumentPath}.vdocld`);
+      }
+      return { revdocld };
+    } catch (error) {
+      throw wrapError(error, new Error(`During generateRevdocAndWriteToDocs("${revdocPath}")`),
+          "\n\ttargetDocPath:", targetDocPath,
+          "\n\ttargetDocName:", targetDocName,
+          "\n\temitReVDocLD:", emitReVDocLD);
     }
-    return { revdocld };
   }
 
   function _combineIRI (base, ...rest) {

@@ -2,6 +2,21 @@
 <bom xmlns="http://cyclonedx.org/schema/bom/1.0" version="1">
     <components>
         <component type="library">
+            <group>valos</group>
+            <name>toolset-domain</name>
+            <version>0.35.0-prerelease.8</version>
+            <description>
+                <![CDATA[ValOS Toolset for managing ValOS workspace domains]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40valos/toolset-domain@0.35.0-prerelease.8</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
             <name>asap</name>
             <version>2.0.6</version>
             <description>
@@ -213,7 +228,7 @@
         </component>
         <component type="library">
             <name>graceful-fs</name>
-            <version>4.2.0</version>
+            <version>4.2.1</version>
             <description>
                 <![CDATA[A drop-in replacement for fs, making various improvements.]]>
             </description>
@@ -222,12 +237,12 @@
                     <id>ISC</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/graceful-fs@4.2.0</purl>
+            <purl>pkg:npm/graceful-fs@4.2.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <name>hosted-git-info</name>
-            <version>2.7.1</version>
+            <version>2.8.0</version>
             <description>
                 <![CDATA[Provides metadata and conversions from repository urls for Github, Bitbucket and Gitlab]]>
             </description>
@@ -236,7 +251,35 @@
                     <id>ISC</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/hosted-git-info@2.7.1</purl>
+            <purl>pkg:npm/hosted-git-info@2.8.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>lru-cache</name>
+            <version>5.1.1</version>
+            <description>
+                <![CDATA[A cache object that deletes the least-recently-used items.]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>ISC</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/lru-cache@5.1.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>yallist</name>
+            <version>3.0.3</version>
+            <description>
+                <![CDATA[Yet Another Linked List]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>ISC</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/yallist@3.0.3</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -269,7 +312,7 @@
         </component>
         <component type="library">
             <name>resolve</name>
-            <version>1.11.1</version>
+            <version>1.12.0</version>
             <description>
                 <![CDATA[resolve like require.resolve() on behalf of files asynchronously and synchronously]]>
             </description>
@@ -278,7 +321,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/resolve@1.11.1</purl>
+            <purl>pkg:npm/resolve@1.12.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -551,7 +594,7 @@
         <component type="library">
             <group>valos</group>
             <name>inspire</name>
-            <version>0.35.0-prerelease.7</version>
+            <version>0.35.0-prerelease.8</version>
             <description>
                 <![CDATA[ValOS Inspire application gateway]]>
             </description>
@@ -560,13 +603,28 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/inspire@0.35.0-prerelease.7</purl>
+            <purl>pkg:npm/%40valos/inspire@0.35.0-prerelease.8</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>valos</group>
+            <name>kernel</name>
+            <version>0.35.0-prerelease.8</version>
+            <description>
+                <![CDATA[@valos/kernel domain workshop]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40valos/kernel@0.35.0-prerelease.8</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>toolset-revealer</name>
-            <version>0.35.0-prerelease.7</version>
+            <version>0.35.0-prerelease.8</version>
             <description>
                 <![CDATA[Tools for building revelations both for development and deployment purposes]]>
             </description>
@@ -575,12 +633,12 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.7</purl>
+            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.8</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <name>valma</name>
-            <version>0.35.0-prerelease.7</version>
+            <version>0.35.0-prerelease.8</version>
             <description>
                 <![CDATA[A ValOS CLI tool for discovering and executing context-dependent command scripts]]>
             </description>
@@ -589,7 +647,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/valma@0.35.0-prerelease.7</purl>
+            <purl>pkg:npm/valma@0.35.0-prerelease.8</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -679,7 +737,7 @@
         <component type="library">
             <group>valos</group>
             <name>type-vault</name>
-            <version>0.35.0-prerelease.7</version>
+            <version>0.35.0-prerelease.8</version>
             <description>
                 <![CDATA[The ValOS type toolset for vault workspaces]]>
             </description>
@@ -688,7 +746,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/type-vault@0.35.0-prerelease.7</purl>
+            <purl>pkg:npm/%40valos/type-vault@0.35.0-prerelease.8</purl>
             <modified>false</modified>
         </component>
         <component type="library">

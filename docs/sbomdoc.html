@@ -7,19 +7,21 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-prerelease.7","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"sbomdoc","alternateFormats":[{"label":"VDoc","uri":"sbomdoc.jsonld"}]};
+      var respecConfig = {"subtitle":"0.35.0-prerelease.8","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"sbomdoc","alternateFormats":[{"label":"VDoc","uri":"sbomdoc.vdocld"}]};
     </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
   </head>
   <body>
     
-  <section id="abstract" class="vdoc type-vdoc-chapter">This document specifies SBomDoc, a <a href="https:/valospace.org/kernel/vdoc/#extension" class="vdoc type-vdoc-reference">VDoc extension</a>for extracting and emitting <a href="https://cyclonedx.org/" class="vdoc type-vdoc-reference">CycloneDX BOM documents</a>in various formats.
+  <section id="abstract" class="vdoc type-vdoc-chapter">This document specifies SBomDoc, a <a href="https://valospace.org/vdoc#extension" class="vdoc type-vdoc-reference">VDoc extension</a> for extracting and emitting <a href="https://cyclonedx.org/" class="vdoc type-vdoc-reference">CycloneDX BOM documents</a> in various formats.
   </section>
 
   <section id="sotd" class="vdoc type-vdoc-chapter">      <p>This document has not been reviewed. This is a draft document and
     may be updated, replaced or obsoleted by other documents at any
     time.</p>
       <p>This document is part of the <a href="@valos/kernel/spec" class="vdoc type-vdoc-reference">ValOS core specification</a>.</p>
-      <p>The format is implemented and supported by <a href="https:/valospace.org/kernel/sbomdoc" class="vdoc type-vdoc-reference">@valos/sbomdoc npm package</a>.</p>
+      <p>The format is implemented and supported by <a href="https://valospace.org/sbomdoc" class="vdoc type-revdoc-package"><em>@valos/sbomdoc</em></a> npm package.</p>
 
   </section>
 
@@ -29,8 +31,10 @@
 
   <section id="ontology" class="vdoc type-vdoc-chapter">
     <h2>SBoMDoc ontology</h2>
-
-  <section id="prefixes" class="vdoc type-vdoc-chapter">
+SBoMDoc ontology provides vocabulary and definitions which are
+      tailored for representing CycloneDX SBoM analysis semantic
+      content.
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
     <h2>SBoMDoc IRI prefixes</h2>
 
     <table class="vdoc type-vdoc-table">
@@ -39,20 +43,19 @@
         <th class="vdoc type-vdoc-header">IRI</th>
       </thead>
       <tbody>
-        <tr><td>sbomdoc</td><td>https://valospace.org/kernel/sbomdoc#</td></tr>
+        <tr><td>sbomdoc</td><td>https://valospace.org/sbomdoc#</td></tr>
       </tbody>
     </table>
 
   </section>
 
-  <section id="classes" class="vdoc type-vdoc-chapter">
-    <h2>SBoMDoc rdfs:Class vocabulary, prefix sbomdoc:</h2>
+  <section id="section_classes" class="vdoc type-vdoc-chapter">
+    <h2><em>sbomdoc:* a vdoc:Class</em> vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
         <th class="vdoc type-vdoc-header">rdfs:label</th>
         <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
-        <th class="vdoc type-vdoc-header">rdfs:comment</th>
       </thead>
       <tbody>
         
@@ -61,8 +64,8 @@
 
   </section>
 
-  <section id="properties" class="vdoc type-vdoc-chapter">
-    <h2>SBoMDoc rdf:Property vocabulary, prefix sbomdoc:</h2>
+  <section id="section_properties" class="vdoc type-vdoc-chapter">
+    <h2><em>sbomdoc:* a vdoc:Property</em> vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -70,7 +73,6 @@
         <th class="vdoc type-vdoc-header">rdfs:subPropertyOf</th>
         <th class="vdoc type-vdoc-header">rdfs:domain</th>
         <th class="vdoc type-vdoc-header">rdfs:range</th>
-        <th class="vdoc type-vdoc-header">rdfs:comment</th>
       </thead>
       <tbody>
         
@@ -79,23 +81,24 @@
 
   </section>
 
-  <section id="vocabulary" class="vdoc type-vdoc-chapter">
-    <h2>SBoMDoc remaining vocabulary, prefix sbomdoc:</h2>
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h2><em>sbomdoc:</em> other vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
         <th class="vdoc type-vdoc-header">rdfs:label</th>
         <th class="vdoc type-vdoc-header">rdf:type</th>
-        <th class="vdoc type-vdoc-header">rdfs:comment</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
       </thead>
       <tbody>
-        <tr id="Document"><td>Document</td><td>rdfs:class</td><td>A Software Bill of Materials document</td></tr>
+        <tr id="Document"class=" vdoc-nth-child-2n"><td><a href="#Document" class="vdoc type-vdoc-reference"><em>Document</em></a></td><td>rdfs:class</td><td>vdoc:Chapter</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=3>A Software Bill of Materials document</td></tr>
       </tbody>
     </table>
 
   </section>
 
-  <section id="context" class="vdoc type-vdoc-chapter">
+  <section id="section_context" class="vdoc type-vdoc-chapter">
     <h2>SBoMDoc JSON-LD context term definitions</h2>
 
     <table class="vdoc type-vdoc-table">
@@ -124,9 +127,10 @@
     <table class="vdoc type-vdoc-table">
       <thead>
         <th class="vdoc type-vdoc-header">Rule name</th>
-        <th class="vdoc type-vdoc-header">Node rdf:type</th>
-        <th class="vdoc type-vdoc-header">primary target</th>
-        <th class="vdoc type-vdoc-header">';rest' target</th>
+        <th class="vdoc type-vdoc-header">Inter-node rdf:type</th>
+        <th class="vdoc type-vdoc-header">Owner property</th>
+        <th class="vdoc type-vdoc-header">Body property</th>
+        <th class="vdoc type-vdoc-header">';rest' property</th>
         <th class="vdoc type-vdoc-header">Comment</th>
       </thead>
       <tbody>
@@ -145,7 +149,7 @@
         <th class="vdoc type-vdoc-header">rdf:type</th>
       </thead>
       <tbody>
-        <tr><td>vdoc:content</td><td></td></tr>
+        
       </tbody>
     </table>
 
@@ -158,7 +162,7 @@
 
   <section id="emission_rules" class="vdoc type-vdoc-chapter">
     <h2>SBoMDoc emission rules</h2>
-ReVDoc provides html emission overrides for vdoc:Document sbomdoc:Document
+ReVDoc provides html emission rules for vdoc:Document sbomdoc:Document
   </section>
 
   </section>

@@ -9,13 +9,15 @@
     <script class='remove'>
       var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Jaradacl","url":"https://valaatech.github.io/fabric/authors/Jaradacl","github":"http://github.com/valospace"}],"authors":[],"shortName":"assortedTutorials"};
     </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
   </head>
   <body>
     
   <section id="abstract" class="vdoc type-vdoc-chapter">This document is a collection of tutorials and possibly other notes created by Jaradacl based on the tasks given. (During first few days at least)
   </section>
 
-  <section id="sotd" class="vdoc type-vdoc-chapter">This document is part of the toolset workspace <a href="https:/valospace.org/kernel/type-vault" class="vdoc type-vdoc-reference">@valos/type-vault</a> (of domain <a href="@valos/kernel" class="vdoc type-vdoc-reference">@valos/kernel</a>) which is A valma toolset for managing valos vault monorepository workspaces
+  <section id="sotd" class="vdoc type-vdoc-chapter">This document is part of the toolset workspace <a href="https://valospace.org/type-vault" class="vdoc type-revdoc-package"><em>@valos/type-vault</em></a> (of domain <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which is A valma toolset for managing valos vault monorepository workspaces
   </section>
 
   <section id="how_to_create_revdoc" class="vdoc type-vdoc-chapter">
@@ -27,7 +29,7 @@ This is a step-by-step guide on how to create RevDoc using cli.
   <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">vlm create-revdoc YOUR_DOCUMENT_NAME_WITHOUT_FILE_EXTENSION</span>
 
   </div>
- Note: If you create your RevDoc under the revdocs/ folder, your HTML and JSONLD files will be generated to the project root</li>
+ Note: If you create your RevDoc under the revdocs/ folder, your HTML and VDocLD files will be generated to the project root</li>
       <li>You will now be asked the following information: 
     <ul>
       <li>Title of the document: This is human-readable title of the document.</li>
@@ -40,14 +42,14 @@ This is a step-by-step guide on how to create RevDoc using cli.
   <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">vlm regenerate-docs</span>
 
   </div>
- This will create HTML and JSONLD files based on your RevDoc</li>
+ This will create HTML and VDocLD files based on your RevDoc</li>
       <li>Now run the following command 
   <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">python -m SimpleHTTPServer</span>
 
   </div>
 </li>
       <li>Open browser and navigate to the localhost in the port you just opened. (8000 by default)</li>
-      <li>Your HTML and JSONLD files can now be found under docs/ in the same path as where you saved your RevDoc file; for example if you saved your RevDoc under packages/type-vault it can now be found under docs/packages/type-vault.</li>
+      <li>Your HTML and VDocLD files can now be found under docs/ in the same path as where you saved your RevDoc file; for example if you saved your RevDoc under packages/type-vault it can now be found under docs/packages/type-vault.</li>
     </ol>
 
   </section>

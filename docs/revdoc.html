@@ -7,19 +7,21 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-prerelease.7","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
+      var respecConfig = {"subtitle":"0.35.0-prerelease.8","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.vdocld"}]};
     </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
   </head>
   <body>
     
-  <section id="abstract" class="vdoc type-vdoc-chapter">This document specifies ReVDoc, a <a href="https:/valospace.org/kernel/vdoc/#extension" class="vdoc type-vdoc-reference">VDoc extension</a> for extracting and emitting <a href="https://github.com/w3c/respec" class="vdoc type-vdoc-reference">ReSpec documents</a>.
+  <section id="abstract" class="vdoc type-vdoc-chapter">This document specifies ReVDoc, a <a href="https://valospace.org/vdoc#extension" class="vdoc type-vdoc-reference">VDoc extension</a> for extracting and emitting <a href="https://github.com/w3c/respec" class="vdoc type-vdoc-reference">ReSpec documents</a>.
   </section>
 
   <section id="sotd" class="vdoc type-vdoc-chapter">      <p>This document has not been reviewed. This is a draft document and
     may be updated, replaced or obsoleted by other documents at any
     time.</p>
       <p>This document is part of the <a href="@valos/kernel/spec" class="vdoc type-vdoc-reference">ValOS core specification</a>.</p>
-      <p>The format is implemented and supported by <a href="https:/valospace.org/kernel/revdoc" class="vdoc type-vdoc-reference">@valos/revdoc npm package</a>.</p>
+      <p>The format is implemented and supported by <a href="https://valospace.org/revdoc" class="vdoc type-revdoc-package"><em>@valos/revdoc</em></a> npm package.</p>
 
   </section>
 
@@ -28,8 +30,9 @@
 
   <section id="ontology" class="vdoc type-vdoc-chapter">
     <h2>ReVDoc ontology</h2>
-
-  <section id="prefixes" class="vdoc type-vdoc-chapter">
+ReVDoc ontology provides vocabulary and definitions which are
+      tailored for emitting ReSpec html output documents.
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
     <h2>ReVDoc IRI prefixes</h2>
 
     <table class="vdoc type-vdoc-table">
@@ -38,34 +41,38 @@
         <th class="vdoc type-vdoc-header">IRI</th>
       </thead>
       <tbody>
-        <tr><td>revdoc</td><td>https://valospace.org/kernel/revdoc#</td></tr>
+        <tr><td>revdoc</td><td>https://valospace.org/revdoc#</td></tr>
       </tbody>
     </table>
 
   </section>
 
-  <section id="classes" class="vdoc type-vdoc-chapter">
-    <h2>ReVDoc rdfs:Class vocabulary, prefix revdoc:</h2>
+  <section id="section_classes" class="vdoc type-vdoc-chapter">
+    <h2><em>revdoc:* a vdoc:Class</em> vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
         <th class="vdoc type-vdoc-header">rdfs:label</th>
         <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
-        <th class="vdoc type-vdoc-header">rdfs:comment</th>
       </thead>
       <tbody>
-        <tr id="Document"><td>Document</td><td>vdoc:Chapter</td><td>A ReSpec specification document</td></tr>
-        <tr id="Definition"><td>Definition</td><td>vdoc:Node</td><td>A ReSpec term definition document node</td></tr>
-        <tr id="Package"><td>Package</td><td>vdoc:Reference</td><td>A package reference document node</td></tr>
-        <tr id="Command"><td>Command</td><td>vdoc:Node</td><td>A command invokation document node</td></tr>
-        <tr id="CommandLineInteraction"><td>CommandLineInteraction</td><td>vdoc:Node</td><td>A command line interaction sequence document node</td></tr>
+        <tr id="Document"class=" vdoc-nth-child-2n"><td><a href="#Document" class="vdoc type-vdoc-reference"><em>Document</em></a></td><td>vdoc:Chapter</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=2>A ReSpec specification document</td></tr>
+        <tr id="Definition"><td><a href="#Definition" class="vdoc type-vdoc-reference"><em>Definition</em></a></td><td>vdoc:Node</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=2>A ReSpec term definition document node</td></tr>
+        <tr id="Package"class=" vdoc-nth-child-2n"><td><a href="#Package" class="vdoc type-vdoc-reference"><em>Package</em></a></td><td>vdoc:Reference</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=2>A package reference document node</td></tr>
+        <tr id="Command"><td><a href="#Command" class="vdoc type-vdoc-reference"><em>Command</em></a></td><td>vdoc:Node</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=2>A command invokation document node</td></tr>
+        <tr id="CommandLineInteraction"class=" vdoc-nth-child-2n"><td><a href="#CommandLineInteraction" class="vdoc type-vdoc-reference"><em>CommandLineInteraction</em></a></td><td>vdoc:Node</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=2>A command line interaction sequence document node</td></tr>
       </tbody>
     </table>
 
   </section>
 
-  <section id="properties" class="vdoc type-vdoc-chapter">
-    <h2>ReVDoc rdf:Property vocabulary, prefix revdoc:</h2>
+  <section id="section_properties" class="vdoc type-vdoc-chapter">
+    <h2><em>revdoc:* a vdoc:Property</em> vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -73,23 +80,29 @@
         <th class="vdoc type-vdoc-header">rdfs:subPropertyOf</th>
         <th class="vdoc type-vdoc-header">rdfs:domain</th>
         <th class="vdoc type-vdoc-header">rdfs:range</th>
-        <th class="vdoc type-vdoc-header">rdfs:comment</th>
       </thead>
       <tbody>
-        
+        <tr id="prefix"class=" vdoc-nth-child-2n"><td><a href="#prefix" class="vdoc type-vdoc-reference"><em>prefix</em></a></td><td></td><td>revdoc:Document</td><td>rdfs:Literal</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=4>The preferred prefix of an ontology document</td></tr>
+        <tr id="prefixIRI"><td><a href="#prefixIRI" class="vdoc type-vdoc-reference"><em>prefixIRI</em></a></td><td></td><td>revdoc:Document</td><td>rdfs:Resource</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=4>The IRI associated with the preferred prefix of an ontology</td></tr>
+        <tr id="package"class=" vdoc-nth-child-2n"><td><a href="#package" class="vdoc type-vdoc-reference"><em>package</em></a></td><td></td><td>vdoc:Node</td><td>rdfs:Literal</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=4>A package name</td></tr>
+        <tr id="version"><td><a href="#version" class="vdoc type-vdoc-reference"><em>version</em></a></td><td></td><td>vdoc:Node</td><td>rdfs:Literal</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=4>A semver string</td></tr>
       </tbody>
     </table>
 
   </section>
 
-  <section id="vocabulary" class="vdoc type-vdoc-chapter">
-    <h2>ReVDoc remaining vocabulary, prefix revdoc:</h2>
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h2><em>revdoc:</em> other vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
         <th class="vdoc type-vdoc-header">rdfs:label</th>
         <th class="vdoc type-vdoc-header">rdf:type</th>
-        <th class="vdoc type-vdoc-header">rdfs:comment</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
       </thead>
       <tbody>
         
@@ -98,7 +111,7 @@
 
   </section>
 
-  <section id="context" class="vdoc type-vdoc-chapter">
+  <section id="section_context" class="vdoc type-vdoc-chapter">
     <h2>ReVDoc JSON-LD context term definitions</h2>
 
     <table class="vdoc type-vdoc-table">
@@ -127,13 +140,14 @@
     <table class="vdoc type-vdoc-table">
       <thead>
         <th class="vdoc type-vdoc-header">Rule name</th>
-        <th class="vdoc type-vdoc-header">Node rdf:type</th>
-        <th class="vdoc type-vdoc-header">primary target</th>
-        <th class="vdoc type-vdoc-header">';rest' target</th>
+        <th class="vdoc type-vdoc-header">Inter-node rdf:type</th>
+        <th class="vdoc type-vdoc-header">Owner property</th>
+        <th class="vdoc type-vdoc-header">Body property</th>
+        <th class="vdoc type-vdoc-header">';rest' property</th>
         <th class="vdoc type-vdoc-header">Comment</th>
       </thead>
       <tbody>
-        <tr><td>ontology</td><td>vdoc:Chapter</td><td>vdoc:content</td><td>dc:title</td><td>Ontology specification chapter</td></tr>
+        <tr><td>ontology</td><td>vdoc:Chapter</td><td>vdoc:content</td><td>vdoc:content</td><td>dc:title</td><td>Ontology specification chapter</td></tr>
       </tbody>
     </table>
 
@@ -148,16 +162,81 @@
         <th class="vdoc type-vdoc-header">rdf:type</th>
       </thead>
       <tbody>
-        <tr><td>authors</td><td></td></tr>
-        <tr><td>dfn</td><td></td></tr>
-        <tr><td>pkg</td><td></td></tr>
-        <tr><td>command</td><td></td></tr>
-        <tr><td>cli</td><td></td></tr>
-        <tr><td>emphasis</td><td></td></tr>
-        <tr><td>strong</td><td></td></tr>
-        <tr><td>strikethrough</td><td></td></tr>
-        <tr><td>filterVocabulary</td><td></td></tr>
-        <tr><td>filterVocabularyNot</td><td></td></tr>
+        <tr><td>authors</td><td>authors(...authorNames) {
+    const toolsetsPath = `${process.cwd()}/toolsets.json`;
+    const authorLookup = (((require(toolsetsPath)["@valos/type-vault"] || {})
+        .tools || {}).docs || {}).authors || {};
+    return (authorNames || []).map(authorName => {
+      const author = authorLookup[authorName];
+      if (!author) {
+        throw new Error(`Cannot find author '${authorName}' from toolsetConfig("${
+          toolsetsPath}")["@valos/type-vault"].tools.docs.authors`);
+      }
+      return author;
+    });
+  }</td></tr>
+        <trclass=" vdoc-nth-child-2n"><td>dfn</td><td>dfn(text, definitionId, ...explanation) {
+    return aggregate({
+      "revdoc:dfn": definitionId,
+      "vdoc:content": [strong(ref(text, definitionId))],
+    }, "vdoc:content", ...explanation);
+  }</td></tr>
+        <tr><td>pkg</td><td>pkg(packageName, ...rest) {
+    return {
+      ...ref(em(packageName), packageName, ...rest),
+      "rdf:type": "revdoc:Package",
+    };
+  }</td></tr>
+        <trclass=" vdoc-nth-child-2n"><td>command</td><td>command(...parts) {
+    return {
+      "rdf:type": "revdoc:Command",
+      "vdoc:words": [].concat(...parts.map(
+              part => (typeof part !== "string" ? [part] : part.split(/(\s+)/))))
+          .filter(w => (typeof w !== "string") || !w.match(/^\s+$/)),
+    };
+  }</td></tr>
+        <tr><td>cli</td><td>cli(...rows) {
+    const commandedRows = rows.map(line => ((typeof line !== "string")
+        ? line
+        : module.exports.command(line)));
+    let currentContext = "";
+    const contextedRows = [];
+    for (const row of commandedRows) {
+      if ((row != null) && (row["rdf:type"] === "vdoc:ContextBase")) {
+        currentContext = row;
+      } else {
+        contextedRows.push([currentContext, "$ ", row]);
+      }
+    }
+    return {
+      "rdf:type": "revdoc:CommandLineInteraction",
+      "vdoc:entries": contextedRows,
+    };
+  }</td></tr>
+        <trclass=" vdoc-nth-child-2n"><td>filterKeysWithAnyOf</td><td>filterKeysWithAnyOf(entryFieldName, searchedValueOrValues = [], container) {
+    return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
+        (a, [field, searched]) => a || field.includes(searched));
+  }</td></tr>
+        <tr><td>filterKeysWithAllOf</td><td>filterKeysWithAllOf(entryFieldName, searchedValueOrValues = [], container) {
+    return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
+        (a, [field, searched]) => a && field.includes(searched), true);
+  }</td></tr>
+        <trclass=" vdoc-nth-child-2n"><td>filterKeysWithNoneOf</td><td>filterKeysWithNoneOf(entryFieldName, searchedValueOrValues = [], container) {
+    return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
+        (a, [field, searched]) => a && !field.includes(searched), true);
+  }</td></tr>
+        <tr><td>filterKeysWithFieldReduction</td><td>function filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
+    reduction, initial) {
+  const searchedValues = [].concat(
+      searchedValueOrValues !== undefined ? searchedValueOrValues : []);
+  return Object.entries(container)
+      .filter(([, entry]) => searchedValues
+          .reduce((a, searchedValue) => reduction(a, [
+            [].concat(entry[entryFieldName] !== undefined ? entry[entryFieldName] : []),
+            searchedValue,
+          ]), initial))
+      .map(([key]) => key);
+}</td></tr>
       </tbody>
     </table>
 
@@ -170,7 +249,7 @@ ReVDoc emits html which makes use of ReSpec primitives.
 
   <section id="emission_rules" class="vdoc type-vdoc-chapter">
     <h2>ReVDoc emission rules</h2>
-ReVDoc provides html emission overrides for vdoc:Document revdoc:Document vdoc:Chapter vdoc:Reference
+ReVDoc provides html emission rules for vdoc:Document revdoc:Document vdoc:Chapter vdoc:Reference
   </section>
 
   </section>

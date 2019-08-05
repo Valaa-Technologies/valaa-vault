@@ -1,33 +1,37 @@
 [
   {
-    "@id": "https://valospace.org/kernel/type-vault/AssortedTutorials",
+    "@id": "https://valospace.org/type-vault/AssortedTutorials",
     "@context": {
-      "@base": "https://valospace.org/kernel/type-vault/AssortedTutorials#",
-      "sbomdoc": "https://valospace.org/kernel/sbomdoc#",
-      "revdoc": "https://valospace.org/kernel/revdoc#",
+      "@base": "https://valospace.org/type-vault/AssortedTutorials#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-      "vdoc": "https://valospace.org/kernel/vdoc#",
+      "vdoc": "https://valospace.org/vdoc#",
       "a": {
         "@id": "rdf:type",
         "@type": "@id"
       },
       "vdoc:content": {
-        "@id": "https://valospace.org/kernel/vdoc#content",
+        "@id": "https://valospace.org/vdoc#content",
         "@container": "@list"
       },
       "vdoc:words": {
-        "@id": "https://valospace.org/kernel/vdoc#words",
+        "@id": "https://valospace.org/vdoc#words",
         "@container": "@list"
       },
       "vdoc:entries": {
-        "@id": "https://valospace.org/kernel/vdoc#entries",
+        "@id": "https://valospace.org/vdoc#entries",
         "@container": "@list"
       }
     },
     "dc:title": "Assorted tutorials",
+    "vdoc:tags": [
+      "PRIMARY",
+      "HOW_TO"
+    ],
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -54,17 +58,27 @@
       "vdoc:content": [
         "This document is part of the toolset workspace ",
         {
-          "rdf:type": "vdoc:Reference",
+          "rdf:type": "revdoc:Package",
           "vdoc:content": [
-            "@valos/type-vault"
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/type-vault"
+              ]
+            }
           ],
           "vdoc:ref": "@valos/type-vault"
         },
         " (of domain ",
         {
-          "rdf:type": "vdoc:Reference",
+          "rdf:type": "revdoc:Package",
           "vdoc:content": [
-            "@valos/kernel"
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/kernel"
+              ]
+            }
           ],
           "vdoc:ref": "@valos/kernel"
         },
@@ -104,7 +118,7 @@
                     ]
                   },
                   " Note: If you create your RevDoc under the revdocs/ folder, ",
-                  "your HTML and JSONLD files will be generated to the project root"
+                  "your HTML and VDocLD files will be generated to the project root"
                 ],
                 [
                   "You will now be asked the following information: ",
@@ -140,7 +154,7 @@
                       ]
                     ]
                   },
-                  " This will create HTML and JSONLD files based on your RevDoc"
+                  " This will create HTML and VDocLD files based on your RevDoc"
                 ],
                 [
                   "Now run the following command ",
@@ -164,7 +178,7 @@
                 ],
                 "Open browser and navigate to the localhost in the port you just opened. (8000 by default)",
                 [
-                  "Your HTML and JSONLD files can now be found ",
+                  "Your HTML and VDocLD files can now be found ",
                   "under docs/ in the same path as where you saved your RevDoc file; ",
                   "for example if you saved your RevDoc under packages/type-vault ",
                   "it can now be found under docs/packages/type-vault."

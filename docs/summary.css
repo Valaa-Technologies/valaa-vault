@@ -1,0 +1,29 @@
+.type-vdoc-table {
+  border: 1px solid #dfe2e5;
+  padding: 6px 13px;
+  border-collapse: collapse;
+}
+
+.type-vdoc-table tr {
+  background-color: #fff;
+  border-top: 1px solid #c6cbd1;
+}
+
+.type-vdoc-table tr.vdoc-nth-child-2n {
+  background-color: #f6f8fa;
+}
+
+.type-vdoc-table tr.vdoc-wide {
+  border-top: 1px dashed #dfe2e5;
+}
+
+.type-vdoc-table td {
+  vertical-align: top;
+  border-left: 1px solid #dfe2e5;
+  padding: 4px 10px;
+}
+
+.type-vdoc-table th {
+  border: 1px solid #dfe2e5;
+  padding: 4px 10px;
+}

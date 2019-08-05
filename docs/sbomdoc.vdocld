@@ -1,0 +1,576 @@
+[
+  {
+    "@id": "https://valospace.org/sbomdoc",
+    "@context": {
+      "@base": "https://valospace.org/sbomdoc#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "vdoc": "https://valospace.org/vdoc#",
+      "a": {
+        "@id": "rdf:type",
+        "@type": "@id"
+      },
+      "vdoc:content": {
+        "@id": "https://valospace.org/vdoc#content",
+        "@container": "@list"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/vdoc#words",
+        "@container": "@list"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
+        "@container": "@list"
+      }
+    },
+    "dc:title": "SBoMDoc - Software Bill of Materials VDoc extension",
+    "vdoc:tags": [
+      "PRIMARY",
+      "ONTOLOGY"
+    ],
+    "revdoc:package": "@valos/sbomdoc",
+    "revdoc:prefix": "sbomdoc",
+    "revdoc:prefixIRI": "https://valospace.org/sbomdoc#",
+    "revdoc:version": "0.35.0-prerelease.8",
+    "respecConfig": {
+      "subtitle": "0.35.0-prerelease.8",
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "shortName": "sbomdoc",
+      "alternateFormats": [
+        {
+          "label": "VDoc",
+          "uri": "sbomdoc.vdocld"
+        }
+      ]
+    },
+    "abstract": {
+      "@id": "abstract",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document specifies SBomDoc, a ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "VDoc extension"
+          ],
+          "vdoc:ref": "@valos/vdoc#extension"
+        },
+        " for extracting and emitting ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "CycloneDX BOM documents"
+          ],
+          "vdoc:ref": "https://cyclonedx.org/"
+        },
+        " in various formats."
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document has not been reviewed. This is a draft document and\n    may be updated, replaced or obsoleted by other documents at any\n    time.",
+        null,
+        "This document is part of the ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ValOS core specification"
+          ],
+          "vdoc:ref": "@valos/kernel/spec"
+        },
+        ".",
+        null,
+        "The format is implemented and supported by ",
+        {
+          "rdf:type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/sbomdoc"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/sbomdoc"
+        },
+        " npm package."
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "SBoMDoc is a VDoc extension which uses CycloneDX namespaces and\n    can emit BOM documents in various formats."
+      ]
+    },
+    "ontology": {
+      "@id": "ontology",
+      "dc:title": "SBoMDoc ontology",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@id": "section_ontology_abstract"
+        },
+        {
+          "@id": "section_prefixes"
+        },
+        {
+          "@id": "section_classes"
+        },
+        {
+          "@id": "section_properties"
+        },
+        {
+          "@id": "section_vocabulary_other"
+        },
+        {
+          "@id": "section_context"
+        }
+      ]
+    },
+    "prefixes": {
+      "@id": "prefixes",
+      "sbomdoc": "https://valospace.org/sbomdoc#"
+    },
+    "vocabulary": {
+      "@id": "vocabulary",
+      "Document": {
+        "rdf:type": "rdfs:class",
+        "rdfs:subClassOf": "vdoc:Chapter",
+        "rdfs:comment": "A Software Bill of Materials document"
+      }
+    },
+    "context": {
+      "@id": "context"
+    },
+    "section_ontology_abstract": {
+      "@id": "section_ontology_abstract",
+      "vdoc:content": [
+        "SBoMDoc ontology provides vocabulary and definitions which are\n      tailored for representing CycloneDX SBoM analysis semantic\n      content."
+      ]
+    },
+    "section_prefixes": {
+      "@id": "section_prefixes",
+      "dc:title": "SBoMDoc IRI prefixes",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "prefixes",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:cell": "vdoc:selectKey",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Prefix"
+              ]
+            },
+            {
+              "vdoc:cell": "vdoc:selectValue",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "IRI"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "section_classes": {
+      "@id": "section_classes",
+      "dc:title": "<em>sbomdoc:* a vdoc:Class</em> vocabulary",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "rdf:type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "vdoc:cell": {
+                  "vdoc:words": {
+                    "vdoc:selectField": "rdfs:subClassOf"
+                  }
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:comment"
+                ],
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": []
+        }
+      ]
+    },
+    "section_properties": {
+      "@id": "section_properties",
+      "dc:title": "<em>sbomdoc:* a vdoc:Property</em> vocabulary",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "rdf:type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:subPropertyOf",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subPropertyOf"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:domain",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:domain"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:range",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:range"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:comment"
+                ],
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": []
+        }
+      ]
+    },
+    "section_vocabulary_other": {
+      "@id": "section_vocabulary_other",
+      "dc:title": "<em>sbomdoc:</em> other vocabulary",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "rdf:type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "vdoc:cell": "rdf:type",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdf:type"
+                ]
+              },
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "vdoc:cell": {
+                  "vdoc:words": {
+                    "vdoc:selectField": "rdfs:subClassOf"
+                  }
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:comment"
+                ],
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": [
+            "Document"
+          ]
+        }
+      ]
+    },
+    "section_context": {
+      "@id": "section_context",
+      "dc:title": "SBoMDoc JSON-LD context term definitions",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "context",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:cell": "vdoc:selectKey",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Term"
+              ]
+            },
+            {
+              "vdoc:cell": "vdoc:selectValue",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Definition"
+              ]
+            },
+            {
+              "vdoc:cell": "@id",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "@id"
+              ]
+            },
+            {
+              "vdoc:cell": "@type",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "@type"
+              ]
+            },
+            {
+              "vdoc:cell": "@container",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "@container"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "transformations": {
+      "@id": "transformations",
+      "dc:title": "SBoMDoc transformations",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@id": "extraction_rules"
+        },
+        {
+          "@id": "extractee_api"
+        },
+        {
+          "@id": "emission_output"
+        },
+        {
+          "@id": "emission_rules"
+        }
+      ]
+    },
+    "extraction_rules": {
+      "@id": "extraction_rules",
+      "dc:title": "SBoMDoc extraction rules",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "extraction_rules_data",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:cell": "vdoc:selectKey",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Rule name"
+              ]
+            },
+            {
+              "vdoc:cell": "range",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Inter-node rdf:type"
+              ]
+            },
+            {
+              "vdoc:cell": "owner",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Owner property"
+              ]
+            },
+            {
+              "vdoc:cell": "body",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Body property"
+              ]
+            },
+            {
+              "vdoc:cell": "rest",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "';rest' property"
+              ]
+            },
+            {
+              "vdoc:cell": "comment",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Comment"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "extraction_rules_data": {
+      "@id": "extraction_rules_data"
+    },
+    "extractee_api": {
+      "@id": "extractee_api",
+      "dc:title": "SBoMDoc extractee API",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "extractee_api_lookup",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:cell": "vdoc:selectKey",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "API identifier"
+              ]
+            },
+            {
+              "vdoc:cell": "vdoc:selectValue",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "rdf:type"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "extractee_api_lookup": {
+      "@id": "extractee_api_lookup"
+    },
+    "emission_output": {
+      "@id": "emission_output",
+      "dc:title": "SBoMDoc emission output",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "emission_rules": {
+      "@id": "emission_rules",
+      "dc:title": "SBoMDoc emission rules",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "ReVDoc provides html emission rules for ",
+        {
+          "vdoc:words": [
+            "vdoc:Document",
+            "sbomdoc:Document"
+          ]
+        }
+      ]
+    },
+    "rdf:type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "ontology"
+      },
+      {
+        "@id": "transformations"
+      }
+    ]
+  }
+]

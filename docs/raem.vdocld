@@ -1,0 +1,1560 @@
+[
+  {
+    "@id": "https://valospace.org/raem",
+    "@context": {
+      "@base": "https://valospace.org/raem#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "vdoc": "https://valospace.org/vdoc#",
+      "a": {
+        "@id": "rdf:type",
+        "@type": "@id"
+      },
+      "vdoc:content": {
+        "@id": "https://valospace.org/vdoc#content",
+        "@container": "@list"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/vdoc#words",
+        "@container": "@list"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
+        "@container": "@list"
+      }
+    },
+    "dc:title": "ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology",
+    "vdoc:tags": [
+      "PRIMARY",
+      "INTRODUCTORY",
+      "ONTOLOGY",
+      "LIBRARY"
+    ],
+    "revdoc:package": "@valos/raem",
+    "revdoc:prefix": "valos",
+    "revdoc:prefixIRI": "https://valospace.org/#",
+    "revdoc:version": "0.35.0-prerelease.8",
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "raem"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This library provides the definitions and reference implementation\n    for the fundamental ",
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "ValOS Resources"
+          ]
+        },
+        " and ",
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "ValOS Events"
+          ]
+        },
+        " systems."
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is part of the library workspace ",
+        {
+          "rdf:type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/raem"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/raem"
+        },
+        " (of domain ",
+        {
+          "rdf:type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/kernel"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/kernel"
+        },
+        ") which is ",
+        "ValOS Resources And Events Model (ValOS-RAEM) API, Schema"
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This library provides the definitions and reference implementations\n    for the fundamental ",
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "ValOS Resources"
+          ]
+        },
+        " and ",
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "ValOS Events"
+          ]
+        },
+        " systems.",
+        null,
+        {
+          "vdoc:quote": true,
+          "vdoc:content": [
+            [
+              "A ValOS Resource ",
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "resource"
+                ]
+              },
+              " represents a well-defined part of\n      the world. It has a well-defined state at each particular moment in time."
+            ]
+          ]
+        },
+        null,
+        {
+          "vdoc:quote": true,
+          "vdoc:content": [
+            [
+              "A ValOS Event ",
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "event"
+                ]
+              },
+              " represents a dynamic change to a\n      resource by describing the change from previous to subsequent resource\n      states at a particular time."
+            ]
+          ]
+        },
+        null,
+        "The interplay of these distinct yet interwoven systems forms the\n    foundation of the Valaa Open System."
+      ]
+    },
+    "readme": {
+      "@id": "readme",
+      "dc:title": "@valos/raem provides ValOS Resources And Events Model `ValOS-RaEM` (/væləsˌɹɛem/)",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This library provides:",
+        {
+          "rdf:type": "vdoc:BulletList",
+          "vdoc:entries": [
+            [
+              "schema definitions for ",
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "Resource"
+                ]
+              },
+              " and the other core types."
+            ],
+            [
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "Corpus"
+                ]
+              },
+              " component which stores in-memory representations of the resources."
+            ],
+            [
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "reducers"
+                ]
+              },
+              " which a corpus uses to convert (",
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "reduce"
+                ]
+              },
+              ") events into changes of its resource representations."
+            ],
+            [
+              "the kuery language ",
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "VALK"
+                ]
+              },
+              " definition and the kuery engine ",
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "Valker"
+                ]
+              },
+              "component for accessing and manipulating the resources."
+            ],
+            [
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "ghost instancing"
+                ]
+              },
+              " mechanism which unifies the object\n        oriented instantiation and inheritance principles into a single\n        but powerful mechanism for ValOS resources."
+            ],
+            [
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "resource couplings"
+                ]
+              },
+              " mechanism which allows referential\n        integrity and the definition of different types of reference\n        semantics like ownership, global references and local references."
+            ],
+            [
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "urn:valos"
+                ]
+              },
+              " specification which defines globally unique\n        identifiers for ValOS resources."
+            ],
+            [
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "ValOSURL"
+                ]
+              },
+              " specification which allows for universal locating of resources."
+            ],
+            [
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "valospace"
+                ]
+              },
+              " definition as a distributed set of resources\n        containing references to each other using the VRLs."
+            ],
+            [
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "partitions"
+                ]
+              },
+              " mechanism which allows for unlimited scalability of\n      the ",
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "valospace"
+                ]
+              },
+              " into a singular globally distributed and\n      unified object space."
+            ]
+          ]
+        },
+        {
+          "rdf:type": "vdoc:BulletList",
+          "vdoc:entries": [
+            [
+              "depends:",
+              {
+                "rdf:type": "revdoc:Package",
+                "vdoc:content": [
+                  {
+                    "vdoc:em": true,
+                    "vdoc:content": [
+                      "@valos/tools"
+                    ]
+                  }
+                ],
+                "vdoc:ref": "@valos/tools"
+              },
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "immutable"
+                ]
+              }
+            ],
+            [
+              "exports:",
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "Corpus"
+                ]
+              },
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "Command"
+                ]
+              },
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "VALK"
+                ]
+              },
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "Valker"
+                ]
+              },
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "RAEMContentAPI"
+                ]
+              }
+            ],
+            [
+              "valosheath:",
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "Resource"
+                ]
+              },
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "TransientFields"
+                ]
+              },
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "Bvob"
+                ]
+              },
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "Partition"
+                ]
+              }
+            ],
+            [
+              "concepts:",
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "ghost instancing"
+                ]
+              },
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "partitions"
+                ]
+              },
+              {
+                "rdf:type": "vdoc:CharacterData",
+                "vdoc:content": [
+                  "couplings"
+                ]
+              }
+            ]
+          ]
+        },
+        {
+          "@id": "section_url_urn_id"
+        }
+      ]
+    },
+    "section_url_urn_id": {
+      "@id": "section_url_urn_id",
+      "dc:title": "ValOS URLs, urn:valos and raw id's",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "ValOS URL is used to specify a parameterized location reference to a\n        ValOS Resource. It has two major parts separated by the URI fragment\n        separator `#`: *partition URI* part and a *local reference* part.",
+        null,
+        "*Partition URI* identifies the target authority and partition of\n        the reference. It corresponds to scheme, hierarchical and query parts\n        of an URI; everything but the fragment. Its precise structure and\n        interpretation is specified by the scheme but typically the scheme and\n        hierarchical part identify an authority and query part identifies\n        a partition.",
+        null,
+        "*Local reference* identifies a particular resource inside a partition\n        but also contains optional *coupling*, *ghost path*, *lens* (and other)\n        parts which further parameterize the reference itself. It corresponds\n        to the URI fragment part but has sub-structure which is specified in\n        this document.",
+        {
+          "@id": "valos_iri_structure"
+        },
+        {
+          "@id": "section_dualisms"
+        },
+        {
+          "@id": "resource_id"
+        },
+        {
+          "@id": "vrl"
+        }
+      ]
+    },
+    "valos_iri_structure": {
+      "@id": "valos_iri_structure",
+      "vdoc:language": "Correlations between ValOS URL and urn:valos (top) and URI and URN (bottom)",
+      "rdf:type": "vdoc:CharacterData",
+      "vdoc:content": [
+        "                                            valos-url\n┌────────────────────────────────────────────────┴─────────────────────────────────────────────────┐\n                  partition-url                                      resource-ref\n┌───────────────────────┴────────────────────────┐ ┌──────────────────────┴────────────────────────┐\n                         resource-url                                         ref-params\n┌──────────────────────────────┴────────────────────────────────┐  ┌───────────────┴───────────────┐\n         authority-uri               partition-id   resource-id         coupling           lens\n┌──────────────┴───────────────┐    ┌─────┴──────┐ ┌─────┴──────┐  ┌───────┴────────┐ ┌─────┴──────┐\n\nvalaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=relations&lens=ROOT_LENS\n\n                                                   └─────┬──────┘  └──────────────┬────────────────┘\n                                                        nss                  q-component\n└───┬────┘   └──────┬──────┘ └┬┘ └───────┬───────┘ └──────────────────────┬────────────────────────┘\n  scheme        authority    path      query                           fragment\n             └────────┬────────┘\n                  hier-part\n"
+      ]
+    },
+    "section_dualisms": {
+      "@id": "section_dualisms",
+      "dc:title": "Curious dualisms of *partition URI* and *local reference*",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "The division between partition URI and local reference has many curious\n          dualistic qualities: backend vs. frontend, hierarchical vs. flat,\n          routing vs. computation, extensible vs. fixed, absolute vs. contextual,\n          coarse vs. granular, self-contained vs. part-of-a-whole.",
+        {
+          "dc:title": "Partition URI domain is backend, local reference domain is front-end",
+          "rdf:type": "vdoc:Chapter",
+          "vdoc:content": [
+            "ValOS backends deal with the indivisible partitions and thus don't care\n          about the particularities of local references to individual resources.\n          This corresponds to how in web architecture URI fragments are not sent\n          to backend with resource requests. Conversely, ValOS frontends don't\n          care where a resource comes from once it has been loaded, but about its\n          identity, relationships and the parameters of those relationships. This\n          is reflected in how frontend code regularily drops the partition URI."
+          ]
+        },
+        {
+          "dc:title": "Partition URI structure is specified by the scheme, local reference structure is specified by ValOS",
+          "rdf:type": "vdoc:Chapter",
+          "vdoc:content": [
+            "By the nature of its distributed event sourcing architecture ValOS\n          focuses heavily on the frontend. The cross-compatibility between\n          components is driven by how new backends can integrate and talk with\n          existing front-end clients. This is facilitated by front-end plugin\n          systems which enables new ValOS URI schemes to specify new routing\n          solutions and fundamentally new backend infrastructures, as long as\n          said infrastructures can route ValOS event streams to clients. This\n          corresponds to how ValOS doesn't specify how a *partition URI*\n          identifies and locates partitions and authorities but leaves it to\n          the scheme specifications and their reference implementations of\n          frontend plugins."
+          ]
+        },
+        {
+          "dc:title": "Partitions URI's identify self-contained wholes, resource references need their context",
+          "rdf:type": "vdoc:Chapter",
+          "vdoc:content": [
+            "Web architecture specifies that all or none of the document is\n          retrieved. This corresponds to the behaviour of ValOS partitions which\n          are always retrieved as a whole. Partition URI's contain all and\n          nothing but the components which identify web resources, that is\n          everything but the fragment."
+          ]
+        },
+        {
+          "dc:title": "Etc.",
+          "rdf:type": "vdoc:Chapter",
+          "vdoc:content": []
+        }
+      ]
+    },
+    "resource_id": {
+      "@id": "resource_id",
+      "dc:title": "resource-id",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Resource id is the NSS part of an urn:valos URI. It globally uniquely\n          identifies a *referenced resource*:",
+        null,
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "resource-id        = primary-part [ \"/\" secondary-part ]"
+          ]
+        },
+        null,
+        "The first, non-optional *primary* part globally uniquely identifies a\n          freely movable *primary* resource. If no secondary part exists this\n          resource is also the referenced resource. If the secondary part exists\n          it identifies a structural sub-resource which is deterministic to\n          the primary resource.\n          The referenced resource is then this sub-resource.",
+        null,
+        "Two resource ids refer to the same resource iff their canonical string\n          representations are lexically equivalent. Notably:",
+        {
+          "rdf:type": "vdoc:NumberedList",
+          "vdoc:entries": [
+            [
+              "both parts are case sensitive. If a part specification refers to a\n            case insensitive external naming system it must specify a canonical\n            representation.\n            It is recommended that this representation be all-lowercase."
+            ],
+            [
+              "no redundant encoding. If a part contains encoding schemes then any\n            characters or tokens which can expressed without encoding must not\n            be encoded."
+            ]
+          ]
+        },
+        {
+          "@id": "primary_part"
+        },
+        {
+          "@id": "secondary_part"
+        }
+      ]
+    },
+    "primary_part": {
+      "@id": "primary_part",
+      "dc:title": "primary-part - restricted naming, free ownership",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "The primary id part has a very restricted character set of ",
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "unreserved"
+          ]
+        },
+        "as specified in the ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "URI specification"
+          ],
+          "vdoc:ref": "https://tools.ietf.org/html/rfc3986"
+        },
+        ".",
+        null,
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "primary-part       = *( unreserved )"
+          ]
+        },
+        null,
+        "The *primary* part must be globally unique.\n          Note: uuid v4 is recommended for now, but eventually primary id\n          generation should tied to the deterministic event id chain. This in\n          turn should be seeded by some ValOS authority.",
+        null,
+        "Note: when using base64 encoded values as primary id, use ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "url-and-filename-ready base64url characters"
+          ],
+          "vdoc:ref": "https://tools.ietf.org/html/rfc4648#section-5"
+        },
+        ".",
+        null,
+        "Note: derivedId currently used by the codebase uses only the primary\n          id but breaks the above character set requirement, as it uses base64\n          encoding with ",
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "+"
+          ]
+        },
+        " and ",
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "/"
+          ]
+        },
+        ". For backwards\n          compatibility they are permitted, but ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "considered equal to the base64url"
+          ],
+          "vdoc:ref": "https://tools.ietf.org/html/rfc7515#appendix-C"
+        },
+        "using ",
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "+"
+          ]
+        },
+        " <-> ",
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "-"
+          ]
+        },
+        " and ",
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "/"
+          ]
+        },
+        " <-> ",
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "_"
+          ]
+        },
+        " character mappings."
+      ]
+    },
+    "secondary_part": {
+      "@id": "secondary_part",
+      "dc:title": "secondary-part - lenient naming, restricted ownership",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "The *secondary* id part is a qualified name which can be expanded into\n          an URI. This URI then defines how the referred resource is determined\n          from the primary resource.",
+        null,
+        {
+          "rdf:type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "\n\n            secondary-part    = prefix *( pchar / \"/\" )\n            prefix            = *( unreserved / pct-encoded / sub-delims / \"@\" ) \":\""
+          ]
+        },
+        "The expansion is done by replacing the prefix with a corresponding\n          value. Currently the only allowed prefixes and their semantics is\n          limited to the exclusive list of three entries:",
+        null,
+        {
+          "vdoc:content": [
+            {
+              "rdf:type": "vdoc:NumberedList",
+              "vdoc:entries": [
+                [
+                  "prefix `@:` - instance-ghost ids\n              `urn:valos:ba54/@:b7e4` reads as \"inside the instanced resource\n              `ba54` the ghost of the regular resource `b7e4`\".\n              The expansion of the prefix `@:` is `valos:urn:` itself.\n              This means nested ghost paths are allowed, like so:\n              `urn:valos:f00b/@:ba54/@:b7e4` reads as \"inside the instance\n              `f00b` the ghost of `urn:valos:ba54/@:b7e4`."
+                ],
+                [
+                  "prefix `.:` - property ids\n              `urn:valos:f00b/.:propName` - a directly owned Property resource\n              with a constant name `propName` and prototype which is dynamically\n              linked to the corresponding Property in the prototype of\n              `urn:valos:f00b`, like so: `${prototype(\"urn:valos:f00b\")}/.:propName`."
+                ],
+                [
+                  "prefix `$:` - virtual resource ids\n              permanently immaterial ghosts with nevertheless separate identities.\n              When used as prototype with instance-ghosts allows separate\n              instantiation of the same fundamental prototype in the same instance:\n              `urn:valos:f00b/$:1/@:b74e`\n              `urn:valos:f00b/$:2/@:b74e`\n              `urn:valos:f00b/$:textsalt/@:b74e`"
+                ]
+              ]
+            }
+          ]
+        },
+        null,
+        "Resources identified by these parts are tightly bound to the resource\n          identified by the primary part (which must exist). They must be always\n          directly or indirectly owned by the primary resource."
+      ]
+    },
+    "vrl": {
+      "@id": "vrl",
+      "dc:title": "VRL",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Javascript class which implements ValOS reference URI and associated\n        operations."
+      ]
+    },
+    "ontology": {
+      "@id": "ontology",
+      "dc:title": "<em>valos:</em> library @valos/raem ontology",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@id": "section_ontology_abstract"
+        },
+        {
+          "@id": "section_prefixes"
+        },
+        {
+          "@id": "section_classes"
+        },
+        {
+          "@id": "section_properties"
+        },
+        {
+          "@id": "section_types"
+        },
+        {
+          "@id": "section_fields"
+        },
+        {
+          "@id": "section_vocabulary_other"
+        }
+      ]
+    },
+    "prefixes": {
+      "@id": "prefixes",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "valos": "https://valospace.org/#"
+    },
+    "vocabulary": {
+      "@id": "vocabulary",
+      "@context": {
+        "dc": "http://purl.org/dc/elements/1.1/",
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "a": "rdf:type",
+        "valos": "https://valospace.org/#",
+        "@base": "https://valospace.org/#",
+        "valos:propertyRestriction": {
+          "@reverse": "owl:onProperty"
+        }
+      },
+      "Class": {
+        "rdf:type": "valos:Class",
+        "rdfs:subClassOf": "rdfs:Class",
+        "rdfs:comment": "The class of classes which are specified by the ValOS kernel ontology."
+      },
+      "Property": {
+        "rdf:type": "valos:Class",
+        "rdfs:subClassOf": "rdf:Property",
+        "rdfs:comment": "The class of properties which are specified by the ValOS kernel ontology."
+      },
+      "Type": {
+        "rdf:type": "valos:Class",
+        "rdfs:subClassOf": "rdfs:Class",
+        "rdfs:comment": "The class of all valospace type classes."
+      },
+      "Field": {
+        "rdf:type": "valos:Class",
+        "rdfs:subClassOf": "rdf:Property",
+        "rdfs:comment": "The class of properties with custom semantics inside valospace.\nInstances of this class are called valos fields."
+      },
+      "PrimaryField": {
+        "rdf:type": "valos:Class",
+        "rdfs:subClassOf": "valos:Field",
+        "rdfs:comment": "The class of valos fields which are primary, persisted sources of\ntruth and have both a state representation inside valospace and a\nchange representation in event logs."
+      },
+      "TransientField": {
+        "rdf:type": "valos:Class",
+        "rdfs:subClassOf": "valos:Field",
+        "rdfs:comment": "The class of valos fields which have primary state representations\ninside valospace but which have only inferred representation in event\nlogs."
+      },
+      "InferredField": {
+        "rdf:type": "valos:Class",
+        "rdfs:subClassOf": "valos:Field",
+        "rdfs:comment": "The class of valos fields with inference semantics which specify how\nnew triples with the inferred field as a predicate can be inferred\nfrom existing triples."
+      },
+      "GeneratedField": {
+        "rdf:type": "valos:Class",
+        "rdfs:subClassOf": "valos:InferredField",
+        "rdfs:comment": "The class of inferred fields where a field is associated with a\n'generator', a convergent procedural rule like taking an average or\nretrieving the partition of a valos Resource. As convergent rules a\nGeneratedField's can't have mutation semantics that could be reliably\ntranslated back to mutations of other triples."
+      },
+      "generator": {
+        "rdf:type": "valos:Property",
+        "rdfs:domain": "valos:GeneratedField",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "The generator algorithm specification or identifier of\na GeneratedField."
+      },
+      "AliasField": {
+        "rdf:type": "valos:Class",
+        "rdfs:subClassOf": "valos:InferredField",
+        "rdfs:comment": "The class of inferred fields called alias fields where each such field\nhas an 'aliasOf' RDF property or valos Field. Alias fields are\nmutation-inference symmetric so that triples with an alias field as\npredicate are inferred from triples with aliasOf as predicate and\nmutations with an alias field as predicate are translated to use\nthe aliasOf as predicate."
+      },
+      "aliasOf": {
+        "rdf:type": "valos:Property",
+        "rdfs:domain": "valos:AliasField",
+        "rdfs:range": "valos:Field",
+        "rdfs:comment": "The alias target property specifies the inference source and mutation\ntarget of an alias field."
+      },
+      "coupledField": {
+        "rdf:type": "valos:Property",
+        "rdfs:domain": "valos:Field",
+        "rdfs:range": "xsd:string",
+        "rdfs:comment": ""
+      },
+      "defaultCoupledField": {
+        "rdf:type": "valos:Property",
+        "rdfs:domain": "valos:Field",
+        "rdfs:range": "xsd:string",
+        "rdfs:comment": ""
+      },
+      "isOwned": {
+        "rdf:type": "valos:Property",
+        "rdfs:domain": "valos:Field",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "This field owns the targeted resource. If the subject of this field\nis destroyed the targeted resource will be cascade destroyed."
+      },
+      "isOwning": {
+        "rdf:type": "valos:Property",
+        "rdfs:domain": "valos:Field",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "This field is a coupled field of an owning field. If the owning field\nis destroyed this resource will be be cascade destroyed."
+      },
+      "isDuplicateable": {
+        "rdf:type": "valos:Property",
+        "rdfs:domain": "valos:Field",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "If set to false this field not be visible for DUPLICATED class of\nevents."
+      },
+      "immediateDefaultValue": {
+        "rdf:type": "valos:Property",
+        "rdfs:domain": "valos:Field",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "The immediate default value for a field when the field doesn't have\nan own value, ie. bypassing prototype lookups."
+      },
+      "allowTransientFieldToBeSingular": {
+        "rdf:type": "valos:Property",
+        "rdfs:domain": "valos:Field",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "Bypass the default behavior which forces transient fields to be plural\nto allow for singular fields."
+      },
+      "Bvob": {
+        "rdf:type": "valos:Type",
+        "rdfs:subClassOf": "valos:Resource",
+        "rdfs:comment": "Bvob (Binary ValOS OBject) specifies a class of valos resources which\nhave a valid base64-url encoded 240-bit SHAKE256 hash of some\noctet-stream content prefixed with \"hashV240:\" as their resource id."
+      },
+      "id": {
+        "rdf:type": "valos:GeneratedField",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "rdfs:Resource",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:cardinality": 1
+        },
+        "valos:generator": "getId",
+        "rdfs:comment": "VRL of this Resource"
+      },
+      "contentHash": {
+        "rdf:type": "valos:GeneratedField",
+        "rdfs:domain": "valos:Bvob",
+        "rdfs:range": "xsd:string",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:cardinality": 1
+        },
+        "valos:generator": "$V.id.rawId()",
+        "rdfs:comment": "The content has of this Bvob"
+      },
+      "contentReferrers": {
+        "rdf:type": "valos:TransientField",
+        "rdfs:domain": "valos:Bvob",
+        "rdfs:range": "valos:Resource",
+        "valos:defaultCoupledField": "valos:content",
+        "rdfs:comment": "Incoming references to this Bvob"
+      },
+      "TransientFields": {
+        "rdf:type": "valos:Type",
+        "rdfs:comment": "The class of valos resources which are referenced from within this\nworld and also the domain of all transient and generated fields which\nare available even for the inactive, out-of-this-world resources."
+      },
+      "rawId": {
+        "rdf:type": "valos:GeneratedField",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "xsd:string",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:cardinality": 1
+        },
+        "valos:generator": "getRawId",
+        "rdfs:comment": "Globally unique identifier of this Resource"
+      },
+      "typeName": {
+        "rdf:type": "valos:GeneratedField",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "xsd:string",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:cardinality": 1
+        },
+        "valos:generator": "getTransientTypeName",
+        "rdfs:comment": "Globally unique identifier of this Resource"
+      },
+      "partition": {
+        "rdf:type": "valos:GeneratedField",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "valos:Partition",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos:generator": "partitionResolver",
+        "rdfs:comment": "The partition root Resource of this Resource, ie. the nearest owner\n(possibly self) which is also an active partition."
+      },
+      "partitionIRI": {
+        "rdf:type": "valos:GeneratedField",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "rdfs:Resource",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos:generator": "partitionURIResolver",
+        "rdfs:comment": "The partition IRI of the partition this Resource belongs to."
+      },
+      "partitionURI": {
+        "rdf:type": "valos:AliasField",
+        "valos:aliasOf": "valos:partitionIRI",
+        "rdfs:subPropertyOf": "valos:partitionIRI",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "rdfs:Resource",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "revdoc:deprecatedInFavorOf": "valos:authorityIRI"
+      },
+      "prototype": {
+        "rdf:type": "valos:PrimaryField",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "valos:TransientFields",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos:defaultCoupledField": "valos:prototypers",
+        "rdfs:comment": "The prototype of this Resource. All field lookups for which there is\nno associated value set and whose field descriptors don't have\nimmediateDefaultValue are forwarded to the prototype."
+      },
+      "prototypeAlias": {
+        "rdf:type": "valos:AliasField",
+        "valos:aliasOf": "valos:prototype",
+        "rdfs:subPropertyOf": "valos:prototype",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "valos:TransientFields",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The prototype of this Resource.\nThis is an alias for valos:prototype to bypass conflicts with native\njavascript property 'prototype'."
+      },
+      "ownFields": {
+        "rdf:type": "valos:GeneratedField",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "valos:TransientFields",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos:generator": "resolveOwnFields",
+        "rdfs:comment": "A transient version of this object as if prototype was undefined.\nAll property accesses will only return field values which are directly\nowned by this resource."
+      },
+      "prototypers": {
+        "rdf:type": "valos:TransientField",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "valos:TransientFields",
+        "valos:coupledField": "valos:prototype",
+        "valos:preventsDestroy": true,
+        "valos:immediateDefaultValue": [],
+        "rdfs:comment": "All resources which have this Resource as valos:prototype but not as\nvalos:instancePrototype nor as valos:ghostPrototype."
+      },
+      "instancePrototype": {
+        "rdf:type": "valos:AliasField",
+        "valos:aliasOf": "valos:prototype",
+        "rdfs:subPropertyOf": "valos:prototype",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "valos:TransientFields",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos:coupledField": "valos:instances",
+        "rdfs:comment": "The instance prototype of this instance Resource."
+      },
+      "instances": {
+        "rdf:type": "valos:TransientField",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "valos:TransientFields",
+        "valos:coupledField": "valos:prototype",
+        "valos:preventsDestroy": true,
+        "valos:immediateDefaultValue": [],
+        "rdfs:comment": "All resources which have this Resource as their\nvalos:instancePrototype."
+      },
+      "ghostPrototype": {
+        "rdf:type": "valos:AliasField",
+        "valos:aliasOf": "valos:prototype",
+        "rdfs:subPropertyOf": "valos:prototype",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "valos:TransientFields",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos:coupledField": "valos:materializedGhosts",
+        "rdfs:comment": "Ghost prototype of this ghost resource. The ghost prototype is the\nbase resource from which this ghost was created during some primary\ninstantiation.\nThis instantiation (which happens on prototype and results in an\ninstance of it) also ghost-instantiates all the direct and indirect\nownlings of the prototype as ghost ownlings in the instance. The\ninstance is called the *ghost host* of all these ghosts. Likewise, the\ninstance prototype is called the ghost host prototype, and the\n(grand-)ownlings of this ghost host prototype are the ghost prototypes\nof the corresponding ghosts (ie. this field).} ."
+      },
+      "materializedGhosts": {
+        "rdf:type": "valos:TransientField",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "valos:TransientFields",
+        "valos:coupledField": "valos:prototype",
+        "valos:preventsDestroy": true,
+        "valos:immediateDefaultValue": [],
+        "rdfs:comment": "All materialized ghosts which have this Resource as their\nvalos:ghostPrototype."
+      },
+      "unnamedCouplings": {
+        "rdf:type": "valos:TransientField",
+        "rdfs:domain": "valos:TransientField",
+        "rdfs:range": "valos:TransientField",
+        "valos:coupledField": "",
+        "valos:isOwning": true,
+        "rdfs:comment": "Referrers with a missing coupledField referring this Resource"
+      },
+      "ghostHost": {
+        "rdf:type": "valos:GeneratedField",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "valos:TransientFields",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos:generator": "ghostHostResolver",
+        "rdfs:comment": "The ghost host of this ghost Resource or null if not a ghost. The\nghost host is the innermost direct or indirect non-ghost owner of this\nghost, or in other words the instance that indirectly created this\nghost."
+      },
+      "ghostOwner": {
+        "rdf:type": "valos:TransientField",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "valos:TransientFields",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos:coupledField": "valos:ghostOwnlings",
+        "valos:isOwned": true,
+        "valos:immediateDefaultValue": null,
+        "valos:allowTransientFieldToBeSingular": true,
+        "rdfs:comment": "Refers to the ghost host of this ghost resource if this ghost is\nmaterialized, otherwise null.\nNote that materialized grand-ownling ghosts will have a differing owner\nand ghostOwner and that destruction of either of them will result in\nimmaterialization of the grand-ownling ghost."
+      },
+      "ghostOwnlings": {
+        "rdf:type": "valos:TransientField",
+        "rdfs:domain": "valos:TransientFields",
+        "rdfs:range": "valos:TransientFields",
+        "valos:isOwning": true,
+        "valos:coupledField": "valos:ghostOwner",
+        "valos:immediateDefaultValue": [],
+        "rdfs:comment": "Materialized ghost Resource's which have this instance as their ghost\nhost."
+      },
+      "Resource": {
+        "rdf:type": "valos:Type",
+        "rdfs:subClassOf": "valos:TransientFields",
+        "revdoc:brief": "resource",
+        "rdfs:comment": "A first-class object with fields and properties that can be directly\ncreated and mutated using events in associated partition event logs.\nResources have an identity and can be destroyed, subsequently\ndestroying all resources which are in the ownership hierarchy of this\nResource."
+      },
+      "owner": {
+        "rdf:type": "valos:PrimaryField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos:isOwned": true,
+        "valos:defaultCoupledField": "valos:ownlings",
+        "rdfs:comment": "The owner of this Resource"
+      },
+      "name": {
+        "rdf:type": "valos:PrimaryField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "xsd:string",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The primary ValOS name of this Resource. It is globally non-unique but\noften context-dependently unique."
+      },
+      "nameAlias": {
+        "rdf:type": "valos:AliasField",
+        "valos:aliasOf": "valos:name",
+        "rdfs:subPropertyOf": "valos:name",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "xsd:string",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The primary name of this Resource. It is globally non-unique but often\ncontext-dependently unique.\nThis is an alias of Resource.name for circumventing conflicts with the\nnative javascript property 'name' in some execution contexts"
+      },
+      "ownlings": {
+        "rdf:type": "valos:PrimaryField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "valos:isOwning": true,
+        "valos:coupledField": "valos:owner",
+        "rdfs:comment": "Collection of all the resources owned by this Resource via all\nproperties that are marked as valos:isOwning."
+      },
+      "unnamedOwnlings": {
+        "rdf:type": "valos:PrimaryField",
+        "rdfs:subPropertyOf": "valos:ownlings",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "valos:isOwning": true,
+        "valos:coupledField": "valos:owner",
+        "rdfs:comment": "All the resources owned by this Resource which are not part of another\nnamed owning property"
+      },
+      "isFrozen": {
+        "rdf:type": "valos:PrimaryField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "xsd:boolean",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:cardinality": 1
+        },
+        "valos:isDuplicateable": false,
+        "valos:immediateDefaultValue": false,
+        "rdfs:comment": "Indicates whether this Resource is frozen. A frozen Resource nor any\nof its ownlings cannot have any of their primary fields be modified.\nSetting isFrozen to true is (by design) an irreversible operation.\nIf this Resource is also the root resource of a partition the whole\npartition is permanently frozen."
+      },
+      "InactiveResource": {
+        "rdf:type": "valos:Type",
+        "rdfs:subClassOf": "valos:TransientFields",
+        "revdoc:brief": "inactive resource",
+        "rdfs:comment": "An InactiveResource is a Resource whose partition has not yet been\nfully loaded, and has only the limited set of fields of TransientFields\navailable. The transition from InactiveResource to and from other\nconcrete Resource types is the only possible runtime type change and\nhappens dynamically based on the partition activation and inactivation."
+      },
+      "DestroyedResource": {
+        "rdf:type": "valos:Type",
+        "rdfs:subClassOf": "valos:TransientFields",
+        "revdoc:brief:": "destroyed resource",
+        "rdfs:comment": "A DestroyedResource is a Resource which has been destroyed and only\nprovides the external fields listed in TransientFields interface."
+      },
+      "Partition": {
+        "rdf:type": "valos:Type",
+        "rdfs:subClassOf": "valos:Resource",
+        "revdoc:brief": "partition",
+        "rdfs:comment": "A Partition is a subdivision of the whole ValOS object space into\nsmaller recursive wholes. The Partition implementation contains\nResource's either by direct or transitive ownership. Each such\ncontained Resource also knows their containing Partition.\n\nTODO(iridian, 2019-08): Update outdated terminology in this comment.\n\nIn addition to the few direct member fields relating to snapshotting\nand event stream synchronization, the Partition Resource's serve as\na key latching point for external services.\n\nEach Partition object is managed by an authority, which performs\nconflict resolution, authorization and recording of incoming commands,\nconverting them into the truth event log for that particular Partition.\n\nThe Partition id is used by the query routers to globally locate the\nauthority responsible for any given Partition. Also, cross-partition\nResource references are implemented as Resource stubs, ie. objects that\nonly contain the Resource id and its most recently known partition\n(which will retain the new owning Partition in a stub, enabling\nforwarding). Together these allow for any Resource to always be\nlocateable from anywhere."
+      },
+      "authorityIRI": {
+        "rdf:type": "valos:PrimaryField",
+        "rdfs:domain": "valos:Partition",
+        "rdfs:range": "xsd:string",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos:isDuplicateable": false,
+        "valos:immediateDefaultValue": null,
+        "rdfs:comment": "The authority IRI of this Resource. If this field is set it means that\nthis is an active partition root object. The partition IRI is generated\nas per the rules specified by the authority IRI schema."
+      },
+      "partitionAuthorityURI": {
+        "rdf:type": "valos:AliasField",
+        "valos:aliasOf": "valos:authorityIRI",
+        "rdfs:subPropertyOf": "valos:authorityIRI",
+        "rdfs:domain": "valos:Partition",
+        "rdfs:range": "xsd:string",
+        "valos:propertyRestriction": {
+          "rdf:type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "revdoc:deprecatedInFavorOf": "valos:authorityIRI"
+      }
+    },
+    "section_ontology_abstract": {
+      "@id": "section_ontology_abstract",
+      "vdoc:content": [
+        "@valos/raem ontology specifies the Valospace core types and\n      properties directly to the @valos/kernel namespace. "
+      ]
+    },
+    "section_prefixes": {
+      "@id": "section_prefixes",
+      "dc:title": "@valos/raem IRI prefixes",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "prefixes",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:cell": "vdoc:selectKey",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Prefix"
+              ]
+            },
+            {
+              "vdoc:cell": "vdoc:selectValue",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "IRI"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "section_classes": {
+      "@id": "section_classes",
+      "dc:title": "<em>valos:* a valos:Class</em> vocabulary",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "rdf:type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "vdoc:cell": {
+                  "vdoc:words": {
+                    "vdoc:selectField": "rdfs:subClassOf"
+                  }
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:comment"
+                ],
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": [
+            "Class",
+            "Property",
+            "Type",
+            "Field",
+            "PrimaryField",
+            "TransientField",
+            "InferredField",
+            "GeneratedField",
+            "AliasField"
+          ]
+        }
+      ]
+    },
+    "section_properties": {
+      "@id": "section_properties",
+      "dc:title": "<em>valos:* a valos:Property</em> vocabulary",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "rdf:type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:subPropertyOf",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subPropertyOf"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:domain",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:domain"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:range",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:range"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:comment"
+                ],
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": [
+            "generator",
+            "aliasOf",
+            "coupledField",
+            "defaultCoupledField",
+            "isOwned",
+            "isOwning",
+            "isDuplicateable",
+            "immediateDefaultValue",
+            "allowTransientFieldToBeSingular"
+          ]
+        }
+      ]
+    },
+    "section_types": {
+      "@id": "section_types",
+      "dc:title": "<em>valos:* a valos:Type</em> vocabulary",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "rdf:type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "vdoc:cell": {
+                  "vdoc:words": {
+                    "vdoc:selectField": "rdfs:subClassOf"
+                  }
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:comment"
+                ],
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": [
+            "Bvob",
+            "TransientFields",
+            "Resource",
+            "InactiveResource",
+            "DestroyedResource",
+            "Partition"
+          ]
+        }
+      ]
+    },
+    "section_fields": {
+      "@id": "section_fields",
+      "dc:title": "<em>valos:* a valos:Field</em> vocabulary",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "rdf:type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:domain",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:domain"
+                ]
+              },
+              {
+                "vdoc:cell": "rdf:type",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdf:type"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:subPropertyOf",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subPropertyOf"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:range",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:range"
+                ]
+              },
+              {
+                "vdoc:cell": "valos:coupledField",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "valos:coupledField"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:comment"
+                ],
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": [
+            "id",
+            "contentHash",
+            "contentReferrers",
+            "rawId",
+            "typeName",
+            "partition",
+            "partitionIRI",
+            "partitionURI",
+            "prototype",
+            "prototypeAlias",
+            "ownFields",
+            "prototypers",
+            "instancePrototype",
+            "instances",
+            "ghostPrototype",
+            "materializedGhosts",
+            "unnamedCouplings",
+            "ghostHost",
+            "ghostOwner",
+            "ghostOwnlings",
+            "owner",
+            "name",
+            "nameAlias",
+            "ownlings",
+            "unnamedOwnlings",
+            "isFrozen",
+            "authorityIRI",
+            "partitionAuthorityURI"
+          ]
+        }
+      ]
+    },
+    "section_vocabulary_other": {
+      "@id": "section_vocabulary_other",
+      "dc:title": "<em>valos:*</em> other vocabulary:",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "rdf:type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "vdoc:cell": "rdf:type",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdf:type"
+                ]
+              },
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "vdoc:cell": {
+                  "vdoc:words": {
+                    "vdoc:selectField": "rdfs:subClassOf"
+                  }
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:comment"
+                ],
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": [
+            "@context"
+          ]
+        }
+      ]
+    },
+    "rdf:type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "readme"
+      },
+      {
+        "@id": "ontology"
+      }
+    ]
+  }
+]

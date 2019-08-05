@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"raem"};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body>
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter">This library provides the definitions and reference implementation
+    for the fundamental <span class="vdoc type-vdoc-character-data">ValOS Resources</span>
+ and <span class="vdoc type-vdoc-character-data">ValOS Events</span>
+ systems.
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter">This document is part of the library workspace <a href="https://valospace.org/raem" class="vdoc type-revdoc-package"><em>@valos/raem</em></a> (of domain <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which is ValOS Resources And Events Model (ValOS-RAEM) API, Schema
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter">      <p>This library provides the definitions and reference implementations
+    for the fundamental <span class="vdoc type-vdoc-character-data">ValOS Resources</span>
+ and <span class="vdoc type-vdoc-character-data">ValOS Events</span>
+ systems.</p>
+      <p><quote>A ValOS Resource <span class="vdoc type-vdoc-character-data">resource</span>
+ represents a well-defined part of
+      the world. It has a well-defined state at each particular moment in time.</quote></p>
+      <p><quote>A ValOS Event <span class="vdoc type-vdoc-character-data">event</span>
+ represents a dynamic change to a
+      resource by describing the change from previous to subsequent resource
+      states at a particular time.</quote></p>
+      <p>The interplay of these distinct yet interwoven systems forms the
+    foundation of the Valaa Open System.</p>
+
+  </section>
+
+  <section id="readme" class="vdoc type-vdoc-chapter">
+    <h2>@valos/raem provides ValOS Resources And Events Model `ValOS-RaEM` (/væləsˌɹɛem/)</h2>
+This library provides:
+    <ul>
+      <li>schema definitions for <span class="vdoc type-vdoc-character-data">Resource</span>
+ and the other core types.</li>
+      <li><span class="vdoc type-vdoc-character-data">Corpus</span>
+ component which stores in-memory representations of the resources.</li>
+      <li><span class="vdoc type-vdoc-character-data">reducers</span>
+ which a corpus uses to convert (<span class="vdoc type-vdoc-character-data">reduce</span>
+) events into changes of its resource representations.</li>
+      <li>the kuery language <span class="vdoc type-vdoc-character-data">VALK</span>
+ definition and the kuery engine <span class="vdoc type-vdoc-character-data">Valker</span>
+component for accessing and manipulating the resources.</li>
+      <li><span class="vdoc type-vdoc-character-data">ghost instancing</span>
+ mechanism which unifies the object
+        oriented instantiation and inheritance principles into a single
+        but powerful mechanism for ValOS resources.</li>
+      <li><span class="vdoc type-vdoc-character-data">resource couplings</span>
+ mechanism which allows referential
+        integrity and the definition of different types of reference
+        semantics like ownership, global references and local references.</li>
+      <li><span class="vdoc type-vdoc-character-data">urn:valos</span>
+ specification which defines globally unique
+        identifiers for ValOS resources.</li>
+      <li><span class="vdoc type-vdoc-character-data">ValOSURL</span>
+ specification which allows for universal locating of resources.</li>
+      <li><span class="vdoc type-vdoc-character-data">valospace</span>
+ definition as a distributed set of resources
+        containing references to each other using the VRLs.</li>
+      <li><span class="vdoc type-vdoc-character-data">partitions</span>
+ mechanism which allows for unlimited scalability of
+      the <span class="vdoc type-vdoc-character-data">valospace</span>
+ into a singular globally distributed and
+      unified object space.</li>
+    </ul>
+
+    <ul>
+      <li>depends:<a href="@valos/tools" class="vdoc type-revdoc-package"><em>@valos/tools</em></a><span class="vdoc type-vdoc-character-data">immutable</span>
+</li>
+      <li>exports:<span class="vdoc type-vdoc-character-data">Corpus</span>
+<span class="vdoc type-vdoc-character-data">Command</span>
+<span class="vdoc type-vdoc-character-data">VALK</span>
+<span class="vdoc type-vdoc-character-data">Valker</span>
+<span class="vdoc type-vdoc-character-data">RAEMContentAPI</span>
+</li>
+      <li>valosheath:<span class="vdoc type-vdoc-character-data">Resource</span>
+<span class="vdoc type-vdoc-character-data">TransientFields</span>
+<span class="vdoc type-vdoc-character-data">Bvob</span>
+<span class="vdoc type-vdoc-character-data">Partition</span>
+</li>
+      <li>concepts:<span class="vdoc type-vdoc-character-data">ghost instancing</span>
+<span class="vdoc type-vdoc-character-data">partitions</span>
+<span class="vdoc type-vdoc-character-data">couplings</span>
+</li>
+    </ul>
+
+  <section id="section_url_urn_id" class="vdoc type-vdoc-chapter">
+    <h2>ValOS URLs, urn:valos and raw id's</h2>
+      <p>ValOS URL is used to specify a parameterized location reference to a
+        ValOS Resource. It has two major parts separated by the URI fragment
+        separator `#`: *partition URI* part and a *local reference* part.</p>
+      <p>*Partition URI* identifies the target authority and partition of
+        the reference. It corresponds to scheme, hierarchical and query parts
+        of an URI; everything but the fragment. Its precise structure and
+        interpretation is specified by the scheme but typically the scheme and
+        hierarchical part identify an authority and query part identifies
+        a partition.</p>
+      <p>*Local reference* identifies a particular resource inside a partition
+        but also contains optional *coupling*, *ghost path*, *lens* (and other)
+        parts which further parameterize the reference itself. It corresponds
+        to the URI fragment part but has sub-structure which is specified in
+        this document.<span id="valos_iri_structure" class="vdoc type-vdoc-character-data">                                            valos-url
+┌────────────────────────────────────────────────┴─────────────────────────────────────────────────┐
+                  partition-url                                      resource-ref
+┌───────────────────────┴────────────────────────┐ ┌──────────────────────┴────────────────────────┐
+                         resource-url                                         ref-params
+┌──────────────────────────────┴────────────────────────────────┐  ┌───────────────┴───────────────┐
+         authority-uri               partition-id   resource-id         coupling           lens
+┌──────────────┴───────────────┐    ┌─────┴──────┐ ┌─────┴──────┐  ┌───────┴────────┐ ┌─────┴──────┐
+
+valaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=relations&lens=ROOT_LENS
+
+                                                   └─────┬──────┘  └──────────────┬────────────────┘
+                                                        nss                  q-component
+└───┬────┘   └──────┬──────┘ └┬┘ └───────┬───────┘ └──────────────────────┬────────────────────────┘
+  scheme        authority    path      query                           fragment
+             └────────┬────────┘
+                  hier-part
+</span>
+
+  <section id="section_dualisms" class="vdoc type-vdoc-chapter">
+    <h2>Curious dualisms of *partition URI* and *local reference*</h2>
+The division between partition URI and local reference has many curious
+          dualistic qualities: backend vs. frontend, hierarchical vs. flat,
+          routing vs. computation, extensible vs. fixed, absolute vs. contextual,
+          coarse vs. granular, self-contained vs. part-of-a-whole.
+  <section class="vdoc type-vdoc-chapter">
+    <h2>Partition URI domain is backend, local reference domain is front-end</h2>
+ValOS backends deal with the indivisible partitions and thus don't care
+          about the particularities of local references to individual resources.
+          This corresponds to how in web architecture URI fragments are not sent
+          to backend with resource requests. Conversely, ValOS frontends don't
+          care where a resource comes from once it has been loaded, but about its
+          identity, relationships and the parameters of those relationships. This
+          is reflected in how frontend code regularily drops the partition URI.
+  </section>
+
+  <section class="vdoc type-vdoc-chapter">
+    <h2>Partition URI structure is specified by the scheme, local reference structure is specified by ValOS</h2>
+By the nature of its distributed event sourcing architecture ValOS
+          focuses heavily on the frontend. The cross-compatibility between
+          components is driven by how new backends can integrate and talk with
+          existing front-end clients. This is facilitated by front-end plugin
+          systems which enables new ValOS URI schemes to specify new routing
+          solutions and fundamentally new backend infrastructures, as long as
+          said infrastructures can route ValOS event streams to clients. This
+          corresponds to how ValOS doesn't specify how a *partition URI*
+          identifies and locates partitions and authorities but leaves it to
+          the scheme specifications and their reference implementations of
+          frontend plugins.
+  </section>
+
+  <section class="vdoc type-vdoc-chapter">
+    <h2>Partitions URI's identify self-contained wholes, resource references need their context</h2>
+Web architecture specifies that all or none of the document is
+          retrieved. This corresponds to the behaviour of ValOS partitions which
+          are always retrieved as a whole. Partition URI's contain all and
+          nothing but the components which identify web resources, that is
+          everything but the fragment.
+  </section>
+
+  <section class="vdoc type-vdoc-chapter">
+    <h2>Etc.</h2>
+
+  </section>
+
+  </section>
+
+  <section id="resource_id" class="vdoc type-vdoc-chapter">
+    <h2>resource-id</h2>
+      <p>Resource id is the NSS part of an urn:valos URI. It globally uniquely
+          identifies a *referenced resource*:</p>
+      <p><span class="vdoc type-vdoc-character-data">resource-id        = primary-part [ "/" secondary-part ]</span>
+</p>
+      <p>The first, non-optional *primary* part globally uniquely identifies a
+          freely movable *primary* resource. If no secondary part exists this
+          resource is also the referenced resource. If the secondary part exists
+          it identifies a structural sub-resource which is deterministic to
+          the primary resource.
+          The referenced resource is then this sub-resource.</p>
+      <p>Two resource ids refer to the same resource iff their canonical string
+          representations are lexically equivalent. Notably:
+    <ol>
+      <li>both parts are case sensitive. If a part specification refers to a
+            case insensitive external naming system it must specify a canonical
+            representation.
+            It is recommended that this representation be all-lowercase.</li>
+      <li>no redundant encoding. If a part contains encoding schemes then any
+            characters or tokens which can expressed without encoding must not
+            be encoded.</li>
+    </ol>
+
+  <section id="primary_part" class="vdoc type-vdoc-chapter">
+    <h2>primary-part - restricted naming, free ownership</h2>
+      <p>The primary id part has a very restricted character set of <span class="vdoc type-vdoc-character-data">unreserved</span>
+as specified in the <a href="https://tools.ietf.org/html/rfc3986" class="vdoc type-vdoc-reference">URI specification</a>.</p>
+      <p><span class="vdoc type-vdoc-character-data">primary-part       = *( unreserved )</span>
+</p>
+      <p>The *primary* part must be globally unique.
+          Note: uuid v4 is recommended for now, but eventually primary id
+          generation should tied to the deterministic event id chain. This in
+          turn should be seeded by some ValOS authority.</p>
+      <p>Note: when using base64 encoded values as primary id, use <a href="https://tools.ietf.org/html/rfc4648#section-5" class="vdoc type-vdoc-reference">url-and-filename-ready base64url characters</a>.</p>
+      <p>Note: derivedId currently used by the codebase uses only the primary
+          id but breaks the above character set requirement, as it uses base64
+          encoding with <span class="vdoc type-vdoc-character-data">+</span>
+ and <span class="vdoc type-vdoc-character-data">/</span>
+. For backwards
+          compatibility they are permitted, but <a href="https://tools.ietf.org/html/rfc7515#appendix-C" class="vdoc type-vdoc-reference">considered equal to the base64url</a>using <span class="vdoc type-vdoc-character-data">+</span>
+ <-> <span class="vdoc type-vdoc-character-data">-</span>
+ and <span class="vdoc type-vdoc-character-data">/</span>
+ <-> <span class="vdoc type-vdoc-character-data">_</span>
+ character mappings.</p>
+
+  </section>
+
+  <section id="secondary_part" class="vdoc type-vdoc-chapter">
+    <h2>secondary-part - lenient naming, restricted ownership</h2>
+      <p>The *secondary* id part is a qualified name which can be expanded into
+          an URI. This URI then defines how the referred resource is determined
+          from the primary resource.</p>
+      <p><span class="vdoc type-vdoc-character-data">
+
+            secondary-part    = prefix *( pchar / "/" )
+            prefix            = *( unreserved / pct-encoded / sub-delims / "@" ) ":"</span>
+The expansion is done by replacing the prefix with a corresponding
+          value. Currently the only allowed prefixes and their semantics is
+          limited to the exclusive list of three entries:</p>
+      <p>
+    <ol>
+      <li>prefix `@:` - instance-ghost ids
+              `urn:valos:ba54/@:b7e4` reads as "inside the instanced resource
+              `ba54` the ghost of the regular resource `b7e4`".
+              The expansion of the prefix `@:` is `valos:urn:` itself.
+              This means nested ghost paths are allowed, like so:
+              `urn:valos:f00b/@:ba54/@:b7e4` reads as "inside the instance
+              `f00b` the ghost of `urn:valos:ba54/@:b7e4`.</li>
+      <li>prefix `.:` - property ids
+              `urn:valos:f00b/.:propName` - a directly owned Property resource
+              with a constant name `propName` and prototype which is dynamically
+              linked to the corresponding Property in the prototype of
+              `urn:valos:f00b`, like so: `${prototype("urn:valos:f00b")}/.:propName`.</li>
+      <li>prefix `$:` - virtual resource ids
+              permanently immaterial ghosts with nevertheless separate identities.
+              When used as prototype with instance-ghosts allows separate
+              instantiation of the same fundamental prototype in the same instance:
+              `urn:valos:f00b/$:1/@:b74e`
+              `urn:valos:f00b/$:2/@:b74e`
+              `urn:valos:f00b/$:textsalt/@:b74e`</li>
+    </ol>
+</p>
+      <p>Resources identified by these parts are tightly bound to the resource
+          identified by the primary part (which must exist). They must be always
+          directly or indirectly owned by the primary resource.</p>
+
+  </section>
+</p>
+
+  </section>
+
+  <section id="vrl" class="vdoc type-vdoc-chapter">
+    <h2>VRL</h2>
+Javascript class which implements ValOS reference URI and associated
+        operations.
+  </section>
+</p>
+
+  </section>
+
+  </section>
+
+  <section id="ontology" class="vdoc type-vdoc-chapter">
+    <h2><em>valos:</em> library @valos/raem ontology</h2>
+@valos/raem ontology specifies the Valospace core types and
+      properties directly to the @valos/kernel namespace. 
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
+    <h2>@valos/raem IRI prefixes</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Prefix</th>
+        <th class="vdoc type-vdoc-header">IRI</th>
+      </thead>
+      <tbody>
+        <tr><td>dc</td><td>http://purl.org/dc/elements/1.1/</td></tr>
+        <trclass=" vdoc-nth-child-2n"><td>owl</td><td>http://www.w3.org/2002/07/owl#</td></tr>
+        <tr><td>rdf</td><td>http://www.w3.org/1999/02/22-rdf-syntax-ns#</td></tr>
+        <trclass=" vdoc-nth-child-2n"><td>rdfs</td><td>http://www.w3.org/2000/01/rdf-schema#</td></tr>
+        <tr><td>valos</td><td>https://valospace.org/#</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_classes" class="vdoc type-vdoc-chapter">
+    <h2><em>valos:* a valos:Class</em> vocabulary</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
+      </thead>
+      <tbody>
+        <tr id="Class"class=" vdoc-nth-child-2n"><td><a href="#Class" class="vdoc type-vdoc-reference"><em>Class</em></a></td><td>rdfs:Class</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=2>The class of classes which are specified by the ValOS kernel ontology.</td></tr>
+        <tr id="Property"><td><a href="#Property" class="vdoc type-vdoc-reference"><em>Property</em></a></td><td>rdf:Property</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=2>The class of properties which are specified by the ValOS kernel ontology.</td></tr>
+        <tr id="Type"class=" vdoc-nth-child-2n"><td><a href="#Type" class="vdoc type-vdoc-reference"><em>Type</em></a></td><td>rdfs:Class</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=2>The class of all valospace type classes.</td></tr>
+        <tr id="Field"><td><a href="#Field" class="vdoc type-vdoc-reference"><em>Field</em></a></td><td>rdf:Property</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=2>The class of properties with custom semantics inside valospace.
+Instances of this class are called valos fields.</td></tr>
+        <tr id="PrimaryField"class=" vdoc-nth-child-2n"><td><a href="#PrimaryField" class="vdoc type-vdoc-reference"><em>PrimaryField</em></a></td><td>valos:Field</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=2>The class of valos fields which are primary, persisted sources of
+truth and have both a state representation inside valospace and a
+change representation in event logs.</td></tr>
+        <tr id="TransientField"><td><a href="#TransientField" class="vdoc type-vdoc-reference"><em>TransientField</em></a></td><td>valos:Field</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=2>The class of valos fields which have primary state representations
+inside valospace but which have only inferred representation in event
+logs.</td></tr>
+        <tr id="InferredField"class=" vdoc-nth-child-2n"><td><a href="#InferredField" class="vdoc type-vdoc-reference"><em>InferredField</em></a></td><td>valos:Field</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=2>The class of valos fields with inference semantics which specify how
+new triples with the inferred field as a predicate can be inferred
+from existing triples.</td></tr>
+        <tr id="GeneratedField"><td><a href="#GeneratedField" class="vdoc type-vdoc-reference"><em>GeneratedField</em></a></td><td>valos:InferredField</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=2>The class of inferred fields where a field is associated with a
+'generator', a convergent procedural rule like taking an average or
+retrieving the partition of a valos Resource. As convergent rules a
+GeneratedField's can't have mutation semantics that could be reliably
+translated back to mutations of other triples.</td></tr>
+        <tr id="AliasField"class=" vdoc-nth-child-2n"><td><a href="#AliasField" class="vdoc type-vdoc-reference"><em>AliasField</em></a></td><td>valos:InferredField</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=2>The class of inferred fields called alias fields where each such field
+has an 'aliasOf' RDF property or valos Field. Alias fields are
+mutation-inference symmetric so that triples with an alias field as
+predicate are inferred from triples with aliasOf as predicate and
+mutations with an alias field as predicate are translated to use
+the aliasOf as predicate.</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_properties" class="vdoc type-vdoc-chapter">
+    <h2><em>valos:* a valos:Property</em> vocabulary</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:subPropertyOf</th>
+        <th class="vdoc type-vdoc-header">rdfs:domain</th>
+        <th class="vdoc type-vdoc-header">rdfs:range</th>
+      </thead>
+      <tbody>
+        <tr id="generator"class=" vdoc-nth-child-2n"><td><a href="#generator" class="vdoc type-vdoc-reference"><em>generator</em></a></td><td></td><td>valos:GeneratedField</td><td>rdfs:Resource</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=4>The generator algorithm specification or identifier of
+a GeneratedField.</td></tr>
+        <tr id="aliasOf"><td><a href="#aliasOf" class="vdoc type-vdoc-reference"><em>aliasOf</em></a></td><td></td><td>valos:AliasField</td><td>valos:Field</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=4>The alias target property specifies the inference source and mutation
+target of an alias field.</td></tr>
+        <tr id="coupledField"class=" vdoc-nth-child-2n"><td><a href="#coupledField" class="vdoc type-vdoc-reference"><em>coupledField</em></a></td><td></td><td>valos:Field</td><td>xsd:string</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=4></td></tr>
+        <tr id="defaultCoupledField"><td><a href="#defaultCoupledField" class="vdoc type-vdoc-reference"><em>defaultCoupledField</em></a></td><td></td><td>valos:Field</td><td>xsd:string</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=4></td></tr>
+        <tr id="isOwned"class=" vdoc-nth-child-2n"><td><a href="#isOwned" class="vdoc type-vdoc-reference"><em>isOwned</em></a></td><td></td><td>valos:Field</td><td>xsd:boolean</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=4>This field owns the targeted resource. If the subject of this field
+is destroyed the targeted resource will be cascade destroyed.</td></tr>
+        <tr id="isOwning"><td><a href="#isOwning" class="vdoc type-vdoc-reference"><em>isOwning</em></a></td><td></td><td>valos:Field</td><td>xsd:boolean</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=4>This field is a coupled field of an owning field. If the owning field
+is destroyed this resource will be be cascade destroyed.</td></tr>
+        <tr id="isDuplicateable"class=" vdoc-nth-child-2n"><td><a href="#isDuplicateable" class="vdoc type-vdoc-reference"><em>isDuplicateable</em></a></td><td></td><td>valos:Field</td><td>xsd:boolean</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=4>If set to false this field not be visible for DUPLICATED class of
+events.</td></tr>
+        <tr id="immediateDefaultValue"><td><a href="#immediateDefaultValue" class="vdoc type-vdoc-reference"><em>immediateDefaultValue</em></a></td><td></td><td>valos:Field</td><td>rdfs:Resource</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=4>The immediate default value for a field when the field doesn't have
+an own value, ie. bypassing prototype lookups.</td></tr>
+        <tr id="allowTransientFieldToBeSingular"class=" vdoc-nth-child-2n"><td><a href="#allowTransientFieldToBeSingular" class="vdoc type-vdoc-reference"><em>allowTransientFieldToBeSingular</em></a></td><td></td><td>valos:Field</td><td>xsd:boolean</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=4>Bypass the default behavior which forces transient fields to be plural
+to allow for singular fields.</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_types" class="vdoc type-vdoc-chapter">
+    <h2><em>valos:* a valos:Type</em> vocabulary</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
+      </thead>
+      <tbody>
+        <tr id="Bvob"class=" vdoc-nth-child-2n"><td><a href="#Bvob" class="vdoc type-vdoc-reference"><em>Bvob</em></a></td><td>valos:Resource</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=2>Bvob (Binary ValOS OBject) specifies a class of valos resources which
+have a valid base64-url encoded 240-bit SHAKE256 hash of some
+octet-stream content prefixed with "hashV240:" as their resource id.</td></tr>
+        <tr id="TransientFields"><td><a href="#TransientFields" class="vdoc type-vdoc-reference"><em>TransientFields</em></a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=2>The class of valos resources which are referenced from within this
+world and also the domain of all transient and generated fields which
+are available even for the inactive, out-of-this-world resources.</td></tr>
+        <tr id="Resource"class=" vdoc-nth-child-2n"><td><a href="#Resource" class="vdoc type-vdoc-reference"><em>Resource</em></a></td><td>valos:TransientFields</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=2>A first-class object with fields and properties that can be directly
+created and mutated using events in associated partition event logs.
+Resources have an identity and can be destroyed, subsequently
+destroying all resources which are in the ownership hierarchy of this
+Resource.</td></tr>
+        <tr id="InactiveResource"><td><a href="#InactiveResource" class="vdoc type-vdoc-reference"><em>InactiveResource</em></a></td><td>valos:TransientFields</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=2>An InactiveResource is a Resource whose partition has not yet been
+fully loaded, and has only the limited set of fields of TransientFields
+available. The transition from InactiveResource to and from other
+concrete Resource types is the only possible runtime type change and
+happens dynamically based on the partition activation and inactivation.</td></tr>
+        <tr id="DestroyedResource"class=" vdoc-nth-child-2n"><td><a href="#DestroyedResource" class="vdoc type-vdoc-reference"><em>DestroyedResource</em></a></td><td>valos:TransientFields</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=2>A DestroyedResource is a Resource which has been destroyed and only
+provides the external fields listed in TransientFields interface.</td></tr>
+        <tr id="Partition"><td><a href="#Partition" class="vdoc type-vdoc-reference"><em>Partition</em></a></td><td>valos:Resource</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=2>A Partition is a subdivision of the whole ValOS object space into
+smaller recursive wholes. The Partition implementation contains
+Resource's either by direct or transitive ownership. Each such
+contained Resource also knows their containing Partition.
+
+TODO(iridian, 2019-08): Update outdated terminology in this comment.
+
+In addition to the few direct member fields relating to snapshotting
+and event stream synchronization, the Partition Resource's serve as
+a key latching point for external services.
+
+Each Partition object is managed by an authority, which performs
+conflict resolution, authorization and recording of incoming commands,
+converting them into the truth event log for that particular Partition.
+
+The Partition id is used by the query routers to globally locate the
+authority responsible for any given Partition. Also, cross-partition
+Resource references are implemented as Resource stubs, ie. objects that
+only contain the Resource id and its most recently known partition
+(which will retain the new owning Partition in a stub, enabling
+forwarding). Together these allow for any Resource to always be
+locateable from anywhere.</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_fields" class="vdoc type-vdoc-chapter">
+    <h2><em>valos:* a valos:Field</em> vocabulary</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:domain</th>
+        <th class="vdoc type-vdoc-header">rdf:type</th>
+        <th class="vdoc type-vdoc-header">rdfs:subPropertyOf</th>
+        <th class="vdoc type-vdoc-header">rdfs:range</th>
+        <th class="vdoc type-vdoc-header">valos:coupledField</th>
+      </thead>
+      <tbody>
+        <tr id="id"class=" vdoc-nth-child-2n"><td><a href="#id" class="vdoc type-vdoc-reference"><em>id</em></a></td><td>valos:TransientFields</td><td>valos:GeneratedField</td><td></td><td>rdfs:Resource</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>VRL of this Resource</td></tr>
+        <tr id="contentHash"><td><a href="#contentHash" class="vdoc type-vdoc-reference"><em>contentHash</em></a></td><td>valos:Bvob</td><td>valos:GeneratedField</td><td></td><td>xsd:string</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6>The content has of this Bvob</td></tr>
+        <tr id="contentReferrers"class=" vdoc-nth-child-2n"><td><a href="#contentReferrers" class="vdoc type-vdoc-reference"><em>contentReferrers</em></a></td><td>valos:Bvob</td><td>valos:TransientField</td><td></td><td>valos:Resource</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>Incoming references to this Bvob</td></tr>
+        <tr id="rawId"><td><a href="#rawId" class="vdoc type-vdoc-reference"><em>rawId</em></a></td><td>valos:TransientFields</td><td>valos:GeneratedField</td><td></td><td>xsd:string</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6>Globally unique identifier of this Resource</td></tr>
+        <tr id="typeName"class=" vdoc-nth-child-2n"><td><a href="#typeName" class="vdoc type-vdoc-reference"><em>typeName</em></a></td><td>valos:TransientFields</td><td>valos:GeneratedField</td><td></td><td>xsd:string</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>Globally unique identifier of this Resource</td></tr>
+        <tr id="partition"><td><a href="#partition" class="vdoc type-vdoc-reference"><em>partition</em></a></td><td>valos:TransientFields</td><td>valos:GeneratedField</td><td></td><td>valos:Partition</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6>The partition root Resource of this Resource, ie. the nearest owner
+(possibly self) which is also an active partition.</td></tr>
+        <tr id="partitionIRI"class=" vdoc-nth-child-2n"><td><a href="#partitionIRI" class="vdoc type-vdoc-reference"><em>partitionIRI</em></a></td><td>valos:TransientFields</td><td>valos:GeneratedField</td><td></td><td>rdfs:Resource</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>The partition IRI of the partition this Resource belongs to.</td></tr>
+        <tr id="partitionURI"><td><a href="#partitionURI" class="vdoc type-vdoc-reference"><em>partitionURI</em></a></td><td>valos:TransientFields</td><td>valos:AliasField</td><td>valos:partitionIRI</td><td>rdfs:Resource</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6></td></tr>
+        <tr id="prototype"class=" vdoc-nth-child-2n"><td><a href="#prototype" class="vdoc type-vdoc-reference"><em>prototype</em></a></td><td>valos:TransientFields</td><td>valos:PrimaryField</td><td></td><td>valos:TransientFields</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>The prototype of this Resource. All field lookups for which there is
+no associated value set and whose field descriptors don't have
+immediateDefaultValue are forwarded to the prototype.</td></tr>
+        <tr id="prototypeAlias"><td><a href="#prototypeAlias" class="vdoc type-vdoc-reference"><em>prototypeAlias</em></a></td><td>valos:TransientFields</td><td>valos:AliasField</td><td>valos:prototype</td><td>valos:TransientFields</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6>The prototype of this Resource.
+This is an alias for valos:prototype to bypass conflicts with native
+javascript property 'prototype'.</td></tr>
+        <tr id="ownFields"class=" vdoc-nth-child-2n"><td><a href="#ownFields" class="vdoc type-vdoc-reference"><em>ownFields</em></a></td><td>valos:TransientFields</td><td>valos:GeneratedField</td><td></td><td>valos:TransientFields</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>A transient version of this object as if prototype was undefined.
+All property accesses will only return field values which are directly
+owned by this resource.</td></tr>
+        <tr id="prototypers"><td><a href="#prototypers" class="vdoc type-vdoc-reference"><em>prototypers</em></a></td><td>valos:TransientFields</td><td>valos:TransientField</td><td></td><td>valos:TransientFields</td><td>valos:prototype</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6>All resources which have this Resource as valos:prototype but not as
+valos:instancePrototype nor as valos:ghostPrototype.</td></tr>
+        <tr id="instancePrototype"class=" vdoc-nth-child-2n"><td><a href="#instancePrototype" class="vdoc type-vdoc-reference"><em>instancePrototype</em></a></td><td>valos:TransientFields</td><td>valos:AliasField</td><td>valos:prototype</td><td>valos:TransientFields</td><td>valos:instances</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>The instance prototype of this instance Resource.</td></tr>
+        <tr id="instances"><td><a href="#instances" class="vdoc type-vdoc-reference"><em>instances</em></a></td><td>valos:TransientFields</td><td>valos:TransientField</td><td></td><td>valos:TransientFields</td><td>valos:prototype</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6>All resources which have this Resource as their
+valos:instancePrototype.</td></tr>
+        <tr id="ghostPrototype"class=" vdoc-nth-child-2n"><td><a href="#ghostPrototype" class="vdoc type-vdoc-reference"><em>ghostPrototype</em></a></td><td>valos:TransientFields</td><td>valos:AliasField</td><td>valos:prototype</td><td>valos:TransientFields</td><td>valos:materializedGhosts</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>Ghost prototype of this ghost resource. The ghost prototype is the
+base resource from which this ghost was created during some primary
+instantiation.
+This instantiation (which happens on prototype and results in an
+instance of it) also ghost-instantiates all the direct and indirect
+ownlings of the prototype as ghost ownlings in the instance. The
+instance is called the *ghost host* of all these ghosts. Likewise, the
+instance prototype is called the ghost host prototype, and the
+(grand-)ownlings of this ghost host prototype are the ghost prototypes
+of the corresponding ghosts (ie. this field).} .</td></tr>
+        <tr id="materializedGhosts"><td><a href="#materializedGhosts" class="vdoc type-vdoc-reference"><em>materializedGhosts</em></a></td><td>valos:TransientFields</td><td>valos:TransientField</td><td></td><td>valos:TransientFields</td><td>valos:prototype</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6>All materialized ghosts which have this Resource as their
+valos:ghostPrototype.</td></tr>
+        <tr id="unnamedCouplings"class=" vdoc-nth-child-2n"><td><a href="#unnamedCouplings" class="vdoc type-vdoc-reference"><em>unnamedCouplings</em></a></td><td>valos:TransientField</td><td>valos:TransientField</td><td></td><td>valos:TransientField</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>Referrers with a missing coupledField referring this Resource</td></tr>
+        <tr id="ghostHost"><td><a href="#ghostHost" class="vdoc type-vdoc-reference"><em>ghostHost</em></a></td><td>valos:TransientFields</td><td>valos:GeneratedField</td><td></td><td>valos:TransientFields</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6>The ghost host of this ghost Resource or null if not a ghost. The
+ghost host is the innermost direct or indirect non-ghost owner of this
+ghost, or in other words the instance that indirectly created this
+ghost.</td></tr>
+        <tr id="ghostOwner"class=" vdoc-nth-child-2n"><td><a href="#ghostOwner" class="vdoc type-vdoc-reference"><em>ghostOwner</em></a></td><td>valos:TransientFields</td><td>valos:TransientField</td><td></td><td>valos:TransientFields</td><td>valos:ghostOwnlings</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>Refers to the ghost host of this ghost resource if this ghost is
+materialized, otherwise null.
+Note that materialized grand-ownling ghosts will have a differing owner
+and ghostOwner and that destruction of either of them will result in
+immaterialization of the grand-ownling ghost.</td></tr>
+        <tr id="ghostOwnlings"><td><a href="#ghostOwnlings" class="vdoc type-vdoc-reference"><em>ghostOwnlings</em></a></td><td>valos:TransientFields</td><td>valos:TransientField</td><td></td><td>valos:TransientFields</td><td>valos:ghostOwner</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6>Materialized ghost Resource's which have this instance as their ghost
+host.</td></tr>
+        <tr id="owner"class=" vdoc-nth-child-2n"><td><a href="#owner" class="vdoc type-vdoc-reference"><em>owner</em></a></td><td>valos:Resource</td><td>valos:PrimaryField</td><td></td><td>valos:Resource</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>The owner of this Resource</td></tr>
+        <tr id="name"><td><a href="#name" class="vdoc type-vdoc-reference"><em>name</em></a></td><td>valos:Resource</td><td>valos:PrimaryField</td><td></td><td>xsd:string</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6>The primary ValOS name of this Resource. It is globally non-unique but
+often context-dependently unique.</td></tr>
+        <tr id="nameAlias"class=" vdoc-nth-child-2n"><td><a href="#nameAlias" class="vdoc type-vdoc-reference"><em>nameAlias</em></a></td><td>valos:Resource</td><td>valos:AliasField</td><td>valos:name</td><td>xsd:string</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>The primary name of this Resource. It is globally non-unique but often
+context-dependently unique.
+This is an alias of Resource.name for circumventing conflicts with the
+native javascript property 'name' in some execution contexts</td></tr>
+        <tr id="ownlings"><td><a href="#ownlings" class="vdoc type-vdoc-reference"><em>ownlings</em></a></td><td>valos:Resource</td><td>valos:PrimaryField</td><td></td><td>valos:Resource</td><td>valos:owner</td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6>Collection of all the resources owned by this Resource via all
+properties that are marked as valos:isOwning.</td></tr>
+        <tr id="unnamedOwnlings"class=" vdoc-nth-child-2n"><td><a href="#unnamedOwnlings" class="vdoc type-vdoc-reference"><em>unnamedOwnlings</em></a></td><td>valos:Resource</td><td>valos:PrimaryField</td><td>valos:ownlings</td><td>valos:Resource</td><td>valos:owner</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>All the resources owned by this Resource which are not part of another
+named owning property</td></tr>
+        <tr id="isFrozen"><td><a href="#isFrozen" class="vdoc type-vdoc-reference"><em>isFrozen</em></a></td><td>valos:Resource</td><td>valos:PrimaryField</td><td></td><td>xsd:boolean</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6>Indicates whether this Resource is frozen. A frozen Resource nor any
+of its ownlings cannot have any of their primary fields be modified.
+Setting isFrozen to true is (by design) an irreversible operation.
+If this Resource is also the root resource of a partition the whole
+partition is permanently frozen.</td></tr>
+        <tr id="authorityIRI"class=" vdoc-nth-child-2n"><td><a href="#authorityIRI" class="vdoc type-vdoc-reference"><em>authorityIRI</em></a></td><td>valos:Partition</td><td>valos:PrimaryField</td><td></td><td>xsd:string</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=6>The authority IRI of this Resource. If this field is set it means that
+this is an active partition root object. The partition IRI is generated
+as per the rules specified by the authority IRI schema.</td></tr>
+        <tr id="partitionAuthorityURI"><td><a href="#partitionAuthorityURI" class="vdoc type-vdoc-reference"><em>partitionAuthorityURI</em></a></td><td>valos:Partition</td><td>valos:AliasField</td><td>valos:authorityIRI</td><td>xsd:string</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td>rdfs:comment</td><td colspan=6></td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h2><em>valos:*</em> other vocabulary:</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdf:type</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
+      </thead>
+      <tbody>
+        <tr id="@context"class=" vdoc-nth-child-2n"><td><a href="#@context" class="vdoc type-vdoc-reference"><em>@context</em></a></td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td>rdfs:comment</td><td colspan=3></td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  </section>
+
+  </body>
+</html>

@@ -1,33 +1,33 @@
 [
   {
-    "@id": "https:/valaatech.github.io/vault/type-vault/revdoc/tutorial",
+    "@id": "https://valospace.org/engine",
     "@context": {
-      "@base": "https:/valaatech.github.io/vault/type-vault/revdoc/tutorial#",
-      "sbomdoc": "https://valaatech.github.io/vault/type-vault/sbomdoc#",
-      "revdoc": "https://valaatech.github.io/vault/type-vault/revdoc#",
+      "@base": "https://valospace.org/engine#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-      "vdoc": "https://valaatech.github.io/vault/type-vault/vdoc#",
+      "vdoc": "https://valospace.org/vdoc#",
       "a": {
         "@id": "rdf:type",
         "@type": "@id"
       },
       "vdoc:content": {
-        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#content",
+        "@id": "https://valospace.org/vdoc#content",
         "@container": "@list"
       },
       "vdoc:words": {
-        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#words",
+        "@id": "https://valospace.org/vdoc#words",
         "@container": "@list"
       },
-      "vdoc:rows": {
-        "@id": "https://valaatech.github.io/vault/type-vault/vdoc#rows",
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
         "@container": "@list"
       }
     },
-    "dc:title": "ReVDoc Tutorial",
+    "dc:title": "@valos/gateway library reference",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -38,37 +38,47 @@
         }
       ],
       "authors": [],
-      "shortName": "tutorial"
+      "shortName": "engine"
     },
     "abstract": {
       "@id": "abstract",
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is a revdoc template document 'tutorial' created by create-revdoc."
+        "This document is a revdoc template document 'engine' created by create-revdoc."
       ]
     },
     "sotd": {
       "@id": "sotd",
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is part of the toolset workspace ",
+        "This document is part of the library workspace ",
         {
-          "rdf:type": "vdoc:Reference",
+          "rdf:type": "revdoc:Package",
           "vdoc:content": [
-            "@valos/type-vault"
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/engine"
+              ]
+            }
           ],
-          "vdoc:ref": "@valos/type-vault"
+          "vdoc:ref": "@valos/engine"
         },
         " (of domain ",
         {
-          "rdf:type": "vdoc:Reference",
+          "rdf:type": "revdoc:Package",
           "vdoc:content": [
-            "packages"
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/kernel"
+              ]
+            }
           ],
-          "vdoc:ref": "packages"
+          "vdoc:ref": "@valos/kernel"
         },
         ") which is ",
-        "A valma toolset for managing valos vault monorepository workspaces"
+        "ValOS Engine API and Schema"
       ]
     },
     "introduction": {
@@ -90,7 +100,7 @@
           "vdoc:content": [
             "ReVDoc tutorial"
           ],
-          "vdoc:ref": "@valos/type-vault/revdoc/tutorial"
+          "vdoc:ref": "@valos/revdoc/tutorial"
         },
         " for instructions on how to write revdoc source documents.",
         null,
@@ -100,7 +110,7 @@
           "vdoc:content": [
             "ReVdoc specification"
           ],
-          "vdoc:ref": "@valos/type-vault/revdoc"
+          "vdoc:ref": "@valos/revdoc"
         },
         " and ",
         {
@@ -108,7 +118,7 @@
           "vdoc:content": [
             "VDoc specification"
           ],
-          "vdoc:ref": "@valos/type-vault/vdoc"
+          "vdoc:ref": "@valos/vdoc"
         },
         " for reference documentation."
       ]

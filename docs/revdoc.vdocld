@@ -1,0 +1,640 @@
+[
+  {
+    "@id": "https://valospace.org/revdoc",
+    "@context": {
+      "@base": "https://valospace.org/revdoc#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "vdoc": "https://valospace.org/vdoc#",
+      "a": {
+        "@id": "rdf:type",
+        "@type": "@id"
+      },
+      "vdoc:content": {
+        "@id": "https://valospace.org/vdoc#content",
+        "@container": "@list"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/vdoc#words",
+        "@container": "@list"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
+        "@container": "@list"
+      }
+    },
+    "dc:title": "ReVDoc - ReSpec document VDoc extension",
+    "vdoc:tags": [
+      "PRIMARY",
+      "ONTOLOGY"
+    ],
+    "revdoc:package": "@valos/revdoc",
+    "revdoc:prefix": "revdoc",
+    "revdoc:prefixIRI": "https://valospace.org/revdoc#",
+    "revdoc:version": "0.35.0-prerelease.8",
+    "respecConfig": {
+      "subtitle": "0.35.0-prerelease.8",
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "shortName": "revdoc",
+      "alternateFormats": [
+        {
+          "label": "VDoc",
+          "uri": "revdoc.vdocld"
+        }
+      ]
+    },
+    "abstract": {
+      "@id": "abstract",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document specifies ReVDoc, a ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "VDoc extension"
+          ],
+          "vdoc:ref": "@valos/vdoc#extension"
+        },
+        " for extracting and emitting ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReSpec documents"
+          ],
+          "vdoc:ref": "https://github.com/w3c/respec"
+        },
+        "."
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document has not been reviewed. This is a draft document and\n    may be updated, replaced or obsoleted by other documents at any\n    time.",
+        null,
+        "This document is part of the ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ValOS core specification"
+          ],
+          "vdoc:ref": "@valos/kernel/spec"
+        },
+        ".",
+        null,
+        "The format is implemented and supported by ",
+        {
+          "rdf:type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/revdoc"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/revdoc"
+        },
+        " npm package."
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "ReVDoc is a VDoc extension which can produce ReSpec documents."
+      ]
+    },
+    "ontology": {
+      "@id": "ontology",
+      "dc:title": "ReVDoc ontology",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@id": "section_ontology_abstract"
+        },
+        {
+          "@id": "section_prefixes"
+        },
+        {
+          "@id": "section_classes"
+        },
+        {
+          "@id": "section_properties"
+        },
+        {
+          "@id": "section_vocabulary_other"
+        },
+        {
+          "@id": "section_context"
+        }
+      ]
+    },
+    "prefixes": {
+      "@id": "prefixes",
+      "revdoc": "https://valospace.org/revdoc#"
+    },
+    "vocabulary": {
+      "@id": "vocabulary",
+      "Document": {
+        "rdf:type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:Chapter",
+        "rdfs:comment": "A ReSpec specification document"
+      },
+      "Definition": {
+        "rdf:type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:Node",
+        "rdfs:comment": "A ReSpec term definition document node"
+      },
+      "Package": {
+        "rdf:type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:Reference",
+        "rdfs:comment": "A package reference document node"
+      },
+      "Command": {
+        "rdf:type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:Node",
+        "rdfs:comment": "A command invokation document node"
+      },
+      "CommandLineInteraction": {
+        "rdf:type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:Node",
+        "rdfs:comment": "A command line interaction sequence document node"
+      },
+      "prefix": {
+        "rdf:type": "vdoc:Property",
+        "rdfs:domain": "revdoc:Document",
+        "rdfs:range": "rdfs:Literal",
+        "rdfs:comment": "The preferred prefix of an ontology document"
+      },
+      "prefixIRI": {
+        "rdf:type": "vdoc:Property",
+        "rdfs:domain": "revdoc:Document",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "The IRI associated with the preferred prefix of an ontology"
+      },
+      "package": {
+        "rdf:type": "vdoc:Property",
+        "rdfs:domain": "vdoc:Node",
+        "rdfs:range": "rdfs:Literal",
+        "rdfs:comment": "A package name"
+      },
+      "version": {
+        "rdf:type": "vdoc:Property",
+        "rdfs:domain": "vdoc:Node",
+        "rdfs:range": "rdfs:Literal",
+        "rdfs:comment": "A semver string"
+      }
+    },
+    "context": {
+      "@id": "context"
+    },
+    "section_ontology_abstract": {
+      "@id": "section_ontology_abstract",
+      "vdoc:content": [
+        "ReVDoc ontology provides vocabulary and definitions which are\n      tailored for emitting ReSpec html output documents."
+      ]
+    },
+    "section_prefixes": {
+      "@id": "section_prefixes",
+      "dc:title": "ReVDoc IRI prefixes",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "prefixes",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:cell": "vdoc:selectKey",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Prefix"
+              ]
+            },
+            {
+              "vdoc:cell": "vdoc:selectValue",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "IRI"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "section_classes": {
+      "@id": "section_classes",
+      "dc:title": "<em>revdoc:* a vdoc:Class</em> vocabulary",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "rdf:type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "vdoc:cell": {
+                  "vdoc:words": {
+                    "vdoc:selectField": "rdfs:subClassOf"
+                  }
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:comment"
+                ],
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": [
+            "Document",
+            "Definition",
+            "Package",
+            "Command",
+            "CommandLineInteraction"
+          ]
+        }
+      ]
+    },
+    "section_properties": {
+      "@id": "section_properties",
+      "dc:title": "<em>revdoc:* a vdoc:Property</em> vocabulary",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "rdf:type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:subPropertyOf",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subPropertyOf"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:domain",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:domain"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:range",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:range"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:comment"
+                ],
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": [
+            "prefix",
+            "prefixIRI",
+            "package",
+            "version"
+          ]
+        }
+      ]
+    },
+    "section_vocabulary_other": {
+      "@id": "section_vocabulary_other",
+      "dc:title": "<em>revdoc:</em> other vocabulary",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "rdf:type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "vdoc:cell": "rdf:type",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdf:type"
+                ]
+              },
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "vdoc:cell": {
+                  "vdoc:words": {
+                    "vdoc:selectField": "rdfs:subClassOf"
+                  }
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:comment"
+                ],
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": []
+        }
+      ]
+    },
+    "section_context": {
+      "@id": "section_context",
+      "dc:title": "ReVDoc JSON-LD context term definitions",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "context",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:cell": "vdoc:selectKey",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Term"
+              ]
+            },
+            {
+              "vdoc:cell": "vdoc:selectValue",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Definition"
+              ]
+            },
+            {
+              "vdoc:cell": "@id",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "@id"
+              ]
+            },
+            {
+              "vdoc:cell": "@type",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "@type"
+              ]
+            },
+            {
+              "vdoc:cell": "@container",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "@container"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "transformations": {
+      "@id": "transformations",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "ReVDoc lightly extends basic VDoc extraction with some\n      ReSpec specific primitives and specifies a ReSpec html emission\n      transformation.",
+        {
+          "@id": "extraction_rules"
+        },
+        {
+          "@id": "extractee_api"
+        },
+        {
+          "@id": "emission_output"
+        },
+        {
+          "@id": "emission_rules"
+        }
+      ]
+    },
+    "extraction_rules": {
+      "@id": "extraction_rules",
+      "dc:title": "ReVDoc extraction rules",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "extraction_rules_data",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:cell": "vdoc:selectKey",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Rule name"
+              ]
+            },
+            {
+              "vdoc:cell": "range",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Inter-node rdf:type"
+              ]
+            },
+            {
+              "vdoc:cell": "owner",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Owner property"
+              ]
+            },
+            {
+              "vdoc:cell": "body",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Body property"
+              ]
+            },
+            {
+              "vdoc:cell": "rest",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "';rest' property"
+              ]
+            },
+            {
+              "vdoc:cell": "comment",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "Comment"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "extraction_rules_data": {
+      "@id": "extraction_rules_data",
+      "ontology": {
+        "range": "vdoc:Chapter",
+        "owner": "vdoc:content",
+        "body": "vdoc:content",
+        "rest": "dc:title",
+        "comment": "Ontology specification chapter"
+      }
+    },
+    "extractee_api": {
+      "@id": "extractee_api",
+      "dc:title": "ReVDoc extractee API",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "extractee_api_lookup",
+          "rdf:type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:cell": "vdoc:selectKey",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "API identifier"
+              ]
+            },
+            {
+              "vdoc:cell": "vdoc:selectValue",
+              "rdf:type": "vdoc:Header",
+              "vdoc:content": [
+                "rdf:type"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "extractee_api_lookup": {
+      "@id": "extractee_api_lookup"
+    },
+    "emission_output": {
+      "@id": "emission_output",
+      "dc:title": "ReVDoc emission output",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "ReVDoc emits html which makes use of ReSpec primitives."
+      ]
+    },
+    "emission_rules": {
+      "@id": "emission_rules",
+      "dc:title": "ReVDoc emission rules",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "ReVDoc provides html emission rules for ",
+        {
+          "vdoc:words": [
+            "vdoc:Document",
+            "revdoc:Document",
+            "vdoc:Chapter",
+            "vdoc:Reference"
+          ]
+        }
+      ]
+    },
+    "rdf:type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "ontology"
+      },
+      {
+        "@id": "transformations"
+      }
+    ]
+  }
+]

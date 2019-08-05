@@ -1,29 +1,29 @@
 [
   {
-    "@id": "https://valospace.org/kernel/revdoc/tutorial",
+    "@id": "https://valospace.org/revdoc/tutorial",
     "@context": {
-      "@base": "https://valospace.org/kernel/revdoc/tutorial#",
-      "sbomdoc": "https://valospace.org/kernel/sbomdoc#",
-      "revdoc": "https://valospace.org/kernel/revdoc#",
+      "@base": "https://valospace.org/revdoc/tutorial#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-      "vdoc": "https://valospace.org/kernel/vdoc#",
+      "vdoc": "https://valospace.org/vdoc#",
       "a": {
         "@id": "rdf:type",
         "@type": "@id"
       },
       "vdoc:content": {
-        "@id": "https://valospace.org/kernel/vdoc#content",
+        "@id": "https://valospace.org/vdoc#content",
         "@container": "@list"
       },
       "vdoc:words": {
-        "@id": "https://valospace.org/kernel/vdoc#words",
+        "@id": "https://valospace.org/vdoc#words",
         "@container": "@list"
       },
       "vdoc:entries": {
-        "@id": "https://valospace.org/kernel/vdoc#entries",
+        "@id": "https://valospace.org/vdoc#entries",
         "@container": "@list"
       }
     },
@@ -53,9 +53,14 @@
       "vdoc:content": [
         "This document is part of the library workspace ",
         {
-          "rdf:type": "vdoc:Reference",
+          "rdf:type": "revdoc:Package",
           "vdoc:content": [
-            "@valos/revdoc"
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/revdoc"
+              ]
+            }
           ],
           "vdoc:ref": "@valos/revdoc"
         }

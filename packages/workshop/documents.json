@@ -102,6 +102,7 @@
         " systems.",
         null,
         {
+          "vdoc:quote": true,
           "vdoc:content": [
             [
               "A ValOS Resource ",
@@ -117,6 +118,7 @@
         },
         null,
         {
+          "vdoc:quote": true,
           "vdoc:content": [
             [
               "A ValOS Event ",
@@ -378,12 +380,16 @@
           "revdoc:dfn": "#vdoc",
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:Reference",
+              "vdoc:strong": true,
               "vdoc:content": [
-                "VDoc"
-              ],
-              "vdoc:ref": "#vdoc",
-              "vdoc:style": "bold"
+                {
+                  "rdf:type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "VDoc"
+                  ],
+                  "vdoc:ref": "#vdoc"
+                }
+              ]
             },
             " is an extensible JSON-LD interchange\n      specification for extracting documents from varying sources,\n      passing the now-machine-manipulable interchange document around\n      and subsequently producing documents of specific formats such\n      as Valospace resources, markdown, ReSpec HTML and browser and\n      ansi-colored console outputs."
           ]

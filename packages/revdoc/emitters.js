@@ -21,6 +21,9 @@ function emitReVDocHTML (node, emission, stack) {
     <script class='remove'>
       var respecConfig = ${JSON.stringify(node.respecConfig)};
     </script>
+    ${[].concat((stack.revdoc || {}).stylesheets || []).map(stylesheet =>
+    `<link rel = "stylesheet" type = "text/css" href = "${stylesheet}" />
+    `).join()}
   </head>
   <body>
     ${stack.emitNode(node["vdoc:content"], "")}
@@ -36,8 +39,12 @@ function emitReVDocChapter (node, emission, stack) {
 
 function emitReVDocReference (node, emission, stack) {
   let node_ = node;
-  if ((node["vdoc:ref"] || "")[0] === "@") {
-    const refParts = node["vdoc:ref"].match(/^([^/#]*)\/([^/#]*)\/?(#?.*)?$/);
+  let ref = node_["vdoc:ref"];
+  if ((ref != null) && (typeof ref !== "string")) {
+    node_ = { ...node, "vdoc:ref": ref = stack.emitNode(node_["vdoc:ref"], "") };
+  }
+  if ((ref || "")[0] === "@") {
+    const refParts = ref.match(/^([^/#]*)\/([^/#]*)\/?(#?.*)?$/);
     const packageName = (refParts[1] === "@")
         ? refParts[2]
         : refParts.slice(1, 3).join("/");

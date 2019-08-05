@@ -8,10 +8,11 @@ const {
 const { headers: domainHeaders } = require("@valos/toolset-domain");
 
 const { name, version, repository } = require("../package");
-const documents = require("./documents-summary") || {};
-
-const { workspaces, types, toolsets, tools, commands } = require("./domain-summary");
-const { prefix, prefixIRI, prefixes, vocabulary, context } = require("./ontology");
+const {
+  summary: { workspaces, types, toolsets, tools, commands },
+  ontology: { prefix, prefixIRI, prefixes, vocabulary, context },
+  documents,
+} = require("../packages/workshop");
 
 const introductionDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "INTRODUCTORY"], documents);
 const apiReferenceDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "API"], documents);

@@ -1,3 +1,4 @@
+require("@babel/polyfill");
 const { wrapError } = require("@valos/tools/wrapError");
 
 exports.vlm = { toolset: "@valos/type-vault" };
@@ -23,6 +24,11 @@ exports.builder = (yargs) => yargs.options({
   revdocs: {
     default: true,
     description: "Generate revdocs from all vault **/*revdoc.js files",
+  },
+  stylesheets: {
+    type: "string", array: true,
+    default: [].concat(yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "stylesheets") || []),
+    description: "CSS directives to add to revdoc generation",
   },
   vdocld: {
     default: true,
@@ -248,7 +254,9 @@ exports.handler = async (yargv) => {
   }
 
   async function emitHTML (sbomvdocld) {
-    const sbomhtml = extension.emit(sbomvdocld, "html", { css: yargv.css });
+    const sbomhtml = extension.emit(sbomvdocld, "html", {
+      revdoc: { stylesheets: yargv.stylesheets },
+    });
     return sbomhtml;
   }
 

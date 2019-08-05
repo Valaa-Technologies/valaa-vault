@@ -29,7 +29,7 @@
       "summary": {
         "inUse": true,
         "regenerateOnRelease": true,
-        "target": "revdocs/domain-summary.json"
+        "target": "./packages/workshop/summary.json"
       }
     }
   },
@@ -52,6 +52,7 @@
       "docs": {
         "inUse": true,
         "docsBaseIRI": "https://valospace.org/",
+        "stylesheets": ["/summary.css"],
         "regenerateOnRelease": true,
         "authors": {
           "iridian": {
@@ -66,7 +67,7 @@
           }
         },
         "introduction": [],
-        "listingTarget": "revdocs/documents-summary.json"
+        "listingTarget": "packages/workshop/documents.json"
       }
     },
     "inUse": "always"

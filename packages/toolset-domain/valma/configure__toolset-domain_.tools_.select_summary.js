@@ -17,7 +17,7 @@ exports.builder = (yargs) => yargs.options({
   },
   target: {
     default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "summary", "target")
-        || "revdocs/domain-summary.json",
+        || "packages/workshop/summary.json",
     description: "Target domain summary JSON path",
     interactive: { type: "confirm", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
   },

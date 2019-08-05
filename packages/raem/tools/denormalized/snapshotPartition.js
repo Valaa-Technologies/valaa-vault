@@ -119,7 +119,7 @@ export default async function snapshotPartition (/* { partitionId, state, schema
       if (!parentIsResource) return valueId;
       // Object is contained in a Resource. Place deferred sets for references not owned by this
       // field and if we're not processing an entry in an array (field.type !== type).
-      if (!(field.coupling && field.coupling.isOwner)
+      if (!(field.coupling && field.coupling.isOwning)
           && (!(field.type instanceof GraphQLList) || (type instanceof GraphQLList))) {
         addDeferredSet(getTransientTypeName(parent, schema), parent.get("id").rawId(), field.name,
             Iterable.isIterable(fieldEntry) ? fieldEntry.toJS() : fieldEntry);

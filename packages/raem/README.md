@@ -1,4 +1,4 @@
-# @ValOS/raem provides ValOS Resources And Events Model `ValOS-RaEM` (/væləsˌɹɛem/)
+# @valos/raem provides ValOS Resources And Events Model `ValOS-RaEM` (/væləsˌɹɛem/)
 
 This library provides the definitions and reference implementations for
 the fundamental `ValOS Resources` and `ValOS Events` systems.

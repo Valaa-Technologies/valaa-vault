@@ -37,26 +37,26 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
       ...generatedField("id", new GraphQLNonNull(GraphQLID),
           `VRL of this ${objectDescription}`,
           resource => resource.get("id"),
-          { affiliatedType: "Transientfields" },
+          { affiliatedType: "TransientFields" },
       ),
 
       ...generatedField("rawId", new GraphQLNonNull(GraphQLString),
           `Globally unique identifier of this ${objectDescription}`,
           resource => resource.get("id").rawId(),
-          { affiliatedType: "Transientfields" },
+          { affiliatedType: "TransientFields" },
       ),
 
       ...generatedField("typeName", new GraphQLNonNull(GraphQLString),
           `Type name of this ${objectDescription}`,
           getTransientTypeName,
-          { affiliatedType: "Transientfields" },
+          { affiliatedType: "TransientFields" },
       ),
 
       ...generatedField("partition", Partition,
           `The partition Resource of this ${objectDescription}, ie. the nearest owner (or self)${
               ""} which is also an active partition.`,
           partitionResolver,
-          { affiliatedType: "Transientfields" },
+          { affiliatedType: "TransientFields" },
       ),
 
       ...generatedField("partitionURI", GraphQLString,
@@ -64,7 +64,7 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
               ""} This root resource of this Partition is the innermost owning resource with {
               ""} Partition.partitionAuthorityURI set.`,
           partitionURIResolver,
-          { affiliatedType: "Transientfields" },
+          { affiliatedType: "TransientFields" },
       ),
 
       ...primaryField("prototype", TransientFields,
@@ -80,14 +80,14 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
           `The prototype of this ${objectDescription}. This is an alias for ${
               ""} TransientFields.prototype${
               ""} to bypass conflicts with native javascript property 'prototype'.`,
-          { affiliatedType: "Transientfields" },
+          { affiliatedType: "TransientFields" },
       ),
 
       ...generatedField("ownFields", TransientFields,
           `A transient version of this object without prototype. All property accesses will only${
             ""}return values owned directly.`,
           object => object.set("prototype", null),
-          { affiliatedType: "Transientfields" },
+          { affiliatedType: "TransientFields" },
       ),
 
       ...transientField("prototypers", new GraphQLList(TransientFields),

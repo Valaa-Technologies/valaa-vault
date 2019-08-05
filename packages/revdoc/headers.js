@@ -1,4 +1,4 @@
-const { extractee: { aggregate, em, ref } } = require("@valos/vdoc");
+const { extractee: { em, ref } } = require("@valos/vdoc");
 
 const vocabulary = {
   "header#0": {

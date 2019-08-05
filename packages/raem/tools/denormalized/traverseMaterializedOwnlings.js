@@ -20,7 +20,7 @@ export default function traverseMaterializedOwnlings (bard: Bard, transient: Tra
   const fieldIntros = typeIntro.getFields();
   for (const [fieldName, fieldValue] of transient.entries()) {
     const fieldIntro = fieldIntros[fieldName];
-    if (fieldIntro && fieldIntro.isOwner && fieldValue) {
+    if (fieldIntro && fieldIntro.isOwning && fieldValue) {
       for (const entryId of (fieldIntro.isSequence ? fieldValue : [fieldValue])) {
         if (!entryId) continue;
         let entryTransient = visitor(entryId);

@@ -175,11 +175,32 @@ module.exports = {
         "vdoc:entries": filterKeysWithAnyOf("rdf:type", "valos:Property", vocabulary),
       },
     },
+    [`chapter#section_types>4;<em>${prefix}:* a valos:Type</em> vocabulary`]: {
+      "#0": [],
+      "table#>0;vocabulary": {
+        "vdoc:headers": revdocHeaders.types,
+        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "valos:Type", vocabulary),
+      },
+    },
+    [`chapter#section_fields>5;<em>${prefix}:* a valos:Field</em> vocabulary`]: {
+      "#0": [],
+      "table#>0;vocabulary": {
+        "vdoc:headers": revdocHeaders.fields,
+        "vdoc:entries": filterKeysWithAnyOf("rdf:type", [
+          "valos:Field", "valos:PrimaryField", "valos:TransientField", "valos:InferredField",
+          "valos:GeneratedField", "valos:AliasField",
+        ], vocabulary),
+      },
+    },
     [`chapter#section_vocabulary_other>8;<em>${prefix}:</em> other vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": revdocHeaders.vocabulary,
-        "vdoc:entries": filterKeysWithNoneOf("a", ["rdfs:Class", "rdf:Property"], vocabulary),
+        "vdoc:headers": revdocHeaders.vocabularyOther,
+        "vdoc:entries": filterKeysWithNoneOf("rdf:type", [
+          "valos:Class", "valos:Type", "valos:Property", "valos:Field",
+          "valos:PrimaryField", "valos:TransientField", "valos:InferredField",
+          "valos:GeneratedField", "valos:AliasField",
+        ], vocabulary),
       },
     },
     [`chapter#section_context>9;JSON-LD context term definitions`]: {

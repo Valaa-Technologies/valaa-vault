@@ -70,7 +70,7 @@
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
         "This document was automatically generated on",
-        "2019-08-05T05:48:10.023Z",
+        "2019-08-05T23:01:33.183Z",
         ".",
         null,
         "This SBoM document is available in following formats:",
@@ -415,15 +415,6 @@
       },
       {
         "type": "library",
-        "name": "read-installed",
-        "version": "4.0.3",
-        "description": "Read all the installed packages in a folder, and return a tree structure with all the data.",
-        "licenses": "ISC",
-        "purl": "pkg:npm/read-installed@4.0.3",
-        "modified": false
-      },
-      {
-        "type": "library",
         "name": "read-package-json",
         "version": "2.0.13",
         "description": "The thing npm uses to read package.json files with semantics and defaults and validation",
@@ -438,6 +429,15 @@
         "description": "Convert Windows backslash paths to slash paths",
         "licenses": "MIT",
         "purl": "pkg:npm/slash@1.0.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "read-installed",
+        "version": "4.0.3",
+        "description": "Read all the installed packages in a folder, and return a tree structure with all the data.",
+        "licenses": "ISC",
+        "purl": "pkg:npm/read-installed@4.0.3",
         "modified": false
       },
       {
@@ -507,21 +507,21 @@
       {
         "type": "library",
         "group": "valos",
-        "name": "inspire",
-        "version": "0.35.0-prerelease.8",
-        "description": "ValOS Inspire application gateway",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/inspire@0.35.0-prerelease.8",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "valos",
         "name": "kernel",
         "version": "0.35.0-prerelease.8",
         "description": "@valos/kernel domain workshop",
         "licenses": "MIT",
         "purl": "pkg:npm/%40valos/kernel@0.35.0-prerelease.8",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "valos",
+        "name": "inspire",
+        "version": "0.35.0-prerelease.8",
+        "description": "ValOS Inspire application gateway",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40valos/inspire@0.35.0-prerelease.8",
         "modified": false
       },
       {

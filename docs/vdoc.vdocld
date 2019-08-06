@@ -468,66 +468,72 @@
       "@id": "node_types",
       "rdf:type": "vdoc:NumberedList",
       "vdoc:entries": [
-        {
-          "revdoc:dfn": "#document_node",
-          "vdoc:content": [
-            {
-              "vdoc:strong": true,
-              "vdoc:content": [
-                {
-                  "rdf:type": "vdoc:Reference",
-                  "vdoc:content": [
-                    "Document node"
-                  ],
-                  "vdoc:ref": "#document_node"
-                }
-              ]
-            },
-            " is an always-first-level\n        node identified by a ",
-            {
-              "rdf:type": "vdoc:Reference",
-              "vdoc:content": [
-                "a global document IRI"
-              ],
-              "vdoc:ref": "#document_iri"
-            },
-            "as its ",
-            {
-              "rdf:type": "vdoc:Reference",
-              "vdoc:content": [
-                "JSON-LD @id"
-              ],
-              "vdoc:ref": "https://www.w3.org/TR/json-ld11/#node-identifiers"
-            },
-            "."
-          ]
-        },
-        {
-          "revdoc:dfn": "#resource_node",
-          "vdoc:content": [
-            {
-              "vdoc:strong": true,
-              "vdoc:content": [
-                {
-                  "rdf:type": "vdoc:Reference",
-                  "vdoc:content": [
-                    "Resource node"
-                  ],
-                  "vdoc:ref": "#resource_node"
-                }
-              ]
-            },
-            " is an always-second-level\n        node which is directly accessible from the first-level document\n        via its document relative ",
-            {
-              "rdf:type": "vdoc:Reference",
-              "vdoc:content": [
-                "resource identifier"
-              ],
-              "vdoc:ref": "#resource_id"
-            },
-            "as the dictionary key."
-          ]
-        },
+        [
+          {
+            "revdoc:dfn": "#document_node",
+            "vdoc:content": [
+              {
+                "vdoc:strong": true,
+                "vdoc:content": [
+                  {
+                    "rdf:type": "vdoc:Reference",
+                    "vdoc:content": [
+                      "Document node"
+                    ],
+                    "vdoc:ref": "#document_node"
+                  }
+                ]
+              },
+              " is an always-first-level\n        node identified by a ",
+              {
+                "rdf:type": "vdoc:Reference",
+                "vdoc:content": [
+                  "a global document IRI"
+                ],
+                "vdoc:ref": "#document_iri"
+              },
+              "as its ",
+              {
+                "rdf:type": "vdoc:Reference",
+                "vdoc:content": [
+                  "JSON-LD @id"
+                ],
+                "vdoc:ref": "https://www.w3.org/TR/json-ld11/#node-identifiers"
+              },
+              "."
+            ]
+          },
+          " Links to document nodes in bold and italics."
+        ],
+        [
+          {
+            "revdoc:dfn": "#resource_node",
+            "vdoc:content": [
+              {
+                "vdoc:strong": true,
+                "vdoc:content": [
+                  {
+                    "rdf:type": "vdoc:Reference",
+                    "vdoc:content": [
+                      "Resource node"
+                    ],
+                    "vdoc:ref": "#resource_node"
+                  }
+                ]
+              },
+              " is an always-second-level\n        node which is directly accessible from the first-level document\n        via its document relative ",
+              {
+                "rdf:type": "vdoc:Reference",
+                "vdoc:content": [
+                  "resource identifier"
+                ],
+                "vdoc:ref": "#resource_id"
+              },
+              "as the dictionary key."
+            ]
+          },
+          " Links to resource nodese are in italics."
+        ],
         {
           "revdoc:dfn": "#element_node",
           "vdoc:content": [
@@ -1343,9 +1349,12 @@
               {
                 "vdoc:cell": "rdfs:comment",
                 "rdf:type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:comment"
-                ],
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
                 "vdoc:wide": true
               }
             ]
@@ -1425,9 +1434,12 @@
               {
                 "vdoc:cell": "rdfs:comment",
                 "rdf:type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:comment"
-                ],
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
                 "vdoc:wide": true
               }
             ]
@@ -1531,9 +1543,12 @@
               {
                 "vdoc:cell": "rdfs:comment",
                 "rdf:type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:comment"
-                ],
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
                 "vdoc:wide": true
               }
             ]
@@ -1602,9 +1617,12 @@
               {
                 "vdoc:cell": "rdfs:comment",
                 "rdf:type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:comment"
-                ],
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
                 "vdoc:wide": true
               }
             ]
@@ -1903,7 +1921,8 @@
             "vdoc:BulletList",
             "vdoc:NumberedList",
             "vdoc:Table",
-            "vdoc:Reference"
+            "vdoc:Reference",
+            "vdoc:CharacterData"
           ]
         }
       ]

@@ -425,7 +425,11 @@
       "vdoc:language": "Correlations between ValOS URL and urn:valos (top) and URI and URN (bottom)",
       "rdf:type": "vdoc:CharacterData",
       "vdoc:content": [
-        "                                            valos-url\n┌────────────────────────────────────────────────┴─────────────────────────────────────────────────┐\n                  partition-url                                      resource-ref\n┌───────────────────────┴────────────────────────┐ ┌──────────────────────┴────────────────────────┐\n                         resource-url                                         ref-params\n┌──────────────────────────────┴────────────────────────────────┐  ┌───────────────┴───────────────┐\n         authority-uri               partition-id   resource-id         coupling           lens\n┌──────────────┴───────────────┐    ┌─────┴──────┐ ┌─────┴──────┐  ┌───────┴────────┐ ┌─────┴──────┐\n\nvalaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=relations&lens=ROOT_LENS\n\n                                                   └─────┬──────┘  └──────────────┬────────────────┘\n                                                        nss                  q-component\n└───┬────┘   └──────┬──────┘ └┬┘ └───────┬───────┘ └──────────────────────┬────────────────────────┘\n  scheme        authority    path      query                           fragment\n             └────────┬────────┘\n                  hier-part\n"
+        "                                            valos-url\n┌────────────────────────────────────────────────┴─────────────────────────────────────────────────┐\n                  partition-url                                      resource-ref\n┌───────────────────────┴────────────────────────┐ ┌──────────────────────┴────────────────────────┐\n                         resource-url                                         ref-params\n┌──────────────────────────────┴────────────────────────────────┐  ┌───────────────┴───────────────┐\n         authority-uri               partition-id   resource-id         coupling           lens\n┌──────────────┴───────────────┐    ┌─────┴──────┐ ┌─────┴──────┐  ┌───────┴────────┐ ┌─────┴──────┐",
+        null,
+        "valaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=relations&lens=ROOT_LENS",
+        null,
+        "                                                   └─────┬──────┘  └──────────────┬────────────────┘\n                                                        nss                  q-component\n└───┬────┘   └──────┬──────┘ └┬┘ └───────┬───────┘ └──────────────────────┬────────────────────────┘\n  scheme        authority    path      query                           fragment\n             └────────┬────────┘\n                  hier-part\n"
       ]
     },
     "section_dualisms": {
@@ -1200,9 +1204,12 @@
               {
                 "vdoc:cell": "rdfs:comment",
                 "rdf:type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:comment"
-                ],
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
                 "vdoc:wide": true
               }
             ]
@@ -1277,9 +1284,12 @@
               {
                 "vdoc:cell": "rdfs:comment",
                 "rdf:type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:comment"
-                ],
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
                 "vdoc:wide": true
               }
             ]
@@ -1344,9 +1354,12 @@
               {
                 "vdoc:cell": "rdfs:comment",
                 "rdf:type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:comment"
-                ],
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
                 "vdoc:wide": true
               }
             ]
@@ -1432,9 +1445,12 @@
               {
                 "vdoc:cell": "rdfs:comment",
                 "rdf:type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:comment"
-                ],
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
                 "vdoc:wide": true
               }
             ]
@@ -1525,9 +1541,12 @@
               {
                 "vdoc:cell": "rdfs:comment",
                 "rdf:type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:comment"
-                ],
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
                 "vdoc:wide": true
               }
             ]

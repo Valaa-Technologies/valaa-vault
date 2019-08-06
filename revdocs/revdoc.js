@@ -15,11 +15,13 @@ const {
   documents,
 } = require("../packages/workshop");
 
+const roleDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents);
 const introductionDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "INTRODUCTORY"], documents);
 const apiReferenceDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "API"], documents);
 const ontologyDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "ONTOLOGY"], documents);
 const otherPrimaryDocuments = filterKeysWithAllOf("tags", "PRIMARY", documents)
-    .filter(key => !introductionDocuments.includes(key)
+    .filter(key => !roleDocuments.includes(key)
+        && !introductionDocuments.includes(key)
         && !apiReferenceDocuments.includes(key)
         && !ontologyDocuments.includes(key));
 
@@ -61,9 +63,23 @@ module.exports = {
     " (of domain ", pkg(name), ") which is ",
     "ValOS common infrastructure tools and libraries monorepo.",
   ],
-  "chapter#introduction>2": [
-    "No content yet.",
-  ],
+  "chapter#introduction>2": {
+    "dc:title": em(`"Greetings, I am Valme, the ValOS Medium. Who are you?"`),
+    "#0": [
+      `ValOS ecosystem revolves around various roles. You can be one,
+      many or even none of them but you should know at least a bit
+      about all of them.`,
+      null,
+      ref("Valme"), ` itself is a collection of tools for interacting
+      with the ValOS ecosystem, most notable of which is `,
+      ref([em("vlm"), ` the command line script invoker`], "@/valma"),
+      ".",
+    ],
+    "table#>0;documents": {
+      "vdoc:headers": domainHeaders.roles,
+      "vdoc:entries": roleDocuments,
+    },
+  },
   "chapter#section_documentation>3;Documentation": {
     "#0": [
       `This domain provides the following primary documents:`,

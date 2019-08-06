@@ -279,9 +279,12 @@
               {
                 "vdoc:cell": "rdfs:comment",
                 "rdf:type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:comment"
-                ],
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
                 "vdoc:wide": true
               }
             ]
@@ -352,9 +355,12 @@
               {
                 "vdoc:cell": "rdfs:comment",
                 "rdf:type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:comment"
-                ],
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
                 "vdoc:wide": true
               }
             ]
@@ -421,9 +427,12 @@
               {
                 "vdoc:cell": "rdfs:comment",
                 "rdf:type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:comment"
-                ],
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
                 "vdoc:wide": true
               }
             ]

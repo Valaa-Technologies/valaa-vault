@@ -1,0 +1,136 @@
+[
+  {
+    "@id": "https://valospace.org/valonaut",
+    "@context": {
+      "@base": "https://valospace.org/valonaut#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "vdoc": "https://valospace.org/vdoc#",
+      "a": {
+        "@id": "rdf:type",
+        "@type": "@id"
+      },
+      "vdoc:content": {
+        "@id": "https://valospace.org/vdoc#content",
+        "@container": "@list"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/vdoc#words",
+        "@container": "@list"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
+        "@container": "@list"
+      }
+    },
+    "dc:title": "\"I am a valonaut, I want to create and share interactive content\"",
+    "vdoc:tags": [
+      "PRIMARY",
+      "ROLE"
+    ],
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "valonaut"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is the first introduction for valonauts - the\n    primary content creators - to the ValOS ecosystem and its core\n    tools."
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is part of the vault workspace ",
+        {
+          "rdf:type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/kernel"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/kernel"
+        },
+        " (of domain ",
+        {
+          "rdf:type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/kernel"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/kernel"
+        },
+        ") which is ",
+        "ValOS common infrastructure tools and libraries monorepository."
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "dc:title": "How do I create and share interactive content?",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "As a valonaut you create, share and deploy web content and\n    interactive applications fully from inside ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "Valospace"
+          ],
+          "vdoc:ref": "Valospace"
+        },
+        ".",
+        null,
+        "You use a web editor called ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "Zero"
+          ],
+          "vdoc:ref": "Zero"
+        },
+        " and with it employ\n    traditional web technologies; HTML5, CSS and the Javascript\n    dialect ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "valoscript"
+          ],
+          "vdoc:ref": "@valos/script"
+        },
+        null,
+        "The skills you learn to do this are like cycling or writing - they\n    are used to support your other interests. While you don't need to\n    become a professional you certainly can!"
+      ]
+    },
+    "rdf:type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      }
+    ]
+  }
+]

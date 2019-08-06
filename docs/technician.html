@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>"I am a ValOS technician, I want to enable valonauts and expand valospace"</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"technician"};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body>
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter">This document is the first introduction for ValOS technicians -
+    the primary infrastructure developers and operators - to the ValOS
+    ecosystem and its infrastructure toolchains and workflows.
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter">      <p>This document is part of the vault workspace <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a> (of domain <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which is ValOS common infrastructure tools and libraries monorepository.</p>
+      <p>NOTE(2019-08): This content is what used to be in DEVOPS.md,
+    is relatively old and needs to undergo revision of details, of
+    the emphasis, and the specification needs to be extracted to a
+    separate document. The essential content is correct, though.</p>
+
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter">
+    <h2>How do I enable valonauts and expand the Valospace?</h2>
+      <p>As a technician you develop and operate the <strong><a href="#fabric" class="vdoc type-vdoc-reference">ValOS fabric</a></strong>, the globally distributed web-like infrastructure of servers,
+        services and components which underlies the Valospace.</p>
+      <p>    You use <a href="valma" class="vdoc type-vdoc-reference">vlm</a> and employ your existing,
+    likely professional knowledge of JavaScript, Node.js, DevOps,
+    backend and library development.</p>
+      <p>    You create new open source and/or proprietary packages. These
+    permanently create new fabric functionalities and <a href="expand" class="vdoc type-vdoc-reference">expand</a> the Valospace by integrating it to old world systems.</p>
+
+  </section>
+
+  <section id="preface" class="vdoc type-vdoc-chapter">
+    <h2>*IMPORTANT</h2>
+      <p>This document, like most of the more principled and less pragmatic
+    documents must be understood as strong speculation and as an
+    architectural exercise (although a very serious one) on
+    what-could-be.</p>
+      <p>    This rings especially true for the primary focus of this document,
+    ie. for <code><span class="vdoc type-vdoc-node">ValOS Core</span>
+</code> as the fully functional open source
+    core around which the often proprietary ValOS ecosystem would expand.
+    This is an ambitious, even presumptuous attempt to facilitate the
+    fruitful side-by-side living of open source communities as well as
+    private enterprises as a combination of technical and social
+    architecture.</p>
+      <p>    (The technical part is the ambitious part and the social part is
+    the presumptuous part. :D)</p>
+
+  </section>
+
+  <section id="specification" class="vdoc type-vdoc-chapter">
+    <h2>ValOS specification</h2>
+      <p>This document has two purposes. Firstly it provides the initial
+    specification of Valaa Open System (<code><span class="vdoc type-vdoc-node">ValOS</span>
+</code>) and secondly
+    it serves as the introduction for <a href="https://en.wikipedia.org/wiki/DevOps" class="vdoc type-vdoc-reference">Development Operations</a>.</p>
+      <p>    ValOS specification is provided as quoted and numbered ValOS rules.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-1.1</span>
+</code>: <code><span class="vdoc type-vdoc-node">ValOS packages</span>
+</code>are
+        all the npmjs.com packages with <code><span class="vdoc type-vdoc-node">@valos</span>
+</code> scope which
+        don't have cyclic dependencies with other <code><span class="vdoc type-vdoc-node">@valos</span>
+</code> scope packages.</blockquote><blockquote><code><span class="vdoc type-vdoc-node">valos-vault-1.2</span>
+</code>: Valaa Open System (<code><span class="vdoc type-vdoc-node">ValOS</span>
+</code> is defined to be the contents of all ValOS
+        packages and nothing else.</blockquote><blockquote><code><span class="vdoc type-vdoc-node">valos-vault-1.3</span>
+</code>: <code><span class="vdoc type-vdoc-node">ValOS specification</span>
+</code> consists of all files in all ValOS packages whose path in the
+        package matches the JS regex <code><span class="vdoc type-vdoc-node">/^specifications\/\w*.md$/</span>
+</code> and nothing else.</blockquote><blockquote><code><span class="vdoc type-vdoc-node">valos-vault-1.4</span>
+</code>: Rules in a package are
+        considered to be more specific than the rules in its package
+        dependency tree. More specific rules take precedence.</blockquote><blockquote><code><span class="vdoc type-vdoc-node">valos-vault-1.5</span>
+</code>: All packages which conform to
+        ValOS specification are called <code><span class="vdoc type-vdoc-node">ValOS packages</span>
+</code>. These
+        packages are inclusively considered part of the <code><span class="vdoc type-vdoc-node">ValOS ecosystem</span>
+</code>.</blockquote>The system is structured into a plethora of purpose-oriented
+    vertical <code><span class="vdoc type-vdoc-node">domains</span>
+</code> and into four content oriented
+    horizontal <code><span class="vdoc type-vdoc-node">utility layers</span>
+</code>.</p>
+      <p>    Each utility layer is named by the content or service is provides
+    and builds or depends on the previous layers.
+    <ul>
+      <li><code><span class="vdoc type-vdoc-node">files</span>
+</code> layer provides files via git repositories.</li>
+      <li><code><span class="vdoc type-vdoc-node">packages</span>
+</code> layer provides npm packages via npm registry.
+        These packages are created by git repositories called <code><span class="vdoc type-vdoc-node">vaults</span>
+</code>.</li>
+      <li><code><span class="vdoc type-vdoc-node">authorities</span>
+</code> layer provides the ValOS live authority
+        service APIs. Authorities are deployed and managed with <code><span class="vdoc type-vdoc-node">opspace</span>
+</code> workspaces.</li>
+      <li><code><span class="vdoc type-vdoc-node">partitions</span>
+</code> layer provides the resource content as
+        partition events and bvobs. These are served via authority
+        service APIs.</li>
+    </ul>
+</p>
+      <p>    TODO(iridian): Figure out and describe the concrete role of domains.
+    NOTE(iridian, 2019-08): Domains are now mostly figured out; they
+    are administrative, organisational units and namespaces.</p>
+      <p>    A DevOp manages these layers by scripts that are delivered inside
+    the packages alongside their main content. A command line tool
+    called ValOS Medium or <code><span class="vdoc type-vdoc-node">vlm</span>
+</code> is used to discover and <code><span class="vdoc type-vdoc-node">invoke</span>
+</code> these scripts as <code><span class="vdoc type-vdoc-node">valme commands</span>
+</code>.</p>
+      <p>    From a DevOps perspective <code><span class="vdoc type-vdoc-node">valme</span>
+</code>, <code><span class="vdoc type-vdoc-node">vault</span>
+</code> and <code><span class="vdoc type-vdoc-node">opspace</span>
+</code> are the three concrete core mechanisms that
+    everything else ties into.</p>
+      <p>    Valma and specific domains are specified in other documents and as such
+    are only briefly described here.
+    The utility layers are common to everything form the bulk of this
+    document. They are fully specified at the last part of this document
+    after all the brief descriptions.</p>
+
+  </section>
+
+  <section id="domains" class="vdoc type-vdoc-chapter">
+    <h2>ValOS `domains` are cross-stack slices, each with a well-defined purpose</h2>
+<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-2.1</span>
+</code>: A <code><span class="vdoc type-vdoc-node">domain</span>
+</code> is the
+        collection of all the systems, interactions and dynamics which
+        exclusively serve a particular purpose.</blockquote><blockquote><code><span class="vdoc type-vdoc-node">valos-vault-2.2</span>
+</code>: A domain must define the
+        purpose, describe its producers and consumers and should
+        provide a direction for technical and operational structure as
+        well.</blockquote>For example the <a href="@valos/kernel" class="vdoc type-vdoc-reference">@valos/kernel</a> domain provides the
+    essential central ValOS code for developing new ValOS
+    infrastructure software. Its main producers are the kernel software
+    developers and its consumers are the infrastructure software
+    developers. It revolves around developing code as library packages.
+  </section>
+
+  <section id="valme" class="vdoc type-vdoc-chapter">
+    <h2>`valme` - a convenience CLI to context-dependent command scripts</h2>
+valme (<code><span class="vdoc type-vdoc-node">vlm</span>
+</code> in CLI) is a convenience tool for executing
+    command scripts exported by packages in valos workspace contexts.
+    It is a generalization of 'npx -c' behaviour, adding
+    discoverability, ability to invoke global scripts and the ability
+    to invoke multiple scripts at once using glob matching.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.1</span>
+</code>: valme is installed with <span class="vdoc type-revdoc-command">npm install -g valme</span>
+ or as a package dependency</blockquote>This installs the global CLI command <code><span class="vdoc type-vdoc-node">vlm</span>
+</code>. At its core
+    valme is a command dispatcher to <code><span class="vdoc type-vdoc-node">valme scripts</span>
+</code> in
+    various <code><span class="vdoc type-vdoc-node">command pools</span>
+</code>.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.2</span>
+</code>: valme searches the scripts
+        first from the package.json <code><span class="vdoc type-vdoc-node">scripts</span>
+</code> pool, then from <code><span class="vdoc type-vdoc-node">./node_modules/.bin/</span>
+</code><code><span class="vdoc type-vdoc-node">depends</span>
+</code> pool and lastly from
+        the OS-specific variant of <code><span class="vdoc type-vdoc-node">/usr/bin</span>
+</code><code><span class="vdoc type-vdoc-node">global</span>
+</code> pool.</blockquote>As an example typing <span class="vdoc type-revdoc-command">vlm status</span>
+ in some directory
+    context would forward the command to <span class="vdoc type-revdoc-command">valme.bin/valme-status</span>
+ first if one exists and falling back to the more generic versions
+    if not. The call eventually resolves at the global <span class="vdoc type-revdoc-command">/usr/bin/valme-status</span>
+. Its implementation then calls <span class="vdoc type-revdoc-command">vlm .status/**/*</span>
+ which calls all scripts which match
+    the glob <span class="vdoc type-revdoc-command">.valme-status/**/*</span>
+ and are visible on the
+    execution context pools (the scripts called by <span class="vdoc type-revdoc-command">vlm status</span>
+ are known as <code><span class="vdoc type-vdoc-node">valme status scripts</span>
+</code>).<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.3</span>
+</code>: A package can export valme scripts using npm package.json <code><span class="vdoc type-vdoc-node">bin</span>
+</code> section and by prefixing the exported name with <code><span class="vdoc type-vdoc-node">valme-</span>
+</code> as usual. These scripts will be available for
+        all packages depending on this package in their <code><span class="vdoc type-vdoc-node">depends</span>
+</code> pool.</blockquote>Running <code><span class="vdoc type-vdoc-node">vlm</span>
+</code> with no arguments lists all available
+    commands grouped by pool in current directory context.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.5</span>
+</code>: valme can be used in programmatic contexts to run valme
+        scripts. When done so, valme must be added as a dependency.</blockquote>This happens just like with the CLI by using <code><span class="vdoc type-vdoc-node">vlm <command> [<args>]</span>
+</code>.
+    ("npx -c" would be the alternative but it's slow and limited).<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.5.1</span>
+</code>: valme ensures that node environment is loaded</blockquote>The environment is loaded only once even for recursive script
+    invokations.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.5.2</span>
+</code>: valme ensures that 'vlm' is always found in path</blockquote>This is so that valme scripts can call 'vlm' even valme is not
+    globally installed as long as valme has been installed as a dependency.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.5.3</span>
+</code>: valme ensures that the most specific 'vlm' version is used
+        to evaluate a command, preferring scripts over depended over global.</blockquote>This is so that toolkits can precisely control the whole toolchain
+    in their dependencies.
+  </section>
+
+  <section id="utility_layer" class="vdoc type-vdoc-chapter">
+    <h2>ValOS `utility` layer provides an operational service</h2>
+ValOS has four main utility layers: <code><span class="vdoc type-vdoc-node">files</span>
+</code>, <code><span class="vdoc type-vdoc-node">packages</span>
+</code>, <code><span class="vdoc type-vdoc-node">authorities</span>
+</code> and <code><span class="vdoc type-vdoc-node">partitions</span>
+</code>. These layers
+      form the core operational infrastructure of ValOS.
+  <section id="utility_layer_overview" class="vdoc type-vdoc-chapter">
+    <h2>Overview of utility layers</h2>
+      <p><blockquote><code><span class="vdoc type-vdoc-node">valos-vault-4.1.1</span>
+</code>: An <code><span class="vdoc type-vdoc-node">utility</span>
+</code> is
+          a domain with a well-defined operational purpose.</blockquote><blockquote><code><span class="vdoc type-vdoc-node">valos-vault-4.1.2</span>
+</code>: utility must explicitly
+          define the <code><span class="vdoc type-vdoc-node">payload</span>
+</code> it provides to its consumers as
+          well as the providers, tools and workflows used to manage
+          that payload.</blockquote>Below is a rough correlation of similar concepts across utilities.      <p>files`git`files in `./*`github.com`git clone`N/A`.git/*``branch` `commit``git push` & PRhumanmerge PR to & `git push master`</p>
+      <p>packages`vlm`, `yarn`files in `/node_modules/..`npmjs.com`depend` `require``files``package.json`ups. `src/*` `bin/*`upstreamhybrid`assemble-packages` `publish-packages`</p>
+      <p>authorities`vlm`APIs, site & gateway filesIaaS, custombrowsers, various`files`upstream *upstream *upstreamhybrid`build-release` `deploy-release`</p>
+      <p>partitions`vlm`, gatewayevent logs, bvobsauthoritiesevent & bvob APIsN/AN/Agatewaycommand & bvob APIsauthoritiesautomatic, custom</p>
+</p>
+      <p>
+    <ul>
+      <li><code><span class="vdoc type-vdoc-node">Utility</span>
+</code>- the utility layer which is being described</li>
+      <li><code><span class="vdoc type-vdoc-node">Tool</span>
+</code> - the name of the tool used to manipulate the payload and/or metadata</li>
+      <li><code><span class="vdoc type-vdoc-node">Payload</span>
+</code> - the content or the service the utility delivers to consumers</li>
+      <li><code><span class="vdoc type-vdoc-node">Providers</span>
+</code> - the authoritative source for the payload</li>
+      <li><code><span class="vdoc type-vdoc-node">Consumed via</span>
+</code> - the mechanism used by a consumer to access the payload</li>
+      <li><code><span class="vdoc type-vdoc-node">Upstream</span>
+</code> - the possible external source of payload updates</li>
+      <li><code><span class="vdoc type-vdoc-node">Configuration</span>
+</code> - where the configuration of the utility itself is specified</li>
+      <li><code><span class="vdoc type-vdoc-node">Modifed via</span>
+</code> - how to make local changes to the payload</li>
+      <li><code><span class="vdoc type-vdoc-node">Produced via</span>
+</code> - how to request for a set of local changes to be distributed</li>
+      <li><code><span class="vdoc type-vdoc-node">Authority</span>
+</code> - who accepts and distributes a change request</li>
+      <li><code><span class="vdoc type-vdoc-node">Distributed via</span>
+</code> - how changes are made live to all consumers</li>
+    </ul>
+Note that <code><span class="vdoc type-vdoc-node">files</span>
+</code> and <code><span class="vdoc type-vdoc-node">partitions</span>
+</code> don't have
+      an external upstream and thus these bands are the defining
+      authority of all of their payload.</p>
+      <p>      On the other hand <code><span class="vdoc type-vdoc-node">packages</span>
+</code> and <code><span class="vdoc type-vdoc-node">authorities</span>
+</code> use the <code><span class="vdoc type-vdoc-node">files</span>
+</code> as their external upstream: their payload is
+      generated from the content in git repositories. Making updates to
+      such utility content thus requires:</p>
+      <p>
+    <ol>
+      <li>modifying the corresponding upstream git repository</li>
+      <li>distributing the git changes (a PR followed with <span class="vdoc type-revdoc-command">git push master</span>
+)</li>
+      <li>distributing the utility update (<span class="vdoc type-revdoc-command">publish-packages</span>
+ or <span class="vdoc type-revdoc-command">deploy-release</span>
+).</li>
+    </ol>
+</p>
+      <p>Step 3 can be automated by tooling in particular domains as
+      a response to particularily formed git repository updates.</p>
+
+  </section>
+
+  <section id="files_layer" class="vdoc type-vdoc-chapter">
+    <h2>Files utility layer has files committed in git repositories</h2>
+<a href="https://git-scm.com/" class="vdoc type-vdoc-reference">git</a> is the industry standard
+      for version managing sets of files in a non-centralized ecosystem.
+      No additional tools are provided because there is no need.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-4.2.1</span>
+</code>: ValOS tools should use git as the files provider.</blockquote>While github.com is the de facto standard provider and
+      the typical choice it must *not* be _required_.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-4.2.2</span>
+</code>: All git providers must be fully supported by all ValOS
+          tools and libraries.</blockquote>
+  </section>
+
+  <section id="packages_layer" class="vdoc type-vdoc-chapter">
+    <h2>Packages utility layer has shared, versioned, dependable sets of files published as npmjs.com packages</h2>
+      <p><blockquote><code><span class="vdoc type-vdoc-node">valos-vault-4.3.1</span>
+</code>: The packages utility payload is <a href="https://docs.npmjs.com/getting-started/packages" class="vdoc type-vdoc-reference">npmjs.com packages</a></blockquote>These packages can be libraries, toolsets or prebuilt release
+      runtimes - any sets of files really. The raison d'être for
+      packages is when several different consumers depend on the same
+      set of files which are also expected to undergo periodic
+      development. The files thus need versioning, dependency
+      management and automated distribution - this all is provided by
+      npm.</p>
+      <p>      Note: npmjs.com is a javascript repository - this should not be a
+      problem as long as ValOS remains mostly javascript and config
+      files. If a need to diversity the languages arises a <a href="https://docs.npmjs.com/misc/registry#can-i-run-my-own-private-registry" class="vdoc type-vdoc-reference">private npm registry</a>can be set up for that purpose.</p>
+      <p>      valme package commands: <span class="vdoc type-revdoc-command">vlm assemble-packages</span>
+ <span class="vdoc type-revdoc-command">vlm publish-packages</span>
+</p>
+
+  </section>
+
+  <section id="authorities_layer" class="vdoc type-vdoc-chapter">
+    <h2>Authorities utility layer has the authority deployments on infrastructure services</h2>
+<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-4.4.1</span>
+</code>: A ValOS <code><span class="vdoc type-vdoc-node">authority</span>
+</code> is uniquely identified by an
+            authority URI.</blockquote><a href="packages/raem/README.md" class="vdoc type-vdoc-reference">Read more about valos URIs</a>.
+
+        <blockquote><code><span class="vdoc type-vdoc-node">valos-vault-4.4.2</span>
+</code>: A ValOS <code><span class="vdoc type-vdoc-node">authority</span>
+</code> can contain ValOS <code><span class="vdoc type-vdoc-node">partitions</span>
+</code> and must provide a mechanism for
+            accessing event logs and bvob content as well as for
+            accepting and authorizing incoming commands into authorized
+            partition events.</blockquote>Authorities are usually live deployments on some
+        infrastructure and they provide service APIs as the required
+        mechanisms.
+
+        Stateless or in some way non-infrastructural authorities also exist but
+        are specified elsewhere (they are considered degenerate, without
+        upstream and with empty payload).
+
+        <a href="packages/sourcerer/README.md" class="vdoc type-vdoc-reference">Read more about authorities</a>.
+
+        <blockquote><code><span class="vdoc type-vdoc-node">valos-vault-4.4.3</span>
+</code>: Authorities utility layer payload (<code><span class="vdoc type-vdoc-node">authority payload</span>
+</code>) is a set of deployed authority service APIs and any
+            associated static content.</blockquote>The payload here refers to the service deployments and their live APIs
+        themselves and not any dynamic content delivered through them. Such
+        dynamic content belongs to other domains (notably valospace content
+        resides in the <code><span class="vdoc type-vdoc-node">partitions</span>
+</code> utility layer, see below).
+
+        The static content includes HTTP landing pages, site routes and their
+        configurations, ValOS gateway and plugin runtimes and any other similar
+        statically configured files.
+
+        <blockquote><code><span class="vdoc type-vdoc-node">valos-vault-4.4.4</span>
+</code>: An authority may have
+            an operations workspace (<code><span class="vdoc type-vdoc-node">opspace</span>
+</code>) as its
+            upstream for managing its payload.</blockquote>
+
+        Particular authorities are naturally free to implement their
+        operational architectures in any way they like. This said opspaces
+        have a well-defined structure which valme authority tools make use of.
+
+        Updates to the authority payloads are primarily done as modifications
+        to the corresponding opspace and then distributing those via release
+        deployments.
+
+        <blockquote><code><span class="vdoc type-vdoc-node">valos-vault-4.4.5</span>
+</code>: An opspace should not
+            be published as a package.</blockquote>
+
+        While opspaces make use of package.json and the npm dependency
+        management this provides, they can also contain considerable amounts of
+        static content. Also, there should be no reason to depend on
+        an opspace. Automatic release deployment systems should have access
+        to a opspace directly for building the release.
+
+        <blockquote><code><span class="vdoc type-vdoc-node">valos-vault-4.4.6</span>
+</code>: Information must not
+            move from deployed authorities back to authority utility
+            layer upstream.</blockquote>
+
+        Information flowing back upstream increases complexity,
+        prevents decentralized and manual upstreams (there is a
+        definite upstream which must be always accessible), and are
+        a security concern (for programmatic access the downstream must
+        have the upstream credentials).
+
+        If a use case necessitating this arises, still seriously
+        consider keeping the mutateable content separate from the
+        upstream itself and instead have upstream only contain the
+        necessary code and credentials to access this content.
+
+        Note: this applies to architectural decisions and automations
+        only. Interactive content in valospace is not limited from
+        using an opspace to update authorities (although it is still
+        recommended to keep such valospace applications deployments
+        separate from the authorities they are used to control).
+
+        valme opspace commands: <code><span class="vdoc type-vdoc-node">vlm build-release</span>
+</code> <code><span class="vdoc type-vdoc-node">vlm deploy-release</span>
+</code>
+  <section class="vdoc type-vdoc-chapter">
+    <h2>ValOS core vs. auxiliary authorities</h2>
+ValOS authorities and any partition content they provide do
+        not need to be public. A ValOS core authority is an authority
+        which can be accessed using only ValOS core plugins (including
+        no plugins at all). A ValOS auxiliary authority is an authority
+        which requires a conforming but non-core ValOS gateway plugin
+        in order to be accessed. (Design Note 2019-03: the plugin
+        conformance requirements are unspecified. When they are
+        specified they must be lenient enough to enable sophisticated
+        protocols but constrained/sandboxed enough that gateway plugins
+        cannot interfere with other reasonably written plugins).
+  </section>
+
+  </section>
+
+  <section id="partitions_layer" class="vdoc type-vdoc-chapter">
+    <h2>Partitions utility layer - the foundation of valospace</h2>
+Event logs and bvob content are the partitions payload and are
+        consumed by ValOS gateways. It is more extensively covered
+        elsewhere and is mentioned here for completeness; precious
+        little infrastructural tooling is provided for them yet.
+
+        Eventually various partition diagnostics tools will come in handy:
+    <ul>
+      <li>Media content import/export tools</li>
+      <li>Complete partition to file system hierarchy save/load tools</li>
+      <li>Event log introspection and manipulation tools</li>
+      <li>etc.</li>
+    </ul>
+
+  <section class="vdoc type-vdoc-chapter">
+    <h2>ValOS public vs protected partitions</h2>
+All partitions provided by ValOS authorities are ValOS
+        partitions. Additionally ValOS public partitions are partitions
+        which are both
+    <ol>
+      <li>provided by ValOS core authorities, and</li>
+      <li>are available for an anonymous consumer with nothing but
+          a client capable of running the ValOS gateway runtime which
+          the authority itself provides (with reasonable concessions
+          for the authority to prevent DDOS attacks)</li>
+    </ol>
+TODO(iridian): Figure out whether this is the actually most
+                        meaningful place to put this semantic border.
+                        A specific term for non-authenticated
+                        partitions capable of running only on standard
+                        runtime is useful, but how useful actually?
+  </section>
+
+  </section>
+
+  </section>
+
+  <section class="vdoc type-vdoc-chapter">
+    <h2>Kernel domain provides the ValOS primary libraries</h2>
+It does, indeed (this section pending better understanding on
+      how to write domain specifications).
+  </section>
+
+  </body>
+</html>

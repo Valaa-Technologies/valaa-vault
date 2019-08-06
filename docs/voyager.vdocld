@@ -1,0 +1,118 @@
+[
+  {
+    "@id": "https://valospace.org/voyager",
+    "@context": {
+      "@base": "https://valospace.org/voyager#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "vdoc": "https://valospace.org/vdoc#",
+      "a": {
+        "@id": "rdf:type",
+        "@type": "@id"
+      },
+      "vdoc:content": {
+        "@id": "https://valospace.org/vdoc#content",
+        "@container": "@list"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/vdoc#words",
+        "@container": "@list"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
+        "@container": "@list"
+      }
+    },
+    "dc:title": "\"I am a ValOS voyager, I want to discover ValOS and enlighten others\"",
+    "vdoc:tags": [
+      "PRIMARY",
+      "ROLE"
+    ],
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "voyager"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is the first introduction for ValOS voyagers -\n    the first adopters, entrepreneurs and evangelists - to the ValOS\n    ecosystem, its philosophy and its ultimate goals."
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is part of the vault workspace ",
+        {
+          "rdf:type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/kernel"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/kernel"
+        },
+        " (of domain ",
+        {
+          "rdf:type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/kernel"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/kernel"
+        },
+        ") which is ",
+        "ValOS common infrastructure tools and libraries monorepository."
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "dc:title": "How do I discover opportunities and enlighten others?",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "As a voyager you have stakes that matter. Whether you were to\n    invest on a ValOS collaborator as a financier, to adopt ValOS as\n    technology as an executive or to commit your personal time and\n    energy on a ValOS project you need to ",
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "see"
+          ]
+        },
+        " forward.",
+        null,
+        "To make sound decisions and to position yourself proactively you\n    need to understand the big picture and philosophy of the ValOS\n    ecosystem. Only then you can enlighten others."
+      ]
+    },
+    "rdf:type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      }
+    ]
+  }
+]

@@ -14,7 +14,7 @@ function emitReVDocHTML (node, emission, stack) {
 <html>
   <head>
     <meta charset='utf-8'>
-    <title>${node["dc:title"]}</title>
+    <title>${stack.emitNode(node["dc:title"], "")}</title>
     <script
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>

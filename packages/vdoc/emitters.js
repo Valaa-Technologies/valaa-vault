@@ -14,6 +14,7 @@ module.exports = {
     "vdoc:NumberedList": emitNumberedListHTML,
     "vdoc:Table": emitTableHTML,
     "vdoc:Reference": emitReferenceHTML,
+    "vdoc:CharacterData": emitCharacterDataHTML,
   },
 };
 
@@ -32,7 +33,7 @@ const htmlElements = Object.entries(ontology.vocabulary)
 function emitNodeHTML (node, emission, stack) {
   let body = "";
   if (node["dc:title"]) {
-    body += `\n    <h2>${node["dc:title"]}</h2>\n`;
+    body += `\n    <h2>${stack.emitNode(node["dc:title"], "")}</h2>\n`;
   }
   const content = node["vdoc:content"]
       || (node["vdoc:words"] && [].concat(...[].concat(node["vdoc:words"] || [])
@@ -218,4 +219,8 @@ function emitReferenceHTML (node, emission, stack) {
   return node["vdoc:content"]
       ? `${head}>${stack.emitNode(node["vdoc:content"], "")}</a>`
       : `${head} />`;
+}
+
+function emitCharacterDataHTML (node, emission, stack) {
+  return `<code>${stack.emitNode({ ...node, "rdf:type": "vdoc:Node" }, "")}</code>`;
 }

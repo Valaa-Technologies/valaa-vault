@@ -1,9 +1,9 @@
 // @flow
 
 const {
-  headers,
   extension: { ontology, extractee, emitters },
   extractee: { authors, ref, /* dfn, */ pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
+  ontologyHeaders,
 } = require("@valos/revdoc");
 
 const { name, version, description } = require("./package");
@@ -54,33 +54,33 @@ module.exports = {
     ],
     "chapter#section_prefixes>1;ReVDoc IRI prefixes": {
       "#0": [],
-      "table#>0;prefixes": headers.prefixes,
+      "table#>0;prefixes": ontologyHeaders.prefixes,
     },
     [`chapter#section_classes>2;<em>${prefix}:* a vdoc:Class</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": headers.classes,
+        "vdoc:headers": ontologyHeaders.classes,
         "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:Class", vocabulary),
       },
     },
     [`chapter#section_properties>3;<em>${prefix}:* a vdoc:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": headers.properties,
+        "vdoc:headers": ontologyHeaders.properties,
         "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:Property", vocabulary),
       },
     },
     [`chapter#section_vocabulary_other>8;<em>${prefix}:</em> other vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": headers.vocabularyOther,
+        "vdoc:headers": ontologyHeaders.vocabularyOther,
         "vdoc:entries": filterKeysWithNoneOf(
             "rdf:type", ["vdoc:Class", "vdoc:Property"], vocabulary),
       },
     },
     "chapter#section_context>9;ReVDoc JSON-LD context term definitions": {
       "#0": [],
-      "table#>0;context": headers.context,
+      "table#>0;context": ontologyHeaders.context,
     },
   },
   "chapter#transformations>9:ReVDoc transformations": {
@@ -91,12 +91,12 @@ module.exports = {
     ],
     "chapter#extraction_rules>0;ReVDoc extraction rules": {
       "#0": [],
-      "table#>0;extraction_rules_data": headers.extractionRules,
+      "table#>0;extraction_rules_data": ontologyHeaders.extractionRules,
       "data#extraction_rules_data": extractionRules,
     },
     "chapter#extractee_api>1;ReVDoc extractee API": {
       "#0": [],
-      "table#>0;extractee_api_lookup": headers.extractee,
+      "table#>0;extractee_api_lookup": ontologyHeaders.extractee,
       "data#extractee_api_lookup": extractee,
     },
     "chapter#emission_output>2;ReVDoc emission output": {

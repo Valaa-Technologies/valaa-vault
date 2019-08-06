@@ -2,7 +2,8 @@
 
 const { extension: { ontology, extractee, emitters } } = require("@valos/vdoc");
 const {
-  headers, extractee: { authors, ref, dfn, pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
+  extractee: { authors, ref, dfn, pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
+  ontologyHeaders,
 } = require("@valos/revdoc");
 
 const { name, version, description } = require("./package");
@@ -153,14 +154,14 @@ module.exports = {
       structure consisting of three types of nodes, corresponding to
       the first, second and remaining levels of the tree:`,
     "numbered#node_types>0": [
-      dfn("Document node", "#document_node", ` is an always-first-level
+      [dfn("Document node", "#document_node", ` is an always-first-level
         node identified by a `, ref("a global document IRI", "#document_iri"),
         "as its ", ref("JSON-LD @id", "https://www.w3.org/TR/json-ld11/#node-identifiers"),
-        "."),
-      dfn("Resource node", "#resource_node", ` is an always-second-level
+        "."), " Links to document nodes in bold and italics."],
+      [dfn("Resource node", "#resource_node", ` is an always-second-level
         node which is directly accessible from the first-level document
         via its document relative `, ref("resource identifier", "#resource_id"),
-        `as the dictionary key.`),
+        `as the dictionary key.`), " Links to resource nodese are in italics."],
       dfn("Element node", "#element_node", ` is a third-or-more-level
         node. It might be anonymous and lacks a stable and unique
         identifiers. It MAY have a locally unique identifier. If the
@@ -312,7 +313,7 @@ module.exports = {
         `for constructing of extension extraction source graphs. By doing
         this the native implementations gain the benefits of integrated
         toolchains:`,
-        { "bulleted#0": [
+        { "bulleted#": [
           `Improved discoverability via integrated documentation and code
           completion`,
           `Implicitly well-formed primitives and structures where
@@ -347,19 +348,19 @@ module.exports = {
     ],
     "chapter#section_prefixes>1;VDoc Core IRI prefixes": {
       "#0": [],
-      "table#>0;prefixes": headers.prefixes,
+      "table#>0;prefixes": ontologyHeaders.prefixes,
     },
     [`chapter#section_classes>2;<em>${prefix}:* a vdoc:Class</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": headers.classes,
+        "vdoc:headers": ontologyHeaders.classes,
         "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:Class", vocabulary),
       },
     },
     [`chapter#section_properties>3;<em>${prefix}:* a vdoc:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": headers.properties,
+        "vdoc:headers": ontologyHeaders.properties,
         "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:Property", vocabulary),
       },
     },
@@ -373,7 +374,7 @@ with structural semantic meaning are exposed via VDoc core ontology.`,
       ],
       "table#>0;vocabulary": {
         "vdoc:headers": {
-          ...headers.properties,
+          ...ontologyHeaders.properties,
           "header#1;rdfs:subPropertyOf": undefined,
           "header#1": {
             "vdoc:content": ["HTML5 element"],
@@ -388,14 +389,14 @@ with structural semantic meaning are exposed via VDoc core ontology.`,
     [`chapter#section_vocabulary_other>8;<em>${prefix}:*</em> other vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": headers.vocabularyOther,
+        "vdoc:headers": ontologyHeaders.vocabularyOther,
         "vdoc:entries": filterKeysWithNoneOf(
             "rdf:type", ["vdoc:Class", "vdoc:Property", "vdoc:HTMLElementProperty"], vocabulary),
       },
     },
     "chapter#section_context>9;VDoc Core JSON-LD context term definitions": {
       "#0": [],
-      "table#>0;context": headers.context,
+      "table#>0;context": ontologyHeaders.context,
     },
   },
   "chapter#transformations>9;VDoc Core transformations": {
@@ -415,11 +416,11 @@ with structural semantic meaning are exposed via VDoc core ontology.`,
     ],
     "chapter#extraction_rules>0;VDoc Core extraction rules": {
       "#0": [],
-      "table#>0;extraction_rules_lookup": headers.extractionRules,
+      "table#>0;extraction_rules_lookup": ontologyHeaders.extractionRules,
     },
     "chapter#extractee_api>1;VDoc Core extractee API": {
       "#0": [],
-      "table#>0;extractee_api_lookup": headers.extractee,
+      "table#>0;extractee_api_lookup": ontologyHeaders.extractee,
     },
     "chapter#emission_output>2;VDoc Core emission output": {
       "#0": [],

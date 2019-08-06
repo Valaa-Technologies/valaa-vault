@@ -1,11 +1,11 @@
 
 const {
-  headers,
   extractee: {
     c, ref,
     authors, quote, pkg,
     filterKeysWithAnyOf, filterKeysWithNoneOf,
   },
+  ontologyHeaders,
 } = require("@valos/revdoc");
 
 const { prefix, prefixIRI, prefixes, vocabulary } = require("./ontology");
@@ -271,33 +271,33 @@ valaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=rela
     ],
     [`chapter#section_prefixes>1;${name} IRI prefixes`]: {
       "#0": [],
-      "table#>0;prefixes": headers.prefixes,
+      "table#>0;prefixes": ontologyHeaders.prefixes,
     },
     [`chapter#section_classes>2;<em>${prefix}:* a valos:Class</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": headers.classes,
+        "vdoc:headers": ontologyHeaders.classes,
         "vdoc:entries": filterKeysWithAnyOf("rdf:type", "valos:Class", vocabulary),
       },
     },
     [`chapter#section_properties>3;<em>${prefix}:* a valos:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": headers.properties,
+        "vdoc:headers": ontologyHeaders.properties,
         "vdoc:entries": filterKeysWithAnyOf("rdf:type", "valos:Property", vocabulary),
       },
     },
     [`chapter#section_types>4;<em>${prefix}:* a valos:Type</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": headers.types,
+        "vdoc:headers": ontologyHeaders.types,
         "vdoc:entries": filterKeysWithAnyOf("rdf:type", "valos:Type", vocabulary),
       },
     },
     [`chapter#section_fields>5;<em>${prefix}:* a valos:Field</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": headers.fields,
+        "vdoc:headers": ontologyHeaders.fields,
         "vdoc:entries": filterKeysWithAnyOf("rdf:type", [
           "valos:Field", "valos:PrimaryField", "valos:TransientField", "valos:InferredField",
           "valos:GeneratedField", "valos:AliasField",
@@ -307,7 +307,7 @@ valaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=rela
     [`chapter#section_vocabulary_other>8;<em>${prefix}:*</em> other vocabulary:`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": headers.vocabularyOther,
+        "vdoc:headers": ontologyHeaders.vocabularyOther,
         "vdoc:entries": filterKeysWithNoneOf("rdf:type", [
           "valos:Class", "valos:Type", "valos:Property", "valos:Field",
           "valos:PrimaryField", "valos:TransientField", "valos:InferredField",

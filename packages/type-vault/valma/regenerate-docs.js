@@ -59,7 +59,7 @@ exports.handler = async (yargv) => {
           .filter((v, i, a) => a.indexOf(v) === i),
       title: vdocld[0]["dc:title"] || documentPath,
       ..._embedSection("abstract", vdocld[0].abstract),
-      ..._embedSection("introduction", vdocld[0].introduction),
+      ..._embedSection("introduction", { ...vdocld[0].introduction || {}, "dc:title": undefined }),
       ..._embedSection("apiAbstract", vdocld[0].section_api_abstract),
       ..._embedSection("ontologyAbstract", vdocld[0].section_ontology_abstract),
       ...rest,

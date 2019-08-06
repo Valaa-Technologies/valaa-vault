@@ -1,11 +1,12 @@
 
 const {
-  headers: revdocHeaders,
   extractee: {
-    authors, ref, identifize, pkg, filterKeysWithAnyOf, filterKeysWithAllOf, filterKeysWithNoneOf,
+    authors, dfn, em, identifize, pkg, ref,
+    filterKeysWithAnyOf, filterKeysWithAllOf, filterKeysWithNoneOf,
   },
+  ontologyHeaders,
 } = require("@valos/revdoc");
-const { headers: domainHeaders } = require("@valos/toolset-domain");
+const { domainHeaders } = require("@valos/toolset-domain");
 
 const { name, version, repository } = require("../package");
 const {
@@ -159,33 +160,33 @@ module.exports = {
     ],
     [`chapter#section_prefixes>1;IRI prefixes`]: {
       "#0": [],
-      "table#>0;prefixes": revdocHeaders.prefixes,
+      "table#>0;prefixes": ontologyHeaders.prefixes,
     },
     [`chapter#section_classes>2;<em>${prefix}:* a valos:Class</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": revdocHeaders.classes,
+        "vdoc:headers": ontologyHeaders.classes,
         "vdoc:entries": filterKeysWithAnyOf("rdf:type", "valos:Class", vocabulary),
       },
     },
     [`chapter#section_properties>3;<em>${prefix}:* a valos:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": revdocHeaders.properties,
+        "vdoc:headers": ontologyHeaders.properties,
         "vdoc:entries": filterKeysWithAnyOf("rdf:type", "valos:Property", vocabulary),
       },
     },
     [`chapter#section_types>4;<em>${prefix}:* a valos:Type</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": revdocHeaders.types,
+        "vdoc:headers": ontologyHeaders.types,
         "vdoc:entries": filterKeysWithAnyOf("rdf:type", "valos:Type", vocabulary),
       },
     },
     [`chapter#section_fields>5;<em>${prefix}:* a valos:Field</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": revdocHeaders.fields,
+        "vdoc:headers": ontologyHeaders.fields,
         "vdoc:entries": filterKeysWithAnyOf("rdf:type", [
           "valos:Field", "valos:PrimaryField", "valos:TransientField", "valos:InferredField",
           "valos:GeneratedField", "valos:AliasField",
@@ -195,7 +196,7 @@ module.exports = {
     [`chapter#section_vocabulary_other>8;<em>${prefix}:</em> other vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": revdocHeaders.vocabularyOther,
+        "vdoc:headers": ontologyHeaders.vocabularyOther,
         "vdoc:entries": filterKeysWithNoneOf("rdf:type", [
           "valos:Class", "valos:Type", "valos:Property", "valos:Field",
           "valos:PrimaryField", "valos:TransientField", "valos:InferredField",
@@ -205,7 +206,7 @@ module.exports = {
     },
     [`chapter#section_context>9;JSON-LD context term definitions`]: {
       "#0": [],
-      "table#>0;context": revdocHeaders.context,
+      "table#>0;context": ontologyHeaders.context,
     },
   },
   "chapter#section_hierarchy>9;Component hierarchy": {

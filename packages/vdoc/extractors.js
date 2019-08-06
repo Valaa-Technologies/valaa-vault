@@ -28,6 +28,9 @@ module.exports = {
           node = patch;
         } else {
           node[rule.body] = this.extend([], [patch]);
+          if (rule.body === "vdoc:content") {
+            node[rule.body] = _splitNewlineWhitespaceSections(node[rule.body]);
+          }
         }
       } else if (Array.isArray(patch)) {
         if (!rule.owner || (!resourceId && !Object.keys(node).length)) {
@@ -35,6 +38,9 @@ module.exports = {
           if (resourceId) this.documentNode[resourceId] = node;
         } else {
           node[rule.body] = this.extend([], patch);
+          if (rule.body === "vdoc:content") {
+            node[rule.body] = _splitNewlineWhitespaceSections(node[rule.body]);
+          }
         }
       } else {
         node["vdoc:pre_body"] = rule.body;
@@ -66,6 +72,13 @@ module.exports = {
     },
   },
 };
+
+function _splitNewlineWhitespaceSections (value = []) {
+  return [].concat(...[].concat(value)
+      .map(e => ((typeof e !== "string")
+          ? [e]
+          : e.split(/\n\s*(\n)/).map((se, i) => (i % 2 ? null : se)))));
+}
 
 function _compareWithOrderQualifier (l, r) {
   return (l[0] < r[0]) ? -1 : (l[0] > r[0]) ? 1 : 0;

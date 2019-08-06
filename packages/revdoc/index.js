@@ -14,5 +14,5 @@ module.exports = {
     ...vdoc.extractee,
     ...extractee,
   },
-  headers: require("./headers"),
+  ontologyHeaders: require("./ontologyHeaders"),
 };

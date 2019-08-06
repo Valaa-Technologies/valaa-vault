@@ -10,7 +10,7 @@ function emitSBoMDocHTML (node, emission, stack) {
 <html>
   <head>
     <meta charset='utf-8'>
-    <title>${node["dc:title"]}</title>
+    <title>${stack.emitNode(node["dc:title"], "")}</title>
   </head>
   <body>
     ${stack.emitNode(node["vdoc:content"], "")}

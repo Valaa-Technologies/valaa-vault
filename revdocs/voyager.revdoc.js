@@ -6,6 +6,10 @@ const {
 module.exports = {
   "dc:title": `"I am a ValOS voyager, I want to discover ValOS and enlighten others"`,
   "vdoc:tags": ["PRIMARY", "ROLE"],
+  subProfiles: [
+    "enthusiast", "entrepreneur", "evangelist", "investor", "business_owner",
+    "sales_rep", "etc"
+  ],
   respecConfig: {
     specStatus: "unofficial",
     editors: authors("iridian"),
@@ -26,11 +30,44 @@ module.exports = {
   "chapter#introduction>2;How do I discover opportunities and enlighten others?": [
     `As a voyager you have stakes that matter. Whether you were to
     invest on a ValOS collaborator as a financier, to adopt ValOS as
-    technology as an executive or to commit your personal time and
+    technology as an executive or just to commit your personal time and
     energy on a ValOS project you need to `, em("see"), ` forward.`,
     null,
     `To make sound decisions and to position yourself proactively you
     need to understand the big picture and philosophy of the ValOS
     ecosystem. Only then you can enlighten others.`,
+    null,
+    `You use tailored but real-world ValOS demo setups to illustrate
+    how ValOS a solution could be configured to meet the needs at hand.
+    Your audience can be your customer, your team or even just
+    yourself.`,
   ],
+  "chapter#section_profiles>9;Voyager profiles": {
+    "#0": [
+      `Voyager is generic orientation. There are various voyager
+      sub-profiles which benefit from more specific guidance.`,
+    ],
+    "chapter#enthusiast>0;How enthusiasts impress themselves and others": {
+      "#0": [],
+    },
+    "chapter#entrepreneur>1;How entrepreneurs search for uncharted business opportunities": {
+      "#0": [],
+    },
+    "chapter#evangelist>2;How evangelists enlighten about new innovations": {
+      "#0": [],
+    },
+    "chapter#investor>3;How investors perform due diligence": {
+      "#0": [],
+    },
+    "chapter#business_owner>4;How business owners understand the consequences of their choices": {
+      "#0": [],
+    },
+    "chapter#sales_rep>5;How sales representatives identify solutions to customer needs": {
+      "#0": [],
+    },
+    "chapter#etc>9;How to add new profiles": [
+      `Create a `, ref("PR in github", "https://help.github.com/en/articles/about-pull-requests"),
+      ` against @valos/kernel/revdocs/valonaut.revdoc.js`,
+    ],
+  },
 };

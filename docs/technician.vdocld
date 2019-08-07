@@ -32,6 +32,14 @@
       "PRIMARY",
       "ROLE"
     ],
+    "subProfiles": [
+      "contributor",
+      "developer",
+      "administrator",
+      "devops",
+      "hacker",
+      "etc"
+    ],
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -391,7 +399,7 @@
         {
           "rdf:type": "vdoc:CharacterData",
           "vdoc:content": [
-            "valme commands"
+            "valma commands"
           ]
         },
         ".",
@@ -400,7 +408,7 @@
         {
           "rdf:type": "vdoc:CharacterData",
           "vdoc:content": [
-            "valme"
+            "valma"
           ]
         },
         ", ",
@@ -469,12 +477,12 @@
         " domain provides the\n    essential central ValOS code for developing new ValOS\n    infrastructure software. Its main producers are the kernel software\n    developers and its consumers are the infrastructure software\n    developers. It revolves around developing code as library packages."
       ]
     },
-    "valme": {
-      "@id": "valme",
-      "dc:title": "`valme` - a convenience CLI to context-dependent command scripts",
+    "valma": {
+      "@id": "valma",
+      "dc:title": "`valma` - a convenience CLI to context-dependent command scripts",
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
-        "valme (",
+        "valma (",
         {
           "rdf:type": "vdoc:CharacterData",
           "vdoc:content": [
@@ -491,14 +499,14 @@
                 "valos-vault-3.1"
               ]
             },
-            ": valme is installed with ",
+            ": valma is installed with ",
             {
               "rdf:type": "revdoc:Command",
               "vdoc:words": [
                 "npm",
                 "install",
                 "-g",
-                "valme"
+                "valma"
               ]
             },
             " or as a package dependency"
@@ -511,11 +519,11 @@
             "vlm"
           ]
         },
-        ". At its core\n    valme is a command dispatcher to ",
+        ". At its core\n    valma is a command dispatcher to ",
         {
           "rdf:type": "vdoc:CharacterData",
           "vdoc:content": [
-            "valme scripts"
+            "valma scripts"
           ]
         },
         " in\n    various ",
@@ -535,7 +543,7 @@
                 "valos-vault-3.2"
               ]
             },
-            ": valme searches the scripts\n        first from the package.json ",
+            ": valma searches the scripts\n        first from the package.json ",
             {
               "rdf:type": "vdoc:CharacterData",
               "vdoc:content": [
@@ -583,14 +591,14 @@
         {
           "rdf:type": "revdoc:Command",
           "vdoc:words": [
-            "valme.bin/valme-status"
+            "valma.bin/valma-status"
           ]
         },
         " first if one exists and falling back to the more generic versions\n    if not. The call eventually resolves at the global ",
         {
           "rdf:type": "revdoc:Command",
           "vdoc:words": [
-            "/usr/bin/valme-status"
+            "/usr/bin/valma-status"
           ]
         },
         ". Its implementation then calls ",
@@ -605,7 +613,7 @@
         {
           "rdf:type": "revdoc:Command",
           "vdoc:words": [
-            ".valme-status/**/*"
+            ".valma-status/**/*"
           ]
         },
         " and are visible on the\n    execution context pools (the scripts called by ",
@@ -620,7 +628,7 @@
         {
           "rdf:type": "vdoc:CharacterData",
           "vdoc:content": [
-            "valme status scripts"
+            "valma status scripts"
           ]
         },
         ").",
@@ -633,7 +641,7 @@
                 "valos-vault-3.3"
               ]
             },
-            ": A package can export valme scripts using npm package.json ",
+            ": A package can export valma scripts using npm package.json ",
             {
               "rdf:type": "vdoc:CharacterData",
               "vdoc:content": [
@@ -644,7 +652,7 @@
             {
               "rdf:type": "vdoc:CharacterData",
               "vdoc:content": [
-                "valme-"
+                "valma-"
               ]
             },
             " as usual. These scripts will be available for\n        all packages depending on this package in their ",
@@ -674,7 +682,7 @@
                 "valos-vault-3.5"
               ]
             },
-            ": valme can be used in programmatic contexts to run valme\n        scripts. When done so, valme must be added as a dependency."
+            ": valma can be used in programmatic contexts to run valma\n        scripts. When done so, valma must be added as a dependency."
           ]
         },
         "This happens just like with the CLI by using ",
@@ -694,7 +702,7 @@
                 "valos-vault-3.5.1"
               ]
             },
-            ": valme ensures that node environment is loaded"
+            ": valma ensures that node environment is loaded"
           ]
         },
         "The environment is loaded only once even for recursive script\n    invokations.",
@@ -707,10 +715,10 @@
                 "valos-vault-3.5.2"
               ]
             },
-            ": valme ensures that 'vlm' is always found in path"
+            ": valma ensures that 'vlm' is always found in path"
           ]
         },
-        "This is so that valme scripts can call 'vlm' even valme is not\n    globally installed as long as valme has been installed as a dependency.",
+        "This is so that valma scripts can call 'vlm' even valma is not\n    globally installed as long as valma has been installed as a dependency.",
         {
           "vdoc:blockquote": true,
           "vdoc:content": [
@@ -720,7 +728,7 @@
                 "valos-vault-3.5.3"
               ]
             },
-            ": valme ensures that the most specific 'vlm' version is used\n        to evaluate a command, preferring scripts over depended over global."
+            ": valma ensures that the most specific 'vlm' version is used\n        to evaluate a command, preferring scripts over depended over global."
           ]
         },
         "This is so that toolkits can precisely control the whole toolchain\n    in their dependencies."
@@ -728,7 +736,7 @@
     },
     "utility_layer": {
       "@id": "utility_layer",
-      "dc:title": "ValOS `utility` layer provides an operational service",
+      "dc:title": "ValOS `utility` layers provide operational services",
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
         "ValOS has four main utility layers: ",
@@ -1159,7 +1167,7 @@
         },
         "can be set up for that purpose.",
         null,
-        "      valme package commands: ",
+        "      valma package commands: ",
         {
           "rdf:type": "revdoc:Command",
           "vdoc:words": [
@@ -1290,7 +1298,7 @@
             ") as its\n            upstream for managing its payload."
           ]
         },
-        "\n\n        Particular authorities are naturally free to implement their\n        operational architectures in any way they like. This said opspaces\n        have a well-defined structure which valme authority tools make use of.\n\n        Updates to the authority payloads are primarily done as modifications\n        to the corresponding opspace and then distributing those via release\n        deployments.\n\n        ",
+        "\n\n        Particular authorities are naturally free to implement their\n        operational architectures in any way they like. This said opspaces\n        have a well-defined structure which valma authority tools make use of.\n\n        Updates to the authority payloads are primarily done as modifications\n        to the corresponding opspace and then distributing those via release\n        deployments.\n\n        ",
         {
           "vdoc:blockquote": true,
           "vdoc:content": [
@@ -1316,7 +1324,7 @@
             ": Information must not\n            move from deployed authorities back to authority utility\n            layer upstream."
           ]
         },
-        "\n\n        Information flowing back upstream increases complexity,\n        prevents decentralized and manual upstreams (there is a\n        definite upstream which must be always accessible), and are\n        a security concern (for programmatic access the downstream must\n        have the upstream credentials).\n\n        If a use case necessitating this arises, still seriously\n        consider keeping the mutateable content separate from the\n        upstream itself and instead have upstream only contain the\n        necessary code and credentials to access this content.\n\n        Note: this applies to architectural decisions and automations\n        only. Interactive content in valospace is not limited from\n        using an opspace to update authorities (although it is still\n        recommended to keep such valospace applications deployments\n        separate from the authorities they are used to control).\n\n        valme opspace commands: ",
+        "\n\n        Information flowing back upstream increases complexity,\n        prevents decentralized and manual upstreams (there is a\n        definite upstream which must be always accessible), and are\n        a security concern (for programmatic access the downstream must\n        have the upstream credentials).\n\n        If a use case necessitating this arises, still seriously\n        consider keeping the mutateable content separate from the\n        upstream itself and instead have upstream only contain the\n        necessary code and credentials to access this content.\n\n        Note: this applies to architectural decisions and automations\n        only. Interactive content in valospace is not limited from\n        using an opspace to update authorities (although it is still\n        recommended to keep such valospace applications deployments\n        separate from the authorities they are used to control).\n\n        valma opspace commands: ",
         {
           "rdf:type": "vdoc:CharacterData",
           "vdoc:content": [
@@ -1379,6 +1387,78 @@
         }
       ]
     },
+    "section_profiles": {
+      "@id": "section_profiles",
+      "dc:title": "Technician profiles",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Technician is generic orientation. There are various voyager\n      sub-profiles which benefit from more specific guidance.",
+        {
+          "@id": "developer"
+        },
+        {
+          "@id": "contributor"
+        },
+        {
+          "@id": "administrator"
+        },
+        {
+          "@id": "devops"
+        },
+        {
+          "@id": "hacker"
+        },
+        {
+          "@id": "etc"
+        }
+      ]
+    },
+    "developer": {
+      "@id": "developer",
+      "dc:title": "How developers set up their development environments",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "contributor": {
+      "@id": "contributor",
+      "dc:title": "How contributors produce new fabric packages and code",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "administrator": {
+      "@id": "administrator",
+      "dc:title": "How administrators manage infrastructure resources",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "devops": {
+      "@id": "devops",
+      "dc:title": "How DevOps workflows are implemented with valma",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "hacker": {
+      "@id": "hacker",
+      "dc:title": "How to have fun while avoiding pain",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "etc": {
+      "@id": "etc",
+      "dc:title": "How to add new profiles",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Create a ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "PR in github"
+          ],
+          "vdoc:ref": "https://help.github.com/en/articles/about-pull-requests"
+        },
+        " against @valos/kernel/revdocs/valonaut.revdoc.js"
+      ]
+    },
     "rdf:type": "revdoc:Document",
     "vdoc:content": [
       {
@@ -1400,7 +1480,7 @@
         "@id": "domains"
       },
       {
-        "@id": "valme"
+        "@id": "valma"
       },
       {
         "@id": "utility_layer"
@@ -1411,6 +1491,9 @@
         "vdoc:content": [
           "It does, indeed (this section pending better understanding on\n      how to write domain specifications)."
         ]
+      },
+      {
+        "@id": "section_profiles"
       }
     ]
   }

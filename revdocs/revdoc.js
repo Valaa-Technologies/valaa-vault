@@ -64,13 +64,13 @@ module.exports = {
     "ValOS common infrastructure tools and libraries monorepo.",
   ],
   "chapter#introduction>2": {
-    "dc:title": em(`"Greetings, I am Valme, the ValOS Medium. Who are you?"`),
+    "dc:title": em(`"Greetings, I am Valma, the ValOS Mediator. Who are you?"`),
     "#0": [
       `ValOS ecosystem revolves around various roles. You can be one,
       many or even none of them but you should know at least a bit
       about all of them.`,
       null,
-      ref("Valme"), ` itself is a collection of tools for interacting
+      ref("Valma"), ` itself is a collection of tools for interacting
       with the ValOS ecosystem, most notable of which is `,
       ref([em("vlm"), ` the command line script invoker`], "@/valma"),
       ".",

@@ -32,6 +32,13 @@
       "PRIMARY",
       "ROLE"
     ],
+    "subProfiles": [
+      "everyone",
+      "personal",
+      "student",
+      "prototypist",
+      "etc"
+    ],
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -120,6 +127,69 @@
         "The skills you learn to do this are like cycling or writing - they\n    are used to support your other interests. While you don't need to\n    become a professional you certainly can!"
       ]
     },
+    "section_profiles": {
+      "@id": "section_profiles",
+      "dc:title": "Valonaut profiles",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Valonaut is generic orientation. There are various valonaut\n      sub-profiles which benefit from more specific guidance.",
+        {
+          "@id": "everyone"
+        },
+        {
+          "@id": "personal"
+        },
+        {
+          "@id": "student"
+        },
+        {
+          "@id": "prototypist"
+        },
+        {
+          "@id": "etc"
+        }
+      ]
+    },
+    "everyone": {
+      "@id": "everyone",
+      "dc:title": "How everyone is a valonaut",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "personal": {
+      "@id": "personal",
+      "dc:title": "How to manage personal tools and data",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "student": {
+      "@id": "student",
+      "dc:title": "How to learn to code with Zero",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "prototypist": {
+      "@id": "prototypist",
+      "dc:title": "How to rapidly create interactive prototypes",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "etc": {
+      "@id": "etc",
+      "dc:title": "How to add new profiles",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Create a ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "PR in github"
+          ],
+          "vdoc:ref": "https://help.github.com/en/articles/about-pull-requests"
+        },
+        " against @valos/kernel/revdocs/valonaut.revdoc.js"
+      ]
+    },
     "rdf:type": "revdoc:Document",
     "vdoc:content": [
       {
@@ -130,6 +200,9 @@
       },
       {
         "@id": "introduction"
+      },
+      {
+        "@id": "section_profiles"
       }
     ]
   }

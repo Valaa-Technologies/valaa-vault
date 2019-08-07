@@ -32,6 +32,15 @@
       "PRIMARY",
       "ROLE"
     ],
+    "subProfiles": [
+      "enthusiast",
+      "entrepreneur",
+      "evangelist",
+      "investor",
+      "business_owner",
+      "sales_rep",
+      "etc"
+    ],
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -90,7 +99,7 @@
       "dc:title": "How do I discover opportunities and enlighten others?",
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
-        "As a voyager you have stakes that matter. Whether you were to\n    invest on a ValOS collaborator as a financier, to adopt ValOS as\n    technology as an executive or to commit your personal time and\n    energy on a ValOS project you need to ",
+        "As a voyager you have stakes that matter. Whether you were to\n    invest on a ValOS collaborator as a financier, to adopt ValOS as\n    technology as an executive or just to commit your personal time and\n    energy on a ValOS project you need to ",
         {
           "vdoc:em": true,
           "vdoc:content": [
@@ -99,7 +108,90 @@
         },
         " forward.",
         null,
-        "To make sound decisions and to position yourself proactively you\n    need to understand the big picture and philosophy of the ValOS\n    ecosystem. Only then you can enlighten others."
+        "To make sound decisions and to position yourself proactively you\n    need to understand the big picture and philosophy of the ValOS\n    ecosystem. Only then you can enlighten others.",
+        null,
+        "You use tailored but real-world ValOS demo setups to illustrate\n    how ValOS a solution could be configured to meet the needs at hand.\n    Your audience can be your customer, your team or even just\n    yourself."
+      ]
+    },
+    "section_profiles": {
+      "@id": "section_profiles",
+      "dc:title": "Voyager profiles",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Voyager is generic orientation. There are various voyager\n      sub-profiles which benefit from more specific guidance.",
+        {
+          "@id": "enthusiast"
+        },
+        {
+          "@id": "entrepreneur"
+        },
+        {
+          "@id": "evangelist"
+        },
+        {
+          "@id": "investor"
+        },
+        {
+          "@id": "business_owner"
+        },
+        {
+          "@id": "sales_rep"
+        },
+        {
+          "@id": "etc"
+        }
+      ]
+    },
+    "enthusiast": {
+      "@id": "enthusiast",
+      "dc:title": "How enthusiasts impress themselves and others",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "entrepreneur": {
+      "@id": "entrepreneur",
+      "dc:title": "How entrepreneurs search for uncharted business opportunities",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "evangelist": {
+      "@id": "evangelist",
+      "dc:title": "How evangelists enlighten about new innovations",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "investor": {
+      "@id": "investor",
+      "dc:title": "How investors perform due diligence",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "business_owner": {
+      "@id": "business_owner",
+      "dc:title": "How business owners understand the consequences of their choices",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "sales_rep": {
+      "@id": "sales_rep",
+      "dc:title": "How sales representatives identify solutions to customer needs",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "etc": {
+      "@id": "etc",
+      "dc:title": "How to add new profiles",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Create a ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "PR in github"
+          ],
+          "vdoc:ref": "https://help.github.com/en/articles/about-pull-requests"
+        },
+        " against @valos/kernel/revdocs/valonaut.revdoc.js"
       ]
     },
     "rdf:type": "revdoc:Document",
@@ -112,6 +204,9 @@
       },
       {
         "@id": "introduction"
+      },
+      {
+        "@id": "section_profiles"
       }
     ]
   }

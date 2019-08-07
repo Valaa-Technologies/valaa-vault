@@ -6,6 +6,9 @@ const {
 module.exports = {
   "dc:title": `"I am a ValOS technician, I want to enable valonauts and expand valospace"`,
   "vdoc:tags": ["PRIMARY", "ROLE"],
+  subProfiles: [
+    "contributor", "developer", "administrator", "devops", "hacker", "etc",
+  ],
   respecConfig: {
     specStatus: "unofficial",
     editors: authors("iridian"),
@@ -110,9 +113,9 @@ module.exports = {
     A DevOp manages these layers by scripts that are delivered inside
     the packages alongside their main content. A command line tool
     called ValOS Medium or `, c("vlm"), ` is used to discover and `,
-    c("invoke"), ` these scripts as `, c("valme commands"), `.
+    c("invoke"), ` these scripts as `, c("valma commands"), `.
 
-    From a DevOps perspective `, c("valme"), `, `, c("vault"), ` and `,
+    From a DevOps perspective `, c("valma"), `, `, c("vault"), ` and `,
     c("opspace"), ` are the three concrete core mechanisms that
     everything else ties into.
 
@@ -136,59 +139,59 @@ module.exports = {
     developers and its consumers are the infrastructure software
     developers. It revolves around developing code as library packages.`,
   ],
-  "chapter#valme>6;`valme` - a convenience CLI to context-dependent command scripts": [
-    `valme (`, c("vlm"), ` in CLI) is a convenience tool for executing
+  "chapter#valma>6;`valma` - a convenience CLI to context-dependent command scripts": [
+    `valma (`, c("vlm"), ` in CLI) is a convenience tool for executing
     command scripts exported by packages in valos workspace contexts.
     It is a generalization of 'npx -c' behaviour, adding
     discoverability, ability to invoke global scripts and the ability
     to invoke multiple scripts at once using glob matching.`,
-    blockquote(c("valos-vault-3.1"), `: valme is installed with `,
-        command("npm install -g valme"), ` or as a package dependency`),
+    blockquote(c("valos-vault-3.1"), `: valma is installed with `,
+        command("npm install -g valma"), ` or as a package dependency`),
     `This installs the global CLI command `, c("vlm"), `. At its core
-    valme is a command dispatcher to `, c("valme scripts"), ` in
+    valma is a command dispatcher to `, c("valma scripts"), ` in
     various `, c("command pools"), `.`,
-    blockquote(c("valos-vault-3.2"), `: valme searches the scripts
+    blockquote(c("valos-vault-3.2"), `: valma searches the scripts
         first from the package.json `, c("scripts"), ` pool, then from `,
         c("./node_modules/.bin/"), c("depends"), ` pool and lastly from
         the OS-specific variant of `, c("/usr/bin"), c("global"),
         ` pool.`),
     `As an example typing `, command("vlm status"), ` in some directory
-    context would forward the command to `, command("valme.bin/valme-status"),
+    context would forward the command to `, command("valma.bin/valma-status"),
     ` first if one exists and falling back to the more generic versions
     if not. The call eventually resolves at the global `,
-    command("/usr/bin/valme-status"), `. Its implementation then calls `,
+    command("/usr/bin/valma-status"), `. Its implementation then calls `,
     command("vlm .status/**/*"), ` which calls all scripts which match
-    the glob `, command(".valme-status/**/*"), ` and are visible on the
+    the glob `, command(".valma-status/**/*"), ` and are visible on the
     execution context pools (the scripts called by `, command("vlm status"),
-    ` are known as `, c("valme status scripts"), `).`,
+    ` are known as `, c("valma status scripts"), `).`,
     blockquote(c("valos-vault-3.3"),
-        `: A package can export valme scripts using npm package.json `,
+        `: A package can export valma scripts using npm package.json `,
         c("bin"), ` section and by prefixing the exported name with `,
-        c("valme-"), ` as usual. These scripts will be available for
+        c("valma-"), ` as usual. These scripts will be available for
         all packages depending on this package in their `, c("depends"),
         ` pool.`),
     `Running `, c("vlm"), ` with no arguments lists all available
     commands grouped by pool in current directory context.`,
     blockquote(c("valos-vault-3.5"),
-        `: valme can be used in programmatic contexts to run valme
-        scripts. When done so, valme must be added as a dependency.`),
+        `: valma can be used in programmatic contexts to run valma
+        scripts. When done so, valma must be added as a dependency.`),
     `This happens just like with the CLI by using `, c("vlm <command> [<args>]"), `.
     ("npx -c" would be the alternative but it's slow and limited).`,
     blockquote(c("valos-vault-3.5.1"),
-        `: valme ensures that node environment is loaded`),
+        `: valma ensures that node environment is loaded`),
     `The environment is loaded only once even for recursive script
     invokations.`,
     blockquote(c("valos-vault-3.5.2"),
-        `: valme ensures that 'vlm' is always found in path`),
-    `This is so that valme scripts can call 'vlm' even valme is not
-    globally installed as long as valme has been installed as a dependency.`,
+        `: valma ensures that 'vlm' is always found in path`),
+    `This is so that valma scripts can call 'vlm' even valma is not
+    globally installed as long as valma has been installed as a dependency.`,
     blockquote(c("valos-vault-3.5.3"),
-        `: valme ensures that the most specific 'vlm' version is used
+        `: valma ensures that the most specific 'vlm' version is used
         to evaluate a command, preferring scripts over depended over global.`),
     `This is so that toolkits can precisely control the whole toolchain
     in their dependencies.`,
   ],
-  "chapter#utility_layer>7;ValOS `utility` layer provides an operational service": {
+  "chapter#utility_layer>7;ValOS `utility` layers provide operational services": {
     "#0": [
       `ValOS has four main utility layers: `, c("files"), `, `, c("packages"),
       `, `, c("authorities"), ` and `, c("partitions"), `. These layers
@@ -279,7 +282,7 @@ module.exports = {
           "https://docs.npmjs.com/misc/registry#can-i-run-my-own-private-registry"),
       `can be set up for that purpose.
 
-      valme package commands: `, command("vlm assemble-packages"), ` `,
+      valma package commands: `, command("vlm assemble-packages"), ` `,
       command("vlm publish-packages"),
     ],
     [`chapter#authorities_layer>3;Authorities utility layer has the authority deployments${
@@ -325,7 +328,7 @@ module.exports = {
 
         Particular authorities are naturally free to implement their
         operational architectures in any way they like. This said opspaces
-        have a well-defined structure which valme authority tools make use of.
+        have a well-defined structure which valma authority tools make use of.
 
         Updates to the authority payloads are primarily done as modifications
         to the corresponding opspace and then distributing those via release
@@ -361,7 +364,7 @@ module.exports = {
         recommended to keep such valospace applications deployments
         separate from the authorities they are used to control).
 
-        valme opspace commands: `, c("vlm build-release"), ` `,
+        valma opspace commands: `, c("vlm build-release"), ` `,
         c("vlm deploy-release"),
       ],
       "chapter#>0;ValOS core vs. auxiliary authorities": [
@@ -411,10 +414,35 @@ module.exports = {
       ],
     },
   },
-  "chapter#>;Kernel domain provides the ValOS primary libraries": {
+  "chapter#>8;Kernel domain provides the ValOS primary libraries": {
     "#0": [
       `It does, indeed (this section pending better understanding on
       how to write domain specifications).`
+    ],
+  },
+  "chapter#section_profiles>9;Technician profiles": {
+    "#0": [
+      `Technician is generic orientation. There are various voyager
+      sub-profiles which benefit from more specific guidance.`,
+    ],
+    "chapter#developer>0;How developers set up their development environments": {
+      "#0": [],
+    },
+    "chapter#contributor>1;How contributors produce new fabric packages and code": {
+      "#0": [],
+    },
+    "chapter#administrator>2;How administrators manage infrastructure resources": {
+      "#0": [],
+    },
+    "chapter#devops>3;How DevOps workflows are implemented with valma": {
+      "#0": [],
+    },
+    "chapter#hacker>4;How to have fun while avoiding pain": {
+      "#0": [],
+    },
+    "chapter#etc>9;How to add new profiles": [
+      `Create a `, ref("PR in github", "https://help.github.com/en/articles/about-pull-requests"),
+      ` against @valos/kernel/revdocs/valonaut.revdoc.js`,
     ],
   },
 };

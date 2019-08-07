@@ -116,9 +116,9 @@
     the packages alongside their main content. A command line tool
     called ValOS Medium or <code><span class="vdoc type-vdoc-node">vlm</span>
 </code> is used to discover and <code><span class="vdoc type-vdoc-node">invoke</span>
-</code> these scripts as <code><span class="vdoc type-vdoc-node">valme commands</span>
+</code> these scripts as <code><span class="vdoc type-vdoc-node">valma commands</span>
 </code>.</p>
-      <p>    From a DevOps perspective <code><span class="vdoc type-vdoc-node">valme</span>
+      <p>    From a DevOps perspective <code><span class="vdoc type-vdoc-node">valma</span>
 </code>, <code><span class="vdoc type-vdoc-node">vault</span>
 </code> and <code><span class="vdoc type-vdoc-node">opspace</span>
 </code> are the three concrete core mechanisms that
@@ -148,22 +148,22 @@
     developers. It revolves around developing code as library packages.
   </section>
 
-  <section id="valme" class="vdoc type-vdoc-chapter">
-    <h2>`valme` - a convenience CLI to context-dependent command scripts</h2>
-valme (<code><span class="vdoc type-vdoc-node">vlm</span>
+  <section id="valma" class="vdoc type-vdoc-chapter">
+    <h2>`valma` - a convenience CLI to context-dependent command scripts</h2>
+valma (<code><span class="vdoc type-vdoc-node">vlm</span>
 </code> in CLI) is a convenience tool for executing
     command scripts exported by packages in valos workspace contexts.
     It is a generalization of 'npx -c' behaviour, adding
     discoverability, ability to invoke global scripts and the ability
     to invoke multiple scripts at once using glob matching.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.1</span>
-</code>: valme is installed with <span class="vdoc type-revdoc-command">npm install -g valme</span>
+</code>: valma is installed with <span class="vdoc type-revdoc-command">npm install -g valma</span>
  or as a package dependency</blockquote>This installs the global CLI command <code><span class="vdoc type-vdoc-node">vlm</span>
 </code>. At its core
-    valme is a command dispatcher to <code><span class="vdoc type-vdoc-node">valme scripts</span>
+    valma is a command dispatcher to <code><span class="vdoc type-vdoc-node">valma scripts</span>
 </code> in
     various <code><span class="vdoc type-vdoc-node">command pools</span>
 </code>.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.2</span>
-</code>: valme searches the scripts
+</code>: valma searches the scripts
         first from the package.json <code><span class="vdoc type-vdoc-node">scripts</span>
 </code> pool, then from <code><span class="vdoc type-vdoc-node">./node_modules/.bin/</span>
 </code><code><span class="vdoc type-vdoc-node">depends</span>
@@ -172,38 +172,38 @@ valme (<code><span class="vdoc type-vdoc-node">vlm</span>
 </code><code><span class="vdoc type-vdoc-node">global</span>
 </code> pool.</blockquote>As an example typing <span class="vdoc type-revdoc-command">vlm status</span>
  in some directory
-    context would forward the command to <span class="vdoc type-revdoc-command">valme.bin/valme-status</span>
+    context would forward the command to <span class="vdoc type-revdoc-command">valma.bin/valma-status</span>
  first if one exists and falling back to the more generic versions
-    if not. The call eventually resolves at the global <span class="vdoc type-revdoc-command">/usr/bin/valme-status</span>
+    if not. The call eventually resolves at the global <span class="vdoc type-revdoc-command">/usr/bin/valma-status</span>
 . Its implementation then calls <span class="vdoc type-revdoc-command">vlm .status/**/*</span>
  which calls all scripts which match
-    the glob <span class="vdoc type-revdoc-command">.valme-status/**/*</span>
+    the glob <span class="vdoc type-revdoc-command">.valma-status/**/*</span>
  and are visible on the
     execution context pools (the scripts called by <span class="vdoc type-revdoc-command">vlm status</span>
- are known as <code><span class="vdoc type-vdoc-node">valme status scripts</span>
+ are known as <code><span class="vdoc type-vdoc-node">valma status scripts</span>
 </code>).<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.3</span>
-</code>: A package can export valme scripts using npm package.json <code><span class="vdoc type-vdoc-node">bin</span>
-</code> section and by prefixing the exported name with <code><span class="vdoc type-vdoc-node">valme-</span>
+</code>: A package can export valma scripts using npm package.json <code><span class="vdoc type-vdoc-node">bin</span>
+</code> section and by prefixing the exported name with <code><span class="vdoc type-vdoc-node">valma-</span>
 </code> as usual. These scripts will be available for
         all packages depending on this package in their <code><span class="vdoc type-vdoc-node">depends</span>
 </code> pool.</blockquote>Running <code><span class="vdoc type-vdoc-node">vlm</span>
 </code> with no arguments lists all available
     commands grouped by pool in current directory context.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.5</span>
-</code>: valme can be used in programmatic contexts to run valme
-        scripts. When done so, valme must be added as a dependency.</blockquote>This happens just like with the CLI by using <code><span class="vdoc type-vdoc-node">vlm <command> [<args>]</span>
+</code>: valma can be used in programmatic contexts to run valma
+        scripts. When done so, valma must be added as a dependency.</blockquote>This happens just like with the CLI by using <code><span class="vdoc type-vdoc-node">vlm <command> [<args>]</span>
 </code>.
     ("npx -c" would be the alternative but it's slow and limited).<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.5.1</span>
-</code>: valme ensures that node environment is loaded</blockquote>The environment is loaded only once even for recursive script
+</code>: valma ensures that node environment is loaded</blockquote>The environment is loaded only once even for recursive script
     invokations.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.5.2</span>
-</code>: valme ensures that 'vlm' is always found in path</blockquote>This is so that valme scripts can call 'vlm' even valme is not
-    globally installed as long as valme has been installed as a dependency.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.5.3</span>
-</code>: valme ensures that the most specific 'vlm' version is used
+</code>: valma ensures that 'vlm' is always found in path</blockquote>This is so that valma scripts can call 'vlm' even valma is not
+    globally installed as long as valma has been installed as a dependency.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.5.3</span>
+</code>: valma ensures that the most specific 'vlm' version is used
         to evaluate a command, preferring scripts over depended over global.</blockquote>This is so that toolkits can precisely control the whole toolchain
     in their dependencies.
   </section>
 
   <section id="utility_layer" class="vdoc type-vdoc-chapter">
-    <h2>ValOS `utility` layer provides an operational service</h2>
+    <h2>ValOS `utility` layers provide operational services</h2>
 ValOS has four main utility layers: <code><span class="vdoc type-vdoc-node">files</span>
 </code>, <code><span class="vdoc type-vdoc-node">packages</span>
 </code>, <code><span class="vdoc type-vdoc-node">authorities</span>
@@ -300,7 +300,7 @@ Note that <code><span class="vdoc type-vdoc-node">files</span>
       <p>      Note: npmjs.com is a javascript repository - this should not be a
       problem as long as ValOS remains mostly javascript and config
       files. If a need to diversity the languages arises a <a href="https://docs.npmjs.com/misc/registry#can-i-run-my-own-private-registry" class="vdoc type-vdoc-reference">private npm registry</a>can be set up for that purpose.</p>
-      <p>      valme package commands: <span class="vdoc type-revdoc-command">vlm assemble-packages</span>
+      <p>      valma package commands: <span class="vdoc type-revdoc-command">vlm assemble-packages</span>
  <span class="vdoc type-revdoc-command">vlm publish-packages</span>
 </p>
 
@@ -350,7 +350,7 @@ Note that <code><span class="vdoc type-vdoc-node">files</span>
 
         Particular authorities are naturally free to implement their
         operational architectures in any way they like. This said opspaces
-        have a well-defined structure which valme authority tools make use of.
+        have a well-defined structure which valma authority tools make use of.
 
         Updates to the authority payloads are primarily done as modifications
         to the corresponding opspace and then distributing those via release
@@ -388,7 +388,7 @@ Note that <code><span class="vdoc type-vdoc-node">files</span>
         recommended to keep such valospace applications deployments
         separate from the authorities they are used to control).
 
-        valme opspace commands: <code><span class="vdoc type-vdoc-node">vlm build-release</span>
+        valma opspace commands: <code><span class="vdoc type-vdoc-node">vlm build-release</span>
 </code> <code><span class="vdoc type-vdoc-node">vlm deploy-release</span>
 </code>
   <section class="vdoc type-vdoc-chapter">
@@ -449,6 +449,42 @@ TODO(iridian): Figure out whether this is the actually most
     <h2>Kernel domain provides the ValOS primary libraries</h2>
 It does, indeed (this section pending better understanding on
       how to write domain specifications).
+  </section>
+
+  <section id="section_profiles" class="vdoc type-vdoc-chapter">
+    <h2>Technician profiles</h2>
+Technician is generic orientation. There are various voyager
+      sub-profiles which benefit from more specific guidance.
+  <section id="developer" class="vdoc type-vdoc-chapter">
+    <h2>How developers set up their development environments</h2>
+
+  </section>
+
+  <section id="contributor" class="vdoc type-vdoc-chapter">
+    <h2>How contributors produce new fabric packages and code</h2>
+
+  </section>
+
+  <section id="administrator" class="vdoc type-vdoc-chapter">
+    <h2>How administrators manage infrastructure resources</h2>
+
+  </section>
+
+  <section id="devops" class="vdoc type-vdoc-chapter">
+    <h2>How DevOps workflows are implemented with valma</h2>
+
+  </section>
+
+  <section id="hacker" class="vdoc type-vdoc-chapter">
+    <h2>How to have fun while avoiding pain</h2>
+
+  </section>
+
+  <section id="etc" class="vdoc type-vdoc-chapter">
+    <h2>How to add new profiles</h2>
+Create a <a href="https://help.github.com/en/articles/about-pull-requests" class="vdoc type-vdoc-reference">PR in github</a> against @valos/kernel/revdocs/valonaut.revdoc.js
+  </section>
+
   </section>
 
   </body>

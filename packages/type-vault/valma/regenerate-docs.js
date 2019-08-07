@@ -57,6 +57,7 @@ exports.handler = async (yargv) => {
       "@id": vdocld[0]["@id"],
       tags: (vdocld[0]["vdoc:tags"] || []).concat(...tags)
           .filter((v, i, a) => a.indexOf(v) === i),
+      subProfiles: (vdocld[0].subProfiles || []),
       title: vdocld[0]["dc:title"] || documentPath,
       ..._embedSection("abstract", vdocld[0].abstract),
       ..._embedSection("introduction", { ...vdocld[0].introduction || {}, "dc:title": undefined }),

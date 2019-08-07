@@ -1,4 +1,114 @@
 {
+  "engine": {
+    "@id": "https://valospace.org/engine",
+    "tags": [],
+    "subProfiles": [],
+    "title": "engine",
+    "abstract": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is a revdoc template document 'engine' created by create-revdoc."
+      ]
+    },
+    "introduction": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReSpec boilerplate"
+          ],
+          "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+        },
+        null,
+        "See ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReVDoc tutorial"
+          ],
+          "vdoc:ref": "@valos/revdoc/tutorial"
+        },
+        " for instructions on how to write revdoc source documents.",
+        null,
+        "See also ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReVdoc specification"
+          ],
+          "vdoc:ref": "@valos/revdoc"
+        },
+        " and ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "VDoc specification"
+          ],
+          "vdoc:ref": "@valos/vdoc"
+        },
+        " for reference documentation."
+      ]
+    },
+    "package": "@valos/engine",
+    "version": "0.35.0-prerelease.8"
+  },
+  "inspire": {
+    "@id": "https://valospace.org/inspire",
+    "tags": [],
+    "subProfiles": [],
+    "title": "inspire",
+    "abstract": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is a revdoc template document 'inspire' created by create-revdoc."
+      ]
+    },
+    "introduction": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReSpec boilerplate"
+          ],
+          "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+        },
+        null,
+        "See ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReVDoc tutorial"
+          ],
+          "vdoc:ref": "@valos/revdoc/tutorial"
+        },
+        " for instructions on how to write revdoc source documents.",
+        null,
+        "See also ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReVdoc specification"
+          ],
+          "vdoc:ref": "@valos/revdoc"
+        },
+        " and ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "VDoc specification"
+          ],
+          "vdoc:ref": "@valos/vdoc"
+        },
+        " for reference documentation."
+      ]
+    },
+    "package": "@valos/inspire",
+    "version": "0.35.0-prerelease.8"
+  },
   "raem": {
     "@id": "https://valospace.org/raem",
     "tags": [
@@ -7,6 +117,7 @@
       "ONTOLOGY",
       "LIBRARY"
     ],
+    "subProfiles": [],
     "title": "ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology",
     "abstract": {
       "rdf:type": "vdoc:Chapter",
@@ -96,6 +207,7 @@
       "PRIMARY",
       "ONTOLOGY"
     ],
+    "subProfiles": [],
     "title": "ReVDoc - ReSpec document VDoc extension",
     "abstract": {
       "rdf:type": "vdoc:Chapter",
@@ -136,6 +248,7 @@
   "revdoc/tutorial": {
     "@id": "https://valospace.org/revdoc/tutorial",
     "tags": [],
+    "subProfiles": [],
     "title": "ReVDoc Tutorial",
     "abstract": {
       "rdf:type": "vdoc:Chapter",
@@ -193,6 +306,7 @@
       "PRIMARY",
       "ONTOLOGY"
     ],
+    "subProfiles": [],
     "title": "SBoMDoc - Software Bill of Materials VDoc extension",
     "abstract": {
       "rdf:type": "vdoc:Chapter",
@@ -230,12 +344,123 @@
     "package": "@valos/sbomdoc",
     "version": "0.35.0-prerelease.8"
   },
+  "script": {
+    "@id": "https://valospace.org/script",
+    "tags": [],
+    "subProfiles": [],
+    "title": "script",
+    "abstract": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is a revdoc template document 'script' created by create-revdoc."
+      ]
+    },
+    "introduction": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReSpec boilerplate"
+          ],
+          "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+        },
+        null,
+        "See ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReVDoc tutorial"
+          ],
+          "vdoc:ref": "@valos/revdoc/tutorial"
+        },
+        " for instructions on how to write revdoc source documents.",
+        null,
+        "See also ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReVdoc specification"
+          ],
+          "vdoc:ref": "@valos/revdoc"
+        },
+        " and ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "VDoc specification"
+          ],
+          "vdoc:ref": "@valos/vdoc"
+        },
+        " for reference documentation."
+      ]
+    },
+    "package": "@valos/script",
+    "version": "0.35.0-prerelease.8"
+  },
+  "sourcerer": {
+    "@id": "https://valospace.org/sourcerer",
+    "tags": [],
+    "subProfiles": [],
+    "title": "sourcerer",
+    "abstract": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is a revdoc template document 'sourcerer' created by create-revdoc."
+      ]
+    },
+    "introduction": {
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReSpec boilerplate"
+          ],
+          "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+        },
+        null,
+        "See ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReVDoc tutorial"
+          ],
+          "vdoc:ref": "@valos/revdoc/tutorial"
+        },
+        " for instructions on how to write revdoc source documents.",
+        null,
+        "See also ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "ReVdoc specification"
+          ],
+          "vdoc:ref": "@valos/revdoc"
+        },
+        " and ",
+        {
+          "rdf:type": "vdoc:Reference",
+          "vdoc:content": [
+            "VDoc specification"
+          ],
+          "vdoc:ref": "@valos/vdoc"
+        },
+        " for reference documentation."
+      ]
+    },
+    "package": "@valos/sourcerer",
+    "version": "0.35.0-prerelease.8"
+  },
   "twindoc": {
     "@id": "https://valospace.org/twindoc",
     "tags": [
       "PRIMARY",
       "ONTOLOGY"
     ],
+    "subProfiles": [],
     "title": "TwinDoc - Valospace Hypertwin VDoc extension",
     "abstract": {
       "rdf:type": "vdoc:Chapter",
@@ -286,6 +511,7 @@
       "PRIMARY",
       "HOW_TO"
     ],
+    "subProfiles": [],
     "title": "Assorted tutorials",
     "abstract": {
       "rdf:type": "vdoc:Chapter",
@@ -304,6 +530,7 @@
       "PRIMARY",
       "ONTOLOGY"
     ],
+    "subProfiles": [],
     "title": "VDoc - ValOS document interchange specification",
     "abstract": {
       "rdf:type": "vdoc:Chapter",
@@ -368,6 +595,7 @@
       "DOMAIN",
       "ONTOLOGY"
     ],
+    "subProfiles": [],
     "title": "@valos/kernel domain content reference",
     "abstract": {
       "rdf:type": "vdoc:Chapter",
@@ -399,14 +627,14 @@
     "introduction": {
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
-        "ValOS ecosystem revolves around various roles. You can be one,\n      many or even none of them but you should know about all of them.",
+        "ValOS ecosystem revolves around various roles. You can be one,\n      many or even none of them but you should know at least a bit\n      about all of them.",
         null,
         {
           "rdf:type": "vdoc:Reference",
           "vdoc:content": [
-            "Valme"
+            "Valma"
           ],
-          "vdoc:ref": "Valme"
+          "vdoc:ref": "Valma"
         },
         " itself is a collection of tools for interacting\n      with the ValOS ecosystem, most notable of which is ",
         {
@@ -487,6 +715,35 @@
                 },
                 "vdoc:wide": true,
                 "vdoc:tall": true
+              },
+              {
+                "rdf:type": "vdoc:Header",
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "Aliases:"
+                  ]
+                },
+                "vdoc:wide": true,
+                "vdoc:cell": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    {
+                      "rdf:type": "vdoc:Reference",
+                      "vdoc:content": [
+                        {
+                          "vdoc:words": {
+                            "vdoc:selectField": "subProfiles"
+                          }
+                        }
+                      ],
+                      "vdoc:ref": [
+                        "vdoc:selectKey",
+                        "#section_profiles"
+                      ]
+                    }
+                  ]
+                }
               }
             ]
           },
@@ -511,6 +768,14 @@
     "tags": [
       "PRIMARY",
       "ROLE"
+    ],
+    "subProfiles": [
+      "contributor",
+      "developer",
+      "administrator",
+      "devops",
+      "hacker",
+      "etc"
     ],
     "title": "\"I am a ValOS technician, I want to enable valonauts and expand valospace\"",
     "abstract": {
@@ -574,6 +839,13 @@
       "PRIMARY",
       "ROLE"
     ],
+    "subProfiles": [
+      "everyone",
+      "personal",
+      "student",
+      "prototypist",
+      "etc"
+    ],
     "title": "\"I am a valonaut, I want to create and share interactive content\"",
     "abstract": {
       "rdf:type": "vdoc:Chapter",
@@ -623,6 +895,15 @@
       "PRIMARY",
       "ROLE"
     ],
+    "subProfiles": [
+      "enthusiast",
+      "entrepreneur",
+      "evangelist",
+      "investor",
+      "business_owner",
+      "sales_rep",
+      "etc"
+    ],
     "title": "\"I am a ValOS voyager, I want to discover ValOS and enlighten others\"",
     "abstract": {
       "rdf:type": "vdoc:Chapter",
@@ -633,7 +914,7 @@
     "introduction": {
       "rdf:type": "vdoc:Chapter",
       "vdoc:content": [
-        "As a voyager you have stakes that matter. Whether you were to\n    invest on a ValOS collaborator as a financier, to adopt ValOS as\n    technology as an executive or to commit your personal time and\n    energy on a ValOS project you need to ",
+        "As a voyager you have stakes that matter. Whether you were to\n    invest on a ValOS collaborator as a financier, to adopt ValOS as\n    technology as an executive or just to commit your personal time and\n    energy on a ValOS project you need to ",
         {
           "vdoc:em": true,
           "vdoc:content": [
@@ -642,7 +923,9 @@
         },
         " forward.",
         null,
-        "To make sound decisions and to position yourself proactively you\n    need to understand the big picture and philosophy of the ValOS\n    ecosystem. Only then you can enlighten others."
+        "To make sound decisions and to position yourself proactively you\n    need to understand the big picture and philosophy of the ValOS\n    ecosystem. Only then you can enlighten others.",
+        null,
+        "You use tailored but real-world ValOS demo setups to illustrate\n    how ValOS a solution could be configured to meet the needs at hand.\n    Your audience can be your customer, your team or even just\n    yourself."
       ]
     },
     "package": "@valos/kernel",

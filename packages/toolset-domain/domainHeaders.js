@@ -40,10 +40,17 @@ const roles =  {
         ref({ "vdoc:selectField": "title" }, ["vdoc:selectKey", "#introduction"]))),
     "vdoc:content": ["Your answer..."],
   },
-  "header#9;introduction": {
+  "header#8;introduction": {
     "vdoc:content": em("Introduction:"),
     "vdoc:wide": true,
     "vdoc:tall": true,
+  },
+  "header#9": {
+    "vdoc:content": em("Aliases:"),
+    "vdoc:wide": true,
+    "vdoc:cell": em(ref(
+        { "vdoc:words": { "vdoc:selectField": "subProfiles" } },
+        ["vdoc:selectKey", "#section_profiles"])),
   },
 };
 

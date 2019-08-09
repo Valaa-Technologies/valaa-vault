@@ -14,17 +14,33 @@ are available even for the inactive, out-of-this-world resources.`,
     "valos:restriction": { "@type": "owl:Restriction", "owl:cardinality": 1 },
     "valos:generator": "getId",
     "rdfs:comment":
-`VRL of this Resource`,
+`The immutable resource id of this Resource.`,
   },
 
   rawId: {
     "@type": "valos:AliasField",
+    "revdoc:deprecatedInFavorOf": "valos:id",
+    "valos:aliasOf": "valos:id",
+    "rdfs:subPropertyOf": "valos:id",
     "rdfs:domain": "valos:TransientFields",
     "rdfs:range": "xsd:string",
     "valos:restriction": { "@type": "owl:Restriction", "owl:cardinality": 1 },
     "valos:generator": "getRawId",
     "rdfs:comment":
-`Globally unique identifier of this Resource`,
+`The resource id of this Resource`,
+  },
+
+  resourceIRI: {
+    "@type": "valos:GeneratedField",
+    "rdfs:domain": "valos:TransientFields",
+    "rdfs:range": "xsd:anyURI",
+    "valos:restriction": { "@type": "owl:Restriction", "owl:cardinality": 1 },
+    "valos:generator": "getIRI",
+    "rdfs:comment":
+`The most recent authoritative IRI of this Resource in the current view
+of the world. Always equivalent to a catenation of
+<valos:partitionIRI> "#" <valos:id>
+of this resource`,
   },
 
   typeName: {
@@ -34,7 +50,7 @@ are available even for the inactive, out-of-this-world resources.`,
     "valos:restriction": { "@type": "owl:Restriction", "owl:cardinality": 1 },
     "valos:generator": "getTransientTypeName",
     "rdfs:comment":
-`Globally unique identifier of this Resource`,
+`The primary type name of this Resource`,
   },
 
   partition: {
@@ -44,8 +60,8 @@ are available even for the inactive, out-of-this-world resources.`,
     "valos:restriction": { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "valos:generator": "partitionResolver",
     "rdfs:comment":
-`The partition root Resource of this Resource, ie. the nearest owner
-(possibly self) which is also an active partition.`,
+`The partition root Resource of this Resource, ie. the nearest ancestor
+(possibly self) with a non-null valos:authorityIRI.`,
   },
 
   partitionIRI: {
@@ -55,7 +71,8 @@ are available even for the inactive, out-of-this-world resources.`,
     "valos:restriction": { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "valos:generator": "partitionURIResolver",
     "rdfs:comment":
-`The partition IRI of the partition this Resource belongs to.`,
+`The partition IRI of the partition this Resource belongs to in the
+current view of the world.`,
   },
 
   partitionURI: {
@@ -78,19 +95,6 @@ are available even for the inactive, out-of-this-world resources.`,
 `The prototype of this Resource. All field lookups for which there is
 no associated value set and whose field descriptors don't have
 ownDefaultValue are forwarded to the prototype.`,
-  },
-
-  prototypeAlias: {
-    "rdf:type": "valos:AliasField",
-    "valos:aliasOf": "valos:prototype",
-    "rdfs:subPropertyOf": "valos:prototype",
-    "rdfs:domain": "valos:TransientFields",
-    "rdfs:range": "valos:TransientFields",
-    "valos:propertyRestriction": { "rdf:type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "rdfs:comment":
-`The prototype of this Resource.
-This is an alias for valos:prototype to bypass conflicts with native
-javascript property 'prototype'.`
   },
 
   ownFields: {

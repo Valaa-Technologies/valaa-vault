@@ -10,12 +10,14 @@
   },
   "valos": {
     "type": "library",
-    "domain": "@valos/kernel"
+    "domain": "@valos/kernel",
+    "docs": "https://valospace.org/script"
   },
   "main": "index.js",
   "dependencies": {
     "@valos/raem": "^0.35.0-prerelease.8",
     "acorn": "^5.0.3",
     "graphql": "^0.6.2"
-  }
+  },
+  "homepage": "https://valospace.org/script"
 }

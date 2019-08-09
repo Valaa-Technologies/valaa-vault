@@ -21,14 +21,36 @@ their resource id.`
     "rdfs:comment":
 `Content-hashed identifier of the Bvob`
   },
+  */
+
+  hashAlgorithm: {
+    "@type": "valos:GeneratedField",
+    "rdfs:domain": "valos:Bvob",
+    "rdfs:range": "xsd:string",
+    "valos:restriction": { "@type": "owl:Restriction", "owl:cardinality": 1 },
+    "valos:generator": "hashAlgorithm",
+    "rdfs:comment":
+`The hash algorithm used to create the content hash of this Bvob`,
+  },
 
   contentHash: {
-    "rdf:type": "valos:GeneratedField",
-    "rdfs:domain": "valos:Bvob", "rdfs:range": "xsd:string",
-    "valos:propertyRestriction": { "rdf:type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos:generator": "$V.id.rawId()",
+    "@type": "valos:GeneratedField",
+    "rdfs:domain": "valos:Bvob",
+    "rdfs:range": "xsd:string",
+    "valos:restriction": { "@type": "owl:Restriction", "owl:cardinality": 1 },
+    "valos:generator": "contentHash",
     "rdfs:comment":
-`The content has of this Bvob`
+`The content hash of the octet-stream associated with this Bvob`,
+  },
+
+  contentLength: {
+    "@type": "valos:GeneratedField",
+    "rdfs:domain": "valos:Bvob",
+    "rdfs:range": "xsd:nonNegativeInteger",
+    "valos:restriction": { "@type": "owl:Restriction", "owl:cardinality": 1 },
+    "valos:generator": "contentLength",
+    "rdfs:comment":
+`The number of octets in the octet-stream associated with this Bvob.`,
   },
 
   contentReferrers: {

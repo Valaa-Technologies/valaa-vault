@@ -48,7 +48,7 @@ containing non-nullable references will be cascade destroyed.`,
           ""} true is (by design) an irreversible operation. If this ${objectDescription} is also${
           ""} the root resource of a partition the whole partition is permanently frozen.`, {
             isDuplicateable: false,
-            immediateDefaultValue: false,
+            ownDefaultValue: false,
             affiliatedType: "Resource",
           },
       ),

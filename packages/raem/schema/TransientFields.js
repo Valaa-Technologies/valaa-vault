@@ -69,7 +69,7 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
 
       ...primaryField("prototype", TransientFields,
           `The prototype of this ${objectDescription}. All field lookups for which there is no${
-            ""} associated value set and whose field descriptors don't have immediateDefaultValue${
+            ""} associated value set and whose field descriptors don't have ownDefaultValue${
             ""} are forwarded to the prototype.`, {
             coupling: toOne({ defaultCoupledField: "prototypers" }),
             affiliatedType: "TransientFields",
@@ -94,7 +94,7 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
           `All ${objectDescription}'s which have this ${objectDescription
           } as prototype but which are not instances (direct nor ghost)`, {
             coupling: toMany({ coupledField: "prototype", preventsDestroy: true }),
-            immediateDefaultValue: [],
+            ownDefaultValue: [],
             affiliatedType: "TransientFields",
           },
       ),
@@ -109,7 +109,7 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
       ...transientField("instances", new GraphQLList(TransientFields),
           `Instances which have this ${objectDescription} as prototype`, {
             coupling: toMany({ coupledField: "prototype", preventsDestroy: true }),
-            immediateDefaultValue: [],
+            ownDefaultValue: [],
             affiliatedType: "TransientFields",
           },
       ),
@@ -131,7 +131,7 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
       ...transientField("materializedGhosts", new GraphQLList(TransientFields),
           `Materialized ghosts which have this ${objectDescription} as their ghostPrototype`, {
             coupling: toMany({ coupledField: "prototype", preventsDestroy: true }),
-            immediateDefaultValue: [],
+            ownDefaultValue: [],
             affiliatedType: "TransientFields",
           },
       ),
@@ -161,7 +161,7 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
             ""} ghostOwner and that destruction of either of them will result in immaterialization${
             ""} of the grand-ownling ghost.`, {
             coupling: toOwner({ coupledField: "ghostOwnlings" }),
-            immediateDefaultValue: null,
+            ownDefaultValue: null,
             allowTransientFieldToBeSingular: true,
             affiliatedType: "TransientFields",
           },
@@ -171,7 +171,7 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
           `Materialized ghost Resource's which have this ${objectDescription
           } instance as their host`, {
             coupling: toManyOwnlings({ coupledField: "ghostOwner" }),
-            immediateDefaultValue: [],
+            ownDefaultValue: [],
             affiliatedType: "TransientFields",
           },
       ),

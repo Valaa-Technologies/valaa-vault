@@ -5,17 +5,17 @@
     "subProfiles": [],
     "title": "engine",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is a revdoc template document 'engine' created by create-revdoc."
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ReSpec boilerplate"
           ],
@@ -24,7 +24,7 @@
         null,
         "See ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ReVDoc tutorial"
           ],
@@ -34,7 +34,7 @@
         null,
         "See also ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ReVdoc specification"
           ],
@@ -42,7 +42,7 @@
         },
         " and ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "VDoc specification"
           ],
@@ -60,17 +60,17 @@
     "subProfiles": [],
     "title": "inspire",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is a revdoc template document 'inspire' created by create-revdoc."
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ReSpec boilerplate"
           ],
@@ -79,7 +79,7 @@
         null,
         "See ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ReVDoc tutorial"
           ],
@@ -89,7 +89,7 @@
         null,
         "See also ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ReVdoc specification"
           ],
@@ -97,7 +97,7 @@
         },
         " and ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "VDoc specification"
           ],
@@ -120,18 +120,18 @@
     "subProfiles": [],
     "title": "ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This library provides the definitions and reference implementation\n    for the fundamental ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "ValOS Resources"
           ]
         },
         " and ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "ValOS Events"
           ]
@@ -140,18 +140,18 @@
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This library provides the definitions and reference implementations\n    for the fundamental ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "ValOS Resources"
           ]
         },
         " and ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "ValOS Events"
           ]
@@ -164,7 +164,7 @@
             [
               "A ValOS Resource ",
               {
-                "rdf:type": "vdoc:CharacterData",
+                "@type": "vdoc:CharacterData",
                 "vdoc:content": [
                   "resource"
                 ]
@@ -180,7 +180,7 @@
             [
               "A ValOS Event ",
               {
-                "rdf:type": "vdoc:CharacterData",
+                "@type": "vdoc:CharacterData",
                 "vdoc:content": [
                   "event"
                 ]
@@ -210,11 +210,11 @@
     "subProfiles": [],
     "title": "ReVDoc - ReSpec document VDoc extension",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document specifies ReVDoc, a ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "VDoc extension"
           ],
@@ -222,7 +222,7 @@
         },
         " for extracting and emitting ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ReSpec documents"
           ],
@@ -232,7 +232,7 @@
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "ReVDoc is a VDoc extension which can produce ReSpec documents."
       ]
@@ -251,17 +251,17 @@
     "subProfiles": [],
     "title": "ReVDoc Tutorial",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is a revdoc template document 'tutorial' created by create-revdoc."
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ReSpec boilerplate"
           ],
@@ -270,7 +270,7 @@
         null,
         "See ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ReVDoc tutorial"
           ],
@@ -280,7 +280,7 @@
         null,
         "See also ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ReVdoc specification"
           ],
@@ -288,7 +288,7 @@
         },
         " and ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "VDoc specification"
           ],
@@ -309,11 +309,11 @@
     "subProfiles": [],
     "title": "SBoMDoc - Software Bill of Materials VDoc extension",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document specifies SBomDoc, a ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "VDoc extension"
           ],
@@ -321,7 +321,7 @@
         },
         " for extracting and emitting ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "CycloneDX BOM documents"
           ],
@@ -331,7 +331,7 @@
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "SBoMDoc is a VDoc extension which uses CycloneDX namespaces and\n    can emit BOM documents in various formats."
       ]
@@ -346,54 +346,37 @@
   },
   "script": {
     "@id": "https://valospace.org/script",
-    "tags": [],
+    "tags": [
+      "PRIMARY",
+      "INTRODUCTORY",
+      "ONTOLOGY",
+      "LIBRARY"
+    ],
     "subProfiles": [],
-    "title": "script",
+    "title": "ValOS Script API, schema",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is a revdoc template document 'script' created by create-revdoc."
+        "This library provides the definitions and reference implementation\n    for valoscript, the valospace ECMAScript dialect."
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
+        "Valoscript extends ECMAScript 5 object model transparently for\nmanipulating valospace resources. The valoscript interpreter creates ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
-            "ReSpec boilerplate"
+            "events"
           ],
-          "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+          "vdoc:ref": "@valos/raem#event"
         },
-        null,
-        "See ",
-        {
-          "rdf:type": "vdoc:Reference",
-          "vdoc:content": [
-            "ReVDoc tutorial"
-          ],
-          "vdoc:ref": "@valos/revdoc/tutorial"
-        },
-        " for instructions on how to write revdoc source documents.",
-        null,
-        "See also ",
-        {
-          "rdf:type": "vdoc:Reference",
-          "vdoc:content": [
-            "ReVdoc specification"
-          ],
-          "vdoc:ref": "@valos/revdoc"
-        },
-        " and ",
-        {
-          "rdf:type": "vdoc:Reference",
-          "vdoc:content": [
-            "VDoc specification"
-          ],
-          "vdoc:ref": "@valos/vdoc"
-        },
-        " for reference documentation."
+        " from all valospace resource\nmodification side-effects and groups all such side effects into\ntransactions. Valoscript retains ECMAScript 5 syntax and semantics."
+      ]
+    },
+    "ontologyAbstract": {
+      "vdoc:content": [
+        "@valos/script ontology specifies the Valospace core types and\n      properties directly to the @valos/kernel namespace. "
       ]
     },
     "package": "@valos/script",
@@ -401,54 +384,34 @@
   },
   "sourcerer": {
     "@id": "https://valospace.org/sourcerer",
-    "tags": [],
+    "tags": [
+      "PRIMARY",
+      "INTRODUCTORY",
+      "ONTOLOGY",
+      "LIBRARY"
+    ],
     "subProfiles": [],
-    "title": "sourcerer",
+    "title": "ValOS Sourcerer API, schema",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is a revdoc template document 'sourcerer' created by create-revdoc."
+        "This library provides the definitions and reference implementation\n    of the ValOS sourcerer architecture which is used to route ",
+        {
+          "@type": "vdoc:CharacterData",
+          "vdoc:content": [
+            "ValOS event streams"
+          ]
+        },
+        "."
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "ontologyAbstract": {
       "vdoc:content": [
-        "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
-        {
-          "rdf:type": "vdoc:Reference",
-          "vdoc:content": [
-            "ReSpec boilerplate"
-          ],
-          "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
-        },
-        null,
-        "See ",
-        {
-          "rdf:type": "vdoc:Reference",
-          "vdoc:content": [
-            "ReVDoc tutorial"
-          ],
-          "vdoc:ref": "@valos/revdoc/tutorial"
-        },
-        " for instructions on how to write revdoc source documents.",
-        null,
-        "See also ",
-        {
-          "rdf:type": "vdoc:Reference",
-          "vdoc:content": [
-            "ReVdoc specification"
-          ],
-          "vdoc:ref": "@valos/revdoc"
-        },
-        " and ",
-        {
-          "rdf:type": "vdoc:Reference",
-          "vdoc:content": [
-            "VDoc specification"
-          ],
-          "vdoc:ref": "@valos/vdoc"
-        },
-        " for reference documentation."
+        "@valos/sourcerer ontology specifies the Valospace core types and\n      properties directly to the @valos/kernel namespace. "
       ]
     },
     "package": "@valos/sourcerer",
@@ -463,11 +426,11 @@
     "subProfiles": [],
     "title": "TwinDoc - Valospace Hypertwin VDoc extension",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document specifies TwinDoc, a ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "VDoc extension"
           ],
@@ -479,13 +442,13 @@
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "TwinDoc provides both full isomorphic synchronization as well as\n    incremental, additive updates between VDoc documents and valospace\n    resources.\n    The fully isomoprhic extraction and emission transformations to\n    valospace resources provide lossless roundtrips to both directions:",
         {
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:NumberedList",
+              "@type": "vdoc:NumberedList",
               "vdoc:entries": [
                 "emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD",
                 "extract + emit: a roundtrip starting from valospace into VDocLD back into valospace"
@@ -514,7 +477,7 @@
     "subProfiles": [],
     "title": "Assorted tutorials",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is a collection of tutorials and possibly other notes",
         " created by Jaradacl based on the tasks given. (During first few days at least)"
@@ -533,11 +496,11 @@
     "subProfiles": [],
     "title": "VDoc - ValOS document interchange specification",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document specifies VDoc, a ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "a JSON-LD"
           ],
@@ -547,7 +510,7 @@
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "revdoc:dfn": "#vdoc",
@@ -556,7 +519,7 @@
               "vdoc:strong": true,
               "vdoc:content": [
                 {
-                  "rdf:type": "vdoc:Reference",
+                  "@type": "vdoc:Reference",
                   "vdoc:content": [
                     "VDoc"
                   ],
@@ -570,7 +533,7 @@
         null,
         "Motivation for this specification is to provide the foundation\n    for document ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "Valospace hypertwins"
           ],
@@ -598,14 +561,14 @@
     "subProfiles": [],
     "title": "@valos/kernel domain content reference",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "@valos/kernel domain ",
         "includes all core infrastructure components of ValOS - the Valaa Open System.",
         null,
         "These components are hosted at the ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "npmjs repository within @valos namespace"
           ],
@@ -615,7 +578,7 @@
         null,
         "These components are developed at the ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "valos git repository"
           ],
@@ -625,12 +588,12 @@
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "ValOS ecosystem revolves around various roles. You can be one,\n      many or even none of them but you should know at least a bit\n      about all of them.",
         null,
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "Valma"
           ],
@@ -638,7 +601,7 @@
         },
         " itself is a collection of tools for interacting\n      with the ValOS ecosystem, most notable of which is ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             [
               {
@@ -655,16 +618,16 @@
         ".",
         {
           "vdoc:lookup": "documents",
-          "rdf:type": "vdoc:Table",
+          "@type": "vdoc:Table",
           "vdoc:headers": {
             "vdoc:entries": [
               {
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:cell": {
                   "vdoc:strong": true,
                   "vdoc:content": [
                     {
-                      "rdf:type": "vdoc:Reference",
+                      "@type": "vdoc:Reference",
                       "vdoc:content": [
                         "vdoc:selectKey"
                       ],
@@ -677,7 +640,7 @@
                 ]
               },
               {
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:cell": {
                   "vdoc:strong": true,
                   "vdoc:content": [
@@ -685,7 +648,7 @@
                       "vdoc:em": true,
                       "vdoc:content": [
                         {
-                          "rdf:type": "vdoc:Reference",
+                          "@type": "vdoc:Reference",
                           "vdoc:content": [
                             {
                               "vdoc:selectField": "title"
@@ -706,7 +669,7 @@
               },
               {
                 "vdoc:cell": "introduction",
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:content": {
                   "vdoc:em": true,
                   "vdoc:content": [
@@ -717,7 +680,7 @@
                 "vdoc:tall": true
               },
               {
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:content": {
                   "vdoc:em": true,
                   "vdoc:content": [
@@ -729,7 +692,7 @@
                   "vdoc:em": true,
                   "vdoc:content": [
                     {
-                      "rdf:type": "vdoc:Reference",
+                      "@type": "vdoc:Reference",
                       "vdoc:content": [
                         {
                           "vdoc:words": {
@@ -779,13 +742,13 @@
     ],
     "title": "\"I am a ValOS technician, I want to enable valonauts and expand valospace\"",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is the first introduction for ValOS technicians -\n    the primary infrastructure developers and operators - to the ValOS\n    ecosystem and its infrastructure toolchains and workflows."
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "As a technician you develop and operate the ",
         {
@@ -795,7 +758,7 @@
               "vdoc:strong": true,
               "vdoc:content": [
                 {
-                  "rdf:type": "vdoc:Reference",
+                  "@type": "vdoc:Reference",
                   "vdoc:content": [
                     "ValOS fabric"
                   ],
@@ -811,7 +774,7 @@
         null,
         "    You use ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "vlm"
           ],
@@ -821,7 +784,7 @@
         null,
         "    You create new open source and/or proprietary packages. These\n    permanently create new fabric functionalities and ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "expand"
           ],
@@ -848,17 +811,17 @@
     ],
     "title": "\"I am a valonaut, I want to create and share interactive content\"",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is the first introduction for valonauts - the\n    primary content creators - to the ValOS ecosystem and its core\n    tools."
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "As a valonaut you create, share and deploy web content and\n    interactive applications fully from inside ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "Valospace"
           ],
@@ -868,7 +831,7 @@
         null,
         "You use a web editor called ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "Zero"
           ],
@@ -876,7 +839,7 @@
         },
         " and with it employ\n    traditional web technologies; HTML5, CSS and the Javascript\n    dialect ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "valoscript"
           ],
@@ -906,13 +869,13 @@
     ],
     "title": "\"I am a ValOS voyager, I want to discover ValOS and enlighten others\"",
     "abstract": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is the first introduction for ValOS voyagers -\n    the first adopters, entrepreneurs and evangelists - to the ValOS\n    ecosystem, its philosophy and its ultimate goals."
       ]
     },
     "introduction": {
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "As a voyager you have stakes that matter. Whether you were to\n    invest on a ValOS collaborator as a financier, to adopt ValOS as\n    technology as an executive or just to commit your personal time and\n    energy on a ValOS project you need to ",
         {

@@ -22,7 +22,7 @@ module.exports = {
         }
         node[rule.rest] = rest;
       }
-      if (rule.range) node["rdf:type"] = rule.range;
+      if (rule.range) node["@type"] = rule.range;
       if ((typeof patch !== "object") || (patch === null)) {
         if (!resourceId && !Object.keys(node).length) {
           node = patch;

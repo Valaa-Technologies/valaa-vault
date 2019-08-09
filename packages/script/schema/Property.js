@@ -30,7 +30,7 @@ export default new GraphQLObjectType({
 
     ...primaryField("value", Expression,
         "The target of the property",
-        { initialValue: null, defaultValue: undefined, affiliatedType: "Property" },
+        { initialValue: null, finalDefaultValue: undefined, affiliatedType: "Property" },
     ),
   }),
 });

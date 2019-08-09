@@ -354,14 +354,14 @@ module.exports = {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.classes,
-        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:Class", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:Class", vocabulary),
       },
     },
     [`chapter#section_properties>3;<em>${prefix}:* a vdoc:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.properties,
-        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:Property", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:Property", vocabulary),
       },
     },
     [`chapter#section_html_element_properties>3;<em>${
@@ -383,7 +383,7 @@ with structural semantic meaning are exposed via VDoc core ontology.`,
                 { "vdoc:selectField": "vdoc:elementSpec" }),
           },
         },
-        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:HTMLElementProperty", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:HTMLElementProperty", vocabulary),
       },
     },
     [`chapter#section_vocabulary_other>8;<em>${prefix}:*</em> other vocabulary`]: {
@@ -391,7 +391,7 @@ with structural semantic meaning are exposed via VDoc core ontology.`,
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.vocabularyOther,
         "vdoc:entries": filterKeysWithNoneOf(
-            "rdf:type", ["vdoc:Class", "vdoc:Property", "vdoc:HTMLElementProperty"], vocabulary),
+            "@type", ["vdoc:Class", "vdoc:Property", "vdoc:HTMLElementProperty"], vocabulary),
       },
     },
     "chapter#section_context>9;VDoc Core JSON-LD context term definitions": {

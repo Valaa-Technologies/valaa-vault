@@ -14,6 +14,7 @@ module.exports = {
     emit,
   },
   extractee,
+  createOntology: require("./createOntology"),
 };
 
 function extract (sourceGraphs, {
@@ -77,7 +78,7 @@ function emit (vdocld, formatName, options) {
   options.emitNode = function emitNode (node, target, explicitType) {
     const type = explicitType
         || ((node == null) && "null")
-        || node["rdf:type"]
+        || node["@type"]
         || (Array.isArray(node) && "array")
         || typeof node;
     let subClassOf;

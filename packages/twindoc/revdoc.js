@@ -84,14 +84,14 @@ module.exports = {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.classes,
-        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:Class", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:Class", vocabulary),
       },
     },
     [`chapter#section_properties>3;<em>${prefix}:* a vdoc:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.properties,
-        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "vdoc:Property", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:Property", vocabulary),
       },
     },
     [`chapter#section_vocabulary_other>8;<em>${prefix}:</em> other vocabulary`]: {
@@ -99,7 +99,7 @@ module.exports = {
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.vocabularyOther,
         "vdoc:entries": filterKeysWithNoneOf(
-            "rdf:type", ["vdoc:Class", "vdoc:Property"], vocabulary),
+            "@type", ["vdoc:Class", "vdoc:Property"], vocabulary),
       },
     },
     "chapter#section_context>9;TwinDoc JSON-LD context term definitions": {

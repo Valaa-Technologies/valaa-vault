@@ -1,20 +1,11 @@
 // @flow
 
-// const { ontology } = require("~/vdoc");
+const { createOntology } = require("@valos/vdoc");
 
-module.exports = {
-  prefix: "sbomdoc",
-  prefixIRI: "https://valospace.org/sbomdoc#",
-
-  prefixes: {
-    sbomdoc: "https://valospace.org/sbomdoc#",
-  },
-  context: {
-  },
+module.exports = createOntology("sbomdoc", "https://valospace.org/sbomdoc#", {
   vocabulary: {
-    Document: { "rdf:type": "rdfs:class", "rdfs:subClassOf": "vdoc:Chapter",
+    Document: { "@type": "rdfs:class", "rdfs:subClassOf": "vdoc:Chapter",
       "rdfs:comment": "A Software Bill of Materials document",
     },
   },
-  extractionRules: {},
-};
+});

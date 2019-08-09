@@ -1,7 +1,7 @@
 
 const {
   extractee: {
-    authors, dfn, em, identifize, pkg, ref,
+    authors, em, identifize, pkg, ref,
     filterKeysWithAnyOf, filterKeysWithAllOf, filterKeysWithNoneOf,
   },
   ontologyHeaders,
@@ -182,28 +182,28 @@ module.exports = {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.classes,
-        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "valos:Class", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", "valos:Class", vocabulary),
       },
     },
     [`chapter#section_properties>3;<em>${prefix}:* a valos:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.properties,
-        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "valos:Property", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", "valos:Property", vocabulary),
       },
     },
     [`chapter#section_types>4;<em>${prefix}:* a valos:Type</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.types,
-        "vdoc:entries": filterKeysWithAnyOf("rdf:type", "valos:Type", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", "valos:Type", vocabulary),
       },
     },
-    [`chapter#section_fields>5;<em>${prefix}:* a valos:Field</em> vocabulary`]: {
+    [`chapter#section_fields>5;<em>${prefix}:* a valos:Field*</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.fields,
-        "vdoc:entries": filterKeysWithAnyOf("rdf:type", [
+        "vdoc:entries": filterKeysWithAnyOf("@type", [
           "valos:Field", "valos:PrimaryField", "valos:TransientField", "valos:InferredField",
           "valos:GeneratedField", "valos:AliasField",
         ], vocabulary),
@@ -213,7 +213,7 @@ module.exports = {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.vocabularyOther,
-        "vdoc:entries": filterKeysWithNoneOf("rdf:type", [
+        "vdoc:entries": filterKeysWithNoneOf("@type", [
           "valos:Class", "valos:Type", "valos:Property", "valos:Field",
           "valos:PrimaryField", "valos:TransientField", "valos:InferredField",
           "valos:GeneratedField", "valos:AliasField",

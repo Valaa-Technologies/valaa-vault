@@ -47,7 +47,7 @@ module.exports = {
   pkg (packageName, ...rest) {
     return {
       ...ref(em(packageName), packageName, ...rest),
-      "rdf:type": "revdoc:Package",
+      "@type": "revdoc:Package",
     };
   },
 
@@ -59,7 +59,7 @@ module.exports = {
    */
   command (...parts) {
     return {
-      "rdf:type": "revdoc:Command",
+      "@type": "revdoc:Command",
       "vdoc:words": [].concat(...parts.map(
               part => (typeof part !== "string" ? [part] : part.split(/(\s+)/))))
           .filter(w => (typeof w !== "string") || !w.match(/^\s+$/)),
@@ -79,14 +79,14 @@ module.exports = {
     let currentContext = "";
     const contextedRows = [];
     for (const row of commandedRows) {
-      if ((row != null) && (row["rdf:type"] === "vdoc:ContextBase")) {
+      if ((row != null) && (row["@type"] === "vdoc:ContextBase")) {
         currentContext = row;
       } else {
         contextedRows.push([currentContext, "$ ", row]);
       }
     }
     return {
-      "rdf:type": "revdoc:CommandLineInteraction",
+      "@type": "revdoc:CommandLineInteraction",
       "vdoc:entries": contextedRows,
     };
   },

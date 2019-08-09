@@ -37,7 +37,7 @@ module.exports = {
    */
   c (languageOrCharacters, charactersOrOptions, options) {
     return {
-      "rdf:type": "vdoc:CharacterData",
+      "@type": "vdoc:CharacterData",
       ...(typeof charactersOrOptions === "string" ? {
         "vdoc:language": languageOrCharacters,
         "vdoc:content": [charactersOrOptions],
@@ -56,7 +56,7 @@ module.exports = {
    * @returns
    */
   bulleted () {
-    return { "rdf:type": "vdoc:BulletList", "vdoc:entries": [].slice.call(arguments) };
+    return { "@type": "vdoc:BulletList", "vdoc:entries": [].slice.call(arguments) };
   },
 
   /**
@@ -66,7 +66,7 @@ module.exports = {
    * @returns
    */
   numbered () {
-    return { "rdf:type": "vdoc:NumberedList", "vdoc:entries": [].slice.call(arguments) };
+    return { "@type": "vdoc:NumberedList", "vdoc:entries": [].slice.call(arguments) };
   },
 
   /**
@@ -78,7 +78,7 @@ module.exports = {
    */
   ref (text, ref_ = text) {
     return aggregate({
-      "rdf:type": "vdoc:Reference", "vdoc:content": [text], "vdoc:ref": ref_,
+      "@type": "vdoc:Reference", "vdoc:content": [text], "vdoc:ref": ref_,
     }, "vdoc:content", ...[].slice.call(arguments, 2));
   },
 
@@ -95,7 +95,7 @@ module.exports = {
    */
   cpath (contextPath, contextBase) {
     return {
-      "rdf:type": "vdoc:ContextPath",
+      "@type": "vdoc:ContextPath",
       "vdoc:content": [contextPath],
       ...(contextBase !== undefined ? {
         "vdoc:context": contextBase,
@@ -113,7 +113,7 @@ module.exports = {
   context (newContextPath, contextBase) {
     return {
       ...module.exports.cpath(newContextPath, contextBase),
-      "rdf:type": "vdoc:ContextBase",
+      "@type": "vdoc:ContextBase",
     };
   },
 
@@ -174,5 +174,5 @@ module.exports = {
 
 function _htmlElement (htmlNode, args) {
   return aggregate(aggregate(htmlNode, "vdoc:content", [].slice.call(args)),
-      { "rdf:type": "vdoc:Node" });
+      { "@type": "vdoc:Node" });
 }

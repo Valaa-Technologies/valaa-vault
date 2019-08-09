@@ -57,15 +57,15 @@ const types = {
 const fields = {
   ...vocabulary,
   "header#1;rdfs:domain": "rdfs:domain",
-  "header#2;rdf:type": "rdf:type",
-  "header#3;rdfs:subPropertyOf": "rdfs:subPropertyOf",
-  "header#4;rdfs:range": "rdfs:range",
+  "header#2;rdfs:range": "rdfs:range",
+  "header#3;@type": "rdf:type",
+  "header#4;rdfs:subPropertyOf": "rdfs:subPropertyOf",
   "header#5;valos:coupledField": "valos:coupledField",
 };
 
 const vocabularyOther = {
   ...vocabulary,
-  "header#1;rdf:type": "rdf:type",
+  "header#1;@type": "rdf:type",
   "header#2": {
     "vdoc:content": ["rdfs:subClassOf"],
     "vdoc:cell": { "vdoc:words": { "vdoc:selectField": "rdfs:subClassOf" } },

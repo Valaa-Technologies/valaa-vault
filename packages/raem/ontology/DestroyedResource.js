@@ -1,6 +1,6 @@
 module.exports = {
   DestroyedResource: {
-    "rdf:type": "valos:Type",
+    "@type": "valos:Type",
     "rdfs:subClassOf": "valos:TransientFields",
     "revdoc:brief:": "destroyed resource",
     "rdfs:comment":

@@ -1,11 +1,6 @@
-module.exports = {
-  prefix: "twindoc",
-  prefixIRI: "https://valospace.org/twindoc#",
+const { createOntology } = require("@valos/vdoc");
 
-  prefixes: {
-    twindoc: "https://valospace.org/twindoc#",
-  },
-  context: {},
+module.exports = createOntology("twindoc", "https://valospace.org/twindoc#", {
   vocabulary: {},
   extractionRules: {},
-};
+});

@@ -104,7 +104,7 @@ function _elevateRawSequence (resolver: Resolver, object: Transient,
   let fullUnelevatedSequence = partialRawSequence || [];
   // Grab elevation before the recursive self-call thrashes fieldInfo.
   const elevation = _tryFieldGhostElevation(fieldInfo);
-  if (partialRemoves !== null && (fieldInfo.intro.immediateDefaultValue === undefined)) {
+  if (partialRemoves !== null && (fieldInfo.intro.ownDefaultValue === undefined)) {
     let prototypeSequence;
     let currentObject = object;
     do {

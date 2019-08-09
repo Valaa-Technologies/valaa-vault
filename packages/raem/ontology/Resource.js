@@ -1,6 +1,6 @@
 module.exports = {
   Resource: {
-    "rdf:type": "valos:Type",
+    "@type": "valos:Type",
     "rdfs:subClassOf": "valos:TransientFields",
     "revdoc:brief": "resource",
     "rdfs:comment":
@@ -12,10 +12,10 @@ Resource.`,
   },
 
   owner: {
-    "rdf:type": "valos:PrimaryField",
+    "@type": "valos:PrimaryField",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
-    "valos:propertyRestriction": { "rdf:type": "owl:Restriction", "owl:maxCardinality": 1 },
+    "valos:restriction": { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "valos:isOwned": true,
     "valos:defaultCoupledField": "valos:ownlings",
     "rdfs:comment":
@@ -23,22 +23,22 @@ Resource.`,
   },
 
   name: {
-    "rdf:type": "valos:PrimaryField",
+    "@type": "valos:PrimaryField",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "xsd:string",
-    "valos:propertyRestriction": { "rdf:type": "owl:Restriction", "owl:maxCardinality": 1 },
+    "valos:restriction": { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
 `The primary ValOS name of this Resource. It is globally non-unique but
 often context-dependently unique.`,
   },
 
   nameAlias: {
-    "rdf:type": "valos:AliasField",
+    "@type": "valos:AliasField",
     "valos:aliasOf": "valos:name",
     "rdfs:subPropertyOf": "valos:name",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "xsd:string",
-    "valos:propertyRestriction": { "rdf:type": "owl:Restriction", "owl:maxCardinality": 1 },
+    "valos:restriction": { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
 `The primary name of this Resource. It is globally non-unique but often
 context-dependently unique.
@@ -47,7 +47,7 @@ native javascript property 'name' in some execution contexts`,
   },
 
   ownlings: {
-    "rdf:type": "valos:PrimaryField",
+    "@type": "valos:PrimaryField",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
     "valos:isOwning": true,
@@ -58,7 +58,7 @@ properties that are marked as valos:isOwning.`
   },
 
   unnamedOwnlings: {
-    "rdf:type": "valos:PrimaryField",
+    "@type": "valos:PrimaryField",
     "rdfs:subPropertyOf": "valos:ownlings",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
@@ -70,12 +70,12 @@ named owning property`,
   },
 
   isFrozen: {
-    "rdf:type": "valos:PrimaryField",
+    "@type": "valos:PrimaryField",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "xsd:boolean",
-    "valos:propertyRestriction": { "rdf:type": "owl:Restriction", "owl:cardinality": 1 },
+    "valos:restriction": { "@type": "owl:Restriction", "owl:cardinality": 1 },
     "valos:isDuplicateable": false,
-    "valos:immediateDefaultValue": false,
+    "valos:ownDefaultValue": false,
     "rdfs:comment":
 `Indicates whether this Resource is frozen. A frozen Resource nor any
 of its ownlings cannot have any of their primary fields be modified.

@@ -7,7 +7,7 @@ const documents = {
   },
   /*
   "header#0": {
-    "vdoc:cell": { "rdf:type": "vdoc:TemplateSelector",
+    "vdoc:cell": { "@type": "vdoc:TemplateSelector",
       "vdoc:content": ["vdoc:selectKey"],
       "vdoc:ref": "vdoc:ref",
     },

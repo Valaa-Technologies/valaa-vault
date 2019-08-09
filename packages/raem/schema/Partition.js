@@ -44,7 +44,7 @@ Resource to always be locateable from anywhere.`,
           ""} means that this is an active partition root object. The full partition URI is ${
           ""} generated as per the rules specified by the partition authority URI schema.`, {
             isDuplicateable: false,
-            immediateDefaultValue: null,
+            ownDefaultValue: null,
             affiliatedType: "Partition",
           },
       ),

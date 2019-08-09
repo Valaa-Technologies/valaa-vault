@@ -1,6 +1,6 @@
 module.exports = {
   InactiveResource: {
-    "rdf:type": "valos:Type",
+    "@type": "valos:Type",
     "rdfs:subClassOf": "valos:TransientFields",
     "revdoc:brief": "inactive resource",
     "rdfs:comment":

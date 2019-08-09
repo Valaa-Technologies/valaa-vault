@@ -67,9 +67,9 @@ function emitNodeHTML (node, emission, stack) {
 function nodeAttributes (node, ...classes) {
   let ret = "";
   const typeClasses = [].concat(node["vdoc:class"] || [], ...classes);
-  if (node["rdf:type"]) {
+  if (node["@type"]) {
     if (node["@id"]) ret += ` id="${node["@id"]}"`;
-    typeClasses.push(`type-${node["rdf:type"]}`);
+    typeClasses.push(`type-${node["@type"]}`);
   }
   if (typeClasses.length) {
     ret += ` class="${["vdoc"].concat(typeClasses).map(_classify).join(" ")}"`;
@@ -222,5 +222,5 @@ function emitReferenceHTML (node, emission, stack) {
 }
 
 function emitCharacterDataHTML (node, emission, stack) {
-  return `<code>${stack.emitNode({ ...node, "rdf:type": "vdoc:Node" }, "")}</code>`;
+  return `<code>${stack.emitNode({ ...node, "@type": "vdoc:Node" }, "")}</code>`;
 }

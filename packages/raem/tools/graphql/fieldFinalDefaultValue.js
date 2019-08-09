@@ -8,7 +8,7 @@ import { OrderedMap } from "immutable";
  * @param {any} field
  * @returns
  */
-export default function fieldDefaultValue (fieldIntro) {
+export default function fieldFinalDefaultValue (fieldIntro) {
   const type = fieldIntro.type;
   return type instanceof GraphQLList ? OrderedMap()
       : type instanceof GraphQLScalarType ?

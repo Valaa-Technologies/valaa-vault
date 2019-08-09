@@ -1,6 +1,6 @@
 module.exports = {
   Partition: {
-    "rdf:type": "valos:Type",
+    "@type": "valos:Type",
     "rdfs:subClassOf": "valos:Resource",
     "revdoc:brief": "partition",
     "rdfs:comment":
@@ -29,12 +29,12 @@ locateable from anywhere.`,
   },
 
   authorityIRI: {
-    "rdf:type": "valos:PrimaryField",
+    "@type": "valos:PrimaryField",
     "rdfs:domain": "valos:Partition",
-    "rdfs:range": "xsd:string",
-    "valos:propertyRestriction": { "rdf:type": "owl:Restriction", "owl:maxCardinality": 1 },
+    "rdfs:range": "xsd:anyURI",
+    "valos:restriction": { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "valos:isDuplicateable": false,
-    "valos:immediateDefaultValue": null,
+    "valos:ownDefaultValue": null,
     "rdfs:comment":
 `The authority IRI of this Resource. If this field is set it means that
 this is an active partition root object. The partition IRI is generated
@@ -42,12 +42,12 @@ as per the rules specified by the authority IRI schema.`,
   },
 
   partitionAuthorityURI: {
-    "rdf:type": "valos:AliasField",
+    "@type": "valos:AliasField",
     "valos:aliasOf": "valos:authorityIRI",
     "rdfs:subPropertyOf": "valos:authorityIRI",
     "rdfs:domain": "valos:Partition",
     "rdfs:range": "xsd:string",
-    "valos:propertyRestriction": { "rdf:type": "owl:Restriction", "owl:maxCardinality": 1 },
+    "valos:restriction": { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "revdoc:deprecatedInFavorOf": "valos:authorityIRI",
   },
 };

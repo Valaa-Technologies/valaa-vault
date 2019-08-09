@@ -8,7 +8,7 @@ export default function aliasField (fieldName, targetFieldName, type, descriptio
         }') not supported for fields with no coupling`);
   }
   */
-  if (typeof additionalDescriptors.initialValue !== "undefined") {
+  if (additionalDescriptors.initialValue !== undefined) {
     throw new Error(`Alias fields (here for '${targetFieldName}') cannot have initial values`);
     // ...at least before they have use cases which warrant the added complexity.
   }

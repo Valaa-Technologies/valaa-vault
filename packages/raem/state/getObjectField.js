@@ -10,7 +10,7 @@ import Transient, { tryTransientTypeName, createImmaterialTransient, PrototypeOf
     from "~/raem/state/Transient";
 import denormalizedFromJS from "~/raem/state/denormalizedFromJS";
 
-import fieldDefaultValue from "~/raem/tools/graphql/fieldDefaultValue";
+import fieldFinalDefaultValue from "~/raem/tools/graphql/fieldFinalDefaultValue";
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
 import { wrapError, dumpObject } from "~/tools";
@@ -159,8 +159,8 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
       resolver.objectTransient = object;
     }
 
-    if (fieldInfo.intro && fieldInfo.intro.hasOwnProperty("immediateDefaultValue")) {
-      return denormalizedFromJS(fieldInfo.intro.immediateDefaultValue);
+    if (fieldInfo.intro && fieldInfo.intro.hasOwnProperty("ownDefaultValue")) {
+      return denormalizedFromJS(fieldInfo.intro.ownDefaultValue);
     }
 
     // Prototype access section
@@ -185,10 +185,10 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
 
     // Default value section
     if (fieldInfo.intro) {
-      if (fieldInfo.intro.hasOwnProperty("defaultValue")) {
-        return denormalizedFromJS(fieldInfo.intro.defaultValue);
+      if (fieldInfo.intro.hasOwnProperty("finalDefaultValue")) {
+        return denormalizedFromJS(fieldInfo.intro.finalDefaultValue);
       }
-      ret = fieldDefaultValue(fieldInfo.intro);
+      ret = fieldFinalDefaultValue(fieldInfo.intro);
       if (ret !== undefined) return ret;
     }
     return ret;

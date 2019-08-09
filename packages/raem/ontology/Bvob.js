@@ -1,17 +1,22 @@
 module.exports = {
   Bvob: {
-    "rdf:type": "valos:Type",
+    "@type": "valos:Type",
     "rdfs:subClassOf": "valos:Resource",
     "rdfs:comment":
 `Bvob (Binary ValOS OBject) specifies a class of valos resources which
-have a valid base64-url encoded 240-bit SHAKE256 hash of some
-octet-stream content prefixed with "hashV240:" as their resource id.`,
+are associated with an octet-stream of fixed length. Bvob resources
+have a hash of that octet-stream, prefixed with the hash algorithm, as
+their resource id.`
   },
+  // and have a valid base64-url encoded 240-bit SHAKE256 hash of that
+  // octet-streamprefixed with "hashV240:" as their resource id.`,
 
+  /*
   id: {
-    "rdf:type": "valos:GeneratedField",
-    "rdfs:domain": "valos:Bvob", "rdfs:range": "rdfs:Resource",
-    "valos:propertyRestriction": { "rdf:type": "owl:Restriction", "owl:cardinality": 1 },
+    "@type": "valos:GeneratedField",
+    "rdfs:domain": "valos:Bvob",
+    "rdfs:range": "rdfs:Resource",
+    "valos:restriction": { "@type": "owl:Restriction", "owl:cardinality": 1 },
     "valos:generator": "null",
     "rdfs:comment":
 `Content-hashed identifier of the Bvob`
@@ -27,7 +32,7 @@ octet-stream content prefixed with "hashV240:" as their resource id.`,
   },
 
   contentReferrers: {
-    "rdf:type": "valos:TransientField",
+    "@type": "valos:TransientField",
     "rdfs:domain": "valos:Bvob", "rdfs:range": "valos:Resource",
     "valos:defaultCoupledField": "valos:content",
     "rdfs:comment":

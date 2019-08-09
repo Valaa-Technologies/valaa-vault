@@ -39,12 +39,43 @@ module.exports = {
 
     You use `, ref("vlm", "@/valma"), ` and employ your existing,
     likely professional knowledge of JavaScript, Node.js, DevOps,
-    backend and library development.
+    backend, library and other software development skills.
 
-    You create new open source and/or proprietary packages. These
+    You create new open source and/or proprietary node packages. These
     permanently create new fabric functionalities and `, ref("expand"),
     ` the Valospace by integrating it to old world systems.`,
   ],
+  "chapter#section_profiles>3;Technician role sub-profiles": {
+    "#0": [
+      `Technician sub-profiles detail the typical stages of software
+      development and operations workflows within ValOS ecosystem.
+      A technician should read the detail docs of their own profiles
+      but also understand the at least the abstract principles of all
+      other profiles, which are expanded below.`,
+    ],
+    "chapter#developer>0;How developers set up their development environments": {
+      "#0": [],
+    },
+    "chapter#contributor>1;How contributors produce git PR's and new fabric packages": {
+      "#0": [],
+    },
+    "chapter#tester>2;How testers assure quality before releases": {
+      "#0": [],
+    },
+    "chapter#administrator>3;How administrators manage infrastructure resources": {
+      "#0": [],
+    },
+    "chapter#devops>4;How DevOps workflows are implemented using valma": {
+      "#0": [],
+    },
+    "chapter#hacker>5;How hackers have fun whilst avoiding pain": {
+      "#0": [],
+    },
+    "chapter#etc>9;How to add new profiles": [
+      `Create a `, ref("PR in github", "https://help.github.com/en/articles/about-pull-requests"),
+      ` against @valos/kernel/revdocs/technician.revdoc.js`,
+    ],
+  },
   "chapter#preface>3;*IMPORTANT": [
     `This document, like most of the more principled and less pragmatic
     documents must be understood as strong speculation and as an
@@ -418,31 +449,6 @@ module.exports = {
     "#0": [
       `It does, indeed (this section pending better understanding on
       how to write domain specifications).`
-    ],
-  },
-  "chapter#section_profiles>9;Technician profiles": {
-    "#0": [
-      `Technician is generic orientation. There are various voyager
-      sub-profiles which benefit from more specific guidance.`,
-    ],
-    "chapter#developer>0;How developers set up their development environments": {
-      "#0": [],
-    },
-    "chapter#contributor>1;How contributors produce new fabric packages and code": {
-      "#0": [],
-    },
-    "chapter#administrator>2;How administrators manage infrastructure resources": {
-      "#0": [],
-    },
-    "chapter#devops>3;How DevOps workflows are implemented with valma": {
-      "#0": [],
-    },
-    "chapter#hacker>4;How to have fun while avoiding pain": {
-      "#0": [],
-    },
-    "chapter#etc>9;How to add new profiles": [
-      `Create a `, ref("PR in github", "https://help.github.com/en/articles/about-pull-requests"),
-      ` against @valos/kernel/revdocs/valonaut.revdoc.js`,
     ],
   },
 };

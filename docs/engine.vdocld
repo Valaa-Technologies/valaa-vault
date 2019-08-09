@@ -5,26 +5,36 @@
       "@base": "https://valospace.org/engine#",
       "sbomdoc": "https://valospace.org/sbomdoc#",
       "revdoc": "https://valospace.org/revdoc#",
-      "dc": "http://purl.org/dc/elements/1.1/",
-      "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
       "vdoc": "https://valospace.org/vdoc#",
-      "a": {
-        "@id": "rdf:type",
-        "@type": "@id"
-      },
       "vdoc:content": {
         "@id": "https://valospace.org/vdoc#content",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
       },
       "vdoc:words": {
         "@id": "https://valospace.org/vdoc#words",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
       },
       "vdoc:entries": {
         "@id": "https://valospace.org/vdoc#entries",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:headers": {
+        "@id": "https://valospace.org/vdoc#headers",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:cell": {
+        "@id": "https://valospace.org/vdoc#cell",
+        "@container": "@list",
+        "@type": "@id"
       }
     },
     "dc:title": "",
@@ -42,18 +52,18 @@
     },
     "abstract": {
       "@id": "abstract",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is a revdoc template document 'engine' created by create-revdoc."
       ]
     },
     "sotd": {
       "@id": "sotd",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is part of the library workspace ",
         {
-          "rdf:type": "revdoc:Package",
+          "@type": "revdoc:Package",
           "vdoc:content": [
             {
               "vdoc:em": true,
@@ -66,7 +76,7 @@
         },
         " (of domain ",
         {
-          "rdf:type": "revdoc:Package",
+          "@type": "revdoc:Package",
           "vdoc:content": [
             {
               "vdoc:em": true,
@@ -83,11 +93,11 @@
     },
     "introduction": {
       "@id": "introduction",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ReSpec boilerplate"
           ],
@@ -96,7 +106,7 @@
         null,
         "See ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ReVDoc tutorial"
           ],
@@ -106,7 +116,7 @@
         null,
         "See also ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ReVdoc specification"
           ],
@@ -114,7 +124,7 @@
         },
         " and ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "VDoc specification"
           ],
@@ -123,7 +133,7 @@
         " for reference documentation."
       ]
     },
-    "rdf:type": "revdoc:Document",
+    "@type": "revdoc:Document",
     "vdoc:content": [
       {
         "@id": "abstract"

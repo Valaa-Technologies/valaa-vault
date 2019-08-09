@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset='utf-8'>
-    <title></title>
+    <title>ValOS Sourcerer API, schema</title>
     <script
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
@@ -14,15 +14,175 @@
   </head>
   <body>
     
-  <section id="abstract" class="vdoc type-vdoc-chapter">This document is a revdoc template document 'sourcerer' created by create-revdoc.
+  <section id="abstract" class="vdoc type-vdoc-chapter">This library provides the definitions and reference implementation
+    of the ValOS sourcerer architecture which is used to route <code><span class="vdoc type-vdoc-node">ValOS event streams</span>
+</code>.
   </section>
 
   <section id="sotd" class="vdoc type-vdoc-chapter">This document is part of the library workspace <a href="https://valospace.org/sourcerer" class="vdoc type-revdoc-package"><em>@valos/sourcerer</em></a> (of domain <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which is ValOS Sourcerer API, schema
   </section>
 
-  <section id="introduction" class="vdoc type-vdoc-chapter">      <p>Edit me - this is the first payload chapter. Abstract and SOTD are essential<a href="https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate" class="vdoc type-vdoc-reference">ReSpec boilerplate</a></p>
-      <p>See <a href="https://valospace.org/revdoc/tutorial" class="vdoc type-vdoc-reference">ReVDoc tutorial</a> for instructions on how to write revdoc source documents.</p>
-      <p>See also <a href="https://valospace.org/revdoc" class="vdoc type-vdoc-reference">ReVdoc specification</a> and <a href="https://valospace.org/vdoc" class="vdoc type-vdoc-reference">VDoc specification</a> for reference documentation.</p>
+  <section id="introduction" class="vdoc type-vdoc-chapter">
+  </section>
+
+  <section id="ontology" class="vdoc type-vdoc-chapter">
+    <h2><em>valos:</em> library @valos/sourcerer ontology</h2>
+@valos/sourcerer ontology specifies the Valospace core types and
+      properties directly to the @valos/kernel namespace. 
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
+    <h2>@valos/sourcerer IRI prefixes</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Prefix</th>
+        <th class="vdoc type-vdoc-header">IRI</th>
+      </thead>
+      <tbody>
+        <tr><td>rdf</td><td>http://www.w3.org/1999/02/22-rdf-syntax-ns#</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>rdfs</td><td>http://www.w3.org/2000/01/rdf-schema#</td></tr>
+        <tr><td>xsd</td><td>http://www.w3.org/2001/XMLSchema#</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>owl</td><td>http://www.w3.org/2002/07/owl#</td></tr>
+        <tr><td>dc</td><td>http://purl.org/dc/elements/1.1/</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos</td><td>https://valospace.org/#</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_classes" class="vdoc type-vdoc-chapter">
+    <h2><em>valos:* a valos:Class</em> vocabulary</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_properties" class="vdoc type-vdoc-chapter">
+    <h2><em>valos:* a valos:Property</em> vocabulary</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:subPropertyOf</th>
+        <th class="vdoc type-vdoc-header">rdfs:domain</th>
+        <th class="vdoc type-vdoc-header">rdfs:range</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_types" class="vdoc type-vdoc-chapter">
+    <h2><em>valos:* a valos:Type</em> vocabulary</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
+      </thead>
+      <tbody>
+        <tr id="Entity" class=" vdoc-nth-child-2n"><td><a href="#Entity" class="vdoc type-vdoc-reference"><em>Entity</em></a></td><td>valos:TransientFields valos:Resource valos:TransientScriptFields valos:Scope valos:Relatable valos:Partition</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>The class of valospace resources which can act as the partition root.</td></tr>
+        <tr id="Media"><td><a href="#Media" class="vdoc type-vdoc-reference"><em>Media</em></a></td><td>valos:TransientFields valos:Resource valos:TransientScriptFields valos:Scope valos:Relatable</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>The class of valospace resources which represent interpretable media
+and can be associated with binary content and accompanying metadata.</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_fields" class="vdoc type-vdoc-chapter">
+    <h2><em>valos:* a valos:Field*</em> vocabulary</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:domain</th>
+        <th class="vdoc type-vdoc-header">rdfs:range</th>
+        <th class="vdoc type-vdoc-header">rdf:type</th>
+        <th class="vdoc type-vdoc-header">rdfs:subPropertyOf</th>
+        <th class="vdoc type-vdoc-header">valos:coupledField</th>
+      </thead>
+      <tbody>
+        <tr id="directory" class=" vdoc-nth-child-2n"><td><a href="#directory" class="vdoc type-vdoc-reference"><em>directory</em></a></td><td>valos:Entityvalos:Media</td><td>rdfs:Relatable</td><td>valos:AliasField</td><td>valos:owner</td><td>valos:entries</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The directory (and owner) relatable of this entry resource.</td></tr>
+        <tr id="entries"><td><a href="#entries" class="vdoc type-vdoc-reference"><em>entries</em></a></td><td>valos:Relatable</td><td>rdfs:List</td><td>valos:AliasField</td><td>valos:ownlings</td><td>valos:directory</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of entry entities and medias of this relatable.</td></tr>
+        <tr id="parent" class=" vdoc-nth-child-2n"><td><a href="#parent" class="vdoc type-vdoc-reference"><em>parent</em></a></td><td>valos:Entity</td><td>valos:Relatable</td><td>valos:AliasField</td><td>valos:directory</td><td>valos:children</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The parent (and owner) relatable of this entity.</td></tr>
+        <tr id="children"><td><a href="#children" class="vdoc type-vdoc-reference"><em>children</em></a></td><td>valos:Relatable</td><td>rdfs:List</td><td>valos:AliasField</td><td>valos:entries</td><td>valos:parent</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of child entities of this relatable</td></tr>
+        <tr id="container" class=" vdoc-nth-child-2n"><td><a href="#container" class="vdoc type-vdoc-reference"><em>container</em></a></td><td>valos:Media</td><td>valos:Relatable</td><td>valos:AliasField</td><td>valos:owner</td><td>valos:medias</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The container (and owner) relatable of this media.</td></tr>
+        <tr id="medias"><td><a href="#medias" class="vdoc type-vdoc-reference"><em>medias</em></a></td><td>valos:Relatable</td><td>rdfs:List</td><td>valos:AliasField</td><td>valos:ownlings</td><td>valos:container</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of medias contained in this relatable</td></tr>
+        <tr id="sourceURL" class=" vdoc-nth-child-2n"><td><a href="#sourceURL" class="vdoc type-vdoc-reference"><em>sourceURL</em></a></td><td>valos:Media</td><td>xsd:anyURI</td><td>valos:PrimaryField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The unreliable source URL of this Media. This URL is dereferenced
+when the Media content is accessed and as such is subject to all
+failure considerations associated with its protocol.</td></tr>
+        <tr id="content"><td><a href="#content" class="vdoc type-vdoc-reference"><em>content</em></a></td><td>valos:Media</td><td>valos:Bvob</td><td>valos:PrimaryField</td><td></td><td>valos:contentReferrers</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The infrastructure-backed octet-stream content of this Media.</td></tr>
+        <tr id="created" class=" vdoc-nth-child-2n"><td><a href="#created" class="vdoc type-vdoc-reference"><em>created</em></a></td><td>valos:Media</td><td>xsd:double</td><td>valos:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The creation UNIX epoch time of this Media. This is defined as the
+truth log aspect timestamp of the CREATED event which brought this
+Media into being.</td></tr>
+        <tr id="modified"><td><a href="#modified" class="vdoc type-vdoc-reference"><em>modified</em></a></td><td>valos:Media</td><td>xsd:double</td><td>valos:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The latest modification UNIX epoch time of this Media. This is defined
+as the truth log aspect timestamp of the most recent event that
+directly affects this Media resource.</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h2><em>valos:*</em> other vocabulary:</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdf:type</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_context" class="vdoc type-vdoc-chapter">
+    <h2><em>valos:*</em> JSON-LD context term definitions</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Term</th>
+        <th class="vdoc type-vdoc-header">Definition</th>
+        <th class="vdoc type-vdoc-header">@id</th>
+        <th class="vdoc type-vdoc-header">@type</th>
+        <th class="vdoc type-vdoc-header">@container</th>
+      </thead>
+      <tbody>
+        <tr><td>valos:directory</td><td></td><td>https://valospace.org/#directory</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:entries</td><td></td><td>https://valospace.org/#entries</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos:parent</td><td></td><td>https://valospace.org/#parent</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:children</td><td></td><td>https://valospace.org/#children</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos:container</td><td></td><td>https://valospace.org/#container</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:medias</td><td></td><td>https://valospace.org/#medias</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos:content</td><td></td><td>https://valospace.org/#content</td><td>@id</td><td></td></tr>
+      </tbody>
+    </table>
+
+  </section>
 
   </section>
 

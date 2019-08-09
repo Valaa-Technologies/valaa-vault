@@ -1,6 +1,6 @@
 
 const {
-  extractee: { c, authors, em, ref, context, cli, command, cpath, bulleted, pkg },
+  extractee: { authors, em, ref, pkg },
 } = require("@valos/revdoc");
 
 module.exports = {
@@ -42,10 +42,10 @@ module.exports = {
     Your audience can be your customer, your team or even just
     yourself.`,
   ],
-  "chapter#section_profiles>9;Voyager profiles": {
+  "chapter#section_profiles>3;Voyager profiles": {
     "#0": [
       `Voyager is generic orientation. There are various voyager
-      sub-profiles which benefit from more specific guidance.`,
+      sub-profiles with their own documents briefly detailed here.`,
     ],
     "chapter#enthusiast>0;How enthusiasts impress themselves and others": {
       "#0": [],

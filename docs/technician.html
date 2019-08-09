@@ -156,8 +156,8 @@ valma (<code><span class="vdoc type-vdoc-node">vlm</span>
     It is a generalization of 'npx -c' behaviour, adding
     discoverability, ability to invoke global scripts and the ability
     to invoke multiple scripts at once using glob matching.<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.1</span>
-</code>: valma is installed with <span class="vdoc type-revdoc-command">npm install -g valma</span>
- or as a package dependency</blockquote>This installs the global CLI command <code><span class="vdoc type-vdoc-node">vlm</span>
+</code>: valma is installed with <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">npm install -g valma</span>
+</em></strong> or as a package dependency</blockquote>This installs the global CLI command <code><span class="vdoc type-vdoc-node">vlm</span>
 </code>. At its core
     valma is a command dispatcher to <code><span class="vdoc type-vdoc-node">valma scripts</span>
 </code> in
@@ -170,17 +170,17 @@ valma (<code><span class="vdoc type-vdoc-node">vlm</span>
 </code> pool and lastly from
         the OS-specific variant of <code><span class="vdoc type-vdoc-node">/usr/bin</span>
 </code><code><span class="vdoc type-vdoc-node">global</span>
-</code> pool.</blockquote>As an example typing <span class="vdoc type-revdoc-command">vlm status</span>
- in some directory
-    context would forward the command to <span class="vdoc type-revdoc-command">valma.bin/valma-status</span>
- first if one exists and falling back to the more generic versions
-    if not. The call eventually resolves at the global <span class="vdoc type-revdoc-command">/usr/bin/valma-status</span>
-. Its implementation then calls <span class="vdoc type-revdoc-command">vlm .status/**/*</span>
- which calls all scripts which match
-    the glob <span class="vdoc type-revdoc-command">.valma-status/**/*</span>
- and are visible on the
-    execution context pools (the scripts called by <span class="vdoc type-revdoc-command">vlm status</span>
- are known as <code><span class="vdoc type-vdoc-node">valma status scripts</span>
+</code> pool.</blockquote>As an example typing <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm status</span>
+</em></strong> in some directory
+    context would forward the command to <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">valma.bin/valma-status</span>
+</em></strong> first if one exists and falling back to the more generic versions
+    if not. The call eventually resolves at the global <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">/usr/bin/valma-status</span>
+</em></strong>. Its implementation then calls <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm .status/**/*</span>
+</em></strong> which calls all scripts which match
+    the glob <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">.valma-status/**/*</span>
+</em></strong> and are visible on the
+    execution context pools (the scripts called by <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm status</span>
+</em></strong> are known as <code><span class="vdoc type-vdoc-node">valma status scripts</span>
 </code>).<blockquote><code><span class="vdoc type-vdoc-node">valos-vault-3.3</span>
 </code>: A package can export valma scripts using npm package.json <code><span class="vdoc type-vdoc-node">bin</span>
 </code> section and by prefixing the exported name with <code><span class="vdoc type-vdoc-node">valma-</span>
@@ -264,11 +264,11 @@ Note that <code><span class="vdoc type-vdoc-node">files</span>
       <p>
     <ol>
       <li>modifying the corresponding upstream git repository</li>
-      <li>distributing the git changes (a PR followed with <span class="vdoc type-revdoc-command">git push master</span>
-)</li>
-      <li>distributing the utility update (<span class="vdoc type-revdoc-command">publish-packages</span>
- or <span class="vdoc type-revdoc-command">deploy-release</span>
-).</li>
+      <li>distributing the git changes (a PR followed with <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">git push master</span>
+</em></strong>)</li>
+      <li>distributing the utility update (<strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">publish-packages</span>
+</em></strong> or <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">deploy-release</span>
+</em></strong>).</li>
     </ol>
 </p>
       <p>Step 3 can be automated by tooling in particular domains as
@@ -300,9 +300,9 @@ Note that <code><span class="vdoc type-vdoc-node">files</span>
       <p>      Note: npmjs.com is a javascript repository - this should not be a
       problem as long as ValOS remains mostly javascript and config
       files. If a need to diversity the languages arises a <a href="https://docs.npmjs.com/misc/registry#can-i-run-my-own-private-registry" class="vdoc type-vdoc-reference">private npm registry</a>can be set up for that purpose.</p>
-      <p>      valma package commands: <span class="vdoc type-revdoc-command">vlm assemble-packages</span>
- <span class="vdoc type-revdoc-command">vlm publish-packages</span>
-</p>
+      <p>      valma package commands: <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm assemble-packages</span>
+</em></strong> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm publish-packages</span>
+</em></strong></p>
 
   </section>
 

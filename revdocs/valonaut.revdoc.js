@@ -1,6 +1,6 @@
 
 const {
-  extractee: { c, authors, ref, context, cli, command, cpath, bulleted, pkg },
+  extractee: { authors, ref, pkg },
 } = require("@valos/revdoc");
 
 module.exports = {
@@ -38,10 +38,10 @@ module.exports = {
     are used to support your other interests. While you don't need to
     become a professional you certainly can!`,
   ],
-  "chapter#section_profiles>9;Valonaut profiles": {
+  "chapter#section_profiles>3;Valonaut profiles": {
     "#0": [
       `Valonaut is generic orientation. There are various valonaut
-      sub-profiles which benefit from more specific guidance.`,
+      sub-profiles with their own documents briefly detailed here.`,
     ],
     "chapter#everyone>0;How everyone is a valonaut": {
       "#0": [],

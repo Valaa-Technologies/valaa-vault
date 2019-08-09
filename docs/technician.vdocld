@@ -5,26 +5,36 @@
       "@base": "https://valospace.org/technician#",
       "sbomdoc": "https://valospace.org/sbomdoc#",
       "revdoc": "https://valospace.org/revdoc#",
-      "dc": "http://purl.org/dc/elements/1.1/",
-      "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
       "vdoc": "https://valospace.org/vdoc#",
-      "a": {
-        "@id": "rdf:type",
-        "@type": "@id"
-      },
       "vdoc:content": {
         "@id": "https://valospace.org/vdoc#content",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
       },
       "vdoc:words": {
         "@id": "https://valospace.org/vdoc#words",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
       },
       "vdoc:entries": {
         "@id": "https://valospace.org/vdoc#entries",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:headers": {
+        "@id": "https://valospace.org/vdoc#headers",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:cell": {
+        "@id": "https://valospace.org/vdoc#cell",
+        "@container": "@list",
+        "@type": "@id"
       }
     },
     "dc:title": "\"I am a ValOS technician, I want to enable valonauts and expand valospace\"",
@@ -54,18 +64,18 @@
     },
     "abstract": {
       "@id": "abstract",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is the first introduction for ValOS technicians -\n    the primary infrastructure developers and operators - to the ValOS\n    ecosystem and its infrastructure toolchains and workflows."
       ]
     },
     "sotd": {
       "@id": "sotd",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is part of the vault workspace ",
         {
-          "rdf:type": "revdoc:Package",
+          "@type": "revdoc:Package",
           "vdoc:content": [
             {
               "vdoc:em": true,
@@ -78,7 +88,7 @@
         },
         " (of domain ",
         {
-          "rdf:type": "revdoc:Package",
+          "@type": "revdoc:Package",
           "vdoc:content": [
             {
               "vdoc:em": true,
@@ -98,7 +108,7 @@
     "introduction": {
       "@id": "introduction",
       "dc:title": "How do I enable valonauts and expand the Valospace?",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "As a technician you develop and operate the ",
         {
@@ -108,7 +118,7 @@
               "vdoc:strong": true,
               "vdoc:content": [
                 {
-                  "rdf:type": "vdoc:Reference",
+                  "@type": "vdoc:Reference",
                   "vdoc:content": [
                     "ValOS fabric"
                   ],
@@ -124,7 +134,7 @@
         null,
         "    You use ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "vlm"
           ],
@@ -134,7 +144,7 @@
         null,
         "    You create new open source and/or proprietary packages. These\n    permanently create new fabric functionalities and ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "expand"
           ],
@@ -146,13 +156,13 @@
     "preface": {
       "@id": "preface",
       "dc:title": "*IMPORTANT",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document, like most of the more principled and less pragmatic\n    documents must be understood as strong speculation and as an\n    architectural exercise (although a very serious one) on\n    what-could-be.",
         null,
         "    This rings especially true for the primary focus of this document,\n    ie. for ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "ValOS Core"
           ]
@@ -165,18 +175,18 @@
     "specification": {
       "@id": "specification",
       "dc:title": "ValOS specification",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document has two purposes. Firstly it provides the initial\n    specification of Valaa Open System (",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "ValOS"
           ]
         },
         ") and secondly\n    it serves as the introduction for ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "Development Operations"
           ],
@@ -189,28 +199,28 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-1.1"
               ]
             },
             ": ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "ValOS packages"
               ]
             },
             "are\n        all the npmjs.com packages with ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "@valos"
               ]
             },
             " scope which\n        don't have cyclic dependencies with other ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "@valos"
               ]
@@ -222,14 +232,14 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-1.2"
               ]
             },
             ": Valaa Open System (",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "ValOS"
               ]
@@ -241,21 +251,21 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-1.3"
               ]
             },
             ": ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "ValOS specification"
               ]
             },
             " consists of all files in all ValOS packages whose path in the\n        package matches the JS regex ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "/^specifications\\/\\w*.md$/"
               ]
@@ -267,7 +277,7 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-1.4"
               ]
@@ -279,21 +289,21 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-1.5"
               ]
             },
             ": All packages which conform to\n        ValOS specification are called ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "ValOS packages"
               ]
             },
             ". These\n        packages are inclusively considered part of the ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "ValOS ecosystem"
               ]
@@ -303,14 +313,14 @@
         },
         "The system is structured into a plethora of purpose-oriented\n    vertical ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "domains"
           ]
         },
         " and into four content oriented\n    horizontal ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "utility layers"
           ]
@@ -321,11 +331,11 @@
         {
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:BulletList",
+              "@type": "vdoc:BulletList",
               "vdoc:entries": [
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "files"
                     ]
@@ -334,14 +344,14 @@
                 ],
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "packages"
                     ]
                   },
                   " layer provides npm packages via npm registry.\n        These packages are created by git repositories called ",
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "vaults"
                     ]
@@ -350,14 +360,14 @@
                 ],
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "authorities"
                     ]
                   },
                   " layer provides the ValOS live authority\n        service APIs. Authorities are deployed and managed with ",
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "opspace"
                     ]
@@ -366,7 +376,7 @@
                 ],
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "partitions"
                     ]
@@ -383,21 +393,21 @@
         null,
         "    A DevOp manages these layers by scripts that are delivered inside\n    the packages alongside their main content. A command line tool\n    called ValOS Medium or ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "vlm"
           ]
         },
         " is used to discover and ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "invoke"
           ]
         },
         " these scripts as ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "valma commands"
           ]
@@ -406,21 +416,21 @@
         null,
         "    From a DevOps perspective ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "valma"
           ]
         },
         ", ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "vault"
           ]
         },
         " and ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "opspace"
           ]
@@ -433,20 +443,20 @@
     "domains": {
       "@id": "domains",
       "dc:title": "ValOS `domains` are cross-stack slices, each with a well-defined purpose",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-2.1"
               ]
             },
             ": A ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "domain"
               ]
@@ -458,7 +468,7 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-2.2"
               ]
@@ -468,7 +478,7 @@
         },
         "For example the ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "@valos/kernel"
           ],
@@ -480,11 +490,11 @@
     "valma": {
       "@id": "valma",
       "dc:title": "`valma` - a convenience CLI to context-dependent command scripts",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "valma (",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "vlm"
           ]
@@ -494,19 +504,16 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-3.1"
               ]
             },
             ": valma is installed with ",
             {
-              "rdf:type": "revdoc:Command",
-              "vdoc:words": [
-                "npm",
-                "install",
-                "-g",
-                "valma"
+              "@type": "revdoc:Command",
+              "vdoc:content": [
+                "npm install -g valma"
               ]
             },
             " or as a package dependency"
@@ -514,21 +521,21 @@
         },
         "This installs the global CLI command ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "vlm"
           ]
         },
         ". At its core\n    valma is a command dispatcher to ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "valma scripts"
           ]
         },
         " in\n    various ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "command pools"
           ]
@@ -538,40 +545,40 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-3.2"
               ]
             },
             ": valma searches the scripts\n        first from the package.json ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "scripts"
               ]
             },
             " pool, then from ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "./node_modules/.bin/"
               ]
             },
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "depends"
               ]
             },
             " pool and lastly from\n        the OS-specific variant of ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "/usr/bin"
               ]
             },
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "global"
               ]
@@ -581,52 +588,49 @@
         },
         "As an example typing ",
         {
-          "rdf:type": "revdoc:Command",
-          "vdoc:words": [
-            "vlm",
-            "status"
+          "@type": "revdoc:Command",
+          "vdoc:content": [
+            "vlm status"
           ]
         },
         " in some directory\n    context would forward the command to ",
         {
-          "rdf:type": "revdoc:Command",
-          "vdoc:words": [
+          "@type": "revdoc:Command",
+          "vdoc:content": [
             "valma.bin/valma-status"
           ]
         },
         " first if one exists and falling back to the more generic versions\n    if not. The call eventually resolves at the global ",
         {
-          "rdf:type": "revdoc:Command",
-          "vdoc:words": [
+          "@type": "revdoc:Command",
+          "vdoc:content": [
             "/usr/bin/valma-status"
           ]
         },
         ". Its implementation then calls ",
         {
-          "rdf:type": "revdoc:Command",
-          "vdoc:words": [
-            "vlm",
-            ".status/**/*"
+          "@type": "revdoc:Command",
+          "vdoc:content": [
+            "vlm .status/**/*"
           ]
         },
         " which calls all scripts which match\n    the glob ",
         {
-          "rdf:type": "revdoc:Command",
-          "vdoc:words": [
+          "@type": "revdoc:Command",
+          "vdoc:content": [
             ".valma-status/**/*"
           ]
         },
         " and are visible on the\n    execution context pools (the scripts called by ",
         {
-          "rdf:type": "revdoc:Command",
-          "vdoc:words": [
-            "vlm",
-            "status"
+          "@type": "revdoc:Command",
+          "vdoc:content": [
+            "vlm status"
           ]
         },
         " are known as ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "valma status scripts"
           ]
@@ -636,28 +640,28 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-3.3"
               ]
             },
             ": A package can export valma scripts using npm package.json ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "bin"
               ]
             },
             " section and by prefixing the exported name with ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valma-"
               ]
             },
             " as usual. These scripts will be available for\n        all packages depending on this package in their ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "depends"
               ]
@@ -667,7 +671,7 @@
         },
         "Running ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "vlm"
           ]
@@ -677,7 +681,7 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-3.5"
               ]
@@ -687,7 +691,7 @@
         },
         "This happens just like with the CLI by using ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "vlm <command> [<args>]"
           ]
@@ -697,7 +701,7 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-3.5.1"
               ]
@@ -710,7 +714,7 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-3.5.2"
               ]
@@ -723,7 +727,7 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-3.5.3"
               ]
@@ -737,32 +741,32 @@
     "utility_layer": {
       "@id": "utility_layer",
       "dc:title": "ValOS `utility` layers provide operational services",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "ValOS has four main utility layers: ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "files"
           ]
         },
         ", ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "packages"
           ]
         },
         ", ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "authorities"
           ]
         },
         " and ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "partitions"
           ]
@@ -788,20 +792,20 @@
     "utility_layer_overview": {
       "@id": "utility_layer_overview",
       "dc:title": "Overview of utility layers",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-4.1.1"
               ]
             },
             ": An ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "utility"
               ]
@@ -813,14 +817,14 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-4.1.2"
               ]
             },
             ": utility must explicitly\n          define the ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "payload"
               ]
@@ -902,11 +906,11 @@
         {
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:BulletList",
+              "@type": "vdoc:BulletList",
               "vdoc:entries": [
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "Utility"
                     ]
@@ -915,7 +919,7 @@
                 ],
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "Tool"
                     ]
@@ -924,7 +928,7 @@
                 ],
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "Payload"
                     ]
@@ -933,7 +937,7 @@
                 ],
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "Providers"
                     ]
@@ -942,7 +946,7 @@
                 ],
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "Consumed via"
                     ]
@@ -951,7 +955,7 @@
                 ],
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "Upstream"
                     ]
@@ -960,7 +964,7 @@
                 ],
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "Configuration"
                     ]
@@ -969,7 +973,7 @@
                 ],
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "Modifed via"
                     ]
@@ -978,7 +982,7 @@
                 ],
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "Produced via"
                     ]
@@ -987,7 +991,7 @@
                 ],
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "Authority"
                     ]
@@ -996,7 +1000,7 @@
                 ],
                 [
                   {
-                    "rdf:type": "vdoc:CharacterData",
+                    "@type": "vdoc:CharacterData",
                     "vdoc:content": [
                       "Distributed via"
                     ]
@@ -1009,14 +1013,14 @@
         },
         "Note that ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "files"
           ]
         },
         " and ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "partitions"
           ]
@@ -1025,21 +1029,21 @@
         null,
         "      On the other hand ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "packages"
           ]
         },
         " and ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "authorities"
           ]
         },
         " use the ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "files"
           ]
@@ -1049,7 +1053,7 @@
         {
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:NumberedList",
+              "@type": "vdoc:NumberedList",
               "vdoc:entries": [
                 [
                   "modifying the corresponding upstream git repository"
@@ -1057,11 +1061,9 @@
                 [
                   "distributing the git changes (a PR followed with ",
                   {
-                    "rdf:type": "revdoc:Command",
-                    "vdoc:words": [
-                      "git",
-                      "push",
-                      "master"
+                    "@type": "revdoc:Command",
+                    "vdoc:content": [
+                      "git push master"
                     ]
                   },
                   ")"
@@ -1069,15 +1071,15 @@
                 [
                   "distributing the utility update (",
                   {
-                    "rdf:type": "revdoc:Command",
-                    "vdoc:words": [
+                    "@type": "revdoc:Command",
+                    "vdoc:content": [
                       "publish-packages"
                     ]
                   },
                   " or ",
                   {
-                    "rdf:type": "revdoc:Command",
-                    "vdoc:words": [
+                    "@type": "revdoc:Command",
+                    "vdoc:content": [
                       "deploy-release"
                     ]
                   },
@@ -1094,10 +1096,10 @@
     "files_layer": {
       "@id": "files_layer",
       "dc:title": "Files utility layer has files committed in git repositories",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "git"
           ],
@@ -1108,7 +1110,7 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-4.2.1"
               ]
@@ -1121,7 +1123,7 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-4.2.2"
               ]
@@ -1134,20 +1136,20 @@
     "packages_layer": {
       "@id": "packages_layer",
       "dc:title": "Packages utility layer has shared, versioned, dependable sets of files published as npmjs.com packages",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-4.3.1"
               ]
             },
             ": The packages utility payload is ",
             {
-              "rdf:type": "vdoc:Reference",
+              "@type": "vdoc:Reference",
               "vdoc:content": [
                 "npmjs.com packages"
               ],
@@ -1159,7 +1161,7 @@
         null,
         "      Note: npmjs.com is a javascript repository - this should not be a\n      problem as long as ValOS remains mostly javascript and config\n      files. If a need to diversity the languages arises a ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "private npm registry"
           ],
@@ -1169,18 +1171,16 @@
         null,
         "      valma package commands: ",
         {
-          "rdf:type": "revdoc:Command",
-          "vdoc:words": [
-            "vlm",
-            "assemble-packages"
+          "@type": "revdoc:Command",
+          "vdoc:content": [
+            "vlm assemble-packages"
           ]
         },
         " ",
         {
-          "rdf:type": "revdoc:Command",
-          "vdoc:words": [
-            "vlm",
-            "publish-packages"
+          "@type": "revdoc:Command",
+          "vdoc:content": [
+            "vlm publish-packages"
           ]
         }
       ]
@@ -1188,20 +1188,20 @@
     "authorities_layer": {
       "@id": "authorities_layer",
       "dc:title": "Authorities utility layer has the authority deployments on infrastructure services",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-4.4.1"
               ]
             },
             ": A ValOS ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "authority"
               ]
@@ -1210,7 +1210,7 @@
           ]
         },
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "Read more about valos URIs"
           ],
@@ -1221,21 +1221,21 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-4.4.2"
               ]
             },
             ": A ValOS ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "authority"
               ]
             },
             " can contain ValOS ",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "partitions"
               ]
@@ -1245,7 +1245,7 @@
         },
         "Authorities are usually live deployments on some\n        infrastructure and they provide service APIs as the required\n        mechanisms.\n\n        Stateless or in some way non-infrastructural authorities also exist but\n        are specified elsewhere (they are considered degenerate, without\n        upstream and with empty payload).\n\n        ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "Read more about authorities"
           ],
@@ -1256,14 +1256,14 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-4.4.3"
               ]
             },
             ": Authorities utility layer payload (",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "authority payload"
               ]
@@ -1273,7 +1273,7 @@
         },
         "The payload here refers to the service deployments and their live APIs\n        themselves and not any dynamic content delivered through them. Such\n        dynamic content belongs to other domains (notably valospace content\n        resides in the ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "partitions"
           ]
@@ -1283,14 +1283,14 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-4.4.4"
               ]
             },
             ": An authority may have\n            an operations workspace (",
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "opspace"
               ]
@@ -1303,7 +1303,7 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-4.4.5"
               ]
@@ -1316,7 +1316,7 @@
           "vdoc:blockquote": true,
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:CharacterData",
+              "@type": "vdoc:CharacterData",
               "vdoc:content": [
                 "valos-vault-4.4.6"
               ]
@@ -1326,21 +1326,21 @@
         },
         "\n\n        Information flowing back upstream increases complexity,\n        prevents decentralized and manual upstreams (there is a\n        definite upstream which must be always accessible), and are\n        a security concern (for programmatic access the downstream must\n        have the upstream credentials).\n\n        If a use case necessitating this arises, still seriously\n        consider keeping the mutateable content separate from the\n        upstream itself and instead have upstream only contain the\n        necessary code and credentials to access this content.\n\n        Note: this applies to architectural decisions and automations\n        only. Interactive content in valospace is not limited from\n        using an opspace to update authorities (although it is still\n        recommended to keep such valospace applications deployments\n        separate from the authorities they are used to control).\n\n        valma opspace commands: ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "vlm build-release"
           ]
         },
         " ",
         {
-          "rdf:type": "vdoc:CharacterData",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
             "vlm deploy-release"
           ]
         },
         {
           "dc:title": "ValOS core vs. auxiliary authorities",
-          "rdf:type": "vdoc:Chapter",
+          "@type": "vdoc:Chapter",
           "vdoc:content": [
             "ValOS authorities and any partition content they provide do\n        not need to be public. A ValOS core authority is an authority\n        which can be accessed using only ValOS core plugins (including\n        no plugins at all). A ValOS auxiliary authority is an authority\n        which requires a conforming but non-core ValOS gateway plugin\n        in order to be accessed. (Design Note 2019-03: the plugin\n        conformance requirements are unspecified. When they are\n        specified they must be lenient enough to enable sophisticated\n        protocols but constrained/sandboxed enough that gateway plugins\n        cannot interfere with other reasonably written plugins)."
           ]
@@ -1350,13 +1350,13 @@
     "partitions_layer": {
       "@id": "partitions_layer",
       "dc:title": "Partitions utility layer - the foundation of valospace",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "Event logs and bvob content are the partitions payload and are\n        consumed by ValOS gateways. It is more extensively covered\n        elsewhere and is mentioned here for completeness; precious\n        little infrastructural tooling is provided for them yet.\n\n        Eventually various partition diagnostics tools will come in handy:",
         {
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:BulletList",
+              "@type": "vdoc:BulletList",
               "vdoc:entries": [
                 "Media content import/export tools",
                 "Complete partition to file system hierarchy save/load tools",
@@ -1368,13 +1368,13 @@
         },
         {
           "dc:title": "ValOS public vs protected partitions",
-          "rdf:type": "vdoc:Chapter",
+          "@type": "vdoc:Chapter",
           "vdoc:content": [
             "All partitions provided by ValOS authorities are ValOS\n        partitions. Additionally ValOS public partitions are partitions\n        which are both",
             {
               "vdoc:content": [
                 {
-                  "rdf:type": "vdoc:NumberedList",
+                  "@type": "vdoc:NumberedList",
                   "vdoc:entries": [
                     "provided by ValOS core authorities, and",
                     "are available for an anonymous consumer with nothing but\n          a client capable of running the ValOS gateway runtime which\n          the authority itself provides (with reasonable concessions\n          for the authority to prevent DDOS attacks)"
@@ -1390,7 +1390,7 @@
     "section_profiles": {
       "@id": "section_profiles",
       "dc:title": "Technician profiles",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "Technician is generic orientation. There are various voyager\n      sub-profiles which benefit from more specific guidance.",
         {
@@ -1416,41 +1416,41 @@
     "developer": {
       "@id": "developer",
       "dc:title": "How developers set up their development environments",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
     "contributor": {
       "@id": "contributor",
       "dc:title": "How contributors produce new fabric packages and code",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
     "administrator": {
       "@id": "administrator",
       "dc:title": "How administrators manage infrastructure resources",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
     "devops": {
       "@id": "devops",
       "dc:title": "How DevOps workflows are implemented with valma",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
     "hacker": {
       "@id": "hacker",
       "dc:title": "How to have fun while avoiding pain",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
     "etc": {
       "@id": "etc",
       "dc:title": "How to add new profiles",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "Create a ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "PR in github"
           ],
@@ -1459,7 +1459,7 @@
         " against @valos/kernel/revdocs/valonaut.revdoc.js"
       ]
     },
-    "rdf:type": "revdoc:Document",
+    "@type": "revdoc:Document",
     "vdoc:content": [
       {
         "@id": "abstract"
@@ -1487,7 +1487,7 @@
       },
       {
         "dc:title": "Kernel domain provides the ValOS primary libraries",
-        "rdf:type": "vdoc:Chapter",
+        "@type": "vdoc:Chapter",
         "vdoc:content": [
           "It does, indeed (this section pending better understanding on\n      how to write domain specifications)."
         ]

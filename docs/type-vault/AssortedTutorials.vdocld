@@ -5,26 +5,36 @@
       "@base": "https://valospace.org/type-vault/AssortedTutorials#",
       "sbomdoc": "https://valospace.org/sbomdoc#",
       "revdoc": "https://valospace.org/revdoc#",
-      "dc": "http://purl.org/dc/elements/1.1/",
-      "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
       "vdoc": "https://valospace.org/vdoc#",
-      "a": {
-        "@id": "rdf:type",
-        "@type": "@id"
-      },
       "vdoc:content": {
         "@id": "https://valospace.org/vdoc#content",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
       },
       "vdoc:words": {
         "@id": "https://valospace.org/vdoc#words",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
       },
       "vdoc:entries": {
         "@id": "https://valospace.org/vdoc#entries",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:headers": {
+        "@id": "https://valospace.org/vdoc#headers",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:cell": {
+        "@id": "https://valospace.org/vdoc#cell",
+        "@container": "@list",
+        "@type": "@id"
       }
     },
     "dc:title": "Assorted tutorials",
@@ -46,7 +56,7 @@
     },
     "abstract": {
       "@id": "abstract",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is a collection of tutorials and possibly other notes",
         " created by Jaradacl based on the tasks given. (During first few days at least)"
@@ -54,11 +64,11 @@
     },
     "sotd": {
       "@id": "sotd",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is part of the toolset workspace ",
         {
-          "rdf:type": "revdoc:Package",
+          "@type": "revdoc:Package",
           "vdoc:content": [
             {
               "vdoc:em": true,
@@ -71,7 +81,7 @@
         },
         " (of domain ",
         {
-          "rdf:type": "revdoc:Package",
+          "@type": "revdoc:Package",
           "vdoc:content": [
             {
               "vdoc:em": true,
@@ -89,27 +99,32 @@
     "how_to_create_revdoc": {
       "@id": "how_to_create_revdoc",
       "dc:title": "How to create RevDoc",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This is a step-by-step guide on how to create RevDoc using cli.",
         {
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:NumberedList",
+              "@type": "vdoc:NumberedList",
               "vdoc:entries": [
                 "Ensure you have python installed.",
                 [
                   "Navigate to the folder you want your revdoc.js to reside and run the following command: ",
                   {
-                    "rdf:type": "revdoc:CommandLineInteraction",
+                    "@type": "revdoc:CommandLineInteraction",
                     "vdoc:entries": [
                       [
                         "",
                         "$ ",
                         {
-                          "rdf:type": "revdoc:Command",
+                          "@type": "revdoc:Invokation",
                           "vdoc:words": [
-                            "vlm",
+                            {
+                              "@type": "revdoc:Command",
+                              "vdoc:content": [
+                                "vlm"
+                              ]
+                            },
                             "create-revdoc",
                             "YOUR_DOCUMENT_NAME_WITHOUT_FILE_EXTENSION"
                           ]
@@ -125,7 +140,7 @@
                   {
                     "vdoc:content": [
                       {
-                        "rdf:type": "vdoc:BulletList",
+                        "@type": "vdoc:BulletList",
                         "vdoc:entries": [
                           "Title of the document: This is human-readable title of the document.",
                           "ReSpec short name",
@@ -139,15 +154,20 @@
                 [
                   "Next navigate to the root of your project and run the following command ",
                   {
-                    "rdf:type": "revdoc:CommandLineInteraction",
+                    "@type": "revdoc:CommandLineInteraction",
                     "vdoc:entries": [
                       [
                         "",
                         "$ ",
                         {
-                          "rdf:type": "revdoc:Command",
+                          "@type": "revdoc:Invokation",
                           "vdoc:words": [
-                            "vlm",
+                            {
+                              "@type": "revdoc:Command",
+                              "vdoc:content": [
+                                "vlm"
+                              ]
+                            },
                             "regenerate-docs"
                           ]
                         }
@@ -159,15 +179,20 @@
                 [
                   "Now run the following command ",
                   {
-                    "rdf:type": "revdoc:CommandLineInteraction",
+                    "@type": "revdoc:CommandLineInteraction",
                     "vdoc:entries": [
                       [
                         "",
                         "$ ",
                         {
-                          "rdf:type": "revdoc:Command",
+                          "@type": "revdoc:Invokation",
                           "vdoc:words": [
-                            "python",
+                            {
+                              "@type": "revdoc:Command",
+                              "vdoc:content": [
+                                "python"
+                              ]
+                            },
                             "-m",
                             "SimpleHTTPServer"
                           ]
@@ -189,7 +214,7 @@
         }
       ]
     },
-    "rdf:type": "revdoc:Document",
+    "@type": "revdoc:Document",
     "vdoc:content": [
       {
         "@id": "abstract"

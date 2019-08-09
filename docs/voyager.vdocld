@@ -5,26 +5,36 @@
       "@base": "https://valospace.org/voyager#",
       "sbomdoc": "https://valospace.org/sbomdoc#",
       "revdoc": "https://valospace.org/revdoc#",
-      "dc": "http://purl.org/dc/elements/1.1/",
-      "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
       "vdoc": "https://valospace.org/vdoc#",
-      "a": {
-        "@id": "rdf:type",
-        "@type": "@id"
-      },
       "vdoc:content": {
         "@id": "https://valospace.org/vdoc#content",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
       },
       "vdoc:words": {
         "@id": "https://valospace.org/vdoc#words",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
       },
       "vdoc:entries": {
         "@id": "https://valospace.org/vdoc#entries",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:headers": {
+        "@id": "https://valospace.org/vdoc#headers",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:cell": {
+        "@id": "https://valospace.org/vdoc#cell",
+        "@container": "@list",
+        "@type": "@id"
       }
     },
     "dc:title": "\"I am a ValOS voyager, I want to discover ValOS and enlighten others\"",
@@ -55,18 +65,18 @@
     },
     "abstract": {
       "@id": "abstract",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is the first introduction for ValOS voyagers -\n    the first adopters, entrepreneurs and evangelists - to the ValOS\n    ecosystem, its philosophy and its ultimate goals."
       ]
     },
     "sotd": {
       "@id": "sotd",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document is part of the vault workspace ",
         {
-          "rdf:type": "revdoc:Package",
+          "@type": "revdoc:Package",
           "vdoc:content": [
             {
               "vdoc:em": true,
@@ -79,7 +89,7 @@
         },
         " (of domain ",
         {
-          "rdf:type": "revdoc:Package",
+          "@type": "revdoc:Package",
           "vdoc:content": [
             {
               "vdoc:em": true,
@@ -97,7 +107,7 @@
     "introduction": {
       "@id": "introduction",
       "dc:title": "How do I discover opportunities and enlighten others?",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "As a voyager you have stakes that matter. Whether you were to\n    invest on a ValOS collaborator as a financier, to adopt ValOS as\n    technology as an executive or just to commit your personal time and\n    energy on a ValOS project you need to ",
         {
@@ -116,7 +126,7 @@
     "section_profiles": {
       "@id": "section_profiles",
       "dc:title": "Voyager profiles",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "Voyager is generic orientation. There are various voyager\n      sub-profiles which benefit from more specific guidance.",
         {
@@ -145,47 +155,47 @@
     "enthusiast": {
       "@id": "enthusiast",
       "dc:title": "How enthusiasts impress themselves and others",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
     "entrepreneur": {
       "@id": "entrepreneur",
       "dc:title": "How entrepreneurs search for uncharted business opportunities",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
     "evangelist": {
       "@id": "evangelist",
       "dc:title": "How evangelists enlighten about new innovations",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
     "investor": {
       "@id": "investor",
       "dc:title": "How investors perform due diligence",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
     "business_owner": {
       "@id": "business_owner",
       "dc:title": "How business owners understand the consequences of their choices",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
     "sales_rep": {
       "@id": "sales_rep",
       "dc:title": "How sales representatives identify solutions to customer needs",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
     "etc": {
       "@id": "etc",
       "dc:title": "How to add new profiles",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "Create a ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "PR in github"
           ],
@@ -194,7 +204,7 @@
         " against @valos/kernel/revdocs/valonaut.revdoc.js"
       ]
     },
-    "rdf:type": "revdoc:Document",
+    "@type": "revdoc:Document",
     "vdoc:content": [
       {
         "@id": "abstract"

@@ -164,7 +164,7 @@ function emitTableHTML (node, emission, stack) {
       entryText += `<td>${
         (typeof instance !== "object") ? instance : stack.emitNode(instance, "")}</td>`;
     }
-    entryTexts.push(`<tr${id ? ` id="${id}"` : ""}${rowNthNess && `class="${rowNthNess}"`}>${
+    entryTexts.push(`<tr${id ? ` id="${id}"` : ""}${rowNthNess && ` class="${rowNthNess}"`}>${
       entryText
     }</tr>`);
     for (const { headerText, cell } of wideRowContents) {

@@ -6,6 +6,9 @@ module.exports = {
     "revdoc:Document": emitReVDocHTML,
     "vdoc:Chapter": emitReVDocChapter,
     "vdoc:Reference": emitReVDocReference,
+    "revdoc:Invokation": emitReVDocInvokation,
+    "revdoc:Command": emitReVDocCommand,
+    "revdoc:Example": emitReVDocExample,
   },
 };
 
@@ -58,4 +61,23 @@ function emitReVDocReference (node, emission, stack) {
     });
   }
   return vdocExtension.emitters.html["vdoc:Reference"](node_, emission, stack);
+}
+
+function emitReVDocInvokation (node, emission, stack) {
+  return `${emission}<code>${
+    stack.emitNode({ ...node, "@type": "vdoc:Node" }, "")
+  }</code>`;
+}
+
+function emitReVDocCommand (node, emission, stack) {
+  return `${emission}<strong><em class="vdoc type-revdoc-command">${
+    stack.emitNode({ ...node, "@type": "vdoc:Node" }, "")
+  }</em></strong>`;
+}
+
+function emitReVDocExample (node, emission, stack) {
+  const title = !node["dc:title"] ? "" : `\n    <h2>${stack.emitNode(node["dc:title"], "")}</h2>\n`;
+  return `${emission}<blockquote class="vdoc type-revdoc-example">${title}
+    <code>${stack.emitNode({ ...node, "@type": "vdoc:Node" }, "")}</code>
+  </blockquote>`;
 }

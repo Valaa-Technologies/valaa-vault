@@ -1,4 +1,4 @@
-const { extractee: { aggregate, em, ref, strong } } = require("@valos/vdoc");
+const { extractee: { aggregate, cpath, em, ref, strong } } = require("@valos/vdoc");
 
 module.exports = {
   /**
@@ -52,17 +52,35 @@ module.exports = {
   },
 
   /**
-   * Construct revdoc:Command element.
+   * Construct revdoc:Command reference element.
+   *
+   * @param {*} packageName
+   * @param {*} rest
+   * @returns
+   */
+  command (commandName) {
+    return {
+      ...cpath(commandName),
+      "@type": "revdoc:Command",
+    };
+  },
+
+  /**
+   * Construct revdoc:Invokation element.
+   * Splits and spreads parts strings by whitespaces and if the first
+   * part is a string wraps it in a revdoc:Command if it is a string.
+   *
    *
    * @param {*} parts
    * @returns
    */
-  command (...parts) {
+  invokation (...parts) {
     return {
-      "@type": "revdoc:Command",
+      "@type": "revdoc:Invokation",
       "vdoc:words": [].concat(...parts.map(
               part => (typeof part !== "string" ? [part] : part.split(/(\s+)/))))
-          .filter(w => (typeof w !== "string") || !w.match(/^\s+$/)),
+          .filter(w => (typeof w !== "string") || !w.match(/^\s+$/))
+          .map((w, i) => ((i || typeof w !== "string") ? w : module.exports.command(w))),
     };
   },
 
@@ -75,7 +93,7 @@ module.exports = {
   cli (...rows) {
     const commandedRows = rows.map(line => ((typeof line !== "string")
         ? line
-        : module.exports.command(line)));
+        : module.exports.invokation(line)));
     let currentContext = "";
     const contextedRows = [];
     for (const row of commandedRows) {

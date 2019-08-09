@@ -56,15 +56,19 @@ ReVDoc ontology provides vocabulary and definitions which are
         <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
       </thead>
       <tbody>
-        <tr id="Document"class=" vdoc-nth-child-2n"><td><a href="#Document" class="vdoc type-vdoc-reference"><em>Document</em></a></td><td>vdoc:Chapter</td></tr>
+        <tr id="Document" class=" vdoc-nth-child-2n"><td><a href="#Document" class="vdoc type-vdoc-reference"><em>Document</em></a></td><td>vdoc:Chapter</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>A ReSpec specification document</td></tr>
-        <tr id="Definition"><td><a href="#Definition" class="vdoc type-vdoc-reference"><em>Definition</em></a></td><td>vdoc:Node</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>A ReSpec term definition document node</td></tr>
-        <tr id="Package"class=" vdoc-nth-child-2n"><td><a href="#Package" class="vdoc type-vdoc-reference"><em>Package</em></a></td><td>vdoc:Reference</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>A package reference document node</td></tr>
-        <tr id="Command"><td><a href="#Command" class="vdoc type-vdoc-reference"><em>Command</em></a></td><td>vdoc:Node</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>A command invokation document node</td></tr>
-        <tr id="CommandLineInteraction"class=" vdoc-nth-child-2n"><td><a href="#CommandLineInteraction" class="vdoc type-vdoc-reference"><em>CommandLineInteraction</em></a></td><td>vdoc:Node</td></tr>
+        <tr id="Example"><td><a href="#Example" class="vdoc type-vdoc-reference"><em>Example</em></a></td><td>vdoc:Node</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>A ReSpec example node</td></tr>
+        <tr id="Definition" class=" vdoc-nth-child-2n"><td><a href="#Definition" class="vdoc type-vdoc-reference"><em>Definition</em></a></td><td>vdoc:Node</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>A ReSpec term definition document node</td></tr>
+        <tr id="Package"><td><a href="#Package" class="vdoc type-vdoc-reference"><em>Package</em></a></td><td>vdoc:Reference</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>A package reference document node</td></tr>
+        <tr id="Invokation" class=" vdoc-nth-child-2n"><td><a href="#Invokation" class="vdoc type-vdoc-reference"><em>Invokation</em></a></td><td>vdoc:Node</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>A command invokation document node</td></tr>
+        <tr id="Command"><td><a href="#Command" class="vdoc type-vdoc-reference"><em>Command</em></a></td><td>vdoc:ContextPath</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>A command reference node</td></tr>
+        <tr id="CommandLineInteraction" class=" vdoc-nth-child-2n"><td><a href="#CommandLineInteraction" class="vdoc type-vdoc-reference"><em>CommandLineInteraction</em></a></td><td>revdoc:Example</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>A command line interaction sequence document node</td></tr>
       </tbody>
     </table>
@@ -82,11 +86,11 @@ ReVDoc ontology provides vocabulary and definitions which are
         <th class="vdoc type-vdoc-header">rdfs:range</th>
       </thead>
       <tbody>
-        <tr id="prefix"class=" vdoc-nth-child-2n"><td><a href="#prefix" class="vdoc type-vdoc-reference"><em>prefix</em></a></td><td></td><td>revdoc:Document</td><td>rdfs:Literal</td></tr>
+        <tr id="prefix" class=" vdoc-nth-child-2n"><td><a href="#prefix" class="vdoc type-vdoc-reference"><em>prefix</em></a></td><td></td><td>revdoc:Document</td><td>rdfs:Literal</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=4>The preferred prefix of an ontology document</td></tr>
         <tr id="prefixIRI"><td><a href="#prefixIRI" class="vdoc type-vdoc-reference"><em>prefixIRI</em></a></td><td></td><td>revdoc:Document</td><td>rdfs:Resource</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=4>The IRI associated with the preferred prefix of an ontology</td></tr>
-        <tr id="package"class=" vdoc-nth-child-2n"><td><a href="#package" class="vdoc type-vdoc-reference"><em>package</em></a></td><td></td><td>vdoc:Node</td><td>rdfs:Literal</td></tr>
+        <tr id="package" class=" vdoc-nth-child-2n"><td><a href="#package" class="vdoc type-vdoc-reference"><em>package</em></a></td><td></td><td>vdoc:Node</td><td>rdfs:Literal</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=4>A package name</td></tr>
         <tr id="version"><td><a href="#version" class="vdoc type-vdoc-reference"><em>version</em></a></td><td></td><td>vdoc:Node</td><td>rdfs:Literal</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=4>A semver string</td></tr>
@@ -147,7 +151,8 @@ ReVDoc ontology provides vocabulary and definitions which are
         <th class="vdoc type-vdoc-header">Comment</th>
       </thead>
       <tbody>
-        <tr><td>ontology</td><td>vdoc:Chapter</td><td>vdoc:content</td><td>vdoc:content</td><td>dc:title</td><td>Ontology specification chapter</td></tr>
+        <tr><td>example</td><td>vdoc:Example</td><td>vdoc:content</td><td>vdoc:content</td><td>dc:title</td><td>Example node</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>ontology</td><td>vdoc:Chapter</td><td>vdoc:content</td><td>vdoc:content</td><td>dc:title</td><td>Ontology specification chapter</td></tr>
       </tbody>
     </table>
 
@@ -180,7 +185,7 @@ ReVDoc ontology provides vocabulary and definitions which are
       return author;
     });
   }</td></tr>
-        <trclass=" vdoc-nth-child-2n"><td>dfn</td><td>function dfn(text, definitionId) {
+        <tr class=" vdoc-nth-child-2n"><td>dfn</td><td>function dfn(text, definitionId) {
     for (var _len2 = arguments.length, explanation = new Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
       explanation[_key2 - 2] = arguments[_key2];
     }
@@ -196,10 +201,15 @@ ReVDoc ontology provides vocabulary and definitions which are
     }
 
     return _objectSpread({}, ref.apply(void 0, [em(packageName), packageName].concat(rest)), {
-      "rdf:type": "revdoc:Package"
+      "@type": "revdoc:Package"
     });
   }</td></tr>
-        <trclass=" vdoc-nth-child-2n"><td>command</td><td>function command() {
+        <tr class=" vdoc-nth-child-2n"><td>command</td><td>function command(commandName) {
+    return _objectSpread({}, cpath(commandName), {
+      "@type": "revdoc:Command"
+    });
+  }</td></tr>
+        <tr><td>invokation</td><td>function invokation() {
     var _ref;
 
     for (var _len4 = arguments.length, parts = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
@@ -207,21 +217,23 @@ ReVDoc ontology provides vocabulary and definitions which are
     }
 
     return {
-      "rdf:type": "revdoc:Command",
+      "@type": "revdoc:Invokation",
       "vdoc:words": (_ref = []).concat.apply(_ref, _toConsumableArray(parts.map(function (part) {
         return typeof part !== "string" ? [part] : part.split(/(\s+)/);
       }))).filter(function (w) {
         return typeof w !== "string" || !w.match(/^\s+$/);
+      }).map(function (w, i) {
+        return i || typeof w !== "string" ? w : module.exports.command(w);
       })
     };
   }</td></tr>
-        <tr><td>cli</td><td>function cli() {
+        <tr class=" vdoc-nth-child-2n"><td>cli</td><td>function cli() {
     for (var _len5 = arguments.length, rows = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
       rows[_key5] = arguments[_key5];
     }
 
     var commandedRows = rows.map(function (line) {
-      return typeof line !== "string" ? line : module.exports.command(line);
+      return typeof line !== "string" ? line : module.exports.invokation(line);
     });
     var currentContext = "";
     var contextedRows = [];
@@ -233,7 +245,7 @@ ReVDoc ontology provides vocabulary and definitions which are
       for (var _iterator = commandedRows[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
         var row = _step.value;
 
-        if (row != null && row["rdf:type"] === "vdoc:ContextBase") {
+        if (row != null && row["@type"] === "vdoc:ContextBase") {
           currentContext = row;
         } else {
           contextedRows.push([currentContext, "$ ", row]);
@@ -255,11 +267,11 @@ ReVDoc ontology provides vocabulary and definitions which are
     }
 
     return {
-      "rdf:type": "revdoc:CommandLineInteraction",
+      "@type": "revdoc:CommandLineInteraction",
       "vdoc:entries": contextedRows
     };
   }</td></tr>
-        <trclass=" vdoc-nth-child-2n"><td>filterKeysWithAnyOf</td><td>function filterKeysWithAnyOf(entryFieldName) {
+        <tr><td>filterKeysWithAnyOf</td><td>function filterKeysWithAnyOf(entryFieldName) {
     var searchedValueOrValues = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
     var container = arguments.length > 2 ? arguments[2] : undefined;
     return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container, function (a, _ref2) {
@@ -270,7 +282,7 @@ ReVDoc ontology provides vocabulary and definitions which are
       return a || field.includes(searched);
     });
   }</td></tr>
-        <tr><td>filterKeysWithAllOf</td><td>function filterKeysWithAllOf(entryFieldName) {
+        <tr class=" vdoc-nth-child-2n"><td>filterKeysWithAllOf</td><td>function filterKeysWithAllOf(entryFieldName) {
     var searchedValueOrValues = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
     var container = arguments.length > 2 ? arguments[2] : undefined;
     return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container, function (a, _ref4) {
@@ -281,7 +293,7 @@ ReVDoc ontology provides vocabulary and definitions which are
       return a && field.includes(searched);
     }, true);
   }</td></tr>
-        <trclass=" vdoc-nth-child-2n"><td>filterKeysWithNoneOf</td><td>function filterKeysWithNoneOf(entryFieldName) {
+        <tr><td>filterKeysWithNoneOf</td><td>function filterKeysWithNoneOf(entryFieldName) {
     var searchedValueOrValues = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
     var container = arguments.length > 2 ? arguments[2] : undefined;
     return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container, function (a, _ref6) {
@@ -292,7 +304,7 @@ ReVDoc ontology provides vocabulary and definitions which are
       return a && !field.includes(searched);
     }, true);
   }</td></tr>
-        <tr><td>filterKeysWithFieldReduction</td><td>function filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container, reduction, initial) {
+        <tr class=" vdoc-nth-child-2n"><td>filterKeysWithFieldReduction</td><td>function filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container, reduction, initial) {
   var searchedValues = [].concat(searchedValueOrValues !== undefined ? searchedValueOrValues : []);
   return Object.entries(container).filter(function (_ref8) {
     var _ref9 = _slicedToArray(_ref8, 2),
@@ -320,7 +332,7 @@ ReVDoc emits html which makes use of ReSpec primitives.
 
   <section id="emission_rules" class="vdoc type-vdoc-chapter">
     <h2>ReVDoc emission rules</h2>
-ReVDoc provides html emission rules for vdoc:Document revdoc:Document vdoc:Chapter vdoc:Reference
+ReVDoc provides html emission rules for vdoc:Document revdoc:Document vdoc:Chapter vdoc:Reference revdoc:Invokation revdoc:Command revdoc:Example
   </section>
 
   </section>

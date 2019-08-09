@@ -5,26 +5,36 @@
       "@base": "https://valospace.org/twindoc#",
       "sbomdoc": "https://valospace.org/sbomdoc#",
       "revdoc": "https://valospace.org/revdoc#",
-      "dc": "http://purl.org/dc/elements/1.1/",
-      "owl": "http://www.w3.org/2002/07/owl#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
       "vdoc": "https://valospace.org/vdoc#",
-      "a": {
-        "@id": "rdf:type",
-        "@type": "@id"
-      },
       "vdoc:content": {
         "@id": "https://valospace.org/vdoc#content",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
       },
       "vdoc:words": {
         "@id": "https://valospace.org/vdoc#words",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
       },
       "vdoc:entries": {
         "@id": "https://valospace.org/vdoc#entries",
-        "@container": "@list"
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:headers": {
+        "@id": "https://valospace.org/vdoc#headers",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:cell": {
+        "@id": "https://valospace.org/vdoc#cell",
+        "@container": "@list",
+        "@type": "@id"
       }
     },
     "dc:title": "TwinDoc - Valospace Hypertwin VDoc extension",
@@ -56,11 +66,11 @@
     },
     "abstract": {
       "@id": "abstract",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document specifies TwinDoc, a ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "VDoc extension"
           ],
@@ -73,13 +83,13 @@
     },
     "sotd": {
       "@id": "sotd",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "This document has not been reviewed. This is a draft document and\n    may be updated, replaced or obsoleted by other documents at any\n    time.",
         null,
         "This document is part of the ",
         {
-          "rdf:type": "vdoc:Reference",
+          "@type": "vdoc:Reference",
           "vdoc:content": [
             "ValOS core specification"
           ],
@@ -89,7 +99,7 @@
         null,
         "The extension is specified and supported by ",
         {
-          "rdf:type": "revdoc:Package",
+          "@type": "revdoc:Package",
           "vdoc:content": [
             {
               "vdoc:em": true,
@@ -105,13 +115,13 @@
     },
     "introduction": {
       "@id": "introduction",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "TwinDoc provides both full isomorphic synchronization as well as\n    incremental, additive updates between VDoc documents and valospace\n    resources.\n    The fully isomoprhic extraction and emission transformations to\n    valospace resources provide lossless roundtrips to both directions:",
         {
           "vdoc:content": [
             {
-              "rdf:type": "vdoc:NumberedList",
+              "@type": "vdoc:NumberedList",
               "vdoc:entries": [
                 "emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD",
                 "extract + emit: a roundtrip starting from valospace into VDocLD back into valospace"
@@ -126,7 +136,7 @@
     "ontology": {
       "@id": "ontology",
       "dc:title": "TwinDoc ontology",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "@id": "section_ontology_abstract"
@@ -167,22 +177,22 @@
     "section_prefixes": {
       "@id": "section_prefixes",
       "dc:title": "TwinDoc IRI prefixes",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "vdoc:lookup": "prefixes",
-          "rdf:type": "vdoc:Table",
+          "@type": "vdoc:Table",
           "vdoc:headers": [
             {
               "vdoc:cell": "vdoc:selectKey",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "Prefix"
               ]
             },
             {
               "vdoc:cell": "vdoc:selectValue",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "IRI"
               ]
@@ -194,21 +204,21 @@
     "section_classes": {
       "@id": "section_classes",
       "dc:title": "<em>twindoc:* a vdoc:Class</em> vocabulary",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "vdoc:lookup": "vocabulary",
-          "rdf:type": "vdoc:Table",
+          "@type": "vdoc:Table",
           "vdoc:headers": {
             "vdoc:entries": [
               {
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:content": [
                   "rdfs:label"
                 ],
                 "vdoc:cell": {
                   "vdoc:resourceId": "vdoc:selectKey",
-                  "rdf:type": "vdoc:Reference",
+                  "@type": "vdoc:Reference",
                   "vdoc:content": [
                     {
                       "vdoc:em": true,
@@ -224,7 +234,7 @@
                 }
               },
               {
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:content": [
                   "rdfs:subClassOf"
                 ],
@@ -236,7 +246,7 @@
               },
               {
                 "vdoc:cell": "rdfs:comment",
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:content": {
                   "vdoc:em": true,
                   "vdoc:content": [
@@ -254,21 +264,21 @@
     "section_properties": {
       "@id": "section_properties",
       "dc:title": "<em>twindoc:* a vdoc:Property</em> vocabulary",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "vdoc:lookup": "vocabulary",
-          "rdf:type": "vdoc:Table",
+          "@type": "vdoc:Table",
           "vdoc:headers": {
             "vdoc:entries": [
               {
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:content": [
                   "rdfs:label"
                 ],
                 "vdoc:cell": {
                   "vdoc:resourceId": "vdoc:selectKey",
-                  "rdf:type": "vdoc:Reference",
+                  "@type": "vdoc:Reference",
                   "vdoc:content": [
                     {
                       "vdoc:em": true,
@@ -285,28 +295,28 @@
               },
               {
                 "vdoc:cell": "rdfs:subPropertyOf",
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:content": [
                   "rdfs:subPropertyOf"
                 ]
               },
               {
                 "vdoc:cell": "rdfs:domain",
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:content": [
                   "rdfs:domain"
                 ]
               },
               {
                 "vdoc:cell": "rdfs:range",
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:content": [
                   "rdfs:range"
                 ]
               },
               {
                 "vdoc:cell": "rdfs:comment",
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:content": {
                   "vdoc:em": true,
                   "vdoc:content": [
@@ -324,21 +334,21 @@
     "section_vocabulary_other": {
       "@id": "section_vocabulary_other",
       "dc:title": "<em>twindoc:</em> other vocabulary",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "vdoc:lookup": "vocabulary",
-          "rdf:type": "vdoc:Table",
+          "@type": "vdoc:Table",
           "vdoc:headers": {
             "vdoc:entries": [
               {
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:content": [
                   "rdfs:label"
                 ],
                 "vdoc:cell": {
                   "vdoc:resourceId": "vdoc:selectKey",
-                  "rdf:type": "vdoc:Reference",
+                  "@type": "vdoc:Reference",
                   "vdoc:content": [
                     {
                       "vdoc:em": true,
@@ -354,14 +364,14 @@
                 }
               },
               {
-                "vdoc:cell": "rdf:type",
-                "rdf:type": "vdoc:Header",
+                "vdoc:cell": "@type",
+                "@type": "vdoc:Header",
                 "vdoc:content": [
                   "rdf:type"
                 ]
               },
               {
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:content": [
                   "rdfs:subClassOf"
                 ],
@@ -373,7 +383,7 @@
               },
               {
                 "vdoc:cell": "rdfs:comment",
-                "rdf:type": "vdoc:Header",
+                "@type": "vdoc:Header",
                 "vdoc:content": {
                   "vdoc:em": true,
                   "vdoc:content": [
@@ -391,43 +401,43 @@
     "section_context": {
       "@id": "section_context",
       "dc:title": "TwinDoc JSON-LD context term definitions",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "vdoc:lookup": "context",
-          "rdf:type": "vdoc:Table",
+          "@type": "vdoc:Table",
           "vdoc:headers": [
             {
               "vdoc:cell": "vdoc:selectKey",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "Term"
               ]
             },
             {
               "vdoc:cell": "vdoc:selectValue",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "Definition"
               ]
             },
             {
               "vdoc:cell": "@id",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "@id"
               ]
             },
             {
               "vdoc:cell": "@type",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "@type"
               ]
             },
             {
               "vdoc:cell": "@container",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "@container"
               ]
@@ -439,7 +449,7 @@
     "transformations": {
       "@id": "transformations",
       "dc:title": "TwinDoc transformations",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "@id": "extraction_rules"
@@ -458,50 +468,50 @@
     "extraction_rules": {
       "@id": "extraction_rules",
       "dc:title": "TwinDoc extraction rules",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "vdoc:lookup": "extraction_rules_data",
-          "rdf:type": "vdoc:Table",
+          "@type": "vdoc:Table",
           "vdoc:headers": [
             {
               "vdoc:cell": "vdoc:selectKey",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "Rule name"
               ]
             },
             {
               "vdoc:cell": "range",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "Inter-node rdf:type"
               ]
             },
             {
               "vdoc:cell": "owner",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "Owner property"
               ]
             },
             {
               "vdoc:cell": "body",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "Body property"
               ]
             },
             {
               "vdoc:cell": "rest",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "';rest' property"
               ]
             },
             {
               "vdoc:cell": "comment",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "Comment"
               ]
@@ -516,22 +526,22 @@
     "extractee_api": {
       "@id": "extractee_api",
       "dc:title": "TwinDoc extractee API",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "vdoc:lookup": "extractee_api_lookup",
-          "rdf:type": "vdoc:Table",
+          "@type": "vdoc:Table",
           "vdoc:headers": [
             {
               "vdoc:cell": "vdoc:selectKey",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "API identifier"
               ]
             },
             {
               "vdoc:cell": "vdoc:selectValue",
-              "rdf:type": "vdoc:Header",
+              "@type": "vdoc:Header",
               "vdoc:content": [
                 "rdf:type"
               ]
@@ -546,11 +556,11 @@
     "emission_output": {
       "@id": "emission_output",
       "dc:title": "TwinDoc emission output",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": [
         "TwinDoc emits event log updates into valospace resources.",
         {
-          "rdf:type": "revdoc:Package",
+          "@type": "revdoc:Package",
           "vdoc:content": [
             {
               "vdoc:em": true,
@@ -567,10 +577,10 @@
     "emission_rules": {
       "@id": "emission_rules",
       "dc:title": "TwinDoc emission rules",
-      "rdf:type": "vdoc:Chapter",
+      "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
-    "rdf:type": "revdoc:Document",
+    "@type": "revdoc:Document",
     "vdoc:content": [
       {
         "@id": "abstract"

@@ -45,8 +45,8 @@
       "LIBRARY"
     ],
     "revdoc:package": "@valos/script",
-    "revdoc:prefix": "valos",
-    "revdoc:prefixIRI": "https://valospace.org/#",
+    "revdoc:prefix": "valos-script",
+    "revdoc:prefixIRI": "https://valospace.org/script#",
     "revdoc:version": "0.35.0-prerelease.8",
     "respecConfig": {
       "specStatus": "unofficial",
@@ -118,7 +118,7 @@
     },
     "ontology": {
       "@id": "ontology",
-      "dc:title": "<em>valos:</em> library @valos/script ontology",
+      "dc:title": "<em>valos-script:</em> library @valos/script ontology",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -149,193 +149,13 @@
     },
     "prefixes": {
       "@id": "prefixes",
-      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-      "xsd": "http://www.w3.org/2001/XMLSchema#",
-      "owl": "http://www.w3.org/2002/07/owl#",
-      "dc": "http://purl.org/dc/elements/1.1/",
-      "valos": "https://valospace.org/#"
+      "valos-script": "https://valospace.org/script#"
     },
     "vocabulary": {
-      "@id": "vocabulary",
-      "prototypeAlias": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:prototype",
-        "rdfs:subPropertyOf": "valos:prototype",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "valos:TransientFields",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The prototype of this Resource. This is an alias for valos:prototype\nto bypass conflicts with native javascript property 'prototype' in\ncertain contexts."
-      },
-      "TransientScriptsFields": {
-        "@type": "valos:Type",
-        "rdfs:subClassOf": [
-          "valos:TransientScriptFields"
-        ],
-        "revdoc:brief": "transient script fields",
-        "rdfs:comment": "The class of valos script resources which are not active within the\ncurrent view of the world but which have references to them. As such\nit is the domain of all transient and generated script fields."
-      },
-      "incomingRelations": {
-        "@type": "valos:TransientField",
-        "rdfs:domain": "valos:TransientScriptFields",
-        "rdfs:range": "valos:Relation",
-        "valos:coupledField": "valos:target",
-        "rdfs:comment": "Unordered set of relations that are targeting this relatable resource."
-      },
-      "DestroyedScriptResource": {
-        "@type": "valos:Type",
-        "rdfs:subClassOf": [
-          "valos:TransientFields",
-          "valos:Resource"
-        ],
-        "revdoc:brief": "destroyed script resource",
-        "rdfs:comment": "The class of valospace script resources which have been destroyed in\nthis view of the world. It only provides the external fields listed in\nTransientScripFields and TransientFields interfaces."
-      },
-      "ScriptProperty": {
-        "@type": "valos:Type",
-        "rdfs:subClassOf": [
-          "valos:TransientFields",
-          "valos:Resource"
-        ],
-        "revdoc:brief": "property",
-        "rdfs:comment": "The class of valospace Property resources which are expressed as\nvaloscript object properties."
-      },
-      "scope": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:owner",
-        "rdfs:subPropertyOf": "valos:owner",
-        "rdfs:domain": "valos:ScriptProperty",
-        "rdfs:range": "valos:Scope",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:isOwned": true,
-        "valos:coupledField": "valos:properties",
-        "rdfs:comment": "The scope resource (and owner) of this Property"
-      },
-      "value": {
-        "@type": "valos:PrimaryField",
-        "rdfs:domain": "valos:ScriptProperty",
-        "rdfs:range": "rdfs:Resource",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:initialValue": null,
-        "valos:finalDefaultValue": [
-          "§void"
-        ],
-        "rdfs:comment": "The value of this Property"
-      },
-      "Scope": {
-        "@type": "valos:Type",
-        "rdfs:subClassOf": [
-          "valos:TransientFields"
-        ],
-        "revdoc:brief": "scope",
-        "rdfs:comment": "The class of valospace resources which can have valospace script\nproperties."
-      },
-      "properties": {
-        "@type": "valos:PrimaryField",
-        "rdfs:domain": "valos:Scope",
-        "rdfs:range": "rdfs:List",
-        "valos:coupledField": "valos:scope",
-        "valos:isOwning": true,
-        "rdfs:comment": "The ordered list of Property resources of this scope"
-      },
-      "Relatable": {
-        "@type": "valos:Type",
-        "rdfs:subClassOf": [
-          "valos:TransientFields",
-          "valos:Resource",
-          "valos:TransientScriptFields",
-          "valos:Scope"
-        ],
-        "revdoc:brief": "relatable",
-        "rdfs:comment": "The class of valospace resources which can act as source and target of\na valospace Relation."
-      },
-      "relations": {
-        "@type": "valos:PrimaryField",
-        "rdfs:domain": "valos:Relatable",
-        "rdfs:range": "rdfs:List",
-        "valos:coupledField": "valos:source",
-        "valos:isOwning": true,
-        "rdfs:comment": "The ordered list of outgoing relations of this relatable"
-      },
-      "Relation": {
-        "@type": "valos:Type",
-        "rdfs:subClassOf": [
-          "valos:TransientFields",
-          "valos:Resource",
-          "valos:TransientScriptFields",
-          "valos:Scope",
-          "valos:Relatable"
-        ],
-        "revdoc:brief": "relation",
-        "rdfs:comment": "The class of valospace resources which can act as source and target of\na valospace Relation."
-      },
-      "source": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:owner",
-        "rdfs:subPropertyOf": "valos:owner",
-        "rdfs:domain": "valos:Relation",
-        "rdfs:range": "valos:Relatable",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:isOwned": true,
-        "valos:coupledField": "valos:relations",
-        "rdfs:comment": "The source (and owner) relatable of this relation."
-      },
-      "target": {
-        "@type": "valos:PrimaryField",
-        "rdfs:domain": "valos:Relation",
-        "rdfs:range": "valos:Relatable",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:coupledField": "valos:incomingRelations",
-        "rdfs:comment": "The target relatable of this relation."
-      }
+      "@id": "vocabulary"
     },
     "context": {
-      "@id": "context",
-      "valos:prototypeAlias": {
-        "@id": "https://valospace.org/#prototypeAlias",
-        "@type": "@id"
-      },
-      "valos:incomingRelations": {
-        "@id": "https://valospace.org/#incomingRelations",
-        "@type": "@id"
-      },
-      "valos:scope": {
-        "@id": "https://valospace.org/#scope",
-        "@type": "@id"
-      },
-      "valos:properties": {
-        "@id": "https://valospace.org/#properties",
-        "@container": "@list",
-        "@type": "@id"
-      },
-      "valos:relations": {
-        "@id": "https://valospace.org/#relations",
-        "@container": "@list",
-        "@type": "@id"
-      },
-      "valos:source": {
-        "@id": "https://valospace.org/#source",
-        "@type": "@id"
-      },
-      "valos:target": {
-        "@id": "https://valospace.org/#target",
-        "@type": "@id"
-      }
+      "@id": "context"
     },
     "section_ontology_abstract": {
       "@id": "section_ontology_abstract",
@@ -372,7 +192,7 @@
     },
     "section_classes": {
       "@id": "section_classes",
-      "dc:title": "<em>valos:* a valos:Class</em> vocabulary",
+      "dc:title": "<em>valos-script:* a valos-kernel:Class</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -432,7 +252,7 @@
     },
     "section_properties": {
       "@id": "section_properties",
-      "dc:title": "<em>valos:* a valos:Property</em> vocabulary",
+      "dc:title": "<em>valos-script:* a valos-kernel:Property</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -502,7 +322,7 @@
     },
     "section_types": {
       "@id": "section_types",
-      "dc:title": "<em>valos:* a valos:Type</em> vocabulary",
+      "dc:title": "<em>valos-script:* a valos-raem:Type</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -535,6 +355,20 @@
               {
                 "@type": "vdoc:Header",
                 "vdoc:content": [
+                  "revdoc:brief"
+                ],
+                "vdoc:cell": {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "vdoc:selectField": "revdoc:brief"
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": [
                   "rdfs:subClassOf"
                 ],
                 "vdoc:cell": {
@@ -556,20 +390,13 @@
               }
             ]
           },
-          "vdoc:entries": [
-            "TransientScriptsFields",
-            "DestroyedScriptResource",
-            "ScriptProperty",
-            "Scope",
-            "Relatable",
-            "Relation"
-          ]
+          "vdoc:entries": []
         }
       ]
     },
     "section_fields": {
       "@id": "section_fields",
-      "dc:title": "<em>valos:* a valos:Field*</em> vocabulary",
+      "dc:title": "<em>valos-script:* a valos-raem:Field*</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -628,10 +455,10 @@
                 ]
               },
               {
-                "vdoc:cell": "valos:coupledField",
+                "vdoc:cell": "valos-raem:coupledField",
                 "@type": "vdoc:Header",
                 "vdoc:content": [
-                  "valos:coupledField"
+                  "valos-raem:coupledField"
                 ]
               },
               {
@@ -647,22 +474,13 @@
               }
             ]
           },
-          "vdoc:entries": [
-            "prototypeAlias",
-            "incomingRelations",
-            "scope",
-            "value",
-            "properties",
-            "relations",
-            "source",
-            "target"
-          ]
+          "vdoc:entries": []
         }
       ]
     },
     "section_vocabulary_other": {
       "@id": "section_vocabulary_other",
-      "dc:title": "<em>valos:*</em> other vocabulary:",
+      "dc:title": "<em>valos-script:*</em> other vocabulary:",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -729,7 +547,7 @@
     },
     "section_context": {
       "@id": "section_context",
-      "dc:title": "<em>valos:*</em> JSON-LD context term definitions",
+      "dc:title": "<em>valos-script:*</em> JSON-LD context term definitions",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {

@@ -1,4 +1,4 @@
-const { extractee: { em, ref } } = require("@valos/vdoc");
+const { extractee: { em, ref, strong } } = require("@valos/vdoc");
 
 const prefixes = {
   "header#0;vdoc:selectKey": "Prefix",
@@ -49,6 +49,10 @@ const elements = {
 const types = {
   ...vocabulary,
   "header#1": {
+    "vdoc:content": ["revdoc:brief"],
+    "vdoc:cell": strong({ "vdoc:selectField": "revdoc:brief" }),
+  },
+  "header#2": {
     "vdoc:content": ["rdfs:subClassOf"],
     "vdoc:cell": { "vdoc:words": { "vdoc:selectField": "rdfs:subClassOf" } },
   },
@@ -60,7 +64,7 @@ const fields = {
   "header#2;rdfs:range": "rdfs:range",
   "header#3;@type": "rdf:type",
   "header#4;rdfs:subPropertyOf": "rdfs:subPropertyOf",
-  "header#5;valos:coupledField": "valos:coupledField",
+  "header#5;valos-raem:coupledField": "valos-raem:coupledField",
 };
 
 const vocabularyOther = {

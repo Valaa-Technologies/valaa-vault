@@ -8,7 +8,9 @@ const {
   ontologyHeaders,
 } = require("@valos/revdoc");
 
-const { prefix, prefixIRI, prefixes, vocabulary, context } = require("./ontology");
+const {
+  "valos-raem": { prefix, prefixIRI, prefixes, vocabulary, context },
+ } = require("./ontologies");
 
 const { name, version, description } = require("./package");
 
@@ -274,34 +276,34 @@ valaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=rela
       "#0": [],
       "table#>0;prefixes": ontologyHeaders.prefixes,
     },
-    [`chapter#section_classes>2;<em>${prefix}:* a valos:Class</em> vocabulary`]: {
+    [`chapter#section_classes>2;<em>${prefix}:* a valos-kernel:Class</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.classes,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "valos:Class", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", "valos-kernel:Class", vocabulary),
       },
     },
-    [`chapter#section_properties>3;<em>${prefix}:* a valos:Property</em> vocabulary`]: {
+    [`chapter#section_properties>3;<em>${prefix}:* a valos-kernel:Property</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.properties,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "valos:Property", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", "valos-kernel:Property", vocabulary),
       },
     },
-    [`chapter#section_types>4;<em>${prefix}:* a valos:Type</em> vocabulary`]: {
+    [`chapter#section_types>4;<em>${prefix}:* a valos-raem:Type</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.types,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "valos:Type", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", "valos-raem:Type", vocabulary),
       },
     },
-    [`chapter#section_fields>5;<em>${prefix}:* a valos:Field*</em> vocabulary`]: {
+    [`chapter#section_fields>5;<em>${prefix}:* a valos-raem:Field*</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.fields,
         "vdoc:entries": filterKeysWithAnyOf("@type", [
-          "valos:Field", "valos:PrimaryField", "valos:TransientField", "valos:InferredField",
-          "valos:GeneratedField", "valos:AliasField",
+          "valos-raem:Field", "valos-raem:PrimaryField", "valos-raem:TransientField",
+          "valos-raem:InferredField", "valos-raem:GeneratedField", "valos-raem:AliasField",
         ], vocabulary),
       },
     },
@@ -310,9 +312,9 @@ valaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=rela
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.vocabularyOther,
         "vdoc:entries": filterKeysWithNoneOf("@type", [
-          "valos:Class", "valos:Type", "valos:Property", "valos:Field",
-          "valos:PrimaryField", "valos:TransientField", "valos:InferredField",
-          "valos:GeneratedField", "valos:AliasField",
+          "valos-kernel:Class", "valos-raem:Type", "valos-kernel:Property", "valos-raem:Field",
+          "valos-raem:PrimaryField", "valos-raem:TransientField", "valos-raem:InferredField",
+          "valos-raem:GeneratedField", "valos-raem:AliasField",
         ], vocabulary),
       },
     },

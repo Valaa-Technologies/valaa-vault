@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>@valos/kernel domain content reference</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"subtitle":"0.35.0-prerelease.8","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"valosKernelDomain"};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body>
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter">      <p>@valos/kernel domain includes all core infrastructure components of ValOS - the Valaa Open System.</p>
+      <p>These components are hosted at the <a href="https://www.npmjs.com/search?q=%40valos" class="vdoc type-vdoc-reference">npmjs repository within @valos namespace</a>.</p>
+      <p>These components are developed at the <a href="https://github.com/valaatech/kernel" class="vdoc type-vdoc-reference">valos git repository</a>.</p>
+
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter">This document is part of the vault workspace <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a> (of domain <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which is ValOS common infrastructure tools and libraries monorepo.
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter">
+    <h2><em>"Greetings, I am Valma, the ValOS Mediator. Who are you?"</em></h2>
+      <p>ValOS ecosystem revolves around various roles. This document is
+      a reference document of the ValOS fabric systems and structures
+      and is directed for technicians. Check out the brief
+      description and introductions of the other roles as well.</p>
+      <p><a href="Valma" class="vdoc type-vdoc-reference">Valma</a> itself is a collection of tools for interacting
+      with the ValOS ecosystem, most notable of which is <a href="valma" class="vdoc type-vdoc-reference"><em>vlm</em> the command line script invoker</a>.
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Your role:</th>
+        <th class="vdoc type-vdoc-header">Your answer...</th>
+      </thead>
+      <tbody>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="technician" class="vdoc type-vdoc-reference">technician</a></strong></td><td><strong><em><a href="technician#introduction" class="vdoc type-vdoc-reference">"I am a ValOS technician, I want to enable valonauts and expand valospace"</a></em></strong></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=3>
+  <section class="vdoc type-vdoc-chapter">      <p>As a technician you develop and operate the <strong><a href="#fabric" class="vdoc type-vdoc-reference">ValOS fabric</a></strong>, the globally distributed web-like infrastructure of servers,
+        services and components which underlies the Valospace.</p>
+      <p>    You use <a href="valma" class="vdoc type-vdoc-reference">vlm</a> and employ your existing,
+    likely professional knowledge of JavaScript, Node.js, DevOps,
+    backend, library and other software development skills.</p>
+      <p>    You create new open source and/or proprietary node packages. These
+    permanently create new fabric functionalities and <a href="expand" class="vdoc type-vdoc-reference">expand</a> the Valospace by integrating it to old world systems.</p>
+
+  </section>
+</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Aliases:</em></td><td colspan=3><em><a href="technician#section_profiles" class="vdoc type-vdoc-reference">contributor developer administrator devops hacker etc</a></em></td></tr>
+        <tr><td><strong><a href="valonaut" class="vdoc type-vdoc-reference">valonaut</a></strong></td><td><strong><em><a href="valonaut#introduction" class="vdoc type-vdoc-reference">"I am a valonaut, I want to create and share interactive content"</a></em></strong></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=3>
+  <section class="vdoc type-vdoc-chapter">      <p>As a valonaut you create, share and deploy web content and
+    interactive applications fully from inside <a href="Valospace" class="vdoc type-vdoc-reference">Valospace</a>.</p>
+      <p>You use a web editor called <a href="Zero" class="vdoc type-vdoc-reference">Zero</a> and with it employ
+    traditional web technologies; HTML5, CSS and the Javascript
+    dialect <a href="https://valospace.org/script" class="vdoc type-vdoc-reference">valoscript</a></p>
+      <p>The skills you learn to do this are like cycling or writing - they
+    are used to support your other interests. While you don't need to
+    become a professional you certainly can!</p>
+
+  </section>
+</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Aliases:</em></td><td colspan=3><em><a href="valonaut#section_profiles" class="vdoc type-vdoc-reference">everyone personal student prototypist etc</a></em></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="voyager" class="vdoc type-vdoc-reference">voyager</a></strong></td><td><strong><em><a href="voyager#introduction" class="vdoc type-vdoc-reference">"I am a ValOS voyager, I want to discover ValOS and enlighten others"</a></em></strong></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=3>
+  <section class="vdoc type-vdoc-chapter">      <p>As a voyager you have stakes that matter. Whether you were to
+    invest on a ValOS collaborator as a financier, to adopt ValOS as
+    technology as an executive or just to commit your personal time and
+    energy on a ValOS project you need to <em>see</em> forward.</p>
+      <p>To make sound decisions and to position yourself proactively you
+    need to understand the big picture and philosophy of the ValOS
+    ecosystem. Only then you can enlighten others.</p>
+      <p>You use tailored but real-world ValOS demo setups to illustrate
+    how ValOS a solution could be configured to meet the needs at hand.
+    Your audience can be your customer, your team or even just
+    yourself.</p>
+
+  </section>
+</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Aliases:</em></td><td colspan=3><em><a href="voyager#section_profiles" class="vdoc type-vdoc-reference">enthusiast entrepreneur evangelist investor business_owner sales_rep etc</a></em></td></tr>
+      </tbody>
+    </table>
+</p>
+
+  </section>
+
+  <section id="section_documentation" class="vdoc type-vdoc-chapter">
+    <h2>Documentation</h2>
+This domain provides the following primary documents:
+  <section id="section_introduction_documents" class="vdoc type-vdoc-chapter">
+    <h2>Introduction documents</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Name</th>
+        <th class="vdoc type-vdoc-header">Package</th>
+        <th class="vdoc type-vdoc-header">Version</th>
+        <th class="vdoc type-vdoc-header">Tags</th>
+      </thead>
+      <tbody>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="raem" class="vdoc type-vdoc-reference">raem</a></strong></td><td>@valos/raem</td><td>0.35.0-prerelease.8</td><td>PRIMARY INTRODUCTORY ONTOLOGY LIBRARY</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Title:</em></td><td colspan=5><a href="raem#introduction" class="vdoc type-vdoc-reference">ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=5>
+  <section class="vdoc type-vdoc-chapter">      <p>This library provides the definitions and reference implementations
+    for the fundamental <code><span class="vdoc type-vdoc-node">ValOS Resources</span>
+</code> and <code><span class="vdoc type-vdoc-node">ValOS Events</span>
+</code> systems.</p>
+      <p><quote>A ValOS Resource <code><span class="vdoc type-vdoc-node">resource</span>
+</code> represents a well-defined part of
+      the world. It has a well-defined state at each particular moment in time.</quote></p>
+      <p><quote>A ValOS Event <code><span class="vdoc type-vdoc-node">event</span>
+</code> represents a dynamic change to a
+      resource by describing the change from previous to subsequent resource
+      states at a particular time.</quote></p>
+      <p>The interplay of these distinct yet interwoven systems forms the
+    foundation of the Valaa Open System.</p>
+
+  </section>
+</td></tr>
+        <tr><td><strong><a href="script" class="vdoc type-vdoc-reference">script</a></strong></td><td>@valos/script</td><td>0.35.0-prerelease.8</td><td>PRIMARY INTRODUCTORY ONTOLOGY LIBRARY</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Title:</em></td><td colspan=5><a href="script#introduction" class="vdoc type-vdoc-reference">ValOS Script API, schema</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=5>
+  <section class="vdoc type-vdoc-chapter">Valoscript extends ECMAScript 5 object model transparently for
+manipulating valospace resources. The valoscript interpreter creates <a href="https://valospace.org/raem#event" class="vdoc type-vdoc-reference">events</a> from all valospace resource
+modification side-effects and groups all such side effects into
+transactions. Valoscript retains ECMAScript 5 syntax and semantics.
+  </section>
+</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="sourcerer" class="vdoc type-vdoc-reference">sourcerer</a></strong></td><td>@valos/sourcerer</td><td>0.35.0-prerelease.8</td><td>PRIMARY INTRODUCTORY ONTOLOGY LIBRARY</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Title:</em></td><td colspan=5><a href="sourcerer#introduction" class="vdoc type-vdoc-reference">ValOS Sourcerer API, schema</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=5>
+  <section class="vdoc type-vdoc-chapter">
+  </section>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_api_reference_documents" class="vdoc type-vdoc-chapter">
+    <h2>API reference documents</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Name</th>
+        <th class="vdoc type-vdoc-header">Package</th>
+        <th class="vdoc type-vdoc-header">Version</th>
+        <th class="vdoc type-vdoc-header">Tags</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_ontology_documents" class="vdoc type-vdoc-chapter">
+    <h2>Ontology documents</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Name</th>
+        <th class="vdoc type-vdoc-header">Package</th>
+        <th class="vdoc type-vdoc-header">Version</th>
+        <th class="vdoc type-vdoc-header">Tags</th>
+      </thead>
+      <tbody>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="raem" class="vdoc type-vdoc-reference">raem</a></strong></td><td>@valos/raem</td><td>0.35.0-prerelease.8</td><td>PRIMARY INTRODUCTORY ONTOLOGY LIBRARY</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Title:</em></td><td colspan=5><a href="raem#ontology" class="vdoc type-vdoc-reference">ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Ontology abstract:</em></td><td colspan=5>@valos/raem ontology specifies the Valospace core types and
+      properties directly to the @valos/kernel namespace. </td></tr>
+        <tr><td><strong><a href="revdoc" class="vdoc type-vdoc-reference">revdoc</a></strong></td><td>@valos/revdoc</td><td>0.35.0-prerelease.8</td><td>PRIMARY ONTOLOGY</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Title:</em></td><td colspan=5><a href="revdoc#ontology" class="vdoc type-vdoc-reference">ReVDoc - ReSpec document VDoc extension</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Ontology abstract:</em></td><td colspan=5>ReVDoc ontology provides vocabulary and definitions which are
+      tailored for emitting ReSpec html output documents.</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="sbomdoc" class="vdoc type-vdoc-reference">sbomdoc</a></strong></td><td>@valos/sbomdoc</td><td>0.35.0-prerelease.8</td><td>PRIMARY ONTOLOGY</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Title:</em></td><td colspan=5><a href="sbomdoc#ontology" class="vdoc type-vdoc-reference">SBoMDoc - Software Bill of Materials VDoc extension</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Ontology abstract:</em></td><td colspan=5>SBoMDoc ontology provides vocabulary and definitions which are
+      tailored for representing CycloneDX SBoM analysis semantic
+      content.</td></tr>
+        <tr><td><strong><a href="script" class="vdoc type-vdoc-reference">script</a></strong></td><td>@valos/script</td><td>0.35.0-prerelease.8</td><td>PRIMARY INTRODUCTORY ONTOLOGY LIBRARY</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Title:</em></td><td colspan=5><a href="script#ontology" class="vdoc type-vdoc-reference">ValOS Script API, schema</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Ontology abstract:</em></td><td colspan=5>@valos/script ontology specifies the Valospace core types and
+      properties directly to the @valos/kernel namespace. </td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="sourcerer" class="vdoc type-vdoc-reference">sourcerer</a></strong></td><td>@valos/sourcerer</td><td>0.35.0-prerelease.8</td><td>PRIMARY INTRODUCTORY ONTOLOGY LIBRARY</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Title:</em></td><td colspan=5><a href="sourcerer#ontology" class="vdoc type-vdoc-reference">ValOS Sourcerer API, schema</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Ontology abstract:</em></td><td colspan=5>@valos/sourcerer ontology specifies the Valospace core types and
+      properties directly to the @valos/kernel namespace. </td></tr>
+        <tr><td><strong><a href="twindoc" class="vdoc type-vdoc-reference">twindoc</a></strong></td><td>@valos/twindoc</td><td>0.35.0-prerelease.8</td><td>PRIMARY ONTOLOGY</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Title:</em></td><td colspan=5><a href="twindoc#ontology" class="vdoc type-vdoc-reference">TwinDoc - Valospace Hypertwin VDoc extension</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Ontology abstract:</em></td><td colspan=5>TwinDoc ontology provides vocabulary for defining hypertwin
+      mappings and configurations; actual hypertwin content is
+      represented using the valos core ontologies and possible
+      extension content ontologies.</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="vdoc" class="vdoc type-vdoc-reference">vdoc</a></strong></td><td>@valos/vdoc</td><td>0.35.0-prerelease.8</td><td>PRIMARY ONTOLOGY</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Title:</em></td><td colspan=5><a href="vdoc#ontology" class="vdoc type-vdoc-reference">VDoc - ValOS document interchange specification</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Ontology abstract:</em></td><td colspan=5>VDoc core ontology specifies the vocabulary for the human facing
+      document structure by means of primitives which are sufficiently
+      common and meaningful across all types of documents.
+      These primitives include constructs such as chapters, titles,
+      lists, tables, cross-references, etc.VDoc core ontology explicitly does not specify any semantic
+      meanings outside the document structure itself.</td></tr>
+        <tr><td><strong><a href="kernel" class="vdoc type-vdoc-reference">kernel</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td><td>PRIMARY DOMAIN ONTOLOGY TECHNICIAN</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Title:</em></td><td colspan=5><a href="kernel#ontology" class="vdoc type-vdoc-reference">@valos/kernel domain content reference</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Ontology abstract:</em></td><td colspan=5>@valos/kernel ontology provides vocabulary and definitions of
+      the ValOS core concepts.</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="@valos/kernel" class="vdoc type-vdoc-reference">@valos/kernel</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td><td>PRIMARY INTRODUCTION ONTOLOGY VALONAUT</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Title:</em></td><td colspan=5><a href="@valos/kernel#ontology" class="vdoc type-vdoc-reference">Valospace reference</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Ontology abstract:</em></td><td colspan=5>Valospace ontology provides vocabulary and definitions of
+      the primary ValOS resources.</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_other_primary_documents" class="vdoc type-vdoc-chapter">
+    <h2>Other primary documents</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Name</th>
+        <th class="vdoc type-vdoc-header">Package</th>
+        <th class="vdoc type-vdoc-header">Version</th>
+        <th class="vdoc type-vdoc-header">Tags</th>
+      </thead>
+      <tbody>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="type-vault/AssortedTutorials" class="vdoc type-vdoc-reference">type-vault/AssortedTutorials</a></strong></td><td>@valos/type-vault</td><td>0.35.0-prerelease.8</td><td>PRIMARY HOW_TO</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Title:</em></td><td colspan=5><a href="type-vault/AssortedTutorials#abstract" class="vdoc type-vdoc-reference">Assorted tutorials</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Abstract:</em></td><td colspan=5>
+  <section class="vdoc type-vdoc-chapter">This document is a collection of tutorials and possibly other notes created by Jaradacl based on the tasks given. (During first few days at least)
+  </section>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  </section>
+
+  <section id="section_workspaces" class="vdoc type-vdoc-chapter">
+    <h2>Workspaces</h2>
+This domain introduces the following <a href="valma#workspace" class="vdoc type-vdoc-reference">workspaces</a> and workspace infrastructure components.
+  <section id="section_new_types" class="vdoc type-vdoc-chapter">
+    <h2>Workspace types, 9 new</h2>
+This domain introduces the following <a href="valma#type" class="vdoc type-vdoc-reference">workspace types</a>.
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Name</th>
+        <th class="vdoc type-vdoc-header">Package</th>
+        <th class="vdoc type-vdoc-header">Version</th>
+      </thead>
+      <tbody>
+        <tr><td><strong><a href="gateway-plugin" class="vdoc type-vdoc-reference">gateway-plugin</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=3>A gateway-plugin extends inspire and perspire gateways with various
+types of functionalities: new resources schemas, media decoders,
+protocol schemes, external APIs, valosheath APIs, etc.</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="library" class="vdoc type-vdoc-reference">library</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=3>A library workspace contains arbitrary ES5 source code and exposes a
+API via package.json .main stanza (usually index.js).
+
+A library can provide convenience valma commands but unlike toolsets
+a library cannot have workspace local configurations.
+
+Library workspaces are almost always published as a packages and
+typically reside in "packages/*" vault workspace directory.</td></tr>
+        <tr><td><strong><a href="opspace" class="vdoc type-vdoc-reference">opspace</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=3>An opspaces workspace is used to for configuring, deploying, updating,
+monitoring and diagnosing all types of live infrastructure resources.
+
+Opspaces rely heavily on various toolsets to get their job done.
+Opspaces rarily are published and packages and typically reside in
+"opspaces/*" vault workspace directory</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="tool" class="vdoc type-vdoc-reference">tool</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=3>Tools are a toolset implementation detail. A tool is similar to
+a toolset in that it can have its own workspace specific
+configurations. A tool differs from a toolset in that it cannot be
+standalone; it doesn't appear in listings, its always part of one or
+more toolsets and its toolsets.json config stanzas are placed under
+its parent toolset stanzas.
+
+The main case for tools and toolsets separation came from the release
+deployment system of opspaces, where the modularity and granular
+semantic versioning of tool packages allows for more efficient and
+robust deployments.
+
+Tool workspaces allows splitting complex toolsets into separate
+tools with different deployment logic. Infrastructure code which
+changes rarily can be placed under tool packages with naive
+deployment logic which relies on the tool package version number only.
+Frequently changing configs can be managed by the toolset workspace
+itself but even it can then use tool workspaces to source in
+commands and other resources to help with the deployment management.
+
+Additionally because the tool configuration is always inside its
+parent toolset config this allows the same tool be used by several
+different toolsets in a single workspace. Because of this all tool
+commands must have an option for '--toolset=<@scope/toolsetname>' which
+uses yargs.vlm.toolset as its default value.</td></tr>
+        <tr><td><strong><a href="toolset" class="vdoc type-vdoc-reference">toolset</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=3>A toolset workspace can be 'selected' by another workspace so that:
+1. The toolset is added as a devDependency to the target workspace,
+2. A configuration section is added for the toolset in the target
+   workspace root 'toolsets.json'
+
+This makes all valma scripts of the toolset available for the target
+workspace and allows these commands to easily access and manipulate
+their local configuration in the target workspace.</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="vault" class="vdoc type-vdoc-reference">vault</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=3>A vault is a monorepository which contains multiple workspaces of
+various types. Vaults are used to group packages with high cohesion
+together so that typical feature development, testing and deployment
+workflows can be done within a single repository when feasible.</td></tr>
+        <tr><td><strong><a href="vdoc-extension" class="vdoc type-vdoc-reference">vdoc-extension</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=3>A vdoc-extension workspace contains the extension specification and
+supporting libraries for a VDoc extension. It inherits library
+workspace characteristics but has a specific structure and initial
+templates which is useful for VDoc extensions in specific.
+</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="worker" class="vdoc type-vdoc-reference">worker</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=3>A worker workspace is used to launch and manage a particular service
+process. The workspace files contain configuration and data used by the
+process. This data can include even dynamic runtime data.
+
+A worker workspace is fully agnostic to version control solutions:
+- script-generated workers, where worker is locally spawned by scripts
+- clone-and-forget workers, where worker is cloned from a versioned
+  upstream repository, has its configuration locally customized and
+  local content potentially overridden. No further download sync is
+  expected nor will workers push updates back upstream. Each clone
+  represents its own computation.
+- synchronized workers, where the versioned repository itself
+  represents the worker process. Worker workspace shards (there can be
+  many if the computation is parallelizable) are still cloned from the
+  versioned upstream. Unlike with clone-and-forget workers the
+  synchronized worker workspaces keep themselves in sync with
+  upstream configuration and data changes and adjust their computation
+  accordingly.
+  Sync workers shards can even push results back to the versioned
+  repository if appropriate.</td></tr>
+        <tr><td><strong><a href="workshop" class="vdoc type-vdoc-reference">workshop</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=3>A workshop package provides a set of valma commands for defining and
+managing a ValOS domain. The workshops then:
+1. shall provide domain package (de)registration via
+   .configure/.<domain>/{,de}register-package
+2. can provide new workspace types via .configure/.type/*
+3. can provide new toolsets via
+   .configure/{,.type/.<type>/,.domain/.<domain>/}.toolset/**/*
+
+Notably the package (de)registration should provide means for any new
+domain toolset packages to request the addition of their toolset
+configure command to the domain workshop.
+Idiomatic way to implement this is a workshop command which issues a PR
+against the source control repository of the workshop package.</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_new_toolsets" class="vdoc type-vdoc-chapter">
+    <h2>Workspace toolsets, 4 new</h2>
+This domain introduces the following <a href="valma#toolset" class="vdoc type-vdoc-reference">workspace toolsets</a>:
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Name</th>
+        <th class="vdoc type-vdoc-header">Package</th>
+        <th class="vdoc type-vdoc-header">Version</th>
+      </thead>
+      <tbody>
+        <tr><td><strong><a href="@valos/toolset-domain" class="vdoc type-vdoc-reference">@valos/toolset-domain</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=3>This workspace type provides configuration template and commands for
+managing a ValOS domain.
+
+The toolset 'toolset-domain' is selectable by 'vault', 'workshop' workspaces.</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="@valos/toolset-rest-api-gateway-plugin" class="vdoc type-vdoc-reference">@valos/toolset-rest-api-gateway-plugin</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=3>This toolset extends a perspire worker workspaces with REST-style
+configurable and extensible web service plugin.</td></tr>
+        <tr><td><strong><a href="@valos/toolset-revealer" class="vdoc type-vdoc-reference">@valos/toolset-revealer</a></strong></td><td>@valos/kernel</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=3>This toolset enables valma command 'rouse-revealer' for deploying a
+local dev environment for inspire gateway revelations.
+
+Sets up the webpack entry and output config as webpack.config.js in
+the workspace root, which combines shared revealer config from
+@valos/toolset-revealer/shared/webpack.config.js, local toolset config
+and any customizations in the root webpack.config.js itself.</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="https://valospace.org/type-vault/enable-babel" class="vdoc type-vdoc-reference">@valos/type-vault/enable-babel</a></strong></td><td>@valos/type-vault</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=3>This toolset enables babel transpilation for a library workspace
+when 'vlm assemble-packages' is executed in the surrounding vault
+workspace.</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_new_tools" class="vdoc type-vdoc-chapter">
+    <h2>Workspace tools, 2 new</h2>
+This domain introduces the following <a href="valma#tool" class="vdoc type-vdoc-reference">workspace tools</a>:
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Name</th>
+        <th class="vdoc type-vdoc-header">Package</th>
+        <th class="vdoc type-vdoc-header">Version</th>
+      </thead>
+      <tbody>
+        <tr><td><strong><a href="@valos/toolset-domain#summary" class="vdoc type-vdoc-reference">@valos/toolset-domain#summary</a></strong></td><td>@valos/toolset-domain</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=3>This toolset-domain tool enables the (re)generation of docs/index.html
+domain summary revdoc document.</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="https://valospace.org/type-vault#docs" class="vdoc type-vdoc-reference">@valos/type-vault#docs</a></strong></td><td>@valos/type-vault</td><td>0.35.0-prerelease.8</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=3>This type-vault tool provides commands for (re)generating the /docs
+folder from document sources present in the local workspaces, notably
+all revdoc documents matching pattern '*.revdoc.js'.
+Additionally this tool can be configured to regenerate all docs on
+(pre)release time.</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_new_commands" class="vdoc type-vdoc-chapter">
+    <h2>Valma commands, 17 new</h2>
+This domain introduces the following top-level <a href="valma#command" class="vdoc type-vdoc-reference">valma commands</a>:
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Name</th>
+      </thead>
+      <tbody>
+        <tr><td><strong><a href="generate-domain-summary" class="vdoc type-vdoc-reference">generate-domain-summary</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=2>Generate the domain components summary file for the domain root revdoc</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=2></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="compose-revelation" class="vdoc type-vdoc-reference">compose-revelation</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=2>Compose revealer bundles based on the revealer toolset config</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=2></td></tr>
+        <tr><td><strong><a href="rouse-revealer" class="vdoc type-vdoc-reference">rouse-revealer</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=2>Launch a webpack-dev-server at localhost serving a local revelation</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=2>The revelation consists of two parts: webpack output and static files.
+Webpack output is configured by the project root webpack.config.js and
+the static files are served from --content-base. If this --content-base
+doesn't exist it is created by copying all files from the directory(s)
+provided by --content-source.</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="build-release" class="vdoc type-vdoc-reference">build-release</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=2>Build all toolset sub-releases which have source modifications</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=2>The sub-releases are placed under the provided dist target path.
+
+This command is first part of the two-part deployment with
+deploy-release making the actual deployment.</td></tr>
+        <tr><td><strong><a href="deploy-release" class="vdoc type-vdoc-reference">deploy-release</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=2>Deploy previously built releases to their deployment targets</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=2>This command is second part of the two-part deployment with
+build-release building the release.</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="assemble-packages" class="vdoc type-vdoc-reference">assemble-packages</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=2>Assemble all current modified vault packages (preparing for publish)</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=2>Uses lerna to handle the monorepo sub-packages update detection,
+versioning, and git interactions. Configuration for lerna is in
+lerna.json: notably the version increase semantics is configured there.
+
+Lerna is not used for constructing the actual packages. This is done by
+a flat recursive cp to the target at the moment.
+
+Invokes babel for all projects with babel.config.js in their root. If
+the vault has a shared babel.config.js for all packages, a symlink from
+this root to each project should be created.
+
+When assembling lerna will automatically update the shared version for
+all packages and their cross-dependencies and make a git commit and git
+tag for the new version.
+This behaviour can be omitted with --no-versioning.
+
+  Iterative development with yalc and publish-packages:
+
+Once a set of packages has been been built to the target, run:
+
+'vlm publish-packages --publisher=yalc'
+
+This will make the package assemblies available in a local yalc
+'registry'; see https://github.com/whitecolor/yalc for more details on
+how to use such packages by other depending packages. Reassembling
+and pushing those changes through yalc to dependents can be done with:
+
+'vlm assemble-packages --reassemble --post-execute="cd $ASSEMBLY_TARGET && yalc push --no-sig"'
+
+This allows packages to be developed iteratively locally while having
+other packages depend and be tested against them.
+</td></tr>
+        <tr><td><strong><a href="clean-vault" class="vdoc type-vdoc-reference">clean-vault</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=2>Clean various more or less transient vault files and subdirectories</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=2>By default the three elements installed by 'yarn install' are cleaned:
+1. workspace packages by 'lerna clean --yes'
+2. yalc local dependencies by 'yalc remove --all'
+3. vault root node_modules by 'rm -rf'
+
+In addition, dist/ can be removed with --dist in preparation for a clean slate publish/deploy ops.
+Be mindful that all of dist/ will be removed.
+yarn.lock can be removed with --yarn in preparation for persisted dependency updates.</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="create-revdoc" class="vdoc type-vdoc-reference">create-revdoc</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=2>Create a revdoc source code file</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=2></td></tr>
+        <tr><td><strong><a href="release-vault" class="vdoc type-vdoc-reference">release-vault</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=2>Prepare, commit and potentially publish a new release of vault packages</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=2>Create a new release/prerelease branch or extend an existing one
+based on given options and current environment.
+
+Prepares the release by first running sanity checks, then cleaning and
+reinstalling intermediate files like node_modules, yarn workspaces,
+yarn.lock and dist/ and finally requires all test suites and lint to
+pass without errors.
+
+Once preparation is done creates a new release commit and tag using
+'lerna version'.
+
+If --publish is not explicitly given then the final publish step must
+be manually performed. In this case a pre-publish phase is done which
+prepares the manual publish command instructions in the results output.
+
+Will invoke valma command hooks between stages as per:
+1. 'vlm .release-vault/.prepared-hooks/{**/,}* --summary=<obj>' after successful preparation
+2. 'vlm .release-vault/.committed-hooks/{**/,}* --summary=<obj>' after successful commit
+3. 'vlm .release-vault/.pre-published-hooks/{**/,}* --summary=<obj>' after successful pre-publish
+4. 'vlm .release-vault/.published-hooks/{**/,}* --summary=<obj>' after successful publish
+</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="publish-packages" class="vdoc type-vdoc-reference">publish-packages</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=2>Publish package assemblies to their registries</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=2></td></tr>
+        <tr><td><strong><a href="regenerate-docs" class="vdoc type-vdoc-reference">regenerate-docs</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=2>Regenerate all configured /docs content</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=2></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="perspire" class="vdoc type-vdoc-reference">perspire</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=2>Launch a headless worker gateway for persistent virtual DOM ValOS computation</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=2></td></tr>
+        <tr><td><strong><a href="configure" class="vdoc type-vdoc-reference">configure</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=2>Configure the current ValOS workspace and its toolsets</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=2>Allows grabbing and stowing of available toolsets and their tools and
+then invokes all in-use toolset configure commands.</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="create-command" class="vdoc type-vdoc-reference">create-command</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=2>Create and possibly export a new valma command script</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=2>The new command is created as a local valma.bin/ command with the
+source file in valma/, making it the highest priority command and
+immediately available.
+With --import a existing exported script is copied for local editing
+and development.</td></tr>
+        <tr><td><strong><a href="status" class="vdoc type-vdoc-reference">status</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=2>Display the status of the current workspace</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=2>If toolsetGlob is specified the status is limited to status scripts
+matching '.status/*{toolsetGlob}*/**/*', otherwise all status scripts
+by '.status/**/*' are used.</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="$" class="vdoc type-vdoc-reference">$</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=2>Execute a non-valma command within valma context interactively</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=2>Execute a non-valma command within valma context interactively.
+
+This is the command line shim to valma script vlm.interact.
+Like 'npx -c' it executes a regular command exported by some package
+dependency to the node_modules/.bin/ folder.
+
+Unlike 'npx' which only searches the current directory and the global
+cache '$' prepends all available valma pools to env.PATH, innermost
+pool first.
+</td></tr>
+        <tr><td><strong><a href="init" class="vdoc type-vdoc-reference">init</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=2>Initialize the current directory as a ValOS workspace from scratch</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=2>This command will interactively walk through the process of creating
+and configuring a new valma workspace in the current working directory
+from scratch.
+
+Valma init has following interactive phases:
+1. Initialization of package.json via 'yarn init'
+2. Configuration of workspace valos.type and .domain via 'vlm .configure/.valos-stanza'
+3. Addition of new known workshops via 'yarn add -W --dev'
+4. Selection of in-use toolsets from available toolsets via 'vlm .configure/.select-toolsets'
+5. Configuration of in-use toolsets and tools via 'vlm configure'</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_new_workshop_workspaces" class="vdoc type-vdoc-chapter">
+    <h2>Type 'workshop' workspaces, 1 new</h2>
+      <p>A workshop package provides a set of valma commands for defining and
+managing a ValOS domain. The workshops then:
+1. shall provide domain package (de)registration via
+   .configure/.<domain>/{,de}register-package
+2. can provide new workspace types via .configure/.type/*
+3. can provide new toolsets via
+   .configure/{,.type/.<type>/,.domain/.<domain>/}.toolset/**/*
+
+Notably the package (de)registration should provide means for any new
+domain toolset packages to request the addition of their toolset
+configure command to the domain workshop.
+Idiomatic way to implement this is a workshop command which issues a PR
+against the source control repository of the workshop package.</p>
+      <p>This domain introduces the following workshop <a href="valma#workspace" class="vdoc type-vdoc-reference">workspaces</a>.
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Name</th>
+        <th class="vdoc type-vdoc-header">Version</th>
+        <th class="vdoc type-vdoc-header">License</th>
+      </thead>
+      <tbody>
+        <tr><td><strong><a href="@valos/kernel" class="vdoc type-vdoc-reference">@valos/kernel</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=4>@valos/kernel domain workshop</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+      </tbody>
+    </table>
+</p>
+
+  </section>
+
+  <section id="section_new_toolset_workspaces" class="vdoc type-vdoc-chapter">
+    <h2>Type 'toolset' workspaces, 8 new</h2>
+      <p>A toolset workspace can be 'selected' by another workspace so that:
+1. The toolset is added as a devDependency to the target workspace,
+2. A configuration section is added for the toolset in the target
+   workspace root 'toolsets.json'
+
+This makes all valma scripts of the toolset available for the target
+workspace and allows these commands to easily access and manipulate
+their local configuration in the target workspace.</p>
+      <p>This domain introduces the following toolset <a href="valma#workspace" class="vdoc type-vdoc-reference">workspaces</a>.
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Name</th>
+        <th class="vdoc type-vdoc-header">Version</th>
+        <th class="vdoc type-vdoc-header">License</th>
+      </thead>
+      <tbody>
+        <tr><td><strong><a href="valma" class="vdoc type-vdoc-reference">valma</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=4>A ValOS CLI tool for discovering and executing context-dependent command scripts</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="@valos/toolset-domain" class="vdoc type-vdoc-reference">@valos/toolset-domain</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=4>ValOS Toolset for managing ValOS workspace domains</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr><td><strong><a href="@valos/toolset-rest-api-gateway-plugin" class="vdoc type-vdoc-reference">@valos/toolset-rest-api-gateway-plugin</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=4>A toolset for managing Structured ValOS REST API Gateway Plugin</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="@valos/toolset-revealer" class="vdoc type-vdoc-reference">@valos/toolset-revealer</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=4>Tools for building revelations both for development and deployment purposes</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr><td><strong><a href="@valos/type-gateway-plugin" class="vdoc type-vdoc-reference">@valos/type-gateway-plugin</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=4>The ValOS type toolset for 'gateway-plugin' workspaces</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="@valos/type-opspace" class="vdoc type-vdoc-reference">@valos/type-opspace</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=4>The ValOS type toolset for opspace workspaces</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr><td><strong><a href="https://valospace.org/type-vault" class="vdoc type-vdoc-reference">@valos/type-vault</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=4>The ValOS type toolset for vault workspaces</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="@valos/type-worker" class="vdoc type-vdoc-reference">@valos/type-worker</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=4>The ValOS type toolset for worker workspaces</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+      </tbody>
+    </table>
+</p>
+
+  </section>
+
+  <section id="section_new_library_workspaces" class="vdoc type-vdoc-chapter">
+    <h2>Type 'library' workspaces, 8 new</h2>
+      <p>A library workspace contains arbitrary ES5 source code and exposes a
+API via package.json .main stanza (usually index.js).
+
+A library can provide convenience valma commands but unlike toolsets
+a library cannot have workspace local configurations.
+
+Library workspaces are almost always published as a packages and
+typically reside in "packages/*" vault workspace directory.</p>
+      <p>This domain introduces the following library <a href="valma#workspace" class="vdoc type-vdoc-reference">workspaces</a>.
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Name</th>
+        <th class="vdoc type-vdoc-header">Version</th>
+        <th class="vdoc type-vdoc-header">License</th>
+      </thead>
+      <tbody>
+        <tr><td><strong><a href="https://valospace.org/engine" class="vdoc type-vdoc-reference">@valos/engine</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=4>ValOS Engine API and Schema</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="@valos/gateway-api" class="vdoc type-vdoc-reference">@valos/gateway-api</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=4>Minimal footprint ValOS Gateway API local forwards</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr><td><strong><a href="@valos/hypertwin" class="vdoc type-vdoc-reference">@valos/hypertwin</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=4>ValOS Hypertwin Specifications and Tools Library</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="https://valospace.org/inspire" class="vdoc type-vdoc-reference">@valos/inspire</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=4>ValOS Inspire application gateway</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr><td><strong><a href="https://valospace.org/raem" class="vdoc type-vdoc-reference">@valos/raem</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=4>ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="https://valospace.org/script" class="vdoc type-vdoc-reference">@valos/script</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=4>ValOS Script API, schema</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr><td><strong><a href="https://valospace.org/sourcerer" class="vdoc type-vdoc-reference">@valos/sourcerer</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=4>ValOS Sourcerer API, schema</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="@valos/tools" class="vdoc type-vdoc-reference">@valos/tools</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=4>ValOS Tools API</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+      </tbody>
+    </table>
+</p>
+
+  </section>
+
+  <section id="section_new_vdoc_extension_workspaces" class="vdoc type-vdoc-chapter">
+    <h2>Type 'vdoc-extension' workspaces, 4 new</h2>
+      <p>A vdoc-extension workspace contains the extension specification and
+supporting libraries for a VDoc extension. It inherits library
+workspace characteristics but has a specific structure and initial
+templates which is useful for VDoc extensions in specific.
+</p>
+      <p>This domain introduces the following vdoc-extension <a href="valma#workspace" class="vdoc type-vdoc-reference">workspaces</a>.
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Name</th>
+        <th class="vdoc type-vdoc-header">Version</th>
+        <th class="vdoc type-vdoc-header">License</th>
+      </thead>
+      <tbody>
+        <tr><td><strong><a href="https://valospace.org/revdoc" class="vdoc type-vdoc-reference">@valos/revdoc</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=4>ReVDoc - ReSpec document VDoc extension</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="https://valospace.org/sbomdoc" class="vdoc type-vdoc-reference">@valos/sbomdoc</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=4>SBoMDoc - Software Bill of Materials VDoc extension</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr><td><strong><a href="https://valospace.org/twindoc" class="vdoc type-vdoc-reference">@valos/twindoc</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=4>TwinDoc - Valospace Hypertwin VDoc extension</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="https://valospace.org/vdoc" class="vdoc type-vdoc-reference">@valos/vdoc</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=4>VDoc - ValOS document interchange specification</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=4></td></tr>
+      </tbody>
+    </table>
+</p>
+
+  </section>
+
+  </section>
+
+  <section id="ontology" class="vdoc type-vdoc-chapter">
+    <h2>@valos/kernel domain root ontology</h2>
+All labels have implicit prefix IRI "https://valospace.org/kernel#" (typically
+      abbreviated as prefix "valos-kernel:")@valos/kernel ontology provides vocabulary and definitions of
+      the ValOS core concepts.
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
+    <h2>IRI prefixes</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Prefix</th>
+        <th class="vdoc type-vdoc-header">IRI</th>
+      </thead>
+      <tbody>
+        <tr><td>rdf</td><td>http://www.w3.org/1999/02/22-rdf-syntax-ns#</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>rdfs</td><td>http://www.w3.org/2000/01/rdf-schema#</td></tr>
+        <tr><td>xsd</td><td>http://www.w3.org/2001/XMLSchema#</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>owl</td><td>http://www.w3.org/2002/07/owl#</td></tr>
+        <tr><td>dc</td><td>http://purl.org/dc/elements/1.1/</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos-kernel</td><td>https://valospace.org/kernel#</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_classes" class="vdoc type-vdoc-chapter">
+    <h2><em>valos-kernel:* a valos-kernel:Class</em> vocabulary</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
+      </thead>
+      <tbody>
+        <tr id="Class" class=" vdoc-nth-child-2n"><td><a href="#Class" class="vdoc type-vdoc-reference"><em>Class</em></a></td><td>rdfs:Class</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>The class of classes which are defined by the ValOS kernel domain
+ontologies.</td></tr>
+        <tr id="Property"><td><a href="#Property" class="vdoc type-vdoc-reference"><em>Property</em></a></td><td>rdf:Property</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>The class of properties which are defined by the ValOS kernel domain
+ontologies.</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_properties" class="vdoc type-vdoc-chapter">
+    <h2><em>valos-kernel:* a valos-kernel:Property</em> vocabulary</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:subPropertyOf</th>
+        <th class="vdoc type-vdoc-header">rdfs:domain</th>
+        <th class="vdoc type-vdoc-header">rdfs:range</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_types" class="vdoc type-vdoc-chapter">
+    <h2><em>valos-kernel:* a valos-raem:Type</em> vocabulary</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">revdoc:brief</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_fields" class="vdoc type-vdoc-chapter">
+    <h2><em>valos-kernel:* a valos-raem:Field*</em> vocabulary</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:domain</th>
+        <th class="vdoc type-vdoc-header">rdfs:range</th>
+        <th class="vdoc type-vdoc-header">rdf:type</th>
+        <th class="vdoc type-vdoc-header">rdfs:subPropertyOf</th>
+        <th class="vdoc type-vdoc-header">valos-raem:coupledField</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h2><em>valos-kernel:</em> other vocabulary</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdf:type</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
+      </thead>
+      <tbody>
+        <tr id="@context" class=" vdoc-nth-child-2n"><td><a href="#@context" class="vdoc type-vdoc-reference"><em>@context</em></a></td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3></td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_context" class="vdoc type-vdoc-chapter">
+    <h2>JSON-LD context term definitions</h2>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Term</th>
+        <th class="vdoc type-vdoc-header">Definition</th>
+        <th class="vdoc type-vdoc-header">@id</th>
+        <th class="vdoc type-vdoc-header">@type</th>
+        <th class="vdoc type-vdoc-header">@container</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  </section>
+
+  <section id="section_hierarchy" class="vdoc type-vdoc-chapter">
+    <h2>Component hierarchy</h2>
+This section will contain hierarchical presentation of all above
+      components (and more).
+  </section>
+
+  </body>
+</html>

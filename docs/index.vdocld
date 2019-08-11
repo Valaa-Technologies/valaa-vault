@@ -37,18 +37,18 @@
         "@type": "@id"
       }
     },
-    "dc:title": "@valos/kernel domain content reference",
+    "dc:title": "Valospace reference",
     "vdoc:tags": [
       "PRIMARY",
-      "DOMAIN",
-      "ONTOLOGY"
+      "INTRODUCTION",
+      "ONTOLOGY",
+      "VALONAUT"
     ],
     "revdoc:package": "@valos/kernel",
     "revdoc:prefix": "valos",
     "revdoc:prefixIRI": "https://valospace.org/#",
     "revdoc:version": "0.35.0-prerelease.8",
     "respecConfig": {
-      "subtitle": "0.35.0-prerelease.8",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -58,7 +58,7 @@
         }
       ],
       "authors": [],
-      "shortName": "valosKernelDomain"
+      "shortName": "valos"
     },
     "documents": {
       "@id": "documents",
@@ -613,12 +613,13 @@
         "package": "@valos/vdoc",
         "version": "0.35.0-prerelease.8"
       },
-      "@valos/kernel": {
-        "@id": "https://valospace.org/index",
+      "kernel": {
+        "@id": "https://valospace.org/kernel",
         "tags": [
           "PRIMARY",
           "DOMAIN",
-          "ONTOLOGY"
+          "ONTOLOGY",
+          "TECHNICIAN"
         ],
         "subProfiles": [],
         "title": "@valos/kernel domain content reference",
@@ -652,7 +653,7 @@
         "introduction": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "ValOS ecosystem revolves around various roles. You can be one,\n      many or even none of them but you should know at least a bit\n      about all of them.",
+            "ValOS ecosystem revolves around various roles. This document is\n      a reference document of the ValOS fabric systems and structures\n      and is directed for technicians. Check out the brief\n      description and introductions of the other roles as well.",
             null,
             {
               "@type": "vdoc:Reference",
@@ -788,6 +789,138 @@
         "package": "@valos/kernel",
         "version": "0.35.0-prerelease.8"
       },
+      "@valos/kernel": {
+        "@id": "https://valospace.org/index",
+        "tags": [
+          "PRIMARY",
+          "INTRODUCTION",
+          "ONTOLOGY",
+          "VALONAUT"
+        ],
+        "subProfiles": [],
+        "title": "Valospace reference",
+        "abstract": {
+          "@type": "vdoc:Chapter",
+          "vdoc:content": [
+            "Overview of the valospace APIs and ontologies."
+          ]
+        },
+        "introduction": {
+          "@type": "vdoc:Chapter",
+          "vdoc:content": [
+            "ValOS ecosystem revolves around various roles. This document\n      is a reference document of valospace systems and structures and\n      is directed for more experienced valonauts. Check out the brief\n      description and introductions of the other roles as well.",
+            null,
+            ".",
+            {
+              "vdoc:lookup": "documents",
+              "@type": "vdoc:Table",
+              "vdoc:headers": {
+                "vdoc:entries": [
+                  {
+                    "@type": "vdoc:Header",
+                    "vdoc:cell": {
+                      "vdoc:strong": true,
+                      "vdoc:content": [
+                        {
+                          "@type": "vdoc:Reference",
+                          "vdoc:content": [
+                            "vdoc:selectKey"
+                          ],
+                          "vdoc:ref": "vdoc:selectKey"
+                        }
+                      ]
+                    },
+                    "vdoc:content": [
+                      "Your role:"
+                    ]
+                  },
+                  {
+                    "@type": "vdoc:Header",
+                    "vdoc:cell": {
+                      "vdoc:strong": true,
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            {
+                              "@type": "vdoc:Reference",
+                              "vdoc:content": [
+                                {
+                                  "vdoc:selectField": "title"
+                                }
+                              ],
+                              "vdoc:ref": [
+                                "vdoc:selectKey",
+                                "#introduction"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "vdoc:content": [
+                      "Your answer..."
+                    ]
+                  },
+                  {
+                    "vdoc:cell": "introduction",
+                    "@type": "vdoc:Header",
+                    "vdoc:content": {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "Introduction:"
+                      ]
+                    },
+                    "vdoc:wide": true,
+                    "vdoc:tall": true
+                  },
+                  {
+                    "@type": "vdoc:Header",
+                    "vdoc:content": {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "Aliases:"
+                      ]
+                    },
+                    "vdoc:wide": true,
+                    "vdoc:cell": {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        {
+                          "@type": "vdoc:Reference",
+                          "vdoc:content": [
+                            {
+                              "vdoc:words": {
+                                "vdoc:selectField": "subProfiles"
+                              }
+                            }
+                          ],
+                          "vdoc:ref": [
+                            "vdoc:selectKey",
+                            "#section_profiles"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "vdoc:entries": [
+                "technician",
+                "valonaut",
+                "voyager"
+              ]
+            }
+          ]
+        },
+        "ontologyAbstract": {
+          "vdoc:content": [
+            "Valospace ontology provides vocabulary and definitions of\n      the primary ValOS resources."
+          ]
+        },
+        "package": "@valos/kernel",
+        "version": "0.35.0-prerelease.8"
+      },
       "technician": {
         "@id": "https://valospace.org/technician",
         "tags": [
@@ -842,9 +975,9 @@
               ],
               "vdoc:ref": "@/valma"
             },
-            " and employ your existing,\n    likely professional knowledge of JavaScript, Node.js, DevOps,\n    backend and library development.",
+            " and employ your existing,\n    likely professional knowledge of JavaScript, Node.js, DevOps,\n    backend, library and other software development skills.",
             null,
-            "    You create new open source and/or proprietary packages. These\n    permanently create new fabric functionalities and ",
+            "    You create new open source and/or proprietary node packages. These\n    permanently create new fabric functionalities and ",
             {
               "@type": "vdoc:Reference",
               "vdoc:content": [
@@ -957,355 +1090,6 @@
         "version": "0.35.0-prerelease.8"
       }
     },
-    "workspaces": {
-      "@id": "workspaces",
-      "workshop": {
-        "@valos/kernel": {
-          "version": "0.35.0-prerelease.8",
-          "description": "@valos/kernel domain workshop",
-          "license": "MIT"
-        }
-      },
-      "toolset": {
-        "valma": {
-          "version": "0.35.0-prerelease.8",
-          "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
-          "license": "MIT"
-        },
-        "@valos/toolset-domain": {
-          "version": "0.35.0-prerelease.8",
-          "description": "ValOS Toolset for managing ValOS workspace domains",
-          "license": "MIT"
-        },
-        "@valos/toolset-rest-api-gateway-plugin": {
-          "version": "0.35.0-prerelease.8",
-          "description": "A toolset for managing Structured ValOS REST API Gateway Plugin",
-          "license": "MIT"
-        },
-        "@valos/toolset-revealer": {
-          "version": "0.35.0-prerelease.8",
-          "description": "Tools for building revelations both for development and deployment purposes",
-          "license": "MIT"
-        },
-        "@valos/type-gateway-plugin": {
-          "version": "0.35.0-prerelease.8",
-          "description": "The ValOS type toolset for 'gateway-plugin' workspaces",
-          "license": "MIT"
-        },
-        "@valos/type-opspace": {
-          "version": "0.35.0-prerelease.8",
-          "description": "The ValOS type toolset for opspace workspaces",
-          "license": "MIT"
-        },
-        "@valos/type-vault": {
-          "version": "0.35.0-prerelease.8",
-          "description": "The ValOS type toolset for vault workspaces",
-          "homepage": "https://valospace.org/type-vault",
-          "license": "MIT"
-        },
-        "@valos/type-worker": {
-          "version": "0.35.0-prerelease.8",
-          "description": "The ValOS type toolset for worker workspaces",
-          "license": "MIT"
-        }
-      },
-      "library": {
-        "@valos/engine": {
-          "version": "0.35.0-prerelease.8",
-          "description": "ValOS Engine API and Schema",
-          "homepage": "https://valospace.org/engine",
-          "license": "MIT"
-        },
-        "@valos/gateway-api": {
-          "version": "0.35.0-prerelease.8",
-          "description": "Minimal footprint ValOS Gateway API local forwards",
-          "license": "MIT"
-        },
-        "@valos/hypertwin": {
-          "version": "0.35.0-prerelease.8",
-          "description": "ValOS Hypertwin Specifications and Tools Library",
-          "license": "MIT"
-        },
-        "@valos/inspire": {
-          "version": "0.35.0-prerelease.8",
-          "description": "ValOS Inspire application gateway",
-          "license": "MIT"
-        },
-        "@valos/raem": {
-          "version": "0.35.0-prerelease.8",
-          "description": "ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology",
-          "homepage": "https://valospace.org/raem",
-          "license": "MIT"
-        },
-        "@valos/script": {
-          "version": "0.35.0-prerelease.8",
-          "description": "ValOS Script API, schema",
-          "license": "MIT"
-        },
-        "@valos/sourcerer": {
-          "version": "0.35.0-prerelease.8",
-          "description": "ValOS Sourcerer API, schema",
-          "license": "MIT"
-        },
-        "@valos/tools": {
-          "version": "0.35.0-prerelease.8",
-          "description": "ValOS Tools API",
-          "license": "MIT"
-        }
-      },
-      "vdoc-extension": {
-        "@valos/revdoc": {
-          "version": "0.35.0-prerelease.8",
-          "description": "ReVDoc - ReSpec document VDoc extension",
-          "homepage": "https://valospace.org/revdoc",
-          "license": "MIT"
-        },
-        "@valos/sbomdoc": {
-          "version": "0.35.0-prerelease.8",
-          "description": "SBoMDoc - Software Bill of Materials VDoc extension",
-          "homepage": "https://valospace.org/sbomdoc",
-          "license": "MIT"
-        },
-        "@valos/twindoc": {
-          "version": "0.35.0-prerelease.8",
-          "description": "TwinDoc - Valospace Hypertwin VDoc extension",
-          "homepage": "https://valospace.org/twindoc",
-          "license": "MIT"
-        },
-        "@valos/vdoc": {
-          "version": "0.35.0-prerelease.8",
-          "description": "VDoc - ValOS document interchange specification",
-          "homepage": "https://valospace.org/vdoc",
-          "license": "MIT"
-        }
-      }
-    },
-    "types": {
-      "@id": "types",
-      "gateway-plugin": {
-        "disabled": "DISABLED",
-        "explanation": ".disabled => Workspace is not a 'gateway-plugin' (is 'vault')",
-        "description": "Initialize gateway-plugin workspace",
-        "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "A gateway-plugin extends inspire and perspire gateways with various\ntypes of functionalities: new resources schemas, media decoders,\nprotocol schemes, external APIs, valosheath APIs, etc."
-      },
-      "library": {
-        "disabled": "DISABLED",
-        "explanation": ".disabled => Workspace is not a 'library' (is 'vault')",
-        "description": "Initialize library workspace",
-        "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "A library workspace contains arbitrary ES5 source code and exposes a\nAPI via package.json .main stanza (usually index.js).\n\nA library can provide convenience valma commands but unlike toolsets\na library cannot have workspace local configurations.\n\nLibrary workspaces are almost always published as a packages and\ntypically reside in \"packages/*\" vault workspace directory."
-      },
-      "opspace": {
-        "disabled": "DISABLED",
-        "explanation": ".disabled => Workspace is not an 'opspace' (is 'vault')",
-        "description": "Initialize opspace workspace",
-        "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "An opspaces workspace is used to for configuring, deploying, updating,\nmonitoring and diagnosing all types of live infrastructure resources.\n\nOpspaces rely heavily on various toolsets to get their job done.\nOpspaces rarily are published and packages and typically reside in\n\"opspaces/*\" vault workspace directory"
-      },
-      "tool": {
-        "disabled": "DISABLED",
-        "explanation": ".disabled => Workspace is not a 'tool' (is 'vault')",
-        "description": "Initialize tool workspace",
-        "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "Tools are a toolset implementation detail. A tool is similar to\na toolset in that it can have its own workspace specific\nconfigurations. A tool differs from a toolset in that it cannot be\nstandalone; it doesn't appear in listings, its always part of one or\nmore toolsets and its toolsets.json config stanzas are placed under\nits parent toolset stanzas.\n\nThe main case for tools and toolsets separation came from the release\ndeployment system of opspaces, where the modularity and granular\nsemantic versioning of tool packages allows for more efficient and\nrobust deployments.\n\nTool workspaces allows splitting complex toolsets into separate\ntools with different deployment logic. Infrastructure code which\nchanges rarily can be placed under tool packages with naive\ndeployment logic which relies on the tool package version number only.\nFrequently changing configs can be managed by the toolset workspace\nitself but even it can then use tool workspaces to source in\ncommands and other resources to help with the deployment management.\n\nAdditionally because the tool configuration is always inside its\nparent toolset config this allows the same tool be used by several\ndifferent toolsets in a single workspace. Because of this all tool\ncommands must have an option for '--toolset=<@scope/toolsetname>' which\nuses yargs.vlm.toolset as its default value."
-      },
-      "toolset": {
-        "disabled": "DISABLED",
-        "explanation": ".disabled => Workspace is not a 'toolset' (is 'vault')",
-        "description": "Initialize toolset workspace",
-        "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "A toolset workspace can be 'selected' by another workspace so that:\n1. The toolset is added as a devDependency to the target workspace,\n2. A configuration section is added for the toolset in the target\n   workspace root 'toolsets.json'\n\nThis makes all valma scripts of the toolset available for the target\nworkspace and allows these commands to easily access and manipulate\ntheir local configuration in the target workspace."
-      },
-      "vault": {
-        "description": "Initialize vault workspace",
-        "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "A vault is a monorepository which contains multiple workspaces of\nvarious types. Vaults are used to group packages with high cohesion\ntogether so that typical feature development, testing and deployment\nworkflows can be done within a single repository when feasible."
-      },
-      "vdoc-extension": {
-        "disabled": "DISABLED",
-        "explanation": ".disabled => Workspace is not a 'vdoc-extension' (is 'vault')",
-        "description": "Initialize vdoc-extension workspace",
-        "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "A vdoc-extension workspace contains the extension specification and\nsupporting libraries for a VDoc extension. It inherits library\nworkspace characteristics but has a specific structure and initial\ntemplates which is useful for VDoc extensions in specific.\n"
-      },
-      "worker": {
-        "disabled": "DISABLED",
-        "explanation": ".disabled => Workspace is not a 'worker' (is 'vault')",
-        "description": "Initialize worker workspace",
-        "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "A worker workspace is used to launch and manage a particular service\nprocess. The workspace files contain configuration and data used by the\nprocess. This data can include even dynamic runtime data.\n\nA worker workspace is fully agnostic to version control solutions:\n- script-generated workers, where worker is locally spawned by scripts\n- clone-and-forget workers, where worker is cloned from a versioned\n  upstream repository, has its configuration locally customized and\n  local content potentially overridden. No further download sync is\n  expected nor will workers push updates back upstream. Each clone\n  represents its own computation.\n- synchronized workers, where the versioned repository itself\n  represents the worker process. Worker workspace shards (there can be\n  many if the computation is parallelizable) are still cloned from the\n  versioned upstream. Unlike with clone-and-forget workers the\n  synchronized worker workspaces keep themselves in sync with\n  upstream configuration and data changes and adjust their computation\n  accordingly.\n  Sync workers shards can even push results back to the versioned\n  repository if appropriate."
-      },
-      "workshop": {
-        "disabled": "DISABLED",
-        "explanation": ".disabled => Workspace is not a 'workshop' (is 'vault')",
-        "description": "Initialize workshop workspace",
-        "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "A workshop package provides a set of valma commands for defining and\nmanaging a ValOS domain. The workshops then:\n1. shall provide domain package (de)registration via\n   .configure/.<domain>/{,de}register-package\n2. can provide new workspace types via .configure/.type/*\n3. can provide new toolsets via\n   .configure/{,.type/.<type>/,.domain/.<domain>/}.toolset/**/*\n\nNotably the package (de)registration should provide means for any new\ndomain toolset packages to request the addition of their toolset\nconfigure command to the domain workshop.\nIdiomatic way to implement this is a workshop command which issues a PR\nagainst the source control repository of the workshop package."
-      }
-    },
-    "toolsets": {
-      "@id": "toolsets",
-      "@valos/toolset-domain": {
-        "description": "Select and configure 'toolset-domain' for the current vault or workshop workspace",
-        "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "This workspace type provides configuration template and commands for\nmanaging a ValOS domain.\n\nThe toolset 'toolset-domain' is selectable by 'vault', 'workshop' workspaces."
-      },
-      "@valos/toolset-rest-api-gateway-plugin": {
-        "disabled": "DISABLED",
-        "explanation": ".disabled => Workspace is not a worker (is vault)",
-        "description": "Select the toolset 'toolset-rest-api-gateway-plugin'",
-        "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "This toolset extends a perspire worker workspaces with REST-style\nconfigurable and extensible web service plugin."
-      },
-      "@valos/toolset-revealer": {
-        "description": "Select the toolset 'toolset-revealer'",
-        "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "This toolset enables valma command 'rouse-revealer' for deploying a\nlocal dev environment for inspire gateway revelations.\n\nSets up the webpack entry and output config as webpack.config.js in\nthe workspace root, which combines shared revealer config from\n@valos/toolset-revealer/shared/webpack.config.js, local toolset config\nand any customizations in the root webpack.config.js itself."
-      },
-      "@valos/type-vault/enable-babel": {
-        "disabled": "DISABLED",
-        "explanation": ".disabled => Workspace is not a library (is vault)",
-        "description": "Select the workspace to be transpiled using vault babel.config.js",
-        "package": "@valos/type-vault",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "This toolset enables babel transpilation for a library workspace\nwhen 'vlm assemble-packages' is executed in the surrounding vault\nworkspace."
-      }
-    },
-    "tools": {
-      "@id": "tools",
-      "@valos/toolset-domain#summary": {
-        "description": "Select domain summary revdoc generation tool for a vault workspace",
-        "package": "@valos/toolset-domain",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "This toolset-domain tool enables the (re)generation of docs/index.html\ndomain summary revdoc document."
-      },
-      "@valos/type-vault#docs": {
-        "description": "Select vault /docs generation tool",
-        "package": "@valos/type-vault",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "This type-vault tool provides commands for (re)generating the /docs\nfolder from document sources present in the local workspaces, notably\nall revdoc documents matching pattern '*.revdoc.js'.\nAdditionally this tool can be configured to regenerate all docs on\n(pre)release time."
-      }
-    },
-    "commands": {
-      "@id": "commands",
-      "generate-domain-summary": {
-        "description": "Generate the domain components summary file for the domain root revdoc",
-        "package": "@valos/toolset-domain",
-        "version": "0.35.0-prerelease.8",
-        "introduction": ""
-      },
-      "compose-revelation": {
-        "description": "Compose revealer bundles based on the revealer toolset config",
-        "package": "@valos/toolset-revealer",
-        "version": "0.35.0-prerelease.8",
-        "introduction": ""
-      },
-      "rouse-revealer": {
-        "description": "Launch a webpack-dev-server at localhost serving a local revelation",
-        "package": "@valos/toolset-revealer",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "The revelation consists of two parts: webpack output and static files.\nWebpack output is configured by the project root webpack.config.js and\nthe static files are served from --content-base. If this --content-base\ndoesn't exist it is created by copying all files from the directory(s)\nprovided by --content-source."
-      },
-      "build-release": {
-        "description": "Build all toolset sub-releases which have source modifications",
-        "package": "@valos/type-opspace",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "The sub-releases are placed under the provided dist target path.\n\nThis command is first part of the two-part deployment with\ndeploy-release making the actual deployment."
-      },
-      "deploy-release": {
-        "description": "Deploy previously built releases to their deployment targets",
-        "package": "@valos/type-opspace",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "This command is second part of the two-part deployment with\nbuild-release building the release."
-      },
-      "assemble-packages": {
-        "description": "Assemble all current modified vault packages (preparing for publish)",
-        "package": "@valos/type-vault",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "Uses lerna to handle the monorepo sub-packages update detection,\nversioning, and git interactions. Configuration for lerna is in\nlerna.json: notably the version increase semantics is configured there.\n\nLerna is not used for constructing the actual packages. This is done by\na flat recursive cp to the target at the moment.\n\nInvokes babel for all projects with babel.config.js in their root. If\nthe vault has a shared babel.config.js for all packages, a symlink from\nthis root to each project should be created.\n\nWhen assembling lerna will automatically update the shared version for\nall packages and their cross-dependencies and make a git commit and git\ntag for the new version.\nThis behaviour can be omitted with --no-versioning.\n\n  Iterative development with yalc and publish-packages:\n\nOnce a set of packages has been been built to the target, run:\n\n'vlm publish-packages --publisher=yalc'\n\nThis will make the package assemblies available in a local yalc\n'registry'; see https://github.com/whitecolor/yalc for more details on\nhow to use such packages by other depending packages. Reassembling\nand pushing those changes through yalc to dependents can be done with:\n\n'vlm assemble-packages --reassemble --post-execute=\"cd $ASSEMBLY_TARGET && yalc push --no-sig\"'\n\nThis allows packages to be developed iteratively locally while having\nother packages depend and be tested against them.\n"
-      },
-      "clean-vault": {
-        "description": "Clean various more or less transient vault files and subdirectories",
-        "package": "@valos/type-vault",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "By default the three elements installed by 'yarn install' are cleaned:\n1. workspace packages by 'lerna clean --yes'\n2. yalc local dependencies by 'yalc remove --all'\n3. vault root node_modules by 'rm -rf'\n\nIn addition, dist/ can be removed with --dist in preparation for a clean slate publish/deploy ops.\nBe mindful that all of dist/ will be removed.\nyarn.lock can be removed with --yarn in preparation for persisted dependency updates."
-      },
-      "create-revdoc": {
-        "description": "Create a revdoc source code file",
-        "package": "@valos/type-vault",
-        "version": "0.35.0-prerelease.8",
-        "introduction": ""
-      },
-      "release-vault": {
-        "description": "Prepare, commit and potentially publish a new release of vault packages",
-        "package": "@valos/type-vault",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "Create a new release/prerelease branch or extend an existing one\nbased on given options and current environment.\n\nPrepares the release by first running sanity checks, then cleaning and\nreinstalling intermediate files like node_modules, yarn workspaces,\nyarn.lock and dist/ and finally requires all test suites and lint to\npass without errors.\n\nOnce preparation is done creates a new release commit and tag using\n'lerna version'.\n\nIf --publish is not explicitly given then the final publish step must\nbe manually performed. In this case a pre-publish phase is done which\nprepares the manual publish command instructions in the results output.\n\nWill invoke valma command hooks between stages as per:\n1. 'vlm .release-vault/.prepared-hooks/{**/,}* --summary=<obj>' after successful preparation\n2. 'vlm .release-vault/.committed-hooks/{**/,}* --summary=<obj>' after successful commit\n3. 'vlm .release-vault/.pre-published-hooks/{**/,}* --summary=<obj>' after successful pre-publish\n4. 'vlm .release-vault/.published-hooks/{**/,}* --summary=<obj>' after successful publish\n"
-      },
-      "publish-packages": {
-        "description": "Publish package assemblies to their registries",
-        "package": "@valos/type-vault",
-        "version": "0.35.0-prerelease.8",
-        "introduction": ""
-      },
-      "regenerate-docs": {
-        "description": "Regenerate all configured /docs content",
-        "package": "@valos/type-vault",
-        "version": "0.35.0-prerelease.8",
-        "introduction": ""
-      },
-      "perspire": {
-        "description": "Launch a headless worker gateway for persistent virtual DOM ValOS computation",
-        "package": "@valos/type-worker",
-        "version": "0.35.0-prerelease.8",
-        "introduction": ""
-      },
-      "configure": {
-        "description": "Configure the current ValOS workspace and its toolsets",
-        "package": "valma",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "Allows grabbing and stowing of available toolsets and their tools and\nthen invokes all in-use toolset configure commands."
-      },
-      "create-command": {
-        "description": "Create and possibly export a new valma command script",
-        "package": "valma",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "The new command is created as a local valma.bin/ command with the\nsource file in valma/, making it the highest priority command and\nimmediately available.\nWith --import a existing exported script is copied for local editing\nand development."
-      },
-      "status": {
-        "description": "Display the status of the current workspace",
-        "package": "valma",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "If toolsetGlob is specified the status is limited to status scripts\nmatching '.status/*{toolsetGlob}*/**/*', otherwise all status scripts\nby '.status/**/*' are used."
-      },
-      "$": {
-        "description": "Execute a non-valma command within valma context interactively",
-        "package": "valma",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "Execute a non-valma command within valma context interactively.\n\nThis is the command line shim to valma script vlm.interact.\nLike 'npx -c' it executes a regular command exported by some package\ndependency to the node_modules/.bin/ folder.\n\nUnlike 'npx' which only searches the current directory and the global\ncache '$' prepends all available valma pools to env.PATH, innermost\npool first.\n"
-      },
-      "init": {
-        "disabled": "DISABLED",
-        "explanation": ".disabled => Already initialized (package.json:valos section exists)",
-        "description": "Initialize the current directory as a ValOS workspace from scratch",
-        "package": "valma",
-        "version": "0.35.0-prerelease.8",
-        "introduction": "This command will interactively walk through the process of creating\nand configuring a new valma workspace in the current working directory\nfrom scratch.\n\nValma init has following interactive phases:\n1. Initialization of package.json via 'yarn init'\n2. Configuration of workspace valos.type and .domain via 'vlm .configure/.valos-stanza'\n3. Addition of new known workshops via 'yarn add -W --dev'\n4. Selection of in-use toolsets from available toolsets via 'vlm .configure/.select-toolsets'\n5. Configuration of in-use toolsets and tools via 'vlm configure'"
-      }
-    },
     "prefixes": {
       "@id": "prefixes",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -1313,784 +1097,699 @@
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "valos": "https://valospace.org/#",
-      "vdoc": "https://valospace.org/vdoc#"
+      "valos-kernel": "https://valospace.org/kernel#",
+      "valos": "https://valospace.org/#"
     },
     "vocabulary": {
       "@id": "vocabulary",
-      "@context": {
-        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-        "xsd": "http://www.w3.org/2001/XMLSchema#",
-        "owl": "http://www.w3.org/2002/07/owl#",
-        "dc": "http://purl.org/dc/elements/1.1/",
-        "valos": "https://valospace.org/#",
-        "@base": "https://valospace.org/#",
-        "valos:restriction": {
-          "@reverse": "owl:onProperty"
+      "Resource": {
+        "@type": "valos-raem:Type",
+        "rdfs:subClassOf": "rdfs:Resource",
+        "revdoc:brief": "valospace resource",
+        "rdfs:comment": "The class of resources which can appear as a subject in valospace\nresource and event graphs. The domain of all transient and generated\nfields which are available even for unsourced bodies."
+      },
+      "id": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "xsd:string",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:cardinality": 1
+        },
+        "valos-raem:generator": "getId",
+        "rdfs:comment": "The immutable resource id of this resource."
+      },
+      "iri": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "xsd:anyURI",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:cardinality": 1
+        },
+        "valos-raem:generator": "getIRI",
+        "rdfs:comment": "The authoritative locator IRI of this resource in the current view of\nthe world. Always equivalent to a catenation of\n<valos:partitionIRI> \"#\" <valos:id>\nof this resource"
+      },
+      "rawId": {
+        "@type": "valos-raem:AliasField",
+        "revdoc:deprecatedInFavorOf": "valos:id",
+        "valos-raem:aliasOf": "valos:id",
+        "rdfs:subPropertyOf": "valos:id",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "xsd:string",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:cardinality": 1
+        },
+        "valos-raem:generator": "getRawId",
+        "rdfs:comment": "The resource id of this resource"
+      },
+      "typeName": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "xsd:string",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:cardinality": 1
+        },
+        "valos-raem:generator": "getTransientTypeName",
+        "rdfs:comment": "The dominant type name of this resource"
+      },
+      "partition": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Partition",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos-raem:generator": "partitionResolver",
+        "rdfs:comment": "The partition root resource of this resource, ie. the nearest ancestor\n(possibly self) with a non-null valos:authorityIRI."
+      },
+      "partitionIRI": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "xsd:anyURI",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos-raem:generator": "partitionURIResolver",
+        "rdfs:comment": "The partition IRI of the partition this resource belongs to in the\ncurrent view of the world."
+      },
+      "partitionURI": {
+        "@type": "valos-raem:AliasField",
+        "revdoc:deprecatedInFavorOf": "valos:partitionIRI",
+        "valos-raem:aliasOf": "valos:partitionIRI",
+        "rdfs:subPropertyOf": "valos:partitionIRI",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "xsd:anyURI",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
         }
       },
-      "Class": {
-        "@type": "valos:Class",
-        "rdfs:subClassOf": "rdfs:Class",
-        "rdfs:comment": "The class of classes which are specified by the ValOS kernel ontology."
+      "prototype": {
+        "@type": "valos-raem:PrimaryField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos-raem:coupledField": "valos:derivations",
+        "rdfs:comment": "The prototype of this resource. All field lookups for which there is\nno associated value set and whose field descriptors don't have\nownDefaultValue are forwarded to the prototype."
       },
-      "Property": {
-        "@type": "valos:Class",
-        "rdfs:subClassOf": "rdf:Property",
-        "rdfs:comment": "The class of properties which are specified by the ValOS kernel ontology."
+      "derivations": {
+        "@type": "valos-raem:TransientField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "valos-raem:coupledField": "valos:prototype",
+        "valos-raem:preventsDestroy": true,
+        "valos-raem:ownDefaultValue": [],
+        "rdfs:comment": "An unordered set of resources which have this resource as their\nvalos:prototype."
       },
-      "Kuery": {
-        "@type": "valos:Class",
-        "rdfs:comment": "The class of resources which represent VALK kueries."
+      "ownFields": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos-raem:generator": "resolveOwnFields",
+        "rdfs:comment": "A transient version of this object as if prototype was undefined.\nAll property accesses will only return field values which are directly\nowned by this resource."
       },
-      "Type": {
-        "@type": "valos:Class",
-        "rdfs:subClassOf": "rdfs:Class",
-        "rdfs:comment": "The class of all valospace type classes."
+      "inheritancePrototype": {
+        "@type": "valos-raem:PrimaryField",
+        "rdfs:subPropertyOf": "valos:prototype",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos-raem:coupledField": "valos:inheritors",
+        "rdfs:comment": "The derivation prototype of this resource. This represents the\ntraditional prototypical inheritance where inherited field values are\nnot remapped in any way."
       },
-      "Field": {
-        "@type": "valos:Class",
-        "rdfs:subClassOf": "rdf:Property",
-        "rdfs:comment": "The class of properties with custom semantics inside valospace.\nInstances of this class are called valos resource fields. All resource\nfields have valos:Type or one of its sub-classes as their rdf:domain."
+      "inheritors": {
+        "@type": "valos-raem:TransientField",
+        "rdfs:subPropertyOf": "valos:derivations",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "valos-raem:coupledField": "valos:inheritancePrototype",
+        "valos-raem:preventsDestroy": true,
+        "valos-raem:ownDefaultValue": [],
+        "rdfs:comment": "An unordered set of resources which have this resource as their\nvalos:inheritancePrototype."
       },
-      "PrimaryField": {
-        "@type": "valos:Class",
-        "rdfs:subClassOf": "valos:Field",
-        "rdfs:comment": "The class of valos fields which are primary, persisted sources of\ntruth and have both a state representation inside valospace and a\nchange representation in event logs."
+      "instancePrototype": {
+        "@type": "valos-raem:PrimaryField",
+        "rdfs:subPropertyOf": "valos:prototype",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos-raem:coupledField": "valos:instances",
+        "rdfs:comment": "The instance prototype of this resource instance."
       },
-      "TransientField": {
-        "@type": "valos:Class",
-        "rdfs:subClassOf": "valos:Field",
-        "rdfs:comment": "The class of valos fields which have primary state representations\ninside valospace but which have only inferred representation in event\nlogs."
+      "instances": {
+        "@type": "valos-raem:TransientField",
+        "rdfs:subPropertyOf": "valos:derivations",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "valos-raem:coupledField": "valos:instancePrototype",
+        "valos-raem:preventsDestroy": true,
+        "valos-raem:ownDefaultValue": [],
+        "rdfs:comment": "An unordered set of resources which have this resource as their\ndirectvalospace:instancePrototype."
       },
-      "InferredField": {
-        "@type": "valos:Class",
-        "rdfs:subClassOf": "valos:Field",
-        "rdfs:comment": "The class of valos fields with inference semantics which specify how\nnew triples with the inferred field as a predicate can be inferred\nfrom existing triples."
+      "ghostPrototype": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:subPropertyOf": "valos:prototype",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos-raem:generator": "ghostPrototypeResolver",
+        "valos-raem:coupledField": "valos:ghosts",
+        "rdfs:comment": "Ghost prototype of this ghost resource. The ghost prototype is the\nbase resource from which this ghost was created during some primary\ninstantiation.\nThis instantiation (which happens on prototype and results in an\ninstance of it) also ghost-instantiates all the direct and indirect\nownlings of the prototype as ghost ownlings in the instance. The\ninstance is called the *ghost host* of all these ghosts. Likewise, the\ninstance prototype is called the ghost host prototype, and the\n(grand-)ownlings of this ghost host prototype are the ghost prototypes\nof the corresponding ghosts (ie. this field).} ."
       },
-      "GeneratedField": {
-        "@type": "valos:Class",
-        "rdfs:subClassOf": "valos:InferredField",
-        "rdfs:comment": "The class of inferred fields where a field is associated with a\n'generator', a convergent procedural rule like taking an average or\nretrieving the partition of a valos Resource. As convergent rules a\nGeneratedField's can't have mutation semantics that could be reliably\ntranslated back to mutations of other triples."
+      "ghosts": {
+        "@type": "valos-raem:TransientField",
+        "rdfs:subPropertyOf": "valos:derivations",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "valos-raem:coupledField": "valos:ghostPrototype",
+        "valos-raem:preventsDestroy": true,
+        "valos-raem:ownDefaultValue": [],
+        "rdfs:comment": "An unordered set of all (materialized) ghosts which have this resource\nas their valos:ghostPrototype. See @valos/raem#section_ghost_instancing\nfor why immaterial ghosts are not listed."
       },
-      "generator": {
-        "@type": "valos:Property",
-        "rdfs:domain": "valos:GeneratedField",
-        "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "The generator algorithm specification or identifier of\na GeneratedField."
+      "materializedGhosts": {
+        "@type": "valos-raem:AliasField",
+        "revdoc:deprecatedInFavorOf": "valos:ghosts",
+        "valos-raem:aliasOf": "valos:ghosts",
+        "rdfs:subPropertyOf": "valos:ghosts",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "valos-raem:coupledField": "valos:ghostPrototype",
+        "valos-raem:preventsDestroy": true,
+        "valos-raem:ownDefaultValue": []
       },
-      "AliasField": {
-        "@type": "valos:Class",
-        "rdfs:subClassOf": "valos:InferredField",
-        "rdfs:comment": "The class of inferred fields called alias fields where each such field\nhas an 'aliasOf' RDF property or valos Field. Alias fields are\nmutation-inference symmetric so that triples with an alias field as\npredicate are inferred from triples with aliasOf as predicate and\nmutations with an alias field as predicate are translated to use\nthe aliasOf as predicate."
+      "unnamedCouplings": {
+        "@type": "valos-raem:TransientField",
+        "rdfs:domain": "valos-raem:TransientField",
+        "rdfs:range": "valos-raem:TransientField",
+        "valos-raem:coupledField": "",
+        "valos-raem:isOwnerOf": true,
+        "rdfs:comment": "Referrers with a missing coupledField referring this resource"
       },
-      "aliasOf": {
-        "@type": "valos:Property",
-        "rdfs:domain": "valos:AliasField",
-        "rdfs:range": "valos:Field",
-        "rdfs:comment": "The alias target property specifies the inference source and mutation\ntarget of an alias field."
+      "ghostHost": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos-raem:generator": "ghostHostResolver",
+        "rdfs:comment": "The instance resource which brought this ghost into being. This\ninstance is equivalent to the innermost ancestor of this ghost which is\nnot a ghost itself."
       },
-      "coupledField": {
-        "@type": "valos:Property",
-        "rdfs:domain": "valos:Field",
-        "rdfs:range": "valosField",
-        "rdfs:comment": ""
+      "ghostOwner": {
+        "@type": "valos-raem:TransientField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos-raem:coupledField": "valos:ghostOwnlings",
+        "valos-raem:isOwnedBy": true,
+        "valos-raem:ownDefaultValue": null,
+        "valos-raem:allowTransientFieldToBeSingular": true,
+        "rdfs:comment": "The instance resource which owns this materialized ghost or null if\nthis ghost is immaterial.\nNote that materialized ghosts will have a two own fields: the\nghostOwner and the regular owner (or one of its aliases). The\nremoval of either of these owning field relationships will\nimmaterialize, not destroy, the ghost."
       },
-      "defaultCoupledField": {
-        "@type": "valos:Property",
-        "rdfs:domain": "valos:Field",
-        "rdfs:range": "xsd:string",
-        "rdfs:comment": ""
-      },
-      "isOwned": {
-        "@type": "valos:Property",
-        "rdfs:domain": "valos:Field",
-        "rdfs:range": "xsd:boolean",
-        "rdfs:comment": "This field owns the targeted resource. If the subject of this field\nis destroyed the targeted resource will be cascade destroyed."
-      },
-      "isOwning": {
-        "@type": "valos:Property",
-        "rdfs:domain": "valos:Field",
-        "rdfs:range": "xsd:boolean",
-        "rdfs:comment": "This field is a coupled field of an owning field. If the owning field\nis destroyed this resource will be be cascade destroyed."
-      },
-      "isDuplicateable": {
-        "@type": "valos:Property",
-        "rdfs:domain": "valos:Field",
-        "rdfs:range": "xsd:boolean",
-        "rdfs:comment": "If set to false this field not be visible for DUPLICATED class of\nevents."
-      },
-      "initialValue": {
-        "@type": "valos:Property",
-        "rdfs:domain": "valos:Field",
-        "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "The implicit initial value of the resource field when the resource is\ncreated."
-      },
-      "ownDefaultValue": {
-        "@type": "valos:Property",
-        "rdfs:domain": "valos:Field",
-        "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "The value of a resource field which doesn't have an own value defined\n(ie. is evaluated before prototype field lookup)."
-      },
-      "finalDefaultValue": {
-        "@type": "valos:Property",
-        "rdfs:domain": "valos:Field",
-        "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "The value of a resource field which doesn't have a value defined by\nany resource in its prototype chain."
-      },
-      "allowTransientFieldToBeSingular": {
-        "@type": "valos:Property",
-        "rdfs:domain": "valos:Field",
-        "rdfs:range": "xsd:boolean",
-        "rdfs:comment": "Bypass the default behavior which forces transient fields to be plural\nto allow for singular fields."
+      "ghostOwnlings": {
+        "@type": "valos-raem:TransientField",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "valos-raem:isOwnerOf": true,
+        "valos-raem:coupledField": "valos:ghostOwner",
+        "valos-raem:ownDefaultValue": [],
+        "rdfs:comment": "Materialized ghost resources which have this instance as their ghost\nhost."
       },
       "Bvob": {
-        "@type": "valos:Type",
+        "@type": "valos-raem:Type",
+        "revdoc:brief": "binary content handle",
         "rdfs:subClassOf": "valos:Resource",
         "rdfs:comment": "Bvob (Binary ValOS OBject) specifies a class of valos resources which\nare associated with an octet-stream of fixed length. Bvob resources\nhave a hash of that octet-stream, prefixed with the hash algorithm, as\ntheir resource id."
       },
       "hashAlgorithm": {
-        "@type": "valos:GeneratedField",
+        "@type": "valos-raem:GeneratedField",
         "rdfs:domain": "valos:Bvob",
         "rdfs:range": "xsd:string",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos:generator": "hashAlgorithm",
+        "valos-raem:generator": "hashAlgorithm",
         "rdfs:comment": "The hash algorithm used to create the content hash of this Bvob"
       },
       "contentHash": {
-        "@type": "valos:GeneratedField",
+        "@type": "valos-raem:GeneratedField",
         "rdfs:domain": "valos:Bvob",
         "rdfs:range": "xsd:string",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos:generator": "contentHash",
+        "valos-raem:generator": "contentHash",
         "rdfs:comment": "The content hash of the octet-stream associated with this Bvob"
       },
       "contentLength": {
-        "@type": "valos:GeneratedField",
+        "@type": "valos-raem:GeneratedField",
         "rdfs:domain": "valos:Bvob",
         "rdfs:range": "xsd:nonNegativeInteger",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos:generator": "contentLength",
+        "valos-raem:generator": "contentLength",
         "rdfs:comment": "The number of octets in the octet-stream associated with this Bvob."
       },
       "contentReferrers": {
-        "@type": "valos:TransientField",
+        "@type": "valos-raem:TransientField",
         "rdfs:domain": "valos:Bvob",
-        "rdfs:range": "valos:Resource",
-        "valos:defaultCoupledField": "valos:content",
-        "rdfs:comment": "Incoming references to this Bvob"
+        "rdfs:range": "valos:Sourced",
+        "valos-raem:defaultCoupledField": "valos:content",
+        "rdfs:comment": "The unordered set of valos:content references to this Bvob from\nwithin this view of the world."
       },
-      "TransientFields": {
-        "@type": "valos:Type",
-        "rdfs:comment": "The class of valos resources which are referenced from within this\nworld and also the domain of all transient and generated fields which\nare available even for the inactive, out-of-this-world resources."
-      },
-      "id": {
-        "@type": "valos:GeneratedField",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "rdfs:Resource",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:cardinality": 1
-        },
-        "valos:generator": "getId",
-        "rdfs:comment": "VRL of this Resource"
-      },
-      "rawId": {
-        "@type": "valos:GeneratedField",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "xsd:string",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:cardinality": 1
-        },
-        "valos:generator": "getRawId",
-        "rdfs:comment": "Globally unique identifier of this Resource"
-      },
-      "typeName": {
-        "@type": "valos:GeneratedField",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "xsd:string",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:cardinality": 1
-        },
-        "valos:generator": "getTransientTypeName",
-        "rdfs:comment": "Globally unique identifier of this Resource"
-      },
-      "partition": {
-        "@type": "valos:GeneratedField",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "valos:Partition",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:generator": "partitionResolver",
-        "rdfs:comment": "The partition root Resource of this Resource, ie. the nearest owner\n(possibly self) which is also an active partition."
-      },
-      "partitionIRI": {
-        "@type": "valos:GeneratedField",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "rdfs:Resource",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:generator": "partitionURIResolver",
-        "rdfs:comment": "The partition IRI of the partition this Resource belongs to."
-      },
-      "partitionURI": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:partitionIRI",
-        "rdfs:subPropertyOf": "valos:partitionIRI",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "rdfs:Resource",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "revdoc:deprecatedInFavorOf": "valos:authorityIRI"
-      },
-      "prototype": {
-        "@type": "valos:PrimaryField",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "valos:TransientFields",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:defaultCoupledField": "valos:prototypers",
-        "rdfs:comment": "The prototype of this Resource. All field lookups for which there is\nno associated value set and whose field descriptors don't have\nownDefaultValue are forwarded to the prototype."
-      },
-      "prototypeAlias": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:prototype",
-        "rdfs:subPropertyOf": "valos:prototype",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "valos:TransientFields",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The prototype of this Resource.\nThis is an alias for valos:prototype to bypass conflicts with native\njavascript property 'prototype'."
-      },
-      "ownFields": {
-        "@type": "valos:GeneratedField",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "valos:TransientFields",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:generator": "resolveOwnFields",
-        "rdfs:comment": "A transient version of this object as if prototype was undefined.\nAll property accesses will only return field values which are directly\nowned by this resource."
-      },
-      "prototypers": {
-        "@type": "valos:TransientField",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "valos:TransientFields",
-        "valos:coupledField": "valos:prototype",
-        "valos:preventsDestroy": true,
-        "valos:ownDefaultValue": [],
-        "rdfs:comment": "All resources which have this Resource as valos:prototype but not as\nvalos:instancePrototype nor as valos:ghostPrototype."
-      },
-      "instancePrototype": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:prototype",
-        "rdfs:subPropertyOf": "valos:prototype",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "valos:TransientFields",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:coupledField": "valos:instances",
-        "rdfs:comment": "The instance prototype of this instance Resource."
-      },
-      "instances": {
-        "@type": "valos:TransientField",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "valos:TransientFields",
-        "valos:coupledField": "valos:prototype",
-        "valos:preventsDestroy": true,
-        "valos:ownDefaultValue": [],
-        "rdfs:comment": "All resources which have this Resource as their\nvalos:instancePrototype."
-      },
-      "ghostPrototype": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:prototype",
-        "rdfs:subPropertyOf": "valos:prototype",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "valos:TransientFields",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:coupledField": "valos:materializedGhosts",
-        "rdfs:comment": "Ghost prototype of this ghost resource. The ghost prototype is the\nbase resource from which this ghost was created during some primary\ninstantiation.\nThis instantiation (which happens on prototype and results in an\ninstance of it) also ghost-instantiates all the direct and indirect\nownlings of the prototype as ghost ownlings in the instance. The\ninstance is called the *ghost host* of all these ghosts. Likewise, the\ninstance prototype is called the ghost host prototype, and the\n(grand-)ownlings of this ghost host prototype are the ghost prototypes\nof the corresponding ghosts (ie. this field).} ."
-      },
-      "materializedGhosts": {
-        "@type": "valos:TransientField",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "valos:TransientFields",
-        "valos:coupledField": "valos:prototype",
-        "valos:preventsDestroy": true,
-        "valos:ownDefaultValue": [],
-        "rdfs:comment": "All materialized ghosts which have this Resource as their\nvalos:ghostPrototype."
-      },
-      "unnamedCouplings": {
-        "@type": "valos:TransientField",
-        "rdfs:domain": "valos:TransientField",
-        "rdfs:range": "valos:TransientField",
-        "valos:coupledField": "",
-        "valos:isOwning": true,
-        "rdfs:comment": "Referrers with a missing coupledField referring this Resource"
-      },
-      "ghostHost": {
-        "@type": "valos:GeneratedField",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "valos:TransientFields",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:generator": "ghostHostResolver",
-        "rdfs:comment": "The ghost host of this ghost Resource or null if not a ghost. The\nghost host is the innermost direct or indirect non-ghost owner of this\nghost, or in other words the instance that indirectly created this\nghost."
-      },
-      "ghostOwner": {
-        "@type": "valos:TransientField",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "valos:TransientFields",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:coupledField": "valos:ghostOwnlings",
-        "valos:isOwned": true,
-        "valos:ownDefaultValue": null,
-        "valos:allowTransientFieldToBeSingular": true,
-        "rdfs:comment": "Refers to the ghost host of this ghost resource if this ghost is\nmaterialized, otherwise null.\nNote that materialized grand-ownling ghosts will have a differing owner\nand ghostOwner and that destruction of either of them will result in\nimmaterialization of the grand-ownling ghost."
-      },
-      "ghostOwnlings": {
-        "@type": "valos:TransientField",
-        "rdfs:domain": "valos:TransientFields",
-        "rdfs:range": "valos:TransientFields",
-        "valos:isOwning": true,
-        "valos:coupledField": "valos:ghostOwner",
-        "valos:ownDefaultValue": [],
-        "rdfs:comment": "Materialized ghost Resource's which have this instance as their ghost\nhost."
-      },
-      "Resource": {
-        "@type": "valos:Type",
-        "rdfs:subClassOf": "valos:TransientFields",
-        "revdoc:brief": "resource",
-        "rdfs:comment": "A first-class object with fields and properties that can be directly\ncreated and mutated using events in associated partition event logs.\nResources have an identity and can be destroyed, subsequently\ndestroying all resources which are in the ownership hierarchy of this\nResource."
+      "Sourced": {
+        "@type": "valos-raem:Type",
+        "rdfs:subClassOf": "valos:Resource",
+        "revdoc:brief": "active, visible resource",
+        "rdfs:comment": "The class of valospace resources that are sourced in this view of\nthe world. A sourced resource has all of its fields and properties\navailable and it can thus be manipulated."
       },
       "owner": {
-        "@type": "valos:PrimaryField",
-        "rdfs:domain": "valos:Resource",
-        "rdfs:range": "valos:Resource",
-        "valos:restriction": {
+        "@type": "valos-raem:PrimaryField",
+        "rdfs:domain": "valos:Sourced",
+        "rdfs:range": "valos:Sourced",
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos:isOwned": true,
-        "valos:defaultCoupledField": "valos:ownlings",
-        "rdfs:comment": "The owner of this Resource"
+        "valos-raem:isOwnedBy": true,
+        "valos-raem:defaultCoupledField": "valos:ownlings",
+        "rdfs:comment": "The owner of this resource"
       },
       "name": {
-        "@type": "valos:PrimaryField",
-        "rdfs:domain": "valos:Resource",
+        "@type": "valos-raem:PrimaryField",
+        "rdfs:domain": "valos:Sourced",
         "rdfs:range": "xsd:string",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "rdfs:comment": "The primary ValOS name of this Resource. It is globally non-unique but\noften context-dependently unique."
-      },
-      "nameAlias": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:name",
-        "rdfs:subPropertyOf": "valos:name",
-        "rdfs:domain": "valos:Resource",
-        "rdfs:range": "xsd:string",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The primary name of this Resource. It is globally non-unique but often\ncontext-dependently unique.\nThis is an alias of Resource.name for circumventing conflicts with the\nnative javascript property 'name' in some execution contexts"
+        "rdfs:comment": "The primary ValOS name of this resource. It is globally non-unique but\noften context-dependently unique."
       },
       "ownlings": {
-        "@type": "valos:PrimaryField",
-        "rdfs:domain": "valos:Resource",
-        "rdfs:range": "valos:Resource",
-        "valos:isOwning": true,
-        "valos:coupledField": "valos:owner",
-        "rdfs:comment": "Collection of all the resources owned by this Resource via all\nproperties that are marked as valos:isOwning."
+        "@type": "valos-raem:PrimaryField",
+        "rdfs:domain": "valos:Sourced",
+        "rdfs:range": "rdfs:List",
+        "valos-raem:isOwnerOf": true,
+        "valos-raem:coupledField": "valos:owner",
+        "rdfs:comment": "The ordered list of all resources owned by this resource. This\nlist is a union of all fields with a valos-raem:isOwnerOf in their\nontology definition."
       },
       "unnamedOwnlings": {
-        "@type": "valos:PrimaryField",
+        "@type": "valos-raem:PrimaryField",
         "rdfs:subPropertyOf": "valos:ownlings",
-        "rdfs:domain": "valos:Resource",
-        "rdfs:range": "valos:Resource",
-        "valos:isOwning": true,
-        "valos:coupledField": "valos:owner",
-        "rdfs:comment": "All the resources owned by this Resource which are not part of another\nnamed owning property"
+        "rdfs:domain": "valos:Sourced",
+        "rdfs:range": "valos:Sourced",
+        "valos-raem:isOwnerOf": true,
+        "valos-raem:coupledField": "valos:owner",
+        "rdfs:comment": "The ordered list of all resources owned by this resource which are not\ncontained in another valos-raem:isOwnerOf field list."
       },
       "isFrozen": {
-        "@type": "valos:PrimaryField",
-        "rdfs:domain": "valos:Resource",
+        "@type": "valos-raem:PrimaryField",
+        "rdfs:domain": "valos:Sourced",
         "rdfs:range": "xsd:boolean",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos:isDuplicateable": false,
-        "valos:ownDefaultValue": false,
-        "rdfs:comment": "Indicates whether this Resource is frozen. A frozen Resource nor any\nof its ownlings cannot have any of their primary fields be modified.\nSetting isFrozen to true is (by design) an irreversible operation.\nIf this Resource is also the root resource of a partition the whole\npartition is permanently frozen."
+        "valos-raem:isDuplicateable": false,
+        "valos-raem:ownDefaultValue": false,
+        "rdfs:comment": "Indicates whether this resource is frozen. A frozen resource nor any\nof its ownlings cannot have any of their primary fields be modified.\nSetting isFrozen to true is (by design) an irreversible operation.\nIf this resource is also the root resource of a partition the whole\npartition is permanently frozen."
       },
-      "InactiveResource": {
-        "@type": "valos:Type",
-        "rdfs:subClassOf": "valos:TransientFields",
-        "revdoc:brief": "inactive resource",
-        "rdfs:comment": "An InactiveResource is a Resource whose partition has not yet been\nfully loaded, and has only the limited set of fields of TransientFields\navailable. The transition from InactiveResource to and from other\nconcrete Resource types is the only possible runtime type change and\nhappens dynamically based on the partition activation and inactivation."
+      "Unsourced": {
+        "@type": "valos-raem:Type",
+        "rdfs:subClassOf": "valos:Resource",
+        "revdoc:brief": "out-of-this-world resource",
+        "rdfs:comment": "The dominant type class of 'unsourced' valospace resources. An\nunsourced resource doesn't have a known representation in this view of\nthe world, typically because it is inside an unsourced Partition.\nThe transition from Unsourced to and from other dominant types is the\nonly possible runtime type change and happens dynamically based on\nthe partition sourcery and banishment."
       },
-      "DestroyedResource": {
-        "@type": "valos:Type",
-        "rdfs:subClassOf": "valos:TransientFields",
+      "Destroyed": {
+        "@type": "valos-raem:Type",
+        "rdfs:subClassOf": "valos:Resource",
         "revdoc:brief:": "destroyed resource",
-        "rdfs:comment": "A DestroyedResource is a Resource which has been destroyed and only\nprovides the external fields listed in TransientFields interface."
+        "rdfs:comment": "The dominant type class of resources which have been destroyed."
       },
       "Partition": {
-        "@type": "valos:Type",
-        "rdfs:subClassOf": "valos:Resource",
-        "revdoc:brief": "partition",
-        "rdfs:comment": "A Partition is a subdivision of the whole ValOS object space into\nsmaller recursive wholes. The Partition implementation contains\nResource's either by direct or transitive ownership. Each such\ncontained Resource also knows their containing Partition.\n\nTODO(iridian, 2019-08): Update outdated terminology in this comment.\n\nIn addition to the few direct member fields relating to snapshotting\nand event stream synchronization, the Partition Resource's serve as\na key latching point for external services.\n\nEach Partition object is managed by an authority, which performs\nconflict resolution, authorization and recording of incoming commands,\nconverting them into the truth event log for that particular Partition.\n\nThe Partition id is used by the query routers to globally locate the\nauthority responsible for any given Partition. Also, cross-partition\nResource references are implemented as Resource stubs, ie. objects that\nonly contain the Resource id and its most recently known partition\n(which will retain the new owning Partition in a stub, enabling\nforwarding). Together these allow for any Resource to always be\nlocateable from anywhere."
+        "@type": "valos-raem:Type",
+        "rdfs:subClassOf": "valos:Sourced",
+        "revdoc:brief": "world subdivision, a document",
+        "rdfs:comment": "A Partition is a subdivision of the whole ValOS object space into\nsmaller recursive, individually sourcable wholes. The Partition\nimplementation contains resources either by direct or transitive\nownership. Each such contained resource also knows their containing\nPartition.\n\nTODO(iridian, 2019-08): Update outdated terminology in this comment.\n\nIn addition to the few direct member fields relating to snapshotting\nand event stream synchronization, the Partition resources serve as\na key latching point for external services.\n\nEach Partition object is managed by an authority, which performs\nconflict resolution, authorization and recording of incoming commands,\nconverting them into the truth event log for that particular Partition.\n\nThe Partition id is used by the query routers to globally locate the\nauthority responsible for any given Partition. Also, cross-partition\nresource references are implemented as Unsourced resource stubs, ie.\nobjects that only contain the resource id and its most recently known\npartition (which will retain the new owning Partition in a stub,\nenabling forwarding). Together these allow for any resource to always\nbe eventually locateable from anywhere."
       },
       "authorityIRI": {
-        "@type": "valos:PrimaryField",
+        "@type": "valos-raem:PrimaryField",
         "rdfs:domain": "valos:Partition",
-        "rdfs:range": "xsd:string",
-        "valos:restriction": {
+        "rdfs:range": "xsd:anyURI",
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos:isDuplicateable": false,
-        "valos:ownDefaultValue": null,
-        "rdfs:comment": "The authority IRI of this Resource. If this field is set it means that\nthis is an active partition root object. The partition IRI is generated\nas per the rules specified by the authority IRI schema."
+        "valos-raem:isDuplicateable": false,
+        "valos-raem:ownDefaultValue": null,
+        "rdfs:comment": "The authority IRI of this resource. If this field is set it means that\nthis is an active partition root object. The partition IRI is generated\nas per the rules specified by the authority IRI schema."
       },
       "partitionAuthorityURI": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:authorityIRI",
+        "@type": "valos-raem:AliasField",
+        "revdoc:deprecatedInFavorOf": "valos:authorityIRI",
+        "valos-raem:aliasOf": "valos:authorityIRI",
         "rdfs:subPropertyOf": "valos:authorityIRI",
         "rdfs:domain": "valos:Partition",
         "rdfs:range": "xsd:string",
-        "valos:restriction": {
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        }
+      },
+      "nameAlias": {
+        "@type": "valos-raem:AliasField",
+        "valos-raem:aliasOf": "valos:name",
+        "rdfs:subPropertyOf": "valos:name",
+        "rdfs:domain": "valos:Sourced",
+        "rdfs:range": "xsd:string",
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "revdoc:deprecatedInFavorOf": "valos:authorityIRI"
+        "rdfs:comment": "The primary name of this resource. It is globally non-unique but often\n  context-dependently unique.\n  This is an alias of valos:name for circumventing conflicts with the\n  native javascript property 'name' in some execution contexts"
       },
-      "TransientScriptsFields": {
-        "@type": "valos:Type",
+      "prototypeAlias": {
+        "@type": "valos-raem:AliasField",
+        "valos-raem:aliasOf": "valos:prototype",
+        "rdfs:subPropertyOf": "valos:prototype",
+        "rdfs:domain": "valos:Resource",
+        "rdfs:range": "valos:Resource",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The prototype of this resource. This is an alias for valos:prototype\nto bypass conflicts with native javascript property 'prototype' in\ncertain contexts."
+      },
+      "ScriptResource": {
+        "@type": "valos-raem:Type",
         "rdfs:subClassOf": [
-          "valos:TransientScriptFields"
+          "valos:Resource"
         ],
-        "revdoc:brief": "transient script fields",
-        "rdfs:comment": "The class of valos script resources which are not active within the\ncurrent view of the world but which have references to them. As such\nit is the domain of all transient and generated script fields."
+        "revdoc:brief": "valoscript resource interface",
+        "rdfs:comment": "The class of valospace resources which have script references to them\nfrom within this world. The domain of all transient and generated\nfields which are available even for out-of-this-world resources."
       },
       "incomingRelations": {
-        "@type": "valos:TransientField",
-        "rdfs:domain": "valos:TransientScriptFields",
+        "@type": "valos-raem:TransientField",
+        "rdfs:domain": "valos:ScriptResource",
         "rdfs:range": "valos:Relation",
-        "valos:coupledField": "valos:target",
-        "rdfs:comment": "Unordered set of relations that are targeting this relatable resource."
+        "valos-raem:coupledField": "valos:target",
+        "rdfs:comment": "The unordered set of relations that are targeting this relatable\nresource within this view of the world."
       },
-      "DestroyedScriptResource": {
-        "@type": "valos:Type",
+      "ScriptDestroyed": {
+        "@type": "valos-raem:Type",
         "rdfs:subClassOf": [
-          "valos:TransientFields",
-          "valos:Resource"
+          "valos:Resource",
+          "valos:Destroyed"
         ],
         "revdoc:brief": "destroyed script resource",
         "rdfs:comment": "The class of valospace script resources which have been destroyed in\nthis view of the world. It only provides the external fields listed in\nTransientScripFields and TransientFields interfaces."
       },
       "ScriptProperty": {
-        "@type": "valos:Type",
+        "@type": "valos-raem:Type",
         "rdfs:subClassOf": [
-          "valos:TransientFields",
-          "valos:Resource"
+          "valos:Resource",
+          "valos:Sourced"
         ],
-        "revdoc:brief": "property",
+        "revdoc:brief": "valoscript property",
         "rdfs:comment": "The class of valospace Property resources which are expressed as\nvaloscript object properties."
       },
       "scope": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:owner",
+        "@type": "valos-raem:AliasField",
+        "valos-raem:aliasOf": "valos:owner",
         "rdfs:subPropertyOf": "valos:owner",
         "rdfs:domain": "valos:ScriptProperty",
         "rdfs:range": "valos:Scope",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos:isOwned": true,
-        "valos:coupledField": "valos:properties",
+        "valos-raem:isOwnedBy": true,
+        "valos-raem:coupledField": "valos:properties",
         "rdfs:comment": "The scope resource (and owner) of this Property"
       },
       "value": {
-        "@type": "valos:PrimaryField",
+        "@type": "valos-raem:PrimaryField",
         "rdfs:domain": "valos:ScriptProperty",
         "rdfs:range": "rdfs:Resource",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos:initialValue": null,
-        "valos:finalDefaultValue": [
+        "valos-raem:initialValue": null,
+        "valos-raem:finalDefaultValue": [
           "§void"
         ],
         "rdfs:comment": "The value of this Property"
       },
       "Scope": {
-        "@type": "valos:Type",
+        "@type": "valos-raem:Type",
         "rdfs:subClassOf": [
-          "valos:TransientFields"
+          "valos:Resource"
         ],
-        "revdoc:brief": "scope",
+        "revdoc:brief": "local namespace of properties",
         "rdfs:comment": "The class of valospace resources which can have valospace script\nproperties."
       },
       "properties": {
-        "@type": "valos:PrimaryField",
+        "@type": "valos-raem:PrimaryField",
         "rdfs:domain": "valos:Scope",
         "rdfs:range": "rdfs:List",
-        "valos:coupledField": "valos:scope",
-        "valos:isOwning": true,
+        "valos-raem:coupledField": "valos:scope",
+        "valos-raem:isOwnerOf": true,
         "rdfs:comment": "The ordered list of Property resources of this scope"
       },
       "Relatable": {
-        "@type": "valos:Type",
+        "@type": "valos-raem:Type",
         "rdfs:subClassOf": [
-          "valos:TransientFields",
           "valos:Resource",
-          "valos:TransientScriptFields",
+          "valos:Sourced",
+          "valos:ScriptResource",
           "valos:Scope"
         ],
-        "revdoc:brief": "relatable",
+        "revdoc:brief": "relation source and/or target interface",
         "rdfs:comment": "The class of valospace resources which can act as source and target of\na valospace Relation."
       },
       "relations": {
-        "@type": "valos:PrimaryField",
+        "@type": "valos-raem:PrimaryField",
         "rdfs:domain": "valos:Relatable",
         "rdfs:range": "rdfs:List",
-        "valos:coupledField": "valos:source",
-        "valos:isOwning": true,
+        "valos-raem:coupledField": "valos:source",
+        "valos-raem:isOwnerOf": true,
         "rdfs:comment": "The ordered list of outgoing relations of this relatable"
       },
       "Relation": {
-        "@type": "valos:Type",
+        "@type": "valos-raem:Type",
         "rdfs:subClassOf": [
-          "valos:TransientFields",
           "valos:Resource",
-          "valos:TransientScriptFields",
+          "valos:Sourced",
+          "valos:ScriptResource",
           "valos:Scope",
           "valos:Relatable"
         ],
-        "revdoc:brief": "relation",
-        "rdfs:comment": "The class of valospace resources which can act as source and target of\na valospace Relation."
+        "revdoc:brief": "a named, directed, parameterized primary resource relationship edge",
+        "rdfs:comment": "The class of valospace resources which represent directed,\nmany-to-many relationships between relatable resources.\nWith Entity and Media it forms the group of three primary types.\nAs a Scope it can have scriptable properties. Relation being\na Relatable itself allows for nested and recursive relationship\nstructures."
       },
       "source": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:owner",
+        "@type": "valos-raem:AliasField",
+        "valos-raem:aliasOf": "valos:owner",
         "rdfs:subPropertyOf": "valos:owner",
         "rdfs:domain": "valos:Relation",
         "rdfs:range": "valos:Relatable",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos:isOwned": true,
-        "valos:coupledField": "valos:relations",
+        "valos-raem:isOwnedBy": true,
+        "valos-raem:coupledField": "valos:relations",
         "rdfs:comment": "The source (and owner) relatable of this relation."
       },
       "target": {
-        "@type": "valos:PrimaryField",
+        "@type": "valos-raem:PrimaryField",
         "rdfs:domain": "valos:Relation",
         "rdfs:range": "valos:Relatable",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos:coupledField": "valos:incomingRelations",
+        "valos-raem:coupledField": "valos:incomingRelations",
         "rdfs:comment": "The target relatable of this relation."
       },
       "directory": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:owner",
+        "@type": "valos-raem:AliasField",
+        "valos-raem:aliasOf": "valos:owner",
         "rdfs:subPropertyOf": "valos:owner",
         "rdfs:domain": [
           "valos:Entity",
           "valos:Media"
         ],
         "rdfs:range": "rdfs:Relatable",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos:isOwned": true,
-        "valos:coupledField": "valos:entries",
+        "valos-raem:isOwnedBy": true,
+        "valos-raem:coupledField": "valos:entries",
         "rdfs:comment": "The directory (and owner) relatable of this entry resource."
       },
       "entries": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:ownlings",
+        "@type": "valos-raem:AliasField",
+        "valos-raem:aliasOf": "valos:ownlings",
         "rdfs:subPropertyOf": "valos:ownlings",
         "rdfs:domain": "valos:Relatable",
         "rdfs:range": "rdfs:List",
-        "valos:isOwning": true,
-        "valos:coupledField": "valos:directory",
+        "valos-raem:isOwnerOf": true,
+        "valos-raem:coupledField": "valos:directory",
         "rdfs:comment": "The ordered list of entry entities and medias of this relatable."
       },
       "Entity": {
-        "@type": "valos:Type",
+        "@type": "valos-raem:Type",
+        "revdoc:brief": "primary resource hierachy node",
         "rdfs:subClassOf": [
-          "valos:TransientFields",
           "valos:Resource",
-          "valos:TransientScriptFields",
+          "valos:Sourced",
+          "valos:ScriptResource",
           "valos:Scope",
           "valos:Relatable",
           "valos:Partition"
         ],
-        "revdoc:brief": "entity",
-        "rdfs:comment": "The class of valospace resources which can act as the partition root."
+        "rdfs:comment": "The class of valospace resources which act as the hierarchy nodes.\nWith Relation and Media it forms the group of three primary types.\nAs a Scope it can have scriptable properties, which entities expose\nto all contained resources in a lexical scripting namespace.\n"
       },
       "parent": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:directory",
+        "@type": "valos-raem:AliasField",
+        "valos-raem:aliasOf": "valos:directory",
         "rdfs:subPropertyOf": "valos:directory",
         "rdfs:domain": "valos:Entity",
         "rdfs:range": "valos:Relatable",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos:isOwned": true,
-        "valos:coupledField": "valos:children",
+        "valos-raem:isOwnedBy": true,
+        "valos-raem:coupledField": "valos:children",
         "rdfs:comment": "The parent (and owner) relatable of this entity."
       },
       "children": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:entries",
+        "@type": "valos-raem:AliasField",
+        "valos-raem:aliasOf": "valos:entries",
         "rdfs:subPropertyOf": "valos:entries",
         "rdfs:domain": "valos:Relatable",
         "rdfs:range": "rdfs:List",
-        "valos:isOwning": true,
-        "valos:coupledField": "valos:parent",
+        "valos-raem:isOwnerOf": true,
+        "valos-raem:coupledField": "valos:parent",
         "rdfs:comment": "The ordered list of child entities of this relatable"
       },
       "Media": {
-        "@type": "valos:Type",
+        "@type": "valos-raem:Type",
         "rdfs:subClassOf": [
-          "valos:TransientFields",
           "valos:Resource",
-          "valos:TransientScriptFields",
+          "valos:Sourced",
+          "valos:ScriptResource",
           "valos:Scope",
           "valos:Relatable"
         ],
-        "revdoc:brief": "media",
-        "rdfs:comment": "The class of valospace resources which represent interpretable media\nand can be associated with binary content and accompanying metadata."
+        "revdoc:brief": "primary file, streamed and other typed content resource",
+        "rdfs:comment": "The class of valospace resources which represent interpretable media\nand can be associated with binary content and accompanying metadata.\nWith Relation and Media it forms the group of three primary types.\n"
       },
       "container": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:owner",
+        "@type": "valos-raem:AliasField",
+        "valos-raem:aliasOf": "valos:owner",
         "rdfs:subPropertyOf": "valos:owner",
         "rdfs:domain": "valos:Media",
         "rdfs:range": "valos:Relatable",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos:isOwned": true,
-        "valos:coupledField": "valos:medias",
+        "valos-raem:isOwnedBy": true,
+        "valos-raem:coupledField": "valos:medias",
         "rdfs:comment": "The container (and owner) relatable of this media."
       },
       "medias": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:ownlings",
+        "@type": "valos-raem:AliasField",
+        "valos-raem:aliasOf": "valos:ownlings",
         "rdfs:subPropertyOf": "valos:ownlings",
         "rdfs:domain": "valos:Relatable",
         "rdfs:range": "rdfs:List",
-        "valos:isOwning": true,
-        "valos:coupledField": "valos:container",
+        "valos-raem:isOwnerOf": true,
+        "valos-raem:coupledField": "valos:container",
         "rdfs:comment": "The ordered list of medias contained in this relatable"
       },
       "sourceURL": {
-        "@type": "valos:PrimaryField",
+        "@type": "valos-raem:PrimaryField",
         "rdfs:domain": "valos:Media",
         "rdfs:range": "xsd:anyURI",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
         "rdfs:comment": "The unreliable source URL of this Media. This URL is dereferenced\nwhen the Media content is accessed and as such is subject to all\nfailure considerations associated with its protocol."
       },
       "content": {
-        "@type": "valos:PrimaryField",
+        "@type": "valos-raem:PrimaryField",
         "rdfs:domain": "valos:Media",
         "rdfs:range": "valos:Bvob",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos:coupledField": "valos:contentReferrers",
+        "valos-raem:coupledField": "valos:contentReferrers",
         "rdfs:comment": "The infrastructure-backed octet-stream content of this Media."
       },
       "created": {
-        "@type": "valos:GeneratedField",
+        "@type": "valos-raem:GeneratedField",
         "rdfs:domain": "valos:Media",
         "rdfs:range": "xsd:double",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos:generator": "created",
+        "valos-raem:generator": "created",
         "rdfs:comment": "The creation UNIX epoch time of this Media. This is defined as the\ntruth log aspect timestamp of the CREATED event which brought this\nMedia into being."
       },
       "modified": {
-        "@type": "valos:GeneratedField",
+        "@type": "valos-raem:GeneratedField",
         "rdfs:domain": "valos:Media",
         "rdfs:range": "xsd:double",
-        "valos:restriction": {
+        "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos:generator": "modified",
+        "valos-raem:generator": "modified",
         "rdfs:comment": "The latest modification UNIX epoch time of this Media. This is defined\nas the truth log aspect timestamp of the most recent event that\ndirectly affects this Media resource."
       }
     },
     "context": {
       "@id": "context",
-      "valos:aliasOf": {
-        "@id": "https://valospace.org/#aliasOf",
-        "@type": "@id"
-      },
-      "valos:coupledField": {
-        "@id": "https://valospace.org/#coupledField",
-        "@type": "@id"
-      },
-      "valos:contentReferrers": {
-        "@id": "https://valospace.org/#contentReferrers",
-        "@type": "@id"
+      "restriction": {
+        "@reverse": "owl:onProperty"
       },
       "valos:partition": {
         "@id": "https://valospace.org/#partition",
@@ -2100,16 +1799,20 @@
         "@id": "https://valospace.org/#prototype",
         "@type": "@id"
       },
-      "valos:prototypeAlias": {
-        "@id": "https://valospace.org/#prototypeAlias",
+      "valos:derivations": {
+        "@id": "https://valospace.org/#derivations",
         "@type": "@id"
       },
       "valos:ownFields": {
         "@id": "https://valospace.org/#ownFields",
         "@type": "@id"
       },
-      "valos:prototypers": {
-        "@id": "https://valospace.org/#prototypers",
+      "valos:inheritancePrototype": {
+        "@id": "https://valospace.org/#inheritancePrototype",
+        "@type": "@id"
+      },
+      "valos:inheritors": {
+        "@id": "https://valospace.org/#inheritors",
         "@type": "@id"
       },
       "valos:instancePrototype": {
@@ -2122,6 +1825,10 @@
       },
       "valos:ghostPrototype": {
         "@id": "https://valospace.org/#ghostPrototype",
+        "@type": "@id"
+      },
+      "valos:ghosts": {
+        "@id": "https://valospace.org/#ghosts",
         "@type": "@id"
       },
       "valos:materializedGhosts": {
@@ -2144,16 +1851,25 @@
         "@id": "https://valospace.org/#ghostOwnlings",
         "@type": "@id"
       },
+      "valos:contentReferrers": {
+        "@id": "https://valospace.org/#contentReferrers",
+        "@type": "@id"
+      },
       "valos:owner": {
         "@id": "https://valospace.org/#owner",
         "@type": "@id"
       },
       "valos:ownlings": {
         "@id": "https://valospace.org/#ownlings",
+        "@container": "@list",
         "@type": "@id"
       },
       "valos:unnamedOwnlings": {
         "@id": "https://valospace.org/#unnamedOwnlings",
+        "@type": "@id"
+      },
+      "valos:prototypeAlias": {
+        "@id": "https://valospace.org/#prototypeAlias",
         "@type": "@id"
       },
       "valos:incomingRelations": {
@@ -2218,28 +1934,7 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "@valos/kernel domain ",
-        "includes all core infrastructure components of ValOS - the Valaa Open System.",
-        null,
-        "These components are hosted at the ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "npmjs repository within @valos namespace"
-          ],
-          "vdoc:ref": "https://www.npmjs.com/search?q=%40valos"
-        },
-        ".",
-        null,
-        "These components are developed at the ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "valos git repository"
-          ],
-          "vdoc:ref": "https://github.com/valaatech/kernel"
-        },
-        "."
+        "Overview of the valospace APIs and ontologies."
       ]
     },
     "sotd": {
@@ -2273,7 +1968,7 @@
           "vdoc:ref": "@valos/kernel"
         },
         ") which is ",
-        "ValOS common infrastructure tools and libraries monorepo."
+        "ValOS common infrastructure tools and libraries monorepository."
       ]
     },
     "introduction": {
@@ -2286,31 +1981,8 @@
         ]
       },
       "vdoc:content": [
-        "ValOS ecosystem revolves around various roles. You can be one,\n      many or even none of them but you should know at least a bit\n      about all of them.",
+        "ValOS ecosystem revolves around various roles. This document\n      is a reference document of valospace systems and structures and\n      is directed for more experienced valonauts. Check out the brief\n      description and introductions of the other roles as well.",
         null,
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "Valma"
-          ],
-          "vdoc:ref": "Valma"
-        },
-        " itself is a collection of tools for interacting\n      with the ValOS ecosystem, most notable of which is ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            [
-              {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "vlm"
-                ]
-              },
-              " the command line script invoker"
-            ]
-          ],
-          "vdoc:ref": "@/valma"
-        },
         ".",
         {
           "vdoc:lookup": "documents",
@@ -2414,1171 +2086,16 @@
         }
       ]
     },
-    "section_documentation": {
-      "@id": "section_documentation",
-      "dc:title": "Documentation",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "This domain provides the following primary documents:",
-        {
-          "@id": "section_introduction_documents"
-        },
-        {
-          "@id": "section_api_reference_documents"
-        },
-        {
-          "@id": "section_ontology_documents"
-        },
-        {
-          "@id": "section_other_primary_documents"
-        }
-      ]
-    },
-    "section_introduction_documents": {
-      "@id": "section_introduction_documents",
-      "dc:title": "Introduction documents",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "vdoc:lookup": "documents",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
-              {
-                "@type": "vdoc:Header",
-                "vdoc:cell": {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
-                    {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
-                        "vdoc:selectKey"
-                      ],
-                      "vdoc:ref": "vdoc:selectKey"
-                    }
-                  ]
-                },
-                "vdoc:content": [
-                  "Name"
-                ]
-              },
-              {
-                "vdoc:cell": "package",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "Package"
-                ]
-              },
-              {
-                "vdoc:cell": "version",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "Version"
-                ]
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:cell": {
-                  "vdoc:words": {
-                    "vdoc:selectField": "tags"
-                  }
-                },
-                "vdoc:content": [
-                  "Tags"
-                ]
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "Title:"
-                  ]
-                },
-                "vdoc:cell": {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    {
-                      "vdoc:selectField": "title"
-                    }
-                  ],
-                  "vdoc:ref": [
-                    "vdoc:selectKey",
-                    "#introduction"
-                  ]
-                },
-                "vdoc:wide": true
-              },
-              {
-                "vdoc:cell": "introduction",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "Introduction:"
-                  ]
-                },
-                "vdoc:wide": true,
-                "vdoc:tall": true
-              }
-            ]
-          },
-          "vdoc:entries": [
-            "raem",
-            "script",
-            "sourcerer"
-          ]
-        }
-      ]
-    },
-    "section_api_reference_documents": {
-      "@id": "section_api_reference_documents",
-      "dc:title": "API reference documents",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "vdoc:lookup": "documents",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
-              {
-                "@type": "vdoc:Header",
-                "vdoc:cell": {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
-                    {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
-                        "vdoc:selectKey"
-                      ],
-                      "vdoc:ref": "vdoc:selectKey"
-                    }
-                  ]
-                },
-                "vdoc:content": [
-                  "Name"
-                ]
-              },
-              {
-                "vdoc:cell": "package",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "Package"
-                ]
-              },
-              {
-                "vdoc:cell": "version",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "Version"
-                ]
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:cell": {
-                  "vdoc:words": {
-                    "vdoc:selectField": "tags"
-                  }
-                },
-                "vdoc:content": [
-                  "Tags"
-                ]
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "Title:"
-                  ]
-                },
-                "vdoc:cell": {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    {
-                      "vdoc:selectField": "title"
-                    }
-                  ],
-                  "vdoc:ref": [
-                    "vdoc:selectKey",
-                    "#apiAbstract"
-                  ]
-                },
-                "vdoc:wide": true
-              },
-              {
-                "vdoc:cell": "apiAbstract",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "API abstract:"
-                  ]
-                },
-                "vdoc:wide": true,
-                "vdoc:tall": true
-              }
-            ]
-          },
-          "vdoc:entries": []
-        }
-      ]
-    },
-    "section_ontology_documents": {
-      "@id": "section_ontology_documents",
-      "dc:title": "Ontology documents",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "vdoc:lookup": "documents",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
-              {
-                "@type": "vdoc:Header",
-                "vdoc:cell": {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
-                    {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
-                        "vdoc:selectKey"
-                      ],
-                      "vdoc:ref": "vdoc:selectKey"
-                    }
-                  ]
-                },
-                "vdoc:content": [
-                  "Name"
-                ]
-              },
-              {
-                "vdoc:cell": "package",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "Package"
-                ]
-              },
-              {
-                "vdoc:cell": "version",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "Version"
-                ]
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:cell": {
-                  "vdoc:words": {
-                    "vdoc:selectField": "tags"
-                  }
-                },
-                "vdoc:content": [
-                  "Tags"
-                ]
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "Title:"
-                  ]
-                },
-                "vdoc:cell": {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    {
-                      "vdoc:selectField": "title"
-                    }
-                  ],
-                  "vdoc:ref": [
-                    "vdoc:selectKey",
-                    "#ontology"
-                  ]
-                },
-                "vdoc:wide": true
-              },
-              {
-                "vdoc:cell": "ontologyAbstract",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "Ontology abstract:"
-                  ]
-                },
-                "vdoc:wide": true,
-                "vdoc:tall": true
-              }
-            ]
-          },
-          "vdoc:entries": [
-            "raem",
-            "revdoc",
-            "sbomdoc",
-            "script",
-            "sourcerer",
-            "twindoc",
-            "vdoc",
-            "@valos/kernel"
-          ]
-        }
-      ]
-    },
-    "section_other_primary_documents": {
-      "@id": "section_other_primary_documents",
-      "dc:title": "Other primary documents",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "vdoc:lookup": "documents",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
-              {
-                "@type": "vdoc:Header",
-                "vdoc:cell": {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
-                    {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
-                        "vdoc:selectKey"
-                      ],
-                      "vdoc:ref": "vdoc:selectKey"
-                    }
-                  ]
-                },
-                "vdoc:content": [
-                  "Name"
-                ]
-              },
-              {
-                "vdoc:cell": "package",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "Package"
-                ]
-              },
-              {
-                "vdoc:cell": "version",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "Version"
-                ]
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:cell": {
-                  "vdoc:words": {
-                    "vdoc:selectField": "tags"
-                  }
-                },
-                "vdoc:content": [
-                  "Tags"
-                ]
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "Title:"
-                  ]
-                },
-                "vdoc:cell": {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    {
-                      "vdoc:selectField": "title"
-                    }
-                  ],
-                  "vdoc:ref": [
-                    "vdoc:selectKey",
-                    "#abstract"
-                  ]
-                },
-                "vdoc:wide": true
-              },
-              {
-                "vdoc:cell": "abstract",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "Abstract:"
-                  ]
-                },
-                "vdoc:wide": true,
-                "vdoc:tall": true
-              }
-            ]
-          },
-          "vdoc:entries": [
-            "type-vault/AssortedTutorials"
-          ]
-        }
-      ]
-    },
-    "section_workspaces": {
-      "@id": "section_workspaces",
-      "dc:title": "Workspaces",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "This domain introduces the following ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "workspaces"
-          ],
-          "vdoc:ref": "@/valma#workspace"
-        },
-        " and workspace infrastructure components.",
-        {
-          "@id": "section_new_types"
-        },
-        {
-          "@id": "section_new_toolsets"
-        },
-        {
-          "@id": "section_new_tools"
-        },
-        {
-          "@id": "section_new_commands"
-        },
-        {
-          "@id": "section_new_workshop_workspaces"
-        },
-        {
-          "@id": "section_new_toolset_workspaces"
-        },
-        {
-          "@id": "section_new_library_workspaces"
-        },
-        {
-          "@id": "section_new_vdoc_extension_workspaces"
-        }
-      ]
-    },
-    "section_new_types": {
-      "@id": "section_new_types",
-      "dc:title": "Workspace types, 9 new",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "This domain introduces the following ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "workspace types"
-          ],
-          "vdoc:ref": "@/valma#type"
-        },
-        ".",
-        {
-          "vdoc:lookup": "types",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
-            {
-              "@type": "vdoc:Header",
-              "vdoc:cell": {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "vdoc:selectKey"
-                    ],
-                    "vdoc:ref": "vdoc:selectKey"
-                  }
-                ]
-              },
-              "vdoc:content": [
-                "Name"
-              ]
-            },
-            {
-              "vdoc:cell": "package",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Package"
-              ]
-            },
-            {
-              "vdoc:cell": "version",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Version"
-              ]
-            },
-            {
-              "vdoc:cell": "introduction",
-              "@type": "vdoc:Header",
-              "vdoc:content": {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "Introduction:"
-                ]
-              },
-              "vdoc:wide": true
-            }
-          ]
-        }
-      ]
-    },
-    "section_new_toolsets": {
-      "@id": "section_new_toolsets",
-      "dc:title": "Workspace toolsets, 4 new",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "This domain introduces the following ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "workspace toolsets"
-          ],
-          "vdoc:ref": "@/valma#toolset"
-        },
-        ":",
-        {
-          "vdoc:lookup": "toolsets",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
-            {
-              "@type": "vdoc:Header",
-              "vdoc:cell": {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "vdoc:selectKey"
-                    ],
-                    "vdoc:ref": "vdoc:selectKey"
-                  }
-                ]
-              },
-              "vdoc:content": [
-                "Name"
-              ]
-            },
-            {
-              "vdoc:cell": "package",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Package"
-              ]
-            },
-            {
-              "vdoc:cell": "version",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Version"
-              ]
-            },
-            {
-              "vdoc:cell": "introduction",
-              "@type": "vdoc:Header",
-              "vdoc:content": {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "Introduction:"
-                ]
-              },
-              "vdoc:wide": true
-            }
-          ]
-        }
-      ]
-    },
-    "section_new_tools": {
-      "@id": "section_new_tools",
-      "dc:title": "Workspace tools, 2 new",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "This domain introduces the following ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "workspace tools"
-          ],
-          "vdoc:ref": "@/valma#tool"
-        },
-        ":",
-        {
-          "vdoc:lookup": "tools",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
-            {
-              "@type": "vdoc:Header",
-              "vdoc:cell": {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "vdoc:selectKey"
-                    ],
-                    "vdoc:ref": "vdoc:selectKey"
-                  }
-                ]
-              },
-              "vdoc:content": [
-                "Name"
-              ]
-            },
-            {
-              "vdoc:cell": "package",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Package"
-              ]
-            },
-            {
-              "vdoc:cell": "version",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Version"
-              ]
-            },
-            {
-              "vdoc:cell": "introduction",
-              "@type": "vdoc:Header",
-              "vdoc:content": {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "Introduction:"
-                ]
-              },
-              "vdoc:wide": true
-            }
-          ]
-        }
-      ]
-    },
-    "section_new_commands": {
-      "@id": "section_new_commands",
-      "dc:title": "Valma commands, 17 new",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "This domain introduces the following top-level ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "valma commands"
-          ],
-          "vdoc:ref": "@/valma#command"
-        },
-        ":",
-        {
-          "vdoc:lookup": "commands",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
-            {
-              "@type": "vdoc:Header",
-              "vdoc:cell": {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "vdoc:selectKey"
-                    ],
-                    "vdoc:ref": "vdoc:selectKey"
-                  }
-                ]
-              },
-              "vdoc:content": [
-                "Name"
-              ]
-            },
-            {
-              "vdoc:cell": "description",
-              "@type": "vdoc:Header",
-              "vdoc:content": {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "Description:"
-                ]
-              },
-              "vdoc:wide": true
-            },
-            {
-              "vdoc:cell": "introduction",
-              "@type": "vdoc:Header",
-              "vdoc:content": {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "Introduction:"
-                ]
-              },
-              "vdoc:wide": true
-            }
-          ]
-        }
-      ]
-    },
-    "section_new_workshop_workspaces": {
-      "@id": "section_new_workshop_workspaces",
-      "dc:title": "Type 'workshop' workspaces, 1 new",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "A workshop package provides a set of valma commands for defining and\nmanaging a ValOS domain. The workshops then:\n1. shall provide domain package (de)registration via\n   .configure/.<domain>/{,de}register-package\n2. can provide new workspace types via .configure/.type/*\n3. can provide new toolsets via\n   .configure/{,.type/.<type>/,.domain/.<domain>/}.toolset/**/*\n\nNotably the package (de)registration should provide means for any new\ndomain toolset packages to request the addition of their toolset\nconfigure command to the domain workshop.\nIdiomatic way to implement this is a workshop command which issues a PR\nagainst the source control repository of the workshop package.",
-        null,
-        "This domain introduces the following ",
-        "workshop",
-        " ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "workspaces"
-          ],
-          "vdoc:ref": "@/valma#workspace"
-        },
-        ".",
-        {
-          "vdoc:lookup": "workshop_workspaces",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
-            {
-              "@type": "vdoc:Header",
-              "vdoc:cell": {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "vdoc:selectKey"
-                    ],
-                    "vdoc:ref": "vdoc:selectKey"
-                  }
-                ]
-              },
-              "vdoc:content": [
-                "Name"
-              ]
-            },
-            {
-              "vdoc:cell": "version",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Version"
-              ]
-            },
-            {
-              "vdoc:cell": "license",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "License"
-              ]
-            },
-            {
-              "vdoc:cell": "description",
-              "@type": "vdoc:Header",
-              "vdoc:content": {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "Description:"
-                ]
-              },
-              "vdoc:wide": true
-            },
-            {
-              "vdoc:cell": "introduction",
-              "@type": "vdoc:Header",
-              "vdoc:content": {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "Introduction:"
-                ]
-              },
-              "vdoc:wide": true
-            }
-          ]
-        }
-      ]
-    },
-    "workshop_workspaces": {
-      "@id": "workshop_workspaces",
-      "@valos/kernel": {
-        "version": "0.35.0-prerelease.8",
-        "description": "@valos/kernel domain workshop",
-        "license": "MIT"
-      }
-    },
-    "section_new_toolset_workspaces": {
-      "@id": "section_new_toolset_workspaces",
-      "dc:title": "Type 'toolset' workspaces, 8 new",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "A toolset workspace can be 'selected' by another workspace so that:\n1. The toolset is added as a devDependency to the target workspace,\n2. A configuration section is added for the toolset in the target\n   workspace root 'toolsets.json'\n\nThis makes all valma scripts of the toolset available for the target\nworkspace and allows these commands to easily access and manipulate\ntheir local configuration in the target workspace.",
-        null,
-        "This domain introduces the following ",
-        "toolset",
-        " ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "workspaces"
-          ],
-          "vdoc:ref": "@/valma#workspace"
-        },
-        ".",
-        {
-          "vdoc:lookup": "toolset_workspaces",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
-            {
-              "@type": "vdoc:Header",
-              "vdoc:cell": {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "vdoc:selectKey"
-                    ],
-                    "vdoc:ref": "vdoc:selectKey"
-                  }
-                ]
-              },
-              "vdoc:content": [
-                "Name"
-              ]
-            },
-            {
-              "vdoc:cell": "version",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Version"
-              ]
-            },
-            {
-              "vdoc:cell": "license",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "License"
-              ]
-            },
-            {
-              "vdoc:cell": "description",
-              "@type": "vdoc:Header",
-              "vdoc:content": {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "Description:"
-                ]
-              },
-              "vdoc:wide": true
-            },
-            {
-              "vdoc:cell": "introduction",
-              "@type": "vdoc:Header",
-              "vdoc:content": {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "Introduction:"
-                ]
-              },
-              "vdoc:wide": true
-            }
-          ]
-        }
-      ]
-    },
-    "toolset_workspaces": {
-      "@id": "toolset_workspaces",
-      "valma": {
-        "version": "0.35.0-prerelease.8",
-        "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
-        "license": "MIT"
-      },
-      "@valos/toolset-domain": {
-        "version": "0.35.0-prerelease.8",
-        "description": "ValOS Toolset for managing ValOS workspace domains",
-        "license": "MIT"
-      },
-      "@valos/toolset-rest-api-gateway-plugin": {
-        "version": "0.35.0-prerelease.8",
-        "description": "A toolset for managing Structured ValOS REST API Gateway Plugin",
-        "license": "MIT"
-      },
-      "@valos/toolset-revealer": {
-        "version": "0.35.0-prerelease.8",
-        "description": "Tools for building revelations both for development and deployment purposes",
-        "license": "MIT"
-      },
-      "@valos/type-gateway-plugin": {
-        "version": "0.35.0-prerelease.8",
-        "description": "The ValOS type toolset for 'gateway-plugin' workspaces",
-        "license": "MIT"
-      },
-      "@valos/type-opspace": {
-        "version": "0.35.0-prerelease.8",
-        "description": "The ValOS type toolset for opspace workspaces",
-        "license": "MIT"
-      },
-      "@valos/type-vault": {
-        "version": "0.35.0-prerelease.8",
-        "description": "The ValOS type toolset for vault workspaces",
-        "homepage": "https://valospace.org/type-vault",
-        "license": "MIT"
-      },
-      "@valos/type-worker": {
-        "version": "0.35.0-prerelease.8",
-        "description": "The ValOS type toolset for worker workspaces",
-        "license": "MIT"
-      }
-    },
-    "section_new_library_workspaces": {
-      "@id": "section_new_library_workspaces",
-      "dc:title": "Type 'library' workspaces, 8 new",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "A library workspace contains arbitrary ES5 source code and exposes a\nAPI via package.json .main stanza (usually index.js).\n\nA library can provide convenience valma commands but unlike toolsets\na library cannot have workspace local configurations.\n\nLibrary workspaces are almost always published as a packages and\ntypically reside in \"packages/*\" vault workspace directory.",
-        null,
-        "This domain introduces the following ",
-        "library",
-        " ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "workspaces"
-          ],
-          "vdoc:ref": "@/valma#workspace"
-        },
-        ".",
-        {
-          "vdoc:lookup": "library_workspaces",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
-            {
-              "@type": "vdoc:Header",
-              "vdoc:cell": {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "vdoc:selectKey"
-                    ],
-                    "vdoc:ref": "vdoc:selectKey"
-                  }
-                ]
-              },
-              "vdoc:content": [
-                "Name"
-              ]
-            },
-            {
-              "vdoc:cell": "version",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Version"
-              ]
-            },
-            {
-              "vdoc:cell": "license",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "License"
-              ]
-            },
-            {
-              "vdoc:cell": "description",
-              "@type": "vdoc:Header",
-              "vdoc:content": {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "Description:"
-                ]
-              },
-              "vdoc:wide": true
-            },
-            {
-              "vdoc:cell": "introduction",
-              "@type": "vdoc:Header",
-              "vdoc:content": {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "Introduction:"
-                ]
-              },
-              "vdoc:wide": true
-            }
-          ]
-        }
-      ]
-    },
-    "library_workspaces": {
-      "@id": "library_workspaces",
-      "@valos/engine": {
-        "version": "0.35.0-prerelease.8",
-        "description": "ValOS Engine API and Schema",
-        "homepage": "https://valospace.org/engine",
-        "license": "MIT"
-      },
-      "@valos/gateway-api": {
-        "version": "0.35.0-prerelease.8",
-        "description": "Minimal footprint ValOS Gateway API local forwards",
-        "license": "MIT"
-      },
-      "@valos/hypertwin": {
-        "version": "0.35.0-prerelease.8",
-        "description": "ValOS Hypertwin Specifications and Tools Library",
-        "license": "MIT"
-      },
-      "@valos/inspire": {
-        "version": "0.35.0-prerelease.8",
-        "description": "ValOS Inspire application gateway",
-        "license": "MIT"
-      },
-      "@valos/raem": {
-        "version": "0.35.0-prerelease.8",
-        "description": "ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology",
-        "homepage": "https://valospace.org/raem",
-        "license": "MIT"
-      },
-      "@valos/script": {
-        "version": "0.35.0-prerelease.8",
-        "description": "ValOS Script API, schema",
-        "license": "MIT"
-      },
-      "@valos/sourcerer": {
-        "version": "0.35.0-prerelease.8",
-        "description": "ValOS Sourcerer API, schema",
-        "license": "MIT"
-      },
-      "@valos/tools": {
-        "version": "0.35.0-prerelease.8",
-        "description": "ValOS Tools API",
-        "license": "MIT"
-      }
-    },
-    "section_new_vdoc_extension_workspaces": {
-      "@id": "section_new_vdoc_extension_workspaces",
-      "dc:title": "Type 'vdoc-extension' workspaces, 4 new",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "A vdoc-extension workspace contains the extension specification and\nsupporting libraries for a VDoc extension. It inherits library\nworkspace characteristics but has a specific structure and initial\ntemplates which is useful for VDoc extensions in specific.\n",
-        null,
-        "This domain introduces the following ",
-        "vdoc-extension",
-        " ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "workspaces"
-          ],
-          "vdoc:ref": "@/valma#workspace"
-        },
-        ".",
-        {
-          "vdoc:lookup": "vdoc_extension_workspaces",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
-            {
-              "@type": "vdoc:Header",
-              "vdoc:cell": {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "vdoc:selectKey"
-                    ],
-                    "vdoc:ref": "vdoc:selectKey"
-                  }
-                ]
-              },
-              "vdoc:content": [
-                "Name"
-              ]
-            },
-            {
-              "vdoc:cell": "version",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Version"
-              ]
-            },
-            {
-              "vdoc:cell": "license",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "License"
-              ]
-            },
-            {
-              "vdoc:cell": "description",
-              "@type": "vdoc:Header",
-              "vdoc:content": {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "Description:"
-                ]
-              },
-              "vdoc:wide": true
-            },
-            {
-              "vdoc:cell": "introduction",
-              "@type": "vdoc:Header",
-              "vdoc:content": {
-                "vdoc:em": true,
-                "vdoc:content": [
-                  "Introduction:"
-                ]
-              },
-              "vdoc:wide": true
-            }
-          ]
-        }
-      ]
-    },
-    "vdoc_extension_workspaces": {
-      "@id": "vdoc_extension_workspaces",
-      "@valos/revdoc": {
-        "version": "0.35.0-prerelease.8",
-        "description": "ReVDoc - ReSpec document VDoc extension",
-        "homepage": "https://valospace.org/revdoc",
-        "license": "MIT"
-      },
-      "@valos/sbomdoc": {
-        "version": "0.35.0-prerelease.8",
-        "description": "SBoMDoc - Software Bill of Materials VDoc extension",
-        "homepage": "https://valospace.org/sbomdoc",
-        "license": "MIT"
-      },
-      "@valos/twindoc": {
-        "version": "0.35.0-prerelease.8",
-        "description": "TwinDoc - Valospace Hypertwin VDoc extension",
-        "homepage": "https://valospace.org/twindoc",
-        "license": "MIT"
-      },
-      "@valos/vdoc": {
-        "version": "0.35.0-prerelease.8",
-        "description": "VDoc - ValOS document interchange specification",
-        "homepage": "https://valospace.org/vdoc",
-        "license": "MIT"
-      }
-    },
     "ontology": {
       "@id": "ontology",
-      "dc:title": "@valos/kernel domain root ontology",
+      "dc:title": "Valospace ontology, prefix https://valospace.org/#, preferred label 'valos'",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "All labels have implicit prefix IRI \"https://valospace.org/#\" (typically\n      abbreviated as prefix \"valos:\")",
         {
           "@id": "section_ontology_abstract"
         },
         {
           "@id": "section_prefixes"
-        },
-        {
-          "@id": "section_classes"
-        },
-        {
-          "@id": "section_properties"
         },
         {
           "@id": "section_types"
@@ -3597,7 +2114,7 @@
     "section_ontology_abstract": {
       "@id": "section_ontology_abstract",
       "vdoc:content": [
-        "@valos/kernel ontology provides vocabulary and definitions of\n      the ValOS core concepts."
+        "Valospace ontology provides vocabulary and definitions of\n      the primary ValOS resources."
       ]
     },
     "section_prefixes": {
@@ -3627,162 +2144,9 @@
         }
       ]
     },
-    "section_classes": {
-      "@id": "section_classes",
-      "dc:title": "<em>valos:* a valos:Class</em> vocabulary",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "vdoc:lookup": "vocabulary",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
-              {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:label"
-                ],
-                "vdoc:cell": {
-                  "vdoc:resourceId": "vdoc:selectKey",
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    {
-                      "vdoc:em": true,
-                      "vdoc:content": [
-                        "vdoc:selectKey"
-                      ]
-                    }
-                  ],
-                  "vdoc:ref": [
-                    "#",
-                    "vdoc:selectKey"
-                  ]
-                }
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:subClassOf"
-                ],
-                "vdoc:cell": {
-                  "vdoc:words": {
-                    "vdoc:selectField": "rdfs:subClassOf"
-                  }
-                }
-              },
-              {
-                "vdoc:cell": "rdfs:comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "rdfs:comment"
-                  ]
-                },
-                "vdoc:wide": true
-              }
-            ]
-          },
-          "vdoc:entries": [
-            "Class",
-            "Property",
-            "Kuery",
-            "Type",
-            "Field",
-            "PrimaryField",
-            "TransientField",
-            "InferredField",
-            "GeneratedField",
-            "AliasField"
-          ]
-        }
-      ]
-    },
-    "section_properties": {
-      "@id": "section_properties",
-      "dc:title": "<em>valos:* a valos:Property</em> vocabulary",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "vdoc:lookup": "vocabulary",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
-              {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:label"
-                ],
-                "vdoc:cell": {
-                  "vdoc:resourceId": "vdoc:selectKey",
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    {
-                      "vdoc:em": true,
-                      "vdoc:content": [
-                        "vdoc:selectKey"
-                      ]
-                    }
-                  ],
-                  "vdoc:ref": [
-                    "#",
-                    "vdoc:selectKey"
-                  ]
-                }
-              },
-              {
-                "vdoc:cell": "rdfs:subPropertyOf",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:subPropertyOf"
-                ]
-              },
-              {
-                "vdoc:cell": "rdfs:domain",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:domain"
-                ]
-              },
-              {
-                "vdoc:cell": "rdfs:range",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:range"
-                ]
-              },
-              {
-                "vdoc:cell": "rdfs:comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "rdfs:comment"
-                  ]
-                },
-                "vdoc:wide": true
-              }
-            ]
-          },
-          "vdoc:entries": [
-            "generator",
-            "aliasOf",
-            "coupledField",
-            "defaultCoupledField",
-            "isOwned",
-            "isOwning",
-            "isDuplicateable",
-            "initialValue",
-            "ownDefaultValue",
-            "finalDefaultValue",
-            "allowTransientFieldToBeSingular"
-          ]
-        }
-      ]
-    },
     "section_types": {
       "@id": "section_types",
-      "dc:title": "<em>valos:* a valos:Type</em> vocabulary",
+      "dc:title": "<em>valos:* a valos-raem:Type</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -3815,6 +2179,20 @@
               {
                 "@type": "vdoc:Header",
                 "vdoc:content": [
+                  "revdoc:brief"
+                ],
+                "vdoc:cell": {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "vdoc:selectField": "revdoc:brief"
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": [
                   "rdfs:subClassOf"
                 ],
                 "vdoc:cell": {
@@ -3837,14 +2215,14 @@
             ]
           },
           "vdoc:entries": [
-            "Bvob",
-            "TransientFields",
             "Resource",
-            "InactiveResource",
-            "DestroyedResource",
+            "Bvob",
+            "Sourced",
+            "Unsourced",
+            "Destroyed",
             "Partition",
-            "TransientScriptsFields",
-            "DestroyedScriptResource",
+            "ScriptResource",
+            "ScriptDestroyed",
             "ScriptProperty",
             "Scope",
             "Relatable",
@@ -3857,7 +2235,7 @@
     },
     "section_fields": {
       "@id": "section_fields",
-      "dc:title": "<em>valos:* a valos:Field*</em> vocabulary",
+      "dc:title": "<em>valos:* a valos-raem:Field*</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -3916,10 +2294,10 @@
                 ]
               },
               {
-                "vdoc:cell": "valos:coupledField",
+                "vdoc:cell": "valos-raem:coupledField",
                 "@type": "vdoc:Header",
                 "vdoc:content": [
-                  "valos:coupledField"
+                  "valos-raem:coupledField"
                 ]
               },
               {
@@ -3936,36 +2314,40 @@
             ]
           },
           "vdoc:entries": [
-            "hashAlgorithm",
-            "contentHash",
-            "contentLength",
-            "contentReferrers",
             "id",
+            "iri",
             "rawId",
             "typeName",
             "partition",
             "partitionIRI",
             "partitionURI",
             "prototype",
-            "prototypeAlias",
+            "derivations",
             "ownFields",
-            "prototypers",
+            "inheritancePrototype",
+            "inheritors",
             "instancePrototype",
             "instances",
             "ghostPrototype",
+            "ghosts",
             "materializedGhosts",
             "unnamedCouplings",
             "ghostHost",
             "ghostOwner",
             "ghostOwnlings",
+            "hashAlgorithm",
+            "contentHash",
+            "contentLength",
+            "contentReferrers",
             "owner",
             "name",
-            "nameAlias",
             "ownlings",
             "unnamedOwnlings",
             "isFrozen",
             "authorityIRI",
             "partitionAuthorityURI",
+            "nameAlias",
+            "prototypeAlias",
             "incomingRelations",
             "scope",
             "value",
@@ -4050,9 +2432,7 @@
               }
             ]
           },
-          "vdoc:entries": [
-            "@context"
-          ]
+          "vdoc:entries": []
         }
       ]
     },
@@ -4104,14 +2484,6 @@
         }
       ]
     },
-    "section_hierarchy": {
-      "@id": "section_hierarchy",
-      "dc:title": "Component hierarchy",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "This section will contain hierarchical presentation of all above\n      components (and more)."
-      ]
-    },
     "@type": "revdoc:Document",
     "vdoc:content": [
       {
@@ -4124,16 +2496,7 @@
         "@id": "introduction"
       },
       {
-        "@id": "section_documentation"
-      },
-      {
-        "@id": "section_workspaces"
-      },
-      {
         "@id": "ontology"
-      },
-      {
-        "@id": "section_hierarchy"
       }
     ]
   }

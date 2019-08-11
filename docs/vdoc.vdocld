@@ -1057,14 +1057,20 @@
     "vocabulary": {
       "@id": "vocabulary",
       "Class": {
-        "@type": "vdoc:Class",
+        "@type": [
+          "vdoc:Class",
+          "valos-kernel:Class"
+        ],
         "rdfs:subClassOf": "rdfs:Class",
-        "rdfs:comment": "The class of classes which are specified by vdoc or a vdoc extension"
+        "rdfs:comment": "The class of classes which are defined by vdoc or a vdoc extension"
       },
       "Property": {
-        "@type": "vdoc:Class",
+        "@type": [
+          "vdoc:Class",
+          "valos-kernel:Class"
+        ],
         "rdfs:subClassOf": "rdf:Property",
-        "rdfs:comment": "The class of properties which are specified by vdoc or a vdoc extension"
+        "rdfs:comment": "The class of properties which are defined by vdoc or a vdoc extension"
       },
       "Node": {
         "@type": "vdoc:Class",

@@ -551,12 +551,13 @@
     "package": "@valos/vdoc",
     "version": "0.35.0-prerelease.8"
   },
-  "@valos/kernel": {
-    "@id": "https://valospace.org/index",
+  "kernel": {
+    "@id": "https://valospace.org/kernel",
     "tags": [
       "PRIMARY",
       "DOMAIN",
-      "ONTOLOGY"
+      "ONTOLOGY",
+      "TECHNICIAN"
     ],
     "subProfiles": [],
     "title": "@valos/kernel domain content reference",
@@ -590,7 +591,7 @@
     "introduction": {
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "ValOS ecosystem revolves around various roles. You can be one,\n      many or even none of them but you should know at least a bit\n      about all of them.",
+        "ValOS ecosystem revolves around various roles. This document is\n      a reference document of the ValOS fabric systems and structures\n      and is directed for technicians. Check out the brief\n      description and introductions of the other roles as well.",
         null,
         {
           "@type": "vdoc:Reference",
@@ -726,6 +727,138 @@
     "package": "@valos/kernel",
     "version": "0.35.0-prerelease.8"
   },
+  "@valos/kernel": {
+    "@id": "https://valospace.org/index",
+    "tags": [
+      "PRIMARY",
+      "INTRODUCTION",
+      "ONTOLOGY",
+      "VALONAUT"
+    ],
+    "subProfiles": [],
+    "title": "Valospace reference",
+    "abstract": {
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Overview of the valospace APIs and ontologies."
+      ]
+    },
+    "introduction": {
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "ValOS ecosystem revolves around various roles. This document\n      is a reference document of valospace systems and structures and\n      is directed for more experienced valonauts. Check out the brief\n      description and introductions of the other roles as well.",
+        null,
+        ".",
+        {
+          "vdoc:lookup": "documents",
+          "@type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "@type": "vdoc:Header",
+                "vdoc:cell": {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ],
+                      "vdoc:ref": "vdoc:selectKey"
+                    }
+                  ]
+                },
+                "vdoc:content": [
+                  "Your role:"
+                ]
+              },
+              {
+                "@type": "vdoc:Header",
+                "vdoc:cell": {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        {
+                          "@type": "vdoc:Reference",
+                          "vdoc:content": [
+                            {
+                              "vdoc:selectField": "title"
+                            }
+                          ],
+                          "vdoc:ref": [
+                            "vdoc:selectKey",
+                            "#introduction"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "vdoc:content": [
+                  "Your answer..."
+                ]
+              },
+              {
+                "vdoc:cell": "introduction",
+                "@type": "vdoc:Header",
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "Introduction:"
+                  ]
+                },
+                "vdoc:wide": true,
+                "vdoc:tall": true
+              },
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "Aliases:"
+                  ]
+                },
+                "vdoc:wide": true,
+                "vdoc:cell": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        {
+                          "vdoc:words": {
+                            "vdoc:selectField": "subProfiles"
+                          }
+                        }
+                      ],
+                      "vdoc:ref": [
+                        "vdoc:selectKey",
+                        "#section_profiles"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "vdoc:entries": [
+            "technician",
+            "valonaut",
+            "voyager"
+          ]
+        }
+      ]
+    },
+    "ontologyAbstract": {
+      "vdoc:content": [
+        "Valospace ontology provides vocabulary and definitions of\n      the primary ValOS resources."
+      ]
+    },
+    "package": "@valos/kernel",
+    "version": "0.35.0-prerelease.8"
+  },
   "technician": {
     "@id": "https://valospace.org/technician",
     "tags": [
@@ -780,9 +913,9 @@
           ],
           "vdoc:ref": "@/valma"
         },
-        " and employ your existing,\n    likely professional knowledge of JavaScript, Node.js, DevOps,\n    backend and library development.",
+        " and employ your existing,\n    likely professional knowledge of JavaScript, Node.js, DevOps,\n    backend, library and other software development skills.",
         null,
-        "    You create new open source and/or proprietary packages. These\n    permanently create new fabric functionalities and ",
+        "    You create new open source and/or proprietary node packages. These\n    permanently create new fabric functionalities and ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [

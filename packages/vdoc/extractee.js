@@ -1,3 +1,5 @@
+/* eslint-disable prefer-rest-params */
+
 /**
  * Aggregates given aggregatees into the given aggregateProperty of
  * the given parent. If there is only a single aggregatees entry and

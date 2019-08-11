@@ -128,7 +128,7 @@
       "dc:title": "Voyager profiles",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Voyager is generic orientation. There are various voyager\n      sub-profiles which benefit from more specific guidance.",
+        "Voyager is generic orientation. There are various voyager\n      sub-profiles with their own documents briefly detailed here.",
         {
           "@id": "enthusiast"
         },

@@ -6,7 +6,7 @@ const extractee = require("./extractee");
 module.exports = {
   extension: {
     extends: [],
-    ontology: require("./ontology"),
+    ontology: require("./ontologies").vdoc,
     extractors: require("./extractors"),
     emitters: require("./emitters"),
     extractee,
@@ -14,7 +14,7 @@ module.exports = {
     emit,
   },
   extractee,
-  createOntology: require("./createOntology"),
+  extendOntology: require("./extendOntology"),
 };
 
 function extract (sourceGraphs, {

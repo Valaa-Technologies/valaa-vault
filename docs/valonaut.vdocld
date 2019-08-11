@@ -142,7 +142,7 @@
       "dc:title": "Valonaut profiles",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Valonaut is generic orientation. There are various valonaut\n      sub-profiles which benefit from more specific guidance.",
+        "Valonaut is generic orientation. There are various valonaut\n      sub-profiles with their own documents briefly detailed here.",
         {
           "@id": "everyone"
         },

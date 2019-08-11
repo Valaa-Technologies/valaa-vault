@@ -140,9 +140,9 @@
           ],
           "vdoc:ref": "@/valma"
         },
-        " and employ your existing,\n    likely professional knowledge of JavaScript, Node.js, DevOps,\n    backend and library development.",
+        " and employ your existing,\n    likely professional knowledge of JavaScript, Node.js, DevOps,\n    backend, library and other software development skills.",
         null,
-        "    You create new open source and/or proprietary packages. These\n    permanently create new fabric functionalities and ",
+        "    You create new open source and/or proprietary node packages. These\n    permanently create new fabric functionalities and ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
@@ -151,6 +151,87 @@
           "vdoc:ref": "expand"
         },
         " the Valospace by integrating it to old world systems."
+      ]
+    },
+    "section_profiles": {
+      "@id": "section_profiles",
+      "dc:title": "Technician role sub-profiles",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Technician sub-profiles detail the typical stages of software\n      development and operations workflows within ValOS ecosystem.\n      A technician should read the detail docs of their own profiles\n      but also understand the at least the abstract principles of all\n      other profiles, which are expanded below.",
+        {
+          "@id": "developer"
+        },
+        {
+          "@id": "contributor"
+        },
+        {
+          "@id": "tester"
+        },
+        {
+          "@id": "administrator"
+        },
+        {
+          "@id": "devops"
+        },
+        {
+          "@id": "hacker"
+        },
+        {
+          "@id": "etc"
+        }
+      ]
+    },
+    "developer": {
+      "@id": "developer",
+      "dc:title": "How developers set up their development environments",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "contributor": {
+      "@id": "contributor",
+      "dc:title": "How contributors produce git PR's and new fabric packages",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "tester": {
+      "@id": "tester",
+      "dc:title": "How testers assure quality before releases",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "administrator": {
+      "@id": "administrator",
+      "dc:title": "How administrators manage infrastructure resources",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "devops": {
+      "@id": "devops",
+      "dc:title": "How DevOps workflows are implemented using valma",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "hacker": {
+      "@id": "hacker",
+      "dc:title": "How hackers have fun whilst avoiding pain",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "etc": {
+      "@id": "etc",
+      "dc:title": "How to add new profiles",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Create a ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "PR in github"
+          ],
+          "vdoc:ref": "https://help.github.com/en/articles/about-pull-requests"
+        },
+        " against @valos/kernel/revdocs/technician.revdoc.js"
       ]
     },
     "preface": {
@@ -1387,78 +1468,6 @@
         }
       ]
     },
-    "section_profiles": {
-      "@id": "section_profiles",
-      "dc:title": "Technician profiles",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "Technician is generic orientation. There are various voyager\n      sub-profiles which benefit from more specific guidance.",
-        {
-          "@id": "developer"
-        },
-        {
-          "@id": "contributor"
-        },
-        {
-          "@id": "administrator"
-        },
-        {
-          "@id": "devops"
-        },
-        {
-          "@id": "hacker"
-        },
-        {
-          "@id": "etc"
-        }
-      ]
-    },
-    "developer": {
-      "@id": "developer",
-      "dc:title": "How developers set up their development environments",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
-    },
-    "contributor": {
-      "@id": "contributor",
-      "dc:title": "How contributors produce new fabric packages and code",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
-    },
-    "administrator": {
-      "@id": "administrator",
-      "dc:title": "How administrators manage infrastructure resources",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
-    },
-    "devops": {
-      "@id": "devops",
-      "dc:title": "How DevOps workflows are implemented with valma",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
-    },
-    "hacker": {
-      "@id": "hacker",
-      "dc:title": "How to have fun while avoiding pain",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
-    },
-    "etc": {
-      "@id": "etc",
-      "dc:title": "How to add new profiles",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "Create a ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "PR in github"
-          ],
-          "vdoc:ref": "https://help.github.com/en/articles/about-pull-requests"
-        },
-        " against @valos/kernel/revdocs/valonaut.revdoc.js"
-      ]
-    },
     "@type": "revdoc:Document",
     "vdoc:content": [
       {
@@ -1469,6 +1478,9 @@
       },
       {
         "@id": "introduction"
+      },
+      {
+        "@id": "section_profiles"
       },
       {
         "@id": "preface"
@@ -1491,9 +1503,6 @@
         "vdoc:content": [
           "It does, indeed (this section pending better understanding on\n      how to write domain specifications)."
         ]
-      },
-      {
-        "@id": "section_profiles"
       }
     ]
   }

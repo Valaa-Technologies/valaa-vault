@@ -45,8 +45,8 @@
       "LIBRARY"
     ],
     "revdoc:package": "@valos/sourcerer",
-    "revdoc:prefix": "valos",
-    "revdoc:prefixIRI": "https://valospace.org/#",
+    "revdoc:prefix": "valos-sourcerer",
+    "revdoc:prefixIRI": "https://valospace.org/sourcerer#",
     "revdoc:version": "0.35.0-prerelease.8",
     "respecConfig": {
       "specStatus": "unofficial",
@@ -115,7 +115,7 @@
     },
     "ontology": {
       "@id": "ontology",
-      "dc:title": "<em>valos:</em> library @valos/sourcerer ontology",
+      "dc:title": "<em>valos-sourcerer:</em> library @valos/sourcerer ontology",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -146,192 +146,13 @@
     },
     "prefixes": {
       "@id": "prefixes",
-      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-      "xsd": "http://www.w3.org/2001/XMLSchema#",
-      "owl": "http://www.w3.org/2002/07/owl#",
-      "dc": "http://purl.org/dc/elements/1.1/",
-      "valos": "https://valospace.org/#"
+      "valos-sourcerer": "https://valospace.org/sourcerer#"
     },
     "vocabulary": {
-      "@id": "vocabulary",
-      "directory": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:owner",
-        "rdfs:subPropertyOf": "valos:owner",
-        "rdfs:domain": [
-          "valos:Entity",
-          "valos:Media"
-        ],
-        "rdfs:range": "rdfs:Relatable",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:isOwned": true,
-        "valos:coupledField": "valos:entries",
-        "rdfs:comment": "The directory (and owner) relatable of this entry resource."
-      },
-      "entries": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:ownlings",
-        "rdfs:subPropertyOf": "valos:ownlings",
-        "rdfs:domain": "valos:Relatable",
-        "rdfs:range": "rdfs:List",
-        "valos:isOwning": true,
-        "valos:coupledField": "valos:directory",
-        "rdfs:comment": "The ordered list of entry entities and medias of this relatable."
-      },
-      "Entity": {
-        "@type": "valos:Type",
-        "rdfs:subClassOf": [
-          "valos:TransientFields",
-          "valos:Resource",
-          "valos:TransientScriptFields",
-          "valos:Scope",
-          "valos:Relatable",
-          "valos:Partition"
-        ],
-        "revdoc:brief": "entity",
-        "rdfs:comment": "The class of valospace resources which can act as the partition root."
-      },
-      "parent": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:directory",
-        "rdfs:subPropertyOf": "valos:directory",
-        "rdfs:domain": "valos:Entity",
-        "rdfs:range": "valos:Relatable",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:isOwned": true,
-        "valos:coupledField": "valos:children",
-        "rdfs:comment": "The parent (and owner) relatable of this entity."
-      },
-      "children": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:entries",
-        "rdfs:subPropertyOf": "valos:entries",
-        "rdfs:domain": "valos:Relatable",
-        "rdfs:range": "rdfs:List",
-        "valos:isOwning": true,
-        "valos:coupledField": "valos:parent",
-        "rdfs:comment": "The ordered list of child entities of this relatable"
-      },
-      "Media": {
-        "@type": "valos:Type",
-        "rdfs:subClassOf": [
-          "valos:TransientFields",
-          "valos:Resource",
-          "valos:TransientScriptFields",
-          "valos:Scope",
-          "valos:Relatable"
-        ],
-        "revdoc:brief": "media",
-        "rdfs:comment": "The class of valospace resources which represent interpretable media\nand can be associated with binary content and accompanying metadata."
-      },
-      "container": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:owner",
-        "rdfs:subPropertyOf": "valos:owner",
-        "rdfs:domain": "valos:Media",
-        "rdfs:range": "valos:Relatable",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:isOwned": true,
-        "valos:coupledField": "valos:medias",
-        "rdfs:comment": "The container (and owner) relatable of this media."
-      },
-      "medias": {
-        "@type": "valos:AliasField",
-        "valos:aliasOf": "valos:ownlings",
-        "rdfs:subPropertyOf": "valos:ownlings",
-        "rdfs:domain": "valos:Relatable",
-        "rdfs:range": "rdfs:List",
-        "valos:isOwning": true,
-        "valos:coupledField": "valos:container",
-        "rdfs:comment": "The ordered list of medias contained in this relatable"
-      },
-      "sourceURL": {
-        "@type": "valos:PrimaryField",
-        "rdfs:domain": "valos:Media",
-        "rdfs:range": "xsd:anyURI",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The unreliable source URL of this Media. This URL is dereferenced\nwhen the Media content is accessed and as such is subject to all\nfailure considerations associated with its protocol."
-      },
-      "content": {
-        "@type": "valos:PrimaryField",
-        "rdfs:domain": "valos:Media",
-        "rdfs:range": "valos:Bvob",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:coupledField": "valos:contentReferrers",
-        "rdfs:comment": "The infrastructure-backed octet-stream content of this Media."
-      },
-      "created": {
-        "@type": "valos:GeneratedField",
-        "rdfs:domain": "valos:Media",
-        "rdfs:range": "xsd:double",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:generator": "created",
-        "rdfs:comment": "The creation UNIX epoch time of this Media. This is defined as the\ntruth log aspect timestamp of the CREATED event which brought this\nMedia into being."
-      },
-      "modified": {
-        "@type": "valos:GeneratedField",
-        "rdfs:domain": "valos:Media",
-        "rdfs:range": "xsd:double",
-        "valos:restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "valos:generator": "modified",
-        "rdfs:comment": "The latest modification UNIX epoch time of this Media. This is defined\nas the truth log aspect timestamp of the most recent event that\ndirectly affects this Media resource."
-      }
+      "@id": "vocabulary"
     },
     "context": {
-      "@id": "context",
-      "valos:directory": {
-        "@id": "https://valospace.org/#directory",
-        "@type": "@id"
-      },
-      "valos:entries": {
-        "@id": "https://valospace.org/#entries",
-        "@container": "@list",
-        "@type": "@id"
-      },
-      "valos:parent": {
-        "@id": "https://valospace.org/#parent",
-        "@type": "@id"
-      },
-      "valos:children": {
-        "@id": "https://valospace.org/#children",
-        "@container": "@list",
-        "@type": "@id"
-      },
-      "valos:container": {
-        "@id": "https://valospace.org/#container",
-        "@type": "@id"
-      },
-      "valos:medias": {
-        "@id": "https://valospace.org/#medias",
-        "@container": "@list",
-        "@type": "@id"
-      },
-      "valos:content": {
-        "@id": "https://valospace.org/#content",
-        "@type": "@id"
-      }
+      "@id": "context"
     },
     "section_ontology_abstract": {
       "@id": "section_ontology_abstract",
@@ -368,7 +189,7 @@
     },
     "section_classes": {
       "@id": "section_classes",
-      "dc:title": "<em>valos:* a valos:Class</em> vocabulary",
+      "dc:title": "<em>valos-sourcerer:* a valos-kernel:Class</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -428,7 +249,7 @@
     },
     "section_properties": {
       "@id": "section_properties",
-      "dc:title": "<em>valos:* a valos:Property</em> vocabulary",
+      "dc:title": "<em>valos-sourcerer:* a valos-kernel:Property</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -498,7 +319,7 @@
     },
     "section_types": {
       "@id": "section_types",
-      "dc:title": "<em>valos:* a valos:Type</em> vocabulary",
+      "dc:title": "<em>valos-sourcerer:* a valos-raem:Type</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -531,6 +352,20 @@
               {
                 "@type": "vdoc:Header",
                 "vdoc:content": [
+                  "revdoc:brief"
+                ],
+                "vdoc:cell": {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "vdoc:selectField": "revdoc:brief"
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": [
                   "rdfs:subClassOf"
                 ],
                 "vdoc:cell": {
@@ -552,16 +387,13 @@
               }
             ]
           },
-          "vdoc:entries": [
-            "Entity",
-            "Media"
-          ]
+          "vdoc:entries": []
         }
       ]
     },
     "section_fields": {
       "@id": "section_fields",
-      "dc:title": "<em>valos:* a valos:Field*</em> vocabulary",
+      "dc:title": "<em>valos-sourcerer:* a valos-raem:Field*</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -620,10 +452,10 @@
                 ]
               },
               {
-                "vdoc:cell": "valos:coupledField",
+                "vdoc:cell": "valos-raem:coupledField",
                 "@type": "vdoc:Header",
                 "vdoc:content": [
-                  "valos:coupledField"
+                  "valos-raem:coupledField"
                 ]
               },
               {
@@ -639,24 +471,13 @@
               }
             ]
           },
-          "vdoc:entries": [
-            "directory",
-            "entries",
-            "parent",
-            "children",
-            "container",
-            "medias",
-            "sourceURL",
-            "content",
-            "created",
-            "modified"
-          ]
+          "vdoc:entries": []
         }
       ]
     },
     "section_vocabulary_other": {
       "@id": "section_vocabulary_other",
-      "dc:title": "<em>valos:*</em> other vocabulary:",
+      "dc:title": "<em>valos-sourcerer:*</em> other vocabulary:",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -723,7 +544,7 @@
     },
     "section_context": {
       "@id": "section_context",
-      "dc:title": "<em>valos:*</em> JSON-LD context term definitions",
+      "dc:title": "<em>valos-sourcerer:*</em> JSON-LD context term definitions",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {

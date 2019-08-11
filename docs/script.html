@@ -28,7 +28,7 @@ transactions. Valoscript retains ECMAScript 5 syntax and semantics.
   </section>
 
   <section id="ontology" class="vdoc type-vdoc-chapter">
-    <h2><em>valos:</em> library @valos/script ontology</h2>
+    <h2><em>valos-script:</em> library @valos/script ontology</h2>
 @valos/script ontology specifies the Valospace core types and
       properties directly to the @valos/kernel namespace. 
   <section id="section_prefixes" class="vdoc type-vdoc-chapter">
@@ -40,19 +40,14 @@ transactions. Valoscript retains ECMAScript 5 syntax and semantics.
         <th class="vdoc type-vdoc-header">IRI</th>
       </thead>
       <tbody>
-        <tr><td>rdf</td><td>http://www.w3.org/1999/02/22-rdf-syntax-ns#</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>rdfs</td><td>http://www.w3.org/2000/01/rdf-schema#</td></tr>
-        <tr><td>xsd</td><td>http://www.w3.org/2001/XMLSchema#</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>owl</td><td>http://www.w3.org/2002/07/owl#</td></tr>
-        <tr><td>dc</td><td>http://purl.org/dc/elements/1.1/</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos</td><td>https://valospace.org/#</td></tr>
+        <tr><td>valos-script</td><td>https://valospace.org/script#</td></tr>
       </tbody>
     </table>
 
   </section>
 
   <section id="section_classes" class="vdoc type-vdoc-chapter">
-    <h2><em>valos:* a valos:Class</em> vocabulary</h2>
+    <h2><em>valos-script:* a valos-kernel:Class</em> vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -67,7 +62,7 @@ transactions. Valoscript retains ECMAScript 5 syntax and semantics.
   </section>
 
   <section id="section_properties" class="vdoc type-vdoc-chapter">
-    <h2><em>valos:* a valos:Property</em> vocabulary</h2>
+    <h2><em>valos-script:* a valos-kernel:Property</em> vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -84,41 +79,23 @@ transactions. Valoscript retains ECMAScript 5 syntax and semantics.
   </section>
 
   <section id="section_types" class="vdoc type-vdoc-chapter">
-    <h2><em>valos:* a valos:Type</em> vocabulary</h2>
+    <h2><em>valos-script:* a valos-raem:Type</em> vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
         <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">revdoc:brief</th>
         <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
       </thead>
       <tbody>
-        <tr id="TransientScriptsFields" class=" vdoc-nth-child-2n"><td><a href="#TransientScriptsFields" class="vdoc type-vdoc-reference"><em>TransientScriptsFields</em></a></td><td>valos:TransientScriptFields</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>The class of valos script resources which are not active within the
-current view of the world but which have references to them. As such
-it is the domain of all transient and generated script fields.</td></tr>
-        <tr id="DestroyedScriptResource"><td><a href="#DestroyedScriptResource" class="vdoc type-vdoc-reference"><em>DestroyedScriptResource</em></a></td><td>valos:TransientFields valos:Resource</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>The class of valospace script resources which have been destroyed in
-this view of the world. It only provides the external fields listed in
-TransientScripFields and TransientFields interfaces.</td></tr>
-        <tr id="ScriptProperty" class=" vdoc-nth-child-2n"><td><a href="#ScriptProperty" class="vdoc type-vdoc-reference"><em>ScriptProperty</em></a></td><td>valos:TransientFields valos:Resource</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>The class of valospace Property resources which are expressed as
-valoscript object properties.</td></tr>
-        <tr id="Scope"><td><a href="#Scope" class="vdoc type-vdoc-reference"><em>Scope</em></a></td><td>valos:TransientFields</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>The class of valospace resources which can have valospace script
-properties.</td></tr>
-        <tr id="Relatable" class=" vdoc-nth-child-2n"><td><a href="#Relatable" class="vdoc type-vdoc-reference"><em>Relatable</em></a></td><td>valos:TransientFields valos:Resource valos:TransientScriptFields valos:Scope</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>The class of valospace resources which can act as source and target of
-a valospace Relation.</td></tr>
-        <tr id="Relation"><td><a href="#Relation" class="vdoc type-vdoc-reference"><em>Relation</em></a></td><td>valos:TransientFields valos:Resource valos:TransientScriptFields valos:Scope valos:Relatable</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>The class of valospace resources which can act as source and target of
-a valospace Relation.</td></tr>
+        
       </tbody>
     </table>
 
   </section>
 
   <section id="section_fields" class="vdoc type-vdoc-chapter">
-    <h2><em>valos:* a valos:Field*</em> vocabulary</h2>
+    <h2><em>valos-script:* a valos-raem:Field*</em> vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -127,34 +104,17 @@ a valospace Relation.</td></tr>
         <th class="vdoc type-vdoc-header">rdfs:range</th>
         <th class="vdoc type-vdoc-header">rdf:type</th>
         <th class="vdoc type-vdoc-header">rdfs:subPropertyOf</th>
-        <th class="vdoc type-vdoc-header">valos:coupledField</th>
+        <th class="vdoc type-vdoc-header">valos-raem:coupledField</th>
       </thead>
       <tbody>
-        <tr id="prototypeAlias" class=" vdoc-nth-child-2n"><td><a href="#prototypeAlias" class="vdoc type-vdoc-reference"><em>prototypeAlias</em></a></td><td>valos:TransientFields</td><td>valos:TransientFields</td><td>valos:AliasField</td><td>valos:prototype</td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The prototype of this Resource. This is an alias for valos:prototype
-to bypass conflicts with native javascript property 'prototype' in
-certain contexts.</td></tr>
-        <tr id="incomingRelations"><td><a href="#incomingRelations" class="vdoc type-vdoc-reference"><em>incomingRelations</em></a></td><td>valos:TransientScriptFields</td><td>valos:Relation</td><td>valos:TransientField</td><td></td><td>valos:target</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>Unordered set of relations that are targeting this relatable resource.</td></tr>
-        <tr id="scope" class=" vdoc-nth-child-2n"><td><a href="#scope" class="vdoc type-vdoc-reference"><em>scope</em></a></td><td>valos:ScriptProperty</td><td>valos:Scope</td><td>valos:AliasField</td><td>valos:owner</td><td>valos:properties</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The scope resource (and owner) of this Property</td></tr>
-        <tr id="value"><td><a href="#value" class="vdoc type-vdoc-reference"><em>value</em></a></td><td>valos:ScriptProperty</td><td>rdfs:Resource</td><td>valos:PrimaryField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The value of this Property</td></tr>
-        <tr id="properties" class=" vdoc-nth-child-2n"><td><a href="#properties" class="vdoc type-vdoc-reference"><em>properties</em></a></td><td>valos:Scope</td><td>rdfs:List</td><td>valos:PrimaryField</td><td></td><td>valos:scope</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of Property resources of this scope</td></tr>
-        <tr id="relations"><td><a href="#relations" class="vdoc type-vdoc-reference"><em>relations</em></a></td><td>valos:Relatable</td><td>rdfs:List</td><td>valos:PrimaryField</td><td></td><td>valos:source</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of outgoing relations of this relatable</td></tr>
-        <tr id="source" class=" vdoc-nth-child-2n"><td><a href="#source" class="vdoc type-vdoc-reference"><em>source</em></a></td><td>valos:Relation</td><td>valos:Relatable</td><td>valos:AliasField</td><td>valos:owner</td><td>valos:relations</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The source (and owner) relatable of this relation.</td></tr>
-        <tr id="target"><td><a href="#target" class="vdoc type-vdoc-reference"><em>target</em></a></td><td>valos:Relation</td><td>valos:Relatable</td><td>valos:PrimaryField</td><td></td><td>valos:incomingRelations</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The target relatable of this relation.</td></tr>
+        
       </tbody>
     </table>
 
   </section>
 
   <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h2><em>valos:*</em> other vocabulary:</h2>
+    <h2><em>valos-script:*</em> other vocabulary:</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -170,7 +130,7 @@ certain contexts.</td></tr>
   </section>
 
   <section id="section_context" class="vdoc type-vdoc-chapter">
-    <h2><em>valos:*</em> JSON-LD context term definitions</h2>
+    <h2><em>valos-script:*</em> JSON-LD context term definitions</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -181,13 +141,7 @@ certain contexts.</td></tr>
         <th class="vdoc type-vdoc-header">@container</th>
       </thead>
       <tbody>
-        <tr><td>valos:prototypeAlias</td><td></td><td>https://valospace.org/#prototypeAlias</td><td>@id</td><td></td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos:incomingRelations</td><td></td><td>https://valospace.org/#incomingRelations</td><td>@id</td><td></td></tr>
-        <tr><td>valos:scope</td><td></td><td>https://valospace.org/#scope</td><td>@id</td><td></td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos:properties</td><td></td><td>https://valospace.org/#properties</td><td>@id</td><td>@list</td></tr>
-        <tr><td>valos:relations</td><td></td><td>https://valospace.org/#relations</td><td>@id</td><td>@list</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos:source</td><td></td><td>https://valospace.org/#source</td><td>@id</td><td></td></tr>
-        <tr><td>valos:target</td><td></td><td>https://valospace.org/#target</td><td>@id</td><td></td></tr>
+        
       </tbody>
     </table>
 

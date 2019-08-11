@@ -1,5 +1,5 @@
 const patchWith = require("@valos/tools/patchWith").default;
-const ontology = require("./ontology");
+const { vdoc: ontology } = require("./ontologies");
 
 module.exports = {
   html: {

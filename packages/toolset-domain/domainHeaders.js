@@ -28,7 +28,7 @@ const titledDocuments = {
     "vdoc:content": em("Title:"),
     "vdoc:wide": true,
   },
-}
+};
 
 const roles =  {
   "header#0": {

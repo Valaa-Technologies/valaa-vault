@@ -199,7 +199,7 @@ export default class Vrapper extends Cog {
     if (!prototypeIdData) return "";
     const coupledField = tryCoupledFieldFrom(prototypeIdData);
     return `'${this.getRawId("id")}'${
-        coupledField === "prototypers" ? "<==>"
+        coupledField === "inheritors" ? "<==>"
         : coupledField === "instances" ? "<=|>"
         : coupledField === "materializedGhosts" ? "<-|>"
         : coupledField === null ? "-|>" // immaterialized ghost

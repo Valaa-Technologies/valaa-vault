@@ -107,9 +107,9 @@ export function duplicateFields (bard: DuplicateBard, mutableTransient: Transien
     try {
       /*
       console.log("Duplicating field:", `${String(ownerId)}.${fieldName}`,
-          fieldIntro.isOwning, fieldIntro.isDuplicateable, originalFieldValue);
+          fieldIntro.isOwnerOf, fieldIntro.isDuplicateable, originalFieldValue);
       */
-      if (!fieldIntro.isOwning) {
+      if (!fieldIntro.isOwnerOf) {
         if (fieldIntro.isDuplicateable) {
           // Non-coupling or non-owned coupling reference: delay for post-processing but discard
           // from transient for the time being.
@@ -118,7 +118,7 @@ export function duplicateFields (bard: DuplicateBard, mutableTransient: Transien
         mutableTransient.remove(fieldName);
         continue;
       }
-      // isOwning always implies isDuplicateable
+      // isOwnerOf always implies isDuplicateable
       let newFieldValue;
       if (!fieldIntro.isSequence) {
         newFieldValue = _duplicateOwnlingField(bard, fieldIntro, originalFieldValue, ownerId);

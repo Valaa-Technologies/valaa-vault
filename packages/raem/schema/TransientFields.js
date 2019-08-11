@@ -71,7 +71,7 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
           `The prototype of this ${objectDescription}. All field lookups for which there is no${
             ""} associated value set and whose field descriptors don't have ownDefaultValue${
             ""} are forwarded to the prototype.`, {
-            coupling: toOne({ defaultCoupledField: "prototypers" }),
+            coupling: toOne({ defaultCoupledField: "inheritors" }),
             affiliatedType: "TransientFields",
           },
       ),
@@ -90,7 +90,7 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
           { affiliatedType: "TransientFields" },
       ),
 
-      ...transientField("prototypers", new GraphQLList(TransientFields),
+      ...transientField("inheritors", new GraphQLList(TransientFields),
           `All ${objectDescription}'s which have this ${objectDescription
           } as prototype but which are not instances (direct nor ghost)`, {
             coupling: toMany({ coupledField: "prototype", preventsDestroy: true }),

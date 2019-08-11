@@ -29,14 +29,14 @@ import invariantify from "~/tools/invariantify";
 
 export function toNone () { return "none"; }
 
-export function toOne ({ coupledField, defaultCoupledField, alias, isOwning, whenUnmatched,
+export function toOne ({ coupledField, defaultCoupledField, alias, isOwnerOf, whenUnmatched,
     preventsDestroy, ...rest } = {}) {
   invariantify(!Object.keys(rest).length, `toOne: Unrecognized coupling options: ${
       Object.keys(rest).join(", ")}`);
   invariantify(!(coupledField && defaultCoupledField),
       "Can only specify either coupledField or defaultCoupledField");
   return coupledField ? {
-    coupledField, alias, isOwning, whenUnmatched, preventsDestroy,
+    coupledField, alias, isOwnerOf, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId) =>
         fieldsSet({ id, typeName, meta: { updateCouplings: false },
           sets: { [coupledFieldName]: localId },
@@ -46,7 +46,7 @@ export function toOne ({ coupledField, defaultCoupledField, alias, isOwning, whe
           sets: { [coupledFieldName]: null },
         }),
   } : {
-    defaultCoupledField, alias, isOwning, whenUnmatched, preventsDestroy,
+    defaultCoupledField, alias, isOwnerOf, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
         fieldsSet({ id, typeName, meta: { updateCouplings: false },
           sets: { [coupledFieldName]: localId.coupleWith(localFieldName) },
@@ -58,14 +58,14 @@ export function toOne ({ coupledField, defaultCoupledField, alias, isOwning, whe
   };
 }
 
-export function toMany ({ coupledField, defaultCoupledField, alias, isOwning, whenUnmatched,
+export function toMany ({ coupledField, defaultCoupledField, alias, isOwnerOf, whenUnmatched,
     preventsDestroy, ...rest } = {}) {
   invariantify(!Object.keys(rest).length, `toMany: Unrecognized coupling options: ${
       Object.keys(rest).join(", ")}`);
   invariantify(!(coupledField && defaultCoupledField),
       "Can't specify both coupledField and defaultCoupledField");
   return coupledField ? {
-    coupledField, alias, isOwning, whenUnmatched, preventsDestroy,
+    coupledField, alias, isOwnerOf, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId) =>
         addedTo({ id, typeName, meta: { updateCouplings: false },
           adds: { [coupledFieldName]: [localId] },
@@ -75,7 +75,7 @@ export function toMany ({ coupledField, defaultCoupledField, alias, isOwning, wh
           removes: { [coupledFieldName]: [localId] },
         }),
   } : {
-    defaultCoupledField, alias, isOwning, whenUnmatched, preventsDestroy,
+    defaultCoupledField, alias, isOwnerOf, whenUnmatched, preventsDestroy,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
         addedTo({ id, typeName, meta: { updateCouplings: false },
           adds: { [coupledFieldName]: [localId.coupleWith(localFieldName)] },
@@ -88,18 +88,18 @@ export function toMany ({ coupledField, defaultCoupledField, alias, isOwning, wh
 }
 
 export function toOneOwnling (fields = {}) {
-  return toOne({ coupledField: "owner", isOwning: true, ...fields });
+  return toOne({ coupledField: "owner", isOwnerOf: true, ...fields });
 }
 
 export function toManyOwnlings (fields = {}) {
-  return toMany({ coupledField: "owner", isOwning: true, ...fields });
+  return toMany({ coupledField: "owner", isOwnerOf: true, ...fields });
 }
 
 export function toOwner ({ coupledField, defaultCoupledField, ...rest }) {
   invariantify(!Object.keys(rest).length, `toOwner: Unrecognized coupling options: ${
       Object.keys(rest).join(", ")}`);
   return {
-    coupledField, defaultCoupledField, isOwned: true,
+    coupledField, defaultCoupledField, isOwnedBy: true,
     createCoupleToRemoteAction: (id, typeName, coupledFieldName, localId, localFieldName) =>
         fieldsSet({ id, typeName, meta: { updateCouplings: false },
           sets: { [coupledFieldName]: localId.coupleWith(localFieldName) },

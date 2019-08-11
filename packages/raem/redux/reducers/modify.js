@@ -173,7 +173,7 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
       }
       updateCoupling = (bard.updateCouplings !== false) && getCoupling(fieldInfo.intro);
       if (!validateFieldUpdate(bard, fieldInfo.intro, updateClause, operationDescription)) continue;
-      if (fieldInfo.intro.isPersisted && !fieldInfo.intro.isOwned) {
+      if (fieldInfo.intro.isPersisted && !fieldInfo.intro.isOwnedBy) {
         // don't mark owning relation updates as primary, so that
         // frozen resources can still be moved
         isPrimaryMutation = true;

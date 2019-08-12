@@ -23,7 +23,7 @@
     ".valma-configure_.@valos_type-vault_.tools_.select_docs": "valma/configure__type-vault_.tools_.select_docs.js",
     "valma-regenerate-docs": "valma/regenerate-docs.js",
     ".valma-release-vault_.prepared-hooks_regenerate-docs": "valma/regenerate-docs.js",
-    "valma-create-revdoc": "valma/create-revdoc.js"
+    "valma-write-revdoc": "valma/write-revdoc.js"
   },
   "dependencies": {
     "@babel/cli": ">7.0.0-rc",

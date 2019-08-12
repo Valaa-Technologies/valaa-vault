@@ -280,7 +280,7 @@
       "version": "0.35.0-prerelease.8",
       "introduction": "By default the three elements installed by 'yarn install' are cleaned:\n1. workspace packages by 'lerna clean --yes'\n2. yalc local dependencies by 'yalc remove --all'\n3. vault root node_modules by 'rm -rf'\n\nIn addition, dist/ can be removed with --dist in preparation for a clean slate publish/deploy ops.\nBe mindful that all of dist/ will be removed.\nyarn.lock can be removed with --yarn in preparation for persisted dependency updates."
     },
-    "create-revdoc": {
+    "write-revdoc": {
       "description": "Create a revdoc source code file",
       "package": "@valos/type-vault",
       "version": "0.35.0-prerelease.8",

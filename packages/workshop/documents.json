@@ -7,7 +7,7 @@
     "abstract": {
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is a revdoc template document 'engine' created by create-revdoc."
+        "This document is a revdoc template document 'engine' created by write-revdoc."
       ]
     },
     "introduction": {
@@ -62,7 +62,7 @@
     "abstract": {
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is a revdoc template document 'inspire' created by create-revdoc."
+        "This document is a revdoc template document 'inspire' created by write-revdoc."
       ]
     },
     "introduction": {
@@ -253,7 +253,7 @@
     "abstract": {
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is a revdoc template document 'tutorial' created by create-revdoc."
+        "This document is a revdoc template document 'tutorial' created by write-revdoc."
       ]
     },
     "introduction": {

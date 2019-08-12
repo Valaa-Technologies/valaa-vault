@@ -12,7 +12,7 @@ module.exports = {
     shortName: "tutorial",
   },
   "chapter#abstract>0": [
-    "This document is a revdoc template document 'tutorial' created by create-revdoc.",
+    "This document is a revdoc template document 'tutorial' created by write-revdoc.",
   ],
   "chapter#sotd>1": [
     "This document is part of the library workspace ", pkg("@valos/revdoc"),

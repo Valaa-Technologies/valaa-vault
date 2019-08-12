@@ -26,7 +26,7 @@ module.exports = {
     { "numbered#": [
       "Ensure you have python installed.",
       ["Navigate to the folder you want your revdoc.js to reside and run the following command: ",
-        cli("vlm create-revdoc YOUR_DOCUMENT_NAME_WITHOUT_FILE_EXTENSION"),
+        cli("vlm write-revdoc YOUR_DOCUMENT_NAME_WITHOUT_FILE_EXTENSION"),
         " Note: If you create your RevDoc under the revdocs/ folder, ",
         "your HTML and VDocLD files will be generated to the project root",
       ],

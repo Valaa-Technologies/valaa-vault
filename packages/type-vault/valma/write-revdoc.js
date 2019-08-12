@@ -1,7 +1,7 @@
 #!/usr/bin/env vlm
 
-exports.command = "create-revdoc [revdocName]";
-exports.describe = "Create a revdoc source code file";
+exports.command = "write-revdoc [revdocName]";
+exports.describe = "Write a new revdoc source code file";
 exports.introduction = ``;
 
 exports.disabled = () => false;
@@ -72,7 +72,7 @@ module.exports = {
     shortName: "${shortName || ""}",
   },
   "chapter#abstract>0": [
-    "This document is a revdoc template document '${shortName}' created by create-revdoc.",
+    "This document is a revdoc template document '${shortName}' created by write-revdoc.",
   ],
   "chapter#sotd>1": [
     "This document is part of the ${packageConfig.valos.type} workspace ",

@@ -13,7 +13,7 @@ import type HashV240 from "~/sourcerer/tools/hashV240";
 // properties are still available through the EventAspects object.
 //
 // EventAspects itself is a context-free structure which contains all
-// information throughough event message lifetime through the ValOS
+// information throughout event message lifetime through the ValOS
 // streams. These properties are grouped to different contextual and/or
 // functional aspects.
 //

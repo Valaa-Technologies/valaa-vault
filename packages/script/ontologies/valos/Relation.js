@@ -15,19 +15,6 @@ a Relatable itself allows for nested and recursive relationship
 structures.`,
   },
 
-  /*
-  owner: {
-    "@type": "valos-raem:PrimaryField",
-    "rdfs:domain": "valos:Relation",
-    "rdfs:range": "valos:Relatable",
-    restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:isOwnedBy": true,
-    "valos-raem:defaultCoupledField": "valos:relations",
-    "rdfs:comment":
-`The owner of this Property`,
-  },
-  */
-
   source: {
     "@type": "valos-raem:AliasField",
     "valos-raem:aliasOf": "valos:owner",

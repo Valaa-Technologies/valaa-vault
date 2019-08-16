@@ -19,6 +19,9 @@ exports.builder = (yargs) => yargs.options({
     type: "string", default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "summary", "target"),
     description: "Target for domain component summary",
   },
+  summary: {
+    type: "object", description: "Preparation summary",
+  },
 });
 
 exports.handler = async (yargv) => {

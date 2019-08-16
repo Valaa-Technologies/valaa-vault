@@ -70,7 +70,7 @@
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "This document is a revdoc template document 'engine' created by create-revdoc."
+            "This document is a revdoc template document 'engine' created by write-revdoc."
           ]
         },
         "introduction": {
@@ -125,7 +125,7 @@
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "This document is a revdoc template document 'inspire' created by create-revdoc."
+            "This document is a revdoc template document 'inspire' created by write-revdoc."
           ]
         },
         "introduction": {
@@ -316,7 +316,7 @@
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "This document is a revdoc template document 'tutorial' created by create-revdoc."
+            "This document is a revdoc template document 'tutorial' created by write-revdoc."
           ]
         },
         "introduction": {
@@ -1105,7 +1105,7 @@
       "Resource": {
         "@type": "valos-raem:Type",
         "rdfs:subClassOf": "rdfs:Resource",
-        "revdoc:brief": "valospace resource",
+        "revdoc:brief": "valospace resource interface",
         "rdfs:comment": "The class of resources which can appear as a subject in valospace\nresource and event graphs. The domain of all transient and generated\nfields which are available even for unsourced bodies."
       },
       "id": {
@@ -1342,9 +1342,9 @@
       },
       "Bvob": {
         "@type": "valos-raem:Type",
-        "revdoc:brief": "binary content handle",
+        "revdoc:brief": "Binary ValOS Object type",
         "rdfs:subClassOf": "valos:Resource",
-        "rdfs:comment": "Bvob (Binary ValOS OBject) specifies a class of valos resources which\nare associated with an octet-stream of fixed length. Bvob resources\nhave a hash of that octet-stream, prefixed with the hash algorithm, as\ntheir resource id."
+        "rdfs:comment": "The dominant type class of resources which are immutably associated\nwith an octet-stream of fixed length. Bvob resources have a hash of\nthat octet-stream, prefixed with the hash algorithm, as their resource\nid."
       },
       "hashAlgorithm": {
         "@type": "valos-raem:GeneratedField",
@@ -1389,7 +1389,7 @@
       "Sourced": {
         "@type": "valos-raem:Type",
         "rdfs:subClassOf": "valos:Resource",
-        "revdoc:brief": "active, visible resource",
+        "revdoc:brief": "active, visible resource interface",
         "rdfs:comment": "The class of valospace resources that are sourced in this view of\nthe world. A sourced resource has all of its fields and properties\navailable and it can thus be manipulated."
       },
       "owner": {
@@ -1446,19 +1446,19 @@
       "Unsourced": {
         "@type": "valos-raem:Type",
         "rdfs:subClassOf": "valos:Resource",
-        "revdoc:brief": "out-of-this-world resource",
+        "revdoc:brief": "out-of-this-world resource type",
         "rdfs:comment": "The dominant type class of 'unsourced' valospace resources. An\nunsourced resource doesn't have a known representation in this view of\nthe world, typically because it is inside an unsourced Partition.\nThe transition from Unsourced to and from other dominant types is the\nonly possible runtime type change and happens dynamically based on\nthe partition sourcery and banishment."
       },
       "Destroyed": {
         "@type": "valos-raem:Type",
         "rdfs:subClassOf": "valos:Resource",
-        "revdoc:brief:": "destroyed resource",
+        "revdoc:brief:": "destroyed resource type",
         "rdfs:comment": "The dominant type class of resources which have been destroyed."
       },
       "Partition": {
         "@type": "valos-raem:Type",
         "rdfs:subClassOf": "valos:Sourced",
-        "revdoc:brief": "world subdivision, a document",
+        "revdoc:brief": "a document, world subdivision interface",
         "rdfs:comment": "A Partition is a subdivision of the whole ValOS object space into\nsmaller recursive, individually sourcable wholes. The Partition\nimplementation contains resources either by direct or transitive\nownership. Each such contained resource also knows their containing\nPartition.\n\nTODO(iridian, 2019-08): Update outdated terminology in this comment.\n\nIn addition to the few direct member fields relating to snapshotting\nand event stream synchronization, the Partition resources serve as\na key latching point for external services.\n\nEach Partition object is managed by an authority, which performs\nconflict resolution, authorization and recording of incoming commands,\nconverting them into the truth event log for that particular Partition.\n\nThe Partition id is used by the query routers to globally locate the\nauthority responsible for any given Partition. Also, cross-partition\nresource references are implemented as Unsourced resource stubs, ie.\nobjects that only contain the resource id and its most recently known\npartition (which will retain the new owning Partition in a stub,\nenabling forwarding). Together these allow for any resource to always\nbe eventually locateable from anywhere."
       },
       "authorityIRI": {
@@ -1528,16 +1528,17 @@
         "@type": "valos-raem:Type",
         "rdfs:subClassOf": [
           "valos:Resource",
-          "valos:Destroyed"
+          "valos:ScriptResource"
         ],
-        "revdoc:brief": "destroyed script resource",
+        "revdoc:brief": "destroyed script resource type",
         "rdfs:comment": "The class of valospace script resources which have been destroyed in\nthis view of the world. It only provides the external fields listed in\nTransientScripFields and TransientFields interfaces."
       },
       "ScriptProperty": {
         "@type": "valos-raem:Type",
         "rdfs:subClassOf": [
           "valos:Resource",
-          "valos:Sourced"
+          "valos:Sourced",
+          "rdf:Statement"
         ],
         "revdoc:brief": "valoscript property",
         "rdfs:comment": "The class of valospace Property resources which are expressed as\nvaloscript object properties."
@@ -1554,7 +1555,7 @@
         },
         "valos-raem:isOwnedBy": true,
         "valos-raem:coupledField": "valos:properties",
-        "rdfs:comment": "The scope resource (and owner) of this Property"
+        "rdfs:comment": "The scope resource (and owner) of this ScriptProperty"
       },
       "value": {
         "@type": "valos-raem:PrimaryField",
@@ -1568,15 +1569,62 @@
         "valos-raem:finalDefaultValue": [
           "§void"
         ],
-        "rdfs:comment": "The value of this Property"
+        "rdfs:comment": "The value of this ScriptProperty"
+      },
+      "twinspace": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:ScriptProperty",
+        "rdfs:range": "rdfs:Resource",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos-raem:generator": "getTwinspace",
+        "rdfs:comment": "The twinspace of this ScriptProperty. Equates to the expanded prefix\nof the valos:name of this ScriptProperty using the context of this\npartition. Additionally if the local part of the valos:name is an empty\nstring then the valos:value of this ScriptProperty defines\nthe twinspace id of the scope resource for this twinspace."
+      },
+      "subject": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:subPropertyOf": "rdf:subject",
+        "rdfs:domain": "valos:ScriptProperty",
+        "rdfs:range": "rdfs:Resource",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos-raem:generator": "getSubject",
+        "rdfs:comment": "The subject of this ScriptProperty when interpreted as a reified\nrdf:Statement. Equates to the twinspace id of the scope resource using\nthe valos:twinspace of this ScriptProperty."
+      },
+      "predicate": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:subPropertyOf": "rdf:predicate",
+        "rdfs:domain": "valos:ScriptProperty",
+        "rdfs:range": "rdfs:Resource",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "valos-raem:generator": "getPredicate",
+        "rdfs:comment": "The subject of this ScriptProperty when interpreted as a reified\nrdf:Statement. Equates to the IRI expansion of valos:name of this\nScriptProperty using the context of this partition."
+      },
+      "object": {
+        "@type": "valos-raem:AliasField",
+        "valos-raem:aliasOf": "valos:value",
+        "rdfs:subPropertyOf": "rdf:object",
+        "rdfs:domain": "valos:ScriptProperty",
+        "rdfs:range": "rdfs:Resource",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The subject of this ScriptProperty when interpreted as a reified\nrdf:Statement. Equates to the twinspace id of the valos:value using\nthe valos:twinspace of this ScriptProperty if one is defined. Otherwise\nequals to the valos:value itself.\n"
       },
       "Scope": {
         "@type": "valos-raem:Type",
         "rdfs:subClassOf": [
           "valos:Resource"
         ],
-        "revdoc:brief": "local namespace of properties",
-        "rdfs:comment": "The class of valospace resources which can have valospace script\nproperties."
+        "revdoc:brief": "property namespace interface",
+        "rdfs:comment": "The class of valospace resources which can have valoscript properties."
       },
       "properties": {
         "@type": "valos-raem:PrimaryField",
@@ -1614,7 +1662,7 @@
           "valos:Scope",
           "valos:Relatable"
         ],
-        "revdoc:brief": "a named, directed, parameterized primary resource relationship edge",
+        "revdoc:brief": "primary directed relationship edge type",
         "rdfs:comment": "The class of valospace resources which represent directed,\nmany-to-many relationships between relatable resources.\nWith Entity and Media it forms the group of three primary types.\nAs a Scope it can have scriptable properties. Relation being\na Relatable itself allows for nested and recursive relationship\nstructures."
       },
       "source": {
@@ -1671,7 +1719,7 @@
       },
       "Entity": {
         "@type": "valos-raem:Type",
-        "revdoc:brief": "primary resource hierachy node",
+        "revdoc:brief": "primary resource hierachy node type",
         "rdfs:subClassOf": [
           "valos:Resource",
           "valos:Sourced",
@@ -1680,7 +1728,7 @@
           "valos:Relatable",
           "valos:Partition"
         ],
-        "rdfs:comment": "The class of valospace resources which act as the hierarchy nodes.\nWith Relation and Media it forms the group of three primary types.\nAs a Scope it can have scriptable properties, which entities expose\nto all contained resources in a lexical scripting namespace.\n"
+        "rdfs:comment": "The class of valospace resources which act as the main valospace\nhierarchy building block. With Relation and Media it forms the group of\nthree primary types. As a Scope it can have scriptable properties,\nwhich entities expose to all child resources as their lexical scripting\nnamespace.\n"
       },
       "parent": {
         "@type": "valos-raem:AliasField",
@@ -1715,8 +1763,8 @@
           "valos:Scope",
           "valos:Relatable"
         ],
-        "revdoc:brief": "primary file, streamed and other typed content resource",
-        "rdfs:comment": "The class of valospace resources which represent interpretable media\nand can be associated with binary content and accompanying metadata.\nWith Relation and Media it forms the group of three primary types.\n"
+        "revdoc:brief": "primary file media type",
+        "rdfs:comment": "The class of valospace resources which represent interpretable media\nand can be associated with mutable binary content and accompanying\nmetadata. With Relation and Media it forms the group of three primary\ntypes.\n"
       },
       "container": {
         "@type": "valos-raem:AliasField",
@@ -2351,6 +2399,10 @@
             "incomingRelations",
             "scope",
             "value",
+            "twinspace",
+            "subject",
+            "predicate",
+            "object",
             "properties",
             "relations",
             "source",

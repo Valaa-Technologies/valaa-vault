@@ -54,7 +54,7 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is a revdoc template document 'tutorial' created by create-revdoc."
+        "This document is a revdoc template document 'tutorial' created by write-revdoc."
       ]
     },
     "sotd": {

@@ -493,12 +493,9 @@ other packages depend and be tested against them.
 In addition, dist/ can be removed with --dist in preparation for a clean slate publish/deploy ops.
 Be mindful that all of dist/ will be removed.
 yarn.lock can be removed with --yarn in preparation for persisted dependency updates.</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td><strong><a href="create-revdoc" class="vdoc type-vdoc-reference">create-revdoc</a></strong></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=2>Create a revdoc source code file</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=2></td></tr>
-        <tr><td><strong><a href="release-vault" class="vdoc type-vdoc-reference">release-vault</a></strong></td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=2>Prepare, commit and potentially publish a new release of vault packages</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=2>Create a new release/prerelease branch or extend an existing one
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="release-vault" class="vdoc type-vdoc-reference">release-vault</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=2>Prepare, commit and potentially publish a new release of vault packages</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=2>Create a new release/prerelease branch or extend an existing one
 based on given options and current environment.
 
 Prepares the release by first running sanity checks, then cleaning and
@@ -519,11 +516,14 @@ Will invoke valma command hooks between stages as per:
 3. 'vlm .release-vault/.pre-published-hooks/{**/,}* --summary=<obj>' after successful pre-publish
 4. 'vlm .release-vault/.published-hooks/{**/,}* --summary=<obj>' after successful publish
 </td></tr>
-        <tr class=" vdoc-nth-child-2n"><td><strong><a href="publish-packages" class="vdoc type-vdoc-reference">publish-packages</a></strong></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=2>Publish package assemblies to their registries</td></tr>
+        <tr><td><strong><a href="publish-packages" class="vdoc type-vdoc-reference">publish-packages</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=2>Publish package assemblies to their registries</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=2></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="regenerate-docs" class="vdoc type-vdoc-reference">regenerate-docs</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=2>Regenerate all configured /docs content</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=2></td></tr>
-        <tr><td><strong><a href="regenerate-docs" class="vdoc type-vdoc-reference">regenerate-docs</a></strong></td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=2>Regenerate all configured /docs content</td></tr>
+        <tr><td><strong><a href="write-revdoc" class="vdoc type-vdoc-reference">write-revdoc</a></strong></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=2>Write a new revdoc source code file</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=2></td></tr>
         <tr class=" vdoc-nth-child-2n"><td><strong><a href="perspire" class="vdoc type-vdoc-reference">perspire</a></strong></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=2>Launch a headless worker gateway for persistent virtual DOM ValOS computation</td></tr>
@@ -680,7 +680,7 @@ typically reside in "packages/*" vault workspace directory.</p>
         <tr><td><strong><a href="@valos/hypertwin" class="vdoc type-vdoc-reference">@valos/hypertwin</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>Description:</em></td><td colspan=4>ValOS Hypertwin Specifications and Tools Library</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>Introduction:</em></td><td colspan=4></td></tr>
-        <tr class=" vdoc-nth-child-2n"><td><strong><a href="https://valospace.org/inspire" class="vdoc type-vdoc-reference">@valos/inspire</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td><strong><a href="@valos/inspire" class="vdoc type-vdoc-reference">@valos/inspire</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Description:</em></td><td colspan=4>ValOS Inspire application gateway</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>Introduction:</em></td><td colspan=4></td></tr>
         <tr><td><strong><a href="https://valospace.org/raem" class="vdoc type-vdoc-reference">@valos/raem</a></strong></td><td>0.35.0-prerelease.8</td><td>MIT</td></tr>

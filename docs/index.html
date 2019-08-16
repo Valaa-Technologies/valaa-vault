@@ -118,20 +118,20 @@ Valospace ontology provides vocabulary and definitions of
         <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
       </thead>
       <tbody>
-        <tr id="Resource" class=" vdoc-nth-child-2n"><td><a href="#Resource" class="vdoc type-vdoc-reference"><em>Resource</em></a></td><td><strong>valospace resource</strong></td><td>rdfs:Resource</td></tr>
+        <tr id="Resource" class=" vdoc-nth-child-2n"><td><a href="#Resource" class="vdoc type-vdoc-reference"><em>Resource</em></a></td><td><strong>valospace resource interface</strong></td><td>rdfs:Resource</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of resources which can appear as a subject in valospace
 resource and event graphs. The domain of all transient and generated
 fields which are available even for unsourced bodies.</td></tr>
-        <tr id="Bvob"><td><a href="#Bvob" class="vdoc type-vdoc-reference"><em>Bvob</em></a></td><td><strong>binary content handle</strong></td><td>valos:Resource</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>Bvob (Binary ValOS OBject) specifies a class of valos resources which
-are associated with an octet-stream of fixed length. Bvob resources
-have a hash of that octet-stream, prefixed with the hash algorithm, as
-their resource id.</td></tr>
-        <tr id="Sourced" class=" vdoc-nth-child-2n"><td><a href="#Sourced" class="vdoc type-vdoc-reference"><em>Sourced</em></a></td><td><strong>active, visible resource</strong></td><td>valos:Resource</td></tr>
+        <tr id="Bvob"><td><a href="#Bvob" class="vdoc type-vdoc-reference"><em>Bvob</em></a></td><td><strong>Binary ValOS Object type</strong></td><td>valos:Resource</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The dominant type class of resources which are immutably associated
+with an octet-stream of fixed length. Bvob resources have a hash of
+that octet-stream, prefixed with the hash algorithm, as their resource
+id.</td></tr>
+        <tr id="Sourced" class=" vdoc-nth-child-2n"><td><a href="#Sourced" class="vdoc type-vdoc-reference"><em>Sourced</em></a></td><td><strong>active, visible resource interface</strong></td><td>valos:Resource</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources that are sourced in this view of
 the world. A sourced resource has all of its fields and properties
 available and it can thus be manipulated.</td></tr>
-        <tr id="Unsourced"><td><a href="#Unsourced" class="vdoc type-vdoc-reference"><em>Unsourced</em></a></td><td><strong>out-of-this-world resource</strong></td><td>valos:Resource</td></tr>
+        <tr id="Unsourced"><td><a href="#Unsourced" class="vdoc type-vdoc-reference"><em>Unsourced</em></a></td><td><strong>out-of-this-world resource type</strong></td><td>valos:Resource</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The dominant type class of 'unsourced' valospace resources. An
 unsourced resource doesn't have a known representation in this view of
 the world, typically because it is inside an unsourced Partition.
@@ -140,7 +140,7 @@ only possible runtime type change and happens dynamically based on
 the partition sourcery and banishment.</td></tr>
         <tr id="Destroyed" class=" vdoc-nth-child-2n"><td><a href="#Destroyed" class="vdoc type-vdoc-reference"><em>Destroyed</em></a></td><td><strong></strong></td><td>valos:Resource</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The dominant type class of resources which have been destroyed.</td></tr>
-        <tr id="Partition"><td><a href="#Partition" class="vdoc type-vdoc-reference"><em>Partition</em></a></td><td><strong>world subdivision, a document</strong></td><td>valos:Sourced</td></tr>
+        <tr id="Partition"><td><a href="#Partition" class="vdoc type-vdoc-reference"><em>Partition</em></a></td><td><strong>a document, world subdivision interface</strong></td><td>valos:Sourced</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>A Partition is a subdivision of the whole ValOS object space into
 smaller recursive, individually sourcable wholes. The Partition
 implementation contains resources either by direct or transitive
@@ -168,36 +168,37 @@ be eventually locateable from anywhere.</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which have script references to them
 from within this world. The domain of all transient and generated
 fields which are available even for out-of-this-world resources.</td></tr>
-        <tr id="ScriptDestroyed"><td><a href="#ScriptDestroyed" class="vdoc type-vdoc-reference"><em>ScriptDestroyed</em></a></td><td><strong>destroyed script resource</strong></td><td>valos:Resource valos:Destroyed</td></tr>
+        <tr id="ScriptDestroyed"><td><a href="#ScriptDestroyed" class="vdoc type-vdoc-reference"><em>ScriptDestroyed</em></a></td><td><strong>destroyed script resource type</strong></td><td>valos:Resource valos:ScriptResource</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace script resources which have been destroyed in
 this view of the world. It only provides the external fields listed in
 TransientScripFields and TransientFields interfaces.</td></tr>
-        <tr id="ScriptProperty" class=" vdoc-nth-child-2n"><td><a href="#ScriptProperty" class="vdoc type-vdoc-reference"><em>ScriptProperty</em></a></td><td><strong>valoscript property</strong></td><td>valos:Resource valos:Sourced</td></tr>
+        <tr id="ScriptProperty" class=" vdoc-nth-child-2n"><td><a href="#ScriptProperty" class="vdoc type-vdoc-reference"><em>ScriptProperty</em></a></td><td><strong>valoscript property</strong></td><td>valos:Resource valos:Sourced rdf:Statement</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace Property resources which are expressed as
 valoscript object properties.</td></tr>
-        <tr id="Scope"><td><a href="#Scope" class="vdoc type-vdoc-reference"><em>Scope</em></a></td><td><strong>local namespace of properties</strong></td><td>valos:Resource</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which can have valospace script
-properties.</td></tr>
+        <tr id="Scope"><td><a href="#Scope" class="vdoc type-vdoc-reference"><em>Scope</em></a></td><td><strong>property namespace interface</strong></td><td>valos:Resource</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which can have valoscript properties.</td></tr>
         <tr id="Relatable" class=" vdoc-nth-child-2n"><td><a href="#Relatable" class="vdoc type-vdoc-reference"><em>Relatable</em></a></td><td><strong>relation source and/or target interface</strong></td><td>valos:Resource valos:Sourced valos:ScriptResource valos:Scope</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which can act as source and target of
 a valospace Relation.</td></tr>
-        <tr id="Relation"><td><a href="#Relation" class="vdoc type-vdoc-reference"><em>Relation</em></a></td><td><strong>a named, directed, parameterized primary resource relationship edge</strong></td><td>valos:Resource valos:Sourced valos:ScriptResource valos:Scope valos:Relatable</td></tr>
+        <tr id="Relation"><td><a href="#Relation" class="vdoc type-vdoc-reference"><em>Relation</em></a></td><td><strong>primary directed relationship edge type</strong></td><td>valos:Resource valos:Sourced valos:ScriptResource valos:Scope valos:Relatable</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which represent directed,
 many-to-many relationships between relatable resources.
 With Entity and Media it forms the group of three primary types.
 As a Scope it can have scriptable properties. Relation being
 a Relatable itself allows for nested and recursive relationship
 structures.</td></tr>
-        <tr id="Entity" class=" vdoc-nth-child-2n"><td><a href="#Entity" class="vdoc type-vdoc-reference"><em>Entity</em></a></td><td><strong>primary resource hierachy node</strong></td><td>valos:Resource valos:Sourced valos:ScriptResource valos:Scope valos:Relatable valos:Partition</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which act as the hierarchy nodes.
-With Relation and Media it forms the group of three primary types.
-As a Scope it can have scriptable properties, which entities expose
-to all contained resources in a lexical scripting namespace.
+        <tr id="Entity" class=" vdoc-nth-child-2n"><td><a href="#Entity" class="vdoc type-vdoc-reference"><em>Entity</em></a></td><td><strong>primary resource hierachy node type</strong></td><td>valos:Resource valos:Sourced valos:ScriptResource valos:Scope valos:Relatable valos:Partition</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which act as the main valospace
+hierarchy building block. With Relation and Media it forms the group of
+three primary types. As a Scope it can have scriptable properties,
+which entities expose to all child resources as their lexical scripting
+namespace.
 </td></tr>
-        <tr id="Media"><td><a href="#Media" class="vdoc type-vdoc-reference"><em>Media</em></a></td><td><strong>primary file, streamed and other typed content resource</strong></td><td>valos:Resource valos:Sourced valos:ScriptResource valos:Scope valos:Relatable</td></tr>
+        <tr id="Media"><td><a href="#Media" class="vdoc type-vdoc-reference"><em>Media</em></a></td><td><strong>primary file media type</strong></td><td>valos:Resource valos:Sourced valos:ScriptResource valos:Scope valos:Relatable</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which represent interpretable media
-and can be associated with binary content and accompanying metadata.
-With Relation and Media it forms the group of three primary types.
+and can be associated with mutable binary content and accompanying
+metadata. With Relation and Media it forms the group of three primary
+types.
 </td></tr>
       </tbody>
     </table>
@@ -338,9 +339,29 @@ certain contexts.</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The unordered set of relations that are targeting this relatable
 resource within this view of the world.</td></tr>
         <tr id="scope"><td><a href="#scope" class="vdoc type-vdoc-reference"><em>scope</em></a></td><td>valos:ScriptProperty</td><td>valos:Scope</td><td>valos-raem:AliasField</td><td>valos:owner</td><td>valos:properties</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The scope resource (and owner) of this Property</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The scope resource (and owner) of this ScriptProperty</td></tr>
         <tr id="value" class=" vdoc-nth-child-2n"><td><a href="#value" class="vdoc type-vdoc-reference"><em>value</em></a></td><td>valos:ScriptProperty</td><td>rdfs:Resource</td><td>valos-raem:PrimaryField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The value of this Property</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The value of this ScriptProperty</td></tr>
+        <tr id="twinspace"><td><a href="#twinspace" class="vdoc type-vdoc-reference"><em>twinspace</em></a></td><td>valos:ScriptProperty</td><td>rdfs:Resource</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The twinspace of this ScriptProperty. Equates to the expanded prefix
+of the valos:name of this ScriptProperty using the context of this
+partition. Additionally if the local part of the valos:name is an empty
+string then the valos:value of this ScriptProperty defines
+the twinspace id of the scope resource for this twinspace.</td></tr>
+        <tr id="subject" class=" vdoc-nth-child-2n"><td><a href="#subject" class="vdoc type-vdoc-reference"><em>subject</em></a></td><td>valos:ScriptProperty</td><td>rdfs:Resource</td><td>valos-raem:GeneratedField</td><td>rdf:subject</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The subject of this ScriptProperty when interpreted as a reified
+rdf:Statement. Equates to the twinspace id of the scope resource using
+the valos:twinspace of this ScriptProperty.</td></tr>
+        <tr id="predicate"><td><a href="#predicate" class="vdoc type-vdoc-reference"><em>predicate</em></a></td><td>valos:ScriptProperty</td><td>rdfs:Resource</td><td>valos-raem:GeneratedField</td><td>rdf:predicate</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The subject of this ScriptProperty when interpreted as a reified
+rdf:Statement. Equates to the IRI expansion of valos:name of this
+ScriptProperty using the context of this partition.</td></tr>
+        <tr id="object" class=" vdoc-nth-child-2n"><td><a href="#object" class="vdoc type-vdoc-reference"><em>object</em></a></td><td>valos:ScriptProperty</td><td>rdfs:Resource</td><td>valos-raem:AliasField</td><td>rdf:object</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The subject of this ScriptProperty when interpreted as a reified
+rdf:Statement. Equates to the twinspace id of the valos:value using
+the valos:twinspace of this ScriptProperty if one is defined. Otherwise
+equals to the valos:value itself.
+</td></tr>
         <tr id="properties"><td><a href="#properties" class="vdoc type-vdoc-reference"><em>properties</em></a></td><td>valos:Scope</td><td>rdfs:List</td><td>valos-raem:PrimaryField</td><td></td><td>valos:scope</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of Property resources of this scope</td></tr>
         <tr id="relations" class=" vdoc-nth-child-2n"><td><a href="#relations" class="vdoc type-vdoc-reference"><em>relations</em></a></td><td>valos:Relatable</td><td>rdfs:List</td><td>valos-raem:PrimaryField</td><td></td><td>valos:source</td></tr>

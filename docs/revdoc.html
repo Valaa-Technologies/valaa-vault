@@ -167,158 +167,87 @@ ReVDoc ontology provides vocabulary and definitions which are
         <th class="vdoc type-vdoc-header">rdf:type</th>
       </thead>
       <tbody>
-        <tr><td>authors</td><td>function authors() {
-    var toolsetsPath = "".concat(process.cwd(), "/toolsets.json");
-    var authorLookup = (((require(toolsetsPath)["@valos/type-vault"] || {}).tools || {}).docs || {}).authors || {};
-
-    for (var _len = arguments.length, authorNames = new Array(_len), _key = 0; _key < _len; _key++) {
-      authorNames[_key] = arguments[_key];
-    }
-
-    return (authorNames || []).map(function (authorName) {
-      var author = authorLookup[authorName];
-
+        <tr><td>authors</td><td>authors(...authorNames) {
+    const toolsetsPath = `${process.cwd()}/toolsets.json`;
+    const authorLookup = (((require(toolsetsPath)["@valos/type-vault"] || {})
+        .tools || {}).docs || {}).authors || {};
+    return (authorNames || []).map(authorName => {
+      const author = authorLookup[authorName];
       if (!author) {
-        throw new Error("Cannot find author '".concat(authorName, "' from toolsetConfig(\"").concat(toolsetsPath, "\")[\"@valos/type-vault\"].tools.docs.authors"));
+        throw new Error(`Cannot find author '${authorName}' from toolsetConfig("${
+          toolsetsPath}")["@valos/type-vault"].tools.docs.authors`);
       }
-
       return author;
     });
   }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>dfn</td><td>function dfn(text, definitionId) {
-    for (var _len2 = arguments.length, explanation = new Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-      explanation[_key2 - 2] = arguments[_key2];
-    }
-
-    return aggregate.apply(void 0, [{
+        <tr class=" vdoc-nth-child-2n"><td>dfn</td><td>dfn(text, definitionId, ...explanation) {
+    return aggregate({
       "revdoc:dfn": definitionId,
-      "vdoc:content": [strong(ref(text, definitionId))]
-    }, "vdoc:content"].concat(explanation));
+      "vdoc:content": [strong(ref(text, definitionId))],
+    }, "vdoc:content", ...explanation);
   }</td></tr>
-        <tr><td>pkg</td><td>function pkg(packageName) {
-    for (var _len3 = arguments.length, rest = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-      rest[_key3 - 1] = arguments[_key3];
-    }
-
-    return _objectSpread({}, ref.apply(void 0, [em(packageName), packageName].concat(rest)), {
-      "@type": "revdoc:Package"
-    });
+        <tr><td>pkg</td><td>pkg(packageName, ...rest) {
+    return {
+      ...ref(em(packageName), packageName, ...rest),
+      "@type": "revdoc:Package",
+    };
   }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>command</td><td>function command(commandName) {
-    return _objectSpread({}, cpath(commandName), {
-      "@type": "revdoc:Command"
-    });
+        <tr class=" vdoc-nth-child-2n"><td>command</td><td>command(commandName) {
+    return {
+      ...cpath(commandName),
+      "@type": "revdoc:Command",
+    };
   }</td></tr>
-        <tr><td>invokation</td><td>function invokation() {
-    var _ref;
-
-    for (var _len4 = arguments.length, parts = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-      parts[_key4] = arguments[_key4];
-    }
-
+        <tr><td>invokation</td><td>invokation(...parts) {
     return {
       "@type": "revdoc:Invokation",
-      "vdoc:words": (_ref = []).concat.apply(_ref, _toConsumableArray(parts.map(function (part) {
-        return typeof part !== "string" ? [part] : part.split(/(\s+)/);
-      }))).filter(function (w) {
-        return typeof w !== "string" || !w.match(/^\s+$/);
-      }).map(function (w, i) {
-        return i || typeof w !== "string" ? w : module.exports.command(w);
-      })
+      "vdoc:words": [].concat(...parts.map(
+              part => (typeof part !== "string" ? [part] : part.split(/(\s+)/))))
+          .filter(w => (typeof w !== "string") || !w.match(/^\s+$/))
+          .map((w, i) => ((i || typeof w !== "string") ? w : module.exports.command(w))),
     };
   }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>cli</td><td>function cli() {
-    for (var _len5 = arguments.length, rows = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-      rows[_key5] = arguments[_key5];
-    }
-
-    var commandedRows = rows.map(function (line) {
-      return typeof line !== "string" ? line : module.exports.invokation(line);
-    });
-    var currentContext = "";
-    var contextedRows = [];
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
-
-    try {
-      for (var _iterator = commandedRows[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-        var row = _step.value;
-
-        if (row != null && row["@type"] === "vdoc:ContextBase") {
-          currentContext = row;
-        } else {
-          contextedRows.push([currentContext, "$ ", row]);
-        }
-      }
-    } catch (err) {
-      _didIteratorError = true;
-      _iteratorError = err;
-    } finally {
-      try {
-        if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-          _iterator["return"]();
-        }
-      } finally {
-        if (_didIteratorError) {
-          throw _iteratorError;
-        }
+        <tr class=" vdoc-nth-child-2n"><td>cli</td><td>cli(...rows) {
+    const commandedRows = rows.map(line => ((typeof line !== "string")
+        ? line
+        : module.exports.invokation(line)));
+    let currentContext = "";
+    const contextedRows = [];
+    for (const row of commandedRows) {
+      if ((row != null) && (row["@type"] === "vdoc:ContextBase")) {
+        currentContext = row;
+      } else {
+        contextedRows.push([currentContext, "$ ", row]);
       }
     }
-
     return {
       "@type": "revdoc:CommandLineInteraction",
-      "vdoc:entries": contextedRows
+      "vdoc:entries": contextedRows,
     };
   }</td></tr>
-        <tr><td>filterKeysWithAnyOf</td><td>function filterKeysWithAnyOf(entryFieldName) {
-    var searchedValueOrValues = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-    var container = arguments.length > 2 ? arguments[2] : undefined;
-    return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container, function (a, _ref2) {
-      var _ref3 = _slicedToArray(_ref2, 2),
-          field = _ref3[0],
-          searched = _ref3[1];
-
-      return a || field.includes(searched);
-    });
+        <tr><td>filterKeysWithAnyOf</td><td>filterKeysWithAnyOf(entryFieldName, searchedValueOrValues = [], container) {
+    return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
+        (a, [field, searched]) => a || field.includes(searched));
   }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>filterKeysWithAllOf</td><td>function filterKeysWithAllOf(entryFieldName) {
-    var searchedValueOrValues = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-    var container = arguments.length > 2 ? arguments[2] : undefined;
-    return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container, function (a, _ref4) {
-      var _ref5 = _slicedToArray(_ref4, 2),
-          field = _ref5[0],
-          searched = _ref5[1];
-
-      return a && field.includes(searched);
-    }, true);
+        <tr class=" vdoc-nth-child-2n"><td>filterKeysWithAllOf</td><td>filterKeysWithAllOf(entryFieldName, searchedValueOrValues = [], container) {
+    return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
+        (a, [field, searched]) => a && field.includes(searched), true);
   }</td></tr>
-        <tr><td>filterKeysWithNoneOf</td><td>function filterKeysWithNoneOf(entryFieldName) {
-    var searchedValueOrValues = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-    var container = arguments.length > 2 ? arguments[2] : undefined;
-    return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container, function (a, _ref6) {
-      var _ref7 = _slicedToArray(_ref6, 2),
-          field = _ref7[0],
-          searched = _ref7[1];
-
-      return a && !field.includes(searched);
-    }, true);
+        <tr><td>filterKeysWithNoneOf</td><td>filterKeysWithNoneOf(entryFieldName, searchedValueOrValues = [], container) {
+    return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
+        (a, [field, searched]) => a && !field.includes(searched), true);
   }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>filterKeysWithFieldReduction</td><td>function filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container, reduction, initial) {
-  var searchedValues = [].concat(searchedValueOrValues !== undefined ? searchedValueOrValues : []);
-  return Object.entries(container).filter(function (_ref8) {
-    var _ref9 = _slicedToArray(_ref8, 2),
-        entry = _ref9[1];
-
-    return searchedValues.reduce(function (a, searchedValue) {
-      return reduction(a, [[].concat(entry[entryFieldName] !== undefined ? entry[entryFieldName] : []), searchedValue]);
-    }, initial);
-  }).map(function (_ref10) {
-    var _ref11 = _slicedToArray(_ref10, 1),
-        key = _ref11[0];
-
-    return key;
-  });
+        <tr class=" vdoc-nth-child-2n"><td>filterKeysWithFieldReduction</td><td>function filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
+    reduction, initial) {
+  const searchedValues = [].concat(
+      searchedValueOrValues !== undefined ? searchedValueOrValues : []);
+  return Object.entries(container)
+      .filter(([, entry]) => searchedValues
+          .reduce((a, searchedValue) => reduction(a, [
+            [].concat(entry[entryFieldName] !== undefined ? entry[entryFieldName] : []),
+            searchedValue,
+          ]), initial))
+      .map(([key]) => key);
 }</td></tr>
       </tbody>
     </table>

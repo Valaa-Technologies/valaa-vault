@@ -71,7 +71,7 @@
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "This document is a revdoc template document 'engine' created by create-revdoc."
+            "This document is a revdoc template document 'engine' created by write-revdoc."
           ]
         },
         "introduction": {
@@ -126,7 +126,7 @@
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "This document is a revdoc template document 'inspire' created by create-revdoc."
+            "This document is a revdoc template document 'inspire' created by write-revdoc."
           ]
         },
         "introduction": {
@@ -317,7 +317,7 @@
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "This document is a revdoc template document 'tutorial' created by create-revdoc."
+            "This document is a revdoc template document 'tutorial' created by write-revdoc."
           ]
         },
         "introduction": {
@@ -1174,11 +1174,13 @@
         "@valos/script": {
           "version": "0.35.0-prerelease.8",
           "description": "ValOS Script API, schema",
+          "homepage": "https://valospace.org/script",
           "license": "MIT"
         },
         "@valos/sourcerer": {
           "version": "0.35.0-prerelease.8",
           "description": "ValOS Sourcerer API, schema",
+          "homepage": "https://valospace.org/sourcerer",
           "license": "MIT"
         },
         "@valos/tools": {
@@ -1377,12 +1379,6 @@
         "version": "0.35.0-prerelease.8",
         "introduction": "By default the three elements installed by 'yarn install' are cleaned:\n1. workspace packages by 'lerna clean --yes'\n2. yalc local dependencies by 'yalc remove --all'\n3. vault root node_modules by 'rm -rf'\n\nIn addition, dist/ can be removed with --dist in preparation for a clean slate publish/deploy ops.\nBe mindful that all of dist/ will be removed.\nyarn.lock can be removed with --yarn in preparation for persisted dependency updates."
       },
-      "create-revdoc": {
-        "description": "Create a revdoc source code file",
-        "package": "@valos/type-vault",
-        "version": "0.35.0-prerelease.8",
-        "introduction": ""
-      },
       "release-vault": {
         "description": "Prepare, commit and potentially publish a new release of vault packages",
         "package": "@valos/type-vault",
@@ -1397,6 +1393,12 @@
       },
       "regenerate-docs": {
         "description": "Regenerate all configured /docs content",
+        "package": "@valos/type-vault",
+        "version": "0.35.0-prerelease.8",
+        "introduction": ""
+      },
+      "write-revdoc": {
+        "description": "Write a new revdoc source code file",
         "package": "@valos/type-vault",
         "version": "0.35.0-prerelease.8",
         "introduction": ""
@@ -2706,11 +2708,13 @@
       "@valos/script": {
         "version": "0.35.0-prerelease.8",
         "description": "ValOS Script API, schema",
+        "homepage": "https://valospace.org/script",
         "license": "MIT"
       },
       "@valos/sourcerer": {
         "version": "0.35.0-prerelease.8",
         "description": "ValOS Sourcerer API, schema",
+        "homepage": "https://valospace.org/sourcerer",
         "license": "MIT"
       },
       "@valos/tools": {

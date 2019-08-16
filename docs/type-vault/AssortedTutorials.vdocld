@@ -125,7 +125,7 @@
                                 "vlm"
                               ]
                             },
-                            "create-revdoc",
+                            "write-revdoc",
                             "YOUR_DOCUMENT_NAME_WITHOUT_FILE_EXTENSION"
                           ]
                         }

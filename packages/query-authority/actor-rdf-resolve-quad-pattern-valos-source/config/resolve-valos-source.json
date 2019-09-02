@@ -1,0 +1,14 @@
+{
+  "@context": [
+    "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/runner/^1.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/@comunica/bus-rdf-resolve-quad-pattern/^1.0.0/components/context.jsonld",
+    "https://linkedsoftwaredependencies.org/bundles/npm/@valos/query-authority/^0.35.0-prerelease.4/actor-rdf-resolve-quad-pattern-valos-source/^1.0.0/components/context.jsonld"
+  ],
+  "@id": "urn:comunica:my",
+  "actors": [
+    {
+      "@id": "varrqpvs:resolve-valos-source.json#myValosSourceQuadPatternResolver",
+      "@type": "ActorRdfResolveQuadPatternValosSource"
+    }
+  ]
+}

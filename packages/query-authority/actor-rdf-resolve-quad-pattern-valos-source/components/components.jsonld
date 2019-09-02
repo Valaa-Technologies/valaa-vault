@@ -1,0 +1,9 @@
+{
+  "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@valos/query-authority/^0.35.0-prerelease.4/actor-rdf-resolve-quad-pattern-valos-source/^1.0.0/components/context.jsonld",
+  "@id": "quar:actor-rdf-resolve-quad-pattern-valos-source",
+  "@type": "Module",
+  "requireName": "@valos/query-authority/actor-rdf-resolve-quad-pattern-valos-source",
+  "import": [
+    "varrqpvs:components/Actor/RdfResolveQuadPattern/ValosSource.jsonld"
+  ]
+}

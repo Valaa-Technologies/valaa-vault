@@ -1,5 +1,5 @@
 {
   "@valos/type-vault/enable-babel": {
-    "inUse": true
+    "inUse": false
   }
 }

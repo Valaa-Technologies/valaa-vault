@@ -1,16 +1,15 @@
 // @flow
-import { Readable } from "stream";
 
-import { vRef } from "~/raem/VRL";
-import VALEK from "~/engine/VALEK";
-import Vrapper from "~/engine/Vrapper";
+const Readable = require("stream").Readable;
 
-export type Term = (termType: string, value: any) => any;
-export type TermOrNull = Term | null;
+const vRef = require("~/raem/VRL").vRef;
+const VALEK = require("~/engine/VALEK").default;
+const Vrapper = require("~/engine/Vrapper").default;
+const Datafactory = require("./CorpusQuadDatafactory.js").default;
 
-const baseUrn = "valos:id:";
+const baseIdUrn = "valos:id:";
 
-export const dataTypes = {
+const dataTypes = {
   string: "http://www.w3.org/2001/XMLSchema#string",
   number: "http://www.w3.org/2001/XMLSchema#integer",
   boolean: "http://www.w3.org/2001/XMLSchema#boolean",
@@ -25,117 +24,255 @@ export const dataTypes = {
  * @export
  * @class CorpusQuadSource
  */
-export class CorpusQuadSource {
-  _engine = null
+class CorpusQuadSource {
+  _context = {}
+  querySessionSymbol = Symbol("_querySession")
 
   constructor (engine) {
-    this._engine = engine;
+    this.engine = engine;
+    this._context[this.querySessionSymbol] = { variables: {} };
   }
 
-  match (s?: TermOrNull, p?: TermOrNull, o?: TermOrNull, g?: TermOrNull) {
+  match (s?: any, p?: any, o?: any, g?: any, context?: any) {
     const stream = new Readable({ objectMode: true });
     const self = this;
 
-    try {
-      const quad = _parseParametes(s, p, o, g);
-      const hasSubject = (Object.keys(quad.s).length !== 0);
-      const hasPredicate = (Object.keys(quad.p).length !== 0);
-      const hasObject = (Object.keys(quad.o).length !== 0);
+    //  console.log("match parameters ",
+    //   { subject: s, predicate: p, object: o, graph: g });
 
-      if (hasSubject && hasPredicate && !hasObject) {
-        const result = self._engine.run(vRef(quad.s.id), VALEK[quad.p.searchMethod](quad.p.id));
-        _pushToStream(stream,
-          [{ subject: s, predicate: p, object: _parseResponse(result), graph: g }]);
-      } else if (hasSubject && hasPredicate && hasObject) {
-        const result = self._engine.run(vRef(quad.s.id), VALEK[quad.p.searchMethod](quad.p.id));
-        const parsedResult = _parseResponse(result);
-
-        _pushToStream(stream, (_checkTermEquality(parsedResult, o)) ?
-          [{ subject: s, predicate: p, object: o, graph: g }] : null
-        );
+    if (context) {
+      for (const key in context) {
+        if (context.hasOwnProperty(key)) self._context[key] = context[key];
       }
+    }
+
+    try {
+      const quad = _parseParametes(s, p, o, self);
+      const hasSubject = ((quad.s.value !== undefined && quad.s.value !== null)
+        || (Array.isArray(quad.s.data) && quad.s.data.length !== 0));
+      const hasPredicate = (quad.p.value !== undefined && quad.p.value !== null);
+      const hasObject = (quad.o.value !== undefined && quad.o.value !== null);
+
+      if (hasSubject && hasPredicate && hasObject) {
+        const result = _runEngine(self.engine, quad.s.id, quad.p.kuery);
+
+        if (result && Array.isArray(result)) {
+          let isMatch = false;
+          for (let i = 0; i < result.length; i++) {
+            const match = o.value.match(/<valos:id:(.*)/);
+            if (result[i].getRawId() === match[1].slice(0, match[1].length - 1)) {
+              _pushToStream(stream, [_createQuad(s, p, o)]);
+              isMatch = true;
+              break;
+            }
+          }
+          if (!isMatch) _pushToStream(stream, null);
+        } else {
+          _pushToStream(stream, (_parseResponse(result).equals(o)) ?
+            [_createQuad(s, p, o)] : null
+          );
+        }
+      } else if (hasSubject && hasPredicate && !hasObject) {
+        let result = [];
+
+        if (Array.isArray(quad.s.data) && quad.s.data.length !== 0) {
+          for (const subject of quad.s.data) {
+              result.push({
+                s: Datafactory.namedNode(`<${baseIdUrn + subject.id}>`),
+                o: _runEngine(self.engine, subject.id, quad.p.kuery),
+              });
+          }
+        } else {
+          const engineResult = _runEngine(self.engine, quad.s.id, quad.p.kuery);
+          if (Array.isArray(engineResult)) {
+            result = engineResult.map((res) => ({ o: res }));
+          } else result.push({ o: engineResult });
+        }
+        const quads = [];
+
+        result = result.filter((res) => {
+          const entry = res.o;
+          if (!quad.p.filterType || !(entry instanceof Vrapper)) return true;
+
+          return (entry.getTypeName().toLowerCase()
+            === quad.p.filterType.toLowerCase());
+        });
+
+        for (let i = 0; i < result.length; i++) {
+          const res = result[i];
+          const resultObj = _parseResponse(res.o, quad.o, self._context[self.querySessionSymbol]);
+          quads.push((resultObj) ?
+            _createQuad((res.s) ? res.s : s, p, resultObj) : null);
+        }
+        _pushToStream(stream, quads);
+      } else {
+        _pushToStream(stream, null);
+      }
+      // else if (hasSubject && !hasPredicate && !hasObject) {
+      //   const quads = [
+      //     _createQuad(quad.s.data[0], Datafactory.namedNode("<valos:name>"),
+      //       Datafactory.literal("hiya")),
+      //     _createQuad(quad.s.data[1], Datafactory.namedNode("<valos:name>"),
+      //       Datafactory.literal("moar hiya"))
+      //   ];
+
+      //   console.log("quads", quads);
+      //   _pushToStream(stream, quads);
+      // }
 
       return stream;
     } catch (e) {
-      const errMsg = `Resource kuery failed: ${e.message}`;
-
+      console.log("ErrMsg ", e.message);
       stream._read = () => {};
-      stream.destroy(errMsg);
+      stream.destroy(e.message);
       return stream;
     }
   }
 }
 
+function _runEngine (engine, id, kuery) {
+  if (engine && id && kuery) {
+    try {
+      return engine.run(vRef(id), kuery);
+    } catch (e) {
+      console.log("error: ", e.message);
+    }
+  }
+
+  return undefined;
+}
+
+function _createQuad (s, p, o) {
+  return Datafactory.quad(
+    Datafactory.namedNode(s.value), Datafactory.namedNode(p.value),
+    o, Datafactory.defaultGraph());
+}
+
 function _pushToStream (stream: Readable, data: any) {
+  console.log("Data", data);
   stream._read = () => {
     stream._read = () => {};
 
     if (Array.isArray(data) && data.length) {
       for (const obj of data) {
-        stream.push(obj);
+        if (obj) stream.push(obj);
       }
-    } else stream.push({});
+    }
 
     stream.push(null);
   };
 }
 
-function _parseParametes (s, p, o, g) {
-  const quad = {
-    s: (!s) ? {} : s,
-    p: (!p) ? { termType: "NamedNode", } : p,
-    o: (!o) ? {} : o,
-    g: (!g) ? {} : g
-  };
-
-  for (const key in quad) {
-    if (quad.hasOwnProperty(key)) {
-      const term = quad[key];
-      const iriMatch = term && term.value &&
-        typeof term.value === "string" && term.value.match(/http:\/\/valospace.org\/(.*)/);
-
-      if (iriMatch) {
-        const suffix = iriMatch[1].split("#");
-        term.id = suffix[1];
-
-        switch (suffix[0]) {
-          case "Property": term.searchMethod = "propertyValue"; break;
-          default: break;
-        }
-      }
-
-      quad[key] = term;
-    }
-  }
-
-  return quad;
-}
-
-function _checkTermEquality (termA: Object, termB: Object) {
-  if (termA.termType === "Literal" && termB === "Literal") {
-    return (termA.datatype && termB.datatype
-      && termA.datatype.termType === termB.datatype.termType
-      && termA.datatype.value === termB.datatype.value);
-  }
-
-  return (termA.termType === termB.termType && termA.value === termB.value);
-}
-
-function _parseResponse (res: any) {
-  if (res instanceof Vrapper) {
-    return {
-      termType: "NamedNode",
-      value: `<${baseUrn + res.getRawId()}>`
-    };
-  }
-
+function _parseParametes (s, p, o, source) {
   return {
-    termType: "Literal",
-    value: (res === null) ? "" :
-      (typeof res === "object" && res !== null) ? JSON.stringify(res) : res,
-    language: "",
-    datatype: {
-      termType: "NamedNode", value: dataTypes[(res === null) ? "null" : typeof res]
-    }
+    s: _getInitialTermValue(s, source, "subject"),
+    p: _getInitialTermValue(p, source, "predicate"),
+    o: _getInitialTermValue(o, source, "object")
   };
 }
+
+function _parseResponse (res: any, term: Object, session: any) {
+  if (!res) return undefined;
+
+  if (res instanceof Vrapper || (res.reference && !(res instanceof Vrapper))) {
+    const rawId = (res.reference && !(res instanceof Vrapper))
+      ? res.reference.rawId() : res.getRawId();
+
+    const resultNode
+      = Datafactory.namedNode(`<${baseIdUrn + rawId}>`);
+
+    if (term && term.variable && session) {
+      let variable = session.variables[term.variable];
+      if (!variable) variable = resultNode;
+      else if (variable && !variable.data) {
+        variable = { data: [variable, resultNode] };
+      } else variable.data.push(resultNode);
+
+      session.variables[term.variable] = variable;
+    }
+    return resultNode;
+  }
+
+  const resultValue = res.value;
+  const value = (resultValue === null)
+    ? "" : (typeof resultValue === "object" && resultValue !== null)
+    ? JSON.stringify(resultValue) : resultValue;
+
+  const datatype
+    = Datafactory.namedNode(dataTypes[(resultValue === null) ? "null" : typeof resultValue]);
+
+  return Datafactory.literal(value, datatype);
+}
+
+function _getInitialTermValue (term: any, source: CorpusQuadSource, type: String) {
+  let termData = {};
+  if (!term) return termData;
+
+  if (term.termType === "BlankNode" || term.termType === "Variable") {
+    termData.variable = term.value;
+
+    const sessionVariable
+      = source._context[source.querySessionSymbol].variables[term.value];
+    if (sessionVariable && type !== "object") {
+      termData = (Array.isArray(sessionVariable.data)
+        && sessionVariable.length !== 0)
+        ? sessionVariable : Datafactory.namedNode(sessionVariable);
+    }
+  } else termData.value = term.value;
+
+  if (Array.isArray(termData.data) && termData.data.length !== 0) {
+    for (let i = 0; i < termData.data.length; i++) {
+      termData.data[i] = _parseTerm(termData.data[i], type);
+    }
+  } else termData = _parseTerm(termData, type);
+
+  return termData;
+}
+
+function _parseTerm (term: Object, type: String) {
+  const iriMatch = term && term.value
+    && typeof term.value === "string"
+    && (term.value.match(/http:\/\/valospace.org\/(.*)/)
+    || term.value.match(/<valos:id:(.*)>/));
+
+  if (iriMatch) {
+    const suffix = iriMatch[1].split("/");
+    term.id = (suffix[1]) ? suffix[1] : suffix[0];
+
+    if (type !== "predicate") return term;
+
+    switch (suffix[0]) {
+      case "namedProperty":
+        term.kuery = VALEK.property(term.id); break;
+      case "namedPropertyValue":
+        term.kuery = VALEK.property(term.id).toField("value"); break;
+      case "property":
+        term.kuery = VALEK.toField("properties"); break;
+      case "namedRelation":
+        term.kuery = VALEK.toField("relations")
+          .find(VALEK.hasName(term.id)); break;
+      case "namedRelationTarget":
+        term.kuery = VALEK.toField("relations")
+          .find(VALEK.hasName(term.id)).toField("target"); break;
+      case "relation":
+        term.kuery = VALEK.toField("relations"); break;
+      case "media":
+      case "entity":
+        term.kuery = VALEK.toField("unnamedOwnlings");
+        term.filterType = suffix[0]; break;
+      case "ownling":
+        term.kuery = VALEK.toField("unnamedOwnlings"); break;
+      case "value":
+        term.kuery = VALEK.toField("value"); break;
+      case "target":
+        term.kuery = VALEK.toField("target"); break;
+      default:
+        delete term.id; break;
+    }
+  }
+
+  return term;
+}
+
+Object.defineProperty(exports, "__esModule", { value: true });
+module.exports = { CorpusQuadSource, dataTypes };

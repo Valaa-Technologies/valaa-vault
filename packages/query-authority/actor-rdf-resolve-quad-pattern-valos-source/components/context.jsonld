@@ -1,0 +1,12 @@
+{
+  "@context": [
+    "https://linkedsoftwaredependencies.org/bundles/npm/componentsjs/^3.0.0/components/context.jsonld",
+    {
+      "npmd": "https://linkedsoftwaredependencies.org/bundles/npm/",
+      "quar": "npmd:@valos/query-authority/^0.35.0-prerelease.4/",
+      "varrqpvs": "quar:actor-rdf-resolve-quad-pattern-valos-source/^1.0.0/"
+
+      "ActorRdfResolveQuadPatternValosSource": "varrqpvs:Actor/RdfResolveQuadPattern/ValosSource"
+    }
+  ]
+}

@@ -27,20 +27,14 @@ module.exports = {
         if (!resourceId && !Object.keys(node).length) {
           node = patch;
         } else {
-          node[rule.body] = this.extend([], [patch]);
-          if (rule.body === "vdoc:content") {
-            node[rule.body] = _splitNewlineWhitespaceSections(node[rule.body]);
-          }
+          _extendRuleBodyWithArrayPatch(this, node, rule, [patch]);
         }
       } else if (Array.isArray(patch)) {
         if (!rule.owner || (!resourceId && !Object.keys(node).length)) {
           node = this.extend([], patch);
           if (resourceId) this.documentNode[resourceId] = node;
         } else {
-          node[rule.body] = this.extend([], patch);
-          if (rule.body === "vdoc:content") {
-            node[rule.body] = _splitNewlineWhitespaceSections(node[rule.body]);
-          }
+          _extendRuleBodyWithArrayPatch(this, node, rule, patch);
         }
       } else {
         node["vdoc:pre_body"] = rule.body;
@@ -72,6 +66,15 @@ module.exports = {
     },
   },
 };
+
+function _extendRuleBodyWithArrayPatch (extender, node, rule, arrayPatch) {
+  node[rule.body] = extender.extend([], arrayPatch);
+  if (rule.body === "vdoc:content") {
+    node[rule.body] = _splitNewlineWhitespaceSections(node[rule.body]);
+  } else if (rule.body === "vdoc:entries") {
+    node[rule.body] = node[rule.body].map(_splitNewlineWhitespaceSections);
+  }
+}
 
 function _splitNewlineWhitespaceSections (value = []) {
   return [].concat(...[].concat(value)

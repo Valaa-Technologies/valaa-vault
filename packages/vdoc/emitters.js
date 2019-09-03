@@ -1,4 +1,5 @@
 const patchWith = require("@valos/tools/patchWith").default;
+const htmlEntities = require("he");
 const { vdoc: ontology } = require("./ontologies");
 
 module.exports = {
@@ -23,7 +24,7 @@ function emitBreakHTML (node, emission) {
 }
 
 function emitValueHTML (value, emission) {
-  return `${emission}${value}`;
+  return `${emission}${htmlEntities.encode(value)}`;
 }
 
 const htmlElements = Object.entries(ontology.vocabulary)
@@ -222,5 +223,5 @@ function emitReferenceHTML (node, emission, stack) {
 }
 
 function emitCharacterDataHTML (node, emission, stack) {
-  return `<code>${stack.emitNode({ ...node, "@type": "vdoc:Node" }, "")}</code>`;
+  return `<pre><code>${stack.emitNode({ ...node, "@type": "vdoc:Node" }, "")}</code></pre>`;
 }

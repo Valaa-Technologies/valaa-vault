@@ -13,5 +13,8 @@
     "access": "public"
   },
   "description": "VDoc - ValOS document interchange specification",
-  "main": "index.js"
+  "main": "index.js",
+  "dependencies": {
+    "he": "^1.2.0"
+  }
 }

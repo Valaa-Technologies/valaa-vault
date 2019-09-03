@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-prerelease.8","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"vdoc","alternateFormats":[{"label":"VDoc","uri":"vdoc.vdocld"}]};
+      var respecConfig = {"subtitle":"0.35.0-prerelease.8","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"vdoc","alternateFormats":[{"label":"VDoc","uri":"vdoc.jsonld"}]};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -131,7 +131,7 @@ VDocLD is a JSON-LD document with a well-formed tree
     </ol>
 There can be multiple first-level document nodes in a single
       VDocLD (as per JSON-LD). <strong><a href="#root_node" class="vdoc type-vdoc-reference">The tree root node</a></strong> is the singular,
-        implicit '0th-level' VDocLD node without semantics defined by
+        implicit &#x27;0th-level&#x27; VDocLD node without semantics defined by
         VDoc itself.
   <section id="node_keys" class="vdoc type-vdoc-chapter">
     <h2>Node keys</h2>
@@ -207,7 +207,7 @@ Element nodes are structural document building blocks which
       transformation operations are well-defined and deterministic even
       if multiple extensions are used at the same time. There are two
       primary mechanisms to reach this goal: global dns-registration
-      based ontology base IRI's and and extension ordering primacy
+      based ontology base IRI&#x27;s and and extension ordering primacy
       during transformations.
   <section id="extension_ontology" class="vdoc type-vdoc-chapter">
     <h2>VDoc extension ontology</h2>
@@ -323,7 +323,7 @@ VDoc core ontology specifies the vocabulary for the human facing
   </section>
 
   <section id="section_classes" class="vdoc type-vdoc-chapter">
-    <h2><em>vdoc:* a vdoc:Class</em> vocabulary</h2>
+    <h2>&#x3C;em&#x3E;vdoc:* a vdoc:Class&#x3C;/em&#x3E; vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -365,7 +365,7 @@ VDoc core ontology specifies the vocabulary for the human facing
   </section>
 
   <section id="section_properties" class="vdoc type-vdoc-chapter">
-    <h2><em>vdoc:* a vdoc:Property</em> vocabulary</h2>
+    <h2>&#x3C;em&#x3E;vdoc:* a vdoc:Property&#x3C;/em&#x3E; vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -407,7 +407,7 @@ VDoc core ontology specifies the vocabulary for the human facing
   </section>
 
   <section id="section_html_element_properties" class="vdoc type-vdoc-chapter">
-    <h2><em>vdoc: a vdoc:HTMLElementProperty</em> vocabulary</h2>
+    <h2>&#x3C;em&#x3E;vdoc: a vdoc:HTMLElementProperty&#x3C;/em&#x3E; vocabulary</h2>
       <p>Properties instanced from <a href="#HTMLElementProperty" class="vdoc type-vdoc-reference">vdoc:HTMLElementProperty</a> inherit HTML5 element semantics directly. Only those HTMl5 elements
 with structural semantic meaning are exposed via VDoc core ontology.</p>
       <p>
@@ -439,7 +439,7 @@ with structural semantic meaning are exposed via VDoc core ontology.</p>
   </section>
 
   <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h2><em>vdoc:*</em> other vocabulary</h2>
+    <h2>&#x3C;em&#x3E;vdoc:*&#x3C;/em&#x3E; other vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -499,7 +499,7 @@ with structural semantic meaning are exposed via VDoc core ontology.</p>
         <th class="vdoc type-vdoc-header">Inter-node rdf:type</th>
         <th class="vdoc type-vdoc-header">Owner property</th>
         <th class="vdoc type-vdoc-header">Body property</th>
-        <th class="vdoc type-vdoc-header">';rest' property</th>
+        <th class="vdoc type-vdoc-header">&#x27;;rest&#x27; property</th>
         <th class="vdoc type-vdoc-header">Comment</th>
       </thead>
       <tbody>

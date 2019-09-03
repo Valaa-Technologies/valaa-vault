@@ -136,7 +136,7 @@ exports.handler = async (yargv) => {
         .to("docs/sbom.cyclonedx.xml");
     const sbomvdocld = await extractVDocLD(sbomxml);
     await vlm.shell.ShellString(JSON.stringify(sbomvdocld, null, 2))
-        .to("docs/sbom.vdocld");
+        .to("docs/sbom.jsonld");
     _addDocumentToListing("sbom", sbomvdocld, {
       package: config.name, version: config.version, tags: ["PRIMARY", "SBOM"],
     });
@@ -174,7 +174,7 @@ exports.handler = async (yargv) => {
           .to(`${targetDocumentPath}.html`);
       if (emitReVDocLD) {
         await vlm.shell.ShellString(JSON.stringify(revdocld, null, 2))
-            .to(`${targetDocumentPath}.vdocld`);
+            .to(`${targetDocumentPath}.jsonld`);
       }
       return { revdocld };
     } catch (error) {
@@ -237,7 +237,7 @@ exports.handler = async (yargv) => {
         null,
         "This SBoM document is available in following formats:",
         ref("CycloneDX XML", "sbom.cyclonedx.xml"), ",",
-        ref("VDoc JSON-LD", "sbom.vdocld"), ",",
+        ref("VDoc JSON-LD", "sbom.jsonld"), ",",
         ref("SBoM HTML", "sbom.html"), "and",
         ref("markdown", "sbom.md"), ".",
       ],

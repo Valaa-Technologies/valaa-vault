@@ -60,7 +60,7 @@
       "alternateFormats": [
         {
           "label": "VDoc",
-          "uri": "vdoc.vdocld"
+          "uri": "vdoc.jsonld"
         }
       ]
     },
@@ -544,31 +544,33 @@
           },
           " Links to resource nodese are in italics."
         ],
-        {
-          "revdoc:dfn": "#element_node",
-          "vdoc:content": [
-            {
-              "vdoc:strong": true,
-              "vdoc:content": [
-                {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    "Element node"
-                  ],
-                  "vdoc:ref": "#element_node"
-                }
-              ]
-            },
-            " is a third-or-more-level\n        node. It might be anonymous and lacks a stable and unique\n        identifiers. It MAY have a locally unique identifier. If the\n        element node and all its parent element nodes have locally\n        unique identifier then the ordered set of those identifiers\n        can be considered a document local unique identifier of the\n        element node, similar to ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "the resource identifier"
-              ],
-              "vdoc:ref": "#resource_id"
-            }
-          ]
-        }
+        [
+          {
+            "revdoc:dfn": "#element_node",
+            "vdoc:content": [
+              {
+                "vdoc:strong": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:Reference",
+                    "vdoc:content": [
+                      "Element node"
+                    ],
+                    "vdoc:ref": "#element_node"
+                  }
+                ]
+              },
+              " is a third-or-more-level\n        node. It might be anonymous and lacks a stable and unique\n        identifiers. It MAY have a locally unique identifier. If the\n        element node and all its parent element nodes have locally\n        unique identifier then the ordered set of those identifiers\n        can be considered a document local unique identifier of the\n        element node, similar to ",
+              {
+                "@type": "vdoc:Reference",
+                "vdoc:content": [
+                  "the resource identifier"
+                ],
+                "vdoc:ref": "#resource_id"
+              }
+            ]
+          }
+        ]
       ]
     },
     "node_keys": {
@@ -586,78 +588,86 @@
       "@id": "node_key_categories",
       "@type": "vdoc:NumberedList",
       "vdoc:entries": [
-        {
-          "revdoc:dfn": "#vdoc_key",
-          "vdoc:content": [
-            {
-              "vdoc:strong": true,
-              "vdoc:content": [
-                {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    "VDoc node key"
-                  ],
-                  "vdoc:ref": "#vdoc_key"
-                }
-              ]
-            },
-            " is any IRI which matches\n          a VDoc ontology context term. Its semantics are defined by\n          this specification."
-          ]
-        },
-        {
-          "revdoc:dfn": "#extension_key",
-          "vdoc:content": [
-            {
-              "vdoc:strong": true,
-              "vdoc:content": [
-                {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    "Extension node key"
-                  ],
-                  "vdoc:ref": "#extension_key"
-                }
-              ]
-            },
-            " is any IRI which\n          matches an extension ontology context term. Its semantics\n          are defined by the corresponding extension specification"
-          ]
-        },
-        {
-          "revdoc:dfn": "#generic_key",
-          "vdoc:content": [
-            {
-              "vdoc:strong": true,
-              "vdoc:content": [
-                {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    "Generic IRI key"
-                  ],
-                  "vdoc:ref": "#generic_key"
-                }
-              ]
-            },
-            " is any IRI key lacking\n          recognized ontology. It has no semantics in addition to what\n          JSON-LD specifies."
-          ]
-        },
-        {
-          "revdoc:dfn": "#identifier_key",
-          "vdoc:content": [
-            {
-              "vdoc:strong": true,
-              "vdoc:content": [
-                {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    "Identifier key"
-                  ],
-                  "vdoc:ref": "#identifier_key"
-                }
-              ]
-            },
-            " is any non-IRI key.\n          The semantics of an identifier key is defined by the node."
-          ]
-        }
+        [
+          {
+            "revdoc:dfn": "#vdoc_key",
+            "vdoc:content": [
+              {
+                "vdoc:strong": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:Reference",
+                    "vdoc:content": [
+                      "VDoc node key"
+                    ],
+                    "vdoc:ref": "#vdoc_key"
+                  }
+                ]
+              },
+              " is any IRI which matches\n          a VDoc ontology context term. Its semantics are defined by\n          this specification."
+            ]
+          }
+        ],
+        [
+          {
+            "revdoc:dfn": "#extension_key",
+            "vdoc:content": [
+              {
+                "vdoc:strong": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:Reference",
+                    "vdoc:content": [
+                      "Extension node key"
+                    ],
+                    "vdoc:ref": "#extension_key"
+                  }
+                ]
+              },
+              " is any IRI which\n          matches an extension ontology context term. Its semantics\n          are defined by the corresponding extension specification"
+            ]
+          }
+        ],
+        [
+          {
+            "revdoc:dfn": "#generic_key",
+            "vdoc:content": [
+              {
+                "vdoc:strong": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:Reference",
+                    "vdoc:content": [
+                      "Generic IRI key"
+                    ],
+                    "vdoc:ref": "#generic_key"
+                  }
+                ]
+              },
+              " is any IRI key lacking\n          recognized ontology. It has no semantics in addition to what\n          JSON-LD specifies."
+            ]
+          }
+        ],
+        [
+          {
+            "revdoc:dfn": "#identifier_key",
+            "vdoc:content": [
+              {
+                "vdoc:strong": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:Reference",
+                    "vdoc:content": [
+                      "Identifier key"
+                    ],
+                    "vdoc:ref": "#identifier_key"
+                  }
+                ]
+              },
+              " is any non-IRI key.\n          The semantics of an identifier key is defined by the node."
+            ]
+          }
+        ]
       ]
     },
     "document_node": {
@@ -788,10 +798,18 @@
             {
               "@type": "vdoc:NumberedList",
               "vdoc:entries": [
-                "namespace preferred prefix and its associated prefixIRI",
-                "depended ontologies with their prefix definitions",
-                "extension RDF vocabulary",
-                "JSON-LD context term definitions"
+                [
+                  "namespace preferred prefix and its associated prefixIRI"
+                ],
+                [
+                  "depended ontologies with their prefix definitions"
+                ],
+                [
+                  "extension RDF vocabulary"
+                ],
+                [
+                  "JSON-LD context term definitions"
+                ]
               ]
             }
           ]
@@ -860,50 +878,54 @@
             {
               "@type": "vdoc:BulletList",
               "vdoc:entries": [
-                {
-                  "revdoc:dfn": "#extraction_key_pattern",
-                  "vdoc:content": [
-                    {
-                      "vdoc:strong": true,
-                      "vdoc:content": [
-                        {
-                          "@type": "vdoc:Reference",
-                          "vdoc:content": [
-                            "key pattern matcher"
-                          ],
-                          "vdoc:ref": "#extraction_key_pattern"
-                        }
-                      ]
-                    },
-                    " is\n              matched against each source graph node dictionary key to\n              see if the key matches the rule and to parse the\n              extraction rule parameters"
-                  ]
-                },
-                {
-                  "revdoc:dfn": "#extraction_action",
-                  "vdoc:content": [
-                    {
-                      "vdoc:strong": true,
-                      "vdoc:content": [
-                        {
-                          "@type": "vdoc:Reference",
-                          "vdoc:content": [
-                            "extraction action"
-                          ],
-                          "vdoc:ref": "#extraction_action"
-                        }
-                      ]
-                    },
-                    " specifies\n              how the extraction rule parameters and ",
-                    {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
-                        "extraction context"
-                      ],
-                      "vdoc:ref": "extraction context"
-                    },
-                    " is interpreted as a set of mutations on the current\n              target VDocLD document node"
-                  ]
-                }
+                [
+                  {
+                    "revdoc:dfn": "#extraction_key_pattern",
+                    "vdoc:content": [
+                      {
+                        "vdoc:strong": true,
+                        "vdoc:content": [
+                          {
+                            "@type": "vdoc:Reference",
+                            "vdoc:content": [
+                              "key pattern matcher"
+                            ],
+                            "vdoc:ref": "#extraction_key_pattern"
+                          }
+                        ]
+                      },
+                      " is\n              matched against each source graph node dictionary key to\n              see if the key matches the rule and to parse the\n              extraction rule parameters"
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "revdoc:dfn": "#extraction_action",
+                    "vdoc:content": [
+                      {
+                        "vdoc:strong": true,
+                        "vdoc:content": [
+                          {
+                            "@type": "vdoc:Reference",
+                            "vdoc:content": [
+                              "extraction action"
+                            ],
+                            "vdoc:ref": "#extraction_action"
+                          }
+                        ]
+                      },
+                      " specifies\n              how the extraction rule parameters and ",
+                      {
+                        "@type": "vdoc:Reference",
+                        "vdoc:content": [
+                          "extraction context"
+                        ],
+                        "vdoc:ref": "extraction context"
+                      },
+                      " is interpreted as a set of mutations on the current\n              target VDocLD document node"
+                    ]
+                  }
+                ]
               ]
             }
           ]
@@ -995,9 +1017,15 @@
             {
               "@type": "vdoc:BulletList",
               "vdoc:entries": [
-                "Improved discoverability via integrated documentation and code\n          completion",
-                "Implicitly well-formed primitives and structures where\n          possible, validation of input where not",
-                "Improved readability of the document in contexts where the\n          primary document source graph is expressed in native code"
+                [
+                  "Improved discoverability via integrated documentation and code\n          completion"
+                ],
+                [
+                  "Implicitly well-formed primitives and structures where\n          possible, validation of input where not"
+                ],
+                [
+                  "Improved readability of the document in contexts where the\n          primary document source graph is expressed in native code"
+                ]
               ]
             }
           ]

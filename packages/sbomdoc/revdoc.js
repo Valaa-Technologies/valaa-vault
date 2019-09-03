@@ -22,7 +22,7 @@ module.exports = {
     specStatus: "unofficial",
     editors: authors("iridian"),
     shortName: "sbomdoc",
-    alternateFormats: [{ label: "VDoc", uri: "sbomdoc.vdocld" }],
+    alternateFormats: [{ label: "VDoc", uri: "sbomdoc.jsonld" }],
   },
   "chapter#abstract>0": [
     `This document specifies SBomDoc, a `,

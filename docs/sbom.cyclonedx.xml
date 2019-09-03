@@ -227,20 +227,6 @@
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>hosted-git-info</name>
-            <version>2.8.4</version>
-            <description>
-                <![CDATA[Provides metadata and conversions from repository urls for Github, Bitbucket and Gitlab]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>ISC</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/hosted-git-info@2.8.4</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
             <name>graceful-fs</name>
             <version>4.2.2</version>
             <description>
@@ -252,6 +238,20 @@
                 </license>
             </licenses>
             <purl>pkg:npm/graceful-fs@4.2.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>hosted-git-info</name>
+            <version>2.8.4</version>
+            <description>
+                <![CDATA[Provides metadata and conversions from repository urls for Github, Bitbucket and Gitlab]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>ISC</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/hosted-git-info@2.8.4</purl>
             <modified>false</modified>
         </component>
         <component type="library">

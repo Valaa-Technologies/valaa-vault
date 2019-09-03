@@ -1439,10 +1439,18 @@
             {
               "@type": "vdoc:BulletList",
               "vdoc:entries": [
-                "Media content import/export tools",
-                "Complete partition to file system hierarchy save/load tools",
-                "Event log introspection and manipulation tools",
-                "etc."
+                [
+                  "Media content import/export tools"
+                ],
+                [
+                  "Complete partition to file system hierarchy save/load tools"
+                ],
+                [
+                  "Event log introspection and manipulation tools"
+                ],
+                [
+                  "etc."
+                ]
               ]
             }
           ]
@@ -1457,8 +1465,12 @@
                 {
                   "@type": "vdoc:NumberedList",
                   "vdoc:entries": [
-                    "provided by ValOS core authorities, and",
-                    "are available for an anonymous consumer with nothing but\n          a client capable of running the ValOS gateway runtime which\n          the authority itself provides (with reasonable concessions\n          for the authority to prevent DDOS attacks)"
+                    [
+                      "provided by ValOS core authorities, and"
+                    ],
+                    [
+                      "are available for an anonymous consumer with nothing but\n          a client capable of running the ValOS gateway runtime which\n          the authority itself provides (with reasonable concessions\n          for the authority to prevent DDOS attacks)"
+                    ]
                   ]
                 }
               ]

@@ -60,7 +60,7 @@
       "alternateFormats": [
         {
           "label": "VDoc",
-          "uri": "index.vdocld"
+          "uri": "index.jsonld"
         }
       ]
     },
@@ -123,8 +123,12 @@
             {
               "@type": "vdoc:NumberedList",
               "vdoc:entries": [
-                "emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD",
-                "extract + emit: a roundtrip starting from valospace into VDocLD back into valospace"
+                [
+                  "emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD"
+                ],
+                [
+                  "extract + emit: a roundtrip starting from valospace into VDocLD back into valospace"
+                ]
               ]
             }
           ]

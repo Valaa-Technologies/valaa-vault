@@ -1,0 +1,242 @@
+[
+  {
+    "@id": "https://valospace.org/type-vault/AssortedTutorials",
+    "@context": {
+      "@base": "https://valospace.org/type-vault/AssortedTutorials#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "vdoc": "https://valospace.org/vdoc#",
+      "vdoc:content": {
+        "@id": "https://valospace.org/vdoc#content",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/vdoc#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:headers": {
+        "@id": "https://valospace.org/vdoc#headers",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:cell": {
+        "@id": "https://valospace.org/vdoc#cell",
+        "@container": "@list",
+        "@type": "@id"
+      }
+    },
+    "dc:title": "Assorted tutorials",
+    "vdoc:tags": [
+      "PRIMARY",
+      "HOW_TO"
+    ],
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Jaradacl",
+          "url": "https://valaatech.github.io/fabric/authors/Jaradacl",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "assortedTutorials"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is a collection of tutorials and possibly other notes",
+        " created by Jaradacl based on the tasks given. (During first few days at least)"
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is part of the toolset workspace ",
+        {
+          "@type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/type-vault"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/type-vault"
+        },
+        " (of domain ",
+        {
+          "@type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/kernel"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/kernel"
+        },
+        ") which is ",
+        "A valma toolset for managing valos vault monorepository workspaces"
+      ]
+    },
+    "how_to_create_revdoc": {
+      "@id": "how_to_create_revdoc",
+      "dc:title": "How to create RevDoc",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This is a step-by-step guide on how to create RevDoc using cli.",
+        {
+          "vdoc:content": [
+            {
+              "@type": "vdoc:NumberedList",
+              "vdoc:entries": [
+                [
+                  "Ensure you have python installed."
+                ],
+                [
+                  "Navigate to the folder you want your revdoc.js to reside and run the following command: ",
+                  {
+                    "@type": "revdoc:CommandLineInteraction",
+                    "vdoc:entries": [
+                      [
+                        "",
+                        "$ ",
+                        {
+                          "@type": "revdoc:Invokation",
+                          "vdoc:words": [
+                            {
+                              "@type": "revdoc:Command",
+                              "vdoc:content": [
+                                "vlm"
+                              ]
+                            },
+                            "write-revdoc",
+                            "YOUR_DOCUMENT_NAME_WITHOUT_FILE_EXTENSION"
+                          ]
+                        }
+                      ]
+                    ]
+                  },
+                  " Note: If you create your RevDoc under the revdocs/ folder, ",
+                  "your HTML and VDocLD files will be generated to the project root"
+                ],
+                [
+                  "You will now be asked the following information: ",
+                  {
+                    "vdoc:content": [
+                      {
+                        "@type": "vdoc:BulletList",
+                        "vdoc:entries": [
+                          [
+                            "Title of the document: This is human-readable title of the document."
+                          ],
+                          [
+                            "ReSpec short name"
+                          ],
+                          [
+                            "Document editors: Comma-separated value of the editors of your document."
+                          ],
+                          [
+                            "Document authors: Comma-separated value of the authors of your document."
+                          ]
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                [
+                  "Next navigate to the root of your project and run the following command ",
+                  {
+                    "@type": "revdoc:CommandLineInteraction",
+                    "vdoc:entries": [
+                      [
+                        "",
+                        "$ ",
+                        {
+                          "@type": "revdoc:Invokation",
+                          "vdoc:words": [
+                            {
+                              "@type": "revdoc:Command",
+                              "vdoc:content": [
+                                "vlm"
+                              ]
+                            },
+                            "regenerate-docs"
+                          ]
+                        }
+                      ]
+                    ]
+                  },
+                  " This will create HTML and VDocLD files based on your RevDoc"
+                ],
+                [
+                  "Now run the following command ",
+                  {
+                    "@type": "revdoc:CommandLineInteraction",
+                    "vdoc:entries": [
+                      [
+                        "",
+                        "$ ",
+                        {
+                          "@type": "revdoc:Invokation",
+                          "vdoc:words": [
+                            {
+                              "@type": "revdoc:Command",
+                              "vdoc:content": [
+                                "python"
+                              ]
+                            },
+                            "-m",
+                            "SimpleHTTPServer"
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ],
+                [
+                  "Open browser and navigate to the localhost in the port you just opened. (8000 by default)"
+                ],
+                [
+                  "Your HTML and VDocLD files can now be found ",
+                  "under docs/ in the same path as where you saved your RevDoc file; ",
+                  "for example if you saved your RevDoc under packages/type-vault ",
+                  "it can now be found under docs/packages/type-vault."
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "@type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "how_to_create_revdoc"
+      }
+    ]
+  }
+]

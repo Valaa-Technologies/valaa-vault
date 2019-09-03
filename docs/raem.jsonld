@@ -64,7 +64,7 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This library provides the definitions and reference implementation\n    for the fundamental ",
+        "This library provides the definitions and reference implementation\nfor the fundamental ",
         {
           "@type": "vdoc:CharacterData",
           "vdoc:content": [
@@ -119,7 +119,7 @@
       "@id": "introduction",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This library provides the definitions and reference implementations\n    for the fundamental ",
+        "This library provides the definitions and reference implementations\nfor the fundamental ",
         {
           "@type": "vdoc:CharacterData",
           "vdoc:content": [
@@ -135,6 +135,7 @@
         },
         " systems.",
         null,
+        "",
         {
           "vdoc:quote": true,
           "vdoc:content": [
@@ -146,11 +147,13 @@
                   "resource"
                 ]
               },
-              " represents a well-defined part of\n      the world. It has a well-defined state at each particular moment in time."
+              " represents a well-defined part of\n  the world. It has a well-defined state at each particular moment in time."
             ]
           ]
         },
+        "",
         null,
+        "",
         {
           "vdoc:quote": true,
           "vdoc:content": [
@@ -162,12 +165,13 @@
                   "event"
                 ]
               },
-              " represents a dynamic change to a\n      resource by describing the change from previous to subsequent resource\n      states at a particular time."
+              " represents a dynamic change to a\n  resource by describing the change from previous to subsequent resource\n  states at a particular time."
             ]
           ]
         },
+        "",
         null,
-        "The interplay of these distinct yet interwoven systems forms the\n    foundation of the Valaa Open System."
+        "The interplay of these distinct yet interwoven systems forms the\nfoundation of the Valaa Open System."
       ]
     },
     "readme": {
@@ -238,7 +242,7 @@
                   "ghost instancing"
                 ]
               },
-              " mechanism which unifies the object\n        oriented instantiation and inheritance principles into a single\n        but powerful mechanism for ValOS resources."
+              " mechanism which unifies the object\n    oriented instantiation and inheritance principles into a single\n    but powerful mechanism for ValOS resources."
             ],
             [
               {
@@ -247,7 +251,7 @@
                   "resource couplings"
                 ]
               },
-              " mechanism which allows referential\n        integrity and the definition of different types of reference\n        semantics like ownership, global references and local references."
+              " mechanism which allows referential\n    integrity and the definition of different types of reference\n    semantics like ownership, global references and local references."
             ],
             [
               {
@@ -256,7 +260,7 @@
                   "urn:valos"
                 ]
               },
-              " specification which defines globally unique\n        identifiers for ValOS resources."
+              " specification which defines globally unique\n    identifiers for ValOS resources."
             ],
             [
               {
@@ -274,7 +278,7 @@
                   "valospace"
                 ]
               },
-              " definition as a distributed set of resources\n        containing references to each other using the VRLs."
+              " definition as a distributed set of resources\n    containing references to each other using the VRLs."
             ],
             [
               {
@@ -283,14 +287,14 @@
                   "partitions"
                 ]
               },
-              " mechanism which allows for unlimited scalability of\n      the ",
+              " mechanism which allows for unlimited scalability of\n    the ",
               {
                 "@type": "vdoc:CharacterData",
                 "vdoc:content": [
                   "valospace"
                 ]
               },
-              " into a singular globally distributed and\n      unified object space."
+              " into a singular globally distributed and\n    unified object space."
             ]
           ]
         },
@@ -411,11 +415,7 @@
       "dc:title": "ValOS URLs, urn:valos and raw id's",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "ValOS URL is used to specify a parameterized location reference to a\n        ValOS Resource. It has two major parts separated by the URI fragment\n        separator `#`: *partition URI* part and a *local reference* part.",
-        null,
-        "*Partition URI* identifies the target authority and partition of\n        the reference. It corresponds to scheme, hierarchical and query parts\n        of an URI; everything but the fragment. Its precise structure and\n        interpretation is specified by the scheme but typically the scheme and\n        hierarchical part identify an authority and query part identifies\n        a partition.",
-        null,
-        "*Local reference* identifies a particular resource inside a partition\n        but also contains optional *coupling*, *ghost path*, *lens* (and other)\n        parts which further parameterize the reference itself. It corresponds\n        to the URI fragment part but has sub-structure which is specified in\n        this document.",
+        "ValOS URL is used to specify a parameterized location reference to a\nValOS Resource. It has two major parts separated by the URI fragment\nseparator `#`: *partition URI* part and a *local reference* part.\n\n*Partition URI* identifies the target authority and partition of\nthe reference. It corresponds to scheme, hierarchical and query parts\nof an URI; everything but the fragment. Its precise structure and\ninterpretation is specified by the scheme but typically the scheme and\nhierarchical part identify an authority and query part identifies\na partition.\n\n*Local reference* identifies a particular resource inside a partition\nbut also contains optional *coupling*, *ghost path*, *lens* (and other)\nparts which further parameterize the reference itself. It corresponds\nto the URI fragment part but has sub-structure which is specified in\nthis document.",
         {
           "@id": "valos_iri_structure"
         },
@@ -447,26 +447,26 @@
       "dc:title": "Curious dualisms of *partition URI* and *local reference*",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "The division between partition URI and local reference has many curious\n          dualistic qualities: backend vs. frontend, hierarchical vs. flat,\n          routing vs. computation, extensible vs. fixed, absolute vs. contextual,\n          coarse vs. granular, self-contained vs. part-of-a-whole.",
+        "The division between partition URI and local reference has many curious\ndualistic qualities: backend vs. frontend, hierarchical vs. flat,\nrouting vs. computation, extensible vs. fixed, absolute vs. contextual,\ncoarse vs. granular, self-contained vs. part-of-a-whole.",
         {
           "dc:title": "Partition URI domain is backend, local reference domain is front-end",
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "ValOS backends deal with the indivisible partitions and thus don't care\n          about the particularities of local references to individual resources.\n          This corresponds to how in web architecture URI fragments are not sent\n          to backend with resource requests. Conversely, ValOS frontends don't\n          care where a resource comes from once it has been loaded, but about its\n          identity, relationships and the parameters of those relationships. This\n          is reflected in how frontend code regularily drops the partition URI."
+            "ValOS backends deal with the indivisible partitions and thus don't care\nabout the particularities of local references to individual resources.\nThis corresponds to how in web architecture URI fragments are not sent\nto backend with resource requests. Conversely, ValOS frontends don't\ncare where a resource comes from once it has been loaded, but about its\nidentity, relationships and the parameters of those relationships. This\nis reflected in how frontend code regularily drops the partition URI."
           ]
         },
         {
           "dc:title": "Partition URI structure is specified by the scheme, local reference structure is specified by ValOS",
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "By the nature of its distributed event sourcing architecture ValOS\n          focuses heavily on the frontend. The cross-compatibility between\n          components is driven by how new backends can integrate and talk with\n          existing front-end clients. This is facilitated by front-end plugin\n          systems which enables new ValOS URI schemes to specify new routing\n          solutions and fundamentally new backend infrastructures, as long as\n          said infrastructures can route ValOS event streams to clients. This\n          corresponds to how ValOS doesn't specify how a *partition URI*\n          identifies and locates partitions and authorities but leaves it to\n          the scheme specifications and their reference implementations of\n          frontend plugins."
+            "By the nature of its distributed event sourcing architecture ValOS\nfocuses heavily on the frontend. The cross-compatibility between\ncomponents is driven by how new backends can integrate and talk with\nexisting front-end clients. This is facilitated by front-end plugin\nsystems which enables new ValOS URI schemes to specify new routing\nsolutions and fundamentally new backend infrastructures, as long as\nsaid infrastructures can route ValOS event streams to clients. This\ncorresponds to how ValOS doesn't specify how a *partition URI*\nidentifies and locates partitions and authorities but leaves it to\nthe scheme specifications and their reference implementations of\nfrontend plugins."
           ]
         },
         {
           "dc:title": "Partitions URI's identify self-contained wholes, resource references need their context",
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "Web architecture specifies that all or none of the document is\n          retrieved. This corresponds to the behaviour of ValOS partitions which\n          are always retrieved as a whole. Partition URI's contain all and\n          nothing but the components which identify web resources, that is\n          everything but the fragment."
+            "Web architecture specifies that all or none of the document is\nretrieved. This corresponds to the behaviour of ValOS partitions which\nare always retrieved as a whole. Partition URI's contain all and\nnothing but the components which identify web resources, that is\neverything but the fragment."
           ]
         },
         {
@@ -480,175 +480,14 @@
       "@id": "resource_id",
       "dc:title": "resource-id",
       "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "Resource id is the NSS part of an urn:valos URI. It globally uniquely\n          identifies a *referenced resource*:",
-        null,
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "resource-id        = primary-part [ \"/\" secondary-part ]"
-          ]
-        },
-        null,
-        "The first, non-optional *primary* part globally uniquely identifies a\n          freely movable *primary* resource. If no secondary part exists this\n          resource is also the referenced resource. If the secondary part exists\n          it identifies a structural sub-resource which is deterministic to\n          the primary resource.\n          The referenced resource is then this sub-resource.",
-        null,
-        "Two resource ids refer to the same resource iff their canonical string\n          representations are lexically equivalent. Notably:",
-        {
-          "@type": "vdoc:NumberedList",
-          "vdoc:entries": [
-            [
-              "both parts are case sensitive. If a part specification refers to a\n            case insensitive external naming system it must specify a canonical\n            representation.\n            It is recommended that this representation be all-lowercase."
-            ],
-            [
-              "no redundant encoding. If a part contains encoding schemes then any\n            characters or tokens which can expressed without encoding must not\n            be encoded."
-            ]
-          ]
-        },
-        {
-          "@id": "primary_part"
-        },
-        {
-          "@id": "secondary_part"
-        }
-      ]
-    },
-    "primary_part": {
-      "@id": "primary_part",
-      "dc:title": "primary-part - restricted naming, free ownership",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "The primary id part has a very restricted character set of ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "unreserved"
-          ]
-        },
-        "as specified in the ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "URI specification"
-          ],
-          "vdoc:ref": "https://tools.ietf.org/html/rfc3986"
-        },
-        ".",
-        null,
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "primary-part       = *( unreserved )"
-          ]
-        },
-        null,
-        "The *primary* part must be globally unique.\n          Note: uuid v4 is recommended for now, but eventually primary id\n          generation should tied to the deterministic event id chain. This in\n          turn should be seeded by some ValOS authority.",
-        null,
-        "Note: when using base64 encoded values as primary id, use ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "url-and-filename-ready base64url characters"
-          ],
-          "vdoc:ref": "https://tools.ietf.org/html/rfc4648#section-5"
-        },
-        ".",
-        null,
-        "Note: derivedId currently used by the codebase uses only the primary\n          id but breaks the above character set requirement, as it uses base64\n          encoding with ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "+"
-          ]
-        },
-        " and ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "/"
-          ]
-        },
-        ". For backwards\n          compatibility they are permitted, but ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "considered equal to the base64url"
-          ],
-          "vdoc:ref": "https://tools.ietf.org/html/rfc7515#appendix-C"
-        },
-        "using ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "+"
-          ]
-        },
-        " <-> ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "-"
-          ]
-        },
-        " and ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "/"
-          ]
-        },
-        " <-> ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "_"
-          ]
-        },
-        " character mappings."
-      ]
-    },
-    "secondary_part": {
-      "@id": "secondary_part",
-      "dc:title": "secondary-part - lenient naming, restricted ownership",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "The *secondary* id part is a qualified name which can be expanded into\n          an URI. This URI then defines how the referred resource is determined\n          from the primary resource.",
-        null,
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "\n\n            secondary-part    = prefix *( pchar / \"/\" )\n            prefix            = *( unreserved / pct-encoded / sub-delims / \"@\" ) \":\""
-          ]
-        },
-        "The expansion is done by replacing the prefix with a corresponding\n          value. Currently the only allowed prefixes and their semantics is\n          limited to the exclusive list of three entries:",
-        null,
-        {
-          "vdoc:content": [
-            {
-              "@type": "vdoc:NumberedList",
-              "vdoc:entries": [
-                [
-                  "prefix `@:` - instance-ghost ids\n              `urn:valos:ba54/@:b7e4` reads as \"inside the instanced resource\n              `ba54` the ghost of the regular resource `b7e4`\".\n              The expansion of the prefix `@:` is `valos:urn:` itself.\n              This means nested ghost paths are allowed, like so:\n              `urn:valos:f00b/@:ba54/@:b7e4` reads as \"inside the instance\n              `f00b` the ghost of `urn:valos:ba54/@:b7e4`."
-                ],
-                [
-                  "prefix `.:` - property ids\n              `urn:valos:f00b/.:propName` - a directly owned Property resource\n              with a constant name `propName` and prototype which is dynamically\n              linked to the corresponding Property in the prototype of\n              `urn:valos:f00b`, like so: `${prototype(\"urn:valos:f00b\")}/.:propName`."
-                ],
-                [
-                  "prefix `$:` - virtual resource ids\n              permanently immaterial ghosts with nevertheless separate identities.\n              When used as prototype with instance-ghosts allows separate\n              instantiation of the same fundamental prototype in the same instance:\n              `urn:valos:f00b/$:1/@:b74e`\n              `urn:valos:f00b/$:2/@:b74e`\n              `urn:valos:f00b/$:textsalt/@:b74e`"
-                ]
-              ]
-            }
-          ]
-        },
-        null,
-        "Resources identified by these parts are tightly bound to the resource\n          identified by the primary part (which must exist). They must be always\n          directly or indirectly owned by the primary resource."
-      ]
+      "vdoc:content": []
     },
     "vrl": {
       "@id": "vrl",
       "dc:title": "VRL",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Javascript class which implements ValOS reference URI and associated\n        operations."
+        "Javascript class which implements ValOS reference URI and associated\noperations."
       ]
     },
     "ontology": {

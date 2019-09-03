@@ -22,7 +22,7 @@ module.exports = {
     specStatus: "unofficial",
     editors: authors("iridian"),
     shortName: "twindoc",
-    alternateFormats: [{ label: "VDoc", uri: "index.vdocld" }],
+    alternateFormats: [{ label: "VDoc", uri: "index.jsonld" }],
   },
   "chapter#abstract>0": [
     `This document specifies TwinDoc, a `,

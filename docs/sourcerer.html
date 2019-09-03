@@ -15,8 +15,8 @@
   <body>
     
   <section id="abstract" class="vdoc type-vdoc-chapter">This library provides the definitions and reference implementation
-    of the ValOS sourcerer architecture which is used to route <code><span class="vdoc type-vdoc-node">ValOS event streams</span>
-</code>.
+    of the ValOS sourcerer architecture which is used to route <pre><code><span class="vdoc type-vdoc-node">ValOS event streams</span>
+</code></pre>.
   </section>
 
   <section id="sotd" class="vdoc type-vdoc-chapter">This document is part of the library workspace <a href="https://valospace.org/sourcerer" class="vdoc type-revdoc-package"><em>@valos/sourcerer</em></a> (of domain <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which is ValOS Sourcerer API, schema
@@ -26,7 +26,7 @@
   </section>
 
   <section id="ontology" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-sourcerer:</em> library @valos/sourcerer ontology</h2>
+    <h2>&#x3C;em&#x3E;valos-sourcerer:&#x3C;/em&#x3E; library @valos/sourcerer ontology</h2>
 @valos/sourcerer ontology specifies the Valospace core types and
       properties directly to the @valos/kernel namespace. 
   <section id="section_prefixes" class="vdoc type-vdoc-chapter">
@@ -38,14 +38,21 @@
         <th class="vdoc type-vdoc-header">IRI</th>
       </thead>
       <tbody>
-        <tr><td>valos-sourcerer</td><td>https://valospace.org/sourcerer#</td></tr>
+        <tr><td>rdf</td><td>http://www.w3.org/1999/02/22-rdf-syntax-ns#</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>rdfs</td><td>http://www.w3.org/2000/01/rdf-schema#</td></tr>
+        <tr><td>xsd</td><td>http://www.w3.org/2001/XMLSchema#</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>owl</td><td>http://www.w3.org/2002/07/owl#</td></tr>
+        <tr><td>dc</td><td>http://purl.org/dc/elements/1.1/</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos-kernel</td><td>https://valospace.org/kernel#</td></tr>
+        <tr><td>valos-raem</td><td>https://valospace.org/raem#</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos-sourcerer</td><td>https://valospace.org/sourcerer#</td></tr>
       </tbody>
     </table>
 
   </section>
 
   <section id="section_classes" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-sourcerer:* a valos-kernel:Class</em> vocabulary</h2>
+    <h2>&#x3C;em&#x3E;valos-sourcerer:* a valos-kernel:Class&#x3C;/em&#x3E; vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -53,14 +60,21 @@
         <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
       </thead>
       <tbody>
-        
+        <tr id="EventAspect" class=" vdoc-nth-child-2n"><td><a href="#EventAspect" class="vdoc type-vdoc-reference"><em>EventAspect</em></a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>The class of resources which contain contextual attributes of a
+particular event message lifetime phase.</td></tr>
+        <tr id="EventAspects"><td><a href="#EventAspects" class="vdoc type-vdoc-reference"><em>EventAspects</em></a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>The class of resources which provide context-free container of all
+different aspects of event message lifetime as it travels through the
+ValOS sourcing streams. These properties are grouped to different
+contextual and/or functional aspects.</td></tr>
       </tbody>
     </table>
 
   </section>
 
   <section id="section_properties" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-sourcerer:* a valos-kernel:Property</em> vocabulary</h2>
+    <h2>&#x3C;em&#x3E;valos-sourcerer:* a valos-kernel:Property&#x3C;/em&#x3E; vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -70,14 +84,21 @@
         <th class="vdoc type-vdoc-header">rdfs:range</th>
       </thead>
       <tbody>
-        
+        <tr id="version" class=" vdoc-nth-child-2n"><td><a href="#version" class="vdoc type-vdoc-reference"><em>version</em></a></td><td></td><td>valos-sourcerer:EventAspects</td><td>xsd:string</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=4>The aspect version string. The version number of this specification is "0.3"</td></tr>
+        <tr id="event"><td><a href="#event" class="vdoc type-vdoc-reference"><em>event</em></a></td><td></td><td>valos-sourcerer:EventAspects</td><td>valos-raem:Event</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=4>The aspect which contains the raem model event payload.</td></tr>
+        <tr id="command" class=" vdoc-nth-child-2n"><td><a href="#command" class="vdoc type-vdoc-reference"><em>command</em></a></td><td></td><td>valos-sourcerer:EventAspects</td><td>valos-sourcerer:CommandAspect</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=4>The aspect which contains the client-generated command properties.</td></tr>
+        <tr id="log"><td><a href="#log" class="vdoc type-vdoc-reference"><em>log</em></a></td><td></td><td>valos-sourcerer:EventAspects</td><td>valos-sourcerer:LogAspect</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=4>The aspect which contains the authority-confirmed event log properties.</td></tr>
       </tbody>
     </table>
 
   </section>
 
   <section id="section_types" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-sourcerer:* a valos-raem:Type</em> vocabulary</h2>
+    <h2>&#x3C;em&#x3E;valos-sourcerer:* a valos-raem:Type&#x3C;/em&#x3E; vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -93,7 +114,7 @@
   </section>
 
   <section id="section_fields" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-sourcerer:* a valos-raem:Field*</em> vocabulary</h2>
+    <h2>&#x3C;em&#x3E;valos-sourcerer:* a valos-raem:Field*&#x3C;/em&#x3E; vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -112,7 +133,7 @@
   </section>
 
   <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-sourcerer:*</em> other vocabulary:</h2>
+    <h2>&#x3C;em&#x3E;valos-sourcerer:*&#x3C;/em&#x3E; other vocabulary:</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -128,7 +149,7 @@
   </section>
 
   <section id="section_context" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-sourcerer:*</em> JSON-LD context term definitions</h2>
+    <h2>&#x3C;em&#x3E;valos-sourcerer:*&#x3C;/em&#x3E; JSON-LD context term definitions</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -139,7 +160,10 @@
         <th class="vdoc type-vdoc-header">@container</th>
       </thead>
       <tbody>
-        
+        <tr><td>aspects</td><td></td><td></td><td></td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos-sourcerer:event</td><td></td><td>https://valospace.org/sourcerer#event</td><td>@id</td><td></td></tr>
+        <tr><td>valos-sourcerer:command</td><td></td><td>https://valospace.org/sourcerer#command</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos-sourcerer:log</td><td></td><td>https://valospace.org/sourcerer#log</td><td>@id</td><td></td></tr>
       </tbody>
     </table>
 

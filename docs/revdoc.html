@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-prerelease.8","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.vdocld"}]};
+      var respecConfig = {"subtitle":"0.35.0-prerelease.8","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -48,7 +48,7 @@ ReVDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="section_classes" class="vdoc type-vdoc-chapter">
-    <h2><em>revdoc:* a vdoc:Class</em> vocabulary</h2>
+    <h2>&#x3C;em&#x3E;revdoc:* a vdoc:Class&#x3C;/em&#x3E; vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -64,6 +64,10 @@ ReVDoc ontology provides vocabulary and definitions which are
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>A ReSpec term definition document node</td></tr>
         <tr id="Package"><td><a href="#Package" class="vdoc type-vdoc-reference"><em>Package</em></a></td><td>vdoc:Reference</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>A package reference document node</td></tr>
+        <tr id="ABNF" class=" vdoc-nth-child-2n"><td><a href="#ABNF" class="vdoc type-vdoc-reference"><em>ABNF</em></a></td><td>vdoc:CharacterData</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>An ABNF section node</td></tr>
+        <tr id="Turtle"><td><a href="#Turtle" class="vdoc type-vdoc-reference"><em>Turtle</em></a></td><td>vdoc:CharacterData</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>An Turtle section node</td></tr>
         <tr id="Invokation" class=" vdoc-nth-child-2n"><td><a href="#Invokation" class="vdoc type-vdoc-reference"><em>Invokation</em></a></td><td>vdoc:Node</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>A command invokation document node</td></tr>
         <tr id="Command"><td><a href="#Command" class="vdoc type-vdoc-reference"><em>Command</em></a></td><td>vdoc:ContextPath</td></tr>
@@ -76,7 +80,7 @@ ReVDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="section_properties" class="vdoc type-vdoc-chapter">
-    <h2><em>revdoc:* a vdoc:Property</em> vocabulary</h2>
+    <h2>&#x3C;em&#x3E;revdoc:* a vdoc:Property&#x3C;/em&#x3E; vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -100,7 +104,7 @@ ReVDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h2><em>revdoc:</em> other vocabulary</h2>
+    <h2>&#x3C;em&#x3E;revdoc:&#x3C;/em&#x3E; other vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -147,7 +151,7 @@ ReVDoc ontology provides vocabulary and definitions which are
         <th class="vdoc type-vdoc-header">Inter-node rdf:type</th>
         <th class="vdoc type-vdoc-header">Owner property</th>
         <th class="vdoc type-vdoc-header">Body property</th>
-        <th class="vdoc type-vdoc-header">';rest' property</th>
+        <th class="vdoc type-vdoc-header">&#x27;;rest&#x27; property</th>
         <th class="vdoc type-vdoc-header">Comment</th>
       </thead>
       <tbody>
@@ -167,6 +171,24 @@ ReVDoc ontology provides vocabulary and definitions which are
         <th class="vdoc type-vdoc-header">rdf:type</th>
       </thead>
       <tbody>
+        <tr><td>abnf</td><td>abnf(text) {
+    // Add validation and maybe restructuring?
+    return {
+      // TODO(iridian, 2019-08): Figure out if there's any sense in
+      // providing language identifiers for non-natural languages.
+      ...c("https://tools.ietf.org/html/rfc5234", text),
+      "@type": "revdoc:ABNF",
+    };
+  }</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>turtle</td><td>turtle(text) {
+    // Add validation and maybe restructuring?
+    return {
+      // TODO(iridian, 2019-08): Figure out if there's any sense in
+      // providing language identifiers for non-natural languages.
+      ...c("https://www.w3.org/TR/turtle/", text),
+      "@type": "revdoc:Turtle",
+    };
+  }</td></tr>
         <tr><td>authors</td><td>authors(...authorNames) {
     const toolsetsPath = `${process.cwd()}/toolsets.json`;
     const authorLookup = (((require(toolsetsPath)["@valos/type-vault"] || {})

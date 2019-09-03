@@ -15,159 +15,161 @@
   <body>
     
   <section id="abstract" class="vdoc type-vdoc-chapter">This library provides the definitions and reference implementation
-    for the fundamental <code><span class="vdoc type-vdoc-node">ValOS Resources</span>
-</code> and <code><span class="vdoc type-vdoc-node">ValOS Events</span>
-</code> systems.
+for the fundamental <pre><code><span class="vdoc type-vdoc-node">ValOS Resources</span>
+</code></pre> and <pre><code><span class="vdoc type-vdoc-node">ValOS Events</span>
+</code></pre> systems.
   </section>
 
   <section id="sotd" class="vdoc type-vdoc-chapter">This document is part of the library workspace <a href="https://valospace.org/raem" class="vdoc type-revdoc-package"><em>@valos/raem</em></a> (of domain <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which is ValOS Resources And Events Model (ValOS-RAEM) API, Schema
   </section>
 
   <section id="introduction" class="vdoc type-vdoc-chapter">      <p>This library provides the definitions and reference implementations
-    for the fundamental <code><span class="vdoc type-vdoc-node">ValOS Resources</span>
-</code> and <code><span class="vdoc type-vdoc-node">ValOS Events</span>
-</code> systems.</p>
-      <p><quote>A ValOS Resource <code><span class="vdoc type-vdoc-node">resource</span>
-</code> represents a well-defined part of
-      the world. It has a well-defined state at each particular moment in time.</quote></p>
-      <p><quote>A ValOS Event <code><span class="vdoc type-vdoc-node">event</span>
-</code> represents a dynamic change to a
-      resource by describing the change from previous to subsequent resource
-      states at a particular time.</quote></p>
+for the fundamental <pre><code><span class="vdoc type-vdoc-node">ValOS Resources</span>
+</code></pre> and <pre><code><span class="vdoc type-vdoc-node">ValOS Events</span>
+</code></pre> systems.</p>
+      <p><quote>A ValOS Resource <pre><code><span class="vdoc type-vdoc-node">resource</span>
+</code></pre> represents a well-defined part of
+  the world. It has a well-defined state at each particular moment in time.</quote></p>
+      <p><quote>A ValOS Event <pre><code><span class="vdoc type-vdoc-node">event</span>
+</code></pre> represents a dynamic change to a
+  resource by describing the change from previous to subsequent resource
+  states at a particular time.</quote></p>
       <p>The interplay of these distinct yet interwoven systems forms the
-    foundation of the Valaa Open System.</p>
+foundation of the Valaa Open System.</p>
 
   </section>
 
   <section id="readme" class="vdoc type-vdoc-chapter">
-    <h2>@valos/raem provides ValOS Resources And Events Model `ValOS-RaEM` (/væləsˌɹɛem/)</h2>
+    <h2>@valos/raem provides ValOS Resources And Events Model &#x60;ValOS-RaEM&#x60; (/v&#xE6;l&#x259;s&#x2CC;&#x279;&#x25B;em/)</h2>
 This library provides:
     <ul>
-      <li>schema definitions for <code><span class="vdoc type-vdoc-node">Resource</span>
-</code> and the other core types.</li>
-      <li><code><span class="vdoc type-vdoc-node">Corpus</span>
-</code> component which stores in-memory representations of the resources.</li>
-      <li><code><span class="vdoc type-vdoc-node">reducers</span>
-</code> which a corpus uses to convert (<code><span class="vdoc type-vdoc-node">reduce</span>
-</code>) events into changes of its resource representations.</li>
-      <li>the kuery language <code><span class="vdoc type-vdoc-node">VALK</span>
-</code> definition and the kuery engine <code><span class="vdoc type-vdoc-node">Valker</span>
-</code>component for accessing and manipulating the resources.</li>
-      <li><code><span class="vdoc type-vdoc-node">ghost instancing</span>
-</code> mechanism which unifies the object
-        oriented instantiation and inheritance principles into a single
-        but powerful mechanism for ValOS resources.</li>
-      <li><code><span class="vdoc type-vdoc-node">resource couplings</span>
-</code> mechanism which allows referential
-        integrity and the definition of different types of reference
-        semantics like ownership, global references and local references.</li>
-      <li><code><span class="vdoc type-vdoc-node">urn:valos</span>
-</code> specification which defines globally unique
-        identifiers for ValOS resources.</li>
-      <li><code><span class="vdoc type-vdoc-node">ValOSURL</span>
-</code> specification which allows for universal locating of resources.</li>
-      <li><code><span class="vdoc type-vdoc-node">valospace</span>
-</code> definition as a distributed set of resources
-        containing references to each other using the VRLs.</li>
-      <li><code><span class="vdoc type-vdoc-node">partitions</span>
-</code> mechanism which allows for unlimited scalability of
-      the <code><span class="vdoc type-vdoc-node">valospace</span>
-</code> into a singular globally distributed and
-      unified object space.</li>
+      <li>schema definitions for <pre><code><span class="vdoc type-vdoc-node">Resource</span>
+</code></pre> and the other core types.</li>
+      <li><pre><code><span class="vdoc type-vdoc-node">Corpus</span>
+</code></pre> component which stores in-memory representations of the resources.</li>
+      <li><pre><code><span class="vdoc type-vdoc-node">reducers</span>
+</code></pre> which a corpus uses to convert (<pre><code><span class="vdoc type-vdoc-node">reduce</span>
+</code></pre>) events into changes of its resource representations.</li>
+      <li>the kuery language <pre><code><span class="vdoc type-vdoc-node">VALK</span>
+</code></pre> definition and the kuery engine <pre><code><span class="vdoc type-vdoc-node">Valker</span>
+</code></pre>component for accessing and manipulating the resources.</li>
+      <li><pre><code><span class="vdoc type-vdoc-node">ghost instancing</span>
+</code></pre> mechanism which unifies the object
+    oriented instantiation and inheritance principles into a single
+    but powerful mechanism for ValOS resources.</li>
+      <li><pre><code><span class="vdoc type-vdoc-node">resource couplings</span>
+</code></pre> mechanism which allows referential
+    integrity and the definition of different types of reference
+    semantics like ownership, global references and local references.</li>
+      <li><pre><code><span class="vdoc type-vdoc-node">urn:valos</span>
+</code></pre> specification which defines globally unique
+    identifiers for ValOS resources.</li>
+      <li><pre><code><span class="vdoc type-vdoc-node">ValOSURL</span>
+</code></pre> specification which allows for universal locating of resources.</li>
+      <li><pre><code><span class="vdoc type-vdoc-node">valospace</span>
+</code></pre> definition as a distributed set of resources
+    containing references to each other using the VRLs.</li>
+      <li><pre><code><span class="vdoc type-vdoc-node">partitions</span>
+</code></pre> mechanism which allows for unlimited scalability of
+    the <pre><code><span class="vdoc type-vdoc-node">valospace</span>
+</code></pre> into a singular globally distributed and
+    unified object space.</li>
     </ul>
 
     <ul>
-      <li>depends:<a href="@valos/tools" class="vdoc type-revdoc-package"><em>@valos/tools</em></a><code><span class="vdoc type-vdoc-node">immutable</span>
-</code></li>
-      <li>exports:<code><span class="vdoc type-vdoc-node">Corpus</span>
-</code><code><span class="vdoc type-vdoc-node">Command</span>
-</code><code><span class="vdoc type-vdoc-node">VALK</span>
-</code><code><span class="vdoc type-vdoc-node">Valker</span>
-</code><code><span class="vdoc type-vdoc-node">RAEMContentAPI</span>
-</code></li>
-      <li>valosheath:<code><span class="vdoc type-vdoc-node">Resource</span>
-</code><code><span class="vdoc type-vdoc-node">TransientFields</span>
-</code><code><span class="vdoc type-vdoc-node">Bvob</span>
-</code><code><span class="vdoc type-vdoc-node">Partition</span>
-</code></li>
-      <li>concepts:<code><span class="vdoc type-vdoc-node">ghost instancing</span>
-</code><code><span class="vdoc type-vdoc-node">partitions</span>
-</code><code><span class="vdoc type-vdoc-node">couplings</span>
-</code></li>
+      <li>depends:<a href="@valos/tools" class="vdoc type-revdoc-package"><em>@valos/tools</em></a><pre><code><span class="vdoc type-vdoc-node">immutable</span>
+</code></pre></li>
+      <li>exports:<pre><code><span class="vdoc type-vdoc-node">Corpus</span>
+</code></pre><pre><code><span class="vdoc type-vdoc-node">Command</span>
+</code></pre><pre><code><span class="vdoc type-vdoc-node">VALK</span>
+</code></pre><pre><code><span class="vdoc type-vdoc-node">Valker</span>
+</code></pre><pre><code><span class="vdoc type-vdoc-node">RAEMContentAPI</span>
+</code></pre></li>
+      <li>valosheath:<pre><code><span class="vdoc type-vdoc-node">Resource</span>
+</code></pre><pre><code><span class="vdoc type-vdoc-node">TransientFields</span>
+</code></pre><pre><code><span class="vdoc type-vdoc-node">Bvob</span>
+</code></pre><pre><code><span class="vdoc type-vdoc-node">Partition</span>
+</code></pre></li>
+      <li>concepts:<pre><code><span class="vdoc type-vdoc-node">ghost instancing</span>
+</code></pre><pre><code><span class="vdoc type-vdoc-node">partitions</span>
+</code></pre><pre><code><span class="vdoc type-vdoc-node">couplings</span>
+</code></pre></li>
     </ul>
 
   <section id="section_url_urn_id" class="vdoc type-vdoc-chapter">
-    <h2>ValOS URLs, urn:valos and raw id's</h2>
-      <p>ValOS URL is used to specify a parameterized location reference to a
-        ValOS Resource. It has two major parts separated by the URI fragment
-        separator `#`: *partition URI* part and a *local reference* part.</p>
-      <p>*Partition URI* identifies the target authority and partition of
-        the reference. It corresponds to scheme, hierarchical and query parts
-        of an URI; everything but the fragment. Its precise structure and
-        interpretation is specified by the scheme but typically the scheme and
-        hierarchical part identify an authority and query part identifies
-        a partition.</p>
-      <p>*Local reference* identifies a particular resource inside a partition
-        but also contains optional *coupling*, *ghost path*, *lens* (and other)
-        parts which further parameterize the reference itself. It corresponds
-        to the URI fragment part but has sub-structure which is specified in
-        this document.<code><span id="valos_iri_structure" class="vdoc type-vdoc-node">      <p>                                            valos-url
-┌────────────────────────────────────────────────┴─────────────────────────────────────────────────┐
+    <h2>ValOS URLs, urn:valos and raw id&#x27;s</h2>
+ValOS URL is used to specify a parameterized location reference to a
+ValOS Resource. It has two major parts separated by the URI fragment
+separator &#x60;#&#x60;: *partition URI* part and a *local reference* part.
+
+*Partition URI* identifies the target authority and partition of
+the reference. It corresponds to scheme, hierarchical and query parts
+of an URI; everything but the fragment. Its precise structure and
+interpretation is specified by the scheme but typically the scheme and
+hierarchical part identify an authority and query part identifies
+a partition.
+
+*Local reference* identifies a particular resource inside a partition
+but also contains optional *coupling*, *ghost path*, *lens* (and other)
+parts which further parameterize the reference itself. It corresponds
+to the URI fragment part but has sub-structure which is specified in
+this document.<pre><code><span id="valos_iri_structure" class="vdoc type-vdoc-node">      <p>                                            valos-url
+&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
                   partition-url                                      resource-ref
-┌───────────────────────┴────────────────────────┐ ┌──────────────────────┴────────────────────────┐
+&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510; &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
                          resource-url                                         ref-params
-┌──────────────────────────────┴────────────────────────────────┐  ┌───────────────┴───────────────┐
+&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;  &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
          authority-uri               partition-id   resource-id         coupling           lens
-┌──────────────┴───────────────┐    ┌─────┴──────┐ ┌─────┴──────┐  ┌───────┴────────┐ ┌─────┴──────┐</p>
-      <p>valaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=relations&lens=ROOT_LENS</p>
-      <p>                                                   └─────┬──────┘  └──────────────┬────────────────┘
+&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;    &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510; &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;  &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510; &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;</p>
+      <p>valaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=relations&#x26;lens=ROOT_LENS</p>
+      <p>                                                   &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;  &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
                                                         nss                  q-component
-└───┬────┘   └──────┬──────┘ └┬┘ └───────┬───────┘ └──────────────────────┬────────────────────────┘
+&#x2514;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;   &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518; &#x2514;&#x252C;&#x2518; &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518; &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
   scheme        authority    path      query                           fragment
-             └────────┬────────┘
+             &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
                   hier-part
 </p>
 </span>
-</code>
+</code></pre>
   <section id="section_dualisms" class="vdoc type-vdoc-chapter">
     <h2>Curious dualisms of *partition URI* and *local reference*</h2>
 The division between partition URI and local reference has many curious
-          dualistic qualities: backend vs. frontend, hierarchical vs. flat,
-          routing vs. computation, extensible vs. fixed, absolute vs. contextual,
-          coarse vs. granular, self-contained vs. part-of-a-whole.
+dualistic qualities: backend vs. frontend, hierarchical vs. flat,
+routing vs. computation, extensible vs. fixed, absolute vs. contextual,
+coarse vs. granular, self-contained vs. part-of-a-whole.
   <section class="vdoc type-vdoc-chapter">
     <h2>Partition URI domain is backend, local reference domain is front-end</h2>
-ValOS backends deal with the indivisible partitions and thus don't care
-          about the particularities of local references to individual resources.
-          This corresponds to how in web architecture URI fragments are not sent
-          to backend with resource requests. Conversely, ValOS frontends don't
-          care where a resource comes from once it has been loaded, but about its
-          identity, relationships and the parameters of those relationships. This
-          is reflected in how frontend code regularily drops the partition URI.
+ValOS backends deal with the indivisible partitions and thus don&#x27;t care
+about the particularities of local references to individual resources.
+This corresponds to how in web architecture URI fragments are not sent
+to backend with resource requests. Conversely, ValOS frontends don&#x27;t
+care where a resource comes from once it has been loaded, but about its
+identity, relationships and the parameters of those relationships. This
+is reflected in how frontend code regularily drops the partition URI.
   </section>
 
   <section class="vdoc type-vdoc-chapter">
     <h2>Partition URI structure is specified by the scheme, local reference structure is specified by ValOS</h2>
 By the nature of its distributed event sourcing architecture ValOS
-          focuses heavily on the frontend. The cross-compatibility between
-          components is driven by how new backends can integrate and talk with
-          existing front-end clients. This is facilitated by front-end plugin
-          systems which enables new ValOS URI schemes to specify new routing
-          solutions and fundamentally new backend infrastructures, as long as
-          said infrastructures can route ValOS event streams to clients. This
-          corresponds to how ValOS doesn't specify how a *partition URI*
-          identifies and locates partitions and authorities but leaves it to
-          the scheme specifications and their reference implementations of
-          frontend plugins.
+focuses heavily on the frontend. The cross-compatibility between
+components is driven by how new backends can integrate and talk with
+existing front-end clients. This is facilitated by front-end plugin
+systems which enables new ValOS URI schemes to specify new routing
+solutions and fundamentally new backend infrastructures, as long as
+said infrastructures can route ValOS event streams to clients. This
+corresponds to how ValOS doesn&#x27;t specify how a *partition URI*
+identifies and locates partitions and authorities but leaves it to
+the scheme specifications and their reference implementations of
+frontend plugins.
   </section>
 
   <section class="vdoc type-vdoc-chapter">
-    <h2>Partitions URI's identify self-contained wholes, resource references need their context</h2>
+    <h2>Partitions URI&#x27;s identify self-contained wholes, resource references need their context</h2>
 Web architecture specifies that all or none of the document is
-          retrieved. This corresponds to the behaviour of ValOS partitions which
-          are always retrieved as a whole. Partition URI's contain all and
-          nothing but the components which identify web resources, that is
-          everything but the fragment.
+retrieved. This corresponds to the behaviour of ValOS partitions which
+are always retrieved as a whole. Partition URI&#x27;s contain all and
+nothing but the components which identify web resources, that is
+everything but the fragment.
   </section>
 
   <section class="vdoc type-vdoc-chapter">
@@ -179,109 +181,21 @@ Web architecture specifies that all or none of the document is
 
   <section id="resource_id" class="vdoc type-vdoc-chapter">
     <h2>resource-id</h2>
-      <p>Resource id is the NSS part of an urn:valos URI. It globally uniquely
-          identifies a *referenced resource*:</p>
-      <p><code><span class="vdoc type-vdoc-node">resource-id        = primary-part [ "/" secondary-part ]</span>
-</code></p>
-      <p>The first, non-optional *primary* part globally uniquely identifies a
-          freely movable *primary* resource. If no secondary part exists this
-          resource is also the referenced resource. If the secondary part exists
-          it identifies a structural sub-resource which is deterministic to
-          the primary resource.
-          The referenced resource is then this sub-resource.</p>
-      <p>Two resource ids refer to the same resource iff their canonical string
-          representations are lexically equivalent. Notably:
-    <ol>
-      <li>both parts are case sensitive. If a part specification refers to a
-            case insensitive external naming system it must specify a canonical
-            representation.
-            It is recommended that this representation be all-lowercase.</li>
-      <li>no redundant encoding. If a part contains encoding schemes then any
-            characters or tokens which can expressed without encoding must not
-            be encoded.</li>
-    </ol>
-
-  <section id="primary_part" class="vdoc type-vdoc-chapter">
-    <h2>primary-part - restricted naming, free ownership</h2>
-      <p>The primary id part has a very restricted character set of <code><span class="vdoc type-vdoc-node">unreserved</span>
-</code>as specified in the <a href="https://tools.ietf.org/html/rfc3986" class="vdoc type-vdoc-reference">URI specification</a>.</p>
-      <p><code><span class="vdoc type-vdoc-node">primary-part       = *( unreserved )</span>
-</code></p>
-      <p>The *primary* part must be globally unique.
-          Note: uuid v4 is recommended for now, but eventually primary id
-          generation should tied to the deterministic event id chain. This in
-          turn should be seeded by some ValOS authority.</p>
-      <p>Note: when using base64 encoded values as primary id, use <a href="https://tools.ietf.org/html/rfc4648#section-5" class="vdoc type-vdoc-reference">url-and-filename-ready base64url characters</a>.</p>
-      <p>Note: derivedId currently used by the codebase uses only the primary
-          id but breaks the above character set requirement, as it uses base64
-          encoding with <code><span class="vdoc type-vdoc-node">+</span>
-</code> and <code><span class="vdoc type-vdoc-node">/</span>
-</code>. For backwards
-          compatibility they are permitted, but <a href="https://tools.ietf.org/html/rfc7515#appendix-C" class="vdoc type-vdoc-reference">considered equal to the base64url</a>using <code><span class="vdoc type-vdoc-node">+</span>
-</code> <-> <code><span class="vdoc type-vdoc-node">-</span>
-</code> and <code><span class="vdoc type-vdoc-node">/</span>
-</code> <-> <code><span class="vdoc type-vdoc-node">_</span>
-</code> character mappings.</p>
-
-  </section>
-
-  <section id="secondary_part" class="vdoc type-vdoc-chapter">
-    <h2>secondary-part - lenient naming, restricted ownership</h2>
-      <p>The *secondary* id part is a qualified name which can be expanded into
-          an URI. This URI then defines how the referred resource is determined
-          from the primary resource.</p>
-      <p><code><span class="vdoc type-vdoc-node">
-
-            secondary-part    = prefix *( pchar / "/" )
-            prefix            = *( unreserved / pct-encoded / sub-delims / "@" ) ":"</span>
-</code>The expansion is done by replacing the prefix with a corresponding
-          value. Currently the only allowed prefixes and their semantics is
-          limited to the exclusive list of three entries:</p>
-      <p>
-    <ol>
-      <li>prefix `@:` - instance-ghost ids
-              `urn:valos:ba54/@:b7e4` reads as "inside the instanced resource
-              `ba54` the ghost of the regular resource `b7e4`".
-              The expansion of the prefix `@:` is `valos:urn:` itself.
-              This means nested ghost paths are allowed, like so:
-              `urn:valos:f00b/@:ba54/@:b7e4` reads as "inside the instance
-              `f00b` the ghost of `urn:valos:ba54/@:b7e4`.</li>
-      <li>prefix `.:` - property ids
-              `urn:valos:f00b/.:propName` - a directly owned Property resource
-              with a constant name `propName` and prototype which is dynamically
-              linked to the corresponding Property in the prototype of
-              `urn:valos:f00b`, like so: `${prototype("urn:valos:f00b")}/.:propName`.</li>
-      <li>prefix `$:` - virtual resource ids
-              permanently immaterial ghosts with nevertheless separate identities.
-              When used as prototype with instance-ghosts allows separate
-              instantiation of the same fundamental prototype in the same instance:
-              `urn:valos:f00b/$:1/@:b74e`
-              `urn:valos:f00b/$:2/@:b74e`
-              `urn:valos:f00b/$:textsalt/@:b74e`</li>
-    </ol>
-</p>
-      <p>Resources identified by these parts are tightly bound to the resource
-          identified by the primary part (which must exist). They must be always
-          directly or indirectly owned by the primary resource.</p>
-
-  </section>
-</p>
 
   </section>
 
   <section id="vrl" class="vdoc type-vdoc-chapter">
     <h2>VRL</h2>
 Javascript class which implements ValOS reference URI and associated
-        operations.
+operations.
   </section>
-</p>
 
   </section>
 
   </section>
 
   <section id="ontology" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-raem:</em> library @valos/raem ontology</h2>
+    <h2>&#x3C;em&#x3E;valos-raem:&#x3C;/em&#x3E; library @valos/raem ontology</h2>
 @valos/raem ontology specifies the Valospace core types and
       properties directly to the @valos/kernel namespace. 
   <section id="section_prefixes" class="vdoc type-vdoc-chapter">
@@ -306,7 +220,7 @@ Javascript class which implements ValOS reference URI and associated
   </section>
 
   <section id="section_classes" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-raem:* a valos-kernel:Class</em> vocabulary</h2>
+    <h2>&#x3C;em&#x3E;valos-raem:* a valos-kernel:Class&#x3C;/em&#x3E; vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -356,7 +270,7 @@ the aliasOf as predicate.</td></tr>
   </section>
 
   <section id="section_properties" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-raem:* a valos-kernel:Property</em> vocabulary</h2>
+    <h2>&#x3C;em&#x3E;valos-raem:* a valos-kernel:Property&#x3C;/em&#x3E; vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -410,7 +324,7 @@ to allow for singular fields.</td></tr>
   </section>
 
   <section id="section_types" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-raem:* a valos-raem:Type</em> vocabulary</h2>
+    <h2>&#x3C;em&#x3E;valos-raem:* a valos-raem:Type&#x3C;/em&#x3E; vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -426,7 +340,7 @@ to allow for singular fields.</td></tr>
   </section>
 
   <section id="section_fields" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-raem:* a valos-raem:Field*</em> vocabulary</h2>
+    <h2>&#x3C;em&#x3E;valos-raem:* a valos-raem:Field*&#x3C;/em&#x3E; vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -445,7 +359,7 @@ to allow for singular fields.</td></tr>
   </section>
 
   <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-raem:*</em> other vocabulary:</h2>
+    <h2>&#x3C;em&#x3E;valos-raem:*&#x3C;/em&#x3E; other vocabulary:</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -461,7 +375,7 @@ to allow for singular fields.</td></tr>
   </section>
 
   <section id="section_context" class="vdoc type-vdoc-chapter">
-    <h2><em>valos-raem:*</em> JSON-LD context term definitions</h2>
+    <h2>&#x3C;em&#x3E;valos-raem:*&#x3C;/em&#x3E; JSON-LD context term definitions</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>

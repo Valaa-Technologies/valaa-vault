@@ -1,8 +1,8 @@
 [
   {
-    "@id": "https://valospace.org/sbomdoc",
+    "@id": "https://valospace.org/revdoc",
     "@context": {
-      "@base": "https://valospace.org/sbomdoc#",
+      "@base": "https://valospace.org/revdoc#",
       "sbomdoc": "https://valospace.org/sbomdoc#",
       "revdoc": "https://valospace.org/revdoc#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -37,14 +37,14 @@
         "@type": "@id"
       }
     },
-    "dc:title": "SBoMDoc - Software Bill of Materials VDoc extension",
+    "dc:title": "ReVDoc - ReSpec document VDoc extension",
     "vdoc:tags": [
       "PRIMARY",
       "ONTOLOGY"
     ],
-    "revdoc:package": "@valos/sbomdoc",
-    "revdoc:prefix": "sbomdoc",
-    "revdoc:prefixIRI": "https://valospace.org/sbomdoc#",
+    "revdoc:package": "@valos/revdoc",
+    "revdoc:prefix": "revdoc",
+    "revdoc:prefixIRI": "https://valospace.org/revdoc#",
     "revdoc:version": "0.35.0-prerelease.8",
     "respecConfig": {
       "subtitle": "0.35.0-prerelease.8",
@@ -56,11 +56,11 @@
           "github": "http://github.com/valospace"
         }
       ],
-      "shortName": "sbomdoc",
+      "shortName": "revdoc",
       "alternateFormats": [
         {
           "label": "VDoc",
-          "uri": "sbomdoc.vdocld"
+          "uri": "revdoc.jsonld"
         }
       ]
     },
@@ -68,7 +68,7 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document specifies SBomDoc, a ",
+        "This document specifies ReVDoc, a ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
@@ -80,11 +80,11 @@
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "CycloneDX BOM documents"
+            "ReSpec documents"
           ],
-          "vdoc:ref": "https://cyclonedx.org/"
+          "vdoc:ref": "https://github.com/w3c/respec"
         },
-        " in various formats."
+        "."
       ]
     },
     "sotd": {
@@ -110,11 +110,11 @@
             {
               "vdoc:em": true,
               "vdoc:content": [
-                "@valos/sbomdoc"
+                "@valos/revdoc"
               ]
             }
           ],
-          "vdoc:ref": "@valos/sbomdoc"
+          "vdoc:ref": "@valos/revdoc"
         },
         " npm package."
       ]
@@ -123,12 +123,12 @@
       "@id": "introduction",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "SBoMDoc is a VDoc extension which uses CycloneDX namespaces and\n    can emit BOM documents in various formats."
+        "ReVDoc is a VDoc extension which can produce ReSpec documents."
       ]
     },
     "ontology": {
       "@id": "ontology",
-      "dc:title": "SBoMDoc ontology",
+      "dc:title": "ReVDoc ontology",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -153,14 +153,78 @@
     },
     "prefixes": {
       "@id": "prefixes",
-      "sbomdoc": "https://valospace.org/sbomdoc#"
+      "revdoc": "https://valospace.org/revdoc#"
     },
     "vocabulary": {
       "@id": "vocabulary",
       "Document": {
-        "@type": "rdfs:class",
+        "@type": "vdoc:Class",
         "rdfs:subClassOf": "vdoc:Chapter",
-        "rdfs:comment": "A Software Bill of Materials document"
+        "rdfs:comment": "A ReSpec specification document"
+      },
+      "Example": {
+        "@type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:Node",
+        "rdfs:comment": "A ReSpec example node"
+      },
+      "Definition": {
+        "@type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:Node",
+        "rdfs:comment": "A ReSpec term definition document node"
+      },
+      "Package": {
+        "@type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:Reference",
+        "rdfs:comment": "A package reference document node"
+      },
+      "ABNF": {
+        "@type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:CharacterData",
+        "rdfs:comment": "An ABNF section node"
+      },
+      "Turtle": {
+        "@type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:CharacterData",
+        "rdfs:comment": "An Turtle section node"
+      },
+      "Invokation": {
+        "@type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:Node",
+        "rdfs:comment": "A command invokation document node"
+      },
+      "Command": {
+        "@type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:ContextPath",
+        "rdfs:comment": "A command reference node"
+      },
+      "CommandLineInteraction": {
+        "@type": "vdoc:Class",
+        "rdfs:subClassOf": "revdoc:Example",
+        "rdfs:comment": "A command line interaction sequence document node"
+      },
+      "prefix": {
+        "@type": "vdoc:Property",
+        "rdfs:domain": "revdoc:Document",
+        "rdfs:range": "rdfs:Literal",
+        "rdfs:comment": "The preferred prefix of an ontology document"
+      },
+      "prefixIRI": {
+        "@type": "vdoc:Property",
+        "rdfs:domain": "revdoc:Document",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "The IRI associated with the preferred prefix of an ontology"
+      },
+      "package": {
+        "@type": "vdoc:Property",
+        "rdfs:domain": "vdoc:Node",
+        "rdfs:range": "rdfs:Literal",
+        "rdfs:comment": "A package name"
+      },
+      "version": {
+        "@type": "vdoc:Property",
+        "rdfs:domain": "vdoc:Node",
+        "rdfs:range": "rdfs:Literal",
+        "rdfs:comment": "A semver string"
       }
     },
     "context": {
@@ -169,12 +233,12 @@
     "section_ontology_abstract": {
       "@id": "section_ontology_abstract",
       "vdoc:content": [
-        "SBoMDoc ontology provides vocabulary and definitions which are\n      tailored for representing CycloneDX SBoM analysis semantic\n      content."
+        "ReVDoc ontology provides vocabulary and definitions which are\n      tailored for emitting ReSpec html output documents."
       ]
     },
     "section_prefixes": {
       "@id": "section_prefixes",
-      "dc:title": "SBoMDoc IRI prefixes",
+      "dc:title": "ReVDoc IRI prefixes",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -201,7 +265,7 @@
     },
     "section_classes": {
       "@id": "section_classes",
-      "dc:title": "<em>sbomdoc:* a vdoc:Class</em> vocabulary",
+      "dc:title": "<em>revdoc:* a vdoc:Class</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -255,13 +319,23 @@
               }
             ]
           },
-          "vdoc:entries": []
+          "vdoc:entries": [
+            "Document",
+            "Example",
+            "Definition",
+            "Package",
+            "ABNF",
+            "Turtle",
+            "Invokation",
+            "Command",
+            "CommandLineInteraction"
+          ]
         }
       ]
     },
     "section_properties": {
       "@id": "section_properties",
-      "dc:title": "<em>sbomdoc:* a vdoc:Property</em> vocabulary",
+      "dc:title": "<em>revdoc:* a vdoc:Property</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -325,13 +399,18 @@
               }
             ]
           },
-          "vdoc:entries": []
+          "vdoc:entries": [
+            "prefix",
+            "prefixIRI",
+            "package",
+            "version"
+          ]
         }
       ]
     },
     "section_vocabulary_other": {
       "@id": "section_vocabulary_other",
-      "dc:title": "<em>sbomdoc:</em> other vocabulary",
+      "dc:title": "<em>revdoc:</em> other vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -392,15 +471,13 @@
               }
             ]
           },
-          "vdoc:entries": [
-            "Document"
-          ]
+          "vdoc:entries": []
         }
       ]
     },
     "section_context": {
       "@id": "section_context",
-      "dc:title": "SBoMDoc JSON-LD context term definitions",
+      "dc:title": "ReVDoc JSON-LD context term definitions",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -448,9 +525,9 @@
     },
     "transformations": {
       "@id": "transformations",
-      "dc:title": "SBoMDoc transformations",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
+        "ReVDoc lightly extends basic VDoc extraction with some\n      ReSpec specific primitives and specifies a ReSpec html emission\n      transformation.",
         {
           "@id": "extraction_rules"
         },
@@ -467,7 +544,7 @@
     },
     "extraction_rules": {
       "@id": "extraction_rules",
-      "dc:title": "SBoMDoc extraction rules",
+      "dc:title": "ReVDoc extraction rules",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -521,11 +598,25 @@
       ]
     },
     "extraction_rules_data": {
-      "@id": "extraction_rules_data"
+      "@id": "extraction_rules_data",
+      "example": {
+        "range": "vdoc:Example",
+        "owner": "vdoc:content",
+        "body": "vdoc:content",
+        "rest": "dc:title",
+        "comment": "Example node"
+      },
+      "ontology": {
+        "range": "vdoc:Chapter",
+        "owner": "vdoc:content",
+        "body": "vdoc:content",
+        "rest": "dc:title",
+        "comment": "Ontology specification chapter"
+      }
     },
     "extractee_api": {
       "@id": "extractee_api",
-      "dc:title": "SBoMDoc extractee API",
+      "dc:title": "ReVDoc extractee API",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -555,20 +646,27 @@
     },
     "emission_output": {
       "@id": "emission_output",
-      "dc:title": "SBoMDoc emission output",
+      "dc:title": "ReVDoc emission output",
       "@type": "vdoc:Chapter",
-      "vdoc:content": []
+      "vdoc:content": [
+        "ReVDoc emits html which makes use of ReSpec primitives."
+      ]
     },
     "emission_rules": {
       "@id": "emission_rules",
-      "dc:title": "SBoMDoc emission rules",
+      "dc:title": "ReVDoc emission rules",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         "ReVDoc provides html emission rules for ",
         {
           "vdoc:words": [
             "vdoc:Document",
-            "sbomdoc:Document"
+            "revdoc:Document",
+            "vdoc:Chapter",
+            "vdoc:Reference",
+            "revdoc:Invokation",
+            "revdoc:Command",
+            "revdoc:Example"
           ]
         }
       ]

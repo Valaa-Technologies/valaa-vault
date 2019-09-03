@@ -1,8 +1,8 @@
 [
   {
-    "@id": "https://valospace.org/revdoc",
+    "@id": "https://valospace.org/sourcerer",
     "@context": {
-      "@base": "https://valospace.org/revdoc#",
+      "@base": "https://valospace.org/sourcerer#",
       "sbomdoc": "https://valospace.org/sbomdoc#",
       "revdoc": "https://valospace.org/revdoc#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -37,17 +37,18 @@
         "@type": "@id"
       }
     },
-    "dc:title": "ReVDoc - ReSpec document VDoc extension",
+    "dc:title": "ValOS Sourcerer API, schema",
     "vdoc:tags": [
       "PRIMARY",
-      "ONTOLOGY"
+      "INTRODUCTORY",
+      "ONTOLOGY",
+      "LIBRARY"
     ],
-    "revdoc:package": "@valos/revdoc",
-    "revdoc:prefix": "revdoc",
-    "revdoc:prefixIRI": "https://valospace.org/revdoc#",
+    "revdoc:package": "@valos/sourcerer",
+    "revdoc:prefix": "valos-sourcerer",
+    "revdoc:prefixIRI": "https://valospace.org/sourcerer#",
     "revdoc:version": "0.35.0-prerelease.8",
     "respecConfig": {
-      "subtitle": "0.35.0-prerelease.8",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -56,33 +57,19 @@
           "github": "http://github.com/valospace"
         }
       ],
-      "shortName": "revdoc",
-      "alternateFormats": [
-        {
-          "label": "VDoc",
-          "uri": "revdoc.vdocld"
-        }
-      ]
+      "authors": [],
+      "shortName": "sourcerer"
     },
     "abstract": {
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document specifies ReVDoc, a ",
+        "This library provides the definitions and reference implementation\n    of the ValOS sourcerer architecture which is used to route ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:CharacterData",
           "vdoc:content": [
-            "VDoc extension"
-          ],
-          "vdoc:ref": "@valos/vdoc#extension"
-        },
-        " for extracting and emitting ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "ReSpec documents"
-          ],
-          "vdoc:ref": "https://github.com/w3c/respec"
+            "ValOS event streams"
+          ]
         },
         "."
       ]
@@ -91,44 +78,44 @@
       "@id": "sotd",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document has not been reviewed. This is a draft document and\n    may be updated, replaced or obsoleted by other documents at any\n    time.",
-        null,
-        "This document is part of the ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "ValOS core specification"
-          ],
-          "vdoc:ref": "@valos/kernel/spec"
-        },
-        ".",
-        null,
-        "The format is implemented and supported by ",
+        "This document is part of the library workspace ",
         {
           "@type": "revdoc:Package",
           "vdoc:content": [
             {
               "vdoc:em": true,
               "vdoc:content": [
-                "@valos/revdoc"
+                "@valos/sourcerer"
               ]
             }
           ],
-          "vdoc:ref": "@valos/revdoc"
+          "vdoc:ref": "@valos/sourcerer"
         },
-        " npm package."
+        " (of domain ",
+        {
+          "@type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/kernel"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/kernel"
+        },
+        ") which is ",
+        "ValOS Sourcerer API, schema"
       ]
     },
     "introduction": {
       "@id": "introduction",
       "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "ReVDoc is a VDoc extension which can produce ReSpec documents."
-      ]
+      "vdoc:content": []
     },
     "ontology": {
       "@id": "ontology",
-      "dc:title": "ReVDoc ontology",
+      "dc:title": "<em>valos-sourcerer:</em> library @valos/sourcerer ontology",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -144,6 +131,12 @@
           "@id": "section_properties"
         },
         {
+          "@id": "section_types"
+        },
+        {
+          "@id": "section_fields"
+        },
+        {
           "@id": "section_vocabulary_other"
         },
         {
@@ -153,82 +146,95 @@
     },
     "prefixes": {
       "@id": "prefixes",
-      "revdoc": "https://valospace.org/revdoc#"
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "valos-kernel": "https://valospace.org/kernel#",
+      "valos-raem": "https://valospace.org/raem#",
+      "valos-sourcerer": "https://valospace.org/sourcerer#"
     },
     "vocabulary": {
       "@id": "vocabulary",
-      "Document": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Chapter",
-        "rdfs:comment": "A ReSpec specification document"
+      "EventAspect": {
+        "@type": "valos-kernel:Class",
+        "revdoc:brief": "contextual event aspect",
+        "rdfs:comment": "The class of resources which contain contextual attributes of a\nparticular event message lifetime phase."
       },
-      "Example": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Node",
-        "rdfs:comment": "A ReSpec example node"
-      },
-      "Definition": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Node",
-        "rdfs:comment": "A ReSpec term definition document node"
-      },
-      "Package": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Reference",
-        "rdfs:comment": "A package reference document node"
-      },
-      "Invokation": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Node",
-        "rdfs:comment": "A command invokation document node"
-      },
-      "Command": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:ContextPath",
-        "rdfs:comment": "A command reference node"
-      },
-      "CommandLineInteraction": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "revdoc:Example",
-        "rdfs:comment": "A command line interaction sequence document node"
-      },
-      "prefix": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "revdoc:Document",
-        "rdfs:range": "rdfs:Literal",
-        "rdfs:comment": "The preferred prefix of an ontology document"
-      },
-      "prefixIRI": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "revdoc:Document",
-        "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "The IRI associated with the preferred prefix of an ontology"
-      },
-      "package": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "vdoc:Node",
-        "rdfs:range": "rdfs:Literal",
-        "rdfs:comment": "A package name"
+      "EventAspects": {
+        "@type": "valos-kernel:Class",
+        "revdoc:brief": "context-free container of event aspects",
+        "rdfs:comment": "The class of resources which provide context-free container of all\ndifferent aspects of event message lifetime as it travels through the\nValOS sourcing streams. These properties are grouped to different\ncontextual and/or functional aspects."
       },
       "version": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "vdoc:Node",
-        "rdfs:range": "rdfs:Literal",
-        "rdfs:comment": "A semver string"
+        "@type": "valos-kernel:Property",
+        "rdfs:domain": "valos-sourcerer:EventAspects",
+        "rdfs:range": "xsd:string",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The aspect version string. The version number of this specification is \"0.3\""
+      },
+      "event": {
+        "@type": "valos-kernel:Property",
+        "rdfs:domain": "valos-sourcerer:EventAspects",
+        "rdfs:range": "valos-raem:Event",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The aspect which contains the raem model event payload."
+      },
+      "command": {
+        "@type": "valos-kernel:Property",
+        "rdfs:domain": "valos-sourcerer:EventAspects",
+        "rdfs:range": "valos-sourcerer:CommandAspect",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The aspect which contains the client-generated command properties."
+      },
+      "log": {
+        "@type": "valos-kernel:Property",
+        "rdfs:domain": "valos-sourcerer:EventAspects",
+        "rdfs:range": "valos-sourcerer:LogAspect",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The aspect which contains the authority-confirmed event log properties."
       }
     },
     "context": {
-      "@id": "context"
+      "@id": "context",
+      "aspects": {
+        "@reverse": "valos-sourcerer:event"
+      },
+      "valos-sourcerer:event": {
+        "@id": "https://valospace.org/sourcerer#event",
+        "@type": "@id"
+      },
+      "valos-sourcerer:command": {
+        "@id": "https://valospace.org/sourcerer#command",
+        "@type": "@id"
+      },
+      "valos-sourcerer:log": {
+        "@id": "https://valospace.org/sourcerer#log",
+        "@type": "@id"
+      }
     },
     "section_ontology_abstract": {
       "@id": "section_ontology_abstract",
       "vdoc:content": [
-        "ReVDoc ontology provides vocabulary and definitions which are\n      tailored for emitting ReSpec html output documents."
+        "@valos/sourcerer ontology specifies the Valospace core types and\n      properties directly to the @valos/kernel namespace. "
       ]
     },
     "section_prefixes": {
       "@id": "section_prefixes",
-      "dc:title": "ReVDoc IRI prefixes",
+      "dc:title": "@valos/sourcerer IRI prefixes",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -255,7 +261,7 @@
     },
     "section_classes": {
       "@id": "section_classes",
-      "dc:title": "<em>revdoc:* a vdoc:Class</em> vocabulary",
+      "dc:title": "<em>valos-sourcerer:* a valos-kernel:Class</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -310,20 +316,15 @@
             ]
           },
           "vdoc:entries": [
-            "Document",
-            "Example",
-            "Definition",
-            "Package",
-            "Invokation",
-            "Command",
-            "CommandLineInteraction"
+            "EventAspect",
+            "EventAspects"
           ]
         }
       ]
     },
     "section_properties": {
       "@id": "section_properties",
-      "dc:title": "<em>revdoc:* a vdoc:Property</em> vocabulary",
+      "dc:title": "<em>valos-sourcerer:* a valos-kernel:Property</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -388,17 +389,175 @@
             ]
           },
           "vdoc:entries": [
-            "prefix",
-            "prefixIRI",
-            "package",
-            "version"
+            "version",
+            "event",
+            "command",
+            "log"
           ]
+        }
+      ]
+    },
+    "section_types": {
+      "@id": "section_types",
+      "dc:title": "<em>valos-sourcerer:* a valos-raem:Type</em> vocabulary",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "@type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "revdoc:brief"
+                ],
+                "vdoc:cell": {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "vdoc:selectField": "revdoc:brief"
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "vdoc:cell": {
+                  "vdoc:words": {
+                    "vdoc:selectField": "rdfs:subClassOf"
+                  }
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "@type": "vdoc:Header",
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": []
+        }
+      ]
+    },
+    "section_fields": {
+      "@id": "section_fields",
+      "dc:title": "<em>valos-sourcerer:* a valos-raem:Field*</em> vocabulary",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "@type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:domain",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:domain"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:range",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:range"
+                ]
+              },
+              {
+                "vdoc:cell": "@type",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdf:type"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:subPropertyOf",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subPropertyOf"
+                ]
+              },
+              {
+                "vdoc:cell": "valos-raem:coupledField",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "valos-raem:coupledField"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "@type": "vdoc:Header",
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": []
         }
       ]
     },
     "section_vocabulary_other": {
       "@id": "section_vocabulary_other",
-      "dc:title": "<em>revdoc:</em> other vocabulary",
+      "dc:title": "<em>valos-sourcerer:*</em> other vocabulary:",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -465,7 +624,7 @@
     },
     "section_context": {
       "@id": "section_context",
-      "dc:title": "ReVDoc JSON-LD context term definitions",
+      "dc:title": "<em>valos-sourcerer:*</em> JSON-LD context term definitions",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -511,154 +670,6 @@
         }
       ]
     },
-    "transformations": {
-      "@id": "transformations",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "ReVDoc lightly extends basic VDoc extraction with some\n      ReSpec specific primitives and specifies a ReSpec html emission\n      transformation.",
-        {
-          "@id": "extraction_rules"
-        },
-        {
-          "@id": "extractee_api"
-        },
-        {
-          "@id": "emission_output"
-        },
-        {
-          "@id": "emission_rules"
-        }
-      ]
-    },
-    "extraction_rules": {
-      "@id": "extraction_rules",
-      "dc:title": "ReVDoc extraction rules",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "vdoc:lookup": "extraction_rules_data",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
-            {
-              "vdoc:cell": "vdoc:selectKey",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Rule name"
-              ]
-            },
-            {
-              "vdoc:cell": "range",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Inter-node rdf:type"
-              ]
-            },
-            {
-              "vdoc:cell": "owner",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Owner property"
-              ]
-            },
-            {
-              "vdoc:cell": "body",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Body property"
-              ]
-            },
-            {
-              "vdoc:cell": "rest",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "';rest' property"
-              ]
-            },
-            {
-              "vdoc:cell": "comment",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Comment"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "extraction_rules_data": {
-      "@id": "extraction_rules_data",
-      "example": {
-        "range": "vdoc:Example",
-        "owner": "vdoc:content",
-        "body": "vdoc:content",
-        "rest": "dc:title",
-        "comment": "Example node"
-      },
-      "ontology": {
-        "range": "vdoc:Chapter",
-        "owner": "vdoc:content",
-        "body": "vdoc:content",
-        "rest": "dc:title",
-        "comment": "Ontology specification chapter"
-      }
-    },
-    "extractee_api": {
-      "@id": "extractee_api",
-      "dc:title": "ReVDoc extractee API",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "vdoc:lookup": "extractee_api_lookup",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
-            {
-              "vdoc:cell": "vdoc:selectKey",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "API identifier"
-              ]
-            },
-            {
-              "vdoc:cell": "vdoc:selectValue",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "rdf:type"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "extractee_api_lookup": {
-      "@id": "extractee_api_lookup"
-    },
-    "emission_output": {
-      "@id": "emission_output",
-      "dc:title": "ReVDoc emission output",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "ReVDoc emits html which makes use of ReSpec primitives."
-      ]
-    },
-    "emission_rules": {
-      "@id": "emission_rules",
-      "dc:title": "ReVDoc emission rules",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        "ReVDoc provides html emission rules for ",
-        {
-          "vdoc:words": [
-            "vdoc:Document",
-            "revdoc:Document",
-            "vdoc:Chapter",
-            "vdoc:Reference",
-            "revdoc:Invokation",
-            "revdoc:Command",
-            "revdoc:Example"
-          ]
-        }
-      ]
-    },
     "@type": "revdoc:Document",
     "vdoc:content": [
       {
@@ -672,9 +683,6 @@
       },
       {
         "@id": "ontology"
-      },
-      {
-        "@id": "transformations"
       }
     ]
   }

@@ -1,8 +1,8 @@
 [
   {
-    "@id": "https://valospace.org/inspire",
+    "@id": "https://valospace.org/engine",
     "@context": {
-      "@base": "https://valospace.org/inspire#",
+      "@base": "https://valospace.org/engine#",
       "sbomdoc": "https://valospace.org/sbomdoc#",
       "revdoc": "https://valospace.org/revdoc#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -48,13 +48,13 @@
         }
       ],
       "authors": [],
-      "shortName": "inspire"
+      "shortName": "engine"
     },
     "abstract": {
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is a revdoc template document 'inspire' created by create-revdoc."
+        "This document is a revdoc template document 'engine' created by write-revdoc."
       ]
     },
     "sotd": {
@@ -68,11 +68,11 @@
             {
               "vdoc:em": true,
               "vdoc:content": [
-                "@valos/inspire"
+                "@valos/engine"
               ]
             }
           ],
-          "vdoc:ref": "@valos/inspire"
+          "vdoc:ref": "@valos/engine"
         },
         " (of domain ",
         {
@@ -88,7 +88,7 @@
           "vdoc:ref": "@valos/kernel"
         },
         ") which is ",
-        "ValOS Inspire application gateway"
+        "ValOS Engine API and Schema"
       ]
     },
     "introduction": {

@@ -22,7 +22,7 @@ module.exports = {
     specStatus: "unofficial",
     editors: authors("iridian"),
     shortName: "vdoc",
-    alternateFormats: [{ label: "VDoc", uri: "vdoc.vdocld" }],
+    alternateFormats: [{ label: "VDoc", uri: "vdoc.jsonld" }],
   },
   "chapter#abstract>0": [
     `This document specifies VDoc, a `, ref("a JSON-LD", "https://www.w3.org/TR/json-ld11/"),

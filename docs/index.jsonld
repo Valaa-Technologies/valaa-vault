@@ -185,7 +185,7 @@
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "This library provides the definitions and reference implementation\n    for the fundamental ",
+            "This library provides the definitions and reference implementation\nfor the fundamental ",
             {
               "@type": "vdoc:CharacterData",
               "vdoc:content": [
@@ -205,7 +205,7 @@
         "introduction": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "This library provides the definitions and reference implementations\n    for the fundamental ",
+            "This library provides the definitions and reference implementations\nfor the fundamental ",
             {
               "@type": "vdoc:CharacterData",
               "vdoc:content": [
@@ -221,6 +221,7 @@
             },
             " systems.",
             null,
+            "",
             {
               "vdoc:quote": true,
               "vdoc:content": [
@@ -232,11 +233,13 @@
                       "resource"
                     ]
                   },
-                  " represents a well-defined part of\n      the world. It has a well-defined state at each particular moment in time."
+                  " represents a well-defined part of\n  the world. It has a well-defined state at each particular moment in time."
                 ]
               ]
             },
+            "",
             null,
+            "",
             {
               "vdoc:quote": true,
               "vdoc:content": [
@@ -248,17 +251,74 @@
                       "event"
                     ]
                   },
-                  " represents a dynamic change to a\n      resource by describing the change from previous to subsequent resource\n      states at a particular time."
+                  " represents a dynamic change to a\n  resource by describing the change from previous to subsequent resource\n  states at a particular time."
                 ]
               ]
             },
+            "",
             null,
-            "The interplay of these distinct yet interwoven systems forms the\n    foundation of the Valaa Open System."
+            "The interplay of these distinct yet interwoven systems forms the\nfoundation of the Valaa Open System."
           ]
         },
         "ontologyAbstract": {
           "vdoc:content": [
             "@valos/raem ontology specifies the Valospace core types and\n      properties directly to the @valos/kernel namespace. "
+          ]
+        },
+        "package": "@valos/raem",
+        "version": "0.35.0-prerelease.8"
+      },
+      "raem/valos-resource-id": {
+        "@id": "https://valospace.org/raem/valos-resource-id",
+        "tags": [],
+        "subProfiles": [],
+        "title": "ValOS Resource Identifier",
+        "abstract": {
+          "@type": "vdoc:Chapter",
+          "vdoc:content": [
+            "ValOS Resource Identifiers (*VRIDs*) uniquely identify valospace\nresources created and manipulated by ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "ValOS event logs"
+              ],
+              "vdoc:ref": "@valos/raem/valos-event-log"
+            },
+            ".\nVRIDs are strings with restricted grammar so that they can be embedded\ninto various URI component and list formats without encoding.\n"
+          ]
+        },
+        "introduction": {
+          "@type": "vdoc:Chapter",
+          "vdoc:content": [
+            "A VRID is the NSS part of an urn:valos URI. It is a string with two\nnested levels of syntactic structure. The outer structure consists of\n`@`-separated segments.",
+            null,
+            "",
+            {
+              "@type": "revdoc:ABNF",
+              "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+              "vdoc:content": [
+                "\n  vrid           = vgrid-segment *( \"@\" sub-segment )\n"
+              ]
+            },
+            "",
+            null,
+            "The vgrid-segment uniquely identifies a *global resource*. The\noptional sub-segments identify an unambiguous path from the\nglobal resource to a *structural sub-resource* which also is the\n*referenced resource* of the VRID. Otherwise if there are no\nsub-segments the global resource is the referenced resource.",
+            null,
+            "The inner structure consists of `$`-separated parts which specify\nthe semantics of each individual segment.",
+            null,
+            "",
+            {
+              "@type": "revdoc:ABNF",
+              "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+              "vdoc:content": [
+                "\n  vgrid-segment  = \"$\" vgrid-format-term \"$\" vgrid-body\n  sub-segment    = sub-type-term \"$\" sub-context-term \"$\" sub-body\n"
+              ]
+            },
+            "",
+            null,
+            "The identified resource (and thus the VRID itself) is always affiliated\nwith an event log in the context where the VRID appears.\nThe *term* parts refer the event log JSON-LD context term definitions,\nboth for syntactic purposes (e.g. as simple prefix expansions) as well\nas semantically (JSON-LD constructs such as index maps have semantic\nmeaning for some VRID subsegments).",
+            null,
+            "The two *body* parts carry the actual encodeURIComponent-encoded\nsegment data. The precise meaning depends on the segment type (e.g. URI\nsuffix, member access etc.).\n"
           ]
         },
         "package": "@valos/raem",
@@ -513,8 +573,12 @@
                 {
                   "@type": "vdoc:NumberedList",
                   "vdoc:entries": [
-                    "emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD",
-                    "extract + emit: a roundtrip starting from valospace into VDocLD back into valospace"
+                    [
+                      "emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD"
+                    ],
+                    [
+                      "extract + emit: a roundtrip starting from valospace into VDocLD back into valospace"
+                    ]
                   ]
                 }
               ]
@@ -1098,7 +1162,8 @@
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "valos-kernel": "https://valospace.org/kernel#",
-      "valos": "https://valospace.org/#"
+      "valos": "https://valospace.org/#",
+      "valos-raem": "https://valospace.org/raem#"
     },
     "vocabulary": {
       "@id": "vocabulary",
@@ -1533,7 +1598,7 @@
         "revdoc:brief": "destroyed script resource type",
         "rdfs:comment": "The class of valospace script resources which have been destroyed in\nthis view of the world. It only provides the external fields listed in\nTransientScripFields and TransientFields interfaces."
       },
-      "ScriptProperty": {
+      "ScopeProperty": {
         "@type": "valos-raem:Type",
         "rdfs:subClassOf": [
           "valos:Resource",
@@ -1541,13 +1606,13 @@
           "rdf:Statement"
         ],
         "revdoc:brief": "valoscript property",
-        "rdfs:comment": "The class of valospace Property resources which are expressed as\nvaloscript object properties."
+        "rdfs:comment": "The class of valospace Property resources which belong to a scope."
       },
       "scope": {
         "@type": "valos-raem:AliasField",
         "valos-raem:aliasOf": "valos:owner",
         "rdfs:subPropertyOf": "valos:owner",
-        "rdfs:domain": "valos:ScriptProperty",
+        "rdfs:domain": "valos:ScopeProperty",
         "rdfs:range": "valos:Scope",
         "restriction": {
           "@type": "owl:Restriction",
@@ -1555,11 +1620,11 @@
         },
         "valos-raem:isOwnedBy": true,
         "valos-raem:coupledField": "valos:properties",
-        "rdfs:comment": "The scope resource (and owner) of this ScriptProperty"
+        "rdfs:comment": "The scope resource (and owner) of this ScopeProperty"
       },
       "value": {
         "@type": "valos-raem:PrimaryField",
-        "rdfs:domain": "valos:ScriptProperty",
+        "rdfs:domain": "valos:ScopeProperty",
         "rdfs:range": "rdfs:Resource",
         "restriction": {
           "@type": "owl:Restriction",
@@ -1569,54 +1634,54 @@
         "valos-raem:finalDefaultValue": [
           "§void"
         ],
-        "rdfs:comment": "The value of this ScriptProperty"
+        "rdfs:comment": "The value of this ScopeProperty"
       },
       "twinspace": {
         "@type": "valos-raem:GeneratedField",
-        "rdfs:domain": "valos:ScriptProperty",
+        "rdfs:domain": "valos:ScopeProperty",
         "rdfs:range": "rdfs:Resource",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
         "valos-raem:generator": "getTwinspace",
-        "rdfs:comment": "The twinspace of this ScriptProperty. Equates to the expanded prefix\nof the valos:name of this ScriptProperty using the context of this\npartition. Additionally if the local part of the valos:name is an empty\nstring then the valos:value of this ScriptProperty defines\nthe twinspace id of the scope resource for this twinspace."
+        "rdfs:comment": "The twinspace of this ScopeProperty. Equates to the expanded prefix\nof the valos:name of this ScopeProperty using the context of this\npartition. Additionally if the local part of the valos:name is an empty\nstring then the valos:value of this ScopeProperty defines\nthe twinspace id of the scope resource for this twinspace."
       },
       "subject": {
         "@type": "valos-raem:GeneratedField",
         "rdfs:subPropertyOf": "rdf:subject",
-        "rdfs:domain": "valos:ScriptProperty",
+        "rdfs:domain": "valos:ScopeProperty",
         "rdfs:range": "rdfs:Resource",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
         "valos-raem:generator": "getSubject",
-        "rdfs:comment": "The subject of this ScriptProperty when interpreted as a reified\nrdf:Statement. Equates to the twinspace id of the scope resource using\nthe valos:twinspace of this ScriptProperty."
+        "rdfs:comment": "The subject of this ScopeProperty when interpreted as a reified\nrdf:Statement. Equates to the twinspace id of the scope resource using\nthe valos:twinspace of this ScopeProperty."
       },
       "predicate": {
         "@type": "valos-raem:GeneratedField",
         "rdfs:subPropertyOf": "rdf:predicate",
-        "rdfs:domain": "valos:ScriptProperty",
+        "rdfs:domain": "valos:ScopeProperty",
         "rdfs:range": "rdfs:Resource",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
         "valos-raem:generator": "getPredicate",
-        "rdfs:comment": "The subject of this ScriptProperty when interpreted as a reified\nrdf:Statement. Equates to the IRI expansion of valos:name of this\nScriptProperty using the context of this partition."
+        "rdfs:comment": "The subject of this ScopeProperty when interpreted as a reified\nrdf:Statement. Equates to the IRI expansion of valos:name of this\nScopeProperty using the context of this partition."
       },
       "object": {
         "@type": "valos-raem:AliasField",
         "valos-raem:aliasOf": "valos:value",
         "rdfs:subPropertyOf": "rdf:object",
-        "rdfs:domain": "valos:ScriptProperty",
+        "rdfs:domain": "valos:ScopeProperty",
         "rdfs:range": "rdfs:Resource",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "rdfs:comment": "The subject of this ScriptProperty when interpreted as a reified\nrdf:Statement. Equates to the twinspace id of the valos:value using\nthe valos:twinspace of this ScriptProperty if one is defined. Otherwise\nequals to the valos:value itself.\n"
+        "rdfs:comment": "The subject of this ScopeProperty when interpreted as a reified\nrdf:Statement. Equates to the twinspace id of the valos:value using\nthe valos:twinspace of this ScopeProperty if one is defined. Otherwise\nequals to the valos:value itself.\n"
       },
       "Scope": {
         "@type": "valos-raem:Type",
@@ -1668,7 +1733,10 @@
       "source": {
         "@type": "valos-raem:AliasField",
         "valos-raem:aliasOf": "valos:owner",
-        "rdfs:subPropertyOf": "valos:owner",
+        "rdfs:subPropertyOf": [
+          "valos:owner",
+          "rdf:source"
+        ],
         "rdfs:domain": "valos:Relation",
         "rdfs:range": "valos:Relatable",
         "restriction": {
@@ -1681,6 +1749,7 @@
       },
       "target": {
         "@type": "valos-raem:PrimaryField",
+        "rdfs:subPropertyOf": "rdf:object",
         "rdfs:domain": "valos:Relation",
         "rdfs:range": "valos:Relatable",
         "restriction": {
@@ -1802,6 +1871,7 @@
       },
       "content": {
         "@type": "valos-raem:PrimaryField",
+        "rdfs:subPropertyOf": "rdf:object",
         "rdfs:domain": "valos:Media",
         "rdfs:range": "valos:Bvob",
         "restriction": {
@@ -2271,7 +2341,7 @@
             "Partition",
             "ScriptResource",
             "ScriptDestroyed",
-            "ScriptProperty",
+            "ScopeProperty",
             "Scope",
             "Relatable",
             "Relation",

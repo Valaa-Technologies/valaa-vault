@@ -10,7 +10,8 @@
   },
   "valos": {
     "type": "library",
-    "domain": "@valos/kernel"
+    "domain": "@valos/kernel",
+    "docs": "https://valospace.org/inspire"
   },
   "main": "index.js",
   "dependencies": {
@@ -34,5 +35,6 @@
     "react-dom": "^16.2.0",
     "simplebar-react": "^0.1.4",
     "ws": "^6.1.4"
-  }
+  },
+  "homepage": "https://valospace.org/inspire"
 }

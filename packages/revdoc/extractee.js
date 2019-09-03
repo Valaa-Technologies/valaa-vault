@@ -1,6 +1,40 @@
-const { extractee: { aggregate, cpath, em, ref, strong } } = require("@valos/vdoc");
+const { extractee: { aggregate, c, cpath, em, ref, strong } } = require("@valos/vdoc");
 
 module.exports = {
+  /**
+   * Construct a revdoc:ABNF element.
+   *
+   * @param {*} text
+   * @param {*} rest
+   * @returns
+   */
+  abnf (text) {
+    // Add validation and maybe restructuring?
+    return {
+      // TODO(iridian, 2019-08): Figure out if there's any sense in
+      // providing language identifiers for non-natural languages.
+      ...c("https://tools.ietf.org/html/rfc5234", text),
+      "@type": "revdoc:ABNF",
+    };
+  },
+
+  /**
+   * Construct a revdoc:ABNF element.
+   *
+   * @param {*} text
+   * @param {*} rest
+   * @returns
+   */
+  turtle (text) {
+    // Add validation and maybe restructuring?
+    return {
+      // TODO(iridian, 2019-08): Figure out if there's any sense in
+      // providing language identifiers for non-natural languages.
+      ...c("https://www.w3.org/TR/turtle/", text),
+      "@type": "revdoc:Turtle",
+    };
+  },
+
   /**
    * Construct ReSpec authors section based on the @valos/type-vault
    * valma configuration of the current working directory.

@@ -30,23 +30,23 @@
       },
       "@valos/type-gateway-plugin": {
         "version": "0.35.0-prerelease.8",
-        "description": "The ValOS type toolset for 'gateway-plugin' workspaces",
+        "description": "The ValOS 'gateway-plugin' workspace type toolset",
         "license": "MIT"
       },
       "@valos/type-opspace": {
         "version": "0.35.0-prerelease.8",
-        "description": "The ValOS type toolset for opspace workspaces",
+        "description": "The ValOS 'opspace' workspace type toolset",
         "license": "MIT"
       },
       "@valos/type-vault": {
         "version": "0.35.0-prerelease.8",
-        "description": "The ValOS type toolset for vault workspaces",
+        "description": "The ValOS 'vault' workspace type toolset",
         "homepage": "https://valospace.org/type-vault",
         "license": "MIT"
       },
       "@valos/type-worker": {
         "version": "0.35.0-prerelease.8",
-        "description": "The ValOS type toolset for worker workspaces",
+        "description": "The ValOS 'worker' workspace type toolset",
         "license": "MIT"
       }
     },
@@ -316,7 +316,7 @@
       "version": "0.35.0-prerelease.8",
       "introduction": "Allows grabbing and stowing of available toolsets and their tools and\nthen invokes all in-use toolset configure commands."
     },
-    "create-command": {
+    "draft-command": {
       "description": "Create and possibly export a new valma command script",
       "package": "valma",
       "version": "0.35.0-prerelease.8",

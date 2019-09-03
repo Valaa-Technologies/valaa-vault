@@ -6,7 +6,7 @@
     "domain": "@valos/kernel",
     "docs": "https://valospace.org/type-vault"
   },
-  "description": "The ValOS type toolset for vault workspaces",
+  "description": "The ValOS 'vault' workspace type toolset",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
   "private": false,

@@ -1,5 +1,6 @@
 exports.vlm = { toolset: "@valos/type-gateway-plugin" };
 exports.command = ".configure/.type/.gateway-plugin/@valos/type-gateway-plugin";
+exports.brief = "configure 'type-gateway-plugin'";
 exports.describe = "Configure the 'type-gateway-plugin' toolset";
 exports.introduction = `${exports.describe}.
 

@@ -2,7 +2,7 @@
 
 exports.vlm = { toolset: "@valos/toolset-domain" };
 exports.command = "generate-domain-summary";
-exports.brief = "";
+exports.brief = "generate domain summary";
 exports.describe = "Generate the domain components summary file for the domain root revdoc";
 exports.introduction = ``;
 

@@ -18,7 +18,7 @@
   "bin": {
     "vlm": "valma/valma.js",
     "valma-configure": "valma/configure.js",
-    "valma-create-command": "valma/create-command.js",
+    "valma-draft-command": "valma/draft-command.js",
     "valma-init": "valma/init.js",
     "valma-status": "valma/status.js",
     "valma-$": "valma/execute.js",

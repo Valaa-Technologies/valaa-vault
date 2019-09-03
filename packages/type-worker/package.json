@@ -5,7 +5,7 @@
     "type": "toolset",
     "domain": "@valos/kernel"
   },
-  "description": "The ValOS type toolset for worker workspaces",
+  "description": "The ValOS 'worker' workspace type toolset",
   "main": "",
   "author": "Valaa Technologies Ltd",
   "license": "MIT",

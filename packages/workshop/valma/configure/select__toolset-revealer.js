@@ -1,5 +1,6 @@
 exports.vlm = { toolset: "@valos/toolset-revealer" };
 exports.command = ".configure/.select/@valos/toolset-revealer";
+exports.brief = "select 'toolset-revealer'";
 exports.describe = "Select the toolset 'toolset-revealer'";
 exports.introduction =
 `This toolset enables valma command 'rouse-revealer' for deploying a

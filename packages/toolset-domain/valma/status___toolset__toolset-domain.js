@@ -1,6 +1,6 @@
 exports.vlm = { toolset: "@valos/toolset-domain" };
 exports.command = ".status/40-toolsets/@valos/toolset-domain";
-exports.brief = "Display toolset status";
+exports.brief = "display 'toolset-domain' status";
 exports.describe = "Display the toolset '@valos/toolset-domain' status of this workspace";
 exports.introduction = `${exports.describe}.`;
 

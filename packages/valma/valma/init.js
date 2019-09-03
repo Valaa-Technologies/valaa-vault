@@ -103,9 +103,11 @@ package configuration file for yarn (and also for npm, which yarn is
       "Is this a 'public' published package? ('n' for 'restricted')")) ? "public" : "restricted"}"
 }`;
           } else if (parts[0][parts[0].length - 1] === "s") parts[0] = parts[0].slice(0, -1);
+          const workspacePrefix = ((vaultConfig || {}).valos || {}).workspacePrefix
+              || `${vaultConfig.name}-`;
           vlm.shell.ShellString(
 `{
-"name": "${vaultConfig.name}-${parts.join("-")}",
+"name": "${workspacePrefix}${parts.join("-")}",
 "version": "${vaultConfig.version}",
 "author": "${vaultConfig.author}",
 "license": "${vaultConfig.license}",
@@ -152,7 +154,7 @@ publishConfigLine}
 
   async function _addInitialValmaDevDependencies () {
     const yarnAdd = "yarn add -W --dev";
-    const coloredYarnAdd = vlm.theme.executable(yarnAdd);
+    const themedYarnAdd = vlm.theme.executable(yarnAdd);
     let wasError;
     const wasInitial = !vlm.packageConfig.devDependencies;
     while (yargv.reconfigure || wasInitial) {
@@ -173,7 +175,7 @@ publishConfigLine}
       if (answer.choice === "help") {
         vlm.speak();
         vlm.info("workshop registration",
-`This phase uses '${coloredYarnAdd}' to add workshops as devDependencies.
+`This phase uses '${themedYarnAdd}' to add workshops as devDependencies.
 This makes the domains, types and toolsets provided by those workshops
 available for the listings in following phases.
 `);
@@ -181,7 +183,7 @@ available for the listings in following phases.
       }
       answer = await vlm.inquire([{
         type: "input", name: "devDependencies",
-        message: `enter a space-separated list of workshops for '${coloredYarnAdd}':\n`,
+        message: `enter a space-separated list of workshops for '${themedYarnAdd}':\n`,
       }]);
       if (!answer || !answer.devDependencies) {
         vlm.info(`No devDependencies provided, skipping workshop registration phase`);
@@ -195,7 +197,7 @@ available for the listings in following phases.
         }
       }
     }
-    vlm.info(`Skipped '${coloredYarnAdd}'.`, ...tellIfNoReconfigure);
+    vlm.info(`Skipped '${themedYarnAdd}'.`, ...tellIfNoReconfigure);
     return {};
   }
 

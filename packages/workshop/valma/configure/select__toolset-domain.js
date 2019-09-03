@@ -1,6 +1,6 @@
 exports.vlm = { toolset: "@valos/toolset-domain" };
 exports.command = ".configure/.select/@valos/toolset-domain";
-exports.brief = "select toolset";
+exports.brief = "select 'toolset-domain'";
 exports.describe =
     "Select and configure 'toolset-domain' for the current vault or workshop workspace";
 const enabledTypes = ["vault", "workshop"];

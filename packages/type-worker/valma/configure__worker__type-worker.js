@@ -1,8 +1,8 @@
 exports.vlm = { toolset: "@valos/type-worker" };
 exports.command = ".configure/.type/.worker/@valos/type-worker";
+exports.brief = "configure 'type-worker'";
 exports.describe = "Configure the 'type-worker' toolset";
-exports.introduction = `${exports.describe}.
-
+exports.introduction = `
 `;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")

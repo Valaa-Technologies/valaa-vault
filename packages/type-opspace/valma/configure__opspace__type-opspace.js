@@ -1,5 +1,6 @@
 exports.vlm = { toolset: "@valos/type-opspace" };
 exports.command = ".configure/.type/.opspace/@valos/type-opspace";
+exports.brief = "configure 'type-opspace'";
 exports.describe = "Configure the 'type-opspace' toolset";
 exports.introduction = `${exports.describe}.
 
@@ -46,8 +47,6 @@ following strategy is used:
    deployments are initiated.
 `;
 
-// Example template which displays the command name itself and package name where it is ran
-// Only enabled inside package
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "opspace")
     && `Workspace is not an opspace (is ${yargs.vlm.getValOSConfig("type")})`;
 exports.builder = (yargs) => yargs.options({
@@ -65,5 +64,5 @@ exports.handler = async (yargv) => {
   vlm.shell.cp("-n", templates, ".");
 
   const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);
-  return { command: exports.command, ...selectionResult };
+  return { success: true, command: exports.command, ...selectionResult };
 };

@@ -1,9 +1,9 @@
 #!/usr/bin/env vlm
 
-exports.command = "create-command [commandName]";
-exports.describe = "Create and possibly export a new valma command script";
+exports.command = "draft-command [commandName]";
+exports.describe = "Draft and possibly export a new valma command script";
 exports.introduction =
-`The new command is created as a local valma.bin/ command with the
+`The new command is drafted as a local valma.bin/ command with the
 source file in valma/, making it the highest priority command and
 immediately available.
 With --import a existing exported script is copied for local editing
@@ -29,7 +29,7 @@ exports.builder = (yargs) => yargs.options({
   },
   skeleton: {
     type: "boolean", default: true,
-    description: "If true will only create a minimal script skeleton",
+    description: "If true will only draft a minimal script skeleton",
   },
   header: {
     type: "string", description: "Lines to place at the beginning of the script skeleton",
@@ -86,7 +86,7 @@ exports.handler = async (yargv) => {
     }
     if (answer.choice === "help") {
       vlm.speak(yargv.introduction);
-      vlm.info(`This step creates a ${yargv.brief || (local ? "local" : "exported")
+      vlm.info(`This step drafts a ${yargv.brief || (local ? "local" : "exported")
           } valma command script template\n`);
       continue;
     }
@@ -98,7 +98,7 @@ exports.handler = async (yargv) => {
     } else {
       vlm.shell.mkdir("-p", vlm.path.dirname(scriptPath));
       if (!yargv.import) {
-        vlm.shell.ShellString(_createSource(command, yargv)).to(scriptPath);
+        vlm.shell.ShellString(_draftSource(command, yargv)).to(scriptPath);
         vlm.shell.chmod("+x", scriptPath);
       } else {
         const sourcePath = await vlm.invoke(command, ["-T"]);
@@ -139,9 +139,9 @@ exports.handler = async (yargv) => {
   return { local, verb, [command]: scriptPath };
 };
 
-function _createSource (command, yargv) {
+function _draftSource (command, yargv) {
   // Emit shebang only if the command is a top-level command.
-  const components = yargv.skeleton ? _createSkeleton() : _createExample();
+  const components = yargv.skeleton ? _draftSkeleton() : _draftExample();
   return `${(command[0] === ".") || command.includes("/.") ? "" : "#!/usr/bin/env vlm\n\n"
 }${yargv.header || ""
 }${!yargv.exportsVlm ? "" : `exports.vlm = ${yargv.exportsVlm};\n`
@@ -157,7 +157,7 @@ exports.builder = ${yargv.builder || components.builder};
 exports.handler = ${yargv.handler || components.handler};
 `;
 
-  function _createSkeleton () {
+  function _draftSkeleton () {
     return {
       disabled: "(yargs) => !yargs.vlm.packageConfig",
       builder:
@@ -173,7 +173,7 @@ exports.handler = ${yargv.handler || components.handler};
     };
   }
 
-  function _createExample () {
+  function _draftExample () {
     return {
       disabled: "(yargs) => !yargs.vlm.packageConfig",
       builder:

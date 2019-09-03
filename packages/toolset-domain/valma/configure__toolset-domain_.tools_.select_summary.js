@@ -1,6 +1,6 @@
 exports.vlm = { toolset: "@valos/toolset-domain" };
 exports.command = ".configure/.@valos/toolset-domain/.tools/.select/summary";
-exports.brief = "";
+exports.brief = "select summary generation";
 exports.describe = "Select domain summary revdoc generation tool for a vault workspace";
 exports.introduction =
 `This toolset-domain tool enables the (re)generation of docs/index.html
@@ -17,7 +17,8 @@ exports.builder = (yargs) => yargs.options({
   },
   target: {
     default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "summary", "target")
-        || "packages/workshop/summary.json",
+        || `packages/${yargs.vlm.getValOSConfig("domain")
+            .split(yargs.vlm.getValOSConfig("prefix") || "/")[1] || "REPLACEME"}/summary.json`,
     description: "Target domain summary JSON path",
     interactive: { type: "confirm", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
   },

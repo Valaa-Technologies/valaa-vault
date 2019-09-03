@@ -1,6 +1,6 @@
 exports.vlm = { toolset: "@valos/toolset-domain" };
 exports.command = ".configure/.toolset/@valos/toolset-domain";
-exports.brief = "configure toolset";
+exports.brief = "configure 'toolset-domain'";
 exports.describe = "Configure the toolset 'toolset-domain' within the current workspace";
 exports.introduction = `${exports.describe}.
 

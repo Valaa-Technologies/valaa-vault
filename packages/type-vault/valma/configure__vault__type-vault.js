@@ -1,5 +1,6 @@
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = ".configure/.type/.vault/@valos/type-vault";
+exports.brief = "configure 'type-vault'";
 exports.describe = "Configure the 'type-vault' toolset";
 exports.introduction = `${exports.describe}.
 

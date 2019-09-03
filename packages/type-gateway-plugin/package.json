@@ -5,7 +5,7 @@
     "type": "toolset",
     "domain": "@valos/kernel"
   },
-  "description": "The ValOS type toolset for 'gateway-plugin' workspaces",
+  "description": "The ValOS 'gateway-plugin' workspace type toolset",
   "main": "",
   "author": "Valaa Technologies Ltd",
   "license": "MIT",

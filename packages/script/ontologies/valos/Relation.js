@@ -18,7 +18,7 @@ structures.`,
   source: {
     "@type": "valos-raem:AliasField",
     "valos-raem:aliasOf": "valos:owner",
-    "rdfs:subPropertyOf": "valos:owner",
+    "rdfs:subPropertyOf": ["valos:owner", "rdf:source"],
     "rdfs:domain": "valos:Relation",
     "rdfs:range": "valos:Relatable",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
@@ -30,6 +30,7 @@ structures.`,
 
   target: {
     "@type": "valos-raem:PrimaryField",
+    "rdfs:subPropertyOf": "rdf:object",
     "rdfs:domain": "valos:Relation",
     "rdfs:range": "valos:Relatable",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },

@@ -75,6 +75,7 @@ to determine the default interpretation of the Media.`,
 
   content: {
     "@type": "valos-raem:PrimaryField",
+    "rdfs:subPropertyOf": "rdf:object",
     "rdfs:domain": "valos:Media",
     "rdfs:range": "valos:Bvob",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },

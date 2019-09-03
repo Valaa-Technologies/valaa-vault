@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>ValOS Resource Identifier</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"vrid"};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body>
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter">ValOS Resource Identifiers (*VRIDs*) uniquely identify valospace
+resources created and manipulated by <a href="https://valospace.org/sourcerer/valos-event-log" class="vdoc type-vdoc-reference">ValOS event logs</a>.
+VRIDs are strings with restricted grammar so that they can be embedded
+into various URI component and list formats without encoding.
+
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter">This document is part of the library workspace <a href="https://valospace.org/raem" class="vdoc type-revdoc-package"><em>@valos/raem</em></a> but is &#x60;NOT SUPPORTED NOR IMPLEMENTED&#x60; by it yet in any manner.
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter">
+    <h2>VRID is a stable identifier</h2>
+      <p>A VRID is the NSS part of an urn:valos URI. It is a string with two
+nested levels of syntactic structure. The outer structure consists of
+&#x60;@&#x60;-separated segments.</p>
+      <p><pre><code><span class="vdoc type-vdoc-node">
+  vrid           = vgrid-segment *( &#x22;@&#x22; sub-segment )
+</span>
+</code></pre></p>
+      <p>The vgrid-segment uniquely identifies a *global resource*. The
+optional sub-segments identify an unambiguous path from the
+global resource to a *structural sub-resource* which also is the
+*referenced resource* of the VRID. Otherwise if there are no
+sub-segments the global resource is the referenced resource.</p>
+      <p>The inner structure consists of &#x60;$&#x60;-separated parts which specify
+the semantics of each individual segment.</p>
+      <p><pre><code><span class="vdoc type-vdoc-node">
+  vgrid-segment  = &#x22;$&#x22; vgrid-format-term &#x22;$&#x22; vgrid-body
+  sub-segment    = sub-type-term &#x22;$&#x22; sub-context-term &#x22;$&#x22; sub-body
+</span>
+</code></pre></p>
+      <p>The identified resource (and thus the VRID itself) is always affiliated
+with an event log in the context where the VRID appears.
+The *term* parts refer the event log JSON-LD context term definitions,
+both for syntactic purposes (e.g. as simple prefix expansions) as well
+as semantically (JSON-LD constructs such as index maps have semantic
+meaning for some VRID subsegments).</p>
+      <p>The two *body* parts carry the actual encodeURIComponent-encoded
+segment data. The precise meaning depends on the segment type (e.g. URI
+suffix, member access etc.).
+</p>
+
+  </section>
+
+  <section id="section_equivalence" class="vdoc type-vdoc-chapter">      <p>
+Two VRIDs refer to the same resource iff their URN representations are <a href="https://tools.ietf.org/html/rfc8141#section-3" class="vdoc type-vdoc-reference">urn-equivalent</a>(i.e. if the two VRID&#x27;s are equivalent after section 3.1. case
+normalization for step 3. percent-encoding case normalization).</p>
+      <p>Maintaining this consistency between lexical equivalence and semantic
+equivalence without having to dereference VRID&#x27;s is useful but has
+implications.</p>
+      <p><blockquote>When resources are transferred between event logs the
+semantics of their context terms and body-parts must remain equivalent.</blockquote></p>
+      <p>A *simple equivalence* is that two simple prefix term definitions
+resolve to the same URI. An *extended equivalence* is when two extended
+term definitions in the source and target event logs are equivalent
+after normalization. These two equivalences are [will be] defined by
+this document.</p>
+      <p>More complex equivalences are outside the scope of this document but
+can be defined by specifications specifying segment types. These
+equivalences might take details of the particular sub-type-term into
+account and/or specify context definition additions which do not change
+the equivalence semantics.
+</p>
+
+  </section>
+
+  <section id="section_vgrid" class="vdoc type-vdoc-chapter">
+    <h2>*vgrid-segment* - restricted naming, free ownership, only concrete state</h2>
+      <p>
+The first segment identifies the global resource and is also called
+ValOS /Global/ Resource Id or *VGRID*. If there are no sub-segments
+then this global resource is also the referenced resource of the VRID.</p>
+      <p><pre><code><span class="vdoc type-vdoc-node">
+  vgrid-segment     = &#x22;$&#x22; vgrid-format-term &#x22;$&#x22; vgrid-body
+  vgrid-format-term = context-term
+  vgrid-body        = 1*unreserved
+  context-term      = ALPHA 0*30( ALPHA / DIGIT / &#x22;-&#x22; ) ( ALPHA / DIGIT )
+</span>
+</code></pre></p>
+      <p>The VGRID character set is very restricted, with only &#x22;$&#x22; in addition
+to *unreserved*  as specified in the <a href="https://tools.ietf.org/html/rfc3986" class="vdoc type-vdoc-reference">URI specification</a>).
+<blockquote>Note: when using base64 encoded values as vgrid-body, use <a href="https://tools.ietf.org/html/rfc4648#section-5" class="vdoc type-vdoc-reference">url-and-filename-ready base64url characters</a>.
+</blockquote></p>
+      <p>Global resources can be transferred between event logs. To maintain
+immutability across these transfers VGRID&#x27;s must not contain partition
+or other non-identifying locator information. Similar to URN&#x27;s VRID&#x27;s
+always relies external structures and systems for carrying locator
+information.</p>
+      <p><blockquote>Note: uuid v4 (format term &#x60;iu4&#x60;) is recommended for
+    now, but eventually VGRID generation will be tied to the
+    deterministic event id chain (format term &#x60;icc&#x60;).
+    This in turn should be seeded by some ValOS authority.
+</blockquote></p>
+
+  </section>
+
+  <section id="section_subsegments" class="vdoc type-vdoc-chapter">
+    <h2>*sub-segment* - lenient naming, fixed ownership, also inferred state</h2>
+The sequence of sub-segments specifies a structured path from the
+global resource to a *structured sub-resource*.
+
+<pre><code><span class="vdoc type-vdoc-node">
+  sub-segment      = sub-type-term &#x22;$&#x22; sub-context-term &#x22;$&#x22; sub-body
+  sub-type-term    = *( unreserved / &#x22;!&#x22; / &#x22;*&#x22; / &#x22;&#x27;&#x22; / &#x22;(&#x22; / &#x22;)&#x22; )
+  sub-context-term = context-term
+  sub-body         = *( unreserved / pct-encoded / &#x22;!&#x22; / &#x22;*&#x22; / &#x22;&#x27;&#x22; / &#x22;(&#x22; / &#x22;)&#x22; )
+  context-term     = ALPHA 0*30( ALPHA / DIGIT / &#x22;-&#x22; ) ( ALPHA / DIGIT )
+</span>
+</code></pre>
+
+Note that while sub-type-term and sub-context-term grammar are still
+relatively restricted, *sub-body* allows all characters in percent
+encoded form (as per encodeURIComponent).
+
+The sub-resources of a particular global resource can be nested and
+thus form a tree. Individual sug-segments specify the edges in this
+tree.
+
+Each sub-segment specifies the relationship from its
+*host resource* to its sub-resource in addition to other constraints of
+the sub-resource. The global resource is the host resource for the
+first sub-segment; the sub-resource of that segment is the host
+resource of the second sub-segment and so on.
+
+As the VRID identities of the sub-resources are structurally fixed to
+this tree the coupling between host and sub-resource must be static.
+The typical implementation for this is an ownership coupling.
+
+  <section id="section_sub_type" class="vdoc type-vdoc-chapter">
+    <h2>*sub-type-term*</h2>
+
+*sub-type-term* specifies the relationship category between the segment
+host resource and sub-resource, a set of inferred triples as well as
+other possible constraints.
+
+The examples below all share the following example data:<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$iu4$f00b&#x3E; a valos:Entity
+      ; valos:prototype &#x3C;urn:valos:$iu4$f00b-b507-0763&#x3E;
+</span>
+</code></pre>
+  <section id="section_structured_ghost" class="vdoc type-vdoc-chapter">
+    <h2>sub-type &#x22;&#x60;!&#x60;&#x22;: ghost sub-resource</h2>
+      <p></p>
+      <p>Ghost sub-resources are products of ghost instantiation. All the ghosts
+of the directly _and indirectly_ owned resources of the instance
+prototype are flattened as _direct_ structural sub-resources of the
+instance itself. The instance is called *ghost host* of all such ghosts.</p>
+      <p>e.g. &#x60;&#x3C;urn:valos:$iu4$f00b@!$iu4$ba54&#x3E;&#x60; reads as &#x22;inside the
+instance resource &#x60;f00b&#x60; the ghost of the iu4 resource &#x60;ba54&#x60;&#x22;
+and infers triples:<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$iu4$f00b@!$iu4$ba54&#x3E;
+        valos:ghostHost &#x3C;urn:valos:$iu4$f00b&#x3E;
+      ; valos:ghostPrototype &#x3C;urn:valos:$iu4$ba54&#x3E;
+</span>
+</code></pre>
+In case of deeper instantiation chains the outermost ghost segment
+provides inferences recursively to all of its sub-resources; nested
+ghost segments wont provide any further inferences.</p>
+      <p>e.g. &#x60;&#x3C;urn:valos:$iu4$f00b@!$iu4$ba54@!$iu4$b7e4&#x3E;&#x60; reads as &#x22;inside
+the instance resource &#x60;f00b&#x60; the ghost of
+&#x60;&#x3C;urn:valos:$iu4$ba54@!$iu4$b7e4&#x3E;&#x60;&#x22; and infers triples:<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$iu4$f00b@!$iu4$ba54@!$iu4$b7e4&#x3E;
+        valos:ghostHost &#x3C;urn:valos:$iu4$f00b&#x3E;
+      ; valos:ghostPrototype &#x3C;urn:valos:$iu4$ba54@!$iu4$b7e4&#x3E;
+</span>
+</code></pre></p>
+
+  </section>
+
+  <section id="section_structured_subspace" class="vdoc type-vdoc-chapter">
+    <h2>sub-type &#x22;&#x60;~&#x60;&#x22;: subspace selector</h2>
+      <p></p>
+      <p>Selects a variant resource value for a base resource within a
+structurally identified subspace. The variant resource provides
+inferred &#x60;subspacePrototype&#x60; fallbacks to an *inner* subspace and
+eventually to the non-variant base resource as well as to the
+homologous sub-resource of the host resource inheritancePrototype.
+This means that no matter where a subspace variant is defined in
+the prototype chain or in the nested sub-structure its value will be
+found.</p>
+      <p>e.g. &#x60;&#x3C;urn:valos:$iu4$f00b@.$$myProp@~$lang$fi&#x3E;&#x60; is a lang fi
+variant of f00b myProp and infers triples:<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$iu4$f00b@.$$myProp@~$lang$fi&#x3E; a valos:ScopeProperty
+      ; valos:subspacePrototype &#x3C;urn:valos:$iu4$f00b@.$$myProp&#x3E;
+                              , &#x3C;urn:valos:$iu4$f00b-b507-0763@.$$myProp@~$lang$fi&#x3E;
+      ; valos:language &#x22;fi&#x22;
+</span>
+</code></pre>
+Subspace selectors can be used to access language variants,
+statically identified ghost variants within an instance, statically
+identified Relation&#x27;s etc.</p>
+      <p>The sub-context-term can also specify triple inferences for *all*
+sub-resources in the subspace (not just for the immediate
+sub-resource of the selector segment).</p>
+      <p>e.g. &#x60;&#x3C;urn:valos:$iu4$f00b@!$iu4$b453@~$lang$fi@!$$iu4$b74e@.$$myProp&#x3E;&#x60;
+infers triples:<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$iu4$f00b@!$iu4$b453@~$lang$fi@!$$iu4$b74e@.$$myProp&#x3E; a valos:ScopeProperty
+      ; valos:ghostHost &#x3C;urn:valos:$iu4$f00b&#x3E;
+      ; valos:ghostPrototype &#x3C;urn:valos:$iu4$b453@~$lang$fi@!$$iu4$b74e@.$$myProp&#x3E;
+      ; valos:subspacePrototype &#x3C;urn:valos:$iu4$f00b@!$iu4$b453@!$$iu4$b74e@~$lang$fi@.$$myProp&#x3E;
+      ; valos:language &#x22;fi&#x22;
+</span>
+</code></pre></p>
+
+  </section>
+
+  <section id="section_structured_scope_property" class="vdoc type-vdoc-chapter">
+    <h2>sub-type &#x22;&#x60;.&#x60;&#x22;: structured ScopeProperty</h2>
+      <p></p>
+      <p>e.g. &#x60;&#x3C;urn:valos:$iu4$f00b@.$$myProp&#x3E;&#x60; is a resource with fixed
+name &#x22;myProp&#x22;, dominant type ScopeProperty, iu4 resource f00b as the
+owning scope and a structurally homologous prototype inside
+f00b-b507-0763 and thus infers triples:<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$iu4$f00b@.$$myProp&#x3E; a valos:ScopeProperty
+      ; valos:scope &#x3C;urn:valos:$iu4$f00b&#x3E;
+      ; valos:inheritancePrototype &#x3C;urn:valos:$iu4$f00b-b507-0763@.$$myProp&#x3E;
+      ; valos:name &#x22;myProp&#x22;
+</span>
+</code></pre></p>
+
+  </section>
+
+  <section id="section_structured_relation" class="vdoc type-vdoc-chapter">
+    <h2>sub-type &#x22;&#x60;*&#x60;&#x22;: structured Relation</h2>
+      <p></p>
+      <p>e.g. &#x60;&#x3C;urn:valos:$iu4$f00b@*$$PERMISSIONS@~$$1&#x3E;&#x60; is a resource with
+fixed name &#x22;PERMISSIONS&#x22;, dominant type Relation, iu4 f00b as the
+source, a structurally homologous prototype inside f00b-b507-0763
+and thus infers triples:<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$iu4$f00b@*$$PERMISSIONS&#x3E; a valos:Relation
+      ; valos:source &#x3C;urn:valos:$iu4$f00b&#x3E;
+      ; valos:inheritancePrototype &#x3C;urn:valos:$iu4$f00b-b507-0763@*$$PERMISSIONS&#x3E;
+      ; valos:name &#x22;PERMISSIONS&#x22;
+  &#x3C;urn:valos:$iu4$f00b@*$$PERMISSIONS@~$$1&#x3E; a valos:Relation
+      ; valos:subspacePrototype &#x3C;urn:valos:$iu4$f00b@*$$PERMISSIONS&#x3E;
+                              , &#x3C;urn:valos:$iu4$f00b-b507-0763@*$$PERMISSIONS@~$$1&#x3E;
+</span>
+</code></pre></p>
+
+  </section>
+
+  <section id="section_structured_media" class="vdoc type-vdoc-chapter">
+    <h2>sub-type &#x22;&#x60;&#x27;&#x60;&#x22;: structured Media</h2>
+      <p></p>
+      <p>e.g. &#x60;&#x3C;urn:valos:$iu4$f00b@&#x27;$$foo.vs&#x3E;&#x60; is a media with fixed
+name &#x22;foo.vs&#x22;, dominant type Media, iu4 resource f00b as the
+owning directory and a structurally homologous prototype inside
+f00b-b507-0763 and thus infers triples:<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$iu4$f00b@&#x27;$$foo.vs&#x3E; a valos:Media
+      ; valos:directory &#x3C;urn:valos:$iu4$f00b&#x3E;
+      ; valos:inheritancePrototype &#x3C;urn:valos:$iu4$f00b-b507-0763@&#x27;$$foo.vs&#x3E;
+      ; valos:name &#x22;foo.vs&#x22;
+</span>
+</code></pre></p>
+
+  </section>
+
+  <section id="section_structured_entity" class="vdoc type-vdoc-chapter">
+    <h2>sub-type &#x22;&#x60;+&#x60;&#x22;: structured Entity</h2>
+      <p></p>
+      <p>e.g. &#x60;&#x3C;urn:valos:$iu4$f00b@+$$scripts&#x3E;&#x60; is an entity with fixed
+name &#x22;scripts&#x22;, dominant type Entity, iu4 resource f00b as the
+owning directory and a structurally homologous prototype inside
+f00b-b507-0763 and thus infers triples:<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$iu4$f00b@+$$scripts&#x3E; a valos:Entity
+      ; valos:directory &#x3C;urn:valos:$iu4$f00b&#x3E;
+      ; valos:inheritancePrototype &#x3C;urn:valos:$iu4$f00b-b507-0763@+$$scripts&#x3E;
+      ; valos:name &#x22;scripts&#x22;
+</span>
+</code></pre></p>
+
+  </section>
+
+  <section id="section_structured_object_value" class="vdoc type-vdoc-chapter">
+    <h2>sub-type &#x22;&#x60;-&#x60;&#x22; - structured rdf:object value</h2>
+      <p></p>
+      <p>Extends the preceding sub-segment with a fixed rdf:object triple.
+The actual rdf:object sub-property depends on the dominant type of
+the sub-segment: &#x60;valos:value&#x60; for ScopeProperty, &#x60;valos:target&#x60;
+for Relation, &#x60;valos:content&#x60; for Media, etc.</p>
+      <p>e.g. &#x60;&#x3C;urn:valos:$iu4$f00b@*$$PERMISSIONS@-$ihi$8766&#x3E;&#x60; is PERMISSIONS
+relation with fixed ihi target 8766 and thus infers triples:<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$iu4$f00b@*$$PERMISSIONS@-$ihi$8766&#x3E; a valos:Relation
+      ; valos:source &#x3C;urn:valos:$iu4$f00b&#x3E;
+      ; valos:prototype &#x3C;urn:valos:$iu4$f00b-b507-0763@*$$PERMISSIONS@-$ihi$8766&#x3E;
+      ; valos:name &#x22;PERMISSIONS&#x22;
+      ; valos:target &#x3C;urn:valos:$iu4$8766-src&#x3E;
+</span>
+</code></pre></p>
+
+  </section>
+
+  </section>
+
+  <section id="section_context_term" class="vdoc type-vdoc-chapter">
+    <h2>*context-term* is a lookup term to event log context</h2>
+
+*context-term* specifies a lookup term to the event log JSON-LD context.
+This binds the relationship to a well-defined namespace or rule
+(idiomatic example: namespace prefixes expand to a base URI).
+
+  </section>
+
+  <section id="section_sub_body" class="vdoc type-vdoc-chapter">
+    <h2>*sub-body* specifies rule content</h2>
+      <p>
+Rule content is interpreted depending on the combination of
+*sub-type-term* and *context-term* (idiomatic example: generic property
+name if no context-term namespace is provided, otherwise a compact IRI
+local part for an IRI property).</p>
+      <p>Currently the only allowed sub-types and their semantics is limited to
+the exclusive list of three entries:
+</p>
+
+  </section>
+
+  </section>
+
+  <section id="section_substructure" class="vdoc type-vdoc-chapter">
+  </section>
+
+  <section id="section_grammar" class="vdoc type-vdoc-chapter">
+  </section>
+
+  </body>
+</html>

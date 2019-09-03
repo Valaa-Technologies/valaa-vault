@@ -122,7 +122,7 @@
     "abstract": {
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This library provides the definitions and reference implementation\n    for the fundamental ",
+        "This library provides the definitions and reference implementation\nfor the fundamental ",
         {
           "@type": "vdoc:CharacterData",
           "vdoc:content": [
@@ -142,7 +142,7 @@
     "introduction": {
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This library provides the definitions and reference implementations\n    for the fundamental ",
+        "This library provides the definitions and reference implementations\nfor the fundamental ",
         {
           "@type": "vdoc:CharacterData",
           "vdoc:content": [
@@ -158,6 +158,7 @@
         },
         " systems.",
         null,
+        "",
         {
           "vdoc:quote": true,
           "vdoc:content": [
@@ -169,11 +170,13 @@
                   "resource"
                 ]
               },
-              " represents a well-defined part of\n      the world. It has a well-defined state at each particular moment in time."
+              " represents a well-defined part of\n  the world. It has a well-defined state at each particular moment in time."
             ]
           ]
         },
+        "",
         null,
+        "",
         {
           "vdoc:quote": true,
           "vdoc:content": [
@@ -185,17 +188,74 @@
                   "event"
                 ]
               },
-              " represents a dynamic change to a\n      resource by describing the change from previous to subsequent resource\n      states at a particular time."
+              " represents a dynamic change to a\n  resource by describing the change from previous to subsequent resource\n  states at a particular time."
             ]
           ]
         },
+        "",
         null,
-        "The interplay of these distinct yet interwoven systems forms the\n    foundation of the Valaa Open System."
+        "The interplay of these distinct yet interwoven systems forms the\nfoundation of the Valaa Open System."
       ]
     },
     "ontologyAbstract": {
       "vdoc:content": [
         "@valos/raem ontology specifies the Valospace core types and\n      properties directly to the @valos/kernel namespace. "
+      ]
+    },
+    "package": "@valos/raem",
+    "version": "0.35.0-prerelease.8"
+  },
+  "raem/valos-resource-id": {
+    "@id": "https://valospace.org/raem/valos-resource-id",
+    "tags": [],
+    "subProfiles": [],
+    "title": "ValOS Resource Identifier",
+    "abstract": {
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "ValOS Resource Identifiers (*VRIDs*) uniquely identify valospace\nresources created and manipulated by ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "ValOS event logs"
+          ],
+          "vdoc:ref": "@valos/sourcerer/valos-event-log"
+        },
+        ".\nVRIDs are strings with restricted grammar so that they can be embedded\ninto various URI component and list formats without encoding.\n"
+      ]
+    },
+    "introduction": {
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "A VRID is the NSS part of an urn:valos URI. It is a string with two\nnested levels of syntactic structure. The outer structure consists of\n`@`-separated segments.",
+        null,
+        "",
+        {
+          "@type": "revdoc:ABNF",
+          "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+          "vdoc:content": [
+            "\n  vrid           = vgrid-segment *( \"@\" sub-segment )\n"
+          ]
+        },
+        "",
+        null,
+        "The vgrid-segment uniquely identifies a *global resource*. The\noptional sub-segments identify an unambiguous path from the\nglobal resource to a *structural sub-resource* which also is the\n*referenced resource* of the VRID. Otherwise if there are no\nsub-segments the global resource is the referenced resource.",
+        null,
+        "The inner structure consists of `$`-separated parts which specify\nthe semantics of each individual segment.",
+        null,
+        "",
+        {
+          "@type": "revdoc:ABNF",
+          "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+          "vdoc:content": [
+            "\n  vgrid-segment  = \"$\" vgrid-format-term \"$\" vgrid-body\n  sub-segment    = sub-type-term \"$\" sub-context-term \"$\" sub-body\n"
+          ]
+        },
+        "",
+        null,
+        "The identified resource (and thus the VRID itself) is always affiliated\nwith an event log in the context where the VRID appears.\nThe *term* parts refer the event log JSON-LD context term definitions,\nboth for syntactic purposes (e.g. as simple prefix expansions) as well\nas semantically (JSON-LD constructs such as index maps have semantic\nmeaning for some VRID subsegments).",
+        null,
+        "The two *body* parts carry the actual encodeURIComponent-encoded\nsegment data. The precise meaning depends on the segment type (e.g. URI\nsuffix, member access etc.).\n"
       ]
     },
     "package": "@valos/raem",
@@ -417,6 +477,26 @@
     "package": "@valos/sourcerer",
     "version": "0.35.0-prerelease.8"
   },
+  "sourcerer/valos-event-log": {
+    "@id": "https://valospace.org/sourcerer/valos-event-log",
+    "tags": [],
+    "subProfiles": [],
+    "title": "ValOS Event Log",
+    "abstract": {
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "ValOS Event Log is an ordered, numbered sequence of JSON-LD documents.\nEach document represents a single event. Together these events\nincrementally, exclusively and deterministically specify the state\nchanges of a single valospace partition from its initial empty state to\nthe current state after the most recent event."
+      ]
+    },
+    "introduction": {
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "."
+      ]
+    },
+    "package": "@valos/sourcerer",
+    "version": "0.35.0-prerelease.8"
+  },
   "twindoc": {
     "@id": "https://valospace.org/twindoc",
     "tags": [
@@ -450,8 +530,12 @@
             {
               "@type": "vdoc:NumberedList",
               "vdoc:entries": [
-                "emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD",
-                "extract + emit: a roundtrip starting from valospace into VDocLD back into valospace"
+                [
+                  "emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD"
+                ],
+                [
+                  "extract + emit: a roundtrip starting from valospace into VDocLD back into valospace"
+                ]
               ]
             }
           ]

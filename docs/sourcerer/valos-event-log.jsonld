@@ -1,0 +1,100 @@
+[
+  {
+    "@id": "https://valospace.org/sourcerer/valos-event-log",
+    "@context": {
+      "@base": "https://valospace.org/sourcerer/valos-event-log#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "vdoc": "https://valospace.org/vdoc#",
+      "vdoc:content": {
+        "@id": "https://valospace.org/vdoc#content",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/vdoc#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:headers": {
+        "@id": "https://valospace.org/vdoc#headers",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:cell": {
+        "@id": "https://valospace.org/vdoc#cell",
+        "@container": "@list",
+        "@type": "@id"
+      }
+    },
+    "dc:title": "ValOS Event Log",
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "eventLog"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "ValOS Event Log is an ordered, numbered sequence of JSON-LD documents.\nEach document represents a single event. Together these events\nincrementally, exclusively and deterministically specify the state\nchanges of a single valospace partition from its initial empty state to\nthe current state after the most recent event."
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is part of the library workspace ",
+        {
+          "@type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/sourcerer"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/sourcerer"
+        },
+        " but is `NOT SUPPORTED NOR IMPLEMENTED` by it yet in any manner."
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "."
+      ]
+    },
+    "@type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      }
+    ]
+  }
+]

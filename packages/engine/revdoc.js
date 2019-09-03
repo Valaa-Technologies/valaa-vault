@@ -1,6 +1,6 @@
 
 const {
-  extractee: { c, authors, ref, context, cli, command, cpath, bulleted, pkg },
+  extractee: { authors, ref, pkg },
 } = require("@valos/revdoc");
 
 module.exports = {

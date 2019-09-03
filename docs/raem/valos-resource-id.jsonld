@@ -1,0 +1,472 @@
+[
+  {
+    "@id": "https://valospace.org/raem/valos-resource-id",
+    "@context": {
+      "@base": "https://valospace.org/raem/valos-resource-id#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "vdoc": "https://valospace.org/vdoc#",
+      "vdoc:content": {
+        "@id": "https://valospace.org/vdoc#content",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/vdoc#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:headers": {
+        "@id": "https://valospace.org/vdoc#headers",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:cell": {
+        "@id": "https://valospace.org/vdoc#cell",
+        "@container": "@list",
+        "@type": "@id"
+      }
+    },
+    "dc:title": "ValOS Resource Identifier",
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "vrid"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "ValOS Resource Identifiers (*VRIDs*) uniquely identify valospace\nresources created and manipulated by ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "ValOS event logs"
+          ],
+          "vdoc:ref": "@valos/sourcerer/valos-event-log"
+        },
+        ".\nVRIDs are strings with restricted grammar so that they can be embedded\ninto various URI component and list formats without encoding.\n"
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is part of the library workspace ",
+        {
+          "@type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/raem"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/raem"
+        },
+        " but is `NOT SUPPORTED NOR IMPLEMENTED` by it yet in any manner."
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "dc:title": "VRID is a stable identifier",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "A VRID is the NSS part of an urn:valos URI. It is a string with two\nnested levels of syntactic structure. The outer structure consists of\n`@`-separated segments.",
+        null,
+        "",
+        {
+          "@type": "revdoc:ABNF",
+          "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+          "vdoc:content": [
+            "\n  vrid           = vgrid-segment *( \"@\" sub-segment )\n"
+          ]
+        },
+        "",
+        null,
+        "The vgrid-segment uniquely identifies a *global resource*. The\noptional sub-segments identify an unambiguous path from the\nglobal resource to a *structural sub-resource* which also is the\n*referenced resource* of the VRID. Otherwise if there are no\nsub-segments the global resource is the referenced resource.",
+        null,
+        "The inner structure consists of `$`-separated parts which specify\nthe semantics of each individual segment.",
+        null,
+        "",
+        {
+          "@type": "revdoc:ABNF",
+          "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+          "vdoc:content": [
+            "\n  vgrid-segment  = \"$\" vgrid-format-term \"$\" vgrid-body\n  sub-segment    = sub-type-term \"$\" sub-context-term \"$\" sub-body\n"
+          ]
+        },
+        "",
+        null,
+        "The identified resource (and thus the VRID itself) is always affiliated\nwith an event log in the context where the VRID appears.\nThe *term* parts refer the event log JSON-LD context term definitions,\nboth for syntactic purposes (e.g. as simple prefix expansions) as well\nas semantically (JSON-LD constructs such as index maps have semantic\nmeaning for some VRID subsegments).",
+        null,
+        "The two *body* parts carry the actual encodeURIComponent-encoded\nsegment data. The precise meaning depends on the segment type (e.g. URI\nsuffix, member access etc.).\n"
+      ]
+    },
+    "section_equivalence": {
+      "@id": "section_equivalence",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\nTwo VRIDs refer to the same resource iff their URN representations are ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "urn-equivalent"
+          ],
+          "vdoc:ref": "https://tools.ietf.org/html/rfc8141#section-3"
+        },
+        "(i.e. if the two VRID's are equivalent after section 3.1. case\nnormalization for step 3. percent-encoding case normalization).",
+        null,
+        "Maintaining this consistency between lexical equivalence and semantic\nequivalence without having to dereference VRID's is useful but has\nimplications.",
+        null,
+        "",
+        {
+          "vdoc:blockquote": true,
+          "vdoc:content": [
+            "When resources are transferred between event logs the\nsemantics of their context terms and body-parts must remain equivalent."
+          ]
+        },
+        "",
+        null,
+        "A *simple equivalence* is that two simple prefix term definitions\nresolve to the same URI. An *extended equivalence* is when two extended\nterm definitions in the source and target event logs are equivalent\nafter normalization. These two equivalences are [will be] defined by\nthis document.",
+        null,
+        "More complex equivalences are outside the scope of this document but\ncan be defined by specifications specifying segment types. These\nequivalences might take details of the particular sub-type-term into\naccount and/or specify context definition additions which do not change\nthe equivalence semantics.\n"
+      ]
+    },
+    "section_vgrid": {
+      "@id": "section_vgrid",
+      "dc:title": "*vgrid-segment* - restricted naming, free ownership, only concrete state",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\nThe first segment identifies the global resource and is also called\nValOS /Global/ Resource Id or *VGRID*. If there are no sub-segments\nthen this global resource is also the referenced resource of the VRID.",
+        null,
+        "",
+        {
+          "@type": "revdoc:ABNF",
+          "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+          "vdoc:content": [
+            "\n  vgrid-segment     = \"$\" vgrid-format-term \"$\" vgrid-body\n  vgrid-format-term = context-term\n  vgrid-body        = 1*unreserved\n  context-term      = ALPHA 0*30( ALPHA / DIGIT / \"-\" ) ( ALPHA / DIGIT )\n"
+          ]
+        },
+        "",
+        null,
+        "The VGRID character set is very restricted, with only \"$\" in addition\nto *unreserved*  as specified in the ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "URI specification"
+          ],
+          "vdoc:ref": "https://tools.ietf.org/html/rfc3986"
+        },
+        ").\n",
+        {
+          "vdoc:blockquote": true,
+          "vdoc:content": [
+            "Note: when using base64 encoded values as vgrid-body, use ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "url-and-filename-ready base64url characters"
+              ],
+              "vdoc:ref": "https://tools.ietf.org/html/rfc4648#section-5"
+            },
+            ".\n"
+          ]
+        },
+        "",
+        null,
+        "Global resources can be transferred between event logs. To maintain\nimmutability across these transfers VGRID's must not contain partition\nor other non-identifying locator information. Similar to URN's VRID's\nalways relies external structures and systems for carrying locator\ninformation.",
+        null,
+        "",
+        {
+          "vdoc:blockquote": true,
+          "vdoc:content": [
+            "Note: uuid v4 (format term `iu4`) is recommended for\n    now, but eventually VGRID generation will be tied to the\n    deterministic event id chain (format term `icc`).\n    This in turn should be seeded by some ValOS authority.\n"
+          ]
+        }
+      ]
+    },
+    "section_subsegments": {
+      "@id": "section_subsegments",
+      "dc:title": "*sub-segment* - lenient naming, fixed ownership, also inferred state",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "The sequence of sub-segments specifies a structured path from the\nglobal resource to a *structured sub-resource*.\n\n",
+        {
+          "@type": "revdoc:ABNF",
+          "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+          "vdoc:content": [
+            "\n  sub-segment      = sub-type-term \"$\" sub-context-term \"$\" sub-body\n  sub-type-term    = *( unreserved / \"!\" / \"*\" / \"'\" / \"(\" / \")\" )\n  sub-context-term = context-term\n  sub-body         = *( unreserved / pct-encoded / \"!\" / \"*\" / \"'\" / \"(\" / \")\" )\n  context-term     = ALPHA 0*30( ALPHA / DIGIT / \"-\" ) ( ALPHA / DIGIT )\n"
+          ]
+        },
+        "\n\nNote that while sub-type-term and sub-context-term grammar are still\nrelatively restricted, *sub-body* allows all characters in percent\nencoded form (as per encodeURIComponent).\n\nThe sub-resources of a particular global resource can be nested and\nthus form a tree. Individual sug-segments specify the edges in this\ntree.\n\nEach sub-segment specifies the relationship from its\n*host resource* to its sub-resource in addition to other constraints of\nthe sub-resource. The global resource is the host resource for the\nfirst sub-segment; the sub-resource of that segment is the host\nresource of the second sub-segment and so on.\n\nAs the VRID identities of the sub-resources are structurally fixed to\nthis tree the coupling between host and sub-resource must be static.\nThe typical implementation for this is an ownership coupling.\n",
+        {
+          "@id": "section_sub_type"
+        },
+        {
+          "@id": "section_context_term"
+        },
+        {
+          "@id": "section_sub_body"
+        }
+      ]
+    },
+    "section_sub_type": {
+      "@id": "section_sub_type",
+      "dc:title": "*sub-type-term*",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\n*sub-type-term* specifies the relationship category between the segment\nhost resource and sub-resource, a set of inferred triples as well as\nother possible constraints.\n\nThe examples below all share the following example data:",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:$iu4$f00b> a valos:Entity\n      ; valos:prototype <urn:valos:$iu4$f00b-b507-0763>\n"
+          ]
+        },
+        {
+          "@id": "section_structured_ghost"
+        },
+        {
+          "@id": "section_structured_subspace"
+        },
+        {
+          "@id": "section_structured_scope_property"
+        },
+        {
+          "@id": "section_structured_relation"
+        },
+        {
+          "@id": "section_structured_media"
+        },
+        {
+          "@id": "section_structured_entity"
+        },
+        {
+          "@id": "section_structured_object_value"
+        }
+      ]
+    },
+    "section_structured_ghost": {
+      "@id": "section_structured_ghost",
+      "dc:title": "sub-type \"`!`\": ghost sub-resource",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Ghost sub-resources are products of ghost instantiation. All the ghosts\nof the directly _and indirectly_ owned resources of the instance\nprototype are flattened as _direct_ structural sub-resources of the\ninstance itself. The instance is called *ghost host* of all such ghosts.",
+        null,
+        "e.g. `<urn:valos:$iu4$f00b@!$iu4$ba54>` reads as \"inside the\ninstance resource `f00b` the ghost of the iu4 resource `ba54`\"\nand infers triples:",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:$iu4$f00b@!$iu4$ba54>\n        valos:ghostHost <urn:valos:$iu4$f00b>\n      ; valos:ghostPrototype <urn:valos:$iu4$ba54>\n"
+          ]
+        },
+        "\nIn case of deeper instantiation chains the outermost ghost segment\nprovides inferences recursively to all of its sub-resources; nested\nghost segments wont provide any further inferences.",
+        null,
+        "e.g. `<urn:valos:$iu4$f00b@!$iu4$ba54@!$iu4$b7e4>` reads as \"inside\nthe instance resource `f00b` the ghost of\n`<urn:valos:$iu4$ba54@!$iu4$b7e4>`\" and infers triples:",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:$iu4$f00b@!$iu4$ba54@!$iu4$b7e4>\n        valos:ghostHost <urn:valos:$iu4$f00b>\n      ; valos:ghostPrototype <urn:valos:$iu4$ba54@!$iu4$b7e4>\n"
+          ]
+        }
+      ]
+    },
+    "section_structured_subspace": {
+      "@id": "section_structured_subspace",
+      "dc:title": "sub-type \"`~`\": subspace selector",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Selects a variant resource value for a base resource within a\nstructurally identified subspace. The variant resource provides\ninferred `subspacePrototype` fallbacks to an *inner* subspace and\neventually to the non-variant base resource as well as to the\nhomologous sub-resource of the host resource inheritancePrototype.\nThis means that no matter where a subspace variant is defined in\nthe prototype chain or in the nested sub-structure its value will be\nfound.",
+        null,
+        "e.g. `<urn:valos:$iu4$f00b@.$$myProp@~$lang$fi>` is a lang fi\nvariant of f00b myProp and infers triples:",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:$iu4$f00b@.$$myProp@~$lang$fi> a valos:ScopeProperty\n      ; valos:subspacePrototype <urn:valos:$iu4$f00b@.$$myProp>\n                              , <urn:valos:$iu4$f00b-b507-0763@.$$myProp@~$lang$fi>\n      ; valos:language \"fi\"\n"
+          ]
+        },
+        "\nSubspace selectors can be used to access language variants,\nstatically identified ghost variants within an instance, statically\nidentified Relation's etc.",
+        null,
+        "The sub-context-term can also specify triple inferences for *all*\nsub-resources in the subspace (not just for the immediate\nsub-resource of the selector segment).",
+        null,
+        "e.g. `<urn:valos:$iu4$f00b@!$iu4$b453@~$lang$fi@!$$iu4$b74e@.$$myProp>`\ninfers triples:",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:$iu4$f00b@!$iu4$b453@~$lang$fi@!$$iu4$b74e@.$$myProp> a valos:ScopeProperty\n      ; valos:ghostHost <urn:valos:$iu4$f00b>\n      ; valos:ghostPrototype <urn:valos:$iu4$b453@~$lang$fi@!$$iu4$b74e@.$$myProp>\n      ; valos:subspacePrototype <urn:valos:$iu4$f00b@!$iu4$b453@!$$iu4$b74e@~$lang$fi@.$$myProp>\n      ; valos:language \"fi\"\n"
+          ]
+        }
+      ]
+    },
+    "section_structured_scope_property": {
+      "@id": "section_structured_scope_property",
+      "dc:title": "sub-type \"`.`\": structured ScopeProperty",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "e.g. `<urn:valos:$iu4$f00b@.$$myProp>` is a resource with fixed\nname \"myProp\", dominant type ScopeProperty, iu4 resource f00b as the\nowning scope and a structurally homologous prototype inside\nf00b-b507-0763 and thus infers triples:",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:$iu4$f00b@.$$myProp> a valos:ScopeProperty\n      ; valos:scope <urn:valos:$iu4$f00b>\n      ; valos:inheritancePrototype <urn:valos:$iu4$f00b-b507-0763@.$$myProp>\n      ; valos:name \"myProp\"\n"
+          ]
+        }
+      ]
+    },
+    "section_structured_relation": {
+      "@id": "section_structured_relation",
+      "dc:title": "sub-type \"`*`\": structured Relation",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "e.g. `<urn:valos:$iu4$f00b@*$$PERMISSIONS@~$$1>` is a resource with\nfixed name \"PERMISSIONS\", dominant type Relation, iu4 f00b as the\nsource, a structurally homologous prototype inside f00b-b507-0763\nand thus infers triples:",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:$iu4$f00b@*$$PERMISSIONS> a valos:Relation\n      ; valos:source <urn:valos:$iu4$f00b>\n      ; valos:inheritancePrototype <urn:valos:$iu4$f00b-b507-0763@*$$PERMISSIONS>\n      ; valos:name \"PERMISSIONS\"\n  <urn:valos:$iu4$f00b@*$$PERMISSIONS@~$$1> a valos:Relation\n      ; valos:subspacePrototype <urn:valos:$iu4$f00b@*$$PERMISSIONS>\n                              , <urn:valos:$iu4$f00b-b507-0763@*$$PERMISSIONS@~$$1>\n"
+          ]
+        }
+      ]
+    },
+    "section_structured_media": {
+      "@id": "section_structured_media",
+      "dc:title": "sub-type \"`'`\": structured Media",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "e.g. `<urn:valos:$iu4$f00b@'$$foo.vs>` is a media with fixed\nname \"foo.vs\", dominant type Media, iu4 resource f00b as the\nowning directory and a structurally homologous prototype inside\nf00b-b507-0763 and thus infers triples:",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:$iu4$f00b@'$$foo.vs> a valos:Media\n      ; valos:directory <urn:valos:$iu4$f00b>\n      ; valos:inheritancePrototype <urn:valos:$iu4$f00b-b507-0763@'$$foo.vs>\n      ; valos:name \"foo.vs\"\n"
+          ]
+        }
+      ]
+    },
+    "section_structured_entity": {
+      "@id": "section_structured_entity",
+      "dc:title": "sub-type \"`+`\": structured Entity",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "e.g. `<urn:valos:$iu4$f00b@+$$scripts>` is an entity with fixed\nname \"scripts\", dominant type Entity, iu4 resource f00b as the\nowning directory and a structurally homologous prototype inside\nf00b-b507-0763 and thus infers triples:",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:$iu4$f00b@+$$scripts> a valos:Entity\n      ; valos:directory <urn:valos:$iu4$f00b>\n      ; valos:inheritancePrototype <urn:valos:$iu4$f00b-b507-0763@+$$scripts>\n      ; valos:name \"scripts\"\n"
+          ]
+        }
+      ]
+    },
+    "section_structured_object_value": {
+      "@id": "section_structured_object_value",
+      "dc:title": "sub-type \"`-`\" - structured rdf:object value",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Extends the preceding sub-segment with a fixed rdf:object triple.\nThe actual rdf:object sub-property depends on the dominant type of\nthe sub-segment: `valos:value` for ScopeProperty, `valos:target`\nfor Relation, `valos:content` for Media, etc.",
+        null,
+        "e.g. `<urn:valos:$iu4$f00b@*$$PERMISSIONS@-$ihi$8766>` is PERMISSIONS\nrelation with fixed ihi target 8766 and thus infers triples:",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:$iu4$f00b@*$$PERMISSIONS@-$ihi$8766> a valos:Relation\n      ; valos:source <urn:valos:$iu4$f00b>\n      ; valos:prototype <urn:valos:$iu4$f00b-b507-0763@*$$PERMISSIONS@-$ihi$8766>\n      ; valos:name \"PERMISSIONS\"\n      ; valos:target <urn:valos:$iu4$8766-src>\n"
+          ]
+        }
+      ]
+    },
+    "section_context_term": {
+      "@id": "section_context_term",
+      "dc:title": "*context-term* is a lookup term to event log context",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\n*context-term* specifies a lookup term to the event log JSON-LD context.\nThis binds the relationship to a well-defined namespace or rule\n(idiomatic example: namespace prefixes expand to a base URI).\n"
+      ]
+    },
+    "section_sub_body": {
+      "@id": "section_sub_body",
+      "dc:title": "*sub-body* specifies rule content",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\nRule content is interpreted depending on the combination of\n*sub-type-term* and *context-term* (idiomatic example: generic property\nname if no context-term namespace is provided, otherwise a compact IRI\nlocal part for an IRI property).",
+        null,
+        "Currently the only allowed sub-types and their semantics is limited to\nthe exclusive list of three entries:\n"
+      ]
+    },
+    "section_substructure": {
+      "@id": "section_substructure",
+      "dc:title": "",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "section_grammar": {
+      "@id": "section_grammar",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": []
+    },
+    "@type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "section_equivalence"
+      },
+      {
+        "@id": "section_vgrid"
+      },
+      {
+        "@id": "section_subsegments"
+      },
+      {
+        "@id": "section_substructure"
+      },
+      {
+        "@id": "section_grammar"
+      }
+    ]
+  }
+]

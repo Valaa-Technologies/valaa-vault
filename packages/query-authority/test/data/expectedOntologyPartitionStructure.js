@@ -143,21 +143,33 @@ const pot = {
     }
   },
   additionalPrototypes: ["Room", "Story", "LocatedAt", "ManagerAt",
-  "ManagerOf", "OwnerAt", "OwnerOf", "TenantAt"],
+  "ManagerOf", "OwnerAt", "OwnerOf", "TenantAt", "BuildingAutomationSystem",
+  "HeatingSystem", "LightingSystem", "PowerSystem", "SecuritySystem",
+  "SewageSystem", "VentilationSystem", "VideoSurveillanceSystem",
+  "Column", "CurtainWall", "Door", "Floor", "Roof", "Slab", "Stair",
+  "Wall", "Window", "AirFilteringDevice", "HeatingDevice", "PowerDevice",
+  "SecurityDevice", "Sensor", "PresenceSensor", "QuantitySensor",
+  "TemperatureSensor", "VentilationDevice", "WaterDevice", "Case",
+  "Apartment", "RealEstate", "dli:SupportedAttribute", "dli:SupportedClass"]
 };
 
-const dli = {};
+const dli = {
+  thoroughPrototypes: {},
+  additionalPrototypes: []
+};
 
 const getPotUpdated = () => {
   console.log("getUpdated");
-  const potUpdated = {};
-  for (const key in pot) {
-    if (pot.hasOwnProperty(key) && key !== "BelongsTo") {
-      potUpdated[(key === "Space") ? "NewSpace" : key] = pot[key];
+  const potUpdated = { thoroughPrototypes: {},
+    additionalPrototypes: pot.additionalPrototypes };
+  for (const key in pot.thoroughPrototypes) {
+    if (pot.thoroughPrototypes.hasOwnProperty(key) && key !== "BelongsTo") {
+      potUpdated.thoroughPrototypes[(key === "Space")
+        ? "NewSpace" : key] = pot.thoroughPrototypes[key];
     }
   }
 
-  potUpdated.Zone.parent = "NewSpace";
+  potUpdated.thoroughPrototypes.Zone.parent = "NewSpace";
   return potUpdated;
 };
 

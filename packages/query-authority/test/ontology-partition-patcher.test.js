@@ -33,49 +33,55 @@ function _checkOntologyPartition (ontologyPartition: Vrapper,
   expect(ontologyPartition.get(VALEK.toField("name")))
     .toBe(`${ontologyName.toUpperCase()} Partition`);
 
-  const expectedPrototypeKeys = Object.keys(expectedPrototypes);
+  const expectedPrototypeKeys
+    = Object.keys(expectedPrototypes.thoroughPrototypes);
 
-  const prototypes = ontologyPartition.get(VALEK.toField("unnamedOwnlings"))
-    .filter((prototype) => expectedPrototypeKeys
-      .indexOf(prototype.get(VALEK.toField("name"))) !== -1);
-
-  expect(prototypes.length).toBe(expectedPrototypeKeys.length);
+  const prototypes = ontologyPartition.get(VALEK.toField("unnamedOwnlings"));
+  expect(prototypes.length).toBe(expectedPrototypeKeys.length
+    + expectedPrototypes.additionalPrototypes.length);
 
   prototypes.forEach((prototype) => {
-    expect(prototype).toBeInstanceOf(Vrapper);
-    const expectedPrototype
-      = expectedPrototypes[prototype.get(VALEK.toField("name"))];
+      expect(prototype).toBeInstanceOf(Vrapper);
+      const prototypeName = prototype.get(VALEK.toField("name"));
 
-    expect(expectedPrototype).not.toBeFalsy();
-    expect(prototype.getTypeName()).toBe("Entity");
-
-    const parent = prototype.get(VALEK.toField("prototype"));
-    if (expectedPrototype.parent) {
-      expect(parent).toBeInstanceOf(Vrapper);
-      expect(parent.get(VALEK.toField("name"))).toBe(expectedPrototype.parent);
-    } else {
-      expect(parent).toBe(null);
-    }
-
-    const ownProperties = prototypePropertyMap[prototype.get(VALEK.toField("name"))];
-    if (!ownProperties) console.log("prototype", prototype.get(VALEK.toField("name")));
-    expect(ownProperties).not.toBeFalsy();
-    expect(ownProperties.length)
-      .toBe(Object.keys(expectedPrototype.properties).length);
-
-    ownProperties.forEach((property) => {
-      const expectedProperty = expectedPrototype.properties[property];
-      if (!expectedProperty) console.log("missing property", property);
-      expect(expectedProperty).not.toBeFalsy();
-
-      const propertyValue = prototype.get(VALEK.propertyValue(property));
-      if (expectedProperty.type === "Property") {
-        expect(propertyValue).toBe(null);
-      } else {
-        expect(propertyValue).toBeInstanceOf(Vrapper);
-        expect(propertyValue.getTypeName()).toBe(expectedProperty.type);
+      if (expectedPrototypes.additionalPrototypes.indexOf(prototypeName) !== -1) {
+        return;
       }
-    });
+
+      const expectedPrototype
+        = expectedPrototypes.thoroughPrototypes[prototypeName];
+
+      if (!expectedPrototype) console.log("missing prototype", prototypeName);
+      expect(expectedPrototype).not.toBeFalsy();
+      expect(prototype.getTypeName()).toBe("Entity");
+
+      const parent = prototype.get(VALEK.toField("prototype"));
+      if (expectedPrototype.parent) {
+        expect(parent).toBeInstanceOf(Vrapper);
+        expect(parent.get(VALEK.toField("name"))).toBe(expectedPrototype.parent);
+      } else {
+        expect(parent).toBe(null);
+      }
+
+      const ownProperties = prototypePropertyMap[prototype.get(VALEK.toField("name"))];
+      if (!ownProperties) console.log("prototype", prototype.get(VALEK.toField("name")));
+      expect(ownProperties).not.toBeFalsy();
+      expect(ownProperties.length)
+        .toBe(Object.keys(expectedPrototype.properties).length);
+
+      ownProperties.forEach((property) => {
+        const expectedProperty = expectedPrototype.properties[property];
+        if (!expectedProperty) console.log("missing property", property);
+        expect(expectedProperty).not.toBeFalsy();
+
+        const propertyValue = prototype.get(VALEK.propertyValue(property));
+        if (expectedProperty.type === "Property") {
+          expect(propertyValue).toBe(null);
+        } else {
+          expect(propertyValue).toBeInstanceOf(Vrapper);
+          expect(propertyValue.getTypeName()).toBe(expectedProperty.type);
+        }
+      });
   });
 }
 
@@ -112,9 +118,8 @@ describe("Ontology prototype patcher", () => {
 
     const dliOntologyRelation = ontologies[1];
     expect(dliOntologyRelation.get(VALEK.toField("name"))).toBe("ONTOLOGY");
-    _checkOntologyPartition(dliOntologyRelation.get(VALEK.toField("target")),
-      expectedOntologyPartitionStructure.dli, "dli",
-      ontologyIndexData.prototypePropertyMap.dli);
+    expect(dliOntologyRelation.get(VALEK.toField("target")).get(VALEK.toField("name")))
+      .toBe("DLI Partition");
   });
 
   it(`creates partition which consists of prototypes of terms from

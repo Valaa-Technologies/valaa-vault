@@ -135,32 +135,39 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
       function patchInstance (ontologyClass, prototypeName) {
         let prototype = ontologyPartition[prototypeName];
 
-        if (!prototype) {
-          const subClassOf = (ontologyClass["rdfs:subClassOf"]
-            || ontologyClass[contextLookup["rdfs:subClassOf"]]);
+        const subClassOf = (ontologyClass["rdfs:subClassOf"]
+          || ontologyClass[contextLookup["rdfs:subClassOf"]]);
 
-          let parentInstance;
+        let parentInstance;
 
-          if (subClassOf) {
-            for (let i = 0; i < ontologyData.classes.length; i++) {
-              const ontologyParentClass = ontologyData.classes[i];
-              const ontologyParentClassId = ontologyParentClass["@id"];
-              if (ontologyParentClassId === subClassOf) {
-                const parentPrototypeName
-                  = createPrototypeName(ontologyParentClassId);
-                if (ontologyPartition[parentPrototypeName]) {
-                  parentInstance = ontologyPartition[parentPrototypeName];
-                }
-                else {
-                  parentInstance = patchInstance(ontologyParentClass,
-                    parentPrototypeName);
-                }
+        if (subClassOf) {
+          for (let i = 0; i < ontologyData.classes.length; i++) {
+            const ontologyParentClass = ontologyData.classes[i];
+            const ontologyParentClassId = ontologyParentClass["@id"];
+            if (ontologyParentClassId === subClassOf) {
+              const parentPrototypeName
+                = createPrototypeName(ontologyParentClassId);
 
-                break;
+              if (prototype && prototype.$V.prototype
+                && prototype.$V.prototype.$V.name !== parentPrototypeName) {
+                valos.Resource.destroy(prototype);
+                prototype = undefined;
               }
+
+              if (ontologyPartition[parentPrototypeName]) {
+                parentInstance = ontologyPartition[parentPrototypeName];
+              }
+              else {
+                parentInstance = patchInstance(ontologyParentClass,
+                  parentPrototypeName);
+              }
+
+              break;
             }
           }
+        }
 
+        if (!prototype) {
           if (!parentInstance) parentInstance = Entity;
 
           prototype = new parentInstance({
@@ -176,6 +183,7 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
 
       function patchProperties (prototype, ontologyClass) {
         if (patchedClasses.indexOf(prototype.$V.rawId) !== -1) return;
+        patchedClasses.push(prototype.$V.rawId);
 
         const classProperties = ontologyClass[ownPropertiesSymbol];
         if (!classProperties) return;
@@ -212,14 +220,20 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
             prototype[prototypePropertyName] = null;
           }
         }
-
-        patchedClasses.push(prototype.$V.rawId);
       }
 
       function createPrototypeName(ontologyClassId) {
         const match = ontologyClassId && ontologyClassId
           .match(new RegExp(ontologyName + ":(.*)"));
         return (match) ? match[1] : ontologyClassId;
+      }
+
+      const ownlings = ontologyPartition.$V.unnamedOwnlings;
+      for (let i = 0; i < ownlings.length; i++) {
+        const ownling = ownlings[i];
+        if (patchedClasses.indexOf(ownling.$V.rawId) === -1) {
+          valos.Resource.destroy(ownling);
+        }
       }
 
       (prototypePropertyMap)

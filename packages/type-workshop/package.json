@@ -1,0 +1,24 @@
+{
+  "name": "@valos/type-workshop",
+  "version": "0.35.0-prerelease.10",
+  "valos": {
+    "type": "toolset",
+    "domain": "@valos/kernel"
+  },
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "The ValOS workshop workspace type toolset",
+  "main": "index.js",
+  "bin": {
+    ".valma-configure_.type_.workshop_@valos_type-workshop": "valma/configure__workshop__type-workshop.js",
+    ".valma-status_.type_.workshop_10-workshop": "valma/status__workshop_10-workshop.js"
+  },
+  "dependencies": {
+    "@valos/tools": "^0.35.0-prerelease.10",
+    "@valos/vdoc": "^0.35.0-prerelease.10"
+  }
+}

@@ -3,7 +3,7 @@
     "inUse": true,
     "domain": "@valos/kernel",
     "workspaceIds": {
-      "@valos/kernel": "./packages/workshop",
+      "@valos/kernel": "./packages/kernel",
       "valma": "./packages/valma",
       "@valos/engine": "./packages/engine",
       "@valos/gateway-api": "./packages/gateway-api",
@@ -29,7 +29,7 @@
       "summary": {
         "inUse": true,
         "regenerateOnRelease": true,
-        "target": "./packages/workshop/summary.json"
+        "target": "./packages/kernel/summary.json"
       }
     }
   },
@@ -67,7 +67,7 @@
           }
         },
         "introduction": [],
-        "listingTarget": "packages/workshop/documents.json"
+        "listingTarget": "packages/kernel/documents.json"
       }
     },
     "inUse": "always"

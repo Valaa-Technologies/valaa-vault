@@ -9,7 +9,7 @@ const {
 const { domainHeaders } = require("@valos/toolset-domain");
 
 const { name, version, repository } = require("../package");
-const { summary, ontologies, documents } = require("../packages/workshop");
+const { summary, ontologies, documents } = require("../packages/kernel");
 
 const { workspaces, types, toolsets, tools, commands } = summary;
 

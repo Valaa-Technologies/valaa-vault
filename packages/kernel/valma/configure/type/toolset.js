@@ -82,7 +82,7 @@ exports.handler = async (yargv) => {
 exports.createConfigureCommand = createConfigureCommand;
 function createConfigureCommand (vlm, type, name, simpleName, brief) {
   const isTool = (type === "tool") ? true : ""; // else toolset.
-  return vlm.invoke("create-command", [{
+  return vlm.invoke("draft-command", [{
     filename: `configure_${type}__${simpleName}.js`,
     export: true,
     skeleton: true,
@@ -122,7 +122,7 @@ toolset or tool which uses this tool must explicit invoke this command.`,
 
 exports.createSelectToolsetCommand = createSelectToolsetCommand;
 function createSelectToolsetCommand (vlm, name, simpleName, restrict, restrictToTypeGlob) {
-  return vlm.invoke("create-command", [{
+  return vlm.invoke("draft-command", [{
     filename: `configure_${restrict ? `_${restrict}_` : ""}select__${simpleName}.js`,
     export: true,
     skeleton: true,
@@ -151,7 +151,7 @@ function createSelectToolsetCommand (vlm, name, simpleName, restrict, restrictTo
 exports.createStatusSubCommand = createStatusSubCommand;
 function createStatusSubCommand (vlm, type, name, simpleName, commandPath) {
   const isTool = (type === "tool") ? true : "";
-  return vlm.invoke("create-command", [{
+  return vlm.invoke("draft-command", [{
     filename: `status_${isTool && "tool_"}_${simpleName}.js`,
     brief: `Display ${type} status`,
     export: true,
@@ -228,7 +228,7 @@ exports.createReleaseSubCommand = createReleaseSubCommand;
 function createReleaseSubCommand (vlm, type, name, simpleName, subName) {
   const isTool = (type === "tool") ? true : "";
   const isBuild = (subName === "build");
-  return vlm.invoke("create-command", [{
+  return vlm.invoke("draft-command", [{
     filename: `release-${subName}_${isTool && "tool_"}_${simpleName}.js`,
     brief: `${isBuild ? "Build" : "Deploy"} a sub-release`,
     export: true,

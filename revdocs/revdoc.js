@@ -9,12 +9,12 @@ const {
 const { domainHeaders } = require("@valos/toolset-domain");
 
 const { name, version } = require("../package");
-const { documents } = require("../packages/workshop");
+const { documents } = require("../packages/kernel");
 const {
   ontologies: {
     valos: { prefix, prefixIRI, prefixes, vocabulary, context },
   },
-} = require("../packages/workshop");
+} = require("../packages/kernel");
 
 const roleDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents);
 

@@ -31,6 +31,16 @@ exports.builder = (yargs) => yargs.options({
   breakdown: {
     type: "boolean", description: "Show full breakdown of the init process even if successful.",
   },
+  description: {
+    type: "string", description: "Initial description of the package.",
+  },
+  valos: {
+    type: "object", description: "Initial package.json valos stanza.",
+  },
+  devDependencies: {
+    type: "string", array: true,
+    description: "List of initial devDependencies entries.",
+  },
 });
 
 exports.handler = async (yargv) => {
@@ -43,22 +53,28 @@ exports.handler = async (yargv) => {
   const ret_ = { success: true };
   Object.assign(await _initPackageJSON());
   if (ret_.success === false) return ret_;
-  if (!packageJSON) return vlm.interact("vlm init");
-  if (ret_.success !== false) Object.assign(ret_, await _addInitialValmaDevDependencies());
+  if (!packageJSON) {
+    return vlm.interact(["vlm init", {
+      breakdown: yargv.breakdown, devDependencies: yargv.devDependencies, valos: yargv.valos,
+    }]);
+  }
+  if ((ret_.success !== false) && ((yargv.devDependencies || [])[0] !== false)) {
+    Object.assign(ret_, await _addInitialValmaDevDependencies());
+  }
   if (ret_.success !== false) Object.assign(ret_, await _selectValOSTypeAndDomain());
   if (ret_.success !== false) Object.assign(ret_, await _configure());
   return yargv.breakdown || (ret_.success === false) ? ret_ : { success: ret_.success };
 
   async function _initPackageJSON () {
     while (yargv.reconfigure || !packageJSON) {
-      const choices = (packageJSON ? ["Skip", "reconfigure"] : ["Initialize"])
+      const choices = (packageJSON ? ["Bypass", "reconfigure"] : ["Initialize"])
           .concat(["help", "quit"]);
       const answer = await vlm.inquire([{
         message: `${packageJSON ? "Reconfigure the existing" : "Initialize"
             } package.json with 'yarn init'?`,
         type: "list", name: "choice", default: choices[0], choices,
       }]);
-      if (answer.choice === "Skip") break;
+      if (answer.choice === "Bypass") break;
       if (answer.choice === "quit") return { success: false, reason: answer };
       if (answer.choice === "help") {
         vlm.speak();
@@ -109,6 +125,7 @@ package configuration file for yarn (and also for npm, which yarn is
 `{
 "name": "${workspacePrefix}${parts.join("-")}",
 "version": "${vaultConfig.version}",
+"description": ${JSON.stringify(yargv.description || "")},
 "author": "${vaultConfig.author}",
 "license": "${vaultConfig.license}",
 "private": ${isPrivate ? "true" : "false"}${
@@ -124,8 +141,11 @@ publishConfigLine}
     let justConfigured = false;
     const ret = {};
     while (yargv.reconfigure || !vlm.packageConfig.valos || justConfigured) {
+      if (!vlm.packageConfig.valos && Object.keys(yargv.valos).length) {
+        await vlm.updatePackageConfig({ valos: yargv.valos });
+      }
       const choices = (justConfigured ? ["Confirm", "reconfigure"]
-              : vlm.packageConfig.valos ? ["Skip", "reconfigure"] : ["Initialize"])
+              : vlm.packageConfig.valos ? ["Bypass", "reconfigure"] : ["Initialize"])
           .concat(["help", "quit"]);
       const answer = await vlm.inquire([{
         message: !vlm.packageConfig.valos
@@ -134,7 +154,7 @@ publishConfigLine}
                 } valos stanza: ${JSON.stringify({ ...vlm.packageConfig.valos })}?`,
         type: "list", name: "choice", default: choices[0], choices,
       }]);
-      if (answer.choice === "Skip") break;
+      if (answer.choice === "Bypass") break;
       if (answer.choice === "quit") return Object.assign(ret, { success: false, reason: answer });
       if (answer.choice === "help") {
         vlm.speak();
@@ -143,8 +163,8 @@ publishConfigLine}
         continue;
       }
       if (answer.choice === "Confirm") return ret;
-      vlm.reconfigure = yargv.reconfigure;
-      ret.stanza = await vlm.invoke(".configure/.valos-stanza", { reconfigure: yargv.reconfigure });
+      vlm.reconfigure = yargv.reconfigure || (answer.choice === "reconfigure");
+      ret.stanza = await vlm.invoke(".configure/.valos-stanza", { reconfigure: vlm.reconfigure });
       justConfigured = true;
     }
     vlm.info("Skipped configuring valos type and domain of this workspace.",
@@ -159,8 +179,8 @@ publishConfigLine}
     const wasInitial = !vlm.packageConfig.devDependencies;
     while (yargv.reconfigure || wasInitial) {
       const choices = vlm.packageConfig.devDependencies
-          ? ["Skip", "yes", "help", "quit"]
-          : ["Yes", "skip", "help", "quit"];
+          ? ["Bypass", "yes", "help", "quit"]
+          : ["Yes", "bypass", "help", "quit"];
       let answer = await vlm.inquire([{
         message: wasError
             ? "Retry adding workshops (or direct toolsets) as devDependencies?"
@@ -170,7 +190,7 @@ publishConfigLine}
         type: "list", name: "choice", default: choices[0], choices,
       }]);
       wasError = false;
-      if (answer.choice === "Skip" || answer.choice === "skip") break;
+      if (answer.choice === "Bypass" || answer.choice === "bypass") break;
       if (answer.choice === "quit") return { success: false, reason: answer };
       if (answer.choice === "help") {
         vlm.speak();
@@ -213,14 +233,14 @@ available for the listings in following phases.
           };
         }
       } catch (error) { /* */ }
-      const choices = (toolsetsConfig ? ["Skip", "reconfigure"] : ["Configure"])
+      const choices = (toolsetsConfig ? ["Bypass", "reconfigure"] : ["Configure"])
           .concat(["help", "quit"]);
       const answer = await vlm.inquire([{
         message: `${toolsetsConfig ? "Reconfigure" : "Configure"} workspace with '${
             vlm.theme.command("vlm configure")}'?`,
         type: "list", name: "choice", default: choices[0], choices,
       }]);
-      if (answer.choice === "Skip") break;
+      if (answer.choice === "Bypass") break;
       if (answer.choice === "quit") return { success: false, reason: answer };
       if (answer.choice === "help") {
         vlm.speak();
@@ -228,7 +248,8 @@ available for the listings in following phases.
         vlm.speak();
         continue;
       }
-      return vlm.invoke("configure", { reconfigure: yargv.reconfigure });
+      vlm.reconfigure = yargv.reconfigure || (answer.choice === "reconfigure");
+      return vlm.invoke("configure", { reconfigure: vlm.reconfigure });
     }
     vlm.info("Skipped 'vlm configure'.", ...tellIfNoReconfigure);
     return {};

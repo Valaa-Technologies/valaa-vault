@@ -4,7 +4,7 @@
         <component type="library">
             <group>valos</group>
             <name>toolset-domain</name>
-            <version>0.35.0-prerelease.8</version>
+            <version>0.35.0-prerelease.9</version>
             <description>
                 <![CDATA[ValOS Toolset for managing ValOS workspace domains]]>
             </description>
@@ -13,7 +13,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/toolset-domain@0.35.0-prerelease.8</purl>
+            <purl>pkg:npm/%40valos/toolset-domain@0.35.0-prerelease.9</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -566,7 +566,7 @@
         <component type="library">
             <group>valos</group>
             <name>inspire</name>
-            <version>0.35.0-prerelease.8</version>
+            <version>0.35.0-prerelease.9</version>
             <description>
                 <![CDATA[ValOS Inspire application gateway]]>
             </description>
@@ -575,13 +575,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/inspire@0.35.0-prerelease.8</purl>
+            <purl>pkg:npm/%40valos/inspire@0.35.0-prerelease.9</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>kernel</name>
-            <version>0.35.0-prerelease.8</version>
+            <version>0.35.0-prerelease.9</version>
             <description>
                 <![CDATA[@valos/kernel domain workshop]]>
             </description>
@@ -590,13 +590,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/kernel@0.35.0-prerelease.8</purl>
+            <purl>pkg:npm/%40valos/kernel@0.35.0-prerelease.9</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>toolset-revealer</name>
-            <version>0.35.0-prerelease.8</version>
+            <version>0.35.0-prerelease.9</version>
             <description>
                 <![CDATA[Tools for building revelations both for development and deployment purposes]]>
             </description>
@@ -605,12 +605,12 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.8</purl>
+            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.9</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <name>valma</name>
-            <version>0.35.0-prerelease.8</version>
+            <version>0.35.0-prerelease.9</version>
             <description>
                 <![CDATA[A ValOS CLI tool for discovering and executing context-dependent command scripts]]>
             </description>
@@ -619,7 +619,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/valma@0.35.0-prerelease.8</purl>
+            <purl>pkg:npm/valma@0.35.0-prerelease.9</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -634,48 +634,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/inquirer@5.2.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>cli-cursor</name>
-            <version>2.1.0</version>
-            <description>
-                <![CDATA[Toggle the CLI cursor]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/cli-cursor@2.1.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>restore-cursor</name>
-            <version>2.0.0</version>
-            <description>
-                <![CDATA[Gracefully restore the CLI cursor on exit]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/restore-cursor@2.0.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>onetime</name>
-            <version>2.0.1</version>
-            <description>
-                <![CDATA[Ensure a function is only called once]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/onetime@2.0.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -704,34 +662,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/chardet@0.4.2</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>figures</name>
-            <version>2.0.0</version>
-            <description>
-                <![CDATA[Unicode symbols with Windows CMD fallbacks]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/figures@2.0.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>mute-stream</name>
-            <version>0.0.7</version>
-            <description>
-                <![CDATA[Bytes go in, but they don't come out (when muted).]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>ISC</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/mute-stream@0.0.7</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -779,7 +709,7 @@
         <component type="library">
             <group>valos</group>
             <name>type-vault</name>
-            <version>0.35.0-prerelease.8</version>
+            <version>0.35.0-prerelease.9</version>
             <description>
                 <![CDATA[The ValOS type toolset for vault workspaces]]>
             </description>
@@ -788,7 +718,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/type-vault@0.35.0-prerelease.8</purl>
+            <purl>pkg:npm/%40valos/type-vault@0.35.0-prerelease.9</purl>
             <modified>false</modified>
         </component>
         <component type="library">

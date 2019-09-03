@@ -47,7 +47,7 @@
     "revdoc:package": "@valos/kernel",
     "revdoc:prefix": "valos",
     "revdoc:prefixIRI": "https://valospace.org/#",
-    "revdoc:version": "0.35.0-prerelease.8",
+    "revdoc:version": "0.35.0-prerelease.9",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -282,7 +282,7 @@
               "vdoc:content": [
                 "ValOS event logs"
               ],
-              "vdoc:ref": "@valos/raem/valos-event-log"
+              "vdoc:ref": "@valos/sourcerer/valos-event-log"
             },
             ".\nVRIDs are strings with restricted grammar so that they can be embedded\ninto various URI component and list formats without encoding.\n"
           ]
@@ -535,6 +535,26 @@
         "ontologyAbstract": {
           "vdoc:content": [
             "@valos/sourcerer ontology specifies the Valospace core types and\n      properties directly to the @valos/kernel namespace. "
+          ]
+        },
+        "package": "@valos/sourcerer",
+        "version": "0.35.0-prerelease.8"
+      },
+      "sourcerer/valos-event-log": {
+        "@id": "https://valospace.org/sourcerer/valos-event-log",
+        "tags": [],
+        "subProfiles": [],
+        "title": "ValOS Event Log",
+        "abstract": {
+          "@type": "vdoc:Chapter",
+          "vdoc:content": [
+            "ValOS Event Log is an ordered, numbered sequence of JSON-LD documents.\nEach document represents a single event. Together these events\nincrementally, exclusively and deterministically specify the state\nchanges of a single valospace partition from its initial empty state to\nthe current state after the most recent event."
+          ]
+        },
+        "introduction": {
+          "@type": "vdoc:Chapter",
+          "vdoc:content": [
+            "."
           ]
         },
         "package": "@valos/sourcerer",

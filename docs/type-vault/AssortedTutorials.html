@@ -100,7 +100,7 @@ Guide on how to create a new library using valma. Note: Scope of this guide cove
 
   </div>
 </li>
-      <li>Select "@valos/toolset-vault/enable-babel" to use from available toolsets.</li>
+      <li>Select "@valos/type-vault/enable-babel" to use from available toolsets.</li>
       <li>Select "Yes" for whether to enable babel transpilation for the library</li>
     </ol>
 </li>
@@ -119,19 +119,23 @@ Guide on how to get your library ready for testing with Jest.
       <li>index.js</li>
     </ul>
 </li>
-      <li>Add the following code snippet to your "your-library-name.test.js" file:import foo from "./index.js";
+      <li>      <p>Add the following code snippet to your "your-library-name.test.js" file:</p>
+      <p>import foo from "./index.js";
 
           describe("your-library-name", () => {
             it("*", () => {
               expect(foo())
                   .toEqual(true);
             });
-          });</li>
-      <li>And then the following snippet to the  "index.js" file:"// @flow
+          });</p>
+</li>
+      <li>      <p>And then the following snippet to the  "index.js" file:"</p>
+      <p>// @flow
 
           export default function foo () {
             return true;
-          }</li>
+          }</p>
+</li>
       <li>And lastly ensure that you have the following section in your "package.json{
             "scripts": {
               "test": "jest"
@@ -163,6 +167,74 @@ Sometimes you may need to use your own packages with your project. To do this yo
 
   </div>
 This assembles your packages and adds them to a local Yalc repository. Find out more about Yalc <a href="https://github.com/whitecolor/yalc" class="vdoc type-vdoc-reference">here</a>
+  </section>
+
+  <section id="creating_new_vault" class="vdoc type-vdoc-chapter">
+    <h2>Guide on how to create a new vault</h2>
+This guide will go through the steps on creating a new vault with valma
+    and releasing a prerelease version of it. Setting up credentials
+    for npm and setting remote github repository is out of the scope of this guide.
+    <ol>
+      <li>Create new folder for your vault and navigate there.</li>
+      <li>Run the following command: 
+  <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">vlm init</span>
+
+  </div>
+Following list will go through the steps of the initialization script:
+    <ol>
+      <li>Select "Initialize" on whether to initialize package.json with 'yarn init'.
+          The initialization script will prompt
+          multiple questions about the basic information of the package which will be
+          written to the root package.json. Answer to the questions as you wish,
+          except for "private" which needs to be "true" as vaults
+          themselves are never published.</li>
+      <li>Select "Initialize" on whether to initialize repository valos stanza type and domain,
+          and then select "vault" from the list of different types.
+          Confirm your selection when the scripts asks for it.</li>
+      <li>Select "<custom>" when the scripts asks for stanza valos.domain.
+          Enter the desired domain and confirm both the domain selection
+          as well as the whole stanza configuration.</li>
+      <li>Select "bypass" when the scripts asks for whether to add
+          initial workshops as devDependencies.</li>
+      <li>Select "Configure" when asked whether to configure repository
+          with "vlm configure".</li>
+      <li>For the comma-separated list of package.json .workspaces stanza globs
+          the initial "packages/*" will suffice. This list will determine
+          the workspaces for the vault. All of the necessary dependencies
+          will now be installed.</li>
+      <li>Select "@valos/toolset-domain" when asked to select a toolset
+          to be used for the vault as vaults should always use the
+          domain toolset. Said toolset will now be installed.</li>
+      <li>Select "docs" when asked to select tools for the type-vault toolset.</li>
+      <li>Select "Yes" when asked to initialize git repository,
+          set up initial release branch and whether to regenerate software
+          bill of materials. This will set up the initial local git repository
+          and release branch for the vault and ensure that sbom documents
+          are regenerated on each release or prerelease.</li>
+      <li>Choose the base URI for your published vauld documents when
+          asked.</li>
+    </ol>
+You have now initialized the vault. If everything went accordingly,
+        your vault root directory should now contain all basic necessary files.</li>
+      <li>*NOT IN CORRECT PLACE* You need to also configure domain toolset.
+      Following steps guide you through the configuration.
+    <ol>
+      <li>First step</li>
+    </ol>
+</li>
+      <li>Before releasing your vault you need to have commited all changes.
+      If there are uncommitted changes that you haven't made, you should amend
+      them to the initial commit.</li>
+      <li>Releasing your vault is as simple as running the following command:
+  <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">vlm release-vault --prerelease</span>
+
+  </div>
+This command will run all the set hooks & assemble all the packages
+      from your workspaces. If you have configured npm credentials and set up
+      remote github repository the script will also publish your packages
+      to npm and push the vault to the github repository.</li>
+    </ol>
+
   </section>
 
   </body>

@@ -238,12 +238,12 @@
           "vdoc:content": [
             {
               "rdf:type": "vdoc:NumberedList",
-              "vdoc:rows": [
+              "vdoc:entries": [
                 [
                   "After ensuring you are in a prerelease branch, creating new branch is as easy as running: ",
                   {
                     "rdf:type": "revdoc:CommandLineInteraction",
-                    "vdoc:rows": [
+                    "vdoc:entries": [
                       [
                         "",
                         "$ ",
@@ -281,12 +281,12 @@
           "vdoc:content": [
             {
               "rdf:type": "vdoc:NumberedList",
-              "vdoc:rows": [
+              "vdoc:entries": [
                 [
                   "Create a folder for your new library and navigate to there. Run the following command: ",
                   {
                     "rdf:type": "revdoc:CommandLineInteraction",
-                    "vdoc:rows": [
+                    "vdoc:entries": [
                       [
                         "",
                         "$ ",
@@ -306,7 +306,7 @@
                   "vdoc:content": [
                     {
                       "rdf:type": "vdoc:NumberedList",
-                      "vdoc:rows": [
+                      "vdoc:entries": [
                         "Select \"Initialize\" when it asks about package.json initialization.",
                         "Select \"Yes\" for whether the package is public.",
                         "Select \"Initialize\" when it asks about initializing repository info.",
@@ -317,7 +317,7 @@
                           "Select \"configure\" for whether to configure the repository with ",
                           {
                             "rdf:type": "revdoc:CommandLineInteraction",
-                            "vdoc:rows": [
+                            "vdoc:entries": [
                               [
                                 "",
                                 "$ ",
@@ -332,7 +332,7 @@
                             ]
                           }
                         ],
-                        "Select \"@valos/toolset-vault/enable-babel\" to use from available toolsets.",
+                        "Select \"@valos/type-vault/enable-babel\" to use from available toolsets.",
                         "Select \"Yes\" for whether to enable babel transpilation for the library"
                       ]
                     }
@@ -364,14 +364,14 @@
           "vdoc:content": [
             {
               "rdf:type": "vdoc:NumberedList",
-              "vdoc:rows": [
+              "vdoc:entries": [
                 [
                   "Create the following files into your library folder: ",
                   {
                     "vdoc:content": [
                       {
                         "rdf:type": "vdoc:BulletList",
-                        "vdoc:rows": [
+                        "vdoc:entries": [
                           "your-library-name.test.js",
                           "index.js"
                         ]
@@ -381,10 +381,12 @@
                 ],
                 [
                   "Add the following code snippet to your \"your-library-name.test.js\" file:",
+                  null,
                   "import foo from \"./index.js\";\n\n          describe(\"your-library-name\", () => {\n            it(\"*\", () => {\n              expect(foo())\n                  .toEqual(true);\n            });\n          });"
                 ],
                 [
                   "And then the following snippet to the  \"index.js\" file:\"",
+                  null,
                   "// @flow\n\n          export default function foo () {\n            return true;\n          }"
                 ],
                 [
@@ -397,7 +399,7 @@
                   "to the project root and running the following command:",
                   {
                     "rdf:type": "revdoc:CommandLineInteraction",
-                    "vdoc:rows": [
+                    "vdoc:entries": [
                       [
                         "",
                         "$ ",
@@ -436,7 +438,7 @@
         "Just run the following command:",
         {
           "rdf:type": "revdoc:CommandLineInteraction",
-          "vdoc:rows": [
+          "vdoc:entries": [
             [
               "",
               "$ ",
@@ -469,7 +471,7 @@
         "to a local repository, run the following command inside your project root:",
         {
           "rdf:type": "revdoc:CommandLineInteraction",
-          "vdoc:rows": [
+          "vdoc:entries": [
             [
               "",
               "$ ",
@@ -497,6 +499,102 @@
         }
       ]
     },
+    "creating_new_vault": {
+      "@id": "creating_new_vault",
+      "dc:title": "Guide on how to create a new vault",
+      "rdf:type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This guide will go through the steps on creating a new vault with valma\n    and releasing a prerelease version of it. Setting up credentials\n    for npm and setting remote github repository is out of the scope of this guide.",
+        {
+          "vdoc:content": [
+            {
+              "rdf:type": "vdoc:NumberedList",
+              "vdoc:entries": [
+                "Create new folder for your vault and navigate there.",
+                [
+                  "Run the following command: ",
+                  {
+                    "rdf:type": "revdoc:CommandLineInteraction",
+                    "vdoc:entries": [
+                      [
+                        "",
+                        "$ ",
+                        {
+                          "rdf:type": "revdoc:Command",
+                          "vdoc:words": [
+                            "vlm",
+                            "init"
+                          ]
+                        }
+                      ]
+                    ]
+                  },
+                  "Following list will go through the steps of the initialization script:",
+                  {
+                    "vdoc:content": [
+                      {
+                        "rdf:type": "vdoc:NumberedList",
+                        "vdoc:entries": [
+                          [
+                            "Select \"Initialize\" on whether to initialize package.json with 'yarn init'.\n          The initialization script will prompt\n          multiple questions about the basic information of the package which will be\n          written to the root package.json. Answer to the questions as you wish,\n          except for \"private\" which needs to be \"true\" as vaults\n          themselves are never published."
+                          ],
+                          "Select \"Initialize\" on whether to initialize repository valos stanza type and domain,\n          and then select \"vault\" from the list of different types.\n          Confirm your selection when the scripts asks for it.",
+                          "Select \"<custom>\" when the scripts asks for stanza valos.domain.\n          Enter the desired domain and confirm both the domain selection\n          as well as the whole stanza configuration.",
+                          "Select \"bypass\" when the scripts asks for whether to add\n          initial workshops as devDependencies.",
+                          "Select \"Configure\" when asked whether to configure repository\n          with \"vlm configure\".",
+                          "For the comma-separated list of package.json .workspaces stanza globs\n          the initial \"packages/*\" will suffice. This list will determine\n          the workspaces for the vault. All of the necessary dependencies\n          will now be installed.",
+                          "Select \"@valos/toolset-domain\" when asked to select a toolset\n          to be used for the vault as vaults should always use the\n          domain toolset. Said toolset will now be installed.",
+                          "Select \"docs\" when asked to select tools for the type-vault toolset.",
+                          "Select \"Yes\" when asked to initialize git repository,\n          set up initial release branch and whether to regenerate software\n          bill of materials. This will set up the initial local git repository\n          and release branch for the vault and ensure that sbom documents\n          are regenerated on each release or prerelease.",
+                          "Choose the base URI for your published vauld documents when\n          asked."
+                        ]
+                      }
+                    ]
+                  },
+                  "You have now initialized the vault. If everything went accordingly,\n        your vault root directory should now contain all basic necessary files."
+                ],
+                [
+                  "*NOT IN CORRECT PLACE* You need to also configure domain toolset.\n      Following steps guide you through the configuration.",
+                  {
+                    "vdoc:content": [
+                      {
+                        "rdf:type": "vdoc:NumberedList",
+                        "vdoc:entries": [
+                          "First step"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "Before releasing your vault you need to have commited all changes.\n      If there are uncommitted changes that you haven't made, you should amend\n      them to the initial commit.",
+                [
+                  "Releasing your vault is as simple as running the following command:",
+                  {
+                    "rdf:type": "revdoc:CommandLineInteraction",
+                    "vdoc:entries": [
+                      [
+                        "",
+                        "$ ",
+                        {
+                          "rdf:type": "revdoc:Command",
+                          "vdoc:words": [
+                            "vlm",
+                            "release-vault",
+                            "--prerelease"
+                          ]
+                        }
+                      ]
+                    ]
+                  },
+                  "This command will run all the set hooks & assemble all the packages\n      from your workspaces. If you have configured npm credentials and set up\n      remote github repository the script will also publish your packages\n      to npm and push the vault to the github repository."
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "rdf:type": "revdoc:Document",
     "vdoc:content": [
       {
         "@id": "abstract"
@@ -521,6 +619,9 @@
       },
       {
         "@id": "assembling_local_packages"
+      },
+      {
+        "@id": "creating_new_vault"
       }
     ]
   }

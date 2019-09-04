@@ -2,7 +2,7 @@
 
 const ownPropertiesSymbol = Symbol("ownProperties");
 
-function patchOntologyPartitions (ontologies: Object, engine: Object,
+async function patchOntologyPartitions (ontologies: Object, engine: Object,
     authority: String, existingIndexPartition?: Object) {
   const ontologyIndex = {};
 
@@ -83,6 +83,7 @@ function _filterTermData (ontology: Array) {
 
 async function _patchValosResources (ontologyIndex: Array, engine: Object,
     authority: String, existingIndexPartition?: Object) {
+  const isUpdating = (existingIndexPartition !== undefined);
   let indexPartition = existingIndexPartition;
   if (!indexPartition) {
     indexPartition = await engine.runValoscript(null, `
@@ -94,155 +95,189 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
     `, { scope: { authority }, awaitResult: (result) => result.getComposedEvent()
     });
   }
+  const prototypePropertyMap = {};
 
-  const ontologyNames = Object.keys(ontologyIndex);
-  let prototypePropertyMap = {};
-
-  ontologyNames.forEach(async (ontologyName) => {
+  for (const ontologyName in ontologyIndex) {
+    if (!ontologyIndex.hasOwnProperty(ontologyName)) continue;
     prototypePropertyMap[ontologyName] = {};
 
-    prototypePropertyMap = await engine.runValoscript(null, `
-      const ontologyData = ontologyIndex[ontologyName];
+    await engine.runValoscript(null, `
+      (new Promise((baseResolve, baseReject) => {
+        const ontologyData = ontologyIndex[ontologyName];
+        const contextLookup = ontologyData.contextLookup;
+        const patchedClasses = [];
 
-      const contextLookup = ontologyData.contextLookup;
-      const patchedClasses = [];
+        if (!indexPartition[ontologyName]) {
+          indexPartition[ontologyName] = new Relation({
+            owner: indexPartition, name: "ONTOLOGY"
+          });
+        }
 
-      if (!indexPartition[ontologyName]) {
-        indexPartition[ontologyName] = new Relation({
-          owner: indexPartition, name: "ONTOLOGY"
+        let ontologyPartition = indexPartition[ontologyName].$V.target;
+
+        if (!ontologyPartition) {
+          ontologyPartition = new Entity({
+            name: ontologyName.toUpperCase() + " Partition",
+            owner: null,
+            partitionAuthorityURI: authority
+          });
+
+          indexPartition[ontologyName].$V.target = ontologyPartition;
+        }
+
+        let i = 0;
+        function iterateClasses () {
+          return new Promise((resolve, reject) => {
+            if (i >= ontologyData.classes.length) resolve();
+
+            const ontologyClass = ontologyData.classes[i];
+            const prototypeName = createPrototypeName(ontologyClass["@id"]);
+
+            getInstance(ontologyClass, prototypeName)
+            .then((resolvedData) => {
+              createInstance(resolvedData.prototype, prototypeName,
+                resolvedData.parentInstance, ontologyClass);
+              i++;
+              iterateClasses().then(() => resolve());
+            });
+          });
+        }
+
+        iterateClasses().then(() => {
+          const ownlings = ontologyPartition.$V.unnamedOwnlings;
+          for (let i = 0; i < ownlings.length; i++) {
+            const ownling = ownlings[i];
+            if (patchedClasses.indexOf(ownling.$V.rawId) === -1) {
+              console.log("nonexistent destroy", ownling.$V.name);
+              valos.Resource.destroy(ownling);
+            }
+          }
+
+          baseResolve();
         });
-      }
 
-      let ontologyPartition = indexPartition[ontologyName].$V.target;
+        function createInstance (existingPrototype, prototypeName, instanceType, ontologyClass) {
+          let prototype = existingPrototype;
+          if (!prototype) {
+            //if (isUpdating)
+            //  console.log("create new instance while updating", prototypeName);
 
-      if (!ontologyPartition) {
-        ontologyPartition = new Entity({
-          name: ontologyName.toUpperCase() + " Partition",
-          owner: null,
-          partitionAuthorityURI: authority
-        });
+            let parentInstance = (!instanceType) ? Entity : instanceType;
 
-        indexPartition[ontologyName].$V.target = ontologyPartition;
-      }
+            prototype = new parentInstance({
+              owner: ontologyPartition, name: prototypeName
+            });
 
-      for (let i = 0; i < ontologyData.classes.length; i++) {
-        const ontologyClass = ontologyData.classes[i];
-        const prototypeName = createPrototypeName(ontologyClass["@id"]);
+            ontologyPartition[prototypeName] = prototype;
+          }
 
-        patchInstance(ontologyClass, prototypeName);
-      }
+          if (patchedClasses.indexOf(prototype.$V.rawId) === -1) {
+            patchedClasses.push(prototype.$V.rawId);
+            patchProperties(prototype, ontologyClass);
+          };
 
-      function patchInstance (ontologyClass, prototypeName) {
-        let prototype = ontologyPartition[prototypeName];
+          return prototype;
+        }
 
-        const subClassOf = (ontologyClass["rdfs:subClassOf"]
-          || ontologyClass[contextLookup["rdfs:subClassOf"]]);
+        function getInstance (ontologyClass, prototypeName) {
+          return new Promise((resolve, reject) => {
+            let isCreatingParent = false;
+            let prototype = ontologyPartition[prototypeName];
 
-        let parentInstance;
+            const subClassOf = (ontologyClass["rdfs:subClassOf"]
+              || ontologyClass[contextLookup["rdfs:subClassOf"]]);
 
-        if (subClassOf) {
-          for (let i = 0; i < ontologyData.classes.length; i++) {
-            const ontologyParentClass = ontologyData.classes[i];
-            const ontologyParentClassId = ontologyParentClass["@id"];
-            if (ontologyParentClassId === subClassOf) {
-              const parentPrototypeName
-                = createPrototypeName(ontologyParentClassId);
+            let parentInstance;
 
-              if (prototype && prototype.$V.prototype
-                && prototype.$V.prototype.$V.name !== parentPrototypeName) {
-                valos.Resource.destroy(prototype);
-                prototype = undefined;
+            if (subClassOf) {
+              for (let i = 0; i < ontologyData.classes.length; i++) {
+                const ontologyParentClass = ontologyData.classes[i];
+                const ontologyParentClassId = ontologyParentClass["@id"];
+                if (ontologyParentClassId === subClassOf) {
+                  const parentPrototypeName
+                    = createPrototypeName(ontologyParentClassId);
+
+                  if (prototype && prototype.$V.prototype
+                      && prototype.$V.prototype.$V.name !== parentPrototypeName) {
+                    valos.Resource.destroy(prototype);
+                    prototype = undefined;
+                  }
+
+                  if (ontologyPartition[parentPrototypeName]) {
+                    parentInstance = ontologyPartition[parentPrototypeName];
+                  }
+                  else {
+                    isCreatingParent = true;
+                    getInstance(ontologyParentClass,
+                        parentPrototypeName).then((resolvedData) => {
+                      parentInstance = createInstance(resolvedData.prototype,
+                        parentPrototypeName, resolvedData.parentInstance,
+                        ontologyParentClass);
+
+                      resolve({ prototype, parentInstance });
+                    });
+                  }
+
+                  break;
+                }
               }
+            }
 
-              if (ontologyPartition[parentPrototypeName]) {
-                parentInstance = ontologyPartition[parentPrototypeName];
-              }
-              else {
-                parentInstance = patchInstance(ontologyParentClass,
-                  parentPrototypeName);
-              }
+            if (!isCreatingParent) resolve({ prototype, parentInstance });
+          });
+        }
 
-              break;
+        function patchProperties (prototype, ontologyClass) {
+          const classProperties = ontologyClass[ownPropertiesSymbol];
+          if (!classProperties) return;
+
+          const prototypeName = prototype.$V.name;
+          if (!prototypePropertyMap[ontologyName][prototypeName]) {
+            prototypePropertyMap[ontologyName][prototypeName] = [];
+          }
+
+          for (let i = 0; i < classProperties.length; i++) {
+            const classProperty = classProperties[i];
+            const prototypePropertyName
+              = createPrototypeName(classProperty["@id"]);
+
+            if (prototypePropertyMap[ontologyName][prototypeName]
+                .indexOf(prototypePropertyName) == -1) {
+              prototypePropertyMap[ontologyName][prototypeName]
+                .push(prototypePropertyName);
+            }
+
+            const xsdObj = "xsd:object";
+            if (classProperty["rdfs:range"] === xsdObj
+            || classProperty[contextLookup["rdfs:range"]] === xsdObj
+            || (classProperty["xsd:restriction"]
+              && classProperty["xsd:restriction"]["xsd:base"] === xsdObj)
+            || (classProperty[contextLookup["xsd:restriction"]]
+              && classProperty[contextLookup["xsd:restriction"]]["xsd:base"] === xsdObj)
+            && (!prototype[prototypePropertyName]
+              || prototype[prototypePropertyName].$V.typeName !== "Entity")) {
+                prototype[prototypePropertyName] = new Entity({
+                  owner: prototype, name: prototypePropertyName
+                });
+            } else if (prototype[prototypePropertyName] !== null) {
+              //if (isUpdating) console.log("setprop", prototype.$V.name);
+              prototype[prototypePropertyName] = null;
             }
           }
         }
 
-        if (!prototype) {
-          if (!parentInstance) parentInstance = Entity;
-
-          prototype = new parentInstance({
-            owner: ontologyPartition, name: prototypeName
-          });
-
-          ontologyPartition[prototypeName] = prototype;
+        function createPrototypeName (ontologyClassId) {
+          const match = ontologyClassId && ontologyClassId
+              .match(new RegExp(ontologyName + ":(.*)"));
+          return (match) ? match[1] : ontologyClassId;
         }
-
-        patchProperties(prototype, ontologyClass);
-        return prototype;
-      }
-
-      function patchProperties (prototype, ontologyClass) {
-        if (patchedClasses.indexOf(prototype.$V.rawId) !== -1) return;
-        patchedClasses.push(prototype.$V.rawId);
-
-        const classProperties = ontologyClass[ownPropertiesSymbol];
-        if (!classProperties) return;
-
-        const prototypeName = prototype.$V.name;
-        if (!prototypePropertyMap[ontologyName][prototypeName]) {
-          prototypePropertyMap[ontologyName][prototypeName] = [];
-        }
-
-        for (let i = 0; i < classProperties.length; i++) {
-          const classProperty = classProperties[i];
-          const prototypePropertyName
-            = createPrototypeName(classProperty["@id"]);
-
-          if (prototypePropertyMap[ontologyName][prototypeName]
-              .indexOf(prototypePropertyName) == -1) {
-            prototypePropertyMap[ontologyName][prototypeName]
-              .push(prototypePropertyName);
-          }
-
-          const xsdObj = "xsd:object";
-          if (classProperty["rdfs:range"] === xsdObj
-          || classProperty[contextLookup["rdfs:range"]] === xsdObj
-          || (classProperty["xsd:restriction"]
-            && classProperty["xsd:restriction"]["xsd:base"] === xsdObj)
-          || (classProperty[contextLookup["xsd:restriction"]]
-            && classProperty[contextLookup["xsd:restriction"]]["xsd:base"] === xsdObj)
-          && (!prototype[prototypePropertyName]
-            || prototype[prototypePropertyName].$V.typeName !== "Entity")) {
-              prototype[prototypePropertyName] = new Entity({
-                owner: prototype, name: prototypePropertyName
-              });
-          } else if (prototype[prototypePropertyName] !== null) {
-            prototype[prototypePropertyName] = null;
-          }
-        }
-      }
-
-      function createPrototypeName(ontologyClassId) {
-        const match = ontologyClassId && ontologyClassId
-          .match(new RegExp(ontologyName + ":(.*)"));
-        return (match) ? match[1] : ontologyClassId;
-      }
-
-      const ownlings = ontologyPartition.$V.unnamedOwnlings;
-      for (let i = 0; i < ownlings.length; i++) {
-        const ownling = ownlings[i];
-        if (patchedClasses.indexOf(ownling.$V.rawId) === -1) {
-          valos.Resource.destroy(ownling);
-        }
-      }
-
-      (prototypePropertyMap)
+      }));
     `, { scope: { ontologyIndex, ownPropertiesSymbol,
         indexPartition, ontologyName, prototypePropertyMap,
-        authority, console },
+        authority, isUpdating, console },
         awaitResult: (result) => result.getComposedEvent()
     });
-  });
+  }
 
   return { indexPartition, prototypePropertyMap };
 }

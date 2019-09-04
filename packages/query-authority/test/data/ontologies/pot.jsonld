@@ -57,6 +57,75 @@
   "rdfs:seeAlso": "https://github.com/PlatformOfTrust/standards/",
   "defines": [
   {
+    "@id": "pot:HousingCooperative",
+    "@type": "pot:Class",
+    "subClassOf": "pot:LimitedCompany",
+    "dli:label": [
+      {
+        "rdfs:label": {
+          "@language": "en-us",
+          "@value": "Housing Cooperative"
+        }
+      }
+    ],
+    "dli:comment": [
+      {
+        "rdfs:comment": {
+          "@language": "en-us",
+          "@value": "Legal entity, usually a cooperative or a corporation, which owns real estate, consisting of one or more residential buildings. (also called housing company, apartment housing company, limited liability housing company)"
+        }
+      }
+    ],
+    "vs:term_status": "unstable",
+    "owl:versionInfo": "DRAFT"
+  },
+  {
+    "@id": "pot:Zone",
+    "@type": "pot:Class",
+    "subClassOf": "pot:Space",
+    "dli:label": [
+      {
+        "rdfs:label": {
+          "@language": "en-us",
+          "@value": "Zone"
+        }
+      }
+    ],
+    "dli:comment": [
+      {
+        "rdfs:comment": {
+          "@language": "en-us",
+          "@value": "Zone is an area that can be defined by coordinates and polygons or collection of other space types like apartments or rooms"
+        }
+      }
+    ],
+    "vs:term_status": "unstable",
+    "owl:versionInfo": "DRAFT"
+  },
+  {
+    "@id": "pot:Floor",
+    "@type": "pot:Class",
+    "subClassOf": "pot:BuildingElement",
+    "dli:label": [
+      {
+        "rdfs:label": {
+          "@language": "en-us",
+          "@value": "Floor"
+        }
+      }
+    ],
+    "dli:comment": [
+      {
+        "rdfs:comment": {
+          "@language": "en-us",
+          "@value": "Floor is composed of the structural objects which are built on top of story"
+        }
+      }
+    ],
+    "vs:term_status": "unstable",
+    "owl:versionInfo": "DRAFT"
+  },
+  {
     "@id": "pot:LocatedAt",
     "@type": "pot:Class",
     "subClassOf": "dli:Role",
@@ -200,29 +269,6 @@
         "rdfs:comment": {
           "@language": "en-us",
           "@value": "The liability of members or subscribers of the company is limited to what they have invested or guaranteed to the company. Limited companies may be limited by shares or by guaratee. The former may be further divided in public companies and private companies. Who may become a member of a private limited company is restricted by law and by the company's rules. In contrast, anyone may buy shares in a public limited company."
-        }
-      }
-    ],
-    "vs:term_status": "unstable",
-    "owl:versionInfo": "DRAFT"
-  },
-  {
-    "@id": "pot:HousingCooperative",
-    "@type": "pot:Class",
-    "subClassOf": "pot:LimitedCompany",
-    "dli:label": [
-      {
-        "rdfs:label": {
-          "@language": "en-us",
-          "@value": "Housing Cooperative"
-        }
-      }
-    ],
-    "dli:comment": [
-      {
-        "rdfs:comment": {
-          "@language": "en-us",
-          "@value": "Legal entity, usually a cooperative or a corporation, which owns real estate, consisting of one or more residential buildings. (also called housing company, apartment housing company, limited liability housing company)"
         }
       }
     ],
@@ -897,29 +943,6 @@
     "owl:versionInfo": "DRAFT"
   },
   {
-    "@id": "pot:Floor",
-    "@type": "pot:Class",
-    "subClassOf": "pot:BuildingElement",
-    "dli:label": [
-      {
-        "rdfs:label": {
-          "@language": "en-us",
-          "@value": "Floor"
-        }
-      }
-    ],
-    "dli:comment": [
-      {
-        "rdfs:comment": {
-          "@language": "en-us",
-          "@value": "Floor is composed of the structural objects which are built on top of story"
-        }
-      }
-    ],
-    "vs:term_status": "unstable",
-    "owl:versionInfo": "DRAFT"
-  },
-  {
     "@id": "pot:Column",
     "@type": "pot:Class",
     "subClassOf": "pot:BuildingElement",
@@ -1189,29 +1212,6 @@
         "rdfs:comment": {
           "@language": "en-us",
           "@value": "An apartment (Flat (British English) or unit (Australian English) is a self-contained housing unit that occupies only part of a building, generally on a single floor"
-        }
-      }
-    ],
-    "vs:term_status": "unstable",
-    "owl:versionInfo": "DRAFT"
-  },
-  {
-    "@id": "pot:Zone",
-    "@type": "pot:Class",
-    "subClassOf": "pot:Space",
-    "dli:label": [
-      {
-        "rdfs:label": {
-          "@language": "en-us",
-          "@value": "Zone"
-        }
-      }
-    ],
-    "dli:comment": [
-      {
-        "rdfs:comment": {
-          "@language": "en-us",
-          "@value": "Zone is an area that can be defined by coordinates and polygons or collection of other space types like apartments or rooms"
         }
       }
     ],

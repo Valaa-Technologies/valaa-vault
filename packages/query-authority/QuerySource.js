@@ -8,7 +8,6 @@ function querySource (query: String, source: any) {
     }).then(async (result) => {
       let resultStream, parseMethod;
       const resultSet = [];
-      //console.log("result", result);
 
       if (result && result.bindingsStream) {
         resultStream = result.bindingsStream;

@@ -7,6 +7,8 @@ const expectedOntologyPartitionStructure
   = require("./data/expectedOntologyPartitionStructure");
 const patchOntologyPartitions = require("../OntologyPartitionPatcher")
   .patchOntologyPartitions;
+const createMemoryPartitionURIFromRawId = require("~/raem/ValaaURI")
+  .createMemoryPartitionURIFromRawId;
 const engineTestHarness = require("~/engine/test/EngineTestHarness");
 
 const engine = engineTestHarness
@@ -29,7 +31,7 @@ function readOntologies (ontologies) {
 
 function _checkOntologyPartition (ontologyPartition: Vrapper,
     expectedPrototypes: Object, ontologyName: String,
-    prototypePropertyMap: Array) {
+    prototypePropertyMap: Array, expectedTruthCount: Number) {
   expect(ontologyPartition.get(VALEK.toField("name")))
     .toBe(`${ontologyName.toUpperCase()} Partition`);
 
@@ -37,8 +39,19 @@ function _checkOntologyPartition (ontologyPartition: Vrapper,
     = Object.keys(expectedPrototypes.thoroughPrototypes);
 
   const prototypes = ontologyPartition.get(VALEK.toField("unnamedOwnlings"));
-  expect(prototypes.length).toBe(expectedPrototypeKeys.length
-    + expectedPrototypes.additionalPrototypes.length);
+  const expectedPrototypeCount = expectedPrototypeKeys.length
+  + expectedPrototypes.additionalPrototypes.length;
+  expect(prototypes.length).toBe(expectedPrototypeCount);
+
+  const ontologyPartitionConnection = engine.sourcerer
+    .acquireConnection(createMemoryPartitionURIFromRawId(
+      ontologyPartition.getRawId()));
+
+  const connectionStatus = ontologyPartitionConnection.getStatus();
+  expect(connectionStatus).not.toBeFalsy();
+  expect(connectionStatus.truths)
+    .toBe((expectedTruthCount !== undefined) ? expectedTruthCount
+      : expectedPrototypeCount + 1);
 
   prototypes.forEach((prototype) => {
       expect(prototype).toBeInstanceOf(Vrapper);
@@ -57,6 +70,7 @@ function _checkOntologyPartition (ontologyPartition: Vrapper,
 
       const parent = prototype.get(VALEK.toField("prototype"));
       if (expectedPrototype.parent) {
+        if (!(parent instanceof Vrapper)) console.log("missing parent", prototypeName);
         expect(parent).toBeInstanceOf(Vrapper);
         expect(parent.get(VALEK.toField("name"))).toBe(expectedPrototype.parent);
       } else {
@@ -66,6 +80,7 @@ function _checkOntologyPartition (ontologyPartition: Vrapper,
       const ownProperties = prototypePropertyMap[prototype.get(VALEK.toField("name"))];
       if (!ownProperties) console.log("prototype", prototype.get(VALEK.toField("name")));
       expect(ownProperties).not.toBeFalsy();
+
       expect(ownProperties.length)
         .toBe(Object.keys(expectedPrototype.properties).length);
 
@@ -87,6 +102,7 @@ function _checkOntologyPartition (ontologyPartition: Vrapper,
 
 describe("Ontology prototype patcher", () => {
   xit(`creates partition which consists of prototypes of terms from given ontologies`, async () => {
+    const authority = "valaa-memory:";
     let ontologyIndexData;
 
     function getTerms () { return this.data.defines; }
@@ -99,7 +115,7 @@ describe("Ontology prototype patcher", () => {
 
       parsedOntologies.pot.getTerms = parsedOntologies.dli.getTerms = getTerms;
       ontologyIndexData = await patchOntologyPartitions(parsedOntologies,
-        engine, "valaa-memory:");
+        engine, authority);
     } catch (e) {
       console.log("Error with reading ontologies", e);
       expect(false).toBe(true);
@@ -159,6 +175,6 @@ describe("Ontology prototype patcher", () => {
     expect(potOntologyRelation.get(VALEK.toField("name"))).toBe("ONTOLOGY");
     _checkOntologyPartition(potOntologyRelation.get(VALEK.toField("target")),
       expectedOntologyPartitionStructure.getPotUpdated(), "pot",
-      ontologyIndexData.prototypePropertyMap.pot);
+      ontologyIndexData.prototypePropertyMap.pot, /* , 58 + */);
   });
 });

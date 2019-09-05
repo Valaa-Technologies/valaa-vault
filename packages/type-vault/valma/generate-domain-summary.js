@@ -1,23 +1,23 @@
 #!/usr/bin/env vlm
 
-exports.vlm = { toolset: "@valos/toolset-domain" };
+exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = "generate-domain-summary";
 exports.brief = "generate domain summary";
 exports.describe = "Generate the domain components summary file for the domain root revdoc";
 exports.introduction = ``;
 
-exports.disabled = (yargs) => (!yargs.vlm.getToolConfig(yargs.vlm.toolset, "summary", "inUse")
-        ? "@valos/toolset-domain tool 'summary' is not configured to be inUse"
+exports.disabled = (yargs) => (!yargs.vlm.getToolConfig(yargs.vlm.toolset, "domain", "inUse")
+        ? "@valos/type-vault tool 'domain' is not configured to be inUse"
     : ((yargs.vlm.commandName ===
         ".release-vault/.prepared-hooks/00-generate-domain-summary")
-            && !yargs.vlm.getToolConfig(yargs.vlm.toolset, "summary", "regenerateOnRelease"))
-        ? "@valos/toolset-domain tool 'summary' is not configured to be regenerated on release"
+            && !yargs.vlm.getToolConfig(yargs.vlm.toolset, "domain", "regenerateOnRelease"))
+        ? "@valos/type-vault tool 'domain' is not configured to be regenerated on release"
     : false);
 
 exports.builder = (yargs) => yargs.options({
-  target: {
-    type: "string", default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "summary", "target"),
-    description: "Target for domain component summary",
+  "summary-target": {
+    type: "string", default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "domain", "summaryTarget"),
+    description: "Target domain component summary file",
   },
   summary: {
     type: "object", description: "Preparation summary",
@@ -26,11 +26,11 @@ exports.builder = (yargs) => yargs.options({
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const { domain, workspaceIds } = vlm.getToolsetConfig(vlm.toolset) || {};
-  if (!domain || !workspaceIds) {
-    return { success: false, reason: "Invalid @valos/toolset-domain config" };
+  const { workspaceIds } = vlm.getToolConfig(vlm.toolset, "domain") || {};
+  if (!workspaceIds) {
+    return { success: false, reason: "Invalid @valos/type-vault config" };
   }
-  vlm.shell.mkdir("-p", vlm.path.dirname(yargv.target));
+  vlm.shell.mkdir("-p", vlm.path.dirname(yargv["summary-target"]));
   const workspaces = {};
   Object.entries(workspaceIds).forEach(([name, requireId]) => {
     const {
@@ -49,9 +49,9 @@ exports.handler = async (yargv) => {
       name => name.match(/.configure\/\.(.*)\/.tools\/.select\/(.*)$/).slice(1, 3).join("#"));
   const commands = await _invokeAndFilter("PVDI", "*");
   const summary = { workspaces, types, toolsets, tools, commands };
-  await vlm.shell.ShellString(JSON.stringify(summary, null, 2)).to(yargv.target);
+  await vlm.shell.ShellString(JSON.stringify(summary, null, 2)).to(yargv["summary-target"]);
   return {
-    domain,
+    domain: vlm.packageConfig.valos.domain,
     workspaces: Object.keys(workspaceIds),
     success: `Generated a summary of ${
       Object.keys(workspaceIds).length} workspaces of ${

@@ -13,11 +13,6 @@
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "license": "MIT"
       },
-      "@valos/toolset-domain": {
-        "version": "0.35.0-prerelease.8",
-        "description": "ValOS Toolset for managing ValOS workspace domains",
-        "license": "MIT"
-      },
       "@valos/toolset-rest-api-gateway-plugin": {
         "version": "0.35.0-prerelease.8",
         "description": "A toolset for managing Structured ValOS REST API Gateway Plugin",
@@ -194,12 +189,6 @@
     }
   },
   "toolsets": {
-    "@valos/toolset-domain": {
-      "description": "Select and configure 'toolset-domain' for the current vault or workshop workspace",
-      "package": "@valos/kernel",
-      "version": "0.35.0-prerelease.8",
-      "introduction": "This workspace type provides configuration template and commands for\nmanaging a ValOS domain.\n\nThe toolset 'toolset-domain' is selectable by 'vault', 'workshop' workspaces."
-    },
     "@valos/toolset-rest-api-gateway-plugin": {
       "disabled": "DISABLED",
       "explanation": ".disabled => Workspace is not a worker (is vault)",
@@ -224,11 +213,11 @@
     }
   },
   "tools": {
-    "@valos/toolset-domain#summary": {
+    "@valos/type-vault#domain": {
       "description": "Select domain summary revdoc generation tool for a vault workspace",
-      "package": "@valos/toolset-domain",
+      "package": "@valos/type-vault",
       "version": "0.35.0-prerelease.8",
-      "introduction": "This toolset-domain tool enables the (re)generation of docs/index.html\ndomain summary revdoc document."
+      "introduction": "This type-vault tool enables the (re)generation of docs/index.html\ndomain summary revdoc document."
     },
     "@valos/type-vault#docs": {
       "description": "Select vault /docs generation tool",
@@ -238,12 +227,6 @@
     }
   },
   "commands": {
-    "generate-domain-summary": {
-      "description": "Generate the domain components summary file for the domain root revdoc",
-      "package": "@valos/toolset-domain",
-      "version": "0.35.0-prerelease.8",
-      "introduction": ""
-    },
     "compose-revelation": {
       "description": "Compose revealer bundles based on the revealer toolset config",
       "package": "@valos/toolset-revealer",
@@ -279,6 +262,12 @@
       "package": "@valos/type-vault",
       "version": "0.35.0-prerelease.8",
       "introduction": "By default the three elements installed by 'yarn install' are cleaned:\n1. workspace packages by 'lerna clean --yes'\n2. yalc local dependencies by 'yalc remove --all'\n3. vault root node_modules by 'rm -rf'\n\nIn addition, dist/ can be removed with --dist in preparation for a clean slate publish/deploy ops.\nBe mindful that all of dist/ will be removed.\nyarn.lock can be removed with --yarn in preparation for persisted dependency updates."
+    },
+    "generate-domain-summary": {
+      "description": "Generate the domain components summary file for the domain root revdoc",
+      "package": "@valos/type-vault",
+      "version": "0.35.0-prerelease.8",
+      "introduction": ""
     },
     "write-revdoc": {
       "description": "Create a revdoc source code file",

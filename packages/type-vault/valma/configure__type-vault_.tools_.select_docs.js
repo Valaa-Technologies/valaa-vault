@@ -1,6 +1,7 @@
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = ".configure/.@valos/type-vault/.tools/.select/docs";
-exports.describe = "Select vault /docs generation tool";
+exports.brief = "select docs generation";
+exports.describe = "Select /docs generation tool for a vault workspace";
 exports.introduction =
 `This type-vault tool provides commands for (re)generating the /docs
 folder from document sources present in the local workspaces, notably

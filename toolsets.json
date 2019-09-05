@@ -1,38 +1,4 @@
 {
-  "@valos/toolset-domain": {
-    "inUse": true,
-    "domain": "@valos/kernel",
-    "workspaceIds": {
-      "@valos/kernel": "./packages/kernel",
-      "valma": "./packages/valma",
-      "@valos/engine": "./packages/engine",
-      "@valos/gateway-api": "./packages/gateway-api",
-      "@valos/hypertwin": "./packages/hypertwin",
-      "@valos/inspire": "./packages/inspire",
-      "@valos/raem": "./packages/raem",
-      "@valos/revdoc": "./packages/revdoc",
-      "@valos/sbomdoc": "./packages/sbomdoc",
-      "@valos/script": "./packages/script",
-      "@valos/sourcerer": "./packages/sourcerer",
-      "@valos/tools": "./packages/tools",
-      "@valos/toolset-domain": "./packages/toolset-domain",
-      "@valos/toolset-rest-api-gateway-plugin": "./packages/toolset-rest-api-gateway-plugin",
-      "@valos/toolset-revealer": "./packages/toolset-revealer",
-      "@valos/twindoc": "./packages/twindoc",
-      "@valos/type-gateway-plugin": "./packages/type-gateway-plugin",
-      "@valos/type-opspace": "./packages/type-opspace",
-      "@valos/type-vault": "./packages/type-vault",
-      "@valos/type-worker": "./packages/type-worker",
-      "@valos/vdoc": "./packages/vdoc"
-    },
-    "tools": {
-      "summary": {
-        "inUse": true,
-        "regenerateOnRelease": true,
-        "target": "./packages/kernel/summary.json"
-      }
-    }
-  },
   "@valos/toolset-revealer": {
     "inUse": true,
     "webpack": {
@@ -48,6 +14,7 @@
     "tools": {}
   },
   "@valos/type-vault": {
+    "inUse": "always",
     "tools": {
       "docs": {
         "inUse": true,
@@ -68,8 +35,35 @@
         },
         "introduction": [],
         "listingTarget": "packages/kernel/documents.json"
+      },
+      "domain": {
+        "inUse": true,
+        "regenerateOnRelease": true,
+        "summaryTarget": "./packages/kernel/summary.json",
+        "workspaceIds": {
+          "valma": "./packages/valma",
+          "@valos/engine": "./packages/engine",
+          "@valos/gateway-api": "./packages/gateway-api",
+          "@valos/hypertwin": "./packages/hypertwin",
+          "@valos/inspire": "./packages/inspire",
+          "@valos/kernel": "./packages/kernel",
+          "@valos/raem": "./packages/raem",
+          "@valos/revdoc": "./packages/revdoc",
+          "@valos/sbomdoc": "./packages/sbomdoc",
+          "@valos/script": "./packages/script",
+          "@valos/sourcerer": "./packages/sourcerer",
+          "@valos/tools": "./packages/tools",
+          "@valos/toolset-rest-api-gateway-plugin": "./packages/toolset-rest-api-gateway-plugin",
+          "@valos/toolset-revealer": "./packages/toolset-revealer",
+          "@valos/twindoc": "./packages/twindoc",
+          "@valos/type-gateway-plugin": "./packages/type-gateway-plugin",
+          "@valos/type-opspace": "./packages/type-opspace",
+          "@valos/type-vault": "./packages/type-vault",
+          "@valos/type-worker": "./packages/type-worker",
+          "@valos/type-workshop": "./packages/type-workshop",
+          "@valos/vdoc": "./packages/vdoc"
+        }
       }
-    },
-    "inUse": "always"
+    }
   }
 }

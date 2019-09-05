@@ -6,7 +6,7 @@ const {
   },
   ontologyHeaders,
 } = require("@valos/revdoc");
-const { domainHeaders } = require("@valos/toolset-domain");
+const { domainHeaders } = require("@valos/type-vault");
 
 const { name, version } = require("../package");
 const { documents } = require("../packages/kernel");

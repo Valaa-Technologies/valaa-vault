@@ -17,7 +17,7 @@ exports.builder = (yargs) => {
   const domainChoices = vlm.listMatchingCommands(".configure/.domain/{,*/**/}*")
       .map(n => n.match(/^.configure\/.domain\/(@[^/@]*\/[^/@]*|[^/@]*)/)[1])
       .filter(n => n)
-      .concat("<custom>");
+      .concat("<create new>");
   return yargs.options({
     reconfigure: {
       alias: "r", type: "boolean",
@@ -43,17 +43,22 @@ exports.builder = (yargs) => {
 };
 
 async function _inquireIfCustomThenAlwaysConfirm (vlm, category, selection, answers) {
-  if (selection === "<custom>") {
-    answers[category] = await vlm.inquireText(`Enter custom valos.${category}:`);
-  }
-  vlm.speak(await vlm.invoke(
+  if ((selection === "<custom>") || (selection === "<create new>")) {
+    answers[category] = await vlm.inquireText(`Enter valos.${category}:`);
+    if (selection === "<create new>") answers.newDomain = true; // hack: this is forwarded to yargv.
+  } else {
+    vlm.speak(await vlm.invoke(
       `.configure/.${category}/${answers[category]}`, ["--show-introduction"]));
+  }
   return vlm.inquireConfirm(`Confirm valos.${category} selection: '${answers[category]}'?`);
 }
 
-exports.handler = (yargv) => yargv.vlm.updatePackageConfig({
-  valos: {
-    type: yargv.type,
-    domain: yargv.domain,
-  },
+exports.handler = (yargv) => ({
+  newDomain: yargv.newDomain,
+  configUpdate: yargv.vlm.updatePackageConfig({
+    valos: {
+      type: yargv.type,
+      domain: yargv.domain,
+    },
+  }),
 });

@@ -46,11 +46,11 @@ exports.handler = async (yargv) => {
     vlm.instruct(`! Edit toolsets.json:['${vlm.theme.package(vlm.toolset
         )}'].webpack to further configure webpack entry and output locations.`);
   }
-  const devDependencies = { "@valos/toolset-revealer": true };
+  const devDependencies = { "@valos/toolset-revealer": vlm.domainVersionTag("@valos/kernel") };
   if (!vlm.getPackageConfig("devDependencies", "@valos/inspire")) {
     if (await vlm.inquireConfirm(`rouse-revealer requires @valos/inspire as a peerDependency.${
         ""} Install it in workspace devDependencies?`)) {
-      devDependencies["@valos/inspire"] = true;
+      devDependencies["@valos/inspire"] = yargv.vlm.domainVersionTag("@valos/kernel");
     }
   }
   const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);

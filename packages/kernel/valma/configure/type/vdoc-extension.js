@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/vdoc-extension";
-exports.describe = "Initialize vdoc-extension workspace";
+exports.describe = "Select 'vdoc-extension' workspace type";
 exports.introduction =
 `A vdoc-extension workspace contains the extension specification and
 supporting libraries for a VDoc extension. It inherits library

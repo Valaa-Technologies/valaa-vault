@@ -53,7 +53,9 @@ exports.handler = async (yargv) => {
       yargv, vlm.getToolsetConfig(vlm.toolset));
   return {
     command: exports.command,
-    devDependencies: { "@valos/toolset-rest-api-gateway-plugin": true },
+    devDependencies: {
+      "@valos/toolset-rest-api-gateway-plugin": vlm.domainVersionTag("@valos/kernel"),
+    },
     ...selectionResult,
   };
 };

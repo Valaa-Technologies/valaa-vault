@@ -25,7 +25,7 @@ exports.handler = async (yargv) => {
   const devDependencies = {};
   if (!vlm.getPackageConfig("devDependencies", "@valos/tools")) {
     if (await vlm.inquireConfirm(`Install @valos/tools in devDependencies?`)) {
-      devDependencies["@valos/tools"] = true;
+      devDependencies["@valos/tools"] = yargv.vlm.domainVersionTag("@valos/kernel");
     }
   }
 

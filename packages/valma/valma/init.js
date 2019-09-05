@@ -10,7 +10,7 @@ from scratch.
 Valma init has following interactive phases:
 1. Initialization of package.json via 'yarn init'
 2. Configuration of workspace valos.type and .domain via 'vlm .configure/.valos-stanza'
-3. Addition of new known workshops via 'yarn add -W --dev'
+3. Addition of new known workshops via 'yarn add --dev (-W)'
 4. Selection of in-use toolsets from available toolsets via 'vlm .configure/.select-toolsets'
 5. Configuration of in-use toolsets and tools via 'vlm configure'`;
 
@@ -141,7 +141,8 @@ publishConfigLine}
     let justConfigured = false;
     const ret = {};
     while (yargv.reconfigure || !vlm.packageConfig.valos || justConfigured) {
-      if (!vlm.packageConfig.valos && Object.keys(yargv.valos).length) {
+      if (Object.keys(yargv.valos || {}).length
+          && (!vlm.packageConfig.valos || yargv.reconfigure)) {
         await vlm.updatePackageConfig({ valos: yargv.valos });
       }
       const choices = (justConfigured ? ["Confirm", "reconfigure"]
@@ -150,7 +151,7 @@ publishConfigLine}
       const answer = await vlm.inquire([{
         message: !vlm.packageConfig.valos
             ? "Initialize workspace valos stanza type and domain?"
-            : `${justConfigured ? "Confirm selection or reconfigure" : "Reconfigure"
+            : `${justConfigured ? "Confirm" : "Reconfigure"
                 } valos stanza: ${JSON.stringify({ ...vlm.packageConfig.valos })}?`,
         type: "list", name: "choice", default: choices[0], choices,
       }]);
@@ -173,20 +174,21 @@ publishConfigLine}
   }
 
   async function _addInitialValmaDevDependencies () {
-    const yarnAdd = "yarn add -W --dev";
+    const yarnAdd = "yarn add --dev -W";
     const themedYarnAdd = vlm.theme.executable(yarnAdd);
     let wasError;
     const wasInitial = !vlm.packageConfig.devDependencies;
     while (yargv.reconfigure || wasInitial) {
+      const visibleDomains = await vlm.delegate("vlm -ePVO .configure/.domain/{,*/**/}*");
+      vlm.info("Visible domains:\n", visibleDomains);
       const choices = vlm.packageConfig.devDependencies
           ? ["Bypass", "yes", "help", "quit"]
           : ["Yes", "bypass", "help", "quit"];
       let answer = await vlm.inquire([{
         message: wasError
             ? "Retry adding workshops (or direct toolsets) as devDependencies?"
-            : `${vlm.theme.executable("yarn add")} ${
-              vlm.packageConfig.devDependencies ? "more" : "initial"
-              } workshops as devDependencies directly to this workspace?`,
+            : `${vlm.theme.executable("yarn add")
+              } more workshops as devDependencies directly to this workspace?`,
         type: "list", name: "choice", default: choices[0], choices,
       }]);
       wasError = false;
@@ -249,7 +251,10 @@ available for the listings in following phases.
         continue;
       }
       vlm.reconfigure = yargv.reconfigure || (answer.choice === "reconfigure");
-      return vlm.invoke("configure", { reconfigure: vlm.reconfigure });
+      return vlm.invoke("configure", {
+        reconfigure: vlm.reconfigure,
+        domain: !(ret_.stanza || {}).newDomain,
+      });
     }
     vlm.info("Skipped 'vlm configure'.", ...tellIfNoReconfigure);
     return {};

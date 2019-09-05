@@ -13,6 +13,14 @@ exports.builder = (yargs) => yargs.options({
     alias: "r", type: "boolean",
     description: "Reconfigure all config of this workspace.",
   },
+  domain: {
+    type: "boolean", default: true,
+    description: "(re)configure all domain settings.",
+  },
+  type: {
+    type: "boolean", default: true,
+    description: "(re)configure all type settings.",
+  },
   breakdown: {
     type: "boolean", description: "Show full breakdown of the init process even if successful.",
   },
@@ -32,14 +40,18 @@ exports.handler = async (yargv) => {
 
   const ret = {
     success: false,
-    domain: [await vlm.invoke(`.configure/.domain/${valos.domain}`, rest)],
-    type: [await vlm.invoke(`.configure/.type/${valos.type}`, rest)],
+    domain: !yargv.domain ? [] : [await vlm.invoke(`.configure/.domain/${valos.domain}`, rest)],
+    type: !yargv.type ? [] : [await vlm.invoke(`.configure/.type/${valos.type}`, rest)],
   };
   Object.assign(ret, await updateResultSideEffects(vlm, ret.domain[0], ret.type[0]));
   if (ret.success === false) return ret;
 
-  ret.domain.push(...await vlm.invoke(`.configure/.domain/.${valos.domain}/**/*`, rest));
-  ret.type.push(...await vlm.invoke(`.configure/.type/.${valos.type}/**/*`, rest));
+  if (yargv.domain) {
+    ret.domain.push(...await vlm.invoke(`.configure/.domain/.${valos.domain}/**/*`, rest));
+  }
+  if (yargv.type) {
+    ret.type.push(...await vlm.invoke(`.configure/.type/.${valos.type}/**/*`, rest));
+  }
   Object.assign(ret, await updateResultSideEffects(
       vlm, ...ret.domain.slice(1), ...ret.type.slice(1)));
   if (ret.success === false) return ret;
@@ -58,18 +70,32 @@ exports.handler = async (yargv) => {
 };
 
 exports.updateResultSideEffects = updateResultSideEffects;
+exports.yarnAddNewDevDependencies = yarnAddNewDevDependencies;
+
 async function updateResultSideEffects (vlm, ...results) {
   const resultBreakdown = {};
+
   const devDependencies = Object.assign({}, ...results.map(r => (r || {}).devDependencies || {}));
-  const devDependencyNames = Object.keys(devDependencies)
-      .filter(name =>
-          !(vlm.packageConfig.dependencies || {})[name]
-          && !(vlm.packageConfig.devDependencies || {})[name]);
-  if (devDependencyNames.length) {
-    resultBreakdown.newDevDependencies = devDependencyNames;
-    await vlm.interact(["yarn add -W --dev", ...devDependencyNames]);
-  }
+  const newDevDependencies = await yarnAddNewDevDependencies(vlm, devDependencies);
+  if (newDevDependencies) resultBreakdown.newDevDependencies = newDevDependencies;
+
   results.forEach(r => (r || {}).toolsetsUpdate && vlm.updateToolsetsConfig(r.toolsetsUpdate));
   resultBreakdown.success = results.reduce((a, r) => a && ((r || {}).success !== false), true);
   return resultBreakdown;
+}
+
+async function yarnAddNewDevDependencies (vlm, candidateDevDependencies) {
+  const { valos, dependencies, devDependencies } = vlm.packageConfig;
+  const newDevDependencies = Object.entries(candidateDevDependencies)
+      .filter(([name, newVersion]) => {
+        if (!newVersion) return false;
+        const currentVersion = (dependencies || {})[name] || (devDependencies || {})[name];
+        if (!currentVersion) return true;
+        if (newVersion === true) return false;
+        return newVersion !== currentVersion;
+      })
+      .map(([name, newVersion]) => (newVersion === true ? name : `${name}@${newVersion}`));
+  if (!newDevDependencies.length) return undefined;
+  await vlm.interact(["yarn add --dev", valos.type === "vault" ? "-W" : "", ...newDevDependencies]);
+  return newDevDependencies;
 }

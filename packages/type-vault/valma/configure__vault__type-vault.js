@@ -53,16 +53,39 @@ exports.handler = async (yargv) => {
       command: {
         // If patch version is specified and not 0, set up (pre)patch bump.
         // Otherwise bump (pre)minor.
-        bump: `${preid ? "pre" : ""}${(version.split(".")[2] || "0") !== "0" ? "patch" : "minor"}`,
-        preid: preid || "",
-        allowBranch: `${branchName}/*`,
+        version: {
+          bump: `${preid ? "pre" : ""}${
+              (version.split(".")[2] || "0") !== "0" ? "patch" : "minor"}`,
+          preid: preid || "",
+          allowBranch: `${branchName}/*`,
+        }
       },
     };
     vlm.shell.ShellString(JSON.stringify(lerna, null, 2)).to("./lerna.json");
   }
+  const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);
 
-  if (!vlm.shell.test("-d", ".git") && await vlm.inquireConfirm("Initialize git repository?")) {
+  const hadGit = vlm.shell.test("-d", ".git");
+  if (!hadGit && await vlm.inquireConfirm("Initialize git repository?")) {
     await vlm.interact("git init");
+    const newOrigin = (await vlm.inquireText(
+        `git remote "origin" to add (leave empty to skip):`) || "").trim();
+    if (newOrigin) {
+      await vlm.interact(`git remote add origin ${newOrigin}`);
+      await vlm.interact(`git fetch`);
+      try {
+        await vlm.interact(`git checkout master`);
+        if (!(await vlm.inquireConfirm(
+            `Remote repository not empty. Continue appending on top of 'master'?`))) {
+          throw new Error("Aborted by user due to non-empty 'master'. No cleanup done.");
+        }
+      } catch (error) {
+        if ((await vlm.delegate("git branch -a") || "").trim()) {
+          throw new Error(
+              "Invalid, initialized git state: branches exist but 'git checkout master' failed");
+        }
+      }
+    }
     await vlm.interact("git add -A");
     await vlm.interact(`git commit -a -m v${config.version}`);
     if (await vlm.inquireConfirm(`Set up initial ${branchName} branch and its annotated tag?`)) {
@@ -71,7 +94,5 @@ exports.handler = async (yargv) => {
           config.version.split(".").slice(0, 2).join(".")}`);
     }
   }
-
-  const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);
   return { command: exports.command, ...selectionResult };
 };

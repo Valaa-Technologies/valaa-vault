@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/library";
-exports.describe = "Initialize library workspace";
+exports.describe = "Select 'library' workspace type";
 exports.introduction =
 `A library workspace contains arbitrary ES5 source code and exposes a
 API via package.json .main stanza (usually index.js).

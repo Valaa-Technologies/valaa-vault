@@ -11,6 +11,7 @@ Additionally this tool can be configured to regenerate all docs on
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
     && `Workspace is not a vault (is ${yargs.vlm.getValOSConfig("type")})`;
+
 exports.builder = (yargs) => yargs.options({
   ...yargs.vlm.createConfigureToolOptions(exports),
   "regenerate-on-release": {
@@ -26,14 +27,24 @@ exports.builder = (yargs) => yargs.options({
   },
 });
 
-exports.handler = (yargv) => ({
-  command: exports.command,
-  devDependencies: { "@cyclonedx/bom": true, "xml-js": true },
-  toolsetsUpdate: { [yargv.vlm.toolset]: { tools: { docs: {
-    inUse: true,
-    regenerateOnRelease: yargv["regenerate-on-release"] || false,
-    docsBaseIRI: yargv["docs-base-iri"] || "",
-    authors: {},
-    introduction: [],
-  } } } },
-});
+exports.handler = (yargv) => {
+  const vlm = yargv.vlm;
+  const kernelVersionTag = vlm.domainVersionTag("@valos/kernel");
+  return {
+    command: exports.command,
+    devDependencies: {
+      "@cyclonedx/bom": true,
+      "xml-js": true,
+      "@valos/vdoc": kernelVersionTag,
+      "@valos/revdoc": kernelVersionTag,
+      "@valos/sbomdoc": kernelVersionTag,
+    },
+    toolsetsUpdate: { [yargv.vlm.toolset]: { tools: { docs: {
+      inUse: true,
+      regenerateOnRelease: yargv["regenerate-on-release"] || false,
+      docsBaseIRI: yargv["docs-base-iri"] || "",
+      authors: {},
+      introduction: [],
+    } } } },
+  };
+};

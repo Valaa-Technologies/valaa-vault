@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/toolset";
-exports.describe = "Initialize toolset workspace";
+exports.describe = "Select 'toolset' workspace type";
 exports.introduction =
 `A toolset workspace can be 'selected' by another workspace so that:
 1. The toolset is added as a devDependency to the target workspace,
@@ -58,23 +58,24 @@ async function _inquireIfCustomThenAlwaysConfirm (vlm, category, selection, answ
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const simpleName = vlm.packageConfig.name.match(/([^/]*)$/)[1];
+  const fullName = vlm.packageConfig.name;
+  const simpleName = fullName.match(/([^/]*)$/)[1];
   const restrict = (yargv.restrict && (yargv.restrict !== "<none>") && yargv.restrict) || "";
   const restrictToTypeGlob = yargv.restrict ? `.type/.${yargv.restrict}/` : "";
-  await createConfigureCommand(vlm, "toolset", vlm.packageConfig.name, simpleName, yargv.brief);
+  await createConfigureCommand(vlm, "toolset", fullName, simpleName, yargv.brief);
   if (yargv.selectable) {
-    await createSelectToolsetCommand(
-        vlm, vlm.packageConfig.name, simpleName, restrict, restrictToTypeGlob);
+    await createSelectToolsetCommand(vlm, vlm.packageConfig.valos.domain,
+        fullName, simpleName, restrict, restrictToTypeGlob);
   }
   if (await vlm.inquireConfirm("Create toolset status sub-command skeleton?")) {
-    await createStatusSubCommand(vlm, "toolset", vlm.packageConfig.name,
+    await createStatusSubCommand(vlm, "toolset", fullName,
         `${restrict ? `${restrict}_` : ""}_toolset__${simpleName}`,
         `${restrictToTypeGlob}40-toolsets/`);
   }
   if ((yargv.restrict === "opspace") && await vlm.inquireConfirm(
       "Create opspace toolset (build|deploy)-release sub-command skeletons?")) {
-    await createReleaseSubCommand(vlm, "toolset", vlm.packageConfig.name, simpleName, "build");
-    await createReleaseSubCommand(vlm, "toolset", vlm.packageConfig.name, simpleName, "deploy");
+    await createReleaseSubCommand(vlm, "toolset", fullName, simpleName, "build");
+    await createReleaseSubCommand(vlm, "toolset", fullName, simpleName, "deploy");
   }
   return { success: true };
 };
@@ -121,12 +122,12 @@ toolset or tool which uses this tool must explicit invoke this command.`,
 }
 
 exports.createSelectToolsetCommand = createSelectToolsetCommand;
-function createSelectToolsetCommand (vlm, name, simpleName, restrict, restrictToTypeGlob) {
+function createSelectToolsetCommand (vlm, domain, name, simpleName, restrict, restrictToTypeGlob) {
   return vlm.invoke("draft-command", [{
     filename: `configure_${restrict ? `_${restrict}_` : ""}select__${simpleName}.js`,
     export: true,
     skeleton: true,
-    brief: "select toolset",
+    brief: `select toolset '${simpleName}'`,
     "exports-vlm": `{ toolset: "${name}" }`,
     describe: `Select the toolset '${simpleName}' for the current ${restrict || "workspace"}`,
 
@@ -143,7 +144,10 @@ function createSelectToolsetCommand (vlm, name, simpleName, restrict, restrictTo
   // vlm select-toolsets.
   const vlm = yargv.vlm;
   vlm.updateToolsetConfig(vlm.toolset, { inUse: true });
-  return { success: true, devDependencies: { [exports.vlm.toolset]: true } };
+  return {
+    devDependencies: { [exports.vlm.toolset]: vlm.domainVersionTag("${domain}") },
+    success: true,
+  };
 }`,
   }, `.configure/${restrictToTypeGlob}.select/${name}`]);
 }

@@ -8,7 +8,7 @@ exports.introduction = ``;
 
 exports.disabled = (yargs) => (!yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "inUse")
         ? "@valos/type-vault tool 'docs' is not configured to be inUse"
-    : ((yargs.vlm.commandName === ".release-vault/.prepared-hooks/regenerate-docs")
+    : ((yargs.vlm.contextCommand === ".release-vault/.prepared-hooks/regenerate-docs")
             && !yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "regenerateOnRelease"))
         ? "@valos/type-vault tool 'docs' is not configured to be regenerated on release"
     : false);
@@ -126,6 +126,7 @@ exports.handler = async (yargv) => {
   if (yargv["listing-target"]) {
     vlm.shell.ShellString(JSON.stringify(listing, null, 2))
         .to(vlm.path.join(process.cwd(), yargv["listing-target"]));
+    await vlm.execute([`git add`, yargv["listing-target"]]);
   }
   await vlm.execute("git add docs/*");
   return true;

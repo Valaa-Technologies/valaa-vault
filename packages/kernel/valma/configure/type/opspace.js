@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/opspace";
-exports.describe = "Initialize opspace workspace";
+exports.describe = "Select 'opspace' workspace type";
 exports.introduction =
 `An opspaces workspace is used to for configuring, deploying, updating,
 monitoring and diagnosing all types of live infrastructure resources.
@@ -17,8 +17,8 @@ exports.builder = (yargs) => yargs.options({
   },
 });
 
-exports.handler = () => ({
-  devDependencies: { "@valos/type-opspace": true },
+exports.handler = (yargv) => ({
+  devDependencies: { "@valos/type-opspace": yargv.vlm.domainVersionTag("@valos/kernel") },
   toolsetsUpdate: { "@valos/type-opspace": { inUse: "always" } },
   success: true,
 });

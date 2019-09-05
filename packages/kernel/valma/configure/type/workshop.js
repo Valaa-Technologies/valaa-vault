@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/workshop";
-exports.describe = "Initialize workshop workspace";
+exports.describe = "Select 'workshop' workspace type";
 exports.introduction =
 `A workshop package provides a set of valma commands for defining and
 managing a ValOS domain. The workshops then:
@@ -24,8 +24,8 @@ exports.builder = (yargs) => yargs.options({
   },
 });
 
-exports.handler = () => ({
-  devDependencies: { "@valos/type-workshop": true },
+exports.handler = (yargv) => ({
+  devDependencies: { "@valos/type-workshop": yargv.vlm.domainVersionTag("@valos/kernel") },
   toolsetsUpdate: { "@valos/type-workshop": { inUse: "always" } },
   success: true,
 });

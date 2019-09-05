@@ -8,7 +8,7 @@ exports.introduction = ``;
 
 exports.disabled = (yargs) => (!yargs.vlm.getToolConfig(yargs.vlm.toolset, "domain", "inUse")
         ? "@valos/type-vault tool 'domain' is not configured to be inUse"
-    : ((yargs.vlm.commandName ===
+    : ((yargs.vlm.contextCommand ===
         ".release-vault/.prepared-hooks/00-generate-domain-summary")
             && !yargs.vlm.getToolConfig(yargs.vlm.toolset, "domain", "regenerateOnRelease"))
         ? "@valos/type-vault tool 'domain' is not configured to be regenerated on release"
@@ -50,6 +50,7 @@ exports.handler = async (yargv) => {
   const commands = await _invokeAndFilter("PVDI", "*");
   const summary = { workspaces, types, toolsets, tools, commands };
   await vlm.shell.ShellString(JSON.stringify(summary, null, 2)).to(yargv["summary-target"]);
+  await vlm.execute([`git add`, yargv["summary-target"]]);
   return {
     domain: vlm.packageConfig.valos.domain,
     workspaces: Object.keys(workspaceIds),

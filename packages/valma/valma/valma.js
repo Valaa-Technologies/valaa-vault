@@ -155,6 +155,7 @@ const _vlm = {
   createConfigureToolOptions,
   createStandardToolsetOption,
   configureToolSelection,
+  domainVersionTag,
 
   // Returns a list of available sub-command names which match the given command glob.
   listMatchingCommands,
@@ -424,6 +425,7 @@ const _vlm = {
   _invoke,
   _peekReturnValue,
   _parseUntilLastPositional,
+  _refreshAvailablePools,
   _locateDependedPools,
   _refreshActivePools,
   _availablePools: [],
@@ -885,20 +887,18 @@ _vlm.ifVerbose(1).babble("phase 1, init:", "determine global options and availab
 // When a command begins with ./ or contains the command prefix (if it
 // is non-empty) it is considered a direct file valma command.
 // Its parent directory is made the initial "file" pool.
-let poolBase = _vlm.vargv.poolBase;
+let _poolBase = _vlm.vargv.poolBase;
+let _filePoolPath;
 if ((_commandPrefix && (_vlm.vargv.command || "").includes(_commandPrefix))
     || (_vlm.vargv.command || "").slice(0, 2) === "./") {
   if (_vlm.vargv.isCompleting) process.exit(0); // Let bash filename completion do its thing.
   const commandMatcher = new RegExp(`(.*/)?(\\.?)${_commandPrefix}(.*?)(.js)?$`);
   const match = _vlm.vargv.command.match(commandMatcher);
   _vlm.vargv.command = match ? `${match[2]}${match[3]}` : "";
-  const filePoolPath = _vlm.path.resolve((match && match[1]) || "");
-  _vlm._availablePools.push({ name: "file", path: filePoolPath });
-  poolBase = filePoolPath;
+  _filePoolPath = _vlm.path.resolve((match && match[1]) || "");
+  _poolBase = _filePoolPath;
 }
-_vlm._availablePools.push(..._vlm._locateDependedPools(
-    poolBase, _vlm.vargv.poolDirectories, poolBase === path.posix.resolve(".") ? "." : poolBase));
-_vlm._availablePools.push({ name: "global", path: _vlm.vargv.globalPool });
+_vlm._refreshAvailablePools();
 
 _vlm.ifVerbose(2)
     .expound("available pools:", _vlm._availablePools);
@@ -1136,6 +1136,7 @@ async function execute (args, options = {}) {
               }
             } else {
               if (options.stdout === "json") processedOutput = JSON.parse(output);
+              this._refreshAvailablePools();
               this._refreshActivePools();
               this._reloadPackageAndToolsetsConfigs();
               result = (options.onSuccess === undefined) ? processedOutput
@@ -1371,7 +1372,7 @@ async function _invoke (commandSelector, argv) {
       }
 
       const subVLM = activeCommand.vlm;
-      subVLM.vargv = subVLM._parseUntilLastPositional(argv, module.command);
+      subVLM.vargv = subVLM._parseUntilLastPositional(argv, module.command, activeCommand.broken);
       subVLM.verbosity = subVLM.vargv.verbose;
       const subIntrospect = subVLM._determineIntrospection(module, commandName, false, false, argv);
 
@@ -1489,10 +1490,10 @@ async function _invoke (commandSelector, argv) {
 ######   ######     #    #    #     #    ######
 */
 
-function _parseUntilLastPositional (argv_, commandUsage) {
+function _parseUntilLastPositional (argv_, commandUsage, isBroken) {
   const endIndex = argv_.findIndex(arg => (arg === "--") || (arg[0] !== "-"));
   const args = argv_.slice(0, (endIndex === -1) ? undefined : endIndex);
-  const ret = this.vargs.parse(args);
+  const ret = !isBroken ? this.vargs.parse(args) : {};
   if (ret.vlm) ret.vlmOption = ret.vlm;
   ret.vlm = this;
   const usageParts = commandUsage.split(" ");
@@ -1543,6 +1544,18 @@ function __underToSlash (text = "") {
   return text.replace(/_/g, "/");
 }
 
+function _refreshAvailablePools () {
+  this._availablePools.splice(0, this._availablePools.length);
+  if (_filePoolPath) {
+    this._availablePools.push({ name: "file", path: _filePoolPath });
+  }
+  this._availablePools.push(...this._locateDependedPools(
+      _poolBase,
+      _vlm.vargv.poolDirectories,
+      _poolBase === path.posix.resolve(".") ? "." : _poolBase));
+  this._availablePools.push({ name: "global", path: _vlm.vargv.globalPool });
+}
+
 function _locateDependedPools (initialPoolBase, poolDirectories, relativePoolBase) {
   // TODO(iridian): eventually make less singletony to allow for different sub-invokation
   // current working diretory execution contexts (now fixed in the initial cwd)
@@ -1578,7 +1591,7 @@ function _locateDependedPools (initialPoolBase, poolDirectories, relativePoolBas
 function _refreshActivePools (searchForwardPool) {
   // TODO(iridian): same as _locateDependedPools: make _activePools properly context dependent.
   // Now splicing so that only the root _vlm._activePools is affected.
-  this._activePools.splice(0, -1);
+  this._activePools.splice(0, this._activePools.length);
   let specificEnoughVLMSeen = false;
   let ret;
   for (const pool of this._availablePools) {
@@ -1678,6 +1691,7 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
 
       try {
         if (!module.builder || !module.builder(subVargs)) {
+          if (!activeCommand.broken) activeCommand.broken = ".builder => falsy";
           if (!activeCommand.disabled) activeCommand.disabled = ".builder => falsy";
         }
       } catch (error) {
@@ -1910,7 +1924,7 @@ function _introspectCommands (introspect, commands_, commandGlob, isWildcard_, e
     poolIntro = pools[visiblePoolName];
   }
   const keys = Object.keys(poolIntro).filter(k => (k !== "..."));
-  if (keys.length !== 1) return poolIntro;
+  if (isWildcard_ || (keys.length !== 1)) return poolIntro;
   const ret = poolIntro[keys[0]];
   if (typeof ret !== "object" || !ret || Array.isArray(ret)) return ret;
   Object.assign(ret["..."] || (ret["..."] = { chapters: true }),
@@ -2265,6 +2279,12 @@ function createStandardToolsetOption (description) {
   };
 }
 
+function domainVersionTag (domain) {
+  const packageJSON = require(`${domain}/package`);
+  const [, prerelease] = packageJSON.version.match(/[0-9]*\.[0-9]*\.[0-9]*(-prerelease)?/);
+  if (prerelease) return "prerelease";
+  return true; // means 'any'.
+}
 
 function __deepFreeze (object) {
   if (typeof object !== "object" || !object) return;

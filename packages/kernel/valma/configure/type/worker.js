@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/worker";
-exports.describe = "Initialize worker workspace";
+exports.describe = "Select 'worker' workspace type";
 exports.introduction =
 `A worker workspace is used to launch and manage a particular service
 process. The workspace files contain configuration and data used by the
@@ -31,8 +31,8 @@ exports.builder = (yargs) => yargs.options({
   },
 });
 
-exports.handler = () => ({
-  devDependencies: { "@valos/type-worker": true },
+exports.handler = (yargv) => ({
+  devDependencies: { "@valos/type-worker": yargv.vlm.domainVersionTag("@valos/kernel") },
   toolsetsUpdate: { "@valos/type-worker": { inUse: "always" } },
   success: true,
 });

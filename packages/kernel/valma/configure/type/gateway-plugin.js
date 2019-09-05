@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/gateway-plugin";
-exports.describe = "Initialize gateway-plugin workspace";
+exports.describe = "Select 'gateway-plugin' workspace type";
 exports.introduction =
 `A gateway-plugin extends inspire and perspire gateways with various
 types of functionalities: new resources schemas, media decoders,
@@ -14,8 +14,8 @@ exports.builder = (yargs) => yargs.options({
   },
 });
 
-exports.handler = () => ({
-  devDependencies: { "@valos/type-gateway-plugin": true },
+exports.handler = (yargv) => ({
+  devDependencies: { "@valos/type-gateway-plugin": yargv.vlm.domainVersionTag("@valos/kernel") },
   toolsetsUpdate: { "@valos/type-gateway-plugin": { inUse: "always" } },
   success: true,
 });

@@ -17,6 +17,7 @@ exports.builder = (yargs) => yargs.options({
     interactive: { type: "confirm", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
   },
   "summary-target": {
+    type: "string",
     default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "domain", "summaryTarget")
         || `packages/${yargs.vlm.getValOSConfig("domain")
             .split(yargs.vlm.getValOSConfig("prefix") || "/")[1] || "REPLACEME"}/summary.json`,
@@ -28,7 +29,8 @@ exports.builder = (yargs) => yargs.options({
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const domain = vlm.getValOSConfig("domain");
-  const domainWorkshopPath = vlm.path.join(process.cwd(), "packages", domain.split("/")[1]);
+  const domainLocal = domain.split("/")[1];
+  const domainWorkshopPath = vlm.path.join(process.cwd(), "packages", domainLocal);
   if (!vlm.shell.test("-d", domainWorkshopPath) &&
       await vlm.inquireConfirm(`Create domain workshop workspace ${vlm.theme.package(domain)} at ${
           vlm.theme.path(domainWorkshopPath)}?`)) {
@@ -39,6 +41,25 @@ exports.handler = async (yargv) => {
       valos: { type: "workshop", domain },
       devDependencies: false,
     });
+    await vlm.interact([`vlm draft-command`, {
+      filename: `configure_domain__${domainLocal}.js`,
+      export: true,
+      skeleton: true,
+      brief: `select ${domain} domain`,
+      describe: `Configure ${domain} domain for this workspace.`,
+      introduction: ``,
+
+      disabled: `(yargs) => yargs.vlm.getValOSConfig("domain") !== undefined
+      && \`Workspace domain is already defined: '\${yargs.vlm.getValOSConfig("domain")}')\``,
+
+      builder: `(yargs) => yargs.options({
+  reconfigure: {
+    alias: "r", type: "boolean",
+    description: "Reconfigure '${domain}' domain for this workspace.",
+  },
+})`,
+      handler: `() => ({ success: true })`,
+    }, `.configure/.domain/${domain}`]);
     vlm.shell.popd();
   }
   return {

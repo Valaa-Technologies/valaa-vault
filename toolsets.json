@@ -38,7 +38,7 @@
       },
       "domain": {
         "inUse": true,
-        "regenerateOnRelease": false,
+        "regenerateOnRelease": true,
         "summaryTarget": "./packages/kernel/summary.json",
         "workspaceIds": {
           "valma": "./packages/valma",

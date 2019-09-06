@@ -96,6 +96,7 @@ async function yarnAddNewDevDependencies (vlm, candidateDevDependencies) {
       })
       .map(([name, newVersion]) => (newVersion === true ? name : `${name}@${newVersion}`));
   if (!newDevDependencies.length) return undefined;
-  await vlm.interact(["yarn add --dev", valos.type === "vault" ? "-W" : "", ...newDevDependencies]);
+  await vlm.interact([`yarn add --dev${valos.type === "vault" ? [" -W"] : ""}`,
+      ...newDevDependencies]);
   return newDevDependencies;
 }

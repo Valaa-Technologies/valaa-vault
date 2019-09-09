@@ -9,7 +9,7 @@ import { invariantifyString } from "~/tools";
 
 export default class PerspireServer {
   constructor ({
-    isTest, logger, siteRoot, domainRoot, revelationRoot, revelations, cacheBasePath, plugins,
+    isTest, logger, siteRoot, domainRoot, revelationRoot, revelations, cacheBasePath, spindleIds,
   }: Object) {
     invariantifyString(revelationRoot, "PerspireServer.options.revelationRoot",
         { allowEmpty: true });
@@ -25,7 +25,7 @@ export default class PerspireServer {
 
     this.revelations = revelations || [];
     this.cacheBasePath = cacheBasePath;
-    this.plugins = plugins;
+    this.spindleIds = spindleIds;
   }
 
   async initialize () {
@@ -36,7 +36,7 @@ export default class PerspireServer {
     global.atob = (str) => Buffer.from(str, "base64").toString("binary");
     global.btoa = (str) => Buffer.from(str, "binary").toString("base64");
 
-    (this.plugins || []).forEach(plugin => require(plugin));
+    (this.spindleIds || []).forEach(spindleId => require(spindleId));
     return (this.gateway =
         (!this.isTest
             ? this._createWorkerPerspireGateway(this.gatewayOptions, ...this.revelations)

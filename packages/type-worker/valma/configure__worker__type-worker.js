@@ -16,10 +16,10 @@ exports.builder = (yargs) => {
       interactive: { type: "input", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
       description: "The partition URI perspire gateway loads and renders first",
     },
-    plugin: {
+    "spindle-id": {
       type: "string", array: true,
-      default: (((toolsetConfig.commands || {}).perspire || {}).options || {}).plugin || [],
-      description: "List of plugin id's which are require'd before gateway creation.",
+      default: (((toolsetConfig.commands || {}).perspire || {}).options || {})["spindle-id"] || [],
+      description: "List of spindle id's which are require'd before gateway creation.",
     },
   });
 };
@@ -41,7 +41,7 @@ exports.handler = async (yargv) => {
       options: {
         keepalive: 5,
         output: "dist/perspire/vdomSnapshot.html",
-        plugin: yargv.plugin,
+        "spindle-id": yargv["spindle-id"],
       }
     };
   }

@@ -153,14 +153,14 @@ is reflected in how frontend code regularily drops the partition URI.`,
 `By the nature of its distributed event sourcing architecture ValOS
 focuses heavily on the frontend. The cross-compatibility between
 components is driven by how new backends can integrate and talk with
-existing front-end clients. This is facilitated by front-end plugin
+existing front-end clients. This is facilitated by front-end spindle
 systems which enables new ValOS URI schemes to specify new routing
 solutions and fundamentally new backend infrastructures, as long as
 said infrastructures can route ValOS event streams to clients. This
 corresponds to how ValOS doesn't specify how a *partition URI*
 identifies and locates partitions and authorities but leaves it to
 the scheme specifications and their reference implementations of
-frontend plugins.`,
+frontend spindles.`,
         "chapter#3;Partitions URI's identify self-contained wholes, resource references need their context":
 `Web architecture specifies that all or none of the document is
 retrieved. This corresponds to the behaviour of ValOS partitions which

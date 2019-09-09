@@ -4,7 +4,7 @@ import ContentAPI from "./EngineContentAPI";
 
 const valos = require("~/gateway-api/valos").default;
 
-export default valos.exportPlugin({ name: "@valos/engine", ContentAPI });
+export default valos.exportSpindle({ name: "@valos/engine", ContentAPI });
 
 
 export {

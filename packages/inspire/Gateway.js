@@ -69,19 +69,21 @@ export default class Gateway extends FabricEventTarget {
 
   /**
    * valos.gateway.require is the entry point for ValOS fabric library
-   * imports from inside plugins.
+   * imports from inside spindles.
    *
    * @param {string} module
    * @returns
    * @memberof Gateway
    */
   require (module: string) {
-    // TODO(iridian, 2018-12): fabric library version semver compatibility checking against plugin
-    //                package.json dependencies
-    // TODO(iridian, 2018-12): plugin-sourced library registration system for webpack environments
-    // TODO(iridian, 2018-12): correlate require semantics with import semantics
-    // TODO(iridian, 2018-12): evaluate making require contents available as the default require
-    //                         from within valospace
+    // TODO(iridian, 2018-12): fabric library version semver
+    //   compatibility checking against spindle package.json dependencies
+    // TODO(iridian, 2018-12): spindle-sourced library registration
+    //   system for webpack environments
+    // TODO(iridian, 2018-12): correlate require semantics with import
+    //   semantics
+    // TODO(iridian, 2018-12): evaluate making require contents
+    //   available as the default require from within valospace
 
     // TODO(iridian): This issues a webpack warning but is not an
     // actual fault; require will never be called in webpack context
@@ -167,7 +169,7 @@ export default class Gateway extends FabricEventTarget {
       // Create a connection and an identity for the gateway towards false prophet
       this.discourse = await this._initiateDiscourse(this.gatewayRevelation, this.falseProphet);
 
-      await this.attachPlugins(await this.gatewayRevelation.plugins);
+      await this.attachSpindles(await this.gatewayRevelation.spindlePrototypes);
 
       this.prologueRevelation = await this.revelation.prologue;
 
@@ -178,12 +180,12 @@ export default class Gateway extends FabricEventTarget {
 
       this.clockEvent(1, `vidgets.register`, `Registering builtin Inspire vidgets`);
       registerVidgets();
-      const pluginNames = Object.keys(this._attachedPlugins);
-      this.clockEvent(1, `plugins.notify`,
-          `Notifying ${pluginNames.length} plugins of gateway initialization:`,
-          pluginNames.join(", "));
-      for (const plugin of Object.values(this._attachedPlugins)) {
-        await this._notifyPluginGatewayInitialized(plugin);
+      const spindleNames = Object.keys(this._attachedSpindles);
+      this.clockEvent(1, `spindles.notify`,
+          `Notifying ${spindleNames.length} spindles of gateway initialization:`,
+          spindleNames.join(", "));
+      for (const spindle of Object.values(this._attachedSpindles)) {
+        await this._notifySpindleOfGatewayInitialized(spindle);
       }
       this._isInitialized = true;
       this.clockEvent(1, `initialized`, "Gateway initialized");
@@ -284,19 +286,19 @@ export default class Gateway extends FabricEventTarget {
         function _attachView () {
           return view.attach(container, explicitWindow, viewConfig);
         },
-        function _notifyViewPlugins (attachedView) {
+        function _notifyViewSpindles (attachedView) {
           gateway._views[viewId] = rootScope.valos.view = attachedView;
           attachedView.rootScope = rootScope;
-          const attachedViewAwarePlugins = Object.values(gateway._attachedPlugins)
-              .filter(plugin => plugin.onViewAttached);
-          attachedView.clockEvent(1, () => [`view.attach.plugins.notify`,
-            `Notifying ${attachedViewAwarePlugins.length} attached view-aware plugins`,
+          const attachedViewAwareSpindles = Object.values(gateway._attachedSpindles)
+              .filter(spindle => spindle.onViewAttached);
+          attachedView.clockEvent(1, () => [`view.attach.spindles.notify`,
+            `Notifying ${attachedViewAwareSpindles.length} attached view-aware spindles`,
           ]);
-          return mapEagerly(attachedViewAwarePlugins,
-              plugin => gateway._notifyPluginViewAttached(plugin, attachedView, viewId));
+          return mapEagerly(attachedViewAwareSpindles,
+              spindle => gateway._notifySpindleOfViewAttached(spindle, attachedView, viewId));
         },
-        reactions => gateway._views[viewId].clockEvent(1, () => [`view.attach.plugins.reactions`,
-          "\n\tplugin reactions:", ...dumpObject(reactions.filter(notNull => notNull)),
+        reactions => gateway._views[viewId].clockEvent(1, () => [`view.attach.spindles.reactions`,
+          "\n\tspindle reactions:", ...dumpObject(reactions.filter(notNull => notNull)),
         ]),
         () => gateway._views[viewId],
       ]));
@@ -544,63 +546,64 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
-  _attachedPlugins = {};
+  _attachedSpindles = {};
 
-  async attachPlugin (pluginPrototype: Promise<Object>) {
-    return this.attachPlugins([pluginPrototype]);
+  async attachSpindle (spindlePrototype: Promise<Object>) {
+    return this.attachSpindles([spindlePrototype]);
   }
 
-  async attachPlugins (pluginPrototypes_: (Promise<Object> | Object)[]) {
-    this.clockEvent(1, `plugins.obtain`, `Obtaining ${pluginPrototypes_.length} plugin prototypes`);
-    const pluginPrototypes = await Promise.all(pluginPrototypes_);
-    const newPluginLookup = {};
-    const pluginNames = [];
-    pluginPrototypes.forEach(pluginPrototype => {
-      if (newPluginLookup[pluginPrototype.name]) {
-        this.errorEvent(`Plugin '${pluginPrototype.name}' already being added:`,
-            newPluginLookup[pluginPrototype.name],
-            "\n\tskipping adding a new duplicate:", ...dumpObject(pluginPrototype));
+  async attachSpindles (spindlePrototypes_: (Promise<Object> | Object)[]) {
+    this.clockEvent(1, `spindles.obtain`,
+        `Obtaining ${spindlePrototypes_.length} spindle prototypes`);
+    const spindlePrototypes = await Promise.all(spindlePrototypes_);
+    const newSpindleLookup = {};
+    const spindleNames = [];
+    spindlePrototypes.forEach(spindlePrototype => {
+      if (newSpindleLookup[spindlePrototype.name]) {
+        this.errorEvent(`Spindle '${spindlePrototype.name}' already being added:`,
+            newSpindleLookup[spindlePrototype.name],
+            "\n\tskipping adding a new duplicate:", ...dumpObject(spindlePrototype));
       }
-      if (this._attachedPlugins[pluginPrototype.name]) {
-        throw new Error(`Plugin '${pluginPrototype.name}' already attached`);
+      if (this._attachedSpindles[spindlePrototype.name]) {
+        throw new Error(`Spindle '${spindlePrototype.name}' already attached`);
       }
-      pluginNames.push(pluginPrototype.name);
-      newPluginLookup[pluginPrototype.name] =
-          (pluginPrototype.attach && pluginPrototype.attach(this))
-              || pluginPrototype;
+      spindleNames.push(spindlePrototype.name);
+      newSpindleLookup[spindlePrototype.name] = spindlePrototype.attachSpawn
+          ? spindlePrototype.attachSpawn(this)
+          : Object.create(spindlePrototype);
     });
-    this.clockEvent(1, `plugins.attach`, `Attaching ${pluginNames.length} plugins:`,
-        pluginNames.join(", "));
-    for (const name of pluginNames) await this._attachPlugin(name, newPluginLookup[name]);
+    this.clockEvent(1, `spindles.attach`, `Attaching ${spindleNames.length} spindles:`,
+        spindleNames.join(", "));
+    for (const name of spindleNames) await this._attachSpindle(name, newSpindleLookup[name]);
   }
 
-  _attachPlugin (name: string, plugin: Object) {
-    this._attachedPlugins[name] = plugin;
-    for (const schemeModule of Object.values(plugin.schemeModules || {})) {
+  _attachSpindle (name: string, spindle: Object) {
+    this._attachedSpindles[name] = spindle;
+    for (const schemeModule of Object.values(spindle.schemeModules || {})) {
       this.authorityNexus.addSchemeModule(this.callRevelation(schemeModule));
     }
-    for (const authorityConfig of Object.values(plugin.authorityConfigs || {})) {
+    for (const authorityConfig of Object.values(spindle.authorityConfigs || {})) {
       this.authorityNexus.addAuthorityPreConfig(authorityConfig);
     }
-    for (const MediaDecoder_: any of Object.values(plugin.mediaDecoders || {})) {
+    for (const MediaDecoder_: any of Object.values(spindle.mediaDecoders || {})) {
       this.oracle.getDecoderArray().addDecoder(this.callRevelation(MediaDecoder_));
     }
     return thenChainEagerly(null, [
-      () => this._isInitialized && this._notifyPluginGatewayInitialized(plugin),
+      () => this._isInitialized && this._notifySpindleOfGatewayInitialized(spindle),
       ...Object.keys(this._views || {}).map(viewName =>
       // Do not block for views to init
           () => !isPromise(this._views[viewName])
-      // Do wait for plugin itself
-              && this._notifyPluginViewAttached(plugin, this._views[viewName], viewName))
+      // Do wait for spindle itself
+              && this._notifySpindleOfViewAttached(spindle, this._views[viewName], viewName))
     ]);
   }
 
-  _notifyPluginGatewayInitialized (plugin: Object) {
-    return plugin.onGatewayInitialized && plugin.onGatewayInitialized(this);
+  _notifySpindleOfGatewayInitialized (spindle: Object) {
+    return spindle.onGatewayInitialized && spindle.onGatewayInitialized(this);
   }
 
-  _notifyPluginViewAttached (plugin: Object, view: InspireView, viewName: string) {
-    return plugin.onViewAttached && plugin.onViewAttached(view, viewName);
+  _notifySpindleOfViewAttached (spindle: Object, view: InspireView, viewName: string) {
+    return spindle.onViewAttached && spindle.onViewAttached(view, viewName);
   }
 
   async _narratePrologues (prologueRevelation: Object) {

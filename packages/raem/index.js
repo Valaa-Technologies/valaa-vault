@@ -4,7 +4,7 @@ import ContentAPI from "./RAEMContentAPI";
 
 const valos = require("~/gateway-api/valos").default;
 
-export default valos.exportPlugin({ name: "@valos/raem", ContentAPI });
+export default valos.exportSpindle({ name: "@valos/raem", ContentAPI });
 
 
 export {

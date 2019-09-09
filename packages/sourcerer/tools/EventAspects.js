@@ -24,7 +24,7 @@ import type HashV240 from "~/sourcerer/tools/hashV240";
 // 2. IndexedDB storage promotes Log aspect as the root so that
 //    root.index can be used the key and root.timeStamp is directly
 //    visible available for manual debugging.
-// 3. An authority plugin network serializer might promote Buffer
+// 3. An authority network serializer spindle might promote Buffer
 //    aspect as the root to facilitate performant serialization.
 // 4. etc.
 //

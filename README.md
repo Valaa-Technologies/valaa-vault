@@ -62,7 +62,7 @@ This launches webpack-dev-server at 0.0.0.0:8080 which serves the
 it. The gateway will deliver `Zero Editor` as its `valospace` entry
 site (which sourced locally from `./revelations/local-zero`).
 
-### No remote authority plugins - limited persistence
+### No remote authority spindles - limited persistence
 
 local-zero supports only `valaa-local:` and `valaa-memory:` schemes, so
 no remote content can be accessed. All content that is created is

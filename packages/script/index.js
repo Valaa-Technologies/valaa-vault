@@ -5,7 +5,7 @@ import * as mediaDecoders from "./mediaDecoders";
 
 const valos = require("~/gateway-api/valos").default;
 
-export default valos.exportPlugin({ name: "@valos/script", ContentAPI, mediaDecoders });
+export default valos.exportSpindle({ name: "@valos/script", ContentAPI, mediaDecoders });
 
 
 export {

@@ -18,7 +18,7 @@ export default {
     runtime: "",
 
     verbosity: 0,
-    plugins: arrayOf(plugin()),
+    spindlePrototypes: arrayOf(spindlePrototype()),
 
     authorityConfigs: dictionaryOf(authorityConfig()),
     scribe: { verbosity: 0 },
@@ -40,7 +40,7 @@ export default {
   views: dictionaryOf(viewConfig()),
 };
 
-function plugin () {
+function spindlePrototype () {
   return {
     ContentAPI: {
       name: "",

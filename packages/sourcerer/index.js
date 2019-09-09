@@ -7,7 +7,7 @@ import schemeModules from "./schemeModules";
 
 const valos = require("~/gateway-api/valos").default;
 
-export default valos.exportPlugin({ name: "@valos/sourcerer", ContentAPI, schemeModules });
+export default valos.exportSpindle({ name: "@valos/sourcerer", ContentAPI, schemeModules });
 
 export {                   default as EVENT_VERSION } from "./tools/EVENT_VERSION";
 

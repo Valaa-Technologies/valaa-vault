@@ -1,0 +1,24 @@
+{
+  "name": "@valos/rest-api-spindle",
+  "version": "0.35.0-prerelease.13",
+  "valos": {
+    "type": "spindle",
+    "domain": "@valos/kernel"
+  },
+  "description": "A spindle for structured ValOS REST APIs",
+  "main": "index.js",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "fastify": "^2.3.0",
+    "fastify-cookie": "^3.0.2",
+    "fastify-swagger": "^2.3.2"
+  },
+  "peerDependencies": {
+    "@valos/inspire": "^0.35.0-prerelease.0"
+  }
+}

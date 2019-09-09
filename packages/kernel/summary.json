@@ -6,9 +6,9 @@
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "license": "MIT"
       },
-      "@valos/toolset-rest-api-gateway-plugin": {
+      "@valos/rest-api-spindle": {
         "version": "0.35.0-prerelease.12",
-        "description": "A toolset for managing Structured ValOS REST API Gateway Plugin",
+        "description": "A spindle for managing structured ValOS REST APIs",
         "license": "MIT"
       },
       "@valos/toolset-revealer": {
@@ -16,9 +16,9 @@
         "description": "Tools for building revelations both for development and deployment purposes",
         "license": "MIT"
       },
-      "@valos/type-gateway-plugin": {
+      "@valos/type-spindle": {
         "version": "0.35.0-prerelease.12",
-        "description": "The ValOS 'gateway-plugin' workspace type toolset",
+        "description": "The ValOS 'spindle' workspace type toolset",
         "license": "MIT"
       },
       "@valos/type-opspace": {
@@ -125,13 +125,13 @@
     }
   },
   "types": {
-    "gateway-plugin": {
+    "spindle": {
       "disabled": "DISABLED",
-      "explanation": ".disabled => Workspace is not a 'gateway-plugin' (is 'vault')",
-      "description": "Select 'gateway-plugin' workspace type",
+      "explanation": ".disabled => Workspace is not a 'spindle' (is 'vault')",
+      "description": "Select 'spindle' workspace type",
       "package": "@valos/kernel",
       "version": "0.35.0-prerelease.12",
-      "introduction": "A gateway-plugin extends inspire and perspire gateways with various\ntypes of functionalities: new resources schemas, media decoders,\nprotocol schemes, external APIs, valosheath APIs, etc."
+      "introduction": "A spindle extends inspire and perspire gateways with various\ntypes of functionalities: new resources schemas, media decoders,\nprotocol schemes, external APIs, valosheath APIs, etc."
     },
     "library": {
       "disabled": "DISABLED",
@@ -203,13 +203,13 @@
       "version": "0.35.0-prerelease.12",
       "introduction": "This toolset enables valma command 'rouse-revealer' for deploying a\nlocal dev environment for inspire gateway revelations.\n\nSets up the webpack entry and output config as webpack.config.js in\nthe workspace root, which combines shared revealer config from\n@valos/toolset-revealer/shared/webpack.config.js, local toolset config\nand any customizations in the root webpack.config.js itself."
     },
-    "@valos/toolset-rest-api-gateway-plugin": {
+    "@valos/rest-api-spindle": {
       "disabled": "DISABLED",
       "explanation": ".disabled => Workspace is not a worker (is vault)",
-      "description": "Select the worker toolset 'toolset-rest-api-gateway-plugin'",
+      "description": "Select the worker toolset 'rest-api-spindle'",
       "package": "@valos/kernel",
       "version": "0.35.0-prerelease.12",
-      "introduction": "This toolset extends a perspire worker workspace with REST-style\nconfigurable and extensible web service plugin."
+      "introduction": "This toolset extends a perspire worker workspace with REST-style\nconfigurable and extensible web service spindle."
     },
     "@valos/type-vault/enable-babel": {
       "disabled": "DISABLED",

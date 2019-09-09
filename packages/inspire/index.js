@@ -23,8 +23,9 @@ if (inBrowser()) {
 const logger = new FabricEventLogger();
 
 // TODO(iridian, 2018-12): Oof... this should be moved to @valos/raem
-// plugin initializer. This requires plugin initializers though which
+// spindle initializer. This requires spindle initializers though which
 // don't exist.
+// TODO(iridian, 2019-09): They do now though. See attachSpawn
 valos.getURIQueryField = getURIQueryField;
 
 valos.createInspireGateway = function createInspireGateway (...revelations: any[]) {
@@ -46,17 +47,19 @@ export default (valos.createGateway = async function createGateway (gatewayOptio
     ...revelations: any) {
   let ret;
   let combinedRevelation;
-  const delayedPlugins = [];
+  const delayedSpindlePrototypes = [];
   try {
-    valos.exportPlugin({ name: "@valos/inspire", mediaDecoders });
+    valos.exportSpindle({ name: "@valos/inspire", mediaDecoders });
     if (valos.gateway) {
       throw new Error(`valos.gateway already exists as ${
           valos.gateway.debugId()}. There can be only one.`);
     }
 
-    const gatewayPluginsRevelation = { gateway: { plugins: valos.plugins } };
+    const spindlesRevelation = { gateway: { spindlePrototypes: valos.spindlePrototypes } };
 
-    valos.plugins = { push (plugin) { delayedPlugins.push(plugin); } };
+    valos.spindlePrototypes = {
+      push (spindlePrototype) { delayedSpindlePrototypes.push(spindlePrototype); }
+    };
 
     ret = new Gateway({ name: "Uninitialized Gateway", logger, ...gatewayOptions });
     valos.require = ret.require.bind(ret);
@@ -66,14 +69,14 @@ export default (valos.createGateway = async function createGateway (gatewayOptio
     ret.warnEvent(0, () => [
       `Combining ${revelations.length} revelations:`,
       ...[].concat(...revelations.map(revelation => dumpify(revelation))),
-      "\n\tand the gatewayPluginsRevelation:", ...dumpObject(gatewayPluginsRevelation),
+      "\n\tand the spindlesRevelation:", ...dumpObject(spindlesRevelation),
     ]);
 
     combinedRevelation = await combineRevelationsLazily(
         ret,
         revelationTemplate,
         ...revelations,
-        gatewayPluginsRevelation);
+        spindlesRevelation);
 
     ret.clockEvent(1, `gateway.initialize`, `Initializing gateway`);
     await ret.initialize(combinedRevelation);
@@ -81,10 +84,12 @@ export default (valos.createGateway = async function createGateway (gatewayOptio
     valos.gateway = ret;
     ret.warnEvent(`Gateway set to window.valos.gateway as`, ...dumpObject(ret));
 
-    ret.clockEvent(1, `gateway.plugins.delayed.attach`, `Attaching ${delayedPlugins.length
-        } delayed second stage plugins`);
-    while (delayedPlugins.length) await ret.attachPlugins(delayedPlugins.splice(0));
-    valos.plugins = { push (plugin) { ret.attachPlugin(plugin); } };
+    ret.clockEvent(1, `gateway.spindles.delayed.attach`, `Attaching ${
+        delayedSpindlePrototypes.length} delayed second stage spindles`);
+    while (delayedSpindlePrototypes.length) {
+      await ret.attachSpindles(delayedSpindlePrototypes.splice(0));
+    }
+    valos.spindlePrototypes = { push (spindlePrototype) { ret.attachSpindle(spindlePrototype); } };
 
     ret.clockEvent(1, "gateway.initialized");
     return ret;

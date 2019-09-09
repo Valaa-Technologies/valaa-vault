@@ -350,7 +350,7 @@ module.exports = {
         resides in the `, c("partitions"), ` utility layer, see below).
 
         The static content includes HTTP landing pages, site routes and their
-        configurations, ValOS gateway and plugin runtimes and any other similar
+        configurations, ValOS gateway and spindle runtimes and any other similar
         statically configured files.
 
         `, blockquote(c("valos-vault-4.4.4"), `: An authority may have
@@ -401,14 +401,14 @@ module.exports = {
       "chapter#>0;ValOS core vs. auxiliary authorities": [
         `ValOS authorities and any partition content they provide do
         not need to be public. A ValOS core authority is an authority
-        which can be accessed using only ValOS core plugins (including
-        no plugins at all). A ValOS auxiliary authority is an authority
-        which requires a conforming but non-core ValOS gateway plugin
-        in order to be accessed. (Design Note 2019-03: the plugin
+        which can be accessed using only ValOS core spindles (including
+        no spindles at all). A ValOS auxiliary authority is an authority
+        which requires a conforming but non-core ValOS gateway spindle
+        in order to be accessed. (Design Note 2019-03: the spindle
         conformance requirements are unspecified. When they are
         specified they must be lenient enough to enable sophisticated
-        protocols but constrained/sandboxed enough that gateway plugins
-        cannot interfere with other reasonably written plugins).`,
+        protocols but constrained/sandboxed enough that such spindles
+        cannot interfere with other reasonably written spindles).`,
       ],
     },
     "chapter#partitions_layer>4;Partitions utility layer - the foundation of valospace": {

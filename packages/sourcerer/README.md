@@ -173,7 +173,7 @@ inside the same execution environment.
 
 #### 3.3.2. Content ArrayBuffer is *decoded* into immutable, cacheable object representation based on mime
 
-The octet stream is decoded by decoder plugins associated with
+The octet stream is decoded by decoder spindles associated with
 the requested mime type into some runtime object representation. This
 object representation can range anything from a flat text decoding,
 through a complex JavaScript composite object representation into a

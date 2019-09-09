@@ -64,8 +64,8 @@ module.exports = {
           and minimizing bugs.`,
         ],
         3: [`As a service with a valosheath API.`,
-          `This is usually done as a plugin of some existing ValOS
-          authority with a plugin API specifically built for this
+          `This is usually done as a spindle of some existing ValOS
+          authority with a spindle API specifically built for this
           purpose. This can also be done by implementing the event
           stream API of some authority. Or this can be done as a full
           ValOS non-core authority.`,

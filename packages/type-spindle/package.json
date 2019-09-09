@@ -1,0 +1,19 @@
+{
+  "name": "@valos/type-spindle",
+  "version": "0.35.0-prerelease.13",
+  "valos": {
+    "type": "toolset",
+    "domain": "@valos/kernel"
+  },
+  "description": "The ValOS 'spindle' workspace type toolset",
+  "main": "",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    ".valma-configure_.type_.spindle_@valos_type-spindle": "valma/configure__spindle__type-spindle.js"
+  }
+}

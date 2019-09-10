@@ -158,59 +158,74 @@ module.exports = {
     and releasing a prerelease version of it. Setting up credentials
     for npm and setting remote github repository is out of the scope of this guide.`,
     { "numbered#": [
+      [`In case you have not; install valma and valos kernel globally
+        through npm by running the following command: `,
+        cli("sudo npm add -g valma @valos/kernel"),
+        `To ensure that the installation succeeded you can run: `,
+        cli("vlm"),
+      ],
       "Create new folder for your vault and navigate there.",
       ["Run the following command: ",
         cli("vlm init"),
         "Following list will go through the steps of the initialization script:",
         { "numbered#": [
           [`Select "Initialize" on whether to initialize package.json with 'yarn init'.
-          The initialization script will prompt
-          multiple questions about the basic information of the package which will be
-          written to the root package.json. Answer to the questions as you wish,
-          except for "private" which needs to be "true" as vaults
-          themselves are never published.`,
+            The initialization script will prompt
+            multiple questions about the basic information of the package which will be
+            written to the root package.json. Answer the questions according
+            to the following list: `,
+            { "bulleted#": [
+              `Name should be @valaatech/{YOUR_VAULT_NAME}`,
+              `Initial version should be 0.1.0`,
+              `Entry point and repository url should be empty`,
+              `Author should be "Valaa Technologies Ltd"`,
+              `Licenses should be UNLICENSED`,
+              `Private should be true as vaults themselves are never
+              published`
+            ] },
           ],
+          `Select bypass when asked whether to add more workshops`,
           `Select "Initialize" on whether to initialize repository valos stanza type and domain,
           and then select "vault" from the list of different types.
           Confirm your selection when the scripts asks for it.`,
-          `Select "<custom>" when the scripts asks for stanza valos.domain.
-          Enter the desired domain and confirm both the domain selection
-          as well as the whole stanza configuration.`,
-          `Select "bypass" when the scripts asks for whether to add
-          initial workshops as devDependencies.`,
+          `Select "<create new>" when the scripts asks for stanza valos.domain.
+          Domain should be @valaatech/{YOUR_VAULT_NAME}.
+          Confirm both the domain selection as well as the whole stanza configuration.`,
           `Select "Configure" when asked whether to configure repository
           with "vlm configure".`,
           `For the comma-separated list of package.json .workspaces stanza globs
           the initial "packages/*" will suffice. This list will determine
           the workspaces for the vault. All of the necessary dependencies
           will now be installed.`,
-          `Select "@valos/toolset-domain" when asked to select a toolset
-          to be used for the vault as vaults should always use the
-          domain toolset. Said toolset will now be installed.`,
-          `Select "docs" when asked to select tools for the type-vault toolset.`,
-          `Select "Yes" when asked to initialize git repository,
-          set up initial release branch and whether to regenerate software
-          bill of materials. This will set up the initial local git repository
-          and release branch for the vault and ensure that sbom documents
-          are regenerated on each release or prerelease.`,
-          `Choose the base URI for your published vauld documents when
-          asked.`,
+          `Select both "domain" and "docs" when asked to select a toolset
+          to be used for the vault. Said toolsets will now be installed.`,
+          `Select "Yes" on regeneration of software bill of materials.`,
+          `For the public base IRI of the final published vault documents
+          put {INSERT_PUBLIC_BASE_IRI_HERE}`,
+          `Select "Yes" on regeneration of domain summary revdoc and
+          on domain workshop workspace creation.`,
+          [`Now you need to configure the workspace.
+            Following steps will guide you through the configuration.`,
+            { "numbered#": [
+              `Select "Initialize" when asked whether to initialize package.json
+              with "yarn init" and "No" when prompted for whether the package
+              is public. This will now run the "yarn init" which prompts
+              same questions as when initializing vault. Everything
+              can be left as default, besides the private which should be false`,
+              `Bypass the reconfiguration of valos stanza and choose configure
+              when prompted on whether to configure workspace.`,
+            ] },
+            `Configuration of the workspace is now done.`,
+          ],
+          `Select "Export" on whether to export the script skeleton.`,
+          `Select "Yes" on git repository initialization`,
+          `If you already have set up the remote git repository you can
+          now enter the repository url when asked.`,
+          `Select "Yes" on whether to set up inital release branch`,
+          `Don't select anything when asked for toolsets to use for the vault.`
         ] },
         `You have now initialized the vault. If everything went accordingly,
         your vault root directory should now contain all basic necessary files.`
-      ],
-      [`*NOT IN CORRECT PLACE* You need to also configure domain toolset.
-      Following steps guide you through the configuration.`,
-        { "numbered#": [
-        `Select "summary" when asked for the tools to be used for domain toolset.`,
-        `Select "Initialize" when asked whether to initialize package.json
-        with "yarn init" and "Yes" when prompted for whether the package
-        is public. This will now run the "yarn init" which prompts
-        same questions as when initializing vault. Choose answers accordingly,
-        though besides name and description answers could be skipped if
-        one wants to use the same values as with vault.`,
-        `Bypass any reconfiguration`, ``
-        ] }
       ],
       `Before releasing your vault you need to have commited all changes.
       If there are uncommitted changes that you haven't made, you should amend

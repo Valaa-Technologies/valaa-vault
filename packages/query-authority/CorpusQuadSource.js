@@ -18,8 +18,7 @@ const dataTypes = {
 };
 
 /**
- * Implements RDFJS source interface by wrapping Valker object
- * and converts the source interface match calls to VALK calls
+ * Converts the source interface match calls to VALK calls
  *
  * @export
  * @class CorpusQuadSource
@@ -37,9 +36,6 @@ class CorpusQuadSource {
     const stream = new Readable({ objectMode: true });
     const self = this;
 
-    //  console.log("match parameters ",
-    //   { subject: s, predicate: p, object: o, graph: g });
-
     if (context) {
       for (const key in context) {
         if (context.hasOwnProperty(key)) self._context[key] = context[key];
@@ -47,14 +43,19 @@ class CorpusQuadSource {
     }
 
     try {
-      const quad = _parseParametes(s, p, o, self);
+      const quad = {
+        s: _getInitialTermValue(s, self, "subject"),
+        p: _getInitialTermValue(p, self, "predicate"),
+        o: _getInitialTermValue(o, self, "object")
+      };
+
       const hasSubject = ((quad.s.value !== undefined && quad.s.value !== null)
         || (Array.isArray(quad.s.data) && quad.s.data.length !== 0));
       const hasPredicate = (quad.p.value !== undefined && quad.p.value !== null);
       const hasObject = (quad.o.value !== undefined && quad.o.value !== null);
 
       if (hasSubject && hasPredicate && hasObject) {
-        const result = _runEngine(self.engine, quad.s.id, quad.p.kuery);
+        const result = _kueryEngine(self.engine, quad.s.id, quad.p.kuery);
 
         if (result && Array.isArray(result)) {
           let isMatch = false;
@@ -77,26 +78,29 @@ class CorpusQuadSource {
 
         if (Array.isArray(quad.s.data) && quad.s.data.length !== 0) {
           for (const subject of quad.s.data) {
-              result.push({
-                s: Datafactory.namedNode(`<${baseIdUrn + subject.id}>`),
-                o: _runEngine(self.engine, subject.id, quad.p.kuery),
-              });
+            result.push({
+              s: Datafactory.namedNode(`<${baseIdUrn + subject.id}>`),
+              o: _kueryEngine(self.engine, subject.id, quad.p.kuery),
+            });
           }
         } else {
-          const engineResult = _runEngine(self.engine, quad.s.id, quad.p.kuery);
+          const engineResult = _kueryEngine(self.engine, quad.s.id, quad.p.kuery);
           if (Array.isArray(engineResult)) {
             result = engineResult.map((res) => ({ o: res }));
           } else result.push({ o: engineResult });
         }
+
         const quads = [];
 
-        result = result.filter((res) => {
-          const entry = res.o;
-          if (!quad.p.filterType || !(entry instanceof Vrapper)) return true;
+        if (quad.p.filterType) {
+          result = result.filter((res) => {
+            const entry = res.o;
+            if (!(entry instanceof Vrapper)) return true;
 
-          return (entry.getTypeName().toLowerCase()
-            === quad.p.filterType.toLowerCase());
-        });
+            return (entry.getTypeName().toLowerCase()
+              === quad.p.filterType.toLowerCase());
+          });
+        }
 
         for (let i = 0; i < result.length; i++) {
           const res = result[i];
@@ -108,17 +112,6 @@ class CorpusQuadSource {
       } else {
         _pushToStream(stream, null);
       }
-      // else if (hasSubject && !hasPredicate && !hasObject) {
-      //   const quads = [
-      //     _createQuad(quad.s.data[0], Datafactory.namedNode("<valos:name>"),
-      //       Datafactory.literal("hiya")),
-      //     _createQuad(quad.s.data[1], Datafactory.namedNode("<valos:name>"),
-      //       Datafactory.literal("moar hiya"))
-      //   ];
-
-      //   console.log("quads", quads);
-      //   _pushToStream(stream, quads);
-      // }
 
       return stream;
     } catch (e) {
@@ -130,7 +123,7 @@ class CorpusQuadSource {
   }
 }
 
-function _runEngine (engine, id, kuery) {
+function _kueryEngine (engine, id, kuery) {
   if (engine && id && kuery) {
     try {
       return engine.run(vRef(id), kuery);
@@ -148,8 +141,9 @@ function _createQuad (s, p, o) {
     o, Datafactory.defaultGraph());
 }
 
+// Sets stream._read to empty function after
+// first run to avoid data being pushed multiple times to the stream
 function _pushToStream (stream: Readable, data: any) {
-  console.log("Data", data);
   stream._read = () => {
     stream._read = () => {};
 
@@ -163,20 +157,12 @@ function _pushToStream (stream: Readable, data: any) {
   };
 }
 
-function _parseParametes (s, p, o, source) {
-  return {
-    s: _getInitialTermValue(s, source, "subject"),
-    p: _getInitialTermValue(p, source, "predicate"),
-    o: _getInitialTermValue(o, source, "object")
-  };
-}
+function _parseResponse (result: any, term: Object, session: any) {
+  if (!result) return undefined;
 
-function _parseResponse (res: any, term: Object, session: any) {
-  if (!res) return undefined;
-
-  if (res instanceof Vrapper || (res.reference && !(res instanceof Vrapper))) {
-    const rawId = (res.reference && !(res instanceof Vrapper))
-      ? res.reference.rawId() : res.getRawId();
+  if (result instanceof Vrapper || (result.reference && !(result instanceof Vrapper))) {
+    const rawId = (result.reference && !(result instanceof Vrapper))
+      ? result.reference.rawId() : result.getRawId();
 
     const resultNode
       = Datafactory.namedNode(`<${baseIdUrn + rawId}>`);
@@ -193,7 +179,7 @@ function _parseResponse (res: any, term: Object, session: any) {
     return resultNode;
   }
 
-  const resultValue = res.value;
+  const resultValue = result.value;
   const value = (resultValue === null)
     ? "" : (typeof resultValue === "object" && resultValue !== null)
     ? JSON.stringify(resultValue) : resultValue;

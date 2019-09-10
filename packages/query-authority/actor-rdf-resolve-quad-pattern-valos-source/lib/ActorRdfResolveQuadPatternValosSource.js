@@ -5,7 +5,6 @@ const asyncIterator = require("asynciterator").AsyncIterator;
 
 class ActorRdfResolveQuadPatternValosSource
   extends busRdfResolveQuadPattern.ActorRdfResolveQuadPatternSource {
-
   async test (action) {
     return (_getValosSource(action.context));
   }

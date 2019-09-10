@@ -215,6 +215,16 @@ This guide will go through the steps on creating a new vault with valma
     and releasing a prerelease version of it. Setting up credentials
     for npm and setting remote github repository is out of the scope of this guide.
     <ol>
+      <li>In case you have not; install valma and valos kernel globally
+        through npm by running the following command: 
+  <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">sudo npm add -g valma @valos/kernel</span>
+
+  </div>
+To ensure that the installation succeeded you can run: 
+  <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">vlm</span>
+
+  </div>
+</li>
       <li>Create new folder for your vault and navigate there.</li>
       <li>Run the following command: 
   <div class="vdoc type-revdoc-command-line-interaction">$ <span class="vdoc type-revdoc-command">vlm init</span>
@@ -223,45 +233,61 @@ This guide will go through the steps on creating a new vault with valma
 Following list will go through the steps of the initialization script:
     <ol>
       <li>Select "Initialize" on whether to initialize package.json with 'yarn init'.
-          The initialization script will prompt
-          multiple questions about the basic information of the package which will be
-          written to the root package.json. Answer to the questions as you wish,
-          except for "private" which needs to be "true" as vaults
-          themselves are never published.</li>
+            The initialization script will prompt
+            multiple questions about the basic information of the package which will be
+            written to the root package.json. Answer the questions according
+            to the following list: 
+    <ul>
+      <li>Name should be @valaatech/{YOUR_VAULT_NAME}</li>
+      <li>Initial version should be 0.1.0</li>
+      <li>Entry point and repository url should be empty</li>
+      <li>Author should be "Valaa Technologies Ltd"</li>
+      <li>Licenses should be UNLICENSED</li>
+      <li>Private should be true as vaults themselves are never
+              published</li>
+    </ul>
+</li>
+      <li>Select bypass when asked whether to add more workshops</li>
       <li>Select "Initialize" on whether to initialize repository valos stanza type and domain,
           and then select "vault" from the list of different types.
           Confirm your selection when the scripts asks for it.</li>
-      <li>Select "<custom>" when the scripts asks for stanza valos.domain.
-          Enter the desired domain and confirm both the domain selection
-          as well as the whole stanza configuration.</li>
-      <li>Select "bypass" when the scripts asks for whether to add
-          initial workshops as devDependencies.</li>
+      <li>Select "<create new>" when the scripts asks for stanza valos.domain.
+          Domain should be @valaatech/{YOUR_VAULT_NAME}.
+          Confirm both the domain selection as well as the whole stanza configuration.</li>
       <li>Select "Configure" when asked whether to configure repository
           with "vlm configure".</li>
       <li>For the comma-separated list of package.json .workspaces stanza globs
           the initial "packages/*" will suffice. This list will determine
           the workspaces for the vault. All of the necessary dependencies
           will now be installed.</li>
-      <li>Select "@valos/toolset-domain" when asked to select a toolset
-          to be used for the vault as vaults should always use the
-          domain toolset. Said toolset will now be installed.</li>
-      <li>Select "docs" when asked to select tools for the type-vault toolset.</li>
-      <li>Select "Yes" when asked to initialize git repository,
-          set up initial release branch and whether to regenerate software
-          bill of materials. This will set up the initial local git repository
-          and release branch for the vault and ensure that sbom documents
-          are regenerated on each release or prerelease.</li>
-      <li>Choose the base URI for your published vauld documents when
-          asked.</li>
+      <li>Select both "domain" and "docs" when asked to select a toolset
+          to be used for the vault. Said toolsets will now be installed.</li>
+      <li>Select "Yes" on regeneration of software bill of materials.</li>
+      <li>For the public base IRI of the final published vault documents
+          put {INSERT_PUBLIC_BASE_IRI_HERE}</li>
+      <li>Select "Yes" on regeneration of domain summary revdoc and
+          on domain workshop workspace creation.</li>
+      <li>Now you need to configure the workspace.
+            Following steps will guide you through the configuration.
+    <ol>
+      <li>Select "Initialize" when asked whether to initialize package.json
+              with "yarn init" and "No" when prompted for whether the package
+              is public. This will now run the "yarn init" which prompts
+              same questions as when initializing vault. Everything
+              can be left as default, besides the private which should be false</li>
+      <li>Bypass the reconfiguration of valos stanza and choose configure
+              when prompted on whether to configure workspace.</li>
+    </ol>
+Configuration of the workspace is now done</li>
+      <li>Select "Export" on whether to export the script skeleton.</li>
+      <li>Select "Yes" on git repository initialization</li>
+      <li>If you already have set up the remote git repository you can
+          now enter the repository url when asked.</li>
+      <li>Select "Yes" on whether to set up inital release branch</li>
+      <li>Don't select anything when asked for toolsets to use for the vault.</li>
     </ol>
 You have now initialized the vault. If everything went accordingly,
         your vault root directory should now contain all basic necessary files.</li>
-      <li>*NOT IN CORRECT PLACE* You need to also configure domain toolset.
-      Following steps guide you through the configuration.
-    <ol>
-      <li>First step</li>
-    </ol>
-</li>
       <li>Before releasing your vault you need to have commited all changes.
       If there are uncommitted changes that you haven't made, you should amend
       them to the initial commit.</li>

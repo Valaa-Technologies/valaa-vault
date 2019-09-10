@@ -14,7 +14,10 @@ harness.chronicleEvents(queryTestResources(engineTestHarness.testPartitionURI));
 let source;
 
 beforeEach(async () => {
-  source = new quadSource.CorpusQuadSource(harness);
+  source = [{
+    type: "rdfValosSource",
+    value: new quadSource.CorpusQuadSource(harness)
+  }];
 });
 
 afterEach(() => { source = undefined; });
@@ -23,11 +26,6 @@ function _getResourceById (owner: Object, field: String, resourceRawId: String) 
   return owner.get(VALEK.toField(field)
     .find(VALEK.equalTo(VALEK.toField("rawId"), resourceRawId)));
 }
-
-// function _getResourceByName (owner: Object, field: String, resourceName: String) {
-//   return owner.get(VALEK.toField(field)
-//     .find(VALEK.hasName(resourceName)));
-// }
 
 function _getPropertyValue (owner: Object, propertyName: String) {
   return owner.get(VALEK.propertyValue(propertyName));
@@ -38,7 +36,7 @@ function _addPrefixes (query: String) {
 }
 
 describe("Entity creation", () => {
-  xit(`creates an entity with single property string`, async () => {
+  it(`creates an entity with single property string`, async () => {
     const query = `CONSTRUCT {
       <entity/query-test-entity>
       <namedPropertyValue/test_string>
@@ -86,7 +84,7 @@ describe("Entity creation", () => {
     expect(_getPropertyValue(subject, "newProperty4")).toBe(true);
     expect(_getPropertyValue(subject, "newProperty5")).toBe(null);
     expect(_getPropertyValue(subject, "newProperty6")).toEqual({ hello: "world" });
-
-    console.log("pointer", _getPropertyValue(subject, "newProperty7"));
+    expect(_getPropertyValue(subject, "newProperty7"))
+      .toEqual("<valos:id:test-ownling>");
   });
 });

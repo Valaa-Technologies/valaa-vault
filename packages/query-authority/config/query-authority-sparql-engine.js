@@ -138,7 +138,7 @@ const actorDescribeSubjectQueryOperator
     name: `${queryOpJson}#myDescribeQueryOperator`,
     bus: busQueryOperation
 });
-const actorRdfJoinNestedLoop = new (require('@comunica/actor-rdf-join-nestedloop')
+const actorRdfJoinNestedLoop = new (require("@comunica/actor-rdf-join-nestedloop")
   .ActorRdfJoinNestedLoop)({
     name: `${ais100ConfigSets}join.json#myRdfJoinActor`,
     bus: busRdfJoin
@@ -205,4 +205,4 @@ const urnComunicaMy = ({
   ]
 });
 
-module.exports = urnComunicaSparqlInit;
+module.exports = { urnComunicaSparqlInit, urnComunicaMy };

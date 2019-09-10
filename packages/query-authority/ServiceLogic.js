@@ -1,6 +1,6 @@
 // @flow
 
-const querySource = require("./QuerySource.js").querySource;
+const querySources = require("./QuerySources.js");
 const hashV240 = require("~/sourcerer/tools/hashV240.js").default;
 const dataTypes = require("~/query-authority/CorpusQuadSource.js").dataTypes;
 
@@ -10,7 +10,7 @@ async function createQueryAuthorityPartition
       throw new Error("All necessary parameters we not passed");
     }
 
-    const queryResult = await querySource(query, source);
+    const queryResult = await querySources(query, source);
     if (!queryResult || queryResult.length === 0) return [];
 
     for (let i = 0; i < queryResult.length; i++) _parseQuad(queryResult[i]);
@@ -89,8 +89,6 @@ async function createQueryAuthorityPartition
     return quarPartitionData;
 }
 
-// TODO: expand query before normalizing
-// (or just replace prefixes with the corresponding IRIs)
 function _createQuarPartitionId (query: String) {
   return hashV240(query.replace(/[\r\n\s\t]+/g, " ").normalize());
 }

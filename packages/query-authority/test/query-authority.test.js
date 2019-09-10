@@ -4,17 +4,20 @@ const quadSource = require("../CorpusQuadSource.js");
 const engineTestHarness = require("~/engine/test/EngineTestHarness");
 const queryTestResources = require("./data/queryTestResources").default;
 const Datafactory = require("../CorpusQuadDatafactory.js").default;
-const querySource = require("../QuerySource.js").querySource;
+const querySources = require("../QuerySources.js");
 
 const dataTypes = quadSource.dataTypes;
 const harness = engineTestHarness
-  .createEngineTestHarness({ verbosity: 0, claimBaseBlock: true })
+  .createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
 harness.chronicleEvents(queryTestResources(engineTestHarness.testPartitionURI));
 
 let source;
 
 beforeEach(async () => {
-  source = new quadSource.CorpusQuadSource(harness);
+  source = [{
+    type: "rdfValosSource",
+    value: new quadSource.CorpusQuadSource(harness)
+  }];
 });
 
 afterEach(() => { source = undefined; });
@@ -55,7 +58,7 @@ function _addPrefixes (query: String) {
   return `BASE <http://valospace.org/> ${query}`;
 }
 
-xdescribe("Property queries", () => {
+describe("Property queries", () => {
   it(`should return rawId for named property`, async () => {
     const query = `SELECT ?o WHERE {
       <entity/query-test-entity>
@@ -63,7 +66,7 @@ xdescribe("Property queries", () => {
       ?o
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, { "?o":
       Datafactory.namedNode("<valos:id:query-test-string>") });
   });
@@ -76,7 +79,7 @@ xdescribe("Property queries", () => {
       ?o
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, { "?o":
       Datafactory.namedNode("<valos:id:test-ownling>") });
   });
@@ -95,7 +98,7 @@ xdescribe("Property queries", () => {
       ?lo }
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, [
       { "?so": Datafactory.literal("hello world") },
       { "?io": Datafactory.literal(42,
@@ -121,7 +124,7 @@ xdescribe("Property queries", () => {
       ?o
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, { "?o": Datafactory.literal("hello world") });
   });
 
@@ -130,7 +133,7 @@ xdescribe("Property queries", () => {
     const query = `SELECT ?o WHERE
       { <entity/query-test-entity> <property> ?o }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, [
       { "?o": Datafactory.namedNode("<valos:id:query-test-string>") },
       { "?o": Datafactory.namedNode("<valos:id:query-test-anotherstring>") },
@@ -146,7 +149,7 @@ xdescribe("Property queries", () => {
     const query = `SELECT ?o WHERE
       { <entity/query-test-entity> <property> [<value> ?o] }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, [
       { "?o": Datafactory.literal("hello world") },
       { "?o": Datafactory.literal("hello world") },
@@ -162,7 +165,7 @@ xdescribe("Property queries", () => {
   });
 });
 
-xdescribe("Propery literal value types", () => {
+describe("Propery literal value types", () => {
   it(`queries for value of single entity's property
     where value is string literal`, async () => {
     const query = `SELECT ?o WHERE {
@@ -171,7 +174,7 @@ xdescribe("Propery literal value types", () => {
       ?o
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, { "?o": Datafactory.literal("hello world") });
   });
 
@@ -183,7 +186,7 @@ xdescribe("Propery literal value types", () => {
       ?o
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, { "?o": Datafactory.literal(42,
         Datafactory.namedNode(dataTypes.number)) });
   });
@@ -196,7 +199,7 @@ xdescribe("Propery literal value types", () => {
       ?o
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, { "?o": Datafactory.literal(true,
       Datafactory.namedNode(dataTypes.boolean)) });
   });
@@ -209,7 +212,7 @@ xdescribe("Propery literal value types", () => {
       ?o
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, { "?o": Datafactory.literal("",
       Datafactory.namedNode(dataTypes.null)) });
   });
@@ -222,7 +225,7 @@ xdescribe("Propery literal value types", () => {
       ?o
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, { "?o": Datafactory.literal(
       `{"hello":"world"}`,
       Datafactory.namedNode(dataTypes.object))
@@ -230,12 +233,12 @@ xdescribe("Propery literal value types", () => {
   });
 });
 
-xdescribe("Unnamedownlings queries", () => {
+describe("Unnamedownlings queries", () => {
   it(`query for entity's ownling entitites`, async () => {
     const query = `SELECT ?o WHERE
       { <entity/query-test-entity> <entity> ?o }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, [
       { "?o": Datafactory.namedNode("<valos:id:query-test-ownling-entity>") },
       { "?o": Datafactory.namedNode("<valos:id:query-test-ownling-anotherentity>") }
@@ -246,7 +249,7 @@ xdescribe("Unnamedownlings queries", () => {
     const query = `SELECT ?p ?o WHERE
       { <entity/query-test-entity> <media> ?o }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, [
       { "?o": Datafactory.namedNode("<valos:id:query-test-ownling-media>") },
       { "?o": Datafactory.namedNode("<valos:id:query-test-ownling-anothermedia>") }
@@ -257,7 +260,7 @@ xdescribe("Unnamedownlings queries", () => {
     const query = `SELECT ?o WHERE
       { <entity/query-test-entity> <ownling> ?o }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, [
       { "?o": Datafactory.namedNode("<valos:id:query-test-ownling-entity>") },
       { "?o": Datafactory.namedNode("<valos:id:query-test-ownling-anotherentity>") },
@@ -267,12 +270,12 @@ xdescribe("Unnamedownlings queries", () => {
   });
 });
 
-xdescribe("Relation queries", () => {
+describe("Relation queries", () => {
   it(`query for named relation`, async () => {
     const query = `SELECT ?o WHERE
       { <entity/query-test-entity> <namedRelation/query_test_ownling_relation> ?o }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data,
       { "?o": Datafactory.namedNode("<valos:id:query-test-ownling-relation>") });
   });
@@ -282,7 +285,7 @@ xdescribe("Relation queries", () => {
       { <entity/query-test-entity>
         <namedRelationTarget/query_test_ownling_anotherrelation> ?o }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data,
       { "?o": Datafactory.namedNode("<valos:id:query-test-ownling-anotherentity>") });
   });
@@ -291,7 +294,7 @@ xdescribe("Relation queries", () => {
     const query = `SELECT ?o WHERE
       { <entity/query-test-entity> <relation> ?o }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, [
       { "?o": Datafactory.namedNode("<valos:id:query-test-ownling-relation>") },
       { "?o": Datafactory.namedNode("<valos:id:query-test-ownling-anotherrelation>") },
@@ -302,7 +305,7 @@ xdescribe("Relation queries", () => {
     const query = `SELECT ?o WHERE
       { <entity/query-test-entity> <relation> [<target> ?o] }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, [
       { "?o": Datafactory.namedNode("<valos:id:query-test-ownling-entity>") },
       { "?o": Datafactory.namedNode("<valos:id:query-test-ownling-anotherentity>") }
@@ -310,7 +313,7 @@ xdescribe("Relation queries", () => {
   });
 });
 
-xdescribe("Error handling", () => {
+describe("Error handling", () => {
   it(`queries with nonexistent suffix`, async () => {
     const query = `SELECT ?o WHERE {
       <nonexistent_suffix>
@@ -318,7 +321,7 @@ xdescribe("Error handling", () => {
       ?o
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     expect(data).toEqual([]);
   });
 
@@ -329,7 +332,7 @@ xdescribe("Error handling", () => {
       ?o
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     expect(data).toEqual([]);
   });
 
@@ -340,12 +343,12 @@ xdescribe("Error handling", () => {
       ?o
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     expect(data).toEqual([]);
   });
 });
 
-xdescribe("OPTIONAL queries", () => {
+describe("OPTIONAL queries", () => {
   it(`queries with optional pattern`, async () => {
     const query = `SELECT ?o WHERE {
       <entity/query-test-entity>
@@ -357,19 +360,19 @@ xdescribe("OPTIONAL queries", () => {
       }
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, { "?o": Datafactory.literal("hello world") });
   });
 });
 
-xdescribe("FILTER queries", () => {
+describe("FILTER queries", () => {
   it(`queries with filter`, async () => {
     const query = `SELECT ?o WHERE {
       <entity/query-test-entity> <property> [<value> ?o] .
       FILTER regex(?o, "(hello world)", "i")
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     _checkResultData(data, [
       { "?o": Datafactory.literal("hello world") },
       { "?o": Datafactory.literal("hello world") }
@@ -377,13 +380,13 @@ xdescribe("FILTER queries", () => {
   });
 });
 
-xdescribe("ASK queries", () => {
+describe("ASK queries", () => {
   it(`queries with ASK where solution to query is found`, async () => {
     const query = `ASK {
       <entity/query-test-entity> <namedPropertyValue/test_string> ?o
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     expect(data).toBe(true);
   });
 
@@ -393,18 +396,7 @@ xdescribe("ASK queries", () => {
       FILTER regex(?o, "(nonexistent_word)", "i")
     }`;
 
-    const data = await querySource(_addPrefixes(query), source);
+    const data = await querySources(_addPrefixes(query), source);
     expect(data).toBe(false);
-  });
-});
-
-describe("DESCRIBE queries", () => {
-  it(`describes all ownlings of an entity`, async () => {
-    const query = `DESCRIBE ?o WHERE {
-      <entity/query-test-entity> <entity> ?o
-    }`;
-
-    const data = await querySource(_addPrefixes(query), source);
-    console.log("Data", data);
   });
 });

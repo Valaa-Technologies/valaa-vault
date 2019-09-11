@@ -239,11 +239,3 @@ module.exports = {
     ] },
   ],
 };
-
-/*
-  creating new vault for pot under domain @valaatech/pot
-    - adding initial workshop: ability to add devdependencies before other tools are added
-      This phase uses 'yarn add -W --dev' to add workshops as devDependencies.
-      This makes the toolsets in those workshops to be immediately available
-      for the listings in following phases.
-*/

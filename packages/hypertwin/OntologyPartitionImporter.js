@@ -112,10 +112,12 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
     // to batch actions into less events
     await engine.runValoscript(null, `
       (new Promise((baseResolve, baseReject) => {
+        const metadataSymbol = Symbol("metadata");
         const actions = [];
         const ontologyData = ontologyIndex[ontologyName];
         const contextLookup = ontologyData.contextLookup;
         const patchedClasses = [];
+        const nameRegex = new RegExp(ontologyName + ":(.*)");
         const eventActionLimit = 50; // Can be moved to config file or similiar
 
         if (!indexPartition[ontologyName]) {
@@ -159,7 +161,7 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
             if (startIndex >= actions.length) { resolve(); return; }
             const executableActions = actions.slice(startIndex, startIndex + eventActionLimit);
 
-            new Promise((resolve) => resolve()).then(() => {
+            Promise.resolve().then(() => {
               for (let i = 0; i < executableActions.length; i++) {
                 const executableAction = executableActions[i];
                 if (executableAction.action === "CREATE") {
@@ -178,10 +180,15 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
                     ? Relation : (executableAction.type === "Media")
                     ? Media : Entity;
 
+                  const groupedProperties = groupProperties(executableAction.properties);
+
                   const prototype = new ((executableAction.isProperty && resourceType)
                   || ownerPrototype || resourceType)({
-                    name: executableAction.name, owner
+                    name: executableAction.name, owner,
+                    properties: groupedProperties.properties
                   });
+
+                  createChildEntitites(groupedProperties.entities, prototype);
 
                   owner[executableAction.name] = prototype;
                   classContext[executableAction.name] = prototype;
@@ -209,7 +216,7 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
 
         // Recursively adds CREATE actions for prototypes if they have not yet
         // been created and do not exist
-        //
+
         // If parent prototype has DESTROY action or if current
         // parent prototype does not match the one in ontology,
         // adds DESTROY actions also
@@ -248,7 +255,7 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
 
                 if (!hasOwnerActionCreate
                 && patchedClasses.indexOf(prototypeName) === -1) {
-                  result = createAction(ontologyParentClass, ownerPrototypeName);
+                  const result = createAction(ontologyParentClass, ownerPrototypeName);
                   if (result.isPrototypeDestroyed) hasOwnerActionDestroy = true;
                 }
 
@@ -273,8 +280,9 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
 
           if (patchedClasses.indexOf(prototypeName) === -1) {
             patchedClasses.push(prototypeName);
+
+            createPropertyActions(prototypeName, ontologyClass, prototype, action);
             if (!prototype) actions.push(action);
-            createPropertyActions(prototypeName, ontologyClass, prototype);
           };
 
           return { isPrototypeDestroyed };
@@ -283,53 +291,55 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
         // For now if range or restriction for term is "xsd:object"
         // type of the property to be created is Entity
 
-        function createPropertyActions (prototypeName, ontologyClass, prototype) {
+        function createPropertyActions (prototypeName, ontologyClass, prototype, prototypeAction) {
           const classProperties = ontologyClass[ownPropertiesSymbol];
+          const classContext = ontologyClass["@context"];
           if (!classProperties) return;
 
           if (!prototypePropertyMap[ontologyName][prototypeName]) {
-            prototypePropertyMap[ontologyName][prototypeName] = [];
+            prototypePropertyMap[ontologyName][prototypeName] = {};
           }
+
+          constructPropertyNesting(classProperties, classContext);
 
           let ontologyProperties = [];
           for (let i = 0; i < classProperties.length; i++) {
             const classProperty = classProperties[i];
+            const propertyId = classProperty["@id"];
+            const propertyValue = ((classProperty[metadataSymbol]
+              && classProperty[metadataSymbol].propertyValue) || null);
+
             const prototypePropertyName
               = createPrototypeName(classProperty["@id"]);
 
             ontologyProperties.push(prototypePropertyName);
-            if (prototypePropertyMap[ontologyName][prototypeName]
-                .indexOf(prototypePropertyName) == -1) {
-              prototypePropertyMap[ontologyName][prototypeName]
-                .push(prototypePropertyName);
+
+            const propertyMap = prototypePropertyMap[ontologyName][prototypeName];
+
+            if (!propertyMap.hasOwnProperty(prototypePropertyName)
+            && (!classContext
+            || (classContext[propertyId] &&
+            !classContext[propertyId].hasOwnProperty("@nest")))) {
+              propertyMap[prototypePropertyName] = propertyValue;
             }
 
-            const xsdObj = "xsd:object";
-            if ((classProperty["rdfs:range"] === xsdObj
-            || classProperty[contextLookup["rdfs:range"]] === xsdObj
-            || (classProperty["xsd:restriction"]
-              && classProperty["xsd:restriction"]["xsd:base"] === xsdObj)
-            || (classProperty[contextLookup["xsd:restriction"]]
-              && classProperty[contextLookup["xsd:restriction"]]["xsd:base"] === xsdObj))
-            && (!prototype || (prototype && !prototype.hasOwnProperty(prototypePropertyName)))) {
+            if (!prototype) {
+              if (!prototypeAction.properties) prototypeAction.properties = {};
+
+              prototypeAction.properties[prototypePropertyName] = propertyValue;
+            } else if (prototype && !prototype.hasOwnProperty(prototypePropertyName)) {
               const propertyAction = {
-                action: "CREATE", type: "Entity",
-                isProperty: true, name: prototypePropertyName
+                action: "CREATE", type: (isObject) ? "Entity" : "Property",
+                 name: prototypePropertyName
               };
+
+              if (isObject) {
+                propertyAction.properties = propertyValue;
+                propertyAction.isProperty = true;
+              }
 
               if (prototype) propertyAction.ownerPrototype = prototype;
               else propertyAction.ownerPrototypeName = prototypeName
-
-              actions.push(propertyAction);
-            } else if (!prototype || (prototype && !prototype
-                .hasOwnProperty(prototypePropertyName))) {
-              const propertyAction = {
-                action: "CREATE", type: "Property",
-                name: prototypePropertyName
-              };
-
-              if (prototype) propertyAction.ownerPrototype = prototype;
-              else propertyAction.ownerPrototypeName = prototypeName;
 
               actions.push(propertyAction);
             }
@@ -352,9 +362,78 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
         }
 
         function createPrototypeName (ontologyClassId) {
-          const match = ontologyClassId && ontologyClassId
-              .match(new RegExp(ontologyName + ":(.*)"));
+          const match = ontologyClassId && ontologyClassId.match(nameRegex);
           return (match) ? match[1] : ontologyClassId;
+        }
+
+        function isPropertyObject (property) {
+          const xsdObj = "xsd:object";
+
+          return (property["rdfs:range"] === xsdObj
+            || property[contextLookup["rdfs:range"]] === xsdObj
+            || (!!property["xsd:restriction"]
+              && property["xsd:restriction"]["xsd:base"] === xsdObj)
+            || (!!property[contextLookup["xsd:restriction"]]
+              && property[contextLookup["xsd:restriction"]]["xsd:base"] === xsdObj));
+        }
+
+        function groupProperties (properties) {
+          return Object.entries(properties)
+            .reduce((acc, value) => {
+              if (value[1] && typeof value[1] === "object") acc.entities[value[0]] = value[1];
+              else acc.properties[value[0]] = value[1];
+              return acc;
+          }, { entities: {}, properties: {}});
+        }
+
+        function createChildEntitites (entities, owner) {
+          Object.entries(entities).forEach((entity) => {
+            const name = entity[0];
+            const groupedProperties = groupProperties(entity[1]);
+
+            const childEntity = new Entity({
+              name, owner, properties: groupedProperties.properties
+            });
+
+            createChildEntitites(groupedProperties.entities, childEntity);
+
+            owner[name] = childEntity;
+          });
+        }
+
+        function constructPropertyNesting (classProperties, classContext, parentPropertyValue) {
+          for (let i = 0; i < classProperties.length; i++) {
+            const classProperty = classProperties[i];
+            const propertyId = classProperty["@id"];
+
+            if (!classProperty[metadataSymbol]) {
+              const isObject = isPropertyObject(classProperty)
+              const propertyMetadata = classProperty[metadataSymbol] = {
+                isObject, propertyValue: null
+              };
+
+              if (isObject) {
+                propertyMetadata.propertyValue = {};
+                const nestedProps = Object.entries(classContext)
+                  .reduce((arr, val) => {
+                    if (val[1] && val[1]["@nest"] === propertyId) arr.push(val[0]);
+                    return arr;
+                }, []);
+
+                const filteredProperties
+                  = classProperties.filter((prop) => nestedProps.indexOf(prop["@id"]) !== -1);
+
+                constructPropertyNesting(filteredProperties, classContext,
+                  propertyMetadata.propertyValue);
+              }
+
+            }
+
+            if (parentPropertyValue) {
+              parentPropertyValue[createPrototypeName(propertyId)]
+                = classProperty[metadataSymbol].propertyValue;
+            }
+          }
         }
       }));
     `, { scope: { ontologyIndex, ownPropertiesSymbol,

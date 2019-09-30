@@ -1,28 +1,39 @@
 // @flow
 
 const commonProperty = { type: "Property" };
-const dataProperty = { type: "Entity" };
 const rootProperty = { type: "Property" };
 const loneProperty = { type: "Property" };
+const deepNestedProperty = { type: "Property" };
+const nestedDataProperty = { type: "Entity", properties: { deepNestedProperty } };
+const dataProperty = { type: "Entity", properties: { commonProperty, loneProperty } };
+
 const newRootProperty = { type: "Property" };
 
 const defaultStructure = {
     LoneClass: {
-      properties: { commonProperty, dataProperty, rootProperty, loneProperty },
+      properties: { rootProperty, dataProperty: {
+        type: "Entity",
+        properties: {
+          commonProperty,
+          loneProperty,
+          nestedDataProperty
+        }
+      } },
+      type: "Relation"
     },
     ParentClass: {
-      properties: { commonProperty, dataProperty, rootProperty }
+      properties: { dataProperty, rootProperty }
     },
-    LoneChildClass: {
-      properties: { commonProperty, dataProperty, loneProperty },
+    LoneChildRelation: {
+      properties: { dataProperty },
       parent: "ParentClass"
     },
     ParentChildClass: {
-      properties: { commonProperty, dataProperty },
+      properties: { dataProperty },
       parent: "ParentClass"
     },
     GrandChildClass: {
-      properties: { commonProperty, dataProperty },
+      properties: { dataProperty },
       parent: "ParentChildClass"
     }
 };
@@ -34,9 +45,9 @@ const updatedStructure = {
   NewParentClass: {
     properties: { commonProperty, newRootProperty }
   },
-  LoneChildClass: {
+  LoneChildRelation: {
     properties: { commonProperty, loneProperty },
-    parent: "NewParentClass"
+    parent: "NewParentClass", type: "Relation"
   },
   ParentChildClass: {
     properties: { commonProperty },

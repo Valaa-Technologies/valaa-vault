@@ -33,9 +33,12 @@
     "@valos/inspire": "^0.35.0-prerelease.10",
     "@valos/kernel": "^0.35.0-prerelease.10",
     "@valos/toolset-revealer": "^0.35.0-prerelease.10",
-    "@valos/type-vault": "^0.35.0-prerelease.10",
+    "@valos/type-vault": "file:.yalc/@valos/type-vault",
     "valma": "^0.35.0-prerelease.10",
     "xml-js": "^1.6.11"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@valos/hypertwin": "file:.yalc/@valos/hypertwin",
+    "@valos/query-authority": "file:.yalc/@valos/query-authority"
+  }
 }

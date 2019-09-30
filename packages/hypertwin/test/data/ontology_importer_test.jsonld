@@ -2,26 +2,71 @@
   "@context": {},
   "terms": [
     {
+      "@context": {
+        "test:commonProperty": {
+          "@nest": "test:dataProperty"
+        },
+        "test:dataProperty": {},
+        "test:rootProperty": {},
+        "test:loneProperty": {
+          "@nest": "test:dataProperty"
+        },
+        "test:nestedDataProperty": {
+          "@nest": "test:dataProperty"
+        },
+        "test:deepNestedProperty": {
+          "@nest": "test:nestedDataProperty"
+        }
+      },
       "@id": "test:LoneClass",
       "@type": "rdf:Class",
-      "rdfs:subClassOf": "rdf:Class"
+      "rdfs:subClassOf": "rdf:Class",
+      "valosType": "Relation"
     },
     {
+      "@context": {
+        "test:commonProperty": {
+          "@nest": "test:dataProperty"
+        },
+        "test:dataProperty": {},
+        "test:rootProperty": {}
+      },
       "@id": "test:ParentClass",
       "@type": "rdf:Class",
       "rdfs:subClassOf": "rdf:Class"
     },
     {
-      "@id": "test:LoneChildClass",
+      "@context": {
+        "test:commonProperty": {
+          "@nest": "test:dataProperty"
+        },
+        "test:dataProperty": {},
+        "test:loneProperty": {
+          "@nest": "test:dataProperty"
+        }
+      },
+      "@id": "test:LoneChildRelation",
       "@type": "rdf:Class",
       "rdfs:subClassOf": "test:ParentClass"
     },
     {
+      "@context": {
+        "test:commonProperty": {
+          "@nest": "test:dataProperty"
+        },
+        "test:dataProperty": {}
+      },
       "@id": "test:ParentChildClass",
       "@type": "rdf:Class",
       "rdfs:subClassOf": "test:ParentClass"
     },
     {
+      "@context": {
+        "test:commonProperty": {
+          "@nest": "test:dataProperty"
+        },
+        "test:dataProperty": {}
+      },
       "@id": "test:GrandChildClass",
       "@type": "rdf:Class",
       "rdfs:subClassOf": "test:ParentChildClass"
@@ -31,7 +76,7 @@
       "@type": "rdf:Property",
       "xsd:restriction": { "xsd:base": "xsd:decimal" },
       "rdfs:domain": [
-        "test:LoneClass", "test:ParentClass", "test:LoneChildClass",
+        "test:LoneClass", "test:ParentClass", "test:LoneChildRelation",
         "test:ParentChildClass", "test:GrandChildClass"
       ],
       "rdfs:range": ["xsd:decimal"]
@@ -41,10 +86,28 @@
       "@type": "rdf:Property",
       "xsd:restriction": { "xsd:base": "xsd:object" },
       "rdfs:domain": [
-        "test:LoneClass", "test:ParentClass", "test:LoneChildClass",
+        "test:LoneClass", "test:ParentClass", "test:LoneChildRelation",
         "test:ParentChildClass", "test:GrandChildClass"
       ],
       "rdfs:range": ["xsd:object"]
+    },
+    {
+      "@id": "test:nestedDataProperty",
+      "@type": "rdf:Property",
+      "xsd:restriction": { "xsd:base": "xsd:object" },
+      "rdfs:domain": [
+        "test:LoneClass"
+      ],
+      "rdfs:range": ["xsd:object"]
+    },
+    {
+      "@id": "test:deepNestedProperty",
+      "@type": "rdf:Property",
+      "xsd:restriction": { "xsd:base": "xsd:string" },
+      "rdfs:domain": [
+        "test:LoneClass"
+      ],
+      "rdfs:range": ["xsd:string"]
     },
     {
       "@id": "test:rootProperty",
@@ -60,7 +123,7 @@
       "@type": "rdf:Property",
       "xsd:restriction": { "xsd:base": "xsd:string" },
       "rdfs:domain": [
-        "test:LoneClass", "test:LoneChildClass"
+        "test:LoneClass", "test:LoneChildRelation"
       ],
       "rdfs:range": ["xsd:string"]
     }

@@ -38,5 +38,8 @@
     "valma": "^0.37.0-alpha.4",
     "xml-js": "^1.6.11"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@valos/hypertwin": "file:.yalc/@valos/hypertwin",
+    "@valos/query-authority": "file:.yalc/@valos/query-authority"
+  }
 }

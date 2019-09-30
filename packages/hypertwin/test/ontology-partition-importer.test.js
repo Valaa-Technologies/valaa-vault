@@ -82,26 +82,39 @@ function _checkOntologyPartition (ontologyPartition: Vrapper,
       const ownProperties = prototypePropertyMap[prototype.get(VALEK.toField("name"))];
       expect(ownProperties).not.toBeFalsy();
 
-      expect(ownProperties.length)
+      expect(Object.keys(ownProperties).length)
         .toBe(Object.keys(expectedPrototype.properties).length);
 
-      ownProperties.forEach((property) => {
-        const expectedProperty = expectedPrototype.properties[property];
-        expect(expectedProperty).not.toBeFalsy();
-
-        const propertyValue = prototype.get(VALEK.propertyValue(property));
-        if (expectedProperty.type === "Property") {
-          expect(propertyValue).toBe(null);
-        } else {
-          expect(propertyValue).toBeInstanceOf(Vrapper);
-          expect(propertyValue.getTypeName()).toBe(expectedProperty.type);
-        }
-      });
+      iterateProperties(ownProperties, expectedPrototype.properties, prototype);
   });
 }
 
+function iterateProperties (properties, expectedProperties, owner) {
+  for (const propertyKey in properties) {
+    if (!properties.hasOwnProperty(propertyKey)) continue;
+
+    const expectedProperty = expectedProperties[propertyKey];
+    console.log("propertykey", propertyKey, expectedProperties);
+    expect(expectedProperty).not.toBeFalsy();
+
+    const ownProperty = properties[propertyKey];
+    const propertyValue = owner.get(VALEK.propertyValue(propertyKey));
+
+    if (expectedProperty.type === "Property") {
+      expect(propertyValue).toBe(properties[propertyKey]);
+    } else {
+      expect(propertyValue).toBeInstanceOf(Vrapper);
+      expect(propertyValue.getTypeName()).toBe(expectedProperty.type);
+
+      if (ownProperty && typeof ownProperty === "object" && Object.keys(ownProperty)) {
+        iterateProperties(ownProperty, expectedProperty.properties, propertyValue);
+      }
+    }
+  }
+}
+
 describe("Ontology prototype patcher", () => {
-  it(`creates partition which consists of prototypes of terms from given ontologies`, async () => {
+  it.only(`creates partition which consists of prototypes of terms from given ontologies`, async () => {
     const authority = "valaa-memory:";
     let ontologyIndexData;
 
@@ -116,7 +129,7 @@ describe("Ontology prototype patcher", () => {
       ontologyIndexData = await importOntologyPartitions(parsedOntologies,
         engine, authority);
     } catch (e) {
-      console.log("Error with reading ontologies", e);
+      console.log("Error with importing ontologies", e);
       expect(false).toBe(true);
     }
 

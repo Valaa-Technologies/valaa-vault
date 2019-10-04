@@ -1,8 +1,8 @@
 module.exports = {
   Resource: {
     "@type": "valos-raem:Type",
+    "revdoc:brief": "base resource interface",
     "rdfs:subClassOf": "rdfs:Resource",
-    "revdoc:brief": "valospace resource interface",
     "rdfs:comment":
 `The class of resources which can appear as a subject in valospace
 resource and event graphs. The domain of all transient and generated
@@ -16,20 +16,7 @@ fields which are available even for unsourced bodies.`,
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
     "valos-raem:generator": "getId",
     "rdfs:comment":
-`The immutable resource id of this resource.`,
-  },
-
-  iri: {
-    "@type": "valos-raem:GeneratedField",
-    "rdfs:domain": "valos:Resource",
-    "rdfs:range": "xsd:anyURI",
-    restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos-raem:generator": "getIRI",
-    "rdfs:comment":
-`The authoritative locator IRI of this resource in the current view of
-the world. Always equivalent to a catenation of
-<valos:partitionIRI> "#" <valos:id>
-of this resource`,
+`The immutable string representation of the vrid of this resource.`,
   },
 
   rawId: {
@@ -40,9 +27,19 @@ of this resource`,
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos-raem:generator": "getRawId",
     "rdfs:comment":
-`The resource id of this resource`,
+`The immutable string representation of the vrid of this resource.`,
+  },
+
+  vrid: {
+    "@type": "valos-raem:TransientField",
+    "rdfs:domain": "valos:Resource",
+    "rdfs:range": "rdfs:List",
+    restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
+    "valos-raem:generator": "getTransientTypeName",
+    "rdfs:comment":
+`The immutable, expanded object representation of the vrid of this
+resource.`,
   },
 
   typeName: {
@@ -50,57 +47,23 @@ of this resource`,
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos-raem:generator": "getTransientTypeName",
     "rdfs:comment":
 `The dominant type name of this resource`,
-  },
-
-  partition: {
-    "@type": "valos-raem:GeneratedField",
-    "rdfs:domain": "valos:Resource",
-    "rdfs:range": "valos:Partition",
-    restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:generator": "partitionResolver",
-    "rdfs:comment":
-`The partition root resource of this resource, ie. the nearest ancestor
-(possibly self) with a non-null valos:authorityIRI.`,
-  },
-
-  partitionIRI: {
-    "@type": "valos-raem:GeneratedField",
-    "rdfs:domain": "valos:Resource",
-    "rdfs:range": "xsd:anyURI",
-    restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:generator": "partitionURIResolver",
-    "rdfs:comment":
-`The partition IRI of the partition this resource belongs to in the
-current view of the world.`,
-  },
-
-  partitionURI: {
-    "@type": "valos-raem:AliasField",
-    "revdoc:deprecatedInFavorOf": "valos:partitionIRI",
-    "valos-raem:aliasOf": "valos:partitionIRI",
-    "rdfs:subPropertyOf": "valos:partitionIRI",
-    "rdfs:domain": "valos:Resource",
-    "rdfs:range": "xsd:anyURI",
-    restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
   },
 
   prototype: {
     "@type": "valos-raem:PrimaryField",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
-    restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "valos-raem:coupledField": "valos:derivations",
     "rdfs:comment":
-`The prototype of this resource. All field lookups for which there is
+`The prototypes of this resource. All field lookups for which there is
 no associated value set and whose field descriptors don't have
 ownDefaultValue are forwarded to the prototype.`,
   },
 
   derivations: {
-    "@type": "valos-raem:TransientField",
+    "@type": "valos-raem:CoupledField",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
     "valos-raem:coupledField": "valos:prototype",
@@ -112,7 +75,7 @@ valos:prototype.`,
   },
 
   ownFields: {
-    "@type": "valos-raem:GeneratedField",
+    "@type": "valos-raem:TransientField",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
@@ -123,21 +86,8 @@ All property accesses will only return field values which are directly
 owned by this resource.`,
   },
 
-  inheritancePrototype: {
-    "@type": "valos-raem:PrimaryField",
-    "rdfs:subPropertyOf": "valos:prototype",
-    "rdfs:domain": "valos:Resource",
-    "rdfs:range": "valos:Resource",
-    restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:coupledField": "valos:inheritors",
-    "rdfs:comment":
-`The derivation prototype of this resource. This represents the
-traditional prototypical inheritance where inherited field values are
-not remapped in any way.`,
-  },
-
   inheritors: {
-    "@type": "valos-raem:TransientField",
+    "@type": "valos-raem:CoupledField",
     "rdfs:subPropertyOf": "valos:derivations",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
@@ -149,19 +99,8 @@ not remapped in any way.`,
 valos:inheritancePrototype.`,
   },
 
-  instancePrototype: {
-    "@type": "valos-raem:PrimaryField",
-    "rdfs:subPropertyOf": "valos:prototype",
-    "rdfs:domain": "valos:Resource",
-    "rdfs:range": "valos:Resource",
-    restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:coupledField": "valos:instances",
-    "rdfs:comment":
-`The instance prototype of this resource instance.`,
-  },
-
   instances: {
-    "@type": "valos-raem:TransientField",
+    "@type": "valos-raem:CoupledField",
     "rdfs:subPropertyOf": "valos:derivations",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
@@ -170,7 +109,7 @@ valos:inheritancePrototype.`,
     "valos-raem:ownDefaultValue": [],
     "rdfs:comment":
 `An unordered set of resources which have this resource as their
-directvalospace:instancePrototype.`,
+direct valos:instancePrototype.`,
   },
 
   ghostPrototype: {
@@ -195,7 +134,7 @@ of the corresponding ghosts (ie. this field).} .`,
   },
 
   ghosts: {
-    "@type": "valos-raem:TransientField",
+    "@type": "valos-raem:CoupledField",
     "rdfs:subPropertyOf": "valos:derivations",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
@@ -221,11 +160,11 @@ for why immaterial ghosts are not listed.`,
   },
 
   unnamedCouplings: {
-    "@type": "valos-raem:TransientField",
-    "rdfs:domain": "valos-raem:TransientField",
-    "rdfs:range": "valos-raem:TransientField",
-    "valos-raem:coupledField": "",
+    "@type": "valos-raem:CoupledField",
+    "rdfs:domain": "valos:Resource",
+    "rdfs:range": "valos:Resource",
     "valos-raem:isOwnerOf": true,
+    "valos-raem:coupledField": "",
     "rdfs:comment":
 `Referrers with a missing coupledField referring this resource`,
   },
@@ -243,12 +182,12 @@ not a ghost itself.`,
   },
 
   ghostOwner: {
-    "@type": "valos-raem:TransientField",
+    "@type": "valos-raem:PrimaryField",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:coupledField": "valos:ghostOwnlings",
     "valos-raem:isOwnedBy": true,
+    "valos-raem:coupledField": "valos:ghostOwnlings",
     "valos-raem:ownDefaultValue": null,
     "valos-raem:allowTransientFieldToBeSingular": true,
     "rdfs:comment":
@@ -261,7 +200,7 @@ immaterialize, not destroy, the ghost.`,
   },
 
   ghostOwnlings: {
-    "@type": "valos-raem:TransientField",
+    "@type": "valos-raem:CoupledField",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
     "valos-raem:isOwnerOf": true,

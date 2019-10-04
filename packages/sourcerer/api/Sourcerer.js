@@ -108,7 +108,7 @@ export default class Sourcerer extends FabricEventTarget {
    *    remote authority connection
    * 3. all events in the remote authorize event log itself
    *
-   * Irrespective of where the first narration is sourced, an
+   * Irrespective of where the first narration is sourcered, an
    * authorized full narration is initiated against the remote
    * authority if available.
    *

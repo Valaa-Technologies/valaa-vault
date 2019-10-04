@@ -517,7 +517,7 @@ source, a structurally homologous prototype inside f00b-b507-0763
 and thus infers triples:
 `, turtle(`
   <urn:valos:@$iu4:f00b@*:PERMISSIONS@> a valos:Relation
-      ; valos:source <urn:valos:$iu4:f00b>
+      ; valos:connectorSource <urn:valos:$iu4:f00b>
       ; valos:inheritancePrototype <urn:valos:@$iu4:f00b-b507-0763@*:PERMISSIONS@>
       ; valos:name "PERMISSIONS"
   <urn:valos:@$iu4:f00b@*:PERMISSIONS@_:1@> a valos:Relation
@@ -562,7 +562,7 @@ e.g. \`<urn:valos:@$iu4:f00b@*:PERMISSIONS:@-$ihi:8766@@>\` is a
 PERMISSIONS relation with fixed ihi target 8766 and infers triples:
 `, turtle(`
   <urn:valos:@$iu4:f00b@*:PERMISSIONS:@-$ihi:8766@@> a valos:Relation
-      ; valos:containerSource <urn:valos:$iu4:f00b>
+      ; valos:connectorSource <urn:valos:$iu4:f00b>
       ; valos:prototype <urn:valos:@$iu4:f00b-b507-0763@*:PERMISSIONS:@-$ihi:8766@@>
       ; valos:name "PERMISSIONS"
       ; valos:target <urn:valos:$iu4:8766-src>

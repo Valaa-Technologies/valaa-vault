@@ -15,6 +15,8 @@ module.exports = {
   ...extendOntology("valos-valk", "https://valospace.org/valk#", prefixes, require("./valos-valk")),
   ...extendOntology("valos-raem", "https://valospace.org/raem#", prefixes, require("./valos-raem")),
   ...extendOntology("valos", "https://valospace.org/#", prefixes, require("./valos"), {
-    context: { restriction: { "@reverse": "owl:onProperty" } }
+    context: {
+      restriction: { "@reverse": "owl:onProperty" },
+    },
   }),
 };

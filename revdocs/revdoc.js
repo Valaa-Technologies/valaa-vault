@@ -76,24 +76,25 @@ module.exports = {
         "vdoc:entries": filterKeysWithAnyOf("@type", "valos-raem:Type", vocabulary),
       },
     },
-    [`chapter#section_fields>3;<em>${prefix}:* a valos-raem:Field*</em> vocabulary`]: {
+    [`chapter#section_fields>3;<em>${prefix}:* a valos-raem:Field</em> vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.fields,
         "vdoc:entries": filterKeysWithAnyOf("@type", [
-          "valos-raem:Field", "valos-raem:PrimaryField", "valos-raem:TransientField", "valos-raem:InferredField",
-          "valos-raem:GeneratedField", "valos-raem:AliasField",
+          "valos-raem:Field",
+          "valos-raem:ExpressedField", "valos-raem:EventLoggedField", "valos-raem:CoupledField",
+          "valos-raem:GeneratedField", "valos-raem:TransientField", "valos-raem:AliasField",
         ], vocabulary),
       },
     },
-    [`chapter#section_vocabulary_other>8;<em>${prefix}:</em> other vocabulary`]: {
+    [`chapter#section_vocabulary_other>8;<em>${prefix}:*</em> other vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.vocabularyOther,
         "vdoc:entries": filterKeysWithNoneOf("@type", [
-          "valos-raem:Type", "valos-raem:Field",
-          "valos-raem:PrimaryField", "valos-raem:TransientField", "valos-raem:InferredField",
-          "valos-raem:GeneratedField", "valos-raem:AliasField",
+          "valos-raem:Type", "valos-kernel:Property", "valos-raem:Field",
+          "valos-raem:ExpressedField", "valos-raem:EventLoggedField", "valos-raem:CoupledField",
+          "valos-raem:GeneratedField", "valos-raem:TransientField", "valos-raem:AliasField",
         ], vocabulary),
       },
     },

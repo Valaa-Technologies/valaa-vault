@@ -25,6 +25,21 @@ its sub-classes as their rdf:domain.`,
 all regular query and graph contexts (as opposed to fields with
 non-triple semantics or triple expression only in limited contexts).`
   },
+  expressor: {
+    "@type": "valos-kernel:Property",
+    "rdfs:domain": "valos-raem:ExpressedField",
+    "rdfs:range": "rdfs:List",
+    "rdfs:comment":
+`The custom expressor of an ExpressedField as a vpath. If defined and
+whenever a triple expression for this field is required the expressor
+vpath is valked with scope values:
+- valos-raem:0 being the field owner,
+- valos-raem:1 being the field id, and
+- valos-raem:2 being the possible field raw triple object value if it
+  exists, otherwise undefined.
+The resulting valk value is used as the object of a new triple, with
+field owner and field id used as the subject and predicate.`,
+  },
   EventLoggedField: {
     "@type": "valos-kernel:Class",
     "rdfs:subClassOf": "valos-raem:ExpressedField",
@@ -32,6 +47,20 @@ non-triple semantics or triple expression only in limited contexts).`
 `The class of valospace fields which have both a triple state
 expression inside valospace and a change impression in event logs;
 these are the primary, persisted sources of truth.`
+  },
+  impressor: {
+    "@type": "valos-kernel:Property",
+    "rdfs:domain": "valos-raem:EventLoggedField",
+    "rdfs:range": "rdfs:List",
+    "rdfs:comment":
+`The custom impressor of an EventLoggedField as a vpath. Whenever an
+event log entry is required for an update that targets this field the
+impressor vpath is valked with scope values:
+- valos-raem:0 as the field owner,
+- valos-raem:1 as the field id,
+- valos-raem:2 as the possible current field raw triple object value or
+  undefined otherwise, and
+- valos-raem:3 the new value being updated to this field.`,
   },
   CoupledField: {
     "@type": "valos-kernel:Class",
@@ -54,15 +83,9 @@ expressor, with scope values:
   TransientField: {
     "@type": "valos-kernel:Class",
     "rdfs:subClassOf": "valos-raem:Field",
-  generator: {
-    "@type": "valos-kernel:Property",
-    "rdfs:domain": "valos-raem:GeneratedField",
-    "rdfs:range": "rdfs:Resource",
     "rdfs:comment":
 `The class of valospace fields with no general triple expression but
 with custom semantics for specific queries.`,
-`The generator algorithm specification or identifier of
-a GeneratedField.`
   },
   AliasField: {
     "@type": "valos-kernel:Class",
@@ -164,5 +187,53 @@ any resource in its prototype chain.`,
     "rdfs:comment":
 `Bypass the default behavior which forces transient fields to be plural
 to allow for singular fields.`,
+  },
+  VPathRule: {
+    "@type": "valos-kernel:Class",
+    "rdfs:subClassOf": ["rdfs:Literal", "rdfs:List"],
+    "revdoc:brief": "VPath 'vrid' literal datatype",
+    "rdfs:comment":
+`The class of all resources representing some VPath rule or
+pseudo-rule. 'vrid'.
+If this class is used as literal datatype URI the literal contains the
+flat string VPath rule representation. Otherwise when this class is
+the range of a property which is used as a predicate in a triple, and
+the object of the triple is not a literal, then the object contains
+the expanded representation of the VPath rule value as an rdf List.`
+  },
+  VPath: { "@type": "valos-kernel:Class",
+    "rdfs:subClassOf": "valos-raem:VPathRule",
+    "revdoc:brief": "VPath rule 'vpath' datatype",
+    "rdfs:comment":
+`The class of all resources representing the VPath rule 'vpath' (always
+begins with '@')`,
+  },
+  VRId: { "@type": "valos-kernel:Class",
+    "rdfs:subClassOf": "valos-raem:VPathRule",
+    "revdoc:brief": "VPath rule 'vrid' datatype",
+    "rdfs:comment":
+`The class of all resources representing the VPath pseudo-rule
+'vrid' (always begins with '@')`,
+  },
+  VVerbPath: { "@type": "valos-kernel:Class",
+    "rdfs:subClassOf": "valos-raem:VPathRule",
+    "revdoc:brief": "VPath rule 'vverb-path' datatype",
+    "rdfs:comment":
+`The class of all resources representing the VPath pseudo-rule
+'vverb-path' (always begins with '@').`,
+  },
+  VGRId: { "@type": "valos-kernel:Class",
+    "rdfs:subClassOf": "valos-raem:VPathRule",
+    "revdoc:brief": "VPath rule 'vgrid' datatype",
+    "rdfs:comment":
+`The class of all resources representing the VPath rule 'vgrid' (always
+begins with '$').`,
+  },
+  VParam: { "@type": "valos-kernel:Class",
+    "rdfs:subClassOf": "valos-raem:VPathRule",
+    "revdoc:brief": "VPath rule 'vparam' datatype",
+    "rdfs:comment":
+`The class of all resources representing the VPath pseudo-rule
+'vparam' (always begins with '$' or ':').`,
   },
 };

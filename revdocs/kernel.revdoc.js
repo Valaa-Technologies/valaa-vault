@@ -213,6 +213,13 @@ module.exports = {
         ], vocabulary),
       },
     },
+    [`chapter#section_resolvers>6;<em>${prefix}:* a valos-raem:Resolver</em> vocabulary`]: {
+      "#0": [],
+      "table#>0;vocabulary": {
+        "vdoc:headers": ontologyHeaders.resolvers,
+        "vdoc:entries": filterKeysWithAnyOf("@type", "valos-raem:Resolver", vocabulary),
+      },
+    },
     [`chapter#section_vocabulary_other>8;<em>${prefix}:</em> other vocabulary`]: {
       "#0": [],
       "table#>0;vocabulary": {

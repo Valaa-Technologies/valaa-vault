@@ -205,8 +205,8 @@ REST lambdas and the AWS mqtt IoT as event pub-sub.
 
 - depends: `@valos/script`, `IndexedDB`, `AWS IoT/S3/DynamoDB`
 - exports: `FalseProphet`, `Connection`, `SourcererContentAPI`
-- valosheath: `Relatable`, `Entity`, `Media`, `Relation`,
-  `TransientSourcererFields`
+- valosheath: `SourceredNode`, `Entity`, `Media`, `Relation`,
+  `SourcerableNode`
 - concepts: `ACID`, `authorities`, `pub-sub`, `offline readiness`
 
 

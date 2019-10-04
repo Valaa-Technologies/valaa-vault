@@ -16,7 +16,7 @@ that octet-stream, prefixed with the hash algorithm, as their vgrid.`
     "rdfs:domain": "valos:Bvob",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos-raem:generator": "hashAlgorithm",
+    "valos-raem:expressor": "$valos-raem:resolveContextTerm:@!$$valos:vrid:1:1@",
     "rdfs:comment":
 `The hash algorithm used to create the content hash of this Bvob`,
   },
@@ -26,7 +26,7 @@ that octet-stream, prefixed with the hash algorithm, as their vgrid.`
     "rdfs:domain": "valos:Bvob",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos-raem:generator": "contentHash",
+    "valos-raem:expressor": "!$$valos:vrid:1:3",
     "rdfs:comment":
 `The content hash of the octet-stream associated with this Bvob`,
   },
@@ -36,7 +36,7 @@ that octet-stream, prefixed with the hash algorithm, as their vgrid.`
     "rdfs:domain": "valos:Bvob",
     "rdfs:range": "xsd:nonNegativeInteger",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos-raem:generator": "contentLength",
+    "valos-raem:expressor": "$valos-raem:resolveContentLength",
     "rdfs:comment":
 `The number of octets in the octet-stream associated with this Bvob.`,
   },

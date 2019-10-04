@@ -67,6 +67,12 @@ const fields = {
   "header#5;valos-raem:coupledField": "valos-raem:coupledField",
 };
 
+const resolvers = {
+  ...vocabulary,
+  "header#1;@type": "rdf:type",
+  "header#2;comment": "Comment",
+};
+
 const vocabularyOther = {
   ...vocabulary,
   "header#1;@type": "rdf:type",
@@ -99,6 +105,7 @@ module.exports = {
   elements,
   types,
   fields,
+  resolvers,
   vocabularyOther,
 
   extractionRules,

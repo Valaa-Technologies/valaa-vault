@@ -25,6 +25,8 @@ block as an rdf:Statement reification of hypertwinned triples.`,
 
   value: {
     "@type": "valos-raem:EventLoggedField",
+    "valos-raem:expressor": "$valos-raem:resolveVPath",
+    "valos-raem:impressor": "$valos-raem:impressViaVPath",
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": ["xsd:string", "valos-raem:VPath"],
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
@@ -39,7 +41,7 @@ block as an rdf:Statement reification of hypertwinned triples.`,
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:generator": "getTwinspace",
+    "valos-raem:expressor": "$valos-script:resolveTwinspace",
     "rdfs:comment":
 `The twinspace of this ScopeProperty. Equates to the expanded prefix
 of the valos:name of this ScopeProperty using the context of this
@@ -54,7 +56,7 @@ the twinspace id of the scope resource for this twinspace.`,
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:generator": "getSubject",
+    "valos-raem:expressor": "$valos-script:resolveTwinSubject",
     "rdfs:comment":
 `The subject of this ScopeProperty when interpreted as a reified
 rdf:Statement. Equates to the twinspace id of the scope resource using
@@ -67,7 +69,7 @@ the valos:twinspace of this ScopeProperty.`,
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:generator": "getPredicate",
+    "valos-raem:expressor": "$$valos:name",
     "rdfs:comment":
 `The predicate of this ScopeProperty when interpreted as a reified
 rdf:Statement. Equates to the IRI expansion of valos:name of this
@@ -81,6 +83,7 @@ ScopeProperty using the context of this partition.`,
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
+    "valos-raem:expressor": "$valos-script:resolveTwinObject",
     "rdfs:comment":
 `The object of this ScopeProperty when interpreted as a reified
 rdf:Statement. If the valos:value refers to a scope which has this

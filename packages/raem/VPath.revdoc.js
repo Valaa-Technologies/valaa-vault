@@ -574,6 +574,8 @@ PERMISSIONS relation with fixed ihi target 8766 and infers triples:
     "#0": [
 `The VPath grammar is an LL(1) grammar. It is recursive as param-value
 productions can contain nested vpaths without additional encoding.
+
+The list of definitive rules:
 `, abnf(
 `  vpath         = "@" vgrid-path / verb-path
 
@@ -598,28 +600,46 @@ productions can contain nested vpaths without additional encoding.
   pct-encoded   = "%" HEXDIG HEXDIG`,
 ), `
 
+In addition there are pseudo-rules which are not used by an LL(1)
+parser but which have well-defined meaning and can thus be referred to
+from other documents.
+
+The list of informative pseudo-rules:
+`, abnf(
+`  vrid            = "@" vgrid-path
+  vverb-path      = "@" verb-path
+  vparam          = [ "$" [ context-term ] ] [ ":" param-value ]
+  context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )
+`), `
+
 There are couple notes not explicitly expressed by the the grammar
 itself. These notes primarily relate to LL(1)-parseability:`
     ],
     "bulleted#1": [
-[`There are no explicit rule 'vrid' for a VPath with 'vgrid' as the first
-  expansion as that would prohibit LL(1) parsing.`],
-[`A note that 'params' rule is right recursive. This is to ensure that
-  the string "$foo:bar" will be properly LL(1)-parsed as a singular
-  'context-tail' with 'param-value', instead of a 'context-tail'
-  (without 'param-value') that is followed by 'value-tail'.
+[`Pseudo-rule 'vrid': this class contains all 'vpath' productions with
+  'vgrid' as their first expansion.`],
+[`Pseudo-rule 'vparam': this class contains all 'context-tail' and
+  'value-tail' expansions while excluding their '[ params ]' and
+  'context-tail' right recursive expansions.`],
+[`Also note how 'params' rule is right recursive. This is to ensure
+  that the string "$foo:bar" will be properly LL(1)-parsed as a
+  singular 'context-tail' with 'param-value', instead of a
+  'context-tail' (without 'param-value') that is followed by
+  'value-tail'.
   To represent a 'context-tail' (without 'param-value') that is
   followed by a 'value-tail' an empty context must be added:
   "$foo$:bar". To represent an empty param an empty "$" can be
   inserted: "$$foo:bar" and as a consequence if the following param of
   an empty param has no context it must also prepended with "$" like
   so: "$$:bar".`],
-[`'context-term's which are plain namespace prefixes should be
-  restricted to rule 'ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )' as
+[`Pseudo-rule 'context-term-ns': this class contains all 'context-term'
+  expansions which match this more restrictive specification (max 32
+  chars, special chars only in the middle). All 'context-term's which
+  are plain namespace prefixes should be restricted to this rule as
   this is the prefix grammar of some relevant prefix context.
   `, blockquote(
     `Editorial Note: which context was this again? Neither
-    SPARQL, Turtle nor JSON-LD have this limitation).`
+    SPARQL, Turtle nor JSON-LD have this limitation.`
   )],
 [`The nesting hierarchy can be manually quickly established by first
   splitting a valid vpath string by the delimiter regex /(@$:)/

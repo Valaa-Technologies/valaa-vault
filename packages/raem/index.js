@@ -31,6 +31,11 @@ export {
                            default as VRL,
                                       vRef,
 } from "./VRL";
+export {
+                                      expandVPath,
+                                      coinVerb,
+                                      validateVerb,
+} from "./VPath";
 export type {
                                       ValaaURI,
 } from "./ValaaURI";

@@ -1,6 +1,6 @@
 // @flow
 
-import VALK, { run as unwrappedRun, expandTildeVAKON } from "~/raem/VALK";
+import VALK, { run as unwrappedRun } from "~/raem/VALK";
 import { created, fieldsSet } from "~/raem/events";
 import { vRef } from "~/raem/VRL";
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
@@ -42,16 +42,36 @@ describe("VALK basic functionality tests", () => {
     expect(VALK.object({ value: VALK.head() }).toVAKON())
         .toEqual({ value: ["§->", null] });
   });
+});
 
-  it("Expands tilde notation", () => {
-    expect(expandTildeVAKON("~$/scriptRoot", ["~$/scriptRoot", ["~random"]]))
-        .toEqual(["§->", ["§$"], ["§..", "scriptRoot"], ["~random"]]);
-    expect(expandTildeVAKON("~invoke:create",
-            ["~invoke:create", "event", ["~$:source"], ["~$:body/$V/target/name"]]))
-        .toEqual(["§invoke", "create", "event", ["~$:source"], ["~$:body/$V/target/name"]]);
-    expect(expandTildeVAKON("~invoke:create",
-            ["~invoke:create", ["~$:body/$V/target/name"]]))
-        .toEqual(["§invoke", "create", ["~$:body/$V/target/name"]]);
+describe("VPath to VAKON conversions", () => {
+  it("Converts simple VPaths into VAKON", () => {
+    expect(VALK.fromVPath("@!:scriptRoot@!random@").toVAKON())
+        .toEqual(["§->", ["§$", "scriptRoot"], ["§random"]]);
+    expect(VALK.fromVPath("@!invoke:create:@!:body:%24V:target:name@@").toVAKON())
+        .toEqual([
+          "§invoke", "create",
+          ["§->", ["§$", "body"], ["§..", "$V"], ["§..", "target"], ["§..", "name"]],
+        ]);
+  });
+  it("Converts complex VPaths into VAKON", () => {
+    expect(VALK.fromVPath("@!invoke:create:event:@!:source@:@!:body@.:%24V@.:target@.:name@@")
+        .toVAKON())
+    .toEqual([
+      "§invoke", "create", "event", ["§$", "source"],
+      ["§->", ["§$", "body"], ["§..", "$V"], ["§..", "target"], ["§..", "name"]],
+    ]);
+  });
+  it("Converts complex embedded VPaths into VAKON", () => {
+    expect(VALK.fromVPath([
+      "@!invoke:create:event:", ["@!:source@"], ":",
+        "@!:body@.:%24V@", [".:target"], "@", [".:name"], "@",
+      "@",
+    ]).toVAKON())
+    .toEqual([
+      "§invoke", "create", "event", ["§$", "source"],
+      ["§->", ["§$", "body"], ["§..", "$V"], ["§..", "target"], ["§..", "name"]],
+    ]);
   });
 });
 

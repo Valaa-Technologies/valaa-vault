@@ -1,5 +1,6 @@
 import { vRef } from "~/raem/VRL";
 import type { VRL } from "~/raem/VRL"; // eslint-disable-line no-duplicate-imports
+import { expandVPath } from "~/raem/VPath";
 
 import beaumpify from "~/tools/beaumpify";
 import invariantify, { invariantifyArray, invariantifyNumber, invariantifyString,
@@ -8,6 +9,7 @@ import { dumpObject as _dumpObject, wrapError } from "~/tools/wrapError";
 import trivialClone from "~/tools/trivialClone";
 
 import { isHostRef, tryHostRef } from "./hostReference";
+import { vakonizeExpandedVPath } from "./_tildeOps";
 
 const dumpify = require("~/tools/dumpify").default;
 const inBrowser = require("~/gateway-api/inBrowser").default;
@@ -424,6 +426,10 @@ export default class Kuery {
 
   fromVAKON (kuery: any, type: ?string): Kuery {
     return this._addRawVAKON(kuery, type);
+  }
+
+  fromVPath (vrid: string | Array<any>, type: ?string): Kuery {
+    return this._addRawVAKON(vakonizeExpandedVPath(expandVPath(vrid)), type);
   }
 
   /**

@@ -38,9 +38,9 @@ identifier (or 'vgrid') as its first segment is a valospace resource
 identifier (or *VRId*).
 
 `, abnf(
-`  vpath         = "@" vgrid-path / verb-path
-  vgrid-path    = vgrid "@" [ verb-path ]
-  verb-path     = verb "@" [ verb-path ]
+`  vpath         = "@" vgrid-tail / verbs-tail
+  vgrid-tail    = vgrid "@" [ verbs-tail ]
+  verbs-tail     = verb "@" [ verbs-tail ]
   verb          = verb-type params
 `), `
 
@@ -79,7 +79,7 @@ call.
 A verb is made up of type and a parameter list, with each parameter
 carrying an optional context-term in addition to their value.
 `, abnf(
-`  verb-path     = verb "@" [ verb-path ]
+`  verbs-tail     = verb "@" [ verbs-tail ]
   verb          = verb-type params
   verb-type     = 1*unencoded
 
@@ -233,10 +233,10 @@ them as the value type of the param-value etc.`,
       ""}VRId is a stable identifier of a global resource or a structural sub-resource`]: {
     "#0": [
 `A VRId is a vpath which has vgrid as its first production (via
-vgrid-path).
+vgrid-tail).
 `, abnf(
-`  vpath         = "@" vgrid-path / verb-path
-  vgrid-path    = vgrid "@" [ verb-path ]
+`  vpath         = "@" vgrid-tail / verbs-tail
+  vgrid-tail    = vgrid "@" [ verbs-tail ]
   vgrid         = "$" format-term ":" param-value [ params ]
 `), `
 
@@ -344,15 +344,15 @@ the equivalence semantics.`,
     [`chapter#section_structural_sub_resources>3;VRId verbs identify structural sub-resources${
         ""} - fixed ownership, inferred state, 'secondary keys'`]: {
       "#0": [
-`In VRId context the verb-path that follows the VGRId specifies
+`In VRId context the verbs-tail that follows the VGRId specifies
 a structural path from the global resource to a
 *structural sub-resource* of the global resource. The triple
 constraints of each verb in that path are _inferred as triples_ for the
 particular resource that that verb affects.
 
 `, blockquote(`Principle: a structured sub-resource using a particular
-verb-path in its identifying VRId will always infer the triples that
-are required to satisfy the same verb-path in a query context which
+verbs-tail in its identifying VRId will always infer the triples that
+are required to satisfy the same verbs-tail in a query context which
 starts from the same global resource.`), `
 
 This fixed triple inference is the meat and bones of the structural
@@ -577,13 +577,13 @@ productions can contain nested vpaths without additional encoding.
 
 The list of definitive rules:
 `, abnf(
-`  vpath         = "@" vgrid-path / verb-path
+`  vpath         = "@" vgrid-tail / verbs-tail
 
-  vgrid-path    = vgrid "@" [ verb-path ]
+  vgrid-tail    = vgrid "@" [ verbs-tail ]
   vgrid         = "$" format-term ":" param-value [ params ]
   format-term   = context-term
 
-  verb-path     = verb "@" [ verb-path ]
+  verbs-tail     = verb "@" [ verbs-tail ]
   verb          = verb-type params
   verb-type     = 1*unencoded
 
@@ -606,8 +606,8 @@ from other documents.
 
 The list of informative pseudo-rules:
 `, abnf(
-`  vrid            = "@" vgrid-path
-  vverb-path      = "@" verb-path
+`  vrid            = "@" vgrid-tail
+  verbs          = "@" verbs-tail
   vparam          = [ "$" [ context-term ] ] [ ":" param-value ]
   context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )
 `), `

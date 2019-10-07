@@ -242,7 +242,7 @@
           "@type": "revdoc:ABNF",
           "vdoc:language": "https://tools.ietf.org/html/rfc5234",
           "vdoc:content": [
-            "  vpath         = \"@\" vgrid-path / verb-path\n  vgrid-path    = vgrid \"@\" [ verb-path ]\n  verb-path     = verb \"@\" [ verb-path ]\n  verb          = verb-type params\n"
+            "  vpath         = \"@\" vgrid-tail / verbs-tail\n  vgrid-tail    = vgrid \"@\" [ verbs-tail ]\n  verbs-tail     = verb \"@\" [ verbs-tail ]\n  verb          = verb-type params\n"
           ]
         },
         "",

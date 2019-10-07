@@ -1,89 +1,192 @@
 // @flow
 
-export function mintFullVrid (...segments) {
-  const first = segments[0];
-  if (first[0] !== "$") {
-    return `@${segments.map(s => mintVerb(...s)).join("")}`;
+export function mintVPath (...segments) {
+  return `@${segments.map(_mintVPathSegment).join("@")}@`;
+}
+
+function _mintVPathSegment (segment, index) {
+  if (typeof segment === "string") {
+    return segment[0] === "$"
+        ? validateVGRId(segment)
+        : validateVerb(segment, index);
   }
-  validateContextTerm(first[1]);
-  validateVerbValue(first[3]);
-  return `@${first.join("")}${segments.slice(1).map(s => mintVerb(...s)).join("")}`;
-}
-
-export function mintVerb (type, ...params: (string | [string, string])[]) {
-  validateVerbTypeTerm(type);
-  return `${type}${params.map(mintParam).join()}`;
-}
-
-export function mintParam (paramElement: ["$" | ":", string, ?":", ?string],
-    index = "(standalone)") {
-  validateVerbParamElement(paramElement);
-  const value = paramElement[paramElement.length - 1];
-  return `${paramElement.slice(0, paramElement.length - 1).join("")}${
-    Array.isArray(value) ? mintFullVrid(value) : encodeURIComponent(value)}`;
-}
-
-export function validateVerbsVrid (verbs) {
-  const vpathArray = expandVPath(verbs);
-  if (vpathArray[0] !== "@") {
-    throw new Error(`Invalid non-vgrid vpath: expected "@" as first entry`);
+  if (!Array.isArray(segment)) {
+    throw new Error(`Invalid segment #${index} while minting: must be a string or Array, got ${
+      typeof segment}`);
   }
-  validateVerb(vpathArray[1], 0);
-}
-
-export function validateVerb (verb, index) {
-  const verbElement = expandVPath(verb);
-  const verbType = verbElement[0];
-  if (typeof verbType !== "string" || verbType === "@" || verbType === "$" || verbType === ":") {
-    throw new Error(`Invalid verb-type: expected non-("@"|"$"|":") string`);
+  if (segment[0] !== "$") {
+    // verb
+    return mintVerb(...segment);
   }
-  const [, type, body] = verb.match(/([^$:])+\$[^$]*\$([^$])+/) || [];
-  if (type && body) return;
-  throw new Error(`Invalid verb${index === undefined ? "" : ` at #${index}`}: '${verb}'`);
+  // vgrid
+  if (index) {
+    throw new Error(`Invalid segment #${index} while minting:${
+      ""} expected verb (is not first segment), got vgrid ("$" as first segment element)`);
+  }
+  return mintVGRId(...segment.slice(1));
 }
 
-export function validateVerbParamElement (element: any[]) {
-  if (!Array.isArray(element)) throw new Error(`Invalid verb-param: expected an array`);
-  if (element[0] === "$") {
-    if (element.length !== 4) {
-      throw new Error(`Invalid verb-param: expected length 4 with leading "$", got length ${
-        element.length}`);
+export function mintVGRId (formatTerm: string, paramElement: any,
+    ...params: (string | ["$", string, ?string])) {
+  validateFormatTerm(formatTerm);
+  const paramValue = mintParamValue(paramElement);
+  if (!paramValue) throw new Error(`Invalid vgrid: param-value missing`);
+  return `$${formatTerm}:${paramValue}${params.map(mintParam).join("")}`;
+}
+
+export function mintVerb (verbType, ...params: (string | ["$", string, ?string])[]) {
+  validateVerbType(verbType);
+  return `${verbType}${params.map(mintParam).join("")}`;
+}
+
+export function mintParam (paramElement: (string | ["$", string, ?string]), index, params) {
+  let ret;
+  if (typeof paramElement === "string") {
+    ret = validateVParam(paramElement);
+  } else if (Array.isArray(paramElement) && (paramElement[0] === "$")) {
+    if (paramElement[1]) validateContextTerm(paramElement[1]);
+    const value = mintParamValue(paramElement[2]);
+    ret = !paramElement[1] ? `:${value}`
+        : !value ? `$${paramElement[1]}`
+        : `$${paramElement[1]}:${value}`;
+  } else {
+    throw new Error(`Invalid paramElement #${index
+        }: expected a string or a param Array with "$" as first element`);
+  }
+  if ((ret[0] !== "$") && index) {
+    const prevParam = params[index - 1];
+    if ((typeof prevParam === "string") ? !prevParam.contains(":") : !prevParam[2]) {
+      return `$${ret}`;
     }
-    validateContextTerm(element[1]);
-  } else if (element[0] !== ":") {
-    throw new Error(`Invalid verb-param: expected leading ":" or "$", got ${element[0]}`);
-  } else if (element.length !== 2) {
-    throw new Error(`Invalid verb-param: expected length 2 with leading ":", got length ${
-      element.length}`);
   }
-  const value = element[element.length - 1];
-  if (typeof value === "string") validateVerbValue();
-  else validateFullVridElement(value);
+  return ret;
+}
+
+export function mintParamValue (value) {
+  if ((value === undefined) || (value === "")) return value;
+  if (typeof value === "string") return encodeURIComponent(value);
+  if (value === null) throw new Error(`Invalid param-value null`);
+  if (!Array.isArray(value)) throw new Error(`Invalid param-value with type ${typeof value}`);
+  if (value[0] !== "@") {
+    throw new Error(`Invalid param-value: expanded vpath production must begin with "@"`);
+  }
+  return mintVPath(...value.slice(1));
+}
+
+export function validateVPath (element) {
+  const isVRId = (typeof element === "string") ? (element[1] === "$")
+      : Array.isArray(element) ? (element[1][0] === "$")
+      : undefined;
+  if (isVRId === undefined) {
+    throw new Error(`Invalid vpath: must be a string or Array with length > 1`);
+  }
+  return isVRId
+      ? validateVRId(element)
+      : validateVerbs(element);
+}
+
+export function validateVRId (element) {
+  const [firstEntry, vgrid, ...verbs] = expandVPath(element);
+  if (firstEntry !== "@") {
+    throw new Error(`Invalid vrid: expected "@" as first entry`);
+  }
+  validateVGRId(vgrid);
+  verbs.forEach(validateVerb);
+  return element;
+}
+
+export function validateVerbs (element) {
+  const [firstEntry, ...verbs] = expandVPath(element);
+  if (firstEntry !== "@") {
+    throw new Error(`Invalid verbs: expected "@" as first entry`);
+  }
+  verbs.forEach(validateVerb);
+  return element;
+}
+
+export function validateVGRId (element) {
+  const [firstEntry, formatTerm, paramValue, ...params] = expandVPath(element);
+  if (firstEntry !== "$") {
+    throw new Error(`Invalid vgrid: expected "$" as first entry`);
+  }
+  validateFormatTerm(formatTerm);
+  validateParamValueText(paramValue);
+  params.forEach(validateVParam);
+  return element;
+}
+
+export function validateFormatTerm (element) {
+  return validateContextTerm(element);
+}
+
+export function validateVerb (element) {
+  const [verbType, ...params] = expandVPath(element);
+  validateVerbType(verbType);
+  params.forEach(validateVParam);
+  return element;
+}
+
+export function validateVerbType (str) {
+  if (typeof str !== "string") throw new Error("Invalid verb-type: not a string");
+  if (!str.match(/[a-zA-Z0-9\-_.~!*'()]+/)) {
+    throw new Error(`Invalid verb-type: doesn't match rule${
+      ""} 1*(ALPHA / DIGIT / "-" / "_" / "." / "~" / "!" / "*" / "'" / "(" / ")")`);
+  }
+  return str;
+}
+
+export function validateVParam (element: any[]) {
+  const [firstEntry, contextTerm, paramValue] =
+      (typeof element !== "string") ? element : expandVPath(element);
+  if (firstEntry !== "$") {
+    throw new Error(`Invalid vparam: expected "$" as first entry`);
+  }
+  if (contextTerm !== undefined) {
+    if (typeof contextTerm !== "string") {
+      throw new Error(`Invalid vparam: context-term must be undefined or a string`);
+    }
+    if (contextTerm !== "") validateContextTerm(contextTerm);
+  }
+  if (paramValue !== undefined) {
+    if (typeof paramValue === "string") {
+      if (paramValue[0] === "@") validateVPath(paramValue);
+      else validateParamValueText(paramValue);
+    } else if (Array.isArray(paramValue)) {
+      validateVPath(paramValue);
+    } else {
+      throw new Error(`Invalid vparam:${
+        ""} param-value must be undefined, string or an array containing an expanded vpath`);
+    }
+  }
+  return element;
 }
 
 export function validateContextTerm (str) {
   if (typeof str !== "string") throw new Error("Invalid context-term: not a string");
+  if (!str.match(/[a-zA-Z][a-zA-Z0-9\-_.]*/)) {
+    throw new Error(`Invalid context-term: doesn't match rule${
+      ""} ALPHA [ 0*30unreserved-nt ( ALPHA / DIGIT ) ]`);
+  }
+  return str;
+}
+
+export function validateContextTermNS (str) {
+  if (typeof str !== "string") throw new Error("Invalid context-term-ns: not a string");
   if (!str.match(/[a-zA-Z]([a-zA-Z0-9\-_.]{0,30}[a-zA-Z0-9])?/)) {
     throw new Error(`Invalid context-term: doesn't match rule${
       ""} ALPHA [ 0*30unreserved-nt ( ALPHA / DIGIT ) ]`);
   }
+  return str;
 }
 
-export function validateVerbTypeTerm (str) {
-  if (typeof str !== "string") throw new Error("Invalid verb-type: not a string");
-  if (!str.match(/[a-zA-Z0-9\-_.~!*'()]+/)) {
-    throw new Error(`invalid verb-type: doesn't match rule${
-      ""} 1*(ALPHA / DIGIT / "-" / "_" / "." / "~" / "!" / "*" / "'" / "(" / ")")`);
-  }
-}
-
-export function validateVerbValue (str) {
-  if (typeof str !== "string") throw new Error("Invalid verb-value: not a string");
+export function validateParamValueText (str) {
+  if (typeof str !== "string") throw new Error("Invalid param-value: not a string");
   if (!str.match(/([a-zA-Z0-9\-_.~!*'()]|%[0-9a-fA-F]{2})+/)) {
-    throw new Error(`invalid verb-value: doesn't match rule${
+    throw new Error(`invalid param-value: doesn't match rule${
       ""} 1*("%" HEXDIG HEXDIG |${
       ""} ALPHA / DIGIT / "-" / "_" / "." / "~" / "!" / "*" / "'" / "(" / ")")`);
   }
+  return str;
 }
 
 /**
@@ -123,6 +226,11 @@ export function validateVerbValue (str) {
  * @returns
  */
 export function expandVPath (vpath) {
+  if (Array.isArray(vpath) && (vpath[0] === "@" || vpath[0] === "$" || !vpath[0].match(/[$:]/))) {
+    // already an expanded vpath element.
+    // Only re-expand possibly flattened sub-elements.
+    return vpath.map(e => ((typeof e === "string") ? e : expandVPath(e)));
+  }
   const vpathArray = [];
   for (const part of Array.isArray(vpath) ? vpath : [vpath]) {
     if (Array.isArray(part)) {
@@ -204,10 +312,10 @@ function _nestSegment (segment, initial = 1) {
     } else continue;
     const verbValue = nested[2];
     if (typeof verbValue === "string") {
-      validateVerbValue(verbValue);
+      validateParamValueText(verbValue);
       nested[2] = decodeURIComponent(verbValue);
     } else if (verbValue != null && (!Array.isArray(verbValue) || (verbValue[0] !== "@"))) {
-      throw new Error(`Invalid embedded verb-param:${
+      throw new Error(`Invalid expanded param-value:${
         ""} must be a vpath element array (ie. must have "@" as first entry)`);
     }
     segment.splice(i, 0, nested);

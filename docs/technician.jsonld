@@ -1359,7 +1359,7 @@
             "partitions"
           ]
         },
-        " utility layer, see below).\n\n        The static content includes HTTP landing pages, site routes and their\n        configurations, ValOS gateway and plugin runtimes and any other similar\n        statically configured files.\n\n        ",
+        " utility layer, see below).\n\n        The static content includes HTTP landing pages, site routes and their\n        configurations, ValOS gateway and spindle runtimes and any other similar\n        statically configured files.\n\n        ",
         {
           "vdoc:blockquote": true,
           "vdoc:content": [
@@ -1423,7 +1423,7 @@
           "dc:title": "ValOS core vs. auxiliary authorities",
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "ValOS authorities and any partition content they provide do\n        not need to be public. A ValOS core authority is an authority\n        which can be accessed using only ValOS core plugins (including\n        no plugins at all). A ValOS auxiliary authority is an authority\n        which requires a conforming but non-core ValOS gateway plugin\n        in order to be accessed. (Design Note 2019-03: the plugin\n        conformance requirements are unspecified. When they are\n        specified they must be lenient enough to enable sophisticated\n        protocols but constrained/sandboxed enough that gateway plugins\n        cannot interfere with other reasonably written plugins)."
+            "ValOS authorities and any partition content they provide do\n        not need to be public. A ValOS core authority is an authority\n        which can be accessed using only ValOS core spindles (including\n        no spindles at all). A ValOS auxiliary authority is an authority\n        which requires a conforming but non-core ValOS gateway spindle\n        in order to be accessed. (Design Note 2019-03: the spindle\n        conformance requirements are unspecified. When they are\n        specified they must be lenient enough to enable sophisticated\n        protocols but constrained/sandboxed enough that such spindles\n        cannot interfere with other reasonably written spindles)."
           ]
         }
       ]

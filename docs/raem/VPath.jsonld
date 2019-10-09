@@ -1,0 +1,1102 @@
+[
+  {
+    "@id": "https://valospace.org/raem/VPath",
+    "@context": {
+      "@base": "https://valospace.org/raem/VPath#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "vdoc": "https://valospace.org/vdoc#",
+      "vdoc:content": {
+        "@id": "https://valospace.org/vdoc#content",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/vdoc#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:headers": {
+        "@id": "https://valospace.org/vdoc#headers",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:cell": {
+        "@id": "https://valospace.org/vdoc#cell",
+        "@container": "@list",
+        "@type": "@id"
+      }
+    },
+    "dc:title": "ValOS Path",
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "VPath"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "ValOS Paths ('VPaths') identify paths between valospace resources.\nVrids (a subset of VPaths) identify valospace resources.",
+        null,
+        "These VRIds are also affiliated with ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "ValOS event logs"
+          ],
+          "vdoc:ref": "@valos/sourcerer/valos-event-log"
+        },
+        " which define their internal path semantics further.",
+        null,
+        "VPaths are strings with restricted grammar so that they can be embedded\ninto various URI component and list formats without additional encoding."
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "This document is part of the library workspace ",
+        {
+          "@type": "revdoc:Package",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "@valos/raem"
+              ]
+            }
+          ],
+          "vdoc:ref": "@valos/raem"
+        },
+        " but is `NOT SUPPORTED NOR IMPLEMENTED` by it yet in any manner."
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "dc:title": "VPath with a vgrid is a resource identifier: a VRId",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "VPaths serve two notably different purposes, both as paths and as\nresource identifiers. A VPath which has a global valospace resource\nidentifier (or 'vgrid') as its first segment is a valospace resource\nidentifier (or *VRId*).",
+        null,
+        "",
+        {
+          "@type": "revdoc:ABNF",
+          "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+          "vdoc:content": [
+            "  vpath         = \"@\" vgrid-tail / verbs-tail\n  vgrid-tail    = vgrid \"@\" [ verbs-tail ]\n  verbs-tail     = verb \"@\" [ verbs-tail ]\n  verb          = verb-type params\n"
+          ]
+        },
+        "",
+        null,
+        "Many valospace resources, so called *structural sub-resources* are\nidentified by a fixed path from the global resource defined by the same\nverbs that define non-VRId VPaths. Thus while paths and identifiers are\nsuperficially different it is useful to represent them both using the\nsame VPath verb structure.",
+        null,
+        "Both verb and vgrid params can also have context term references to\nan external lookup of URI prefixes and semantic definitions."
+      ]
+    },
+    "section_equivalence": {
+      "@id": "section_equivalence",
+      "dc:title": "VPath equivalence follows URN equivalence",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Two VPaths identify the same path and in case they're VRIds, refer to\nthe same resource iff their URN representations are ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "urn-equivalent"
+          ],
+          "vdoc:ref": "https://tools.ietf.org/html/rfc8141#section-3"
+        },
+        ". In other words two VPath are equivalent if and only if they are\nlexically equivalent after case normalization of any percent-encoded\ncharacters.",
+        null,
+        "For the general case the actual semantics of a VPath and specifically\nof its context-term's depends on the context it is used. Vrids have a\nfixed context which is established by the vgrid. This has some\nimplications:",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "read more about the VRId equivalence"
+          ],
+          "vdoc:ref": "@valos/raem/VPath#section_vrid_equivalence"
+        },
+        "."
+      ]
+    },
+    "section_verb": {
+      "@id": "section_verb",
+      "dc:title": "*verb* - a step from a source resource to target resource(s)",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "A verb is a one-to-maybe-many relationship between resources. A verb\ncan be as simple as a trivial predicate of atriple or it can represent\nsomething as complex as a fully parameterized computation or a function\ncall.\n\nA verb is made up of type and a parameter list, with each parameter\ncarrying an optional context-term in addition to their value.\n",
+        {
+          "@type": "revdoc:ABNF",
+          "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+          "vdoc:content": [
+            "  verbs-tail     = verb \"@\" [ verbs-tail ]\n  verb          = verb-type params\n  verb-type     = 1*unencoded\n\n  params        = context-tail / value-tail\n  context-tail  = \"$\" [ context-term ] [ \":\" param-value [ params ] / context-tail ]\n  value-tail    = \":\" param-value [ params ]\n\n  context-term  = ALPHA *unreserved-nt\n  param-value   = vpath / 1*( unencoded / pct-encoded )\n"
+          ]
+        },
+        "\n\nNote that while the grammar of verb-type and context-term are\nstill relatively restricted, *param-value* both allows for fully\nunencoded nesting of vpath's as well as allows encoding of all unicode\ncharacters in percent encoded form (as per encodeURIComponent).",
+        {
+          "@id": "section_verb_type"
+        },
+        {
+          "@id": "section_verb_context_term"
+        },
+        {
+          "@id": "section_param_value"
+        }
+      ]
+    },
+    "section_verb_type": {
+      "@id": "section_verb_type",
+      "dc:title": "*verb-type*",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\n*verb-type* specifies the relationship category between the segment\nhost resource and sub-resource, a set of inferred triples as well as\nother possible constraints.",
+        {
+          "@id": "section_verb_property"
+        },
+        {
+          "@id": "section_verb_sequence"
+        },
+        {
+          "@id": "section_verb_content"
+        },
+        {
+          "@id": "section_verb_container"
+        },
+        {
+          "@id": "section_verb_object"
+        },
+        {
+          "@id": "section_verb_ghost"
+        },
+        {
+          "@id": "section_verb_subspace"
+        },
+        {
+          "@id": "section_verb_computation"
+        }
+      ]
+    },
+    "section_verb_property": {
+      "@id": "section_verb_property",
+      "dc:title": "verb type \"`.`\": property or ScopeProperty selector",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Verb for selecting the resource (typically a ScopeProperty) with the\ngiven name and which has the head as its scope.",
+        null,
+        "e.g. triple pattern `?s <urn:valos:.:myProp> ?o` matches like:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  ?o    valos:scope ?s\n      ; valos:name \"myProp\"\n"
+          ]
+        },
+        "\nMnemonic: '.' to access a property (ie. ScopeProperty)."
+      ]
+    },
+    "section_verb_sequence": {
+      "@id": "section_verb_sequence",
+      "dc:title": "verb type \"`*`\": sequence or Relation selector",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Verb for selecting all resources (typically Relations) with the given\nname and which have the head as their source.",
+        null,
+        "e.g. triple pattern `?s <urn:valos:*:PERMISSIONS> ?o` matches like:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  ?o    valos:source ?s\n      ; valos:name \"PERMISSIONS\"\n"
+          ]
+        },
+        "\nMnemonic: '*' to access many things (only Relations are many with the same name)."
+      ]
+    },
+    "section_verb_content": {
+      "@id": "section_verb_content",
+      "dc:title": "verb type \"`'`\": content or Media selector",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Verb for selecting the Media with the given name which has the\nhead as their folder.",
+        null,
+        "e.g. triple pattern `?s <urn:valos:':foo.vs> ?o` matches like:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  ?o    valos:folder ?s\n      ; valos:name \"foo.vs\"\n"
+          ]
+        },
+        "\nMnemonic: \"'\" for quoted content (Media has content)."
+      ]
+    },
+    "section_verb_container": {
+      "@id": "section_verb_container",
+      "dc:title": "verb type \"`+`\": container or Entity selector",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Verb for selecting the resource (typically an Entity) with the given\nname and which has the head as their container.",
+        null,
+        "e.g. triple pattern `?s <urn:valos:+:Scripts> ?o` matches like:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  ?o    valos:parent ?s\n      ; valos:name \"Scripts\"\n"
+          ]
+        },
+        "\nMnemonic: click symbol '+' to expand container (Entity contains things)."
+      ]
+    },
+    "section_verb_object": {
+      "@id": "section_verb_object",
+      "dc:title": "verb type \"`-`\": object or target selector",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Verb that is a synonym for predicate 'rdf:object'.",
+        null,
+        "e.g. triple pattern `?s <urn:valos:-> ?o` matches like:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  ?s    rdf:object ?o\n"
+          ]
+        },
+        "\nMnemonic: follow line '-' to target."
+      ]
+    },
+    "section_verb_ghost": {
+      "@id": "section_verb_ghost",
+      "dc:title": "verb type \"`~`\": ghost selector",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Verb for selecting a ghost of the given resource from within the path\nhead as host.",
+        null,
+        "e.g. triple pattern `?s <urn:valos:~$iu4:ba54> ?o` matches like:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  ?o    valos:ghostHost ?s\n      ; valos:ghostPrototype <urn:valos:$iu4:ba54>\n"
+          ]
+        }
+      ]
+    },
+    "section_verb_subspace": {
+      "@id": "section_verb_subspace",
+      "dc:title": "verb type \"`_`\": subspace selector",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Verb for selecting a subspace variant.",
+        null,
+        "e.g. triple pattern `?s <urn:valos:@.:myProp@_$lang:fi@> ?o` matches\nlike:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  ?_sp  valos:scope ?s\n      ; valos:name \"myProp\"\n  . ?o  valos:subspacePrototype* ?_sp\n      ; valos:language \"fi\"\n"
+          ]
+        }
+      ]
+    },
+    "section_verb_computation": {
+      "@id": "section_verb_computation",
+      "dc:title": "verb type \"`!`\": computation selector",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Verb representing the result of a computation.",
+        null,
+        "e.g. triple pattern `?s <urn:valos:@!$valk:plus$number:10:@!:myVal@@> ?o`\nmatches like:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  ?_:0  valos:scope ?s\n      ; valos:name \"myVal\"\n      ; valos:value ?myVal\n  . FILTER (?o === 10 + ?myVal)\n"
+          ]
+        },
+        {
+          "vdoc:blockquote": true,
+          "vdoc:content": [
+            "Editorial Note: this section should be greatly improved.\nThe purpose of computation verbs lies more on representing various\nconversions (as part of dynamic operations such as rest API route\nmapping) and less on clever SPARQL trickery. The illustration here uses\n(questionable) SPARQL primarily for consistency."
+          ]
+        }
+      ]
+    },
+    "section_verb_context_term": {
+      "@id": "section_verb_context_term",
+      "dc:title": " 'context-term' is a lookup to definitions provided by the context",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\nA verb (and vgrid via its format-term) can be contextual via the\ncontext-term's of its params. The context where the verb is used\ndefines the exact meaning of these terms. The meaning for context-terms\nis recommended to be uniform across domains where possible. A verb is\ninvalid in contexts which don't have a definition for its context-term.\nThis gives different contexts a fine-grained mechanism for defining the\nvocabularies that are available.\n\nIdiomatic example of such context is the event log and its JSON-LD\ncontext structure which is to define both URI namespace prefixes as\nwell as available semantics."
+      ]
+    },
+    "section_param_value": {
+      "@id": "section_param_value",
+      "dc:title": "'param-value' specifies vgrid and verb payload",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\n*params* is a sequence of param-value's, optionally prefixed with\n\"$\" and a context-term. The idiomatic param-value is a string. If\npresent a context-term usually denotes a URI prefix in which case the\nparam-value is a URI reference. However contexts are free to provide\nspecific semantics for specific context-terms, such as interpreting\nthem as the value type of the param-value etc."
+      ]
+    },
+    "section_vrid": {
+      "@id": "section_vrid",
+      "dc:title": "VRId is a stable identifier of a global resource or a structural sub-resource",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "A VRId is a vpath which has vgrid as its first production (via\nvgrid-tail).\n",
+        {
+          "@type": "revdoc:ABNF",
+          "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+          "vdoc:content": [
+            "  vpath         = \"@\" vgrid-tail / verbs-tail\n  vgrid-tail    = vgrid \"@\" [ verbs-tail ]\n  vgrid         = \"$\" format-term \":\" param-value [ params ]\n"
+          ]
+        },
+        "\n\nThe VRId can be directly used as the NSS part of an 'urn:valos:'\nprefixed URI.\n\nEach valospace resource is identified by a VRId.\n\nIf a resource VRId has only vgrid part but no verbs the resource is\ncalled a global resource.\n\nIf a resource VRId has verbs then the verbs describe a structural path\nfrom the global resource of its initial vgrid part to the resource\nitself. The resource is called a *structural sub-resource* of that\nglobal resource.\n\nEach resource is affiliated with an event log of its global resource.\n\nAll direct VRId context-terms are references to this event log ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "JSON-LD context"
+          ],
+          "vdoc:ref": "https://w3c.github.io/json-ld-syntax/#the-context"
+        },
+        ".",
+        {
+          "@id": "section_vgrid"
+        },
+        {
+          "@id": "section_vrid_event_log"
+        },
+        {
+          "@id": "section_vrid_equivalence"
+        },
+        {
+          "@id": "section_structural_sub_resources"
+        },
+        {
+          "@id": "section_vgrid_types"
+        },
+        {
+          "@id": "section_vrid_verb_types"
+        }
+      ]
+    },
+    "section_vgrid": {
+      "@id": "section_vgrid",
+      "dc:title": "vgrid identifies global resources - primary keys, free ownership, concrete state",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "The vgrid uniquely identifies a *global resource*. If a VRId contains\na vgrid and no verbs this global resource is also the\n*referenced resource* of the VRId itself.",
+        null,
+        "",
+        {
+          "@type": "revdoc:ABNF",
+          "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+          "vdoc:content": [
+            "  vgrid         = \"$\" format-term \":\" param-value [ params ]\n  format-term   = context-term\n\n  params        = context-tail / value-tail\n  context-tail  = \"$\" [ context-term ] [ \":\" param-value [ params ] / context-tail ]\n  value-tail    = \":\" param-value [ params ]\n\n  context-term  = ALPHA *unreserved-nt\n  param-value   = vpath / 1*( unencoded / pct-encoded )\n"
+          ]
+        },
+        "",
+        null,
+        "The format-term defines the global resource identifier schema as well\nas often some (or all) characteristics of the resource.",
+        null,
+        "Some vgrid types restrict the param-value further, with only \"$\" in\naddition to *unreserved*  as specified in the ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "URI specification"
+          ],
+          "vdoc:ref": "https://tools.ietf.org/html/rfc3986"
+        },
+        ").\n",
+        {
+          "vdoc:blockquote": true,
+          "vdoc:content": [
+            "Note: when using base64 encoded values as vgrid\n  param-value, use the url-and-filename-ready",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "base64url characters"
+              ],
+              "vdoc:ref": "https://tools.ietf.org/html/rfc4648#section-5"
+            },
+            "."
+          ]
+        }
+      ]
+    },
+    "section_vrid_event_log": {
+      "@id": "section_vrid_event_log",
+      "dc:title": "VRId is affiliated with an event log",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "The resource identified by a VRId is always affiliated with an event\nlog of its global resource. Because the VRId doesn't contain the\nlocator information of this event log it must be discoverable from the\ncontext where the VRId is used.",
+        null,
+        "All context-terms of the VGRId and VRId verb params are references to\nthe event log ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "JSON-LD context"
+          ],
+          "vdoc:ref": "https://w3c.github.io/json-ld-syntax/#the-context"
+        },
+        " (this applies only to immediate but not to nested VPath params).",
+        null,
+        "Global resources can be transferred between event logs. To maintain\nimmutability across these transfers VGRId's must not contain partition\nor other non-identifying locator information. Similar to URN's VRId's\nalways relies external structures and systems for carrying locator\ninformation.\n",
+        {
+          "vdoc:blockquote": true,
+          "vdoc:content": [
+            "Note: uuid v4 (format term `iu4`) is recommended for\n  now, but eventually VGRId generation will be tied to the\n  deterministic event id chain (format term `icc`).\n  This in turn should be seeded by some ValOS authority.\n"
+          ]
+        }
+      ]
+    },
+    "section_vrid_equivalence": {
+      "@id": "section_vrid_equivalence",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Two VRIds refer to the same resource iff their URN representations are ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "urn-equivalent"
+          ],
+          "vdoc:ref": "https://tools.ietf.org/html/rfc8141#section-3"
+        },
+        "(i.e. if the two VRIds are equivalent after section 3.1. case\nnormalization for step 3. percent-encoding case normalization).",
+        null,
+        "Maintaining the consistency between this lexical equivalence and the\nsemantic equivalence of a resource which has been transferred between\nevent logs without having to dereference VRIds is useful but has\nimplications.\n",
+        {
+          "vdoc:blockquote": true,
+          "vdoc:content": [
+            "Rule: When resources are transferred between event logs\n  the semantics of their context terms and body-parts must remain\n  equivalent."
+          ]
+        },
+        "",
+        null,
+        "A *simple equivalence* is that two simple prefix term definitions\nresolve to the same URI. An *extended equivalence* is when two extended\nterm definitions in the source and target event logs are equivalent\nafter normalization. These two equivalences are [will be] defined by\nthis document.",
+        null,
+        "More complex equivalences are outside the scope of this document but\ncan be defined by specifications specifying segment types. These\nequivalences might take details of the particular verb-type into\naccount and/or specify context definition additions which do not change\nthe equivalence semantics."
+      ]
+    },
+    "section_structural_sub_resources": {
+      "@id": "section_structural_sub_resources",
+      "dc:title": "VRId verbs identify structural sub-resources - fixed ownership, inferred state, 'secondary keys'",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "In VRId context the verbs-tail that follows the VGRId specifies\na structural path from the global resource to a\n*structural sub-resource* of the global resource. The triple\nconstraints of each verb in that path are _inferred as triples_ for the\nparticular resource that that verb affects.\n\n",
+        {
+          "vdoc:blockquote": true,
+          "vdoc:content": [
+            "Principle: a structured sub-resource using a particular\nverbs-tail in its identifying VRId will always infer the triples that\nare required to satisfy the same verbs-tail in a query context which\nstarts from the same global resource."
+          ]
+        },
+        "\n\nThis fixed triple inference is the meat and bones of the structural\nsub-resources: they allow for protected, constrained semantics to be\nexpressed in the valospace resources. This allows both simplified\nsemantics (eg. properties _cannot_ be renamed so the complex\nfunctionality doesn't need to be supported on fabric level), more\nprincipled mechanism for partition crypto behaviours (permission\nrelations are structural sub-resources which simplifies security\nanalysis but retains valospace convenience) and also a mechanism for\nexpressing non-trivial resources such as hypertwin resources.\n\nThe sub-resources can be nested and form a tree with the global\nresource as the root. Typical verb sub-segments specify the edges in\nthis tree (some verbs only specify the current node resource further\nwithout specifying a new edge). The global resource is the host\nresource for the first verb; the sub-resource of that segment is the\nhost resource of the second verb and so on.\n\nAs the VRId identities of the sub-resources are structurally fixed to\nthis tree the coupling between host and sub-resource must be static.\nThe typical implementation for this is an ownership coupling."
+      ]
+    },
+    "section_vgrid_types": {
+      "@id": "section_vgrid_types",
+      "dc:title": "List of VGRId formats:",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\nVGRId context-term specifies the particular identifier format and\npossible semantics of the identified global resource. ValOS kernel\nreserves all context-terms matching '\"i\" 2( ALPHA / DIGIT )' for\nitself with currently defined formats exhaustively listed here.\n      ",
+        {
+          "@id": "section_vgrid_iu4"
+        },
+        {
+          "@id": "section_vgrid_ibv"
+        },
+        {
+          "@id": "section_vgrid_ipw"
+        },
+        {
+          "@id": "section_vgrid_ice"
+        },
+        {
+          "@id": "section_vgrid_igh"
+        }
+      ]
+    },
+    "section_vgrid_iu4": {
+      "@id": "section_vgrid_iu4",
+      "dc:title": "VGRId format \"`iu4`\": Uuid v4 of a native, insecure resource",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\nAn identifier for native valospace resource with an event log.\nThis is insecure as there are no guarantees against resource id\ncollisions by malicious event logs. These identifiers can thus only be\nused in trusted, protected environments.\n      "
+      ]
+    },
+    "section_vgrid_ibv": {
+      "@id": "section_vgrid_ibv",
+      "dc:title": "VGRId format \"`ibv`\": The content hash of Binary ValOS object",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\nAn identifier of an immutable octet-stream, with the content hash in\nthe param-value.\n      "
+      ]
+    },
+    "section_vgrid_ipw": {
+      "@id": "section_vgrid_ipw",
+      "dc:title": "VGRId format \"`ipw`\": The id of an immutable Platonic resource With inferences",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\nAn identifier of an immutable, procedurally generated resource with its\ncontent inferred from the vpath embedded in the param-value.\nWhile of limited use in itself this is useful when used as the\nprototype of structural ghost sub-resources which are quite mutable.\n      "
+      ]
+    },
+    "section_vgrid_ice": {
+      "@id": "section_vgrid_ice",
+      "dc:title": "VGRId format \"`ice`\": The id of Crypto-Event-log-coupled secure resource",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\nAn identifier of a native, secure valospace resource with an event log.\nThis id is deterministically derived from the most recent hash-chain\nevent log entry of the particular event which created it, the\ncryptographic secret of the creating identity and a salt, thus ensuring\ncollision resistance and a mechanism for creator to prove their claim\nto the resource.\n      "
+      ]
+    },
+    "section_vgrid_igh": {
+      "@id": "section_vgrid_igh",
+      "dc:title": "VGRId format \"`igh`\": The derived Hash id of a native, insecure Ghost resource",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\nThis is a legacy format for native ghost resources, with id created\nfrom the hash of the 'ghost path' of the resource.\n      "
+      ]
+    },
+    "section_vrid_verb_types": {
+      "@id": "section_vrid_verb_types",
+      "dc:title": "List of VRId-specific verb type semantics:",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\nVRId *verb-type* specifies the relationship category between the\nsegment host resource and sub-resource, a set of inferred triples as\nwell as other possible constraints.\n\nThe examples below all share the following example data:",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:$iu4:f00b> a valos:Entity\n      ; valos:prototype <urn:valos:$iu4:f00b-b507-0763>\n"
+          ]
+        },
+        {
+          "@id": "section_structured_ghost"
+        },
+        {
+          "@id": "section_structured_subspace"
+        },
+        {
+          "@id": "section_structured_scope_property"
+        },
+        {
+          "@id": "section_structured_relation"
+        },
+        {
+          "@id": "section_structured_media"
+        },
+        {
+          "@id": "section_structured_entity"
+        },
+        {
+          "@id": "section_structured_object_value"
+        }
+      ]
+    },
+    "section_structured_ghost": {
+      "@id": "section_structured_ghost",
+      "dc:title": "verb type \"`~`\": ghost sub-resource",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Ghost sub-resources are products of ghost instantiation. All the ghosts\nof the directly _and indirectly_ owned resources of the instance\nprototype are flattened as _direct_ structural sub-resources of the\ninstance itself. The instance is called *ghost host* of all such ghosts.",
+        null,
+        "e.g. `<urn:valos:@$iu4:f00b@~$iu4:ba54@>` reads as \"inside the\ninstance resource `f00b` the ghost of the $iu4 resource `ba54`\"\nand infers triples:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:@$iu4:f00b@~$iu4:ba54@>\n        valos:ghostHost <urn:valos:$iu4:f00b>\n      ; valos:ghostPrototype <urn:valos:$iu4:ba54>\n"
+          ]
+        },
+        "\nIn case of deeper instantiation chains the outermost ghost segment\nprovides inferences recursively to all of its sub-resources; nested\nghost segments wont provide any further inferences.",
+        null,
+        "e.g. `<urn:valos:@$iu4:f00b@~$iu4:ba54@~$iu4:b7e4@>` reads as \"inside\nthe instance resource `f00b` the ghost of\n`<urn:valos:@$iu4:ba54@~$iu4:b7e4@>`\" and infers triples:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:@$iu4:f00b@~$iu4:ba54@~$iu4:b7e4@>\n        valos:ghostHost <urn:valos:$iu4:f00b>\n      ; valos:ghostPrototype <urn:valos:@$iu4:ba54@~$iu4:b7e4@>\n"
+          ]
+        }
+      ]
+    },
+    "section_structured_subspace": {
+      "@id": "section_structured_subspace",
+      "dc:title": "verb type \"`_`\": subspace override",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Selects a variant resource value for a base resource within a\nstructurally identified subspace. The variant resource provides\ninferred `subspacePrototype` fallbacks to an *inner* subspace and\neventually to the non-variant base resource as well as to the\nhomologous sub-resource of the host resource inheritancePrototype.\nThis means that no matter where a subspace variant is defined in\nthe prototype chain or in the nested sub-structure its value will be\nfound.",
+        null,
+        "e.g. `<urn:valos:@$iu4:f00b@.:myProp@_$lang:fi@>` is a lang fi\nvariant of f00b myProp and infers triples:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:@$iu4:f00b@.:myProp@_$lang:fi@> a valos:ScopeProperty\n      ; valos:subspacePrototype <urn:valos:@$iu4:f00b@.:myProp@>\n                              , <urn:valos:@$iu4:f00b-b507-0763@.:myProp@_$lang:fi@>\n      ; valos:language \"fi\"\n"
+          ]
+        },
+        "",
+        null,
+        "Subspace selectors can be used to access language variants,\nstatically identified ghost variants within an instance, statically\nidentified Relation's etc.",
+        null,
+        "The verb segment-term can also specify triple inferences for *all*\nsub-resources in the subspace (not just for the immediate\nsub-resource of the selector segment).",
+        null,
+        "e.g. `<urn:valos:@$iu4:f00b@~$iu4:b453@_$lang:fi@~$iu4:b74e@.:myProp@>`\ninfers triples:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:@$iu4:f00b@~$iu4:b453@_$lang:fi@~$iu4:b74e@.:myProp@> a valos:ScopeProperty\n      ; valos:ghostHost <urn:valos:$iu4:f00b>\n      ; valos:ghostPrototype <urn:valos:@$iu4:b453@_$lang:fi@~$iu4:b74e@.:myProp@>\n      ; valos:subspacePrototype <urn:valos:@$iu4:f00b@~$iu4:b453@~$iu4:b74e@_$lang:fi@.:myProp@>\n      ; valos:language \"fi\"\n"
+          ]
+        }
+      ]
+    },
+    "section_structured_scope_property": {
+      "@id": "section_structured_scope_property",
+      "dc:title": "verb type \"`.`\": structural ScopeProperty",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "e.g. `<urn:valos:@$iu4:f00b@.:myProp@>` is a resource with fixed\nname \"myProp\", dominant type ScopeProperty, $iu4 resource f00b as the\nowning scope and a structurally homologous prototype inside\nf00b-b507-0763 and thus infers triples:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:@$iu4:f00b@.:myProp@> a valos:ScopeProperty\n      ; valos:scope <urn:valos:$iu4:f00b>\n      ; valos:inheritancePrototype <urn:valos:@$iu4:f00b-b507-0763@.:myProp@>\n      ; valos:name \"myProp\"\n"
+          ]
+        }
+      ]
+    },
+    "section_structured_relation": {
+      "@id": "section_structured_relation",
+      "dc:title": "verb type \"`*`\": structural Relation",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "e.g. `<urn:valos:@$iu4:f00b@*:PERMISSIONS@_:1@>` is a resource with\nfixed name \"PERMISSIONS\", dominant type Relation, iu4 f00b as the\nsource, a structurally homologous prototype inside f00b-b507-0763\nand thus infers triples:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:@$iu4:f00b@*:PERMISSIONS@> a valos:Relation\n      ; valos:connectorSource <urn:valos:$iu4:f00b>\n      ; valos:inheritancePrototype <urn:valos:@$iu4:f00b-b507-0763@*:PERMISSIONS@>\n      ; valos:name \"PERMISSIONS\"\n  <urn:valos:@$iu4:f00b@*:PERMISSIONS@_:1@> a valos:Relation\n      ; valos:subspacePrototype <urn:valos:@$iu4:f00b@*:PERMISSIONS@>\n                              , <urn:valos:@$iu4:f00b-b507-0763@*:PERMISSIONS@_:1@>\n"
+          ]
+        }
+      ]
+    },
+    "section_structured_media": {
+      "@id": "section_structured_media",
+      "dc:title": "verb type \"`'`\": structural Media",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "e.g. `<urn:valos:@$iu4:f00b@':foo.vs@>` is a media with fixed\nname \"foo.vs\", dominant type Media, $iu4 resource f00b as the\nowning folder and a structurally homologous prototype inside\nf00b-b507-0763 and thus infers triples:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:@$iu4:f00b@':foo.vs@> a valos:Media\n      ; valos:folder <urn:valos:$iu4:f00b>\n      ; valos:inheritancePrototype <urn:valos:@$iu4:f00b-b507-0763@':foo.vs@>\n      ; valos:name \"foo.vs\"\n"
+          ]
+        }
+      ]
+    },
+    "section_structured_entity": {
+      "@id": "section_structured_entity",
+      "dc:title": "verb type \"`+`\": structural Entity",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "e.g. `<urn:valos:@$iu4:f00b@+:scripts@>` is an entity with fixed\nname \"scripts\", dominant type Entity, $iu4 resource f00b as the\nowning container and a structurally homologous prototype inside\nf00b-b507-0763 and thus infers triples:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:@$iu4:f00b@+:scripts@> a valos:Entity\n      ; valos:parent <urn:valos:$iu4:f00b>\n      ; valos:inheritancePrototype <urn:valos:@$iu4:f00b-b507-0763@+:scripts@>\n      ; valos:name \"scripts\"\n"
+          ]
+        }
+      ]
+    },
+    "section_structured_object_value": {
+      "@id": "section_structured_object_value",
+      "dc:title": "verb type  \"`-`\" - fixed rdf:object value",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Extends the preceding verb-param with a fixed rdf:object triple.\nThe actual rdf:object sub-property depends on the dominant type of\nthe verb-param: `valos:value` for ScopeProperty, `valos:target`\nfor Relation, `valos:content` for Media, etc.",
+        null,
+        "e.g. `<urn:valos:@$iu4:f00b@*:PERMISSIONS:@-$ihi:8766@@>` is a\nPERMISSIONS relation with fixed ihi target 8766 and infers triples:\n",
+        {
+          "@type": "revdoc:Turtle",
+          "vdoc:language": "https://www.w3.org/TR/turtle/",
+          "vdoc:content": [
+            "\n  <urn:valos:@$iu4:f00b@*:PERMISSIONS:@-$ihi:8766@@> a valos:Relation\n      ; valos:connectorSource <urn:valos:$iu4:f00b>\n      ; valos:prototype <urn:valos:@$iu4:f00b-b507-0763@*:PERMISSIONS:@-$ihi:8766@@>\n      ; valos:name \"PERMISSIONS\"\n      ; valos:target <urn:valos:$iu4:8766-src>\n"
+          ]
+        }
+      ]
+    },
+    "section_grammar": {
+      "@id": "section_grammar",
+      "dc:title": "Collected VPath ABNF grammar",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "The VPath grammar is an LL(1) grammar. It is recursive as param-value\nproductions can contain nested vpaths without additional encoding.\n\nThe list of definitive rules:\n",
+        {
+          "@type": "revdoc:ABNF",
+          "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+          "vdoc:content": [
+            "  vpath         = \"@\" vgrid-tail / verbs-tail\n\n  vgrid-tail    = vgrid \"@\" [ verbs-tail ]\n  vgrid         = \"$\" format-term \":\" param-value [ params ]\n  format-term   = context-term\n\n  verbs-tail     = verb \"@\" [ verbs-tail ]\n  verb          = verb-type params\n  verb-type     = 1*unencoded\n\n  params        = context-tail / value-tail\n  context-tail  = \"$\" [ context-term ] [ \":\" param-value [ params ] / context-tail ]\n  value-tail    = \":\" param-value [ params ]\n\n  context-term  = ALPHA *unreserved-nt\n  param-value   = vpath / 1*( unencoded / pct-encoded )\n\n  unencoded     = unreserved / \"!\" / \"*\" / \"'\" / \"(\" / \")\"\n  unreserved    = unreserved-nt / \"~\"\n  unreserved-nt = ALPHA / DIGIT / \"-\" / \"_\" / \".\"\n  pct-encoded   = \"%\" HEXDIG HEXDIG"
+          ]
+        },
+        "\n\nIn addition there are pseudo-rules which are not used by an LL(1)\nparser but which have well-defined meaning and can thus be referred to\nfrom other documents.\n\nThe list of informative pseudo-rules:\n",
+        {
+          "@type": "revdoc:ABNF",
+          "vdoc:language": "https://tools.ietf.org/html/rfc5234",
+          "vdoc:content": [
+            "  vrid            = \"@\" vgrid-tail\n  verbs          = \"@\" verbs-tail\n  vparam          = [ \"$\" [ context-term ] ] [ \":\" param-value ]\n  context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )\n"
+          ]
+        },
+        "\n\nThere are couple notes not explicitly expressed by the the grammar\nitself. These notes primarily relate to LL(1)-parseability:",
+        {
+          "@type": "vdoc:BulletList",
+          "vdoc:entries": [
+            [
+              "Pseudo-rule 'vrid': this class contains all 'vpath' productions with\n  'vgrid' as their first expansion."
+            ],
+            [
+              "Pseudo-rule 'vparam': this class contains all 'context-tail' and\n  'value-tail' expansions while excluding their '[ params ]' and\n  'context-tail' right recursive expansions."
+            ],
+            [
+              "Also note how 'params' rule is right recursive. This is to ensure\n  that the string \"$foo:bar\" will be properly LL(1)-parsed as a\n  singular 'context-tail' with 'param-value', instead of a\n  'context-tail' (without 'param-value') that is followed by\n  'value-tail'.\n  To represent a 'context-tail' (without 'param-value') that is\n  followed by a 'value-tail' an empty context must be added:\n  \"$foo$:bar\". To represent an empty param an empty \"$\" can be\n  inserted: \"$$foo:bar\" and as a consequence if the following param of\n  an empty param has no context it must also prepended with \"$\" like\n  so: \"$$:bar\"."
+            ],
+            [
+              "Pseudo-rule 'context-term-ns': this class contains all 'context-term'\n  expansions which match this more restrictive specification (max 32\n  chars, special chars only in the middle). All 'context-term's which\n  are plain namespace prefixes should be restricted to this rule as\n  this is the prefix grammar of some relevant prefix context.\n  ",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  "Editorial Note: which context was this again? Neither\n    SPARQL, Turtle nor JSON-LD have this limitation."
+                ]
+              }
+            ],
+            [
+              "The nesting hierarchy can be manually quickly established by first\n  splitting a valid vpath string by the delimiter regex /(@$:)/\n  (retaining these delimiters in the result). Then a tree structure is\n  formed by traversing the array from left to right and dividing it to\n  different nesting depths. The nesting depth is increased for the\n  initial \"@\" and for each \"@\" that is preceded by a \":\" (corresponds\n  to the 'vpath' production prefix of some 'short-param' production)\n  and reducing the nesting depth for each \"@\" that is succeeded by a\n  \"$\", \":\", \"@\" or EOF (corresponds to the terminator of the last\n  'vgrid' or 'verb' production of some 'vpath' production). All\n  remaining \"@\" correspond to non-final 'vgrid' or 'verb' production\n  terminators of some 'vpath' rule production and thus don't change the\n  nesting depth."
+            ]
+          ]
+        }
+      ]
+    },
+    "section_encoding_considerations": {
+      "@id": "section_encoding_considerations",
+      "dc:title": "VPath design considerations and case studies",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\nThis section contains considerations on the choice of character set and\non where and how VPaths need or don't need to be encoded. There's a\nhistorical emphasis on the decision of which characters to use as\ndelimiters (ie. \"@\", \":\" and \"$\").",
+        {
+          "@id": "section_robust_composition"
+        },
+        {
+          "@id": "section_unencoded_contexts"
+        },
+        {
+          "@id": "section_encoded_contexts"
+        },
+        {
+          "@id": "section_tilde_problem"
+        }
+      ]
+    },
+    "section_robust_composition": {
+      "@id": "section_robust_composition",
+      "dc:title": "VPath composition and decomposition should be robust",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@id": "section_no_contextual_delimiters"
+        },
+        {
+          "@id": "section_consistent_encoding"
+        }
+      ]
+    },
+    "section_no_contextual_delimiters": {
+      "@id": "section_no_contextual_delimiters",
+      "dc:title": "No contextual delimiters",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "If a character is a delimiter in some context within a VPath then this\ncharacter must always encoded when not used as a delimiter."
+      ]
+    },
+    "section_consistent_encoding": {
+      "@id": "section_consistent_encoding",
+      "dc:title": "All value segments are encoded and decoded using encodeURIComponent",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Characters not encoded are ruled out from structural delimiters.\nThis leaves \"?\" | \"#\" and \"/\" | \":\" | \"@\" and \"$\" | \"+\" | \";\" | \",\" | \"=\" | \"&\""
+      ]
+    },
+    "section_unencoded_contexts": {
+      "@id": "section_unencoded_contexts",
+      "dc:title": "Contexts where VPath doesn't need encoding",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "\nIn general VPaths don't require encoding in contexts where the VPath\ndelimiters \"@\" / \":\" / \"$\" and the encodeURIComponent result character\nset ALPHA / DIGIT / \"-\" / \"_\" / \".\" / \"~\" / \"!\" / \"*\" / \"'\" / \"(\" / \")\"\ncan be used.\n",
+        {
+          "vdoc:blockquote": true,
+          "vdoc:content": [
+            "Editorial Note: \"(\" and \")\" can in principle be\n  substantially inconvenient in many contexts. But as they're grouped\n  with \"!\" / \"*\" / \"'\" which have their uses in verb-type's all\n  five are for now retained as allowed characters."
+          ]
+        },
+        {
+          "@id": "section_unencoded_in_rfc_3986_segment_nz"
+        },
+        {
+          "@id": "section_unencoded_in_sequences"
+        },
+        {
+          "@id": "section_unencoded_in_rfc_3986_query"
+        },
+        {
+          "@id": "section_unencoded_in_rfc_3986_fragment"
+        },
+        {
+          "@id": "section_unencoded_in_rfc_8141_nss"
+        },
+        {
+          "@id": "section_unencoded_in_rfc_8141_rq_f"
+        }
+      ]
+    },
+    "section_unencoded_in_rfc_3986_segment_nz": {
+      "@id": "section_unencoded_in_rfc_3986_segment_nz",
+      "dc:title": "As RFC 3986 URI segment-nz component",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "VPaths can be used as-is in URI path parts (except as segment-nz-nc, see below).\nThis rules out \"?\", \"#\", \"/\" from structural delimiters"
+      ]
+    },
+    "section_unencoded_in_sequences": {
+      "@id": "section_unencoded_in_sequences",
+      "dc:title": "As a typical sequence entry",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Rules out \",\" | \";\" from structural delimiters"
+      ]
+    },
+    "section_unencoded_in_rfc_3986_query": {
+      "@id": "section_unencoded_in_rfc_3986_query",
+      "dc:title": "As part of RFC 3986 URI query component when consumer is known not to decode",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "VPath can and is intended to be used as-is in the query part (even as\nthe right-hand side value of \"=\") ",
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "as long as the URI\nconsumer or possible middlewares don't perform x-www-form-urlencoded\n(or other) decoding of the key-value pairs"
+          ]
+        },
+        "before VPath expansion.",
+        null,
+        "Rules out \"=\" , \"&\" from structural characters.\n",
+        {
+          "vdoc:blockquote": true,
+          "vdoc:content": [
+            "Note: This is completely regular. If the consumer is\n  known to explicitly decode query values and because VPaths can\n  contain \"%\" characters they must be appropriately symmetrically\n  encoded. This can result in double encoding. However as the intent is that VPath\n  expansion should be considered to be part of ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "the URI parsing and separation itself"
+              ],
+              "vdoc:ref": "https://tools.ietf.org/html/rfc3986#section-2.4"
+            },
+            " any  separate encoding and decoding should not be needed."
+          ]
+        }
+      ]
+    },
+    "section_unencoded_in_rfc_3986_fragment": {
+      "@id": "section_unencoded_in_rfc_3986_fragment",
+      "dc:title": "As RFC 3986 URI fragment component",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Doesn't rule out any delimiter options not yet ruled out."
+      ]
+    },
+    "section_unencoded_in_rfc_8141_nss": {
+      "@id": "section_unencoded_in_rfc_8141_nss",
+      "dc:title": "As RFC 8141 URN NSS components",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Doesn't rule out any delimiter options not yet ruled out.\nSpecifically this does not rule out \":\" as that is allowed in NSS sub-parts."
+      ]
+    },
+    "section_unencoded_in_rfc_8141_rq_f": {
+      "@id": "section_unencoded_in_rfc_8141_rq_f",
+      "dc:title": "As RFC 8141 URN rq-, and f-component",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Covered by URI query and fragment sections."
+      ]
+    },
+    "section_encoded_contexts": {
+      "@id": "section_encoded_contexts",
+      "dc:title": "VPath must be used escaped/quoted/encoded in following contexts",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@id": "section_quoted_string"
+        },
+        {
+          "@id": "section_in_rfc_3986_segment_nz_nc"
+        },
+        {
+          "@id": "section_x_www_form_urlencoded"
+        }
+      ]
+    },
+    "section_quoted_string": {
+      "@id": "section_quoted_string",
+      "dc:title": "In HTTP/1.1 headers always as a quoted-string",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "URI's in general need to be quoted here and VPath is URI-like.\nThis retains \"@\" as an allowed delimiter."
+      ]
+    },
+    "section_x_www_form_urlencoded": {
+      "@id": "section_x_www_form_urlencoded",
+      "dc:title": "In form fields as x-www-form-urlencoded",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "Encoded and serialized as per ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "https://url.spec.whatwg.org/#urlencoded-serializing"
+          ],
+          "vdoc:ref": "https://url.spec.whatwg.org/#urlencoded-serializing"
+        }
+      ]
+    },
+    "section_in_rfc_3986_segment_nz_nc": {
+      "@id": "section_in_rfc_3986_segment_nz_nc",
+      "dc:title": "In URI relative-part with no scheme must be prefixed with \"./\"",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "This retains \":\" as an allowed delimiter which segment-nz-nc would\notherwise prevent."
+      ]
+    },
+    "section_tilde_problem": {
+      "@id": "section_tilde_problem",
+      "dc:title": "The tilde problem with URN RFC 2141 is solved by RFC 8141",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "",
+        null,
+        "RFC 2141 reserves \"~\" but encodeURIComponent doesn't encode it. To\nmaintain direct drop-in 2141 compatibility would require disallowing\n\"~\" from the character set. This in turn would complicate specific\njavascript domain implementations as they would have to encode \"~\"\nseparately without being able to solely rely on encodeURIComponent.",
+        null,
+        "As this concern is not likely to be a problem in practice anyway we\nchoose to refer to RFC 8141 for URN's which removes \"~\" from the set of\nreserved character. This solves this (relatively theoretical) issue."
+      ]
+    },
+    "@type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "section_equivalence"
+      },
+      {
+        "@id": "section_verb"
+      },
+      {
+        "@id": "section_vrid"
+      },
+      {
+        "@id": "section_grammar"
+      },
+      {
+        "@id": "section_encoding_considerations"
+      }
+    ]
+  }
+]

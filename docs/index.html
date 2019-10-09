@@ -119,94 +119,107 @@ Valospace ontology provides vocabulary and definitions of
         <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
       </thead>
       <tbody>
-        <tr id="Resource" class=" vdoc-nth-child-2n"><td><a href="#Resource" class="vdoc type-vdoc-reference"><em>Resource</em></a></td><td><strong>valospace resource interface</strong></td><td>rdfs:Resource</td></tr>
+        <tr id="Resource" class=" vdoc-nth-child-2n"><td><a href="#Resource" class="vdoc type-vdoc-reference"><em>Resource</em></a></td><td><strong>base resource interface</strong></td><td>rdfs:Resource</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of resources which can appear as a subject in valospace
 resource and event graphs. The domain of all transient and generated
 fields which are available even for unsourced bodies.</td></tr>
         <tr id="Bvob"><td><a href="#Bvob" class="vdoc type-vdoc-reference"><em>Bvob</em></a></td><td><strong>Binary ValOS Object type</strong></td><td>valos:Resource</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The dominant type class of resources which are immutably associated
 with an octet-stream of fixed length. Bvob resources have a hash of
-that octet-stream, prefixed with the hash algorithm, as their resource
-id.</td></tr>
-        <tr id="Sourced" class=" vdoc-nth-child-2n"><td><a href="#Sourced" class="vdoc type-vdoc-reference"><em>Sourced</em></a></td><td><strong>active, visible resource interface</strong></td><td>valos:Resource</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources that are sourced in this view of
-the world. A sourced resource has all of its fields and properties
-available and it can thus be manipulated.</td></tr>
-        <tr id="Unsourced"><td><a href="#Unsourced" class="vdoc type-vdoc-reference"><em>Unsourced</em></a></td><td><strong>out-of-this-world resource type</strong></td><td>valos:Resource</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The dominant type class of 'unsourced' valospace resources. An
-unsourced resource doesn't have a known representation in this view of
-the world, typically because it is inside an unsourced Partition.
-The transition from Unsourced to and from other dominant types is the
+that octet-stream, prefixed with the hash algorithm, as their vgrid.</td></tr>
+        <tr id="Absent" class=" vdoc-nth-child-2n"><td><a href="#Absent" class="vdoc type-vdoc-reference"><em>Absent</em></a></td><td><strong>absent resource type</strong></td><td>valos:Resource</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The dominant type class of absent valospace resources. An absent
+resource doesn't have a known representation in this view of the world,
+buts its existence is inferred due to existing references to it.
+
+The transition from Absent to and from other dominant types is the
 only possible runtime type change and happens dynamically based on
 the partition sourcery and banishment.</td></tr>
-        <tr id="Destroyed" class=" vdoc-nth-child-2n"><td><a href="#Destroyed" class="vdoc type-vdoc-reference"><em>Destroyed</em></a></td><td><strong></strong></td><td>valos:Resource</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The dominant type class of resources which have been destroyed.</td></tr>
-        <tr id="Partition"><td><a href="#Partition" class="vdoc type-vdoc-reference"><em>Partition</em></a></td><td><strong>a document, world subdivision interface</strong></td><td>valos:Sourced</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>A Partition is a subdivision of the whole ValOS object space into
-smaller recursive, individually sourcable wholes. The Partition
-implementation contains resources either by direct or transitive
-ownership. Each such contained resource also knows their containing
-Partition.
+        <tr id="Extant"><td><a href="#Extant" class="vdoc type-vdoc-reference"><em>Extant</em></a></td><td><strong>extant and present resource interface</strong></td><td>valos:Resource</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources that are present and extant in this
+view of the world. An extant resource has all of its fields and
+properties available and it can thus be manipulated.</td></tr>
+        <tr id="NonExistent" class=" vdoc-nth-child-2n"><td><a href="#NonExistent" class="vdoc type-vdoc-reference"><em>NonExistent</em></a></td><td><strong></strong></td><td>valos:Resource</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The dominant type class of resources which should be present but are
+not. This is typically because they have been destroyed or because they
+have never existed in the first place.
 
-TODO(iridian, 2019-08): Update outdated terminology in this comment.
+Only provides the transient fields of the Resource interface.</td></tr>
+        <tr id="ScopeProperty"><td><a href="#ScopeProperty" class="vdoc type-vdoc-reference"><em>ScopeProperty</em></a></td><td><strong>scope property type</strong></td><td>valos:Resource valos:Extant rdf:Statement</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The dominant type class of resources representing properties with a
+locally unique name inside an owning Scope namespace resource.
 
-In addition to the few direct member fields relating to snapshotting
-and event stream synchronization, the Partition resources serve as
-a key latching point for external services.
+Additionally a ScopeProperty represents the core hypertwin building
+block as an rdf:Statement reification of hypertwinned triples.</td></tr>
+        <tr id="Scope" class=" vdoc-nth-child-2n"><td><a href="#Scope" class="vdoc type-vdoc-reference"><em>Scope</em></a></td><td><strong>property scope interface</strong></td><td>valos:Resource valos:Extant</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which can have scoped properties.</td></tr>
+        <tr id="SourcerableNode"><td><a href="#SourcerableNode" class="vdoc type-vdoc-reference"><em>SourcerableNode</em></a></td><td><strong>sourcerable node interface</strong></td><td>valos:Resource</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The class of sourcerable valospace nodes which either are already
+sourcered or are unsourcered but have references to them from extant
+resources.
 
-Each Partition object is managed by an authority, which performs
-conflict resolution, authorization and recording of incoming commands,
-converting them into the truth event log for that particular Partition.
+This interface is the domain of all transient and generated fields
+which are available even for unsourcered node resources.</td></tr>
+        <tr id="UnsourceredNode" class=" vdoc-nth-child-2n"><td><a href="#UnsourceredNode" class="vdoc type-vdoc-reference"><em>UnsourceredNode</em></a></td><td><strong>absent, sourceable node type</strong></td><td>valos:Resource valos:SourcerableNode</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The dominant type class of absent but sourcerable valospace nodes. An
+absent resource doesn't have a known representation in this view of the
+world because it is inside an unsourcered Partition.
 
-The Partition id is used by the query routers to globally locate the
-authority responsible for any given Partition. Also, cross-partition
-resource references are implemented as Unsourced resource stubs, ie.
-objects that only contain the resource id and its most recently known
-partition (which will retain the new owning Partition in a stub,
-enabling forwarding). Together these allow for any resource to always
-be eventually locateable from anywhere.</td></tr>
-        <tr id="ScriptResource" class=" vdoc-nth-child-2n"><td><a href="#ScriptResource" class="vdoc type-vdoc-reference"><em>ScriptResource</em></a></td><td><strong>valoscript resource interface</strong></td><td>valos:Resource</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which have script references to them
-from within this world. The domain of all transient and generated
-fields which are available even for out-of-this-world resources.</td></tr>
-        <tr id="ScriptDestroyed"><td><a href="#ScriptDestroyed" class="vdoc type-vdoc-reference"><em>ScriptDestroyed</em></a></td><td><strong>destroyed script resource type</strong></td><td>valos:Resource valos:ScriptResource</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace script resources which have been destroyed in
-this view of the world. It only provides the external fields listed in
-TransientScripFields and TransientFields interfaces.</td></tr>
-        <tr id="ScopeProperty" class=" vdoc-nth-child-2n"><td><a href="#ScopeProperty" class="vdoc type-vdoc-reference"><em>ScopeProperty</em></a></td><td><strong>valoscript property</strong></td><td>valos:Resource valos:Sourced rdf:Statement</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace Property resources which belong to a scope.</td></tr>
-        <tr id="Scope"><td><a href="#Scope" class="vdoc type-vdoc-reference"><em>Scope</em></a></td><td><strong>property namespace interface</strong></td><td>valos:Resource</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which can have valoscript properties.</td></tr>
-        <tr id="Relatable" class=" vdoc-nth-child-2n"><td><a href="#Relatable" class="vdoc type-vdoc-reference"><em>Relatable</em></a></td><td><strong>relation source and/or target interface</strong></td><td>valos:Resource valos:Sourced valos:ScriptResource valos:Scope</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which can act as source and target of
-a valospace Relation.</td></tr>
-        <tr id="Relation"><td><a href="#Relation" class="vdoc type-vdoc-reference"><em>Relation</em></a></td><td><strong>primary directed relationship edge type</strong></td><td>valos:Resource valos:Sourced valos:ScriptResource valos:Scope valos:Relatable</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which represent directed,
-many-to-many relationships between relatable resources.
-With Entity and Media it forms the group of three primary types.
-As a Scope it can have scriptable properties. Relation being
-a Relatable itself allows for nested and recursive relationship
-structures.</td></tr>
-        <tr id="Entity" class=" vdoc-nth-child-2n"><td><a href="#Entity" class="vdoc type-vdoc-reference"><em>Entity</em></a></td><td><strong>primary resource hierachy node type</strong></td><td>valos:Resource valos:Sourced valos:ScriptResource valos:Scope valos:Relatable valos:Partition</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which act as the main valospace
+The transition from UnsourceredNode to and from other dominant types is
+the only possible runtime type change for SourcerableNodes and happens
+dynamically based on the partition sourcery and banishment.</td></tr>
+        <tr id="NonExistentNode"><td><a href="#NonExistentNode" class="vdoc type-vdoc-reference"><em>NonExistentNode</em></a></td><td><strong>non-existent node type</strong></td><td>valos:Resource valos:SourcerableNode</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The dominant type class of sourcered resources which should be present
+but are not. This typically because they have been destroyed or because
+they never existed in the first place.
+
+Only provides the transient fields of the SourcerableNode and Resource
+interfaces.</td></tr>
+        <tr id="SourceredNode" class=" vdoc-nth-child-2n"><td><a href="#SourceredNode" class="vdoc type-vdoc-reference"><em>SourceredNode</em></a></td><td><strong>sourcered node interface</strong></td><td>valos:Resource valos:Extant valos:Scope valos:SourcerableNode</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of sourcered (ie. extant) valospace nodes. A node can act as
+a partition root resource, as the source and target of Relation nodes,
+as the folder of Media nodes and as the parent of Entity nodes.
+As these aforementioned types are also the primary sourcered nodes
+themselves they form the main structure of global valospace resource
+graph.</td></tr>
+        <tr id="Entity"><td><a href="#Entity" class="vdoc type-vdoc-reference"><em>Entity</em></a></td><td><strong>primary resource tree node type</strong></td><td>valos:Resource valos:Extant valos:Scope valos:SourcerableNode valos:SourceredNode</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which act as the main valospace tree
 hierarchy building block. With Relation and Media it forms the group of
-three primary types. As a Scope it can have scriptable properties,
+three primary node types. As a Scope it can have scriptable properties,
 which entities expose to all child resources as their lexical scripting
 namespace.
+
+The set of valospace tree hierarchies is defined via triple pattern:
+
+  SELECT ?root ?parent ?node WHERE {
+    ?node valos:parent ?parent .
+    ?parent valos:parent* ?root .
+    NOT EXISTS ( ?root valos:parent ?rootParent )
+  }
+
+This implies that only Entity resources can be nodes but any primary
+node can act as a root resource.
 </td></tr>
-        <tr id="Media"><td><a href="#Media" class="vdoc type-vdoc-reference"><em>Media</em></a></td><td><strong>primary file media type</strong></td><td>valos:Resource valos:Sourced valos:ScriptResource valos:Scope valos:Relatable</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which represent interpretable media
+        <tr id="Media" class=" vdoc-nth-child-2n"><td><a href="#Media" class="vdoc type-vdoc-reference"><em>Media</em></a></td><td><strong>file media node type</strong></td><td>valos:Resource valos:Extant valos:Scope valos:SourcerableNode valos:SourceredNode</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which represent interpretable media
 and can be associated with mutable binary content and accompanying
 metadata. With Relation and Media it forms the group of three primary
-types.
+node types.
 </td></tr>
+        <tr id="Relation"><td><a href="#Relation" class="vdoc type-vdoc-reference"><em>Relation</em></a></td><td><strong>directed relationship node type</strong></td><td>valos:Resource valos:Extant valos:Scope valos:SourcerableNode valos:SourceredNode</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The class of valospace resources which represent directed,
+many-to-many relationships between nodes.
+With Entity and Media it forms the group of three primary node types.
+As a Scope it can have scriptable properties. Relation being
+a SourceredNode itself allows for nested and recursive relationship
+structures.</td></tr>
       </tbody>
     </table>
 
   </section>
 
   <section id="section_fields" class="vdoc type-vdoc-chapter">
-    <h2>&#x3C;em&#x3E;valos:* a valos-raem:Field*&#x3C;/em&#x3E; vocabulary</h2>
+    <h2>&#x3C;em&#x3E;valos:* a valos-raem:Field&#x3C;/em&#x3E; vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -219,47 +232,27 @@ types.
       </thead>
       <tbody>
         <tr id="id" class=" vdoc-nth-child-2n"><td><a href="#id" class="vdoc type-vdoc-reference"><em>id</em></a></td><td>valos:Resource</td><td>xsd:string</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The immutable resource id of this resource.</td></tr>
-        <tr id="iri"><td><a href="#iri" class="vdoc type-vdoc-reference"><em>iri</em></a></td><td>valos:Resource</td><td>xsd:anyURI</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The authoritative locator IRI of this resource in the current view of
-the world. Always equivalent to a catenation of
-<valos:partitionIRI> "#" <valos:id>
-of this resource</td></tr>
-        <tr id="rawId" class=" vdoc-nth-child-2n"><td><a href="#rawId" class="vdoc type-vdoc-reference"><em>rawId</em></a></td><td>valos:Resource</td><td>xsd:string</td><td>valos-raem:AliasField</td><td>valos:id</td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The resource id of this resource</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The immutable string representation of the vrid of this resource.</td></tr>
+        <tr id="rawId"><td><a href="#rawId" class="vdoc type-vdoc-reference"><em>rawId</em></a></td><td>valos:Resource</td><td>xsd:string</td><td>valos-raem:AliasField</td><td>valos:id</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The immutable string representation of the vrid of this resource.</td></tr>
+        <tr id="vrid" class=" vdoc-nth-child-2n"><td><a href="#vrid" class="vdoc type-vdoc-reference"><em>vrid</em></a></td><td>valos:Resource</td><td>rdfs:List</td><td>valos-raem:TransientField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The immutable, expanded object representation of the vrid of this
+resource.</td></tr>
         <tr id="typeName"><td><a href="#typeName" class="vdoc type-vdoc-reference"><em>typeName</em></a></td><td>valos:Resource</td><td>xsd:string</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The dominant type name of this resource</td></tr>
-        <tr id="partition" class=" vdoc-nth-child-2n"><td><a href="#partition" class="vdoc type-vdoc-reference"><em>partition</em></a></td><td>valos:Resource</td><td>valos:Partition</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The partition root resource of this resource, ie. the nearest ancestor
-(possibly self) with a non-null valos:authorityIRI.</td></tr>
-        <tr id="partitionIRI"><td><a href="#partitionIRI" class="vdoc type-vdoc-reference"><em>partitionIRI</em></a></td><td>valos:Resource</td><td>xsd:anyURI</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The partition IRI of the partition this resource belongs to in the
-current view of the world.</td></tr>
-        <tr id="partitionURI" class=" vdoc-nth-child-2n"><td><a href="#partitionURI" class="vdoc type-vdoc-reference"><em>partitionURI</em></a></td><td>valos:Resource</td><td>xsd:anyURI</td><td>valos-raem:AliasField</td><td>valos:partitionIRI</td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6></td></tr>
-        <tr id="prototype"><td><a href="#prototype" class="vdoc type-vdoc-reference"><em>prototype</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:PrimaryField</td><td></td><td>valos:derivations</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The prototype of this resource. All field lookups for which there is
-no associated value set and whose field descriptors don't have
-ownDefaultValue are forwarded to the prototype.</td></tr>
-        <tr id="derivations" class=" vdoc-nth-child-2n"><td><a href="#derivations" class="vdoc type-vdoc-reference"><em>derivations</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:TransientField</td><td></td><td>valos:prototype</td></tr>
+        <tr id="derivations" class=" vdoc-nth-child-2n"><td><a href="#derivations" class="vdoc type-vdoc-reference"><em>derivations</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:CoupledField</td><td></td><td>valos:prototype</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>An unordered set of resources which have this resource as their
 valos:prototype.</td></tr>
-        <tr id="ownFields"><td><a href="#ownFields" class="vdoc type-vdoc-reference"><em>ownFields</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr id="ownFields"><td><a href="#ownFields" class="vdoc type-vdoc-reference"><em>ownFields</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:TransientField</td><td></td><td></td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>A transient version of this object as if prototype was undefined.
 All property accesses will only return field values which are directly
 owned by this resource.</td></tr>
-        <tr id="inheritancePrototype" class=" vdoc-nth-child-2n"><td><a href="#inheritancePrototype" class="vdoc type-vdoc-reference"><em>inheritancePrototype</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:PrimaryField</td><td>valos:prototype</td><td>valos:inheritors</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The derivation prototype of this resource. This represents the
-traditional prototypical inheritance where inherited field values are
-not remapped in any way.</td></tr>
-        <tr id="inheritors"><td><a href="#inheritors" class="vdoc type-vdoc-reference"><em>inheritors</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:TransientField</td><td>valos:derivations</td><td>valos:inheritancePrototype</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>An unordered set of resources which have this resource as their
+        <tr id="inheritors" class=" vdoc-nth-child-2n"><td><a href="#inheritors" class="vdoc type-vdoc-reference"><em>inheritors</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:CoupledField</td><td>valos:derivations</td><td>valos:inheritancePrototype</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>An unordered set of resources which have this resource as their
 valos:inheritancePrototype.</td></tr>
-        <tr id="instancePrototype" class=" vdoc-nth-child-2n"><td><a href="#instancePrototype" class="vdoc type-vdoc-reference"><em>instancePrototype</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:PrimaryField</td><td>valos:prototype</td><td>valos:instances</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The instance prototype of this resource instance.</td></tr>
-        <tr id="instances"><td><a href="#instances" class="vdoc type-vdoc-reference"><em>instances</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:TransientField</td><td>valos:derivations</td><td>valos:instancePrototype</td></tr>
+        <tr id="instances"><td><a href="#instances" class="vdoc type-vdoc-reference"><em>instances</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:CoupledField</td><td>valos:derivations</td><td>valos:instancePrototype</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>An unordered set of resources which have this resource as their
-directvalospace:instancePrototype.</td></tr>
+direct valos:instancePrototype.</td></tr>
         <tr id="ghostPrototype" class=" vdoc-nth-child-2n"><td><a href="#ghostPrototype" class="vdoc type-vdoc-reference"><em>ghostPrototype</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:GeneratedField</td><td>valos:prototype</td><td>valos:ghosts</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>Ghost prototype of this ghost resource. The ghost prototype is the
 base resource from which this ghost was created during some primary
@@ -271,77 +264,73 @@ instance is called the *ghost host* of all these ghosts. Likewise, the
 instance prototype is called the ghost host prototype, and the
 (grand-)ownlings of this ghost host prototype are the ghost prototypes
 of the corresponding ghosts (ie. this field).} .</td></tr>
-        <tr id="ghosts"><td><a href="#ghosts" class="vdoc type-vdoc-reference"><em>ghosts</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:TransientField</td><td>valos:derivations</td><td>valos:ghostPrototype</td></tr>
+        <tr id="ghosts"><td><a href="#ghosts" class="vdoc type-vdoc-reference"><em>ghosts</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:CoupledField</td><td>valos:derivations</td><td>valos:ghostPrototype</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>An unordered set of all (materialized) ghosts which have this resource
 as their valos:ghostPrototype. See @valos/raem#section_ghost_instancing
 for why immaterial ghosts are not listed.</td></tr>
         <tr id="materializedGhosts" class=" vdoc-nth-child-2n"><td><a href="#materializedGhosts" class="vdoc type-vdoc-reference"><em>materializedGhosts</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:AliasField</td><td>valos:ghosts</td><td>valos:ghostPrototype</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6></td></tr>
-        <tr id="unnamedCouplings"><td><a href="#unnamedCouplings" class="vdoc type-vdoc-reference"><em>unnamedCouplings</em></a></td><td>valos-raem:TransientField</td><td>valos-raem:TransientField</td><td>valos-raem:TransientField</td><td></td><td></td></tr>
+        <tr id="unnamedCouplings"><td><a href="#unnamedCouplings" class="vdoc type-vdoc-reference"><em>unnamedCouplings</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:CoupledField</td><td></td><td></td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>Referrers with a missing coupledField referring this resource</td></tr>
         <tr id="ghostHost" class=" vdoc-nth-child-2n"><td><a href="#ghostHost" class="vdoc type-vdoc-reference"><em>ghostHost</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The instance resource which brought this ghost into being. This
 instance is equivalent to the innermost ancestor of this ghost which is
 not a ghost itself.</td></tr>
-        <tr id="ghostOwner"><td><a href="#ghostOwner" class="vdoc type-vdoc-reference"><em>ghostOwner</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:TransientField</td><td></td><td>valos:ghostOwnlings</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The instance resource which owns this materialized ghost or null if
-this ghost is immaterial.
-Note that materialized ghosts will have a two own fields: the
-ghostOwner and the regular owner (or one of its aliases). The
-removal of either of these owning field relationships will
-immaterialize, not destroy, the ghost.</td></tr>
-        <tr id="ghostOwnlings" class=" vdoc-nth-child-2n"><td><a href="#ghostOwnlings" class="vdoc type-vdoc-reference"><em>ghostOwnlings</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:TransientField</td><td></td><td>valos:ghostOwner</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>Materialized ghost resources which have this instance as their ghost
+        <tr id="ghostOwnlings"><td><a href="#ghostOwnlings" class="vdoc type-vdoc-reference"><em>ghostOwnlings</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:CoupledField</td><td></td><td>valos:ghostOwner</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>Materialized ghost resources which have this instance as their ghost
 host.</td></tr>
-        <tr id="hashAlgorithm"><td><a href="#hashAlgorithm" class="vdoc type-vdoc-reference"><em>hashAlgorithm</em></a></td><td>valos:Bvob</td><td>xsd:string</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The hash algorithm used to create the content hash of this Bvob</td></tr>
-        <tr id="contentHash" class=" vdoc-nth-child-2n"><td><a href="#contentHash" class="vdoc type-vdoc-reference"><em>contentHash</em></a></td><td>valos:Bvob</td><td>xsd:string</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The content hash of the octet-stream associated with this Bvob</td></tr>
-        <tr id="contentLength"><td><a href="#contentLength" class="vdoc type-vdoc-reference"><em>contentLength</em></a></td><td>valos:Bvob</td><td>xsd:nonNegativeInteger</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The number of octets in the octet-stream associated with this Bvob.</td></tr>
-        <tr id="contentReferrers" class=" vdoc-nth-child-2n"><td><a href="#contentReferrers" class="vdoc type-vdoc-reference"><em>contentReferrers</em></a></td><td>valos:Bvob</td><td>valos:Sourced</td><td>valos-raem:TransientField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The unordered set of valos:content references to this Bvob from
+        <tr id="hashAlgorithm" class=" vdoc-nth-child-2n"><td><a href="#hashAlgorithm" class="vdoc type-vdoc-reference"><em>hashAlgorithm</em></a></td><td>valos:Bvob</td><td>xsd:string</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The hash algorithm used to create the content hash of this Bvob</td></tr>
+        <tr id="contentHash"><td><a href="#contentHash" class="vdoc type-vdoc-reference"><em>contentHash</em></a></td><td>valos:Bvob</td><td>xsd:string</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The content hash of the octet-stream associated with this Bvob</td></tr>
+        <tr id="contentLength" class=" vdoc-nth-child-2n"><td><a href="#contentLength" class="vdoc type-vdoc-reference"><em>contentLength</em></a></td><td>valos:Bvob</td><td>xsd:nonNegativeInteger</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The number of octets in the octet-stream associated with this Bvob.</td></tr>
+        <tr id="contentReferrers"><td><a href="#contentReferrers" class="vdoc type-vdoc-reference"><em>contentReferrers</em></a></td><td>valos:Bvob</td><td>valos:Extant</td><td>valos-raem:CoupledField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The unordered set of valos:content references to this Bvob from
 within this view of the world.</td></tr>
-        <tr id="owner"><td><a href="#owner" class="vdoc type-vdoc-reference"><em>owner</em></a></td><td>valos:Sourced</td><td>valos:Sourced</td><td>valos-raem:PrimaryField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The owner of this resource</td></tr>
-        <tr id="name" class=" vdoc-nth-child-2n"><td><a href="#name" class="vdoc type-vdoc-reference"><em>name</em></a></td><td>valos:Sourced</td><td>xsd:string</td><td>valos-raem:PrimaryField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The primary ValOS name of this resource. It is globally non-unique but
-often context-dependently unique.</td></tr>
-        <tr id="ownlings"><td><a href="#ownlings" class="vdoc type-vdoc-reference"><em>ownlings</em></a></td><td>valos:Sourced</td><td>rdfs:List</td><td>valos-raem:PrimaryField</td><td></td><td>valos:owner</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of all resources owned by this resource. This
+        <tr id="owner" class=" vdoc-nth-child-2n"><td><a href="#owner" class="vdoc type-vdoc-reference"><em>owner</em></a></td><td>valos:Extant</td><td>valos:Extant</td><td>valos-raem:EventLoggedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The owner of this extant resource.</td></tr>
+        <tr id="name"><td><a href="#name" class="vdoc type-vdoc-reference"><em>name</em></a></td><td>valos:Extant</td><td>xsd:stringvalos-raem:VParam</td><td>valos-raem:EventLoggedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The primary ValOS name of this extant resource. This name is a local
+identifier to differentiate the resource from other resources within
+the same context. Idiomatically this context is all resources of
+a particular type which are owned by the same resource.</td></tr>
+        <tr id="inheritancePrototype" class=" vdoc-nth-child-2n"><td><a href="#inheritancePrototype" class="vdoc type-vdoc-reference"><em>inheritancePrototype</em></a></td><td>valos:Extant</td><td>valos:Resource</td><td>valos-raem:EventLoggedField</td><td>valos:prototype</td><td>valos:inheritors</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The inheritance prototype of this extant resource. This represents the
+traditional prototypical inheritance where inherited field values are
+not remapped in any way.</td></tr>
+        <tr id="instancePrototype"><td><a href="#instancePrototype" class="vdoc type-vdoc-reference"><em>instancePrototype</em></a></td><td>valos:Extant</td><td>valos:Resource</td><td>valos-raem:EventLoggedField</td><td>valos:prototype</td><td>valos:instances</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The instance prototype of this extant resource. This represents
+valos 'ghost instantiation' where all recursively owned resources of
+the instancePrototype are also inherited as 'ghosts' under this extant
+resource.</td></tr>
+        <tr id="ownlings" class=" vdoc-nth-child-2n"><td><a href="#ownlings" class="vdoc type-vdoc-reference"><em>ownlings</em></a></td><td>valos:Extant</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td></td><td>valos:owner</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of all resources owned by this extant resource. This
 list is a union of all fields with a valos-raem:isOwnerOf in their
 ontology definition.</td></tr>
-        <tr id="unnamedOwnlings" class=" vdoc-nth-child-2n"><td><a href="#unnamedOwnlings" class="vdoc type-vdoc-reference"><em>unnamedOwnlings</em></a></td><td>valos:Sourced</td><td>valos:Sourced</td><td>valos-raem:PrimaryField</td><td>valos:ownlings</td><td>valos:owner</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of all resources owned by this resource which are not
-contained in another valos-raem:isOwnerOf field list.</td></tr>
-        <tr id="isFrozen"><td><a href="#isFrozen" class="vdoc type-vdoc-reference"><em>isFrozen</em></a></td><td>valos:Sourced</td><td>xsd:boolean</td><td>valos-raem:PrimaryField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>Indicates whether this resource is frozen. A frozen resource nor any
-of its ownlings cannot have any of their primary fields be modified.
-Setting isFrozen to true is (by design) an irreversible operation.
-If this resource is also the root resource of a partition the whole
-partition is permanently frozen.</td></tr>
-        <tr id="authorityIRI" class=" vdoc-nth-child-2n"><td><a href="#authorityIRI" class="vdoc type-vdoc-reference"><em>authorityIRI</em></a></td><td>valos:Partition</td><td>xsd:anyURI</td><td>valos-raem:PrimaryField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The authority IRI of this resource. If this field is set it means that
-this is an active partition root object. The partition IRI is generated
-as per the rules specified by the authority IRI schema.</td></tr>
-        <tr id="partitionAuthorityURI"><td><a href="#partitionAuthorityURI" class="vdoc type-vdoc-reference"><em>partitionAuthorityURI</em></a></td><td>valos:Partition</td><td>xsd:string</td><td>valos-raem:AliasField</td><td>valos:authorityIRI</td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6></td></tr>
-        <tr id="nameAlias" class=" vdoc-nth-child-2n"><td><a href="#nameAlias" class="vdoc type-vdoc-reference"><em>nameAlias</em></a></td><td>valos:Sourced</td><td>xsd:string</td><td>valos-raem:AliasField</td><td>valos:name</td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The primary name of this resource. It is globally non-unique but often
-  context-dependently unique.
-  This is an alias of valos:name for circumventing conflicts with the
-  native javascript property 'name' in some execution contexts</td></tr>
-        <tr id="prototypeAlias"><td><a href="#prototypeAlias" class="vdoc type-vdoc-reference"><em>prototypeAlias</em></a></td><td>valos:Resource</td><td>valos:Resource</td><td>valos-raem:AliasField</td><td>valos:prototype</td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The prototype of this resource. This is an alias for valos:prototype
-to bypass conflicts with native javascript property 'prototype' in
-certain contexts.</td></tr>
-        <tr id="incomingRelations" class=" vdoc-nth-child-2n"><td><a href="#incomingRelations" class="vdoc type-vdoc-reference"><em>incomingRelations</em></a></td><td>valos:ScriptResource</td><td>valos:Relation</td><td>valos-raem:TransientField</td><td></td><td>valos:target</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The unordered set of relations that are targeting this relatable
-resource within this view of the world.</td></tr>
-        <tr id="scope"><td><a href="#scope" class="vdoc type-vdoc-reference"><em>scope</em></a></td><td>valos:ScopeProperty</td><td>valos:Scope</td><td>valos-raem:AliasField</td><td>valos:owner</td><td>valos:properties</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The scope resource (and owner) of this ScopeProperty</td></tr>
-        <tr id="value" class=" vdoc-nth-child-2n"><td><a href="#value" class="vdoc type-vdoc-reference"><em>value</em></a></td><td>valos:ScopeProperty</td><td>rdfs:Resource</td><td>valos-raem:PrimaryField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The value of this ScopeProperty</td></tr>
+        <tr id="unnamedOwnlings"><td><a href="#unnamedOwnlings" class="vdoc type-vdoc-reference"><em>unnamedOwnlings</em></a></td><td>valos:Extant</td><td>valos:Extant</td><td>valos-raem:EventLoggedField</td><td>valos:ownlings</td><td>valos:owner</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of all resources owned by this extant resource which
+are not contained in another valos-raem:isOwnerOf field list.</td></tr>
+        <tr id="isFrozen" class=" vdoc-nth-child-2n"><td><a href="#isFrozen" class="vdoc type-vdoc-reference"><em>isFrozen</em></a></td><td>valos:Extant</td><td>xsd:boolean</td><td>valos-raem:EventLoggedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>Indicates whether this extant resource is frozen. A frozen resource
+nor any of its ownlings cannot have any of their primary fields be
+modified.
+Setting isFrozen to true is (by design) an irreversible operation.</td></tr>
+        <tr id="nameAlias"><td><a href="#nameAlias" class="vdoc type-vdoc-reference"><em>nameAlias</em></a></td><td>valos:Extant</td><td>xsd:string</td><td>valos-raem:AliasField</td><td>valos:name</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The primary name of this resource. It is globally non-unique but often
+context-dependently unique.
+
+This is an alias of valos:name for circumventing conflicts with the
+native javascript property 'name' in certain execution contexts</td></tr>
+        <tr id="prototypeAlias" class=" vdoc-nth-child-2n"><td><a href="#prototypeAlias" class="vdoc type-vdoc-reference"><em>prototypeAlias</em></a></td><td>valos:Extant</td><td>valos:Resource</td><td>valos-raem:AliasField</td><td>valos:prototype</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The prototype of this resource.
+
+This is an alias for valos:prototype to bypass conflicts with native
+javascript property 'prototype' in certain execution contexts.</td></tr>
+        <tr id="scope"><td><a href="#scope" class="vdoc type-vdoc-reference"><em>scope</em></a></td><td>valos:ScopeProperty</td><td>valos:Scope</td><td>valos-raem:EventLoggedField</td><td>valos:owner</td><td>valos:properties</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The scope resource (and owner) of this ScopeProperty.</td></tr>
+        <tr id="value" class=" vdoc-nth-child-2n"><td><a href="#value" class="vdoc type-vdoc-reference"><em>value</em></a></td><td>valos:ScopeProperty</td><td>xsd:stringvalos-raem:VPath</td><td>valos-raem:EventLoggedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The value of this ScopeProperty.</td></tr>
         <tr id="twinspace"><td><a href="#twinspace" class="vdoc type-vdoc-reference"><em>twinspace</em></a></td><td>valos:ScopeProperty</td><td>rdfs:Resource</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The twinspace of this ScopeProperty. Equates to the expanded prefix
 of the valos:name of this ScopeProperty using the context of this
@@ -353,56 +342,135 @@ the twinspace id of the scope resource for this twinspace.</td></tr>
 rdf:Statement. Equates to the twinspace id of the scope resource using
 the valos:twinspace of this ScopeProperty.</td></tr>
         <tr id="predicate"><td><a href="#predicate" class="vdoc type-vdoc-reference"><em>predicate</em></a></td><td>valos:ScopeProperty</td><td>rdfs:Resource</td><td>valos-raem:GeneratedField</td><td>rdf:predicate</td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The subject of this ScopeProperty when interpreted as a reified
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The predicate of this ScopeProperty when interpreted as a reified
 rdf:Statement. Equates to the IRI expansion of valos:name of this
 ScopeProperty using the context of this partition.</td></tr>
-        <tr id="object" class=" vdoc-nth-child-2n"><td><a href="#object" class="vdoc type-vdoc-reference"><em>object</em></a></td><td>valos:ScopeProperty</td><td>rdfs:Resource</td><td>valos-raem:AliasField</td><td>rdf:object</td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The subject of this ScopeProperty when interpreted as a reified
-rdf:Statement. Equates to the twinspace id of the valos:value using
-the valos:twinspace of this ScopeProperty if one is defined. Otherwise
-equals to the valos:value itself.
+        <tr id="object" class=" vdoc-nth-child-2n"><td><a href="#object" class="vdoc type-vdoc-reference"><em>object</em></a></td><td>valos:ScopeProperty</td><td>rdfs:Resource</td><td>valos-raem:GeneratedField</td><td>rdf:object</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The object of this ScopeProperty when interpreted as a reified
+rdf:Statement. If the valos:value refers to a scope which has this
+twinspace id defined (ie. it owns a property with twinspace id as a
+name), then this field will be expressed as that twinspace id.
+Otherwise equals to the valos:value itself.
 </td></tr>
-        <tr id="properties"><td><a href="#properties" class="vdoc type-vdoc-reference"><em>properties</em></a></td><td>valos:Scope</td><td>rdfs:List</td><td>valos-raem:PrimaryField</td><td></td><td>valos:scope</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of Property resources of this scope</td></tr>
-        <tr id="relations" class=" vdoc-nth-child-2n"><td><a href="#relations" class="vdoc type-vdoc-reference"><em>relations</em></a></td><td>valos:Relatable</td><td>rdfs:List</td><td>valos-raem:PrimaryField</td><td></td><td>valos:source</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of outgoing relations of this relatable</td></tr>
-        <tr id="source"><td><a href="#source" class="vdoc type-vdoc-reference"><em>source</em></a></td><td>valos:Relation</td><td>valos:Relatable</td><td>valos-raem:AliasField</td><td>valos:ownerrdf:source</td><td>valos:relations</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The source (and owner) relatable of this relation.</td></tr>
-        <tr id="target" class=" vdoc-nth-child-2n"><td><a href="#target" class="vdoc type-vdoc-reference"><em>target</em></a></td><td>valos:Relation</td><td>valos:Relatable</td><td>valos-raem:PrimaryField</td><td>rdf:object</td><td>valos:incomingRelations</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The target relatable of this relation.</td></tr>
-        <tr id="directory"><td><a href="#directory" class="vdoc type-vdoc-reference"><em>directory</em></a></td><td>valos:Entityvalos:Media</td><td>rdfs:Relatable</td><td>valos-raem:AliasField</td><td>valos:owner</td><td>valos:entries</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The directory (and owner) relatable of this entry resource.</td></tr>
-        <tr id="entries" class=" vdoc-nth-child-2n"><td><a href="#entries" class="vdoc type-vdoc-reference"><em>entries</em></a></td><td>valos:Relatable</td><td>rdfs:List</td><td>valos-raem:AliasField</td><td>valos:ownlings</td><td>valos:directory</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of entry entities and medias of this relatable.</td></tr>
-        <tr id="parent"><td><a href="#parent" class="vdoc type-vdoc-reference"><em>parent</em></a></td><td>valos:Entity</td><td>valos:Relatable</td><td>valos-raem:AliasField</td><td>valos:directory</td><td>valos:children</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The parent (and owner) relatable of this entity.</td></tr>
-        <tr id="children" class=" vdoc-nth-child-2n"><td><a href="#children" class="vdoc type-vdoc-reference"><em>children</em></a></td><td>valos:Relatable</td><td>rdfs:List</td><td>valos-raem:AliasField</td><td>valos:entries</td><td>valos:parent</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of child entities of this relatable</td></tr>
-        <tr id="container"><td><a href="#container" class="vdoc type-vdoc-reference"><em>container</em></a></td><td>valos:Media</td><td>valos:Relatable</td><td>valos-raem:AliasField</td><td>valos:owner</td><td>valos:medias</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The container (and owner) relatable of this media.</td></tr>
-        <tr id="medias" class=" vdoc-nth-child-2n"><td><a href="#medias" class="vdoc type-vdoc-reference"><em>medias</em></a></td><td>valos:Relatable</td><td>rdfs:List</td><td>valos-raem:AliasField</td><td>valos:ownlings</td><td>valos:container</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of medias contained in this relatable</td></tr>
-        <tr id="sourceURL"><td><a href="#sourceURL" class="vdoc type-vdoc-reference"><em>sourceURL</em></a></td><td>valos:Media</td><td>xsd:anyURI</td><td>valos-raem:PrimaryField</td><td></td><td></td></tr>
+        <tr id="properties"><td><a href="#properties" class="vdoc type-vdoc-reference"><em>properties</em></a></td><td>valos:Scope</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:ownlings</td><td>valos:scope</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of ScopeProperty resources of this scope</td></tr>
+        <tr id="partitionRoot" class=" vdoc-nth-child-2n"><td><a href="#partitionRoot" class="vdoc type-vdoc-reference"><em>partitionRoot</em></a></td><td>valos:Resource</td><td>valos:SourceredNode</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The partition root node of this sourcerable (ie. the nearest ancestor,
+possibly this sourcerable itself self which has a non-null
+valos:authorityURL).</td></tr>
+        <tr id="partitionURL"><td><a href="#partitionURL" class="vdoc type-vdoc-reference"><em>partitionURL</em></a></td><td>valos:Resource</td><td>xsd:anyURI</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The partition URL of the event log that contain this potentially
+absent sourcerable as is known by the current view of the world.</td></tr>
+        <tr id="url" class=" vdoc-nth-child-2n"><td><a href="#url" class="vdoc type-vdoc-reference"><em>url</em></a></td><td>valos:Resource</td><td>xsd:anyURI</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The authoritative URL string of this sourcerable in the current view
+of the world. Always equivalent to a catenation of
+<valos:partitionURL> "#" <valos:id>
+of this resource</td></tr>
+        <tr id="partition"><td><a href="#partition" class="vdoc type-vdoc-reference"><em>partition</em></a></td><td>valos:Resource</td><td>valos:SourceredNode</td><td>valos-raem:AliasField</td><td>valos:partitionRoot</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The partition root node of this sourcerable, ie. the nearest ancestor
+(possibly self) with a non-null valos:authorityURL.</td></tr>
+        <tr id="partitionURI" class=" vdoc-nth-child-2n"><td><a href="#partitionURI" class="vdoc type-vdoc-reference"><em>partitionURI</em></a></td><td>valos:Resource</td><td>xsd:anyURI</td><td>valos-raem:AliasField</td><td>valos:partitionURL</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>Deprecated in favor of 'partitionURL'. This field is by definition
+always a locator so its name should reflect it.</td></tr>
+        <tr id="container"><td><a href="#container" class="vdoc type-vdoc-reference"><em>container</em></a></td><td>valos:SourceredNode</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:owner</td><td>valos:nodes</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The container (and owner) node of this sourcered node.</td></tr>
+        <tr id="nodes" class=" vdoc-nth-child-2n"><td><a href="#nodes" class="vdoc type-vdoc-reference"><em>nodes</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:ownlings</td><td>valos:container</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of all nodes directly contained by this sourcered
+node.</td></tr>
+        <tr id="authorityURL"><td><a href="#authorityURL" class="vdoc type-vdoc-reference"><em>authorityURL</em></a></td><td>valos:SourceredNode</td><td>xsd:anyURI</td><td>valos-raem:EventLoggedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The authority URL of this sourcered partition root node. If this field
+is null then this sourcered node is not a root node. Setting this field
+makes this resource the root of a new partition root (if allowed). The
+partition URL is generated based on this as per the rules specified by
+the authority URL schema.
+If the partition root node is frozen the whole partition is permanently
+frozen.</td></tr>
+        <tr id="createdAt" class=" vdoc-nth-child-2n"><td><a href="#createdAt" class="vdoc type-vdoc-reference"><em>createdAt</em></a></td><td>valos:SourceredNode</td><td>xsd:double</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The creation UNIX epoch time of this node. This is defined as the
+log aspect timestamp of the CREATED event which impressed this node
+into being.</td></tr>
+        <tr id="modifiedAt"><td><a href="#modifiedAt" class="vdoc type-vdoc-reference"><em>modifiedAt</em></a></td><td>valos:SourceredNode</td><td>xsd:double</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The latest modification UNIX epoch time of this node. This is defined
+as the log aspect timestamp of the most recent event with a direct
+impression on this Media resource.</td></tr>
+        <tr id="partitionAuthorityURI" class=" vdoc-nth-child-2n"><td><a href="#partitionAuthorityURI" class="vdoc type-vdoc-reference"><em>partitionAuthorityURI</em></a></td><td>valos:SourceredNode</td><td>xsd:string</td><td>valos-raem:AliasField</td><td>valos:authorityURL</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6></td></tr>
+        <tr id="directory"><td><a href="#directory" class="vdoc type-vdoc-reference"><em>directory</em></a></td><td>valos:Entityvalos:Media</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:container</td><td>valos:entries</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The directory (and owner) node of this sourcered node.</td></tr>
+        <tr id="entries" class=" vdoc-nth-child-2n"><td><a href="#entries" class="vdoc type-vdoc-reference"><em>entries</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:nodes</td><td>valos:directory</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of entries of this sourcered node when seen as
+a directory.</td></tr>
+        <tr id="parent"><td><a href="#parent" class="vdoc type-vdoc-reference"><em>parent</em></a></td><td>valos:Entity</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:directory</td><td>valos:entities</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The parent (and directory, owner) node of this entity.</td></tr>
+        <tr id="entities" class=" vdoc-nth-child-2n"><td><a href="#entities" class="vdoc type-vdoc-reference"><em>entities</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:entries</td><td>valos:parent</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of entities contained in this sourcered node.</td></tr>
+        <tr id="folder"><td><a href="#folder" class="vdoc type-vdoc-reference"><em>folder</em></a></td><td>valos:Media</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:directory</td><td>valos:medias</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The folder (and directory, owner) node of this media.</td></tr>
+        <tr id="medias" class=" vdoc-nth-child-2n"><td><a href="#medias" class="vdoc type-vdoc-reference"><em>medias</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:entries</td><td>valos:folder</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of medias contained in this sourcered node when seen
+as a folder</td></tr>
+        <tr id="sourceURL"><td><a href="#sourceURL" class="vdoc type-vdoc-reference"><em>sourceURL</em></a></td><td>valos:Media</td><td>xsd:anyURI</td><td>valos-raem:EventLoggedField</td><td></td><td></td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The unreliable source URL of this Media. This URL is dereferenced
 when the Media content is accessed and as such is subject to all
 failure considerations associated with its protocol.</td></tr>
-        <tr id="content" class=" vdoc-nth-child-2n"><td><a href="#content" class="vdoc type-vdoc-reference"><em>content</em></a></td><td>valos:Media</td><td>valos:Bvob</td><td>valos-raem:PrimaryField</td><td>rdf:object</td><td>valos:contentReferrers</td></tr>
+        <tr id="content" class=" vdoc-nth-child-2n"><td><a href="#content" class="vdoc type-vdoc-reference"><em>content</em></a></td><td>valos:Media</td><td>valos:Bvob</td><td>valos-raem:EventLoggedField</td><td>rdf:object</td><td>valos:contentReferrers</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The infrastructure-backed octet-stream content of this Media.</td></tr>
-        <tr id="created"><td><a href="#created" class="vdoc type-vdoc-reference"><em>created</em></a></td><td>valos:Media</td><td>xsd:double</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The creation UNIX epoch time of this Media. This is defined as the
-truth log aspect timestamp of the CREATED event which brought this
-Media into being.</td></tr>
-        <tr id="modified" class=" vdoc-nth-child-2n"><td><a href="#modified" class="vdoc type-vdoc-reference"><em>modified</em></a></td><td>valos:Media</td><td>xsd:double</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The latest modification UNIX epoch time of this Media. This is defined
-as the truth log aspect timestamp of the most recent event that
-directly affects this Media resource.</td></tr>
+        <tr id="connector"><td><a href="#connector" class="vdoc type-vdoc-reference"><em>connector</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:container</td><td>valos:connectedRelations</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The connector (and container, owner) node of this relation.
+Typically also either the source or the target but possibly neither.</td></tr>
+        <tr id="connectedRelations" class=" vdoc-nth-child-2n"><td><a href="#connectedRelations" class="vdoc type-vdoc-reference"><em>connectedRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:nodes</td><td>valos:connector</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of relations that are connected (and contained,
+owned) _by_ this sourcered node. This includes both
+connectedInRelations and connectedOutRelations (ie. incoming and
+outgoing relations which are also connected by this sourcered node) but
+also relations which only have this sourcered node as their connector
+but not as source or target.</td></tr>
+        <tr id="source"><td><a href="#source" class="vdoc type-vdoc-reference"><em>source</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>rdf:subject</td><td>valos:outgoingRelations</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The source node of this relation.</td></tr>
+        <tr id="outgoingRelations" class=" vdoc-nth-child-2n"><td><a href="#outgoingRelations" class="vdoc type-vdoc-reference"><em>outgoingRelations</em></a></td><td>valos:SourcerableNode</td><td>rdfs:List</td><td>valos-raem:CoupledField</td><td>valos:nodes</td><td>valos:source</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The unordered list of outgoing relations with this sourcerable
+(but possibly absent) node as their source (note that sourcerable and
+source are completely separate concepts here).</td></tr>
+        <tr id="target"><td><a href="#target" class="vdoc type-vdoc-reference"><em>target</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>rdf:object</td><td>valos:incomingRelations</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The target node of this relation.</td></tr>
+        <tr id="incomingRelations" class=" vdoc-nth-child-2n"><td><a href="#incomingRelations" class="vdoc type-vdoc-reference"><em>incomingRelations</em></a></td><td>valos:SourcerableNode</td><td>rdfs:List</td><td>valos-raem:CoupledField</td><td>valos:nodes</td><td>valos:target</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The unordered list of incoming relations with this sourcerable
+(but possibly absent) node as their target.</td></tr>
+        <tr id="pairedSource"><td><a href="#pairedSource" class="vdoc type-vdoc-reference"><em>pairedSource</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:source</td><td>valos:pairedOutRelations</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The paired source node of this relation (paired denotes that the
+coupled field 'pairedOutRelations' is an event logged field).</td></tr>
+        <tr id="pairedOutRelations" class=" vdoc-nth-child-2n"><td><a href="#pairedOutRelations" class="vdoc type-vdoc-reference"><em>pairedOutRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:outgoingRelations</td><td>valos:pairedSource</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of outgoing relations paired to this sourcered node.</td></tr>
+        <tr id="pairedTarget"><td><a href="#pairedTarget" class="vdoc type-vdoc-reference"><em>pairedTarget</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:target</td><td>valos:pairedInRelations</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The paired target node of this relation (the coupled field
+'pairedInRelations' is an event logged field).</td></tr>
+        <tr id="pairedInRelations" class=" vdoc-nth-child-2n"><td><a href="#pairedInRelations" class="vdoc type-vdoc-reference"><em>pairedInRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:incomingRelations</td><td>valos:pairedTarget</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of incoming relations paired to this sourcered node.</td></tr>
+        <tr id="connectorSource"><td><a href="#connectorSource" class="vdoc type-vdoc-reference"><em>connectorSource</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:connectorvalos:pairedSource</td><td>valos:connectedOutRelations</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The source and also the connector node of this relation.</td></tr>
+        <tr id="connectedOutRelations" class=" vdoc-nth-child-2n"><td><a href="#connectedOutRelations" class="vdoc type-vdoc-reference"><em>connectedOutRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:connectedRelationsvalos:pairedOutRelations</td><td>valos:connectorSource</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of outgoing relations contained in (and owned by)
+this sourcered node.</td></tr>
+        <tr id="connectorTarget"><td><a href="#connectorTarget" class="vdoc type-vdoc-reference"><em>connectorTarget</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:connectorvalos:pairedTarget</td><td>valos:connectedInRelations</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The target and also the connector node of this relation.</td></tr>
+        <tr id="connectedInRelations" class=" vdoc-nth-child-2n"><td><a href="#connectedInRelations" class="vdoc type-vdoc-reference"><em>connectedInRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:connectedRelationsvalos:pairedInRelations</td><td>valos:connectorTarget</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of incoming relations contained in (and owned by)
+this sourcered node.</td></tr>
+        <tr id="relations"><td><a href="#relations" class="vdoc type-vdoc-reference"><em>relations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:AliasField</td><td>valos:connectedRelations</td><td>valos:connector</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>A deprecation of valos:connectedRelations; the ordered list of
+relations contained within this sourcered node when seen as a graph.
+Do note that the semantics have changed: connectedRelations can now
+also contain relations which have this sourcered node as their the
+target (instead of source) or as neither source nor target.
+The set of just outgoing relations is 'outgoingRelations' and the set
+of owned outgoing relations is 'connectedOutRelations'.</td></tr>
       </tbody>
     </table>
 
   </section>
 
   <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h2>&#x3C;em&#x3E;valos:&#x3C;/em&#x3E; other vocabulary</h2>
+    <h2>&#x3C;em&#x3E;valos:*&#x3C;/em&#x3E; other vocabulary</h2>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -411,7 +479,17 @@ directly affects this Media resource.</td></tr>
         <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
       </thead>
       <tbody>
-        
+        <tr id="prototype" class=" vdoc-nth-child-2n"><td><a href="#prototype" class="vdoc type-vdoc-reference"><em>prototype</em></a></td><td>valos-raem:PrimaryField</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>The prototypes of this resource. All field lookups for which there is
+no associated value set and whose field descriptors don't have
+ownDefaultValue are forwarded to the prototype.</td></tr>
+        <tr id="ghostOwner"><td><a href="#ghostOwner" class="vdoc type-vdoc-reference"><em>ghostOwner</em></a></td><td>valos-raem:PrimaryField</td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>The instance resource which owns this materialized ghost or null if
+this ghost is immaterial.
+Note that materialized ghosts will have a two own fields: the
+ghostOwner and the regular owner (or one of its aliases). The
+removal of either of these owning field relationships will
+immaterialize, not destroy, the ghost.</td></tr>
       </tbody>
     </table>
 
@@ -430,13 +508,11 @@ directly affects this Media resource.</td></tr>
       </thead>
       <tbody>
         <tr><td>restriction</td><td></td><td></td><td></td><td></td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos:partition</td><td></td><td>https://valospace.org/#partition</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:vrid</td><td></td><td>https://valospace.org/#vrid</td><td>@id</td><td>@list</td></tr>
         <tr><td>valos:prototype</td><td></td><td>https://valospace.org/#prototype</td><td>@id</td><td></td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:derivations</td><td></td><td>https://valospace.org/#derivations</td><td>@id</td><td></td></tr>
         <tr><td>valos:ownFields</td><td></td><td>https://valospace.org/#ownFields</td><td>@id</td><td></td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos:inheritancePrototype</td><td></td><td>https://valospace.org/#inheritancePrototype</td><td>@id</td><td></td></tr>
-        <tr><td>valos:inheritors</td><td></td><td>https://valospace.org/#inheritors</td><td>@id</td><td></td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos:instancePrototype</td><td></td><td>https://valospace.org/#instancePrototype</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:inheritors</td><td></td><td>https://valospace.org/#inheritors</td><td>@id</td><td></td></tr>
         <tr><td>valos:instances</td><td></td><td>https://valospace.org/#instances</td><td>@id</td><td></td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:ghostPrototype</td><td></td><td>https://valospace.org/#ghostPrototype</td><td>@id</td><td></td></tr>
         <tr><td>valos:ghosts</td><td></td><td>https://valospace.org/#ghosts</td><td>@id</td><td></td></tr>
@@ -447,22 +523,41 @@ directly affects this Media resource.</td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:ghostOwnlings</td><td></td><td>https://valospace.org/#ghostOwnlings</td><td>@id</td><td></td></tr>
         <tr><td>valos:contentReferrers</td><td></td><td>https://valospace.org/#contentReferrers</td><td>@id</td><td></td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:owner</td><td></td><td>https://valospace.org/#owner</td><td>@id</td><td></td></tr>
-        <tr><td>valos:ownlings</td><td></td><td>https://valospace.org/#ownlings</td><td>@id</td><td>@list</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos:unnamedOwnlings</td><td></td><td>https://valospace.org/#unnamedOwnlings</td><td>@id</td><td></td></tr>
-        <tr><td>valos:prototypeAlias</td><td></td><td>https://valospace.org/#prototypeAlias</td><td>@id</td><td></td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos:incomingRelations</td><td></td><td>https://valospace.org/#incomingRelations</td><td>@id</td><td></td></tr>
+        <tr><td>valos:name</td><td></td><td>https://valospace.org/#name</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:inheritancePrototype</td><td></td><td>https://valospace.org/#inheritancePrototype</td><td>@id</td><td></td></tr>
+        <tr><td>valos:instancePrototype</td><td></td><td>https://valospace.org/#instancePrototype</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:ownlings</td><td></td><td>https://valospace.org/#ownlings</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos:unnamedOwnlings</td><td></td><td>https://valospace.org/#unnamedOwnlings</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:prototypeAlias</td><td></td><td>https://valospace.org/#prototypeAlias</td><td>@id</td><td></td></tr>
         <tr><td>valos:scope</td><td></td><td>https://valospace.org/#scope</td><td>@id</td><td></td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos:properties</td><td></td><td>https://valospace.org/#properties</td><td>@id</td><td>@list</td></tr>
-        <tr><td>valos:relations</td><td></td><td>https://valospace.org/#relations</td><td>@id</td><td>@list</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos:source</td><td></td><td>https://valospace.org/#source</td><td>@id</td><td></td></tr>
-        <tr><td>valos:target</td><td></td><td>https://valospace.org/#target</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:value</td><td></td><td>https://valospace.org/#value</td><td>@id</td><td></td></tr>
+        <tr><td>valos:properties</td><td></td><td>https://valospace.org/#properties</td><td>@id</td><td>@list</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:partitionRoot</td><td></td><td>https://valospace.org/#partitionRoot</td><td>@id</td><td></td></tr>
+        <tr><td>valos:partition</td><td></td><td>https://valospace.org/#partition</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:container</td><td></td><td>https://valospace.org/#container</td><td>@id</td><td></td></tr>
+        <tr><td>valos:nodes</td><td></td><td>https://valospace.org/#nodes</td><td>@id</td><td>@list</td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:directory</td><td></td><td>https://valospace.org/#directory</td><td>@id</td><td></td></tr>
         <tr><td>valos:entries</td><td></td><td>https://valospace.org/#entries</td><td>@id</td><td>@list</td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:parent</td><td></td><td>https://valospace.org/#parent</td><td>@id</td><td></td></tr>
-        <tr><td>valos:children</td><td></td><td>https://valospace.org/#children</td><td>@id</td><td>@list</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos:container</td><td></td><td>https://valospace.org/#container</td><td>@id</td><td></td></tr>
+        <tr><td>valos:entities</td><td></td><td>https://valospace.org/#entities</td><td>@id</td><td>@list</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:folder</td><td></td><td>https://valospace.org/#folder</td><td>@id</td><td></td></tr>
         <tr><td>valos:medias</td><td></td><td>https://valospace.org/#medias</td><td>@id</td><td>@list</td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:content</td><td></td><td>https://valospace.org/#content</td><td>@id</td><td></td></tr>
+        <tr><td>valos:connector</td><td></td><td>https://valospace.org/#connector</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:connectedRelations</td><td></td><td>https://valospace.org/#connectedRelations</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos:source</td><td></td><td>https://valospace.org/#source</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:outgoingRelations</td><td></td><td>https://valospace.org/#outgoingRelations</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos:target</td><td></td><td>https://valospace.org/#target</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:incomingRelations</td><td></td><td>https://valospace.org/#incomingRelations</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos:pairedSource</td><td></td><td>https://valospace.org/#pairedSource</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:pairedOutRelations</td><td></td><td>https://valospace.org/#pairedOutRelations</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos:pairedTarget</td><td></td><td>https://valospace.org/#pairedTarget</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:pairedInRelations</td><td></td><td>https://valospace.org/#pairedInRelations</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos:connectorSource</td><td></td><td>https://valospace.org/#connectorSource</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:connectedOutRelations</td><td></td><td>https://valospace.org/#connectedOutRelations</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos:connectorTarget</td><td></td><td>https://valospace.org/#connectorTarget</td><td>@id</td><td></td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:connectedInRelations</td><td></td><td>https://valospace.org/#connectedInRelations</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos:relations</td><td></td><td>https://valospace.org/#relations</td><td>@id</td><td>@list</td></tr>
       </tbody>
     </table>
 

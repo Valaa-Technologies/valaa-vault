@@ -47,9 +47,9 @@
     "revdoc:package": "@valos/kernel",
     "revdoc:prefix": "valos-kernel",
     "revdoc:prefixIRI": "https://valospace.org/kernel#",
-    "revdoc:version": "0.35.0-prerelease.12",
+    "revdoc:version": "0.35.0-prerelease.13",
     "respecConfig": {
-      "subtitle": "0.35.0-prerelease.12",
+      "subtitle": "0.35.0-prerelease.13",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -70,7 +70,7 @@
           "SBOM"
         ],
         "subProfiles": [],
-        "title": "@valos/kernel@0.35.0-prerelease.11 Software Bill of Materials",
+        "title": "@valos/kernel@0.35.0-prerelease.13 Software Bill of Materials",
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
@@ -106,7 +106,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "engine": {
         "@id": "https://valospace.org/engine",
@@ -161,7 +161,7 @@
           ]
         },
         "package": "@valos/engine",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "inspire": {
         "@id": "https://valospace.org/inspire",
@@ -216,7 +216,7 @@
           ]
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "raem": {
         "@id": "https://valospace.org/raem",
@@ -312,17 +312,21 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
-      "raem/valos-resource-id": {
-        "@id": "https://valospace.org/raem/valos-resource-id",
+      "raem/VPath": {
+        "@id": "https://valospace.org/raem/VPath",
         "tags": [],
         "subProfiles": [],
-        "title": "ValOS Resource Identifier",
+        "title": "ValOS Path",
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "ValOS Resource Identifiers (*VRIDs*) uniquely identify valospace\nresources created and manipulated by ",
+            "",
+            null,
+            "ValOS Paths ('VPaths') identify paths between valospace resources.\nVrids (a subset of VPaths) identify valospace resources.",
+            null,
+            "These VRIds are also affiliated with ",
             {
               "@type": "vdoc:Reference",
               "vdoc:content": [
@@ -330,45 +334,35 @@
               ],
               "vdoc:ref": "@valos/sourcerer/valos-event-log"
             },
-            ".\nVRIDs are strings with restricted grammar so that they can be embedded\ninto various URI component and list formats without encoding.\n"
+            " which define their internal path semantics further.",
+            null,
+            "VPaths are strings with restricted grammar so that they can be embedded\ninto various URI component and list formats without additional encoding."
           ]
         },
         "introduction": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "A VRID is the NSS part of an urn:valos URI. It is a string with two\nnested levels of syntactic structure. The outer structure consists of\n`@`-separated segments.",
+            "",
+            null,
+            "VPaths serve two notably different purposes, both as paths and as\nresource identifiers. A VPath which has a global valospace resource\nidentifier (or 'vgrid') as its first segment is a valospace resource\nidentifier (or *VRId*).",
             null,
             "",
             {
               "@type": "revdoc:ABNF",
               "vdoc:language": "https://tools.ietf.org/html/rfc5234",
               "vdoc:content": [
-                "\n  vrid           = vgrid-segment *( \"@\" sub-segment )\n"
+                "  vpath         = \"@\" vgrid-tail / verbs-tail\n  vgrid-tail    = vgrid \"@\" [ verbs-tail ]\n  verbs-tail     = verb \"@\" [ verbs-tail ]\n  verb          = verb-type params\n"
               ]
             },
             "",
             null,
-            "The vgrid-segment uniquely identifies a *global resource*. The\noptional sub-segments identify an unambiguous path from the\nglobal resource to a *structural sub-resource* which also is the\n*referenced resource* of the VRID. Otherwise if there are no\nsub-segments the global resource is the referenced resource.",
+            "Many valospace resources, so called *structural sub-resources* are\nidentified by a fixed path from the global resource defined by the same\nverbs that define non-VRId VPaths. Thus while paths and identifiers are\nsuperficially different it is useful to represent them both using the\nsame VPath verb structure.",
             null,
-            "The inner structure consists of `$`-separated parts which specify\nthe semantics of each individual segment.",
-            null,
-            "",
-            {
-              "@type": "revdoc:ABNF",
-              "vdoc:language": "https://tools.ietf.org/html/rfc5234",
-              "vdoc:content": [
-                "\n  vgrid-segment  = \"$\" vgrid-format-term \"$\" vgrid-body\n  sub-segment    = sub-type-term \"$\" sub-context-term \"$\" sub-body\n"
-              ]
-            },
-            "",
-            null,
-            "The identified resource (and thus the VRID itself) is always affiliated\nwith an event log in the context where the VRID appears.\nThe *term* parts refer the event log JSON-LD context term definitions,\nboth for syntactic purposes (e.g. as simple prefix expansions) as well\nas semantically (JSON-LD constructs such as index maps have semantic\nmeaning for some VRID subsegments).",
-            null,
-            "The two *body* parts carry the actual encodeURIComponent-encoded\nsegment data. The precise meaning depends on the segment type (e.g. URI\nsuffix, member access etc.).\n"
+            "Both verb and vgrid params can also have context term references to\nan external lookup of URI prefixes and semantic definitions."
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "revdoc": {
         "@id": "https://valospace.org/revdoc",
@@ -412,7 +406,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "revdoc/tutorial": {
         "@id": "https://valospace.org/revdoc/tutorial",
@@ -467,7 +461,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "sbomdoc": {
         "@id": "https://valospace.org/sbomdoc",
@@ -511,7 +505,7 @@
           ]
         },
         "package": "@valos/sbomdoc",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "script": {
         "@id": "https://valospace.org/script",
@@ -549,7 +543,7 @@
           ]
         },
         "package": "@valos/script",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "sourcerer": {
         "@id": "https://valospace.org/sourcerer",
@@ -584,7 +578,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "sourcerer/valos-event-log": {
         "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -604,7 +598,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "twindoc": {
         "@id": "https://valospace.org/twindoc",
@@ -659,7 +653,7 @@
           ]
         },
         "package": "@valos/twindoc",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "type-vault/AssortedTutorials": {
         "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -677,7 +671,7 @@
           ]
         },
         "package": "@valos/type-vault",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "vdoc": {
         "@id": "https://valospace.org/vdoc",
@@ -741,7 +735,7 @@
           ]
         },
         "package": "@valos/vdoc",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "kernel": {
         "@id": "https://valospace.org/kernel",
@@ -917,7 +911,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "@valos/kernel": {
         "@id": "https://valospace.org/index",
@@ -1049,7 +1043,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "technician": {
         "@id": "https://valospace.org/technician",
@@ -1119,7 +1113,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "valonaut": {
         "@id": "https://valospace.org/valonaut",
@@ -1175,7 +1169,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       },
       "voyager": {
         "@id": "https://valospace.org/voyager",
@@ -1217,7 +1211,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.11"
+        "version": "0.35.0-prerelease.13"
       }
     },
     "workspaces": {
@@ -1228,9 +1222,9 @@
           "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
           "license": "MIT"
         },
-        "@valos/toolset-rest-api-gateway-plugin": {
+        "@valos/rest-api-spindle": {
           "version": "0.35.0-prerelease.12",
-          "description": "A toolset for managing Structured ValOS REST API Gateway Plugin",
+          "description": "A spindle for managing structured ValOS REST APIs",
           "license": "MIT"
         },
         "@valos/toolset-revealer": {
@@ -1238,9 +1232,9 @@
           "description": "Tools for building revelations both for development and deployment purposes",
           "license": "MIT"
         },
-        "@valos/type-gateway-plugin": {
+        "@valos/type-spindle": {
           "version": "0.35.0-prerelease.12",
-          "description": "The ValOS 'gateway-plugin' workspace type toolset",
+          "description": "The ValOS 'spindle' workspace type toolset",
           "license": "MIT"
         },
         "@valos/type-opspace": {
@@ -1348,13 +1342,13 @@
     },
     "types": {
       "@id": "types",
-      "gateway-plugin": {
+      "spindle": {
         "disabled": "DISABLED",
-        "explanation": ".disabled => Workspace is not a 'gateway-plugin' (is 'vault')",
-        "description": "Select 'gateway-plugin' workspace type",
+        "explanation": ".disabled => Workspace is not a 'spindle' (is 'vault')",
+        "description": "Select 'spindle' workspace type",
         "package": "@valos/kernel",
         "version": "0.35.0-prerelease.12",
-        "introduction": "A gateway-plugin extends inspire and perspire gateways with various\ntypes of functionalities: new resources schemas, media decoders,\nprotocol schemes, external APIs, valosheath APIs, etc."
+        "introduction": "A spindle extends inspire and perspire gateways with various\ntypes of functionalities: new resources schemas, media decoders,\nprotocol schemes, external APIs, valosheath APIs, etc."
       },
       "library": {
         "disabled": "DISABLED",
@@ -1427,13 +1421,13 @@
         "version": "0.35.0-prerelease.12",
         "introduction": "This toolset enables valma command 'rouse-revealer' for deploying a\nlocal dev environment for inspire gateway revelations.\n\nSets up the webpack entry and output config as webpack.config.js in\nthe workspace root, which combines shared revealer config from\n@valos/toolset-revealer/shared/webpack.config.js, local toolset config\nand any customizations in the root webpack.config.js itself."
       },
-      "@valos/toolset-rest-api-gateway-plugin": {
+      "@valos/rest-api-spindle": {
         "disabled": "DISABLED",
         "explanation": ".disabled => Workspace is not a worker (is vault)",
-        "description": "Select the worker toolset 'toolset-rest-api-gateway-plugin'",
+        "description": "Select the worker toolset 'rest-api-spindle'",
         "package": "@valos/kernel",
         "version": "0.35.0-prerelease.12",
-        "introduction": "This toolset extends a perspire worker workspace with REST-style\nconfigurable and extensible web service plugin."
+        "introduction": "This toolset extends a perspire worker workspace with REST-style\nconfigurable and extensible web service spindle."
       },
       "@valos/type-vault/enable-babel": {
         "disabled": "DISABLED",
@@ -2596,9 +2590,9 @@
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "license": "MIT"
       },
-      "@valos/toolset-rest-api-gateway-plugin": {
+      "@valos/rest-api-spindle": {
         "version": "0.35.0-prerelease.12",
-        "description": "A toolset for managing Structured ValOS REST API Gateway Plugin",
+        "description": "A spindle for managing structured ValOS REST APIs",
         "license": "MIT"
       },
       "@valos/toolset-revealer": {
@@ -2606,9 +2600,9 @@
         "description": "Tools for building revelations both for development and deployment purposes",
         "license": "MIT"
       },
-      "@valos/type-gateway-plugin": {
+      "@valos/type-spindle": {
         "version": "0.35.0-prerelease.12",
-        "description": "The ValOS 'gateway-plugin' workspace type toolset",
+        "description": "The ValOS 'spindle' workspace type toolset",
         "license": "MIT"
       },
       "@valos/type-opspace": {
@@ -2981,6 +2975,9 @@
           "@id": "section_fields"
         },
         {
+          "@id": "section_resolvers"
+        },
+        {
           "@id": "section_vocabulary_other"
         },
         {
@@ -3230,7 +3227,7 @@
     },
     "section_fields": {
       "@id": "section_fields",
-      "dc:title": "<em>valos-kernel:* a valos-raem:Field*</em> vocabulary",
+      "dc:title": "<em>valos-kernel:* a valos-raem:Field</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -3293,6 +3290,69 @@
                 "@type": "vdoc:Header",
                 "vdoc:content": [
                   "valos-raem:coupledField"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "@type": "vdoc:Header",
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": []
+        }
+      ]
+    },
+    "section_resolvers": {
+      "@id": "section_resolvers",
+      "dc:title": "<em>valos-kernel:* a valos-raem:Resolver</em> vocabulary",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "@type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "vdoc:cell": "@type",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdf:type"
+                ]
+              },
+              {
+                "vdoc:cell": "comment",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "Comment"
                 ]
               },
               {

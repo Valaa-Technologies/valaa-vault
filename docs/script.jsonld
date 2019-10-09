@@ -47,7 +47,7 @@
     "revdoc:package": "@valos/script",
     "revdoc:prefix": "valos-script",
     "revdoc:prefixIRI": "https://valospace.org/script#",
-    "revdoc:version": "0.35.0-prerelease.12",
+    "revdoc:version": "0.35.0-prerelease.13",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -138,6 +138,9 @@
         },
         {
           "@id": "section_fields"
+        },
+        {
+          "@id": "section_resolvers"
         },
         {
           "@id": "section_vocabulary_other"
@@ -396,7 +399,7 @@
     },
     "section_fields": {
       "@id": "section_fields",
-      "dc:title": "<em>valos-script:* a valos-raem:Field*</em> vocabulary",
+      "dc:title": "<em>valos-script:* a valos-raem:Field</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -459,6 +462,69 @@
                 "@type": "vdoc:Header",
                 "vdoc:content": [
                   "valos-raem:coupledField"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "@type": "vdoc:Header",
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": []
+        }
+      ]
+    },
+    "section_resolvers": {
+      "@id": "section_resolvers",
+      "dc:title": "<em>valos-script:* a valos-raem:Resolver</em> vocabulary",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "@type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "vdoc:cell": "@type",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdf:type"
+                ]
+              },
+              {
+                "vdoc:cell": "comment",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "Comment"
                 ]
               },
               {

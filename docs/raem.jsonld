@@ -47,7 +47,7 @@
     "revdoc:package": "@valos/raem",
     "revdoc:prefix": "valos-raem",
     "revdoc:prefixIRI": "https://valospace.org/raem#",
-    "revdoc:version": "0.35.0-prerelease.12",
+    "revdoc:version": "0.35.0-prerelease.13",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -459,7 +459,7 @@
           "dc:title": "Partition URI structure is specified by the scheme, local reference structure is specified by ValOS",
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "By the nature of its distributed event sourcing architecture ValOS\nfocuses heavily on the frontend. The cross-compatibility between\ncomponents is driven by how new backends can integrate and talk with\nexisting front-end clients. This is facilitated by front-end plugin\nsystems which enables new ValOS URI schemes to specify new routing\nsolutions and fundamentally new backend infrastructures, as long as\nsaid infrastructures can route ValOS event streams to clients. This\ncorresponds to how ValOS doesn't specify how a *partition URI*\nidentifies and locates partitions and authorities but leaves it to\nthe scheme specifications and their reference implementations of\nfrontend plugins."
+            "By the nature of its distributed event sourcing architecture ValOS\nfocuses heavily on the frontend. The cross-compatibility between\ncomponents is driven by how new backends can integrate and talk with\nexisting front-end clients. This is facilitated by front-end spindle\nsystems which enables new ValOS URI schemes to specify new routing\nsolutions and fundamentally new backend infrastructures, as long as\nsaid infrastructures can route ValOS event streams to clients. This\ncorresponds to how ValOS doesn't specify how a *partition URI*\nidentifies and locates partitions and authorities but leaves it to\nthe scheme specifications and their reference implementations of\nfrontend spindles."
           ]
         },
         {
@@ -514,6 +514,9 @@
           "@id": "section_fields"
         },
         {
+          "@id": "section_resolvers"
+        },
+        {
           "@id": "section_vocabulary_other"
         },
         {
@@ -532,6 +535,31 @@
       "valos-raem": "https://valospace.org/raem#"
     },
     "vocabulary": {
+      "0": {
+        "@type": "rdfs:Literal",
+        "revdoc:brief": "positional argument 0",
+        "rdfs:comment": "positional argument 0"
+      },
+      "1": {
+        "@type": "rdfs:Literal",
+        "revdoc:brief": "positional argument 1",
+        "rdfs:comment": "positional argument 1"
+      },
+      "2": {
+        "@type": "rdfs:Literal",
+        "revdoc:brief": "positional argument 2",
+        "rdfs:comment": "positional argument 2"
+      },
+      "3": {
+        "@type": "rdfs:Literal",
+        "revdoc:brief": "positional argument 3",
+        "rdfs:comment": "positional argument 3"
+      },
+      "4": {
+        "@type": "rdfs:Literal",
+        "revdoc:brief": "positional argument 4",
+        "rdfs:comment": "positional argument 4"
+      },
       "@id": "vocabulary",
       "Type": {
         "@type": "valos-kernel:Class",
@@ -543,37 +571,48 @@
         "@type": "valos-kernel:Class",
         "rdfs:subClassOf": "rdf:Property",
         "revdoc:brief": "valospace field",
-        "rdfs:comment": "The class of all resources which can appear as a predicate in\nvalospace triple graphs.\nresource and event triple graphs o which can are accessible inside valospace from\nvalospace resources. The instances of\nthis class are called 'valospace fields'. All valospace fields have\nvalos-raem:Type or one of its sub-classes as their rdf:domain."
+        "rdfs:comment": "The class of all resources which can appear as a predicate in\nvalospace triple graphs or which can are accessible inside valospace\nfrom valospace resources. The instances of this class are called\n'valospace fields'. All valospace fields have valos-raem:Type or one of\nits sub-classes as their rdf:domain."
       },
-      "PrimaryField": {
+      "ExpressedField": {
         "@type": "valos-kernel:Class",
         "rdfs:subClassOf": "valos-raem:Field",
-        "rdfs:comment": "The class of valospace fields which are primary, persisted sources of\ntruth and have both a state representation inside valospace and a\nchange representation in event logs."
+        "rdfs:comment": "The class of valospace fields which have a full triple expression in\nall regular query and graph contexts (as opposed to fields with\nnon-triple semantics or triple expression only in limited contexts)."
+      },
+      "expressor": {
+        "@type": "valos-kernel:Property",
+        "rdfs:domain": "valos-raem:ExpressedField",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "The custom expressor of an ExpressedField as a vpath. If defined and\nwhenever a triple expression for this field is required the expressor\nvpath is valked with scope values:\n- valos-raem:0 being the field owner,\n- valos-raem:1 being the field id, and\n- valos-raem:2 being the possible field raw triple object value if it\n  exists, otherwise undefined.\nThe resulting valk value is used as the object of a new triple, with\nfield owner and field id used as the subject and predicate."
+      },
+      "EventLoggedField": {
+        "@type": "valos-kernel:Class",
+        "rdfs:subClassOf": "valos-raem:ExpressedField",
+        "rdfs:comment": "The class of valospace fields which have both a triple state\nexpression inside valospace and a change impression in event logs;\nthese are the primary, persisted sources of truth."
+      },
+      "impressor": {
+        "@type": "valos-kernel:Property",
+        "rdfs:domain": "valos-raem:EventLoggedField",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "The custom impressor of an EventLoggedField as a vpath. Whenever an\nevent log entry is required for an update that targets this field the\nimpressor vpath is valked with scope values:\n- valos-raem:0 as the field owner,\n- valos-raem:1 as the field id,\n- valos-raem:2 as the possible current field raw triple object value or\n  undefined otherwise, and\n- valos-raem:3 the new value being updated to this field."
+      },
+      "CoupledField": {
+        "@type": "valos-kernel:Class",
+        "rdfs:subClassOf": "valos-raem:ExpressedField",
+        "rdfs:comment": "The class of valospace fields which have triple expression inside\nvalospace via coupled fields but no event log impression."
+      },
+      "GeneratedField": {
+        "@type": "valos-kernel:Class",
+        "rdfs:subClassOf": "valos-raem:ExpressedField",
+        "rdfs:comment": "The class of inferred fields where a field is not associated with\nraw valospace triples but the triples are fully generated by the\nexpressor, with scope values:\n- valos-raem:0 as the field owner,\n- valos-raem:1 as the field id, and\n- valos-raem:2 as undefined."
       },
       "TransientField": {
         "@type": "valos-kernel:Class",
         "rdfs:subClassOf": "valos-raem:Field",
-        "rdfs:comment": "The class of valospace fields which have primary state representations\ninside valospace but which have only inferred representation in event\nlogs."
-      },
-      "InferredField": {
-        "@type": "valos-kernel:Class",
-        "rdfs:subClassOf": "valos-raem:Field",
-        "rdfs:comment": "The class of valospace fields with inference semantics which specify\nhow new triples with the inferred field as a predicate can be inferred\nfrom existing triples."
-      },
-      "GeneratedField": {
-        "@type": "valos-kernel:Class",
-        "rdfs:subClassOf": "valos-raem:InferredField",
-        "rdfs:comment": "The class of inferred fields where a field is associated with a\n'generator', a convergent procedural rule like taking an average or\nretrieving the partition of a valos Resource. As convergent rules a\nGeneratedField's can't have mutation semantics that could be reliably\ntranslated back to mutations of other triples."
-      },
-      "generator": {
-        "@type": "valos-kernel:Property",
-        "rdfs:domain": "valos-raem:GeneratedField",
-        "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "The generator algorithm specification or identifier of\na GeneratedField."
+        "rdfs:comment": "The class of valospace fields with no general triple expression but\nwith custom semantics for specific queries."
       },
       "AliasField": {
         "@type": "valos-kernel:Class",
-        "rdfs:subClassOf": "valos-raem:InferredField",
+        "rdfs:subClassOf": "valos-raem:Field",
         "rdfs:comment": "The class of inferred fields called alias fields where each such field\nhas an 'aliasOf' RDF property or valos Field. Alias fields are\nmutation-inference symmetric so that triples with an alias field as\npredicate are inferred from triples with aliasOf as predicate and\nmutations with an alias field as predicate are translated to use\nthe aliasOf as predicate."
       },
       "aliasOf": {
@@ -641,10 +680,115 @@
         "rdfs:domain": "valos-raem:Field",
         "rdfs:range": "xsd:boolean",
         "rdfs:comment": "Bypass the default behavior which forces transient fields to be plural\nto allow for singular fields."
+      },
+      "VPathRule": {
+        "@type": "valos-kernel:Class",
+        "rdfs:subClassOf": [
+          "rdfs:Literal",
+          "rdfs:List"
+        ],
+        "revdoc:brief": "VPath 'vrid' literal datatype",
+        "rdfs:comment": "The class of all resources representing some VPath rule or\npseudo-rule. 'vrid'.\nIf this class is used as literal datatype URI the literal contains the\nflat string VPath rule representation. Otherwise when this class is\nthe range of a property which is used as a predicate in a triple, and\nthe object of the triple is not a literal, then the object contains\nthe expanded representation of the VPath rule value as an rdf List."
+      },
+      "VPath": {
+        "@type": "valos-kernel:Class",
+        "rdfs:subClassOf": "valos-raem:VPathRule",
+        "revdoc:brief": "VPath rule 'vpath' datatype",
+        "rdfs:comment": "The class of all resources representing the VPath rule 'vpath' (always\nbegins with '@')"
+      },
+      "VRId": {
+        "@type": "valos-kernel:Class",
+        "rdfs:subClassOf": "valos-raem:VPathRule",
+        "revdoc:brief": "VPath rule 'vrid' datatype",
+        "rdfs:comment": "The class of all resources representing the VPath pseudo-rule\n'vrid' (always begins with '@')"
+      },
+      "Verbs": {
+        "@type": "valos-kernel:Class",
+        "rdfs:subClassOf": "valos-raem:VPathRule",
+        "revdoc:brief": "VPath rule 'verbs' datatype",
+        "rdfs:comment": "The class of all resources representing the VPath pseudo-rule\n'verbs' (always begins with '@')."
+      },
+      "VGRId": {
+        "@type": "valos-kernel:Class",
+        "rdfs:subClassOf": "valos-raem:VPathRule",
+        "revdoc:brief": "VPath rule 'vgrid' datatype",
+        "rdfs:comment": "The class of all resources representing the VPath rule 'vgrid' (always\nbegins with '$')."
+      },
+      "VParam": {
+        "@type": "valos-kernel:Class",
+        "rdfs:subClassOf": "valos-raem:VPathRule",
+        "revdoc:brief": "VPath rule 'vparam' datatype",
+        "rdfs:comment": "The class of all resources representing the VPath pseudo-rule\n'vparam' (always begins with '$' or ':')."
+      },
+      "Resolver": {
+        "@type": "valos-kernel:Class",
+        "rdfs:subClassOf": "rdfs:Class",
+        "revdoc:brief": "resolver name tag type",
+        "rdfs:comment": "The class of all resolver name tags. Each context which performs vpath\ncomputation valks provides native implementations for the resolvers\nit supports in its vpath valks.\n"
+      },
+      "resolveVPath": {
+        "@type": "valos-raem:Resolver",
+        "revdoc:brief": "resolve VPath",
+        "rdfs:comment": "resolve VPath"
+      },
+      "impressViaVPath": {
+        "@type": "valos-raem:Resolver",
+        "revdoc:brief": "assign via VPath",
+        "rdfs:comment": "assign via VPath"
+      },
+      "resolveContextTerm": {
+        "@type": "valos-raem:Resolver",
+        "revdoc:brief": "resolve context term",
+        "rdfs:comment": "resolve context term against the event log of the given resource"
+      },
+      "resolveId": {
+        "@type": "valos-raem:Resolver",
+        "revdoc:brief": "resolve resource id",
+        "rdfs:comment": "resolve resource id of the given resource"
+      },
+      "resolveVRIdTransient": {
+        "@type": "valos-raem:Resolver",
+        "revdoc:brief": "resolve resource vrid object",
+        "rdfs:comment": "resolve resource vrid object of the given resource"
+      },
+      "resolveDominantTypeName": {
+        "@type": "valos-raem:Resolver",
+        "revdoc:brief": "resolve dominant type name",
+        "rdfs:comment": "resolve dominant type name of the given resource"
+      },
+      "resolveOwnFieldsTransient": {
+        "@type": "valos-raem:Resolver",
+        "revdoc:brief": "resolve only owns-fields transient",
+        "rdfs:comment": "resolve only owns-fields-only transient of this resource"
+      },
+      "resolveGhostPrototype": {
+        "@type": "valos-raem:Resolver",
+        "revdoc:brief": "resolve ghost prototype",
+        "rdfs:comment": "resolve the ghost prototype of this ghost"
+      },
+      "resolveGhostHost": {
+        "@type": "valos-raem:Resolver",
+        "revdoc:brief": "resolve ghost host",
+        "rdfs:comment": "resolve the ghost host of this ghost"
+      },
+      "resolveContentLength": {
+        "@type": "valos-raem:Resolver",
+        "revdoc:brief": "resolve Bvob octet count",
+        "rdfs:comment": "resolve octet count of the octet-stream associated with the Bvob"
       }
     },
     "context": {
       "@id": "context",
+      "valos-raem:expressor": {
+        "@id": "https://valospace.org/raem#expressor",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "valos-raem:impressor": {
+        "@id": "https://valospace.org/raem#impressor",
+        "@container": "@list",
+        "@type": "@id"
+      },
       "valos-raem:aliasOf": {
         "@id": "https://valospace.org/raem#aliasOf",
         "@type": "@id"
@@ -746,11 +890,19 @@
           "vdoc:entries": [
             "Type",
             "Field",
-            "PrimaryField",
-            "TransientField",
-            "InferredField",
+            "ExpressedField",
+            "EventLoggedField",
+            "CoupledField",
             "GeneratedField",
-            "AliasField"
+            "TransientField",
+            "AliasField",
+            "VPathRule",
+            "VPath",
+            "VRId",
+            "Verbs",
+            "VGRId",
+            "VParam",
+            "Resolver"
           ]
         }
       ]
@@ -822,7 +974,8 @@
             ]
           },
           "vdoc:entries": [
-            "generator",
+            "expressor",
+            "impressor",
             "aliasOf",
             "isOwnerOf",
             "isOwnedBy",
@@ -914,7 +1067,7 @@
     },
     "section_fields": {
       "@id": "section_fields",
-      "dc:title": "<em>valos-raem:* a valos-raem:Field*</em> vocabulary",
+      "dc:title": "<em>valos-raem:* a valos-raem:Field</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -996,6 +1149,80 @@
         }
       ]
     },
+    "section_resolvers": {
+      "@id": "section_resolvers",
+      "dc:title": "<em>valos-raem:* a valos-raem:Resolver</em> vocabulary",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "@type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "vdoc:cell": "@type",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdf:type"
+                ]
+              },
+              {
+                "vdoc:cell": "comment",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "Comment"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "@type": "vdoc:Header",
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": [
+            "resolveVPath",
+            "impressViaVPath",
+            "resolveContextTerm",
+            "resolveId",
+            "resolveVRIdTransient",
+            "resolveDominantTypeName",
+            "resolveOwnFieldsTransient",
+            "resolveGhostPrototype",
+            "resolveGhostHost",
+            "resolveContentLength"
+          ]
+        }
+      ]
+    },
     "section_vocabulary_other": {
       "@id": "section_vocabulary_other",
       "dc:title": "<em>valos-raem:*</em> other vocabulary:",
@@ -1059,7 +1286,13 @@
               }
             ]
           },
-          "vdoc:entries": []
+          "vdoc:entries": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4"
+          ]
         }
       ]
     },

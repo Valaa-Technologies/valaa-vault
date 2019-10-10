@@ -72,7 +72,6 @@ function _checkOntologyPartition (ontologyPartition: Vrapper,
 
       const parent = prototype.get(VALEK.toField("prototype"));
       if (expectedPrototype.parent) {
-        if (!parent) console.log("parent", expectedPrototype.parent, prototypeName);
         expect(parent).toBeInstanceOf(Vrapper);
         expect(parent.get(VALEK.toField("name"))).toBe(expectedPrototype.parent);
       } else {
@@ -94,7 +93,6 @@ function iterateProperties (properties, expectedProperties, owner) {
     if (!properties.hasOwnProperty(propertyKey)) continue;
 
     const expectedProperty = expectedProperties[propertyKey];
-    console.log("propertykey", propertyKey, expectedProperties);
     expect(expectedProperty).not.toBeFalsy();
 
     const ownProperty = properties[propertyKey];

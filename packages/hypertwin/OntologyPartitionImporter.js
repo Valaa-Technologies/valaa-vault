@@ -62,7 +62,7 @@ function _createOntologyMap (terms, contextLookup) {
 
     domains.forEach((domain) => {
       if (!ontologyMap.properties[domain]) ontologyMap.properties[domain] = [];
-      ontologyMap.properties[domain].push(term);
+      ontologyMap.properties[domain].push(Object.create(term));
     });
   });
 
@@ -300,7 +300,11 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
             prototypePropertyMap[ontologyName][prototypeName] = {};
           }
 
-          constructPropertyNesting(classProperties, classContext);
+          const propertyNestingScope = {
+            classProperties, constructPropertyNesting
+          };
+
+          propertyNestingScope.constructPropertyNesting(classProperties, classContext);
 
           let ontologyProperties = [];
           for (let i = 0; i < classProperties.length; i++) {
@@ -401,9 +405,9 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
           });
         }
 
-        function constructPropertyNesting (classProperties, classContext, parentPropertyValue) {
-          for (let i = 0; i < classProperties.length; i++) {
-            const classProperty = classProperties[i];
+        function constructPropertyNesting (properties, classContext, parentPropertyValue) {
+          for (let i = 0; i < properties.length; i++) {
+            const classProperty = properties[i];
             const propertyId = classProperty["@id"];
 
             if (!classProperty[metadataSymbol]) {
@@ -421,12 +425,11 @@ async function _patchValosResources (ontologyIndex: Array, engine: Object,
                 }, []);
 
                 const filteredProperties
-                  = classProperties.filter((prop) => nestedProps.indexOf(prop["@id"]) !== -1);
+                  = this.classProperties.filter((prop) => nestedProps.indexOf(prop["@id"]) !== -1);
 
-                constructPropertyNesting(filteredProperties, classContext,
+                this.constructPropertyNesting(filteredProperties, classContext,
                   propertyMetadata.propertyValue);
               }
-
             }
 
             if (parentPropertyValue) {

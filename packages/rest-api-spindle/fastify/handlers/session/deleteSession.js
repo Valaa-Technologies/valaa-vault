@@ -1,8 +1,8 @@
 
-import type RestAPIServer, { Route } from "~/rest-api-spindle/fastify/RestAPIServer";
+import type RestAPIService, { Route } from "~/rest-api-spindle/fastify/RestAPIService";
 import { burlaesgDecode, hs256JWTDecode } from "~/rest-api-spindle/fastify/security";
 
-export default function createRouteHandler (server: RestAPIServer, route: Route) {
+export default function createRouteHandler (server: RestAPIService, route: Route) {
   return {
     category: "session", method: "DELETE", fastifyRoute: route,
     requiredRuntimeRules: [
@@ -16,13 +16,13 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       }
       this.builtinRules.clientCookie = ["cookies", this._identity.getClientCookieName()];
       this.builtinRules.sessionCookie = ["cookies", this._identity.getSessionCookieName()];
-      this.scopeRules = server.prepareScopeRules(this);
+      this.routeRuntime = server.prepareRuntime(this);
     },
     preload () {
-      return server.preloadScopeRules(this.scopeRules);
+      return server.preloadRuntime(this.routeRuntime);
     },
     handleRequest (request, reply) {
-      const scope = server.buildScope(request, this.scopeRules);
+      const scope = server.buildScope(request, this.routeRuntime);
       server.infoEvent(1, () => [
         "\n\trequest.query:", request.query,
         "\n\trequest.cookies:", request.cookies,

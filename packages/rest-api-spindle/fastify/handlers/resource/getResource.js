@@ -1,17 +1,17 @@
 // @flow
 
-import type RestAPIServer, { Route } from "~/rest-api-spindle/fastify/RestAPIServer";
+import type RestAPIService, { Route } from "~/rest-api-spindle/fastify/RestAPIService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
 
-export default function createRouteHandler (server: RestAPIServer, route: Route) {
+export default function createRouteHandler (server: RestAPIService, route: Route) {
   return {
     category: "resource", method: "GET", fastifyRoute: route,
     requiredRuntimeRules: ["resourceId"],
     builtinRules: {},
     prepare (/* fastify */) {
-      this.scopeRules = server.prepareScopeRules(this);
+      this.routeRuntime = server.prepareRuntime(this);
       this.toResourceFields = ["§->"];
       server.buildKuery(route.schema.response[200], this.toResourceFields);
       this.hardcodedResources = route.config.valos.hardcodedResources;
@@ -19,15 +19,15 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
     async preload () {
       const connection = await server.getDiscourse().acquireConnection(
           route.config.valos.subject, { newPartition: false }).asActiveConnection();
-      await server.preloadScopeRules(this.scopeRules);
-      this.scopeRules.scopeBase = Object.freeze({
         subject: server.getEngine().getVrapper(
+      await server.preloadRuntime(this.routeRuntime);
+      this.routeRuntime.scopeBase = Object.freeze({
             [connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) }]),
-        ...this.scopeRules.scopeBase,
+        ...this.routeRuntime.scopeBase,
       });
     },
     handleRequest (request, reply) {
-      const scope = server.buildScope(request, this.scopeRules);
+      const scope = server.buildScope(request, this.routeRuntime);
       server.infoEvent(2, () => [
         `${this.name}:`, scope.resourceId,
         "\n\trequest.query:", request.query,

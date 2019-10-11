@@ -1,11 +1,11 @@
 // @flow
 
-import type RestAPIServer, { Route } from "~/rest-api-spindle/fastify/RestAPIServer";
+import type RestAPIService, { Route } from "~/rest-api-spindle/fastify/RestAPIService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _createToMappingsParts, _resolveMappingResource } from "./_mappingHandlerOps";
 
-export default function createRouteHandler (server: RestAPIServer, route: Route) {
+export default function createRouteHandler (server: RestAPIService, route: Route) {
   return {
     category: "mapping", method: "POST", fastifyRoute: route,
     requiredRuntimeRules: ["resourceId", "mappingName"],
@@ -14,7 +14,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       createResourceAndMapping: ["constant", route.config.createResourceAndMapping],
     },
     prepare (/* fastify */) {
-      this.scopeRules = server.prepareScopeRules(this);
+      this.routeRuntime = server.prepareRuntime(this);
       const { toMappingsResults, relationsStepIndex } = _createToMappingsParts(server, route);
 
       if (relationsStepIndex > 1) this.toSource = toMappingsResults.slice(0, relationsStepIndex);
@@ -28,14 +28,14 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
     async preload () {
       const viewFocus = server.getViewFocus();
       if (!viewFocus) throw new Error(`Can't locate viewFocus for route: ${this.name}`);
-      await server.preloadScopeRules(this.scopeRules);
-      this.scopeRules.scopeBase = Object.freeze({
+      await server.preloadRuntime(this.routeRuntime);
+      this.routeRuntime.scopeBase = Object.freeze({
         viewFocus,
-        ...this.scopeRules.scopeBase,
+        ...this.routeRuntime.scopeBase,
       });
     },
     handleRequest (request, reply) {
-      const scope = server.buildScope(request, this.scopeRules);
+      const scope = server.buildScope(request, this.routeRuntime);
       server.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId, scope.mappingName,
         "\n\trequest.query:", request.query,
@@ -107,7 +107,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
             "\n\tscope.resource:", ...dumpObject(scope.resource),
             "\n\tscope.source:", ...dumpObject(scope.source),
             "\n\tscope.target:", ...dumpObject(scope.target),
-            "\n\tscopeRules:", ...dumpObject(this.scopeRules),
+            "\n\trouteRuntime:", ...dumpObject(this.routeRuntime),
         );
       });
     },

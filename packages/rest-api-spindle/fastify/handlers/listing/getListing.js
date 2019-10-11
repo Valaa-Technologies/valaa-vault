@@ -1,19 +1,19 @@
 // @flow
 
-import type RestAPIServer, { Route } from "~/rest-api-spindle/fastify/RestAPIServer";
+import type RestAPIService, { Route } from "~/rest-api-spindle/fastify/RestAPIService";
 
 import { dumpify, dumpObject, thenChainEagerly } from "~/tools";
 
 import { _verifyResourceAuthorization } from "../resource/_resourceHandlerOps";
 
-export default function createRouteHandler (server: RestAPIServer, route: Route) {
+export default function createRouteHandler (server: RestAPIService, route: Route) {
   return {
     category: "listing", method: "GET", fastifyRoute: route,
     requiredRuntimeRules: [],
     builtinRules: {},
     prepare (/* fastify */) {
       try {
-        this.scopeRules = server.prepareScopeRules(this);
+        this.routeRuntime = server.prepareRuntime(this);
         this.toPreloads = ["§->"];
         if (!server.addSchemaStep(route.config, this.toPreloads)) {
           if (route.config.valos.hardcodedResources) return;
@@ -53,7 +53,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
             "\n\tresources:", ...[].concat(...vTargets.map(vTarget => (!vTarget ? ["\n\t: <null>"]
                 : ["\n\t:", vTarget.debugId()]))));
         await Promise.all(vTargets.map(vTarget => vTarget && vTarget.activate())
-            .concat(server.preloadScopeRules(this.scopeRules)));
+            .concat(server.preloadRuntime(this.routeRuntime)));
 
         server.infoEvent("Done preloading route:", this.name,
             "\n\tresources:", ...[].concat(...vTargets.map(vTarget => (!vTarget
@@ -62,10 +62,10 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
               "\n\t\t:", vTarget.getConnection().isActive(),
                   String(vTarget.getConnection().getPartitionURI()),
             ]))));
-        this.scopeRules.scopeBase = Object.freeze({
+        this.routeRuntime.scopeBase = Object.freeze({
           subject: vIndexRoot,
           indexRoot: vIndexRoot,
-          ...this.scopeRules.scopeBase,
+          ...this.routeRuntime.scopeBase,
         });
       } catch (error) {
         throw server.wrapErrorEvent(error, new Error(`preload(${this.name})`),
@@ -76,7 +76,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       }
     },
     handleRequest (request, reply) {
-      const scope = server.buildScope(request, this.scopeRules);
+      const scope = server.buildScope(request, this.routeRuntime);
       const {
         filter, // unimplemented
         sort, offset, limit, ids,

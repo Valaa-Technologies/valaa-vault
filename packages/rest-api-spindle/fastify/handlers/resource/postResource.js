@@ -2,12 +2,12 @@
 
 import { Vrapper } from "~/engine";
 
-import type RestAPIServer, { Route } from "~/rest-api-spindle/fastify/RestAPIServer";
+import type RestAPIService, { Route } from "~/rest-api-spindle/fastify/RestAPIService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
 
-export default function createRouteHandler (server: RestAPIServer, route: Route) {
+export default function createRouteHandler (server: RestAPIService, route: Route) {
   return {
     category: "resource", method: "POST", fastifyRoute: route,
     requiredRuntimeRules: [],
@@ -15,7 +15,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       createResource: ["constant", route.config.createResource],
     },
     prepare (/* fastify */) {
-      this.scopeRules = server.prepareScopeRules(this);
+      this.routeRuntime = server.prepareRuntime(this);
 
       const toPatchTarget = ["§->"];
       server.buildKuery(route.config.resourceSchema, toPatchTarget);
@@ -24,18 +24,18 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
     async preload () {
       const viewFocus = server.getViewFocus();
       if (!viewFocus) throw new Error(`Can't locate viewFocus for route: ${this.name}`);
-      await server.preloadScopeRules(this.scopeRules);
+      await server.preloadRuntime(this.routeRuntime);
       const connection = await server.getDiscourse().acquireConnection(
           route.config.valos.subject, { newPartition: false }).asActiveConnection();
       this.scopeRules.scopeBase = Object.freeze({
         viewFocus,
         subject: server.getEngine().getVrapper(
             [connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) }]),
-        ...this.scopeRules.scopeBase,
+        ...this.routeRuntime.scopeBase,
       });
     },
     handleRequest (request, reply) {
-      const scope = server.buildScope(request, this.scopeRules);
+      const scope = server.buildScope(request, this.routeRuntime);
       server.infoEvent(1, () => [
         `${this.name}:`,
         "\n\trequest.query:", request.query,
@@ -93,7 +93,7 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
             "\n\tscope.resource:", ...dumpObject(scope.resource),
             "\n\tscope.source:", ...dumpObject(scope.source),
             "\n\tscope.target:", ...dumpObject(scope.target),
-            "\n\tscopeRules:", ...dumpObject(this.scopeRules),
+            "\n\trouteRuntime:", ...dumpObject(this.routeRuntime),
         );
       });
     },

@@ -9,7 +9,7 @@ export default valosheath.exportSpindle({
 
   onViewAttached (view, viewName) {
     const patchWith = require("@valos/tools/patchWith").default;
-    const RestAPIServer = require("./fastify/RestAPIServer").default;
+    const RestAPIService = require("./fastify/RestAPIService").default;
     const configRequire = (module) =>
         valosheath.require(path.isAbsolute(module) ? module : path.join(process.cwd(), module));
 
@@ -35,8 +35,8 @@ export default valosheath.exportSpindle({
         prefixAPI.identity = Object.assign(Object.create(valosheath.identity), prefixAPI.identity);
       }
     });
-    view._restAPIServer = new RestAPIServer(options);
-    return view._restAPIServer.start();
+    view._restAPIService = new RestAPIService(options);
+    return view._restAPIService.start();
   },
 });
 

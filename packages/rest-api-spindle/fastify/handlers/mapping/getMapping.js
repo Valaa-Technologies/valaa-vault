@@ -1,11 +1,11 @@
 // @flow
 
-import type RestAPIServer, { Route } from "~/rest-api-spindle/fastify/RestAPIServer";
+import type RestAPIService, { Route } from "~/rest-api-spindle/fastify/RestAPIService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _createTargetedToMappingFields, _resolveMappingResource } from "./_mappingHandlerOps";
 
-export default function createRouteHandler (server: RestAPIServer, route: Route) {
+export default function createRouteHandler (server: RestAPIService, route: Route) {
   return {
     category: "mapping", method: "GET", fastifyRoute: route,
     requiredRuntimeRules: ["resourceId", "mappingName", "targetId"],
@@ -13,15 +13,15 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
       mappingName: ["constant", route.config.mappingName],
     },
     prepare (/* fastify */) {
-      this.scopeRules = server.prepareScopeRules(this);
+      this.routeRuntime = server.prepareRuntime(this);
       this.toMappingFields = _createTargetedToMappingFields(server, route, ["~$:targetId"])
           .toMappingFields;
     },
     preload () {
-      return server.preloadScopeRules(this.scopeRules);
+      return server.preloadRuntime(this.routeRuntime);
     },
     handleRequest (request, reply) {
-      const scope = server.buildScope(request, this.scopeRules);
+      const scope = server.buildScope(request, this.routeRuntime);
       server.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId, scope.mappingName, scope.targetId,
         "\n\trequest.query:", request.query,

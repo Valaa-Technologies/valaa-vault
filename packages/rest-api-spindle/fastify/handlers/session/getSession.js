@@ -1,11 +1,11 @@
 // @flow
 
-import type RestAPIServer, { Route } from "~/rest-api-spindle/fastify/RestAPIServer";
+import type RestAPIService, { Route } from "~/rest-api-spindle/fastify/RestAPIService";
 import {
   burlaesgDecode, burlaesgEncode, hs256JWTEncode,
 } from "~/rest-api-spindle/fastify/security";
 
-export default function createRouteHandler (server: RestAPIServer, route: Route) {
+export default function createRouteHandler (server: RestAPIService, route: Route) {
   return {
     category: "session", method: "GET", fastifyRoute: route,
     requiredRuntimeRules: [
@@ -23,15 +23,15 @@ export default function createRouteHandler (server: RestAPIServer, route: Route)
         throw new Error("Cannot prepare session route GET: identity not configured");
       }
       this.builtinRules.userAgentState = ["cookies", this._identity.getClientCookieName()];
-      this.scopeRules = server.prepareScopeRules(this);
+      this.routeRuntime = server.prepareRuntime(this);
       this._clientURI = this._identity.clientURI;
       this._secret = this._identity.clientSecret;
     },
     preload () {
-      return server.preloadScopeRules(this.scopeRules);
+      return server.preloadRuntime(this.routeRuntime);
     },
     handleRequest (request, reply) {
-      const scope = server.buildScope(request, this.scopeRules);
+      const scope = server.buildScope(request, this.routeRuntime);
       server.infoEvent(1, () => [
         "\n\trequest.query:", request.query,
         "\n\trequest.cookies:", request.cookies,

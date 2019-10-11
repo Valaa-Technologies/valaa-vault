@@ -17,7 +17,7 @@ const Fastify = require("fastify");
 const FastifySwaggerPlugin = require("fastify-swagger");
 const FastifyCookiePlugin = require("fastify-cookie");
 
-export default class RestAPIServer extends FabricEventTarget {
+export default class RestAPIService extends FabricEventTarget {
   constructor ({ view, viewName, port, address, fastify, prefixes, ...rest }) {
     super(rest.name, rest.verbosity, view._gateway.getLogger());
     this._view = view;
@@ -185,10 +185,10 @@ export default class RestAPIServer extends FabricEventTarget {
     }
   }
 
-  prepareScopeRules ({
+  prepareRuntime ({
     category, method, fastifyRoute, builtinRules, requiredRules, requiredRuntimeRules,
   }) {
-    const wrap = new Error(`prepareScopeRules(${category} ${method} ${fastifyRoute.url})`);
+    const wrap = new Error(`prepareRuntime(${category} ${method} ${fastifyRoute.url})`);
     let ret;
     try {
       ret = {
@@ -455,9 +455,9 @@ export default class RestAPIServer extends FabricEventTarget {
     }
   }
 
-  async preloadScopeRules (scopeRules) {
+  async preloadRuntime (routeRuntime) {
     const activations =  [];
-    scopeRules.scopeBase = patchWith({}, scopeRules.scopeBase, {
+    routeRuntime.scopeBase = patchWith({}, routeRuntime.scopeBase, {
       preExtend: (tgt, patch) => {
         if (!Array.isArray(patch) || (patch[0] !== "~ref")) return undefined;
         const vResource = this.getEngine().getVrapper(patch[1]);

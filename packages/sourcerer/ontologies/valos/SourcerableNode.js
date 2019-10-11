@@ -40,7 +40,7 @@ be eventually locateable from anywhere.`,
 
   partitionRoot: {
     "@type": "valos-raem:GeneratedField",
-    "rdfs:domain": "valos:Resource",
+    "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "valos:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "valos-raem:expressor": "$valos-sourcerer:resolvePartitionRoot",
@@ -52,7 +52,7 @@ valos:authorityURL).`,
 
   partitionURL: {
     "@type": "valos-raem:GeneratedField",
-    "rdfs:domain": "valos:Resource",
+    "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "xsd:anyURI", // still a literal
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "valos-raem:expressor": "$valos-sourcerer:resolvePartitionURL",
@@ -63,7 +63,7 @@ absent sourcerable as is known by the current view of the world.`,
 
   url: {
     "@type": "valos-raem:GeneratedField",
-    "rdfs:domain": "valos:Resource",
+    "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "xsd:anyURI", // still a literal
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
     "valos-raem:expressor": ["$valk:add:@!$V:partitionURL@", [":", "#"], ":@!$V:id@"],
@@ -81,7 +81,7 @@ of this resource`,
     "revdoc:deprecatedInFavorOf": "valos:partitionRoot",
     "valos-raem:aliasOf": "valos:partitionRoot",
     "rdfs:subPropertyOf": "valos:partitionRoot",
-    "rdfs:domain": "valos:Resource",
+    "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "valos:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "valos-raem:expressor": "$valos-sourcerer:resolvePartitionRoot",
@@ -95,7 +95,7 @@ of this resource`,
     "revdoc:deprecatedInFavorOf": "valos:partitionURL",
     "valos-raem:aliasOf": "valos:partitionURL",
     "rdfs:subPropertyOf": "valos:partitionURL",
-    "rdfs:domain": "valos:Resource",
+    "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "xsd:anyURI",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":

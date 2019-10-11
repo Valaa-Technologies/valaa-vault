@@ -9,6 +9,10 @@ schemes, external APIs, valosheath APIs, etc.
 
 Custom spindles can be plugged into workers for arbitrary code but are
 only available on inspire if they are explicitly bundled with it.
+
+Spindles load their configuration from the gateway revelation. When a
+particular spindle is configured for a perspire worker its
+configuration is typically placed as a tool the toolset.
 `;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "spindle")

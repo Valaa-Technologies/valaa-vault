@@ -5,17 +5,17 @@ module.exports = function extendOntology (prefix, prefixIRI, prefixes = {}, voca
   const moreContext = {};
   Object.entries(vocabulary).forEach(([idSuffix, definition]) => {
     let term;
-    function define () {
+    function defineContextTerm () {
       if (!term) moreContext[`${prefix}:${idSuffix}`] = term = { "@id": `${prefixIRI}${idSuffix}` };
       return term;
     }
     const range = definition["rdfs:range"];
-    if (range === "rdfs:List") define()["@container"] = "@list";
+    if (range === "rdfs:List") defineContextTerm()["@container"] = "@list";
     if (range
         && (range.slice(0, 4) !== "xsd:")
         && (range !== "rdfs:Literal")
         && (range !== "rdfs:Resource")) {
-      define()["@type"] = "@id";
+      defineContextTerm()["@type"] = "@id";
     }
   });
   return {

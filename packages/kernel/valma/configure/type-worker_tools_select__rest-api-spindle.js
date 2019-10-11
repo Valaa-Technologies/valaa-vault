@@ -39,10 +39,10 @@ exports.handler = async (yargv) => {
 
   // Add/remove the rest API spindle to type-worker config
   const workerToolsetSpindles = vlm.getToolsetConfig("@valos/type-worker",
-      "commands", "perspire", "options", "spindle-id") || [];
+      "commands", "perspire", "options", "spindle-ids") || [];
   if (toolsetConfigUpdate.inUse && !workerToolsetSpindles.includes(vlm.toolset)) {
     vlm.updateToolsetConfig("@valos/type-worker",
-        { commands: { perspire: { options: { "spindle-id": [vlm.toolset] } } } });
+        { commands: { perspire: { options: { "spindle-ids": [vlm.toolset] } } } });
   } else if (!toolsetConfigUpdate.inUse && (workerToolsetSpindles.includes(vlm.toolset))) {
     vlm.warn(`Removing stowed toolset '${vlm.toolset
         }' from '@valos/type-worker' config spindles not implemented yet.`,

@@ -47,7 +47,7 @@ exports.builder = (yargs) => yargs.option({
     description: `Enable interactive console. Console input is interpreted as valoscript and ${
         ""} executed using the exec.this as 'this' (or view if exec is not specified)`,
   },
-  "spindle-id": {
+  "spindle-ids": {
     type: "string", array: true, default: [],
     description: `List of spindle id's which are require'd before gateway creation.`,
   },
@@ -142,7 +142,7 @@ exports.handler = async (yargv) => {
   vlm.clock("perspire.handler", "gateway.create", "server = new PerspireServer");
   const server = new PerspireServer({
     logger: vlm,
-    spindleIds: yargv["spindle-id"],
+    spindleIds: yargv["spindle-ids"],
     cacheBasePath: yargv.cacheBasePath,
     siteRoot,
     domainRoot,

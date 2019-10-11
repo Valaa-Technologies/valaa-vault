@@ -53,7 +53,7 @@ resource.`,
   },
 
   prototype: {
-    "@type": "valos-raem:PrimaryField",
+    "@type": "valos-raem:EventLoggedField",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
     "valos-raem:coupledField": "valos:derivations",
@@ -183,7 +183,7 @@ not a ghost itself.`,
   },
 
   ghostOwner: {
-    "@type": "valos-raem:PrimaryField",
+    "@type": "valos-raem:EventLoggedField",
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },

@@ -1,11 +1,11 @@
 // @flow
 
-import type RestAPIService, { Route } from "~/rest-api-spindle/fastify/RestAPIService";
+import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _createTargetedToMapping, _resolveMappingResource } from "./_mappingHandlerOps";
 
-export default function createRouteHandler (server: RestAPIService, route: Route) {
+export default function createRouteHandler (mapper: MapperService, route: Route) {
   return {
     category: "mapping", method: "DELETE", fastifyRoute: route,
     requiredRuntimeRules: ["resourceId", "mappingName", "targetId"],
@@ -13,26 +13,26 @@ export default function createRouteHandler (server: RestAPIService, route: Route
       mappingName: ["constant", route.config.mappingName],
     },
     prepare (/* fastify */) {
-      this.routeRuntime = server.prepareRuntime(this);
-      const { toMapping } = _createTargetedToMapping(server, route, ["~$:targetId"]);
+      this.routeRuntime = mapper.createRouteRuntime(this);
+      const { toMapping } = _createTargetedToMapping(mapper, route, ["~$:targetId"]);
       this.toMapping = toMapping;
       /*
       const toRelations = ["§->",
           ...route.config.mappingName.split("/").slice(0, -1).map(name => ["§..", name])];
-      server.buildKuery(route.config.relationSchema, toRelations);
+      mapper.buildKuery(route.config.relationSchema, toRelations);
       toRelations.splice(-1);
       */
     },
     preload () {
-      return server.preloadRuntime(this.routeRuntime);
+      return mapper.preloadRuntimeResources(this.routeRuntime);
     },
     handleRequest (request, reply) {
-      const scope = server.buildScope(request, this.routeRuntime);
-      server.infoEvent(1, () => [
+      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+      mapper.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId, scope.mappingName, scope.targetId,
         "\n\trequest.query:", request.query,
       ]);
-      if (_resolveMappingResource(server, route, request, reply, scope)) return true;
+      if (_resolveMappingResource(mapper, route, request, reply, scope)) return true;
       scope.mapping = scope.resource.get(this.toMapping, { scope });
       if (scope.mapping === undefined) {
         reply.code(404);
@@ -49,14 +49,14 @@ export default function createRouteHandler (server: RestAPIService, route: Route
           const results = "DESTROYED";
           reply.code(200);
           reply.send(results);
-          server.infoEvent(2, () => [
+          mapper.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),
           ]);
           return true;
         },
       ], (error) => {
-        throw server.wrapErrorEvent(error, wrap,
+        throw mapper.wrapErrorEvent(error, wrap,
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\tscope.mapping:", ...dumpObject(scope.mapping),
           "\n\tscope.resource:", ...dumpObject(scope.resource),

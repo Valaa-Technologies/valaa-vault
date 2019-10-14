@@ -1,11 +1,11 @@
 // @flow
 
-import type RestAPIService, { Route } from "~/rest-api-spindle/fastify/RestAPIService";
+import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _createTargetedToMappingFields, _resolveMappingResource } from "./_mappingHandlerOps";
 
-export default function createRouteHandler (server: RestAPIService, route: Route) {
+export default function createRouteHandler (mapper: MapperService, route: Route) {
   return {
     category: "mapping", method: "PATCH", fastifyRoute: route,
     requiredRuntimeRules: ["resourceId", "mappingName", "targetId"],
@@ -14,29 +14,29 @@ export default function createRouteHandler (server: RestAPIService, route: Route
       createMapping: ["constant", route.config.createMapping],
     },
     prepare (/* fastify */) {
-      this.routeRuntime = server.prepareRuntime(this);
+      this.routeRuntime = mapper.createRouteRuntime(this);
       const { toMappingFields, relationsStepIndex } =
-          _createTargetedToMappingFields(server, route, ["~$:targetId"]);
+          _createTargetedToMappingFields(mapper, route, ["~$:targetId"]);
       if (relationsStepIndex > 1) this.toSource = toMappingFields.slice(0, relationsStepIndex);
       this.toMapping = toMappingFields.slice(0, -2).concat(0);
     },
     async preload () {
-      const viewFocus = server.getViewFocus();
+      const viewFocus = mapper.getViewFocus();
       if (!viewFocus) throw new Error(`Can't locate viewFocus for route: ${this.name}`);
-      await server.preloadRuntime(this.routeRuntime);
+      await mapper.preloadRuntimeResources(this.routeRuntime);
       this.routeRuntime.scopeBase = Object.freeze({
         viewFocus,
         ...this.routeRuntime.scopeBase,
       });
     },
     handleRequest (request, reply) {
-      const scope = server.buildScope(request, this.routeRuntime);
-      server.infoEvent(1, () => [
+      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+      mapper.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId, scope.mappingName, scope.targetId,
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
       ]);
-      if (_resolveMappingResource(server, route, request, reply, scope)) return true;
+      if (_resolveMappingResource(mapper, route, request, reply, scope)) return true;
       const vExistingMapping = scope.resource.get(this.toMapping, { scope });
       if (!vExistingMapping) {
         if (!scope.createMapping) {
@@ -44,7 +44,7 @@ export default function createRouteHandler (server: RestAPIService, route: Route
           reply.send(`${this.name} CREATE is disabled: no configuration for mapping creation`);
           return true;
         }
-        scope.target = server._engine.tryVrapper([scope.targetId]);
+        scope.target = mapper._engine.tryVrapper([scope.targetId]);
         if (!scope.target) {
           reply.code(404);
           reply.send(`No such ${route.config.targetTypeName} route target: ${scope.targetId}`);
@@ -52,7 +52,7 @@ export default function createRouteHandler (server: RestAPIService, route: Route
         }
       }
       const wrap = new Error(this.name);
-      const discourse = server.getDiscourse().acquireFabricator();
+      const discourse = mapper.getDiscourse().acquireFabricator();
       return thenChainEagerly(discourse, [
         () => {
           if (vExistingMapping) return vExistingMapping;
@@ -63,7 +63,7 @@ export default function createRouteHandler (server: RestAPIService, route: Route
           // and explicit instantiate.
           return scope.viewFocus.do(scope.createMapping, { discourse, scope });
         },
-        vMapping => server.patchResource((scope.mapping = vMapping), request.body,
+        vMapping => mapper.updateResource((scope.mapping = vMapping), request.body,
             { discourse, scope, route }),
         () => discourse.releaseFabricator(),
         eventResult => eventResult
@@ -71,11 +71,11 @@ export default function createRouteHandler (server: RestAPIService, route: Route
         (/* persistedEvent */) => {
           const results = {
             $V: {
-              href: `${server.getResourceHRefPrefix(route.config.resourceSchema)}${
+              href: `${mapper.getResourceHRefPrefix(route.config.resourceSchema)}${
                 scope.resourceId}/${scope.mappingName}/${scope.targetId}`,
               rel: "self",
               target: { $V: {
-                href: `${server.getResourceHRefPrefix(route.config.targetSchema)}${
+                href: `${mapper.getResourceHRefPrefix(route.config.targetSchema)}${
                   scope.targetId}`,
                 rel: "self",
               } },
@@ -83,7 +83,7 @@ export default function createRouteHandler (server: RestAPIService, route: Route
           };
           reply.code(vExistingMapping ? 200 : 201);
           reply.send(JSON.stringify(results, null, 2));
-          server.infoEvent(2, () => [
+          mapper.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),
           ]);
@@ -91,7 +91,7 @@ export default function createRouteHandler (server: RestAPIService, route: Route
         },
       ], (error) => {
         discourse.releaseFabricator({ abort: error });
-        throw server.wrapErrorEvent(error, wrap,
+        throw mapper.wrapErrorEvent(error, wrap,
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\trequest.body:", ...dumpObject(request.body),
           "\n\tscope.resource:", ...dumpObject(scope.resource),

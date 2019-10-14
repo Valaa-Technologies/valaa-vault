@@ -1,11 +1,11 @@
 // @flow
 
-import type RestAPIService, { Route } from "~/rest-api-spindle/fastify/RestAPIService";
+import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
 import {
   burlaesgDecode, burlaesgEncode, hs256JWTEncode,
 } from "~/rest-api-spindle/fastify/security";
 
-export default function createRouteHandler (server: RestAPIService, route: Route) {
+export default function createRouteHandler (mapper: MapperService, route: Route) {
   return {
     category: "session", method: "GET", fastifyRoute: route,
     requiredRuntimeRules: [
@@ -18,21 +18,21 @@ export default function createRouteHandler (server: RestAPIService, route: Route
     ],
     builtinRules: {},
     prepare (/* fastify */) {
-      this._identity = server.getIdentity();
+      this._identity = mapper.getIdentity();
       if (!this._identity) {
         throw new Error("Cannot prepare session route GET: identity not configured");
       }
       this.builtinRules.userAgentState = ["cookies", this._identity.getClientCookieName()];
-      this.routeRuntime = server.prepareRuntime(this);
+      this.routeRuntime = mapper.createRouteRuntime(this);
       this._clientURI = this._identity.clientURI;
       this._secret = this._identity.clientSecret;
     },
     preload () {
-      return server.preloadRuntime(this.routeRuntime);
+      return mapper.preloadRuntimeResources(this.routeRuntime);
     },
     handleRequest (request, reply) {
-      const scope = server.buildScope(request, this.routeRuntime);
-      server.infoEvent(1, () => [
+      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+      mapper.infoEvent(1, () => [
         "\n\trequest.query:", request.query,
         "\n\trequest.cookies:", request.cookies,
       ]);
@@ -88,7 +88,7 @@ export default function createRouteHandler (server: RestAPIService, route: Route
         reply.redirect(scope.clientRedirectPath);
         return true;
       } catch (error) {
-        throw server.wrapErrorEvent(error,
+        throw mapper.wrapErrorEvent(error,
             new Error(`authorizeSessionWithGrant(${this._clientURI})`),
             "\n\ttimeStamp:", timeStamp,
             "\n\tauthorizationGrant:", scope.authorizationGrant,

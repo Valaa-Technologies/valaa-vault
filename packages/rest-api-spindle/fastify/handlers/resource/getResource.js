@@ -1,39 +1,39 @@
 // @flow
 
-import type RestAPIService, { Route } from "~/rest-api-spindle/fastify/RestAPIService";
+import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
 
-export default function createRouteHandler (server: RestAPIService, route: Route) {
+export default function createRouteHandler (mapper: MapperService, route: Route) {
   return {
     category: "resource", method: "GET", fastifyRoute: route,
     requiredRuntimeRules: ["resourceId"],
     builtinRules: {},
     prepare (/* fastify */) {
-      this.routeRuntime = server.prepareRuntime(this);
+      this.routeRuntime = mapper.createRouteRuntime(this);
       this.toResourceFields = ["§->"];
-      server.buildKuery(route.schema.response[200], this.toResourceFields);
+      mapper.buildKuery(route.schema.response[200], this.toResourceFields);
       this.hardcodedResources = route.config.valos.hardcodedResources;
     },
     async preload () {
-      const connection = await server.getDiscourse().acquireConnection(
+      const connection = await mapper.getDiscourse().acquireConnection(
           route.config.valos.subject, { newPartition: false }).asActiveConnection();
         subject: server.getEngine().getVrapper(
-      await server.preloadRuntime(this.routeRuntime);
+      await mapper.preloadRuntimeResources(this.routeRuntime);
       this.routeRuntime.scopeBase = Object.freeze({
             [connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) }]),
         ...this.routeRuntime.scopeBase,
       });
     },
     handleRequest (request, reply) {
-      const scope = server.buildScope(request, this.routeRuntime);
-      server.infoEvent(2, () => [
+      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+      mapper.infoEvent(2, () => [
         `${this.name}:`, scope.resourceId,
         "\n\trequest.query:", request.query,
       ]);
-      if (_verifyResourceAuthorization(server, route, request, reply, scope)) return true;
-      scope.resource = server._engine.tryVrapper([scope.resourceId]);
+      if (_verifyResourceAuthorization(mapper, route, request, reply, scope)) return true;
+      scope.resource = mapper._engine.tryVrapper([scope.resourceId]);
       if (!scope.resource) {
         reply.code(404);
         reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
@@ -44,11 +44,11 @@ export default function createRouteHandler (server: RestAPIService, route: Route
         vResource => vResource.get(this.toResourceFields, { scope, verbosity: 0 })
             || this.hardcodedResources[scope.resourceId],
         (fields)
-            && (results => server._pickResultFields(results, fields, route.schema.response[200])),
+            && (results => mapper.pickResultFields(results, fields, route.schema.response[200])),
         results => {
           reply.code(200);
           reply.send(JSON.stringify(results, null, 2));
-          server.infoEvent(2, () => [
+          mapper.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),
           ]);

@@ -2,12 +2,12 @@
 
 import { Vrapper } from "~/engine";
 
-import type RestAPIService, { Route } from "~/rest-api-spindle/fastify/RestAPIService";
+import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
 
-export default function createRouteHandler (server: RestAPIService, route: Route) {
+export default function createRouteHandler (mapper: MapperService, route: Route) {
   return {
     category: "resource", method: "POST", fastifyRoute: route,
     requiredRuntimeRules: [],
@@ -15,19 +15,19 @@ export default function createRouteHandler (server: RestAPIService, route: Route
       createResource: ["constant", route.config.createResource],
     },
     prepare (/* fastify */) {
-      this.routeRuntime = server.prepareRuntime(this);
+      this.routeRuntime = mapper.createRouteRuntime(this);
 
       const toPatchTarget = ["§->"];
-      server.buildKuery(route.config.resourceSchema, toPatchTarget);
+      mapper.buildKuery(route.config.resourceSchema, toPatchTarget);
       // if (toPatchTarget.length > 1) this.toPatchTarget = toPatchTarget;
     },
     async preload () {
-      const viewFocus = server.getViewFocus();
+      const viewFocus = mapper.getViewFocus();
       if (!viewFocus) throw new Error(`Can't locate viewFocus for route: ${this.name}`);
-      await server.preloadRuntime(this.routeRuntime);
-      const connection = await server.getDiscourse().acquireConnection(
+      await mapper.preloadRuntimeResources(this.routeRuntime);
+      const connection = await mapper.getDiscourse().acquireConnection(
           route.config.valos.subject, { newPartition: false }).asActiveConnection();
-      this.scopeRules.scopeBase = Object.freeze({
+      this.routeRuntime.scopeBase = Object.freeze({
         viewFocus,
         subject: server.getEngine().getVrapper(
             [connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) }]),
@@ -35,20 +35,20 @@ export default function createRouteHandler (server: RestAPIService, route: Route
       });
     },
     handleRequest (request, reply) {
-      const scope = server.buildScope(request, this.routeRuntime);
-      server.infoEvent(1, () => [
+      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+      mapper.infoEvent(1, () => [
         `${this.name}:`,
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
       ]);
-      if (_verifyResourceAuthorization(server, route, request, reply, scope)) return true;
+      if (_verifyResourceAuthorization(mapper, route, request, reply, scope)) return true;
       if (!scope.createResource) {
         reply.code(405);
         reply.send(`${this.name} is disabled: no scope.createResource defined`);
         return false;
       }
       const wrap = new Error(`resource POST ${route.url}`);
-      const discourse = server.getDiscourse().acquireFabricator();
+      const discourse = mapper.getDiscourse().acquireFabricator();
       return thenChainEagerly(discourse, [
         () => {
           console.log("resource POST dump:", ...dumpObject(scope.createResource),
@@ -62,7 +62,7 @@ export default function createRouteHandler (server: RestAPIService, route: Route
           }
           scope.resource = vResource;
           if (request.body) {
-            server.patchResource(vResource, request.body,
+            mapper.updateResource(vResource, request.body,
                   { discourse, scope, route, toPatchTarget: this.toPatchTarget });
           }
         },
@@ -73,13 +73,13 @@ export default function createRouteHandler (server: RestAPIService, route: Route
           const resourceId = scope.resource.getRawId();
           const results = {
             $V: {
-              href: `${server.getResourceHRefPrefix(route.config.resourceSchema)}${resourceId}`,
+              href: `${mapper.getResourceHRefPrefix(route.config.resourceSchema)}${resourceId}`,
               rel: "self",
             },
           };
           reply.code(201);
           reply.send(JSON.stringify(results, null, 2));
-          server.infoEvent(2, () => [
+          mapper.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),
           ]);
@@ -87,7 +87,7 @@ export default function createRouteHandler (server: RestAPIService, route: Route
         },
       ], (error) => {
         if (discourse) discourse.releaseFabricator({ abort: error });
-        throw server.wrapErrorEvent(error, wrap,
+        throw mapper.wrapErrorEvent(error, wrap,
             "\n\trequest.query:", ...dumpObject(request.query),
             "\n\trequest.body:", ...dumpObject(request.body),
             "\n\tscope.resource:", ...dumpObject(scope.resource),

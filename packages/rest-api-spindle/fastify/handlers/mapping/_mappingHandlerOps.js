@@ -6,19 +6,19 @@ import { verifySessionAuthorization } from "~/rest-api-spindle/fastify/security"
 
 import { _addToRelationsSourceSteps } from "../_handlerOps";
 
-export function _resolveMappingResource (server, route, request, reply, scope) {
-  scope.resource = server._engine.tryVrapper([scope.resourceId]);
+export function _resolveMappingResource (mapper, route, request, reply, scope) {
+  scope.resource = mapper.getEngine().tryVrapper([scope.resourceId]);
   if (!scope.resource || !(scope.resource instanceof Vrapper)) {
     reply.code(404);
     reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
     return true;
   }
-  return verifySessionAuthorization(server, route, request, reply, scope, scope.resource);
+  return verifySessionAuthorization(mapper, route, request, reply, scope, scope.resource);
 }
 
-export function _createTargetedToMapping (server, route, toTargetId) {
+export function _createTargetedToMapping (mapper, route, toTargetId) {
   const { toMappingFields, relationsStepIndex } =
-      _createTargetedToMappingFields(server, route, toTargetId);
+      _createTargetedToMappingFields(mapper, route, toTargetId);
   toMappingFields.splice(-2, 1);
   return {
     toMapping: toMappingFields,
@@ -26,8 +26,8 @@ export function _createTargetedToMapping (server, route, toTargetId) {
   };
 }
 
-export function _createTargetedToMappingFields (server, route, toTargetId) {
-  const { toMappingsResults, relationsStepIndex } = _createToMappingsParts(server, route);
+export function _createTargetedToMappingFields (mapper, route, toTargetId) {
+  const { toMappingsResults, relationsStepIndex } = _createToMappingsParts(mapper, route);
   toMappingsResults.splice(relationsStepIndex + 1, 0,
       ["~filter", ["~==", ["~->:target:rawId"], toTargetId]]);
   return {
@@ -36,11 +36,11 @@ export function _createTargetedToMappingFields (server, route, toTargetId) {
   };
 }
 
-export function _createToMappingsParts (server, route) {
+export function _createToMappingsParts (mapper, route) {
   const toMappingsResults = ["§->"];
-  _addToRelationsSourceSteps(server, route.config.resourceSchema, route.config.mappingName,
+  _addToRelationsSourceSteps(mapper, route.config.resourceSchema, route.config.mappingName,
       toMappingsResults);
-  server.buildKuery(route.config.relationSchema, toMappingsResults);
+  mapper.buildKuery(route.config.relationSchema, toMappingsResults);
   const relationsStepIndex = toMappingsResults.indexOf("relations");
   if (!(relationsStepIndex >= 0)) {
     throw new Error(`Could not find 'relations' step from kuery built from relationSchema while${

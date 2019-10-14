@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>ValOS state serialization format</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"stateFormat"};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body>
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter">ValOS state format specification for serializing valospace state into
+a JSON-LD document with a well-defined underlying semantic ontology.
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter">      <p>This document is a stub of a specification and only contains a single
+example that is used as the model for the specification.</p>
+      <p>This document is part of the library workspace <a href="https://valospace.org/sourcerer" class="vdoc type-revdoc-package"><em>@valos/sourcerer</em></a> (of domain <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which is ValOS Sourcerer API, schema</p>
+
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter">      <p>Below is an example state serialization of a hypertwin resource.</p>
+      <p><pre><code><span class="vdoc type-vdoc-node">[{
+  &#x22;@context&#x22;: [{
+    &#x22;$&#x22;: &#x22;https://valospace.org/#&#x22;,
+    &#x22;@vocab&#x22;: &#x22;urn:valos:.:&#x22;,
+
+    &#x22;/.&#x22;: { &#x22;@id&#x22;: &#x22;$:properties&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@index&#x22; },
+    &#x22;/.-&#x22;: { &#x22;@id&#x22;: &#x22;$:value&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+    &#x22;/+&#x22;: { &#x22;@id&#x22;: &#x22;$:entities&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@index&#x22; },
+    &#x22;/+-&#x22;: { &#x22;@id&#x22;: &#x22;$:parent&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+    &#x22;/&#x27;&#x22;: { &#x22;@id&#x22;: &#x22;$:medias&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@index&#x22; },
+    &#x22;/&#x27;-&#x22;: { &#x22;@id&#x22;: &#x22;$:content&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+    &#x22;/*&#x22;: { &#x22;@id&#x22;: &#x22;$:connectedRelations&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@list&#x22; },
+    &#x22;/*=&#x3E;&#x22;: { &#x22;@id&#x22;: &#x22;$:pairedOutRelations&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+    &#x22;/*=&#x3C;&#x22;: { &#x22;@id&#x22;: &#x22;$:pairedInRelations&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+
+    &#x22;/&#x3C;-&#x22;: { &#x22;@id&#x22;: &#x22;$:source&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+    &#x22;/&#x3E;-&#x22;: { &#x22;@id&#x22;: &#x22;$:target&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+    &#x22;/&#x3C;=&#x22;: { &#x22;@id&#x22;: &#x22;$:pairedSource&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+    &#x22;/&#x3E;=&#x22;: { &#x22;@id&#x22;: &#x22;$:pairedTarget&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+
+    &#x22;$!u4&#x22;: { &#x22;@id&#x22;: &#x22;urn:valos:$!u4:&#x22;, &#x22;@prefix&#x22;: true },
+    &#x22;$!pw&#x22;: { &#x22;@id&#x22;: &#x22;urn:valos:$!pw:&#x22;, &#x22;@prefix&#x22;: true },
+
+    &#x22;$valos-sourcerer&#x22;: &#x22;https://valospace.org/sourcerer#&#x22;,
+    &#x22;/hasGlobal&#x22;: { &#x22;@id&#x22;: &#x22;$valos-sourcerer:hasGlobal&#x22;, &#x22;@container&#x22;: &#x22;@type&#x22; },
+
+    &#x22;$pot&#x22;: &#x22;https://oftrust/#&#x22;,
+    &#x22;^pot-hypertwin-index&#x22;: &#x22;$!u4:55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0&#x22;
+  }, {
+    &#x22;^thistwinroot&#x22;: &#x22;^pot-hypertwin-index:@~$!pw$:@.$pot@-:7741938f-801a-4892-9cf0-dd59bd8c9166@&#x22;,
+    &#x22;^user1&#x22;: &#x22;^pot-hypertwin-index:@~$!pw$:@.$pot@-:u535-b457-1710-aaaa-bbbbccccdddd@&#x22;,
+    &#x22;^user2&#x22;: &#x22;^pot-hypertwin-index:@~$!pw$:@.$pot@-:u535-b457-1710-dddd-eeeeffff0000@&#x22;
+  }],
+  &#x22;@id&#x22;: &#x22;http://foobar.com/?id=$!u4:55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0:@~$!pw$:@.$pot@-:7741938f-801a-4892-9cf0-dd59bd8c9166@&#x22;,
+  &#x22;/hasGlobal&#x22;: {
+    &#x22;$:Entity&#x22;: [{
+      &#x22;@context&#x22;: { &#x22;^0&#x22;: &#x22;^thistwinroot:&#x22; },
+      &#x22;@id&#x22;: &#x22;^0:&#x22;,
+      &#x22;$:name&#x22;: &#x22;thistwinname&#x22;,
+      &#x22;$pot:&#x22;: &#x22;7741938f-801a-4892-9cf0-dd59bd8c9166&#x22;,
+      &#x22;$pot:area&#x22;: 400,
+      &#x22;blah%3Afoo&#x22;: &#x22;content&#x22;,
+      &#x22;foo&#x22;: { &#x22;@id&#x22;: &#x22;^0:@&#x27;:foo.vs&#x22; },
+      &#x22;title&#x22;: &#x22;sumtext&#x22;,
+      &#x22;/.&#x22;: {
+        &#x22;foo&#x22;: { &#x22;@id&#x22;: &#x22;^0:@.:foo&#x22;, &#x22;$:isFrozen&#x22;: true }
+      },
+      &#x22;/&#x27;&#x22;: {
+        &#x22;foo.vs&#x22;: { &#x22;@id&#x22;: &#x22;^0:@&#x27;:foo.vs&#x22; }
+      },
+      &#x22;/+&#x22;: {
+        &#x22;subBLEH&#x22;: { &#x22;@context&#x22;: { &#x22;^1&#x22;: &#x22;^0:@+:subBLEH&#x22; }, &#x22;@id&#x22;: &#x22;^1:&#x22; }
+      },
+      &#x22;/&#x27;&#x22;: {
+        &#x22;foo.vs&#x22;: { &#x22;@id&#x22;: &#x22;^0:@&#x27;:foo.vs&#x22; }
+      },
+      &#x22;/*&#x22;: [{
+          &#x22;@id&#x22;: &#x22;^0:@*:PERMISSIONS@_:15-1&#x22;,
+          &#x22;$:name&#x22;: &#x22;PERMISSIONS&#x22;,
+          &#x22;/&#x3C;=&#x22;: &#x22;^0:&#x22;, &#x22;/&#x3E;-&#x22;: &#x22;^user1:&#x22;,
+          &#x22;write&#x22;: true
+        },
+        &#x22;$!u4:b&#x22;, {
+          &#x22;@id&#x22;: &#x22;^0:@-*$pot:ownerOf@-:@$!pw$:@.$pot@-:aa592f56-1d82-4484-8360-ad9b82d00592@@&#x22;,
+          &#x22;$:name&#x22;: { &#x22;@id&#x22;: &#x22;$pot:ownerOf&#x22; },
+          &#x22;/&#x3E;=&#x22;: &#x22;^0:&#x22;,
+          &#x22;/&#x3C;=&#x22;: &#x22;^pot-hypertwin-index:@~$!pw$:@.$pot@-:aa592f56-1d82-4484-8360-ad9b82d00592@&#x22;
+        }, {
+          &#x22;@id&#x22;: &#x22;^0:@*:PERMISSIONS@_:234-3&#x22;,
+          &#x22;$:name&#x22;: &#x22;PERMISSIONS&#x22;,
+          &#x22;/&#x3C;=&#x22;: &#x22;^0:&#x22;,
+          &#x22;/&#x3E;-&#x22;: &#x22;^user2:&#x22;,
+          &#x22;write&#x22;: false
+        },
+        &#x22;$!u4:d&#x22;
+      ],
+      &#x22;/*=&#x3E;&#x22;: [
+        &#x22;^0:@*:PERMISSIONS@_:15-1&#x22;,
+        &#x22;^0:@*:PERMISSIONS@_:234-3&#x22;
+      ],
+      &#x22;/*=&#x3C;&#x22;: [
+        &#x22;$!u4:b&#x22;,
+        &#x22;^0:@-*$pot:ownerOf@-:@$!pw$:@.$pot@-:aa592f56-1d82-4484-8360-ad9b82d00592@@&#x22;],
+        &#x22;$!u4:d&#x22;
+      ]
+    }],
+    &#x22;$:Relation&#x22;: [{
+      &#x22;@context&#x22;: { &#x22;^0&#x22;: &#x22;$!u4:b&#x22; }, &#x22;@id&#x22;: &#x22;^0:&#x22;
+    }, {
+      &#x22;@context&#x22;: { &#x22;^0&#x22;: &#x22;$!u4:d&#x22; }, &#x22;@id&#x22;: &#x22;^0:&#x22;
+    }]
+  }
+}]
+</span>
+</code></pre></p>
+
+  </section>
+
+  </body>
+</html>

@@ -19,6 +19,23 @@ module.exports = {
   },
 
   /**
+   * Construct a revdoc:JSONLD element.
+   *
+   * @param {*} text
+   * @param {*} rest
+   * @returns
+   */
+  jsonld (text) {
+    // Add validation and maybe restructuring?
+    return {
+      // TODO(iridian, 2019-08): Figure out if there's any sense in
+      // providing language identifiers for non-natural languages.
+      ...c("https://www.w3.org/TR/json-ld11/", text),
+      "@type": "revdoc:JSONLD",
+    };
+  },
+
+  /**
    * Construct a revdoc:ABNF element.
    *
    * @param {*} text

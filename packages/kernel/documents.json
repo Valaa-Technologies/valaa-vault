@@ -536,6 +536,34 @@
     "package": "@valos/sourcerer",
     "version": "0.35.0-prerelease.13"
   },
+  "sourcerer/VState": {
+    "@id": "https://valospace.org/sourcerer/VState",
+    "tags": [],
+    "subProfiles": [],
+    "title": "ValOS state serialization format",
+    "abstract": {
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "ValOS state format specification for serializing valospace state into\na JSON-LD document with a well-defined underlying semantic ontology."
+      ]
+    },
+    "introduction": {
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        "Below is an example state serialization of a hypertwin resource.",
+        null,
+        {
+          "@type": "revdoc:JSONLD",
+          "vdoc:language": "https://www.w3.org/TR/json-ld11/",
+          "vdoc:content": [
+            "[{\n  \"@context\": [{\n    \"$\": \"https://valospace.org/#\",\n    \"@vocab\": \"urn:valos:.:\",\n\n    \"/.\": { \"@id\": \"$:properties\", \"@type\": \"@id\", \"@container\": \"@index\" },\n    \"/.-\": { \"@id\": \"$:value\", \"@type\": \"@id\" },\n    \"/+\": { \"@id\": \"$:entities\", \"@type\": \"@id\", \"@container\": \"@index\" },\n    \"/+-\": { \"@id\": \"$:parent\", \"@type\": \"@id\" },\n    \"/'\": { \"@id\": \"$:medias\", \"@type\": \"@id\", \"@container\": \"@index\" },\n    \"/'-\": { \"@id\": \"$:content\", \"@type\": \"@id\" },\n    \"/*\": { \"@id\": \"$:connectedRelations\", \"@type\": \"@id\", \"@container\": \"@list\" },\n    \"/*=>\": { \"@id\": \"$:pairedOutRelations\", \"@type\": \"@id\" },\n    \"/*=<\": { \"@id\": \"$:pairedInRelations\", \"@type\": \"@id\" },\n\n    \"/<-\": { \"@id\": \"$:source\", \"@type\": \"@id\" },\n    \"/>-\": { \"@id\": \"$:target\", \"@type\": \"@id\" },\n    \"/<=\": { \"@id\": \"$:pairedSource\", \"@type\": \"@id\" },\n    \"/>=\": { \"@id\": \"$:pairedTarget\", \"@type\": \"@id\" },\n\n    \"$!u4\": { \"@id\": \"urn:valos:$!u4:\", \"@prefix\": true },\n    \"$!pw\": { \"@id\": \"urn:valos:$!pw:\", \"@prefix\": true },\n\n    \"$valos-sourcerer\": \"https://valospace.org/sourcerer#\",\n    \"/hasGlobal\": { \"@id\": \"$valos-sourcerer:hasGlobal\", \"@container\": \"@type\" },\n\n    \"$pot\": \"https://oftrust/#\",\n    \"^pot-hypertwin-index\": \"$!u4:55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0\"\n  }, {\n    \"^thistwinroot\": \"^pot-hypertwin-index:@~$!pw$:@.$pot@-:7741938f-801a-4892-9cf0-dd59bd8c9166@\",\n    \"^user1\": \"^pot-hypertwin-index:@~$!pw$:@.$pot@-:u535-b457-1710-aaaa-bbbbccccdddd@\",\n    \"^user2\": \"^pot-hypertwin-index:@~$!pw$:@.$pot@-:u535-b457-1710-dddd-eeeeffff0000@\"\n  }],\n  \"@id\": \"http://foobar.com/?id=$!u4:55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0:@~$!pw$:@.$pot@-:7741938f-801a-4892-9cf0-dd59bd8c9166@\",\n  \"/hasGlobal\": {\n    \"$:Entity\": [{\n      \"@context\": { \"^0\": \"^thistwinroot:\" },\n      \"@id\": \"^0:\",\n      \"$:name\": \"thistwinname\",\n      \"$pot:\": \"7741938f-801a-4892-9cf0-dd59bd8c9166\",\n      \"$pot:area\": 400,\n      \"blah%3Afoo\": \"content\",\n      \"foo\": { \"@id\": \"^0:@':foo.vs\" },\n      \"title\": \"sumtext\",\n      \"/.\": {\n        \"foo\": { \"@id\": \"^0:@.:foo\", \"$:isFrozen\": true }\n      },\n      \"/'\": {\n        \"foo.vs\": { \"@id\": \"^0:@':foo.vs\" }\n      },\n      \"/+\": {\n        \"subBLEH\": { \"@context\": { \"^1\": \"^0:@+:subBLEH\" }, \"@id\": \"^1:\" }\n      },\n      \"/'\": {\n        \"foo.vs\": { \"@id\": \"^0:@':foo.vs\" }\n      },\n      \"/*\": [{\n          \"@id\": \"^0:@*:PERMISSIONS@_:15-1\",\n          \"$:name\": \"PERMISSIONS\",\n          \"/<=\": \"^0:\", \"/>-\": \"^user1:\",\n          \"write\": true\n        },\n        \"$!u4:b\", {\n          \"@id\": \"^0:@-*$pot:ownerOf@-:@$!pw$:@.$pot@-:aa592f56-1d82-4484-8360-ad9b82d00592@@\",\n          \"$:name\": { \"@id\": \"$pot:ownerOf\" },\n          \"/>=\": \"^0:\",\n          \"/<=\": \"^pot-hypertwin-index:@~$!pw$:@.$pot@-:aa592f56-1d82-4484-8360-ad9b82d00592@\"\n        }, {\n          \"@id\": \"^0:@*:PERMISSIONS@_:234-3\",\n          \"$:name\": \"PERMISSIONS\",\n          \"/<=\": \"^0:\",\n          \"/>-\": \"^user2:\",\n          \"write\": false\n        },\n        \"$!u4:d\"\n      ],\n      \"/*=>\": [\n        \"^0:@*:PERMISSIONS@_:15-1\",\n        \"^0:@*:PERMISSIONS@_:234-3\"\n      ],\n      \"/*=<\": [\n        \"$!u4:b\",\n        \"^0:@-*$pot:ownerOf@-:@$!pw$:@.$pot@-:aa592f56-1d82-4484-8360-ad9b82d00592@@\"],\n        \"$!u4:d\"\n      ]\n    }],\n    \"$:Relation\": [{\n      \"@context\": { \"^0\": \"$!u4:b\" }, \"@id\": \"^0:\"\n    }, {\n      \"@context\": { \"^0\": \"$!u4:d\" }, \"@id\": \"^0:\"\n    }]\n  }\n}]\n"
+          ]
+        }
+      ]
+    },
+    "package": "@valos/sourcerer",
+    "version": "0.35.0-prerelease.13"
+  },
   "twindoc": {
     "@id": "https://valospace.org/twindoc",
     "tags": [

@@ -2,7 +2,7 @@ require("@babel/polyfill");
 const { wrapError } = require("@valos/tools/wrapError");
 
 exports.vlm = { toolset: "@valos/type-vault" };
-exports.command = "regenerate-docs";
+exports.command = "regenerate-docs [name-pattern]";
 exports.describe = "Regenerate all configured /docs content";
 exports.introduction = ``;
 
@@ -76,7 +76,9 @@ exports.handler = async (yargv) => {
 
   vlm.shell.mkdir("-p", "docs");
 
-  if (yargv.sbom) {
+  const namePattern = yargv["name-pattern"];
+
+  if (!namePattern && yargv.sbom) {
     await generateFormatsAndWriteToDocs();
   }
 
@@ -87,6 +89,7 @@ exports.handler = async (yargv) => {
       try {
         const [, workspaceBase, workspaceName, docDir,, docName] = revdocPath.match(
             /^(revdocs|packages\/|opspaces\/|workers\/)([^/]*)\/(.*\/)?(([^/]*)\.)?revdoc\.js/);
+        if (namePattern && !revdocPath.includes(namePattern)) continue;
         let targetDocName = docName;
         const targetWorkspaceBase = (workspaceBase !== "packages/" && workspaceBase !== "revdocs")
             ? [workspaceBase] : [];
@@ -123,7 +126,7 @@ exports.handler = async (yargv) => {
       }
     }
   }
-  if (yargv["listing-target"]) {
+  if (!namePattern && yargv["listing-target"]) {
     vlm.shell.ShellString(JSON.stringify(listing, null, 2))
         .to(vlm.path.join(process.cwd(), yargv["listing-target"]));
     await vlm.execute([`git add`, yargv["listing-target"]]);

@@ -16,36 +16,41 @@ module.exports = {
     authors: authors(),
     shortName: "voyager",
   },
-  "chapter#abstract>0": [
-    `This document is the first introduction for ValOS voyagers -
-    the first adopters, entrepreneurs and evangelists - to the ValOS
-    ecosystem, its philosophy and its ultimate goals.`,
-  ],
-  "chapter#sotd>1": [
-    "This document is part of the vault workspace ",
-    pkg("@valos/kernel"),
-    " (of domain ", pkg("@valos/kernel"), ") which is ",
-    "ValOS common infrastructure tools and libraries monorepository.",
-  ],
-  "chapter#introduction>2;How do I discover opportunities and enlighten others?": [
-    `As a voyager you have stakes that matter. Whether you were to
-    invest on a ValOS collaborator as a financier, to adopt ValOS as
-    technology as an executive or just to commit your personal time and
-    energy on a ValOS project you need to `, em("see"), ` forward.`,
-    null,
-    `To make sound decisions and to position yourself proactively you
-    need to understand the big picture and philosophy of the ValOS
-    ecosystem. Only then you can enlighten others.`,
-    null,
-    `You use tailored but real-world ValOS demo setups to illustrate
-    how ValOS a solution could be configured to meet the needs at hand.
-    Your audience can be your customer, your team or even just
-    yourself.`,
-  ],
+  "chapter#abstract>0": {
+    "#0": [
+`This document is the first introduction for ValOS voyagers - the first
+adopters, entrepreneurs and evangelists - to the ValOS ecosystem, its
+philosophy and its ultimate goals.`,
+    ],
+  },
+  "chapter#sotd>1": {
+    "#0": [
+`This document is part of the vault workspace `, pkg("@valos/kernel"), `
+(of domain `, pkg("@valos/kernel"), `) which has the description:
+\`ValOS common infrastructure tools and libraries monorepository\`.`,
+    ],
+  },
+  "chapter#introduction>2;How do I discover opportunities and enlighten others?": {
+    "#0": [
+`As a voyager you have stakes that matter. Whether you were to
+invest on a ValOS collaborator as a financier, to adopt ValOS as
+technology as an executive or just to commit your personal time and
+energy on a ValOS project you need to `, em("see"), ` forward.
+
+To make sound decisions and to position yourself proactively you
+need to understand the big picture and philosophy of the ValOS
+ecosystem. Only then you can enlighten others.
+
+You use tailored but real-world ValOS demo setups to illustrate
+how ValOS a solution could be configured to meet the needs at hand.
+Your audience can be your customer, your team or even just
+yourself.`,
+    ],
+  },
   "chapter#section_profiles>3;Voyager profiles": {
     "#0": [
-      `Voyager is generic orientation. There are various voyager
-      sub-profiles with their own documents briefly detailed here.`,
+`Voyager is generic orientation. There are various voyager sub-profiles
+with their own documents briefly detailed here.`,
     ],
     "chapter#enthusiast>0;How enthusiasts impress themselves and others": {
       "#0": [],
@@ -65,9 +70,11 @@ module.exports = {
     "chapter#sales_rep>5;How sales representatives identify solutions to customer needs": {
       "#0": [],
     },
-    "chapter#etc>9;How to add new profiles": [
-      `Create a `, ref("PR in github", "https://help.github.com/en/articles/about-pull-requests"),
-      ` against @valos/kernel/revdocs/valonaut.revdoc.js`,
-    ],
+    "chapter#etc>9;How to add new profiles": {
+      "#0": [
+`Create a `, ref("PR in github", "https://help.github.com/en/articles/about-pull-requests"), `
+against @valos/kernel/revdocs/valonaut.revdoc.js`,
+      ],
+    },
   },
 };

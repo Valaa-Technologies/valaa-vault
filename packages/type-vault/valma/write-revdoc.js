@@ -71,30 +71,36 @@ module.exports = {
     authors: authors(${authors.map(authorName => `"${authorName}"`).join(", ")}),
     shortName: "${shortName || ""}",
   },
-  "chapter#abstract>0": [
-    "This document is a revdoc template document '${shortName}' created by write-revdoc.",
-  ],
-  "chapter#sotd>1": [
-    "This document is part of the ${packageConfig.valos.type} workspace ",
-    pkg("${packageConfig.name}"),
-    " (of domain ", pkg("${packageConfig.valos.domain}"), ") which is ",
-    "${packageConfig.description}",
-  ],
+  "chapter#abstract>0": {
+    "#0":
+\`This document is a revdoc template document '${shortName}' created by
+write-revdoc.\`,
+  },
+  "chapter#sotd>1": {
+    "#0": [
+\`This document is part of the ${packageConfig.valos.type} workspace \`, pkg("${
+  packageConfig.name}"), \`
+(of domain \`, pkg("${packageConfig.valos.domain}"), \`) which has the description:
+\\\`${packageConfig.description}\\\`.\`,
+    ],
+  },
 ${chapters}};
 `;
 }
 
 function _createTutorialIntroductionSource () {
-return `  "chapter#introduction>2": [
-    "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
-    ref("ReSpec boilerplate", "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"),
-    null,
-    "See ", ref("ReVDoc tutorial", "@valos/revdoc/tutorial"),
-    " for instructions on how to write revdoc source documents.",
-    null,
-    "See also ", ref("ReVdoc specification", "@valos/revdoc"),
-    " and ", ref("VDoc specification", "@valos/vdoc"),
-    " for reference documentation.",
-  ],
+return `  "chapter#introduction>2": {
+    "#0": [
+\`Edit me - this is the first payload chapter. Abstract and SOTD are
+essential \`, ref("ReSpec boilerplate",
+    "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"), \`
+
+See \`, ref("ReVDoc tutorial", "@valos/revdoc/tutorial"), \` for
+instructions on how to write revdoc source documents.
+
+See also \`, ref("ReVdoc specification", "@valos/revdoc"), \` and \`,
+ref("VDoc specification", "@valos/vdoc"), \` for reference documentation.\`,
+    ],
+  },
 `;
 }

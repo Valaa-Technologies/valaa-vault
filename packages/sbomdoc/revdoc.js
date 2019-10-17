@@ -24,36 +24,39 @@ module.exports = {
     shortName: "sbomdoc",
     alternateFormats: [{ label: "VDoc", uri: "sbomdoc.jsonld" }],
   },
-  "chapter#abstract>0": [
-    `This document specifies SBomDoc, a `,
-    ref("VDoc extension", "@valos/vdoc#extension"),
-    ` for extracting and emitting `, ref("CycloneDX BOM documents", "https://cyclonedx.org/"),
-    ` in various formats.`,
-  ],
-  "chapter#sotd>1": [
-    `This document has not been reviewed. This is a draft document and
-    may be updated, replaced or obsoleted by other documents at any
-    time.`,
-    null,
-    `This document is part of the `, ref("ValOS core specification", "@valos/kernel/spec"),
-    ".",
-    null,
-    `The format is implemented and supported by `, pkg("@valos/sbomdoc"),
-    " npm package.",
-  ],
-  "chapter#introduction>2": [
-    `SBoMDoc is a VDoc extension which uses CycloneDX namespaces and
-    can emit BOM documents in various formats.`,
-  ],
+  "chapter#abstract>0": {
+    "#0": [
+`This document specifies SBomDoc, a `, ref("VDoc extension", "@valos/vdoc#extension"), `
+for extracting and emitting `, ref("CycloneDX BOM documents", "https://cyclonedx.org/"), `
+in various formats.`,
+    ],
+  },
+  "chapter#sotd>1": {
+    "#0": [
+`This document has not been reviewed. This is a draft document and
+may be updated, replaced or obsoleted by other documents at any
+time.
+
+This document is part of the `, ref("ValOS core specification", "@valos/kernel/spec"), `.
+
+The format is implemented and supported by `, pkg("@valos/sbomdoc"), `
+npm package.`,
+    ],
+  },
+  "chapter#introduction>2": {
+    "#0": [
+`SBoMDoc is a VDoc extension which uses CycloneDX namespaces and can
+emit BOM documents in various formats.`,
+    ],
+  },
   "chapter#ontology>8;SBoMDoc ontology": {
     "#0": [],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
     "#section_ontology_abstract>0": [
-      `SBoMDoc ontology provides vocabulary and definitions which are
-      tailored for representing CycloneDX SBoM analysis semantic
-      content.`
+`SBoMDoc ontology provides vocabulary and definitions which are
+tailored for representing CycloneDX SBoM analysis semantic content.`
     ],
     "chapter#section_prefixes>1;SBoMDoc IRI prefixes": {
       "#0": [],

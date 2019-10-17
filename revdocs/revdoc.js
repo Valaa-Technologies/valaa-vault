@@ -36,24 +36,25 @@ module.exports = {
   "data#vocabulary": vocabulary,
   "data#context": context,
 
-  "chapter#abstract>0": [
-    "Overview of the valospace APIs and ontologies.",
-  ],
-  "chapter#sotd>1": [
-    "This document is part of the vault workspace ",
-    pkg("@valos/kernel"),
-    " (of domain ", pkg("@valos/kernel"), ") which is ",
-    "ValOS common infrastructure tools and libraries monorepository.",
-  ],
+  "chapter#abstract>0": {
+    "#0": [
+`Overview of the valospace APIs and ontologies.`,
+    ],
+  },
+  "chapter#sotd>1": {
+    "#0": [
+`This document is part of the vault workspace `, pkg("@valos/kernel"), `
+(of domain `, pkg("@valos/kernel"), `) which has the description:
+\`ValOS common infrastructure tools and libraries monorepository\`.`,
+    ],
+  },
   "chapter#introduction>2": {
     "dc:title": em(`"Greetings, I am Valma, the ValOS Mediator. Who are you?"`),
     "#0": [
-      `ValOS ecosystem revolves around various roles. This document
-      is a reference document of valospace systems and structures and
-      is directed for more experienced valonauts. Check out the brief
-      description and introductions of the other roles as well.`,
-      null,
-      ".",
+`ValOS ecosystem revolves around various roles. This document is
+a reference document of valospace systems and structures and is
+directed for more experienced valonauts. Check out the brief description
+and introductions of the other roles as well.`,
     ],
     "table#>0;documents": {
       "vdoc:headers": domainHeaders.roles,
@@ -62,8 +63,8 @@ module.exports = {
   },
   [`chapter#ontology>8;Valospace ontology, prefix ${prefixIRI}, preferred label '${prefix}'`]: {
     "#section_ontology_abstract>0": [
-      `Valospace ontology provides vocabulary and definitions of
-      the primary ValOS resources.`
+`Valospace ontology provides vocabulary and definitions of the primary
+ValOS resources.`
     ],
     [`chapter#section_prefixes>1;IRI prefixes`]: {
       "#0": [],

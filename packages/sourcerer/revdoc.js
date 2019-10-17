@@ -26,17 +26,20 @@ module.exports = {
     authors: authors(),
     shortName: "sourcerer",
   },
-  "chapter#abstract>0": [
-    `This library provides the definitions and reference implementation
-    of the ValOS sourcerer architecture which is used to route `,
-    c("ValOS event streams"), `.`,
-  ],
-  "chapter#sotd>1": [
-    "This document is part of the library workspace ",
-    pkg("@valos/sourcerer"),
-    " (of domain ", pkg("@valos/kernel"), ") which is ",
-    "ValOS Sourcerer API, schema",
-  ],
+  "chapter#abstract>0": {
+    "#0": [
+`This library provides the definitions and reference implementation
+of the ValOS sourcerer architecture which is used to route `,
+c("ValOS event streams"), `.`,
+    ],
+  },
+  "chapter#sotd>1": {
+    "#0": [
+`This document is part of the library workspace `, pkg("@valos/sourcerer"), `
+(of domain `, pkg("@valos/kernel"), `) which has the description:
+\`ValOS Sourcerer API, schema\``,
+    ],
+  },
   "chapter#introduction>2": {
     "#0": [],
   },
@@ -45,8 +48,8 @@ module.exports = {
     "data#vocabulary": vocabulary,
     "data#context": context,
     "#section_ontology_abstract>0": [
-      `${name} ontology specifies the Valospace core types and
-      properties directly to the @valos/kernel namespace. `,
+`${name} ontology specifies the Valospace core types and
+properties directly to the @valos/kernel namespace. `,
     ],
     [`chapter#section_prefixes>1;${name} IRI prefixes`]: {
       "#0": [],

@@ -24,58 +24,62 @@ module.exports = {
     shortName: "twindoc",
     alternateFormats: [{ label: "VDoc", uri: "index.jsonld" }],
   },
-  "chapter#abstract>0": [
-    `This document specifies TwinDoc, a `,
-    ref("VDoc extension", "@valos/vdoc#extension"),
-    ` which specifies an isomorphism and synchronization
-    transformations between VDoc documents and valospace resources.`,
-    null,
-    `More specifically TwinDoc allows for the serialization and
-    deserialization of an arbitrary selection of valospace resources
-    into a VDoc document array and back even if the source resources
-    are not a representation of a VDoc document nor use any VDoc core
-    or extension ontologies.`
-  ],
-  "chapter#sotd>1": [
-    `This document has not been reviewed. This is a draft document and
-    may be updated, replaced or obsoleted by other documents at any
-    time.`,
-    null,
-    `This document is part of the `, ref("ValOS core specification", "@valos/kernel/spec"),
-    ".",
-    null,
-    `The extension is specified and supported by `, pkg("@valos/twindoc"),
-    " npm package.",
-  ],
-  "chapter#introduction>2": [
-    `TwinDoc provides both full isomorphic synchronization as well as
-    incremental, additive updates between VDoc documents and valospace
-    resources.
-    The fully isomoprhic extraction and emission transformations to
-    valospace resources provide lossless roundtrips to both directions:`,
-    { "numbered#": [
-      `emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD`,
-      `extract + emit: a roundtrip starting from valospace into VDocLD back into valospace`,
-    ], },
-    null,
-    `TwinDoc also specifies incremental transformations which are given
-    a diff base in addition to the source and which compute a diffset
-    and then merge the resulting diffset to the pre-existing
-    transformation target.
-    This not only gives performance advantages but also makes it
-    possible to have the final document be a combination of several
-    partial primary sources.`
-  ],
+  "chapter#abstract>0": {
+    "#0": [
+`This document specifies TwinDoc, a `, ref("VDoc extension", "@valos/vdoc#extension"), `
+which specifies an isomorphism and synchronization transformations
+between VDoc documents and valospace resources.
+
+More specifically TwinDoc allows for the serialization and
+deserialization of an arbitrary selection of valospace resources
+into a VDoc document array and back even if the source resources
+are not a representation of a VDoc document nor use any VDoc core
+or extension ontologies.`,
+    ],
+  },
+  "chapter#sotd>1": {
+    "#0": [
+`This document has not been reviewed. This is a draft document and
+may be updated, replaced or obsoleted by other documents at any
+time.
+
+This document is part of the `, ref("ValOS core specification", "@valos/kernel/spec"), `.
+
+The extension is specified and supported by `, pkg("@valos/twindoc"), `
+npm package.`,
+    ],
+  },
+  "chapter#introduction>2": {
+    "#0": [
+`TwinDoc provides both full isomorphic synchronization as well as
+incremental, additive updates between VDoc documents and valospace
+resources.
+The fully isomoprhic extraction and emission transformations to
+valospace resources provide lossless roundtrips to both directions:`,
+{ "numbered#": [
+  `emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD`,
+  `extract + emit: a roundtrip starting from valospace into VDocLD back into valospace`,
+], }, `
+
+TwinDoc also specifies incremental transformations which are given
+a diff base in addition to the source and which compute a diffset and
+then merge the resulting diffset to the pre-existing transformation
+target. This not only gives performance advantages but also makes it
+possible to have the final document be a combination of several
+partial primary sources.`,
+    ],
+  },
   "chapter#ontology>8;TwinDoc ontology": {
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": [
-      `TwinDoc ontology provides vocabulary for defining hypertwin
-      mappings and configurations; actual hypertwin content is
-      represented using the valos core ontologies and possible
-      extension content ontologies.`
-    ],
+    "#section_ontology_abstract>0": {
+      "#0": [
+`TwinDoc ontology provides vocabulary for defining hypertwin mappings
+and configurations; actual hypertwin content is represented using the
+valos core ontologies and possible extension content ontologies.`,
+      ],
+    },
     "chapter#section_prefixes>1;TwinDoc IRI prefixes": {
       "#0": [],
       "table#>0;prefixes": ontologyHeaders.prefixes,

@@ -51,32 +51,35 @@ module.exports = {
   "data#vocabulary": vocabulary,
   "data#context": context,
 
-  "chapter#abstract>0": [
-    `${name} domain `,
-    `includes all core infrastructure components of ValOS - the Valaa Open System.`,
-    null,
-    `These components are hosted at the `,
-    ref("npmjs repository within @valos namespace", "https://www.npmjs.com/search?q=%40valos"), ".",
-    null,
-    `These components are developed at the `, ref("valos git repository", repository), ".",
-  ],
-  "chapter#sotd>1": [
-    "This document is part of the vault workspace ", pkg(name),
-    " (of domain ", pkg(name), ") which is ",
-    "ValOS common infrastructure tools and libraries monorepo.",
-  ],
+  "chapter#abstract>0": {
+    "#0": [
+`${name} domain  includes all core infrastructure components of ValOS -
+the Valaa Open System.
+
+These components are hosted at the `, ref("npmjs repository within @valos namespace",
+    "https://www.npmjs.com/search?q=%40valos"), `.
+
+These components are developed at the `, ref("valos git repository", repository), `.`,
+    ],
+  },
+  "chapter#sotd>1": {
+    "#0": [
+`This document is part of the vault workspace `, pkg(name), `
+(of domain `, pkg(name), `) which has the description:
+\`ValOS common infrastructure tools and libraries monorepo\`.`,
+    ],
+  },
   "chapter#introduction>2": {
     "dc:title": em(`"Greetings, I am Valma, the ValOS Mediator. Who are you?"`),
     "#0": [
-      `ValOS ecosystem revolves around various roles. This document is
-      a reference document of the ValOS fabric systems and structures
-      and is directed for technicians. Check out the brief
-      description and introductions of the other roles as well.`,
-      null,
-      ref("Valma"), ` itself is a collection of tools for interacting
-      with the ValOS ecosystem, most notable of which is `,
-      ref([em("vlm"), ` the command line script invoker`], "@/valma"),
-      ".",
+`ValOS ecosystem revolves around various roles. This document is
+a reference document of the ValOS fabric systems and structures
+and is directed for technicians. Check out the brief
+description and introductions of the other roles as well.
+
+`, ref("Valma"), ` itself is a collection of tools for interacting
+with the ValOS ecosystem, most notable of which is `,
+ref([em("vlm"), ` the command line script invoker`], "@/valma"), `.`,
     ],
     "table#>0;documents": {
       "vdoc:headers": domainHeaders.roles,
@@ -85,7 +88,7 @@ module.exports = {
   },
   "chapter#section_documentation>3;Documentation": {
     "#0": [
-      `This domain provides the following primary documents:`,
+`This domain provides the following primary documents:`,
     ],
     "chapter#section_introduction_documents>0;Introduction documents": {
       "#0": [],
@@ -118,8 +121,8 @@ module.exports = {
   },
   "chapter#section_workspaces>4;Workspaces": {
     "#0": [
-      `This domain introduces the following `, ref("workspaces", "@/valma#workspace"),
-      ` and workspace infrastructure components.`,
+`This domain introduces the following `, ref("workspaces", "@/valma#workspace"),
+` and workspace infrastructure components.`,
     ],
     [`chapter#section_new_types>0;Workspace types, ${Object.keys(types).length} new`]: {
       "#0": [
@@ -151,10 +154,9 @@ module.exports = {
       [`chapter#section_new_${identifize(type)}_workspaces>${4 + index
           };Type '${type}' workspaces, ${Object.keys(typeWorkspaces).length} new`]: {
         "#0": [
-          (types[type] || {}).introduction || "",
-          null,
-          `This domain introduces the following `, type, " ",
-          ref("workspaces", "@/valma#workspace"), ".",
+(types[type] || {}).introduction || `
+
+This domain introduces the following `, type, ` `, ref("workspaces", "@/valma#workspace"), `.`,
         ],
         [`data#${identifize(type)}_workspaces`]: typeWorkspaces,
         [`table#>0;${identifize(type)}_workspaces`]: domainHeaders.workspaces,
@@ -170,12 +172,12 @@ module.exports = {
   },
   [`chapter#ontology>8;${name} domain root ontology`]: {
     "#section_ontology_abstract>0": [
-      `@valos/kernel ontology provides vocabulary and definitions of
-      the ValOS core concepts.`
+`@valos/kernel ontology provides vocabulary and definitions of the
+ValOS core concepts.`
     ],
     "#0": [
-      `All labels have implicit prefix IRI "${prefixIRI}" (typically
-      abbreviated as prefix "${prefix}:")`,
+`All labels have implicit prefix IRI "${prefixIRI}" (typically
+abbreviated as prefix "${prefix}:")`,
     ],
     [`chapter#section_prefixes>1;IRI prefixes`]: {
       "#0": [],
@@ -239,8 +241,8 @@ module.exports = {
   },
   "chapter#section_hierarchy>9;Component hierarchy": {
     "#0": [
-      `This section will contain hierarchical presentation of all above
-      components (and more).`,
+`This section will contain hierarchical presentation of all above
+components (and more).`,
     ]
   },
 };

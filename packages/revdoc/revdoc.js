@@ -24,33 +24,34 @@ module.exports = {
     shortName: "revdoc",
     alternateFormats: [{ label: "VDoc", uri: "revdoc.jsonld" }],
   },
-  "chapter#abstract>0": [
-    `This document specifies ReVDoc, a `,
-    ref("VDoc extension", "@valos/vdoc#extension"),
-    ` for extracting and emitting `, ref("ReSpec documents", "https://github.com/w3c/respec"),
-    `.`,
-  ],
-  "chapter#sotd>1": [
-    `This document has not been reviewed. This is a draft document and
-    may be updated, replaced or obsoleted by other documents at any
-    time.`,
-    null,
-    `This document is part of the `, ref("ValOS core specification", "@valos/kernel/spec"),
-    ".",
-    null,
-    `The format is implemented and supported by `, pkg("@valos/revdoc"),
-    " npm package.",
-  ],
-  "chapter#introduction>2": [
-    `ReVDoc is a VDoc extension which can produce ReSpec documents.`
-  ],
+  "chapter#abstract>0": {
+    "#0": [
+`This document specifies ReVDoc, a `, ref("VDoc extension", "@valos/vdoc#extension"), `
+for extracting and emitting `, ref("ReSpec documents", "https://github.com/w3c/respec"), `.`,
+    ],
+  },
+  "chapter#sotd>1": {
+    "#0": [
+`This document has not been reviewed. This is a draft document and may
+be updated, replaced or obsoleted by other documents at any time.
+
+This document is part of the `, ref("ValOS core specification", "@valos/kernel/spec"), `.
+
+The format is implemented and supported by `, pkg("@valos/revdoc"), `
+npm package.`,
+    ],
+  },
+  "chapter#introduction>2": {
+    "#0":
+`ReVDoc is a VDoc extension which can produce ReSpec documents.`
+  },
   "chapter#ontology>8;ReVDoc ontology": {
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
     "#section_ontology_abstract>0": [
-      `ReVDoc ontology provides vocabulary and definitions which are
-      tailored for emitting ReSpec html output documents.`
+`ReVDoc ontology provides vocabulary and definitions which are tailored
+for emitting ReSpec html output documents.`
     ],
     "chapter#section_prefixes>1;ReVDoc IRI prefixes": {
       "#0": [],
@@ -85,9 +86,8 @@ module.exports = {
   },
   "chapter#transformations>9:ReVDoc transformations": {
     "#0": [
-      `ReVDoc lightly extends basic VDoc extraction with some
-      ReSpec specific primitives and specifies a ReSpec html emission
-      transformation.`,
+`ReVDoc lightly extends basic VDoc extraction with some ReSpec specific
+primitives and specifies a ReSpec html emission transformation.`,
     ],
     "chapter#extraction_rules>0;ReVDoc extraction rules": {
       "#0": [],
@@ -101,13 +101,12 @@ module.exports = {
     },
     "chapter#emission_output>2;ReVDoc emission output": {
       "#0": [
-        `ReVDoc emits html which makes use of ReSpec primitives.`
+`ReVDoc emits html which makes use of ReSpec primitives.`,
       ],
     },
     "chapter#emission_rules>3;ReVDoc emission rules": {
       "#0": [
-        `ReVDoc provides html emission rules for `,
-        { "vdoc:words": Object.keys(emitters.html) },
+`ReVDoc provides html emission rules for `, { "vdoc:words": Object.keys(emitters.html) },
       ],
     },
   },

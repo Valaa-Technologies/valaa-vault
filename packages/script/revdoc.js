@@ -27,16 +27,19 @@ module.exports = {
     authors: authors(),
     shortName: "script",
   },
-  "chapter#abstract>0": [
-    `This library provides the definitions and reference implementation
-    for valoscript, the valospace ECMAScript dialect.`,
-  ],
-  "chapter#sotd>1": [
-    "This document is part of the library workspace ",
-    pkg("@valos/script"),
-    " (of domain ", pkg("@valos/kernel"), ") which is ",
-    "ValOS Script API, schema",
-  ],
+  "chapter#abstract>0": {
+    "#0": [
+`This library provides the definitions and reference implementation
+for valoscript, the valospace ECMAScript dialect.`,
+    ],
+  },
+  "chapter#sotd>1": {
+    "#0": [
+`This document is part of the library workspace `, pkg("@valos/script"), `
+(of domain `, pkg("@valos/kernel"), `) which has the description:
+\`ValOS Script API, schema\``,
+    ],
+  },
   "chapter#introduction>2": {
     "#0": [
 `Valoscript extends ECMAScript 5 object model transparently for
@@ -51,8 +54,8 @@ transactions. Valoscript retains ECMAScript 5 syntax and semantics.`,
     "data#vocabulary": vocabulary,
     "data#context": context,
     "#section_ontology_abstract>0": [
-      `${name} ontology specifies the Valospace core types and
-      properties directly to the @valos/kernel namespace. `,
+`${name} ontology specifies the Valospace core types and properties
+directly to the @valos/kernel namespace. `,
     ],
     [`chapter#section_prefixes>1;${name} IRI prefixes`]: {
       "#0": [],

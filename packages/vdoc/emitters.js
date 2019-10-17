@@ -11,6 +11,7 @@ module.exports = {
     object: emitNodeHTML,
     "vdoc:Node": emitNodeHTML,
     "vdoc:Chapter": emitChapterHTML,
+    "vdoc:Paragraph": emitParagraphHTML,
     "vdoc:BulletList": emitBulletListHTML,
     "vdoc:NumberedList": emitNumberedListHTML,
     "vdoc:Table": emitTableHTML,
@@ -34,7 +35,10 @@ const htmlElements = Object.entries(ontology.vocabulary)
 function emitNodeHTML (node, emission, stack) {
   let body = "";
   if (node["dc:title"]) {
-    body += `\n    <h2>${stack.emitNode(node["dc:title"], "")}</h2>\n`;
+    const selfRef = node["@id"] && stack.document[node["@id"]]
+        && `<a aria-label="§" href="#${node["@id"]}">§ </a>`;
+    const elem = "h3";
+    body += `\n    <${elem}>${selfRef || ""}${stack.emitNode(node["dc:title"], "")}</${elem}>\n`;
   }
   const content = node["vdoc:content"]
       || (node["vdoc:words"] && [].concat(...[].concat(node["vdoc:words"] || [])
@@ -87,12 +91,17 @@ function emitArrayHTML (content, emission, stack) {
   let paragraphBegin = 0;
   let ret = emission;
   for (let i = 0; i <= content.length; ++i) {
+    // TODO(iridian, 2019-10): This is legacy code: paragraph is now
+    // done on the extraction side. 'null' array entries should be
+    // removed from vdocld, and then this code can be removed also.
     if (i < content.length ? (content[i] === null) : paragraphBegin) {
       if (i > paragraphBegin) {
         const body = emitArrayHTML(content.slice(paragraphBegin, i), "", stack);
-        ret += ((i === content.length) && !paragraphBegin)
-            ? body
-            : `      <p>${body}</p>\n`;
+        if (body) {
+          ret += ((i === content.length) && !paragraphBegin)
+              ? body
+              : `      <p>${body}</p>\n`;
+        }
       }
       paragraphBegin = i + 1;
     }
@@ -105,6 +114,12 @@ function emitArrayHTML (content, emission, stack) {
 
 function emitChapterHTML (node, emission, stack) {
   return emitNodeHTML(node, emission, stack);
+}
+
+function emitParagraphHTML (node, emission, stack) {
+  const ret = emitNodeHTML(node, "", stack);
+  if (!ret) return emission;
+  return `${emission}<div><p>${ret}</p></div>`;
 }
 
 function emitBulletListHTML (node, emission, stack) {

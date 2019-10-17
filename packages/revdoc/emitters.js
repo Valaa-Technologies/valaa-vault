@@ -28,7 +28,7 @@ function emitReVDocHTML (node, emission, stack) {
     `<link rel = "stylesheet" type = "text/css" href = "${stylesheet}" />
     `).join()}
   </head>
-  <body>
+  <body class="vdoc vdoc-body">
     ${stack.emitNode(node["vdoc:content"], "")}
   </body>
 </html>
@@ -36,8 +36,12 @@ function emitReVDocHTML (node, emission, stack) {
 }
 
 function emitReVDocChapter (node, emission, stack) {
-  return vdocExtension.emitters.html["vdoc:Chapter"](
-      Object.assign({}, node, { "vdoc:element": "section" }), emission, stack);
+  return vdocExtension.emitters.html["vdoc:Chapter"](Object.assign({}, node, {
+    "vdoc:element": "section",
+    "vdoc:content": (node["vdoc:content"] || []).map(e => ((typeof e !== "string")
+        ? e
+        : { "@type": "vdoc:Node", "vdoc:element": "span", "vdoc:content": [e] })),
+  }), emission, stack);
 }
 
 function emitReVDocReference (node, emission, stack) {
@@ -76,8 +80,8 @@ function emitReVDocCommand (node, emission, stack) {
 }
 
 function emitReVDocExample (node, emission, stack) {
-  const title = !node["dc:title"] ? "" : `\n    <h2>${stack.emitNode(node["dc:title"], "")}</h2>\n`;
-  return `${emission}<blockquote class="vdoc type-revdoc-example">${title}
-    <code>${stack.emitNode({ ...node, "@type": "vdoc:Node" }, "")}</code>
-  </blockquote>`;
+  return `${emission}
+<blockquote class="vdoc type-revdoc-example">
+    ${stack.emitNode({ ...node, "@type": "vdoc:Node" }, "")}
+</blockquote>`;
 }

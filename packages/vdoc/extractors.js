@@ -23,20 +23,27 @@ module.exports = {
         node[rule.rest] = rest;
       }
       if (rule.range) node["@type"] = rule.range;
-      if ((typeof patch !== "object") || (patch === null)) {
-        if (!resourceId && !Object.keys(node).length) {
-          node = patch;
-        } else {
-          _extendRuleBodyWithArrayPatch(this, node, rule, [patch]);
-        }
-      } else if (Array.isArray(patch)) {
+      if (Array.isArray(patch)) {
         if (!rule.owner || (!resourceId && !Object.keys(node).length)) {
-          node = this.extend([], patch);
+          // console.log("array-split:", ruleName, key);
+          node = _splitNewlineWhitespaceSections(this.extend([], patch), rule.paragraphize);
           if (resourceId) this.documentNode[resourceId] = node;
         } else {
-          _extendRuleBodyWithArrayPatch(this, node, rule, patch);
+          // console.log("array-extend:", ruleName, key);
+          node[rule.body] = _extendWithArrayPatch(this, rule, patch);
+        }
+      } else if ((typeof patch !== "object") || (patch === null) || patch["@type"]) {
+        if (!resourceId && !Object.keys(node).length) {
+          // console.log("singular-split:", ruleName, key);
+          node = (typeof patch !== "string")
+              ? patch
+              : _splitNewlineWhitespaceSections(patch, rule.paragraphize);
+        } else {
+          // console.log("singular-extend:", ruleName, key, JSON.stringify(rule, null, 0));
+          node[rule.body] = _extendWithArrayPatch(this, rule, [patch]);
         }
       } else {
+        // console.log("pre-post-process:", ruleName, key);
         node["vdoc:pre_body"] = rule.body;
         this.extend(node, patch);
         delete node["vdoc:pre_body"];
@@ -67,20 +74,53 @@ module.exports = {
   },
 };
 
-function _extendRuleBodyWithArrayPatch (extender, node, rule, arrayPatch) {
-  node[rule.body] = extender.extend([], arrayPatch);
+function _extendWithArrayPatch (extender, rule, arrayPatch) {
+  const ret = extender.extend([], arrayPatch);
   if (rule.body === "vdoc:content") {
-    node[rule.body] = _splitNewlineWhitespaceSections(node[rule.body]);
-  } else if (rule.body === "vdoc:entries") {
-    node[rule.body] = node[rule.body].map(_splitNewlineWhitespaceSections);
+    const body = _splitNewlineWhitespaceSections(ret, rule.paragraphize);
+    const onlyEntry = !Array.isArray(body) ? body : (body.length === 1) ? body[0] : undefined;
+    return [].concat(
+        (onlyEntry || {})["vdoc:content"] && (Object.keys(onlyEntry).length === 1)
+            ? onlyEntry["vdoc:content"]
+            : body);
   }
+  if (rule.body === "vdoc:entries") {
+    return ret.map(_splitNewlineWhitespaceSections, rule.paragraphize);
+  }
+  return ret;
 }
 
-function _splitNewlineWhitespaceSections (value = []) {
-  return [].concat(...[].concat(value)
-      .map(e => ((typeof e !== "string")
-          ? [e]
-          : e.split(/\n\s*(\n)/).map((se, i) => (i % 2 ? null : se)))));
+function _splitNewlineWhitespaceSections (values = [], alwaysParagraphize) {
+  const result = [];
+  let currentParagraph = [];
+  for (const value of [].concat(values)) {
+    if (value === null) {
+      flushCurrent();
+    } else if (typeof value !== "string") {
+      currentParagraph.push(value);
+    } else {
+      value.split(/\n\s*(\n)/).forEach(bubbleOnDoubleNewline);
+    }
+  }
+  if (!result.length && !alwaysParagraphize) return currentParagraph;
+  flushCurrent();
+  return (result.length !== 1) ? result : result[0];
+  function flushCurrent () {
+    if (currentParagraph.length) {
+      result.push({
+        "@type": "vdoc:Paragraph",
+        "vdoc:content": currentParagraph,
+      });
+      currentParagraph = [];
+    }
+  }
+  function bubbleOnDoubleNewline (e, i) {
+    if (!(i % 2)) {
+      if (e) currentParagraph.push(e);
+    } else if (currentParagraph.length) {
+      flushCurrent();
+    }
+  }
 }
 
 function _compareWithOrderQualifier (l, r) {

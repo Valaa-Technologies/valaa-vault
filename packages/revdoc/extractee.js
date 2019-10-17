@@ -8,6 +8,20 @@ module.exports = {
    * @param {*} rest
    * @returns
    */
+  example () {
+    return {
+      "@type": "revdoc:Example",
+      "vdoc:content": [].slice.call(arguments), // eslint-disable-line prefer-rest-params
+    };
+  },
+
+  /**
+   * Construct a revdoc:ABNF element.
+   *
+   * @param {*} text
+   * @param {*} rest
+   * @returns
+   */
   abnf (text) {
     // Add validation and maybe restructuring?
     return {

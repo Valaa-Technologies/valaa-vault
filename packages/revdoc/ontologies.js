@@ -64,7 +64,7 @@ module.exports = extendOntology("revdoc", "https://valospace.org/revdoc#", {}, {
 }, {
   extractionRules: {
     example: {
-      range: "vdoc:Example", owner: "vdoc:content", body: "vdoc:content", rest: "dc:title",
+      range: "revdoc:Example", owner: "vdoc:content", body: "vdoc:content", rest: "dc:title",
       comment: "Example node",
     },
     ontology: {

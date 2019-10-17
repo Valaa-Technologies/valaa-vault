@@ -62,6 +62,10 @@ module.exports = extendOntology("vdoc", "https://valospace.org/vdoc#", prefixes,
     "rdfs:subClassOf": "vdoc:Node",
     "rdfs:comment": "A titled, possibly numbered chapter document node",
   },
+  Paragraph: { "@type": "vdoc:Class",
+    "rdfs:subClassOf": "vdoc:Node",
+    "rdfs:comment": "A vertically segmented paragraph document node",
+  },
   BulletList: { "@type": "vdoc:Class",
     "rdfs:subClassOf": "vdoc:Node",
     "rdfs:comment": "A bullet list document node",
@@ -184,10 +188,15 @@ module.exports = extendOntology("vdoc", "https://valospace.org/vdoc#", prefixes,
   extractionRules: {
     "": {
       comment: "Basic Node", owner: "vdoc:content", body: "vdoc:content",
+      paragraphize: true,
     },
     chapter: {
       range: "vdoc:Chapter", owner: "vdoc:content", body: "vdoc:content", rest: "dc:title",
       comment: "Numbered, titled chapter",
+    },
+    p: {
+      range: "vdoc:Paragraph", owner: "vdoc:content", body: "vdoc:content",
+      comment: "Vertically segmented paragraph",
     },
     c: {
       range: "vdoc:CharacterData", owner: "vdoc:content", body: "vdoc:content",

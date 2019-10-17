@@ -27,3 +27,56 @@
   border: 1px solid #dfe2e5;
   padding: 4px 10px;
 }
+
+.type-vdoc-chapter>* {
+  box-sizing: border-box;
+  max-width: 50em;
+  float: left;
+  clear: left;
+}
+
+.type-vdoc-chapter>.type-vdoc-chapter, .type-vdoc-chapter {
+  width: 100%;
+  max-width: 100%;
+  float: left;
+  clear: left;
+}
+
+.type-vdoc-chapter>.type-revdoc-example {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  float: right;
+  clear: right;
+}
+
+.type-vdoc-chapter>h1, .type-vdoc-chapter>h2, .type-vdoc-chapter>h3,
+.type-vdoc-chapter>h4, .type-vdoc-chapter>h5, .type-vdoc-chapter>h6 {
+  box-sizing: content-box;
+  padding-left: 0;
+  padding-right: 50%;
+}
+
+@media screen and (min-width: 100em)
+{
+  .vdoc-body {
+    max-width: calc(100% - 30em);
+  }
+
+  .type-vdoc-chapter>* {
+    width: 50%;
+  }
+
+  .type-vdoc-chapter>.type-revdoc-example {
+    width: 50%;
+  }
+}
+
+@media screen and (min-width: 140em)
+{
+  .type-vdoc-chapter>.type-revdoc-example {
+    min-width: 40em;
+    max-width: calc(100% - 50em);
+    width: calc(100% - 50em);
+  }
+}

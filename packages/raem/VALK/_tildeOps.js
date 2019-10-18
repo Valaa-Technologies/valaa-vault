@@ -34,8 +34,29 @@ export function expandTildeVAKON (tildeStepName, vakon) {
   }
 }
 
-export function vakonizeExpandedVPath (expandedVPath, containerType = "@", containerIndex = 0) {
-  if (!Array.isArray(expandedVPath)) return expandedVPath;
+const fieldLookup = {
+  "*": "relations",
+  "_out*": "relations",
+  "_in*": "incomingRelations",
+  ".E": "unnamedOwnlings", // "entities",
+  ".M": "unnamedOwnlings", // "medias",
+};
+
+const objectLookup = {
+  "-": "value",
+  "-trg": "target",
+  "-src": "source",
+  "-E": "owner", // "entities",
+  "-M": "content", // "medias",
+}
+
+export function vakonizeExpandedVPath (vp, containerType = "@", containerIndex = 0) {
+  let expandedVPath = vp;
+  if (containerType !== "@") {
+    if (!Array.isArray(vp) || (vp[0] === "@")) expandedVPath = ["$", "", vp];
+  } else if (!Array.isArray(vp)) {
+    return vp;
+  }
   const type = expandedVPath[0];
   switch (type) {
   case "":
@@ -69,7 +90,7 @@ export function vakonizeExpandedVPath (expandedVPath, containerType = "@", conta
     expandedVPath[0] = "§->";
     break;
   case "~":
-    // ref("@valos/raem/VPath#section_structured_scope_property")
+    // ref("@valos/raem/VPath#section_structured_subspace_selector")
     throw new Error("subspace selector not implemented");
   case ".":
     // ref("@valos/raem/VPath#section_structured_scope_property")
@@ -78,20 +99,28 @@ export function vakonizeExpandedVPath (expandedVPath, containerType = "@", conta
     }
     return vakonizeExpandedVPath(expandedVPath[1], ".", 1);
   case "*":
-    // ref("@valos/raem/VPath#section_structured_scope_property")
-  case "'": // eslint-disable-line no-fallthrough
+  case "_in*":
+  case "_out*":
+    // ref("@valos/raem/VPath#section_structured_relation")
+  case ".M": // eslint-disable-line no-fallthrough
     // ref("@valos/raem/VPath#section_structured_media")
-  case "+": { // eslint-disable-line no-fallthrough
+  case ".E": { // eslint-disable-line no-fallthrough
     // ref("@valos/raem/VPath#section_structured_entity")
-    const field = type === "*" ? "relations" : type === "'" ? "medias" : "entities";
+    const field = fieldLookup[type];
     if (expandedVPath.length > 2) throw new Error(`multi-param '${field}' selectors not allowed`);
     return ["§->", field,
       ..._filterByFieldValue("name", vakonizeExpandedVPath(expandedVPath[1], type, 1)),
     ];
   }
   case "-":
+  case "-trg":
+  case "-src":
+  case "-E":
+  case "-M": {
+    const object = objectLookup[type];
     // ref("@valos/raem/VPath#section_structured_object_value")
-    return ["§->", ..._filterByFieldValue("object", vakonizeExpandedVPath(expandedVPath[1]))];
+    return ["§->", ..._filterByFieldValue(object, vakonizeExpandedVPath(expandedVPath[1]))];
+  }
   case "!": {
     if (expandedVPath.length === 2) return vakonizeExpandedVPath(expandedVPath[1], "!", 1);
     expandedVPath[0] = "§->";

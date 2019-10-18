@@ -1,29 +1,36 @@
 // @flow
 
+import { wrapError } from "~/tools";
+
 export function mintVPath (...segments) {
   return `@${segments.map(_mintVPathSegment).join("@")}@`;
 }
 
 function _mintVPathSegment (segment, index) {
-  if (typeof segment === "string") {
-    return segment[0] === "$"
-        ? validateVGRId(segment)
-        : validateVerb(segment, index);
+  try {
+    if (typeof segment === "string") {
+      return segment[0] === "$"
+          ? validateVGRId(segment)
+          : validateVerb(segment, index);
+    }
+    if (!Array.isArray(segment)) {
+      throw new Error(`Invalid segment #${index} while minting: must be a string or Array, got ${
+        typeof segment}`);
+    }
+    if (segment[0] !== "$") {
+      // verb
+      return mintVerb(...segment);
+    }
+    // vgrid
+    if (index) {
+      throw new Error(`Invalid segment #${index} while minting:${
+        ""} expected verb (is not first segment), got vgrid ("$" as first segment element)`);
+    }
+    return mintVGRId(...segment.slice(1));
+  } catch (error) {
+    throw wrapError(error, new Error(`While minting VPath segment #${index}`),
+        "\n\tsegment:", segment);
   }
-  if (!Array.isArray(segment)) {
-    throw new Error(`Invalid segment #${index} while minting: must be a string or Array, got ${
-      typeof segment}`);
-  }
-  if (segment[0] !== "$") {
-    // verb
-    return mintVerb(...segment);
-  }
-  // vgrid
-  if (index) {
-    throw new Error(`Invalid segment #${index} while minting:${
-      ""} expected verb (is not first segment), got vgrid ("$" as first segment element)`);
-  }
-  return mintVGRId(...segment.slice(1));
 }
 
 export function mintVGRId (formatTerm: string, paramElement: any,
@@ -41,21 +48,22 @@ export function mintVerb (verbType, ...params: (string | ["$", string, ?string])
 
 export function mintParam (paramElement: (string | ["$", string, ?string]), index, params) {
   let ret;
-  if (typeof paramElement === "string") {
-    ret = validateVParam(paramElement);
-  } else if (Array.isArray(paramElement) && (paramElement[0] === "$")) {
+  if ((typeof paramElement === "string") || (paramElement[0] === "@")) {
+    ret = `:${mintParamValue(paramElement)}`;
+  } else if (!Array.isArray(paramElement)) {
+    throw new Error(`Invalid paramElement #${index}: expected a string or a param Array`);
+  } else if (paramElement[0] === "$") {
     if (paramElement[1]) validateContextTerm(paramElement[1]);
     const value = mintParamValue(paramElement[2]);
     ret = !paramElement[1] ? `:${value}`
         : !value ? `$${paramElement[1]}`
         : `$${paramElement[1]}:${value}`;
   } else {
-    throw new Error(`Invalid paramElement #${index
-        }: expected a string or a param Array with "$" as first element`);
+    throw new Error(`Invalid paramElement #${index}: expected first array entry to be "$" or "@"`);
   }
   if ((ret[0] !== "$") && index) {
     const prevParam = params[index - 1];
-    if ((typeof prevParam === "string") ? !prevParam.contains(":") : !prevParam[2]) {
+    if ((typeof prevParam !== "string") && (prevParam[0] === "$") && !prevParam[2]) {
       return `$${ret}`;
     }
   }
@@ -136,8 +144,11 @@ export function validateVerbType (str) {
 }
 
 export function validateVParam (element: any[]) {
+  const expandedParam = (typeof element !== "string") ? element : expandVPath(element);
   const [firstEntry, contextTerm, paramValue] =
-      (typeof element !== "string") ? element : expandVPath(element);
+      (expandedParam.length === 1 || expandedParam[0] === "@")
+          ? ["$", "", expandedParam[0]]
+          : expandedParam;
   if (firstEntry !== "$") {
     throw new Error(`Invalid vparam: expected "$" as first entry`);
   }
@@ -273,7 +284,11 @@ function _nestAll (vpathArray, start = 0) {
         throw new Error(`Invalid vpath: neither vgrid nor verb cannot begin with ':'`);
       }
       if (segment[0] === "$") { // vgrid
+        if (segment[2] !== ":") {
+          throw new Error(`Invalid vpath: vgrid must always have a param, expected ':'`);
+        }
         segment.splice(2, 1); // drop the ":"
+        if (segment.length > 3) _nestSegment(segment, 3);
       } else { // verb
         _nestSegment(segment);
       }
@@ -296,28 +311,42 @@ function _nestAll (vpathArray, start = 0) {
 }
 
 function _nestSegment (segment, initial = 1) {
-  for (let i = initial; i !== segment.length; ++i) {
-    let nested;
-    if (segment[i] === "$") {
-      if (segment[i + 2] !== ":") {
-        nested = segment.splice(i, 2);
-      } else {
-        nested = segment.splice(i, 4);
-        nested.splice(2, 1);
+  let i = initial;
+  let nested;
+  try {
+    for (; i !== segment.length; ++i) {
+      if (segment[i] === "$") {
+        if (segment[i + 2] === ":") {
+          nested = segment.splice(i, 4);
+          nested.splice(2, 1);
+        } else if (segment[i + 1] === ":") {
+          nested = segment.splice(i, 3);
+          nested[1] = "";
+        } else {
+          nested = segment.splice(i, 2);
+        }
+      } else if (segment[i] === ":") {
+        nested = ["$", "", segment[i + 1]];
+        segment.splice(i, 2);
+      } else continue;
+      const verbValue = nested[2];
+      if (typeof verbValue === "string") {
+        validateParamValueText(verbValue);
+        nested[2] = decodeURIComponent(verbValue);
+      } else if (verbValue != null && (!Array.isArray(verbValue) || (verbValue[0] !== "@"))) {
+        throw new Error(`Invalid expanded param-value:${
+          ""} must be a vpath element array (ie. must have "@" as first entry)`);
       }
-      validateContextTerm(nested[1]);
-    } else if (segment[i] === ":") {
-      nested = ["$", "", segment[i + 1]];
-      segment.splice(i, 2);
-    } else continue;
-    const verbValue = nested[2];
-    if (typeof verbValue === "string") {
-      validateParamValueText(verbValue);
-      nested[2] = decodeURIComponent(verbValue);
-    } else if (verbValue != null && (!Array.isArray(verbValue) || (verbValue[0] !== "@"))) {
-      throw new Error(`Invalid expanded param-value:${
-        ""} must be a vpath element array (ie. must have "@" as first entry)`);
+      if (nested[1] !== "") {
+        validateContextTerm(nested[1]);
+      } else {
+        nested = nested[2];
+      }
+      segment.splice(i, 0, nested);
     }
-    segment.splice(i, 0, nested);
+  } catch (error) {
+    throw wrapError(error, new Error(`While nesting segment #${i}`),
+        "\n\tnested:", nested,
+        "\n\tsegment:", segment);
   }
 }

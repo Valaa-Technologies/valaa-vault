@@ -125,33 +125,33 @@ name and which have the head as their source.`,
   ?o    valos:source ?s
       ; valos:name "PERMISSIONS"
 `), `
-Mnemonic: '*' to access many things (only Relations are many with the same name).`,
+Mnemonic: '*' for many things like with regexes (only Relations are many with the same name).`,
         ],
       },
-      "chapter#section_verb_content>3;verb type \"`'`\": content or Media selector": {
+      "chapter#section_verb_content>3;verb type \"`.M`\": content or Media selector": {
         "#0": `
 Verb for selecting the Media with the given name which has the
 head as their folder.`,
         "example#example_verb_content>0;Content selector example": [
-`Triple pattern \`?s <urn:valos:':foo.vs> ?o\` matches like:
+`Triple pattern \`?s <urn:valos:.M:foo.vs> ?o\` matches like:
 `, turtle(`
   ?o    valos:folder ?s
       ; valos:name "foo.vs"
 `), `
-Mnemonic: "'" for quoted content (Media has content).`,
+Mnemonic: "M" for Media.`,
         ],
       },
-      "chapter#section_verb_container>4;verb type \"`+`\": container or Entity selector": {
+      "chapter#section_verb_container>4;verb type \"`.E`\": container or Entity selector": {
         "#0": `
 Verb for selecting the resource (typically an Entity) with the given
 name and which has the head as their container.`,
         "example#example_verb_container>0;Container selector example": [
-`Triple pattern \`?s <urn:valos:+:Scripts> ?o\` matches like:
+`Triple pattern \`?s <urn:valos:.E:Scripts> ?o\` matches like:
 `, turtle(`
   ?o    valos:parent ?s
       ; valos:name "Scripts"
 `), `
-Mnemonic: click symbol '+' to expand container (Entity contains things).`,
+Mnemonic: "E" for Entity.`,
         ],
       },
       "chapter#section_verb_object>4;verb type \"`-`\": object or target selector": {
@@ -170,10 +170,10 @@ Mnemonic: follow line '-' to target.`,
 Verb for selecting a ghost of the given resource from within the path
 head as host.`,
         "example#example_verb_ghost>0;Ghost selector example": [
-`Triple pattern \`?s <urn:valos:~$iu4:ba54> ?o\` matches like:
+`Triple pattern \`?s <urn:valos:~$~u4:ba54> ?o\` matches like:
 `, turtle(`
   ?o    valos:ghostHost ?s
-      ; valos:ghostPrototype <urn:valos:$iu4:ba54>
+      ; valos:ghostPrototype <urn:valos:$~u4:ba54>
 `),
         ],
       },
@@ -181,7 +181,7 @@ head as host.`,
         "#0": `
 Verb for selecting a subspace variant.`,
         "example#example_verb_subspace>0;Subspace selector example": [
-`Triple pattern \`?s <urn:valos:@.:myProp@_$lang:fi@> ?o\` matches like:
+`Triple pattern \`?s <urn:valos:.:myProp@_$lang:fi> ?o\` matches like:
 `, turtle(`
   ?_sp  valos:scope ?s
       ; valos:name "myProp"
@@ -194,7 +194,7 @@ Verb for selecting a subspace variant.`,
         "#0": `
 Verb representing the result of a computation.`,
         "example#example_verb_computation>0;Computation selector example": [
-`Triple pattern \`?s <urn:valos:@!$valk:plus$number:10:@!:myVal@@> ?o\`
+`Triple pattern \`?s <urn:valos:!$valk:plus$number:10:@!:myVal> ?o\`
 matches like:
 `, turtle(`
   ?_:0  valos:scope ?s
@@ -276,7 +276,7 @@ a vgrid and no verbs this global resource is also the
 *referenced resource* of the VRId itself.`,
       "example#main_vgrid_rules>0;Main vgrid rules": abnf(
 `  vgrid         = "$" format-term ":" param-value [ params ]
-  format-term   = context-term
+  format-term   = "~" context-term
 
   params        = context-tail / value-tail
   context-tail  = "$" [ context-term ] [ ":" param-value [ params ] / context-tail ]
@@ -318,9 +318,9 @@ always relies external structures and systems for carrying locator
 information.
 `],
       "example#1":
-`Note: uuid v4 (format term \`iu4\`) is recommended for
+`Note: uuid v4 (format term \`~u4\`) is recommended for
 now, but eventually VGRId generation will be tied to the
-deterministic event id chain (format term \`icc\`).
+deterministic event id chain (format term \`~cc\`).
 This in turn should be seeded by some ValOS authority.`,
     },
     "chapter#section_vrid_equivalence>2": {
@@ -396,30 +396,30 @@ possible semantics of the identified global resource. ValOS kernel
 reserves all context-terms matching '"i" 2( ALPHA / DIGIT )' for
 itself with currently defined formats exhaustively listed here.
       `,
-      [`chapter#section_vgrid_iu4>0;${
-          ""}VGRId format "\`iu4\`": Uuid v4 of a native, insecure resource`]: {
+      [`chapter#section_vgrid_uuid_v4>0;${
+          ""}VGRId format "\`~u4\`": Uuid v4 of a native, insecure resource`]: {
         "#0": `
 An identifier for native valospace resource with an event log.
 This is insecure as there are no guarantees against resource id
 collisions by malicious event logs. These identifiers can thus only be
 used in trusted, protected environments.`,
       },
-      [`chapter#section_vgrid_ibv>1;${
-          ""}VGRId format "\`ibv\`": The content hash of Binary ValOS object`]: {
+      [`chapter#section_vgrid_content_hash>1;${
+          ""}VGRId format "\`~bv\`": The content hash of Binary ValOS object`]: {
         "#0": `
 An identifier of an immutable octet-stream, with the content hash in
 the param-value.`
       },
-      [`chapter#section_vgrid_ipw>2;${
-          ""}VGRId format "\`ipw\`": The id of an immutable Platonic resource With inferences`]: {
+      [`chapter#section_vgrid_platonic_resource>2;${
+          ""}VGRId format "\`~pw\`": The id of an immutable Platonic resource With inferences`]: {
         "#0": `
 An identifier of an immutable, procedurally generated resource with its
 content inferred from the vpath embedded in the param-value.
 While of limited use in itself this is useful when used as the
 prototype of structural ghost sub-resources which are quite mutable.`,
       },
-      [`chapter#section_vgrid_ice>3;${
-          ""}VGRId format "\`ice\`": The id of Crypto-Event-log-coupled secure resource`]: {
+      [`chapter#section_vgrid_crypto_chained>3;${
+          ""}VGRId format "\`~cc\`": The id of Crypto-event-log-Chained secure resource`]: {
         "#0": `
 An identifier of a native, secure valospace resource with an event log.
 This id is deterministically derived from the most recent hash-chain
@@ -428,8 +428,8 @@ cryptographic secret of the creating identity and a salt, thus ensuring
 collision resistance and a mechanism for creator to prove their claim
 to the resource.`,
       },
-      [`chapter#section_vgrid_igh>4;${
-          ""}VGRId format "\`igh\`": The derived Hash id of a native, insecure Ghost resource`]: {
+      [`chapter#section_vgrid_ghost>4;${
+          ""}VGRId format "\`~gh\`": The derived Hash id of a native, insecure Ghost resource`]: {
         "#0": `
 This is a legacy format for native ghost resources, with id created
 from the hash of the 'ghost path' of the resource.`,
@@ -443,8 +443,8 @@ well as other possible constraints.`,
       "example#example_shared_vrid_verb_data>0;Shared example data": [
 `The examples below all share the following triples:`,
         turtle(`
-  <urn:valos:$iu4:f00b> a valos:Entity
-      ; valos:prototype <urn:valos:$iu4:f00b-b507-0763>
+  <urn:valos:$~u4:f00b> a valos:Entity
+      ; valos:prototype <urn:valos:$~u4:f00b-b507-0763>
 `),
       ],
       "chapter#section_structural_ghost>0;verb type \"`~`\": structural ghost sub-resource": {
@@ -454,13 +454,13 @@ of the directly _and indirectly_ owned resources of the instance
 prototype are flattened as _direct_ structural sub-resources of the
 instance itself. The instance is called *ghost host* of all such ghosts.`,
         "example#example_structural_ghost>0;Structural ghost triple inference": [
-`\`<urn:valos:@$iu4:f00b@~$iu4:ba54@>\` reads as "inside the
-instance resource \`f00b\` the ghost of the $iu4 resource \`ba54\`"
+`\`<urn:valos:$~u4:f00b@~$~u4:ba54>\` reads as "inside the
+instance resource \`f00b\` the ghost of the $~u4 resource \`ba54\`"
 and infers triples:
 `, turtle(`
-  <urn:valos:@$iu4:f00b@~$iu4:ba54@>
-        valos:ghostHost <urn:valos:$iu4:f00b>
-      ; valos:ghostPrototype <urn:valos:$iu4:ba54>
+  <urn:valos:$~u4:f00b@~$~u4:ba54>
+        valos:ghostHost <urn:valos:$~u4:f00b>
+      ; valos:ghostPrototype <urn:valos:$~u4:ba54>
 `),
         ],
         "#1": `
@@ -468,13 +468,13 @@ In case of deeper instantiation chains the outermost ghost segment
 provides inferences recursively to all of its sub-resources; nested
 ghost segments wont provide any further inferences.`,
         "example#example_structural_ghost_recursive>1;Recursive ghost triple inference": [
-`\`<urn:valos:@$iu4:f00b@~$iu4:ba54@~$iu4:b7e4@>\` reads as "inside
+`\`<urn:valos:$~u4:f00b@~$~u4:ba54@~$~u4:b7e4>\` reads as "inside
 the instance resource \`f00b\` the ghost of
-\`<urn:valos:@$iu4:ba54@~$iu4:b7e4@>\`" and infers triples:
+\`<urn:valos:$~u4:ba54@~$~u4:b7e4>\`" and infers triples:
 `, turtle(`
-  <urn:valos:@$iu4:f00b@~$iu4:ba54@~$iu4:b7e4@>
-        valos:ghostHost <urn:valos:$iu4:f00b>
-      ; valos:ghostPrototype <urn:valos:@$iu4:ba54@~$iu4:b7e4@>
+  <urn:valos:$~u4:f00b@~$~u4:ba54@~$~u4:b7e4>
+        valos:ghostHost <urn:valos:$~u4:f00b>
+      ; valos:ghostPrototype <urn:valos:$~u4:ba54@~$~u4:b7e4>
 `)
         ],
       },
@@ -490,12 +490,12 @@ This means that no matter where a subspace variant is defined in
 the prototype chain or in the nested sub-structure its value will be
 found.`,
         "example#example_structural_subspace>0;Structural subspace triple inference": [
-`\`<urn:valos:@$iu4:f00b@.:myProp@_$lang:fi@>\` is a lang fi variant of
+`\`<urn:valos:$~u4:f00b@.:myProp@_$lang:fi>\` is a lang fi variant of
 f00b myProp and infers triples:
 `, turtle(`
-  <urn:valos:@$iu4:f00b@.:myProp@_$lang:fi@> a valos:ScopeProperty
-      ; valos:subspacePrototype <urn:valos:@$iu4:f00b@.:myProp@>
-                              , <urn:valos:@$iu4:f00b-b507-0763@.:myProp@_$lang:fi@>
+  <urn:valos:$~u4:f00b@.:myProp@_$lang:fi> a valos:ScopeProperty
+      ; valos:subspacePrototype <urn:valos:$~u4:f00b@.:myProp>
+                              , <urn:valos:$~u4:f00b-b507-0763@.:myProp@_$lang:fi>
       ; valos:language "fi"
 `)
         ],
@@ -508,13 +508,13 @@ The verb segment-term can also specify triple inferences for *all*
 sub-resources in the subspace (not just for the immediate
 sub-resource of the selector segment).`,
         "example#example_structural_subspace_recursive>1;Structural subspace recursive inference": [
-`\`<urn:valos:@$iu4:f00b@~$iu4:b453@_$lang:fi@~$iu4:b74e@.:myProp@>\`
+`\`<urn:valos:$~u4:f00b@~$~u4:b453@_$lang:fi@~$~u4:b74e@.:myProp>\`
 infers triples:
 `, turtle(`
-  <urn:valos:@$iu4:f00b@~$iu4:b453@_$lang:fi@~$iu4:b74e@.:myProp@> a valos:ScopeProperty
-      ; valos:ghostHost <urn:valos:$iu4:f00b>
-      ; valos:ghostPrototype <urn:valos:@$iu4:b453@_$lang:fi@~$iu4:b74e@.:myProp@>
-      ; valos:subspacePrototype <urn:valos:@$iu4:f00b@~$iu4:b453@~$iu4:b74e@_$lang:fi@.:myProp@>
+  <urn:valos:$~u4:f00b@~$~u4:b453@_$lang:fi@~$~u4:b74e@.:myProp> a valos:ScopeProperty
+      ; valos:ghostHost <urn:valos:$~u4:f00b>
+      ; valos:ghostPrototype <urn:valos:$~u4:b453@_$lang:fi@~$~u4:b74e@.:myProp>
+      ; valos:subspacePrototype <urn:valos:$~u4:f00b@~$~u4:b453@~$~u4:b74e@_$lang:fi@.:myProp>
       ; valos:language "fi"
 `),
         ],
@@ -523,14 +523,14 @@ infers triples:
         "#0": `
 Structural properties infer a type, fixed owner and name.`,
         "example#example_structural_scope_property>0;Structural scope property triple inference": [
-`\`<urn:valos:@$iu4:f00b@.:myProp@>\` is a resource with fixed name
-"myProp", dominant type ScopeProperty, $iu4 resource f00b as the owning
+`\`<urn:valos:$~u4:f00b@.:myProp>\` is a resource with fixed name
+"myProp", dominant type ScopeProperty, $~u4 resource f00b as the owning
 scope and a structurally homologous prototype inside
 f00b-b507-0763 and thus infers triples:
 `, turtle(`
-  <urn:valos:@$iu4:f00b@.:myProp@> a valos:ScopeProperty
-      ; valos:scope <urn:valos:$iu4:f00b>
-      ; valos:inheritancePrototype <urn:valos:@$iu4:f00b-b507-0763@.:myProp@>
+  <urn:valos:$~u4:f00b@.:myProp> a valos:ScopeProperty
+      ; valos:scope <urn:valos:$~u4:f00b>
+      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@.:myProp>
       ; valos:name "myProp"
 `),
         ],
@@ -540,49 +540,49 @@ f00b-b507-0763 and thus infers triples:
 Structural relations infer a type, fixed owner (connector), name and
 possibly source and target.`,
         "example#example_structural_relation>0;Structural relation triple inference": [
-`\`<urn:valos:@$iu4:f00b@*:PERMISSIONS@_:1@>\` is a resource with
-fixed name "PERMISSIONS", dominant type Relation, iu4 f00b as the
+`\`<urn:valos:$~u4:f00b@*:PERMISSIONS@_:1>\` is a resource with
+fixed name "PERMISSIONS", dominant type Relation, ~u4 f00b as the
 source, a structurally homologous prototype inside f00b-b507-0763
 and thus infers triples:
 `, turtle(`
-  <urn:valos:@$iu4:f00b@*:PERMISSIONS@> a valos:Relation
-      ; valos:connectorSource <urn:valos:$iu4:f00b>
-      ; valos:inheritancePrototype <urn:valos:@$iu4:f00b-b507-0763@*:PERMISSIONS@>
+  <urn:valos:$~u4:f00b@*:PERMISSIONS> a valos:Relation
+      ; valos:connectorSource <urn:valos:$~u4:f00b>
+      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS>
       ; valos:name "PERMISSIONS"
-  <urn:valos:@$iu4:f00b@*:PERMISSIONS@_:1@> a valos:Relation
-      ; valos:subspacePrototype <urn:valos:@$iu4:f00b@*:PERMISSIONS@>
-                              , <urn:valos:@$iu4:f00b-b507-0763@*:PERMISSIONS@_:1@>
+  <urn:valos:$~u4:f00b@*:PERMISSIONS@_:1> a valos:Relation
+      ; valos:subspacePrototype <urn:valos:$~u4:f00b@*:PERMISSIONS>
+                              , <urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS@_:1>
 `),
         ],
       },
-      "chapter#section_structural_media>4;verb type \"`'`\": structural Media": {
+      "chapter#section_structural_media>4;verb type \"`.M`\": structural Media": {
         "#0": `
 Structural medias infer a type, fixed owner (folder) and name.`,
         "example#example_structural_media>0;Structural Media triple inference": [
-`\`<urn:valos:@$iu4:f00b@':foo.vs@>\` is a media with fixed
-name "foo.vs", dominant type Media, $iu4 resource f00b as the
+`\`<urn:valos:$~u4:f00b@.M:foo.vs>\` is a media with fixed
+name "foo.vs", dominant type Media, $~u4 resource f00b as the
 owning folder and a structurally homologous prototype inside
 f00b-b507-0763 and thus infers triples:
 `, turtle(`
-  <urn:valos:@$iu4:f00b@':foo.vs@> a valos:Media
-      ; valos:folder <urn:valos:$iu4:f00b>
-      ; valos:inheritancePrototype <urn:valos:@$iu4:f00b-b507-0763@':foo.vs@>
+  <urn:valos:$~u4:f00b@.M:foo.vs> a valos:Media
+      ; valos:folder <urn:valos:$~u4:f00b>
+      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@.M:foo.vs>
       ; valos:name "foo.vs"
 `),
         ],
       },
-      "chapter#section_structural_entity>5;verb type \"`+`\": structural Entity": {
+      "chapter#section_structural_entity>5;verb type \"`.E`\": structural Entity": {
         "#0": `
 Structural entities infer a type, fixed owner (parent) and name.`,
         "example#example_structural_entity>0;Structural Entity triple inference": [
-`\`<urn:valos:@$iu4:f00b@+:scripts@>\` is an entity with fixed
-name "scripts", dominant type Entity, $iu4 resource f00b as the
+`\`<urn:valos:$~u4:f00b@.E:Scripts>\` is an entity with fixed
+name "scripts", dominant type Entity, $~u4 resource f00b as the
 owning container and a structurally homologous prototype inside
 f00b-b507-0763 and thus infers triples:
 `, turtle(`
-  <urn:valos:@$iu4:f00b@+:scripts@> a valos:Entity
-      ; valos:parent <urn:valos:$iu4:f00b>
-      ; valos:inheritancePrototype <urn:valos:@$iu4:f00b-b507-0763@+:scripts@>
+  <urn:valos:$~u4:f00b@.E:Scripts> a valos:Entity
+      ; valos:parent <urn:valos:$~u4:f00b>
+      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@.E:scripts>
       ; valos:name "scripts"
 `),
         ],
@@ -594,14 +594,14 @@ The actual rdf:object sub-property depends on the dominant type of
 the verb-param: \`valos:value\` for ScopeProperty, \`valos:target\`
 for Relation, \`valos:content\` for Media, etc.`,
         "example#example_structural_object_value>0;Structural rdf:object triple inference": [
-`\`<urn:valos:@$iu4:f00b@*:PERMISSIONS:@-$ihi:8766@@>\` is a
-PERMISSIONS relation with fixed ihi target 8766 and infers triples:
+`\`<urn:valos:$~u4:f00b@*:PERMISSIONS:@-$~ih:8766>\` is a
+PERMISSIONS relation with fixed ~ih target 8766 and infers triples:
 `, turtle(`
-  <urn:valos:@$iu4:f00b@*:PERMISSIONS:@-$ihi:8766@@> a valos:Relation
-      ; valos:connectorSource <urn:valos:$iu4:f00b>
-      ; valos:prototype <urn:valos:@$iu4:f00b-b507-0763@*:PERMISSIONS:@-$ihi:8766@@>
+  <urn:valos:$~u4:f00b@*:PERMISSIONS:@-$~ih:8766> a valos:Relation
+      ; valos:connectorSource <urn:valos:$~u4:f00b>
+      ; valos:prototype <urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS:@-$~ih:8766>
       ; valos:name "PERMISSIONS"
-      ; valos:target <urn:valos:$iu4:8766-src>
+      ; valos:target <urn:valos:$~u4:8766-src>
 `),
         ],
       },
@@ -618,7 +618,7 @@ The list of definitive rules:
 
   vgrid-tail    = vgrid "@" [ verbs-tail ]
   vgrid         = "$" format-term ":" param-value [ params ]
-  format-term   = context-term
+  format-term   = "~" context-term
 
   verbs-tail     = verb "@" [ verbs-tail ]
   verb          = verb-type params
@@ -644,7 +644,7 @@ from other documents.
 The list of informative pseudo-rules:
 `, abnf(
 `  vrid            = "@" vgrid-tail
-  verbs          = "@" verbs-tail
+  verbs           = "@" verbs-tail
   vparam          = [ "$" [ context-term ] ] [ ":" param-value ]
   context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )
 `), `

@@ -110,116 +110,143 @@
                 [
                   "Ensure you have python installed."
                 ],
-                [
-                  "Navigate to the folder you want your revdoc.js to reside and run the following command: ",
-                  {
-                    "@type": "revdoc:CommandLineInteraction",
-                    "vdoc:entries": [
-                      [
-                        "",
-                        "$ ",
-                        {
-                          "@type": "revdoc:Invokation",
-                          "vdoc:words": [
-                            {
-                              "@type": "revdoc:Command",
-                              "vdoc:content": [
-                                "vlm"
-                              ]
-                            },
-                            "write-revdoc",
-                            "YOUR_DOCUMENT_NAME_WITHOUT_FILE_EXTENSION"
-                          ]
-                        }
-                      ]
-                    ]
-                  },
-                  " Note: If you create your RevDoc under the revdocs/ folder, ",
-                  "your HTML and VDocLD files will be generated to the project root"
-                ],
-                [
-                  "You will now be asked the following information: ",
-                  {
-                    "vdoc:content": [
-                      {
-                        "@type": "vdoc:BulletList",
-                        "vdoc:entries": [
-                          [
-                            "Title of the document: This is human-readable title of the document."
-                          ],
-                          [
-                            "ReSpec short name"
-                          ],
-                          [
-                            "Document editors: Comma-separated value of the editors of your document."
-                          ],
-                          [
-                            "Document authors: Comma-separated value of the authors of your document."
-                          ]
+                {
+                  "@type": "vdoc:Paragraph",
+                  "vdoc:content": [
+                    "Navigate to the folder you want your revdoc.js to reside and run the following command: ",
+                    {
+                      "@type": "revdoc:CommandLineInteraction",
+                      "vdoc:entries": [
+                        [
+                          "",
+                          "$ ",
+                          {
+                            "@type": "revdoc:Invokation",
+                            "vdoc:words": [
+                              {
+                                "@type": "revdoc:Command",
+                                "vdoc:content": [
+                                  "vlm"
+                                ]
+                              },
+                              "write-revdoc",
+                              "YOUR_DOCUMENT_NAME_WITHOUT_FILE_EXTENSION"
+                            ]
+                          }
                         ]
-                      }
-                    ]
-                  }
-                ],
-                [
-                  "Next navigate to the root of your project and run the following command ",
-                  {
-                    "@type": "revdoc:CommandLineInteraction",
-                    "vdoc:entries": [
-                      [
-                        "",
-                        "$ ",
+                      ]
+                    },
+                    " Note: If you create your RevDoc under the revdocs/ folder, ",
+                    "your HTML and VDocLD files will be generated to the project root"
+                  ]
+                },
+                {
+                  "@type": "vdoc:Paragraph",
+                  "vdoc:content": [
+                    "You will now be asked the following information: ",
+                    {
+                      "vdoc:content": [
                         {
-                          "@type": "revdoc:Invokation",
-                          "vdoc:words": [
+                          "@type": "vdoc:BulletList",
+                          "vdoc:entries": [
+                            [
+                              "Title of the document: This is human-readable title of the document."
+                            ],
                             {
-                              "@type": "revdoc:Command",
+                              "@type": "vdoc:Paragraph",
                               "vdoc:content": [
-                                "vlm"
+                                "ReSpec short name"
                               ]
                             },
-                            "regenerate-docs"
+                            {
+                              "@type": "vdoc:Paragraph",
+                              "vdoc:content": [
+                                "Document editors: Comma-separated value of the editors of your document."
+                              ]
+                            },
+                            {
+                              "@type": "vdoc:Paragraph",
+                              "vdoc:content": [
+                                "Document authors: Comma-separated value of the authors of your document."
+                              ]
+                            }
                           ]
                         }
                       ]
-                    ]
-                  },
-                  " This will create HTML and VDocLD files based on your RevDoc"
-                ],
-                [
-                  "Now run the following command ",
-                  {
-                    "@type": "revdoc:CommandLineInteraction",
-                    "vdoc:entries": [
-                      [
-                        "",
-                        "$ ",
-                        {
-                          "@type": "revdoc:Invokation",
-                          "vdoc:words": [
-                            {
-                              "@type": "revdoc:Command",
-                              "vdoc:content": [
-                                "python"
-                              ]
-                            },
-                            "-m",
-                            "SimpleHTTPServer"
-                          ]
-                        }
+                    }
+                  ]
+                },
+                {
+                  "@type": "vdoc:Paragraph",
+                  "vdoc:content": [
+                    "Next navigate to the root of your project and run the following command ",
+                    {
+                      "@type": "revdoc:CommandLineInteraction",
+                      "vdoc:entries": [
+                        [
+                          "",
+                          "$ ",
+                          {
+                            "@type": "revdoc:Invokation",
+                            "vdoc:words": [
+                              {
+                                "@type": "revdoc:Command",
+                                "vdoc:content": [
+                                  "vlm"
+                                ]
+                              },
+                              "regenerate-docs"
+                            ]
+                          }
+                        ]
                       ]
-                    ]
-                  }
-                ],
-                [
-                  "Open browser and navigate to the localhost in the port you just opened. (8000 by default)"
-                ],
-                [
-                  "Your HTML and VDocLD files can now be found ",
-                  "under docs/ in the same path as where you saved your RevDoc file; ",
-                  "for example if you saved your RevDoc under packages/type-vault ",
-                  "it can now be found under docs/packages/type-vault."
-                ]
+                    },
+                    " This will create HTML and VDocLD files based on your RevDoc"
+                  ]
+                },
+                {
+                  "@type": "vdoc:Paragraph",
+                  "vdoc:content": [
+                    "Now run the following command ",
+                    {
+                      "@type": "revdoc:CommandLineInteraction",
+                      "vdoc:entries": [
+                        [
+                          "",
+                          "$ ",
+                          {
+                            "@type": "revdoc:Invokation",
+                            "vdoc:words": [
+                              {
+                                "@type": "revdoc:Command",
+                                "vdoc:content": [
+                                  "python"
+                                ]
+                              },
+                              "-m",
+                              "SimpleHTTPServer"
+                            ]
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "@type": "vdoc:Paragraph",
+                  "vdoc:content": [
+                    "Open browser and navigate to the localhost in the port you just opened. (8000 by default)"
+                  ]
+                },
+                {
+                  "@type": "vdoc:Paragraph",
+                  "vdoc:content": [
+                    "Your HTML and VDocLD files can now be found ",
+                    "under docs/ in the same path as where you saved your RevDoc file; ",
+                    "for example if you saved your RevDoc under packages/type-vault ",
+                    "it can now be found under docs/packages/type-vault."
+                  ]
+                }
               ]
             }
           ]

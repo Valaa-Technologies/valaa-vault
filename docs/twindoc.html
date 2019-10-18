@@ -12,54 +12,56 @@
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
   </head>
-  <body>
+  <body class="vdoc vdoc-body">
     
-  <section id="abstract" class="vdoc type-vdoc-chapter">      <p>This document specifies TwinDoc, a <a href="https://valospace.org/vdoc#extension" class="vdoc type-vdoc-reference">VDoc extension</a> which specifies an isomorphism and synchronization
-    transformations between VDoc documents and valospace resources.</p>
-      <p>More specifically TwinDoc allows for the serialization and
-    deserialization of an arbitrary selection of valospace resources
-    into a VDoc document array and back even if the source resources
-    are not a representation of a VDoc document nor use any VDoc core
-    or extension ontologies.</p>
-
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document specifies TwinDoc, a <a href="https://valospace.org/vdoc#extension" class="vdoc type-vdoc-reference">VDoc extension</a>
+which specifies an isomorphism and synchronization transformations
+between VDoc documents and valospace resources.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">More specifically TwinDoc allows for the serialization and
+deserialization of an arbitrary selection of valospace resources
+into a VDoc document array and back even if the source resources
+are not a representation of a VDoc document nor use any VDoc core
+or extension ontologies.</span>
+</p></div>
   </section>
 
-  <section id="sotd" class="vdoc type-vdoc-chapter">      <p>This document has not been reviewed. This is a draft document and
-    may be updated, replaced or obsoleted by other documents at any
-    time.</p>
-      <p>This document is part of the <a href="@valos/kernel/spec" class="vdoc type-vdoc-reference">ValOS core specification</a>.</p>
-      <p>The extension is specified and supported by <a href="https://valospace.org/twindoc" class="vdoc type-revdoc-package"><em>@valos/twindoc</em></a> npm package.</p>
-
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document has not been reviewed. This is a draft document and
+may be updated, replaced or obsoleted by other documents at any
+time.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">This document is part of the <a href="@valos/kernel/spec" class="vdoc type-vdoc-reference">ValOS core specification</a>.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The extension is specified and supported by <a href="https://valospace.org/twindoc" class="vdoc type-revdoc-package"><em>@valos/twindoc</em></a>
+npm package.</span>
+</p></div>
   </section>
 
-  <section id="introduction" class="vdoc type-vdoc-chapter">      <p>TwinDoc provides both full isomorphic synchronization as well as
-    incremental, additive updates between VDoc documents and valospace
-    resources.
-    The fully isomoprhic extraction and emission transformations to
-    valospace resources provide lossless roundtrips to both directions:
+  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">TwinDoc provides both full isomorphic synchronization as well as
+incremental, additive updates between VDoc documents and valospace
+resources.
+The fully isomoprhic extraction and emission transformations to
+valospace resources provide lossless roundtrips to both directions:
     <ol>
       <li>emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD</li>
-      <li>extract + emit: a roundtrip starting from valospace into VDocLD back into valospace</li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">extract + emit: a roundtrip starting from valospace into VDocLD back into valospace</span>
+</p></div></li>
     </ol>
-</p>
-      <p>TwinDoc also specifies incremental transformations which are given
-    a diff base in addition to the source and which compute a diffset
-    and then merge the resulting diffset to the pre-existing
-    transformation target.
-    This not only gives performance advantages but also makes it
-    possible to have the final document be a combination of several
-    partial primary sources.</p>
-
+</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">TwinDoc also specifies incremental transformations which are given
+a diff base in addition to the source and which compute a diffset and
+then merge the resulting diffset to the pre-existing transformation
+target. This not only gives performance advantages but also makes it
+possible to have the final document be a combination of several
+partial primary sources.</span>
+</p></div>
   </section>
 
   <section id="ontology" class="vdoc type-vdoc-chapter">
-    <h2>TwinDoc ontology</h2>
-TwinDoc ontology provides vocabulary for defining hypertwin
-      mappings and configurations; actual hypertwin content is
-      represented using the valos core ontologies and possible
-      extension content ontologies.
+    <h3><a aria-label="§" href="#ontology">§ </a>TwinDoc ontology</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">TwinDoc ontology provides vocabulary for defining hypertwin mappings
+and configurations; actual hypertwin content is represented using the
+valos core ontologies and possible extension content ontologies.</span>
+</p></div>
   <section id="section_prefixes" class="vdoc type-vdoc-chapter">
-    <h2>TwinDoc IRI prefixes</h2>
+    <h3><a aria-label="§" href="#section_prefixes">§ </a>TwinDoc IRI prefixes</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -74,7 +76,7 @@ TwinDoc ontology provides vocabulary for defining hypertwin
   </section>
 
   <section id="section_classes" class="vdoc type-vdoc-chapter">
-    <h2>&#x3C;em&#x3E;twindoc:* a vdoc:Class&#x3C;/em&#x3E; vocabulary</h2>
+    <h3><a aria-label="§" href="#section_classes">§ </a>&#x3C;em&#x3E;twindoc:* a vdoc:Class&#x3C;/em&#x3E; vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -89,7 +91,7 @@ TwinDoc ontology provides vocabulary for defining hypertwin
   </section>
 
   <section id="section_properties" class="vdoc type-vdoc-chapter">
-    <h2>&#x3C;em&#x3E;twindoc:* a vdoc:Property&#x3C;/em&#x3E; vocabulary</h2>
+    <h3><a aria-label="§" href="#section_properties">§ </a>&#x3C;em&#x3E;twindoc:* a vdoc:Property&#x3C;/em&#x3E; vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -106,7 +108,7 @@ TwinDoc ontology provides vocabulary for defining hypertwin
   </section>
 
   <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h2>&#x3C;em&#x3E;twindoc:&#x3C;/em&#x3E; other vocabulary</h2>
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a>&#x3C;em&#x3E;twindoc:&#x3C;/em&#x3E; other vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -122,7 +124,7 @@ TwinDoc ontology provides vocabulary for defining hypertwin
   </section>
 
   <section id="section_context" class="vdoc type-vdoc-chapter">
-    <h2>TwinDoc JSON-LD context term definitions</h2>
+    <h3><a aria-label="§" href="#section_context">§ </a>TwinDoc JSON-LD context term definitions</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -142,10 +144,10 @@ TwinDoc ontology provides vocabulary for defining hypertwin
   </section>
 
   <section id="transformations" class="vdoc type-vdoc-chapter">
-    <h2>TwinDoc transformations</h2>
+    <h3><a aria-label="§" href="#transformations">§ </a>TwinDoc transformations</h3>
 
   <section id="extraction_rules" class="vdoc type-vdoc-chapter">
-    <h2>TwinDoc extraction rules</h2>
+    <h3><a aria-label="§" href="#extraction_rules">§ </a>TwinDoc extraction rules</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -164,7 +166,7 @@ TwinDoc ontology provides vocabulary for defining hypertwin
   </section>
 
   <section id="extractee_api" class="vdoc type-vdoc-chapter">
-    <h2>TwinDoc extractee API</h2>
+    <h3><a aria-label="§" href="#extractee_api">§ </a>TwinDoc extractee API</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -179,13 +181,14 @@ TwinDoc ontology provides vocabulary for defining hypertwin
   </section>
 
   <section id="emission_output" class="vdoc type-vdoc-chapter">
-    <h2>TwinDoc emission output</h2>
-TwinDoc emits event log updates into valospace resources.<a href="@valos/hypertwin" class="vdoc type-revdoc-package"><em>@valos/hypertwin</em></a> provides tools which implement this
-        transformation using the gateway API.
+    <h3><a aria-label="§" href="#emission_output">§ </a>TwinDoc emission output</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">TwinDoc emits event log updates into valospace resources.<a href="@valos/hypertwin" class="vdoc type-revdoc-package"><em>@valos/hypertwin</em></a> provides tools which implement this
+        transformation using the gateway API.</span>
+</p></div>
   </section>
 
   <section id="emission_rules" class="vdoc type-vdoc-chapter">
-    <h2>TwinDoc emission rules</h2>
+    <h3><a aria-label="§" href="#emission_rules">§ </a>TwinDoc emission rules</h3>
 
   </section>
 

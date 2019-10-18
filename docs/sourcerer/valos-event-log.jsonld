@@ -54,34 +54,49 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "ValOS Event Log is an ordered, numbered sequence of JSON-LD documents.\nEach document represents a single event. Together these events\nincrementally, exclusively and deterministically specify the state\nchanges of a single valospace partition from its initial empty state to\nthe current state after the most recent event."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "ValOS Event Log is an ordered, numbered sequence of JSON-LD documents.\nEach document represents a single event. Together these events\nincrementally, exclusively and deterministically specify the state\nchanges of a single valospace partition from its initial empty state to\nthe current state after the most recent event."
+          ]
+        }
       ]
     },
     "sotd": {
       "@id": "sotd",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is part of the library workspace ",
         {
-          "@type": "revdoc:Package",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "This document is part of the library workspace ",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/sourcerer"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/sourcerer"
-        },
-        " but is `NOT SUPPORTED NOR IMPLEMENTED` by it yet in any manner."
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/sourcerer"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/sourcerer"
+            },
+            "\nbut is `NOT SUPPORTED NOR IMPLEMENTED` by it yet in any manner."
+          ]
+        }
       ]
     },
     "introduction": {
       "@id": "introduction",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "TODO."
+          ]
+        }
       ]
     },
     "@type": "revdoc:Document",

@@ -12,53 +12,72 @@
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
   </head>
-  <body>
+  <body class="vdoc vdoc-body">
     
-  <section id="abstract" class="vdoc type-vdoc-chapter">This document is a collection of tutorials and possibly other notes created by Jaradacl based on the tasks given. (During first few days at least)
+  <section id="abstract" class="vdoc type-vdoc-chapter"><span class="vdoc type-vdoc-node">This document is a collection of tutorials and possibly other notes</span>
+<span class="vdoc type-vdoc-node"> created by Jaradacl based on the tasks given. (During first few days at least)</span>
+
   </section>
 
-  <section id="sotd" class="vdoc type-vdoc-chapter">This document is part of the toolset workspace <a href="https://valospace.org/type-vault" class="vdoc type-revdoc-package"><em>@valos/type-vault</em></a> (of domain <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which is A valma toolset for managing valos vault monorepository workspaces
+  <section id="sotd" class="vdoc type-vdoc-chapter"><span class="vdoc type-vdoc-node">This document is part of the toolset workspace </span>
+<a href="https://valospace.org/type-vault" class="vdoc type-revdoc-package"><em>@valos/type-vault</em></a><span class="vdoc type-vdoc-node"> (of domain </span>
+<a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a><span class="vdoc type-vdoc-node">) which is </span>
+<span class="vdoc type-vdoc-node">A valma toolset for managing valos vault monorepository workspaces</span>
+
   </section>
 
   <section id="how_to_create_revdoc" class="vdoc type-vdoc-chapter">
-    <h2>How to create RevDoc</h2>
-This is a step-by-step guide on how to create RevDoc using cli.
+    <h3><a aria-label="§" href="#how_to_create_revdoc">§ </a>How to create RevDoc</h3>
+<span class="vdoc type-vdoc-node">This is a step-by-step guide on how to create RevDoc using cli.</span>
+
     <ol>
       <li>Ensure you have python installed.</li>
-      <li>Navigate to the folder you want your revdoc.js to reside and run the following command: <blockquote class="vdoc type-revdoc-example">
-    <code>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">Navigate to the folder you want your revdoc.js to reside and run the following command: 
+<blockquote class="vdoc type-revdoc-example">
+    
   <div class="vdoc type-vdoc-node">$ <code><span class="vdoc type-vdoc-node"><strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm</span>
 </em></strong> write-revdoc YOUR_DOCUMENT_NAME_WITHOUT_FILE_EXTENSION</span>
 </code>
   </div>
-</code>
-  </blockquote> Note: If you create your RevDoc under the revdocs/ folder, your HTML and VDocLD files will be generated to the project root</li>
-      <li>You will now be asked the following information: 
+
+</blockquote> Note: If you create your RevDoc under the revdocs/ folder, your HTML and VDocLD files will be generated to the project root</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">You will now be asked the following information: 
     <ul>
       <li>Title of the document: This is human-readable title of the document.</li>
-      <li>ReSpec short name</li>
-      <li>Document editors: Comma-separated value of the editors of your document.</li>
-      <li>Document authors: Comma-separated value of the authors of your document.</li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">ReSpec short name</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">Document editors: Comma-separated value of the editors of your document.</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">Document authors: Comma-separated value of the authors of your document.</span>
+</p></div></li>
     </ul>
-</li>
-      <li>Next navigate to the root of your project and run the following command <blockquote class="vdoc type-revdoc-example">
-    <code>
+</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">Next navigate to the root of your project and run the following command 
+<blockquote class="vdoc type-revdoc-example">
+    
   <div class="vdoc type-vdoc-node">$ <code><span class="vdoc type-vdoc-node"><strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm</span>
 </em></strong> regenerate-docs</span>
 </code>
   </div>
-</code>
-  </blockquote> This will create HTML and VDocLD files based on your RevDoc</li>
-      <li>Now run the following command <blockquote class="vdoc type-revdoc-example">
-    <code>
+
+</blockquote> This will create HTML and VDocLD files based on your RevDoc</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">Now run the following command 
+<blockquote class="vdoc type-revdoc-example">
+    
   <div class="vdoc type-vdoc-node">$ <code><span class="vdoc type-vdoc-node"><strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">python</span>
 </em></strong> -m SimpleHTTPServer</span>
 </code>
   </div>
-</code>
-  </blockquote></li>
-      <li>Open browser and navigate to the localhost in the port you just opened. (8000 by default)</li>
-      <li>Your HTML and VDocLD files can now be found under docs/ in the same path as where you saved your RevDoc file; for example if you saved your RevDoc under packages/type-vault it can now be found under docs/packages/type-vault.</li>
+
+</blockquote></span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">Open browser and navigate to the localhost in the port you just opened. (8000 by default)</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">Your HTML and VDocLD files can now be found under docs/ in the same path as where you saved your RevDoc file; for example if you saved your RevDoc under packages/type-vault it can now be found under docs/packages/type-vault.</span>
+</p></div></li>
     </ol>
 
   </section>

@@ -64,56 +64,70 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This library provides the definitions and reference implementation\n    for valoscript, the valospace ECMAScript dialect."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This library provides the definitions and reference implementation\nfor valoscript, the valospace ECMAScript dialect."
+          ]
+        }
       ]
     },
     "sotd": {
       "@id": "sotd",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is part of the library workspace ",
         {
-          "@type": "revdoc:Package",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "This document is part of the library workspace ",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/script"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/script"
-        },
-        " (of domain ",
-        {
-          "@type": "revdoc:Package",
-          "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/script"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/script"
+            },
+            "\n(of domain ",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/kernel"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/kernel"
-        },
-        ") which is ",
-        "ValOS Script API, schema"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`ValOS Script API, schema`"
+          ]
+        }
       ]
     },
     "introduction": {
       "@id": "introduction",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Valoscript extends ECMAScript 5 object model transparently for\nmanipulating valospace resources. The valoscript interpreter creates ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "events"
-          ],
-          "vdoc:ref": "@valos/raem#event"
-        },
-        " from all valospace resource\nmodification side-effects and groups all such side effects into\ntransactions. Valoscript retains ECMAScript 5 syntax and semantics."
+            "Valoscript extends ECMAScript 5 object model transparently for\nmanipulating valospace resources. The valoscript interpreter creates ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "events"
+              ],
+              "vdoc:ref": "@valos/raem#event"
+            },
+            " from all valospace resource\nmodification side-effects and groups all such side effects into\ntransactions. Valoscript retains ECMAScript 5 syntax and semantics."
+          ]
+        }
       ]
     },
     "ontology": {
@@ -163,7 +177,12 @@
     "section_ontology_abstract": {
       "@id": "section_ontology_abstract",
       "vdoc:content": [
-        "@valos/script ontology specifies the Valospace core types and\n      properties directly to the @valos/kernel namespace. "
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "@valos/script ontology specifies the Valospace core types and properties\ndirectly to the @valos/kernel namespace. "
+          ]
+        }
       ]
     },
     "section_prefixes": {

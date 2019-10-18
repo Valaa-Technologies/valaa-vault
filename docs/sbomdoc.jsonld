@@ -68,62 +68,85 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document specifies SBomDoc, a ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "VDoc extension"
-          ],
-          "vdoc:ref": "@valos/vdoc#extension"
-        },
-        " for extracting and emitting ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "CycloneDX BOM documents"
-          ],
-          "vdoc:ref": "https://cyclonedx.org/"
-        },
-        " in various formats."
+            "This document specifies SBomDoc, a ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "VDoc extension"
+              ],
+              "vdoc:ref": "@valos/vdoc#extension"
+            },
+            "\nfor extracting and emitting ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "CycloneDX BOM documents"
+              ],
+              "vdoc:ref": "https://cyclonedx.org/"
+            },
+            "\nin various formats."
+          ]
+        }
       ]
     },
     "sotd": {
       "@id": "sotd",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document has not been reviewed. This is a draft document and\n    may be updated, replaced or obsoleted by other documents at any\n    time.",
-        null,
-        "This document is part of the ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ValOS core specification"
-          ],
-          "vdoc:ref": "@valos/kernel/spec"
+            "This document has not been reviewed. This is a draft document and\nmay be updated, replaced or obsoleted by other documents at any\ntime."
+          ]
         },
-        ".",
-        null,
-        "The format is implemented and supported by ",
         {
-          "@type": "revdoc:Package",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "This document is part of the ",
             {
-              "vdoc:em": true,
+              "@type": "vdoc:Reference",
               "vdoc:content": [
-                "@valos/sbomdoc"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/sbomdoc"
+                "ValOS core specification"
+              ],
+              "vdoc:ref": "@valos/kernel/spec"
+            },
+            "."
+          ]
         },
-        " npm package."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The format is implemented and supported by ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/sbomdoc"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/sbomdoc"
+            },
+            "\nnpm package."
+          ]
+        }
       ]
     },
     "introduction": {
       "@id": "introduction",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "SBoMDoc is a VDoc extension which uses CycloneDX namespaces and\n    can emit BOM documents in various formats."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "SBoMDoc is a VDoc extension which uses CycloneDX namespaces and can\nemit BOM documents in various formats."
+          ]
+        }
       ]
     },
     "ontology": {
@@ -169,7 +192,12 @@
     "section_ontology_abstract": {
       "@id": "section_ontology_abstract",
       "vdoc:content": [
-        "SBoMDoc ontology provides vocabulary and definitions which are\n      tailored for representing CycloneDX SBoM analysis semantic\n      content."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "SBoMDoc ontology provides vocabulary and definitions which are\ntailored for representing CycloneDX SBoM analysis semantic content."
+          ]
+        }
       ]
     },
     "section_prefixes": {
@@ -564,11 +592,16 @@
       "dc:title": "SBoMDoc emission rules",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "ReVDoc provides html emission rules for ",
         {
-          "vdoc:words": [
-            "vdoc:Document",
-            "sbomdoc:Document"
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "ReVDoc provides html emission rules for ",
+            {
+              "vdoc:words": [
+                "vdoc:Document",
+                "sbomdoc:Document"
+              ]
+            }
           ]
         }
       ]

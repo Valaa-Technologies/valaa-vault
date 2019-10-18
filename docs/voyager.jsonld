@@ -67,41 +67,50 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is the first introduction for ValOS voyagers -\n    the first adopters, entrepreneurs and evangelists - to the ValOS\n    ecosystem, its philosophy and its ultimate goals."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This document is the first introduction for ValOS voyagers - the first\nadopters, entrepreneurs and evangelists - to the ValOS ecosystem, its\nphilosophy and its ultimate goals."
+          ]
+        }
       ]
     },
     "sotd": {
       "@id": "sotd",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is part of the vault workspace ",
         {
-          "@type": "revdoc:Package",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "This document is part of the vault workspace ",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/kernel"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/kernel"
-        },
-        " (of domain ",
-        {
-          "@type": "revdoc:Package",
-          "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            "\n(of domain ",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/kernel"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/kernel"
-        },
-        ") which is ",
-        "ValOS common infrastructure tools and libraries monorepository."
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`ValOS common infrastructure tools and libraries monorepository`."
+          ]
+        }
       ]
     },
     "introduction": {
@@ -109,18 +118,31 @@
       "dc:title": "How do I discover opportunities and enlighten others?",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "As a voyager you have stakes that matter. Whether you were to\n    invest on a ValOS collaborator as a financier, to adopt ValOS as\n    technology as an executive or just to commit your personal time and\n    energy on a ValOS project you need to ",
         {
-          "vdoc:em": true,
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "see"
+            "As a voyager you have stakes that matter. Whether you were to\ninvest on a ValOS collaborator as a financier, to adopt ValOS as\ntechnology as an executive or just to commit your personal time and\nenergy on a ValOS project you need to ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "see"
+              ]
+            },
+            " forward."
           ]
         },
-        " forward.",
-        null,
-        "To make sound decisions and to position yourself proactively you\n    need to understand the big picture and philosophy of the ValOS\n    ecosystem. Only then you can enlighten others.",
-        null,
-        "You use tailored but real-world ValOS demo setups to illustrate\n    how ValOS a solution could be configured to meet the needs at hand.\n    Your audience can be your customer, your team or even just\n    yourself."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "To make sound decisions and to position yourself proactively you\nneed to understand the big picture and philosophy of the ValOS\necosystem. Only then you can enlighten others."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "You use tailored but real-world ValOS demo setups to illustrate\nhow ValOS a solution could be configured to meet the needs at hand.\nYour audience can be your customer, your team or even just\nyourself."
+          ]
+        }
       ]
     },
     "section_profiles": {
@@ -128,7 +150,12 @@
       "dc:title": "Voyager profiles",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Voyager is generic orientation. There are various voyager\n      sub-profiles with their own documents briefly detailed here.",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Voyager is generic orientation. There are various voyager sub-profiles\nwith their own documents briefly detailed here."
+          ]
+        },
         {
           "@id": "enthusiast"
         },
@@ -193,15 +220,20 @@
       "dc:title": "How to add new profiles",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Create a ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "PR in github"
-          ],
-          "vdoc:ref": "https://help.github.com/en/articles/about-pull-requests"
-        },
-        " against @valos/kernel/revdocs/valonaut.revdoc.js"
+            "Create a ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "PR in github"
+              ],
+              "vdoc:ref": "https://help.github.com/en/articles/about-pull-requests"
+            },
+            "\nagainst @valos/kernel/revdocs/valonaut.revdoc.js"
+          ]
+        }
       ]
     },
     "@type": "revdoc:Document",

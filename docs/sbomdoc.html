@@ -12,30 +12,35 @@
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
   </head>
-  <body>
+  <body class="vdoc vdoc-body">
     
-  <section id="abstract" class="vdoc type-vdoc-chapter">This document specifies SBomDoc, a <a href="https://valospace.org/vdoc#extension" class="vdoc type-vdoc-reference">VDoc extension</a> for extracting and emitting <a href="https://cyclonedx.org/" class="vdoc type-vdoc-reference">CycloneDX BOM documents</a> in various formats.
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document specifies SBomDoc, a <a href="https://valospace.org/vdoc#extension" class="vdoc type-vdoc-reference">VDoc extension</a>
+for extracting and emitting <a href="https://cyclonedx.org/" class="vdoc type-vdoc-reference">CycloneDX BOM documents</a>
+in various formats.</span>
+</p></div>
   </section>
 
-  <section id="sotd" class="vdoc type-vdoc-chapter">      <p>This document has not been reviewed. This is a draft document and
-    may be updated, replaced or obsoleted by other documents at any
-    time.</p>
-      <p>This document is part of the <a href="@valos/kernel/spec" class="vdoc type-vdoc-reference">ValOS core specification</a>.</p>
-      <p>The format is implemented and supported by <a href="https://valospace.org/sbomdoc" class="vdoc type-revdoc-package"><em>@valos/sbomdoc</em></a> npm package.</p>
-
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document has not been reviewed. This is a draft document and
+may be updated, replaced or obsoleted by other documents at any
+time.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">This document is part of the <a href="@valos/kernel/spec" class="vdoc type-vdoc-reference">ValOS core specification</a>.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The format is implemented and supported by <a href="https://valospace.org/sbomdoc" class="vdoc type-revdoc-package"><em>@valos/sbomdoc</em></a>
+npm package.</span>
+</p></div>
   </section>
 
-  <section id="introduction" class="vdoc type-vdoc-chapter">SBoMDoc is a VDoc extension which uses CycloneDX namespaces and
-    can emit BOM documents in various formats.
+  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">SBoMDoc is a VDoc extension which uses CycloneDX namespaces and can
+emit BOM documents in various formats.</span>
+</p></div>
   </section>
 
   <section id="ontology" class="vdoc type-vdoc-chapter">
-    <h2>SBoMDoc ontology</h2>
-SBoMDoc ontology provides vocabulary and definitions which are
-      tailored for representing CycloneDX SBoM analysis semantic
-      content.
+    <h3><a aria-label="§" href="#ontology">§ </a>SBoMDoc ontology</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">SBoMDoc ontology provides vocabulary and definitions which are
+tailored for representing CycloneDX SBoM analysis semantic content.</span>
+</p></div>
   <section id="section_prefixes" class="vdoc type-vdoc-chapter">
-    <h2>SBoMDoc IRI prefixes</h2>
+    <h3><a aria-label="§" href="#section_prefixes">§ </a>SBoMDoc IRI prefixes</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -50,7 +55,7 @@ SBoMDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="section_classes" class="vdoc type-vdoc-chapter">
-    <h2>&#x3C;em&#x3E;sbomdoc:* a vdoc:Class&#x3C;/em&#x3E; vocabulary</h2>
+    <h3><a aria-label="§" href="#section_classes">§ </a>&#x3C;em&#x3E;sbomdoc:* a vdoc:Class&#x3C;/em&#x3E; vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -65,7 +70,7 @@ SBoMDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="section_properties" class="vdoc type-vdoc-chapter">
-    <h2>&#x3C;em&#x3E;sbomdoc:* a vdoc:Property&#x3C;/em&#x3E; vocabulary</h2>
+    <h3><a aria-label="§" href="#section_properties">§ </a>&#x3C;em&#x3E;sbomdoc:* a vdoc:Property&#x3C;/em&#x3E; vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -82,7 +87,7 @@ SBoMDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h2>&#x3C;em&#x3E;sbomdoc:&#x3C;/em&#x3E; other vocabulary</h2>
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a>&#x3C;em&#x3E;sbomdoc:&#x3C;/em&#x3E; other vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -99,7 +104,7 @@ SBoMDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="section_context" class="vdoc type-vdoc-chapter">
-    <h2>SBoMDoc JSON-LD context term definitions</h2>
+    <h3><a aria-label="§" href="#section_context">§ </a>SBoMDoc JSON-LD context term definitions</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -119,10 +124,10 @@ SBoMDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="transformations" class="vdoc type-vdoc-chapter">
-    <h2>SBoMDoc transformations</h2>
+    <h3><a aria-label="§" href="#transformations">§ </a>SBoMDoc transformations</h3>
 
   <section id="extraction_rules" class="vdoc type-vdoc-chapter">
-    <h2>SBoMDoc extraction rules</h2>
+    <h3><a aria-label="§" href="#extraction_rules">§ </a>SBoMDoc extraction rules</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -141,7 +146,7 @@ SBoMDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="extractee_api" class="vdoc type-vdoc-chapter">
-    <h2>SBoMDoc extractee API</h2>
+    <h3><a aria-label="§" href="#extractee_api">§ </a>SBoMDoc extractee API</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -156,13 +161,14 @@ SBoMDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="emission_output" class="vdoc type-vdoc-chapter">
-    <h2>SBoMDoc emission output</h2>
+    <h3><a aria-label="§" href="#emission_output">§ </a>SBoMDoc emission output</h3>
 
   </section>
 
   <section id="emission_rules" class="vdoc type-vdoc-chapter">
-    <h2>SBoMDoc emission rules</h2>
-ReVDoc provides html emission rules for vdoc:Document sbomdoc:Document
+    <h3><a aria-label="§" href="#emission_rules">§ </a>SBoMDoc emission rules</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">ReVDoc provides html emission rules for vdoc:Document sbomdoc:Document</span>
+</p></div>
   </section>
 
   </section>

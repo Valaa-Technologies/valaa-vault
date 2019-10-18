@@ -66,43 +66,56 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is the first introduction for ValOS technicians -\n    the primary infrastructure developers and operators - to the ValOS\n    ecosystem and its infrastructure toolchains and workflows."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This document is the first introduction for ValOS technicians -\nthe primary infrastructure developers and operators - to the ValOS\necosystem and its infrastructure toolchains and workflows."
+          ]
+        }
       ]
     },
     "sotd": {
       "@id": "sotd",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is part of the vault workspace ",
         {
-          "@type": "revdoc:Package",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "This document is part of the vault workspace ",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/kernel"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/kernel"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            "\n(of domain ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`ValOS common infrastructure tools and libraries monorepository`."
+          ]
         },
-        " (of domain ",
         {
-          "@type": "revdoc:Package",
+          "@type": "revdoc:Example",
           "vdoc:content": [
-            {
-              "vdoc:em": true,
-              "vdoc:content": [
-                "@valos/kernel"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/kernel"
-        },
-        ") which is ",
-        "ValOS common infrastructure tools and libraries monorepository.",
-        null,
-        "NOTE(2019-08): This content is what used to be in DEVOPS.md,\n    is relatively old and needs to undergo revision of details, of\n    the emphasis, and the specification needs to be extracted to a\n    separate document. The essential content is correct, though."
+            "\nNOTE(2019-08): This document is severely `OUTDATED and SEMANTICALLY UNRELIABLE`.\nThis content is what used to be in DEVOPS.md, is relatively old and\nneeds to be revised. The specification needs to be extracted to be\na separate document from the devops workflows."
+          ]
+        }
       ]
     },
     "introduction": {
@@ -110,47 +123,60 @@
       "dc:title": "How do I enable valonauts and expand the Valospace?",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "As a technician you develop and operate the ",
         {
-          "revdoc:dfn": "#fabric",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "As a technician you develop and operate the ",
             {
-              "vdoc:strong": true,
+              "revdoc:dfn": "#fabric",
               "vdoc:content": [
                 {
-                  "@type": "vdoc:Reference",
+                  "vdoc:strong": true,
                   "vdoc:content": [
-                    "ValOS fabric"
-                  ],
-                  "vdoc:ref": "#fabric"
-                }
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "ValOS fabric"
+                      ],
+                      "vdoc:ref": "#fabric"
+                    }
+                  ]
+                },
+                ", ",
+                "the globally distributed web-like infrastructure of servers,\n    services and components which underlies the Valospace"
               ]
             },
-            ", ",
-            "the globally distributed web-like infrastructure of servers,\n        services and components which underlies the Valospace"
+            "."
           ]
         },
-        ".",
-        null,
-        "    You use ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "vlm"
-          ],
-          "vdoc:ref": "@/valma"
+            "You use ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "vlm"
+              ],
+              "vdoc:ref": "@/valma"
+            },
+            " and employ your existing,\nlikely professional knowledge of JavaScript, Node.js, DevOps,\nbackend, library and other software development skills."
+          ]
         },
-        " and employ your existing,\n    likely professional knowledge of JavaScript, Node.js, DevOps,\n    backend, library and other software development skills.",
-        null,
-        "    You create new open source and/or proprietary node packages. These\n    permanently create new fabric functionalities and ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "expand"
-          ],
-          "vdoc:ref": "expand"
-        },
-        " the Valospace by integrating it to old world systems."
+            "You create new open source and/or proprietary node packages. These\npermanently create new fabric functionalities and ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "expand"
+              ],
+              "vdoc:ref": "expand"
+            },
+            " the Valospace by integrating it to old world systems."
+          ]
+        }
       ]
     },
     "section_profiles": {
@@ -158,7 +184,12 @@
       "dc:title": "Technician role sub-profiles",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Technician sub-profiles detail the typical stages of software\n      development and operations workflows within ValOS ecosystem.\n      A technician should read the detail docs of their own profiles\n      but also understand the at least the abstract principles of all\n      other profiles, which are expanded below.",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Technician sub-profiles detail the typical stages of software\ndevelopment and operations workflows within ValOS ecosystem.\nA technician should read the detail docs of their own profiles\nbut also understand the at least the abstract principles of all\nother profiles, which are expanded below."
+          ]
+        },
         {
           "@id": "developer"
         },
@@ -223,15 +254,20 @@
       "dc:title": "How to add new profiles",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Create a ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "PR in github"
-          ],
-          "vdoc:ref": "https://help.github.com/en/articles/about-pull-requests"
-        },
-        " against @valos/kernel/revdocs/technician.revdoc.js"
+            "Create a ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "PR in github"
+              ],
+              "vdoc:ref": "https://help.github.com/en/articles/about-pull-requests"
+            },
+            " against @valos/kernel/revdocs/technician.revdoc.js"
+          ]
+        }
       ]
     },
     "preface": {
@@ -239,18 +275,31 @@
       "dc:title": "*IMPORTANT",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document, like most of the more principled and less pragmatic\n    documents must be understood as strong speculation and as an\n    architectural exercise (although a very serious one) on\n    what-could-be.",
-        null,
-        "    This rings especially true for the primary focus of this document,\n    ie. for ",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ValOS Core"
+            "This document, like most of the more principled and less pragmatic\ndocuments must be understood as strong speculation and as an\narchitectural exercise (although a very serious one) on\nwhat-could-be."
           ]
         },
-        " as the fully functional open source\n    core around which the often proprietary ValOS ecosystem would expand.\n    This is an ambitious, even presumptuous attempt to facilitate the\n    fruitful side-by-side living of open source communities as well as\n    private enterprises as a combination of technical and social\n    architecture.",
-        null,
-        "    (The technical part is the ambitious part and the social part is\n    the presumptuous part. :D)"
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This rings especially true for the primary focus of this document,\nie. for ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "ValOS Core"
+              ]
+            },
+            " as the fully functional open source\ncore around which the often proprietary ValOS ecosystem would expand.\nThis is an ambitious, even presumptuous attempt to facilitate the\nfruitful side-by-side living of open source communities as well as\nprivate enterprises as a combination of technical and social\narchitecture."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "(The technical part is the ambitious part and the social part is\nthe presumptuous part. :D)"
+          ]
+        }
       ]
     },
     "specification": {
@@ -258,267 +307,315 @@
       "dc:title": "ValOS specification",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document has two purposes. Firstly it provides the initial\n    specification of Valaa Open System (",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ValOS"
-          ]
-        },
-        ") and secondly\n    it serves as the introduction for ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "Development Operations"
-          ],
-          "vdoc:ref": "https://en.wikipedia.org/wiki/DevOps"
-        },
-        ".",
-        null,
-        "    ValOS specification is provided as quoted and numbered ValOS rules.",
-        {
-          "vdoc:blockquote": true,
-          "vdoc:content": [
+            "This document has two purposes. Firstly it provides the initial\nspecification of Valaa Open System (",
             {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "valos-vault-1.1"
-              ]
-            },
-            ": ",
-            {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "ValOS packages"
-              ]
-            },
-            "are\n        all the npmjs.com packages with ",
-            {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "@valos"
-              ]
-            },
-            " scope which\n        don't have cyclic dependencies with other ",
-            {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "@valos"
-              ]
-            },
-            " scope packages."
-          ]
-        },
-        {
-          "vdoc:blockquote": true,
-          "vdoc:content": [
-            {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "valos-vault-1.2"
-              ]
-            },
-            ": Valaa Open System (",
-            {
-              "@type": "vdoc:CharacterData",
+              "vdoc:em": true,
               "vdoc:content": [
                 "ValOS"
               ]
             },
-            " is defined to be the contents of all ValOS\n        packages and nothing else."
+            ") and secondly\nit serves as the introduction for ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "Development Operations"
+              ],
+              "vdoc:ref": "https://en.wikipedia.org/wiki/DevOps"
+            },
+            "."
           ]
         },
         {
-          "vdoc:blockquote": true,
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "ValOS specification is provided as quoted and numbered ValOS rules.",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "valos-vault-1.3"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-1.1"
+                  ]
+                },
+                ": ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "ValOS packages"
+                  ]
+                },
+                " are\n    all the npmjs.com packages with ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos"
+                  ]
+                },
+                " scope which\n    don't have cyclic dependencies with other ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos"
+                  ]
+                },
+                "\n    scope packages."
               ]
             },
-            ": ",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "ValOS specification"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-1.2"
+                  ]
+                },
+                ": Valaa Open System (",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "ValOS"
+                  ]
+                },
+                " is defined to be the contents of all ValOS\n    packages and nothing else."
               ]
             },
-            " consists of all files in all ValOS packages whose path in the\n        package matches the JS regex ",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "/^specifications\\/\\w*.md$/"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-1.3"
+                  ]
+                },
+                ": ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "ValOS specification"
+                  ]
+                },
+                "\n    consists of all files in all ValOS packages whose path in the\n    package matches the JS regex ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "/^specifications\\/\\w*.md$/"
+                  ]
+                },
+                "\n    and nothing else."
               ]
             },
-            " and nothing else."
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-1.4"
+                  ]
+                },
+                ": Rules in a package are considered\n    to be more specific than the rules in its package dependency tree.\n    More specific rules take precedence."
+              ]
+            },
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-1.5"
+                  ]
+                },
+                ": All packages which conform to\n    ValOS specification are called ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "ValOS packages"
+                  ]
+                },
+                ". These\n    packages are inclusively considered part of the ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "ValOS ecosystem"
+                  ]
+                },
+                "."
+              ]
+            }
           ]
         },
         {
-          "vdoc:blockquote": true,
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "The system is structured into purpose-oriented vertical ",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:em": true,
               "vdoc:content": [
-                "valos-vault-1.4"
+                "domains"
               ]
             },
-            ": Rules in a package are\n        considered to be more specific than the rules in its package\n        dependency tree. More specific rules take precedence."
-          ]
-        },
-        {
-          "vdoc:blockquote": true,
-          "vdoc:content": [
+            "\nand into four content oriented horizontal ",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:em": true,
               "vdoc:content": [
-                "valos-vault-1.5"
-              ]
-            },
-            ": All packages which conform to\n        ValOS specification are called ",
-            {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "ValOS packages"
-              ]
-            },
-            ". These\n        packages are inclusively considered part of the ",
-            {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "ValOS ecosystem"
+                "utility layers"
               ]
             },
             "."
           ]
         },
-        "The system is structured into a plethora of purpose-oriented\n    vertical ",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "domains"
-          ]
-        },
-        " and into four content oriented\n    horizontal ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "utility layers"
-          ]
-        },
-        ".",
-        null,
-        "    Each utility layer is named by the content or service is provides\n    and builds or depends on the previous layers.",
-        {
-          "vdoc:content": [
+            "Each utility layer is named by the content or service is provides\nand builds or depends on the previous layers.",
             {
-              "@type": "vdoc:BulletList",
-              "vdoc:entries": [
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "files"
-                    ]
-                  },
-                  " layer provides files via git repositories."
-                ],
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "packages"
-                    ]
-                  },
-                  " layer provides npm packages via npm registry.\n        These packages are created by git repositories called ",
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "vaults"
-                    ]
-                  },
-                  "."
-                ],
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "authorities"
-                    ]
-                  },
-                  " layer provides the ValOS live authority\n        service APIs. Authorities are deployed and managed with ",
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "opspace"
-                    ]
-                  },
-                  " workspaces."
-                ],
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "partitions"
-                    ]
-                  },
-                  " layer provides the resource content as\n        partition events and bvobs. These are served via authority\n        service APIs."
-                ]
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:BulletList",
+                  "vdoc:entries": [
+                    [
+                      {
+                        "vdoc:em": true,
+                        "vdoc:content": [
+                          "files"
+                        ]
+                      },
+                      " layer provides files via git repositories."
+                    ],
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "packages"
+                          ]
+                        },
+                        " layer provides npm packages via npm registry.\n  These packages are created by git repositories called ",
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "vaults"
+                          ]
+                        },
+                        "."
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "authorities"
+                          ]
+                        },
+                        " layer provides the ValOS live authority\n  service APIs. Authorities are deployed and managed with ",
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "opspace"
+                          ]
+                        },
+                        " workspaces."
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "partitions"
+                          ]
+                        },
+                        " layer provides the resource content as\n  partition events and bvobs. These are served via authority\n  service APIs."
+                      ]
+                    }
+                  ]
+                }
               ]
             }
           ]
         },
-        "",
-        null,
-        "    TODO(iridian): Figure out and describe the concrete role of domains.\n    NOTE(iridian, 2019-08): Domains are now mostly figured out; they\n    are administrative, organisational units and namespaces.",
-        null,
-        "    A DevOp manages these layers by scripts that are delivered inside\n    the packages alongside their main content. A command line tool\n    called ValOS Medium or ",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "vlm"
+            "TODO(iridian): Figure out and describe the concrete role of domains.\nNOTE(iridian, 2019-08): Domains are now mostly figured out; they\nare administrative, organisational units and namespaces."
           ]
         },
-        " is used to discover and ",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "invoke"
+            "A DevOp manages these layers by scripts that are delivered inside\nthe packages alongside their main content. A command line tool called\nValOS Medium or ",
+            {
+              "@type": "revdoc:Command",
+              "vdoc:content": [
+                "vlm"
+              ]
+            },
+            " is used to discover and ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "invoke"
+              ]
+            },
+            "\nthese scripts as ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "valma commands"
+              ]
+            },
+            "."
           ]
         },
-        " these scripts as ",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "valma commands"
+            "From a DevOps perspective ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "valma"
+              ]
+            },
+            ", ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "vault"
+              ]
+            },
+            " and ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "opspace"
+              ]
+            },
+            " are the three concrete core mechanisms that everything\nelse ties into."
           ]
         },
-        ".",
-        null,
-        "    From a DevOps perspective ",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "valma"
+            "Valma and specific domains are specified in other documents and as such\nare only briefly described here."
           ]
         },
-        ", ",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "vault"
+            "The utility layers are common to everything form the bulk of this\ndocument. They are fully specified at the last part of this document\nafter all the brief descriptions."
           ]
-        },
-        " and ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "opspace"
-          ]
-        },
-        " are the three concrete core mechanisms that\n    everything else ties into.",
-        null,
-        "    Valma and specific domains are specified in other documents and as such\n    are only briefly described here.\n    The utility layers are common to everything form the bulk of this\n    document. They are fully specified at the last part of this document\n    after all the brief descriptions."
+        }
       ]
     },
     "domains": {
@@ -527,45 +624,55 @@
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
-          "vdoc:blockquote": true,
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "valos-vault-2.1"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-2.1"
+                  ]
+                },
+                ": A ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "domain"
+                  ]
+                },
+                " is the\n    collection of all the systems, interactions and dynamics which\n    exclusively serve a particular purpose."
               ]
             },
-            ": A ",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "domain"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-2.2"
+                  ]
+                },
+                ": A domain must define the\n    purpose, describe its producers and consumers and should\n    provide a direction for technical and operational structure as\n    well."
               ]
             },
-            " is the\n        collection of all the systems, interactions and dynamics which\n        exclusively serve a particular purpose."
+            "For example the ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            " domain provides the\nessential central ValOS code for developing new ValOS\ninfrastructure software. Its main producers are the kernel software\ndevelopers and its consumers are the infrastructure software\ndevelopers. It revolves around developing code as library packages."
           ]
-        },
-        {
-          "vdoc:blockquote": true,
-          "vdoc:content": [
-            {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "valos-vault-2.2"
-              ]
-            },
-            ": A domain must define the\n        purpose, describe its producers and consumers and should\n        provide a direction for technical and operational structure as\n        well."
-          ]
-        },
-        "For example the ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "@valos/kernel"
-          ],
-          "vdoc:ref": "@valos/kernel"
-        },
-        " domain provides the\n    essential central ValOS code for developing new ValOS\n    infrastructure software. Its main producers are the kernel software\n    developers and its consumers are the infrastructure software\n    developers. It revolves around developing code as library packages."
+        }
       ]
     },
     "valma": {
@@ -573,250 +680,255 @@
       "dc:title": "`valma` - a convenience CLI to context-dependent command scripts",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "valma (",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "vlm"
-          ]
-        },
-        " in CLI) is a convenience tool for executing\n    command scripts exported by packages in valos workspace contexts.\n    It is a generalization of 'npx -c' behaviour, adding\n    discoverability, ability to invoke global scripts and the ability\n    to invoke multiple scripts at once using glob matching.",
-        {
-          "vdoc:blockquote": true,
-          "vdoc:content": [
-            {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "valos-vault-3.1"
-              ]
-            },
-            ": valma is installed with ",
+            "valma (",
             {
               "@type": "revdoc:Command",
               "vdoc:content": [
-                "npm install -g valma"
+                "vlm"
               ]
             },
-            " or as a package dependency"
-          ]
-        },
-        "This installs the global CLI command ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "vlm"
-          ]
-        },
-        ". At its core\n    valma is a command dispatcher to ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "valma scripts"
-          ]
-        },
-        " in\n    various ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "command pools"
-          ]
-        },
-        ".",
-        {
-          "vdoc:blockquote": true,
-          "vdoc:content": [
+            " in CLI) is a convenience tool for executing\ncommand scripts exported by packages in valos workspace contexts.\nIt is a generalization of 'npx -c' behaviour, adding\ndiscoverability, ability to invoke global scripts and the ability\nto invoke multiple scripts at once using glob matching.",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "valos-vault-3.2"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-3.1"
+                  ]
+                },
+                ": valma is installed with ",
+                {
+                  "@type": "revdoc:Command",
+                  "vdoc:content": [
+                    "npm install -g valma"
+                  ]
+                },
+                " or as a package dependency"
               ]
             },
-            ": valma searches the scripts\n        first from the package.json ",
+            "This installs the global CLI command ",
             {
-              "@type": "vdoc:CharacterData",
+              "@type": "revdoc:Command",
               "vdoc:content": [
-                "scripts"
+                "vlm"
               ]
             },
-            " pool, then from ",
+            ". At its core\nvalma is a command dispatcher to ",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:em": true,
               "vdoc:content": [
-                "./node_modules/.bin/"
+                "valma scripts"
               ]
             },
+            " in\nvarious ",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:em": true,
               "vdoc:content": [
-                "depends"
+                "command pools"
               ]
             },
-            " pool and lastly from\n        the OS-specific variant of ",
+            ".",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "/usr/bin"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-3.2"
+                  ]
+                },
+                ": valma searches the scripts\n    first from the package.json ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "scripts"
+                  ]
+                },
+                " pool, then from ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "./node_modules/.bin/"
+                  ]
+                },
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "depends"
+                  ]
+                },
+                " pool and lastly from\n    the OS-specific variant of ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "/usr/bin"
+                  ]
+                },
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "global"
+                  ]
+                },
+                " pool."
               ]
             },
+            "As an example typing ",
             {
-              "@type": "vdoc:CharacterData",
+              "@type": "revdoc:Command",
               "vdoc:content": [
-                "global"
+                "vlm status"
               ]
             },
-            " pool."
-          ]
-        },
-        "As an example typing ",
-        {
-          "@type": "revdoc:Command",
-          "vdoc:content": [
-            "vlm status"
-          ]
-        },
-        " in some directory\n    context would forward the command to ",
-        {
-          "@type": "revdoc:Command",
-          "vdoc:content": [
-            "valma.bin/valma-status"
-          ]
-        },
-        " first if one exists and falling back to the more generic versions\n    if not. The call eventually resolves at the global ",
-        {
-          "@type": "revdoc:Command",
-          "vdoc:content": [
-            "/usr/bin/valma-status"
-          ]
-        },
-        ". Its implementation then calls ",
-        {
-          "@type": "revdoc:Command",
-          "vdoc:content": [
-            "vlm .status/**/*"
-          ]
-        },
-        " which calls all scripts which match\n    the glob ",
-        {
-          "@type": "revdoc:Command",
-          "vdoc:content": [
-            ".valma-status/**/*"
-          ]
-        },
-        " and are visible on the\n    execution context pools (the scripts called by ",
-        {
-          "@type": "revdoc:Command",
-          "vdoc:content": [
-            "vlm status"
-          ]
-        },
-        " are known as ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "valma status scripts"
-          ]
-        },
-        ").",
-        {
-          "vdoc:blockquote": true,
-          "vdoc:content": [
+            " in some directory\ncontext would forward the command to ",
             {
-              "@type": "vdoc:CharacterData",
+              "@type": "revdoc:Command",
               "vdoc:content": [
-                "valos-vault-3.3"
+                "valma.bin/valma-status"
               ]
             },
-            ": A package can export valma scripts using npm package.json ",
+            " first if one exists and falling back to the more generic versions\nif not. The call eventually resolves at the global ",
             {
-              "@type": "vdoc:CharacterData",
+              "@type": "revdoc:Command",
               "vdoc:content": [
-                "bin"
+                "/usr/bin/valma-status"
               ]
             },
-            " section and by prefixing the exported name with ",
+            ". Its implementation then calls ",
             {
-              "@type": "vdoc:CharacterData",
+              "@type": "revdoc:Command",
               "vdoc:content": [
-                "valma-"
+                "vlm .status/**/*"
               ]
             },
-            " as usual. These scripts will be available for\n        all packages depending on this package in their ",
+            " which calls all scripts which match\nthe glob ",
             {
-              "@type": "vdoc:CharacterData",
+              "@type": "revdoc:Command",
               "vdoc:content": [
-                "depends"
+                ".valma-status/**/*"
               ]
             },
-            " pool."
-          ]
-        },
-        "Running ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "vlm"
-          ]
-        },
-        " with no arguments lists all available\n    commands grouped by pool in current directory context.",
-        {
-          "vdoc:blockquote": true,
-          "vdoc:content": [
+            " and are visible on the\nexecution context pools (the scripts called by ",
             {
-              "@type": "vdoc:CharacterData",
+              "@type": "revdoc:Command",
               "vdoc:content": [
-                "valos-vault-3.5"
+                "vlm status"
               ]
             },
-            ": valma can be used in programmatic contexts to run valma\n        scripts. When done so, valma must be added as a dependency."
-          ]
-        },
-        "This happens just like with the CLI by using ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "vlm <command> [<args>]"
-          ]
-        },
-        ".\n    (\"npx -c\" would be the alternative but it's slow and limited).",
-        {
-          "vdoc:blockquote": true,
-          "vdoc:content": [
+            " are known as ",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:em": true,
               "vdoc:content": [
-                "valos-vault-3.5.1"
+                "valma status scripts"
               ]
             },
-            ": valma ensures that node environment is loaded"
-          ]
-        },
-        "The environment is loaded only once even for recursive script\n    invokations.",
-        {
-          "vdoc:blockquote": true,
-          "vdoc:content": [
+            ").",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "valos-vault-3.5.2"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-3.3"
+                  ]
+                },
+                ": A package can export valma scripts using npm package.json ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "bin"
+                  ]
+                },
+                " section and by prefixing the exported name with ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valma-"
+                  ]
+                },
+                " as usual. These scripts will be available for\n    all packages depending on this package in their ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "depends"
+                  ]
+                },
+                " pool."
               ]
             },
-            ": valma ensures that 'vlm' is always found in path"
-          ]
-        },
-        "This is so that valma scripts can call 'vlm' even valma is not\n    globally installed as long as valma has been installed as a dependency.",
-        {
-          "vdoc:blockquote": true,
-          "vdoc:content": [
+            "Running ",
             {
-              "@type": "vdoc:CharacterData",
+              "@type": "revdoc:Command",
               "vdoc:content": [
-                "valos-vault-3.5.3"
+                "vlm"
               ]
             },
-            ": valma ensures that the most specific 'vlm' version is used\n        to evaluate a command, preferring scripts over depended over global."
+            " with no arguments lists all available\ncommands grouped by pool in current directory context.",
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-3.5"
+                  ]
+                },
+                ": valma can be used in programmatic contexts to run valma\n    scripts. When done so, valma must be added as a dependency."
+              ]
+            },
+            "This happens just like with the CLI by using ",
+            {
+              "@type": "revdoc:Command",
+              "vdoc:content": [
+                "vlm <command> [<args>]"
+              ]
+            },
+            ".\n(\"npx -c\" would be the alternative but it's slow and limited).",
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-3.5.1"
+                  ]
+                },
+                ": valma ensures that node environment is loaded"
+              ]
+            },
+            "The environment is loaded only once even for recursive script\ninvokations.",
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-3.5.2"
+                  ]
+                },
+                ": valma ensures that 'vlm' is always found in path"
+              ]
+            },
+            "This is so that valma scripts can call 'vlm' even valma is not\nglobally installed as long as valma has been installed as a dependency.",
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-3.5.3"
+                  ]
+                },
+                ": valma ensures that the most specific 'vlm' version is used\n    to evaluate a command, preferring scripts over depended over global."
+              ]
+            },
+            "This is so that toolkits can precisely control the whole toolchain\nin their dependencies."
           ]
-        },
-        "This is so that toolkits can precisely control the whole toolchain\n    in their dependencies."
+        }
       ]
     },
     "utility_layer": {
@@ -824,35 +936,40 @@
       "dc:title": "ValOS `utility` layers provide operational services",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "ValOS has four main utility layers: ",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "files"
+            "ValOS has four main utility layers: ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "files"
+              ]
+            },
+            ", ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "packages"
+              ]
+            },
+            ",\n",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "authorities"
+              ]
+            },
+            " and ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "partitions"
+              ]
+            },
+            ". These layers form\nthe core operational infrastructure of ValOS."
           ]
         },
-        ", ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "packages"
-          ]
-        },
-        ", ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "authorities"
-          ]
-        },
-        " and ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "partitions"
-          ]
-        },
-        ". These layers\n      form the core operational infrastructure of ValOS.",
         {
           "@id": "utility_layer_overview"
         },
@@ -876,45 +993,51 @@
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
-          "vdoc:blockquote": true,
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "valos-vault-4.1.1"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-4.1.1"
+                  ]
+                },
+                ": An ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "utility"
+                  ]
+                },
+                " is a domain\n    with a well-defined operational purpose."
               ]
             },
-            ": An ",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "utility"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-4.1.2"
+                  ]
+                },
+                ": utility must explicitly define\n    the ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "payload"
+                  ]
+                },
+                " it provides to its consumers as well as the\n    providers, tools and workflows used to manage that payload."
               ]
             },
-            " is\n          a domain with a well-defined operational purpose."
+            "Below is a rough correlation of similar concepts across utilities."
           ]
         },
         {
-          "vdoc:blockquote": true,
-          "vdoc:content": [
-            {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "valos-vault-4.1.2"
-              ]
-            },
-            ": utility must explicitly\n          define the ",
-            {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "payload"
-              ]
-            },
-            " it provides to its consumers as\n          well as the providers, tools and workflows used to manage\n          that payload."
-          ]
-        },
-        "Below is a rough correlation of similar concepts across utilities.",
-        {
+          "@type": "vdoc:Table",
           "vdoc:headers": [
             "Utility",
             "Tool",
@@ -983,195 +1106,237 @@
             ]
           ]
         },
-        null,
         {
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "@type": "vdoc:BulletList",
-              "vdoc:entries": [
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "Utility"
-                    ]
-                  },
-                  "- the utility layer which is being described"
-                ],
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "Tool"
-                    ]
-                  },
-                  " - the name of the tool used to manipulate the payload and/or metadata"
-                ],
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "Payload"
-                    ]
-                  },
-                  " - the content or the service the utility delivers to consumers"
-                ],
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "Providers"
-                    ]
-                  },
-                  " - the authoritative source for the payload"
-                ],
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "Consumed via"
-                    ]
-                  },
-                  " - the mechanism used by a consumer to access the payload"
-                ],
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "Upstream"
-                    ]
-                  },
-                  " - the possible external source of payload updates"
-                ],
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "Configuration"
-                    ]
-                  },
-                  " - where the configuration of the utility itself is specified"
-                ],
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "Modifed via"
-                    ]
-                  },
-                  " - how to make local changes to the payload"
-                ],
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "Produced via"
-                    ]
-                  },
-                  " - how to request for a set of local changes to be distributed"
-                ],
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "Authority"
-                    ]
-                  },
-                  " - who accepts and distributes a change request"
-                ],
-                [
-                  {
-                    "@type": "vdoc:CharacterData",
-                    "vdoc:content": [
-                      "Distributed via"
-                    ]
-                  },
-                  " - how changes are made live to all consumers"
-                ]
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:BulletList",
+                  "vdoc:entries": [
+                    [
+                      {
+                        "vdoc:em": true,
+                        "vdoc:content": [
+                          "Utility"
+                        ]
+                      },
+                      "- the utility layer which is being described"
+                    ],
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "Tool"
+                          ]
+                        },
+                        " - the name of the tool used to manipulate the payload and/or metadata"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "Payload"
+                          ]
+                        },
+                        " - the content or the service the utility delivers to consumers"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "Providers"
+                          ]
+                        },
+                        " - the authoritative source for the payload"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "Consumed via"
+                          ]
+                        },
+                        " - the mechanism used by a consumer to access the payload"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "Upstream"
+                          ]
+                        },
+                        " - the possible external source of payload updates"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "Configuration"
+                          ]
+                        },
+                        " - where the configuration of the utility itself is specified"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "Modifed via"
+                          ]
+                        },
+                        " - how to make local changes to the payload"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "Produced via"
+                          ]
+                        },
+                        " - how to request for a set of local changes to be distributed"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "Authority"
+                          ]
+                        },
+                        " - who accepts and distributes a change request"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "vdoc:em": true,
+                          "vdoc:content": [
+                            "Distributed via"
+                          ]
+                        },
+                        " - how changes are made live to all consumers"
+                      ]
+                    }
+                  ]
+                }
               ]
-            }
-          ]
-        },
-        "Note that ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "files"
-          ]
-        },
-        " and ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "partitions"
-          ]
-        },
-        " don't have\n      an external upstream and thus these bands are the defining\n      authority of all of their payload.",
-        null,
-        "      On the other hand ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "packages"
-          ]
-        },
-        " and ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "authorities"
-          ]
-        },
-        " use the ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "files"
-          ]
-        },
-        " as their external upstream: their payload is\n      generated from the content in git repositories. Making updates to\n      such utility content thus requires:",
-        null,
-        {
-          "vdoc:content": [
+            },
+            "Note that ",
             {
-              "@type": "vdoc:NumberedList",
-              "vdoc:entries": [
-                [
-                  "modifying the corresponding upstream git repository"
-                ],
-                [
-                  "distributing the git changes (a PR followed with ",
-                  {
-                    "@type": "revdoc:Command",
-                    "vdoc:content": [
-                      "git push master"
-                    ]
-                  },
-                  ")"
-                ],
-                [
-                  "distributing the utility update (",
-                  {
-                    "@type": "revdoc:Command",
-                    "vdoc:content": [
-                      "publish-packages"
-                    ]
-                  },
-                  " or ",
-                  {
-                    "@type": "revdoc:Command",
-                    "vdoc:content": [
-                      "deploy-release"
-                    ]
-                  },
-                  ")."
-                ]
+              "vdoc:em": true,
+              "vdoc:content": [
+                "files"
               ]
-            }
+            },
+            " and ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "partitions"
+              ]
+            },
+            " don't have\nan external upstream and thus these bands are the defining\nauthority of all of their payload."
           ]
         },
-        null,
-        "Step 3 can be automated by tooling in particular domains as\n      a response to particularily formed git repository updates."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "On the other hand ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "packages"
+              ]
+            },
+            " and ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "authorities"
+              ]
+            },
+            " use\nthe ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "files"
+              ]
+            },
+            " as their external upstream: their payload is\ngenerated from the content in git repositories. Making updates to\nsuch utility content thus requires:",
+            {
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:NumberedList",
+                  "vdoc:entries": [
+                    [
+                      "modifying the corresponding upstream git repository"
+                    ],
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        "distributing the git changes (a PR followed with ",
+                        {
+                          "@type": "revdoc:Command",
+                          "vdoc:content": [
+                            "git push master"
+                          ]
+                        },
+                        ")"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        "distributing the utility update (",
+                        {
+                          "@type": "revdoc:Command",
+                          "vdoc:content": [
+                            "publish-packages"
+                          ]
+                        },
+                        " or ",
+                        {
+                          "@type": "revdoc:Command",
+                          "vdoc:content": [
+                            "deploy-release"
+                          ]
+                        },
+                        ")."
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "\nStep 3 can be automated by tooling in particular domains as a response\nto particularily formed git repository updates."
+          ]
+        }
       ]
     },
     "files_layer": {
@@ -1180,36 +1345,41 @@
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "git"
-          ],
-          "vdoc:ref": "https://git-scm.com/"
-        },
-        " is the industry standard\n      for version managing sets of files in a non-centralized ecosystem.\n      No additional tools are provided because there is no need.",
-        {
-          "vdoc:blockquote": true,
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "@type": "vdoc:CharacterData",
+              "@type": "vdoc:Reference",
               "vdoc:content": [
-                "valos-vault-4.2.1"
-              ]
+                "git"
+              ],
+              "vdoc:ref": "https://git-scm.com/"
             },
-            ": ValOS tools should use git as the files provider."
-          ]
-        },
-        "While github.com is the de facto standard provider and\n      the typical choice it must *not* be _required_.",
-        {
-          "vdoc:blockquote": true,
-          "vdoc:content": [
+            " is the industry standard\nfor version managing sets of files in a non-centralized ecosystem.\nNo additional tools are provided because there is no need.",
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "valos-vault-4.2.2"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-4.2.1"
+                  ]
+                },
+                ": ValOS tools should use git as the files provider."
               ]
             },
-            ": All git providers must be fully supported by all ValOS\n          tools and libraries."
+            "While github.com is the de facto standard provider and\nthe typical choice it must *not* be _required_.",
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-4.2.2"
+                  ]
+                },
+                ": All git providers must be fully supported by all ValOS tools and\n    libraries."
+              ]
+            }
           ]
         }
       ]
@@ -1220,48 +1390,61 @@
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
-          "vdoc:blockquote": true,
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "valos-vault-4.3.1"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-4.3.1"
+                  ]
+                },
+                ": The packages utility payload is ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "npmjs.com packages"
+                  ],
+                  "vdoc:ref": "https://docs.npmjs.com/getting-started/packages"
+                }
               ]
             },
-            ": The packages utility payload is ",
+            "These packages can be libraries, toolsets or prebuilt release runtimes\n- any sets of files really. The raison d'être for packages is when\nseveral different consumers depend on the same set of files which are\nalso expected to undergo periodic development. The files thus need\nversioning, dependency management and automated distribution - this all\nis provided by npm."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Note: npmjs.com is a javascript repository - this should not be\na problem as long as ValOS remains mostly javascript and config files.\nIf a need to diversity the languages arises a ",
             {
               "@type": "vdoc:Reference",
               "vdoc:content": [
-                "npmjs.com packages"
+                "private npm registry"
               ],
-              "vdoc:ref": "https://docs.npmjs.com/getting-started/packages"
+              "vdoc:ref": "https://docs.npmjs.com/misc/registry#can-i-run-my-own-private-registry"
+            },
+            "can be set up for that purpose."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "valma package commands: ",
+            {
+              "@type": "revdoc:Command",
+              "vdoc:content": [
+                "vlm assemble-packages"
+              ]
+            },
+            " ",
+            {
+              "@type": "revdoc:Command",
+              "vdoc:content": [
+                "vlm publish-packages"
+              ]
             }
-          ]
-        },
-        "These packages can be libraries, toolsets or prebuilt release\n      runtimes - any sets of files really. The raison d'être for\n      packages is when several different consumers depend on the same\n      set of files which are also expected to undergo periodic\n      development. The files thus need versioning, dependency\n      management and automated distribution - this all is provided by\n      npm.",
-        null,
-        "      Note: npmjs.com is a javascript repository - this should not be a\n      problem as long as ValOS remains mostly javascript and config\n      files. If a need to diversity the languages arises a ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "private npm registry"
-          ],
-          "vdoc:ref": "https://docs.npmjs.com/misc/registry#can-i-run-my-own-private-registry"
-        },
-        "can be set up for that purpose.",
-        null,
-        "      valma package commands: ",
-        {
-          "@type": "revdoc:Command",
-          "vdoc:content": [
-            "vlm assemble-packages"
-          ]
-        },
-        " ",
-        {
-          "@type": "revdoc:Command",
-          "vdoc:content": [
-            "vlm publish-packages"
           ]
         }
       ]
@@ -1272,158 +1455,261 @@
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
-          "vdoc:blockquote": true,
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "valos-vault-4.4.1"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-4.4.1"
+                  ]
+                },
+                ": A ValOS ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "authority"
+                  ]
+                },
+                " is uniquely identified by an\n    authority URI."
               ]
             },
-            ": A ValOS ",
             {
-              "@type": "vdoc:CharacterData",
+              "@type": "vdoc:Reference",
               "vdoc:content": [
-                "authority"
-              ]
+                "Read more about valos URIs"
+              ],
+              "vdoc:ref": "packages/raem/README.md"
             },
-            " is uniquely identified by an\n            authority URI."
+            "."
           ]
         },
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "Read more about valos URIs"
-          ],
-          "vdoc:ref": "packages/raem/README.md"
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-4.4.2"
+                  ]
+                },
+                ": A ValOS ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "authority"
+                  ]
+                },
+                " can contain ValOS ",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "partitions"
+                  ]
+                },
+                " and must provide a mechanism for\n    accessing event logs and bvob content as well as for\n    accepting and authorizing incoming commands into authorized\n    partition events."
+              ]
+            },
+            "Authorities are usually live deployments on some\ninfrastructure and they provide service APIs as the required\nmechanisms."
+          ]
         },
-        ".\n\n        ",
         {
-          "vdoc:blockquote": true,
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Stateless or in some way non-infrastructural authorities also exist but\nare specified elsewhere (they are considered degenerate, without\nupstream and with empty payload)."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "@type": "vdoc:CharacterData",
+              "@type": "vdoc:Reference",
               "vdoc:content": [
-                "valos-vault-4.4.2"
+                "Read more about authorities"
+              ],
+              "vdoc:ref": "packages/sourcerer/README.md"
+            },
+            "."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-4.4.3"
+                  ]
+                },
+                ": Authorities utility layer payload (",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "authority payload"
+                  ]
+                },
+                ")\n    is a set of deployed authority service APIs and any associated\n    static content."
               ]
             },
-            ": A ValOS ",
+            "The payload here refers to the service deployments and their live APIs\nthemselves and not any dynamic content delivered through them. Such\ndynamic content belongs to other domains (notably valospace content\nresides in the ",
             {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "authority"
-              ]
-            },
-            " can contain ValOS ",
-            {
-              "@type": "vdoc:CharacterData",
+              "vdoc:em": true,
               "vdoc:content": [
                 "partitions"
               ]
             },
-            " and must provide a mechanism for\n            accessing event logs and bvob content as well as for\n            accepting and authorizing incoming commands into authorized\n            partition events."
+            " utility layer, see below)."
           ]
         },
-        "Authorities are usually live deployments on some\n        infrastructure and they provide service APIs as the required\n        mechanisms.\n\n        Stateless or in some way non-infrastructural authorities also exist but\n        are specified elsewhere (they are considered degenerate, without\n        upstream and with empty payload).\n\n        ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "Read more about authorities"
-          ],
-          "vdoc:ref": "packages/sourcerer/README.md"
+            "The static content includes HTTP landing pages, site routes and their\nconfigurations, ValOS gateway and spindle runtimes and any other similar\nstatically configured files."
+          ]
         },
-        ".\n\n        ",
         {
-          "vdoc:blockquote": true,
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "valos-vault-4.4.3"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-4.4.4"
+                  ]
+                },
+                ": An authority may have\n    an operations workspace (",
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "opspace"
+                  ]
+                },
+                ") as its upstream for\n    managing its payload."
               ]
-            },
-            ": Authorities utility layer payload (",
-            {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "authority payload"
-              ]
-            },
-            ") is a set of deployed authority service APIs and any\n            associated static content."
+            }
           ]
         },
-        "The payload here refers to the service deployments and their live APIs\n        themselves and not any dynamic content delivered through them. Such\n        dynamic content belongs to other domains (notably valospace content\n        resides in the ",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "partitions"
+            "Particular authorities are naturally free to implement their\noperational architectures in any way they like. This said opspaces\nhave a well-defined structure which valma authority tools make use of."
           ]
         },
-        " utility layer, see below).\n\n        The static content includes HTTP landing pages, site routes and their\n        configurations, ValOS gateway and spindle runtimes and any other similar\n        statically configured files.\n\n        ",
         {
-          "vdoc:blockquote": true,
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "valos-vault-4.4.4"
-              ]
-            },
-            ": An authority may have\n            an operations workspace (",
-            {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
-                "opspace"
-              ]
-            },
-            ") as its\n            upstream for managing its payload."
+            "Updates to the authority payloads are primarily done as modifications\nto the corresponding opspace and then distributing those via release\ndeployments."
           ]
         },
-        "\n\n        Particular authorities are naturally free to implement their\n        operational architectures in any way they like. This said opspaces\n        have a well-defined structure which valma authority tools make use of.\n\n        Updates to the authority payloads are primarily done as modifications\n        to the corresponding opspace and then distributing those via release\n        deployments.\n\n        ",
         {
-          "vdoc:blockquote": true,
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "valos-vault-4.4.5"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-4.4.5"
+                  ]
+                },
+                ": An opspace should not\n    be published as a package."
               ]
-            },
-            ": An opspace should not\n            be published as a package."
+            }
           ]
         },
-        "\n\n        While opspaces make use of package.json and the npm dependency\n        management this provides, they can also contain considerable amounts of\n        static content. Also, there should be no reason to depend on\n        an opspace. Automatic release deployment systems should have access\n        to a opspace directly for building the release.\n\n        ",
         {
-          "vdoc:blockquote": true,
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "While opspaces make use of package.json and the npm dependency\nmanagement this provides, they can also contain considerable amounts of\nstatic content. Also, there should be no reason to depend on an opspace.\nAutomatic release deployment systems should have access to a opspace\ndirectly for building the release."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "@type": "vdoc:CharacterData",
+              "vdoc:blockquote": true,
               "vdoc:content": [
-                "valos-vault-4.4.6"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "valos-vault-4.4.6"
+                  ]
+                },
+                ": Information must not move\n    from deployed authorities back to authority utility layer\n    upstream."
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Information flowing back upstream increases complexity, prevents\ndecentralized and manual upstreams (there is a definite upstream which\nmust be always accessible), and are a security concern (for\nprogrammatic access the downstream must have the upstream credentials)."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "If a use case necessitating this arises, still seriously consider\nkeeping the mutateable content separate from the upstream itself and\ninstead have upstream only contain the necessary code and credentials\nto access this content."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Note: this applies to architectural decisions and automations only.\nInteractive content in valospace is not limited from using an opspace\nto update authorities (although it is still recommended to keep such\nvalospace applications deployments separate from the authorities they\nare used to control)."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "valma opspace commands: ",
+            {
+              "@type": "revdoc:Command",
+              "vdoc:content": [
+                "vlm build-release"
               ]
             },
-            ": Information must not\n            move from deployed authorities back to authority utility\n            layer upstream."
-          ]
-        },
-        "\n\n        Information flowing back upstream increases complexity,\n        prevents decentralized and manual upstreams (there is a\n        definite upstream which must be always accessible), and are\n        a security concern (for programmatic access the downstream must\n        have the upstream credentials).\n\n        If a use case necessitating this arises, still seriously\n        consider keeping the mutateable content separate from the\n        upstream itself and instead have upstream only contain the\n        necessary code and credentials to access this content.\n\n        Note: this applies to architectural decisions and automations\n        only. Interactive content in valospace is not limited from\n        using an opspace to update authorities (although it is still\n        recommended to keep such valospace applications deployments\n        separate from the authorities they are used to control).\n\n        valma opspace commands: ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "vlm build-release"
-          ]
-        },
-        " ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "vlm deploy-release"
+            " ",
+            {
+              "@type": "revdoc:Command",
+              "vdoc:content": [
+                "vlm deploy-release"
+              ]
+            }
           ]
         },
         {
           "dc:title": "ValOS core vs. auxiliary authorities",
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "ValOS authorities and any partition content they provide do\n        not need to be public. A ValOS core authority is an authority\n        which can be accessed using only ValOS core spindles (including\n        no spindles at all). A ValOS auxiliary authority is an authority\n        which requires a conforming but non-core ValOS gateway spindle\n        in order to be accessed. (Design Note 2019-03: the spindle\n        conformance requirements are unspecified. When they are\n        specified they must be lenient enough to enable sophisticated\n        protocols but constrained/sandboxed enough that such spindles\n        cannot interfere with other reasonably written spindles)."
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "ValOS authorities and any partition content they provide do not need\nto be public. A ValOS core authority is an authority which can be\naccessed using only ValOS core spindles (including no spindles at all)."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "A ValOS auxiliary authority is an authority which requires a conforming\nbut non-core ValOS gateway spindle in order to be accessed."
+              ]
+            },
+            {
+              "@type": "revdoc:Example",
+              "vdoc:content": [
+                "Design Note 2019-03: the spindle conformance requirements are\nunspecified. When they are specified they must be lenient enough to\nenable sophisticated protocols but constrained/sandboxed enough that\nsuch spindles cannot interfere with other reasonably written spindles."
+              ]
+            }
           ]
         }
       ]
@@ -1433,24 +1719,44 @@
       "dc:title": "Partitions utility layer - the foundation of valospace",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Event logs and bvob content are the partitions payload and are\n        consumed by ValOS gateways. It is more extensively covered\n        elsewhere and is mentioned here for completeness; precious\n        little infrastructural tooling is provided for them yet.\n\n        Eventually various partition diagnostics tools will come in handy:",
         {
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "Event logs and bvob content are the partitions payload and are\nconsumed by ValOS gateways. It is more extensively covered elsewhere\nand is mentioned here for completeness; precious little infrastructural\ntooling is provided for them yet."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Eventually various partition diagnostics tools will come in handy:",
             {
-              "@type": "vdoc:BulletList",
-              "vdoc:entries": [
-                [
-                  "Media content import/export tools"
-                ],
-                [
-                  "Complete partition to file system hierarchy save/load tools"
-                ],
-                [
-                  "Event log introspection and manipulation tools"
-                ],
-                [
-                  "etc."
-                ]
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:BulletList",
+                  "vdoc:entries": [
+                    [
+                      "Media content import/export tools"
+                    ],
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        "Complete partition to file system hierarchy save/load tools"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        "Event log introspection and manipulation tools"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        "etc."
+                      ]
+                    }
+                  ]
+                }
               ]
             }
           ]
@@ -1459,23 +1765,36 @@
           "dc:title": "ValOS public vs protected partitions",
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "All partitions provided by ValOS authorities are ValOS\n        partitions. Additionally ValOS public partitions are partitions\n        which are both",
             {
+              "@type": "vdoc:Paragraph",
               "vdoc:content": [
+                "All partitions provided by ValOS authorities are ValOS partitions.\nAdditionally ValOS public partitions are partitions which are both",
                 {
-                  "@type": "vdoc:NumberedList",
-                  "vdoc:entries": [
-                    [
-                      "provided by ValOS core authorities, and"
-                    ],
-                    [
-                      "are available for an anonymous consumer with nothing but\n          a client capable of running the ValOS gateway runtime which\n          the authority itself provides (with reasonable concessions\n          for the authority to prevent DDOS attacks)"
-                    ]
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:NumberedList",
+                      "vdoc:entries": [
+                        [
+                          "provided by ValOS core authorities, and"
+                        ],
+                        {
+                          "@type": "vdoc:Paragraph",
+                          "vdoc:content": [
+                            "are available for an anonymous consumer with nothing but a client\n  capable of running the ValOS gateway runtime which the authority\n  itself provides (with reasonable concessions for the authority to\n  prevent DDOS attacks)"
+                          ]
+                        }
+                      ]
+                    }
                   ]
                 }
               ]
             },
-            "TODO(iridian): Figure out whether this is the actually most\n                        meaningful place to put this semantic border.\n                        A specific term for non-authenticated\n                        partitions capable of running only on standard\n                        runtime is useful, but how useful actually?"
+            {
+              "@type": "revdoc:Example",
+              "vdoc:content": [
+                "TODO(iridian): Figure out whether this is actually the most meaningful\nplace to assign this semantic border. A specific term for\nnon-authenticated partitions capable of running only on standard\nruntime is useful, but how useful actually?"
+              ]
+            }
           ]
         }
       ]
@@ -1513,7 +1832,12 @@
         "dc:title": "Kernel domain provides the ValOS primary libraries",
         "@type": "vdoc:Chapter",
         "vdoc:content": [
-          "It does, indeed (this section pending better understanding on\n      how to write domain specifications)."
+          {
+            "@type": "vdoc:Paragraph",
+            "vdoc:content": [
+              "It does, indeed (this section pending better understanding on how to\nwrite domain specifications)."
+            ]
+          }
         ]
       }
     ]

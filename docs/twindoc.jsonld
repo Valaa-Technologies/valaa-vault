@@ -68,73 +68,107 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document specifies TwinDoc, a ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "VDoc extension"
-          ],
-          "vdoc:ref": "@valos/vdoc#extension"
+            "This document specifies TwinDoc, a ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "VDoc extension"
+              ],
+              "vdoc:ref": "@valos/vdoc#extension"
+            },
+            "\nwhich specifies an isomorphism and synchronization transformations\nbetween VDoc documents and valospace resources."
+          ]
         },
-        " which specifies an isomorphism and synchronization\n    transformations between VDoc documents and valospace resources.",
-        null,
-        "More specifically TwinDoc allows for the serialization and\n    deserialization of an arbitrary selection of valospace resources\n    into a VDoc document array and back even if the source resources\n    are not a representation of a VDoc document nor use any VDoc core\n    or extension ontologies."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "More specifically TwinDoc allows for the serialization and\ndeserialization of an arbitrary selection of valospace resources\ninto a VDoc document array and back even if the source resources\nare not a representation of a VDoc document nor use any VDoc core\nor extension ontologies."
+          ]
+        }
       ]
     },
     "sotd": {
       "@id": "sotd",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document has not been reviewed. This is a draft document and\n    may be updated, replaced or obsoleted by other documents at any\n    time.",
-        null,
-        "This document is part of the ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ValOS core specification"
-          ],
-          "vdoc:ref": "@valos/kernel/spec"
+            "This document has not been reviewed. This is a draft document and\nmay be updated, replaced or obsoleted by other documents at any\ntime."
+          ]
         },
-        ".",
-        null,
-        "The extension is specified and supported by ",
         {
-          "@type": "revdoc:Package",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "This document is part of the ",
             {
-              "vdoc:em": true,
+              "@type": "vdoc:Reference",
               "vdoc:content": [
-                "@valos/twindoc"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/twindoc"
+                "ValOS core specification"
+              ],
+              "vdoc:ref": "@valos/kernel/spec"
+            },
+            "."
+          ]
         },
-        " npm package."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The extension is specified and supported by ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/twindoc"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/twindoc"
+            },
+            "\nnpm package."
+          ]
+        }
       ]
     },
     "introduction": {
       "@id": "introduction",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "TwinDoc provides both full isomorphic synchronization as well as\n    incremental, additive updates between VDoc documents and valospace\n    resources.\n    The fully isomoprhic extraction and emission transformations to\n    valospace resources provide lossless roundtrips to both directions:",
         {
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "TwinDoc provides both full isomorphic synchronization as well as\nincremental, additive updates between VDoc documents and valospace\nresources.\nThe fully isomoprhic extraction and emission transformations to\nvalospace resources provide lossless roundtrips to both directions:",
             {
-              "@type": "vdoc:NumberedList",
-              "vdoc:entries": [
-                [
-                  "emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD"
-                ],
-                [
-                  "extract + emit: a roundtrip starting from valospace into VDocLD back into valospace"
-                ]
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:NumberedList",
+                  "vdoc:entries": [
+                    [
+                      "emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD"
+                    ],
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        "extract + emit: a roundtrip starting from valospace into VDocLD back into valospace"
+                      ]
+                    }
+                  ]
+                }
               ]
             }
           ]
         },
-        null,
-        "TwinDoc also specifies incremental transformations which are given\n    a diff base in addition to the source and which compute a diffset\n    and then merge the resulting diffset to the pre-existing\n    transformation target.\n    This not only gives performance advantages but also makes it\n    possible to have the final document be a combination of several\n    partial primary sources."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "TwinDoc also specifies incremental transformations which are given\na diff base in addition to the source and which compute a diffset and\nthen merge the resulting diffset to the pre-existing transformation\ntarget. This not only gives performance advantages but also makes it\npossible to have the final document be a combination of several\npartial primary sources."
+          ]
+        }
       ]
     },
     "ontology": {
@@ -175,7 +209,12 @@
     "section_ontology_abstract": {
       "@id": "section_ontology_abstract",
       "vdoc:content": [
-        "TwinDoc ontology provides vocabulary for defining hypertwin\n      mappings and configurations; actual hypertwin content is\n      represented using the valos core ontologies and possible\n      extension content ontologies."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "TwinDoc ontology provides vocabulary for defining hypertwin mappings\nand configurations; actual hypertwin content is represented using the\nvalos core ontologies and possible extension content ontologies."
+          ]
+        }
       ]
     },
     "section_prefixes": {
@@ -562,20 +601,25 @@
       "dc:title": "TwinDoc emission output",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "TwinDoc emits event log updates into valospace resources.",
         {
-          "@type": "revdoc:Package",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "TwinDoc emits event log updates into valospace resources.",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/hypertwin"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/hypertwin"
-        },
-        " provides tools which implement this\n        transformation using the gateway API."
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/hypertwin"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/hypertwin"
+            },
+            " provides tools which implement this\n        transformation using the gateway API."
+          ]
+        }
       ]
     },
     "emission_rules": {

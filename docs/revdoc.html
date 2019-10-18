@@ -12,28 +12,32 @@
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
   </head>
-  <body>
+  <body class="vdoc vdoc-body">
     
-  <section id="abstract" class="vdoc type-vdoc-chapter">This document specifies ReVDoc, a <a href="https://valospace.org/vdoc#extension" class="vdoc type-vdoc-reference">VDoc extension</a> for extracting and emitting <a href="https://github.com/w3c/respec" class="vdoc type-vdoc-reference">ReSpec documents</a>.
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document specifies ReVDoc, a <a href="https://valospace.org/vdoc#extension" class="vdoc type-vdoc-reference">VDoc extension</a>
+for extracting and emitting <a href="https://github.com/w3c/respec" class="vdoc type-vdoc-reference">ReSpec documents</a>.</span>
+</p></div>
   </section>
 
-  <section id="sotd" class="vdoc type-vdoc-chapter">      <p>This document has not been reviewed. This is a draft document and
-    may be updated, replaced or obsoleted by other documents at any
-    time.</p>
-      <p>This document is part of the <a href="@valos/kernel/spec" class="vdoc type-vdoc-reference">ValOS core specification</a>.</p>
-      <p>The format is implemented and supported by <a href="https://valospace.org/revdoc" class="vdoc type-revdoc-package"><em>@valos/revdoc</em></a> npm package.</p>
-
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document has not been reviewed. This is a draft document and may
+be updated, replaced or obsoleted by other documents at any time.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">This document is part of the <a href="@valos/kernel/spec" class="vdoc type-vdoc-reference">ValOS core specification</a>.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The format is implemented and supported by <a href="https://valospace.org/revdoc" class="vdoc type-revdoc-package"><em>@valos/revdoc</em></a>
+npm package.</span>
+</p></div>
   </section>
 
-  <section id="introduction" class="vdoc type-vdoc-chapter">ReVDoc is a VDoc extension which can produce ReSpec documents.
+  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">ReVDoc is a VDoc extension which can produce ReSpec documents.</span>
+</p></div>
   </section>
 
   <section id="ontology" class="vdoc type-vdoc-chapter">
-    <h2>ReVDoc ontology</h2>
-ReVDoc ontology provides vocabulary and definitions which are
-      tailored for emitting ReSpec html output documents.
+    <h3><a aria-label="§" href="#ontology">§ </a>ReVDoc ontology</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">ReVDoc ontology provides vocabulary and definitions which are tailored
+for emitting ReSpec html output documents.</span>
+</p></div>
   <section id="section_prefixes" class="vdoc type-vdoc-chapter">
-    <h2>ReVDoc IRI prefixes</h2>
+    <h3><a aria-label="§" href="#section_prefixes">§ </a>ReVDoc IRI prefixes</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -48,7 +52,7 @@ ReVDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="section_classes" class="vdoc type-vdoc-chapter">
-    <h2>&#x3C;em&#x3E;revdoc:* a vdoc:Class&#x3C;/em&#x3E; vocabulary</h2>
+    <h3><a aria-label="§" href="#section_classes">§ </a>&#x3C;em&#x3E;revdoc:* a vdoc:Class&#x3C;/em&#x3E; vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -66,21 +70,23 @@ ReVDoc ontology provides vocabulary and definitions which are
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>A package reference document node</td></tr>
         <tr id="ABNF" class=" vdoc-nth-child-2n"><td><a href="#ABNF" class="vdoc type-vdoc-reference"><em>ABNF</em></a></td><td>vdoc:CharacterData</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>An ABNF section node</td></tr>
-        <tr id="Turtle"><td><a href="#Turtle" class="vdoc type-vdoc-reference"><em>Turtle</em></a></td><td>vdoc:CharacterData</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>An Turtle section node</td></tr>
-        <tr id="Invokation" class=" vdoc-nth-child-2n"><td><a href="#Invokation" class="vdoc type-vdoc-reference"><em>Invokation</em></a></td><td>vdoc:Node</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>A command invokation document node</td></tr>
-        <tr id="Command"><td><a href="#Command" class="vdoc type-vdoc-reference"><em>Command</em></a></td><td>vdoc:ContextPath</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>A command reference node</td></tr>
-        <tr id="CommandLineInteraction" class=" vdoc-nth-child-2n"><td><a href="#CommandLineInteraction" class="vdoc type-vdoc-reference"><em>CommandLineInteraction</em></a></td><td>revdoc:Example</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>A command line interaction sequence document node</td></tr>
+        <tr id="JSONLD"><td><a href="#JSONLD" class="vdoc type-vdoc-reference"><em>JSONLD</em></a></td><td>vdoc:CharacterData</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>An JSONLD section node</td></tr>
+        <tr id="Turtle" class=" vdoc-nth-child-2n"><td><a href="#Turtle" class="vdoc type-vdoc-reference"><em>Turtle</em></a></td><td>vdoc:CharacterData</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>An Turtle section node</td></tr>
+        <tr id="Invokation"><td><a href="#Invokation" class="vdoc type-vdoc-reference"><em>Invokation</em></a></td><td>vdoc:Node</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>A command invokation document node</td></tr>
+        <tr id="Command" class=" vdoc-nth-child-2n"><td><a href="#Command" class="vdoc type-vdoc-reference"><em>Command</em></a></td><td>vdoc:ContextPath</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>A command reference node</td></tr>
+        <tr id="CommandLineInteraction"><td><a href="#CommandLineInteraction" class="vdoc type-vdoc-reference"><em>CommandLineInteraction</em></a></td><td>revdoc:Example</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>A command line interaction sequence document node</td></tr>
       </tbody>
     </table>
 
   </section>
 
   <section id="section_properties" class="vdoc type-vdoc-chapter">
-    <h2>&#x3C;em&#x3E;revdoc:* a vdoc:Property&#x3C;/em&#x3E; vocabulary</h2>
+    <h3><a aria-label="§" href="#section_properties">§ </a>&#x3C;em&#x3E;revdoc:* a vdoc:Property&#x3C;/em&#x3E; vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -104,7 +110,7 @@ ReVDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h2>&#x3C;em&#x3E;revdoc:&#x3C;/em&#x3E; other vocabulary</h2>
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a>&#x3C;em&#x3E;revdoc:&#x3C;/em&#x3E; other vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -120,7 +126,7 @@ ReVDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="section_context" class="vdoc type-vdoc-chapter">
-    <h2>ReVDoc JSON-LD context term definitions</h2>
+    <h3><a aria-label="§" href="#section_context">§ </a>ReVDoc JSON-LD context term definitions</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -139,11 +145,11 @@ ReVDoc ontology provides vocabulary and definitions which are
 
   </section>
 
-  <section id="transformations" class="vdoc type-vdoc-chapter">ReVDoc lightly extends basic VDoc extraction with some
-      ReSpec specific primitives and specifies a ReSpec html emission
-      transformation.
+  <section id="transformations" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">ReVDoc lightly extends basic VDoc extraction with some ReSpec specific
+primitives and specifies a ReSpec html emission transformation.</span>
+</p></div>
   <section id="extraction_rules" class="vdoc type-vdoc-chapter">
-    <h2>ReVDoc extraction rules</h2>
+    <h3><a aria-label="§" href="#extraction_rules">§ </a>ReVDoc extraction rules</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -155,7 +161,7 @@ ReVDoc ontology provides vocabulary and definitions which are
         <th class="vdoc type-vdoc-header">Comment</th>
       </thead>
       <tbody>
-        <tr><td>example</td><td>vdoc:Example</td><td>vdoc:content</td><td>vdoc:content</td><td>dc:title</td><td>Example node</td></tr>
+        <tr><td>example</td><td>revdoc:Example</td><td>vdoc:content</td><td>vdoc:content</td><td>dc:title</td><td>Example node</td></tr>
         <tr class=" vdoc-nth-child-2n"><td>ontology</td><td>vdoc:Chapter</td><td>vdoc:content</td><td>vdoc:content</td><td>dc:title</td><td>Ontology specification chapter</td></tr>
       </tbody>
     </table>
@@ -163,7 +169,7 @@ ReVDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="extractee_api" class="vdoc type-vdoc-chapter">
-    <h2>ReVDoc extractee API</h2>
+    <h3><a aria-label="§" href="#extractee_api">§ </a>ReVDoc extractee API</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -171,13 +177,28 @@ ReVDoc ontology provides vocabulary and definitions which are
         <th class="vdoc type-vdoc-header">rdf:type</th>
       </thead>
       <tbody>
-        <tr><td>abnf</td><td>abnf(text) {
+        <tr><td>example</td><td>example() {
+    return {
+      "@type": "revdoc:Example",
+      "vdoc:content": [].slice.call(arguments), // eslint-disable-line prefer-rest-params
+    };
+  }</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>abnf</td><td>abnf(text) {
     // Add validation and maybe restructuring?
     return {
       // TODO(iridian, 2019-08): Figure out if there's any sense in
       // providing language identifiers for non-natural languages.
       ...c("https://tools.ietf.org/html/rfc5234", text),
       "@type": "revdoc:ABNF",
+    };
+  }</td></tr>
+        <tr><td>jsonld</td><td>jsonld(text) {
+    // Add validation and maybe restructuring?
+    return {
+      // TODO(iridian, 2019-08): Figure out if there's any sense in
+      // providing language identifiers for non-natural languages.
+      ...c("https://www.w3.org/TR/json-ld11/", text),
+      "@type": "revdoc:JSONLD",
     };
   }</td></tr>
         <tr class=" vdoc-nth-child-2n"><td>turtle</td><td>turtle(text) {
@@ -277,13 +298,15 @@ ReVDoc ontology provides vocabulary and definitions which are
   </section>
 
   <section id="emission_output" class="vdoc type-vdoc-chapter">
-    <h2>ReVDoc emission output</h2>
-ReVDoc emits html which makes use of ReSpec primitives.
+    <h3><a aria-label="§" href="#emission_output">§ </a>ReVDoc emission output</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">ReVDoc emits html which makes use of ReSpec primitives.</span>
+</p></div>
   </section>
 
   <section id="emission_rules" class="vdoc type-vdoc-chapter">
-    <h2>ReVDoc emission rules</h2>
-ReVDoc provides html emission rules for vdoc:Document revdoc:Document vdoc:Chapter vdoc:Reference revdoc:Invokation revdoc:Command revdoc:Example
+    <h3><a aria-label="§" href="#emission_rules">§ </a>ReVDoc emission rules</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">ReVDoc provides html emission rules for vdoc:Document revdoc:Document vdoc:Chapter vdoc:Reference revdoc:Invokation revdoc:Command revdoc:Example</span>
+</p></div>
   </section>
 
   </section>

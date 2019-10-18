@@ -68,62 +68,85 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document specifies ReVDoc, a ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "VDoc extension"
-          ],
-          "vdoc:ref": "@valos/vdoc#extension"
-        },
-        " for extracting and emitting ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "ReSpec documents"
-          ],
-          "vdoc:ref": "https://github.com/w3c/respec"
-        },
-        "."
+            "This document specifies ReVDoc, a ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "VDoc extension"
+              ],
+              "vdoc:ref": "@valos/vdoc#extension"
+            },
+            "\nfor extracting and emitting ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "ReSpec documents"
+              ],
+              "vdoc:ref": "https://github.com/w3c/respec"
+            },
+            "."
+          ]
+        }
       ]
     },
     "sotd": {
       "@id": "sotd",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document has not been reviewed. This is a draft document and\n    may be updated, replaced or obsoleted by other documents at any\n    time.",
-        null,
-        "This document is part of the ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ValOS core specification"
-          ],
-          "vdoc:ref": "@valos/kernel/spec"
+            "This document has not been reviewed. This is a draft document and may\nbe updated, replaced or obsoleted by other documents at any time."
+          ]
         },
-        ".",
-        null,
-        "The format is implemented and supported by ",
         {
-          "@type": "revdoc:Package",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "This document is part of the ",
             {
-              "vdoc:em": true,
+              "@type": "vdoc:Reference",
               "vdoc:content": [
-                "@valos/revdoc"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/revdoc"
+                "ValOS core specification"
+              ],
+              "vdoc:ref": "@valos/kernel/spec"
+            },
+            "."
+          ]
         },
-        " npm package."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The format is implemented and supported by ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/revdoc"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/revdoc"
+            },
+            "\nnpm package."
+          ]
+        }
       ]
     },
     "introduction": {
       "@id": "introduction",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "ReVDoc is a VDoc extension which can produce ReSpec documents."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "ReVDoc is a VDoc extension which can produce ReSpec documents."
+          ]
+        }
       ]
     },
     "ontology": {
@@ -182,6 +205,11 @@
         "rdfs:subClassOf": "vdoc:CharacterData",
         "rdfs:comment": "An ABNF section node"
       },
+      "JSONLD": {
+        "@type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:CharacterData",
+        "rdfs:comment": "An JSONLD section node"
+      },
       "Turtle": {
         "@type": "vdoc:Class",
         "rdfs:subClassOf": "vdoc:CharacterData",
@@ -233,7 +261,12 @@
     "section_ontology_abstract": {
       "@id": "section_ontology_abstract",
       "vdoc:content": [
-        "ReVDoc ontology provides vocabulary and definitions which are\n      tailored for emitting ReSpec html output documents."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "ReVDoc ontology provides vocabulary and definitions which are tailored\nfor emitting ReSpec html output documents."
+          ]
+        }
       ]
     },
     "section_prefixes": {
@@ -325,6 +358,7 @@
             "Definition",
             "Package",
             "ABNF",
+            "JSONLD",
             "Turtle",
             "Invokation",
             "Command",
@@ -527,7 +561,12 @@
       "@id": "transformations",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "ReVDoc lightly extends basic VDoc extraction with some\n      ReSpec specific primitives and specifies a ReSpec html emission\n      transformation.",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "ReVDoc lightly extends basic VDoc extraction with some ReSpec specific\nprimitives and specifies a ReSpec html emission transformation."
+          ]
+        },
         {
           "@id": "extraction_rules"
         },
@@ -600,7 +639,7 @@
     "extraction_rules_data": {
       "@id": "extraction_rules_data",
       "example": {
-        "range": "vdoc:Example",
+        "range": "revdoc:Example",
         "owner": "vdoc:content",
         "body": "vdoc:content",
         "rest": "dc:title",
@@ -649,7 +688,12 @@
       "dc:title": "ReVDoc emission output",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "ReVDoc emits html which makes use of ReSpec primitives."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "ReVDoc emits html which makes use of ReSpec primitives."
+          ]
+        }
       ]
     },
     "emission_rules": {
@@ -657,16 +701,21 @@
       "dc:title": "ReVDoc emission rules",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "ReVDoc provides html emission rules for ",
         {
-          "vdoc:words": [
-            "vdoc:Document",
-            "revdoc:Document",
-            "vdoc:Chapter",
-            "vdoc:Reference",
-            "revdoc:Invokation",
-            "revdoc:Command",
-            "revdoc:Example"
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "ReVDoc provides html emission rules for ",
+            {
+              "vdoc:words": [
+                "vdoc:Document",
+                "revdoc:Document",
+                "vdoc:Chapter",
+                "vdoc:Reference",
+                "revdoc:Invokation",
+                "revdoc:Command",
+                "revdoc:Example"
+              ]
+            }
           ]
         }
       ]

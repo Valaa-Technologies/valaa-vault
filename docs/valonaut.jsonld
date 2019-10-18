@@ -65,41 +65,50 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is the first introduction for valonauts - the\n    primary content creators - to the ValOS ecosystem and its core\n    tools."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This document is the first introduction for valonauts - the primary\ncontent creators - to the ValOS ecosystem and its core tools."
+          ]
+        }
       ]
     },
     "sotd": {
       "@id": "sotd",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is part of the vault workspace ",
         {
-          "@type": "revdoc:Package",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "This document is part of the vault workspace ",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/kernel"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/kernel"
-        },
-        " (of domain ",
-        {
-          "@type": "revdoc:Package",
-          "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            "\n(of domain ",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/kernel"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/kernel"
-        },
-        ") which is ",
-        "ValOS common infrastructure tools and libraries monorepository."
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`ValOS common infrastructure tools and libraries monorepository`."
+          ]
+        }
       ]
     },
     "introduction": {
@@ -107,34 +116,47 @@
       "dc:title": "How do I create and share interactive content?",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "As a valonaut you create, share and deploy web content and\n    interactive applications fully from inside ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "Valospace"
-          ],
-          "vdoc:ref": "Valospace"
+            "As a valonaut you create, share and deploy web content and\ninteractive applications fully from inside ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "Valospace"
+              ],
+              "vdoc:ref": "Valospace"
+            },
+            "."
+          ]
         },
-        ".",
-        null,
-        "You use a web editor called ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "Zero"
-          ],
-          "vdoc:ref": "Zero"
+            "You use a web editor called ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "Zero"
+              ],
+              "vdoc:ref": "Zero"
+            },
+            " and with it employ\ntraditional web technologies; HTML5, CSS and the Javascript\ndialect ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "valoscript"
+              ],
+              "vdoc:ref": "@valos/script"
+            }
+          ]
         },
-        " and with it employ\n    traditional web technologies; HTML5, CSS and the Javascript\n    dialect ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "valoscript"
-          ],
-          "vdoc:ref": "@valos/script"
-        },
-        null,
-        "The skills you learn to do this are like cycling or writing - they\n    are used to support your other interests. While you don't need to\n    become a professional you certainly can!"
+            "The skills you learn to do this are like cycling or writing - they\nare used to support your other interests. While you don't need to\nbecome a professional you certainly can!"
+          ]
+        }
       ]
     },
     "section_profiles": {
@@ -142,7 +164,12 @@
       "dc:title": "Valonaut profiles",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Valonaut is generic orientation. There are various valonaut\n      sub-profiles with their own documents briefly detailed here.",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Valonaut is generic orientation. There are various valonaut\nsub-profiles with their own documents briefly detailed here."
+          ]
+        },
         {
           "@id": "everyone"
         },
@@ -189,15 +216,20 @@
       "dc:title": "How to add new profiles",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Create a ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "PR in github"
-          ],
-          "vdoc:ref": "https://help.github.com/en/articles/about-pull-requests"
-        },
-        " against @valos/kernel/revdocs/valonaut.revdoc.js"
+            "Create a ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "PR in github"
+              ],
+              "vdoc:ref": "https://help.github.com/en/articles/about-pull-requests"
+            },
+            "\nagainst @valos/kernel/revdocs/valonaut.revdoc.js"
+          ]
+        }
       ]
     },
     "@type": "revdoc:Document",

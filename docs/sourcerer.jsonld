@@ -64,48 +64,57 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This library provides the definitions and reference implementation\n    of the ValOS sourcerer architecture which is used to route ",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ValOS event streams"
+            "This library provides the definitions and reference implementation\nof the ValOS sourcerer architecture which is used to route ",
+            {
+              "@type": "vdoc:CharacterData",
+              "vdoc:content": [
+                "ValOS event streams"
+              ]
+            },
+            "."
           ]
-        },
-        "."
+        }
       ]
     },
     "sotd": {
       "@id": "sotd",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is part of the library workspace ",
         {
-          "@type": "revdoc:Package",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "This document is part of the library workspace ",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/sourcerer"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/sourcerer"
-        },
-        " (of domain ",
-        {
-          "@type": "revdoc:Package",
-          "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/sourcerer"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/sourcerer"
+            },
+            "\n(of domain ",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/kernel"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/kernel"
-        },
-        ") which is ",
-        "ValOS Sourcerer API, schema"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`ValOS Sourcerer API, schema`"
+          ]
+        }
       ]
     },
     "introduction": {
@@ -252,7 +261,12 @@
     "section_ontology_abstract": {
       "@id": "section_ontology_abstract",
       "vdoc:content": [
-        "@valos/sourcerer ontology specifies the Valospace core types and\n      properties directly to the @valos/kernel namespace. "
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "@valos/sourcerer ontology specifies the Valospace core types and\nproperties directly to the @valos/kernel namespace. "
+          ]
+        }
       ]
     },
     "section_prefixes": {

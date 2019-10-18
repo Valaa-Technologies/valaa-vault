@@ -68,47 +68,65 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document specifies VDoc, a ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "a JSON-LD"
-          ],
-          "vdoc:ref": "https://www.w3.org/TR/json-ld11/"
-        },
-        "-based documentation human-machine-valospace interchange format."
+            "This document specifies VDoc, a ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "a JSON-LD"
+              ],
+              "vdoc:ref": "https://www.w3.org/TR/json-ld11/"
+            },
+            "-based documentation\nhuman-machine-valospace interchange format."
+          ]
+        }
       ]
     },
     "sotd": {
       "@id": "sotd",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document has not been reviewed. This is a draft document\n    and may be updated, replaced or obsoleted by other documents at\n    any time.",
-        null,
-        "This document is part of the ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ValOS core specification"
-          ],
-          "vdoc:ref": "@valos/kernel"
+            "This document has not been reviewed. This is a draft document and may\nbe updated, replaced or obsoleted by other documents at any time."
+          ]
         },
-        ".",
-        null,
-        "The format is implemented and supported by ",
         {
-          "@type": "revdoc:Package",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "This document is part of the ",
             {
-              "vdoc:em": true,
+              "@type": "vdoc:Reference",
               "vdoc:content": [
-                "@valos/vdoc"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/vdoc"
+                "ValOS core specification"
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            "."
+          ]
         },
-        " npm package."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The format is implemented and supported by ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/vdoc"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/vdoc"
+            },
+            " npm package."
+          ]
+        }
       ]
     },
     "introduction": {
@@ -117,33 +135,42 @@
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
-          "revdoc:dfn": "#vdoc",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "vdoc:strong": true,
+              "revdoc:dfn": "#vdoc",
               "vdoc:content": [
                 {
-                  "@type": "vdoc:Reference",
+                  "vdoc:strong": true,
                   "vdoc:content": [
-                    "VDoc"
-                  ],
-                  "vdoc:ref": "#vdoc"
-                }
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "VDoc"
+                      ],
+                      "vdoc:ref": "#vdoc"
+                    }
+                  ]
+                },
+                " is an extensible JSON-LD interchange\n  specification for extracting documents from varying sources,\n  passing the now-machine-manipulable interchange document around\n  and subsequently producing documents of specific formats such\n  as Valospace resources, markdown, ReSpec HTML and browser and\n  ansi-colored console outputs."
               ]
-            },
-            " is an extensible JSON-LD interchange\n      specification for extracting documents from varying sources,\n      passing the now-machine-manipulable interchange document around\n      and subsequently producing documents of specific formats such\n      as Valospace resources, markdown, ReSpec HTML and browser and\n      ansi-colored console outputs."
+            }
           ]
         },
-        null,
-        "Motivation for this specification is to provide the foundation\n    for document ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "Valospace hypertwins"
-          ],
-          "vdoc:ref": "@valos/hypertwin"
-        },
-        " by supporting the ValOS resources as an emission target. This\n    allows all kinds of documents to be accessible from within\n    Valospace with minimal additional tooling. This is not made\n    an explicit design goal unto itself; instead the design goals are\n    chosen to be generic in a way that satisfies this goal as the\n    original author believes this leads to better design."
+            "Motivation for this specification is to provide the foundation for\ndocument ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "Valospace hypertwins"
+              ],
+              "vdoc:ref": "@valos/hypertwin"
+            },
+            " by\nsupporting the ValOS resources as an emission target. This allows all\nkinds of documents to be accessible from within Valospace with minimal\nadditional tooling.\nThis is not made an explicit design goal unto itself; instead the\ndesign goals are chosen to be generic in a way that satisfies this goal\nas the original author believes this leads to better design."
+          ]
+        }
       ]
     },
     "goals_and_non_goals": {
@@ -151,33 +178,52 @@
       "dc:title": "Goals and non-goals",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "VDoc design goals are:",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "VDoc design goals are:"
+          ]
+        },
         {
           "@id": "design_goals"
         },
-        "Design non-goals are:",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Design non-goals are:"
+          ]
+        },
         {
           "@id": "design_non_goals"
         },
-        "To satisfy the goals VDoc chooses ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "JSON-LD 1.1"
-          ],
-          "vdoc:ref": "https://www.w3.org/TR/json-ld11/"
+            "To satisfy the goals VDoc chooses ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "JSON-LD 1.1"
+              ],
+              "vdoc:ref": "https://www.w3.org/TR/json-ld11/"
+            },
+            " as the primary interchange format and as a consequence RDF as\nthe underlying document object model."
+          ]
         },
-        " as the primary interchange format and as a consequence RDF as\n      the underlying document object model.",
-        null,
-        "Additionally VDoc provides extensibility via custom ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "VDoc extensions"
-          ],
-          "vdoc:ref": "#extension"
-        },
-        " which can introduce\n      domain-specific namespaces and ontologies, extraction and\n      emission transformation operations and document output formats."
+            "Additionally VDoc provides extensibility via custom ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "VDoc extensions"
+              ],
+              "vdoc:ref": "#extension"
+            },
+            " which can introduce\ndomain-specific namespaces and ontologies, extraction and emission\ntransformation operations and document output formats."
+          ]
+        }
       ]
     },
     "design_goals": {
@@ -201,25 +247,45 @@
     "robustly_writable": {
       "@id": "robustly_writable",
       "vdoc:content": [
-        "Manual writing VDoc should be robust and must rely on minimal\n        number of intuitive rules. The more there is to remember the\n        higher the threshold to writing docs."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Manual writing VDoc should be robust and must rely on minimal\nnumber of intuitive rules. The more there is to remember the\nhigher the threshold to writing docs."
+          ]
+        }
       ]
     },
     "programmatically_manipulable": {
       "@id": "programmatically_manipulable",
       "vdoc:content": [
-        "VDoc should be programmatically manipulable with minimal\n        boilerplate. Complex array and other wrapper nestings make\n        introspection and comprehension harder for a less than\n        dedicated developer."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "VDoc should be programmatically manipulable with minimal\nboilerplate. Complex array and other wrapper nestings make\nintrospection and comprehension harder for a less than\ndedicated developer."
+          ]
+        }
       ]
     },
     "semantically_modeled": {
       "@id": "semantically_modeled",
       "vdoc:content": [
-        "VDoc should have semantic structure with a globally\n        referenceable underlying model. Documents should be combinable\n        and allowed to evolve; identifying document parts by their\n        position in a document is brittle."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "VDoc should have semantic structure with a globally\nreferenceable underlying model. Documents should be combinable\nand allowed to evolve; identifying document parts by their\nposition in a document is brittle."
+          ]
+        }
       ]
     },
     "contextually_extensible": {
       "@id": "contextually_extensible",
       "vdoc:content": [
-        "VDoc should be contextually extensible. Formats often have\n        details which resist universalization but must still be\n        accessible during document emission."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "VDoc should be contextually extensible. Formats often have\ndetails which resist universalization but must still be\naccessible during document emission."
+          ]
+        }
       ]
     },
     "design_non_goals": {
@@ -237,13 +303,23 @@
     "no_unified_ontology": {
       "@id": "no_unified_ontology",
       "vdoc:content": [
-        "VDoc does not attempt at providing a unified ontology.\n        Documentation formats are contextual and often evolve. Common\n        structures may be represented in unified manner using existing\n        ontologies where possible but providing an interchange ontology\n        is outside the scope of this document."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "VDoc does not attempt at providing a unified ontology.\nDocumentation formats are contextual and often evolve. Common\nstructures may be represented in unified manner using existing\nontologies where possible but providing an interchange ontology\nis outside the scope of this document."
+          ]
+        }
       ]
     },
     "no_complete_model": {
       "@id": "no_complete_model",
       "vdoc:content": [
-        "Documentation formats are contextual. Not all information\n        needs to survive the roundtrip via the underlying unified\n        model and back. As a corollary a specific format generator can\n        know about other formats explicitly and consume their\n        contextual data."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Documentation formats are contextual. Not all information\nneeds to survive the roundtrip via the underlying unified\nmodel and back. As a corollary a specific format generator can\nknow about other formats explicitly and consume their\ncontextual data."
+          ]
+        }
       ]
     },
     "document_flow": {
@@ -251,39 +327,54 @@
       "dc:title": "Document phases and transformations",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "VDoc defines the central document flow in terms of three\n      document phases:",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "VDoc defines the central document flow in terms of three\ndocument phases:"
+          ]
+        },
         {
           "@id": "document_phases"
         },
-        "VDoc defines two transformations between the phases:",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "VDoc defines two transformations between the phases:"
+          ]
+        },
         {
           "@id": "document_transformations"
         },
-        "In addition to these phases and transformations VDoc makes use of ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "JSON-LD 1.1 format"
-          ],
-          "vdoc:ref": "https://www.w3.org/TR/json-ld11/"
-        },
-        ", its ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "API and algorithms"
-          ],
-          "vdoc:ref": "https://www.w3.org/TR/json-ld11-api/"
-        },
-        " and (maybe) ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "its framing"
-          ],
-          "vdoc:ref": "https://www.w3.org/TR/json-ld11-framing/"
-        },
-        " for providing a mapping from VDocLD to RDF model."
+            "In addition to these phases and transformations VDoc makes use of ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "JSON-LD 1.1 format"
+              ],
+              "vdoc:ref": "https://www.w3.org/TR/json-ld11/"
+            },
+            ", its ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "API and algorithms"
+              ],
+              "vdoc:ref": "https://www.w3.org/TR/json-ld11-api/"
+            },
+            " and (maybe) ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "its framing"
+              ],
+              "vdoc:ref": "https://www.w3.org/TR/json-ld11-framing/"
+            },
+            " for providing a mapping from VDocLD to RDF model."
+          ]
+        }
       ]
     },
     "document_phases": {
@@ -306,7 +397,7 @@
                   }
                 ]
               },
-              " is a cyclic graph of\n        native objects with some of its sub-graphs matching some of the ",
+              " is a cyclic graph of\n  native objects with some of its sub-graphs matching some of the ",
               {
                 "@type": "vdoc:Reference",
                 "vdoc:content": [
@@ -317,56 +408,62 @@
               "."
             ]
           },
-          " It can be manually hand-written, programmatically generated\n      or even dynamically introspected."
+          " It can be manually hand-written, programmatically generated\nor even dynamically introspected."
         ],
-        [
-          {
-            "revdoc:dfn": "#vdocld",
-            "vdoc:content": [
-              {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "VDocLD"
-                    ],
-                    "vdoc:ref": "#vdocld"
-                  }
-                ]
-              },
-              " is a JSON-LD construct and the\n        primary VDoc interchange format. It is a normalized, complete\n        and self-contained structure with potentially multiple\n        different format-specific @context(s)."
-            ]
-          }
-        ],
-        [
-          {
-            "revdoc:dfn": "#extension_output",
-            "vdoc:content": [
-              {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "Emission output"
-                    ],
-                    "vdoc:ref": "#extension_output"
-                  }
-                ]
-              },
-              " is a format specific\n        output that is produced by ",
-              {
-                "@type": "vdoc:Reference",
-                "vdoc:content": [
-                  "emission"
-                ],
-                "vdoc:ref": "#emission"
-              },
-              " from a VDocLD and format specific set of emission parameters."
-            ]
-          }
-        ]
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            {
+              "revdoc:dfn": "#vdocld",
+              "vdoc:content": [
+                {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "VDocLD"
+                      ],
+                      "vdoc:ref": "#vdocld"
+                    }
+                  ]
+                },
+                " is a JSON-LD construct and the\n  primary VDoc interchange format. It is a normalized, complete\n  and self-contained structure with potentially multiple\n  different format-specific @context(s)."
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            {
+              "revdoc:dfn": "#extension_output",
+              "vdoc:content": [
+                {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "Emission output"
+                      ],
+                      "vdoc:ref": "#extension_output"
+                    }
+                  ]
+                },
+                " is a format specific\n  output that is produced by ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "emission"
+                  ],
+                  "vdoc:ref": "#emission"
+                },
+                " from a VDocLD and format specific set of emission parameters."
+              ]
+            }
+          ]
+        }
       ]
     },
     "document_transformations": {
@@ -389,7 +486,7 @@
                   }
                 ]
               },
-              " transforms a source graph into\n        a VDocLD by applying the idempotent ",
+              " transforms a source graph into\n  a VDocLD by applying the idempotent ",
               {
                 "@type": "vdoc:Reference",
                 "vdoc:content": [
@@ -400,36 +497,39 @@
               " until the output no longer changes."
             ]
           },
-          "Due to idempotence the source graph can wildly different or\n      arbitrarily close to the resulting VDocLD; in fact a VDocLD is\n      always its own source graph."
+          "Due to idempotence the source graph can wildly different or\narbitrarily close to the resulting VDocLD; in fact a VDocLD is\nalways its own source graph."
         ],
-        [
-          {
-            "revdoc:dfn": "#emission",
-            "vdoc:content": [
-              {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "Emission"
-                    ],
-                    "vdoc:ref": "#emission"
-                  }
-                ]
-              },
-              " is a format specific transformation\n        which emits the ",
-              {
-                "@type": "vdoc:Reference",
-                "vdoc:content": [
-                  "format specific output"
-                ],
-                "vdoc:ref": "#output_format"
-              },
-              " from VDocLD."
-            ]
-          }
-        ]
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            {
+              "revdoc:dfn": "#emission",
+              "vdoc:content": [
+                {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "Emission"
+                      ],
+                      "vdoc:ref": "#emission"
+                    }
+                  ]
+                },
+                " is a format specific transformation\n  which emits the ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "format specific output"
+                  ],
+                  "vdoc:ref": "#output_format"
+                },
+                " from VDocLD."
+              ]
+            }
+          ]
+        }
       ]
     },
     "vdocld": {
@@ -437,27 +537,37 @@
       "dc:title": "VDocLD - primary interchange format",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "VDocLD is a JSON-LD document with a well-formed tree\n      structure consisting of three types of nodes, corresponding to\n      the first, second and remaining levels of the tree:",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "\nVDocLD is a JSON-LD document with a well-formed tree structure\nconsisting of three types of nodes, corresponding to the first, second\nand remaining levels of the tree:"
+          ]
+        },
         {
           "@id": "node_types"
         },
-        "There can be multiple first-level document nodes in a single\n      VDocLD (as per JSON-LD). ",
         {
-          "revdoc:dfn": "#root_node",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "There can be multiple first-level document nodes in a single\nVDocLD (as per JSON-LD). ",
             {
-              "vdoc:strong": true,
+              "revdoc:dfn": "#root_node",
               "vdoc:content": [
                 {
-                  "@type": "vdoc:Reference",
+                  "vdoc:strong": true,
                   "vdoc:content": [
-                    "The tree root node"
-                  ],
-                  "vdoc:ref": "#root_node"
-                }
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "The tree root node"
+                      ],
+                      "vdoc:ref": "#root_node"
+                    }
+                  ]
+                },
+                " is the singular,\n  implicit '0th-level' VDocLD node without semantics defined by\n  VDoc itself."
               ]
-            },
-            " is the singular,\n        implicit '0th-level' VDocLD node without semantics defined by\n        VDoc itself."
+            }
           ]
         },
         {
@@ -494,7 +604,7 @@
                   }
                 ]
               },
-              " is an always-first-level\n        node identified by a ",
+              " is an always-first-level\n  node identified by a ",
               {
                 "@type": "vdoc:Reference",
                 "vdoc:content": [
@@ -515,62 +625,68 @@
           },
           " Links to document nodes in bold and italics."
         ],
-        [
-          {
-            "revdoc:dfn": "#resource_node",
-            "vdoc:content": [
-              {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "Resource node"
-                    ],
-                    "vdoc:ref": "#resource_node"
-                  }
-                ]
-              },
-              " is an always-second-level\n        node which is directly accessible from the first-level document\n        via its document relative ",
-              {
-                "@type": "vdoc:Reference",
-                "vdoc:content": [
-                  "resource identifier"
-                ],
-                "vdoc:ref": "#resource_id"
-              },
-              "as the dictionary key."
-            ]
-          },
-          " Links to resource nodese are in italics."
-        ],
-        [
-          {
-            "revdoc:dfn": "#element_node",
-            "vdoc:content": [
-              {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "Element node"
-                    ],
-                    "vdoc:ref": "#element_node"
-                  }
-                ]
-              },
-              " is a third-or-more-level\n        node. It might be anonymous and lacks a stable and unique\n        identifiers. It MAY have a locally unique identifier. If the\n        element node and all its parent element nodes have locally\n        unique identifier then the ordered set of those identifiers\n        can be considered a document local unique identifier of the\n        element node, similar to ",
-              {
-                "@type": "vdoc:Reference",
-                "vdoc:content": [
-                  "the resource identifier"
-                ],
-                "vdoc:ref": "#resource_id"
-              }
-            ]
-          }
-        ]
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            {
+              "revdoc:dfn": "#resource_node",
+              "vdoc:content": [
+                {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "Resource node"
+                      ],
+                      "vdoc:ref": "#resource_node"
+                    }
+                  ]
+                },
+                " is an always-second-level\n  node which is directly accessible from the first-level document\n  via its document relative ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "resource identifier"
+                  ],
+                  "vdoc:ref": "#resource_id"
+                },
+                "as the dictionary key."
+              ]
+            },
+            " Links to resource nodese are in italics."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            {
+              "revdoc:dfn": "#element_node",
+              "vdoc:content": [
+                {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "Element node"
+                      ],
+                      "vdoc:ref": "#element_node"
+                    }
+                  ]
+                },
+                " is a third-or-more-level\n  node. It might be anonymous and lacks a stable and unique\n  identifiers. It MAY have a locally unique identifier. If the\n  element node and all its parent element nodes have locally\n  unique identifier then the ordered set of those identifiers\n  can be considered a document local unique identifier of the\n  element node, similar to ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "the resource identifier"
+                  ],
+                  "vdoc:ref": "#resource_id"
+                }
+              ]
+            }
+          ]
+        }
       ]
     },
     "node_keys": {
@@ -578,7 +694,12 @@
       "dc:title": "Node keys",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "The keys of the VDocLD nodes have four categories\n        depending on whether the key is an IRI or not and whether an\n        IRI key has semantics defined VDoc or extension format\n        specifications:",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "\nThe keys of the VDocLD nodes have four categories depending on whether\nthe key is an IRI or not and whether an IRI key has semantics defined\nVDoc or extension format specifications:"
+          ]
+        },
         {
           "@id": "node_key_categories"
         }
@@ -604,70 +725,79 @@
                   }
                 ]
               },
-              " is any IRI which matches\n          a VDoc ontology context term. Its semantics are defined by\n          this specification."
+              " is any IRI which matches\n  a VDoc ontology context term. Its semantics are defined by\n  this specification."
             ]
           }
         ],
-        [
-          {
-            "revdoc:dfn": "#extension_key",
-            "vdoc:content": [
-              {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "Extension node key"
-                    ],
-                    "vdoc:ref": "#extension_key"
-                  }
-                ]
-              },
-              " is any IRI which\n          matches an extension ontology context term. Its semantics\n          are defined by the corresponding extension specification"
-            ]
-          }
-        ],
-        [
-          {
-            "revdoc:dfn": "#generic_key",
-            "vdoc:content": [
-              {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "Generic IRI key"
-                    ],
-                    "vdoc:ref": "#generic_key"
-                  }
-                ]
-              },
-              " is any IRI key lacking\n          recognized ontology. It has no semantics in addition to what\n          JSON-LD specifies."
-            ]
-          }
-        ],
-        [
-          {
-            "revdoc:dfn": "#identifier_key",
-            "vdoc:content": [
-              {
-                "vdoc:strong": true,
-                "vdoc:content": [
-                  {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
-                      "Identifier key"
-                    ],
-                    "vdoc:ref": "#identifier_key"
-                  }
-                ]
-              },
-              " is any non-IRI key.\n          The semantics of an identifier key is defined by the node."
-            ]
-          }
-        ]
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            {
+              "revdoc:dfn": "#extension_key",
+              "vdoc:content": [
+                {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "Extension node key"
+                      ],
+                      "vdoc:ref": "#extension_key"
+                    }
+                  ]
+                },
+                " is any IRI which\n  matches an extension ontology context term. Its semantics\n  are defined by the corresponding extension specification"
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            {
+              "revdoc:dfn": "#generic_key",
+              "vdoc:content": [
+                {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "Generic IRI key"
+                      ],
+                      "vdoc:ref": "#generic_key"
+                    }
+                  ]
+                },
+                " is any IRI key lacking\n  recognized ontology. It has no semantics in addition to what\n  JSON-LD specifies."
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            {
+              "revdoc:dfn": "#identifier_key",
+              "vdoc:content": [
+                {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "Identifier key"
+                      ],
+                      "vdoc:ref": "#identifier_key"
+                    }
+                  ]
+                },
+                " is any non-IRI key.\n  The semantics of an identifier key is defined by the node."
+              ]
+            }
+          ]
+        }
       ]
     },
     "document_node": {
@@ -676,32 +806,37 @@
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
-          "revdoc:dfn": "#document_iri",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "vdoc:strong": true,
+              "revdoc:dfn": "#document_iri",
               "vdoc:content": [
                 {
-                  "@type": "vdoc:Reference",
+                  "vdoc:strong": true,
                   "vdoc:content": [
-                    "The document IRI"
-                  ],
-                  "vdoc:ref": "#document_iri"
-                }
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "The document IRI"
+                      ],
+                      "vdoc:ref": "#document_iri"
+                    }
+                  ]
+                },
+                " is a global\n  identifier of a document. It must not have a fragment part."
               ]
             },
-            " is a global\n        identifier of a document. It must not have a fragment part."
+            "All ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "identifier keys"
+              ],
+              "vdoc:ref": "#identifier_key"
+            },
+            " of a\ndocument node must have a resource node as their value."
           ]
-        },
-        "All ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "identifier keys"
-          ],
-          "vdoc:ref": "#identifier_key"
-        },
-        " of a\n      document node must have a resource node as their value."
+        }
       ]
     },
     "resource_node": {
@@ -710,32 +845,37 @@
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
-          "revdoc:dfn": "#resource_id",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "vdoc:strong": true,
+              "revdoc:dfn": "#resource_id",
               "vdoc:content": [
                 {
-                  "@type": "vdoc:Reference",
+                  "vdoc:strong": true,
                   "vdoc:content": [
-                    "The resource identifier"
-                  ],
-                  "vdoc:ref": "#resource_id"
-                }
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "The resource identifier"
+                      ],
+                      "vdoc:ref": "#resource_id"
+                    }
+                  ]
+                },
+                " is a string using\ncharacter set restricted to valid javascript identifiers, is\nunique within a document and which identifies a resource node\ninside that document."
               ]
             },
-            " is a string using\n      character set restricted to valid javascript identifiers, is\n      unique within a document and which identifies a resource node\n      inside that document."
+            "When the resource identifier is appended to ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "the document IRI"
+              ],
+              "vdoc:ref": "#document_iri"
+            },
+            " as an IRI fragment part the resource node has a stable,\nglobal identity over time."
           ]
-        },
-        "When the resource identifier is appended to ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "the document IRI"
-          ],
-          "vdoc:ref": "#document_iri"
-        },
-        " as an IRI fragment part the resource node has a stable,\n      global identity over time."
+        }
       ]
     },
     "element_node": {
@@ -743,7 +883,12 @@
       "dc:title": "Element nodes",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Element nodes are structural document building blocks which\n      lack a stable identity even within the document."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Element nodes are structural document building blocks which\nlack a stable identity even within the document."
+          ]
+        }
       ]
     },
     "transformations_spec": {
@@ -776,9 +921,18 @@
       "dc:title": "Extensions provide new ontologies and transformations",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "A VDoc extension is a specification which can extend the VDoc\n      specification in different ways in the different transformation\n      stages. An extension has two main parts; the extension ontology\n      introduces new vocabulary for the VDoc interchange format itself\n      and the extension transformations introduces new algorithms for\n      extracting and emitting said vocabulary.",
-        null,
-        "Multiple VDoc extensions can co-exist; extensions must be\n      specified in a manner that a VDoc document itself and all\n      transformation operations are well-defined and deterministic even\n      if multiple extensions are used at the same time. There are two\n      primary mechanisms to reach this goal: global dns-registration\n      based ontology base IRI's and and extension ordering primacy\n      during transformations.",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "A VDoc extension is a specification which can extend the VDoc\nspecification in different ways in the different transformation\nstages. An extension has two main parts; the extension ontology\nintroduces new vocabulary for the VDoc interchange format itself\nand the extension transformations introduces new algorithms for\nextracting and emitting said vocabulary."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Multiple VDoc extensions can co-exist; extensions must be\nspecified in a manner that a VDoc document itself and all\ntransformation operations are well-defined and deterministic even\nif multiple extensions are used at the same time. There are two\nprimary mechanisms to reach this goal: global dns-registration\nbased ontology base IRI's and and extension ordering primacy\nduring transformations."
+          ]
+        },
         {
           "@id": "extension_ontology"
         },
@@ -792,29 +946,43 @@
       "dc:title": "VDoc extension ontology",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "VDoc extension ontology is the combination of the extension",
         {
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "VDoc extension ontology is the combination of the extension",
             {
-              "@type": "vdoc:NumberedList",
-              "vdoc:entries": [
-                [
-                  "namespace preferred prefix and its associated prefixIRI"
-                ],
-                [
-                  "depended ontologies with their prefix definitions"
-                ],
-                [
-                  "extension RDF vocabulary"
-                ],
-                [
-                  "JSON-LD context term definitions"
-                ]
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:NumberedList",
+                  "vdoc:entries": [
+                    [
+                      "namespace preferred prefix and its associated prefixIRI"
+                    ],
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        "depended ontologies with their prefix definitions"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        "extension RDF vocabulary"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        "JSON-LD context term definitions"
+                      ]
+                    }
+                  ]
+                }
               ]
-            }
+            },
+            "Together these fully specify the semantics of an extension\nontology. More specifically the ontologies of all extensions\nlisted in the @context section of a VDoc JSON-LD document fully\ndefine all the semantics of that particular document itself."
           ]
         },
-        "Together these fully specify the semantics of an extension\n        ontology. More specifically the ontologies of all extensions\n        listed in the @context section of a VDoc JSON-LD document fully\n        define all the semantics of that particular document itself.",
         {
           "@id": "extension_prefixes"
         },
@@ -830,21 +998,36 @@
       "@id": "extension_prefixes",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Mappings from short, document-local strings into a globally unique IRIs."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Mappings from short, document-local strings into a globally unique IRIs."
+          ]
+        }
       ]
     },
     "extension_vocabulary": {
       "@id": "extension_vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "A collection of RDF classes, properties and other names, all\n          of which have the ontology prefixIRI as a prefix."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "A collection of RDF classes, properties and other names, all\nof which have the ontology prefixIRI as a prefix."
+          ]
+        }
       ]
     },
     "extension_context": {
       "@id": "extension_context",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "A collection of JSON-LD context term definitions."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "A collection of JSON-LD context term definitions."
+          ]
+        }
       ]
     },
     "extension_transformations": {
@@ -852,7 +1035,12 @@
       "dc:title": "VDoc extension transformations: extraction and emission",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "An extension can specify an arbitrary number of extraction\n        and emission transformation algorithms and rules from various\n        source graphs via the VDoc interchange format into various\n        output formats.",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "An extension can specify an arbitrary number of extraction and\nemission transformation algorithms and rules from various source graphs\nvia the VDoc interchange format into various output formats."
+          ]
+        },
         {
           "@id": "extension_extraction_rules"
         },
@@ -872,130 +1060,138 @@
       "dc:title": "Extraction transformation rules",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Extraction rules specify how a source graph is interpreted as\n        mutations (usually additions) to a given target VDocLD document.\n        An extraction rule consists of two parts:",
         {
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "Extraction rules specify how a source graph is interpreted as\nmutations (usually additions) to a given target VDocLD document.\nAn extraction rule consists of two parts:",
             {
-              "@type": "vdoc:BulletList",
-              "vdoc:entries": [
-                [
-                  {
-                    "revdoc:dfn": "#extraction_key_pattern",
-                    "vdoc:content": [
-                      {
-                        "vdoc:strong": true,
-                        "vdoc:content": [
-                          {
-                            "@type": "vdoc:Reference",
-                            "vdoc:content": [
-                              "key pattern matcher"
-                            ],
-                            "vdoc:ref": "#extraction_key_pattern"
-                          }
-                        ]
-                      },
-                      " is\n              matched against each source graph node dictionary key to\n              see if the key matches the rule and to parse the\n              extraction rule parameters"
-                    ]
-                  }
-                ],
-                [
-                  {
-                    "revdoc:dfn": "#extraction_action",
-                    "vdoc:content": [
-                      {
-                        "vdoc:strong": true,
-                        "vdoc:content": [
-                          {
-                            "@type": "vdoc:Reference",
-                            "vdoc:content": [
-                              "extraction action"
-                            ],
-                            "vdoc:ref": "#extraction_action"
-                          }
-                        ]
-                      },
-                      " specifies\n              how the extraction rule parameters and ",
-                      {
-                        "@type": "vdoc:Reference",
-                        "vdoc:content": [
-                          "extraction context"
-                        ],
-                        "vdoc:ref": "extraction context"
-                      },
-                      " is interpreted as a set of mutations on the current\n              target VDocLD document node"
-                    ]
-                  }
-                ]
-              ]
-            }
-          ]
-        },
-        {
-          "revdoc:dfn": "#extraction_context",
-          "vdoc:content": [
-            {
-              "vdoc:strong": true,
               "vdoc:content": [
                 {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    "Extraction context"
-                  ],
-                  "vdoc:ref": "#extraction_context"
+                  "@type": "vdoc:BulletList",
+                  "vdoc:entries": [
+                    [
+                      {
+                        "revdoc:dfn": "#extraction_key_pattern",
+                        "vdoc:content": [
+                          {
+                            "vdoc:strong": true,
+                            "vdoc:content": [
+                              {
+                                "@type": "vdoc:Reference",
+                                "vdoc:content": [
+                                  "key pattern matcher"
+                                ],
+                                "vdoc:ref": "#extraction_key_pattern"
+                              }
+                            ]
+                          },
+                          " is\n    matched against each source graph node dictionary key to\n    see if the key matches the rule and to parse the\n    extraction rule parameters"
+                        ]
+                      }
+                    ],
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        {
+                          "revdoc:dfn": "#extraction_action",
+                          "vdoc:content": [
+                            {
+                              "vdoc:strong": true,
+                              "vdoc:content": [
+                                {
+                                  "@type": "vdoc:Reference",
+                                  "vdoc:content": [
+                                    "extraction action"
+                                  ],
+                                  "vdoc:ref": "#extraction_action"
+                                }
+                              ]
+                            },
+                            " specifies\n    how the extraction rule parameters and ",
+                            {
+                              "@type": "vdoc:Reference",
+                              "vdoc:content": [
+                                "extraction context"
+                              ],
+                              "vdoc:ref": "extraction context"
+                            },
+                            " is interpreted as a set of mutations on the current\n    target VDocLD document node"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             },
-            " is\n            defined as a collection of ",
             {
-              "@type": "vdoc:Reference",
+              "revdoc:dfn": "#extraction_context",
               "vdoc:content": [
-                "rule key"
-              ],
-              "vdoc:ref": "rule key"
+                {
+                  "vdoc:strong": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "Extraction context"
+                      ],
+                      "vdoc:ref": "#extraction_context"
+                    }
+                  ]
+                },
+                " is\n    defined as a collection of ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "rule key"
+                  ],
+                  "vdoc:ref": "rule key"
+                },
+                ", ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "source graph parent node"
+                  ],
+                  "vdoc:ref": "source graph parent node"
+                },
+                ", ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "source graph node value"
+                  ],
+                  "vdoc:ref": "source graph node value"
+                },
+                ", ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "target document parent node"
+                  ],
+                  "vdoc:ref": "target document parent node"
+                },
+                " and ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "target document value"
+                  ],
+                  "vdoc:ref": "target document value"
+                }
+              ]
             },
-            ", ",
+            "Typical extraction rule creates a new Node, adds it to target document\nparent (directly or as a reference depending on the ",
             {
               "@type": "vdoc:Reference",
               "vdoc:content": [
-                "source graph parent node"
+                "Node type"
               ],
-              "vdoc:ref": "source graph parent node"
+              "vdoc:ref": "#node_type"
             },
-            ", ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "source graph node value"
-              ],
-              "vdoc:ref": "source graph node value"
-            },
-            ", ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "target document parent node"
-              ],
-              "vdoc:ref": "target document parent node"
-            },
-            " and ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "target document value"
-              ],
-              "vdoc:ref": "target document value"
-            }
+            ") and adds the source node value to\nsome specific property of the new Node."
           ]
-        },
-        "Typical extraction rule creates a new Node, adds it to target\n        document parent (directly or as a reference depending on the ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "Node type"
-          ],
-          "vdoc:ref": "#node_type"
-        },
-        ") and adds the source node\n        value to some specific property of the new Node."
+        }
       ]
     },
     "extension_extractee_apis": {
@@ -1003,34 +1199,45 @@
       "dc:title": "Extraction extractee tool APIs",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "An extension MAY specify an extractee API as a collection\n        of ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "WebIDL interfaces"
-          ],
-          "vdoc:ref": "https://www.w3.org/TR/WebIDL-1/"
-        },
-        "for constructing of extension extraction source graphs. By doing\n        this the native implementations gain the benefits of integrated\n        toolchains:",
-        {
-          "vdoc:content": [
+            "An extension MAY specify an extractee API as a collection\nof ",
             {
-              "@type": "vdoc:BulletList",
-              "vdoc:entries": [
-                [
-                  "Improved discoverability via integrated documentation and code\n          completion"
-                ],
-                [
-                  "Implicitly well-formed primitives and structures where\n          possible, validation of input where not"
-                ],
-                [
-                  "Improved readability of the document in contexts where the\n          primary document source graph is expressed in native code"
-                ]
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "WebIDL interfaces"
+              ],
+              "vdoc:ref": "https://www.w3.org/TR/WebIDL-1/"
+            },
+            " for\nconstructing of extension extraction source graphs. By doing this the\nnative implementations gain the benefits of integrated toolchains:",
+            {
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:BulletList",
+                  "vdoc:entries": [
+                    [
+                      "Improved discoverability via integrated documentation and code\n  completion"
+                    ],
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        "Implicitly well-formed primitives and structures where\n  possible, validation of input where not"
+                      ]
+                    },
+                    {
+                      "@type": "vdoc:Paragraph",
+                      "vdoc:content": [
+                        "Improved readability of the document in contexts where the\n  primary document source graph is expressed in native code"
+                      ]
+                    }
+                  ]
+                }
               ]
-            }
+            },
+            "All put together the extraction APIs are intended to lower the\nthreshold of adoption of new extensions and as such make the\nintroduction of new extensions easier."
           ]
-        },
-        "Altogether the extraction APIs are intended to lower the\n        threshold of adoption of new extensions and as such make the\n        introduction of new extensions easier."
+        }
       ]
     },
     "extension_output": {
@@ -1152,6 +1359,11 @@
         "@type": "vdoc:Class",
         "rdfs:subClassOf": "vdoc:Node",
         "rdfs:comment": "A titled, possibly numbered chapter document node"
+      },
+      "Paragraph": {
+        "@type": "vdoc:Class",
+        "rdfs:subClassOf": "vdoc:Node",
+        "rdfs:comment": "A vertically segmented paragraph document node"
       },
       "BulletList": {
         "@type": "vdoc:Class",
@@ -1326,8 +1538,18 @@
     "section_ontology_abstract": {
       "@id": "section_ontology_abstract",
       "vdoc:content": [
-        "VDoc core ontology specifies the vocabulary for the human facing\n      document structure by means of primitives which are sufficiently\n      common and meaningful across all types of documents.\n      These primitives include constructs such as chapters, titles,\n      lists, tables, cross-references, etc.",
-        "VDoc core ontology explicitly does not specify any semantic\n      meanings outside the document structure itself."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "VDoc core ontology specifies the vocabulary for the human facing\ndocument structure by means of primitives which are sufficiently\ncommon and meaningful across all types of documents. These primitives\ninclude constructs such as chapters, titles, lists, tables,\ncross-references, etc."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "VDoc core ontology explicitly does not specify any semantic\nmeanings outside the document structure itself."
+          ]
+        }
       ]
     },
     "section_prefixes": {
@@ -1418,6 +1640,7 @@
             "Property",
             "Node",
             "Chapter",
+            "Paragraph",
             "BulletList",
             "NumberedList",
             "Table",
@@ -1521,16 +1744,20 @@
       "dc:title": "<em>vdoc: a vdoc:HTMLElementProperty</em> vocabulary",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Properties instanced from ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "vdoc:HTMLElementProperty"
-          ],
-          "vdoc:ref": "#HTMLElementProperty"
+            "Properties instanced from ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "vdoc:HTMLElementProperty"
+              ],
+              "vdoc:ref": "#HTMLElementProperty"
+            },
+            "\ninherit HTML5 element semantics directly. Only those HTMl5 elements\nwith structural semantic meaning are exposed via VDoc core ontology."
+          ]
         },
-        " inherit HTML5 element semantics directly. Only those HTMl5 elements\nwith structural semantic meaning are exposed via VDoc core ontology.",
-        null,
         {
           "vdoc:lookup": "vocabulary",
           "@type": "vdoc:Table",
@@ -1741,63 +1968,72 @@
       "dc:title": "VDoc Core transformations",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "VDoc defines a single extraction transformation from a native\n      javascript source graph. To support this VDoc defines an ",
         {
-          "revdoc:dfn": "#extractee_api",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "VDoc defines a single extraction transformation from a native\njavascript source graph. To support this VDoc defines an ",
             {
-              "vdoc:strong": true,
+              "revdoc:dfn": "#extractee_api",
               "vdoc:content": [
                 {
-                  "@type": "vdoc:Reference",
+                  "vdoc:strong": true,
                   "vdoc:content": [
-                    "extractee API"
-                  ],
-                  "vdoc:ref": "#extractee_api"
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "extractee API"
+                      ],
+                      "vdoc:ref": "#extractee_api"
+                    }
+                  ]
                 }
               ]
-            }
+            },
+            " as native javascript\nconvenience functions and libraries which construct typical VDoc source\ngraph primitives. This API can be extended by extensions which make use\nof native source graph extractors."
           ]
         },
-        " as native javascript\n      convenience functions and libraries which construct typical\n      VDoc source graph primitives. This API can be extended by\n      extensions which make use of native source graph extractors.",
-        null,
-        "The extraction transformation is based around two basic\n      mechanisms: ",
         {
-          "revdoc:dfn": "#array_composition",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "The extraction transformation is based around two basic mechanisms: ",
             {
-              "vdoc:strong": true,
+              "revdoc:dfn": "#array_composition",
               "vdoc:content": [
                 {
-                  "@type": "vdoc:Reference",
+                  "vdoc:strong": true,
                   "vdoc:content": [
-                    "array composition"
-                  ],
-                  "vdoc:ref": "#array_composition"
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "array composition"
+                      ],
+                      "vdoc:ref": "#array_composition"
+                    }
+                  ]
                 }
               ]
-            }
-          ]
-        },
-        " and ",
-        {
-          "revdoc:dfn": "#extraction_rules",
-          "vdoc:content": [
+            },
+            " and ",
             {
-              "vdoc:strong": true,
+              "revdoc:dfn": "#extraction_rules",
               "vdoc:content": [
                 {
-                  "@type": "vdoc:Reference",
+                  "vdoc:strong": true,
                   "vdoc:content": [
-                    "extraction rules"
-                  ],
-                  "vdoc:ref": "#extraction_rules"
+                    {
+                      "@type": "vdoc:Reference",
+                      "vdoc:content": [
+                        "extraction rules"
+                      ],
+                      "vdoc:ref": "#extraction_rules"
+                    }
+                  ]
                 }
               ]
-            }
+            },
+            "."
           ]
         },
-        ".",
         {
           "@id": "extraction_rules"
         },
@@ -1817,7 +2053,8 @@
       "": {
         "comment": "Basic Node",
         "owner": "vdoc:content",
-        "body": "vdoc:content"
+        "body": "vdoc:content",
+        "paragraphize": true
       },
       "chapter": {
         "range": "vdoc:Chapter",
@@ -1825,6 +2062,12 @@
         "body": "vdoc:content",
         "rest": "dc:title",
         "comment": "Numbered, titled chapter"
+      },
+      "p": {
+        "range": "vdoc:Paragraph",
+        "owner": "vdoc:content",
+        "body": "vdoc:content",
+        "comment": "Vertically segmented paragraph"
       },
       "c": {
         "range": "vdoc:CharacterData",
@@ -1962,21 +2205,27 @@
       "dc:title": "VDoc Core emission rules",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "ReVDoc provides html emission rules for ",
         {
-          "vdoc:words": [
-            "null",
-            "string",
-            "number",
-            "array",
-            "object",
-            "vdoc:Node",
-            "vdoc:Chapter",
-            "vdoc:BulletList",
-            "vdoc:NumberedList",
-            "vdoc:Table",
-            "vdoc:Reference",
-            "vdoc:CharacterData"
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "ReVDoc provides html emission rules for ",
+            {
+              "vdoc:words": [
+                "null",
+                "string",
+                "number",
+                "array",
+                "object",
+                "vdoc:Node",
+                "vdoc:Chapter",
+                "vdoc:Paragraph",
+                "vdoc:BulletList",
+                "vdoc:NumberedList",
+                "vdoc:Table",
+                "vdoc:Reference",
+                "vdoc:CharacterData"
+              ]
+            }
           ]
         }
       ]

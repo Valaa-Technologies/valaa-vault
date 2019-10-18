@@ -64,114 +64,136 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This library provides the definitions and reference implementation\nfor the fundamental ",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ValOS Resources"
+            "This library provides the definitions and reference implementation\nfor the fundamental ",
+            {
+              "@type": "vdoc:CharacterData",
+              "vdoc:content": [
+                "ValOS Resources"
+              ]
+            },
+            " and ",
+            {
+              "@type": "vdoc:CharacterData",
+              "vdoc:content": [
+                "ValOS Events"
+              ]
+            },
+            "\nsystems."
           ]
-        },
-        " and ",
-        {
-          "@type": "vdoc:CharacterData",
-          "vdoc:content": [
-            "ValOS Events"
-          ]
-        },
-        " systems."
+        }
       ]
     },
     "sotd": {
       "@id": "sotd",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is part of the library workspace ",
         {
-          "@type": "revdoc:Package",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "This document is part of the library workspace ",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/raem"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/raem"
-        },
-        " (of domain ",
-        {
-          "@type": "revdoc:Package",
-          "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/raem"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/raem"
+            },
+            "\n(of domain ",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/kernel"
-              ]
-            }
-          ],
-          "vdoc:ref": "@valos/kernel"
-        },
-        ") which is ",
-        "ValOS Resources And Events Model (ValOS-RAEM) API, Schema"
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`ValOS Resources And Events Model (ValOS-RAEM) API, Schema`"
+          ]
+        }
       ]
     },
     "introduction": {
       "@id": "introduction",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This library provides the definitions and reference implementations\nfor the fundamental ",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ValOS Resources"
+            "This library provides the definitions and reference implementations\nfor the fundamental ",
+            {
+              "@type": "vdoc:CharacterData",
+              "vdoc:content": [
+                "ValOS Resources"
+              ]
+            },
+            " and ",
+            {
+              "@type": "vdoc:CharacterData",
+              "vdoc:content": [
+                "ValOS Events"
+              ]
+            },
+            "\nsystems."
           ]
         },
-        " and ",
         {
-          "@type": "vdoc:CharacterData",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ValOS Events"
-          ]
-        },
-        " systems.",
-        null,
-        "",
-        {
-          "vdoc:quote": true,
-          "vdoc:content": [
-            [
-              "A ValOS Resource ",
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "resource"
+            {
+              "vdoc:quote": true,
+              "vdoc:content": [
+                [
+                  "A ValOS Resource ",
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      "resource"
+                    ]
+                  },
+                  " represents a well-defined part of\n  the world. It has a well-defined state at each particular moment in time."
                 ]
-              },
-              " represents a well-defined part of\n  the world. It has a well-defined state at each particular moment in time."
-            ]
+              ]
+            }
           ]
         },
-        "",
-        null,
-        "",
         {
-          "vdoc:quote": true,
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            [
-              "A ValOS Event ",
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "event"
+            {
+              "vdoc:quote": true,
+              "vdoc:content": [
+                [
+                  "A ValOS Event ",
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      "event"
+                    ]
+                  },
+                  " represents a dynamic change to a\n  resource by describing the change from previous to subsequent resource\n  states at a particular time."
                 ]
-              },
-              " represents a dynamic change to a\n  resource by describing the change from previous to subsequent resource\n  states at a particular time."
-            ]
+              ]
+            }
           ]
         },
-        "",
-        null,
-        "The interplay of these distinct yet interwoven systems forms the\nfoundation of the Valaa Open System."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The interplay of these distinct yet interwoven systems forms the\nfoundation of the Valaa Open System."
+          ]
+        }
       ]
     },
     "readme": {
@@ -179,7 +201,12 @@
       "dc:title": "@valos/raem provides ValOS Resources And Events Model `ValOS-RaEM` (/væləsˌɹɛem/)",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This library provides:",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This library provides:"
+          ]
+        },
         {
           "@type": "vdoc:BulletList",
           "vdoc:entries": [
@@ -193,109 +220,136 @@
               },
               " and the other core types."
             ],
-            [
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "Corpus"
-                ]
-              },
-              " component which stores in-memory representations of the resources."
-            ],
-            [
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "reducers"
-                ]
-              },
-              " which a corpus uses to convert (",
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "reduce"
-                ]
-              },
-              ") events into changes of its resource representations."
-            ],
-            [
-              "the kuery language ",
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "VALK"
-                ]
-              },
-              " definition and the kuery engine ",
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "Valker"
-                ]
-              },
-              "component for accessing and manipulating the resources."
-            ],
-            [
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "ghost instancing"
-                ]
-              },
-              " mechanism which unifies the object\n    oriented instantiation and inheritance principles into a single\n    but powerful mechanism for ValOS resources."
-            ],
-            [
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "resource couplings"
-                ]
-              },
-              " mechanism which allows referential\n    integrity and the definition of different types of reference\n    semantics like ownership, global references and local references."
-            ],
-            [
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "urn:valos"
-                ]
-              },
-              " specification which defines globally unique\n    identifiers for ValOS resources."
-            ],
-            [
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "ValOSURL"
-                ]
-              },
-              " specification which allows for universal locating of resources."
-            ],
-            [
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "valospace"
-                ]
-              },
-              " definition as a distributed set of resources\n    containing references to each other using the VRLs."
-            ],
-            [
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "partitions"
-                ]
-              },
-              " mechanism which allows for unlimited scalability of\n    the ",
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "valospace"
-                ]
-              },
-              " into a singular globally distributed and\n    unified object space."
-            ]
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "Corpus"
+                  ]
+                },
+                " component which stores in-memory representations of the resources."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "reducers"
+                  ]
+                },
+                " which a corpus uses to convert (",
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "reduce"
+                  ]
+                },
+                ") events into changes of its resource representations."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "the kuery language ",
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "VALK"
+                  ]
+                },
+                " definition and the kuery engine ",
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "Valker"
+                  ]
+                },
+                "component for accessing and manipulating the resources."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "ghost instancing"
+                  ]
+                },
+                " mechanism which unifies the object\n  oriented instantiation and inheritance principles into a single\n  but powerful mechanism for ValOS resources."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "resource couplings"
+                  ]
+                },
+                " mechanism which allows referential\n  integrity and the definition of different types of reference\n  semantics like ownership, global references and local references."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "urn:valos"
+                  ]
+                },
+                " specification which defines globally unique\n  identifiers for ValOS resources."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "ValOSURL"
+                  ]
+                },
+                " specification which allows for universal locating of resources."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "valospace"
+                  ]
+                },
+                " definition as a distributed set of resources\n  containing references to each other using the VRLs."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "partitions"
+                  ]
+                },
+                " mechanism which allows for unlimited scalability of\n  the ",
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "valospace"
+                  ]
+                },
+                " into a singular globally distributed and\n  unified object space."
+              ]
+            }
           ]
         },
         {
@@ -322,87 +376,96 @@
                 ]
               }
             ],
-            [
-              "exports:",
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "Corpus"
-                ]
-              },
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "Command"
-                ]
-              },
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "VALK"
-                ]
-              },
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "Valker"
-                ]
-              },
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "RAEMContentAPI"
-                ]
-              }
-            ],
-            [
-              "valosheath:",
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "Resource"
-                ]
-              },
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "TransientFields"
-                ]
-              },
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "Bvob"
-                ]
-              },
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "Partition"
-                ]
-              }
-            ],
-            [
-              "concepts:",
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "ghost instancing"
-                ]
-              },
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "partitions"
-                ]
-              },
-              {
-                "@type": "vdoc:CharacterData",
-                "vdoc:content": [
-                  "couplings"
-                ]
-              }
-            ]
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "exports:",
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "Corpus"
+                  ]
+                },
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "Command"
+                  ]
+                },
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "VALK"
+                  ]
+                },
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "Valker"
+                  ]
+                },
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "RAEMContentAPI"
+                  ]
+                }
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "valosheath:",
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "Resource"
+                  ]
+                },
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "TransientFields"
+                  ]
+                },
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "Bvob"
+                  ]
+                },
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "Partition"
+                  ]
+                }
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "concepts:",
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "ghost instancing"
+                  ]
+                },
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "partitions"
+                  ]
+                },
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "couplings"
+                  ]
+                }
+              ]
+            }
           ]
         },
         {
@@ -415,7 +478,24 @@
       "dc:title": "ValOS URLs, urn:valos and raw id's",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "ValOS URL is used to specify a parameterized location reference to a\nValOS Resource. It has two major parts separated by the URI fragment\nseparator `#`: *partition URI* part and a *local reference* part.\n\n*Partition URI* identifies the target authority and partition of\nthe reference. It corresponds to scheme, hierarchical and query parts\nof an URI; everything but the fragment. Its precise structure and\ninterpretation is specified by the scheme but typically the scheme and\nhierarchical part identify an authority and query part identifies\na partition.\n\n*Local reference* identifies a particular resource inside a partition\nbut also contains optional *coupling*, *ghost path*, *lens* (and other)\nparts which further parameterize the reference itself. It corresponds\nto the URI fragment part but has sub-structure which is specified in\nthis document.",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "ValOS URL is used to specify a parameterized location reference to a\nValOS Resource. It has two major parts separated by the URI fragment\nseparator `#`: *partition URI* part and a *local reference* part."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "*Partition URI* identifies the target authority and partition of\nthe reference. It corresponds to scheme, hierarchical and query parts\nof an URI; everything but the fragment. Its precise structure and\ninterpretation is specified by the scheme but typically the scheme and\nhierarchical part identify an authority and query part identifies\na partition."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "*Local reference* identifies a particular resource inside a partition\nbut also contains optional *coupling*, *ghost path*, *lens* (and other)\nparts which further parameterize the reference itself. It corresponds\nto the URI fragment part but has sub-structure which is specified in\nthis document."
+          ]
+        },
         {
           "@id": "valos_iri_structure"
         },
@@ -435,11 +515,24 @@
       "vdoc:language": "Correlations between ValOS URL and urn:valos (top) and URI and URN (bottom)",
       "@type": "vdoc:CharacterData",
       "vdoc:content": [
-        "                                            valos-url\n┌────────────────────────────────────────────────┴─────────────────────────────────────────────────┐\n                  partition-url                                      resource-ref\n┌───────────────────────┴────────────────────────┐ ┌──────────────────────┴────────────────────────┐\n                         resource-url                                         ref-params\n┌──────────────────────────────┴────────────────────────────────┐  ┌───────────────┴───────────────┐\n         authority-uri               partition-id   resource-id         coupling           lens\n┌──────────────┴───────────────┐    ┌─────┴──────┐ ┌─────┴──────┐  ┌───────┴────────┐ ┌─────┴──────┐",
-        null,
-        "valaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=relations&lens=ROOT_LENS",
-        null,
-        "                                                   └─────┬──────┘  └──────────────┬────────────────┘\n                                                        nss                  q-component\n└───┬────┘   └──────┬──────┘ └┬┘ └───────┬───────┘ └──────────────────────┬────────────────────────┘\n  scheme        authority    path      query                           fragment\n             └────────┬────────┘\n                  hier-part\n"
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "                                            valos-url\n┌────────────────────────────────────────────────┴─────────────────────────────────────────────────┐\n                  partition-url                                      resource-ref\n┌───────────────────────┴────────────────────────┐ ┌──────────────────────┴────────────────────────┐\n                         resource-url                                         ref-params\n┌──────────────────────────────┴────────────────────────────────┐  ┌───────────────┴───────────────┐\n         authority-uri               partition-id   resource-id         coupling           lens\n┌──────────────┴───────────────┐    ┌─────┴──────┐ ┌─────┴──────┐  ┌───────┴────────┐ ┌─────┴──────┐"
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "valaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=relations&lens=ROOT_LENS"
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "                                                   └─────┬──────┘  └──────────────┬────────────────┘\n                                                        nss                  q-component\n└───┬────┘   └──────┬──────┘ └┬┘ └───────┬───────┘ └──────────────────────┬────────────────────────┘\n  scheme        authority    path      query                           fragment\n             └────────┬────────┘\n                  hier-part\n"
+          ]
+        }
       ]
     },
     "section_dualisms": {
@@ -447,26 +540,46 @@
       "dc:title": "Curious dualisms of *partition URI* and *local reference*",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "The division between partition URI and local reference has many curious\ndualistic qualities: backend vs. frontend, hierarchical vs. flat,\nrouting vs. computation, extensible vs. fixed, absolute vs. contextual,\ncoarse vs. granular, self-contained vs. part-of-a-whole.",
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The division between partition URI and local reference has many curious\ndualistic qualities: backend vs. frontend, hierarchical vs. flat,\nrouting vs. computation, extensible vs. fixed, absolute vs. contextual,\ncoarse vs. granular, self-contained vs. part-of-a-whole."
+          ]
+        },
         {
           "dc:title": "Partition URI domain is backend, local reference domain is front-end",
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "ValOS backends deal with the indivisible partitions and thus don't care\nabout the particularities of local references to individual resources.\nThis corresponds to how in web architecture URI fragments are not sent\nto backend with resource requests. Conversely, ValOS frontends don't\ncare where a resource comes from once it has been loaded, but about its\nidentity, relationships and the parameters of those relationships. This\nis reflected in how frontend code regularily drops the partition URI."
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "ValOS backends deal with the indivisible partitions and thus don't care\nabout the particularities of local references to individual resources.\nThis corresponds to how in web architecture URI fragments are not sent\nto backend with resource requests. Conversely, ValOS frontends don't\ncare where a resource comes from once it has been loaded, but about its\nidentity, relationships and the parameters of those relationships. This\nis reflected in how frontend code regularily drops the partition URI."
+              ]
+            }
           ]
         },
         {
           "dc:title": "Partition URI structure is specified by the scheme, local reference structure is specified by ValOS",
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "By the nature of its distributed event sourcing architecture ValOS\nfocuses heavily on the frontend. The cross-compatibility between\ncomponents is driven by how new backends can integrate and talk with\nexisting front-end clients. This is facilitated by front-end spindle\nsystems which enables new ValOS URI schemes to specify new routing\nsolutions and fundamentally new backend infrastructures, as long as\nsaid infrastructures can route ValOS event streams to clients. This\ncorresponds to how ValOS doesn't specify how a *partition URI*\nidentifies and locates partitions and authorities but leaves it to\nthe scheme specifications and their reference implementations of\nfrontend spindles."
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "By the nature of its distributed event sourcing architecture ValOS\nfocuses heavily on the frontend. The cross-compatibility between\ncomponents is driven by how new backends can integrate and talk with\nexisting front-end clients. This is facilitated by front-end spindle\nsystems which enables new ValOS URI schemes to specify new routing\nsolutions and fundamentally new backend infrastructures, as long as\nsaid infrastructures can route ValOS event streams to clients. This\ncorresponds to how ValOS doesn't specify how a *partition URI*\nidentifies and locates partitions and authorities but leaves it to\nthe scheme specifications and their reference implementations of\nfrontend spindles."
+              ]
+            }
           ]
         },
         {
           "dc:title": "Partitions URI's identify self-contained wholes, resource references need their context",
           "@type": "vdoc:Chapter",
           "vdoc:content": [
-            "Web architecture specifies that all or none of the document is\nretrieved. This corresponds to the behaviour of ValOS partitions which\nare always retrieved as a whole. Partition URI's contain all and\nnothing but the components which identify web resources, that is\neverything but the fragment."
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "Web architecture specifies that all or none of the document is\nretrieved. This corresponds to the behaviour of ValOS partitions which\nare always retrieved as a whole. Partition URI's contain all and\nnothing but the components which identify web resources, that is\neverything but the fragment."
+              ]
+            }
           ]
         },
         {
@@ -487,7 +600,12 @@
       "dc:title": "VRL",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Javascript class which implements ValOS reference URI and associated\noperations."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Javascript class which implements ValOS reference URI and associated\noperations."
+          ]
+        }
       ]
     },
     "ontology": {
@@ -801,7 +919,12 @@
     "section_ontology_abstract": {
       "@id": "section_ontology_abstract",
       "vdoc:content": [
-        "@valos/raem ontology specifies the Valospace core types and\n      properties directly to the @valos/kernel namespace. "
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "@valos/raem ontology specifies the Valospace core types and properties\ndirectly to the @valos/kernel namespace."
+          ]
+        }
       ]
     },
     "section_prefixes": {

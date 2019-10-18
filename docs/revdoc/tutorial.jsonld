@@ -54,25 +54,35 @@
       "@id": "abstract",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is a revdoc template document 'tutorial' created by write-revdoc."
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This document is a revdoc template document 'tutorial' created by\nwrite-revdoc."
+          ]
+        }
       ]
     },
     "sotd": {
       "@id": "sotd",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "This document is part of the library workspace ",
         {
-          "@type": "revdoc:Package",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
+            "This document is part of the library workspace ",
             {
-              "vdoc:em": true,
+              "@type": "revdoc:Package",
               "vdoc:content": [
-                "@valos/revdoc"
-              ]
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/revdoc"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/revdoc"
             }
-          ],
-          "vdoc:ref": "@valos/revdoc"
+          ]
         }
       ]
     },
@@ -80,42 +90,56 @@
       "@id": "introduction",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
-        "Edit me - this is the first payload chapter. Abstract and SOTD are essential",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ReSpec boilerplate"
-          ],
-          "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+            "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "ReSpec boilerplate"
+              ],
+              "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+            },
+            "."
+          ]
         },
-        null,
-        "See ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ReVDoc tutorial"
-          ],
-          "vdoc:ref": "@valos/revdoc/tutorial"
+            "See ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "ReVDoc tutorial"
+              ],
+              "vdoc:ref": "@valos/revdoc/tutorial"
+            },
+            " for\ninstructions on how to write revdoc source documents."
+          ]
         },
-        " for instructions on how to write revdoc source documents.",
-        null,
-        "See also ",
         {
-          "@type": "vdoc:Reference",
+          "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ReVdoc specification"
-          ],
-          "vdoc:ref": "@valos/revdoc"
-        },
-        " and ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "VDoc specification"
-          ],
-          "vdoc:ref": "@valos/vdoc"
-        },
-        " for reference documentation."
+            "See also ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "ReVdoc specification"
+              ],
+              "vdoc:ref": "@valos/revdoc"
+            },
+            " and ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "VDoc specification"
+              ],
+              "vdoc:ref": "@valos/vdoc"
+            },
+            " for reference documentation."
+          ]
+        }
       ]
     },
     "@type": "revdoc:Document",

@@ -1,7 +1,6 @@
-// @flow
+Object.defineProperty(exports, "__esModule", { value: true });
 
-import { dumpObject, wrapError } from "~/tools/wrapError";
-import { invariantifyArray } from "~/tools/invariantify";
+const { dumpObject, wrapError } = require("./wrapError");
 
 /**
  * Resolves the chain of then-operations eagerly ie. synchronously if
@@ -42,18 +41,29 @@ import { invariantifyArray } from "~/tools/invariantify";
  * @param {any} onError(error, stepIndex, head, callbacks)
  */
 
+module.exports = {
+  mapEagerly,
+  thenChainEagerly,
+  thisChainEagerly,
+};
+
 // Sequential map on maybeThenable which awaits for each entry and each
 // return value of the mapped function eagerly: if no thenables are
 // encountered resolves synchronously.
-export function mapEagerly (entriesOrThenables: any[] | Promise<any[]>, callback: Function,
-    onRejected?: Function, startIndex: number = 0, results: Array<any> = []) {
+
+function mapEagerly (
+    entriesOrThenables, // : any[] | Promise<any[]>,
+    callback, // : Function,
+    onRejected, // ?: Function,
+    startIndex = 0,
+    results = []) {
   let index = null;
   let wrap;
   let entries;
   try {
     if (!Array.isArray(entriesOrThenables)) {
       if ((entriesOrThenables == null) || (typeof entriesOrThenables.then !== "function")) {
-        invariantifyArray(entriesOrThenables, "mapEagerly.entriesOrThenables");
+        throw new Error("mapEagerly: array expected as first argument");
       }
       wrap = new Error(`During mapEagerly.entriesOrThenables.catch`);
       return entriesOrThenables.then(
@@ -111,8 +121,12 @@ export function mapEagerly (entriesOrThenables: any[] | Promise<any[]>, callback
   }
 }
 
-export default function thenChainEagerly (initialValue: any, functions: any | Function[],
-    onRejected: ?Function, startIndex: number) {
+function thenChainEagerly (
+    initialValue, // : any,
+    functions, // : any | Function[],
+    onRejected, // : ?Function,
+    startIndex // : number
+) {
   const functionChain = (startIndex !== undefined) || Array.isArray(functions) ? functions
       : [functions];
   let next = initialValue;
@@ -152,8 +166,13 @@ export default function thenChainEagerly (initialValue: any, functions: any | Fu
   }
 }
 
-export function thisChainEagerly (this_: any, initialParams: any,
-    functions: any | Function[], onRejected: ?Function, startIndex: number) {
+function thisChainEagerly (
+    this_, // : any,
+    initialParams, // : any,
+    functions, // : any | Function[],
+    onRejected, // : ?Function,
+    startIndex // : number
+) {
   let index = startIndex || 0, params = initialParams;
   let arrayPromise;
   for (;;) {

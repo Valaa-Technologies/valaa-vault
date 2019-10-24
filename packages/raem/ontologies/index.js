@@ -10,8 +10,8 @@ const prefixes = {
 };
 
 module.exports = {
-  ...extendOntology(
-      "valos-kernel", "https://valospace.org/kernel#", prefixes, require("./valos-kernel")),
+  ...extendOntology("valos-kernel", "https://valospace.org/kernel#", prefixes,
+      require("./valos-kernel")),
   ...extendOntology("valos-valk", "https://valospace.org/valk#", prefixes, require("./valos-valk")),
   ...extendOntology("valos-raem", "https://valospace.org/raem#", prefixes, require("./valos-raem")),
   ...extendOntology("valos", "https://valospace.org/#", prefixes, require("./valos"), {

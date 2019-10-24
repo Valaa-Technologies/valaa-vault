@@ -4,7 +4,7 @@ import { Command, EventBase, Truth } from "~/raem/events";
 import type { VRL } from "~/raem/VRL";
 import { getActionFromPassage, Story } from "~/raem/redux/Bard";
 
-import thenChainEagerly from "~/tools/thenChainEagerly";
+import { thenChainEagerly } from "~/tools/thenChainEagerly";
 import { FabricEventTarget } from "~/tools/FabricEvent";
 
 export type MediaInfo = {

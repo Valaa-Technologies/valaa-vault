@@ -189,6 +189,12 @@ module.exports = {
         (a, [field, searched]) => a && !field.includes(searched), true);
   },
 
+  valosRaemFieldClasses: [
+    "valos-raem:Field",
+    "valos-raem:ExpressedField", "valos-raem:EventLoggedField", "valos-raem:CoupledField",
+    "valos-raem:GeneratedField", "valos-raem:TransientField", "valos-raem:AliasField",
+  ],
+
   filterKeysWithFieldReduction,
 };
 

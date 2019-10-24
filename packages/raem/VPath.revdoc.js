@@ -40,8 +40,8 @@ identifier (or 'vgrid') as its first segment is a valospace resource
 identifier (or *VRId*).`,
     "example#main_vpath_rules>0;Main VPath rules": abnf(
 `  vpath         = "@" vgrid-tail / verbs-tail
-  vgrid-tail    = vgrid "@" [ verbs-tail ]
-  verbs-tail     = verb "@" [ verbs-tail ]
+  vgrid-tail    = "$" vgrid "@" [ verbs-tail ]
+  verbs-tail    = verb "@" [ verbs-tail ]
   verb          = verb-type params
 `),
     "#1": `
@@ -194,7 +194,7 @@ Verb for selecting a subspace variant.`,
         "#0": `
 Verb representing the result of a computation.`,
         "example#example_verb_computation>0;Computation selector example": [
-`Triple pattern \`?s <urn:valos:!$valk:plus$number:10:@!:myVal> ?o\`
+`Triple pattern \`?s <urn:valos:!$valk:add$number:10:@!:myVal@> ?o\`
 matches like:
 `, turtle(`
   ?_:0  valos:scope ?s
@@ -245,8 +245,8 @@ A VRId is a vpath which has vgrid as its first production
 (via vgrid-tail).`,
     "example#main_vrid_rules>0;Main vrid rules": abnf(
 `  vpath         = "@" vgrid-tail / verbs-tail
-  vgrid-tail    = vgrid "@" [ verbs-tail ]
-  vgrid         = "$" format-term ":" param-value [ params ]
+  vgrid-tail    = "$" vgrid "@" [ verbs-tail ]
+  vgrid         = format-term ":" param-value [ params ]
 `),
     "#1": [`
 The VRId can be directly used as the NSS part of an 'urn:valos:'
@@ -275,7 +275,8 @@ The vgrid uniquely identifies a *global resource*. If a VRId contains
 a vgrid and no verbs this global resource is also the
 *referenced resource* of the VRId itself.`,
       "example#main_vgrid_rules>0;Main vgrid rules": abnf(
-`  vgrid         = "$" format-term ":" param-value [ params ]
+`  vgrid-tail    = "$" vgrid "@" [ verbs-tail ]
+  vgrid         = format-term ":" param-value [ params ]
   format-term   = "~" context-term
 
   params        = context-tail / value-tail
@@ -616,8 +617,8 @@ The list of definitive rules:
 `, abnf(
 `  vpath         = "@" vgrid-tail / verbs-tail
 
-  vgrid-tail    = vgrid "@" [ verbs-tail ]
-  vgrid         = "$" format-term ":" param-value [ params ]
+  vgrid-tail    = "$" vgrid "@" [ verbs-tail ]
+  vgrid         = format-term ":" param-value [ params ]
   format-term   = "~" context-term
 
   verbs-tail     = verb "@" [ verbs-tail ]
@@ -643,7 +644,7 @@ from other documents.
 
 The list of informative pseudo-rules:
 `, abnf(
-`  vrid            = "@" vgrid-tail
+`  vrid            = "@" "$" vgrid "@" [ verbs-tail ]
   verbs           = "@" verbs-tail
   vparam          = [ "$" [ context-term ] ] [ ":" param-value ]
   context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )

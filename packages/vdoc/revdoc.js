@@ -2,7 +2,7 @@
 
 const { extension: { ontology, extractee, emitters } } = require("@valos/vdoc");
 const {
-  extractee: { authors, ref, dfn, pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
+  extractee: { authors, ref, dfn, em, pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
   ontologyHeaders,
 } = require("@valos/revdoc");
 
@@ -367,22 +367,25 @@ meanings outside the document structure itself.`,
       "#0": [],
       "table#>0;prefixes": ontologyHeaders.prefixes,
     },
-    [`chapter#section_classes>2;<em>${prefix}:* a vdoc:Class</em> vocabulary`]: {
+    "chapter#section_classes>2": {
+      "dc:title": [em(prefix), ` `, ref("vdoc:Class", "@valos/vdoc#Class"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.classes,
         "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:Class", vocabulary),
       },
     },
-    [`chapter#section_properties>3;<em>${prefix}:* a vdoc:Property</em> vocabulary`]: {
+    "chapter#section_properties>3": {
+      "dc:title": [em(prefix), ` `, ref("vdoc:Property", "@valos/vdoc#Property"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.properties,
         "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:Property", vocabulary),
       },
     },
-    [`chapter#section_html_element_properties>3;<em>${
-        prefix}: a vdoc:HTMLElementProperty</em> vocabulary`]: {
+    "chapter#section_html_element_properties>4": {
+      "dc:title":
+          [em(prefix), ` `, ref("vdoc:HTMLElementProperty", "#HTMLElementProperty"), ` vocabulary`],
       "#0": [
 `Properties instanced from `, ref("vdoc:HTMLElementProperty", "#HTMLElementProperty"), `
 inherit HTML5 element semantics directly. Only those HTMl5 elements
@@ -402,7 +405,8 @@ with structural semantic meaning are exposed via VDoc core ontology.`,
         "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:HTMLElementProperty", vocabulary),
       },
     },
-    [`chapter#section_vocabulary_other>8;<em>${prefix}:*</em> other vocabulary`]: {
+    "chapter#section_vocabulary_other>8": {
+      "dc:title": [em(prefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.vocabularyOther,

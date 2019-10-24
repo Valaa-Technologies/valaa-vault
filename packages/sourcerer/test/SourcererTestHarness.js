@@ -26,7 +26,7 @@ import createValaaTransientScheme from "~/sourcerer/schemeModules/valaa-transien
 import * as ValoscriptDecoders from "~/script/mediaDecoders";
 import * as ToolsDecoders from "~/tools/mediaDecoders";
 
-import thenChainEagerly from "~/tools/thenChainEagerly";
+import { thenChainEagerly } from "~/tools/thenChainEagerly";
 import { getDatabaseAPI } from "~/tools/indexedDB/getInMemoryDatabaseAPI";
 import { openDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 import { dumpify, dumpObject, isPromise, wrapError } from "~/tools";

@@ -47,7 +47,7 @@ export const FabricEventTarget = require("./FabricEvent").FabricEventTarget;
 
 export const SimpleData = require("./SimpleData").default;
 
-export const thenChainEagerly = require("./thenChainEagerly").default;
+export const thenChainEagerly = require("./thenChainEagerly").thenChainEagerly;
 export const thisChainEagerly = require("./thenChainEagerly").thisChainEagerly;
 export const mapEagerly = require("./thenChainEagerly").mapEagerly;
 

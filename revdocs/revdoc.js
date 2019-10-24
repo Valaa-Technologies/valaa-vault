@@ -1,8 +1,9 @@
 
 const {
   extractee: {
-    authors, em, pkg,
+    authors, em, pkg, ref,
     filterKeysWithAnyOf, filterKeysWithAllOf, filterKeysWithNoneOf,
+    valosRaemFieldClasses,
   },
   ontologyHeaders,
 } = require("@valos/revdoc");
@@ -26,6 +27,7 @@ module.exports = {
   "revdoc:prefixIRI": prefixIRI,
   "revdoc:version": version,
   respecConfig: {
+    subtitle: version,
     specStatus: "unofficial",
     editors: authors("iridian"),
     authors: authors(),
@@ -66,36 +68,34 @@ and introductions of the other roles as well.`,
 `Valospace ontology provides vocabulary and definitions of the primary
 ValOS resources.`
     ],
-    [`chapter#section_prefixes>1;IRI prefixes`]: {
+    "chapter#section_prefixes>1": {
+      "dc:title": [em(prefix), ` IRI prefixes`],
       "#0": [],
       "table#>0;prefixes": ontologyHeaders.prefixes,
     },
-    [`chapter#section_types>2;<em>${prefix}:* a valos-raem:Type</em> vocabulary`]: {
+    "chapter#section_types>4": {
+      "dc:title": [em(prefix), ` `, ref("valos-raem:Type", "@valos/raem#Type"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.types,
         "vdoc:entries": filterKeysWithAnyOf("@type", "valos-raem:Type", vocabulary),
       },
     },
-    [`chapter#section_fields>3;<em>${prefix}:* a valos-raem:Field</em> vocabulary`]: {
+    "chapter#section_fields>5": {
+      "dc:title": [em(prefix), ` `, ref("valos-raem:Field", "@valos/raem#Field"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.fields,
-        "vdoc:entries": filterKeysWithAnyOf("@type", [
-          "valos-raem:Field",
-          "valos-raem:ExpressedField", "valos-raem:EventLoggedField", "valos-raem:CoupledField",
-          "valos-raem:GeneratedField", "valos-raem:TransientField", "valos-raem:AliasField",
-        ], vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", valosRaemFieldClasses, vocabulary),
       },
     },
-    [`chapter#section_vocabulary_other>8;<em>${prefix}:*</em> other vocabulary`]: {
+    "chapter#section_vocabulary_other>8": {
+      "dc:title": [em(prefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.vocabularyOther,
         "vdoc:entries": filterKeysWithNoneOf("@type", [
-          "valos-raem:Type", "valos-kernel:Property", "valos-raem:Field",
-          "valos-raem:ExpressedField", "valos-raem:EventLoggedField", "valos-raem:CoupledField",
-          "valos-raem:GeneratedField", "valos-raem:TransientField", "valos-raem:AliasField",
+          "valos-raem:Type", "valos-kernel:Property", ...valosRaemFieldClasses,
         ], vocabulary),
       },
     },

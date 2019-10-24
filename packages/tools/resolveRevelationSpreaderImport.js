@@ -1,9 +1,9 @@
-// @flow
+Object.defineProperty(exports, "__esModule", { value: true });
 
 const path = require("path");
-const inBrowser = require("~/gateway-api/inBrowser").default;
+const inBrowser = require("../gateway-api/inBrowser").default;
 
-export default function resolveRevelationSpreaderImport (reference, siteRoot,
+exports.default = function resolveRevelationSpreaderImport (reference, siteRoot,
   revelationRoot, domainRoot, currentRevelationPath
 ) {
   if ((reference[0] !== "<") || (reference[reference.length - 1] !== ">")) {

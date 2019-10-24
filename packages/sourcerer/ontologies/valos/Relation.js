@@ -52,14 +52,14 @@ but not as source or target.`,
     "rdfs:domain": "valos:Relation",
     "rdfs:range": "valos:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:coupledField": "valos:outgoingRelations",
+    "valos-raem:coupledField": "valos:outRelations",
     "rdfs:comment":
 `The source node of this relation.`,
   },
 
   // Note: 'outgoingRelations' has domain SourcerableNode but is listed
   // here due to its coupling with 'source'.
-  outgoingRelations: {
+  outRelations: {
     "@type": "valos-raem:CoupledField",
     "rdfs:subPropertyOf": "valos:nodes",
     "rdfs:domain": "valos:SourcerableNode",
@@ -77,14 +77,14 @@ source are completely separate concepts here).`,
     "rdfs:domain": "valos:Relation",
     "rdfs:range": "valos:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:coupledField": "valos:incomingRelations",
+    "valos-raem:coupledField": "valos:inRelations",
     "rdfs:comment":
 `The target node of this relation.`,
   },
 
   // Note: 'incomingRelations' has domain SourcerableNode but is listed
   // here due to its coupling with 'source'.
-  incomingRelations: {
+  inRelations: {
     "@type": "valos-raem:CoupledField",
     "rdfs:subPropertyOf": "valos:nodes",
     "rdfs:domain": "valos:SourcerableNode",
@@ -214,5 +214,32 @@ also contain relations which have this sourcered node as their the
 target (instead of source) or as neither source nor target.
 The set of just outgoing relations is 'outgoingRelations' and the set
 of owned outgoing relations is 'connectedOutRelations'.`,
+  },
+
+  outgoingRelations: {
+    "@type": "valos-raem:AliasField",
+    "revdoc:deprecatedInFavorOf": "valos:outRelations",
+    "valos-raem:aliasOf": "valos:outRelations",
+    "rdfs:subPropertyOf": "valos:outRelations",
+    "rdfs:domain": "valos:SourcerableNode",
+    "rdfs:range": "rdfs:List",
+    "valos-raem:coupledField": "valos:source",
+    "rdfs:comment":
+`The unordered list of outgoing relations with this sourcerable
+(but possibly absent) node as their source (note that sourcerable and
+source are completely separate concepts here).`,
+  },
+
+  incomingRelations: {
+    "@type": "valos-raem:AliasField",
+    "revdoc:deprecatedInFavorOf": "valos:inRelations",
+    "valos-raem:aliasOf": "valos:inRelations",
+    "rdfs:subPropertyOf": "valos:inRelations",
+    "rdfs:domain": "valos:SourcerableNode",
+    "rdfs:range": "rdfs:List",
+    "valos-raem:coupledField": "valos:target",
+    "rdfs:comment":
+`The unordered list of incoming relations with this sourcerable
+(but possibly absent) node as their target.`,
   },
 };

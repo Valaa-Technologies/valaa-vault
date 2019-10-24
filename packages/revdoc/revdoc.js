@@ -2,7 +2,7 @@
 
 const {
   extension: { ontology, extractee, emitters },
-  extractee: { authors, ref, /* dfn, */ pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
+  extractee: { authors, em, ref, /* dfn, */ pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
   ontologyHeaders,
 } = require("@valos/revdoc");
 
@@ -57,21 +57,24 @@ for emitting ReSpec html output documents.`
       "#0": [],
       "table#>0;prefixes": ontologyHeaders.prefixes,
     },
-    [`chapter#section_classes>2;<em>${prefix}:* a vdoc:Class</em> vocabulary`]: {
+    "chapter#section_classes>2": {
+      "dc:title": [em(prefix), ` `, ref("vdoc:Class", "@valos/vdoc#Class"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.classes,
         "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:Class", vocabulary),
       },
     },
-    [`chapter#section_properties>3;<em>${prefix}:* a vdoc:Property</em> vocabulary`]: {
+    "chapter#section_properties>3": {
+      "dc:title": [em(prefix), ` `, ref("vdoc:Property", "@valos/vdoc#Property"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.properties,
         "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:Property", vocabulary),
       },
     },
-    [`chapter#section_vocabulary_other>8;<em>${prefix}:</em> other vocabulary`]: {
+    "chapter#section_vocabulary_other>8": {
+      "dc:title": [em(prefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.vocabularyOther,

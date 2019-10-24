@@ -1,8 +1,12 @@
-// @flow
+Object.defineProperty(exports, "__esModule", { value: true });
 
-import { inBrowser, getGlobal, thenChainEagerly, wrapError } from "~/tools";
+const inBrowser = require("../gateway-api/inBrowser").default;
+const getGlobal = require("../gateway-api/getGlobal").default;
 
-export default function (opts) { return asyncRequest(opts); }
+const { thenChainEagerly } = require("./thenChainEagerly");
+const { wrapError } = require("./wrapError");
+
+exports.default = function request (opts) { return asyncRequest(opts); }
 
 const _cache = {};
 

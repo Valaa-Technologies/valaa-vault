@@ -1,7 +1,7 @@
 // @flow
 import { TextEncoder, TextDecoder } from "text-encoding";
 import { contentHashFromArrayBuffer } from "~/tools/id/contentId";
-import thenChainEagerly from "~/tools/thenChainEagerly";
+import { thenChainEagerly } from "~/tools/thenChainEagerly";
 
 // FIXME(iridian): This needs to be properly tested, especially on the surrogate pairs an aether
 // planes, so that UCS2String and UCS2Stream give identical results!

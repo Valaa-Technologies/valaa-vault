@@ -6,7 +6,7 @@ import Connection from "~/sourcerer/api/Connection";
 import { ChronicleRequest, ChronicleOptions, ChronicleEventResult, MediaInfo, NarrateOptions }
     from "~/sourcerer/api/types";
 
-import thenChainEagerly, { mapEagerly } from "~/tools/thenChainEagerly";
+import { thenChainEagerly, mapEagerly } from "~/tools/thenChainEagerly";
 import { debugObjectType, dumpObject } from "~/tools/wrapError";
 
 /**

@@ -32,8 +32,8 @@ export {
                                       vRef,
 } from "./VRL";
 export {
+                                      mintVPath,
                                       expandVPath,
-                                      coinVerb,
                                       validateVerb,
 } from "./VPath";
 export type {

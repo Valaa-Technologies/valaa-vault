@@ -1,8 +1,8 @@
 
 const {
   extractee: {
-    c, authors, pkg,
-    filterKeysWithAnyOf, filterKeysWithNoneOf,
+    c, authors, em, pkg, ref,
+    filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses,
   },
   ontologyHeaders,
 } = require("@valos/revdoc");
@@ -43,7 +43,8 @@ c("ValOS event streams"), `.`,
   "chapter#introduction>2": {
     "#0": [],
   },
-  [`chapter#ontology>8;<em>${prefix}:</em> library ${name} ontology`]: {
+  "chapter#ontology>8": {
+    "dc:title": [`library `, em(name), ` ontology, prefix `, em(prefix)],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
@@ -51,62 +52,67 @@ c("ValOS event streams"), `.`,
 `${name} ontology specifies the Valospace core types and
 properties directly to the @valos/kernel namespace. `,
     ],
-    [`chapter#section_prefixes>1;${name} IRI prefixes`]: {
+    "chapter#section_prefixes>1": {
+      "dc:title": [em(name), ` IRI prefixes`],
       "#0": [],
       "table#>0;prefixes": ontologyHeaders.prefixes,
     },
-    [`chapter#section_classes>2;<em>${prefix}:* a valos-kernel:Class</em> vocabulary`]: {
+    "chapter#section_classes>2": {
+      "dc:title":
+          [em(prefix), ` `, ref("valos-kernel:Class", "@valos/kernel#Class"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.classes,
         "vdoc:entries": filterKeysWithAnyOf("@type", "valos-kernel:Class", vocabulary),
       },
     },
-    [`chapter#section_properties>3;<em>${prefix}:* a valos-kernel:Property</em> vocabulary`]: {
+    "chapter#section_properties>3": {
+      "dc:title":
+          [em(prefix), ` `, ref("valos-kernel:Property", "@valos/kernel#Property"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.properties,
         "vdoc:entries": filterKeysWithAnyOf("@type", "valos-kernel:Property", vocabulary),
       },
     },
-    [`chapter#section_types>4;<em>${prefix}:* a valos-raem:Type</em> vocabulary`]: {
+    "chapter#section_types>4": {
+      "dc:title": [em(prefix), ` `, ref("valos-raem:Type", "@valos/raem#Type"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.types,
         "vdoc:entries": filterKeysWithAnyOf("@type", "valos-raem:Type", vocabulary),
       },
     },
-    [`chapter#section_fields>5;<em>${prefix}:* a valos-raem:Field</em> vocabulary`]: {
+    "chapter#section_fields>5": {
+      "dc:title": [em(prefix), ` `, ref("valos-raem:Field", "@valos/raem#Field"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.fields,
-        "vdoc:entries": filterKeysWithAnyOf("@type", [
-          "valos-raem:Field",
-          "valos-raem:ExpressedField", "valos-raem:EventLoggedField", "valos-raem:CoupledField",
-          "valos-raem:GeneratedField", "valos-raem:TransientField", "valos-raem:AliasField",
-        ], vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", valosRaemFieldClasses, vocabulary),
       },
     },
-    [`chapter#section_resolvers>6;<em>${prefix}:* a valos-raem:Resolver</em> vocabulary`]: {
+    "chapter#section_resolvers>6": {
+      "dc:title":
+          [em(prefix), ` `, ref("valos-raem:Resolver", "@valos/raem#Resolver"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.resolvers,
         "vdoc:entries": filterKeysWithAnyOf("@type", "valos-raem:Resolver", vocabulary),
       },
     },
-    [`chapter#section_vocabulary_other>8;<em>${prefix}:*</em> other vocabulary:`]: {
+    "chapter#section_vocabulary_other>8": {
+      "dc:title": [em(prefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.vocabularyOther,
         "vdoc:entries": filterKeysWithNoneOf("@type", [
           "valos-kernel:Class", "valos-kernel:Property",
-          "valos-raem:Type", "valos-raem:Field", "valos-raem:Resolver",
-          "valos-raem:ExpressedField", "valos-raem:EventLoggedField", "valos-raem:CoupledField",
-          "valos-raem:GeneratedField", "valos-raem:TransientField", "valos-raem:AliasField",
+          "valos-raem:Type", ...valosRaemFieldClasses, "valos-raem:Resolver",
         ], vocabulary),
       },
     },
-    [`chapter#section_context>9;<em>${prefix}:*</em> JSON-LD context term definitions`]: {
+    "chapter#section_context>9": {
+      "dc:title": [em(prefix), ` JSON-LD context term definitions`],
       "#0": [],
       "table#>0;context": ontologyHeaders.context,
     },

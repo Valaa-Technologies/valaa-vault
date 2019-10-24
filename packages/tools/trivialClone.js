@@ -1,4 +1,4 @@
-// @flow
+Object.defineProperty(exports, "__esModule", { value: true });
 
 /**
  * Performs a deep clone with a customizer using the trivial clone algorithm described below.
@@ -44,12 +44,11 @@
  * @param {Function} customizer
  * @returns
  */
-export default function trivialClone (value_: any, customizer: ?Function) {
+exports.default = function trivialClone (value_, customizer) {
   const existingClones = new Map();
   return _trivialClone(value_);
 
-  function _trivialClone (value: any, indexKeyOrSymbol?: any, object?: Object,
-      fieldDescriptor?: Object) {
+  function _trivialClone (value, indexKeyOrSymbol, object, fieldDescriptor) {
     let clone = existingClones.get(value);
     if (clone !== undefined) return clone;
     clone = customizer

@@ -1,5 +1,10 @@
 // @flow
 
+module.exports = {
+  isTildeStepName,
+  expandTildeVAKON,
+};
+
 // VALK Tilde expansion notation maintains asymmetric compatibility
 // with JSON pointers ( https://tools.ietf.org/html/rfc6901 ):
 // 1. valid JSON pointers are treated unchanged literals when evaluated
@@ -10,12 +15,12 @@
 // pointer values. This prevents accidental misuse: the leading VAKON
 // operation almost invariably has a semantic meaning that conflicts
 // with JSON pointer semantics.
-export function isTildeStepName (stepName: ?string) {
+function isTildeStepName (stepName: ?string) {
   return (typeof stepName === "string") && (stepName[0] === "~")
       && (stepName[1] !== "0") && (stepName[1] !== "1");
 }
 
-export function expandTildeVAKON (tildeStepName, vakon) {
+function expandTildeVAKON (tildeStepName, vakon) {
   const solidusSplit = tildeStepName.split("/");
   const expansion = (solidusSplit.length === 1)
       ? _tildeSemiColonExpand(tildeStepName)
@@ -48,7 +53,7 @@ const objectLookup = {
   "-src": "source",
   "-E": "owner", // "entities",
   "-M": "content", // "medias",
-}
+};
 
 export function vakonizeExpandedVPath (vp, containerType = "@", containerIndex = 0) {
   let expandedVPath = vp;
@@ -147,4 +152,3 @@ function _filterByFieldValue (fieldName, requiredValue) {
         ["§filter", ["§===", fieldName, ["§$", "requiredValue"]]],
       ];
 }
-

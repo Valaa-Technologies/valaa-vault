@@ -1,3 +1,5 @@
+Object.defineProperty(exports, "__esModule", { value: true });
+
 exports.default = function inBrowser () {
   return ((typeof global === "undefined")
           || Object.prototype.toString.call(global.process) !== "[object process]")

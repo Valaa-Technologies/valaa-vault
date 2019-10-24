@@ -1,8 +1,28 @@
 // @flow
 
-import { wrapError } from "~/tools";
+const { wrapError } = require("../tools/wrapError");
 
-export function mintVPath (...segments) {
+module.exports = {
+  mintVPath,
+  mintVGRId,
+  mintVerb,
+  mintParam,
+  mintParamValue,
+  expandVPath,
+  validateVPath,
+  validateVRId,
+  validateVerbs,
+  validateVGRId,
+  validateFormatTerm,
+  validateVerb,
+  validateVerbType,
+  validateVParam,
+  validateContextTerm,
+  validateContextTermNS,
+  validateParamValueText,
+};
+
+function mintVPath (...segments) {
   return `@${segments.map(_mintVPathSegment).join("@")}@`;
 }
 
@@ -33,20 +53,20 @@ function _mintVPathSegment (segment, index) {
   }
 }
 
-export function mintVGRId (formatTerm: string, paramElement: any,
-    ...params: (string | ["$", string, ?string])) {
+function mintVGRId (formatTerm, paramElement,
+    ...params /* : (string | ["$", string, ?string]) */) {
   validateFormatTerm(formatTerm);
   const paramValue = mintParamValue(paramElement);
   if (!paramValue) throw new Error(`Invalid vgrid: param-value missing`);
   return `$${formatTerm}:${paramValue}${params.map(mintParam).join("")}`;
 }
 
-export function mintVerb (verbType, ...params: (string | ["$", string, ?string])[]) {
+function mintVerb (verbType, ...params /* : (string | ["$", string, ?string])[] */) {
   validateVerbType(verbType);
   return `${verbType}${params.map(mintParam).join("")}`;
 }
 
-export function mintParam (paramElement: (string | ["$", string, ?string]), index, params) {
+function mintParam (paramElement /* : (string | ["$", string, ?string]) */, index, params) {
   let ret;
   if ((typeof paramElement === "string") || (paramElement[0] === "@")) {
     ret = `:${mintParamValue(paramElement)}`;
@@ -70,7 +90,7 @@ export function mintParam (paramElement: (string | ["$", string, ?string]), inde
   return ret;
 }
 
-export function mintParamValue (value) {
+function mintParamValue (value) {
   if ((value === undefined) || (value === "")) return value;
   if (typeof value === "string") return encodeURIComponent(value);
   if (value === null) throw new Error(`Invalid param-value null`);
@@ -81,7 +101,7 @@ export function mintParamValue (value) {
   return mintVPath(...value.slice(1));
 }
 
-export function validateVPath (element) {
+function validateVPath (element) {
   const isVRId = (typeof element === "string") ? (element[1] === "$")
       : Array.isArray(element) ? (element[1][0] === "$")
       : undefined;
@@ -93,7 +113,7 @@ export function validateVPath (element) {
       : validateVerbs(element);
 }
 
-export function validateVRId (element) {
+function validateVRId (element) {
   const [firstEntry, vgrid, ...verbs] = expandVPath(element);
   if (firstEntry !== "@") {
     throw new Error(`Invalid vrid: expected "@" as first entry`);
@@ -103,7 +123,7 @@ export function validateVRId (element) {
   return element;
 }
 
-export function validateVerbs (element) {
+function validateVerbs (element) {
   const [firstEntry, ...verbs] = expandVPath(element);
   if (firstEntry !== "@") {
     throw new Error(`Invalid verbs: expected "@" as first entry`);
@@ -112,7 +132,7 @@ export function validateVerbs (element) {
   return element;
 }
 
-export function validateVGRId (element) {
+function validateVGRId (element) {
   const [firstEntry, formatTerm, paramValue, ...params] = expandVPath(element);
   if (firstEntry !== "$") {
     throw new Error(`Invalid vgrid: expected "$" as first entry`);
@@ -123,18 +143,18 @@ export function validateVGRId (element) {
   return element;
 }
 
-export function validateFormatTerm (element) {
+function validateFormatTerm (element) {
   return validateContextTerm(element);
 }
 
-export function validateVerb (element) {
+function validateVerb (element) {
   const [verbType, ...params] = expandVPath(element);
   validateVerbType(verbType);
   params.forEach(validateVParam);
   return element;
 }
 
-export function validateVerbType (str) {
+function validateVerbType (str) {
   if (typeof str !== "string") throw new Error("Invalid verb-type: not a string");
   if (!str.match(/[a-zA-Z0-9\-_.~!*'()]+/)) {
     throw new Error(`Invalid verb-type: doesn't match rule${
@@ -143,7 +163,7 @@ export function validateVerbType (str) {
   return str;
 }
 
-export function validateVParam (element: any[]) {
+function validateVParam (element) {
   const expandedParam = (typeof element !== "string") ? element : expandVPath(element);
   const [firstEntry, contextTerm, paramValue] =
       (expandedParam.length === 1 || expandedParam[0] === "@")
@@ -172,7 +192,7 @@ export function validateVParam (element: any[]) {
   return element;
 }
 
-export function validateContextTerm (str) {
+function validateContextTerm (str) {
   if (typeof str !== "string") throw new Error("Invalid context-term: not a string");
   if (!str.match(/[a-zA-Z][a-zA-Z0-9\-_.]*/)) {
     throw new Error(`Invalid context-term: doesn't match rule${
@@ -181,7 +201,7 @@ export function validateContextTerm (str) {
   return str;
 }
 
-export function validateContextTermNS (str) {
+function validateContextTermNS (str) {
   if (typeof str !== "string") throw new Error("Invalid context-term-ns: not a string");
   if (!str.match(/[a-zA-Z]([a-zA-Z0-9\-_.]{0,30}[a-zA-Z0-9])?/)) {
     throw new Error(`Invalid context-term: doesn't match rule${
@@ -190,7 +210,7 @@ export function validateContextTermNS (str) {
   return str;
 }
 
-export function validateParamValueText (str) {
+function validateParamValueText (str) {
   if (typeof str !== "string") throw new Error("Invalid param-value: not a string");
   if (!str.match(/([a-zA-Z0-9\-_.~!*'()]|%[0-9a-fA-F]{2})+/)) {
     throw new Error(`invalid param-value: doesn't match rule${
@@ -236,7 +256,7 @@ export function validateParamValueText (str) {
  * @param {*} vpath
  * @returns
  */
-export function expandVPath (vpath) {
+function expandVPath (vpath) {
   if (Array.isArray(vpath) && (vpath[0] === "@" || vpath[0] === "$" || !vpath[0].match(/[$:]/))) {
     // already an expanded vpath element.
     // Only re-expand possibly flattened sub-elements.

@@ -1,14 +1,19 @@
-// @flow
+const path = require("path");
 
-import path from "path";
-import {
-  dumpObject, inProduction, isPromise, request, wrapError, inBrowser, trivialClone,
-} from "~/tools";
-import resolveRevelationSpreaderImport from "~/tools/resolveRevelationSpreaderImport";
 
-// Revelation is a JSON configuration file in which all "..." keys and
-// their *spreader* string values denote file import requests to other
-// revelation JSON files.
+const inBrowser = require("../gateway-api/inBrowser").default;
+
+const inProduction = require("../tools/inProduction").default;
+const request = require("../tools/request").default;
+const resolveRevelationSpreaderImport = require("../tools/resolveRevelationSpreaderImport").default;
+const trivialClone = require("../tools/trivialClone").default;
+const isPromise = require("../tools/isPromise").default;
+
+const { dumpObject, wrapError } = require("../tools/wrapError");
+
+// Revelation is a JSON configuration file in which all "!!!" keys and
+// their *spreader* string values denote require requests to other
+// revelation JSON files and packages.
 //
 // The primary purpose of the revelation system is to allow config
 // files to extract configuration parameters shared by several
@@ -156,24 +161,33 @@ import resolveRevelationSpreaderImport from "~/tools/resolveRevelationSpreaderIm
 // automatically wrapped inside an object, possibly also containing
 // encoding and other XHR response information.
 
-export type Revelation = any;
+// type Revelation = any;
 
-export const EntryTemplate = Symbol("EntryTemplate");
-export const Deprecated = Symbol("Deprecated revelation option");
+const EntryTemplate = Symbol("EntryTemplate");
+const Deprecated = Symbol("Deprecated revelation option");
 
-export function dictionaryOf (valueTemplate: any) {
+module.exports = {
+  EntryTemplate,
+  Deprecated,
+  dictionaryOf,
+  arrayOf,
+  deprecated,
+  combineRevelationsLazily,
+};
+
+function dictionaryOf (valueTemplate) {
   const ret = {};
   ret[EntryTemplate] = valueTemplate;
   return ret;
 }
 
-export function arrayOf (entryTemplate: any) {
+function arrayOf (entryTemplate) {
   const ret = [];
   ret[EntryTemplate] = entryTemplate;
   return ret;
 }
 
-export function deprecated (template: any, deprecationMessage: string) {
+function deprecated (template, deprecationMessage) {
   template[Deprecated] = deprecationMessage;
   return template;
 }
@@ -188,11 +202,11 @@ export function deprecated (template: any, deprecationMessage: string) {
  * @param {...any} extensionSets
  * @returns
  */
-export function combineRevelationsLazily (gateway: Object, ...revelations: any) {
+function combineRevelationsLazily (gateway, ...revelations) {
   return _keepCalling(_combineRevelationsLazily(gateway, ...revelations));
 }
 
-function _combineRevelationsLazily (gateway: Object, ...revelations: any) {
+function _combineRevelationsLazily (gateway, ...revelations) {
   return revelations.reduce(
       (template, update) => ((isPromise(template) || isPromise(update))
           ? _markLazy(async () =>
@@ -200,8 +214,7 @@ function _combineRevelationsLazily (gateway: Object, ...revelations: any) {
           : _combineRevelation(gateway, template, update)));
 }
 
-function _combineRevelation (gateway: Object, template: Object, update: Object,
-    validateeFieldName: ?string, updateName: ?string) {
+function _combineRevelation (gateway, template, update, validateeFieldName, updateName) {
   let currentKey;
   let ret;
   try {
@@ -298,7 +311,7 @@ function _combineRevelation (gateway: Object, template: Object, update: Object,
   } */
 }
 
-function _spreadAndCombineRevelation (gateway: Object, template: any, update: any, spreader: any) {
+function _spreadAndCombineRevelation (gateway, template, update, spreader) {
   const postUpdate = { ...update };
   delete postUpdate["..."];
   const spreadUpdate = (typeof spreader === "function")
@@ -313,7 +326,7 @@ function _pathOpFromSpreader (spreader) {
       : spreader;
 }
 
-function _callAndCombineRevelation (gateway: Object, template: any, update: any) {
+function _callAndCombineRevelation (gateway, template, update) {
   if (typeof template !== "function") {
     let updateCallResult;
     try {
@@ -344,7 +357,7 @@ function _callAndCombineRevelation (gateway: Object, template: any, update: any)
 }
 
 
-function _keepCalling (callMeMaybe: Function | any): any {
+function _keepCalling (callMeMaybe) {
   try {
     return _isLazy(callMeMaybe) ? _keepCalling(callMeMaybe())
         : isPromise(callMeMaybe) ? callMeMaybe.then(_keepCalling)
@@ -354,16 +367,16 @@ function _keepCalling (callMeMaybe: Function | any): any {
   }
 }
 
-function _markLazy (func: Function) {
+function _markLazy (func) {
   func._isLazy = true;
   return func;
 }
 
-function _isLazy (candidate: Function | any) {
+function _isLazy (candidate) {
   return (typeof candidate === "function") && candidate._isLazy;
 }
 
-function _setMaybeLazyProperty (target: any, key: any, value: any) {
+function _setMaybeLazyProperty (target, key, value) {
   if (!_isLazy(value)) {
     target[key] = value;
   } else {

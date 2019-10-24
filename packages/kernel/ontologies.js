@@ -1,7 +1,12 @@
 const { exportWorkshopAggregateOntologiesFromDocuments } = require("@valos/type-workshop");
+const { createRemovedFromOntology } = require("@valos/raem/tools/createRemovedFromOntology");
 
 module.exports = exportWorkshopAggregateOntologiesFromDocuments(
     require("./package").name, require("./documents"));
+
+Object.assign(module.exports,
+    createRemovedFromOntology("valos-removed-from", "https://valospace.org/removed-from#",
+        module.exports.valos));
 
 /*
 module.exports = {

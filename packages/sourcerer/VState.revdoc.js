@@ -57,6 +57,13 @@ when it is expanded as triples.
     "/-trg": { "@id": "$V:target", "@type": "@id" },
     "/-src": { "@id": "$V:source", "@type": "@id" },
 
+    "$V--": "https://valospace.org/removed-from#",
+    "/--.": { "@id": "$V--:properties", "@type": "@id" },
+    "/--.E": { "@id": "$V--:entities", "@type": "@id" },
+    "/--.M": { "@id": "$V--:medias", "@type": "@id" },
+    "/--*": { "@id": "$V--:relations", "@type": "@id" },
+    "/--_out*": { "@id": "$V--:pairedOutRelations", "@type": "@id" },
+    "/--_in*": { "@id": "$V--:pairedInRelations", "@type": "@id" },
 
     "$~u4": { "@id": "urn:valos:$~u4:", "@prefix": true },
     "$~pw": { "@id": "urn:valos:$~pw:", "@prefix": true },

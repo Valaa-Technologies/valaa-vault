@@ -5,7 +5,7 @@ exports.describe = "Select /docs generation tool for a vault workspace";
 exports.introduction =
 `This type-vault tool provides commands for (re)generating the /docs
 folder from document sources present in the local workspaces, notably
-all revdoc documents matching pattern '*.revdoc.js'.
+all revdoc documents matching glob '*.revdoc{,.test}.js'.
 Additionally this tool can be configured to regenerate all docs on
 (pre)release time.`;
 

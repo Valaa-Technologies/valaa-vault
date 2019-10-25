@@ -1,4 +1,6 @@
-const { extractee: { aggregate, c, cpath, em, ref, strong } } = require("@valos/vdoc");
+const { extractee: { aggregate, blockquote, c, cpath, em, ref, strong } } = require("@valos/vdoc");
+
+const { outputError } = require("@valos/tools/wrapError");
 
 module.exports = {
   /**
@@ -196,6 +198,43 @@ module.exports = {
   ],
 
   filterKeysWithFieldReduction,
+
+  prepareTestDoc (title) {
+    const tests = [];
+    return {
+      itExpects (named, operation, toSatisfy, result) {
+        tests.push([named, operation, toSatisfy, result]);
+        const body = operation.toString();
+        return {
+          "dc:title": named,
+          "#0": [
+            blockquote(body.slice(
+                Math.min(body.indexOf("{") !== -1 ? body.indexOf("{") : body.length,
+                    body.indexOf(">")) + 1,
+                Math.max(body.lastIndexOf("}"), body.length))),
+            toSatisfy,
+            blockquote(JSON.stringify(result, null, 2)),
+          ],
+        };
+      },
+      runTestDoc () {
+        if (typeof describe !== "undefined") {
+          describe(`testdoc: ${title}`, () => {
+            for (const [named, operation, toSatisfy, result] of tests) {
+              it(named, async () => {
+                try {
+                  expect(await operation())[toSatisfy](result);
+                } catch (error) {
+                  outputError(error, `Exception noted while running testdoc test ${named}`);
+                  throw error;
+                }
+              });
+            }
+          });
+        }
+      }
+    };
+  },
 };
 
 function filterKeysWithFieldReduction (entryFieldName, searchedValueOrValues, container,

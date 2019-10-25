@@ -30,11 +30,17 @@ exports.builder = (yargs) => yargs.options({
     type: "boolean", default: true,
     description: "Add introduction chapter with respec tutorial references"
   },
+  testdoc: {
+    type: "boolean",
+    description: "Create a testdoc document (with '-revdoc.test.js' suffix)",
+  }
 });
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const revdocName = !yargv.revdocName ? "revdoc.js" : `${yargv.revdocName}.revdoc.js`;
+  const revdocName = [
+    yargv.revdocName, "revdoc", yargv.testdoc && "test", "js",
+  ].filter(e => e).join(".");
   if (vlm.shell.test("-e", revdocName)) {
     throw new Error(`Cannot create revdoc '${revdocName}' which already exists`);
   }
@@ -45,7 +51,8 @@ exports.handler = async (yargv) => {
     editors: yargv.editors || [],
     authors: yargv.authors || [],
     packageConfig: { valos: {}, ...(vlm.getPackageConfig() || {}) },
-    chapters: yargv.tutorial ? _createTutorialIntroductionSource() : "",
+    chapters: yargv.tutorial ? _createTutorialIntroductionSource(yargv.testdoc) : "",
+    isTestDoc: yargv.testdoc,
   });
   if (!await vlm.inquireConfirm(
       `Confirm creation of revdoc source: ${vlm.theme.path(revdocName)}`)) {
@@ -57,14 +64,22 @@ exports.handler = async (yargv) => {
   return { revdocName, success: true };
 };
 
-function _createReVDocSource ({ title, shortName, editors, authors, packageConfig, chapters }) {
+function _createReVDocSource ({
+  title, shortName, editors, authors, packageConfig, chapters, isTestDoc,
+}) {
   return `
 const {
-  extractee: { c, authors, ref, context, cli, command, cpath, bulleted, pkg },
+  extractee: {
+    c, authors, ref, context, cli, command, cpath, bulleted, pkg,${!isTestDoc ? "" : `
+    prepareTestDoc,`}
+  },
 } = require("@valos/revdoc");
 
+const title = "${title || ""}";${!isTestDoc ? "" : `
+const { itExpects, runTestDoc } = prepareTestDoc(title);
+`}
 module.exports = {
-  "dc:title": "${title || ""}",
+  "dc:title": title,
   respecConfig: {
     specStatus: "unofficial",
     editors: authors(${editors.map(editorName => `"${editorName}"`).join(", ")}),
@@ -84,11 +99,14 @@ write-revdoc.\`,
 \\\`${packageConfig.description}\\\`.\`,
     ],
   },
-${chapters}};
+${chapters
+}};${!isTestDoc ? "" : `
+
+runTestDoc();`}
 `;
 }
 
-function _createTutorialIntroductionSource () {
+function _createTutorialIntroductionSource (isTestDoc) {
 return `  "chapter#introduction>2": {
     "#0": [
 \`Edit me - this is the first payload chapter. Abstract and SOTD are
@@ -101,6 +119,11 @@ instructions on how to write revdoc source documents.
 See also \`, ref("ReVdoc specification", "@valos/revdoc"), \` and \`,
 ref("VDoc specification", "@valos/vdoc"), \` for reference documentation.\`,
     ],
-  },
+  ${!isTestDoc ? "" :
+  `  "example#1": itExpects("trivial testdoc test",
+        () => ({ value: 10 }),
+        "toEqual",
+        { value: 10 }),
+  `}},
 `;
 }

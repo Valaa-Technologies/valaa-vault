@@ -23,7 +23,7 @@ exports.builder = (yargs) => yargs.options({
   },
   revdocs: {
     default: true,
-    description: "Generate revdocs from all vault **/*revdoc.js files",
+    description: "Generate revdocs from all vault **/*revdoc*.js files",
   },
   stylesheets: {
     type: "string", array: true,
@@ -32,13 +32,16 @@ exports.builder = (yargs) => yargs.options({
   },
   vdocld: {
     default: true,
-    description: "Generate vdocld documents from all vault **/*revdoc.js files",
+    description: "Generate vdocld documents from all vault **/*revdoc*.js files",
   },
   "listing-target": {
     type: "string", default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "listingTarget"),
     description: "Target path for document listing",
   },
 });
+
+const revdocRegex =
+    /^(revdocs|packages\/|opspaces\/|workers\/)([^/]*)\/(.*\/)?(([^/]*)\.)?revdoc(.test)?\.js/;
 
 exports.handler = async (yargv) => {
   const convert = require("xml-js");
@@ -84,11 +87,10 @@ exports.handler = async (yargv) => {
 
   if (yargv.revdocs) {
     const packageRevdocPaths = [...(vlm.shell.find("-l",
-        "{revdocs,packages,opspaces,workers}/**/{*.,}revdoc.js") || [])];
+        "{revdocs,packages,opspaces,workers}/**/{,*.}revdoc{,.test}.js") || [])];
     for (const revdocPath of packageRevdocPaths) {
       try {
-        const [, workspaceBase, workspaceName, docDir,, docName] = revdocPath.match(
-            /^(revdocs|packages\/|opspaces\/|workers\/)([^/]*)\/(.*\/)?(([^/]*)\.)?revdoc\.js/);
+        const [, workspaceBase, workspaceName, docDir,, docName] = revdocPath.match(revdocRegex);
         if (namePattern && !revdocPath.includes(namePattern)) continue;
         let targetDocName = docName;
         const targetWorkspaceBase = (workspaceBase !== "packages/" && workspaceBase !== "revdocs")

@@ -3,7 +3,7 @@
     "version": "0.31.0",
     "runtime": "inspire@0.31.0.js",
     "authorityConfigs": {
-      "...": "authorityConfigs.json"
+      "!!!": "./authorityConfigs.json"
     },
     "verbosity": 1,
     "scribe": { "verbosity": 0 }
@@ -11,16 +11,16 @@
   "prologue": {
     "rootPartitionURI": "valaa-local:?id=f3d306d9-79ac-4087-afbc-46f739226eb2",
     "partitionInfos": {
-      "...": "<partitions/partitionInfos.json>"
+      "!!!": "<partitions/partitionInfos.json>"
     },
     "bvobInfos": {
-      "...": "/revelations/perspire-test/partitions/bvobInfos.json"
+      "!!!": "/revelations/perspire-test/partitions/bvobInfos.json"
     },
     "bvobBuffers": {
-      "...": "./../perspire-test/partitions/bvobBuffers.json"
+      "!!!": "./../perspire-test/partitions/bvobBuffers.json"
     },
     "authorityConfigs": {
-      "...": "authorityConfigs.json"
+      "!!!": "./authorityConfigs.json"
     }
   }
 }

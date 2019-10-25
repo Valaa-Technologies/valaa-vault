@@ -7,7 +7,7 @@ import { request } from "~/tools";
 
 export default {
   vRef,
-  asyncRequest: request,
+  asyncFetch: request,
   /*
   setField: VALEK.setField(VALEK.fromScope("$1"), VALEK.fromScope("$2")),
   addToField: VALEK.addToField(VALEK.fromScope("$1"), VALEK.fromScope("$2")),

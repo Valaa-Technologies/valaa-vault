@@ -6,11 +6,11 @@ const getGlobal = require("../gateway-api/getGlobal").default;
 const { thenChainEagerly } = require("./thenChainEagerly");
 const { wrapError } = require("./wrapError");
 
-exports.default = function request (opts) { return asyncRequest(opts); }
+exports.default = function fetch (opts) { return asyncFetch(opts); };
 
 const _cache = {};
 
-function asyncRequest ({ input, fetch: fetchOpts }) {
+function asyncFetch ({ input, fetch: fetchOpts }) {
   return _cache[input] || (_cache[input] = thenChainEagerly({ fetch: { ...(fetchOpts || {}) } }, [
     state => {
       const fetch = getGlobal().fetch;

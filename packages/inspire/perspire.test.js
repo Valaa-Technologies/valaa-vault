@@ -19,7 +19,7 @@ describe("testing perspire", () => {
         isTest: true,
         siteRoot: process.cwd(),
         revelationRoot,
-        revelations: [{ "...": "revela.json", gateway: { verbosity: 0 } }],
+        revelations: [{ "!!!": "./revela.json", gateway: { verbosity: 0 } }],
       });
       await server.initialize();
       await server.createMainView();

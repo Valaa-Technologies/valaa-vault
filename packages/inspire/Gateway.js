@@ -36,6 +36,7 @@ import { setGlobalLogger } from "~/tools/wrapError";
 import getGlobal from "~/gateway-api/getGlobal";
 import { byteArrayFromBase64 } from "~/gateway-api/base64";
 
+const fetch = require("@valos/tools/request").default;
 const patchWith = require("@valos/tools/patchWith").default;
 
 const { AuthorityNexus, FalseProphet, Oracle, Sourcerer, Scribe } = valosSourcerer;
@@ -132,6 +133,8 @@ export default class Gateway extends FabricEventTarget {
     }
     return ret;
   }
+
+  fetch (...rest) { return fetch(...rest); }
 
   async initialize (revelation: Revelation) {
     try {

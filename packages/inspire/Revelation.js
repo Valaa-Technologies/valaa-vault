@@ -1,10 +1,10 @@
 const path = require("path");
 
+const { expandVPath, bindExpandedVPath } = require("../raem/VPath");
 
 const inBrowser = require("../gateway-api/inBrowser").default;
 
 const inProduction = require("../tools/inProduction").default;
-const request = require("../tools/request").default;
 const resolveRevelationSpreaderImport = require("../tools/resolveRevelationSpreaderImport").default;
 const trivialClone = require("../tools/trivialClone").default;
 const isPromise = require("../tools/isPromise").default;
@@ -139,13 +139,13 @@ const { dumpObject, wrapError } = require("../tools/wrapError");
 // {
 //   "somebobcontenthash": { "base64": "v0987c1r1bxa876a8s723f21=" },
 //   "otherbvobcontenthash": { "base64": "b7b98q09au2322h3f2j3hf==" },
-//   "contenthash3": { "...": "relative/to/thisFile" },
-//   "contenthash4": { "...": "./relative/to/thisFile/also" },
-//   "contenthash5": { "...": "/relative/to/siteRoot" },
-//   "contenthash8": { "...": "<http://global.url.com/to/buffer52>" },
-//   "contenthash9": { "...": "<relative/to/revelationRoot>" },
-//   "contenthash10": { "...": "<./relative/to/revelationRoot/also>" },
-//   "contenthash11": { "...": "</relative/to/domainRoot>" } },
+//   "contenthash3": { "!!!": "package-name/require" },
+//   "contenthash4": { "!!!": "./relative/to/thisFile/also" },
+//   "contenthash5": { "!!!": "/relative/to/siteRoot" },
+//   "contenthash8": { "!!!": "<http://global.url.com/to/buffer52>" },
+//   "contenthash9": { "!!!": "<relative/to/revelationRoot>" },
+//   "contenthash10": { "!!!": "<./relative/to/revelationRoot/also>" },
+//   "contenthash11": { "!!!": "</relative/to/domainRoot>" } },
 // }
 // ```
 // And the corresponding buffer template in revelation.template.js:
@@ -236,7 +236,7 @@ function _combineRevelation (gateway, template, update, validateeFieldName, upda
     }
 
     const spreader = (update != null) && (typeof update === "object")
-        && update.hasOwnProperty("...") && update["..."];
+        && update.hasOwnProperty("!!!") && update["!!!"];
     if (spreader) {
       return (ret = _spreadAndCombineRevelation(gateway, template, update, spreader));
     }
@@ -313,17 +313,51 @@ function _combineRevelation (gateway, template, update, validateeFieldName, upda
 
 function _spreadAndCombineRevelation (gateway, template, update, spreader) {
   const postUpdate = { ...update };
-  delete postUpdate["..."];
+  delete postUpdate["!!!"];
   const spreadUpdate = (typeof spreader === "function")
       ? spreader
       : _valk(gateway, null, _pathOpFromSpreader(spreader));
   return _markLazy(() => _combineRevelationsLazily(gateway, template, spreadUpdate, postUpdate));
 }
 
+const revelationContext = {
+  revela: {
+    stepsFor: {
+      import: ["§import"],
+    },
+  },
+  valk: {
+    stepsFor: {
+      invoke: ["§invoke"],
+    },
+  },
+  V: {
+    steps: ["§."],
+  },
+};
+
 function _pathOpFromSpreader (spreader) {
-  return !Array.isArray(spreader) ? ["§get", spreader]
-      : (typeof spreader[0] !== "string") || (spreader[0][0] !== "§") ? ["§get", ...spreader]
-      : spreader;
+  const vpath = expandVPath(_vpathFromSpreader(spreader));
+  return bindExpandedVPath(vpath, revelationContext);
+  function _vpathFromSpreader (entry, isInnerOp) {
+    if ((typeof entry === "string") || (typeof entry === "number")) {
+      return [!isInnerOp ? "!$revela:import" : ".", entry];
+    }
+    if (Array.isArray(entry)) {
+      if ((typeof entry[0] === "string") && entry[0].match(/^[^a-zA-Z]*(:.*|\$.*|)$/)) return entry;
+      return [
+        isInnerOp ? "*" : "@",
+        ...entry.map((e, i) => _vpathFromSpreader(e, (isInnerOp !== undefined) || i)),
+      ];
+    }
+    if (typeof entry === "object") {
+      return Object.entries(entry).reduce((a, [k, v]) => {
+        a[k] = _vpathFromSpreader(v, true);
+        return a;
+      }, {});
+    }
+    return entry;
+  }
 }
 
 function _callAndCombineRevelation (gateway, template, update) {
@@ -402,65 +436,80 @@ function _setMaybeLazyProperty (target, key, value) {
 function _valk (gateway, head, step) {
   const delayed = _delayIfAnyPromise(head, head_ => _valk(gateway, head_, step))
       || _delayIfAnyPromise(step, step_ => this._valk(gateway, head, step_));
-  if (delayed !== undefined) return delayed;
-  if ((step === null) || (step === undefined)) return head;
-  if ((typeof step === "string") || (typeof step === "number")) return head[step];
-  if (!Array.isArray(step)) {
-    const ret = {};
-    const keys = Object.keys(step);
-    const values = keys.map(key => (ret[key] = _valk(gateway, head, step[key])));
-    return _delayIfAnyPromise(values, resolved => {
-      keys.forEach((key, index) => { ret[key] = resolved[index]; });
-      return ret;
-    }) || ret;
-  }
-  if ((typeof step[0] !== "string") || (step[0][0] !== "§")) {
-    const ret = step.map(substep => _valk(gateway, head, substep));
-    return _delayIfAnyPromise(ret, resolved => resolved) || ret;
-  }
-  const opId = step[0];
-  if (opId === "§'") return step[1];
-  if (opId === "§->") return step.slice(1).reduce(_valk.bind(null, gateway), head);
-  /*
-  // Spreader stuff, currently untested.
-  if (opId === "§merge") {
-    const valked = step.slice(1).map(e => _valk(gateway, head, e));
-    return valked.reduce((nextHead, subStep) => _combineRevelation(gateway, nextHead, subStep)),
-        head === undefined ? null : head);
-  }
-  */
-  if (opId !== "§get") throw new Error(`Unrecognized revelation op '${opId}'`);
-
-  const getOptions = step[1];
-
-  const isObjectRequest = (typeof getOptions !== "string");
-  let resourceLocation = !isObjectRequest ? getOptions
-      : (getOptions.url || getOptions.input || getOptions.path);
-  const spreadOptions = getOptions.spread || {};
   try {
-    if (!getOptions.url) {
-      resourceLocation = resolveRevelationSpreaderImport(resourceLocation,
+    if (delayed !== undefined) return delayed;
+    if ((step === null) || (step === undefined)) return head;
+    if ((typeof step === "string") || (typeof step === "number")) return head[step];
+    if (!Array.isArray(step)) {
+      const ret = {};
+      const keys = Object.keys(step);
+      const values = keys.map(key => (ret[key] = _valk(gateway, head, step[key])));
+      return _delayIfAnyPromise(values, resolved => {
+        keys.forEach((key, index) => { ret[key] = resolved[index]; });
+        return ret;
+      }) || ret;
+    }
+    if ((typeof step[0] !== "string") || (step[0][0] !== "§")) {
+      const ret = step.map(substep => _valk(gateway, head, substep));
+      return _delayIfAnyPromise(ret, resolved => resolved) || ret;
+    }
+    const opId = step[0];
+    if (opId === "§'") return step[1];
+    if (opId === "§..") return head[step[1]];
+    if (opId === "§->") return step.slice(1).reduce(_valk.bind(null, gateway), head);
+    if (opId === "§[]") {
+      const ret = step.slice(1).map(_valk.bind(null, gateway, head));
+      return ret;
+    }
+    if (opId === "§import") return _require(gateway, step);
+    /*
+    // Spreader stuff, currently untested.
+    if (opId === "§merge") {
+      const valked = step.slice(1).map(e => _valk(gateway, head, e));
+      return valked.reduce((nextHead, subStep) => _combineRevelation(gateway, nextHead, subStep)),
+          head === undefined ? null : head);
+    }
+    */
+    throw new Error(`Unrecognized revelation op '${opId}'`);
+  } catch (error) {
+    throw wrapError(error, new Error("_valk"),
+      "\n\thead:", ...dumpObject(head),
+      "\n\tstep:", ...dumpObject(step));
+  }
+}
+
+function _require (gateway, step) {
+  let location = step[1];
+  let options = step[2] || {};
+  let pathOp = step.slice(3);
+  if (typeof step[1] === "object") {
+    options = step[1];
+    location = options.url || options.input || options.path;
+    pathOp = step.slice(2);
+  }
+  const spreadOptions = options.spread || {};
+  try {
+    if (!options.url) {
+      location = resolveRevelationSpreaderImport(location,
           gateway.siteRoot, gateway.revelationRoot, gateway.domainRoot,
           gateway.currentRevelationPath);
     }
-    if (inBrowser() || getOptions.fetch) {
-      return _markLazy(async () => _postProcessGetContent(
-          gateway, spreadOptions.final, resourceLocation,
-          await request({
-            input: resourceLocation,
-            fetch: getOptions.fetch || {},
+    if (inBrowser() || options.fetch || location.match(/^[^/]*:/)) {
+      return _markLazy(async () => _postProcessGetContent(gateway, spreadOptions.final, location,
+          await gateway.fetch({
+            input: location,
+            fetch: options.fetch || {},
           }),
-          step.slice(2),
+          pathOp,
       ));
     }
-    return _postProcessGetContent(
-        gateway, spreadOptions.final, resourceLocation,
-        gateway.require(resourceLocation),
-        step.slice(2),
+    return _postProcessGetContent(gateway, spreadOptions.final, location,
+        gateway.require(location),
+        pathOp,
     );
   } catch (error) {
     throw gateway.wrapErrorEvent(error,
-        `_tryExpandExtension('${resourceLocation}')`,
+        `_require('${location}')`,
         "\n\tgateway.siteRoot:", gateway.siteRoot,
         "\n\tgateway.revelationRoot:", gateway.revelationRoot,
         "\n\tgateway.currentRevelationPath:", gateway.currentRevelationPath,
@@ -469,10 +518,11 @@ function _valk (gateway, head, step) {
 }
 
 function _delayIfAnyPromise (promiseCandidate, operation) {
-  const delay = isPromise(promiseCandidate)
-          ? promiseCandidate
-      : Array.isArray(promiseCandidate) && promiseCandidate.find(isPromise)
-          ? Promise.all(promiseCandidate)
+  const eager = _isLazy(promiseCandidate) ? promiseCandidate() : promiseCandidate;
+  const delay = isPromise(eager)
+          ? eager
+      : Array.isArray(eager) && eager.find(isPromise)
+          ? Promise.all(eager)
       : undefined;
   if (delay === undefined) return delay;
   return delay.then(operation);
@@ -482,7 +532,7 @@ function _postProcessGetContent (gateway, isFinal, resourceLocation, content_, p
   let content = content_;
   if (!isFinal) {
     content = trivialClone(content, (value, key) => {
-      if (key !== "...") return undefined;
+      if (key !== "!!!") return undefined;
       if (isPromise(value)) return value;
       return _markLazy(() => _valk(
           Object.assign(Object.create(gateway), {

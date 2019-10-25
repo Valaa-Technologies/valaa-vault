@@ -1,6 +1,6 @@
 // @flow
 
-const { wrapError } = require("../tools/wrapError");
+const { dumpObject, wrapError } = require("../tools/wrapError");
 
 module.exports = {
   mintVPath,
@@ -20,6 +20,7 @@ module.exports = {
   validateContextTerm,
   validateContextTermNS,
   validateParamValueText,
+  bindExpandedVPath,
 };
 
 function mintVPath (...segments) {
@@ -166,30 +167,36 @@ function validateVerbType (str) {
 function validateVParam (element) {
   const expandedParam = (typeof element !== "string") ? element : expandVPath(element);
   const [firstEntry, contextTerm, paramValue] =
-      (expandedParam.length === 1 || expandedParam[0] === "@")
+      ((expandedParam.length === 1) || (expandedParam[0] !== "$"))
           ? ["$", "", expandedParam[0]]
           : expandedParam;
-  if (firstEntry !== "$") {
-    throw new Error(`Invalid vparam: expected "$" as first entry`);
-  }
-  if (contextTerm !== undefined) {
-    if (typeof contextTerm !== "string") {
-      throw new Error(`Invalid vparam: context-term must be undefined or a string`);
+  try {
+    if (contextTerm !== undefined) {
+      if (typeof contextTerm !== "string") {
+        throw new Error(`Invalid vparam: context-term must be undefined or a string`);
+      }
+      if (contextTerm !== "") validateContextTerm(contextTerm);
     }
-    if (contextTerm !== "") validateContextTerm(contextTerm);
-  }
-  if (paramValue !== undefined) {
-    if (typeof paramValue === "string") {
-      if (paramValue[0] === "@") validateVPath(paramValue);
-      else validateParamValueText(paramValue);
-    } else if (Array.isArray(paramValue)) {
-      validateVPath(paramValue);
-    } else {
-      throw new Error(`Invalid vparam:${
-        ""} param-value must be undefined, string or an array containing an expanded vpath`);
+    if (paramValue !== undefined) {
+      if (typeof paramValue === "string") {
+        if (paramValue[0] === "@") validateVPath(paramValue);
+        else validateParamValueText(paramValue);
+      } else if (Array.isArray(paramValue)) {
+        validateVPath(paramValue);
+      } else {
+        throw new Error(`Invalid vparam:${
+          ""} param-value must be undefined, string or an array containing an expanded vpath`);
+      }
     }
+    return element;
+  } catch (error) {
+    throw wrapError(error, new Error("During validateVParam()"),
+        "\n\telement:", ...dumpObject(element),
+        "\n\tfirstEntry:", ...dumpObject(firstEntry),
+        "\n\tcontextTerm:", ...dumpObject(contextTerm),
+        "\n\tparamValue:", ...dumpObject(paramValue),
+    );
   }
-  return element;
 }
 
 function validateContextTerm (str) {
@@ -263,16 +270,16 @@ function expandVPath (vpath) {
     return vpath.map(e => ((typeof e === "string") ? e : expandVPath(e)));
   }
   const vpathArray = [];
-  for (const part of Array.isArray(vpath) ? vpath : [vpath]) {
+  (Array.isArray(vpath) ? vpath : [vpath]).forEach((part, index) => {
     if (Array.isArray(part)) {
       vpathArray.push(expandVPath(part));
-    } else if (typeof part === "string"
+    } else if (!index && (typeof part === "string")
         && (part !== "") && (part !== "@") && (part !== "$") && (part !== ":")) {
       vpathArray.push(...part.split(/(@|\$|:)/).filter(e => e !== ""));
     } else {
       vpathArray.push(part);
     }
-  }
+  });
   return _nestAll(vpathArray);
 }
 
@@ -353,9 +360,12 @@ function _nestSegment (segment, initial = 1) {
       if (typeof verbValue === "string") {
         validateParamValueText(verbValue);
         nested[2] = decodeURIComponent(verbValue);
-      } else if (verbValue != null && (!Array.isArray(verbValue) || (verbValue[0] !== "@"))) {
-        throw new Error(`Invalid expanded param-value:${
-          ""} must be a vpath element array (ie. must have "@" as first entry)`);
+      } else if (verbValue != null) {
+        if (Array.isArray(verbValue)) {
+          if (verbValue[0] !== "@") {
+            validateVerbType(verbValue[0]);
+          }
+        }
       }
       if (nested[1] !== "") {
         validateContextTerm(nested[1]);
@@ -369,4 +379,153 @@ function _nestSegment (segment, initial = 1) {
         "\n\tnested:", nested,
         "\n\tsegment:", segment);
   }
+}
+
+
+const fieldLookup = {
+  "*": "relations",
+  "_out*": "relations",
+  "_in*": "incomingRelations",
+  ".E": "unnamedOwnlings", // "entities",
+  ".M": "unnamedOwnlings", // "medias",
+};
+
+const objectLookup = {
+  "-": "value",
+  "-trg": "target",
+  "-src": "source",
+  "-E": "owner", // "entities",
+  "-M": "content", // "medias",
+};
+
+function bindExpandedVPath (vp, contextLookup = {}, containerType = "@", containerIndex = 0) {
+  let expandedVPath = vp;
+  if (containerType === "@") {
+    if (!Array.isArray(vp)) return vp;
+  } else if (!Array.isArray(vp) || (vp[0] === "@")) {
+    expandedVPath = ["$", "", vp];
+  }
+  let type = expandedVPath[0];
+  let i = 1;
+  switch (type) {
+  case "@":
+    if (expandedVPath.length === 2) {
+      return bindExpandedVPath(expandedVPath[1], contextLookup, "@", 1);
+    }
+    expandedVPath[0] = "§->";
+    break;
+  case "":
+  case ":":
+    throw new Error(`Invalid expanded VPath head: ":" and "" can't appear as first entries`);
+  case "$": { // eslint-disable-line no-fallthrough
+    let value = bindExpandedVPath(expandedVPath[2], contextLookup);
+    let contextValue;
+    if (expandedVPath[1]) {
+      const context = contextLookup[expandedVPath[1]];
+      if (context) {
+        if (contextValue == null) contextValue = (context.symbolFor || {})[value];
+        if (contextValue == null) contextValue = (context.stepsFor || {})[value];
+        if ((contextValue == null) && context.steps) contextValue = [...context.steps, value];
+        if (!contextValue) {
+          throw new Error(`Term operation '${value}' ${
+              contextValue === false ? "disabled" : "not found"} in the non-trivial context '${
+              expandedVPath[1]}'`);
+        }
+        if (Array.isArray(contextValue)) return contextValue;
+        value = contextValue;
+        contextValue = null;
+      } else {
+        expandedVPath[0] = "§:";
+        expandedVPath[2] = value;
+        value = expandedVPath;
+      }
+    }
+    switch (containerType) {
+    case "@":
+      // vgrid
+      return ["§ref", value];
+    case "!0": // first entry of a trivial resource valk
+      return ["§$", value];
+    case ".":
+      return ["§..", value]; // valospace native property
+    case ":":
+    default: // eslint-disable-line no-fallthrough
+      return value;
+    }
+  }
+  case "~":
+    // ref("@valos/raem/VPath#section_structured_subspace_selector")
+    throw new Error("subspace selector not implemented");
+  case ".":
+    // ref("@valos/raem/VPath#section_structured_scope_property")
+    if (expandedVPath.length <= 2) {
+      return bindExpandedVPath(expandedVPath[1], contextLookup, ".", 1);
+    }
+    expandedVPath[0] = "§->";
+    break;
+  case "*":
+    expandedVPath[0] = "§[]";
+    break;
+  case "_in*":
+  case "_out*":
+    // ref("@valos/raem/VPath#section_structured_relation")
+  case ".M": // eslint-disable-line no-fallthrough
+    // ref("@valos/raem/VPath#section_structured_media")
+  case ".E": { // eslint-disable-line no-fallthrough
+    // ref("@valos/raem/VPath#section_structured_entity")
+    const field = fieldLookup[type];
+    if (expandedVPath.length > 2) {
+      throw new Error(`multi-param '${field}' selectors not allowed`);
+    }
+    return ["§->", field,
+      ..._filterByFieldValue("name",
+          bindExpandedVPath(expandedVPath[1], contextLookup, type, 1)),
+    ];
+  }
+  case "-":
+  case "-trg":
+  case "-src":
+  case "-E":
+  case "-M": {
+    const object = objectLookup[type];
+    // ref("@valos/raem/VPath#section_structured_object_value")
+    return [
+      "§->",
+      ..._filterByFieldValue(object, bindExpandedVPath(expandedVPath[1], contextLookup)),
+    ];
+  }
+  case "!": {
+    const first = bindExpandedVPath(expandedVPath[1], contextLookup, "!0", 1);
+    if (expandedVPath.length === 2) return first;
+    if (first[0] === "§$") {
+      expandedVPath[0] = "§->";
+      expandedVPath[1] = first;
+      type = ".";
+      i = 2;
+    } else {
+      expandedVPath.splice(0, 2, ...first);
+      i = first.length;
+    }
+    break;
+  }
+  default:
+    if (type[0] === "!") expandedVPath[0] = `§${type.slice(1)}`;
+    else throw new Error(`unrecognized verb type: ${JSON.stringify(type)}`);
+    break;
+  }
+  for (; i !== expandedVPath.length; ++i) {
+    expandedVPath[i] = bindExpandedVPath(expandedVPath[i], contextLookup, type, i);
+  }
+  return expandedVPath;
+}
+
+function _filterByFieldValue (fieldName, requiredValue) {
+  return (typeof requiredValue !== "object")
+      ? [
+        ["§filter", ["§===", fieldName, requiredValue]]
+      ]
+      : [
+        ["§$<-", "requiredValue", requiredValue],
+        ["§filter", ["§===", fieldName, ["§$", "requiredValue"]]],
+      ];
 }

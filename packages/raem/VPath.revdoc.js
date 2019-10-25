@@ -190,9 +190,22 @@ Verb for selecting a subspace variant.`,
 `),
         ],
       },
-      "chapter#section_verb_computation>6;verb type \"`!`\": computation selector": {
-        "#0": `
-Verb representing the result of a computation.`,
+      "chapter#section_verb_computation>6;verb type \"`!`\": eager evaluator": {
+        "#0": [`
+Verb representing the result of an eager evaluation. When a VPath is
+bound to a `, em("context"), ` all nested eager evaluators selectors
+are resolved depth first, left to right. The resolution of a selector
+first evaluates the evaluator operation using the head and term lookups
+of the original context and then replaces the selector with the result
+of the evaluation.
+
+The first parameter defines the evaluation operation. If this parameter
+has a trivial context-term (ie. no context-term or is a simple prefix
+term in the context term definition) then the operation is a path
+operation.
+
+If the context-term is non-trivial then the context must
+have a definition for the operation.`],
         "example#example_verb_computation>0;Computation selector example": [
 `Triple pattern \`?s <urn:valos:!$valk:add$number:10:@!:myVal@> ?o\`
 matches like:

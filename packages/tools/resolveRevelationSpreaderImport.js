@@ -16,7 +16,7 @@ exports.default = function resolveRevelationSpreaderImport (reference, siteRoot,
     if (inBrowser()) return uri;
     return path.join(domainRoot || siteRoot, uri.slice(1));
   }
-  if (uri.match(/$[^/]*:/)) return uri; // absolute-ref uri: global reference
+  if (uri.match(/^[^/]*:/)) return uri; // absolute-ref uri: global reference
   // relative-path URI ref - revelation root relative ref
   return path.join(revelationRoot, uri);
-}
+};

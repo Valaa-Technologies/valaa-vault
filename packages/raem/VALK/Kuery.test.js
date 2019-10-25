@@ -64,8 +64,8 @@ describe("VPath to VAKON conversions", () => {
   });
   it("Converts complex embedded VPaths into VAKON", () => {
     expect(VALK.fromVPath([
-      "@!invoke:create:event:", ["@!:source@"], ":",
-        "@!:body@.:%24V@", [".:target"], "@", [".:name"], "@",
+      "@!invoke:create:event", ["!:source"],
+        ["@!:body@.:%24V@", [".:target"], "@", [".:name"], "@"],
       "@",
     ]).toVAKON())
     .toEqual([

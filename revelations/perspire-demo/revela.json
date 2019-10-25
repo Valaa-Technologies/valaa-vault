@@ -1,22 +1,22 @@
 {
   "gateway": {
     "authorityConfigs": {
-      "...": "authorityConfigs.json"
+      "!!!": "./authorityConfigs.json"
     }
   },
   "prologue": {
     "rootPartitionURI": "valaa-local:?id=33bea1e3-9aac-4181-a767-3427f58375f7",
     "partitionInfos": {
-      "...": "partitionInfos.json"
+      "!!!": "./partitionInfos.json"
     },
     "bvobInfos": {
-      "...": "bvobInfos.json"
+      "!!!": "./bvobInfos.json"
     },
     "bvobBuffers": {
-      "...": "bvobBuffers.json"
+      "!!!": "./bvobBuffers.json"
     },
     "authorityConfigs": {
-      "...": "authorityConfigs.json"
+      "!!!": "./authorityConfigs.json"
     }
   }
 }

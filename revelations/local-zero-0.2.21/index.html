@@ -24,7 +24,9 @@
     <script src="/valos/inspire/valos-inspire.js"></script>
     <script>
       valos.createInspireGateway(
-          { "...": { input: "revela.json", fetch: { crossOrigin: "same-authority" } } },
+          { "!!!": ["!$revela:import", "./revela.json", {
+            fetch: { crossOrigin: "same-authority" },
+          }]},
           {
             gateway: {
               verbosity: 1,

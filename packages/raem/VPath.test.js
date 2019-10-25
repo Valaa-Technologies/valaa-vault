@@ -1,6 +1,7 @@
 // @flow
 
 import { validateVPath, mintVPath, expandVPath } from "./VPath";
+import { outputError } from "~/tools";
 
 describe("VPath", () => {
   describe("VPath validation", () => {
@@ -18,8 +19,7 @@ describe("VPath", () => {
       expect(validateVPath(["@", ["!", ["$", "", "scriptRoot"]], ["!random"]]))
           .toBeTruthy();
       expect(validateVPath(["@", [
-        "!invoke",
-        "create",
+        "!invoke", "create",
         ["@", ["!", "body", ["$", "V", "target"], "name"]],
       ]])).toBeTruthy();
       expect(validateVPath(["@", ["$", "~u4", "0000"], ["!random"]]))
@@ -35,14 +35,15 @@ describe("VPath", () => {
       ]])).toBeTruthy();
     });
     it("Validates expanded VPaths", () => {
+      try {
       expect(validateVPath([
-        "@!invoke:create:event:", ["@!:source@"], ":",
-        "@!:body@!:%24V@", ["!:target"], "@", ["!:name"], "@", "@",
+        "@!invoke:create:event:", ["!:source"], ["@!:body@!:%24V@"], ["!:target"], ["!:name"],
+        "@",
       ])).toBeTruthy();
       expect(validateVPath([
-        "@!invoke:create:event:", ["@!:source@"], ":",
-        ["@!:body@!:%24V@!:target@", "!:name@"], "@",
+        "@", ["!invoke:create:event:", ["!:source"], ["@!:body@!:%24V@!:target@"], ["!:name"]],
       ])).toBeTruthy();
+      } catch (error) { outputError(error); }
     });
   });
   describe("VPath minting", () => {
@@ -133,16 +134,16 @@ describe("VPath", () => {
       ]);
     });
     it("Parses embedded VPath's", () => {
-      expect(expandVPath(["@!invoke:create:event:", ["@!:source@"],
-          ":", "@!:body@!:%24V@", ["!:target"], "@", ["!:name"], "@", "@",
+      expect(expandVPath(["@!invoke:create:event:", ["!:source"],
+          ["@!:body@!:%24V@", ["!:target"], "@", ["!:name"], "@"], "@",
       ]))
       .toEqual(["@", [
         "!invoke", "create", "event",
-        ["@", ["!", "source"]],
+        ["!", "source"],
         ["@", ["!", "body"], ["!", "$V"], ["!", "target"], ["!", "name"]],
       ]]);
       expect(expandVPath([
-        "@!invoke:create:event:", ["@!:source@"], ":", ["@!:body@!:%24V@!:target@", "!:name@"], "@",
+        "@!invoke:create:event", ["@!:source@"], ["@!:body@!:%24V@!:target@", ["!:name"], "@"], "@",
       ]))
       .toEqual(["@", [
         "!invoke", "create", "event",

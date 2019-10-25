@@ -1,19 +1,19 @@
 {
-  "name": { "...": ["§get", "package.json", "name"] },
-  "description": { "...": ["§get", "package.json", "description"] },
+  "name": { "!!!": ["./package.json", "name"] },
+  "description": { "!!!": ["./package.json", "description"] },
   "valos": {
     "type": "site"
   },
   "gateway": {
     "authorityConfigs": {
-      "...": "authorityConfigs.json"
+      "!!!": "./authorityConfigs.json"
     },
     "verbosity": 1,
     "scribe": { "verbosity": 0 }
   },
   "prologue": {
     "rootPartitionURI": {
-      "...": ["§get", "toolsets.json", "@valos/type-worker", "rootPartitionURI"]
+      "!!!": ["./toolsets.json", "@valos/type-worker", "rootPartitionURI"]
     }
   }
 }

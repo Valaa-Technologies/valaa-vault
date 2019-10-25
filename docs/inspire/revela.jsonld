@@ -1,0 +1,514 @@
+[
+  {
+    "@id": "https://valospace.org/inspire/revela",
+    "@context": {
+      "@base": "https://valospace.org/inspire/revela#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "vdoc": "https://valospace.org/vdoc#",
+      "vdoc:content": {
+        "@id": "https://valospace.org/vdoc#content",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/vdoc#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:headers": {
+        "@id": "https://valospace.org/vdoc#headers",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:cell": {
+        "@id": "https://valospace.org/vdoc#cell",
+        "@container": "@list",
+        "@type": "@id"
+      }
+    },
+    "dc:title": "revela.json format specification",
+    "vdoc:tags": [
+      "INTRODUCTORY",
+      "ONTOLOGY",
+      "TESTDOC"
+    ],
+    "revdoc:package": "@valos/inspire",
+    "revdoc:prefix": "revela",
+    "revdoc:prefixIRI": "https://valospace.org/inspire/revela#",
+    "revdoc:version": "0.35.0-prerelease.13",
+    "respecConfig": {
+      "subtitle": "0.35.0-prerelease.13",
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "revela"
+    },
+    "prefixes": {
+      "@id": "prefixes",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "revela": "https://valospace.org/inspire/revela#"
+    },
+    "vocabulary": {
+      "@id": "vocabulary",
+      "import": {
+        "@type": "valos-raem:Verb",
+        "revdoc:brief": "revela.json import verb",
+        "rdfs:comment": "import verb with first param being the location to import and second\nparam being an options object."
+      }
+    },
+    "context": {
+      "@id": "context"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "revela.json (pronounced: ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "revelation"
+              ]
+            },
+            ") is a JSON\nconfiguration file in which all \"!!!\" key values (",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "spreads"
+              ]
+            },
+            ")\nare evaluated and their results then spread and merged on top of the\nsurrounding object."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The evaluation allows for VPath operations, most notably importing\nrelative config files and accessing their subsections. Together the\nevaluation, spread and merge allow for fine-grained ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "DRY"
+              ],
+              "vdoc:ref": "https://en.wikipedia.org/wiki/Don%27t_repeat_yourself"
+            },
+            "\nfor various valos fabric config files."
+          ]
+        }
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This document is part of the library workspace ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/inspire"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/inspire"
+            },
+            "\n(of domain ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`ValOS Inspire application gateway`."
+          ]
+        }
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "revdoc:Example",
+          "dc:title": "trivial combine",
+          "vdoc:content": [
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "vdoc:blockquote": true,
+                  "vdoc:content": [
+                    " combineRevelationsLazily(gatewayMock, { a: [1] }, { a: [2] })"
+                  ]
+                },
+                "toEqual",
+                {
+                  "vdoc:blockquote": true,
+                  "vdoc:content": [
+                    "{\n  \"a\": [\n    1,\n    2\n  ]\n}"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "revdoc:Example",
+          "dc:title": "spread of a simple relative import",
+          "vdoc:content": [
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "vdoc:blockquote": true,
+                  "vdoc:content": [
+                    " combineRevelationsLazily(gatewayMock, {}, { \"!!!\": \"./path\" })"
+                  ]
+                },
+                "toEqual",
+                {
+                  "vdoc:blockquote": true,
+                  "vdoc:content": [
+                    "{\n  \"requireKey\": \"/site/revelation/path\",\n  \"someField\": 1\n}"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "revdoc:Example",
+          "dc:title": "spread of an explicit site root import followed by field access",
+          "vdoc:content": [
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "vdoc:blockquote": true,
+                  "vdoc:content": [
+                    " combineRevelationsLazily(gatewayMock, \"\",\n            { \"!!!\": [[\"!$revela:import\", \"/path\"], \"requireKey\"] })"
+                  ]
+                },
+                "toEqual",
+                {
+                  "vdoc:blockquote": true,
+                  "vdoc:content": [
+                    "\"/site/path\""
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "revdoc:Example",
+          "dc:title": "spread of an implicit URI import followed by array creation",
+          "vdoc:content": [
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "vdoc:blockquote": true,
+                  "vdoc:content": [
+                    " combineRevelationsLazily(gatewayMock, [], { \"!!!\": [\n          [\"!$revela:import\", \"<https://foobar.com/path>\"],\n          [\"fetchedField\", [\".:fetchOptions:input\"]],\n        ] })"
+                  ]
+                },
+                "toEqual",
+                {
+                  "vdoc:blockquote": true,
+                  "vdoc:content": [
+                    "[\n  1,\n  \"https://foobar.com/path\"\n]"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "ontology": {
+      "@id": "ontology",
+      "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "revela"
+          ]
+        },
+        " ontology"
+      ],
+      "vdoc:content": [
+        {
+          "@id": "section_ontology_abstract"
+        },
+        {
+          "@id": "section_prefixes"
+        },
+        {
+          "@id": "section_verbs"
+        },
+        {
+          "@id": "section_vocabulary_other"
+        }
+      ]
+    },
+    "section_ontology_abstract": {
+      "@id": "section_ontology_abstract",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "revela"
+              ]
+            },
+            " ontology specifies the verbs specific to revela.json\nfiles."
+          ]
+        }
+      ]
+    },
+    "section_prefixes": {
+      "@id": "section_prefixes",
+      "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "revela"
+          ]
+        },
+        " IRI prefixes"
+      ],
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "prefixes",
+          "@type": "vdoc:Table",
+          "vdoc:headers": [
+            {
+              "vdoc:cell": "vdoc:selectKey",
+              "@type": "vdoc:Header",
+              "vdoc:content": [
+                "Prefix"
+              ]
+            },
+            {
+              "vdoc:cell": "vdoc:selectValue",
+              "@type": "vdoc:Header",
+              "vdoc:content": [
+                "IRI"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "section_verbs": {
+      "@id": "section_verbs",
+      "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "revela"
+          ]
+        },
+        " ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "valos-raem:Verb"
+          ],
+          "vdoc:ref": "@valos/raem#Verb"
+        },
+        " vocabulary"
+      ],
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "@type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "vdoc:cell": "@type",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdf:type"
+                ]
+              },
+              {
+                "vdoc:cell": "comment",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "Comment"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "@type": "vdoc:Header",
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": [
+            "import"
+          ]
+        }
+      ]
+    },
+    "section_vocabulary_other": {
+      "@id": "section_vocabulary_other",
+      "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "revela"
+          ]
+        },
+        " remaining vocabulary"
+      ],
+      "vdoc:content": [
+        {
+          "vdoc:lookup": "vocabulary",
+          "@type": "vdoc:Table",
+          "vdoc:headers": {
+            "vdoc:entries": [
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:label"
+                ],
+                "vdoc:cell": {
+                  "vdoc:resourceId": "vdoc:selectKey",
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    {
+                      "vdoc:em": true,
+                      "vdoc:content": [
+                        "vdoc:selectKey"
+                      ]
+                    }
+                  ],
+                  "vdoc:ref": [
+                    "#",
+                    "vdoc:selectKey"
+                  ]
+                }
+              },
+              {
+                "vdoc:cell": "@type",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdf:type"
+                ]
+              },
+              {
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "vdoc:cell": {
+                  "vdoc:words": {
+                    "vdoc:selectField": "rdfs:subClassOf"
+                  }
+                }
+              },
+              {
+                "vdoc:cell": "rdfs:comment",
+                "@type": "vdoc:Header",
+                "vdoc:content": {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "rdfs:comment"
+                  ]
+                },
+                "vdoc:wide": true
+              }
+            ]
+          },
+          "vdoc:entries": []
+        }
+      ]
+    },
+    "@type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "ontology"
+      }
+    ]
+  }
+]

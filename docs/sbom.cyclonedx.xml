@@ -6219,6 +6219,36 @@
         </component>
         <component type="library">
             <group>webassemblyjs</group>
+            <name>helper-buffer</name>
+            <version>1.8.5</version>
+            <description>
+                <![CDATA[Buffer manipulation utility]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40webassemblyjs/helper-buffer@1.8.5</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>webassemblyjs</group>
+            <name>helper-fsm</name>
+            <version>1.8.5</version>
+            <description>
+                <![CDATA[FSM implementation]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>ISC</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40webassemblyjs/helper-fsm@1.8.5</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>webassemblyjs</group>
             <name>helper-code-frame</name>
             <version>1.8.5</version>
             <description>
@@ -6323,21 +6353,6 @@
             <modified>false</modified>
         </component>
         <component type="library">
-            <group>webassemblyjs</group>
-            <name>helper-fsm</name>
-            <version>1.8.5</version>
-            <description>
-                <![CDATA[FSM implementation]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>ISC</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40webassemblyjs/helper-fsm@1.8.5</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
             <group>xtuc</group>
             <name>long</name>
             <version>4.2.2</version>
@@ -6350,21 +6365,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/%40xtuc/long@4.2.2</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>webassemblyjs</group>
-            <name>helper-buffer</name>
-            <version>1.8.5</version>
-            <description>
-                <![CDATA[Buffer manipulation utility]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40webassemblyjs/helper-buffer@1.8.5</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -6724,6 +6724,36 @@
         </component>
         <component type="library">
             <group>babel</group>
+            <name>helper-call-delegate</name>
+            <version>7.4.4</version>
+            <description>
+                <![CDATA[Helper function to call delegate]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/helper-call-delegate@7.4.4</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
+            <name>helper-hoist-variables</name>
+            <version>7.4.4</version>
+            <description>
+                <![CDATA[Helper function to hoist variables]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/helper-hoist-variables@7.4.4</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
             <name>helper-builder-react-jsx</name>
             <version>7.3.0</version>
             <description>
@@ -6825,36 +6855,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/%40babel/helper-define-map@7.5.5</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
-            <name>helper-call-delegate</name>
-            <version>7.4.4</version>
-            <description>
-                <![CDATA[Helper function to call delegate]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/helper-call-delegate@7.4.4</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
-            <name>helper-hoist-variables</name>
-            <version>7.4.4</version>
-            <description>
-                <![CDATA[Helper function to hoist variables]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/helper-hoist-variables@7.4.4</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -7129,36 +7129,6 @@
         </component>
         <component type="library">
             <group>babel</group>
-            <name>plugin-proposal-optional-catch-binding</name>
-            <version>7.2.0</version>
-            <description>
-                <![CDATA[Compile optional catch bindings]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/plugin-proposal-optional-catch-binding@7.2.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
-            <name>plugin-syntax-optional-catch-binding</name>
-            <version>7.2.0</version>
-            <description>
-                <![CDATA[Allow parsing of optional catch bindings]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/plugin-syntax-optional-catch-binding@7.2.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
             <name>plugin-proposal-object-rest-spread</name>
             <version>7.6.2</version>
             <description>
@@ -7185,6 +7155,36 @@
                 </license>
             </licenses>
             <purl>pkg:npm/%40babel/plugin-syntax-object-rest-spread@7.2.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
+            <name>plugin-proposal-optional-catch-binding</name>
+            <version>7.2.0</version>
+            <description>
+                <![CDATA[Compile optional catch bindings]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/plugin-proposal-optional-catch-binding@7.2.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
+            <name>plugin-syntax-optional-catch-binding</name>
+            <version>7.2.0</version>
+            <description>
+                <![CDATA[Allow parsing of optional catch bindings]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/plugin-syntax-optional-catch-binding@7.2.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -7418,21 +7418,6 @@
         </component>
         <component type="library">
             <group>babel</group>
-            <name>plugin-transform-block-scoping</name>
-            <version>7.6.3</version>
-            <description>
-                <![CDATA[Compile ES2015 block scoping (const and let) to ES5]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/plugin-transform-block-scoping@7.6.3</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
             <name>plugin-transform-classes</name>
             <version>7.5.5</version>
             <description>
@@ -7444,6 +7429,21 @@
                 </license>
             </licenses>
             <purl>pkg:npm/%40babel/plugin-transform-classes@7.5.5</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
+            <name>plugin-transform-block-scoping</name>
+            <version>7.6.3</version>
+            <description>
+                <![CDATA[Compile ES2015 block scoping (const and let) to ES5]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/plugin-transform-block-scoping@7.6.3</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -7474,36 +7474,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/%40babel/plugin-transform-destructuring@7.6.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
-            <name>plugin-transform-dotall-regex</name>
-            <version>7.6.2</version>
-            <description>
-                <![CDATA[Compile regular expressions using the `s` (`dotAll`) flag to ES5.]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/plugin-transform-dotall-regex@7.6.2</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
-            <name>plugin-transform-duplicate-keys</name>
-            <version>7.5.0</version>
-            <description>
-                <![CDATA[Compile objects with duplicate keys to valid strict ES5]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/plugin-transform-duplicate-keys@7.5.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -7568,6 +7538,21 @@
         </component>
         <component type="library">
             <group>babel</group>
+            <name>plugin-transform-literals</name>
+            <version>7.2.0</version>
+            <description>
+                <![CDATA[Compile ES2015 unicode string and number literals to ES5]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/plugin-transform-literals@7.2.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
             <name>plugin-transform-member-expression-literals</name>
             <version>7.2.0</version>
             <description>
@@ -7626,21 +7611,6 @@
         </component>
         <component type="library">
             <group>babel</group>
-            <name>plugin-transform-literals</name>
-            <version>7.2.0</version>
-            <description>
-                <![CDATA[Compile ES2015 unicode string and number literals to ES5]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/plugin-transform-literals@7.2.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
             <name>plugin-transform-modules-commonjs</name>
             <version>7.6.0</version>
             <description>
@@ -7686,6 +7656,21 @@
         </component>
         <component type="library">
             <group>babel</group>
+            <name>plugin-transform-dotall-regex</name>
+            <version>7.6.2</version>
+            <description>
+                <![CDATA[Compile regular expressions using the `s` (`dotAll`) flag to ES5.]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/plugin-transform-dotall-regex@7.6.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
             <name>plugin-transform-named-capturing-groups-regex</name>
             <version>7.6.3</version>
             <description>
@@ -7701,21 +7686,6 @@
         </component>
         <component type="library">
             <group>babel</group>
-            <name>plugin-transform-object-super</name>
-            <version>7.5.5</version>
-            <description>
-                <![CDATA[Compile ES2015 object super to ES5]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/plugin-transform-object-super@7.5.5</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
             <name>plugin-transform-new-target</name>
             <version>7.4.4</version>
             <description>
@@ -7727,6 +7697,21 @@
                 </license>
             </licenses>
             <purl>pkg:npm/%40babel/plugin-transform-new-target@7.4.4</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
+            <name>plugin-transform-object-super</name>
+            <version>7.5.5</version>
+            <description>
+                <![CDATA[Compile ES2015 object super to ES5]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/plugin-transform-object-super@7.5.5</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -7757,6 +7742,21 @@
                 </license>
             </licenses>
             <purl>pkg:npm/%40babel/plugin-transform-parameters@7.4.4</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
+            <name>plugin-transform-react-display-name</name>
+            <version>7.2.0</version>
+            <description>
+                <![CDATA[Add displayName to React.createClass calls]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/plugin-transform-react-display-name@7.2.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -7806,21 +7806,6 @@
         </component>
         <component type="library">
             <group>babel</group>
-            <name>plugin-transform-react-display-name</name>
-            <version>7.2.0</version>
-            <description>
-                <![CDATA[Add displayName to React.createClass calls]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/plugin-transform-react-display-name@7.2.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
             <name>plugin-transform-regenerator</name>
             <version>7.4.5</version>
             <description>
@@ -7861,6 +7846,21 @@
                 </license>
             </licenses>
             <purl>pkg:npm/%40babel/plugin-transform-reserved-words@7.2.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
+            <name>plugin-transform-runtime</name>
+            <version>7.6.2</version>
+            <description>
+                <![CDATA[Externalise references to helpers and builtins, automatically polyfilling your code without polluting globals]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/plugin-transform-runtime@7.6.2</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -7925,36 +7925,6 @@
         </component>
         <component type="library">
             <group>babel</group>
-            <name>plugin-transform-typeof-symbol</name>
-            <version>7.2.0</version>
-            <description>
-                <![CDATA[This transformer wraps all typeof expressions with a method that replicates native behaviour. (ie. returning “symbol” for symbols)]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/plugin-transform-typeof-symbol@7.2.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
-            <name>plugin-transform-unicode-regex</name>
-            <version>7.6.2</version>
-            <description>
-                <![CDATA[Compile ES2015 Unicode regex to ES5]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/plugin-transform-unicode-regex@7.6.2</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
             <name>polyfill</name>
             <version>7.6.0</version>
             <description>
@@ -7984,17 +7954,62 @@
         </component>
         <component type="library">
             <group>babel</group>
-            <name>plugin-transform-runtime</name>
+            <name>plugin-transform-unicode-regex</name>
             <version>7.6.2</version>
             <description>
-                <![CDATA[Externalise references to helpers and builtins, automatically polyfilling your code without polluting globals]]>
+                <![CDATA[Compile ES2015 Unicode regex to ES5]]>
             </description>
             <licenses>
                 <license>
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40babel/plugin-transform-runtime@7.6.2</purl>
+            <purl>pkg:npm/%40babel/plugin-transform-unicode-regex@7.6.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
+            <name>plugin-transform-typeof-symbol</name>
+            <version>7.2.0</version>
+            <description>
+                <![CDATA[This transformer wraps all typeof expressions with a method that replicates native behaviour. (ie. returning “symbol” for symbols)]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/plugin-transform-typeof-symbol@7.2.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
+            <name>preset-react</name>
+            <version>7.6.3</version>
+            <description>
+                <![CDATA[Babel preset for all React plugins.]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/preset-react@7.6.3</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
+            <name>preset-stage-0</name>
+            <version>7.0.0</version>
+            <description>
+                <![CDATA[Babel preset for stage 0 plugins]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/preset-stage-0@7.0.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -8010,6 +8025,21 @@
                 </license>
             </licenses>
             <purl>pkg:npm/%40babel/preset-env@7.6.3</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>babel</group>
+            <name>plugin-transform-duplicate-keys</name>
+            <version>7.5.0</version>
+            <description>
+                <![CDATA[Compile objects with duplicate keys to valid strict ES5]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40babel/plugin-transform-duplicate-keys@7.5.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -8108,36 +8138,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/js-levenshtein@1.1.6</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
-            <name>preset-react</name>
-            <version>7.6.3</version>
-            <description>
-                <![CDATA[Babel preset for all React plugins.]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/preset-react@7.6.3</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>babel</group>
-            <name>preset-stage-0</name>
-            <version>7.0.0</version>
-            <description>
-                <![CDATA[Babel preset for stage 0 plugins]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40babel/preset-stage-0@7.0.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -12540,21 +12540,6 @@
         </component>
         <component type="library">
             <group>lerna</group>
-            <name>diff</name>
-            <version>3.16.5</version>
-            <description>
-                <![CDATA[Diff all packages or a single package since the last release]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40lerna/diff@3.16.5</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>lerna</group>
             <name>exec</name>
             <version>3.16.5</version>
             <description>
@@ -12566,6 +12551,21 @@
                 </license>
             </licenses>
             <purl>pkg:npm/%40lerna/exec@3.16.5</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>lerna</group>
+            <name>diff</name>
+            <version>3.16.5</version>
+            <description>
+                <![CDATA[Diff all packages or a single package since the last release]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40lerna/diff@3.16.5</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -12611,21 +12611,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/%40lerna/import@3.16.5</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>lerna</group>
-            <name>global-options</name>
-            <version>3.13.0</version>
-            <description>
-                <![CDATA[Global options applicable to _every_ lerna sub-command]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40lerna/global-options@3.13.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -12689,6 +12674,21 @@
         </component>
         <component type="library">
             <group>lerna</group>
+            <name>global-options</name>
+            <version>3.13.0</version>
+            <description>
+                <![CDATA[Global options applicable to _every_ lerna sub-command]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40lerna/global-options@3.13.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>lerna</group>
             <name>npm-dist-tag</name>
             <version>3.16.0</version>
             <description>
@@ -12730,6 +12730,21 @@
                 </license>
             </licenses>
             <purl>pkg:npm/%40lerna/npm-install@3.16.5</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>lerna</group>
+            <name>npm-run-script</name>
+            <version>3.16.5</version>
+            <description>
+                <![CDATA[An internal Lerna tool]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40lerna/npm-run-script@3.16.5</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -12802,21 +12817,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/read-package-json@2.1.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>lerna</group>
-            <name>npm-run-script</name>
-            <version>3.16.5</version>
-            <description>
-                <![CDATA[An internal Lerna tool]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40lerna/npm-run-script@3.16.5</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -12964,20 +12964,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/ajv-errors@1.0.1</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>ajv-keywords</name>
-            <version>3.4.1</version>
-            <description>
-                <![CDATA[Custom JSON-Schema keywords for Ajv validator]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/ajv-keywords@3.4.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -13426,6 +13412,20 @@
                 </license>
             </licenses>
             <purl>pkg:npm/base64-js@1.3.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>ajv-keywords</name>
+            <version>3.4.1</version>
+            <description>
+                <![CDATA[Custom JSON-Schema keywords for Ajv validator]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/ajv-keywords@3.4.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -14098,20 +14098,6 @@
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>eslint-config-airbnb</name>
-            <version>17.1.1</version>
-            <description>
-                <![CDATA[Airbnb's ESLint config, following our styleguide]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/eslint-config-airbnb@17.1.1</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
             <name>eslint-config-airbnb-base</name>
             <version>13.2.0</version>
             <description>
@@ -14140,17 +14126,17 @@
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>eslint-import-resolver-babel-plugin-root-import</name>
-            <version>1.1.1</version>
+            <name>eslint-config-airbnb</name>
+            <version>17.1.1</version>
             <description>
-                <![CDATA[fork of eslint-import-resolver-babel-root-import that works]]>
+                <![CDATA[Airbnb's ESLint config, following our styleguide]]>
             </description>
             <licenses>
                 <license>
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/eslint-import-resolver-babel-plugin-root-import@1.1.1</purl>
+            <purl>pkg:npm/eslint-config-airbnb@17.1.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -14168,6 +14154,20 @@
             <modified>false</modified>
         </component>
         <component type="library">
+            <name>eslint-import-resolver-babel-plugin-root-import</name>
+            <version>1.1.1</version>
+            <description>
+                <![CDATA[fork of eslint-import-resolver-babel-root-import that works]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/eslint-import-resolver-babel-plugin-root-import@1.1.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
             <name>eslint-plugin-flowtype</name>
             <version>3.13.0</version>
             <description>
@@ -14179,6 +14179,34 @@
                 </license>
             </licenses>
             <purl>pkg:npm/eslint-plugin-flowtype@3.13.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>eslint-scope</name>
+            <version>4.0.3</version>
+            <description>
+                <![CDATA[ECMAScript scope analyzer for ESLint]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>BSD-2-Clause</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/eslint-scope@4.0.3</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>esrecurse</name>
+            <version>4.2.1</version>
+            <description>
+                <![CDATA[ECMAScript AST recursive visitor]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>BSD-2-Clause</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/esrecurse@4.2.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -14221,34 +14249,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/eslint-utils@1.4.2</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>eslint-scope</name>
-            <version>4.0.3</version>
-            <description>
-                <![CDATA[ECMAScript scope analyzer for ESLint]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>BSD-2-Clause</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/eslint-scope@4.0.3</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>esrecurse</name>
-            <version>4.2.1</version>
-            <description>
-                <![CDATA[ECMAScript AST recursive visitor]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>BSD-2-Clause</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/esrecurse@4.2.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -14560,20 +14560,6 @@
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>is-path-cwd</name>
-            <version>1.0.0</version>
-            <description>
-                <![CDATA[Check if a path is CWD]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/is-path-cwd@1.0.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
             <name>is-path-in-cwd</name>
             <version>1.0.1</version>
             <description>
@@ -14602,6 +14588,20 @@
             <modified>false</modified>
         </component>
         <component type="library">
+            <name>is-path-cwd</name>
+            <version>1.0.0</version>
+            <description>
+                <![CDATA[Check if a path is CWD]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/is-path-cwd@1.0.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
             <name>is-wsl</name>
             <version>1.1.0</version>
             <description>
@@ -14616,20 +14616,6 @@
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>istanbul-lib-hook</name>
-            <version>1.2.2</version>
-            <description>
-                <![CDATA[Hooks for require, vm and script used in istanbul]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>BSD-3-Clause</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/istanbul-lib-hook@1.2.2</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
             <name>istanbul-reports</name>
             <version>1.5.1</version>
             <description>
@@ -14641,6 +14627,20 @@
                 </license>
             </licenses>
             <purl>pkg:npm/istanbul-reports@1.5.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>istanbul-lib-hook</name>
+            <version>1.2.2</version>
+            <description>
+                <![CDATA[Hooks for require, vm and script used in istanbul]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>BSD-3-Clause</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/istanbul-lib-hook@1.2.2</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -14938,33 +14938,6 @@
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>prompts</name>
-            <version>0.1.14</version>
-            <description>
-                <![CDATA[Lightweight, beautiful and user-friendly prompts]]>
-            </description>
-            <licenses>
-                <license>
-                </license>
-            </licenses>
-            <purl>pkg:npm/prompts@0.1.14</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>sisteransi</name>
-            <version>0.1.1</version>
-            <description>
-                <![CDATA[ANSI escape codes for some terminal swag]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/sisteransi@0.1.1</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
             <name>prop-types</name>
             <version>15.7.2</version>
             <description>
@@ -14990,6 +14963,33 @@
                 </license>
             </licenses>
             <purl>pkg:npm/react-is@16.10.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>prompts</name>
+            <version>0.1.14</version>
+            <description>
+                <![CDATA[Lightweight, beautiful and user-friendly prompts]]>
+            </description>
+            <licenses>
+                <license>
+                </license>
+            </licenses>
+            <purl>pkg:npm/prompts@0.1.14</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>sisteransi</name>
+            <version>0.1.1</version>
+            <description>
+                <![CDATA[ANSI escape codes for some terminal swag]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/sisteransi@0.1.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">

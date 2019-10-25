@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"raem"};
+      var respecConfig = {"subtitle":"0.35.0-prerelease.13","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"raem"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -218,12 +218,12 @@ operations.</span>
   </section>
 
   <section id="ontology" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#ontology">§ </a>&#x3C;em&#x3E;valos-raem:&#x3C;/em&#x3E; library @valos/raem ontology</h3>
+    <h3><a aria-label="§" href="#ontology">§ </a>library <em>@valos/raem</em> ontology, prefix <em>valos-raem</em></h3>
 <div><p><span class="vdoc type-vdoc-paragraph">@valos/raem ontology specifies the Valospace core types and properties
 directly to the @valos/kernel namespace.</span>
 </p></div>
   <section id="section_prefixes" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_prefixes">§ </a>@valos/raem IRI prefixes</h3>
+    <h3><a aria-label="§" href="#section_prefixes">§ </a><em>@valos/raem</em> IRI prefixes</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -244,7 +244,7 @@ directly to the @valos/kernel namespace.</span>
   </section>
 
   <section id="section_classes" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_classes">§ </a>&#x3C;em&#x3E;valos-raem:* a valos-kernel:Class&#x3C;/em&#x3E; vocabulary</h3>
+    <h3><a aria-label="§" href="#section_classes">§ </a><em>valos-raem</em> <a href="@valos/kernel#Class" class="vdoc type-vdoc-reference">valos-kernel:Class</a> vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -313,10 +313,14 @@ begins with '$').</td></tr>
         <tr id="VParam"><td><a href="#VParam" class="vdoc type-vdoc-reference"><em>VParam</em></a></td><td>valos-raem:VPathRule</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>The class of all resources representing the VPath pseudo-rule
 'vparam' (always begins with '$' or ':').</td></tr>
-        <tr id="Resolver" class=" vdoc-nth-child-2n"><td><a href="#Resolver" class="vdoc type-vdoc-reference"><em>Resolver</em></a></td><td>rdfs:Class</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>The class of all resolver name tags. Each context which performs vpath
+        <tr id="Verb" class=" vdoc-nth-child-2n"><td><a href="#Verb" class="vdoc type-vdoc-reference"><em>Verb</em></a></td><td>valos-kernel:Property</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>The class of all verb names. Each context which performs vpath
 computation valks provides native implementations for the resolvers
 it supports in its vpath valks.
+</td></tr>
+        <tr id="Resolver"><td><a href="#Resolver" class="vdoc type-vdoc-reference"><em>Resolver</em></a></td><td>valos-raem:Verb</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>The class of all resolver names. Resolvers are verbs which are used
+for resolving generated properties.
 </td></tr>
       </tbody>
     </table>
@@ -324,7 +328,7 @@ it supports in its vpath valks.
   </section>
 
   <section id="section_properties" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_properties">§ </a>&#x3C;em&#x3E;valos-raem:* a valos-kernel:Property&#x3C;/em&#x3E; vocabulary</h3>
+    <h3><a aria-label="§" href="#section_properties">§ </a><em>valos-raem</em> <a href="@valos/kernel#Property" class="vdoc type-vdoc-reference">valos-kernel:Property</a> vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -394,7 +398,7 @@ to allow for singular fields.</td></tr>
   </section>
 
   <section id="section_types" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_types">§ </a>&#x3C;em&#x3E;valos-raem:* a valos-raem:Type&#x3C;/em&#x3E; vocabulary</h3>
+    <h3><a aria-label="§" href="#section_types">§ </a><em>valos-raem</em> <a href="https://valospace.org/raem#Type" class="vdoc type-vdoc-reference">valos-raem:Type</a> vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -410,7 +414,7 @@ to allow for singular fields.</td></tr>
   </section>
 
   <section id="section_fields" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_fields">§ </a>&#x3C;em&#x3E;valos-raem:* a valos-raem:Field&#x3C;/em&#x3E; vocabulary</h3>
+    <h3><a aria-label="§" href="#section_fields">§ </a><em>valos-raem</em> <a href="https://valospace.org/raem#Field" class="vdoc type-vdoc-reference">valos-raem:Field</a> vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -429,7 +433,7 @@ to allow for singular fields.</td></tr>
   </section>
 
   <section id="section_resolvers" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_resolvers">§ </a>&#x3C;em&#x3E;valos-raem:* a valos-raem:Resolver&#x3C;/em&#x3E; vocabulary</h3>
+    <h3><a aria-label="§" href="#section_resolvers">§ </a><em>valos-raem</em> <a href="https://valospace.org/raem#Resolver" class="vdoc type-vdoc-reference">valos-raem:Resolver</a> vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -464,7 +468,7 @@ to allow for singular fields.</td></tr>
   </section>
 
   <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a>&#x3C;em&#x3E;valos-raem:*&#x3C;/em&#x3E; other vocabulary:</h3>
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>valos-raem</em> remaining vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -489,7 +493,7 @@ to allow for singular fields.</td></tr>
   </section>
 
   <section id="section_context" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_context">§ </a>&#x3C;em&#x3E;valos-raem:*&#x3C;/em&#x3E; JSON-LD context term definitions</h3>
+    <h3><a aria-label="§" href="#section_context">§ </a><em>valos-raem</em> JSON-LD context term definitions</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>

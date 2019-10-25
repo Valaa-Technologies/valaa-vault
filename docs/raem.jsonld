@@ -49,6 +49,7 @@
     "revdoc:prefixIRI": "https://valospace.org/raem#",
     "revdoc:version": "0.35.0-prerelease.13",
     "respecConfig": {
+      "subtitle": "0.35.0-prerelease.13",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -610,8 +611,23 @@
     },
     "ontology": {
       "@id": "ontology",
-      "dc:title": "<em>valos-raem:</em> library @valos/raem ontology",
       "@type": "vdoc:Chapter",
+      "dc:title": [
+        "library ",
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "@valos/raem"
+          ]
+        },
+        " ontology, prefix ",
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "valos-raem"
+          ]
+        }
+      ],
       "vdoc:content": [
         {
           "@id": "section_ontology_abstract"
@@ -838,11 +854,17 @@
         "revdoc:brief": "VPath rule 'vparam' datatype",
         "rdfs:comment": "The class of all resources representing the VPath pseudo-rule\n'vparam' (always begins with '$' or ':')."
       },
+      "Verb": {
+        "@type": "valos-kernel:Class",
+        "rdfs:subClassOf": "valos-kernel:Property",
+        "revdoc:brief": "verb name type",
+        "rdfs:comment": "The class of all verb names. Each context which performs vpath\ncomputation valks provides native implementations for the resolvers\nit supports in its vpath valks.\n"
+      },
       "Resolver": {
         "@type": "valos-kernel:Class",
-        "rdfs:subClassOf": "rdfs:Class",
-        "revdoc:brief": "resolver name tag type",
-        "rdfs:comment": "The class of all resolver name tags. Each context which performs vpath\ncomputation valks provides native implementations for the resolvers\nit supports in its vpath valks.\n"
+        "rdfs:subClassOf": "valos-raem:Verb",
+        "revdoc:brief": "resolver verb name type",
+        "rdfs:comment": "The class of all resolver names. Resolvers are verbs which are used\nfor resolving generated properties.\n"
       },
       "resolveVPath": {
         "@type": "valos-raem:Resolver",
@@ -929,8 +951,16 @@
     },
     "section_prefixes": {
       "@id": "section_prefixes",
-      "dc:title": "@valos/raem IRI prefixes",
       "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "@valos/raem"
+          ]
+        },
+        " IRI prefixes"
+      ],
       "vdoc:content": [
         {
           "vdoc:lookup": "prefixes",
@@ -956,8 +986,24 @@
     },
     "section_classes": {
       "@id": "section_classes",
-      "dc:title": "<em>valos-raem:* a valos-kernel:Class</em> vocabulary",
       "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "valos-raem"
+          ]
+        },
+        " ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "valos-kernel:Class"
+          ],
+          "vdoc:ref": "@valos/kernel#Class"
+        },
+        " vocabulary"
+      ],
       "vdoc:content": [
         {
           "vdoc:lookup": "vocabulary",
@@ -1025,6 +1071,7 @@
             "Verbs",
             "VGRId",
             "VParam",
+            "Verb",
             "Resolver"
           ]
         }
@@ -1032,8 +1079,24 @@
     },
     "section_properties": {
       "@id": "section_properties",
-      "dc:title": "<em>valos-raem:* a valos-kernel:Property</em> vocabulary",
       "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "valos-raem"
+          ]
+        },
+        " ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "valos-kernel:Property"
+          ],
+          "vdoc:ref": "@valos/kernel#Property"
+        },
+        " vocabulary"
+      ],
       "vdoc:content": [
         {
           "vdoc:lookup": "vocabulary",
@@ -1116,8 +1179,24 @@
     },
     "section_types": {
       "@id": "section_types",
-      "dc:title": "<em>valos-raem:* a valos-raem:Type</em> vocabulary",
       "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "valos-raem"
+          ]
+        },
+        " ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "valos-raem:Type"
+          ],
+          "vdoc:ref": "@valos/raem#Type"
+        },
+        " vocabulary"
+      ],
       "vdoc:content": [
         {
           "vdoc:lookup": "vocabulary",
@@ -1190,8 +1269,24 @@
     },
     "section_fields": {
       "@id": "section_fields",
-      "dc:title": "<em>valos-raem:* a valos-raem:Field</em> vocabulary",
       "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "valos-raem"
+          ]
+        },
+        " ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "valos-raem:Field"
+          ],
+          "vdoc:ref": "@valos/raem#Field"
+        },
+        " vocabulary"
+      ],
       "vdoc:content": [
         {
           "vdoc:lookup": "vocabulary",
@@ -1274,8 +1369,24 @@
     },
     "section_resolvers": {
       "@id": "section_resolvers",
-      "dc:title": "<em>valos-raem:* a valos-raem:Resolver</em> vocabulary",
       "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "valos-raem"
+          ]
+        },
+        " ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "valos-raem:Resolver"
+          ],
+          "vdoc:ref": "@valos/raem#Resolver"
+        },
+        " vocabulary"
+      ],
       "vdoc:content": [
         {
           "vdoc:lookup": "vocabulary",
@@ -1348,8 +1459,16 @@
     },
     "section_vocabulary_other": {
       "@id": "section_vocabulary_other",
-      "dc:title": "<em>valos-raem:*</em> other vocabulary:",
       "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "valos-raem"
+          ]
+        },
+        " remaining vocabulary"
+      ],
       "vdoc:content": [
         {
           "vdoc:lookup": "vocabulary",
@@ -1421,8 +1540,16 @@
     },
     "section_context": {
       "@id": "section_context",
-      "dc:title": "<em>valos-raem:*</em> JSON-LD context term definitions",
       "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "valos-raem"
+          ]
+        },
+        " JSON-LD context term definitions"
+      ],
       "vdoc:content": [
         {
           "vdoc:lookup": "context",

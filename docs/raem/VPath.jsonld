@@ -144,7 +144,7 @@
           "@type": "revdoc:ABNF",
           "vdoc:language": "https://tools.ietf.org/html/rfc5234",
           "vdoc:content": [
-            "  vpath         = \"@\" vgrid-tail / verbs-tail\n  vgrid-tail    = vgrid \"@\" [ verbs-tail ]\n  verbs-tail     = verb \"@\" [ verbs-tail ]\n  verb          = verb-type params\n"
+            "  vpath         = \"@\" vgrid-tail / verbs-tail\n  vgrid-tail    = \"$\" vgrid \"@\" [ verbs-tail ]\n  verbs-tail    = verb \"@\" [ verbs-tail ]\n  verb          = verb-type params\n"
           ]
         }
       ]
@@ -496,13 +496,32 @@
     },
     "section_verb_computation": {
       "@id": "section_verb_computation",
-      "dc:title": "verb type \"`!`\": computation selector",
+      "dc:title": "verb type \"`!`\": eager evaluator",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "\nVerb representing the result of a computation."
+            "\nVerb representing the result of an eager evaluation. When a VPath is\nbound to a ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "context"
+              ]
+            },
+            " all nested eager evaluators selectors\nare resolved depth first, left to right. The resolution of a selector\nfirst evaluates the evaluator operation using the head and term lookups\nof the original context and then replaces the selector with the result\nof the evaluation."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The first parameter defines the evaluation operation. If this parameter\nhas a trivial context-term (ie. no context-term or is a simple prefix\nterm in the context term definition) then the operation is a path\noperation."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "If the context-term is non-trivial then the context must\nhave a definition for the operation."
           ]
         },
         {
@@ -521,7 +540,7 @@
       "dc:title": "Computation selector example",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "Triple pattern `?s <urn:valos:!$valk:plus$number:10:@!:myVal> ?o`\nmatches like:\n",
+        "Triple pattern `?s <urn:valos:!$valk:add$number:10:@!:myVal@> ?o`\nmatches like:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
@@ -650,7 +669,7 @@
           "@type": "revdoc:ABNF",
           "vdoc:language": "https://tools.ietf.org/html/rfc5234",
           "vdoc:content": [
-            "  vpath         = \"@\" vgrid-tail / verbs-tail\n  vgrid-tail    = vgrid \"@\" [ verbs-tail ]\n  vgrid         = \"$\" format-term \":\" param-value [ params ]\n"
+            "  vpath         = \"@\" vgrid-tail / verbs-tail\n  vgrid-tail    = \"$\" vgrid \"@\" [ verbs-tail ]\n  vgrid         = format-term \":\" param-value [ params ]\n"
           ]
         }
       ]
@@ -714,7 +733,7 @@
           "@type": "revdoc:ABNF",
           "vdoc:language": "https://tools.ietf.org/html/rfc5234",
           "vdoc:content": [
-            "  vgrid         = \"$\" format-term \":\" param-value [ params ]\n  format-term   = \"~\" context-term\n\n  params        = context-tail / value-tail\n  context-tail  = \"$\" [ context-term ] [ \":\" param-value [ params ] / context-tail ]\n  value-tail    = \":\" param-value [ params ]\n\n  context-term  = ALPHA *unreserved-nt\n  param-value   = vpath / 1*( unencoded / pct-encoded )\n"
+            "  vgrid-tail    = \"$\" vgrid \"@\" [ verbs-tail ]\n  vgrid         = format-term \":\" param-value [ params ]\n  format-term   = \"~\" context-term\n\n  params        = context-tail / value-tail\n  context-tail  = \"$\" [ context-term ] [ \":\" param-value [ params ] / context-tail ]\n  value-tail    = \":\" param-value [ params ]\n\n  context-term  = ALPHA *unreserved-nt\n  param-value   = vpath / 1*( unencoded / pct-encoded )\n"
           ]
         }
       ]
@@ -1285,7 +1304,7 @@
               "@type": "revdoc:ABNF",
               "vdoc:language": "https://tools.ietf.org/html/rfc5234",
               "vdoc:content": [
-                "  vpath         = \"@\" vgrid-tail / verbs-tail\n\n  vgrid-tail    = vgrid \"@\" [ verbs-tail ]\n  vgrid         = \"$\" format-term \":\" param-value [ params ]\n  format-term   = \"~\" context-term\n\n  verbs-tail     = verb \"@\" [ verbs-tail ]\n  verb          = verb-type params\n  verb-type     = 1*unencoded\n\n  params        = context-tail / value-tail\n  context-tail  = \"$\" [ context-term ] [ \":\" param-value [ params ] / context-tail ]\n  value-tail    = \":\" param-value [ params ]\n\n  context-term  = ALPHA *unreserved-nt\n  param-value   = vpath / 1*( unencoded / pct-encoded )\n\n  unencoded     = unreserved / \"!\" / \"*\" / \"'\" / \"(\" / \")\"\n  unreserved    = unreserved-nt / \"~\"\n  unreserved-nt = ALPHA / DIGIT / \"-\" / \"_\" / \".\"\n  pct-encoded   = \"%\" HEXDIG HEXDIG"
+                "  vpath         = \"@\" vgrid-tail / verbs-tail\n\n  vgrid-tail    = \"$\" vgrid \"@\" [ verbs-tail ]\n  vgrid         = format-term \":\" param-value [ params ]\n  format-term   = \"~\" context-term\n\n  verbs-tail     = verb \"@\" [ verbs-tail ]\n  verb          = verb-type params\n  verb-type     = 1*unencoded\n\n  params        = context-tail / value-tail\n  context-tail  = \"$\" [ context-term ] [ \":\" param-value [ params ] / context-tail ]\n  value-tail    = \":\" param-value [ params ]\n\n  context-term  = ALPHA *unreserved-nt\n  param-value   = vpath / 1*( unencoded / pct-encoded )\n\n  unencoded     = unreserved / \"!\" / \"*\" / \"'\" / \"(\" / \")\"\n  unreserved    = unreserved-nt / \"~\"\n  unreserved-nt = ALPHA / DIGIT / \"-\" / \"_\" / \".\"\n  pct-encoded   = \"%\" HEXDIG HEXDIG"
               ]
             }
           ]
@@ -1304,7 +1323,7 @@
               "@type": "revdoc:ABNF",
               "vdoc:language": "https://tools.ietf.org/html/rfc5234",
               "vdoc:content": [
-                "  vrid            = \"@\" vgrid-tail\n  verbs           = \"@\" verbs-tail\n  vparam          = [ \"$\" [ context-term ] ] [ \":\" param-value ]\n  context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )\n"
+                "  vrid            = \"@\" \"$\" vgrid \"@\" [ verbs-tail ]\n  verbs           = \"@\" verbs-tail\n  vparam          = [ \"$\" [ context-term ] ] [ \":\" param-value ]\n  context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )\n"
               ]
             }
           ]

@@ -398,7 +398,8 @@ const objectLookup = {
   "-M": "content", // "medias",
 };
 
-function bindExpandedVPath (vp, contextLookup = {}, containerType = "@", containerIndex = 0) {
+function bindExpandedVPath (vp, contextLookup = {}, containerType = "@"
+    /* , containerIndex = 0 */) {
   let expandedVPath = vp;
   if (containerType === "@") {
     if (!Array.isArray(vp)) return vp;

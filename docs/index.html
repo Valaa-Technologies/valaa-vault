@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"valos"};
+      var respecConfig = {"subtitle":"0.35.0-prerelease.13","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"valos"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -92,7 +92,7 @@ yourself.</span>
 ValOS resources.</span>
 </p></div>
   <section id="section_prefixes" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_prefixes">§ </a>IRI prefixes</h3>
+    <h3><a aria-label="§" href="#section_prefixes">§ </a><em>valos</em> IRI prefixes</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -114,7 +114,7 @@ ValOS resources.</span>
   </section>
 
   <section id="section_types" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_types">§ </a>&#x3C;em&#x3E;valos:* a valos-raem:Type&#x3C;/em&#x3E; vocabulary</h3>
+    <h3><a aria-label="§" href="#section_types">§ </a><em>valos</em> <a href="https://valospace.org/raem#Type" class="vdoc type-vdoc-reference">valos-raem:Type</a> vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -223,7 +223,7 @@ structures.</td></tr>
   </section>
 
   <section id="section_fields" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_fields">§ </a>&#x3C;em&#x3E;valos:* a valos-raem:Field&#x3C;/em&#x3E; vocabulary</h3>
+    <h3><a aria-label="§" href="#section_fields">§ </a><em>valos</em> <a href="https://valospace.org/raem#Field" class="vdoc type-vdoc-reference">valos-raem:Field</a> vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -440,15 +440,15 @@ connectedInRelations and connectedOutRelations (ie. incoming and
 outgoing relations which are also connected by this sourcered node) but
 also relations which only have this sourcered node as their connector
 but not as source or target.</td></tr>
-        <tr id="source"><td><a href="#source" class="vdoc type-vdoc-reference"><em>source</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>rdf:subject</td><td>valos:outgoingRelations</td></tr>
+        <tr id="source"><td><a href="#source" class="vdoc type-vdoc-reference"><em>source</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>rdf:subject</td><td>valos:outRelations</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The source node of this relation.</td></tr>
-        <tr id="outgoingRelations" class=" vdoc-nth-child-2n"><td><a href="#outgoingRelations" class="vdoc type-vdoc-reference"><em>outgoingRelations</em></a></td><td>valos:SourcerableNode</td><td>rdfs:List</td><td>valos-raem:CoupledField</td><td>valos:nodes</td><td>valos:source</td></tr>
+        <tr id="outRelations" class=" vdoc-nth-child-2n"><td><a href="#outRelations" class="vdoc type-vdoc-reference"><em>outRelations</em></a></td><td>valos:SourcerableNode</td><td>rdfs:List</td><td>valos-raem:CoupledField</td><td>valos:nodes</td><td>valos:source</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The unordered list of outgoing relations with this sourcerable
 (but possibly absent) node as their source (note that sourcerable and
 source are completely separate concepts here).</td></tr>
-        <tr id="target"><td><a href="#target" class="vdoc type-vdoc-reference"><em>target</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>rdf:object</td><td>valos:incomingRelations</td></tr>
+        <tr id="target"><td><a href="#target" class="vdoc type-vdoc-reference"><em>target</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>rdf:object</td><td>valos:inRelations</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The target node of this relation.</td></tr>
-        <tr id="incomingRelations" class=" vdoc-nth-child-2n"><td><a href="#incomingRelations" class="vdoc type-vdoc-reference"><em>incomingRelations</em></a></td><td>valos:SourcerableNode</td><td>rdfs:List</td><td>valos-raem:CoupledField</td><td>valos:nodes</td><td>valos:target</td></tr>
+        <tr id="inRelations" class=" vdoc-nth-child-2n"><td><a href="#inRelations" class="vdoc type-vdoc-reference"><em>inRelations</em></a></td><td>valos:SourcerableNode</td><td>rdfs:List</td><td>valos-raem:CoupledField</td><td>valos:nodes</td><td>valos:target</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The unordered list of incoming relations with this sourcerable
 (but possibly absent) node as their target.</td></tr>
         <tr id="pairedSource"><td><a href="#pairedSource" class="vdoc type-vdoc-reference"><em>pairedSource</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:source</td><td>valos:pairedOutRelations</td></tr>
@@ -479,13 +479,20 @@ also contain relations which have this sourcered node as their the
 target (instead of source) or as neither source nor target.
 The set of just outgoing relations is 'outgoingRelations' and the set
 of owned outgoing relations is 'connectedOutRelations'.</td></tr>
+        <tr id="outgoingRelations" class=" vdoc-nth-child-2n"><td><a href="#outgoingRelations" class="vdoc type-vdoc-reference"><em>outgoingRelations</em></a></td><td>valos:SourcerableNode</td><td>rdfs:List</td><td>valos-raem:AliasField</td><td>valos:outRelations</td><td>valos:source</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The unordered list of outgoing relations with this sourcerable
+(but possibly absent) node as their source (note that sourcerable and
+source are completely separate concepts here).</td></tr>
+        <tr id="incomingRelations"><td><a href="#incomingRelations" class="vdoc type-vdoc-reference"><em>incomingRelations</em></a></td><td>valos:SourcerableNode</td><td>rdfs:List</td><td>valos-raem:AliasField</td><td>valos:inRelations</td><td>valos:target</td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The unordered list of incoming relations with this sourcerable
+(but possibly absent) node as their target.</td></tr>
       </tbody>
     </table>
 
   </section>
 
   <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a>&#x3C;em&#x3E;valos:*&#x3C;/em&#x3E; other vocabulary</h3>
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>valos</em> remaining vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -551,9 +558,9 @@ of owned outgoing relations is 'connectedOutRelations'.</td></tr>
         <tr><td>valos:connector</td><td></td><td>https://valospace.org/#connector</td><td>@id</td><td></td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:connectedRelations</td><td></td><td>https://valospace.org/#connectedRelations</td><td>@id</td><td>@list</td></tr>
         <tr><td>valos:source</td><td></td><td>https://valospace.org/#source</td><td>@id</td><td></td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos:outgoingRelations</td><td></td><td>https://valospace.org/#outgoingRelations</td><td>@id</td><td>@list</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:outRelations</td><td></td><td>https://valospace.org/#outRelations</td><td>@id</td><td>@list</td></tr>
         <tr><td>valos:target</td><td></td><td>https://valospace.org/#target</td><td>@id</td><td></td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valos:incomingRelations</td><td></td><td>https://valospace.org/#incomingRelations</td><td>@id</td><td>@list</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:inRelations</td><td></td><td>https://valospace.org/#inRelations</td><td>@id</td><td>@list</td></tr>
         <tr><td>valos:pairedSource</td><td></td><td>https://valospace.org/#pairedSource</td><td>@id</td><td></td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:pairedOutRelations</td><td></td><td>https://valospace.org/#pairedOutRelations</td><td>@id</td><td>@list</td></tr>
         <tr><td>valos:pairedTarget</td><td></td><td>https://valospace.org/#pairedTarget</td><td>@id</td><td></td></tr>
@@ -563,6 +570,8 @@ of owned outgoing relations is 'connectedOutRelations'.</td></tr>
         <tr><td>valos:connectorTarget</td><td></td><td>https://valospace.org/#connectorTarget</td><td>@id</td><td></td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:connectedInRelations</td><td></td><td>https://valospace.org/#connectedInRelations</td><td>@id</td><td>@list</td></tr>
         <tr><td>valos:relations</td><td></td><td>https://valospace.org/#relations</td><td>@id</td><td>@list</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos:outgoingRelations</td><td></td><td>https://valospace.org/#outgoingRelations</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos:incomingRelations</td><td></td><td>https://valospace.org/#incomingRelations</td><td>@id</td><td>@list</td></tr>
       </tbody>
     </table>
 

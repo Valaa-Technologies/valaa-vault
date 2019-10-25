@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>@valos/kernel removed-from field reference</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"subtitle":"0.35.0-prerelease.13","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"valosRemovedFrom"};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body class="vdoc vdoc-body">
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">Ontology of the secondary &#x60;removed-from&#x60; fields of the primary
+valospace fields which have them (ie. those which statefully track
+entries that have been removed from them).</span>
+</p></div>
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document is part of the vault workspace <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>
+(of domain <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which has the description:
+&#x60;ValOS common infrastructure tools and libraries monorepository.&#x60;.</span>
+</p></div>
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">Some container fields maintain a hidden list of entries that have been
+removed from them, f.ex. for expressing removals from ghost fields
+which are empty as they inherit their entries from the prototype.</span>
+</p></div>
+  </section>
+
+  <section id="ontology" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#ontology">§ </a>Valospace ontology, prefix https://valospace.org/removed-from#, preferred label &#x27;valos-removed-from&#x27;</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">Valospace removed-from ontology provides vocabulary and definitions of
+the primary ValOS resources removed-from fields.</span>
+</p></div>
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_prefixes">§ </a><em>valos-removed-from</em> IRI prefixes</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Prefix</th>
+        <th class="vdoc type-vdoc-header">IRI</th>
+      </thead>
+      <tbody>
+        <tr><td>rdf</td><td>http://www.w3.org/1999/02/22-rdf-syntax-ns#</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>rdfs</td><td>http://www.w3.org/2000/01/rdf-schema#</td></tr>
+        <tr><td>xsd</td><td>http://www.w3.org/2001/XMLSchema#</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>owl</td><td>http://www.w3.org/2002/07/owl#</td></tr>
+        <tr><td>dc</td><td>http://purl.org/dc/elements/1.1/</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos-kernel</td><td>https://valospace.org/kernel#</td></tr>
+        <tr><td>valos</td><td>https://valospace.org/#</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos-raem</td><td>https://valospace.org/raem#</td></tr>
+        <tr><td>valos-removed-from</td><td>https://valospace.org/removed-from#</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_fields" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_fields">§ </a><em>valos-removed-from</em> <a href="https://valospace.org/raem#Field" class="vdoc type-vdoc-reference">valos-raem:Field</a> vocabulary</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdfs:domain</th>
+        <th class="vdoc type-vdoc-header">rdfs:range</th>
+        <th class="vdoc type-vdoc-header">rdf:type</th>
+        <th class="vdoc type-vdoc-header">rdfs:subPropertyOf</th>
+        <th class="vdoc type-vdoc-header">valos-raem:coupledField</th>
+      </thead>
+      <tbody>
+        <tr id="ownlings" class=" vdoc-nth-child-2n"><td><a href="#ownlings" class="vdoc type-vdoc-reference"><em>ownlings</em></a></td><td>valos:Extant</td><td>rdfs:List</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>removed-from entries of field valos:ownlings.</td></tr>
+        <tr id="properties"><td><a href="#properties" class="vdoc type-vdoc-reference"><em>properties</em></a></td><td>valos:Scope</td><td>rdfs:List</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>removed-from entries of field valos:properties.</td></tr>
+        <tr id="nodes" class=" vdoc-nth-child-2n"><td><a href="#nodes" class="vdoc type-vdoc-reference"><em>nodes</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>removed-from entries of field valos:nodes.</td></tr>
+        <tr id="entries"><td><a href="#entries" class="vdoc type-vdoc-reference"><em>entries</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>removed-from entries of field valos:entries.</td></tr>
+        <tr id="entities" class=" vdoc-nth-child-2n"><td><a href="#entities" class="vdoc type-vdoc-reference"><em>entities</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>removed-from entries of field valos:entities.</td></tr>
+        <tr id="medias"><td><a href="#medias" class="vdoc type-vdoc-reference"><em>medias</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>removed-from entries of field valos:medias.</td></tr>
+        <tr id="connectedRelations" class=" vdoc-nth-child-2n"><td><a href="#connectedRelations" class="vdoc type-vdoc-reference"><em>connectedRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>removed-from entries of field valos:connectedRelations.</td></tr>
+        <tr id="outRelations"><td><a href="#outRelations" class="vdoc type-vdoc-reference"><em>outRelations</em></a></td><td>valos:SourcerableNode</td><td>rdfs:List</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>removed-from entries of field valos:outRelations.</td></tr>
+        <tr id="inRelations" class=" vdoc-nth-child-2n"><td><a href="#inRelations" class="vdoc type-vdoc-reference"><em>inRelations</em></a></td><td>valos:SourcerableNode</td><td>rdfs:List</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>removed-from entries of field valos:inRelations.</td></tr>
+        <tr id="pairedOutRelations"><td><a href="#pairedOutRelations" class="vdoc type-vdoc-reference"><em>pairedOutRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>removed-from entries of field valos:pairedOutRelations.</td></tr>
+        <tr id="pairedInRelations" class=" vdoc-nth-child-2n"><td><a href="#pairedInRelations" class="vdoc type-vdoc-reference"><em>pairedInRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>removed-from entries of field valos:pairedInRelations.</td></tr>
+        <tr id="connectedOutRelations"><td><a href="#connectedOutRelations" class="vdoc type-vdoc-reference"><em>connectedOutRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>removed-from entries of field valos:connectedOutRelations.</td></tr>
+        <tr id="connectedInRelations" class=" vdoc-nth-child-2n"><td><a href="#connectedInRelations" class="vdoc type-vdoc-reference"><em>connectedInRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>removed-from entries of field valos:connectedInRelations.</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>valos-removed-from</em> remaining vocabulary</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdf:type</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_context" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_context">§ </a>JSON-LD context term definitions</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Term</th>
+        <th class="vdoc type-vdoc-header">Definition</th>
+        <th class="vdoc type-vdoc-header">@id</th>
+        <th class="vdoc type-vdoc-header">@type</th>
+        <th class="vdoc type-vdoc-header">@container</th>
+      </thead>
+      <tbody>
+        <tr><td>valos-removed-from:ownlings</td><td></td><td>https://valospace.org/removed-from#ownlings</td><td>@id</td><td>@list</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos-removed-from:properties</td><td></td><td>https://valospace.org/removed-from#properties</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos-removed-from:nodes</td><td></td><td>https://valospace.org/removed-from#nodes</td><td>@id</td><td>@list</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos-removed-from:entries</td><td></td><td>https://valospace.org/removed-from#entries</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos-removed-from:entities</td><td></td><td>https://valospace.org/removed-from#entities</td><td>@id</td><td>@list</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos-removed-from:medias</td><td></td><td>https://valospace.org/removed-from#medias</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos-removed-from:connectedRelations</td><td></td><td>https://valospace.org/removed-from#connectedRelations</td><td>@id</td><td>@list</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos-removed-from:outRelations</td><td></td><td>https://valospace.org/removed-from#outRelations</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos-removed-from:inRelations</td><td></td><td>https://valospace.org/removed-from#inRelations</td><td>@id</td><td>@list</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos-removed-from:pairedOutRelations</td><td></td><td>https://valospace.org/removed-from#pairedOutRelations</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos-removed-from:pairedInRelations</td><td></td><td>https://valospace.org/removed-from#pairedInRelations</td><td>@id</td><td>@list</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valos-removed-from:connectedOutRelations</td><td></td><td>https://valospace.org/removed-from#connectedOutRelations</td><td>@id</td><td>@list</td></tr>
+        <tr><td>valos-removed-from:connectedInRelations</td><td></td><td>https://valospace.org/removed-from#connectedInRelations</td><td>@id</td><td>@list</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  </section>
+
+  </body>
+</html>

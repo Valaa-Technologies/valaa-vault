@@ -1,8 +1,8 @@
 [
   {
-    "@id": "https://valospace.org/sbomdoc",
+    "@id": "https://valospace.org/removed-from",
     "@context": {
-      "@base": "https://valospace.org/sbomdoc#",
+      "@base": "https://valospace.org/removed-from#",
       "sbomdoc": "https://valospace.org/sbomdoc#",
       "revdoc": "https://valospace.org/revdoc#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -37,15 +37,14 @@
         "@type": "@id"
       }
     },
-    "dc:title": "SBoMDoc - Software Bill of Materials VDoc extension",
+    "dc:title": "@valos/kernel removed-from field reference",
     "vdoc:tags": [
-      "PRIMARY",
-      "ONTOLOGY"
+      "ONTOLOGY",
+      "TECHNICIAN"
     ],
-    "revdoc:package": "@valos/sbomdoc",
-    "revdoc:prefix": "sbomdoc",
-    "revdoc:prefixIRI": "https://valospace.org/sbomdoc#",
-    "revdoc:version": "0.35.0-prerelease.13",
+    "revdoc:package": "@valos/kernel",
+    "revdoc:prefix": "valos-removed-from",
+    "revdoc:prefixIRI": "https://valospace.org/removed-from#",
     "respecConfig": {
       "subtitle": "0.35.0-prerelease.13",
       "specStatus": "unofficial",
@@ -56,13 +55,169 @@
           "github": "http://github.com/valospace"
         }
       ],
-      "shortName": "sbomdoc",
-      "alternateFormats": [
-        {
-          "label": "VDoc",
-          "uri": "sbomdoc.jsonld"
-        }
-      ]
+      "authors": [],
+      "shortName": "valosRemovedFrom"
+    },
+    "prefixes": {
+      "@id": "prefixes",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "valos-kernel": "https://valospace.org/kernel#",
+      "valos": "https://valospace.org/#",
+      "valos-raem": "https://valospace.org/raem#",
+      "valos-removed-from": "https://valospace.org/removed-from#"
+    },
+    "vocabulary": {
+      "@id": "vocabulary",
+      "ownlings": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:Extant",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field valos:ownlings."
+      },
+      "properties": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:Scope",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field valos:properties."
+      },
+      "nodes": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field valos:nodes."
+      },
+      "entries": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field valos:entries."
+      },
+      "entities": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field valos:entities."
+      },
+      "medias": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field valos:medias."
+      },
+      "connectedRelations": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field valos:connectedRelations."
+      },
+      "outRelations": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:SourcerableNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field valos:outRelations."
+      },
+      "inRelations": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:SourcerableNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field valos:inRelations."
+      },
+      "pairedOutRelations": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field valos:pairedOutRelations."
+      },
+      "pairedInRelations": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field valos:pairedInRelations."
+      },
+      "connectedOutRelations": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field valos:connectedOutRelations."
+      },
+      "connectedInRelations": {
+        "@type": "valos-raem:GeneratedField",
+        "rdfs:domain": "valos:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field valos:connectedInRelations."
+      }
+    },
+    "context": {
+      "@id": "context",
+      "valos-removed-from:ownlings": {
+        "@id": "https://valospace.org/removed-from#ownlings",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "valos-removed-from:properties": {
+        "@id": "https://valospace.org/removed-from#properties",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "valos-removed-from:nodes": {
+        "@id": "https://valospace.org/removed-from#nodes",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "valos-removed-from:entries": {
+        "@id": "https://valospace.org/removed-from#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "valos-removed-from:entities": {
+        "@id": "https://valospace.org/removed-from#entities",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "valos-removed-from:medias": {
+        "@id": "https://valospace.org/removed-from#medias",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "valos-removed-from:connectedRelations": {
+        "@id": "https://valospace.org/removed-from#connectedRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "valos-removed-from:outRelations": {
+        "@id": "https://valospace.org/removed-from#outRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "valos-removed-from:inRelations": {
+        "@id": "https://valospace.org/removed-from#inRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "valos-removed-from:pairedOutRelations": {
+        "@id": "https://valospace.org/removed-from#pairedOutRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "valos-removed-from:pairedInRelations": {
+        "@id": "https://valospace.org/removed-from#pairedInRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "valos-removed-from:connectedOutRelations": {
+        "@id": "https://valospace.org/removed-from#connectedOutRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "valos-removed-from:connectedInRelations": {
+        "@id": "https://valospace.org/removed-from#connectedInRelations",
+        "@container": "@list",
+        "@type": "@id"
+      }
     },
     "abstract": {
       "@id": "abstract",
@@ -71,23 +226,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "This document specifies SBomDoc, a ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "VDoc extension"
-              ],
-              "vdoc:ref": "@valos/vdoc#extension"
-            },
-            "\nfor extracting and emitting ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "CycloneDX BOM documents"
-              ],
-              "vdoc:ref": "https://cyclonedx.org/"
-            },
-            "\nin various formats."
+            "Ontology of the secondary `removed-from` fields of the primary\nvalospace fields which have them (ie. those which statefully track\nentries that have been removed from them)."
           ]
         }
       ]
@@ -99,59 +238,53 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "This document has not been reviewed. This is a draft document and\nmay be updated, replaced or obsoleted by other documents at any\ntime."
-          ]
-        },
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "This document is part of the ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "ValOS core specification"
-              ],
-              "vdoc:ref": "@valos/kernel/spec"
-            },
-            "."
-          ]
-        },
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "The format is implemented and supported by ",
+            "This document is part of the vault workspace ",
             {
               "@type": "revdoc:Package",
               "vdoc:content": [
                 {
                   "vdoc:em": true,
                   "vdoc:content": [
-                    "@valos/sbomdoc"
+                    "@valos/kernel"
                   ]
                 }
               ],
-              "vdoc:ref": "@valos/sbomdoc"
+              "vdoc:ref": "@valos/kernel"
             },
-            "\nnpm package."
+            "\n(of domain ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`ValOS common infrastructure tools and libraries monorepository.`."
           ]
         }
       ]
     },
     "introduction": {
       "@id": "introduction",
+      "dc:title": "",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "SBoMDoc is a VDoc extension which uses CycloneDX namespaces and can\nemit BOM documents in various formats."
+            "Some container fields maintain a hidden list of entries that have been\nremoved from them, f.ex. for expressing removals from ghost fields\nwhich are empty as they inherit their entries from the prototype."
           ]
         }
       ]
     },
     "ontology": {
       "@id": "ontology",
-      "dc:title": "SBoMDoc ontology",
+      "dc:title": "Valospace ontology, prefix https://valospace.org/removed-from#, preferred label 'valos-removed-from'",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -161,10 +294,7 @@
           "@id": "section_prefixes"
         },
         {
-          "@id": "section_classes"
-        },
-        {
-          "@id": "section_properties"
+          "@id": "section_fields"
         },
         {
           "@id": "section_vocabulary_other"
@@ -174,36 +304,29 @@
         }
       ]
     },
-    "prefixes": {
-      "@id": "prefixes",
-      "sbomdoc": "https://valospace.org/sbomdoc#"
-    },
-    "vocabulary": {
-      "@id": "vocabulary",
-      "Document": {
-        "@type": "rdfs:class",
-        "rdfs:subClassOf": "vdoc:Chapter",
-        "rdfs:comment": "A Software Bill of Materials document"
-      }
-    },
-    "context": {
-      "@id": "context"
-    },
     "section_ontology_abstract": {
       "@id": "section_ontology_abstract",
       "vdoc:content": [
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "SBoMDoc ontology provides vocabulary and definitions which are\ntailored for representing CycloneDX SBoM analysis semantic content."
+            "Valospace removed-from ontology provides vocabulary and definitions of\nthe primary ValOS resources removed-from fields."
           ]
         }
       ]
     },
     "section_prefixes": {
       "@id": "section_prefixes",
-      "dc:title": "SBoMDoc IRI prefixes",
       "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "valos-removed-from"
+          ]
+        },
+        " IRI prefixes"
+      ],
       "vdoc:content": [
         {
           "vdoc:lookup": "prefixes",
@@ -227,23 +350,23 @@
         }
       ]
     },
-    "section_classes": {
-      "@id": "section_classes",
+    "section_fields": {
+      "@id": "section_fields",
       "@type": "vdoc:Chapter",
       "dc:title": [
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "sbomdoc"
+            "valos-removed-from"
           ]
         },
         " ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "vdoc:Class"
+            "valos-raem:Field"
           ],
-          "vdoc:ref": "@valos/vdoc#Class"
+          "vdoc:ref": "@valos/raem#Field"
         },
         " vocabulary"
       ],
@@ -274,89 +397,6 @@
                     "vdoc:selectKey"
                   ]
                 }
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:subClassOf"
-                ],
-                "vdoc:cell": {
-                  "vdoc:words": {
-                    "vdoc:selectField": "rdfs:subClassOf"
-                  }
-                }
-              },
-              {
-                "vdoc:cell": "rdfs:comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "rdfs:comment"
-                  ]
-                },
-                "vdoc:wide": true
-              }
-            ]
-          },
-          "vdoc:entries": []
-        }
-      ]
-    },
-    "section_properties": {
-      "@id": "section_properties",
-      "@type": "vdoc:Chapter",
-      "dc:title": [
-        {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "sbomdoc"
-          ]
-        },
-        " ",
-        {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "vdoc:Property"
-          ],
-          "vdoc:ref": "@valos/vdoc#Property"
-        },
-        " vocabulary"
-      ],
-      "vdoc:content": [
-        {
-          "vdoc:lookup": "vocabulary",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
-              {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:label"
-                ],
-                "vdoc:cell": {
-                  "vdoc:resourceId": "vdoc:selectKey",
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    {
-                      "vdoc:em": true,
-                      "vdoc:content": [
-                        "vdoc:selectKey"
-                      ]
-                    }
-                  ],
-                  "vdoc:ref": [
-                    "#",
-                    "vdoc:selectKey"
-                  ]
-                }
-              },
-              {
-                "vdoc:cell": "rdfs:subPropertyOf",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:subPropertyOf"
-                ]
               },
               {
                 "vdoc:cell": "rdfs:domain",
@@ -373,6 +413,27 @@
                 ]
               },
               {
+                "vdoc:cell": "@type",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdf:type"
+                ]
+              },
+              {
+                "vdoc:cell": "rdfs:subPropertyOf",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "rdfs:subPropertyOf"
+                ]
+              },
+              {
+                "vdoc:cell": "valos-raem:coupledField",
+                "@type": "vdoc:Header",
+                "vdoc:content": [
+                  "valos-raem:coupledField"
+                ]
+              },
+              {
                 "vdoc:cell": "rdfs:comment",
                 "@type": "vdoc:Header",
                 "vdoc:content": {
@@ -385,7 +446,21 @@
               }
             ]
           },
-          "vdoc:entries": []
+          "vdoc:entries": [
+            "ownlings",
+            "properties",
+            "nodes",
+            "entries",
+            "entities",
+            "medias",
+            "connectedRelations",
+            "outRelations",
+            "inRelations",
+            "pairedOutRelations",
+            "pairedInRelations",
+            "connectedOutRelations",
+            "connectedInRelations"
+          ]
         }
       ]
     },
@@ -396,7 +471,7 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "sbomdoc"
+            "valos-removed-from"
           ]
         },
         " remaining vocabulary"
@@ -460,15 +535,13 @@
               }
             ]
           },
-          "vdoc:entries": [
-            "Document"
-          ]
+          "vdoc:entries": []
         }
       ]
     },
     "section_context": {
       "@id": "section_context",
-      "dc:title": "SBoMDoc JSON-LD context term definitions",
+      "dc:title": "JSON-LD context term definitions",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -514,138 +587,6 @@
         }
       ]
     },
-    "transformations": {
-      "@id": "transformations",
-      "dc:title": "SBoMDoc transformations",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "@id": "extraction_rules"
-        },
-        {
-          "@id": "extractee_api"
-        },
-        {
-          "@id": "emission_output"
-        },
-        {
-          "@id": "emission_rules"
-        }
-      ]
-    },
-    "extraction_rules": {
-      "@id": "extraction_rules",
-      "dc:title": "SBoMDoc extraction rules",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "vdoc:lookup": "extraction_rules_data",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
-            {
-              "vdoc:cell": "vdoc:selectKey",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Rule name"
-              ]
-            },
-            {
-              "vdoc:cell": "range",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Inter-node rdf:type"
-              ]
-            },
-            {
-              "vdoc:cell": "owner",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Owner property"
-              ]
-            },
-            {
-              "vdoc:cell": "body",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Body property"
-              ]
-            },
-            {
-              "vdoc:cell": "rest",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "';rest' property"
-              ]
-            },
-            {
-              "vdoc:cell": "comment",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "Comment"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "extraction_rules_data": {
-      "@id": "extraction_rules_data"
-    },
-    "extractee_api": {
-      "@id": "extractee_api",
-      "dc:title": "SBoMDoc extractee API",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "vdoc:lookup": "extractee_api_lookup",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
-            {
-              "vdoc:cell": "vdoc:selectKey",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "API identifier"
-              ]
-            },
-            {
-              "vdoc:cell": "vdoc:selectValue",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
-                "rdf:type"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "extractee_api_lookup": {
-      "@id": "extractee_api_lookup"
-    },
-    "emission_output": {
-      "@id": "emission_output",
-      "dc:title": "SBoMDoc emission output",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
-    },
-    "emission_rules": {
-      "@id": "emission_rules",
-      "dc:title": "SBoMDoc emission rules",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "ReVDoc provides html emission rules for ",
-            {
-              "vdoc:words": [
-                "vdoc:Document",
-                "sbomdoc:Document"
-              ]
-            }
-          ]
-        }
-      ]
-    },
     "@type": "revdoc:Document",
     "vdoc:content": [
       {
@@ -659,9 +600,6 @@
       },
       {
         "@id": "ontology"
-      },
-      {
-        "@id": "transformations"
       }
     ]
   }

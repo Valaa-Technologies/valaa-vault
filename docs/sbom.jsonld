@@ -89,7 +89,7 @@
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
             "This document was automatically generated on ",
-            "2019-10-18T01:05:34.727Z",
+            "2019-10-25T05:54:44.366Z",
             "."
           ]
         },
@@ -4155,6 +4155,26 @@
       {
         "type": "library",
         "group": "webassemblyjs",
+        "name": "helper-buffer",
+        "version": "1.8.5",
+        "description": "Buffer manipulation utility",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40webassemblyjs/helper-buffer@1.8.5",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "webassemblyjs",
+        "name": "helper-fsm",
+        "version": "1.8.5",
+        "description": "FSM implementation",
+        "licenses": "ISC",
+        "purl": "pkg:npm/%40webassemblyjs/helper-fsm@1.8.5",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "webassemblyjs",
         "name": "helper-code-frame",
         "version": "1.8.5",
         "licenses": "MIT",
@@ -4222,32 +4242,12 @@
       },
       {
         "type": "library",
-        "group": "webassemblyjs",
-        "name": "helper-fsm",
-        "version": "1.8.5",
-        "description": "FSM implementation",
-        "licenses": "ISC",
-        "purl": "pkg:npm/%40webassemblyjs/helper-fsm@1.8.5",
-        "modified": false
-      },
-      {
-        "type": "library",
         "group": "xtuc",
         "name": "long",
         "version": "4.2.2",
         "description": "A Long class for representing a 64-bit two's-complement integer value.",
         "licenses": "Apache-2.0",
         "purl": "pkg:npm/%40xtuc/long@4.2.2",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "webassemblyjs",
-        "name": "helper-buffer",
-        "version": "1.8.5",
-        "description": "Buffer manipulation utility",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40webassemblyjs/helper-buffer@1.8.5",
         "modified": false
       },
       {
@@ -4486,6 +4486,26 @@
       {
         "type": "library",
         "group": "babel",
+        "name": "helper-call-delegate",
+        "version": "7.4.4",
+        "description": "Helper function to call delegate",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/helper-call-delegate@7.4.4",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
+        "name": "helper-hoist-variables",
+        "version": "7.4.4",
+        "description": "Helper function to hoist variables",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/helper-hoist-variables@7.4.4",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
         "name": "helper-builder-react-jsx",
         "version": "7.3.0",
         "description": "Helper function to build react jsx",
@@ -4551,26 +4571,6 @@
         "description": "Helper function to define a map",
         "licenses": "MIT",
         "purl": "pkg:npm/%40babel/helper-define-map@7.5.5",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
-        "name": "helper-call-delegate",
-        "version": "7.4.4",
-        "description": "Helper function to call delegate",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/helper-call-delegate@7.4.4",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
-        "name": "helper-hoist-variables",
-        "version": "7.4.4",
-        "description": "Helper function to hoist variables",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/helper-hoist-variables@7.4.4",
         "modified": false
       },
       {
@@ -4756,26 +4756,6 @@
       {
         "type": "library",
         "group": "babel",
-        "name": "plugin-proposal-optional-catch-binding",
-        "version": "7.2.0",
-        "description": "Compile optional catch bindings",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/plugin-proposal-optional-catch-binding@7.2.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
-        "name": "plugin-syntax-optional-catch-binding",
-        "version": "7.2.0",
-        "description": "Allow parsing of optional catch bindings",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/plugin-syntax-optional-catch-binding@7.2.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
         "name": "plugin-proposal-object-rest-spread",
         "version": "7.6.2",
         "description": "Compile object rest and spread to ES5",
@@ -4791,6 +4771,26 @@
         "description": "Allow parsing of object rest/spread",
         "licenses": "MIT",
         "purl": "pkg:npm/%40babel/plugin-syntax-object-rest-spread@7.2.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
+        "name": "plugin-proposal-optional-catch-binding",
+        "version": "7.2.0",
+        "description": "Compile optional catch bindings",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/plugin-proposal-optional-catch-binding@7.2.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
+        "name": "plugin-syntax-optional-catch-binding",
+        "version": "7.2.0",
+        "description": "Allow parsing of optional catch bindings",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/plugin-syntax-optional-catch-binding@7.2.0",
         "modified": false
       },
       {
@@ -4946,21 +4946,21 @@
       {
         "type": "library",
         "group": "babel",
-        "name": "plugin-transform-block-scoping",
-        "version": "7.6.3",
-        "description": "Compile ES2015 block scoping (const and let) to ES5",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/plugin-transform-block-scoping@7.6.3",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
         "name": "plugin-transform-classes",
         "version": "7.5.5",
         "description": "Compile ES2015 classes to ES5",
         "licenses": "MIT",
         "purl": "pkg:npm/%40babel/plugin-transform-classes@7.5.5",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
+        "name": "plugin-transform-block-scoping",
+        "version": "7.6.3",
+        "description": "Compile ES2015 block scoping (const and let) to ES5",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/plugin-transform-block-scoping@7.6.3",
         "modified": false
       },
       {
@@ -4981,26 +4981,6 @@
         "description": "Compile ES2015 destructuring to ES5",
         "licenses": "MIT",
         "purl": "pkg:npm/%40babel/plugin-transform-destructuring@7.6.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
-        "name": "plugin-transform-dotall-regex",
-        "version": "7.6.2",
-        "description": "Compile regular expressions using the `s` (`dotAll`) flag to ES5.",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/plugin-transform-dotall-regex@7.6.2",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
-        "name": "plugin-transform-duplicate-keys",
-        "version": "7.5.0",
-        "description": "Compile objects with duplicate keys to valid strict ES5",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/plugin-transform-duplicate-keys@7.5.0",
         "modified": false
       },
       {
@@ -5046,6 +5026,16 @@
       {
         "type": "library",
         "group": "babel",
+        "name": "plugin-transform-literals",
+        "version": "7.2.0",
+        "description": "Compile ES2015 unicode string and number literals to ES5",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/plugin-transform-literals@7.2.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
         "name": "plugin-transform-member-expression-literals",
         "version": "7.2.0",
         "description": "Ensure that reserved words are quoted in property accesses",
@@ -5084,16 +5074,6 @@
       {
         "type": "library",
         "group": "babel",
-        "name": "plugin-transform-literals",
-        "version": "7.2.0",
-        "description": "Compile ES2015 unicode string and number literals to ES5",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/plugin-transform-literals@7.2.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
         "name": "plugin-transform-modules-commonjs",
         "version": "7.6.0",
         "description": "This plugin transforms ES2015 modules to CommonJS",
@@ -5124,6 +5104,16 @@
       {
         "type": "library",
         "group": "babel",
+        "name": "plugin-transform-dotall-regex",
+        "version": "7.6.2",
+        "description": "Compile regular expressions using the `s` (`dotAll`) flag to ES5.",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/plugin-transform-dotall-regex@7.6.2",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
         "name": "plugin-transform-named-capturing-groups-regex",
         "version": "7.6.3",
         "description": "Compile regular expressions using named groups to ES5.",
@@ -5134,21 +5124,21 @@
       {
         "type": "library",
         "group": "babel",
-        "name": "plugin-transform-object-super",
-        "version": "7.5.5",
-        "description": "Compile ES2015 object super to ES5",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/plugin-transform-object-super@7.5.5",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
         "name": "plugin-transform-new-target",
         "version": "7.4.4",
         "description": "Transforms new.target meta property",
         "licenses": "MIT",
         "purl": "pkg:npm/%40babel/plugin-transform-new-target@7.4.4",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
+        "name": "plugin-transform-object-super",
+        "version": "7.5.5",
+        "description": "Compile ES2015 object super to ES5",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/plugin-transform-object-super@7.5.5",
         "modified": false
       },
       {
@@ -5169,6 +5159,16 @@
         "description": "Compile ES2015 default and rest parameters to ES5",
         "licenses": "MIT",
         "purl": "pkg:npm/%40babel/plugin-transform-parameters@7.4.4",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
+        "name": "plugin-transform-react-display-name",
+        "version": "7.2.0",
+        "description": "Add displayName to React.createClass calls",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/plugin-transform-react-display-name@7.2.0",
         "modified": false
       },
       {
@@ -5204,16 +5204,6 @@
       {
         "type": "library",
         "group": "babel",
-        "name": "plugin-transform-react-display-name",
-        "version": "7.2.0",
-        "description": "Add displayName to React.createClass calls",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/plugin-transform-react-display-name@7.2.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
         "name": "plugin-transform-regenerator",
         "version": "7.4.5",
         "description": "Explode async and generator functions into a state machine.",
@@ -5238,6 +5228,16 @@
         "description": "Ensure that no reserved words are used.",
         "licenses": "MIT",
         "purl": "pkg:npm/%40babel/plugin-transform-reserved-words@7.2.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
+        "name": "plugin-transform-runtime",
+        "version": "7.6.2",
+        "description": "Externalise references to helpers and builtins, automatically polyfilling your code without polluting globals",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/plugin-transform-runtime@7.6.2",
         "modified": false
       },
       {
@@ -5283,26 +5283,6 @@
       {
         "type": "library",
         "group": "babel",
-        "name": "plugin-transform-typeof-symbol",
-        "version": "7.2.0",
-        "description": "This transformer wraps all typeof expressions with a method that replicates native behaviour. (ie. returning “symbol” for symbols)",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/plugin-transform-typeof-symbol@7.2.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
-        "name": "plugin-transform-unicode-regex",
-        "version": "7.6.2",
-        "description": "Compile ES2015 Unicode regex to ES5",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/plugin-transform-unicode-regex@7.6.2",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
         "name": "polyfill",
         "version": "7.6.0",
         "description": "Provides polyfills necessary for a full ES2015+ environment",
@@ -5322,11 +5302,41 @@
       {
         "type": "library",
         "group": "babel",
-        "name": "plugin-transform-runtime",
+        "name": "plugin-transform-unicode-regex",
         "version": "7.6.2",
-        "description": "Externalise references to helpers and builtins, automatically polyfilling your code without polluting globals",
+        "description": "Compile ES2015 Unicode regex to ES5",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/plugin-transform-runtime@7.6.2",
+        "purl": "pkg:npm/%40babel/plugin-transform-unicode-regex@7.6.2",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
+        "name": "plugin-transform-typeof-symbol",
+        "version": "7.2.0",
+        "description": "This transformer wraps all typeof expressions with a method that replicates native behaviour. (ie. returning “symbol” for symbols)",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/plugin-transform-typeof-symbol@7.2.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
+        "name": "preset-react",
+        "version": "7.6.3",
+        "description": "Babel preset for all React plugins.",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/preset-react@7.6.3",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
+        "name": "preset-stage-0",
+        "version": "7.0.0",
+        "description": "Babel preset for stage 0 plugins",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/preset-stage-0@7.0.0",
         "modified": false
       },
       {
@@ -5337,6 +5347,16 @@
         "description": "A Babel preset for each environment.",
         "licenses": "MIT",
         "purl": "pkg:npm/%40babel/preset-env@7.6.3",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "babel",
+        "name": "plugin-transform-duplicate-keys",
+        "version": "7.5.0",
+        "description": "Compile objects with duplicate keys to valid strict ES5",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40babel/plugin-transform-duplicate-keys@7.5.0",
         "modified": false
       },
       {
@@ -5400,26 +5420,6 @@
         "description": "The most efficient JS implementation calculating the Levenshtein distance, i.e. the difference between two strings.",
         "licenses": "MIT",
         "purl": "pkg:npm/js-levenshtein@1.1.6",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
-        "name": "preset-react",
-        "version": "7.6.3",
-        "description": "Babel preset for all React plugins.",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/preset-react@7.6.3",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "babel",
-        "name": "preset-stage-0",
-        "version": "7.0.0",
-        "description": "Babel preset for stage 0 plugins",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40babel/preset-stage-0@7.0.0",
         "modified": false
       },
       {
@@ -8270,21 +8270,21 @@
       {
         "type": "library",
         "group": "lerna",
-        "name": "diff",
-        "version": "3.16.5",
-        "description": "Diff all packages or a single package since the last release",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40lerna/diff@3.16.5",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "lerna",
         "name": "exec",
         "version": "3.16.5",
         "description": "Execute an arbitrary command in each package",
         "licenses": "MIT",
         "purl": "pkg:npm/%40lerna/exec@3.16.5",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "lerna",
+        "name": "diff",
+        "version": "3.16.5",
+        "description": "Diff all packages or a single package since the last release",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40lerna/diff@3.16.5",
         "modified": false
       },
       {
@@ -8315,16 +8315,6 @@
         "description": "Import a package into the monorepo with commit history",
         "licenses": "MIT",
         "purl": "pkg:npm/%40lerna/import@3.16.5",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "lerna",
-        "name": "global-options",
-        "version": "3.13.0",
-        "description": "Global options applicable to _every_ lerna sub-command",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40lerna/global-options@3.13.0",
         "modified": false
       },
       {
@@ -8369,6 +8359,16 @@
       {
         "type": "library",
         "group": "lerna",
+        "name": "global-options",
+        "version": "3.13.0",
+        "description": "Global options applicable to _every_ lerna sub-command",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40lerna/global-options@3.13.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "lerna",
         "name": "npm-dist-tag",
         "version": "3.16.0",
         "description": "An internal Lerna tool",
@@ -8394,6 +8394,16 @@
         "description": "An internal Lerna tool",
         "licenses": "MIT",
         "purl": "pkg:npm/%40lerna/npm-install@3.16.5",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "lerna",
+        "name": "npm-run-script",
+        "version": "3.16.5",
+        "description": "An internal Lerna tool",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40lerna/npm-run-script@3.16.5",
         "modified": false
       },
       {
@@ -8441,16 +8451,6 @@
         "description": "The thing npm uses to read package.json files with semantics and defaults and validation",
         "licenses": "ISC",
         "purl": "pkg:npm/read-package-json@2.1.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "lerna",
-        "name": "npm-run-script",
-        "version": "3.16.5",
-        "description": "An internal Lerna tool",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40lerna/npm-run-script@3.16.5",
         "modified": false
       },
       {
@@ -8548,15 +8548,6 @@
         "description": "Custom error messages in JSON-Schema for Ajv validator",
         "licenses": "MIT",
         "purl": "pkg:npm/ajv-errors@1.0.1",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "ajv-keywords",
-        "version": "3.4.1",
-        "description": "Custom JSON-Schema keywords for Ajv validator",
-        "licenses": "MIT",
-        "purl": "pkg:npm/ajv-keywords@3.4.1",
         "modified": false
       },
       {
@@ -8845,6 +8836,15 @@
         "description": "Base64 encoding/decoding in pure JS",
         "licenses": "MIT",
         "purl": "pkg:npm/base64-js@1.3.1",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "ajv-keywords",
+        "version": "3.4.1",
+        "description": "Custom JSON-Schema keywords for Ajv validator",
+        "licenses": "MIT",
+        "purl": "pkg:npm/ajv-keywords@3.4.1",
         "modified": false
       },
       {
@@ -9281,15 +9281,6 @@
       },
       {
         "type": "library",
-        "name": "eslint-config-airbnb",
-        "version": "17.1.1",
-        "description": "Airbnb's ESLint config, following our styleguide",
-        "licenses": "MIT",
-        "purl": "pkg:npm/eslint-config-airbnb@17.1.1",
-        "modified": false
-      },
-      {
-        "type": "library",
         "name": "eslint-config-airbnb-base",
         "version": "13.2.0",
         "description": "Airbnb's base JS ESLint config, following our styleguide",
@@ -9308,11 +9299,11 @@
       },
       {
         "type": "library",
-        "name": "eslint-import-resolver-babel-plugin-root-import",
-        "version": "1.1.1",
-        "description": "fork of eslint-import-resolver-babel-root-import that works",
+        "name": "eslint-config-airbnb",
+        "version": "17.1.1",
+        "description": "Airbnb's ESLint config, following our styleguide",
         "licenses": "MIT",
-        "purl": "pkg:npm/eslint-import-resolver-babel-plugin-root-import@1.1.1",
+        "purl": "pkg:npm/eslint-config-airbnb@17.1.1",
         "modified": false
       },
       {
@@ -9326,11 +9317,38 @@
       },
       {
         "type": "library",
+        "name": "eslint-import-resolver-babel-plugin-root-import",
+        "version": "1.1.1",
+        "description": "fork of eslint-import-resolver-babel-root-import that works",
+        "licenses": "MIT",
+        "purl": "pkg:npm/eslint-import-resolver-babel-plugin-root-import@1.1.1",
+        "modified": false
+      },
+      {
+        "type": "library",
         "name": "eslint-plugin-flowtype",
         "version": "3.13.0",
         "description": "Flowtype linting rules for ESLint.",
         "licenses": "BSD-3-Clause",
         "purl": "pkg:npm/eslint-plugin-flowtype@3.13.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "eslint-scope",
+        "version": "4.0.3",
+        "description": "ECMAScript scope analyzer for ESLint",
+        "licenses": "BSD-2-Clause",
+        "purl": "pkg:npm/eslint-scope@4.0.3",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "esrecurse",
+        "version": "4.2.1",
+        "description": "ECMAScript AST recursive visitor",
+        "licenses": "BSD-2-Clause",
+        "purl": "pkg:npm/esrecurse@4.2.1",
         "modified": false
       },
       {
@@ -9358,24 +9376,6 @@
         "description": "Utilities for ESLint plugins.",
         "licenses": "MIT",
         "purl": "pkg:npm/eslint-utils@1.4.2",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "eslint-scope",
-        "version": "4.0.3",
-        "description": "ECMAScript scope analyzer for ESLint",
-        "licenses": "BSD-2-Clause",
-        "purl": "pkg:npm/eslint-scope@4.0.3",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "esrecurse",
-        "version": "4.2.1",
-        "description": "ECMAScript AST recursive visitor",
-        "licenses": "BSD-2-Clause",
-        "purl": "pkg:npm/esrecurse@4.2.1",
         "modified": false
       },
       {
@@ -9578,15 +9578,6 @@
       },
       {
         "type": "library",
-        "name": "is-path-cwd",
-        "version": "1.0.0",
-        "description": "Check if a path is CWD",
-        "licenses": "MIT",
-        "purl": "pkg:npm/is-path-cwd@1.0.0",
-        "modified": false
-      },
-      {
-        "type": "library",
         "name": "is-path-in-cwd",
         "version": "1.0.1",
         "description": "Check if a path is in the current working directory",
@@ -9605,6 +9596,15 @@
       },
       {
         "type": "library",
+        "name": "is-path-cwd",
+        "version": "1.0.0",
+        "description": "Check if a path is CWD",
+        "licenses": "MIT",
+        "purl": "pkg:npm/is-path-cwd@1.0.0",
+        "modified": false
+      },
+      {
+        "type": "library",
         "name": "is-wsl",
         "version": "1.1.0",
         "description": "Check if the process is running inside Windows Subsystem for Linux (Bash on Windows)",
@@ -9614,20 +9614,20 @@
       },
       {
         "type": "library",
-        "name": "istanbul-lib-hook",
-        "version": "1.2.2",
-        "description": "Hooks for require, vm and script used in istanbul",
-        "licenses": "BSD-3-Clause",
-        "purl": "pkg:npm/istanbul-lib-hook@1.2.2",
-        "modified": false
-      },
-      {
-        "type": "library",
         "name": "istanbul-reports",
         "version": "1.5.1",
         "description": "istanbul reports",
         "licenses": "BSD-3-Clause",
         "purl": "pkg:npm/istanbul-reports@1.5.1",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "istanbul-lib-hook",
+        "version": "1.2.2",
+        "description": "Hooks for require, vm and script used in istanbul",
+        "licenses": "BSD-3-Clause",
+        "purl": "pkg:npm/istanbul-lib-hook@1.2.2",
         "modified": false
       },
       {
@@ -9821,24 +9821,6 @@
       },
       {
         "type": "library",
-        "name": "prompts",
-        "version": "0.1.14",
-        "description": "Lightweight, beautiful and user-friendly prompts",
-        "licenses": "",
-        "purl": "pkg:npm/prompts@0.1.14",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "sisteransi",
-        "version": "0.1.1",
-        "description": "ANSI escape codes for some terminal swag",
-        "licenses": "MIT",
-        "purl": "pkg:npm/sisteransi@0.1.1",
-        "modified": false
-      },
-      {
-        "type": "library",
         "name": "prop-types",
         "version": "15.7.2",
         "description": "Runtime type checking for React props and similar objects.",
@@ -9853,6 +9835,24 @@
         "description": "Brand checking of React Elements.",
         "licenses": "MIT",
         "purl": "pkg:npm/react-is@16.10.2",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "prompts",
+        "version": "0.1.14",
+        "description": "Lightweight, beautiful and user-friendly prompts",
+        "licenses": "",
+        "purl": "pkg:npm/prompts@0.1.14",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "sisteransi",
+        "version": "0.1.1",
+        "description": "ANSI escape codes for some terminal swag",
+        "licenses": "MIT",
+        "purl": "pkg:npm/sisteransi@0.1.1",
         "modified": false
       },
       {

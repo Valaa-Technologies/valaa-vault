@@ -8,5 +8,5 @@ export function _verifyResourceAuthorization (mapper, route, request, reply, sco
   if (!scope.subject || !(scope.subject instanceof Vrapper)) {
     throw new Error("Resource route subject missing or invalid");
   }
-  return verifySessionAuthorization(server, route, request, reply, scope, scope.subject);
+  return verifySessionAuthorization(mapper, route, request, reply, scope, scope.subject);
 }

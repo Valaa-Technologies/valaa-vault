@@ -86,4 +86,4 @@ exports.default = function trivialClone (value_, customizer) {
     }
     return clone;
   }
-}
+};

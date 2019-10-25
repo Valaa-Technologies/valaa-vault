@@ -298,8 +298,24 @@
     },
     "section_classes": {
       "@id": "section_classes",
-      "dc:title": "<em>revdoc:* a vdoc:Class</em> vocabulary",
       "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "revdoc"
+          ]
+        },
+        " ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "vdoc:Class"
+          ],
+          "vdoc:ref": "@valos/vdoc#Class"
+        },
+        " vocabulary"
+      ],
       "vdoc:content": [
         {
           "vdoc:lookup": "vocabulary",
@@ -369,8 +385,24 @@
     },
     "section_properties": {
       "@id": "section_properties",
-      "dc:title": "<em>revdoc:* a vdoc:Property</em> vocabulary",
       "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "revdoc"
+          ]
+        },
+        " ",
+        {
+          "@type": "vdoc:Reference",
+          "vdoc:content": [
+            "vdoc:Property"
+          ],
+          "vdoc:ref": "@valos/vdoc#Property"
+        },
+        " vocabulary"
+      ],
       "vdoc:content": [
         {
           "vdoc:lookup": "vocabulary",
@@ -444,8 +476,16 @@
     },
     "section_vocabulary_other": {
       "@id": "section_vocabulary_other",
-      "dc:title": "<em>revdoc:</em> other vocabulary",
       "@type": "vdoc:Chapter",
+      "dc:title": [
+        {
+          "vdoc:em": true,
+          "vdoc:content": [
+            "revdoc"
+          ]
+        },
+        " remaining vocabulary"
+      ],
       "vdoc:content": [
         {
           "vdoc:lookup": "vocabulary",
@@ -681,7 +721,16 @@
       ]
     },
     "extractee_api_lookup": {
-      "@id": "extractee_api_lookup"
+      "@id": "extractee_api_lookup",
+      "valosRaemFieldClasses": [
+        "valos-raem:Field",
+        "valos-raem:ExpressedField",
+        "valos-raem:EventLoggedField",
+        "valos-raem:CoupledField",
+        "valos-raem:GeneratedField",
+        "valos-raem:TransientField",
+        "valos-raem:AliasField"
+      ]
     },
     "emission_output": {
       "@id": "emission_output",

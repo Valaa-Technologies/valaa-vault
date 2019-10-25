@@ -29,7 +29,7 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
           route.config.valos.subject, { newPartition: false }).asActiveConnection();
       this.routeRuntime.scopeBase = Object.freeze({
         viewFocus,
-        subject: server.getEngine().getVrapper(
+        subject: mapper.getEngine().getVrapper(
             [connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) }]),
         ...this.routeRuntime.scopeBase,
       });

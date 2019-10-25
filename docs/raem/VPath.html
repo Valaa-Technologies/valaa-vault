@@ -40,8 +40,8 @@ identifier (or *VRId*).</span>
     <span id="main_vpath_rules" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#main_vpath_rules">§ </a>Main VPath rules</h3>
 <pre><code><span class="vdoc type-vdoc-node">  vpath         = &#x22;@&#x22; vgrid-tail / verbs-tail
-  vgrid-tail    = vgrid &#x22;@&#x22; [ verbs-tail ]
-  verbs-tail     = verb &#x22;@&#x22; [ verbs-tail ]
+  vgrid-tail    = &#x22;$&#x22; vgrid &#x22;@&#x22; [ verbs-tail ]
+  verbs-tail    = verb &#x22;@&#x22; [ verbs-tail ]
   verb          = verb-type params
 </span>
 </code></pre></span>
@@ -246,14 +246,25 @@ Triple pattern &#x60;?s &#x3C;urn:valos:.:myProp@_$lang:fi&#x3E; ?o&#x60; matche
   </section>
 
   <section id="section_verb_computation" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_verb_computation">§ </a>verb type &#x22;&#x60;!&#x60;&#x22;: computation selector</h3>
+    <h3><a aria-label="§" href="#section_verb_computation">§ </a>verb type &#x22;&#x60;!&#x60;&#x22;: eager evaluator</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
-Verb representing the result of a computation.</span>
+Verb representing the result of an eager evaluation. When a VPath is
+bound to a <em>context</em> all nested eager evaluators selectors
+are resolved depth first, left to right. The resolution of a selector
+first evaluates the evaluator operation using the head and term lookups
+of the original context and then replaces the selector with the result
+of the evaluation.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The first parameter defines the evaluation operation. If this parameter
+has a trivial context-term (ie. no context-term or is a simple prefix
+term in the context term definition) then the operation is a path
+operation.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">If the context-term is non-trivial then the context must
+have a definition for the operation.</span>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_verb_computation" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_verb_computation">§ </a>Computation selector example</h3>
-Triple pattern &#x60;?s &#x3C;urn:valos:!$valk:plus$number:10:@!:myVal&#x3E; ?o&#x60;
+Triple pattern &#x60;?s &#x3C;urn:valos:!$valk:add$number:10:@!:myVal@&#x3E; ?o&#x60;
 matches like:
 <pre><code><span class="vdoc type-vdoc-node">
   ?_:0  valos:scope ?s
@@ -317,8 +328,8 @@ A VRId is a vpath which has vgrid as its first production
     <span id="main_vrid_rules" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#main_vrid_rules">§ </a>Main vrid rules</h3>
 <pre><code><span class="vdoc type-vdoc-node">  vpath         = &#x22;@&#x22; vgrid-tail / verbs-tail
-  vgrid-tail    = vgrid &#x22;@&#x22; [ verbs-tail ]
-  vgrid         = &#x22;$&#x22; format-term &#x22;:&#x22; param-value [ params ]
+  vgrid-tail    = &#x22;$&#x22; vgrid &#x22;@&#x22; [ verbs-tail ]
+  vgrid         = format-term &#x22;:&#x22; param-value [ params ]
 </span>
 </code></pre></span>
 
@@ -333,7 +344,8 @@ a vgrid and no verbs this global resource is also the
 <blockquote class="vdoc type-revdoc-example">
     <span id="main_vgrid_rules" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#main_vgrid_rules">§ </a>Main vgrid rules</h3>
-<pre><code><span class="vdoc type-vdoc-node">  vgrid         = &#x22;$&#x22; format-term &#x22;:&#x22; param-value [ params ]
+<pre><code><span class="vdoc type-vdoc-node">  vgrid-tail    = &#x22;$&#x22; vgrid &#x22;@&#x22; [ verbs-tail ]
+  vgrid         = format-term &#x22;:&#x22; param-value [ params ]
   format-term   = &#x22;~&#x22; context-term
 
   params        = context-tail / value-tail
@@ -752,8 +764,8 @@ productions can contain nested vpaths without additional encoding.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">The list of definitive rules:
 <pre><code><span class="vdoc type-vdoc-node">  vpath         = &#x22;@&#x22; vgrid-tail / verbs-tail
 
-  vgrid-tail    = vgrid &#x22;@&#x22; [ verbs-tail ]
-  vgrid         = &#x22;$&#x22; format-term &#x22;:&#x22; param-value [ params ]
+  vgrid-tail    = &#x22;$&#x22; vgrid &#x22;@&#x22; [ verbs-tail ]
+  vgrid         = format-term &#x22;:&#x22; param-value [ params ]
   format-term   = &#x22;~&#x22; context-term
 
   verbs-tail     = verb &#x22;@&#x22; [ verbs-tail ]
@@ -776,7 +788,7 @@ productions can contain nested vpaths without additional encoding.</span>
 parser but which have well-defined meaning and can thus be referred to
 from other documents.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">The list of informative pseudo-rules:
-<pre><code><span class="vdoc type-vdoc-node">  vrid            = &#x22;@&#x22; vgrid-tail
+<pre><code><span class="vdoc type-vdoc-node">  vrid            = &#x22;@&#x22; &#x22;$&#x22; vgrid &#x22;@&#x22; [ verbs-tail ]
   verbs           = &#x22;@&#x22; verbs-tail
   vparam          = [ &#x22;$&#x22; [ context-term ] ] [ &#x22;:&#x22; param-value ]
   context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )

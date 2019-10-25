@@ -15,7 +15,7 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
       try {
         this.routeRuntime = mapper.createRouteRuntime(this);
         this.toPreloads = ["§->"];
-        if (!server.addSchemaStep(route.config, this.toPreloads)) {
+        if (!mapper.addSchemaStep(route.config, this.toPreloads)) {
           if (route.config.valos.hardcodedResources) return;
           throw new Error(`Route listing GET <${route.url}> is missing valos schema predicate`);
         }

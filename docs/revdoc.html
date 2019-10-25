@@ -52,7 +52,7 @@ for emitting ReSpec html output documents.</span>
   </section>
 
   <section id="section_classes" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_classes">§ </a>&#x3C;em&#x3E;revdoc:* a vdoc:Class&#x3C;/em&#x3E; vocabulary</h3>
+    <h3><a aria-label="§" href="#section_classes">§ </a><em>revdoc</em> <a href="https://valospace.org/vdoc#Class" class="vdoc type-vdoc-reference">vdoc:Class</a> vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -86,7 +86,7 @@ for emitting ReSpec html output documents.</span>
   </section>
 
   <section id="section_properties" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_properties">§ </a>&#x3C;em&#x3E;revdoc:* a vdoc:Property&#x3C;/em&#x3E; vocabulary</h3>
+    <h3><a aria-label="§" href="#section_properties">§ </a><em>revdoc</em> <a href="https://valospace.org/vdoc#Property" class="vdoc type-vdoc-reference">vdoc:Property</a> vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -110,7 +110,7 @@ for emitting ReSpec html output documents.</span>
   </section>
 
   <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a>&#x3C;em&#x3E;revdoc:&#x3C;/em&#x3E; other vocabulary</h3>
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>revdoc</em> remaining vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -280,7 +280,8 @@ primitives and specifies a ReSpec html emission transformation.</span>
     return filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
         (a, [field, searched]) => a && !field.includes(searched), true);
   }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>filterKeysWithFieldReduction</td><td>function filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
+        <tr class=" vdoc-nth-child-2n"><td>valosRaemFieldClasses</td><td>valos-raem:Fieldvalos-raem:ExpressedFieldvalos-raem:EventLoggedFieldvalos-raem:CoupledFieldvalos-raem:GeneratedFieldvalos-raem:TransientFieldvalos-raem:AliasField</td></tr>
+        <tr><td>filterKeysWithFieldReduction</td><td>function filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container,
     reduction, initial) {
   const searchedValues = [].concat(
       searchedValueOrValues !== undefined ? searchedValueOrValues : []);
@@ -292,6 +293,42 @@ primitives and specifies a ReSpec html emission transformation.</span>
           ]), initial))
       .map(([key]) => key);
 }</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>prepareTestDoc</td><td>prepareTestDoc(title) {
+    const tests = [];
+    return {
+      itExpects (named, operation, toSatisfy, result) {
+        tests.push([named, operation, toSatisfy, result]);
+        const body = operation.toString();
+        return {
+          "dc:title": named,
+          "#0": [
+            blockquote(body.slice(
+                Math.min(body.indexOf("{") !== -1 ? body.indexOf("{") : body.length,
+                    body.indexOf(">")) + 1,
+                Math.max(body.lastIndexOf("}"), body.length))),
+            toSatisfy,
+            blockquote(JSON.stringify(result, null, 2)),
+          ],
+        };
+      },
+      runTestDoc () {
+        if (typeof describe !== "undefined") {
+          describe(`testdoc: ${title}`, () => {
+            for (const [named, operation, toSatisfy, result] of tests) {
+              it(named, async () => {
+                try {
+                  expect(await operation())[toSatisfy](result);
+                } catch (error) {
+                  outputError(error, `Exception noted while running testdoc test ${named}`);
+                  throw error;
+                }
+              });
+            }
+          });
+        }
+      }
+    };
+  }</td></tr>
       </tbody>
     </table>
 

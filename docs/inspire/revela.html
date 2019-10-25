@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>revela.json format specification</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"subtitle":"0.35.0-prerelease.13","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"revela"};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body class="vdoc vdoc-body">
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">revela.json (pronounced: <em>revelation</em>) is a JSON
+configuration file in which all &#x22;!!!&#x22; key values (<em>spreads</em>)
+are evaluated and their results then spread and merged on top of the
+surrounding object.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The evaluation allows for VPath operations, most notably importing
+relative config files and accessing their subsections. Together the
+evaluation, spread and merge allow for fine-grained <a href="https://en.wikipedia.org/wiki/Don%27t_repeat_yourself" class="vdoc type-vdoc-reference">DRY</a>
+for various valos fabric config files.</span>
+</p></div>
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="https://valospace.org/inspire" class="vdoc type-revdoc-package"><em>@valos/inspire</em></a>
+(of domain <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which has the description:
+&#x60;ValOS Inspire application gateway&#x60;.</span>
+</p></div>
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter">
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>trivial combine</h3>
+<div><p><span class="vdoc type-vdoc-paragraph"><blockquote> combineRevelationsLazily(gatewayMock, { a: [1] }, { a: [2] })</blockquote>toEqual<blockquote>{
+  &#x22;a&#x22;: [
+    1,
+    2
+  ]
+}</blockquote></span>
+</p></div></span>
+
+</blockquote>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>spread of a simple relative import</h3>
+<div><p><span class="vdoc type-vdoc-paragraph"><blockquote> combineRevelationsLazily(gatewayMock, {}, { &#x22;!!!&#x22;: &#x22;./path&#x22; })</blockquote>toEqual<blockquote>{
+  &#x22;requireKey&#x22;: &#x22;/site/revelation/path&#x22;,
+  &#x22;someField&#x22;: 1
+}</blockquote></span>
+</p></div></span>
+
+</blockquote>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>spread of an explicit site root import followed by field access</h3>
+<div><p><span class="vdoc type-vdoc-paragraph"><blockquote> combineRevelationsLazily(gatewayMock, &#x22;&#x22;,
+            { &#x22;!!!&#x22;: [[&#x22;!$revela:import&#x22;, &#x22;/path&#x22;], &#x22;requireKey&#x22;] })</blockquote>toEqual<blockquote>&#x22;/site/path&#x22;</blockquote></span>
+</p></div></span>
+
+</blockquote>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>spread of an implicit URI import followed by array creation</h3>
+<div><p><span class="vdoc type-vdoc-paragraph"><blockquote> combineRevelationsLazily(gatewayMock, [], { &#x22;!!!&#x22;: [
+          [&#x22;!$revela:import&#x22;, &#x22;&#x3C;https://foobar.com/path&#x3E;&#x22;],
+          [&#x22;fetchedField&#x22;, [&#x22;.:fetchOptions:input&#x22;]],
+        ] })</blockquote>toEqual<blockquote>[
+  1,
+  &#x22;https://foobar.com/path&#x22;
+]</blockquote></span>
+</p></div></span>
+
+</blockquote>
+  </section>
+
+  <section id="ontology" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#ontology">§ </a><em>revela</em> ontology</h3>
+<div><p><span class="vdoc type-vdoc-paragraph"><em>revela</em> ontology specifies the verbs specific to revela.json
+files.</span>
+</p></div>
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_prefixes">§ </a><em>revela</em> IRI prefixes</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">Prefix</th>
+        <th class="vdoc type-vdoc-header">IRI</th>
+      </thead>
+      <tbody>
+        <tr><td>rdf</td><td>http://www.w3.org/1999/02/22-rdf-syntax-ns#</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>rdfs</td><td>http://www.w3.org/2000/01/rdf-schema#</td></tr>
+        <tr><td>xsd</td><td>http://www.w3.org/2001/XMLSchema#</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>owl</td><td>http://www.w3.org/2002/07/owl#</td></tr>
+        <tr><td>dc</td><td>http://purl.org/dc/elements/1.1/</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>revela</td><td>https://valospace.org/inspire/revela#</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_verbs" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_verbs">§ </a><em>revela</em> <a href="https://valospace.org/raem#Verb" class="vdoc type-vdoc-reference">valos-raem:Verb</a> vocabulary</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdf:type</th>
+        <th class="vdoc type-vdoc-header">Comment</th>
+      </thead>
+      <tbody>
+        <tr id="import" class=" vdoc-nth-child-2n"><td><a href="#import" class="vdoc type-vdoc-reference"><em>import</em></a></td><td>valos-raem:Verb</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>import verb with first param being the location to import and second
+param being an options object.</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>revela</em> remaining vocabulary</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header">rdfs:label</th>
+        <th class="vdoc type-vdoc-header">rdf:type</th>
+        <th class="vdoc type-vdoc-header">rdfs:subClassOf</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  </section>
+
+  </body>
+</html>

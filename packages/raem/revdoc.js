@@ -248,7 +248,7 @@ directly to the @valos/kernel namespace.`,
           [em(prefix), ` `, ref("valos-raem:Resolver", "@valos/raem#Resolver"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.resolvers,
+        "vdoc:headers": ontologyHeaders.verbs,
         "vdoc:entries": filterKeysWithAnyOf("@type", "valos-raem:Resolver", vocabulary),
       },
     },

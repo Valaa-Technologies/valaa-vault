@@ -272,6 +272,7 @@ function expandVPath (vpath) {
   const vpathArray = [];
   (Array.isArray(vpath) ? vpath : [vpath]).forEach((part, index) => {
     if (Array.isArray(part)) {
+      if (index === 0) vpathArray.push("@");
       vpathArray.push(expandVPath(part));
     } else if (!index && (typeof part === "string")
         && (part !== "") && (part !== "@") && (part !== "$") && (part !== ":")) {
@@ -398,7 +399,7 @@ const objectLookup = {
   "-M": "content", // "medias",
 };
 
-function bindExpandedVPath (vp, contextLookup = {}, containerType = "@"
+function bindExpandedVPath (vp, contextLookup = {}, contextState, containerType = "@"
     /* , containerIndex = 0 */) {
   let expandedVPath = vp;
   if (containerType === "@") {
@@ -411,7 +412,7 @@ function bindExpandedVPath (vp, contextLookup = {}, containerType = "@"
   switch (type) {
   case "@":
     if (expandedVPath.length === 2) {
-      return bindExpandedVPath(expandedVPath[1], contextLookup, "@", 1);
+      return bindExpandedVPath(expandedVPath[1], contextLookup, contextState, "@", 1);
     }
     expandedVPath[0] = "§->";
     break;
@@ -419,18 +420,30 @@ function bindExpandedVPath (vp, contextLookup = {}, containerType = "@"
   case ":":
     throw new Error(`Invalid expanded VPath head: ":" and "" can't appear as first entries`);
   case "$": { // eslint-disable-line no-fallthrough
-    let value = bindExpandedVPath(expandedVPath[2], contextLookup);
+    let value = bindExpandedVPath(expandedVPath[2], contextLookup, contextState);
     let contextValue;
-    if (expandedVPath[1]) {
-      const context = contextLookup[expandedVPath[1]];
+    const contextTerm = expandedVPath[1];
+    if (contextTerm) {
+      const context = contextLookup[contextTerm];
       if (context) {
+        if (typeof context === "function") contextValue = context;
         if (contextValue == null) contextValue = (context.symbolFor || {})[value];
         if (contextValue == null) contextValue = (context.stepsFor || {})[value];
-        if ((contextValue == null) && context.steps) contextValue = [...context.steps, value];
+        if ((contextValue == null) && context.steps) {
+          contextValue = [
+            ...(typeof context.steps !== "function"
+                ? context.steps
+                : context.steps(contextState, value, contextTerm)),
+            value,
+          ];
+        }
         if (!contextValue) {
           throw new Error(`Term operation '${value}' ${
               contextValue === false ? "disabled" : "not found"} in the non-trivial context '${
-              expandedVPath[1]}'`);
+              contextTerm}'`);
+        }
+        if (typeof contextValue === "function") {
+          contextValue = contextValue(contextState, value, contextTerm);
         }
         if (Array.isArray(contextValue)) return contextValue;
         value = contextValue;
@@ -460,7 +473,7 @@ function bindExpandedVPath (vp, contextLookup = {}, containerType = "@"
   case ".":
     // ref("@valos/raem/VPath#section_structured_scope_property")
     if (expandedVPath.length <= 2) {
-      return bindExpandedVPath(expandedVPath[1], contextLookup, ".", 1);
+      return bindExpandedVPath(expandedVPath[1], contextLookup, contextState, ".", 1);
     }
     expandedVPath[0] = "§->";
     break;
@@ -480,7 +493,7 @@ function bindExpandedVPath (vp, contextLookup = {}, containerType = "@"
     }
     return ["§->", field,
       ..._filterByFieldValue("name",
-          bindExpandedVPath(expandedVPath[1], contextLookup, type, 1)),
+          bindExpandedVPath(expandedVPath[1], contextLookup, contextState, type, 1)),
     ];
   }
   case "-":
@@ -492,11 +505,12 @@ function bindExpandedVPath (vp, contextLookup = {}, containerType = "@"
     // ref("@valos/raem/VPath#section_structured_object_value")
     return [
       "§->",
-      ..._filterByFieldValue(object, bindExpandedVPath(expandedVPath[1], contextLookup)),
+      ..._filterByFieldValue(object,
+          bindExpandedVPath(expandedVPath[1], contextLookup, contextState)),
     ];
   }
   case "!": {
-    const first = bindExpandedVPath(expandedVPath[1], contextLookup, "!0", 1);
+    const first = bindExpandedVPath(expandedVPath[1], contextLookup, contextState, "!0", 1);
     if (expandedVPath.length === 2) return first;
     if (first[0] === "§$") {
       expandedVPath[0] = "§->";
@@ -515,7 +529,7 @@ function bindExpandedVPath (vp, contextLookup = {}, containerType = "@"
     break;
   }
   for (; i !== expandedVPath.length; ++i) {
-    expandedVPath[i] = bindExpandedVPath(expandedVPath[i], contextLookup, type, i);
+    expandedVPath[i] = bindExpandedVPath(expandedVPath[i], contextLookup, contextState, type, i);
   }
   return expandedVPath;
 }

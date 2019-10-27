@@ -1,4 +1,4 @@
-// @flow
+Object.defineProperty(exports, "__esModule", { value: true });
 
 /**
  * Recursively updates the *target* with the changes described in *patch*

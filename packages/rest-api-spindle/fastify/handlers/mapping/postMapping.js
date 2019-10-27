@@ -5,16 +5,16 @@ import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _createToMappingsParts, _resolveMappingResource } from "./_mappingHandlerOps";
 
-export default function createRouteHandler (mapper: MapperService, route: Route) {
+export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    category: "mapping", method: "POST", fastifyRoute: route,
-    requiredRuntimeRules: ["resourceId", "mappingName"],
-    builtinRules: {
-      mappingName: ["constant", route.config.mappingName],
-      createResourceAndMapping: ["constant", route.config.createResourceAndMapping],
+    requiredRules: ["routeRoot", "resource", "createResourceAndMapping"],
+    rules: {
+      mappingName: route && route.config.mapping.name,
     },
+
     prepare (/* fastify */) {
-      this.routeRuntime = mapper.createRouteRuntime(this);
+      this.runtime = mapper.createRouteRuntime(this);
+
       const { toMappingsResults, relationsStepIndex } = _createToMappingsParts(mapper, route);
 
       if (relationsStepIndex > 1) this.toSource = toMappingsResults.slice(0, relationsStepIndex);
@@ -25,17 +25,13 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
       mapper.buildKuery(route.config.targetSchema, this.toPatchTarget);
       this.toPatchTarget.splice(-1);
     },
-    async preload () {
-      const viewFocus = mapper.getViewFocus();
-      if (!viewFocus) throw new Error(`Can't locate viewFocus for route: ${this.name}`);
-      await mapper.preloadRuntimeResources(this.routeRuntime);
-      this.routeRuntime.scopeBase = Object.freeze({
-        viewFocus,
-        ...this.routeRuntime.scopeBase,
-      });
+
+    preload () {
+      return mapper.preloadRuntimeResources(this, this.runtime);
     },
-    handleRequest (request, reply) {
-      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+
+    handler (request, reply) {
+      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       mapper.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId, scope.mappingName,
         "\n\trequest.query:", request.query,
@@ -64,10 +60,10 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
               ? scope.resource
               : scope.resource.get(this.toSource, { discourse, scope });
           console.log("mapping POST dump:", ...dumpObject(scope.createResourceAndMapping),
-              "\n\tviewFocus:", ...dumpObject(scope.viewFocus),
+              "\n\tservice index:", ...dumpObject(scope.serviceIndex),
               "\n\tsource:", ...dumpObject(scope.source),
               "\n\tname:", targetName);
-          return scope.viewFocus.do(scope.createResourceAndMapping, { discourse, scope });
+          return scope.serviceIndex.do(scope.createResourceAndMapping, { discourse, scope });
         },
         vMapping => {
           scope.mapping = mapper.updateResource(vMapping, request.body,
@@ -107,7 +103,7 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
             "\n\tscope.resource:", ...dumpObject(scope.resource),
             "\n\tscope.source:", ...dumpObject(scope.source),
             "\n\tscope.target:", ...dumpObject(scope.target),
-            "\n\trouteRuntime:", ...dumpObject(this.routeRuntime),
+            "\n\trouteRuntime:", ...dumpObject(this.runtime),
         );
       });
     },

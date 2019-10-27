@@ -7,11 +7,11 @@ import VALEK from "~/engine/VALEK";
 
 import { dumpify, dumpObject, FabricEventTarget, outputError } from "~/tools";
 
-import { _createMapper } from "./_mapperOps";
+import { _createPrefixService } from "./_mapperOps";
 import {
-  _createRouteRuntime, _preloadRuntimeResources, _buildRuntimeScope,
+  _createRouteRuntime, _preloadRuntimeResources, _buildRuntimeVALKOptions,
 } from "./_routeRuntimeOps";
-import { _buildKuery, _resolveSchemaName, _getResourceHRefPrefix } from "./_buildOps";
+import { _buildSchemaKuery, _resolveSchemaName, _getResourceHRefPrefix } from "./_buildOps";
 import { _filterResults, _sortResults, _paginateResults, _pickResultFields } from "./_resultOps";
 import { _updateResource } from "./_updateOps";
 
@@ -51,7 +51,7 @@ export default class MapperService extends FabricEventTarget {
       this._mappers = Object.entries(this._prefixes).map(([prefix, options]) => {
         const service = this;
         try {
-          const mapper = _createMapper(this, prefix, options);
+          const mapper = _createPrefixService(this, prefix, options);
           this.getRootFastify().after(error => {
             if (error) {
               outputError(errorOnCreatePrefixPlugin(error),
@@ -88,61 +88,57 @@ export default class MapperService extends FabricEventTarget {
 
   // Runtime ops
 
-  _createRouteRuntime (options) {
-    const wrap = new Error(
-        `_createRouteRuntime(${options.category} ${options.method} ${options.fastifyRoute.url})`);
+  createRouteRuntime (route) {
     const runtime = {};
     try {
-      return _createRouteRuntime(this, options, runtime);
+      return _createRouteRuntime(this, route, runtime);
     } catch (error) {
-      throw this.wrapErrorEvent(error, wrap,
-          "\n\tfastifyRoute:", ...dumpObject(options.fastifyRoute),
-          "\n\tbuiltinRules:", dumpify(options.builtinRules),
-          "\n\trequiredRules:", dumpify(options.requiredRules),
-          "\n\trequiredRuntimeRules:", dumpify(options.requiredRuntimeRules),
-          "\n\tscopeBase:", dumpify(runtime.scopeBase, { indent: 2 }),
-          "\n\trequestRules:", dumpify(runtime.requestRules, { indent: 2 }),
+      throw this.wrapErrorEvent(error,
+          new Error(`createRouteRuntime(${route.category} ${route.method} ${route.url})`),
+          "\n\tconfig:", ...dumpObject(route.config),
+          "\n\truntime:", ...dumpObject(runtime),
+          "\n\troute:", ...dumpObject(route),
       );
     }
   }
 
-  async preloadRuntimeResources (routeRuntime) {
+  async preloadRuntimeResources (route, runtime) {
     try {
-      return await _preloadRuntimeResources(this, routeRuntime);
+      return await _preloadRuntimeResources(this, route, runtime);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`preloadRuntimeResources(${
-            routeRuntime.category} ${routeRuntime.method} ${routeRuntime.url})`),
-          "\n\tfastifyRoute:", ...dumpObject(routeRuntime.fastifyRoute),
-          "\n\tscopeBase:", dumpify(routeRuntime.scopeBase, { indent: 2 }),
-          "\n\trequestRules:", dumpify(routeRuntime.requestRules, { indent: 2 }),
+      throw this.wrapErrorEvent(error,
+          new Error(`preloadRuntimeResources(${route.category} ${route.method} ${route.url})`),
+          "\n\tconfig:", ...dumpObject(route.config),
+          "\n\truntime:", ...dumpObject(runtime),
+          "\n\troute:", ...dumpObject(route),
       );
     }
   }
 
-  buildRuntimeScope (routeRuntime, request) {
+  buildRuntimeVALKOptions (route, runtime, request, reply) {
     try {
-      return _buildRuntimeScope(this, routeRuntime, request);
+      return _buildRuntimeVALKOptions(this, route, runtime, request, reply);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`buildRuntimeScope(${
-            routeRuntime.category} ${routeRuntime.method} ${routeRuntime.url})`),
-          "\n\tfastifyRoute:", ...dumpObject(routeRuntime.fastifyRoute),
-          "\n\tscopeBase:", dumpify(routeRuntime.scopeBase, { indent: 2 }),
-          "\n\trequestRules:", dumpify(routeRuntime.requestRules, { indent: 2 }),
+      throw this.wrapErrorEvent(error,
+          new Error(`buildRuntimeVALKOptions(${route.category} ${route.method} ${route.url})`),
+          "\n\tconfig:", ...dumpObject(route.config),
+          "\n\truntime:", ...dumpObject(runtime),
+          "\n\troute:", ...dumpObject(route),
       );
     }
   }
 
   // Build ops
 
-  buildKuery (maybeJSONSchema, outerKuery, isValOSFields) {
+  buildSchemaKuery (maybeJSONSchema, outerKuery = ["§->"], isValOSFields) {
     let innerKuery, jsonSchema;
     if (!maybeJSONSchema) return outerKuery;
     try {
       jsonSchema = _resolveSchemaName(this, maybeJSONSchema);
       innerKuery = this.addSchemaStep(jsonSchema, outerKuery);
-      return _buildKuery(this, jsonSchema, outerKuery, innerKuery, isValOSFields);
+      return _buildSchemaKuery(this, jsonSchema, outerKuery, innerKuery, isValOSFields);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error("buildKuery"),
+      throw this.wrapErrorEvent(error, new Error("buildSchemaKuery"),
           "\n\tjsonSchema:", ...dumpObject(jsonSchema),
           "\n\touterKuery:", ...dumpObject(outerKuery),
           "\n\tinnerKuery:", ...dumpObject(innerKuery));

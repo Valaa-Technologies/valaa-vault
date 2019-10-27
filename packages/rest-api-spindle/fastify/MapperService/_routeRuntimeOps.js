@@ -2,13 +2,19 @@
 
 import Vrapper from "~/engine/Vrapper";
 
-import {
-  patchWith,
-} from "~/tools";
+import { dumpify, dumpObject } from "~/tools";
 
-export function _createRouteRuntime (mapper, {
-  category, method, fastifyRoute, builtinRules, requiredRules, requiredRuntimeRules,
-}, routeRuntime) {
+export function _createRouteRuntime (mapper, { url, config }, runtime) {
+  for (const ruleName of config.requiredRules) {
+    if (config.rules[ruleName] === undefined) {
+      throw new Error(`Required route rule '${ruleName}' missing for route <${url}>`);
+    }
+  }
+  const scopeBase = runtime.scopeBase = {};
+  runtime.ruleResolvers = [];
+  runtime.staticResources = [];
+  runtime.identity = mapper.getIdentity();
+
   Object.assign(routeRuntime, {
     category, method, url: fastifyRoute.url,
     fastifyRoute,
@@ -43,59 +49,62 @@ export function _createRouteRuntime (mapper, {
       throw new Error(`Required ${category} ${method} rule '${requiredRuleName}' is undefined`);
     }
   }
-  return routeRuntime;
+  return runtime;
 }
 
-function _entriesOf (object) {
-  return Array.isArray(object) ? object : Object.entries(object);
-}
+export async function _preloadRuntimeResources (mapper, route, runtime) {
+  let vRouteRoot, vPreloads;
+  try {
+    runtime.scopeBase.serviceIndex = mapper.getViewFocus();
+    if (runtime.scopeBase.serviceIndex === undefined) {
+      throw new Error(`Can't locate service index for route: ${route.name}`);
+    }
 
-export async function _preloadRuntimeResources (mapper, routeRuntime) {
-  const activations = [];
-  routeRuntime.scopeBase = patchWith({}, routeRuntime.scopeBase, {
-    preExtend: (tgt, patch) => {
-      if (!Array.isArray(patch) || (patch[0] !== "~ref")) return undefined;
-      const vResource = mapper.getEngine().getVrapper(patch[1]);
-      const activation = vResource.activate();
+    if (!runtime.resolveRouteRoot) {
+      throw new Error(`Route root rule 'toRouteRoot' missing for route: ${route.name}`);
+    }
+    vRouteRoot = runtime.scopeBase.routeRoot = runtime.resolveRouteRoot(
+        mapper.getEngine(), runtime.scopeBase.serviceIndex, { scope: runtime.scopeBase });
+    if (!(vRouteRoot instanceof Vrapper)) {
+      throw new Error(`Route root is not a resource for route: ${route.name}`);
+    }
+    mapper.infoEvent("Preloading route ", route.name, "; activating root resource and",
+        runtime.staticResources.length, "static rule resources");
+    await vRouteRoot.activate();
+    const activations = [];
+    for (const staticResource of runtime.staticResources) {
+      const vStaticResource = mapper.getEngine().getVrapper(staticResource);
+      const activation = vStaticResource.activate();
       if (activation) activations.push(activation);
-      return vResource;
-    },
-    postExtend: (tgt) => {
-      if (tgt && (typeof tgt === "object") && !(tgt instanceof Vrapper)) Object.freeze(tgt);
-      return tgt;
-    },
-  });
-  await Promise.all(activations);
-}
-
-/*
-function preloadVAKONRefResources (mapper, kuery, resultResources = []) {
-  if ((kuery == null) || (typeof kuery !== "object")) return resultResources;
-  if (!Array.isArray(kuery)) {
-    Object.values(kuery).map(value => mapper.preloadVAKONRefResources(value, resultResources));
-  } else if (kuery[0] !== "~ref") {
-    kuery.map(value => mapper.preloadVAKONRefResources(value, resultResources));
-  } else {
-    const vResource = mapper.getEngine().getVrapper(kuery[1]);
-    resultResources.push(vResource);
-    vResource.activate();
+    }
+    await Promise.all(activations);
+    mapper.infoEvent("Done preloading route:", route.name,
+        "\n\tactive route root:", ...dumpObject(vRouteRoot.debugId()),
+        "\n\tactivated", activations.length, "static rule resources");
+  } catch (error) {
+    throw mapper.wrapErrorEvent(error, new Error(`preloadRuntimeResources(${route.name})`),
+        "\n\tvRouteRoot:", ...dumpObject(vRouteRoot),
+        "\n\ttoPreloads:", dumpify(this.toPreloads, { indent: 2 }),
+        "\n\tvTargets:", ...dumpObject(vPreloads),
+    );
   }
-  return resultResources;
 }
-*/
 
-export function _buildRuntimeScope (mapper, routeRuntime, request) {
-  const { scopeBase, requiredRuntimeRules, requestRules } = routeRuntime;
-  const scope = Object.create(scopeBase);
+export function _buildRuntimeVALKOptions (mapper, route, runtime, request, reply) {
+  const scope = Object.create(runtime.scopeBase);
+  const valkOptions = { scope };
   scope.request = request;
-  for (const [ruleName, sourceSection, source] of requestRules) {
-    scope[ruleName] = request[sourceSection][source];
-  }
-  // for (const [ruleName, rule] of kueryRules) {}
-  for (const ruleName of requiredRuntimeRules) {
-    if (scope[ruleName] === undefined) {
-      throw new Error(`scope rule '${ruleName}' resolved into undefined`);
+  scope.reply = reply;
+  for (const [ruleName, resolveRule, requireRuntimeRule] of runtime.ruleResolvers) {
+    scope[ruleName] = resolveRule(mapper.getEngine(), scope.routeRoot, valkOptions);
+    if (requireRuntimeRule && scope[ruleName] === undefined) {
+      if (typeof requireRuntimeRule === "function") {
+        requireRuntimeRule(ruleName, mapper.getEngine(), scope.routeRoot, valkOptions);
+      } else {
+        throw new Error(`Required route runtime rule '${ruleName
+          }' unsatisfied: value resolved into undefined`);
+      }
     }
   }
-  return scope;
+  return valkOptions;
 }

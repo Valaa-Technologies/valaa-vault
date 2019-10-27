@@ -5,23 +5,24 @@ import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _createTargetedToMappingFields, _resolveMappingResource } from "./_mappingHandlerOps";
 
-export default function createRouteHandler (mapper: MapperService, route: Route) {
+export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    category: "mapping", method: "GET", fastifyRoute: route,
-    requiredRuntimeRules: ["resourceId", "mappingName", "targetId"],
-    builtinRules: {
-      mappingName: ["constant", route.config.mappingName],
+    requiredRules: ["routeRoot", "resource", "target"],
+    rules: {
+      mappingName: route && route.config.mapping.name,
     },
+
     prepare (/* fastify */) {
-      this.routeRuntime = mapper.createRouteRuntime(this);
+      this.runtime = mapper.createRouteRuntime(this);
       this.toMappingFields = _createTargetedToMappingFields(mapper, route, ["~$:targetId"])
           .toMappingFields;
     },
     preload () {
-      return mapper.preloadRuntimeResources(this.routeRuntime);
+      return mapper.preloadRuntimeResources(this, this.runtime);
     },
-    handleRequest (request, reply) {
-      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+
+    handler (request, reply) {
+      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       mapper.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId, scope.mappingName, scope.targetId,
         "\n\trequest.query:", request.query,

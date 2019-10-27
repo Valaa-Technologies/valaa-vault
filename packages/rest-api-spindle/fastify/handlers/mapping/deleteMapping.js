@@ -5,15 +5,15 @@ import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _createTargetedToMapping, _resolveMappingResource } from "./_mappingHandlerOps";
 
-export default function createRouteHandler (mapper: MapperService, route: Route) {
+export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    category: "mapping", method: "DELETE", fastifyRoute: route,
-    requiredRuntimeRules: ["resourceId", "mappingName", "targetId"],
-    builtinRules: {
-      mappingName: ["constant", route.config.mappingName],
+    requiredRules: ["routeRoot", "resource", "target"],
+    rules: {
+      mappingName: route && route.config.mapping.name,
     },
+
     prepare (/* fastify */) {
-      this.routeRuntime = mapper.createRouteRuntime(this);
+      this.runtime = mapper.createRouteRuntime(this);
       const { toMapping } = _createTargetedToMapping(mapper, route, ["~$:targetId"]);
       this.toMapping = toMapping;
       /*
@@ -24,10 +24,11 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
       */
     },
     preload () {
-      return mapper.preloadRuntimeResources(this.routeRuntime);
+      return mapper.preloadRuntimeResources(this, this.runtime);
     },
-    handleRequest (request, reply) {
-      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+
+    handler (request, reply) {
+      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       mapper.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId, scope.mappingName, scope.targetId,
         "\n\trequest.query:", request.query,
@@ -60,7 +61,7 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\tscope.mapping:", ...dumpObject(scope.mapping),
           "\n\tscope.resource:", ...dumpObject(scope.resource),
-          "\n\trouteRuntime:", ...dumpObject(this.routeRuntime),
+          "\n\trouteRuntime:", ...dumpObject(this.runtime),
         );
       });
     }

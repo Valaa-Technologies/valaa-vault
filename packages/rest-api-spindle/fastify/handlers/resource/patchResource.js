@@ -5,30 +5,23 @@ import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
 
-export default function createRouteHandler (mapper: MapperService, route: Route) {
+export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    category: "resource", method: "PATCH", fastifyRoute: route,
-    requiredRuntimeRules: ["resourceId"],
-    builtinRules: {},
-    prepare (/* fastify */) {
-      this.routeRuntime = mapper.createRouteRuntime(this);
+    requiredRules: ["routeRoot", "resource"],
 
+    prepare (/* fastify */) {
+      this.runtime = mapper.createRouteRuntime(this);
       const toPatchTarget = ["§->"];
       mapper.buildKuery(route.config.resourceSchema, toPatchTarget);
       if (toPatchTarget.length > 1) this.toPatchTarget = toPatchTarget.slice(0, -1);
     },
-    async preload () {
-      const connection = await mapper.getDiscourse().acquireConnection(
-          route.config.valos.subject, { newPartition: false }).asActiveConnection();
-        subject: server.getEngine().getVrapper(
-      await mapper.preloadRuntimeResources(this.routeRuntime);
-      this.routeRuntime.scopeBase = Object.freeze({
-            [connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) }]),
-        ...this.routeRuntime.scopeBase,
-      });
+
+    preload () {
+      return mapper.preloadRuntimeResources(this, this.runtime);
     },
-    handleRequest (request, reply) {
-      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+
+    handler (request, reply) {
+      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       mapper.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId,
         "\n\trequest.query:", request.query,
@@ -65,7 +58,7 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\trequest.body:", ...dumpObject(request.body),
           "\n\tscope.resource:", ...dumpObject(scope.resource),
-          "\n\trouteRuntime:", ...dumpObject(this.routeRuntime),
+          "\n\trouteRuntime:", ...dumpObject(this.runtime),
         );
       });
     },

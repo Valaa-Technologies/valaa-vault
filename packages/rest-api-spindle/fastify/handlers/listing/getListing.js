@@ -6,14 +6,13 @@ import { dumpify, dumpObject, thenChainEagerly } from "~/tools";
 
 import { _verifyResourceAuthorization } from "../resource/_resourceHandlerOps";
 
-export default function createRouteHandler (mapper: MapperService, route: Route) {
+export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    category: "listing", method: "GET", fastifyRoute: route,
-    requiredRuntimeRules: [],
-    builtinRules: {},
+    requiredRules: ["routeRoot"],
+
     prepare (/* fastify */) {
       try {
-        this.routeRuntime = mapper.createRouteRuntime(this);
+        this.runtime = mapper.createRouteRuntime(this);
         this.toPreloads = ["§->"];
         if (!mapper.addSchemaStep(route.config, this.toPreloads)) {
           if (route.config.valos.hardcodedResources) return;
@@ -75,8 +74,9 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
         );
       }
     },
-    handleRequest (request, reply) {
-      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+
+    handler (request, reply) {
+      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       const {
         filter, // unimplemented
         sort, offset, limit, ids,

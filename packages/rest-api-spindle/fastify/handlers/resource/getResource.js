@@ -5,29 +5,23 @@ import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
 
-export default function createRouteHandler (mapper: MapperService, route: Route) {
+export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    category: "resource", method: "GET", fastifyRoute: route,
-    requiredRuntimeRules: ["resourceId"],
-    builtinRules: {},
+    requiredRules: ["routeRoot", "resource"],
+
     prepare (/* fastify */) {
-      this.routeRuntime = mapper.createRouteRuntime(this);
+      this.runtime = mapper.createRouteRuntime(this);
       this.toResourceFields = ["§->"];
       mapper.buildKuery(route.schema.response[200], this.toResourceFields);
       this.hardcodedResources = route.config.valos.hardcodedResources;
     },
-    async preload () {
-      const connection = await mapper.getDiscourse().acquireConnection(
-          route.config.valos.subject, { newPartition: false }).asActiveConnection();
-        subject: server.getEngine().getVrapper(
-      await mapper.preloadRuntimeResources(this.routeRuntime);
-      this.routeRuntime.scopeBase = Object.freeze({
-            [connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) }]),
-        ...this.routeRuntime.scopeBase,
-      });
+
+    preload () {
+      return mapper.preloadRuntimeResources(this, this.runtime);
     },
-    handleRequest (request, reply) {
-      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+
+    handler (request, reply) {
+      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       mapper.infoEvent(2, () => [
         `${this.name}:`, scope.resourceId,
         "\n\trequest.query:", request.query,

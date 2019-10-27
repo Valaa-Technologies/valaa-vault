@@ -4,27 +4,25 @@ import { asyncConnectToPartitionsIfMissingAndRetry } from "~/raem/tools/denormal
 
 import { dumpify, dumpObject, outputError, thenChainEagerly } from "~/tools";
 
-import * as handlerCreators from "./handlers";
+import * as routerCreators from "./handlers";
 
 const FastifySwaggerPlugin = require("fastify-swagger");
 const FastifyCookiePlugin = require("fastify-cookie");
 
-export function _createMapper (mapperService, prefix, {
+export function _createPrefixService (rootService, prefix, {
   openapi, swaggerPrefix, schemas, routes, identity, sessionDuration, ...pluginOptions
 }) {
-  const ret = Object.create(mapperService);
+  const ret = Object.create(rootService);
   ret.getRoutePrefix = () => prefix;
-  ret.getSessionDuration = () => (sessionDuration || mapperService.getSessionDuration());
+  ret.getSessionDuration = () => (sessionDuration || rootService.getSessionDuration());
   ret.getIdentity = () => identity;
 
   // Create handlers for all routes before trying to register.
   // At this stage neither schema nor fastify is available for the
   // handlers.
-  const routeHandlers = routes
-      .map(route => _createRouteHandler(ret, route))
-      .filter(notFalsy => notFalsy);
+  const routers = routes.map(route => _createRouter(ret, route)).filter(r => r);
   // https://github.com/fastify/fastify/blob/master/docs/Server.md
-  mapperService.getRootFastify().register(async (fastify, opts, next) => {
+  rootService.getRootFastify().register(async (fastify, opts, next) => {
     ret._fastify = fastify;
     fastify.register(FastifyCookiePlugin);
     if (swaggerPrefix) {
@@ -40,20 +38,17 @@ export function _createMapper (mapperService, prefix, {
     ]);
     schemas.forEach(schema => fastify.addSchema(schema));
     ret.infoEvent(1, () => [
-      `${prefix}: preparing ${routeHandlers.length} route handlers`,
+      `${prefix}: preparing ${routers.length} routers`,
     ]);
-    await Promise.all(routeHandlers.map(routeHandler =>
-        routeHandler.prepare && routeHandler.prepare(fastify)));
+    await Promise.all(routers.map(router => router.prepare && router.prepare(fastify)));
     ret.infoEvent(1, () => [
-      `${prefix}: preloading ${routeHandlers.length} route handlers`,
+      `${prefix}: preloading ${routers.length} routers`,
     ]);
-    await Promise.all(routeHandlers.map(routeHandler =>
-        routeHandler.preload && routeHandler.preload()));
+    await Promise.all(routers.map(router => router.preload && router.preload(fastify)));
     ret.infoEvent(1, () => [
-      `${prefix}: adding ${routeHandlers.length} fastify routes`,
+      `${prefix}: adding ${routers.length} fastify routes`,
     ]);
-    routeHandlers.forEach(routeHandler =>
-        fastify.route(routeHandler.fastifyRoute));
+    routers.forEach(router => fastify.route(_fastifyRouteOptions(ret, router)));
     ret.infoEvent(1, () => [
       `${prefix}: plugin ready`,
     ]);
@@ -69,49 +64,59 @@ export function _createMapper (mapperService, prefix, {
   return ret;
 }
 
-function _createRouteHandler (mapper, route) {
-  const wrap = new Error(`createRouteHandler(${route.category || "<categoryless>"} ${
-      route.method} ${route.url})`);
+function _createRouter (mapper, route) {
+  const wrap = new Error(
+      `createRouter(${route.category} ${route.method} ${route.url})`);
   try {
+    if (!route.url) throw new Error(`Route url undefined`);
     if (!route.category) throw new Error(`Route category undefined`);
     if (!route.method) throw new Error(`Route method undefined`);
-    if (!route.url) throw new Error(`Route url undefined`);
     if (!route.config) throw new Error(`Route config undefined`);
-    const createRouteHandler = (handlerCreators[route.category] || {})[route.method];
-    if (!createRouteHandler) {
-      throw new Error(`No route handler creators found for '${route.category} ${route.method}'`);
-    }
-    const routeHandler = createRouteHandler(mapper, route);
-    if (!routeHandler) return undefined;
-    if (!routeHandler.name) routeHandler.name = `${route.category} ${route.method} ${route.url}`;
-    const routeErrorMessage = `Exception caught during: ${routeHandler.name}`;
-    const handleRequestAndErrors = asyncConnectToPartitionsIfMissingAndRetry(
-        (request, reply) => thenChainEagerly(
-            routeHandler.handleRequest(request, reply),
-            result => {
-              if (result !== true) {
-                throw mapper.wrapErrorEvent(
-                    new Error("INTERNAL SERVER ERROR: invalid route handler return value"),
-                    new Error(`handleRequest return value validator`),
-                    "\n\treturn value:", ...dumpObject(result),
-                    "Note: routeHandler.handleRequest must explicitly call reply.code/send",
-                    "and return true or return a Promise which resolves to true.",
-                    "This ensures that exceptions are always caught and logged properly");
-              }
-            }),
-        (error, request, reply) => {
-          reply.code(500);
-          reply.send(error.message);
-          outputError(mapper.wrapErrorEvent(error, new Error(`${routeHandler.name}`),
-              "\n\trequest.params:", ...dumpObject(request.params),
-              "\n\trequest.query:", ...dumpObject(request.query),
-              "\n\trequest.body:", ...dumpObject(request.body),
-          ), routeErrorMessage, mapper.getLogger());
-        },
-    );
-    route.handler = (request, reply) => { handleRequestAndErrors(request, reply); };
-    return routeHandler;
+    const createRouter = (routerCreators[route.category] || {})[route.method];
+    if (!createRouter) throw new Error(`No router found for '${route.category} ${route.method}'`);
+    const router = createRouter(mapper, route);
+    if (router == null) return undefined;
+    if (!router.name) router.name = `${route.category} ${route.method} ${route.url}`;
+    router.route = route;
+    return router;
   } catch (error) {
-    throw mapper.wrapErrorEvent(error, wrap, "\n\troute:", dumpify(route, { indent: 2 }));
+    throw mapper.wrapErrorEvent(error, wrap,
+        "\n\troute:", dumpify(route, { indent: 2 }));
   }
+}
+
+function _fastifyRouteOptions (mapper, router) {
+  return {
+    ...router.route,
+    handler: _wrapHandler(mapper, router),
+  };
+}
+
+function _wrapHandler (mapper, router) {
+  const routeErrorMessage = `Exception caught during: ${router.name}`;
+  const handleRequestAndErrors = asyncConnectToPartitionsIfMissingAndRetry(
+      (request, reply) => thenChainEagerly(
+          router.handler(request, reply),
+          result => {
+            if (result !== true) {
+              throw mapper.wrapErrorEvent(
+                  new Error("INTERNAL SERVER ERROR: invalid route handler return value"),
+                  new Error(`handler return value validator`),
+                  "\n\treturn value:", ...dumpObject(result),
+                  "Note: router.handler must explicitly call reply.code/send",
+                  "and return true or return a Promise which resolves to true.",
+                  "This ensures that exceptions are always caught and logged properly");
+            }
+          }),
+      (error, request, reply) => {
+        reply.code(500);
+        reply.send(error.message);
+        outputError(mapper.wrapErrorEvent(error, new Error(`${router.name}`),
+            "\n\trequest.params:", ...dumpObject(request.params),
+            "\n\trequest.query:", ...dumpObject(request.query),
+            "\n\trequest.body:", ...dumpObject(request.body),
+        ), routeErrorMessage, mapper.getLogger());
+      },
+  );
+  return (request, reply) => { handleRequestAndErrors(request, reply); };
 }

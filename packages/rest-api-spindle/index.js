@@ -39,24 +39,3 @@ export default valosheath.exportSpindle({
     return view._restAPIService.start();
   },
 });
-
-export function assignRouteConfigFrom (
-    routeToExtract: { route: string, category: string, method: string, mapping: string },
-    routeConfigSource: Object,
-    target = {}) {
-  const { ofRoute, ofCategory, ofMethod, ofMapping, ...rest } = routeConfigSource;
-  Object.assign(target, rest);
-  if ((ofRoute || {})[routeToExtract.route]) {
-    assignRouteConfigFrom(ofRoute[routeToExtract.route], routeToExtract, target);
-  }
-  if ((ofCategory || {})[routeToExtract.category]) {
-    assignRouteConfigFrom(ofCategory[routeToExtract.category], routeToExtract, target);
-  }
-  if ((ofMethod || {})[routeToExtract.method]) {
-    assignRouteConfigFrom(ofMethod[routeToExtract.method], routeToExtract, target);
-  }
-  if ((ofMapping || {})[routeToExtract.mapping]) {
-    assignRouteConfigFrom(ofMapping[routeToExtract.mapping], routeToExtract, target);
-  }
-  return target;
-}

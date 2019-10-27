@@ -1,37 +1,39 @@
 // @flow
 
-import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
+import type MapperService from "~/rest-api-spindle/fastify/MapperService";
 import {
   burlaesgDecode, burlaesgEncode, hs256JWTEncode,
 } from "~/rest-api-spindle/fastify/security";
 
-export default function createRouteHandler (mapper: MapperService, route: Route) {
+export default function createRouter (mapper: MapperService/* , route: Route */) {
   return {
-    category: "session", method: "GET", fastifyRoute: route,
-    requiredRuntimeRules: [
-      "userAgentState",
-      "clientRedirectPath", "grantProviderState",
-      "grantExpirationDelay", "tokenExpirationDelay",
-    ],
     requiredRules: [
-      "authorizationGrant", "error", "errorDescription", "errorURI",
+      "routeRoot",
+      "clientRedirectPath", "grantExpirationDelay", "tokenExpirationDelay",
+      "userAgentState",
+      "authorizationGrant", "grantProviderState", "error", "errorDescription", "errorURI",
     ],
-    builtinRules: {},
+
     prepare (/* fastify */) {
-      this._identity = mapper.getIdentity();
-      if (!this._identity) {
-        throw new Error("Cannot prepare session route GET: identity not configured");
+      this.runtime = mapper.createRouteRuntime(this);
+
+      if (!this.runtime.identity) {
+        throw new Error("Cannot prepare session route GET: service identity not configured");
       }
-      this.builtinRules.userAgentState = ["cookies", this._identity.getClientCookieName()];
-      this.routeRuntime = mapper.createRouteRuntime(this);
-      this._clientURI = this._identity.clientURI;
-      this._secret = this._identity.clientSecret;
+      this.runtime.scopeBase.identity = Object.freeze({
+        clientSecret: this.runtime.identity.clientSecret,
+        clientURI: this.runtime.identity.clientURI,
+        clientCookieName: this.runtime.identity.getClientCookieName(),
+        sessionCookieName: this.runtime.identity.getSessionCookieName(),
+      });
     },
+
     preload () {
-      return mapper.preloadRuntimeResources(this.routeRuntime);
+      return mapper.preloadRuntimeResources(this, this.runtime);
     },
-    handleRequest (request, reply) {
-      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+
+    handler (request, reply) {
+      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       mapper.infoEvent(1, () => [
         "\n\trequest.query:", request.query,
         "\n\trequest.cookies:", request.cookies,
@@ -48,15 +50,15 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
           throw new Error("Inconsistent session authorization state");
         }
 
-        const secret = this._identity.clientSecret;
-        ({ iv, alg, payload } = burlaesgDecode(scope.authorizationGrant, secret));
+        ({ iv, alg, payload } =
+            burlaesgDecode(scope.authorizationGrant, scope.identity.clientSecret));
         ({
           nonce, identityPartition, timeStamp: grantTimeStamp,
           claims: { email, preferred_username },
         } = payload);
         console.log("Authorizing session with payload:", payload);
 
-        if (!(timeStamp < Number(grantTimeStamp) + (scope.grantExpirationDelay || 60))) {
+        if (!(timeStamp < Number(grantTimeStamp) + scope.grantExpirationDelay)) {
           reply.code(401);
           reply.send("Authorization session request has expired");
           throw new Error("Expired");
@@ -64,22 +66,22 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
         }
 
         sessionToken = { timeStamp, nonce, identityPartition };
-        reply.setCookie(this._identity.getSessionCookieName(),
-            burlaesgEncode(sessionToken, secret, iv), {
+        reply.setCookie(scope.identity.sessionCookieName,
+            burlaesgEncode(sessionToken, scope.identity.clientSecret, iv), {
               httpOnly: true,
               secure: true, maxAge: scope.tokenExpirationDelay, path: scope.clientRedirectPath,
             });
 
         clientToken = {
-          iss: this._clientURI,
+          iss: scope.identity.clientURI,
           sub: identityPartition,
           iat: timeStamp,
           exp: timeStamp + scope.tokenExpirationDelay,
           email, preferred_username,
           // aud: "", nbf: "", jti: "",
         };
-        reply.setCookie(this._identity.getClientCookieName(),
-            hs256JWTEncode(clientToken, secret), {
+        reply.setCookie(scope.identity.clientCookieName,
+            hs256JWTEncode(clientToken, scope.identity.clientSecret), {
               httpOnly: false,
               secure: true, maxAge: scope.tokenExpirationDelay, path: scope.clientRedirectPath,
             });
@@ -89,7 +91,7 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
         return true;
       } catch (error) {
         throw mapper.wrapErrorEvent(error,
-            new Error(`authorizeSessionWithGrant(${this._clientURI})`),
+            new Error(`authorizeSessionWithGrant(${scope.identity.clientURI})`),
             "\n\ttimeStamp:", timeStamp,
             "\n\tauthorizationGrant:", scope.authorizationGrant,
             "\n\tclientRedirectPath:", scope.clientRedirectPath,

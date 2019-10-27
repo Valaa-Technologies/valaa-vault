@@ -7,35 +7,23 @@ import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
 
-export default function createRouteHandler (mapper: MapperService, route: Route) {
+export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    category: "resource", method: "POST", fastifyRoute: route,
-    requiredRuntimeRules: [],
-    builtinRules: {
-      createResource: ["constant", route.config.createResource],
-    },
-    prepare (/* fastify */) {
-      this.routeRuntime = mapper.createRouteRuntime(this);
+    requiredRules: ["routeRoot", "createResource"],
 
+    prepare (/* fastify */) {
+      this.runtime = mapper.createRouteRuntime(this);
       const toPatchTarget = ["§->"];
       mapper.buildKuery(route.config.resourceSchema, toPatchTarget);
       // if (toPatchTarget.length > 1) this.toPatchTarget = toPatchTarget;
     },
-    async preload () {
-      const viewFocus = mapper.getViewFocus();
-      if (!viewFocus) throw new Error(`Can't locate viewFocus for route: ${this.name}`);
-      await mapper.preloadRuntimeResources(this.routeRuntime);
-      const connection = await mapper.getDiscourse().acquireConnection(
-          route.config.valos.subject, { newPartition: false }).asActiveConnection();
-      this.routeRuntime.scopeBase = Object.freeze({
-        viewFocus,
-        subject: mapper.getEngine().getVrapper(
-            [connection.getPartitionRawId(), { partition: String(connection.getPartitionURI()) }]),
-        ...this.routeRuntime.scopeBase,
-      });
+
+    preload () {
+      return mapper.preloadRuntimeResources(this, this.runtime);
     },
-    handleRequest (request, reply) {
-      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+
+    handler (request, reply) {
+      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       mapper.infoEvent(1, () => [
         `${this.name}:`,
         "\n\trequest.query:", request.query,
@@ -52,9 +40,9 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
       return thenChainEagerly(discourse, [
         () => {
           console.log("resource POST dump:", ...dumpObject(scope.createResource),
-              "\n\tviewFocus:", ...dumpObject(scope.viewFocus),
+              "\n\tserviceIndex:", ...dumpObject(scope.serviceIndex),
               "\n\ttoPatchTarget:", ...dumpObject(this.toPatchTarget));
-          return scope.viewFocus.do(scope.createResource, { discourse, scope });
+          return scope.serviceIndex.do(scope.createResource, { discourse, scope });
         },
         vResource => {
           if (!vResource || !(vResource instanceof Vrapper)) {
@@ -93,7 +81,7 @@ export default function createRouteHandler (mapper: MapperService, route: Route)
             "\n\tscope.resource:", ...dumpObject(scope.resource),
             "\n\tscope.source:", ...dumpObject(scope.source),
             "\n\tscope.target:", ...dumpObject(scope.target),
-            "\n\trouteRuntime:", ...dumpObject(this.routeRuntime),
+            "\n\trouteRuntime:", ...dumpObject(this.runtime),
         );
       });
     },

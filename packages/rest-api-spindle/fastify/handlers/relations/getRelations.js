@@ -5,28 +5,28 @@ import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _addToRelationsSourceSteps } from "../_handlerOps";
 
-export default function createRouteHandler (mapper: MapperService, route: Route) {
+export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    category: "relations", method: "GET", fastifyRoute: route,
-    requiredRuntimeRules: ["resourceId"],
-    builtinRules: {},
+    requiredRules: ["routeRoot", "resource"],
+
     prepare (/* fastify */) {
-      this.routeRuntime = mapper.createRouteRuntime(this);
+      this.runtime = mapper.createRouteRuntime(this);
       this.toRelationsFields = ["§->"];
       _addToRelationsSourceSteps(mapper, route.config.resourceSchema, route.config.relationName,
           this.toRelationsFields);
       mapper.buildKuery(route.schema.response[200], this.toRelationsFields);
     },
     preload () {
-      return mapper.preloadRuntimeResources(this.routeRuntime);
+      return mapper.preloadRuntimeResources(this, this.runtime);
     },
-    handleRequest (request, reply) {
-      const scope = mapper.buildRuntimeScope(this.routeRuntime, request);
+
+    handler (request, reply) {
+      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       mapper.infoEvent(1, () => [
         `${this.name}:`, scope.resourceId,
         "\n\trequest.query:", request.query,
       ]);
-      scope.resource = mapper._engine.tryVrapper([scope.resourceId]);
+      scope.resource = mapper.getEngine().tryVrapper([scope.resourceId]);
       if (!scope.resource) {
         reply.code(404);
         reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);

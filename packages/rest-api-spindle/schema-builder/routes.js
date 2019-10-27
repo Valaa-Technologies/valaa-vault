@@ -1,200 +1,193 @@
 // @flow
 
-import { wrapError, dumpify, dumpObject } from "~/tools";
+import { wrapError, dumpify, dumpObject, patchWith } from "~/tools";
 
 import {
   ArrayJSONSchema, ObjectJSONSchema, StringType, XWWWFormURLEncodedStringType, IdValOSType,
   getBaseRelationTypeOf, schemaReference, trySharedSchemaName,
 } from "./types";
 
-export function listingGETRoute (valos, ResourceType, { url, querystring, ...rest }) {
+import * as handlers from "~/rest-api-spindle/fastify/handlers";
+
+export function assignRulesFrom (
+    ruleSource: Object,
+    routeToExtract: { name: string, category: string, method: string, mappingName: string },
+    rules = {}) {
+  if (!ruleSource) return rules;
+  const {
+    ":ofName": ofName,
+    ":ofCategory": ofCategory,
+    ":ofMethod": ofMethod,
+    ":ofMapping": ofMapping,
+    ...rest
+  } = ruleSource;
+  Object.assign(rules, rest);
+  if ((ofName || {})[routeToExtract.name]) {
+    assignRulesFrom(ofName[routeToExtract.name], routeToExtract, rules);
+  }
+  if ((ofCategory || {})[routeToExtract.category]) {
+    assignRulesFrom(ofCategory[routeToExtract.category], routeToExtract, rules);
+  }
+  if ((ofMethod || {})[routeToExtract.method]) {
+    assignRulesFrom(ofMethod[routeToExtract.method], routeToExtract, rules);
+  }
+  const mappingName = ((routeToExtract.config || {}).mapping || {}).name;
+  if ((ofMapping || {})[mappingName]) {
+    assignRulesFrom(ofMapping[mappingName], routeToExtract, rules);
+  }
+  return rules;
+}
+
+export function listingGETRoute (url, userConfig, globalRules, ResourceType) {
+  const route = { url, category: "resource", method: "GET" };
   try {
-    const resourceSchema = schemaReference(ResourceType);
-    const resourceTypeName = trySharedSchemaName(ResourceType) || "<Type>";
-    return {
-      category: "listing",
-      method: "GET",
-      url,
-      schema: {
-        description: `List all listable ${resourceTypeName} resources`,
-        querystring: {
-          ..._genericGETResourceQueryStringSchema(ResourceType),
-          ..._resourceSequenceQueryStringSchema(ResourceType),
-          ...(querystring || {}),
-        },
-        response: {
-          200: {
-            type: "array",
-            items: resourceSchema,
-          },
+    _setupRoute(route, userConfig, globalRules, ResourceType);
+    route.schema = {
+      description: `List all listable ${route.config.resource.name} resources`,
+      querystring: {
+        ..._genericGETResourceQueryStringSchema(ResourceType),
+        ..._resourceSequenceQueryStringSchema(ResourceType),
+        ...(route.querystring || {}),
+      },
+      response: {
+        200: {
+          type: "array",
+          items: route.config.resource.schema,
         },
       },
-      config: { valos, resourceSchema, resourceTypeName, ...rest },
     };
+    return route;
   } catch (error) {
-    throw wrapError(error, new Error(`listingGETRoute(<${url}>)`),
-        "\n\tvalos:", dumpify(valos),
+    throw wrapError(error, new Error(`listingGETRoute(<${route.url}>)`),
+        "\n\tresource:", ...dumpObject(route.config.resource),
         "\n\tResourceType:", ...dumpObject(ResourceType),
-        "\n\tquerystring:", dumpify(querystring),
+        "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function resourcePOSTRoute (valos, ResourceType,
-    { url, querystring, createResource, ...rest }) {
+export function resourcePOSTRoute (url, userConfig, globalRules, ResourceType) {
+  const route = { url, category: "resource", method: "POST" };
   try {
-    const resourceSchema = schemaReference(ResourceType);
-    const resourceTypeName = trySharedSchemaName(ResourceType) || "<Type>";
-    return {
-      category: "resource",
-      method: "POST",
-      url,
-      schema: {
-        description: `Create a new ${resourceTypeName} resource`,
-        querystring: querystring ? { ...querystring } : undefined,
-        body: resourceSchema,
-        response: {
-          200: resourceSchema,
-          403: { type: "string" },
-        },
+    _setupRoute(route, userConfig, globalRules, ResourceType);
+    route.schema = {
+      description: `Create a new ${route.config.resource.name} resource`,
+      querystring: route.querystring ? { ...route.querystring } : undefined,
+      body: route.config.resource.schema,
+      response: {
+        200: route.config.resource.schema,
+        403: { type: "string" },
       },
-      config: { valos, resourceSchema, resourceTypeName, createResource, ...rest },
     };
+    return route;
   } catch (error) {
-    throw wrapError(error, new Error(`resourcePOSTRoute(<${url}>)`),
-        "\n\tvalos:", dumpify(valos),
+    throw wrapError(error, new Error(`resourcePOSTRoute(<${route.url}>)`),
+        "\n\tresource:", dumpify(route.config.resource),
         "\n\tType:", ...dumpObject(ResourceType),
-        "\n\tquerystring:", dumpify(querystring),
+        "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function resourceGETRoute (valos, ResourceType, { url, querystring, ...rest }) {
+export function resourceGETRoute (url, userConfig, globalRules, ResourceType) {
+  const route = { url, category: "resource", method: "GET" };
   try {
-    const resourceSchema = schemaReference(ResourceType);
-    const resourceTypeName = trySharedSchemaName(ResourceType) || "<Type>";
-    return {
-      category: "resource",
-      method: "GET",
-      url,
-      schema: {
-        description:
-            `Get the contents of a ${resourceTypeName} route resource`,
-        querystring: {
-          ..._genericGETResourceQueryStringSchema(ResourceType),
-          ...(querystring || {}),
-        },
-        response: {
-          200: resourceSchema,
-          404: { type: "string", resourceTypeName },
-        },
+    _setupRoute(route, userConfig, globalRules, ResourceType);
+    route.schema = {
+      description: `Get the contents of a ${route.config.resource.name} route resource`,
+      querystring: {
+        ..._genericGETResourceQueryStringSchema(ResourceType),
+        ...(route.querystring || {}),
       },
-      config: { valos, resourceSchema, ...rest },
+      response: {
+        200: route.config.resource.schema,
+        404: { type: "string" },
+      },
     };
+    return route;
   } catch (error) {
-    throw wrapError(error, new Error(`resourceGETRoute(<${url}>)`),
-        "\n\tvalos:", dumpify(valos),
+    throw wrapError(error, new Error(`resourceGETRoute(<${route.url}>)`),
+        "\n\tresource:", ...dumpObject(route.config.resource),
         "\n\tResourceType:", ...dumpObject(ResourceType),
-        "\n\tquerystring:", dumpify(querystring),
+        "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function resourcePATCHRoute (valos, ResourceType, { url, querystring, ...rest }) {
+export function resourcePATCHRoute (url, userConfig, globalRules, ResourceType) {
+  const route = { url, category: "resource", method: "PATCH" };
   try {
-    const resourceSchema = schemaReference(ResourceType);
-    const resourceTypeName = trySharedSchemaName(ResourceType) || "<Type>";
-    return {
-      category: "resource",
-      method: "PATCH",
-      url,
-      schema: {
-        description: `Update parts of a ${resourceTypeName} route resource`,
-        querystring: querystring ? { ...querystring } : undefined,
-        body: resourceSchema,
-        response: {
-          200: { type: "string" },
-          403: { type: "string" },
-          404: { type: "string" },
-        },
+    _setupRoute(route, userConfig, globalRules, ResourceType);
+    route.schema = {
+      description: `Update parts of a ${route.config.resource.name} route resource`,
+      querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
+      body: route.config.resource.schema,
+      response: {
+        200: { type: "string" },
+        403: { type: "string" },
+        404: { type: "string" },
       },
-      config: { valos, resourceSchema, resourceTypeName, ...rest },
     };
+    return route;
   } catch (error) {
-    throw wrapError(error, new Error(`resourcePATCHRoute(<${url}>)`),
-        "\n\tvalos:", dumpify(valos),
+    throw wrapError(error, new Error(`resourcePATCHRoute(<${route.url}>)`),
+        "\n\tresource:", ...dumpObject(route.config.resource),
         "\n\tResourceType:", ...dumpObject(ResourceType),
-        "\n\tquerystring:", dumpify(querystring),
+        "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function resourceDELETERoute (valos, Type,
-    { url, querystring, ...rest }) {
+export function resourceDELETERoute (url, userConfig, globalRules, ResourceType) {
+  const route = { url, category: "resource", method: "DELETE" };
   try {
-    const resourceTypeName = trySharedSchemaName(Type) || "<Type>";
-    return {
-      category: "resource",
-      method: "DELETE",
-      url,
-      schema: {
-        description: `Destroy a ${resourceTypeName} route resource`,
-        querystring: querystring ? { ...querystring } : undefined,
-        response: {
-          200: { type: "string" },
-          403: { type: "string" },
-          404: { type: "string" },
-        },
+    _setupRoute(route, userConfig, globalRules, ResourceType);
+    route.schema = {
+      description: `Destroy a ${route.config.resource.name} route resource`,
+      querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
+      response: {
+        200: { type: "string" },
+        403: { type: "string" },
+        404: { type: "string" },
       },
-      config: { valos, resourceTypeName, ...rest },
     };
+    return route;
   } catch (error) {
-    throw wrapError(error, new Error(`resourceDELETERoute(<${url}>)`),
-        "\n\tvalos:", dumpify(valos),
-        "\n\tType:", ...dumpObject(Type),
-        "\n\tquerystring:", dumpify(querystring),
+    throw wrapError(error, new Error(`resourceDELETERoute(<${route.url}>)`),
+        "\n\tresource:", ...dumpObject(route.config.resource),
+        "\n\tResourceType:", ...dumpObject(ResourceType),
+        "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function relationsGETRoute (valos, ResourceType, RelationType,
-    { url, querystring, ...rest }) {
+export function relationsGETRoute (url, userConfig, globalRules, ResourceType, RelationType) {
+  const route = { url, category: "relations", method: "GET" };
   try {
-    const { mappingName: relationName, TargetType } = _getMappingParams(RelationType);
-    // const BaseRelationType = getBaseRelationTypeOf(RelationType);
-    const resourceTypeName = trySharedSchemaName(ResourceType) || "<ResourceType>";
-    const targetTypeName = trySharedSchemaName(TargetType) || "<TargetType>";
-    return {
-      category: "relations",
-      method: "GET",
-      url,
-      schema: {
-        description: `List all '${relationName}' relations from the source ${
-          resourceTypeName} route resource to all target ${targetTypeName} resources`,
-        querystring: {
-          ..._genericGETResourceQueryStringSchema(RelationType),
-          ..._resourceSequenceQueryStringSchema(RelationType),
-          ...(querystring || {}),
-        },
-        response: {
-          200: schemaReference(RelationType),
-        },
+    _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
+    route.schema = {
+      description: `List all '${route.config.mapping.name}' relations from the source ${
+        route.config.resource.name} route resource to all target ${
+        route.config.target.name} resources`,
+      querystring: {
+        ..._genericGETResourceQueryStringSchema(RelationType),
+        ..._resourceSequenceQueryStringSchema(RelationType),
+        ...(route.config.querystring || {}),
       },
-      config: {
-        valos, resourceTypeName, relationName, targetTypeName,
-        resourceSchema: schemaReference(ResourceType),
-        ...rest,
+      response: {
+        200: route.config.mapping.schema,
       },
     };
+    return route;
   } catch (error) {
-    throw wrapError(error, new Error(`relationsGETRoute(<${url}>)`),
-        "\n\tvalos:", dumpify(valos),
+    throw wrapError(error, new Error(`relationsGETRoute(<${route.url}>)`),
+        "\n\tresource:", ...dumpObject(route.config.resource),
         "\n\tSourceType:", ...dumpObject(ResourceType),
         "\n\tRelationType[ArrayJSONSchema]:", dumpify(RelationType[ArrayJSONSchema]),
         "\n\tRelationType[ObjectJSONSchema]:", dumpify(RelationType[ObjectJSONSchema]),
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
-        "\n\tquerystring:", dumpify(querystring),
+        "\n\troute:", ...dumpObject(route),
     );
   }
 }
@@ -206,269 +199,273 @@ whereas the identify of a Relation is an explicit id. The identity of
 mapping is thus implicitly inferred from the route.
 */
 
-export function mappingPOSTRoute (valos, ResourceType, RelationType,
-    { url, querystring, createResourceAndMapping, ...rest }) {
+export function mappingPOSTRoute (url, userConfig, globalRules, ResourceType, RelationType) {
+  const route = { url, category: "mapping", method: "POST" };
   try {
-    const { mappingName, TargetType } = _getMappingParams(RelationType);
+    _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
+
+    const target = RelationType.$V[ObjectJSONSchema].valospace.TargetType;
     const BodyType = getBaseRelationTypeOf(RelationType);
-    BodyType.$V = { target: TargetType };
+    BodyType.$V = { target };
     const ResponseBodyType = getBaseRelationTypeOf(RelationType);
-    ResponseBodyType.$V = { ...ResponseBodyType.$V, target: BodyType.$V.target };
-    const resourceTypeName = trySharedSchemaName(ResourceType) || "<ResourceType>";
-    const targetTypeName = trySharedSchemaName(TargetType) || "<TargetType>";
-    return {
-      category: "mapping",
-      method: "POST",
-      url,
-      schema: {
-        description: `Create a new ${targetTypeName
-          } resource *using **body.$V.target** as content* and then a new '${mappingName
-          }' mapping to it from the source ${resourceTypeName
-          } route resource. The remaining fields of the body are set as the mapping content.\n${
-          ""} Similarily the response will contain the newly created target resource content${
-          ""} in *response.$V.target* with the rest of the response containing the mapping.`,
-        querystring: querystring ? { ...querystring } : undefined,
-        body: schemaReference(BodyType),
-        response: {
-          200: schemaReference(ResponseBodyType),
-          403: { type: "string" },
-        },
-      },
-      config: {
-        valos, resourceTypeName, mappingName, targetTypeName, createResourceAndMapping,
-        resourceSchema: schemaReference(ResourceType),
-        relationSchema: schemaReference(RelationType),
-        targetSchema: schemaReference(TargetType),
-        ...rest,
+    ResponseBodyType.$V = { ...ResponseBodyType.$V, target };
+
+    route.schema = {
+      description:
+`Create a new ${route.config.target.name} resource
+*using **body.$V.target** as content* and then a new '${route.config.mapping.name}'
+mapping to it from the source ${route.config.resource.name} route
+resource. The remaining fields of the body are set as the mapping
+content. Similarily the response will contain the newly created target
+resource content in *response.$V.target* with the rest of the response
+containing the mapping.`,
+      querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
+      body: schemaReference(BodyType),
+      response: {
+        200: schemaReference(ResponseBodyType),
+        403: { type: "string" },
       },
     };
+    return route;
   } catch (error) {
-    throw wrapError(error, new Error(`mappingPOSTRoute(<${url}>)`),
-        "\n\tvalos:", dumpify(valos),
+    throw wrapError(error, new Error(`mappingPOSTRoute(<${route.url}>)`),
+        "\n\tresource:", ...dumpObject(route.config.resource),
         "\n\tSourceType:", ...dumpObject(ResourceType),
         "\n\tRelationType[ArrayJSONSchema]:", dumpify(RelationType[ArrayJSONSchema]),
         "\n\tRelationType[ObjectJSONSchema]:", dumpify(RelationType[ObjectJSONSchema]),
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
-        "\n\tquerystring:", dumpify(querystring),
+        "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function mappingGETRoute (valos, ResourceType, RelationType,
-    { url, querystring, ...rest }) {
+export function mappingGETRoute (url, userConfig, globalRules, ResourceType, RelationType) {
+  const route = { url, category: "mapping", method: "GET" };
   try {
-    const { mappingName, TargetType } = _getMappingParams(RelationType);
+    _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
+
     const BaseRelationType = getBaseRelationTypeOf(RelationType);
-    const resourceTypeName = trySharedSchemaName(ResourceType) || "<ResourceType>";
-    const targetTypeName = trySharedSchemaName(TargetType) || "<TargetType>";
-    return {
-      category: "mapping",
-      method: "GET",
-      url,
-      schema: {
-        description: `Get the contents of a '${mappingName}' relation from the source ${
-          resourceTypeName} route resource to the target ${targetTypeName} route resource`,
-        querystring: {
-          ..._genericGETResourceQueryStringSchema(BaseRelationType),
-          ...(querystring || {}),
-        },
-        response: {
-          200: schemaReference(BaseRelationType),
-          404: { type: "string" },
-        },
+
+    route.schema = {
+      description: `Get the contents of a '${route.config.mapping.name}' relation from the source ${
+        route.config.resource.name} route resource to the target ${route.config.target.name} route resource`,
+      querystring: {
+        ..._genericGETResourceQueryStringSchema(BaseRelationType),
+        ...(route.config.querystring || {}),
       },
-      config: {
-        valos, resourceTypeName, mappingName, targetTypeName,
-        resourceSchema: schemaReference(ResourceType),
-        relationSchema: schemaReference(RelationType),
-        ...rest,
+      response: {
+        200: schemaReference(BaseRelationType),
+        404: { type: "string" },
       },
     };
+    return route;
   } catch (error) {
-    throw wrapError(error, new Error(`mappingGETRoute(<${url}>)`),
-        "\n\tvalos:", dumpify(valos),
+    throw wrapError(error, new Error(`mappingGETRoute(<${route.url}>)`),
+        "\n\tresource:", ...dumpObject(route.config.resource),
         "\n\tSourceType:", ...dumpObject(ResourceType),
         "\n\tRelationType[ArrayJSONSchema]:", dumpify(RelationType[ArrayJSONSchema]),
         "\n\tRelationType[ObjectJSONSchema]:", dumpify(RelationType[ObjectJSONSchema]),
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
-        "\n\tquerystring:", dumpify(querystring),
+        "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function mappingPATCHRoute (valos, ResourceType, RelationType,
-    { url, querystring, createMapping, ...rest }) {
+export function mappingPATCHRoute (url, userConfig, globalRules, ResourceType, RelationType) {
+  const route = { url, category: "mapping", method: "PATCH" };
   try {
-    /*
-    if (createMapping === undefined) {
-      throw new Error("mappingPATCHRoute.createMapping is undefined");
-    }
-    */
-    const PatchRelationType = {
+    _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
+
+    route.config.mapping.schema = schemaReference({
       ...RelationType,
       [ArrayJSONSchema]: RelationType[ArrayJSONSchema],
       [ObjectJSONSchema]: RelationType[ObjectJSONSchema],
       $V: { ...RelationType.$V, id: IdValOSType },
-    };
-    const { mappingName, TargetType } = _getMappingParams(RelationType);
-    const BaseRelationType = getBaseRelationTypeOf(RelationType);
-    const resourceTypeName = trySharedSchemaName(ResourceType) || "<ResourceType>";
-    const targetTypeName = trySharedSchemaName(TargetType) || "<TargetType>";
-    return {
-      category: "mapping",
-      method: "PATCH",
-      url,
-      schema: {
-        description: `Update the contents of a '${mappingName}' mapping from the source ${
-          resourceTypeName} route resource to the target ${targetTypeName} route resource`,
-        querystring: querystring ? { ...querystring } : undefined,
-        body: schemaReference(BaseRelationType),
-        response: {
-          200: { type: "string" },
-          201: { type: "string" },
-          403: { type: "string" },
-          404: { type: "string" },
-        },
-      },
-      config: {
-        valos, resourceTypeName, mappingName, targetTypeName, createMapping,
-        resourceSchema: schemaReference(ResourceType),
-        relationSchema: schemaReference(PatchRelationType),
-        targetSchema: schemaReference(TargetType),
-        ...rest,
+    });
+
+    route.schema = {
+      description: `Update the contents of a '${route.config.mapping.name
+        }' mapping from the source ${route.config.resource.name
+        } route resource to the target ${route.config.target.name} route resource`,
+      querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
+      body: schemaReference(getBaseRelationTypeOf(RelationType)),
+      response: {
+        200: { type: "string" },
+        201: { type: "string" },
+        403: { type: "string" },
+        404: { type: "string" },
       },
     };
+    return route;
   } catch (error) {
-    throw wrapError(error, new Error(`mappingPATCHRoute(<${url}>)`),
-        "\n\tvalos:", dumpify(valos),
+    throw wrapError(error, new Error(`mappingPATCHRoute(<${route.url}>)`),
+        "\n\tresource:", ...dumpObject(route.config.resource),
         "\n\tSourceType:", ...dumpObject(ResourceType),
         "\n\tRelationType[ArrayJSONSchema]:", dumpify(RelationType[ArrayJSONSchema]),
         "\n\tRelationType[ObjectJSONSchema]:", dumpify(RelationType[ObjectJSONSchema]),
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
-        "\n\tquerystring:", dumpify(querystring),
+        "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function mappingDELETERoute (valos, ResourceType, RelationType,
-    { url, querystring, ...rest }) {
+export function mappingDELETERoute (url, userConfig, globalRules, ResourceType, RelationType) {
+  const route = { url, category: "mapping", method: "DELETE" };
   try {
-    const { mappingName, TargetType } = _getMappingParams(RelationType);
-    const resourceTypeName = trySharedSchemaName(ResourceType) || "<ResourceType>";
-    const targetTypeName = trySharedSchemaName(TargetType) || "<TargetType>";
-    return {
-      category: "mapping",
-      method: "DELETE",
-      url,
-      schema: {
-        description: `Delete a '${mappingName}' mapping from the source ${
-          resourceTypeName} route resource to the target ${targetTypeName} route resource.`,
-        querystring: querystring ? { ...querystring } : undefined,
-        response: {
-          200: { type: "string" },
-          403: { type: "string" },
-          404: { type: "string" },
-        },
-      },
-      config: {
-        valos, resourceTypeName, mappingName, targetTypeName,
-        resourceSchema: schemaReference(ResourceType),
-        relationSchema: schemaReference(RelationType),
-        ...rest,
+    _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
+    route.schema = {
+      description: `Delete a '${route.config.mapping.name}' mapping from the source ${
+        route.config.resource.name} route resource to the target ${
+        route.config.target.name} route resource.`,
+      querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
+      response: {
+        200: { type: "string" },
+        403: { type: "string" },
+        404: { type: "string" },
       },
     };
+    return route;
   } catch (error) {
-    throw wrapError(error, new Error(`mappingDELETERoute(<${url}>)`),
-        "\n\tvalos:", dumpify(valos),
+    throw wrapError(error, new Error(`mappingDELETERoute(<${route.url}>)`),
+        "\n\tresource:", ...dumpObject(route.config.resource),
         "\n\tSourceType:", ...dumpObject(ResourceType),
         "\n\tRelationType[ArrayJSONSchema]:", dumpify(RelationType[ArrayJSONSchema]),
         "\n\tRelationType[ObjectJSONSchema]:", dumpify(RelationType[ObjectJSONSchema]),
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
-        "\n\tquerystring:", dumpify(querystring),
+        "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function sessionGETRoute ({ url, querystring, clientRedirectPath, ...rest }) {
+export function sessionGETRoute (url, userConfig, globalRules) {
+  const route = { url, category: "session", method: "GET", config: {
+    rules: {
+      grantExpirationDelay: 60,
+      tokenExpirationDelay: 86400,
+      userAgentState: ["!:request:cookies", ["!:identity:clientCookieName"]],
+      authorizationGrant: ["!:request:query:code"],
+      grantProviderState: ["!:request:query:state"],
+      error: ["!:request:query:error"],
+      errorDescription: ["!:request:query:error_description"],
+      errorURI: ["!:request:query:error_uri"],
+    },
+  } };
   try {
-    return {
-      category: "session",
-      method: "GET",
-      url,
-      schema: {
-        description: `Get a session redirection via a ValOS OpenId Connect authorization response`,
-        querystring: {
-          code: { ...XWWWFormURLEncodedStringType },
-          state: { ...XWWWFormURLEncodedStringType },
-          error: StringType, // ASCII,
-          error_description: StringType,
-          // Values for the "error_description" parameter MUST NOT include
-          // characters outside the set %x20-21 / %x23-5B / %x5D-7E.
-          error_uri: StringType,
-          // Values for the "error_uri" parameter MUST conform to the
-          // URI-reference syntax and thus MUST NOT include characters
-          // outside the set %x21 / %x23-5B / %x5D-7E.
-          ...(querystring || {}),
-        },
-        response: {
-          302: StringType,
-          404: { type: "string" },
-        },
+    _setupRoute(route, userConfig, globalRules);
+    route.schema = {
+      description: `Get a session redirection via a ValOS OpenId Connect authorization response`,
+      querystring: {
+        code: { ...XWWWFormURLEncodedStringType },
+        state: { ...XWWWFormURLEncodedStringType },
+        error: StringType, // ASCII,
+        error_description: StringType,
+        // Values for the "error_description" parameter MUST NOT include
+        // characters outside the set %x20-21 / %x23-5B / %x5D-7E.
+        error_uri: StringType,
+        // Values for the "error_uri" parameter MUST conform to the
+        // URI-reference syntax and thus MUST NOT include characters
+        // outside the set %x21 / %x23-5B / %x5D-7E.
+        ...(route.config.querystring || {}),
       },
-      config: {
-        ...rest,
-        constantRules: {
-          ...(rest.constantRules || {}),
-          clientRedirectPath,
-        },
-        queryRules: {
-          ...(rest.queryRules || {}),
-          authorizationGrant: "code", grantProviderState: "state",
-          error: "error", errorDescription: "error_description", errorURI: "error_uri",
-        },
+      response: {
+        302: StringType,
+        404: { type: "string" },
       },
     };
+    return route;
   } catch (error) {
-    throw wrapError(error, new Error(`sessionGETRoute(<${url}>)`),
-        "\n\tquerystring:", dumpify(querystring),
+    throw wrapError(error, new Error(`sessionGETRoute(<${route.url}>)`),
+        "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function sessionDELETERoute ({ url, querystring, clientRedirectPath, ...rest }) {
+export function sessionDELETERoute (url, userConfig, globalRules) {
+  const route = { url, category: "session", method: "DELETE", config: {
+    rules: {
+      clientCookie: ["!:request:cookies", ["!:identity:clientCookieName"]],
+      sessionCookie: ["!:request:cookies", ["!:identity:sessionCookieName"]],
+    },
+  } };
   try {
-    return {
-      category: "session",
-      method: "DELETE",
-      url,
-      schema: {
-        description: `Close an active session specified by the client${
-          ""} and session token cookies and also clear those cookies.`,
-        querystring: querystring ? { ...querystring } : undefined,
-        response: {
-          303: StringType,
-          400: { type: "string" },
-          404: { type: "string" },
-        },
-      },
-      config: {
-        ...(rest || {}),
-        constantRules: {
-          ...(rest.constantRules || {}),
-          clientRedirectPath,
-        },
-        queryRules: { ...(rest.queryRules || {}) },
+    _setupRoute(route, userConfig, globalRules);
+    route.schema = {
+      description: `Close an active session specified by the client${
+        ""} and session token cookies and also clear those cookies.`,
+      querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
+      response: {
+        303: StringType,
+        400: { type: "string" },
+        404: { type: "string" },
       },
     };
+    return route;
   } catch (error) {
-    throw wrapError(error, new Error(`sessionDELETERoute(<${url}>)`),
-        "\n\tquerystring:", dumpify(querystring),
+    throw wrapError(error, new Error(`sessionDELETERoute(<${route.url}>)`),
+        "\n\troute:", ...dumpObject(route),
     );
   }
+}
+
+function _setupRoute (route, userConfig, globalRules, ResourceType, RelationType) {
+  const category = handlers[route.category];
+  if (!category) throw new Error(`No such category '${route.category}' for route <${route.url}>`);
+  const handler = category[route.method];
+  if (!handler) {
+    throw new Error(`No such method '${route.method}' in category '${
+        route.category}' for route <${route.url}>`);
+  }
+  const { requiredRules } = handler();
+
+  route.config = patchWith({ requiredRules: [...requiredRules], rules: {} }, userConfig);
+
+  if (ResourceType) {
+    const name = trySharedSchemaName(ResourceType) || "<ResourceType>";
+    const valospace = ResourceType[ObjectJSONSchema].valospace || {};
+    if (!valospace.entrance) {
+      throw new Error(`Can't find valospace entrance for <${route.url}> Resource '${name}'`);
+    }
+    if (!route.name) route.name = valospace.entrance.name;
+    route.config.resource = {
+      ...valospace,
+      name,
+      schema: schemaReference(ResourceType),
+    };
+  }
+
+  if (RelationType) {
+    const outermost = RelationType[ArrayJSONSchema] || RelationType[ObjectJSONSchema];
+    const mappingName = (outermost.valospace || {}).mappingName;
+    if (!mappingName) {
+      throw new Error("RelationType[(Array|Object)JSONSchema].valospace.mappingName missing");
+    }
+    route.config.mapping = {
+      name: mappingName,
+      schema: schemaReference(RelationType),
+    };
+
+    const TargetType = RelationType.$V[ObjectJSONSchema].valospace.TargetType;
+    if (!TargetType) {
+      throw new Error("RelationType.$V[ObjectJSONSchema].valospace.TargetType missing");
+    }
+    route.config.target = {
+      name: trySharedSchemaName(TargetType) || "<TargetType>",
+      schema: schemaReference(TargetType),
+    };
+  }
+
+  assignRulesFrom(globalRules, route, route.config.rules);
+  route.config.requiredRules.forEach(ruleName => {
+    if (route.config.rules[ruleName] === undefined) {
+      throw new Error(`Required route rule '${ruleName}' missing for route <${route.url}>`);
+    }
+  });
+
+  return route;
 }
 
 const _unreservedWordListPattern = "^([a-zA-Z0-9\\-_.~/*$]*(\\,([a-zA-Z0-9\\-_.~/*$])*)*)?$";
@@ -495,15 +492,4 @@ function _resourceSequenceQueryStringSchema (ResourceType) {
     }
   }
   return ret;
-}
-
-function _getMappingParams (RelationType) {
-  const outermost = RelationType[ArrayJSONSchema] || RelationType[ObjectJSONSchema];
-  const mappingName = (outermost.valos || {}).mappingName;
-  const TargetType = RelationType.$V[ObjectJSONSchema].valos.TargetType;
-  if (!mappingName) {
-    throw new Error("RelationType[(Array|Object)JSONSchema].valos.mappingName missing");
-  }
-  if (!TargetType) throw new Error("RelationType.$V[ObjectJSONSchema].valos.TargetType missing");
-  return { mappingName, TargetType };
 }

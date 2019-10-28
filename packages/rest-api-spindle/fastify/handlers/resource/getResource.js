@@ -11,8 +11,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
 
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
-      this.toResourceFields = ["§->"];
-      mapper.buildKuery(route.schema.response[200], this.toResourceFields);
+      this.toSuccessBodyFields = mapper.buildSchemaKuery(route.schema.response[200]);
       this.hardcodedResources = route.config.valos.hardcodedResources;
     },
 
@@ -35,10 +34,10 @@ export default function createRouter (mapper: MapperService, route: Route) {
       }
       const { fields } = request.query;
       return thenChainEagerly(scope.resource, [
-        vResource => vResource.get(this.toResourceFields, { scope, verbosity: 0 })
+        vResource => vResource.get(this.toSuccessBodyFields, { scope, verbosity: 0 })
             || this.hardcodedResources[scope.resourceId],
-        (fields)
-            && (results => mapper.pickResultFields(results, fields, route.schema.response[200])),
+        (fields) && (results =>
+            mapper.pickResultFields(results, fields, route.schema.response[200])),
         results => {
           reply.code(200);
           reply.send(JSON.stringify(results, null, 2));

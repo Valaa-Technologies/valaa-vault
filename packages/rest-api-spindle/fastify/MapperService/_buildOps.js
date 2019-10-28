@@ -2,8 +2,9 @@
 
 import path from "path";
 
-export function _buildKuery (routeMapper, jsonSchema, outerKuery, innerKuery, isValOSFields) {
-  const hardcoded = (innerKuery === undefined) && (jsonSchema.valos || {}).hardcodedResources;
+export function _buildSchemaKuery (routeMapper, jsonSchema, outerKuery, innerKuery, isValOSFields) {
+  const hardcoded = (innerKuery === undefined)
+      && (jsonSchema.valospace || {}).hardcodedResources;
   if (hardcoded) {
     outerKuery.push(["§'", Object.values(hardcoded).map(e => e)]);
     return outerKuery;
@@ -12,12 +13,12 @@ export function _buildKuery (routeMapper, jsonSchema, outerKuery, innerKuery, is
     if (!innerKuery) {
       throw new Error("json schema valos predicate missing with json schema type 'array'");
     }
-    routeMapper.buildKuery(jsonSchema.items, innerKuery);
+    routeMapper.buildSchemaKuery(jsonSchema.items, innerKuery);
   } else if (jsonSchema.type === "object") {
     const objectKuery = {};
     Object.entries(jsonSchema.properties).forEach(([key, valueSchema]) => {
       let op;
-      if (isValOSFields && ((valueSchema.valos || {}).predicate === undefined)) {
+      if (isValOSFields && ((valueSchema.valospace || {}).toValue === undefined)) {
         if (key === "href") {
           op = ["§->", "target", false, "rawId",
             ["§+", _getResourceHRefPrefix(routeMapper, jsonSchema), ["§->", null]]
@@ -25,12 +26,12 @@ export function _buildKuery (routeMapper, jsonSchema, outerKuery, innerKuery, is
         } else if (key === "rel") op = "self";
         else op = ["§->", key];
       } else if (key === "$V") {
-        routeMapper.buildKuery(valueSchema, (op = ["§->"]), true);
+        op = routeMapper.buildSchemaKuery(valueSchema, undefined, true);
       } else {
-        routeMapper.buildKuery(valueSchema, (op = ["§->"]));
+        op = routeMapper.buildSchemaKuery(valueSchema);
         op = (op.length === 1) ? ["§..", key]
             : ((valueSchema.type === "array")
-                || (valueSchema.valos || {}).predicate !== undefined) ? op
+                || (valueSchema.valospace || {}).toValue !== undefined) ? op
             : ["§->", ["§..", key], false, ...op.slice(1)];
       }
       objectKuery[key] = op;
@@ -41,7 +42,7 @@ export function _buildKuery (routeMapper, jsonSchema, outerKuery, innerKuery, is
 }
 
 export function _getResourceHRefPrefix (routeMapper, jsonSchema) {
-  const routeName = ((jsonSchema.valos || {}).route || {}).name;
+  const routeName = ((jsonSchema.valospace || {}).route || {}).name;
   if (typeof routeName !== "string") {
     throw new Error("href requested without json schema valos route.name");
   }

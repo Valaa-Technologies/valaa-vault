@@ -4,13 +4,13 @@ import { Vrapper } from "~/engine";
 
 import { verifySessionAuthorization } from "~/rest-api-spindle/fastify/security";
 
-import { _addToRelationsSourceSteps } from "../_handlerOps";
+import { _buildToRelationsSource } from "../_handlerOps";
 
 export function _resolveMappingResource (mapper, route, request, reply, scope) {
   scope.resource = mapper.getEngine().tryVrapper([scope.resourceId]);
   if (!scope.resource || !(scope.resource instanceof Vrapper)) {
     reply.code(404);
-    reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
+    reply.send(`No such ${route.config.resource.name} route resource: ${scope.resourceId}`);
     return true;
   }
   return verifySessionAuthorization(mapper, route, request, reply, scope, scope.resource);
@@ -37,10 +37,8 @@ export function _createTargetedToMappingFields (mapper, route, toTargetId) {
 }
 
 export function _createToMappingsParts (mapper, route) {
-  const toMappingsResults = ["§->"];
-  _addToRelationsSourceSteps(mapper, route.config.resourceSchema, route.config.mappingName,
-      toMappingsResults);
-  mapper.buildKuery(route.config.relationSchema, toMappingsResults);
+  const toMappingsResults = mapper.buildSchemaKuery(route.config.relation.schema,
+      _buildToRelationsSource(mapper, route.config.resource.schema, route.config.mapping.name));
   const relationsStepIndex = toMappingsResults.indexOf("relations");
   if (!(relationsStepIndex >= 0)) {
     throw new Error(`Could not find 'relations' step from kuery built from relationSchema while${

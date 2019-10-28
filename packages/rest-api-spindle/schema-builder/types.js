@@ -1,7 +1,10 @@
 // @flow
 
-export const ObjectJSONSchema = Symbol("Object-JSONSchema");
-export const ArrayJSONSchema = Symbol("Array-JSONSchema");
+import { mintVerb, validateVerbs } from "~/raem";
+import patchWith from "~/tools/patchWith";
+
+export const ObjectSchema = Symbol("Object-JSONSchema");
+export const CollectionSchema = Symbol("Array-JSONSchema");
 
 // export const EmailType = { type: "email" };
 export const EmailType = { type: "string" };
@@ -27,111 +30,138 @@ export const DateTimeZoneExtendedISO8601Type = { type: "string", format: "date-t
 export const IdValOSType = {
   type: "string",
   pattern: "^[a-zA-Z0-9\\-_.~]+$",
-  valos: { predicate: "valos:field:rawId" },
+  valospace: { toValue: [".$V:rawId"] },
 };
 // export const ReferenceValOSType = { type: "uri" };
 export const ReferenceValOSType = { type: "string" };
 
 export const $VType = {
-  [ObjectJSONSchema]: { valos: { predicate: "" } },
+  [ObjectSchema]: { valospace: { /* toValue: "" */ } },
   id: IdValOSType,
   // name: StringType, // internal ValOS name
 };
 
-export function createMappingToOne (mappingName, TargetType, relationNameOrPredicate,
+export const ResourceType = {
+  $V: $VType,
+};
+
+export function schemaType (schemaName, baseTypes, schema) {
+  return patchWith({},
+      [].concat({
+        [ObjectSchema]: { valospace: { schemaName } },
+        $V: $VType,
+      },
+      baseTypes || [],
+      schema));
+}
+
+export function extendType (baseTypes, schema) {
+  return patchWith({}, [].concat(baseTypes || [], schema));
+}
+
+export function createMappingToOne (mappingName, ofTargetType, relationNameOrToValue,
     options = {}) {
-  if (!options[ObjectJSONSchema]) options[ObjectJSONSchema] = {};
-  options[ObjectJSONSchema].valos = { ...(options[ObjectJSONSchema].valos || {}), mappingName };
-  return createRelationTypeToOne(TargetType, relationNameOrPredicate, options);
-}
-
-export function createMappingToMany (mappingName, TargetType, relationNameOrPredicate,
-    options = {}) {
-  if (!options[ArrayJSONSchema]) options[ArrayJSONSchema] = {};
-  options[ArrayJSONSchema].valos = { ...(options[ArrayJSONSchema].valos || {}), mappingName };
-  return createRelationTypeToMany(TargetType, relationNameOrPredicate, options);
-}
-
-export function createRelationTypeToOne (TargetType, relationNameOrPredicate, options = {}) {
-  if (options[ArrayJSONSchema] !== undefined) {
-    throw new Error("Must not specify options[ArrayJSONSchema] for a Relation-to-one type");
-  }
-  return _createRelationTypeTo(TargetType, relationNameOrPredicate, options);
-}
-
-export function createRelationTypeToMany (TargetType, relationNameOrPredicate, options = {}) {
-  if (options[ArrayJSONSchema] === undefined) options[ArrayJSONSchema] = {};
-  return _createRelationTypeTo(TargetType, relationNameOrPredicate, options);
-}
-
-export function getBaseRelationTypeOf (RelationTypeManyOrOne) {
-  const actualRelationType = (typeof RelationTypeManyOrOne === "function")
-      ? RelationTypeManyOrOne()
-      : RelationTypeManyOrOne;
-  return {
-    ...actualRelationType,
-    [ObjectJSONSchema]: actualRelationType[ObjectJSONSchema],
-    [ArrayJSONSchema]: undefined,
+  if (!options[ObjectSchema]) options[ObjectSchema] = {};
+  options[ObjectSchema].valospace = {
+    ...(options[ObjectSchema].valospace || {}),
+    mappingName,
   };
+  return createRelationTypeToOne(ofTargetType, relationNameOrToValue, options);
 }
 
-export function enumerateMappingsOf (ResourceType) {
-  return [].concat(...Object.values(ResourceType).map(property => {
+export function createMappingToMany (mappingName, ofTargetType, relationNameOrToValue,
+    options = {}) {
+  if (!options[CollectionSchema]) options[CollectionSchema] = {};
+  options[CollectionSchema].valospace = {
+    ...(options[CollectionSchema].valospace || {}),
+    mappingName,
+  };
+  return createRelationTypeToMany(ofTargetType, relationNameOrToValue, options);
+}
+
+export function createRelationTypeToOne (ofTargetType, relationNameOrToValue, options = {}) {
+  if (options[CollectionSchema] !== undefined) {
+    throw new Error("Must not specify options[CollectionSchema] for a Relation-to-one type");
+  }
+  return _createRelationTypeTo(ofTargetType, relationNameOrToValue, options);
+}
+
+export function createRelationTypeToMany (ofTargetType, relationNameOrToValue, options = {}) {
+  if (options[CollectionSchema] === undefined) options[CollectionSchema] = {};
+  return _createRelationTypeTo(ofTargetType, relationNameOrToValue, options);
+}
+
+export function getBaseRelationTypeOf (anAnyRelationType, schemaPatch) {
+  const actualRelationType = (typeof anAnyRelationType === "function")
+      ? anAnyRelationType()
+      : anAnyRelationType;
+  return patchWith({
+    ...actualRelationType,
+    [ObjectSchema]: actualRelationType[ObjectSchema],
+    [CollectionSchema]: undefined,
+  }, schemaPatch || []);
+}
+
+export function enumerateMappingsOf (aResourceType) {
+  return [].concat(...Object.values(aResourceType).map(property => {
     const actualProperty = (typeof property !== "function") ? property : property();
     const outermostSchema = (actualProperty != null)
-        && (actualProperty[ArrayJSONSchema] || actualProperty[ObjectJSONSchema]);
+        && (actualProperty[CollectionSchema] || actualProperty[ObjectSchema]);
     if (!outermostSchema) return [];
-    const mappingName = (outermostSchema.valos || {}).mappingName;
+    const mappingName = (outermostSchema.valospace || {}).mappingName;
     if (mappingName) return [[mappingName, actualProperty]];
     return enumerateMappingsOf(actualProperty);
   }));
 }
 
-export function sharedSchema (name, Type) {
-  const schemaName = Type[ObjectJSONSchema].schemaName;
+export function sharedSchemaOf (aType) {
+  const schemaName = aType[ObjectSchema].schemaName;
   if (!schemaName) {
-    throw new Error("Type[ObjectJSONSchema].schemaName missing when trying to add shared Type");
+    throw new Error("Type[ObjectSchema].schemaName missing when trying to get a shared Type");
   }
-  const schema = _convertTypeToSchema(Type);
+  const schema = _convertSchemaOf(aType);
   schema.$id = schemaName;
   return schema;
 }
 
-export function trySharedSchemaName (Type) {
-  return ((Type || {})[ObjectJSONSchema] || {}).schemaName
-      && `${Type[ObjectJSONSchema].schemaName}#`;
+export function trySchemaNameOf (aType) {
+  return ((aType || {})[ObjectSchema] || {}).schemaName
+      && `${aType[ObjectSchema].schemaName}#`;
 }
 
-export function schemaReference (Type, schema) {
-  return trySharedSchemaName(Type) || schema || _convertTypeToSchema(Type);
+export function schemaRefOf (aType) {
+  return trySchemaNameOf(aType) || _convertSchemaOf(aType);
 }
 
-function _createRelationTypeTo (TargetType, relationNameOrPredicate, {
-    [ArrayJSONSchema]: arraySchema,
-    [ObjectJSONSchema]: objectSchema = {},
+function _createRelationTypeTo (aTargetType, relationNameOrToValue, {
+    [CollectionSchema]: collectionSchema,
+    [ObjectSchema]: objectSchema = {},
     ...relationProperties
 } = {}) {
   const ret = {
-    [ArrayJSONSchema]: arraySchema && { ...arraySchema },
-    [ObjectJSONSchema]: { ...objectSchema },
+    [CollectionSchema]: collectionSchema && { ...collectionSchema },
+    [ObjectSchema]: { ...objectSchema },
     $V: {
-      [ObjectJSONSchema]: {
-        valos: { TargetType, route: TargetType[ObjectJSONSchema].valos.route },
+      [ObjectSchema]: {
+        valospace: {
+          TargetType: aTargetType,
+          route: aTargetType[ObjectSchema].valospace.route,
+        },
       },
       href: {
         ...URIReferenceType,
-        // valos: { predicate: "" }, // not yet
+        // valospace: { toValue: "" }, // not yet
       },
       rel: {
         ...StringType,
-        // valos: { predicate: "" }, // not yet
+        // valospace: { toValue: "" }, // not yet
       },
     },
     ...relationProperties,
   };
-  const outermost = ret[ArrayJSONSchema] || ret[ObjectJSONSchema];
-  outermost.valos = {
-    ...(outermost.valos || {}),
+  const outermost = ret[CollectionSchema] || ret[ObjectSchema];
+  outermost.valospace = {
+    ...(outermost.valospace || {}),
     predicate: (relationNameOrPredicate.slice(0, 6) !== "valos:")
         ? `valos:Relation:${relationNameOrPredicate}`
         : relationNameOrPredicate,
@@ -139,30 +169,30 @@ function _createRelationTypeTo (TargetType, relationNameOrPredicate, {
   return ret;
 }
 
-function _convertTypeToSchema (Type) {
-  if (typeof Type === "function") return _convertTypeToSchema(Type());
-  if (Type == null || (typeof Type !== "object")) return Type;
+function _convertSchemaOf (aType) {
+  if (typeof aType === "function") return _convertSchemaOf(aType());
+  if ((aType == null) || (typeof aType !== "object")) return aType;
   const ret = {};
   let current = ret;
-  if (Type[ArrayJSONSchema]) {
-    Object.assign(current, Type[ArrayJSONSchema]);
+  if (aType[CollectionSchema]) {
+    Object.assign(current, aType[CollectionSchema]);
     delete current.TargetType;
     current.type = "array";
     current.items = {};
     current = current.items;
   }
-  if (Type[ObjectJSONSchema]) {
-    Object.assign(current, Type[ObjectJSONSchema]);
+  if (aType[ObjectSchema]) {
+    Object.assign(current, aType[ObjectSchema]);
     current.type = "object";
     current.properties = {};
-    if (current.$V) {
+    if (current.$V) { // Also a collection.
       current.$V = {
         ...current.$V,
-        TargetType: trySharedSchemaName(current.$V.TargetType) || null,
+        TargetType: trySchemaNameOf(current.$V.TargetType) || null,
       };
     }
     current = current.properties;
   }
-  for (const [key, value] of Object.entries(Type)) current[key] = _convertTypeToSchema(value);
+  for (const [key, value] of Object.entries(aType)) current[key] = _convertSchemaOf(value);
   return ret;
 }

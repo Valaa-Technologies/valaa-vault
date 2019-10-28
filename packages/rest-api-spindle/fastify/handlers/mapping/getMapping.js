@@ -14,9 +14,10 @@ export default function createRouter (mapper: MapperService, route: Route) {
 
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
-      this.toMappingFields = _createTargetedToMappingFields(mapper, route, ["~$:targetId"])
+      this.toSuccessBodyFields = _createTargetedToMappingFields(mapper, route, ["~$:targetId"])
           .toMappingFields;
     },
+
     preload () {
       return mapper.preloadRuntimeResources(this, this.runtime);
     },
@@ -28,15 +29,17 @@ export default function createRouter (mapper: MapperService, route: Route) {
         "\n\trequest.query:", request.query,
       ]);
       if (_resolveMappingResource(mapper, route, request, reply, scope)) return true;
+
       const { fields } = request.query;
       return thenChainEagerly(scope.resource, [
-        vResource => vResource.get(this.toMappingFields, { scope, verbosity: 0 }),
-        results => ((!fields || !results) ? results
+        vResource => vResource.get(this.toSuccessBodyFields, { scope, verbosity: 0 }),
+        results => ((!fields || !results)
+            ? results
             : mapper.pickResultFields(results, fields, route.schema.response[200])),
         results => {
           if (!results) {
             reply.code(404);
-            reply.send(`No mapping '${route.config.mappingName}' found from route resource ${
+            reply.send(`No mapping '${route.config.mapping.name}' found from route resource ${
               scope.resourceId} to ${scope.targetId}`);
             return true;
           }

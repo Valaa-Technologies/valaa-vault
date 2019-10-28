@@ -11,9 +11,9 @@ export default function createRouter (mapper: MapperService, route: Route) {
 
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
-      const toPatchTarget = ["§->"];
-      mapper.buildKuery(route.config.resourceSchema, toPatchTarget);
-      if (toPatchTarget.length > 1) this.toPatchTarget = toPatchTarget.slice(0, -1);
+      this.toPatchTarget = mapper.buildSchemaKuery(route.config.resource.schema);
+      if (this.toPatchTarget.length <= 1) this.toPatchTarget = undefined;
+      else this.toPatchTarget.splice(-1, 1);
     },
 
     preload () {

@@ -3,8 +3,8 @@
 import { wrapError, dumpify, dumpObject, patchWith } from "~/tools";
 
 import {
-  ArrayJSONSchema, ObjectJSONSchema, StringType, XWWWFormURLEncodedStringType, IdValOSType,
-  getBaseRelationTypeOf, schemaReference, trySharedSchemaName,
+  CollectionSchema, ObjectSchema, StringType, XWWWFormURLEncodedStringType, IdValOSType,
+  extendType, getBaseRelationTypeOf, schemaRefOf, trySchemaNameOf,
 } from "./types";
 
 import * as handlers from "~/rest-api-spindle/fastify/handlers";
@@ -183,8 +183,8 @@ export function relationsGETRoute (url, userConfig, globalRules, ResourceType, R
     throw wrapError(error, new Error(`relationsGETRoute(<${route.url}>)`),
         "\n\tresource:", ...dumpObject(route.config.resource),
         "\n\tSourceType:", ...dumpObject(ResourceType),
-        "\n\tRelationType[ArrayJSONSchema]:", dumpify(RelationType[ArrayJSONSchema]),
-        "\n\tRelationType[ObjectJSONSchema]:", dumpify(RelationType[ObjectJSONSchema]),
+        "\n\tRelationType[CollectionSchema]:", dumpify(RelationType[CollectionSchema]),
+        "\n\tRelationType[ObjectSchema]:", dumpify(RelationType[ObjectSchema]),
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\troute:", ...dumpObject(route),
@@ -204,11 +204,7 @@ export function mappingPOSTRoute (url, userConfig, globalRules, ResourceType, Re
   try {
     _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
 
-    const target = RelationType.$V[ObjectJSONSchema].valospace.TargetType;
-    const BodyType = getBaseRelationTypeOf(RelationType);
-    BodyType.$V = { target };
-    const ResponseBodyType = getBaseRelationTypeOf(RelationType);
-    ResponseBodyType.$V = { ...ResponseBodyType.$V, target };
+    const target = RelationType.$V[ObjectSchema].valospace.TargetType;
 
     route.schema = {
       description:
@@ -220,9 +216,13 @@ content. Similarily the response will contain the newly created target
 resource content in *response.$V.target* with the rest of the response
 containing the mapping.`,
       querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
-      body: schemaReference(BodyType),
+      body: schemaRefOf(getBaseRelationTypeOf(RelationType, {
+        $V: [null, { target }]
+      })),
       response: {
-        200: schemaReference(ResponseBodyType),
+        200: schemaRefOf(getBaseRelationTypeOf(RelationType, {
+          $V: { target },
+        })),
         403: { type: "string" },
       },
     };
@@ -231,8 +231,8 @@ containing the mapping.`,
     throw wrapError(error, new Error(`mappingPOSTRoute(<${route.url}>)`),
         "\n\tresource:", ...dumpObject(route.config.resource),
         "\n\tSourceType:", ...dumpObject(ResourceType),
-        "\n\tRelationType[ArrayJSONSchema]:", dumpify(RelationType[ArrayJSONSchema]),
-        "\n\tRelationType[ObjectJSONSchema]:", dumpify(RelationType[ObjectJSONSchema]),
+        "\n\tRelationType[CollectionSchema]:", dumpify(RelationType[CollectionSchema]),
+        "\n\tRelationType[ObjectSchema]:", dumpify(RelationType[ObjectSchema]),
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\troute:", ...dumpObject(route),
@@ -255,7 +255,7 @@ export function mappingGETRoute (url, userConfig, globalRules, ResourceType, Rel
         ...(route.config.querystring || {}),
       },
       response: {
-        200: schemaReference(BaseRelationType),
+        200: schemaRefOf(BaseRelationType),
         404: { type: "string" },
       },
     };
@@ -264,8 +264,8 @@ export function mappingGETRoute (url, userConfig, globalRules, ResourceType, Rel
     throw wrapError(error, new Error(`mappingGETRoute(<${route.url}>)`),
         "\n\tresource:", ...dumpObject(route.config.resource),
         "\n\tSourceType:", ...dumpObject(ResourceType),
-        "\n\tRelationType[ArrayJSONSchema]:", dumpify(RelationType[ArrayJSONSchema]),
-        "\n\tRelationType[ObjectJSONSchema]:", dumpify(RelationType[ObjectJSONSchema]),
+        "\n\tRelationType[CollectionSchema]:", dumpify(RelationType[CollectionSchema]),
+        "\n\tRelationType[ObjectSchema]:", dumpify(RelationType[ObjectSchema]),
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\troute:", ...dumpObject(route),
@@ -278,19 +278,16 @@ export function mappingPATCHRoute (url, userConfig, globalRules, ResourceType, R
   try {
     _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
 
-    route.config.mapping.schema = schemaReference({
-      ...RelationType,
-      [ArrayJSONSchema]: RelationType[ArrayJSONSchema],
-      [ObjectJSONSchema]: RelationType[ObjectJSONSchema],
-      $V: { ...RelationType.$V, id: IdValOSType },
-    });
+    route.config.mapping.schema = schemaRefOf(extendType(RelationType, {
+      $V: { id: [null, IdValOSType] },
+    }));
 
     route.schema = {
       description: `Update the contents of a '${route.config.mapping.name
         }' mapping from the source ${route.config.resource.name
         } route resource to the target ${route.config.target.name} route resource`,
       querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
-      body: schemaReference(getBaseRelationTypeOf(RelationType)),
+      body: schemaRefOf(getBaseRelationTypeOf(RelationType)),
       response: {
         200: { type: "string" },
         201: { type: "string" },
@@ -303,8 +300,8 @@ export function mappingPATCHRoute (url, userConfig, globalRules, ResourceType, R
     throw wrapError(error, new Error(`mappingPATCHRoute(<${route.url}>)`),
         "\n\tresource:", ...dumpObject(route.config.resource),
         "\n\tSourceType:", ...dumpObject(ResourceType),
-        "\n\tRelationType[ArrayJSONSchema]:", dumpify(RelationType[ArrayJSONSchema]),
-        "\n\tRelationType[ObjectJSONSchema]:", dumpify(RelationType[ObjectJSONSchema]),
+        "\n\tRelationType[CollectionSchema]:", dumpify(RelationType[CollectionSchema]),
+        "\n\tRelationType[ObjectSchema]:", dumpify(RelationType[ObjectSchema]),
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\troute:", ...dumpObject(route),
@@ -332,8 +329,8 @@ export function mappingDELETERoute (url, userConfig, globalRules, ResourceType, 
     throw wrapError(error, new Error(`mappingDELETERoute(<${route.url}>)`),
         "\n\tresource:", ...dumpObject(route.config.resource),
         "\n\tSourceType:", ...dumpObject(ResourceType),
-        "\n\tRelationType[ArrayJSONSchema]:", dumpify(RelationType[ArrayJSONSchema]),
-        "\n\tRelationType[ObjectJSONSchema]:", dumpify(RelationType[ObjectJSONSchema]),
+        "\n\tRelationType[CollectionSchema]:", dumpify(RelationType[CollectionSchema]),
+        "\n\tRelationType[ObjectSchema]:", dumpify(RelationType[ObjectSchema]),
         "\n\tRelationType.$V:", dumpify(RelationType.$V),
         "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
         "\n\troute:", ...dumpObject(route),
@@ -424,37 +421,29 @@ function _setupRoute (route, userConfig, globalRules, ResourceType, RelationType
   route.config = patchWith({ requiredRules: [...requiredRules], rules: {} }, userConfig);
 
   if (ResourceType) {
-    const name = trySharedSchemaName(ResourceType) || "<ResourceType>";
-    const valospace = ResourceType[ObjectJSONSchema].valospace || {};
+    const name = trySchemaNameOf(ResourceType) || "<ResourceType>";
+    const valospace = ResourceType[ObjectSchema].valospace || {};
     if (!valospace.entrance) {
       throw new Error(`Can't find valospace entrance for <${route.url}> Resource '${name}'`);
     }
     if (!route.name) route.name = valospace.entrance.name;
-    route.config.resource = {
-      ...valospace,
-      name,
-      schema: schemaReference(ResourceType),
-    };
+    route.config.resource = { name, schema: schemaRefOf(ResourceType) };
   }
 
   if (RelationType) {
-    const outermost = RelationType[ArrayJSONSchema] || RelationType[ObjectJSONSchema];
+    const outermost = RelationType[CollectionSchema] || RelationType[ObjectSchema];
     const mappingName = (outermost.valospace || {}).mappingName;
     if (!mappingName) {
       throw new Error("RelationType[(Array|Object)JSONSchema].valospace.mappingName missing");
     }
-    route.config.mapping = {
-      name: mappingName,
-      schema: schemaReference(RelationType),
-    };
+    route.config.mapping = { name: mappingName, schema: schemaRefOf(RelationType) };
 
-    const TargetType = RelationType.$V[ObjectJSONSchema].valospace.TargetType;
+    const TargetType = RelationType.$V[ObjectSchema].valospace.TargetType;
     if (!TargetType) {
-      throw new Error("RelationType.$V[ObjectJSONSchema].valospace.TargetType missing");
+      throw new Error("RelationType.$V[ObjectSchema].valospace.TargetType missing");
     }
     route.config.target = {
-      name: trySharedSchemaName(TargetType) || "<TargetType>",
-      schema: schemaReference(TargetType),
+      name: trySchemaNameOf(TargetType) || "<TargetType>", schema: schemaRefOf(TargetType),
     };
   }
 
@@ -487,7 +476,7 @@ function _resourceSequenceQueryStringSchema (ResourceType) {
     ids: { ...StringType, pattern: _unreservedWordListPattern },
   };
   for (const [key, schema] of Object.entries(ResourceType)) {
-    if (((schema[ObjectJSONSchema] || {}).valos || {}).filterable) {
+    if (((schema[ObjectSchema] || {}).valos || {}).filterable) {
       ret[`require-${key}`] = IdValOSType;
     }
   }

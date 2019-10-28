@@ -67,11 +67,11 @@ export default function createRouter (mapper: MapperService, route: Route) {
         (/* persistedEvent */) => {
           const results = {
             $V: {
-              href: `${mapper.getResourceHRefPrefix(route.config.resourceSchema)}${
+              href: `${mapper.getResourceHRefPrefix(route.config.resource.schema)}${
                 scope.resourceId}/${scope.mappingName}/${scope.targetId}`,
               rel: "self",
               target: { $V: {
-                href: `${mapper.getResourceHRefPrefix(route.config.targetSchema)}${
+                href: `${mapper.getResourceHRefPrefix(route.config.target.schema)}${
                   scope.targetId}`,
                 rel: "self",
               } },

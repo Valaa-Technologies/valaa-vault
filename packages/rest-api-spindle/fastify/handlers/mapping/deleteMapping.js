@@ -17,12 +17,14 @@ export default function createRouter (mapper: MapperService, route: Route) {
       const { toMapping } = _createTargetedToMapping(mapper, route, ["~$:targetId"]);
       this.toMapping = toMapping;
       /*
-      const toRelations = ["§->",
-          ...route.config.mappingName.split("/").slice(0, -1).map(name => ["§..", name])];
-      mapper.buildKuery(route.config.relationSchema, toRelations);
+      const toRelations = mapper.buildSchemaKuery(route.config.mapping.schema, [
+        "§->",
+        ...route.config.mapping.name.split("/").slice(0, -1).map(name => ["§..", name]),
+      ]);
       toRelations.splice(-1);
       */
     },
+
     preload () {
       return mapper.preloadRuntimeResources(this, this.runtime);
     },
@@ -37,7 +39,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
       scope.mapping = scope.resource.get(this.toMapping, { scope });
       if (scope.mapping === undefined) {
         reply.code(404);
-        reply.send(`No mapping '${route.config.mappingName}' found from ${
+        reply.send(`No mapping '${route.config.mapping.name}' found from ${
           scope.resourceId} to ${scope.targetId}`);
         return true;
       }

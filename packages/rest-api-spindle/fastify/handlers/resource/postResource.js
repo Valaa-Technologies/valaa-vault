@@ -61,7 +61,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
           const resourceId = scope.resource.getRawId();
           const results = {
             $V: {
-              href: `${mapper.getResourceHRefPrefix(route.config.resourceSchema)}${resourceId}`,
+              href: `${mapper.getResourceHRefPrefix(route.config.resource.schema)}${resourceId}`,
               rel: "self",
             },
           };

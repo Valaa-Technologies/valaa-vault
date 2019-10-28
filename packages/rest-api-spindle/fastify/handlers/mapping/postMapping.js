@@ -21,9 +21,9 @@ export default function createRouter (mapper: MapperService, route: Route) {
       // const toMappingFields = _createToMappingFields(mapper, route);
       // toMappingFields.splice(-1);
 
-      this.toPatchTarget = ["§->", false, "target"];
-      mapper.buildKuery(route.config.targetSchema, this.toPatchTarget);
-      this.toPatchTarget.splice(-1);
+      this.toPatchTarget = mapper
+          .buildSchemaKuery(route.config.target.schema, ["§->", false, "target"])
+          .slice(0, -1);
     },
 
     preload () {
@@ -78,11 +78,11 @@ export default function createRouter (mapper: MapperService, route: Route) {
           const targetId = scope.mapping.get("target").getRawId();
           const results = {
             $V: {
-              href: `${mapper.getResourceHRefPrefix(route.config.resourceSchema)}${
+              href: `${mapper.getResourceHRefPrefix(route.config.resource.schema)}${
                 scope.resourceId}/${scope.mappingName}/${targetId}`,
               rel: "self",
               target: { $V: {
-                href: `${mapper.getResourceHRefPrefix(route.config.targetSchema)}${targetId}`,
+                href: `${mapper.getResourceHRefPrefix(route.config.target.schema)}${targetId}`,
                 rel: "self",
               } },
             }

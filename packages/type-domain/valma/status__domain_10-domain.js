@@ -1,7 +1,7 @@
-exports.vlm = { toolset: "@valos/type-workshop" };
-exports.command = ".status/.type/.workshop/10-workshop";
-exports.brief = "display 'type-workshop' status";
-exports.describe = "Display the toolset '@valos/type-workshop' status of this workspace";
+exports.vlm = { toolset: "@valos/type-domain" };
+exports.command = ".status/.type/.domain/10-domain";
+exports.brief = "display 'type-domain' status";
+exports.describe = "Display the toolset '@valos/type-domain' status of this workspace";
 exports.introduction = `${exports.describe}.`;
 
 exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
@@ -36,6 +36,6 @@ exports.handler = async (yargv) => {
       : !failures.length ? { warnings }
       : { failures, warnings };
   return extension.extract(
-      { "data#status_toolsets": { "@valos/type-workshop": status } },
+      { "data#status_toolsets": { "@valos/type-domain": status } },
       { target, omitContext: true });
 };

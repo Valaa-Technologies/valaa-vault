@@ -1,5 +1,5 @@
 exports.command = ".status/.type/.opspace/10-opspace";
-exports.brief = "display the workshop status";
+exports.brief = "display the domain status";
 exports.describe = "Display the opspace status";
 exports.introduction = `
 `;

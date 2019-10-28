@@ -37,9 +37,9 @@
         "description": "The ValOS 'worker' workspace type toolset",
         "license": "MIT"
       },
-      "@valos/type-workshop": {
+      "@valos/type-domain": {
         "version": "0.35.0-prerelease.12",
-        "description": "The ValOS workshop workspace type toolset",
+        "description": "The ValOS domain workspace type toolset",
         "license": "MIT"
       }
     },
@@ -90,10 +90,10 @@
         "license": "MIT"
       }
     },
-    "workshop": {
+    "domain": {
       "@valos/kernel": {
         "version": "0.35.0-prerelease.12",
-        "description": "@valos/kernel domain workshop",
+        "description": "@valos/kernel domain",
         "license": "MIT"
       }
     },
@@ -169,7 +169,7 @@
       "description": "Select 'vault' workspace type",
       "package": "@valos/kernel",
       "version": "0.35.0-prerelease.12",
-      "introduction": "A vault is a *monorepository* which contains multiple sub-workspaces\nof various types. Vaults are used to group packages with high cohesion\ntogether so that development, testing, review and deployment workflows\ncan be done within a single repository when feasible.\n\nVault is primarily an organizational unit and is hosted in a single\nversion control repository. All sub-workspaces have identical access\nrights for all contributors. All sub-workspaces must have similar\nlicences. Exceptions to this must be clearly noted both in the\nexceptional workspace root document as well as in the vault root\ndocument.\n\nA vault can have different types of workshops in it; some of these\n(such as libraries, toolsets) may be published to repositories as\n*packages* so that they can be used as dependencies for other\nworkspaces. Others are only local and used for other purposes;\n*opspaces* contain configurations and tools for managing infrastructure\nconfigurations and *workers* contain files for spawning local processes.\n\nNo matter what the valos type of the workshop all share important\nqualities: they can have package dependencies, are versioned and are\nmanaged by valma.\n\nA vault often also manages a *domain* for the packages it publishes via\na *domain workshop package*. Domain is a discovery construct. When\na domain workshop is added as a devDependency to some external package\nthen valma will be able to list and configure any applicable toolsets\nand other workshops for this package.\n"
+      "introduction": "A vault is a *monorepository* which contains multiple sub-workspaces\nof various types. Vaults are used to group packages with high cohesion\ntogether so that development, testing, review and deployment workflows\ncan be done within a single repository when feasible.\n\nVault is primarily an organizational unit and is hosted in a single\nversion control repository. All sub-workspaces have identical access\nrights for all contributors. All sub-workspaces must have similar\nlicences. Exceptions to this must be clearly noted both in the\nexceptional workspace root document as well as in the vault root\ndocument.\n\nA vault can have different types of domains in it; some of these\n(such as libraries, toolsets) may be published to repositories as\n*packages* so that they can be used as dependencies for other\nworkspaces. Others are only local and used for other purposes;\n*opspaces* contain configurations and tools for managing infrastructure\nconfigurations and *workers* contain files for spawning local processes.\n\nNo matter what the valos type of the domain all share important\nqualities: they can have package dependencies, are versioned and are\nmanaged by valma.\n\nA vault often also manages a *domain* for the packages it publishes via\na *domain domain package*. Domain is a discovery construct. When\na domain domain is added as a devDependency to some external package\nthen valma will be able to list and configure any applicable toolsets\nand other domains for this package.\n"
     },
     "vdoc-extension": {
       "disabled": "DISABLED",
@@ -187,13 +187,13 @@
       "version": "0.35.0-prerelease.12",
       "introduction": "A worker workspace is used to launch and manage a particular service\nprocess. The workspace files contain configuration and data used by the\nprocess. This data can include even dynamic runtime data.\n\nA worker workspace is fully agnostic to version control solutions:\n- script-generated workers, where worker is locally spawned by scripts\n- clone-and-forget workers, where worker is cloned from a versioned\n  upstream repository, has its configuration locally customized and\n  local content potentially overridden. No further download sync is\n  expected nor will workers push updates back upstream. Each clone\n  represents its own computation.\n- synchronized workers, where the versioned repository itself\n  represents the worker process. Worker workspace shards (there can be\n  many if the computation is parallelizable) are still cloned from the\n  versioned upstream. Unlike with clone-and-forget workers the\n  synchronized worker workspaces keep themselves in sync with\n  upstream configuration and data changes and adjust their computation\n  accordingly.\n  Sync workers shards can even push results back to the versioned\n  repository if appropriate."
     },
-    "workshop": {
+    "domain": {
       "disabled": "DISABLED",
-      "explanation": ".disabled => Workspace is not a 'workshop' (is 'vault')",
-      "description": "Select 'workshop' workspace type",
+      "explanation": ".disabled => Workspace is not a 'domain' (is 'vault')",
+      "description": "Select 'domain' workspace type",
       "package": "@valos/kernel",
       "version": "0.35.0-prerelease.12",
-      "introduction": "A workshop package provides a set of valma commands for defining and\nmanaging a ValOS domain. The workshops then:\n1. shall provide domain package (de)registration via\n   .configure/.<domain>/{,de}register-package\n2. can provide new workspace types via .configure/.type/*\n3. can provide new toolsets via\n   .configure/{,.type/.<type>/,.domain/.<domain>/}.toolset/**/*\n\nNotably the package (de)registration should provide means for any new\ndomain toolset packages to request the addition of their toolset\nconfigure command to the domain workshop.\nIdiomatic way to implement this is a workshop command which issues a PR\nagainst the source control repository of the workshop package."
+      "introduction": "A domain package provides a set of valma commands for defining and\nmanaging a ValOS domain. The domains then:\n1. shall provide domain package (de)registration via\n   .configure/.<domain>/{,de}register-package\n2. can provide new workspace types via .configure/.type/*\n3. can provide new toolsets via\n   .configure/{,.type/.<type>/,.domain/.<domain>/}.toolset/**/*\n\nNotably the package (de)registration should provide means for any new\ndomain toolset packages to request the addition of their toolset\nconfigure command to the domain domain.\nIdiomatic way to implement this is a domain command which issues a PR\nagainst the source control repository of the domain package."
     }
   },
   "toolsets": {
@@ -337,7 +337,7 @@
       "description": "Initialize the current directory as a ValOS workspace from scratch",
       "package": "valma",
       "version": "0.35.0-prerelease.12",
-      "introduction": "This command will interactively walk through the process of creating\nand configuring a new valma workspace in the current working directory\nfrom scratch.\n\nValma init has following interactive phases:\n1. Initialization of package.json via 'yarn init'\n2. Configuration of workspace valos.type and .domain via 'vlm .configure/.valos-stanza'\n3. Addition of new known workshops via 'yarn add --dev (-W)'\n4. Selection of in-use toolsets from available toolsets via 'vlm .configure/.select-toolsets'\n5. Configuration of in-use toolsets and tools via 'vlm configure'"
+      "introduction": "This command will interactively walk through the process of creating\nand configuring a new valma workspace in the current working directory\nfrom scratch.\n\nValma init has following interactive phases:\n1. Initialization of package.json via 'yarn init'\n2. Configuration of workspace valos.type and .domain via 'vlm .configure/.valos-stanza'\n3. Addition of new known domains via 'yarn add --dev (-W)'\n4. Selection of in-use toolsets from available toolsets via 'vlm .configure/.select-toolsets'\n5. Configuration of in-use toolsets and tools via 'vlm configure'"
     }
   }
 }

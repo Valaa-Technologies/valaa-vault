@@ -139,9 +139,9 @@ function createSelectToolsetCommand (vlm, domain, name, simpleName, restrict, re
 
     builder: `(yargs) => yargs.options({})`,
     handler: `async (yargv) => {
-  // Note: this file and the command should be moved to the workshop of
-  // this domain. Otherwise the toolset will not be visible in
-  // vlm select-toolsets.
+  // Note: this file and the command should be moved to the domain
+  // package of this domain. Otherwise the toolset will not be visible
+  // in vlm select-toolsets.
   const vlm = yargv.vlm;
   vlm.updateToolsetConfig(vlm.toolset, { inUse: false });
   return {

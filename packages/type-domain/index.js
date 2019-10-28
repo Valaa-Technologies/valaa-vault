@@ -2,10 +2,10 @@ const { extendOntology } = require("@valos/vdoc");
 const { wrapError } = require("@valos/tools/wrapError");
 
 module.exports = {
-  exportWorkshopAggregateOntologiesFromDocuments,
+  exportDomainAggregateOntologiesFromDocuments,
 };
 
-function exportWorkshopAggregateOntologiesFromDocuments (name, documents) {
+function exportDomainAggregateOntologiesFromDocuments (name, documents) {
   const preOntologies = {};
   Object.values(documents).forEach(document => {
     if (document.package === name
@@ -37,7 +37,7 @@ function exportWorkshopAggregateOntologiesFromDocuments (name, documents) {
         current.mostRecentDocument = document;
       } catch (error) {
         throw wrapError(error,
-            new Error(`During exportWorkshopAggregateOntologiesFromDocuments(${name})`),
+            new Error(`During exportDomainAggregateOntologiesFromDocuments(${name})`),
             "\n\tconflicting new document:", document["@id"], document["dc:title"],
             "\n\tconflicted previous document:", current.mostRecentDocument["@id"],
                 current.mostRecentDocument["dc:title"]);

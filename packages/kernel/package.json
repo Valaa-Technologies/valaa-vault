@@ -2,10 +2,10 @@
   "name": "@valos/kernel",
   "version": "0.35.0-prerelease.13",
   "valos": {
-    "type": "workshop",
+    "type": "domain",
     "domain": "@valos/kernel"
   },
-  "description": "@valos/kernel domain workshop",
+  "description": "@valos/kernel domain",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
   "private": false,
@@ -21,7 +21,7 @@
     ".valma-configure_.type_vault": "valma/configure/type/vault.js",
     ".valma-configure_.type_vdoc-extension": "valma/configure/type/vdoc-extension.js",
     ".valma-configure_.type_worker": "valma/configure/type/worker.js",
-    ".valma-configure_.type_workshop": "valma/configure/type/workshop.js",
+    ".valma-configure_.type_domain": "valma/configure/type/domain.js",
     ".valma-configure_.select_@valos_toolset-revealer": "valma/configure/select__toolset-revealer.js",
     ".valma-configure_.@valos_type-worker_.tools_.select_@valos_rest-api-spindle": "valma/configure/type-worker_tools_select__rest-api-spindle.js",
     ".valma-configure_.domain_@valos_kernel": "valma/configure/domain__kernel.js"
@@ -30,6 +30,6 @@
     "valma": "^0.35.0-prerelease.13"
   },
   "devDependencies": {
-    "@valos/type-workshop": "^0.35.0-prerelease.13"
+    "@valos/type-domain": "^0.35.0-prerelease.13"
   }
 }

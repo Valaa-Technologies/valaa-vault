@@ -19,7 +19,7 @@ are in use.
 The simple way to make a toolset available for some package context is
 by adding a direct devDependency to the toolset package itself. In
 addition there are two ways to source in groups of toolsets:
-1. adding a devDependency to a workshop package which aggregates
+1. adding a devDependency to a domain package which aggregates
   several toolsets together.
 2. packages under a vault sub-directory have access to all the toolsets
   at vault root devDependencies.

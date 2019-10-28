@@ -10,7 +10,7 @@ from scratch.
 Valma init has following interactive phases:
 1. Initialization of package.json via 'yarn init'
 2. Configuration of workspace valos.type and .domain via 'vlm .configure/.valos-stanza'
-3. Addition of new known workshops via 'yarn add --dev (-W)'
+3. Addition of new known domains via 'yarn add --dev (-W)'
 4. Selection of in-use toolsets from available toolsets via 'vlm .configure/.select-toolsets'
 5. Configuration of in-use toolsets and tools via 'vlm configure'`;
 
@@ -186,9 +186,9 @@ publishConfigLine}
           : ["Yes", "bypass", "help", "quit"];
       let answer = await vlm.inquire([{
         message: wasError
-            ? "Retry adding workshops (or direct toolsets) as devDependencies?"
+            ? "Retry adding domains (or direct toolsets) as devDependencies?"
             : `${vlm.theme.executable("yarn add")
-              } more workshops as devDependencies directly to this workspace?`,
+              } more domains as devDependencies directly to this workspace?`,
         type: "list", name: "choice", default: choices[0], choices,
       }]);
       wasError = false;
@@ -196,19 +196,19 @@ publishConfigLine}
       if (answer.choice === "quit") return { success: false, reason: answer };
       if (answer.choice === "help") {
         vlm.speak();
-        vlm.info("workshop registration",
-`This phase uses '${themedYarnAdd}' to add workshops as devDependencies.
-This makes the domains, types and toolsets provided by those workshops
+        vlm.info("domain registration",
+`This phase uses '${themedYarnAdd}' to add domains as devDependencies.
+This makes the domains, types and toolsets provided by those domains
 available for the listings in following phases.
 `);
         continue;
       }
       answer = await vlm.inquire([{
         type: "input", name: "devDependencies",
-        message: `enter a space-separated list of workshops for '${themedYarnAdd}':\n`,
+        message: `enter a space-separated list of domains for '${themedYarnAdd}':\n`,
       }]);
       if (!answer || !answer.devDependencies) {
-        vlm.info(`No devDependencies provided, skipping workshop registration phase`);
+        vlm.info(`No devDependencies provided, skipping domain registration phase`);
       } else {
         try {
           await vlm.interact(["yarn add -W --dev", answer.devDependencies]);

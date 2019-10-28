@@ -13,22 +13,22 @@ licences. Exceptions to this must be clearly noted both in the
 exceptional workspace root document as well as in the vault root
 document.
 
-A vault can have different types of workshops in it; some of these
+A vault can have different types of workspaces in it; some of these
 (such as libraries, toolsets) may be published to repositories as
 *packages* so that they can be used as dependencies for other
 workspaces. Others are only local and used for other purposes;
 *opspaces* contain configurations and tools for managing infrastructure
 configurations and *workers* contain files for spawning local processes.
 
-No matter what the valos type of the workshop all share important
+No matter what the valos type of the domain all share important
 qualities: they can have package dependencies, are versioned and are
 managed by valma.
 
 A vault often also manages a *domain* for the packages it publishes via
-a *domain workshop package*. Domain is a discovery construct. When
-a domain workshop is added as a devDependency to some external package
+a *domain package*. Domain is a discovery construct. When
+a domain package is added as a devDependency to some external package
 then valma will be able to list and configure any applicable toolsets
-and other workshops for this package.
+and other workspaces for this package.
 `;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")

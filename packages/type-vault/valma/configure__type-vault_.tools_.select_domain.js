@@ -30,15 +30,15 @@ exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const domain = vlm.getValOSConfig("domain");
   const domainLocal = domain.split("/")[1];
-  const domainWorkshopPath = vlm.path.join(process.cwd(), "packages", domainLocal);
-  if (!vlm.shell.test("-d", domainWorkshopPath) &&
-      await vlm.inquireConfirm(`Create domain workshop workspace ${vlm.theme.package(domain)} at ${
-          vlm.theme.path(domainWorkshopPath)}?`)) {
-    vlm.shell.mkdir("-p", domainWorkshopPath);
-    vlm.shell.pushd(domainWorkshopPath);
+  const domainWorkspacePath = vlm.path.join(process.cwd(), "packages", domainLocal);
+  if (!vlm.shell.test("-d", domainWorkspacePath) &&
+      await vlm.inquireConfirm(`Create domain workspace ${vlm.theme.package(domain)} at ${
+          vlm.theme.path(domainWorkspacePath)}?`)) {
+    vlm.shell.mkdir("-p", domainWorkspacePath);
+    vlm.shell.pushd(domainWorkspacePath);
     await vlm.invoke(`init`, {
-      description: `The domain '${domain}' workshop`,
-      valos: { type: "workshop", domain },
+      description: `The domain '${domain}'`,
+      valos: { type: "domain", domain },
       devDependencies: false,
     });
     await vlm.interact([`vlm draft-command`, {

@@ -1,7 +1,7 @@
-const { exportWorkshopAggregateOntologiesFromDocuments } = require("@valos/type-workshop");
+const { exportDomainAggregateOntologiesFromDocuments } = require("@valos/type-domain");
 const { createRemovedFromOntology } = require("@valos/raem/tools/createRemovedFromOntology");
 
-module.exports = exportWorkshopAggregateOntologiesFromDocuments(
+module.exports = exportDomainAggregateOntologiesFromDocuments(
     require("./package").name, require("./documents"));
 
 Object.assign(module.exports,

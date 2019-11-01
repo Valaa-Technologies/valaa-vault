@@ -4,12 +4,22 @@
 // deploy commands get listed next to each other.
 exports.vlm = { toolset: "@valos/type-opspace" };
 exports.command = "build-release [toolsetGlob]";
-exports.describe = "Build all toolset sub-releases which have source modifications";
+exports.describe = "Build a new release of this opspace";
 exports.introduction =
-`The sub-releases are placed under the provided dist target path.
+`This command prepares, builds and tests a new opspace release locally.
+This command forms the first half of a release deployment process which
+doesn't trigger external changes; \`deploy-release\` initiates the
+actual deployment process.
 
-This command is first part of the two-part deployment with
-deploy-release making the actual deployment.`;
+This command resolves a local 'releasePath' for the build and then
+invokes all release-build sub-commands as follows:
+
+vlm .release-build/\${toolsetGlob || "**/*"} --target=\${releasePath} \${rest}
+
+These sub-commands (which can be local opspace commands or commands
+provided by opspace toolset dependencies) then (re)build the actual
+build artifacts under the target path.
+`;
 
 exports.builder = (yargs) => yargs.options({
   target: {

@@ -1304,7 +1304,8 @@ async function _invoke (commandSelector, argv) {
       .expound("introspect:", introspect)
       .expound("contextVargv:", JSON.stringify({ ...contextVargv, vlm: "<hidden>" }));
 
-  const activeCommands = this._selectActiveCommands(commandGlob, argv, introspect);
+  const activeCommands = this._selectActiveCommands(
+      commandGlob, argv, introspect, isWildcardCommand);
 
   if (this.isCompleting || contextVargv.bashCompletion) {
     globalVargs.completion("bash-completion", (current, argvSoFar) => {
@@ -1617,7 +1618,7 @@ function _refreshActivePools (searchForwardPool) {
   return ret;
 }
 
-function _selectActiveCommands (commandGlob, argv, introspect) {
+function _selectActiveCommands (commandGlob, argv, introspect, isWildcardCommand) {
   if (((introspect || {}).aggregatePool || {}).commands) return introspect.aggregatePool.commands;
   const ret = {};
   for (const pool of this._activePools) {
@@ -1706,10 +1707,12 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
             this.theme.command(commandName)}' inferred from file:`, file.name);
       }
 
-      subVargs.usage(module.command.replace(exportedCommandName, "$0"), module.describe);
+      const description = _generateModuleDescription(module, { full: !isWildcardCommand });
+
+      subVargs.usage(module.command.replace(exportedCommandName, "$0"), description);
       if (!activeCommand.disabled
           || (activeCommand.broken ? this.vargv.broken : this.vargv.enableDisabled)) {
-        globalVargs.command(module.command, module.describe,
+        globalVargs.command(module.command, description,
             ...(!activeCommand.disabled && module.builder ? [module.builder] : []), () => {});
       } else {
         pool.stats.disabled = (pool.stats.disabled || 0) + 1;
@@ -1722,6 +1725,16 @@ function _selectActiveCommands (commandGlob, argv, introspect) {
     });
   }
   return ret;
+}
+
+function _generateModuleDescription (module, { full }) {
+  if (!full || (module.introduction === undefined)) {
+    return module.describe;
+  }
+  return `${module.describe}.
+
+${module.introduction}
+`;
 }
 
 /**
@@ -2014,8 +2027,7 @@ function _introspectPool (introspect, pool, selectedCommands, isWildcard, enable
     _addData("link", info.linkPath);
     _addData("target", info.targetPath || _missingFile);
     if (introspect.show.introduction) {
-      const intro = !module ? null
-          : (module.introduction !== undefined ? module.introduction : module.describe);
+      const intro = _generateModuleDescription(module, { full: true });
       if (intro === null) {
         this.warn(`Cannot read command '${name}' script introduction from:`,
             info.targetPath);

@@ -42,7 +42,7 @@ exports.builder = (yargs) => {
       description: "Reconfigure all 'vault' configurations of this workspace.",
     },
     workspaces: {
-      type: "string", default: current || "packages/*",
+      type: "string", array: true, default: current || "packages/*",
       interactive: {
         type: "input", when: !current ? "always" : "if-undefined",
         message: "Set package.json .workspaces stanza globs as a comma-separated list.",
@@ -53,8 +53,9 @@ exports.builder = (yargs) => {
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  if ((vlm.getPackageConfig("workspaces") || []).join(",") !== yargv.workspaces) {
-    await vlm.updatePackageConfig({ workspaces: [yargv.workspaces] });
+  if ((vlm.getPackageConfig("workspaces") || []).join(",")
+      !== [].concat(yargv.workspaces).join(",")) {
+    await vlm.updatePackageConfig({ workspaces: [].concat(yargv.workspaces) });
     // await vlm.interact("yarn install");
   }
   return {

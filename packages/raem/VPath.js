@@ -384,20 +384,26 @@ function _nestSegment (segment, initial = 1) {
 
 
 const fieldLookup = {
+  "-": "unnamedOwnlings", // "entities",
+  "'": "unnamedOwnlings", // "medias",
   "*": "relations",
-  "_out*": "relations",
-  "_in*": "incomingRelations",
-  ".E": "unnamedOwnlings", // "entities",
-  ".M": "unnamedOwnlings", // "medias",
+  "*out": "relations",
+  "*in": "incomingRelations",
+  "*out~": "relations",
+  "*in~": "incomingRelations",
 };
 
 const objectLookup = {
-  "-": "value",
-  "-trg": "target",
-  "-src": "source",
-  "-E": "owner", // "entities",
-  "-M": "content", // "medias",
+  ".o.": "value",
+  ".o-": "owner", // "entities",
+  ".o'": "content", // "medias",
+  ".o*": "target",
+  ".s*": "source",
+  ".o*~": "target",
+  ".s*~": "source",
 };
+
+/* eslint-disable complexity */
 
 function bindExpandedVPath (vp, contextLookup = {}, contextState, containerType = "@"
     /* , containerIndex = 0 */) {
@@ -480,13 +486,15 @@ function bindExpandedVPath (vp, contextLookup = {}, contextState, containerType 
   case "*":
     expandedVPath[0] = "§[]";
     break;
-  case "_in*":
-  case "_out*":
-    // ref("@valos/raem/VPath#section_structured_relation")
-  case ".M": // eslint-disable-line no-fallthrough
-    // ref("@valos/raem/VPath#section_structured_media")
-  case ".E": { // eslint-disable-line no-fallthrough
+  case "-":
     // ref("@valos/raem/VPath#section_structured_entity")
+  case "'": // eslint-disable-line no-fallthrough
+    // ref("@valos/raem/VPath#section_structured_media")
+  case "*in": // eslint-disable-line no-fallthrough
+  case "*out": // eslint-disable-line no-fallthrough
+  case "*in~": // eslint-disable-line no-fallthrough
+  case "*out~": { // eslint-disable-line no-fallthrough
+    // ref("@valos/raem/VPath#section_structured_relation")
     const field = fieldLookup[type];
     if (expandedVPath.length > 2) {
       throw new Error(`multi-param '${field}' selectors not allowed`);
@@ -496,11 +504,13 @@ function bindExpandedVPath (vp, contextLookup = {}, contextState, containerType 
           bindExpandedVPath(expandedVPath[1], contextLookup, contextState, type, 1)),
     ];
   }
-  case "-":
-  case "-trg":
-  case "-src":
-  case "-E":
-  case "-M": {
+  case ".o.":
+  case ".o-":
+  case ".o'":
+  case ".o*":
+  case ".s*":
+  case ".o*~":
+  case ".s*~": {
     const object = objectLookup[type];
     // ref("@valos/raem/VPath#section_structured_object_value")
     return [

@@ -125,33 +125,34 @@ name and which have the head as their source.`,
   ?o    valos:source ?s
       ; valos:name "PERMISSIONS"
 `), `
-Mnemonic: '*' for many things like with regexes (only Relations are many with the same name).`,
+Mnemonic: '*' for many things as per regex/glob syntax (Relations are
+the only things that can have multiple instances with the same name).`,
         ],
       },
-      "chapter#section_verb_content>3;verb type \"`.M`\": content or Media selector": {
-        "#0": `
-Verb for selecting the Media with the given name which has the
-head as their folder.`,
-        "example#example_verb_content>0;Content selector example": [
-`Triple pattern \`?s <urn:valos:.M:foo.vs> ?o\` matches like:
-`, turtle(`
-  ?o    valos:folder ?s
-      ; valos:name "foo.vs"
-`), `
-Mnemonic: "M" for Media.`,
-        ],
-      },
-      "chapter#section_verb_container>4;verb type \"`.E`\": container or Entity selector": {
+      "chapter#section_verb_container>3;verb type \"`-`\": container or Entity selector": {
         "#0": `
 Verb for selecting the resource (typically an Entity) with the given
 name and which has the head as their container.`,
         "example#example_verb_container>0;Container selector example": [
-`Triple pattern \`?s <urn:valos:.E:Scripts> ?o\` matches like:
+`Triple pattern \`?s <urn:valos:-:Scripts> ?o\` matches like:
 `, turtle(`
   ?o    valos:parent ?s
       ; valos:name "Scripts"
 `), `
-Mnemonic: "E" for Entity.`,
+Mnemonic: "-" links a container to its parent.`,
+        ],
+      },
+      "chapter#section_verb_content>3;verb type \"`'`\": content or Media selector": {
+        "#0": `
+Verb for selecting the Media with the given name which has the
+head as their folder.`,
+        "example#example_verb_content>0;Content selector example": [
+`Triple pattern \`?s <urn:valos:':foo.vs> ?o\` matches like:
+`, turtle(`
+  ?o    valos:folder ?s
+      ; valos:name "foo.vs"
+`), `
+Mnemonic: "'" for quoted content suggests text data.`,
         ],
       },
       "chapter#section_verb_object>4;verb type \"`-`\": object or target selector": {
@@ -165,29 +166,30 @@ Verb that is a synonym for predicate 'rdf:object'.`,
 Mnemonic: follow line '-' to target.`,
         ],
       },
-      "chapter#section_verb_ghost>5;verb type \"`~`\": ghost selector": {
+      "chapter#section_verb_ghost>5;verb type \"`_`\": subspace selector": {
         "#0": `
-Verb for selecting a ghost of the given resource from within the path
-head as host.`,
-        "example#example_verb_ghost>0;Ghost selector example": [
-`Triple pattern \`?s <urn:valos:~$~u4:ba54> ?o\` matches like:
-`, turtle(`
-  ?o    valos:ghostHost ?s
-      ; valos:ghostPrototype <urn:valos:$~u4:ba54>
-`),
-        ],
-      },
-      "chapter#section_verb_subspace>6;verb type \"`_`\": subspace selector": {
-        "#0": `
-Verb for selecting a subspace variant.`,
-        "example#example_verb_subspace>0;Subspace selector example": [
+Verb for selecting named subspaces and ghosts.`,
+        "example#example_verb_language_subspace>0;Language subspace selector example": [
 `Triple pattern \`?s <urn:valos:.:myProp@_$lang:fi> ?o\` matches like:
 `, turtle(`
   ?_sp  valos:scope ?s
       ; valos:name "myProp"
   . ?o  valos:subspacePrototype* ?_sp
       ; valos:language "fi"
-`),
+`), `
+Mnemonic: '_' is underscore is subscript is subspace.`],
+        "#1": [
+`If the verb name context term is an identifier term then the subspace
+denotes the ghost subspace of the identified resource inside the
+current resource.`
+        ],
+        "example#example_verb_ghost_subspace>1;Ghost subspace selector example": [
+`Triple pattern \`?s <urn:valos:_$~u4:ba54> ?o\` matches like:
+`, turtle(`
+  ?o    valos:ghostHost ?s
+      ; valos:ghostPrototype <urn:valos:$~u4:ba54>
+`), `
+Mnemonic: The '_$~' is a 'subspace of ghoStS'.`,
         ],
       },
       "chapter#section_verb_computation>6;verb type \"`!`\": eager evaluator": {
@@ -461,18 +463,18 @@ well as other possible constraints.`,
       ; valos:prototype <urn:valos:$~u4:f00b-b507-0763>
 `),
       ],
-      "chapter#section_structural_ghost>0;verb type \"`~`\": structural ghost sub-resource": {
+      "chapter#section_structural_ghost>0;verb type \"`_`\": structural subspace sub-resource": {
         "#0": `
 Ghost sub-resources are products of ghost instantiation. All the ghosts
 of the directly _and indirectly_ owned resources of the instance
 prototype are flattened as _direct_ structural sub-resources of the
 instance itself. The instance is called *ghost host* of all such ghosts.`,
         "example#example_structural_ghost>0;Structural ghost triple inference": [
-`\`<urn:valos:$~u4:f00b@~$~u4:ba54>\` reads as "inside the
+`\`<urn:valos:$~u4:f00b@_$~u4:ba54>\` reads as "inside the
 instance resource \`f00b\` the ghost of the $~u4 resource \`ba54\`"
 and infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@~$~u4:ba54>
+  <urn:valos:$~u4:f00b@_$~u4:ba54>
         valos:ghostHost <urn:valos:$~u4:f00b>
       ; valos:ghostPrototype <urn:valos:$~u4:ba54>
 `),
@@ -482,13 +484,13 @@ In case of deeper instantiation chains the outermost ghost segment
 provides inferences recursively to all of its sub-resources; nested
 ghost segments wont provide any further inferences.`,
         "example#example_structural_ghost_recursive>1;Recursive ghost triple inference": [
-`\`<urn:valos:$~u4:f00b@~$~u4:ba54@~$~u4:b7e4>\` reads as "inside
+`\`<urn:valos:$~u4:f00b@_$~u4:ba54@_$~u4:b7e4>\` reads as "inside
 the instance resource \`f00b\` the ghost of
-\`<urn:valos:$~u4:ba54@~$~u4:b7e4>\`" and infers triples:
+\`<urn:valos:$~u4:ba54@_$~u4:b7e4>\`" and infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@~$~u4:ba54@~$~u4:b7e4>
+  <urn:valos:$~u4:f00b@_$~u4:ba54@_$~u4:b7e4>
         valos:ghostHost <urn:valos:$~u4:f00b>
-      ; valos:ghostPrototype <urn:valos:$~u4:ba54@~$~u4:b7e4>
+      ; valos:ghostPrototype <urn:valos:$~u4:ba54@_$~u4:b7e4>
 `)
         ],
       },
@@ -522,13 +524,13 @@ The verb segment-term can also specify triple inferences for *all*
 sub-resources in the subspace (not just for the immediate
 sub-resource of the selector segment).`,
         "example#example_structural_subspace_recursive>1;Structural subspace recursive inference": [
-`\`<urn:valos:$~u4:f00b@~$~u4:b453@_$lang:fi@~$~u4:b74e@.:myProp>\`
+`\`<urn:valos:$~u4:f00b@_$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp>\`
 infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@~$~u4:b453@_$lang:fi@~$~u4:b74e@.:myProp> a valos:ScopeProperty
+  <urn:valos:$~u4:f00b@_$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp> a valos:ScopeProperty
       ; valos:ghostHost <urn:valos:$~u4:f00b>
-      ; valos:ghostPrototype <urn:valos:$~u4:b453@_$lang:fi@~$~u4:b74e@.:myProp>
-      ; valos:subspacePrototype <urn:valos:$~u4:f00b@~$~u4:b453@~$~u4:b74e@_$lang:fi@.:myProp>
+      ; valos:ghostPrototype <urn:valos:$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp>
+      ; valos:subspacePrototype <urn:valos:$~u4:f00b@_$~u4:b453@_$~u4:b74e@_$lang:fi@.:myProp>
       ; valos:language "fi"
 `),
         ],
@@ -548,6 +550,29 @@ f00b-b507-0763 and thus infers triples:
       ; valos:name "myProp"
 `),
         ],
+        "#1": [
+`The verbs \`.o.\`, \`.o*\`, \`.o-\` and \`.o'\` denote the properties
+\`valos:value\`, \`valos:target\`, \`valos:parent\` and
+\`valos:content'\` respectively. These are the primary `, em("rdf:object sub-properties"), `
+of ScopeProperty, Relation, Entity and Media, respectively (the letter
+'o' in the verbs stands for rdf:object). When given as a parameter to a
+primary resource they modify it with a fixed rdf:object triple.
+In addition \`.s*\` denotes \`valos:source\` which is the rdf:subject
+of a Relation.`,
+        ],
+        "example#example_structural_object>1;Structural rdf:object triple inference": [
+`\`<urn:valos:$~u4:f00b@*:PERMISSIONS:@.*$~ih:8766>\` is a PERMISSIONS
+relation with fixed ~ih target 8766 and infers triples:
+`, turtle(`
+  <urn:valos:$~u4:f00b@*:PERMISSIONS:@.*$~ih:8766> a valos:Relation
+      ; valos:connectedSource <urn:valos:$~u4:f00b>
+      ; valos:prototype <urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS:@.*$~ih:8766>
+      ; valos:name "PERMISSIONS"
+      ; valos:target <urn:valos:$~u4:8766-src>
+`),
+`Mnemonic: these verbs are read right-to-left, eg. \`.o*\` -> 'Relation
+rdf:object property is valos:target'`
+        ],
       },
       "chapter#section_structural_relation>3;verb type \"`*`\": structural Relation": {
         "#0": `
@@ -560,7 +585,7 @@ source, a structurally homologous prototype inside f00b-b507-0763
 and thus infers triples:
 `, turtle(`
   <urn:valos:$~u4:f00b@*:PERMISSIONS> a valos:Relation
-      ; valos:connectorSource <urn:valos:$~u4:f00b>
+      ; valos:connectedSource <urn:valos:$~u4:f00b>
       ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS>
       ; valos:name "PERMISSIONS"
   <urn:valos:$~u4:f00b@*:PERMISSIONS@_:1> a valos:Relation
@@ -569,53 +594,34 @@ and thus infers triples:
 `),
         ],
       },
-      "chapter#section_structural_media>4;verb type \"`.M`\": structural Media": {
-        "#0": `
-Structural medias infer a type, fixed owner (folder) and name.`,
-        "example#example_structural_media>0;Structural Media triple inference": [
-`\`<urn:valos:$~u4:f00b@.M:foo.vs>\` is a media with fixed
-name "foo.vs", dominant type Media, $~u4 resource f00b as the
-owning folder and a structurally homologous prototype inside
-f00b-b507-0763 and thus infers triples:
-`, turtle(`
-  <urn:valos:$~u4:f00b@.M:foo.vs> a valos:Media
-      ; valos:folder <urn:valos:$~u4:f00b>
-      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@.M:foo.vs>
-      ; valos:name "foo.vs"
-`),
-        ],
-      },
-      "chapter#section_structural_entity>5;verb type \"`.E`\": structural Entity": {
+      "chapter#section_structural_entity>4;verb type \"`-`\": structural Entity": {
         "#0": `
 Structural entities infer a type, fixed owner (parent) and name.`,
         "example#example_structural_entity>0;Structural Entity triple inference": [
-`\`<urn:valos:$~u4:f00b@.E:Scripts>\` is an entity with fixed
-name "scripts", dominant type Entity, $~u4 resource f00b as the
-owning container and a structurally homologous prototype inside
-f00b-b507-0763 and thus infers triples:
+`\`<urn:valos:$~u4:f00b@-:Scripts>\` has a fixed name "scripts",
+dominant type Entity, $~u4 resource f00b as the owning container and
+a structurally homologous prototype inside f00b-b507-0763 and thus
+infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@.E:Scripts> a valos:Entity
+  <urn:valos:$~u4:f00b@-:Scripts> a valos:Entity
       ; valos:parent <urn:valos:$~u4:f00b>
-      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@.E:scripts>
+      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@-:scripts>
       ; valos:name "scripts"
 `),
         ],
       },
-      "chapter#section_structural_object_value>6;verb type  \"`-`\" - fixed rdf:object value": {
+      "chapter#section_structural_media>5;verb type \"`'`\": structural Media": {
         "#0": `
-Extends the preceding verb-param with a fixed rdf:object triple.
-The actual rdf:object sub-property depends on the dominant type of
-the verb-param: \`valos:value\` for ScopeProperty, \`valos:target\`
-for Relation, \`valos:content\` for Media, etc.`,
-        "example#example_structural_object_value>0;Structural rdf:object triple inference": [
-`\`<urn:valos:$~u4:f00b@*:PERMISSIONS:@-$~ih:8766>\` is a
-PERMISSIONS relation with fixed ~ih target 8766 and infers triples:
+Structural medias infer a type, fixed owner (folder) and name.`,
+        "example#example_structural_media>0;Structural Media triple inference": [
+`\`<urn:valos:$~u4:f00b@':foo.vs>\` has a fixed name "foo.vs", dominant
+type Media, $~u4 resource f00b as the owning folder and a structurally
+homologous prototype inside f00b-b507-0763 and thus infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@*:PERMISSIONS:@-$~ih:8766> a valos:Relation
-      ; valos:connectorSource <urn:valos:$~u4:f00b>
-      ; valos:prototype <urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS:@-$~ih:8766>
-      ; valos:name "PERMISSIONS"
-      ; valos:target <urn:valos:$~u4:8766-src>
+  <urn:valos:$~u4:f00b@':foo.vs> a valos:Media
+      ; valos:folder <urn:valos:$~u4:f00b>
+      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@':foo.vs>
+      ; valos:name "foo.vs"
 `),
         ],
       },

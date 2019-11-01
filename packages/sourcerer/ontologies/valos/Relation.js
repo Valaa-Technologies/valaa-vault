@@ -143,7 +143,7 @@ coupled field 'pairedOutRelations' is an event logged field).`,
 `The ordered list of incoming relations paired to this sourcered node.`,
   },
 
-  connectorSource: {
+  connectedSource: {
     "@type": "valos-raem:EventLoggedField",
     "rdfs:subPropertyOf": ["valos:connector", "valos:pairedSource"],
     "rdfs:domain": "valos:Relation",
@@ -156,20 +156,20 @@ coupled field 'pairedOutRelations' is an event logged field).`,
   },
 
   // Note: 'connectedOutRelations' has domain SourceredNode but is listed
-  // here due to its coupling with 'connectorSource'.
+  // here due to its coupling with 'connectedSource'.
   connectedOutRelations: {
     "@type": "valos-raem:EventLoggedField",
     "rdfs:subPropertyOf": ["valos:connectedRelations", "valos:pairedOutRelations"],
     "rdfs:domain": "valos:SourceredNode",
     "rdfs:range": "rdfs:List",
     "valos-raem:isOwnerOf": true,
-    "valos-raem:coupledField": "valos:connectorSource",
+    "valos-raem:coupledField": "valos:connectedSource",
     "rdfs:comment":
 `The ordered list of outgoing relations contained in (and owned by)
 this sourcered node.`,
   },
 
-  connectorTarget: {
+  connectedTarget: {
     "@type": "valos-raem:EventLoggedField",
     "rdfs:subPropertyOf": ["valos:connector", "valos:pairedTarget"],
     "rdfs:domain": "valos:Relation",
@@ -182,14 +182,14 @@ this sourcered node.`,
   },
 
   // Note: 'connectedInRelations' has domain SourceredNode but is
-  // listed here due to its coupling with 'connectorTarget'.
+  // listed here due to its coupling with 'connectedTarget'.
   connectedInRelations: {
     "@type": "valos-raem:EventLoggedField",
     "rdfs:subPropertyOf": ["valos:connectedRelations", "valos:pairedInRelations"],
     "rdfs:domain": "valos:SourceredNode",
     "rdfs:range": "rdfs:List",
     "valos-raem:isOwnerOf": true,
-    "valos-raem:coupledField": "valos:connectorTarget",
+    "valos-raem:coupledField": "valos:connectedTarget",
     "rdfs:comment":
 `The ordered list of incoming relations contained in (and owned by)
 this sourcered node.`,

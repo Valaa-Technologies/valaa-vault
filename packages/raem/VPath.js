@@ -394,13 +394,18 @@ const fieldLookup = {
 };
 
 const objectLookup = {
-  ".o.": "value",
-  ".o-": "owner", // "entities",
-  ".o'": "content", // "medias",
-  ".o*": "target",
-  ".s*": "source",
-  ".o*~": "target",
-  ".s*~": "source",
+  ".S.!": "owner",
+  ".O.": "value",
+  ".S-!": "owner",
+  ".O-": "rawId",
+  ".S'!": "owner",
+  ".O'": "content",
+  ".S*": "source",
+  ".O*": "target",
+  ".S*~": "source",
+  ".O*~": "target",
+  ".S*!": "source",
+  ".O*!": "target",
 };
 
 /* eslint-disable complexity */
@@ -504,13 +509,18 @@ function bindExpandedVPath (vp, contextLookup = {}, contextState, containerType 
           bindExpandedVPath(expandedVPath[1], contextLookup, contextState, type, 1)),
     ];
   }
-  case ".o.":
-  case ".o-":
-  case ".o'":
-  case ".o*":
-  case ".s*":
-  case ".o*~":
-  case ".s*~": {
+  case ".S.!":
+  case ".O.":
+  case ".S-!":
+  case ".O-":
+  case ".S'!":
+  case ".O'":
+  case ".O*":
+  case ".S*":
+  case ".O*~":
+  case ".S*~":
+  case ".O*!":
+  case ".S*!": {
     const object = objectLookup[type];
     // ref("@valos/raem/VPath#section_structured_object_value")
     return [

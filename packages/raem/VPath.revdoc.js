@@ -551,14 +551,14 @@ f00b-b507-0763 and thus infers triples:
 `),
         ],
         "#1": [
-`The verbs \`.o.\`, \`.o*\`, \`.o-\` and \`.o'\` denote the properties
-\`valos:value\`, \`valos:target\`, \`valos:parent\` and
-\`valos:content'\` respectively. These are the primary `, em("rdf:object sub-properties"), `
-of ScopeProperty, Relation, Entity and Media, respectively (the letter
-'o' in the verbs stands for rdf:object). When given as a parameter to a
-primary resource they modify it with a fixed rdf:object triple.
-In addition \`.s*\` denotes \`valos:source\` which is the rdf:subject
-of a Relation.`,
+`The verbs \`.O.\`, \`.O*\`, and \`.O'\` denote the properties
+\`valos:value\`, \`valos:target\`, and \`valos:content'\` respectively.
+These are the primary `, em("rdf:object sub-properties"), ` of
+ScopeProperty, Entity and Media, respectively (the letter 'o' in the
+verbs stands for rdf:object). When given as a parameter to a primary
+resource they modify it with a fixed rdf:object triple.
+In addition \`.S*\` and \`.O*\` denote \`valos:source\` \`valos:target\`
+which are the rdf:subject and rdf:object properties of a Relation.`,
         ],
         "example#example_structural_object>1;Structural rdf:object triple inference": [
 `\`<urn:valos:$~u4:f00b@*:PERMISSIONS:@.*$~ih:8766>\` is a PERMISSIONS
@@ -570,7 +570,7 @@ relation with fixed ~ih target 8766 and infers triples:
       ; valos:name "PERMISSIONS"
       ; valos:target <urn:valos:$~u4:8766-src>
 `),
-`Mnemonic: these verbs are read right-to-left, eg. \`.o*\` -> 'Relation
+`Mnemonic: these verbs are read right-to-left, eg. \`.O*\` -> 'Relation
 rdf:object property is valos:target'`
         ],
       },

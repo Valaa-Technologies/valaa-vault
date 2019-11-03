@@ -382,8 +382,51 @@ function _nestSegment (segment, initial = 1) {
   }
 }
 
+/* eslint-disable complexity */
 
-const fieldLookup = {
+function bindExpandedVPath (vp, contextLookup = {}, contextState, componentTypeOverride) {
+  let expandedVPath = vp;
+  if (!componentTypeOverride || (componentTypeOverride === "@")) {
+    if (!Array.isArray(vp)) return vp;
+  } else if (!Array.isArray(vp) || (vp[0] === "@")) {
+    expandedVPath = ["$", "", vp];
+  }
+  const verbType = expandedVPath[0];
+  const bind = _typeBinders[verbType];
+  if (bind) {
+    return bind(expandedVPath, contextLookup, contextState, componentTypeOverride || verbType);
+  }
+  if (verbType[0] === "!") {
+    expandedVPath[0] = `§${verbType.slice(1)}`;
+    _expandRest(expandedVPath, contextLookup, contextState, "!", 1);
+  }
+  throw new Error(`unrecognized verb type: ${JSON.stringify(verbType)}`);
+}
+
+function _expandRest (expandedVPath, contextLookup, contextState, componentType, initial) {
+  for (let i = initial; i !== expandedVPath.length; ++i) {
+    expandedVPath[i] = bindExpandedVPath(
+        expandedVPath[i], contextLookup, contextState, componentType, i);
+  }
+  return expandedVPath;
+}
+
+const _singularLookup = {
+  ".S.!": ["§.", "owner"],
+  ".O.": ["§.", "value"],
+  ".S-!": ["§.", "owner"],
+  ".O-": ["§.", "rawId"],
+  ".S'!": ["§.", "owner"],
+  ".O'": ["§.", "content"],
+  ".S*": ["§.", "source"],
+  ".O*": ["§.", "target"],
+  ".S*~": ["§.", "source"],
+  ".O*~": ["§.", "target"],
+  ".S*!": ["§.", "source"],
+  ".O*!": ["§.", "target"],
+};
+
+const _pluralLookup = {
   "-": "unnamedOwnlings", // "entities",
   "'": "unnamedOwnlings", // "medias",
   "*": "relations",
@@ -393,165 +436,159 @@ const fieldLookup = {
   "*in~": "incomingRelations",
 };
 
-const objectLookup = {
-  ".S.!": "owner",
-  ".O.": "value",
-  ".S-!": "owner",
-  ".O-": "rawId",
-  ".S'!": "owner",
-  ".O'": "content",
-  ".S*": "source",
-  ".O*": "target",
-  ".S*~": "source",
-  ".O*~": "target",
-  ".S*!": "source",
-  ".O*!": "target",
+
+const _typeBinders = {
+  "@": _statements,
+  $: _vparam,
+  "!": _computation,
+  "": _invalidHead,
+  ":": _invalidHead,
+  "~": function _subspace () {
+    throw new Error("subspace selector not implemented");
+  },
+  ...(Object.keys(_singularLookup)
+      .reduce((a, p) => { a[p] = _singularProperty; return a; }, {})),
+  ...(Object.keys(_pluralLookup)
+      .reduce((a, p) => { a[p] = _pluralProperty; return a; }, {})),
+  ".": function _property (expandedVPath, contextLookup, contextState, componentType) {
+    // ref("@valos/raem/VPath#section_structured_scope_property")
+    const first = bindExpandedVPath(
+        expandedVPath[1], contextLookup, contextState, componentType || ".", 1);
+    if (expandedVPath.length <= 2) return first;
+    expandedVPath[0] = "§->";
+    expandedVPath[1] = first;
+    return _expandRest(expandedVPath, contextLookup, contextState, ".", 2);
+  },
+  "-": _namedCollection,
+  "'": _namedCollection,
+  "*": _namedCollection,
 };
 
-/* eslint-disable complexity */
+function _invalidHead () {
+  throw new Error(`Invalid expanded VPath head: ":" and "" can't appear as first entries`);
+}
 
-function bindExpandedVPath (vp, contextLookup = {}, contextState, containerType = "@"
-    /* , containerIndex = 0 */) {
-  let expandedVPath = vp;
-  if (containerType === "@") {
-    if (!Array.isArray(vp)) return vp;
-  } else if (!Array.isArray(vp) || (vp[0] === "@")) {
-    expandedVPath = ["$", "", vp];
+function _tryAsNameParam (vparam) {
+  if (Array.isArray(vparam) && (vparam[0] === "$") && !vparam[1] && !vparam[2]) return null;
+  return vparam;
+}
+
+function _statements (expandedVPath, contextLookup, contextState, componentType) {
+  if (expandedVPath.length === 2) {
+    return bindExpandedVPath(expandedVPath[1], contextLookup, contextState, componentType, 1);
   }
-  let type = expandedVPath[0];
-  let i = 1;
-  switch (type) {
-  case "@":
-    if (expandedVPath.length === 2) {
-      return bindExpandedVPath(expandedVPath[1], contextLookup, contextState, "@", 1);
-    }
-    expandedVPath[0] = "§->";
-    break;
-  case "":
-  case ":":
-    throw new Error(`Invalid expanded VPath head: ":" and "" can't appear as first entries`);
-  case "$": { // eslint-disable-line no-fallthrough
-    let value = bindExpandedVPath(expandedVPath[2], contextLookup, contextState);
-    let contextValue;
-    const contextTerm = expandedVPath[1];
-    if (contextTerm) {
-      const context = contextLookup[contextTerm];
-      if (context) {
-        if (typeof context === "function") contextValue = context;
-        if (contextValue == null) contextValue = (context.symbolFor || {})[value];
-        if (contextValue == null) contextValue = (context.stepsFor || {})[value];
-        if ((contextValue == null) && context.steps) {
-          contextValue = [
-            ...(typeof context.steps !== "function"
-                ? context.steps
-                : context.steps(contextState, value, contextTerm)),
-            value,
-          ];
-        }
-        if (!contextValue) {
-          throw new Error(`Term operation '${value}' ${
-              contextValue === false ? "disabled" : "not found"} in the non-trivial context '${
-              contextTerm}'`);
-        }
-        if (typeof contextValue === "function") {
-          contextValue = contextValue(contextState, value, contextTerm);
-        }
-        if (Array.isArray(contextValue)) return contextValue;
-        value = contextValue;
-        contextValue = null;
-      } else {
-        expandedVPath[0] = "§:";
-        expandedVPath[2] = value;
-        value = expandedVPath;
+  expandedVPath[0] = "§->";
+  return _expandRest(expandedVPath, contextLookup, contextState, componentType, 1);
+}
+
+function _vparam (expandedVPath, contextLookup, contextState, componentType) {
+  let value = bindExpandedVPath(expandedVPath[2], contextLookup, contextState);
+  let contextValue;
+  const contextTerm = expandedVPath[1];
+  if (contextTerm) {
+    const context = contextLookup[contextTerm];
+    if (context) {
+      if (typeof context === "function") contextValue = context;
+      if (contextValue == null) contextValue = (context.symbolFor || {})[value];
+      if (contextValue == null) contextValue = (context.stepsFor || {})[value];
+      if ((contextValue == null) && context.steps) {
+        contextValue = [
+          ...(typeof context.steps !== "function"
+              ? context.steps
+              : context.steps(contextState, value, contextTerm)),
+          value,
+        ];
       }
-    }
-    switch (containerType) {
-    case "@":
-      // vgrid
-      return ["§ref", value];
-    case "!0": // first entry of a trivial resource valk
-      return ["§$", value];
-    case ".":
-      return ["§..", value]; // valospace native property
-    case ":":
-    default: // eslint-disable-line no-fallthrough
-      return value;
-    }
-  }
-  case "~":
-    // ref("@valos/raem/VPath#section_structured_subspace_selector")
-    throw new Error("subspace selector not implemented");
-  case ".":
-    // ref("@valos/raem/VPath#section_structured_scope_property")
-    if (expandedVPath.length <= 2) {
-      return bindExpandedVPath(expandedVPath[1], contextLookup, contextState, ".", 1);
-    }
-    expandedVPath[0] = "§->";
-    break;
-  case "*":
-    expandedVPath[0] = "§[]";
-    break;
-  case "-":
-    // ref("@valos/raem/VPath#section_structured_entity")
-  case "'": // eslint-disable-line no-fallthrough
-    // ref("@valos/raem/VPath#section_structured_media")
-  case "*in": // eslint-disable-line no-fallthrough
-  case "*out": // eslint-disable-line no-fallthrough
-  case "*in~": // eslint-disable-line no-fallthrough
-  case "*out~": { // eslint-disable-line no-fallthrough
-    // ref("@valos/raem/VPath#section_structured_relation")
-    const field = fieldLookup[type];
-    if (expandedVPath.length > 2) {
-      throw new Error(`multi-param '${field}' selectors not allowed`);
-    }
-    return ["§->", field,
-      ..._filterByFieldValue("name",
-          bindExpandedVPath(expandedVPath[1], contextLookup, contextState, type, 1)),
-    ];
-  }
-  case ".S.!":
-  case ".O.":
-  case ".S-!":
-  case ".O-":
-  case ".S'!":
-  case ".O'":
-  case ".O*":
-  case ".S*":
-  case ".O*~":
-  case ".S*~":
-  case ".O*!":
-  case ".S*!": {
-    const object = objectLookup[type];
-    // ref("@valos/raem/VPath#section_structured_object_value")
-    return [
-      "§->",
-      ..._filterByFieldValue(object,
-          bindExpandedVPath(expandedVPath[1], contextLookup, contextState)),
-    ];
-  }
-  case "!": {
-    const first = bindExpandedVPath(expandedVPath[1], contextLookup, contextState, "!0", 1);
-    if (expandedVPath.length === 2) return first;
-    if (first[0] === "§$") {
-      expandedVPath[0] = "§->";
-      expandedVPath[1] = first;
-      type = ".";
-      i = 2;
+      if (!contextValue) {
+        throw new Error(`Term operation '${value}' ${
+            contextValue === false ? "disabled" : "not found"} in the non-trivial context '${
+            contextTerm}'`);
+      }
+      if (typeof contextValue === "function") {
+        contextValue = contextValue(contextState, value, contextTerm);
+      }
+      if (Array.isArray(contextValue)) return contextValue;
+      value = contextValue;
+      contextValue = null;
     } else {
-      expandedVPath.splice(0, 2, ...first);
-      i = first.length;
+      expandedVPath[0] = "§:";
+      expandedVPath[2] = value;
+      value = expandedVPath;
     }
-    break;
   }
-  default:
-    if (type[0] === "!") expandedVPath[0] = `§${type.slice(1)}`;
-    else throw new Error(`unrecognized verb type: ${JSON.stringify(type)}`);
-    break;
+  switch (componentType) {
+  case "@":
+    // vgrid
+    return ["§ref", value];
+  case "!0": // first entry of a trivial resource valk
+    return ["§$", value];
+  case ".":
+    return ["§..", value]; // valospace native property
+  case ":":
+  default: // eslint-disable-line no-fallthrough
+    return value;
   }
-  for (; i !== expandedVPath.length; ++i) {
-    expandedVPath[i] = bindExpandedVPath(expandedVPath[i], contextLookup, contextState, type, i);
+}
+
+function _computation (expandedVPath, contextLookup, contextState, componentType) {
+  const first = bindExpandedVPath(expandedVPath[1], contextLookup, contextState, "!0", 1);
+  if (expandedVPath.length === 2) return first;
+  if (first[0] === "§$") {
+    expandedVPath[0] = "§->";
+    expandedVPath[1] = first;
+    return _expandRest(expandedVPath, contextLookup, contextState, ".", 2);
   }
-  return expandedVPath;
+  expandedVPath.splice(0, 2, ...first);
+  return _expandRest(expandedVPath, contextLookup, contextState, componentType, first.length);
+}
+
+function _namedCollection (expandedVPath, contextLookup, contextState, componentType) {
+  const nameParam = _tryAsNameParam(expandedVPath[1]);
+  const nameSelector = (nameParam != null)
+      && _pluralProperty(expandedVPath, contextLookup, contextState);
+  if (nameSelector && expandedVPath.length <= 2) return nameSelector;
+  let isSequence;
+  if (componentType[0] === "*") isSequence = true;
+  else if (componentType[0] !== "-") {
+    throw new Error(`Unrecognized named collection verb type ${componentType
+        } (must begin with "-" or "*")`);
+  }
+  if (expandedVPath.length > 2) {
+    _expandRest(expandedVPath, contextLookup, contextState, isSequence ? "*" : "-", 2);
+  }
+  expandedVPath.splice(0, 2, isSequence ? "§[]" : "§{}");
+  return !nameSelector ? expandedVPath
+      : isSequence ? ["§concat", nameSelector, expandedVPath]
+      : ["§append", ["§{}"], nameSelector, expandedVPath];
+}
+
+function _singularProperty (expandedVPath, contextLookup, contextState, componentType) {
+  const selector = _singularLookup[componentType];
+  if (expandedVPath.length > 1) {
+    throw new Error(`multi-param '${componentType}' selectors not allowed`);
+  }
+  return selector;
+  // ref("@valos/raem/VPath#section_structured_object_value")
+  /*
+    what was this?
+  return [
+    "§->",
+    ..._filterByFieldValue(object,
+        bindExpandedVPath(expandedVPath[1], contextLookup, contextState)),
+  ];
+  */
+}
+
+function _pluralProperty (expandedVPath, contextLookup, contextState, componentType) {
+  // ref("@valos/raem/VPath#section_structured_relation")
+  const field = _pluralLookup[componentType];
+  if (expandedVPath.length > 2) {
+    throw new Error(`multi-param '${field}' selectors not allowed`);
+  }
+  return ["§->", false, field,
+    ..._filterByFieldValue("name",
+        bindExpandedVPath(expandedVPath[1], contextLookup, contextState)),
+  ];
 }
 
 function _filterByFieldValue (fieldName, requiredValue) {

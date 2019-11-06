@@ -35,43 +35,76 @@ for various valos fabric config files.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">
     <h3>trivial combine</h3>
-<div><p><span class="vdoc type-vdoc-paragraph"><blockquote> combineRevelationsLazily(gatewayMock, { a: [1] }, { a: [2] })</blockquote>toEqual<blockquote>{
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node">
+      return combineRevelationsLazily(gatewayMock, {
+        a: [1]
+      }, {
+        a: [2]
+      });
+    }</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">{
   &#x22;a&#x22;: [
     1,
     2
   ]
-}</blockquote></span>
+}</span>
+</code></pre></blockquote></span>
 </p></div></span>
 
 </blockquote>
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">
     <h3>spread of a simple relative import</h3>
-<div><p><span class="vdoc type-vdoc-paragraph"><blockquote> combineRevelationsLazily(gatewayMock, {}, { &#x22;!!!&#x22;: &#x22;./path&#x22; })</blockquote>toEqual<blockquote>{
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node">
+      return combineRevelationsLazily(gatewayMock, {}, {
+        &#x22;!!!&#x22;: &#x22;./path&#x22;
+      });
+    }</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">{
   &#x22;requireKey&#x22;: &#x22;/site/revelation/path&#x22;,
   &#x22;someField&#x22;: 1
-}</blockquote></span>
+}</span>
+</code></pre></blockquote></span>
 </p></div></span>
 
 </blockquote>
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">
     <h3>spread of an explicit site root import followed by field access</h3>
-<div><p><span class="vdoc type-vdoc-paragraph"><blockquote> combineRevelationsLazily(gatewayMock, &#x22;&#x22;,
-            { &#x22;!!!&#x22;: [[&#x22;!$revela:import&#x22;, &#x22;/path&#x22;], &#x22;requireKey&#x22;] })</blockquote>toEqual<blockquote>&#x22;/site/path&#x22;</blockquote></span>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node">
+      return combineRevelationsLazily(gatewayMock, &#x22;&#x22;, {
+        &#x22;!!!&#x22;: [[&#x22;!$revela:import&#x22;, &#x22;/path&#x22;], &#x22;requireKey&#x22;]
+      });
+    }</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">&#x22;/site/path&#x22;</span>
+</code></pre></blockquote></span>
 </p></div></span>
 
 </blockquote>
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">
     <h3>spread of an implicit URI import followed by array creation</h3>
-<div><p><span class="vdoc type-vdoc-paragraph"><blockquote> combineRevelationsLazily(gatewayMock, [], { &#x22;!!!&#x22;: [
-          [&#x22;!$revela:import&#x22;, &#x22;&#x3C;https://foobar.com/path&#x3E;&#x22;],
-          [&#x22;fetchedField&#x22;, [&#x22;.:fetchOptions:input&#x22;]],
-        ] })</blockquote>toEqual<blockquote>[
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node">
+      return regeneratorRuntime.async(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              return _context.abrupt(&#x22;return&#x22;, combineRevelationsLazily(gatewayMock, [], {
+                &#x22;!!!&#x22;: [[&#x22;!$revela:import&#x22;, &#x22;&#x3C;https://foobar.com/path&#x3E;&#x22;], [&#x22;fetchedField&#x22;, [&#x22;.:fetchOptions:input&#x22;]]]
+              }));
+
+            case 1:
+            case &#x22;end&#x22;:
+              return _context.stop();
+          }
+        }
+      });
+    }</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">[
   1,
   &#x22;https://foobar.com/path&#x22;
-]</blockquote></span>
+]</span>
+</code></pre></blockquote></span>
 </p></div></span>
 
 </blockquote>

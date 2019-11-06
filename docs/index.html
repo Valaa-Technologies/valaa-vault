@@ -461,14 +461,14 @@ coupled field 'pairedOutRelations' is an event logged field).</td></tr>
 'pairedInRelations' is an event logged field).</td></tr>
         <tr id="pairedInRelations" class=" vdoc-nth-child-2n"><td><a href="#pairedInRelations" class="vdoc type-vdoc-reference"><em>pairedInRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:incomingRelations</td><td>valos:pairedTarget</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of incoming relations paired to this sourcered node.</td></tr>
-        <tr id="connectorSource"><td><a href="#connectorSource" class="vdoc type-vdoc-reference"><em>connectorSource</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:connectorvalos:pairedSource</td><td>valos:connectedOutRelations</td></tr>
+        <tr id="connectedSource"><td><a href="#connectedSource" class="vdoc type-vdoc-reference"><em>connectedSource</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:connectorvalos:pairedSource</td><td>valos:connectedOutRelations</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The source and also the connector node of this relation.</td></tr>
-        <tr id="connectedOutRelations" class=" vdoc-nth-child-2n"><td><a href="#connectedOutRelations" class="vdoc type-vdoc-reference"><em>connectedOutRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:connectedRelationsvalos:pairedOutRelations</td><td>valos:connectorSource</td></tr>
+        <tr id="connectedOutRelations" class=" vdoc-nth-child-2n"><td><a href="#connectedOutRelations" class="vdoc type-vdoc-reference"><em>connectedOutRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:connectedRelationsvalos:pairedOutRelations</td><td>valos:connectedSource</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of outgoing relations contained in (and owned by)
 this sourcered node.</td></tr>
-        <tr id="connectorTarget"><td><a href="#connectorTarget" class="vdoc type-vdoc-reference"><em>connectorTarget</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:connectorvalos:pairedTarget</td><td>valos:connectedInRelations</td></tr>
+        <tr id="connectedTarget"><td><a href="#connectedTarget" class="vdoc type-vdoc-reference"><em>connectedTarget</em></a></td><td>valos:Relation</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:connectorvalos:pairedTarget</td><td>valos:connectedInRelations</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The target and also the connector node of this relation.</td></tr>
-        <tr id="connectedInRelations" class=" vdoc-nth-child-2n"><td><a href="#connectedInRelations" class="vdoc type-vdoc-reference"><em>connectedInRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:connectedRelationsvalos:pairedInRelations</td><td>valos:connectorTarget</td></tr>
+        <tr id="connectedInRelations" class=" vdoc-nth-child-2n"><td><a href="#connectedInRelations" class="vdoc type-vdoc-reference"><em>connectedInRelations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:connectedRelationsvalos:pairedInRelations</td><td>valos:connectedTarget</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of incoming relations contained in (and owned by)
 this sourcered node.</td></tr>
         <tr id="relations"><td><a href="#relations" class="vdoc type-vdoc-reference"><em>relations</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:AliasField</td><td>valos:connectedRelations</td><td>valos:connector</td></tr>
@@ -565,9 +565,9 @@ source are completely separate concepts here).</td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:pairedOutRelations</td><td></td><td>https://valospace.org/#pairedOutRelations</td><td>@id</td><td>@list</td></tr>
         <tr><td>valos:pairedTarget</td><td></td><td>https://valospace.org/#pairedTarget</td><td>@id</td><td></td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:pairedInRelations</td><td></td><td>https://valospace.org/#pairedInRelations</td><td>@id</td><td>@list</td></tr>
-        <tr><td>valos:connectorSource</td><td></td><td>https://valospace.org/#connectorSource</td><td>@id</td><td></td></tr>
+        <tr><td>valos:connectedSource</td><td></td><td>https://valospace.org/#connectedSource</td><td>@id</td><td></td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:connectedOutRelations</td><td></td><td>https://valospace.org/#connectedOutRelations</td><td>@id</td><td>@list</td></tr>
-        <tr><td>valos:connectorTarget</td><td></td><td>https://valospace.org/#connectorTarget</td><td>@id</td><td></td></tr>
+        <tr><td>valos:connectedTarget</td><td></td><td>https://valospace.org/#connectedTarget</td><td>@id</td><td></td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:connectedInRelations</td><td></td><td>https://valospace.org/#connectedInRelations</td><td>@id</td><td>@list</td></tr>
         <tr><td>valos:relations</td><td></td><td>https://valospace.org/#relations</td><td>@id</td><td>@list</td></tr>
         <tr class=" vdoc-nth-child-2n"><td>valos:outgoingRelations</td><td></td><td>https://valospace.org/#outgoingRelations</td><td>@id</td><td>@list</td></tr>

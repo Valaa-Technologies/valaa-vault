@@ -570,68 +570,104 @@ of native source graph extractors.</span>
         <th class="vdoc type-vdoc-header">rdf:type</th>
       </thead>
       <tbody>
-        <tr><td>aggregate</td><td>function aggregate(parent, aggregatedField, ...aggregatees) {
-  if (!aggregatees.length) return parent;
-  const first = aggregatees[0];
-  let ret = parent, aggregatees_ = aggregatees;
-  if ((first != null) && (typeof first === "object") && !Array.isArray(first)) {
-    ret = Object.assign({}, first, parent);
-    aggregatees_ = (first[aggregatedField] == null) ? [] : [first[aggregatedField]];
+        <tr><td>aggregate</td><td>function aggregate(parent, aggregatedField) {
+  var _ref;
+
+  for (var _len = arguments.length, aggregatees = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+    aggregatees[_key - 2] = arguments[_key];
   }
-  const aggregated = [].concat(
-      (parent[aggregatedField] == null) ? [] : parent[aggregatedField],
-      ...aggregatees_);
+
+  if (!aggregatees.length) return parent;
+  var first = aggregatees[0];
+  var ret = parent,
+      aggregatees_ = aggregatees;
+
+  if (first != null && _typeof(first) === "object" && !Array.isArray(first)) {
+    ret = Object.assign({}, first, parent);
+    aggregatees_ = first[aggregatedField] == null ? [] : [first[aggregatedField]];
+  }
+
+  var aggregated = (_ref = []).concat.apply(_ref, [parent[aggregatedField] == null ? [] : parent[aggregatedField]].concat(_toConsumableArray(aggregatees_)));
+
   if (aggregated.length) ret[aggregatedField] = aggregated;
   return ret;
 }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>c</td><td>c(languageOrCharacters, charactersOrOptions, options) {
+        <tr class=" vdoc-nth-child-2n"><td>c</td><td>function c(languageOrCharacters, charactersOrOptions, options) {
+    return _objectSpread({
+      "@type": "vdoc:CharacterData"
+    }, typeof charactersOrOptions === "string" ? _objectSpread({
+      "vdoc:language": languageOrCharacters,
+      "vdoc:content": [charactersOrOptions]
+    }, options || {}) : _objectSpread({
+      "vdoc:content": [languageOrCharacters]
+    }, charactersOrOptions || {}));
+  }</td></tr>
+        <tr><td>bulleted</td><td>function bulleted() {
     return {
-      "@type": "vdoc:CharacterData",
-      ...(typeof charactersOrOptions === "string" ? {
-        "vdoc:language": languageOrCharacters,
-        "vdoc:content": [charactersOrOptions],
-        ...(options || {}),
-      } : {
-        "vdoc:content": [languageOrCharacters],
-        ...(charactersOrOptions || {}),
-      }),
+      "@type": "vdoc:BulletList",
+      "vdoc:entries": [].slice.call(arguments)
     };
   }</td></tr>
-        <tr><td>bulleted</td><td>bulleted() {
-    return { "@type": "vdoc:BulletList", "vdoc:entries": [].slice.call(arguments) };
+        <tr class=" vdoc-nth-child-2n"><td>numbered</td><td>function numbered() {
+    return {
+      "@type": "vdoc:NumberedList",
+      "vdoc:entries": [].slice.call(arguments)
+    };
   }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>numbered</td><td>numbered() {
-    return { "@type": "vdoc:NumberedList", "vdoc:entries": [].slice.call(arguments) };
+        <tr><td>ref</td><td>function ref(text) {
+    var ref_ = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : text;
+    return aggregate.apply(void 0, [{
+      "@type": "vdoc:Reference",
+      "vdoc:content": [text],
+      "vdoc:ref": ref_
+    }, "vdoc:content"].concat(_toConsumableArray([].slice.call(arguments, 2))));
   }</td></tr>
-        <tr><td>ref</td><td>ref(text, ref_ = text) {
-    return aggregate({
-      "@type": "vdoc:Reference", "vdoc:content": [text], "vdoc:ref": ref_,
-    }, "vdoc:content", ...[].slice.call(arguments, 2));
-  }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>identifize</td><td>identifize(str) {
+        <tr class=" vdoc-nth-child-2n"><td>identifize</td><td>function identifize(str) {
     return str.replace(/[^a-zA-Z0-9_]/g, "_");
   }</td></tr>
-        <tr><td>cpath</td><td>cpath(contextPath, contextBase) {
-    return {
+        <tr><td>cpath</td><td>function cpath(contextPath, contextBase) {
+    return _objectSpread({
       "@type": "vdoc:ContextPath",
-      "vdoc:content": [contextPath],
-      ...(contextBase !== undefined ? {
-        "vdoc:context": contextBase,
-      } : {}),
-    };
+      "vdoc:content": [contextPath]
+    }, contextBase !== undefined ? {
+      "vdoc:context": contextBase
+    } : {});
   }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>context</td><td>context(newContextPath, contextBase) {
-    return {
-      ...module.exports.cpath(newContextPath, contextBase),
-      "@type": "vdoc:ContextBase",
-    };
+        <tr class=" vdoc-nth-child-2n"><td>context</td><td>function context(newContextPath, contextBase) {
+    return _objectSpread({}, module.exports.cpath(newContextPath, contextBase), {
+      "@type": "vdoc:ContextBase"
+    });
   }</td></tr>
-        <tr><td>em</td><td>em() { return _htmlElement({ "vdoc:em": true }, arguments); }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>strong</td><td>strong() { return _htmlElement({ "vdoc:strong": true }, arguments); }</td></tr>
-        <tr><td>ins</td><td>ins() { return _htmlElement({ "vdoc:ins": true }, arguments); }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>del</td><td>del() { return _htmlElement({ "vdoc:del": true }, arguments); }</td></tr>
-        <tr><td>quote</td><td>quote() { return _htmlElement({ "vdoc:quote": true }, arguments); }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>blockquote</td><td>blockquote() { return _htmlElement({ "vdoc:blockquote": true }, arguments); }</td></tr>
+        <tr><td>em</td><td>function em() {
+    return _htmlElement({
+      "vdoc:em": true
+    }, arguments);
+  }</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>strong</td><td>function strong() {
+    return _htmlElement({
+      "vdoc:strong": true
+    }, arguments);
+  }</td></tr>
+        <tr><td>ins</td><td>function ins() {
+    return _htmlElement({
+      "vdoc:ins": true
+    }, arguments);
+  }</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>del</td><td>function del() {
+    return _htmlElement({
+      "vdoc:del": true
+    }, arguments);
+  }</td></tr>
+        <tr><td>quote</td><td>function quote() {
+    return _htmlElement({
+      "vdoc:quote": true
+    }, arguments);
+  }</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>blockquote</td><td>function blockquote() {
+    return _htmlElement({
+      "vdoc:blockquote": true
+    }, arguments);
+  }</td></tr>
       </tbody>
     </table>
 

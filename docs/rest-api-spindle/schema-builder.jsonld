@@ -1,0 +1,653 @@
+[
+  {
+    "@id": "https://valospace.org/rest-api-spindle/schema-builder",
+    "@context": {
+      "@base": "https://valospace.org/rest-api-spindle/schema-builder#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "vdoc": "https://valospace.org/vdoc#",
+      "vdoc:content": {
+        "@id": "https://valospace.org/vdoc#content",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/vdoc#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:headers": {
+        "@id": "https://valospace.org/vdoc#headers",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:cell": {
+        "@id": "https://valospace.org/vdoc#cell",
+        "@container": "@list",
+        "@type": "@id"
+      }
+    },
+    "dc:title": "REST API Schema Builder TestDoc",
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "restSchemaBuilder"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "REST API schema builder is a javascript library for generating the\nfull REST API spindle JSON schema mapping definition. This definition\nis specified using convenient types and routes which have the valospace\nprojections embedded as fine-grained VPaths."
+          ]
+        }
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This document is part of the spindle workspace ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/rest-api-spindle"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/rest-api-spindle"
+            },
+            "\n(of domain ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`A spindle for structured ValOS REST APIs`."
+          ]
+        }
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "dc:title": "Routes, types, and projections",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The three schema builder concepts are:"
+          ]
+        },
+        {
+          "@type": "vdoc:BulletList",
+          "vdoc:entries": [
+            [
+              "Types describe layouts of valospace resources and their properties.\n  These are used for GET result body contents, POST, PATCH and PUT\n  request body fields."
+            ],
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "Projections are VPaths embedded in the type schemas which define the\n  mappings into valospace resources. "
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "Routes define the traditional entry points and parameters. Primary\n  resource type gate injections are projections which define the\n  entry mappings to valospace resources."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "types": {
+      "@id": "types",
+      "dc:title": "Type schemas",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The main building block of is the object type schema. In JSON schema\nall object properties are listed under 'properties' field and all meta\nfields are outermost fields. Schema builder format for objects lists\nfields on the outside and properties inside the symbol field\n`[ObjectSchema]`. The schema expansion will then flip the type\ninside out to get the appropriate JSON schema layout."
+          ]
+        },
+        {
+          "@id": "example_simple_object"
+        },
+        {
+          "@id": "extending_schemas"
+        },
+        {
+          "@id": "resource_type_schemas"
+        },
+        {
+          "@id": "resource_type_references"
+        },
+        {
+          "@id": "mapping_schemas"
+        },
+        {
+          "@id": "complex_resource_type5"
+        }
+      ]
+    },
+    "example_simple_object": {
+      "@id": "example_simple_object",
+      "@type": "revdoc:Example",
+      "dc:title": "expanded schema of simple object type",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            [
+              "we expect",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      "\n      var _generateSchemaOf;\n\n      return generateSchemaOf((_generateSchemaOf = {}, _defineProperty(_generateSchemaOf, ObjectSchema, {\n        description: \"simple object type\",\n        valospace: {\n          projection: [\".:forwardedFields\"]\n        }\n      }), _defineProperty(_generateSchemaOf, \"name\", StringType), _generateSchemaOf));\n    }"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "toEqual",
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "\n      return {\n        description: \"simple object type\",\n        type: \"object\",\n        valospace: {\n          projection: [\".\", [\":\", \"forwardedFields\"]]\n        },\n        properties: {\n          name: {\n            type: \"string\"\n          }\n        }\n      };\n    }"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "extending_schemas": {
+      "@id": "extending_schemas",
+      "dc:title": "Extending schemas",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The schemas can also be extended using ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "extendType"
+              ]
+            },
+            ".\nThe extension is a nested merge and can accept multiple base types."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Here we extend a string type with a valospace projection path to the\nfield ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "@valos/kernel#name"
+              ],
+              "vdoc:ref": "@valos/kernel#name"
+            },
+            "."
+          ]
+        },
+        {
+          "@id": "example_schema_extension"
+        }
+      ]
+    },
+    "example_schema_extension": {
+      "@id": "example_schema_extension",
+      "@type": "revdoc:Example",
+      "dc:title": "expanded schema of an extended string",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            [
+              "we expect",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      "\n        return extendType(StringType, {\n          valospace: {\n            projection: [\".$V:name\"]\n          }\n        });\n      }"
+                    ]
+                  }
+                ]
+              }
+            ],
+            [
+              "via",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      "\n        return generateSchemaOf(type);\n      }"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "toEqual",
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "\n        return {\n          type: \"string\",\n          valospace: {\n            projection: [\".\", [\"$\", \"V\", \"name\"]]\n          }\n        };\n      }"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "resource_type_schemas": {
+      "@id": "resource_type_schemas",
+      "dc:title": "Shared resource type schemas",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Valospace resources can be named in addition to providing them base\ntypes they extend. A resource that is given a valospace gate are\nprimary resources which can be directly reached through ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "routes"
+              ],
+              "vdoc:ref": "#routes"
+            },
+            " via their injection path."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Schema builder provides a builtin object type `ResourceType`\nfor valospace resources with following JSON schema:",
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "{\n  \"$V\": {\n    \"id\": {\n      \"type\": \"string\",\n      \"pattern\": \"^[a-zA-Z0-9\\\\-_.~]+$\",\n      \"valospace\": {\n        \"projection\": [\n          \".$V:rawId\"\n        ]\n      }\n    }\n  }\n}"
+                  ]
+                }
+              ]
+            },
+            "\nThis type contains the basic valospace selector under the key $V\nwhich contains the resource 'id' field."
+          ]
+        },
+        {
+          "@id": "example_named_resources"
+        }
+      ]
+    },
+    "example_named_resources": {
+      "@id": "example_named_resources",
+      "@type": "revdoc:Example",
+      "dc:title": "expanded schema of a named resource",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            [
+              "we expect",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      "\n  var _namedResourceType;\n\n  return namedResourceType(\"TestTag\", [], (_namedResourceType = {}, _defineProperty(_namedResourceType, ObjectSchema, {\n    description: \"Test Tag resource\",\n    valospace: {\n      gate: {\n        name: \"tags\",\n        injection: [[\"out*:TAG\"], [\".$V:target\"]]\n      }\n    }\n  }), _defineProperty(_namedResourceType, \"name\", extendType(StringType, {\n    summary: \"Tag name\"\n  })), _namedResourceType));\n}"
+                    ]
+                  }
+                ]
+              }
+            ],
+            [
+              "via",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      "\n        return generateSchemaOf(type);\n      }"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "toEqual",
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "\n        return {\n          schemaName: \"TestTag\",\n          description: \"Test Tag resource\",\n          type: \"object\",\n          valospace: {\n            gate: {\n              name: \"tags\",\n              injection: [\"@\", [\"out*\", [\":\", \"TAG\"]], [\".\", [\"$\", \"V\", \"target\"]]]\n            }\n          },\n          properties: {\n            $V: {\n              type: \"object\",\n              properties: {\n                id: {\n                  pattern: \"^[a-zA-Z0-9\\\\-_.~]+$\",\n                  type: \"string\",\n                  valospace: {\n                    projection: [\".\", [\"$\", \"V\", \"rawId\"]]\n                  }\n                }\n              }\n            },\n            name: {\n              summary: \"Tag name\",\n              type: \"string\"\n            }\n          }\n        };\n      }"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "resource_type_references": {
+      "@id": "resource_type_references",
+      "dc:title": "Automatic substitution of shared type references",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The resource types are shared and can be referred to by their name\nwith a '#'-suffix in the JSON schema. Schema builder does this\nautomatically during schema generation."
+          ]
+        },
+        {
+          "@id": "example_named_schema_reference"
+        }
+      ]
+    },
+    "example_named_schema_reference": {
+      "@id": "example_named_schema_reference",
+      "@type": "revdoc:Example",
+      "dc:title": "expanded schema of a named type reference",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            [
+              "we expect",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      "\n        return {\n          tag: TestTagType\n        };\n      }"
+                    ]
+                  }
+                ]
+              }
+            ],
+            [
+              "via",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      "\n        return generateSchemaOf(type);\n      }"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "toEqual",
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "{\n  \"tag\": \"TestTag#\"\n}"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "mapping_schemas": {
+      "@id": "mapping_schemas",
+      "dc:title": "Mapping schemas",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "A mapping is group of ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "relations"
+              ],
+              "vdoc:ref": "@valos/kernel#Relation"
+            },
+            " originating from a resource with a common name. The mapping relations\ncan have properties and can be referred from the REST API also\nindividually: their identity (ie. 'primary key') of is the unique\ncombination of the mapping ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "source"
+              ],
+              "vdoc:ref": "@valos/kernel#source"
+            },
+            " resource and mapping ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "name"
+              ],
+              "vdoc:ref": "@valos/kernel#name"
+            },
+            " plus the\nindividual",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "target"
+              ],
+              "vdoc:ref": "@valos/kernel#target"
+            },
+            " resource."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The mappings in valospace are defined by a projection to a set of\nrelations. Here ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "mappingToMany"
+              ]
+            },
+            " defines a mapping 'tags'\ninto outgoing TAGS relations with a mapping property 'highlight' and\nwhere the target resource is a Tag type defined earlier."
+          ]
+        },
+        {
+          "@id": "example_mapping"
+        }
+      ]
+    },
+    "example_mapping": {
+      "@id": "example_mapping",
+      "@type": "revdoc:Example",
+      "dc:title": "expanded schema of a mapping property",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            [
+              "we expect",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      "\n        return mappingToManyOf(\"tags\", TestTagType, [\"out*:TAGS\"], {\n          highlight: BooleanType\n        });\n      }"
+                    ]
+                  }
+                ]
+              }
+            ],
+            [
+              "via",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      "\n        return generateSchemaOf(type);\n      }"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "toEqual",
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "\n        return {\n          type: \"array\",\n          valospace: {\n            mappingName: \"tags\",\n            projection: [\"out*\", [\":\", \"TAGS\"]]\n          },\n          items: {\n            type: \"object\",\n            properties: {\n              highlight: {\n                type: \"boolean\"\n              },\n              $V: {\n                type: \"object\",\n                properties: {\n                  href: {\n                    type: \"string\"\n                  },\n                  rel: {\n                    type: \"string\"\n                  }\n                },\n                valospace: {\n                  TargetType: \"TestTag#\"\n                }\n              }\n            }\n          }\n        };\n      }"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "complex_resource_type5": {
+      "@id": "complex_resource_type5",
+      "dc:title": "Putting a complex resource type together",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "A complex example which puts all together."
+          ]
+        },
+        {
+          "@id": "example_complex_resource_type"
+        }
+      ]
+    },
+    "example_complex_resource_type": {
+      "@id": "example_complex_resource_type",
+      "@type": "revdoc:Example",
+      "dc:title": "expanded schema of a complex resource type",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            [
+              "we expect",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      "\n  var _contact, _owned, _namedResourceType2;\n\n  return namedResourceType(\"TestThing\", [], (_namedResourceType2 = {}, _defineProperty(_namedResourceType2, ObjectSchema, {\n    valospace: {\n      gate: {\n        name: \"things\",\n        injection: [[\"out*:THING\"], [\".$V:target\"]]\n      },\n      projection: [\".:fields\"]\n    }\n  }), _defineProperty(_namedResourceType2, \"$V\", {\n    id: {\n      valospace: {\n        projection: [[\".$V:owner\"], [\".$V:rawId\"]]\n      }\n    }\n  }), _defineProperty(_namedResourceType2, \"name\", StringType), _defineProperty(_namedResourceType2, \"description\", StringType), _defineProperty(_namedResourceType2, \"visible\", BooleanType), _defineProperty(_namedResourceType2, \"contact\", (_contact = {}, _defineProperty(_contact, ObjectSchema, {}), _defineProperty(_contact, \"email\", EmailType), _defineProperty(_contact, \"facebook\", StringType), _defineProperty(_contact, \"linkedin\", StringType), _defineProperty(_contact, \"phone\", StringType), _defineProperty(_contact, \"website\", URIReferenceType), _contact)), _defineProperty(_namedResourceType2, \"owned\", (_owned = {}, _defineProperty(_owned, ObjectSchema, {// TODO: permission-based hiding.\n  }), _defineProperty(_owned, \"news\", function news() {\n    return mappingToManyOf(\"owned/news\", exports.TestNewsItemType, [[\".:owned\"], [\"out*:NEWSITEM\"]], {\n      highlight: BooleanType\n    });\n  }), _owned)), _defineProperty(_namedResourceType2, \"tags\", function tags() {\n    return mappingToManyOf(\"tags\", exports.TestTagType, [[\".:tags\"], [\"out*:TAG\"]], _defineProperty({}, ObjectSchema, {\n      valospace: {\n        filterable: true\n      }\n    }));\n  }), _defineProperty(_namedResourceType2, \"icon\", StringType), _defineProperty(_namedResourceType2, \"image\", extendType(StringType, {\n    valospace: {\n      projection: [\".$V:name\"]\n    }\n  })), _namedResourceType2));\n}"
+                    ]
+                  }
+                ]
+              }
+            ],
+            [
+              "via",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      "\n        return generateSchemaOf(type);\n      }"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "toEqual",
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    "\n        return {\n          schemaName: \"TestThing\",\n          type: \"object\",\n          valospace: {\n            gate: {\n              name: \"things\",\n              injection: [\"@\", [\"out*\", [\":\", \"THING\"]], [\".\", [\"$\", \"V\", \"target\"]]]\n            },\n            projection: [\".\", [\":\", \"fields\"]]\n          },\n          properties: {\n            $V: {\n              type: \"object\",\n              properties: {\n                id: {\n                  type: \"string\",\n                  pattern: \"^[a-zA-Z0-9\\\\-_.~]+$\",\n                  valospace: {\n                    projection: [\"@\", [\".\", [\"$\", \"V\", \"owner\"]], [\".\", [\"$\", \"V\", \"rawId\"]]]\n                  }\n                }\n              }\n            },\n            contact: {\n              email: {\n                type: \"string\"\n              },\n              facebook: {\n                type: \"string\"\n              },\n              linkedin: {\n                type: \"string\"\n              },\n              phone: {\n                type: \"string\"\n              },\n              website: {\n                type: \"string\"\n              }\n            },\n            description: {\n              type: \"string\"\n            },\n            icon: {\n              type: \"string\"\n            },\n            image: {\n              type: \"string\",\n              valospace: {\n                projection: [\".\", [\"$\", \"V\", \"name\"]]\n              }\n            },\n            name: {\n              type: \"string\"\n            },\n            owned: {\n              news: {\n                type: \"array\",\n                valospace: {\n                  mappingName: \"owned/news\",\n                  projection: [\"@\", [\".\", [\":\", \"owned\"]], [\"out*\", [\":\", \"NEWSITEM\"]]]\n                },\n                items: {\n                  type: \"object\",\n                  properties: {\n                    $V: {\n                      type: \"object\",\n                      valospace: {\n                        TargetType: \"TestNewsItem#\"\n                      },\n                      properties: {\n                        href: {\n                          type: \"string\"\n                        },\n                        rel: {\n                          type: \"string\"\n                        }\n                      }\n                    },\n                    highlight: {\n                      type: \"boolean\"\n                    }\n                  }\n                }\n              }\n            },\n            tags: {\n              type: \"array\",\n              valospace: {\n                mappingName: \"tags\",\n                projection: [\"@\", [\".\", [\":\", \"tags\"]], [\"out*\", [\":\", \"TAG\"]]]\n              },\n              items: {\n                type: \"object\",\n                valospace: {\n                  filterable: true\n                },\n                properties: {\n                  $V: {\n                    type: \"object\",\n                    valospace: {\n                      TargetType: \"TestTag#\"\n                    },\n                    properties: {\n                      href: {\n                        type: \"string\"\n                      },\n                      rel: {\n                        type: \"string\"\n                      }\n                    }\n                  }\n                }\n              }\n            },\n            visible: {\n              type: \"boolean\"\n            }\n          }\n        };\n      }"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "@type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "types"
+      }
+    ]
+  }
+]

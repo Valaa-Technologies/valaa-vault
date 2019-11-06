@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>REST API Schema Builder TestDoc</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"restSchemaBuilder"};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body class="vdoc vdoc-body">
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">REST API schema builder is a javascript library for generating the
+full REST API spindle JSON schema mapping definition. This definition
+is specified using convenient types and routes which have the valospace
+projections embedded as fine-grained VPaths.</span>
+</p></div>
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document is part of the spindle workspace <a href="https://valospace.org/rest-api-spindle" class="vdoc type-revdoc-package"><em>@valos/rest-api-spindle</em></a>
+(of domain <a href="@valos/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which has the description:
+&#x60;A spindle for structured ValOS REST APIs&#x60;.</span>
+</p></div>
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#introduction">§ </a>Routes, types, and projections</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">The three schema builder concepts are:</span>
+</p></div>
+    <ul>
+      <li>Types describe layouts of valospace resources and their properties.
+  These are used for GET result body contents, POST, PATCH and PUT
+  request body fields.</li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">Projections are VPaths embedded in the type schemas which define the
+  mappings into valospace resources. </span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">Routes define the traditional entry points and parameters. Primary
+  resource type gate injections are projections which define the
+  entry mappings to valospace resources.</span>
+</p></div></li>
+    </ul>
+
+  </section>
+
+  <section id="types" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#types">§ </a>Type schemas</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">The main building block of is the object type schema. In JSON schema
+all object properties are listed under &#x27;properties&#x27; field and all meta
+fields are outermost fields. Schema builder format for objects lists
+fields on the outside and properties inside the symbol field
+&#x60;[ObjectSchema]&#x60;. The schema expansion will then flip the type
+inside out to get the appropriate JSON schema layout.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_simple_object" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_simple_object">§ </a>expanded schema of simple object type</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node">
+      var _generateSchemaOf;
+
+      return generateSchemaOf((_generateSchemaOf = {}, _defineProperty(_generateSchemaOf, ObjectSchema, {
+        description: &#x22;simple object type&#x22;,
+        valospace: {
+          projection: [&#x22;.:forwardedFields&#x22;]
+        }
+      }), _defineProperty(_generateSchemaOf, &#x22;name&#x22;, StringType), _generateSchemaOf));
+    }</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">
+      return {
+        description: &#x22;simple object type&#x22;,
+        type: &#x22;object&#x22;,
+        valospace: {
+          projection: [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;forwardedFields&#x22;]]
+        },
+        properties: {
+          name: {
+            type: &#x22;string&#x22;
+          }
+        }
+      };
+    }</span>
+</code></pre></blockquote></span>
+</p></div></span>
+
+</blockquote>
+  <section id="extending_schemas" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#extending_schemas">§ </a>Extending schemas</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">The schemas can also be extended using <em>extendType</em>.
+The extension is a nested merge and can accept multiple base types.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Here we extend a string type with a valospace projection path to the
+field <a href="@valos/kernel#name" class="vdoc type-vdoc-reference">@valos/kernel#name</a>.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_schema_extension" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_schema_extension">§ </a>expanded schema of an extended string</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node">
+        return extendType(StringType, {
+          valospace: {
+            projection: [&#x22;.$V:name&#x22;]
+          }
+        });
+      }</span>
+</code></pre></blockquote>via<blockquote><pre><code><span class="vdoc type-vdoc-node">
+        return generateSchemaOf(type);
+      }</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">
+        return {
+          type: &#x22;string&#x22;,
+          valospace: {
+            projection: [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;name&#x22;]]
+          }
+        };
+      }</span>
+</code></pre></blockquote></span>
+</p></div></span>
+
+</blockquote>
+  </section>
+
+  <section id="resource_type_schemas" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#resource_type_schemas">§ </a>Shared resource type schemas</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">Valospace resources can be named in addition to providing them base
+types they extend. A resource that is given a valospace gate are
+primary resources which can be directly reached through <a href="#routes" class="vdoc type-vdoc-reference">routes</a> via their injection path.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Schema builder provides a builtin object type &#x60;ResourceType&#x60;
+for valospace resources with following JSON schema:<blockquote><pre><code><span class="vdoc type-vdoc-node">{
+  &#x22;$V&#x22;: {
+    &#x22;id&#x22;: {
+      &#x22;type&#x22;: &#x22;string&#x22;,
+      &#x22;pattern&#x22;: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
+      &#x22;valospace&#x22;: {
+        &#x22;projection&#x22;: [
+          &#x22;.$V:rawId&#x22;
+        ]
+      }
+    }
+  }
+}</span>
+</code></pre></blockquote>
+This type contains the basic valospace selector under the key $V
+which contains the resource &#x27;id&#x27; field.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_named_resources" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_named_resources">§ </a>expanded schema of a named resource</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node">
+  var _namedResourceType;
+
+  return namedResourceType(&#x22;TestTag&#x22;, [], (_namedResourceType = {}, _defineProperty(_namedResourceType, ObjectSchema, {
+    description: &#x22;Test Tag resource&#x22;,
+    valospace: {
+      gate: {
+        name: &#x22;tags&#x22;,
+        injection: [[&#x22;out*:TAG&#x22;], [&#x22;.$V:target&#x22;]]
+      }
+    }
+  }), _defineProperty(_namedResourceType, &#x22;name&#x22;, extendType(StringType, {
+    summary: &#x22;Tag name&#x22;
+  })), _namedResourceType));
+}</span>
+</code></pre></blockquote>via<blockquote><pre><code><span class="vdoc type-vdoc-node">
+        return generateSchemaOf(type);
+      }</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">
+        return {
+          schemaName: &#x22;TestTag&#x22;,
+          description: &#x22;Test Tag resource&#x22;,
+          type: &#x22;object&#x22;,
+          valospace: {
+            gate: {
+              name: &#x22;tags&#x22;,
+              injection: [&#x22;@&#x22;, [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]]
+            }
+          },
+          properties: {
+            $V: {
+              type: &#x22;object&#x22;,
+              properties: {
+                id: {
+                  pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
+                  type: &#x22;string&#x22;,
+                  valospace: {
+                    projection: [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]]
+                  }
+                }
+              }
+            },
+            name: {
+              summary: &#x22;Tag name&#x22;,
+              type: &#x22;string&#x22;
+            }
+          }
+        };
+      }</span>
+</code></pre></blockquote></span>
+</p></div></span>
+
+</blockquote>
+  </section>
+
+  <section id="resource_type_references" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#resource_type_references">§ </a>Automatic substitution of shared type references</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">The resource types are shared and can be referred to by their name
+with a &#x27;#&#x27;-suffix in the JSON schema. Schema builder does this
+automatically during schema generation.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_named_schema_reference" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_named_schema_reference">§ </a>expanded schema of a named type reference</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node">
+        return {
+          tag: TestTagType
+        };
+      }</span>
+</code></pre></blockquote>via<blockquote><pre><code><span class="vdoc type-vdoc-node">
+        return generateSchemaOf(type);
+      }</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">{
+  &#x22;tag&#x22;: &#x22;TestTag#&#x22;
+}</span>
+</code></pre></blockquote></span>
+</p></div></span>
+
+</blockquote>
+  </section>
+
+  <section id="mapping_schemas" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#mapping_schemas">§ </a>Mapping schemas</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">A mapping is group of <a href="@valos/kernel#Relation" class="vdoc type-vdoc-reference">relations</a> originating from a resource with a common name. The mapping relations
+can have properties and can be referred from the REST API also
+individually: their identity (ie. &#x27;primary key&#x27;) of is the unique
+combination of the mapping <a href="@valos/kernel#source" class="vdoc type-vdoc-reference">source</a> resource and mapping <a href="@valos/kernel#name" class="vdoc type-vdoc-reference">name</a> plus the
+individual<a href="@valos/kernel#target" class="vdoc type-vdoc-reference">target</a> resource.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The mappings in valospace are defined by a projection to a set of
+relations. Here <em>mappingToMany</em> defines a mapping &#x27;tags&#x27;
+into outgoing TAGS relations with a mapping property &#x27;highlight&#x27; and
+where the target resource is a Tag type defined earlier.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_mapping" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_mapping">§ </a>expanded schema of a mapping property</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node">
+        return mappingToManyOf(&#x22;tags&#x22;, TestTagType, [&#x22;out*:TAGS&#x22;], {
+          highlight: BooleanType
+        });
+      }</span>
+</code></pre></blockquote>via<blockquote><pre><code><span class="vdoc type-vdoc-node">
+        return generateSchemaOf(type);
+      }</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">
+        return {
+          type: &#x22;array&#x22;,
+          valospace: {
+            mappingName: &#x22;tags&#x22;,
+            projection: [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAGS&#x22;]]
+          },
+          items: {
+            type: &#x22;object&#x22;,
+            properties: {
+              highlight: {
+                type: &#x22;boolean&#x22;
+              },
+              $V: {
+                type: &#x22;object&#x22;,
+                properties: {
+                  href: {
+                    type: &#x22;string&#x22;
+                  },
+                  rel: {
+                    type: &#x22;string&#x22;
+                  }
+                },
+                valospace: {
+                  TargetType: &#x22;TestTag#&#x22;
+                }
+              }
+            }
+          }
+        };
+      }</span>
+</code></pre></blockquote></span>
+</p></div></span>
+
+</blockquote>
+  </section>
+
+  <section id="complex_resource_type5" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#complex_resource_type5">§ </a>Putting a complex resource type together</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">A complex example which puts all together.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_complex_resource_type" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_complex_resource_type">§ </a>expanded schema of a complex resource type</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node">
+  var _contact, _owned, _namedResourceType2;
+
+  return namedResourceType(&#x22;TestThing&#x22;, [], (_namedResourceType2 = {}, _defineProperty(_namedResourceType2, ObjectSchema, {
+    valospace: {
+      gate: {
+        name: &#x22;things&#x22;,
+        injection: [[&#x22;out*:THING&#x22;], [&#x22;.$V:target&#x22;]]
+      },
+      projection: [&#x22;.:fields&#x22;]
+    }
+  }), _defineProperty(_namedResourceType2, &#x22;$V&#x22;, {
+    id: {
+      valospace: {
+        projection: [[&#x22;.$V:owner&#x22;], [&#x22;.$V:rawId&#x22;]]
+      }
+    }
+  }), _defineProperty(_namedResourceType2, &#x22;name&#x22;, StringType), _defineProperty(_namedResourceType2, &#x22;description&#x22;, StringType), _defineProperty(_namedResourceType2, &#x22;visible&#x22;, BooleanType), _defineProperty(_namedResourceType2, &#x22;contact&#x22;, (_contact = {}, _defineProperty(_contact, ObjectSchema, {}), _defineProperty(_contact, &#x22;email&#x22;, EmailType), _defineProperty(_contact, &#x22;facebook&#x22;, StringType), _defineProperty(_contact, &#x22;linkedin&#x22;, StringType), _defineProperty(_contact, &#x22;phone&#x22;, StringType), _defineProperty(_contact, &#x22;website&#x22;, URIReferenceType), _contact)), _defineProperty(_namedResourceType2, &#x22;owned&#x22;, (_owned = {}, _defineProperty(_owned, ObjectSchema, {// TODO: permission-based hiding.
+  }), _defineProperty(_owned, &#x22;news&#x22;, function news() {
+    return mappingToManyOf(&#x22;owned/news&#x22;, exports.TestNewsItemType, [[&#x22;.:owned&#x22;], [&#x22;out*:NEWSITEM&#x22;]], {
+      highlight: BooleanType
+    });
+  }), _owned)), _defineProperty(_namedResourceType2, &#x22;tags&#x22;, function tags() {
+    return mappingToManyOf(&#x22;tags&#x22;, exports.TestTagType, [[&#x22;.:tags&#x22;], [&#x22;out*:TAG&#x22;]], _defineProperty({}, ObjectSchema, {
+      valospace: {
+        filterable: true
+      }
+    }));
+  }), _defineProperty(_namedResourceType2, &#x22;icon&#x22;, StringType), _defineProperty(_namedResourceType2, &#x22;image&#x22;, extendType(StringType, {
+    valospace: {
+      projection: [&#x22;.$V:name&#x22;]
+    }
+  })), _namedResourceType2));
+}</span>
+</code></pre></blockquote>via<blockquote><pre><code><span class="vdoc type-vdoc-node">
+        return generateSchemaOf(type);
+      }</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">
+        return {
+          schemaName: &#x22;TestThing&#x22;,
+          type: &#x22;object&#x22;,
+          valospace: {
+            gate: {
+              name: &#x22;things&#x22;,
+              injection: [&#x22;@&#x22;, [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;THING&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]]
+            },
+            projection: [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;fields&#x22;]]
+          },
+          properties: {
+            $V: {
+              type: &#x22;object&#x22;,
+              properties: {
+                id: {
+                  type: &#x22;string&#x22;,
+                  pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
+                  valospace: {
+                    projection: [&#x22;@&#x22;, [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;owner&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]]]
+                  }
+                }
+              }
+            },
+            contact: {
+              email: {
+                type: &#x22;string&#x22;
+              },
+              facebook: {
+                type: &#x22;string&#x22;
+              },
+              linkedin: {
+                type: &#x22;string&#x22;
+              },
+              phone: {
+                type: &#x22;string&#x22;
+              },
+              website: {
+                type: &#x22;string&#x22;
+              }
+            },
+            description: {
+              type: &#x22;string&#x22;
+            },
+            icon: {
+              type: &#x22;string&#x22;
+            },
+            image: {
+              type: &#x22;string&#x22;,
+              valospace: {
+                projection: [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;name&#x22;]]
+              }
+            },
+            name: {
+              type: &#x22;string&#x22;
+            },
+            owned: {
+              news: {
+                type: &#x22;array&#x22;,
+                valospace: {
+                  mappingName: &#x22;owned/news&#x22;,
+                  projection: [&#x22;@&#x22;, [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;owned&#x22;]], [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;NEWSITEM&#x22;]]]
+                },
+                items: {
+                  type: &#x22;object&#x22;,
+                  properties: {
+                    $V: {
+                      type: &#x22;object&#x22;,
+                      valospace: {
+                        TargetType: &#x22;TestNewsItem#&#x22;
+                      },
+                      properties: {
+                        href: {
+                          type: &#x22;string&#x22;
+                        },
+                        rel: {
+                          type: &#x22;string&#x22;
+                        }
+                      }
+                    },
+                    highlight: {
+                      type: &#x22;boolean&#x22;
+                    }
+                  }
+                }
+              }
+            },
+            tags: {
+              type: &#x22;array&#x22;,
+              valospace: {
+                mappingName: &#x22;tags&#x22;,
+                projection: [&#x22;@&#x22;, [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;tags&#x22;]], [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]]]
+              },
+              items: {
+                type: &#x22;object&#x22;,
+                valospace: {
+                  filterable: true
+                },
+                properties: {
+                  $V: {
+                    type: &#x22;object&#x22;,
+                    valospace: {
+                      TargetType: &#x22;TestTag#&#x22;
+                    },
+                    properties: {
+                      href: {
+                        type: &#x22;string&#x22;
+                      },
+                      rel: {
+                        type: &#x22;string&#x22;
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            visible: {
+              type: &#x22;boolean&#x22;
+            }
+          }
+        };
+      }</span>
+</code></pre></blockquote></span>
+</p></div></span>
+
+</blockquote>
+  </section>
+
+  </section>
+
+  </body>
+</html>

@@ -27,6 +27,8 @@
     ".valma-configure_.domain_@valos_kernel": "valma/configure/domain__kernel.js"
   },
   "dependencies": {
+    "@valos/raem": "^0.35.0-prerelease.13",
+    "@valos/type-domain": "^0.35.0-prerelease.13",
     "valma": "^0.35.0-prerelease.13"
   },
   "devDependencies": {

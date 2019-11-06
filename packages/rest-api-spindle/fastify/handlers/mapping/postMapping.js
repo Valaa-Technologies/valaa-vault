@@ -7,9 +7,9 @@ import { _createToMappingsParts, _resolveMappingResource } from "./_mappingHandl
 
 export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    requiredRules: ["routeRoot", "resource", "createResourceAndMapping"],
+    requiredRules: ["routeRoot", "resource", "doCreateMappingAndTarget"],
     rules: {
-      mappingName: route && route.config.mapping.name,
+      mappingName: route && route.config.relation.name,
     },
 
     prepare (/* fastify */) {
@@ -31,30 +31,32 @@ export default function createRouter (mapper: MapperService, route: Route) {
     },
 
     handler (request, reply) {
-      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      mapper.infoEvent(1, () => [
-        `${this.name}:`, scope.resourceId, scope.mappingName,
-        "\n\trequest.query:", request.query,
-        "\n\trequest.body:", request.body,
-      ]);
-      if (!scope.createResourceAndMapping) {
+      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const scope = valkOptions.scope;
+      if (!scope.doCreateMappingAndTarget) {
         reply.code(405);
-        reply.send(`${this.name} is disabled: no configuration for resource and mapping creation`);
+        reply.send(`${this.name} is disabled: no 'doCreateMappingAndTarget' rule`);
         return true;
       }
       const targetName = ((request.body.$V || {}).target || {}).name;
-
+      mapper.infoEvent(1, () => [
+        `${this.name}:`, ...dumpObject(scope.resource),
+        `\n\t${scope.mappingName} new target name:`, ...dumpObject(targetName),
+        "\n\trequest.query:", request.query,
+        "\n\trequest.body:", request.body,
+      ]);
       if (typeof targetName !== "string") {
         reply.code(400);
-        reply.send(`Required body.$V.target.name string field is missing or malformed`);
+        reply.send(`Required body.$V.target.name field is missing or is not a string`);
         return true;
       }
 
       if (_resolveMappingResource(mapper, route, request, reply, scope)) return true;
 
       const wrap = new Error(`mapping POST ${route.url}`);
-      const discourse = undefined; // mapper.getDiscourse().acquireFabricator();
-      return thenChainEagerly(discourse, [
+      valkOptions.route = route;
+      valkOptions.discourse = mapper.getDiscourse().acquireFabricator();
+      return thenChainEagerly(scope.resource, [
         () => {
           scope.source = !this.toSource
               ? scope.resource
@@ -71,15 +73,14 @@ export default function createRouter (mapper: MapperService, route: Route) {
           scope.target = mapper.updateResource(vMapping, request.body.$V.target,
               { discourse, scope, route, toPatchTarget: this.toPatchTarget });
         },
-        () => discourse && discourse.releaseFabricator(),
-        eventResult => eventResult
-            && eventResult.getPersistedEvent(),
+        () => valkOptions.discourse && valkOptions.discourse.releaseFabricator(),
+        eventResult => eventResult && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
           const targetId = scope.mapping.get("target").getRawId();
           const results = {
             $V: {
-              href: `${mapper.getResourceHRefPrefix(route.config.resource.schema)}${
-                scope.resourceId}/${scope.mappingName}/${targetId}`,
+              href: `${mapper.getResourceHRefPrefix(route.config.resource.schema)
+                }${scope.resource.getRawId()}/${scope.mappingName}/${targetId}`,
               rel: "self",
               target: { $V: {
                 href: `${mapper.getResourceHRefPrefix(route.config.target.schema)}${targetId}`,
@@ -96,7 +97,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
           return true;
         },
       ], (error) => {
-        if (discourse) discourse.releaseFabricator({ abort: error });
+        if (valkOptions.discourse) valkOptions.discourse.releaseFabricator({ abort: error });
         throw mapper.wrapErrorEvent(error, wrap,
             "\n\trequest.query:", ...dumpObject(request.query),
             "\n\trequest.body:", ...dumpObject(request.body),

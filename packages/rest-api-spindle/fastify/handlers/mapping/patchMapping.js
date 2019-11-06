@@ -7,9 +7,9 @@ import { _createTargetedToMappingFields, _resolveMappingResource } from "./_mapp
 
 export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    requiredRules: ["routeRoot", "resource", "target", "createMapping"],
+    requiredRules: ["routeRoot", "resource", "target", "doCreateMapping"],
     rules: {
-      mappingName: route && route.config.mapping.name,
+      mappingName: route && route.config.relation.name,
     },
 
     prepare (/* fastify */) {
@@ -26,12 +26,19 @@ export default function createRouter (mapper: MapperService, route: Route) {
     },
 
     handler (request, reply) {
-      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const scope = valkOptions.scope;
       mapper.infoEvent(1, () => [
-        `${this.name}:`, scope.resourceId, scope.mappingName, scope.targetId,
+        `${this.name}:`, ...dumpObject(scope.resource),
+        `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),
+        `\n\ttarget:`, ...dumpObject(scope.target),
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
       ]);
+      if (!scope.mapping && !scope.doCreateMapping) {
+        reply.code(405);
+        reply.send(`${this.name} is disabled: no doCreateMapping configured`);
+        return true;
       if (_resolveMappingResource(mapper, route, request, reply, scope)) return true;
       const vExistingMapping = scope.resource.get(this.toMapping, { scope });
       if (!vExistingMapping) {
@@ -47,9 +54,11 @@ export default function createRouter (mapper: MapperService, route: Route) {
           return true;
         }
       }
+
       const wrap = new Error(this.name);
-      const discourse = mapper.getDiscourse().acquireFabricator();
-      return thenChainEagerly(discourse, [
+      valkOptions.route = route;
+      valkOptions.discourse = mapper.getDiscourse().acquireFabricator();
+      return thenChainEagerly(scope.resource, [
         () => {
           if (vExistingMapping) return vExistingMapping;
           // vSource is not needed if the mapping was found already
@@ -59,25 +68,24 @@ export default function createRouter (mapper: MapperService, route: Route) {
           // and explicit instantiate.
           return scope.serviceIndex.do(scope.createMapping, { discourse, scope });
         },
-        vMapping => mapper.updateResource((scope.mapping = vMapping), request.body,
-            { discourse, scope, route }),
-        () => discourse.releaseFabricator(),
+        vMapping => mapper.updateResource((scope.mapping = vMapping), request.body, valkOptions),
+        () => valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult
             && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
           const results = {
             $V: {
               href: `${mapper.getResourceHRefPrefix(route.config.resource.schema)}${
-                scope.resourceId}/${scope.mappingName}/${scope.targetId}`,
+                scope.resource.getRawId()}/${scope.mappingName}/${scope.target.getRawId()}`,
               rel: "self",
               target: { $V: {
                 href: `${mapper.getResourceHRefPrefix(route.config.target.schema)}${
-                  scope.targetId}`,
+                  scope.target.getRawId()}`,
                 rel: "self",
               } },
             }
           };
-          reply.code(vExistingMapping ? 200 : 201);
+          reply.code(scope.mapping ? 200 : 201);
           reply.send(JSON.stringify(results, null, 2));
           mapper.infoEvent(2, () => [
             `${this.name}:`,
@@ -86,7 +94,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
           return true;
         },
       ], (error) => {
-        discourse.releaseFabricator({ abort: error });
+        valkOptions.discourse.releaseFabricator({ abort: error });
         throw mapper.wrapErrorEvent(error, wrap,
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\trequest.body:", ...dumpObject(request.body),

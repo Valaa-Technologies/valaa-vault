@@ -76,7 +76,15 @@ export default function createRouter (mapper: MapperService, route: Route) {
     },
 
     handler (request, reply) {
-      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const scope = valkOptions.scope;
+      mapper.infoEvent(1, () => [
+        `${this.name}:`,
+        "\n\trequest.query:", ...dumpObject(request.query),
+        "\n\troute.config:", ...dumpObject(route.config),
+        "\n\troute.schema.response[200]:", ...dumpObject(route.schema.response[200]),
+        "\n\ttoSuccessBodyFields:", ...dumpObject(this.toSuccessBodyFields),
+      ]);
       const {
         filter, // unimplemented
         sort, offset, limit, ids,
@@ -85,16 +93,8 @@ export default function createRouter (mapper: MapperService, route: Route) {
         // Relies on schema validation to reject garbage params.
         ...fieldRequirements
       } = request.query;
-      mapper.infoEvent(1, () => [
-        `${this.name}:`,
-        "\n\trequest.query:", request.query,
-        "\n\troute.schema.response[200]:", ...dumpObject(route.schema.response[200]),
-        "\n\tkuery:", ...dumpObject(this.toListingFields),
-        "\n\troute.config:", ...dumpObject(route.config),
-      ]);
-      if (_verifyResourceAuthorization(mapper, route, request, reply, scope)) return true;
-      return thenChainEagerly(scope.indexRoot, [
-        vIndexRoot => vIndexRoot.get(this.toListingFields, { scope }),
+      return thenChainEagerly(scope.routeRoot, [
+        vRouteRoot => vRouteRoot.get(this.toSuccessBodyFields, valkOptions),
         (filter || ids || Object.keys(fieldRequirements).length)
             && (results => mapper.filterResults(results, filter, ids, fieldRequirements)),
         (sort)

@@ -10,15 +10,15 @@ export function _buildSchemaKuery (routeMapper, jsonSchema, outerKuery, innerKue
     return outerKuery;
   }
   if (jsonSchema.type === "array") {
-    if (!innerKuery) {
-      throw new Error("json schema valos predicate missing with json schema type 'array'");
+    if (!innerTargetVAKON) {
+      throw new Error("json schema valospace vpath missing with json schema type 'array'");
     }
     routeMapper.buildSchemaKuery(jsonSchema.items, innerKuery);
   } else if (jsonSchema.type === "object") {
     const objectKuery = {};
     Object.entries(jsonSchema.properties).forEach(([key, valueSchema]) => {
       let op;
-      if (isValOSFields && ((valueSchema.valospace || {}).toValue === undefined)) {
+      if (isValOSFields && ((valueSchema.valospace || {}).projection === undefined)) {
         if (key === "href") {
           op = ["§->", "target", false, "rawId",
             ["§+", _getResourceHRefPrefix(routeMapper, jsonSchema), ["§->", null]]
@@ -31,33 +31,32 @@ export function _buildSchemaKuery (routeMapper, jsonSchema, outerKuery, innerKue
         op = routeMapper.buildSchemaKuery(valueSchema);
         op = (op.length === 1) ? ["§..", key]
             : ((valueSchema.type === "array")
-                || (valueSchema.valospace || {}).toValue !== undefined) ? op
+                || (valueSchema.valospace || {}).projection !== undefined) ? op
             : ["§->", ["§..", key], false, ...op.slice(1)];
       }
       objectKuery[key] = op;
     });
-    (innerKuery || outerKuery).push(objectKuery);
+    (innerTargetVAKON || targetVAKON).push(objectKuery);
   }
-  return outerKuery;
+  return targetVAKON;
 }
 
 export function _getResourceHRefPrefix (routeMapper, jsonSchema) {
-  const routeName = ((jsonSchema.valospace || {}).route || {}).name;
+  const routeName = ((jsonSchema.valospace || {}).gate || {}).name;
   if (typeof routeName !== "string") {
-    throw new Error("href requested without json schema valos route.name");
+    throw new Error("href requested of a resource without a valospace.gate.name");
   }
   return path.join("/", routeMapper.getRoutePrefix(), routeName, "/");
 }
 
-export function _resolveSchemaName (routeMapper, maybeSchemaName) {
-  if (typeof maybeSchemaName !== "string") return maybeSchemaName;
-  if (maybeSchemaName[(maybeSchemaName.length || 1) - 1] !== "#") {
-    throw new Error(
-        `String without '#' suffix is not a valid shared schema name: "${maybeSchemaName}"`);
+export function _derefSchema (routeMapper, schemaOrSchemaName) {
+  if (typeof maybeSchemaName !== "string") return schemaOrSchemaName;
+  if (schemaOrSchemaName[(schemaOrSchemaName.length || 1) - 1] !== "#") {
+    throw new Error(`Invalid shared schema name: "${schemaOrSchemaName}" is missing '#'-suffix`);
   }
-  const sharedSchema = routeMapper._fastify.getSchemas()[maybeSchemaName.slice(0, -1)];
+  const sharedSchema = routeMapper._fastify.getSchemas()[schemaOrSchemaName.slice(0, -1)];
   if (!sharedSchema) {
-    throw new Error(`Can't resolve shared schema "${maybeSchemaName}"`);
+    throw new Error(`Can't resolve shared schema "${schemaOrSchemaName}"`);
   }
   return sharedSchema;
 }

@@ -15,10 +15,10 @@ const _normalizeAlg = Object.assign(Object.create(null), {
   "aes-256-gcm": "aes-256-gcm",
 });
 
-export function verifySessionAuthorization (service, route, request, reply, scope: Object,
-    accessRoot: Vrapper) {
+export function verifySessionAuthorization (
+    routeMapper, route, scope: Object, accessRoot: Vrapper) {
   try {
-    const identity = service.getIdentity();
+    const identity = routeMapper.getIdentity();
     if (!identity) {
       throw new Error("Cannot verify session authorization: valosheath identity not configured");
     }
@@ -28,17 +28,18 @@ export function verifySessionAuthorization (service, route, request, reply, scop
     if ((rights == null) || !rights.length) {
       if (route.method === "GET") return false;
     } else {
-      const accessToken = request.cookies[identity.getSessionCookieName()];
+      const accessToken = scope.request.cookies[identity.getSessionCookieName()];
       let timeStamp, identityPartition;
       if (accessToken) {
         ({ identityPartition, timeStamp } =
             burlaesgDecode(accessToken, identity.clientSecret).payload);
-        if (!(Math.floor(Date.now() / 1000) < Number(timeStamp) + service.getSessionDuration())) {
+        if (!(Math.floor(Date.now() / 1000)
+            < Number(timeStamp) + routeMapper.getSessionDuration())) {
           console.log("Session expired:", Math.floor(Date.now() / 1000), ">=", timeStamp,
-              service.getSessionDuration(),
+              routeMapper.getSessionDuration(),
               "\n\tpayload:", timeStamp, identityPartition);
-          reply.code(401);
-          reply.send("Session has expired");
+          scope.reply.code(401);
+          scope.reply.send("Session has expired");
           return true;
         }
       }
@@ -50,11 +51,11 @@ export function verifySessionAuthorization (service, route, request, reply, scop
         if (right.write !== false) return false;
       }
     }
-    reply.code(403);
-    reply.send("Unauthorized");
+    scope.reply.code(403);
+    scope.reply.send("Unauthorized");
     return true;
   } catch (error) {
-    throw service.wrapErrorEvent(error, new Error("verifySessionAuthorization"),
+    throw routeMapper.wrapErrorEvent(error, new Error("verifySessionAuthorization"),
         "\n\taccessRoot:", ...dumpObject(accessRoot));
   }
 }

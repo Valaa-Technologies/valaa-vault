@@ -4,9 +4,9 @@ import type MapperService from "~/rest-api-spindle/fastify/MapperService";
 // import { dumpObject, thenChainEagerly } from "~/tools";
 // import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
 
-export default function createRouter (mapper: MapperService /* , route: Route */) {
+export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    requiredRules: ["routeRoot", "resource"],
+    requiredRules: ["routeRoot", "resource", "doDeleteResource"],
 
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
@@ -17,10 +17,11 @@ export default function createRouter (mapper: MapperService /* , route: Route */
     },
 
     handler (request, reply) {
-      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const scope = valkOptions.scope;
       mapper.infoEvent(1, () => [
-        `${this.name}:`, scope.resourceId,
-        "\n\trequest.query:", request.query,
+        `${this.name}:`, ...dumpObject(scope.resource),
+        "\n\trequest.query:", ...dumpObject(request.query),
       ]);
       reply.code(501);
       reply.send("Unimplemented");
@@ -37,20 +38,26 @@ export default function createRouter (mapper: MapperService /* , route: Route */
         return false;
       }
       const wrap = new Error(this.name);
-      return thenChainEagerly(null, [
-        () => scope.resource.destroy(),
-        eventResult => eventResult.getPersistedEvent(),
+      valkOptions.discourse = mapper.getDiscourse().acquireFabricator();
+      return thenChainEagerly(valkOptions.discourse, [
+        () => (scope.doDeleteResource
+            ? scope.resource.do(scope.doDeleteResource, valkOptions)
+            : scope.resource.destroy(valkOptions)),
+        () => valkOptions.discourse.releaseFabricator(),
+        eventResult => eventResult
+            && eventResult.getPersistedEvent(),
         () => {
           const results = "DESTROYED";
           reply.code(200);
           reply.send(results);
           mapper.infoEvent(2, () => [
-            `${this.name}:`,
+            `${this.name}:`, ...dumpObject(scope.resource),
             "\n\tresults:", ...dumpObject(results),
           ]);
           return true;
         },
       ], (error) => {
+        valkOptions.discourse.releaseFabricator({ abort: error });
         throw mapper.wrapErrorEvent(error, wrap,
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\tscope.resource:", ...dumpObject(scope.resource),

@@ -7,9 +7,9 @@ import { _createTargetedToMapping, _resolveMappingResource } from "./_mappingHan
 
 export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    requiredRules: ["routeRoot", "resource", "target"],
+    requiredRules: ["routeRoot", "resource", "target", "destroyMapping"],
     rules: {
-      mappingName: route && route.config.mapping.name,
+      mappingName: route && route.config.relation.name,
     },
 
     prepare (/* fastify */) {
@@ -30,23 +30,30 @@ export default function createRouter (mapper: MapperService, route: Route) {
     },
 
     handler (request, reply) {
-      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const scope = valkOptions.scope;
       mapper.infoEvent(1, () => [
-        `${this.name}:`, scope.resourceId, scope.mappingName, scope.targetId,
+        `${this.name}:`, ...dumpObject(scope.resource),
+        `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),
+        `\n\ttarget:`, ...dumpObject(scope.target),
         "\n\trequest.query:", request.query,
       ]);
       if (_resolveMappingResource(mapper, route, request, reply, scope)) return true;
       scope.mapping = scope.resource.get(this.toMapping, { scope });
       if (scope.mapping === undefined) {
-        reply.code(404);
-        reply.send(`No mapping '${route.config.mapping.name}' found from ${
-          scope.resourceId} to ${scope.targetId}`);
+        scope.reply.code(404);
+        scope.reply.send(`No mapping '${route.config.relation.name}' found from ${
+          scope.resource.getRawId()} to ${scope.target.getRawId()}`);
         return true;
       }
 
       const wrap = new Error(this.name);
-      return thenChainEagerly(null, [
-        () => scope.mapping.destroy(),
+      valkOptions.discourse = mapper.getDiscourse().acquireFabricator();
+      return thenChainEagerly(scope.mapping, [
+        vMapping => (scope.destroyMapping
+            ? vMapping.do(scope.destroyMapping, valkOptions)
+            : vMapping.destroy(valkOptions)),
+        () => valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult.getPersistedEvent(),
         () => {
           const results = "DESTROYED";
@@ -59,6 +66,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
           return true;
         },
       ], (error) => {
+        valkOptions.discourse.releaseFabricator({ abort: error });
         throw mapper.wrapErrorEvent(error, wrap,
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\tscope.mapping:", ...dumpObject(scope.mapping),

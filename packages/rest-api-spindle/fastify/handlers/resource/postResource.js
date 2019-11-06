@@ -9,7 +9,7 @@ import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
 
 export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    requiredRules: ["routeRoot", "createResource"],
+    requiredRules: ["routeRoot", "doCreateResource"],
 
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
@@ -23,38 +23,40 @@ export default function createRouter (mapper: MapperService, route: Route) {
     },
 
     handler (request, reply) {
-      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const scope = valkOptions.scope;
       mapper.infoEvent(1, () => [
         `${this.name}:`,
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
       ]);
       if (_verifyResourceAuthorization(mapper, route, request, reply, scope)) return true;
-      if (!scope.createResource) {
+      if (!scope.doCreateResource) {
         reply.code(405);
-        reply.send(`${this.name} is disabled: no scope.createResource defined`);
+        reply.send(`${this.name} is disabled: no scope.doCreateResource defined`);
         return false;
       }
       const wrap = new Error(`resource POST ${route.url}`);
-      const discourse = mapper.getDiscourse().acquireFabricator();
-      return thenChainEagerly(discourse, [
+      valkOptions.discourse = mapper.getDiscourse().acquireFabricator();
+      return thenChainEagerly(valkOptions.discourse, [
         () => {
-          console.log("resource POST dump:", ...dumpObject(scope.createResource),
+          console.log("resource POST dump:", ...dumpObject(scope.doCreateResource),
               "\n\tserviceIndex:", ...dumpObject(scope.serviceIndex),
               "\n\ttoPatchTarget:", ...dumpObject(this.toPatchTarget));
-          return scope.serviceIndex.do(scope.createResource, { discourse, scope });
+          return scope.routeRoot.do(scope.doCreateResource, valkOptions);
+          // return scope.serviceIndex.do(scope.doCreateResource, valkOptions);
         },
         vResource => {
           if (!vResource || !(vResource instanceof Vrapper)) {
-            throw new Error(`${this.name} createResource didn't return a resource value`);
+            throw new Error(`${this.name} doCreateResource didn't return a resource value`);
           }
           scope.resource = vResource;
           if (request.body) {
             mapper.updateResource(vResource, request.body,
-                  { discourse, scope, route, toPatchTarget: this.toPatchTarget });
+                  { ...valkOptions, route, toPatchTarget: this.toPatchTarget });
           }
         },
-        () => discourse && discourse.releaseFabricator(),
+        () => valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult
             && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
@@ -74,7 +76,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
           return true;
         },
       ], (error) => {
-        if (discourse) discourse.releaseFabricator({ abort: error });
+        valkOptions.discourse.releaseFabricator({ abort: error });
         throw mapper.wrapErrorEvent(error, wrap,
             "\n\trequest.query:", ...dumpObject(request.query),
             "\n\trequest.body:", ...dumpObject(request.body),

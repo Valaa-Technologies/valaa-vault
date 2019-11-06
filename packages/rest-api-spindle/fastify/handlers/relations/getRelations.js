@@ -20,9 +20,10 @@ export default function createRouter (mapper: MapperService, route: Route) {
     },
 
     handler (request, reply) {
-      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const scope = valkOptions.scope;
       mapper.infoEvent(1, () => [
-        `${this.name}:`, scope.resourceId,
+        `${this.name}:`, ...dumpObject(scope.resource),
         "\n\trequest.query:", request.query,
       ]);
       scope.resource = mapper.getEngine().tryVrapper([scope.resourceId]);
@@ -33,14 +34,14 @@ export default function createRouter (mapper: MapperService, route: Route) {
       }
       const { fields } = request.query;
       return thenChainEagerly(scope.resource, [
-        vResource => vResource.get(this.toSuccessBodyFields, { scope, verbosity: 0 }),
-        (fields)
-            && (results => mapper.pickResultFields(results, fields, route.schema.response[200])),
+        vResource => vResource.get(this.toSuccessBodyFields, valkOptions),
+        (fields) && (results =>
+            mapper.pickResultFields(results, fields, route.schema.response[200])),
         results => {
           reply.code(200);
           reply.send(JSON.stringify(results, null, 2));
           mapper.infoEvent(2, () => [
-            `${this.name}:`,
+            `${this.name}:`, ...dumpObject(scope.resource),
             "\n\tresults:", ...dumpObject(results),
           ]);
           return true;

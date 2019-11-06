@@ -87,7 +87,7 @@ export function _pickResultFields (mapper, rootResult, fields /* , resultSchema 
         : {}; /* : steps.reduce((subSchema, step, index) => {
       let returning;
       for (let current = subSchema; ;) {
-        if (typeof current === "string") current = _resolveSchemaName(mapper, current);
+        if (typeof current === "string") current = _derefSchema(mapper, current);
         else if (current.type === "array") current = current.items;
         else if (returning) return current;
         else if (current.type !== "object") {
@@ -123,7 +123,7 @@ export function _pickResultFields (mapper, rootResult, fields /* , resultSchema 
         && ((fieldSchema && (fieldSchema !== true)) || Object.keys(selector).length)) {
       // So this is not exactly kosher. To implement expansion of
       // nested properties we make virtual GET requests using the
-      // injection API which is primarily intended for testing and
+      // projection API which is primarily intended for testing and
       // incurs full request overheads for each call. On the other
       // hand, this is simple, complete and way more efficient than
       // having clients make separate queries for the entries.

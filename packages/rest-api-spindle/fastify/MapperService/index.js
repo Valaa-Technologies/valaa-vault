@@ -109,8 +109,8 @@ export default class MapperService extends FabricEventTarget {
       throw this.wrapErrorEvent(error,
           new Error(`preloadRuntimeResources(${route.category} ${route.method} ${route.url})`),
           "\n\tconfig:", ...dumpObject(route.config),
-          "\n\truntime:", ...dumpObject(runtime),
           "\n\troute:", ...dumpObject(route),
+          "\n\truntime:", ...dumpObject(runtime),
       );
     }
   }
@@ -134,7 +134,7 @@ export default class MapperService extends FabricEventTarget {
     let innerKuery, jsonSchema;
     if (!maybeJSONSchema) return outerKuery;
     try {
-      jsonSchema = _resolveSchemaName(this, maybeJSONSchema);
+      jsonSchema = this.derefSchema(maybeJSONSchema);
       innerKuery = this.addSchemaStep(jsonSchema, outerKuery);
       return _buildSchemaKuery(this, jsonSchema, outerKuery, innerKuery, isValOSFields);
     } catch (error) {
@@ -148,7 +148,7 @@ export default class MapperService extends FabricEventTarget {
   getResourceHRefPrefix (maybeJSONSchema: string | Object) {
     let jsonSchema;
     try {
-      jsonSchema = _resolveSchemaName(this, maybeJSONSchema);
+      jsonSchema = this.derefSchema(maybeJSONSchema);
       return _getResourceHRefPrefix(this, jsonSchema);
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error("getResourceHRefPrefix"),
@@ -156,6 +156,8 @@ export default class MapperService extends FabricEventTarget {
     }
   }
 
+  derefSchema (maybeJSONSchemaOrName: string | Object) {
+    return _derefSchema(this, maybeJSONSchemaOrName);
   addSchemaStep (maybeJSONSchema, outerKuery) {
     const jsonSchema = _resolveSchemaName(this, maybeJSONSchema);
     const predicate = (jsonSchema.valos || {}).predicate;

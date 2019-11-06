@@ -9,7 +9,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
   return {
     requiredRules: ["routeRoot", "resource", "target"],
     rules: {
-      mappingName: route && route.config.mapping.name,
+      mappingName: route && route.config.relation.name,
     },
 
     prepare (/* fastify */) {
@@ -23,24 +23,27 @@ export default function createRouter (mapper: MapperService, route: Route) {
     },
 
     handler (request, reply) {
-      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const scope = valkOptions.scope;
       mapper.infoEvent(1, () => [
-        `${this.name}:`, scope.resourceId, scope.mappingName, scope.targetId,
+        `${this.name}:`, ...dumpObject(scope.resource),
+        `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),
+        `\n\ttarget:`, ...dumpObject(scope.target),
         "\n\trequest.query:", request.query,
       ]);
       if (_resolveMappingResource(mapper, route, request, reply, scope)) return true;
 
       const { fields } = request.query;
       return thenChainEagerly(scope.resource, [
-        vResource => vResource.get(this.toSuccessBodyFields, { scope, verbosity: 0 }),
+        vMapping => vMapping.get(this.toSuccessBodyFields, valkOptions),
         results => ((!fields || !results)
             ? results
             : mapper.pickResultFields(results, fields, route.schema.response[200])),
         results => {
           if (!results) {
             reply.code(404);
-            reply.send(`No mapping '${route.config.mapping.name}' found from route resource ${
-              scope.resourceId} to ${scope.targetId}`);
+            reply.send(`No mapping '${route.config.relation.name}' found from route resource ${
+              scope.resource.getRawId()} to ${scope.target.getRawId()}`);
             return true;
           }
           reply.code(200);

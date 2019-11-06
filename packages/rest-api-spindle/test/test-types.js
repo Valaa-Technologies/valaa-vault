@@ -35,7 +35,7 @@ exports.createTestTagType = () => namedResourceType("TestTag", [], {
     valospace: {
       gate: {
         name: "tags",
-        injection: [["out*:TAG"], [".$V:target"]],
+        projection: [["out*:TAG"], [".$V:target"]],
       },
     },
   },
@@ -48,13 +48,13 @@ exports.createTestThingType = () => namedResourceType("TestThing", [], {
     valospace: {
       gate: {
         name: "things",
-        injection: [["out*:THING"], [".$V:target"]],
+        projection: [["out*:THING"], [".$V:target"]],
       },
-      projection: [".:fields"]
+      reflection: [".:fields"]
     },
   },
   $V: {
-    id: { valospace: { projection: [[".$V:owner"], [".$V:rawId"]] } },
+    id: { valospace: { reflection: [[".$V:owner"], [".$V:rawId"]] } },
   },
   name: StringType, // title
   description: StringType,
@@ -67,24 +67,17 @@ exports.createTestThingType = () => namedResourceType("TestThing", [], {
     phone: StringType,
     website: URIReferenceType,
   },
-  owned: {
-    [ObjectSchema]: {
-      // TODO: permission-based hiding.
-    },
-    news: () => mappingToManyOf("owned/news", exports.TestNewsItemType,
-        [[".:owned"], ["out*:NEWSITEM"]],
-        { highlight: BooleanType }),
-  },
 
   // Meta
   tags: () => mappingToManyOf("tags", exports.TestTagType,
-      [[".:tags"], ["out*:TAG"]],
-      { [ObjectSchema]: { valospace: { filterable: true } },
-  }),
+      [[".:tags"], ["out*:TAG"]], {
+        [ObjectSchema]: { valospace: { filterable: true } },
+        highlight: BooleanType,
+      }),
 
   // Presentation
   icon: StringType,
-  image: extendType(StringType, { valospace: { projection: [".$V:name"] } }),
+  image: extendType(StringType, { valospace: { reflection: [".$V:name"] } }),
 });
 exports.TestThingType = exports.createTestThingType();
 
@@ -105,8 +98,8 @@ exports.createTestNewsItemType = () => namedResourceType("TestNewsItem", exports
     valospace: {
       gate: {
         name: "news",
-        injection: [["out*:NEWSITEM"], [".$V:target"]],
-        toFilter: [".:visible"],
+        projection: [["out*:NEWSITEM"], [".$V:target"]],
+        filterCondition: [".:visible"],
       },
     },
   },
@@ -122,8 +115,8 @@ exports.createTestIndividualType = () =>
     valospace: {
       gate: {
         name: "individuals",
-        injection: [["out*:INDIVIDUAL"], [".$V:target"]],
-        toFilter: [".:visible"],
+        projection: [["out*:INDIVIDUAL"], [".$V:target"]],
+        filterCondition: [".:visible"],
       },
     },
   },
@@ -143,8 +136,8 @@ exports.createTestServiceType = () => namedResourceType("TestService", exports.T
     valospace: {
       gate: {
         name: "services",
-        injection: [["out*:SERVICE"], [".$V:target"]],
-        toFilter: [".:visible"],
+        projection: [["out*:SERVICE"], [".$V:target"]],
+        filterCondition: [".:visible"],
       },
     },
   },

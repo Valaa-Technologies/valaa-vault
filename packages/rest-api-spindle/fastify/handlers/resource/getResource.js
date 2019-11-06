@@ -20,11 +20,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
     },
 
     handler (request, reply) {
-      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      mapper.infoEvent(2, () => [
-        `${this.name}:`, scope.resourceId,
-        "\n\trequest.query:", request.query,
-      ]);
+      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       if (_verifyResourceAuthorization(mapper, route, request, reply, scope)) return true;
       scope.resource = mapper._engine.tryVrapper([scope.resourceId]);
       if (!scope.resource) {
@@ -32,17 +28,22 @@ export default function createRouter (mapper: MapperService, route: Route) {
         reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
         return true;
       }
+      const scope = valkOptions.scope;
+      mapper.infoEvent(2, () => [
+        `${this.name}:`, ...dumpObject(scope.resource),
+        "\n\trequest.query:", ...dumpObject(request.query),
+      ]);
+
       const { fields } = request.query;
-      return thenChainEagerly(scope.resource, [
-        vResource => vResource.get(this.toSuccessBodyFields, { scope, verbosity: 0 })
-            || this.hardcodedResources[scope.resourceId],
+      return thenChainEagerly(valkOptions.scope.resource, [
+        vResource => vResource.get(this.toSuccessBodyFields, valkOptions),
         (fields) && (results =>
             mapper.pickResultFields(results, fields, route.schema.response[200])),
         results => {
           reply.code(200);
           reply.send(JSON.stringify(results, null, 2));
           mapper.infoEvent(2, () => [
-            `${this.name}:`,
+            `${this.name}:`, ...dumpObject(scope.resource),
             "\n\tresults:", ...dumpObject(results),
           ]);
           return true;

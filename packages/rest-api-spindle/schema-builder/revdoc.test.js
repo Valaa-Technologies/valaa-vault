@@ -47,11 +47,13 @@ projections embedded as fine-grained VPaths.`,
 [`Types describe layouts of valospace resources and their properties.
   These are used for GET result body contents, POST, PATCH and PUT
   request body fields.`],
-[`Projections are VPaths embedded in the type schemas which define the
-  mappings into valospace resources. `],
-[`Routes define the traditional entry points and parameters. Primary
-  resource type gate injections are projections which define the
-  entry mappings to valospace resources.`],
+[`Routes are the traditional tool to define request entry points and
+  to descrbibe their parameters. Routes tie into primary resources via
+  gates which define the entry points to valospace resources.`],
+[`Reflections are VPaths embedded in the type schemas which define the
+  mappings into and between valospace resources. Gates specify entry
+  reflections called projections which define the initial entry paths
+  to valospace.`],
     ],
   },
   "chapter#types>3;Type schemas": {
@@ -68,7 +70,7 @@ inside out to get the appropriate JSON schema layout.`
 () => generateSchemaOf({
   [ObjectSchema]: {
     description: "simple object type",
-    valospace: { projection: [".:forwardedFields"] },
+    valospace: { reflection: [".:forwardedFields"] },
   },
   name: StringType,
 }),
@@ -76,7 +78,7 @@ inside out to get the appropriate JSON schema layout.`
 () => ({
   description: "simple object type",
   type: "object",
-  valospace: { projection: [".", [":", "forwardedFields"]] },
+  valospace: { reflection: [".", [":", "forwardedFields"]] },
   properties: { name: { type: "string" } },
 })),
     "chapter#extending_schemas>1;Extending schemas": {
@@ -84,18 +86,18 @@ inside out to get the appropriate JSON schema layout.`
 `The schemas can also be extended using `, em("extendType"), `.
 The extension is a nested merge and can accept multiple base types.
 
-Here we extend a string type with a valospace projection path to the
+Here we extend a string type with a valospace reflection path to the
 field `, ref("@valos/kernel#name"), `.`,
       ],
       "example#example_schema_extension>2": itExpects(
           "expanded schema of an extended string", [
-            () => extendType(StringType, { valospace: { projection: [".$V:name"] } }),
+            () => extendType(StringType, { valospace: { reflection: [".$V:name"] } }),
             type => generateSchemaOf(type),
           ],
           "toEqual",
 () => ({
   type: "string",
-  valospace: { projection: [".", ["$", "V", "name"]] },
+  valospace: { reflection: [".", ["$", "V", "name"]] },
 })),
     },
     "chapter#resource_type_schemas>2;Shared resource type schemas": {
@@ -103,7 +105,7 @@ field `, ref("@valos/kernel#name"), `.`,
 `Valospace resources can be named in addition to providing them base
 types they extend. A resource that is given a valospace gate are
 primary resources which can be directly reached through `,
-ref("routes", "#routes"), ` via their injection path.
+ref("routes", "#routes"), ` via their projection path.
 
 Schema builder provides a builtin object type \`ResourceType\`
 for valospace resources with following JSON schema:`,
@@ -122,7 +124,7 @@ which contains the resource 'id' field.`,
   valospace: {
     gate: {
       name: "tags",
-      injection: ["@", ["out*", [":", "TAG"]], [".", ["$", "V", "target"]]],
+      projection: ["@", ["out*", [":", "TAG"]], [".", ["$", "V", "target"]]],
     },
   },
   properties: {
@@ -132,7 +134,7 @@ which contains the resource 'id' field.`,
         id: {
           pattern: "^[a-zA-Z0-9\\-_.~]+$",
           type: "string",
-          valospace: { projection: [".", ["$", "V", "rawId"]] }
+          valospace: { reflection: [".", ["$", "V", "rawId"]] }
         },
       },
     },
@@ -162,7 +164,7 @@ combination of the mapping `, ref("source", "@valos/kernel#source"),
 ` resource and mapping `, ref("name", "@valos/kernel#name"), ` plus the
 individual`, ref("target", "@valos/kernel#target"), ` resource.
 
-The mappings in valospace are defined by a projection to a set of
+The mappings in valospace are defined by a reflection to a set of
 relations. Here `, em("mappingToMany"), ` defines a mapping 'tags'
 into outgoing TAGS relations with a mapping property 'highlight' and
 where the target resource is a Tag type defined earlier.`,
@@ -177,7 +179,7 @@ type => generateSchemaOf(type),
   type: "array",
   valospace: {
     mappingName: "tags",
-    projection: ["out*", [":", "TAGS"]],
+    reflection: ["out*", [":", "TAGS"]],
   },
   items: {
     type: "object",
@@ -206,9 +208,9 @@ type => generateSchemaOf(type),
   valospace: {
     gate: {
       name: "things",
-      injection: ["@", ["out*", [":", "THING"]], [".", ["$", "V", "target"]]],
+      projection: ["@", ["out*", [":", "THING"]], [".", ["$", "V", "target"]]],
     },
-    projection: [".", [":", "fields"]],
+    reflection: [".", [":", "fields"]],
   },
   properties: {
     $V: {
@@ -217,7 +219,7 @@ type => generateSchemaOf(type),
         id: {
           type: "string", pattern: "^[a-zA-Z0-9\\-_.~]+$",
           valospace: {
-            projection: ["@", [".", ["$", "V", "owner"]], [".", ["$", "V", "rawId"]]],
+            reflection: ["@", [".", ["$", "V", "owner"]], [".", ["$", "V", "rawId"]]],
           },
         },
       },
@@ -233,7 +235,7 @@ type => generateSchemaOf(type),
     icon: { type: "string" },
     image: {
       type: "string",
-      valospace: { projection: [".", ["$", "V", "name"]] },
+      valospace: { reflection: [".", ["$", "V", "name"]] },
     },
     name: { type: "string" },
     owned: {
@@ -241,7 +243,7 @@ type => generateSchemaOf(type),
         type: "array",
         valospace: {
           mappingName: "owned/news",
-          projection: ["@", [".", [":", "owned"]], ["out*", [":", "NEWSITEM"]]],
+          reflection: ["@", [".", [":", "owned"]], ["out*", [":", "NEWSITEM"]]],
         },
         items: {
           type: "object",
@@ -260,7 +262,7 @@ type => generateSchemaOf(type),
       type: "array",
       valospace: {
         mappingName: "tags",
-        projection: ["@", [".", [":", "tags"]], ["out*", [":", "TAG"]]],
+        reflection: ["@", [".", [":", "tags"]], ["out*", [":", "TAG"]]],
       },
       items: {
         type: "object",

@@ -30,13 +30,13 @@ export const DateTimeZoneExtendedISO8601Type = { type: "string", format: "date-t
 export const IdValOSType = {
   type: "string",
   pattern: "^[a-zA-Z0-9\\-_.~]+$",
-  valospace: { projection: [".$V:rawId"] },
+  valospace: { reflection: [".$V:rawId"] },
 };
 // export const ReferenceValOSType = { type: "uri" };
 export const ReferenceValOSType = { type: "string" };
 
 export const $VType = {
-  [ObjectSchema]: { valospace: { /* projection: "" */ } },
+  [ObjectSchema]: { valospace: { /* reflection: "" */ } },
   id: IdValOSType,
   // name: StringType, // internal ValOS name
 };
@@ -60,36 +60,36 @@ export function extendType (baseTypes, schema) {
   return patchWith({}, [].concat(baseTypes || [], schema));
 }
 
-export function mappingToOneOf (mappingName, aTargetType, relationNameOrProjection,
+export function mappingToOneOf (mappingName, targetType, relationNameOrProjection,
     options = {}) {
   if (!options[ObjectSchema]) options[ObjectSchema] = {};
   options[ObjectSchema].valospace = {
     ...(options[ObjectSchema].valospace || {}),
     mappingName,
   };
-  return relationToOneOf(aTargetType, relationNameOrProjection, options);
+  return relationToOneOf(targetType, relationNameOrProjection, options);
 }
 
-export function mappingToManyOf (mappingName, aTargetType, relationNameOrProjection,
+export function mappingToManyOf (mappingName, targetType, relationNameOrProjection,
     options = {}) {
   if (!options[CollectionSchema]) options[CollectionSchema] = {};
   options[CollectionSchema].valospace = {
     ...(options[CollectionSchema].valospace || {}),
     mappingName,
   };
-  return relationToManyOf(aTargetType, relationNameOrProjection, options);
+  return relationToManyOf(targetType, relationNameOrProjection, options);
 }
 
-export function relationToOneOf (aTargetType, relationNameOrProjection, options = {}) {
+export function relationToOneOf (targetType, relationNameOrProjection, options = {}) {
   if (options[CollectionSchema] !== undefined) {
     throw new Error("Must not specify options[CollectionSchema] for a Relation-to-one type");
   }
-  return _createRelationTypeTo(aTargetType, relationNameOrProjection, options);
+  return _createRelationTypeTo(targetType, relationNameOrProjection, options);
 }
 
-export function relationToManyOf (aTargetType, relationNameOrProjection, options = {}) {
+export function relationToManyOf (targetType, relationNameOrProjection, options = {}) {
   if (options[CollectionSchema] === undefined) options[CollectionSchema] = {};
-  return _createRelationTypeTo(aTargetType, relationNameOrProjection, options);
+  return _createRelationTypeTo(targetType, relationNameOrProjection, options);
 }
 
 export function getBaseRelationTypeOf (anAnyRelationType, schemaPatch) {
@@ -126,20 +126,21 @@ export function sharedSchemaOf (aType) {
 }
 
 export function trySchemaNameOf (aType) {
-  return ((aType || {})[ObjectSchema] || {}).schemaName
-      && `${aType[ObjectSchema].schemaName}#`;
+  return ((aType || {})[ObjectSchema] || {}).schemaName;
 }
 
 export function schemaRefOf (aType) {
-  return trySchemaNameOf(aType) || generateSchemaOf(aType);
+  return trySchemaNameOf(aType)
+      ? `${aType[ObjectSchema].schemaName}#`
+      : generateSchemaOf(aType);
 }
 
-function _createRelationTypeTo (aTargetType, relationNameOrProjection, {
+function _createRelationTypeTo (targetType, relationNameOrProjection, {
     [CollectionSchema]: collectionSchema,
     [ObjectSchema]: objectSchema = {},
     ...relationProperties
 } = {}) {
-  const projection = (typeof relationNameOrProjection === "string")
+  const reflection = (typeof relationNameOrProjection === "string")
       ? mintVerb("*out", ["$", "", relationNameOrProjection])
       : expandVPath(relationNameOrProjection);
   const ret = {
@@ -147,17 +148,15 @@ function _createRelationTypeTo (aTargetType, relationNameOrProjection, {
     [ObjectSchema]: { ...objectSchema },
     $V: {
       [ObjectSchema]: {
-        valospace: {
-          TargetType: aTargetType,
-        },
+        valospace: { targetType },
       },
       href: {
         ...URIReferenceType,
-        // valospace: { projection: "" }, // not yet
+        // valospace: { reflection: "" }, // not yet
       },
       rel: {
         ...StringType,
-        // valospace: { projection: "" }, // not yet
+        // valospace: { reflection: "" }, // not yet
       },
     },
     ...relationProperties,
@@ -165,7 +164,7 @@ function _createRelationTypeTo (aTargetType, relationNameOrProjection, {
   const outermost = ret[CollectionSchema] || ret[ObjectSchema];
   outermost.valospace = {
     ...(outermost.valospace || {}),
-    projection,
+    reflection,
   };
   return ret;
 }
@@ -177,7 +176,7 @@ export function generateSchemaOf (aType) {
   let current = ret;
   if (aType[CollectionSchema]) {
     Object.assign(current, aType[CollectionSchema]);
-    delete current.TargetType;
+    delete current.targetType;
     current.type = "array";
     current.items = {};
     current = current.items;
@@ -192,16 +191,16 @@ export function generateSchemaOf (aType) {
   }
   if (ret.valospace) {
     ret.valospace = { ...ret.valospace };
-    if (ret.valospace.TargetType) {
-      ret.valospace.TargetType = schemaRefOf(ret.valospace.TargetType);
+    if (ret.valospace.targetType) {
+      ret.valospace.targetType = schemaRefOf(ret.valospace.targetType);
     }
-    if (ret.valospace.projection) {
-      ret.valospace.projection = expandVPath(ret.valospace.projection);
+    if (ret.valospace.reflection) {
+      ret.valospace.reflection = expandVPath(ret.valospace.reflection);
     }
     if (ret.valospace.gate) {
       ret.valospace.gate = {
         ...ret.valospace.gate,
-        injection: expandVPath(ret.valospace.gate.injection),
+        projection: expandVPath(ret.valospace.gate.projection),
       };
     }
   }

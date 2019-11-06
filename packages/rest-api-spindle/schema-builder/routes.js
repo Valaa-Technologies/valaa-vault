@@ -1,5 +1,6 @@
 // @flow
 
+import { expandVPath } from "~/raem/VPath";
 import { wrapError, dumpify, dumpObject, patchWith } from "~/tools";
 
 import {
@@ -38,15 +39,15 @@ export function assignRulesFrom (
   return rules;
 }
 
-export function listingGETRoute (url, userConfig, globalRules, ResourceType) {
+export function listingGETRoute (url, userConfig, globalRules, resourceType) {
   const route = { url, category: "resource", method: "GET" };
   try {
-    _setupRoute(route, userConfig, globalRules, ResourceType);
+    _setupRoute(route, userConfig, globalRules, resourceType);
     route.schema = {
       description: `List all listable ${route.config.resource.name} resources`,
       querystring: {
-        ..._genericGETResourceQueryStringSchema(ResourceType),
-        ..._resourceSequenceQueryStringSchema(ResourceType),
+        ..._genericGETResourceQueryStringSchema(resourceType),
+        ..._resourceSequenceQueryStringSchema(resourceType),
         ...(route.querystring || {}),
       },
       response: {
@@ -58,18 +59,18 @@ export function listingGETRoute (url, userConfig, globalRules, ResourceType) {
     };
     return route;
   } catch (error) {
-    throw wrapError(error, new Error(`listingGETRoute(<${route.url}>)`),
+    throw wrapError(error, new Error(`listingGETRoute(${_routeName(route)})`),
         "\n\tresource:", ...dumpObject(route.config.resource),
-        "\n\tResourceType:", ...dumpObject(ResourceType),
+        "\n\tResourceType:", ...dumpObject(resourceType),
         "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function resourcePOSTRoute (url, userConfig, globalRules, ResourceType) {
+export function resourcePOSTRoute (url, userConfig, globalRules, resourceType) {
   const route = { url, category: "resource", method: "POST" };
   try {
-    _setupRoute(route, userConfig, globalRules, ResourceType);
+    _setupRoute(route, userConfig, globalRules, resourceType);
     route.schema = {
       description: `Create a new ${route.config.resource.name} resource`,
       querystring: route.querystring ? { ...route.querystring } : undefined,
@@ -81,22 +82,22 @@ export function resourcePOSTRoute (url, userConfig, globalRules, ResourceType) {
     };
     return route;
   } catch (error) {
-    throw wrapError(error, new Error(`resourcePOSTRoute(<${route.url}>)`),
+    throw wrapError(error, new Error(`resourcePOSTRoute(${_routeName(route)})`),
         "\n\tresource:", dumpify(route.config.resource),
-        "\n\tType:", ...dumpObject(ResourceType),
+        "\n\tType:", ...dumpObject(resourceType),
         "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function resourceGETRoute (url, userConfig, globalRules, ResourceType) {
+export function resourceGETRoute (url, userConfig, globalRules, resourceType) {
   const route = { url, category: "resource", method: "GET" };
   try {
-    _setupRoute(route, userConfig, globalRules, ResourceType);
+    _setupRoute(route, userConfig, globalRules, resourceType);
     route.schema = {
       description: `Get the contents of a ${route.config.resource.name} route resource`,
       querystring: {
-        ..._genericGETResourceQueryStringSchema(ResourceType),
+        ..._genericGETResourceQueryStringSchema(resourceType),
         ...(route.querystring || {}),
       },
       response: {
@@ -106,18 +107,18 @@ export function resourceGETRoute (url, userConfig, globalRules, ResourceType) {
     };
     return route;
   } catch (error) {
-    throw wrapError(error, new Error(`resourceGETRoute(<${route.url}>)`),
+    throw wrapError(error, new Error(`resourceGETRoute(${_routeName(route)})`),
         "\n\tresource:", ...dumpObject(route.config.resource),
-        "\n\tResourceType:", ...dumpObject(ResourceType),
+        "\n\tResourceType:", ...dumpObject(resourceType),
         "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function resourcePATCHRoute (url, userConfig, globalRules, ResourceType) {
+export function resourcePATCHRoute (url, userConfig, globalRules, resourceType) {
   const route = { url, category: "resource", method: "PATCH" };
   try {
-    _setupRoute(route, userConfig, globalRules, ResourceType);
+    _setupRoute(route, userConfig, globalRules, resourceType);
     route.schema = {
       description: `Update parts of a ${route.config.resource.name} route resource`,
       querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
@@ -130,18 +131,18 @@ export function resourcePATCHRoute (url, userConfig, globalRules, ResourceType) 
     };
     return route;
   } catch (error) {
-    throw wrapError(error, new Error(`resourcePATCHRoute(<${route.url}>)`),
+    throw wrapError(error, new Error(`resourcePATCHRoute(${_routeName(route)})`),
         "\n\tresource:", ...dumpObject(route.config.resource),
-        "\n\tResourceType:", ...dumpObject(ResourceType),
+        "\n\tResourceType:", ...dumpObject(resourceType),
         "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function resourceDELETERoute (url, userConfig, globalRules, ResourceType) {
+export function resourceDELETERoute (url, userConfig, globalRules, resourceType) {
   const route = { url, category: "resource", method: "DELETE" };
   try {
-    _setupRoute(route, userConfig, globalRules, ResourceType);
+    _setupRoute(route, userConfig, globalRules, resourceType);
     route.schema = {
       description: `Destroy a ${route.config.resource.name} route resource`,
       querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
@@ -153,25 +154,25 @@ export function resourceDELETERoute (url, userConfig, globalRules, ResourceType)
     };
     return route;
   } catch (error) {
-    throw wrapError(error, new Error(`resourceDELETERoute(<${route.url}>)`),
+    throw wrapError(error, new Error(`resourceDELETERoute(${_routeName(route)})`),
         "\n\tresource:", ...dumpObject(route.config.resource),
-        "\n\tResourceType:", ...dumpObject(ResourceType),
+        "\n\tResourceType:", ...dumpObject(resourceType),
         "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function relationsGETRoute (url, userConfig, globalRules, ResourceType, RelationType) {
+export function relationsGETRoute (url, userConfig, globalRules, resourceType, relationField) {
   const route = { url, category: "relations", method: "GET" };
   try {
-    _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
+    _setupRoute(route, userConfig, globalRules, resourceType, relationField);
     route.schema = {
       description: `List all '${route.config.relation.name}' relations from the source ${
         route.config.resource.name} route resource to all target ${
         route.config.target.name} resources`,
       querystring: {
-        ..._genericGETResourceQueryStringSchema(RelationType),
-        ..._resourceSequenceQueryStringSchema(RelationType),
+        ..._genericGETResourceQueryStringSchema(relationField),
+        ..._resourceSequenceQueryStringSchema(relationField),
         ...(route.config.querystring || {}),
       },
       response: {
@@ -180,13 +181,13 @@ export function relationsGETRoute (url, userConfig, globalRules, ResourceType, R
     };
     return route;
   } catch (error) {
-    throw wrapError(error, new Error(`relationsGETRoute(<${route.url}>)`),
+    throw wrapError(error, new Error(`relationsGETRoute(${_routeName(route)})`),
         "\n\tresource:", ...dumpObject(route.config.resource),
-        "\n\tSourceType:", ...dumpObject(ResourceType),
-        "\n\tRelationType[CollectionSchema]:", dumpify(RelationType[CollectionSchema]),
-        "\n\tRelationType[ObjectSchema]:", dumpify(RelationType[ObjectSchema]),
-        "\n\tRelationType.$V:", dumpify(RelationType.$V),
-        "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
+        "\n\tSourceType:", ...dumpObject(resourceType),
+        "\n\tRelationType[CollectionSchema]:", dumpify(relationField[CollectionSchema]),
+        "\n\tRelationType[ObjectSchema]:", dumpify(relationField[ObjectSchema]),
+        "\n\tRelationType.$V:", dumpify(relationField.$V),
+        "\n\tRelationType ...rest:", ...dumpObject({ ...relationField, $V: undefined }),
         "\n\troute:", ...dumpObject(route),
     );
   }
@@ -199,12 +200,13 @@ whereas the identify of a Relation is an explicit id. The identity of
 mapping is thus implicitly inferred from the route.
 */
 
-export function mappingPOSTRoute (url, userConfig, globalRules, ResourceType, RelationType) {
+export function mappingPOSTRoute (url, userConfig, globalRules, resourceType, relationField_) {
   const route = { url, category: "mapping", method: "POST" };
+  const relationField = _resolveFunction(relationField_);
   try {
-    _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
+    _setupRoute(route, userConfig, globalRules, resourceType, relationField);
 
-    const target = RelationType.$V[ObjectSchema].valospace.TargetType;
+    const target = relationField.$V[ObjectSchema].valospace.targetType;
 
     route.schema = {
       description:
@@ -216,11 +218,11 @@ content. Similarily the response will contain the newly created target
 resource content in *response.$V.target* with the rest of the response
 containing the mapping.`,
       querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
-      body: schemaRefOf(getBaseRelationTypeOf(RelationType, {
+      body: schemaRefOf(getBaseRelationTypeOf(relationField, {
         $V: [null, { target }]
       })),
       response: {
-        200: schemaRefOf(getBaseRelationTypeOf(RelationType, {
+        200: schemaRefOf(getBaseRelationTypeOf(relationField, {
           $V: { target },
         })),
         403: { type: "string" },
@@ -228,24 +230,25 @@ containing the mapping.`,
     };
     return route;
   } catch (error) {
-    throw wrapError(error, new Error(`mappingPOSTRoute(<${route.url}>)`),
+    throw wrapError(error, new Error(`mappingPOSTRoute(${_routeName(route)})`),
         "\n\tresource:", ...dumpObject(route.config.resource),
-        "\n\tSourceType:", ...dumpObject(ResourceType),
-        "\n\tRelationType[CollectionSchema]:", dumpify(RelationType[CollectionSchema]),
-        "\n\tRelationType[ObjectSchema]:", dumpify(RelationType[ObjectSchema]),
-        "\n\tRelationType.$V:", dumpify(RelationType.$V),
-        "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
+        "\n\tSourceType:", ...dumpObject(resourceType),
+        "\n\tRelationType[CollectionSchema]:", dumpify(relationField[CollectionSchema]),
+        "\n\tRelationType[ObjectSchema]:", dumpify(relationField[ObjectSchema]),
+        "\n\tRelationType.$V:", dumpify(relationField.$V),
+        "\n\tRelationType ...rest:", ...dumpObject({ ...relationField, $V: undefined }),
         "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function mappingGETRoute (url, userConfig, globalRules, ResourceType, RelationType) {
+export function mappingGETRoute (url, userConfig, globalRules, resourceType, relationField_) {
   const route = { url, category: "mapping", method: "GET" };
+  const relationField = _resolveFunction(relationField_);
   try {
-    _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
+    _setupRoute(route, userConfig, globalRules, resourceType, relationField);
 
-    const BaseRelationType = getBaseRelationTypeOf(RelationType);
+    const BaseRelationType = getBaseRelationTypeOf(relationField);
 
     route.schema = {
       description:
@@ -263,24 +266,25 @@ route.config.target.name} route resource`,
     };
     return route;
   } catch (error) {
-    throw wrapError(error, new Error(`mappingGETRoute(<${route.url}>)`),
+    throw wrapError(error, new Error(`mappingGETRoute(${_routeName(route)})`),
         "\n\tresource:", ...dumpObject(route.config.resource),
-        "\n\tSourceType:", ...dumpObject(ResourceType),
-        "\n\tRelationType[CollectionSchema]:", dumpify(RelationType[CollectionSchema]),
-        "\n\tRelationType[ObjectSchema]:", dumpify(RelationType[ObjectSchema]),
-        "\n\tRelationType.$V:", dumpify(RelationType.$V),
-        "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
+        "\n\tSourceType:", ...dumpObject(resourceType),
+        "\n\tRelationType[CollectionSchema]:", dumpify(relationField[CollectionSchema]),
+        "\n\tRelationType[ObjectSchema]:", dumpify(relationField[ObjectSchema]),
+        "\n\tRelationType.$V:", dumpify(relationField.$V),
+        "\n\tRelationType ...rest:", ...dumpObject({ ...relationField, $V: undefined }),
         "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function mappingPATCHRoute (url, userConfig, globalRules, ResourceType, RelationType) {
+export function mappingPATCHRoute (url, userConfig, globalRules, resourceType, relationField_) {
   const route = { url, category: "mapping", method: "PATCH" };
+  const relationField = _resolveFunction(relationField_);
   try {
-    _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
+    _setupRoute(route, userConfig, globalRules, resourceType, relationField);
 
-    route.config.relation.schema = schemaRefOf(extendType(RelationType, {
+    route.config.relation.schema = schemaRefOf(extendType(relationField, {
       $V: { id: [null, IdValOSType] },
     }));
 
@@ -289,7 +293,7 @@ export function mappingPATCHRoute (url, userConfig, globalRules, ResourceType, R
         }' mapping from the source ${route.config.resource.name
         } route resource to the target ${route.config.target.name} route resource`,
       querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
-      body: schemaRefOf(getBaseRelationTypeOf(RelationType)),
+      body: schemaRefOf(getBaseRelationTypeOf(relationField)),
       response: {
         200: { type: "string" },
         201: { type: "string" },
@@ -299,22 +303,23 @@ export function mappingPATCHRoute (url, userConfig, globalRules, ResourceType, R
     };
     return route;
   } catch (error) {
-    throw wrapError(error, new Error(`mappingPATCHRoute(<${route.url}>)`),
+    throw wrapError(error, new Error(`mappingPATCHRoute(${_routeName(route)})`),
         "\n\tresource:", ...dumpObject(route.config.resource),
-        "\n\tSourceType:", ...dumpObject(ResourceType),
-        "\n\tRelationType[CollectionSchema]:", dumpify(RelationType[CollectionSchema]),
-        "\n\tRelationType[ObjectSchema]:", dumpify(RelationType[ObjectSchema]),
-        "\n\tRelationType.$V:", dumpify(RelationType.$V),
-        "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
+        "\n\tSourceType:", ...dumpObject(resourceType),
+        "\n\tRelationType[CollectionSchema]:", dumpify(relationField[CollectionSchema]),
+        "\n\tRelationType[ObjectSchema]:", dumpify(relationField[ObjectSchema]),
+        "\n\tRelationType.$V:", dumpify(relationField.$V),
+        "\n\tRelationType ...rest:", ...dumpObject({ ...relationField, $V: undefined }),
         "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-export function mappingDELETERoute (url, userConfig, globalRules, ResourceType, RelationType) {
+export function mappingDELETERoute (url, userConfig, globalRules, resourceType, relationField_) {
   const route = { url, category: "mapping", method: "DELETE" };
+  const relationField = _resolveFunction(relationField_);
   try {
-    _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
+    _setupRoute(route, userConfig, globalRules, resourceType, relationField);
     route.schema = {
       description: `Delete a '${route.config.relation.name}' mapping from the source ${
         route.config.resource.name} route resource to the target ${
@@ -328,13 +333,13 @@ export function mappingDELETERoute (url, userConfig, globalRules, ResourceType, 
     };
     return route;
   } catch (error) {
-    throw wrapError(error, new Error(`mappingDELETERoute(<${route.url}>)`),
+    throw wrapError(error, new Error(`mappingDELETERoute(${_routeName(route)})`),
         "\n\tresource:", ...dumpObject(route.config.resource),
-        "\n\tSourceType:", ...dumpObject(ResourceType),
-        "\n\tRelationType[CollectionSchema]:", dumpify(RelationType[CollectionSchema]),
-        "\n\tRelationType[ObjectSchema]:", dumpify(RelationType[ObjectSchema]),
-        "\n\tRelationType.$V:", dumpify(RelationType.$V),
-        "\n\tRelationType ...rest:", ...dumpObject({ ...RelationType, $V: undefined }),
+        "\n\tSourceType:", ...dumpObject(resourceType),
+        "\n\tRelationType[CollectionSchema]:", dumpify(relationField[CollectionSchema]),
+        "\n\tRelationType[ObjectSchema]:", dumpify(relationField[ObjectSchema]),
+        "\n\tRelationType.$V:", dumpify(relationField.$V),
+        "\n\tRelationType ...rest:", ...dumpObject({ ...relationField, $V: undefined }),
         "\n\troute:", ...dumpObject(route),
     );
   }
@@ -377,7 +382,7 @@ export function sessionGETRoute (url, userConfig, globalRules) {
     };
     return route;
   } catch (error) {
-    throw wrapError(error, new Error(`sessionGETRoute(<${route.url}>)`),
+    throw wrapError(error, new Error(`sessionGETRoute(${_routeName(route)})`),
         "\n\troute:", ...dumpObject(route),
     );
   }
@@ -404,67 +409,81 @@ export function sessionDELETERoute (url, userConfig, globalRules) {
     };
     return route;
   } catch (error) {
-    throw wrapError(error, new Error(`sessionDELETERoute(<${route.url}>)`),
+    throw wrapError(error, new Error(`sessionDELETERoute(${_routeName(route)})`),
         "\n\troute:", ...dumpObject(route),
     );
   }
 }
 
-function _setupRoute (route, userConfig, globalRules, ResourceType, RelationType) {
+function _setupRoute (route, userConfig, globalRules, resourceType, relationField) {
   const category = handlers[route.category];
-  if (!category) throw new Error(`No such category '${route.category}' for route <${route.url}>`);
+  if (!category) throw new Error(`No such category '${route.category}' for ${_routeName(route)}`);
   const handler = category[route.method];
   if (!handler) {
     throw new Error(`No such method '${route.method}' in category '${
-        route.category}' for route <${route.url}>`);
+        route.category}' for ${_routeName(route)}`);
   }
   const { requiredRules } = handler();
 
   route.config = patchWith({ requiredRules: [...requiredRules], rules: {} }, userConfig);
 
-  if (ResourceType) {
-    const name = trySchemaNameOf(ResourceType) || "<ResourceType>";
-    const valospace = ResourceType[ObjectSchema].valospace || {};
+  if (resourceType) {
+    const name = trySchemaNameOf(resourceType) || "<resource>";
+    const valospace = resourceType[ObjectSchema].valospace || {};
     if (!valospace.gate) {
-      throw new Error(`Can't find valospace gate for <${route.url}> Resource '${name}'`);
+      throw new Error(`Can't find valospace gate for resource '${name}' in ${_routeName(route)}`);
     }
     if (!route.name) route.name = valospace.gate.name;
     route.config.resource = {
       name,
-      schema: schemaRefOf(ResourceType),
-      gate: valospace.gate,
+      schema: schemaRefOf(resourceType),
+      gate: { ...valospace.gate, projection: expandVPath(valospace.gate.projection) },
     };
   }
 
-  if (RelationType) {
-    const outermost = RelationType[CollectionSchema] || RelationType[ObjectSchema];
+  if (relationField) {
+    const actualRelation = (typeof relationField === "function" ? relationField() : relationField);
+    const outermost = actualRelation[CollectionSchema] || actualRelation[ObjectSchema];
     const mappingName = (outermost.valospace || {}).mappingName;
     if (!mappingName) {
-      throw new Error("RelationType[(Array|Object)JSONSchema].valospace.mappingName missing");
+      throw new Error(`relationType[(Array|Object)JSONSchema].valospace.mappingName missing for ${
+          _routeName(route)}`);
     }
     route.config.relation = {
       name: mappingName,
-      schema: schemaRefOf(RelationType),
+      schema: schemaRefOf(actualRelation),
     };
 
-    const TargetType = RelationType.$V[ObjectSchema].valospace.TargetType;
-    if (!TargetType) {
-      throw new Error("RelationType.$V[ObjectSchema].valospace.TargetType missing");
+    const targetType = actualRelation.$V[ObjectSchema].valospace.targetType;
+    if (!targetType) {
+      throw new Error(`relationType.$V[ObjectSchema].valospace.targetType missing for ${
+          _routeName(route)}`);
     }
     route.config.target = {
-      name: trySchemaNameOf(TargetType) || "<TargetType>",
-      schema: schemaRefOf(TargetType),
+      name: trySchemaNameOf(targetType) || "<target>",
+      schema: schemaRefOf(targetType),
     };
   }
 
   assignRulesFrom(globalRules, route, route.config.rules);
+  for (const [key, rule] of Object.entries(route.config.rules)) {
+    if (Array.isArray(rule)) route.config.rules[key] = expandVPath(rule);
+  }
   route.config.requiredRules.forEach(ruleName => {
     if (route.config.rules[ruleName] === undefined) {
-      throw new Error(`Required route rule '${ruleName}' missing for route <${route.url}>`);
+      throw new Error(`Required route rule '${ruleName}' missing for ${_routeName(route)}`);
     }
   });
 
   return route;
+}
+
+function _resolveFunction (maybeFunction) {
+  return typeof maybeFunction === "function" ? maybeFunction() : maybeFunction;
+}
+
+function _routeName (route) {
+  return `${route.method}-${route.category} <${route.url}>`;
 }
 
 const _unreservedWordListPattern = "^([a-zA-Z0-9\\-_.~/*$]*(\\,([a-zA-Z0-9\\-_.~/*$])*)*)?$";
@@ -478,14 +497,14 @@ function _genericGETResourceQueryStringSchema (/* Type */) {
   };
 }
 
-function _resourceSequenceQueryStringSchema (ResourceType) {
+function _resourceSequenceQueryStringSchema (resourceType) {
   const ret = {
     offset: { type: "integer", minimum: 0 },
     limit: { type: "integer", minimum: 0 },
     sort: { ...StringType, pattern: _unreservedSortListPattern },
     ids: { ...StringType, pattern: _unreservedWordListPattern },
   };
-  for (const [key, schema] of Object.entries(ResourceType)) {
+  for (const [key, schema] of Object.entries(resourceType)) {
     if (((schema[ObjectSchema] || {}).valospace || {}).filterable) {
       ret[`require-${key}`] = IdValOSType;
     }

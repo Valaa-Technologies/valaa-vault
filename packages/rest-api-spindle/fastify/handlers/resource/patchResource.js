@@ -7,7 +7,7 @@ import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
 
 export default function createRouter (mapper: MapperService, route: Route) {
   return {
-    requiredRules: ["routeRoot", "resource"],
+    requiredRules: ["routeRoot", "resource", "doPatchResource"],
 
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
@@ -21,12 +21,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
     },
 
     handler (request, reply) {
-      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      mapper.infoEvent(1, () => [
-        `${this.name}:`, scope.resourceId,
-        "\n\trequest.query:", request.query,
-        "\n\trequest.body:", request.body,
-      ]);
+      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       if (_verifyResourceAuthorization(mapper, route, request, reply, scope)) return true;
       scope.resource = mapper._engine.tryVrapper([scope.resourceId]);
       if (!scope.resource) {
@@ -34,12 +29,21 @@ export default function createRouter (mapper: MapperService, route: Route) {
         reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
         return true;
       }
+      const scope = valkOptions.scope;
+      mapper.infoEvent(1, () => [
+        `${this.name}:`, ...dumpObject(scope.resource),
+        "\n\trequest.query:", ...dumpObject(request.query),
+        "\n\trequest.body:", ...dumpObject(request.body),
+      ]);
+
       const wrap = new Error(this.name);
-      const discourse = mapper.getDiscourse().acquireFabricator();
-      return thenChainEagerly(discourse, [
-        () => mapper.updateResource(scope.resource, request.body,
-            { discourse, scope, route, toPatchTarget: this.toPatchTarget }),
-        () => discourse.releaseFabricator(),
+      valkOptions.discourse = mapper.getDiscourse().acquireFabricator();
+      return thenChainEagerly(scope.resource, [
+        () => (scope.doPatchResource
+            ? scope.resource.do(scope.doPatchResource, valkOptions)
+            : mapper.updateResource(scope.resource, request.body,
+                { ...valkOptions, route, toPatchTarget: this.toPatchTarget })),
+        () => valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult
             && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
@@ -53,7 +57,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
           return true;
         },
       ], (error) => {
-        discourse.releaseFabricator({ abort: error });
+        valkOptions.discourse.releaseFabricator({ abort: error });
         throw mapper.wrapErrorEvent(error, wrap,
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\trequest.body:", ...dumpObject(request.body),

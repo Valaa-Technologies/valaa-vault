@@ -1,6 +1,6 @@
 // @flow
 
-import { mintVerb, validateVerbs } from "~/raem";
+import { mintVerb, expandVPath } from "~/raem";
 import patchWith from "~/tools/patchWith";
 
 export const ObjectSchema = Symbol("Object-JSONSchema");
@@ -30,13 +30,13 @@ export const DateTimeZoneExtendedISO8601Type = { type: "string", format: "date-t
 export const IdValOSType = {
   type: "string",
   pattern: "^[a-zA-Z0-9\\-_.~]+$",
-  valospace: { toValue: [".$V:rawId"] },
+  valospace: { projection: [".$V:rawId"] },
 };
 // export const ReferenceValOSType = { type: "uri" };
 export const ReferenceValOSType = { type: "string" };
 
 export const $VType = {
-  [ObjectSchema]: { valospace: { /* toValue: "" */ } },
+  [ObjectSchema]: { valospace: { /* projection: "" */ } },
   id: IdValOSType,
   // name: StringType, // internal ValOS name
 };
@@ -45,50 +45,51 @@ export const ResourceType = {
   $V: $VType,
 };
 
-export function schemaType (schemaName, baseTypes, schema) {
+export function namedResourceType (schemaName, baseTypes, schema) {
   return patchWith({},
-      [].concat({
-        [ObjectSchema]: { valospace: { schemaName } },
-        $V: $VType,
-      },
-      baseTypes || [],
-      schema));
+      [].concat(
+          baseTypes || [], {
+            [ObjectSchema]: { schemaName },
+            $V: $VType,
+          },
+          schema),
+      { patchSymbols: true, concatArrays: false });
 }
 
 export function extendType (baseTypes, schema) {
   return patchWith({}, [].concat(baseTypes || [], schema));
 }
 
-export function createMappingToOne (mappingName, ofTargetType, relationNameOrToValue,
+export function mappingToOneOf (mappingName, aTargetType, relationNameOrProjection,
     options = {}) {
   if (!options[ObjectSchema]) options[ObjectSchema] = {};
   options[ObjectSchema].valospace = {
     ...(options[ObjectSchema].valospace || {}),
     mappingName,
   };
-  return createRelationTypeToOne(ofTargetType, relationNameOrToValue, options);
+  return relationToOneOf(aTargetType, relationNameOrProjection, options);
 }
 
-export function createMappingToMany (mappingName, ofTargetType, relationNameOrToValue,
+export function mappingToManyOf (mappingName, aTargetType, relationNameOrProjection,
     options = {}) {
   if (!options[CollectionSchema]) options[CollectionSchema] = {};
   options[CollectionSchema].valospace = {
     ...(options[CollectionSchema].valospace || {}),
     mappingName,
   };
-  return createRelationTypeToMany(ofTargetType, relationNameOrToValue, options);
+  return relationToManyOf(aTargetType, relationNameOrProjection, options);
 }
 
-export function createRelationTypeToOne (ofTargetType, relationNameOrToValue, options = {}) {
+export function relationToOneOf (aTargetType, relationNameOrProjection, options = {}) {
   if (options[CollectionSchema] !== undefined) {
     throw new Error("Must not specify options[CollectionSchema] for a Relation-to-one type");
   }
-  return _createRelationTypeTo(ofTargetType, relationNameOrToValue, options);
+  return _createRelationTypeTo(aTargetType, relationNameOrProjection, options);
 }
 
-export function createRelationTypeToMany (ofTargetType, relationNameOrToValue, options = {}) {
+export function relationToManyOf (aTargetType, relationNameOrProjection, options = {}) {
   if (options[CollectionSchema] === undefined) options[CollectionSchema] = {};
-  return _createRelationTypeTo(ofTargetType, relationNameOrToValue, options);
+  return _createRelationTypeTo(aTargetType, relationNameOrProjection, options);
 }
 
 export function getBaseRelationTypeOf (anAnyRelationType, schemaPatch) {
@@ -119,7 +120,7 @@ export function sharedSchemaOf (aType) {
   if (!schemaName) {
     throw new Error("Type[ObjectSchema].schemaName missing when trying to get a shared Type");
   }
-  const schema = _convertSchemaOf(aType);
+  const schema = generateSchemaOf(aType);
   schema.$id = schemaName;
   return schema;
 }
@@ -130,14 +131,17 @@ export function trySchemaNameOf (aType) {
 }
 
 export function schemaRefOf (aType) {
-  return trySchemaNameOf(aType) || _convertSchemaOf(aType);
+  return trySchemaNameOf(aType) || generateSchemaOf(aType);
 }
 
-function _createRelationTypeTo (aTargetType, relationNameOrToValue, {
+function _createRelationTypeTo (aTargetType, relationNameOrProjection, {
     [CollectionSchema]: collectionSchema,
     [ObjectSchema]: objectSchema = {},
     ...relationProperties
 } = {}) {
+  const projection = (typeof relationNameOrProjection === "string")
+      ? mintVerb("*out", ["$", "", relationNameOrProjection])
+      : expandVPath(relationNameOrProjection);
   const ret = {
     [CollectionSchema]: collectionSchema && { ...collectionSchema },
     [ObjectSchema]: { ...objectSchema },
@@ -145,16 +149,15 @@ function _createRelationTypeTo (aTargetType, relationNameOrToValue, {
       [ObjectSchema]: {
         valospace: {
           TargetType: aTargetType,
-          route: aTargetType[ObjectSchema].valospace.route,
         },
       },
       href: {
         ...URIReferenceType,
-        // valospace: { toValue: "" }, // not yet
+        // valospace: { projection: "" }, // not yet
       },
       rel: {
         ...StringType,
-        // valospace: { toValue: "" }, // not yet
+        // valospace: { projection: "" }, // not yet
       },
     },
     ...relationProperties,
@@ -162,16 +165,14 @@ function _createRelationTypeTo (aTargetType, relationNameOrToValue, {
   const outermost = ret[CollectionSchema] || ret[ObjectSchema];
   outermost.valospace = {
     ...(outermost.valospace || {}),
-    predicate: (relationNameOrPredicate.slice(0, 6) !== "valos:")
-        ? `valos:Relation:${relationNameOrPredicate}`
-        : relationNameOrPredicate,
+    projection,
   };
   return ret;
 }
 
-function _convertSchemaOf (aType) {
-  if (typeof aType === "function") return _convertSchemaOf(aType());
-  if ((aType == null) || (typeof aType !== "object")) return aType;
+export function generateSchemaOf (aType) {
+  if (typeof aType === "function") return generateSchemaOf(aType());
+  if ((aType == null) || (typeof aType !== "object") || (Array.isArray(aType))) return aType;
   const ret = {};
   let current = ret;
   if (aType[CollectionSchema]) {
@@ -184,15 +185,25 @@ function _convertSchemaOf (aType) {
   if (aType[ObjectSchema]) {
     Object.assign(current, aType[ObjectSchema]);
     current.type = "object";
-    current.properties = {};
-    if (current.$V) { // Also a collection.
-      current.$V = {
-        ...current.$V,
-        TargetType: trySchemaNameOf(current.$V.TargetType) || null,
+    current = current.properties = {};
+  }
+  for (const [key, value] of Object.entries(aType)) {
+    current[key] = schemaRefOf(value);
+  }
+  if (ret.valospace) {
+    ret.valospace = { ...ret.valospace };
+    if (ret.valospace.TargetType) {
+      ret.valospace.TargetType = schemaRefOf(ret.valospace.TargetType);
+    }
+    if (ret.valospace.projection) {
+      ret.valospace.projection = expandVPath(ret.valospace.projection);
+    }
+    if (ret.valospace.gate) {
+      ret.valospace.gate = {
+        ...ret.valospace.gate,
+        injection: expandVPath(ret.valospace.gate.injection),
       };
     }
-    current = current.properties;
   }
-  for (const [key, value] of Object.entries(aType)) current[key] = _convertSchemaOf(value);
   return ret;
 }

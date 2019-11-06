@@ -1,7 +1,6 @@
 const { extractee: { aggregate, blockquote, c, cpath, em, ref, strong } } = require("@valos/vdoc");
 
 const { outputError } = require("@valos/tools/wrapError");
-const dumpify = require("@valos/tools/dumpify").default;
 
 module.exports = {
   /**

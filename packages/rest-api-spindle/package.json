@@ -3,7 +3,8 @@
   "version": "0.35.0-prerelease.13",
   "valos": {
     "type": "spindle",
-    "domain": "@valos/kernel"
+    "domain": "@valos/kernel",
+    "docs": "https://valospace.org/rest-api-spindle"
   },
   "description": "A spindle for structured ValOS REST APIs",
   "main": "index.js",
@@ -20,5 +21,6 @@
   },
   "peerDependencies": {
     "@valos/inspire": "^0.35.0-prerelease.0"
-  }
+  },
+  "homepage": "https://valospace.org/rest-api-spindle"
 }

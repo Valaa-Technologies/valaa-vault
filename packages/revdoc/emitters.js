@@ -55,7 +55,12 @@ function emitReVDocReference (node, emission, stack) {
     const packageName = (refParts[1] === "@")
         ? refParts[2]
         : refParts.slice(1, 3).join("/");
-    const packageJSON = require(`${packageName}/package`);
+    let packageJSON;
+    try {
+      packageJSON = require(`${packageName}/package`);
+    } catch (error) {
+      packageJSON = {};
+    }
     const docsBase = (packageJSON.valos || {}).docs || packageName;
     const subPath = refParts[3] || "";
     node_ = Object.assign({}, node, {

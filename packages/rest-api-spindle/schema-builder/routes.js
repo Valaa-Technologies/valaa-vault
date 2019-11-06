@@ -31,7 +31,7 @@ export function assignRulesFrom (
   if ((ofMethod || {})[routeToExtract.method]) {
     assignRulesFrom(ofMethod[routeToExtract.method], routeToExtract, rules);
   }
-  const mappingName = ((routeToExtract.config || {}).mapping || {}).name;
+  const mappingName = ((routeToExtract.config || {}).relation || {}).name;
   if ((ofMapping || {})[mappingName]) {
     assignRulesFrom(ofMapping[mappingName], routeToExtract, rules);
   }
@@ -166,7 +166,7 @@ export function relationsGETRoute (url, userConfig, globalRules, ResourceType, R
   try {
     _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
     route.schema = {
-      description: `List all '${route.config.mapping.name}' relations from the source ${
+      description: `List all '${route.config.relation.name}' relations from the source ${
         route.config.resource.name} route resource to all target ${
         route.config.target.name} resources`,
       querystring: {
@@ -175,7 +175,7 @@ export function relationsGETRoute (url, userConfig, globalRules, ResourceType, R
         ...(route.config.querystring || {}),
       },
       response: {
-        200: route.config.mapping.schema,
+        200: route.config.relation.schema,
       },
     };
     return route;
@@ -209,7 +209,7 @@ export function mappingPOSTRoute (url, userConfig, globalRules, ResourceType, Re
     route.schema = {
       description:
 `Create a new ${route.config.target.name} resource
-*using **body.$V.target** as content* and then a new '${route.config.mapping.name}'
+*using **body.$V.target** as content* and then a new '${route.config.relation.name}'
 mapping to it from the source ${route.config.resource.name} route
 resource. The remaining fields of the body are set as the mapping
 content. Similarily the response will contain the newly created target
@@ -248,8 +248,10 @@ export function mappingGETRoute (url, userConfig, globalRules, ResourceType, Rel
     const BaseRelationType = getBaseRelationTypeOf(RelationType);
 
     route.schema = {
-      description: `Get the contents of a '${route.config.mapping.name}' relation from the source ${
-        route.config.resource.name} route resource to the target ${route.config.target.name} route resource`,
+      description:
+`Get the contents of a '${route.config.relation.name}' relation from the
+source ${route.config.resource.name} route resource to the target ${
+route.config.target.name} route resource`,
       querystring: {
         ..._genericGETResourceQueryStringSchema(BaseRelationType),
         ...(route.config.querystring || {}),
@@ -278,12 +280,12 @@ export function mappingPATCHRoute (url, userConfig, globalRules, ResourceType, R
   try {
     _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
 
-    route.config.mapping.schema = schemaRefOf(extendType(RelationType, {
+    route.config.relation.schema = schemaRefOf(extendType(RelationType, {
       $V: { id: [null, IdValOSType] },
     }));
 
     route.schema = {
-      description: `Update the contents of a '${route.config.mapping.name
+      description: `Update the contents of a '${route.config.relation.name
         }' mapping from the source ${route.config.resource.name
         } route resource to the target ${route.config.target.name} route resource`,
       querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
@@ -314,7 +316,7 @@ export function mappingDELETERoute (url, userConfig, globalRules, ResourceType, 
   try {
     _setupRoute(route, userConfig, globalRules, ResourceType, RelationType);
     route.schema = {
-      description: `Delete a '${route.config.mapping.name}' mapping from the source ${
+      description: `Delete a '${route.config.relation.name}' mapping from the source ${
         route.config.resource.name} route resource to the target ${
         route.config.target.name} route resource.`,
       querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
@@ -423,11 +425,15 @@ function _setupRoute (route, userConfig, globalRules, ResourceType, RelationType
   if (ResourceType) {
     const name = trySchemaNameOf(ResourceType) || "<ResourceType>";
     const valospace = ResourceType[ObjectSchema].valospace || {};
-    if (!valospace.entrance) {
-      throw new Error(`Can't find valospace entrance for <${route.url}> Resource '${name}'`);
+    if (!valospace.gate) {
+      throw new Error(`Can't find valospace gate for <${route.url}> Resource '${name}'`);
     }
-    if (!route.name) route.name = valospace.entrance.name;
-    route.config.resource = { name, schema: schemaRefOf(ResourceType) };
+    if (!route.name) route.name = valospace.gate.name;
+    route.config.resource = {
+      name,
+      schema: schemaRefOf(ResourceType),
+      gate: valospace.gate,
+    };
   }
 
   if (RelationType) {
@@ -436,14 +442,18 @@ function _setupRoute (route, userConfig, globalRules, ResourceType, RelationType
     if (!mappingName) {
       throw new Error("RelationType[(Array|Object)JSONSchema].valospace.mappingName missing");
     }
-    route.config.mapping = { name: mappingName, schema: schemaRefOf(RelationType) };
+    route.config.relation = {
+      name: mappingName,
+      schema: schemaRefOf(RelationType),
+    };
 
     const TargetType = RelationType.$V[ObjectSchema].valospace.TargetType;
     if (!TargetType) {
       throw new Error("RelationType.$V[ObjectSchema].valospace.TargetType missing");
     }
     route.config.target = {
-      name: trySchemaNameOf(TargetType) || "<TargetType>", schema: schemaRefOf(TargetType),
+      name: trySchemaNameOf(TargetType) || "<TargetType>",
+      schema: schemaRefOf(TargetType),
     };
   }
 
@@ -476,7 +486,7 @@ function _resourceSequenceQueryStringSchema (ResourceType) {
     ids: { ...StringType, pattern: _unreservedWordListPattern },
   };
   for (const [key, schema] of Object.entries(ResourceType)) {
-    if (((schema[ObjectSchema] || {}).valos || {}).filterable) {
+    if (((schema[ObjectSchema] || {}).valospace || {}).filterable) {
       ret[`require-${key}`] = IdValOSType;
     }
   }

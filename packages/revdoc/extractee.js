@@ -1,6 +1,7 @@
 const { extractee: { aggregate, blockquote, c, cpath, em, ref, strong } } = require("@valos/vdoc");
 
 const { outputError } = require("@valos/tools/wrapError");
+const dumpify = require("@valos/tools/dumpify").default;
 
 module.exports = {
   /**
@@ -202,28 +203,31 @@ module.exports = {
   prepareTestDoc (title) {
     const tests = [];
     return {
-      itExpects (named, operation, toSatisfy, result) {
-        tests.push([named, operation, toSatisfy, result]);
-        const body = operation.toString();
+      itExpects (named, operations, toSatisfy, result) {
+        tests.push([named, operations, toSatisfy, result]);
         return {
           "dc:title": named,
           "#0": [
-            blockquote(body.slice(
-                Math.min(body.indexOf("{") !== -1 ? body.indexOf("{") : body.length,
-                    body.indexOf(">")) + 1,
-                Math.max(body.lastIndexOf("}"), body.length))),
+            ...[].concat(operations)
+                .map(_extractTestPieceText)
+                .map(body => blockquote(body)),
             toSatisfy,
-            blockquote(JSON.stringify(result, null, 2)),
+            blockquote(_extractTestPieceText(result)),
           ],
         };
       },
       runTestDoc () {
         if (typeof describe !== "undefined") {
           describe(`testdoc: ${title}`, () => {
-            for (const [named, operation, toSatisfy, result] of tests) {
+            for (const [named, operations, toSatisfy, result] of tests) {
               it(named, async () => {
                 try {
-                  expect(await operation())[toSatisfy](result);
+                  const actual = await [].concat(operations).reduce(async (a, op) => {
+                    const ra = await a;
+                    return op(typeof ra === "function" ? ra() : ra);
+                  });
+                  expect(typeof actual === "function" ? await actual() : actual)[toSatisfy](
+                      typeof result === "function" ? await result() : result);
                 } catch (error) {
                   outputError(error, `Exception noted while running testdoc test ${named}`);
                   throw error;
@@ -236,6 +240,17 @@ module.exports = {
     };
   },
 };
+
+function _extractTestPieceText (piece) {
+  if (typeof piece === "function") {
+    const body = piece.toString();
+    return body.slice(
+      Math.min(body.indexOf("{") !== -1 ? body.indexOf("{") : body.length,
+          body.indexOf(">")) + 1,
+      Math.max(body.lastIndexOf("}"), body.length));
+  }
+  return dumpify(piece);
+}
 
 function filterKeysWithFieldReduction (entryFieldName, searchedValueOrValues, container,
     reduction, initial) {

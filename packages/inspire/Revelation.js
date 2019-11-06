@@ -346,7 +346,7 @@ function _pathOpFromSpreader (spreader) {
     if (Array.isArray(entry)) {
       if ((typeof entry[0] === "string") && entry[0].match(/^[^a-zA-Z]*(:.*|\$.*|)$/)) return entry;
       return [
-        ...(isInnerOp ? ["*", ["$"]] : ["@"]),
+        ...(isInnerOp ? ["*", [":"]] : ["@"]),
         ...entry.map((e, i) => _vpathFromSpreader(e, (isInnerOp !== undefined) || i)),
       ];
     }

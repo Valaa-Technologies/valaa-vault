@@ -46,8 +46,8 @@ describe("VALK basic functionality tests", () => {
 
 describe("VPath to VAKON conversions", () => {
   it("Converts simple VPaths into VAKON", () => {
-    expect(VALK.fromVPath("@!:scriptRoot@!random@").toVAKON())
-        .toEqual(["§->", ["§$", "scriptRoot"], ["§random"]]);
+    expect(VALK.fromVPath("@!:scriptRoot@!$random@").toVAKON())
+        .toEqual(["§->", ["§$", "scriptRoot"], ["§$", ["§:", "random"]]]);
     expect(VALK.fromVPath("@!invoke:create:@!:body:%24V:target:name@@").toVAKON())
         .toEqual([
           "§invoke", "create",
@@ -64,9 +64,8 @@ describe("VPath to VAKON conversions", () => {
   });
   it("Converts complex embedded VPaths into VAKON", () => {
     expect(VALK.fromVPath([
-      "@!invoke:create:event", ["!:source"],
-        ["@!:body@.:%24V@", [".:target"], "@", [".:name"], "@"],
-      "@",
+      "!invoke:create:event", ["!:source"],
+        ["@!:body@.:%24V@", [".:target"], [".:name"]],
     ]).toVAKON())
     .toEqual([
       "§invoke", "create", "event", ["§$", "source"],

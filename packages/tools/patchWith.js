@@ -125,6 +125,7 @@ exports.default = function patchWith (target /* : Object */, patch /* : Array<an
 } */) {
   const stack = options || {};
   stack.returnUndefined = _returnUndefined;
+  if (stack.concatArrays === undefined) stack.concatArrays = true;
   if (stack.customizer) {
     stack.preExtend = stack.customizer;
     console.warn("patchWith.options.customizer DEPRECATED in favor of options.preExtend");
@@ -177,6 +178,7 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
           if (_setRetFromSpreadAndMaybeBail(this, patch_[i])) break;
         }
       } else if (Array.isArray(ret) || !_setRetFromCacheAndMaybeBail(this)) {
+        if (!this.concatArrays) ret = [];
         for (const entry of patch_) {
           const newEntry = this.extend(undefined, entry, ret.length, ret, patch_);
           if (newEntry !== undefined) ret.push(newEntry);
@@ -190,7 +192,11 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
       }
     } else {
       const targetIsArray = Array.isArray(ret);
-      for (const key of Object.keys(patch_)) {
+      const keys = Object.keys(patch_);
+      if (this.patchSymbols) {
+        keys.push(...Object.getOwnPropertySymbols(patch_));
+      }
+      for (const key of keys) {
         if (key === this.spreaderKey) continue;
         if (((ret === null) || (typeof ret !== "object")) && _setRetFromCacheAndMaybeBail(this)) {
           break;

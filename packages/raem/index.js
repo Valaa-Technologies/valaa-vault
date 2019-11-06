@@ -34,7 +34,7 @@ export {
 export {
                                       mintVPath,
                                       expandVPath,
-                                      validateVerb,
+                                      validateVPath,
 } from "./VPath";
 export type {
                                       ValaaURI,

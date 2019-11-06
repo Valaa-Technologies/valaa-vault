@@ -10,6 +10,7 @@ module.exports = {
   mintParamValue,
   expandVPath,
   validateVPath,
+  validateFullVPath,
   validateVRId,
   validateVerbs,
   validateVGRId,
@@ -74,13 +75,14 @@ function mintParam (paramElement /* : (string | ["$", string, ?string]) */, inde
   } else if (!Array.isArray(paramElement)) {
     throw new Error(`Invalid paramElement #${index}: expected a string or a param Array`);
   } else if (paramElement[0] === "$") {
-    if (paramElement[1]) validateContextTerm(paramElement[1]);
+    validateContextTerm(paramElement[1]);
     const value = mintParamValue(paramElement[2]);
-    ret = !paramElement[1] ? `:${value}`
-        : !value ? `$${paramElement[1]}`
+    ret = !value ? `$${paramElement[1]}`
         : `$${paramElement[1]}:${value}`;
+  } else if (paramElement[0] === ":") {
+    ret = `:${mintParamValue(paramElement[1])}`;
   } else {
-    throw new Error(`Invalid paramElement #${index}: expected first array entry to be "$" or "@"`);
+    throw new Error(`Invalid paramElement #${index}: expected first array entry to be "@", "$" or ":"`);
   }
   if ((ret[0] !== "$") && index) {
     const prevParam = params[index - 1];
@@ -103,15 +105,16 @@ function mintParamValue (value) {
 }
 
 function validateVPath (element) {
-  const isVRId = (typeof element === "string") ? (element[1] === "$")
-      : Array.isArray(element) ? (element[1][0] === "$")
-      : undefined;
-  if (isVRId === undefined) {
-    throw new Error(`Invalid vpath: must be a string or Array with length > 1`);
+  expandVPath(element);
+  return element;
+}
+
+function validateFullVPath (element) {
+  const expandedVPath = expandVPath(element);
+  if (expandedVPath[0] !== "@") {
+    throw new Error(`Invalid vpath: expected "@" as element type, got "${expandedVPath[0]}"`);
   }
-  return isVRId
-      ? validateVRId(element)
-      : validateVerbs(element);
+  return element;
 }
 
 function validateVRId (element) {
@@ -168,7 +171,7 @@ function validateVParam (element) {
   const expandedParam = (typeof element !== "string") ? element : expandVPath(element);
   const [firstEntry, contextTerm, paramValue] =
       ((expandedParam.length === 1) || (expandedParam[0] !== "$"))
-          ? ["$", "", expandedParam[0]]
+          ? [":", expandedParam[0]]
           : expandedParam;
   try {
     if (contextTerm !== undefined) {
@@ -202,7 +205,7 @@ function validateVParam (element) {
 function validateContextTerm (str) {
   if (typeof str !== "string") throw new Error("Invalid context-term: not a string");
   if (!str.match(/[a-zA-Z][a-zA-Z0-9\-_.]*/)) {
-    throw new Error(`Invalid context-term: doesn't match rule${
+    throw new Error(`Invalid context-term: "${str}" doesn't match rule${
       ""} ALPHA [ 0*30unreserved-nt ( ALPHA / DIGIT ) ]`);
   }
   return str;
@@ -211,7 +214,7 @@ function validateContextTerm (str) {
 function validateContextTermNS (str) {
   if (typeof str !== "string") throw new Error("Invalid context-term-ns: not a string");
   if (!str.match(/[a-zA-Z]([a-zA-Z0-9\-_.]{0,30}[a-zA-Z0-9])?/)) {
-    throw new Error(`Invalid context-term: doesn't match rule${
+    throw new Error(`Invalid context-term: "${str}" doesn't match rule${
       ""} ALPHA [ 0*30unreserved-nt ( ALPHA / DIGIT ) ]`);
   }
   return str;
@@ -220,7 +223,7 @@ function validateContextTermNS (str) {
 function validateParamValueText (str) {
   if (typeof str !== "string") throw new Error("Invalid param-value: not a string");
   if (!str.match(/([a-zA-Z0-9\-_.~!*'()]|%[0-9a-fA-F]{2})+/)) {
-    throw new Error(`invalid param-value: doesn't match rule${
+    throw new Error(`invalid param-value: "${str}" doesn't match rule${
       ""} 1*("%" HEXDIG HEXDIG |${
       ""} ALPHA / DIGIT / "-" / "_" / "." / "~" / "!" / "*" / "'" / "(" / ")")`);
   }
@@ -264,27 +267,82 @@ function validateParamValueText (str) {
  * @returns
  */
 function expandVPath (vpath) {
-  if (Array.isArray(vpath) && (vpath[0] === "@" || vpath[0] === "$" || !vpath[0].match(/[$:]/))) {
-    // already an expanded vpath element.
-    // Only re-expand possibly flattened sub-elements.
-    return vpath.map(e => ((typeof e === "string") ? e : expandVPath(e)));
+  try {
+    if (typeof vpath === "string") return _expandVPathFirstAndRest(vpath, undefined, 0);
+    if (Array.isArray(vpath)) return _expandVPathFirstAndRest(vpath[0], vpath, 1);
+    throw new Error("Invalid VPath: expected a string or an array");
+  } catch (error) {
+    throw wrapError(error, new Error("During expandVPath"),
+        "\n\tvpath:", ...dumpObject(vpath));
   }
-  const vpathArray = [];
-  (Array.isArray(vpath) ? vpath : [vpath]).forEach((part, index) => {
-    if (Array.isArray(part)) {
-      if (index === 0) vpathArray.push("@");
-      vpathArray.push(expandVPath(part));
-    } else if (!index && (typeof part === "string")
-        && (part !== "") && (part !== "@") && (part !== "$") && (part !== ":")) {
-      vpathArray.push(...part.split(/(@|\$|:)/).filter(e => e !== ""));
-    } else {
-      vpathArray.push(part);
-    }
-  });
-  return _nestAll(vpathArray);
 }
 
-function _nestAll (vpathArray, start = 0) {
+function _expandVPathFirstAndRest (first, rest, initial) {
+  let ret;
+  if (typeof first !== "string") {
+    ret = ["@"];
+    initial = 0; // eslint-disable-line no-param-reassign
+  } else if (first === "@") {
+    ret = [first];
+  } else if (first === "$" || first === ":") {
+    const expandedValue = _expandVParamValue(rest, first, initial);
+    ret = [first];
+    if (first === "$") ret.push(validateContextTerm(rest[initial]));
+    if (expandedValue !== undefined) ret.push(expandedValue);
+    return ret;
+  } else {
+    const parts = first.split(/(@|\$|:)/);
+    if (parts.length === 1) {
+      validateVerbType(first);
+      ret = [first];
+    } else {
+      ret = _expandVPathStringParts(parts.filter(e => e));
+    }
+  }
+  return _appendVRest(ret, rest, initial);
+}
+
+function _expandVParamValue (vparam, type, initial) {
+  if (!Array.isArray(vparam)) throw new Error(`Invalid "${type}" vparam: missing parts`);
+  const requiredParams = type === "$" ? 2 : 1;
+  if (vparam.length - initial > requiredParams) {
+    throw new Error(`Invalid "${type}" vparam: expected max ${requiredParams} parts, got ${
+        vparam.length - initial}`);
+  }
+  const entry = vparam[initial + requiredParams - 1];
+  if ((entry == null) || (typeof entry !== "object")) return entry;
+  if (Array.isArray(entry)) return expandVPath(entry);
+  return _appendVObject(["-"], entry);
+}
+
+function _appendVRest (target, rest, initial) {
+  if (rest === undefined) return target;
+  if ((rest === null) || (typeof rest !== "object")) target.push([":", rest]);
+  else if (!Array.isArray(rest)) {
+    _appendVObject(target, rest);
+  } else {
+    for (let i = initial; i !== rest.length; ++i) {
+      const entry = rest[i];
+      if (Array.isArray(entry)) target.push(expandVPath(entry));
+      else _appendVRest(target, entry, 0);
+    }
+  }
+  return target;
+}
+
+function _appendVObject (target, vobject) {
+  for (const key of Object.keys(vobject).sort()) {
+    const parts = key.split(/(@|\$|:)/);
+    target.push(
+        _appendVRest((parts.length === 1)
+                ? [".", [":", parts[0]]]
+                : _expandVPathStringParts(parts.filter(e => e)),
+            vobject[key],
+            0));
+  }
+}
+
+function _expandVPathStringParts (vpathArray, start = 0) {
   let segmentStart = start;
   if (vpathArray[start] === "@") ++segmentStart;
   for (let i = segmentStart; i !== vpathArray.length; ++i) {
@@ -303,7 +361,7 @@ function _nestAll (vpathArray, start = 0) {
     } else if ((typeof element !== "string") || (element !== "@")) {
       continue;
     } else if (vpathArray[i - 1] === ":") { // nest deeper, this is a vpath as param-value
-      vpathArray.splice(i, 0, _nestAll(vpathArray, i));
+      vpathArray.splice(i, 0, _expandVPathStringParts(vpathArray, i));
       continue;
     } else {
       const segment = vpathArray.splice(segmentStart, i + 1 - segmentStart);
@@ -349,18 +407,17 @@ function _nestSegment (segment, initial = 1) {
           nested.splice(2, 1);
         } else if (segment[i + 1] === ":") {
           nested = segment.splice(i, 3);
-          nested[1] = "";
+          nested.shift();
         } else {
           nested = segment.splice(i, 2);
         }
       } else if (segment[i] === ":") {
-        nested = ["$", "", segment[i + 1]];
-        segment.splice(i, 2);
+        nested = segment.splice(i, 2);
       } else continue;
-      const verbValue = nested[2];
+      const verbValue = nested[nested.length - 1];
       if (typeof verbValue === "string") {
         validateParamValueText(verbValue);
-        nested[2] = decodeURIComponent(verbValue);
+        nested[nested.length - 1] = decodeURIComponent(verbValue);
       } else if (verbValue != null) {
         if (Array.isArray(verbValue)) {
           if (verbValue[0] !== "@") {
@@ -368,10 +425,8 @@ function _nestSegment (segment, initial = 1) {
           }
         }
       }
-      if (nested[1] !== "") {
+      if (nested[0] === "$") {
         validateContextTerm(nested[1]);
-      } else {
-        nested = nested[2];
       }
       segment.splice(i, 0, nested);
     }
@@ -382,31 +437,35 @@ function _nestSegment (segment, initial = 1) {
   }
 }
 
-/* eslint-disable complexity */
-
-function bindExpandedVPath (vp, contextLookup = {}, contextState, componentTypeOverride) {
+function bindExpandedVPath (vp, contextLookup = {}, contextState, componentType) {
   let expandedVPath = vp;
-  if (!componentTypeOverride || (componentTypeOverride === "@")) {
-    if (!Array.isArray(vp)) return vp;
-  } else if (!Array.isArray(vp) || (vp[0] === "@")) {
-    expandedVPath = ["$", "", vp];
+  try {
+    if (!componentType || (componentType === "@")) {
+      if (!Array.isArray(vp)) return vp;
+    } else if (!Array.isArray(vp) || (vp[0] === "@")) {
+      expandedVPath = [":", vp];
+    }
+    const elementType = expandedVPath[0];
+    const typeBind = _typeBinders[elementType];
+    if (typeBind) {
+      return typeBind(expandedVPath, contextLookup, contextState, componentType || elementType);
+    }
+    if (elementType[0] === "!") {
+      expandedVPath[0] = `§${elementType.slice(1)}`;
+      return _expandRest(expandedVPath, contextLookup, contextState, "!", 1);
+    }
+    throw new Error(`unrecognized verb type: ${JSON.stringify(elementType)}`);
+  } catch (error) {
+    throw wrapError(error, new Error("During bindExpandedVPath"),
+        "\n\texpandedVPath:", ...dumpObject(expandedVPath),
+        "\n\tcomponentType:", ...dumpObject(componentType));
   }
-  const verbType = expandedVPath[0];
-  const bind = _typeBinders[verbType];
-  if (bind) {
-    return bind(expandedVPath, contextLookup, contextState, componentTypeOverride || verbType);
-  }
-  if (verbType[0] === "!") {
-    expandedVPath[0] = `§${verbType.slice(1)}`;
-    _expandRest(expandedVPath, contextLookup, contextState, "!", 1);
-  }
-  throw new Error(`unrecognized verb type: ${JSON.stringify(verbType)}`);
 }
 
 function _expandRest (expandedVPath, contextLookup, contextState, componentType, initial) {
   for (let i = initial; i !== expandedVPath.length; ++i) {
-    expandedVPath[i] = bindExpandedVPath(
-        expandedVPath[i], contextLookup, contextState, componentType, i);
+    expandedVPath[i] = bindExpandedVPath(expandedVPath[i], contextLookup, contextState,
+        componentType);
   }
   return expandedVPath;
 }
@@ -439,10 +498,10 @@ const _pluralLookup = {
 
 const _typeBinders = {
   "@": _statements,
-  $: _vparam,
-  "!": _computation,
   "": _invalidHead,
-  ":": _invalidHead,
+  $: _vparam,
+  ":": _vparamContextLess,
+  "!": _computation,
   "~": function _subspace () {
     throw new Error("subspace selector not implemented");
   },
@@ -452,8 +511,8 @@ const _typeBinders = {
       .reduce((a, p) => { a[p] = _pluralProperty; return a; }, {})),
   ".": function _property (expandedVPath, contextLookup, contextState, componentType) {
     // ref("@valos/raem/VPath#section_structured_scope_property")
-    const first = bindExpandedVPath(
-        expandedVPath[1], contextLookup, contextState, componentType || ".", 1);
+    const first = bindExpandedVPath(expandedVPath[1], contextLookup, contextState,
+        componentType || ".");
     if (expandedVPath.length <= 2) return first;
     expandedVPath[0] = "§->";
     expandedVPath[1] = first;
@@ -469,16 +528,22 @@ function _invalidHead () {
 }
 
 function _tryAsNameParam (vparam) {
-  if (Array.isArray(vparam) && (vparam[0] === "$") && !vparam[1] && !vparam[2]) return null;
+  if (Array.isArray(vparam) && ((vparam[0] === "$") || (vparam[0] === ":"))
+    && !vparam[1] && !vparam[2]) return null;
   return vparam;
 }
 
-function _statements (expandedVPath, contextLookup, contextState, componentType) {
+function _statements (expandedVPath, contextLookup, contextState) {
   if (expandedVPath.length === 2) {
-    return bindExpandedVPath(expandedVPath[1], contextLookup, contextState, componentType, 1);
+    return bindExpandedVPath(expandedVPath[1], contextLookup, contextState, expandedVPath[0]);
   }
   expandedVPath[0] = "§->";
-  return _expandRest(expandedVPath, contextLookup, contextState, componentType, 1);
+  return _expandRest(expandedVPath, contextLookup, contextState, ".", 1);
+}
+
+function _vparamContextLess (expandedVPath, contextLookup, contextState, componentType) {
+  return _vparam(["$", "", expandedVPath[1]], contextLookup, contextState,
+      (componentType === "@") ? ":" : componentType);
 }
 
 function _vparam (expandedVPath, contextLookup, contextState, componentType) {
@@ -487,7 +552,11 @@ function _vparam (expandedVPath, contextLookup, contextState, componentType) {
   const contextTerm = expandedVPath[1];
   if (contextTerm) {
     const context = contextLookup[contextTerm];
-    if (context) {
+    if (!context) {
+      expandedVPath[0] = "§:";
+      if (value !== undefined) expandedVPath[2] = value;
+      value = expandedVPath;
+    } else {
       if (typeof context === "function") contextValue = context;
       if (contextValue == null) contextValue = (context.symbolFor || {})[value];
       if (contextValue == null) contextValue = (context.stepsFor || {})[value];
@@ -510,10 +579,6 @@ function _vparam (expandedVPath, contextLookup, contextState, componentType) {
       if (Array.isArray(contextValue)) return contextValue;
       value = contextValue;
       contextValue = null;
-    } else {
-      expandedVPath[0] = "§:";
-      expandedVPath[2] = value;
-      value = expandedVPath;
     }
   }
   switch (componentType) {
@@ -530,7 +595,8 @@ function _vparam (expandedVPath, contextLookup, contextState, componentType) {
   }
 }
 
-function _computation (expandedVPath, contextLookup, contextState, componentType) {
+function _computation (expandedVPath, contextLookup, contextState) {
+  const computationType = expandedVPath[0];
   const first = bindExpandedVPath(expandedVPath[1], contextLookup, contextState, "!0", 1);
   if (expandedVPath.length === 2) return first;
   if (first[0] === "§$") {
@@ -539,18 +605,19 @@ function _computation (expandedVPath, contextLookup, contextState, componentType
     return _expandRest(expandedVPath, contextLookup, contextState, ".", 2);
   }
   expandedVPath.splice(0, 2, ...first);
-  return _expandRest(expandedVPath, contextLookup, contextState, componentType, first.length);
+  return _expandRest(expandedVPath, contextLookup, contextState, computationType, first.length);
 }
 
-function _namedCollection (expandedVPath, contextLookup, contextState, componentType) {
+function _namedCollection (expandedVPath, contextLookup, contextState) {
+  const collectionType = expandedVPath[0];
   const nameParam = _tryAsNameParam(expandedVPath[1]);
   const nameSelector = (nameParam != null)
-      && _pluralProperty(expandedVPath, contextLookup, contextState);
+      && _pluralProperty(expandedVPath, contextLookup, contextState, collectionType);
   if (nameSelector && expandedVPath.length <= 2) return nameSelector;
   let isSequence;
-  if (componentType[0] === "*") isSequence = true;
-  else if (componentType[0] !== "-") {
-    throw new Error(`Unrecognized named collection verb type ${componentType
+  if (collectionType[0] === "*") isSequence = true;
+  else if (collectionType[0] !== "-") {
+    throw new Error(`Unrecognized named collection verb type ${collectionType
         } (must begin with "-" or "*")`);
   }
   if (expandedVPath.length > 2) {
@@ -562,26 +629,18 @@ function _namedCollection (expandedVPath, contextLookup, contextState, component
       : ["§append", ["§{}"], nameSelector, expandedVPath];
 }
 
-function _singularProperty (expandedVPath, contextLookup, contextState, componentType) {
-  const selector = _singularLookup[componentType];
+function _singularProperty (expandedVPath) {
+  // ref("@valos/raem/VPath#section_structured_object_value")
+  const selector = _singularLookup[expandedVPath[0]];
   if (expandedVPath.length > 1) {
-    throw new Error(`multi-param '${componentType}' selectors not allowed`);
+    throw new Error(`multi-param '${expandedVPath[0]}' selectors not allowed`);
   }
   return selector;
-  // ref("@valos/raem/VPath#section_structured_object_value")
-  /*
-    what was this?
-  return [
-    "§->",
-    ..._filterByFieldValue(object,
-        bindExpandedVPath(expandedVPath[1], contextLookup, contextState)),
-  ];
-  */
 }
 
-function _pluralProperty (expandedVPath, contextLookup, contextState, componentType) {
+function _pluralProperty (expandedVPath, contextLookup, contextState) {
   // ref("@valos/raem/VPath#section_structured_relation")
-  const field = _pluralLookup[componentType];
+  const field = _pluralLookup[expandedVPath[0]];
   if (expandedVPath.length > 2) {
     throw new Error(`multi-param '${field}' selectors not allowed`);
   }

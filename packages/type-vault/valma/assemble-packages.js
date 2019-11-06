@@ -44,6 +44,10 @@ exports.builder = (yargs) => yargs.options({
     type: "string", default: "dist/packages",
     description: "Target directory for building the packages (must be empty or not exist)",
   },
+  "sibling-node-modules": {
+    type: "string", default: true,
+    description: "Create a node_modules which symlinks to the target as a sibling of the target.",
+  },
   source: {
     type: "string", default: "packages",
     description: "Source packages directory. Must match one lerna.json entry.",
@@ -111,6 +115,13 @@ exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const publishDist = yargv.target;
   vlm.shell.mkdir("-p", publishDist);
+  if (yargv["sibling-node-modules"]) {
+    const target = vlm.path.join("./", publishDist.match(/\/([^/]*)$/)[1]);
+    const link = vlm.path.join(publishDist.replace(/(\/[^/]*)$/, ""), "node_modules");
+    vlm.info("Creating sibling node_modules symlink to", vlm.theme.path(target),
+        "as symlink", vlm.theme.path(link));
+    vlm.shell.ln("-sf", target, link);
+  }
   const targetListing = vlm.shell.ls("-lA", publishDist);
   if (!yargv.overwrite && targetListing.length) {
     vlm.warn(`Target directory '${vlm.theme.path(publishDist)}' is not empty:`,

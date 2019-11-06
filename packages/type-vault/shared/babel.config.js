@@ -4,7 +4,7 @@ module.exports = function configureBabel (api, rootPrefix) {
   }
 
   const ret = {
-    ignore: ["node_modules/**/*"],
+    ignore: ["node_modules/**/*", "**/test-*.js", "**/{*.,}revdoc.test.js"],
     presets: [
       "@babel/preset-env",
       "@babel/preset-react",

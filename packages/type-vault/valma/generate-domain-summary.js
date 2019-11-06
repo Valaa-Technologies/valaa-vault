@@ -9,7 +9,7 @@ exports.introduction = ``;
 exports.disabled = (yargs) => (!yargs.vlm.getToolConfig(yargs.vlm.toolset, "domain", "inUse")
         ? "@valos/type-vault tool 'domain' is not configured to be inUse"
     : ((yargs.vlm.contextCommand ===
-        ".release-vault/.prepared-hooks/00-generate-domain-summary")
+        ".release-vault/.assembled-hooks/00-generate-domain-summary")
             && !yargs.vlm.getToolConfig(yargs.vlm.toolset, "domain", "regenerateOnRelease"))
         ? "@valos/type-vault tool 'domain' is not configured to be regenerated on release"
     : false);

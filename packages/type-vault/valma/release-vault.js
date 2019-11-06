@@ -238,6 +238,8 @@ exports.handler = async (yargv) => {
       if (!commit.version) {
         throw new Error("Couldn't locate new version from 'vlm assemble-packages' results");
       }
+      commit.assembled = await vlm.invoke(`.release-vault/.assembled-hooks/{**/,}*`,
+          [{ summary: commit }]);
       await vlm.updatePackageConfig({ version: commit.version });
       const tagName = `v${commit.version}`;
       await vlm.delegate([`git tag -d`, [tagName]]);

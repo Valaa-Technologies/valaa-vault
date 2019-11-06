@@ -21,10 +21,10 @@
     "valma-release-vault": "valma/release-vault.js",
     ".valma-configure_.type_.library_.select_@valos_type-vault_enable-babel": "valma/configure_.type_.library_.select_@valos_type-vault_enable-babel.js",
     "valma-regenerate-docs": "valma/regenerate-docs.js",
-    ".valma-release-vault_.prepared-hooks_regenerate-docs": "valma/regenerate-docs.js",
+    ".valma-release-vault_.assembled-hooks_regenerate-docs": "valma/regenerate-docs.js",
     "valma-write-revdoc": "valma/write-revdoc.js",
     "valma-generate-domain-summary": "valma/generate-domain-summary.js",
-    ".valma-release-vault_.prepared-hooks_00-generate-domain-summary": "valma/generate-domain-summary.js",
+    ".valma-release-vault_.assembled-hooks_00-generate-domain-summary": "valma/generate-domain-summary.js",
     ".valma-configure_.@valos_type-vault_.tools_.select_docs": "valma/configure__type-vault_.tools_.select_docs.js",
     ".valma-configure_.@valos_type-vault_.tools_.select_domain": "valma/configure__type-vault_.tools_.select_domain.js"
   },

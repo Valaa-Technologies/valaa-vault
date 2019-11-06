@@ -210,9 +210,9 @@ module.exports = {
           "#0": [
             ...[].concat(operations)
                 .map(_extractTestPieceText)
-                .map(body => blockquote(body)),
+                .map((bodyText, index) => [index ? "via" : "we expect", blockquote(c(bodyText))]),
             toSatisfy,
-            blockquote(_extractTestPieceText(result)),
+            blockquote(c(_extractTestPieceText(result))),
           ],
         };
       },
@@ -243,13 +243,13 @@ module.exports = {
 
 function _extractTestPieceText (piece) {
   if (typeof piece === "function") {
-    const body = piece.toString();
-    return body.slice(
-      Math.min(body.indexOf("{") !== -1 ? body.indexOf("{") : body.length,
-          body.indexOf(">")) + 1,
-      Math.max(body.lastIndexOf("}"), body.length));
+    const bodyText = piece.toString();
+    return bodyText.slice(
+        Math.min(bodyText.indexOf("{") !== -1 ? bodyText.indexOf("{") : bodyText.length,
+            bodyText.indexOf(">") !== -1 ? bodyText.indexOf(">") : bodyText.length) + 1,
+        Math.max(bodyText.lastIndexOf("}"), bodyText.length));
   }
-  return dumpify(piece);
+  return JSON.stringify(piece, null, 2);
 }
 
 function filterKeysWithFieldReduction (entryFieldName, searchedValueOrValues, container,

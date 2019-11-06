@@ -8,7 +8,7 @@ exports.introduction = ``;
 
 exports.disabled = (yargs) => (!yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "inUse")
         ? "@valos/type-vault tool 'docs' is not configured to be inUse"
-    : ((yargs.vlm.contextCommand === ".release-vault/.prepared-hooks/regenerate-docs")
+    : ((yargs.vlm.contextCommand === ".release-vault/.assembled-hooks/regenerate-docs")
             && !yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "regenerateOnRelease"))
         ? "@valos/type-vault tool 'docs' is not configured to be regenerated on release"
     : false);
@@ -105,6 +105,14 @@ exports.handler = async (yargv) => {
             targetDocPath = vlm.path.join(targetDocPath, "..");
           }
         }
+        let sourcePath = revdocPath;
+        if (workspaceBase === "packages/") {
+          const babelifiedPath = vlm.path.join("dist", "packages",
+              config.valos.domain.match(/^([^/]*)/)[1], revdocPath.replace(/^packages\//, ""));
+          if (vlm.shell.test("-f", vlm.path.join(process.cwd(), babelifiedPath))) {
+            sourcePath = babelifiedPath;
+          }
+        }
         const packageJSONPath = !workspaceName ? "package.json"
             : vlm.path.join(workspaceBase, workspaceName, "package.json");
         const packageJSON = JSON.parse(await vlm.tryReadFile(packageJSONPath));
@@ -113,7 +121,7 @@ exports.handler = async (yargv) => {
               workspaceName, targetWorkspaceBase, packageJSON, packageJSONPath);
         }
         const { revdocld } = await generateRevdocAndWriteToDocs(
-            revdocPath, targetDocPath, targetDocName, yargv.vdocld);
+            sourcePath, targetDocPath, targetDocName, yargv.vdocld);
         if (revdocld) {
           const documentName = targetDocName === "index"
               ? config.name
